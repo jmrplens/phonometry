@@ -9,14 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
-- **The nonlinearity parameter B/A of a hundred and sixty-four liquid
-  states.** `fluids.PUBLISHED_NONLINEARITY` holds Rossing (2014) Tables 8.1 to
+- **A hundred and sixty-four published values of the nonlinearity parameter
+  B/A.** `fluids.PUBLISHED_NONLINEARITY` holds Rossing (2014) Tables 8.1 to
   8.4: pure water from 0 to 100 °C, water up to 50 MPa, organic liquids,
   liquid metals and liquefied gases, each value with the temperature (and,
   where printed, the pressure and the year) it was measured at, the paper it
   comes from spelled out from the chapter's reference list, and the
   plus-or-minus where the page prints one. `fluids.nonlinearity_named` finds a
-  substance. A line of Table 8.3 printed twice is held once and registered.
+  substance. A line of Table 8.3 printed twice is held once, six years of
+  Table 8.1 that the chapter's own reference list contradicts serve nothing,
+  and six liquefied gases of Table 8.4 that are above their boiling point at
+  the atmospheric pressure the caption gives say so; all three are
+  registered.
   The published catalogue page now writes a printed uncertainty in its cell,
   which also brings back the seven of Cox's ground table that only a note
   carried, and writes a year without grouping its digits.

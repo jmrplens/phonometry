@@ -1,6 +1,6 @@
 {
   "source": "Rossing (2014) Table 8.4, PDF page 285 (printed p. 269)",
-  "about": "Twenty-three values of the nonlinearity parameter B/A of liquid metals, liquefied gases and two other substances, sea water and molten sulfur, at atmospheric pressure, under the three headings the table prints in its body, which are each row's group. The liquefied gases are measured far below 0 °C, and the page prints those temperatures with a minus sign, held here as negative degrees Celsius: liquid helium at −271.38 °C. Methane shows how strongly B/A can depend on temperature in a liquid near its boiling point, from 17.95 at −163.15 °C to 5.41 twenty-five degrees higher. Every value carries its reference in attributed_to.",
+  "about": "Twenty-three values of the nonlinearity parameter B/A of liquid metals, liquefied gases and two other substances, sea water and molten sulfur, under the three headings the table prints in its body, which are each row's group. The liquefied gases are measured far below 0 °C, and the page prints those temperatures with a minus sign, held here as negative degrees Celsius: liquid helium at −271.38 °C. Methane shows how strongly B/A depends on temperature in a liquefied gas, from 17.95 at −163.15 °C to 5.41 twenty-five degrees higher. Every value carries its reference in attributed_to.\n\nThe caption says \"at atmospheric pressure\", and six of the liquefied-gas rows cannot be: argon at −183.15 °C, methane at −153.15, −143.15 and −138.15 °C and nitrogen at −193.15 and −183.15 °C are above the gas's normal boiling point, and are liquid only under a pressure the page does not print. Their reference, [8.74], is titled a study of B/A in liquified gases \"as a function of temperature and pressure\". The six are served with a note saying so, hold no pressure, and the caption's condition is registered in docs/ERRATA.md.",
   "rows": [
     {
       "key": "bismuth_318c_8_59",
@@ -80,7 +80,8 @@
       "attributed_to": {
         "b_over_a": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
       },
-      "group": "Liquid gases"
+      "group": "Liquid gases",
+      "note": "The caption says atmospheric pressure, and argon boils at -185.85 °C at one atmosphere, so at -183.15 °C it is liquid only under a higher pressure the page does not print; the reference, [8.74], measured B/A in liquefied gases as a function of temperature and pressure. The value is served as printed and the caption's condition is registered in docs/ERRATA.md."
     },
     {
       "key": "helium_m_271_38c_8_75",
@@ -150,7 +151,8 @@
       "attributed_to": {
         "b_over_a": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
       },
-      "group": "Liquid gases"
+      "group": "Liquid gases",
+      "note": "The caption says atmospheric pressure, and methane boils at -161.49 °C at one atmosphere, so at -153.15 °C it is liquid only under a higher pressure the page does not print; the reference, [8.74], measured B/A in liquefied gases as a function of temperature and pressure. The value is served as printed and the caption's condition is registered in docs/ERRATA.md."
     },
     {
       "key": "methane_m_143_15c_8_74",
@@ -160,7 +162,8 @@
       "attributed_to": {
         "b_over_a": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
       },
-      "group": "Liquid gases"
+      "group": "Liquid gases",
+      "note": "The caption says atmospheric pressure, and methane boils at -161.49 °C at one atmosphere, so at -143.15 °C it is liquid only under a higher pressure the page does not print; the reference, [8.74], measured B/A in liquefied gases as a function of temperature and pressure. The value is served as printed and the caption's condition is registered in docs/ERRATA.md."
     },
     {
       "key": "methane_m_138_15c_8_74",
@@ -170,7 +173,8 @@
       "attributed_to": {
         "b_over_a": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
       },
-      "group": "Liquid gases"
+      "group": "Liquid gases",
+      "note": "The caption says atmospheric pressure, and methane boils at -161.49 °C at one atmosphere, so at -138.15 °C it is liquid only under a higher pressure the page does not print; the reference, [8.74], measured B/A in liquefied gases as a function of temperature and pressure. The value is served as printed and the caption's condition is registered in docs/ERRATA.md."
     },
     {
       "key": "nitrogen_m_203_15c_8_74",
@@ -200,7 +204,8 @@
       "attributed_to": {
         "b_over_a": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
       },
-      "group": "Liquid gases"
+      "group": "Liquid gases",
+      "note": "The caption says atmospheric pressure, and nitrogen boils at -195.79 °C at one atmosphere, so at -193.15 °C it is liquid only under a higher pressure the page does not print; the reference, [8.74], measured B/A in liquefied gases as a function of temperature and pressure. The value is served as printed and the caption's condition is registered in docs/ERRATA.md."
     },
     {
       "key": "nitrogen_m_183_15c_8_74",
@@ -210,7 +215,8 @@
       "attributed_to": {
         "b_over_a": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
       },
-      "group": "Liquid gases"
+      "group": "Liquid gases",
+      "note": "The caption says atmospheric pressure, and nitrogen boils at -195.79 °C at one atmosphere, so at -183.15 °C it is liquid only under a higher pressure the page does not print; the reference, [8.74], measured B/A in liquefied gases as a function of temperature and pressure. The value is served as printed and the caption's condition is registered in docs/ERRATA.md."
     },
     {
       "key": "sea_water_3_5_nacl_20c_8_59",

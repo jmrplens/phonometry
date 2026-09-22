@@ -7059,6 +7059,49 @@ in the same order.
   its note says the page prints it twice.
 - **Status:** unreported.
 
+## Rossing (2014), Table 8.1 (a year its own reference list contradicts)
+
+- **Location:** Table 8.1, "B/A values for pure water at atmospheric
+  pressure", column "Year", the six rows credited to [8.65], on printed page
+  268 (PDF page 284). Non-normative source: a handbook.
+- **The print:** the six rows at 30, 40, 50, 60, 70 and 80 °C credited to
+  [8.65] print the year 2001.
+- **The problem:** the chapter's reference list, on printed page 308 (PDF page
+  324), gives [8.65] as Plantier, Daridon and Lagourette, J. Acoust. Soc. Am.
+  111, 707-715 (2002). Every other row of the column prints the year its
+  reference carries in that list (1974, 1983, 1985, 1989, 1991), so the
+  column is the year of the reference, and 2001 is not the year of this one.
+- **Evidence:** Verified on PDF pages 284 and 324 (printed pp. 268 and 308) of
+  Rossing (ed.), *Springer Handbook of Acoustics* 2e (2014), on the page images.
+- **What the library does:** in
+  [`PUBLISHED_NONLINEARITY`](../src/phonometry/fluids/nonlinearity.py) the six
+  rows serve no year and mark the cell `misprinted`, quoting both dates; their
+  values and their reference are unaffected.
+- **Status:** unreported.
+
+## Rossing (2014), Table 8.4 ("at atmospheric pressure" for six gases above their boiling point)
+
+- **Location:** Table 8.4, "B/A values for liquid metals and gases at
+  atmospheric pressure", block "Liquid gases", on printed page 269 (PDF page
+  285). Non-normative source: a handbook.
+- **The print:** the caption gives every row at atmospheric pressure, and the
+  block prints argon at −183,15 °C, methane at −153,15, −143,15 and −138,15 °C
+  and nitrogen at −193,15 and −183,15 °C.
+- **The problem:** at one atmosphere argon boils at −185,85 °C, methane at
+  −161,49 °C and nitrogen at −195,79 °C, so at those six temperatures each is a
+  gas, and a liquid only under a higher pressure. The rows' own reference,
+  [8.74], is titled on PDF page 324 "A study of (B/A) in liquified gases as a
+  function of temperature and pressure". The values are not in question; the
+  condition the caption attaches to them is.
+- **Evidence:** Verified on PDF pages 285 and 324 (printed pp. 269 and 308) of
+  Rossing (ed.), *Springer Handbook of Acoustics* 2e (2014), on the page
+  images; the normal boiling points are those of the NIST Chemistry WebBook.
+- **What the library does:** the six rows are served as printed in
+  [`PUBLISHED_NONLINEARITY`](../src/phonometry/fluids/nonlinearity.py), hold
+  no pressure, and each says in its note that the caption's condition cannot
+  hold for it.
+- **Status:** unreported.
+
 ## Related source properties that are not errata
 
 Recorded here to prevent future "fixes" that would break agreement with the

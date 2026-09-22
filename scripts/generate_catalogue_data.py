@@ -761,9 +761,10 @@ def cell(
         if is_estimated is not None and is_estimated(field):
             kind, note = "estimated", ""
         text = written(value, exact=not derived)
-        # The plus-or-minus a page prints beside the value is part of what it
-        # printed, in the same unit, so it is written in the cell rather than
-        # left to a note nobody opens.
+        # The plus-or-minus a page prints beside the value is written in the
+        # cell, in the same unit, rather than left to a note nobody opens. It
+        # is written the way every number here is, so a trailing zero the page
+        # set (5.11 ± 0.20) is not carried: the row holds a float, not a string.
         spread = row.uncertainty.get(field)
         if spread is not None:
             text = f"{text} ± {written(spread)}"

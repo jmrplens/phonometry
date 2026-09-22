@@ -7529,6 +7529,52 @@ dos ediciones con las mismas entradas y en el mismo orden.
   nota dice que la página la imprime dos veces.
 - **Estado:** sin comunicar.
 
+## Rossing (2014), tabla 8.1 (un año que su propia lista de referencias contradice)
+
+- **Dónde:** tabla 8.1, «B/A values for pure water at atmospheric pressure»,
+  columna «Year», las seis filas acreditadas a [8.65], en la página impresa
+  268 (página 284 del PDF). Fuente no normativa: un manual.
+- **Lo impreso:** las seis filas a 30, 40, 50, 60, 70 y 80 °C acreditadas a
+  [8.65] imprimen el año 2001.
+- **El problema:** la lista de referencias del capítulo, en la página impresa
+  308 (página 324 del PDF), da [8.65] como Plantier, Daridon y Lagourette,
+  J. Acoust. Soc. Am. 111, 707-715 (2002). Todas las demás filas de la columna
+  imprimen el año que su referencia lleva en esa lista (1974, 1983, 1985, 1989,
+  1991), así que la columna es el año de la referencia, y 2001 no es el de
+  esta.
+- **Evidencia:** Verificado en las páginas 284 y 324 del PDF (pp. impresas 268
+  y 308) de Rossing (ed.), *Springer Handbook of Acoustics* 2e (2014), sobre
+  las imágenes de las páginas.
+- **Qué hace la biblioteca:** en
+  [`PUBLISHED_NONLINEARITY`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/fluids/nonlinearity.py) las seis
+  filas no sirven año y marcan la celda como `misprinted`, citando las dos
+  fechas; sus valores y su referencia no cambian.
+- **Estado:** sin comunicar.
+
+## Rossing (2014), tabla 8.4 («at atmospheric pressure» para seis gases por encima de su punto de ebullición)
+
+- **Dónde:** tabla 8.4, «B/A values for liquid metals and gases at atmospheric
+  pressure», bloque «Liquid gases», en la página impresa 269 (página 285 del
+  PDF). Fuente no normativa: un manual.
+- **Lo impreso:** el pie da todas las filas a presión atmosférica, y el bloque
+  imprime el argón a −183,15 °C, el metano a −153,15, −143,15 y −138,15 °C y el
+  nitrógeno a −193,15 y −183,15 °C.
+- **El problema:** a una atmósfera el argón hierve a −185,85 °C, el metano a
+  −161,49 °C y el nitrógeno a −195,79 °C, así que a esas seis temperaturas cada
+  uno es un gas, y solo es líquido a una presión mayor. La propia referencia de
+  esas filas, [8.74], se titula en la página 324 del PDF «A study of (B/A) in
+  liquified gases as a function of temperature and pressure». No se ponen en
+  duda los valores, sino la condición que el pie les atribuye.
+- **Evidencia:** Verificado en las páginas 285 y 324 del PDF (pp. impresas 269
+  y 308) de Rossing (ed.), *Springer Handbook of Acoustics* 2e (2014), sobre
+  las imágenes de las páginas; los puntos de ebullición normales son los del
+  NIST Chemistry WebBook.
+- **Qué hace la biblioteca:** las seis filas se sirven tal como se imprimen en
+  [`PUBLISHED_NONLINEARITY`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/fluids/nonlinearity.py), no
+  llevan presión, y cada una dice en su nota que la condición del pie no puede
+  cumplirse para ella.
+- **Estado:** sin comunicar.
+
 ## Propiedades de las fuentes, relacionadas, que no son erratas
 
 Registradas aquí para prevenir futuros «arreglos» que romperían la

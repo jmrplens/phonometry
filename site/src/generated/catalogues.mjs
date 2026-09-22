@@ -51507,9 +51507,9 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "2001",
-            "kind": "printed",
-            "note": ""
+            "text": "",
+            "kind": "absent",
+            "note": "the page prints 2001 in the Year column, and the chapter's own reference list dates [8.65] to 2002 (J. Acoust. Soc. Am. 111, 707-715), where every other row's year is its reference's; registered in docs/ERRATA.md"
           }
         ]
       },
@@ -51589,9 +51589,9 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "2001",
-            "kind": "printed",
-            "note": ""
+            "text": "",
+            "kind": "absent",
+            "note": "the page prints 2001 in the Year column, and the chapter's own reference list dates [8.65] to 2002 (J. Acoust. Soc. Am. 111, 707-715), where every other row's year is its reference's; registered in docs/ERRATA.md"
           }
         ]
       },
@@ -51630,9 +51630,9 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "2001",
-            "kind": "printed",
-            "note": ""
+            "text": "",
+            "kind": "absent",
+            "note": "the page prints 2001 in the Year column, and the chapter's own reference list dates [8.65] to 2002 (J. Acoust. Soc. Am. 111, 707-715), where every other row's year is its reference's; registered in docs/ERRATA.md"
           }
         ]
       },
@@ -51712,9 +51712,9 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "2001",
-            "kind": "printed",
-            "note": ""
+            "text": "",
+            "kind": "absent",
+            "note": "the page prints 2001 in the Year column, and the chapter's own reference list dates [8.65] to 2002 (J. Acoust. Soc. Am. 111, 707-715), where every other row's year is its reference's; registered in docs/ERRATA.md"
           }
         ]
       },
@@ -51753,9 +51753,9 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "2001",
-            "kind": "printed",
-            "note": ""
+            "text": "",
+            "kind": "absent",
+            "note": "the page prints 2001 in the Year column, and the chapter's own reference list dates [8.65] to 2002 (J. Acoust. Soc. Am. 111, 707-715), where every other row's year is its reference's; registered in docs/ERRATA.md"
           }
         ]
       },
@@ -51835,9 +51835,9 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "2001",
-            "kind": "printed",
-            "note": ""
+            "text": "",
+            "kind": "absent",
+            "note": "the page prints 2001 in the Year column, and the chapter's own reference list dates [8.65] to 2002 (J. Acoust. Soc. Am. 111, 707-715), where every other row's year is its reference's; registered in docs/ERRATA.md"
           }
         ]
       },
@@ -57226,7 +57226,7 @@ export const catalogues = {
         "gauge": "",
         "weave": "",
         "source": "Rossing (2014) Table 8.4, PDF page 285 (printed p. 269)",
-        "note": "",
+        "note": "The caption says atmospheric pressure, and argon boils at -185.85 °C at one atmosphere, so at -183.15 °C it is liquid only under a higher pressure the page does not print; the reference, [8.74], measured B/A in liquefied gases as a function of temperature and pressure. The value is served as printed and the caption's condition is registered in docs/ERRATA.md.",
         "attributedTo": {
           "b_over_a": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
         },
@@ -57513,7 +57513,7 @@ export const catalogues = {
         "gauge": "",
         "weave": "",
         "source": "Rossing (2014) Table 8.4, PDF page 285 (printed p. 269)",
-        "note": "",
+        "note": "The caption says atmospheric pressure, and methane boils at -161.49 °C at one atmosphere, so at -153.15 °C it is liquid only under a higher pressure the page does not print; the reference, [8.74], measured B/A in liquefied gases as a function of temperature and pressure. The value is served as printed and the caption's condition is registered in docs/ERRATA.md.",
         "attributedTo": {
           "b_over_a": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
         },
@@ -57554,7 +57554,7 @@ export const catalogues = {
         "gauge": "",
         "weave": "",
         "source": "Rossing (2014) Table 8.4, PDF page 285 (printed p. 269)",
-        "note": "",
+        "note": "The caption says atmospheric pressure, and methane boils at -161.49 °C at one atmosphere, so at -143.15 °C it is liquid only under a higher pressure the page does not print; the reference, [8.74], measured B/A in liquefied gases as a function of temperature and pressure. The value is served as printed and the caption's condition is registered in docs/ERRATA.md.",
         "attributedTo": {
           "b_over_a": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
         },
@@ -57595,7 +57595,7 @@ export const catalogues = {
         "gauge": "",
         "weave": "",
         "source": "Rossing (2014) Table 8.4, PDF page 285 (printed p. 269)",
-        "note": "",
+        "note": "The caption says atmospheric pressure, and methane boils at -161.49 °C at one atmosphere, so at -138.15 °C it is liquid only under a higher pressure the page does not print; the reference, [8.74], measured B/A in liquefied gases as a function of temperature and pressure. The value is served as printed and the caption's condition is registered in docs/ERRATA.md.",
         "attributedTo": {
           "b_over_a": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
         },
@@ -57718,7 +57718,7 @@ export const catalogues = {
         "gauge": "",
         "weave": "",
         "source": "Rossing (2014) Table 8.4, PDF page 285 (printed p. 269)",
-        "note": "",
+        "note": "The caption says atmospheric pressure, and nitrogen boils at -195.79 °C at one atmosphere, so at -193.15 °C it is liquid only under a higher pressure the page does not print; the reference, [8.74], measured B/A in liquefied gases as a function of temperature and pressure. The value is served as printed and the caption's condition is registered in docs/ERRATA.md.",
         "attributedTo": {
           "b_over_a": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
         },
@@ -57759,7 +57759,7 @@ export const catalogues = {
         "gauge": "",
         "weave": "",
         "source": "Rossing (2014) Table 8.4, PDF page 285 (printed p. 269)",
-        "note": "",
+        "note": "The caption says atmospheric pressure, and nitrogen boils at -195.79 °C at one atmosphere, so at -183.15 °C it is liquid only under a higher pressure the page does not print; the reference, [8.74], measured B/A in liquefied gases as a function of temperature and pressure. The value is served as printed and the caption's condition is registered in docs/ERRATA.md.",
         "attributedTo": {
           "b_over_a": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
         },

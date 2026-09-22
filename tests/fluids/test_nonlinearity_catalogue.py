@@ -67,9 +67,16 @@ def test_table_8_1_holds_every_measurement_with_its_year_and_paper() -> None:
     ):
         assert row.name == "Water"
         assert row.temperature_c == _number(temperature)
-        assert row.year == int(year)
         assert row.static_pressure_pa is None
         _check(row, value, reference)
+        if reference == "[8.65]":
+            # The Year column prints 2001; the chapter's references say 2002.
+            assert year == "2001"
+            assert row.year is None
+            assert "2002" in row.why_missing("year")
+            assert "2002" in row.attributed_to["b_over_a"]
+        else:
+            assert row.year == int(year)
 
 
 def test_table_8_2_is_one_row_per_printed_cell_and_none_for_a_rule() -> None:
@@ -179,7 +186,30 @@ def test_only_the_pressure_table_holds_a_pressure() -> None:
 
 def test_only_table_8_1_holds_a_year() -> None:
     for row in PUBLISHED_NONLINEARITY.values():
-        assert (row.year is not None) == (row.table == T81)
+        if row.table != T81:
+            assert row.year is None
+            assert "year" not in row.misprinted
+
+
+def test_a_liquefied_gas_above_its_boiling_point_says_the_caption_cannot_hold() -> None:
+    """Six rows of Table 8.4 are warmer than their gas boils at one atmosphere."""
+    boiling_c = {"Argon": -185.85, "Methane": -161.49, "Nitrogen": -195.79}
+    flagged = [
+        (row.name, row.temperature_c)
+        for row in _rows(T84)
+        if row.name in boiling_c and row.temperature_c > boiling_c[row.name] + 0.1
+    ]
+    assert flagged == [
+        ("Argon", -183.15),
+        ("Methane", -153.15),
+        ("Methane", -143.15),
+        ("Methane", -138.15),
+        ("Nitrogen", -193.15),
+        ("Nitrogen", -183.15),
+    ]
+    for row in _rows(T84):
+        says_so = "ERRATA" in row.note and "atmospheric" in row.note
+        assert says_so == ((row.name, row.temperature_c) in flagged)
 
 
 def test_every_row_cites_its_own_page() -> None:

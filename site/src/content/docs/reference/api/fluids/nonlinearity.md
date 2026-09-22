@@ -9,10 +9,11 @@ The nonlinearity parameter B/A of liquids, as a handbook tabulates it.
 
 Sound in a fluid is linear only in the limit of a vanishing amplitude. At a
 finite one the pressure is not proportional to the change in density, and the
-first term of the departure is what B/A measures: the ratio of the second- to
-the first-order coefficient of the pressure in a Taylor expansion of the
-equation of state about the undisturbed density, at constant entropy. It is
-dimensionless. It sets how fast a finite wave steepens towards a shock, how
+first term of the departure is what B/A measures. Expanding the adiabatic
+pressure in the condensation `s = (rho - rho0) / rho0` gives
+`p - p0 = A s + (B/2) s**2 + ...`, with `A = rho0 (dp/drho)_s`, which is
+`rho0 c0**2`, and `B = rho0**2 (d2p/drho2)_s`: Rossing's equations (8.7) to
+(8.9). B/A is the ratio of those two, dimensionless. It sets how fast a finite wave steepens towards a shock, how
 strongly two beams generate their sum and difference frequencies, and with it
 the output of a parametric array; the coefficient of nonlinearity is
 `1 + B/(2A)`. In the rows below water sits between 4.2 and 6.2, the organic
@@ -22,8 +23,9 @@ air, for comparison, is 0.4 because an ideal gas has `B/A = gamma - 1`.
 What the rows are
 -----------------
 Each row is one published value: a substance, the temperature it was measured
-at, the value, and the paper it comes from. Rossing's four tables print a
-reference beside every value, and that is not decoration: at 30 °C water
+at, the value, and the paper it comes from. Three of Rossing's tables print a
+reference beside every value and the fourth credits one paper in its caption,
+and that is not decoration: at 30 °C water
 prints four values between 5.18 and 5.38 from four papers, and toluene prints
 5.6 at 20 °C from one paper and 8.929 at 30 °C from another. A caller who
 wants "the" B/A of a liquid has to choose, and the row carries in
@@ -36,7 +38,9 @@ plus-or-minus beside the value it is in
 Table 8.2 is the only one that prints a pressure, from 0.1 to 50 MPa, and its
 rows carry it; the other three say "at atmospheric pressure" in the caption and
 print no number, so their rows hold none rather than a 101 325 Pa the page did
-not write.
+not write. For six of the liquefied gases of Table 8.4 the caption cannot be
+right: they are above their normal boiling point, liquid only under a pressure
+the page does not give, and their rows say so.
 
 What it is not
 --------------
@@ -107,7 +111,7 @@ One published value of B/A, with the conditions it was measured at.
 | `b_over_a` | The nonlinearity parameter B/A. Dimensionless. |
 | `temperature_c` | The temperature the value was measured at, in degrees Celsius. Table 8.2 prints it in kelvin and it is converted at 273.15 K exactly; the liquefied gases of Table 8.4 are far below zero and are held as the negative temperatures the page prints. |
 | `static_pressure_pa` | The static pressure the value was measured at, in pascals, on the rows of the one table that prints it. Empty on every other row, whose caption says atmospheric pressure without a number. |
-| `year` | The year of the measurement, on the rows of the one table that prints a year beside the value. |
+| `year` | The year the page prints beside the value, on the rows of the one table that prints one; it is the year of the row's reference. Six rows print a year their reference contradicts and serve none. |
 | `name` | The material as the table names it, attribution stripped. |
 | `variant` | Which specimen or condition this row is, when the page prints several under one name: `"chemically pure"`, `"direction x"`, `"0.68 mm diameter"`. Empty when the page prints one. |
 | `source` | Document, table, PDF page and printed folio. |

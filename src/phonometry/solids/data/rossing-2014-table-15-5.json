@@ -1,0 +1,37 @@
+{
+  "source": "Rossing (2014) Table 15.5, PDF page 632 (printed p. 622)",
+  "about": "Two woods used to model the plates of stringed instruments, with the four elastic constants of an orthotropic thin plate as the page's equation (15.86) defines them: D1 = Ex/12μ along the grain, D2 = νxy Ey/6μ the Poisson coupling between the two directions, D3 = Ey/12μ across the grain and D4 = Gxy/3 the twisting stiffness, with μ = 1 − νxy νyx. Every other solid this library holds is treated as isotropic, with one modulus and one Poisson ratio, which cannot say that spruce is thirteen times stiffer along the grain than across it (D1 over D3). The table is printed after Woodhouse, whom it credits, and every row carries that attribution. The page prints the table with the woods as its columns and the properties as its rows, and this file turns it so that a wood is a row, which is how every other catalogue here is keyed. The page prints the constants in megapascals and they are held in pascals. Two of the maple cells carry an asterisk the caption calls an intelligent guess, and they are marked as estimates rather than measurements. The relative scaling factor is the fourth root of D1 over D3 for each wood: how much the equivalent isotropic plate is stretched across the grain, not a factor between the two woods.",
+  "rows": [
+    {
+      "key": "spruce",
+      "name": "Spruce",
+      "density_kg_m3": 420.0,
+      "plate_stiffness_d1_pa": 1100000000.0,
+      "plate_stiffness_d2_pa": 67000000.0,
+      "plate_stiffness_d3_pa": 84000000.0,
+      "plate_stiffness_d4_pa": 230000000.0,
+      "relative_scaling_factor": 1.9,
+      "attributed_to": {
+        "table": "Woodhouse [15.77]"
+      }
+    },
+    {
+      "key": "maple",
+      "name": "Maple",
+      "density_kg_m3": 650.0,
+      "plate_stiffness_d1_pa": 860000000.0,
+      "plate_stiffness_d2_pa": 140000000.0,
+      "plate_stiffness_d3_pa": 170000000.0,
+      "plate_stiffness_d4_pa": 230000000.0,
+      "relative_scaling_factor": 1.4,
+      "estimated": [
+        "plate_stiffness_d2_pa",
+        "plate_stiffness_d4_pa"
+      ],
+      "note": "Two of this row's four plate constants, D2 and D4, carry the table's asterisk, which the caption explains as “intelligent guesses in the absence of experimental data”: they are the author's estimates and not measurements. They are served, because the page prints them as numbers, but they are marked as estimates so that a caller who wants measurements can tell them apart. The relative scaling factor the page prints for maple, 1.4, does not follow from this row: the same row prints the relation as the fourth root of D1 over D3, and maple's D1 of 860 MPa and D3 of 170 MPa, neither of them asterisked, give 1.50. Spruce's 1.9 does follow from its own row. The factor is served as printed and the defect is registered in docs/ERRATA.md under “Rossing (2014), Table 15.5”.",
+      "attributed_to": {
+        "table": "Woodhouse [15.77]"
+      }
+    }
+  ]
+}

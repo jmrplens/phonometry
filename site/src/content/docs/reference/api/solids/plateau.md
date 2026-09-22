@@ -1,75 +1,85 @@
 ---
-title: "fluids.catalogue"
-description: "Fluid states read from a printed page."
+title: "solids.plateau"
+description: "The three numbers a panel needs before its transmission loss can be sketched."
 sidebar:
-  label: "catalogue"
+  label: "plateau"
 ---
 
-Fluid states read from a printed page.
+The three numbers a panel needs before its transmission loss can be sketched.
 
-A density and a speed of sound stand behind every level this library computes,
-and most of them are computed: [`air`](/phonometry/reference/api/fluids/air/),
-[`ideal_gas`](/phonometry/reference/api/fluids/gas/#ideal_gas) and [`sea_water`](/phonometry/reference/api/fluids/water/#sea_water)
-take the conditions that were measured and return the state that follows. A
-few are not. Some books print a table of fluids the way they print a table of
-solids, a density and a speed of sound at a stated temperature, and those are
-read rather than derived. This is where they live.
+A single panel does not attenuate sound the way the mass law says it does. The
+mass law is a straight line rising six decibels an octave, and a real panel
+leaves it twice: once at the bottom, where the panel is stiff and resonant
+rather than limp, and once near the coincidence frequency, where a bending
+wave in the panel and a sound wave in the air travel at the same speed along
+the surface and the panel stops resisting at all. Between those two departures
+the curve flattens into a plateau.
 
-The distinction is carried in [`model`](/phonometry/reference/api/fluids/fluids/#fluid), which
-every state already uses to say what produced it. A computed state names the
-closed form, the annex or the fit; a state from here names the table, with its
-PDF page and its printed folio, because the table is what produced it and a
-reader checking the number needs the page rather than the name of an equation
-that was never used. The citation lives once, in the data file beside the
-rows, the same shape the solid and porous catalogues use.
+The plateau method is the cheap way to draw that shape. Rather than solving
+the plate model, it places the plateau from three numbers that depend only on
+what the panel is made of: how much mass a millimetre of it brings, how high
+the plateau sits, and how wide it is in frequency. Norton & Karczub draw the
+mass law first, then "the coincidence region is approximated by a horizontal
+line whose height is obtained from Table 3.1"; the plateau starts where that
+line meets the mass law, at a frequency A, ends at B, which the frequency
+ratio places relative to A, and above B the curve rises at 10 dB per octave.
+This module holds those three numbers, for the eight materials the table
+lists, and [`phonometry.building.plateau_transmission_loss`](/phonometry/reference/api/building/panel-transmission/#plateau_transmission_loss) draws the
+curve from them: its `building.PLATEAU_MATERIALS` is built from the rows
+here, so the table is typed once.
 
-Not every named air in this library is here
--------------------------------------------
-Four more sit elsewhere in the tree, each beside the model or the standard
-that fixes it, and they disagree: the absorber models propagate through
-343 m/s at 1,205 kg/m3, the airflow-resistance annex through 345,87 at 1,186,
-EN/ISO 12354 through 340 at 1,29, and the acoustic solver defaults to 343 at
-1,2. None of them is wrong. Each is the air its own document assumes, and
-substituting one for another would change a number that document prints, which
-is why each stays with the clause that prints it rather than being gathered
-here.
+Why the first column is not a density
+-------------------------------------
+[`PlateauMaterial.surface_density_per_mm_kg_m2`](/phonometry/reference/api/solids/plateau/#plateaumaterial) is kilograms per square
+metre per millimetre of thickness, which is the material's density divided by
+a thousand. Aluminium's 2.66 is 2660 kg/m3. It is held in the unit the page
+prints rather than converted to a density, because the method is applied with
+it in that form: multiply by the thickness in millimetres and the surface
+density of the panel falls out. Converting it would make a caller divide by a
+thousand again at the point of use, and a catalogue that stores a quantity in
+a unit nobody uses it in has made the reader's work harder to look tidier.
 
-Gathering them would also invert the dependency this package exists at the
-bottom of: `fluids` is part of the transverse toolbox precisely so that any
-domain may import it, and a catalogue here that imported `materials`,
-`building` and `simulation` to reach them would make the medium depend on
-three of the domains that stand on it. The comparison a reader wants is a
-documentation artefact, and it is built as one: the published-catalogues page
-of the site lists all of them side by side, gathered by a script that is free
-to see the whole tree.
+What this is not
+----------------
+It is not a transmission loss spectrum. One of the three numbers is a
+transmission loss, [`PlateauMaterial.coincidence_height_db`](/phonometry/reference/api/solids/plateau/#plateaumaterial), the level of
+the plateau in decibels, and it holds only over the plateau and only as the
+method's approximation to it. The measured and tabulated insulation of real
+constructions lives in
+[`PUBLISHED_TRANSMISSION_LOSS`](/phonometry/reference/api/building/catalogue/#published_transmission_loss), and the duct walls
+in [`PUBLISHED_DUCT_TRANSMISSION_LOSS`](/phonometry/reference/api/noise_control/duct-walls/#published_duct_transmission_loss).
 
-Gases are the other half, and they are not states
--------------------------------------------------
-A book that prints a table of gases prints something different from a table of
-fluids: not a density and a speed of sound, which a gas only has once a
-temperature and a pressure are named, but the ratio of specific heats and the
-molar mass, which close the ideal-gas state at any temperature and pressure.
-So the gases live in a
-catalogue of their own, [`PUBLISHED_GASES`](/phonometry/reference/api/fluids/catalogue/#published_gases), and reach a state through
-[`Gas.ideal_state`](/phonometry/reference/api/fluids/catalogue/#gasideal_state), which is [`ideal_gas`](/phonometry/reference/api/fluids/gas/#ideal_gas) with the
-citation carried along. Air appears in both, and it should: Bies prints it once
-as a state at 20 degC and once as a pair of constants, and those are two
-different readings of the same gas.
-
-What it is not
---------------
-It is not a table of fluid properties to look values up in. Air at 23 degC and
-50 per cent relative humidity is [`air`](/phonometry/reference/api/fluids/air/), which computes
-it from the conditions that were measured; sea water is
-[`sea_water`](/phonometry/reference/api/fluids/water/#sea_water). Use a row here to reproduce a book's own
-number.
+Where the rows live
+-------------------
+In `solids/data/norton-karczub-2003-table-3-1.json`, read at import through
+the package-data reader in `phonometry._internal`, the same as every other
+catalogue here.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
-## Gas
+## plateau_material_named
 
 ```python
-Gas(
+plateau_material_named(name: str) -> tuple[PlateauMaterial, ...]
+```
+
+Every row whose printed name contains *name*, case insensitively.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `name` | Part of a material name, as the page prints it. |
+
+**Returns:** The matching rows, in the order the tables list them. Empty when nothing matches, which is not an error: a caller asking whether a material is tabulated gets an empty answer rather than an exception.
+
+## PlateauMaterial
+
+```python
+PlateauMaterial(
+    surface_density_per_mm_kg_m2: float | None = None,
+    coincidence_height_db: float | None = None,
+    plateau_frequency_ratio: float | None = None,
     *,
     name: str,
     source: str,
@@ -88,34 +98,18 @@ Gas(
     attributed_to: Mapping[str, str] = ...,
     group: str = '',
     note: str = '',
-    molar_mass_kg_mol: float | None = None,
-    heat_capacity_ratio: float | None = None,
 )
 ```
 
-One gas of a published table: the two numbers that close its state.
-
-A table of gases does not print a density and a speed of sound, because a
-gas does not have one: it has whichever the temperature and the pressure
-give it. What it prints instead is the pair that fixes the whole family,
-the ratio of specific heats and the molar mass, and
-`ideal_state` walks from that pair to the ideal-gas state at
-whichever temperature and pressure the caller asks for.
-That is the difference between this catalogue and
-[`PUBLISHED_FLUIDS`](/phonometry/reference/api/fluids/catalogue/#published_fluids), which holds states: a row there is one condition
-a book measured, a row here is every condition its two constants close under
-the ideal-gas relations.
-
-The hedges of `CatalogueRow` apply
-unchanged. A cell printed as an interval is a range and not a value, which
-is what saturated steam is in the table this reads first.
+One material's plateau-method constants, as a page printed them.
 
 **Attributes**
 
 | Name | Description |
 | :--- | :--- |
-| `molar_mass_kg_mol` | Molar mass `M`, in kg/mol, as the page prints it. The gas tables print kg/mol rather than g/mol, so the number in the cell is 0,028 97 for air. |
-| `heat_capacity_ratio` | Ratio of specific heats `gamma`, which is `c_p/c_v` and therefore above 1 for every gas. |
+| `surface_density_per_mm_kg_m2` | The mass a square metre of this material brings per millimetre of thickness, in kg/m2 per mm. It is the density divided by a thousand and is held as the page prints it; see the module docstring for why. |
+| `coincidence_height_db` | The height of the plateau, in decibels: the transmission loss the method gives the panel over the coincidence region, drawn as a horizontal line. It depends on the material and not on the thickness, which moves the plateau along the frequency axis and leaves its level where it is. |
+| `plateau_frequency_ratio` | The ratio of the two frequencies that bound the plateau, which the page writes B/A: A where the plateau meets the mass law, B where the curve starts to rise again. Dimensionless. |
 | `name` | The material as the table names it, attribution stripped. |
 | `variant` | Which specimen or condition this row is, when the page prints several under one name: `"chemically pure"`, `"direction x"`, `"0.68 mm diameter"`. Empty when the page prints one. |
 | `source` | Document, table, PDF page and printed folio. |
@@ -134,37 +128,10 @@ is what saturated steam is in the table this reads first.
 | `group` | The heading of the block this row sits under, when the table prints its rows in named groups: Cox files each material under `"Fibrous materials"`, `"Cellular materials"`, `"Granular materials"` or `"Other"`. Empty for a table that prints one list. |
 | `note` | What the page says about this row beyond its numbers. |
 
-### Gas.ideal_state()
+### PlateauMaterial.is_approximate()
 
 ```python
-Gas.ideal_state(
-    *,
-    temperature_c: float,
-    static_pressure_pa: float | None = None,
-) -> Fluid
-```
-
-The gas at one state, through the ideal-gas closure.
-
-**Parameters**
-
-| Name | Description |
-| :--- | :--- |
-| `temperature_c` | Temperature `t`, in degrees Celsius. |
-| `static_pressure_pa` | Static pressure `p`, in pascals. Omitted means one standard atmosphere, and [`ideal_gas`](/phonometry/reference/api/fluids/gas/#ideal_gas) says so with a warning. |
-
-**Returns:** The [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) the two printed constants give at that state, carrying this row's citation in its model so the state can be traced back to the page.
-
-**Raises**
-
-| Exception | When |
-| :--- | :--- |
-| ValueError | when the page did not print both constants, naming the one it left out and what the cell held instead. |
-
-### Gas.is_approximate()
-
-```python
-Gas.is_approximate(field_name: str) -> bool
+PlateauMaterial.is_approximate(field_name: str) -> bool
 ```
 
 Whether the page prints this field with a `~`.
@@ -177,10 +144,10 @@ Whether the page prints this field with a `~`.
 
 **Returns:** `True` when the page rounded the cell on purpose.
 
-### Gas.is_derived()
+### PlateauMaterial.is_derived()
 
 ```python
-Gas.is_derived(field_name: str) -> bool
+PlateauMaterial.is_derived(field_name: str) -> bool
 ```
 
 Whether this library computed this field instead of reading it.
@@ -193,10 +160,14 @@ Whether this library computed this field instead of reading it.
 
 **Returns:** `True` when the page did not print it and the value follows from cells that it did. `derived` says how.
 
-### Gas.printed()
+### PlateauMaterial.printed()
 
 ```python
-Gas.printed(field_name: str, *, wanted_by: str = 'the caller') -> float
+PlateauMaterial.printed(
+    field_name: str,
+    *,
+    wanted_by: str = 'the caller',
+) -> float
 ```
 
 One quantity this page prints, or a refusal that says what it had.
@@ -223,10 +194,10 @@ and a cell holding the word "model".
 | :--- | :--- |
 | ValueError | when the page did not print a number there. |
 
-### Gas.why_missing()
+### PlateauMaterial.why_missing()
 
 ```python
-Gas.why_missing(field_name: str) -> str
+PlateauMaterial.why_missing(field_name: str) -> str
 ```
 
 Why this field is `None`, in the page's own terms.
@@ -250,33 +221,6 @@ that is not a number. Each of those is a different answer.
 | :--- | :--- |
 | AttributeError | for a name this class does not have, because a misspelt field would otherwise answer as if the cell were empty. |
 
-## gases_named
-
-```python
-gases_named(name: str) -> tuple[Gas, ...]
-```
-
-Every published row for a gas name, across the tables.
-
-Two books printing one gas is worth having, because the pair they print is
-not always the same pair: for carbon dioxide one of them gives 1,30 and
-the other 1,33. That is 2,3 per cent on the ratio and, since the speed of
-sound goes as its square root, 1,2 per cent on the speed, which a reader
-deserves to see both sides of rather than whichever this library happened
-to load first.
-
-**Parameters**
-
-| Name | Description |
-| :--- | :--- |
-| `name` | The gas as a table names it, matched without regard to case and ignoring a parenthesis the page adds: `"air"` answers with the row Hopkins prints as `"Air (dry)"`. |
-
-**Returns:** The rows whose [`Gas.name`](/phonometry/reference/api/fluids/catalogue/#gas) matches, in the order the tables are read, which is empty when no page names it.
-
-## PUBLISHED_FLUIDS
-
-*Constant* (`mappingproxy`).
-
-## PUBLISHED_GASES
+## PUBLISHED_PLATEAU_DATA
 
 *Constant* (`mappingproxy`).

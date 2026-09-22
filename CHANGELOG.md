@@ -9,6 +9,53 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- **Two more books of solids, and the speeds most tables print only one of.**
+  Norton & Karczub 2e Appendix 4 A adds twenty-one solids to
+  `solids.PUBLISHED_SOLIDS` with the bar and the bulk longitudinal speed in
+  separate columns, and their Table 6.1 adds eleven structural loss factors.
+  Vigran (2008) Table 3.1 adds nine building materials, almost every cell a
+  range or an approximation the page marks, with the modulus column dynamic by
+  its own footnote except the one cell a second footnote makes static, and
+  that row derives no wave speed from it. The appendix's last column, the
+  product of critical frequency and thickness, is held as printed: it is
+  Norton & Karczub's own approximation, the speed of sound in air squared over
+  1.8 times the speed in the row, and not the plate-speed product this library
+  derives where a page prints none. Every table was read twice
+  from the page and compared cell by cell: 392 cells, and no disagreement about
+  a number.
+- **Eighteen liquids and gases, each at the temperature its page states.**
+  Norton & Karczub's Appendix 4 B and C join `fluids.PUBLISHED_FLUIDS` with a
+  density, a speed of sound and, where the page prints one, the ratio of
+  specific heats. A substance printed at two temperatures is two states. A row
+  that prints a rule where the ratio of specific heats would go refuses to
+  answer for it rather than borrowing one. The four hydrogen and oxygen
+  states, whose page prints one density at two temperatures, say so in their
+  `validity`.
+- **Wood that is not the same material in two directions.**
+  `solids.PUBLISHED_ORTHOTROPIC_WOOD` holds Rossing (2014) Table 15.5, after
+  Woodhouse: spruce and maple with the four elastic constants of a thin
+  orthotropic plate, D1 along the grain, D3 across it, D2 the coupling and D4
+  the twisting stiffness. Every other solid here is isotropic and cannot say
+  that spruce is thirteen times stiffer along the grain than across it.
+  `OrthotropicWood.is_estimated` answers for the two maple cells the table's
+  caption calls intelligent guesses, and the published catalogue marks them.
+- **The plateau method's three constants, in one place.**
+  `solids.PUBLISHED_PLATEAU_DATA` holds Norton & Karczub Table 3.1: for eight
+  materials, the mass a millimetre brings, the height of the plateau and its
+  width, which is what it takes to sketch a single panel's transmission loss
+  without solving the plate model. `building.PLATEAU_MATERIALS`, which typed
+  the same twenty-four numbers a second time, is now built from it.
+
+### Fixed
+
+- **Every fluid table carried the hedge of the first one.** The loader for
+  `fluids.PUBLISHED_FLUIDS` attached Bies's warning that Table C.1 is
+  "representative only" to every state it read, as a constant in the module,
+  so the second table to arrive would have carried a claim its own book never
+  made. Each data file now carries its own book's sentence about itself, and
+  the loader reads it from there. The loader also dropped the ratio of
+  specific heats a row printed; it now keeps it.
+
 - **Seventeen damping materials, and the temperature their loss factor peaks
   at.** `solids.PUBLISHED_DAMPING` holds Ver & Beranek 2e TABLE 14.1: the
   maximum loss factor of each treatment, the Young's modulus at the two ends

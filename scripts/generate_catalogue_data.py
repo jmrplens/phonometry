@@ -39,6 +39,7 @@ from typing import TYPE_CHECKING, Any, NamedTuple
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "src"))
 
+from phonometry._internal.catalogue import read_table  # noqa: E402
 from phonometry.building import (  # noqa: E402
     PUBLISHED_IMPACT_INSULATION,
     PUBLISHED_TRANSMISSION_LOSS,
@@ -74,7 +75,12 @@ from phonometry.room.enclosed_space_absorption import (  # noqa: E402
     PUBLISHED_AIR_CONDITION,
 )
 from phonometry.simulation.ntff import SIMULATION_AIR  # noqa: E402
-from phonometry.solids import PUBLISHED_DAMPING, PUBLISHED_SOLIDS  # noqa: E402
+from phonometry.solids import (  # noqa: E402
+    PUBLISHED_DAMPING,
+    PUBLISHED_ORTHOTROPIC_WOOD,
+    PUBLISHED_PLATEAU_DATA,
+    PUBLISHED_SOLIDS,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Iterator, Mapping
@@ -171,6 +177,42 @@ DAMPING_COLUMNS = (
         "Pa",
     ),
     ("loss_modulus_max_pa", "Maximum loss modulus", "Módulo de pérdidas máximo", "Pa"),
+)
+
+
+WOOD_COLUMNS = (
+    ("density_kg_m3", "Density", "Densidad", "kg/m³"),
+    (
+        "plate_stiffness_d1_pa",
+        "D1, along the grain",
+        "D1, a lo largo de la fibra",
+        "Pa",
+    ),
+    ("plate_stiffness_d2_pa", "D2, coupling", "D2, acoplamiento", "Pa"),
+    ("plate_stiffness_d3_pa", "D3, across the grain", "D3, a través de la fibra", "Pa"),
+    ("plate_stiffness_d4_pa", "D4, twisting", "D4, torsión", "Pa"),
+    (
+        "relative_scaling_factor",
+        "Relative scaling factor",
+        "Factor de escala relativo",
+        "",
+    ),
+)
+
+PLATEAU_COLUMNS = (
+    (
+        "surface_density_per_mm_kg_m2",
+        "Surface density per mm",
+        "Densidad superficial por mm",
+        "kg/m² per mm",
+    ),
+    ("coincidence_height_db", "Coincidence height", "Altura de la coincidencia", "dB"),
+    (
+        "plateau_frequency_ratio",
+        "Plateau frequency ratio B/A",
+        "Razón de frecuencias B/A",
+        "",
+    ),
 )
 
 POROUS_COLUMNS = (
@@ -674,6 +716,14 @@ def cell(
         note = row.derived.get(field, "")
         if row.is_approximate(field):
             kind, note = "approximate", "the page prints it with a tilde"
+        # Only the orthotropic woods carry this hedge: a number the page prints
+        # and marks as the author's guess. It is served, so the cell is not
+        # empty, and it is not a measurement, so it is not "printed" either.
+        is_estimated = getattr(row, "is_estimated", None)
+        # The note stays empty so that the page reads the kind's own words,
+        # which it has in both languages.
+        if is_estimated is not None and is_estimated(field):
+            kind, note = "estimated", ""
         return {"text": written(value, exact=not derived), "kind": kind, "note": note}
     interval = row.ranges.get(field)
     if interval is not None:
@@ -894,6 +944,15 @@ def fluids() -> tuple[list[dict[str, str]], list[dict[str, Any]]]:
         }
         for name, heading, spanish, _ in quantities
     ]
+    # A state is a physical state and keeps neither the name the page prints
+    # nor the row's note, so both are read back from the data file the state
+    # came from. The name is the printed one: the key carries a temperature
+    # to tell two rows of one substance apart, and "Hydrogen 0c" is not
+    # anything a page printed. The temperature has a column of its own.
+    printed: dict[str, dict[str, Any]] = {}
+    for table in {key.partition("/")[0] for key in PUBLISHED_FLUIDS}:
+        _, records = read_table("phonometry.fluids", f"{table}.json")
+        printed.update({f"{table}/{record['key']}": record for record in records})
     out: list[dict[str, Any]] = []
     for key, state in states.items():
         # A state read from a table and a state a model fixes are different
@@ -901,11 +960,20 @@ def fluids() -> tuple[list[dict[str, str]], list[dict[str, Any]]]:
         # printed, where the 345,86652 m/s of the metrology annex is what its
         # closed form returns at the conditions that annex assumes.
         kind = "printed" if key in PUBLISHED_FLUIDS else "fixed"
+        record = printed.get(key, {})
+        note = record.get("note", "")
+        # Every note a fluid row carries is about its density, the one column
+        # a page has been caught repeating; a note about anything else has to
+        # say which cell it belongs on before it can be placed.
+        if note and "density" not in note:
+            msg = f"{key}: a fluid row note has to name the cell it is about"
+            raise ValueError(msg)
         out.append(
             {
                 "key": key,
                 "table": key.partition("/")[0],
-                "name": key.rpartition("/")[2].replace("_", " ").capitalize(),
+                "name": record.get("name")
+                or key.rpartition("/")[2].replace("_", " ").capitalize(),
                 "temperature": number(state.temperature_c),
                 "pressure": number(state.static_pressure_pa),
                 "model": state.model,
@@ -920,7 +988,7 @@ def fluids() -> tuple[list[dict[str, str]], list[dict[str, Any]]]:
                         if name in state.properties
                         else "",
                         "kind": kind if name in state.properties else "absent",
-                        "note": "",
+                        "note": note if name == "density" else "",
                     }
                     for name, _, _, _ in quantities
                 ],
@@ -1177,6 +1245,8 @@ def render() -> str:
             "rows": list(rows(PUBLISHED_GASES, GAS_COLUMNS)),
         },
         "damping": section(PUBLISHED_DAMPING, DAMPING_COLUMNS),
+        "orthotropicWood": section(PUBLISHED_ORTHOTROPIC_WOOD, WOOD_COLUMNS),
+        "plateau": section(PUBLISHED_PLATEAU_DATA, PLATEAU_COLUMNS),
         "flowResistance": section(PUBLISHED_FLOW_RESISTANCE, FLOW_RESISTANCE_COLUMNS),
         "resilientLayers": transcribed(resilient_layers(), RESILIENT_LAYER_COLUMNS),
         "absorption": section(PUBLISHED_ABSORPTION, ABSORPTION_COLUMNS),
@@ -1236,6 +1306,8 @@ def main(argv: list[str] | None = None) -> int:
     counts = {
         "solids": len(PUBLISHED_SOLIDS),
         "damping materials": len(PUBLISHED_DAMPING),
+        "orthotropic woods": len(PUBLISHED_ORTHOTROPIC_WOOD),
+        "plateau materials": len(PUBLISHED_PLATEAU_DATA),
         "ground": len(PUBLISHED_GROUND),
         "porous": len(PUBLISHED_POROUS),
         "resistive facings": len(PUBLISHED_FLOW_RESISTANCE),

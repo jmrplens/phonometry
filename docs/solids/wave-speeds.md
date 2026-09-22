@@ -111,7 +111,7 @@ Table A2, and the rounded one misses the steel row by 0,8 per cent.
 
 ## The table, and what it does not say
 
-`PUBLISHED_SOLIDS` holds two hundred and nineteen rows read from six
+`PUBLISHED_SOLIDS` holds two hundred and sixty rows read from nine
 published tables:
 Hopkins **Table A2**, twenty-five building materials; Cremer 3e **Table 4.3**,
 thirteen metals over fifteen rows; and Mechel **Table 3**, thirty-eight
@@ -120,7 +120,10 @@ three of them print a steel and they are not the same steel. Bies 5e
 **Table C.1** adds one hundred and five metals, building materials, woods,
 plastics and honeycomb panels, and its loss factor column is two quantities and
 not a range: the low end is the internal loss factor and the high end the one a
-panel has once it is installed. Every row is also on the
+panel has once it is installed. Norton & Karczub **Appendix 4 A** adds
+twenty-one solids with the bar and the bulk speed in separate columns, their
+**Table 6.1** eleven structural loss factors, and Vigran **Table 3.1** nine
+building materials. Every row is also on the
 [published catalogues](https://jmrplens.github.io/phonometry/reference/catalogues/#solids)
 page, filterable, with the book and the page each one was read on.
 
@@ -159,7 +162,7 @@ all is `h f_c`, which Hopkins prints as a column and Mechel as `f_cr d`: for
 steel both print 12,3 m Hz, to the digit. Cremer prints no such column, so his
 rows carry a derived one.
 
-Two of the six tables qualify nothing. Long prints a "Speed of Longitudinal
+Two of the nine tables qualify nothing. Long prints a "Speed of Longitudinal
 Waves" with no modulus and no Poisson ratio beside it, so nothing on the page
 says which of the three it is and the value goes in `longitudinal_speed_m_s`
 rather than in a named one. Comparing it with the tables that do say points at
@@ -189,15 +192,16 @@ Two books printing different numbers for the same material is the catalogue
 working. `check_solid_agreement.py` puts them side by side and fails only when
 two densities are more than 8 per cent apart, which is the one column a table
 cannot get very wrong without describing a different material: every density
-the gate does not already accept agrees to within 2,6 per cent, while the
-moduli disagree by nineteen per cent on aluminium and thirty on lead without
-anybody being wrong, and those it reports and never fails on. Its first full
-run found tin, where Cremer and Mechel print 4,4 GPa and Bies 54 while the
-three densities agree to 0,3 per cent. Each book is consistent with itself, so
+the gate does not already accept agrees with the other books' to within that,
+while the moduli disagree by nineteen per cent on aluminium without anybody
+being wrong, and those it reports and never fails on. Its first full run found
+tin, where Cremer and Mechel print 4,4 GPa, Bies 54 and Norton & Karczub 45,
+while the four densities agree to 0,3 per cent. Each book is consistent with itself, so
 no page contradicts itself and this is not an errata; but a tin of 4,4 GPa
 would carry sound at 780 m/s, among the soft plastics and below every lead row
-here at 1 180 to 1 257 m/s, so the two books that agree are the ones the rest of
-the catalogue argues against. That is why it keeps all six books and nothing in it votes by
+here at 1 180 to 1 257 m/s, so the two books that agree are the ones the rest of
+the catalogue argues against, and the fourth book to print a tin sides with the
+rest. That is why it keeps every book's reading and nothing in it votes by
 majority.
 
 None of this is a specification. Block densities vary by manufacturer, which is

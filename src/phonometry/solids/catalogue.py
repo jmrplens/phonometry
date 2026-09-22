@@ -342,6 +342,9 @@ _TABLES = (
     "bies-2017-table-c1",
     "long-2014-table-12-1",
     "arau-1999-table-4-1",
+    "norton-karczub-2003-appendix-4a",
+    "norton-karczub-2003-table-6-1",
+    "vigran-2008-table-3-1",
 )
 
 

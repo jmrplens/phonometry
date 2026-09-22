@@ -28,6 +28,12 @@ from .elastic import (
     youngs_modulus_from_bulk_speed,
     youngs_modulus_from_plate_speed,
 )
+from .orthotropic_wood import (
+    PUBLISHED_ORTHOTROPIC_WOOD,
+    OrthotropicWood,
+    orthotropic_wood_named,
+)
+from .plateau import PUBLISHED_PLATEAU_DATA, PlateauMaterial, plateau_material_named
 
 __all__ = [
     "DEFAULT_SPEED_OF_SOUND_M_S",
@@ -37,6 +43,12 @@ __all__ = [
     "SolidMaterial",
     "beam_longitudinal_speed",
     "bulk_longitudinal_speed",
+    "PUBLISHED_ORTHOTROPIC_WOOD",
+    "PUBLISHED_PLATEAU_DATA",
+    "OrthotropicWood",
+    "PlateauMaterial",
+    "orthotropic_wood_named",
+    "plateau_material_named",
     "damping_named",
     "plate_longitudinal_speed",
     "solids_named",

@@ -46,6 +46,8 @@ interface Props {
 	catalogue:
 		| 'solids'
 		| 'damping'
+		| 'orthotropicWood'
+		| 'plateau'
 		| 'porous'
 		| 'flowResistance'
 		| 'resilientLayers'
@@ -121,6 +123,7 @@ const copy = {
 			fixed: 'what the model or the standard beside it fixes',
 			derived: 'worked out by this library',
 			approximate: 'the page prints it with a tilde',
+			estimated: 'the page marks it as an estimate, not a measurement',
 			range: 'the page prints an interval',
 			bound: 'the page prints a bound and no value',
 			reported: 'the page lists several readings',
@@ -175,6 +178,7 @@ const copy = {
 			fixed: 'lo que fija el modelo o la norma que lleva al lado',
 			derived: 'calculado por esta biblioteca',
 			approximate: 'la página lo imprime con una tilde',
+			estimated: 'la página lo marca como estimación, no como medida',
 			range: 'la página imprime un intervalo',
 			bound: 'la página imprime una cota, no un valor',
 			reported: 'la página enumera varias lecturas',
@@ -928,7 +932,8 @@ const textColumns = (
 
 	.cell-range,
 	.cell-bound,
-	.cell-reported {
+	.cell-reported,
+	.cell-estimated {
 		border-block-end-color: var(--sl-color-gray-3);
 	}
 

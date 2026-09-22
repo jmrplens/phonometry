@@ -418,6 +418,9 @@ SOLID_TABLE_SIZES: tuple[tuple[str, int], ...] = (
     ("bies-2017-table-c1", 105),
     ("long-2014-table-12-1", 18),
     ("arau-1999-table-4-1", 18),
+    ("norton-karczub-2003-appendix-4a", 21),
+    ("norton-karczub-2003-table-6-1", 11),
+    ("vigran-2008-table-3-1", 9),
 )
 
 

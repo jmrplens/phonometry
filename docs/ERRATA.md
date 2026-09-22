@@ -6939,11 +6939,109 @@ in the same order.
   5 and 37A, whose densities convert, are served normally.
 - **Status:** unreported.
 
+## Norton & Karczub 2e (2003), Appendix 4 (the Young's modulus of cork, three powers of ten too large)
+
+- **Location:** Appendix 4, "Physical properties of some common substances",
+  part A "Solids", row "Cork", on printed page 605 (PDF page 625).
+  Non-normative source: a textbook.
+- **The print:** Cork: density $250$ kg/m$^3$, Young's modulus
+  $6.2 \times 10^{10}$ Pa, a dash in both the Poisson ratio and the bar speed
+  cells, bulk speed $500$ m/s, product of critical frequency and thickness
+  $130.7$.
+- **The problem:** $6.2 \times 10^{10}$ Pa is the modulus of a glass, and it
+  is the value the same table prints for Glass (Pyrex) two rows below. The
+  rest of the cork row contradicts it: with the density and the speed the row
+  prints, $\rho c^2 = 250 \times 500^2 = 6.25 \times 10^{7}$ Pa, a factor of
+  about a thousand smaller. The table's own last column agrees with the
+  $500$ m/s rather than with the modulus: it is $c_0^2/(1.8\,c)$ with
+  $c_0 = 343$ m/s, and $343^2/(1.8 \times 500) = 130.7$, which is what the page
+  prints. The two other foamed or cellular solids in the same block,
+  polyurethane and polystyrene, are printed at $1.9 \times 10^{7}$ and
+  $1.1 \times 10^{7}$ Pa. The mantissa is consistent with the row and the
+  exponent is not.
+- **Evidence:** Verified on PDF page 625 (printed p. 605) of Norton &
+  Karczub, *Fundamentals of Noise and Vibration Analysis for Engineers* 2e
+  (2003). The two moduli, cork's and Pyrex's, are legible and identical on the
+  page; the cork row's density, speed and last column are equally legible and
+  consistent with each other.
+- **What the library does:** the cell is held as `misprinted` in
+  [`PUBLISHED_SOLIDS`](../src/phonometry/solids/catalogue.py), so the row
+  keeps what the book prints and refuses to serve it as a modulus. The page
+  does not print the exponent it meant, so no corrected value is supplied. The
+  rest of the row is served normally.
+- **Status:** unreported.
+
+## Vigran (2008), Table 3.1 (a Poisson ratio whose second endpoint has lost its decimal point)
+
+- **Location:** Table 3.1, "Examples of material properties", row
+  "Aluminium", column "Poisson's ratio", on printed page 88 (PDF page 109).
+  Non-normative source: a textbook.
+- **The print:** "0.33–034".
+- **The problem:** a Poisson ratio lies between $-1$ and $0.5$, and $034$ is
+  not one. The row above, steel, prints its range as "0.28–0.31" with both
+  endpoints written as decimals, and so does every other range in the column.
+  The second endpoint of the aluminium range has lost its decimal point.
+- **Evidence:** Verified on PDF page 109 (printed p. 88) of Vigran,
+  *Building Acoustics* (2008). The cell is legible and reads "0.33–034"; the
+  steel cell immediately above it reads "0.28–0.31".
+- **What the library does:** the cell is held as `misprinted` in
+  [`PUBLISHED_SOLIDS`](../src/phonometry/solids/catalogue.py) and refused.
+  The intended endpoint is easy to guess from the pattern, but the page does
+  not print it, and this library does not finish a value the page left
+  unfinished.
+- **Status:** unreported.
+
+## Rossing (2014), Table 15.5 (a relative scaling factor that its own row does not give)
+
+- **Location:** Table 15.5, "Typical densities and elastic properties of
+  wood used for stringed instrument modelling (after Woodhouse)", column
+  "Maple", row "Relative scaling factors", on printed page 622 (PDF page 632).
+  Non-normative source: a handbook.
+- **The print:** the row prints its symbol as $\sqrt[4]{D_1/D_3}$ and the
+  values $1.9$ for spruce and $1.4$ for maple. Maple's $D_1$ is $860$ MPa and
+  its $D_3$ is $170$ MPa; the table marks two of maple's stiffnesses with an
+  asterisk as estimates, and neither of these two is marked.
+- **The problem:** $\sqrt[4]{860/170} = 1.50$, not $1.4$. Spruce's printed
+  factor does follow from its row: $\sqrt[4]{1100/84} = 1.90$. The same row
+  prints the relation and the value that does not satisfy it, and the page
+  does not say whether the factor or one of the two stiffnesses is wrong.
+- **Evidence:** Verified on PDF page 632 (printed p. 622) of Rossing (ed.),
+  *Springer Handbook of Acoustics* 2e (2014). The running text on the same
+  page states the relation independently: "The relative change in scaled
+  dimensions is therefore $\sqrt[4]{D_1/D_3}$."
+- **What the library does:** every cell is served as printed in
+  [`PUBLISHED_ORTHOTROPIC_WOOD`](../src/phonometry/solids/orthotropic_wood.py),
+  because nothing on the page says which of the three is the wrong one; the
+  maple row carries a note saying so, and a test asserts the relation holds
+  on every other row.
+- **Status:** unreported.
+
 ## Related source properties that are not errata
 
 Recorded here to prevent future "fixes" that would break agreement with the
 published sources:
 
+- **Norton & Karczub 2e (2003), Appendix 4 A, the densities of
+  polystyrene, polyurethane and PVC:** the appendix prints $42$, $72$ and
+  $66$ kg/m$^3$, where Mechel and Bies print $1070$, $900$ and $1400$ for the
+  same names. The difference is not a lost digit. Each Norton & Karczub row
+  also prints a Young's modulus and a bulk speed, and the three satisfy
+  $E = \rho c^2$ to within a per cent, which describes the expanded or
+  cellular form of the polymer; the other books describe the solid one.
+  Neither page qualifies the bare name. Verified on PDF page 625 (printed
+  p. 605). Registered here, and in `ACCEPTED` in
+  `scripts/check_solid_agreement.py`, so that the low densities are not
+  "corrected" to the solid polymer's.
+- **Norton & Karczub 2e (2003), Appendix 4 C, hydrogen and oxygen at 0 and
+  20 °C:** each gas is printed with the same density at both temperatures,
+  $0.084$ and $1.43$ kg/m$^3$, while its speed changes as it should and air, in
+  the same table, drops from $1.293$ to $1.21$ over the same interval. It is
+  not registered as an erratum because the table's own columns do not settle
+  it: $P = \rho c^2/\gamma$ puts these rows between $96$ and $109$ kPa, no
+  further from an atmosphere than the carbon dioxide and steam rows. Verified
+  on PDF page 626 (printed p. 606). The four states say so in their
+  `validity` in [`PUBLISHED_FLUIDS`](../src/phonometry/fluids/catalogue.py),
+  and the published catalogues page shows it on their density.
 - **ISO 11546-1:1995 Annex A and Annex B:** Figure B.1 is captioned "Source
   spectrum for an artificial sound source constructed according to the
   guidelines given in annex A", while Annex A, which asks for a steel plate of

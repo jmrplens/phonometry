@@ -1,0 +1,184 @@
+{
+  "source": "Vigran (2008) Table 3.1, PDF page 109 (printed p. 88)",
+  "about": "Nine common building materials, read as the page sets them rather than reduced to a figure each: five of the nine print a density as a range, five print the modulus as a range, and every loss factor is either a range or an approximation the page marks with a tilde. The loss factor column is headed eta_int times ten to the minus three, so a printed 0.1 is a loss factor of 0.0001 and is stored as one. The modulus column is dynamic by its own footnote, except the one cell a second footnote makes static, which carries a note saying so. Glass prints a rule where its Poisson ratio would go and is served without one. The table credits no source.",
+  "rows": [
+    {
+      "key": "steel",
+      "name": "Steel",
+      "loss_factor": 0.0001,
+      "ranges": {
+        "density_kg_m3": [
+          7700,
+          7800
+        ],
+        "youngs_modulus_pa": [
+          190000000000.0,
+          210000000000.0
+        ],
+        "poisson_ratio": [
+          0.28,
+          0.31
+        ]
+      },
+      "approximate": [
+        "loss_factor"
+      ]
+    },
+    {
+      "key": "aluminium",
+      "name": "Aluminium",
+      "density_kg_m3": 2700.0,
+      "loss_factor": 0.0001,
+      "misprinted": {
+        "poisson_ratio": "the page prints “0.33–034”, and 034 is not a Poisson ratio: the second endpoint has lost its decimal point, which the steel row above it keeps (“0.28–0.31”). The intended endpoint is legible from the pattern but the page does not print it, and this library does not finish a value the page left unfinished. The defect is registered in docs/ERRATA.md under “Vigran (2008), Table 3.1”."
+      },
+      "ranges": {
+        "youngs_modulus_pa": [
+          66000000000.0,
+          72000000000.0
+        ]
+      },
+      "approximate": [
+        "loss_factor"
+      ]
+    },
+    {
+      "key": "glass",
+      "name": "Glass",
+      "density_kg_m3": 2500.0,
+      "youngs_modulus_pa": 60000000000.0,
+      "ranges": {
+        "loss_factor": [
+          0.0006,
+          0.002
+        ]
+      }
+    },
+    {
+      "key": "concrete",
+      "name": "Concrete",
+      "density_kg_m3": 2300.0,
+      "ranges": {
+        "youngs_modulus_pa": [
+          32000000000.0,
+          40000000000.0
+        ],
+        "poisson_ratio": [
+          0.15,
+          0.2
+        ],
+        "loss_factor": [
+          0.004,
+          0.008
+        ]
+      }
+    },
+    {
+      "key": "concrete_lightweight_aggregate",
+      "name": "Concrete (lightweight aggregate)",
+      "poisson_ratio": 0.2,
+      "ranges": {
+        "density_kg_m3": [
+          400,
+          600
+        ],
+        "youngs_modulus_pa": [
+          1000000000.0,
+          2500000000.0
+        ],
+        "loss_factor": [
+          0.01,
+          0.02
+        ]
+      },
+      "approximate": [
+        "poisson_ratio"
+      ]
+    },
+    {
+      "key": "concrete_autoclaved_aerated",
+      "name": "Concrete (autoclaved aerated)",
+      "density_kg_m3": 1300.0,
+      "youngs_modulus_pa": 3800000000.0,
+      "poisson_ratio": 0.2,
+      "note": "Footnote 2 of the table marks this modulus alone: where the heading's footnote 1 makes the whole column a dynamic modulus, this cell is the modulus for static pressure. It is therefore not comparable with the other eight rows of the same column.",
+      "ranges": {
+        "loss_factor": [
+          0.01,
+          0.02
+        ]
+      },
+      "approximate": [
+        "poisson_ratio"
+      ],
+      "not_derivable": {
+        "shear_modulus_pa": "the modulus this row prints is the static one, by the table's footnote 2, and a wave speed, a shear modulus or a critical frequency worked out from it would be a dynamic quantity computed from a static modulus",
+        "bar_longitudinal_speed_m_s": "the modulus this row prints is the static one, by the table's footnote 2, and a wave speed, a shear modulus or a critical frequency worked out from it would be a dynamic quantity computed from a static modulus",
+        "plate_longitudinal_speed_m_s": "the modulus this row prints is the static one, by the table's footnote 2, and a wave speed, a shear modulus or a critical frequency worked out from it would be a dynamic quantity computed from a static modulus",
+        "bulk_longitudinal_speed_m_s": "the modulus this row prints is the static one, by the table's footnote 2, and a wave speed, a shear modulus or a critical frequency worked out from it would be a dynamic quantity computed from a static modulus",
+        "transverse_speed_m_s": "the modulus this row prints is the static one, by the table's footnote 2, and a wave speed, a shear modulus or a critical frequency worked out from it would be a dynamic quantity computed from a static modulus",
+        "thickness_critical_frequency_product_m_hz": "the modulus this row prints is the static one, by the table's footnote 2, and a wave speed, a shear modulus or a critical frequency worked out from it would be a dynamic quantity computed from a static modulus"
+      }
+    },
+    {
+      "key": "gypsum_plasterboard",
+      "name": "Gypsum plate (plasterboard)",
+      "youngs_modulus_pa": 4100000000.0,
+      "poisson_ratio": 0.3,
+      "ranges": {
+        "density_kg_m3": [
+          800,
+          900
+        ],
+        "loss_factor": [
+          0.01,
+          0.015
+        ]
+      },
+      "approximate": [
+        "poisson_ratio"
+      ]
+    },
+    {
+      "key": "chipboard",
+      "name": "Chipboard",
+      "youngs_modulus_pa": 3800000000.0,
+      "poisson_ratio": 0.2,
+      "ranges": {
+        "density_kg_m3": [
+          650,
+          800
+        ],
+        "loss_factor": [
+          0.01,
+          0.03
+        ]
+      },
+      "approximate": [
+        "poisson_ratio"
+      ]
+    },
+    {
+      "key": "fir_spruce",
+      "name": "Fir, spruce",
+      "poisson_ratio": 0.4,
+      "ranges": {
+        "density_kg_m3": [
+          400,
+          700
+        ],
+        "youngs_modulus_pa": [
+          7000000000.0,
+          12000000000.0
+        ],
+        "loss_factor": [
+          0.008,
+          0.01
+        ]
+      },
+      "approximate": [
+        "poisson_ratio"
+      ]
+    }
+  ]
+}

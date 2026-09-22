@@ -77,6 +77,8 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | [`solids.elastic`](/phonometry/reference/api/solids/elastic/) | Three longitudinal wave speeds of a solid, and which one a table prints. |
 | [`solids.catalogue`](/phonometry/reference/api/solids/catalogue/) | Solid materials as one published table prints them. |
 | [`solids.damping`](/phonometry/reference/api/solids/damping/) | Commercial damping materials, with the temperature and the frequency. |
+| [`solids.orthotropic_wood`](/phonometry/reference/api/solids/orthotropic-wood/) | Wood, which is not the same material in two directions. |
+| [`solids.plateau`](/phonometry/reference/api/solids/plateau/) | The three numbers a panel needs before its transmission loss can be sketched. |
 
 ## Audio files
 

@@ -65,6 +65,8 @@ export const apiSections = {
       'reference/api/solids/elastic',
       'reference/api/solids/catalogue',
       'reference/api/solids/damping',
+      'reference/api/solids/orthotropic-wood',
+      'reference/api/solids/plateau',
     ],
   },
   'io': {

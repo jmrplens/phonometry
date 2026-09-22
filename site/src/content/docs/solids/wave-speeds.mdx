@@ -130,7 +130,7 @@ steel row by 0,8 per cent.
 ## The table, and what it does not say
 
 Typing the row yourself is the other half of the problem the three speeds
-solve. `PUBLISHED_SOLIDS` holds two hundred and nineteen rows read from six published tables, keyed
+solve. `PUBLISHED_SOLIDS` holds two hundred and sixty rows read from nine published tables, keyed
 by the table they came from, so a plasterboard partition or a concrete floor
 starts from a number somebody published rather than one you half remember.
 Every one of them is also on the
@@ -155,10 +155,12 @@ number this library computed is never stored as though a page had printed it.
 
 ### The key names the book on purpose
 
-Four of the six tables print a row named Steel, and they are not the same
+Seven of the nine tables print a row named Steel, and they are not the same
 steel: Hopkins gives a plate speed of 5 270 m/s and a Poisson ratio of 0,28,
 Cremer a modulus of 210 GPa and 0,31, Bies 207 GPa for mild steel and 210 for
-one per cent carbon, and Long a speed and a density and no modulus at all.
+one per cent carbon, Long a speed and a density and no modulus at all, Norton &
+Karczub 195 GPa in their appendix and nothing but a loss factor in their Table
+6.1, and Vigran a modulus printed as a range.
 Mechel prints a steel too and calls it "Steel, cast steel", so the lookup does
 not reach it: matching a material across books is the agreement work's job and
 not the name's. A flat `"steel"` would have to pick one of them without
@@ -174,10 +176,13 @@ for row in solids.solids_named("Steel"):
 # bies-2017-table-c1 mild 207.0
 # bies-2017-table-c1 1% carbon 210.0
 # long-2014-table-12-1 - None
+# norton-karczub-2003-appendix-4a - 195.0
+# norton-karczub-2003-table-6-1 - None
+# vigran-2008-table-3-1 - None
 ```
 
-Long prints no modulus at all, which is why the loop asks whether there is one
-before dividing. A book that gives fewer columns is the normal case here, not
+Long and the loss-factor table print no modulus, and Vigran's is a range, which
+is why the loop asks whether there is one before dividing. A book that gives fewer columns is the normal case here, not
 the exception.
 
 Every row carries all three longitudinal speeds whenever its own cells allow
@@ -337,36 +342,40 @@ a page. It fails on the first and reports the other two, and the property it
 fails on is density.
 
 Density is the one column a table cannot get very wrong without describing a
-different material. Every density the gate does not already accept agrees
-across these six tables to within 2,6 per cent, while the moduli disagree by
-nineteen per cent on aluminium and thirty on lead without anybody being wrong.
+different material. Across these nine tables every density the gate does not
+already accept agrees with the other books' to within 8 per cent, while the
+moduli disagree by nineteen per cent on aluminium without anybody being wrong.
 So a density more than 8 per cent apart is a transcription error, anything
 under that passes without a word, and a modulus twice its neighbour is the
 literature.
 
-The first full run found tin, where three books do not agree about a factor of
+The first full run found tin, where the books do not agree about a factor of
 twelve.
 
 ```python
 for row in solids.solids_named("Tin"):
-    print(row.table.split("-")[0], round(row.youngs_modulus_pa / 1e9, 1), row.density_kg_m3)
+    if row.youngs_modulus_pa is not None:
+        print(row.table.split("-")[0], round(row.youngs_modulus_pa / 1e9, 1), row.density_kg_m3)
 # cremer 4.4 7280.0
 # mechel 4.4 7280.0
 # bies 54.0 7300.0
+# norton 45.0 7300.0
 ```
 
 The densities agree to 0,3 per cent, so nobody has confused the material, and
 each book is consistent with itself: Cremer's 4,4 GPa reproduces his own
 printed 780 m/s, his shear modulus and his transverse speed; Bies' 54
-reproduces his printed 2 720 m/s exactly; and Mechel's `h f_c` of 81 m Hz
+reproduces his printed 2 720 m/s exactly; Norton & Karczub's 45 reproduces
+their printed 2 500 m/s to within one per cent; and Mechel's `h f_c` of 81 m Hz
 follows from 4,4 and not from 54. No page contradicts itself, so this is not an
-errata to register and the catalogue keeps all three readings.
+errata to register and the catalogue keeps all four readings.
 
 The rest of the catalogue does say which way to look. A tin of 4,4 GPa carries
 sound at 780 m/s, which lands it among the soft plastics, below high-density
 polyethylene at 1 030 and below every lead row here, and those run from 1 180
 to 1 257 m/s although lead is the softer metal and half again as dense. So the two books that agree are the two the
-other two hundred rows argue against, which is the whole reason nothing in this
+other two hundred and fifty rows argue against, and the fourth book to print a
+tin sides with the rows, which is the whole reason nothing in this
 catalogue votes by majority: two books agreeing is not evidence, and when they
 share a mistake it is usually because they share an ancestor.
 

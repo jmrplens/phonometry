@@ -103,9 +103,12 @@ print(sea.validity)
 
 ## Solids
 
-Elastic constants, wave speeds and loss factors, read from the tables of six
-books. Four of them print a steel and they are not the same steel, which is why
-a key names the table it came from.
+Elastic constants, wave speeds and loss factors, read from nine tables in
+eight books. Seven of those books print a steel and they are not the same
+steel, which is why a key names the table it came from. Three polymers are
+printed by one book as the expanded form and by another as the solid one under
+the same bare name, with densities a factor of twelve to twenty-five apart;
+both are kept, and each row's own modulus and speed say which it describes.
 
 <Catalogues catalogue="solids" lang="en" />
 
@@ -138,6 +141,41 @@ three of its cells are corrupted in the printing, are registered in this
 project's errata and are left empty here rather than guessed at.
 
 <Catalogues catalogue="damping" lang="en" />
+
+## Orthotropic wood
+
+Every solid above is isotropic: one Young's modulus, one Poisson ratio, and the
+same answer whichever way a wave runs through it. Wood is not. A spruce plate
+is thirteen times stiffer along the grain than across it, and an instrument
+maker chooses the wood precisely for that difference, so a single modulus for
+it describes no direction at all. These two woods, the ones a stringed
+instrument is made of, carry the four elastic constants of a thin orthotropic
+plate: D1 along the grain, D3 across it, D2 the coupling between the two
+directions and D4 the twisting stiffness. Each is a modulus divided by twelve
+or a third of the shear modulus rather than a modulus itself, so they do not
+compare with the fir and spruce in the solids table. The page prints the
+woods as its columns and this table turns it so that a wood is a row. Two of
+maple's constants are the author's own guesses, which the page marks and the
+table shows, and maple's printed scaling factor does not follow from its own
+row, which is registered in this project's errata.
+
+<Catalogues catalogue="orthotropicWood" lang="en" />
+
+## Plateau-method constants
+
+The three numbers the plateau method needs to sketch a single panel's
+transmission loss without solving the plate model: the mass one millimetre of
+the material brings, how high the plateau sits, and how wide it is in
+frequency. The first is a density in disguise, kilograms per square metre per
+millimetre, which is the density divided by a thousand; it is kept in that
+unit because that is the unit the method uses it in. The second is a
+transmission loss, the level the method draws as a horizontal line over the
+coincidence region, and it depends on the material and not on the thickness.
+These are the numbers the library's own plateau-method prediction reads. The
+measured insulation of real constructions is in the transmission loss table
+below.
+
+<Catalogues catalogue="plateau" lang="en" />
 
 ## Porous materials
 
@@ -415,8 +453,11 @@ print it, and they do not print quite the same pair for it.
 
 ## Fluids
 
-Every named fluid state this library carries. The three read from a page are in
-`fluids.PUBLISHED_FLUIDS`; the four airs below them sit elsewhere in the tree,
+Every named fluid state this library carries. The twenty-one read from a page
+are in `fluids.PUBLISHED_FLUIDS`: three from Bies and eighteen liquids and
+gases from Norton & Karczub, each at the temperature its page states and with
+the ratio of specific heats where the page prints one. The four airs below
+them sit elsewhere in the tree,
 each beside the model or the standard that fixes it, and they disagree because
 each is the air its own document assumes.
 

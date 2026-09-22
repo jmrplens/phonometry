@@ -1,0 +1,169 @@
+{
+  "source": "Norton & Karczub 2e Appendix 4 B and C, PDF page 626 (printed p. 606)",
+  "about": "Nine liquids and nine gases, each at a temperature the page states, with the density, the ratio of specific heats and the speed of sound at that temperature. The appendix prints them as two parts, and this catalogue keeps them in one file with the part in each row's group: both parts have the same four columns and describe a substance in a stated state, and splitting one printed appendix in two by a distinction its own columns do not make would be this library imposing a shape the source does not have. Four substances appear twice, at two temperatures, so the row key carries the temperature. Four liquids print a rule where the ratio of specific heats would go and are served without one. Two gases repeat a density across two temperatures and say so in a note.",
+  "rows": [
+    {
+      "key": "castor_oil",
+      "name": "Castor oil",
+      "temperature_c": 20.0,
+      "density_kg_m3": 950.0,
+      "speed_of_sound_m_s": 1540.0,
+      "group": "Liquids"
+    },
+    {
+      "key": "ethyl_alcohol",
+      "name": "Ethyl alcohol",
+      "temperature_c": 20.0,
+      "density_kg_m3": 790.0,
+      "speed_of_sound_m_s": 1150.0,
+      "group": "Liquids"
+    },
+    {
+      "key": "fresh_water_20c",
+      "name": "Fresh water",
+      "temperature_c": 20.0,
+      "density_kg_m3": 998.0,
+      "speed_of_sound_m_s": 1483.0,
+      "group": "Liquids",
+      "heat_capacity_ratio": 1.004
+    },
+    {
+      "key": "fresh_water_13c",
+      "name": "Fresh water",
+      "temperature_c": 13.0,
+      "density_kg_m3": 998.0,
+      "speed_of_sound_m_s": 1441.0,
+      "group": "Liquids",
+      "heat_capacity_ratio": 1.004
+    },
+    {
+      "key": "glycerin",
+      "name": "Glycerin",
+      "temperature_c": 20.0,
+      "density_kg_m3": 1260.0,
+      "speed_of_sound_m_s": 1980.0,
+      "group": "Liquids"
+    },
+    {
+      "key": "mercury",
+      "name": "Mercury",
+      "temperature_c": 20.0,
+      "density_kg_m3": 13600.0,
+      "speed_of_sound_m_s": 1450.0,
+      "group": "Liquids",
+      "heat_capacity_ratio": 1.13
+    },
+    {
+      "key": "petrol",
+      "name": "Petrol",
+      "temperature_c": 20.0,
+      "density_kg_m3": 680.0,
+      "speed_of_sound_m_s": 1390.0,
+      "group": "Liquids"
+    },
+    {
+      "key": "sea_water_13c",
+      "name": "Sea water",
+      "temperature_c": 13.0,
+      "density_kg_m3": 1026.0,
+      "speed_of_sound_m_s": 1500.0,
+      "group": "Liquids",
+      "heat_capacity_ratio": 1.01
+    },
+    {
+      "key": "turpentine",
+      "name": "Turpentine",
+      "temperature_c": 20.0,
+      "density_kg_m3": 870.0,
+      "speed_of_sound_m_s": 1250.0,
+      "group": "Liquids",
+      "heat_capacity_ratio": 1.27
+    },
+    {
+      "key": "air_0c",
+      "name": "Air",
+      "temperature_c": 0.0,
+      "density_kg_m3": 1.293,
+      "speed_of_sound_m_s": 332.0,
+      "group": "Gases",
+      "heat_capacity_ratio": 1.402
+    },
+    {
+      "key": "air_20c",
+      "name": "Air",
+      "temperature_c": 20.0,
+      "density_kg_m3": 1.21,
+      "speed_of_sound_m_s": 343.0,
+      "group": "Gases",
+      "heat_capacity_ratio": 1.402
+    },
+    {
+      "key": "carbon_dioxide_20c",
+      "name": "Carbon dioxide",
+      "temperature_c": 20.0,
+      "density_kg_m3": 1.84,
+      "speed_of_sound_m_s": 267.0,
+      "group": "Gases",
+      "heat_capacity_ratio": 1.4
+    },
+    {
+      "key": "hydrogen_0c",
+      "name": "Hydrogen",
+      "temperature_c": 0.0,
+      "density_kg_m3": 0.084,
+      "speed_of_sound_m_s": 1270.0,
+      "group": "Gases",
+      "heat_capacity_ratio": 1.41,
+      "note": "The appendix prints the same density for this substance at both temperatures it lists, while the speed beside it changes as a speed should. Air, in the same part of the same table, does drop from 1.293 to 1.21 kg/m3 over the same interval, so the repetition here is the table departing from its own practice. It is served exactly as printed: the ideal-gas relation P = rho c^2 / gamma applied to these three columns puts this row between 96 and 109 kPa, which is no further from an atmosphere than the carbon dioxide and steam rows that nobody disputes, so nothing in the document settles which of the two densities was meant."
+    },
+    {
+      "key": "hydrogen_20c",
+      "name": "Hydrogen",
+      "temperature_c": 20.0,
+      "density_kg_m3": 0.084,
+      "speed_of_sound_m_s": 1330.0,
+      "group": "Gases",
+      "heat_capacity_ratio": 1.41,
+      "note": "The appendix prints the same density for this substance at both temperatures it lists, while the speed beside it changes as a speed should. Air, in the same part of the same table, does drop from 1.293 to 1.21 kg/m3 over the same interval, so the repetition here is the table departing from its own practice. It is served exactly as printed: the ideal-gas relation P = rho c^2 / gamma applied to these three columns puts this row between 96 and 109 kPa, which is no further from an atmosphere than the carbon dioxide and steam rows that nobody disputes, so nothing in the document settles which of the two densities was meant."
+    },
+    {
+      "key": "nitrogen_20c",
+      "name": "Nitrogen",
+      "temperature_c": 20.0,
+      "density_kg_m3": 1.17,
+      "speed_of_sound_m_s": 349.0,
+      "group": "Gases",
+      "heat_capacity_ratio": 1.4
+    },
+    {
+      "key": "oxygen_0c",
+      "name": "Oxygen",
+      "temperature_c": 0.0,
+      "density_kg_m3": 1.43,
+      "speed_of_sound_m_s": 317.0,
+      "group": "Gases",
+      "heat_capacity_ratio": 1.4,
+      "note": "The appendix prints the same density for this substance at both temperatures it lists, while the speed beside it changes as a speed should. Air, in the same part of the same table, does drop from 1.293 to 1.21 kg/m3 over the same interval, so the repetition here is the table departing from its own practice. It is served exactly as printed: the ideal-gas relation P = rho c^2 / gamma applied to these three columns puts this row between 96 and 109 kPa, which is no further from an atmosphere than the carbon dioxide and steam rows that nobody disputes, so nothing in the document settles which of the two densities was meant."
+    },
+    {
+      "key": "oxygen_20c",
+      "name": "Oxygen",
+      "temperature_c": 20.0,
+      "density_kg_m3": 1.43,
+      "speed_of_sound_m_s": 326.0,
+      "group": "Gases",
+      "heat_capacity_ratio": 1.4,
+      "note": "The appendix prints the same density for this substance at both temperatures it lists, while the speed beside it changes as a speed should. Air, in the same part of the same table, does drop from 1.293 to 1.21 kg/m3 over the same interval, so the repetition here is the table departing from its own practice. It is served exactly as printed: the ideal-gas relation P = rho c^2 / gamma applied to these three columns puts this row between 96 and 109 kPa, which is no further from an atmosphere than the carbon dioxide and steam rows that nobody disputes, so nothing in the document settles which of the two densities was meant."
+    },
+    {
+      "key": "steam_100c",
+      "name": "Steam",
+      "temperature_c": 100.0,
+      "density_kg_m3": 0.6,
+      "speed_of_sound_m_s": 405.0,
+      "group": "Gases",
+      "heat_capacity_ratio": 1.324
+    }
+  ],
+  "validity": "Norton & Karczub say of Appendix 4 that its data 'have been collated from several sources' and name four of their own references, without saying which row came from which."
+}

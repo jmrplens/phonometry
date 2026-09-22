@@ -106,9 +106,12 @@ print(sea.validity)
 
 ## Sólidos
 
-Constantes elásticas, velocidades de onda y factores de pérdidas, leídos de las
-tablas de seis libros. Cuatro de ellos imprimen un acero y no son el mismo
-acero, y por eso la clave nombra la tabla de la que salió.
+Constantes elásticas, velocidades de onda y factores de pérdidas, leídos de
+nueve tablas de ocho libros. Siete de esos libros imprimen un acero y no son el
+mismo acero, y por eso la clave nombra la tabla de la que salió. Tres polímeros
+los imprime un libro en su forma expandida y otro en la maciza bajo el mismo
+nombre desnudo, con densidades que difieren entre doce y veinticinco veces; se
+guardan los dos, y el módulo y la velocidad de cada fila dicen cuál describe.
 
 <Catalogues catalogue="solids" lang="es" />
 
@@ -143,6 +146,42 @@ material; tres de sus celdas están corrompidas en la impresión, constan en las
 erratas del proyecto y aquí se quedan vacías en vez de adivinarse.
 
 <Catalogues catalogue="damping" lang="es" />
+
+## Madera ortótropa
+
+Todos los sólidos de arriba son isótropos: un módulo de Young, un coeficiente
+de Poisson y la misma respuesta vaya la onda en la dirección que vaya. La
+madera no. Una placa de picea es trece veces más rígida a lo largo de la
+fibra que a través, y un constructor de instrumentos elige la madera
+justamente por esa diferencia, así que un solo módulo para ella no describe
+ninguna dirección. Estas dos maderas, las de las que se hace un instrumento de
+cuerda, llevan las cuatro constantes elásticas de una placa delgada
+ortótropa: D1 a lo largo de la fibra, D3 a través de ella, D2 el acoplamiento
+entre las dos direcciones y D4 la rigidez a torsión. Cada una es un módulo
+dividido entre doce o un tercio del módulo de cizalladura, no un módulo, así
+que no se comparan con el abeto y la picea de la tabla de sólidos. La página
+imprime las maderas como columnas y esta tabla la gira para que una madera sea
+una fila. Dos constantes del arce son estimaciones del propio autor, que la
+página marca y la tabla enseña, y el factor de escala que imprime para el arce
+no se sigue de su propia fila, lo que consta en las erratas del proyecto.
+
+<Catalogues catalogue="orthotropicWood" lang="es" />
+
+## Constantes del método de la meseta
+
+Los tres números que necesita el método de la meseta para esbozar la pérdida
+por transmisión de un panel simple sin resolver el modelo de placa: la masa que
+aporta un milímetro del material, a qué altura está la meseta y lo ancha que
+es en frecuencia. El primero es una densidad disfrazada, kilogramos por metro
+cuadrado y por milímetro, que es la densidad dividida entre mil; se guarda en
+esa unidad porque es la unidad en la que la usa el método. El segundo es una
+pérdida por transmisión, el nivel que el método dibuja como una recta
+horizontal sobre la zona de coincidencia, y depende del material y no del
+espesor. Son los números que lee la predicción por el método de la meseta de
+la propia biblioteca. El aislamiento medido de construcciones reales está en
+la tabla de pérdida por transmisión de más abajo.
+
+<Catalogues catalogue="plateau" lang="es" />
 
 ## Materiales porosos
 
@@ -431,9 +470,11 @@ imprimen exactamente el mismo par.
 
 ## Fluidos
 
-Todos los estados de fluido con nombre que lleva esta biblioteca. Los tres que
-se leyeron de una página están en `fluids.PUBLISHED_FLUIDS`; los cuatro aires
-de debajo viven en otros puntos del árbol, cada uno junto al modelo o la norma
+Todos los estados de fluido con nombre que lleva esta biblioteca. Los
+veintiuno que se leyeron de una página están en `fluids.PUBLISHED_FLUIDS`: tres
+de Bies y dieciocho líquidos y gases de Norton & Karczub, cada uno a la
+temperatura que dice su página y con la razón de calores específicos donde la
+página la imprime. Los cuatro aires de debajo viven en otros puntos del árbol, cada uno junto al modelo o la norma
 que lo fija, y discrepan porque cada uno es el aire que supone su propio
 documento.
 

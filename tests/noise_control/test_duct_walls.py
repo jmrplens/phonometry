@@ -171,7 +171,11 @@ def test_every_cell_is_the_mark_the_second_reader_read(
     assert row.direction == direction
     _assert_the_row_is_the_one_the_label_names(row, index, label)
     if length:
-        assert f"{row.duct_length_m:g}" == length
+        # The attribute first, like every other comparison in this file, and
+        # against the number rather than a rendering of it: formatting the
+        # float to compare two strings put the only expected value on the left
+        # in the whole module.
+        assert row.duct_length_m == pytest.approx(float(length))
     else:
         assert row.duct_length_m is None
 

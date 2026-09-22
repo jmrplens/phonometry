@@ -47,7 +47,7 @@ other catalogue in this library.
 
 ## PUBLISHED_RESILIENT_MODULI
 
-*Constant* (`mappingproxy`).
+*Constant* (`mapping`).
 
 ## resilient_moduli_named
 

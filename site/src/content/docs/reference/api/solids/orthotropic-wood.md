@@ -249,4 +249,4 @@ that is not a number. Each of those is a different answer.
 
 ## PUBLISHED_ORTHOTROPIC_WOOD
 
-*Constant* (`mappingproxy`).
+*Constant* (`mapping`).

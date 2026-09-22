@@ -7063,6 +7063,28 @@ in the same order.
   word stands for.
 - **Status:** unreported.
 
+## Rossing (2014), Table 8.3 (the 1-pentanol line printed twice)
+
+- **Location:** Table 8.3, "B/A values for organic liquids at atmospheric
+  pressure", fourth and fifth lines of the left panel, on printed page 269
+  (PDF page 285). Non-normative source: a handbook.
+- **The print:** two consecutive lines read "1-Pentanol | 20 | 10 | [8.68]",
+  identical in every cell.
+- **The problem:** every other substance of the table names itself once and
+  leaves the name blank on its further lines, and every other repeated
+  temperature of a substance cites a different paper or prints a different
+  value. These two lines are one measurement printed twice: the lines above
+  and below them run through the 1-alcohols from propanol to decanol, one line
+  each and all citing the same paper, and pentanol is the only one that
+  appears twice.
+- **Evidence:** Verified on PDF page 285 (printed p. 269) of Rossing (ed.),
+  *Springer Handbook of Acoustics* 2e (2014); both independent readings of
+  the page and a crop of the panel print the line twice.
+- **What the library does:** the measurement is held once in
+  [`PUBLISHED_NONLINEARITY`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/fluids/nonlinearity.py), and
+  its note says the page prints it twice.
+- **Status:** unreported.
+
 ## Related source properties that are not errata
 
 Recorded here to prevent future "fixes" that would break agreement with the

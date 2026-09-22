@@ -47,7 +47,11 @@ from phonometry.building import (  # noqa: E402
 )
 from phonometry.building.prediction.detailed_model import EN_12354_AIR  # noqa: E402
 from phonometry.environment.propagation import PUBLISHED_GROUND  # noqa: E402
-from phonometry.fluids import PUBLISHED_FLUIDS, PUBLISHED_GASES  # noqa: E402
+from phonometry.fluids import (  # noqa: E402
+    PUBLISHED_FLUIDS,
+    PUBLISHED_GASES,
+    PUBLISHED_NONLINEARITY,
+)
 from phonometry.materials.absorbers import (  # noqa: E402
     ABSORPTION_BANDS_HZ,
     PUBLISHED_ABSORPTION,
@@ -213,6 +217,18 @@ PLATEAU_COLUMNS = (
         "Razón de frecuencias B/A",
         "",
     ),
+)
+
+#: The nonlinearity parameter of a liquid, and the conditions it was
+#: measured at. The value leads, because it is what a reader came for; the
+#: temperature follows because most substances are printed at several, and
+#: the pressure and the year are each printed by one table only and stay
+#: empty on the rest.
+NONLINEARITY_COLUMNS = (
+    ("b_over_a", "B/A", "B/A", ""),
+    ("temperature_c", "Temperature", "Temperatura", "°C"),
+    ("static_pressure_pa", "Static pressure", "Presión estática", "Pa"),
+    ("year", "Year", "Año", ""),
 )
 
 POROUS_COLUMNS = (
@@ -726,6 +742,10 @@ def cell(
         number, exponent=style.exponent, scientific=style.scientific
     )
     value = getattr(row, field, None)
+    # A year is a label and not a quantity: grouping its thousands would
+    # print 1 989.
+    if field == "year" and value is not None:
+        return {"text": str(int(value)), "kind": "printed", "note": ""}
     if value is not None:
         derived = row.is_derived(field)
         kind = "derived" if derived else "printed"
@@ -740,7 +760,14 @@ def cell(
         # which it has in both languages.
         if is_estimated is not None and is_estimated(field):
             kind, note = "estimated", ""
-        return {"text": written(value, exact=not derived), "kind": kind, "note": note}
+        text = written(value, exact=not derived)
+        # The plus-or-minus a page prints beside the value is part of what it
+        # printed, in the same unit, so it is written in the cell rather than
+        # left to a note nobody opens.
+        spread = row.uncertainty.get(field)
+        if spread is not None:
+            text = f"{text} ± {written(spread)}"
+        return {"text": text, "kind": kind, "note": note}
     interval = row.ranges.get(field)
     if interval is not None:
         low, high = interval
@@ -1263,6 +1290,7 @@ def render() -> str:
         "damping": section(PUBLISHED_DAMPING, DAMPING_COLUMNS),
         "orthotropicWood": section(PUBLISHED_ORTHOTROPIC_WOOD, WOOD_COLUMNS),
         "plateau": section(PUBLISHED_PLATEAU_DATA, PLATEAU_COLUMNS),
+        "nonlinearity": section(PUBLISHED_NONLINEARITY, NONLINEARITY_COLUMNS),
         "flowResistance": section(PUBLISHED_FLOW_RESISTANCE, FLOW_RESISTANCE_COLUMNS),
         "resilientLayers": transcribed(resilient_layers(), RESILIENT_LAYER_COLUMNS),
         "absorption": section(PUBLISHED_ABSORPTION, ABSORPTION_COLUMNS),
@@ -1324,6 +1352,7 @@ def main(argv: list[str] | None = None) -> int:
         "damping materials": len(PUBLISHED_DAMPING),
         "orthotropic woods": len(PUBLISHED_ORTHOTROPIC_WOOD),
         "plateau materials": len(PUBLISHED_PLATEAU_DATA),
+        "nonlinearity values": len(PUBLISHED_NONLINEARITY),
         "ground": len(PUBLISHED_GROUND),
         "porous": len(PUBLISHED_POROUS),
         "resistive facings": len(PUBLISHED_FLOW_RESISTANCE),

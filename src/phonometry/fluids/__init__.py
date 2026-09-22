@@ -42,6 +42,11 @@ from .gas import (
     MOLAR_GAS_CONSTANT,
     ideal_gas,
 )
+from .nonlinearity import (
+    PUBLISHED_NONLINEARITY,
+    NonlinearityParameter,
+    nonlinearity_named,
+)
 from .water import (
     depth_to_absolute_pressure_pa,
     depth_to_gauge_pressure_mpa,
@@ -58,15 +63,18 @@ __all__ = [
     "MOLAR_GAS_CONSTANT",
     "PUBLISHED_FLUIDS",
     "PUBLISHED_GASES",
+    "PUBLISHED_NONLINEARITY",
     "Fluid",
     "FluidAssumptionWarning",
     "FluidPropertyUnavailable",
     "FluidWarning",
     "Gas",
+    "NonlinearityParameter",
     "air",
     "characteristic_impedance",
     "gases_named",
     "ideal_gas",
+    "nonlinearity_named",
     "depth_to_absolute_pressure_pa",
     "depth_to_gauge_pressure_mpa",
     "sea_water",

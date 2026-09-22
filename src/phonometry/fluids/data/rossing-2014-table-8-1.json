@@ -1,0 +1,216 @@
+{
+  "source": "Rossing (2014) Table 8.1, PDF page 284 (printed p. 268)",
+  "about": "Eighteen measurements of the nonlinearity parameter B/A of pure water at atmospheric pressure, from 0 to 100 °C, as Table 8.1 prints them: each row with the year of its measurement and the reference it comes from, which the row carries in attributed_to with the reference list of the chapter spelled out. Several temperatures are measured more than once, by different authors in different years, and each measurement is a row of its own: at 30 °C the page prints four values from 5.18 to 5.38, which is the spread a caller should expect of this quantity. Ten values print a plus-or-minus beside them, which is held in uncertainty. The caption gives the pressure as atmospheric and prints no number for it, so no row holds a pressure. B/A is dimensionless: the ratio of the second- to the first-order coefficient of the pressure in a Taylor expansion of the equation of state.",
+  "rows": [
+    {
+      "key": "water_0c_8_59",
+      "name": "Water",
+      "temperature_c": 0,
+      "b_over_a": 4.2,
+      "year": 1974,
+      "attributed_to": {
+        "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+      }
+    },
+    {
+      "key": "water_20c_8_59",
+      "name": "Water",
+      "temperature_c": 20,
+      "b_over_a": 5,
+      "year": 1974,
+      "attributed_to": {
+        "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+      }
+    },
+    {
+      "key": "water_20c_8_60",
+      "name": "Water",
+      "temperature_c": 20,
+      "b_over_a": 4.985,
+      "uncertainty": {
+        "b_over_a": 0.063
+      },
+      "year": 1989,
+      "attributed_to": {
+        "b_over_a": "E.C. Everbach: Tissue Composition Determination via Measurement of the Acoustic Nonlinearity Parameter B/A. Ph.D. Thesis (Yale Univ., New Haven 1989) pp. 66– [8.60]"
+      }
+    },
+    {
+      "key": "water_25c_8_61",
+      "name": "Water",
+      "temperature_c": 25,
+      "b_over_a": 5.11,
+      "uncertainty": {
+        "b_over_a": 0.2
+      },
+      "year": 1983,
+      "attributed_to": {
+        "b_over_a": "Z. Zhu, S. Roos, N. Cobb, K. Jensen: Determination of the acoustic nonlinearity parameter B/A from phase measurements, J. Acoust. Soc. Am. 74, 1518–1521 (1983) [8.61]"
+      }
+    },
+    {
+      "key": "water_26c_8_62",
+      "name": "Water",
+      "temperature_c": 26,
+      "b_over_a": 5.1,
+      "year": 1989,
+      "attributed_to": {
+        "b_over_a": "X. Gong, Z. Zhu, T. Shi, J. Huang: Determination of the acoustic nonlinearity parameter in biological media using FAIS and ITD methods, J. Acoust. Soc. Am. 86, 1–5 (1989) [8.62]"
+      }
+    },
+    {
+      "key": "water_30c_8_63",
+      "name": "Water",
+      "temperature_c": 30,
+      "b_over_a": 5.31,
+      "year": 1985,
+      "attributed_to": {
+        "b_over_a": "K. Law, A. Frizell, F. Dunn: Determination of the nonlinearity parameter B/A of biological media, Ultrasound Med. Biol. 11, 307–318 (1985) [8.63]"
+      }
+    },
+    {
+      "key": "water_30c_8_64",
+      "name": "Water",
+      "temperature_c": 30,
+      "b_over_a": 5.18,
+      "uncertainty": {
+        "b_over_a": 0.033
+      },
+      "year": 1991,
+      "attributed_to": {
+        "b_over_a": "J. Zhang, F. Dunn: A small volume thermodynamic system for B/A measurement, J. Acoust. Soc. Am. 89, 73–79 (1991) [8.64]"
+      }
+    },
+    {
+      "key": "water_30c_8_60",
+      "name": "Water",
+      "temperature_c": 30,
+      "b_over_a": 5.28,
+      "uncertainty": {
+        "b_over_a": 0.021
+      },
+      "year": 1989,
+      "attributed_to": {
+        "b_over_a": "E.C. Everbach: Tissue Composition Determination via Measurement of the Acoustic Nonlinearity Parameter B/A. Ph.D. Thesis (Yale Univ., New Haven 1989) pp. 66– [8.60]"
+      }
+    },
+    {
+      "key": "water_30c_8_65",
+      "name": "Water",
+      "temperature_c": 30,
+      "b_over_a": 5.38,
+      "uncertainty": {
+        "b_over_a": 0.12
+      },
+      "year": 2001,
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_40c_8_59",
+      "name": "Water",
+      "temperature_c": 40,
+      "b_over_a": 5.4,
+      "year": 1974,
+      "attributed_to": {
+        "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+      }
+    },
+    {
+      "key": "water_40c_8_65",
+      "name": "Water",
+      "temperature_c": 40,
+      "b_over_a": 5.54,
+      "uncertainty": {
+        "b_over_a": 0.12
+      },
+      "year": 2001,
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_50c_8_65",
+      "name": "Water",
+      "temperature_c": 50,
+      "b_over_a": 5.69,
+      "uncertainty": {
+        "b_over_a": 0.13
+      },
+      "year": 2001,
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_60c_8_59",
+      "name": "Water",
+      "temperature_c": 60,
+      "b_over_a": 5.7,
+      "year": 1974,
+      "attributed_to": {
+        "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+      }
+    },
+    {
+      "key": "water_60c_8_65",
+      "name": "Water",
+      "temperature_c": 60,
+      "b_over_a": 5.82,
+      "uncertainty": {
+        "b_over_a": 0.13
+      },
+      "year": 2001,
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_70c_8_65",
+      "name": "Water",
+      "temperature_c": 70,
+      "b_over_a": 5.98,
+      "uncertainty": {
+        "b_over_a": 0.13
+      },
+      "year": 2001,
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_80c_8_59",
+      "name": "Water",
+      "temperature_c": 80,
+      "b_over_a": 6.1,
+      "year": 1974,
+      "attributed_to": {
+        "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+      }
+    },
+    {
+      "key": "water_80c_8_65",
+      "name": "Water",
+      "temperature_c": 80,
+      "b_over_a": 6.06,
+      "uncertainty": {
+        "b_over_a": 0.13
+      },
+      "year": 2001,
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_100c_8_59",
+      "name": "Water",
+      "temperature_c": 100,
+      "b_over_a": 6.1,
+      "year": 1974,
+      "attributed_to": {
+        "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+      }
+    }
+  ]
+}

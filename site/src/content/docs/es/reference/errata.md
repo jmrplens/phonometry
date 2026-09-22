@@ -7506,6 +7506,29 @@ dos ediciones con las mismas entradas y en el mismo orden.
   qué quiere decir.
 - **Estado:** sin comunicar.
 
+## Rossing (2014), tabla 8.3 (la línea del 1-pentanol impresa dos veces)
+
+- **Dónde:** tabla 8.3, «B/A values for organic liquids at atmospheric
+  pressure», líneas cuarta y quinta del panel izquierdo, en la página impresa
+  269 (página 285 del PDF). Fuente no normativa: un manual.
+- **Lo impreso:** dos líneas seguidas dicen «1-Pentanol | 20 | 10 | [8.68]»,
+  idénticas en todas las celdas.
+- **El problema:** todas las demás sustancias de la tabla se nombran una vez y
+  dejan el nombre en blanco en sus líneas siguientes, y cada temperatura que
+  se repite en una sustancia cita otro artículo o imprime otro valor. Estas dos
+  líneas son una sola medida impresa dos veces: las líneas de encima y de
+  debajo recorren los 1-alcoholes del propanol al decanol, una línea cada uno
+  y todas con el mismo artículo, y el pentanol es el único que aparece dos
+  veces.
+- **Evidencia:** Verificado en la página 285 del PDF (p. impresa 269) de
+  Rossing (ed.), *Springer Handbook of Acoustics* 2e (2014); las dos lecturas
+  independientes de la página y un recorte del panel imprimen la línea dos
+  veces.
+- **Qué hace la biblioteca:** la medida se guarda una vez en
+  [`PUBLISHED_NONLINEARITY`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/fluids/nonlinearity.py), y su
+  nota dice que la página la imprime dos veces.
+- **Estado:** sin comunicar.
+
 ## Propiedades de las fuentes, relacionadas, que no son erratas
 
 Registradas aquí para prevenir futuros «arreglos» que romperían la

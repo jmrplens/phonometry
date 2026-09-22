@@ -9,6 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- **The nonlinearity parameter B/A of a hundred and sixty-four liquid
+  states.** `fluids.PUBLISHED_NONLINEARITY` holds Rossing (2014) Tables 8.1 to
+  8.4: pure water from 0 to 100 °C, water up to 50 MPa, organic liquids,
+  liquid metals and liquefied gases, each value with the temperature (and,
+  where printed, the pressure and the year) it was measured at, the paper it
+  comes from spelled out from the chapter's reference list, and the
+  plus-or-minus where the page prints one. `fluids.nonlinearity_named` finds a
+  substance. A line of Table 8.3 printed twice is held once and registered.
+  The published catalogue page now writes a printed uncertainty in its cell,
+  which also brings back the seven of Cox's ground table that only a note
+  carried, and writes a year without grouping its digits.
 - **A hundred and fifty-two more partitions, most of them rated and not
   measured band by band.** `building.PUBLISHED_TRANSMISSION_LOSS` adds
   Rossing (2014) Table 11.4, twenty-three common partitions with six octave

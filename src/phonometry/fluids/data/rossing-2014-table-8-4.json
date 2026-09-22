@@ -1,0 +1,236 @@
+{
+  "source": "Rossing (2014) Table 8.4, PDF page 285 (printed p. 269)",
+  "about": "Twenty-three values of the nonlinearity parameter B/A of liquid metals, liquefied gases and two other substances, sea water and molten sulfur, at atmospheric pressure, under the three headings the table prints in its body, which are each row's group. The liquefied gases are measured far below 0 °C, and the page prints those temperatures with a minus sign, held here as negative degrees Celsius: liquid helium at −271.38 °C. Methane shows how strongly B/A can depend on temperature in a liquid near its boiling point, from 17.95 at −163.15 °C to 5.41 twenty-five degrees higher. Every value carries its reference in attributed_to.",
+  "rows": [
+    {
+      "key": "bismuth_318c_8_59",
+      "name": "Bismuth",
+      "temperature_c": 318,
+      "b_over_a": 7.1,
+      "attributed_to": {
+        "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+      },
+      "group": "Liquid metals"
+    },
+    {
+      "key": "indium_160c_8_59",
+      "name": "Indium",
+      "temperature_c": 160,
+      "b_over_a": 4.6,
+      "attributed_to": {
+        "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+      },
+      "group": "Liquid metals"
+    },
+    {
+      "key": "mercury_30c_8_59",
+      "name": "Mercury",
+      "temperature_c": 30,
+      "b_over_a": 7.8,
+      "attributed_to": {
+        "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+      },
+      "group": "Liquid metals"
+    },
+    {
+      "key": "potassium_100c_8_59",
+      "name": "Potassium",
+      "temperature_c": 100,
+      "b_over_a": 2.9,
+      "attributed_to": {
+        "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+      },
+      "group": "Liquid metals"
+    },
+    {
+      "key": "sodium_110c_8_59",
+      "name": "Sodium",
+      "temperature_c": 110,
+      "b_over_a": 2.7,
+      "attributed_to": {
+        "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+      },
+      "group": "Liquid metals"
+    },
+    {
+      "key": "tin_240c_8_59",
+      "name": "Tin",
+      "temperature_c": 240,
+      "b_over_a": 4.4,
+      "attributed_to": {
+        "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+      },
+      "group": "Liquid metals"
+    },
+    {
+      "key": "argon_m_187_15c_8_74",
+      "name": "Argon",
+      "temperature_c": -187.15,
+      "b_over_a": 5.01,
+      "attributed_to": {
+        "b_over_a": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
+      },
+      "group": "Liquid gases"
+    },
+    {
+      "key": "argon_m_183_15c_8_74",
+      "name": "Argon",
+      "temperature_c": -183.15,
+      "b_over_a": 5.67,
+      "attributed_to": {
+        "b_over_a": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
+      },
+      "group": "Liquid gases"
+    },
+    {
+      "key": "helium_m_271_38c_8_75",
+      "name": "Helium",
+      "temperature_c": -271.38,
+      "b_over_a": 4.5,
+      "attributed_to": {
+        "b_over_a": "H.A. Kashkooli, P.J. Dolan Jr., C.W. Smith: Measurement of the acoustic nonlinearity parameter in water, methanol, liquid nitrogen, and liquid helium-II by two different methods: A comparison, J. Acoust. Soc. Am. 82, 2086–2089 (1987) [8.75]"
+      },
+      "group": "Liquid gases"
+    },
+    {
+      "key": "hydrogen_m_259_15c_8_74",
+      "name": "Hydrogen",
+      "temperature_c": -259.15,
+      "b_over_a": 5.59,
+      "attributed_to": {
+        "b_over_a": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
+      },
+      "group": "Liquid gases"
+    },
+    {
+      "key": "hydrogen_m_257_15c_8_74",
+      "name": "Hydrogen",
+      "temperature_c": -257.15,
+      "b_over_a": 6.87,
+      "attributed_to": {
+        "b_over_a": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
+      },
+      "group": "Liquid gases"
+    },
+    {
+      "key": "hydrogen_m_255_15c_8_74",
+      "name": "Hydrogen",
+      "temperature_c": -255.15,
+      "b_over_a": 7.64,
+      "attributed_to": {
+        "b_over_a": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
+      },
+      "group": "Liquid gases"
+    },
+    {
+      "key": "hydrogen_m_253_15c_8_74",
+      "name": "Hydrogen",
+      "temperature_c": -253.15,
+      "b_over_a": 7.79,
+      "attributed_to": {
+        "b_over_a": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
+      },
+      "group": "Liquid gases"
+    },
+    {
+      "key": "methane_m_163_15c_8_74",
+      "name": "Methane",
+      "temperature_c": -163.15,
+      "b_over_a": 17.95,
+      "attributed_to": {
+        "b_over_a": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
+      },
+      "group": "Liquid gases"
+    },
+    {
+      "key": "methane_m_153_15c_8_74",
+      "name": "Methane",
+      "temperature_c": -153.15,
+      "b_over_a": 10.31,
+      "attributed_to": {
+        "b_over_a": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
+      },
+      "group": "Liquid gases"
+    },
+    {
+      "key": "methane_m_143_15c_8_74",
+      "name": "Methane",
+      "temperature_c": -143.15,
+      "b_over_a": 6.54,
+      "attributed_to": {
+        "b_over_a": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
+      },
+      "group": "Liquid gases"
+    },
+    {
+      "key": "methane_m_138_15c_8_74",
+      "name": "Methane",
+      "temperature_c": -138.15,
+      "b_over_a": 5.41,
+      "attributed_to": {
+        "b_over_a": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
+      },
+      "group": "Liquid gases"
+    },
+    {
+      "key": "nitrogen_m_203_15c_8_74",
+      "name": "Nitrogen",
+      "temperature_c": -203.15,
+      "b_over_a": 7.7,
+      "attributed_to": {
+        "b_over_a": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
+      },
+      "group": "Liquid gases"
+    },
+    {
+      "key": "nitrogen_m_195_76c_8_75",
+      "name": "Nitrogen",
+      "temperature_c": -195.76,
+      "b_over_a": 6.6,
+      "attributed_to": {
+        "b_over_a": "H.A. Kashkooli, P.J. Dolan Jr., C.W. Smith: Measurement of the acoustic nonlinearity parameter in water, methanol, liquid nitrogen, and liquid helium-II by two different methods: A comparison, J. Acoust. Soc. Am. 82, 2086–2089 (1987) [8.75]"
+      },
+      "group": "Liquid gases"
+    },
+    {
+      "key": "nitrogen_m_193_15c_8_74",
+      "name": "Nitrogen",
+      "temperature_c": -193.15,
+      "b_over_a": 8.03,
+      "attributed_to": {
+        "b_over_a": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
+      },
+      "group": "Liquid gases"
+    },
+    {
+      "key": "nitrogen_m_183_15c_8_74",
+      "name": "Nitrogen",
+      "temperature_c": -183.15,
+      "b_over_a": 9,
+      "attributed_to": {
+        "b_over_a": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
+      },
+      "group": "Liquid gases"
+    },
+    {
+      "key": "sea_water_3_5_nacl_20c_8_59",
+      "name": "Sea water (3.5% NaCl)",
+      "temperature_c": 20,
+      "b_over_a": 5.25,
+      "attributed_to": {
+        "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+      },
+      "group": "Other substances"
+    },
+    {
+      "key": "sulfur_121c_8_59",
+      "name": "Sulfur",
+      "temperature_c": 121,
+      "b_over_a": 9.5,
+      "attributed_to": {
+        "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+      },
+      "group": "Other substances"
+    }
+  ]
+}

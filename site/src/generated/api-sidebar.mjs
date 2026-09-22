@@ -55,6 +55,7 @@ export const apiSections = {
       'reference/api/fluids/gas',
       'reference/api/fluids/water',
       'reference/api/fluids/catalogue',
+      'reference/api/fluids/nonlinearity',
     ],
   },
   'solids': {

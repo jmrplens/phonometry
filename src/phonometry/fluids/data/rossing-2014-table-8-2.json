@@ -1,0 +1,812 @@
+{
+  "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
+  "about": "Sixty-two values of the nonlinearity parameter B/A of water over a grid of eight pressures, from 0.1 to 50 MPa, and eight temperatures, from 303.15 to 373.15 K, all from one measurement campaign, Plantier, Daridon and Lagourette (2002), which the caption credits for the whole table. Each cell is a row: the pressure is held in pascals and the temperature in degrees Celsius, 303.15 K being 30 °C exactly, and every value carries the plus-or-minus the page prints beside it.\n\nTwo cells print a short rule and no value: 0.1 MPa at 363.15 and 373.15 K. They have no row. The page gives no reason for either; at 0.1 MPa water boils at about 99.6 °C, so the second of them is not a liquid state.\n\nThe 0.1 MPa row repeats, cell for cell, the six measurements of the same reference that Table 8.1 prints at 30 to 80 °C under atmospheric pressure. Both are kept, each under the table that prints it, because the two tables are not the same table and a caller reading one should find every row it prints.",
+  "rows": [
+    {
+      "key": "water_30c_0_1mpa",
+      "name": "Water",
+      "temperature_c": 30,
+      "static_pressure_pa": 100000.0,
+      "b_over_a": 5.38,
+      "uncertainty": {
+        "b_over_a": 0.12
+      },
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_40c_0_1mpa",
+      "name": "Water",
+      "temperature_c": 40,
+      "static_pressure_pa": 100000.0,
+      "b_over_a": 5.54,
+      "uncertainty": {
+        "b_over_a": 0.12
+      },
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_50c_0_1mpa",
+      "name": "Water",
+      "temperature_c": 50,
+      "static_pressure_pa": 100000.0,
+      "b_over_a": 5.69,
+      "uncertainty": {
+        "b_over_a": 0.13
+      },
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_60c_0_1mpa",
+      "name": "Water",
+      "temperature_c": 60,
+      "static_pressure_pa": 100000.0,
+      "b_over_a": 5.82,
+      "uncertainty": {
+        "b_over_a": 0.13
+      },
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_70c_0_1mpa",
+      "name": "Water",
+      "temperature_c": 70,
+      "static_pressure_pa": 100000.0,
+      "b_over_a": 5.98,
+      "uncertainty": {
+        "b_over_a": 0.13
+      },
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_80c_0_1mpa",
+      "name": "Water",
+      "temperature_c": 80,
+      "static_pressure_pa": 100000.0,
+      "b_over_a": 6.06,
+      "uncertainty": {
+        "b_over_a": 0.13
+      },
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_30c_5mpa",
+      "name": "Water",
+      "temperature_c": 30,
+      "static_pressure_pa": 5000000.0,
+      "b_over_a": 5.46,
+      "uncertainty": {
+        "b_over_a": 0.12
+      },
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_40c_5mpa",
+      "name": "Water",
+      "temperature_c": 40,
+      "static_pressure_pa": 5000000.0,
+      "b_over_a": 5.59,
+      "uncertainty": {
+        "b_over_a": 0.12
+      },
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_50c_5mpa",
+      "name": "Water",
+      "temperature_c": 50,
+      "static_pressure_pa": 5000000.0,
+      "b_over_a": 5.76,
+      "uncertainty": {
+        "b_over_a": 0.13
+      },
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_60c_5mpa",
+      "name": "Water",
+      "temperature_c": 60,
+      "static_pressure_pa": 5000000.0,
+      "b_over_a": 5.87,
+      "uncertainty": {
+        "b_over_a": 0.13
+      },
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_70c_5mpa",
+      "name": "Water",
+      "temperature_c": 70,
+      "static_pressure_pa": 5000000.0,
+      "b_over_a": 6.04,
+      "uncertainty": {
+        "b_over_a": 0.13
+      },
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_80c_5mpa",
+      "name": "Water",
+      "temperature_c": 80,
+      "static_pressure_pa": 5000000.0,
+      "b_over_a": 6.07,
+      "uncertainty": {
+        "b_over_a": 0.13
+      },
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_90c_5mpa",
+      "name": "Water",
+      "temperature_c": 90,
+      "static_pressure_pa": 5000000.0,
+      "b_over_a": 6.03,
+      "uncertainty": {
+        "b_over_a": 0.13
+      },
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_100c_5mpa",
+      "name": "Water",
+      "temperature_c": 100,
+      "static_pressure_pa": 5000000.0,
+      "b_over_a": 6.05,
+      "uncertainty": {
+        "b_over_a": 0.13
+      },
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_30c_10mpa",
+      "name": "Water",
+      "temperature_c": 30,
+      "static_pressure_pa": 10000000.0,
+      "b_over_a": 5.55,
+      "uncertainty": {
+        "b_over_a": 0.12
+      },
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_40c_10mpa",
+      "name": "Water",
+      "temperature_c": 40,
+      "static_pressure_pa": 10000000.0,
+      "b_over_a": 5.62,
+      "uncertainty": {
+        "b_over_a": 0.12
+      },
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_50c_10mpa",
+      "name": "Water",
+      "temperature_c": 50,
+      "static_pressure_pa": 10000000.0,
+      "b_over_a": 5.78,
+      "uncertainty": {
+        "b_over_a": 0.13
+      },
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_60c_10mpa",
+      "name": "Water",
+      "temperature_c": 60,
+      "static_pressure_pa": 10000000.0,
+      "b_over_a": 5.94,
+      "uncertainty": {
+        "b_over_a": 0.13
+      },
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_70c_10mpa",
+      "name": "Water",
+      "temperature_c": 70,
+      "static_pressure_pa": 10000000.0,
+      "b_over_a": 6.03,
+      "uncertainty": {
+        "b_over_a": 0.13
+      },
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_80c_10mpa",
+      "name": "Water",
+      "temperature_c": 80,
+      "static_pressure_pa": 10000000.0,
+      "b_over_a": 6.11,
+      "uncertainty": {
+        "b_over_a": 0.13
+      },
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_90c_10mpa",
+      "name": "Water",
+      "temperature_c": 90,
+      "static_pressure_pa": 10000000.0,
+      "b_over_a": 6.06,
+      "uncertainty": {
+        "b_over_a": 0.13
+      },
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_100c_10mpa",
+      "name": "Water",
+      "temperature_c": 100,
+      "static_pressure_pa": 10000000.0,
+      "b_over_a": 6.01,
+      "uncertainty": {
+        "b_over_a": 0.13
+      },
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_30c_15mpa",
+      "name": "Water",
+      "temperature_c": 30,
+      "static_pressure_pa": 15000000.0,
+      "b_over_a": 5.57,
+      "uncertainty": {
+        "b_over_a": 0.12
+      },
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_40c_15mpa",
+      "name": "Water",
+      "temperature_c": 40,
+      "static_pressure_pa": 15000000.0,
+      "b_over_a": 5.66,
+      "uncertainty": {
+        "b_over_a": 0.12
+      },
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_50c_15mpa",
+      "name": "Water",
+      "temperature_c": 50,
+      "static_pressure_pa": 15000000.0,
+      "b_over_a": 5.83,
+      "uncertainty": {
+        "b_over_a": 0.13
+      },
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_60c_15mpa",
+      "name": "Water",
+      "temperature_c": 60,
+      "static_pressure_pa": 15000000.0,
+      "b_over_a": 5.96,
+      "uncertainty": {
+        "b_over_a": 0.13
+      },
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_70c_15mpa",
+      "name": "Water",
+      "temperature_c": 70,
+      "static_pressure_pa": 15000000.0,
+      "b_over_a": 6.07,
+      "uncertainty": {
+        "b_over_a": 0.13
+      },
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_80c_15mpa",
+      "name": "Water",
+      "temperature_c": 80,
+      "static_pressure_pa": 15000000.0,
+      "b_over_a": 6.09,
+      "uncertainty": {
+        "b_over_a": 0.13
+      },
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_90c_15mpa",
+      "name": "Water",
+      "temperature_c": 90,
+      "static_pressure_pa": 15000000.0,
+      "b_over_a": 6.11,
+      "uncertainty": {
+        "b_over_a": 0.13
+      },
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_100c_15mpa",
+      "name": "Water",
+      "temperature_c": 100,
+      "static_pressure_pa": 15000000.0,
+      "b_over_a": 6.08,
+      "uncertainty": {
+        "b_over_a": 0.13
+      },
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_30c_20mpa",
+      "name": "Water",
+      "temperature_c": 30,
+      "static_pressure_pa": 20000000.0,
+      "b_over_a": 5.61,
+      "uncertainty": {
+        "b_over_a": 0.12
+      },
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_40c_20mpa",
+      "name": "Water",
+      "temperature_c": 40,
+      "static_pressure_pa": 20000000.0,
+      "b_over_a": 5.68,
+      "uncertainty": {
+        "b_over_a": 0.13
+      },
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_50c_20mpa",
+      "name": "Water",
+      "temperature_c": 50,
+      "static_pressure_pa": 20000000.0,
+      "b_over_a": 5.81,
+      "uncertainty": {
+        "b_over_a": 0.13
+      },
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_60c_20mpa",
+      "name": "Water",
+      "temperature_c": 60,
+      "static_pressure_pa": 20000000.0,
+      "b_over_a": 5.98,
+      "uncertainty": {
+        "b_over_a": 0.13
+      },
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_70c_20mpa",
+      "name": "Water",
+      "temperature_c": 70,
+      "static_pressure_pa": 20000000.0,
+      "b_over_a": 6.1,
+      "uncertainty": {
+        "b_over_a": 0.13
+      },
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_80c_20mpa",
+      "name": "Water",
+      "temperature_c": 80,
+      "static_pressure_pa": 20000000.0,
+      "b_over_a": 6.14,
+      "uncertainty": {
+        "b_over_a": 0.14
+      },
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_90c_20mpa",
+      "name": "Water",
+      "temperature_c": 90,
+      "static_pressure_pa": 20000000.0,
+      "b_over_a": 6.12,
+      "uncertainty": {
+        "b_over_a": 0.13
+      },
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_100c_20mpa",
+      "name": "Water",
+      "temperature_c": 100,
+      "static_pressure_pa": 20000000.0,
+      "b_over_a": 6.06,
+      "uncertainty": {
+        "b_over_a": 0.13
+      },
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_30c_30mpa",
+      "name": "Water",
+      "temperature_c": 30,
+      "static_pressure_pa": 30000000.0,
+      "b_over_a": 5.63,
+      "uncertainty": {
+        "b_over_a": 0.12
+      },
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_40c_30mpa",
+      "name": "Water",
+      "temperature_c": 40,
+      "static_pressure_pa": 30000000.0,
+      "b_over_a": 5.7,
+      "uncertainty": {
+        "b_over_a": 0.13
+      },
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_50c_30mpa",
+      "name": "Water",
+      "temperature_c": 50,
+      "static_pressure_pa": 30000000.0,
+      "b_over_a": 5.84,
+      "uncertainty": {
+        "b_over_a": 0.13
+      },
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_60c_30mpa",
+      "name": "Water",
+      "temperature_c": 60,
+      "static_pressure_pa": 30000000.0,
+      "b_over_a": 5.95,
+      "uncertainty": {
+        "b_over_a": 0.13
+      },
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_70c_30mpa",
+      "name": "Water",
+      "temperature_c": 70,
+      "static_pressure_pa": 30000000.0,
+      "b_over_a": 6.07,
+      "uncertainty": {
+        "b_over_a": 0.13
+      },
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_80c_30mpa",
+      "name": "Water",
+      "temperature_c": 80,
+      "static_pressure_pa": 30000000.0,
+      "b_over_a": 6.16,
+      "uncertainty": {
+        "b_over_a": 0.14
+      },
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_90c_30mpa",
+      "name": "Water",
+      "temperature_c": 90,
+      "static_pressure_pa": 30000000.0,
+      "b_over_a": 6.09,
+      "uncertainty": {
+        "b_over_a": 0.13
+      },
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_100c_30mpa",
+      "name": "Water",
+      "temperature_c": 100,
+      "static_pressure_pa": 30000000.0,
+      "b_over_a": 6.08,
+      "uncertainty": {
+        "b_over_a": 0.13
+      },
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_30c_40mpa",
+      "name": "Water",
+      "temperature_c": 30,
+      "static_pressure_pa": 40000000.0,
+      "b_over_a": 5.73,
+      "uncertainty": {
+        "b_over_a": 0.13
+      },
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_40c_40mpa",
+      "name": "Water",
+      "temperature_c": 40,
+      "static_pressure_pa": 40000000.0,
+      "b_over_a": 5.77,
+      "uncertainty": {
+        "b_over_a": 0.13
+      },
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_50c_40mpa",
+      "name": "Water",
+      "temperature_c": 50,
+      "static_pressure_pa": 40000000.0,
+      "b_over_a": 5.86,
+      "uncertainty": {
+        "b_over_a": 0.13
+      },
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_60c_40mpa",
+      "name": "Water",
+      "temperature_c": 60,
+      "static_pressure_pa": 40000000.0,
+      "b_over_a": 6.02,
+      "uncertainty": {
+        "b_over_a": 0.13
+      },
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_70c_40mpa",
+      "name": "Water",
+      "temperature_c": 70,
+      "static_pressure_pa": 40000000.0,
+      "b_over_a": 6.11,
+      "uncertainty": {
+        "b_over_a": 0.13
+      },
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_80c_40mpa",
+      "name": "Water",
+      "temperature_c": 80,
+      "static_pressure_pa": 40000000.0,
+      "b_over_a": 6.14,
+      "uncertainty": {
+        "b_over_a": 0.14
+      },
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_90c_40mpa",
+      "name": "Water",
+      "temperature_c": 90,
+      "static_pressure_pa": 40000000.0,
+      "b_over_a": 6.16,
+      "uncertainty": {
+        "b_over_a": 0.14
+      },
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_100c_40mpa",
+      "name": "Water",
+      "temperature_c": 100,
+      "static_pressure_pa": 40000000.0,
+      "b_over_a": 6.14,
+      "uncertainty": {
+        "b_over_a": 0.14
+      },
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_30c_50mpa",
+      "name": "Water",
+      "temperature_c": 30,
+      "static_pressure_pa": 50000000.0,
+      "b_over_a": 5.82,
+      "uncertainty": {
+        "b_over_a": 0.13
+      },
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_40c_50mpa",
+      "name": "Water",
+      "temperature_c": 40,
+      "static_pressure_pa": 50000000.0,
+      "b_over_a": 5.84,
+      "uncertainty": {
+        "b_over_a": 0.13
+      },
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_50c_50mpa",
+      "name": "Water",
+      "temperature_c": 50,
+      "static_pressure_pa": 50000000.0,
+      "b_over_a": 5.93,
+      "uncertainty": {
+        "b_over_a": 0.13
+      },
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_60c_50mpa",
+      "name": "Water",
+      "temperature_c": 60,
+      "static_pressure_pa": 50000000.0,
+      "b_over_a": 6.04,
+      "uncertainty": {
+        "b_over_a": 0.13
+      },
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_70c_50mpa",
+      "name": "Water",
+      "temperature_c": 70,
+      "static_pressure_pa": 50000000.0,
+      "b_over_a": 6.13,
+      "uncertainty": {
+        "b_over_a": 0.13
+      },
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_80c_50mpa",
+      "name": "Water",
+      "temperature_c": 80,
+      "static_pressure_pa": 50000000.0,
+      "b_over_a": 6.16,
+      "uncertainty": {
+        "b_over_a": 0.14
+      },
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_90c_50mpa",
+      "name": "Water",
+      "temperature_c": 90,
+      "static_pressure_pa": 50000000.0,
+      "b_over_a": 6.12,
+      "uncertainty": {
+        "b_over_a": 0.13
+      },
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    },
+    {
+      "key": "water_100c_50mpa",
+      "name": "Water",
+      "temperature_c": 100,
+      "static_pressure_pa": 50000000.0,
+      "b_over_a": 6.09,
+      "uncertainty": {
+        "b_over_a": 0.13
+      },
+      "attributed_to": {
+        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+      }
+    }
+  ]
+}

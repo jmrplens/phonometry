@@ -1,0 +1,366 @@
+{
+  "source": "Vér & Beranek 2e TABLE 14.1, PDF page 599 (printed p. 598)",
+  "about": "Seventeen commercial viscoelastic damping materials, from section 14.6 \"Application of Damping Materials\" of the chapter Eric E. Ungar and Jeffrey A. Zapfe wrote on structural damping. It is the only table in this catalogue where a loss factor carries the two things that decide it: the temperature at which the material reaches its greatest loss factor, and the frequency that temperature belongs to. Every other loss factor the library holds is a single number with neither, which is a property of a material only in the sense that a photograph is a property of a room.\n\nThe page is in degrees Fahrenheit and pounds per square inch, and the rows here are in degrees Celsius and pascals, so every one of those cells is marked as derived and says what the page printed. The book's own footnote offers \"multiply tabulated values by 7 x 10^3\" to reach N/m2; this catalogue does not use it, because a psi is 6894.757293 Pa by definition and the rounded factor is 1.5 per cent above it. The conversion of the temperatures is the page's own formula, which is exact.\n\nThese are not measurements this book made. Footnote a reads \"Approximate values taken from curves in Ref. 11\", so each number was read off a published curve, and the running text says of damping data in general that they should be obtained from the supplier. Three cells are corrupted in the printing and are registered in docs/ERRATA.md; they are held as misprinted and no number is served for them.",
+  "rows": [
+    {
+      "key": "antiphon_13",
+      "name": "Antiphon-13",
+      "max_loss_factor": 1.8,
+      "peak_temperature_celsius_at_10_hz": -3.888888888888889,
+      "peak_temperature_celsius_at_100_hz": 23.88888888888889,
+      "peak_temperature_celsius_at_1000_hz": 48.888888888888886,
+      "youngs_modulus_max_pa": 2068427187.950508,
+      "youngs_modulus_min_pa": 8273708.751802033,
+      "youngs_modulus_transition_pa": 131000388.57019885,
+      "derived": {
+        "peak_temperature_celsius_at_10_hz": "25 degrees F as the page prints it, by (5/9)(F - 32)",
+        "peak_temperature_celsius_at_100_hz": "75 degrees F as the page prints it, by (5/9)(F - 32)",
+        "peak_temperature_celsius_at_1000_hz": "120 degrees F as the page prints it, by (5/9)(F - 32)",
+        "youngs_modulus_max_pa": "3e5 psi as the page prints it, by the exact 6894.757293 Pa/psi",
+        "youngs_modulus_min_pa": "1.2e3 psi as the page prints it, by the exact 6894.757293 Pa/psi",
+        "youngs_modulus_transition_pa": "1.9e4 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+      },
+      "misprinted": {
+        "loss_modulus_max_pa": "the page prints \"3.e3e\" here, which is not a number in the table's own e-notation"
+      }
+    },
+    {
+      "key": "blachford_aquaplas",
+      "name": "blachford Aquaplas",
+      "max_loss_factor": 0.5,
+      "peak_temperature_celsius_at_10_hz": 10.0,
+      "peak_temperature_celsius_at_100_hz": 26.666666666666668,
+      "peak_temperature_celsius_at_1000_hz": 51.666666666666664,
+      "youngs_modulus_max_pa": 11031611669.069378,
+      "youngs_modulus_min_pa": 206842718.79505083,
+      "youngs_modulus_transition_pa": 1516846604.4970393,
+      "loss_modulus_max_pa": 758423302.2485197,
+      "derived": {
+        "peak_temperature_celsius_at_10_hz": "50 degrees F as the page prints it, by (5/9)(F - 32)",
+        "peak_temperature_celsius_at_100_hz": "80 degrees F as the page prints it, by (5/9)(F - 32)",
+        "peak_temperature_celsius_at_1000_hz": "125 degrees F as the page prints it, by (5/9)(F - 32)",
+        "youngs_modulus_max_pa": "1.6e6 psi as the page prints it, by the exact 6894.757293 Pa/psi",
+        "youngs_modulus_min_pa": "3e4 psi as the page prints it, by the exact 6894.757293 Pa/psi",
+        "youngs_modulus_transition_pa": "2.2e5 psi as the page prints it, by the exact 6894.757293 Pa/psi",
+        "loss_modulus_max_pa": "1.1e5 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+      }
+    },
+    {
+      "key": "barry_controls_h_326",
+      "name": "Barry Controls H-326",
+      "max_loss_factor": 0.8,
+      "peak_temperature_celsius_at_10_hz": -40.0,
+      "peak_temperature_celsius_at_100_hz": -31.666666666666668,
+      "peak_temperature_celsius_at_1000_hz": -23.333333333333332,
+      "youngs_modulus_max_pa": 4136854375.901016,
+      "youngs_modulus_min_pa": 20684271.879505083,
+      "youngs_modulus_transition_pa": 289579806.31307113,
+      "loss_modulus_max_pa": 234421747.96772426,
+      "derived": {
+        "peak_temperature_celsius_at_10_hz": "−40 degrees F as the page prints it, by (5/9)(F - 32)",
+        "peak_temperature_celsius_at_100_hz": "−25 degrees F as the page prints it, by (5/9)(F - 32)",
+        "peak_temperature_celsius_at_1000_hz": "−10 degrees F as the page prints it, by (5/9)(F - 32)",
+        "youngs_modulus_max_pa": "6e5 psi as the page prints it, by the exact 6894.757293 Pa/psi",
+        "youngs_modulus_min_pa": "3e3 psi as the page prints it, by the exact 6894.757293 Pa/psi",
+        "youngs_modulus_transition_pa": "4.2e4 psi as the page prints it, by the exact 6894.757293 Pa/psi",
+        "loss_modulus_max_pa": "3.4e4 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+      }
+    },
+    {
+      "key": "dow_corning_sylgard_188",
+      "name": "Dow Corning Sylgard 188",
+      "max_loss_factor": 0.6,
+      "peak_temperature_celsius_at_10_hz": 15.555555555555555,
+      "peak_temperature_celsius_at_100_hz": 26.666666666666668,
+      "peak_temperature_celsius_at_1000_hz": 43.333333333333336,
+      "youngs_modulus_max_pa": 151684660.44970393,
+      "youngs_modulus_min_pa": 2068427.1879505082,
+      "youngs_modulus_transition_pa": 17926368.962237738,
+      "loss_modulus_max_pa": 10342135.939752541,
+      "derived": {
+        "peak_temperature_celsius_at_10_hz": "60 degrees F as the page prints it, by (5/9)(F - 32)",
+        "peak_temperature_celsius_at_100_hz": "80 degrees F as the page prints it, by (5/9)(F - 32)",
+        "peak_temperature_celsius_at_1000_hz": "110 degrees F as the page prints it, by (5/9)(F - 32)",
+        "youngs_modulus_max_pa": "2.2e4 psi as the page prints it, by the exact 6894.757293 Pa/psi",
+        "youngs_modulus_min_pa": "3e2 psi as the page prints it, by the exact 6894.757293 Pa/psi",
+        "youngs_modulus_transition_pa": "2.6e3 psi as the page prints it, by the exact 6894.757293 Pa/psi",
+        "loss_modulus_max_pa": "1.5e3 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+      }
+    },
+    {
+      "key": "ear_c_1002",
+      "name": "EAR C-1002",
+      "max_loss_factor": 1.9,
+      "peak_temperature_celsius_at_10_hz": -5.0,
+      "peak_temperature_celsius_at_100_hz": 12.777777777777779,
+      "peak_temperature_celsius_at_1000_hz": 32.22222222222222,
+      "youngs_modulus_max_pa": 2068427187.950508,
+      "youngs_modulus_min_pa": 1378951.4586336722,
+      "youngs_modulus_transition_pa": 53089631.157396376,
+      "loss_modulus_max_pa": 103421359.39752541,
+      "derived": {
+        "peak_temperature_celsius_at_10_hz": "23 degrees F as the page prints it, by (5/9)(F - 32)",
+        "peak_temperature_celsius_at_100_hz": "55 degrees F as the page prints it, by (5/9)(F - 32)",
+        "peak_temperature_celsius_at_1000_hz": "90 degrees F as the page prints it, by (5/9)(F - 32)",
+        "youngs_modulus_max_pa": "3e5 psi as the page prints it, by the exact 6894.757293 Pa/psi",
+        "youngs_modulus_min_pa": "2e2 psi as the page prints it, by the exact 6894.757293 Pa/psi",
+        "youngs_modulus_transition_pa": "7.7e3 psi as the page prints it, by the exact 6894.757293 Pa/psi",
+        "loss_modulus_max_pa": "1.5e4 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+      }
+    },
+    {
+      "key": "ear_c_2003",
+      "name": "EAR C-2003",
+      "max_loss_factor": 1.0,
+      "peak_temperature_celsius_at_10_hz": 7.222222222222222,
+      "peak_temperature_celsius_at_100_hz": 21.11111111111111,
+      "peak_temperature_celsius_at_1000_hz": 37.77777777777778,
+      "youngs_modulus_max_pa": 5515805834.534689,
+      "youngs_modulus_min_pa": 4136854.3759010164,
+      "youngs_modulus_transition_pa": 151684660.44970393,
+      "loss_modulus_max_pa": 151684660.44970393,
+      "derived": {
+        "peak_temperature_celsius_at_10_hz": "45 degrees F as the page prints it, by (5/9)(F - 32)",
+        "peak_temperature_celsius_at_100_hz": "70 degrees F as the page prints it, by (5/9)(F - 32)",
+        "peak_temperature_celsius_at_1000_hz": "100 degrees F as the page prints it, by (5/9)(F - 32)",
+        "youngs_modulus_max_pa": "8e5 psi as the page prints it, by the exact 6894.757293 Pa/psi",
+        "youngs_modulus_min_pa": "6e2 psi as the page prints it, by the exact 6894.757293 Pa/psi",
+        "youngs_modulus_transition_pa": "2.2e4 psi as the page prints it, by the exact 6894.757293 Pa/psi",
+        "loss_modulus_max_pa": "2.2e4 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+      }
+    },
+    {
+      "key": "lord_ld_400",
+      "name": "lord LD-400",
+      "max_loss_factor": 0.7,
+      "peak_temperature_celsius_at_10_hz": 10.0,
+      "peak_temperature_celsius_at_100_hz": 26.666666666666668,
+      "peak_temperature_celsius_at_1000_hz": 51.666666666666664,
+      "youngs_modulus_max_pa": 20684271879.50508,
+      "youngs_modulus_min_pa": 22752699.06745559,
+      "youngs_modulus_transition_pa": 689475729.3168361,
+      "loss_modulus_max_pa": 482633010.52178526,
+      "derived": {
+        "peak_temperature_celsius_at_10_hz": "50 degrees F as the page prints it, by (5/9)(F - 32)",
+        "peak_temperature_celsius_at_100_hz": "80 degrees F as the page prints it, by (5/9)(F - 32)",
+        "peak_temperature_celsius_at_1000_hz": "125 degrees F as the page prints it, by (5/9)(F - 32)",
+        "youngs_modulus_max_pa": "3e6 psi as the page prints it, by the exact 6894.757293 Pa/psi",
+        "youngs_modulus_min_pa": "3.3e3 psi as the page prints it, by the exact 6894.757293 Pa/psi",
+        "youngs_modulus_transition_pa": "1e5 psi as the page prints it, by the exact 6894.757293 Pa/psi",
+        "loss_modulus_max_pa": "7e4 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+      }
+    },
+    {
+      "key": "soundcoat_dyad_601",
+      "name": "Soundcoat DYAD 601",
+      "max_loss_factor": 1.0,
+      "peak_temperature_celsius_at_10_hz": -9.444444444444445,
+      "peak_temperature_celsius_at_100_hz": 10.0,
+      "peak_temperature_celsius_at_1000_hz": 23.88888888888889,
+      "youngs_modulus_max_pa": 2068427187.950508,
+      "youngs_modulus_min_pa": 1034213.5939752541,
+      "youngs_modulus_transition_pa": 46194873.86422802,
+      "loss_modulus_max_pa": 46194873.86422802,
+      "derived": {
+        "peak_temperature_celsius_at_10_hz": "15 degrees F as the page prints it, by (5/9)(F - 32)",
+        "peak_temperature_celsius_at_100_hz": "50 degrees F as the page prints it, by (5/9)(F - 32)",
+        "peak_temperature_celsius_at_1000_hz": "75 degrees F as the page prints it, by (5/9)(F - 32)",
+        "youngs_modulus_max_pa": "3e5 psi as the page prints it, by the exact 6894.757293 Pa/psi",
+        "youngs_modulus_min_pa": "1.5e2 psi as the page prints it, by the exact 6894.757293 Pa/psi",
+        "youngs_modulus_transition_pa": "6.7e3 psi as the page prints it, by the exact 6894.757293 Pa/psi",
+        "loss_modulus_max_pa": "6.7e3 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+      }
+    },
+    {
+      "key": "soundcoat_dyad_606",
+      "name": "Soundcoat DYAD 606",
+      "max_loss_factor": 1.0,
+      "peak_temperature_celsius_at_10_hz": 21.11111111111111,
+      "peak_temperature_celsius_at_100_hz": 37.77777777777778,
+      "peak_temperature_celsius_at_1000_hz": 54.44444444444444,
+      "youngs_modulus_min_pa": 827370.8751802032,
+      "youngs_modulus_transition_pa": 41368543.759010166,
+      "loss_modulus_max_pa": 41368543.759010166,
+      "derived": {
+        "peak_temperature_celsius_at_10_hz": "70 degrees F as the page prints it, by (5/9)(F - 32)",
+        "peak_temperature_celsius_at_100_hz": "100 degrees F as the page prints it, by (5/9)(F - 32)",
+        "peak_temperature_celsius_at_1000_hz": "130 degrees F as the page prints it, by (5/9)(F - 32)",
+        "youngs_modulus_min_pa": "1.2e2 psi as the page prints it, by the exact 6894.757293 Pa/psi",
+        "youngs_modulus_transition_pa": "6e3 psi as the page prints it, by the exact 6894.757293 Pa/psi",
+        "loss_modulus_max_pa": "6e3 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+      },
+      "misprinted": {
+        "youngs_modulus_max_pa": "the page prints \"3G5\" here, which is not a number in the table's own e-notation"
+      }
+    },
+    {
+      "key": "soundcoat_dyad_609",
+      "name": "Soundcoat DYAD 609",
+      "max_loss_factor": 1.0,
+      "peak_temperature_celsius_at_10_hz": 51.666666666666664,
+      "peak_temperature_celsius_at_100_hz": 65.55555555555556,
+      "peak_temperature_celsius_at_1000_hz": 85.0,
+      "youngs_modulus_max_pa": 1378951458.6336722,
+      "youngs_modulus_min_pa": 4136854.3759010164,
+      "youngs_modulus_transition_pa": 75842330.22485197,
+      "loss_modulus_max_pa": 75842330.22485197,
+      "derived": {
+        "peak_temperature_celsius_at_10_hz": "125 degrees F as the page prints it, by (5/9)(F - 32)",
+        "peak_temperature_celsius_at_100_hz": "150 degrees F as the page prints it, by (5/9)(F - 32)",
+        "peak_temperature_celsius_at_1000_hz": "185 degrees F as the page prints it, by (5/9)(F - 32)",
+        "youngs_modulus_max_pa": "2e5 psi as the page prints it, by the exact 6894.757293 Pa/psi",
+        "youngs_modulus_min_pa": "6e2 psi as the page prints it, by the exact 6894.757293 Pa/psi",
+        "youngs_modulus_transition_pa": "1.1e4 psi as the page prints it, by the exact 6894.757293 Pa/psi",
+        "loss_modulus_max_pa": "1.1e4 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+      }
+    },
+    {
+      "key": "soundcoat_n",
+      "name": "Soundcoat N",
+      "max_loss_factor": 1.5,
+      "peak_temperature_celsius_at_10_hz": -9.444444444444445,
+      "peak_temperature_celsius_at_100_hz": -1.1111111111111112,
+      "peak_temperature_celsius_at_1000_hz": 21.11111111111111,
+      "youngs_modulus_max_pa": 2068427187.950508,
+      "youngs_modulus_min_pa": 482633.01052178524,
+      "youngs_modulus_transition_pa": 31715883.54857446,
+      "loss_modulus_max_pa": 47573825.32286169,
+      "derived": {
+        "peak_temperature_celsius_at_10_hz": "15 degrees F as the page prints it, by (5/9)(F - 32)",
+        "peak_temperature_celsius_at_100_hz": "30 degrees F as the page prints it, by (5/9)(F - 32)",
+        "peak_temperature_celsius_at_1000_hz": "70 degrees F as the page prints it, by (5/9)(F - 32)",
+        "youngs_modulus_max_pa": "3e5 psi as the page prints it, by the exact 6894.757293 Pa/psi",
+        "youngs_modulus_min_pa": "7e1 psi as the page prints it, by the exact 6894.757293 Pa/psi",
+        "youngs_modulus_transition_pa": "4.6e3 psi as the page prints it, by the exact 6894.757293 Pa/psi",
+        "loss_modulus_max_pa": "6.9e3 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+      }
+    },
+    {
+      "key": "3m_isd_110",
+      "name": "3M ISD-110",
+      "max_loss_factor": 1.7,
+      "peak_temperature_celsius_at_10_hz": 26.666666666666668,
+      "peak_temperature_celsius_at_100_hz": 46.111111111111114,
+      "peak_temperature_celsius_at_1000_hz": 65.55555555555556,
+      "youngs_modulus_max_pa": 206842718.79505083,
+      "youngs_modulus_min_pa": 206842.7187950508,
+      "youngs_modulus_transition_pa": 6894757.29316836,
+      "loss_modulus_max_pa": 11721087.398386214,
+      "derived": {
+        "peak_temperature_celsius_at_10_hz": "80 degrees F as the page prints it, by (5/9)(F - 32)",
+        "peak_temperature_celsius_at_100_hz": "115 degrees F as the page prints it, by (5/9)(F - 32)",
+        "peak_temperature_celsius_at_1000_hz": "150 degrees F as the page prints it, by (5/9)(F - 32)",
+        "youngs_modulus_max_pa": "3e4 psi as the page prints it, by the exact 6894.757293 Pa/psi",
+        "youngs_modulus_min_pa": "3e1 psi as the page prints it, by the exact 6894.757293 Pa/psi",
+        "youngs_modulus_transition_pa": "1e3 psi as the page prints it, by the exact 6894.757293 Pa/psi",
+        "loss_modulus_max_pa": "1.7e3 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+      }
+    },
+    {
+      "key": "3m_isd_112",
+      "name": "3M ISD-112",
+      "max_loss_factor": 1.2,
+      "peak_temperature_celsius_at_10_hz": -12.222222222222221,
+      "peak_temperature_celsius_at_100_hz": 4.444444444444445,
+      "peak_temperature_celsius_at_1000_hz": 26.666666666666668,
+      "youngs_modulus_max_pa": 896318448.1118869,
+      "youngs_modulus_min_pa": 551580.5834534689,
+      "youngs_modulus_transition_pa": 22063223.338138755,
+      "loss_modulus_max_pa": 26889553.443356607,
+      "derived": {
+        "peak_temperature_celsius_at_10_hz": "10 degrees F as the page prints it, by (5/9)(F - 32)",
+        "peak_temperature_celsius_at_100_hz": "40 degrees F as the page prints it, by (5/9)(F - 32)",
+        "peak_temperature_celsius_at_1000_hz": "80 degrees F as the page prints it, by (5/9)(F - 32)",
+        "youngs_modulus_max_pa": "1.3e5 psi as the page prints it, by the exact 6894.757293 Pa/psi",
+        "youngs_modulus_min_pa": "8e1 psi as the page prints it, by the exact 6894.757293 Pa/psi",
+        "youngs_modulus_transition_pa": "3.2e3 psi as the page prints it, by the exact 6894.757293 Pa/psi",
+        "loss_modulus_max_pa": "3.9e3 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+      }
+    },
+    {
+      "key": "3m_isd_113",
+      "name": "3M ISD-113",
+      "max_loss_factor": 1.1,
+      "peak_temperature_celsius_at_10_hz": -42.77777777777778,
+      "peak_temperature_celsius_at_100_hz": -28.88888888888889,
+      "peak_temperature_celsius_at_1000_hz": -9.444444444444445,
+      "youngs_modulus_max_pa": 1034213593.975254,
+      "youngs_modulus_min_pa": 2068427.1879505082,
+      "youngs_modulus_transition_pa": 1447899.0315653558,
+      "loss_modulus_max_pa": 1585794.177428723,
+      "derived": {
+        "peak_temperature_celsius_at_10_hz": "−45 degrees F as the page prints it, by (5/9)(F - 32)",
+        "peak_temperature_celsius_at_100_hz": "−20 degrees F as the page prints it, by (5/9)(F - 32)",
+        "peak_temperature_celsius_at_1000_hz": "15 degrees F as the page prints it, by (5/9)(F - 32)",
+        "youngs_modulus_max_pa": "1.5e5 psi as the page prints it, by the exact 6894.757293 Pa/psi",
+        "youngs_modulus_min_pa": "3e2 psi as the page prints it, by the exact 6894.757293 Pa/psi",
+        "youngs_modulus_transition_pa": "2.1e2 psi as the page prints it, by the exact 6894.757293 Pa/psi",
+        "loss_modulus_max_pa": "2.3e2 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+      }
+    },
+    {
+      "key": "3m_468",
+      "name": "3m 468",
+      "max_loss_factor": 0.8,
+      "peak_temperature_celsius_at_10_hz": -9.444444444444445,
+      "peak_temperature_celsius_at_100_hz": 10.0,
+      "peak_temperature_celsius_at_1000_hz": 29.444444444444443,
+      "youngs_modulus_max_pa": 965266021.0435705,
+      "youngs_modulus_min_pa": 206842.7187950508,
+      "youngs_modulus_transition_pa": 13789514.58633672,
+      "loss_modulus_max_pa": 11031611.669069378,
+      "derived": {
+        "peak_temperature_celsius_at_10_hz": "15 degrees F as the page prints it, by (5/9)(F - 32)",
+        "peak_temperature_celsius_at_100_hz": "50 degrees F as the page prints it, by (5/9)(F - 32)",
+        "peak_temperature_celsius_at_1000_hz": "85 degrees F as the page prints it, by (5/9)(F - 32)",
+        "youngs_modulus_max_pa": "1.4e5 psi as the page prints it, by the exact 6894.757293 Pa/psi",
+        "youngs_modulus_min_pa": "3e1 psi as the page prints it, by the exact 6894.757293 Pa/psi",
+        "youngs_modulus_transition_pa": "2e3 psi as the page prints it, by the exact 6894.757293 Pa/psi",
+        "loss_modulus_max_pa": "1.6e3 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+      }
+    },
+    {
+      "key": "3m_isd_830",
+      "name": "3M ISD-830",
+      "max_loss_factor": 1.0,
+      "peak_temperature_celsius_at_10_hz": -59.44444444444444,
+      "peak_temperature_celsius_at_100_hz": -45.55555555555556,
+      "peak_temperature_celsius_at_1000_hz": -28.88888888888889,
+      "youngs_modulus_max_pa": 1378951458.6336722,
+      "youngs_modulus_min_pa": 1034213.5939752541,
+      "youngs_modulus_transition_pa": 37921165.11242598,
+      "loss_modulus_max_pa": 37921165.11242598,
+      "derived": {
+        "peak_temperature_celsius_at_10_hz": "−75 degrees F as the page prints it, by (5/9)(F - 32)",
+        "peak_temperature_celsius_at_100_hz": "−50 degrees F as the page prints it, by (5/9)(F - 32)",
+        "peak_temperature_celsius_at_1000_hz": "−20 degrees F as the page prints it, by (5/9)(F - 32)",
+        "youngs_modulus_max_pa": "2e5 psi as the page prints it, by the exact 6894.757293 Pa/psi",
+        "youngs_modulus_min_pa": "1.5e2 psi as the page prints it, by the exact 6894.757293 Pa/psi",
+        "youngs_modulus_transition_pa": "5.5e3 psi as the page prints it, by the exact 6894.757293 Pa/psi",
+        "loss_modulus_max_pa": "5.5e3 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+      }
+    },
+    {
+      "key": "ge_smrd",
+      "name": "GE SMRD",
+      "max_loss_factor": 0.9,
+      "peak_temperature_celsius_at_10_hz": 10.0,
+      "peak_temperature_celsius_at_100_hz": 26.666666666666668,
+      "peak_temperature_celsius_at_1000_hz": 51.666666666666664,
+      "youngs_modulus_min_pa": 34473786.46584181,
+      "youngs_modulus_transition_pa": 268895534.4335661,
+      "loss_modulus_max_pa": 241316505.26089263,
+      "derived": {
+        "peak_temperature_celsius_at_10_hz": "50 degrees F as the page prints it, by (5/9)(F - 32)",
+        "peak_temperature_celsius_at_100_hz": "80 degrees F as the page prints it, by (5/9)(F - 32)",
+        "peak_temperature_celsius_at_1000_hz": "125 degrees F as the page prints it, by (5/9)(F - 32)",
+        "youngs_modulus_min_pa": "5e3 psi as the page prints it, by the exact 6894.757293 Pa/psi",
+        "youngs_modulus_transition_pa": "3.9e4 psi as the page prints it, by the exact 6894.757293 Pa/psi",
+        "loss_modulus_max_pa": "3.5e4 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+      },
+      "misprinted": {
+        "youngs_modulus_max_pa": "the page prints \"e35\" here, which is not a number in the table's own e-notation"
+      }
+    }
+  ]
+}

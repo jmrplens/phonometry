@@ -6615,6 +6615,44 @@ in the same order.
   lets a reader see the contradiction.
 - **Status:** not reported.
 
+## Ver & Beranek 2e (2006), TABLE 14.1 (three moduli whose e-notation is corrupted in the printing)
+
+- **Location:** TABLE 14.1, "Properties of Some Commercial Damping Materials",
+  on printed page 598 (PDF page 599), in chapter 14, "Structural Damping", by
+  Eric E. Ungar and Jeffrey A. Zapfe. Non-normative source: a handbook.
+- **The print:** the four moduli columns are set in a notation the table
+  defines in its own footnote c: "The number following e represents the power
+  of 10 by which the number preceding e is to be multiplied; e.g., 1.2e3
+  represents $1.2 \times 10^3$". Every cell of the block obeys it except
+  three. Antiphon-13 prints `3.e3e` under $E_{I,\max}$; Soundcoat DYAD 606
+  prints `3G5` under $E_{\max}$; and GE SMRD prints `e35` under $E_{\max}$.
+- **The problem:** none of the three is a number in that notation. `3.e3e`
+  ends with an exponent marker that has no digit after it and has a decimal
+  point with no fraction before the first marker; `3G5` puts a capital G where
+  the marker belongs, and a capital G appears nowhere else in the table; `e35`
+  leads with the marker and has no mantissa at all. A reader cannot recover
+  the intended value, because each one is consistent with more than one
+  reading: `3.e3e` could be $3 \times 10^3$ with a stray marker or
+  $3.3 \times 10^{-3}$ of some other setting, and `e35` could be
+  $3 \times 10^5$ or $3.5 \times 10^{?}$.
+- **Evidence:** Verified on PDF page 599 (printed p. 598) of Ver & Beranek,
+  *Noise and Vibration Control Engineering* 2e (2006). The three strings are
+  legible and are what the page carries; the surrounding cells of the same
+  block are equally legible and obey the notation, so the defect belongs to
+  the printing. The neighbouring columns do not settle any of the three
+  either. For Antiphon-13 the chapter's own relation
+  $E_{I,\max} \approx \eta_{\max} E_{\mathrm{trans}}$ gives
+  $1.8 \times 1.9 \times 10^4 = 3.4 \times 10^4$ psi, which is consistent with
+  a mantissa of 3 and an exponent of 4, but the printed string offers 3 and
+  no legible exponent, and this library does not publish a value it had to
+  finish itself.
+- **What the library does:** the three cells are held as `misprinted` in
+  [`PUBLISHED_DAMPING`](../src/phonometry/solids/damping.py), so the row keeps
+  what the book prints and refuses to serve it as a number. Asking for one of
+  them by `printed()` raises and names the glyphs. Every other cell of the
+  seventeen rows is served normally.
+- **Status:** unreported.
+
 ## Related source properties that are not errata
 
 Recorded here to prevent future "fixes" that would break agreement with the

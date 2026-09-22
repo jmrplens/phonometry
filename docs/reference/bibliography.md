@@ -693,6 +693,14 @@ it; the list grows as guides gain their References sections.
 
 ## Structure-borne sound
 
+- Vér, I. L., & Beranek, L. L. (Eds.). (2006). *Noise and vibration control
+  engineering: Principles and applications* (2nd ed.). John Wiley & Sons.
+  ISBN 978-0-471-44942-3.
+  [doi:10.1002/9780470172568](https://doi.org/10.1002/9780470172568).
+  The handbook this library reads its commercial damping materials from:
+  Table 14.1 of chapter 14, "Structural Damping", by Eric E. Ungar and
+  Jeffrey A. Zapfe, which is the only table in the corpus that gives a loss
+  factor with the temperature and the frequency at which it peaks.
 - Cremer, L., Heckl, M., & Petersson, B. A. T. (2005). *Structure-borne
   sound: Structural vibrations and sound radiation at audio frequencies*
   (3rd ed.). Springer. ISBN 978-3-540-22696-3.

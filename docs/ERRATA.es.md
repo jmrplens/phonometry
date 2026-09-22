@@ -7038,6 +7038,44 @@ dos ediciones con las mismas entradas y en el mismo orden.
   permite a quien lea ver la contradicción.
 - **Estado:** no reportado.
 
+## Ver & Beranek 2e (2006), TABLA 14.1 (tres módulos con la notación e corrompida en la impresión)
+
+- **Dónde:** TABLA 14.1, «Properties of Some Commercial Damping Materials», en
+  la página impresa 598 (página 599 del PDF), dentro del capítulo 14,
+  «Structural Damping», de Eric E. Ungar y Jeffrey A. Zapfe. Fuente no
+  normativa: un manual.
+- **Lo impreso:** las cuatro columnas de módulos van en una notación que la
+  propia tabla define en su nota al pie c: «The number following e represents
+  the power of 10 by which the number preceding e is to be multiplied; e.g.,
+  1.2e3 represents $1.2 \times 10^3$». Todas las celdas del bloque la cumplen
+  menos tres. Antiphon-13 imprime `3.e3e` en $E_{I,\max}$; Soundcoat DYAD 606
+  imprime `3G5` en $E_{\max}$; y GE SMRD imprime `e35` en $E_{\max}$.
+- **El problema:** ninguna de las tres es un número en esa notación. `3.e3e`
+  acaba en un marcador de exponente sin dígito detrás y lleva un punto decimal
+  sin parte fraccionaria antes del primer marcador; `3G5` pone una G mayúscula
+  donde va el marcador, y no hay ninguna otra G mayúscula en la tabla; `e35`
+  empieza por el marcador y no tiene mantisa. El valor pretendido no se puede
+  recuperar, porque cada cadena admite más de una lectura: `3.e3e` podría ser
+  $3 \times 10^3$ con un marcador sobrante o $3.3 \times 10^{-3}$ de otra
+  composición, y `e35` podría ser $3 \times 10^5$ o $3.5 \times 10^{?}$.
+- **Evidencia:** Verificado en la página 599 del PDF (p. impresa 598) de
+  Ver & Beranek, *Noise and Vibration Control Engineering* 2e (2006). Las tres
+  cadenas se leen y son lo que la página lleva; las celdas vecinas del mismo
+  bloque se leen igual de bien y sí cumplen la notación, así que el defecto es
+  de la impresión. Las columnas contiguas tampoco resuelven ninguna de las
+  tres. Para Antiphon-13, la relación que el propio capítulo imprime,
+  $E_{I,\max} \approx \eta_{\max} E_{\mathrm{trans}}$, da
+  $1.8 \times 1.9 \times 10^4 = 3.4 \times 10^4$ psi, compatible con una
+  mantisa 3 y un exponente 4; pero la cadena impresa ofrece un 3 y ningún
+  exponente legible, y esta biblioteca no publica un valor que ha tenido que
+  terminar ella.
+- **Qué hace la biblioteca:** las tres celdas se guardan como `misprinted` en
+  [`PUBLISHED_DAMPING`](../src/phonometry/solids/damping.py), de modo que la
+  fila conserva lo que imprime el libro y se niega a servirlo como número.
+  Pedir una de ellas con `printed()` lanza excepción y nombra los glifos. Las
+  demás celdas de las diecisiete filas se sirven con normalidad.
+- **Estado:** sin comunicar.
+
 ## Propiedades de las fuentes, relacionadas, que no son erratas
 
 Registradas aquí para prevenir futuros «arreglos» que romperían la

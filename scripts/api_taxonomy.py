@@ -113,7 +113,11 @@ _SECTION_LIST: tuple[Section, ...] = (
         # The relations live in ``elastic`` and the published rows in
         # ``catalogue``; the ``__init__`` only re-exports, so it holds no
         # public name of its own.
-        modules=("phonometry.solids.elastic", "phonometry.solids.catalogue"),
+        modules=(
+            "phonometry.solids.elastic",
+            "phonometry.solids.catalogue",
+            "phonometry.solids.damping",
+        ),
     ),
     Section(
         key="io",
@@ -474,6 +478,7 @@ OBJECT_MODULE_OVERRIDES: dict[str, str] = {
     "DEFAULT_SPEED_OF_SOUND_M_S": "phonometry.solids.elastic",
     # The published catalogue is a mapping, so a plain scan sees it in the
     # module that builds it and in the package that re-exports it.
+    "PUBLISHED_DAMPING": "phonometry.solids.damping",
     "PUBLISHED_SOLIDS": "phonometry.solids.catalogue",
     "PUBLISHED_GROUND": "phonometry.environment.propagation.ground_surfaces",
     "PUBLISHED_POROUS": "phonometry.materials.absorbers.catalogue",

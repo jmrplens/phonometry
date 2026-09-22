@@ -64,6 +64,7 @@ export const apiSections = {
     items: [
       'reference/api/solids/elastic',
       'reference/api/solids/catalogue',
+      'reference/api/solids/damping',
     ],
   },
   'io': {

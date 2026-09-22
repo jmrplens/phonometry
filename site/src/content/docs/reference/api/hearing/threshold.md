@@ -119,7 +119,7 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 
 ## EARPHONE_COUPLERS
 
-*Constant* (`dict`).
+*Constant* (`mappingproxy`).
 
 ```python
 EARPHONE_COUPLERS = {'DT 48': 'IEC 60303 acoustic coupler', 'TDH 39': 'IEC 60303 acoustic coupler', 'other supra-aural': 'IEC 60318 artificial ear'}

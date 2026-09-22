@@ -68,6 +68,7 @@ from __future__ import annotations
 import math
 import warnings
 from dataclasses import dataclass
+from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, NamedTuple
 
 import numpy as np
@@ -114,16 +115,18 @@ _POROSITY_MESSAGE = "'porosity' must not exceed 1."
 #: Table D.1, PDF page 757 (printed p. 728), in Appendix D:
 #: ``Zc = rho c (1 + C1 X^-C2 - j C3 X^-C4)`` and
 #: ``k = (w/c)(1 + C5 X^-C6 - j C7 X^-C8)`` with ``X = rho f / sigma``.
-DELANY_BAZLEY_COEFFICIENTS: Mapping[str, tuple[float, ...]] = {
-    # Rockwool / fibreglass (Delany & Bazley 1970).
-    "delany_bazley": (0.0571, 0.754, 0.087, 0.732, 0.0978, 0.700, 0.189, 0.595),
-    # Polyester (Garai & Pompoli 2005).
-    "garai_pompoli": (0.078, 0.623, 0.074, 0.660, 0.159, 0.571, 0.121, 0.530),
-    # Polyurethane foam of low flow resistivity (Dunn & Davern 1986).
-    "dunn_davern": (0.114, 0.369, 0.0985, 0.758, 0.168, 0.715, 0.136, 0.491),
-    # Porous plastic foams of medium flow resistivity (Wu 1988).
-    "wu": (0.212, 0.455, 0.105, 0.607, 0.163, 0.592, 0.188, 0.544),
-}
+DELANY_BAZLEY_COEFFICIENTS: Mapping[str, tuple[float, ...]] = MappingProxyType(
+    {
+        # Rockwool / fibreglass (Delany & Bazley 1970).
+        "delany_bazley": (0.0571, 0.754, 0.087, 0.732, 0.0978, 0.700, 0.189, 0.595),
+        # Polyester (Garai & Pompoli 2005).
+        "garai_pompoli": (0.078, 0.623, 0.074, 0.660, 0.159, 0.571, 0.121, 0.530),
+        # Polyurethane foam of low flow resistivity (Dunn & Davern 1986).
+        "dunn_davern": (0.114, 0.369, 0.0985, 0.758, 0.168, 0.715, 0.136, 0.491),
+        # Porous plastic foams of medium flow resistivity (Wu 1988).
+        "wu": (0.212, 0.455, 0.105, 0.607, 0.163, 0.592, 0.188, 0.544),
+    }
+)
 
 #: Count of Delany-Bazley power-law coefficients ``C1..C8`` an explicit
 #: ``coefficients`` tuple must supply: four for ``Zc`` and four for ``k``
@@ -148,7 +151,9 @@ MIKI_VALIDITY = (0.01, 1.0)
 #: to which Doutres et al. (2007) relaxed it with their frame structural
 #: interaction criterion (which, with ``K_f`` approximated by the isothermal
 #: value of air ``P0 = 101,3 kPa``, is the book's "lower than 20 kPa").
-LIMP_FRAME_CRITERIA: Mapping[str, float] = {"beranek": 0.05, "doutres": 0.2}
+LIMP_FRAME_CRITERIA: Mapping[str, float] = MappingProxyType(
+    {"beranek": 0.05, "doutres": 0.2}
+)
 
 __all__ = [
     "DELANY_BAZLEY_COEFFICIENTS",

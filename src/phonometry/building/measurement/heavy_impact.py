@@ -98,6 +98,7 @@ used when the *measurement* is reported in octaves.
 from __future__ import annotations
 
 from dataclasses import KW_ONLY, dataclass
+from types import MappingProxyType
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -113,7 +114,7 @@ from ..._internal.validation import (
 from ...io._resolve import SignalInput, resolve_fs, resolve_samples
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
+    from collections.abc import Mapping, Sequence
 
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
@@ -148,44 +149,52 @@ HEAVY_IMPACT_OCTAVE_BANDS: tuple[float, ...] = (31.5, 63.0, 125.0, 250.0, 500.0)
 #: Table A.1** (impact force characteristic 1, printed p. 6). Keyed by source
 #: name, each value is the tuple of ``(LFE, tolerance)`` pairs ordered as
 #: :data:`HEAVY_IMPACT_OCTAVE_BANDS`.
-HEAVY_IMPACT_SOURCES: dict[str, tuple[tuple[float, float], ...]] = {
-    "rubber_ball": (
-        (39.0, 1.0),
-        (31.0, 1.5),
-        (23.0, 1.5),
-        (17.0, 2.0),
-        (12.5, 2.0),
-    ),
-    "bang_machine": (
-        (47.0, 1.0),
-        (40.0, 1.5),
-        (22.0, 1.5),
-        (11.5, 2.0),
-        (5.5, 2.0),
-    ),
-}
+HEAVY_IMPACT_SOURCES: Mapping[str, tuple[tuple[float, float], ...]] = MappingProxyType(
+    {
+        "rubber_ball": (
+            (39.0, 1.0),
+            (31.0, 1.5),
+            (23.0, 1.5),
+            (17.0, 2.0),
+            (12.5, 2.0),
+        ),
+        "bang_machine": (
+            (47.0, 1.0),
+            (40.0, 1.5),
+            (22.0, 1.5),
+            (11.5, 2.0),
+            (5.5, 2.0),
+        ),
+    }
+)
 
 #: A-weighting correction ``Aj`` for the one-third-octave bands 50 Hz to 630 Hz
 #: and the octave bands 63 Hz to 500 Hz, transcribed from **ISO 717-2:2020
 #: Table D.3** (printed p. 21). Keyed by band width, each value maps the band
 #: centre frequency in Hz to ``Aj`` in dB.
-HEAVY_IMPACT_A_WEIGHTING: dict[str, dict[float, float]] = {
-    "third": {
-        50.0: -30.3,
-        63.0: -26.2,
-        80.0: -22.4,
-        100.0: -19.1,
-        125.0: -16.2,
-        160.0: -13.2,
-        200.0: -10.8,
-        250.0: -8.7,
-        315.0: -6.6,
-        400.0: -4.8,
-        500.0: -3.2,
-        630.0: -1.9,
-    },
-    "octave": {63.0: -26.2, 125.0: -16.2, 250.0: -8.7, 500.0: -3.2},
-}
+HEAVY_IMPACT_A_WEIGHTING: Mapping[str, Mapping[float, float]] = MappingProxyType(
+    {
+        "third": MappingProxyType(
+            {
+                50.0: -30.3,
+                63.0: -26.2,
+                80.0: -22.4,
+                100.0: -19.1,
+                125.0: -16.2,
+                160.0: -13.2,
+                200.0: -10.8,
+                250.0: -8.7,
+                315.0: -6.6,
+                400.0: -4.8,
+                500.0: -3.2,
+                630.0: -1.9,
+            }
+        ),
+        "octave": MappingProxyType(
+            {63.0: -26.2, 125.0: -16.2, 250.0: -8.7, 500.0: -3.2}
+        ),
+    }
+)
 
 #: Reference force ``F0`` of Formula (A.1), in newtons.
 _FORCE_REFERENCE = 1.0

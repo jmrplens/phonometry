@@ -55,6 +55,7 @@ from __future__ import annotations
 
 import warnings
 from dataclasses import dataclass
+from types import MappingProxyType
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -62,6 +63,8 @@ import numpy as np
 from ..._internal.validation import require_finite_array
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
+    from collections.abc import Mapping
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
@@ -138,10 +141,12 @@ NORMALISED_RAILWAY_NOISE_SPECTRUM_DB: tuple[float, ...] = (
 
 #: The two spectra a device can be rated against, by the standard that
 #: prints each: ``"road"`` is EN 1793-3 and ``"railway"`` is EN 16272-3-1.
-SPECTRA: dict[str, tuple[float, ...]] = {
-    "road": NORMALISED_TRAFFIC_NOISE_SPECTRUM_DB,
-    "railway": NORMALISED_RAILWAY_NOISE_SPECTRUM_DB,
-}
+SPECTRA: Mapping[str, tuple[float, ...]] = MappingProxyType(
+    {
+        "road": NORMALISED_TRAFFIC_NOISE_SPECTRUM_DB,
+        "railway": NORMALISED_RAILWAY_NOISE_SPECTRUM_DB,
+    }
+)
 
 #: EN 1793-1:2012, Clause 5 and EN 16272-3-1:2012, Clause 5. The ceiling both
 #: standards put on the weighted absorption ratio, so that a measured

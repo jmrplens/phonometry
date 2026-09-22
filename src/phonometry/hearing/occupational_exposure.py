@@ -47,6 +47,7 @@ from __future__ import annotations
 import warnings
 from dataclasses import KW_ONLY, dataclass, field, replace
 from math import isfinite, log10, sqrt
+from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
@@ -61,7 +62,7 @@ from .._internal.validation import (
 from .._internal.warnings import PhonometryWarning
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
+    from collections.abc import Mapping, Sequence
 
     from matplotlib.axes import Axes
 
@@ -107,11 +108,13 @@ _TABLE1_LARGE_GROUP_MAX: int = 40
 InstrumentClass = Literal["class1", "class2", "personal_exposimeter"]
 
 #: Instrument standard uncertainty u2 by class (Table C.5), dB.
-INSTRUMENT_U2: dict[str, float] = {
-    "class1": 0.7,  # sound level meter IEC 61672-1:2002 class 1
-    "class2": 1.5,  # sound level meter IEC 61672-1:2002 class 2
-    "personal_exposimeter": 1.5,  # personal sound exposure meter IEC 61252
-}
+INSTRUMENT_U2: Mapping[str, float] = MappingProxyType(
+    {
+        "class1": 0.7,  # sound level meter IEC 61672-1:2002 class 1
+        "class2": 1.5,  # sound level meter IEC 61672-1:2002 class 2
+        "personal_exposimeter": 1.5,  # personal sound exposure meter IEC 61252
+    }
+)
 
 
 class OccupationalExposureWarning(PhonometryWarning):

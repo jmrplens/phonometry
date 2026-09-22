@@ -85,6 +85,7 @@ from __future__ import annotations
 import math
 import warnings
 from dataclasses import dataclass
+from types import MappingProxyType
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -98,6 +99,8 @@ from .._internal.validation import (
 from .._internal.warnings import PhonometryWarning
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
@@ -208,26 +211,30 @@ ISO7235_SPREAD_LIMITS: tuple[tuple[float, float], ...] = (
 #: silencers; the other two are estimates based on experience (7.9). The
 #: sound-intensity column is qualified by a footnote limiting it to 5 000 Hz,
 #: which is why its last pair stops there rather than at 10 000 Hz.
-ISO7235_REPRODUCIBILITY: dict[str, tuple[tuple[float, float], ...]] = {
-    "insertion_loss": (
-        (100.0, 1.5),
-        (500.0, 1.0),
-        (1250.0, 2.0),
-        (10000.0, 3.0),
-    ),
-    "transmission_loss": (
-        (100.0, 3.0),
-        (500.0, 3.0),
-        (1250.0, 3.0),
-        (10000.0, 3.0),
-    ),
-    "intensity": (
-        (100.0, 3.0),
-        (500.0, 1.5),
-        (1250.0, 1.0),
-        (5000.0, 1.0),
-    ),
-}
+ISO7235_REPRODUCIBILITY: Mapping[str, tuple[tuple[float, float], ...]] = (
+    MappingProxyType(
+        {
+            "insertion_loss": (
+                (100.0, 1.5),
+                (500.0, 1.0),
+                (1250.0, 2.0),
+                (10000.0, 3.0),
+            ),
+            "transmission_loss": (
+                (100.0, 3.0),
+                (500.0, 3.0),
+                (1250.0, 3.0),
+                (10000.0, 3.0),
+            ),
+            "intensity": (
+                (100.0, 3.0),
+                (500.0, 1.5),
+                (1250.0, 1.0),
+                (5000.0, 1.0),
+            ),
+        }
+    )
+)
 
 #: ISO 7235:2003, 7.9. The expanded uncertainty for a coverage probability of
 #: 95 % is twice the reproducibility standard deviation of Table 7.
@@ -238,13 +245,15 @@ ISO7235_COVERAGE_FACTOR = 2.0
 #: of Figure B.2: **A** flush in a wall, **B** at the junction of a wall and
 #: the floor, **C** a duct end projecting into the room, **D** a box standing
 #: on the floor, **E** a duct in the middle of the room.
-RADIATION_SOLID_ANGLES: dict[str, float] = {
-    "A": 2.0 * math.pi,
-    "B": math.pi,
-    "C": 4.0 * math.pi,
-    "D": 2.0 * math.pi,
-    "E": 4.0 * math.pi,
-}
+RADIATION_SOLID_ANGLES: Mapping[str, float] = MappingProxyType(
+    {
+        "A": 2.0 * math.pi,
+        "B": math.pi,
+        "C": 4.0 * math.pi,
+        "D": 2.0 * math.pi,
+        "E": 4.0 * math.pi,
+    }
+)
 
 #: ISO 7235:2003, 5.2.2.3. The longitudinal attenuation of the fundamental
 #: mode the modal filter has to provide, in dB: at least the first at the

@@ -138,7 +138,7 @@ contour read at 500 Hz (clause 5.5).
 
 ## CEILING_ATTENUATION_CONTOUR
 
-*Constant* (`dict`).
+*Constant* (`mappingproxy`).
 
 ```python
 CEILING_ATTENUATION_CONTOUR = {125.0: -16.0, 160.0: -13.0, 200.0: -10.0, 250.0: -7.0, 315.0: -4.0, 400.0: -1.0, 500.0: 0.0, 630.0: 1.0, 800.0: 2.0, 1000.0: 3.0, 1250.0: 4.0, 1600.0: 4.0, 2000.0: 4.0, 2500.0: 4.0, 3150.0: 4.0, 4000.0: 4.0}

@@ -40,6 +40,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
+from types import MappingProxyType
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -613,7 +614,7 @@ def room_parameters(
 #: 2^(1/6) - 2^(-1/6) = 0,2316, so the printed pair is each of those rounded
 #: to two figures, 0,4 % and 0,7 % away. Since sigma follows the square root
 #: of B, that is at most 0,4 % on the answer.
-FILTER_BANDWIDTH_FRACTION = {1: 0.71, 3: 0.23}
+FILTER_BANDWIDTH_FRACTION = MappingProxyType({1: 0.71, 3: 0.23})
 
 #: The coefficients ISO 3382-1:2009, Equations (4) and (5) print, keyed by the
 #: evaluation range in dB they belong to: ``(prefactor, decay term)``.
@@ -622,7 +623,9 @@ FILTER_BANDWIDTH_FRACTION = {1: 0.71, 3: 0.23}
 #: 3382-2:2008 prints as Equation (A.4), at its Table A.1 column for
 #: gamma = T/T_det = 5, which ISO 3382-1 does not print: G = 88 % with
 #: H = 1,90, and G = 55 % with H = 1,52.
-DECAY_UNCERTAINTY_COEFFICIENTS = {20.0: (0.88, 1.90), 30.0: (0.55, 1.52)}
+DECAY_UNCERTAINTY_COEFFICIENTS = MappingProxyType(
+    {20.0: (0.88, 1.90), 30.0: (0.55, 1.52)}
+)
 
 #: Decays per position the integrated impulse response method is worth
 #: (ISO 3382-1:2009, 7.2). The theory says an infinite number, but the clause

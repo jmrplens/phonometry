@@ -69,6 +69,7 @@ from __future__ import annotations
 import math
 import warnings
 from dataclasses import dataclass
+from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
@@ -82,6 +83,8 @@ from ..._internal.validation import (
 from ..._internal.warnings import PhonometryWarning
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
@@ -110,29 +113,35 @@ FOUNDATION_FREQUENCIES_HZ: tuple[float, ...] = (1.0, 10.0, 50.0, 100.0)
 #: table prints a band as a range ("20 bis 40"), and Bild 1 shows what the
 #: range means: a straight line from the value at the start of the band to
 #: the value at its end, on a linear frequency axis.
-SHORT_TERM_FOUNDATION_MM_S: dict[str, tuple[float, ...]] = {
-    "commercial": (20.0, 20.0, 40.0, 50.0),
-    "residential": (5.0, 5.0, 15.0, 20.0),
-    "sensitive": (3.0, 3.0, 8.0, 10.0),
-}
+SHORT_TERM_FOUNDATION_MM_S: Mapping[str, tuple[float, ...]] = MappingProxyType(
+    {
+        "commercial": (20.0, 20.0, 40.0, 50.0),
+        "residential": (5.0, 5.0, 15.0, 20.0),
+        "sensitive": (3.0, 3.0, 8.0, 10.0),
+    }
+)
 
 #: Table 1, last column: the guideline peak velocity in the topmost floor
 #: plane, horizontal, at all frequencies, in millimetres per second.
-SHORT_TERM_TOP_FLOOR_MM_S: dict[str, float] = {
-    "commercial": 40.0,
-    "residential": 15.0,
-    "sensitive": 8.0,
-}
+SHORT_TERM_TOP_FLOOR_MM_S: Mapping[str, float] = MappingProxyType(
+    {
+        "commercial": 40.0,
+        "residential": 15.0,
+        "sensitive": 8.0,
+    }
+)
 
 #: Table 3: the long-term guideline peak velocity in the topmost floor plane,
 #: horizontal, at all frequencies, in millimetres per second. Table 3 has no
 #: foundation column, because a structure responding at its own frequencies
 #: is judged where it responds.
-LONG_TERM_TOP_FLOOR_MM_S: dict[str, float] = {
-    "commercial": 10.0,
-    "residential": 5.0,
-    "sensitive": 2.5,
-}
+LONG_TERM_TOP_FLOOR_MM_S: Mapping[str, float] = MappingProxyType(
+    {
+        "commercial": 10.0,
+        "residential": 5.0,
+        "sensitive": 2.5,
+    }
+)
 
 #: Clause 5.2: the vertical peak velocity below which short-term vibration is
 #: not expected to reduce the serviceability of a ceiling or floor, in
@@ -161,11 +170,13 @@ PIPELINE_MATERIALS: tuple[str, ...] = (
 #: Table 2: the guideline peak velocity on a buried pipeline, in millimetres
 #: per second, by pipe material. Row 2 covers vitrified clay, concrete,
 #: reinforced and prestressed concrete, and metal with or without flanges.
-PIPELINE_MM_S: dict[str, float] = {
-    "welded_steel": 100.0,
-    "concrete_or_flanged_metal": 80.0,
-    "masonry_or_plastic": 50.0,
-}
+PIPELINE_MM_S: Mapping[str, float] = MappingProxyType(
+    {
+        "welded_steel": 100.0,
+        "concrete_or_flanged_metal": 80.0,
+        "masonry_or_plastic": 50.0,
+    }
+)
 
 #: Clause 6.3: without further evidence, Table 2 may be used for long-term
 #: vibration reduced by this factor.

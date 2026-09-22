@@ -98,7 +98,7 @@ Judge short-term vibration on a building by Annex E.
 
 ## ASSESSMENT_GUIDE_VALUES_MM_S
 
-*Constant* (`dict`).
+*Constant* (`mappingproxy`).
 
 ```python
 ASSESSMENT_GUIDE_VALUES_MM_S = {'commercial': 20.0, 'residential': 5.0, 'sensitive': 3.0}
@@ -413,7 +413,7 @@ KB_REFERENCE_FREQUENCY_HZ = 16.0
 
 ## KB_REFERENCE_INDICATIONS
 
-*Constant* (`dict`).
+*Constant* (`mappingproxy`).
 
 ```python
 KB_REFERENCE_INDICATIONS = {'peak_velocity_mm_s': 1.0, 'kbf': 0.667, 'kbf_max': 0.68, 'kbf_takt_rms': 0.68}
@@ -455,7 +455,7 @@ per second for the result to mean what the standard says.
 
 ## KB_TEST_INDICATIONS
 
-*Constant* (`dict`).
+*Constant* (`mappingproxy`).
 
 ```python
 KB_TEST_INDICATIONS = {1.0: (0.103, 0.13, 0.13), 5.6: (0.5, 0.528, 0.528), 31.5: (0.693, 0.7, 0.7), 80.0: (0.594, 0.597, 0.597), 315.0: (0.071, 0.071, 0.071)}
@@ -874,7 +874,7 @@ The frequency that uses the largest share of its allowance.
 
 ## WORKING_RANGES_HZ
 
-*Constant* (`dict`).
+*Constant* (`mappingproxy`).
 
 ```python
 WORKING_RANGES_HZ = {'building': (1.0, 80.0), 'railway': (4.0, 315.0)}

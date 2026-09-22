@@ -73,11 +73,14 @@ multi-junction adjustment ``dK`` of clause F.1
 from __future__ import annotations
 
 from dataclasses import dataclass
+from types import MappingProxyType
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
@@ -252,14 +255,16 @@ def coupling_term_velocity_source(
 #: names each row of :func:`typical_element_mobility` requires. The printed
 #: symbols are ``M`` [kg], ``rho`` [kg/m3], ``cL`` [m/s], ``S`` [m^2], ``t``
 #: [m], ``w`` [m], ``r`` (radius) [m], ``s`` [N/m] and ``eta`` [-].
-TABLE_D1_QUANTITIES: dict[str, tuple[str, ...]] = {
-    "mass": ("mass",),
-    "bar_end": ("density", "longitudinal_velocity", "area"),
-    "beam": ("density", "longitudinal_velocity", "thickness", "width"),
-    "plate": ("density", "longitudinal_velocity", "thickness"),
-    "pipe": ("density", "longitudinal_velocity", "thickness", "radius"),
-    "mass_spring": ("mass", "stiffness", "loss_factor"),
-}
+TABLE_D1_QUANTITIES: Mapping[str, tuple[str, ...]] = MappingProxyType(
+    {
+        "mass": ("mass",),
+        "bar_end": ("density", "longitudinal_velocity", "area"),
+        "beam": ("density", "longitudinal_velocity", "thickness", "width"),
+        "plate": ("density", "longitudinal_velocity", "thickness"),
+        "pipe": ("density", "longitudinal_velocity", "thickness", "radius"),
+        "mass_spring": ("mass", "stiffness", "loss_factor"),
+    }
+)
 
 #: The Table D.1 rows whose printed expression contains the frequency ``f``.
 #: The other two are frequency-independent, and passing ``frequency`` to them

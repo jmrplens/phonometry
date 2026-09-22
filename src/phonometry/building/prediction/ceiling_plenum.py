@@ -104,6 +104,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
+from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, overload
 
 import numpy as np
@@ -118,6 +119,8 @@ from ..._internal.validation import (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
@@ -136,24 +139,26 @@ __all__ = [
 #: zero (Note 2); other contours are derived by adding the same integer to every
 #: value. The same array rates STC (E90), NIC/NNIC/ASTC (E336), NIC (E596) and
 #: the ceiling attenuation class CAC (E1414).
-CEILING_ATTENUATION_CONTOUR: dict[float, float] = {
-    125.0: -16.0,
-    160.0: -13.0,
-    200.0: -10.0,
-    250.0: -7.0,
-    315.0: -4.0,
-    400.0: -1.0,
-    500.0: 0.0,
-    630.0: 1.0,
-    800.0: 2.0,
-    1000.0: 3.0,
-    1250.0: 4.0,
-    1600.0: 4.0,
-    2000.0: 4.0,
-    2500.0: 4.0,
-    3150.0: 4.0,
-    4000.0: 4.0,
-}
+CEILING_ATTENUATION_CONTOUR: Mapping[float, float] = MappingProxyType(
+    {
+        125.0: -16.0,
+        160.0: -13.0,
+        200.0: -10.0,
+        250.0: -7.0,
+        315.0: -4.0,
+        400.0: -1.0,
+        500.0: 0.0,
+        630.0: 1.0,
+        800.0: 2.0,
+        1000.0: 3.0,
+        1250.0: 4.0,
+        1600.0: 4.0,
+        2000.0: 4.0,
+        2500.0: 4.0,
+        3150.0: 4.0,
+        4000.0: 4.0,
+    }
+)
 
 #: Reference equivalent absorption area ``A0`` of ISO 140-9:1985 clause 3.3 and
 #: ISO 10848-2, in m2.

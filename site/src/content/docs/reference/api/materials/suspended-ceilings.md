@@ -105,7 +105,7 @@ AIR_CORRECTION_LIMIT = 0.05
 
 ## CEILING_UNCERTAINTY
 
-*Constant* (`dict`).
+*Constant* (`mappingproxy`).
 
 ```python
 CEILING_UNCERTAINTY = {125.0: 0.23, 250.0: 0.23, 500.0: 0.11, 1000.0: 0.1, 2000.0: 0.1, 4000.0: 0.13}
@@ -309,7 +309,7 @@ What one mounting letter of EN ISO 354 Annex B means here.
 
 ## MOUNTING_TYPES
 
-*Constant* (`dict`).
+*Constant* (`mappingproxy`).
 
 ```python
 MOUNTING_TYPES = {'A': 'attached directly against a hard surface, with no air space', 'B': 'glued to a hard surface with a 3 mm air space kept by corner shims', 'E': 'suspended from a hard surface with an air space behind it', 'J': 'a discrete absorber, freely suspended or standing'}

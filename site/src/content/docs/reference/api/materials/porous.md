@@ -180,7 +180,7 @@ are still returned.
 
 ## DELANY_BAZLEY_COEFFICIENTS
 
-*Constant* (`dict`).
+*Constant* (`mappingproxy`).
 
 ```python
 DELANY_BAZLEY_COEFFICIENTS = {'delany_bazley': (0.0571, 0.754, 0.087, 0.732, 0.0978, 0.7, 0.189, 0.595), 'garai_pompoli': (0.078, 0.623, 0.074, 0.66, 0.159, 0.571, 0.121, 0.53), 'dunn_davern': (0.114, 0.369, 0.0985, 0.758, 0.168, 0.715, 0.136, 0.491), 'wu': (0.212, 0.455, 0.105, 0.607, 0.163, 0.592, 0.188, 0.544)}
@@ -493,7 +493,7 @@ vibrating structure by an air gap behaves limply well above the limit.
 
 ## LIMP_FRAME_CRITERIA
 
-*Constant* (`dict`).
+*Constant* (`mappingproxy`).
 
 ```python
 LIMP_FRAME_CRITERIA = {'beranek': 0.05, 'doutres': 0.2}

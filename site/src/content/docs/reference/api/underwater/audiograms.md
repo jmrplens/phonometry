@@ -155,7 +155,7 @@ Plot the hearing threshold versus frequency.
 
 ## BEST_HEARING_FREQUENCY_KHZ
 
-*Constant* (`dict`).
+*Constant* (`mappingproxy`).
 
 ```python
 BEST_HEARING_FREQUENCY_KHZ = {'HF': (55.0, 58.0), 'VHF': (105.0, 105.0), 'SI': (16.0, 12.0), 'PCW': (8.6, 13.0), 'OCW': (12.0, 10.0), 'PCA': (2.3, 2.3), 'OCA': (10.0, 10.0)}

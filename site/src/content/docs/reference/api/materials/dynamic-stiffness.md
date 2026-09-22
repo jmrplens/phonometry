@@ -361,7 +361,7 @@ plate.
 
 ## PUBLISHED_RESILIENT_LAYERS
 
-*Constant* (`dict`).
+*Constant* (`mappingproxy`).
 
 ## resilient_layer
 

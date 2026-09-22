@@ -65,6 +65,7 @@ from __future__ import annotations
 import math
 import warnings
 from dataclasses import dataclass
+from types import MappingProxyType
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -138,7 +139,7 @@ __all__ = [
 #: estimate of 6.3.2. Equation (3b) has no flow coefficient in it, so it has
 #: no :math:`N_{34}` either; the constant printed at full size on its
 #: baseline is :math:`N_o`, a count of holes.
-CAPACITY_SCALE_CONSTANTS = {"Cv": 1.17, "Kv": 1.0}
+CAPACITY_SCALE_CONSTANTS = MappingProxyType({"Cv": 1.17, "Kv": 1.0})
 
 #: Table 2's acoustic power ratio :math:`r_W`, the fraction of the sound
 #: power that is radiated into the pipe rather than lost in the valve body.
@@ -147,20 +148,22 @@ CAPACITY_SCALE_CONSTANTS = {"Cv": 1.17, "Kv": 1.0}
 #: body to lose anything in. The two swing-through and fluted-vane rows are
 #: printed "to 70 deg", a limit on the travel rather than on the valve, and
 #: the table says nothing about either of them past it.
-ACOUSTIC_POWER_RATIOS = {
-    "globe parabolic plug": 0.25,
-    "globe 3 V-port plug": 0.25,
-    "globe 4 V-port plug": 0.25,
-    "globe 6 V-port plug": 0.25,
-    "globe 60 hole drilled cage": 0.25,
-    "globe 120 hole drilled cage": 0.25,
-    "butterfly swing-through": 0.5,
-    "butterfly fluted vane": 0.5,
-    "butterfly 60 deg flat disk": 0.5,
-    "eccentric rotary plug": 0.25,
-    "segmented ball 90 deg": 0.25,
-    "expander": 1.0,
-}
+ACOUSTIC_POWER_RATIOS = MappingProxyType(
+    {
+        "globe parabolic plug": 0.25,
+        "globe 3 V-port plug": 0.25,
+        "globe 4 V-port plug": 0.25,
+        "globe 6 V-port plug": 0.25,
+        "globe 60 hole drilled cage": 0.25,
+        "globe 120 hole drilled cage": 0.25,
+        "butterfly swing-through": 0.5,
+        "butterfly fluted vane": 0.5,
+        "butterfly 60 deg flat disk": 0.5,
+        "eccentric rotary plug": 0.25,
+        "segmented ball 90 deg": 0.25,
+        "expander": 1.0,
+    }
+)
 
 #: Density of the air outside the pipe, from the Clause 3 symbol list, in
 #: kg/m³. Equation (15) uses it against the pipe wall's own impedance, so it
@@ -178,7 +181,7 @@ REFERENCE_INLET_PRESSURE_PA = 6.0e5
 #: are not the same function of the valve: for Annex A's :math:`F_d = 0{,}42`
 #: the annex form is 6 % below the clause form, and for a plain single-port
 #: valve at :math:`F_d = 1` it is 80 % above it.
-STROUHAL_CONSTANTS = {"annex": 0.036, "clause": 0.02}
+STROUHAL_CONSTANTS = MappingProxyType({"annex": 0.036, "clause": 0.02})
 
 #: The width in :math:`x_F` of the band just above incipient cavitation where
 #: the NOTE to Equation (17) floors the efficiency ratio. Inside it the

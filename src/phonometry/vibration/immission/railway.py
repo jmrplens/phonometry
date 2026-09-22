@@ -47,6 +47,7 @@ from __future__ import annotations
 import math
 import warnings
 from dataclasses import dataclass
+from types import MappingProxyType
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -68,6 +69,8 @@ from .vibration_meter import (
 )
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
+    from collections.abc import Mapping
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
@@ -139,30 +142,32 @@ NARROWBAND_RESOLUTION_HZ: float = 1.25
 #: of an octave either side of the nominal centre holds, except at 10 Hz and
 #: 12,5 Hz, where the table gives each band two lines and those edges give one
 #: and three.
-THIRD_OCTAVE_LINES: dict[float, int] = {
-    4.0: 1,
-    5.0: 1,
-    6.3: 1,
-    8.0: 2,
-    10.0: 2,
-    12.5: 2,
-    16.0: 3,
-    20.0: 3,
-    25.0: 5,
-    31.5: 6,
-    40.0: 7,
-    50.0: 9,
-    63.0: 12,
-    80.0: 14,
-    100.0: 18,
-    125.0: 23,
-    160.0: 29,
-    200.0: 37,
-    250.0: 46,
-    315.0: 58,
-    400.0: 74,
-    500.0: 92,
-}
+THIRD_OCTAVE_LINES: Mapping[float, int] = MappingProxyType(
+    {
+        4.0: 1,
+        5.0: 1,
+        6.3: 1,
+        8.0: 2,
+        10.0: 2,
+        12.5: 2,
+        16.0: 3,
+        20.0: 3,
+        25.0: 5,
+        31.5: 6,
+        40.0: 7,
+        50.0: 9,
+        63.0: 12,
+        80.0: 14,
+        100.0: 18,
+        125.0: 23,
+        160.0: 29,
+        200.0: 37,
+        250.0: 46,
+        315.0: 58,
+        400.0: 74,
+        500.0: 92,
+    }
+)
 
 #: How far the line spacing may stray from 1,25 Hz before Table 1 stops
 #: describing the spectrum it is handed. The counts are counts of lines of that

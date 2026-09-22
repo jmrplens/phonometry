@@ -243,7 +243,7 @@ LOW_FREQUENCY_WEIGHTING = 'Wf'
 
 ## MAX_EXPANDED_UNCERTAINTY_PERCENT
 
-*Constant* (`dict`).
+*Constant* (`mappingproxy`).
 
 ```python
 MAX_EXPANDED_UNCERTAINTY_PERCENT = {'12.7': 2.0, '12.10.1': 2.0, '12.10.2': 3.0, '12.10.2 additional ranges': 4.0, '12.11.2': 4.5, '12.11.3': 3.0, '12.11.4': 5.0, '12.13': 3.0, '12.14': 2.0, '12.18': 0.01, '13.9': 2.0, '13.11': 4.0, '13.14': 2.0, '13.15': 0.01, '14.9': 5.0}
@@ -251,7 +251,7 @@ MAX_EXPANDED_UNCERTAINTY_PERCENT = {'12.7': 2.0, '12.10.1': 2.0, '12.10.2': 3.0,
 
 ## NOMINAL_FREQUENCY_RANGE_HZ
 
-*Constant* (`dict`).
+*Constant* (`mappingproxy`).
 
 ```python
 NOMINAL_FREQUENCY_RANGE_HZ = {'Wb': (0.5, 80.0), 'Wc': (0.5, 80.0), 'Wd': (0.5, 80.0), 'We': (0.5, 80.0), 'Wf': (0.1, 0.5), 'Wh': (8.0, 1000.0), 'Wj': (0.5, 80.0), 'Wk': (0.5, 80.0), 'Wm': (1.0, 80.0)}
@@ -417,7 +417,7 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 
 ## REFERENCE_ACCELERATION_M_S2
 
-*Constant* (`dict`).
+*Constant* (`mappingproxy`).
 
 ```python
 REFERENCE_ACCELERATION_M_S2 = {'Wb': 1.0, 'Wc': 1.0, 'Wd': 1.0, 'We': 1.0, 'Wf': 0.1, 'Wh': 10.0, 'Wj': 1.0, 'Wk': 1.0, 'Wm': 1.0}
@@ -425,7 +425,7 @@ REFERENCE_ACCELERATION_M_S2 = {'Wb': 1.0, 'Wc': 1.0, 'Wd': 1.0, 'We': 1.0, 'Wf':
 
 ## REFERENCE_FREQUENCY_HZ
 
-*Constant* (`dict`).
+*Constant* (`mappingproxy`).
 
 ```python
 REFERENCE_FREQUENCY_HZ = {'Wb': 15.915494309189533, 'Wc': 15.915494309189533, 'Wd': 15.915494309189533, 'We': 15.915494309189533, 'Wf': 0.3978873577297384, 'Wh': 79.57747154594767, 'Wj': 15.915494309189533, 'Wk': 15.915494309189533, 'Wm': 15.915494309189533}
@@ -514,7 +514,7 @@ for the three time constants the standard tabulates.
 
 ## RUNNING_RMS_DECAY_TIME_S
 
-*Constant* (`dict`).
+*Constant* (`mappingproxy`).
 
 ```python
 RUNNING_RMS_DECAY_TIME_S = {'linear': ((0.125, 0.124, 0.005), (1.0, 0.99, 0.05), (8.0, 7.92, 0.2)), 'exponential': ((0.125, 0.58, 0.03), (1.0, 4.61, 0.25), (8.0, 36.8, 2.0))}
@@ -538,7 +538,7 @@ TAIL_TOLERANCE_PERCENT = (26.0, -100.0, inf)
 
 ## TRANSITION_FREQUENCIES_HZ
 
-*Constant* (`dict`).
+*Constant* (`mappingproxy`).
 
 ```python
 TRANSITION_FREQUENCIES_HZ = {'Wb': (0.251188643150958, 0.6309573444801932, 63.09573444801933, 158.48931924611142), 'Wc': (0.251188643150958, 0.6309573444801932, 63.09573444801933, 158.48931924611142), 'Wd': (0.251188643150958, 0.6309573444801932, 63.09573444801933, 158.48931924611142), 'We': (0.251188643150958, 0.6309573444801932, 63.09573444801933, 158.48931924611142), 'Wf': (0.05011872336272722, 0.12589254117941673, 0.3981071705534972, 1.0), 'Wh': (3.9810717055349722, 10.0, 794.3282347242813, 1995.2623149688789), 'Wj': (0.251188643150958, 0.6309573444801932, 63.09573444801933, 158.48931924611142), 'Wk': (0.251188643150958, 0.6309573444801932, 63.09573444801933, 158.48931924611142), 'Wm': (0.5011872336272722, 1.2589254117941673, 63.09573444801933, 158.48931924611142)}

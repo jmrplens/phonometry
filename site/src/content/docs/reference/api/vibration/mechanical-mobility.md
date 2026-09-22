@@ -127,7 +127,7 @@ the name used here).
 
 ## FRF_UNITS
 
-*Constant* (`dict`).
+*Constant* (`mappingproxy`).
 
 ```python
 FRF_UNITS = {'receptance': 'm/N', 'mobility': 'm/(N·s)', 'accelerance': '1/kg', 'dynamic_stiffness': 'N/m', 'impedance': 'N·s/m', 'apparent_mass': 'kg'}

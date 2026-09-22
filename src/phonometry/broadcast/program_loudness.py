@@ -41,6 +41,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from math import ceil, isclose
+from types import MappingProxyType
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -49,6 +50,8 @@ from scipy import signal
 from ..io._resolve import SignalInput, resolve_fs, resolve_samples
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
@@ -121,12 +124,14 @@ _STAGE2_A48 = (1.0, -1.99004745483398, 0.99007225036621)
 #: Channel weights of Table 3 by channel count: mono, stereo (L/R),
 #: 3/2 multichannel (L/R/C/Ls/Rs) and 5.1 (L/R/C/LFE/Ls/Rs; the LFE channel
 #: is excluded from the measurement, hence its zero weight).
-DEFAULT_CHANNEL_WEIGHTS: dict[int, tuple[float, ...]] = {
-    1: (1.0,),
-    2: (1.0, 1.0),
-    5: (1.0, 1.0, 1.0, 1.41, 1.41),
-    6: (1.0, 1.0, 1.0, 0.0, 1.41, 1.41),
-}
+DEFAULT_CHANNEL_WEIGHTS: Mapping[int, tuple[float, ...]] = MappingProxyType(
+    {
+        1: (1.0,),
+        2: (1.0, 1.0),
+        5: (1.0, 1.0, 1.0, 1.41, 1.41),
+        6: (1.0, 1.0, 1.0, 0.0, 1.41, 1.41),
+    }
+)
 
 #: Validation bounds of channel_weight, in degrees: input azimuths may span
 #: a full signed turn (+/-360 deg) before being folded, and a loudspeaker

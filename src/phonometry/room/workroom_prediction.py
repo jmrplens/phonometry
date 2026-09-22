@@ -50,6 +50,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
+from types import MappingProxyType
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -90,43 +91,53 @@ __all__ = [
 _Range = tuple[float | None, float | None]
 
 #: Table 1: how finely the empty room is described, by level of detail.
-ROOM_DETAIL_LEVELS: dict[int, str] = {
-    1: "the volume and the mean absorption coefficient of the surfaces",
-    2: "a box-like shape, one absorption coefficient per surface",
-    3: "a box-like shape, surfaces subdivided by absorption coefficient",
-    4: "the actual shape, with absorption and reflection distributed over it",
-}
+ROOM_DETAIL_LEVELS: Mapping[int, str] = MappingProxyType(
+    {
+        1: "the volume and the mean absorption coefficient of the surfaces",
+        2: "a box-like shape, one absorption coefficient per surface",
+        3: "a box-like shape, surfaces subdivided by absorption coefficient",
+        4: "the actual shape, with absorption and reflection distributed over it",
+    }
+)
 
 #: Table 2: how finely the fittings are described. The NOTE adds that levels 2,
 #: 3 and 4 are not mutually exclusive.
-FITTING_DETAIL_LEVELS: dict[int, str] = {
-    1: "fittings are not taken into account",
-    2: "one mean density and one mean absorption for the whole room",
-    3: "one mean density and one mean absorption per part of the room",
-    4: "the actual shape and location, with shielding and reflection",
-}
+FITTING_DETAIL_LEVELS: Mapping[int, str] = MappingProxyType(
+    {
+        1: "fittings are not taken into account",
+        2: "one mean density and one mean absorption for the whole room",
+        3: "one mean density and one mean absorption per part of the room",
+        4: "the actual shape and location, with shielding and reflection",
+    }
+)
 
 #: Table 3: how finely the sources are described.
-SOURCE_DETAIL_LEVELS: dict[int, str] = {
-    1: "omnidirectional point sources",
-    2: "point sources with a directivity pattern",
-    3: "complex sources",
-}
+SOURCE_DETAIL_LEVELS: Mapping[int, str] = MappingProxyType(
+    {
+        1: "omnidirectional point sources",
+        2: "point sources with a directivity pattern",
+        3: "complex sources",
+    }
+)
 
 #: 4.3: the range each descriptor of ISO 14257 usually falls in, by region, in
 #: decibels. The far region is the one with no upper bound printed: there
 #: ``DL2`` may pass 6 dB and ``DLf`` may be negative, because the fittings
 #: scatter more than the walls reflect.
-TYPICAL_DECAY_RANGE_DB: dict[str, _Range] = {
-    "near": (5.0, 6.0),
-    "middle": (2.0, 5.0),
-    "far": (6.0, None),
-}
-TYPICAL_EXCESS_RANGE_DB: dict[str, _Range] = {
-    "near": (None, None),
-    "middle": (2.0, 10.0),
-    "far": (None, None),
-}
+TYPICAL_DECAY_RANGE_DB: Mapping[str, _Range] = MappingProxyType(
+    {
+        "near": (5.0, 6.0),
+        "middle": (2.0, 5.0),
+        "far": (6.0, None),
+    }
+)
+TYPICAL_EXCESS_RANGE_DB: Mapping[str, _Range] = MappingProxyType(
+    {
+        "near": (None, None),
+        "middle": (2.0, 10.0),
+        "far": (None, None),
+    }
+)
 
 
 @dataclass(frozen=True)
@@ -151,58 +162,62 @@ class PredictionMethod:
 
 #: Table 4 and Table E.1 as one table: the four categories with the levels of
 #: detail each of them is recommended to be fed.
-PREDICTION_METHODS: dict[str, PredictionMethod] = {
-    "1": PredictionMethod(
-        category="1",
-        family="diffuse field",
-        rooms="rooms whose field may be treated as diffuse",
-        room_detail=(1,),
-        fitting_detail=(1,),
-        source_detail=(1, 2, 3),
-    ),
-    "2a": PredictionMethod(
-        category="2a",
-        family="geometrical",
-        rooms=(
-            "rooms that can be approximated by one mean absorption coefficient "
-            "for each wall and one mean density for the fittings"
+PREDICTION_METHODS: Mapping[str, PredictionMethod] = MappingProxyType(
+    {
+        "1": PredictionMethod(
+            category="1",
+            family="diffuse field",
+            rooms="rooms whose field may be treated as diffuse",
+            room_detail=(1,),
+            fitting_detail=(1,),
+            source_detail=(1, 2, 3),
         ),
-        room_detail=(1, 2),
-        fitting_detail=(1, 2),
-        source_detail=(1, 2, 3),
-    ),
-    "2b": PredictionMethod(
-        category="2b",
-        family="geometrical",
-        rooms=(
-            "rooms that can be approximated by one mean absorption coefficient "
-            "for each room surface and one mean density for the fittings in "
-            "each zone"
+        "2a": PredictionMethod(
+            category="2a",
+            family="geometrical",
+            rooms=(
+                "rooms that can be approximated by one mean absorption coefficient "
+                "for each wall and one mean density for the fittings"
+            ),
+            room_detail=(1, 2),
+            fitting_detail=(1, 2),
+            source_detail=(1, 2, 3),
         ),
-        room_detail=(1, 2, 3),
-        fitting_detail=(1, 2, 3),
-        source_detail=(1, 2, 3),
-    ),
-    "2c": PredictionMethod(
-        category="2c",
-        family="geometrical",
-        rooms=(
-            "rooms for which the individual distribution of absorption and "
-            "fittings has to be considered"
+        "2b": PredictionMethod(
+            category="2b",
+            family="geometrical",
+            rooms=(
+                "rooms that can be approximated by one mean absorption coefficient "
+                "for each room surface and one mean density for the fittings in "
+                "each zone"
+            ),
+            room_detail=(1, 2, 3),
+            fitting_detail=(1, 2, 3),
+            source_detail=(1, 2, 3),
         ),
-        room_detail=(1, 2, 3, 4),
-        fitting_detail=(1, 2, 3, 4),
-        source_detail=(1, 2, 3),
-    ),
-}
+        "2c": PredictionMethod(
+            category="2c",
+            family="geometrical",
+            rooms=(
+                "rooms for which the individual distribution of absorption and "
+                "fittings has to be considered"
+            ),
+            room_detail=(1, 2, 3, 4),
+            fitting_detail=(1, 2, 3, 4),
+            source_detail=(1, 2, 3),
+        ),
+    }
+)
 
 #: Table E.1 on its own, as the level ranges keyed by category.
-RECOMMENDED_DETAIL: dict[
+RECOMMENDED_DETAIL: Mapping[
     str, tuple[tuple[int, ...], tuple[int, ...], tuple[int, ...]]
-] = {
-    key: (method.room_detail, method.fitting_detail, method.source_detail)
-    for key, method in PREDICTION_METHODS.items()
-}
+] = MappingProxyType(
+    {
+        key: (method.room_detail, method.fitting_detail, method.source_detail)
+        for key, method in PREDICTION_METHODS.items()
+    }
+)
 
 
 @dataclass(frozen=True)
@@ -274,7 +289,7 @@ def detail_is_sufficient(
     )
 
 
-def _require_level(value: int, table: dict[int, str], name: str, number: int) -> int:
+def _require_level(value: int, table: Mapping[int, str], name: str, number: int) -> int:
     """A level of detail that one of Tables 1 to 3 actually prints."""
     if value not in table:
         printed = ", ".join(str(key) for key in sorted(table))

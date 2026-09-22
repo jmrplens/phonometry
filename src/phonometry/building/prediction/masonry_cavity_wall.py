@@ -78,6 +78,7 @@ stays on the rigid ceiling for another two octaves.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from types import MappingProxyType
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -91,6 +92,8 @@ from ..._internal.validation import (
 from ...vibration.structural.point_mobility import infinite_plate_mobility
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
@@ -112,12 +115,14 @@ __all__ = [
 #: is a property of the tie *at that cavity width*: the same vertical-twist
 #: design measures 94,0 MN/m at 50 mm and 43,4 MN/m at 100 mm, so pass the
 #: matching ``gap`` to the double-wall functions.
-WALL_TIE_STIFFNESS: dict[str, tuple[float, float]] = {
-    "butterfly": (0.050, 1.7e6),
-    "double_triangle": (0.050, 16.1e6),
-    "vertical_twist": (0.050, 94.0e6),
-    "vertical_twist_100mm": (0.100, 43.4e6),
-}
+WALL_TIE_STIFFNESS: Mapping[str, tuple[float, float]] = MappingProxyType(
+    {
+        "butterfly": (0.050, 1.7e6),
+        "double_triangle": (0.050, 16.1e6),
+        "vertical_twist": (0.050, 94.0e6),
+        "vertical_twist_100mm": (0.100, 43.4e6),
+    }
+)
 
 
 def wall_tie_stiffness(tie: str) -> tuple[float, float]:

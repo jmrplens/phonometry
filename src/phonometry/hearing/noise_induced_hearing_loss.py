@@ -29,6 +29,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
+from .._internal.frozen import read_only
 from .._internal.validation import (
     check_engine,
     require_finite_fields,
@@ -50,8 +51,8 @@ if TYPE_CHECKING:
 # ---------------------------------------------------------------------------
 
 #: Audiometric frequencies of ISO 1999, in hertz (clause 6.3.1, Table 1).
-NIPTS_FREQUENCIES: np.ndarray = np.array(
-    [500.0, 1000.0, 2000.0, 3000.0, 4000.0, 6000.0], dtype=np.float64
+NIPTS_FREQUENCIES: np.ndarray = read_only(
+    np.array([500.0, 1000.0, 2000.0, 3000.0, 4000.0, 6000.0], dtype=np.float64)
 )
 
 #: Table 1 columns ``u``, ``v`` and ``L0`` (dB) for the median NIPTS N50.

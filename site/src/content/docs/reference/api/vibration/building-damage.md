@@ -333,7 +333,7 @@ number for all frequencies, and *frequency* is then not needed.
 
 ## LONG_TERM_TOP_FLOOR_MM_S
 
-*Constant* (`dict`).
+*Constant* (`mappingproxy`).
 
 ```python
 LONG_TERM_TOP_FLOOR_MM_S = {'commercial': 10.0, 'residential': 5.0, 'sensitive': 2.5}
@@ -396,7 +396,7 @@ PIPELINE_MATERIALS = ('welded_steel', 'concrete_or_flanged_metal', 'masonry_or_p
 
 ## PIPELINE_MM_S
 
-*Constant* (`dict`).
+*Constant* (`mappingproxy`).
 
 ```python
 PIPELINE_MM_S = {'welded_steel': 100.0, 'concrete_or_flanged_metal': 80.0, 'masonry_or_plastic': 50.0}
@@ -404,7 +404,7 @@ PIPELINE_MM_S = {'welded_steel': 100.0, 'concrete_or_flanged_metal': 80.0, 'maso
 
 ## SHORT_TERM_FOUNDATION_MM_S
 
-*Constant* (`dict`).
+*Constant* (`mappingproxy`).
 
 ```python
 SHORT_TERM_FOUNDATION_MM_S = {'commercial': (20.0, 20.0, 40.0, 50.0), 'residential': (5.0, 5.0, 15.0, 20.0), 'sensitive': (3.0, 3.0, 8.0, 10.0)}
@@ -412,7 +412,7 @@ SHORT_TERM_FOUNDATION_MM_S = {'commercial': (20.0, 20.0, 40.0, 50.0), 'residenti
 
 ## SHORT_TERM_TOP_FLOOR_MM_S
 
-*Constant* (`dict`).
+*Constant* (`mappingproxy`).
 
 ```python
 SHORT_TERM_TOP_FLOOR_MM_S = {'commercial': 40.0, 'residential': 15.0, 'sensitive': 8.0}

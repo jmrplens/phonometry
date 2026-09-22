@@ -90,10 +90,10 @@ FLOOR_NATURAL_FREQUENCIES_HZ = (8.0, 10.0, 12.5, 16.0, 20.0, 25.0, 31.5, 40.0, 5
 
 ## FOUNDATION_TO_FLOOR_DB
 
-*Constant* (`dict`).
+*Constant* (`mappingproxy`).
 
 ```python
-FOUNDATION_TO_FLOOR_DB = {'concrete': {'lower': (-1.52, -1.53, -1.74, -2.42, -2.63, -1.89, -1.81, -1.73, -1.27, -0.72, 0.02, 1.43, 6.05, 9.78, 4.52, 0.12, -3.27, -4.14, -5.29, -1.96, -1.38, nan, nan), 'mean': (0.29, 0.93, 0.72, 1.09, 0.98, 1.62, 1.6, 2.06, 2.52, 3.26, 4.19, 6.35, 9.94, 17.26, 9.85, 4.41, 3.27, 3.25, 1.42, 3.89, 2.83, nan, nan), 'upper': (2.37, 4.16, 3.85, 5.17, 5.15, 5.51, 5.49, 6.42, 6.88, 7.24, 8.74, 11.76, 17.46, 24.23, 17.07, 11.11, 10.23, 10.21, 8.38, 10.25, 7.9, nan, nan)}, 'timber': {'lower': (nan, nan, 0.64, 1.05, 0.52, 1.87, 2.37, 2.45, 2.6, 2.76, 3.43, 5.98, 8.62, 15.29, 9.88, 6.26, 5.13, 5.28, 5.26, 5.42, 7.63, nan, nan), 'mean': (nan, nan, nan, nan, 3.14, 3.06, 2.19, 4.87, 6.55, 7.74, 8.29, 10.47, 17.4, 21.93, 14.81, 11.54, 9.54, 5.4, 3.55, 3.24, 3.01, 3.35, 1.85), 'upper': (nan, nan, nan, nan, nan, nan, nan, 8.1, 11.09, 14.84, 15.68, 16.61, 23.36, 28.84, 22.39, 18.26, 15.24, 14.03, 10.07, 6.88, 5.4, nan, nan)}}
+FOUNDATION_TO_FLOOR_DB = {'concrete': mappingproxy({'lower': (-1.52, -1.53, -1.74, -2.42, -2.63, -1.89, -1.81, -1.73, -1.27, -0.72, 0.02, 1.43, 6.05, 9.78, 4.52, 0.12, -3.27, -4.14, -5.29, -1.96, -1.38, nan, nan), 'mean': (0.29, 0.93, 0.72, 1.09, 0.98, 1.62, 1.6, 2.06, 2.52, 3.26, 4.19, 6.35, 9.94, 17.26, 9.85, 4.41, 3.27, 3.25, 1.42, 3.89, 2.83, nan, nan), 'upper': (2.37, 4.16, 3.85, 5.17, 5.15, 5.51, 5.49, 6.42, 6.88, 7.24, 8.74, 11.76, 17.46, 24.23, 17.07, 11.11, 10.23, 10.21, 8.38, 10.25, 7.9, nan, nan)}), 'timber': mappingproxy({'lower': (nan, nan, 0.64, 1.05, 0.52, 1.87, 2.37, 2.45, 2.6, 2.76, 3.43, 5.98, 8.62, 15.29, 9.88, 6.26, 5.13, 5.28, 5.26, 5.42, 7.63, nan, nan), 'mean': (nan, nan, nan, nan, 3.14, 3.06, 2.19, 4.87, 6.55, 7.74, 8.29, 10.47, 17.4, 21.93, 14.81, 11.54, 9.54, 5.4, 3.55, 3.24, 3.01, 3.35, 1.85), 'upper': (nan, nan, nan, nan, nan, nan, nan, 8.1, 11.09, 14.84, 15.68, 16.61, 23.36, 28.84, 22.39, 18.26, 15.24, 14.03, 10.07, 6.88, 5.4, nan, nan)})}
 ```
 
 ## FOUNDATION_TO_FLOOR_RATIOS
@@ -186,7 +186,7 @@ how it is computed here.
 
 ## GROUND_TO_FLOOR_DB
 
-*Constant* (`dict`).
+*Constant* (`mappingproxy`).
 
 ## ground_to_floor_transfer_db
 
@@ -226,10 +226,10 @@ overestimates considerably.
 
 ## GROUND_TO_FOUNDATION_DB
 
-*Constant* (`dict`).
+*Constant* (`mappingproxy`).
 
 ```python
-GROUND_TO_FOUNDATION_DB = {'basement': {'lower': (-9.1, -8.2, -8.3, -8.7, -8.2, -8.3, -9.5, -12.5, -14.7, -15.6, -14.5, -13.1, -12.4, -11.6), 'mean': (-4.0, -3.5, -3.6, -4.2, -4.2, -3.8, -4.6, -6.0, -8.2, -9.3, -7.4, -5.1, -4.4, -4.2), 'upper': (1.0, 1.5, 1.1, 0.3, 0.1, 0.4, 0.3, -0.4, -2.1, -2.7, -0.1, 3.0, 3.4, 3.1)}, 'ground_floor': {'lower': (-8.3, -7.0, -7.5, -6.4, -4.6, -4.3, -6.3, -7.0, -9.1, -10.7, -11.3, -10.0, -11.2, -9.8), 'mean': (-3.2, -3.0, -3.9, -3.0, -2.2, -1.9, -3.1, -4.2, -5.8, -6.4, -5.7, -4.9, -5.3, -4.7), 'upper': (1.7, 1.1, 0.0, 0.3, -0.5, 0.4, -0.4, -1.4, -1.8, -2.5, -0.7, 0.3, 0.4, 0.8)}}
+GROUND_TO_FOUNDATION_DB = {'basement': mappingproxy({'lower': (-9.1, -8.2, -8.3, -8.7, -8.2, -8.3, -9.5, -12.5, -14.7, -15.6, -14.5, -13.1, -12.4, -11.6), 'mean': (-4.0, -3.5, -3.6, -4.2, -4.2, -3.8, -4.6, -6.0, -8.2, -9.3, -7.4, -5.1, -4.4, -4.2), 'upper': (1.0, 1.5, 1.1, 0.3, 0.1, 0.4, 0.3, -0.4, -2.1, -2.7, -0.1, 3.0, 3.4, 3.1)}), 'ground_floor': mappingproxy({'lower': (-8.3, -7.0, -7.5, -6.4, -4.6, -4.3, -6.3, -7.0, -9.1, -10.7, -11.3, -10.0, -11.2, -9.8), 'mean': (-3.2, -3.0, -3.9, -3.0, -2.2, -1.9, -3.1, -4.2, -5.8, -6.4, -5.7, -4.9, -5.3, -4.7), 'upper': (1.7, 1.1, 0.0, 0.3, -0.5, 0.4, -0.4, -1.4, -1.8, -2.5, -0.7, 0.3, 0.4, 0.8)})}
 ```
 
 ## ground_to_foundation_transfer_db
@@ -353,7 +353,7 @@ not weighted by the table and are refused.
 
 ## KB_WEIGHTING_TABLE_DB
 
-*Constant* (`dict`).
+*Constant* (`mappingproxy`).
 
 ```python
 KB_WEIGHTING_TABLE_DB = {4.0: -4.7, 5.0: -3.5, 6.3: -2.5, 8.0: -1.7, 10.0: -1.2, 12.5: -0.8, 16.0: -0.5, 20.0: -0.3, 25.0: -0.2, 31.5: -0.1, 40.0: -0.1, 50.0: -0.1, 63.0: 0.0, 80.0: 0.0}
@@ -395,7 +395,7 @@ Formula (B.1).
 
 ## LINE_SOURCE_EXPONENT_CORRECTION
 
-*Constant* (`dict`).
+*Constant* (`mappingproxy`).
 
 ```python
 LINE_SOURCE_EXPONENT_CORRECTION = {'power_and_damping': 0.3, 'power_law': 0.5}
@@ -565,10 +565,10 @@ PREDICTION_BAND_CENTRES_HZ = (4.0, 5.0, 6.3, 8.0, 10.0, 12.5, 16.0, 20.0, 25.0, 
 
 ## RECOMMENDED_DISTANCES_M
 
-*Constant* (`dict`).
+*Constant* (`mappingproxy`).
 
 ```python
-RECOMMENDED_DISTANCES_M = {'freight_soft_soil': {'tunnel': None, 'surface': 200.0}, 'mainline': {'tunnel': 30.0, 'surface': 60.0}, 's_bahn': {'tunnel': 20.0, 'surface': 40.0}, 'urban': {'tunnel': 20.0, 'surface': 25.0}}
+RECOMMENDED_DISTANCES_M = {'freight_soft_soil': mappingproxy({'tunnel': None, 'surface': 200.0}), 'mainline': mappingproxy({'tunnel': 30.0, 'surface': 60.0}), 's_bahn': mappingproxy({'tunnel': 20.0, 'surface': 40.0}), 'urban': mappingproxy({'tunnel': 20.0, 'surface': 25.0})}
 ```
 
 ## rescale_emission_for_speed

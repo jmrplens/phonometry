@@ -59,6 +59,7 @@ from __future__ import annotations
 import math
 import warnings
 from dataclasses import KW_ONLY, dataclass
+from types import MappingProxyType
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -70,6 +71,8 @@ from .._internal.validation import (
 from .._internal.warnings import PhonometryWarning
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
+    from collections.abc import Mapping
+
     from numpy.typing import NDArray
 
 __all__ = [
@@ -130,7 +133,7 @@ __all__ = [
 #: 1 % apart rather than identical: 4,9/4,6 is 1,065 where the exact
 #: :math:`K_v` to :math:`C_v` conversion asks for :math:`\sqrt{1{,}156}`,
 #: which is 1,075.
-FLOW_COEFFICIENT_CONSTANTS = {"Cv": 4.6e-3, "Kv": 4.9e-3}
+FLOW_COEFFICIENT_CONSTANTS = MappingProxyType({"Cv": 4.6e-3, "Kv": 4.9e-3})
 
 #: The universal gas constant as the standard prints it in Clause 4, in
 #: J/(kmol K). It is paired with a molecular mass in kg/kmol, which is the
@@ -143,21 +146,23 @@ UNIVERSAL_GAS_CONSTANT = 8314.0
 #: them. NOTE 1 of the table calls these typical only; a manufacturer states
 #: the actual pair, and this module takes them as arguments rather than
 #: looking them up, so the table is here to be read and not to be relied on.
-VALVE_ACOUSTIC_STYLES: dict[str, tuple[float, float]] = {
-    "globe parabolic plug": (-4.2, 0.19),
-    "globe V-port plug": (-4.2, 0.19),
-    "globe ported cage": (-3.8, 0.2),
-    "globe multihole to open": (-4.8, 0.2),
-    "globe multihole to close": (-4.4, 0.2),
-    "butterfly eccentric": (-4.2, 0.3),
-    "butterfly swing-through": (-4.2, 0.3),
-    "butterfly fluted vane": (-4.2, 0.3),
-    "butterfly 60 deg flat disk": (-4.2, 0.3),
-    "eccentric rotary plug": (-3.6, 0.3),
-    "segmented ball 90 deg": (-3.6, 0.3),
-    "drilled hole plate": (-4.8, 0.2),
-    "expander": (-3.0, 0.2),
-}
+VALVE_ACOUSTIC_STYLES: Mapping[str, tuple[float, float]] = MappingProxyType(
+    {
+        "globe parabolic plug": (-4.2, 0.19),
+        "globe V-port plug": (-4.2, 0.19),
+        "globe ported cage": (-3.8, 0.2),
+        "globe multihole to open": (-4.8, 0.2),
+        "globe multihole to close": (-4.4, 0.2),
+        "butterfly eccentric": (-4.2, 0.3),
+        "butterfly swing-through": (-4.2, 0.3),
+        "butterfly fluted vane": (-4.2, 0.3),
+        "butterfly 60 deg flat disk": (-4.2, 0.3),
+        "eccentric rotary plug": (-3.6, 0.3),
+        "segmented ball 90 deg": (-3.6, 0.3),
+        "drilled hole plate": (-4.8, 0.2),
+        "expander": (-3.0, 0.2),
+    }
+)
 
 #: Speed of sound in air of NOTE 3 to Equations (22) and (23), in m/s. It is
 #: the value the coincidence frequencies are printed for, not a property of
@@ -192,7 +197,7 @@ PIPE_WALL_MACH_LIMIT = 0.3
 #: the coefficient wanted. It is the reciprocal of an area per unit
 #: coefficient, so the two figures differ by the same conversion as
 #: :data:`FLOW_COEFFICIENT_CONSTANTS`.
-LAST_STAGE_AREA_CONSTANTS = {"Cv": 4.89e4, "Kv": 4.23e4}
+LAST_STAGE_AREA_CONSTANTS = MappingProxyType({"Cv": 4.89e4, "Kv": 4.23e4})
 
 #: Equation (28a)'s printed constant, which is what makes the first branch of
 #: NOTE 3 differ from a plain quadrature sum.

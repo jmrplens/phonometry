@@ -79,6 +79,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
+from types import MappingProxyType
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -94,6 +95,8 @@ from .railway import VELOCITY_LEVEL_REFERENCE_MM_S, band_sum_level
 from .train_categories import TRAIN_KB_FMAX_FACTOR
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
+    from collections.abc import Mapping
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
@@ -148,22 +151,24 @@ KB_ASSESSMENT_BANDS_HZ: tuple[float, float] = (4.0, 80.0)
 #: :math:`10 \lg (1 / (1 + (5{,}6\ \mathrm{Hz} / f)^2))` rounded to a tenth:
 #: the weighting alone, without the band limitation of the meter, whose
 #: place the draft's limit of the sum to the bands from 4 Hz to 80 Hz takes.
-KB_WEIGHTING_TABLE_DB: dict[float, float] = {
-    4.0: -4.7,
-    5.0: -3.5,
-    6.3: -2.5,
-    8.0: -1.7,
-    10.0: -1.2,
-    12.5: -0.8,
-    16.0: -0.5,
-    20.0: -0.3,
-    25.0: -0.2,
-    31.5: -0.1,
-    40.0: -0.1,
-    50.0: -0.1,
-    63.0: 0.0,
-    80.0: 0.0,
-}
+KB_WEIGHTING_TABLE_DB: Mapping[float, float] = MappingProxyType(
+    {
+        4.0: -4.7,
+        5.0: -3.5,
+        6.3: -2.5,
+        8.0: -1.7,
+        10.0: -1.2,
+        12.5: -0.8,
+        16.0: -0.5,
+        20.0: -0.3,
+        25.0: -0.2,
+        31.5: -0.1,
+        40.0: -0.1,
+        50.0: -0.1,
+        63.0: 0.0,
+        80.0: 0.0,
+    }
+)
 
 #: Table 1 (printed page 8): the distance from the line, in metres, within
 #: which the guide values of DIN 4150-2 are found exceeded by experience and
@@ -171,12 +176,14 @@ KB_WEIGHTING_TABLE_DB: dict[float, float] = {
 #: a tunnel or on the surface. The tunnel distance is from the foundation to
 #: the outer contour of the tunnel. Freight in a tunnel has no experience
 #: behind it and is ``None``; freight on the surface is the soft-soil case.
-RECOMMENDED_DISTANCES_M: dict[str, dict[str, float | None]] = {
-    "freight_soft_soil": {"tunnel": None, "surface": 200.0},
-    "mainline": {"tunnel": 30.0, "surface": 60.0},
-    "s_bahn": {"tunnel": 20.0, "surface": 40.0},
-    "urban": {"tunnel": 20.0, "surface": 25.0},
-}
+RECOMMENDED_DISTANCES_M: Mapping[str, Mapping[str, float | None]] = MappingProxyType(
+    {
+        "freight_soft_soil": MappingProxyType({"tunnel": None, "surface": 200.0}),
+        "mainline": MappingProxyType({"tunnel": 30.0, "surface": 60.0}),
+        "s_bahn": MappingProxyType({"tunnel": 20.0, "surface": 40.0}),
+        "urban": MappingProxyType({"tunnel": 20.0, "surface": 25.0}),
+    }
+)
 
 #: The exponent :math:`n` of Formula (5) that surface rail traffic usually
 #: takes, frequency-independent, 0,2 to 0,4 (Clause 5.3).
@@ -199,10 +206,12 @@ PEAK_VELOCITY_FACTOR: float = 3.0
 #: to get the exponent of a train, up to the transition distance of Formula
 #: (B.1): 0,3 when the point fit separated spreading and damping (Formula
 #: (5)), 0,5 when it lumped both into a power law (Formula (6)).
-LINE_SOURCE_EXPONENT_CORRECTION: dict[str, float] = {
-    "power_and_damping": 0.3,
-    "power_law": 0.5,
-}
+LINE_SOURCE_EXPONENT_CORRECTION: Mapping[str, float] = MappingProxyType(
+    {
+        "power_and_damping": 0.3,
+        "power_law": 0.5,
+    }
+)
 
 #: The natural frequencies of a floor Tables A.1 and A.2 give a column for,
 #: in hertz; the print writes the tenth as 62,5.
@@ -215,8 +224,8 @@ FLOOR_NATURAL_FREQUENCIES_HZ: tuple[float, ...] = (
 #: building with concrete floors and one with timber floors, by the natural
 #: frequency of the floor (the key) and along :data:`PREDICTION_BAND_CENTRES_HZ`.
 #: Valid for every storey. From building measurements, not a formula.
-GROUND_TO_FLOOR_DB: dict[str, dict[float, tuple[float, ...]]] = {
-    "concrete": {
+GROUND_TO_FLOOR_DB: Mapping[str, Mapping[float, tuple[float, ...]]] = MappingProxyType({
+    "concrete": MappingProxyType({
         8.0: (
             -0.51, 1.42, 6.88, 15.0, 5.87, 0.17, -1.26, -0.96, -2.58, -3.5, -3.47,
             -4.78, -5.0, -5.0, -5.0, -5.0, -5.0, -5.0, -5.0,
@@ -261,8 +270,8 @@ GROUND_TO_FLOOR_DB: dict[str, dict[float, tuple[float, ...]]] = {
             -2.5, -2.0, -1.63, -1.22, -1.25, -1.09, -1.02, -0.87, -0.94, -0.85,
             -0.32, 0.9, 4.36, 9.5, 3.72, 0.11, -0.8, -0.72, -1.94,
         ),
-    },
-    "timber": {
+    }),
+    "timber": MappingProxyType({
         8.0: (
             5.14, 7.55, 12.59, 20.0, 10.64, 4.36, 0.41, -2.25, -3.78, -4.6, -4.94,
             -5.0, -5.0, -5.0, -5.0, -5.0, -5.0, -5.0, -5.0,
@@ -307,16 +316,16 @@ GROUND_TO_FLOOR_DB: dict[str, dict[float, tuple[float, ...]]] = {
             -0.7, -0.5, -0.26, -0.24, -0.49, -0.41, -0.13, 0.62, 1.22, 1.88, 2.57,
             3.77, 6.29, 10.0, 5.32, 2.18, 0.2, -1.13, -1.35,
         ),
-    },
-}  # fmt: skip
+    }),
+})  # fmt: skip
 
 #: Tables A.3 and A.4 (printed pages 26 and 27): the level difference
 #: :math:`\Delta L_{v,FB}` from the ground into the foundation, in decibels,
 #: for a basement and for a ground floor, as a mean over the buildings
 #: measured with the deviation either way, along the 14 bands from 4 Hz to
 #: 80 Hz. The print writes the 12,5 Hz row as 12.
-GROUND_TO_FOUNDATION_DB: dict[str, dict[str, tuple[float, ...]]] = {
-    "basement": {
+GROUND_TO_FOUNDATION_DB: Mapping[str, Mapping[str, tuple[float, ...]]] = MappingProxyType({
+    "basement": MappingProxyType({
         "lower": (
             -9.1, -8.2, -8.3, -8.7, -8.2, -8.3, -9.5, -12.5, -14.7, -15.6, -14.5,
             -13.1, -12.4, -11.6,
@@ -329,8 +338,8 @@ GROUND_TO_FOUNDATION_DB: dict[str, dict[str, tuple[float, ...]]] = {
             1.0, 1.5, 1.1, 0.3, 0.1, 0.4, 0.3, -0.4, -2.1, -2.7, -0.1, 3.0, 3.4,
             3.1,
         ),
-    },
-    "ground_floor": {
+    }),
+    "ground_floor": MappingProxyType({
         "lower": (
             -8.3, -7.0, -7.5, -6.4, -4.6, -4.3, -6.3, -7.0, -9.1, -10.7, -11.3,
             -10.0, -11.2, -9.8,
@@ -343,8 +352,8 @@ GROUND_TO_FOUNDATION_DB: dict[str, dict[str, tuple[float, ...]]] = {
             1.7, 1.1, 0.0, 0.3, -0.5, 0.4, -0.4, -1.4, -1.8, -2.5, -0.7, 0.3, 0.4,
             0.8,
         ),
-    },
-}  # fmt: skip
+    }),
+})  # fmt: skip
 
 #: The ratios :math:`f_{Tn} / f_e` of the band to the natural frequency of
 #: the floor that Tables A.5 and A.6 tabulate, on the third-octave grid from
@@ -362,8 +371,8 @@ FOUNDATION_TO_FLOOR_RATIOS: tuple[float, ...] = (
 #: at 0,08 and its mean alone reaches 8. The timber table prints its lower
 #: deviation above its mean at the ratios 0,2, 3,15, 4 and 5, and above its
 #: upper one at 5, so no order between the three is enforced.
-FOUNDATION_TO_FLOOR_DB: dict[str, dict[str, tuple[float, ...]]] = {
-    "concrete": {
+FOUNDATION_TO_FLOOR_DB: Mapping[str, Mapping[str, tuple[float, ...]]] = MappingProxyType({
+    "concrete": MappingProxyType({
         "lower": (
             -1.52, -1.53, -1.74, -2.42, -2.63, -1.89, -1.81, -1.73, -1.27, -0.72,
             0.02, 1.43, 6.05, 9.78, 4.52, 0.12, -3.27, -4.14, -5.29, -1.96, -1.38,
@@ -379,8 +388,8 @@ FOUNDATION_TO_FLOOR_DB: dict[str, dict[str, tuple[float, ...]]] = {
             11.76, 17.46, 24.23, 17.07, 11.11, 10.23, 10.21, 8.38, 10.25, 7.9,
             math.nan, math.nan,
         ),
-    },
-    "timber": {
+    }),
+    "timber": MappingProxyType({
         "lower": (
             math.nan, math.nan, 0.64, 1.05, 0.52, 1.87, 2.37, 2.45, 2.6, 2.76,
             3.43, 5.98, 8.62, 15.29, 9.88, 6.26, 5.13, 5.28, 5.26, 5.42, 7.63,
@@ -396,8 +405,8 @@ FOUNDATION_TO_FLOOR_DB: dict[str, dict[str, tuple[float, ...]]] = {
             8.1, 11.09, 14.84, 15.68, 16.61, 23.36, 28.84, 22.39, 18.26, 15.24,
             14.03, 10.07, 6.88, 5.4, math.nan, math.nan,
         ),
-    },
-}  # fmt: skip
+    }),
+})  # fmt: skip
 
 _FLOORS = tuple(GROUND_TO_FLOOR_DB)
 _LEVELS = tuple(GROUND_TO_FOUNDATION_DB)

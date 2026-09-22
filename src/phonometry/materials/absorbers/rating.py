@@ -50,6 +50,7 @@ from __future__ import annotations
 import math
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
+from types import MappingProxyType
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -105,13 +106,15 @@ THIRD_OCTAVE_BANDS: tuple[int, ...] = (
 )
 
 #: Reference absorption curve, Figure 1 (Clause 4.2), per octave band.
-REFERENCE_CURVE: dict[int, float] = {
-    250: 0.80,
-    500: 1.00,
-    1000: 1.00,
-    2000: 1.00,
-    4000: 0.90,
-}
+REFERENCE_CURVE: Mapping[int, float] = MappingProxyType(
+    {
+        250: 0.80,
+        500: 1.00,
+        1000: 1.00,
+        2000: 1.00,
+        4000: 0.90,
+    }
+)
 
 #: Index of the 500 Hz band, where ``alpha_w`` is read (Clause 4.2).
 _INDEX_500 = 1

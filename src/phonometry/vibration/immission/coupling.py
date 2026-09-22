@@ -40,12 +40,17 @@ list of disturbances are text, and so is the coupling to the ground, where
 from __future__ import annotations
 
 from dataclasses import dataclass
+from types import MappingProxyType
+from typing import TYPE_CHECKING
 
 from ..._internal.validation import (
     require_choice,
     require_non_negative,
     require_positive,
 )
+
+if TYPE_CHECKING:
+    from collections.abc import Mapping
 
 __all__ = [
     "CLEARANCE_TO_DISTURBING_BODY_FACTOR",
@@ -67,7 +72,9 @@ __all__ = [
 #: without falsification, in hertz, by measuring direction (5.3.2.1, 5.3.2.2,
 #: 5.3.3.1, 5.3.3.2): 100 Hz vertically, 40 Hz horizontally, on a hard surface
 #: and on a soft covering alike.
-LOOSE_MOUNTING_LIMITS_HZ: dict[str, float] = {"vertical": 100.0, "horizontal": 40.0}
+LOOSE_MOUNTING_LIMITS_HZ: Mapping[str, float] = MappingProxyType(
+    {"vertical": 100.0, "horizontal": 40.0}
+)
 
 #: The peak acceleration, in metres per second squared, up to which a loose
 #: transducer neither lifts off nor walks (5.3.2.1): 3 m/s² in every direction.
@@ -90,10 +97,14 @@ MASS_LOADING_RATIO_LIMIT: float = 0.01
 #: quantity, in per cent, as ``(class 1, class 2)``, for a value based on an
 #: r.m.s. and for a peak. The 2010 edition of DIN 45669-1 no longer
 #: distinguishes the two classes.
-INSTRUMENT_CONFIDENCE_LIMITS_PERCENT: dict[str, tuple[float, float]] = {
-    "rms": (15.0, 25.0),
-    "peak": (20.0, 35.0),
-}
+INSTRUMENT_CONFIDENCE_LIMITS_PERCENT: Mapping[str, tuple[float, float]] = (
+    MappingProxyType(
+        {
+            "rms": (15.0, 25.0),
+            "peak": (20.0, 35.0),
+        }
+    )
+)
 
 #: How far the coupling of a transducer to the ground alone may move the
 #: reading, in decibels (5.3.4.1), which the clause glosses as a factor of 5 in

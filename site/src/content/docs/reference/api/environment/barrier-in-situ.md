@@ -113,7 +113,7 @@ CLOSE_SOURCE_DISTANCE_M = 15.0
 
 ## CLOUD_COVER_CLASSES
 
-*Constant* (`dict`).
+*Constant* (`mappingproxy`).
 
 ```python
 CLOUD_COVER_CLASSES = {1: 'heavily overcast day or night, 80 % cloud cover or more for 100 % of the measurement time', 2: 'moderately overcast day or night, 50 % to 80 % cloud cover for at least 80 % of the measurement time', 3: 'lightly overcast or sunny day or night, either continuous sun or less than 50 % cloud cover for at least 80 % of the measurement time', 4: 'clear night'}
@@ -228,7 +228,7 @@ distance.
 
 ## ISO10847_BACKGROUND_CORRECTIONS_DB
 
-*Constant* (`dict`).
+*Constant* (`mappingproxy`).
 
 ```python
 ISO10847_BACKGROUND_CORRECTIONS_DB = {4: -2.0, 5: -2.0, 6: -1.0, 7: -1.0, 8: -1.0, 9: -1.0}
@@ -510,7 +510,7 @@ POINT_SOURCE_DIVERGENCE_DB = 6.0
 
 ## RECEIVER_CORRECTIONS_DB
 
-*Constant* (`dict`).
+*Constant* (`mappingproxy`).
 
 ```python
 RECEIVER_CORRECTIONS_DB = {'hemi_free_field': 0.0, 'reflecting_surface': 6.0}
@@ -649,10 +649,10 @@ made at all, which is a refusal rather than a class.
 
 ## WIND_CLASSES
 
-*Constant* (`dict`).
+*Constant* (`mappingproxy`).
 
 ```python
-WIND_CLASSES = {'all': {'downwind': (1.0, 5.0), 'calm': (-1.0, 1.0)}, 'short': {'downwind': (1.0, 5.0), 'calm': (-1.0, 1.0), 'upwind': (-5.0, -1.0)}}
+WIND_CLASSES = {'all': mappingproxy({'downwind': (1.0, 5.0), 'calm': (-1.0, 1.0)}), 'short': mappingproxy({'downwind': (1.0, 5.0), 'calm': (-1.0, 1.0), 'upwind': (-5.0, -1.0)})}
 ```
 
 ## WIND_VECTOR_TOLERANCE_M_S

@@ -89,6 +89,7 @@ from __future__ import annotations
 import math
 import warnings
 from dataclasses import dataclass
+from types import MappingProxyType
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -102,6 +103,8 @@ from .._internal.validation import (
 from .._internal.warnings import PhonometryWarning
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
+    from collections.abc import Mapping
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
@@ -165,14 +168,16 @@ DECADE_TO_DOUBLING: float = 0.3
 
 #: Table 1: the A-weighted pink-noise spectrum of 4.2.3, in decibels, by
 #: nominal octave centre frequency in hertz.
-PINK_NOISE_WEIGHTS_DB: dict[float, float] = {
-    125.0: -16.1,
-    250.0: -8.6,
-    500.0: -3.2,
-    1000.0: 0.0,
-    2000.0: 1.2,
-    4000.0: 1.0,
-}
+PINK_NOISE_WEIGHTS_DB: Mapping[float, float] = MappingProxyType(
+    {
+        125.0: -16.1,
+        250.0: -8.6,
+        500.0: -3.2,
+        1000.0: 0.0,
+        2000.0: 1.2,
+        4000.0: 1.0,
+    }
+)
 
 #: The six octave bands Table 1 covers, in hertz.
 SPATIAL_DECAY_BANDS_HZ: tuple[float, ...] = tuple(PINK_NOISE_WEIGHTS_DB)
@@ -202,11 +207,13 @@ TYPICAL_FAR_LIMIT_M: float = 16.0
 PREFERRED_MIDDLE_LIMIT_M: float = 24.0
 
 #: 6.4.3: the conventional distance each region is read at, in metres.
-EVALUATION_DISTANCES_M: dict[str, float] = {
-    "near": 4.0,
-    "middle": 10.0,
-    "far": 30.0,
-}
+EVALUATION_DISTANCES_M: Mapping[str, float] = MappingProxyType(
+    {
+        "near": 4.0,
+        "middle": 10.0,
+        "far": 30.0,
+    }
+)
 
 #: 5.1.3: the acoustical centre stands at least this far from any wall or
 #: reflecting object other than the floor, in metres.
@@ -275,10 +282,12 @@ _MISMATCH_MSG = (
 
 #: A.4: the repeatability tolerance on the source's sound power, in decibels,
 #: keyed by the one-third-octave range it applies to, in hertz.
-STABILITY_TOLERANCE_DB: dict[tuple[float, float], float] = {
-    (100.0, 160.0): 1.0,
-    (200.0, 5000.0): 0.5,
-}
+STABILITY_TOLERANCE_DB: Mapping[tuple[float, float], float] = MappingProxyType(
+    {
+        (100.0, 160.0): 1.0,
+        (200.0, 5000.0): 0.5,
+    }
+)
 
 
 @dataclass(frozen=True)

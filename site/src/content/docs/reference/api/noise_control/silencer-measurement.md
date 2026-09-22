@@ -356,7 +356,7 @@ ISO7235_GAS_CONSTANT = 287.0
 
 ## ISO7235_REPRODUCIBILITY
 
-*Constant* (`dict`).
+*Constant* (`mappingproxy`).
 
 ```python
 ISO7235_REPRODUCIBILITY = {'insertion_loss': ((100.0, 1.5), (500.0, 1.0), (1250.0, 2.0), (10000.0, 3.0)), 'transmission_loss': ((100.0, 3.0), (500.0, 3.0), (1250.0, 3.0), (10000.0, 3.0)), 'intensity': ((100.0, 3.0), (500.0, 1.5), (1250.0, 1.0), (5000.0, 1.0))}
@@ -941,7 +941,7 @@ of the fundamental method, $\Delta p_{tot,n} / p_{dn}$.
 
 ## RADIATION_SOLID_ANGLES
 
-*Constant* (`dict`).
+*Constant* (`mappingproxy`).
 
 ```python
 RADIATION_SOLID_ANGLES = {'A': 6.283185307179586, 'B': 3.141592653589793, 'C': 12.566370614359172, 'D': 6.283185307179586, 'E': 12.566370614359172}

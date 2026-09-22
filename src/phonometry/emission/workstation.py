@@ -103,6 +103,7 @@ from __future__ import annotations
 import math
 import warnings
 from dataclasses import KW_ONLY, dataclass
+from types import MappingProxyType
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -115,6 +116,8 @@ from .._internal.validation import (
 from ._shared import Grade, SoundPowerWarning, _check_grade
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
@@ -126,10 +129,12 @@ NEGLIGIBLE_BACKGROUND_MARGIN_DB = 15.0
 #: Smallest signal-to-background margin, in decibels, a result of each grade may
 #: be determined from. Below it the correction is clamped there and the level
 #: becomes an upper bound (ISO 11202:2010 6.4.1 and Annex B).
-MINIMUM_BACKGROUND_MARGIN_DB: dict[Grade, float] = {
-    "engineering": 6.0,
-    "survey": 3.0,
-}
+MINIMUM_BACKGROUND_MARGIN_DB: Mapping[Grade, float] = MappingProxyType(
+    {
+        "engineering": 6.0,
+        "survey": 3.0,
+    }
+)
 
 #: Largest local environmental correction, in decibels, that still earns
 #: accuracy grade 2. Above it the result is grade 3 (ISO 11202:2010 A.1.3, and

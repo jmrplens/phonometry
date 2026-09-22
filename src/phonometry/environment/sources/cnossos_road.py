@@ -50,6 +50,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
+from types import MappingProxyType
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -62,6 +63,8 @@ from ..._internal.validation import (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
 
@@ -432,27 +435,27 @@ class RoadEmissionCoefficients:
     :ivar temperature_k: ``K_m`` of (2.2.10), in dB per degree Celsius.
     """
 
-    rolling_a: dict[str, tuple[float, ...]]
-    rolling_b: dict[str, tuple[float, ...]]
-    propulsion_a: dict[str, tuple[float, ...]]
-    propulsion_b: dict[str, tuple[float, ...]]
+    rolling_a: Mapping[str, tuple[float, ...]]
+    rolling_b: Mapping[str, tuple[float, ...]]
+    propulsion_a: Mapping[str, tuple[float, ...]]
+    propulsion_b: Mapping[str, tuple[float, ...]]
     studded_a: tuple[float, ...]
     studded_b: tuple[float, ...]
-    junction_c: dict[str, tuple[tuple[float, float], tuple[float, float]]]
-    temperature_k: dict[str, float]
+    junction_c: Mapping[str, tuple[tuple[float, float], tuple[float, float]]]
+    temperature_k: Mapping[str, float]
 
 
 #: The Appendix F database of the consolidated Directive: Tables F-1 and F-4 as
 #: replaced by (EU) 2021/1226, Tables F-2 and F-3 as published in (EU) 2015/996.
 ROAD_COEFFICIENTS = RoadEmissionCoefficients(
-    rolling_a={k: v[0] for k, v in _TABLE_F1.items()},
-    rolling_b={k: v[1] for k, v in _TABLE_F1.items()},
-    propulsion_a={k: v[2] for k, v in _TABLE_F1.items()},
-    propulsion_b={k: v[3] for k, v in _TABLE_F1.items()},
+    rolling_a=MappingProxyType({k: v[0] for k, v in _TABLE_F1.items()}),
+    rolling_b=MappingProxyType({k: v[1] for k, v in _TABLE_F1.items()}),
+    propulsion_a=MappingProxyType({k: v[2] for k, v in _TABLE_F1.items()}),
+    propulsion_b=MappingProxyType({k: v[3] for k, v in _TABLE_F1.items()}),
     studded_a=_TABLE_F2_A,
     studded_b=_TABLE_F2_B,
-    junction_c=_TABLE_F3,
-    temperature_k=_TEMPERATURE_K,
+    junction_c=MappingProxyType(_TABLE_F3),
+    temperature_k=MappingProxyType(_TEMPERATURE_K),
 )
 
 

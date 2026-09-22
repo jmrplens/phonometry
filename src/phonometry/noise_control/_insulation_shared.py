@@ -17,6 +17,7 @@ for them.
 from __future__ import annotations
 
 import warnings
+from types import MappingProxyType
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -24,6 +25,8 @@ import numpy as np
 from .._internal.validation import require_choice, require_positive
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
+    from collections.abc import Mapping
+
     from numpy.typing import NDArray
 
     from .._internal.warnings import PhonometryWarning
@@ -38,17 +41,21 @@ __all__ = [
 #: The band range both standards require, by band fraction: 100 Hz to 5 kHz in
 #: one-third octaves, 125 Hz to 4 kHz in octaves. ISO 11546 states it in 6.2,
 #: ISO 11957 in 6.4 and again in 7.4.
-MANDATORY_BAND_RANGE_HZ: dict[int, tuple[float, float]] = {
-    3: (100.0, 5000.0),
-    1: (125.0, 4000.0),
-}
+MANDATORY_BAND_RANGE_HZ: Mapping[int, tuple[float, float]] = MappingProxyType(
+    {
+        3: (100.0, 5000.0),
+        1: (125.0, 4000.0),
+    }
+)
 
 #: The range both standards would rather have, by band fraction, from the note
 #: that follows the requirement in each.
-PREFERRED_BAND_RANGE_HZ: dict[int, tuple[float, float]] = {
-    3: (50.0, 10000.0),
-    1: (63.0, 8000.0),
-}
+PREFERRED_BAND_RANGE_HZ: Mapping[int, tuple[float, float]] = MappingProxyType(
+    {
+        3: (50.0, 10000.0),
+        1: (63.0, 8000.0),
+    }
+)
 
 #: The bands ISO 717-1 reads, by band fraction.
 _RATING_BANDS: dict[int, tuple[float, ...]] = {

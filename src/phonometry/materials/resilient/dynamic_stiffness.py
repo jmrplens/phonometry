@@ -67,11 +67,14 @@ from __future__ import annotations
 
 import warnings
 from dataclasses import dataclass
+from types import MappingProxyType
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
@@ -388,117 +391,119 @@ class ResilientLayer:
 #: these rows are the order of magnitude for when there is none, in the sense
 #: :data:`~phonometry.noise_control.ROOM_ABSORPTION_ESTIMATES` is for when
 #: nobody measured an absorption coefficient.
-PUBLISHED_RESILIENT_LAYERS: dict[str, ResilientLayer] = {
-    "closed_cell_polyethylene_foam_45_5": ResilientLayer(
-        name="Closed-cell polyethylene foam",
-        dynamic_stiffness_n_m3=115e6,
-        density_kg_m3=45.0,
-        thickness_mm=5.0,
-        source=_TABLE_A3,
-    ),
-    "expanded_polystyrene_14_50": ResilientLayer(
-        name="Expanded polystyrene",
-        dynamic_stiffness_n_m3=78e6,
-        density_kg_m3=14.0,
-        thickness_mm=50.0,
-        source=_TABLE_A3,
-    ),
-    "expanded_polystyrene_precompressed_10_50": ResilientLayer(
-        name="Expanded polystyrene, pre-compressed",
-        dynamic_stiffness_n_m3=68e6,
-        density_kg_m3=10.0,
-        thickness_mm=50.0,
-        source=_TABLE_A3,
-    ),
-    "mineral_wool_rock_60_30": ResilientLayer(
-        name=_MINERAL_WOOL_ROCK,
-        dynamic_stiffness_n_m3=10e6,
-        density_kg_m3=60.0,
-        thickness_mm=30.0,
-        source=_TABLE_A3,
-    ),
-    "mineral_wool_rock_80_30": ResilientLayer(
-        name=_MINERAL_WOOL_ROCK,
-        dynamic_stiffness_n_m3=11e6,
-        density_kg_m3=80.0,
-        thickness_mm=30.0,
-        source=_TABLE_A3,
-    ),
-    "mineral_wool_rock_100_30": ResilientLayer(
-        name=_MINERAL_WOOL_ROCK,
-        dynamic_stiffness_n_m3=14e6,
-        density_kg_m3=100.0,
-        thickness_mm=30.0,
-        source=_TABLE_A3,
-    ),
-    "mineral_wool_rock_140_30": ResilientLayer(
-        name=_MINERAL_WOOL_ROCK,
-        dynamic_stiffness_n_m3=19e6,
-        density_kg_m3=140.0,
-        thickness_mm=30.0,
-        source=_TABLE_A3,
-    ),
-    "mineral_wool_glass_36_13": ResilientLayer(
-        name=_MINERAL_WOOL_GLASS,
-        dynamic_stiffness_n_m3=28e6,
-        density_kg_m3=36.0,
-        thickness_mm=13.0,
-        source=_TABLE_A3,
-    ),
-    "mineral_wool_glass_36_25": ResilientLayer(
-        name=_MINERAL_WOOL_GLASS,
-        dynamic_stiffness_n_m3=11e6,
-        density_kg_m3=36.0,
-        thickness_mm=25.0,
-        source=_TABLE_A3,
-    ),
-    "mineral_wool_glass_75_25": ResilientLayer(
-        name=_MINERAL_WOOL_GLASS,
-        dynamic_stiffness_n_m3=12e6,
-        density_kg_m3=75.0,
-        thickness_mm=25.0,
-        source=_TABLE_A3,
-    ),
-    "mineral_wool_glass_75_40": ResilientLayer(
-        name=_MINERAL_WOOL_GLASS,
-        dynamic_stiffness_n_m3=7e6,
-        density_kg_m3=75.0,
-        thickness_mm=40.0,
-        source=_TABLE_A3,
-    ),
-    "rebond_foam_64_15": ResilientLayer(
-        name=_REBOND_FOAM,
-        dynamic_stiffness_n_m3=12e6,
-        density_kg_m3=64.0,
-        thickness_mm=15.0,
-        source=_TABLE_A3,
-        attributed_to=_HOPKINS_AND_HALL,
-    ),
-    "rebond_foam_64_20": ResilientLayer(
-        name=_REBOND_FOAM,
-        dynamic_stiffness_n_m3=9e6,
-        density_kg_m3=64.0,
-        thickness_mm=20.0,
-        source=_TABLE_A3,
-        attributed_to=_HOPKINS_AND_HALL,
-    ),
-    "rebond_foam_64_25": ResilientLayer(
-        name=_REBOND_FOAM,
-        dynamic_stiffness_n_m3=7e6,
-        density_kg_m3=64.0,
-        thickness_mm=25.0,
-        source=_TABLE_A3,
-        attributed_to=_HOPKINS_AND_HALL,
-    ),
-    "rebond_foam_96_15": ResilientLayer(
-        name=_REBOND_FOAM,
-        dynamic_stiffness_n_m3=16e6,
-        density_kg_m3=96.0,
-        thickness_mm=15.0,
-        source=_TABLE_A3,
-        attributed_to=_HOPKINS_AND_HALL,
-    ),
-}
+PUBLISHED_RESILIENT_LAYERS: Mapping[str, ResilientLayer] = MappingProxyType(
+    {
+        "closed_cell_polyethylene_foam_45_5": ResilientLayer(
+            name="Closed-cell polyethylene foam",
+            dynamic_stiffness_n_m3=115e6,
+            density_kg_m3=45.0,
+            thickness_mm=5.0,
+            source=_TABLE_A3,
+        ),
+        "expanded_polystyrene_14_50": ResilientLayer(
+            name="Expanded polystyrene",
+            dynamic_stiffness_n_m3=78e6,
+            density_kg_m3=14.0,
+            thickness_mm=50.0,
+            source=_TABLE_A3,
+        ),
+        "expanded_polystyrene_precompressed_10_50": ResilientLayer(
+            name="Expanded polystyrene, pre-compressed",
+            dynamic_stiffness_n_m3=68e6,
+            density_kg_m3=10.0,
+            thickness_mm=50.0,
+            source=_TABLE_A3,
+        ),
+        "mineral_wool_rock_60_30": ResilientLayer(
+            name=_MINERAL_WOOL_ROCK,
+            dynamic_stiffness_n_m3=10e6,
+            density_kg_m3=60.0,
+            thickness_mm=30.0,
+            source=_TABLE_A3,
+        ),
+        "mineral_wool_rock_80_30": ResilientLayer(
+            name=_MINERAL_WOOL_ROCK,
+            dynamic_stiffness_n_m3=11e6,
+            density_kg_m3=80.0,
+            thickness_mm=30.0,
+            source=_TABLE_A3,
+        ),
+        "mineral_wool_rock_100_30": ResilientLayer(
+            name=_MINERAL_WOOL_ROCK,
+            dynamic_stiffness_n_m3=14e6,
+            density_kg_m3=100.0,
+            thickness_mm=30.0,
+            source=_TABLE_A3,
+        ),
+        "mineral_wool_rock_140_30": ResilientLayer(
+            name=_MINERAL_WOOL_ROCK,
+            dynamic_stiffness_n_m3=19e6,
+            density_kg_m3=140.0,
+            thickness_mm=30.0,
+            source=_TABLE_A3,
+        ),
+        "mineral_wool_glass_36_13": ResilientLayer(
+            name=_MINERAL_WOOL_GLASS,
+            dynamic_stiffness_n_m3=28e6,
+            density_kg_m3=36.0,
+            thickness_mm=13.0,
+            source=_TABLE_A3,
+        ),
+        "mineral_wool_glass_36_25": ResilientLayer(
+            name=_MINERAL_WOOL_GLASS,
+            dynamic_stiffness_n_m3=11e6,
+            density_kg_m3=36.0,
+            thickness_mm=25.0,
+            source=_TABLE_A3,
+        ),
+        "mineral_wool_glass_75_25": ResilientLayer(
+            name=_MINERAL_WOOL_GLASS,
+            dynamic_stiffness_n_m3=12e6,
+            density_kg_m3=75.0,
+            thickness_mm=25.0,
+            source=_TABLE_A3,
+        ),
+        "mineral_wool_glass_75_40": ResilientLayer(
+            name=_MINERAL_WOOL_GLASS,
+            dynamic_stiffness_n_m3=7e6,
+            density_kg_m3=75.0,
+            thickness_mm=40.0,
+            source=_TABLE_A3,
+        ),
+        "rebond_foam_64_15": ResilientLayer(
+            name=_REBOND_FOAM,
+            dynamic_stiffness_n_m3=12e6,
+            density_kg_m3=64.0,
+            thickness_mm=15.0,
+            source=_TABLE_A3,
+            attributed_to=_HOPKINS_AND_HALL,
+        ),
+        "rebond_foam_64_20": ResilientLayer(
+            name=_REBOND_FOAM,
+            dynamic_stiffness_n_m3=9e6,
+            density_kg_m3=64.0,
+            thickness_mm=20.0,
+            source=_TABLE_A3,
+            attributed_to=_HOPKINS_AND_HALL,
+        ),
+        "rebond_foam_64_25": ResilientLayer(
+            name=_REBOND_FOAM,
+            dynamic_stiffness_n_m3=7e6,
+            density_kg_m3=64.0,
+            thickness_mm=25.0,
+            source=_TABLE_A3,
+            attributed_to=_HOPKINS_AND_HALL,
+        ),
+        "rebond_foam_96_15": ResilientLayer(
+            name=_REBOND_FOAM,
+            dynamic_stiffness_n_m3=16e6,
+            density_kg_m3=96.0,
+            thickness_mm=15.0,
+            source=_TABLE_A3,
+            attributed_to=_HOPKINS_AND_HALL,
+        ),
+    }
+)
 
 
 def resilient_layer(layer: str | ResilientLayer) -> ResilientLayer:

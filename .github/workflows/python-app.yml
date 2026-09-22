@@ -384,6 +384,34 @@ jobs:
     - name: Check that no pressure, temperature or humidity hides its unit
       run: python scripts/check_parameter_units.py
 
+  # A published table is shared by every caller in the process, so a dict
+  # behind a `Mapping` annotation, or a writeable array, lets one caller change
+  # a printed number for everyone after it without anything raising. This holds
+  # every value reachable from a public name to immutable containers all the
+  # way down. It walks the imported package, like parameter-units, because a
+  # table built by a function call only shows its type once it exists.
+  frozen-constants:
+    name: Every published table refuses writes
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+    - uses: actions/checkout@v7
+      with:
+        persist-credentials: false
+    - name: Set up Python 3.13
+      uses: actions/setup-python@v7
+      with:
+        python-version: "3.13"
+        cache: 'pip'
+    - name: Install runtime dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -e .
+    - name: Check that no published constant can be changed in place
+      run: python scripts/check_frozen_constants.py
+
   # A value transcribed from a book is only checkable if the next reader can
   # open the same page. The convention lived in review until a table came to
   # cite a folio its page does not print and another attributed to a table two

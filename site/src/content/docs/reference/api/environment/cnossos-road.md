@@ -351,14 +351,14 @@ propulsion term is the whole of it (2.2.3).
 
 ```python
 RoadEmissionCoefficients(
-    rolling_a: dict[str, tuple[float, ...]],
-    rolling_b: dict[str, tuple[float, ...]],
-    propulsion_a: dict[str, tuple[float, ...]],
-    propulsion_b: dict[str, tuple[float, ...]],
+    rolling_a: Mapping[str, tuple[float, ...]],
+    rolling_b: Mapping[str, tuple[float, ...]],
+    propulsion_a: Mapping[str, tuple[float, ...]],
+    propulsion_b: Mapping[str, tuple[float, ...]],
     studded_a: tuple[float, ...],
     studded_b: tuple[float, ...],
-    junction_c: dict[str, tuple[tuple[float, float], tuple[float, float]]],
-    temperature_k: dict[str, float],
+    junction_c: Mapping[str, tuple[tuple[float, float], tuple[float, float]]],
+    temperature_k: Mapping[str, float],
 )
 ```
 

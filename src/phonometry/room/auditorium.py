@@ -52,6 +52,7 @@ from __future__ import annotations
 import math
 import warnings
 from dataclasses import KW_ONLY, dataclass
+from types import MappingProxyType
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -1399,14 +1400,16 @@ def stage_support(
 #: Maximum deviation of source directivity in dB, by octave band centre in
 #: Hz (ISO 3382-1:2009, Table 1). The table prints six bands and no more, so
 #: a 63 Hz or 8 kHz survey has no printed limit to be held to.
-MAX_SOURCE_DIRECTIVITY_DEVIATION_DB = {
-    125.0: 1.0,
-    250.0: 1.0,
-    500.0: 1.0,
-    1000.0: 3.0,
-    2000.0: 5.0,
-    4000.0: 6.0,
-}
+MAX_SOURCE_DIRECTIVITY_DEVIATION_DB = MappingProxyType(
+    {
+        125.0: 1.0,
+        250.0: 1.0,
+        500.0: 1.0,
+        1000.0: 3.0,
+        2000.0: 5.0,
+        4000.0: 6.0,
+    }
+)
 
 #: Arc each gliding average of 4.2.1 covers, in degrees.
 DIRECTIVITY_ARC_DEG = 30.0
@@ -1426,11 +1429,13 @@ _MINIMUM_ARC_BEARINGS = 2
 
 #: The octave pairs A.5 offers as a more concise presentation, each averaged
 #: arithmetically, in Hz.
-OCTAVE_PAIRS_HZ = {
-    "low": (125.0, 250.0),
-    "mid": (500.0, 1000.0),
-    "high": (2000.0, 4000.0),
-}
+OCTAVE_PAIRS_HZ = MappingProxyType(
+    {
+        "low": (125.0, 250.0),
+        "mid": (500.0, 1000.0),
+        "high": (2000.0, 4000.0),
+    }
+)
 
 #: The six one-third-octave bands Clause 9.1 offers as the alternative route
 #: to a single-number reverberation time, in Hz.
@@ -1511,78 +1516,80 @@ _CLARITY_ASPECT = "Perceived clarity of sound"
 #: Five listener aspects and seven quantities: "Perceived clarity of sound"
 #: carries three of them, and the early lateral energy fraction is one row
 #: with two alternative symbols.
-TABLE_A1 = {
-    "G": AuditoriumQuantity(
-        symbol="G",
-        aspect="Subjective level of sound",
-        averaging_bands_hz=(500.0, 1000.0),
-        just_noticeable_difference=1.0,
-        relative_jnd=False,
-        typical_range=(-2.0, 10.0),
-        energy_averaged=False,
-        unit="dB",
-    ),
-    "EDT": AuditoriumQuantity(
-        symbol="EDT",
-        aspect="Perceived reverberance",
-        averaging_bands_hz=(500.0, 1000.0),
-        just_noticeable_difference=0.05,
-        relative_jnd=True,
-        typical_range=(1.0, 3.0),
-        energy_averaged=False,
-        unit="s",
-    ),
-    "C80": AuditoriumQuantity(
-        symbol="C80",
-        aspect=_CLARITY_ASPECT,
-        averaging_bands_hz=(500.0, 1000.0),
-        just_noticeable_difference=1.0,
-        relative_jnd=False,
-        typical_range=(-5.0, 5.0),
-        energy_averaged=False,
-        unit="dB",
-    ),
-    "D50": AuditoriumQuantity(
-        symbol="D50",
-        aspect=_CLARITY_ASPECT,
-        averaging_bands_hz=(500.0, 1000.0),
-        just_noticeable_difference=0.05,
-        relative_jnd=False,
-        typical_range=(0.3, 0.7),
-        energy_averaged=False,
-        unit="",
-    ),
-    "Ts": AuditoriumQuantity(
-        symbol="Ts",
-        aspect=_CLARITY_ASPECT,
-        averaging_bands_hz=(500.0, 1000.0),
-        just_noticeable_difference=0.010,
-        relative_jnd=False,
-        typical_range=(0.060, 0.260),
-        energy_averaged=False,
-        unit="s",
-    ),
-    "J_LF": AuditoriumQuantity(
-        symbol="J_LF",
-        aspect="Apparent source width (ASW)",
-        averaging_bands_hz=(125.0, 250.0, 500.0, 1000.0),
-        just_noticeable_difference=0.05,
-        relative_jnd=False,
-        typical_range=(0.05, 0.35),
-        energy_averaged=False,
-        unit="",
-    ),
-    "L_J": AuditoriumQuantity(
-        symbol="L_J",
-        aspect="Listener envelopment (LEV)",
-        averaging_bands_hz=(125.0, 250.0, 500.0, 1000.0),
-        just_noticeable_difference=None,
-        relative_jnd=False,
-        typical_range=(-14.0, 1.0),
-        energy_averaged=True,
-        unit="dB",
-    ),
-}
+TABLE_A1 = MappingProxyType(
+    {
+        "G": AuditoriumQuantity(
+            symbol="G",
+            aspect="Subjective level of sound",
+            averaging_bands_hz=(500.0, 1000.0),
+            just_noticeable_difference=1.0,
+            relative_jnd=False,
+            typical_range=(-2.0, 10.0),
+            energy_averaged=False,
+            unit="dB",
+        ),
+        "EDT": AuditoriumQuantity(
+            symbol="EDT",
+            aspect="Perceived reverberance",
+            averaging_bands_hz=(500.0, 1000.0),
+            just_noticeable_difference=0.05,
+            relative_jnd=True,
+            typical_range=(1.0, 3.0),
+            energy_averaged=False,
+            unit="s",
+        ),
+        "C80": AuditoriumQuantity(
+            symbol="C80",
+            aspect=_CLARITY_ASPECT,
+            averaging_bands_hz=(500.0, 1000.0),
+            just_noticeable_difference=1.0,
+            relative_jnd=False,
+            typical_range=(-5.0, 5.0),
+            energy_averaged=False,
+            unit="dB",
+        ),
+        "D50": AuditoriumQuantity(
+            symbol="D50",
+            aspect=_CLARITY_ASPECT,
+            averaging_bands_hz=(500.0, 1000.0),
+            just_noticeable_difference=0.05,
+            relative_jnd=False,
+            typical_range=(0.3, 0.7),
+            energy_averaged=False,
+            unit="",
+        ),
+        "Ts": AuditoriumQuantity(
+            symbol="Ts",
+            aspect=_CLARITY_ASPECT,
+            averaging_bands_hz=(500.0, 1000.0),
+            just_noticeable_difference=0.010,
+            relative_jnd=False,
+            typical_range=(0.060, 0.260),
+            energy_averaged=False,
+            unit="s",
+        ),
+        "J_LF": AuditoriumQuantity(
+            symbol="J_LF",
+            aspect="Apparent source width (ASW)",
+            averaging_bands_hz=(125.0, 250.0, 500.0, 1000.0),
+            just_noticeable_difference=0.05,
+            relative_jnd=False,
+            typical_range=(0.05, 0.35),
+            energy_averaged=False,
+            unit="",
+        ),
+        "L_J": AuditoriumQuantity(
+            symbol="L_J",
+            aspect="Listener envelopment (LEV)",
+            averaging_bands_hz=(125.0, 250.0, 500.0, 1000.0),
+            just_noticeable_difference=None,
+            relative_jnd=False,
+            typical_range=(-14.0, 1.0),
+            energy_averaged=True,
+            unit="dB",
+        ),
+    }
+)
 
 
 #: The alternative symbol Table A.1 prints inside a row it shares. "Early

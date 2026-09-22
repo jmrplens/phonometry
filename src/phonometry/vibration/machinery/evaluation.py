@@ -62,6 +62,7 @@ from __future__ import annotations
 import functools
 import math
 from dataclasses import dataclass
+from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
@@ -75,6 +76,8 @@ from ..._internal.validation import (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
@@ -105,15 +108,19 @@ TYPICAL_BOUNDARY_LADDER_MM_S: tuple[float, ...] = (
 #: vibration measured on non-rotating parts, in millimetres per second r.m.s.
 #: Small machines (electric motors up to 15 kW) sit at the low end and large
 #: ones on flexible supports at the high end.
-TYPICAL_ZONE_BOUNDARY_RANGES_MM_S: dict[str, tuple[float, float]] = {
-    "A/B": (0.71, 4.5),
-    "B/C": (1.8, 9.3),
-    "C/D": (4.5, 14.7),
-}
+TYPICAL_ZONE_BOUNDARY_RANGES_MM_S: Mapping[str, tuple[float, float]] = MappingProxyType(
+    {
+        "A/B": (0.71, 4.5),
+        "B/C": (1.8, 9.3),
+        "C/D": (4.5, 14.7),
+    }
+)
 
 #: Annex C.2: the factor ``Zbound`` of Formula (C.1) that moves the zone A
 #: curve onto the limit of each zone.
-ZONE_LIMIT_FACTORS: dict[str, float] = {"A": 1.0, "B": 2.56, "C": 6.4}
+ZONE_LIMIT_FACTORS: Mapping[str, float] = MappingProxyType(
+    {"A": 1.0, "B": 2.56, "C": 6.4}
+)
 
 
 @dataclass(frozen=True)
@@ -409,24 +416,28 @@ class MachineZoneLimits:
 #: predecessor of that part rather than a competing document, and the ISO
 #: 20816-1 framework these boundaries are used with cites the series as the
 #: place its numbers live.
-INDUSTRIAL_MACHINE_ZONES: dict[tuple[str, str], MachineZoneLimits] = {
-    ("group_1", "rigid"): MachineZoneLimits(
-        displacement_um=ZoneBoundaries(29.0, 57.0, 90.0),
-        velocity_mm_s=ZoneBoundaries(2.3, 4.5, 7.1),
-    ),
-    ("group_1", "flexible"): MachineZoneLimits(
-        displacement_um=ZoneBoundaries(45.0, 90.0, 140.0),
-        velocity_mm_s=ZoneBoundaries(3.5, 7.1, 11.0),
-    ),
-    ("group_2", "rigid"): MachineZoneLimits(
-        displacement_um=ZoneBoundaries(22.0, 45.0, 71.0),
-        velocity_mm_s=ZoneBoundaries(1.4, 2.8, 4.5),
-    ),
-    ("group_2", "flexible"): MachineZoneLimits(
-        displacement_um=ZoneBoundaries(37.0, 71.0, 113.0),
-        velocity_mm_s=ZoneBoundaries(2.3, 4.5, 7.1),
-    ),
-}
+INDUSTRIAL_MACHINE_ZONES: Mapping[tuple[str, str], MachineZoneLimits] = (
+    MappingProxyType(
+        {
+            ("group_1", "rigid"): MachineZoneLimits(
+                displacement_um=ZoneBoundaries(29.0, 57.0, 90.0),
+                velocity_mm_s=ZoneBoundaries(2.3, 4.5, 7.1),
+            ),
+            ("group_1", "flexible"): MachineZoneLimits(
+                displacement_um=ZoneBoundaries(45.0, 90.0, 140.0),
+                velocity_mm_s=ZoneBoundaries(3.5, 7.1, 11.0),
+            ),
+            ("group_2", "rigid"): MachineZoneLimits(
+                displacement_um=ZoneBoundaries(22.0, 45.0, 71.0),
+                velocity_mm_s=ZoneBoundaries(1.4, 2.8, 4.5),
+            ),
+            ("group_2", "flexible"): MachineZoneLimits(
+                displacement_um=ZoneBoundaries(37.0, 71.0, 113.0),
+                velocity_mm_s=ZoneBoundaries(2.3, 4.5, 7.1),
+            ),
+        }
+    )
+)
 
 #: The fraction of the upper limit of zone B that 5.3 calls a significant
 #: change, and that 5.4.1 adds to the baseline to set an ALARM.
@@ -566,33 +577,41 @@ def trip_limit(zone_c_upper: float) -> float:
 #: velocity is housing r.m.s. in millimetres per second (Table 3), and
 #: acceleration is housing true peak in metres per second squared (Table 4),
 #: which is the vocabulary Table 1 fixes.
-GEAR_UNIT_ZONES: dict[str, dict[float, ZoneBoundaries]] = {
-    "displacement": {
-        31.5: ZoneBoundaries(20.0, 31.5, 50.0),
-        50.0: ZoneBoundaries(31.5, 50.0, 80.0),
-        80.0: ZoneBoundaries(50.0, 80.0, 125.0),
-        125.0: ZoneBoundaries(80.0, 125.0, 200.0),
-        200.0: ZoneBoundaries(125.0, 200.0, 315.0),
-    },
-    "velocity": {
-        3.15: ZoneBoundaries(2.0, 3.15, 5.0),
-        5.0: ZoneBoundaries(3.15, 5.0, 8.0),
-        8.0: ZoneBoundaries(5.0, 8.0, 12.5),
-        12.5: ZoneBoundaries(8.0, 12.5, 20.0),
-        20.0: ZoneBoundaries(12.5, 20.0, 31.5),
-    },
-    "acceleration": {
-        5.0: ZoneBoundaries(3.15, 5.0, 8.0),
-        8.0: ZoneBoundaries(5.0, 8.0, 12.5),
-        12.5: ZoneBoundaries(8.0, 12.5, 20.0),
-        20.0: ZoneBoundaries(12.5, 20.0, 31.5),
-        31.5: ZoneBoundaries(20.0, 31.5, 50.0),
-        50.0: ZoneBoundaries(31.5, 50.0, 80.0),
-        80.0: ZoneBoundaries(50.0, 80.0, 125.0),
-        125.0: ZoneBoundaries(80.0, 125.0, 200.0),
-        200.0: ZoneBoundaries(125.0, 200.0, 315.0),
-    },
-}
+GEAR_UNIT_ZONES: Mapping[str, Mapping[float, ZoneBoundaries]] = MappingProxyType(
+    {
+        "displacement": MappingProxyType(
+            {
+                31.5: ZoneBoundaries(20.0, 31.5, 50.0),
+                50.0: ZoneBoundaries(31.5, 50.0, 80.0),
+                80.0: ZoneBoundaries(50.0, 80.0, 125.0),
+                125.0: ZoneBoundaries(80.0, 125.0, 200.0),
+                200.0: ZoneBoundaries(125.0, 200.0, 315.0),
+            }
+        ),
+        "velocity": MappingProxyType(
+            {
+                3.15: ZoneBoundaries(2.0, 3.15, 5.0),
+                5.0: ZoneBoundaries(3.15, 5.0, 8.0),
+                8.0: ZoneBoundaries(5.0, 8.0, 12.5),
+                12.5: ZoneBoundaries(8.0, 12.5, 20.0),
+                20.0: ZoneBoundaries(12.5, 20.0, 31.5),
+            }
+        ),
+        "acceleration": MappingProxyType(
+            {
+                5.0: ZoneBoundaries(3.15, 5.0, 8.0),
+                8.0: ZoneBoundaries(5.0, 8.0, 12.5),
+                12.5: ZoneBoundaries(8.0, 12.5, 20.0),
+                20.0: ZoneBoundaries(12.5, 20.0, 31.5),
+                31.5: ZoneBoundaries(20.0, 31.5, 50.0),
+                50.0: ZoneBoundaries(31.5, 50.0, 80.0),
+                80.0: ZoneBoundaries(50.0, 80.0, 125.0),
+                125.0: ZoneBoundaries(80.0, 125.0, 200.0),
+                200.0: ZoneBoundaries(125.0, 200.0, 315.0),
+            }
+        ),
+    }
+)
 
 #: Figure A.1: the displacement rating curve is flat up to this corner and
 #: falls above it, in hertz, and the rate it falls at, in decibels per decade.
@@ -628,20 +647,22 @@ class GearUnitRatings:
 #: Class I is special-purpose precision parallel-shaft units, class II
 #: general-purpose parallel-shaft, helical and spiral-bevel units, class III
 #: epicyclic units, and class IV straight-cut units.
-GEAR_UNIT_CLASSES: dict[tuple[str, str], GearUnitRatings] = {
-    ("I", "a"): GearUnitRatings(31.5, 3.15, 50.0),
-    ("I", "b_low"): GearUnitRatings(31.5, 3.15, None),
-    ("I", "b_high"): GearUnitRatings(50.0, 5.0, None),
-    ("II", "a"): GearUnitRatings(50.0, 5.0, 80.0),
-    ("II", "b_low"): GearUnitRatings(50.0, 5.0, None),
-    ("II", "b_high"): GearUnitRatings(80.0, 8.0, None),
-    ("III", "a"): GearUnitRatings(80.0, 8.0, 125.0),
-    ("III", "b_low"): GearUnitRatings(80.0, 8.0, None),
-    ("III", "b_high"): GearUnitRatings(125.0, 12.5, None),
-    ("IV", "a"): GearUnitRatings(125.0, 20.0, 125.0),
-    ("IV", "b_low"): GearUnitRatings(125.0, 12.5, None),
-    ("IV", "b_high"): GearUnitRatings(200.0, 20.0, None),
-}
+GEAR_UNIT_CLASSES: Mapping[tuple[str, str], GearUnitRatings] = MappingProxyType(
+    {
+        ("I", "a"): GearUnitRatings(31.5, 3.15, 50.0),
+        ("I", "b_low"): GearUnitRatings(31.5, 3.15, None),
+        ("I", "b_high"): GearUnitRatings(50.0, 5.0, None),
+        ("II", "a"): GearUnitRatings(50.0, 5.0, 80.0),
+        ("II", "b_low"): GearUnitRatings(50.0, 5.0, None),
+        ("II", "b_high"): GearUnitRatings(80.0, 8.0, None),
+        ("III", "a"): GearUnitRatings(80.0, 8.0, 125.0),
+        ("III", "b_low"): GearUnitRatings(80.0, 8.0, None),
+        ("III", "b_high"): GearUnitRatings(125.0, 12.5, None),
+        ("IV", "a"): GearUnitRatings(125.0, 20.0, 125.0),
+        ("IV", "b_low"): GearUnitRatings(125.0, 12.5, None),
+        ("IV", "b_high"): GearUnitRatings(200.0, 20.0, None),
+    }
+)
 
 #: 8.3: an acceptance criterion for a new unit is normally agreed inside zone
 #: A or B, and normally not above this multiple of the A/B boundary.

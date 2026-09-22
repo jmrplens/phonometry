@@ -357,7 +357,7 @@ What Clause 7 says the flow leaving the valve outlet makes.
 
 ## FLOW_COEFFICIENT_CONSTANTS
 
-*Constant* (`dict`).
+*Constant* (`mappingproxy`).
 
 ```python
 FLOW_COEFFICIENT_CONSTANTS = {'Cv': 0.0046, 'Kv': 0.0049}
@@ -507,7 +507,7 @@ $$
 
 ## LAST_STAGE_AREA_CONSTANTS
 
-*Constant* (`dict`).
+*Constant* (`mappingproxy`).
 
 ```python
 LAST_STAGE_AREA_CONSTANTS = {'Cv': 48900.0, 'Kv': 42300.0}
@@ -946,7 +946,7 @@ UNIVERSAL_GAS_CONSTANT = 8314.0
 
 ## VALVE_ACOUSTIC_STYLES
 
-*Constant* (`dict`).
+*Constant* (`mappingproxy`).
 
 ```python
 VALVE_ACOUSTIC_STYLES = {'globe parabolic plug': (-4.2, 0.19), 'globe V-port plug': (-4.2, 0.19), 'globe ported cage': (-3.8, 0.2), 'globe multihole to open': (-4.8, 0.2), 'globe multihole to close': (-4.4, 0.2), 'butterfly eccentric': (-4.2, 0.3), 'butterfly swing-through': (-4.2, 0.3), 'butterfly fluted vane': (-4.2, 0.3), 'butterfly 60 deg flat disk': (-4.2, 0.3), 'eccentric rotary plug': (-3.6, 0.3), 'segmented ball 90 deg': (-3.6, 0.3), 'drilled hole plate': (-4.8, 0.2), 'expander': (-3.0, 0.2)}

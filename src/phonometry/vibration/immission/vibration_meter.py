@@ -63,6 +63,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from functools import lru_cache
+from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
@@ -77,6 +78,8 @@ from ..._internal.validation import (
 )
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
+    from collections.abc import Mapping
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
@@ -148,10 +151,12 @@ BAND_LIMIT_CORNER_FACTOR: float = 0.8
 #: ``"building"`` is the range the standard is written for and ``"railway"``
 #: the one 5.2.3.1 sends to DIN 45672-1, which blasting work and structure-borne
 #: sound also need.
-WORKING_RANGES_HZ: dict[str, tuple[float, float]] = {
-    "building": (1.0, 80.0),
-    "railway": (4.0, 315.0),
-}
+WORKING_RANGES_HZ: Mapping[str, tuple[float, float]] = MappingProxyType(
+    {
+        "building": (1.0, 80.0),
+        "railway": (4.0, 315.0),
+    }
+)
 
 #: The reference frequency of the reference conditions (5.2.10), in hertz. The
 #: input there is a 1 mm/s sine with at most 2 % distortion.
@@ -161,12 +166,14 @@ KB_REFERENCE_FREQUENCY_HZ: float = 16.0
 #: peak is the amplitude of the input, the r.m.s. quantities are the KB signal
 #: at 16 Hz, and ``kbf_max`` is higher than ``kbf`` because the running r.m.s.
 #: of a sine ripples (Annex B).
-KB_REFERENCE_INDICATIONS: dict[str, float] = {
-    "peak_velocity_mm_s": 1.00,
-    "kbf": 0.667,
-    "kbf_max": 0.680,
-    "kbf_takt_rms": 0.680,
-}
+KB_REFERENCE_INDICATIONS: Mapping[str, float] = MappingProxyType(
+    {
+        "peak_velocity_mm_s": 1.00,
+        "kbf": 0.667,
+        "kbf_max": 0.680,
+        "kbf_takt_rms": 0.680,
+    }
+)
 
 #: The largest deviation allowed from :data:`KB_REFERENCE_INDICATIONS`, in per
 #: cent (6.2.3.12).
@@ -223,23 +230,27 @@ KB_PULSE_RESPONSE_PERCENT: tuple[tuple[float, int, float], ...] = (
 #: each test frequency, the ``KB_F(t)``, ``KB_Fmax`` and ``KB_FTm`` a meter of
 #: the building working range must display. The ``|v|max`` row of the same
 #: table is not here; see the module docstring and ``docs/ERRATA.md``.
-KB_TEST_INDICATIONS: dict[float, tuple[float, float, float]] = {
-    1.0: (0.103, 0.130, 0.130),
-    5.6: (0.500, 0.528, 0.528),
-    31.5: (0.693, 0.700, 0.700),
-    80.0: (0.594, 0.597, 0.597),
-    315.0: (0.071, 0.071, 0.071),
-}
+KB_TEST_INDICATIONS: Mapping[float, tuple[float, float, float]] = MappingProxyType(
+    {
+        1.0: (0.103, 0.130, 0.130),
+        5.6: (0.500, 0.528, 0.528),
+        31.5: (0.693, 0.700, 0.700),
+        80.0: (0.594, 0.597, 0.597),
+        315.0: (0.071, 0.071, 0.071),
+    }
+)
 
 #: Table E.2: the frequency-independent guideline value each assessment
 #: velocity is compared with, in millimetres per second, keyed by the building
 #: class of DIN 4150-3:1999-02 Table 1 as
 #: :data:`~phonometry.vibration.BUILDING_CLASSES` spells it.
-ASSESSMENT_GUIDE_VALUES_MM_S: dict[str, float] = {
-    "commercial": 20.0,
-    "residential": 5.0,
-    "sensitive": 3.0,
-}
+ASSESSMENT_GUIDE_VALUES_MM_S: Mapping[str, float] = MappingProxyType(
+    {
+        "commercial": 20.0,
+        "residential": 5.0,
+        "sensitive": 3.0,
+    }
+)
 
 #: Table E.1: how far a realised assessment weighting may sit from its target
 #: magnitude, as a fraction.

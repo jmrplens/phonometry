@@ -63,6 +63,7 @@ interior room constant reuses :func:`phonometry.room.room_constant`.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Protocol, cast
 
 import numpy as np
@@ -77,12 +78,15 @@ from .._internal.validation import (
 )
 from ..room.steady_field import room_constant
 
+if TYPE_CHECKING:
+    from collections.abc import Mapping
+
 #: Interior build-up correction models. The value is the additive floor inside
 #: the logarithm of ``C = 10 lg(floor + S_E / R_i)``: Bies, Hansen & Howard
 #: (Equation (7.111)) carry ``0.3``, which caps the insertion loss of a fully
 #: lined enclosure at ``R + 5.2 dB``; Norton & Karczub (Equation (4.115)) carry
 #: none.
-ENCLOSURE_MODELS: dict[str, float] = {"bies": 0.3, "norton": 0.0}
+ENCLOSURE_MODELS: Mapping[str, float] = MappingProxyType({"bies": 0.3, "norton": 0.0})
 
 if TYPE_CHECKING:
     from collections.abc import Callable

@@ -182,6 +182,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- **Every published table refuses writes.** A hundred and nine module-level
+  tables were plain dictionaries, several of them annotated `Mapping`, so
+  `GUIDE_VALUES["residential"] = ...` or `REFERENCE_CURVE[500] = 0.0` changed
+  a printed number for every caller in the process without anything raising,
+  and thirty-one published arrays such as `speech.sii.BAND_IMPORTANCE` took
+  in-place arithmetic the same way. The tables are now read-only mappings
+  (`types.MappingProxyType`) down to the dictionaries nested inside them, the
+  arrays have their `writeable` flag cleared, and the per-category fields of
+  `environment.ROAD_COEFFICIENTS` are read-only too. Reading is unchanged;
+  code that edited one of them has to copy it first (`dict(TABLE)`,
+  `array.copy()`). A new check walks the installed package and fails on any
+  mutable container a public name reaches.
+
 - **The catalogues page shows one catalogue at a time.** Seventeen tables
   stacked on one page meant a reader on a phone scrolled through several
   screens before finding out there was a table at all. A single panel at the

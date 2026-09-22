@@ -49,6 +49,7 @@ building's own frequency", not as a frequency to design against.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
@@ -58,6 +59,8 @@ from ..._internal.validation import require_choice, require_positive
 from .building_damage import storey_fundamental_frequency
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
@@ -70,11 +73,13 @@ PERIOD_MODELS: tuple[str, ...] = ("storeys", "height", "height_width", "slendern
 #: :math:`k_1` of Formula (D.1), ``height_width`` is :math:`k_2` of (D.2) and
 #: ``slenderness`` is :math:`k_3` of (D.3). The midpoint of each range is what
 #: this module uses when a caller states no coefficient.
-PERIOD_COEFFICIENT_RANGES: dict[str, tuple[float, float]] = {
-    "height": (0.014, 0.03),
-    "height_width": (0.087, 0.109),
-    "slenderness": (0.06, 0.08),
-}
+PERIOD_COEFFICIENT_RANGES: Mapping[str, tuple[float, float]] = MappingProxyType(
+    {
+        "height": (0.014, 0.03),
+        "height_width": (0.087, 0.109),
+        "slenderness": (0.06, 0.08),
+    }
+)
 
 #: D.2: the storey rule as a period, ``T = 0,1 n`` seconds, which is the
 #: reciprocal of the ``f = 10/n`` hertz DIN 4150-3 6.4 also prints.

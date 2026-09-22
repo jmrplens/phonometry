@@ -73,6 +73,7 @@ from __future__ import annotations
 import math
 import warnings
 from dataclasses import dataclass
+from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
@@ -87,6 +88,8 @@ from .._internal.validation import (
 from .._internal.warnings import PhonometryWarning
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
+    from collections.abc import Mapping
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
@@ -139,16 +142,18 @@ __all__ = [
 #: alone, in decibels. The table is stepped and integer-indexed; below
 #: :data:`ISO11820_MINIMUM_BACKGROUND_MARGIN_DB` it prints "measurements invalid", and
 #: above :data:`ISO11820_NEGLIGIBLE_BACKGROUND_MARGIN_DB` it prints zero.
-ISO11820_BACKGROUND_CORRECTIONS_DB: dict[int, float] = {
-    3: 3.0,
-    4: 2.0,
-    5: 2.0,
-    6: 1.0,
-    7: 1.0,
-    8: 1.0,
-    9: 0.5,
-    10: 0.5,
-}
+ISO11820_BACKGROUND_CORRECTIONS_DB: Mapping[int, float] = MappingProxyType(
+    {
+        3: 3.0,
+        4: 2.0,
+        5: 2.0,
+        6: 1.0,
+        7: 1.0,
+        8: 1.0,
+        9: 0.5,
+        10: 0.5,
+    }
+)
 
 #: Clause 4: below this margin over the background the measurement does not
 #: stand, and only an inequality may be stated.
@@ -331,7 +336,7 @@ def _build_cases() -> dict[int, InstallationCase]:
 
 #: Figure 1 as data: the twenty installations and the area rules clause 9
 #: gives each of them. Cases 1 to 16 are transmission, 17 to 20 insertion.
-INSTALLATION_CASES: dict[int, InstallationCase] = _build_cases()
+INSTALLATION_CASES: Mapping[int, InstallationCase] = MappingProxyType(_build_cases())
 
 
 def installation_case(number: int) -> InstallationCase:

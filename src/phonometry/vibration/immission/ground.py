@@ -39,8 +39,13 @@ what Formula (3) is derived from, and the defect is registered in
 from __future__ import annotations
 
 import math
+from types import MappingProxyType
+from typing import TYPE_CHECKING
 
 from ..._internal.validation import require_positive
+
+if TYPE_CHECKING:
+    from collections.abc import Mapping
 
 __all__ = [
     "GROUND_WAVE_SPEED_RANGES_M_S",
@@ -55,10 +60,12 @@ __all__ = [
 #: The wave speeds Clause 4.5.1 gives for natural ground, in metres per
 #: second, by the soil or rock it is: compression waves between 200 m/s and
 #: 2000 m/s, shear waves between 10 m/s and 1000 m/s.
-GROUND_WAVE_SPEED_RANGES_M_S: dict[str, tuple[float, float]] = {
-    "compression": (200.0, 2000.0),
-    "shear": (10.0, 1000.0),
-}
+GROUND_WAVE_SPEED_RANGES_M_S: Mapping[str, tuple[float, float]] = MappingProxyType(
+    {
+        "compression": (200.0, 2000.0),
+        "shear": (10.0, 1000.0),
+    }
+)
 
 #: The open interval Poisson's ratio of a stable isotropic continuum lies in:
 #: at -1 the shear modulus would carry no bulk stiffness at all, and at 0,5

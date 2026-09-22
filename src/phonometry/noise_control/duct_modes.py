@@ -40,6 +40,7 @@ from __future__ import annotations
 
 import warnings
 from dataclasses import dataclass
+from types import MappingProxyType
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -53,6 +54,8 @@ from .._internal.validation import (
 from .._internal.warnings import PhonometryWarning
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
@@ -63,20 +66,22 @@ _C_AIR = 343.0
 #: first twelve higher-order acoustic modes of a rigid circular duct, keyed
 #: by the mode order ``(p, q)``: ``p`` plane diametral nodal surfaces and
 #: ``q`` cylindrical nodal surfaces.
-CIRCULAR_EIGENVALUES: dict[tuple[int, int], float] = {
-    (1, 0): 1.8412,
-    (2, 0): 3.0542,
-    (0, 1): 3.8317,
-    (3, 0): 4.2012,
-    (4, 0): 5.3175,
-    (1, 1): 5.3314,
-    (5, 0): 6.4156,
-    (2, 1): 6.7061,
-    (0, 2): 7.0156,
-    (6, 0): 7.5013,
-    (3, 1): 8.0152,
-    (1, 2): 8.5363,
-}
+CIRCULAR_EIGENVALUES: Mapping[tuple[int, int], float] = MappingProxyType(
+    {
+        (1, 0): 1.8412,
+        (2, 0): 3.0542,
+        (0, 1): 3.8317,
+        (3, 0): 4.2012,
+        (4, 0): 5.3175,
+        (1, 1): 5.3314,
+        (5, 0): 6.4156,
+        (2, 1): 6.7061,
+        (0, 2): 7.0156,
+        (6, 0): 7.5013,
+        (3, 1): 8.0152,
+        (1, 2): 8.5363,
+    }
+)
 
 #: The plane-wave eigenvalue ``k a_i = 1.8412`` of the ``(1, 0)`` mode: below it
 #: a rigid circular duct carries plane waves only.

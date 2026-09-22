@@ -24,13 +24,17 @@ component with this age component) is not part of this module.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
+from .._internal.frozen import read_only
 from .._internal.validation import require_ranks, require_same_length
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
@@ -40,21 +44,23 @@ if TYPE_CHECKING:
 # ---------------------------------------------------------------------------
 
 #: Audiometric frequencies, in hertz (ISO 7029 Table 1 / ISO 389-7 Table 1).
-AUDIOMETRIC_FREQUENCIES: np.ndarray = np.array(
-    [
-        125.0,
-        250.0,
-        500.0,
-        750.0,
-        1000.0,
-        1500.0,
-        2000.0,
-        3000.0,
-        4000.0,
-        6000.0,
-        8000.0,
-    ],
-    dtype=np.float64,
+AUDIOMETRIC_FREQUENCIES: np.ndarray = read_only(
+    np.array(
+        [
+            125.0,
+            250.0,
+            500.0,
+            750.0,
+            1000.0,
+            1500.0,
+            2000.0,
+            3000.0,
+            4000.0,
+            6000.0,
+            8000.0,
+        ],
+        dtype=np.float64,
+    )
 )
 
 #: Median coefficients ``(a, b)`` of ``dHmd = a*(age-18)**b`` (ISO 7029 Table 1).
@@ -378,33 +384,35 @@ def reference_threshold(
 #: ISO 389-1:1998, Tables 1 and 2. The twenty-three frequencies the earphone
 #: reference levels are printed at, in hertz. They are the audiometric
 #: frequencies plus the intermediate ones an audiometer may offer.
-RETSPL_FREQUENCIES_HZ: np.ndarray = np.array(
-    [
-        125.0,
-        160.0,
-        200.0,
-        250.0,
-        315.0,
-        400.0,
-        500.0,
-        630.0,
-        750.0,
-        800.0,
-        1000.0,
-        1250.0,
-        1500.0,
-        1600.0,
-        2000.0,
-        2500.0,
-        3000.0,
-        3150.0,
-        4000.0,
-        5000.0,
-        6000.0,
-        6300.0,
-        8000.0,
-    ],
-    dtype=np.float64,
+RETSPL_FREQUENCIES_HZ: np.ndarray = read_only(
+    np.array(
+        [
+            125.0,
+            160.0,
+            200.0,
+            250.0,
+            315.0,
+            400.0,
+            500.0,
+            630.0,
+            750.0,
+            800.0,
+            1000.0,
+            1250.0,
+            1500.0,
+            1600.0,
+            2000.0,
+            2500.0,
+            3000.0,
+            3150.0,
+            4000.0,
+            5000.0,
+            6000.0,
+            6300.0,
+            8000.0,
+        ],
+        dtype=np.float64,
+    )
 )
 
 #: ISO 389-1:1998, Table 1: the Beyer DT 48 with a flat cushion, on an
@@ -520,11 +528,13 @@ EARPHONES: tuple[str, ...] = tuple(_RETSPL)
 
 #: What each of them is calibrated on: the two named models on the acoustic
 #: coupler of Clause 4.2, everything else on the artificial ear of 4.3.
-EARPHONE_COUPLERS: dict[str, str] = {
-    _DT48: "IEC 60303 acoustic coupler",
-    _TDH39: "IEC 60303 acoustic coupler",
-    _OTHER: "IEC 60318 artificial ear",
-}
+EARPHONE_COUPLERS: Mapping[str, str] = MappingProxyType(
+    {
+        _DT48: "IEC 60303 acoustic coupler",
+        _TDH39: "IEC 60303 acoustic coupler",
+        _OTHER: "IEC 60318 artificial ear",
+    }
+)
 
 
 def _select_retspl(values: np.ndarray, frequencies: ArrayLike | None) -> np.ndarray:

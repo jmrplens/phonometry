@@ -87,6 +87,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
+from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, overload
 
 import numpy as np
@@ -106,6 +107,8 @@ from ...vibration.structural.point_mobility import plate_bending_stiffness
 from ...vibration.structural.radiation_efficiency import coincidence_frequency
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
@@ -150,7 +153,9 @@ def _plateau_constants() -> dict[str, tuple[float, float, float]]:
 #: per mm of thickness, coincidence plateau height in dB, frequency ratio
 #: B/A)``, keyed by the lower-case material name. The numbers are the rows of
 #: :data:`phonometry.solids.PUBLISHED_PLATEAU_DATA`, which holds the table.
-PLATEAU_MATERIALS: dict[str, tuple[float, float, float]] = _plateau_constants()
+PLATEAU_MATERIALS: Mapping[str, tuple[float, float, float]] = MappingProxyType(
+    _plateau_constants()
+)
 #: Field-incidence correction of Norton Eq. (3.106): a flat 5 dB below the
 #: normal-incidence mass law (a diffuse field limited to 78 degrees).
 _NORTON_FIELD_CORRECTION: float = 5.0

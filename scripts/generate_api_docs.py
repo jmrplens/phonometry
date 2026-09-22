@@ -38,6 +38,7 @@ import shutil
 import sys
 from collections.abc import Mapping
 from pathlib import Path
+from types import MappingProxyType
 from typing import TYPE_CHECKING, get_overloads
 
 from api_taxonomy import (
@@ -835,11 +836,24 @@ def _class_methods(
     return tuple(methods)
 
 
+def _plain(obj: object) -> object:
+    """*obj* with every read-only mapping in it, at any depth, shown as a dict.
+
+    A published table is a :class:`types.MappingProxyType`, and so are the
+    tables nested in it; their repr wraps each level in ``mappingproxy(...)``,
+    which says how the value is stored rather than what it holds.
+    """
+    if isinstance(obj, Mapping):
+        return {key: _plain(value) for key, value in obj.items()}
+    if type(obj) is tuple:
+        return tuple(_plain(item) for item in obj)
+    return obj
+
+
 def _constant_repr(obj: object) -> str:
     if type(obj).__module__ not in ("builtins", "types"):
         return ""  # third-party reprs (numpy arrays) are not pinned; skip
-    value: object = dict(obj) if isinstance(obj, Mapping) else obj
-    text = repr(value)
+    text = repr(_plain(obj))
     if len(text) > _MAX_CONST_REPR or _HEX_ADDR_RE.search(text):
         return ""
     return text
@@ -850,10 +864,12 @@ def _type_name(obj: object) -> str:
     shape = getattr(obj, "shape", None)
     if isinstance(shape, tuple):
         return f"{cls.__module__}.{cls.__qualname__}, shape {shape}"
+    # Checked before the builtins branch: the class of a read-only mapping
+    # reports itself as `builtins.mappingproxy`, a name nobody can import.
+    if cls is MappingProxyType:
+        return "mapping"
     if cls.__module__ == "builtins":
         return cls.__qualname__
-    if cls.__module__ == "types" and cls.__qualname__ == "MappingProxyType":
-        return "mapping"
     # A typing alias is its own documentation: `Literal["a", "b"]` says what
     # the name accepts, where the class behind it is a private implementation
     # detail (`typing._LiteralGenericAlias`) that tells a reader nothing and

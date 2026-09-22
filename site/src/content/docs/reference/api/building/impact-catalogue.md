@@ -290,4 +290,4 @@ that is not a number. Each of those is a different answer.
 
 ## PUBLISHED_IMPACT_INSULATION
 
-*Constant* (`mappingproxy`).
+*Constant* (`mapping`).

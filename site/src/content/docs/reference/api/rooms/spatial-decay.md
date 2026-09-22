@@ -248,7 +248,7 @@ recorded and reported, which is why they are arguments here.
 
 ## EVALUATION_DISTANCES_M
 
-*Constant* (`mappingproxy`).
+*Constant* (`mapping`).
 
 ```python
 EVALUATION_DISTANCES_M = {'near': 4.0, 'middle': 10.0, 'far': 30.0}
@@ -555,7 +555,7 @@ which the two endpoints land on printed bands.
 
 ## PINK_NOISE_WEIGHTS_DB
 
-*Constant* (`mappingproxy`).
+*Constant* (`mapping`).
 
 ```python
 PINK_NOISE_WEIGHTS_DB = {125.0: -16.1, 250.0: -8.6, 500.0: -3.2, 1000.0: 0.0, 2000.0: 1.2, 4000.0: 1.0}
@@ -809,7 +809,7 @@ decision is made on.
 
 ## STABILITY_TOLERANCE_DB
 
-*Constant* (`mappingproxy`).
+*Constant* (`mapping`).
 
 ```python
 STABILITY_TOLERANCE_DB = {(100.0, 160.0): 1.0, (200.0, 5000.0): 0.5}

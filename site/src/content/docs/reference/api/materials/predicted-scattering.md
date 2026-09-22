@@ -307,4 +307,4 @@ that is not a number. Each of those is a different answer.
 
 ## PUBLISHED_PREDICTED_SCATTERING
 
-*Constant* (`mappingproxy`).
+*Constant* (`mapping`).

@@ -495,8 +495,8 @@ that is not a number. Each of those is a different answer.
 
 ## PUBLISHED_ABSORPTION
 
-*Constant* (`mappingproxy`).
+*Constant* (`mapping`).
 
 ## PUBLISHED_ABSORPTION_AREAS
 
-*Constant* (`mappingproxy`).
+*Constant* (`mapping`).

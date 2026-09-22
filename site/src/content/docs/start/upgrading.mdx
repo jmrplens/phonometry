@@ -319,8 +319,8 @@ ax = result.plot()
 ## Published tables refuse writes
 
 Every table the library publishes at module level is read-only in 4.0. In
-3.3.0 a hundred and nine of them were plain dictionaries and thirty-one arrays
-took in-place arithmetic, so a line such as `REFERENCE_CURVE[500] = 0.9` or
+3.3.0 published tables were plain dictionaries and published arrays took
+in-place arithmetic, so a line such as `REFERENCE_CURVE[500] = 0.9` or
 `BAND_IMPORTANCE *= 2` changed the number for every caller that ran after it
 in the same process, and nothing raised. The dictionaries are now
 `types.MappingProxyType`, including the ones nested inside another table, and
@@ -340,6 +340,11 @@ weights[0] = 0.0
 print(REFERENCE_CURVE[4000], curve[4000], weights[0], BAND_IMPORTANCE[0])
 # 0.9 1.0 0.0 0.0083
 ```
+
+A table with tables inside it needs each level copied, as in
+`{area: dict(rows) for area, rows in GUIDE_VALUES.items()}`. The same copy is
+needed before a table is pickled, deep-copied or written out as JSON, because
+a read-only mapping supports none of the three.
 
 ## The ten names that are gone
 

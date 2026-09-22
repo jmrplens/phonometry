@@ -275,8 +275,8 @@ to load first.
 
 ## PUBLISHED_FLUIDS
 
-*Constant* (`mappingproxy`).
+*Constant* (`mapping`).
 
 ## PUBLISHED_GASES
 
-*Constant* (`mappingproxy`).
+*Constant* (`mapping`).

@@ -19,10 +19,12 @@ def read_only[A: np.ndarray](array: A) -> A:
 
     The array is not copied: the flag is cleared on the object itself, so the
     caller hands over a freshly built array and keeps no writeable reference
-    to it.
+    to it. The array still owns its data, so a caller who sets the flag back
+    on can write again; what this stops is the accident, an in-place operation
+    nobody meant to aim at a shared table.
 
     :param array: A newly built array that is about to be published.
-    :return: The same array, which now refuses any write.
+    :return: The same array, which now refuses in-place writes.
     """
     array.flags.writeable = False
     return array

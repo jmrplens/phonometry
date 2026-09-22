@@ -545,7 +545,7 @@ no smooth model predicts.
 
 ## PLATEAU_MATERIALS
 
-*Constant* (`mappingproxy`).
+*Constant* (`mapping`).
 
 ```python
 PLATEAU_MATERIALS = {'aluminium': (2.66, 29.0, 11.0), 'brick': (2.1, 37.0, 4.5), 'concrete': (2.28, 38.0, 4.5), 'glass': (2.47, 27.0, 10.0), 'lead': (11.2, 56.0, 4.0), 'plaster': (1.71, 30.0, 8.0), 'plywood': (0.57, 19.0, 6.5), 'steel': (7.6, 40.0, 11.0)}

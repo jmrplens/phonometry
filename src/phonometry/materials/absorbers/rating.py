@@ -610,7 +610,7 @@ def _rate(
         absorption_class=absorption_class(alpha_w_units / 20.0),
         shift=shift_units / 20.0,
         unfavourable_sum=unfav_units / 20.0,
-        band_centers=np.asarray(OCTAVE_BANDS, dtype=np.float64),
+        band_centers=np.array(OCTAVE_BANDS, dtype=np.float64),
         measured=np.asarray([u / 20.0 for u in measured_units], dtype=np.float64),
         shifted_reference=np.asarray(
             [u / 20.0 for u in shifted_units], dtype=np.float64

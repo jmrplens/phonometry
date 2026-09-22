@@ -88,7 +88,7 @@ BAND_LIMITING = 'band-limiting'
 
 ## BURST_TOLERANCE_PERCENT
 
-*Constant* (`mappingproxy`).
+*Constant* (`mapping`).
 
 ```python
 BURST_TOLERANCE_PERCENT = {'rms': 10.0, 'vdv': 12.0, 'mtvv_linear': 10.0, 'mtvv_exponential': 10.0, 'msdv': 10.0}
@@ -148,7 +148,7 @@ the laboratory rig, not this record.
 
 ## SAWTOOTH_BURST_TESTS
 
-*Constant* (`mappingproxy`).
+*Constant* (`mapping`).
 
 ```python
 SAWTOOTH_BURST_TESTS = {'hand-arm': SawtoothBurstTest(application='hand-arm', weightings=('Wh',), band_limiting_weighting='Wh', angular_frequency_rad_s=500.0, start_time_s=0.2, cycle_counts=(1, 2, 4, 8, 16), repeat_time_s=2.0, duration_s=12.0, max_fall_time_s=0.00015886564694485628, recommended_sampling_rate_hz=200000.0), 'whole-body': SawtoothBurstTest(application='whole-body', weightings=('Wb', 'Wc', 'Wd', 'We', 'Wj', 'Wk', 'Wm'), band_limiting_weighting='Wb', angular_frequency_rad_s=100.0, start_time_s=1.0, cycle_counts=(1, 2, 4, 8, 16), repeat_time_s=10.0, duration_s=60.0, max_fall_time_s=0.002, recommended_sampling_rate_hz=20000.0), 'low-frequency-whole-body': SawtoothBurstTest(application='low-frequency-whole-body', weightings=('Wf',), band_limiting_weighting='Wf', angular_frequency_rad_s=2.5, start_time_s=40.0, cycle_counts=(1, 2, 4, 8, 16), repeat_time_s=400.0, duration_s=2400.0, max_fall_time_s=0.31746031746031744, recommended_sampling_rate_hz=200.0)}
@@ -245,7 +245,7 @@ the linear and the exponential average of Annex D.
 
 ## SIGNAL_BURST_RESPONSE
 
-*Constant* (`mappingproxy`).
+*Constant* (`mapping`).
 
 ## SignalBurstVerification
 

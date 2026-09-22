@@ -16,7 +16,8 @@ and an array through ``phonometry._internal.frozen.read_only``. The walk goes
 into the values of a mapping, the items of a tuple or frozenset and the fields
 of a dataclass instance, because a proxy around a dictionary of dictionaries
 still hands out the inner ones, and a frozen dataclass still holds whatever
-mutable container it was built with.
+mutable container it was built with. A dataclass instance that is not frozen
+is itself an offence: its fields can be rebound.
 
 This walks the imported package rather than the source tree for the same
 reason ``check_parameter_units.py`` does: what a caller reaches is decided by
@@ -36,7 +37,15 @@ import importlib
 import inspect
 import pkgutil
 import sys
-from collections.abc import Mapping
+import types
+from collections.abc import (
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    MutableSet,
+    Sequence,
+    Set,
+)
 from typing import TYPE_CHECKING, NamedTuple
 
 import numpy as np
@@ -45,14 +54,20 @@ import phonometry
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
-    from types import ModuleType
 
 #: Published names that may stay mutable, keyed by ``(module, name)``, each
 #: with the reason. Empty: nothing published needs to be edited in place.
 EXEMPT: dict[tuple[str, str], str] = {}
 
-#: The containers a caller can change in place.
-_MUTABLE = (dict, list, set, bytearray)
+#: The containers a caller can change in place. The abstract classes catch the
+#: builtins and their relatives alike (``UserDict``, ``ChainMap``, ``deque``).
+_MUTABLE = (
+    MutableMapping,
+    MutableSequence,
+    MutableSet,
+    bytearray,
+    types.SimpleNamespace,
+)
 
 
 class Offence(NamedTuple):
@@ -69,7 +84,7 @@ def _is_public(name: str) -> bool:
     return not name.startswith("_")
 
 
-def public_modules() -> Iterator[tuple[str, ModuleType]]:
+def public_modules() -> Iterator[tuple[str, types.ModuleType]]:
     """Every module a caller can import by a public path, imported."""
     yield "phonometry", phonometry
     for found in pkgutil.walk_packages(phonometry.__path__, "phonometry."):
@@ -79,6 +94,24 @@ def public_modules() -> Iterator[tuple[str, ModuleType]]:
             yield found.name, importlib.import_module(found.name)
         except ImportError:  # pragma: no cover - an optional backend
             continue
+
+
+def published(module: types.ModuleType) -> Iterator[tuple[str, object]]:
+    """``(name, value)`` for every public value *module* hands a caller.
+
+    The names are those bound in the module and those its ``__all__`` lists,
+    so a name served by a module-level ``__getattr__`` is read too.
+    """
+    names = set(vars(module)) | set(getattr(module, "__all__", ()))
+    for name in sorted(names):
+        if not _is_public(name):
+            continue
+        try:
+            value = getattr(module, name)
+        except AttributeError:
+            continue
+        if _is_value(value):
+            yield name, value
 
 
 def _is_value(obj: object) -> bool:
@@ -107,48 +140,63 @@ def mutable_parts(value: object, path: str) -> Iterator[tuple[str, str]]:
             if obj.flags.writeable:
                 yield where, "writeable ndarray"
             return
+        is_record = dataclasses.is_dataclass(obj) and not isinstance(obj, type)
         if isinstance(obj, _MUTABLE):
             yield where, type(obj).__name__
+        elif is_record and not type(obj).__dataclass_params__.frozen:  # type: ignore[attr-defined]
+            yield where, f"{type(obj).__name__} (dataclass, not frozen)"
         if isinstance(obj, Mapping):
             for key, item in obj.items():
                 yield from walk(item, f"{where}[{key!r}]")
-        elif isinstance(obj, (tuple, list, set, frozenset)):
+        elif isinstance(obj, (Sequence, Set)) and not isinstance(obj, range):
             for index, item in enumerate(obj):
                 yield from walk(item, f"{where}[{index}]")
-        elif dataclasses.is_dataclass(obj) and not isinstance(obj, type):
-            for field in dataclasses.fields(obj):
+        elif is_record:
+            for field in dataclasses.fields(obj):  # type: ignore[arg-type]
                 yield from walk(getattr(obj, field.name), f"{where}.{field.name}")
 
     yield from walk(value, path)
 
 
 def offenders(
-    modules: Iterator[tuple[str, ModuleType]] | None = None,
+    modules: Iterator[tuple[str, types.ModuleType]] | None = None,
     exempt: Mapping[tuple[str, str], str] = EXEMPT,
 ) -> tuple[list[Offence], list[tuple[str, str]]]:
     """Every mutable part of a published value, and every stale exemption.
 
+    One object published under several names (a table and the package that
+    re-exports it) is reported once, under the first name the walk meets, and
+    an exemption covers the object under every name it goes by.
+
     :param modules: ``(dotted name, module)`` pairs to inspect; the public
         modules of the installed package when omitted.
     :param exempt: The escape hatch, keyed by ``(module, name)``.
-    :return: The offences, reported once per object, and the exemptions that
-        name something that is no longer published.
+    :return: The offences, and the exemptions that no longer excuse anything:
+        the name is gone, or what it holds can no longer be changed.
     """
+    entries = [
+        (module_name, name, value)
+        for module_name, module in (
+            modules if modules is not None else public_modules()
+        )
+        for name, value in published(module)
+    ]
+    by_key = {(module_name, name): value for module_name, name, value in entries}
+    excused = {id(by_key[key]) for key in exempt if key in by_key}
+    stale = sorted(
+        key
+        for key in exempt
+        if key not in by_key or not any(mutable_parts(by_key[key], key[1]))
+    )
     found: list[Offence] = []
     reported: set[int] = set()
-    published: set[tuple[str, str]] = set()
-    for module_name, module in modules if modules is not None else public_modules():
-        for name, value in vars(module).items():
-            if not _is_public(name) or not _is_value(value):
-                continue
-            published.add((module_name, name))
-            if (module_name, name) in exempt or id(value) in reported:
-                continue
-            parts = list(mutable_parts(value, name))
-            if parts:
-                reported.add(id(value))
-            found.extend(Offence(module_name, name, path, kind) for path, kind in parts)
-    stale = sorted(key for key in exempt if key not in published)
+    for module_name, name, value in entries:
+        if id(value) in excused or id(value) in reported:
+            continue
+        parts = list(mutable_parts(value, name))
+        if parts:
+            reported.add(id(value))
+        found.extend(Offence(module_name, name, path, kind) for path, kind in parts)
     return found, stale
 
 
@@ -174,7 +222,10 @@ def main() -> int:
             "scripts/check_frozen_constants.py with its reason."
         )
     for key in stale:
-        print(f"::error::EXEMPT lists {key}, which is no longer published")
+        print(
+            f"::error::EXEMPT lists {key}, which is no longer published or no "
+            "longer mutable"
+        )
     return 1
 
 

@@ -539,7 +539,9 @@ _DAMPER_CORRECTION: dict[str, NDArray[np.float64]] = {
 
 
 def _frequencies(frequencies: ArrayLike) -> NDArray[np.float64]:
-    f = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
+    # A copy, so a result never hands out OCTAVE_BANDS (read-only) or the
+    # caller's own array.
+    f = np.array(frequencies, dtype=np.float64, ndmin=1)
     if f.ndim != 1 or f.size == 0:
         msg = "'frequencies' must be a non-empty 1-D array."
         raise ValueError(msg)

@@ -328,8 +328,8 @@ ax = result.plot()
 ## Las tablas publicadas no admiten escritura
 
 Toda tabla que la biblioteca publica a nivel de módulo es de sólo lectura en
-la 4.0. En la 3.3.0, ciento nueve de ellas eran diccionarios corrientes y
-treinta y un arrays admitían aritmética sobre el propio array, así que una
+la 4.0. En la 3.3.0 las tablas publicadas eran diccionarios corrientes y los
+arrays publicados admitían aritmética sobre el propio array, así que una
 línea como `REFERENCE_CURVE[500] = 0.9` o `BAND_IMPORTANCE *= 2` cambiaba el
 número para todo lo que se ejecutara después en el mismo proceso, sin que
 nada lo avisara. Los diccionarios son ahora `types.MappingProxyType`, también
@@ -350,6 +350,12 @@ weights[0] = 0.0
 print(REFERENCE_CURVE[4000], curve[4000], weights[0], BAND_IMPORTANCE[0])
 # 0.9 1.0 0.0 0.0083
 ```
+
+Una tabla que lleva tablas dentro necesita copiar cada nivel, como en
+`{area: dict(rows) for area, rows in GUIDE_VALUES.items()}`. La misma copia
+hace falta antes de serializar una tabla con pickle, copiarla en profundidad o
+escribirla como JSON, porque un mapeo de sólo lectura no admite ninguna de las
+tres cosas.
 
 ## Los diez nombres que ya no están
 

@@ -183,7 +183,7 @@ $A_o$.
 
 ## RAILWAY_NEW_LINE_NIGHT_A_O
 
-*Constant* (`mappingproxy`).
+*Constant* (`mapping`).
 
 ```python
 RAILWAY_NEW_LINE_NIGHT_A_O = {'surface': 0.6, 'underground': 0.3}
@@ -356,8 +356,8 @@ The weighting factor $\alpha_{Zug}$ of Table 2 for one category.
 
 ## TRAIN_WEIGHTING_FACTORS
 
-*Constant* (`mappingproxy`).
+*Constant* (`mapping`).
 
 ```python
-TRAIN_WEIGHTING_FACTORS = {'tram_metro': mappingproxy({'surface': 0.7, 'underground': 1.0}), 's_bahn': mappingproxy({'surface': 0.8, 'underground': 1.0}), 'passenger': mappingproxy({'surface': 0.9, 'underground': 1.0}), 'freight': mappingproxy({'surface': 1.0, 'underground': 1.0}), 'freight_long': mappingproxy({'surface': 1.3, 'underground': 1.3})}
+TRAIN_WEIGHTING_FACTORS = {'tram_metro': {'surface': 0.7, 'underground': 1.0}, 's_bahn': {'surface': 0.8, 'underground': 1.0}, 'passenger': {'surface': 0.9, 'underground': 1.0}, 'freight': {'surface': 1.0, 'underground': 1.0}, 'freight_long': {'surface': 1.3, 'underground': 1.3}}
 ```

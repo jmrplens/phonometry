@@ -104,7 +104,7 @@ cloth tables print none.
 
 ## PUBLISHED_FLOW_RESISTANCE
 
-*Constant* (`mappingproxy`).
+*Constant* (`mapping`).
 
 ## resistive_sheet_named
 

@@ -90,7 +90,7 @@ is a configuration it does not rate and has no row.
 
 ## PUBLISHED_TRANSMISSION_LOSS
 
-*Constant* (`mappingproxy`).
+*Constant* (`mapping`).
 
 ## TRANSMISSION_LOSS_BANDS_HZ
 

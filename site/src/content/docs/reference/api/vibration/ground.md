@@ -78,7 +78,7 @@ slow at every Poisson's ratio.
 
 ## GROUND_WAVE_SPEED_RANGES_M_S
 
-*Constant* (`mappingproxy`).
+*Constant* (`mapping`).
 
 ```python
 GROUND_WAVE_SPEED_RANGES_M_S = {'compression': (200.0, 2000.0), 'shear': (10.0, 1000.0)}

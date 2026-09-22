@@ -210,7 +210,7 @@ Practical sound absorption coefficients `alpha_p` (ISO 11654 Clause 4.1).
 
 ## REFERENCE_CURVE
 
-*Constant* (`mappingproxy`).
+*Constant* (`mapping`).
 
 ```python
 REFERENCE_CURVE = {250: 0.8, 500: 1.0, 1000: 1.0, 2000: 1.0, 4000: 0.9}

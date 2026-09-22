@@ -215,7 +215,7 @@ modes and `R` / `rc` lose their meaning.
 
 ## SOURCE_POWER_MODELS
 
-*Constant* (`mappingproxy`).
+*Constant* (`mapping`).
 
 ```python
 SOURCE_POWER_MODELS = {'constant_power': 0.0, 'constant_volume': 1.0, 'constant_pressure': -1.0}

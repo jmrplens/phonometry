@@ -182,17 +182,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
-- **Every published table refuses writes.** A hundred and nine module-level
-  tables were plain dictionaries, several of them annotated `Mapping`, so
+- **Every published table refuses writes.** Module-level tables were plain
+  dictionaries, even where the annotation said `Mapping`, so
   `GUIDE_VALUES["residential"] = ...` or `REFERENCE_CURVE[500] = 0.0` changed
   a printed number for every caller in the process without anything raising,
-  and thirty-one published arrays such as `speech.sii.BAND_IMPORTANCE` took
-  in-place arithmetic the same way. The tables are now read-only mappings
+  and published arrays such as `speech.sii.BAND_IMPORTANCE` took in-place
+  arithmetic the same way. The tables are now read-only mappings
   (`types.MappingProxyType`) down to the dictionaries nested inside them, the
-  arrays have their `writeable` flag cleared, and the per-category fields of
-  `environment.ROAD_COEFFICIENTS` are read-only too. Reading is unchanged;
-  code that edited one of them has to copy it first (`dict(TABLE)`,
-  `array.copy()`). A new check walks the installed package and fails on any
+  arrays have their `writeable` flag cleared, and
+  `environment.RoadEmissionCoefficients` holds its per-category tables
+  read-only on any instance while still pickling. Reading is unchanged. Code
+  that edited one of these tables has to copy it first (`dict(TABLE)`,
+  `array.copy()`), and so does code that pickles, deep-copies or writes a
+  table out as JSON, since a read-only mapping supports none of the three.
+  `room.enclosed_space_reverberation`, and the VDI 2081 branch of
+  `noise_control.unlined_circular_duct_attenuation` and
+  `noise_control.silencer_self_noise`, handed back the published band axis as
+  their own `frequencies`, so writing into the result edited the table; they
+  now return a copy. A new check walks the installed package and fails on any
   mutable container a public name reaches.
 
 - **The catalogues page shows one catalogue at a time.** Seventeen tables

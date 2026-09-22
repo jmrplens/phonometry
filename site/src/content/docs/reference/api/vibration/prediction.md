@@ -134,7 +134,7 @@ the distance in millimetres, which the reference metre says is a slip.
 
 ## BLASTING_RELEVANT_DISTANCE_M
 
-*Constant* (`mappingproxy`).
+*Constant* (`mapping`).
 
 ```python
 BLASTING_RELEVANT_DISTANCE_M = {'quarry': 1500.0, 'construction': 400.0}
@@ -361,7 +361,7 @@ MACHINE_COUNT_AXIS = (4, 5, 6, 8, 10, 15, 20, 25, 30, 35, 40, 50, 60, 70, 80, 90
 
 ## MACHINE_COUNT_CORRECTION
 
-*Constant* (`mappingproxy`).
+*Constant* (`mapping`).
 
 ```python
 MACHINE_COUNT_CORRECTION = {3: (0.551, 0.537, 0.519, 0.496, 0.471, 0.423, 0.383, 0.36, 0.336, 0.323, 0.309, 0.3, 0.292, 0.289, 0.289, 0.289, 0.286), 5: (0.455, 0.444, 0.427, 0.406, 0.386, 0.342, 0.308, 0.292, 0.276, 0.264, 0.256, 0.245, 0.239, 0.238, 0.236, 0.234, 0.234), 10: (0.365, 0.355, 0.342, 0.327, 0.308, 0.28, 0.252, 0.239, 0.225, 0.216, 0.207, 0.2, 0.193, 0.192, 0.192, 0.191, 0.189), 30: (0.292, 0.283, 0.273, 0.258, 0.243, 0.22, 0.2, 0.188, 0.176, 0.169, 0.164, 0.157, 0.153, 0.153, 0.151, 0.15, 0.149), 60: (0.242, 0.239, 0.23, 0.22, 0.207, 0.189, 0.17, 0.158, 0.148, 0.142, 0.136, 0.13, 0.127, 0.127, 0.126, 0.125, 0.125), 100: (0.189, 0.188, 0.18, 0.173, 0.161, 0.147, 0.134, 0.125, 0.117, 0.111, 0.108, 0.1, 0.1, 0.1, 0.1, 0.1, 0.099)}
@@ -401,7 +401,7 @@ five-hundredth and interpolated linearly between the readings.
 
 ## MACHINE_FREQUENCY_BANDS_HZ
 
-*Constant* (`mappingproxy`).
+*Constant* (`mapping`).
 
 ```python
 MACHINE_FREQUENCY_BANDS_HZ = {'counter_blow_hammer': (4.0, 8.0), 'forging_press_horizontal': (5.0, 15.0), 'frame_saw': (4.0, 8.0)}
@@ -593,7 +593,7 @@ and predominantly harmonic vibration in the lower frequency range.
 
 ## SOURCE_EXPONENTS
 
-*Constant* (`mappingproxy`).
+*Constant* (`mapping`).
 
 ```python
 SOURCE_EXPONENTS = {('line', 'harmonic', 'surface'): 0.0, ('line', 'harmonic', 'body'): 0.5, ('point', 'harmonic', 'surface'): 0.5, ('line', 'impulsive', 'surface'): 0.5, ('point', 'harmonic', 'body'): 1.0, ('line', 'impulsive', 'body'): 1.0, ('point', 'impulsive', 'surface'): 1.0, ('point', 'impulsive', 'body'): 1.5}
@@ -669,7 +669,7 @@ frequencies of the vehicle itself do not move with the speed.
 
 ## TRACK_TRANSMITTED_BANDS_HZ
 
-*Constant* (`mappingproxy`).
+*Constant* (`mapping`).
 
 ```python
 TRACK_TRANSMITTED_BANDS_HZ = {'ballast': (40.0, 80.0), 'under_ballast_mat': (15.0, 40.0), 'mass_spring': (5.0, 20.0)}
@@ -685,7 +685,7 @@ TRAIN_CHAIN_EXPONENT_RANGE = (0.3, 0.5)
 
 ## VEHICLE_NATURAL_FREQUENCIES_HZ
 
-*Constant* (`mappingproxy`).
+*Constant* (`mapping`).
 
 ```python
 VEHICLE_NATURAL_FREQUENCIES_HZ = {'car_body': (1.0, 3.0), 'bogie': (6.0, 10.0)}

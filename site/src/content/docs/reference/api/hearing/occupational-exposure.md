@@ -198,7 +198,7 @@ sampling advisory. The uncertainty is the job-based budget (Eq C.9, Table C.4).
 
 ## INSTRUMENT_U2
 
-*Constant* (`mappingproxy`).
+*Constant* (`mapping`).
 
 ```python
 INSTRUMENT_U2 = {'class1': 0.7, 'class2': 1.5, 'personal_exposimeter': 1.5}

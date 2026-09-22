@@ -100,7 +100,7 @@ constant $R_\mathrm{i} = S_\mathrm{i} \alpha_\mathrm{i} / (1 - \alpha_\mathrm{i}
 
 ## ENCLOSURE_MODELS
 
-*Constant* (`mappingproxy`).
+*Constant* (`mapping`).
 
 ```python
 ENCLOSURE_MODELS = {'bies': 0.3, 'norton': 0.0}

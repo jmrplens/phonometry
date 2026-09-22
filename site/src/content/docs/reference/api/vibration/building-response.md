@@ -305,7 +305,7 @@ HEIGHT_PERIOD_COEFFICIENT_S_PER_M = 0.022
 
 ## PERIOD_COEFFICIENT_RANGES
 
-*Constant* (`mappingproxy`).
+*Constant* (`mapping`).
 
 ```python
 PERIOD_COEFFICIENT_RANGES = {'height': (0.014, 0.03), 'height_width': (0.087, 0.109), 'slenderness': (0.06, 0.08)}

@@ -382,7 +382,7 @@ An opening fitted with an effective silencer does not count as one.
 
 ## MANDATORY_BAND_RANGE_HZ
 
-*Constant* (`mappingproxy`).
+*Constant* (`mapping`).
 
 ```python
 MANDATORY_BAND_RANGE_HZ = {3: (100.0, 5000.0), 1: (125.0, 4000.0)}
@@ -416,7 +416,7 @@ One row of Table 1: a way of measuring and what it yields.
 
 ## PREFERRED_BAND_RANGE_HZ
 
-*Constant* (`mappingproxy`).
+*Constant* (`mapping`).
 
 ```python
 PREFERRED_BAND_RANGE_HZ = {3: (50.0, 10000.0), 1: (63.0, 8000.0)}
@@ -462,7 +462,7 @@ at all.
 
 ## ROOM_ABSORPTION_ESTIMATES
 
-*Constant* (`mappingproxy`).
+*Constant* (`mapping`).
 
 ```python
 ROOM_ABSORPTION_ESTIMATES = {0.05: 'Nearly empty room with smooth hard walls made of concrete, brick, plaster or tile', 0.1: 'Partly empty room; room with smooth walls', 0.15: 'Room with furniture; rectangular machinery room; rectangular industrial room', 0.2: 'Irregularly shaped room with furniture; irregularly shaped machinery room or industrial room', 0.25: 'Room with upholstered furniture; machinery or industrial room with a small amount of sound-absorbing material on ceiling or walls (e.g. partially absorptive ceiling)', 0.35: 'Room with sound-absorbing materials on both ceiling and walls', 0.5: 'Room with large amounts of sound-absorbing materials on ceiling and walls'}
@@ -679,7 +679,7 @@ rather than a number the annex does not give.
 
 ## TEST_ENVIRONMENT_REQUIREMENTS
 
-*Constant* (`mappingproxy`).
+*Constant* (`mapping`).
 
 ```python
 TEST_ENVIRONMENT_REQUIREMENTS = {'ISO 3743-1': (None, 6.0), 'ISO 3744': (2.0, 6.0), 'ISO 3746': (7.0, 3.0), 'ISO 3747': (None, 3.0), 'ISO 9614-1': (None, None), 'ISO 9614-2': (None, None), 'ISO 11201': (2.0, 6.0), 'ISO 11202': (7.0, 3.0), 'ISO 11204': (7.0, 6.0)}

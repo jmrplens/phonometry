@@ -72,7 +72,7 @@ inputs.
 
 ## BAND_FLATNESS_LIMIT_DB
 
-*Constant* (`mappingproxy`).
+*Constant* (`mapping`).
 
 ```python
 BAND_FLATNESS_LIMIT_DB = {125.0: 6.0, 250.0: 5.0}

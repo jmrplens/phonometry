@@ -85,7 +85,7 @@ operation (Article 25.2) only the last two apply.
 
 ## ACOUSTIC_AREA_TYPES
 
-*Constant* (`mappingproxy`).
+*Constant* (`mapping`).
 
 ```python
 ACOUSTIC_AREA_TYPES = {'e': 'sanitary, educational and cultural land use requiring special protection', 'a': 'residential land use', 'd': 'tertiary land use other than type c', 'c': 'recreational and public-entertainment land use', 'b': 'industrial land use', 'f': 'general transport-infrastructure systems and public facilities'}
@@ -716,7 +716,7 @@ RD1367_MAX_CORRECTION = 9.0
 
 ## RD1367_PERIOD_CLOCK_LIMITS
 
-*Constant* (`mappingproxy`).
+*Constant* (`mapping`).
 
 ```python
 RD1367_PERIOD_CLOCK_LIMITS = {'day': (7, 19), 'evening': (19, 23), 'night': (23, 7)}
@@ -724,7 +724,7 @@ RD1367_PERIOD_CLOCK_LIMITS = {'day': (7, 19), 'evening': (19, 23), 'night': (23,
 
 ## RD1367_PERIOD_HOURS
 
-*Constant* (`mappingproxy`).
+*Constant* (`mapping`).
 
 ```python
 RD1367_PERIOD_HOURS = {'day': 12.0, 'evening': 4.0, 'night': 8.0}

@@ -837,3 +837,35 @@ def test_plot_draws_the_total_and_every_category() -> None:
     ax_es = result.plot(language="es")
     assert "CNOSSOS" in ax_es.get_title()
     plt.close("all")
+
+
+def test_the_coefficient_tables_refuse_writes_on_any_instance() -> None:
+    """``frozen=True`` alone let ``ROAD_COEFFICIENTS.rolling_a["1"] = ...`` through.
+
+    The default database is shared by every caller, and a database a caller
+    builds from plain dictionaries is held the same way.
+    """
+    built = dataclasses.replace(ROAD_COEFFICIENTS, temperature_k={"1": 0.08})
+    for database in (ROAD_COEFFICIENTS, built):
+        with pytest.raises(TypeError, match="does not support item assignment"):
+            database.rolling_a["1"] = (0.0,) * 8  # type: ignore[index]
+        with pytest.raises(TypeError, match="does not support item assignment"):
+            database.temperature_k["1"] = 0.0  # type: ignore[index]
+
+
+def test_the_coefficients_survive_pickling_and_deep_copies() -> None:
+    """A read-only mapping cannot be pickled; the database still has to be.
+
+    Passing the coefficients to a process pool pickles them, and a deep copy
+    goes through the same protocol.
+    """
+    import copy
+    import pickle
+
+    for clone in (
+        pickle.loads(pickle.dumps(ROAD_COEFFICIENTS)),  # noqa: S301 - own object
+        copy.deepcopy(ROAD_COEFFICIENTS),
+    ):
+        assert clone == ROAD_COEFFICIENTS
+        with pytest.raises(TypeError, match="does not support item assignment"):
+            clone.junction_c["1"] = ((0.0, 0.0), (0.0, 0.0))  # type: ignore[index]

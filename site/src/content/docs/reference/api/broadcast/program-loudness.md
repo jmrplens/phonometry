@@ -72,7 +72,7 @@ altogether (use a weight of 0 for them).
 
 ## DEFAULT_CHANNEL_WEIGHTS
 
-*Constant* (`mappingproxy`).
+*Constant* (`mapping`).
 
 ```python
 DEFAULT_CHANNEL_WEIGHTS = {1: (1.0,), 2: (1.0, 1.0), 5: (1.0, 1.0, 1.0, 1.41, 1.41), 6: (1.0, 1.0, 1.0, 0.0, 1.41, 1.41)}

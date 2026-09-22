@@ -358,4 +358,4 @@ that is not a number. Each of those is a different answer.
 
 ## PUBLISHED_DUCT_TRANSMISSION_LOSS
 
-*Constant* (`mappingproxy`).
+*Constant* (`mapping`).

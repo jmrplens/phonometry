@@ -252,10 +252,10 @@ when $T = T_0$.
 
 ## HEAVY_IMPACT_A_WEIGHTING
 
-*Constant* (`mappingproxy`).
+*Constant* (`mapping`).
 
 ```python
-HEAVY_IMPACT_A_WEIGHTING = {'third': mappingproxy({50.0: -30.3, 63.0: -26.2, 80.0: -22.4, 100.0: -19.1, 125.0: -16.2, 160.0: -13.2, 200.0: -10.8, 250.0: -8.7, 315.0: -6.6, 400.0: -4.8, 500.0: -3.2, 630.0: -1.9}), 'octave': mappingproxy({63.0: -26.2, 125.0: -16.2, 250.0: -8.7, 500.0: -3.2})}
+HEAVY_IMPACT_A_WEIGHTING = {'third': {50.0: -30.3, 63.0: -26.2, 80.0: -22.4, 100.0: -19.1, 125.0: -16.2, 160.0: -13.2, 200.0: -10.8, 250.0: -8.7, 315.0: -6.6, 400.0: -4.8, 500.0: -3.2, 630.0: -1.9}, 'octave': {63.0: -26.2, 125.0: -16.2, 250.0: -8.7, 500.0: -3.2}}
 ```
 
 ## HEAVY_IMPACT_OCTAVE_BANDS
@@ -349,7 +349,7 @@ Printed specification of a standard heavy and soft impact source.
 
 ## HEAVY_IMPACT_SOURCES
 
-*Constant* (`mappingproxy`).
+*Constant* (`mapping`).
 
 ```python
 HEAVY_IMPACT_SOURCES = {'rubber_ball': ((39.0, 1.0), (31.0, 1.5), (23.0, 1.5), (17.0, 2.0), (12.5, 2.0)), 'bang_machine': ((47.0, 1.0), (40.0, 1.5), (22.0, 1.5), (11.5, 2.0), (5.5, 2.0))}

@@ -422,7 +422,7 @@ MAX_K3_DB = 7.0
 
 ## MINIMUM_BACKGROUND_MARGIN_DB
 
-*Constant* (`mappingproxy`).
+*Constant* (`mapping`).
 
 ```python
 MINIMUM_BACKGROUND_MARGIN_DB = {'engineering': 6.0, 'survey': 3.0}

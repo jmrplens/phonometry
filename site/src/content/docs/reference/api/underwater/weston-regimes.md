@@ -314,7 +314,7 @@ WESTON_REGIMES = ('spherical', 'cylindrical', 'mode-stripping', 'single-mode')
 
 ## WESTON_SEABEDS
 
-*Constant* (`mappingproxy`).
+*Constant* (`mapping`).
 
 ```python
 WESTON_SEABEDS = {'sand': WestonSeabed(name='sand', grain_size=1.5, sound_speed_ratio=1.2, density_ratio=2.1, attenuation_db_per_wavelength=0.88, loss_parameter=0.0161, sound_speed_gradient_per_s=0.0), 'mud': WestonSeabed(name='mud', grain_size=8.0, sound_speed_ratio=1.0, density_ratio=1.4, attenuation_db_per_wavelength=0.09, loss_parameter=0.00165, sound_speed_gradient_per_s=1.0)}

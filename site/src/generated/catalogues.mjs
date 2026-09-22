@@ -46803,7 +46803,7 @@ export const catalogues = {
         "gauge": "",
         "weave": "",
         "source": "Vér & Beranek 2e TABLE 14.1, PDF page 599 (printed p. 598)",
-        "note": "",
+        "note": "The page prints E_trans = 2.1e2 psi below E_min = 3e2 psi for this row, and footnote c of the same table defines E_min as the smallest value of E. The two cells therefore contradict each other, and the page does not say which of them is wrong: E_I,max = 2.3e2 psi agrees with the printed E_trans through the chapter's own E_I,max = eta_max E_trans, while every other row of the table puts E_trans between one and two orders of magnitude above E_min. Both are served as printed and the defect is registered in docs/ERRATA.md under \"Ver & Beranek 2e (2006), TABLE 14.1\".",
         "attributedTo": {},
         "cells": [
           {
@@ -84551,7 +84551,7 @@ export const catalogues = {
           {
             "text": "610",
             "kind": "derived",
-            "note": "carried down from the 610 mm printed one row above it. The page prints the diameter once for that part of the Spiral Wound Ducts block of Table 30 and leaves the cell blank on the two rows below it, which print their own length and gauge."
+            "note": "carried down from the 610 mm printed two rows above it. The page prints the diameter once for that part of the Spiral Wound Ducts block of Table 30 and leaves the cell blank on the two rows below it, which print their own length and gauge."
           },
           {
             "text": "",

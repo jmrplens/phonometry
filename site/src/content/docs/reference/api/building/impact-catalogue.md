@@ -60,7 +60,7 @@ other catalogue here.
 What the page got wrong
 -----------------------
 These tables print every dimension twice, in SI and in US customary units, and
-nineteen of the three hundred and twenty pairs are not each other: row 9 gives
+nineteen of the three hundred and twenty-one pairs are not each other: row 9 gives
 16 in as 30,8 cm where the other eighteen 16 in of these tables are 40,6 cm,
 row 31 gives 2 in as 10,1 cm, row 38 gives 44 oz/yd2 as 1,99 kg/m2 where 28 and
 30 give it as 1,5. They are registered as one entry in `docs/ERRATA.md` and
@@ -145,7 +145,7 @@ rating, and which one it is says which table it came from.
 | `impact_insulation_class` | The IIC of the whole floor-ceiling assembly this row describes, dimensionless. Filled by Tables 32.1 to 32.7, and never on a row that gives an improvement. Two rows print no class at all and leave it empty, which `why_missing` says. |
 | `impact_insulation_class_improvement` | The delta-IIC an elastic surface treatment adds over a hard massive structural floor, dimensionless. Filled by Table 32.8 alone. It is a difference between two ratings and not a rating, so it is not comparable with `impact_insulation_class` and is not to be added to one from another row: the page gives the improvement over the floor it was measured on, and its own footnote says that over wood joists it may be substantially smaller. |
 | `refers_to_row` | The row this row's printed description refers to instead of repeating the structural floor, named by the number the table prints in its own column. Empty when the description stands on its own. The description itself is printed in full and is kept whole in `name`; this is only the thing it inherits. |
-| `has_section_drawing` | Whether the "Esquema" cell of this row holds a drawing of the section. That cell prints no text of any kind, so there is nothing to transcribe and nothing else is recorded about it. The rows that only refer to another one carry no drawing. |
+| `has_section_drawing` | Whether the "Esquema" cell of this row holds a drawing of the section. That cell prints no text of any kind, so there is nothing to transcribe and nothing else is recorded about it. The four rows whose description is nothing but a reference to another row carry no drawing, and neither do the six rows of Table 32.8, which has no such cell; every other row has one. |
 | `layer_density_kg_m3` | A mass density the running description buries, in kilograms per cubic metre, lifted out so it can be read without parsing prose. Three rows print one and it is the density of one layer, which is why the field says layer and not slab: on row 5 it is a semi-rigid polyurethane foam, on row 35A a compressed paper-pulp board and only on row 37A the structural concrete. Which layer is named by the row's `note`, and it is never a density of the assembly. Row 35A serves none, because the page prints that one cell twice and the two printings disagree; `why_missing` hands back both. |
 | `name` | The material as the table names it, attribution stripped. |
 | `variant` | Which specimen or condition this row is, when the page prints several under one name: `"chemically pure"`, `"direction x"`, `"0.68 mm diameter"`. Empty when the page prints one. |

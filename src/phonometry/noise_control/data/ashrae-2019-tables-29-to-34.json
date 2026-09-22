@@ -352,7 +352,7 @@
       "transmission_loss_2000_db": 28,
       "transmission_loss_4000_db": 41,
       "derived": {
-        "diameter_mm": "carried down from the 610 mm printed one row above it. The page prints the diameter once for that part of the Spiral Wound Ducts block of Table 30 and leaves the cell blank on the two rows below it, which print their own length and gauge."
+        "diameter_mm": "carried down from the 610 mm printed two rows above it. The page prints the diameter once for that part of the Spiral Wound Ducts block of Table 30 and leaves the cell blank on the two rows below it, which print their own length and gauge."
       },
       "group": "Spiral Wound Ducts",
       "ranges": {

@@ -7,12 +7,12 @@ sidebar:
 
 Commercial damping materials, with the temperature and the frequency.
 
-Every other loss factor this library holds is one number. Bies prints 0.0001
-for steel, Cremer 0.0002 for a different steel, Hopkins an estimate for
-plasterboard, and none of them says at what temperature or at what frequency,
-because for a metal it hardly moves. For the materials on this page it moves
-by two orders of magnitude, and a single number is not a property of them at
-all.
+Every other loss factor this library holds is a figure with no conditions
+attached. Bies prints 0.0001 for mild steel, Cremer a band of 0.00002 to
+0.0003 for steel and Hopkins one of 0 to 0.0001, and not one of them says at
+what temperature or at what frequency, because for a metal it hardly moves.
+For the materials on this page it moves by two orders of magnitude, and
+neither a number nor a band is a property of them at all.
 
 A viscoelastic damping treatment is a polymer worked near its glass
 transition. Below that transition it is stiff and stores the energy it is
@@ -192,7 +192,7 @@ The temperature at which the loss factor peaks, at one frequency.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | when the table prints no column for that frequency, or when it prints one and this row leaves it empty. |
+| ValueError | when the table prints no column for that frequency, or when it prints one and this row leaves it empty. An infinite or not-a-number frequency is refused the same way: converting it to an integer first raised `OverflowError` instead, which is not what this method documents and says nothing about the catalogue. |
 
 ### DampingMaterial.printed()
 

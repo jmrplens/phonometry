@@ -1,12 +1,12 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
 """Commercial damping materials, with the temperature and the frequency.
 
-Every other loss factor this library holds is one number. Bies prints 0.0001
-for steel, Cremer 0.0002 for a different steel, Hopkins an estimate for
-plasterboard, and none of them says at what temperature or at what frequency,
-because for a metal it hardly moves. For the materials on this page it moves
-by two orders of magnitude, and a single number is not a property of them at
-all.
+Every other loss factor this library holds is a figure with no conditions
+attached. Bies prints 0.0001 for mild steel, Cremer a band of 0.00002 to
+0.0003 for steel and Hopkins one of 0 to 0.0001, and not one of them says at
+what temperature or at what frequency, because for a metal it hardly moves.
+For the materials on this page it moves by two orders of magnitude, and
+neither a number nor a band is a property of them at all.
 
 A viscoelastic damping treatment is a polymer worked near its glass
 transition. Below that transition it is stiff and stores the energy it is
@@ -46,6 +46,7 @@ and this catalogue refuses them rather than guessing what the digits were.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from math import isfinite
 from types import MappingProxyType
 
 from .._internal.catalogue import CatalogueRow, read_table, take
@@ -105,10 +106,12 @@ class DampingMaterial(CatalogueRow):
         :param frequency_hz: One of the frequencies the table prints, in hertz.
         :return: The temperature in degrees Celsius.
         :raises ValueError: when the table prints no column for that frequency,
-            or when it prints one and this row leaves it empty.
+            or when it prints one and this row leaves it empty. An infinite or
+            not-a-number frequency is refused the same way: converting it to an
+            integer first raised ``OverflowError`` instead, which is not what
+            this method documents and says nothing about the catalogue.
         """
-        wanted = int(frequency_hz)
-        if wanted not in _PEAK_FREQUENCIES_HZ or wanted != frequency_hz:
+        if not isfinite(frequency_hz) or frequency_hz not in _PEAK_FREQUENCIES_HZ:
             printed = ", ".join(f"{hz} Hz" for hz in _PEAK_FREQUENCIES_HZ)
             msg = (
                 f"{self.name} has no peak temperature at {frequency_hz} Hz: the "
@@ -117,6 +120,7 @@ class DampingMaterial(CatalogueRow):
                 "it were this one is the mistake this method exists to prevent."
             )
             raise ValueError(msg)
+        wanted = int(frequency_hz)
         return self.printed(
             f"peak_temperature_at_{wanted}_hz_c",
             wanted_by=f"the peak temperature at {wanted} Hz",

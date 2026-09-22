@@ -35,8 +35,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   Chapter 49 tables that measure a duct wall band by band. Breakout and
   break-in are separate rows rather than two columns of one row, because they
   are separate measurements on specimens the chapter does not claim are the
-  same: the round ducts it measured for breakout are 200, 350, 560 and 810 mm
-  and the ones it measured for break-in are 203, 356, 559 and 813 mm. A cell
+  same: in the long seam blocks it measured 200, 350, 560 and 810 mm for
+  breakout against 203, 356, 559 and 813 mm for break-in, and in the spiral
+  blocks 300, 610 and 915 mm at three lengths against 203, 356, 660 and
+  813 mm all at one. Not one diameter, and not one length, is shared. A cell
   the page writes as a lower bound is held as one and refused rather than
   handed over as a measurement, and a number in parentheses is kept exactly as
   printed with the chapter's own note about it, because the parentheses mark

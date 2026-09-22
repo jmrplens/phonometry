@@ -296,7 +296,8 @@
         "youngs_modulus_min_pa": "3e2 psi as the page prints it, by the exact 6894.757293 Pa/psi",
         "youngs_modulus_transition_pa": "2.1e2 psi as the page prints it, by the exact 6894.757293 Pa/psi",
         "loss_modulus_max_pa": "2.3e2 psi as the page prints it, by the exact 6894.757293 Pa/psi"
-      }
+      },
+      "note": "The page prints E_trans = 2.1e2 psi below E_min = 3e2 psi for this row, and footnote c of the same table defines E_min as the smallest value of E. The two cells therefore contradict each other, and the page does not say which of them is wrong: E_I,max = 2.3e2 psi agrees with the printed E_trans through the chapter's own E_I,max = eta_max E_trans, while every other row of the table puts E_trans between one and two orders of magnitude above E_min. Both are served as printed and the defect is registered in docs/ERRATA.md under \"Ver & Beranek 2e (2006), TABLE 14.1\"."
     },
     {
       "key": "3m_468",

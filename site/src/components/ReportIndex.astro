@@ -45,9 +45,14 @@ const AREAS: Record<string, { en: string; es: string }> = {
 	solids: { en: 'Elastic solids', es: 'Sólidos elásticos' },
 };
 
+/*
+ * One area holds a single fiche (aircraft noise, today), and a count written
+ * without a singular reads "1 fiches" there in English and "1 fichas" in
+ * Spanish. Both are published prose, so both get the singular.
+ */
 const copy = {
-	en: { source: 'Shown in', count: (n: number) => `${n} fiches` },
-	es: { source: 'Se muestra en', count: (n: number) => `${n} fichas` },
+	en: { source: 'Shown in', count: (n: number) => `${n} ${n === 1 ? 'fiche' : 'fiches'}` },
+	es: { source: 'Se muestra en', count: (n: number) => `${n} ${n === 1 ? 'ficha' : 'fichas'}` },
 }[lang];
 
 const groups = lang === 'es' ? reportsByAreaEs : reportsByArea;

@@ -7076,6 +7076,47 @@ dos ediciones con las mismas entradas y en el mismo orden.
   demás celdas de las diecisiete filas se sirven con normalidad.
 - **Estado:** sin comunicar.
 
+## Ver & Beranek 2e (2006), TABLA 14.1 (un módulo de transición impreso por debajo del módulo más pequeño de su propia fila)
+
+- **Dónde:** TABLA 14.1, «Properties of Some Commercial Damping Materials»,
+  fila «3M ISD-113», en la página impresa 598 (página 599 del PDF), dentro del
+  capítulo 14, «Structural Damping», de Eric E. Ungar y Jeffrey A. Zapfe.
+  Fuente no normativa: un manual.
+- **Lo impreso:** la fila da $\eta_{\max} = 1.1$, temperaturas de pico de
+  $-45$, $-20$ y $15\,^\circ\mathrm{F}$, y los cuatro módulos
+  $E_{\max} = 1.5\mathrm{e}5$, $E_{\min} = 3\mathrm{e}2$,
+  $E_{\mathrm{trans}} = 2.1\mathrm{e}2$ y $E_{I,\max} = 2.3\mathrm{e}2$ psi.
+- **El problema:** esa misma página define $E_{\min}$ como «the smallest value
+  of $E$», en el párrafo bajo la tabla y otra vez en la nota al pie c, donde
+  dice que $E_{\max}$ vale a temperaturas bajas, $E_{\min}$ a altas y
+  $E_{\mathrm{trans}}$ en el rango de $\eta_{\max}$, que queda entre ambos.
+  Aquí $E_{\mathrm{trans}} = 2.1 \times 10^2$ psi es menor que
+  $E_{\min} = 3 \times 10^2$ psi, así que una de las dos celdas contradice la
+  definición que la página da de la otra. La página no dice cuál. El
+  $E_{\mathrm{trans}}$ impreso lo respalda su vecina a través de la relación
+  del propio capítulo, $E_{I,\max} \approx \eta_{\max} E_{\mathrm{trans}}$:
+  $1.1 \times 2.1 \times 10^2 = 2.3 \times 10^2$ psi, que es justo lo que
+  imprime $E_{I,\max}$. En contra, las otras catorce filas que imprimen los tres
+  módulos ponen $E_{\mathrm{trans}}$ entre uno y dos órdenes de magnitud por
+  encima de $E_{\min}$, que es donde tendría que estar $E_{\min}$ para que
+  esta fila se pareciera a sus vecinas. Ninguna de las dos lecturas sale de la
+  página.
+- **Evidencia:** Verificado en la página 599 del PDF (p. impresa 598) de
+  Ver & Beranek, *Noise and Vibration Control Engineering* 2e (2006). Las
+  cuatro celdas de la fila se leen sin ambigüedad en la notación que define la
+  nota al pie c, y la frase que define $E_{\min}$ también; el defecto es una
+  contradicción entre dos celdas legibles, no una celda ilegible. Tomando
+  $E_{\mathrm{trans}} / \sqrt{E_{\max} E_{\min}}$ como prueba de forma sobre
+  las quince filas que imprimen los tres, las otras catorce caen entre 0,976
+  y 1,054 y esta da 0,031.
+- **Qué hace la biblioteca:** las dos celdas se sirven tal como se imprimen,
+  porque corregir cualquiera de ellas sería que esta biblioteca eligiera entre
+  dos lecturas que la página deja abiertas. La fila lleva una nota que lo
+  dice, y el catálogo publicado la muestra; un test comprueba que el orden se
+  cumple en todas las demás filas, para que una segunda aparición no pase
+  inadvertida.
+- **Estado:** sin comunicar.
+
 ## Ver & Beranek 2e (2006), TABLA 8.5 (la masa por unidad de superficie de la malla más fina, diez veces mayor en libras)
 
 - **Dónde:** TABLA 8.5, «Mechanical Characteristics and Flow Resistance $R_s$
@@ -7223,8 +7264,8 @@ dos ediciones con las mismas entradas y en el mismo orden.
   dos veces, primero en SI y después, entre paréntesis, en unidades
   estadounidenses, dentro de la descripción corrida de cada construcción:
   «Losa de 10 cm (4 in)», «cada 40,6 cm (16 in)», «alfombra de 1,5 kg/m2
-  (44 oz/yd2)». Las ocho tablas imprimen trescientos veinte pares de esos.
-- **El problema:** diecinueve de los trescientos veinte pares no son la misma
+  (44 oz/yd2)». Las ocho tablas imprimen trescientos veintiún pares de esos.
+- **El problema:** diecinueve de los trescientos veintiún pares no son la misma
   cantidad. La pulgada son 2,54 cm exactos, la libra 0,45359237 kg exactos y
   la yarda 0,9144 m exactos, así que una libra por pie cúbico son 16,0185
   kg/m3, una libra por yarda cuadrada 0,54249 kg/m2 y una onza por yarda
@@ -7307,7 +7348,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   Measurements and Noise Control*. Dos lectores transcribieron las ocho tablas
   por separado y coincidieron en los diecinueve pares; cada uno se volvió a
   leer después en su propia página, ampliado, antes de entrar en esta lista.
-  Los trescientos veinte pares se convirtieron y compararon uno a uno, no por
+  Los trescientos veintiún pares se convirtieron y compararon uno a uno, no por
   muestreo, que es lo que hace de la lista algo cerrado y no una recolección
   de lo que alguien se encontró por el camino. Los casos que quedan fuera son
   los que perdona la regla de arriba, y tres de ellos están nombrados allí.

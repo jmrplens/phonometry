@@ -6679,6 +6679,47 @@ in the same order.
   seventeen rows is served normally.
 - **Status:** unreported.
 
+## Ver & Beranek 2e (2006), TABLE 14.1 (a transition modulus printed below the smallest modulus of its own row)
+
+- **Location:** TABLE 14.1, "Properties of Some Commercial Damping Materials",
+  row "3M ISD-113", on printed page 598 (PDF page 599), in chapter 14,
+  "Structural Damping", by Eric E. Ungar and Jeffrey A. Zapfe. Non-normative
+  source: a handbook.
+- **The print:** the row reads $\eta_{\max} = 1.1$, peak temperatures of
+  $-45$, $-20$ and $15\,^\circ\mathrm{F}$, and the four moduli
+  $E_{\max} = 1.5\mathrm{e}5$, $E_{\min} = 3\mathrm{e}2$,
+  $E_{\mathrm{trans}} = 2.1\mathrm{e}2$ and
+  $E_{I,\max} = 2.3\mathrm{e}2$ psi.
+- **The problem:** the same page defines $E_{\min}$ as "the smallest value of
+  $E$", in the paragraph under the table and again in footnote c, where
+  $E_{\max}$ is said to apply at low temperatures, $E_{\min}$ at high ones and
+  $E_{\mathrm{trans}}$ in the range of $\eta_{\max}$, which lies between them.
+  Here $E_{\mathrm{trans}} = 2.1 \times 10^2$ psi is smaller than
+  $E_{\min} = 3 \times 10^2$ psi, so one of the two cells contradicts the
+  definition the page gives for the other. The page does not say which. The
+  printed $E_{\mathrm{trans}}$ is supported by its neighbour through the
+  chapter's own $E_{I,\max} \approx \eta_{\max} E_{\mathrm{trans}}$:
+  $1.1 \times 2.1 \times 10^2 = 2.3 \times 10^2$ psi, which is exactly what
+  $E_{I,\max}$ prints. Against that, every one of the other fourteen rows that
+  prints all three moduli puts $E_{\mathrm{trans}}$ one to two orders of
+  magnitude above $E_{\min}$, which is where $E_{\min}$ would have to be for
+  this row to behave like its neighbours. Neither reading can be had from the
+  page alone.
+- **Evidence:** Verified on PDF page 599 (printed p. 598) of Ver & Beranek,
+  *Noise and Vibration Control Engineering* 2e (2006). All four cells of the
+  row are legible and unambiguous in the notation footnote c defines, and so
+  is the sentence that defines $E_{\min}$; the defect is a contradiction
+  between two legible cells, not an illegible one. Taking
+  $E_{\mathrm{trans}} / \sqrt{E_{\max} E_{\min}}$ as a shape test across the
+  fifteen rows that print all three, the other fourteen fall between 0.976
+  and 1.054 and this row gives 0.031.
+- **What the library does:** both cells are served exactly as printed, because
+  correcting either one would be this library choosing between two readings
+  the page leaves open. The row carries a note saying so, which the published
+  catalogue shows, and a test asserts the ordering holds on every other row so
+  that a second occurrence cannot pass unnoticed.
+- **Status:** unreported.
+
 ## Ver & Beranek 2e (2006), TABLE 8.5 (mass per unit area of the finest mesh, ten times too large in pounds)
 
 - **Location:** TABLE 8.5, "Mechanical Characteristics and Flow Resistance
@@ -6823,8 +6864,8 @@ in the same order.
   printed twice, SI first and the US customary value in parentheses after it,
   inside the running description of each construction: "Losa de 10 cm (4 in)",
   "cada 40,6 cm (16 in)", "alfombra de 1,5 kg/m2 (44 oz/yd2)". Three hundred
-  and twenty such pairs are printed over the eight tables.
-- **The problem:** nineteen of the three hundred and twenty pairs are not each
+  and twenty-one such pairs are printed over the eight tables.
+- **The problem:** nineteen of the three hundred and twenty-one pairs are not each
   other. The inch is 2,54 cm exactly, the pound is 0,45359237 kg exactly and
   the yard 0,9144 m exactly, so one pound per cubic foot is 16,0185 kg/m3, one
   pound per square yard 0,54249 kg/m2 and one ounce per square yard 33,906
@@ -6904,7 +6945,7 @@ in the same order.
   the Spanish edition of *Handbook of Acoustical Measurements and Noise
   Control*. Two readers transcribed the eight tables independently and agreed
   on every one of these nineteen pairs; each was then read again on its own
-  page, enlarged, before being listed here. The three hundred and twenty pairs
+  page, enlarged, before being listed here. The three hundred and twenty-one pairs
   were converted and compared one by one rather than by sampling, which is
   what makes the list closed rather than a sample of what a reader happened to
   notice. The near misses it leaves off are the ones the rule above forgives,

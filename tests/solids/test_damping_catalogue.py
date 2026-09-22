@@ -94,16 +94,43 @@ def test_every_cell_is_the_printed_one_converted_exactly(
             assert held == printed
 
 
+#: Every field of this table whose value the library worked out of the units
+#: the page prints, which is every field except the dimensionless loss factor.
+CONVERTED_FIELDS = (
+    "peak_temperature_at_10_hz_c",
+    "peak_temperature_at_100_hz_c",
+    "peak_temperature_at_1000_hz_c",
+    "youngs_modulus_max_pa",
+    "youngs_modulus_min_pa",
+    "youngs_modulus_transition_pa",
+    "loss_modulus_max_pa",
+)
+
+
 def test_the_converted_cells_say_they_were_converted() -> None:
-    """A degree Celsius this library worked out is never served as a reading."""
-    row = _row("Antiphon-13")
-    for field in (
-        "peak_temperature_at_10_hz_c",
-        "youngs_modulus_max_pa",
-    ):
-        assert row.is_derived(field)
-        assert "as the page prints it" in row.derived[field]
-    assert not row.is_derived("max_loss_factor")
+    """A degree Celsius this library worked out is never served as a reading.
+
+    Every cell of this table but the loss factor is a value converted out of
+    degrees Fahrenheit or pounds per square inch, and ``derived`` is the only
+    thing that stops it being read as a figure off the page: it is what makes
+    the published table call the cell worked out rather than printed, and what
+    keeps the printed figure beside it. So the marker is asserted on every
+    converted cell of every row rather than on a sample. Checking one row and
+    two fields left the rest free to lose their marker, or their printed
+    figure, without a test going red.
+    """
+    checked = 0
+    for row in PUBLISHED_DAMPING.values():
+        assert not row.is_derived("max_loss_factor"), row.name
+        for field in CONVERTED_FIELDS:
+            if getattr(row, field) is None:
+                # A cell the page corrupted is refused, not converted.
+                assert row.why_missing(field), f"{row.name}.{field}"
+                continue
+            assert row.is_derived(field), f"{row.name}.{field}"
+            assert "as the page prints it" in row.derived[field]
+            checked += 1
+    assert checked == 116
 
 
 def test_the_books_rounded_conversion_factor_is_not_the_one_used() -> None:
@@ -153,6 +180,23 @@ def test_a_frequency_the_table_does_not_print_is_refused() -> None:
         row.peak_temperature_c(500)
 
 
+@pytest.mark.parametrize("frequency", [float("inf"), float("-inf"), float("nan")])
+def test_a_frequency_that_is_not_a_number_is_refused_the_same_way(
+    frequency: float,
+) -> None:
+    """Infinity is refused by this catalogue, not by the integer conversion.
+
+    The method documents ``ValueError`` and nothing else, and a caller who
+    wraps it accordingly has to catch every refusal. Converting the frequency
+    to an integer before looking at it raised ``OverflowError`` for infinity,
+    which that caller does not catch, and for a NaN a ``ValueError`` whose
+    message was about integer conversion rather than about the table.
+    """
+    row = _row("Antiphon-13")
+    with pytest.raises(ValueError, match="has no peak temperature at"):
+        row.peak_temperature_c(frequency)
+
+
 def test_the_loss_modulus_is_about_the_product_of_the_other_two() -> None:
     """``E_I,max ~ eta_max E_trans``, which the chapter prints as a relation.
 
@@ -168,6 +212,33 @@ def test_the_loss_modulus_is_about_the_product_of_the_other_two() -> None:
         assert 0.5 <= row.loss_modulus_max_pa / expected <= 2.0, row.name
         checked += 1
     assert checked == 16
+
+
+def test_the_transition_modulus_lies_between_the_two_ends() -> None:
+    """``E_min <= E_trans <= E_max``, which is the page's own definition.
+
+    The paragraph under the table calls ``E_min`` "the smallest value of E"
+    and puts ``E_trans`` in the range of the loss-factor peak, between the two
+    ends. One row of the printing contradicts that: 3M ISD-113 prints
+    ``E_trans`` below its own ``E_min``, and neither cell can be corrected
+    from the page, so both are served as printed and the row carries a note.
+    It is named here rather than skipped, so that the exception stays a
+    documented one and a second row acquiring the same defect goes red.
+    """
+    contradicted = {"3M ISD-113"}
+    seen = set()
+    checked = 0
+    for row in PUBLISHED_DAMPING.values():
+        ends = (row.youngs_modulus_min_pa, row.youngs_modulus_max_pa)
+        if row.youngs_modulus_transition_pa is None or None in ends:
+            continue
+        low, high = ends
+        if not low <= row.youngs_modulus_transition_pa <= high:
+            seen.add(row.name)
+            continue
+        checked += 1
+    assert seen == contradicted
+    assert checked == 14
 
 
 # ---------------------------------------------------------------------------

@@ -33,6 +33,9 @@ TABLE = "ashrae-2019-tables-29-to-34"
 #: The three breakout tables and the three break-in ones.
 BREAKOUT_TABLES = ("Table 29", "Table 30", "Table 31")
 BREAK_IN_TABLES = ("Table 32", "Table 33", "Table 34")
+#: The four tables whose titles do not say "Experimentally Measured": a
+#: smooth rule rather than a measurement, and monotone band by band.
+SMOOTH_TABLES = ("Table 29", "Table 31", "Table 33", "Table 34")
 
 
 def _rows() -> list[DuctWallSpectrum]:
@@ -164,7 +167,8 @@ def test_every_cell_is_the_mark_the_second_reader_read(
     assert row.group == group
     assert row.sheet_metal_gauge == gauge
     shape, direction = ref.ASHRAE_49_TABLE_TITLES[printed_table]
-    assert (row.shape, row.direction) == (shape, direction)
+    assert row.shape == shape
+    assert row.direction == direction
     _assert_the_row_is_the_one_the_label_names(row, index, label)
     if length:
         assert f"{row.duct_length_m:g}" == length
@@ -292,9 +296,10 @@ def test_break_in_is_three_decibels_under_breakout_at_the_top_of_the_range() -> 
 def test_the_two_measured_tables_are_the_only_ones_that_fall_with_frequency() -> None:
     """A tabulated duct wall rises band by band; a measured one does not.
 
-    Tables 29, 31, 33 and 34 never once go down from one band to the next over
-    their two hundred and eight printed cells, which is what a smooth rule
-    looks like. Tables 30 and 32, the two whose titles say "Experimentally
+    Tables 29, 31, 33 and 34 never once go down from one band to the next:
+    twenty-eight rows, a hundred and sixty-four printed values and a hundred
+    and thirty-six steps between adjacent bands, every one of them upward,
+    which is what a smooth rule looks like. Tables 30 and 32, the two whose titles say "Experimentally
     Measured", fall dozens of times, because a real duct has a ring frequency
     and a breathing mode and the background sound moves around. A monotone run
     appearing in the two measured tables, or a fall appearing in the four
@@ -312,6 +317,13 @@ def test_the_two_measured_tables_are_the_only_ones_that_fall_with_frequency() ->
         falls[name] = counted
     assert falls["Table 29"] == falls["Table 31"] == 0
     assert falls["Table 33"] == falls["Table 34"] == 0
+    # The figures the docstring quotes, so a later reader can check them
+    # against the transcription rather than take the sentence on trust.
+    smooth = [row for name in (*BREAKOUT_TABLES, *BREAK_IN_TABLES) for row in _of(name)]
+    smooth = [row for row in smooth if row.printed_table in SMOOTH_TABLES]
+    assert len(smooth) == 28
+    assert sum(len(list(row.bands())) for row in smooth) == 164
+    assert sum(len(list(row.bands())) - 1 for row in smooth) == 136
     assert falls["Table 30"] > 0
     assert falls["Table 32"] > 0
 
@@ -588,8 +600,9 @@ def test_the_data_file_is_json_that_anything_can_read() -> None:
 
 
 def test_a_frequency_no_table_prints_is_refused_as_such() -> None:
+    row = _rows()[0]
     with pytest.raises(ValueError, match="not an octave band"):
-        _rows()[0].transmission_loss_db(700)
+        row.transmission_loss_db(700)
 
 
 def test_the_catalogue_is_reachable_from_the_package() -> None:

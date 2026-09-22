@@ -38,6 +38,7 @@ from __future__ import annotations
 import importlib
 import pathlib
 import pkgutil
+import re
 import sys
 
 _ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -65,10 +66,29 @@ def published_names() -> dict[str, str]:
         for name in dir(module):
             if not name.startswith("PUBLISHED_"):
                 continue
-            # The first module that defines it wins, so a re-export from a
-            # parent package does not shadow where the rows actually live.
-            found.setdefault(name, info.name)
+            # The deepest module wins, because that is where the rows live.
+            # ``walk_packages`` is a prefix walk, so a parent package that
+            # re-exports a catalogue is yielded before the module that defines
+            # it, and keeping the first would point the report at an
+            # ``__init__`` instead of at the file a reader has to open.
+            previous = found.get(name)
+            if previous is None or info.name.count(".") > previous.count("."):
+                found[name] = info.name
     return found
+
+
+def _is_named(name: str, generator: str) -> bool:
+    """Whether *generator* names this catalogue, rather than merely contains it.
+
+    A plain substring test passes on a prefix. ``PUBLISHED_AIR`` is inside
+    ``PUBLISHED_AIR_CONDITION``, ``PUBLISHED_ABSORPTION`` inside
+    ``PUBLISHED_ABSORPTION_AREAS`` and ``PUBLISHED_TRANSMISSION_LOSS`` inside
+    ``PUBLISHED_DUCT_TRANSMISSION_LOSS``, all of which are in the tree today,
+    so a catalogue added under any of those shorter names would have been
+    reported as reaching a page that had never heard of it. That is the one
+    question this file exists to answer, so the match is on whole words.
+    """
+    return re.search(rf"\b{re.escape(name)}\b", generator) is not None
 
 
 def main() -> int:
@@ -77,7 +97,7 @@ def main() -> int:
     missing = {
         name: module
         for name, module in sorted(published_names().items())
-        if name not in generator and name not in EXEMPT
+        if not _is_named(name, generator) and name not in EXEMPT
     }
     if missing:
         print(

@@ -67,6 +67,7 @@ export const apiSections = {
       'reference/api/solids/catalogue',
       'reference/api/solids/damping',
       'reference/api/solids/damping-treatments',
+      'reference/api/solids/nonlinearity',
       'reference/api/solids/orthotropic-wood',
       'reference/api/solids/plateau',
     ],

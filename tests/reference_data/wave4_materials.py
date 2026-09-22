@@ -70,3 +70,18 @@ HARRIS_30_3: tuple[tuple[str, tuple[str, ...]], ...] = (
     ("De nudo", ("1,1 (32)", "14 (0,56)", "Cortado", "Nylon", "0,70")),
     ("De nudo", ("1,5 (43)", "13 (0,50)", "Cortado", "Lana", "0,70")),
 )
+
+
+#: Rossing (2014) Table 6.5, read twice: from the page image and from the
+#: PDF's own text layer, which agree on all 24 cells. Material or structure;
+#: bonding, beta_avg. The minus sign of fused silica is the page's U+2212.
+ROSSING_6_5: tuple[tuple[str, tuple[str, ...]], ...] = (
+    ("Zincblende", ("Covalent", "2.2")),
+    ("Flourite", ("Ionic", "3.8")),
+    ("FCC", ("Metallic", "5.6")),
+    ("FCC (inert gas)", ("van der Waals", "6.4")),
+    ("BCC", ("Metallic", "8.2")),
+    ("NaCl", ("Ionic", "14.6")),
+    ("Fused silica", ("Isotropic", "−3.4")),
+    ("YBa2Cu3O7−δ (ceramic)", ("Isotropic", "14.3")),
+)

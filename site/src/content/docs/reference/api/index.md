@@ -79,6 +79,7 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | [`solids.catalogue`](/phonometry/reference/api/solids/catalogue/) | Solid materials as one published table prints them. |
 | [`solids.damping`](/phonometry/reference/api/solids/damping/) | Commercial damping materials, with the temperature and the frequency. |
 | [`solids.damping_treatments`](/phonometry/reference/api/solids/damping-treatments/) | Damping treatments rated by the decay rate of a treated panel. |
+| [`solids.nonlinearity`](/phonometry/reference/api/solids/nonlinearity/) | The nonlinearity parameter of solids, as a handbook tabulates it. |
 | [`solids.orthotropic_wood`](/phonometry/reference/api/solids/orthotropic-wood/) | Wood, which is not the same material in two directions. |
 | [`solids.plateau`](/phonometry/reference/api/solids/plateau/) | The three numbers a panel needs before its transmission loss can be sketched. |
 

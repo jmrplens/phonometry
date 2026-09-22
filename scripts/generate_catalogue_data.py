@@ -88,6 +88,7 @@ from phonometry.solids import (  # noqa: E402
     PUBLISHED_DAMPING_TREATMENTS,
     PUBLISHED_ORTHOTROPIC_WOOD,
     PUBLISHED_PLATEAU_DATA,
+    PUBLISHED_SOLID_NONLINEARITY,
     PUBLISHED_SOLIDS,
 )
 
@@ -256,6 +257,12 @@ CARPET_COLUMNS = (
         "Coeficiente de reducción del ruido",
         "",
     ),
+)
+
+#: The nonlinearity parameter of a solid. The bonding is a word and has a
+#: text column of its own, the way a duct's shape does.
+SOLID_NONLINEARITY_COLUMNS = (
+    ("nonlinearity_parameter", "β (averaged)", "β (promediado)", ""),
 )
 
 #: The nonlinearity parameter of a liquid, and the conditions it was
@@ -950,6 +957,9 @@ def rows(
             "shape": getattr(row, "shape", ""),
             "gauge": getattr(row, "sheet_metal_gauge", ""),
             "weave": getattr(row, "weave_construction", ""),
+            # The bonding of a solid, which the nonlinearity table prints
+            # beside each structure and which is a word, not a quantity.
+            "bonding": getattr(row, "bonding", ""),
             "source": row.source,
             "note": row.note,
             "attributedTo": dict(row.attributed_to),
@@ -1164,6 +1174,7 @@ def transcribed(
                 "shape": "",
                 "gauge": "",
                 "weave": "",
+                "bonding": "",
                 "source": record["source"],
                 "note": record.get("note", ""),
                 "attributedTo": record.get("attributedTo", {}),
@@ -1334,6 +1345,9 @@ def render() -> str:
         "orthotropicWood": section(PUBLISHED_ORTHOTROPIC_WOOD, WOOD_COLUMNS),
         "plateau": section(PUBLISHED_PLATEAU_DATA, PLATEAU_COLUMNS),
         "nonlinearity": section(PUBLISHED_NONLINEARITY, NONLINEARITY_COLUMNS),
+        "solidNonlinearity": section(
+            PUBLISHED_SOLID_NONLINEARITY, SOLID_NONLINEARITY_COLUMNS
+        ),
         "flowResistance": section(PUBLISHED_FLOW_RESISTANCE, FLOW_RESISTANCE_COLUMNS),
         "resilientLayers": transcribed(resilient_layers(), RESILIENT_LAYER_COLUMNS),
         "resilientModuli": section(
@@ -1403,6 +1417,7 @@ def main(argv: list[str] | None = None) -> int:
         "resilient moduli": len(PUBLISHED_RESILIENT_MODULI),
         "carpets": len(PUBLISHED_CARPETS),
         "nonlinearity values": len(PUBLISHED_NONLINEARITY),
+        "solid nonlinearity": len(PUBLISHED_SOLID_NONLINEARITY),
         "ground": len(PUBLISHED_GROUND),
         "porous": len(PUBLISHED_POROUS),
         "resistive facings": len(PUBLISHED_FLOW_RESISTANCE),

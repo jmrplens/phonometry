@@ -7138,6 +7138,23 @@ in the same order.
   says in its note that the ounces lost a digit.
 - **Status:** unreported.
 
+## Rossing (2014), Table 6.5 ("Flourite" for fluorite)
+
+- **Location:** Table 6.5, "Comparison of room-temperature values of the
+  ultrasonic nonlinearity parameters of solids", second row, on printed page
+  244 (PDF page 261). Non-normative source: a handbook.
+- **The print:** the row is labelled "Flourite", ionic bonding, beta 3,8.
+- **The problem:** the crystal structure of calcium fluoride is fluorite; the
+  label transposes two letters. No number on the row is affected.
+- **Evidence:** Verified on PDF page 261 (printed p. 244) of Rossing (ed.),
+  *Springer Handbook of Acoustics* 2e (2014), on the page image and in the
+  PDF's own text layer, which both print "Flourite".
+- **What the library does:** the row is served under the printed name in
+  [`PUBLISHED_SOLID_NONLINEARITY`](../src/phonometry/solids/nonlinearity.py),
+  so that a search for the printed word finds it, keyed `fluorite`, and its
+  note says what the word stands for.
+- **Status:** unreported.
+
 ## Related source properties that are not errata
 
 Recorded here to prevent future "fixes" that would break agreement with the

@@ -210,6 +210,13 @@ SOURCED: dict[tuple[str, str], str] = {
         "decay rate of a standard steel panel"
     ),
     (
+        "solids/nonlinearity.py",
+        "PUBLISHED_SOLID_NONLINEARITY",
+    ): (
+        "Rossing (2014) Table 6.5, the ultrasonic nonlinearity parameter of "
+        "eight solids at room temperature"
+    ),
+    (
         "materials/resilient/moduli.py",
         "PUBLISHED_RESILIENT_MODULI",
     ): (

@@ -628,6 +628,7 @@ The generated API reference, one page per module. Fetch these only when a specif
 - [solids/damping](https://jmrplens.github.io/phonometry/reference/api/solids/damping/)
 - [solids/damping-treatments](https://jmrplens.github.io/phonometry/reference/api/solids/damping-treatments/)
 - [solids/elastic](https://jmrplens.github.io/phonometry/reference/api/solids/elastic/)
+- [solids/nonlinearity](https://jmrplens.github.io/phonometry/reference/api/solids/nonlinearity/)
 - [solids/orthotropic-wood](https://jmrplens.github.io/phonometry/reference/api/solids/orthotropic-wood/)
 - [solids/plateau](https://jmrplens.github.io/phonometry/reference/api/solids/plateau/)
 - [speech/objective-intelligibility](https://jmrplens.github.io/phonometry/reference/api/speech/objective-intelligibility/)

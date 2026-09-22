@@ -33,6 +33,11 @@ from .elastic import (
     youngs_modulus_from_bulk_speed,
     youngs_modulus_from_plate_speed,
 )
+from .nonlinearity import (
+    PUBLISHED_SOLID_NONLINEARITY,
+    SolidNonlinearity,
+    solid_nonlinearity_named,
+)
 from .orthotropic_wood import (
     PUBLISHED_ORTHOTROPIC_WOOD,
     OrthotropicWood,
@@ -41,6 +46,9 @@ from .orthotropic_wood import (
 from .plateau import PUBLISHED_PLATEAU_DATA, PlateauMaterial, plateau_material_named
 
 __all__ = [
+    "PUBLISHED_SOLID_NONLINEARITY",
+    "SolidNonlinearity",
+    "solid_nonlinearity_named",
     "PUBLISHED_DAMPING_TREATMENTS",
     "DampingTreatment",
     "damping_treatments_named",

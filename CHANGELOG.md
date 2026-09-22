@@ -22,6 +22,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   printed halves are not each other are registered, and the four in doubt
   serve nothing. Each catalogue has a lookup by name and a section of the
   published catalogues page.
+- **The nonlinearity parameter of solids.** `solids.PUBLISHED_SOLID_NONLINEARITY`
+  holds Rossing (2014) Table 6.5, the ultrasonic β of eight solids at room
+  temperature, averaged over the pure-mode directions of a cubic crystal. It
+  is the page's β = −(3 + K3/K2), which for a liquid is B/A + 2 and not B/A,
+  and the documentation says so beside the B/A catalogue.
 - **A hundred and sixty-four published values of the nonlinearity parameter
   B/A.** `fluids.PUBLISHED_NONLINEARITY` holds Rossing (2014) Tables 8.1 to
   8.4: pure water from 0 to 100 °C, water up to 50 MPa, organic liquids,

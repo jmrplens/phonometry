@@ -119,6 +119,7 @@ _SECTION_LIST: tuple[Section, ...] = (
             "phonometry.solids.catalogue",
             "phonometry.solids.damping",
             "phonometry.solids.damping_treatments",
+            "phonometry.solids.nonlinearity",
             "phonometry.solids.orthotropic_wood",
             "phonometry.solids.plateau",
         ),
@@ -489,6 +490,7 @@ OBJECT_MODULE_OVERRIDES: dict[str, str] = {
     # module that builds it and in the package that re-exports it.
     "PUBLISHED_DAMPING": "phonometry.solids.damping",
     "PUBLISHED_DAMPING_TREATMENTS": "phonometry.solids.damping_treatments",
+    "PUBLISHED_SOLID_NONLINEARITY": "phonometry.solids.nonlinearity",
     "PUBLISHED_RESILIENT_MODULI": "phonometry.materials.resilient.moduli",
     "PUBLISHED_CARPETS": "phonometry.materials.absorbers.carpets",
     "PUBLISHED_ORTHOTROPIC_WOOD": "phonometry.solids.orthotropic_wood",

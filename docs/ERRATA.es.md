@@ -7572,6 +7572,25 @@ dos ediciones con las mismas entradas y en el mismo orden.
   kg/m$^2$ y dice en su nota que a las onzas les falta una cifra.
 - **Estado:** sin comunicar.
 
+## Rossing (2014), tabla 6.5 («Flourite» por fluorita)
+
+- **Dónde:** tabla 6.5, «Comparison of room-temperature values of the
+  ultrasonic nonlinearity parameters of solids», segunda fila, en la página
+  impresa 244 (página 261 del PDF). Fuente no normativa: un manual.
+- **Lo impreso:** la fila se rotula «Flourite», enlace iónico, beta 3,8.
+- **El problema:** la estructura cristalina del fluoruro de calcio es la
+  fluorita (*fluorite*); el rótulo intercambia dos letras. Ningún número de la
+  fila se ve afectado.
+- **Evidencia:** Verificado en la página 261 del PDF (p. impresa 244) de
+  Rossing (ed.), *Springer Handbook of Acoustics* 2e (2014), sobre la imagen de
+  la página y en la capa de texto del propio PDF, que imprimen las dos
+  «Flourite».
+- **Qué hace la biblioteca:** la fila se sirve con el nombre impreso en
+  [`PUBLISHED_SOLID_NONLINEARITY`](../src/phonometry/solids/nonlinearity.py),
+  para que una búsqueda por la palabra impresa la encuentre, con la clave
+  `fluorite`, y su nota dice qué quiere decir.
+- **Estado:** sin comunicar.
+
 ## Propiedades de las fuentes, relacionadas, que no son erratas
 
 Registradas aquí para prevenir futuros «arreglos» que romperían la

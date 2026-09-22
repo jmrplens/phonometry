@@ -66,6 +66,7 @@ interface Props {
 		| 'predictedScattering'
 		| 'fluids'
 		| 'nonlinearity'
+		| 'solidNonlinearity'
 		| 'airAttenuation';
 	/** Locale of the page it is rendered on. */
 	lang?: 'en' | 'es';
@@ -117,6 +118,7 @@ const copy = {
 		substance: 'Substance',
 		treatment: 'Treatment',
 		construction: 'Construction',
+		structure: 'Material or structure',
 		conditions: 'Conditions',
 		mounting: 'Mount',
 		per: 'Per',
@@ -125,6 +127,7 @@ const copy = {
 		shape: 'Shape',
 		gauge: 'Sheet gauge',
 		weave: 'Weave',
+		bonding: 'Bonding',
 		fixedBy: 'What fixes it',
 		source: 'Source',
 		regionLabel: 'Published values, scrollable sideways',
@@ -179,6 +182,7 @@ const copy = {
 		substance: 'Sustancia',
 		treatment: 'Tratamiento',
 		construction: 'Construcción',
+		structure: 'Material o estructura',
 		conditions: 'Condiciones',
 		mounting: 'Montaje',
 		per: 'Por',
@@ -187,6 +191,7 @@ const copy = {
 		shape: 'Forma',
 		gauge: 'Calibre de chapa',
 		weave: 'Tejido',
+		bonding: 'Enlace',
 		fixedBy: 'Qué lo fija',
 		source: 'Fuente',
 		regionLabel: 'Valores publicados, con desplazamiento lateral',
@@ -253,6 +258,7 @@ const placeholder = placeholders[section] ?? copy.searchPlaceholder;
 const rowHeadings: Partial<Record<typeof section, string>> = {
 	fluids: copy.state,
 	nonlinearity: copy.substance,
+	solidNonlinearity: copy.structure,
 	dampingTreatments: copy.treatment,
 	carpets: copy.construction,
 	ground: copy.surface,
@@ -327,6 +333,7 @@ const textColumns = (
 		{ field: 'shape', label: copy.shape, wrap: false },
 		{ field: 'gauge', label: copy.gauge, wrap: false },
 		{ field: 'weave', label: copy.weave, wrap: false },
+		{ field: 'bonding', label: copy.bonding, wrap: false },
 		/* The fluids carry a model too, and it is what fixes the state rather
 		   than a solver that computed a row, so it is the last column of that
 		   table and not one of these. */

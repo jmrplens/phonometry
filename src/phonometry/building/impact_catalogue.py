@@ -123,9 +123,13 @@ class ImpactInsulation(CatalogueRow):
     """One floor-ceiling construction or surface treatment, as printed.
 
     The name, the citation and the hedges a cell can carry instead of a number
-    are the ones every catalogue row has. What this class adds is that its two
-    quantities are never both filled: a row is a rating or an improvement on a
-    rating, and which one it is says which table it came from.
+    are the ones every catalogue row has. What this class adds is that its
+    three results are never filled together: a row is a rating (Tables 32.1 to
+    32.7), an improvement on a rating (Table 32.8) or an improvement in
+    decibels (the 1977 Tables 19.2 to 19.4), and which one it is says which
+    table it came from. The load a 1977 floor was measured under is a
+    condition of the measurement, not a result, and sits beside the
+    improvement it qualifies.
 
     :ivar impact_insulation_class: The IIC of the whole floor-ceiling assembly
         this row describes, dimensionless. Filled by Tables 32.1 to 32.7, and

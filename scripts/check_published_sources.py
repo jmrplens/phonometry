@@ -16,7 +16,9 @@ vacuous.
    entry"): the document, the table or section, the PDF page and the printed
    folio, cited by designation and never by file path. A row whose columns come
    off two pages names both, separated by ``"; "``. :data:`FOLIO_FORMS` has the
-   four spellings, including the one for a page that prints no folio at all.
+   four spellings, including the one for a page that prints no folio at all,
+   and each of them takes either a page number or the chapter-and-page form a
+   handbook of independently paginated chapters prints.
    Nothing published here needs that fourth form yet; it is accepted from the
    start so that the first row that does cannot invent a second spelling for an
    unnumbered page. ``scripts/check_errata_evidence.py``, which reads the same
@@ -113,11 +115,20 @@ CITATION = re.compile(
 #: semicolon of its own, so the split is only made after a closing parenthesis.
 JOINER = re.compile(r"(?<=\)); ")
 
+#: A folio as a page prints it. Most books print a page number and nothing
+#: else, but a handbook whose chapters are paginated independently prints the
+#: chapter with it, so the eighth page of Chapter 32 carries "32.8" and there
+#: is no other number on it. That is a reading of the page, not a malformed
+#: one, and the errata registry has accepted it from the start
+#: (``scripts/check_errata_evidence.py``, PAGE_CITATION); this gate refused it
+#: only because its first shape was written before the first such book landed.
+FOLIO = r"\d+(?:\.\d+)?"
+
 FOLIO_FORMS = (
-    re.compile(r"^printed p\. \d+$"),
-    re.compile(r"^printed pp\. \d+-\d+$"),
-    re.compile(r"^printed folio \d+$"),
-    re.compile(r"^no printed folio; between folios \d+ and \d+$"),
+    re.compile(rf"^printed p\. {FOLIO}$"),
+    re.compile(rf"^printed pp\. {FOLIO}-{FOLIO}$"),
+    re.compile(rf"^printed folio {FOLIO}$"),
+    re.compile(rf"^no printed folio; between folios {FOLIO} and {FOLIO}$"),
 )
 
 #: Every table in ``src`` transcribed from a book or a paper, with what it holds.
@@ -244,7 +255,27 @@ SOURCED: dict[tuple[str, str], str] = {
         "PUBLISHED_TRANSMISSION_LOSS",
     ): (
         "Bies 5e Table 7.6, ninety-four constructions with a thickness, a "
-        "surface density and eight octave bands of transmission loss"
+        "surface density and eight octave bands of transmission loss; "
+        "ASHRAE (2019) HVAC Applications Handbook Chapter 49 Table 40, nine "
+        "machine equipment room walls, floors and ceilings with a sound "
+        "transmission class and seven octave bands"
+    ),
+    (
+        "noise_control/duct_walls.py",
+        "PUBLISHED_DUCT_TRANSMISSION_LOSS",
+    ): (
+        "ASHRAE (2019) HVAC Applications Handbook Chapter 49 Tables 29 to 34, "
+        "forty-six duct walls over six tables: the breakout and the break-in "
+        "transmission loss of a rectangular, round and flat oval duct wall, "
+        "band by band"
+    ),
+    (
+        "building/impact_catalogue.py",
+        "PUBLISHED_IMPACT_INSULATION",
+    ): (
+        "Harris 3e Tables 32.1 to 32.8, forty-two floor-ceiling constructions "
+        "with an impact insulation class and six elastic surface treatments "
+        "with the improvement each adds over a hard massive floor"
     ),
     (
         "materials/diffusers/measured_scattering.py",
@@ -281,6 +312,14 @@ SOURCED: dict[tuple[str, str], str] = {
         "spread over eight chapters"
     ),
     (
+        "materials/absorbers/resistive_sheets.py",
+        "PUBLISHED_FLOW_RESISTANCE",
+    ): (
+        "Vér & Beranek 2e TABLE 8.5, five wire mesh cloths; "
+        "Vér & Beranek 2e TABLE 8.6, thirteen glass fibre cloths; "
+        "Vér & Beranek 2e TABLE 8.7, eleven sintered porous metal sheets"
+    ),
+    (
         "materials/absorbers/porous.py",
         "ROCK_WOOL_LATERAL_FIT",
     ): "Hopkins (2007) Eq. (1.165), the lateral k1 and k2 of the rock wool",
@@ -309,6 +348,21 @@ SOURCED: dict[tuple[str, str], str] = {
         "noise_control/duct_modes.py",
         "CIRCULAR_EIGENVALUES",
     ): "Norton & Karczub (2003) Table 7.1, twelve circular-duct eigenvalues",
+    (
+        "noise_control/hvac.py",
+        "_DAMPER_CORRECTION",
+    ): (
+        "ASHRAE (2019) HVAC Applications Handbook Chapter 49 Table 10, the "
+        "decibels added to a diffuser sound rating for damper throttling, at "
+        "three places a damper can sit"
+    ),
+    (
+        "noise_control/hvac.py",
+        "_DAMPER_PRESSURE_RATIOS",
+    ): (
+        "ASHRAE (2019) HVAC Applications Handbook Chapter 49 Table 10, the six "
+        "damper pressure ratios those decibels are tabulated against"
+    ),
     (
         "noise_control/hvac.py",
         "_EFFICIENCY_CORRECTION",
@@ -345,6 +399,14 @@ SOURCED: dict[tuple[str, str], str] = {
         "noise_control/hvac.py",
         "_SILENCER_SELF_NOISE_CORRECTION",
     ): "Long 2e Table 14.8, eight self-noise corrections",
+    (
+        "noise_control/hvac.py",
+        "_TERMINAL_VELOCITY_LIMIT",
+    ): (
+        "ASHRAE (2019) HVAC Applications Handbook Chapter 49 Table 9, the "
+        "maximum free-opening face velocity of a supply diffuser and a return "
+        "register, over five design room criteria"
+    ),
     (
         "noise_control/hvac.py",
         "_UNLINED_CIRCULAR_DB_PER_FT",
@@ -419,8 +481,15 @@ NOT_TRANSCRIBED: dict[tuple[str, str], str] = {
     "named for Eq. 6.29, which consumes them",
 }
 
-#: One bibliography entry: the lead surname it opens with.
-_BIBLIOGRAPHY_ENTRY = re.compile(r"^- (?P<lead>[^\s,.]+)[,.]", re.MULTILINE)
+#: One bibliography entry: the lead surname, or the organisation, it opens
+#: with. A person is written ``- Cremer, L., ...`` and a body that authors its
+#: own handbook is written ``- ASHRAE (2019). ...``, which is the APA shape for
+#: a corporate author and was invisible to the first version of this pattern:
+#: it required a comma or a full stop straight after the lead, so every
+#: organisation in the bibliography was missing from the ratchet and a table
+#: transcribed from one of their handbooks could sit in ``src`` uncited while
+#: the gate reported green. Found by ASHRAE Chapter 49.
+_BIBLIOGRAPHY_ENTRY = re.compile(r"^- (?P<lead>[^\s,.]+)(?:[,.]| \()", re.MULTILINE)
 
 
 def bibliography_leads() -> tuple[str, ...]:
@@ -468,7 +537,7 @@ LOCATOR = re.compile(
 
 #: What a registered banner has to carry.
 BANNER_PDF_PAGE = re.compile(r"PDF pages? \d+")
-BANNER_FOLIO = re.compile(r"printed (?:p\.|pp\.|folio) \d+|no printed folio")
+BANNER_FOLIO = re.compile(rf"printed (?:p\.|pp\.|folio) {FOLIO}|no printed folio")
 
 
 class Problem(NamedTuple):

@@ -98,6 +98,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Hopkins (2007) Table A2, PDF pages 635-636 (no printed folio; between folios 607 and 610)",
         "note": "the table prints the speed as 1900 with a typical range of 1600 to 2300 m/s, and the density only as a range",
         "attributedTo": {
@@ -185,6 +189,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Hopkins (2007) Table A2, PDF pages 635-636 (no printed folio; between folios 607 and 610)",
         "note": "",
         "attributedTo": {
@@ -272,6 +280,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Hopkins (2007) Table A2, PDF pages 635-636 (no printed folio; between folios 607 and 610)",
         "note": "",
         "attributedTo": {
@@ -359,6 +371,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Hopkins (2007) Table A2, PDF pages 635-636 (no printed folio; between folios 607 and 610)",
         "note": "",
         "attributedTo": {
@@ -446,6 +462,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Hopkins (2007) Table A2, PDF pages 635-636 (no printed folio; between folios 607 and 610)",
         "note": "",
         "attributedTo": {
@@ -533,6 +553,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Hopkins (2007) Table A2, PDF pages 635-636 (no printed folio; between folios 607 and 610)",
         "note": "",
         "attributedTo": {
@@ -620,6 +644,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Hopkins (2007) Table A2, PDF pages 635-636 (no printed folio; between folios 607 and 610)",
         "note": "",
         "attributedTo": {
@@ -707,6 +735,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Hopkins (2007) Table A2, PDF pages 635-636 (no printed folio; between folios 607 and 610)",
         "note": "",
         "attributedTo": {
@@ -794,6 +826,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Hopkins (2007) Table A2, PDF pages 635-636 (no printed folio; between folios 607 and 610)",
         "note": "",
         "attributedTo": {
@@ -881,6 +917,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Hopkins (2007) Table A2, PDF pages 635-636 (no printed folio; between folios 607 and 610)",
         "note": "",
         "attributedTo": {
@@ -968,6 +1008,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Hopkins (2007) Table A2, PDF pages 635-636 (no printed folio; between folios 607 and 610)",
         "note": "",
         "attributedTo": {
@@ -1055,6 +1099,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Hopkins (2007) Table A2, PDF pages 635-636 (no printed folio; between folios 607 and 610)",
         "note": "",
         "attributedTo": {
@@ -1142,6 +1190,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Hopkins (2007) Table A2, PDF pages 635-636 (no printed folio; between folios 607 and 610)",
         "note": "",
         "attributedTo": {
@@ -1229,6 +1281,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Hopkins (2007) Table A2, PDF pages 635-636 (no printed folio; between folios 607 and 610)",
         "note": "",
         "attributedTo": {
@@ -1316,6 +1372,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Hopkins (2007) Table A2, PDF pages 635-636 (no printed folio; between folios 607 and 610)",
         "note": "",
         "attributedTo": {
@@ -1403,6 +1463,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Hopkins (2007) Table A2, PDF pages 635-636 (no printed folio; between folios 607 and 610)",
         "note": "usually orthotropic, with 2200 to 3500 m/s depending on the direction; the quoted speed is the effective one",
         "attributedTo": {
@@ -1490,6 +1554,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Hopkins (2007) Table A2, PDF pages 635-636 (no printed folio; between folios 607 and 610)",
         "note": "",
         "attributedTo": {
@@ -1577,6 +1645,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Hopkins (2007) Table A2, PDF pages 635-636 (no printed folio; between folios 607 and 610)",
         "note": "",
         "attributedTo": {
@@ -1664,6 +1736,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Hopkins (2007) Table A2, PDF pages 635-636 (no printed folio; between folios 607 and 610)",
         "note": "",
         "attributedTo": {
@@ -1751,6 +1827,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Hopkins (2007) Table A2, PDF pages 635-636 (no printed folio; between folios 607 and 610)",
         "note": "",
         "attributedTo": {
@@ -1838,6 +1918,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Hopkins (2007) Table A2, PDF pages 635-636 (no printed folio; between folios 607 and 610)",
         "note": "",
         "attributedTo": {
@@ -1925,6 +2009,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Hopkins (2007) Table A2, PDF pages 635-636 (no printed folio; between folios 607 and 610)",
         "note": "",
         "attributedTo": {
@@ -2012,6 +2100,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Hopkins (2007) Table A2, PDF pages 635-636 (no printed folio; between folios 607 and 610)",
         "note": "",
         "attributedTo": {
@@ -2099,6 +2191,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Hopkins (2007) Table A2, PDF pages 635-636 (no printed folio; between folios 607 and 610)",
         "note": "",
         "attributedTo": {
@@ -2188,6 +2284,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Hopkins (2007) Table A2, PDF pages 635-636 (no printed folio; between folios 607 and 610)",
         "note": "",
         "attributedTo": {
@@ -2275,6 +2375,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cremer 3e Table 4.3, PDF page 201 (printed p. 191)",
         "note": "",
         "attributedTo": {
@@ -2362,6 +2466,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cremer 3e Table 4.3, PDF page 201 (printed p. 191)",
         "note": "",
         "attributedTo": {
@@ -2449,6 +2557,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cremer 3e Table 4.3, PDF page 201 (printed p. 191)",
         "note": "",
         "attributedTo": {
@@ -2536,6 +2648,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cremer 3e Table 4.3, PDF page 201 (printed p. 191)",
         "note": "",
         "attributedTo": {
@@ -2623,6 +2739,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cremer 3e Table 4.3, PDF page 201 (printed p. 191)",
         "note": "",
         "attributedTo": {},
@@ -2708,6 +2828,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cremer 3e Table 4.3, PDF page 201 (printed p. 191)",
         "note": "",
         "attributedTo": {
@@ -2795,6 +2919,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cremer 3e Table 4.3, PDF page 201 (printed p. 191)",
         "note": "",
         "attributedTo": {},
@@ -2880,6 +3008,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cremer 3e Table 4.3, PDF page 201 (printed p. 191)",
         "note": "",
         "attributedTo": {},
@@ -2965,6 +3097,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cremer 3e Table 4.3, PDF page 201 (printed p. 191)",
         "note": "",
         "attributedTo": {
@@ -3052,6 +3188,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cremer 3e Table 4.3, PDF page 201 (printed p. 191)",
         "note": "",
         "attributedTo": {
@@ -3139,6 +3279,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cremer 3e Table 4.3, PDF page 201 (printed p. 191)",
         "note": "",
         "attributedTo": {
@@ -3226,6 +3370,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cremer 3e Table 4.3, PDF page 201 (printed p. 191)",
         "note": "",
         "attributedTo": {
@@ -3313,6 +3461,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cremer 3e Table 4.3, PDF page 201 (printed p. 191)",
         "note": "",
         "attributedTo": {
@@ -3400,6 +3552,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cremer 3e Table 4.3, PDF page 201 (printed p. 191)",
         "note": "",
         "attributedTo": {
@@ -3487,6 +3643,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cremer 3e Table 4.3, PDF page 201 (printed p. 191)",
         "note": "",
         "attributedTo": {
@@ -3574,6 +3734,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -3659,6 +3823,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -3744,6 +3912,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -3829,6 +4001,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -3914,6 +4090,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -3999,6 +4179,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -4084,6 +4268,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -4169,6 +4357,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -4254,6 +4446,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -4339,6 +4535,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -4424,6 +4624,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -4509,6 +4713,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -4594,6 +4802,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -4679,6 +4891,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -4764,6 +4980,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -4849,6 +5069,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -4934,6 +5158,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -5019,6 +5247,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -5104,6 +5336,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -5189,6 +5425,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -5274,6 +5514,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -5359,6 +5603,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -5444,6 +5692,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "the table prints no modulus and no loss factor, and its Z_m of 1220 is 8.4 times what its own Eq. (11) gives for this row",
         "attributedTo": {},
@@ -5529,6 +5781,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -5614,6 +5870,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -5699,6 +5959,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -5784,6 +6048,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -5869,6 +6137,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -5954,6 +6226,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -6039,6 +6315,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -6124,6 +6404,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -6209,6 +6493,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -6294,6 +6582,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -6379,6 +6671,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -6464,6 +6760,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -6549,6 +6849,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -6634,6 +6938,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -6719,6 +7027,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -6804,6 +7116,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -6889,6 +7205,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -6974,6 +7294,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -7059,6 +7383,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -7144,6 +7472,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -7229,6 +7561,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -7314,6 +7650,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -7399,6 +7739,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -7484,6 +7828,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -7569,6 +7917,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -7654,6 +8006,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -7739,6 +8095,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -7824,6 +8184,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -7909,6 +8273,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -7994,6 +8362,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -8079,6 +8451,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -8164,6 +8540,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -8249,6 +8629,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -8334,6 +8718,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -8419,6 +8807,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -8504,6 +8896,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -8589,6 +8985,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -8674,6 +9074,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -8759,6 +9163,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -8844,6 +9252,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -8929,6 +9341,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -9014,6 +9430,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -9099,6 +9519,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -9184,6 +9608,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -9269,6 +9697,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -9354,6 +9786,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -9439,6 +9875,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -9524,6 +9964,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -9609,6 +10053,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -9694,6 +10142,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -9779,6 +10231,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -9864,6 +10320,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -9949,6 +10409,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -10034,6 +10498,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -10119,6 +10587,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -10204,6 +10676,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under building materials; the printed speed is +5 per cent from sqrt(E/rho) on this row's own two columns, which the page says it was calculated from; see docs/ERRATA.md",
         "attributedTo": {},
@@ -10289,6 +10765,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under building materials",
         "attributedTo": {},
@@ -10374,6 +10854,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under building materials; the loss factor column prints one number here where it prints two elsewhere, so only the internal one is held",
         "attributedTo": {},
@@ -10459,6 +10943,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under building materials",
         "attributedTo": {},
@@ -10544,6 +11032,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under building materials",
         "attributedTo": {},
@@ -10629,6 +11121,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under building materials; the printed speed is -21 per cent from sqrt(E/rho) on this row's own two columns, which the page says it was calculated from; see docs/ERRATA.md",
         "attributedTo": {},
@@ -10714,6 +11210,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under building materials",
         "attributedTo": {},
@@ -10799,6 +11299,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under building materials",
         "attributedTo": {},
@@ -10884,6 +11388,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under building materials",
         "attributedTo": {},
@@ -10969,6 +11477,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under building materials",
         "attributedTo": {},
@@ -11054,6 +11566,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood",
         "attributedTo": {},
@@ -11139,6 +11655,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood",
         "attributedTo": {},
@@ -11224,6 +11744,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood",
         "attributedTo": {},
@@ -11309,6 +11833,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood",
         "attributedTo": {},
@@ -11394,6 +11922,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood",
         "attributedTo": {},
@@ -11479,6 +12011,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood",
         "attributedTo": {},
@@ -11564,6 +12100,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood",
         "attributedTo": {},
@@ -11649,6 +12189,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood",
         "attributedTo": {},
@@ -11734,6 +12278,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood",
         "attributedTo": {},
@@ -11819,6 +12367,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood",
         "attributedTo": {},
@@ -11904,6 +12456,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood",
         "attributedTo": {},
@@ -11989,6 +12545,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood",
         "attributedTo": {},
@@ -12074,6 +12634,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood",
         "attributedTo": {},
@@ -12159,6 +12723,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood",
         "attributedTo": {},
@@ -12244,6 +12812,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood",
         "attributedTo": {},
@@ -12329,6 +12901,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood",
         "attributedTo": {},
@@ -12414,6 +12990,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood",
         "attributedTo": {},
@@ -12499,6 +13079,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood",
         "attributedTo": {},
@@ -12584,6 +13168,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood",
         "attributedTo": {},
@@ -12669,6 +13257,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood",
         "attributedTo": {},
@@ -12754,6 +13346,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood",
         "attributedTo": {},
@@ -12839,6 +13435,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood",
         "attributedTo": {},
@@ -12924,6 +13524,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood",
         "attributedTo": {},
@@ -13009,6 +13613,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood; the printed speed is +22 per cent from sqrt(E/rho) on this row's own two columns, which the page says it was calculated from; see docs/ERRATA.md",
         "attributedTo": {},
@@ -13094,6 +13702,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood",
         "attributedTo": {},
@@ -13179,6 +13791,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood",
         "attributedTo": {},
@@ -13264,6 +13880,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood",
         "attributedTo": {},
@@ -13349,6 +13969,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood",
         "attributedTo": {},
@@ -13434,6 +14058,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood",
         "attributedTo": {},
@@ -13519,6 +14147,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood",
         "attributedTo": {},
@@ -13604,6 +14236,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood",
         "attributedTo": {},
@@ -13689,6 +14325,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood",
         "attributedTo": {},
@@ -13774,6 +14414,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood",
         "attributedTo": {},
@@ -13859,6 +14503,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood",
         "attributedTo": {},
@@ -13944,6 +14592,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under plastics and other",
         "attributedTo": {},
@@ -14029,6 +14681,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under plastics and other",
         "attributedTo": {},
@@ -14114,6 +14770,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under plastics and other",
         "attributedTo": {},
@@ -14199,6 +14859,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under plastics and other",
         "attributedTo": {},
@@ -14284,6 +14948,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under plastics and other",
         "attributedTo": {},
@@ -14369,6 +15037,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under plastics and other",
         "attributedTo": {},
@@ -14454,6 +15126,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under plastics and other",
         "attributedTo": {},
@@ -14539,6 +15215,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under plastics and other",
         "attributedTo": {},
@@ -14624,6 +15304,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under plastics and other",
         "attributedTo": {},
@@ -14709,6 +15393,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under plastics and other",
         "attributedTo": {},
@@ -14794,6 +15482,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under plastics and other",
         "attributedTo": {},
@@ -14879,6 +15571,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under plastics and other",
         "attributedTo": {},
@@ -14964,6 +15660,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under plastics and other",
         "attributedTo": {},
@@ -15049,6 +15749,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under plastics and other",
         "attributedTo": {},
@@ -15134,6 +15838,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under plastics and other",
         "attributedTo": {},
@@ -15219,6 +15927,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under plastics and other",
         "attributedTo": {},
@@ -15304,6 +16016,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under plastics and other; the loss factor column prints one number here where it prints two elsewhere, so only the internal one is held",
         "attributedTo": {},
@@ -15389,6 +16105,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under aluminium honeycomb; a honeycomb panel and not a solid: the modulus and the density are effective, the geometry is in the variant, and the page leaves the speed blank because a one-dimensional speed does not mean anything here",
         "attributedTo": {},
@@ -15474,6 +16194,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under aluminium honeycomb; a honeycomb panel and not a solid: the modulus and the density are effective, the geometry is in the variant, and the page leaves the speed blank because a one-dimensional speed does not mean anything here",
         "attributedTo": {},
@@ -15559,6 +16283,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under aluminium honeycomb; a honeycomb panel and not a solid: the modulus and the density are effective, the geometry is in the variant, and the page leaves the speed blank because a one-dimensional speed does not mean anything here",
         "attributedTo": {},
@@ -15644,6 +16372,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under aluminium honeycomb; a honeycomb panel and not a solid: the modulus and the density are effective, the geometry is in the variant, and the page leaves the speed blank because a one-dimensional speed does not mean anything here",
         "attributedTo": {},
@@ -15729,6 +16461,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 12.1, PDF page 487 (printed p. 485)",
         "note": "",
         "attributedTo": {
@@ -15816,6 +16552,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 12.1, PDF page 487 (printed p. 485)",
         "note": "",
         "attributedTo": {
@@ -15903,6 +16643,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 12.1, PDF page 487 (printed p. 485)",
         "note": "",
         "attributedTo": {
@@ -15990,6 +16734,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 12.1, PDF page 487 (printed p. 485)",
         "note": "",
         "attributedTo": {
@@ -16077,6 +16825,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 12.1, PDF page 487 (printed p. 485)",
         "note": "",
         "attributedTo": {
@@ -16164,6 +16916,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 12.1, PDF page 487 (printed p. 485)",
         "note": "",
         "attributedTo": {
@@ -16251,6 +17007,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 12.1, PDF page 487 (printed p. 485)",
         "note": "",
         "attributedTo": {
@@ -16338,6 +17098,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 12.1, PDF page 487 (printed p. 485)",
         "note": "",
         "attributedTo": {
@@ -16425,6 +17189,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 12.1, PDF page 487 (printed p. 485)",
         "note": "",
         "attributedTo": {
@@ -16512,6 +17280,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 12.1, PDF page 487 (printed p. 485)",
         "note": "the loss factor carries the table's second footnote, which says it is very sensitive to construction techniques and edge conditions",
         "attributedTo": {
@@ -16599,6 +17371,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 12.1, PDF page 487 (printed p. 485)",
         "note": "",
         "attributedTo": {
@@ -16686,6 +17462,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 12.1, PDF page 487 (printed p. 485)",
         "note": "",
         "attributedTo": {
@@ -16773,6 +17553,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 12.1, PDF page 487 (printed p. 485)",
         "note": "",
         "attributedTo": {
@@ -16860,6 +17644,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 12.1, PDF page 487 (printed p. 485)",
         "note": "",
         "attributedTo": {
@@ -16947,6 +17735,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 12.1, PDF page 487 (printed p. 485)",
         "note": "",
         "attributedTo": {
@@ -17034,6 +17826,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 12.1, PDF page 487 (printed p. 485)",
         "note": "",
         "attributedTo": {
@@ -17121,6 +17917,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 12.1, PDF page 487 (printed p. 485)",
         "note": "",
         "attributedTo": {
@@ -17208,6 +18008,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 12.1, PDF page 487 (printed p. 485)",
         "note": "",
         "attributedTo": {
@@ -17295,6 +18099,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Table 4.1, PDF page 129 (printed p. 126)",
         "note": "",
         "attributedTo": {},
@@ -17380,6 +18188,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Table 4.1, PDF page 129 (printed p. 126)",
         "note": "the page prints the damping factor as 1 to 5 times 10^-3",
         "attributedTo": {},
@@ -17465,6 +18277,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Table 4.1, PDF page 129 (printed p. 126)",
         "note": "",
         "attributedTo": {},
@@ -17550,6 +18366,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Table 4.1, PDF page 129 (printed p. 126)",
         "note": "the page prints the damping factor as 1 to 6 times 10^-4",
         "attributedTo": {},
@@ -17635,6 +18455,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Table 4.1, PDF page 129 (printed p. 126)",
         "note": "",
         "attributedTo": {},
@@ -17720,6 +18544,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Table 4.1, PDF page 129 (printed p. 126)",
         "note": "the page prints the damping factor as 0,5 to 2 times 10^-3",
         "attributedTo": {},
@@ -17805,6 +18633,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Table 4.1, PDF page 129 (printed p. 126)",
         "note": "",
         "attributedTo": {},
@@ -17890,6 +18722,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Table 4.1, PDF page 129 (printed p. 126)",
         "note": "",
         "attributedTo": {},
@@ -17975,6 +18811,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Table 4.1, PDF page 129 (printed p. 126)",
         "note": "",
         "attributedTo": {},
@@ -18060,6 +18900,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Table 4.1, PDF page 129 (printed p. 126)",
         "note": "",
         "attributedTo": {},
@@ -18145,6 +18989,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Table 4.1, PDF page 129 (printed p. 126)",
         "note": "",
         "attributedTo": {},
@@ -18230,6 +19078,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Table 4.1, PDF page 129 (printed p. 126)",
         "note": "",
         "attributedTo": {},
@@ -18315,6 +19167,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Table 4.1, PDF page 129 (printed p. 126)",
         "note": "",
         "attributedTo": {},
@@ -18400,6 +19256,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Table 4.1, PDF page 129 (printed p. 126)",
         "note": "",
         "attributedTo": {},
@@ -18485,6 +19345,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Table 4.1, PDF page 129 (printed p. 126)",
         "note": "",
         "attributedTo": {},
@@ -18570,6 +19434,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Table 4.1, PDF page 129 (printed p. 126)",
         "note": "",
         "attributedTo": {},
@@ -18655,6 +19523,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Table 4.1, PDF page 129 (printed p. 126)",
         "note": "",
         "attributedTo": {},
@@ -18740,6 +19612,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Table 4.1, PDF page 129 (printed p. 126)",
         "note": "",
         "attributedTo": {},
@@ -18927,6 +19803,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Allard & Atalla 2e Table 6.1, PDF page 133 (printed p. 124); Allard & Atalla 2e Sect. 6.5.4, PDF page 132 (printed p. 123)",
         "note": "Shear modulus printed as 220(1 + j0.1) N cm-2. Characteristic lengths from the prose of Sect. 6.5.4, not from the table.",
         "attributedTo": {},
@@ -19022,6 +19902,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Allard & Atalla 2e Table 7.1, PDF page 150 (printed p. 142)",
         "note": "",
         "attributedTo": {},
@@ -19117,6 +20001,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Allard & Atalla 2e Table 7.1, PDF page 150 (printed p. 142)",
         "note": "",
         "attributedTo": {},
@@ -19212,6 +20100,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Allard & Atalla 2e Table 8.1, PDF page 181 (printed p. 174)",
         "note": "Shear modulus printed as 75 + j15 kPa.",
         "attributedTo": {},
@@ -19307,6 +20199,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Allard & Atalla 2e Table 8.1, PDF page 181 (printed p. 174)",
         "note": "Shear modulus printed as 80 + j12 kPa.",
         "attributedTo": {},
@@ -19402,6 +20298,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Allard & Atalla 2e Table 9.1, PDF page 210 (printed p. 203)",
         "note": "Printed Lambda 0.12 mm, Lambda' 0.27 mm, thickness 0.1 cm.",
         "attributedTo": {},
@@ -19497,6 +20397,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Allard & Atalla 2e Table 9.1, PDF page 210 (printed p. 203)",
         "note": "Printed Lambda 0.034 mm, Lambda' 0.13 mm, thickness 1.9 cm.",
         "attributedTo": {},
@@ -19592,6 +20496,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Allard & Atalla 2e Table 10.1, PDF page 229 (printed p. 222)",
         "note": "Rigidity parameters G 260(1+0.1j), G' 125(1+0.1j), C 46(1+0.1j) kPa; Poisson coefficients F = A = 0.",
         "attributedTo": {},
@@ -19687,6 +20595,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Allard & Atalla 2e Table 10.1, PDF page 229 (printed p. 222)",
         "note": "Rigidity parameters G 260(1+0.1j), G' 125(1+0.1j), C 46(1+0.1j) kPa; Poisson coefficients F = A = 0.",
         "attributedTo": {},
@@ -19782,6 +20694,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Allard & Atalla 2e Table 11.2, PDF page 260 (printed p. 254)",
         "note": "",
         "attributedTo": {},
@@ -19877,6 +20793,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Allard & Atalla 2e Table 11.3, PDF page 272 (printed p. 266)",
         "note": "",
         "attributedTo": {},
@@ -19972,6 +20892,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Allard & Atalla 2e Table 11.3, PDF page 272 (printed p. 266)",
         "note": "The porous screen of Figure 11.6, a sheet of glass wool bonded onto the foam.",
         "attributedTo": {},
@@ -20067,6 +20991,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Allard & Atalla 2e Table 11.4, PDF page 276 (printed p. 270)",
         "note": "",
         "attributedTo": {},
@@ -20162,6 +21090,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Allard & Atalla 2e Table 11.4, PDF page 276 (printed p. 270)",
         "note": "",
         "attributedTo": {},
@@ -20257,6 +21189,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Allard & Atalla 2e Table 11.4, PDF page 276 (printed p. 270)",
         "note": "",
         "attributedTo": {},
@@ -20352,6 +21288,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Allard & Atalla 2e Table 11.4, PDF page 276 (printed p. 270)",
         "note": "",
         "attributedTo": {},
@@ -20447,6 +21387,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Allard & Atalla 2e Table 11.5, PDF page 277 (printed p. 271)",
         "note": "",
         "attributedTo": {},
@@ -20542,6 +21486,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Allard & Atalla 2e Table 11.5, PDF page 277 (printed p. 271)",
         "note": "Lengths from Lambda = Lambda' = sqrt(8 eta / (phi sigma)) and tortuosity from 1 + (epsilon_e / d)(alpha_felt + alpha_foam), per the prose of printed p. 270; density not printed.",
         "attributedTo": {},
@@ -20637,6 +21585,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Allard & Atalla 2e Table 11.5, PDF page 277 (printed p. 271)",
         "note": "",
         "attributedTo": {},
@@ -20732,6 +21684,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Allard & Atalla 2e Table 11.6, PDF page 279 (printed p. 273)",
         "note": "",
         "attributedTo": {},
@@ -20827,6 +21783,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Allard & Atalla 2e Table 11.7, PDF page 280 (printed p. 274)",
         "note": "",
         "attributedTo": {},
@@ -20922,6 +21882,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Allard & Atalla 2e Table 11.7, PDF page 280 (printed p. 274)",
         "note": "",
         "attributedTo": {},
@@ -21017,6 +21981,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Allard & Atalla 2e Table 11.7, PDF page 280 (printed p. 274)",
         "note": "",
         "attributedTo": {},
@@ -21112,6 +22080,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Allard & Atalla 2e Table 11.8, PDF page 281 (printed p. 275)",
         "note": "The Domisol Coffrage glass wool of Table 6.1. Thickness printed 3.8 mm; the text of Sect. 11.7.3 says 5 cm.",
         "attributedTo": {},
@@ -21207,6 +22179,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Allard & Atalla 2e Table 11.9, PDF page 282 (printed p. 276)",
         "note": "",
         "attributedTo": {},
@@ -21302,6 +22278,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Allard & Atalla 2e Table 12.1, PDF page 297 (printed p. 292)",
         "note": "",
         "attributedTo": {},
@@ -21397,6 +22377,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Allard & Atalla 2e Table 12.2, PDF page 298 (printed p. 293)",
         "note": "",
         "attributedTo": {},
@@ -21492,6 +22476,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Allard & Atalla 2e Table 12.4, PDF page 304 (printed p. 299)",
         "note": "",
         "attributedTo": {},
@@ -21587,6 +22575,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Allard & Atalla 2e Table 12.5, PDF page 306 (printed p. 301)",
         "note": "",
         "attributedTo": {},
@@ -21682,6 +22674,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Allard & Atalla 2e Table 12.5, PDF page 306 (printed p. 301)",
         "note": "",
         "attributedTo": {},
@@ -21777,6 +22773,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Allard & Atalla 2e Table 13.1, PDF page 332 (printed p. 328)",
         "note": "Lengths printed 0.000078 m and 0.000192 m.",
         "attributedTo": {},
@@ -21872,6 +22872,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Allard & Atalla 2e Table 13.2, PDF page 341 (printed p. 337)",
         "note": "Young's modulus printed 4400 Pa; the text reports a skeleton resonance near 1350 Hz that this value cannot give.",
         "attributedTo": {},
@@ -21967,6 +22971,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
         "note": "Page superscript: 39.",
         "attributedTo": {
@@ -22064,6 +23072,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
         "note": "Page superscripts: 40, 41.",
         "attributedTo": {
@@ -22161,6 +23173,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
         "note": "Page superscript: 41.",
         "attributedTo": {
@@ -22258,6 +23274,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
         "note": "No superscript on the page.",
         "attributedTo": {},
@@ -22353,6 +23373,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
         "note": "Page superscripts: 42, 43. Superscript 43 is Kino and Ueno, Appl. Acoust. 69(7) (2008), not their 69(4) paper (ref. 45).",
         "attributedTo": {
@@ -22450,6 +23474,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
         "note": "Page superscript: 44.",
         "attributedTo": {
@@ -22547,6 +23575,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
         "note": "Page superscripts: 41, 45. Superscript 45 is Kino and Ueno, Appl. Acoust. 69(4) (2008), not their 69(7) paper (ref. 43).",
         "attributedTo": {
@@ -22644,6 +23676,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
         "note": "Page superscript: 46.",
         "attributedTo": {
@@ -22741,6 +23777,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
         "note": "Page superscript: 40.",
         "attributedTo": {
@@ -22838,6 +23878,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
         "note": "Page superscript: 47.",
         "attributedTo": {
@@ -22935,6 +23979,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
         "note": "Page superscript: 48. Name wraps over two lines on the page (\"Polylactide and polyethylene\" / \"glycol foam\").",
         "attributedTo": {
@@ -23032,6 +24080,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
         "note": "Page superscripts: 41, 47.",
         "attributedTo": {
@@ -23129,6 +24181,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
         "note": "Page superscripts: 12, 49.",
         "attributedTo": {
@@ -23226,6 +24282,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
         "note": "Page superscript: 12.",
         "attributedTo": {
@@ -23323,6 +24383,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
         "note": "Page superscript: 50.",
         "attributedTo": {
@@ -23420,6 +24484,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
         "note": "Page superscript: 50.",
         "attributedTo": {
@@ -23517,6 +24585,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
         "note": "Page superscript: 51.",
         "attributedTo": {
@@ -23614,6 +24686,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
         "note": "Page superscript: 50. The page prints both specimens on one line: the name “Glass beads, 0.68 and 1.68 mm in diameter” (wrapped after “mm”) against the cell “13,000 and 43,200”, and it does not say which resistivity belongs to which diameter. Pairing them by printed order would be a reading the page does not support, and two things argue against it: flow resistivity falls with the square of the grain size, so the larger bead should be the less resistive of the two, and Table 6.5 prints the same pair of beads from the same study with the sizes the other way round (“1.6 and 0.7 mm”). Both readings are kept, unpaired.",
         "attributedTo": {
@@ -23711,6 +24787,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
         "note": "Page superscript: 52.",
         "attributedTo": {
@@ -23808,6 +24888,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
         "note": "Page superscript: 36.",
         "attributedTo": {
@@ -23905,6 +24989,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
         "note": "Page superscript: 41.",
         "attributedTo": {
@@ -24002,6 +25090,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
         "note": "Page superscript: 53.",
         "attributedTo": {
@@ -24099,6 +25191,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
         "note": "Page superscript: 54.",
         "attributedTo": {
@@ -24196,6 +25292,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
         "note": "Page superscript: 53.",
         "attributedTo": {
@@ -24293,6 +25393,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
         "note": "Page superscript: 52.",
         "attributedTo": {
@@ -24390,6 +25494,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
         "note": "Page superscript: 53.",
         "attributedTo": {
@@ -24487,6 +25595,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
         "note": "Page superscript: 55.",
         "attributedTo": {
@@ -24584,6 +25696,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
         "note": "Page superscript: 56.",
         "attributedTo": {
@@ -24681,6 +25797,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
         "note": "Page superscript: 44.",
         "attributedTo": {
@@ -24778,6 +25898,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.3, PDF page 251 (printed p. 194)",
         "note": "Page superscript: 19.",
         "attributedTo": {
@@ -24875,6 +25999,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.3, PDF page 251 (printed p. 194)",
         "note": "Page superscript: 19.",
         "attributedTo": {
@@ -24972,6 +26100,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.3, PDF page 251 (printed p. 194)",
         "note": "Page superscript: 19.",
         "attributedTo": {
@@ -25069,6 +26201,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.3, PDF page 251 (printed p. 194)",
         "note": "Page superscript: 39.",
         "attributedTo": {
@@ -25166,6 +26302,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.3, PDF page 251 (printed p. 194)",
         "note": "Page superscripts: 19, 20.",
         "attributedTo": {
@@ -25263,6 +26403,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.3, PDF page 251 (printed p. 194)",
         "note": "Page superscripts: 19, 20.",
         "attributedTo": {
@@ -25360,6 +26504,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.3, PDF page 251 (printed p. 194)",
         "note": "Page superscripts: 19, 44, 57.",
         "attributedTo": {
@@ -25457,6 +26605,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.3, PDF page 251 (printed p. 194)",
         "note": "Page superscript: 19.",
         "attributedTo": {
@@ -25554,6 +26706,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.3, PDF page 251 (printed p. 194)",
         "note": "Page superscripts: 19, 20, 57.",
         "attributedTo": {
@@ -25651,6 +26807,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.3, PDF page 251 (printed p. 194)",
         "note": "Page superscripts: 19, 20.",
         "attributedTo": {
@@ -25748,6 +26908,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.3, PDF page 251 (printed p. 194)",
         "note": "Page superscripts: 19, 58.",
         "attributedTo": {
@@ -25845,6 +27009,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.3, PDF page 251 (printed p. 194)",
         "note": "Page superscript: 19.",
         "attributedTo": {
@@ -25942,6 +27110,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.3, PDF page 251 (printed p. 194)",
         "note": "Page superscripts: 19, 42, 58.",
         "attributedTo": {
@@ -26039,6 +27211,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.3, PDF page 251 (printed p. 194)",
         "note": "Page superscript: 57.",
         "attributedTo": {
@@ -26136,6 +27312,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.3, PDF page 251 (printed p. 194)",
         "note": "Page superscripts: 19, 57. Cell printed \"5–25, 63\": a range and a separate value with nothing to pair them to.",
         "attributedTo": {
@@ -26233,6 +27413,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.3, PDF page 251 (printed p. 194)",
         "note": "Page superscript: 20.",
         "attributedTo": {
@@ -26330,6 +27514,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.3, PDF page 251 (printed p. 194)",
         "note": "Page superscript: 59. Superscript 59 is Putra et al., Adv. Acoust. Vib. 605932 (2013), the paddy-waste paper (ref. 60 is the same first authors' sugarcane paper).",
         "attributedTo": {
@@ -26427,6 +27615,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.3, PDF page 251 (printed p. 194)",
         "note": "Page superscript: 20.",
         "attributedTo": {
@@ -26524,6 +27716,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.3, PDF page 251 (printed p. 194)",
         "note": "Page superscript: 60. Superscript 60 is Putra et al., Procedia Eng. 53 (2013), the sugarcane paper (ref. 59 is the same first authors' paddy-waste paper).",
         "attributedTo": {
@@ -26621,6 +27817,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.3, PDF page 251 (printed p. 194)",
         "note": "Page superscripts: 19, 44.",
         "attributedTo": {
@@ -26718,6 +27918,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.3, PDF page 251 (printed p. 194)",
         "note": "Page superscript: 20. Cell printed \"14, 37–63\": a value and a separate range with nothing to pair them to.",
         "attributedTo": {
@@ -26815,6 +28019,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscripts: 1, 41.",
         "attributedTo": {
@@ -26912,6 +28120,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscript: 41.",
         "attributedTo": {
@@ -27009,6 +28221,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscripts: 1, 7, 41.",
         "attributedTo": {
@@ -27106,6 +28322,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscript: 43. Superscript 43 is Kino and Ueno, Appl. Acoust. 69(7) (2008), not their 69(4) paper (ref. 45).",
         "attributedTo": {
@@ -27203,6 +28423,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscript: 7.",
         "attributedTo": {
@@ -27300,6 +28524,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscript: 7.",
         "attributedTo": {
@@ -27397,6 +28625,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscripts: 7, 12, 41, 65. Name wraps over two lines on the page (\"Open cell acoustic foams\" / \"(e.g., PU)\"); the superscripts sit after the closing parenthesis.",
         "attributedTo": {
@@ -27494,6 +28726,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscript: 19.",
         "attributedTo": {
@@ -27591,6 +28827,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscripts: 19, 46.",
         "attributedTo": {
@@ -27688,6 +28928,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscript: 41.",
         "attributedTo": {
@@ -27785,6 +29029,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscript: 48.",
         "attributedTo": {
@@ -27882,6 +29130,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscript: 12.",
         "attributedTo": {
@@ -27979,6 +29231,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscript: 66.",
         "attributedTo": {
@@ -28076,6 +29332,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscript: 50.",
         "attributedTo": {
@@ -28173,6 +29433,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscript: 50.",
         "attributedTo": {
@@ -28270,6 +29534,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "No superscript on the page.",
         "attributedTo": {},
@@ -28365,6 +29633,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscript: 50. Cell printed \"0.34, 0.38\" against the name \"Glass beads (1.6 and 0.7 mm)\". The page does not make the pairing explicit (the sizes are joined by \"and\", the values by a comma, and the sizes are listed largest first, unlike Table 6.2), so both values are kept as reported rather than split into variants.",
         "attributedTo": {
@@ -28462,6 +29734,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscript: 7.",
         "attributedTo": {
@@ -28559,6 +29835,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscript: 55. Name wraps over two lines on the page (\"Lead shot, random loose\" / \"packing\").",
         "attributedTo": {
@@ -28656,6 +29936,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscript: 53.",
         "attributedTo": {
@@ -28753,6 +30037,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscripts: 54, 67.",
         "attributedTo": {
@@ -28850,6 +30138,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscript: 53.",
         "attributedTo": {
@@ -28947,6 +30239,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscript: 1.",
         "attributedTo": {
@@ -29044,6 +30340,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscript: 7.",
         "attributedTo": {
@@ -29141,6 +30441,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscript: 7.",
         "attributedTo": {
@@ -29238,6 +30542,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscript: 53.",
         "attributedTo": {
@@ -29335,6 +30643,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscript: 51.",
         "attributedTo": {
@@ -29432,6 +30744,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscript: 7.",
         "attributedTo": {
@@ -29529,6 +30845,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscript: 53. Cell printed \"≈0.65–0.68\": the approximately-equals sign precedes the whole range.",
         "attributedTo": {
@@ -29626,6 +30946,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscript: 19. Cell printed \">0.75\". The schema has bounded_above for \"< x\" cells only; by analogy this row uses ranges with the printed value as the low end and the physical ceiling of porosity (1.0, NOT a printed number) as the high end, flagged with bounded_below.",
         "attributedTo": {
@@ -29638,8 +30962,8 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "0,75 to 1",
-            "kind": "range",
+            "text": "> 0,75",
+            "kind": "bound",
             "note": "the page prints a lower bound of 0.75 and no value"
           },
           {
@@ -29723,6 +31047,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscript: 52.",
         "attributedTo": {
@@ -29820,6 +31148,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscript: 1.",
         "attributedTo": {
@@ -29917,6 +31249,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscript: 1.",
         "attributedTo": {
@@ -30014,6 +31350,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscript: 1.",
         "attributedTo": {
@@ -30111,6 +31451,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscript: 1. Cell printed \"≈0.005\".",
         "attributedTo": {
@@ -30208,6 +31552,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscript: 56.",
         "attributedTo": {
@@ -30305,6 +31653,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscript: 1.",
         "attributedTo": {
@@ -30402,6 +31754,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.8, PDF page 261 (printed p. 204)",
         "note": "Page superscripts: 40, 41.",
         "attributedTo": {
@@ -30499,6 +31855,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.8, PDF page 261 (printed p. 204)",
         "note": "Page superscripts: 41, 45.",
         "attributedTo": {
@@ -30596,6 +31956,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.8, PDF page 261 (printed p. 204)",
         "note": "Page superscript: 43. References 43 and 45 are two different Kino and Ueno papers of 2008; 43 is the polyester fibre paper.",
         "attributedTo": {
@@ -30693,6 +32057,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.8, PDF page 261 (printed p. 204)",
         "note": "Page superscript: 87. Cellular rubber is listed under Cellular material here and under Granular materials in Table 6.9.",
         "attributedTo": {
@@ -30790,6 +32158,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.8, PDF page 261 (printed p. 204)",
         "note": "Page superscripts: 41, 45.",
         "attributedTo": {
@@ -30887,6 +32259,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.8, PDF page 261 (printed p. 204)",
         "note": "Page superscript: 46. The thermal length cell is a dash, so no thermal length is given.",
         "attributedTo": {
@@ -30984,6 +32360,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.8, PDF page 261 (printed p. 204)",
         "note": "Page superscript: 40. Cells printed \"25, 207, 230\" and \"70 and 690\": three and two separate values with nothing to pair them to.",
         "attributedTo": {
@@ -31081,6 +32461,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.8, PDF page 261 (printed p. 204)",
         "note": "Page superscript: 65. The Poroelastic foam row of Table 6.9 carries no superscript.",
         "attributedTo": {
@@ -31178,6 +32562,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.8, PDF page 261 (printed p. 204)",
         "note": "Page superscript: 47. The thermal length cell is a dash, so no thermal length is given.",
         "attributedTo": {
@@ -31275,6 +32663,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.8, PDF page 261 (printed p. 204)",
         "note": "Page superscript: 48. The name wraps over two lines and the superscript sits on the second line, after \"foam\".",
         "attributedTo": {
@@ -31372,6 +32764,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.8, PDF page 261 (printed p. 204)",
         "note": "Page superscript: 12. Viscous cell printed \"96, 200–450\": a value and a separate range with nothing to pair them to.",
         "attributedTo": {
@@ -31469,6 +32865,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.8, PDF page 261 (printed p. 204)",
         "note": "Page superscripts: 12, 47.",
         "attributedTo": {
@@ -31566,6 +32966,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.8, PDF page 261 (printed p. 204)",
         "note": "Page superscript: 55. The page prints this row as \"2.1 mm lead shot\"; it is one of two lead shot specimens, recorded here as the name \"Lead shot\" with the variant \"2.1 mm\", which is also how Table 6.9 prints \"Lead shot\", once.",
         "attributedTo": {
@@ -31663,6 +33067,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.8, PDF page 261 (printed p. 204)",
         "note": "Page superscript: 55. The page prints this row as \"4 mm lead shot\"; it is one of two lead shot specimens, recorded here as the name \"Lead shot\" with the variant \"4 mm\", which is also how Table 6.9 prints \"Lead shot\", once.",
         "attributedTo": {
@@ -31760,6 +33168,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.8, PDF page 261 (printed p. 204)",
         "note": "Page superscript: 55. Name kept as printed, since the page gives only this one gravel specimen. Viscous cell printed \"190, 290\": two separate values with nothing to pair them to. The thermal length cell is a dash, so no thermal length is given.",
         "attributedTo": {
@@ -31857,6 +33269,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.8, PDF page 261 (printed p. 204)",
         "note": "The only row in the table with no superscript, so no credit is given for it.",
         "attributedTo": {},
@@ -31952,6 +33368,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.8, PDF page 261 (printed p. 204)",
         "note": "Page superscript: 5. Reference 5 of chapter 6 is a Wikimedia Commons photograph credit (Siim Sepp, \"Sand from Gobi Desert\", licensed CC BY-SA 3.0, accessed 3 May 2015), not a source of measured characteristic lengths; the credit is recorded as the page prints it.",
         "attributedTo": {
@@ -32049,6 +33469,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.8, PDF page 261 (printed p. 204)",
         "note": "Page superscript: 55. Viscous cell printed \"470, 770\": two separate values with nothing to pair them to. The thermal length cell is a dash, so no thermal length is given.",
         "attributedTo": {
@@ -32146,6 +33570,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.8, PDF page 261 (printed p. 204)",
         "note": "Page superscript: 88.",
         "attributedTo": {
@@ -32243,6 +33671,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.8, PDF page 261 (printed p. 204)",
         "note": "Page superscript: 81.",
         "attributedTo": {
@@ -32340,6 +33772,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "Page superscript: 41.",
         "attributedTo": {
@@ -32437,6 +33873,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "No superscript on the page, so no credit is given for this row. The name wraps over two lines, \"wool\" alone on the second.",
         "attributedTo": {},
@@ -32532,6 +33972,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "Page superscript: 43. References 43 and 45 are two different Kino and Ueno papers of 2008; 43 is the polyester fibre paper.",
         "attributedTo": {
@@ -32629,6 +34073,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "Page superscript: 41.",
         "attributedTo": {
@@ -32726,6 +34174,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "Page superscripts: 41, 45.",
         "attributedTo": {
@@ -32823,6 +34275,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "Page superscript: 46.",
         "attributedTo": {
@@ -32920,6 +34376,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "Page superscript: 65. Cell printed \"1.06 and 1.7\": two separate values with nothing to pair them to. Table 6.8 gives the Plastic foam characteristic lengths from reference 40 instead.",
         "attributedTo": {
@@ -33017,6 +34477,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "No superscript on the page, so no credit is given for this row, although the Poroelastic foam row of Table 6.8 carries superscript 65.",
         "attributedTo": {},
@@ -33112,6 +34576,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "Page superscript: 47.",
         "attributedTo": {
@@ -33209,6 +34677,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "Page superscript: 48.",
         "attributedTo": {
@@ -33306,6 +34778,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "Page superscripts: 41, 47.",
         "attributedTo": {
@@ -33403,6 +34879,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "Page superscript: 12. Table 6.8 prints the same specimen as \"PU, fully reticulated\".",
         "attributedTo": {
@@ -33500,6 +34980,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "Page superscript: 12. The upper bound is printed \"2.30\". Table 6.8 prints the same specimen as \"PU, partially reticulated\" and credits it to references 12 and 47.",
         "attributedTo": {
@@ -33597,6 +35081,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "Page superscript: 87. Listed under Granular materials here and under Cellular material in Table 6.8.",
         "attributedTo": {
@@ -33694,6 +35182,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "Page superscript: 50.",
         "attributedTo": {
@@ -33791,6 +35283,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "Page superscript: 50.",
         "attributedTo": {
@@ -33888,6 +35384,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "Page superscript: 91.",
         "attributedTo": {
@@ -33985,6 +35485,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "Page superscript: 55. Printed once here, where Table 6.8 splits the same material into a 2.1 mm and a 4 mm specimen.",
         "attributedTo": {
@@ -34082,6 +35586,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "No superscript on the page, so no credit is given for this row.",
         "attributedTo": {},
@@ -34177,6 +35685,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "Page superscript: 50. The name wraps over two lines and the superscript sits on the second line, after \"diameter\". The page gives one interval for the three bead sizes together, so no per-size variant can be split out.",
         "attributedTo": {
@@ -34274,6 +35786,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "No superscript on the page, so no credit is given for this row. The row name repeats the group heading.",
         "attributedTo": {},
@@ -34369,6 +35885,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "Page superscripts: 52, 55. Printed without a size here, where Table 6.8 prints \"9 mm gravel\".",
         "attributedTo": {
@@ -34466,6 +35986,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "Page superscripts: 54, 67. Cell printed \"2–3.3\", the lower bound with no decimal.",
         "attributedTo": {
@@ -34563,6 +36087,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "Page superscript: 5. Reference 5 of chapter 6 is a Wikimedia Commons photograph credit (Siim Sepp, \"Sand from Gobi Desert\", licensed CC BY-SA 3.0, accessed 3 May 2015), not a source of measured tortuosity; the credit is recorded as the page prints it. Table 6.8 prints the same material as \"Perlite (expanded)\".",
         "attributedTo": {
@@ -34660,6 +36188,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "Page superscript: 53. Cell printed \"1.13–1.26, 1.38–1.56\": two separate intervals with nothing to pair them to.",
         "attributedTo": {
@@ -34757,6 +36289,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "Page superscript: 41. Same value as the Cellular rubber row four lines above, which is credited to reference 87.",
         "attributedTo": {
@@ -34854,6 +36390,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "Page superscript: 53. Cell printed \"1.48–1.58, 1.8–2.46\": two separate intervals with nothing to pair them to.",
         "attributedTo": {
@@ -34951,6 +36491,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "Page superscript: 52.",
         "attributedTo": {
@@ -35048,6 +36592,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "Page superscript: 52.",
         "attributedTo": {
@@ -35145,6 +36693,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "Page superscript: 52.",
         "attributedTo": {
@@ -35242,6 +36794,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "Page superscript: 53. Cell printed \"1.31, 1.49\": two separate values with nothing to pair them to.",
         "attributedTo": {
@@ -35339,6 +36895,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "Page superscript: 88.",
         "attributedTo": {
@@ -35436,6 +36996,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "Page superscript: 55.",
         "attributedTo": {
@@ -35533,6 +37097,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "Page superscript: 52.",
         "attributedTo": {
@@ -35630,6 +37198,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "Page superscripts: 52, 81. Cell printed \"1–1.6\", the lower bound with no decimal.",
         "attributedTo": {
@@ -35727,6 +37299,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "No superscript on the page, so no credit is given for this row. This row is missing from the PDF text layer and was read off the rendered page.",
         "attributedTo": {},
@@ -35822,6 +37398,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "No superscript on the page, so no credit is given for this row. Printed as the bare integer \"4\". This row is missing from the PDF text layer and was read off the rendered page; it is the last row of the table.",
         "attributedTo": {},
@@ -35917,6 +37497,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Mechel 2e Sect. G.1 Table 1, PDF page 363 (printed p. 348)",
         "note": "",
         "attributedTo": {
@@ -36014,6 +37598,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Mechel 2e Sect. G.1 Table 1, PDF page 363 (printed p. 348)",
         "note": "",
         "attributedTo": {
@@ -36111,6 +37699,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Mechel 2e Sect. G.1 Table 1, PDF page 363 (printed p. 348)",
         "note": "",
         "attributedTo": {
@@ -36208,6 +37800,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Mechel 2e Sect. G.1 Table 1, PDF page 363 (printed p. 348)",
         "note": "Upper bound printed \"0.80\".",
         "attributedTo": {
@@ -36305,6 +37901,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Mechel 2e Sect. G.1 Table 1, PDF page 363 (printed p. 348)",
         "note": "Lower bound printed \"0.50\".",
         "attributedTo": {
@@ -36402,6 +38002,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Mechel 2e Sect. G.1 Table 1, PDF page 363 (printed p. 348)",
         "note": "Lower bound printed \"0.60\".",
         "attributedTo": {
@@ -36499,6 +38103,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Mechel 2e Sect. G.1 Table 1, PDF page 363 (printed p. 348)",
         "note": "Upper bound printed \"0.50\".",
         "attributedTo": {
@@ -36596,6 +38204,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Mechel 2e Sect. G.1 Table 1, PDF page 363 (printed p. 348)",
         "note": "",
         "attributedTo": {
@@ -36693,6 +38305,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Mechel 2e Sect. G.1 Table 1, PDF page 363 (printed p. 348)",
         "note": "",
         "attributedTo": {
@@ -36790,6 +38406,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Mechel 2e Sect. G.1 Table 1, PDF page 363 (printed p. 348)",
         "note": "Spelled \"filtres\" on the page.",
         "attributedTo": {
@@ -36887,6 +38507,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Mechel 2e Sect. G.1 Table 1, PDF page 363 (printed p. 348)",
         "note": "Upper bound printed \"0.30\".",
         "attributedTo": {
@@ -36984,6 +38608,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Mechel 2e Sect. G.1 Table 1, PDF page 363 (printed p. 348)",
         "note": "Lower bound printed \"0.10\".",
         "attributedTo": {
@@ -37081,6 +38709,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Mechel 2e Sect. G.1 Table 1, PDF page 363 (printed p. 348)",
         "note": "",
         "attributedTo": {
@@ -37178,6 +38810,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Mechel 2e Sect. G.1 Table 1, PDF page 363 (printed p. 348)",
         "note": "",
         "attributedTo": {
@@ -37275,6 +38911,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Mechel 2e Sect. G.1 Table 1, PDF page 363 (printed p. 348)",
         "note": "The only row with no range: the \"σᵥ from\" cell is empty and the \"σᵥ to\" cell reads \"ca. 0.005\". Last row of the table.",
         "attributedTo": {
@@ -37372,6 +39012,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Mechel 2e Sect. G.11 Table 1, PDF page 409 (printed p. 394)",
         "note": "Shot content cell printed \"< 1\": an upper bound, so the low end 0.0 is a floor and not a value. The prose calls this product group \"glass fibre products\".",
         "attributedTo": {
@@ -37469,6 +39113,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Mechel 2e Sect. G.11 Table 1, PDF page 409 (printed p. 394)",
         "note": "The prose calls this product group \"basalt wool products\".",
         "attributedTo": {
@@ -37566,6 +39214,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Mechel 2e Sect. G.11 Table 1, PDF page 409 (printed p. 394)",
         "note": "The prose calls this product group \"mineral fibre products (rockwool)\".",
         "attributedTo": {
@@ -37705,6 +39357,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -37752,6 +39408,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -37799,6 +39459,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -37846,6 +39510,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -37893,6 +39561,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -37940,6 +39612,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -37987,6 +39663,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -38034,6 +39714,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -38081,6 +39765,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -38128,6 +39816,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -38175,6 +39867,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -38222,6 +39918,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -38269,6 +39969,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -38316,6 +40020,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -38363,6 +40071,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -38410,6 +40122,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -38457,6 +40173,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -38504,6 +40224,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -38551,6 +40275,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -38598,6 +40326,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -38645,6 +40377,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -38692,6 +40428,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -38739,6 +40479,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -38786,6 +40530,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -38833,6 +40581,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -38880,6 +40632,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -38927,6 +40683,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -38974,6 +40734,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -39021,6 +40785,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -39068,6 +40836,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -39115,6 +40887,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -39162,6 +40938,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -39209,6 +40989,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -39256,6 +41040,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -39303,6 +41091,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 5.2, PDF page 257 (printed p. 228)",
         "note": "",
         "attributedTo": {
@@ -39350,6 +41142,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 5.2, PDF page 257 (printed p. 228)",
         "note": "",
         "attributedTo": {
@@ -39397,6 +41193,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 5.2, PDF page 257 (printed p. 228)",
         "note": "",
         "attributedTo": {
@@ -39444,6 +41244,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 5.2, PDF page 257 (printed p. 228)",
         "note": "Description wrapped over two printed lines: \"Normal uncompacted ground\" / \"(pastures, forest floors)\".",
         "attributedTo": {
@@ -39491,6 +41295,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 5.2, PDF page 257 (printed p. 228)",
         "note": "",
         "attributedTo": {
@@ -39538,6 +41346,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 5.2, PDF page 257 (printed p. 228)",
         "note": "Description wrapped over two printed lines: \"Compacted dense ground\" / \"(gravel road, parking lot)\".",
         "attributedTo": {
@@ -39585,6 +41397,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 5.2, PDF page 257 (printed p. 228)",
         "note": "",
         "attributedTo": {
@@ -39632,6 +41448,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 5.2, PDF page 257 (printed p. 228)",
         "note": "Class H is water, not a ground surface in the porous sense; the page still gives it a representative flow resistivity, 200000 kPa s/m2, which is an acoustically hard limit rather than a measured value.",
         "attributedTo": {
@@ -39679,6 +41499,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Name wrapped over two printed lines. Water content, porosity and porosity decay cells all print a dash.",
         "attributedTo": {
@@ -39726,6 +41550,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "The water content and porosity decay cells are blank, not dashed.",
         "attributedTo": {
@@ -39773,6 +41601,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Water content, porosity and porosity decay cells all print a dash.",
         "attributedTo": {
@@ -39820,6 +41652,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Water content cell prints a dash.",
         "attributedTo": {
@@ -39867,6 +41703,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Water content cell prints a dash.",
         "attributedTo": {
@@ -39914,6 +41754,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "The water content and porosity decay cells are blank, not dashed.",
         "attributedTo": {
@@ -39961,6 +41805,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Water content, porosity and porosity decay cells all print a dash.",
         "attributedTo": {
@@ -40008,6 +41856,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Flow resistivity printed \"7 × 10^3–20 × 10^4\", the two ends written with different exponents. Water content cell prints a dash.",
         "attributedTo": {
@@ -40055,6 +41907,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Flow resistivity printed \"(540 ± 92) × 10^3\". Name wrapped over two printed lines. Porosity decay cell prints a dash. The Porosity column prints this value as a number far above 1 while every other row of the column prints a fraction; on the page it is plainly a percentage, but it is transcribed exactly as printed.",
         "attributedTo": {
@@ -40102,6 +41958,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Flow resistivity printed \"(230 ± 220) × 10^3\"; the stated uncertainty is almost as large as the value. Porosity decay cell prints a dash. The Porosity column prints this value as a number far above 1 while every other row of the column prints a fraction; on the page it is plainly a percentage, but it is transcribed exactly as printed.",
         "attributedTo": {
@@ -40149,6 +42009,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Flow resistivity printed \"(30 ± 30) × 10^3\"; the stated uncertainty equals the value. Name wrapped over two printed lines, the en dash of \"2–5 cm\" as printed. Water content, porosity and porosity decay cells all print a dash.",
         "attributedTo": {
@@ -40196,6 +42060,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Flow resistivity printed \"(9 ± 5) × 10^3\"; the en dash of \"6–7 cm\" as printed. Porosity decay cell prints a dash. The Porosity column prints this value as a number far above 1 while every other row of the column prints a fraction; on the page it is plainly a percentage, but it is transcribed exactly as printed.",
         "attributedTo": {
@@ -40243,6 +42111,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Water content and porosity cells print a dash.",
         "attributedTo": {
@@ -40290,6 +42162,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "First of three fitted values printed for this surface, marked [a]. The porosity cell, \"0.24\", and the porosity decay cell, \"−270\", are printed once for the surface, on this line, and carry no fit marker. The water content cell is blank.",
         "attributedTo": {
@@ -40337,6 +42213,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Second of three fitted values printed for this surface, marked [b]. Water content, porosity and porosity decay are printed once for this surface, on the line of the first fitted value; see that row.",
         "attributedTo": {
@@ -40384,6 +42264,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Third of three fitted values printed for this surface, marked [c]. Water content, porosity and porosity decay are printed once for this surface, on the line of the first fitted value; see that row.",
         "attributedTo": {
@@ -40431,6 +42315,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "First of three fitted values printed for this surface, marked [a]. The porosity cell is printed \"0.34–1 [b]\": the range itself carries the marker [b] = Fitted using semi-phenomenological model. The porosity decay cell, printed \"−76 to 47\", carries no marker. Both are printed once for the surface, on this line. The water content cell is blank.",
         "attributedTo": {
@@ -40478,6 +42366,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Second of three fitted values printed for this surface, marked [b]. Water content, porosity and porosity decay are printed once for this surface, on the line of the first fitted value; see that row.",
         "attributedTo": {
@@ -40525,6 +42417,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Third of three fitted values printed for this surface, marked [c]. Water content, porosity and porosity decay are printed once for this surface, on the line of the first fitted value; see that row.",
         "attributedTo": {
@@ -40572,6 +42468,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "First of three fitted values printed for this surface, marked [a]. The porosity cell is printed \"0.38–1 [b]\": the range itself carries the marker [b] = Fitted using semi-phenomenological model. The porosity decay cell, printed \"−9 to 48\", carries no marker. Both are printed once for the surface, on this line. The water content cell is blank.",
         "attributedTo": {
@@ -40619,6 +42519,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Second of three fitted values printed for this surface, marked [b]. Water content, porosity and porosity decay are printed once for this surface, on the line of the first fitted value; see that row.",
         "attributedTo": {
@@ -40666,6 +42570,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Third of three fitted values printed for this surface, marked [c]. Water content, porosity and porosity decay are printed once for this surface, on the line of the first fitted value; see that row.",
         "attributedTo": {
@@ -40713,6 +42621,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Two flow resistivity ranges are printed on two lines for this one surface, \"7 × 10^4–8.5 × 10^5\" and \"1 × 10^5–2.4 × 10^5\", with no fit markers and nothing to pair them with, so both go to reported. Water content cell prints a dash.",
         "attributedTo": {
@@ -40760,6 +42672,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "First of three fitted values printed for this surface, marked [a]. The porosity cell is printed \"0.2–1 [b]\": the range itself carries the marker [b] = Fitted using semi-phenomenological model. The porosity decay cell, printed \"−400 to 80\", carries no marker. Both are printed once for the surface, on this line. The water content cell prints a dash.",
         "attributedTo": {
@@ -40807,6 +42723,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Second of three fitted values printed for this surface, marked [b]. Water content, porosity and porosity decay are printed once for this surface, on the line of the first fitted value; see that row.",
         "attributedTo": {
@@ -40854,6 +42774,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Third of three fitted values printed for this surface, marked [c]. Water content, porosity and porosity decay are printed once for this surface, on the line of the first fitted value; see that row.",
         "attributedTo": {
@@ -40901,6 +42825,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Flow resistivity printed \"15 × 10^4–30 × 10^4\". Name wrapped over two printed lines. Water content, porosity and porosity decay cells all print a dash.",
         "attributedTo": {
@@ -40948,6 +42876,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Flow resistivity printed \"(150 ± 90) × 10^3\" and porosity printed \"48 ± 4\", the only porosity cell in the table with a stated uncertainty. Water content and porosity decay cells print a dash. The Porosity column prints this value as a number far above 1 while every other row of the column prints a fraction; on the page it is plainly a percentage, but it is transcribed exactly as printed.",
         "attributedTo": {
@@ -40995,6 +42927,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Water content, porosity and porosity decay cells all print a dash.",
         "attributedTo": {
@@ -41042,6 +42978,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "First of three fitted values printed for this surface, marked [a]. The porosity cell is printed \"0.4 [b]\": the value itself carries the marker [b] = Fitted using semi-phenomenological model. The porosity decay cell, printed \"−49\", carries no marker. Both are printed once for the surface, on this line. The water content cell is blank.",
         "attributedTo": {
@@ -41089,6 +43029,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Second of three fitted values printed for this surface, marked [b]. Water content, porosity and porosity decay are printed once for this surface, on the line of the first fitted value; see that row.",
         "attributedTo": {
@@ -41136,6 +43080,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Third of three fitted values printed for this surface, marked [c]. Water content, porosity and porosity decay are printed once for this surface, on the line of the first fitted value; see that row.",
         "attributedTo": {
@@ -41183,6 +43131,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Water content cell prints a dash.",
         "attributedTo": {
@@ -41230,6 +43182,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Last row of the table on the first printed page (folio 200, which ends with \"(Continued)\"). Water content, porosity and porosity decay cells all print a dash.",
         "attributedTo": {
@@ -41277,6 +43233,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "First row of the continuation page (folio 201); the group heading Earth is not repeated there, so the group is carried over from the first page. First of three fitted values printed for this surface, marked [a]. The porosity cell is printed \"0.15–1 [b]\": the range itself carries the marker [b] = Fitted using semi-phenomenological model. The porosity decay cell, printed \"−490 to 81\", carries no marker. Both are printed once for the surface, on this line. The water content cell is blank.",
         "attributedTo": {
@@ -41324,6 +43284,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Second of three fitted values printed for this surface, marked [b]. Water content, porosity and porosity decay are printed once for this surface, on the line of the first fitted value; see that row.",
         "attributedTo": {
@@ -41371,6 +43335,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Third of three fitted values printed for this surface, marked [c]. Water content, porosity and porosity decay are printed once for this surface, on the line of the first fitted value; see that row.",
         "attributedTo": {
@@ -41418,6 +43386,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "The water content and porosity decay cells are blank, not dashed.",
         "attributedTo": {
@@ -41465,6 +43437,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Water content and porosity cells print a dash.",
         "attributedTo": {
@@ -41512,6 +43488,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "First of three fitted values printed for this surface. TWO defects on the printed line, both transcribed as printed and neither repaired: (1) the low end of the range is printed \"1.7.3 × 10^5\", with two decimal points, which is not a readable number, so the whole flow resistivity cell goes to unquantified rather than being guessed at; (2) the fit marker is printed [b], not [a], although every other surface with three fitted lines in this table is marked [a], [b], [c] in that order and the line below is also marked [b]. The porosity cell is printed \"0.71–1 [b]\": the range itself carries the marker [b] = Fitted using semi-phenomenological model. The porosity decay cell, printed \"17–33\", carries no marker. Both are printed once for the surface, on this line. The water content cell is blank.",
         "attributedTo": {
@@ -41559,6 +43539,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Second of three fitted values printed for this surface, marked [b]. The line above is marked [b] as well; see that row. Water content, porosity and porosity decay are printed once for this surface, on the line of the first fitted value; see that row.",
         "attributedTo": {
@@ -41606,6 +43590,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Third of three fitted values printed for this surface, marked [c]. Water content, porosity and porosity decay are printed once for this surface, on the line of the first fitted value; see that row.",
         "attributedTo": {
@@ -41653,6 +43641,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Flow resistivity printed \"30 × 10^4–80 × 10^4\". Name wrapped over two printed lines. Water content, porosity and porosity decay cells all print a dash.",
         "attributedTo": {
@@ -41700,6 +43692,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "The word \"Clean\" is printed in italic, the rest of the name upright. Name wrapped over two printed lines. Water content, porosity and porosity decay cells all print a dash.",
         "attributedTo": {
@@ -41747,6 +43743,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Name wrapped over two printed lines. Water content, porosity and porosity decay cells all print a dash.",
         "attributedTo": {
@@ -41794,6 +43794,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Flow resistivity printed \"1.5 × 10^3–59 × 10^3\". Water content and porosity decay cells print a dash.",
         "attributedTo": {
@@ -41841,6 +43845,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Flow resistivity printed \"5 × 10^6–20 × 10^6\". Name wrapped over two printed lines. Water content, porosity and porosity decay cells all print a dash.",
         "attributedTo": {
@@ -41888,6 +43896,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Flow resistivity printed \"≈3 × 10^7\" with a printed approximately-equal sign, the only approximate cell in the table. Water content, porosity and porosity decay cells all print a dash.",
         "attributedTo": {
@@ -41935,6 +43947,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Flow resistivity printed \"2 × 10^3–15 × 10^3\". Water content and porosity decay cells print a dash.",
         "attributedTo": {
@@ -41982,6 +43998,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "First of three fitted values printed for this surface, marked [a]. The porosity cell is printed \"0.61–1 [b]\": the range itself carries the marker [b] = Fitted using semi-phenomenological model. The porosity decay cell, printed \"0–25\", carries no marker. Both are printed once for the surface, on this line. The water content cell prints a dash.",
         "attributedTo": {
@@ -42029,6 +44049,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Second of three fitted values printed for this surface, marked [b]; it is a single value where the other two lines are ranges. Water content, porosity and porosity decay are printed once for this surface, on the line of the first fitted value; see that row.",
         "attributedTo": {
@@ -42076,6 +44100,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Third of three fitted values printed for this surface, marked [c]. Water content, porosity and porosity decay are printed once for this surface, on the line of the first fitted value; see that row.",
         "attributedTo": {
@@ -42123,6 +44151,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "First of four. One of four lines printed under this one surface name, one per water content; the water content is the only thing that distinguishes them. Porosity cell prints a dash.",
         "attributedTo": {
@@ -42170,6 +44202,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Second of four. One of four lines printed under this one surface name, one per water content; the water content is the only thing that distinguishes them. Porosity cell prints a dash.",
         "attributedTo": {
@@ -42217,6 +44253,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Third of four. One of four lines printed under this one surface name, one per water content; the water content is the only thing that distinguishes them. Porosity cell prints a dash.",
         "attributedTo": {
@@ -42264,6 +44304,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Fourth of four. One of four lines printed under this one surface name, one per water content; the water content is the only thing that distinguishes them. Porosity cell prints a dash. The flow resistivity falls back at the highest water content, below the 51 % and 11 % lines.",
         "attributedTo": {
@@ -42311,6 +44355,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Water content and porosity decay cells print a dash. Printed name is \"Fine sand\" with no pore size, distinct from the \"Fine sand, pore size 65 μm\" block below it.",
         "attributedTo": {
@@ -42358,6 +44406,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "First of four. One of four lines printed under this one surface name, one per water content; the water content is the only thing that distinguishes them. Porosity cell prints a dash.",
         "attributedTo": {
@@ -42405,6 +44457,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Second of four. One of four lines printed under this one surface name, one per water content; the water content is the only thing that distinguishes them. Porosity cell prints a dash.",
         "attributedTo": {
@@ -42452,6 +44508,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Third of four. One of four lines printed under this one surface name, one per water content; the water content is the only thing that distinguishes them. Porosity cell prints a dash.",
         "attributedTo": {
@@ -42499,6 +44559,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Fourth of four. One of four lines printed under this one surface name, one per water content; the water content is the only thing that distinguishes them. Porosity cell prints a dash.",
         "attributedTo": {
@@ -42546,6 +44610,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Flow resistivity printed \"(420 ± 17) × 10^3\". Porosity decay cell prints a dash. The Porosity column prints this value as a number far above 1 while every other row of the column prints a fraction; on the page it is plainly a percentage, but it is transcribed exactly as printed.",
         "attributedTo": {
@@ -42593,6 +44661,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Flow resistivity printed \"(370 ± 110) × 10^3\". Last row of the table. Porosity decay cell prints a dash. The Porosity column prints this value as a number far above 1 while every other row of the column prints a fraction; on the page it is plainly a percentage, but it is transcribed exactly as printed.",
         "attributedTo": {
@@ -42658,6 +44730,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -42683,6 +44759,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -42708,6 +44788,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -42733,6 +44817,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -42758,6 +44846,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -42783,6 +44875,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -42808,6 +44904,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -42833,6 +44933,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -42858,6 +44962,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -42883,6 +44991,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -42908,6 +45020,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -42933,6 +45049,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -42958,6 +45078,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -42983,6 +45107,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -43008,6 +45136,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -43033,6 +45165,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -43058,6 +45194,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -43083,6 +45223,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -43108,6 +45252,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -43133,6 +45281,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -43158,6 +45310,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -43183,6 +45339,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -43208,6 +45368,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -43233,6 +45397,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -43258,6 +45426,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -43283,6 +45455,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -43308,6 +45484,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -43333,6 +45513,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -43358,6 +45542,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -43383,6 +45571,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -43408,6 +45600,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -43433,6 +45629,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -43458,6 +45658,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -43483,6 +45687,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -43508,6 +45716,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -43533,6 +45745,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -43558,6 +45774,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -43583,6 +45803,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Hopkins (2007) Table A1, PDF page 634 (printed p. 607)",
         "note": "",
         "attributedTo": {},
@@ -43608,6 +45832,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Hopkins (2007) Table A1, PDF page 634 (printed p. 607)",
         "note": "",
         "attributedTo": {},
@@ -43633,6 +45861,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Hopkins (2007) Table A1, PDF page 634 (printed p. 607)",
         "note": "",
         "attributedTo": {},
@@ -43658,6 +45890,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Hopkins (2007) Table A1, PDF page 634 (printed p. 607)",
         "note": "",
         "attributedTo": {},
@@ -43683,6 +45919,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Hopkins (2007) Table A1, PDF page 634 (printed p. 607)",
         "note": "",
         "attributedTo": {},
@@ -43708,6 +45948,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Hopkins (2007) Table A1, PDF page 634 (printed p. 607)",
         "note": "",
         "attributedTo": {},
@@ -43719,6 +45963,3418 @@ export const catalogues = {
           },
           {
             "text": "1,33",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      }
+    ]
+  },
+  "damping": {
+    "columns": [
+      {
+        "field": "max_loss_factor",
+        "heading": "Maximum loss factor",
+        "headingEs": "Factor de pérdidas máximo",
+        "unit": ""
+      },
+      {
+        "field": "peak_temperature_at_10_hz_c",
+        "heading": "Peak at 10 Hz",
+        "headingEs": "Pico a 10 Hz",
+        "unit": "°C"
+      },
+      {
+        "field": "peak_temperature_at_100_hz_c",
+        "heading": "Peak at 100 Hz",
+        "headingEs": "Pico a 100 Hz",
+        "unit": "°C"
+      },
+      {
+        "field": "peak_temperature_at_1000_hz_c",
+        "heading": "Peak at 1 kHz",
+        "headingEs": "Pico a 1 kHz",
+        "unit": "°C"
+      },
+      {
+        "field": "youngs_modulus_max_pa",
+        "heading": "Young's modulus, stiff end",
+        "headingEs": "Módulo de Young, extremo rígido",
+        "unit": "GPa"
+      },
+      {
+        "field": "youngs_modulus_min_pa",
+        "heading": "Young's modulus, soft end",
+        "headingEs": "Módulo de Young, extremo blando",
+        "unit": "MPa"
+      },
+      {
+        "field": "youngs_modulus_transition_pa",
+        "heading": "Young's modulus, transition",
+        "headingEs": "Módulo de Young, en la transición",
+        "unit": "MPa"
+      },
+      {
+        "field": "loss_modulus_max_pa",
+        "heading": "Maximum loss modulus",
+        "headingEs": "Módulo de pérdidas máximo",
+        "unit": "MPa"
+      }
+    ],
+    "rows": [
+      {
+        "key": "ver-beranek-2006-table-14-1/antiphon_13",
+        "table": "ver-beranek-2006-table-14-1",
+        "name": "Antiphon-13",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Vér & Beranek 2e TABLE 14.1, PDF page 599 (printed p. 598)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "1,8",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "-3,889",
+            "kind": "derived",
+            "note": "25 degrees F as the page prints it, by (5/9)(F - 32)"
+          },
+          {
+            "text": "23,89",
+            "kind": "derived",
+            "note": "75 degrees F as the page prints it, by (5/9)(F - 32)"
+          },
+          {
+            "text": "48,89",
+            "kind": "derived",
+            "note": "120 degrees F as the page prints it, by (5/9)(F - 32)"
+          },
+          {
+            "text": "2,068",
+            "kind": "derived",
+            "note": "3e5 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+          },
+          {
+            "text": "8,274",
+            "kind": "derived",
+            "note": "1.2e3 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+          },
+          {
+            "text": "131",
+            "kind": "derived",
+            "note": "1.9e4 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": "the page prints \"3.e3e\" here, which is not a number in the table's own e-notation, and the defect is registered in docs/ERRATA.md under \"Vér & Beranek 2e (2006), TABLE 14.1\""
+          }
+        ]
+      },
+      {
+        "key": "ver-beranek-2006-table-14-1/blachford_aquaplas",
+        "table": "ver-beranek-2006-table-14-1",
+        "name": "blachford Aquaplas",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Vér & Beranek 2e TABLE 14.1, PDF page 599 (printed p. 598)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "10",
+            "kind": "derived",
+            "note": "50 degrees F as the page prints it, by (5/9)(F - 32)"
+          },
+          {
+            "text": "26,67",
+            "kind": "derived",
+            "note": "80 degrees F as the page prints it, by (5/9)(F - 32)"
+          },
+          {
+            "text": "51,67",
+            "kind": "derived",
+            "note": "125 degrees F as the page prints it, by (5/9)(F - 32)"
+          },
+          {
+            "text": "11,03",
+            "kind": "derived",
+            "note": "1.6e6 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+          },
+          {
+            "text": "206,8",
+            "kind": "derived",
+            "note": "3e4 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+          },
+          {
+            "text": "1 517",
+            "kind": "derived",
+            "note": "2.2e5 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+          },
+          {
+            "text": "758,4",
+            "kind": "derived",
+            "note": "1.1e5 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+          }
+        ]
+      },
+      {
+        "key": "ver-beranek-2006-table-14-1/barry_controls_h_326",
+        "table": "ver-beranek-2006-table-14-1",
+        "name": "Barry Controls H-326",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Vér & Beranek 2e TABLE 14.1, PDF page 599 (printed p. 598)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0,8",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "-40",
+            "kind": "derived",
+            "note": "−40 degrees F as the page prints it, by (5/9)(F - 32)"
+          },
+          {
+            "text": "-31,67",
+            "kind": "derived",
+            "note": "−25 degrees F as the page prints it, by (5/9)(F - 32)"
+          },
+          {
+            "text": "-23,33",
+            "kind": "derived",
+            "note": "−10 degrees F as the page prints it, by (5/9)(F - 32)"
+          },
+          {
+            "text": "4,137",
+            "kind": "derived",
+            "note": "6e5 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+          },
+          {
+            "text": "20,68",
+            "kind": "derived",
+            "note": "3e3 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+          },
+          {
+            "text": "289,6",
+            "kind": "derived",
+            "note": "4.2e4 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+          },
+          {
+            "text": "234,4",
+            "kind": "derived",
+            "note": "3.4e4 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+          }
+        ]
+      },
+      {
+        "key": "ver-beranek-2006-table-14-1/dow_corning_sylgard_188",
+        "table": "ver-beranek-2006-table-14-1",
+        "name": "Dow Corning Sylgard 188",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Vér & Beranek 2e TABLE 14.1, PDF page 599 (printed p. 598)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "15,56",
+            "kind": "derived",
+            "note": "60 degrees F as the page prints it, by (5/9)(F - 32)"
+          },
+          {
+            "text": "26,67",
+            "kind": "derived",
+            "note": "80 degrees F as the page prints it, by (5/9)(F - 32)"
+          },
+          {
+            "text": "43,33",
+            "kind": "derived",
+            "note": "110 degrees F as the page prints it, by (5/9)(F - 32)"
+          },
+          {
+            "text": "0,1517",
+            "kind": "derived",
+            "note": "2.2e4 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+          },
+          {
+            "text": "2,068",
+            "kind": "derived",
+            "note": "3e2 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+          },
+          {
+            "text": "17,93",
+            "kind": "derived",
+            "note": "2.6e3 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+          },
+          {
+            "text": "10,34",
+            "kind": "derived",
+            "note": "1.5e3 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+          }
+        ]
+      },
+      {
+        "key": "ver-beranek-2006-table-14-1/ear_c_1002",
+        "table": "ver-beranek-2006-table-14-1",
+        "name": "EAR C-1002",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Vér & Beranek 2e TABLE 14.1, PDF page 599 (printed p. 598)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "1,9",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "-5",
+            "kind": "derived",
+            "note": "23 degrees F as the page prints it, by (5/9)(F - 32)"
+          },
+          {
+            "text": "12,78",
+            "kind": "derived",
+            "note": "55 degrees F as the page prints it, by (5/9)(F - 32)"
+          },
+          {
+            "text": "32,22",
+            "kind": "derived",
+            "note": "90 degrees F as the page prints it, by (5/9)(F - 32)"
+          },
+          {
+            "text": "2,068",
+            "kind": "derived",
+            "note": "3e5 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+          },
+          {
+            "text": "1,379",
+            "kind": "derived",
+            "note": "2e2 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+          },
+          {
+            "text": "53,09",
+            "kind": "derived",
+            "note": "7.7e3 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+          },
+          {
+            "text": "103,4",
+            "kind": "derived",
+            "note": "1.5e4 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+          }
+        ]
+      },
+      {
+        "key": "ver-beranek-2006-table-14-1/ear_c_2003",
+        "table": "ver-beranek-2006-table-14-1",
+        "name": "EAR C-2003",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Vér & Beranek 2e TABLE 14.1, PDF page 599 (printed p. 598)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "7,222",
+            "kind": "derived",
+            "note": "45 degrees F as the page prints it, by (5/9)(F - 32)"
+          },
+          {
+            "text": "21,11",
+            "kind": "derived",
+            "note": "70 degrees F as the page prints it, by (5/9)(F - 32)"
+          },
+          {
+            "text": "37,78",
+            "kind": "derived",
+            "note": "100 degrees F as the page prints it, by (5/9)(F - 32)"
+          },
+          {
+            "text": "5,516",
+            "kind": "derived",
+            "note": "8e5 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+          },
+          {
+            "text": "4,137",
+            "kind": "derived",
+            "note": "6e2 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+          },
+          {
+            "text": "151,7",
+            "kind": "derived",
+            "note": "2.2e4 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+          },
+          {
+            "text": "151,7",
+            "kind": "derived",
+            "note": "2.2e4 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+          }
+        ]
+      },
+      {
+        "key": "ver-beranek-2006-table-14-1/lord_ld_400",
+        "table": "ver-beranek-2006-table-14-1",
+        "name": "lord LD-400",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Vér & Beranek 2e TABLE 14.1, PDF page 599 (printed p. 598)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0,7",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "10",
+            "kind": "derived",
+            "note": "50 degrees F as the page prints it, by (5/9)(F - 32)"
+          },
+          {
+            "text": "26,67",
+            "kind": "derived",
+            "note": "80 degrees F as the page prints it, by (5/9)(F - 32)"
+          },
+          {
+            "text": "51,67",
+            "kind": "derived",
+            "note": "125 degrees F as the page prints it, by (5/9)(F - 32)"
+          },
+          {
+            "text": "20,68",
+            "kind": "derived",
+            "note": "3e6 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+          },
+          {
+            "text": "22,75",
+            "kind": "derived",
+            "note": "3.3e3 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+          },
+          {
+            "text": "689,5",
+            "kind": "derived",
+            "note": "1e5 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+          },
+          {
+            "text": "482,6",
+            "kind": "derived",
+            "note": "7e4 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+          }
+        ]
+      },
+      {
+        "key": "ver-beranek-2006-table-14-1/soundcoat_dyad_601",
+        "table": "ver-beranek-2006-table-14-1",
+        "name": "Soundcoat DYAD 601",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Vér & Beranek 2e TABLE 14.1, PDF page 599 (printed p. 598)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "-9,444",
+            "kind": "derived",
+            "note": "15 degrees F as the page prints it, by (5/9)(F - 32)"
+          },
+          {
+            "text": "10",
+            "kind": "derived",
+            "note": "50 degrees F as the page prints it, by (5/9)(F - 32)"
+          },
+          {
+            "text": "23,89",
+            "kind": "derived",
+            "note": "75 degrees F as the page prints it, by (5/9)(F - 32)"
+          },
+          {
+            "text": "2,068",
+            "kind": "derived",
+            "note": "3e5 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+          },
+          {
+            "text": "1,034",
+            "kind": "derived",
+            "note": "1.5e2 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+          },
+          {
+            "text": "46,19",
+            "kind": "derived",
+            "note": "6.7e3 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+          },
+          {
+            "text": "46,19",
+            "kind": "derived",
+            "note": "6.7e3 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+          }
+        ]
+      },
+      {
+        "key": "ver-beranek-2006-table-14-1/soundcoat_dyad_606",
+        "table": "ver-beranek-2006-table-14-1",
+        "name": "Soundcoat DYAD 606",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Vér & Beranek 2e TABLE 14.1, PDF page 599 (printed p. 598)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "21,11",
+            "kind": "derived",
+            "note": "70 degrees F as the page prints it, by (5/9)(F - 32)"
+          },
+          {
+            "text": "37,78",
+            "kind": "derived",
+            "note": "100 degrees F as the page prints it, by (5/9)(F - 32)"
+          },
+          {
+            "text": "54,44",
+            "kind": "derived",
+            "note": "130 degrees F as the page prints it, by (5/9)(F - 32)"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": "the page prints \"3G5\" here, which is not a number in the table's own e-notation, and the defect is registered in docs/ERRATA.md under \"Vér & Beranek 2e (2006), TABLE 14.1\""
+          },
+          {
+            "text": "0,8274",
+            "kind": "derived",
+            "note": "1.2e2 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+          },
+          {
+            "text": "41,37",
+            "kind": "derived",
+            "note": "6e3 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+          },
+          {
+            "text": "41,37",
+            "kind": "derived",
+            "note": "6e3 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+          }
+        ]
+      },
+      {
+        "key": "ver-beranek-2006-table-14-1/soundcoat_dyad_609",
+        "table": "ver-beranek-2006-table-14-1",
+        "name": "Soundcoat DYAD 609",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Vér & Beranek 2e TABLE 14.1, PDF page 599 (printed p. 598)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "51,67",
+            "kind": "derived",
+            "note": "125 degrees F as the page prints it, by (5/9)(F - 32)"
+          },
+          {
+            "text": "65,56",
+            "kind": "derived",
+            "note": "150 degrees F as the page prints it, by (5/9)(F - 32)"
+          },
+          {
+            "text": "85",
+            "kind": "derived",
+            "note": "185 degrees F as the page prints it, by (5/9)(F - 32)"
+          },
+          {
+            "text": "1,379",
+            "kind": "derived",
+            "note": "2e5 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+          },
+          {
+            "text": "4,137",
+            "kind": "derived",
+            "note": "6e2 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+          },
+          {
+            "text": "75,84",
+            "kind": "derived",
+            "note": "1.1e4 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+          },
+          {
+            "text": "75,84",
+            "kind": "derived",
+            "note": "1.1e4 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+          }
+        ]
+      },
+      {
+        "key": "ver-beranek-2006-table-14-1/soundcoat_n",
+        "table": "ver-beranek-2006-table-14-1",
+        "name": "Soundcoat N",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Vér & Beranek 2e TABLE 14.1, PDF page 599 (printed p. 598)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "1,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "-9,444",
+            "kind": "derived",
+            "note": "15 degrees F as the page prints it, by (5/9)(F - 32)"
+          },
+          {
+            "text": "-1,111",
+            "kind": "derived",
+            "note": "30 degrees F as the page prints it, by (5/9)(F - 32)"
+          },
+          {
+            "text": "21,11",
+            "kind": "derived",
+            "note": "70 degrees F as the page prints it, by (5/9)(F - 32)"
+          },
+          {
+            "text": "2,068",
+            "kind": "derived",
+            "note": "3e5 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+          },
+          {
+            "text": "0,4826",
+            "kind": "derived",
+            "note": "7e1 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+          },
+          {
+            "text": "31,72",
+            "kind": "derived",
+            "note": "4.6e3 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+          },
+          {
+            "text": "47,57",
+            "kind": "derived",
+            "note": "6.9e3 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+          }
+        ]
+      },
+      {
+        "key": "ver-beranek-2006-table-14-1/3m_isd_110",
+        "table": "ver-beranek-2006-table-14-1",
+        "name": "3M ISD-110",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Vér & Beranek 2e TABLE 14.1, PDF page 599 (printed p. 598)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "1,7",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "26,67",
+            "kind": "derived",
+            "note": "80 degrees F as the page prints it, by (5/9)(F - 32)"
+          },
+          {
+            "text": "46,11",
+            "kind": "derived",
+            "note": "115 degrees F as the page prints it, by (5/9)(F - 32)"
+          },
+          {
+            "text": "65,56",
+            "kind": "derived",
+            "note": "150 degrees F as the page prints it, by (5/9)(F - 32)"
+          },
+          {
+            "text": "0,2068",
+            "kind": "derived",
+            "note": "3e4 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+          },
+          {
+            "text": "0,2068",
+            "kind": "derived",
+            "note": "3e1 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+          },
+          {
+            "text": "6,895",
+            "kind": "derived",
+            "note": "1e3 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+          },
+          {
+            "text": "11,72",
+            "kind": "derived",
+            "note": "1.7e3 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+          }
+        ]
+      },
+      {
+        "key": "ver-beranek-2006-table-14-1/3m_isd_112",
+        "table": "ver-beranek-2006-table-14-1",
+        "name": "3M ISD-112",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Vér & Beranek 2e TABLE 14.1, PDF page 599 (printed p. 598)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "1,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "-12,22",
+            "kind": "derived",
+            "note": "10 degrees F as the page prints it, by (5/9)(F - 32)"
+          },
+          {
+            "text": "4,444",
+            "kind": "derived",
+            "note": "40 degrees F as the page prints it, by (5/9)(F - 32)"
+          },
+          {
+            "text": "26,67",
+            "kind": "derived",
+            "note": "80 degrees F as the page prints it, by (5/9)(F - 32)"
+          },
+          {
+            "text": "0,8963",
+            "kind": "derived",
+            "note": "1.3e5 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+          },
+          {
+            "text": "0,5516",
+            "kind": "derived",
+            "note": "8e1 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+          },
+          {
+            "text": "22,06",
+            "kind": "derived",
+            "note": "3.2e3 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+          },
+          {
+            "text": "26,89",
+            "kind": "derived",
+            "note": "3.9e3 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+          }
+        ]
+      },
+      {
+        "key": "ver-beranek-2006-table-14-1/3m_isd_113",
+        "table": "ver-beranek-2006-table-14-1",
+        "name": "3M ISD-113",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Vér & Beranek 2e TABLE 14.1, PDF page 599 (printed p. 598)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "1,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "-42,78",
+            "kind": "derived",
+            "note": "−45 degrees F as the page prints it, by (5/9)(F - 32)"
+          },
+          {
+            "text": "-28,89",
+            "kind": "derived",
+            "note": "−20 degrees F as the page prints it, by (5/9)(F - 32)"
+          },
+          {
+            "text": "-9,444",
+            "kind": "derived",
+            "note": "15 degrees F as the page prints it, by (5/9)(F - 32)"
+          },
+          {
+            "text": "1,034",
+            "kind": "derived",
+            "note": "1.5e5 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+          },
+          {
+            "text": "2,068",
+            "kind": "derived",
+            "note": "3e2 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+          },
+          {
+            "text": "1,448",
+            "kind": "derived",
+            "note": "2.1e2 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+          },
+          {
+            "text": "1,586",
+            "kind": "derived",
+            "note": "2.3e2 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+          }
+        ]
+      },
+      {
+        "key": "ver-beranek-2006-table-14-1/3m_468",
+        "table": "ver-beranek-2006-table-14-1",
+        "name": "3m 468",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Vér & Beranek 2e TABLE 14.1, PDF page 599 (printed p. 598)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0,8",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "-9,444",
+            "kind": "derived",
+            "note": "15 degrees F as the page prints it, by (5/9)(F - 32)"
+          },
+          {
+            "text": "10",
+            "kind": "derived",
+            "note": "50 degrees F as the page prints it, by (5/9)(F - 32)"
+          },
+          {
+            "text": "29,44",
+            "kind": "derived",
+            "note": "85 degrees F as the page prints it, by (5/9)(F - 32)"
+          },
+          {
+            "text": "0,9653",
+            "kind": "derived",
+            "note": "1.4e5 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+          },
+          {
+            "text": "0,2068",
+            "kind": "derived",
+            "note": "3e1 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+          },
+          {
+            "text": "13,79",
+            "kind": "derived",
+            "note": "2e3 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+          },
+          {
+            "text": "11,03",
+            "kind": "derived",
+            "note": "1.6e3 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+          }
+        ]
+      },
+      {
+        "key": "ver-beranek-2006-table-14-1/3m_isd_830",
+        "table": "ver-beranek-2006-table-14-1",
+        "name": "3M ISD-830",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Vér & Beranek 2e TABLE 14.1, PDF page 599 (printed p. 598)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "-59,44",
+            "kind": "derived",
+            "note": "−75 degrees F as the page prints it, by (5/9)(F - 32)"
+          },
+          {
+            "text": "-45,56",
+            "kind": "derived",
+            "note": "−50 degrees F as the page prints it, by (5/9)(F - 32)"
+          },
+          {
+            "text": "-28,89",
+            "kind": "derived",
+            "note": "−20 degrees F as the page prints it, by (5/9)(F - 32)"
+          },
+          {
+            "text": "1,379",
+            "kind": "derived",
+            "note": "2e5 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+          },
+          {
+            "text": "1,034",
+            "kind": "derived",
+            "note": "1.5e2 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+          },
+          {
+            "text": "37,92",
+            "kind": "derived",
+            "note": "5.5e3 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+          },
+          {
+            "text": "37,92",
+            "kind": "derived",
+            "note": "5.5e3 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+          }
+        ]
+      },
+      {
+        "key": "ver-beranek-2006-table-14-1/ge_smrd",
+        "table": "ver-beranek-2006-table-14-1",
+        "name": "GE SMRD",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Vér & Beranek 2e TABLE 14.1, PDF page 599 (printed p. 598)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0,9",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "10",
+            "kind": "derived",
+            "note": "50 degrees F as the page prints it, by (5/9)(F - 32)"
+          },
+          {
+            "text": "26,67",
+            "kind": "derived",
+            "note": "80 degrees F as the page prints it, by (5/9)(F - 32)"
+          },
+          {
+            "text": "51,67",
+            "kind": "derived",
+            "note": "125 degrees F as the page prints it, by (5/9)(F - 32)"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": "the page prints \"e35\" here, which is not a number in the table's own e-notation, and the defect is registered in docs/ERRATA.md under \"Vér & Beranek 2e (2006), TABLE 14.1\""
+          },
+          {
+            "text": "34,47",
+            "kind": "derived",
+            "note": "5e3 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+          },
+          {
+            "text": "268,9",
+            "kind": "derived",
+            "note": "3.9e4 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+          },
+          {
+            "text": "241,3",
+            "kind": "derived",
+            "note": "3.5e4 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+          }
+        ]
+      }
+    ]
+  },
+  "flowResistance": {
+    "columns": [
+      {
+        "field": "specific_flow_resistance_pa_s_m",
+        "heading": "Specific flow resistance",
+        "headingEs": "Resistencia al flujo específica",
+        "unit": "Pa·s/m"
+      },
+      {
+        "field": "normalized_flow_resistance",
+        "heading": "Normalized flow resistance",
+        "headingEs": "Resistencia al flujo normalizada",
+        "unit": ""
+      },
+      {
+        "field": "wires_per_cm",
+        "heading": "Wires per centimetre",
+        "headingEs": "Hilos por centímetro",
+        "unit": "1/cm"
+      },
+      {
+        "field": "wire_diameter_um",
+        "heading": "Wire diameter",
+        "headingEs": "Diámetro del hilo",
+        "unit": "µm"
+      },
+      {
+        "field": "thickness_mm",
+        "heading": "Thickness",
+        "headingEs": "Espesor",
+        "unit": "mm"
+      },
+      {
+        "field": "mass_per_area_kg_m2",
+        "heading": "Mass per unit area",
+        "headingEs": "Masa por unidad de área",
+        "unit": "kg/m²"
+      },
+      {
+        "field": "surface_density_g_m2",
+        "heading": "Surface density",
+        "headingEs": "Masa superficial",
+        "unit": "g/m²"
+      },
+      {
+        "field": "nonlinearity_factor",
+        "heading": "Nonlinearity factor",
+        "headingEs": "Factor de no linealidad",
+        "unit": ""
+      }
+    ],
+    "rows": [
+      {
+        "key": "ver-beranek-2006-table-8-5/wire_mesh_12",
+        "table": "ver-beranek-2006-table-8-5",
+        "name": "12",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Vér & Beranek 2e TABLE 8.5, PDF page 266 (printed p. 262)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "5,7",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,014",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "330",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ver-beranek-2006-table-8-5/wire_mesh_20",
+        "table": "ver-beranek-2006-table-8-5",
+        "name": "20",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Vér & Beranek 2e TABLE 8.5, PDF page 266 (printed p. 262)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "5,9",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,014",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "220",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ver-beranek-2006-table-8-5/wire_mesh_40",
+        "table": "ver-beranek-2006-table-8-5",
+        "name": "40",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Vér & Beranek 2e TABLE 8.5, PDF page 266 (printed p. 262)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "9",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,022",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "115",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,63",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ver-beranek-2006-table-8-5/wire_mesh_47",
+        "table": "ver-beranek-2006-table-8-5",
+        "name": "47",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Vér & Beranek 2e TABLE 8.5, PDF page 266 (printed p. 262)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "13,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,033",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "47",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "90",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,48",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ver-beranek-2006-table-8-5/wire_mesh_80",
+        "table": "ver-beranek-2006-table-8-5",
+        "name": "80",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Vér & Beranek 2e TABLE 8.5, PDF page 266 (printed p. 262)",
+        "note": "The page prints this mass twice, 0.31 kg/m2 and 0.63 lb/ft2, and 0.63 lb/ft2 is 3.08 kg/m2, ten times the first. The defective cell is the pound one, the restatement, which this catalogue does not hold; the row serves the 0.31 kg/m2 that the column above it and the weave of the mesh both support. See docs/ERRATA.md.",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "24,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "80",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ver-beranek-2006-table-8-6/glass_cloth_120",
+        "table": "ver-beranek-2006-table-8-6",
+        "name": "120",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "60 × 58",
+        "source": "Vér & Beranek 2e TABLE 8.6, PDF page 267 (printed p. 263)",
+        "note": "The page prints this surface density twice, 3.16 oz/yd2 and 96 g/m2, and one ounce per square yard is 33.906 grams per square metre to three decimals, by the exact definitions of the ounce and the yard, so the two printings are 11.6 per cent apart. The whole column is, by the same factor; the page does not say which of its two columns carries it, so this row holds the g/m2 as printed and docs/ERRATA.md argues the pair. Footnote a: “Averaged over a large sample.”",
+        "attributedTo": {
+          "row": "cloth number 120 of Burlington Glass Fabrics Company, J. P. Schwebel and Company and United Merchants Industrial Fabrics, credited row by row by the manufacturer code 1, 2, 3 of footnote b"
+        },
+        "cells": [
+          {
+            "text": "300",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "96",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ver-beranek-2006-table-8-6/glass_cloth_126",
+        "table": "ver-beranek-2006-table-8-6",
+        "name": "126",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "34 × 32",
+        "source": "Vér & Beranek 2e TABLE 8.6, PDF page 267 (printed p. 263)",
+        "note": "The page prints this surface density twice, 5.37 oz/yd2 and 164 g/m2, and one ounce per square yard is 33.906 grams per square metre to three decimals, by the exact definitions of the ounce and the yard, so the two printings are 11.0 per cent apart. The whole column is, by the same factor; the page does not say which of its two columns carries it, so this row holds the g/m2 as printed and docs/ERRATA.md argues the pair. Footnote a: “Averaged over a large sample.”",
+        "attributedTo": {
+          "row": "cloth number 126 of Burlington Glass Fabrics Company, J. P. Schwebel and Company and United Merchants Industrial Fabrics, credited row by row by the manufacturer code 1, 2, 3 of footnote b"
+        },
+        "cells": [
+          {
+            "text": "45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "164",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ver-beranek-2006-table-8-6/glass_cloth_138",
+        "table": "ver-beranek-2006-table-8-6",
+        "name": "138",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "64 × 60",
+        "source": "Vér & Beranek 2e TABLE 8.6, PDF page 267 (printed p. 263)",
+        "note": "The page prints this surface density twice, 6.70 oz/yd2 and 204 g/m2, and one ounce per square yard is 33.906 grams per square metre to three decimals, by the exact definitions of the ounce and the yard, so the two printings are 11.4 per cent apart. The whole column is, by the same factor; the page does not say which of its two columns carries it, so this row holds the g/m2 as printed and docs/ERRATA.md argues the pair. Footnote a: “Averaged over a large sample.”",
+        "attributedTo": {
+          "row": "cloth number 138 of Burlington Glass Fabrics Company, J. P. Schwebel and Company and United Merchants Industrial Fabrics, credited row by row by the manufacturer code 1, 2, 3 of footnote b"
+        },
+        "cells": [
+          {
+            "text": "2 200",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "204",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ver-beranek-2006-table-8-6/glass_cloth_181",
+        "table": "ver-beranek-2006-table-8-6",
+        "name": "181",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "57 × 54",
+        "source": "Vér & Beranek 2e TABLE 8.6, PDF page 267 (printed p. 263)",
+        "note": "The page prints this surface density twice, 8.90 oz/yd2 and 272 g/m2, and one ounce per square yard is 33.906 grams per square metre to three decimals, by the exact definitions of the ounce and the yard, so the two printings are 10.9 per cent apart. The whole column is, by the same factor; the page does not say which of its two columns carries it, so this row holds the g/m2 as printed and docs/ERRATA.md argues the pair. Footnote a: “Averaged over a large sample.”",
+        "attributedTo": {
+          "row": "cloth number 181 of Burlington Glass Fabrics Company, J. P. Schwebel and Company and United Merchants Industrial Fabrics, credited row by row by the manufacturer code 1, 2, 3 of footnote b"
+        },
+        "cells": [
+          {
+            "text": "380",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "272",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ver-beranek-2006-table-8-6/glass_cloth_1044",
+        "table": "ver-beranek-2006-table-8-6",
+        "name": "1044",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "14 × 14",
+        "source": "Vér & Beranek 2e TABLE 8.6, PDF page 267 (printed p. 263)",
+        "note": "The page prints this surface density twice, 19.2 oz/yd2 and 585 g/m2, and one ounce per square yard is 33.906 grams per square metre to three decimals, by the exact definitions of the ounce and the yard, so the two printings are 11.3 per cent apart. The whole column is, by the same factor; the page does not say which of its two columns carries it, so this row holds the g/m2 as printed and docs/ERRATA.md argues the pair. Footnote a: “Averaged over a large sample.”",
+        "attributedTo": {
+          "row": "cloth number 1044 of United Merchants Industrial Fabrics, credited row by row by the manufacturer code 3 of footnote b"
+        },
+        "cells": [
+          {
+            "text": "36",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "585",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ver-beranek-2006-table-8-6/glass_cloth_1544",
+        "table": "ver-beranek-2006-table-8-6",
+        "name": "1544",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "14 × 14",
+        "source": "Vér & Beranek 2e TABLE 8.6, PDF page 267 (printed p. 263)",
+        "note": "The page prints this surface density twice, 17.7 oz/yd2 and 535 g/m2, and one ounce per square yard is 33.906 grams per square metre to three decimals, by the exact definitions of the ounce and the yard, so the two printings are 12.2 per cent apart. The whole column is, by the same factor; the page does not say which of its two columns carries it, so this row holds the g/m2 as printed and docs/ERRATA.md argues the pair. Footnote a: “Averaged over a large sample.”",
+        "attributedTo": {
+          "row": "cloth number 1544 of J. P. Schwebel and Company, credited row by row by the manufacturer code 2 of footnote b"
+        },
+        "cells": [
+          {
+            "text": "19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "535",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ver-beranek-2006-table-8-6/glass_cloth_3862",
+        "table": "ver-beranek-2006-table-8-6",
+        "name": "3862",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "20 × 38",
+        "source": "Vér & Beranek 2e TABLE 8.6, PDF page 267 (printed p. 263)",
+        "note": "The page prints this surface density twice, 12.3 oz/yd2 and 375 g/m2, and one ounce per square yard is 33.906 grams per square metre to three decimals, by the exact definitions of the ounce and the yard, so the two printings are 11.2 per cent apart. The whole column is, by the same factor; the page does not say which of its two columns carries it, so this row holds the g/m2 as printed and docs/ERRATA.md argues the pair. Footnote a: “Averaged over a large sample.”",
+        "attributedTo": {
+          "row": "cloth number 3862 of United Merchants Industrial Fabrics, credited row by row by the manufacturer code 3 of footnote b"
+        },
+        "cells": [
+          {
+            "text": "350",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "375",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ver-beranek-2006-table-8-6/glass_cloth_1658",
+        "table": "ver-beranek-2006-table-8-6",
+        "name": "1658",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "24 × 24",
+        "source": "Vér & Beranek 2e TABLE 8.6, PDF page 267 (printed p. 263)",
+        "note": "The page prints this surface density twice, 1.87 oz/yd2 and 57 g/m2, and one ounce per square yard is 33.906 grams per square metre to three decimals, by the exact definitions of the ounce and the yard, so the two printings are 11.2 per cent apart. The whole column is, by the same factor; the page does not say which of its two columns carries it, so this row holds the g/m2 as printed and docs/ERRATA.md argues the pair. Footnote a: “Averaged over a large sample.”",
+        "attributedTo": {
+          "row": "cloth number 1658 of Burlington Glass Fabrics Company, credited row by row by the manufacturer code 1 of footnote b"
+        },
+        "cells": [
+          {
+            "text": "10",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ver-beranek-2006-table-8-6/glass_cloth_1562",
+        "table": "ver-beranek-2006-table-8-6",
+        "name": "1562",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "30 × 16",
+        "source": "Vér & Beranek 2e TABLE 8.6, PDF page 267 (printed p. 263)",
+        "note": "The page prints this surface density twice, 1.94 oz/yd2 and 59 g/m2, and one ounce per square yard is 33.906 grams per square metre to three decimals, by the exact definitions of the ounce and the yard, so the two printings are 11.5 per cent apart. The whole column is, by the same factor; the page does not say which of its two columns carries it, so this row holds the g/m2 as printed and docs/ERRATA.md argues the pair. Footnote a: “Averaged over a large sample.”",
+        "attributedTo": {
+          "row": "cloth number 1562 of Burlington Glass Fabrics Company, credited row by row by the manufacturer code 1 of footnote b"
+        },
+        "cells": [
+          {
+            "text": "< 5",
+            "kind": "bound",
+            "note": "the page prints an upper bound of 5 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "59",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ver-beranek-2006-table-8-6/glass_cloth_1500",
+        "table": "ver-beranek-2006-table-8-6",
+        "name": "1500",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "16 × 14",
+        "source": "Vér & Beranek 2e TABLE 8.6, PDF page 267 (printed p. 263)",
+        "note": "The page prints this surface density twice, 9.60 oz/yd2 and 293 g/m2, and one ounce per square yard is 33.906 grams per square metre to three decimals, by the exact definitions of the ounce and the yard, so the two printings are 11.1 per cent apart. The whole column is, by the same factor; the page does not say which of its two columns carries it, so this row holds the g/m2 as printed and docs/ERRATA.md argues the pair. Footnote a: “Averaged over a large sample.”",
+        "attributedTo": {
+          "row": "cloth number 1500 of Burlington Glass Fabrics Company, credited row by row by the manufacturer code 1 of footnote b"
+        },
+        "cells": [
+          {
+            "text": "13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "293",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ver-beranek-2006-table-8-6/glass_cloth_1582",
+        "table": "ver-beranek-2006-table-8-6",
+        "name": "1582",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "60 × 56",
+        "source": "Vér & Beranek 2e TABLE 8.6, PDF page 267 (printed p. 263)",
+        "note": "The page prints this surface density twice, 14.5 oz/yd2 and 442 g/m2, and one ounce per square yard is 33.906 grams per square metre to three decimals, by the exact definitions of the ounce and the yard, so the two printings are 11.2 per cent apart. The whole column is, by the same factor; the page does not say which of its two columns carries it, so this row holds the g/m2 as printed and docs/ERRATA.md argues the pair. Footnote a: “Averaged over a large sample.”",
+        "attributedTo": {
+          "row": "cloth number 1582 of Burlington Glass Fabrics Company, credited row by row by the manufacturer code 1 of footnote b"
+        },
+        "cells": [
+          {
+            "text": "400",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "442",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ver-beranek-2006-table-8-6/glass_cloth_1584",
+        "table": "ver-beranek-2006-table-8-6",
+        "name": "1584",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "42 × 36",
+        "source": "Vér & Beranek 2e TABLE 8.6, PDF page 267 (printed p. 263)",
+        "note": "The page prints this surface density twice, 24.6 oz/yd2 and 750 g/m2, and one ounce per square yard is 33.906 grams per square metre to three decimals, by the exact definitions of the ounce and the yard, so the two printings are 11.2 per cent apart. The whole column is, by the same factor; the page does not say which of its two columns carries it, so this row holds the g/m2 as printed and docs/ERRATA.md argues the pair. Footnote a: “Averaged over a large sample.”",
+        "attributedTo": {
+          "row": "cloth number 1584 of Burlington Glass Fabrics Company, credited row by row by the manufacturer code 1 of footnote b"
+        },
+        "cells": [
+          {
+            "text": "200",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "750",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ver-beranek-2006-table-8-6/glass_cloth_1589",
+        "table": "ver-beranek-2006-table-8-6",
+        "name": "1589",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "13 × 12",
+        "source": "Vér & Beranek 2e TABLE 8.6, PDF page 267 (printed p. 263)",
+        "note": "The page prints this surface density twice, 12.0 oz/yd2 and 366 g/m2, and one ounce per square yard is 33.906 grams per square metre to three decimals, by the exact definitions of the ounce and the yard, so the two printings are 11.2 per cent apart. The whole column is, by the same factor; the page does not say which of its two columns carries it, so this row holds the g/m2 as printed and docs/ERRATA.md argues the pair. Footnote a: “Averaged over a large sample.”",
+        "attributedTo": {
+          "row": "cloth number 1589 of Burlington Glass Fabrics Company, credited row by row by the manufacturer code 1 of footnote b"
+        },
+        "cells": [
+          {
+            "text": "11",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "366",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ver-beranek-2006-table-8-7/sintered_fm_125",
+        "table": "ver-beranek-2006-table-8-7",
+        "name": "FM 125",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Vér & Beranek 2e TABLE 8.7, PDF page 267 (printed p. 263)",
+        "note": "Type 347 stainless steel, per footnote a. The flow resistance is for air at 70°F, per the column spanner, “Specific Flow Resistance Air, 70°F”.",
+        "attributedTo": {
+          "table": "the Brunswick Corporation, named in the title of TABLE 8.7, “Specific (Unit-Area) Flow Resistance R_s, Thickness, and Mass per Unit Area of Sintered Porous Metals Manufactured by the Brunswick Corporation”, and credited in its footnote a, “Courtesy of Brunswick Corporation.” The page credits no row of the table separately."
+        },
+        "cells": [
+          {
+            "text": "100",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "3,9",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "3,6",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ver-beranek-2006-table-8-7/sintered_fm_127",
+        "table": "ver-beranek-2006-table-8-7",
+        "name": "FM 127",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Vér & Beranek 2e TABLE 8.7, PDF page 267 (printed p. 263)",
+        "note": "Type 347 stainless steel, per footnote a. The flow resistance is for air at 70°F, per the column spanner, “Specific Flow Resistance Air, 70°F”.",
+        "attributedTo": {
+          "table": "the Brunswick Corporation, named in the title of TABLE 8.7, “Specific (Unit-Area) Flow Resistance R_s, Thickness, and Mass per Unit Area of Sintered Porous Metals Manufactured by the Brunswick Corporation”, and credited in its footnote a, “Courtesy of Brunswick Corporation.” The page credits no row of the table separately."
+        },
+        "cells": [
+          {
+            "text": "100",
+            "kind": "derived",
+            "note": "carried down the blank cells of TABLE 8.7 from the FM 125 row, which prints 100 N s/m3 for the six rows of its block"
+          },
+          {
+            "text": "0,25",
+            "kind": "derived",
+            "note": "carried down the blank cells of TABLE 8.7 from the FM 125 row, which prints 0.25 times rho0 c0 for the six rows of its block"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,76",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "3,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "5",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ver-beranek-2006-table-8-7/sintered_fm_185",
+        "table": "ver-beranek-2006-table-8-7",
+        "name": "FM 185",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Vér & Beranek 2e TABLE 8.7, PDF page 267 (printed p. 263)",
+        "note": "Type 347 stainless steel, per footnote a. The flow resistance is for air at 70°F, per the column spanner, “Specific Flow Resistance Air, 70°F”.",
+        "attributedTo": {
+          "table": "the Brunswick Corporation, named in the title of TABLE 8.7, “Specific (Unit-Area) Flow Resistance R_s, Thickness, and Mass per Unit Area of Sintered Porous Metals Manufactured by the Brunswick Corporation”, and credited in its footnote a, “Courtesy of Brunswick Corporation.” The page credits no row of the table separately."
+        },
+        "cells": [
+          {
+            "text": "100",
+            "kind": "derived",
+            "note": "carried down the blank cells of TABLE 8.7 from the FM 125 row, which prints 100 N s/m3 for the six rows of its block"
+          },
+          {
+            "text": "0,25",
+            "kind": "derived",
+            "note": "carried down the blank cells of TABLE 8.7 from the FM 125 row, which prints 0.25 times rho0 c0 for the six rows of its block"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "2,6",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ver-beranek-2006-table-8-7/sintered_347_10_20_ac3a_a",
+        "table": "ver-beranek-2006-table-8-7",
+        "name": "347-10-20-AC3A-A",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Vér & Beranek 2e TABLE 8.7, PDF page 267 (printed p. 263)",
+        "note": "Type 347 stainless steel, per footnote a. The flow resistance is for air at 70°F, per the column spanner, “Specific Flow Resistance Air, 70°F”.",
+        "attributedTo": {
+          "table": "the Brunswick Corporation, named in the title of TABLE 8.7, “Specific (Unit-Area) Flow Resistance R_s, Thickness, and Mass per Unit Area of Sintered Porous Metals Manufactured by the Brunswick Corporation”, and credited in its footnote a, “Courtesy of Brunswick Corporation.” The page credits no row of the table separately."
+        },
+        "cells": [
+          {
+            "text": "100",
+            "kind": "derived",
+            "note": "carried down the blank cells of TABLE 8.7 from the FM 125 row, which prints 100 N s/m3 for the six rows of its block"
+          },
+          {
+            "text": "0,25",
+            "kind": "derived",
+            "note": "carried down the blank cells of TABLE 8.7 from the FM 125 row, which prints 0.25 times rho0 c0 for the six rows of its block"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "2",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ver-beranek-2006-table-8-7/sintered_347_10_30_ac3a_a",
+        "table": "ver-beranek-2006-table-8-7",
+        "name": "347-10-30-AC3A-A",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Vér & Beranek 2e TABLE 8.7, PDF page 267 (printed p. 263)",
+        "note": "Type 347 stainless steel, per footnote a. The flow resistance is for air at 70°F, per the column spanner, “Specific Flow Resistance Air, 70°F”.",
+        "attributedTo": {
+          "table": "the Brunswick Corporation, named in the title of TABLE 8.7, “Specific (Unit-Area) Flow Resistance R_s, Thickness, and Mass per Unit Area of Sintered Porous Metals Manufactured by the Brunswick Corporation”, and credited in its footnote a, “Courtesy of Brunswick Corporation.” The page credits no row of the table separately."
+        },
+        "cells": [
+          {
+            "text": "100",
+            "kind": "derived",
+            "note": "carried down the blank cells of TABLE 8.7 from the FM 125 row, which prints 100 N s/m3 for the six rows of its block"
+          },
+          {
+            "text": "0,25",
+            "kind": "derived",
+            "note": "carried down the blank cells of TABLE 8.7 from the FM 125 row, which prints 0.25 times rho0 c0 for the six rows of its block"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,76",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "2",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ver-beranek-2006-table-8-7/sintered_fm_802",
+        "table": "ver-beranek-2006-table-8-7",
+        "name": "FM 802",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Vér & Beranek 2e TABLE 8.7, PDF page 267 (printed p. 263)",
+        "note": "Hastelloy X, the one material footnote a excepts. The flow resistance is for air at 70°F, per the column spanner, “Specific Flow Resistance Air, 70°F”.",
+        "attributedTo": {
+          "table": "the Brunswick Corporation, named in the title of TABLE 8.7, “Specific (Unit-Area) Flow Resistance R_s, Thickness, and Mass per Unit Area of Sintered Porous Metals Manufactured by the Brunswick Corporation”, and credited in its footnote a, “Courtesy of Brunswick Corporation.” The page credits no row of the table separately."
+        },
+        "cells": [
+          {
+            "text": "100",
+            "kind": "derived",
+            "note": "carried down the blank cells of TABLE 8.7 from the FM 125 row, which prints 100 N s/m3 for the six rows of its block"
+          },
+          {
+            "text": "0,25",
+            "kind": "derived",
+            "note": "carried down the blank cells of TABLE 8.7 from the FM 125 row, which prints 0.25 times rho0 c0 for the six rows of its block"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "2",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ver-beranek-2006-table-8-7/sintered_fm_134",
+        "table": "ver-beranek-2006-table-8-7",
+        "name": "FM 134",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Vér & Beranek 2e TABLE 8.7, PDF page 267 (printed p. 263)",
+        "note": "Type 347 stainless steel, per footnote a. The flow resistance is for air at 70°F, per the column spanner, “Specific Flow Resistance Air, 70°F”.",
+        "attributedTo": {
+          "table": "the Brunswick Corporation, named in the title of TABLE 8.7, “Specific (Unit-Area) Flow Resistance R_s, Thickness, and Mass per Unit Area of Sintered Porous Metals Manufactured by the Brunswick Corporation”, and credited in its footnote a, “Courtesy of Brunswick Corporation.” The page credits no row of the table separately."
+        },
+        "cells": [
+          {
+            "text": "350",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,88",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,89",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "3,8",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "4,7",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ver-beranek-2006-table-8-7/sintered_fm_122",
+        "table": "ver-beranek-2006-table-8-7",
+        "name": "FM 122",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Vér & Beranek 2e TABLE 8.7, PDF page 267 (printed p. 263)",
+        "note": "Type 347 stainless steel, per footnote a. The flow resistance is for air at 70°F, per the column spanner, “Specific Flow Resistance Air, 70°F”.",
+        "attributedTo": {
+          "table": "the Brunswick Corporation, named in the title of TABLE 8.7, “Specific (Unit-Area) Flow Resistance R_s, Thickness, and Mass per Unit Area of Sintered Porous Metals Manufactured by the Brunswick Corporation”, and credited in its footnote a, “Courtesy of Brunswick Corporation.” The page credits no row of the table separately."
+        },
+        "cells": [
+          {
+            "text": "500",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,76",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1,8",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ver-beranek-2006-table-8-7/sintered_fm_126",
+        "table": "ver-beranek-2006-table-8-7",
+        "name": "FM 126",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Vér & Beranek 2e TABLE 8.7, PDF page 267 (printed p. 263)",
+        "note": "Type 347 stainless steel, per footnote a. The flow resistance is for air at 70°F, per the column spanner, “Specific Flow Resistance Air, 70°F”.",
+        "attributedTo": {
+          "table": "the Brunswick Corporation, named in the title of TABLE 8.7, “Specific (Unit-Area) Flow Resistance R_s, Thickness, and Mass per Unit Area of Sintered Porous Metals Manufactured by the Brunswick Corporation”, and credited in its footnote a, “Courtesy of Brunswick Corporation.” The page credits no row of the table separately."
+        },
+        "cells": [
+          {
+            "text": "500",
+            "kind": "derived",
+            "note": "carried down the blank cells of TABLE 8.7 from the FM 122 row, which prints 500 N s/m3 for the four rows of its block"
+          },
+          {
+            "text": "1,25",
+            "kind": "derived",
+            "note": "carried down the blank cells of TABLE 8.7 from the FM 122 row, which prints 1.25 times rho0 c0 for the four rows of its block"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,66",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "3,7",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "3,6",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ver-beranek-2006-table-8-7/sintered_fm_190",
+        "table": "ver-beranek-2006-table-8-7",
+        "name": "FM 190",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Vér & Beranek 2e TABLE 8.7, PDF page 267 (printed p. 263)",
+        "note": "Type 347 stainless steel, per footnote a. The flow resistance is for air at 70°F, per the column spanner, “Specific Flow Resistance Air, 70°F”.",
+        "attributedTo": {
+          "table": "the Brunswick Corporation, named in the title of TABLE 8.7, “Specific (Unit-Area) Flow Resistance R_s, Thickness, and Mass per Unit Area of Sintered Porous Metals Manufactured by the Brunswick Corporation”, and credited in its footnote a, “Courtesy of Brunswick Corporation.” The page credits no row of the table separately."
+        },
+        "cells": [
+          {
+            "text": "500",
+            "kind": "derived",
+            "note": "carried down the blank cells of TABLE 8.7 from the FM 122 row, which prints 500 N s/m3 for the four rows of its block"
+          },
+          {
+            "text": "1,25",
+            "kind": "derived",
+            "note": "carried down the blank cells of TABLE 8.7 from the FM 122 row, which prints 1.25 times rho0 c0 for the four rows of its block"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,41",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "3,3",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ver-beranek-2006-table-8-7/sintered_347_50_30_ac3a_a",
+        "table": "ver-beranek-2006-table-8-7",
+        "name": "347-50-30-AC3A-A",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Vér & Beranek 2e TABLE 8.7, PDF page 267 (printed p. 263)",
+        "note": "Type 347 stainless steel, per footnote a. The flow resistance is for air at 70°F, per the column spanner, “Specific Flow Resistance Air, 70°F”.",
+        "attributedTo": {
+          "table": "the Brunswick Corporation, named in the title of TABLE 8.7, “Specific (Unit-Area) Flow Resistance R_s, Thickness, and Mass per Unit Area of Sintered Porous Metals Manufactured by the Brunswick Corporation”, and credited in its footnote a, “Courtesy of Brunswick Corporation.” The page credits no row of the table separately."
+        },
+        "cells": [
+          {
+            "text": "500",
+            "kind": "derived",
+            "note": "carried down the blank cells of TABLE 8.7 from the FM 122 row, which prints 500 N s/m3 for the four rows of its block"
+          },
+          {
+            "text": "1,25",
+            "kind": "derived",
+            "note": "carried down the blank cells of TABLE 8.7 from the FM 122 row, which prints 1.25 times rho0 c0 for the four rows of its block"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,76",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "2",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      }
+    ]
+  },
+  "resilientLayers": {
+    "columns": [
+      {
+        "field": "dynamic_stiffness_n_m3",
+        "heading": "Dynamic stiffness per unit area",
+        "headingEs": "Rigidez dinámica por unidad de superficie",
+        "unit": "MN/m³"
+      },
+      {
+        "field": "density_kg_m3",
+        "heading": "Density",
+        "headingEs": "Densidad",
+        "unit": "kg/m³"
+      },
+      {
+        "field": "thickness_mm",
+        "heading": "Thickness",
+        "headingEs": "Espesor",
+        "unit": "mm"
+      }
+    ],
+    "rows": [
+      {
+        "key": "hopkins-2007-table-a3/closed_cell_polyethylene_foam_45_5",
+        "table": "hopkins-2007-table-a3",
+        "name": "Closed-cell polyethylene foam",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Hopkins (2007) Table A3, PDF page 637 (printed p. 610)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "115",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "5",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "hopkins-2007-table-a3/expanded_polystyrene_14_50",
+        "table": "hopkins-2007-table-a3",
+        "name": "Expanded polystyrene",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Hopkins (2007) Table A3, PDF page 637 (printed p. 610)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "78",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "50",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "hopkins-2007-table-a3/expanded_polystyrene_precompressed_10_50",
+        "table": "hopkins-2007-table-a3",
+        "name": "Expanded polystyrene, pre-compressed",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Hopkins (2007) Table A3, PDF page 637 (printed p. 610)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "68",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "10",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "50",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "hopkins-2007-table-a3/mineral_wool_rock_60_30",
+        "table": "hopkins-2007-table-a3",
+        "name": "Mineral wool, rock",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Hopkins (2007) Table A3, PDF page 637 (printed p. 610)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "10",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "60",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "hopkins-2007-table-a3/mineral_wool_rock_80_30",
+        "table": "hopkins-2007-table-a3",
+        "name": "Mineral wool, rock",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Hopkins (2007) Table A3, PDF page 637 (printed p. 610)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "11",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "80",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "hopkins-2007-table-a3/mineral_wool_rock_100_30",
+        "table": "hopkins-2007-table-a3",
+        "name": "Mineral wool, rock",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Hopkins (2007) Table A3, PDF page 637 (printed p. 610)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "100",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "hopkins-2007-table-a3/mineral_wool_rock_140_30",
+        "table": "hopkins-2007-table-a3",
+        "name": "Mineral wool, rock",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Hopkins (2007) Table A3, PDF page 637 (printed p. 610)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "140",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "hopkins-2007-table-a3/mineral_wool_glass_36_13",
+        "table": "hopkins-2007-table-a3",
+        "name": "Mineral wool, glass",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Hopkins (2007) Table A3, PDF page 637 (printed p. 610)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "36",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "13",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "hopkins-2007-table-a3/mineral_wool_glass_36_25",
+        "table": "hopkins-2007-table-a3",
+        "name": "Mineral wool, glass",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Hopkins (2007) Table A3, PDF page 637 (printed p. 610)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "11",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "36",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "25",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "hopkins-2007-table-a3/mineral_wool_glass_75_25",
+        "table": "hopkins-2007-table-a3",
+        "name": "Mineral wool, glass",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Hopkins (2007) Table A3, PDF page 637 (printed p. 610)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "75",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "25",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "hopkins-2007-table-a3/mineral_wool_glass_75_40",
+        "table": "hopkins-2007-table-a3",
+        "name": "Mineral wool, glass",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Hopkins (2007) Table A3, PDF page 637 (printed p. 610)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "7",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "75",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "hopkins-2007-table-a3/rebond_foam_64_15",
+        "table": "hopkins-2007-table-a3",
+        "name": "Rebond foam (reconstituted open cell foam)",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Hopkins (2007) Table A3, PDF page 637 (printed p. 610)",
+        "note": "",
+        "attributedTo": {
+          "row": "Hopkins and Hall (2006)"
+        },
+        "cells": [
+          {
+            "text": "12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "64",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "15",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "hopkins-2007-table-a3/rebond_foam_64_20",
+        "table": "hopkins-2007-table-a3",
+        "name": "Rebond foam (reconstituted open cell foam)",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Hopkins (2007) Table A3, PDF page 637 (printed p. 610)",
+        "note": "",
+        "attributedTo": {
+          "row": "Hopkins and Hall (2006)"
+        },
+        "cells": [
+          {
+            "text": "9",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "64",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "hopkins-2007-table-a3/rebond_foam_64_25",
+        "table": "hopkins-2007-table-a3",
+        "name": "Rebond foam (reconstituted open cell foam)",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Hopkins (2007) Table A3, PDF page 637 (printed p. 610)",
+        "note": "",
+        "attributedTo": {
+          "row": "Hopkins and Hall (2006)"
+        },
+        "cells": [
+          {
+            "text": "7",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "64",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "25",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "hopkins-2007-table-a3/rebond_foam_96_15",
+        "table": "hopkins-2007-table-a3",
+        "name": "Rebond foam (reconstituted open cell foam)",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Hopkins (2007) Table A3, PDF page 637 (printed p. 610)",
+        "note": "",
+        "attributedTo": {
+          "row": "Hopkins and Hall (2006)"
+        },
+        "cells": [
+          {
+            "text": "16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "96",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "15",
             "kind": "printed",
             "note": ""
           }
@@ -43781,6 +49437,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {
@@ -43833,6 +49493,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -43883,6 +49547,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -43933,6 +49601,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -43983,6 +49655,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -44033,6 +49709,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -44083,6 +49763,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -44133,6 +49817,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -44183,6 +49871,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -44233,6 +49925,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -44283,6 +49979,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -44333,6 +50033,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -44383,6 +50087,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -44433,6 +50141,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -44483,6 +50195,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -44533,6 +50249,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -44583,6 +50303,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -44633,6 +50357,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -44683,6 +50411,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -44733,6 +50465,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -44783,6 +50519,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -44833,6 +50573,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -44883,6 +50627,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -44933,6 +50681,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -44983,6 +50735,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -45033,6 +50789,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -45083,6 +50843,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -45133,6 +50897,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -45183,6 +50951,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -45233,6 +51005,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -45283,6 +51059,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -45333,6 +51113,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -45383,6 +51167,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -45433,6 +51221,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -45483,6 +51275,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -45533,6 +51329,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -45583,6 +51383,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -45633,6 +51437,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -45683,6 +51491,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -45733,6 +51545,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -45783,6 +51599,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -45833,6 +51653,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -45883,6 +51707,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -45933,6 +51761,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -45983,6 +51815,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "The page prints the thickness as \"3-4 inch\". A cork floor tile between 75 and 100 mm thick is not a thing, and the classic compilations describe this specimen as three-quarters of an inch, about 19 mm; the name is held as printed and the reading is left to the reader.",
         "attributedTo": {},
@@ -46033,6 +51869,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -46083,6 +51923,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -46133,6 +51977,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -46183,6 +52031,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -46233,6 +52085,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -46283,6 +52139,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -46333,6 +52193,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -46383,6 +52247,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -46433,6 +52301,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -46483,6 +52355,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -46533,6 +52409,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -46583,6 +52463,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -46633,6 +52517,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -46683,6 +52571,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -46733,6 +52625,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -46783,6 +52679,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -46833,6 +52733,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -46883,6 +52787,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -46933,6 +52841,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -46983,6 +52895,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -47033,6 +52949,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -47083,6 +53003,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -47133,6 +53057,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -47183,6 +53111,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -47233,6 +53165,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -47283,6 +53219,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -47333,6 +53273,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -47383,6 +53327,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -47433,6 +53381,10 @@ export const catalogues = {
         "mounting": "A",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -47483,6 +53435,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -47533,6 +53489,10 @@ export const catalogues = {
         "mounting": "A",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -47583,6 +53543,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -47633,6 +53597,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -47683,6 +53651,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -47733,6 +53705,10 @@ export const catalogues = {
         "mounting": "A",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -47783,6 +53759,10 @@ export const catalogues = {
         "mounting": "A",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -47833,6 +53813,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -47883,6 +53867,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -47933,6 +53921,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -47983,6 +53975,10 @@ export const catalogues = {
         "mounting": "A",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -48033,6 +54029,10 @@ export const catalogues = {
         "mounting": "A",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -48083,6 +54083,10 @@ export const catalogues = {
         "mounting": "A",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -48133,6 +54137,10 @@ export const catalogues = {
         "mounting": "A",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -48183,6 +54191,10 @@ export const catalogues = {
         "mounting": "A",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -48233,6 +54245,10 @@ export const catalogues = {
         "mounting": "A",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -48283,6 +54299,10 @@ export const catalogues = {
         "mounting": "A",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -48333,6 +54353,10 @@ export const catalogues = {
         "mounting": "A",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -48383,6 +54407,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -48433,6 +54461,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -48483,6 +54515,10 @@ export const catalogues = {
         "mounting": "E400",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -48533,6 +54569,10 @@ export const catalogues = {
         "mounting": "E400",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -48583,6 +54623,10 @@ export const catalogues = {
         "mounting": "E400",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -48633,6 +54677,10 @@ export const catalogues = {
         "mounting": "E400",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -48683,6 +54731,10 @@ export const catalogues = {
         "mounting": "E400",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -48733,6 +54785,10 @@ export const catalogues = {
         "mounting": "E400",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -48783,6 +54839,10 @@ export const catalogues = {
         "mounting": "E400",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -48833,6 +54893,10 @@ export const catalogues = {
         "mounting": "E400",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -48883,6 +54947,10 @@ export const catalogues = {
         "mounting": "E400",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -48933,6 +55001,10 @@ export const catalogues = {
         "mounting": "E400",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -48983,6 +55055,10 @@ export const catalogues = {
         "mounting": "E400",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -49033,6 +55109,10 @@ export const catalogues = {
         "mounting": "E400",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -49083,6 +55163,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -49133,6 +55217,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -49183,6 +55271,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -49233,6 +55325,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -49283,6 +55379,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -49333,6 +55433,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -49383,6 +55487,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -49433,6 +55541,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -49483,6 +55595,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -49533,6 +55649,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -49583,6 +55703,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -49633,6 +55757,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -49683,6 +55811,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -49733,6 +55865,10 @@ export const catalogues = {
         "mounting": "F",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -49783,6 +55919,10 @@ export const catalogues = {
         "mounting": "F",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -49833,6 +55973,10 @@ export const catalogues = {
         "mounting": "F",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -49883,6 +56027,10 @@ export const catalogues = {
         "mounting": "F",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -49933,6 +56081,10 @@ export const catalogues = {
         "mounting": "F",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -49983,6 +56135,10 @@ export const catalogues = {
         "mounting": "F",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -50033,6 +56189,10 @@ export const catalogues = {
         "mounting": "F",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -50083,6 +56243,10 @@ export const catalogues = {
         "mounting": "A",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -50133,6 +56297,10 @@ export const catalogues = {
         "mounting": "A",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -50183,6 +56351,10 @@ export const catalogues = {
         "mounting": "A",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -50233,6 +56405,10 @@ export const catalogues = {
         "mounting": "A",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -50283,6 +56459,10 @@ export const catalogues = {
         "mounting": "A",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -50333,6 +56513,10 @@ export const catalogues = {
         "mounting": "A",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -50383,6 +56567,10 @@ export const catalogues = {
         "mounting": "A",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -50433,6 +56621,10 @@ export const catalogues = {
         "mounting": "A",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -50483,6 +56675,10 @@ export const catalogues = {
         "mounting": "A",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -50533,6 +56729,10 @@ export const catalogues = {
         "mounting": "A",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -50583,6 +56783,10 @@ export const catalogues = {
         "mounting": "A",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -50633,6 +56837,10 @@ export const catalogues = {
         "mounting": "E400",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -50683,6 +56891,10 @@ export const catalogues = {
         "mounting": "E400",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -50733,6 +56945,10 @@ export const catalogues = {
         "mounting": "E400",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -50783,6 +56999,10 @@ export const catalogues = {
         "mounting": "E400",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -50833,6 +57053,10 @@ export const catalogues = {
         "mounting": "A",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -50883,6 +57107,10 @@ export const catalogues = {
         "mounting": "A",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -50933,6 +57161,10 @@ export const catalogues = {
         "mounting": "A",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -50983,6 +57215,10 @@ export const catalogues = {
         "mounting": "A",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -51033,6 +57269,10 @@ export const catalogues = {
         "mounting": "E400",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -51083,6 +57323,10 @@ export const catalogues = {
         "mounting": "E400",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -51133,6 +57377,10 @@ export const catalogues = {
         "mounting": "E400",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -51183,6 +57431,10 @@ export const catalogues = {
         "mounting": "E400",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -51233,6 +57485,10 @@ export const catalogues = {
         "mounting": "A",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -51283,6 +57539,10 @@ export const catalogues = {
         "mounting": "A",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -51333,6 +57593,10 @@ export const catalogues = {
         "mounting": "A",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -51383,6 +57647,10 @@ export const catalogues = {
         "mounting": "A",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -51433,6 +57701,10 @@ export const catalogues = {
         "mounting": "E400",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -51483,6 +57755,10 @@ export const catalogues = {
         "mounting": "E400",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -51533,6 +57809,10 @@ export const catalogues = {
         "mounting": "E400",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -51583,6 +57863,10 @@ export const catalogues = {
         "mounting": "E400",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -51633,6 +57917,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -51685,6 +57973,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -51737,6 +58029,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -51789,6 +58085,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -51841,6 +58141,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -51893,6 +58197,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -51945,6 +58253,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -51997,6 +58309,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -52049,6 +58365,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -52101,6 +58421,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -52153,6 +58477,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -52205,6 +58533,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -52257,6 +58589,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -52309,6 +58645,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -52361,6 +58701,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -52413,6 +58757,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -52465,6 +58813,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -52517,6 +58869,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -52569,6 +58925,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -52621,6 +58981,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -52673,6 +59037,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -52725,6 +59093,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -52777,6 +59149,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -52829,6 +59205,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -52881,6 +59261,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -52933,6 +59317,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -52985,6 +59373,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -53037,6 +59429,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -53089,6 +59485,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -53141,6 +59541,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -53193,6 +59597,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -53245,6 +59653,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -53297,6 +59709,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -53349,6 +59765,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -53401,6 +59821,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -53453,6 +59877,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -53505,6 +59933,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -53557,6 +59989,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -53609,6 +60045,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -53661,6 +60101,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -53713,6 +60157,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -53765,6 +60213,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -53817,6 +60269,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -53869,6 +60325,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -53921,6 +60381,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -53973,6 +60437,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {},
@@ -54023,6 +60491,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -54075,6 +60547,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -54127,6 +60603,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -54179,6 +60659,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -54231,6 +60715,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -54283,6 +60771,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -54335,6 +60827,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -54387,6 +60883,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -54439,6 +60939,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -54491,6 +60995,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -54543,6 +61051,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -54595,6 +61107,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -54647,6 +61163,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -54699,6 +61219,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -54751,6 +61275,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -54803,6 +61331,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -54855,6 +61387,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -54907,6 +61443,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -54959,6 +61499,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -55011,6 +61555,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -55063,6 +61611,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -55115,6 +61667,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -55167,6 +61723,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -55219,6 +61779,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {},
@@ -55269,6 +61833,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -55321,6 +61889,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -55373,6 +61945,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -55425,6 +62001,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -55477,6 +62057,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -55529,6 +62113,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -55581,6 +62169,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -55633,6 +62225,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -55685,6 +62281,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {},
@@ -55735,6 +62335,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -55787,6 +62391,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -55839,6 +62447,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -55891,6 +62503,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -55943,6 +62559,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -55995,6 +62615,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -56047,6 +62671,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -56099,6 +62727,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -56151,6 +62783,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -56203,6 +62839,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -56255,6 +62895,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -56307,6 +62951,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -56359,6 +63007,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -56411,6 +63063,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -56463,6 +63119,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -56515,6 +63175,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -56567,6 +63231,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -56619,6 +63287,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -56671,6 +63343,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -56723,6 +63399,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -56775,6 +63455,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -56827,6 +63511,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -56879,6 +63567,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -56931,6 +63623,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -56983,6 +63679,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -57035,6 +63735,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -57087,6 +63791,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -57139,6 +63847,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -57191,6 +63903,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -57243,6 +63959,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -57295,6 +64015,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -57347,6 +64071,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -57399,6 +64127,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -57451,6 +64183,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -57503,6 +64239,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -57555,6 +64295,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -57607,6 +64351,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -57659,6 +64407,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -57711,6 +64463,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -57763,6 +64519,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -57815,6 +64575,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -57867,6 +64631,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -57919,6 +64687,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -57971,6 +64743,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -58023,6 +64799,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -58075,6 +64855,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -58127,6 +64911,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -58179,6 +64967,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -58231,6 +65023,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -58283,6 +65079,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -58335,6 +65135,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -58387,6 +65191,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -58439,6 +65247,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -58491,6 +65303,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -58543,6 +65359,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {},
@@ -58593,6 +65413,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -58645,6 +65469,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -58697,6 +65525,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -58749,6 +65581,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -58801,6 +65637,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -58853,6 +65693,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -58905,6 +65749,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -58957,6 +65805,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -59009,6 +65861,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -59061,6 +65917,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -59113,6 +65973,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -59165,6 +66029,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -59217,6 +66085,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -59269,6 +66141,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -59321,6 +66197,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -59373,6 +66253,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -59425,6 +66309,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -59477,6 +66365,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -59529,6 +66421,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -59581,6 +66477,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -59633,6 +66533,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -59685,6 +66589,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -59737,6 +66645,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -59789,6 +66701,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -59841,6 +66757,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -59893,6 +66813,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -59945,6 +66869,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
         "note": "",
         "attributedTo": {
@@ -59997,6 +66925,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -60047,6 +66979,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -60097,6 +67033,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -60147,6 +67087,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -60197,6 +67141,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -60247,6 +67195,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -60297,6 +67249,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -60347,6 +67303,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -60397,6 +67357,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -60447,6 +67411,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -60497,6 +67465,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -60547,6 +67519,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -60597,6 +67573,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -60647,6 +67627,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -60697,6 +67681,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -60747,6 +67735,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -60797,6 +67789,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -60847,6 +67843,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -60897,6 +67897,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -60947,6 +67951,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -60997,6 +68005,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -61047,6 +68059,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -61097,6 +68113,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -61147,6 +68167,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -61197,6 +68221,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -61247,6 +68275,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -61297,6 +68329,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -61347,6 +68383,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -61397,6 +68437,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -61447,6 +68491,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -61497,6 +68545,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -61547,6 +68599,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -61597,6 +68653,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -61647,6 +68707,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -61697,6 +68761,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -61747,6 +68815,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -61797,6 +68869,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -61847,6 +68923,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -61897,6 +68977,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -61947,6 +69031,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -61997,6 +69085,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -62047,6 +69139,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -62097,6 +69193,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -62147,6 +69247,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -62197,6 +69301,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -62247,6 +69355,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -62297,6 +69409,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -62347,6 +69463,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -62397,6 +69517,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -62447,6 +69571,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -62497,6 +69625,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -62547,6 +69679,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -62597,6 +69733,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -62647,6 +69787,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -62697,6 +69841,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -62747,6 +69895,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -62797,6 +69949,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -62847,6 +70003,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -62897,6 +70057,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -62947,6 +70111,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -62997,6 +70165,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -63047,6 +70219,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -63097,6 +70273,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -63147,6 +70327,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -63197,6 +70381,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -63247,6 +70435,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -63297,6 +70489,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -63347,6 +70543,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -63397,6 +70597,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -63447,6 +70651,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -63497,6 +70705,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -63547,6 +70759,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -63597,6 +70813,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -63647,6 +70867,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -63697,6 +70921,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -63747,6 +70975,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -63797,6 +71029,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -63847,6 +71083,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -63897,6 +71137,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -63947,6 +71191,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -63997,6 +71245,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -64047,6 +71299,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -64097,6 +71353,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -64147,6 +71407,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -64197,6 +71461,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -64247,6 +71515,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -64297,6 +71569,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -64347,6 +71623,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -64397,6 +71677,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -64447,6 +71731,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -64497,6 +71785,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -64547,6 +71839,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -64597,6 +71893,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "La página imprime un solo intervalo, 0.15 – 0.50, a caballo de las columnas de 125 y 250 Hz, y no dice a qué bandas se aplica.",
         "attributedTo": {},
@@ -64647,6 +71947,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -64697,6 +72001,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -64747,6 +72055,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
         "note": "",
         "attributedTo": {},
@@ -64797,6 +72109,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
         "note": "",
         "attributedTo": {
@@ -64849,6 +72165,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
         "note": "",
         "attributedTo": {
@@ -64901,6 +72221,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
         "note": "",
         "attributedTo": {
@@ -64953,6 +72277,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
         "note": "",
         "attributedTo": {
@@ -65005,6 +72333,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
         "note": "",
         "attributedTo": {
@@ -65057,6 +72389,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
         "note": "",
         "attributedTo": {
@@ -65109,6 +72445,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
         "note": "",
         "attributedTo": {
@@ -65161,6 +72501,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
         "note": "",
         "attributedTo": {
@@ -65213,6 +72557,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
         "note": "",
         "attributedTo": {
@@ -65265,6 +72613,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
         "note": "",
         "attributedTo": {},
@@ -65315,6 +72667,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
         "note": "",
         "attributedTo": {},
@@ -65365,6 +72721,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
         "note": "",
         "attributedTo": {
@@ -65417,6 +72777,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
         "note": "",
         "attributedTo": {
@@ -65469,6 +72833,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
         "note": "",
         "attributedTo": {
@@ -65521,6 +72889,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
         "note": "",
         "attributedTo": {
@@ -65573,6 +72945,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
         "note": "",
         "attributedTo": {
@@ -65625,6 +73001,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
         "note": "",
         "attributedTo": {
@@ -65677,6 +73057,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
         "note": "",
         "attributedTo": {
@@ -65729,6 +73113,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
         "note": "",
         "attributedTo": {
@@ -65781,6 +73169,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
         "note": "",
         "attributedTo": {
@@ -65833,6 +73225,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
         "note": "",
         "attributedTo": {
@@ -65885,6 +73281,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
         "note": "",
         "attributedTo": {
@@ -65937,6 +73337,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
         "note": "",
         "attributedTo": {
@@ -65989,6 +73393,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
         "note": "",
         "attributedTo": {
@@ -66041,6 +73449,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
         "note": "",
         "attributedTo": {
@@ -66093,6 +73505,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
         "note": "",
         "attributedTo": {
@@ -66145,6 +73561,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
         "note": "",
         "attributedTo": {
@@ -66197,6 +73617,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
         "note": "",
         "attributedTo": {
@@ -66249,6 +73673,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
         "note": "",
         "attributedTo": {
@@ -66301,6 +73729,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
         "note": "",
         "attributedTo": {
@@ -66353,6 +73785,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
         "note": "",
         "attributedTo": {
@@ -66405,6 +73841,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
         "note": "",
         "attributedTo": {
@@ -66457,6 +73897,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
         "note": "",
         "attributedTo": {
@@ -66509,6 +73953,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
         "note": "",
         "attributedTo": {
@@ -66561,6 +74009,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
         "note": "",
         "attributedTo": {
@@ -66613,6 +74065,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
         "note": "",
         "attributedTo": {
@@ -66665,6 +74121,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
         "note": "",
         "attributedTo": {
@@ -66717,6 +74177,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
         "note": "",
         "attributedTo": {
@@ -66769,6 +74233,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
         "note": "",
         "attributedTo": {
@@ -66821,6 +74289,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
         "note": "",
         "attributedTo": {
@@ -66873,6 +74345,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
         "note": "",
         "attributedTo": {
@@ -66991,6 +74467,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -67056,6 +74536,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -67121,6 +74605,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -67186,6 +74674,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -67251,6 +74743,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -67316,6 +74812,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -67381,6 +74881,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -67446,6 +74950,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -67511,6 +75019,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -67576,6 +75088,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -67641,6 +75157,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -67706,6 +75226,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -67771,6 +75295,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -67836,6 +75364,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -67901,6 +75433,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -67966,6 +75502,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -68031,6 +75571,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -68096,6 +75640,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -68161,6 +75709,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -68226,6 +75778,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -68291,6 +75847,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -68356,6 +75916,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -68421,6 +75985,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -68486,6 +76054,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -68551,6 +76123,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -68616,6 +76192,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -68681,6 +76261,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -68746,6 +76330,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -68811,6 +76399,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -68876,6 +76468,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -68941,6 +76537,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -69006,6 +76606,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -69071,6 +76675,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -69136,6 +76744,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -69201,6 +76813,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -69266,6 +76882,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -69331,6 +76951,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -69396,6 +77020,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -69461,6 +77089,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -69526,6 +77158,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -69591,6 +77227,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -69656,6 +77296,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -69721,6 +77365,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -69786,6 +77434,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -69851,6 +77503,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -69916,6 +77572,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -69981,6 +77641,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -70046,6 +77710,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -70111,6 +77779,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -70176,6 +77848,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -70241,6 +77917,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -70306,6 +77986,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -70371,6 +78055,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -70436,6 +78124,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -70501,6 +78193,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -70566,6 +78262,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -70631,6 +78331,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -70696,6 +78400,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -70761,6 +78469,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -70826,6 +78538,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -70891,6 +78607,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -70956,6 +78676,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -71021,6 +78745,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -71086,6 +78814,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -71151,6 +78883,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -71216,6 +78952,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -71281,6 +79021,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -71346,6 +79090,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -71411,6 +79159,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -71476,6 +79228,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -71541,6 +79297,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -71606,6 +79366,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -71671,6 +79435,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -71736,6 +79504,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -71801,6 +79573,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -71866,6 +79642,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -71931,6 +79711,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -71996,6 +79780,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -72061,6 +79849,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -72126,6 +79918,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -72191,6 +79987,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -72256,6 +80056,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -72321,6 +80125,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -72386,6 +80194,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -72451,6 +80263,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -72516,6 +80332,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -72581,6 +80401,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -72646,6 +80470,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -72711,6 +80539,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -72776,6 +80608,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -72841,6 +80677,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -72906,6 +80746,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -72971,6 +80815,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -73036,6 +80884,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
         "note": "",
         "attributedTo": {},
@@ -73084,6 +80936,6183 @@ export const catalogues = {
             "text": "65",
             "kind": "printed",
             "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ashrae-2019-table-40/200_mm_cmu",
+        "table": "ashrae-2019-table-40",
+        "name": "200 mm CMU*",
+        "variant": "",
+        "group": "Mechanical equipment room constructions",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "ASHRAE (2019) HVAC Applications Handbook Chapter 49 Table 40, PDF page 922 (printed p. 49.38)",
+        "note": "The asterisk inside the printed name is the page's own and points at the footnote “*CMU = concrete masonry unit; GWB = gypsum wallboard.”",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "41",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "44",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "50",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "64",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ashrae-2019-table-40/200_mm_cmu_with_16_mm_gwb_on_furring_strips",
+        "table": "ashrae-2019-table-40",
+        "name": "200 mm CMU with 16 mm GWB* on furring strips",
+        "variant": "",
+        "group": "Mechanical equipment room constructions",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "ASHRAE (2019) HVAC Applications Handbook Chapter 49 Table 40, PDF page 922 (printed p. 49.38)",
+        "note": "The asterisk inside the printed name is the page's own and points at the footnote “*CMU = concrete masonry unit; GWB = gypsum wallboard.”",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "33",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "44",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "50",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "56",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "59",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "65",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ashrae-2019-table-40/16_mm_gwb_on_both_sides_of_92_mm_metal_studs",
+        "table": "ashrae-2019-table-40",
+        "name": "16 mm GWB on both sides of 92 mm metal studs",
+        "variant": "",
+        "group": "Mechanical equipment room constructions",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "ASHRAE (2019) HVAC Applications Handbook Chapter 49 Table 40, PDF page 922 (printed p. 49.38)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "18",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "33",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "47",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "55",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "43",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "47",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ashrae-2019-table-40/16_mm_gwb_on_both_sides_of_92_mm_metal_studs_with_fiberglass",
+        "table": "ashrae-2019-table-40",
+        "name": "16 mm GWB on both sides of 92 mm metal studs with fiberglass insulation in cavity",
+        "variant": "",
+        "group": "Mechanical equipment room constructions",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "ASHRAE (2019) HVAC Applications Handbook Chapter 49 Table 40, PDF page 922 (printed p. 49.38)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "23",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "44",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "58",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "64",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "52",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "53",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ashrae-2019-table-40/2_layers_of_16_mm_gwb_on_both_sides_of_92_mm_metal_studs_wit",
+        "table": "ashrae-2019-table-40",
+        "name": "2 layers of 16 mm GWB on both sides of 92 mm metal studs with fiberglass insulation in cavity",
+        "variant": "",
+        "group": "Mechanical equipment room constructions",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "ASHRAE (2019) HVAC Applications Handbook Chapter 49 Table 40, PDF page 922 (printed p. 49.38)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "50",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "62",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "67",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "58",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "63",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ashrae-2019-table-40/double_row_of_92_mm_metal_studs_25_mm_apart_each_with_2_laye",
+        "table": "ashrae-2019-table-40",
+        "name": "Double row of 92 mm metal studs, 25 mm apart, each with 2 layers of 16 mm GWB and fiberglass insulation in cavity",
+        "variant": "",
+        "group": "Mechanical equipment room constructions",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "ASHRAE (2019) HVAC Applications Handbook Chapter 49 Table 40, PDF page 922 (printed p. 49.38)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "23",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "54",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "62",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "71",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "69",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "74",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ashrae-2019-table-40/150_mm_solid_concrete_floor_ceiling",
+        "table": "ashrae-2019-table-40",
+        "name": "150 mm solid concrete floor/ceiling",
+        "variant": "",
+        "group": "Mechanical equipment room constructions",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "ASHRAE (2019) HVAC Applications Handbook Chapter 49 Table 40, PDF page 922 (printed p. 49.38)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "49",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "58",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "67",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "76",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ashrae-2019-table-40/150_mm_solid_concrete_floor_with_100_mm_isolated_concrete_sl",
+        "table": "ashrae-2019-table-40",
+        "name": "150 mm solid concrete floor with 100 mm isolated concrete slab and fiberglass insulation in cavity",
+        "variant": "",
+        "group": "Mechanical equipment room constructions",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "ASHRAE (2019) HVAC Applications Handbook Chapter 49 Table 40, PDF page 922 (printed p. 49.38)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "44",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "52",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "58",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "73",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "87",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "97",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "100",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ashrae-2019-table-40/150_mm_solid_concrete_floor_with_two_layers_of_16_mm_gwb_hun",
+        "table": "ashrae-2019-table-40",
+        "name": "150 mm solid concrete floor with two layers of 16 mm GWB hung on spring isolators with fiberglass insulation in cavity",
+        "variant": "",
+        "group": "Mechanical equipment room constructions",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "ASHRAE (2019) HVAC Applications Handbook Chapter 49 Table 40, PDF page 922 (printed p. 49.38)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "53",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "63",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "70",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "84",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "93",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "104",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "105",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      }
+    ]
+  },
+  "impactInsulation": {
+    "columns": [
+      {
+        "field": "impact_insulation_class",
+        "heading": "Impact insulation class",
+        "headingEs": "Clase de aislamiento al impacto",
+        "unit": ""
+      },
+      {
+        "field": "impact_insulation_class_improvement",
+        "heading": "Improvement in the class",
+        "headingEs": "Mejora de la clase",
+        "unit": ""
+      },
+      {
+        "field": "layer_density_kg_m3",
+        "heading": "Density of one layer",
+        "headingEs": "Densidad de una capa",
+        "unit": "kg/m³"
+      }
+    ],
+    "rows": [
+      {
+        "key": "harris-1995-tables-32-1-to-32-8/1",
+        "table": "harris-1995-tables-32-1-to-32-8",
+        "name": "Losa de 10 cm (4 in) de espesor de hormigón armado con una malla AWG del número 6, de 15 por 15 cm, colocada en la línea central del plano horizontal de la losa. Todas las cavidades de la superficie están selladas con una mezcla delgada de mortero.",
+        "variant": "",
+        "group": "TABLA 32.1. Aislamiento del impacto de conjuntos de suelo-techo de hormigón armado",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Tables 32.1 to 32.8, PDF pages 750-757 (printed pp. 32.8-32.15)",
+        "note": "",
+        "attributedTo": {
+          "table": "the chapter's Reference 5, \"A guide to airborne, impact and structureborne noise control in multi-family dwellings\", prepared for the Federal Housing Administration by the National Bureau of Standards, September 1967, which folio 32.7 names as what Tables 32.1 to 32.7 are based on"
+        },
+        "cells": [
+          {
+            "text": "25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-tables-32-1-to-32-8/2",
+        "table": "harris-1995-tables-32-1-to-32-8",
+        "name": "Igual que 1 salvo que se adhiere una baldosa de vinilo de 0,32 cm (1/8 in) de grosor al hormigón",
+        "variant": "",
+        "group": "TABLA 32.1. Aislamiento del impacto de conjuntos de suelo-techo de hormigón armado",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Tables 32.1 to 32.8, PDF pages 750-757 (printed pp. 32.8-32.15)",
+        "note": "",
+        "attributedTo": {
+          "table": "the chapter's Reference 5, \"A guide to airborne, impact and structureborne noise control in multi-family dwellings\", prepared for the Federal Housing Administration by the National Bureau of Standards, September 1967, which folio 32.7 names as what Tables 32.1 to 32.7 are based on"
+        },
+        "cells": [
+          {
+            "text": "28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-tables-32-1-to-32-8/3",
+        "table": "harris-1995-tables-32-1-to-32-8",
+        "name": "Igual que 1 salvo que se adhiere tarima de roble de 1,27 cm (1/2 in) de grosor al hormigón",
+        "variant": "",
+        "group": "TABLA 32.1. Aislamiento del impacto de conjuntos de suelo-techo de hormigón armado",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Tables 32.1 to 32.8, PDF pages 750-757 (printed pp. 32.8-32.15)",
+        "note": "",
+        "attributedTo": {
+          "table": "the chapter's Reference 5, \"A guide to airborne, impact and structureborne noise control in multi-family dwellings\", prepared for the Federal Housing Administration by the National Bureau of Standards, September 1967, which folio 32.7 names as what Tables 32.1 to 32.7 are based on"
+        },
+        "cells": [
+          {
+            "text": "45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-tables-32-1-to-32-8/4",
+        "table": "harris-1995-tables-32-1-to-32-8",
+        "name": "Igual que 1, pero con una alfombra de rizo de lana de 0,64 cm (1/4 in) de grosor, con un cañamazo de yute tejido de 0,32 cm (1/8 in) y un forro de espuma de caucho de 0,64 cm (1/4 in).",
+        "variant": "",
+        "group": "TABLA 32.1. Aislamiento del impacto de conjuntos de suelo-techo de hormigón armado",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Tables 32.1 to 32.8, PDF pages 750-757 (printed pp. 32.8-32.15)",
+        "note": "",
+        "attributedTo": {
+          "table": "the chapter's Reference 5, \"A guide to airborne, impact and structureborne noise control in multi-family dwellings\", prepared for the Federal Housing Administration by the National Bureau of Standards, September 1967, which folio 32.7 names as what Tables 32.1 to 32.7 are based on"
+        },
+        "cells": [
+          {
+            "text": "80",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-tables-32-1-to-32-8/5",
+        "table": "harris-1995-tables-32-1-to-32-8",
+        "name": "Igual que 1, con tarima de roble de 1,27 cm (1/2 in) de grosor, de 22,8 cm por 22,8 cm (9 por 9 in), con espuma de poliuretano semirrígida de 0,64 cm (1/4 in) de grosor de 35,2 kg/m3 (2,2 lb/ft3), sin planchas de forro.",
+        "variant": "",
+        "group": "TABLA 32.1. Aislamiento del impacto de conjuntos de suelo-techo de hormigón armado",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Tables 32.1 to 32.8, PDF pages 750-757 (printed pp. 32.8-32.15)",
+        "note": "The density is the one the description prints for the “espuma de poliuretano semirrígida”, and not of the assembly.",
+        "attributedTo": {
+          "table": "the chapter's Reference 5, \"A guide to airborne, impact and structureborne noise control in multi-family dwellings\", prepared for the Federal Housing Administration by the National Bureau of Standards, September 1967, which folio 32.7 names as what Tables 32.1 to 32.7 are based on"
+        },
+        "cells": [
+          {
+            "text": "52",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "35,2",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-tables-32-1-to-32-8/6",
+        "table": "harris-1995-tables-32-1-to-32-8",
+        "name": "Losa de hormigón armado de 15,2 cm (6 in) de grosor; sobre el lado del suelo, una capa de cemento y arena de 2,2 cm (7/8 in) y revestimiento compuesto de 1,59 cm (5/8 in) de grosor; sobre el lado del techo, 1,27 cm (1/2 in) de masilla.",
+        "variant": "",
+        "group": "TABLA 32.1. Aislamiento del impacto de conjuntos de suelo-techo de hormigón armado",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Tables 32.1 to 32.8, PDF pages 750-757 (printed pp. 32.8-32.15)",
+        "note": "",
+        "attributedTo": {
+          "table": "the chapter's Reference 5, \"A guide to airborne, impact and structureborne noise control in multi-family dwellings\", prepared for the Federal Housing Administration by the National Bureau of Standards, September 1967, which folio 32.7 names as what Tables 32.1 to 32.7 are based on"
+        },
+        "cells": [
+          {
+            "text": "35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-tables-32-1-to-32-8/7",
+        "table": "harris-1995-tables-32-1-to-32-8",
+        "name": "Losa de hormigón armado de 11,1 cm (4 3/8 in) de grosor. Sobre el lado del suelo, una capa de cemento y arena de 1,9 cm (3/4 in), con un revestimiento del suelo de linóleo de 0,32 cm (1/8 in); sobre el lado del techo, una capa de masilla de 0,95 cm (3/8 in).",
+        "variant": "",
+        "group": "TABLA 32.1. Aislamiento del impacto de conjuntos de suelo-techo de hormigón armado",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Tables 32.1 to 32.8, PDF pages 750-757 (printed pp. 32.8-32.15)",
+        "note": "",
+        "attributedTo": {
+          "table": "the chapter's Reference 5, \"A guide to airborne, impact and structureborne noise control in multi-family dwellings\", prepared for the Federal Housing Administration by the National Bureau of Standards, September 1967, which folio 32.7 names as what Tables 32.1 to 32.7 are based on"
+        },
+        "cells": [
+          {
+            "text": "48",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-tables-32-1-to-32-8/8",
+        "table": "harris-1995-tables-32-1-to-32-8",
+        "name": "Hormigón armado de 12,7 cm (5 in) de grosor. Sobre el lado del suelo, una capa de lana de vidrio aglutinada con betún y cubierta con papel de construcción. Sobre el pavimento, 1,27 cm (1/2 in) de brea-masilla, con una cobertura de suelo de linóleo. Sobre el lado del techo, una capa de plástico de 1,27 cm (1/2 in).",
+        "variant": "",
+        "group": "TABLA 32.1. Aislamiento del impacto de conjuntos de suelo-techo de hormigón armado",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Tables 32.1 to 32.8, PDF pages 750-757 (printed pp. 32.8-32.15)",
+        "note": "",
+        "attributedTo": {
+          "table": "the chapter's Reference 5, \"A guide to airborne, impact and structureborne noise control in multi-family dwellings\", prepared for the Federal Housing Administration by the National Bureau of Standards, September 1967, which folio 32.7 names as what Tables 32.1 to 32.7 are based on"
+        },
+        "cells": [
+          {
+            "text": "53",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-tables-32-1-to-32-8/9",
+        "table": "harris-1995-tables-32-1-to-32-8",
+        "name": "Losa de hormigón armado de 15,2 cm (6 in) de grosor. Sobre el lado del suelo, ensambladura de madera de ranura y lengüeta de 1,9 cm (3/4 in) de grosor, clavada sobre listones de madera de 3,81 cm (1 1/2 in) por 5,1 cm (2 in), con un espaciamiento de 30,8 cm (16 in), que flotan sobre una capa de lana de vidrio de 2,54 cm (1 in) de grosor. Sobre el lado del techo, una capa de masilla de 1,27 cm (1/2 in).",
+        "variant": "",
+        "group": "TABLA 32.1. Aislamiento del impacto de conjuntos de suelo-techo de hormigón armado",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Tables 32.1 to 32.8, PDF pages 750-757 (printed pp. 32.8-32.15)",
+        "note": "",
+        "attributedTo": {
+          "table": "the chapter's Reference 5, \"A guide to airborne, impact and structureborne noise control in multi-family dwellings\", prepared for the Federal Housing Administration by the National Bureau of Standards, September 1967, which folio 32.7 names as what Tables 32.1 to 32.7 are based on"
+        },
+        "cells": [
+          {
+            "text": "57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-tables-32-1-to-32-8/10",
+        "table": "harris-1995-tables-32-1-to-32-8",
+        "name": "Losas prefabricadas de hormigón con canales unidas con mortero sobre centros cada 50,8 cm (20 in). Cada losa tiene un canal trapezoidal de 7,6 cm (3 in) de profundidad, con bases de 27,9 cm (11 in) y 37,5 cm (14 3/4 in). En el lado del suelo, un acabado de cemento y arena de 1,9 cm (3/4 in) de grosor.",
+        "variant": "",
+        "group": "TABLA 32.2. Aislamiento de impacto de conjuntos de techo-suelo de hormigón anisotrópico",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Tables 32.1 to 32.8, PDF pages 750-757 (printed pp. 32.8-32.15)",
+        "note": "",
+        "attributedTo": {
+          "table": "the chapter's Reference 5, \"A guide to airborne, impact and structureborne noise control in multi-family dwellings\", prepared for the Federal Housing Administration by the National Bureau of Standards, September 1967, which folio 32.7 names as what Tables 32.1 to 32.7 are based on"
+        },
+        "cells": [
+          {
+            "text": "32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-tables-32-1-to-32-8/11",
+        "table": "harris-1995-tables-32-1-to-32-8",
+        "name": "Suelo de hormigón nervado de 18,4 cm (7 1/4 in). Los nervios tienen 13,3 cm ( 5 1/4 in) por 9,5 cm (3 3/4 in), con espaciamientos de 53,2 cm (21 in) entre los centros; la losa tiene 5,1 cm (2 in) de grosor, con una capa de arena y cemento de 1,9 cm (3/4 in) de grosor. En el lado hacia el techo, listones de madera de 1,58 cm (5/8 in) de grosor, clavados sobre bandas, sujeto mediante tacos y yeso de 1,58 cm (5/8 in) de grosor.",
+        "variant": "",
+        "group": "TABLA 32.2. Aislamiento de impacto de conjuntos de techo-suelo de hormigón anisotrópico",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Tables 32.1 to 32.8, PDF pages 750-757 (printed pp. 32.8-32.15)",
+        "note": "",
+        "attributedTo": {
+          "table": "the chapter's Reference 5, \"A guide to airborne, impact and structureborne noise control in multi-family dwellings\", prepared for the Federal Housing Administration by the National Bureau of Standards, September 1967, which folio 32.7 names as what Tables 32.1 to 32.7 are based on"
+        },
+        "cells": [
+          {
+            "text": "42",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-tables-32-1-to-32-8/12",
+        "table": "harris-1995-tables-32-1-to-32-8",
+        "name": "Vigas prefabricadas de hormigón trapezoidales con canales de 17,8 cm (7 in), sobre centros separados 35,6 cm (14 in), con los espacios entre ellas rellenos con una mezcla de cemento y arena. En el lado del suelo, una capa de cemento y arena de 3,8 cm (1,5 in) de grosor, con un revestimiento de suelo de madera de 2,54 cm (1 in) de grosor. En el lado hacia el techo, una capa de escayola de 1,9 cm (3/4 in) de grosor sobre listones expandidos de metal.",
+        "variant": "",
+        "group": "TABLA 32.2. Aislamiento de impacto de conjuntos de techo-suelo de hormigón anisotrópico",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Tables 32.1 to 32.8, PDF pages 750-757 (printed pp. 32.8-32.15)",
+        "note": "",
+        "attributedTo": {
+          "table": "the chapter's Reference 5, \"A guide to airborne, impact and structureborne noise control in multi-family dwellings\", prepared for the Federal Housing Administration by the National Bureau of Standards, September 1967, which folio 32.7 names as what Tables 32.1 to 32.7 are based on"
+        },
+        "cells": [
+          {
+            "text": "42",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-tables-32-1-to-32-8/13",
+        "table": "harris-1995-tables-32-1-to-32-8",
+        "name": "Vigas prefabricadas de hormigón con canales de 12,7 cm (5 in), sobre centros separados 36,8 cm (14,5 in), con los espacios entre las vigas rellenos con una mezcla de cemento y arena. En el lado del suelo, una ensambladura de ranura y lengüeta de madera de 2,2 cm (7/8 in) de grosor, clavada sobre listones de madera de 2,5 cm (1 in) por 5 cm (2 in), 50,8 cm (20 in), sobre una lámina de lana de vidrio de 2,5 cm (1 in), sobre una capa de cemento y arena de 1,9 cm (3/4 in). En el lado del techo, un tablero de escayola de 0,32 cm (1/8 in), clavado a listones de madera de 2,5 cm (1 in) por 5 cm (2 in), con un espaciamiento de 36,8 cm (14,5 in) entre los centros. La anchura total es de 25,4 cm (10 in).",
+        "variant": "",
+        "group": "TABLA 32.2. Aislamiento de impacto de conjuntos de techo-suelo de hormigón anisotrópico",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Tables 32.1 to 32.8, PDF pages 750-757 (printed pp. 32.8-32.15)",
+        "note": "",
+        "attributedTo": {
+          "table": "the chapter's Reference 5, \"A guide to airborne, impact and structureborne noise control in multi-family dwellings\", prepared for the Federal Housing Administration by the National Bureau of Standards, September 1967, which folio 32.7 names as what Tables 32.1 to 32.7 are based on"
+        },
+        "cells": [
+          {
+            "text": "53",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-tables-32-1-to-32-8/14",
+        "table": "harris-1995-tables-32-1-to-32-8",
+        "name": "Losa armada de 15,6 cm (6 in) con bloques huecos de 30,5 cm (12 in) por 12,7 cm (5 in), con espaciamientos de 40,6 cm (16 in) entre sus centros. En el lado del suelo, una capa de cemento y arena de 3,8 cm (1,5 in), con un acabado de suelo de brea y masilla de 1,6 cm (5/8 in) de grosor sobre fieltro. En el lado del techo, 1,9 cm (3/4 in) de escayola. Espesor total de 21,6 cm (8,5 in).",
+        "variant": "",
+        "group": "TABLA 32.3. Aislamiento de impacto de conjuntos de techo-suelo de hormigón hueco",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Tables 32.1 to 32.8, PDF pages 750-757 (printed pp. 32.8-32.15)",
+        "note": "",
+        "attributedTo": {
+          "table": "the chapter's Reference 5, \"A guide to airborne, impact and structureborne noise control in multi-family dwellings\", prepared for the Federal Housing Administration by the National Bureau of Standards, September 1967, which folio 32.7 names as what Tables 32.1 to 32.7 are based on"
+        },
+        "cells": [
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-tables-32-1-to-32-8/15",
+        "table": "harris-1995-tables-32-1-to-32-8",
+        "name": "Hormigón armado de 14 cm (5,5 in) de grosor con bloques embebidos de 10 cm (4 in) por 30,5 cm (12 in), con espaciamiento de 36,8 cm (14,5 in) entre sus centros. En el lado del suelo, un pavimento de cemento y arena flotante armado con tela metálica de 3,8 cm (1,5 in) de grosor sobre una placa de lana de vidrio aglutinada con betún de 2,5 cm (1 in), cubierta con papel de construcción; revestimiento del suelo de baldosas termoplásticas. Sobre el lado del techo, una capa de escayola de 1,27 cm (0,5 in). Espesor total de 21,6 cm (8,5 in).",
+        "variant": "",
+        "group": "TABLA 32.3. Aislamiento de impacto de conjuntos de techo-suelo de hormigón hueco",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Tables 32.1 to 32.8, PDF pages 750-757 (printed pp. 32.8-32.15)",
+        "note": "",
+        "attributedTo": {
+          "table": "the chapter's Reference 5, \"A guide to airborne, impact and structureborne noise control in multi-family dwellings\", prepared for the Federal Housing Administration by the National Bureau of Standards, September 1967, which folio 32.7 names as what Tables 32.1 to 32.7 are based on"
+        },
+        "cells": [
+          {
+            "text": "37",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-tables-32-1-to-32-8/16",
+        "table": "harris-1995-tables-32-1-to-32-8",
+        "name": "Bloques huecos de mampostería de 10,1 cm (4 in) por 31,8 cm (12,5 in), con espaciamiento entre sus centros de 39,4 cm (15,5 in), con los espacios entre los bloques rellenos con 10,1 cm (4 in) de hormigón armado. En el lado del suelo, un pavimento de arena y cemento de 5,1 cm (2 in); suelo de madera de 2,5 cm (1 in), clavado sobre listones de madera de 5,1 cm (2 in) por 2,5 cm (1 in), con espaciamiento de 39,4 cm (15,5 in) entre sus centros, flotando sobre una plancha de lana de vidrio de 2,5 cm (1 in) de grosor. En el lado del techo, una placa de escayola de 1,9 cm (3/4 in). Espesor total de 23,5 cm (9,25 in).",
+        "variant": "",
+        "group": "TABLA 32.3. Aislamiento de impacto de conjuntos de techo-suelo de hormigón hueco",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Tables 32.1 to 32.8, PDF pages 750-757 (printed pp. 32.8-32.15)",
+        "note": "",
+        "attributedTo": {
+          "table": "the chapter's Reference 5, \"A guide to airborne, impact and structureborne noise control in multi-family dwellings\", prepared for the Federal Housing Administration by the National Bureau of Standards, September 1967, which folio 32.7 names as what Tables 32.1 to 32.7 are based on"
+        },
+        "cells": [
+          {
+            "text": "63",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-tables-32-1-to-32-8/17",
+        "table": "harris-1995-tables-32-1-to-32-8",
+        "name": "Vigas trapezoidales huecas prefabricadas de 15,2 cm (6 in), espaciadas cada 36,9 cm (14,5 in), con bases de 35,6 cm (14 in) y 30,5 cm (12 in). Los espacios entre las vigas están rellenos con hormigón. En el lado del suelo, un acabado de brea y masilla de 1,27 cm (0,5 in). En el lado del techo, una capa de escayola de 1,27 cm (0,5 in). Espesor total: 19 cm (7,5 in).",
+        "variant": "",
+        "group": "TABLA 32.3. Aislamiento de impacto de conjuntos de techo-suelo de hormigón hueco",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Tables 32.1 to 32.8, PDF pages 750-757 (printed pp. 32.8-32.15)",
+        "note": "",
+        "attributedTo": {
+          "table": "the chapter's Reference 5, \"A guide to airborne, impact and structureborne noise control in multi-family dwellings\", prepared for the Federal Housing Administration by the National Bureau of Standards, September 1967, which folio 32.7 names as what Tables 32.1 to 32.7 are based on"
+        },
+        "cells": [
+          {
+            "text": "31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-tables-32-1-to-32-8/18",
+        "table": "harris-1995-tables-32-1-to-32-8",
+        "name": "Vigas de hormigón trapezoidales huecas prefabricadas de 12,7 cm (5 in), espaciadas cada 36,7 cm (14,5 in), con bases de 35,6 cm (14 in) y 31,8 cm (12,5 in). Los espacios entre las vigas están rellenos con una mezcla de arena y cemento. En el lado del suelo, una ensambladura de ranura y lengüeta de madera de 2,2 cm (7/8 in) de grosor, clavada sobre listones de madera de 3,8 cm (1,5 in) por 5,1 cm (2 in), distanciados cada 51 cm (20 in), flotando sobre una lámina de lana de vidrio de 2,5 cm (1 in); cobertura de suelo de linóleo. En el lado hacia el techo, una placa de escayola de 1,6 cm (5/8 in). El espesor total es de 22,2 cm (8,75 in).",
+        "variant": "",
+        "group": "TABLA 32.3. Aislamiento de impacto de conjuntos de techo-suelo de hormigón hueco",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Tables 32.1 to 32.8, PDF pages 750-757 (printed pp. 32.8-32.15)",
+        "note": "",
+        "attributedTo": {
+          "table": "the chapter's Reference 5, \"A guide to airborne, impact and structureborne noise control in multi-family dwellings\", prepared for the Federal Housing Administration by the National Bureau of Standards, September 1967, which folio 32.7 names as what Tables 32.1 to 32.7 are based on"
+        },
+        "cells": [
+          {
+            "text": "49",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-tables-32-1-to-32-8/19",
+        "table": "harris-1995-tables-32-1-to-32-8",
+        "name": "Mismo suelo estructural que el 18. En el lado del suelo, un pavimento de arena y cemento de 2,5 cm (1 in), con revestimiento de baldosas de corcho de 0,48 cm (3/16 in). En el lado del techo, una placa de escayola de 0,95 cm (3/8 in) de grosor, conectada a listones de madera de 5 cm (2 in) por 2,5 cm (1 in), sujetos mediante abrazaderas de metal. El espesor total es de 19,4 cm (7 5/8 in).",
+        "variant": "",
+        "group": "TABLA 32.3. Aislamiento de impacto de conjuntos de techo-suelo de hormigón hueco",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Tables 32.1 to 32.8, PDF pages 750-757 (printed pp. 32.8-32.15)",
+        "note": "",
+        "attributedTo": {
+          "table": "the chapter's Reference 5, \"A guide to airborne, impact and structureborne noise control in multi-family dwellings\", prepared for the Federal Housing Administration by the National Bureau of Standards, September 1967, which folio 32.7 names as what Tables 32.1 to 32.7 are based on"
+        },
+        "cells": [
+          {
+            "text": "51",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-tables-32-1-to-32-8/20",
+        "table": "harris-1995-tables-32-1-to-32-8",
+        "name": "Viguetas de madera de 5,1 cm (2 in) por 20,3 cm (8 in), espaciadas cada 40,6 cm (16 in). En el lado del suelo, una ensambladura de ranura y lengüeta de 2,2 cm (7/8 in) clavada sobre listones; en el lado del techo, un tablero de escayola de 0,95 cm (3/8 in) clavado a las viguetas, con las juntas selladas; grosor total de 24,1 cm (9,5 in).",
+        "variant": "",
+        "group": "TABLA 32.4. Aislamiento de impacto de conjuntos de techo-suelo de viguetas de madera",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Tables 32.1 to 32.8, PDF pages 750-757 (printed pp. 32.8-32.15)",
+        "note": "",
+        "attributedTo": {
+          "table": "the chapter's Reference 5, \"A guide to airborne, impact and structureborne noise control in multi-family dwellings\", prepared for the Federal Housing Administration by the National Bureau of Standards, September 1967, which folio 32.7 names as what Tables 32.1 to 32.7 are based on"
+        },
+        "cells": [
+          {
+            "text": "32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-tables-32-1-to-32-8/21",
+        "table": "harris-1995-tables-32-1-to-32-8",
+        "name": "Viguetas de madera de 5,1 cm (2 in) por 20,3 cm (8 in), separadas cada 40,6 cm (16 in). En el lado del suelo, contrachapado C-D de 1,27 cm (0,5 in) de grosor clavado sobre las viguetas, con distancias entre sus centros de 20,3 cm (8 in); suelo de madera de 1,98 cm (25/32 in) de grosor sobre contrachapado. En el lado del techo, un tablero de escayola de 1,27 cm (0,5 in) de grosor, clavado a las viguetas, con centros distanciados 15,2 cm (6 in), con todas las juntas selladas y acabadas; baldosas en el techo pegadas sobre el tablero de escayola. Grosor total de 26 cm (10,25 in).",
+        "variant": "",
+        "group": "TABLA 32.4. Aislamiento de impacto de conjuntos de techo-suelo de viguetas de madera",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Tables 32.1 to 32.8, PDF pages 750-757 (printed pp. 32.8-32.15)",
+        "note": "",
+        "attributedTo": {
+          "table": "the chapter's Reference 5, \"A guide to airborne, impact and structureborne noise control in multi-family dwellings\", prepared for the Federal Housing Administration by the National Bureau of Standards, September 1967, which folio 32.7 names as what Tables 32.1 to 32.7 are based on"
+        },
+        "cells": [
+          {
+            "text": "37",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-tables-32-1-to-32-8/22",
+        "table": "harris-1995-tables-32-1-to-32-8",
+        "name": "Viguetas de madera de 7,6 cm (3 in) por 17,8 cm (7 in), espaciadas cada 60,1 cm (24 in). En el lado del suelo, suelo de madera de 2,54 cm (1 in) de grosor, clavado a las viguetas, con revestimiento de linóleo. En el lado del techo, una capa de junquillos y yeso de 3,5 cm (1 3/8 in). Grosor total de 24,1 cm (9,5 in).",
+        "variant": "",
+        "group": "TABLA 32.4. Aislamiento de impacto de conjuntos de techo-suelo de viguetas de madera",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Tables 32.1 to 32.8, PDF pages 750-757 (printed pp. 32.8-32.15)",
+        "note": "",
+        "attributedTo": {
+          "table": "the chapter's Reference 5, \"A guide to airborne, impact and structureborne noise control in multi-family dwellings\", prepared for the Federal Housing Administration by the National Bureau of Standards, September 1967, which folio 32.7 names as what Tables 32.1 to 32.7 are based on"
+        },
+        "cells": [
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-tables-32-1-to-32-8/23",
+        "table": "harris-1995-tables-32-1-to-32-8",
+        "name": "Viguetas de madera de 5,1 cm (2 in) por 25,4 cm (10 in), cada 60,1 cm (24 in). En el lado del suelo, un tablero de 4,7 cm (1 27/32 in) de pulpa de papel de edificación comprimido homogéneo, clavado sobre puntos perpendiculares a las viguetas cada 20,3 cm (8 in), una plancha de cartón de 0,32 cm (1/8 in) pegada sobre el tablero, pegada sobre ésta una capa única de papel de fieltro de edificación y, sobre ella, baldosas de asbestos de vinilo de 0,32 cm (1/8 in) por 22,9 cm (9 in). En el lado del techo, un tablero de escayola de 1,27 cm (0,5 in) de grosor, clavado sobre puntos cada 30,5 cm (12 in), con todas las juntas selladas y acabadas. Grosor total: 31,1 cm (12,25 in).",
+        "variant": "",
+        "group": "TABLA 32.4. Aislamiento de impacto de conjuntos de techo-suelo de viguetas de madera",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Tables 32.1 to 32.8, PDF pages 750-757 (printed pp. 32.8-32.15)",
+        "note": "",
+        "attributedTo": {
+          "table": "the chapter's Reference 5, \"A guide to airborne, impact and structureborne noise control in multi-family dwellings\", prepared for the Federal Housing Administration by the National Bureau of Standards, September 1967, which folio 32.7 names as what Tables 32.1 to 32.7 are based on"
+        },
+        "cells": [
+          {
+            "text": "43",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-tables-32-1-to-32-8/24",
+        "table": "harris-1995-tables-32-1-to-32-8",
+        "name": "Viguetas de madera de 5,1 cm (2 in) por 20,3 cm (8 in), cada 40,6 cm (16 in). En el lado del suelo, una ensambladura de fibra de madera de ranura y lengüeta de 3,8 cm (1,5 in) de grosor, clavado a las viguetas, cubierto con cañamazo y alfombra. Grosor total: 25,4 cm (10 in).",
+        "variant": "",
+        "group": "TABLA 32.4. Aislamiento de impacto de conjuntos de techo-suelo de viguetas de madera",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Tables 32.1 to 32.8, PDF pages 750-757 (printed pp. 32.8-32.15)",
+        "note": "",
+        "attributedTo": {
+          "table": "the chapter's Reference 5, \"A guide to airborne, impact and structureborne noise control in multi-family dwellings\", prepared for the Federal Housing Administration by the National Bureau of Standards, September 1967, which folio 32.7 names as what Tables 32.1 to 32.7 are based on"
+        },
+        "cells": [
+          {
+            "text": "56",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-tables-32-1-to-32-8/25",
+        "table": "harris-1995-tables-32-1-to-32-8",
+        "name": "Viguetas de madera de 5,1 cm (2 in) por 25,4 cm (10 in), cada 40,6 cm (16 in). En el lado del suelo, un tablero de 3,4 cm (1,32 in) de pulpa de papel de edificación comprimido homogéneo, clavado en puntos perpendiculares a las viguetas cada 20,3 cm (8 in); el tablero cubierto con una alfombra de espuma de caucho y una alfombra de nylon. La alfombra tiene un grosor no comprimido de 0,64 cm (0,25 in) de pelo de rizo, 7 rizos por pulgada, con un grosor total de 0,95 cm (3/8 in). En el lado del techo, un tablero de escayola de 1,27 cm (0,5 in), clavado sobre puntos cada 30,5 cm (12 in). Grosor total: 31,7 cm (12,5 in).",
+        "variant": "",
+        "group": "TABLA 32.4. Aislamiento de impacto de conjuntos de techo-suelo de viguetas de madera",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Tables 32.1 to 32.8, PDF pages 750-757 (printed pp. 32.8-32.15)",
+        "note": "",
+        "attributedTo": {
+          "table": "the chapter's Reference 5, \"A guide to airborne, impact and structureborne noise control in multi-family dwellings\", prepared for the Federal Housing Administration by the National Bureau of Standards, September 1967, which folio 32.7 names as what Tables 32.1 to 32.7 are based on"
+        },
+        "cells": [
+          {
+            "text": "57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-tables-32-1-to-32-8/26",
+        "table": "harris-1995-tables-32-1-to-32-8",
+        "name": "Viguetas de madera de 5,1 cm (2 in) por 20,3 cm (8 in), cada 40,6 cm (16 in), con planchas de fibra de vidrio de 7,6 cm (3 in) de grosor grapadas entre las juntas. En el lado del suelo, subsuelo de contrachapado de 1,27 cm (0,5 in) de grosor, clavado a las viguetas cada 20,3 cm (8 in), y sobre él, solado de roble de 1,98 cm (0,78 in) de grosor. En el lado del techo, viguetas de madera de techo de 5,1 cm (2 in) por 10,2 cm (4 in), cada 61 cm (24 in), alternadas con viguetas de suelo; una plancha de yeso de 1,27 cm (0,5 in) de grosor clavada a las viguetas del techo. Las juntas de la plancha del techo selladas y acabadas. Grosor total: 32,3 cm (11,75 in).",
+        "variant": "",
+        "group": "TABLA 32.5. Aislamiento de impacto de conjuntos de techo-suelo de viguetas de madera con aislamiento",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Tables 32.1 to 32.8, PDF pages 750-757 (printed pp. 32.8-32.15)",
+        "note": "",
+        "attributedTo": {
+          "table": "the chapter's Reference 5, \"A guide to airborne, impact and structureborne noise control in multi-family dwellings\", prepared for the Federal Housing Administration by the National Bureau of Standards, September 1967, which folio 32.7 names as what Tables 32.1 to 32.7 are based on"
+        },
+        "cells": [
+          {
+            "text": "43",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-tables-32-1-to-32-8/27",
+        "table": "harris-1995-tables-32-1-to-32-8",
+        "name": "Viguetas de madera de 5,1 cm (2 in) por 25,4 cm (10 in), cada 40,6 cm (16 in), con listones de fibra mineral de 7,6 cm (3 in) de grosor grapados entre las juntas. En el lado del suelo, subsuelo de contrachapado de 1,27 cm (0,5 in) de grosor, clavado en los bordes cada 15,2 cm (6 in) y en el centro cada 25,4 cm (10 in), capa de papel de construcción y solado de roble de 1,89 cm (0,78 in) de grosor, clavado en la intersección de las viguetas y en medio de ellas. En el lado del techo, una plancha de escayola de 1,6 cm (5/8 in) de grosor, atornillada cada 30,5 cm (12 in) a canales elásticos, colocados cada 61 cm (24 in) sobre centros perpendiculares a las viguetas. Grosor total: 31,45 cm (12,38 in).",
+        "variant": "",
+        "group": "TABLA 32.5. Aislamiento de impacto de conjuntos de techo-suelo de viguetas de madera con aislamiento",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Tables 32.1 to 32.8, PDF pages 750-757 (printed pp. 32.8-32.15)",
+        "note": "",
+        "attributedTo": {
+          "table": "the chapter's Reference 5, \"A guide to airborne, impact and structureborne noise control in multi-family dwellings\", prepared for the Federal Housing Administration by the National Bureau of Standards, September 1967, which folio 32.7 names as what Tables 32.1 to 32.7 are based on"
+        },
+        "cells": [
+          {
+            "text": "46",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-tables-32-1-to-32-8/28",
+        "table": "harris-1995-tables-32-1-to-32-8",
+        "name": "Viguetas de madera de 5,1 cm (2 in) por 25,4 cm (10 in), cada 40,6 cm (16 in), con listones de fibra mineral de 7,6 cm (3 in) de grosor grapados entre las juntas. En el lado del suelo, subsuelo de contrachapado de 1,27 cm (0,5 in) de grosor, clavado en los bordes cada 15,2 cm (6 in) y en el centro cada 25,4 cm (10 in), capa de papel de construcción y solado de roble de 1,89 cm (0,78 in) de grosor, clavado en la intersección de las viguetas y en medio de ellas; alfombra de 1,5 kg/m2 (44 oz/yd2), con felpudo de pelo de 1,4 kg/m2 (40 oz/yd2), colocada sobre el suelo. En el lado del techo, una plancha de escayola de 1,6 cm (0,63 in) de grosor, clavada a los centros de las viguetas cada 15,2 cm (6 in); todas las juntas selladas y acabadas. Grosor total: 31,6 cm (12,5 in).",
+        "variant": "",
+        "group": "TABLA 32.5. Aislamiento de impacto de conjuntos de techo-suelo de viguetas de madera con aislamiento",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Tables 32.1 to 32.8, PDF pages 750-757 (printed pp. 32.8-32.15)",
+        "note": "",
+        "attributedTo": {
+          "table": "the chapter's Reference 5, \"A guide to airborne, impact and structureborne noise control in multi-family dwellings\", prepared for the Federal Housing Administration by the National Bureau of Standards, September 1967, which folio 32.7 names as what Tables 32.1 to 32.7 are based on"
+        },
+        "cells": [
+          {
+            "text": "58",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-tables-32-1-to-32-8/29",
+        "table": "harris-1995-tables-32-1-to-32-8",
+        "name": "Parecido al anterior, salvo que la plancha de yeso está atornillada cada 30,4 cm (12 in) al centro de canales elásticos, colocados cada 60,8 cm (24 in) sobre puntos perpendiculares a las viguetas. Grosor total: 33 cm (13 in).",
+        "variant": "",
+        "group": "TABLA 32.5. Aislamiento de impacto de conjuntos de techo-suelo de viguetas de madera con aislamiento",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Tables 32.1 to 32.8, PDF pages 750-757 (printed pp. 32.8-32.15)",
+        "note": "",
+        "attributedTo": {
+          "table": "the chapter's Reference 5, \"A guide to airborne, impact and structureborne noise control in multi-family dwellings\", prepared for the Federal Housing Administration by the National Bureau of Standards, September 1967, which folio 32.7 names as what Tables 32.1 to 32.7 are based on"
+        },
+        "cells": [
+          {
+            "text": "70",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-tables-32-1-to-32-8/30",
+        "table": "harris-1995-tables-32-1-to-32-8",
+        "name": "Viguetas de madera de 5,1 cm (2 in) por 20,3 cm (8 in), cada 40,6 cm (16 in). En el lado del suelo, contrachapado burdo regular C-D de 2,86 cm (1,125 in) de grosor, clavado cada 15,2 cm (6 in) a lo largo de la periferia y cada 40,6 cm (16 in) sobre los centros de los cojinetes, cubierto con un felpudo de pelo (40 oz/yd2) y una alfombra de pelo de lana [1,5 kg/m2 (44 oz/yd2)]. El peso total de la alfombra es (4,14 lb/yd2) y el grosor total 0,95 cm (3/8 in). En el lado del techo, viguetas de madera de 5,1 cm (2 in) por 10,2 cm (4 in), sobre centros alternando cada 40,6 cm (16 in) y 20,3 cm (8 in) con respecto a las viguetas del suelo; planchas de fibra de vidrio de 7,6 cm (3 in) grapadas entre las viguetas del techo y una plancha de 1,6 cm (5/8 in) de grosor de escayola clavada sobre las viguetas del techo. Todas las juntas selladas y acabadas y toda la periferia del panel calafateada y sellada. El techo se sujeta de forma independiente a la estructura del suelo. Grosor total: 31,4 cm (12 3/8 in).",
+        "variant": "",
+        "group": "TABLA 32.5. Aislamiento de impacto de conjuntos de techo-suelo de viguetas de madera con aislamiento",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Tables 32.1 to 32.8, PDF pages 750-757 (printed pp. 32.8-32.15)",
+        "note": "The impact insulation class column of Table 32.5 is printed for this row and its cell is empty: no number, no dash and no convention for the gap.",
+        "attributedTo": {
+          "table": "the chapter's Reference 5, \"A guide to airborne, impact and structureborne noise control in multi-family dwellings\", prepared for the Federal Housing Administration by the National Bureau of Standards, September 1967, which folio 32.7 names as what Tables 32.1 to 32.7 are based on"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-tables-32-1-to-32-8/31",
+        "table": "harris-1995-tables-32-1-to-32-8",
+        "name": "Viguetas de madera de 5,1 cm (2 in) por 20,3 cm (8 in), cada 40,6 cm (16 in). En el lado del suelo, solado de madera de ensambladura de ranura y lengüeta de 2,2 cm (7/8 in), sobre 2,5 cm (1 in) de plancha de lana de vidrio aglutinada con betún, y listones de madera de 2,5 cm (1 in) por 10,1 cm (2 in), clavados al subsuelo entre las viguetas. En el lado del techo, una capa de escayola de 1,27 cm (0,5 in) sobre un listón expandido de metal. Grosor total: 25,4 cm (10 in).",
+        "variant": "",
+        "group": "TABLA 32.6. Aislamiento de impacto de conjuntos de techo-suelo de viguetas de madera con suelos flotantes",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Tables 32.1 to 32.8, PDF pages 750-757 (printed pp. 32.8-32.15)",
+        "note": "",
+        "attributedTo": {
+          "table": "the chapter's Reference 5, \"A guide to airborne, impact and structureborne noise control in multi-family dwellings\", prepared for the Federal Housing Administration by the National Bureau of Standards, September 1967, which folio 32.7 names as what Tables 32.1 to 32.7 are based on"
+        },
+        "cells": [
+          {
+            "text": "46",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-tables-32-1-to-32-8/32",
+        "table": "harris-1995-tables-32-1-to-32-8",
+        "name": "Parecido al anterior, salvo que hay una capa de arena de 5,1 cm (2 in) entre las viguetas. Grosor total: 25,4 cm (10 in).",
+        "variant": "",
+        "group": "TABLA 32.6. Aislamiento de impacto de conjuntos de techo-suelo de viguetas de madera con suelos flotantes",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Tables 32.1 to 32.8, PDF pages 750-757 (printed pp. 32.8-32.15)",
+        "note": "",
+        "attributedTo": {
+          "table": "the chapter's Reference 5, \"A guide to airborne, impact and structureborne noise control in multi-family dwellings\", prepared for the Federal Housing Administration by the National Bureau of Standards, September 1967, which folio 32.7 names as what Tables 32.1 to 32.7 are based on"
+        },
+        "cells": [
+          {
+            "text": "57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-tables-32-1-to-32-8/33",
+        "table": "harris-1995-tables-32-1-to-32-8",
+        "name": "Viguetas de madera de 5,1 cm (2 in) por 20,3 cm (8 in), cada 40,6 cm (16 in), con planchas de fibra de vidrio de 7,6 cm (3 in) de grosor grapadas entre las juntas. En el lado del suelo, contrachapado burdo C-D de bordes cuadrados de 1,27 cm (0,5 in), clavado cada 15,2 cm (6 in) a lo largo de la periferia y cada 25,4 cm (10 in) a otros cojinetes; una plancha de fibra de caña de 1,27 cm (1/2 in) grapada cada 61 cm (24 in) al contrachapado; bandas de forro de 5,1 cm (2 in) por 7,6 cm (3 in), pegadas cada 40,6 cm (16 in) a la plancha de fibra, en paralelo y a media distancia entre las viguetas; solado de tablas de madera de 2 cm (25/32 in) de grosor. En el lado del techo, canales elásticos cada 60 cm (24 in), atornillados perpendiculares a las viguetas, un tablero de escayola de 1,59 cm (5/8 in), atornillado a los canales cada 30,5 cm (12 in). Todas las juntas selladas y acabadas y toda la periferia del panel calafateada y sellada. Grosor total: 32,4 cm (12,75 in).",
+        "variant": "",
+        "group": "TABLA 32.6. Aislamiento de impacto de conjuntos de techo-suelo de viguetas de madera con suelos flotantes",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Tables 32.1 to 32.8, PDF pages 750-757 (printed pp. 32.8-32.15)",
+        "note": "",
+        "attributedTo": {
+          "table": "the chapter's Reference 5, \"A guide to airborne, impact and structureborne noise control in multi-family dwellings\", prepared for the Federal Housing Administration by the National Bureau of Standards, September 1967, which folio 32.7 names as what Tables 32.1 to 32.7 are based on"
+        },
+        "cells": [
+          {
+            "text": "51",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-tables-32-1-to-32-8/34A",
+        "table": "harris-1995-tables-32-1-to-32-8",
+        "name": "Viguetas de madera de 5,1 cm (2 in) por 20,3 cm (8 in), cada 40,6 cm (16 in), con planchas de fibra de vidrio de 7,6 cm (3 in) de grosor grapadas entre las juntas. En el lado del suelo, contrachapado de 1,27 cm (0,5 in) de grosor, clavado cada 15,2 cm (6 in) en la periferia y cada 40,6 cm (16 in) sobre estos cojinetes; una plancha de fibra de caña de 1,27 cm (1/2 in), grapada cada 60 cm (24 in) al contrachapado; bandas de forro de 5 cm (2 in) por 7,5 cm (3 in), pegadas cada 40,6 cm (16 in) a la plancha de fibra, en paralelo y a media distancia entre las viguetas; ensambladura de ranura y lengüeta de 1,6 cm (5/8 in); subsuelo de contrachapado C-D empastado, clavado cada 15,2 cm (6 in) en los bordes y cada 25,4 cm (10 in) sobre otros cojinetes; una lámina de vinilo de 0,19 cm (0,075 in) pegada al subsuelo. En el lado del techo, canales elásticos cada 60 cm (24 in), atornillados perpendiculares a las viguetas; un tablero de escayola de 1,6 cm (5/8 in), atornillado a los canales cada 30,5 cm (12 in). Todas las juntas selladas y acabadas y toda la periferia del panel calafateada y sellada. Grosor total: 32,4 cm (12,75 in).",
+        "variant": "",
+        "group": "TABLA 32.6. Aislamiento de impacto de conjuntos de techo-suelo de viguetas de madera con suelos flotantes",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Tables 32.1 to 32.8, PDF pages 750-757 (printed pp. 32.8-32.15)",
+        "note": "",
+        "attributedTo": {
+          "table": "the chapter's Reference 5, \"A guide to airborne, impact and structureborne noise control in multi-family dwellings\", prepared for the Federal Housing Administration by the National Bureau of Standards, September 1967, which folio 32.7 names as what Tables 32.1 to 32.7 are based on"
+        },
+        "cells": [
+          {
+            "text": "49",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-tables-32-1-to-32-8/34B",
+        "table": "harris-1995-tables-32-1-to-32-8",
+        "name": "Parecido al anterior, salvo que la lámina de vinilo es reemplazada por un felpudo de pelo (40 oz/yd2) y una alfombra de pelo de lana (44 oz/yd2). El peso total de la alfombra es 4,14 lb/yd2 y el grosor total 0,95 cm (3/8 in). Grosor total: 34,3 cm (13,5 in).",
+        "variant": "",
+        "group": "TABLA 32.6. Aislamiento de impacto de conjuntos de techo-suelo de viguetas de madera con suelos flotantes",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Tables 32.1 to 32.8, PDF pages 750-757 (printed pp. 32.8-32.15)",
+        "note": "",
+        "attributedTo": {
+          "table": "the chapter's Reference 5, \"A guide to airborne, impact and structureborne noise control in multi-family dwellings\", prepared for the Federal Housing Administration by the National Bureau of Standards, September 1967, which folio 32.7 names as what Tables 32.1 to 32.7 are based on"
+        },
+        "cells": [
+          {
+            "text": "78",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-tables-32-1-to-32-8/35A",
+        "table": "harris-1995-tables-32-1-to-32-8",
+        "name": "Viguetas de acero de 20,3 cm (8 in), cada 40,6 cm (16 in). Las viguetas tienen elementos de apoyo, en la parte superior e inferior, de 5,1 cm (2 in) de anchura, agujeros de 0,16 cm (1/16 in) de diámetro cada 76,2 cm (30 in) y un grosor de cuerpo de 0,16 cm (1/16 in). En el lado del suelo, una plancha de pulpa de papel de construcción comprimido homogéneo de 3,41 cm (1,34 in), de 410 kg/m3 (26,1 lb/ft3), clavada cada 20,3 cm (8 in) sobre centros perpendiculares a las viguetas, un tablero de cartón 0,32 cm (1/8 in) pegado a la plancha, una capa única de papel de construcción de fieltro de 15 lb pegada al cartón y baldosas de asbesto de 0,32 cm (1/8 in) pegadas sobre el fieltro. En el lado del techo, una capa de escayola de 1,27 cm (0,5 in), clavada cada 30,5 cm (12 in), con todas las juntas selladas y acabadas. Grosor total: 25,7 cm (10 1/8 in).",
+        "variant": "",
+        "group": "TABLA 32.7. Aislamiento de impacto de conjuntos de suelo de viguetas de acero",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Tables 32.1 to 32.8, PDF pages 750-757 (printed pp. 32.8-32.15)",
+        "note": "The density the description prints for the “plancha de pulpa de papel de construcción comprimido homogéneo” is the cell this row would hold, and it is the one the page prints twice and inconsistently.",
+        "attributedTo": {
+          "table": "the chapter's Reference 5, \"A guide to airborne, impact and structureborne noise control in multi-family dwellings\", prepared for the Federal Housing Administration by the National Bureau of Standards, September 1967, which folio 32.7 names as what Tables 32.1 to 32.7 are based on"
+        },
+        "cells": [
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": "the page prints this density twice, “410 kg/m3 (26,1 lb/ft3)”, and one pound per cubic foot is 16,0185 kg/m3 by the definitions of the pound and the foot, so 26,1 lb/ft3 is 418 kg/m3 and 410 kg/m3 is 25,6 lb/ft3; the page does not say which of the two halves carries the defect and this library does not choose one, so no density is served for this row. The cell is argued in docs/ERRATA.md."
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-tables-32-1-to-32-8/35B",
+        "table": "harris-1995-tables-32-1-to-32-8",
+        "name": "Parecido al 35A, salvo que las viguetas de acero están cada 60,1 cm (24 in) y tablero de construcción es de 4,7 cm (1,84 in) de grosor. Grosor total: 27 cm (10 5/8 in).",
+        "variant": "",
+        "group": "TABLA 32.7. Aislamiento de impacto de conjuntos de suelo de viguetas de acero",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Tables 32.1 to 32.8, PDF pages 750-757 (printed pp. 32.8-32.15)",
+        "note": "",
+        "attributedTo": {
+          "table": "the chapter's Reference 5, \"A guide to airborne, impact and structureborne noise control in multi-family dwellings\", prepared for the Federal Housing Administration by the National Bureau of Standards, September 1967, which folio 32.7 names as what Tables 32.1 to 32.7 are based on"
+        },
+        "cells": [
+          {
+            "text": "45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-tables-32-1-to-32-8/36A",
+        "table": "harris-1995-tables-32-1-to-32-8",
+        "name": "Las viguetas y el tablero de pulpa de papel de construcción son iguales al 35A, pero éste está cubierto con una alfombra de espuma de caucho y una alfombra de nylon. La alfombra tiene un grosor no comprimido de 0,64 cm (1/4 in), sobre un cañamazo de fibra de yute tejido. La alfombra de nylon tiene un cañamazo tejido de 0,32 cm (1/8 in) y un pelo de 0,64 cm (1/4 in), con una densidad de 2,76 rizos/cm (7 rizos/in), con un grosor total de 0,95 cm (3/8 in). En el lado del techo, una capa de yeso de 1,27 cm (0,5 in), clavada cada 30,5 cm (12 in), con todas las juntas selladas y acabadas. Grosor total: 26,7 cm (10,5 in).",
+        "variant": "",
+        "group": "TABLA 32.7. Aislamiento de impacto de conjuntos de suelo de viguetas de acero",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Tables 32.1 to 32.8, PDF pages 750-757 (printed pp. 32.8-32.15)",
+        "note": "",
+        "attributedTo": {
+          "table": "the chapter's Reference 5, \"A guide to airborne, impact and structureborne noise control in multi-family dwellings\", prepared for the Federal Housing Administration by the National Bureau of Standards, September 1967, which folio 32.7 names as what Tables 32.1 to 32.7 are based on"
+        },
+        "cells": [
+          {
+            "text": "58",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-tables-32-1-to-32-8/36B",
+        "table": "harris-1995-tables-32-1-to-32-8",
+        "name": "Parecido al 36A, salvo que las viguetas de acero están cada 60,1 cm (24 in) y el tablero de construcción es de 4,7 cm (1,84 in) de grosor. Grosor total: 28 cm (11 in).",
+        "variant": "",
+        "group": "TABLA 32.7. Aislamiento de impacto de conjuntos de suelo de viguetas de acero",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Tables 32.1 to 32.8, PDF pages 750-757 (printed pp. 32.8-32.15)",
+        "note": "",
+        "attributedTo": {
+          "table": "the chapter's Reference 5, \"A guide to airborne, impact and structureborne noise control in multi-family dwellings\", prepared for the Federal Housing Administration by the National Bureau of Standards, September 1967, which folio 32.7 names as what Tables 32.1 to 32.7 are based on"
+        },
+        "cells": [
+          {
+            "text": "63",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-tables-32-1-to-32-8/37A",
+        "table": "harris-1995-tables-32-1-to-32-8",
+        "name": "Hormigón de arena y gravilla de 6,35 cm (2,5 in) de grosor, de 2370 kg/m3 (148 lb/ft3), sobre unidades de acero ondulado de 0,38 mm (calibre 28), apoyadas mediante juntas de barras de acero de 35,6 cm (14 in); tela asfáltica de 0,32 cm (1/8 in) de grosor pegada al hormigón. En el lado del techo, canales incrustados de 1,9 cm (3/4 in) cada 34,3 cm (13,5 in), sujetos mediante cables a las viguetas; malla de diamantes y listones de metal de 1,5 kg/m2 (3,4 lb/yd2), sujeta mediante cables a los listones incrustados; capa de 1,4 cm (9/16 in) de masilla de yeso perlite, con acabado blanco de 0,16 cm (1/16 in). Grosor total: 47,1 cm (18,56 in).",
+        "variant": "",
+        "group": "TABLA 32.7. Aislamiento de impacto de conjuntos de suelo de viguetas de acero",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Tables 32.1 to 32.8, PDF pages 750-757 (printed pp. 32.8-32.15)",
+        "note": "The density is the one the description prints for the “hormigón de arena y gravilla”, and not of the assembly.",
+        "attributedTo": {
+          "table": "the chapter's Reference 5, \"A guide to airborne, impact and structureborne noise control in multi-family dwellings\", prepared for the Federal Housing Administration by the National Bureau of Standards, September 1967, which folio 32.7 names as what Tables 32.1 to 32.7 are based on"
+        },
+        "cells": [
+          {
+            "text": "35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "2 370",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-tables-32-1-to-32-8/37B",
+        "table": "harris-1995-tables-32-1-to-32-8",
+        "name": "Parecido al 37A, pero la tela asfáltica es reemplazada por una alfombra y un tejido de fieltro",
+        "variant": "",
+        "group": "TABLA 32.7. Aislamiento de impacto de conjuntos de suelo de viguetas de acero",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Tables 32.1 to 32.8, PDF pages 750-757 (printed pp. 32.8-32.15)",
+        "note": "",
+        "attributedTo": {
+          "table": "the chapter's Reference 5, \"A guide to airborne, impact and structureborne noise control in multi-family dwellings\", prepared for the Federal Housing Administration by the National Bureau of Standards, September 1967, which folio 32.7 names as what Tables 32.1 to 32.7 are based on"
+        },
+        "cells": [
+          {
+            "text": "64",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-tables-32-1-to-32-8/38",
+        "table": "harris-1995-tables-32-1-to-32-8",
+        "name": "Viguetas de acero de 45,7 cm (18 in), cada 81,3 cm (32 in), con planchas de fibra de vidrio de 7,6 cm (3 in) de grosor entre las viguetas. En el lado del suelo, ensambladura de ranura y lengüeta de contrachapado de 2,86 cm (1 1/8 in) de grosor (graduación 2-4-1), clavada a las viguetas; el contrachapado está cubierto con un felpudo de pelo de 1,81 kg/m2 (40 oz/yd2) y una alfombra de pelo de lana de 1,99 kg/m2 (44 oz/yd2). El peso total de la alfombra es de 2,25 kg/m2 (4,14 lb/yd2) y el grosor total 0,95 cm (3/8 in). En el lado del techo, canales elásticos incrustados cada 61 cm (24 in), atornillados perpendiculares a las viguetas; un tablero de escayola de 1,6 cm (5/8 in), atornillado a los canales cada 30,5 cm (12 in). Todas las juntas selladas y acabadas y toda la periferia del panel calafateada y sellada. Grosor total: 53,3 cm (21 in).",
+        "variant": "",
+        "group": "TABLA 32.7. Aislamiento de impacto de conjuntos de suelo de viguetas de acero",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Tables 32.1 to 32.8, PDF pages 750-757 (printed pp. 32.8-32.15)",
+        "note": "The impact insulation class column of Table 32.7 is printed for this row and its cell is empty: no number, no dash and no convention for the gap.",
+        "attributedTo": {
+          "table": "the chapter's Reference 5, \"A guide to airborne, impact and structureborne noise control in multi-family dwellings\", prepared for the Federal Housing Administration by the National Bureau of Standards, September 1967, which folio 32.7 names as what Tables 32.1 to 32.7 are based on"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-tables-32-1-to-32-8/alfombras_de_pelo_de_distinto_tipo",
+        "table": "harris-1995-tables-32-1-to-32-8",
+        "name": "Alfombras de pelo de distinto tipo",
+        "variant": "",
+        "group": "TABLA 32.8. Mejora aproximada en la clase de aislamiento de impacto (ΔIIC) debida a distintos tratamientos con superficies elásticas sobre suelos masivos estructurales duros*",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Tables 32.1 to 32.8, PDF pages 750-757 (printed pp. 32.8-32.15)",
+        "note": "* Si estos tratamientos de superficies se aplican sobre suelos de viguetas de madera, la mejora puede ser sustancialmente inferior a la que aparece en la tabla.",
+        "attributedTo": {
+          "table": "the chapter's Reference 6, W. Zeller, Laermbekaempfung, vol 7, 1963, p. 21, which Table 32.8 credits in a line of its own, \"Fuente: Referencia 6.\", printed under the table on folio 32.15"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "25 to 30",
+            "kind": "range",
+            "note": "the page prints 25 to 30 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-tables-32-1-to-32-8/linoleo_de_0_25_cm_0_1_in_de_grosor_sobre_fieltro_gofrado_de_1_0_kg_m2_1_8_lb_yd2",
+        "table": "harris-1995-tables-32-1-to-32-8",
+        "name": "Linóleo de 0,25 cm (0,1 in) de grosor sobre fieltro gofrado de 1,0 kg/m2 (1,8 lb/yd2)",
+        "variant": "",
+        "group": "TABLA 32.8. Mejora aproximada en la clase de aislamiento de impacto (ΔIIC) debida a distintos tratamientos con superficies elásticas sobre suelos masivos estructurales duros*",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Tables 32.1 to 32.8, PDF pages 750-757 (printed pp. 32.8-32.15)",
+        "note": "* Si estos tratamientos de superficies se aplican sobre suelos de viguetas de madera, la mejora puede ser sustancialmente inferior a la que aparece en la tabla.",
+        "attributedTo": {
+          "table": "the chapter's Reference 6, W. Zeller, Laermbekaempfung, vol 7, 1963, p. 21, which Table 32.8 credits in a line of its own, \"Fuente: Referencia 6.\", printed under the table on folio 32.15"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-tables-32-1-to-32-8/linoleo_de_corcho_de_0_6_cm_0_24_in_de_grosor",
+        "table": "harris-1995-tables-32-1-to-32-8",
+        "name": "Linóleo de corcho de 0,6 cm (0,24 in) de grosor",
+        "variant": "",
+        "group": "TABLA 32.8. Mejora aproximada en la clase de aislamiento de impacto (ΔIIC) debida a distintos tratamientos con superficies elásticas sobre suelos masivos estructurales duros*",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Tables 32.1 to 32.8, PDF pages 750-757 (printed pp. 32.8-32.15)",
+        "note": "* Si estos tratamientos de superficies se aplican sobre suelos de viguetas de madera, la mejora puede ser sustancialmente inferior a la que aparece en la tabla.",
+        "attributedTo": {
+          "table": "the chapter's Reference 6, W. Zeller, Laermbekaempfung, vol 7, 1963, p. 21, which Table 32.8 credits in a line of its own, \"Fuente: Referencia 6.\", printed under the table on folio 32.15"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "18",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-tables-32-1-to-32-8/linoleo_de_corcho_de_0_45_cm_0_18_in_de_grosor",
+        "table": "harris-1995-tables-32-1-to-32-8",
+        "name": "Linóleo de corcho de 0,45 cm (0,18 in) de grosor",
+        "variant": "",
+        "group": "TABLA 32.8. Mejora aproximada en la clase de aislamiento de impacto (ΔIIC) debida a distintos tratamientos con superficies elásticas sobre suelos masivos estructurales duros*",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Tables 32.1 to 32.8, PDF pages 750-757 (printed pp. 32.8-32.15)",
+        "note": "* Si estos tratamientos de superficies se aplican sobre suelos de viguetas de madera, la mejora puede ser sustancialmente inferior a la que aparece en la tabla.",
+        "attributedTo": {
+          "table": "the chapter's Reference 6, W. Zeller, Laermbekaempfung, vol 7, 1963, p. 21, which Table 32.8 credits in a line of its own, \"Fuente: Referencia 6.\", printed under the table on folio 32.15"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "17",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-tables-32-1-to-32-8/linoleo_de_0_2_cm_0_08_in_a_0_32_cm_0_13_in_de_grosor_extendido_sobre_una_plancha_de_corcho",
+        "table": "harris-1995-tables-32-1-to-32-8",
+        "name": "Linóleo de 0,2 cm (0,08 in) a 0,32 cm (0,13 in) de grosor extendido sobre una plancha de corcho de 0,2 cm (0,08 in) a 0,32 cm (0,13 in) de grosor",
+        "variant": "",
+        "group": "TABLA 32.8. Mejora aproximada en la clase de aislamiento de impacto (ΔIIC) debida a distintos tratamientos con superficies elásticas sobre suelos masivos estructurales duros*",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Tables 32.1 to 32.8, PDF pages 750-757 (printed pp. 32.8-32.15)",
+        "note": "* Si estos tratamientos de superficies se aplican sobre suelos de viguetas de madera, la mejora puede ser sustancialmente inferior a la que aparece en la tabla.",
+        "attributedTo": {
+          "table": "the chapter's Reference 6, W. Zeller, Laermbekaempfung, vol 7, 1963, p. 21, which Table 32.8 credits in a line of its own, \"Fuente: Referencia 6.\", printed under the table on folio 32.15"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "17",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-tables-32-1-to-32-8/sandwich_de_linoleo_y_corcho_de_0_4_cm_0_16_in_de_grosor",
+        "table": "harris-1995-tables-32-1-to-32-8",
+        "name": "«Sandwich» de linóleo y corcho de 0,4 cm (0,16 in) de grosor",
+        "variant": "",
+        "group": "TABLA 32.8. Mejora aproximada en la clase de aislamiento de impacto (ΔIIC) debida a distintos tratamientos con superficies elásticas sobre suelos masivos estructurales duros*",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Tables 32.1 to 32.8, PDF pages 750-757 (printed pp. 32.8-32.15)",
+        "note": "* Si estos tratamientos de superficies se aplican sobre suelos de viguetas de madera, la mejora puede ser sustancialmente inferior a la que aparece en la tabla.",
+        "attributedTo": {
+          "table": "the chapter's Reference 6, W. Zeller, Laermbekaempfung, vol 7, 1963, p. 21, which Table 32.8 credits in a line of its own, \"Fuente: Referencia 6.\", printed under the table on folio 32.15"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      }
+    ]
+  },
+  "ductTransmissionLoss": {
+    "columns": [
+      {
+        "field": "diameter_mm",
+        "heading": "Diameter",
+        "headingEs": "Diámetro",
+        "unit": "mm"
+      },
+      {
+        "field": "first_side_mm",
+        "heading": "First side",
+        "headingEs": "Primer lado",
+        "unit": "mm"
+      },
+      {
+        "field": "second_side_mm",
+        "heading": "Second side",
+        "headingEs": "Segundo lado",
+        "unit": "mm"
+      },
+      {
+        "field": "duct_length_m",
+        "heading": "Duct length",
+        "headingEs": "Longitud del conducto",
+        "unit": "m"
+      },
+      {
+        "field": "transmission_loss_63_db",
+        "heading": "63 Hz",
+        "headingEs": "63 Hz",
+        "unit": "dB"
+      },
+      {
+        "field": "transmission_loss_125_db",
+        "heading": "125 Hz",
+        "headingEs": "125 Hz",
+        "unit": "dB"
+      },
+      {
+        "field": "transmission_loss_250_db",
+        "heading": "250 Hz",
+        "headingEs": "250 Hz",
+        "unit": "dB"
+      },
+      {
+        "field": "transmission_loss_500_db",
+        "heading": "500 Hz",
+        "headingEs": "500 Hz",
+        "unit": "dB"
+      },
+      {
+        "field": "transmission_loss_1000_db",
+        "heading": "1 kHz",
+        "headingEs": "1 kHz",
+        "unit": "dB"
+      },
+      {
+        "field": "transmission_loss_2000_db",
+        "heading": "2 kHz",
+        "headingEs": "2 kHz",
+        "unit": "dB"
+      },
+      {
+        "field": "transmission_loss_4000_db",
+        "heading": "4 kHz",
+        "headingEs": "4 kHz",
+        "unit": "dB"
+      },
+      {
+        "field": "transmission_loss_8000_db",
+        "heading": "8 kHz",
+        "headingEs": "8 kHz",
+        "unit": "dB"
+      }
+    ],
+    "rows": [
+      {
+        "key": "ashrae-2019-tables-29-to-34/t29_305x305_gage_24",
+        "table": "ashrae-2019-tables-29-to-34",
+        "name": "305 × 305 mm",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "breakout",
+        "shape": "rectangular",
+        "gauge": "24",
+        "weave": "",
+        "source": "ASHRAE (2019) HVAC Applications Handbook Chapter 49 Tables 29 to 34, PDF pages 914-916 (printed pp. 49.30-49.32)",
+        "note": "",
+        "attributedTo": {
+          "table": "Cummings 1983, 1985 and Lilly 1987, credited in the running text on PDF page 913 (folio 49.29), which reads: “Values of TLout for rectangular ducts are given in Table 29, for round ducts in Table 30, and for flat oval ducts in Table 31 (Cummings 1983, 1985; Lilly 1987).” The table itself carries no source line."
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "305",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "305",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "21",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "24",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "33",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "36",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "41",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "45",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ashrae-2019-tables-29-to-34/t29_305x610_gage_24",
+        "table": "ashrae-2019-tables-29-to-34",
+        "name": "305 × 610 mm",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "breakout",
+        "shape": "rectangular",
+        "gauge": "24",
+        "weave": "",
+        "source": "ASHRAE (2019) HVAC Applications Handbook Chapter 49 Tables 29 to 34, PDF pages 914-916 (printed pp. 49.30-49.32)",
+        "note": "",
+        "attributedTo": {
+          "table": "Cummings 1983, 1985 and Lilly 1987, credited in the running text on PDF page 913 (folio 49.29), which reads: “Values of TLout for rectangular ducts are given in Table 29, for round ducts in Table 30, and for flat oval ducts in Table 31 (Cummings 1983, 1985; Lilly 1987).” The table itself carries no source line."
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "305",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "610",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "41",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "45",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ashrae-2019-tables-29-to-34/t29_305x1220_gage_22",
+        "table": "ashrae-2019-tables-29-to-34",
+        "name": "305 × 1220 mm",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "breakout",
+        "shape": "rectangular",
+        "gauge": "22",
+        "weave": "",
+        "source": "ASHRAE (2019) HVAC Applications Handbook Chapter 49 Tables 29 to 34, PDF pages 914-916 (printed pp. 49.30-49.32)",
+        "note": "",
+        "attributedTo": {
+          "table": "Cummings 1983, 1985 and Lilly 1987, credited in the running text on PDF page 913 (folio 49.29), which reads: “Values of TLout for rectangular ducts are given in Table 29, for round ducts in Table 30, and for flat oval ducts in Table 31 (Cummings 1983, 1985; Lilly 1987).” The table itself carries no source line."
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "305",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1 220",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "37",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "43",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "45",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ashrae-2019-tables-29-to-34/t29_610x610_gage_22",
+        "table": "ashrae-2019-tables-29-to-34",
+        "name": "610 × 610 mm",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "breakout",
+        "shape": "rectangular",
+        "gauge": "22",
+        "weave": "",
+        "source": "ASHRAE (2019) HVAC Applications Handbook Chapter 49 Tables 29 to 34, PDF pages 914-916 (printed pp. 49.30-49.32)",
+        "note": "",
+        "attributedTo": {
+          "table": "Cummings 1983, 1985 and Lilly 1987, credited in the running text on PDF page 913 (folio 49.29), which reads: “Values of TLout for rectangular ducts are given in Table 29, for round ducts in Table 30, and for flat oval ducts in Table 31 (Cummings 1983, 1985; Lilly 1987).” The table itself carries no source line."
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "610",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "610",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "23",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "26",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "29",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "37",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "43",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "45",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ashrae-2019-tables-29-to-34/t29_610x1220_gage_20",
+        "table": "ashrae-2019-tables-29-to-34",
+        "name": "610 × 1220 mm",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "breakout",
+        "shape": "rectangular",
+        "gauge": "20",
+        "weave": "",
+        "source": "ASHRAE (2019) HVAC Applications Handbook Chapter 49 Tables 29 to 34, PDF pages 914-916 (printed pp. 49.30-49.32)",
+        "note": "",
+        "attributedTo": {
+          "table": "Cummings 1983, 1985 and Lilly 1987, credited in the running text on PDF page 913 (folio 49.29), which reads: “Values of TLout for rectangular ducts are given in Table 29, for round ducts in Table 30, and for flat oval ducts in Table 31 (Cummings 1983, 1985; Lilly 1987).” The table itself carries no source line."
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "610",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1 220",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "23",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "26",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "29",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "39",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "45",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ashrae-2019-tables-29-to-34/t29_1220x1220_gage_18",
+        "table": "ashrae-2019-tables-29-to-34",
+        "name": "1220 × 1220 mm",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "breakout",
+        "shape": "rectangular",
+        "gauge": "18",
+        "weave": "",
+        "source": "ASHRAE (2019) HVAC Applications Handbook Chapter 49 Tables 29 to 34, PDF pages 914-916 (printed pp. 49.30-49.32)",
+        "note": "",
+        "attributedTo": {
+          "table": "Cummings 1983, 1985 and Lilly 1987, credited in the running text on PDF page 913 (folio 49.29), which reads: “Values of TLout for rectangular ducts are given in Table 29, for round ducts in Table 30, and for flat oval ducts in Table 31 (Cummings 1983, 1985; Lilly 1987).” The table itself carries no source line."
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1 220",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1 220",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "21",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "24",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "41",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "45",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ashrae-2019-tables-29-to-34/t29_1220x2440_gage_18",
+        "table": "ashrae-2019-tables-29-to-34",
+        "name": "1220 × 2440 mm",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "breakout",
+        "shape": "rectangular",
+        "gauge": "18",
+        "weave": "",
+        "source": "ASHRAE (2019) HVAC Applications Handbook Chapter 49 Tables 29 to 34, PDF pages 914-916 (printed pp. 49.30-49.32)",
+        "note": "",
+        "attributedTo": {
+          "table": "Cummings 1983, 1985 and Lilly 1987, credited in the running text on PDF page 913 (folio 49.29), which reads: “Values of TLout for rectangular ducts are given in Table 29, for round ducts in Table 30, and for flat oval ducts in Table 31 (Cummings 1983, 1985; Lilly 1987).” The table itself carries no source line."
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1 220",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "2 440",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "29",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "41",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "45",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ashrae-2019-tables-29-to-34/t30_long_seam_200_gage_26",
+        "table": "ashrae-2019-tables-29-to-34",
+        "name": "200 mm",
+        "variant": "",
+        "group": "Long Seam Ducts",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "breakout",
+        "shape": "round",
+        "gauge": "26",
+        "weave": "",
+        "source": "ASHRAE (2019) HVAC Applications Handbook Chapter 49 Tables 29 to 34, PDF pages 914-916 (printed pp. 49.30-49.32)",
+        "note": "The 63 Hz cell is printed “>45”, a lower bound and not a value; the page gives no ceiling for it and none is invented. The 125 Hz cell is printed “(53)”. The only legend for that mark anywhere on folios 49.30 to 49.32 is the note under Table 32: “Parentheses indicate measurements in which background sound produced greater uncertainty than usual.” No hedge of this catalogue means that, and approximate is for a number an author rounded on purpose, so the number is held exactly as printed and the mark is recorded here.",
+        "attributedTo": {
+          "table": "Cummings 1983, 1985 and Lilly 1987, credited in the running text on PDF page 913 (folio 49.29), which reads: “Values of TLout for rectangular ducts are given in Table 29, for round ducts in Table 30, and for flat oval ducts in Table 31 (Cummings 1983, 1985; Lilly 1987).” The table itself carries no source line."
+        },
+        "cells": [
+          {
+            "text": "200",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "4,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "> 45",
+            "kind": "bound",
+            "note": "the page prints a lower bound of 45 and no value"
+          },
+          {
+            "text": "53",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "55",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "52",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "44",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "34",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ashrae-2019-tables-29-to-34/t30_long_seam_350_gage_24",
+        "table": "ashrae-2019-tables-29-to-34",
+        "name": "350 mm",
+        "variant": "",
+        "group": "Long Seam Ducts",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "breakout",
+        "shape": "round",
+        "gauge": "24",
+        "weave": "",
+        "source": "ASHRAE (2019) HVAC Applications Handbook Chapter 49 Tables 29 to 34, PDF pages 914-916 (printed pp. 49.30-49.32)",
+        "note": "The 63 Hz cell is printed “>50”, a lower bound and not a value; the page gives no ceiling for it and none is invented.",
+        "attributedTo": {
+          "table": "Cummings 1983, 1985 and Lilly 1987, credited in the running text on PDF page 913 (folio 49.29), which reads: “Values of TLout for rectangular ducts are given in Table 29, for round ducts in Table 30, and for flat oval ducts in Table 31 (Cummings 1983, 1985; Lilly 1987).” The table itself carries no source line."
+        },
+        "cells": [
+          {
+            "text": "350",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "4,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "> 50",
+            "kind": "bound",
+            "note": "the page prints a lower bound of 50 and no value"
+          },
+          {
+            "text": "60",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "54",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "36",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "34",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ashrae-2019-tables-29-to-34/t30_long_seam_560_gage_22",
+        "table": "ashrae-2019-tables-29-to-34",
+        "name": "560 mm",
+        "variant": "",
+        "group": "Long Seam Ducts",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "breakout",
+        "shape": "round",
+        "gauge": "22",
+        "weave": "",
+        "source": "ASHRAE (2019) HVAC Applications Handbook Chapter 49 Tables 29 to 34, PDF pages 914-916 (printed pp. 49.30-49.32)",
+        "note": "The 63 Hz cell is printed “>47”, a lower bound and not a value; the page gives no ceiling for it and none is invented.",
+        "attributedTo": {
+          "table": "Cummings 1983, 1985 and Lilly 1987, credited in the running text on PDF page 913 (folio 49.29), which reads: “Values of TLout for rectangular ducts are given in Table 29, for round ducts in Table 30, and for flat oval ducts in Table 31 (Cummings 1983, 1985; Lilly 1987).” The table itself carries no source line."
+        },
+        "cells": [
+          {
+            "text": "560",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "4,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "> 47",
+            "kind": "bound",
+            "note": "the page prints a lower bound of 47 and no value"
+          },
+          {
+            "text": "53",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "37",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "33",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "33",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ashrae-2019-tables-29-to-34/t30_long_seam_810_gage_22",
+        "table": "ashrae-2019-tables-29-to-34",
+        "name": "810 mm",
+        "variant": "",
+        "group": "Long Seam Ducts",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "breakout",
+        "shape": "round",
+        "gauge": "22",
+        "weave": "",
+        "source": "ASHRAE (2019) HVAC Applications Handbook Chapter 49 Tables 29 to 34, PDF pages 914-916 (printed pp. 49.30-49.32)",
+        "note": "The 63 Hz cell is printed “(51)”. The only legend for that mark anywhere on folios 49.30 to 49.32 is the note under Table 32: “Parentheses indicate measurements in which background sound produced greater uncertainty than usual.” No hedge of this catalogue means that, and approximate is for a number an author rounded on purpose, so the number is held exactly as printed and the mark is recorded here.",
+        "attributedTo": {
+          "table": "Cummings 1983, 1985 and Lilly 1987, credited in the running text on PDF page 913 (folio 49.29), which reads: “Values of TLout for rectangular ducts are given in Table 29, for round ducts in Table 30, and for flat oval ducts in Table 31 (Cummings 1983, 1985; Lilly 1987).” The table itself carries no source line."
+        },
+        "cells": [
+          {
+            "text": "810",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "4,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "51",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "46",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "26",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "26",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "24",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "38",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ashrae-2019-tables-29-to-34/t30_spiral_wound_300_gage_26_lined",
+        "table": "ashrae-2019-tables-29-to-34",
+        "name": "300 mm",
+        "variant": "",
+        "group": "Spiral Wound Ducts",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "breakout",
+        "shape": "round",
+        "gauge": "26*",
+        "weave": "",
+        "source": "ASHRAE (2019) HVAC Applications Handbook Chapter 49 Tables 29 to 34, PDF pages 914-916 (printed pp. 49.30-49.32)",
+        "note": "The gauge carries the asterisk of the footnote printed under Table 30: “*Ducts internally lined with 25 mm thick 24 kg/m3 fiberglass with 0.6 mm perforated sheet metal inner liner.” (the page sets the 3 of the density as a superscript).",
+        "attributedTo": {
+          "table": "Cummings 1983, 1985 and Lilly 1987, credited in the running text on PDF page 913 (folio 49.29), which reads: “Values of TLout for rectangular ducts are given in Table 29, for round ducts in Table 30, and for flat oval ducts in Table 31 (Cummings 1983, 1985; Lilly 1987).” The table itself carries no source line."
+        },
+        "cells": [
+          {
+            "text": "300",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "3,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "52",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "51",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "53",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "51",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "50",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "46",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "36",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ashrae-2019-tables-29-to-34/t30_spiral_wound_610_gage_24",
+        "table": "ashrae-2019-tables-29-to-34",
+        "name": "610 mm",
+        "variant": "",
+        "group": "Spiral Wound Ducts",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "breakout",
+        "shape": "round",
+        "gauge": "24",
+        "weave": "",
+        "source": "ASHRAE (2019) HVAC Applications Handbook Chapter 49 Tables 29 to 34, PDF pages 914-916 (printed pp. 49.30-49.32)",
+        "note": "",
+        "attributedTo": {
+          "table": "Cummings 1983, 1985 and Lilly 1987, credited in the running text on PDF page 913 (folio 49.29), which reads: “Values of TLout for rectangular ducts are given in Table 29, for round ducts in Table 30, and for flat oval ducts in Table 31 (Cummings 1983, 1985; Lilly 1987).” The table itself carries no source line."
+        },
+        "cells": [
+          {
+            "text": "610",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "7,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "51",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "53",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "51",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "44",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "36",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "26",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "29",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ashrae-2019-tables-29-to-34/t30_spiral_wound_610_gage_24_lined",
+        "table": "ashrae-2019-tables-29-to-34",
+        "name": "610 mm",
+        "variant": "",
+        "group": "Spiral Wound Ducts",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "breakout",
+        "shape": "round",
+        "gauge": "24*",
+        "weave": "",
+        "source": "ASHRAE (2019) HVAC Applications Handbook Chapter 49 Tables 29 to 34, PDF pages 914-916 (printed pp. 49.30-49.32)",
+        "note": "The diameter cell is blank on the page, so the 610 mm this row carries was not read from it and is held as a derivation rather than as a printed number. The gauge carries the asterisk of the footnote printed under Table 30: “*Ducts internally lined with 25 mm thick 24 kg/m3 fiberglass with 0.6 mm perforated sheet metal inner liner.” (the page sets the 3 of the density as a superscript).",
+        "attributedTo": {
+          "table": "Cummings 1983, 1985 and Lilly 1987, credited in the running text on PDF page 913 (folio 49.29), which reads: “Values of TLout for rectangular ducts are given in Table 29, for round ducts in Table 30, and for flat oval ducts in Table 31 (Cummings 1983, 1985; Lilly 1987).” The table itself carries no source line."
+        },
+        "cells": [
+          {
+            "text": "610",
+            "kind": "derived",
+            "note": "carried down from the 610 mm printed one row above it. The page prints the diameter once for that part of the Spiral Wound Ducts block of Table 30 and leaves the cell blank on the two rows below it, which print their own length and gauge."
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "7,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "51",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "51",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "54",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "44",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "39",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "33",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "47",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ashrae-2019-tables-29-to-34/t30_spiral_wound_610_gage_16",
+        "table": "ashrae-2019-tables-29-to-34",
+        "name": "610 mm",
+        "variant": "",
+        "group": "Spiral Wound Ducts",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "breakout",
+        "shape": "round",
+        "gauge": "16",
+        "weave": "",
+        "source": "ASHRAE (2019) HVAC Applications Handbook Chapter 49 Tables 29 to 34, PDF pages 914-916 (printed pp. 49.30-49.32)",
+        "note": "The diameter cell is blank on the page, so the 610 mm this row carries was not read from it and is held as a derivation rather than as a printed number. The length is printed as a bare “3”, with no decimal, where every other length in Tables 30 and 32 carries one. The 63 Hz cell is printed “>48”, a lower bound and not a value; the page gives no ceiling for it and none is invented.",
+        "attributedTo": {
+          "table": "Cummings 1983, 1985 and Lilly 1987, credited in the running text on PDF page 913 (folio 49.29), which reads: “Values of TLout for rectangular ducts are given in Table 29, for round ducts in Table 30, and for flat oval ducts in Table 31 (Cummings 1983, 1985; Lilly 1987).” The table itself carries no source line."
+        },
+        "cells": [
+          {
+            "text": "610",
+            "kind": "derived",
+            "note": "carried down from the 610 mm printed one row above it. The page prints the diameter once for that part of the Spiral Wound Ducts block of Table 30 and leaves the cell blank on the two rows below it, which print their own length and gauge."
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "> 48",
+            "kind": "bound",
+            "note": "the page prints a lower bound of 48 and no value"
+          },
+          {
+            "text": "53",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "36",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "41",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ashrae-2019-tables-29-to-34/t30_spiral_wound_915_gage_20",
+        "table": "ashrae-2019-tables-29-to-34",
+        "name": "915 mm",
+        "variant": "",
+        "group": "Spiral Wound Ducts",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "breakout",
+        "shape": "round",
+        "gauge": "20",
+        "weave": "",
+        "source": "ASHRAE (2019) HVAC Applications Handbook Chapter 49 Tables 29 to 34, PDF pages 914-916 (printed pp. 49.30-49.32)",
+        "note": "",
+        "attributedTo": {
+          "table": "Cummings 1983, 1985 and Lilly 1987, credited in the running text on PDF page 913 (folio 49.29), which reads: “Values of TLout for rectangular ducts are given in Table 29, for round ducts in Table 30, and for flat oval ducts in Table 31 (Cummings 1983, 1985; Lilly 1987).” The table itself carries no source line."
+        },
+        "cells": [
+          {
+            "text": "915",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "7,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "51",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "51",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "52",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "46",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "36",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "55",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ashrae-2019-tables-29-to-34/t31_305x152_gage_24",
+        "table": "ashrae-2019-tables-29-to-34",
+        "name": "305 × 152 mm",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "breakout",
+        "shape": "flat oval",
+        "gauge": "24",
+        "weave": "",
+        "source": "ASHRAE (2019) HVAC Applications Handbook Chapter 49 Tables 29 to 34, PDF pages 914-916 (printed pp. 49.30-49.32)",
+        "note": "",
+        "attributedTo": {
+          "table": "Cummings 1983, 1985 and Lilly 1987, credited in the running text on PDF page 913 (folio 49.29), which reads: “Values of TLout for rectangular ducts are given in Table 29, for round ducts in Table 30, and for flat oval ducts in Table 31 (Cummings 1983, 1985; Lilly 1987).” The table itself carries no source line."
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "305",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "152",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "34",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "37",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "43",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "—",
+            "kind": "unquantified",
+            "note": "the page prints “—” where the number would be"
+          },
+          {
+            "text": "—",
+            "kind": "unquantified",
+            "note": "the page prints “—” where the number would be"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ashrae-2019-tables-29-to-34/t31_610x152_gage_24",
+        "table": "ashrae-2019-tables-29-to-34",
+        "name": "610 × 152 mm",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "breakout",
+        "shape": "flat oval",
+        "gauge": "24",
+        "weave": "",
+        "source": "ASHRAE (2019) HVAC Applications Handbook Chapter 49 Tables 29 to 34, PDF pages 914-916 (printed pp. 49.30-49.32)",
+        "note": "",
+        "attributedTo": {
+          "table": "Cummings 1983, 1985 and Lilly 1987, credited in the running text on PDF page 913 (folio 49.29), which reads: “Values of TLout for rectangular ducts are given in Table 29, for round ducts in Table 30, and for flat oval ducts in Table 31 (Cummings 1983, 1985; Lilly 1987).” The table itself carries no source line."
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "610",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "152",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "24",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "33",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "36",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "—",
+            "kind": "unquantified",
+            "note": "the page prints “—” where the number would be"
+          },
+          {
+            "text": "—",
+            "kind": "unquantified",
+            "note": "the page prints “—” where the number would be"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ashrae-2019-tables-29-to-34/t31_610x305_gage_24",
+        "table": "ashrae-2019-tables-29-to-34",
+        "name": "610 × 305 mm",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "breakout",
+        "shape": "flat oval",
+        "gauge": "24",
+        "weave": "",
+        "source": "ASHRAE (2019) HVAC Applications Handbook Chapter 49 Tables 29 to 34, PDF pages 914-916 (printed pp. 49.30-49.32)",
+        "note": "",
+        "attributedTo": {
+          "table": "Cummings 1983, 1985 and Lilly 1987, credited in the running text on PDF page 913 (folio 49.29), which reads: “Values of TLout for rectangular ducts are given in Table 29, for round ducts in Table 30, and for flat oval ducts in Table 31 (Cummings 1983, 1985; Lilly 1987).” The table itself carries no source line."
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "610",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "305",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "34",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "37",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "—",
+            "kind": "unquantified",
+            "note": "the page prints “—” where the number would be"
+          },
+          {
+            "text": "—",
+            "kind": "unquantified",
+            "note": "the page prints “—” where the number would be"
+          },
+          {
+            "text": "—",
+            "kind": "unquantified",
+            "note": "the page prints “—” where the number would be"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ashrae-2019-tables-29-to-34/t31_1220x305_gage_22",
+        "table": "ashrae-2019-tables-29-to-34",
+        "name": "1220 × 305 mm",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "breakout",
+        "shape": "flat oval",
+        "gauge": "22",
+        "weave": "",
+        "source": "ASHRAE (2019) HVAC Applications Handbook Chapter 49 Tables 29 to 34, PDF pages 914-916 (printed pp. 49.30-49.32)",
+        "note": "",
+        "attributedTo": {
+          "table": "Cummings 1983, 1985 and Lilly 1987, credited in the running text on PDF page 913 (folio 49.29), which reads: “Values of TLout for rectangular ducts are given in Table 29, for round ducts in Table 30, and for flat oval ducts in Table 31 (Cummings 1983, 1985; Lilly 1987).” The table itself carries no source line."
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1 220",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "305",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "23",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "26",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "29",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "—",
+            "kind": "unquantified",
+            "note": "the page prints “—” where the number would be"
+          },
+          {
+            "text": "—",
+            "kind": "unquantified",
+            "note": "the page prints “—” where the number would be"
+          },
+          {
+            "text": "—",
+            "kind": "unquantified",
+            "note": "the page prints “—” where the number would be"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ashrae-2019-tables-29-to-34/t31_1220x610_gage_22",
+        "table": "ashrae-2019-tables-29-to-34",
+        "name": "1220 × 610 mm",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "breakout",
+        "shape": "flat oval",
+        "gauge": "22",
+        "weave": "",
+        "source": "ASHRAE (2019) HVAC Applications Handbook Chapter 49 Tables 29 to 34, PDF pages 914-916 (printed pp. 49.30-49.32)",
+        "note": "",
+        "attributedTo": {
+          "table": "Cummings 1983, 1985 and Lilly 1987, credited in the running text on PDF page 913 (folio 49.29), which reads: “Values of TLout for rectangular ducts are given in Table 29, for round ducts in Table 30, and for flat oval ducts in Table 31 (Cummings 1983, 1985; Lilly 1987).” The table itself carries no source line."
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1 220",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "610",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "33",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "—",
+            "kind": "unquantified",
+            "note": "the page prints “—” where the number would be"
+          },
+          {
+            "text": "—",
+            "kind": "unquantified",
+            "note": "the page prints “—” where the number would be"
+          },
+          {
+            "text": "—",
+            "kind": "unquantified",
+            "note": "the page prints “—” where the number would be"
+          },
+          {
+            "text": "—",
+            "kind": "unquantified",
+            "note": "the page prints “—” where the number would be"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ashrae-2019-tables-29-to-34/t31_2440x610_gage_20",
+        "table": "ashrae-2019-tables-29-to-34",
+        "name": "2440 × 610 mm",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "breakout",
+        "shape": "flat oval",
+        "gauge": "20",
+        "weave": "",
+        "source": "ASHRAE (2019) HVAC Applications Handbook Chapter 49 Tables 29 to 34, PDF pages 914-916 (printed pp. 49.30-49.32)",
+        "note": "",
+        "attributedTo": {
+          "table": "Cummings 1983, 1985 and Lilly 1987, credited in the running text on PDF page 913 (folio 49.29), which reads: “Values of TLout for rectangular ducts are given in Table 29, for round ducts in Table 30, and for flat oval ducts in Table 31 (Cummings 1983, 1985; Lilly 1987).” The table itself carries no source line."
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "2 440",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "610",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "—",
+            "kind": "unquantified",
+            "note": "the page prints “—” where the number would be"
+          },
+          {
+            "text": "—",
+            "kind": "unquantified",
+            "note": "the page prints “—” where the number would be"
+          },
+          {
+            "text": "—",
+            "kind": "unquantified",
+            "note": "the page prints “—” where the number would be"
+          },
+          {
+            "text": "—",
+            "kind": "unquantified",
+            "note": "the page prints “—” where the number would be"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ashrae-2019-tables-29-to-34/t31_2440x1220_gage_18",
+        "table": "ashrae-2019-tables-29-to-34",
+        "name": "2440 × 1220 mm",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "breakout",
+        "shape": "flat oval",
+        "gauge": "18",
+        "weave": "",
+        "source": "ASHRAE (2019) HVAC Applications Handbook Chapter 49 Tables 29 to 34, PDF pages 914-916 (printed pp. 49.30-49.32)",
+        "note": "",
+        "attributedTo": {
+          "table": "Cummings 1983, 1985 and Lilly 1987, credited in the running text on PDF page 913 (folio 49.29), which reads: “Values of TLout for rectangular ducts are given in Table 29, for round ducts in Table 30, and for flat oval ducts in Table 31 (Cummings 1983, 1985; Lilly 1987).” The table itself carries no source line."
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "2 440",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1 220",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "—",
+            "kind": "unquantified",
+            "note": "the page prints “—” where the number would be"
+          },
+          {
+            "text": "—",
+            "kind": "unquantified",
+            "note": "the page prints “—” where the number would be"
+          },
+          {
+            "text": "—",
+            "kind": "unquantified",
+            "note": "the page prints “—” where the number would be"
+          },
+          {
+            "text": "—",
+            "kind": "unquantified",
+            "note": "the page prints “—” where the number would be"
+          },
+          {
+            "text": "—",
+            "kind": "unquantified",
+            "note": "the page prints “—” where the number would be"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ashrae-2019-tables-29-to-34/t32_long_seam_203_gage_26",
+        "table": "ashrae-2019-tables-29-to-34",
+        "name": "203 mm",
+        "variant": "",
+        "group": "Long Seam Ducts",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "break-in",
+        "shape": "circular",
+        "gauge": "26",
+        "weave": "",
+        "source": "ASHRAE (2019) HVAC Applications Handbook Chapter 49 Tables 29 to 34, PDF pages 914-916 (printed pp. 49.30-49.32)",
+        "note": "The 63 Hz cell is printed “>17”, a lower bound and not a value; the page gives no ceiling for it and none is invented. The 125 Hz cell is printed “(31)”. The note printed under this table reads: “Parentheses indicate measurements in which background sound produced greater uncertainty than usual.” No hedge of this catalogue means that, and approximate is for a number an author rounded on purpose, so the number is held exactly as printed and the mark is recorded here.",
+        "attributedTo": {
+          "table": "Cummings 1983, 1985, credited in the running text on PDF page 915 (folio 49.31), which reads: “Values for TLin for rectangular ducts are given in Table 32, for round ducts in Table 33, and for flat oval ducts in Table 34 (Cummings 1983, 1985).” That sentence has the first two tables the wrong way round against their own printed titles, a defect of the chapter registered in docs/ERRATA.md, and the table itself carries no source line."
+        },
+        "cells": [
+          {
+            "text": "203",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "4,57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "> 17",
+            "kind": "bound",
+            "note": "the page prints a lower bound of 17 and no value"
+          },
+          {
+            "text": "31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "39",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "42",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "41",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ashrae-2019-tables-29-to-34/t32_long_seam_356_gage_24",
+        "table": "ashrae-2019-tables-29-to-34",
+        "name": "356 mm",
+        "variant": "",
+        "group": "Long Seam Ducts",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "break-in",
+        "shape": "circular",
+        "gauge": "24",
+        "weave": "",
+        "source": "ASHRAE (2019) HVAC Applications Handbook Chapter 49 Tables 29 to 34, PDF pages 914-916 (printed pp. 49.30-49.32)",
+        "note": "The 63 Hz cell is printed “>27”, a lower bound and not a value; the page gives no ceiling for it and none is invented.",
+        "attributedTo": {
+          "table": "Cummings 1983, 1985, credited in the running text on PDF page 915 (folio 49.31), which reads: “Values for TLin for rectangular ducts are given in Table 32, for round ducts in Table 33, and for flat oval ducts in Table 34 (Cummings 1983, 1985).” That sentence has the first two tables the wrong way round against their own printed titles, a defect of the chapter registered in docs/ERRATA.md, and the table itself carries no source line."
+        },
+        "cells": [
+          {
+            "text": "356",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "4,57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "> 27",
+            "kind": "bound",
+            "note": "the page prints a lower bound of 27 and no value"
+          },
+          {
+            "text": "43",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "43",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ashrae-2019-tables-29-to-34/t32_long_seam_559_gage_22",
+        "table": "ashrae-2019-tables-29-to-34",
+        "name": "559 mm",
+        "variant": "",
+        "group": "Long Seam Ducts",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "break-in",
+        "shape": "circular",
+        "gauge": "22",
+        "weave": "",
+        "source": "ASHRAE (2019) HVAC Applications Handbook Chapter 49 Tables 29 to 34, PDF pages 914-916 (printed pp. 49.30-49.32)",
+        "note": "The 63 Hz cell is printed “>28”, a lower bound and not a value; the page gives no ceiling for it and none is invented.",
+        "attributedTo": {
+          "table": "Cummings 1983, 1985, credited in the running text on PDF page 915 (folio 49.31), which reads: “Values for TLin for rectangular ducts are given in Table 32, for round ducts in Table 33, and for flat oval ducts in Table 34 (Cummings 1983, 1985).” That sentence has the first two tables the wrong way round against their own printed titles, a defect of the chapter registered in docs/ERRATA.md, and the table itself carries no source line."
+        },
+        "cells": [
+          {
+            "text": "559",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "4,57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "> 28",
+            "kind": "bound",
+            "note": "the page prints a lower bound of 28 and no value"
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "24",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ashrae-2019-tables-29-to-34/t32_long_seam_813_gage_22",
+        "table": "ashrae-2019-tables-29-to-34",
+        "name": "813 mm",
+        "variant": "",
+        "group": "Long Seam Ducts",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "break-in",
+        "shape": "circular",
+        "gauge": "22",
+        "weave": "",
+        "source": "ASHRAE (2019) HVAC Applications Handbook Chapter 49 Tables 29 to 34, PDF pages 914-916 (printed pp. 49.30-49.32)",
+        "note": "The 63 Hz cell is printed “(35)”. The note printed under this table reads: “Parentheses indicate measurements in which background sound produced greater uncertainty than usual.” No hedge of this catalogue means that, and approximate is for a number an author rounded on purpose, so the number is held exactly as printed and the mark is recorded here.",
+        "attributedTo": {
+          "table": "Cummings 1983, 1985, credited in the running text on PDF page 915 (folio 49.31), which reads: “Values for TLin for rectangular ducts are given in Table 32, for round ducts in Table 33, and for flat oval ducts in Table 34 (Cummings 1983, 1985).” That sentence has the first two tables the wrong way round against their own printed titles, a defect of the chapter registered in docs/ERRATA.md, and the table itself carries no source line."
+        },
+        "cells": [
+          {
+            "text": "813",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "4,57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "36",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "23",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "23",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "21",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ashrae-2019-tables-29-to-34/t32_spiral_wound_203_gage_26",
+        "table": "ashrae-2019-tables-29-to-34",
+        "name": "203 mm",
+        "variant": "",
+        "group": "Spiral Wound Ducts",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "break-in",
+        "shape": "circular",
+        "gauge": "26",
+        "weave": "",
+        "source": "ASHRAE (2019) HVAC Applications Handbook Chapter 49 Tables 29 to 34, PDF pages 914-916 (printed pp. 49.30-49.32)",
+        "note": "The 63 Hz cell is printed “>20”, a lower bound and not a value; the page gives no ceiling for it and none is invented. The 125 Hz cell is printed “>42”, a lower bound and not a value; the page gives no ceiling for it and none is invented. The 250 Hz cell is printed “>59”, a lower bound and not a value; the page gives no ceiling for it and none is invented. The 500 Hz cell is printed “>62”, a lower bound and not a value; the page gives no ceiling for it and none is invented.",
+        "attributedTo": {
+          "table": "Cummings 1983, 1985, credited in the running text on PDF page 915 (folio 49.31), which reads: “Values for TLin for rectangular ducts are given in Table 32, for round ducts in Table 33, and for flat oval ducts in Table 34 (Cummings 1983, 1985).” That sentence has the first two tables the wrong way round against their own printed titles, a defect of the chapter registered in docs/ERRATA.md, and the table itself carries no source line."
+        },
+        "cells": [
+          {
+            "text": "203",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "3,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "> 20",
+            "kind": "bound",
+            "note": "the page prints a lower bound of 20 and no value"
+          },
+          {
+            "text": "> 42",
+            "kind": "bound",
+            "note": "the page prints a lower bound of 42 and no value"
+          },
+          {
+            "text": "> 59",
+            "kind": "bound",
+            "note": "the page prints a lower bound of 59 and no value"
+          },
+          {
+            "text": "> 62",
+            "kind": "bound",
+            "note": "the page prints a lower bound of 62 and no value"
+          },
+          {
+            "text": "53",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "43",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "26",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ashrae-2019-tables-29-to-34/t32_spiral_wound_356_gage_26",
+        "table": "ashrae-2019-tables-29-to-34",
+        "name": "356 mm",
+        "variant": "",
+        "group": "Spiral Wound Ducts",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "break-in",
+        "shape": "circular",
+        "gauge": "26",
+        "weave": "",
+        "source": "ASHRAE (2019) HVAC Applications Handbook Chapter 49 Tables 29 to 34, PDF pages 914-916 (printed pp. 49.30-49.32)",
+        "note": "The 63 Hz cell is printed “>20”, a lower bound and not a value; the page gives no ceiling for it and none is invented. The 125 Hz cell is printed “>36”, a lower bound and not a value; the page gives no ceiling for it and none is invented.",
+        "attributedTo": {
+          "table": "Cummings 1983, 1985, credited in the running text on PDF page 915 (folio 49.31), which reads: “Values for TLin for rectangular ducts are given in Table 32, for round ducts in Table 33, and for flat oval ducts in Table 34 (Cummings 1983, 1985).” That sentence has the first two tables the wrong way round against their own printed titles, a defect of the chapter registered in docs/ERRATA.md, and the table itself carries no source line."
+        },
+        "cells": [
+          {
+            "text": "356",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "3,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "> 20",
+            "kind": "bound",
+            "note": "the page prints a lower bound of 20 and no value"
+          },
+          {
+            "text": "> 36",
+            "kind": "bound",
+            "note": "the page prints a lower bound of 36 and no value"
+          },
+          {
+            "text": "44",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ashrae-2019-tables-29-to-34/t32_spiral_wound_660_gage_24",
+        "table": "ashrae-2019-tables-29-to-34",
+        "name": "660 mm",
+        "variant": "",
+        "group": "Spiral Wound Ducts",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "break-in",
+        "shape": "circular",
+        "gauge": "24",
+        "weave": "",
+        "source": "ASHRAE (2019) HVAC Applications Handbook Chapter 49 Tables 29 to 34, PDF pages 914-916 (printed pp. 49.30-49.32)",
+        "note": "The 63 Hz cell is printed “>27”, a lower bound and not a value; the page gives no ceiling for it and none is invented.",
+        "attributedTo": {
+          "table": "Cummings 1983, 1985, credited in the running text on PDF page 915 (folio 49.31), which reads: “Values for TLin for rectangular ducts are given in Table 32, for round ducts in Table 33, and for flat oval ducts in Table 34 (Cummings 1983, 1985).” That sentence has the first two tables the wrong way round against their own printed titles, a defect of the chapter registered in docs/ERRATA.md, and the table itself carries no source line."
+        },
+        "cells": [
+          {
+            "text": "660",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "3,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "> 27",
+            "kind": "bound",
+            "note": "the page prints a lower bound of 27 and no value"
+          },
+          {
+            "text": "38",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "23",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "33",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ashrae-2019-tables-29-to-34/t32_spiral_wound_660_gage_16",
+        "table": "ashrae-2019-tables-29-to-34",
+        "name": "660 mm",
+        "variant": "",
+        "group": "Spiral Wound Ducts",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "break-in",
+        "shape": "circular",
+        "gauge": "16",
+        "weave": "",
+        "source": "ASHRAE (2019) HVAC Applications Handbook Chapter 49 Tables 29 to 34, PDF pages 914-916 (printed pp. 49.30-49.32)",
+        "note": "The 63 Hz cell is printed “>30”, a lower bound and not a value; the page gives no ceiling for it and none is invented. The 125 Hz cell is printed “>41”, a lower bound and not a value; the page gives no ceiling for it and none is invented.",
+        "attributedTo": {
+          "table": "Cummings 1983, 1985, credited in the running text on PDF page 915 (folio 49.31), which reads: “Values for TLin for rectangular ducts are given in Table 32, for round ducts in Table 33, and for flat oval ducts in Table 34 (Cummings 1983, 1985).” That sentence has the first two tables the wrong way round against their own printed titles, a defect of the chapter registered in docs/ERRATA.md, and the table itself carries no source line."
+        },
+        "cells": [
+          {
+            "text": "660",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "3,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "> 30",
+            "kind": "bound",
+            "note": "the page prints a lower bound of 30 and no value"
+          },
+          {
+            "text": "> 41",
+            "kind": "bound",
+            "note": "the page prints a lower bound of 41 and no value"
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "29",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "29",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "38",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ashrae-2019-tables-29-to-34/t32_spiral_wound_813_gage_22",
+        "table": "ashrae-2019-tables-29-to-34",
+        "name": "813 mm",
+        "variant": "",
+        "group": "Spiral Wound Ducts",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "break-in",
+        "shape": "circular",
+        "gauge": "22",
+        "weave": "",
+        "source": "ASHRAE (2019) HVAC Applications Handbook Chapter 49 Tables 29 to 34, PDF pages 914-916 (printed pp. 49.30-49.32)",
+        "note": "The 63 Hz cell is printed “>27”, a lower bound and not a value; the page gives no ceiling for it and none is invented.",
+        "attributedTo": {
+          "table": "Cummings 1983, 1985, credited in the running text on PDF page 915 (folio 49.31), which reads: “Values for TLin for rectangular ducts are given in Table 32, for round ducts in Table 33, and for flat oval ducts in Table 34 (Cummings 1983, 1985).” That sentence has the first two tables the wrong way round against their own printed titles, a defect of the chapter registered in docs/ERRATA.md, and the table itself carries no source line."
+        },
+        "cells": [
+          {
+            "text": "813",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "3,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "> 27",
+            "kind": "bound",
+            "note": "the page prints a lower bound of 27 and no value"
+          },
+          {
+            "text": "32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "23",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "21",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "37",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ashrae-2019-tables-29-to-34/t33_305x305_gage_24",
+        "table": "ashrae-2019-tables-29-to-34",
+        "name": "305 × 305 mm",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "break-in",
+        "shape": "rectangular",
+        "gauge": "24",
+        "weave": "",
+        "source": "ASHRAE (2019) HVAC Applications Handbook Chapter 49 Tables 29 to 34, PDF pages 914-916 (printed pp. 49.30-49.32)",
+        "note": "",
+        "attributedTo": {
+          "table": "Cummings 1983, 1985, credited in the running text on PDF page 915 (folio 49.31), which reads: “Values for TLin for rectangular ducts are given in Table 32, for round ducts in Table 33, and for flat oval ducts in Table 34 (Cummings 1983, 1985).” That sentence has the first two tables the wrong way round against their own printed titles, a defect of the chapter registered in docs/ERRATA.md, and the table itself carries no source line."
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "305",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "305",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "33",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "38",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "42",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ashrae-2019-tables-29-to-34/t33_305x610_gage_24",
+        "table": "ashrae-2019-tables-29-to-34",
+        "name": "305 × 610 mm",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "break-in",
+        "shape": "rectangular",
+        "gauge": "24",
+        "weave": "",
+        "source": "ASHRAE (2019) HVAC Applications Handbook Chapter 49 Tables 29 to 34, PDF pages 914-916 (printed pp. 49.30-49.32)",
+        "note": "",
+        "attributedTo": {
+          "table": "Cummings 1983, 1985, credited in the running text on PDF page 915 (folio 49.31), which reads: “Values for TLin for rectangular ducts are given in Table 32, for round ducts in Table 33, and for flat oval ducts in Table 34 (Cummings 1983, 1985).” That sentence has the first two tables the wrong way round against their own printed titles, a defect of the chapter registered in docs/ERRATA.md, and the table itself carries no source line."
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "305",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "610",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "17",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "38",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "42",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ashrae-2019-tables-29-to-34/t33_305x1220_gage_22",
+        "table": "ashrae-2019-tables-29-to-34",
+        "name": "305 × 1220 mm",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "break-in",
+        "shape": "rectangular",
+        "gauge": "22",
+        "weave": "",
+        "source": "ASHRAE (2019) HVAC Applications Handbook Chapter 49 Tables 29 to 34, PDF pages 914-916 (printed pp. 49.30-49.32)",
+        "note": "",
+        "attributedTo": {
+          "table": "Cummings 1983, 1985, credited in the running text on PDF page 915 (folio 49.31), which reads: “Values for TLin for rectangular ducts are given in Table 32, for round ducts in Table 33, and for flat oval ducts in Table 34 (Cummings 1983, 1985).” That sentence has the first two tables the wrong way round against their own printed titles, a defect of the chapter registered in docs/ERRATA.md, and the table itself carries no source line."
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "305",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1 220",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "34",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "42",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ashrae-2019-tables-29-to-34/t33_610x610_gage_22",
+        "table": "ashrae-2019-tables-29-to-34",
+        "name": "610 × 610 mm",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "break-in",
+        "shape": "rectangular",
+        "gauge": "22",
+        "weave": "",
+        "source": "ASHRAE (2019) HVAC Applications Handbook Chapter 49 Tables 29 to 34, PDF pages 914-916 (printed pp. 49.30-49.32)",
+        "note": "",
+        "attributedTo": {
+          "table": "Cummings 1983, 1985, credited in the running text on PDF page 915 (folio 49.31), which reads: “Values for TLin for rectangular ducts are given in Table 32, for round ducts in Table 33, and for flat oval ducts in Table 34 (Cummings 1983, 1985).” That sentence has the first two tables the wrong way round against their own printed titles, a defect of the chapter registered in docs/ERRATA.md, and the table itself carries no source line."
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "610",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "610",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "21",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "26",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "29",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "34",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "42",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ashrae-2019-tables-29-to-34/t33_610x1220_gage_20",
+        "table": "ashrae-2019-tables-29-to-34",
+        "name": "610 × 1220 mm",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "break-in",
+        "shape": "rectangular",
+        "gauge": "20",
+        "weave": "",
+        "source": "ASHRAE (2019) HVAC Applications Handbook Chapter 49 Tables 29 to 34, PDF pages 914-916 (printed pp. 49.30-49.32)",
+        "note": "",
+        "attributedTo": {
+          "table": "Cummings 1983, 1985, credited in the running text on PDF page 915 (folio 49.31), which reads: “Values for TLin for rectangular ducts are given in Table 32, for round ducts in Table 33, and for flat oval ducts in Table 34 (Cummings 1983, 1985).” That sentence has the first two tables the wrong way round against their own printed titles, a defect of the chapter registered in docs/ERRATA.md, and the table itself carries no source line."
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "610",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1 220",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "23",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "26",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "36",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "42",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "42",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ashrae-2019-tables-29-to-34/t33_1220x1220_gage_18",
+        "table": "ashrae-2019-tables-29-to-34",
+        "name": "1220 × 1220 mm",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "break-in",
+        "shape": "rectangular",
+        "gauge": "18",
+        "weave": "",
+        "source": "ASHRAE (2019) HVAC Applications Handbook Chapter 49 Tables 29 to 34, PDF pages 914-916 (printed pp. 49.30-49.32)",
+        "note": "",
+        "attributedTo": {
+          "table": "Cummings 1983, 1985, credited in the running text on PDF page 915 (folio 49.31), which reads: “Values for TLin for rectangular ducts are given in Table 32, for round ducts in Table 33, and for flat oval ducts in Table 34 (Cummings 1983, 1985).” That sentence has the first two tables the wrong way round against their own printed titles, a defect of the chapter registered in docs/ERRATA.md, and the table itself carries no source line."
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1 220",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1 220",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "10",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "24",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "38",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "42",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "42",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ashrae-2019-tables-29-to-34/t33_1220x2440_gage_18",
+        "table": "ashrae-2019-tables-29-to-34",
+        "name": "1220 × 2440 mm",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "break-in",
+        "shape": "rectangular",
+        "gauge": "18",
+        "weave": "",
+        "source": "ASHRAE (2019) HVAC Applications Handbook Chapter 49 Tables 29 to 34, PDF pages 914-916 (printed pp. 49.30-49.32)",
+        "note": "",
+        "attributedTo": {
+          "table": "Cummings 1983, 1985, credited in the running text on PDF page 915 (folio 49.31), which reads: “Values for TLin for rectangular ducts are given in Table 32, for round ducts in Table 33, and for flat oval ducts in Table 34 (Cummings 1983, 1985).” That sentence has the first two tables the wrong way round against their own printed titles, a defect of the chapter registered in docs/ERRATA.md, and the table itself carries no source line."
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1 220",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "2 440",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "11",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "26",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "38",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "42",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "42",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ashrae-2019-tables-29-to-34/t34_305x152_gage_24",
+        "table": "ashrae-2019-tables-29-to-34",
+        "name": "305 × 152 mm",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "break-in",
+        "shape": "flat oval",
+        "gauge": "24",
+        "weave": "",
+        "source": "ASHRAE (2019) HVAC Applications Handbook Chapter 49 Tables 29 to 34, PDF pages 914-916 (printed pp. 49.30-49.32)",
+        "note": "Table 34 is printed twice, complete, on folio 49.31 and again on folio 49.32. The two printings were compared row by row and agree, marks included, so one set of rows is kept.",
+        "attributedTo": {
+          "table": "Cummings 1983, 1985, credited in the running text on PDF page 915 (folio 49.31), which reads: “Values for TLin for rectangular ducts are given in Table 32, for round ducts in Table 33, and for flat oval ducts in Table 34 (Cummings 1983, 1985).” That sentence has the first two tables the wrong way round against their own printed titles, a defect of the chapter registered in docs/ERRATA.md, and the table itself carries no source line."
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "305",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "152",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "18",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "18",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "—",
+            "kind": "unquantified",
+            "note": "the page prints “—” where the number would be"
+          },
+          {
+            "text": "—",
+            "kind": "unquantified",
+            "note": "the page prints “—” where the number would be"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ashrae-2019-tables-29-to-34/t34_610x152_gage_24",
+        "table": "ashrae-2019-tables-29-to-34",
+        "name": "610 × 152 mm",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "break-in",
+        "shape": "flat oval",
+        "gauge": "24",
+        "weave": "",
+        "source": "ASHRAE (2019) HVAC Applications Handbook Chapter 49 Tables 29 to 34, PDF pages 914-916 (printed pp. 49.30-49.32)",
+        "note": "Table 34 is printed twice, complete, on folio 49.31 and again on folio 49.32. The two printings were compared row by row and agree, marks included, so one set of rows is kept.",
+        "attributedTo": {
+          "table": "Cummings 1983, 1985, credited in the running text on PDF page 915 (folio 49.31), which reads: “Values for TLin for rectangular ducts are given in Table 32, for round ducts in Table 33, and for flat oval ducts in Table 34 (Cummings 1983, 1985).” That sentence has the first two tables the wrong way round against their own printed titles, a defect of the chapter registered in docs/ERRATA.md, and the table itself carries no source line."
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "610",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "152",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "17",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "17",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "18",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "33",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "—",
+            "kind": "unquantified",
+            "note": "the page prints “—” where the number would be"
+          },
+          {
+            "text": "—",
+            "kind": "unquantified",
+            "note": "the page prints “—” where the number would be"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ashrae-2019-tables-29-to-34/t34_610x305_gage_24",
+        "table": "ashrae-2019-tables-29-to-34",
+        "name": "610 × 305 mm",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "break-in",
+        "shape": "flat oval",
+        "gauge": "24",
+        "weave": "",
+        "source": "ASHRAE (2019) HVAC Applications Handbook Chapter 49 Tables 29 to 34, PDF pages 914-916 (printed pp. 49.30-49.32)",
+        "note": "Table 34 is printed twice, complete, on folio 49.31 and again on folio 49.32. The two printings were compared row by row and agree, marks included, so one set of rows is kept.",
+        "attributedTo": {
+          "table": "Cummings 1983, 1985, credited in the running text on PDF page 915 (folio 49.31), which reads: “Values for TLin for rectangular ducts are given in Table 32, for round ducts in Table 33, and for flat oval ducts in Table 34 (Cummings 1983, 1985).” That sentence has the first two tables the wrong way round against their own printed titles, a defect of the chapter registered in docs/ERRATA.md, and the table itself carries no source line."
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "610",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "305",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "34",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "—",
+            "kind": "unquantified",
+            "note": "the page prints “—” where the number would be"
+          },
+          {
+            "text": "—",
+            "kind": "unquantified",
+            "note": "the page prints “—” where the number would be"
+          },
+          {
+            "text": "—",
+            "kind": "unquantified",
+            "note": "the page prints “—” where the number would be"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ashrae-2019-tables-29-to-34/t34_1220x305_gage_22",
+        "table": "ashrae-2019-tables-29-to-34",
+        "name": "1220 × 305 mm",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "break-in",
+        "shape": "flat oval",
+        "gauge": "22",
+        "weave": "",
+        "source": "ASHRAE (2019) HVAC Applications Handbook Chapter 49 Tables 29 to 34, PDF pages 914-916 (printed pp. 49.30-49.32)",
+        "note": "Table 34 is printed twice, complete, on folio 49.31 and again on folio 49.32. The two printings were compared row by row and agree, marks included, so one set of rows is kept.",
+        "attributedTo": {
+          "table": "Cummings 1983, 1985, credited in the running text on PDF page 915 (folio 49.31), which reads: “Values for TLin for rectangular ducts are given in Table 32, for round ducts in Table 33, and for flat oval ducts in Table 34 (Cummings 1983, 1985).” That sentence has the first two tables the wrong way round against their own printed titles, a defect of the chapter registered in docs/ERRATA.md, and the table itself carries no source line."
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1 220",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "305",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "26",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "29",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "—",
+            "kind": "unquantified",
+            "note": "the page prints “—” where the number would be"
+          },
+          {
+            "text": "—",
+            "kind": "unquantified",
+            "note": "the page prints “—” where the number would be"
+          },
+          {
+            "text": "—",
+            "kind": "unquantified",
+            "note": "the page prints “—” where the number would be"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ashrae-2019-tables-29-to-34/t34_1220x610_gage_22",
+        "table": "ashrae-2019-tables-29-to-34",
+        "name": "1220 × 610 mm",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "break-in",
+        "shape": "flat oval",
+        "gauge": "22",
+        "weave": "",
+        "source": "ASHRAE (2019) HVAC Applications Handbook Chapter 49 Tables 29 to 34, PDF pages 914-916 (printed pp. 49.30-49.32)",
+        "note": "Table 34 is printed twice, complete, on folio 49.31 and again on folio 49.32. The two printings were compared row by row and agree, marks included, so one set of rows is kept.",
+        "attributedTo": {
+          "table": "Cummings 1983, 1985, credited in the running text on PDF page 915 (folio 49.31), which reads: “Values for TLin for rectangular ducts are given in Table 32, for round ducts in Table 33, and for flat oval ducts in Table 34 (Cummings 1983, 1985).” That sentence has the first two tables the wrong way round against their own printed titles, a defect of the chapter registered in docs/ERRATA.md, and the table itself carries no source line."
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1 220",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "610",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "21",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "—",
+            "kind": "unquantified",
+            "note": "the page prints “—” where the number would be"
+          },
+          {
+            "text": "—",
+            "kind": "unquantified",
+            "note": "the page prints “—” where the number would be"
+          },
+          {
+            "text": "—",
+            "kind": "unquantified",
+            "note": "the page prints “—” where the number would be"
+          },
+          {
+            "text": "—",
+            "kind": "unquantified",
+            "note": "the page prints “—” where the number would be"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ashrae-2019-tables-29-to-34/t34_2440x610_gage_20",
+        "table": "ashrae-2019-tables-29-to-34",
+        "name": "2440 × 610 mm",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "break-in",
+        "shape": "flat oval",
+        "gauge": "20",
+        "weave": "",
+        "source": "ASHRAE (2019) HVAC Applications Handbook Chapter 49 Tables 29 to 34, PDF pages 914-916 (printed pp. 49.30-49.32)",
+        "note": "Table 34 is printed twice, complete, on folio 49.31 and again on folio 49.32. The two printings were compared row by row and agree, marks included, so one set of rows is kept.",
+        "attributedTo": {
+          "table": "Cummings 1983, 1985, credited in the running text on PDF page 915 (folio 49.31), which reads: “Values for TLin for rectangular ducts are given in Table 32, for round ducts in Table 33, and for flat oval ducts in Table 34 (Cummings 1983, 1985).” That sentence has the first two tables the wrong way round against their own printed titles, a defect of the chapter registered in docs/ERRATA.md, and the table itself carries no source line."
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "2 440",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "610",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "11",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "—",
+            "kind": "unquantified",
+            "note": "the page prints “—” where the number would be"
+          },
+          {
+            "text": "—",
+            "kind": "unquantified",
+            "note": "the page prints “—” where the number would be"
+          },
+          {
+            "text": "—",
+            "kind": "unquantified",
+            "note": "the page prints “—” where the number would be"
+          },
+          {
+            "text": "—",
+            "kind": "unquantified",
+            "note": "the page prints “—” where the number would be"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "ashrae-2019-tables-29-to-34/t34_2440x1220_gage_18",
+        "table": "ashrae-2019-tables-29-to-34",
+        "name": "2440 × 1220 mm",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "break-in",
+        "shape": "flat oval",
+        "gauge": "18",
+        "weave": "",
+        "source": "ASHRAE (2019) HVAC Applications Handbook Chapter 49 Tables 29 to 34, PDF pages 914-916 (printed pp. 49.30-49.32)",
+        "note": "Table 34 is printed twice, complete, on folio 49.31 and again on folio 49.32. The two printings were compared row by row and agree, marks included, so one set of rows is kept.",
+        "attributedTo": {
+          "table": "Cummings 1983, 1985, credited in the running text on PDF page 915 (folio 49.31), which reads: “Values for TLin for rectangular ducts are given in Table 32, for round ducts in Table 33, and for flat oval ducts in Table 34 (Cummings 1983, 1985).” That sentence has the first two tables the wrong way round against their own printed titles, a defect of the chapter registered in docs/ERRATA.md, and the table itself carries no source line."
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "2 440",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1 220",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "—",
+            "kind": "unquantified",
+            "note": "the page prints “—” where the number would be"
+          },
+          {
+            "text": "—",
+            "kind": "unquantified",
+            "note": "the page prints “—” where the number would be"
+          },
+          {
+            "text": "—",
+            "kind": "unquantified",
+            "note": "the page prints “—” where the number would be"
+          },
+          {
+            "text": "—",
+            "kind": "unquantified",
+            "note": "the page prints “—” where the number would be"
+          },
+          {
+            "text": "—",
+            "kind": "unquantified",
+            "note": "the page prints “—” where the number would be"
           },
           {
             "text": "",
@@ -73215,6 +87244,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix D, PDF pages 554-559 (printed pp. 497-502)",
         "note": "",
         "attributedTo": {
@@ -73322,6 +87355,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix D, PDF pages 554-559 (printed pp. 497-502)",
         "note": "",
         "attributedTo": {
@@ -73429,6 +87466,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix D, PDF pages 554-559 (printed pp. 497-502)",
         "note": "",
         "attributedTo": {
@@ -73536,6 +87577,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix D, PDF pages 554-559 (printed pp. 497-502)",
         "note": "",
         "attributedTo": {
@@ -73643,6 +87688,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix D, PDF pages 554-559 (printed pp. 497-502)",
         "note": "",
         "attributedTo": {
@@ -73750,6 +87799,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix D, PDF pages 554-559 (printed pp. 497-502)",
         "note": "",
         "attributedTo": {
@@ -73857,6 +87910,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix D, PDF pages 554-559 (printed pp. 497-502)",
         "note": "",
         "attributedTo": {
@@ -73964,6 +88021,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix D, PDF pages 554-559 (printed pp. 497-502)",
         "note": "",
         "attributedTo": {
@@ -74071,6 +88132,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix D, PDF pages 554-559 (printed pp. 497-502)",
         "note": "",
         "attributedTo": {
@@ -74178,6 +88243,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix D, PDF pages 554-559 (printed pp. 497-502)",
         "note": "",
         "attributedTo": {
@@ -74285,6 +88354,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix D, PDF pages 554-559 (printed pp. 497-502)",
         "note": "",
         "attributedTo": {
@@ -74392,6 +88465,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix D, PDF pages 554-559 (printed pp. 497-502)",
         "note": "",
         "attributedTo": {
@@ -74499,6 +88576,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix D, PDF pages 554-559 (printed pp. 497-502)",
         "note": "",
         "attributedTo": {
@@ -74606,6 +88687,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix D, PDF pages 554-559 (printed pp. 497-502)",
         "note": "",
         "attributedTo": {
@@ -74713,6 +88798,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix D, PDF pages 554-559 (printed pp. 497-502)",
         "note": "",
         "attributedTo": {
@@ -74820,6 +88909,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix D, PDF pages 554-559 (printed pp. 497-502)",
         "note": "",
         "attributedTo": {
@@ -74927,6 +89020,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix D, PDF pages 554-559 (printed pp. 497-502)",
         "note": "",
         "attributedTo": {
@@ -75034,6 +89131,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix D, PDF pages 554-559 (printed pp. 497-502)",
         "note": "",
         "attributedTo": {
@@ -75141,6 +89242,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix D, PDF pages 554-559 (printed pp. 497-502)",
         "note": "",
         "attributedTo": {
@@ -75248,6 +89353,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix D, PDF pages 554-559 (printed pp. 497-502)",
         "note": "",
         "attributedTo": {
@@ -75355,6 +89464,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix D, PDF pages 554-559 (printed pp. 497-502)",
         "note": "",
         "attributedTo": {
@@ -75462,6 +89575,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix D, PDF pages 554-559 (printed pp. 497-502)",
         "note": "",
         "attributedTo": {
@@ -75569,6 +89686,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix D, PDF pages 554-559 (printed pp. 497-502)",
         "note": "",
         "attributedTo": {
@@ -75676,6 +89797,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix D, PDF pages 554-559 (printed pp. 497-502)",
         "note": "",
         "attributedTo": {
@@ -75783,6 +89908,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix D, PDF pages 554-559 (printed pp. 497-502)",
         "note": "",
         "attributedTo": {
@@ -75890,6 +90019,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix D, PDF pages 554-559 (printed pp. 497-502)",
         "note": "",
         "attributedTo": {
@@ -75997,6 +90130,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix D, PDF pages 554-559 (printed pp. 497-502)",
         "note": "",
         "attributedTo": {
@@ -76104,6 +90241,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix D, PDF pages 554-559 (printed pp. 497-502)",
         "note": "",
         "attributedTo": {
@@ -76211,6 +90352,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix D, PDF pages 554-559 (printed pp. 497-502)",
         "note": "",
         "attributedTo": {
@@ -76318,6 +90463,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix D, PDF pages 554-559 (printed pp. 497-502)",
         "note": "",
         "attributedTo": {
@@ -76425,6 +90574,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix D, PDF pages 554-559 (printed pp. 497-502)",
         "note": "",
         "attributedTo": {
@@ -76532,6 +90685,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix D, PDF pages 554-559 (printed pp. 497-502)",
         "note": "",
         "attributedTo": {
@@ -76639,6 +90796,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix D, PDF pages 554-559 (printed pp. 497-502)",
         "note": "",
         "attributedTo": {
@@ -76746,6 +90907,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix D, PDF pages 554-559 (printed pp. 497-502)",
         "note": "",
         "attributedTo": {
@@ -76853,6 +91018,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix D, PDF pages 554-559 (printed pp. 497-502)",
         "note": "",
         "attributedTo": {
@@ -76960,6 +91129,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix D, PDF pages 554-559 (printed pp. 497-502)",
         "note": "",
         "attributedTo": {
@@ -77067,6 +91240,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix D, PDF pages 554-559 (printed pp. 497-502)",
         "note": "",
         "attributedTo": {
@@ -77174,6 +91351,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix D, PDF pages 554-559 (printed pp. 497-502)",
         "note": "",
         "attributedTo": {
@@ -77281,6 +91462,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix D, PDF pages 554-559 (printed pp. 497-502)",
         "note": "",
         "attributedTo": {
@@ -77388,6 +91573,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix D, PDF pages 554-559 (printed pp. 497-502)",
         "note": "",
         "attributedTo": {
@@ -77495,6 +91684,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix D, PDF pages 554-559 (printed pp. 497-502)",
         "note": "",
         "attributedTo": {
@@ -77602,6 +91795,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix D, PDF pages 554-559 (printed pp. 497-502)",
         "note": "",
         "attributedTo": {
@@ -77709,6 +91906,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix D, PDF pages 554-559 (printed pp. 497-502)",
         "note": "",
         "attributedTo": {
@@ -77816,6 +92017,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix D, PDF pages 554-559 (printed pp. 497-502)",
         "note": "",
         "attributedTo": {
@@ -77923,6 +92128,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix D, PDF pages 554-559 (printed pp. 497-502)",
         "note": "",
         "attributedTo": {
@@ -78030,6 +92239,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix D, PDF pages 554-559 (printed pp. 497-502)",
         "note": "",
         "attributedTo": {
@@ -78257,6 +92470,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -78367,6 +92584,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -78477,6 +92698,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -78587,6 +92812,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -78697,6 +92926,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -78807,6 +93040,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -78917,6 +93154,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -79027,6 +93268,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -79137,6 +93382,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -79247,6 +93496,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -79357,6 +93610,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -79467,6 +93724,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -79577,6 +93838,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -79687,6 +93952,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -79797,6 +94066,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -79907,6 +94180,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -80017,6 +94294,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -80127,6 +94408,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -80237,6 +94522,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -80347,6 +94636,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -80457,6 +94750,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -80567,6 +94864,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -80677,6 +94978,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -80787,6 +95092,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -80897,6 +95206,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -81007,6 +95320,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -81117,6 +95434,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -81227,6 +95548,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -81337,6 +95662,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -81447,6 +95776,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -81557,6 +95890,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -81667,6 +96004,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -81777,6 +96118,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -81887,6 +96232,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -81997,6 +96346,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -82107,6 +96460,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -82217,6 +96574,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -82327,6 +96688,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -82437,6 +96802,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -82547,6 +96916,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -82657,6 +97030,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -82767,6 +97144,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -82877,6 +97258,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -82987,6 +97372,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -83097,6 +97486,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -83207,6 +97600,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -83317,6 +97714,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -83427,6 +97828,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -83537,6 +97942,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -83647,6 +98056,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -83757,6 +98170,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -83867,6 +98284,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -83977,6 +98398,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -84087,6 +98512,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -84197,6 +98626,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -84307,6 +98740,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -84417,6 +98854,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -84527,6 +98968,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -84637,6 +99082,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -84747,6 +99196,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -84857,6 +99310,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -84967,6 +99424,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -85077,6 +99538,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -85187,6 +99652,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -85297,6 +99766,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -85407,6 +99880,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -85517,6 +99994,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -85627,6 +100108,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -85737,6 +100222,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -85847,6 +100336,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -85957,6 +100450,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -86067,6 +100564,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -86177,6 +100678,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -86287,6 +100792,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -86397,6 +100906,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -86507,6 +101020,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -86617,6 +101134,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -86727,6 +101248,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -86837,6 +101362,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -86947,6 +101476,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -87057,6 +101590,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -87167,6 +101704,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -87277,6 +101818,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -87387,6 +101932,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -87497,6 +102046,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -87607,6 +102160,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -87717,6 +102274,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
         "note": "",
         "attributedTo": {},
@@ -87947,6 +102508,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "three-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.1, PDF pages 545-546 (printed pp. 488-489)",
         "note": "",
         "attributedTo": {
@@ -88059,6 +102624,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "three-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.1, PDF pages 545-546 (printed pp. 488-489)",
         "note": "",
         "attributedTo": {
@@ -88171,6 +102740,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "three-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.1, PDF pages 545-546 (printed pp. 488-489)",
         "note": "",
         "attributedTo": {
@@ -88283,6 +102856,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "three-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.1, PDF pages 545-546 (printed pp. 488-489)",
         "note": "",
         "attributedTo": {
@@ -88395,6 +102972,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "three-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.1, PDF pages 545-546 (printed pp. 488-489)",
         "note": "",
         "attributedTo": {
@@ -88507,6 +103088,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "three-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.1, PDF pages 545-546 (printed pp. 488-489)",
         "note": "",
         "attributedTo": {
@@ -88619,6 +103204,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "three-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.1, PDF pages 545-546 (printed pp. 488-489)",
         "note": "",
         "attributedTo": {
@@ -88731,6 +103320,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "three-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.1, PDF pages 545-546 (printed pp. 488-489)",
         "note": "",
         "attributedTo": {
@@ -88843,6 +103436,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "three-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.1, PDF pages 545-546 (printed pp. 488-489)",
         "note": "",
         "attributedTo": {
@@ -88955,6 +103552,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "three-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.1, PDF pages 545-546 (printed pp. 488-489)",
         "note": "",
         "attributedTo": {
@@ -89067,6 +103668,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "three-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.1, PDF pages 545-546 (printed pp. 488-489)",
         "note": "",
         "attributedTo": {
@@ -89179,6 +103784,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "three-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.1, PDF pages 545-546 (printed pp. 488-489)",
         "note": "",
         "attributedTo": {
@@ -89291,6 +103900,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "three-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.1, PDF pages 545-546 (printed pp. 488-489)",
         "note": "",
         "attributedTo": {
@@ -89403,6 +104016,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "three-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.1, PDF pages 545-546 (printed pp. 488-489)",
         "note": "",
         "attributedTo": {
@@ -89515,6 +104132,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "three-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.1, PDF pages 545-546 (printed pp. 488-489)",
         "note": "",
         "attributedTo": {
@@ -89627,6 +104248,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "three-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.1, PDF pages 545-546 (printed pp. 488-489)",
         "note": "",
         "attributedTo": {
@@ -89739,6 +104364,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "three-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.1, PDF pages 545-546 (printed pp. 488-489)",
         "note": "",
         "attributedTo": {
@@ -89851,6 +104480,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "three-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.1, PDF pages 545-546 (printed pp. 488-489)",
         "note": "",
         "attributedTo": {
@@ -89963,6 +104596,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "three-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.2, PDF pages 547-548 (printed pp. 490-491)",
         "note": "",
         "attributedTo": {
@@ -90075,6 +104712,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "three-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.2, PDF pages 547-548 (printed pp. 490-491)",
         "note": "",
         "attributedTo": {
@@ -90187,6 +104828,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "three-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.2, PDF pages 547-548 (printed pp. 490-491)",
         "note": "",
         "attributedTo": {
@@ -90299,6 +104944,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "three-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.2, PDF pages 547-548 (printed pp. 490-491)",
         "note": "",
         "attributedTo": {
@@ -90411,6 +105060,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "three-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.2, PDF pages 547-548 (printed pp. 490-491)",
         "note": "",
         "attributedTo": {
@@ -90523,6 +105176,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "three-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.2, PDF pages 547-548 (printed pp. 490-491)",
         "note": "",
         "attributedTo": {
@@ -90635,6 +105292,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "three-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.2, PDF pages 547-548 (printed pp. 490-491)",
         "note": "",
         "attributedTo": {
@@ -90747,6 +105408,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "three-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.2, PDF pages 547-548 (printed pp. 490-491)",
         "note": "",
         "attributedTo": {
@@ -90859,6 +105524,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "three-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.2, PDF pages 547-548 (printed pp. 490-491)",
         "note": "",
         "attributedTo": {
@@ -90971,6 +105640,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "three-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.2, PDF pages 547-548 (printed pp. 490-491)",
         "note": "",
         "attributedTo": {
@@ -91083,6 +105756,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "three-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.2, PDF pages 547-548 (printed pp. 490-491)",
         "note": "",
         "attributedTo": {
@@ -91195,6 +105872,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "three-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.2, PDF pages 547-548 (printed pp. 490-491)",
         "note": "",
         "attributedTo": {
@@ -91307,6 +105988,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "three-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.2, PDF pages 547-548 (printed pp. 490-491)",
         "note": "",
         "attributedTo": {
@@ -91419,6 +106104,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "three-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.2, PDF pages 547-548 (printed pp. 490-491)",
         "note": "",
         "attributedTo": {
@@ -91531,6 +106220,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "three-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.2, PDF pages 547-548 (printed pp. 490-491)",
         "note": "",
         "attributedTo": {
@@ -91643,6 +106336,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "three-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.2, PDF pages 547-548 (printed pp. 490-491)",
         "note": "",
         "attributedTo": {
@@ -91755,6 +106452,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "three-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.2, PDF pages 547-548 (printed pp. 490-491)",
         "note": "",
         "attributedTo": {
@@ -91867,6 +106568,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "three-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.2, PDF pages 547-548 (printed pp. 490-491)",
         "note": "",
         "attributedTo": {
@@ -91979,6 +106684,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "three-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.2, PDF pages 547-548 (printed pp. 490-491)",
         "note": "",
         "attributedTo": {
@@ -92091,6 +106800,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "three-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.2, PDF pages 547-548 (printed pp. 490-491)",
         "note": "",
         "attributedTo": {
@@ -92203,6 +106916,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "three-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.2, PDF pages 547-548 (printed pp. 490-491)",
         "note": "The page prints this surface twice on one page: it closes the height series of the group and opens the spacing series, with the same thirteen values both times, because it is the reference of both comparisons.",
         "attributedTo": {
@@ -92315,6 +107032,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "three-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.2, PDF pages 547-548 (printed pp. 490-491)",
         "note": "",
         "attributedTo": {
@@ -92427,6 +107148,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -92537,6 +107262,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -92647,6 +107376,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -92757,6 +107490,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -92867,6 +107604,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -92977,6 +107718,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -93087,6 +107832,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -93197,6 +107946,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -93307,6 +108060,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -93417,6 +108174,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -93527,6 +108288,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -93637,6 +108402,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -93747,6 +108516,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -93857,6 +108630,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -93967,6 +108744,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -94077,6 +108858,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -94187,6 +108972,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -94297,6 +109086,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -94407,6 +109200,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -94517,6 +109314,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -94627,6 +109428,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -94737,6 +109542,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -94847,6 +109656,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -94957,6 +109770,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -95067,6 +109884,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -95177,6 +109998,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -95287,6 +110112,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -95397,6 +110226,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -95507,6 +110340,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -95617,6 +110454,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -95727,6 +110568,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -95837,6 +110682,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -95947,6 +110796,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -96057,6 +110910,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -96167,6 +111024,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -96277,6 +111138,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -96387,6 +111252,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -96497,6 +111366,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -96607,6 +111480,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -96717,6 +111594,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -96827,6 +111708,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -96937,6 +111822,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -97047,6 +111936,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -97157,6 +112050,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -97267,6 +112164,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -97377,6 +112278,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -97487,6 +112392,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -97597,6 +112506,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -97707,6 +112620,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -97817,6 +112734,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -97927,6 +112848,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -98037,6 +112962,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -98147,6 +113076,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -98257,6 +113190,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -98367,6 +113304,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -98477,6 +113418,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -98587,6 +113532,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -98697,6 +113646,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -98807,6 +113760,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -98917,6 +113874,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -99027,6 +113988,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -99137,6 +114102,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -99247,6 +114216,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -99357,6 +114330,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -99467,6 +114444,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -99577,6 +114558,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -99687,6 +114672,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -99797,6 +114786,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -99907,6 +114900,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -100017,6 +115014,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -100127,6 +115128,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -100237,6 +115242,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -100347,6 +115356,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -100457,6 +115470,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -100567,6 +115584,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -100677,6 +115698,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -100787,6 +115812,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -100897,6 +115926,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -101007,6 +116040,10 @@ export const catalogues = {
         "mounting": "",
         "per": "",
         "model": "two-dimensional boundary element prediction",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Cox & D'Antonio 3e Table C.3, PDF pages 549-552 (printed pp. 492-495)",
         "note": "",
         "attributedTo": {},
@@ -101159,6 +116196,10 @@ export const catalogues = {
         "mounting": "",
         "per": "person",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "The page prints the quantity as S alpha-bar (m2) beside the name: an absorption area per person, not a coefficient.",
         "attributedTo": {},
@@ -101204,6 +116245,10 @@ export const catalogues = {
         "mounting": "",
         "per": "person",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "The page prints the quantity as S alpha-bar (m2) beside the name: an absorption area per person, not a coefficient.",
         "attributedTo": {},
@@ -101249,6 +116294,10 @@ export const catalogues = {
         "mounting": "",
         "per": "person",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -101294,6 +116343,10 @@ export const catalogues = {
         "mounting": "",
         "per": "cubic metre of air at 50% RH",
         "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
         "note": "",
         "attributedTo": {},
@@ -101573,6 +116626,378 @@ export const catalogues = {
           {
             "text": "",
             "kind": "absent",
+            "note": ""
+          }
+        ]
+      }
+    ]
+  },
+  "airAttenuation": {
+    "columns": [
+      {
+        "field": "air_attenuation_125_np_m",
+        "heading": "125 Hz",
+        "headingEs": "125 Hz",
+        "unit": "mNp/m"
+      },
+      {
+        "field": "air_attenuation_250_np_m",
+        "heading": "250 Hz",
+        "headingEs": "250 Hz",
+        "unit": "mNp/m"
+      },
+      {
+        "field": "air_attenuation_500_np_m",
+        "heading": "500 Hz",
+        "headingEs": "500 Hz",
+        "unit": "mNp/m"
+      },
+      {
+        "field": "air_attenuation_1000_np_m",
+        "heading": "1 kHz",
+        "headingEs": "1 kHz",
+        "unit": "mNp/m"
+      },
+      {
+        "field": "air_attenuation_2000_np_m",
+        "heading": "2 kHz",
+        "headingEs": "2 kHz",
+        "unit": "mNp/m"
+      },
+      {
+        "field": "air_attenuation_4000_np_m",
+        "heading": "4 kHz",
+        "headingEs": "4 kHz",
+        "unit": "mNp/m"
+      },
+      {
+        "field": "air_attenuation_8000_np_m",
+        "heading": "8 kHz",
+        "headingEs": "8 kHz",
+        "unit": "mNp/m"
+      }
+    ],
+    "rows": [
+      {
+        "key": "en-12354-6-table-1/10C_30-50",
+        "table": "en-12354-6-table-1",
+        "name": "10 °C, 30-50 %",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "EN 12354-6:2003 Table 1",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "2,7",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "9,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "29",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "en-12354-6-table-1/10C_50-70",
+        "table": "en-12354-6-table-1",
+        "name": "10 °C, 50-70 %",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "EN 12354-6:2003 Table 1",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,8",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,8",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "5,9",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "21,1",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "en-12354-6-table-1/10C_70-90",
+        "table": "en-12354-6-table-1",
+        "name": "10 °C, 70-90 %",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "EN 12354-6:2003 Table 1",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,7",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "4,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "15,8",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "en-12354-6-table-1/20C_30-50",
+        "table": "en-12354-6-table-1",
+        "name": "20 °C, 30-50 %",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "EN 12354-6:2003 Table 1",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,9",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "5,8",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "20,3",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "en-12354-6-table-1/20C_50-70",
+        "table": "en-12354-6-table-1",
+        "name": "20 °C, 50-70 %",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "EN 12354-6:2003 Table 1",
+        "note": "The condition clause 4.3 recommends when the room's own temperature and humidity are not known.",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,7",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "4,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "13,5",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "en-12354-6-table-1/20C_70-90",
+        "table": "en-12354-6-table-1",
+        "name": "20 °C, 70-90 %",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "EN 12354-6:2003 Table 1",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,7",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "3,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "10,6",
+            "kind": "printed",
             "note": ""
           }
         ]

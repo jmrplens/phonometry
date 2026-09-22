@@ -363,6 +363,17 @@ from .damping import VER_BERANEK_14_1 as VER_BERANEK_14_1
 from .damping import VER_BERANEK_14_1_COLUMNS as VER_BERANEK_14_1_COLUMNS
 from .diffusion import COX_B_BANDS_HZ as COX_B_BANDS_HZ
 from .diffusion import COX_B_DIFFUSION as COX_B_DIFFUSION
+from .duct_walls import ASHRAE_49_BANDS_HZ as ASHRAE_49_BANDS_HZ
+from .duct_walls import ASHRAE_49_CREDITS as ASHRAE_49_CREDITS
+from .duct_walls import ASHRAE_49_DUCT_WALLS as ASHRAE_49_DUCT_WALLS
+from .duct_walls import (
+    ASHRAE_49_INHERITED_DIAMETERS as ASHRAE_49_INHERITED_DIAMETERS,
+)
+from .duct_walls import ASHRAE_49_TABLE_40 as ASHRAE_49_TABLE_40
+from .duct_walls import (
+    ASHRAE_49_TABLE_40_BANDS_HZ as ASHRAE_49_TABLE_40_BANDS_HZ,
+)
+from .duct_walls import ASHRAE_49_TABLE_TITLES as ASHRAE_49_TABLE_TITLES
 from .electroacoustics import CLIPPED_SINE_B1 as CLIPPED_SINE_B1
 from .electroacoustics import CLIPPED_SINE_B3 as CLIPPED_SINE_B3
 from .electroacoustics import CLIPPED_SINE_B5 as CLIPPED_SINE_B5
@@ -634,6 +645,17 @@ from .hearing import ISO9612_ANNEX_F_LEX_8H as ISO9612_ANNEX_F_LEX_8H
 from .hearing import ISO9612_ANNEX_F_SAMPLES as ISO9612_ANNEX_F_SAMPLES
 from .hearing import ISO9612_ANNEX_F_TE_HOURS as ISO9612_ANNEX_F_TE_HOURS
 from .hearing import ISO9612_ANNEX_F_U as ISO9612_ANNEX_F_U
+from .impact_insulation import HARRIS_32_8 as HARRIS_32_8
+from .impact_insulation import HARRIS_32_8_COLUMNS as HARRIS_32_8_COLUMNS
+from .impact_insulation import HARRIS_32_DENSITIES as HARRIS_32_DENSITIES
+from .impact_insulation import HARRIS_32_DRAWINGS as HARRIS_32_DRAWINGS
+from .impact_insulation import HARRIS_32_FLOOR_COLUMNS as HARRIS_32_FLOOR_COLUMNS
+from .impact_insulation import HARRIS_32_FLOORS as HARRIS_32_FLOORS
+from .impact_insulation import (
+    HARRIS_32_MISPRINTED_PAIRS as HARRIS_32_MISPRINTED_PAIRS,
+)
+from .impact_insulation import HARRIS_32_REFERS_TO as HARRIS_32_REFERS_TO
+from .impact_insulation import HARRIS_32_TABLE_OF_ROW as HARRIS_32_TABLE_OF_ROW
 from .materials import ALLARD_AIR_VISCOSITY_PA_S as ALLARD_AIR_VISCOSITY_PA_S
 from .materials import ALLARD_JCA_CARPET_ROWS as ALLARD_JCA_CARPET_ROWS
 from .materials import ALLARD_JCA_SPECIMENS as ALLARD_JCA_SPECIMENS
@@ -884,6 +906,12 @@ from .psychoacoustics import PA_WORKED_INPUT as PA_WORKED_INPUT
 from .psychoacoustics import PA_WORKED_VALUE as PA_WORKED_VALUE
 from .psychoacoustics import PA_WORKED_WFR as PA_WORKED_WFR
 from .psychoacoustics import PA_WORKED_WS as PA_WORKED_WS
+from .resistive_sheets import VER_BERANEK_8_5 as VER_BERANEK_8_5
+from .resistive_sheets import VER_BERANEK_8_5_COLUMNS as VER_BERANEK_8_5_COLUMNS
+from .resistive_sheets import VER_BERANEK_8_6 as VER_BERANEK_8_6
+from .resistive_sheets import VER_BERANEK_8_6_COLUMNS as VER_BERANEK_8_6_COLUMNS
+from .resistive_sheets import VER_BERANEK_8_7 as VER_BERANEK_8_7
+from .resistive_sheets import VER_BERANEK_8_7_COLUMNS as VER_BERANEK_8_7_COLUMNS
 from .room import ANSIS12_2_NC40_SELF as ANSIS12_2_NC40_SELF
 from .room import ANSIS12_2_RC31_63HZ as ANSIS12_2_RC31_63HZ
 from .room import ANSIS12_2_RC35_LMF as ANSIS12_2_RC35_LMF

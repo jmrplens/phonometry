@@ -30,9 +30,9 @@ PASCAL_PER_PSI = 6894.757293168361
 #: How the oracle's columns map onto the fields of the row class.
 FIELDS = {
     "ηmax": "max_loss_factor",
-    "10 Hz": "peak_temperature_celsius_at_10_hz",
-    "100 Hz": "peak_temperature_celsius_at_100_hz",
-    "1000 Hz": "peak_temperature_celsius_at_1000_hz",
+    "10 Hz": "peak_temperature_at_10_hz_c",
+    "100 Hz": "peak_temperature_at_100_hz_c",
+    "1000 Hz": "peak_temperature_at_1000_hz_c",
     "Emax": "youngs_modulus_max_pa",
     "Emin": "youngs_modulus_min_pa",
     "Etrans": "youngs_modulus_transition_pa",
@@ -87,9 +87,9 @@ def test_every_cell_is_the_printed_one_converted_exactly(
             continue
         held = getattr(row, field)
         if column.endswith("Hz"):
-            assert held == pytest.approx((printed - 32.0) * 5.0 / 9.0, abs=1e-4)
+            assert held == pytest.approx((printed - 32.0) * 5.0 / 9.0, abs=1e-6)
         elif column.startswith("E"):
-            assert held == pytest.approx(printed * PASCAL_PER_PSI, rel=1e-6)
+            assert held == pytest.approx(printed * PASCAL_PER_PSI, rel=1e-8)
         else:
             assert held == printed
 
@@ -98,7 +98,7 @@ def test_the_converted_cells_say_they_were_converted() -> None:
     """A degree Celsius this library worked out is never served as a reading."""
     row = _row("Antiphon-13")
     for field in (
-        "peak_temperature_celsius_at_10_hz",
+        "peak_temperature_at_10_hz_c",
         "youngs_modulus_max_pa",
     ):
         assert row.is_derived(field)
@@ -130,7 +130,7 @@ def test_every_row_locates_its_peak_at_all_three_printed_frequencies() -> None:
     for row in PUBLISHED_DAMPING.values():
         assert row.max_loss_factor is not None
         for frequency in (10, 100, 1000):
-            assert isinstance(row.peak_temperature_celsius(frequency), float)
+            assert isinstance(row.peak_temperature_c(frequency), float)
 
 
 def test_the_peak_temperature_rises_with_frequency_in_every_row() -> None:
@@ -141,16 +141,16 @@ def test_the_peak_temperature_rises_with_frequency_in_every_row() -> None:
     table there is.
     """
     for row in PUBLISHED_DAMPING.values():
-        at_10 = row.peak_temperature_celsius(10)
-        at_100 = row.peak_temperature_celsius(100)
-        at_1000 = row.peak_temperature_celsius(1000)
+        at_10 = row.peak_temperature_c(10)
+        at_100 = row.peak_temperature_c(100)
+        at_1000 = row.peak_temperature_c(1000)
         assert at_10 < at_100 < at_1000, row.name
 
 
 def test_a_frequency_the_table_does_not_print_is_refused() -> None:
     row = _row("Antiphon-13")
     with pytest.raises(ValueError, match="no peak temperature at 500 Hz"):
-        row.peak_temperature_celsius(500)
+        row.peak_temperature_c(500)
 
 
 def test_the_loss_modulus_is_about_the_product_of_the_other_two() -> None:
@@ -224,4 +224,4 @@ def test_the_catalogue_cannot_be_written_to() -> None:
 def test_no_temperature_is_a_nan() -> None:
     for row in PUBLISHED_DAMPING.values():
         for frequency in (10, 100, 1000):
-            assert not math.isnan(row.peak_temperature_celsius(frequency))
+            assert not math.isnan(row.peak_temperature_c(frequency))

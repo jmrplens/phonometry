@@ -208,3 +208,109 @@ def test_the_catalogue_cannot_be_written_to() -> None:
         PUBLISHED_TRANSMISSION_LOSS["x/y"] = TransmissionLossSpectrum(  # type: ignore[index]
             name="x", source="nowhere"
         )
+
+
+# ---------------------------------------------------------------------------
+# The second table: the machine equipment room constructions of ASHRAE
+# ---------------------------------------------------------------------------
+#: ASHRAE Chapter 49 Table 40 keyed the way the catalogue keys it.
+ASHRAE = "ashrae-2019-table-40"
+
+
+def _ashrae() -> list[TransmissionLossSpectrum]:
+    """The nine machine equipment room rows, in printed order."""
+    return [
+        row
+        for key, row in PUBLISHED_TRANSMISSION_LOSS.items()
+        if key.startswith(ASHRAE)
+    ]
+
+
+def test_the_catalogue_reads_both_of_its_tables() -> None:
+    """Ninety-four constructions from one book and nine from another.
+
+    They are the same quantity measured the same way, which is why they are
+    one catalogue, and the key names the table because a reader comparing two
+    walls of the same description across two books has to know which is which.
+    """
+    assert len(PUBLISHED_TRANSMISSION_LOSS) == 94 + 9
+    assert len(_ashrae()) == len(ref.ASHRAE_49_TABLE_40) == 9
+    assert {row.table for row in _ashrae()} == {ASHRAE}
+
+
+@pytest.mark.parametrize(
+    ("name", "rating", "values"),
+    ref.ASHRAE_49_TABLE_40,
+    ids=[name[:40] for name, _r, _v in ref.ASHRAE_49_TABLE_40],
+)
+def test_each_machine_room_row_holds_what_the_second_reader_read(
+    name: str, rating: str, values: tuple[str, ...]
+) -> None:
+    """Cell by cell, the rating included, and the label reassembled in full.
+
+    Four of the nine labels wrap over two lines in the narrow printed column,
+    and a label reassembled short is the one defect a spectrum comparison
+    would not catch, so the description is compared character for character
+    beside the numbers.
+    """
+    row = next(row for row in _ashrae() if row.name == name)
+    assert row.sound_transmission_class == float(rating)
+    held = [
+        getattr(row, f"transmission_loss_{band}_db")
+        for band in ref.ASHRAE_49_TABLE_40_BANDS_HZ
+    ]
+    assert held == [float(text) for text in values]
+
+
+def test_the_machine_room_rows_print_no_eight_kilohertz_band() -> None:
+    """The table stops at 4 kHz, and the missing column is not a zero."""
+    for row in _ashrae():
+        assert row.bands() == ref.ASHRAE_49_TABLE_40_BANDS_HZ
+        assert row.transmission_loss_8000_db is None
+        with pytest.raises(ValueError, match="8000 Hz band"):
+            row.transmission_loss_db(8000)
+
+
+def test_the_rating_is_kept_because_the_bands_do_not_give_it_back() -> None:
+    """An STC is computed from third octaves, so it is a reading of its own.
+
+    The nine rows rise monotonically in rating and the 500 Hz band does not
+    rise with them: the two concrete floors are 53 and 72 with 49 and 73 dB at
+    500 Hz, and the double stud wall rates 64 on 62 dB. A catalogue that
+    dropped the rating would be discarding a published number it cannot
+    recompute, and one that rebuilt it from these seven bands would be
+    inventing one.
+    """
+    ratings = [row.sound_transmission_class for row in _ashrae()]
+    assert ratings == [50, 53, 38, 49, 56, 64, 53, 72, 84]
+    assert [row.sound_transmission_class for row in _rows()[:3]] == [None] * 3
+    best = max(_ashrae(), key=lambda row: row.sound_transmission_class or 0)
+    assert "spring isolators" in best.name
+    assert best.transmission_loss_db(500) == 84
+
+
+def test_adding_a_leaf_never_makes_a_machine_room_wall_worse() -> None:
+    """The comparison the nine rows are printed to make.
+
+    The page walks one construction at a time: bare block, block with a lined
+    leaf, one layer of board each side of studs, the same with insulation, two
+    layers, and two rows of studs. Every step up is a better rating and a
+    better 500 Hz band than the step before it, which is what makes the table
+    a design argument rather than a list. A row read out of order, or a digit
+    slipped in either column, breaks the chain.
+    """
+    studs = [row for row in _ashrae() if "metal studs" in row.name]
+    assert len(studs) == 4
+    ratings = [row.sound_transmission_class for row in studs]
+    at_500 = [row.transmission_loss_db(500) for row in studs]
+    assert ratings == sorted(ratings)
+    assert at_500 == sorted(at_500)
+    assert ratings[-1] - ratings[0] == 26
+
+
+def test_the_machine_room_rows_say_nothing_about_thickness_or_mass() -> None:
+    """The page prints neither, so the mass law has nothing to take here."""
+    for row in _ashrae():
+        assert row.thickness_mm is None
+        assert row.surface_density_kg_m2 is None
+        assert row.why_missing("surface_density_kg_m2")

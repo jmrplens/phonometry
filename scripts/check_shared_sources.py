@@ -42,6 +42,7 @@ books, the shared source and the two readings.
 from __future__ import annotations
 
 import argparse
+import math
 import pathlib
 import sys
 from collections import defaultdict
@@ -183,7 +184,18 @@ def reading(row: CatalogueRow, field: str) -> Reading | None:
     interval = row.ranges.get(field)
     if interval is not None:
         low, high = interval
-        return Reading(book_of(row.table), row.table, ((float(low), float(high)),))
+        # An end a bound leaves open is a side the quantity has no limit on,
+        # so every value beyond the printed end is one the book allows.
+        return Reading(
+            book_of(row.table),
+            row.table,
+            (
+                (
+                    -math.inf if low is None else float(low),
+                    math.inf if high is None else float(high),
+                ),
+            ),
+        )
     listed = row.reported.get(field)
     if listed:
         spans = tuple(

@@ -72,10 +72,10 @@ class DampingMaterial(CatalogueRow):
     :ivar max_loss_factor: The greatest loss factor the material reaches,
         dimensionless. Not the loss factor at any temperature you happen to
         have: the peak, which the temperatures below locate.
-    :ivar peak_temperature_celsius_at_10_hz: Temperature at which
+    :ivar peak_temperature_at_10_hz_c: Temperature at which
         :attr:`max_loss_factor` occurs when the material is worked at 10 Hz.
-    :ivar peak_temperature_celsius_at_100_hz: The same at 100 Hz.
-    :ivar peak_temperature_celsius_at_1000_hz: The same at 1000 Hz.
+    :ivar peak_temperature_at_100_hz_c: The same at 100 Hz.
+    :ivar peak_temperature_at_1000_hz_c: The same at 1000 Hz.
     :ivar youngs_modulus_max_pa: Storage Young's modulus at the stiff end, for
         low temperatures or high frequencies.
     :ivar youngs_modulus_min_pa: Storage Young's modulus at the soft end, for
@@ -91,15 +91,15 @@ class DampingMaterial(CatalogueRow):
     """
 
     max_loss_factor: float | None = None
-    peak_temperature_celsius_at_10_hz: float | None = None
-    peak_temperature_celsius_at_100_hz: float | None = None
-    peak_temperature_celsius_at_1000_hz: float | None = None
+    peak_temperature_at_10_hz_c: float | None = None
+    peak_temperature_at_100_hz_c: float | None = None
+    peak_temperature_at_1000_hz_c: float | None = None
     youngs_modulus_max_pa: float | None = None
     youngs_modulus_min_pa: float | None = None
     youngs_modulus_transition_pa: float | None = None
     loss_modulus_max_pa: float | None = None
 
-    def peak_temperature_celsius(self, frequency_hz: float) -> float:
+    def peak_temperature_c(self, frequency_hz: float) -> float:
         """The temperature at which the loss factor peaks, at one frequency.
 
         :param frequency_hz: One of the frequencies the table prints, in hertz.
@@ -118,7 +118,7 @@ class DampingMaterial(CatalogueRow):
             )
             raise ValueError(msg)
         return self.printed(
-            f"peak_temperature_celsius_at_{wanted}_hz",
+            f"peak_temperature_at_{wanted}_hz_c",
             wanted_by=f"the peak temperature at {wanted} Hz",
         )
 

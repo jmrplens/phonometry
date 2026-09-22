@@ -1,0 +1,138 @@
+---
+/**
+ * Every PDF fiche the library ships, grouped by the area it belongs to.
+ *
+ * The rows are not written here. They come from
+ * `site/src/data/reports.mjs`, which reads the `<ReportPreview />` a guide
+ * already carries beside each fiche: the title it gives the report kind and
+ * the sentence it gives a screen reader. So this page and the guides cannot
+ * say different things about the same fiche, and a fiche added to a guide
+ * appears here without anybody remembering to add it.
+ *
+ * Each entry links twice. The title goes to the PDF, which is what a reader
+ * came for; the area line goes to the guide that shows it, which is where the
+ * measurement behind it is explained. A fiche on its own is a page of numbers
+ * in a format somebody standardised, and the guide is the part that says what
+ * the numbers mean.
+ *
+ * No preview image is rendered. Seventy-one of them is four megabytes of
+ * raster the reader has to download to find the one they want, and the point
+ * of an index is to be read quickly.
+ */
+import { reportsByArea, reportsByAreaEs } from '../data/reports.mjs';
+
+interface Props {
+	/** Locale of the page it is rendered on. */
+	lang?: 'en' | 'es';
+}
+const { lang = 'en' } = Astro.props;
+
+const RAW = 'https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports';
+
+/** What each documentation area is called, in each language. */
+const AREAS: Record<string, { en: string; es: string }> = {
+	aircraft: { en: 'Aircraft noise', es: 'Ruido de aeronaves' },
+	buildings: { en: 'Buildings and rooms', es: 'Edificios y salas' },
+	devices: { en: 'Devices and noise control', es: 'Dispositivos y control de ruido' },
+	environment: { en: 'Environment and transport', es: 'Medio ambiente y transporte' },
+	materials: { en: 'Materials and surfaces', es: 'Materiales y superficies' },
+	perception: { en: 'Hearing and perception', es: 'Audición y percepción' },
+	signals: { en: 'Signal analysis', es: 'Análisis de señal' },
+	vibration: { en: 'Vibration', es: 'Vibración' },
+	underwater: { en: 'Underwater acoustics', es: 'Acústica submarina' },
+	simulation: { en: 'Simulation', es: 'Simulación' },
+	fluids: { en: 'The medium', es: 'El medio' },
+	solids: { en: 'Elastic solids', es: 'Sólidos elásticos' },
+};
+
+const copy = {
+	en: { source: 'Shown in', count: (n: number) => `${n} fiches` },
+	es: { source: 'Se muestra en', count: (n: number) => `${n} fichas` },
+}[lang];
+
+const groups = lang === 'es' ? reportsByAreaEs : reportsByArea;
+const areaName = (key: string) => AREAS[key]?.[lang] ?? key;
+const entries = Object.entries(groups).sort(([a], [b]) =>
+	areaName(a).localeCompare(areaName(b), lang),
+);
+---
+
+<div class="fiches not-content">
+	{
+		entries.map(([area, list]) => (
+			<section class="area">
+				<h3>
+					{areaName(area)} <span class="count">{copy.count(list.length)}</span>
+				</h3>
+				<ul>
+					{list.map((report) => (
+						<li>
+							<a class="title" href={`${RAW}/${report.name}.pdf`}>
+								{report.title}
+							</a>
+							<p class="what">{report.description}</p>
+							<p class="where">
+								{copy.source} <a href={report.page}>{report.pageTitle}</a>
+							</p>
+						</li>
+					))}
+				</ul>
+			</section>
+		))
+	}
+</div>
+
+<style>
+	.fiches {
+		margin-block: 1.5rem;
+	}
+
+	.area + .area {
+		margin-block-start: 2rem;
+	}
+
+	h3 {
+		margin-block: 0 0.75rem;
+		font-size: var(--sl-text-h4);
+	}
+
+	.count {
+		font-size: var(--sl-text-sm);
+		font-weight: 400;
+		color: var(--sl-color-gray-3);
+	}
+
+	ul {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		display: grid;
+		gap: 1rem;
+	}
+
+	li {
+		padding-inline-start: 0.9rem;
+		border-inline-start: 2px solid var(--sl-color-gray-5);
+	}
+
+	.title {
+		font-weight: 600;
+	}
+
+	/* The description is the textual alternative the guide wrote for a screen
+	   reader, which is a full sentence about what the page shows. It reads as
+	   prose here and it is long, so it gets a measure rather than the full
+	   column width. */
+	.what {
+		margin-block: 0.2rem 0.3rem;
+		max-width: 68ch;
+		color: var(--sl-color-gray-2);
+		font-size: var(--sl-text-sm);
+	}
+
+	.where {
+		margin: 0;
+		font-size: var(--sl-text-sm);
+		color: var(--sl-color-gray-3);
+	}
+</style>

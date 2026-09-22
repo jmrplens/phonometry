@@ -23,6 +23,7 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { catalogues } from '../generated/catalogues.mjs';
 
 /**
  * The repository root, found by walking up until `VERSION` appears. The same
@@ -137,3 +138,21 @@ export const figures = new Set(
 export const fiches = listing(join(ROOT, '.github', 'reports'), 'the PDF fiches').filter(
   (entry) => entry.name.endsWith('.pdf'),
 ).length;
+
+/**
+ * Rows across every published catalogue, counted from the module the
+ * catalogues page itself renders.
+ *
+ * Counting them here rather than writing the number down is the same argument
+ * as everything else in this file: a catalogue gains rows every time a table
+ * is transcribed, and a figure typed into a sentence would be wrong by the
+ * next merge. `catalogues.mjs` is generated from the packaged data files, so
+ * this number and the tables a reader scrolls through cannot disagree.
+ */
+export const catalogueRows = Object.values(catalogues).reduce(
+  (total, catalogue) => total + catalogue.rows.length,
+  0,
+);
+
+/** How many published catalogues those rows are spread over. */
+export const catalogueCount = Object.keys(catalogues).length;

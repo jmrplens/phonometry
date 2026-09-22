@@ -9,6 +9,99 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- **Seventeen damping materials, and the temperature their loss factor peaks
+  at.** `solids.PUBLISHED_DAMPING` holds Ver & Beranek 2e TABLE 14.1: the
+  maximum loss factor of each treatment, the Young's modulus at the two ends
+  of its transition and at the transition itself, the maximum loss modulus,
+  and the temperature the peak sits at for 10, 100 and 1000 Hz.
+  `peak_temperature_celsius(frequency_hz)` answers only for a frequency the
+  page prints and refuses the rest, because the peak moves with frequency and
+  a value interpolated between three columns would be this library's number
+  rather than the book's. The page prints degrees Fahrenheit and pounds per
+  square inch; both are converted with the exact factor rather than the
+  rounded one the same chapter uses elsewhere, and every converted cell says
+  so and carries the printed figure. Three moduli whose exponent is corrupted
+  in the printing are held as unreadable and refused, and the defect is
+  registered in the errata.
+- **Forty-eight floor and ceiling assemblies with the impact level they
+  measured.** `building.PUBLISHED_IMPACT_INSULATION` holds Harris 3e Tables
+  32.1 to 32.8, from bare concrete slabs to wood joist floors with resilient
+  channels and floating toppings, each with the impact insulation class and
+  the sound transmission class the page prints beside it. The eight tables are
+  one catalogue because they are one specimen series measured one way, and
+  each row names the table it came from so a reader can go back to the page.
+- **Forty-six duct walls, and the direction the sound crossed them in.**
+  `noise_control.PUBLISHED_DUCT_TRANSMISSION_LOSS` holds the six ASHRAE (2019)
+  Chapter 49 tables that measure a duct wall band by band. Breakout and
+  break-in are separate rows rather than two columns of one row, because they
+  are separate measurements on specimens the chapter does not claim are the
+  same: the round ducts it measured for breakout are 200, 350, 560 and 810 mm
+  and the ones it measured for break-in are 203, 356, 559 and 813 mm. A cell
+  the page writes as a lower bound is held as one and refused rather than
+  handed over as a measurement, and a number in parentheses is kept exactly as
+  printed with the chapter's own note about it, because the parentheses mark
+  greater uncertainty and no hedge of this library means that.
+- **Twenty-nine resistive facings, from open-weave cloth to perforated
+  plate.** `materials.absorbers.PUBLISHED_FLOW_RESISTANCE` holds Ver & Beranek
+  2e TABLES 8.5, 8.6 and 8.7: the flow resistance of the screens, cloths and
+  sheets that go in front of a porous absorber, which is the number that
+  decides how much of it the sound ever reaches.
+- **Nine machine equipment room constructions, from a handbook rather than a
+  textbook.** ASHRAE (2019) Chapter 49 Table 40 joins
+  `building.PUBLISHED_TRANSMISSION_LOSS` with walls, floors and ceilings meant
+  for plant rooms, each with a sound transmission class and seven octave
+  bands. They sit beside the ninety-four rows already there and each row still
+  names the book it was read from.
+- **An index of every PDF fiche the library ships.**
+  `/reference/catalogues/` had a counterpart for the catalogues and the fiches
+  had none: a reader met one where a guide happened to show it and had no way
+  to find out what the other seventy were. The new `/reference/reports/` page
+  lists all of them by area, each linking to the fiche itself and to the guide
+  that explains the measurement behind it. The list is not written by hand. It
+  is built from the declaration each guide already carries beside the fiche it
+  shows, in both languages, so the index and the guides cannot say different
+  things and a fiche added to a guide appears here on its own.
+- **A guard that a published catalogue reaches the page that publishes
+  catalogues.** `scripts/check_published_catalogues_reach_the_page.py` walks
+  the imported package and requires every public `PUBLISHED_*` mapping to be
+  named by the generator that feeds `/reference/catalogues/`. Nothing made the
+  two agree before, so rows could be transcribed, tested and documented in the
+  API reference and still be invisible to every reader who is not reading
+  Python. It found six on its first run, and two of them were not new: the
+  resilient layers, which is the thinnest class the library holds and
+  therefore the one a reader is most likely to go looking for, and the
+  published air conditions.
+
+### Changed
+
+- **The catalogues page shows one catalogue at a time.** Seventeen tables
+  stacked on one page meant a reader on a phone scrolled through several
+  screens before finding out there was a table at all. A single panel at the
+  top now chooses the category, and the name and the book are filtered from
+  the same place, so choosing what to look at happens once rather than once
+  per table.
+- **A dotted underline opens its note on a tap.** The notes that explain what
+  a hedge means were reachable only by resting a pointer on them and waiting,
+  which is no gesture at all on a phone. They now open on a click and stay
+  open, and the wait before one opens by itself is left as it was.
+- **The landing page counts materials instead of figures.** The four numbers
+  under the summary print the conformance checks as one figure rather than a
+  ratio, and where one of them counted the figures in the documentation it now
+  counts the material values read from printed pages and links to the
+  catalogue that holds them. The fiche number links to the new index.
+
+### Fixed
+
+- **An organisation that writes its own handbook was invisible to the source
+  census.** `scripts/check_published_sources.py` builds the list of documents
+  it recognises from the lead surname of each bibliography entry, and it
+  required a comma or a full stop straight after that surname. A corporate
+  author is written `ASHRAE (2019).`, with a space and a parenthesis, so every
+  organisation in the bibliography was missing from the list and a table
+  transcribed from one of their handbooks could sit in the package uncited
+  while the gate reported green. Three were: the maximum diffuser and register
+  face velocities of Chapter 49 Table 9, and both halves of Table 10.
+
 - **Absorption coefficients as the books print them, one row per finish.**
   `materials.absorbers.PUBLISHED_ABSORPTION` holds the fifty-seven rows of
   Bies 5e Table 6.2 band by band, with each octave band a field of its own so

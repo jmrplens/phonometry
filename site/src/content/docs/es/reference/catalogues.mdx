@@ -112,6 +112,36 @@ acero, y por eso la clave nombra la tabla de la que salió.
 
 <Catalogues catalogue="solids" lang="es" />
 
+## Materiales amortiguadores
+
+Diecisiete tratamientos amortiguadores comerciales, y una cosa que los separa
+de la tabla de sólidos de arriba: aquí un factor de pérdidas no es un número.
+En el catálogo de sólidos cada factor de pérdidas es una cifra sola, porque en
+un metal apenas se mueve. En un polímero trabajado cerca de su transición
+vítrea se mueve dos órdenes de magnitud con la temperatura y con la frecuencia,
+y lo único que imprimen estas páginas es el pico. Por eso el pico viene con
+tres temperaturas al lado, una por cada frecuencia para la que la tabla
+imprime columna: dónde pica el material trabajando a 10 Hz, a 100 Hz y a
+1 kHz. Un tratamiento cuyo pico cae en 20 °C a 100 Hz no te está haciendo nada
+a 100 Hz una mañana de invierno, y una fila leída sin sus temperaturas dice lo
+contrario de lo que lleva.
+
+Los tres módulos de almacenamiento son el mismo argumento otra vez. Uno es el
+extremo rígido, a temperatura baja o frecuencia alta; otro es el extremo
+blando; y el tercero es el que rige en la banda donde pica el factor de
+pérdidas, que es el único de los tres que pinta al lado del pico. La cuarta
+columna es el módulo de pérdidas, la parte imaginaria, que el capítulo da como
+el producto de los otros dos y es la comprobación más barata que hay sobre una
+fila. Todas las magnitudes se convirtieron de los grados Fahrenheit y las
+libras por pulgada cuadrada que imprime la página, así que cada celda va
+marcada como calculada y no como leída, y dice de qué se calculó. La página
+dice en una nota al pie que los valores se leyeron sobre curvas publicadas y
+que los datos de amortiguamiento hay que pedírselos al suministrador del
+material; tres de sus celdas están corrompidas en la impresión, constan en las
+erratas del proyecto y aquí se quedan vacías en vez de adivinarse.
+
+<Catalogues catalogue="damping" lang="es" />
+
 ## Materiales porosos
 
 Los parámetros que toman los modelos de fluido equivalente y poroelásticos,
@@ -125,6 +155,54 @@ para reproducir un cálculo y una fila compilada para saber si un número que ha
 medido es verosímil.
 
 <Catalogues catalogue="porous" lang="es" />
+
+## Velos resistivos
+
+Veintinueve velos resistivos finos, las mallas metálicas, los tejidos de vidrio
+y las láminas de metal sinterizado que se ponen delante de un absorbente poroso
+o en la boca de una cavidad, cada uno con la resistencia al flujo de la unidad
+de **área**. Es lo que esta tabla se presta más a que se lea mal. El catálogo
+de porosos de arriba guarda una **resistividad** al flujo, por metro del
+material en masa que describe; un velo es una lámina sin espesor que merezca la
+pena dividir, así que lo que se mide sobre él es una resistencia en pascal
+segundo por metro, y entre las dos magnitudes hay un espesor de diferencia.
+Multiplicar una de estas filas por un espesor da un número que no ha medido
+nadie.
+
+Dos de las tres tablas imprimen esa resistencia dos veces, una en los N s/m³ de
+la página y otra como múltiplo de la impedancia característica del aire, y
+ninguna dice qué impedancia tomó. Las dos columnas se guardan tal como están
+impresas en vez de recalcular una a partir de la otra, porque dividirlas la
+devuelve: las mallas metálicas implican de 407 a 421 Pa s/m y las láminas
+sinterizadas 400, salvo un bloque que implica 397,7, y eso es una propiedad de
+la página y no de ningún velo. Las
+sinterizadas son además las únicas con factor de no linealidad, el cociente
+entre las resistencias medidas a 500 y a 20 cm/s de velocidad de cara, y va de
+1,8 a 5: un velo que valiera 1 sería el lineal que da por supuesto el resto de
+esta biblioteca. A los demás los nombra lo que nombraría un tejedor, un número
+de hilos o un ligamento, y el buscador acepta un número a secas porque así es
+como se llama un tejido de vidrio.
+
+<Catalogues catalogue="flowResistance" lang="es" />
+
+## Capas elásticas
+
+Quince capas elásticas, que es sobre lo que flota un suelo flotante, cada una
+con la rigidez dinámica por unidad de superficie medida sobre ella según la
+ISO 9052-1. Es la tabla más delgada de esta página y la que menos deja que
+interpretar: una rigidez, una densidad y un espesor, y las dos últimas están
+porque cuatro filas de lana de roca y cuatro de lana de vidrio no se
+diferencian en nada más.
+
+Lo que una fila no es es un producto. Un suelo flotante se diseña con la
+rigidez que declara el fabricante del material que se va a poner de verdad;
+esto son probetas que alguien midió y publicó en un apéndice, y sirven para
+saber qué orden de magnitud esperar cuando no hay valor declarado delante, o
+para ver cuánto se mueve la rigidez cuando la misma lana se pone al doble de
+densidad. Once son medidas del propio autor y las cuatro de espuma reciclada se
+acreditan a un artículo suyo.
+
+<Catalogues catalogue="resilientLayers" lang="es" />
 
 ## Coeficientes de absorción
 
@@ -195,6 +273,62 @@ mismo espesor. Esa diferencia no la da ninguna fórmula del libro; la da la
 medida.
 
 <Catalogues catalogue="transmissionLoss" lang="es" />
+
+## Aislamiento al ruido de impacto
+
+Cuarenta y ocho filas de aislamiento al impacto medido: cuarenta y dos
+conjuntos de suelo y techo con su clase de aislamiento al impacto, y seis
+tratamientos superficiales elásticos con la mejora que aporta cada uno. La
+clase no es del forjado ni del pavimento. Es lo que hizo una máquina de
+impactos sobre un suelo construido de una manera, con un techo debajo, y se
+mueve cincuenta y cinco puntos entre una losa de hormigón desnuda, que estas
+páginas puntúan 25, y la misma losa con una moqueta de lana encima, que
+puntúan 80.
+
+Las dos valoraciones son dos magnitudes y ninguna fila lleva las dos. Una clase
+es un absoluto y una mejora es la diferencia entre dos clases, así que sumar la
+segunda a la primera sería sumar una diferencia a una valoración sin que nada
+en la cuenta lo advierta, y la nota al pie de las mejoras dice que sobre un
+forjado de viguetas de madera pueden quedarse bastante cortas. Tampoco hay aquí
+espectro ninguno: estas páginas no imprimen nivel de presión de ruido de
+impactos por bandas, ni curva de referencia, ni nada de lo que salga una.
+
+Las filas se leen en español en los dos idiomas de esta página, porque el
+manual del que salen es una traducción al español, y una construcción se
+describe en vez de nombrarse: una docena larga empiezan por `Igual que 1 salvo
+que`, y la fila a la que remiten está a una consulta. Todas las dimensiones van
+impresas dos veces, en centímetros y en pulgadas, y diecinueve de los
+trescientos veinte pares no son el mismo número. Constan en las erratas del
+proyecto, la descripción impresa se conserva entera, y el único desajuste que
+llega a una magnitud en vez de a la prosa deja su celda vacía en lugar de
+servir un valor que el propio registro da por malo.
+
+<Catalogues catalogue="impactInsulation" lang="es" />
+
+## Paredes de conducto
+
+Cuarenta y seis medidas de lo que la pared de un conducto de chapa le hace al
+sonido que la atraviesa, y lo primero que hay que leer en una fila es en qué
+sentido la atravesó. El *breakout* es el sonido que sale del conducto por su
+pared, al local por el que pasa. El *break-in* es el sonido que entra en el
+conducto por esa misma pared y viaja luego por dentro hasta otro sitio. Son dos
+medidas distintas de una misma pared y no dos maneras de decir un número: el
+conducto de 305 mm por 305 mm en calibre 24 da 21 dB en 63 Hz de salida y 16 dB
+de entrada, y 27 frente a 16 en 250 Hz. Dos filas que sólo se diferencian en el
+sentido son dos filas aquí, y la columna dice cuál es cuál.
+
+El resto de la fila es lo que distingue un conducto de otro. La forma es la
+palabra del propio capítulo, que es por lo que su tabla de salida dice *round*
+donde la de entrada dice *circular* para la misma geometría. El calibre es el
+calibre de chapa estadounidense tal como está impreso, con el asterisco que
+marca el conducto forrado por dentro, y la nota de esas filas dice de qué es el
+forro. La medida son los dos lados o el diámetro, en milímetros; dos filas
+llevan un diámetro que la página imprime una sola vez para tres filas seguidas,
+así que esas dos van marcadas como calculadas y no como leídas. Varias celdas
+son una cota inferior y no un valor, porque el sonido radiado quedó por debajo
+del fondo del local donde se midió, y una cota se publica como lo que es.
+
+<Catalogues catalogue="ductTransmissionLoss" lang="es" />
 
 ## Coeficientes de dispersión
 
@@ -300,3 +434,25 @@ que lo fija, y discrepan porque cada uno es el aire que supone su propio
 documento.
 
 <Catalogues catalogue="fluids" lang="es" />
+
+## Atenuación del aire
+
+Las seis condiciones de aire para las que el modelo de sala de la norma de
+edificación tabula la atenuación, con su coeficiente banda a banda. Un modelo
+de sala necesita uno. El aire de una sala absorbe, la absorción crece con la
+frecuencia y con la sequedad, y en 8 kHz ya no es una corrección a las
+superficies sino un término que decide el resultado, que es para lo que el
+modelo tiene término de aire. Así que la norma imprime una tabla corta de dos
+temperaturas cruzadas con tres rangos de humedad relativa, y dice cuál suponer
+cuando no se conocen la temperatura ni la humedad de la sala. Esa fila lleva
+aquí una nota que lo advierte.
+
+El coeficiente es una atenuación de potencia en neper por metro, que es lo que
+pide el término de aire de la propia norma, y no es el decibelio por metro con
+el que trabaja un modelo de propagación exterior. La página lo imprime en
+milésimas de neper por metro, y esta tabla también. Seis filas es todo lo que
+hay: esto es una tabla en la que buscar un valor y no un modelo que
+interpolar, y la norma no dice nada de una sala a 15 °C y 60 % que permita
+inventarle una fila.
+
+<Catalogues catalogue="airAttenuation" lang="es" />

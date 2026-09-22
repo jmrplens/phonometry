@@ -81,7 +81,7 @@ DampingMaterial(
     variant: str = '',
     approximate: frozenset[str] = frozenset(),
     derived: Mapping[str, str] = ...,
-    ranges: Mapping[str, tuple[float, float]] = ...,
+    ranges: Mapping[str, tuple[float | None, float | None]] = ...,
     bounded_above: frozenset[str] = frozenset(),
     bounded_below: frozenset[str] = frozenset(),
     reported: Mapping[str, tuple[float | tuple[float, float], ...]] = ...,
@@ -93,9 +93,9 @@ DampingMaterial(
     group: str = '',
     note: str = '',
     max_loss_factor: float | None = None,
-    peak_temperature_celsius_at_10_hz: float | None = None,
-    peak_temperature_celsius_at_100_hz: float | None = None,
-    peak_temperature_celsius_at_1000_hz: float | None = None,
+    peak_temperature_at_10_hz_c: float | None = None,
+    peak_temperature_at_100_hz_c: float | None = None,
+    peak_temperature_at_1000_hz_c: float | None = None,
     youngs_modulus_max_pa: float | None = None,
     youngs_modulus_min_pa: float | None = None,
     youngs_modulus_transition_pa: float | None = None,
@@ -115,9 +115,9 @@ peaks, once per printed frequency.
 | Name | Description |
 | :--- | :--- |
 | `max_loss_factor` | The greatest loss factor the material reaches, dimensionless. Not the loss factor at any temperature you happen to have: the peak, which the temperatures below locate. |
-| `peak_temperature_celsius_at_10_hz` | Temperature at which `max_loss_factor` occurs when the material is worked at 10 Hz. |
-| `peak_temperature_celsius_at_100_hz` | The same at 100 Hz. |
-| `peak_temperature_celsius_at_1000_hz` | The same at 1000 Hz. |
+| `peak_temperature_at_10_hz_c` | Temperature at which `max_loss_factor` occurs when the material is worked at 10 Hz. |
+| `peak_temperature_at_100_hz_c` | The same at 100 Hz. |
+| `peak_temperature_at_1000_hz_c` | The same at 1000 Hz. |
 | `youngs_modulus_max_pa` | Storage Young's modulus at the stiff end, for low temperatures or high frequencies. |
 | `youngs_modulus_min_pa` | Storage Young's modulus at the soft end, for high temperatures or low frequencies. |
 | `youngs_modulus_transition_pa` | Storage Young's modulus in the band where the loss factor peaks, which is the one that belongs beside `max_loss_factor`. |
@@ -128,9 +128,9 @@ peaks, once per printed frequency.
 | `table` | The data file this row was read from, without the extension, which is also the first half of its key in the catalogue that holds it. |
 | `approximate` | Fields the page prints with a `~`. Not an estimate and not an interval: a number the author rounded on purpose. |
 | `derived` | Field to how it was computed, for the ones this library worked out from the cells the page did print. A derived value is never stored as if it had been read. |
-| `ranges` | `(low, high)` for each field the page prints as an interval rather than a value. |
+| `ranges` | `(low, high)` for each field the page prints as an interval rather than a value. One end is `None` only for a bound whose open side the quantity has no limit on; the end the page prints is always a number, and a two-sided interval has two. |
 | `bounded_above` | The subset of `ranges` the page prints as `< x` or `<= x`, where the low end is a floor and not a measurement. |
-| `bounded_below` | The subset of `ranges` the page prints as `> x` or `>= x`, where the high end is the ceiling the quantity cannot pass and not a measurement: Cox gives an aerogel a porosity of `>0.75`, and the 1 beside it is what a porosity is, not what anybody measured. |
+| `bounded_below` | The subset of `ranges` the page prints as `> x` or `>= x`, where the high end is the ceiling the quantity cannot pass and not a measurement: Cox gives an aerogel a porosity of `>0.75`, and the 1 beside it is what a porosity is, not what anybody measured. A quantity with no such ceiling leaves that end `None` rather than borrowing a number for it: ASHRAE prints `>45` for a duct wall whose radiated sound the background swamped, and a transmission loss has no value it cannot pass, so the open end is empty. It is never an infinity, which is not a number the page has and not a token JSON can carry. |
 | `reported` | Field to the values the page lists for it, for a cell that prints several with no single one: `"25, 207, 230"` or `"96, 200-450"`, readings from as many studies. Each entry is a number or a `(low, high)` pair. Not a range, because the page did not print one, and not variants, because the page does not say which is which. |
 | `unquantified` | Field to what the page printed in place of a number, for a cell that is neither empty nor numeric: `"Varies with frequency"`, `"model"`, `"…"` for a row of dots. What the page printed, and never a sentence about why the number is missing: `why_missing` composes that sentence around it, so a caller and a published table both get the cell as it reads on the page. |
 | `uncertainty` | Field to the plus-or-minus the page prints beside the value, in the same unit. Cox prints an effective flow resistivity of `(540 +/- 92) x 10^3`, and two of his rows print an uncertainty as large as the value itself. What the interval means is not stated on the page, so it is not stated here either: it is the number the page prints beside the value and nothing more. |
@@ -172,10 +172,10 @@ Whether this library computed this field instead of reading it.
 
 **Returns:** `True` when the page did not print it and the value follows from cells that it did. `derived` says how.
 
-### DampingMaterial.peak_temperature_celsius()
+### DampingMaterial.peak_temperature_c()
 
 ```python
-DampingMaterial.peak_temperature_celsius(frequency_hz: float) -> float
+DampingMaterial.peak_temperature_c(frequency_hz: float) -> float
 ```
 
 The temperature at which the loss factor peaks, at one frequency.

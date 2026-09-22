@@ -7076,6 +7076,256 @@ dos ediciones con las mismas entradas y en el mismo orden.
   demás celdas de las diecisiete filas se sirven con normalidad.
 - **Estado:** sin comunicar.
 
+## Ver & Beranek 2e (2006), TABLA 8.5 (la masa por unidad de superficie de la malla más fina, diez veces mayor en libras)
+
+- **Dónde:** TABLA 8.5, «Mechanical Characteristics and Flow Resistance $R_s$
+  of Wire Mesh Cloths», en la página impresa 262 (página 266 del PDF), dentro
+  del capítulo 8, «Sound-Absorbing Materials and Sound Absorbers». Fuente no
+  normativa: un manual.
+- **Lo impreso:** cada magnitud de la tabla se imprime dos veces, pero sólo
+  tres de los cuatro pares son una misma magnitud en dos sistemas de unidades:
+  el número de hilos, el diámetro del hilo y la masa por unidad de superficie.
+  El cuarto imprime la resistencia al flujo en N s/m3 y otra vez como múltiplo
+  de $\rho_0 c_0$. La columna de masa por unidad de superficie va,
+  en kg/m2 frente a lb/ft2: 1.6 / 0.32, luego 1.2 / 0.25, luego 0.63 / 0.13,
+  luego 0.48 / 0.1, y en la última fila, la malla de 80 hilos por centímetro,
+  0.31 / 0.63.
+- **El problema:** una libra por pie cuadrado son
+  $0.45359237 / 0.09290304 = 4.8824$ kg/m2 por las definiciones de la libra y
+  el pie, de modo que 0.31 kg/m2 son 0.063 lb/ft2 y no 0.63. El punto decimal
+  está un lugar a la derecha. Tres cosas deciden cuál de las dos celdas es la
+  defectuosa. Las cuatro filas de arriba convierten dentro del redondeo de su
+  propia última cifra, así que la columna por lo demás está bien. La columna
+  en libras, tal como se imprime, haría de la malla más fina el tejido más
+  pesado de la tabla, el doble que el más grueso, cuando todas las demás
+  columnas bajan con la malla. Y el propio tejido da la masa: un tejido
+  cuadrado de $n$ hilos por metro y diámetro $d$ lleva $2 n \rho \pi d^2/4$
+  por unidad de superficie, que para 8000 hilos por metro de 57 $\mu$m y
+  densidad $\rho = 7800$ kg/m3 son 0.32 kg/m2, el 0.31 impreso y no el 0.63
+  impreso. La página nunca dice de qué es el hilo, así que esa densidad no
+  sale de ella: 7800 kg/m3 son los de un acero inoxidable, y se dice aquí
+  porque sin ella el argumento no es reproducible. La misma aritmética con la
+  misma densidad reproduce las cuatro filas de arriba con un tres por ciento
+  de diferencia.
+- **Evidencia:** Verificado en la página 266 del PDF (p. impresa 262) de
+  Ver & Beranek, *Noise and Vibration Control Engineering* 2e (2006). Dos
+  lectores transcribieron la página por separado y ambos leyeron la celda como
+  tres glifos, «0.63», sin ningún cero inicial perdido entre ellos, y ambos
+  leyeron 0.31 en la celda contigua. Las otras cuatro filas de esa columna se
+  leen igual de bien y convierten correctamente, así que el defecto es de esta
+  celda y de la impresión.
+- **Qué hace la biblioteca:** este catálogo publica la columna en SI de cada
+  par, así que la celda defectuosa no llega a ningún valor servido desde
+  [`PUBLISHED_FLOW_RESISTANCE`](../src/phonometry/materials/absorbers/resistive_sheets.py).
+  La fila guarda los 0.31 kg/m2 impresos, que la columna y el tejido
+  respaldan, y su `note` cita la celda en libras y apunta aquí, de modo que
+  quien reproduzca el libro vea lo que el libro dice sin que eso entre en
+  ningún cálculo. La nota y no el matiz `misprinted`: ese matiz dice que un
+  número no se sirve, y sólo se lee desde la celda que deja vacía, mientras
+  que aquí la celda defectuosa es la reformulación en unidades usuales, para
+  la que este catálogo no tiene ninguna columna.
+- **Estado:** sin comunicar.
+
+## Ver & Beranek 2e (2006), TABLA 8.6 (las dos columnas de densidad superficial discrepan por un mismo factor equivocado en todas las filas)
+
+- **Dónde:** TABLA 8.6, «Mechanical Characteristics and Flow Resistance $R_s$
+  of Glass Fiber Cloth», en la página impresa 263 (página 267 del PDF), dentro
+  del capítulo 8, «Sound-Absorbing Materials and Sound Absorbers». Fuente no
+  normativa: un manual.
+- **Lo impreso:** la densidad superficial se imprime dos veces en cada una de
+  las trece filas, en oz/yd2 y en g/m2: 3.16 / 96, 5.37 / 164, 6.70 / 204,
+  8.90 / 272, 19.2 / 585, 17.7 / 535, 12.3 / 375, 1.87 / 57, 1.94 / 59,
+  9.60 / 293, 14.5 / 442, 24.6 / 750 y 12.0 / 366.
+- **El problema:** una onza por yarda cuadrada son
+  $28.349523125 / 0.83612736 = 33.9057\ldots$ g/m2 por las definiciones de la
+  onza y la yarda, ambas exactas. Lo exacto es el cociente; 33.906 es ese
+  cociente con tres decimales, y así se escribe aquí cada vez que se cita
+  corto. La razón que imprime la tabla está entre 30.2 y
+  30.6 en las trece filas y nunca es 33.9, así que las dos columnas no pueden
+  ser ambas correctas, y el desvío es el mismo once por ciento en todas: una
+  conversión equivocada aplicada a toda la columna, y no trece deslices
+  independientes. Cuál de las dos columnas lo lleva, la página no lo dice, y
+  ninguna otra columna de la tabla lo decide: el tejido y la resistencia al
+  flujo se imprimen una sola vez, en una sola unidad, y ninguno determina una
+  densidad superficial.
+- **Evidencia:** Verificado en la página 267 del PDF (p. impresa 263) de
+  Ver & Beranek, *Noise and Vibration Control Engineering* 2e (2006). Dos
+  lectores transcribieron los trece pares por separado y coincidieron en cada
+  cifra. Las otras dos tablas del capítulo no son como esta: la TABLA 8.7
+  convierte bien su columna de masa en las once filas, y la TABLA 8.5 en
+  cuatro de sus cinco, siendo la quinta la única celda defectuosa que registra
+  la entrada anterior. Una celda de una fila es un desliz de la imprenta;
+  trece filas desviadas por un mismo factor son una columna, que es lo que
+  hace de esto una propiedad de esta tabla y no del capítulo.
+- **Qué hace la biblioteca:** guarda los gramos por metro cuadrado que
+  imprime la página, tal como los imprime, en `surface_density_g_m2`. Todas
+  las filas de esta tabla en
+  [`PUBLISHED_FLOW_RESISTANCE`](../src/phonometry/materials/absorbers/resistive_sheets.py)
+  llevan una `note` que cita los dos valores impresos y el factor exacto entre
+  sus unidades y apunta aquí, de modo que la contradicción le llega al lector
+  con el número y no en su lugar. La biblioteca ni elige entre las dos
+  columnas ni convierte ninguna: publica la que la página imprime en SI y
+  cuenta lo que dice la otra. La celda no va en `not_derivable`, que es para
+  un valor que esta biblioteca se niega a calcular a partir de celdas que la
+  página sí imprime, y nunca para una magnitud que la página imprime ella
+  misma. La resistencia al flujo de estos tejidos, que se imprime una vez y en
+  una sola unidad, se sirve con normalidad.
+- **Estado:** sin comunicar.
+
+## ASHRAE (2019) HVAC Applications Handbook, capítulo 49, folio 49.31 (la frase que presenta las tablas de break-in intercambia dos de ellas)
+
+- **Ubicación:** capítulo 49, "Noise and Vibration Control", el párrafo impreso
+  bajo la ecuación (24) en la página impresa 49.31 (página 915 del PDF), y los
+  títulos de las tablas 32 y 33 impresos en esa misma página. Fuente no
+  normativa: un manual de diseño.
+- **El impreso:** el párrafo dice "Values for TL_in for rectangular ducts are
+  given in Table 32, for round ducts in Table 33, and for flat oval ducts in
+  Table 34 (Cummings 1983, 1985)." Las dos tablas que nombra primero se titulan,
+  en esa misma página, "Table 32 Experimentally Measured TL_in Versus Frequency
+  for Circular Ducts" y "Table 33 TL_in Versus Frequency for Rectangular Ducts".
+- **El problema:** las dos primeras tablas están nombradas al revés. La tabla 32
+  es la circular y la 33 la rectangular, y la frase dice lo contrario; la
+  tercera, la de conducto oval, sí está bien. Lo que imprimen las tablas lo
+  resuelve en contra de la frase y no en contra de los títulos. La tabla 32 está
+  indexada por un diámetro y una longitud, que es lo que tiene un conducto
+  redondo y lo que el capítulo no da a ningún rectangular, y lleva las marcas de
+  una tabla medida, una cota inferior y un valor entre paréntesis, bajo la nota
+  que las explica; la tabla 33 está indexada por un tamaño de conducto de dos
+  lados en milímetros e imprime columna de 8 kHz, cosa que en este capítulo sólo
+  hacen las dos tablas rectangulares. La frase equivalente para el breakout, en
+  el folio 49.29, empareja esas mismas tres formas con las tablas 29, 30 y 31 en
+  el orden rectangular, redondo, oval, y allí los tres títulos impresos
+  concuerdan con ella. Sólo esta frase está mal.
+- **Evidencia:** verificado en la página 915 del PDF (página impresa 49.31) de
+  ASHRAE (2019), *2019 ASHRAE handbook: Heating, ventilating, and
+  air-conditioning applications* (ed. SI), capítulo 49, y contra el párrafo de
+  breakout de la página 913 del PDF (página impresa 49.29) del mismo capítulo.
+  Dos lectores transcribieron la página por separado y ambos leyeron la frase y
+  los dos títulos tal como se citan aquí.
+- **Qué hace la biblioteca:** nada, y nada hace falta: la referencia cruzada es
+  una etiqueta que la biblioteca no lee nunca. Todas las filas de las tablas 32,
+  33 y 34 en
+  [`PUBLISHED_DUCT_TRANSMISSION_LOSS`](../src/phonometry/noise_control/duct_walls.py)
+  están archivadas bajo la tabla de cuyo título impreso se leyeron, y `shape`
+  lleva la palabra que usa ese título. Esa frase es el único crédito que el
+  capítulo da a esas tres tablas, así que todas sus filas la citan literalmente
+  en `attributed_to["table"]` y dejan dicho ahí que sus dos primeras tablas
+  están al revés.
+- **Estado:** sin comunicar.
+
+## Harris 3e (1995), tablas 32.1 a 32.8 (diecinueve pares de unidades cuyas dos mitades no son la misma cantidad)
+
+- **Ubicación:** tablas 32.1 a 32.8, el aislamiento de impacto de conjuntos de
+  suelo-techo, en los folios impresos 32.8 a 32.15 (páginas 750 a 757 del
+  PDF), dentro del capítulo 32, «Aislamiento del sonido transmitido por
+  estructuras», de la edición española. Fuente no normativa: un manual.
+- **Lo impreso:** cada dimensión y cada masa de estas ocho tablas se imprime
+  dos veces, primero en SI y después, entre paréntesis, en unidades
+  estadounidenses, dentro de la descripción corrida de cada construcción:
+  «Losa de 10 cm (4 in)», «cada 40,6 cm (16 in)», «alfombra de 1,5 kg/m2
+  (44 oz/yd2)». Las ocho tablas imprimen trescientos veinte pares de esos.
+- **El problema:** diecinueve de los trescientos veinte pares no son la misma
+  cantidad. La pulgada son 2,54 cm exactos, la libra 0,45359237 kg exactos y
+  la yarda 0,9144 m exactos, así que una libra por pie cúbico son 16,0185
+  kg/m3, una libra por yarda cuadrada 0,54249 kg/m2 y una onza por yarda
+  cuadrada 33,906 g/m2, y cada par se decide por aritmética y nada más. En
+  estas páginas la mitad estadounidense es la medida y la mitad SI su
+  traducción, así que un par cuya mitad imperial es un número entero o una
+  fracción se comprueba sólo en ese sentido, y uno cuya mitad imperial viene
+  ya impresa como decimal redondeado se admite en los dos. Un par está bien
+  cuando la mitad SI es la conversión redondeada **o truncada** a la precisión
+  con que se imprime, que es lo que perdona el redondeo flojo de todo el
+  capítulo: «60 cm (24 in)» y «2,5 cm (1 in)» son truncamientos de 60,96 y
+  2,54 y nada más, y la fila 17 imprime «36,9 cm (14,5 in)», donde 36,9 cm son
+  14,53 in y la página los imprimiría como las 14,5 in que tiene al lado. Los
+  diecinueve de abajo pasan esa prueba. Cada uno nombra la fila que numera la
+  página, el par tal como está compuesto y la conversión que falla:
+  - **Fila 9** (página 750 del PDF, folio impreso 32.8): «30,8 cm (16 in)»
+    para el espaciamiento de los listones. $16 \times 2{,}54 = 40{,}64$ cm,
+    que estas ocho tablas imprimen como 40,6 cm dieciocho veces.
+  - **Fila 11** (página 751 del PDF, folio impreso 32.9): «53,2 cm (21 in)»
+    para el espaciamiento de los nervios. $21 \times 2{,}54 = 53{,}34$ cm, que
+    la fila 38 imprime como 53,3 cm.
+  - **Fila 14** (página 752 del PDF, folio impreso 32.10): «15,6 cm (6 in)»
+    para la losa. $6 \times 2{,}54 = 15{,}24$ cm, que estas ocho tablas
+    imprimen como 15,2 cm once veces.
+  - **Fila 18** (página 752 del PDF, folio impreso 32.10): «36,7 cm (14,5 in)»
+    para el espaciamiento de las vigas. $14{,}5 \times 2{,}54 = 36{,}83$ cm,
+    que las filas 13 y 15 imprimen como 36,8 cm.
+  - **Fila 22** (página 753 del PDF, folio impreso 32.11): «60,1 cm (24 in)»
+    para el espaciamiento de las viguetas. $24 \times 2{,}54 = 60{,}96$ cm,
+    que las filas 26, 27, 33 y 38 imprimen como 61 cm.
+  - **Fila 23** (página 753 del PDF, folio impreso 32.11): «60,1 cm (24 in)»
+    para el espaciamiento de las viguetas, el mismo par otra vez.
+  - **Fila 26** (página 754 del PDF, folio impreso 32.12): «32,3 cm
+    (11,75 in)» para el grosor total. $11{,}75 \times 2{,}54 = 29{,}85$ cm, y
+    32,3 cm son 12,72 in, así que ninguna mitad es la otra.
+  - **Fila 27** (página 754 del PDF, folio impreso 32.12): «1,89 cm (0,78 in)»
+    para el solado de roble. $0{,}78 \times 2{,}54 = 1{,}98$ cm, que la fila
+    26 imprime como 1,98 cm para el mismo solado.
+  - **Fila 28** (página 754 del PDF, folio impreso 32.12): «1,89 cm (0,78 in)»
+    para ese mismo solado de roble.
+  - **Fila 28** (página 754 del PDF, folio impreso 32.12): «31,6 cm (12,5 in)»
+    para el grosor total. $12{,}5 \times 2{,}54 = 31{,}75$ cm, que las filas
+    16 y 18 imprimen como 31,8 cm y la fila 25 como 31,7 cm.
+  - **Fila 29** (página 754 del PDF, folio impreso 32.12): «60,8 cm (24 in)»
+    para los canales elásticos. $24 \times 2{,}54 = 60{,}96$ cm.
+  - **Fila 31** (página 755 del PDF, folio impreso 32.13): «10,1 cm (2 in)»
+    para la sección del listón. $2 \times 2{,}54 = 5{,}08$ cm, que estas ocho
+    tablas imprimen como 5,1 cm veintidós veces, la propia fila incluida.
+  - **Fila 34A** (página 755 del PDF, folio impreso 32.13): «7,5 cm (3 in)»
+    para las bandas de forro. $3 \times 2{,}54 = 7{,}62$ cm, que estas ocho
+    tablas imprimen como 7,6 cm diez veces.
+  - **Fila 35A** (página 756 del PDF, folio impreso 32.14): «410 kg/m3
+    (26,1 lb/ft3)» para la plancha de pulpa de papel comprimido.
+    $26{,}1 \times 16{,}0185 = 418{,}1$ kg/m3, y 410 kg/m3 son 25,6 lb/ft3,
+    así que ninguna mitad es la otra. La página no dice cuál de las dos lleva
+    el defecto, y ninguna otra celda de las ocho tablas lo decide: la fila 5
+    imprime 35,2 kg/m3 (2,2 lb/ft3) y la 37A 2370 kg/m3 (148 lb/ft3), y las
+    dos convierten bien, que es lo que hace de esto una propiedad de esta
+    celda y no del capítulo.
+  - **Fila 35B** (página 756 del PDF, folio impreso 32.14): «60,1 cm (24 in)»
+    para el espaciamiento de las viguetas de acero.
+  - **Fila 36B** (página 756 del PDF, folio impreso 32.14): «60,1 cm (24 in)»
+    para el espaciamiento de las viguetas de acero.
+  - **Fila 37A** (página 756 del PDF, folio impreso 32.14): «1,5 kg/m2
+    (3,4 lb/yd2)» para la malla de diamantes y los listones de metal.
+    $3{,}4 \times 0{,}54249 = 1{,}84$ kg/m2, y la fila 38 convierte 4,14
+    lb/yd2 en 2,25 kg/m2 con ese mismo factor.
+  - **Fila 38** (página 756 del PDF, folio impreso 32.14): «1,81 kg/m2
+    (40 oz/yd2)» para el felpudo de pelo. $40 \times 33{,}906 = 1356$ g/m2,
+    que la fila 28 imprime como 1,4 kg/m2 para el mismo tejido.
+  - **Fila 38** (página 756 del PDF, folio impreso 32.14): «1,99 kg/m2
+    (44 oz/yd2)» para la alfombra de pelo de lana.
+    $44 \times 33{,}906 = 1492$ g/m2, que las filas 28 y 30 imprimen como
+    1,5 kg/m2 para el mismo tejido. Las dos celdas de alfombra de esta fila
+    son 1,334 de su propia conversión, así que lo que se aplicó fue un factor
+    equivocado al par y no dos cifras que se deslizan por separado.
+- **Evidencia:** verificado en las páginas 750 a 757 del PDF (pp. impresas
+  32.8-32.15) de Harris (ed.), *Manual de medidas acústicas y control del
+  ruido* 3e (1995), la edición española de *Handbook of Acoustical
+  Measurements and Noise Control*. Dos lectores transcribieron las ocho tablas
+  por separado y coincidieron en los diecinueve pares; cada uno se volvió a
+  leer después en su propia página, ampliado, antes de entrar en esta lista.
+  Los trescientos veinte pares se convirtieron y compararon uno a uno, no por
+  muestreo, que es lo que hace de la lista algo cerrado y no una recolección
+  de lo que alguien se encontró por el camino. Los casos que quedan fuera son
+  los que perdona la regla de arriba, y tres de ellos están nombrados allí.
+- **Qué hace la biblioteca:** publica todas estas descripciones exactamente
+  como las compone la página. Las diecisiete filas que llevan uno de los
+  diecinueve pares están marcadas en
+  [`PUBLISHED_IMPACT_INSULATION`](../src/phonometry/building/impact_catalogue.py):
+  la celda se registra en `misprinted`, citando el par impreso y la conversión
+  que falla, de modo que quien reproduzca el libro vea lo que el libro dice y
+  quien use el catálogo sepa que no debe. Dieciocho de los diecinueve están
+  dentro de la descripción corrida, de donde este catálogo no sirve ninguna
+  cantidad, y ahí acaba todo. El decimonoveno es la densidad de la fila 35A,
+  que es la única celda de las diecinueve que este catálogo levantaría a un
+  campo propio, así que `layer_density_kg_m3` queda vacío ahí y `why_missing`
+  devuelve las dos mitades impresas en lugar de elegir una. Las filas 5 y 37A,
+  cuyas densidades convierten bien, se sirven con normalidad.
+- **Estado:** sin comunicar.
+
 ## Propiedades de las fuentes, relacionadas, que no son erratas
 
 Registradas aquí para prevenir futuros «arreglos» que romperían la

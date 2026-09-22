@@ -1,0 +1,361 @@
+---
+title: "noise_control.duct_walls"
+description: "What a duct wall does to sound, out of it and into it."
+sidebar:
+  label: "duct_walls"
+---
+
+What a duct wall does to sound, out of it and into it.
+
+A duct is not a pipe with a number on it. The sheet it is rolled from is a
+partition like any other, and two different things happen across it: the sound
+travelling inside the duct leaks out through the wall into the ceiling void, and
+the sound already in that void leaks in and is carried away down the duct. The
+chapter calls the first breakout and the second break-in, writes them TL_out and
+TL_in, and tabulates them apart, because they are not the same number and the
+duct is not symmetric about its own wall.
+
+Why they are not one column
+---------------------------
+Breakout is a wall radiating into a room from a duct that is behaving as a
+waveguide; break-in is a wall driven by a diffuse field and feeding a waveguide.
+They are separate measurements on separate specimens, and the chapter's own
+tables show it: the round ducts it measured for breakout are 200, 350, 560 and
+810 mm at 4.6 m, and the ones it measured for break-in are 203, 356, 559 and
+813 mm at 4.57 m, with spiral blocks that share not one diameter and not one
+length, 300, 610 and 915 mm at 3.6, 7.3 and 3 m against 203, 356, 660 and
+813 mm all at 3.05 m. There is no single construction to hang the two numbers
+on, so this catalogue holds one row per printed row and each row says, in
+[`DuctWallSpectrum.direction`](/phonometry/reference/api/noise_control/duct-walls/#ductwallspectrum), which of the two it is. The rectangular and
+flat oval tables do print the same seven sizes, row for row and each at the
+same gauge as its twin, and they are still two rows each, because the page
+nowhere says the specimen was the same one and a merged row would be this
+library making that claim on the chapter's behalf.
+
+What tells one row from another
+-------------------------------
+The cross section, the length and the gauge of the sheet. A rectangular or flat
+oval duct prints two sides, held in [`DuctWallSpectrum.first_side_mm`](/phonometry/reference/api/noise_control/duct-walls/#ductwallspectrum) and
+[`DuctWallSpectrum.second_side_mm`](/phonometry/reference/api/noise_control/duct-walls/#ductwallspectrum) in the order the page prints them, which
+is not the same order in the two kinds of table; a round or circular one prints
+[`DuctWallSpectrum.diameter_mm`](/phonometry/reference/api/noise_control/duct-walls/#ductwallspectrum), and the two tables that print a length per
+row put it in [`DuctWallSpectrum.duct_length_m`](/phonometry/reference/api/noise_control/duct-walls/#ductwallspectrum). The gauge is a US
+sheet-metal gauge number, and the chapter prints a thickness for one of the six
+gauges these tables use, in passing and five folios past the last of them:
+"16 ga (1.6 mm thickness)" in the running text on folio 49.37, against tables
+that end on folio 49.32, with nothing anywhere for the
+18, 20, 22, 24 and 26 the same tables print. So
+[`DuctWallSpectrum.sheet_metal_gauge`](/phonometry/reference/api/noise_control/duct-walls/#ductwallspectrum) holds the characters the page prints
+and nothing is converted from them.
+
+What a cell can be instead of a number
+--------------------------------------
+Two things, and a third that is a number with a mark beside it. A cell written
+`>45` is a lower bound, because the background sound swamped what the duct
+wall was radiating; it is held as a range whose printed end is the number the
+page gives and whose other end is left empty, because a transmission loss has
+no ceiling and a number put there to stand for one would be read as a
+measurement. It is flagged `bounded_below`, so a caller who asks for the band
+is refused rather than handed the bound. A cell printed as a rule has no legend
+anywhere in the chapter, so it is held as `unquantified` with the glyph the
+page prints and no reading of it is supplied.
+
+A cell in parentheses is the third, and it is not a hedge at all: the number is
+a measurement and it is held exactly as printed. What the parentheses add is
+what the note under Table 32 says they add, "measurements in which background
+sound produced greater uncertainty than usual", and no hedge of this library
+means that. It is not `approximate`, which is a number an author rounded on
+purpose and which the published table reads back as a printed tilde, so the
+mark is recorded in the row's note instead and the value is left alone.
+
+Where the rows live
+-------------------
+In `noise_control/data/ashrae-2019-tables-29-to-34.json`, read at import
+through the package-data reader in `phonometry._internal`, the same as every
+other catalogue here.
+
+What it is not
+--------------
+It is not a specification. Only two of the six tables say in their titles how
+they were obtained, "Experimentally Measured", and they are the two that carry
+the bounds and the parenthesised values the background sound left; the other
+four say nothing at all about measurement or calculation and carry no source
+line either. The credit for all six is in the running text and travels with
+each row in `attributed_to`. Machine-room walls are not here: the chapter's
+Table 40 is an ordinary partition, the same quantity
+[`phonometry.building.PUBLISHED_TRANSMISSION_LOSS`](/phonometry/reference/api/building/catalogue/#published_transmission_loss) holds from Bies, and it
+is published from there.
+
+> Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
+
+## DUCT_WALL_BANDS_HZ
+
+*Constant* (`tuple`).
+
+```python
+DUCT_WALL_BANDS_HZ = (63, 125, 250, 500, 1000, 2000, 4000, 8000)
+```
+
+## duct_wall_named
+
+```python
+duct_wall_named(name: str) -> tuple[DuctWallSpectrum, ...]
+```
+
+Every duct wall whose printed label contains *name*, without case.
+
+A tuple and not one row, and a long one: the label a duct table prints is
+its size, and the same size is printed by the breakout table and by the
+break-in table, so the plain answer to `"305 × 305 mm"` is two rows that
+are two different quantities. Read [`DuctWallSpectrum.direction`](/phonometry/reference/api/noise_control/duct-walls/#ductwallspectrum) to
+tell them apart, and [`DuctWallSpectrum.sheet_metal_gauge`](/phonometry/reference/api/noise_control/duct-walls/#ductwallspectrum) to tell
+apart two rows of one diameter.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `name` | Part of a row label, as its page prints it, with the unit its column heading carries: `"610"`, `"305 × 1220"`, `"152 mm"`. |
+
+**Returns:** The matching rows, in catalogue order. Empty when none match.
+
+## DuctWallSpectrum
+
+```python
+DuctWallSpectrum(
+    *,
+    name: str,
+    source: str,
+    table: str = '',
+    variant: str = '',
+    approximate: frozenset[str] = frozenset(),
+    derived: Mapping[str, str] = ...,
+    ranges: Mapping[str, tuple[float | None, float | None]] = ...,
+    bounded_above: frozenset[str] = frozenset(),
+    bounded_below: frozenset[str] = frozenset(),
+    reported: Mapping[str, tuple[float | tuple[float, float], ...]] = ...,
+    unquantified: Mapping[str, str] = ...,
+    uncertainty: Mapping[str, float] = ...,
+    not_derivable: Mapping[str, str] = ...,
+    misprinted: Mapping[str, str] = ...,
+    attributed_to: Mapping[str, str] = ...,
+    group: str = '',
+    note: str = '',
+    transmission_loss_63_db: float | None = None,
+    transmission_loss_125_db: float | None = None,
+    transmission_loss_250_db: float | None = None,
+    transmission_loss_500_db: float | None = None,
+    transmission_loss_1000_db: float | None = None,
+    transmission_loss_2000_db: float | None = None,
+    transmission_loss_4000_db: float | None = None,
+    transmission_loss_8000_db: float | None = None,
+    direction: str = '',
+    shape: str = '',
+    printed_table: str = '',
+    sheet_metal_gauge: str = '',
+    first_side_mm: float | None = None,
+    second_side_mm: float | None = None,
+    diameter_mm: float | None = None,
+    duct_length_m: float | None = None,
+)
+```
+
+One duct wall of one printed table, in one of the two directions.
+
+The hedges a cell can carry instead of a number are the ones every
+catalogue row has. What this class adds is that the quantity is only half
+named by the column: a transmission loss here is a breakout or a break-in
+transmission loss, never both, and `direction` is what says which.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `transmission_loss_63_db` | The transmission loss in the 63 Hz octave band, in decibels, in the direction `direction` names. |
+| `transmission_loss_125_db` | The same in the 125 Hz band. |
+| `transmission_loss_250_db` | The same in the 250 Hz band. |
+| `transmission_loss_500_db` | The same in the 500 Hz band. |
+| `transmission_loss_1000_db` | The same in the 1 kHz band. |
+| `transmission_loss_2000_db` | The same in the 2 kHz band. |
+| `transmission_loss_4000_db` | The same in the 4 kHz band. |
+| `transmission_loss_8000_db` | The same in the 8 kHz band, which only the two rectangular tables print a column for. |
+| `direction` | `"breakout"` for the sound that leaves the duct through its wall, `"break-in"` for the sound that enters it through the same wall. Two rows of the same size and gauge in the two directions are two measurements and not two columns of one. |
+| `shape` | What the table's own title calls the duct: `"rectangular"`, `"round"`, `"flat oval"` or `"circular"`. The chapter uses "round" for its breakout table and "circular" for its break-in one although the geometry is the same, and each row keeps the word its own page prints. |
+| `printed_table` | Which table of the chapter this row is printed in, `"Table 29"` to `"Table 34"`. |
+| `sheet_metal_gauge` | The gauge of the sheet, exactly as printed, including the asterisk that marks an internally lined duct. It is a US sheet-metal gauge number, and the chapter converts one of the six these tables use, "16 ga (1.6 mm thickness)" in the running text of folio 49.37, and none of the other five, so no thickness is offered here. |
+| `first_side_mm` | The first of the two sides a rectangular or flat oval duct prints, in millimetres. The page does not say which side is the width, and it does not print them in one order: the rectangular tables put the smaller first and the flat oval tables the larger. |
+| `second_side_mm` | The second of those two sides, in millimetres. |
+| `diameter_mm` | The diameter of a round or circular duct, in millimetres. In one block of one table a printed diameter covers three consecutive rows, and the two whose cell the page leaves blank carry it down as a derivation rather than as a number read off the page: `is_derived("diameter_mm")` answers `True` for them and `derived` says where it comes from. |
+| `duct_length_m` | The length of the duct that was measured, in metres, for the two tables that print one per row. The four tables that do not say in a note that their data are for a length of 6.1 m, which is how the page writes it. |
+| `name` | The material as the table names it, attribution stripped. |
+| `variant` | Which specimen or condition this row is, when the page prints several under one name: `"chemically pure"`, `"direction x"`, `"0.68 mm diameter"`. Empty when the page prints one. |
+| `source` | Document, table, PDF page and printed folio. |
+| `table` | The data file this row was read from, without the extension, which is also the first half of its key in the catalogue that holds it. |
+| `approximate` | Fields the page prints with a `~`. Not an estimate and not an interval: a number the author rounded on purpose. |
+| `derived` | Field to how it was computed, for the ones this library worked out from the cells the page did print. A derived value is never stored as if it had been read. |
+| `ranges` | `(low, high)` for each field the page prints as an interval rather than a value. One end is `None` only for a bound whose open side the quantity has no limit on; the end the page prints is always a number, and a two-sided interval has two. |
+| `bounded_above` | The subset of `ranges` the page prints as `< x` or `<= x`, where the low end is a floor and not a measurement. |
+| `bounded_below` | The subset of `ranges` the page prints as `> x` or `>= x`, where the high end is the ceiling the quantity cannot pass and not a measurement: Cox gives an aerogel a porosity of `>0.75`, and the 1 beside it is what a porosity is, not what anybody measured. A quantity with no such ceiling leaves that end `None` rather than borrowing a number for it: ASHRAE prints `>45` for a duct wall whose radiated sound the background swamped, and a transmission loss has no value it cannot pass, so the open end is empty. It is never an infinity, which is not a number the page has and not a token JSON can carry. |
+| `reported` | Field to the values the page lists for it, for a cell that prints several with no single one: `"25, 207, 230"` or `"96, 200-450"`, readings from as many studies. Each entry is a number or a `(low, high)` pair. Not a range, because the page did not print one, and not variants, because the page does not say which is which. |
+| `unquantified` | Field to what the page printed in place of a number, for a cell that is neither empty nor numeric: `"Varies with frequency"`, `"model"`, `"…"` for a row of dots. What the page printed, and never a sentence about why the number is missing: `why_missing` composes that sentence around it, so a caller and a published table both get the cell as it reads on the page. |
+| `uncertainty` | Field to the plus-or-minus the page prints beside the value, in the same unit. Cox prints an effective flow resistivity of `(540 +/- 92) x 10^3`, and two of his rows print an uncertainty as large as the value itself. What the interval means is not stated on the page, so it is not stated here either: it is the number the page prints beside the value and nothing more. |
+| `misprinted` | Field to what the page prints there and why it cannot be that, for a cell whose defect is confirmed and registered in `docs/ERRATA.md`. The number is not served, because a catalogue that handed it over would put a value its own registry calls wrong behind every calculation downstream; it is not dropped either, because a reader reproducing the book needs to see what the book says. This is the narrowest of the hedges and the one that costs most to claim: a cell earns it only when the defect follows from the page itself or from something as settled as the molar mass of a named molecule, and never from one book disagreeing with another. |
+| `not_derivable` | Field to why this library leaves it empty although the arithmetic would reach it. Bies leaves the speed of his aluminium honeycomb panels blank, and the modulus and the density beside it are effective ones, so `sqrt(E/rho)` would put a one-dimensional speed on a panel that has none. A row says so here, and nothing fills the cell afterwards. |
+| `attributed_to` | Credit for a cell the book takes from someone else. Keyed by field name, or by `"row"` or `"table"` when the credit covers all of one. |
+| `group` | The heading of the block this row sits under, when the table prints its rows in named groups: Cox files each material under `"Fibrous materials"`, `"Cellular materials"`, `"Granular materials"` or `"Other"`. Empty for a table that prints one list. |
+| `note` | What the page says about this row beyond its numbers. |
+
+### DuctWallSpectrum.bands()
+
+```python
+DuctWallSpectrum.bands() -> tuple[int, ...]
+```
+
+The bands this row prints a value for, in hertz.
+
+### DuctWallSpectrum.is_approximate()
+
+```python
+DuctWallSpectrum.is_approximate(field_name: str) -> bool
+```
+
+Whether the page prints this field with a `~`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `field_name` | One of the numeric field names of this class. |
+
+**Returns:** `True` when the page rounded the cell on purpose.
+
+### DuctWallSpectrum.is_break_in
+
+*property*
+
+Whether this row is the sound entering the duct through its wall.
+
+### DuctWallSpectrum.is_breakout
+
+*property*
+
+Whether this row is the sound leaving the duct through its wall.
+
+### DuctWallSpectrum.is_derived()
+
+```python
+DuctWallSpectrum.is_derived(field_name: str) -> bool
+```
+
+Whether this library computed this field instead of reading it.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `field_name` | One of the numeric field names of this class. |
+
+**Returns:** `True` when the page did not print it and the value follows from cells that it did. `derived` says how.
+
+### DuctWallSpectrum.printed()
+
+```python
+DuctWallSpectrum.printed(
+    field_name: str,
+    *,
+    wanted_by: str = 'the caller',
+) -> float
+```
+
+One quantity this page prints, or a refusal that says what it had.
+
+Every quantity of a row is optional, because the pages print different
+columns, so a caller passing one into a function that requires a float
+has to narrow it. Doing it here beats an assertion at each call site:
+the refusal names the field, who wanted it and what the page had in
+that cell, which is the difference between a cell the book left empty
+and a cell holding the word "model".
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `field_name` | The quantity wanted. |
+| `wanted_by` | What wants it, named in the message. |
+
+**Returns:** The value, as a float.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | when the page did not print a number there. |
+
+### DuctWallSpectrum.spectrum()
+
+```python
+DuctWallSpectrum.spectrum() -> dict[int, float]
+```
+
+The row as `{band_hz: value}` over the bands it prints.
+
+A band the page left empty, or printed as something other than a
+number, is left out rather than filled with a zero;
+`why_missing` on that band's field says which it
+was.
+
+### DuctWallSpectrum.transmission_loss_db()
+
+```python
+DuctWallSpectrum.transmission_loss_db(band_hz: int) -> float
+```
+
+The loss in one band, or a refusal that says what the page had.
+
+Which of the two transmission losses it is follows from
+`direction`, and the two are never mixed in one row.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `band_hz` | An octave-band centre frequency between 63 Hz and 8 kHz; `bands` says which ones this row fills. |
+
+**Returns:** The printed transmission loss, in decibels.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | when the page has no number in that band, naming the row, the band and what the cell held instead, which for these tables is a lower bound, a rule the chapter never explains, or a column the table does not print at all; or when *band_hz* is not a band these tables print. |
+
+### DuctWallSpectrum.why_missing()
+
+```python
+DuctWallSpectrum.why_missing(field_name: str) -> str
+```
+
+Why this field is `None`, in the page's own terms.
+
+A catalogue that answers `None` and stops is asking the caller to
+guess whether the material has no such property, whether the book
+measured it and printed a dash, or whether the cell holds something
+that is not a number. Each of those is a different answer.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `field_name` | One of the numeric field names of this class. |
+
+**Returns:** What the page had in that cell, or the empty string when the field is not missing at all. A field the page has no column for and this library cannot derive, because the cells it would need are themselves a range, answers that it does not follow.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| AttributeError | for a name this class does not have, because a misspelt field would otherwise answer as if the cell were empty. |
+
+## PUBLISHED_DUCT_TRANSMISSION_LOSS
+
+*Constant* (`mappingproxy`).

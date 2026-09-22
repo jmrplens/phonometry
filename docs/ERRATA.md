@@ -6653,6 +6653,251 @@ in the same order.
   seventeen rows is served normally.
 - **Status:** unreported.
 
+## Ver & Beranek 2e (2006), TABLE 8.5 (mass per unit area of the finest mesh, ten times too large in pounds)
+
+- **Location:** TABLE 8.5, "Mechanical Characteristics and Flow Resistance
+  $R_s$ of Wire Mesh Cloths", on printed page 262 (PDF page 266), in chapter
+  8, "Sound-Absorbing Materials and Sound Absorbers". Non-normative source: a
+  handbook.
+- **The print:** every quantity of the table is printed twice, but only three
+  of the four pairs are one quantity in two systems of units: the wire count,
+  the wire diameter and the mass per unit area. The fourth prints the flow
+  resistance in N s/m3 and again as a multiple of $\rho_0 c_0$. The mass per unit area column runs, in kg/m2 against
+  lb/ft2: 1.6 / 0.32, then 1.2 / 0.25, then 0.63 / 0.13, then 0.48 / 0.1, and
+  on the last row, the mesh of 80 wires per centimetre, 0.31 / 0.63.
+- **The problem:** one pound per square foot is
+  $0.45359237 / 0.09290304 = 4.8824$ kg/m2 by the definitions of the pound and
+  the foot, so 0.31 kg/m2 is 0.063 lb/ft2 and not 0.63. The decimal point is
+  one place too far right. Three things settle which of the two cells is the
+  defective one. The four rows above convert to within the rounding of their
+  own last digit, so the column is otherwise sound. The pound column as
+  printed would make the finest mesh the heaviest cloth of the table, twice
+  the mass of the coarsest, where every other column falls with the mesh.
+  And the weave itself gives the mass: a square cloth of $n$ wires per metre
+  of diameter $d$ carries $2 n \rho \pi d^2/4$ per unit area, which for 8000
+  wires per metre of 57 $\mu$m wire of density $\rho = 7800$ kg/m3 is
+  0.32 kg/m2, the printed 0.31 and not the printed 0.63. The page never says
+  what the wire is made of, so that density is not read off it: 7800 kg/m3 is
+  a stainless steel, and it is stated here because the argument is not
+  reproducible without it. The same arithmetic at the same density reproduces
+  the four rows above to within three per cent.
+- **Evidence:** Verified on PDF page 266 (printed p. 262) of Ver & Beranek,
+  *Noise and Vibration Control Engineering* 2e (2006). Two readers transcribed
+  the page independently and both read the cell as three glyphs, "0.63", with
+  no leading zero lost between them, and both read 0.31 in the cell beside it.
+  The other four rows of the same column are equally legible and convert
+  correctly, so the defect belongs to this cell and to the printing.
+- **What the library does:** this catalogue publishes the SI column of each
+  pair, so the defective cell reaches no value served from
+  [`PUBLISHED_FLOW_RESISTANCE`](../src/phonometry/materials/absorbers/resistive_sheets.py).
+  The row holds the printed 0.31 kg/m2, which the column and the weave both
+  support, and its `note` quotes the pound cell and points here, so a reader
+  reproducing the book sees what the book says without it reaching a
+  calculation. The note and not the `misprinted` hedge: that hedge says a
+  number is not served, and it is read back only from the cell it empties,
+  while the defective cell here is the customary restatement, for which this
+  catalogue holds no column at all.
+- **Status:** unreported.
+
+## Ver & Beranek 2e (2006), TABLE 8.6 (the two surface-density columns disagree by one wrong factor on every row)
+
+- **Location:** TABLE 8.6, "Mechanical Characteristics and Flow Resistance
+  $R_s$ of Glass Fiber Cloth", on printed page 263 (PDF page 267), in chapter
+  8, "Sound-Absorbing Materials and Sound Absorbers". Non-normative source: a
+  handbook.
+- **The print:** the surface density is printed twice on each of the thirteen
+  rows, in oz/yd2 and in g/m2: 3.16 / 96, 5.37 / 164, 6.70 / 204, 8.90 / 272,
+  19.2 / 585, 17.7 / 535, 12.3 / 375, 1.87 / 57, 1.94 / 59, 9.60 / 293,
+  14.5 / 442, 24.6 / 750 and 12.0 / 366.
+- **The problem:** one ounce per square yard is
+  $28.349523125 / 0.83612736 = 33.9057\ldots$ g/m2 by the definitions of the
+  ounce and the yard, both exact. What is exact is the quotient; 33.906 is
+  that quotient to three decimals, and this entry writes it that way whenever
+  it is quoted short. The ratio the table prints is between 30.2 and
+  30.6 on all thirteen rows and never once 33.9, so the two columns cannot
+  both be right, and the offset is the same eleven per cent throughout: one
+  wrong conversion applied to the whole column rather than thirteen
+  independent slips. Which of the two columns carries it the page does not
+  say, and no other column of the table settles it: the weave and the flow
+  resistance are printed once each, in one unit, and neither determines a
+  surface density.
+- **Evidence:** Verified on PDF page 267 (printed p. 263) of Ver & Beranek,
+  *Noise and Vibration Control Engineering* 2e (2006). Two readers transcribed
+  the thirteen pairs independently and agreed on every digit. The other two
+  tables of the chapter are not like this one: TABLE 8.7 converts its own mass
+  column correctly on all eleven rows, and TABLE 8.5 on four of its five, the
+  fifth being the single defective cell registered in the entry above. One
+  cell of one row is a slip of the printing; thirteen rows off by one factor
+  is a column, which is what makes this a property of this table rather than
+  of the chapter.
+- **What the library does:** holds the gramme per square metre the page
+  prints, as it prints it, in `surface_density_g_m2`. Every row of this table
+  in
+  [`PUBLISHED_FLOW_RESISTANCE`](../src/phonometry/materials/absorbers/resistive_sheets.py)
+  carries a `note` that quotes both printed values and the exact factor
+  between their units and points here, so the contradiction reaches the reader
+  with the number rather than instead of it. The library neither chooses
+  between the two columns nor converts either of them: it publishes the one
+  the page prints in SI and says what the other one says. The cell is not
+  `not_derivable`, which is for a value this library declines to compute from
+  cells the page did print and never for a quantity the page prints itself.
+  The flow resistance of these cloths, which is printed once and in one unit,
+  is served normally.
+- **Status:** unreported.
+
+## ASHRAE (2019) HVAC Applications Handbook, Chapter 49, folio 49.31 (the sentence that introduces the break-in tables swaps two of them)
+
+- **Location:** Chapter 49, "Noise and Vibration Control", the paragraph
+  printed under Equation (24) on printed page 49.31 (PDF page 915), and the
+  titles of Tables 32 and 33 printed on that same page. Non-normative source: a
+  design handbook.
+- **The print:** the paragraph reads "Values for TL_in for rectangular ducts
+  are given in Table 32, for round ducts in Table 33, and for flat oval ducts
+  in Table 34 (Cummings 1983, 1985)." The two tables it names first are titled,
+  on the same page, "Table 32 Experimentally Measured TL_in Versus Frequency
+  for Circular Ducts" and "Table 33 TL_in Versus Frequency for Rectangular
+  Ducts".
+- **The problem:** the first two tables are named the wrong way round. Table 32
+  is the circular one and Table 33 the rectangular one, and the sentence says
+  the opposite; the third, flat oval, is right. What the tables print settles
+  it against the sentence rather than against the titles. Table 32 is indexed
+  by a Diameter and a Length, which is what a round duct has and what no
+  rectangular one is given anywhere in the chapter, and it prints the marks of
+  a measured table, a lower bound and a parenthesised value, under the note
+  that explains them; Table 33 is indexed by a Duct Size of two sides in
+  millimetres and prints an 8 kHz column, which in this chapter only the two
+  rectangular tables do. The companion sentence for breakout on folio 49.29
+  pairs the same three shapes with Tables 29, 30 and 31 in the order
+  rectangular, round, flat oval, and there the three printed titles agree with
+  it. Only this sentence is wrong.
+- **Evidence:** Verified on PDF page 915 (printed p. 49.31) of ASHRAE (2019),
+  *2019 ASHRAE handbook: Heating, ventilating, and air-conditioning
+  applications* (SI ed.), Chapter 49, and against the breakout paragraph on PDF
+  page 913 (printed p. 49.29) of the same chapter. Two readers transcribed the
+  page independently and both read the sentence and the two titles as they are
+  quoted here.
+- **What the library does:** nothing, and nothing is needed: the cross
+  reference is a label the library never reads. Every row of Tables 32, 33 and
+  34 in
+  [`PUBLISHED_DUCT_TRANSMISSION_LOSS`](../src/phonometry/noise_control/duct_walls.py)
+  is filed under the table whose own printed title it was read from, and
+  `shape` carries the word that title uses. That sentence is the only credit
+  the chapter gives those three tables, so each of their rows quotes it
+  verbatim in `attributed_to["table"]` and records there that its first two
+  tables are the wrong way round.
+- **Status:** unreported.
+
+## Harris 3e (1995), Tables 32.1 to 32.8 (nineteen double-unit pairs whose two halves are not each other)
+
+- **Location:** Tables 32.1 to 32.8, the impact insulation of floor-ceiling
+  constructions, on printed folios 32.8 to 32.15 (PDF pages 750 to 757), in
+  chapter 32, "Aislamiento del sonido transmitido por estructuras", of the
+  Spanish edition. Non-normative source: a handbook.
+- **The print:** every dimension and every mass of these eight tables is
+  printed twice, SI first and the US customary value in parentheses after it,
+  inside the running description of each construction: "Losa de 10 cm (4 in)",
+  "cada 40,6 cm (16 in)", "alfombra de 1,5 kg/m2 (44 oz/yd2)". Three hundred
+  and twenty such pairs are printed over the eight tables.
+- **The problem:** nineteen of the three hundred and twenty pairs are not each
+  other. The inch is 2,54 cm exactly, the pound is 0,45359237 kg exactly and
+  the yard 0,9144 m exactly, so one pound per cubic foot is 16,0185 kg/m3, one
+  pound per square yard 0,54249 kg/m2 and one ounce per square yard 33,906
+  g/m2, and each pair is decided by arithmetic alone. On these pages the US
+  customary half is the measurement and the SI half its translation, so a pair
+  whose imperial half is a whole number or a fraction is read in that
+  direction only, and one whose imperial half is itself printed as a rounded
+  decimal is allowed either. A pair counts as sound when the SI half is the
+  conversion rounded **or truncated** to the precision it is printed to, which
+  forgives the whole of this chapter's loose rounding: "60 cm (24 in)" and
+  "2,5 cm (1 in)" are truncations of 60,96 and 2,54 and no more than that, and
+  row 17 prints "36,9 cm (14,5 in)", where 36,9 cm is 14,53 in and the page
+  would print that as the 14,5 in beside it. The nineteen below survive that
+  test. Each one names the row the page numbers, the pair as it is set, and
+  the conversion that fails:
+  - **Row 9** (PDF page 750, printed folio 32.8): "30,8 cm (16 in)" for the
+    batten spacing. $16 \times 2{,}54 = 40{,}64$ cm, which these eight tables
+    print as 40,6 cm eighteen times over.
+  - **Row 11** (PDF page 751, printed folio 32.9): "53,2 cm (21 in)" for the
+    rib spacing. $21 \times 2{,}54 = 53{,}34$ cm, which row 38 prints as
+    53,3 cm.
+  - **Row 14** (PDF page 752, printed folio 32.10): "15,6 cm (6 in)" for the
+    slab. $6 \times 2{,}54 = 15{,}24$ cm, which these eight tables print as
+    15,2 cm eleven times over.
+  - **Row 18** (PDF page 752, printed folio 32.10): "36,7 cm (14,5 in)" for
+    the beam spacing. $14{,}5 \times 2{,}54 = 36{,}83$ cm, which rows 13 and
+    15 print as 36,8 cm.
+  - **Row 22** (PDF page 753, printed folio 32.11): "60,1 cm (24 in)" for the
+    joist spacing. $24 \times 2{,}54 = 60{,}96$ cm, which rows 26, 27, 33 and
+    38 print as 61 cm.
+  - **Row 23** (PDF page 753, printed folio 32.11): "60,1 cm (24 in)" for the
+    joist spacing, the same pair again.
+  - **Row 26** (PDF page 754, printed folio 32.12): "32,3 cm (11,75 in)" for
+    the total thickness. $11{,}75 \times 2{,}54 = 29{,}85$ cm, and 32,3 cm is
+    12,72 in, so neither half is the other.
+  - **Row 27** (PDF page 754, printed folio 32.12): "1,89 cm (0,78 in)" for
+    the oak strip floor. $0{,}78 \times 2{,}54 = 1{,}98$ cm, which row 26
+    prints as 1,98 cm for the same floor.
+  - **Row 28** (PDF page 754, printed folio 32.12): "1,89 cm (0,78 in)" for
+    the same oak strip floor.
+  - **Row 28** (PDF page 754, printed folio 32.12): "31,6 cm (12,5 in)" for
+    the total thickness. $12{,}5 \times 2{,}54 = 31{,}75$ cm, which rows 16
+    and 18 print as 31,8 cm and row 25 as 31,7 cm.
+  - **Row 29** (PDF page 754, printed folio 32.12): "60,8 cm (24 in)" for the
+    resilient channels. $24 \times 2{,}54 = 60{,}96$ cm.
+  - **Row 31** (PDF page 755, printed folio 32.13): "10,1 cm (2 in)" for the
+    batten section. $2 \times 2{,}54 = 5{,}08$ cm, which these eight tables
+    print as 5,1 cm twenty-two times over, the same row included.
+  - **Row 34A** (PDF page 755, printed folio 32.13): "7,5 cm (3 in)" for the
+    furring strips. $3 \times 2{,}54 = 7{,}62$ cm, which these eight tables
+    print as 7,6 cm ten times over.
+  - **Row 35A** (PDF page 756, printed folio 32.14): "410 kg/m3 (26,1 lb/ft3)"
+    for the compressed paper-pulp floor board. $26{,}1 \times 16{,}0185 =
+    418{,}1$ kg/m3, and 410 kg/m3 is 25,6 lb/ft3, so neither half is the other.
+    The page does not say which of the two carries the defect, and no other
+    cell of the eight tables settles it: row 5 prints 35,2 kg/m3 (2,2 lb/ft3)
+    and row 37A 2370 kg/m3 (148 lb/ft3), and both of those convert correctly,
+    which makes this a property of this cell and not of the chapter.
+  - **Row 35B** (PDF page 756, printed folio 32.14): "60,1 cm (24 in)" for the
+    steel joist spacing.
+  - **Row 36B** (PDF page 756, printed folio 32.14): "60,1 cm (24 in)" for the
+    steel joist spacing.
+  - **Row 37A** (PDF page 756, printed folio 32.14): "1,5 kg/m2 (3,4 lb/yd2)"
+    for the diamond mesh and metal lath. $3{,}4 \times 0{,}54249 = 1{,}84$
+    kg/m2, and row 38 converts 4,14 lb/yd2 to 2,25 kg/m2 with that same
+    factor.
+  - **Row 38** (PDF page 756, printed folio 32.14): "1,81 kg/m2 (40 oz/yd2)"
+    for the hair underlay. $40 \times 33{,}906 = 1356$ g/m2, which row 28
+    prints as 1,4 kg/m2 for the same cloth.
+  - **Row 38** (PDF page 756, printed folio 32.14): "1,99 kg/m2 (44 oz/yd2)"
+    for the wool pile carpet. $44 \times 33{,}906 = 1492$ g/m2, which rows 28
+    and 30 print as 1,5 kg/m2 for the same cloth. The two carpet cells of this
+    row are both 1,334 of their own conversion, so one wrong factor was
+    applied to the pair rather than two digits slipping.
+- **Evidence:** Verified on PDF pages 750 to 757 (printed pp. 32.8-32.15) of
+  Harris (ed.), *Manual de medidas acústicas y control del ruido* 3e (1995),
+  the Spanish edition of *Handbook of Acoustical Measurements and Noise
+  Control*. Two readers transcribed the eight tables independently and agreed
+  on every one of these nineteen pairs; each was then read again on its own
+  page, enlarged, before being listed here. The three hundred and twenty pairs
+  were converted and compared one by one rather than by sampling, which is
+  what makes the list closed rather than a sample of what a reader happened to
+  notice. The near misses it leaves off are the ones the rule above forgives,
+  and three of them are named there.
+- **What the library does:** publishes every one of these descriptions exactly
+  as the page sets them. The seventeen rows that carry one of the nineteen
+  pairs are marked in
+  [`PUBLISHED_IMPACT_INSULATION`](../src/phonometry/building/impact_catalogue.py):
+  the cell is recorded in `misprinted`, quoting the printed pair and the
+  conversion that fails, so a reader reproducing the book sees what the book
+  says and a reader using the catalogue is told not to. Eighteen of the
+  nineteen sit inside the running description, where this catalogue serves no
+  quantity from them and nothing else follows. The nineteenth is row 35A's
+  density, which is the one cell of the nineteen this catalogue would lift
+  into a field of its own, so `layer_density_kg_m3` is left empty there and
+  `why_missing` hands back both printed halves rather than choosing one. Rows
+  5 and 37A, whose densities convert, are served normally.
+- **Status:** unreported.
+
 ## Related source properties that are not errata
 
 Recorded here to prevent future "fixes" that would break agreement with the

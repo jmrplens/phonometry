@@ -228,6 +228,14 @@ parameter-units:
 published-sources:
 	$(PYTHON) scripts/check_published_sources.py
 
+# A catalogue nobody can see is a catalogue nobody has. Every PUBLISHED_*
+# mapping the package exposes has to reach /reference/catalogues/, which is the
+# only place a reader who is not reading Python meets these rows at all. When
+# this was first run it found six, two of them years old. Needs the package
+# importable, like the two guards above it.
+published-catalogues:
+	$(PYTHON) scripts/check_published_catalogues_reach_the_page.py
+
 # The solids catalogue holds the same material from up to four books, and two
 # densities that disagree are a digit somebody typed wrong: every density the
 # script does not already accept agrees across these tables to within 2,6 per

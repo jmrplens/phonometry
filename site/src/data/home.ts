@@ -17,8 +17,8 @@
  * fell a release behind. They are imported now, so there is exactly one place
  * that can be wrong.
  */
-import { checksRatio, domains, standards } from './conformance-stats.mjs';
-import { apiPages, fiches, figures, guides, version } from './repo-stats.mjs';
+import { domains, passingChecks, standards } from './conformance-stats.mjs';
+import { apiPages, catalogueRows, fiches, guides, version } from './repo-stats.mjs';
 
 export interface Stat {
 	value: string;
@@ -120,10 +120,10 @@ R.report("Rw_fiche.pdf", metadata=meta)`;
 export const en: HomeContent = {
 	statsLabel: 'The library in four numbers',
 	stats: [
-		{ value: checksRatio, label: 'conformance checks passing', href: '/phonometry/reference/conformance/' },
+		{ value: String(passingChecks), label: 'conformance checks passing', href: '/phonometry/reference/conformance/' },
 		{ value: String(standards), label: `standards referenced, across ${domains} test domains`, href: '/phonometry/reference/conformance/' },
-		{ value: String(figures), label: 'figures, each in light and dark, English and Spanish' },
-		{ value: String(fiches), label: 'PDF fiches in the reporting format their standard defines, rendered by .report()' },
+		{ value: String(catalogueRows), label: 'material values read from printed pages, each naming its book', href: '/phonometry/reference/catalogues/' },
+		{ value: String(fiches), label: 'PDF fiches in the reporting format their standard defines', href: '/phonometry/reference/reports/' },
 	],
 	what: {
 		title: 'What this is',
@@ -282,10 +282,10 @@ export const en: HomeContent = {
 export const es: HomeContent = {
 	statsLabel: 'La biblioteca en cuatro cifras',
 	stats: [
-		{ value: checksRatio, label: 'comprobaciones de conformidad superadas', href: '/phonometry/es/reference/conformance/' },
+		{ value: String(passingChecks), label: 'comprobaciones de conformidad superadas', href: '/phonometry/es/reference/conformance/' },
 		{ value: String(standards), label: `normas referenciadas, en ${domains} dominios` },
-		{ value: String(figures), label: 'figuras, cada una en claro y oscuro, en inglés y español' },
-		{ value: String(fiches), label: 'fichas PDF con el formato de informe que define su norma, generadas por .report()' },
+		{ value: String(catalogueRows), label: 'valores de material leídos de páginas impresas, cada uno con su libro', href: '/phonometry/es/reference/catalogues/' },
+		{ value: String(fiches), label: 'fichas PDF con el formato de informe que define su norma', href: '/phonometry/es/reference/reports/' },
 	],
 	what: {
 		title: 'Qué es',

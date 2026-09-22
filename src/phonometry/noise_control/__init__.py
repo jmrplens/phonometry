@@ -64,6 +64,12 @@ from .duct_path import (
     combine_duct_paths,
     duct_path,
 )
+from .duct_walls import (
+    DUCT_WALL_BANDS_HZ,
+    PUBLISHED_DUCT_TRANSMISSION_LOSS,
+    DuctWallSpectrum,
+    duct_wall_named,
+)
 from .enclosure_insulation import (
     ARTIFICIAL_SOURCE_DROP_MM,
     ARTIFICIAL_SOURCE_EXAMPLE_LWA_DB,
@@ -421,10 +427,13 @@ __all__ = [
     "duct_matrix",
     "duct_path",
     "duct_sound_power_level",
+    "DUCT_WALL_BANDS_HZ",
+    "duct_wall_named",
     "DuctElement",
     "DuctModeResult",
     "DuctPathResult",
     "DuctPathStage",
+    "DuctWallSpectrum",
     "dynamic_pressure",
     "elbow_insertion_loss",
     "enclosure_insertion_loss",
@@ -585,6 +594,7 @@ __all__ = [
     "PREFERRED_SIGNAL_TO_BACKGROUND_DB",
     "pressure_loss_coefficient",
     "pressure_ratio_boundaries",
+    "PUBLISHED_DUCT_TRANSMISSION_LOSS",
     "quarter_wave_impedance",
     "quarter_wave_resonator",
     "RADIATION_SOLID_ANGLES",

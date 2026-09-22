@@ -550,6 +550,15 @@ export const topics = [
         label: 'Published catalogues',
         translations: { es: 'Catálogos publicados' },
       },
+      // The fiches sit here for the same reason: a reader who wants to know
+      // what the library can hand them on paper is asking about evidence, not
+      // about one area of acoustics, and the seventy-one of them belong to
+      // eight areas at once.
+      {
+        slug: 'reference/reports',
+        label: 'Report fiches',
+        translations: { es: 'Fichas de informe' },
+      },
       'reference/bibliography',
       'reference/glossary',
     ],

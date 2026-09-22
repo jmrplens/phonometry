@@ -45,16 +45,22 @@ interface Props {
 	/** Which catalogue to render. */
 	catalogue:
 		| 'solids'
+		| 'damping'
 		| 'porous'
+		| 'flowResistance'
+		| 'resilientLayers'
 		| 'ground'
 		| 'gases'
 		| 'absorption'
 		| 'absorptionAreas'
 		| 'transmissionLoss'
+		| 'impactInsulation'
+		| 'ductTransmissionLoss'
 		| 'scattering'
 		| 'diffusion'
 		| 'predictedScattering'
-		| 'fluids';
+		| 'fluids'
+		| 'airAttenuation';
 	/** Locale of the page it is rendered on. */
 	lang?: 'en' | 'es';
 }
@@ -70,6 +76,10 @@ const copy = {
 	en: {
 		search: 'Filter by material',
 		searchGas: 'Filter by gas',
+		searchFacing: 'Filter by facing',
+		searchFloor: 'Filter by floor',
+		searchDuct: 'Filter by duct',
+		searchCondition: 'Filter by condition',
 		searchPlaceholder: 'steel, foam, glass',
 		groundPlaceholder: 'grass, snow, asphalt',
 		gasPlaceholder: 'methane, argon, steam',
@@ -77,17 +87,31 @@ const copy = {
 		partitionPlaceholder: 'brick, door, glass',
 		scatteringPlaceholder: 'pyramid, batten, hedge',
 		diffusionPlaceholder: 'semiellipse, triangle, QRD',
+		dampingPlaceholder: 'DYAD, ISD, Soundcoat',
+		facingPlaceholder: 'FM 125, 1584, 40',
+		resilientPlaceholder: 'polystyrene, wool, foam',
+		floorPlaceholder: 'hormigón, moqueta, viguetas',
+		ductPlaceholder: '610, round, break-in',
+		conditionPlaceholder: '20 °C, 50-70',
 		empty: 'No row matches that filter.',
 		material: 'Material',
 		surface: 'Surface',
 		gas: 'Gas',
 		finish: 'Finish',
 		partition: 'Construction',
+		facing: 'Facing',
+		floor: 'Floor or treatment',
+		duct: 'Duct',
+		condition: 'Condition',
 		state: 'State',
 		conditions: 'Conditions',
 		mounting: 'Mount',
 		per: 'Per',
 		solver: 'Computed with',
+		direction: 'Direction',
+		shape: 'Shape',
+		gauge: 'Sheet gauge',
+		weave: 'Weave',
 		fixedBy: 'What fixes it',
 		source: 'Source',
 		regionLabel: 'Published values, scrollable sideways',
@@ -98,7 +122,7 @@ const copy = {
 			derived: 'worked out by this library',
 			approximate: 'the page prints it with a tilde',
 			range: 'the page prints an interval',
-			bound: 'the page prints an upper bound',
+			bound: 'the page prints a bound and no value',
 			reported: 'the page lists several readings',
 			unquantified: 'the page prints a word here',
 		},
@@ -106,6 +130,10 @@ const copy = {
 	es: {
 		search: 'Filtrar por material',
 		searchGas: 'Filtrar por gas',
+		searchFacing: 'Filtrar por velo',
+		searchFloor: 'Filtrar por suelo',
+		searchDuct: 'Filtrar por conducto',
+		searchCondition: 'Filtrar por condición',
 		searchPlaceholder: 'steel, foam, glass',
 		groundPlaceholder: 'grass, snow, asphalt',
 		gasPlaceholder: 'methane, argon, steam',
@@ -113,17 +141,31 @@ const copy = {
 		partitionPlaceholder: 'brick, door, glass',
 		scatteringPlaceholder: 'pyramid, batten, hedge',
 		diffusionPlaceholder: 'semiellipse, triangle, QRD',
+		dampingPlaceholder: 'DYAD, ISD, Soundcoat',
+		facingPlaceholder: 'FM 125, 1584, 40',
+		resilientPlaceholder: 'polystyrene, wool, foam',
+		floorPlaceholder: 'hormigón, moqueta, viguetas',
+		ductPlaceholder: '610, round, break-in',
+		conditionPlaceholder: '20 °C, 50-70',
 		empty: 'Ninguna fila coincide con ese filtro.',
 		material: 'Material',
 		surface: 'Superficie',
 		gas: 'Gas',
 		finish: 'Acabado',
 		partition: 'Construcción',
+		facing: 'Velo resistivo',
+		floor: 'Suelo o tratamiento',
+		duct: 'Conducto',
+		condition: 'Condición',
 		state: 'Estado',
 		conditions: 'Condiciones',
 		mounting: 'Montaje',
 		per: 'Por',
 		solver: 'Calculado con',
+		direction: 'Dirección',
+		shape: 'Forma',
+		gauge: 'Calibre de chapa',
+		weave: 'Tejido',
 		fixedBy: 'Qué lo fija',
 		source: 'Fuente',
 		regionLabel: 'Valores publicados, con desplazamiento lateral',
@@ -134,47 +176,70 @@ const copy = {
 			derived: 'calculado por esta biblioteca',
 			approximate: 'la página lo imprime con una tilde',
 			range: 'la página imprime un intervalo',
-			bound: 'la página imprime una cota superior',
+			bound: 'la página imprime una cota, no un valor',
 			reported: 'la página enumera varias lecturas',
 			unquantified: 'la página imprime una palabra aquí',
 		},
 	},
 }[lang];
 
+/* The three things a catalogue is asked for by name: what its filter is
+   called, what it suggests you type into it and what its first column holds.
+   A lookup and not a chain of conditionals, because with seventeen catalogues
+   the chain was seven deep before this and the entry for a new one has to be
+   one line in an obvious place rather than a nesting level. Anything not named
+   here is a table of materials, which is what most of them are. */
+
 /** What the filter is called, which is not a material in every catalogue. */
-const searchLabel = section === 'gases' ? copy.searchGas : copy.search;
+const searchLabels: Partial<Record<typeof section, string>> = {
+	gases: copy.searchGas,
+	flowResistance: copy.searchFacing,
+	impactInsulation: copy.searchFloor,
+	ductTransmissionLoss: copy.searchDuct,
+	airAttenuation: copy.searchCondition,
+};
+const searchLabel = searchLabels[section] ?? copy.search;
 
 /** What to search for, which is not a material in the ground catalogue. */
-const placeholder =
-	section === 'ground'
-		? copy.groundPlaceholder
-		: section === 'gases'
-			? copy.gasPlaceholder
-			: section === 'absorption' || section === 'absorptionAreas'
-				? copy.absorptionPlaceholder
-				: section === 'transmissionLoss'
-					? copy.partitionPlaceholder
-					: section === 'scattering'
-						? copy.scatteringPlaceholder
-						: section === 'diffusion'
-							? copy.diffusionPlaceholder
-							: copy.searchPlaceholder;
+const placeholders: Partial<Record<typeof section, string>> = {
+	ground: copy.groundPlaceholder,
+	gases: copy.gasPlaceholder,
+	absorption: copy.absorptionPlaceholder,
+	absorptionAreas: copy.absorptionPlaceholder,
+	transmissionLoss: copy.partitionPlaceholder,
+	scattering: copy.scatteringPlaceholder,
+	diffusion: copy.diffusionPlaceholder,
+	damping: copy.dampingPlaceholder,
+	flowResistance: copy.facingPlaceholder,
+	resilientLayers: copy.resilientPlaceholder,
+	/* The impact insulation is the second catalogue after Arau's absorption
+	   whose rows are printed in Spanish, and this one is printed in Spanish in
+	   both languages of this page: the handbook it comes from is a Spanish
+	   translation, the row is a paragraph describing a floor, and a reader
+	   typing "concrete" into an English page finds nothing. */
+	impactInsulation: copy.floorPlaceholder,
+	ductTransmissionLoss: copy.ductPlaceholder,
+	airAttenuation: copy.conditionPlaceholder,
+};
+const placeholder = placeholders[section] ?? copy.searchPlaceholder;
 
 /** What the first column holds, which is not a material in every catalogue. */
-const rowHeading =
-	section === 'fluids'
-		? copy.state
-		: section === 'ground'
-			? copy.surface
-			: section === 'gases'
-				? copy.gas
-				: section === 'absorption' || section === 'absorptionAreas'
-					? copy.finish
-					: section === 'transmissionLoss'
-						? copy.partition
-						: ['scattering', 'diffusion', 'predictedScattering'].includes(section)
-							? copy.surface
-							: copy.material;
+const rowHeadings: Partial<Record<typeof section, string>> = {
+	fluids: copy.state,
+	ground: copy.surface,
+	gases: copy.gas,
+	absorption: copy.finish,
+	absorptionAreas: copy.finish,
+	transmissionLoss: copy.partition,
+	scattering: copy.surface,
+	diffusion: copy.surface,
+	predictedScattering: copy.surface,
+	flowResistance: copy.facing,
+	impactInsulation: copy.floor,
+	ductTransmissionLoss: copy.duct,
+	airAttenuation: copy.condition,
+};
+const rowHeading = rowHeadings[section] ?? copy.material;
 
 /** A column's heading in the language this page is published in. */
 const heading = (column: { heading: string; headingEs?: string }) =>
@@ -185,7 +250,19 @@ const tablesOf = (rows: { table: string }[]) => [...new Set(rows.map((row) => ro
 
 /** What the filter matches against: everything a reader might type. */
 const haystack = (row: Record<string, unknown>) =>
-	[row.name, row.variant, row.group, row.mounting, row.table, row.source, row.model]
+	[
+		row.name,
+		row.variant,
+		row.group,
+		row.mounting,
+		row.table,
+		row.source,
+		row.model,
+		row.direction,
+		row.shape,
+		row.gauge,
+		row.weave,
+	]
 		.filter(Boolean)
 		.join(' ')
 		.toLowerCase();
@@ -193,23 +270,44 @@ const haystack = (row: Record<string, unknown>) =>
 const data = catalogues[section];
 const tables = tablesOf(data.rows);
 
-/* The mounting column appears when a row fills it, which is the rule the
-   quantity columns follow: only the absorption tables have one, and only
-   the book that prints one fills it. Without the column the same board on
-   two mounts would be two rows of the same name with different numbers and
-   nothing on the page to say why. */
-const showsMounting = data.rows.some((row: { mounting?: string }) => row.mounting);
+/* The columns that hold a word rather than a quantity, each appearing when a
+   row of this catalogue fills it, which is the rule the quantity columns
+   follow: no catalogue pays a column for what another one carries. Every one
+   of them is the thing that tells two otherwise identical rows apart.
 
-/* Same rule for what an area is an area of. An audience row is per person
-   and the air is per cubic metre of air, and both are printed in the same
-   column of square metres, so the heading alone would read as if a cubic
-   metre of air absorbed 0,003 m² of nothing in particular. */
-/* Which solver produced a row, where a catalogue has rows that were
-   computed. It is not decoration: a coefficient a boundary element model
-   produced and one a reverberation room measured are the same number and
-   not the same evidence, and the reader has to see which before using it. */
-const showsModel = section !== 'fluids' && data.rows.some((row) => row.model);
-const showsPer = data.rows.some((row: { per?: string }) => row.per);
+   The mount, because the same board on the floor and over a 400 mm airspace
+   is two rows of one name with different numbers. What an area is an area of,
+   because an audience is priced per person and the air per cubic metre and
+   both are printed in square metres. Which solver produced a row, because a
+   coefficient a boundary element model computed and one a reverberation room
+   measured are the same number and not the same evidence. Which way the sound
+   crossed a duct wall, what shape that duct is and what gauge its sheet was,
+   because the six duct tables print one size in six rows. And how a glass
+   cloth is woven, which is the column its own page prints where the wire mesh
+   table prints a wire count.
+
+   `wrap` is what the value asks for rather than a style: a word or two sits
+   on its line, and only the phrase columns need the block that caps their
+   width. The order is the order they are declared in, and the solver stays
+   last because it is the widest. */
+const textColumns = (
+	[
+		{ field: 'mounting', label: copy.mounting, wrap: false },
+		{ field: 'per', label: copy.per, wrap: true },
+		{ field: 'direction', label: copy.direction, wrap: false },
+		{ field: 'shape', label: copy.shape, wrap: false },
+		{ field: 'gauge', label: copy.gauge, wrap: false },
+		{ field: 'weave', label: copy.weave, wrap: false },
+		/* The fluids carry a model too, and it is what fixes the state rather
+		   than a solver that computed a row, so it is the last column of that
+		   table and not one of these. */
+		{ field: 'model', label: copy.solver, wrap: true, notOn: 'fluids' },
+	] as { field: string; label: string; wrap: boolean; notOn?: string }[]
+).filter(
+	(column) =>
+		column.notOn !== section &&
+		data.rows.some((row: Record<string, unknown>) => row[column.field]),
+);
 ---
 
 <!-- The filters live in CatalogueFinder.astro, at the top of the page, and
@@ -238,9 +336,7 @@ const showsPer = data.rows.some((row: { per?: string }) => row.per);
 			<thead>
 				<tr>
 					<th scope="col">{rowHeading}</th>
-					{showsMounting && <th scope="col">{copy.mounting}</th>}
-					{showsPer && <th scope="col">{copy.per}</th>}
-					{showsModel && <th scope="col">{copy.solver}</th>}
+					{textColumns.map((column) => <th scope="col">{column.label}</th>)}
 					{section === 'fluids' && <th scope="col">{copy.conditions}</th>}
 					{
 						data.columns.map((column) => (
@@ -269,21 +365,15 @@ const showsPer = data.rows.some((row: { per?: string }) => row.per);
 								</span>
 								{row.note && <span class="note">{row.note}</span>}
 							</th>
-							{showsMounting && (
-								<td class="mounting" data-label={copy.mounting} data-empty={row.mounting ? undefined : true}>
-									{row.mounting}
+							{textColumns.map((column) => (
+								<td
+									class={column.field}
+									data-label={column.label}
+									data-empty={row[column.field] ? undefined : true}
+								>
+									{column.wrap ? <span class="wrap">{row[column.field]}</span> : row[column.field]}
 								</td>
-							)}
-							{showsPer && (
-								<td class="per" data-label={copy.per} data-empty={row.per ? undefined : true}>
-									<span class="wrap">{row.per}</span>
-								</td>
-							)}
-							{showsModel && (
-								<td class="model" data-label={copy.solver} data-empty={row.model ? undefined : true}>
-									<span class="wrap">{row.model}</span>
-								</td>
-							)}
+							))}
 							{section === 'fluids' && (
 								<td class="conditions" data-label={copy.conditions}>
 									<span class="wrap">
@@ -676,6 +766,25 @@ const showsPer = data.rows.some((row: { per?: string }) => row.per);
 		max-width: 22ch;
 	}
 
+	/* A row of the impact insulation is not named, it is described: the page
+	   prints a paragraph per construction, up to eleven hundred characters of
+	   it, because about a dozen of them are "the same as 18 except that ...".
+	   At the width every other catalogue is happy with, the whole catalogue
+	   was thirty-eight thousand pixels tall, one word per line, and the two
+	   numbers beside each description sat alone at the top of it.
+
+	   Both halves are needed, and the comments above say why: the floor is on
+	   the cell, because that is the one the automatic table layout honours,
+	   and the ceiling is on the block inside it, because a cell treats
+	   `max-width` as a suggestion. */
+	[data-catalogue='impactInsulation'] .name {
+		min-width: 44ch;
+	}
+
+	[data-catalogue='impactInsulation'] .name .wrap {
+		max-width: 52ch;
+	}
+
 	/* Wider than the name column, because a citation is four fields long and
 	   every row carries one: at 24ch "Hopkins (2007) Table A2, PDF pages
 	   635-636 (no printed folio)" wrapped to four lines and set the height of
@@ -722,10 +831,15 @@ const showsPer = data.rows.some((row: { per?: string }) => row.per);
 		white-space: normal;
 	}
 
-	/* The mount is one or four characters and belongs beside the name, not
-	   among the numbers: "A" right-aligned under a heading called Mount reads
-	   as a quantity. */
-	.mounting {
+	/* The short word columns belong beside the name and not among the numbers:
+	   "A" right-aligned under a heading called Mount reads as a quantity, and
+	   so does a sheet gauge of 24. None of them is longer than "flat oval", so
+	   none of them wraps and none needs the block that caps a phrase. */
+	.mounting,
+	.direction,
+	.shape,
+	.gauge,
+	.weave {
 		white-space: nowrap;
 		color: var(--sl-color-gray-2);
 	}

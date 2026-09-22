@@ -601,6 +601,15 @@ distributed, which is exactly where the five disagree.
   [Laboratory Insulation Measurement](/phonometry/buildings/insulation/insulation-lab/),
   [Dynamic stiffness of resilient materials](/phonometry/materials/resilient/dynamic-stiffness/) and
   [Predicting Panel Sound Insulation](/phonometry/buildings/design/panel-sound-insulation/).
+- Harris, C. M. (Ed.). (1995). *Manual de medidas acústicas y control del
+  ruido* (3.ª ed.). McGraw-Hill.
+  The Spanish edition of the handbook, cited in this tree as Harris 3e and not
+  to be confused with the window paper of F. J. Harris under Signal processing.
+  Chapter 32, "Aislamiento del sonido transmitido por estructuras", prints in
+  its Tables 32.1 to 32.8 the measured impact insulation class of forty-two
+  floor-ceiling constructions and the improvement six elastic surface
+  treatments add over a hard massive floor, which is the only published impact
+  insulation this library holds.
 - International Organization for Standardization. (2020). *Acoustics —
   Rating of sound insulation in buildings and of building elements — Part 1:
   Airborne sound insulation* (ISO 717-1:2020).
@@ -1312,6 +1321,13 @@ ceiling, and the three EBU Tech documents supply the meter behaviour, the
 loudness range and the production practice, together with the test signals the
 implementation is validated against.
 
+- ASHRAE (2019). *2019 ASHRAE handbook: Heating, ventilating, and
+  air-conditioning applications* (SI ed.), Chapter 49, "Noise and vibration
+  control". ASHRAE. ISBN 978-1-947192-13-3.
+  The design chapter this library reads its duct walls from: Tables 29 to 34,
+  the breakout and break-in transmission loss of a rectangular, round and flat
+  oval duct wall band by band, and Table 40, nine machine equipment room
+  walls, floors and ceilings with their Sound Transmission Class.
 - Fahy, F. J. (1995). *Sound intensity* (2nd ed.). E&FN Spon.
   ISBN 978-0-419-19810-9.
   [doi:10.4324/9780203475386](https://doi.org/10.4324/9780203475386).

@@ -144,7 +144,14 @@ jobs:
           echo "$(ls "$dir/images" | wc -l) clip files at phonometry-assets@$(cut -c1-12 assets.lock)"
       - uses: actions/setup-node@v7
         with:
-          node-version: 22
+          # The active LTS line, not the newest release. Astro asks for 22.12
+          # and Lighthouse for 22.19, so the floor is not what decides this:
+          # what decides it is that a documentation build whose accessibility
+          # audits drive a real browser should run on the line that gets
+          # security fixes for another two years, rather than on Current,
+          # which changes under it every two weeks and leaves support before
+          # the next annual release of this library.
+          node-version: 24
       - name: Enable the pnpm this site pins, via corepack
         # corepack ships with Node and installs pnpm cleanly. We avoid
         # pnpm/action-setup, whose bundled installer crashes while self-updating

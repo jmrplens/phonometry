@@ -197,7 +197,7 @@ const conformanceCheck = z
     }
   });
 
-const conformanceSchema = z.object({
+export const conformanceSchema = z.object({
   /** Bumped only on a shape change a reader cannot ignore. */
   schema: z.literal(2),
   library: z.string().min(1),

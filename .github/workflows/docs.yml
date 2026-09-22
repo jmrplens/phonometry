@@ -215,6 +215,15 @@ jobs:
         working-directory: site
       - name: Build site
         run: pnpm install --frozen-lockfile && pnpm build
+
+      # Every page, component and script of the site type-checked in strict
+      # mode. A catalogue row read through a field its table does not carry,
+      # or a DOM lookup that can come back null, used to reach the reader as a
+      # silently empty cell; this refuses them before anything is published.
+      # The TypeScript it runs on is pinned to 6.x in package.json: the native
+      # compiler of 7.x does not yet expose the API astro check drives.
+      - name: Check the types of every page and component
+        run: pnpm run check:types
         working-directory: site
       - name: Install the browser the audits drive
         # After the install, because this asks pnpm to run a binary the install

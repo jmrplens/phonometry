@@ -29,6 +29,8 @@
  * missing.
  */
 import { getEntry } from 'astro:content';
+import type { z } from 'astro/zod';
+import type { conformanceSchema } from '../content.config';
 
 import { markId, sprite } from '../lib/verdict-marks.mjs';
 
@@ -39,92 +41,14 @@ interface Props {
 const { lang = 'en' } = Astro.props;
 
 /**
- * The shape of `docs/conformance.json`, mirroring the zod schema in
- * `content.config.ts` field for field. `getEntry`'s own inference collapses
- * this to `any` through its conditional return type, the way `getCollection`
- * does for the `docs` schema (see routeData.ts), so the fields it hands back
- * are typed again here rather than trusted from the collection.
+ * The shape of `docs/conformance.json`, read off the zod schema that validates
+ * it in `content.config.ts`. `getEntry`'s own inference collapses this to
+ * `any` through its conditional return type, the way `getCollection` does for
+ * the `docs` schema (see routeData.ts), so the type is taken from the schema
+ * itself rather than trusted from the collection, and a field the schema gains
+ * or loses reaches this page without a second copy to keep in step.
  */
-interface ConformanceSide {
-	value?: number;
-	label?: string;
-	record?: Record<string, number>;
-}
-
-interface ConformanceCitedDocument {
-	kind: 'standard' | 'book' | 'article' | 'report' | 'web' | 'derivation';
-	designation: string;
-	edition?: string;
-	clause?: string;
-	lead?: string;
-	relation?: 'corroborates' | 'compares' | 'via' | 'supplies' | 'mentions';
-	written?: string;
-}
-
-interface ConformanceCheck {
-	id: string;
-	domain: string;
-	reference: {
-		cite: string;
-		tail?: string;
-		documents: ConformanceCitedDocument[];
-	};
-	quantity: string;
-	implements?: string;
-	kind: 'scalar' | 'mask' | 'record' | 'count';
-	expected: ConformanceSide;
-	computed: ConformanceSide;
-	unit?: string;
-	tolerance?: {
-		mode: 'absolute' | 'relative' | 'mask';
-		value?: number;
-	};
-	deviation: {
-		value?: number;
-		label?: string;
-	};
-	binding?: {
-		frequency_hz?: number;
-		lower?: number;
-		upper?: number;
-	};
-	precision: number;
-	verdict: 'pass' | 'fail' | 'by-design' | 'not-applicable';
-}
-
-interface ConformancePanel {
-	id: string;
-	title: string;
-	unit?: string;
-	rows: Record<string, unknown>[];
-}
-
-interface ConformanceDomain {
-	id: string;
-	title: string;
-	checks: number;
-	passing: number;
-}
-
-interface ConformanceReport {
-	schema: 2;
-	library: string;
-	generator: string;
-	counts: {
-		checks: number;
-		passing: number;
-		failing: number;
-		domains: number;
-		standards: number;
-		citations: number;
-		designations: number;
-		sources: number;
-	};
-	units: string[];
-	domains: ConformanceDomain[];
-	panels: ConformancePanel[];
-	checks: ConformanceCheck[];
-}
+type ConformanceReport = z.infer<typeof conformanceSchema>;
 
 const entry = await getEntry('conformance', 'report');
 if (!entry) {

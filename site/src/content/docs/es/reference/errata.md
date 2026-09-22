@@ -7412,9 +7412,9 @@ dos ediciones con las mismas entradas y en el mismo orden.
   parte A «Solids», fila «Cork», en la página impresa 605 (página 625 del
   PDF). Fuente no normativa: un libro de texto.
 - **Lo impreso:** corcho: densidad $250$ kg/m$^3$, módulo de Young
-  $6.2 \times 10^{10}$ Pa, coeficiente de Poisson y velocidad de barra en raya,
-  velocidad en medio infinito $500$ m/s, producto de frecuencia crítica y
-  espesor $130.7$.
+  $6.2 \times 10^{10}$ Pa, una raya en las celdas del coeficiente de Poisson
+  y de la velocidad de barra, velocidad en medio infinito $500$ m/s, producto
+  de frecuencia crítica y espesor $130.7$.
 - **El problema:** $6.2 \times 10^{10}$ Pa es el módulo de un vidrio, y es el
   valor que la misma tabla imprime para Glass (Pyrex) dos filas más abajo. El
   resto de la fila del corcho lo contradice: con la densidad y la velocidad que

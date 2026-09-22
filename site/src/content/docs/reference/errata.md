@@ -6971,8 +6971,9 @@ in the same order.
   part A "Solids", row "Cork", on printed page 605 (PDF page 625).
   Non-normative source: a textbook.
 - **The print:** Cork: density $250$ kg/m$^3$, Young's modulus
-  $6.2 \times 10^{10}$ Pa, Poisson ratio and bar speed a rule, bulk speed
-  $500$ m/s, product of critical frequency and thickness $130.7$.
+  $6.2 \times 10^{10}$ Pa, a dash in both the Poisson ratio and the bar speed
+  cells, bulk speed $500$ m/s, product of critical frequency and thickness
+  $130.7$.
 - **The problem:** $6.2 \times 10^{10}$ Pa is the modulus of a glass, and it
   is the value the same table prints for Glass (Pyrex) two rows below. The
   rest of the cork row contradicts it: with the density and the speed the row

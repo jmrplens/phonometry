@@ -376,6 +376,8 @@ The theory pages travel in their own shard (https://jmrplens.github.io/phonometr
 
 - [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): every check, with the standard, the clause, the normative expected value, the value the library computes and the delta
 - [Errata in published sources](https://jmrplens.github.io/phonometry/reference/errata/): defects found in published standards, each re-derived from that standard's own normative clauses
+- [Published catalogues](https://jmrplens.github.io/phonometry/reference/catalogues/): every value this library read off a printed page, with the book, the table and the page it came from, and what the page printed where a number is missing
+- [Report fiches](https://jmrplens.github.io/phonometry/reference/reports/): every PDF fiche the library renders, in the reporting format its standard defines, with the guide that explains the measurement behind each one
 - [Bibliography](https://jmrplens.github.io/phonometry/reference/bibliography/)
 - [About the author and the method](https://jmrplens.github.io/phonometry/start/about/)
 

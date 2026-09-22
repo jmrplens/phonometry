@@ -14,6 +14,7 @@
     "check:search": "node scripts/check-search-designation.mjs",
     "check:sidebar": "node scripts/with-preview.mjs -- node scripts/check-sidebar.mjs",
     "check:structured-data": "node scripts/check-structured-data.mjs",
+    "check:types": "astro check",
     "check:visual": "node scripts/with-preview.mjs -- sh -c 'node scripts/check-contrast.mjs && node scripts/check-home-headings.mjs && node scripts/check-lang-suggest.mjs && node scripts/check-page-chips.mjs'",
     "dev": "astro dev",
     "html-validate": "html-validate 'dist/**/*.html'",
@@ -39,9 +40,11 @@
     "starlight-sidebar-topics": "^0.9.0"
   },
   "devDependencies": {
+    "@astrojs/check": "^0.9.10",
     "html-validate": "^11.16.0",
     "lighthouse": "^13.5.0",
     "pa11y-ci": "^4.1.1",
-    "puppeteer": "25.11.0"
+    "puppeteer": "25.11.0",
+    "typescript": "^6.0.3"
   }
 }

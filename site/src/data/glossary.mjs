@@ -33,6 +33,30 @@
  *   guide       slug of the page that implements it, no locale, no base
  *   definition  `{ en, es }`, one sentence
  */
+
+/** @typedef {{ en: string, es: string }} Localized */
+
+/**
+ * @typedef {object} GlossaryTerm
+ * @property {string} id
+ * @property {string} [symbol]
+ * @property {Localized} [name]
+ * @property {Localized} [qualifier]
+ * @property {string | Localized} [unit]
+ * @property {string | Localized} standard
+ * @property {string | Localized} [clause]
+ * @property {string} guide
+ * @property {Localized} definition
+ */
+
+/**
+ * @typedef {object} GlossaryGroup
+ * @property {string} id
+ * @property {Localized} label
+ * @property {GlossaryTerm[]} terms
+ */
+
+/** @type {GlossaryGroup[]} */
 export const glossary = [
   {
     id: "sound-pressure-power-and-intensity-levels",

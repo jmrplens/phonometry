@@ -20,7 +20,7 @@ import { topics } from '../../data/topics.mjs';
  * on the route the row links to: the landing names ten of the thirteen topics,
  * and a reader who meets a drawing here meets it again in the tree.
  */
-const topicIdOf = (href) => {
+const topicIdOf = (href: string) => {
   const route = href.replace(/^\/phonometry/, '');
   return topics.find((topic) => topic.link === route)?.id ?? '';
 };

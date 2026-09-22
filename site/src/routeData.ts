@@ -1,5 +1,5 @@
 import { defineRouteMiddleware, type StarlightRouteData } from '@astrojs/starlight/route-data';
-import { getCollection } from 'astro:content';
+import { getCollection, type CollectionEntry } from 'astro:content';
 import { hasMarkdownCopy, markdownCopyPath, routeOf } from './lib/page-markdown.mjs';
 
 const BASE = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
@@ -23,7 +23,7 @@ const published = new Set(
     // Astro reports the collection root's index as `index` while Starlight
     // hands the same page the empty id, so both sides go through the one rule
     // the generator uses (src/lib/page-markdown.mjs) before they are compared.
-    .map((entry) => routeOf(entry.id))
+    .map((entry: CollectionEntry<'docs'>) => routeOf(entry.id))
     .filter(hasMarkdownCopy),
 );
 

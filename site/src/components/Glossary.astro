@@ -21,7 +21,7 @@
  * Spanish. A slug that resolves to no page is a build error rather than a
  * dangling link, which is what the four-way copy could never notice.
  */
-import { getCollection } from 'astro:content';
+import { getCollection, type CollectionEntry } from 'astro:content';
 import katex from 'katex';
 import { glossary } from '../data/glossary.mjs';
 import { basePath, siteUrl } from '../data/site.mjs';
@@ -46,7 +46,7 @@ const localized = (value: string | Record<string, string> | undefined) =>
 
 // Guide titles, by slug, in this locale. Starlight ids carry the locale prefix
 // on the Spanish side and nothing on the English one.
-const docs = await getCollection('docs');
+const docs: CollectionEntry<'docs'>[] = await getCollection('docs');
 const titleOf = new Map(
 	docs.map((entry) => [entry.id.replace(/^es\//, ''), entry] as const)
 		.filter(([, entry]) => (lang === 'es') === entry.id.startsWith('es/'))
@@ -167,7 +167,10 @@ const jsonld = {
 	inLanguage: lang,
 	hasDefinedTerm: terms.map((term) => {
 		const code = termCode(term.label);
-		const where = [term.standardText, term.clauseText].filter(Boolean).map(plain).join(', ');
+		const where = [term.standardText, term.clauseText]
+			.filter((value): value is string => Boolean(value))
+			.map(plain)
+			.join(', ');
 		const unit = term.unitText
 			? ` ${lang === 'es' ? 'Unidad' : 'Unit'}: ${plain(term.unitText)}.`
 			: '';

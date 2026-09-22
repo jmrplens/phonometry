@@ -18,7 +18,7 @@
 import { areaLabelFor, artKeyFor } from '../../lib/og-areas.mjs';
 import { generateOgImage } from '../../utils/og-image';
 import type { APIContext } from 'astro';
-import { getCollection } from 'astro:content';
+import { getCollection, type CollectionEntry } from 'astro:content';
 
 interface Props {
   title: string;
@@ -38,7 +38,7 @@ function isApiReference(id: string): boolean {
  * card carries the Spanish title and the Spanish area name.
  */
 export async function getStaticPaths() {
-  const pages = await getCollection('docs');
+  const pages: CollectionEntry<'docs'>[] = await getCollection('docs');
   return pages
     .filter((page) => !isApiReference(page.id))
     .map((page) => {

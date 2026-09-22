@@ -98,6 +98,8 @@ function sourceParts(ref: Reference): Part[] {
 			if (ref.pages) parts.push({ text: `, ${ref.pages}` });
 			return parts;
 		}
+		default:
+			return [];
 	}
 }
 

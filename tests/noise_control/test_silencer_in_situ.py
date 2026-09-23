@@ -9,7 +9,7 @@ when the two temperatures agree.
 
 The second half of the file is what other people printed. Annex B of
 ISO 14163:1998 works the conversion of clause 9.1.5 through three spectra; a
-2014 master's thesis at the Universidad Politecnica de Madrid measured three
+2014 master's thesis at the Universidad Politécnica de Madrid measured three
 splitter silencers to UNE-EN ISO 11820 and printed the whole reduction; and
 six textbooks and engineering guidelines print worked examples of the closed
 forms ISO 11820 shares with the rest of the field. Those numbers, with the

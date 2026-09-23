@@ -186,6 +186,15 @@ subscripts:
 decimal-comma:
 	$(PYTHON) scripts/check_decimal_comma.py
 
+# The words of the Spanish tables, read for the marks a keyboard without the
+# Spanish layout drops. Twenty-nine entries shipped as "Correccion", "medicion"
+# and "aqui", and every other gate was green: the language gate saw translated
+# strings and the figures matched their generator. This fails on a Spanish
+# value carrying a form that is never correct without its accent or eñe, in the
+# tables and in the example fiches whose builders ask for Spanish.
+spanish-accents:
+	$(PYTHON) scripts/check_spanish_accents.py
+
 # The same defect read from the other end: not the labels a pass might miss but
 # the ones it did miss, in the figures as committed. Three machines write the
 # Spanish decimal comma (the library's localize_axes, format_frequency_axis
@@ -611,7 +620,7 @@ check: lint security test
 	assets animations animation-freshness posters brand lighthouse \
 	llms pypi-readme api-docs site-reports conformance install-hooks test test-perf test-gpu coverage check \
 	snippets snippets-static claims subscripts docstring-math language-forwarding \
-	fence-names decimal-comma figure-decimal-point figure-legends figure-tick-clearance \
+	fence-names decimal-comma spanish-accents figure-decimal-point figure-legends figure-tick-clearance \
 	figure-text-clearance figure-minus-sign control-characters hazards dead-constants \
 	conformance-rows conformance-vocabulary parameter-units frozen-constants published-sources \
 	solid-agreement shared-sources catalogue-data published-catalogues

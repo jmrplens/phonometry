@@ -14,14 +14,14 @@ The documents are:
 
 * W. Lindeman, "Comparison of Noise Barrier Insertion-Loss Methodologies",
   Transportation Research Record 1033, Transportation Research Board, 1985.
-* R. Cordero and others, "Metodologia experimental para medida perdidas por
-  insercion de pantallas acusticas de carretera", 41 Congreso Nacional de
-  Acustica, Leon, 2010, paper AAM_026.
+* R. Cordero and others, "Metodología experimental para medida pérdidas por
+  inserción de pantallas acústicas de carretera", 41 Congreso Nacional de
+  Acústica, León, 2010, paper AAM_026.
 * A. Jagniatinskis, B. Fiks and M. Mickaitis, "Determination of Insertion Loss
   of Acoustic Barriers under Specific Conditions", Procedia Engineering 187,
   2017.
-* L. Rodino and F. Masson, "Diseno e implementacion de una barrera acustica
-  para motores fuera de borda", XIII Congreso Argentino de Acustica, Buenos
+* L. Rodiño and F. Masson, "Diseño e implementación de una barrera acústica
+  para motores fuera de borda", XIII Congreso Argentino de Acústica, Buenos
   Aires, 2015, paper AdAA2015-A009.
 * C. S. Y. Lee and G. G. Fleming, *Measurement of Highway-Related Noise*,
   FHWA-PD-96-046, Federal Highway Administration, May 1996.
@@ -39,7 +39,7 @@ from __future__ import annotations
 # Cordero and others (2010): a window in the place of a barrier
 # ---------------------------------------------------------------------------
 
-#: Tabla 1 "Niveles equivalentes de los puntos de evaluacion", printed folio 5
+#: Tabla 1 "Niveles equivalentes de los puntos de evaluación", printed folio 5
 #: (PDF page 5): the four A-weighted levels of each case, in the argument order
 #: of ``measured_insertion_loss_direct``, that is (L_ref,B, L_ref,A, L_r,B,
 #: L_r,A), in decibels. "Antes" is the window open and "despues" the window

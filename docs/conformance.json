@@ -1683,11 +1683,11 @@
       "id": "room-building-acoustics/manual-de-acustica-ambiental-y-arquitectonica-ejemplo-7-1/reported-r-a-of-the-field-test-wall-printed-51-dba-r-w-52-c-1",
       "domain": "room-building-acoustics",
       "reference": {
-        "cite": "Manual de acustica ambiental y arquitectonica, Ejemplo 7.1",
+        "cite": "Manual de acústica ambiental y arquitectónica, Ejemplo 7.1",
         "documents": [
           {
             "kind": "book",
-            "designation": "Manual de acustica ambiental y arquitectonica",
+            "designation": "Manual de acústica ambiental y arquitectónica",
             "clause": "Ejemplo 7.1"
           }
         ]
@@ -1715,11 +1715,11 @@
       "id": "room-building-acoustics/manual-de-acustica-ambiental-y-arquitectonica-ejemplo-7-1/reported-r-a-tr-of-the-same-wall-printed-47-dba-r-w-52-ctr-5",
       "domain": "room-building-acoustics",
       "reference": {
-        "cite": "Manual de acustica ambiental y arquitectonica, Ejemplo 7.1",
+        "cite": "Manual de acústica ambiental y arquitectónica, Ejemplo 7.1",
         "documents": [
           {
             "kind": "book",
-            "designation": "Manual de acustica ambiental y arquitectonica",
+            "designation": "Manual de acústica ambiental y arquitectónica",
             "clause": "Ejemplo 7.1"
           }
         ]
@@ -1747,11 +1747,11 @@
       "id": "room-building-acoustics/cte-catalogo-de-elementos-constructivos/window-size-correction-of-ra-manual-ejemplo-7-4-4-m2-window-2-db",
       "domain": "room-building-acoustics",
       "reference": {
-        "cite": "CTE Catalogo de Elementos Constructivos",
+        "cite": "CTE Catálogo de Elementos Constructivos",
         "documents": [
           {
             "kind": "standard",
-            "designation": "CTE Catalogo",
+            "designation": "CTE Catálogo",
             "clause": "de Elementos Constructivos"
           }
         ]
@@ -37286,11 +37286,11 @@
       "id": "in-situ-measurement-of-silencers-screens-and-barriers/rodino-masson-2015-tabla-2-printed-folio-7-pdf-page-7/six-printed-insertion-losses-of-a-screen-measured-with-no-reference-microphone-where-8-2-1-degenerates-to-the-plain-level-difference",
       "domain": "in-situ-measurement-of-silencers-screens-and-barriers",
       "reference": {
-        "cite": "Rodino & Masson (2015) Tabla 2, printed folio 7 (PDF page 7)",
+        "cite": "Rodiño & Masson (2015) Tabla 2, printed folio 7 (PDF page 7)",
         "documents": [
           {
             "kind": "article",
-            "designation": "Rodino & Masson",
+            "designation": "Rodiño & Masson",
             "edition": "(2015)",
             "clause": "Tabla 2, printed folio 7 (PDF page 7)"
           }

@@ -44,6 +44,9 @@ from figures.i18n import _ES_PATTERNS, _decimal_comma, lookup
         "Ec. 13.1  (peor Δ 13 dB)",
         "§ 7.4",
         "§7.4",
+        # A worked example of a book is numbered like its clauses.
+        "(geometría del Ejemplo 7.5: 6 m² de parte ciega)",
+        "Ejemplos 7.2 y 7.5",
         # Compound references: every number of the list is a reference.
         "Bies Ecs. 8.44, 8.46",
         "Ecs. 13.27-13.33",
@@ -90,6 +93,7 @@ def test_reference_numbers_keep_their_dots(text: str) -> None:
         ("Forma cerrada (FOM = 82.7 dB)", "Forma cerrada (FOM = 82,7 dB)"),
         ("la fórmula da 0.5", "la fórmula da 0,5"),
         ("la espec. 3.5 pide margen", "la espec. 3,5 pide margen"),
+        ("por ejemplo, 0.5 dB", "por ejemplo, 0,5 dB"),
         # Already-Spanish strings pass through unchanged.
         ("ya son 3,5 dB", "ya son 3,5 dB"),
         # Bare numbers (the tick-label path).

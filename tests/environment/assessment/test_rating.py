@@ -112,8 +112,8 @@ def test_composite_rejects_non_finite_hours() -> None:
 
 
 def test_lden_manual_es_published_example() -> None:
-    # Aviles Lopez & Perera Martin, Manual de acustica ambiental y
-    # arquitectonica (Paraninfo), Ejemplo 1.7 (p. 27): Ld = 65, Le = 62,
+    # Avilés López & Perera Martín, Manual de acústica ambiental y
+    # arquitectónica (Paraninfo), Ejemplo 1.7 (p. 27): Ld = 65, Le = 62,
     # Ln = 54 dBA give Lden = 65.1 dB with the standard 12/4/8 h day.
     # The book prints one decimal (exact value 65.12), so 0.05 covers it.
     assert environment.lden(65.0, 62.0, 54.0) == pytest.approx(65.1, abs=0.05)

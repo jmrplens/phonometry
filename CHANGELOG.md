@@ -107,6 +107,50 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **The Spanish building-acoustics figures have their accents and eñes
+  back.** Twenty-nine Spanish labels of six figures had been typed without
+  them: `background_correction_regimes` read "Correccion por ruido de fondo",
+  "limite de medicion (1,3 dB fijos, senalar la banda)", "la regla in situ
+  termina aqui" and "Margen senal-fondo", and
+  `insulation_adaptation_terms`, `fast_reverberation_correction`,
+  `lab_versus_field_insulation`, `composite_facade_weak_element` and
+  `intensity_field_indicator` carried "indice", "especificacion", "hormigon",
+  "Numero", "trafico", "caida", "maximo", "energetico", "terminos",
+  "reverberacion", "transmision", "debil", "geometria", "Calificacion",
+  "Formula", "despues", "absorcion" and "presion", with "por si solo", "aun
+  subiendo" and "mas de 1 dB" where the sentence needs sí, aún and más. The
+  Spanish of those six figures now reads as Spanish, and every other Spanish
+  table of the figures, the plates and the library's plots and report fiches
+  was read word by word against a Spanish dictionary without finding another.
+  The RD 1367/2007 example fiche had the same defect in the header and the
+  phase labels its example writes into the page ("Maquina ruidosa activa",
+  "punto de evaluacion mas desfavorable", "Sonometro integrador-promediador",
+  "Verificacion antes y despues, desviacion"), and now prints them correctly.
+  The same Spanish title of `composite_facade_weak_element` wrote the number
+  of a worked example as a decimal, "Ejemplo 7,5"; an example number is a
+  reference like a clause or a table, so it now keeps its dot, as "Tabla 13.8"
+  already did.
+  `make spanish-accents` reads the translation tables of the figures, the
+  diagrams and the library's renderers, and the example fiches built in
+  Spanish, and fails on a form that is never correct Spanish without its
+  accent or eñe (a singular in -ción or -sión, aquí, señal, límite, número,
+  máximo and the rest of its list), with an allow-list for the verb a listed
+  noun can also spell that fails when an entry no longer matches.
+- **Spanish documents are cited under the titles they print.** The API
+  reference of `building.regulation.spain` named the *Documento Basico HR
+  Proteccion frente al ruido* of the Codigo Tecnico de la Edificacion, its
+  Catalogo de Elementos Constructivos and the worked examples of Aviles Lopez
+  and Perera Martin, and the conformance report cited their Manual de
+  acustica ambiental y arquitectonica, the Catalogo again and a paper of
+  Rodiño and Masson as "Rodino". They now read *Documento Básico HR
+  Protección frente al ruido*, Código Técnico de la Edificación, Catálogo de
+  Elementos Constructivos, Avilés López and Perera Martín, Manual de acústica
+  ambiental y arquitectónica and Rodiño & Masson, as the documents print them,
+  and so do the docstrings and comments that cite them. A conformance id now
+  writes an accented letter as its base letter, so
+  `manual-de-acustica-ambiental-y-arquitectonica-ejemplo-7-1` is still the id
+  of those rows and no id in the report moved; the 1261 checks and their
+  results are unchanged.
 - **No label sits on a tick label, on another label or under a line any
   more.** A label placed by hand could land on anything near it, and on 132
   drawings, 82 plates and 50 plots, one did. The "U = 1.0 dB" of

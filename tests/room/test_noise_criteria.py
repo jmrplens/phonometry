@@ -288,8 +288,8 @@ def test_rc_plot_returns_axes() -> None:
 
 
 def test_nc_rating_manual_es_measured_spectrum() -> None:
-    # Aviles Lopez & Perera Martin, Manual de acustica ambiental y
-    # arquitectonica (Paraninfo), Ejemplo 8.3 (p. 564): measured octave
+    # Avilés López & Perera Martín, Manual de acústica ambiental y
+    # arquitectónica (Paraninfo), Ejemplo 8.3 (p. 564): measured octave
     # spectrum 46/44/38/31/27/22/24/21 dB at 63 Hz - 8 kHz. With the classic
     # 5-step NC family the book rates it NC-30 by tangency and refines to
     # NC-27 by sliding the curve down 3 dB. The interpolated ANSI S12.2

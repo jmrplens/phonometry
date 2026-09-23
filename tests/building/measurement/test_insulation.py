@@ -622,8 +622,8 @@ def test_impact_one_decimal_reference_floor() -> None:
 # ISO 717-1 rating of a published Spanish field test report (CTE DB-HR chain)
 # ---------------------------------------------------------------------------
 
-# Aviles Lopez & Perera Martin, "Manual de acustica ambiental y
-# arquitectonica" (Paraninfo, ISBN 978-84-283-3814-1), Ejemplo 7.2
+# Avilés López & Perera Martín, "Manual de acústica ambiental y
+# arquitectónica" (Paraninfo, ISBN 978-84-283-3814-1), Ejemplo 7.2
 # (pp. 394-395): apparent sound reduction index R' of a separating wall from a
 # real field test report, one-third-octave bands 100 Hz - 3150 Hz (the report
 # extends to 5 kHz; the 16 ISO 717-1 rating bands are used here).

@@ -7,8 +7,8 @@ sidebar:
 
 Spanish building code CTE DB-HR: global indices and requirement checks.
 
-The *Documento Basico HR Proteccion frente al ruido* of the Spanish Codigo
-Tecnico de la Edificacion states its requirements in A-weighted global
+The *Documento Básico HR Protección frente al ruido* of the Spanish Código
+Técnico de la Edificación states its requirements in A-weighted global
 quantities that are close relatives of, but not identical to, the ISO 717-1
 weighted ratings: `RA`, `RA,tr`, `DnT,A` and `D2m,nT,Atr`.
 
@@ -51,7 +51,7 @@ definition to UNE-EN ISO 717-1 without narrowing the frequency range; the
 reading that they must be the *enlarged-range* terms `C100-5000` and
 `Ctr,100-5000`, because the DB-HR indices run to 5 kHz while the ISO 717-1
 core range stops at 3150 Hz, is the one the Spanish literature makes explicit
-(Aviles Lopez & Perera Martin, note to expressions [7.15] and [7.16]). The
+(Avilés López & Perera Martín, note to expressions [7.15] and [7.16]). The
 library keeps both routes: this module implements the direct Formula
 (A.5)-(A.7) route, which is the normative one for DB-HR, and
 [`weighted_rating_extended`](/phonometry/reference/api/building/ratings/#weighted_rating_extended) supplies the
@@ -68,7 +68,7 @@ outside (Table 2.1, keyed on the day noise index `Ld` of the site), impact
 sound pressure level, and reverberation time in classrooms, conference halls,
 dining rooms and restaurants.
 
-**Window size (Catalogo de Elementos Constructivos).** Windows are tested on
+**Window size (Catálogo de Elementos Constructivos).** Windows are tested on
 about 1,8 m2 specimens; larger windows insulate less, and the CEC corrects
 `RA` and `RA,tr` by 0 to -3 dB by total window area.
 
@@ -391,7 +391,7 @@ db_hr_party_wall_requirement(
 
 Airborne requirement on a party wall between two buildings (DB-HR 2.1.1 c).
 
-For a habitable or protected room against a *medianeria*, DB-HR offers two
+For a habitable or protected room against a *medianería*, DB-HR offers two
 alternative routes: either each of the two enclosing leaves reaches
 `D2m,nT,Atr` of at least 40 dBA, or the two leaves taken together reach
 `DnT,A` of at least 50 dBA. They are alternatives, not cumulative
@@ -649,7 +649,7 @@ window_size_correction(area: float) -> int
 Window-size correction of `RA` / `RA,tr`, in dB (CTE CEC).
 
 Windows are tested on specimens of about 1,8 m2; a larger window insulates
-less. The Catalogo de Elementos Constructivos of the CTE corrects the
+less. The Catálogo de Elementos Constructivos of the CTE corrects the
 catalogue value by 0 dB up to 2,7 m2, -1 dB over 2,7 to 3,6 m2, -2 dB over
 3,6 to 4,6 m2 and -3 dB above 4,6 m2.
 

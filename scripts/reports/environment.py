@@ -10,6 +10,8 @@ and the RD 1367/2007 assessment of an activity against the limits binding it.
 
 from __future__ import annotations
 
+from typing import Any
+
 import numpy as np
 
 import phonometry as ph
@@ -301,11 +303,11 @@ def _barrier_insertion_loss_example() -> tuple[object, ReportMetadata, str]:
     return result, metadata, "iso9613_barrier_insertion_loss_example.pdf"
 
 
-def _rd1367_example() -> tuple[object, ReportMetadata, str]:
+def _rd1367_example() -> tuple[object, ReportMetadata, str, dict[str, Any]]:
     """RD 1367/2007 fiche: the noise assessment of an activity.
 
-    The published worked case of Aviles Lopez & Perera Martin, Manual de
-    acustica ambiental y arquitectonica, Ejemplos 3.1 to 3.3: an activity on
+    The published worked case of Avilés López & Perera Martín, Manual de
+    acústica ambiental y arquitectónica, Ejemplos 3.1 to 3.3: an activity on
     residential land (acoustic area type a) open from 9 h to 21 h, with a noisy
     machine running from 9 h to 15 h. The two measured noise phases are
     LAeq,5s = 50 dB with Kt = 6 and Kf = 3 dB (so LKeq,5s = 59 dB) and
@@ -316,12 +318,15 @@ def _rd1367_example() -> tuple[object, ReportMetadata, str]:
     criteria are met but the annual LK,d is not, so a new activity does not
     comply.
 
-    The fiche renders in Spanish, the language of the regulation it applies.
+    The fiche is asked for in Spanish, the language of the regulation it
+    applies. The language is named here although it is the renderer's
+    default, because naming it is how ``scripts/check_spanish_accents.py``
+    finds the Spanish this example writes into the fiche.
     """
     day = [
         ph.environment.NoisePhase(2.0, 0.0, label="Actividad cerrada"),
         ph.environment.NoisePhase(
-            6.0, 50.0, kt=6.0, kf=3.0, label="Maquina ruidosa activa"
+            6.0, 50.0, kt=6.0, kf=3.0, label="Máquina ruidosa activa"
         ),
         ph.environment.NoisePhase(4.0, 48.0, kt=3.0, kf=3.0, label="Resto de fuentes"),
     ]
@@ -337,13 +342,13 @@ def _rd1367_example() -> tuple[object, ReportMetadata, str]:
     metadata = ReportMetadata(
         specimen="Actividad con maquinaria, horario 9 h a 21 h",
         client="Example client",
-        test_room="Ambiente exterior, punto de evaluacion mas desfavorable",
-        instrumentation="Sonometro integrador-promediador clase 1",
-        calibration="Verificacion antes y despues, desviacion 0,1 dB",
+        test_room="Ambiente exterior, punto de evaluación más desfavorable",
+        instrumentation="Sonómetro integrador-promediador clase 1",
+        calibration="Verificación antes y después, desviación 0,1 dB",
         measurement_standard="RD 1367/2007 Anexo IV",
         test_date="2026-07-29",
         laboratory="Phonometry reference example",
         operator="phonometry",
         report_id="EXAMPLE-RD1367",
     )
-    return result, metadata, "rd1367_activity_example.pdf"
+    return result, metadata, "rd1367_activity_example.pdf", {"language": "es"}

@@ -3,18 +3,18 @@
 
 Two independent oracle families anchor this module.
 
-**The code itself** (CTE Documento Basico HR "Proteccion frente al ruido"):
+**The code itself** (CTE Documento Básico HR "Protección frente al ruido"):
 the four normalised A-weighted source spectra of Annex A Tables A.2 to A.5,
 the global-index formulae (A.5) to (A.7), the facade requirement Table 2.1,
 the airborne and impact requirements of clauses 2.1.1 and 2.1.2, the
 reverberation limits of clause 2.2 and the rounding rule of 3.1.3.1 point 4.
 
-**Aviles Lopez & Perera Martin, Manual de acustica ambiental y arquitectonica
+**Avilés López & Perera Martín, Manual de acústica ambiental y arquitectónica
 (Paraninfo), chapter 7**: Ejemplo 7.2 (printed pages 394-395) publishes a full
 eighteen-band ``R'`` spectrum and its global ``R'A`` = 51,4 dBA; Ejercicio 7.1
 (printed page 395) a full ``D2m,nT`` spectrum and its ``D2m,nT,Atr``
 = 32,8 dBA; Ejemplo 7.4 with Tabla 7.3 (printed page 408) the window-size
-correction of the Catalogo de Elementos Constructivos, a 4 m2 window dropping
+correction of the Catálogo de Elementos Constructivos, a 4 m2 window dropping
 from ``RA`` 26 dBA to 24 dBA.
 
 Ejemplo 7.1 (printed pages 391-392) reports the same wall as ``R'w`` = 52 dB
@@ -265,7 +265,7 @@ def test_railway_dominant_facade_is_assessed_as_d2m_nt_a() -> None:
 
     "Cuando el ruido exterior dominante es el ferroviario o el de estaciones
     ferroviarias, se debe usar la magnitud de aislamiento global D2m,nT,A.
-    Cuando el ruido exterior dominante es el de automoviles o el de
+    Cuando el ruido exterior dominante es el de automóviles o el de
     aeronaves, la magnitud del aislamiento global es D2m,nT,Atr." Table H.1
     prints the same split, routing railway through Formula (A.5) and road
     traffic and aircraft through (A.6).
@@ -374,7 +374,7 @@ def test_rounding_is_half_up_not_bankers() -> None:
     ],
 )
 def test_window_size_correction_table(area: float, expected: int) -> None:
-    """Manual Tabla 7.3 (from the CTE Catalogo de Elementos Constructivos).
+    """Manual Tabla 7.3 (from the CTE Catálogo de Elementos Constructivos).
 
     Every breakpoint of the table is checked on both sides: 0 dB up to
     2,7 m2, -1 dB over (2,7 - 3,6], -2 dB over (3,6 - 4,6] and -3 dB above.

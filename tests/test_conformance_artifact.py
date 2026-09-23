@@ -797,10 +797,10 @@ def test_a_split_that_cuts_a_name_falls_through_to_the_next_reading() -> None:
             ("derivation", "Poiseuille limit (Stinson 1991)", None, None),
         ),
         (
-            "Manual de acustica ambiental y arquitectonica, Ejemplo 7.1",
+            "Manual de acústica ambiental y arquitectónica, Ejemplo 7.1",
             (
                 "book",
-                "Manual de acustica ambiental y arquitectonica",
+                "Manual de acústica ambiental y arquitectónica",
                 None,
                 "Ejemplo 7.1",
             ),
@@ -1442,3 +1442,25 @@ def test_a_record_value_that_moved_is_not_tolerated_away() -> None:
     assert outcome.kind is registry.Kind.RECORD
     problems = compare._check_problems(stale, fresh)
     assert any("computed.record.survey" in problem for problem in problems), problems
+
+
+def test_a_spanish_title_keeps_the_id_it_had_without_its_accents() -> None:
+    """The slug keeps the base letter of a spelling mark, and nothing else moves.
+
+    "Catálogo" slugged to ``cat-logo`` before, so writing a Spanish title
+    correctly would have renamed its rows. The circumflex is notation here (the
+    ``â`` of a peak acceleration), and a letter carrying it is still dropped, so
+    no id already in the artefact changes.
+    """
+    assert artifact.slug("CTE Catálogo de Elementos Constructivos") == (
+        artifact.slug("CTE Catalogo de Elementos Constructivos")
+    )
+    assert artifact.slug("Rodiño & Masson (2015)") == "rodino-masson-2015"
+    assert artifact.slug("Calibration L_v from â = 9,81 m/s²") == (
+        "calibration-l-v-from-9-81-m-s"
+    )
+
+
+def test_a_decomposed_accent_reduces_to_the_same_id() -> None:
+    """ "á" and "a" with a combining acute are one letter, so one slug."""
+    assert artifact.slug("Catálogo") == artifact.slug("Catálogo") == "catalogo"

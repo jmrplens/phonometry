@@ -238,6 +238,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- **`io.read_blocks` yields `Signal` blocks.** `io.read` returns a `Signal`
+  and its streaming twin yielded bare float64 arrays, so a block lost the
+  rate, the calibration, the channel labels and the provenance the whole-file
+  read carries, and the docstring had to tell the caller to apply the
+  calibration by hand. Each block is now a `Signal`: `read(path)` cropped to
+  its span, samples and metadata alike. `read_blocks` takes the same
+  `calibration_factor=` as `read` and applies the sidecar by the same
+  precedence, so a block from a calibrated file reaches the filters and the
+  level functions in pascals, and a factor applied by hand on top of it
+  counts twice. Arithmetic on a block goes through `np.asarray`, as it does
+  for any `Signal`. The block-streaming guide printed 66.42 dB for a loop
+  that computes 67.29 dB; it prints what the loop computes now.
+
 - **Every `.plot()` takes the axes first and the rest by name.** Two hundred
   and fifty-four results read `plot(ax=None, *, language=..., ...)`, and nine
   did not. `LoudspeakerCharacteristics.plot` and `MicrophoneCharacteristics.plot`

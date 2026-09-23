@@ -30481,13 +30481,16 @@ Python readers (`npTDMS`, `pyuff`).
 
 A night of monitoring at 48 kHz/24-bit is gigabytes; as float64 it is
 ~5.5 GiB per stereo hour, which no analysis needs in memory at once.
-`read_blocks()` yields bare float64 blocks, not `Signal` objects: the same
-sample values as `np.asarray(read(...))`, with the same scaling and channel
-convention (base-install seek-and-decode for linear WAV including RF64),
-but no calibration or provenance riding along. Apply the calibration factor
-where the level is computed, as the loop below does; the stateful filters of
-[block processing](https://jmrplens.github.io/phonometry/signals/filters/block-processing/) consume
-the stream unchanged:
+`read_blocks()` yields `Signal` blocks, each one what `read()` would return
+for the same span: the same scaling and channel convention (base-install
+seek-and-decode for linear WAV including RF64), and the same rate,
+calibration, channel labels and provenance riding along. The calibration
+follows the rule `read()` follows, so a factor passed here or found in the
+sidecar makes every block present its samples in pascals to the filters and
+the level functions, and no factor is applied by hand. The stateful filters
+of [block processing](https://jmrplens.github.io/phonometry/signals/filters/block-processing/) consume the
+stream unchanged, and the arithmetic below takes `np.asarray` of what they
+return, as it would of any `Signal`:
 
 ```python
 from phonometry import filters
@@ -30495,18 +30498,16 @@ from phonometry import filters
 weighter = filters.WeightingFilter(fs, "A", stateful=True)
 total_energy = 0.0
 total_samples = 0
-for block in io.read_blocks("measurement.wav", block_size=1 << 16):
-    weighted = weighter.filter(block)
+for block in io.read_blocks("measurement.wav", block_size=1 << 16,
+                            calibration_factor=cal):
+    weighted = np.asarray(weighter.filter(block))   # pascals, A-weighted
     total_energy += float(np.sum(weighted ** 2))
     total_samples += weighted.shape[-1]
 
-streamed = 10 * np.log10((cal ** 2 * total_energy / total_samples)
-                         / (2e-5) ** 2)
-whole = float(signals.leq(
-    filters.weighting_filter(np.asarray(sig), fs, curve="A"),
-    calibration_factor=cal))
+streamed = 10 * np.log10((total_energy / total_samples) / (2e-5) ** 2)
+whole = float(signals.leq(filters.weighting_filter(sig, curve="A")))
 print(f"streamed {streamed:.4f} dB, whole file {whole:.4f} dB")
-# streamed 66.4200 dB, whole file 66.4200 dB
+# streamed 67.2940 dB, whole file 67.2940 dB
 ```
 
 The two numbers are not close: they are identical, to the last bit,
@@ -41197,7 +41198,7 @@ documents, one page per module.
 | `sensitivity` | `function`| **SPL Calibration.**<br>• `ref_signal`: Calibration signal<br>• `target_spl`: Level of calibrator (Default: 94.0)<br>• `reference_pressure_pa`: Reference pressure (Default: 20e-6)<br>• `narrowband`: coherent Goertzel tone estimate that rejects broadband hum/noise (needs `fs`; Default: False) | `s = sensitivity(ref_signal, target_spl=94.0)`<br><br>• `s`: Float (multiplier for pressure) |
 | `read` | `function` | **Read a measurement audio file into a `Signal`.**<br>• `path`: WAV/BWF/RF64 in the base install; FLAC, AIFF, Ogg/Opus, MP3 with `[audio]`<br>• `calibration_factor`: digital units → Pa (Default: None; an existing sidecar is applied automatically, an explicit value wins)<br>Native fs kept, no downmix, no normalization; int PCM scaled by 2^(bits−1); lossy sources raise `LossyCompressionWarning` | `sig = io.read("night.wav")`<br><br>• `sig`: `Signal` (float64, (channels, samples), with fs, calibration, `bext`, labels) |
 | `info` | `function` | **Describe a file from its headers alone.**<br>• `path`: any supported container<br>No sample is decoded, so a 12-hour RF64 answers instantly; compressed WAV that `read` refuses still describes itself | `meta = io.info("night.wav")`<br><br>• `meta`: `AudioFileInfo` |
-| `read_blocks` | `function` | **Stream a file block by block.**<br>• `path`, `block_size` [samples]<br>• `overlap`: samples shared between consecutive blocks (Default: 0)<br>Yields exactly what `read` returns, in slices: feeds `BlockProcessing(stateful=True)` unchanged | `for block in io.read_blocks(p, 65536): ...`<br><br>• each `block`: float64 array, `read` conventions |
+| `read_blocks` | `function` | **Stream a file block by block.**<br>• `path`, `block_size` [samples]<br>• `overlap`: samples shared between consecutive blocks (Default: 0)<br>• `calibration_factor`: as in `read`; `None` takes the sidecar's (Default: `None`)<br>Yields exactly what `read` returns, in slices: feeds `BlockProcessing(stateful=True)` unchanged | `for block in io.read_blocks(p, 65536): ...`<br><br>• each `block`: a `Signal` with the rate, calibration, labels and provenance `read` gives |
 | `write` | `function` | **Write WAV/BWF (FLAC with `[audio]`) without touching the level.**<br>• `path`, `x` (array or `Signal`), `fs` (taken from `x` when `x` is a `Signal`)<br>• `subtype`: 'PCM_16'/'PCM_24'/'PCM_32'/'FLOAT'/'DOUBLE' (Default: FLOAT for float data, the matching depth for integer pass-through; FLAC: PCM up to 24)<br>• `bext`: None (Default) carries a `Signal`'s own provenance; `"loudness"` also measures the five EBU R 128 fields in-house; a `BroadcastMetadata` is written as given<br>• `dither`: 'tpdf' at PCM_16 only (Default: None)<br>• `rng`: `numpy.random.Generator` or int seed for the dither noise, for byte-reproducible writes (Default: None = fresh entropy)<br>• `sidecar`: write the calibration sidecar too (Default: False)<br>Never normalizes; clipping saturates, is counted and warns (`ClippingWarning`); RF64 automatic past 4 GiB | `io.write("out.wav", sig, subtype="PCM_24")` |
 | `convert` | `function` | **Convert between lossless containers with the measurement intact.**<br>• `src`, `dst`: WAV/BWF/RF64 ↔ FLAC (lossy targets refused)<br>Samples bit-exact at full precision, `bext` carried (into FLAC via the `riff` APPLICATION block), sidecar copied byte for byte, CodingHistory extended one line; streams, so an hour of RF64 converts flat | `io.convert("night.wav", "night.flac")` |
 | `Signal` | `dataclass` | **Samples plus the metadata they need.**<br>• `data`: (channels, samples) float64<br>• `fs` [Hz]<br>• `calibration_factor`: Pa per digital unit, or None until known<br>• `channel_labels`, `provenance` (`bext`), `source` (`SignalOrigin`)<br>`np.asarray(sig)` yields the bare array (1D mono), so every `(x, fs, ...)` function accepts it; `leq`/`laeq`/`ln_levels`/`sel`/`lc_peak`/`sound_exposure`/`lex_8h` read fs and calibration from it directly | `sig.duration`, `sig.n_channels`<br>`sig.plot()` draws the calibrated waveform |
@@ -58082,6 +58083,18 @@ The result also draws itself, so the band spectrum is one call:
 ```python
 ax = result.plot()
 ```
+
+## A block stream yields `Signal` blocks
+
+`io.read_blocks` is newer than 3.3.0, and in 4.0.0rc1 it yielded bare float64
+arrays. It now yields a `Signal` per block, carrying the rate, the
+calibration, the channel labels and the provenance `io.read` gives, and it
+takes the same `calibration_factor=` and reads the same sidecar. Two things
+change for a loop written against the release candidate. A block from a
+calibrated file reaches the filters and the level functions in pascals, so a
+`calibration_factor` applied by hand on top of it counts twice. And
+arithmetic on a block, or on what a filter returns for one, goes through
+`np.asarray`, as it does for any `Signal`.
 
 ## Published tables refuse writes
 

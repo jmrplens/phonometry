@@ -2,9 +2,9 @@
 """Tests for read_blocks: block trains must equal the whole-file read.
 
 The oracle is read() itself (whose scaling is pinned against hand-computed
-values), compared sample for sample: streaming is an implementation
-strategy, never a different answer. Files come from the wav_forge
-hand-assembly helpers so every depth, the RF64 layout and awkward
+values), compared sample for sample and metadata for metadata: streaming is
+an implementation strategy, never a different answer. Files come from the
+wav_forge hand-assembly helpers so every depth, the RF64 layout and awkward
 geometries (blocks that do not divide the length, overlap) are covered.
 """
 
@@ -17,7 +17,14 @@ import pytest
 from wav_forge import chunk, float_wav, fmt_payload, pcm_wav, rf64_wav, riff_wave
 
 from phonometry import filters, signals
-from phonometry.io import LossyCompressionWarning, read, read_blocks, write
+from phonometry.io import (
+    LossyCompressionWarning,
+    Signal,
+    read,
+    read_blocks,
+    write,
+    write_sidecar,
+)
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -97,7 +104,7 @@ def test_overlap_repeats_the_tail_of_each_block(tmp_path: Path) -> None:
     path = _write(tmp_path, pcm_wav(codes, bits=16))
     whole = np.asarray(read(path))
     blocks = list(read_blocks(path, 4, overlap=2))
-    assert [b.tolist() for b in blocks] == [
+    assert [np.asarray(b).tolist() for b in blocks] == [
         whole[0:4].tolist(),
         whole[2:6].tolist(),
         whole[4:8].tolist(),
@@ -113,8 +120,8 @@ def test_the_overlap_rule_matches_libsndfile_exactly(tmp_path: Path) -> None:
     flac = tmp_path / "same.flac"
     sf.write(str(flac), (codes / 32768), FS, subtype="PCM_16")
     for overlap in (0, 2):
-        ours = [b.tolist() for b in read_blocks(wav, 4, overlap=overlap)]
-        theirs = [b.tolist() for b in read_blocks(flac, 4, overlap=overlap)]
+        ours = [b.data.tolist() for b in read_blocks(wav, 4, overlap=overlap)]
+        theirs = [b.data.tolist() for b in read_blocks(flac, 4, overlap=overlap)]
         assert ours == theirs
 
 
@@ -249,7 +256,7 @@ def test_streamed_stateful_laeq_equals_the_single_pass(
     total, frames = 0.0, 0
     for i, block in enumerate(read_blocks(path, 4800, overlap=overlap)):
         fresh = block[overlap:] if i else block
-        y = aw.filter(fresh)
+        y = np.asarray(aw.filter(fresh))
         total += float(np.sum(y**2))
         frames += y.shape[-1]
     streamed = 10 * np.log10((total / frames) / (2e-5) ** 2)
@@ -280,9 +287,11 @@ def test_streamed_band_leq_through_a_stateful_bank(tmp_path: Path) -> None:
     )
     total, frames = 0.0, 0
     for block in read_blocks(path, 4800):
-        band = bank.filter(
-            block, sigbands=True, detrend=False, calculate_level=False
-        ).require_bands()[0]
+        band = np.asarray(
+            bank.filter(
+                block, sigbands=True, detrend=False, calculate_level=False
+            ).require_bands()[0]
+        )
         total += float(np.sum(band**2))
         frames += band.shape[-1]
     streamed = 10 * np.log10((total / frames) / (2e-5) ** 2)
@@ -323,3 +332,76 @@ def test_streamed_leq_matches_across_backends(tmp_path: Path, overlap: int) -> N
     whole = signals.leq(np.asarray(read(wav)))
     assert _streamed_leq(wav, 4800, overlap) == pytest.approx(whole, abs=1e-9)
     assert _streamed_leq(flac, 4800, overlap) == pytest.approx(whole, abs=1e-9)
+
+
+# ---------------------------------------------------------------------------
+# What a block carries besides its samples: what read() carries, so a block
+# is the whole-file Signal cropped to its span and nothing is retyped.
+# ---------------------------------------------------------------------------
+
+
+def test_every_block_is_a_signal_carrying_what_read_carries(tmp_path: Path) -> None:
+    """Rate, calibration, labels, provenance and origin travel with each block."""
+    rng = np.random.default_rng(5)
+    path = tmp_path / "meas.wav"
+    write(path, rng.uniform(-0.5, 0.5, (2, 100)), FS, subtype="PCM_24")
+    whole = read(path, calibration_factor=3.0)
+    blocks = list(read_blocks(path, 32, calibration_factor=3.0))
+    assert all(isinstance(block, Signal) for block in blocks)
+    for block in blocks:
+        assert block.fs == whole.fs == FS
+        assert block.calibration_factor == whole.calibration_factor == 3.0
+        assert block.channel_labels == whole.channel_labels
+        assert block.provenance == whole.provenance
+        assert block.source == whole.source
+    # And a block is the whole read cropped to its span, samples included.
+    second = whole.crop(32 / FS, 64 / FS)
+    assert blocks[1].data.tolist() == second.data.tolist()
+
+
+def test_the_sidecar_calibrates_the_stream_as_it_calibrates_the_read(
+    tmp_path: Path,
+) -> None:
+    """The sidecar's factor fills in; an explicit argument still wins."""
+    path = tmp_path / "night.wav"
+    write(path, 0.1 * np.ones(40), FS, subtype="PCM_24")
+    write_sidecar(path, calibration_factor=20.0, channel_labels=("P3",))
+    assert read(path).calibration_factor == 20.0
+    streamed = list(read_blocks(path, 16))
+    assert {block.calibration_factor for block in streamed} == {20.0}
+    assert {block.channel_labels for block in streamed} == {("P3",)}
+    explicit = next(iter(read_blocks(path, 16, calibration_factor=4.0)))
+    assert explicit.calibration_factor == 4.0
+
+
+def test_a_calibrated_block_is_read_in_pascals_by_the_level_functions(
+    tmp_path: Path,
+) -> None:
+    """The contract every Signal keeps: calibrated samples are pascals.
+
+    So a stream accumulates the same level the whole calibrated read gives,
+    with no factor applied by hand, and applying one by hand as well would
+    count it twice.
+    """
+    x = _long_synthetic(1.0)
+    path = tmp_path / "night.wav"
+    write(path, x, FS, subtype="DOUBLE")
+    whole = signals.leq(read(path, calibration_factor=2.5))
+    total, frames = 0.0, 0
+    for block in read_blocks(path, 4800, calibration_factor=2.5):
+        weighted = np.asarray(filters.WeightingFilter(FS, "Z").filter(block))
+        total += float(np.sum(weighted**2))
+        frames += weighted.shape[-1]
+    assert 10 * np.log10((total / frames) / (2e-5) ** 2) == pytest.approx(
+        whole, abs=1e-9
+    )
+
+
+@pytest.mark.parametrize("factor", [0.0, -1.0, float("nan"), float("inf")])
+def test_a_bad_calibration_factor_is_refused_at_the_call(
+    tmp_path: Path, factor: float
+) -> None:
+    """As ``read`` refuses it: not at the first block of a loop started later."""
+    path = _write(tmp_path, pcm_wav(np.zeros(8, dtype=np.int64), bits=16))
+    with pytest.raises(ValueError, match=r"calibration_factor must be a positive"):
+        read_blocks(path, 4, calibration_factor=factor)

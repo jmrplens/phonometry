@@ -352,6 +352,18 @@ llamada:
 ax = result.plot()
 ```
 
+## Un flujo por bloques entrega bloques `Signal`
+
+`io.read_blocks` es posterior a la 3.3.0, y en la 4.0.0rc1 entregaba arrays
+float64 desnudos. Ahora entrega un `Signal` por bloque, con la frecuencia de
+muestreo, la calibración, las etiquetas de canal y la procedencia que da
+`io.read`, y toma el mismo `calibration_factor=` y lee el mismo sidecar. Para
+un bucle escrito contra la versión candidata cambian dos cosas. Un bloque de
+un archivo calibrado llega a los filtros y a las funciones de nivel en
+pascales, así que un `calibration_factor` aplicado a mano encima cuenta dos
+veces. Y la aritmética sobre un bloque, o sobre lo que un filtro devuelve para
+él, pasa por `np.asarray`, como con cualquier `Signal`.
+
 ## Las tablas publicadas no admiten escritura
 
 Toda tabla que la biblioteca publica a nivel de módulo es de sólo lectura en

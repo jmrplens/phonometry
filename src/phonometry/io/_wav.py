@@ -259,11 +259,26 @@ def read_wav(
         calibration_factor=calibration_factor,
         channel_labels=fmt.channel_labels(),
         provenance=parsed.bext,
-        source=SignalOrigin(
-            path=str(path),
-            container=parsed.container,
-            format_name=fmt.format_name,
-            bit_depth=fmt.valid_bits or fmt.bits_per_sample,
-            lossy=False,
-        ),
+        source=linear_wav_origin(path, parsed),
+    )
+
+
+def linear_wav_origin(path: str | Path, parsed: WavChunks) -> SignalOrigin:
+    """The origin record of a linear WAV, as the whole-file read stamps it.
+
+    One construction for :func:`read_wav` and for the block reader, so a
+    block and the file it came from cannot disagree about where they came
+    from.
+
+    :param path: The file the samples are read from.
+    :param parsed: Its walked chunks.
+    :return: The :class:`SignalOrigin` both readers attach.
+    """
+    fmt = parsed.fmt
+    return SignalOrigin(
+        path=str(path),
+        container=parsed.container,
+        format_name=fmt.format_name,
+        bit_depth=fmt.valid_bits or fmt.bits_per_sample,
+        lossy=False,
     )

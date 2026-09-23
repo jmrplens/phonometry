@@ -35,7 +35,7 @@ from __future__ import annotations
 import warnings
 from dataclasses import replace
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, NamedTuple
 
 import numpy as np
 
@@ -54,7 +54,7 @@ from ._wav import AudioFileInfo, read_wav, wav_info
 if TYPE_CHECKING:
     from types import ModuleType
 
-    from ._chunks import WavChunks
+    from ._chunks import BroadcastMetadata, WavChunks
 
 
 class LossyCompressionWarning(PhonometryWarning):
@@ -175,25 +175,40 @@ def _soundfile_lossy(subtype: str) -> bool:
     return any(mark in subtype.upper() for mark in _LOSSY_SUBTYPE_MARKS)
 
 
-def _read_soundfile(
+class SoundfileStamp(NamedTuple):
+    """What a signal decoded through soundfile carries besides its samples.
+
+    Read once per file, so the whole-file reader and the block reader stamp
+    the same rate, labels, provenance and origin on what they return.
+    """
+
+    fs: int
+    channel_labels: tuple[str, ...] | None
+    provenance: BroadcastMetadata | None
+    source: SignalOrigin
+
+
+def soundfile_stamp(
+    sf: ModuleType,
     path: str | Path,
     format_name: str,
-    *,
-    calibration_factor: float | None,
     chunks: WavChunks | None = None,
-) -> Signal:
-    """Decode through soundfile, warning and stamping lossy sources.
+) -> SoundfileStamp:
+    """Read the metadata soundfile decodes a file with.
 
     ``chunks`` carries the base walker's harvest for a compressed WAV, so
     the ``bext`` provenance and channel labels libsndfile does not expose
     still reach the signal.
+
+    :param sf: The imported soundfile module.
+    :param path: The file.
+    :param format_name: The sniffer's name for it, which decides where a
+        FLAC keeps its ``bext`` chunk.
+    :param chunks: The walked chunks of a compressed WAV, or ``None``.
+    :return: The stamp both readers attach to what they decode.
     """
-    sf = _import_soundfile(format_name)
     file_info = sf.info(str(path))
     lossy = _soundfile_lossy(str(file_info.subtype))
-    if lossy:
-        _warn_lossy(f"{format_name} ({file_info.subtype})", path)
-    data, fs = sf.read(str(path), dtype="float64", always_2d=True)
     if chunks is not None:
         provenance = chunks.bext
     elif format_name == _FLAC_NAME:
@@ -202,10 +217,8 @@ def _read_soundfile(
         provenance = read_flac_bext(path)
     else:
         provenance = None
-    return Signal(
-        data=np.ascontiguousarray(data.T),
-        fs=int(fs),
-        calibration_factor=calibration_factor,
+    return SoundfileStamp(
+        fs=int(file_info.samplerate),
         channel_labels=chunks.fmt.channel_labels() if chunks is not None else None,
         provenance=provenance,
         source=SignalOrigin(
@@ -215,6 +228,29 @@ def _read_soundfile(
             bit_depth=_SUBTYPE_BITS.get(str(file_info.subtype)),
             lossy=lossy,
         ),
+    )
+
+
+def _read_soundfile(
+    path: str | Path,
+    format_name: str,
+    *,
+    calibration_factor: float | None,
+    chunks: WavChunks | None = None,
+) -> Signal:
+    """Decode through soundfile, warning and stamping lossy sources."""
+    sf = _import_soundfile(format_name)
+    stamp = soundfile_stamp(sf, path, format_name, chunks)
+    if stamp.source.lossy:
+        _warn_lossy(f"{format_name} ({stamp.source.format_name})", path)
+    data, fs = sf.read(str(path), dtype="float64", always_2d=True)
+    return Signal(
+        data=np.ascontiguousarray(data.T),
+        fs=int(fs),
+        calibration_factor=calibration_factor,
+        channel_labels=stamp.channel_labels,
+        provenance=stamp.provenance,
+        source=stamp.source,
     )
 
 

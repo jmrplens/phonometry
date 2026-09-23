@@ -309,13 +309,16 @@ Python readers (`npTDMS`, `pyuff`).
 
 A night of monitoring at 48 kHz/24-bit is gigabytes; as float64 it is
 ~5.5 GiB per stereo hour, which no analysis needs in memory at once.
-`read_blocks()` yields bare float64 blocks, not `Signal` objects: the same
-sample values as `np.asarray(read(...))`, with the same scaling and channel
-convention (base-install seek-and-decode for linear WAV including RF64),
-but no calibration or provenance riding along. Apply the calibration factor
-where the level is computed, as the loop below does; the stateful filters of
-[block processing](../signals/filters/block-processing.md) consume
-the stream unchanged:
+`read_blocks()` yields `Signal` blocks, each one what `read()` would return
+for the same span: the same scaling and channel convention (base-install
+seek-and-decode for linear WAV including RF64), and the same rate,
+calibration, channel labels and provenance riding along. The calibration
+follows the rule `read()` follows, so a factor passed here or found in the
+sidecar makes every block present its samples in pascals to the filters and
+the level functions, and no factor is applied by hand. The stateful filters
+of [block processing](../signals/filters/block-processing.md) consume the
+stream unchanged, and the arithmetic below takes `np.asarray` of what they
+return, as it would of any `Signal`:
 
 ```python
 from phonometry import filters
@@ -323,18 +326,16 @@ from phonometry import filters
 weighter = filters.WeightingFilter(fs, "A", stateful=True)
 total_energy = 0.0
 total_samples = 0
-for block in io.read_blocks("measurement.wav", block_size=1 << 16):
-    weighted = weighter.filter(block)
+for block in io.read_blocks("measurement.wav", block_size=1 << 16,
+                            calibration_factor=cal):
+    weighted = np.asarray(weighter.filter(block))   # pascals, A-weighted
     total_energy += float(np.sum(weighted ** 2))
     total_samples += weighted.shape[-1]
 
-streamed = 10 * np.log10((cal ** 2 * total_energy / total_samples)
-                         / (2e-5) ** 2)
-whole = float(signals.leq(
-    filters.weighting_filter(np.asarray(sig), fs, curve="A"),
-    calibration_factor=cal))
+streamed = 10 * np.log10((total_energy / total_samples) / (2e-5) ** 2)
+whole = float(signals.leq(filters.weighting_filter(sig, curve="A")))
 print(f"streamed {streamed:.4f} dB, whole file {whole:.4f} dB")
-# streamed 66.4200 dB, whole file 66.4200 dB
+# streamed 67.2940 dB, whole file 67.2940 dB
 ```
 
 The two numbers are not close: they are identical, to the last bit,

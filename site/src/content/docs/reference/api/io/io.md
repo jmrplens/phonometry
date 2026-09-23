@@ -29,8 +29,8 @@ because a level computed from a lossy codec is not metrologically defensible.
 
 [`info`](/phonometry/reference/api/io/io/#info) answers from the headers alone -- format, rate, channels, valid
 bits, duration, `bext`, cue points -- without decoding a single sample, so
-it is safe on a 12-hour RF64. [`read_blocks`](/phonometry/reference/api/io/io/#read_blocks) streams the same samples
-[`read`](/phonometry/reference/api/io/io/#read) would return, block by block, into the library's stateful
+it is safe on a 12-hour RF64. [`read_blocks`](/phonometry/reference/api/io/io/#read_blocks) streams what [`read`](/phonometry/reference/api/io/io/#read)
+would return, one [`Signal`](/phonometry/reference/api/io/io/#signal) per block, into the library's stateful
 filters. [`write`](/phonometry/reference/api/io/io/#write) produces WAV/BWF (and FLAC with the extra) with exact
 integer codes, loud clipping ([`ClippingWarning`](/phonometry/reference/api/io/io/#clippingwarning)), optional TPDF dither
 at 16 bits, a `bext` chunk written field by field, and never a silent
@@ -326,21 +326,24 @@ read_blocks(
     block_size: int,
     *,
     overlap: int = 0,
-) -> Iterator[NDArray[np.float64]]
+    calibration_factor: float | None = None,
+) -> Iterator[Signal]
 ```
 
-Stream an audio file as float64 blocks of `block_size` frames.
+Stream an audio file as [`Signal`](/phonometry/reference/api/io/io/#signal) blocks.
 
 Yields what [`phonometry.io.read`](/phonometry/reference/api/io/io/#read) would return for the same
-file, cut into consecutive `(channels, block_size)` pieces (1-D for
-mono, like the `Signal` array view; the last piece may be shorter),
-while holding only one block in memory -- the way an overnight RF64
-flows through `BlockProcessing(stateful=True)` filters without ever
-existing as an array. See the module docstring for the per-backend
-mechanics and the exact overlap rule.
-
-No calibration rides on bare blocks: apply `calibration_factor`
-where the level is computed, as the block-processing guide shows.
+file, cut into consecutive pieces of `block_size` frames (the last
+piece may be shorter), while holding only one block in memory -- the
+way an overnight RF64 flows through `BlockProcessing(stateful=True)`
+filters without ever existing as an array. Each block is a `Signal`
+carrying what the whole-file read would carry: the rate, the
+calibration (from `calibration_factor` or the sidecar, by the same
+precedence as `read`), the channel labels, the `bext` provenance
+and the origin record. So a block is `read(path)` cropped to its own
+span, which is also why its provenance still describes the file, as a
+[`crop`](/phonometry/reference/api/io/io/#signalcrop) does. See the module docstring for
+the per-backend mechanics and the exact overlap rule.
 
 **Parameters**
 
@@ -349,14 +352,15 @@ where the level is computed, as the block-processing guide shows.
 | `path` | The file to stream. |
 | `block_size` | Frames per block (at least 1). |
 | `overlap` | Frames each block shares with its predecessor (`0 <= overlap < block_size`). |
+| `calibration_factor` | Digital-to-pascal multiplier to attach to every block, as in [`read`](/phonometry/reference/api/io/io/#read). `None` (the default) takes the sidecar's factor when a sidecar exists, and otherwise leaves the blocks in digital full-scale units. |
 
-**Returns:** An iterator of float64 blocks.
+**Returns:** An iterator of Signal blocks.
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If the geometry is invalid, the file matches no known audio format, or the data chunk is shorter than its header claims. |
+| ValueError | If the geometry is invalid, `calibration_factor` is not a positive finite number, the file matches no known audio format, or a sidecar exists but is invalid (all at the call), or the data chunk is shorter than its header claims (at the block that reaches the end of it). |
 | ImportError | If the format needs the `[audio]` extra and it is not installed. |
 
 ## read_sidecar

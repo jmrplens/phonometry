@@ -249,6 +249,7 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | [`environment.propagation.air_absorption`](/phonometry/reference/api/environment/air-absorption/) | Atmospheric absorption of sound: ISO 9613-1:1993. |
 | [`environment.sources.cnossos_rail`](/phonometry/reference/api/environment/cnossos-rail/) | CNOSSOS-EU railway source emission (Directive 2002/49/EC Annex II, 2.3). |
 | [`environment.assessment.impulsive_sound`](/phonometry/reference/api/environment/impulsive-sound/) | Prominence of impulsive sounds and the `LAeq` adjustment (NT ACOU 112:2002, ISO/PAS 1996-3:2022). |
+| [`environment.assessment.exposure_distribution`](/phonometry/reference/api/environment/exposure-distribution/) | How often a blast is how loud: the distribution of its sound exposure level (ISO 13474:2009, clauses 4 and 5). |
 | [`environment.assessment.rating`](/phonometry/reference/api/environment/rating/) | Environmental noise descriptors per ISO 1996-1:2016. |
 | [`environment.sources.wind_turbine`](/phonometry/reference/api/environment/wind-turbine/) | Wind-turbine acoustic noise (IEC 61400-11:2012+A1:2018). |
 | [`environment.assessment.measurement`](/phonometry/reference/api/environment/measurement/) | Determination of environmental-noise sound pressure levels (ISO 1996-2:2017). |

@@ -27,11 +27,13 @@ from .common import (
     style_default,
     styled,
     theme_fill,
+    theme_line,
 )
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from ..environment.assessment.exposure_distribution import SelDistribution
     from ..environment.assessment.impulsive_sound import ImpulseProminenceResult
     from ..environment.assessment.measurement import TonalAssessmentResult
     from ..environment.assessment.spain import (
@@ -77,6 +79,9 @@ _FREE_FIELD_LABEL = "Level re free field [dB]"
 #: table and the axes cannot drift apart.
 _INSERTION_LOSS_LABEL = "Insertion loss [dB]"
 _LT_LABEL = "$L_\\mathrm{t}$ [dB]"
+#: The abscissa of the three ISO 13474 views: the level ``x`` the density and
+#: the exceedance are functions of.
+_SEL_X_LABEL = "Single-event sound exposure level $x$ [dB]"
 #: Axis labels and legend names of the two ISO 11819-1 renderers, the names
 #: keyed by vehicle category, written once so the table and the axes agree.
 _SPB_SPEED_LABEL = "Vehicle speed [km/h]"
@@ -185,6 +190,18 @@ _STRINGS: dict[str, str] = {
     ),
     "ISO 11819-1 regression": "Regresión ISO 11819-1",
     "ISO 11819-1 statistical pass-by": "Paso estadístico ISO 11819-1",
+    _SEL_X_LABEL: "Nivel de exposición sonora de un suceso $x$ [dB]",
+    r"Class density $\rho(x)$ [1/dB]": r"Densidad de las clases $\rho(x)$ [1/dB]",
+    r"Continuous density $\rho^{*}(x)$ [1/dB]": r"Densidad continua $\rho^{*}(x)$ [1/dB]",
+    r"Probability of exceeding $x$": r"Probabilidad de superar $x$",
+    "ISO 13474: the classes before the turbulent spread": (
+        "ISO 13474: las clases antes de la dispersión turbulenta"
+    ),
+    "ISO 13474: continuous density": "ISO 13474: densidad continua",
+    "ISO 13474: exceedance of the sound exposure level": (
+        "ISO 13474: superación del nivel de exposición sonora"
+    ),
+    "long-term level": "nivel a largo plazo",
 }
 
 
@@ -1381,5 +1398,118 @@ def plot_statistical_pass_by(
     )
     ax.grid(visible=True, which="major", alpha=0.3)
     place_legend_clear(ax.legend(fontsize="small"))
+    localize_axes(ax, language)
+    return ax
+
+
+#: The exceedance levels Figure A.3 of ISO 13474 prints beside its curve, in
+#: per cent of events.
+_SEL_FIGURE_PERCENTS = (95.0, 50.0, 10.0, 5.0, 1.0)
+
+#: Standard deviations of the turbulent spread drawn either side of the
+#: classes, so every Gaussian is plotted out to where it no longer shows.
+_SEL_SPREAD_MARGIN = 4.0
+
+
+def plot_sel_distribution(
+    result: SelDistribution,
+    ax: Axes | None = None,
+    *,
+    view: str = "density",
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    r"""The ISO 13474 distribution as its class density, density or exceedance.
+
+    ``"classes"`` draws the step density :math:`\rho(x)` over the class
+    boundaries (Annex A Figure A.1); ``"density"`` the continuous density
+    :math:`\rho^{*}(x)` with the long-term level of Equation (A.4) marked
+    (Figure A.2); ``"exceedance"`` the probability of exceeding ``x`` with the
+    95, 50, 10, 5 and 1 per cent exceedance levels marked (Figure A.3).
+
+    :param result: A
+        :class:`~phonometry.environment.assessment.exposure_distribution.SelDistribution`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param view: ``"classes"``, ``"density"`` or ``"exceedance"``.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the primary artist (the step outline or the
+        curve).
+    :return: The axes.
+    """
+    from .._i18n import format_number, localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    lower = np.asarray(result.lower_bounds_db, dtype=np.float64)
+    upper = np.asarray(result.upper_bounds_db, dtype=np.float64)
+    if view == "classes":
+        edges = np.concatenate((lower, upper[-1:]))
+        ax.stairs(
+            np.asarray(result.class_densities_per_db, dtype=np.float64),
+            edges,
+            **styled(kwargs, color=_C_PRIMARY, lw=1.4),
+        )
+        ax.set_ylabel(_t(r"Class density $\rho(x)$ [1/dB]", language))
+        ax.set_title(_t("ISO 13474: the classes before the turbulent spread", language))
+    else:
+        margin = _SEL_SPREAD_MARGIN * result.sigma_db
+        x = np.linspace(
+            float(lower[0]) - result.level_shift_db - margin,
+            float(upper[-1]) + margin,
+            801,
+        )
+        long_term = result.distribution_long_term_level_db
+        # The long-term level is a reference on the level axis, not a series:
+        # drawn in the page's own ink, dimmed, so it reads on both themes and
+        # does not compete with the curve for colour.
+        ink = theme_line(ax.xaxis.label.get_color(), ax, quiet=0.8)
+        lt_label = (
+            f"{_t('long-term level', language)} {format_number(long_term, language)} dB"
+        )
+        if view == "density":
+            ax.plot(
+                x,
+                np.asarray(result.density(x)),
+                **styled(kwargs, color=_C_PRIMARY, lw=1.8),
+            )
+            ax.axvline(long_term, color=ink, ls="--", lw=1.2, label=lt_label)
+            ax.set_ylabel(_t(r"Continuous density $\rho^{*}(x)$ [1/dB]", language))
+            sigma = format_number(result.sigma_db, language)
+            ax.set_title(
+                f"{_t('ISO 13474: continuous density', language)}, "
+                f"$\\sigma$ = {sigma} dB"
+            )
+        else:
+            ax.plot(
+                x,
+                np.asarray(result.exceedance(x)),
+                **styled(kwargs, color=_C_PRIMARY, lw=1.8),
+            )
+            levels = np.asarray(result.exceedance_level(_SEL_FIGURE_PERCENTS))
+            markers = (_C_SECONDARY, _C_TERTIARY, _C_QUATERNARY, _C_REFERENCE, _C_MUTED)
+            for percent, level, color in zip(
+                _SEL_FIGURE_PERCENTS, levels, markers, strict=True
+            ):
+                ax.plot(
+                    [float(level)],
+                    [percent / 100.0],
+                    "o",
+                    color=color,
+                    ms=6,
+                    label=(
+                        f"$L_{{{percent:.0f}}}$ = "
+                        f"{format_number(float(level), language)} dB"
+                    ),
+                )
+            ax.axvline(long_term, color=ink, ls="--", lw=1.2, label=lt_label)
+            ax.set_ylabel(_t(r"Probability of exceeding $x$", language))
+            ax.set_ylim(0.0, 1.05)
+            ax.set_title(
+                _t("ISO 13474: exceedance of the sound exposure level", language)
+            )
+        ax.set_xlim(float(x[0]), float(x[-1]))
+        legend = ax.legend(fontsize="small")
+        place_legend_clear(legend)
+    ax.set_xlabel(_t(_SEL_X_LABEL, language))
+    ax.grid(visible=True, alpha=0.3)
     localize_axes(ax, language)
     return ax

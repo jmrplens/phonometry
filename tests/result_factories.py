@@ -240,6 +240,13 @@ def _exposure() -> ph.hearing.ExposureResult:
     return ph.hearing.task_based_exposure(tasks)
 
 
+def _sel_distribution() -> ph.environment.SelDistribution:
+    """Five replica levels of a distant blast and their probabilities (ISO 13474)."""
+    return ph.environment.sel_distribution(
+        [30.0, 33.0, 36.0, 41.0, 45.0], [0.3, 0.3, 0.2, 0.15, 0.05]
+    )
+
+
 def _static_airflow() -> ph.materials.StaticAirflowResult:
     u = np.array([0.2e-3, 0.4e-3, 0.6e-3, 0.8e-3, 1.0e-3])
     dp = 30000.0 * u + 4.0e6 * u**2

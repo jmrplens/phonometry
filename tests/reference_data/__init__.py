@@ -701,6 +701,27 @@ from .impact_insulation import (
 )
 from .impact_insulation import HARRIS_32_REFERS_TO as HARRIS_32_REFERS_TO
 from .impact_insulation import HARRIS_32_TABLE_OF_ROW as HARRIS_32_TABLE_OF_ROW
+from .impulsive_sel import (
+    ISO13474_ANNEX_A_DAY_FRACTION as ISO13474_ANNEX_A_DAY_FRACTION,
+)
+from .impulsive_sel import (
+    ISO13474_ANNEX_A_NIGHT_FRACTION as ISO13474_ANNEX_A_NIGHT_FRACTION,
+)
+from .impulsive_sel import (
+    ISO13474_ANNEX_A_PRINTED_SHIFT_DB as ISO13474_ANNEX_A_PRINTED_SHIFT_DB,
+)
+from .impulsive_sel import ISO13474_ANNEX_A_SIGMA_DB as ISO13474_ANNEX_A_SIGMA_DB
+from .impulsive_sel import ISO13474_ANNEX_A_SUBCLASSES as ISO13474_ANNEX_A_SUBCLASSES
+from .impulsive_sel import (
+    ISO13474_FIGURE_A3_EXCEEDANCE_DB as ISO13474_FIGURE_A3_EXCEEDANCE_DB,
+)
+from .impulsive_sel import (
+    ISO13474_FIGURE_A3_LOWER_LIMIT_DB as ISO13474_FIGURE_A3_LOWER_LIMIT_DB,
+)
+from .impulsive_sel import ISO13474_FIGURE_A3_LT1_DB as ISO13474_FIGURE_A3_LT1_DB
+from .impulsive_sel import ISO13474_FIGURE_A3_LT2_DB as ISO13474_FIGURE_A3_LT2_DB
+from .impulsive_sel import ISO13474_TABLE_A3 as ISO13474_TABLE_A3
+from .impulsive_sel import ISO13474_TABLE_A4 as ISO13474_TABLE_A4
 from .materials import ALLARD_AIR_VISCOSITY_PA_S as ALLARD_AIR_VISCOSITY_PA_S
 from .materials import ALLARD_JCA_CARPET_ROWS as ALLARD_JCA_CARPET_ROWS
 from .materials import ALLARD_JCA_SPECIMENS as ALLARD_JCA_SPECIMENS

@@ -177,6 +177,16 @@ its own between yours. `make figures` fails on either defect: minor labels
 left to the scale beside major ticks set by hand, and two labels of one axis
 that touch. See `scripts/check_figure_ticks.py`.
 
+Nothing may be drawn over a tick label either. A polar plot writes its radial
+labels inside the plot, along one ray, so park them where no curve runs with
+`ax.set_rlabel_position(angle)` (or the `angle=` of `set_rgrids`), and label
+every other ring if the curves leave no ray all of them clear. An inset writes
+its labels over the data of the panel it sits in, so place it where the
+parent's curves do not run under them. A legend moved out beside the axes has
+to clear their labels as well as the data. `make figure-tick-clearance` reads
+the committed figures for a legend, a stroke or a marker over any tick label;
+see `scripts/check_figure_tick_clearance.py`.
+
 When adding a feature with visual output, write its `generate_*` function in the
 package the two commands are a front end for, not in the command itself:
 
@@ -574,6 +584,20 @@ It reads every committed `*_es.svg` and fails on a tick label that is a number
 with a point in it, whichever pass was meant to write the comma. That is the
 gate that closes the class: a panel none of the three passes reached shipped
 `31.5` beside `52,4` in the same figure, and nothing else could see it.
+
+The sign is read the same way, in both languages:
+
+```bash
+python scripts/check_figure_minus_sign.py   # or: make figure-minus-sign
+```
+
+A negative number is signed with U+2212. Build a reading with `_fmt_minus`
+(the library's renderers with `fmt_minus`), restate the angle grid of a polar
+plot that reaches below zero with explicit labels, since its formatter ignores
+`axes.unicode_minus`, and format a number on a plate with `signed` from
+`scripts/diagrams/canvas.py`. The check reads every committed SVG and fails on
+a hyphen in front of a number; a hyphen that is not a sign, such as the part
+number in "ISO 9053-1/-2", goes in its `ALLOWED` table with the reason.
 
 ### 7c. Defaulting a style the caller may spell either way
 

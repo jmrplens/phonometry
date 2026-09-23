@@ -15,6 +15,8 @@ from __future__ import annotations
 import math
 from typing import TYPE_CHECKING
 
+from .canvas import signed
+
 if TYPE_CHECKING:
     from collections.abc import Callable, Sequence
 
@@ -1141,7 +1143,7 @@ def _d_equal_loudness_weighting(s: SVG, th: Theme) -> None:
     for db in (0, -20, -40, -60):
         y = r_fy(db)
         s.line(rx0 - 5, y, rx0, y, th.muted, 1.2)
-        s.text(rx0 - 9, y + 5, str(db), 11, th.muted, "end")
+        s.text(rx0 - 9, y + 5, signed(db), 11, th.muted, "end")
     s.text(rx0 - 20, ly0 - 12, "dB", 10, th.muted, "middle")
     s.line(rx0, r_fy(0.0), rx1, r_fy(0.0), th.muted, 0.9, dash="3,4")
 

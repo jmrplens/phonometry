@@ -373,6 +373,20 @@ _TITLE_SIZES = (22, 21, 20)
 _TITLE_MARGIN = 30
 
 
+def signed(value: float, spec: str = "") -> str:
+    """*value* formatted with *spec*, its sign written as the minus sign U+2212.
+
+    A plate sets exactly the characters it is given, and ``format`` signs a
+    negative number with the hyphen-minus: a shorter, lower glyph than the
+    "−" every other label of the corpus carries, the plates' hand-typed ones
+    included. A number a plate formats goes through here. Only the leading
+    sign is rewritten, because the hyphen of an exponent belongs to the
+    number, which is the rule the figures' ``_fmt_minus`` follows too.
+    """
+    text = format(value, spec)
+    return "\u2212" + text[1:] if text.startswith("-") else text
+
+
 def _esc(s: str) -> str:
     """Escape XML metacharacters so labels may contain <, > and & literally.
 

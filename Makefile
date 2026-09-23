@@ -207,6 +207,27 @@ figure-decimal-point:
 figure-legends:
 	$(PYTHON) scripts/check_figure_legends.py
 
+# The other thing a legend can land on is a tick label, and a curve can too:
+# the radial labels of a polar plot sit inside it on one ray, and an inset
+# writes its labels over the data of the panel it sits in. The tick audit
+# measures the labels of one axis against each other and the annotation audit
+# measures the labels a generator places, so neither sees it. This reads the
+# committed SVGs for a legend, a stroke or a marker over any tick label, with
+# the clip each one is drawn through, and needs no `make graphs` first.
+# Stdlib only.
+figure-tick-clearance:
+	$(PYTHON) scripts/check_figure_tick_clearance.py
+
+# The corpus signs a negative number with U+2212, and three things still wrote
+# the hyphen-minus: the polar angle formatter, which ignores
+# axes.unicode_minus; a reading built with an f-string; and the plates, which
+# set the characters they are given. This reads the string every committed
+# SVG records beside its outlines, all four variants, and fails on a hyphen
+# in front of a number that is not a designation, a range or an exponent.
+# Stdlib only.
+figure-minus-sign:
+	$(PYTHON) scripts/check_figure_minus_sign.py
+
 # The Python fences of a documentation page form one sequential example, and
 # one shipped page used names its own figure block defined further down --
 # while a same-named variable from a different room sat in scope, so reading
@@ -347,6 +368,8 @@ figures:
 	$(MAKE) figure-ticks
 	$(MAKE) figure-decimal-point
 	$(MAKE) figure-legends
+	$(MAKE) figure-tick-clearance
+	$(MAKE) figure-minus-sign
 	$(PYTHON) scripts/check_figures.py
 
 # Regenerate the Tier-1 documentation animations (WebM for the site, GIF for
@@ -576,6 +599,7 @@ check: lint security test
 	assets animations animation-freshness posters brand lighthouse \
 	llms pypi-readme api-docs site-reports conformance install-hooks test test-perf test-gpu coverage check \
 	snippets snippets-static claims subscripts docstring-math language-forwarding \
-	fence-names decimal-comma figure-decimal-point figure-legends control-characters hazards dead-constants \
+	fence-names decimal-comma figure-decimal-point figure-legends figure-tick-clearance \
+	figure-minus-sign control-characters hazards dead-constants \
 	conformance-rows conformance-vocabulary parameter-units frozen-constants published-sources \
 	solid-agreement shared-sources catalogue-data published-catalogues

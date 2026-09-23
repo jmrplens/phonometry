@@ -113,7 +113,7 @@ _ES_EXACT = {
     "One Parabola, Moved Along by $c_3$": "Una parábola, desplazada por $c_3$",
     "radial, $c_3$ = 0.4": "radial, $c_3$ = 0,4",
     "cylindrical rotor, $c_3$ = 0.15": "rotor cilíndrico, $c_3$ = 0,15",
-    "axial, $c_3$ = -0.6": "axial, $c_3$ = -0,6",
+    "axial, $c_3$ = \u22120.6": "axial, $c_3$ = \u22120,6",
     "$\\Delta L_{W,\\mathrm{oct}} = -5 - 5(\\lg St + c_3)^2$,\n"
     "$St = 60 f/(\\pi n)$: no impeller diameter, it cancels\n"
     "markers: the eight octaves the sheet is written in": "$\\Delta L_{W,\\mathrm{oct}} = -5 - 5(\\lg St + c_3)^2$,\n"

@@ -2247,8 +2247,15 @@ def generate_cnossos_rail_directivity(output_dir: str) -> None:
     left.set_thetamin(-90.0)
     left.set_thetamax(90.0)
     left.set_theta_zero_location("E")
+    # The default theta formatter writes its negative angles with an ASCII
+    # hyphen; restate the same grid with the typographic minus.
+    left.set_thetagrids(
+        np.arange(-90, 91, 30), [f"{_fmt_minus(a, '.0f')}°" for a in range(-90, 91, 30)]
+    )
     left.grid(color=COLOR_GRID, linestyle="--", alpha=0.6)
-    left.legend(loc="lower left", fontsize=8, bbox_to_anchor=(-0.15, -0.12))
+    # Beside the half disc, level with its 60° ray, in the room the half disc
+    # leaves: in the lower corner the box covered the radial "15" and "−90°".
+    left.legend(loc="upper left", fontsize=8, bbox_to_anchor=(0.78, 1.0))
 
     phi = np.radians(np.linspace(0.0, 360.0, 361))
     right.plot(
@@ -2262,8 +2269,13 @@ def generate_cnossos_rail_directivity(output_dir: str) -> None:
     # A ring every 2.5 dB and a label on every other one: nine labels on the
     # one ray ran into each other, and 5 dB apart they clear.
     rings = np.arange(-20.0, 0.1, 2.5)
+    # Inside the upper lobe, where the curve runs out at the rim: at the
+    # default 22.5° the lobe's flank ran through "−10.0", and nearer the track
+    # the null at the centre runs through "−20.0".
     right.set_rgrids(
-        rings, [_fmt_minus(r, ".1f") if i % 2 == 0 else "" for i, r in enumerate(rings)]
+        rings,
+        [_fmt_minus(r, ".1f") if i % 2 == 0 else "" for i, r in enumerate(rings)],
+        angle=70.0,
     )
     right.grid(color=COLOR_GRID, linestyle="--", alpha=0.6)
     right.annotate(

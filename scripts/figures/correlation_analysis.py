@@ -379,7 +379,9 @@ def generate_cepstrum_variants(output_dir: str) -> None:
     x = s + 0.5 * np.roll(s, 384)  # echo: 8 ms, a = 0.5
 
     _fig, ax = plt.subplots(figsize=(10, 6))
-    axins = ax.inset_axes((0.60, 0.28, 0.26, 0.42))
+    # Above the tail of the three cepstra, which run along zero right across
+    # the panel: lower down, that band ran through the "0.0" of the zoom.
+    axins = ax.inset_axes((0.60, 0.40, 0.26, 0.40))
     variants = (
         ("power", COLOR_PRIMARY, "-", "Power cepstrum"),
         ("real", COLOR_TERTIARY, "--", "Real cepstrum (exactly half the power)"),
@@ -412,7 +414,13 @@ def generate_cepstrum_variants(output_dir: str) -> None:
     axins.tick_params(labelsize=7)
     axins.grid(color=COLOR_GRID, linestyle="--", alpha=0.5)
     localize_panel(axins)
-    ax.indicate_inset_zoom(axins, edgecolor=COLOR_FG, alpha=0.5)
+    indicator = ax.indicate_inset_zoom(axins, edgecolor=COLOR_FG, alpha=0.5)
+    # Of the two leaders matplotlib keeps, the lower one runs under the zoom
+    # and through its own tick labels on the way to its far corner; the upper
+    # one alone ties the two boxes together.
+    leaders = indicator.connectors
+    if leaders is not None:
+        leaders[2].set_visible(False)
     ax.annotate(
         "first rahmonic at 8 ms:\nheight $\\approx a$ on the power cepstrum",
         xy=(8.0, 0.5),

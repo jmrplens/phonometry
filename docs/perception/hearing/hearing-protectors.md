@@ -1,6 +1,6 @@
 ← [Documentation index](../../README.md)
 
-# Hearing Protectors (ISO 4869-2)
+# Hearing Protectors (ISO 4869-1 and -2)
 
 A hearing protector is not measured on a coupler. ISO 4869-1 seats it on
 sixteen people and records the threshold shift each of them gets, so what
@@ -8,6 +8,64 @@ comes back from the laboratory is a **distribution**: one attenuation per
 subject per octave band, with a spread that is often a third of the mean.
 ISO 4869-2 is the standard that turns that distribution into a number someone
 can act on, and the first thing it does is refuse to use the mean.
+
+## Where the distribution comes from (ISO 4869-1)
+
+Each of sixteen subjects finds a threshold for one-third-octave bands of pink
+noise at the octave frequencies from 125 Hz to 8 kHz (63 Hz optional), with open
+ears and with the protector in place, and the attenuation is the difference
+(4.6.2):
+
+$$
+A_{j,f} = L_{\mathrm{occluded},j,f} - L_{\mathrm{open},j,f}
+$$
+
+Annex A models the attenuation as the measured value plus three zero-mean
+inputs (method, equipment, environment); within one laboratory the combined
+standard uncertainty is the standard deviation of the mean, $u = s/\sqrt{N}$,
+and $U_{95} = 2u$.
+
+```python
+import numpy as np
+from phonometry import hearing
+
+# ISO 4869-1 Table A.3: one earmuff on sixteen subjects, 125 Hz to 8 kHz.
+table_a3 = np.array([
+    [9.6, 13.5, 27.5, 32.4, 35.2, 29.1, 28.5],  [14.1, 20.2, 25.8, 32.0, 28.9, 35.3, 35.7],
+    [21.8, 27.8, 28.3, 46.6, 37.4, 40.1, 38.7], [18.5, 22.2, 36.5, 44.8, 39.1, 30.6, 33.5],
+    [15.6, 21.9, 31.8, 42.5, 38.9, 38.3, 37.1], [18.7, 28.6, 31.3, 39.0, 35.6, 35.3, 29.4],
+    [23.0, 26.5, 34.0, 41.3, 40.8, 38.7, 35.9], [17.3, 21.7, 25.0, 30.7, 38.6, 37.9, 40.8],
+    [19.4, 19.6, 28.0, 36.6, 40.7, 34.9, 39.4], [11.6, 20.4, 22.6, 38.0, 39.2, 33.9, 30.3],
+    [20.5, 21.8, 29.2, 40.7, 36.2, 35.7, 38.4], [18.3, 19.6, 26.2, 34.6, 32.7, 34.9, 26.6],
+    [15.1, 17.5, 30.1, 39.0, 39.4, 38.2, 39.5], [21.7, 20.8, 28.3, 39.5, 38.1, 40.0, 38.4],
+    [15.9, 17.8, 26.0, 40.6, 38.0, 40.2, 37.2], [11.8, 18.4, 29.6, 37.2, 40.8, 36.0, 29.9],
+])
+reat = hearing.real_ear_attenuation(table_a3)
+print(np.round(reat.mean_db, 1))                  # [17.1 21.1 28.8 38.5 37.5 36.2 35. ]
+print(np.round(reat.expanded_uncertainty_db, 1))  # [2.  1.9 1.7 2.2 1.6 1.6 2.3]
+
+# Annex B, Table B.1: a second test of the same earmuff, printed as means and U95.
+test_2_mean = [16.8, 21.0, 28.3, 38.2, 35.5, 34.6, 38.9]
+test_2_u95 = [1.6, 1.2, 1.4, 1.5, 1.5, 1.7, 2.5]
+difference = hearing.assess_attenuation_difference(
+    reat, test_2_mean, second_expanded_uncertainty_db=test_2_u95
+)
+print(np.round(difference.criterion_db, 1))  # [2.5 2.3 2.2 2.7 2.2 2.3 3.4]
+print(difference.significant_frequencies)    # [8000.]
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/hearing_protector_reat_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/hearing_protector_reat.svg" alt="Left: the sound attenuation of one earmuff on sixteen subjects at the seven test signals from 125 Hz to 8 kHz, one faint line per subject, with the mean drawn over them and the expanded uncertainty of the mean as error bars, attenuation increasing downwards. Right: the difference between the means of two tests of the same earmuff as one bar per test signal, with the root sum of squares of the two expanded uncertainties marked over each bar; only the 8 kHz bar clears its mark and is hatched" width="92%"></picture>
+
+Two means differ significantly at the 5 % level when
+$|m_1 - m_2| > \sqrt{U_{95,1}^2 + U_{95,2}^2}$ (B.1.2), which for two equal
+uncertainties is $\sqrt{2}\,U_{95}$. Tables A.2 and B.2 give typical budgets
+(`hearing.REAT_WITHIN_LABORATORY_UNCERTAINTY`,
+`hearing.REAT_BETWEEN_LABORATORY_UNCERTAINTY`), and B.1.1 evaluates the minimum
+difference on the rounded 2,3 dB its table prints, writing that input out:
+"$\sqrt{2}$ × 2,3 dB = 3,3 dB". From the unrounded 2.27 dB it is 3.21 dB. The
+sound field of the test room (4.2.2, with Table 1 for the rotated directional
+microphone) is judged by `hearing.check_reat_sound_field`, whose verdict passes
+only when the rotation of b) was measured as well as the positions of a).
 
 ## The distribution first (Clause 5)
 
@@ -123,14 +181,17 @@ library carries; the discrepancy is registered in [ERRATA](../../ERRATA.md).
   protectors — Part 1: Subjective method for the measurement of sound
   attenuation* (ISO 4869-1:2018).
   [iso.org catalogue](https://www.iso.org/standard/65581.html).
-  Where the per-subject attenuation values come from.
+  Where the per-subject attenuation values come from: 4.6, Annex A, Annex B
+  and 4.2.2 with Table 1, validated against Tables A.2, A.3, B.1 and B.2.
 
 ## Standards
 
-ISO 4869-2:2018, which defines the assumed protection value $APV_{fx}$
-(Clause 5), the octave-band method (Clause 6), the $H$, $M$ and $L$ values
-(Clause 7) and the single number rating $SNR$ (Clause 8). The attenuation they
-all start from is measured to ISO 4869-1:2018.
+ISO 4869-1:2018, which measures the attenuation (4.6), gives the uncertainty of
+its mean (Annex A, Tables A.2 and A.3), the test of whether two measurements
+differ (Annex B, Tables B.1 and B.2) and the sound-field conditions of the test
+room (4.2.2, Table 1). ISO 4869-2:2018, which defines the assumed protection
+value $APV_{fx}$ (Clause 5), the octave-band method (Clause 6), the $H$, $M$ and
+$L$ values (Clause 7) and the single number rating $SNR$ (Clause 8).
 
 ## See also
 
@@ -140,4 +201,5 @@ all start from is measured to ISO 4869-1:2018.
   the exposure the protector did not stop does over a working life.
 - [Hearing threshold (age and reference zero)](hearing-threshold.md): the
   baseline any protected exposure is judged against.
-- API reference: [`hearing.hearing_protectors`](https://jmrplens.github.io/phonometry/reference/api/hearing/hearing-protectors/).
+- API reference: [`hearing.real_ear_attenuation`](https://jmrplens.github.io/phonometry/reference/api/hearing/real-ear-attenuation/)
+  and [`hearing.hearing_protectors`](https://jmrplens.github.io/phonometry/reference/api/hearing/hearing-protectors/).

@@ -1,6 +1,6 @@
 ---
-title: "Hearing Protectors (ISO 4869-2)"
-description: "The three ISO 4869-2 methods that turn a hearing protector's measured attenuation into the effective A-weighted level: the octave-band method, the HML values and the single number rating, all three set to one protection performance."
+title: "Hearing Protectors (ISO 4869-1 and -2)"
+description: "How a hearing protector's attenuation is measured on sixteen subjects with its uncertainty and its significance test (ISO 4869-1), and the three ISO 4869-2 methods that turn it into the effective A-weighted level: the octave-band method, the HML values and the single number rating."
 references:
   - type: standard
     organization: "International Organization for Standardization"
@@ -15,7 +15,7 @@ references:
     title: "Acoustics — Hearing protectors — Part 1: Subjective method for the measurement of sound attenuation"
     designation: "ISO 4869-1:2018"
     url: "https://www.iso.org/standard/65581.html"
-    note: "Where the per-subject attenuation values come from: the real-ear attenuation at threshold measured on 16 subjects, which is the input every method here starts from."
+    note: "Where the per-subject attenuation values come from: the real-ear attenuation at threshold of 4.6, the uncertainty of its mean in Annex A, the significance test of Annex B and the sound-field qualification of 4.2.2 with its Table 1, validated against Tables A.2, A.3, B.1 and B.2 and the minimum differences of B.1.1 and B.2."
 ---
 
 import Scope from '../../../../components/Scope.astro';
@@ -29,6 +29,165 @@ comes back from the laboratory is a **distribution**: one attenuation per
 subject per octave band, with a spread that is often a third of the mean.
 ISO 4869-2 is the standard that turns that distribution into a number someone
 can act on, and the first thing it does is refuse to use the mean.
+
+## Where the distribution comes from (ISO 4869-1)
+
+ISO 4869-1 measures the attenuation at the threshold of hearing. The test
+signals are one-third-octave bands of pink noise centred on the octave
+frequencies from 125 Hz to 8 kHz, with 63 Hz optional (4.1). Each of sixteen
+subjects finds a threshold for every one of them twice, with open ears and with
+the protector in place, half the panel in each order, and the attenuation of
+that subject in that band is the difference (4.6.2):
+
+$$
+A_{j,f} = L_{\mathrm{occluded},j,f} - L_{\mathrm{open},j,f}
+$$
+
+A report gives those individual values and, per test signal, their mean, their
+standard deviation and the expanded uncertainty of the mean (Clause 6). Annex A
+models the attenuation as the measured value plus three zero-mean inputs, for
+the method (the subject group, the fitting, the threshold judgement, the
+tester, the specimen), the test equipment and the environment. Within one
+laboratory the combined standard uncertainty of a given measurement is the
+standard deviation of its mean, and the coverage factor is 2:
+
+$$
+u = \frac{s}{\sqrt{N}}, \qquad U_{95} = 2u
+$$
+
+```python
+import numpy as np
+from phonometry import hearing
+
+# ISO 4869-1 Table A.3: one earmuff on sixteen subjects, 125 Hz to 8 kHz.
+table_a3 = np.array([
+    [9.6, 13.5, 27.5, 32.4, 35.2, 29.1, 28.5],  [14.1, 20.2, 25.8, 32.0, 28.9, 35.3, 35.7],
+    [21.8, 27.8, 28.3, 46.6, 37.4, 40.1, 38.7], [18.5, 22.2, 36.5, 44.8, 39.1, 30.6, 33.5],
+    [15.6, 21.9, 31.8, 42.5, 38.9, 38.3, 37.1], [18.7, 28.6, 31.3, 39.0, 35.6, 35.3, 29.4],
+    [23.0, 26.5, 34.0, 41.3, 40.8, 38.7, 35.9], [17.3, 21.7, 25.0, 30.7, 38.6, 37.9, 40.8],
+    [19.4, 19.6, 28.0, 36.6, 40.7, 34.9, 39.4], [11.6, 20.4, 22.6, 38.0, 39.2, 33.9, 30.3],
+    [20.5, 21.8, 29.2, 40.7, 36.2, 35.7, 38.4], [18.3, 19.6, 26.2, 34.6, 32.7, 34.9, 26.6],
+    [15.1, 17.5, 30.1, 39.0, 39.4, 38.2, 39.5], [21.7, 20.8, 28.3, 39.5, 38.1, 40.0, 38.4],
+    [15.9, 17.8, 26.0, 40.6, 38.0, 40.2, 37.2], [11.8, 18.4, 29.6, 37.2, 40.8, 36.0, 29.9],
+])
+reat = hearing.real_ear_attenuation(table_a3)
+print(np.round(reat.mean_db, 1))                  # [17.1 21.1 28.8 38.5 37.5 36.2 35. ]
+print(np.round(reat.standard_deviation_db, 1))    # [3.9 3.9 3.5 4.5 3.2 3.2 4.6]
+print(np.round(reat.expanded_uncertainty_db, 1))  # [2.  1.9 1.7 2.2 1.6 1.6 2.3]
+
+# The grid is the input of every ISO 4869-2 method below, unchanged.
+print(np.round(hearing.assumed_protection_value(reat.attenuation_db).apv, 1))
+# [13.1 17.2 25.3 34.  34.3 33.  30.4]
+```
+
+The thresholds themselves can go in instead, as `open_threshold_db` and
+`occluded_threshold_db`; they only need to share a reference, since a level in
+sound pressure and one in hearing level give the same difference. Everything is
+computed at full precision and rounded by whoever prints it, which is what
+Tables A.3 and B.1 say they do.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/hearing_protector_reat.svg" alt="Left: the sound attenuation of one earmuff on sixteen subjects at the seven test signals from 125 Hz to 8 kHz, one faint line per subject, with the mean drawn over them and the expanded uncertainty of the mean as error bars, attenuation increasing downwards; the mean rises from about 17 dB at 125 Hz to about 38 dB at 1 kHz and stays near 35 dB above. Right: the difference between the means of two tests of the same earmuff as one bar per test signal, with the root sum of squares of the two expanded uncertainties marked over each bar; only the 8 kHz bar, at about 3.9 dB against a criterion of 3.4 dB, clears its mark and is hatched" width="92%" />
+
+*Left, Table A.3: the spread across subjects is several decibels, and the
+expanded uncertainty of the mean drawn on it is half that spread, because
+sixteen subjects divide it by four and the coverage factor doubles it back.
+Right, Table B.1: two tests of the earmuff under two test conditions (for
+example two headband positions), which differ by more than the two
+uncertainties allow only at 8 kHz.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+# One line each, from the results computed on this page.
+reat.plot()          # mean downwards, subjects faint, U95 as bars (Clause 6 l))
+plt.show()
+
+test_2_mean = [16.8, 21.0, 28.3, 38.2, 35.5, 34.6, 38.9]
+test_2_u95 = [1.6, 1.2, 1.4, 1.5, 1.5, 1.7, 2.5]
+hearing.assess_attenuation_difference(
+    reat, test_2_mean, second_expanded_uncertainty_db=test_2_u95
+).plot()
+plt.show()
+```
+
+</details>
+
+### Are two measurements different? (Annex B)
+
+Two mean attenuations differ significantly at the 5 % level when their
+difference exceeds the root sum of squares of their expanded uncertainties
+(B.1.2):
+
+$$
+|m_1 - m_2| > \sqrt{U_{95,1}^2 + U_{95,2}^2}
+$$
+
+Table B.1 applies it to the earmuff above and to a second test of it under
+another test condition (headband position is the example B.1.2 gives), which
+the standard prints only as means and uncertainties:
+
+```python
+test_2_mean = [16.8, 21.0, 28.3, 38.2, 35.5, 34.6, 38.9]
+test_2_u95 = [1.6, 1.2, 1.4, 1.5, 1.5, 1.7, 2.5]
+difference = hearing.assess_attenuation_difference(
+    reat, test_2_mean, second_expanded_uncertainty_db=test_2_u95
+)
+print(np.round(difference.criterion_db, 1))  # [2.5 2.3 2.2 2.7 2.2 2.3 3.4]
+print(difference.significant_frequencies)    # [8000.]
+```
+
+When there are no data of the specific measurement, B.1.1 and B.2 take the
+typical uncertainties of Table A.2 (within one laboratory) and Table B.2
+(between laboratories), for earplugs and earmuffs in three frequency ranges.
+The library carries the three components of each and derives the combined and
+expanded values from them, which reproduces every printed cell. For two equal
+uncertainties the criterion becomes $\sqrt{2}\,U_{95}$, and B.1.1 evaluates it
+on the rounded value its table prints, writing that input out: "$\sqrt{2}$ ×
+2,3 dB = 3,3 dB". The unrounded budget gives 3.21 dB:
+
+```python
+plug = hearing.REAT_WITHIN_LABORATORY_UNCERTAINTY["earplug"]["250 Hz up to 4 kHz"]
+print(round(plug.expanded_db, 2))                                          # 2.27
+print(round(hearing.minimum_significant_difference(2.3), 1))               # 3.3
+print(round(hearing.minimum_significant_difference(plug.expanded_db), 2))  # 3.21
+
+# The typical U95 band by band, ready for assess_attenuation_difference.
+print(np.round(hearing.reat_expanded_uncertainty(reat.frequencies, protector="earplug"), 1))
+# [3.2 2.3 2.3 2.3 2.3 2.3 3.2]
+```
+
+Between laboratories the same earplug needs 9.3 dB by B.2's arithmetic
+($\sqrt{2}$ × 6.6 dB), or 9.37 dB from the unrounded 6.62 dB: two laboratories
+disagree mostly on how their subjects fit the protector.
+
+### The test room (4.2.2)
+
+The sound field is qualified with the subject and the chair absent. The level
+15 cm from the reference point on the three axes stays within ±2.5 dB of the
+level at it, the right and left positions within 3 dB of each other, and from
+500 Hz up a directional microphone rotated through 360° sees a variation no
+larger than Table 1 allows for its free-field rejection (20 dB from a rejection
+of 25 dB down to 5 dB for one of 10 dB, and no microphone below that):
+
+```python
+field = hearing.check_reat_sound_field(
+    {"front": [0.8] * 7, "back": [-0.6] * 7, "left": [1.1] * 7,
+     "right": [-1.2] * 7, "up": [1.9] * 7, "down": [-2.0] * 7},
+    [0.0] * 7,
+    rotation_levels_db=[[0.0] * 7, [4.0] * 7],
+    free_field_rejection_db=17.0,
+)
+print(hearing.allowable_field_variation(17.0))  # 10.0
+print(field.passes)                             # True
+```
+
+4.2.2 b) is a requirement of the clause, not an extra: left out, the rotation
+leaves `field.directionality_judged` false and `field.passes` false with it,
+while `field.uniform` and `field.balanced` still give the verdict of a) band by
+band.
 
 ## The distribution first (Clause 5)
 
@@ -233,6 +392,21 @@ library carries; the discrepancy is registered in
 
 <Scope>
 <ScopeClaim status="covered" label="Covered">
+ISO 4869-1:2018's attenuation of 4.6.2 and its statistics (4.6.3), the
+uncertainty of the mean of Annex A with the typical budgets of Tables A.2 and
+B.2, the significance test of Annex B (B.1.2, and the minimum difference of
+B.1.1 and B.2) and the sound-field conditions of 4.2.2 with Table 1, via
+`hearing.real_ear_attenuation`, `hearing.assess_attenuation_difference`,
+`hearing.minimum_significant_difference`, `hearing.reat_expanded_uncertainty`
+and `hearing.check_reat_sound_field`. Every derived cell of Tables A.2, A.3
+and B.2, the criterion row and the verdict of Table B.1 and the four minimum
+differences are reproduced to the printed decimal in the test suite and in the
+conformance report. The difference row of Table B.1 agrees within 0.1 dB,
+because the standard prints the means of its second test rounded: at 8 kHz it
+comes out 3.94 dB against the printed 4,0.
+</ScopeClaim>
+
+<ScopeClaim status="covered" label="Covered">
 ISO 4869-2:2018's assumed protection value (Clause 5, Formula (1), with all
 seven protection performances of Table 1), the octave-band method (Clause 6,
 Formula (2)), the HML method (Clause 7, Formulae (3) to (18), including the
@@ -247,10 +421,12 @@ conformance report.
 </ScopeClaim>
 
 <ScopeClaim status="not-covered" label="Not covered">
-The measurement that produces the attenuation values is ISO 4869-1's and is not
-implemented: the real-ear attenuation at threshold, its subject panel, its
-fitting procedure and its own uncertainty are all taken as given, and this
-library starts from the resulting grid. ISO 4869-2's Annex E uncertainty
+The threshold measurement itself is not simulated: ISO 4869-1's subject
+selection and training (4.4), its fitting procedure (4.5), the test equipment
+(4.3), the reverberation time (4.2.3) and ambient noise (4.2.4, Table 2) of the
+test room and the application force of Clause 5 are laboratory requirements
+this library does not judge, and it starts from the thresholds or the
+attenuations they produced. ISO 4869-2's Annex E uncertainty
 treatment of attenuation values and ratings is not implemented either. Nothing
 here models the difference between laboratory attenuation and what a protector
 achieves in the field, which is the subject of ISO/TR 4869-5 and is
@@ -269,6 +445,7 @@ not make for you.
   what the exposure the protector did not stop does over a working life.
 - [Hearing threshold (age and reference zero)](/phonometry/perception/hearing/hearing-threshold/):
   the baseline any protected exposure is judged against.
-- API reference: [`hearing.hearing_protectors`](/phonometry/reference/api/hearing/hearing-protectors/).
+- API reference: [`hearing.real_ear_attenuation`](/phonometry/reference/api/hearing/real-ear-attenuation/)
+  and [`hearing.hearing_protectors`](/phonometry/reference/api/hearing/hearing-protectors/).
 
 </SeeAlso>

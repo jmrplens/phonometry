@@ -9,6 +9,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- **Where a hearing protector's attenuation comes from, with its uncertainty
+  and the test that says whether two measurements differ (ISO 4869-1:2018).**
+  `hearing.real_ear_attenuation` takes the individual attenuations of a panel
+  of subjects, or the open and occluded thresholds they are the difference of
+  (4.6.2), and returns per test signal the mean, the standard deviation, the
+  standard uncertainty of the mean `s/√N` and the expanded uncertainty `2u` of
+  Annex A; its `attenuation_db` grid goes into `assumed_protection_value`,
+  `hml_rating` and `snr_rating` unchanged, and `.plot()` draws the mean
+  downwards on the grid Clause 6 l) asks for. `hearing.assess_attenuation_difference`
+  applies the Annex B test band by band, significant when the difference of the
+  means exceeds `√(U95,1² + U95,2²)`, and `hearing.minimum_significant_difference`
+  gives its `√2·U95` form. `hearing.REAT_WITHIN_LABORATORY_UNCERTAINTY` and
+  `hearing.REAT_BETWEEN_LABORATORY_UNCERTAINTY` carry the components of Tables
+  A.2 and B.2 as `hearing.ProtectorUncertaintyBudget` rows, with the combined
+  and expanded values derived rather than copied, and
+  `hearing.reat_expanded_uncertainty` reads them band by band.
+  `hearing.check_reat_sound_field` judges the sound field of the test room
+  against 4.2.2 and Table 1 (`hearing.allowable_field_variation`,
+  `hearing.REAT_FIELD_VARIATION_LIMITS`); its verdict passes only when the
+  rotation of b) was measured too, and `directionality_judged` says whether it
+  was. Every derived cell of Tables A.2, A.3 and B.2, the criterion row and the
+  verdict of Table B.1 and the four minimum differences of B.1.1 and B.2 are
+  conformance rows to the printed decimal; the difference row of Table B.1
+  agrees within 0.1 dB, since the standard prints the means of its second
+  test rounded (3.94 dB at 8 kHz against the printed 4,0). B.1.1 and B.2
+  compute those minimum differences from the U95 their
+  tables print rounded, and say so; from the unrounded budgets the earplug
+  values would be 3.21 dB and 9.37 dB rather than the printed 3,3 dB and
+  9,3 dB. The
+  hearing-protector guide gains a section on the measurement in both languages.
 - **The ISO 1683 reference values, published once and read by every level.**
   `metrology.ISO1683_REFERENCE_VALUES` holds ISO 1683:2015 Tables 1 to 3,
   the reference values for sound in gases, sound in liquids and vibration,

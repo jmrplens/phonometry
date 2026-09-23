@@ -4107,6 +4107,146 @@ def generate_hearing_protector_methods(output_dir: str) -> None:
     plt.close()
 
 
+#: ISO 4869-1:2018 Table A.3: one earmuff on sixteen subjects, 125 Hz to
+#: 8 kHz, in dB. Also test 1 of Table B.1.
+_ISO4869_1_TABLE_A3 = (
+    (9.6, 13.5, 27.5, 32.4, 35.2, 29.1, 28.5),
+    (14.1, 20.2, 25.8, 32.0, 28.9, 35.3, 35.7),
+    (21.8, 27.8, 28.3, 46.6, 37.4, 40.1, 38.7),
+    (18.5, 22.2, 36.5, 44.8, 39.1, 30.6, 33.5),
+    (15.6, 21.9, 31.8, 42.5, 38.9, 38.3, 37.1),
+    (18.7, 28.6, 31.3, 39.0, 35.6, 35.3, 29.4),
+    (23.0, 26.5, 34.0, 41.3, 40.8, 38.7, 35.9),
+    (17.3, 21.7, 25.0, 30.7, 38.6, 37.9, 40.8),
+    (19.4, 19.6, 28.0, 36.6, 40.7, 34.9, 39.4),
+    (11.6, 20.4, 22.6, 38.0, 39.2, 33.9, 30.3),
+    (20.5, 21.8, 29.2, 40.7, 36.2, 35.7, 38.4),
+    (18.3, 19.6, 26.2, 34.6, 32.7, 34.9, 26.6),
+    (15.1, 17.5, 30.1, 39.0, 39.4, 38.2, 39.5),
+    (21.7, 20.8, 28.3, 39.5, 38.1, 40.0, 38.4),
+    (15.9, 17.8, 26.0, 40.6, 38.0, 40.2, 37.2),
+    (11.8, 18.4, 29.6, 37.2, 40.8, 36.0, 29.9),
+)
+#: Table B.1, test 2: the printed means and expanded uncertainties, in dB.
+_ISO4869_1_TEST_2_MEAN = (16.8, 21.0, 28.3, 38.2, 35.5, 34.6, 38.9)
+_ISO4869_1_TEST_2_U95 = (1.6, 1.2, 1.4, 1.5, 1.5, 1.7, 2.5)
+
+
+def generate_hearing_protector_reat(output_dir: str) -> None:
+    """ISO 4869-1: sixteen subjects, the uncertainty of their mean, and Annex B."""
+    print("Generating hearing_protector_reat...")
+    from matplotlib.patches import Patch
+
+    from phonometry import hearing
+
+    reat = hearing.real_ear_attenuation(_ISO4869_1_TABLE_A3)
+    comparison = hearing.assess_attenuation_difference(
+        reat,
+        _ISO4869_1_TEST_2_MEAN,
+        second_expanded_uncertainty_db=_ISO4869_1_TEST_2_U95,
+    )
+    freqs = np.asarray(reat.frequencies)
+
+    _fig, (ax_reat, ax_diff) = plt.subplots(1, 2, figsize=(13.0, 5.6))
+
+    # Left: the distribution the whole ISO 4869 family starts from, with
+    # increasing attenuation downwards.
+    for index, row in enumerate(reat.attenuation_db):
+        ax_reat.plot(
+            freqs,
+            row,
+            color=COLOR_TERTIARY,
+            linewidth=0.9,
+            alpha=0.55,
+            zorder=1,
+            label="the 16 subjects" if index == 0 else None,
+        )
+    ax_reat.errorbar(
+        freqs,
+        reat.mean_db,
+        yerr=reat.expanded_uncertainty_db,
+        fmt="none",
+        ecolor=COLOR_SECONDARY,
+        elinewidth=2.4,
+        capsize=5,
+        zorder=4,
+        label=r"$\pm U_{95}$ of the mean",
+    )
+    ax_reat.plot(
+        freqs,
+        reat.mean_db,
+        "-o",
+        color=COLOR_PRIMARY,
+        linewidth=2.4,
+        markersize=6,
+        zorder=5,
+        label="mean attenuation $m$",
+    )
+    ax_reat.set_xscale("log")
+    ax_reat.set_xlim(freqs[0] / 1.3, freqs[-1] * 1.3)
+    format_frequency_axis(ax_reat, language=_LANG)
+    ax_reat.set_xlabel(LABEL_FREQ_HZ)
+    ax_reat.set_ylabel("Sound attenuation [dB]")
+    ax_reat.invert_yaxis()
+    ax_reat.set_title("Sixteen subjects, one mean (Annex A)", pad=12)
+    ax_reat.grid(color=COLOR_GRID, linestyle="--", alpha=0.5, zorder=0)
+    ax_reat.set_axisbelow(True)
+    ax_reat.legend(loc="upper right", fontsize=9, framealpha=1.0, facecolor=COLOR_PANEL)
+
+    # Right: Table B.1, the same earmuff under two test conditions (headband
+    # position is the example B.1.2 gives). Only the band whose difference
+    # clears the root sum of squares of the two U95 is a real difference.
+    x = np.arange(freqs.size)
+    bars = ax_diff.bar(
+        x,
+        comparison.difference_db,
+        width=0.6,
+        color=COLOR_PRIMARY,
+        zorder=3,
+        label=r"$|m_1 - m_2|$",
+    )
+    for bar, flagged in zip(bars, comparison.significant, strict=True):
+        if flagged:
+            bar.set_hatch("//")
+            bar.set_edgecolor(COLOR_SECONDARY)
+    ax_diff.plot(
+        x,
+        comparison.criterion_db,
+        "_",
+        color=COLOR_SECONDARY,
+        markersize=26,
+        markeredgewidth=3.0,
+        zorder=4,
+        label=r"$\sqrt{U_{95,1}^2 + U_{95,2}^2}$",
+    )
+    ax_diff.set_xticks(x)
+    ax_diff.set_xticklabels(
+        [f"{f / 1000:g}k" if f >= 1000 else f"{f:g}" for f in freqs]
+    )
+    ax_diff.set_xlabel(LABEL_FREQ_HZ)
+    ax_diff.set_ylabel("Difference of the means [dB]")
+    ax_diff.set_ylim(0.0, 5.0)
+    ax_diff.set_title("Two tests of one earmuff (Annex B)", pad=12)
+    ax_diff.grid(axis="y", color=COLOR_GRID, linestyle="--", alpha=0.5, zorder=0)
+    ax_diff.set_axisbelow(True)
+    handles, labels = ax_diff.get_legend_handles_labels()
+    handles.append(
+        Patch(facecolor=COLOR_PRIMARY, edgecolor=COLOR_SECONDARY, hatch="//")
+    )
+    labels.append("significant difference")
+    ax_diff.legend(
+        handles,
+        labels,
+        loc="upper left",
+        fontsize=9,
+        framealpha=1.0,
+        facecolor=COLOR_PANEL,
+    )
+    plt.tight_layout()
+    save_figure(output_dir, "hearing_protector_reat.png")
+    plt.close()
+
+
 def generate_audiometric_zero_earphones(output_dir: str) -> None:
     """ISO 389-1 earphone reference levels, against the sound-field zero."""
     print("Generating audiometric_zero_earphones...")

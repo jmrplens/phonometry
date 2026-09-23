@@ -182,3 +182,125 @@ def test_the_two_hml_segments_are_styled_as_one_line() -> None:
     assert labels[0].startswith("$PNR$")
     assert labels[1].startswith("_")
     plt.close("all")
+
+
+# ---------------------------------------------------------------------------
+# ISO 4869-1: the measurement the grid comes from
+# ---------------------------------------------------------------------------
+
+
+def _reat() -> hearing.RealEarAttenuationResult:
+    return hearing.real_ear_attenuation(ref.ISO4869_1_TABLE_A3)
+
+
+def test_the_mean_attenuation_points_downwards_on_the_iec_60263_grid() -> None:
+    """Clause 6 l): increasing values downwards, 50 dB to one decade."""
+    result = _reat()
+    ax = result.plot()
+    mean_line = next(line for line in ax.lines if line.get_marker() == "o")
+    np.testing.assert_allclose(mean_line.get_ydata(), result.mean_db)
+    bottom, top = ax.get_ylim()
+    assert bottom > top, "attenuation is not drawn increasing downwards"
+    left, right = ax.get_xlim()
+    expected = ((bottom - top) / 50.0) / np.log10(right / left)
+    assert ax.get_box_aspect() == pytest.approx(expected)
+    # One faint line per subject behind the mean, one legend entry for them.
+    faint = [line for line in ax.lines if line.get_marker() in ("None", "", None)]
+    assert len(faint) == result.subjects
+    assert "16" in ax.get_title()
+    plt.close("all")
+
+
+def test_axes_handed_in_keep_their_shape() -> None:
+    _fig, ax = plt.subplots()
+    _reat().plot(ax=ax)
+    assert ax.get_box_aspect() is None
+    plt.close("all")
+
+
+def test_the_annex_b_figure_hatches_only_the_significant_band() -> None:
+    result = hearing.assess_attenuation_difference(
+        _reat(),
+        ref.ISO4869_1_TABLE_B1_MEAN_2,
+        second_expanded_uncertainty_db=ref.ISO4869_1_TABLE_B1_U95_2,
+    )
+    ax = result.plot()
+    hatched = [bool(bar.get_hatch()) for bar in ax.patches]
+    assert hatched == [False] * 6 + [True]
+    np.testing.assert_allclose(
+        [bar.get_height() for bar in ax.patches], result.difference_db
+    )
+    assert "8000 Hz" in ax.get_title()
+    # The hatch is explained in the legend, and the bands read as the other
+    # frequency axes of the library do.
+    legend = ax.get_legend()
+    assert legend is not None
+    assert "significant" in [text.get_text() for text in legend.get_texts()]
+    assert [tick.get_text() for tick in ax.get_xticklabels()][-4:] == [
+        "1k",
+        "2k",
+        "4k",
+        "8k",
+    ]
+    plt.close("all")
+
+
+def test_the_annex_b_figure_writes_a_spanish_band_with_a_comma() -> None:
+    result = hearing.assess_attenuation_difference(
+        [20.0, 30.0],
+        [30.0, 30.5],
+        first_expanded_uncertainty_db=1.0,
+        second_expanded_uncertainty_db=1.0,
+        frequencies=[31.5, 63.0],
+    )
+    ax = result.plot(language="es")
+    assert "31,5 Hz" in ax.get_title()
+    assert ax.get_xticklabels()[0].get_text() == "31,5"
+    legend = ax.get_legend()
+    assert legend is not None
+    assert "significativa" in [text.get_text() for text in legend.get_texts()]
+    plt.close("all")
+
+
+_SIX = ("front", "back", "left", "right", "up", "down")
+_ROTATION = {
+    "rotation_levels_db": [[0.0] * 7, [4.0] * 7],
+    "free_field_rejection_db": 17.0,
+}
+
+
+def test_the_sound_field_figure_names_its_verdict() -> None:
+    passing = hearing.check_reat_sound_field(
+        dict.fromkeys(_SIX, [0.0] * 7), [0.0] * 7, **_ROTATION
+    )
+    failing = hearing.check_reat_sound_field(
+        {**dict.fromkeys(_SIX, [0.0] * 7), "up": [3.0] * 7}, [0.0] * 7
+    )
+    assert passing.plot().get_title().endswith("qualifies")
+    assert failing.plot().get_title().endswith("does not qualify")
+    plt.close("all")
+
+
+def test_the_sound_field_figure_says_when_b_was_not_judged() -> None:
+    """Without the rotation the title does not claim the room qualifies."""
+    unjudged = hearing.check_reat_sound_field(dict.fromkeys(_SIX, [0.0] * 7), [0.0] * 7)
+    assert unjudged.plot().get_title().endswith("a) met, b) not judged")
+    assert unjudged.plot(language="es").get_title().endswith("b) sin evaluar")
+    plt.close("all")
+
+
+def test_the_sound_field_figure_draws_the_left_right_difference_undirected() -> None:
+    """The curve is |right - left| and its label does not claim a direction."""
+    check = hearing.check_reat_sound_field(
+        {**dict.fromkeys(_SIX, [0.0] * 7), "right": [-1.2] * 7, "left": [1.1] * 7},
+        [0.0] * 7,
+        **_ROTATION,
+    )
+    ax = check.plot()
+    line = next(
+        line
+        for line in ax.lines
+        if line.get_label() == "difference between right and left"
+    )
+    np.testing.assert_allclose(line.get_ydata(), 2.3)
+    plt.close("all")

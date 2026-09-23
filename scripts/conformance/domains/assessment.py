@@ -26,9 +26,11 @@ from scipy import signal as sg
 
 import phonometry as ph
 
-from ..registry import Outcome, numeric, record, register
+from ..registry import Outcome, count, numeric, record, register
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from phonometry.environment import ImpulseOnset
     from phonometry.metrology import UncertaintyResult
 
@@ -373,6 +375,209 @@ def _chk_nihl_annex_c_htlan() -> Outcome:
     noise = np.where(h + n > ref.ISO1999_ANNEX_C_COMPRESSION_FENCE, compressed, n)
     value = float(np.mean(h) + np.mean(noise))
     return numeric(ref.ISO1999_ANNEX_C_HTLAN, value, 0.05, unit="dB", places=1)
+
+
+_REAT = "Hearing protector attenuation (ISO 4869-1)"
+
+
+def _reat_budget_mismatches(
+    library: Mapping[str, Mapping[str, ph.hearing.ProtectorUncertaintyBudget]],
+    printed: dict[str, list[tuple[float, float, float, float, float]]],
+) -> tuple[int, int]:
+    """Cells of Table A.2 or B.2 the library's budgets do not reproduce.
+
+    The components are compared as transcribed, and the combined and expanded
+    rows as the table prints them: computed at full precision from the three
+    components and rounded to one decimal last (the NOTE under each table).
+
+    :return: ``(mismatches, cells)``.
+    """
+    mismatches = cells = 0
+    for protector, columns in printed.items():
+        for name, (meth, eq, env, u, u95) in zip(
+            ph.hearing.REAT_FREQUENCY_RANGES, columns, strict=True
+        ):
+            budget = library[protector][name]
+            pairs = (
+                (budget.method_db, meth),
+                (budget.equipment_db, eq),
+                (budget.environment_db, env),
+                (round(budget.combined_db, 1), u),
+                (round(budget.expanded_db, 1), u95),
+            )
+            cells += len(pairs)
+            mismatches += sum(abs(got - want) > 1e-9 for got, want in pairs)
+    return mismatches, cells
+
+
+@register(
+    _REAT,
+    "ISO 4869-1:2018 Annex A, Table A.2",
+    "Within-laboratory budget: u and U95 from the three components",
+)
+def _chk_reat_table_a2() -> Outcome:
+    """Table A.2 from its components, earplug and earmuff, three ranges each."""
+    mismatches, cells = _reat_budget_mismatches(
+        ph.hearing.REAT_WITHIN_LABORATORY_UNCERTAINTY, ref.ISO4869_1_TABLE_A2
+    )
+    return count(cells - mismatches, cells, subject="cells of Table A.2")
+
+
+@register(
+    _REAT,
+    "ISO 4869-1:2018 Annex B, Table B.2",
+    "Between-laboratory budget: u and U95 from the three components",
+)
+def _chk_reat_table_b2() -> Outcome:
+    """Table B.2 the same way: every combined and expanded cell, rounded last."""
+    mismatches, cells = _reat_budget_mismatches(
+        ph.hearing.REAT_BETWEEN_LABORATORY_UNCERTAINTY, ref.ISO4869_1_TABLE_B2
+    )
+    return count(cells - mismatches, cells, subject="cells of Table B.2")
+
+
+@register(
+    _REAT,
+    "ISO 4869-1:2018 Annex A, Table A.3",
+    "Earmuff on 16 subjects: mean, sigma, u = sigma/4 and U95, 7 bands",
+)
+def _chk_reat_table_a3() -> Outcome:
+    """All 28 derived cells, at full precision and rounded last (NOTE 2)."""
+    result = ph.hearing.real_ear_attenuation(ref.ISO4869_1_TABLE_A3)
+    rows = (
+        (result.mean_db, ref.ISO4869_1_TABLE_A3_MEAN),
+        (result.standard_deviation_db, ref.ISO4869_1_TABLE_A3_SIGMA),
+        (result.standard_uncertainty_db, ref.ISO4869_1_TABLE_A3_U),
+        (result.expanded_uncertainty_db, ref.ISO4869_1_TABLE_A3_U95),
+    )
+    worst = max(
+        float(np.max(np.abs(np.round(values, 1) - np.asarray(printed))))
+        for values, printed in rows
+    )
+    return Outcome(
+        expected="Table A.3 derived rows at 1 dp, 28 cells",
+        computed=f"max deviation {worst:.3f} dB",
+        delta=f"{worst:.3f} dB",
+        passed=worst <= 1e-9,
+    )
+
+
+#: Table B.1's difference row against the full-precision m1 and the printed
+#: m2: the m2 behind the printed difference lies within 0,05 dB of the printed
+#: one, and the printed difference rounds that again, so a consistent cell is
+#: at most 0,1 dB away.
+_REAT_B1_DIFFERENCE_TOLERANCE_DB = 0.1
+
+
+@register(
+    _REAT,
+    "ISO 4869-1:2018 Annex B, Table B.1",
+    "Two tests of one earmuff: criterion row, difference row and verdict",
+)
+def _chk_reat_table_b1() -> Outcome:
+    """The criterion row to 1 dp, the difference row and 'significant at 8 kHz only'.
+
+    Test 2 is printed rounded, so its mean and U95 enter as printed; test 1 is
+    Table A.3 at full precision. The criterion row reproduces all seven cells
+    to the printed decimal. The difference row can only agree within 0,1 dB:
+    six cells round to the print, and at 8 kHz the full-precision m1 of
+    34,956 dB against the printed m2 of 38,9 dB gives 3,944 dB where the table
+    prints 4,0, 0,056 dB off because m2 is printed rounded.
+    """
+    result = ph.hearing.assess_attenuation_difference(
+        ph.hearing.real_ear_attenuation(ref.ISO4869_1_TABLE_A3),
+        ref.ISO4869_1_TABLE_B1_MEAN_2,
+        second_expanded_uncertainty_db=ref.ISO4869_1_TABLE_B1_U95_2,
+    )
+    worst = float(
+        np.max(
+            np.abs(
+                np.round(result.criterion_db, 1)
+                - np.asarray(ref.ISO4869_1_TABLE_B1_CRITERION)
+            )
+        )
+    )
+    difference = float(
+        np.max(
+            np.abs(result.difference_db - np.asarray(ref.ISO4869_1_TABLE_B1_DIFFERENCE))
+        )
+    )
+    significant = result.significant_frequencies.tolist()
+    passed = (
+        worst <= 1e-9
+        and difference <= _REAT_B1_DIFFERENCE_TOLERANCE_DB
+        and significant == ref.ISO4869_1_TABLE_B1_SIGNIFICANT
+    )
+    return Outcome(
+        expected=(
+            "criterion row at 1 dp; difference row within 0.1 dB of the "
+            "rounded m2; significant at 8000 Hz only"
+        ),
+        computed=(
+            f"criterion max deviation {worst:.3f} dB; difference max deviation "
+            f"{difference:.3f} dB; significant at "
+            f"{', '.join(f'{f:g}' for f in significant) or 'none'} Hz"
+        ),
+        delta=f"{max(worst, difference):.3f} dB",
+        passed=passed,
+    )
+
+
+@register(
+    _REAT,
+    "ISO 4869-1:2018 B.1.1 and B.2",
+    "Minimum significant difference sqrt(2) x U95, 250 Hz to 4 kHz",
+)
+def _chk_reat_minimum_differences() -> Outcome:
+    """3,3 and 2,3 dB within, 9,3 and 6,9 dB between laboratories.
+
+    The text evaluates the rule on the U95 its tables print rounded, and writes
+    that input out ("sqrt(2) x 2,3 dB = 3,3 dB"), so the rounded U95 is what
+    goes in here. From the unrounded budgets the earplug values would be
+    3,21 dB and 9,37 dB; the earmuff ones round the same either way.
+    """
+    computed = {
+        f"{table} {protector}": round(
+            float(ph.hearing.minimum_significant_difference(u95)), 1
+        )
+        for (table, protector), (
+            u95,
+            _printed,
+        ) in ref.ISO4869_1_MINIMUM_DIFFERENCES.items()
+    }
+    expected = {
+        f"{table} {protector}": printed
+        for (table, protector), (
+            _u95,
+            printed,
+        ) in ref.ISO4869_1_MINIMUM_DIFFERENCES.items()
+    }
+    return record(expected, computed, unit="dB")
+
+
+@register(
+    _REAT,
+    "ISO 4869-1:2018 Table 1",
+    "Allowable sound-field variation by microphone free-field rejection",
+)
+def _chk_reat_table_1() -> Outcome:
+    """Each row read at its lower edge, and the 10 dB floor below which none fits."""
+    matching = sum(
+        abs(ph.hearing.allowable_field_variation(lowest) - allowed) <= 1e-9
+        for lowest, allowed in ref.ISO4869_1_TABLE_1
+    )
+    floor = min(lowest for lowest, _allowed in ref.ISO4869_1_TABLE_1)
+    try:
+        ph.hearing.allowable_field_variation(floor - 0.1)
+    except ValueError:
+        matching += 1
+    rows = len(ref.ISO4869_1_TABLE_1) + 1
+    return count(
+        matching,
+        rows,
+        subject="rows of Table 1",
+        expected_label=f"{rows}/{rows} rows of Table 1, the last one 'not suitable'",
+    )
 
 
 _HPD = "Hearing protectors (ISO 4869-2)"

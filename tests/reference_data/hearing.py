@@ -267,3 +267,111 @@ ISO4869_2_ANNEX_D_REPORTED = 82  # dB, both applications
 #: reference noise. Kept so the test that tells the two tables apart names
 #: what it is refusing.
 ISO4869_2_TABLE_C1_NOISE6 = [82.0, 89.4, 93.5, 95.6, 93.0, 90.1, 83.0]
+
+# ---------------------------------------------------------------------------
+# ISO 4869-1:2018 - real-ear attenuation at threshold, its uncertainty and the
+# Annex B significance test. Read on the printed pages: Tables A.2 and A.3 on
+# folios 12-13 (PDF pages 18-19), B.1.1 on folio 14 (PDF 20), Table B.1 on
+# folio 15 (PDF 21), Table B.2 and the text of B.2 on folio 16 (PDF 22), and
+# Table 1 on folio 4 (PDF 10).
+#   A.2, B.2  every combined and expanded cell is the root sum of squares of
+#             the three printed components, times 2 for U95, rounded last;
+#   A.3       all 28 derived cells (mean, sigma, u = sigma/4, U95 = 2u) come
+#             from the 16 x 7 grid at full precision, as its NOTE 2 says;
+#   B.1       test 2 is printed rounded only, so its U95 and mean are the
+#             printed ones. The root-sum-of-squares row reproduces all seven
+#             cells and the verdict is "significant at 8 kHz only"; the
+#             difference row agrees within 0,1 dB: six cells round to the
+#             print, and 8 kHz is 0,056 dB off (3,944 against the printed
+#             4,0) because m2 is printed rounded.
+#   B.1.1, B.2  the minimum differences are sqrt(2) times the ROUNDED U95 of
+#             the tables, which the text writes out ("sqrt(2) x 2,3 dB =
+#             3,3 dB"): 3,3 and 2,3 dB within, 9,3 and 6,9 dB between.
+# ---------------------------------------------------------------------------
+#: The seven test signals of 4.1, in hertz; 63 Hz is optional and not used by
+#: the worked example.
+ISO4869_1_FREQUENCIES = [125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0]
+
+#: Table A.3: earmuff attenuation in dB, one row per test subject, 125 Hz to
+#: 8 kHz. Also test 1 of Table B.1.
+ISO4869_1_TABLE_A3: list[list[float]] = [
+    [9.6, 13.5, 27.5, 32.4, 35.2, 29.1, 28.5],
+    [14.1, 20.2, 25.8, 32.0, 28.9, 35.3, 35.7],
+    [21.8, 27.8, 28.3, 46.6, 37.4, 40.1, 38.7],
+    [18.5, 22.2, 36.5, 44.8, 39.1, 30.6, 33.5],
+    [15.6, 21.9, 31.8, 42.5, 38.9, 38.3, 37.1],
+    [18.7, 28.6, 31.3, 39.0, 35.6, 35.3, 29.4],
+    [23.0, 26.5, 34.0, 41.3, 40.8, 38.7, 35.9],
+    [17.3, 21.7, 25.0, 30.7, 38.6, 37.9, 40.8],
+    [19.4, 19.6, 28.0, 36.6, 40.7, 34.9, 39.4],
+    [11.6, 20.4, 22.6, 38.0, 39.2, 33.9, 30.3],
+    [20.5, 21.8, 29.2, 40.7, 36.2, 35.7, 38.4],
+    [18.3, 19.6, 26.2, 34.6, 32.7, 34.9, 26.6],
+    [15.1, 17.5, 30.1, 39.0, 39.4, 38.2, 39.5],
+    [21.7, 20.8, 28.3, 39.5, 38.1, 40.0, 38.4],
+    [15.9, 17.8, 26.0, 40.6, 38.0, 40.2, 37.2],
+    [11.8, 18.4, 29.6, 37.2, 40.8, 36.0, 29.9],
+]
+#: Table A.3, the four derived rows as printed, in dB.
+ISO4869_1_TABLE_A3_MEAN = [17.1, 21.1, 28.8, 38.5, 37.5, 36.2, 35.0]
+ISO4869_1_TABLE_A3_SIGMA = [3.9, 3.9, 3.5, 4.5, 3.2, 3.2, 4.6]
+ISO4869_1_TABLE_A3_U = [1.0, 1.0, 0.9, 1.1, 0.8, 0.8, 1.1]
+ISO4869_1_TABLE_A3_U95 = [2.0, 1.9, 1.7, 2.2, 1.6, 1.6, 2.3]
+
+#: Table B.1, test 2, as printed (the individual data are not given), in dB.
+ISO4869_1_TABLE_B1_MEAN_2 = [16.8, 21.0, 28.3, 38.2, 35.5, 34.6, 38.9]
+ISO4869_1_TABLE_B1_SIGMA_2 = [3.1, 2.4, 2.7, 3.1, 3.0, 3.3, 4.9]
+ISO4869_1_TABLE_B1_U95_2 = [1.6, 1.2, 1.4, 1.5, 1.5, 1.7, 2.5]
+#: Table B.1, the last two rows: |m1 - m2| and sqrt(U95,1^2 + U95,2^2), in dB.
+ISO4869_1_TABLE_B1_DIFFERENCE = [0.3, 0.1, 0.5, 0.3, 2.0, 1.6, 4.0]
+ISO4869_1_TABLE_B1_CRITERION = [2.5, 2.3, 2.2, 2.7, 2.2, 2.3, 3.4]
+#: B.1.2: "not significantly different in the frequency range 125 Hz to
+#: 4 000 Hz. At 8 000 Hz a significant difference is seen."
+ISO4869_1_TABLE_B1_SIGNIFICANT = [8000.0]
+
+#: Tables A.2 and B.2: the three components (u_meth, u_eq, u_env) in dB, then
+#: the printed combined u and expanded U95, keyed by protector, one tuple per
+#: column (<250 Hz, 250 Hz up to 4 kHz, >4 kHz).
+ISO4869_1_TABLE_A2: dict[str, list[tuple[float, float, float, float, float]]] = {
+    "earplug": [
+        (1.5, 0.2, 0.5, 1.6, 3.2),
+        (1.0, 0.2, 0.5, 1.1, 2.3),
+        (1.5, 0.2, 0.5, 1.6, 3.2),
+    ],
+    "earmuff": [
+        (1.0, 0.2, 0.5, 1.1, 2.3),
+        (0.6, 0.2, 0.5, 0.8, 1.6),
+        (1.0, 0.2, 0.5, 1.1, 2.3),
+    ],
+}
+ISO4869_1_TABLE_B2: dict[str, list[tuple[float, float, float, float, float]]] = {
+    "earplug": [
+        (4.0, 0.3, 0.8, 4.1, 8.2),
+        (3.2, 0.3, 0.8, 3.3, 6.6),
+        (3.2, 0.3, 0.8, 3.3, 6.6),
+    ],
+    "earmuff": [
+        (1.8, 0.3, 0.8, 2.0, 4.0),
+        (2.3, 0.3, 0.8, 2.5, 4.9),
+        (3.2, 0.3, 0.8, 3.3, 6.6),
+    ],
+}
+
+#: B.1.1 and B.2: the minimum differences for 250 Hz to 4 kHz, in dB, keyed
+#: (table, protector): the rounded U95 the text reads and the difference it
+#: prints from it.
+ISO4869_1_MINIMUM_DIFFERENCES: dict[tuple[str, str], tuple[float, float]] = {
+    ("A.2", "earplug"): (2.3, 3.3),
+    ("A.2", "earmuff"): (1.6, 2.3),
+    ("B.2", "earplug"): (6.6, 9.3),
+    ("B.2", "earmuff"): (4.9, 6.9),
+}
+
+#: Table 1: (lowest free-field rejection, allowable field variation) in dB,
+#: from 25 dB and up down to 10 dB; below 10 dB "Microphone not suitable".
+ISO4869_1_TABLE_1: list[tuple[float, float]] = [
+    (25.0, 20.0),
+    (20.0, 15.0),
+    (15.0, 10.0),
+    (10.0, 5.0),
+]

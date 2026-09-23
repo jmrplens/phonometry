@@ -120,6 +120,7 @@ export const apiSections = {
       'reference/api/hearing/threshold',
       'reference/api/hearing/noise-induced-hearing-loss',
       'reference/api/hearing/occupational-exposure',
+      'reference/api/hearing/real-ear-attenuation',
       'reference/api/hearing/hearing-protectors',
     ],
   },

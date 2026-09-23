@@ -19,7 +19,7 @@
 
 ## Numerical conformance report
 
-**1281/1281 conformance checks pass** across 87 domains and 462 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+**1287/1287 conformance checks pass** across 88 domains and 463 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub><b>&#916;</b> is the difference between the computed value and the one the standard publishes. <b>Used</b> is how much of that clause's published tolerance the difference consumes: 100 % means it sits exactly on the limit, 5 % means it uses a twentieth of the allowance, and a dash means the clause states no two-sided tolerance for the quantity, so there is no budget to spend. It is reported and never used to decide a verdict, which is settled at full precision before any rounding.</sub>
 
@@ -1080,6 +1080,20 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO 1999:2013 Annex C, Formulae (C.6) to (C.8) | NIPTS at 1/2/4 kHz, 90 dB, 30 yr, Q = 10 % (annex inputs) | 0, 9, 19 dB | 0, 9, 19 dB | 0 dB | - | ![Pass][cv-pass] Pass |
 | ISO 1999:2013 Annex C, Formula (C.5) | Compressed 4 kHz shift, Formula (1) with the annex's H = 36 dB | 13.3 dB (+/-0.1 dB) | 13.3 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 | ISO 1999:2013 Annex C, Formula (C.11) | Hearing threshold level with age and noise, 1/2/4 kHz mean, Q = 10 % | 31.1 dB (+/-0.1 dB) | 31.1 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+
+</details>
+
+<details>
+<summary><b>Hearing protector attenuation (ISO 4869-1)</b>: 100% (6/6)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
+|:---|:---|:---|:---|:---|:---:|:---:|
+| ISO 4869-1:2018 Annex A, Table A.2 | Within-laboratory budget: u and U95 from the three components | 30/30 cells of Table A.2 | 30/30 cells of Table A.2 | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 4869-1:2018 Annex B, Table B.2 | Between-laboratory budget: u and U95 from the three components | 30/30 cells of Table B.2 | 30/30 cells of Table B.2 | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 4869-1:2018 Annex A, Table A.3 | Earmuff on 16 subjects: mean, sigma, u = sigma/4 and U95, 7 bands | Table A.3 derived rows at 1 dp, 28 cells | max deviation 0.000 dB | 0.000 dB | - | ![Pass][cv-pass] Pass |
+| ISO 4869-1:2018 Annex B, Table B.1 | Two tests of one earmuff: criterion row, difference row and verdict | criterion row at 1 dp; difference row within 0.1 dB of the rounded m2; significant at 8000 Hz only | criterion max deviation 0.000 dB; difference max deviation 0.056 dB; significant at 8000 Hz | 0.056 dB | - | ![Pass][cv-pass] Pass |
+| ISO 4869-1:2018 B.1.1 and B.2 | Minimum significant difference sqrt(2) x U95, 250 Hz to 4 kHz | A.2 earplug = 3.3 dB; A.2 earmuff = 2.3 dB; B.2 earplug = 9.3 dB; B.2 earmuff = 6.9 dB | A.2 earplug = 3.3 dB; A.2 earmuff = 2.3 dB; B.2 earplug = 9.3 dB; B.2 earmuff = 6.9 dB | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 4869-1:2018 Table 1 | Allowable sound-field variation by microphone free-field rejection | 5/5 rows of Table 1, the last one 'not suitable' | 5/5 rows of Table 1 | exact | 0 % | ![Pass][cv-pass] Pass |
 
 </details>
 

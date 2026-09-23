@@ -3,13 +3,13 @@
   "library": "4.0.0rc1",
   "generator": "scripts/conformance_report.py",
   "counts": {
-    "checks": 1281,
-    "passing": 1281,
+    "checks": 1287,
+    "passing": 1287,
     "failing": 0,
-    "domains": 87,
-    "standards": 462,
-    "citations": 867,
-    "designations": 180,
+    "domains": 88,
+    "standards": 463,
+    "citations": 873,
+    "designations": 181,
     "sources": 114
   },
   "units": [
@@ -314,6 +314,12 @@
     {
       "id": "noise-induced-hearing-loss-iso-1999",
       "title": "Noise-induced hearing loss (ISO 1999)",
+      "checks": 6,
+      "passing": 6
+    },
+    {
+      "id": "hearing-protector-attenuation-iso-4869-1",
+      "title": "Hearing protector attenuation (ISO 4869-1)",
       "checks": 6,
       "passing": 6
     },
@@ -23918,6 +23924,211 @@
         "value": 0.0
       },
       "precision": 1,
+      "verdict": "pass"
+    },
+    {
+      "id": "hearing-protector-attenuation-iso-4869-1/iso-4869-1-2018-annex-a-table-a-2/within-laboratory-budget-u-and-u95-from-the-three-components",
+      "domain": "hearing-protector-attenuation-iso-4869-1",
+      "reference": {
+        "cite": "ISO 4869-1:2018 Annex A, Table A.2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 4869-1",
+            "edition": "2018",
+            "clause": "Annex A, Table A.2"
+          }
+        ]
+      },
+      "quantity": "Within-laboratory budget: u and U95 from the three components",
+      "kind": "count",
+      "expected": {
+        "value": 30.0,
+        "label": "30/30 cells of Table A.2"
+      },
+      "computed": {
+        "value": 30.0,
+        "label": "30/30 cells of Table A.2"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "hearing-protector-attenuation-iso-4869-1/iso-4869-1-2018-annex-b-table-b-2/between-laboratory-budget-u-and-u95-from-the-three-components",
+      "domain": "hearing-protector-attenuation-iso-4869-1",
+      "reference": {
+        "cite": "ISO 4869-1:2018 Annex B, Table B.2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 4869-1",
+            "edition": "2018",
+            "clause": "Annex B, Table B.2"
+          }
+        ]
+      },
+      "quantity": "Between-laboratory budget: u and U95 from the three components",
+      "kind": "count",
+      "expected": {
+        "value": 30.0,
+        "label": "30/30 cells of Table B.2"
+      },
+      "computed": {
+        "value": 30.0,
+        "label": "30/30 cells of Table B.2"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "hearing-protector-attenuation-iso-4869-1/iso-4869-1-2018-annex-a-table-a-3/earmuff-on-16-subjects-mean-sigma-u-sigma-4-and-u95-7-bands",
+      "domain": "hearing-protector-attenuation-iso-4869-1",
+      "reference": {
+        "cite": "ISO 4869-1:2018 Annex A, Table A.3",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 4869-1",
+            "edition": "2018",
+            "clause": "Annex A, Table A.3"
+          }
+        ]
+      },
+      "quantity": "Earmuff on 16 subjects: mean, sigma, u = sigma/4 and U95, 7 bands",
+      "kind": "scalar",
+      "expected": {
+        "label": "Table A.3 derived rows at 1 dp, 28 cells"
+      },
+      "computed": {
+        "label": "max deviation 0.000 dB"
+      },
+      "deviation": {
+        "value": 0.0,
+        "label": "0.000 dB"
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "hearing-protector-attenuation-iso-4869-1/iso-4869-1-2018-annex-b-table-b-1/two-tests-of-one-earmuff-criterion-row-difference-row-and-verdict",
+      "domain": "hearing-protector-attenuation-iso-4869-1",
+      "reference": {
+        "cite": "ISO 4869-1:2018 Annex B, Table B.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 4869-1",
+            "edition": "2018",
+            "clause": "Annex B, Table B.1"
+          }
+        ]
+      },
+      "quantity": "Two tests of one earmuff: criterion row, difference row and verdict",
+      "kind": "scalar",
+      "expected": {
+        "label": "criterion row at 1 dp; difference row within 0.1 dB of the rounded m2; significant at 8000 Hz only"
+      },
+      "computed": {
+        "label": "criterion max deviation 0.000 dB; difference max deviation 0.056 dB; significant at 8000 Hz"
+      },
+      "deviation": {
+        "value": 0.056,
+        "label": "0.056 dB"
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "hearing-protector-attenuation-iso-4869-1/iso-4869-1-2018-b-1-1-and-b-2/minimum-significant-difference-sqrt-2-x-u95-250-hz-to-4-khz",
+      "domain": "hearing-protector-attenuation-iso-4869-1",
+      "reference": {
+        "cite": "ISO 4869-1:2018 B.1.1 and B.2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 4869-1",
+            "edition": "2018",
+            "clause": "B.1.1 and B.2"
+          }
+        ]
+      },
+      "quantity": "Minimum significant difference sqrt(2) x U95, 250 Hz to 4 kHz",
+      "kind": "record",
+      "expected": {
+        "label": "A.2 earplug = 3.3 dB; A.2 earmuff = 2.3 dB; B.2 earplug = 9.3 dB; B.2 earmuff = 6.9 dB",
+        "record": {
+          "A.2 earplug": 3.3,
+          "A.2 earmuff": 2.3,
+          "B.2 earplug": 9.3,
+          "B.2 earmuff": 6.9
+        }
+      },
+      "computed": {
+        "label": "A.2 earplug = 3.3 dB; A.2 earmuff = 2.3 dB; B.2 earplug = 9.3 dB; B.2 earmuff = 6.9 dB",
+        "record": {
+          "A.2 earplug": 3.3,
+          "A.2 earmuff": 2.3,
+          "B.2 earplug": 9.3,
+          "B.2 earmuff": 6.9
+        }
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "hearing-protector-attenuation-iso-4869-1/iso-4869-1-2018-table-1/allowable-sound-field-variation-by-microphone-free-field-rejection",
+      "domain": "hearing-protector-attenuation-iso-4869-1",
+      "reference": {
+        "cite": "ISO 4869-1:2018 Table 1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 4869-1",
+            "edition": "2018",
+            "clause": "Table 1"
+          }
+        ]
+      },
+      "quantity": "Allowable sound-field variation by microphone free-field rejection",
+      "kind": "count",
+      "expected": {
+        "value": 5.0,
+        "label": "5/5 rows of Table 1, the last one 'not suitable'"
+      },
+      "computed": {
+        "value": 5.0,
+        "label": "5/5 rows of Table 1"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
       "verdict": "pass"
     },
     {

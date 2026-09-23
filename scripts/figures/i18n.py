@@ -1142,6 +1142,14 @@ _ES_EXACT = {
     "the 8 reference noises, per subject": "los 8 ruidos de referencia, por sujeto",
     "this noise, $L_{p,C} - L_{p,A}$ = \u22121 dB": "este ruido, $L_{p,C} - L_{p,A}$ = \u22121 dB",
     "octave band: $L'_{p,A84}$ = 81 dB\nHML: 82 dB\nSNR (21 dB): 82 dB": "por bandas de octava: $L'_{p,A84}$ = 81 dB\nHML: 82 dB\nSNR (21 dB): 82 dB",
+    # hearing_protector_reat figure (ISO 4869-1)
+    "Sixteen subjects, one mean (Annex A)": "Dieciséis sujetos, una media (anexo A)",
+    "Two tests of one earmuff (Annex B)": "Dos ensayos de una misma orejera (anexo B)",
+    "the 16 subjects": "los 16 sujetos",
+    r"$\pm U_{95}$ of the mean": r"$\pm U_{95}$ de la media",
+    "mean attenuation $m$": "atenuación media $m$",
+    "Difference of the means [dB]": "Diferencia de las medias [dB]",
+    "significant difference": "diferencia significativa",
     # low_frequency_intensity figure (ISO 15186-3)
     "Low-frequency index and its field indicator": "Índice a baja frecuencia y su indicador de campo",
     "Qualifying the facility on a limp panel": "Calificación de la instalación con un panel flexible",

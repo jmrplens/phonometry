@@ -499,8 +499,9 @@ def test_a_signal_is_resampled_only_to_a_whole_number_of_hertz() -> None:
     """
     from phonometry.signals import resample_signal
 
+    record = Signal(_RECORD, FS)
     with pytest.raises(ValueError, match=r"whole number of hertz"):
-        resample_signal(Signal(_RECORD, FS), fs_new=FS / 7)
+        resample_signal(record, fs_new=FS / 7)
     assert isinstance(resample_signal(_RECORD, FS, fs_new=FS / 7).signal, np.ndarray)
 
 

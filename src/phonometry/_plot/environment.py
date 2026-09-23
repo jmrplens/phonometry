@@ -1460,10 +1460,13 @@ def plot_sel_distribution(
         long_term = result.distribution_long_term_level_db
         # The long-term level is a reference on the level axis, not a series:
         # drawn in the page's own ink, dimmed, so it reads on both themes and
-        # does not compete with the curve for colour.
+        # does not compete with the curve for colour. It is the level taken
+        # over the spread distribution, which Figure A.3 names LT2 beside the
+        # LT1 of Equation (7); both print 37,0 dB, so the label names which.
         ink = theme_line(ax.xaxis.label.get_color(), ax, quiet=0.8)
         lt_label = (
-            f"{_t('long-term level', language)} {format_number(long_term, language)} dB"
+            f"LT2 ({_t('long-term level', language)}) "
+            f"{format_number(long_term, language)} dB"
         )
         if view == "density":
             ax.plot(

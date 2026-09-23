@@ -6720,9 +6720,10 @@ _ES_PATTERNS = [
 ]
 
 # The Spanish decimal comma, with the numbers that are NOT decimals carved
-# out. A number introduced by a clause/equation/table/annex token ("apartado
-# 7.4", "Ec. 8.252", "Tabla 13.8") is a reference into a standard or a book,
-# and the Spanish pages keep its dot; a plural token ("Ecs. 8.44, 8.46",
+# out. A number introduced by a clause/equation/table/annex/example token
+# ("apartado 7.4", "Ec. 8.252", "Tabla 13.8", "Ejemplo 7.5") is a reference
+# into a standard or a book, and the Spanish pages keep its dot; a plural
+# token ("Ecs. 8.44, 8.46",
 # "apartados 6.2 y 6.3") extends that reading over its whole list, and a
 # dash-joined range ("Ecs. 13.27-13.33", "apartado 4.1-4.3") is
 # reference-to-reference after either. The carve-out is deliberately no wider:
@@ -6733,8 +6734,8 @@ _ES_PATTERNS = [
 _REF_NUM = r"\d+(?:\.\d+)*(?:[-–−]\d+(?:\.\d+)*)*"
 _CLAUSE_REF_RE = re.compile(
     r"\b(?:apartados|cap[ií]tulos|cl[aá]usulas|anexos|tablas|f[oó]rmulas"
-    r"|ecs\.)\s*" + _REF_NUM + r"(?:(?:\s*,\s*|\s+y\s+)" + _REF_NUM + r")*"
-    r"|(?:\b(?:apartado|cap[ií]tulo|cl[aá]usula|anexo|tabla|f[oó]rmula"
+    r"|ejemplos|ecs\.)\s*" + _REF_NUM + r"(?:(?:\s*,\s*|\s+y\s+)" + _REF_NUM + r")*"
+    r"|(?:\b(?:apartado|cap[ií]tulo|cl[aá]usula|anexo|tabla|f[oó]rmula|ejemplo"
     r"|f[oó]rm\.|ec\.)|§)\s*" + _REF_NUM,
     re.IGNORECASE,
 )

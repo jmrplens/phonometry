@@ -126,6 +126,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   phase labels its example writes into the page ("Maquina ruidosa activa",
   "punto de evaluacion mas desfavorable", "Sonometro integrador-promediador",
   "Verificacion antes y despues, desviacion"), and now prints them correctly.
+  The same Spanish title of `composite_facade_weak_element` wrote the number
+  of a worked example as a decimal, "Ejemplo 7,5"; an example number is a
+  reference like a clause or a table, so it now keeps its dot, as "Tabla 13.8"
+  already did.
   `make spanish-accents` reads the translation tables of the figures, the
   diagrams and the library's renderers, and the example fiches built in
   Spanish, and fails on a form that is never correct Spanish without its

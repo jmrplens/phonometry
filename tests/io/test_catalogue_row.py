@@ -17,7 +17,6 @@ import dataclasses
 import importlib
 import inspect
 import pkgutil
-import sys
 from types import MappingProxyType
 
 import pytest
@@ -110,31 +109,13 @@ def test_no_row_class_is_slotted(cls: type) -> None:
     """A slotted dataclass breaks a zero-argument ``super()`` inside it.
 
     ``slots=True`` builds a new class, and the ``__class__`` cell of a method
-    that calls ``super()`` still points at the old one, so on Python 3.13 a
-    ``__post_init__`` that defers to the base raises ``TypeError`` when the
-    row is built. Seven row classes carried it; none may.
+    that calls ``super()`` still points at the old one, so on the Python 3.13
+    releases that predate the fix (3.13.5 is one) a ``__post_init__`` that
+    defers to the base raises ``TypeError`` when the row is built. The
+    project admits every 3.13 release. Seven row classes carried it; none
+    may.
     """
     assert "__slots__" not in vars(cls)
-
-
-@pytest.mark.skipif(
-    sys.version_info >= (3, 14),
-    reason="Python 3.14 rewrites the __class__ cell of a slotted dataclass",
-)
-def test_a_slotted_row_that_calls_super_cannot_be_built() -> None:
-    """The failure the rule above prevents, on the oldest Python supported.
-
-    Python 3.14 repairs the ``__class__`` cell when it builds the slotted
-    class, and 3.13, which ``requires-python`` still admits, does not.
-    """
-
-    @dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
-    class _Slotted(io.CatalogueRow):
-        def __post_init__(self) -> None:
-            super().__post_init__()
-
-    with pytest.raises(TypeError, match="super"):
-        _Slotted(name="x", source="y")
 
 
 def test_basis_answers_for_the_field_then_the_row_then_not_at_all() -> None:

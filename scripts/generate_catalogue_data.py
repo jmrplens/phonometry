@@ -836,7 +836,8 @@ def _refuse_unshowable(row: CatalogueRow, field: str, value: object) -> None:
     A cell has one kind, and the component styles and words it by that kind.
     Two hedges on one value, or a hedge that only a value can carry on a cell
     that holds an interval, a list or a word, would reach the page with one of
-    them silently gone: an estimated interval read as a plain range, or a
+    them silently gone (a tilde on an interval is written into its text, so
+    ``approximate`` is not one of them): an estimated interval read as a plain range, or a
     converted bound whose note gives the converted number as what the page
     prints. No published cell does either today; the first one to do so stops
     the generator here, so that how it should read is decided rather than
@@ -941,6 +942,12 @@ def cell(
         else:
             text = " to ".join(written(end) for end in interval if end is not None)
             kind = "range"
+        if row.is_approximate(field):
+            # The page prints this interval with a tilde, as Cox Table 6.5 does
+            # for the porosity of granular vermiculite. The range and bound
+            # kinds have no mark of their own for it, so the tilde goes into
+            # the text instead of being dropped.
+            text = f"~{text}"
         return {"text": text, "kind": kind, "note": row.why_missing(field)}
     if field in row.reported:
         listed = ", ".join(

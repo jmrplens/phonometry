@@ -175,9 +175,9 @@ class CatalogueRow:
     Every row of every published catalogue is one of these, a frozen and
     keyword-only dataclass. A subclass written to hold a quantity no
     catalogue of the library publishes is the same, and it leaves out
-    ``slots=True``: on Python 3.13 a slotted dataclass that calls ``super()``
-    without arguments, as a ``__post_init__`` does, raises :class:`TypeError`
-    when it is built.
+    ``slots=True``: on the Python 3.13 releases that predate the fix, a
+    slotted dataclass that calls ``super()`` without arguments, as a
+    ``__post_init__`` does, raises :class:`TypeError` when it is built.
 
     :ivar name: The material as the table names it, attribution stripped.
     :ivar variant: Which specimen or condition this row is, when the page
@@ -370,12 +370,14 @@ class CatalogueRow:
         return field_name in self.derived
 
     def basis_of(self, field_name: str) -> str:
-        """What the source says this field is: measured, declared, estimated.
+        """What the source says this field is, one of :data:`CATALOGUE_BASES`.
+
+        The five are ``measured``, ``declared``, ``calculated``, ``estimated``
+        and ``extended``.
 
         :param field_name: One of the field names of this class.
         :return: The field's own entry in :attr:`basis`, else the row's, else
-            the empty string, which means the source does not say. Otherwise
-            one of :data:`CATALOGUE_BASES`.
+            the empty string, which means the source does not say.
         """
         return self.basis.get(field_name, self.basis.get("row", ""))
 

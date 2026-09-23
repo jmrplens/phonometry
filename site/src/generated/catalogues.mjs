@@ -34881,7 +34881,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "0,65 to 0,68",
+            "text": "~0,65 to 0,68",
             "kind": "range",
             "note": "the page prints 0.65 to 0.68 and no value"
           },

@@ -29,8 +29,15 @@ for digit, what the library builds today. It exists because the page
 generator's `--check` only sees the numbers as the site prints them, and a
 change in the last digit of a float, or a hedge moved from one field to
 another, does not show there. The file is not part of the `phonometry`
-package and is not installed with it. The transcriptions it holds are
-covered by the same terms as the packaged tables they were built from.
+package and is not installed with it.
+
+Unlike the extracts elsewhere in `tests/data/`, this file **is covered by
+this repository's MIT licence**, the same terms as the packaged tables it
+was dumped from (`src/phonometry/**/data/*.json`), which the package already
+distributes under that licence. What it takes from each cited work is the
+transcribed numbers with the citation every row carries; no text, table
+layout, figure or page of any work is reproduced, and nothing in it comes
+from a file whose terms forbid redistribution.
 
 ## Removal policy
 

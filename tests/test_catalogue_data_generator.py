@@ -460,6 +460,20 @@ def test_an_interval_stays_an_interval() -> None:
     assert cell["kind"] == "range"
 
 
+def test_an_interval_the_page_prints_with_a_tilde_keeps_it() -> None:
+    """The range kind has no mark of its own, so the tilde goes in the text.
+
+    Cox Table 6.5 prints the porosity of granular vermiculite as an interval
+    with a tilde; before, the page showed the bare interval.
+    """
+    row = _row(ranges={"porosity": (0.65, 0.68)}, approximate=frozenset({"porosity"}))
+
+    cell = gcd.cell(row, "porosity")
+
+    assert cell["text"] == "~0,65 to 0,68"
+    assert cell["kind"] == "range"
+
+
 def test_an_upper_bound_stays_a_bound() -> None:
     row = _row(
         ranges={"shot_content_percent": (0.0, 1.0)},

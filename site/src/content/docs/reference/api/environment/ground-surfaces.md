@@ -148,7 +148,10 @@ saying what the cell held instead.
 GroundSurface.basis_of(field_name: str) -> str
 ```
 
-What the source says this field is: measured, declared, estimated.
+What the source says this field is, one of [`CATALOGUE_BASES`](/phonometry/reference/api/io/io/#catalogue_bases).
+
+The five are `measured`, `declared`, `calculated`, `estimated`
+and `extended`.
 
 **Parameters**
 
@@ -156,7 +159,7 @@ What the source says this field is: measured, declared, estimated.
 | :--- | :--- |
 | `field_name` | One of the field names of this class. |
 
-**Returns:** The field's own entry in `basis`, else the row's, else the empty string, which means the source does not say. Otherwise one of [`CATALOGUE_BASES`](/phonometry/reference/api/io/io/#catalogue_bases).
+**Returns:** The field's own entry in `basis`, else the row's, else the empty string, which means the source does not say.
 
 ### GroundSurface.is_approximate()
 

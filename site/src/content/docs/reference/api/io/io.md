@@ -171,7 +171,10 @@ The bands this row prints a value for, in hertz.
 BandedRow.basis_of(field_name: str) -> str
 ```
 
-What the source says this field is: measured, declared, estimated.
+What the source says this field is, one of [`CATALOGUE_BASES`](/phonometry/reference/api/io/io/#catalogue_bases).
+
+The five are `measured`, `declared`, `calculated`, `estimated`
+and `extended`.
 
 **Parameters**
 
@@ -179,7 +182,7 @@ What the source says this field is: measured, declared, estimated.
 | :--- | :--- |
 | `field_name` | One of the field names of this class. |
 
-**Returns:** The field's own entry in `basis`, else the row's, else the empty string, which means the source does not say. Otherwise one of [`CATALOGUE_BASES`](/phonometry/reference/api/io/io/#catalogue_bases).
+**Returns:** The field's own entry in `basis`, else the row's, else the empty string, which means the source does not say.
 
 ### BandedRow.is_approximate()
 
@@ -436,9 +439,9 @@ the book left the cell empty, or whether it printed three numbers.
 Every row of every published catalogue is one of these, a frozen and
 keyword-only dataclass. A subclass written to hold a quantity no
 catalogue of the library publishes is the same, and it leaves out
-`slots=True`: on Python 3.13 a slotted dataclass that calls `super()`
-without arguments, as a `__post_init__` does, raises `TypeError`
-when it is built.
+`slots=True`: on the Python 3.13 releases that predate the fix, a
+slotted dataclass that calls `super()` without arguments, as a
+`__post_init__` does, raises `TypeError` when it is built.
 
 **Attributes**
 
@@ -471,7 +474,10 @@ when it is built.
 CatalogueRow.basis_of(field_name: str) -> str
 ```
 
-What the source says this field is: measured, declared, estimated.
+What the source says this field is, one of [`CATALOGUE_BASES`](/phonometry/reference/api/io/io/#catalogue_bases).
+
+The five are `measured`, `declared`, `calculated`, `estimated`
+and `extended`.
 
 **Parameters**
 
@@ -479,7 +485,7 @@ What the source says this field is: measured, declared, estimated.
 | :--- | :--- |
 | `field_name` | One of the field names of this class. |
 
-**Returns:** The field's own entry in `basis`, else the row's, else the empty string, which means the source does not say. Otherwise one of [`CATALOGUE_BASES`](/phonometry/reference/api/io/io/#catalogue_bases).
+**Returns:** The field's own entry in `basis`, else the row's, else the empty string, which means the source does not say.
 
 ### CatalogueRow.is_approximate()
 

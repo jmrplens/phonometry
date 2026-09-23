@@ -120,3 +120,12 @@ def test_one_row_shape_moves_the_cells_it_lists_and_no_others() -> None:
         before[name][key] != after[name][key] for name in before for key in before[name]
     )
     assert changed == 54
+    # Only the hedges this step moves, and the notes that described them,
+    # may differ: a number that changed along with the step would pass the
+    # count above and the comparison with the live rows below.
+    moves = {"estimated", "derived", "basis", "converted", "carried", "note"}
+    for name, rows in before.items():
+        for key, row in rows.items():
+            kept_before = {f: v for f, v in row.items() if f not in moves}
+            kept_after = {f: v for f, v in after[name][key].items() if f not in moves}
+            assert kept_after == kept_before, f"{name}[{key!r}]"

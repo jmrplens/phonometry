@@ -1,0 +1,305 @@
+---
+title: "Exposición sonora de sucesos impulsivos (ISO 13474)"
+description: "Con qué frecuencia una voladura lejana suena con qué nivel: la distribución estadística del nivel de exposición sonora de un suceso según ISO 13474:2009, construida a partir de atmósferas réplica y sus probabilidades. El nivel a largo plazo y el nivel de evaluación con K, las clases ordenadas con sus límites y densidades, la dispersión gaussiana por turbulencia con el desplazamiento de nivel que conserva la energía, y los niveles superados, reproducidos sobre el ejemplo del Anexo A."
+references:
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2009
+    title: "Acoustics — Framework for calculating a distribution of sound exposure levels for impulsive sound events for the purposes of environmental noise assessment"
+    designation: "ISO 13474:2009"
+    primary: true
+    note: "El núcleo estadístico implementado: el nivel ponderado en frecuencia de la Ecuación (5), el nivel medio a largo plazo y el nivel de evaluación de las Ecuaciones (7) y (8), las clases ordenadas de las Ecuaciones (10) a (16), las subclases y la dispersión gaussiana de las Ecuaciones (17) a (23), la superación de las Ecuaciones (24) y (25) y el nivel a largo plazo de la Ecuación (A.4). Leída en BS ISO 13474:2009, que la reproduce sin modificaciones; su Anexo A es el ejemplo que ejecuta esta página."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2016
+    title: "Acoustics — Description, measurement and assessment of environmental noise — Part 1: Basic quantities and assessment procedures"
+    designation: "ISO 1996-1:2016"
+    note: "De dónde sale el ajuste K del nivel de evaluación para sonidos muy impulsivos, y la evaluación a la que ISO 13474 entrega su nivel de evaluación a largo plazo."
+---
+
+import Scope from '../../../../../components/Scope.astro';
+import ScopeClaim from '../../../../../components/ScopeClaim.astro';
+import SeeAlso from '../../../../../components/SeeAlso.astro';
+import ThemeImage from '../../../../../components/ThemeImage.astro';
+
+Una voladura, un disparo o una detonación a unos kilómetros no se oye con un
+solo nivel. La misma carga disparada dos veces desde el mismo sitio llega al
+mismo receptor con diez decibelios o más de diferencia, porque el viento, el
+perfil de temperatura y el terreno entre ambos cambian de una hora a otra, y a
+gran distancia deciden más del nivel que la propia distancia. Una evaluación
+ambiental de un campo de tiro o de una cantera no puede, por tanto, preguntar
+qué nivel tiene un suceso. Pregunta **con qué frecuencia un suceso tiene qué
+nivel**.
+
+ISO 13474:2009 responde con una distribución estadística. El tiempo
+atmosférico se describe como un conjunto de **atmósferas réplica**, cada una la
+combinación de una clase de absorción atmosférica y una clase de atenuación en
+exceso con su probabilidad de ocurrencia; para cada una se calcula el nivel de
+exposición sonora del suceso; y la lista de niveles y probabilidades se
+convierte en una densidad, dispersada por la turbulencia que las réplicas no
+recogen, de la que se leen el nivel a largo plazo y el nivel superado por
+cualquier porcentaje de los sucesos.
+
+Esta página es ese núcleo estadístico, ejecutado sobre el ejemplo que la norma
+imprime en su Anexo A: un lanzador de misiles contracarro TOW oído a
+3 020 m con 27 clases de atenuación en exceso.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sel_distribution_density.svg" alt="Dos paneles para el lanzador TOW del Anexo A de ISO 13474. Izquierda: la densidad escalonada de las 27 clases antes de la dispersión turbulenta, frente al nivel de exposición sonora del suceso de 27 a 47 dB; una clase alta y estrecha cerca de 30,8 dB llega a 1,24 por decibelio, un segundo grupo de clases estrechas está cerca de 31,8 dB y unos escalones bajos y anchos se extienden hasta 46 dB. Derecha: la misma distribución dispersada por una distribución normal de 5 dB de desviación típica, una campana suave con el máximo cerca de 30,5 dB en unos 0,061 por decibelio y una cola larga hacia los niveles altos, y una línea vertical discontinua en el nivel a largo plazo de 37,0 dB" width="100%" />
+
+*Las clases del Anexo A antes de la dispersión (izquierda, Figura A.1 de la
+norma) y después de ella (derecha, Figura A.2), con el nivel a largo plazo
+marcado.*
+
+## 1. Un número por atmósfera réplica
+
+Cada atmósfera réplica da un nivel de exposición sonora por bandas en el
+receptor, el nivel de la fuente menos la atenuación de cada mecanismo a lo
+largo del camino (Ecuación (4)). Lo que trabaja la estadística es un nivel
+ponderado en frecuencia por réplica, la suma energética por bandas de la
+Ecuación (5):
+
+$$
+L_{E,\mathrm{w}} = 10\lg \sum_{j} 10^{0{,}1\left[L_E(j) + \mathrm{w}(j)\right]}~\text{dB}
+$$
+
+La ponderación es la que use la evaluación, A o C, dada como un valor por
+banda. Aquí se aplica a los niveles de la fuente por bandas de octava que el
+Anexo A imprime en su Tabla A.1, con la ponderación A en los centros de
+octava:
+
+```python
+from phonometry import environment
+
+source_db = [115.0, 119.0, 134.0, 135.0, 134.0, 136.0, 133.0, 126.0]  # de 31,5 Hz a 4 kHz
+a_weighting_db = [-39.4, -26.2, -16.1, -8.6, -3.2, 0.0, 1.2, 1.0]
+print(round(environment.frequency_weighted_sel(source_db, a_weighting_db), 1))  # 139.5
+```
+
+Un array de forma `(N_atm, N_exc, n_bands)` con los niveles por bandas de cada
+réplica devuelve los `(N_atm, N_exc)` niveles ponderados en una sola llamada.
+La probabilidad de una réplica es el producto de las probabilidades de sus dos
+clases, que la norma toma como independientes (Ecuación (14)):
+`environment.replica_probabilities(p_atm, p_exc)` devuelve ese producto como
+la misma rejilla `(N_atm, N_exc)`.
+
+El Anexo A usa una sola clase de absorción atmosférica de probabilidad 1, así
+que sus réplicas son sus 27 clases de atenuación en exceso. La Tabla A.3 da el
+nivel ponderado A de cada una en el receptor y su probabilidad de día y de
+noche; el periodo de 07:00 a 19:00 de la evaluación es un 80 % de día y un
+20 % de noche:
+
+```python
+import numpy as np
+
+levels_db = [30.5, 31.2, 31.3, 36.1, 38.3, 38.8, 39.2,
+             30.8, 31.8, 31.8, 33.7, 40.2, 41.0, 41.6, 42.2, 42.4, 42.7, 43.1,
+             28.4, 30.8, 32.2, 42.3, 43.6, 44.5, 45.2, 45.5, 46.1]
+day = [0.0360, 0.0053, 0.0003, 0.0731, 0.0951, 0.0634, 0.0,
+       0.2037, 0.1087, 0.0184, 0.0279, 0.0001, 0.0, 0.0549, 0.0482, 0.0209, 0.0039, 0.0003,
+       0.0, 0.0356, 0.2042, 0.0001, 0.0, 0.0, 0.0, 0.0, 0.0]
+night = [0.0, 0.0, 0.0, 0.0664, 0.0966, 0.0962, 0.0,
+         0.1151, 0.0295, 0.0, 0.0268, 0.0084, 0.0, 0.0665, 0.0445, 0.0172, 0.0033, 0.0003,
+         0.0069, 0.0798, 0.2310, 0.0215, 0.0260, 0.0263, 0.0194, 0.0153, 0.0030]
+probabilities = 0.8 * np.asarray(day) + 0.2 * np.asarray(night)
+```
+
+## 2. El nivel a largo plazo, y el nivel de evaluación con K
+
+La esperanza de la energía sobre las réplicas es el **nivel medio a largo plazo
+de exposición sonora de un suceso** de la Ecuación (7), y con el ajuste $K$
+para sonidos muy impulsivos de ISO 1996-1 dentro de la suma es el **nivel de
+evaluación** de la Ecuación (8), la magnitud que la norma entrega a una
+evaluación según ISO 1996-1:
+
+$$
+\langle L_{E,\mathrm{w}}\rangle_\mathrm{LT} = 10\lg\left[\sum_{k}\sum_{l}
+\wp_{\mathrm{atm},k}\,\wp_{\mathrm{exc},l}\,10^{0{,}1 L_{E,\mathrm{w},k,l}}\right]~\text{dB}
+$$
+
+```python
+print(round(environment.long_term_sel(levels_db, probabilities), 1))  # 37.0
+print(round(environment.long_term_sel(levels_db, probabilities, rating_adjustment_db=12.0), 1))  # 49.0
+```
+
+37,0 dB es el LT1 que imprime la Figura A.3. Queda muy por encima del nivel
+que supera la mitad de los sucesos, 31,5 dB, porque una media energética la
+domina la minoría ruidosa: las clases a favor del viento por encima de 40 dB
+reúnen el 15 % de los sucesos y más de la mitad de la energía.
+
+## 3. Clases, límites y densidades
+
+Para convertir la lista en una distribución, la Ecuación (10) ordena los
+niveles, y cada uno pasa a ser una **clase** cuyos límites quedan a medio
+camino entre él y sus vecinos (Ecuación (11)); los dos límites extremos
+reflejan el límite interior más cercano respecto al nivel del extremo
+(Ecuaciones (12) y (13)). La probabilidad de una clase repartida por igual en
+su anchura es su densidad (Ecuación (15)):
+
+$$
+\rho_m = \frac{\wp_m}{g_{\mathrm{U},m} - g_{\mathrm{L},m}}
+$$
+
+```python
+dist = environment.sel_distribution(levels_db, probabilities, sigma_db=5.0, subclasses=10)
+print(dist.levels_db[:4])                         # [28.4 30.5 30.8 30.8]
+print(dist.lower_bounds_db[:4].round(2))          # [27.35 29.45 30.65 30.8 ]
+print([round(float(r), 4) for r in dist.class_densities_per_db[:4]])  # [0.0007, 0.024, 1.2399, 0.2222]
+print(dist.replicas[2], dist.replicas[3])         # (7,) (19,)
+```
+
+Eso es la Tabla A.4, y sus 27 filas salen dígito a dígito. Hay dos cosas en
+ella que vale la pena ver. Las densidades de las clases son las
+probabilidades a precisión completa entre las anchuras, no la columna
+redondeada que se imprime al lado: 0,1860 entre 0,15 dB se imprimiría 1,2400,
+y la tabla imprime 1,2399. Y dos pares de clases comparten nivel, 30,8 dB
+(filas 8 y 20 de la Tabla A.3) y 31,8 dB (filas 9 y 10). La Ecuación (11) pone
+su límite común en ese nivel y cada una conserva su mitad a su lado, así que
+la tabla mantiene las dos, y `replicas` dice de qué entrada viene cada una. La
+norma dice que una clase solo queda indefinida cuando tres niveles
+consecutivos son iguales, porque la del medio no tiene anchura, y manda
+combinar las clases del mismo nivel; un par en cualquiera de los dos extremos
+de la lista tiene el mismo problema a través de la Ecuación (12) o (13).
+`sel_distribution` combina exactamente esas rachas y deja todos los demás
+pares como los deja el Anexo A.
+
+## 4. La dispersión por turbulencia
+
+Las réplicas describen el estado medio de la atmósfera, no sus perturbaciones
+aleatorias, y las medidas de campo muestran alrededor de cada réplica una
+dispersión del nivel que la norma modela como una distribución normal de
+desviación típica típicamente de 5 dB. La convolución se hace en dos pasos.
+Cada clase se divide en $N_\mathrm{sub}$ subclases iguales centradas en
+$\mu_{m,j}$ (Ecuaciones (17) y (18)), diez en el Anexo A; después cada
+subclase se sustituye por una gaussiana que lleva su probabilidad (Ecuación
+(21)).
+
+La gaussiana no se centra en la subclase. Un nivel es el logaritmo de una
+energía, y una dispersión simétrica del nivel sube la energía media, así que
+cada gaussiana se centra $\Delta\mu$ por debajo de la subclase para mantener
+su media energética donde estaba la subclase (Ecuación (22)):
+
+$$
+\Delta\mu = 10\lg\left[\frac{1}{\sigma\sqrt{2\pi}}\int_{-\infty}^{\infty}
+10^{0{,}1x}\,\mathrm{e}^{-x^2/(2\sigma^2)}\,\mathrm{d}x\right]
+= \frac{\sigma^2\ln 10}{20}~\text{dB}
+$$
+
+```python
+print(round(environment.turbulence_level_shift(5.0), 3))   # 2.878
+print(round(dist.level_shift_db, 3))                       # 2.878
+```
+
+El Anexo A dice que el desplazamiento de su ejemplo fue de 1,04 dB. Ese es el
+valor de la Ecuación (22) con una desviación típica de 3 dB, no con los 5 dB
+del mismo párrafo, y el resto del anexo se calculó con 2,878 dB: con 1,04 dB
+todos los niveles de la distribución subirían 1,84 dB y el nivel a largo plazo
+del apartado siguiente quedaría en 38,8 dB, no en 37,0 dB. El
+[registro de erratas](/phonometry/es/reference/errata/) tiene la entrada. La
+biblioteca evalúa la integral en forma cerrada, así que el desplazamiento no
+es un parámetro.
+
+## 5. Niveles superados, y otra vez el nivel a largo plazo
+
+La densidad dispersada $\rho^{*}(x)$ es continua, y todo se lee de ella. La
+probabilidad de que un suceso supere $x$ es su cola superior (Ecuación (24)),
+y el nivel superado el $n$ % es el nivel que se supera con probabilidad
+$n/100$ (Ecuación (25)):
+
+$$
+\mathrm{P_r}(L_{E,\mathrm{w}} > x) = \int_x^{\infty} \rho^{*}(x')\,\mathrm{d}x'
+$$
+
+```python
+print(dist.exceedance_level([95.0, 50.0, 10.0, 5.0, 1.0]).round(1))  # [21.6 31.5 40.5 43.  47.5]
+print(round(dist.exceedance(37.0), 3))                                 # 0.214
+print(round(dist.long_term_level_db, 2), round(dist.distribution_long_term_level_db, 2))  # 37.01 36.96
+```
+
+El nivel a largo plazo calculado por segunda vez, sobre la densidad continua
+(Ecuación (A.4), LT2), difiere del LT1 solo por dónde queda la energía de cada
+clase dentro de su anchura, y los dos se imprimen como 37,0 dB, que es la
+coincidencia que el anexo ofrece como comprobación. La probabilidad de que un
+suceso supere el nivel a largo plazo es del 21 %: uno de cada cinco sucesos
+suena más que el nivel que los representa a todos.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sel_distribution_exceedance.svg" alt="La probabilidad de que el nivel de exposición sonora del suceso del lanzador TOW supere x, que baja de 1 por debajo de 15 dB a 0 por encima de 50 dB, con cinco puntos marcados: L95 en 21,6 dB, L50 en 31,5 dB, L10 en 40,5 dB, L5 en 43,0 dB y L1 en 47,5 dB, y una línea vertical discontinua en el nivel a largo plazo de 37,0 dB" width="88%" />
+
+*La curva de superación del ejemplo del Anexo A con los cinco niveles que
+lista la Figura A.3, dibujada con `dist.plot(view="exceedance")`.*
+
+La Figura A.3 imprime esos cinco niveles como 21,7; 31,5; 40,6; 43,2 y
+48,0 dB. $L_{50}$ coincide; los otros cuatro se imprimen entre 0,1 dB y 0,5 dB
+más altos, tanto más cuanto más raro es el nivel. Son los valores de una curva
+acumulada desde los 15 dB en que empieza el eje de la figura y no desde menos
+infinito, que cuenta el 0,2 % de los sucesos por debajo de 15 dB en cada
+superación: esa lectura reproduce los cinco al dígito impreso, y el informe de
+conformidad la contrasta con la página. La biblioteca evalúa la Ecuación (24)
+tal como está escrita.
+
+<details>
+<summary>Ver el código de estas figuras</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+fig, (ax_classes, ax_density) = plt.subplots(1, 2, figsize=(13.5, 5.4))
+dist.plot(ax_classes, view="classes", language="es")   # Figura A.1: la densidad escalonada
+dist.plot(ax_density, language="es")                   # Figura A.2: la densidad dispersada
+dist.plot(view="exceedance", language="es")            # Figura A.3: la curva de superación
+plt.show()
+```
+
+</details>
+
+## Qué cubre esta guía
+
+<Scope>
+<ScopeClaim status="covered" label="Cubierto">
+**ISO 13474:2009, el núcleo estadístico:** el nivel del suceso ponderado en
+frecuencia de la Ecuación (5) a partir de niveles por bandas, con cualquier
+ponderación; la probabilidad de cada atmósfera réplica como producto de las
+probabilidades de sus dos clases (Ecuación (14)); el nivel medio a largo plazo
+del suceso de la Ecuación (7) y el nivel de evaluación con $K$ de la Ecuación
+(8); las clases ordenadas, sus límites y densidades de las Ecuaciones (10) a
+(16), con la combinación de niveles iguales cuando una clase se quedaría sin
+anchura; las subclases y la dispersión gaussiana de las Ecuaciones (17) a
+(23), con el desplazamiento de la Ecuación (22) en forma cerrada; la
+probabilidad de superación y el nivel superado el $n$ % de las Ecuaciones (24)
+y (25); y el nivel a largo plazo sobre la densidad continua de la Ecuación
+(A.4). La Tabla A.4 del Anexo A se reproduce dígito a dígito a partir de la
+Tabla A.3, y LT1, LT2 y $L_{50}$ coinciden con la Figura A.3.
+</ScopeClaim>
+
+<ScopeClaim status="not-covered" label="No cubierto">
+Los niveles de las atmósferas réplica son una entrada. La propagación que los
+produce no está implementada aquí: los términos de atenuación del apartado 6
+(divergencia, absorción atmosférica, apantallamiento, terreno y la atenuación
+en exceso de un modelo de ecuación parabólica), la clasificación de la
+atmósfera del apartado 7, la probabilidad de cada clase a partir de datos
+meteorológicos del apartado 8, las impedancias del terreno de la Tabla 1 y los
+descriptores de la fuente del apartado 9. El nivel equivalente de un periodo
+de evaluación de la Ecuación (9) no tiene función propia, y el balance de
+incertidumbre del Anexo B no está modelado. La guía de refracción atmosférica
+de abajo calcula la atenuación en exceso de un perfil de velocidad del sonido,
+que es donde empezaría el nivel de una réplica.
+</ScopeClaim>
+</Scope>
+
+<SeeAlso>
+
+## Ver también
+
+- [Prominencia de sonidos impulsivos (NT ACOU 112)](/phonometry/es/environment/assessment/impulsive-sound/):
+  la otra evaluación del sonido impulsivo, que califica lo prominente que es
+  un impulso en un receptor en vez de cómo se distribuye su nivel.
+- [Niveles ambientales (ISO 1996-1/-2)](/phonometry/es/environment/assessment/environmental-levels/):
+  el marco de evaluación al que se entrega el nivel de evaluación a largo
+  plazo, y el ajuste para sonidos muy impulsivos del que sale $K$.
+- [Refracción atmosférica: rayos y GFPE](/phonometry/es/environment/propagation/atmospheric-refraction/):
+  perfiles de velocidad del sonido, rayos y la GFPE, la atenuación en exceso
+  de una atmósfera réplica.
+- [Niveles integrados y estadísticos](/phonometry/es/signals/levels/levels/):
+  el nivel de exposición sonora de un suceso medido y los niveles percentiles
+  de un registro, que esta página predice en lugar de medir.
+
+</SeeAlso>

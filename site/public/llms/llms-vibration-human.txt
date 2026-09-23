@@ -1978,11 +1978,12 @@ for method in ("linear", "exponential"):
     initial = float(trace[int(cut_s * fs) - 1])
     crossed = np.flatnonzero((t >= cut_s) & (trace < 0.1 * initial))
     decay_s = float(t[crossed[0]] - cut_s)
-    print(method, round(decay_s, 3),
-          vibration.verify_running_rms_decay(
-              decay_s, integration_time_s=1.0, method=method))
-# linear 0.98 True
-# exponential 4.605 True
+    verdict = vibration.verify_running_rms_decay(
+        decay_s, integration_time_s=1.0, method=method)
+    print(method, round(decay_s, 3), verdict.passes,
+          round(verdict.lower_time_s, 3), round(verdict.upper_time_s, 3))
+# linear 0.98 True 0.94 1.04
+# exponential 4.605 True 4.36 4.86
 ```
 
 The linear reading comes out at 0.98 s rather than the 0.99 s of the closed
@@ -1990,7 +1991,10 @@ form, and that is the test behaving as a test rather than as arithmetic. At the
 moment of the crossing the sliding window holds only the last few samples of a
 sinusoid, and their mean square depends on where in the cycle the signal was
 cut. The printed band is 0.99 ± 0.05 s, wide enough to absorb it, which is why
-the band is what the verdict is written against and not the closed form.
+the band is what the verdict is written against and not the closed form. The
+verdict keeps that row: `measured_time_s`, `printed_time_s` and `tolerance_s`
+beside `passes`, the interval as `lower_time_s` and `upper_time_s`, and
+`.plot()` draws the reading on the 10 % rule inside it.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/meter_running_rms_decay_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/meter_running_rms_decay.svg" alt="The ISO 8041-1 clause 5.13 decay test drawn in three panels, for a 1 s averaging time. The top panel plots both running r.m.s. indications falling away from the instant a steady sinusoid at the 15.9155 Hz reference frequency is shut off, in decibels below the value each started from: the linear average sags gently and then falls off a cliff at 1 s, the exponential average falls as a straight line, and each crosses the 10 % criterion at minus 20 decibels inside the printed band drawn around it, 0.99 plus or minus 0.05 s for the linear average and 4.61 plus or minus 0.25 s for the exponential one. The lower left panel magnifies the linear crossing, where the measured trace runs below the closed form rather than around it, in 193 of the 199 samples in which the linear average still has a level at all, and therefore crosses early: the two crossings are labelled where they sit on the criterion rule, the measured one at 0.98 s and the closed form at 0.99 s, and both are well inside the printed band. The lower right panel puts the two columns of Table 11 on one dimensionless axis for the three printed time constants of 0.125, 1 and 8 s: the printed decay time spans about 0.94 to 1.06 times the closed form in every row, and the printed decay rate read as a decay time spans about 0.87 to 1.14, so the time column is the narrower statement of the two." width="96%"></picture>
 

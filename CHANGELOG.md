@@ -238,6 +238,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- **`vibration.verify_running_rms_decay` returns a verdict object.** It was
+  the last `verify_*` still answering with a bare `bool`, so a caller learnt
+  whether a meter passed and lost the printed interval and the measured time
+  it had been judged on. It returns a frozen `RunningRmsDecayVerification`
+  now, like its ISO 8041-1 siblings: `passes`, the row it was held to
+  (`printed_time_s`, `tolerance_s`, `lower_time_s`, `upper_time_s`), the
+  `measured_time_s` it was given and `deviation_s`, and a `.plot()` that
+  draws the reading on the 10 % rule inside the printed span. The object has
+  no truth value, so an `if verify_running_rms_decay(...):` left over from
+  4.0.0rc1 raises `TypeError` rather than passing every meter.
+
 - **Every published table refuses writes.** Module-level tables were plain
   dictionaries, even where the annotation said `Mapping`, so
   `GUIDE_VALUES["residential"] = ...` or `REFERENCE_CURVE[500] = 0.0` changed

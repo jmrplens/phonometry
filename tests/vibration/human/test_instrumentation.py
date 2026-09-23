@@ -732,7 +732,7 @@ def test_the_running_rms_itself_decays_the_way_the_tables_print(
         assert abs(measured - printed) <= tolerance, (method, tau)
         assert ins.verify_running_rms_decay(
             measured, integration_time_s=tau, method=method
-        )
+        ).passes
 
 
 def test_the_decay_rate_column_is_the_looser_statement_of_the_same_decay() -> None:
@@ -752,14 +752,65 @@ def test_the_decay_rate_column_is_the_looser_statement_of_the_same_decay() -> No
 
 def test_the_decay_verdict_is_the_printed_interval_and_nothing_wider() -> None:
     """0,99 +- 0,05 s for a 1 s linear average, both sides of the edge."""
-    assert ins.verify_running_rms_decay(1.039, integration_time_s=1.0, method="linear")
-    assert not ins.verify_running_rms_decay(
-        1.041, integration_time_s=1.0, method="linear"
-    )
-    assert ins.verify_running_rms_decay(0.941, integration_time_s=1.0, method="linear")
-    assert not ins.verify_running_rms_decay(
-        0.939, integration_time_s=1.0, method="linear"
-    )
+
+    def passes(measured: float) -> bool:
+        return ins.verify_running_rms_decay(
+            measured, integration_time_s=1.0, method="linear"
+        ).passes
+
+    assert passes(1.039)
+    assert not passes(1.041)
+    assert passes(0.941)
+    assert not passes(0.939)
+
+
+@pytest.mark.parametrize(
+    ("method", "table"),
+    [("linear", TABLE_10_PRINTED), ("exponential", TABLE_11_PRINTED)],
+)
+def test_the_decay_verdict_keeps_the_row_it_was_judged_against(
+    method: str, table: tuple[tuple[float, float, float], ...]
+) -> None:
+    """The printed interval and the measured time travel with the verdict.
+
+    A bare ``bool`` dropped both, so a caller could not say how far inside or
+    outside the band a meter sat, nor which row it had been held to.
+    """
+    for tau, printed, tolerance in table:
+        measured = printed + 0.5 * tolerance
+        result = ins.verify_running_rms_decay(
+            measured, integration_time_s=tau, method=method
+        )
+        assert result.method == method
+        assert result.integration_time_s == tau
+        assert result.measured_time_s == measured
+        assert result.printed_time_s == printed
+        assert result.tolerance_s == tolerance
+        assert result.lower_time_s == pytest.approx(printed - tolerance)
+        assert result.upper_time_s == pytest.approx(printed + tolerance)
+        assert result.deviation_s == pytest.approx(0.5 * tolerance)
+        assert result.passes
+
+
+def test_the_decay_verdict_has_no_truth_value_of_its_own() -> None:
+    """``if verify_running_rms_decay(...)`` would otherwise pass every meter.
+
+    The function used to return the bool itself, and an object is always
+    true, so the old spelling is refused rather than silently inverted for
+    the failures.
+    """
+    result = ins.verify_running_rms_decay(2.0, integration_time_s=1.0, method="linear")
+    assert not result.passes
+    with pytest.raises(TypeError, match=r"'\.passes'"):
+        bool(result)
+
+
+def test_the_decay_verdict_is_frozen_and_keyword_only() -> None:
+    result = ins.verify_running_rms_decay(0.99, integration_time_s=1.0, method="linear")
+    with pytest.raises(AttributeError):
+        result.measured_time_s = 0.5  # type: ignore[misc]
+    with pytest.raises(TypeError):
+        ins.RunningRmsDecayVerification("linear", 1.0, 0.99, 0.99, 0.05)  # type: ignore[misc]
 
 
 def test_a_time_constant_the_tables_do_not_print_is_refused() -> None:
@@ -847,6 +898,59 @@ def test_the_weighting_plot_paints_a_refusal_red_and_a_pass_green() -> None:
     assert series["outside tolerance"].get_color() == "#d62728"
     # And the one refused band is the only point on the refusal series.
     assert len(series["outside tolerance"].get_xdata()) == 1
+
+
+@pytest.mark.parametrize(
+    ("measured", "label", "colour"),
+    [(0.98, "within tolerance", "#2ca02c"), (1.2, "outside tolerance", "#d62728")],
+)
+def test_the_decay_plot_draws_the_printed_span_and_the_reading_on_the_rule(
+    measured: float, label: str, colour: str
+) -> None:
+    """The span is the printed row, the point is the reading at -20 dB."""
+    pytest.importorskip("matplotlib")
+    import matplotlib as mpl
+
+    mpl.use("Agg")
+    result = ins.verify_running_rms_decay(
+        measured, integration_time_s=1.0, method="linear"
+    )
+    ax = result.plot()
+    points = [line for line in ax.get_lines() if line.get_marker() not in ("", "None")]
+    assert [line.get_label() for line in points] == [label]
+    assert points[0].get_color() == colour
+    assert points[0].get_xdata()[0] == pytest.approx(measured)
+    assert points[0].get_ydata()[0] == pytest.approx(-20.0)
+    spans = [
+        patch for patch in ax.patches if patch.get_label() == "ISO 8041-1 tolerance"
+    ]
+    assert len(spans) == 1
+    left = spans[0].get_x()
+    right = left + spans[0].get_width()
+    assert (left, right) == pytest.approx((0.94, 1.04))
+    assert ("PASS" if result.passes else "FAIL") in ax.get_title()
+
+
+def test_the_decay_plot_speaks_spanish_when_asked() -> None:
+    pytest.importorskip("matplotlib")
+    import matplotlib as mpl
+
+    mpl.use("Agg")
+    ax = ins.verify_running_rms_decay(
+        0.1237, integration_time_s=0.125, method="linear"
+    ).plot(language="es")
+    title = ax.get_title()
+    assert "CUMPLE" in title
+    assert "promedio lineal" in title
+    assert "0,125" in title
+    labels = {text.get_text() for text in ax.get_legend().get_texts()}
+    assert labels == {
+        "tolerancia de ISO 8041-1",
+        "decaimiento en forma cerrada",
+        "10 % del valor inicial",
+        "dentro de tolerancia",
+    }
+    assert ax.get_xlabel() == "Tiempo desde el corte de la señal [s]"
 
 
 def test_the_phase_plot_uses_the_same_pair_as_the_weighting_plot() -> None:

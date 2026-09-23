@@ -1037,11 +1037,12 @@ for method in ("linear", "exponential"):
     initial = float(trace[int(cut_s * fs) - 1])
     crossed = np.flatnonzero((t >= cut_s) & (trace < 0.1 * initial))
     decay_s = float(t[crossed[0]] - cut_s)
-    print(method, round(decay_s, 3),
-          vibration.verify_running_rms_decay(
-              decay_s, integration_time_s=1.0, method=method))
-# linear 0.98 True
-# exponential 4.605 True
+    verdict = vibration.verify_running_rms_decay(
+        decay_s, integration_time_s=1.0, method=method)
+    print(method, round(decay_s, 3), verdict.passes,
+          round(verdict.lower_time_s, 3), round(verdict.upper_time_s, 3))
+# linear 0.98 True 0.94 1.04
+# exponential 4.605 True 4.36 4.86
 ```
 
 La lectura lineal sale a 0,98 s en vez de los 0,99 s de la forma cerrada, y eso es
@@ -1050,6 +1051,10 @@ cruce, la ventana deslizante solo guarda unas pocas muestras finales de una
 sinusoide, y su valor cuadrático medio depende del punto del ciclo en el que se cortó
 la señal. La banda impresa es 0,99 ± 0,05 s, lo bastante ancha para absorberlo,
 y por eso el veredicto se escribe contra la banda y no contra la forma cerrada.
+El veredicto conserva esa fila: `measured_time_s`, `printed_time_s` y
+`tolerance_s` junto a `passes`, el intervalo como `lower_time_s` y
+`upper_time_s`, y `.plot()` dibuja la lectura sobre la línea del 10 % dentro de
+él.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/meter_running_rms_decay.svg" alt="El ensayo de caída del apartado 5.13 de la ISO 8041-1 dibujado en tres paneles, para un tiempo de promediado de 1 s. El panel superior dibuja las dos indicaciones de valor eficaz móvil cayendo desde el instante en que se corta una sinusoide estable a la frecuencia de referencia de 15,9155 Hz, en decibelios por debajo del valor del que partía cada una: el promediado lineal se hunde suavemente y luego se desploma en 1 s, el promediado exponencial cae como una recta, y cada uno cruza el criterio del 10 % en menos 20 decibelios dentro de la banda impresa dibujada a su alrededor, 0,99 más o menos 0,05 s para el promediado lineal y 4,61 más o menos 0,25 s para el exponencial. El panel inferior izquierdo amplía el cruce del lineal, donde la traza medida discurre por debajo de la forma cerrada en lugar de alrededor de ella, en 193 de las 199 muestras en las que el promediado lineal todavía tiene algún nivel, y por eso cruza antes: los dos cruces están rotulados donde caen sobre la línea del criterio, el medido en 0,98 s y la forma cerrada en 0,99 s, y los dos quedan holgadamente dentro de la banda impresa. El panel inferior derecho pone las dos columnas de la Tabla 11 sobre un mismo eje adimensional para las tres constantes de tiempo impresas de 0,125, 1 y 8 s: el tiempo de caída impreso abarca de unas 0,94 a unas 1,06 veces la forma cerrada en todas las filas, y la velocidad de caída impresa leída como tiempo de caída abarca de unas 0,87 a unas 1,14, así que la columna del tiempo es la afirmación más estrecha de las dos." width="96%" />
 

@@ -42674,7 +42674,7 @@ documents, one page per module.
 | `band_limiting_response` / `band_limiting_factors` / `apply_band_limiting` | `function` | **The band-limiting stage of a weighting on its own (ISO 8041-1 Formulae (1) and (2)).**<br>• the two-pole Butterworth high-pass and low-pass pair every weighting starts with, without the transition and step stages<br>• `apply_band_limiting(signal, fs=None, *, name)` filters with it, which is what the band-limiting row of the burst tables is measured on | `vibration.band_limiting_factors('Wk', [1.0])`<br><br>• 0.9874 |
 | `band_limited_weighting_factor` / `WEIGHTING_CONSISTENCY_TOLERANCE_PERCENT` | `function` / `constant` | **The weighting factor a band-limited channel actually shows (ISO 8041-1 Table 2, row 2).**<br>• the design goal times the band-limiting response, which is what a meter indicates when both stages are in the path<br>• the 3 % row 2 allows between the two | `vibration.band_limited_weighting_factor('Wk', [16.0])` |
 | `running_rms_decay_time` | `function` | **How long the running r.m.s. takes to fall to 10 % of its steady value (ISO 8041-1 5.13).**<br>• `integration_time_s`, and `method` selecting linear or exponential averaging<br>• the quantity Table 11 prints, timed from the moment the signal is shut off | `vibration.running_rms_decay_time(1.0, method='linear')` |
-| `verify_running_rms_decay` / `RUNNING_RMS_DECAY_RATE_DB_PER_S` / `RUNNING_RMS_DECAY_TIME_S` / `RUNNING_RMS_CONSISTENCY_TOLERANCE_PERCENT` | `function` / `constant` | **Does the running r.m.s. decay at the printed rate (ISO 8041-1 Tables 10 and 11)?**<br>• the decay in decibels per second and the time to fall, per integration time, for linear and exponential averaging<br>• the 2 % the indication may differ by | `vibration.RUNNING_RMS_DECAY_RATE_DB_PER_S[1]`<br><br>• (1.0, 3.8, 4.9) s, dB, dB |
+| `verify_running_rms_decay` / `RunningRmsDecayVerification` / `RUNNING_RMS_DECAY_RATE_DB_PER_S` / `RUNNING_RMS_DECAY_TIME_S` / `RUNNING_RMS_CONSISTENCY_TOLERANCE_PERCENT` | `function` / `dataclass` / `constant` | **Does the running r.m.s. decay at the printed rate (ISO 8041-1 Tables 10 and 11)?**<br>• `measured_time_s`, with `integration_time_s` and `method` keyword-only<br>• `.passes`, `.printed_time_s`, `.tolerance_s`, `.lower_time_s`, `.upper_time_s`, `.deviation_s`, `.plot()`<br>• the decay in decibels per second and the time to fall, per integration time, for linear and exponential averaging<br>• the 2 % the indication may differ by | `vibration.RUNNING_RMS_DECAY_RATE_DB_PER_S[1]`<br><br>• (1.0, 3.8, 4.9) s, dB, dB |
 | `verify_signal_burst_response` / `SignalBurstVerification` | `function` / `dataclass` | **A meter's response to the saw-tooth burst of ISO 8041-1 5.9 (Tables 7 to 9).**<br>• `application`, `weighting`, the measured indications per burst length<br>• `.passes`, `.deviation_percent`, `.failing_cycle_counts`, `.plot()`<br>• graded on a zero-state simulation, which is what the printed tables come from | `vibration.verify_signal_burst_response('whole-body', 'Wk', measured)` |
 | `sawtooth_burst` / `signal_burst_indications` / `SawtoothBurstTest` / `SAWTOOTH_BURST_TESTS` | `function` / `dataclass` / `constant` | **The burst signal itself and what a conforming meter reads from it (Table 6).**<br>• `sawtooth_burst(...)` builds the waveform: angular frequency, start time, cycle count, repeat and total duration<br>• the three applications, 500 rad/s hand-arm, 100 whole-body and 2,5 low-frequency | `vibration.SAWTOOTH_BURST_TESTS['whole-body'].cycle_counts`<br><br>• (1, 2, 4, 8, 16) |
 | `SIGNAL_BURST_RESPONSE` / `BURST_TOLERANCE_PERCENT` / `BAND_LIMITING` | `constant` | **Tables 7, 8 and 9 as data, and the tolerance each column carries.**<br>• 228 printed cells keyed by `(application, weighting, cycles)`, with `None` for the continuous row<br>• 10 % on the r.m.s. and MTVV columns, 12 % on VDV<br>• `'band-limiting'` names the row measured with the weighting stages out of the path | `vibration.BURST_TOLERANCE_PERCENT['vdv']  # 12.0` |
@@ -51146,9 +51146,9 @@ fits an acceptance mask; these are handed numbers somebody measured on a
 bench, and report whether *that instrument, on the day it was measured*, meets
 the standard it is sold against. There are no classes and no decibel margins
 in them: the verdict is a pass or a fail, in the unit its own standard writes
-its tolerances in. Four of them return a result object whose `passes` says so
-and whose other fields say where and by how much; `verify_running_rms_decay`
-grades one printed row and returns the `bool`.
+its tolerances in. All five return a result object whose verdict says so and
+whose other fields say where and by how much, down to `verify_running_rms_decay`,
+which grades one printed row and keeps it.
 
 | What is graded | Verifier | Acceptance limits |
 | :--- | :--- | :--- |
@@ -58016,6 +58016,15 @@ verdict = verify_filter_class(OctaveFilterBank(48000, fraction=1, limits=[125, 4
 print(verdict.overall_class, len(verdict.bands))
 ```
 
+`verify_running_rms_decay` is newer than 3.3.0, and in 4.0.0rc1 it returned a
+bare `bool`, which threw away the printed interval and the measured time it
+had judged. It now returns a `RunningRmsDecayVerification` that keeps both:
+the verdict is `.passes`, beside `.measured_time_s`, `.printed_time_s`,
+`.tolerance_s` and the interval as `.lower_time_s` and `.upper_time_s`. The
+object refuses to be read as a truth value, so an
+`if verify_running_rms_decay(...):` written against the release candidate
+raises `TypeError` instead of passing every meter.
+
 ## The filter bank returns a result, not a tuple
 
 `octave_filter()` and `OctaveFilterBank.filter()` returned two items normally
@@ -62219,11 +62228,12 @@ for method in ("linear", "exponential"):
     initial = float(trace[int(cut_s * fs) - 1])
     crossed = np.flatnonzero((t >= cut_s) & (trace < 0.1 * initial))
     decay_s = float(t[crossed[0]] - cut_s)
-    print(method, round(decay_s, 3),
-          vibration.verify_running_rms_decay(
-              decay_s, integration_time_s=1.0, method=method))
-# linear 0.98 True
-# exponential 4.605 True
+    verdict = vibration.verify_running_rms_decay(
+        decay_s, integration_time_s=1.0, method=method)
+    print(method, round(decay_s, 3), verdict.passes,
+          round(verdict.lower_time_s, 3), round(verdict.upper_time_s, 3))
+# linear 0.98 True 0.94 1.04
+# exponential 4.605 True 4.36 4.86
 ```
 
 The linear reading comes out at 0.98 s rather than the 0.99 s of the closed
@@ -62231,7 +62241,10 @@ form, and that is the test behaving as a test rather than as arithmetic. At the
 moment of the crossing the sliding window holds only the last few samples of a
 sinusoid, and their mean square depends on where in the cycle the signal was
 cut. The printed band is 0.99 ± 0.05 s, wide enough to absorb it, which is why
-the band is what the verdict is written against and not the closed form.
+the band is what the verdict is written against and not the closed form. The
+verdict keeps that row: `measured_time_s`, `printed_time_s` and `tolerance_s`
+beside `passes`, the interval as `lower_time_s` and `upper_time_s`, and
+`.plot()` draws the reading on the 10 % rule inside it.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/meter_running_rms_decay_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/meter_running_rms_decay.svg" alt="The ISO 8041-1 clause 5.13 decay test drawn in three panels, for a 1 s averaging time. The top panel plots both running r.m.s. indications falling away from the instant a steady sinusoid at the 15.9155 Hz reference frequency is shut off, in decibels below the value each started from: the linear average sags gently and then falls off a cliff at 1 s, the exponential average falls as a straight line, and each crosses the 10 % criterion at minus 20 decibels inside the printed band drawn around it, 0.99 plus or minus 0.05 s for the linear average and 4.61 plus or minus 0.25 s for the exponential one. The lower left panel magnifies the linear crossing, where the measured trace runs below the closed form rather than around it, in 193 of the 199 samples in which the linear average still has a level at all, and therefore crosses early: the two crossings are labelled where they sit on the criterion rule, the measured one at 0.98 s and the closed form at 0.99 s, and both are well inside the printed band. The lower right panel puts the two columns of Table 11 on one dimensionless axis for the three printed time constants of 0.125, 1 and 8 s: the printed decay time spans about 0.94 to 1.06 times the closed form in every row, and the printed decay rate read as a decay time spans about 0.87 to 1.14, so the time column is the narrower statement of the two." width="96%"></picture>
 

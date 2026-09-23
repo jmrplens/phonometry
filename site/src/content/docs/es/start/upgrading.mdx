@@ -284,6 +284,15 @@ verdict = verify_filter_class(OctaveFilterBank(48000, fraction=1, limits=[125, 4
 print(verdict.overall_class, len(verdict.bands))
 ```
 
+`verify_running_rms_decay` es posterior a la 3.3.0, y en la 4.0.0rc1 devolvía
+un `bool` desnudo, que tiraba el intervalo impreso y el tiempo medido que había
+juzgado. Ahora devuelve un `RunningRmsDecayVerification` que conserva los dos:
+el veredicto es `.passes`, junto a `.measured_time_s`, `.printed_time_s`,
+`.tolerance_s` y el intervalo como `.lower_time_s` y `.upper_time_s`. El objeto
+se niega a leerse como valor de verdad, así que un
+`if verify_running_rms_decay(...):` escrito contra la versión candidata levanta
+`TypeError` en vez de dar por buenos todos los vibrómetros.
+
 ## El banco de filtros devuelve un resultado, no una tupla
 
 `octave_filter()` y `OctaveFilterBank.filter()` devolvían dos elementos

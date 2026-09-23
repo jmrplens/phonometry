@@ -520,6 +520,89 @@ for the three time constants the standard tabulates.
 RUNNING_RMS_DECAY_TIME_S = {'linear': ((0.125, 0.124, 0.005), (1.0, 0.99, 0.05), (8.0, 7.92, 0.2)), 'exponential': ((0.125, 0.58, 0.03), (1.0, 4.61, 0.25), (8.0, 36.8, 2.0))}
 ```
 
+## RunningRmsDecayVerification
+
+```python
+RunningRmsDecayVerification(
+    *,
+    method: str,
+    integration_time_s: float,
+    measured_time_s: float,
+    printed_time_s: float,
+    tolerance_s: float,
+)
+```
+
+One measured decay time against its row of ISO 8041-1 Table 10 or 11.
+
+The row is the whole criterion: a printed time to 10 % of the initial
+indicated value and the tolerance printed beside it, for one averaging
+and one time constant. The verdict is derived from those fields rather
+than stored beside them, so a result cannot say it passed over numbers
+that do not.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `method` | `"linear"` (Table 10) or `"exponential"` (Table 11). |
+| `integration_time_s` | The printed time constant the row is for, in seconds. |
+| `measured_time_s` | The measured time to 10 % of the initial indicated value, as supplied, in seconds. |
+| `printed_time_s` | The decay time the row prints, in seconds. |
+| `tolerance_s` | The tolerance printed beside it, in seconds. |
+
+### RunningRmsDecayVerification.deviation_s
+
+*property*
+
+The measured time minus the printed one, in seconds.
+
+### RunningRmsDecayVerification.lower_time_s
+
+*property*
+
+The shortest decay time the row accepts, in seconds.
+
+### RunningRmsDecayVerification.passes
+
+*property*
+
+Whether the measured time sits inside the printed interval.
+
+True says the time weighting decays as clause 5.13 requires, and
+nothing more: the other clauses a meter is graded on are hardware
+measurements this cannot stand in for.
+
+### RunningRmsDecayVerification.plot()
+
+```python
+RunningRmsDecayVerification.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
+```
+
+Draw the measured decay time against the printed interval.
+
+Requires matplotlib (`pip install phonometry[plot]`); returns the
+`Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `ax` | Existing axes, or `None` to create a figure. |
+| `language` | Label language, `"en"` (default) or `"es"`. |
+| `kwargs` | Forwarded to `phonometry._plot.vibration.plot_running_rms_decay_verification`. |
+
+### RunningRmsDecayVerification.upper_time_s
+
+*property*
+
+The longest decay time the row accepts, in seconds.
+
 ## SKIRT_TOLERANCE_PERCENT
 
 *Constant* (`tuple`).
@@ -626,7 +709,7 @@ verify_running_rms_decay(
     *,
     integration_time_s: float,
     method: str,
-) -> bool
+) -> RunningRmsDecayVerification
 ```
 
 Verify a measured decay time against Table 10 or Table 11.
@@ -649,7 +732,7 @@ against a band the standard does not give.
 | `integration_time_s` | The averaging time it was measured at, which has to be one of the printed 0,125 s, 1 s and 8 s. Keyword-only, and so is the method: two times in seconds side by side are the kind of pair a positional call gets the wrong way round in silence. |
 | `method` | `"linear"` (Table 10) or `"exponential"` (Table 11). |
 
-**Returns:** Whether the measurement is inside the printed interval.
+**Returns:** The verdict, as a [`RunningRmsDecayVerification`](/phonometry/reference/api/vibration/instrumentation/#runningrmsdecayverification) that keeps the printed row it was judged against.
 
 **Raises**
 

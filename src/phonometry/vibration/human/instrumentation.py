@@ -1106,9 +1106,97 @@ def running_rms_decay_time(integration_time_s: float, *, method: str) -> float:
     return -2.0 * math.log(_DECAY_FRACTION) * tau
 
 
+@dataclass(frozen=True, kw_only=True)
+class RunningRmsDecayVerification:
+    """One measured decay time against its row of ISO 8041-1 Table 10 or 11.
+
+    The row is the whole criterion: a printed time to 10 % of the initial
+    indicated value and the tolerance printed beside it, for one averaging
+    and one time constant. The verdict is derived from those fields rather
+    than stored beside them, so a result cannot say it passed over numbers
+    that do not.
+
+    :ivar method: ``"linear"`` (Table 10) or ``"exponential"`` (Table 11).
+    :ivar integration_time_s: The printed time constant the row is for, in
+        seconds.
+    :ivar measured_time_s: The measured time to 10 % of the initial
+        indicated value, as supplied, in seconds.
+    :ivar printed_time_s: The decay time the row prints, in seconds.
+    :ivar tolerance_s: The tolerance printed beside it, in seconds.
+    """
+
+    method: str
+    integration_time_s: float
+    measured_time_s: float
+    printed_time_s: float
+    tolerance_s: float
+
+    @property
+    def lower_time_s(self) -> float:
+        """The shortest decay time the row accepts, in seconds."""
+        return self.printed_time_s - self.tolerance_s
+
+    @property
+    def upper_time_s(self) -> float:
+        """The longest decay time the row accepts, in seconds."""
+        return self.printed_time_s + self.tolerance_s
+
+    @property
+    def deviation_s(self) -> float:
+        """The measured time minus the printed one, in seconds."""
+        return self.measured_time_s - self.printed_time_s
+
+    @property
+    def passes(self) -> bool:
+        """Whether the measured time sits inside the printed interval.
+
+        True says the time weighting decays as clause 5.13 requires, and
+        nothing more: the other clauses a meter is graded on are hardware
+        measurements this cannot stand in for.
+        """
+        return abs(self.deviation_s) <= self.tolerance_s
+
+    def __bool__(self) -> bool:
+        """Refuse to stand in for the verdict it carries.
+
+        :func:`verify_running_rms_decay` returned a bare ``bool`` before it
+        returned this object, and an object is always true: without this,
+        ``if verify_running_rms_decay(...):`` would keep running and pass
+        every meter. The verdict is :attr:`passes`.
+
+        :raises TypeError: Always.
+        """
+        msg = (
+            "a RunningRmsDecayVerification has no truth value; read its "
+            "'.passes' for the verdict"
+        )
+        raise TypeError(msg)
+
+    def plot(
+        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    ) -> Axes:
+        """Draw the measured decay time against the printed interval.
+
+        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        :class:`~matplotlib.axes.Axes`.
+
+        :param ax: Existing axes, or ``None`` to create a figure.
+        :param language: Label language, ``"en"`` (default) or ``"es"``.
+        :param kwargs: Forwarded to
+            :func:`phonometry._plot.vibration.plot_running_rms_decay_verification`.
+        """
+        from ..._i18n import check_language
+        from ..._plot.vibration import plot_running_rms_decay_verification
+
+        check_language(language)
+        return plot_running_rms_decay_verification(
+            self, ax, language=language, **kwargs
+        )
+
+
 def verify_running_rms_decay(
     measured_time_s: float, *, integration_time_s: float, method: str
-) -> bool:
+) -> RunningRmsDecayVerification:
     """Verify a measured decay time against Table 10 or Table 11.
 
     The verdict is one printed row: the measured time to 10 % of the initial
@@ -1128,7 +1216,8 @@ def verify_running_rms_decay(
         so is the method: two times in seconds side by side are the kind of
         pair a positional call gets the wrong way round in silence.
     :param method: ``"linear"`` (Table 10) or ``"exponential"`` (Table 11).
-    :return: Whether the measurement is inside the printed interval.
+    :return: The verdict, as a :class:`RunningRmsDecayVerification` that
+        keeps the printed row it was judged against.
     :raises ValueError: If ``method`` is neither average, if the measured time
         is not positive and finite, or if the integration time is not one of
         the three printed time constants.
@@ -1141,7 +1230,13 @@ def verify_running_rms_decay(
     tau = float(integration_time_s)
     for printed_tau, printed_time, tolerance in RUNNING_RMS_DECAY_TIME_S[averaging]:
         if math.isclose(tau, printed_tau, rel_tol=1e-9, abs_tol=0.0):
-            return abs(measured - printed_time) <= tolerance
+            return RunningRmsDecayVerification(
+                method=averaging,
+                integration_time_s=printed_tau,
+                measured_time_s=measured,
+                printed_time_s=printed_time,
+                tolerance_s=tolerance,
+            )
     printed = ", ".join(f"{row[0]:g}" for row in RUNNING_RMS_DECAY_TIME_S[averaging])
     msg = (
         f"'integration_time_s' must be one of the time constants Tables 10 "

@@ -201,6 +201,13 @@ _KWARG_PLOT_CASES = [
     ("exposure", _exposure, "bar"),
     ("vibration_meter_reading", _vibration_meter_reading, "line"),
     ("vibration_meter_verification", _vibration_meter_verification, "line"),
+    (
+        "running_rms_decay_verification",
+        lambda: ph.vibration.verify_running_rms_decay(
+            0.98, integration_time_s=1.0, method="linear"
+        ),
+        "line",
+    ),
     ("assessment_velocity", _assessment_velocity, "line"),
     ("train_passage", _train_passage, "line"),
     ("people_assessment", _people_assessment, "bar"),
@@ -374,6 +381,9 @@ def test_single_axes_plots_accept_external_ax() -> None:
         _impact_insulation(),
         _low_frequency_procedure(),
         _band_uncertainty(),
+        ph.vibration.verify_running_rms_decay(
+            4.7, integration_time_s=1.0, method="exponential"
+        ),
         ph.aircraft.load_anp_database().flight_profile(
             "A320-211", "departure", aerodrome=ph.aircraft.Aerodrome(elevation_ft=0.0)
         ),

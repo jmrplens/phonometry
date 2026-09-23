@@ -598,6 +598,18 @@ jobs:
       # over the calibrated number of pixels either way, printing the band
       # below that for a person to judge.
       run: python scripts/check_figure_annotations.py
+    - name: Fail if two tick labels of one axis run into each other
+      # A band axis set by hand on a logarithmic scale keeps matplotlib's own
+      # minor labels between the bands unless the minor formatter is cleared:
+      # the octave axis of enclosed_space_absorption shipped reading
+      # "2 × 10²50 4 × 10²500" under both panels. The figure matches its
+      # generator, the annotation step above measures the labels a generator
+      # places and not the ones an axis draws, and the committed file has no
+      # text node to find a tick in, so the `make graphs` above measures every
+      # axis of both language editions as it saves them. This fails on minor
+      # labels left to the scale beside major ticks set by hand, and on any
+      # two labels of one axis that touch.
+      run: python scripts/check_figure_ticks.py
     - name: Fail if a Spanish figure numbers a tick with an English point
       # The decimal-comma check above reads the label a generator writes; this
       # reads the label a formatter wrote, in the figure as committed. They are

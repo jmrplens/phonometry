@@ -27,6 +27,7 @@ from typing import TYPE_CHECKING, Any
 # be re-rendered, so writing one here would restamp all forty-two clips for a
 # hook that cannot move a frame.
 import figure_annotation_audit as _annotations
+import figure_tick_audit as _ticks
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy import signal as scipy_signal
@@ -264,6 +265,9 @@ def save_figure(output_dir: str, filename: str, **kwargs: Any) -> None:
         # what puts this after the translation, and it is also why the record
         # is keyed by the asset name with the language suffix on it.
         _annotations.audit(plt.gcf(), f"{stem}{_LANG_SUFFIX}")
+        # The tick labels are measured on the same passes and for the same
+        # reason: a Spanish label carries a decimal comma and a longer word.
+        _ticks.audit(plt.gcf(), f"{stem}{_LANG_SUFFIX}")
     ext = "webp" if stem in _RASTER_FIGURES else "svg"
     path = os.path.join(output_dir, f"{stem}{_LANG_SUFFIX}{_FILENAME_SUFFIX}.{ext}")  # noqa: PTH118
     if ext == "svg":

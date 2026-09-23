@@ -47,6 +47,15 @@ FIGURE_LANGUAGE_ENV = PHONOMETRY_FIGURE_LANGUAGE_AUDIT=$(FIGURE_LANGUAGE_DIR)
 FIGURE_ANNOTATION_DIR = build/figure-annotations
 FIGURE_ANNOTATION_ENV = PHONOMETRY_FIGURE_ANNOTATION_AUDIT=$(FIGURE_ANNOTATION_DIR)
 
+# Where the generators write down which tick labels run into each other --
+# minor labels the scale writes beside major ticks set by hand, and any two
+# labels of one axis that touch -- for `make figure-ticks` to read afterwards
+# (see scripts/figure_tick_audit.py). One layout pass per language of each
+# figure with nothing painted, and it cannot change a written byte; the
+# directory is under build/, which is gitignored.
+FIGURE_TICK_DIR = build/figure-ticks
+FIGURE_TICK_ENV = PHONOMETRY_FIGURE_TICK_AUDIT=$(FIGURE_TICK_DIR)
+
 # `[full]` rather than a bare `-e .`: a development environment wants every
 # optional path importable, numba included, so `make test-perf` can exercise
 # the jitted kernel here the way the tests-perf job does in CI. numba stays out
@@ -95,7 +104,9 @@ graphs:
 	# leftover fragment would let `make figure-annotations` answer about a
 	# figure this run never drew.
 	rm -rf $(FIGURE_ANNOTATION_DIR)
-	$(FIGURE_ENV) $(FIGURE_LANGUAGE_ENV) $(FIGURE_ANNOTATION_ENV) $(PYTHON) scripts/generate_graphs.py
+	# And for the tick-label measurement.
+	rm -rf $(FIGURE_TICK_DIR)
+	$(FIGURE_ENV) $(FIGURE_LANGUAGE_ENV) $(FIGURE_ANNOTATION_ENV) $(FIGURE_TICK_ENV) $(PYTHON) scripts/generate_graphs.py
 	$(FIGURE_ENV) $(FIGURE_LANGUAGE_ENV) $(PYTHON) scripts/generate_diagrams.py
 
 # Every shaded region has to be visible against the page it is drawn on, on
@@ -305,6 +316,19 @@ figure-language:
 figure-annotations:
 	$(PYTHON) scripts/check_figure_annotations.py --audit $(FIGURE_ANNOTATION_DIR)
 
+# A band axis set by hand on a logarithmic scale keeps matplotlib's own minor
+# labels between the bands unless the minor formatter is cleared, and an axis
+# that should read "125 250 500" reads "2 × 10²50 4 × 10²500". Nothing else
+# sees it: the figure matches its generator, the annotation audit measures the
+# labels a generator places and not the ones an axis draws, and the committed
+# file has no text node to find a tick in. The generation run above measures
+# every axis of both language editions; this fails on minor labels left to
+# the scale beside major ticks set by hand, and on any two labels of one axis
+# that touch. Needs a `make graphs` first; it is answering about that run, not
+# about the tree.
+figure-ticks:
+	$(PYTHON) scripts/check_figure_ticks.py --audit $(FIGURE_TICK_DIR)
+
 # What to run locally before committing a figure change: regenerate, then
 # verify legibility and staleness the way CI does, each as its own step.
 # Recipe lines rather than prerequisites: prerequisites are free to run
@@ -320,6 +344,7 @@ figures:
 	$(MAKE) figure-contrast
 	$(MAKE) figure-language
 	$(MAKE) figure-annotations
+	$(MAKE) figure-ticks
 	$(MAKE) figure-decimal-point
 	$(MAKE) figure-legends
 	$(PYTHON) scripts/check_figures.py
@@ -547,7 +572,7 @@ test-gpu:
 check: lint security test
 
 .PHONY: install lint format security snyk sonar graphs figure-contrast figure-language \
-	figure-annotations figures reports \
+	figure-annotations figure-ticks figures reports \
 	assets animations animation-freshness posters brand lighthouse \
 	llms pypi-readme api-docs site-reports conformance install-hooks test test-perf test-gpu coverage check \
 	snippets snippets-static claims subscripts docstring-math language-forwarding \

@@ -2259,6 +2259,12 @@ def generate_cnossos_rail_directivity(output_dir: str) -> None:
     )
     right.set_title("Horizontal dipole (2.3.15)", pad=18)
     right.set_theta_zero_location("E")
+    # A ring every 2.5 dB and a label on every other one: nine labels on the
+    # one ray ran into each other, and 5 dB apart they clear.
+    rings = np.arange(-20.0, 0.1, 2.5)
+    right.set_rgrids(
+        rings, [_fmt_minus(r, ".1f") if i % 2 == 0 else "" for i, r in enumerate(rings)]
+    )
     right.grid(color=COLOR_GRID, linestyle="--", alpha=0.6)
     right.annotate(
         "−20 dB along the track",

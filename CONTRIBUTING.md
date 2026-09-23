@@ -169,6 +169,14 @@ receives. See `scripts/check_figure_annotations.py` for both numbers and for
 the exemption file, which is where an annotation that must stay as it is gets
 recorded with its reason.
 
+The same run measures the tick labels of every axis. Set a frequency axis with
+`format_frequency_axis(ax, language=_LANG)`; if you place the ticks of a
+logarithmic axis yourself, clear its minor labels with
+`ax.xaxis.set_minor_formatter(NullFormatter())`, or matplotlib keeps writing
+its own between yours. `make figures` fails on either defect: minor labels
+left to the scale beside major ticks set by hand, and two labels of one axis
+that touch. See `scripts/check_figure_ticks.py`.
+
 When adding a feature with visual output, write its `generate_*` function in the
 package the two commands are a front end for, not in the command itself:
 

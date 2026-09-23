@@ -1651,6 +1651,9 @@ def generate_enclosed_space_absorption(output_dir: str) -> None:
     ):
         ax.set_xticks(freq)
         ax.set_xticklabels(labels)
+        # The scale keeps labelling its own minor ticks between the bands
+        # (2×10², 3×10², ...) unless told not to, and they land on 250 and 500.
+        ax.xaxis.set_minor_formatter(mticker.NullFormatter())
         ax.set_xlabel("Octave-band centre frequency [Hz]")
         ax.set_ylabel(ylab)
         ax.set_title(title, pad=10)

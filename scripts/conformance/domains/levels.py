@@ -5,6 +5,10 @@ Sound level meter and dosimeter arithmetic: the IEC 61672-1 time and frequency
 weightings applied to signals, the IEC 61252 exposure quantities, and the
 ISO 1996-1/-2 rating levels and adjustments.
 
+The ISO 1683:2015 reference values every one of those levels is counted from
+sit here too: each printed value of its three tables, and the one number its
+notes compute, the 26.0 dB between the air and water pressure references.
+
 Two bodies of work sit with them because they are the same arithmetic applied
 by law and by a room: the Spanish noise regulation RD 1367/2007 and building
 code CTE DB-HR, whose oracles are the printed limit tables and the worked
@@ -24,7 +28,7 @@ import reference_data as ref
 
 import phonometry as ph
 
-from ..registry import Outcome, numeric, register
+from ..registry import Outcome, numeric, record, register
 
 _FS = 48000
 
@@ -505,3 +509,211 @@ def _chk_steady_state_spl() -> Outcome:
     computed = float(ph.room.steady_state_spl(90.0, 1.0, 25.0))
     expected = 90.0 + 10.0 * math.log10(1.0 / (4.0 * math.pi) + 4.0 / 25.0)
     return numeric(expected, computed, 1e-6, unit="dB", places=4)
+
+
+# ---------------------------------------------------------------------------
+# ISO 1683:2015 preferred reference values. Oracle: UNE-EN ISO 1683:2016, the
+# Spanish adoption of ISO 1683:2015 unchanged, PDF pages 8 and 9 (printed
+# folios 8 and 9), read on the page because extracted text drops the micro
+# sign. Each row holds the value the library publishes to the printed one
+# converted out of its prefix, and the comparison is exact: the float the
+# table stores has to be the float the printed decimal is, since every level
+# in the library is divided by it.
+# ---------------------------------------------------------------------------
+def _iso1683_value(
+    medium: str, key: str, expected: float, printed: str, unit: str
+) -> Outcome:
+    """One printed ISO 1683 value against the published table row."""
+    row = ph.metrology.ISO1683_REFERENCE_VALUES[medium][key]
+    in_si = f"{expected:g} {unit}"
+    held = f"{row.value:g} {row.unit}"
+    return record(
+        {key: expected},
+        {key: row.value},
+        unit=unit,
+        label=in_si if printed == in_si else f"{printed} = {in_si}",
+        computed_label=held if row.printed == held else f"{held} ({row.printed})",
+    )
+
+
+@register(
+    "Levels & dosimetry",
+    "ISO 1683:2015 Table 1",
+    "Reference sound pressure, air and other gases (20 µPa)",
+)
+def _chk_iso1683_gas_sound_pressure() -> Outcome:
+    return _iso1683_value("gas", "sound_pressure", 20e-6, "20 µPa", "Pa")
+
+
+@register(
+    "Levels & dosimetry",
+    "ISO 1683:2015 Table 1",
+    "Reference sound exposure, air and other gases ((20 µPa)² s)",
+)
+def _chk_iso1683_gas_sound_exposure() -> Outcome:
+    return _iso1683_value("gas", "sound_exposure", 4e-10, "(20 µPa)² s", "Pa²·s")
+
+
+@register(
+    "Levels & dosimetry",
+    "ISO 1683:2015 Table 1",
+    "Reference sound power, air and other gases (1 pW)",
+)
+def _chk_iso1683_gas_sound_power() -> Outcome:
+    return _iso1683_value("gas", "sound_power", 1e-12, "1 pW", "W")
+
+
+@register(
+    "Levels & dosimetry",
+    "ISO 1683:2015 Table 1",
+    "Reference sound energy, air and other gases (1 pJ)",
+)
+def _chk_iso1683_gas_sound_energy() -> Outcome:
+    return _iso1683_value("gas", "sound_energy", 1e-12, "1 pJ", "J")
+
+
+@register(
+    "Levels & dosimetry",
+    "ISO 1683:2015 Table 1",
+    "Reference sound intensity, air and other gases (1 pW/m²)",
+)
+def _chk_iso1683_gas_sound_intensity() -> Outcome:
+    return _iso1683_value("gas", "sound_intensity", 1e-12, "1 pW/m²", "W/m²")
+
+
+@register(
+    "Levels & dosimetry",
+    "ISO 1683:2015 Table 2",
+    "Reference sound pressure, water and other liquids (1 µPa)",
+)
+def _chk_iso1683_liquid_sound_pressure() -> Outcome:
+    return _iso1683_value("liquid", "sound_pressure", 1e-6, "1 µPa", "Pa")
+
+
+@register(
+    "Levels & dosimetry",
+    "ISO 1683:2015 Table 2",
+    "Reference sound exposure, water and other liquids (1 µPa² s)",
+)
+def _chk_iso1683_liquid_sound_exposure() -> Outcome:
+    return _iso1683_value("liquid", "sound_exposure", 1e-12, "1 µPa² s", "Pa²·s")
+
+
+@register(
+    "Levels & dosimetry",
+    "ISO 1683:2015 Table 2",
+    "Reference sound power, water and other liquids (1 pW)",
+)
+def _chk_iso1683_liquid_sound_power() -> Outcome:
+    return _iso1683_value("liquid", "sound_power", 1e-12, "1 pW", "W")
+
+
+@register(
+    "Levels & dosimetry",
+    "ISO 1683:2015 Table 2",
+    "Reference sound energy, water and other liquids (1 pJ)",
+)
+def _chk_iso1683_liquid_sound_energy() -> Outcome:
+    return _iso1683_value("liquid", "sound_energy", 1e-12, "1 pJ", "J")
+
+
+@register(
+    "Levels & dosimetry",
+    "ISO 1683:2015 Table 2",
+    "Reference sound intensity, water and other liquids (1 pW/m²)",
+)
+def _chk_iso1683_liquid_sound_intensity() -> Outcome:
+    return _iso1683_value("liquid", "sound_intensity", 1e-12, "1 pW/m²", "W/m²")
+
+
+@register(
+    "Levels & dosimetry",
+    "ISO 1683:2015 Table 2",
+    "Reference sound particle displacement, liquids (1 pm)",
+)
+def _chk_iso1683_liquid_particle_displacement() -> Outcome:
+    return _iso1683_value("liquid", "particle_displacement", 1e-12, "1 pm", "m")
+
+
+@register(
+    "Levels & dosimetry",
+    "ISO 1683:2015 Table 2",
+    "Reference sound particle velocity, liquids (1 nm/s)",
+)
+def _chk_iso1683_liquid_particle_velocity() -> Outcome:
+    return _iso1683_value("liquid", "particle_velocity", 1e-9, "1 nm/s", "m/s")
+
+
+@register(
+    "Levels & dosimetry",
+    "ISO 1683:2015 Table 2",
+    "Reference sound particle acceleration, liquids (1 µm/s²)",
+)
+def _chk_iso1683_liquid_particle_acceleration() -> Outcome:
+    return _iso1683_value("liquid", "particle_acceleration", 1e-6, "1 µm/s²", "m/s²")
+
+
+@register(
+    "Levels & dosimetry",
+    "ISO 1683:2015 Table 2",
+    "Reference distance for compound quantities, liquids (1 m)",
+)
+def _chk_iso1683_liquid_distance() -> Outcome:
+    return _iso1683_value("liquid", "distance", 1.0, "1 m", "m")
+
+
+@register(
+    "Levels & dosimetry",
+    "ISO 1683:2015 Table 3",
+    "Reference vibratory displacement (1 pm)",
+)
+def _chk_iso1683_solid_displacement() -> Outcome:
+    return _iso1683_value("solid", "displacement", 1e-12, "1 pm", "m")
+
+
+@register(
+    "Levels & dosimetry",
+    "ISO 1683:2015 Table 3",
+    "Reference vibratory velocity (1 nm/s)",
+)
+def _chk_iso1683_solid_velocity() -> Outcome:
+    return _iso1683_value("solid", "velocity", 1e-9, "1 nm/s", "m/s")
+
+
+@register(
+    "Levels & dosimetry",
+    "ISO 1683:2015 Table 3",
+    "Reference vibratory acceleration (1 µm/s²)",
+)
+def _chk_iso1683_solid_acceleration() -> Outcome:
+    return _iso1683_value("solid", "acceleration", 1e-6, "1 µm/s²", "m/s²")
+
+
+@register(
+    "Levels & dosimetry",
+    "ISO 1683:2015 Table 3",
+    "Reference vibratory force (1 µN)",
+)
+def _chk_iso1683_solid_force() -> Outcome:
+    return _iso1683_value("solid", "force", 1e-6, "1 µN", "N")
+
+
+@register(
+    "Levels & dosimetry",
+    "ISO 1683:2015 Table 3, note b",
+    "Alternative vibratory velocity for structure-borne sound (50 nm/s)",
+)
+def _chk_iso1683_solid_velocity_alternative() -> Outcome:
+    return _iso1683_value("solid", "velocity_alternative", 50e-9, "50 nm/s", "m/s")
+
+
+@register(
+    "Levels & dosimetry",
+    "ISO 1683:2015 Table 2, note b",
+    "Level re 1 µPa minus level re 20 µPa, 10 lg(20²/1²), printed ≈ 26.0 dB",
+)
+def _chk_iso1683_air_to_water_offset() -> Outcome:
+    # The note prints the offset to one decimal ("aproximadamente 26,0 dB");
+    # 10 lg 400 = 26.0206, so the tolerance is the half unit of that decimal.
+    computed = ph.underwater.in_air_to_underwater_spl(0.0)
+    return numeric(26.0, computed, 0.05, unit="dB", places=2)

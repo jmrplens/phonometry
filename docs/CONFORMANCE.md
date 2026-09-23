@@ -19,7 +19,7 @@
 
 ## Numerical conformance report
 
-**1261/1261 conformance checks pass** across 87 domains and 461 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+**1281/1281 conformance checks pass** across 87 domains and 462 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub><b>&#916;</b> is the difference between the computed value and the one the standard publishes. <b>Used</b> is how much of that clause's published tolerance the difference consumes: 100 % means it sits exactly on the limit, 5 % means it uses a twentieth of the allowance, and a dash means the clause states no two-sided tolerance for the quantity, so there is no budget to spend. It is reported and never used to decide a verdict, which is settled at full precision before any rounding.</sub>
 
@@ -113,7 +113,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary><b>Levels &amp; dosimetry</b>: 100% (9/9)</summary>
+<summary><b>Levels &amp; dosimetry</b>: 100% (29/29)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
 |:---|:---|:---|:---|:---|:---:|:---:|
@@ -126,6 +126,26 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | RD 1367/2007 Annex IV A.3.4.2 b | Corrected period level LKeq,d (Manual Ejemplo 3.1: 3 noise phases, 12 h) | 57 dB (+/-0 dB) | 57 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 | RD 1367/2007 Annex I A.2 d | Long-term level LK,d (Manual Ejemplo 3.2: 303 operating days of 365) | 56 dB (+/-0 dB) | 56 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 | RD 1367/2007 Annex III Table B1, Article 25 | Activity verdict (Manual Ejemplo 3.3: area type a, LK,d 56 dB over 55 dB) | phase and daily pass, annual fails, activity not compliant | phase and daily pass, annual fails, activity not compliant | - | - | ![Pass][cv-pass] Pass |
+| ISO 1683:2015 Table 1 | Reference sound pressure, air and other gases (20 µPa) | 20 µPa = 2e-05 Pa | 2e-05 Pa (20 µPa) | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 1683:2015 Table 1 | Reference sound exposure, air and other gases ((20 µPa)² s) | (20 µPa)² s = 4e-10 Pa²·s | 4e-10 Pa²·s ((20 µPa)² s) | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 1683:2015 Table 1 | Reference sound power, air and other gases (1 pW) | 1 pW = 1e-12 W | 1e-12 W (1 pW) | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 1683:2015 Table 1 | Reference sound energy, air and other gases (1 pJ) | 1 pJ = 1e-12 J | 1e-12 J (1 pJ) | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 1683:2015 Table 1 | Reference sound intensity, air and other gases (1 pW/m²) | 1 pW/m² = 1e-12 W/m² | 1e-12 W/m² (1 pW/m²) | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 1683:2015 Table 2 | Reference sound pressure, water and other liquids (1 µPa) | 1 µPa = 1e-06 Pa | 1e-06 Pa (1 µPa) | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 1683:2015 Table 2 | Reference sound exposure, water and other liquids (1 µPa² s) | 1 µPa² s = 1e-12 Pa²·s | 1e-12 Pa²·s (1 µPa² s) | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 1683:2015 Table 2 | Reference sound power, water and other liquids (1 pW) | 1 pW = 1e-12 W | 1e-12 W (1 pW) | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 1683:2015 Table 2 | Reference sound energy, water and other liquids (1 pJ) | 1 pJ = 1e-12 J | 1e-12 J (1 pJ) | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 1683:2015 Table 2 | Reference sound intensity, water and other liquids (1 pW/m²) | 1 pW/m² = 1e-12 W/m² | 1e-12 W/m² (1 pW/m²) | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 1683:2015 Table 2 | Reference sound particle displacement, liquids (1 pm) | 1 pm = 1e-12 m | 1e-12 m (1 pm) | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 1683:2015 Table 2 | Reference sound particle velocity, liquids (1 nm/s) | 1 nm/s = 1e-09 m/s | 1e-09 m/s (1 nm/s) | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 1683:2015 Table 2 | Reference sound particle acceleration, liquids (1 µm/s²) | 1 µm/s² = 1e-06 m/s² | 1e-06 m/s² (1 µm/s²) | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 1683:2015 Table 2 | Reference distance for compound quantities, liquids (1 m) | 1 m | 1 m | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 1683:2015 Table 3 | Reference vibratory displacement (1 pm) | 1 pm = 1e-12 m | 1e-12 m (1 pm) | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 1683:2015 Table 3 | Reference vibratory velocity (1 nm/s) | 1 nm/s = 1e-09 m/s | 1e-09 m/s (1 nm/s) | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 1683:2015 Table 3 | Reference vibratory acceleration (1 µm/s²) | 1 µm/s² = 1e-06 m/s² | 1e-06 m/s² (1 µm/s²) | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 1683:2015 Table 3 | Reference vibratory force (1 µN) | 1 µN = 1e-06 N | 1e-06 N (1 µN) | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 1683:2015 Table 3, note b | Alternative vibratory velocity for structure-borne sound (50 nm/s) | 50 nm/s = 5e-08 m/s | 5e-08 m/s (50 nm/s) | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 1683:2015 Table 2, note b | Level re 1 µPa minus level re 20 µPa, 10 lg(20²/1²), printed ≈ 26.0 dB | 26 dB (+/-0.05 dB) | 26.02 dB | 0.021 dB | 42 % | ![Pass][cv-pass] Pass |
 
 </details>
 

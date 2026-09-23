@@ -16,6 +16,12 @@ references:
     designation: "IEC 61252:1993"
     url: "https://webstore.iec.ch/en/publication/5054"
     note: "La exposición sonora E en Pa²h y el nivel normalizado a 8 h LEX,8h (≡ LEP,d), anclados en 3,2 Pa²h ⇔ exactamente 90 dB. Revisada después como IEC 61252:2025 (https://webstore.iec.ch/en/publication/68929); la primera edición es la implementada."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2015
+    title: "Acoustics. Preferred reference values for acoustical and vibratory levels"
+    designation: "ISO 1683:2015"
+    note: "Las Tablas 1 a 3, el valor de referencia desde el que se cuenta cada nivel de esta página (20 µPa para el sonido en el aire), publicadas como metrology.ISO1683_REFERENCE_VALUES; la nota b de la Tabla 2, los 26,0 dB entre las referencias de presión del aire y del agua. Leída en la adopción española UNE-EN ISO 1683:2016."
   - type: book
     authors: ["Kinsler, L. E.", "Frey, A. R.", "Coppens, A. B.", "Sanders, J. V."]
     year: 2000
@@ -847,7 +853,9 @@ tras los niveles percentiles, el pico ponderado C del apartado 5.13
 (`sel`, verificado frente a la columna $L_{\mathrm{A}E}$ de la Tabla 4); la exposición
 sonora y el LEX,8h de la IEC 61252:1993 (`sound_exposure`, `lex_8h`); y el
 espectrograma en bandas de fracción de octava de
-`OctaveFilterBank.spectrogram`.
+`OctaveFilterBank.spectrogram`; y los valores de referencia de la
+ISO 1683:2015 desde los que se cuenta cada nivel, publicados como
+`metrology.ISO1683_REFERENCE_VALUES`.
 </ScopeClaim>
 
 <ScopeClaim status="not-covered" label="No cubierto">
@@ -869,7 +877,7 @@ edición implementada (1993), no las de la más reciente.
 - [Calibración](/phonometry/es/signals/metrology/calibration/): el factor de sensibilidad que convierte unidades digitales en los pascales que todo nivel de esta página supone.
 - [Exposición laboral (ISO 9612)](/phonometry/es/perception/hearing/occupational-exposure/): las estrategias de medición en el puesto de trabajo que alimentan las medidas de dosis.
 - [Multicanal y rendimiento](/phonometry/es/signals/filters/multichannel/): niveles por canal y cómo combinarlos energéticamente.
-- Referencia de la API: [`signals.levels`](/phonometry/es/reference/api/signals/levels/).
+- Referencia de la API: [`signals.levels`](/phonometry/es/reference/api/signals/levels/), y [`metrology.reference_values`](/phonometry/es/reference/api/metrology/reference-values/) para la tabla de la ISO 1683.
 - Teoría: [Métricas de evento y de dosis](/phonometry/es/reference/theory/signal-analysis/#métricas-de-evento-y-de-dosis): las definiciones energéticas detrás de $L_\mathrm{eq}$, el SEL y las magnitudes de exposición, y cómo se relacionan con ellas los niveles percentiles.
 
 </SeeAlso>
@@ -894,3 +902,40 @@ y $L_\mathrm{EX,8h}$ (equivalente a $L_\mathrm{EP,d}$) es el nivel correspondien
 normalizado a 8 h. El ancla que conviene memorizar: 3,2 Pa²h corresponde a
 exactamente 90 dB durante 8 h. La mitad de dosis son -3 dB, y el doble de
 duración al mismo nivel son +3 dB.
+
+### ¿Desde qué valor de referencia se cuenta cada nivel?
+
+Un nivel en decibelios es el cociente con un valor de referencia, así que no
+significa nada hasta que se nombra la referencia. La ISO 1683:2015 fija una
+por magnitud, y la biblioteca cuenta cada nivel desde ella salvo que la norma
+que implementa una función nombre otra. La tabla se publica como
+`metrology.ISO1683_REFERENCE_VALUES`, indexada por el medio y después por la
+magnitud:
+
+| Magnitud | Gases (Tabla 1) | Líquidos (Tabla 2) | Vibración (Tabla 3) |
+|:---|:---|:---|:---|
+| Presión acústica | 20 µPa | 1 µPa | |
+| Exposición sonora | (20 µPa)² s | 1 µPa² s | |
+| Potencia acústica | 1 pW | 1 pW | |
+| Energía acústica | 1 pJ | 1 pJ | |
+| Intensidad acústica | 1 pW/m² | 1 pW/m² | |
+| Desplazamiento | | 1 pm | 1 pm |
+| Velocidad | | 1 nm/s | 1 nm/s, o 50 nm/s (nota b) |
+| Aceleración | | 1 µm/s² | 1 µm/s² |
+| Fuerza | | | 1 µN |
+| Distancia, para magnitudes compuestas | | 1 m | |
+
+La misma presión se lee $10\lg(20^2/1^2) \approx 26{,}0$ dB más alta frente
+al 1 µPa del agua que frente a los 20 µPa del aire (nota b de la Tabla 2), que
+es el paso que aplica `underwater.in_air_to_underwater_spl`. Cuando una norma
+cuenta desde otro valor, el módulo que la implementa conserva ese valor y
+nombra el documento a su lado: la DIN 45672-2 refiere la vibración ferroviaria
+a los $5\cdot10^{-8}$ m/s de la DIN EN 21683 (ISO 1683:1983), y la
+ISO/TS 7849 y la ISO 9611 usan los 50 nm/s de la nota b.
+
+```python
+from phonometry import metrology
+
+p0 = metrology.ISO1683_REFERENCE_VALUES["gas"]["sound_pressure"]
+print(p0.value, p0.unit, p0.printed)  # 2e-05 Pa 20 µPa
+```

@@ -675,6 +675,9 @@ OBJECT_MODULE_OVERRIDES: dict[str, str] = {
     # Defined in underwater.acoustics, also re-exported by
     # underwater.ship_radiated_noise (identity scan is ambiguous).
     "UNDERWATER_REFERENCE_PRESSURE": "phonometry.underwater.acoustics",
+    # Likewise the exposure reference, which the pile-driving SEL spectrum
+    # imports for its band levels.
+    "UNDERWATER_REFERENCE_EXPOSURE": "phonometry.underwater.acoustics",
     # Defined in the private phonometry._report package; documented with the
     # building insulation ratings whose report() method it drives.
     "ReportMetadata": "phonometry.building.measurement.insulation",

@@ -9,6 +9,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- **The ISO 1683 reference values, published once and read by every level.**
+  `metrology.ISO1683_REFERENCE_VALUES` holds ISO 1683:2015 Tables 1 to 3,
+  the reference values for sound in gases, sound in liquids and vibration,
+  and the 50 nm/s that note b of Table 3 allows for structure-borne sound,
+  keyed by medium (`"gas"`, `"liquid"`, `"solid"`) and quantity. Each row is a
+  `metrology.ReferenceValue` with the value in SI, its unit, the value as the
+  table prints it (`"20 µPa"`) and the table it comes from. The package used
+  to type these numbers out wherever it needed one, the 20 µPa seventeen
+  times and the 1 pW seven, and every one of those copies now reads the
+  table; a module that counts from another reference, such as the 50 nm/s of
+  ISO/TS 7849 and ISO 9611 or the 5·10⁻⁸ m/s DIN 45672-2 takes from the 1983
+  edition, keeps it and names the document beside it.
+  `scripts/check_reference_values.py` (`make reference-values`, and a job of
+  its own in CI) fails on a reference value that repeats the table instead of
+  reading it, or differs from it without saying where it comes from. Every
+  printed value of the three tables is a conformance row, with the 26.0 dB of
+  note b of Table 2 checked against `underwater.in_air_to_underwater_spl`, and
+  the integrated-levels guide lists the table where a reader of a level looks
+  for its reference. No number the library returns changes.
 - **Three small catalogues a floor, a panel and a room need.**
   `materials.PUBLISHED_RESILIENT_MODULI` holds Vigran (2008) Table 8.3, the
   dynamic modulus of six resilient materials under a static load of about

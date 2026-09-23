@@ -32,7 +32,7 @@ by quantity, and every value is in the coherent SI unit its row names, so the
     p0.value, p0.unit, p0.printed  # (2e-05, 'Pa', '20 µPa')
 
 Note b of Table 2 gives the offset between the two pressure references, a
-level re 1 µPa being :math:`10 \lg(20^2/1^2) \approx 26{,}0` dB above the same
+level re 1 µPa being :math:`10 \lg(20^2/1^2) \approx 26.0` dB above the same
 pressure re 20 µPa; :func:`phonometry.underwater.in_air_to_underwater_spl`
 applies it.
 

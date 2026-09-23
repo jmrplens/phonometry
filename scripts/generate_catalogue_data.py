@@ -836,8 +836,8 @@ def _refuse_unshowable(row: CatalogueRow, field: str, value: object) -> None:
     A cell has one kind, and the component styles and words it by that kind.
     Two hedges on one value, or a hedge that only a value can carry on a cell
     that holds an interval, a list or a word, would reach the page with one of
-    them silently gone (a tilde on an interval is written into its text, so
-    ``approximate`` is not one of them): an estimated interval read as a plain range, or a
+    them silently gone (a tilde on an interval or on a list of readings is
+    written into its text, so ``approximate`` is refused only on a word): an estimated interval read as a plain range, or a
     converted bound whose note gives the converted number as what the page
     prints. No published cell does either today; the first one to do so stops
     the generator here, so that how it should read is decided rather than
@@ -853,6 +853,10 @@ def _refuse_unshowable(row: CatalogueRow, field: str, value: object) -> None:
             field in row.ranges or field in row.reported or field in row.unquantified
         )
         clash = [h for h in hedges if h in _SINGLE_VALUE_HEDGES] if spoken else []
+        # An interval or a list of readings carries its tilde in the text; a
+        # printed word has nowhere to put one.
+        if field in row.unquantified and "approximate" in hedges:
+            clash.append("approximate")
     if clash:
         what = "a value" if value is not None else "a cell with no single value"
         msg = (
@@ -956,6 +960,9 @@ def cell(
             else written(entry)
             for entry in row.reported[field]
         )
+        if row.is_approximate(field):
+            # Same as an interval: the kind has no mark of its own for a tilde.
+            listed = f"~{listed}"
         return {"text": listed, "kind": "reported", "note": row.why_missing(field)}
     if field in row.unquantified:
         return {

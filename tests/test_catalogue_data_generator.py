@@ -421,6 +421,13 @@ def test_every_hedged_cell_reaches_the_page_as_its_own_kind() -> None:
             },
             "density_kg_m3 is converted and estimated on a value",
         ),
+        (
+            {
+                "unquantified": {"density_kg_m3": "variable"},
+                "approximate": frozenset({"density_kg_m3"}),
+            },
+            "density_kg_m3 is approximate on a cell with no single value",
+        ),
     ],
     ids=[
         "estimated interval",
@@ -428,6 +435,7 @@ def test_every_hedged_cell_reaches_the_page_as_its_own_kind() -> None:
         "estimated row with an interval",
         "approximate conversion",
         "estimated conversion",
+        "approximate word",
     ],
 )
 def test_a_hedge_the_page_cannot_show_stops_the_generator(
@@ -524,6 +532,19 @@ def test_a_cell_that_lists_several_readings_lists_them() -> None:
     cell = gcd.cell(row, "viscous_length_um")
 
     assert cell["text"] == "25, 207, 200 to 450"
+    assert cell["kind"] == "reported"
+
+
+def test_readings_the_page_prints_with_a_tilde_keep_it() -> None:
+    """As with an interval, the tilde goes into the text of the list."""
+    row = _row(
+        reported={"viscous_length_um": (25.0, 207.0)},
+        approximate=frozenset({"viscous_length_um"}),
+    )
+
+    cell = gcd.cell(row, "viscous_length_um")
+
+    assert cell["text"] == "~25, 207"
     assert cell["kind"] == "reported"
 
 

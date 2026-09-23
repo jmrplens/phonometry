@@ -9,6 +9,15 @@ rather than an ear.
 
 from __future__ import annotations
 
+from .active_noise_reduction import (
+    ANR_WITHIN_LABORATORY_UNCERTAINTY,
+    ActiveInsertionLossResult,
+    AnrLinearityResult,
+    AnrTotalAttenuationResult,
+    active_insertion_loss,
+    anr_total_attenuation,
+    assess_anr_linearity,
+)
 from .hearing_protectors import (
     HML_REFERENCE_C_MINUS_A,
     HML_REFERENCE_D,
@@ -80,9 +89,16 @@ from .threshold import (
 )
 
 __all__ = [
+    "active_insertion_loss",
+    "ActiveInsertionLossResult",
     "age_threshold",
     "AgeThresholdResult",
     "allowable_field_variation",
+    "anr_total_attenuation",
+    "ANR_WITHIN_LABORATORY_UNCERTAINTY",
+    "AnrLinearityResult",
+    "AnrTotalAttenuationResult",
+    "assess_anr_linearity",
     "assess_attenuation_difference",
     "assumed_protection_value",
     "AssumedProtectionResult",

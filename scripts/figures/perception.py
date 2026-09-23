@@ -4247,6 +4247,173 @@ def generate_hearing_protector_reat(output_dir: str) -> None:
     plt.close()
 
 
+#: ISO's calculation example for ISO 4869-6:2019 5.5 (the workbook named in
+#: 5.5, sheet Tabelle1): the REAT of sixteen subjects, octave bands 63 Hz to
+#: 8 kHz (rows 158-173), and their lower-ear active insertion loss, 24
+#: one-third octaves 50 Hz to 10 kHz (rows 134-149), in dB.
+_ISO4869_6_WORKBOOK_REAT = """
+ 11.7  15.7   8.6  10.7  25.6  22.7  43.0  38.0
+ 12.7  20.3  15.7  13.4  23.0  24.3  36.7  42.0
+ 21.0  22.7  17.7  18.0  27.4  31.0  36.3  45.0
+ 21.6  22.0  21.0  13.4  24.7  30.3  36.3  42.3
+ 10.6  10.0  11.7  16.0  24.6  23.4  38.0  42.4
+ 12.3  13.3  12.3  17.6  30.0  22.6  39.3  43.3
+ 11.0  10.0  10.0  13.6  24.3  25.4  36.3  37.4
+ 16.0  12.0  11.3  13.0  28.7  25.7  38.0  35.0
+ 11.4  11.6  11.0  13.7  29.3  24.3  42.7  37.6
+ 12.7  12.0   8.0   9.0  32.7  25.6  37.0  41.0
+ 14.0  10.3   7.7  15.0  21.0  22.7  33.3  33.0
+ 19.3  18.3  15.6  16.3  21.0  26.4  32.7  31.0
+ 13.7  15.4  12.6  13.4  22.0  19.0  40.0  33.3
+ 13.0  15.3   6.7  12.0  23.0  28.7  40.4  38.0
+ 16.7  21.6  18.4  18.0  33.7  37.7  57.0  50.6
+ 10.7  15.0  10.0  11.7  25.0  22.0  32.0  38.7
+"""
+_ISO4869_6_WORKBOOK_LOWER_EAR = """
+ 17.3  18.4  20.6  23.3  23.9  24.8  23.6  21.6  17.0  12.1   5.2  -0.7  -5.7  -4.5  -2.0   0.1  -0.2  -6.5  -4.4  -1.3  -0.2   0.2  -1.0  -0.1
+ 17.5  19.4  19.9  21.7  23.0  23.9  23.9  21.7  17.6  12.8   5.7   0.8  -6.8  -6.4  -2.6  -1.2  -0.4  -1.6  -0.8   0.8  -0.4  -1.3  -1.9   0.7
+ 17.0  19.7  21.2  22.0  23.1  24.6  23.7  20.8  17.0  11.6   3.6  -2.0  -7.0  -4.2  -1.9  -0.6  -2.9  -6.2  -2.8   0.2   0.3  -1.0  -0.6   0.6
+ 17.4  19.8  21.3  22.4  23.1  22.3  20.6  18.7  14.6   9.7   2.2  -2.6  -6.3  -4.9  -2.5  -1.4  -0.5  -2.9  -1.1  -0.2   0.2   0.1   0.2   1.1
+ 19.0  20.5  21.8  23.1  24.5  24.5  22.3  20.2  16.2  10.6   3.1  -1.5  -5.9  -4.4  -1.6  -0.8  -2.9  -7.7  -5.8  -1.4   0.0  -0.6   0.3  -0.7
+ 17.7  18.8  20.4  23.0  24.4  25.3  24.3  20.8  16.4  10.6   3.9  -1.7  -6.2  -4.3  -2.0  -1.2  -2.6  -5.1  -3.9  -0.4   0.3  -0.1  -0.2   0.3
+ 20.0  21.7  22.8  23.2  24.4  24.1  24.2  22.2  17.3  12.5   4.7   0.2  -5.5  -5.2  -2.4  -1.5  -5.1  -8.7  -6.6  -1.5  -1.1  -1.7  -0.3  -0.4
+ 20.1  20.5  21.2  21.4  22.7  24.7  25.1  24.3  19.7  15.5   8.8   5.4  -3.3  -8.8  -7.6  -4.1  -3.1  -6.2  -8.3  -4.8  -2.1  -0.6  -0.7  -1.9
+ 22.9  22.9  22.9  22.9  23.2  24.0  23.6  20.7  17.2  11.7   5.4   0.1  -7.7  -6.5  -3.0  -1.9  -2.8  -3.9  -4.5  -0.5   0.0  -0.7  -1.0   1.1
+ 21.9  21.9  21.9  21.9  22.9  24.3  24.4  23.1  17.8  14.3   8.8   5.3  -3.4  -8.4  -4.8  -2.7  -4.9  -5.0  -4.2  -2.6  -0.3  -0.4  -0.7  -0.4
+ 23.7  23.7  23.7  23.7  24.6  24.3  23.0  20.8  16.7  11.1   3.4  -2.2  -8.0  -6.4  -3.0  -1.7  -0.1   0.0  -0.5  -0.3  -0.2  -1.8  -0.6   0.0
+ 22.0  22.0  22.0  22.0  23.9  24.1  22.8  20.3  16.1  11.1   3.0  -1.8  -6.2  -4.2  -1.9  -0.1  -0.8  -6.0  -5.2  -1.0  -0.2   0.1   0.3   0.7
+ 23.2  23.2  23.2  23.2  24.3  23.9  23.5  20.9  16.8  11.8   4.6  -1.2  -6.8  -5.6  -2.3  -1.2  -0.1  -1.5  -3.2  -0.5   0.8   0.1  -1.0  -0.3
+ 21.5  21.5  21.5  21.5  23.5  24.6  25.1  23.3  17.6  13.4   5.9   1.6  -4.3  -5.2  -2.3  -1.2  -3.1  -7.3  -4.0  -3.6   0.0  -1.3  -1.6   0.6
+ 24.3  24.3  24.3  24.3  24.2  24.6  23.9  22.5  17.7  12.4   4.2  -0.2  -7.2  -6.3  -2.2  -1.0  -2.5  -6.9  -3.1  -0.9   0.0  -0.1  -0.5   0.6
+ 23.8  23.8  23.8  23.8  24.9  24.2  22.3  20.7  15.9  10.9   3.8  -0.4  -6.7  -4.8  -2.1  -0.7  -0.5  -6.3  -3.4  -0.3   0.2   0.1   0.2   1.3
+"""
+
+
+def _rows(text: str) -> np.ndarray:
+    """A whitespace-separated block, one row per line, as a float array."""
+    return np.array([line.split() for line in text.strip().splitlines()], dtype=float)
+
+
+def generate_hearing_protector_anr(output_dir: str) -> None:
+    """ISO 4869-6: passive plus active, subject by subject, and what it rates."""
+    print("Generating hearing_protector_anr...")
+    from phonometry import hearing
+
+    reat = _rows(_ISO4869_6_WORKBOOK_REAT)
+    active = hearing.active_insertion_loss(_rows(_ISO4869_6_WORKBOOK_LOWER_EAR))
+    total = hearing.anr_total_attenuation(reat, active)
+    thirds = np.asarray(total.third_octave_frequencies)
+    octaves = np.asarray(total.frequencies)
+
+    _fig, (ax_chain, ax_ail) = plt.subplots(1, 2, figsize=(13.0, 5.6))
+
+    # Left: the chain of 5.5, averaged over the sixteen subjects. The passive
+    # attenuation is weakest where the circuit works, which is the point.
+    ax_chain.plot(
+        thirds,
+        total.reat_third_octave_db.mean(axis=0),
+        "--",
+        color=COLOR_TERTIARY,
+        linewidth=2.0,
+        zorder=2,
+        label="passive (REAT), interpolated",
+    )
+    ax_chain.plot(
+        thirds,
+        total.insertion_loss_db.mean(axis=0),
+        ":",
+        color=COLOR_SECONDARY,
+        linewidth=2.4,
+        zorder=2,
+        label="active insertion loss, lower-value ear",
+    )
+    ax_chain.plot(
+        thirds,
+        total.total_third_octave_db.mean(axis=0),
+        "-",
+        color=COLOR_PRIMARY,
+        linewidth=2.4,
+        zorder=3,
+        label="total, one-third octaves",
+    )
+    ax_chain.plot(
+        octaves,
+        total.assumed_protection.apv,
+        "s",
+        color=COLOR_FG,
+        markersize=7,
+        zorder=4,
+        label=r"$APV_{f84}$ of the octave totals",
+    )
+    ax_chain.axhline(0.0, color=COLOR_GRID, linewidth=1.0, zorder=0)
+    ax_chain.set_xscale("log")
+    ax_chain.set_xlim(thirds[0] / 1.15, thirds[-1] * 1.15)
+    format_frequency_axis(ax_chain, language=_LANG)
+    ax_chain.set_xlabel(LABEL_FREQ_HZ)
+    ax_chain.set_ylabel("Sound attenuation [dB]")
+    high, medium, low = total.hml.reported
+    ax_chain.set_title(
+        f"Passive plus active: $H$ = {high}, $M$ = {medium}, $L$ = {low}, "
+        f"$SNR$ = {total.snr.reported} dB",
+        pad=12,
+    )
+    ax_chain.grid(color=COLOR_GRID, linestyle="--", alpha=0.5, zorder=0)
+    ax_chain.set_axisbelow(True)
+    # Room below the curves for the legend, which would otherwise sit on the
+    # total at low frequency, where the circuit lifts it to its highest.
+    ax_chain.set_ylim(-30.0, 45.0)
+    ax_chain.legend(
+        loc="lower right", fontsize=9, framealpha=1.0, facecolor=COLOR_PANEL
+    )
+
+    # Right: the active insertion loss of every subject, the Annex A example.
+    # From 1 kHz up the circuit adds sound rather than removing it.
+    for index, row in enumerate(active.insertion_loss_db):
+        ax_ail.plot(
+            active.frequencies,
+            row,
+            color=COLOR_TERTIARY,
+            linewidth=0.9,
+            alpha=0.55,
+            zorder=1,
+            label="the 16 subjects, lower-value ear" if index == 0 else None,
+        )
+    ax_ail.errorbar(
+        active.frequencies,
+        active.mean_db,
+        yerr=active.expanded_uncertainty_db,
+        fmt="none",
+        ecolor=COLOR_SECONDARY,
+        elinewidth=2.2,
+        capsize=4,
+        zorder=4,
+        label=r"$\pm U_{95}$ of the mean",
+    )
+    ax_ail.plot(
+        active.frequencies,
+        active.mean_db,
+        "-o",
+        color=COLOR_PRIMARY,
+        linewidth=2.2,
+        markersize=4,
+        zorder=5,
+        label="mean active insertion loss",
+    )
+    ax_ail.axhline(0.0, color=COLOR_FG, linewidth=1.0, zorder=0)
+    ax_ail.set_xscale("log")
+    ax_ail.set_xlim(thirds[0] / 1.15, thirds[-1] * 1.15)
+    format_frequency_axis(ax_ail, language=_LANG)
+    ax_ail.set_xlabel(LABEL_FREQ_HZ)
+    ax_ail.set_ylabel("Active insertion loss [dB]")
+    ax_ail.set_title("What the circuit adds (Annex A)", pad=12)
+    ax_ail.grid(color=COLOR_GRID, linestyle="--", alpha=0.5, zorder=0)
+    ax_ail.set_axisbelow(True)
+    ax_ail.legend(loc="upper right", fontsize=9, framealpha=1.0, facecolor=COLOR_PANEL)
+    plt.tight_layout()
+    save_figure(output_dir, "hearing_protector_anr.png")
+    plt.close()
+
+
 def generate_audiometric_zero_earphones(output_dir: str) -> None:
     """ISO 389-1 earphone reference levels, against the sound-field zero."""
     print("Generating audiometric_zero_earphones...")

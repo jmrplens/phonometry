@@ -360,10 +360,10 @@ ISO 389-7, ISO 1999 e ISO 9612.
 - [Exposición al ruido en el trabajo (ISO 9612)](/phonometry/es/perception/hearing/occupational-exposure/):
   las estrategias por tareas, basadas en la función y de jornada completa para
   $L_\mathrm{EX,8h}$, con el balance de incertidumbre y el límite superior.
-- [Protectores auditivos (ISO 4869-1 y -2)](/phonometry/es/perception/hearing/hearing-protectors/):
+- [Protectores auditivos (ISO 4869-1, -2 y -6)](/phonometry/es/perception/hearing/hearing-protectors/):
   la atenuación medida sobre dieciséis sujetos con su incertidumbre y su prueba
-  de significación, y los métodos por bandas de octava, HML y SNR que dicen lo
-  que un protector deja en el oído.
+  de significación, los métodos por bandas de octava, HML y SNR que dicen lo que
+  un protector deja en el oído, y lo que añade una orejera de reducción activa.
 
 ## [Salas y edificación](/phonometry/es/buildings/)
 

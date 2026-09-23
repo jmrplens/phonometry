@@ -1,8 +1,8 @@
 # phonometry
 
-> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1287 numerical conformance checks against 463 standards enforced in CI.
+> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1295 numerical conformance checks against 464 standards enforced in CI.
 
-phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1287 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 88 domains.
+phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1295 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 89 domains.
 
 The project was published as **PyOctaveBand** until version 3.0.0. Third-party references and dependency pins still using that name refer to this library.
 
@@ -130,7 +130,7 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 - [Hearing threshold (age and reference zero)](https://jmrplens.github.io/phonometry/perception/hearing/hearing-threshold/)
 - [Occupational Noise Exposure (ISO 9612)](https://jmrplens.github.io/phonometry/perception/hearing/occupational-exposure/)
 - [Noise-induced hearing loss (ISO 1999)](https://jmrplens.github.io/phonometry/perception/hearing/noise-induced-hearing-loss/)
-- [Hearing Protectors (ISO 4869-1 and -2)](https://jmrplens.github.io/phonometry/perception/hearing/hearing-protectors/)
+- [Hearing Protectors (ISO 4869-1, -2 and -6)](https://jmrplens.github.io/phonometry/perception/hearing/hearing-protectors/)
 
 ## Rooms and buildings
 
@@ -521,6 +521,7 @@ The generated API reference, one page per module. Fetch these only when a specif
 - [fluids/gas](https://jmrplens.github.io/phonometry/reference/api/fluids/gas/)
 - [fluids/nonlinearity](https://jmrplens.github.io/phonometry/reference/api/fluids/nonlinearity/)
 - [fluids/water](https://jmrplens.github.io/phonometry/reference/api/fluids/water/)
+- [hearing/active-noise-reduction](https://jmrplens.github.io/phonometry/reference/api/hearing/active-noise-reduction/)
 - [hearing/hearing-protectors](https://jmrplens.github.io/phonometry/reference/api/hearing/hearing-protectors/)
 - [hearing/noise-induced-hearing-loss](https://jmrplens.github.io/phonometry/reference/api/hearing/noise-induced-hearing-loss/)
 - [hearing/occupational-exposure](https://jmrplens.github.io/phonometry/reference/api/hearing/occupational-exposure/)
@@ -36057,7 +36058,7 @@ tracked in [CONFORMANCE.md](https://jmrplens.github.io/phonometry/reference/conf
 <!-- source: docs/perception/hearing/hearing-protectors.md | canonical: https://jmrplens.github.io/phonometry/perception/hearing/hearing-protectors/ -->
 Source: https://jmrplens.github.io/phonometry/perception/hearing/hearing-protectors/
 
-# Hearing Protectors (ISO 4869-1 and -2)
+# Hearing Protectors (ISO 4869-1, -2 and -6)
 
 A hearing protector is not measured on a coupler. ISO 4869-1 seats it on
 sixteen people and records the threshold shift each of them gets, so what
@@ -36226,6 +36227,46 @@ Table C.1 and the reprint disagrees with the original in two cells. Table 2 is
 the one that reproduces the annex's own worked results, and it is the one this
 library carries; the discrepancy is registered in [ERRATA](https://jmrplens.github.io/phonometry/reference/errata/).
 
+## Active noise reduction earmuffs (ISO 4869-6)
+
+An active noise reduction earmuff adds a cancellation circuit to a passive
+shell, and a threshold test cannot see it. ISO 4869-6 measures the two halves
+on the same sixteen subjects: the ISO 4869-1 attenuation with the circuit off,
+in octave bands, and the active insertion loss, the level at each ear with the
+circuit off minus the level with it on, measured with a microphone in the ear
+canal in one-third-octave bands. Clause 5.5 interpolates the passive side into
+one-third octaves (linearly in hertz, as ISO's calculation workbook does it),
+keeps the ear with the lower insertion loss in each band, adds the two, folds
+each octave back with Formula (1) and rates the sixteen results with ISO 4869-2
+at 84 %.
+
+```python
+# ISO 4869-6 Table A.3: the lower-ear active insertion loss, 63 Hz to 8 kHz.
+table_a3_anr = np.array([
+    [18.4, 23.9, 21.6, 5.2, -4.5, -0.2, -1.3, -1.0], [19.4, 23.0, 21.7, 5.7, -6.4, -0.4, 0.8, -1.9],
+    [19.7, 23.1, 20.8, 3.6, -4.2, -2.9, 0.2, -0.6], [19.8, 23.1, 18.7, 2.2, -4.9, -0.5, -0.2, 0.2],
+    [20.5, 24.5, 20.2, 3.1, -4.4, -2.9, -1.4, 0.3], [18.8, 24.4, 20.8, 3.9, -4.3, -2.6, -0.4, -0.2],
+    [21.7, 24.4, 22.2, 4.7, -5.2, -5.1, -1.5, -0.3], [20.5, 22.7, 24.3, 8.8, -8.8, -3.1, -4.8, -0.7],
+    [22.9, 23.2, 20.7, 5.4, -6.5, -2.8, -0.5, -1.0], [21.9, 22.9, 23.1, 8.8, -8.4, -4.9, -2.6, -0.7],
+    [23.7, 24.6, 20.8, 3.4, -6.4, -0.1, -0.3, -0.6], [22.0, 23.9, 20.3, 3.0, -4.2, -0.8, -1.0, 0.3],
+    [23.2, 24.3, 20.9, 4.6, -5.6, -0.1, -0.5, -1.0], [21.5, 23.5, 23.3, 5.9, -5.2, -3.1, -3.6, -1.6],
+    [24.3, 24.2, 22.5, 4.2, -6.3, -2.5, -0.9, -0.5], [23.8, 24.9, 20.7, 3.8, -4.8, -0.5, -0.3, 0.2],
+])
+insertion = hearing.active_insertion_loss(table_a3_anr)
+print(np.round(insertion.mean_db, 1))                  # [21.4 23.8 21.4  4.8 -5.6 -2.  -1.1 -0.6]
+print(np.round(insertion.expanded_uncertainty_db, 1))  # [0.9 0.4 0.7 0.9 0.7 0.8 0.7 0.3]
+```
+
+Table A.3 prints its $u$ and $U_{95}$ rows from the rounded row above each, so
+six of its eight $U_{95}$ cells are a tenth above the value Annex A defines;
+see [ERRATA](https://jmrplens.github.io/phonometry/reference/errata/). On ISO's calculation example the circuit raises
+$L$ from 12 dB to 19 dB and lowers $H$ from 24 dB to 21 dB, because it adds
+sound from 1 kHz up (`hearing.anr_total_attenuation`), and
+`hearing.assess_anr_linearity` finds the highest external level at which every
+ear still follows the 5 dB steps of 5.4.4 within ±1 dB.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/hearing_protector_anr_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/hearing_protector_anr.svg" alt="Left: averaged over sixteen subjects, the passive attenuation of an active noise reduction earmuff interpolated into one-third-octave bands, the active insertion loss of the ear with the lower value, their sum, and the assumed protection value at 84 % in each octave band. Right: the active insertion loss of each subject in one-third-octave bands, with the mean and the expanded uncertainty of the mean as error bars and a line at zero" width="92%"></picture>
+
 ## References
 
 - International Organization for Standardization (2018). *Acoustics — Hearing
@@ -36240,6 +36281,11 @@ library carries; the discrepancy is registered in [ERRATA](https://jmrplens.gith
   [iso.org catalogue](https://www.iso.org/standard/65581.html).
   Where the per-subject attenuation values come from: 4.6, Annex A, Annex B
   and 4.2.2 with Table 1, validated against Tables A.2, A.3, B.1 and B.2.
+- International Organization for Standardization (2019). *Acoustics — Hearing
+  protectors — Part 6: Determination of sound attenuation of active noise
+  reduction earmuffs* (ISO 4869-6:2019). The active insertion loss, its
+  uncertainty, the total attenuation of 5.5 and the linear-operation check of
+  5.4.4, validated against Tables A.2 and A.3 and ISO's calculation workbook.
 
 ## Standards
 
@@ -36249,6 +36295,8 @@ differ (Annex B, Tables B.1 and B.2) and the sound-field conditions of the test
 room (4.2.2, Table 1). ISO 4869-2:2018, which defines the assumed protection
 value $APV_{fx}$ (Clause 5), the octave-band method (Clause 6), the $H$, $M$ and
 $L$ values (Clause 7) and the single number rating $SNR$ (Clause 8).
+ISO 4869-6:2019, which adds the active insertion loss of an active noise
+reduction earmuff to that attenuation (5.4, 5.5, Annex A).
 
 ## See also
 
@@ -36258,8 +36306,9 @@ $L$ values (Clause 7) and the single number rating $SNR$ (Clause 8).
   the exposure the protector did not stop does over a working life.
 - [Hearing threshold (age and reference zero)](https://jmrplens.github.io/phonometry/perception/hearing/hearing-threshold/): the
   baseline any protected exposure is judged against.
-- API reference: [`hearing.real_ear_attenuation`](https://jmrplens.github.io/phonometry/reference/api/hearing/real-ear-attenuation/)
-  and [`hearing.hearing_protectors`](https://jmrplens.github.io/phonometry/reference/api/hearing/hearing-protectors/).
+- API reference: [`hearing.real_ear_attenuation`](https://jmrplens.github.io/phonometry/reference/api/hearing/real-ear-attenuation/),
+  [`hearing.hearing_protectors`](https://jmrplens.github.io/phonometry/reference/api/hearing/hearing-protectors/)
+  and [`hearing.active_noise_reduction`](https://jmrplens.github.io/phonometry/reference/api/hearing/active-noise-reduction/).
 
 ---
 
@@ -36603,10 +36652,11 @@ In the order the chain runs.
 - **Damage**: [Noise-induced hearing loss (ISO 1999)](https://jmrplens.github.io/phonometry/perception/hearing/noise-induced-hearing-loss/):
   NIPTS and its population distribution, and the combination with age into
   HTLAN.
-- **Protection**: [Hearing Protectors (ISO 4869-1 and -2)](https://jmrplens.github.io/phonometry/perception/hearing/hearing-protectors/):
+- **Protection**: [Hearing Protectors (ISO 4869-1, -2 and -6)](https://jmrplens.github.io/phonometry/perception/hearing/hearing-protectors/):
   the attenuation measured on sixteen subjects with its uncertainty and its
-  significance test, and the octave-band, HML and SNR methods that say what a
-  protector actually leaves at the ear.
+  significance test, the octave-band, HML and SNR methods that say what a
+  protector actually leaves at the ear, and what an active noise reduction
+  earmuff adds.
 
 ## What this section does not cover
 
@@ -41909,6 +41959,13 @@ documents, one page per module.
 | `PROTECTION_PERFORMANCES` | `dict` | **Table 1: the constant α for each protection performance x (ISO 4869-2).**<br>50 → 0.00, 75 → 0.67, 80 → 0.84, 84 → 1.00, 90 → 1.28, 95 → 1.64, 98 → 2.00 | `hearing.PROTECTION_PERFORMANCES[84]` |
 | `PROTECTOR_OCTAVE_BANDS` / `PROTECTOR_A_WEIGHTING` | `tuple` | **The eight octave bands of Formula (2) and frequency weighting A at them.**<br>63 Hz to 8 kHz; the weighting is IEC 61672-1:2013 Table 3, which ISO 4869-2 reprints as its Table B.1 | `hearing.PROTECTOR_OCTAVE_BANDS` |
 | `HML_REFERENCE_NOISES` / `HML_REFERENCE_C_MINUS_A` / `HML_REFERENCE_D` | `tuple` | **Table 2: the eight reference noises the HML method is fitted on.**<br>A-weighted octave-band levels 125 Hz to 8 kHz, their (LpC − LpA) and the empirical weights d | `hearing.HML_REFERENCE_NOISES` |
+| `active_insertion_loss` | `function` | **The active insertion loss of an ANR earmuff, its lower ear and its uncertainty (ISO 4869-6 5.4, 5.5 b) and Annex A).**<br>• `passive_levels_db`, `active_levels_db`: MIRE levels, `(subjects, 2, bands)` [dB], left ear first<br>• or `insertion_loss_db` per ear, or already the lower ear<br>• `frequencies` [Hz] (Default: the one-third octaves 50 Hz or 100 Hz to 10 kHz, or the octaves 63 Hz or 125 Hz to 8 kHz, by count) | `ail = hearing.active_insertion_loss(passive_levels_db=off, active_levels_db=on)`<br><br>• `ActiveInsertionLossResult` |
+| `ActiveInsertionLossResult` | `dataclass` | **ISO 4869-6 active insertion loss.**<br>• `insertion_loss_db` (lower ear), `per_ear_db`<br>• `mean_db`, `standard_deviation_db`, `standard_uncertainty_db`, `expanded_uncertainty_db` [dB]<br>• `.plot()` | `ail.expanded_uncertainty_db` |
+| `anr_total_attenuation` | `function` | **Total attenuation of an ANR earmuff and its ISO 4869-2 ratings at 84 % (ISO 4869-6 5.5).**<br>• `reat`: ISO 4869-1 result or `(subjects, octaves)` grid, 63 Hz or 125 Hz to 8 kHz<br>• `insertion_loss`: `ActiveInsertionLossResult` or a grid on the one-third octaves<br>• passive side interpolated linearly in hertz, as ISO's calculation example does | `anr = hearing.anr_total_attenuation(reat, ail)`<br><br>• `AnrTotalAttenuationResult` (`total_octave_db`, `assumed_protection`, `hml`, `snr`) |
+| `AnrTotalAttenuationResult` | `dataclass` | **ISO 4869-6 total attenuation.**<br>• `total_octave_db` (Formula (1)), `total_third_octave_db`, `reat_third_octave_db`, `insertion_loss_db` [dB]<br>• `assumed_protection`, `hml`, `snr` at 84 %<br>• `.plot()` | `anr.hml.reported` |
+| `assess_anr_linearity` | `function` | **Up to what external level does an ANR earmuff stay linear? (ISO 4869-6 5.4.4).**<br>• `external_levels_db`: 5 dB steps up to 110 dB<br>• `ear_levels_db`: 125 Hz octave level at the ear, external levels on the last axis<br>• or `ear_third_octave_levels_db` (100, 125, 160 Hz on the last axis) | `hearing.assess_anr_linearity([90, 95, 100], ears).maximum_linear_level_db`<br><br>• `AnrLinearityResult` |
+| `AnrLinearityResult` | `dataclass` | **5.4.4 verdict.**<br>• `maximum_linear_level_db`, `increments_db`, `linear` per ear and step<br>• `passes`, `linear_to_110_db`; no truth value<br>• `.plot()` | `lin.maximum_linear_level_db` |
+| `ANR_WITHIN_LABORATORY_UNCERTAINTY` | `constant` | **Table A.2 of ISO 4869-6: the typical budget of the mean active insertion loss (0.6, 0.3, 0.4 dB) as a `ProtectorUncertaintyBudget`.** | `hearing.ANR_WITHIN_LABORATORY_UNCERTAINTY.expanded_db  # 1.56` |
 | `PINK_NOISE_A_WEIGHTED` | `tuple` | **Table 3: the pink noise the SNR method is defined against.**<br>A-weighted octave-band levels 125 Hz to 8 kHz of a pink noise whose C-weighted level is 100 dB | `hearing.PINK_NOISE_A_WEIGHTED` |
 | `INSTRUMENT_U2` | `mapping` | **Instrument standard uncertainty u2 [dB] (ISO 9612 Table C.5).**<br>Keyed by `'class1'` (0.7), `'class2'` (1.5), `'personal_exposimeter'` (1.5) | `INSTRUMENT_U2['class1']  # 0.7` |
 | `OccupationalExposureWarning` | `warning class` | **ISO 9612 sampling advisory.**<br>Emitted for the 3 dB task spread (Clause 9.3), c₁u₁ > 3.5 dB (Clause 10.4) or a short Table 1 cumulative duration | `warnings.simplefilter('error', OccupationalExposureWarning)` |
@@ -57752,7 +57809,7 @@ the normative PDF fiche.
 - [Filter Architecture Gallery](https://jmrplens.github.io/phonometry/signals/filters/filter-gallery/): choose an architecture and inspect responses
 - [Calibration and dBFS](https://jmrplens.github.io/phonometry/signals/metrology/calibration/): get real-world SPL values
 - [Why phonometry](https://jmrplens.github.io/phonometry/start/why-phonometry/): the conformance-first design philosophy
-- [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): the expected and computed value of all 1287 checks
+- [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): the expected and computed value of all 1295 checks
 - [API Reference](https://jmrplens.github.io/phonometry/reference/api/): every parameter of every function
 - [Bibliography](https://jmrplens.github.io/phonometry/reference/bibliography/): the books and papers behind every guide, each with a verified link
 
@@ -58682,7 +58739,7 @@ sample from the metrology core:
 | IEC 61252:1993 | The personal sound exposure quantities, `sound_exposure()` and the normalized 8 h level `lex_8h()`; IEC 61252:2025 has since superseded this print, and the transcription still targets the 1993+A2 text | `tests/signals/test_levels.py` |
 
 The same discipline applies far beyond the metrology core: today the suite runs
-1287 numerical conformance checks across 88 domains and 463 standards, covering
+1295 numerical conformance checks across 89 domains and 464 standards, covering
 psychoacoustics and speech intelligibility, room, building and materials
 acoustics, human and machine vibration, environmental, aircraft, rotorcraft
 and underwater noise, electroacoustics, broadcast loudness, industrial noise

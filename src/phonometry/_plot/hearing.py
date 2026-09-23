@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from .common import (
+    _C_EDGE,
     _C_MUTED,
     _C_PRIMARY,
     _C_REFERENCE,
@@ -25,6 +26,11 @@ from .common import (
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from ..hearing.active_noise_reduction import (
+        ActiveInsertionLossResult,
+        AnrLinearityResult,
+        AnrTotalAttenuationResult,
+    )
     from ..hearing.hearing_protectors import (
         AssumedProtectionResult,
         HMLRatingResult,
@@ -74,6 +80,14 @@ _CRITERION_LABEL = "criterion $\\sqrt{U_{95,1}^2 + U_{95,2}^2}$"
 _DIFFERENCE_AXIS_LABEL = "Difference [dB]"
 _FIELD_TITLE = "ISO 4869-1 sound field (4.2.2): {verdict}"
 _FIELD_AXIS_LABEL = "Level deviation [dB]"
+_AIL_LABEL = "Active insertion loss [dB]"
+_AIL_TITLE = "ISO 4869-6 active insertion loss: {n} subjects"
+_ANR_TITLE = (
+    "ISO 4869-6 total attenuation: $H$ = {h}, $M$ = {m}, $L$ = {l}, $SNR$ = {snr} dB"
+)
+_EXTERNAL_LEVEL_LABEL = "External A-weighted level [dB]"
+_STEP_LABEL = "Step at the ear, 125 Hz octave [dB]"
+_LINEARITY_TITLE = "ISO 4869-6 linear operation: up to {level} dB"
 
 _STRINGS: dict[str, str] = {
     _FREQ_LABEL: "Frecuencia [Hz]",
@@ -132,6 +146,23 @@ _STRINGS: dict[str, str] = {
     "rotation variation": "variación en rotación",
     "Table 1 limit": "límite de la Tabla 1",
     _FIELD_AXIS_LABEL: "Desviación del nivel [dB]",
+    _AIL_LABEL: "Pérdida por inserción activa [dB]",
+    _AIL_TITLE: "ISO 4869-6 pérdida por inserción activa: {n} sujetos",
+    _ANR_TITLE: "ISO 4869-6 atenuación total: $H$ = {h}, $M$ = {m}, $L$ = {l}, $SNR$ = {snr} dB",
+    _EXTERNAL_LEVEL_LABEL: "Nivel exterior ponderado A [dB]",
+    _STEP_LABEL: "Paso en el oído, octava de 125 Hz [dB]",
+    _LINEARITY_TITLE: "ISO 4869-6 funcionamiento lineal: hasta {level} dB",
+    "lower-value ear, per subject": "oído de menor pérdida por inserción, por sujeto",
+    "mean active insertion loss": "pérdida por inserción activa media",
+    "passive (REAT), interpolated": "pasiva (REAT), interpolada",
+    "active insertion loss": "pérdida por inserción activa",
+    "total, one-third octaves": "total, tercios de octava",
+    "total, octaves (Formula (1))": "total, octavas (Fórmula (1))",
+    "$APV_{f84}$": "$APV_{f84}$",
+    r"5 dB $\pm$ 1 dB": r"5 dB $\pm$ 1 dB",
+    "each ear": "cada oído",
+    "median over the ears": "mediana de los oídos",
+    "highest linear level": "nivel lineal más alto",
 }
 
 
@@ -895,6 +926,232 @@ def plot_reat_sound_field(
     else:
         verdict = "does not qualify"
     ax.set_title(_t(_FIELD_TITLE, language).format(verdict=_t(verdict, language)))
+    ax.legend(loc="best", fontsize="small")
+    ax.grid(visible=True, alpha=0.3)
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_active_insertion_loss(
+    result: ActiveInsertionLossResult,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """The mean active insertion loss of an ANR earmuff, ISO 4869-6 Annex A.
+
+    The lower-ear value of every subject is drawn faint behind the mean, and
+    the expanded uncertainty of the mean as bars on it. A value below zero is
+    a band where the circuit adds sound, and the zero line is drawn so it
+    reads that way. Works for
+    :class:`~phonometry.hearing.active_noise_reduction.ActiveInsertionLossResult`.
+
+    :param result: An active insertion loss result.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the mean curve.
+    :return: The axes.
+    """
+    from .._i18n import localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
+    grid = np.asarray(result.insertion_loss_db, dtype=np.float64)
+    mean = np.asarray(result.mean_db, dtype=np.float64)
+    for index, row in enumerate(grid):
+        ax.plot(
+            freqs,
+            row,
+            "-",
+            color=_C_MUTED,
+            lw=0.8,
+            alpha=0.5,
+            zorder=1,
+            label=_t("lower-value ear, per subject", language) if index == 0 else None,
+        )
+    ax.errorbar(
+        freqs,
+        mean,
+        yerr=np.asarray(result.expanded_uncertainty_db, dtype=np.float64),
+        fmt="none",
+        ecolor=_C_SECONDARY,
+        elinewidth=2.0,
+        capsize=4,
+        zorder=4,
+        label=_t(_U95_LABEL, language),
+    )
+    mean_kwargs = dict(kwargs)
+    style_default(mean_kwargs, "color", _C_PRIMARY)
+    style_default(mean_kwargs, "linewidth", 2.2)
+    mean_kwargs.setdefault("label", _t("mean active insertion loss", language))
+    ax.plot(freqs, mean, "-o", ms=4, zorder=3, **mean_kwargs)
+    ax.axhline(0.0, color=_C_EDGE, lw=0.8, zorder=0)
+    _freq_axis(ax, freqs, language=language)
+    ax.set_ylabel(_t(_AIL_LABEL, language))
+    ax.set_title(_t(_AIL_TITLE, language).format(n=result.subjects))
+    ax.legend(loc="best", fontsize="small")
+    ax.grid(visible=True, alpha=0.3)
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_anr_total_attenuation(
+    result: AnrTotalAttenuationResult,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """The passive, active and total attenuation of an ANR earmuff, 5.5.
+
+    Draws, averaged over the subjects in one-third-octave bands, the passive
+    attenuation as interpolated in 5.5 a), the lower-ear active insertion loss
+    of 5.5 b) and their sum; then the octave-band totals of Formula (1) and
+    the assumed protection value at 84 % they reduce to. Works for
+    :class:`~phonometry.hearing.active_noise_reduction.AnrTotalAttenuationResult`.
+
+    :param result: A total attenuation result.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the mean total attenuation curve.
+    :return: The axes.
+    """
+    from .._i18n import localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    thirds = np.asarray(result.third_octave_frequencies, dtype=np.float64)
+    octaves = np.asarray(result.frequencies, dtype=np.float64)
+    ax.plot(
+        thirds,
+        np.mean(result.reat_third_octave_db, axis=0),
+        "--",
+        color=_C_MUTED,
+        lw=1.6,
+        zorder=2,
+        label=_t("passive (REAT), interpolated", language),
+    )
+    ax.plot(
+        thirds,
+        np.mean(result.insertion_loss_db, axis=0),
+        ":",
+        color=_C_SECONDARY,
+        lw=1.8,
+        zorder=2,
+        label=_t("active insertion loss", language),
+    )
+    total_kwargs = dict(kwargs)
+    style_default(total_kwargs, "color", _C_PRIMARY)
+    style_default(total_kwargs, "linewidth", 2.2)
+    total_kwargs.setdefault("label", _t("total, one-third octaves", language))
+    ax.plot(
+        thirds,
+        np.mean(result.total_third_octave_db, axis=0),
+        "-",
+        zorder=3,
+        **total_kwargs,
+    )
+    ax.plot(
+        octaves,
+        np.asarray(result.assumed_protection.mean_attenuation, dtype=np.float64),
+        "o",
+        color=_C_PRIMARY,
+        ms=6,
+        zorder=4,
+        label=_t("total, octaves (Formula (1))", language),
+    )
+    ax.plot(
+        octaves,
+        np.asarray(result.assumed_protection.apv, dtype=np.float64),
+        "s",
+        color=_C_REFERENCE,
+        ms=6,
+        zorder=4,
+        label=_t("$APV_{f84}$", language),
+    )
+    ax.axhline(0.0, color=_C_EDGE, lw=0.8, zorder=0)
+    _freq_axis(ax, octaves, language=language)
+    ax.set_xlim(thirds.min() / 1.12, thirds.max() * 1.12)
+    ax.set_ylabel(_t(_ATTENUATION_LABEL, language))
+    high, medium, low = result.hml.reported
+    ax.set_title(
+        _t(_ANR_TITLE, language).format(
+            h=high, m=medium, l=low, snr=result.snr.reported
+        )
+    )
+    ax.legend(loc="best", fontsize="small")
+    ax.grid(visible=True, alpha=0.3)
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_anr_linearity(
+    result: AnrLinearityResult,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """Every step at the ear against the 5 dB ± 1 dB of ISO 4869-6 5.4.4.
+
+    Each ear's step is drawn at the external level it ends on, the median over
+    the ears as a line, and the tolerance as a band; the highest level up to
+    which every step stays inside it is marked. Works for
+    :class:`~phonometry.hearing.active_noise_reduction.AnrLinearityResult`.
+
+    :param result: A linearity result.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the median step curve.
+    :return: The axes.
+    """
+    from .._i18n import decimal_comma, localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    external = np.asarray(result.external_levels_db, dtype=np.float64)
+    upper_ends = external[1:]
+    steps = np.diff(external)
+    increments = np.asarray(result.increments_db, dtype=np.float64)
+    ax.fill_between(
+        upper_ends,
+        steps - 1.0,
+        steps + 1.0,
+        color=theme_fill(_C_TERTIARY, ax),
+        zorder=0,
+        label=_t(r"5 dB $\pm$ 1 dB", language),
+    )
+    ax.plot(
+        np.repeat(upper_ends[None, :], increments.shape[0], axis=0).ravel(),
+        increments.ravel(),
+        ".",
+        color=_C_MUTED,
+        ms=4,
+        alpha=0.6,
+        zorder=2,
+        label=_t("each ear", language),
+    )
+    median_kwargs = dict(kwargs)
+    style_default(median_kwargs, "color", _C_PRIMARY)
+    style_default(median_kwargs, "linewidth", 2.0)
+    median_kwargs.setdefault("label", _t("median over the ears", language))
+    ax.plot(
+        upper_ends, np.median(increments, axis=0), "-o", ms=4, zorder=3, **median_kwargs
+    )
+    ax.axvline(
+        result.maximum_linear_level_db,
+        color=_C_REFERENCE,
+        ls="--",
+        lw=1.4,
+        zorder=1,
+        label=_t("highest linear level", language),
+    )
+    ax.set_xlabel(_t(_EXTERNAL_LEVEL_LABEL, language))
+    ax.set_ylabel(_t(_STEP_LABEL, language))
+    ax.set_title(
+        _t(_LINEARITY_TITLE, language).format(
+            level=decimal_comma(f"{result.maximum_linear_level_db:g}", language)
+        )
+    )
     ax.legend(loc="best", fontsize="small")
     ax.grid(visible=True, alpha=0.3)
     localize_axes(ax, language)

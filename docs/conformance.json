@@ -3,13 +3,13 @@
   "library": "4.0.0rc1",
   "generator": "scripts/conformance_report.py",
   "counts": {
-    "checks": 1287,
-    "passing": 1287,
+    "checks": 1295,
+    "passing": 1295,
     "failing": 0,
-    "domains": 88,
-    "standards": 463,
-    "citations": 873,
-    "designations": 181,
+    "domains": 89,
+    "standards": 464,
+    "citations": 880,
+    "designations": 182,
     "sources": 114
   },
   "units": [
@@ -328,6 +328,12 @@
       "title": "Hearing protectors (ISO 4869-2)",
       "checks": 4,
       "passing": 4
+    },
+    {
+      "id": "active-noise-reduction-earmuffs-iso-4869-6",
+      "title": "Active noise reduction earmuffs (ISO 4869-6)",
+      "checks": 8,
+      "passing": 8
     },
     {
       "id": "multiple-shock-whole-body-vibration-iso-2631-5",
@@ -24243,6 +24249,263 @@
       "deviation": {
         "value": 0.0,
         "label": "+0.000 dB"
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "active-noise-reduction-earmuffs-iso-4869-6/iso-4869-6-2019-annex-a-table-a-2/within-laboratory-budget-of-the-mean-active-insertion-loss",
+      "domain": "active-noise-reduction-earmuffs-iso-4869-6",
+      "reference": {
+        "cite": "ISO 4869-6:2019 Annex A, Table A.2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 4869-6",
+            "edition": "2019",
+            "clause": "Annex A, Table A.2"
+          }
+        ]
+      },
+      "quantity": "Within-laboratory budget of the mean active insertion loss",
+      "kind": "count",
+      "expected": {
+        "value": 5.0,
+        "label": "5/5 cells of Table A.2"
+      },
+      "computed": {
+        "value": 5.0,
+        "label": "5/5 cells of Table A.2"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "active-noise-reduction-earmuffs-iso-4869-6/iso-4869-6-2019-annex-a-table-a-3/active-insertion-loss-of-16-subjects-mean-and-sigma-8-bands",
+      "domain": "active-noise-reduction-earmuffs-iso-4869-6",
+      "reference": {
+        "cite": "ISO 4869-6:2019 Annex A, Table A.3",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 4869-6",
+            "edition": "2019",
+            "clause": "Annex A, Table A.3"
+          }
+        ]
+      },
+      "quantity": "Active insertion loss of 16 subjects: mean and sigma, 8 bands",
+      "kind": "count",
+      "expected": {
+        "value": 16.0,
+        "label": "16/16 cells of the mean and sigma rows"
+      },
+      "computed": {
+        "value": 16.0,
+        "label": "16/16 cells of the mean and sigma rows"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "active-noise-reduction-earmuffs-iso-4869-6/iso-4869-6-2019-annex-a-table-a-3/u-sigma-4-and-u95-2u-as-the-table-forms-them-from-its-rounded-rows",
+      "domain": "active-noise-reduction-earmuffs-iso-4869-6",
+      "reference": {
+        "cite": "ISO 4869-6:2019 Annex A, Table A.3",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 4869-6",
+            "edition": "2019",
+            "clause": "Annex A, Table A.3"
+          }
+        ]
+      },
+      "quantity": "u = sigma/4 and U95 = 2u, as the table forms them from its rounded rows",
+      "kind": "count",
+      "expected": {
+        "value": 16.0,
+        "label": "16/16 cells from the rounded rows; 7 moved at full precision"
+      },
+      "computed": {
+        "value": 16.0,
+        "label": "16/16 cells of the u and U95 rows"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "active-noise-reduction-earmuffs-iso-4869-6/iso-4869-6-2019-5-5-b-calculation-example/lower-ear-active-insertion-loss-from-the-mire-levels-16-x-24-cells",
+      "domain": "active-noise-reduction-earmuffs-iso-4869-6",
+      "reference": {
+        "cite": "ISO 4869-6:2019 5.5 b), calculation example",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 4869-6",
+            "edition": "2019",
+            "clause": "5.5 b), calculation example"
+          }
+        ]
+      },
+      "quantity": "Lower-ear active insertion loss from the MIRE levels, 16 x 24 cells",
+      "kind": "count",
+      "expected": {
+        "value": 384.0,
+        "label": "384/384 cells of rows 134-149"
+      },
+      "computed": {
+        "value": 384.0,
+        "label": "384/384 cells of rows 134-149"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "active-noise-reduction-earmuffs-iso-4869-6/iso-4869-6-2019-5-5-a-calculation-example/reat-interpolated-linearly-in-hertz-into-24-one-third-octaves",
+      "domain": "active-noise-reduction-earmuffs-iso-4869-6",
+      "reference": {
+        "cite": "ISO 4869-6:2019 5.5 a), calculation example",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 4869-6",
+            "edition": "2019",
+            "clause": "5.5 a), calculation example"
+          }
+        ]
+      },
+      "quantity": "REAT interpolated linearly in hertz into 24 one-third octaves",
+      "kind": "count",
+      "expected": {
+        "value": 384.0,
+        "label": "384/384 cells of rows 182-197"
+      },
+      "computed": {
+        "value": 384.0,
+        "label": "384/384 cells of rows 182-197"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "active-noise-reduction-earmuffs-iso-4869-6/iso-4869-6-2019-5-5-c-calculation-example/total-attenuation-per-one-third-octave-16-x-24-cells",
+      "domain": "active-noise-reduction-earmuffs-iso-4869-6",
+      "reference": {
+        "cite": "ISO 4869-6:2019 5.5 c), calculation example",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 4869-6",
+            "edition": "2019",
+            "clause": "5.5 c), calculation example"
+          }
+        ]
+      },
+      "quantity": "Total attenuation per one-third octave, 16 x 24 cells",
+      "kind": "scalar",
+      "expected": {
+        "label": "384 cells of rows 206-221, within 0.05 dB"
+      },
+      "computed": {
+        "label": "max deviation 0.050 dB"
+      },
+      "deviation": {
+        "value": 0.05,
+        "label": "0.050 dB"
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "active-noise-reduction-earmuffs-iso-4869-6/iso-4869-6-2019-formula-1-calculation-example/octave-band-total-attenuation-of-16-subjects-8-bands",
+      "domain": "active-noise-reduction-earmuffs-iso-4869-6",
+      "reference": {
+        "cite": "ISO 4869-6:2019 Formula (1), calculation example",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 4869-6",
+            "edition": "2019",
+            "clause": "Formula (1), calculation example"
+          }
+        ]
+      },
+      "quantity": "Octave-band total attenuation of 16 subjects, 8 bands",
+      "kind": "scalar",
+      "expected": {
+        "label": "128 cells of rows 230-245, within 0.1 dB"
+      },
+      "computed": {
+        "label": "max deviation 0.076 dB"
+      },
+      "deviation": {
+        "value": 0.076,
+        "label": "0.076 dB"
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "active-noise-reduction-earmuffs-iso-4869-6/iso-4869-6-2019-5-5-e-calculation-example/mean-sd-and-apv84-of-the-octave-totals",
+      "domain": "active-noise-reduction-earmuffs-iso-4869-6",
+      "reference": {
+        "cite": "ISO 4869-6:2019 5.5 e), calculation example",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 4869-6",
+            "edition": "2019",
+            "clause": "5.5 e), calculation example"
+          }
+        ]
+      },
+      "quantity": "Mean, SD and APV84 of the octave totals",
+      "kind": "scalar",
+      "expected": {
+        "label": "16/16 cells of rows 247-248; APV84 within 0.1 dB of row 249"
+      },
+      "computed": {
+        "label": "16/16 cells; APV84 max deviation 0.083 dB"
+      },
+      "deviation": {
+        "value": 0.083,
+        "label": "0.083 dB"
       },
       "precision": 4,
       "verdict": "pass"

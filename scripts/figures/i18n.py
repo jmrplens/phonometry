@@ -1150,6 +1150,16 @@ _ES_EXACT = {
     "mean attenuation $m$": "atenuación media $m$",
     "Difference of the means [dB]": "Diferencia de las medias [dB]",
     "significant difference": "diferencia significativa",
+    # hearing_protector_anr figure (ISO 4869-6)
+    "Passive plus active: $H$ = 21, $M$ = 17, $L$ = 19, $SNR$ = 21 dB": "Pasiva más activa: $H$ = 21, $M$ = 17, $L$ = 19, $SNR$ = 21 dB",
+    "What the circuit adds (Annex A)": "Lo que añade el circuito (anexo A)",
+    "Active insertion loss [dB]": "Pérdida por inserción activa [dB]",
+    "passive (REAT), interpolated": "pasiva (REAT), interpolada",
+    "active insertion loss, lower-value ear": "pérdida por inserción activa, oído de menor pérdida",
+    "total, one-third octaves": "total, tercios de octava",
+    "$APV_{f84}$ of the octave totals": "$APV_{f84}$ de los totales por octava",
+    "the 16 subjects, lower-value ear": "los 16 sujetos, oído de menor pérdida",
+    "mean active insertion loss": "pérdida por inserción activa media",
     # low_frequency_intensity figure (ISO 15186-3)
     "Low-frequency index and its field indicator": "Índice a baja frecuencia y su indicador de campo",
     "Qualifying the facility on a limp panel": "Calificación de la instalación con un panel flexible",

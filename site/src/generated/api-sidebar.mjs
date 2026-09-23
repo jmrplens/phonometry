@@ -122,6 +122,7 @@ export const apiSections = {
       'reference/api/hearing/occupational-exposure',
       'reference/api/hearing/real-ear-attenuation',
       'reference/api/hearing/hearing-protectors',
+      'reference/api/hearing/active-noise-reduction',
     ],
   },
   'rooms': {

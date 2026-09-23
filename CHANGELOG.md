@@ -9,6 +9,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- **What an active noise reduction earmuff adds, its uncertainty and where it
+  stops being linear (ISO 4869-6:2019).** `hearing.active_insertion_loss` takes
+  the levels at both ears with the circuit off and on (or the insertion loss
+  directly), keeps the ear with the lower value in each band (5.5 b)) and
+  returns the mean, the standard deviation and the Annex A uncertainty of the
+  mean; `hearing.ANR_WITHIN_LABORATORY_UNCERTAINTY` is the budget of Table A.2.
+  `hearing.anr_total_attenuation` runs the chain of 5.5: the ISO 4869-1
+  attenuation interpolated into one-third octaves linearly in hertz, as the
+  calculation workbook ISO publishes with the standard does it, the lower-ear
+  insertion loss added, Formula (1) back to octaves, and the ISO 4869-2 APV,
+  HML and SNR at 84 %. `hearing.assess_anr_linearity` finds the highest
+  external level at which every ear still follows the 5 dB steps of 5.4.4
+  within ±1 dB. Each result has `.plot()`. The printed Table A.3 is a
+  conformance row, and so is each step of 5.5 the workbook stores: the lower
+  ear (rows 134-149) exactly, the interpolation (182-197) once rounded as the
+  workbook rounds it, the one-third-octave sums (206-221) within 0.05 dB, and
+  Formula (1) (230-245) and the APV84 (249) within 0.1 dB, with the mean and
+  standard deviation (247-248) cell for cell; the workbook rounds the
+  interpolation, Formula (1), the mean and the standard deviation, and the
+  library rounds nothing. Table A.3 forms its u and U95 rows from the
+  rounded row above each, which puts one u cell and six of its eight U95 cells
+  a tenth high; that is registered in the errata, and the library returns the
+  values A.1 and A.2 define. The hearing-protector guide gains a section on
+  these earmuffs in both languages.
 - **Where a hearing protector's attenuation comes from, with its uncertainty
   and the test that says whether two measurements differ (ISO 4869-1:2018).**
   `hearing.real_ear_attenuation` takes the individual attenuations of a panel

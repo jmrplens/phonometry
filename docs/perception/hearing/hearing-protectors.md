@@ -1,6 +1,6 @@
 ← [Documentation index](../../README.md)
 
-# Hearing Protectors (ISO 4869-1 and -2)
+# Hearing Protectors (ISO 4869-1, -2 and -6)
 
 A hearing protector is not measured on a coupler. ISO 4869-1 seats it on
 sixteen people and records the threshold shift each of them gets, so what
@@ -169,6 +169,46 @@ Table C.1 and the reprint disagrees with the original in two cells. Table 2 is
 the one that reproduces the annex's own worked results, and it is the one this
 library carries; the discrepancy is registered in [ERRATA](../../ERRATA.md).
 
+## Active noise reduction earmuffs (ISO 4869-6)
+
+An active noise reduction earmuff adds a cancellation circuit to a passive
+shell, and a threshold test cannot see it. ISO 4869-6 measures the two halves
+on the same sixteen subjects: the ISO 4869-1 attenuation with the circuit off,
+in octave bands, and the active insertion loss, the level at each ear with the
+circuit off minus the level with it on, measured with a microphone in the ear
+canal in one-third-octave bands. Clause 5.5 interpolates the passive side into
+one-third octaves (linearly in hertz, as ISO's calculation workbook does it),
+keeps the ear with the lower insertion loss in each band, adds the two, folds
+each octave back with Formula (1) and rates the sixteen results with ISO 4869-2
+at 84 %.
+
+```python
+# ISO 4869-6 Table A.3: the lower-ear active insertion loss, 63 Hz to 8 kHz.
+table_a3_anr = np.array([
+    [18.4, 23.9, 21.6, 5.2, -4.5, -0.2, -1.3, -1.0], [19.4, 23.0, 21.7, 5.7, -6.4, -0.4, 0.8, -1.9],
+    [19.7, 23.1, 20.8, 3.6, -4.2, -2.9, 0.2, -0.6], [19.8, 23.1, 18.7, 2.2, -4.9, -0.5, -0.2, 0.2],
+    [20.5, 24.5, 20.2, 3.1, -4.4, -2.9, -1.4, 0.3], [18.8, 24.4, 20.8, 3.9, -4.3, -2.6, -0.4, -0.2],
+    [21.7, 24.4, 22.2, 4.7, -5.2, -5.1, -1.5, -0.3], [20.5, 22.7, 24.3, 8.8, -8.8, -3.1, -4.8, -0.7],
+    [22.9, 23.2, 20.7, 5.4, -6.5, -2.8, -0.5, -1.0], [21.9, 22.9, 23.1, 8.8, -8.4, -4.9, -2.6, -0.7],
+    [23.7, 24.6, 20.8, 3.4, -6.4, -0.1, -0.3, -0.6], [22.0, 23.9, 20.3, 3.0, -4.2, -0.8, -1.0, 0.3],
+    [23.2, 24.3, 20.9, 4.6, -5.6, -0.1, -0.5, -1.0], [21.5, 23.5, 23.3, 5.9, -5.2, -3.1, -3.6, -1.6],
+    [24.3, 24.2, 22.5, 4.2, -6.3, -2.5, -0.9, -0.5], [23.8, 24.9, 20.7, 3.8, -4.8, -0.5, -0.3, 0.2],
+])
+insertion = hearing.active_insertion_loss(table_a3_anr)
+print(np.round(insertion.mean_db, 1))                  # [21.4 23.8 21.4  4.8 -5.6 -2.  -1.1 -0.6]
+print(np.round(insertion.expanded_uncertainty_db, 1))  # [0.9 0.4 0.7 0.9 0.7 0.8 0.7 0.3]
+```
+
+Table A.3 prints its $u$ and $U_{95}$ rows from the rounded row above each, so
+six of its eight $U_{95}$ cells are a tenth above the value Annex A defines;
+see [ERRATA](../../ERRATA.md). On ISO's calculation example the circuit raises
+$L$ from 12 dB to 19 dB and lowers $H$ from 24 dB to 21 dB, because it adds
+sound from 1 kHz up (`hearing.anr_total_attenuation`), and
+`hearing.assess_anr_linearity` finds the highest external level at which every
+ear still follows the 5 dB steps of 5.4.4 within ±1 dB.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/hearing_protector_anr_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/hearing_protector_anr.svg" alt="Left: averaged over sixteen subjects, the passive attenuation of an active noise reduction earmuff interpolated into one-third-octave bands, the active insertion loss of the ear with the lower value, their sum, and the assumed protection value at 84 % in each octave band. Right: the active insertion loss of each subject in one-third-octave bands, with the mean and the expanded uncertainty of the mean as error bars and a line at zero" width="92%"></picture>
+
 ## References
 
 - International Organization for Standardization (2018). *Acoustics — Hearing
@@ -183,6 +223,11 @@ library carries; the discrepancy is registered in [ERRATA](../../ERRATA.md).
   [iso.org catalogue](https://www.iso.org/standard/65581.html).
   Where the per-subject attenuation values come from: 4.6, Annex A, Annex B
   and 4.2.2 with Table 1, validated against Tables A.2, A.3, B.1 and B.2.
+- International Organization for Standardization (2019). *Acoustics — Hearing
+  protectors — Part 6: Determination of sound attenuation of active noise
+  reduction earmuffs* (ISO 4869-6:2019). The active insertion loss, its
+  uncertainty, the total attenuation of 5.5 and the linear-operation check of
+  5.4.4, validated against Tables A.2 and A.3 and ISO's calculation workbook.
 
 ## Standards
 
@@ -192,6 +237,8 @@ differ (Annex B, Tables B.1 and B.2) and the sound-field conditions of the test
 room (4.2.2, Table 1). ISO 4869-2:2018, which defines the assumed protection
 value $APV_{fx}$ (Clause 5), the octave-band method (Clause 6), the $H$, $M$ and
 $L$ values (Clause 7) and the single number rating $SNR$ (Clause 8).
+ISO 4869-6:2019, which adds the active insertion loss of an active noise
+reduction earmuff to that attenuation (5.4, 5.5, Annex A).
 
 ## See also
 
@@ -201,5 +248,6 @@ $L$ values (Clause 7) and the single number rating $SNR$ (Clause 8).
   the exposure the protector did not stop does over a working life.
 - [Hearing threshold (age and reference zero)](hearing-threshold.md): the
   baseline any protected exposure is judged against.
-- API reference: [`hearing.real_ear_attenuation`](https://jmrplens.github.io/phonometry/reference/api/hearing/real-ear-attenuation/)
-  and [`hearing.hearing_protectors`](https://jmrplens.github.io/phonometry/reference/api/hearing/hearing-protectors/).
+- API reference: [`hearing.real_ear_attenuation`](https://jmrplens.github.io/phonometry/reference/api/hearing/real-ear-attenuation/),
+  [`hearing.hearing_protectors`](https://jmrplens.github.io/phonometry/reference/api/hearing/hearing-protectors/)
+  and [`hearing.active_noise_reduction`](https://jmrplens.github.io/phonometry/reference/api/hearing/active-noise-reduction/).

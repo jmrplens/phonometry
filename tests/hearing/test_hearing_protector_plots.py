@@ -1,8 +1,10 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
 
-"""What the ISO 4869-2 ``.plot()`` renderers draw.
+"""What the ISO 4869 ``.plot()`` renderers draw.
 
-Four figures for one protector. The assumed-protection figure exists to show
+The measurement of Part 1 and the active noise reduction earmuffs of Part 6
+close the file, each with its own section. Part 2 first, with four figures for
+one protector. The assumed-protection figure exists to show
 the gap Formula (1) opens between the mean attenuation and what most wearers
 actually get, so the spread has to be drawn either side of the mean and the
 assumed value below it. The HML figure is the two-segment line of Formulae
@@ -303,4 +305,87 @@ def test_the_sound_field_figure_draws_the_left_right_difference_undirected() -> 
         if line.get_label() == "difference between right and left"
     )
     np.testing.assert_allclose(line.get_ydata(), 2.3)
+    plt.close("all")
+
+
+# ---------------------------------------------------------------------------
+# ISO 4869-6: active noise reduction earmuffs
+# ---------------------------------------------------------------------------
+
+
+def test_the_insertion_loss_figure_draws_the_mean_and_the_zero_line() -> None:
+    result = hearing.active_insertion_loss(ref.ISO4869_6_TABLE_A3)
+    ax = result.plot()
+    mean_line = next(line for line in ax.lines if line.get_marker() == "o")
+    np.testing.assert_allclose(mean_line.get_ydata(), result.mean_db)
+    # A band where the circuit adds sound reads as below the zero line.
+    assert any(
+        np.allclose(line.get_ydata(), 0.0)
+        for line in ax.lines
+        if len(line.get_ydata()) == 2
+    )
+    assert "16" in ax.get_title()
+    plt.close("all")
+
+
+def test_the_total_attenuation_figure_names_the_ratings() -> None:
+    total = hearing.anr_total_attenuation(
+        ref.ISO4869_6_WORKBOOK_REAT, ref.ISO4869_6_WORKBOOK_LOWER_EAR
+    )
+    ax = total.plot()
+    high, medium, low = total.hml.reported
+    title = ax.get_title()
+    assert f"$H$ = {high}" in title
+    assert f"$L$ = {low}" in title
+    assert f"$SNR$ = {total.snr.reported}" in title
+    squares = next(line for line in ax.lines if line.get_marker() == "s")
+    np.testing.assert_allclose(squares.get_ydata(), total.assumed_protection.apv)
+    plt.close("all")
+
+
+def test_the_linearity_figure_marks_the_highest_linear_level() -> None:
+    result = hearing.assess_anr_linearity(
+        [90.0, 95.0, 100.0, 105.0, 110.0],
+        [[60.0, 65.0, 70.0, 75.0, 80.0], [61.0, 66.0, 71.0, 75.5, 78.0]],
+    )
+    ax = result.plot()
+    vertical = [line for line in ax.lines if np.ptp(line.get_xdata()) == 0.0]
+    assert vertical
+    assert vertical[0].get_xdata()[0] == 105.0
+    assert "105" in ax.get_title()
+    plt.close("all")
+
+
+def test_the_linearity_figure_writes_a_spanish_level_with_a_comma() -> None:
+    """5.4.3 allows a start at 87,5 dB, and the Spanish title keeps the comma."""
+    result = hearing.assess_anr_linearity(
+        [87.5, 92.5, 97.5], [[60.0, 65.0, 70.0], [61.0, 66.0, 71.0]]
+    )
+    title = result.plot(language="es").get_title()
+    assert title.endswith("hasta 97,5 dB")
+    plt.close("all")
+
+
+def test_the_insertion_loss_figure_speaks_spanish() -> None:
+    """The legend names the ear kept in 5.5 b) by its value, not its position."""
+    ax = hearing.active_insertion_loss(ref.ISO4869_6_TABLE_A3).plot(language="es")
+    legend = ax.get_legend()
+    assert legend is not None
+    labels = [text.get_text() for text in legend.get_texts()]
+    assert "oído de menor pérdida por inserción, por sujeto" in labels
+    assert "sujetos" in ax.get_title()
+    plt.close("all")
+
+
+def test_the_total_attenuation_and_reat_figures_speak_spanish() -> None:
+    total = hearing.anr_total_attenuation(
+        ref.ISO4869_6_WORKBOOK_REAT, ref.ISO4869_6_WORKBOOK_LOWER_EAR
+    )
+    assert (
+        total.plot(language="es").get_title().startswith("ISO 4869-6 atenuación total")
+    )
+    reat = hearing.real_ear_attenuation(ref.ISO4869_1_TABLE_A3)
+    assert reat.plot(language="es").get_title() == (
+        "ISO 4869-1 atenuación media: 16 sujetos"
+    )
     plt.close("all")

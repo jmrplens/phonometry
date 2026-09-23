@@ -19,7 +19,7 @@
 
 ## Numerical conformance report
 
-**1287/1287 conformance checks pass** across 88 domains and 463 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+**1295/1295 conformance checks pass** across 89 domains and 464 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub><b>&#916;</b> is the difference between the computed value and the one the standard publishes. <b>Used</b> is how much of that clause's published tolerance the difference consumes: 100 % means it sits exactly on the limit, 5 % means it uses a twentieth of the allowance, and a dash means the clause states no two-sided tolerance for the quantity, so there is no budget to spend. It is reported and never used to decide a verdict, which is settled at full precision before any rounding.</sub>
 
@@ -1106,6 +1106,22 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO 4869-2:2018 Formula (2), Annex B | Octave-band method: Table B.1 net levels and L'p,A84 | Table B.1 rows exact; L'p,A84 = 81.4 dB | rows within 0.000 dB; 81.4 dB | +0.000 dB | - | ![Pass][cv-pass] Pass |
 | ISO 4869-2:2018 Formulae (12) to (15), Annex C | HML method: 16 subject triples, statistics and H84/M84/L84 | Table C.2 exact; H84/M84/L84 = (24, 18, 13) dB | within 0.000 dB; (24, 18, 13) dB | 0.000 dB | - | ![Pass][cv-pass] Pass |
 | ISO 4869-2:2018 Formulae (16) to (24) | HML and SNR applications land on the annexes' 82 dB | PNR84 = 22,5 dB; SNR84 = 21 dB; both report 82 dB | 22.5 dB; 21 dB; 82 and 82 dB | +0.000 dB | - | ![Pass][cv-pass] Pass |
+
+</details>
+
+<details>
+<summary><b>Active noise reduction earmuffs (ISO 4869-6)</b>: 100% (8/8)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
+|:---|:---|:---|:---|:---|:---:|:---:|
+| ISO 4869-6:2019 Annex A, Table A.2 | Within-laboratory budget of the mean active insertion loss | 5/5 cells of Table A.2 | 5/5 cells of Table A.2 | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 4869-6:2019 Annex A, Table A.3 | Active insertion loss of 16 subjects: mean and sigma, 8 bands | 16/16 cells of the mean and sigma rows | 16/16 cells of the mean and sigma rows | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 4869-6:2019 Annex A, Table A.3 | u = sigma/4 and U95 = 2u, as the table forms them from its rounded rows | 16/16 cells from the rounded rows; 7 moved at full precision | 16/16 cells of the u and U95 rows | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 4869-6:2019 5.5 b), calculation example | Lower-ear active insertion loss from the MIRE levels, 16 x 24 cells | 384/384 cells of rows 134-149 | 384/384 cells of rows 134-149 | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 4869-6:2019 5.5 a), calculation example | REAT interpolated linearly in hertz into 24 one-third octaves | 384/384 cells of rows 182-197 | 384/384 cells of rows 182-197 | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 4869-6:2019 5.5 c), calculation example | Total attenuation per one-third octave, 16 x 24 cells | 384 cells of rows 206-221, within 0.05 dB | max deviation 0.050 dB | 0.050 dB | - | ![Pass][cv-pass] Pass |
+| ISO 4869-6:2019 Formula (1), calculation example | Octave-band total attenuation of 16 subjects, 8 bands | 128 cells of rows 230-245, within 0.1 dB | max deviation 0.076 dB | 0.076 dB | - | ![Pass][cv-pass] Pass |
+| ISO 4869-6:2019 5.5 e), calculation example | Mean, SD and APV84 of the octave totals | 16/16 cells of rows 247-248; APV84 within 0.1 dB of row 249 | 16/16 cells; APV84 max deviation 0.083 dB | 0.083 dB | - | ![Pass][cv-pass] Pass |
 
 </details>
 

@@ -16,6 +16,7 @@ here in the order the report reads them.
 
 from __future__ import annotations
 
+import decimal
 import math
 import warnings
 from typing import TYPE_CHECKING
@@ -709,6 +710,226 @@ def _chk_hpd_applications() -> Outcome:
         ),
         delta=f"{hml.noise_reduction - ref.ISO4869_2_ANNEX_C_PNR84:+.3f} dB",
         passed=passed,
+    )
+
+
+_ANR = "Active noise reduction earmuffs (ISO 4869-6)"
+
+
+def _half_up(values: np.ndarray) -> np.ndarray:
+    """Round to one decimal with halves away from zero, as a spreadsheet ROUND does.
+
+    Through the shortest decimal that represents each double, so a value such
+    as 12,85 rounds the way it is written and not the way it is stored.
+    """
+
+    def one(value: float) -> float:
+        exact = decimal.Decimal(repr(round(float(value), 9)))
+        return float(
+            exact.quantize(decimal.Decimal("0.1"), rounding=decimal.ROUND_HALF_UP)
+        )
+
+    flat = [one(value) for value in np.asarray(values, dtype=float).ravel()]
+    return np.asarray(flat, dtype=float).reshape(np.shape(values))
+
+
+def _anr_workbook_insertion_loss() -> ph.hearing.ActiveInsertionLossResult:
+    return ph.hearing.active_insertion_loss(
+        passive_levels_db=ref.ISO4869_6_WORKBOOK_PASSIVE_LEVELS,
+        active_levels_db=ref.ISO4869_6_WORKBOOK_ACTIVE_LEVELS,
+    )
+
+
+def _anr_workbook_total() -> ph.hearing.AnrTotalAttenuationResult:
+    return ph.hearing.anr_total_attenuation(
+        ref.ISO4869_6_WORKBOOK_REAT, _anr_workbook_insertion_loss()
+    )
+
+
+@register(
+    _ANR,
+    "ISO 4869-6:2019 Annex A, Table A.2",
+    "Within-laboratory budget of the mean active insertion loss",
+)
+def _chk_anr_table_a2() -> Outcome:
+    """u = 0,78 dB and U95 = 1,6 dB, derived from the three components."""
+    budget = ph.hearing.ANR_WITHIN_LABORATORY_UNCERTAINTY
+    meth, eq, env, u, u95 = ref.ISO4869_6_TABLE_A2
+    matching = sum(
+        abs(got - want) <= 1e-9
+        for got, want in (
+            (budget.method_db, meth),
+            (budget.equipment_db, eq),
+            (budget.environment_db, env),
+            (round(budget.combined_db, 2), u),
+            (round(budget.expanded_db, 1), u95),
+        )
+    )
+    return count(matching, 5, subject="cells of Table A.2")
+
+
+@register(
+    _ANR,
+    "ISO 4869-6:2019 Annex A, Table A.3",
+    "Active insertion loss of 16 subjects: mean and sigma, 8 bands",
+)
+def _chk_anr_table_a3_spread() -> Outcome:
+    """The mean and sigma rows, at full precision and rounded once."""
+    result = ph.hearing.active_insertion_loss(ref.ISO4869_6_TABLE_A3)
+    matching = int(
+        np.sum(_half_up(result.mean_db) == np.asarray(ref.ISO4869_6_TABLE_A3_MEAN))
+        + np.sum(
+            _half_up(result.standard_deviation_db)
+            == np.asarray(ref.ISO4869_6_TABLE_A3_SIGMA)
+        )
+    )
+    return count(matching, 16, subject="cells of the mean and sigma rows")
+
+
+@register(
+    _ANR,
+    "ISO 4869-6:2019 Annex A, Table A.3",
+    "u = sigma/4 and U95 = 2u, as the table forms them from its rounded rows",
+)
+def _chk_anr_table_a3_uncertainty() -> Outcome:
+    """The u and U95 rows, and the seven cells full precision moves.
+
+    The table forms u from the sigma it prints and U95 from the u it prints,
+    which no note says; at full precision, as A.1 and A.2 define them, one u
+    cell and six U95 cells are a tenth lower (see docs/ERRATA.md). The library
+    returns full precision; this row pins both readings.
+    """
+    result = ph.hearing.active_insertion_loss(ref.ISO4869_6_TABLE_A3)
+    printed_u = np.asarray(ref.ISO4869_6_TABLE_A3_U)
+    printed_u95 = np.asarray(ref.ISO4869_6_TABLE_A3_U95)
+    chained_u = _half_up(_half_up(result.standard_deviation_db) / 4.0)
+    chained_u95 = _half_up(2.0 * chained_u)
+    matching = int(np.sum(chained_u == printed_u) + np.sum(chained_u95 == printed_u95))
+    moved_u = tuple(
+        np.flatnonzero(_half_up(result.standard_uncertainty_db) != printed_u)
+    )
+    moved_u95 = tuple(
+        np.flatnonzero(_half_up(result.expanded_uncertainty_db) != printed_u95)
+    )
+    registered = (
+        moved_u == ref.ISO4869_6_TABLE_A3_U_ROUNDED_FROM_SIGMA
+        and moved_u95 == ref.ISO4869_6_TABLE_A3_U95_ROUNDED_FROM_U
+    )
+    return count(
+        matching if registered else 0,
+        16,
+        subject="cells of the u and U95 rows",
+        expected_label="16/16 cells from the rounded rows; 7 moved at full precision",
+    )
+
+
+@register(
+    _ANR,
+    "ISO 4869-6:2019 5.5 b), calculation example",
+    "Lower-ear active insertion loss from the MIRE levels, 16 x 24 cells",
+)
+def _chk_anr_workbook_lower_ear() -> Outcome:
+    """Passive minus active per ear, and the lower ear per band (rows 134-149)."""
+    result = _anr_workbook_insertion_loss()
+    workbook = np.asarray(ref.ISO4869_6_WORKBOOK_LOWER_EAR)
+    matching = int(np.sum(np.abs(result.insertion_loss_db - workbook) <= 1e-9))
+    return count(matching, workbook.size, subject="cells of rows 134-149")
+
+
+@register(
+    _ANR,
+    "ISO 4869-6:2019 5.5 a), calculation example",
+    "REAT interpolated linearly in hertz into 24 one-third octaves",
+)
+def _chk_anr_workbook_interpolation() -> Outcome:
+    """Rows 182-197, once rounded to 0,1 dB the way the workbook rounds them."""
+    result = _anr_workbook_total()
+    workbook = np.asarray(ref.ISO4869_6_WORKBOOK_REAT_THIRDS)
+    matching = int(np.sum(_half_up(result.reat_third_octave_db) == workbook))
+    return count(matching, workbook.size, subject="cells of rows 182-197")
+
+
+#: 5.5 c): the workbook adds its rounded interpolation (rows 182-197) to the
+#: lower ear, so its sums sit within the 0,05 dB of that rounding.
+_ANR_THIRDS_TOLERANCE_DB = 0.05
+#: Formula (1) and 5.5 e): two roundings of up to 0,05 dB each.
+_ANR_OCTAVE_TOLERANCE_DB = 0.1
+
+
+@register(
+    _ANR,
+    "ISO 4869-6:2019 5.5 c), calculation example",
+    "Total attenuation per one-third octave, 16 x 24 cells",
+)
+def _chk_anr_workbook_thirds() -> Outcome:
+    """Rows 206-221 within the 0,05 dB the workbook's rounding of a) leaves.
+
+    The workbook sums its rounded interpolation (rows 182-197) and the lower
+    ear (rows 134-149) and does not round the sum; the library interpolates
+    at full precision.
+    """
+    result = _anr_workbook_total()
+    workbook = np.asarray(ref.ISO4869_6_WORKBOOK_TOTAL_THIRDS)
+    worst = float(np.max(np.abs(result.total_third_octave_db - workbook)))
+    return Outcome(
+        expected="384 cells of rows 206-221, within 0.05 dB",
+        computed=f"max deviation {worst:.3f} dB",
+        delta=f"{worst:.3f} dB",
+        passed=worst <= _ANR_THIRDS_TOLERANCE_DB + 1e-9,
+    )
+
+
+@register(
+    _ANR,
+    "ISO 4869-6:2019 Formula (1), calculation example",
+    "Octave-band total attenuation of 16 subjects, 8 bands",
+)
+def _chk_anr_workbook_octaves() -> Outcome:
+    """Rows 230-245 within the 0,1 dB the workbook's two roundings leave.
+
+    The workbook rounds the interpolated passive value and the octave result,
+    each by up to 0,05 dB; the library rounds neither.
+    """
+    result = _anr_workbook_total()
+    workbook = np.asarray(ref.ISO4869_6_WORKBOOK_TOTAL_OCTAVES)
+    worst = float(np.max(np.abs(result.total_octave_db - workbook)))
+    return Outcome(
+        expected="128 cells of rows 230-245, within 0.1 dB",
+        computed=f"max deviation {worst:.3f} dB",
+        delta=f"{worst:.3f} dB",
+        passed=worst <= _ANR_OCTAVE_TOLERANCE_DB,
+    )
+
+
+@register(
+    _ANR,
+    "ISO 4869-6:2019 5.5 e), calculation example",
+    "Mean, SD and APV84 of the octave totals",
+)
+def _chk_anr_workbook_statistics() -> Outcome:
+    """Rows 247-248 to 0,1 dB, and the library's own APV84 against row 249.
+
+    The mean and SD rows round the library's values the way the workbook's
+    ROUND does and match cell for cell. Row 249 is the rounded mean less the
+    rounded SD (=D247-D248), which carries both roundings; the library's
+    APV84 is Formula (1) of ISO 4869-2 at full precision and is held to
+    0,1 dB of it (63 Hz: 31,62 dB against the row's 31,7).
+    """
+    apv = _anr_workbook_total().assumed_protection
+    matching = int(
+        np.sum(
+            _half_up(apv.mean_attenuation) == np.asarray(ref.ISO4869_6_WORKBOOK_MEAN)
+        )
+        + np.sum(
+            _half_up(apv.standard_deviation) == np.asarray(ref.ISO4869_6_WORKBOOK_SD)
+        )
+    )
+    worst = float(np.max(np.abs(apv.apv - np.asarray(ref.ISO4869_6_WORKBOOK_APV84))))
+    return Outcome(
+        expected="16/16 cells of rows 247-248; APV84 within 0.1 dB of row 249",
+        computed=f"{matching}/16 cells; APV84 max deviation {worst:.3f} dB",
+        delta=f"{worst:.3f} dB",
+        passed=matching == 16 and worst <= _ANR_OCTAVE_TOLERANCE_DB,
     )
 
 

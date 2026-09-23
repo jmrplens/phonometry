@@ -4291,6 +4291,49 @@ in the same order.
   silently swapped.
 - **Status:** unreported.
 
+## ISO 4869-6:2019, Table A.3 (the uncertainty rows are formed from the rounded row above them)
+
+- **Location:** Annex A (normative), Table A.3 "An example of ANR earmuff
+  active insertion loss test data in dB for a given laboratory", the rows
+  "Combined standard uncertainty, $u$, ($\sigma/\sqrt{N}$)" and "Expanded
+  uncertainty, $U_{95}$", PDF page 16 (printed p. 10), against the definitions
+  of A.1 and A.2 on PDF page 14 (printed p. 8).
+- **The print:** the table gives the active insertion loss of sixteen subjects
+  at the octave frequencies 63 Hz to 8 kHz, then their mean, their standard
+  deviation $\sigma$, $u$ and $U_{95}$. The $u$ row reads 0,5 / 0,2 / **0,4** /
+  0,5 / 0,4 / 0,4 / 0,4 / 0,2 dB and the $U_{95}$ row **1,0** / 0,4 / **0,8** /
+  **1,0** / **0,8** / 0,8 / **0,8** / **0,4** dB. A.2 defines $u$ as "the
+  standard deviation of the individual active insertion loss data divided by
+  the square root of the number of test subjects, i.e. $\sqrt{16} = 4$", and
+  A.1 defines $U_{95}$ as $u$ multiplied by the coverage factor $k = 2$. The
+  table carries no note on how it rounds.
+- **The problem:** from the sixteen printed rows, the mean and $\sigma$
+  reproduce in all sixteen cells, but $u$ at 250 Hz is 0,348 dB, which rounds
+  to 0,3 and not 0,4, and $U_{95} = 2\sigma/4$ is 0,935 / 0,355 / 0,697 /
+  0,940 / 0,711 / 0,839 / 0,720 / 0,325 dB, which rounds to 0,9 / 0,4 / 0,7 /
+  0,9 / 0,7 / 0,8 / 0,7 / 0,3: six of the eight printed cells are 0,1 dB high.
+  Every printed cell is instead the formula applied to the **rounded** row
+  above it: $1{,}4 / 4 = 0{,}35$ prints as 0,4, and each $U_{95}$ is twice the
+  $u$ printed over it. The same table in ISO 4869-1:2018 (its Table A.3, same
+  layout) computes at full precision and says so in its NOTE 2, "All
+  calculations are made with full precision before rounding to one decimal",
+  and all 28 of its derived cells reproduce that way. A reader who applies A.1
+  and A.2 to the printed data of ISO 4869-6 gets an expanded uncertainty a
+  tenth of a decibel below the printed one in six bands of eight, and cannot
+  tell from the page why.
+- **Evidence:** the sixteen rows and four derived rows of Table A.3, PDF page
+  16 (printed p. 10), recomputed with $u = \sigma/4$ and $U_{95} = 2u$ once at
+  full precision and once from the printed $\sigma$ and $u$; A.1 and A.2, PDF
+  page 14 (printed p. 8); all of ISO 4869-6:2019. For the contrast, ISO
+  4869-1:2018 Table A.3 and its NOTE 2, PDF page 19 (printed p. 13).
+- **Library behaviour:** `hearing.active_insertion_loss` returns $u$ and
+  $U_{95}$ at full precision from the data, as A.1 and A.2 define them. The
+  conformance row and `tests/hearing/test_active_noise_reduction.py` pin the
+  mean and $\sigma$ rows as printed, reproduce the $u$ and $U_{95}$ rows the
+  way the table forms them, and assert that full precision differs in exactly
+  the seven cells named here, each by 0,1 dB.
+- **Status:** unreported.
+
 ## VDI 2081 Blatt 1:2001-07, Section 6.4 (the English column says the opposite of the German)
 
 - **Location:** printed folio 40 (PDF page 40), Section 6.4 "Verzweigungen" /

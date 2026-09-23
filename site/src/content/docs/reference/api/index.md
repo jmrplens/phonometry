@@ -126,6 +126,7 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | [`hearing.occupational_exposure`](/phonometry/reference/api/hearing/occupational-exposure/) | Occupational noise exposure: measurement strategies and uncertainty (ISO 9612:2009). |
 | [`hearing.real_ear_attenuation`](/phonometry/reference/api/hearing/real-ear-attenuation/) | Real-ear attenuation of a hearing protector and its uncertainty (ISO 4869-1:2018). |
 | [`hearing.hearing_protectors`](/phonometry/reference/api/hearing/hearing-protectors/) | What a hearing protector leaves at the ear (ISO 4869-2:2018). |
+| [`hearing.active_noise_reduction`](/phonometry/reference/api/hearing/active-noise-reduction/) | Total attenuation of an active noise reduction earmuff (ISO 4869-6:2019). |
 
 ## Room acoustics
 

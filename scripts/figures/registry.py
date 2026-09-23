@@ -374,6 +374,7 @@ from .perception import (
     generate_exposure_uncertainty,
     generate_fluctuation_strength,
     generate_fluctuation_strength_specific,
+    generate_hearing_protector_anr,
     generate_hearing_protector_methods,
     generate_hearing_protector_reat,
     generate_hearing_threshold,
@@ -942,6 +943,7 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     generate_htlan_compression,
     generate_hearing_protector_methods,
     generate_hearing_protector_reat,
+    generate_hearing_protector_anr,
     # Multiple-shock whole-body vibration (ISO 2631-5 Clause 5 + Annex C).
     generate_tonal_audibility,
     generate_multiple_shock,

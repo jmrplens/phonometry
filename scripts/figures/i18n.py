@@ -298,42 +298,42 @@ _ES_EXACT = {
     r"above $f_\mathrm{r}$: the plate moves against the force": r"por encima de $f_\mathrm{r}$: la placa se mueve contra la fuerza",
     "phase": "fase",
     # Building acoustics: sound insulation (B8 figures)
-    "Same weighted rating, different spectrum": "El mismo indice ponderado, distinto espectro",
-    r"$R_\mathrm{w}$ alone is not a specification": r"$R_\mathrm{w}$ por si solo no es una especificacion",
+    "Same weighted rating, different spectrum": "El mismo índice ponderado, distinto espectro",
+    r"$R_\mathrm{w}$ alone is not a specification": r"$R_\mathrm{w}$ por sí solo no es una especificación",
     # Bar-group tick label, symbols only: reads the same in Spanish.
     r"$R_\mathrm{w} + C_\mathrm{tr}$": r"$R_\mathrm{w} + C_\mathrm{tr}$",
     r"shifted reference (both, $R_\mathrm{w}$ = 49 dB)": r"curva de referencia desplazada (ambas, $R_\mathrm{w}$ = 49 dB)",
-    "150 mm dense concrete": "hormigon denso de 150 mm",
+    "150 mm dense concrete": "hormigón denso de 150 mm",
     "double leaf, 12 kg/m² + 90 mm": "doble hoja, 12 kg/m² + 90 mm",
     "mass-air-mass resonance at 82 Hz, below the\n"
     "rated range: the double leaf enters it still climbing": "resonancia masa-aire-masa en 82 Hz, por debajo del\n"
-    "rango valorado: la doble hoja entra aun subiendo",
-    "concrete": "hormigon",
+    "rango valorado: la doble hoja entra aún subiendo",
+    "concrete": "hormigón",
     "double leaf": "doble hoja",
-    "Single number [dB]": "Numero global [dB]",
-    "6 dB apart\nagainst traffic": "6 dB de diferencia\nfrente al trafico",
-    "Background-noise correction: two standards, two thresholds": "Correccion por ruido de fondo: dos normas, dos umbrales",
+    "Single number [dB]": "Número global [dB]",
+    "6 dB apart\nagainst traffic": "6 dB de diferencia\nfrente al tráfico",
+    "Background-noise correction: two standards, two thresholds": "Corrección por ruido de fondo: dos normas, dos umbrales",
     "ISO 10140-4 laboratory (6 / 15 dB)": "ISO 10140-4 laboratorio (6 / 15 dB)",
     "ISO 16283-1 field (6 / 10 dB)": "ISO 16283-1 in situ (6 / 10 dB)",
-    "limit of measurement\n(fixed 1,3 dB, flag the band)": "limite de medicion\n(1,3 dB fijos, senalar la banda)",
-    "the field rule stops here": "la regla in situ termina aqui",
-    "the laboratory rule stops here": "la regla de laboratorio termina aqui",
-    r"Signal-to-background margin $L_\mathrm{sb} - L_\mathrm{b}$ [dB]": r"Margen senal-fondo $L_\mathrm{sb} - L_\mathrm{b}$ [dB]",
-    r"Correction applied, $L_\mathrm{sb} - L$ [dB]": r"Correccion aplicada, $L_\mathrm{sb} - L$ [dB]",
-    "A Fast detector cannot follow a long decay": "Un detector Fast no puede seguir una caida larga",
-    "more than 1 dB apart": "mas de 1 dB de diferencia",
-    "Fast maximum: $10\\,\\mathrm{lg}[g(C)/g(C_0)]$ (ISO 16283-2)": "maximo Fast: $10\\,\\mathrm{lg}[g(C)/g(C_0)]$ (ISO 16283-2)",
-    "energy average: $10\\,\\mathrm{lg}(T/T_0)$": "promedio energetico: $10\\,\\mathrm{lg}(T/T_0)$",
+    "limit of measurement\n(fixed 1,3 dB, flag the band)": "límite de medición\n(1,3 dB fijos, señalar la banda)",
+    "the field rule stops here": "la regla in situ termina aquí",
+    "the laboratory rule stops here": "la regla de laboratorio termina aquí",
+    r"Signal-to-background margin $L_\mathrm{sb} - L_\mathrm{b}$ [dB]": r"Margen señal-fondo $L_\mathrm{sb} - L_\mathrm{b}$ [dB]",
+    r"Correction applied, $L_\mathrm{sb} - L$ [dB]": r"Corrección aplicada, $L_\mathrm{sb} - L$ [dB]",
+    "A Fast detector cannot follow a long decay": "Un detector Fast no puede seguir una caída larga",
+    "more than 1 dB apart": "más de 1 dB de diferencia",
+    "Fast maximum: $10\\,\\mathrm{lg}[g(C)/g(C_0)]$ (ISO 16283-2)": "máximo Fast: $10\\,\\mathrm{lg}[g(C)/g(C_0)]$ (ISO 16283-2)",
+    "energy average: $10\\,\\mathrm{lg}(T/T_0)$": "promedio energético: $10\\,\\mathrm{lg}(T/T_0)$",
     "at $T$ = 5 s the energy average has grown to 10.0 dB\n"
     "while the Fast term has saturated at 5.1 dB": "a $T$ = 5 s el promedio energético ha crecido hasta 10,0 dB\n"
     "mientras el término Fast se ha saturado en 5,1 dB",
-    "$T = T_0$ = 0,5 s\nboth terms vanish": "$T = T_0$ = 0,5 s\nambos terminos se anulan",
+    "$T = T_0$ = 0,5 s\nboth terms vanish": "$T = T_0$ = 0,5 s\nambos términos se anulan",
     "$T$ = 1,7275 s: $C = 1$, $g = 1/e$": "$T$ = 1,7275 s: $C = 1$, $g = 1/e$",
-    "Receiving-room reverberation time $T$ [s]": "Tiempo de reverberacion del recinto receptor $T$ [s]",
-    "Term subtracted from the measured level [dB]": "Termino restado al nivel medido [dB]",
+    "Receiving-room reverberation time $T$ [s]": "Tiempo de reverberación del recinto receptor $T$ [s]",
+    "Term subtracted from the measured level [dB]": "Término restado al nivel medido [dB]",
     "The same wall, in the laboratory and in two buildings\n"
     "(EN 12354-1 flanking over twelve paths)": "La misma pared, en laboratorio y en dos edificios\n"
-    "(transmision por flancos EN 12354-1 sobre doce caminos)",
+    "(transmisión por flancos EN 12354-1 sobre doce caminos)",
     r"laboratory $R$ ($R_\mathrm{w}$ = 49 dB)": r"$R$ de laboratorio ($R_\mathrm{w}$ = 49 dB)",
     r"field $R^{\prime}$, good junctions ($R^{\prime}_\mathrm{w}$ = 47 dB)": r"$R^{\prime}$ in situ, uniones buenas ($R^{\prime}_\mathrm{w}$ = 47 dB)",
     r"field $R^{\prime}$, flanking dominant ($R^{\prime}_\mathrm{w}$ = 42 dB)": r"$R^{\prime}$ in situ, flancos dominantes "
@@ -341,21 +341,21 @@ _ES_EXACT = {
     "2 dB: normal": "2 dB: normal",
     "7 dB: find the path": "7 dB: busque el camino",
     "The weak element sets the composite\n"
-    "(Ejemplo 7.5 geometry: 6 m² blind part + 2 m² window)": "El elemento debil fija el conjunto\n"
-    "(geometria del Ejemplo 7.5: 6 m² de parte ciega + 2 m² de ventana)",
+    "(Ejemplo 7.5 geometry: 6 m² blind part + 2 m² window)": "El elemento débil fija el conjunto\n"
+    "(geometría del Ejemplo 7.5: 6 m² de parte ciega + 2 m² de ventana)",
     r"Window $R_\mathrm{A}$ [dBA]  (2 m² of an 8 m² facade)": r"$R_\mathrm{A}$ de la ventana [dBA]  (2 m² de una fachada de 8 m²)",
     r"Overall facade $R_\mathrm{A}$ [dBA]": r"$R_\mathrm{A}$ global de la fachada [dBA]",
     "+10 dBA on the blind part: +0.4 dBA": "+10 dBA en la parte ciega: +0,4 dBA",
     "+5 dBA on the window: +4.1 dBA": "+5 dBA en la ventana: +4,1 dBA",
-    "Qualifying the measurement surface (ISO 15186-1, 6.4.2)": "Calificacion de la superficie de medicion (ISO 15186-1, 6.4.2)",
+    "Qualifying the measurement surface (ISO 15186-1, 6.4.2)": "Calificación de la superficie de medición (ISO 15186-1, 6.4.2)",
     "surface not qualified": "superficie no calificada",
-    r"$F_{pI} = L_p - L_{I\mathrm{n}}$ (Formula (10))": r"$F_{pI} = L_p - L_{I\mathrm{n}}$ (Formula (10))",
+    r"$F_{pI} = L_p - L_{I\mathrm{n}}$ (Formula (10))": r"$F_{pI} = L_p - L_{I\mathrm{n}}$ (Fórmula (10))",
     "10 dB: reflecting specimen (6.4.2)": "10 dB: probeta reflectante (6.4.2)",
     "6 dB: absorbing specimen": "6 dB: probeta absorbente",
     "remedy in order: +5 to 10 cm of measurement distance first,\n"
-    "then absorption in the receiving room": "remedio en orden: primero +5 a 10 cm de distancia de medicion,\n"
-    "despues absorcion en el recinto receptor",
-    r"Surface pressure-intensity indicator $F_{pI}$ [dB]": r"Indicador superficial presion-intensidad $F_{pI}$ [dB]",
+    "then absorption in the receiving room": "remedio en orden: primero +5 a 10 cm de distancia de medición,\n"
+    "después absorción en el recinto receptor",
+    r"Surface pressure-intensity indicator $F_{pI}$ [dB]": r"Indicador superficial presión-intensidad $F_{pI}$ [dB]",
     # ANP fleet database guide
     "ANP NPD Curves - Boeing 747-100 / JT9DBD (SEL, departure)": "Curvas NPD ANP - Boeing 747-100 / JT9DBD (SEL, despegue)",
     "ANP Default Departure Profile - Boeing 747-100 / JT9DBD": "Perfil de despegue por defecto ANP - Boeing 747-100 / JT9DBD",

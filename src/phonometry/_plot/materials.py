@@ -19,8 +19,8 @@ from .common import (
     _import_pyplot,
     _new_axes,
     _plot_rating,
-    clearest_legend_loc,
     format_frequency_axis,
+    place_legend_clear,
     style_default,
     style_get,
     theme_fill_alpha,
@@ -1141,7 +1141,7 @@ def plot_transfer_matrix(
     lines, labels = ax.get_legend_handles_labels()
     tlines, tlabels = twin.get_legend_handles_labels()
     legend = ax.legend(lines + tlines, labels + tlabels, fontsize="small")
-    legend.set_loc(clearest_legend_loc(legend, twin))
+    place_legend_clear(legend, twin)
     ax.grid(visible=True, which="both", alpha=0.3)
     localize_axes(ax, language)
     localize_axes(twin, language)

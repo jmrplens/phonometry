@@ -5,21 +5,26 @@ matplotlib resolves ``loc="best"`` by scoring its candidate boxes against the
 artists of the axes that carries the legend, and an axes made by ``twinx()`` is
 a separate axes. On a panel with two scales the second one's curves are
 invisible to that search, so the box lands on them as readily as on blank
-paper. :func:`~phonometry._plot.common.clearest_legend_loc` runs the same search
+paper. :func:`~phonometry._plot.common.place_legend_clear` runs the same search
 against every scale, and each renderer that puts one legend over two scales
-places it with that answer.
+places it with that.
 
 What is under a legend is measured here without the helper: every stroke of an
 axes is sampled along its drawn segments in display coordinates, every marker
 is grown by its size and every bar is read by its extent, and the samples that
 fall inside the legend's frame are what it covers. Each case is built so that
-matplotlib's own ``"best"`` covers the twin's data, which is checked first: a
+matplotlib's own ``"best"`` covers the twin's data, and that is asserted too: a
 case where the host alone already finds a clear spot would pass with or without
 the fix and prove nothing.
+
+The marks the search reads are checked one by one on a panel of their own:
+the edge of a marker, the steps of a stepped line, ``hlines``, a text, and a
+hidden artist that must count for nothing.
 """
 
 from __future__ import annotations
 
+import warnings
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -32,18 +37,18 @@ mpl.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.cbook import STEP_LOOKUP_MAP
 from matplotlib.collections import LineCollection, PolyCollection
+from matplotlib.legend import Legend
 from matplotlib.patches import Rectangle
+from matplotlib.transforms import Bbox
 
 import phonometry as ph
-from phonometry._plot.common import clearest_legend_loc
+from phonometry._plot.common import _drawn_marks, _legend_badness, place_legend_clear
 from phonometry.building.prediction.detailed_model import BandPath
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator
 
     from matplotlib.axes import Axes
-    from matplotlib.legend import Legend
-    from matplotlib.transforms import Bbox
 
 #: Samples per drawn segment: enough that a stroke crossing a legend frame
 #: between two of its vertices leaves a sample inside it.
@@ -67,16 +72,23 @@ def _inside(box: Bbox, points: np.ndarray) -> np.ndarray:
     """Which of *points*, in display coordinates, lie strictly inside *box*."""
     x, y = points[:, 0], points[:, 1]
     with np.errstate(invalid="ignore"):
-        return (box.x0 < x) & (x < box.x1) & (box.y0 < y) & (y < box.y1)
+        return np.asarray(
+            (box.x0 < x) & (x < box.x1) & (box.y0 < y) & (y < box.y1), dtype=bool
+        )
 
 
 def _sampled(vertices: np.ndarray) -> np.ndarray:
-    """The straight segments through *vertices*, sampled finely."""
-    finite = vertices[np.isfinite(vertices).all(axis=1)]
-    if len(finite) < 2:
-        return finite
+    """The drawn segments through *vertices*, sampled finely.
+
+    A segment with a non-finite end is a gap in the line and is not drawn, so
+    it is not sampled either.
+    """
+    vertices = np.asarray(vertices, dtype=np.float64).reshape(-1, 2)
+    start, end = vertices[:-1], vertices[1:]
+    drawn = np.isfinite(start).all(axis=1) & np.isfinite(end).all(axis=1)
     t = np.linspace(0.0, 1.0, _SAMPLES_PER_SEGMENT)[None, :, None]
-    return (finite[:-1, None, :] * (1.0 - t) + finite[1:, None, :] * t).reshape(-1, 2)
+    samples = start[drawn, None, :] * (1.0 - t) + end[drawn, None, :] * t
+    return samples.reshape(-1, 2)
 
 
 def _covered(box: Bbox, ax: Axes) -> list[str]:
@@ -104,14 +116,14 @@ def _covered(box: Bbox, ax: Axes) -> list[str]:
                 found.append(f"bar at {patch.get_x():.4g}")
             continue
         outline = patch.get_transform().transform_path(patch.get_path())
-        if _inside(box, _sampled(outline.vertices)).any():
+        if _inside(box, _sampled(np.asarray(outline.vertices))).any():
             found.append(f"patch {patch.get_label()!r}")
     for collection in ax.collections:
         if isinstance(collection, LineCollection | PolyCollection):
             transform = collection.get_transform()
             for path in collection.get_paths():
                 outline = transform.transform_path(path)
-                if _inside(box, _sampled(outline.vertices)).any():
+                if _inside(box, _sampled(np.asarray(outline.vertices))).any():
                     found.append(f"collection {collection.get_label()!r}")
                     break
         else:
@@ -165,36 +177,34 @@ def _two_scale_panel() -> tuple[Axes, Axes, Legend]:
     twin.plot(x, 500.0 + 1000.0 * u**4, color="C2", label="rising")
     handles, labels = ax.get_legend_handles_labels()
     extra_handles, extra_labels = twin.get_legend_handles_labels()
-    legend = ax.legend(handles + extra_handles, labels + extra_labels, loc="best")
+    legend = ax.legend(handles + extra_handles, labels + extra_labels)
     return ax, twin, legend
 
 
-def test_best_covers_the_twin_and_the_clearest_location_covers_neither_scale() -> None:
+def test_best_covers_the_twin_and_the_clear_place_covers_neither_scale() -> None:
     ax, twin, legend = _two_scale_panel()
-    loc = clearest_legend_loc(legend, twin)
+    loc = place_legend_clear(legend, twin)
+    placed = _frame(legend)
 
     best = _best_frame(legend)
     assert _covered(best, twin), "the case no longer puts 'best' on the twin"
     assert not _covered(best, ax)
 
+    assert _covered(placed, ax) == []
+    assert _covered(placed, twin) == []
     legend.set_loc(loc)
-    frame = _frame(legend)
-    assert _covered(frame, ax) == []
-    assert _covered(frame, twin) == []
+    assert _frame(legend).bounds == placed.bounds
 
 
 def test_the_answer_is_the_same_before_the_first_draw_and_after_it() -> None:
     ax, twin, legend = _two_scale_panel()
-    before = clearest_legend_loc(legend, twin)
+    before = place_legend_clear(legend, twin)
     ax.figure.canvas.draw()
-    after = clearest_legend_loc(legend, twin)
-    assert before == after
-    assert clearest_legend_loc(legend, twin) == after
+    assert place_legend_clear(legend, twin) == before
 
 
 def test_no_artist_is_added_to_or_taken_from_either_axes() -> None:
     ax, twin, legend = _two_scale_panel()
-    legend.set_loc("upper right")
     containers = ("lines", "patches", "collections", "texts", "images", "artists")
 
     def inventory() -> list[list[int]]:
@@ -205,11 +215,30 @@ def test_no_artist_is_added_to_or_taken_from_either_axes() -> None:
         ] + [[id(child) for child in axes.get_children()] for axes in (ax, twin)]
 
     held = inventory()
-    frame = legend.get_window_extent()
-    clearest_legend_loc(legend, twin)
+    entries = [text.get_text() for text in legend.get_texts()]
+    place_legend_clear(legend, twin)
     assert inventory() == held
     assert ax.get_legend() is legend
-    assert legend.get_window_extent().bounds == frame.bounds
+    assert [text.get_text() for text in legend.get_texts()] == entries
+
+
+def test_the_box_is_measured_without_a_search_of_its_own(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A legend left at ``"best"`` would search the host just to be measured.
+
+    That search is wasted work, and on a large data set it is the one that
+    warns about being slow, on a legend whose place is then fixed anyway.
+    """
+    _ax, twin, legend = _two_scale_panel()
+
+    def searched(*_args: object) -> tuple[float, float]:
+        msg = "the legend was measured at 'best'"
+        raise AssertionError(msg)
+
+    monkeypatch.setattr(Legend, "_find_best_position", searched)
+    place_legend_clear(legend, twin)
+    _frame(legend)
 
 
 def test_twiny_is_read_through_its_own_abscissa() -> None:
@@ -227,11 +256,11 @@ def test_twiny_is_read_through_its_own_abscissa() -> None:
     extra_handles, extra_labels = twin.get_legend_handles_labels()
     legend = ax.legend(handles + extra_handles, labels + extra_labels)
 
+    place_legend_clear(legend, twin)
+    placed = _frame(legend)
     assert _covered(_best_frame(legend), twin)
-    legend.set_loc(clearest_legend_loc(legend, twin))
-    frame = _frame(legend)
-    assert _covered(frame, ax) == []
-    assert _covered(frame, twin) == []
+    assert _covered(placed, ax) == []
+    assert _covered(placed, twin) == []
 
 
 def test_without_a_twin_it_is_the_box_best_would_give() -> None:
@@ -243,7 +272,7 @@ def test_without_a_twin_it_is_the_box_best_would_give() -> None:
             ax.plot(np.linspace(0.0, 1.0, 40), walk, label=f"walk {k}")
         legend = ax.legend()
         best = _best_frame(legend)
-        legend.set_loc(clearest_legend_loc(legend))
+        place_legend_clear(legend)
         assert _frame(legend).bounds == pytest.approx(best.bounds)
         plt.close(fig)
 
@@ -258,11 +287,95 @@ def test_gaps_and_a_logarithmic_axis_are_read_without_complaint() -> None:
     twin.semilogx(f, np.log10(f), label="rising")
     twin.axhline(3.0, color="C3", label="limit")
     legend = ax.legend()
-    loc = clearest_legend_loc(legend, twin)
-    legend.set_loc(loc)
-    frame = _frame(legend)
-    assert _covered(frame, ax) == []
-    assert _covered(frame, twin) == []
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        place_legend_clear(legend, twin)
+        placed = _frame(legend)
+    assert _covered(placed, ax) == []
+    assert _covered(placed, twin) == []
+
+
+# ---------------------------------------------------------------------------
+# The marks the search reads, one at a time. Each panel has fixed unit limits
+# and one mark, and a box that the mark reaches only in the way under test,
+# next to a control that differs in that one respect and reaches nothing.
+# ---------------------------------------------------------------------------
+
+
+def _unit_panel() -> Axes:
+    _fig, ax = plt.subplots(figsize=(6.4, 4.8))
+    ax.set_xlim(0.0, 1.0)
+    ax.set_ylim(0.0, 1.0)
+    return ax
+
+
+def _box(ax: Axes, x0: float, y0: float, x1: float, y1: float) -> Bbox:
+    """A box given in fractions of the axes, in display coordinates."""
+    return Bbox(ax.transAxes.transform([[x0, y0], [x1, y1]]))
+
+
+def _badness(ax: Axes, box: Bbox) -> int:
+    marks, extents = _drawn_marks(ax, ax.figure.dpi / 72.0)
+    return _legend_badness(box, marks, extents)
+
+
+@pytest.mark.parametrize("size", [20.0, 2.0])
+def test_a_marker_counts_once_its_edge_is_under_the_box(size: float) -> None:
+    ax = _unit_panel()
+    # A centre two hundredths of the axes below the box: about 7 px on this
+    # canvas, less than half a 20 pt marker and more than half a 2 pt one.
+    ax.plot([0.5], [0.48], "o", ms=size)
+    under = _badness(ax, _box(ax, 0.3, 0.5, 0.7, 0.9))
+    assert (under > 0) is (size > 10.0)
+
+
+@pytest.mark.parametrize("area", [400.0, 4.0])
+def test_a_scattered_marker_counts_once_its_edge_is_under_the_box(
+    area: float,
+) -> None:
+    ax = _unit_panel()
+    ax.scatter([0.5], [0.48], s=area)
+    under = _badness(ax, _box(ax, 0.3, 0.5, 0.7, 0.9))
+    assert (under > 0) is (area > 100.0)
+
+
+@pytest.mark.parametrize("style", ["steps-post", "default"])
+def test_a_stepped_line_is_read_through_its_steps(style: str) -> None:
+    ax = _unit_panel()
+    # Stepped, the line runs along the bottom and up the right edge; straight,
+    # it is the diagonal, which the lower right box never meets.
+    ax.plot([0.1, 0.9], [0.1, 0.9], drawstyle=style)
+    under = _badness(ax, _box(ax, 0.6, 0.05, 0.95, 0.3))
+    assert (under > 0) is (style != "default")
+
+
+@pytest.mark.parametrize(("y0", "y1", "reached"), [(0.4, 0.6, True), (0.7, 0.9, False)])
+def test_hlines_are_read_as_the_strokes_they_are(
+    y0: float, y1: float, *, reached: bool
+) -> None:
+    ax = _unit_panel()
+    ax.hlines(0.5, 0.1, 0.9)
+    assert (_badness(ax, _box(ax, 0.3, y0, 0.7, y1)) > 0) is reached
+
+
+@pytest.mark.parametrize("words", ["a reading", ""])
+def test_a_text_counts_and_an_empty_one_does_not(words: str) -> None:
+    ax = _unit_panel()
+    ax.text(0.5, 0.5, words, ha="center", va="center")
+    under = _badness(ax, _box(ax, 0.4, 0.45, 0.6, 0.55))
+    assert (under > 0) is bool(words)
+
+
+@pytest.mark.parametrize("visible", [True, False])
+def test_a_hidden_artist_counts_for_nothing(*, visible: bool) -> None:
+    ax = _unit_panel()
+    (line,) = ax.plot([0.0, 1.0], [0.5, 0.5])
+    bars = ax.bar([0.5], [0.8], width=0.2)
+    line.set_visible(visible)
+    for bar in bars:
+        bar.set_visible(visible)
+    under = _badness(ax, _box(ax, 0.3, 0.4, 0.7, 0.6))
+    assert (under > 0) is visible
 
 
 # ---------------------------------------------------------------------------
@@ -283,10 +396,10 @@ def _transfer_matrix() -> Axes:
     f = np.linspace(200.0, 1600.0, 40)
     rho_c = 407.0
     u = (f - f[0]) / (f[-1] - f[0])
-    series = rho_c * 10.0 * (1.0 - u)
-    shunt = 1.0 / (rho_c * (1.0 + 5.0 * (1.0 - u)))
-    one = np.ones_like(f)
-    matrix = ph.materials.TransferMatrix(one + 0j, series + 0j, shunt + 0j, one + 0j)
+    one = np.ones(f.size, dtype=np.complex128)
+    series = (rho_c * 10.0 * (1.0 - u)).astype(np.complex128)
+    shunt = (1.0 / (rho_c * (1.0 + 5.0 * (1.0 - u)))).astype(np.complex128)
+    matrix = ph.materials.TransferMatrix(one, series, shunt, one)
     return matrix.plot(f, rho_c)
 
 
@@ -296,8 +409,8 @@ def _room_to_room() -> Axes:
     On that figure's canvas: on the default one the two-column legend takes a
     third of the panel and no place in it is clear of both scales.
     """
-    walls = [0.02, 0.02, 0.03, 0.04, 0.05, 0.05]
-    ceiling = [0.05, 0.06, 0.07, 0.08, 0.08, 0.09]
+    ceiling = [0.07, 0.20, 0.40, 0.52, 0.60, 0.67]
+    walls = [0.03, 0.03, 0.03, 0.04, 0.05, 0.07]
     plant = [(80.0, [0.01, 0.01, 0.015, 0.02, 0.02, 0.02]), (80.0, ceiling),
              (108.0, walls)]  # fmt: skip
     operator = [(25.0, [0.08, 0.24, 0.57, 0.69, 0.71, 0.73]), (25.0, ceiling),
@@ -487,10 +600,9 @@ def test_the_renderer_places_its_legend_clear_of_the_twin(
     assert len(twins) == 1
     legend = ax.get_legend()
     assert legend is not None
-
     placed = _frame(legend)
-    assert _covered(placed, twins[0]) == []
 
     assert _covered(_best_frame(legend), twins[0]), (
         "the case no longer puts 'best' on the twin, so it tests nothing"
     )
+    assert _covered(placed, twins[0]) == []

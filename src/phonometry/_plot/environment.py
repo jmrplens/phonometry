@@ -22,8 +22,8 @@ from .common import (
     _freq_axis,
     _new_axes,
     _plot_two_runs,
-    clearest_legend_loc,
     format_frequency_axis,
+    place_legend_clear,
     style_default,
     styled,
 )
@@ -1091,7 +1091,7 @@ def plot_road_device_rating(
     handles, labels = ax.get_legend_handles_labels()
     extra = spectrum.get_legend_handles_labels()
     legend = ax.legend(handles + extra[0], labels + extra[1], fontsize="small")
-    legend.set_loc(clearest_legend_loc(legend, spectrum))
+    place_legend_clear(legend, spectrum)
     ax.grid(visible=True, axis="y", alpha=0.3)
     localize_axes(ax, language)
     localize_axes(spectrum, language)

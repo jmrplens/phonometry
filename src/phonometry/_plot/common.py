@@ -1510,21 +1510,20 @@ def _drawn_marks(
     """What *ax* has drawn, in display coordinates, for a legend box to avoid.
 
     Every artist is read through its own transform, which is what puts the
-    curves of a twin in the same frame as those of its host: the two share the
-    frame of the figure and nothing else.
+    curves of a twin in the same frame as those of its host: a twin shares one
+    axis with its host and scales the other one its own way.
 
     :param ax: The axes whose lines, patches, collections and texts are read.
     :param pixels_per_point: The figure's scale, for marker sizes.
     :return: The marks a box can close over and the extents it can overlap.
-        Each mark is a path the box can cross (``None`` for scattered markers,
-        which have no line between them), the vertices it can cover, and how
-        far a vertex reaches past its centre: half its marker, or nothing for a
-        bare line. The extents are those of the bars and of the texts.
+        Each mark is a path the box can cross (``None`` for markers, which
+        have no line between them), the vertices it can cover, and how far a
+        vertex reaches past its centre: half its marker, or nothing for the
+        corner of a line. The extents are those of the bars and of the texts.
+        A hidden artist and an empty text are left out, since neither is drawn.
     """
-    from matplotlib.cbook import STEP_LOOKUP_MAP
     from matplotlib.collections import LineCollection, PathCollection, PolyCollection
     from matplotlib.patches import Rectangle
-    from matplotlib.path import Path
 
     marks: list[tuple[Path | None, np.ndarray, float]] = []
     extents: list[Bbox] = []
@@ -1532,15 +1531,13 @@ def _drawn_marks(
         if not line.get_visible():
             continue
         transform = line.get_transform()
-        xy = np.asarray(line.get_xydata(), dtype=np.float64).reshape(-1, 2)
-        # A stepped line is drawn through corners its data does not hold, and
-        # the default style is the identity in the same table.
-        stroke = Path(np.column_stack(STEP_LOOKUP_MAP[line.get_drawstyle()](*xy.T)))
-        reach = 0.0
+        # The path of a stepped line already runs through its steps.
+        stroke = transform.transform_path(line.get_path())
+        marks.append((stroke, np.asarray(stroke.vertices), 0.0))
         if str(line.get_marker()) not in _NO_MARKER:
             size = line.get_markersize() + line.get_markeredgewidth()
-            reach = 0.5 * size * pixels_per_point
-        marks.append((transform.transform_path(stroke), transform.transform(xy), reach))
+            centres = transform.transform(np.asarray(line.get_xydata()))
+            marks.append((None, centres, 0.5 * size * pixels_per_point))
     for patch in ax.patches:
         if not patch.get_visible():
             continue
@@ -1585,9 +1582,9 @@ def _legend_badness(
 
     matplotlib's own count for ``loc="best"``: one for every vertex inside the
     box, one for every path that crosses it and one for every bar or text it
-    overlaps. One thing is counted more strictly: a vertex that carries a
-    marker counts as soon as the marker reaches under the box, not only once
-    its centre does, because half a marker under a legend is a reading lost.
+    overlaps. Markers are counted on top of that, each as soon as its edge
+    reaches under the box rather than once its centre does, because half a
+    marker under a legend is a reading lost.
     """
     badness = box.count_overlaps(extents) if extents else 0
     for path, vertices, reach in marks:
@@ -1597,29 +1594,32 @@ def _legend_badness(
     return int(badness)
 
 
-def clearest_legend_loc(legend: Legend, *twins: Axes) -> LegendLocType:
-    """The fixed location where *legend* covers least of every scale's data.
+def place_legend_clear(legend: Legend, *twins: Axes) -> LegendLocType:
+    """Move *legend* to the fixed location where it covers least of every scale.
 
-    The same search as ``loc="best"``, over the same candidate boxes and in the
+    The search ``loc="best"`` makes, over the same candidate boxes and in the
     same order, scored against what the legend's own axes and every one of
     *twins* have drawn, all read in display coordinates, the one frame the
-    scales share. It returns the first candidate that covers nothing, or else
-    the one that covers least, the earlier of two equals, so the choice is the
-    same on every run. The count is the one :func:`_legend_badness` keeps, and
-    it reads lines as they are drawn: a stepped line through its steps, and
-    ``hlines`` and ``vlines`` as the strokes they are.
+    scales share. The legend goes to the first candidate that covers nothing,
+    or else to the one that covers least, the earlier of two equals, so the
+    choice is the same on every run. The count is the one
+    :func:`_legend_badness` keeps, over the marks :func:`_drawn_marks` reads:
+    on a panel of bare lines with no twin it is the box ``"best"`` picks.
 
-    The answer holds for the limits the axes have when it is asked, so the call
-    belongs after the last change to them. Limits that are still waiting on a
-    pending autoscale are brought up to date first, which is all the first
-    draw would have done to them, and nothing is added to or taken from any
-    axes: the answer is the same before the figure is ever drawn and after.
+    The place is chosen for the axes as they stand: their limits, their size
+    in the figure and what they have drawn. Limits still waiting on a pending
+    autoscale are brought up to date first, as the first draw would bring
+    them, so the call can come before the figure is ever drawn; it belongs
+    after the last change to the limits. What happens after it is not
+    foreseen: data drawn later, or a layout engine that resizes the axes at
+    the draw, and a caller who does either can call again. Nothing is added to
+    or taken from any axes.
 
     :param legend: The legend, already made on its axes, whose size the
         candidate boxes take.
     :param twins: The axes made from the legend's axes by ``twinx()`` or
         ``twiny()``, whose data the legend must also avoid.
-    :return: A location for ``legend.set_loc``, or for ``loc=``.
+    :return: The location the legend now has.
     """
     from matplotlib.transforms import Bbox
 
@@ -1635,6 +1635,9 @@ def clearest_legend_loc(legend: Legend, *twins: Axes) -> LegendLocType:
         panel_marks, panel_extents = _drawn_marks(panel, pixels_per_point)
         marks += panel_marks
         extents += panel_extents
+    # Measured at a fixed place: at "best", finding the box's size would run
+    # matplotlib's own search over the host first, for nothing.
+    legend.set_loc(_LEGEND_ANCHORS[0][0])
     width, height = legend.get_window_extent().size
     box = Bbox.from_bounds(0.0, 0.0, width, height)
     # The gap matplotlib keeps between a fixed legend and the edge of the axes.
@@ -1643,11 +1646,13 @@ def clearest_legend_loc(legend: Legend, *twins: Axes) -> LegendLocType:
     scored: list[tuple[int, LegendLocType]] = []
     for loc, corner in _LEGEND_ANCHORS:
         badness = _legend_badness(box.anchored(corner, container), marks, extents)
-        if badness == 0:
-            return loc
         scored.append((badness, loc))
+        if badness == 0:
+            break
     # `min` keeps the first of equals, which is the order `"best"` tries.
-    return min(scored, key=lambda entry: entry[0])[1]
+    chosen = min(scored, key=lambda entry: entry[0])[1]
+    legend.set_loc(chosen)
+    return chosen
 
 
 def _plot_two_runs(
@@ -1757,7 +1762,7 @@ def _plot_two_runs(
         ax.set_xlabel(band_label)
         ax.set_xticks(x)
     # After the frequency axis turns logarithmic, which moves every curve.
-    legend.set_loc(clearest_legend_loc(legend, twin))
+    place_legend_clear(legend, twin)
     localize_axes(ax, language)
     localize_axes(twin, language)
     return ax

@@ -18,8 +18,8 @@ from .common import (
     _LEGEND_UPPER_RIGHT,
     _new_axes,
     _new_axes_column,
-    clearest_legend_loc,
     format_frequency_axis,
+    place_legend_clear,
     style_default,
     style_pop,
     styled,
@@ -217,7 +217,7 @@ def plot_ship_source_level(
     lines, labels = ax.get_legend_handles_labels()
     tlines, tlabels = twin.get_legend_handles_labels()
     legend = ax.legend(lines + tlines, labels + tlabels, fontsize="small")
-    legend.set_loc(clearest_legend_loc(legend, twin))
+    place_legend_clear(legend, twin)
     ax.set_title(
         f"{_t('ISO 17208-2 equivalent monopole source level', language)} "
         rf"($d_\mathrm{{s}}$ = {format_number(result.source_depth, language)} m, "

@@ -17,8 +17,8 @@ from .common import (
     _C_TERTIARY,
     _new_axes,
     _plot_two_runs,
-    clearest_legend_loc,
     format_frequency_axis,
+    place_legend_clear,
     style_default,
     theme_fill,
 )
@@ -409,7 +409,7 @@ def plot_room_to_room(
     format_frequency_axis(ax, language=language)
     format_frequency_axis(twin, language=language)
     # Placed once both scales are final, clear of the curves of each.
-    legend.set_loc(clearest_legend_loc(legend, twin))
+    place_legend_clear(legend, twin)
     localize_axes(ax, language)
     localize_axes(twin, language)
     return ax

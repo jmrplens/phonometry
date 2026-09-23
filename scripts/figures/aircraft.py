@@ -113,7 +113,7 @@ def generate_aircraft_atmospheric_absorption(output_dir: str) -> None:
             freqs, s, temperature_c=25.0, relative_humidity_percent=70.0
         )
         ax.plot(
-            res.frequency,
+            res.frequencies,
             res.band_attenuation,
             color=color,
             linewidth=2.0,
@@ -125,7 +125,7 @@ def generate_aircraft_atmospheric_absorption(output_dir: str) -> None:
         # it keeps the colour and gives up weight -- as a shade, not as an
         # opacity, which on the dark page gives up the line as well.
         ax.plot(
-            res.frequency,
+            res.frequencies,
             res.midband_attenuation,
             color=theme_line(color, ax, quiet=0.6),
             linewidth=1.0,
@@ -170,8 +170,8 @@ def generate_airport_noise(output_dir: str) -> None:
     for p, color in ((20000.0, COLOR_PRIMARY), (12000.0, COLOR_SECONDARY)):
         res = aircraft.npd_curve(powers, distances, levels, p)
         ax.plot(
-            res.distance,
-            res.level,
+            res.distances,
+            res.levels,
             color=color,
             linewidth=2.0,
             label=f"$P$ = {p:.0f} N",

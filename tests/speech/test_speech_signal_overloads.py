@@ -160,7 +160,7 @@ def test_the_noise_corrections_still_take_their_levels_positionally() -> None:
     """
     positional = stipa(Signal(_STIPA, FS), None, None, _LEVEL, _AMBIENT)
     assert_same(positional, stipa(_STIPA, FS, None, _LEVEL, _AMBIENT))
-    assert_same(positional, stipa(Signal(_STIPA, FS), level=_LEVEL, ambient=_AMBIENT))
+    assert_same(positional, stipa(Signal(_STIPA, FS), levels=_LEVEL, ambient=_AMBIENT))
 
 
 def test_a_reference_at_another_rate_is_refused() -> None:

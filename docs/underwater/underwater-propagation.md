@@ -523,7 +523,7 @@ freqs = np.logspace(2, 5.5, 300)
 fig, ax = plt.subplots()
 for u in (5.0, 20.0):
     noise = underwater.ocean_ambient_noise(freqs, wind_speed_knots=u)
-    ax.semilogx(noise.frequency, noise.spectrum_level, label=f"Total ({u:.0f} kn)")
+    ax.semilogx(noise.frequencies, noise.spectrum_level, label=f"Total ({u:.0f} kn)")
 ax.semilogx(freqs, underwater.thermal_noise_spectrum(freqs), ":", label="Thermal")
 ax.set(xlabel="Frequency [Hz]", ylabel="Spectrum level [dB re 1 µPa²/Hz]")
 ax.legend()
@@ -580,7 +580,7 @@ for vessel_class, speed, length in (("containership", 18.0, 300.0),
                                     ("cruise", 17.1, 250.0),
                                     ("tug", 3.7, 30.0)):
     s = underwater.ship_source_spectrum(speed, length, vessel_class=vessel_class)
-    ax.semilogx(s.frequency, s.source_psd,
+    ax.semilogx(s.frequencies, s.source_psd,
                 label=f"{vessel_class} ({speed:.0f} kn, {length:.0f} m)")
 ax.set(xlabel="Frequency [Hz]",
        ylabel="Source spectral density [dB re 1 µPa²/Hz at 1 m]")
@@ -601,7 +601,7 @@ ship.plot()                     # source spectral density vs frequency
 print(underwater.VESSEL_CLASSES)        # the 13 JOMOPANS-ECHO vessel classes
 
 # Feed the predicted spectrum into the ambient noise as the shipping term:
-noise = underwater.ocean_ambient_noise(ship.frequency, wind_speed_knots=10.0,
+noise = underwater.ocean_ambient_noise(ship.frequencies, wind_speed_knots=10.0,
                                shipping=ship.source_psd)
 ```
 

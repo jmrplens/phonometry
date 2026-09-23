@@ -36,7 +36,7 @@ Noise* (2011) -- the rule of fives (p. 2) and the thermal-noise derivation
 
 ```python
 AmbientNoiseResult(
-    frequency: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
     spectrum_level: NDArray[np.float64],
     wind: NDArray[np.float64],
     thermal: NDArray[np.float64],
@@ -51,7 +51,7 @@ Composite ambient-noise spectrum (Wenz framework).
 
 | Name | Description |
 | :--- | :--- |
-| `frequency` | Frequencies, in Hz. |
+| `frequencies` | Frequencies, in Hz. |
 | `spectrum_level` | Composite spectrum level (energy sum of the enabled components), in dB re 1 µPa²/Hz. |
 | `wind` | Wind-noise component per frequency, in dB re 1 µPa²/Hz. |
 | `thermal` | Thermal-noise component per frequency, in dB re 1 µPa²/Hz. |
@@ -81,7 +81,7 @@ ocean_ambient_noise(
     shipping: NDArray[np.float64] | list[float] | None = None,
     temperature_c: float = 16.85,
     density: float = 1025.0,
-    sound_speed: float = 1500.0,
+    speed_of_sound: float = 1500.0,
 ) -> AmbientNoiseResult
 ```
 
@@ -99,7 +99,7 @@ components, plus an optional caller-supplied shipping spectrum.
 | `shipping` | Optional shipping-noise spectrum level per frequency, in dB re 1 µPa²/Hz (same length as `frequency_hz`), or `None`. |
 | `temperature_c` | Water temperature, in degrees Celsius. |
 | `density` | Water density, in kg/m³. |
-| `sound_speed` | Sound speed, in m/s. |
+| `speed_of_sound` | Sound speed, in m/s. |
 
 **Returns:** An [`AmbientNoiseResult`](/phonometry/reference/api/underwater/ambient-noise/#ambientnoiseresult).
 
@@ -117,7 +117,7 @@ thermal_noise_spectrum(
     *,
     temperature_c: float = 16.85,
     density: float = 1025.0,
-    sound_speed: float = 1500.0,
+    speed_of_sound: float = 1500.0,
 ) -> NDArray[np.float64]
 ```
 
@@ -133,7 +133,7 @@ level is $10 \log_{10}(\langle p^2 \rangle / p_0^2)$.
 | `frequency_hz` | Frequency, in Hz (scalar or array). |
 | `temperature_c` | Water temperature, in degrees Celsius (default 16.85 °C = 290 K). |
 | `density` | Water density $\rho$, in kg/m³ (default 1025). |
-| `sound_speed` | Sound speed `c`, in m/s (default 1500). |
+| `speed_of_sound` | Sound speed `c`, in m/s (default 1500). |
 
 **Returns:** Thermal-noise spectrum level per frequency, in dB re 1 µPa²/Hz.
 

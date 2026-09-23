@@ -52,7 +52,7 @@ Evaluate a sound-speed profile over a depth column.
 ```python
 SoundSpeedProfile(
     depth: NDArray[np.float64],
-    sound_speed: NDArray[np.float64],
+    speed_of_sound: NDArray[np.float64],
     gradient_per_s: NDArray[np.float64],
     model: str,
 )
@@ -65,7 +65,7 @@ Sound-speed profile `c(z)` over a column of water.
 | Name | Description |
 | :--- | :--- |
 | `depth` | Depths, in metres (increasing downward). |
-| `sound_speed` | Sound speed at each depth, in m/s. |
+| `speed_of_sound` | Sound speed at each depth, in m/s. |
 | `gradient_per_s` | Vertical sound-speed gradient `dc/dz`, in (m/s)/m. |
 | `model` | The equation used. |
 

@@ -254,19 +254,19 @@ def direction_averaged_level_difference(
 # Structural quantities (Part 1, Clauses 3.5/3.8)
 # --------------------------------------------------------------------------- #
 def total_loss_factor(
-    frequency: Sequence[float] | np.ndarray,
+    frequencies: Sequence[float] | np.ndarray,
     structural_reverberation_time: float | Sequence[float] | np.ndarray,
 ) -> np.ndarray:
     r"""Total loss factor :math:`\eta = 2.2 / (f \, T_\mathrm{s})` (Clause 7.3.1).
 
-    :param frequency: Band centre frequency ``f``, in Hz, per band.
+    :param frequencies: Band centre frequency ``f``, in Hz, per band.
     :param structural_reverberation_time: Structural reverberation time
         ``Ts``, in s, per band (or a single value broadcast to all bands).
     :return: Total loss factor ``η`` (dimensionless) per band.
     :raises ValueError: If the inputs are not positive/finite or their band
         counts are incompatible.
     """
-    f = _positive_array(frequency, "frequency")
+    f = _positive_array(frequencies, "frequencies")
     ts = _positive_array(structural_reverberation_time, "structural_reverberation_time")
     ts = _broadcast(ts, f.size, "structural_reverberation_time")
     return np.asarray(_STRUCTURAL_CONSTANT / (f * ts), dtype=np.float64)
@@ -275,7 +275,7 @@ def total_loss_factor(
 def equivalent_absorption_length(
     area: float,
     structural_reverberation_time: float | Sequence[float] | np.ndarray,
-    frequency: Sequence[float] | np.ndarray,
+    frequencies: Sequence[float] | np.ndarray,
     *,
     speed_of_sound: float = _DEFAULT_SPEED_OF_SOUND,
 ) -> np.ndarray:
@@ -291,7 +291,7 @@ def equivalent_absorption_length(
     :param area: Element surface area ``Sj``, in m².
     :param structural_reverberation_time: Structural reverberation time
         ``Ts,j``, in s, per band (or a single value broadcast to all bands).
-    :param frequency: Band centre frequency ``f``, in Hz, per band.
+    :param frequencies: Band centre frequency ``f``, in Hz, per band.
     :param speed_of_sound: Speed of sound in air ``c0``, in m/s
         (default 343 m/s).
     :return: Equivalent absorption length ``aj``, in m, per band.
@@ -300,7 +300,7 @@ def equivalent_absorption_length(
     """
     s = _positive(area, "area")
     c0 = _positive(speed_of_sound, "speed_of_sound")
-    f = _positive_array(frequency, "frequency")
+    f = _positive_array(frequencies, "frequencies")
     ts = _positive_array(structural_reverberation_time, "structural_reverberation_time")
     ts = _broadcast(ts, f.size, "structural_reverberation_time")
     return (
@@ -533,7 +533,7 @@ def vibration_reduction_index(
     area_i: float,
     area_j: float,
     *,
-    frequency: Sequence[float] | np.ndarray | None = None,
+    frequencies: Sequence[float] | np.ndarray | None = None,
     structural_reverberation_time_i: float | Sequence[float] | np.ndarray | None = None,
     structural_reverberation_time_j: float | Sequence[float] | np.ndarray | None = None,
     speed_of_sound: float = _DEFAULT_SPEED_OF_SOUND,
@@ -556,11 +556,11 @@ def vibration_reduction_index(
     :param junction_length: Common-edge junction length ``lij``, in m.
     :param area_i: Area ``Si`` of element ``i``, in m².
     :param area_j: Area ``Sj`` of element ``j``, in m².
-    :param frequency: Band centre frequencies, in Hz. Required for Formula (12)
+    :param frequencies: Band centre frequencies, in Hz. Required for Formula (12)
         and for the single-number mean; optional for the simplified form.
     :param structural_reverberation_time_i: ``Ts,i`` per band (or a single
         value), in s. Supply together with ``structural_reverberation_time_j``
-        and ``frequency`` to use Formula (12); omit for the simplified form.
+        and ``frequencies`` to use Formula (12); omit for the simplified form.
     :param structural_reverberation_time_j: ``Ts,j`` per band (or a single
         value), in s.
     :param speed_of_sound: Speed of sound in air ``c0``, in m/s.
@@ -579,11 +579,11 @@ def vibration_reduction_index(
     s_i = _positive(area_i, "area_i")
     s_j = _positive(area_j, "area_j")
 
-    freq = None if frequency is None else _positive_array(frequency, "frequency")
+    freq = None if frequencies is None else _positive_array(frequencies, "frequencies")
     if freq is not None:
         require_equal_counts(
             "vibration_reduction_index",
-            {"velocity_level_difference": dv.size, "frequency": freq.size},
+            {"velocity_level_difference": dv.size, "frequencies": freq.size},
             "band",
         )
 
@@ -597,7 +597,7 @@ def vibration_reduction_index(
     if ts_given == 2:  # noqa: PLR2004
         if freq is None:
             msg = (
-                "'frequency' is required when structural reverberation times are "
+                "'frequencies' is required when structural reverberation times are "
                 "supplied (Formula (12))."
             )
             raise ValueError(msg)
@@ -1087,7 +1087,7 @@ def modal_overlap_factor(
 
 
 def band_mode_count(
-    frequency: Sequence[float] | np.ndarray,
+    frequencies: Sequence[float] | np.ndarray,
     area: float,
     critical_frequency: float,
     *,
@@ -1101,13 +1101,13 @@ def band_mode_count(
     band is
     "always satisfactory".
 
-    :param frequency: Band centre frequency ``f``, in Hz, per band.
+    :param frequencies: Band centre frequency ``f``, in Hz, per band.
     :param area: Element area ``S``, in m².
     :param critical_frequency: Critical frequency ``fc``, in Hz.
     :param speed_of_sound: Speed of sound in air ``c0``, in m/s.
     :return: In-band mode count ``N`` per band (dimensionless).
     :raises ValueError: If any input is not positive/finite.
     """
-    f = _positive_array(frequency, "frequency")
+    f = _positive_array(frequencies, "frequencies")
     n = modal_density(area, critical_frequency, speed_of_sound=speed_of_sound)
     return 0.23 * f * n

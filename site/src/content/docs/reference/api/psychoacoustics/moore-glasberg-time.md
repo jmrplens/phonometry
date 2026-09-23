@@ -102,7 +102,7 @@ long-term loudness of 1.000 sone (40 phon) by definition of the sone.
 
 ```python
 MooreGlasbergTimeVaryingLoudness(
-    time: np.ndarray,
+    times: np.ndarray,
     short_term_loudness: np.ndarray,
     long_term_loudness: np.ndarray,
     short_term_loudness_level: np.ndarray,
@@ -117,7 +117,7 @@ MooreGlasbergTimeVaryingLoudness(
 
 Result of an ISO 532-3:2023 time-varying loudness calculation.
 
-`time` is the frame time axis in seconds (1 ms spacing, clause 7.3).
+`times` is the frame time axis in seconds (1 ms spacing, clause 7.3).
 `short_term_loudness` and `long_term_loudness` are the binaural
 short-term `S'(t)` (clause 7.8) and long-term `S''(t)` (clause 7.9)
 loudness traces in sone; `short_term_loudness_level` and

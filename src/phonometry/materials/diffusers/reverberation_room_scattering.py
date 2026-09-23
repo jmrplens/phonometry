@@ -674,7 +674,7 @@ def absorption_coefficient_uncertainty(
     volume: float,
     area: float,
     *,
-    c: ArrayLike,
+    speed_of_sound: ArrayLike,
     t_a: ArrayLike,
     u_a: ArrayLike,
     t_b: ArrayLike,
@@ -693,7 +693,7 @@ def absorption_coefficient_uncertainty(
 
     :param volume: Reverberation-room volume ``V``, in cubic metres.
     :param area: Test-sample area ``S``, in square metres.
-    :param c: Speed of sound ``c``, in m/s.
+    :param speed_of_sound: Speed of sound ``c``, in m/s.
     :param t_a: Reverberation time of the first situation, in seconds.
     :param u_a: Standard uncertainty of ``t_a`` (Eq. (A.1)), in seconds.
     :param t_b: Reverberation time of the second situation, in seconds.
@@ -703,7 +703,7 @@ def absorption_coefficient_uncertainty(
     """
     vol = _positive_scalar(volume, "volume")
     surf = _positive_scalar(area, "area")
-    c_arr = _positive_array(c, "c")
+    c_arr = _positive_array(speed_of_sound, "speed_of_sound")
     ta = _positive_array(t_a, "t_a")
     tb = _positive_array(t_b, "t_b")
     ua = _nonneg_array(u_a, "u_a")

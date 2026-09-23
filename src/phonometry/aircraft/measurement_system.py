@@ -80,32 +80,32 @@ class AircraftSystemComplianceResult:
     What :func:`verify_aircraft_noise_system` returns: the verdict together
     with the individual checks it is the conjunction of.
 
-    :ivar passed: Whether every supplied measurement met its limit.
+    :ivar passes: Whether every supplied measurement met its limit.
     :ivar checks: One entry per checked quantity, ``{"quantity", "limit",
         "value", "ok", ...}``, as an immutable tuple.
     """
 
-    passed: bool
+    passes: bool
     checks: tuple[dict[str, Any], ...]
 
     def __post_init__(self) -> None:
         """Reject a verdict the checks under it do not support.
 
         The chain is qualified by the conjunction of what was actually
-        measured, so a stated ``passed`` that does not restate the table
+        measured, so a stated ``passes`` that does not restate the table
         prints a pass over a row whose ``ok`` is ``False``. A call that
         supplies no measurement carries no check and does not pass: nothing
         was measured, so nothing was qualified.
 
-        :raises ValueError: if ``passed`` is not the conjunction of the
+        :raises ValueError: if ``passes`` is not the conjunction of the
             checks, or is stated over no check at all.
         """
         derived = bool(self.checks) and all(bool(check["ok"]) for check in self.checks)
-        if self.passed != derived:
+        if self.passes != derived:
             msg = (
-                f"{type(self).__name__}: 'passed' must be the conjunction of "
+                f"{type(self).__name__}: 'passes' must be the conjunction of "
                 f"the checks, and False over no check at all; got "
-                f"{self.passed!r} over {len(self.checks)} check(s) where they "
+                f"{self.passes!r} over {len(self.checks)} check(s) where they "
                 f"give {derived!r}."
             )
             raise ValueError(msg)
@@ -131,7 +131,7 @@ def verify_aircraft_noise_system(
     :param linearity: Level non-linearity ``{"reference": dB, "other": dB}``
         against the ±0.4/±0.5 dB limits (§4.5.2).
     :param resolution: Readout resolution, in dB, against the 0.1 dB limit (§4.7).
-    :return: An :class:`AircraftSystemComplianceResult`, whose ``passed`` is
+    :return: An :class:`AircraftSystemComplianceResult`, whose ``passes`` is
         the conjunction of every check and ``False`` when no measurement was
         supplied.
     :raises ValueError: If a frequency or angle is out of the tabulated range.
@@ -147,7 +147,7 @@ def verify_aircraft_noise_system(
         checks.append(_resolution_check(resolution))
 
     return AircraftSystemComplianceResult(
-        passed=bool(checks) and all(c["ok"] for c in checks),
+        passes=bool(checks) and all(c["ok"] for c in checks),
         checks=tuple(checks),
     )
 

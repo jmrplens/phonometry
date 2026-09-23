@@ -21,7 +21,7 @@ and is not repeated here.
 
 ```python
 AircraftSystemComplianceResult(
-    passed: bool,
+    passes: bool,
     checks: tuple[dict[str, Any], ...],
 )
 ```
@@ -35,7 +35,7 @@ with the individual checks it is the conjunction of.
 
 | Name | Description |
 | :--- | :--- |
-| `passed` | Whether every supplied measurement met its limit. |
+| `passes` | Whether every supplied measurement met its limit. |
 | `checks` | One entry per checked quantity, `{"quantity", "limit", "value", "ok", ...}`, as an immutable tuple. |
 
 ## verify_aircraft_noise_system
@@ -65,7 +65,7 @@ verification (subclause 4.6) and is not repeated here.
 | `linearity` | Level non-linearity `{"reference": dB, "other": dB}` against the ±0.4/±0.5 dB limits (§4.5.2). |
 | `resolution` | Readout resolution, in dB, against the 0.1 dB limit (§4.7). |
 
-**Returns:** An [`AircraftSystemComplianceResult`](/phonometry/reference/api/aeroacoustics/measurement-system/#aircraftsystemcomplianceresult), whose `passed` is the conjunction of every check and `False` when no measurement was supplied.
+**Returns:** An [`AircraftSystemComplianceResult`](/phonometry/reference/api/aeroacoustics/measurement-system/#aircraftsystemcomplianceresult), whose `passes` is the conjunction of every check and `False` when no measurement was supplied.
 
 **Raises**
 

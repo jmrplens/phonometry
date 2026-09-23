@@ -206,7 +206,7 @@ def plot_aircraft_band_attenuation(
     from .._i18n import format_number, localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    f = np.asarray(result.frequency, dtype=np.float64)
+    f = np.asarray(result.frequencies, dtype=np.float64)
     label = f"{_t('SAE band', language)} ({format_number(result.path_length, language, decimals=0)} m)"
     ax.plot(
         f,
@@ -250,8 +250,8 @@ def plot_npd_level(
     from .._i18n import decimal_comma, fmt_minus, localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    d = np.asarray(result.distance, dtype=np.float64)
-    lvl = np.asarray(result.level, dtype=np.float64)
+    d = np.asarray(result.distances, dtype=np.float64)
+    lvl = np.asarray(result.levels, dtype=np.float64)
     td = np.asarray(result.table_distances, dtype=np.float64)
     tl = np.asarray(result.table_levels, dtype=np.float64)
     label = f"NPD ($P$ = {decimal_comma(fmt_minus(result.power, 'g'), language)})"
@@ -392,7 +392,7 @@ def plot_noise_contour(
     ax = ax if ax is not None else _new_axes()
     x = np.asarray(result.x, dtype=np.float64) / 1000.0
     y = np.asarray(result.y, dtype=np.float64) / 1000.0
-    lvl = np.asarray(result.level, dtype=np.float64)
+    lvl = np.asarray(result.levels, dtype=np.float64)
     finite = lvl[np.isfinite(lvl)]
     top = float(np.ceil(np.max(finite) / 5.0) * 5.0) if finite.size else 100.0
     levels = np.arange(top - 30.0, top + 0.1, 5.0)
@@ -571,7 +571,7 @@ def plot_rotorcraft_noise_contour(
     ax = ax if ax is not None else _new_axes()
     x = np.asarray(result.x, dtype=np.float64) / 1000.0
     y = np.asarray(result.y, dtype=np.float64) / 1000.0
-    lvl = np.asarray(result.level, dtype=np.float64)
+    lvl = np.asarray(result.levels, dtype=np.float64)
     finite = lvl[np.isfinite(lvl)]
     top = float(np.ceil(np.max(finite) / 5.0) * 5.0) if finite.size else 100.0
     levels = np.arange(top - 30.0, top + 0.1, 5.0)
@@ -734,8 +734,8 @@ def plot_anp_npd(
         curve = npd_curve(result.powers, result.distances, result.levels, float(power))
         reading = decimal_comma(fmt_minus(float(power), "g"), language)
         ax.plot(
-            curve.distance,
-            curve.level,
+            curve.distances,
+            curve.levels,
             **styled(kwargs, lw=1.5, label=f"$P$ = {reading}"),
         )
         ax.plot(result.distances, result.levels[i], "o", ms=3, color=_C_MUTED)

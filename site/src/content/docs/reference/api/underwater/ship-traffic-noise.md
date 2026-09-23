@@ -72,7 +72,7 @@ Predicted underwater source-level spectrum of a ship.
 
 ```python
 ShipTrafficSpectrum(
-    frequency: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
     source_psd: NDArray[np.float64],
     band_level: NDArray[np.float64],
     model: str,
@@ -88,7 +88,7 @@ Predicted ship source-level spectrum.
 
 | Name | Description |
 | :--- | :--- |
-| `frequency` | Frequencies, in Hz. |
+| `frequencies` | Frequencies, in Hz. |
 | `source_psd` | Source pressure spectral-density level, in dB re 1 µPa²/Hz at 1 m (equivalent monopole). |
 | `band_level` | Decidecade-band source level, in dB re 1 µPa m (`source_psd` plus $10 \log_{10}(0.231 f)$). |
 | `model` | The model used. |

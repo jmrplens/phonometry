@@ -82,13 +82,13 @@ supplied.
 
 ```python
 adaptation_term_kc(
-    freq: Sequence[float] | np.ndarray,
+    frequencies: Sequence[float] | np.ndarray,
     *,
     boundary_area: float,
     volume: float,
 ) -> np.ndarray
 
-adaptation_term_kc(freq: Sequence[float] | np.ndarray) -> np.ndarray
+adaptation_term_kc(frequencies: Sequence[float] | np.ndarray) -> np.ndarray
 ```
 
 Adaptation term `Kc` per ISO 15186-1:2000, Annex B.
@@ -110,7 +110,7 @@ $R_\mathrm{I,M} = R_\mathrm{I} + K_\mathrm{c}$ (Clause 3.10). Two forms are avai
 
 | Name | Description |
 | :--- | :--- |
-| `freq` | One-third-octave midband frequencies, in Hz. |
+| `frequencies` | One-third-octave midband frequencies, in Hz. |
 | `boundary_area` | Total boundary-surface area `Sb2` of the receiving room, in m². Supply together with `volume` for (B.1). |
 | `volume` | Receiving-room volume `V2`, in m³. |
 
@@ -120,7 +120,7 @@ $R_\mathrm{I,M} = R_\mathrm{I} + K_\mathrm{c}$ (Clause 3.10). Two forms are avai
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If `freq` is not positive/finite, if only one of `boundary_area` / `volume` is supplied, or if either is not positive. |
+| ValueError | If `frequencies` is not positive/finite, if only one of `boundary_area` / `volume` is supplied, or if either is not positive. |
 
 ## combine_subareas
 

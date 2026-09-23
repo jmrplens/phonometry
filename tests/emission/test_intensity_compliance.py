@@ -430,8 +430,12 @@ def test_phase_conversion_rejects_invalid_inputs() -> None:
         ValueError, match=r"'spacing' must be a positive, finite distance"
     ):
         emission.phase_mismatch_from_residual_index(20.0, 1000.0, -0.01)
-    with pytest.raises(ValueError, match=r"'c' must be a positive, finite speed"):
-        emission.phase_mismatch_from_residual_index(20.0, 1000.0, 0.025, c=0.0)
+    with pytest.raises(
+        ValueError, match=r"'speed_of_sound' must be a positive, finite speed"
+    ):
+        emission.phase_mismatch_from_residual_index(
+            20.0, 1000.0, 0.025, speed_of_sound=0.0
+        )
     with pytest.raises(ValueError, match=r"'frequency' must be finite and positive"):
         emission.phase_mismatch_from_residual_index(20.0, 0.0, 0.025)
 
@@ -486,7 +490,7 @@ def test_a_verdict_whose_device_is_not_a_table_2_column_is_refused() -> None:
 
 
 @pytest.mark.parametrize(
-    "field_name", ["frequency", "residual_index", "limit_class1", "limit_class2"]
+    "field_name", ["frequencies", "residual_index", "limit_class1", "limit_class2"]
 )
 def test_a_non_finite_band_of_the_verdict_is_refused(field_name: str) -> None:
     """A NaN band prints as ``nan`` under a boxed verdict that still complies.
@@ -584,7 +588,7 @@ def test_a_verdict_refuses_a_class_attested_over_no_bands() -> None:
         dataclasses.replace(
             result,
             bands=(),
-            frequency=empty,
+            frequencies=empty,
             residual_index=empty,
             limit_class1=empty,
             limit_class2=empty,

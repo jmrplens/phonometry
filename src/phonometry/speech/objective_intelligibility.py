@@ -105,7 +105,7 @@ class STOIResult:
         segments (STOI only; ``None`` for ESTOI, whose index mixes the bands).
     :ivar band_frequencies: The 15 one-third-octave band centre frequencies,
         in hertz.
-    :ivar sample_rate: The internal sample rate the measure runs at (10 kHz).
+    :ivar fs: The internal sample rate the measure runs at (10 kHz).
     """
 
     value: float
@@ -114,7 +114,7 @@ class STOIResult:
     segment_scores: NDArray[np.float64]
     band_scores: NDArray[np.float64] | None
     band_frequencies: NDArray[np.float64]
-    sample_rate: int
+    fs: int
 
     def __post_init__(self) -> None:
         """Reject a result whose per-band quantities disagree.
@@ -414,5 +414,5 @@ def stoi(
         segment_scores=np.asarray(segment_scores, dtype=np.float64),
         band_scores=band_scores,
         band_frequencies=centers,
-        sample_rate=SAMPLE_RATE,
+        fs=SAMPLE_RATE,
     )

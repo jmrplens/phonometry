@@ -160,7 +160,7 @@ air impedance.
 
 ```python
 MetadiffuserResult(
-    frequency: Real,
+    frequencies: Real,
     reflection: Complex,
     absorption: Real,
     well_absorption: Real,

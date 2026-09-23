@@ -995,7 +995,7 @@ class RotorcraftEventResult:
     :ivar emission_times: Emission times ``t_e``, in s, shape ``(K,)``.
     :ivar times: Recorded times :math:`t_\mathrm{r} = t_\mathrm{e} + r/c` (Eq. 22), in s, shape
         ``(K,)``.
-    :ivar distance: Slant distance ``r`` per step, in metres, shape ``(K,)``.
+    :ivar distances: Slant distance ``r`` per step, in metres, shape ``(K,)``.
     :ivar azimuth: Emission azimuth ``φ`` per step, in degrees, shape ``(K,)``.
     :ivar polar: Emission polar angle ``θ`` per step, in degrees, shape ``(K,)``.
     :ivar band_levels: Received (unweighted) band levels, in dB, shape
@@ -1021,7 +1021,7 @@ class RotorcraftEventResult:
     frequencies: NDArray[np.float64]
     emission_times: NDArray[np.float64]
     times: NDArray[np.float64]
-    distance: NDArray[np.float64]
+    distances: NDArray[np.float64]
     azimuth: NDArray[np.float64]
     polar: NDArray[np.float64]
     band_levels: NDArray[np.float64]
@@ -1077,7 +1077,7 @@ class RotorcraftEventResult:
             frequencies=1,
             emission_times=1,
             times=1,
-            distance=1,
+            distances=1,
             azimuth=1,
             polar=1,
             band_levels=2,
@@ -1089,7 +1089,7 @@ class RotorcraftEventResult:
             self,
             "emission_times",
             "times",
-            "distance",
+            "distances",
             "azimuth",
             "polar",
             "band_levels",
@@ -1134,13 +1134,13 @@ class RotorcraftNoiseContourResult:
 
     :ivar x: Grid x coordinates, in metres, shape ``(nx,)``.
     :ivar y: Grid y coordinates, in metres, shape ``(ny,)``.
-    :ivar level: Event level over the grid, in dB(A), shape ``(ny, nx)``.
+    :ivar levels: Event level over the grid, in dB(A), shape ``(ny, nx)``.
     :ivar metric: ``"exposure"`` (SEL) or ``"maximum"`` (LASmax).
     """
 
     x: NDArray[np.float64]
     y: NDArray[np.float64]
-    level: NDArray[np.float64]
+    levels: NDArray[np.float64]
     metric: str
 
     def __post_init__(self) -> None:
@@ -1166,9 +1166,9 @@ class RotorcraftNoiseContourResult:
         :raises ValueError: if the level grid disagrees with ``x`` or ``y``,
             or ``metric`` is not ``"exposure"`` or ``"maximum"``.
         """
-        require_ranks(self, x=1, y=1, level=2)
-        require_same_length(self, "y", ("level", 0), axis="grid row")
-        require_same_length(self, "x", ("level", 1), axis="grid column")
+        require_ranks(self, x=1, y=1, levels=2)
+        require_same_length(self, "y", ("levels", 0), axis="grid row")
+        require_same_length(self, "x", ("levels", 1), axis="grid column")
         require_choice(self.metric, "metric", ("exposure", "maximum"))
 
     def plot(
@@ -1988,7 +1988,7 @@ def rotorcraft_event_level(
         frequencies=setup.frequencies,
         emission_times=setup.times,
         times=trec[:, 0],
-        distance=dist,
+        distances=dist,
         azimuth=phi,
         polar=theta,
         band_levels=spectra,
@@ -2116,5 +2116,5 @@ def rotorcraft_noise_contour(
     trec, la, _ = _event_histories(setup, receivers)
     level = _exposure_level(la, trec) if key == "exposure" else np.max(la, axis=0)
     return RotorcraftNoiseContourResult(
-        x=gx, y=gy, level=level.reshape(gy.size, gx.size), metric=key
+        x=gx, y=gy, levels=level.reshape(gy.size, gx.size), metric=key
     )

@@ -88,7 +88,7 @@ AerodynamicValveNoise(
     pipe_mach: float,
     velocity_correction: float,
     internal_level: float,
-    frequency: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
     band_internal_level: NDArray[np.float64],
     band_transmission_loss: NDArray[np.float64],
     band_external_level: NDArray[np.float64],
@@ -119,7 +119,7 @@ What IEC 60534-8-3 Clause 5 says about one operating point.
 | `pipe_mach` | $M_2$ of Equation (17), before the 0,3 limit. |
 | `velocity_correction` | $L_g$ of Equation (16), in dB. |
 | `internal_level` | $L_{pi}$ of Equation (18), in dB. |
-| `frequency` | The 33 one-third-octave band centres of Table 5, in Hz. |
+| `frequencies` | The 33 one-third-octave band centres of Table 5, in Hz. |
 | `band_internal_level` | $L_{pi}(f_i)$ of Equation (19), in dB. |
 | `band_transmission_loss` | $TL(f_i)$ of Equation (20a), in dB. |
 | `band_external_level` | $L_{pe,1m}(f_i)$ of Equation (24), in dB. |
@@ -214,7 +214,7 @@ DownstreamPipe(
     wall_thickness: float,
     density: float,
     *,
-    sound_speed: float = 5000.0,
+    speed_of_sound: float = 5000.0,
     air_sound_speed: float = 343.0,
     atmospheric_pressure_pa: float = 101325.0,
     standard_pressure_pa: float = 101325.0,
@@ -234,7 +234,7 @@ not settings anyone is expected to change.
 | `internal_diameter_m` | $D_i$, in m. |
 | `wall_thickness` | $t_S$, in m. |
 | `density` | $\rho_s$ of the pipe material, in kg/m³. |
-| `sound_speed` | $c_s$ in the pipe wall, in m/s. |
+| `speed_of_sound` | $c_s$ in the pipe wall, in m/s. |
 | `air_sound_speed` | $c_a$ outside the pipe, in m/s. |
 | `atmospheric_pressure_pa` | $p_a$, in Pa. |
 | `standard_pressure_pa` | $p_s$, in Pa. |
@@ -268,7 +268,7 @@ cone makes the flow unstable in ways the standard does not model.
 
 ```python
 expander_noise(
-    frequency: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
     *,
     mass_flow: float,
     downstream_density: float,
@@ -298,7 +298,7 @@ computed as supersonic is computed at Mach one instead.
 
 | Name | Description |
 | :--- | :--- |
-| `frequency` | The band centre frequencies, in Hz. |
+| `frequencies` | The band centre frequencies, in Hz. |
 | `mass_flow` | $\dot m$, in kg/s. |
 | `downstream_density` | $\rho_2$, in kg/m³. |
 | `downstream_sound_speed` | $c_2$, in m/s. |
@@ -438,7 +438,7 @@ GLOBE_CONTRACTION_COEFFICIENT = 0.93
 internal_spectrum(
     internal_level: float,
     peak_frequency: float,
-    frequency: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
 ) -> NDArray[np.float64]
 ```
 
@@ -460,7 +460,7 @@ puts 3 dB there for octave bands instead.
 | :--- | :--- |
 | `internal_level` | $L_{pi}$ of Equation (18), in dB. |
 | `peak_frequency` | $f_p$ from Table 3, in Hz. |
-| `frequency` | The band centre frequencies, in Hz. |
+| `frequencies` | The band centre frequencies, in Hz. |
 
 **Returns:** The internal level in each band, in dB.
 
@@ -699,7 +699,7 @@ PIPE_SOUND_SPEED_M_S = 5000.0
 
 ```python
 pipe_transmission_loss(
-    frequency: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
     *,
     internal_diameter_m: float,
     wall_thickness: float,
@@ -727,7 +727,7 @@ internal level, so the sign is not a convention this module chose.
 
 | Name | Description |
 | :--- | :--- |
-| `frequency` | The band centre frequencies, in Hz. |
+| `frequencies` | The band centre frequencies, in Hz. |
 | `internal_diameter_m` | $D_i$, in m. |
 | `wall_thickness` | $t_S$, in m. |
 | `valve_outlet_diameter_m` | $D$, in m, which selects the damping factor of Equation (20b) and is the valve outlet and not the pipe. |

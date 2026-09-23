@@ -268,7 +268,7 @@ dentro de la banda de tolerancia del 5 % por muestra que fija la norma.
 
 Devuelve un dataclass `ZwickerLoudness`: `loudness_level` (fonios), `specific`
 ($N'(z)$, 240 bins de 0,1 Bark) y, para los análisis variables en el tiempo,
-`n5`, `n10`, `time` y `loudness_vs_time` (traza a 500 Hz). `loudness` ($N$,
+`n5`, `n10`, `times` y `loudness_vs_time` (traza a 500 Hz). `loudness` ($N$,
 sonios) cambia de significado con `stationary`: con `stationary=True` es el $N$
 estacionario único del apartado 5, y con el valor por defecto
 `stationary=False` es el máximo $N_\text{max}$ de la traza de sonoridad frente
@@ -300,7 +300,7 @@ devuelve 10,0 sonios, otra magnitud más, la quinta.*
 import matplotlib.pyplot as plt
 
 # `bursts` y `tv` vienen del fragmento de arriba.
-plt.plot(tv.time, tv.loudness_vs_time, label="N(t)")
+plt.plot(tv.times, tv.loudness_vs_time, label="N(t)")
 for value, label in [(tv.loudness, "Nmax"), (tv.n5, "N5"), (tv.n10, "N10")]:
     plt.axhline(value, linestyle="--", label=f"{label} = {value:.1f} sonios")
 plt.xlabel("Tiempo [s]")
@@ -315,7 +315,7 @@ Como $N_5$ es un porcentaje de la ventana de análisis, alargar o acortar el
 registro lo mueve. Cita el tiempo de medición junto a $N_5$, mantenlo idéntico
 entre los sonidos que se comparan (el apartado 6.4 lo exige) y no uses $N_5$
 para impulsos aislados, que es exactamente el caso que caricaturiza la traza de
-arriba. `loudness_vs_time` y `time` llevan la traza, así que un registro se
+arriba. `loudness_vs_time` y `times` llevan la traza, así que un registro se
 puede recortar al estado de funcionamiento de interés antes de leer el
 percentil, y el intervalo de medición va en `ReportMetadata`, ya que la ficha
 imprime $N_5$ sin él.

@@ -261,6 +261,34 @@ un `TypeError`, que es lo que siempre debió ser.
 print(round(float(leq(x, dbfs=True)), 3))
 ```
 
+## Una grafía por concepto
+
+Los nombres públicos se habían ido repartiendo entre varias grafías de la
+misma magnitud, y la 4.0 se queda con la que ya usaba la mayoría. La regla de
+las magnitudes que se cuentan en plural es la que seguía casi toda la API: un
+campo o un parámetro que guarda un array es `frequencies`, `times`,
+`distances` o `levels`, y uno que guarda un solo valor va en singular. Un
+argumento vectorizado que admite un número o un array conserva su nombre.
+
+| 3.3.0 o 4.0.0rc1 | 4.0 |
+| --- | --- |
+| `sound_speed` (válvulas de control, medición de silenciadores, regímenes de Weston, ruido ambiente, `FluidSeabed`, `SoundSpeedProfile`, `ShipSourceLevelResult`) | `speed_of_sound` |
+| `c=` y `rho=` en `sound_intensity`, `c=` en las dos conversiones de desajuste de fase, `phase_mismatch()`, `absorption_coefficient_uncertainty` y `monopole_source_level` | `speed_of_sound=`, `density=` |
+| `speed_of_sound_m_s=` en `thickness_critical_frequency_product` | `speed_of_sound=` |
+| `sample_rate` en el `SignalSource` de FDTD, `STOIResult` e `impact_force_exposure_level` | `fs` |
+| `freq=` en `linkwitz_riley` y `adaptation_term_kc` | `frequency=` y `frequencies=` |
+| `.frequency` en los resultados que llevan un eje de frecuencias: `IntensityResult`, `FieldIndicators`, `IntensityInstrumentComplianceResult`, `RoomAcousticsResult`, los cinco resultados de auditorio, `ImpedanceTubeResult`, `PorousMediumResult`, `LayeredAbsorberResult`, `DiffuseFieldAbsorptionResult`, `BiotWavesResult`, `SlitResonatorAbsorberResult`, `MetadiffuserResult`, `TransferMatrix`, los dos resultados de ruido de válvulas, `AircraftBandAttenuation`, `AmbientNoiseResult`, `ShipTrafficSpectrum` | `.frequencies` |
+| `frequency=` con un array: las funciones de transmisión por flancos, `internal_spectrum`, `pipe_transmission_loss`, `expander_noise`, `transfer_matrix_one_load`, `transfer_matrix_two_load`, `TransferMatrix.plot` | `frequencies=` |
+| `.time` en `ZwickerLoudness`, `EcmaLoudness`, `MooreGlasbergTimeVaryingLoudness`, los resultados de tonalidad, aspereza y fuerza de fluctuación de ECMA-418-2, `DecayCurve`, `QuasiPeakResult` | `.times` |
+| `.level` en `DecayCurve`, `NpdLevelResult`, `NoiseContourResult`, `RotorcraftNoiseContourResult`, `LowFrequencyResult`, `DuctPathStage`, `LateLateralResult`, `TransferStiffnessResult` | `.levels` |
+| `.distance` en `NpdLevelResult` y `RotorcraftEventResult` | `.distances` |
+| `level=`, `measured_level=`, `operational_level=` en `sti_from_impulse_response`, `stipa`, `sti_adjusted_for_levels` y `STIResult.adjusted_for_levels` | `levels=`, `measured_levels=`, `operational_levels=` |
+| `.passed` en `AircraftSystemComplianceResult`, `QuasiPeakDynamicsResult`, `HeavyImpactSourceCheck`, `RigidMassCalibrationResult` | `.passes`, como en todos los demás verificadores |
+
+`times, levels = decay_curve(ir, fs)` sigue desempaquetando la curva de
+caída, en el mismo orden. Los solvers FDTD conservan `c` y `rho`, que nombran
+los mapas en los que están escritas sus ecuaciones.
+
 ## Todo `.plot()` toma primero los ejes
 
 El `.plot()` de cada resultado se lee ahora `plot(ax=None, *, ...)`: primero
@@ -272,7 +300,7 @@ parámetro equivocado:
 | --- | --- |
 | `LoudspeakerCharacteristics.plot("impedance", ax)` | `.plot(ax, quantity="impedance")` |
 | `MicrophoneCharacteristics.plot("noise", ax)` | `.plot(ax, quantity="noise")` |
-| `TransferMatrix.plot(f, rho_c, ax)` | `.plot(ax, frequency=f, characteristic_impedance=rho_c)` |
+| `TransferMatrix.plot(f, rho_c, ax)` | `.plot(ax, frequencies=f, characteristic_impedance=rho_c)` |
 
 Seis resultados posteriores a la 3.3.0 tomaban `language` por posición en la
 4.0.0rc1: las cuatro valoraciones de protectores auditivos y los dos resultados
@@ -291,8 +319,8 @@ fueron con el cambio, ya que el verificador devuelve ahora el objeto él mismo.
 | `verify_filter_class(bank)["overall_class"]` | `verify_filter_class(bank).overall_class` |
 | `verify_weighting_class(wf)["overall_class"]` | `verify_weighting_class(wf).overall_class` |
 | `verify_intensity_class(...)["bands"]` | `verify_intensity_class(...).bands` |
-| `verify_quasi_peak_dynamics()["passed"]` | `verify_quasi_peak_dynamics().passed` |
-| `verify_aircraft_noise_system(...)["passed"]` | `verify_aircraft_noise_system(...).passed` |
+| `verify_quasi_peak_dynamics()["passed"]` | `verify_quasi_peak_dynamics().passes` |
+| `verify_aircraft_noise_system(...)["passed"]` | `verify_aircraft_noise_system(...).passes` |
 | `filter_class_compliance(bank)` | `verify_filter_class(bank)`, que devuelve el mismo `FilterComplianceResult` |
 
 ```python

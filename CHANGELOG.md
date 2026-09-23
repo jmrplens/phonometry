@@ -238,6 +238,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- **One spelling per concept across the public names.** A census of every
+  public field, parameter and property found the same quantity spelled
+  several ways, and the minority now spells it the way the majority does,
+  with no alias. `sound_speed` becomes `speed_of_sound` (seventeen places
+  against eighty), and so do the `c` of `sound_intensity`, the phase-mismatch
+  conversions, `absorption_coefficient_uncertainty` and
+  `monopole_source_level` and the `speed_of_sound_m_s` of
+  `thickness_critical_frequency_product`; the `rho` of `sound_intensity`
+  becomes `density`. `sample_rate` becomes `fs` on the FDTD `SignalSource`,
+  `STOIResult` and `impact_force_exposure_level`. `freq` becomes `frequency`
+  on `linkwitz_riley` and `frequencies` on `adaptation_term_kc`. A verifier's
+  verdict is `passes` everywhere: `AircraftSystemComplianceResult`,
+  `QuasiPeakDynamicsResult`, `HeavyImpactSourceCheck` and
+  `RigidMassCalibrationResult` said `passed`. And an array of a quantity is
+  named in the plural, as some two hundred and twenty already were: fifty-five
+  fields, parameters and properties that held an array under `frequency`,
+  `time`, `distance` or `level` are `frequencies`, `times`, `distances` and
+  `levels` now, among them the frequency axis of the intensity, room
+  acoustics, auditorium, absorber and valve-noise results, the time axis of
+  the time-varying loudness and ECMA-418-2 results, `DecayCurve.times` and
+  `.levels`, and the STI band levels (`levels=`, `measured_levels=`,
+  `operational_levels=`). A vectorised argument that takes one value or many
+  keeps its name, compounds such as `air_sound_speed` are left as their
+  standards write them, and the FDTD solvers keep `c` and `rho` for the maps
+  their equations are written in. Three tests walk the installed package and
+  fail on a minority spelling, a symbol used as a parameter name outside the
+  solvers, and an array named in the singular or a single value in the
+  plural.
+
 - **Waveforms inside result objects come back as the `Signal` they came
   from.** The transforms have returned a `Signal` for a `Signal` since the
   contract was written, and the result objects that carry a record of
@@ -281,7 +310,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   vector and the characteristic impedance there, so the `plot(ax)` every other
   result accepts handed the axes to the wrong parameter. They are
   `plot(ax, *, quantity=...)` and
-  `plot(ax, *, frequency=..., characteristic_impedance=...)` now. The four
+  `plot(ax, *, frequencies=..., characteristic_impedance=...)` now. The four
   hearing-protector ratings and the two low-frequency intensity results took
   `language` by position, so `plot(ax, "es")` worked on those six and nowhere
   else; it is keyword-only there too. A test walks every public class of the

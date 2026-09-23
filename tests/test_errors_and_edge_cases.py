@@ -97,7 +97,7 @@ def test_linkwitz_riley_invalid() -> None:
     rng = np.random.default_rng(42)
     x = rng.standard_normal(1000)
     with pytest.raises(ValueError, match="order must be even"):
-        filters.linkwitz_riley(x, 48000, freq=1000, order=3)
+        filters.linkwitz_riley(x, 48000, frequency=1000, order=3)
 
 
 @pytest.mark.parametrize("order", [0, -2])
@@ -106,7 +106,7 @@ def test_linkwitz_riley_rejects_non_positive_order(order: int) -> None:
     rng = np.random.default_rng(42)
     x = rng.standard_normal(1000)
     with pytest.raises(ValueError, match="'order' must be a positive even integer"):
-        filters.linkwitz_riley(x, 48000, freq=1000, order=order)
+        filters.linkwitz_riley(x, 48000, frequency=1000, order=order)
 
 
 @pytest.mark.parametrize("freq", [0.0, -100.0, float("nan")])
@@ -114,15 +114,17 @@ def test_linkwitz_riley_rejects_non_positive_freq(freq: float) -> None:
     """A bad crossover frequency used to surface as a scipy message without 'freq'."""
     rng = np.random.default_rng(42)
     x = rng.standard_normal(1000)
-    with pytest.raises(ValueError, match="'freq' must be positive"):
-        filters.linkwitz_riley(x, 48000, freq=freq)
+    with pytest.raises(ValueError, match="'frequency' must be positive"):
+        filters.linkwitz_riley(x, 48000, frequency=freq)
 
 
 def test_linkwitz_riley_rejects_freq_at_or_above_nyquist() -> None:
     rng = np.random.default_rng(42)
     x = rng.standard_normal(1000)
-    with pytest.raises(ValueError, match="'freq' must be below the Nyquist frequency"):
-        filters.linkwitz_riley(x, 48000, freq=24000.0)
+    with pytest.raises(
+        ValueError, match="'frequency' must be below the Nyquist frequency"
+    ):
+        filters.linkwitz_riley(x, 48000, frequency=24000.0)
 
 
 def test_linkwitz_riley_rejects_non_positive_sample_rate() -> None:
@@ -130,7 +132,7 @@ def test_linkwitz_riley_rejects_non_positive_sample_rate() -> None:
     rng = np.random.default_rng(42)
     x = rng.standard_normal(1000)
     with pytest.raises(ValueError, match="Sample rate 'fs' must be positive"):
-        filters.linkwitz_riley(x, 0, freq=1000)
+        filters.linkwitz_riley(x, 0, frequency=1000)
 
 
 def test_calculate_sensitivity_silent() -> None:

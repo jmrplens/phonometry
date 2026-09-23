@@ -338,7 +338,7 @@ def test_only_the_three_low_frequency_bands_change() -> None:
     result = apply_low_frequency_procedure(
         _L2, _FREQS, _receiving_procedure(), reverberation_time=_T2
     )
-    assert np.array_equal(result.level[3:], _L2[3:])
+    assert np.array_equal(result.levels[3:], _L2[3:])
     assert result.reverberation_time is not None
     assert np.array_equal(result.reverberation_time[3:], _T2[3:])
 
@@ -387,11 +387,11 @@ def test_the_three_bands_are_read_where_they_actually_sit() -> None:
             for d, c in zip(levels[2:5], _CORNER_MAXIMA, strict=True)
         ]
     )
-    assert np.allclose(result.level[2:5], expected, rtol=0.0, atol=1e-12)
+    assert np.allclose(result.levels[2:5], expected, rtol=0.0, atol=1e-12)
     # 31,5 Hz and 40 Hz are below the procedure and 100 Hz above it: the
     # substitution touches neither end.
-    assert np.array_equal(result.level[:2], levels[:2])
-    assert np.array_equal(result.level[5:], levels[5:])
+    assert np.array_equal(result.levels[:2], levels[:2])
+    assert np.array_equal(result.levels[5:], levels[5:])
     assert result.reverberation_time is not None
     assert np.array_equal(result.reverberation_time[:2], times[:2])
     assert np.array_equal(result.reverberation_time[2:5], np.full(3, _T63_OCTAVE))
@@ -564,7 +564,7 @@ def test_all_three_parts_reach_the_same_low_frequency_code() -> None:
         assert record is not None
         assert np.array_equal(record.l_corner, reference.l_corner)
         assert np.array_equal(record.l_lf, reference.l_lf)
-        assert np.array_equal(record.level, reference.level)
+        assert np.array_equal(record.levels, reference.levels)
         assert record.reverberation_time is not None
         assert reference.reverberation_time is not None
         assert np.array_equal(record.reverberation_time, reference.reverberation_time)

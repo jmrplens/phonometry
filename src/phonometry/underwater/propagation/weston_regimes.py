@@ -227,7 +227,7 @@ def effective_depth(
     frequency_hz: float,
     *,
     seabed: str | WestonSeabed = "sand",
-    sound_speed: float = 1500.0,
+    speed_of_sound: float = 1500.0,
 ) -> float:
     r"""Weston effective water depth ``He`` (Ainslie Eq. 9.55), in metres.
 
@@ -239,14 +239,14 @@ def effective_depth(
     :param water_depth: Water-column depth ``H``, in metres.
     :param frequency_hz: Acoustic frequency, in Hz.
     :param seabed: ``"sand"``, ``"mud"`` or a :class:`WestonSeabed`.
-    :param sound_speed: Water sound speed ``c_w``, in m/s.
+    :param speed_of_sound: Water sound speed ``c_w``, in m/s.
     :return: The effective depth ``He``, in metres.
     :raises ValueError: If the seabed has no critical angle or an input is
         invalid.
     """
     h = require_positive(water_depth, "water_depth")
     f = require_positive(frequency_hz, "frequency_hz")
-    c = require_positive(sound_speed, "sound_speed")
+    c = require_positive(speed_of_sound, "speed_of_sound")
     bed = _seabed(seabed)
     psi_c = critical_grazing_angle(bed.sound_speed_ratio)
     if psi_c <= 0.0:
@@ -263,7 +263,7 @@ def waveguide_cutoff_frequency(
     water_depth: float,
     *,
     seabed: str | WestonSeabed = "sand",
-    sound_speed: float = 1500.0,
+    speed_of_sound: float = 1500.0,
 ) -> float:
     r"""Shallow-water waveguide cut-off frequency ``fc`` (Ainslie Eq. 9.60),
     in Hz.
@@ -274,13 +274,13 @@ def waveguide_cutoff_frequency(
 
     :param water_depth: Water-column depth ``H``, in metres.
     :param seabed: ``"sand"``, ``"mud"`` or a :class:`WestonSeabed`.
-    :param sound_speed: Water sound speed ``c_w``, in m/s.
+    :param speed_of_sound: Water sound speed ``c_w``, in m/s.
     :return: The cut-off frequency, in Hz.
     :raises ValueError: If the seabed has no critical angle or an input is
         invalid.
     """
     h = require_positive(water_depth, "water_depth")
-    c = require_positive(sound_speed, "sound_speed")
+    c = require_positive(speed_of_sound, "speed_of_sound")
     bed = _seabed(seabed)
     psi_c = critical_grazing_angle(bed.sound_speed_ratio)
     if psi_c <= 0.0:
@@ -329,7 +329,7 @@ def weston_regime_boundaries(
     water_depth: float,
     *,
     seabed: str | WestonSeabed = "sand",
-    sound_speed: float = 1500.0,
+    speed_of_sound: float = 1500.0,
     critical_angle_deg: float | None = None,
     reflection_loss_gradient_value_np_per_rad: float | None = None,
 ) -> WestonRegimeBoundaries:
@@ -338,7 +338,7 @@ def weston_regime_boundaries(
     :param frequency_hz: Acoustic frequency, in Hz.
     :param water_depth: Water-column depth ``H``, in metres.
     :param seabed: ``"sand"``, ``"mud"`` or a :class:`WestonSeabed`.
-    :param sound_speed: Water sound speed ``c_w``, in m/s.
+    :param speed_of_sound: Water sound speed ``c_w``, in m/s.
     :param critical_angle_deg: Override the seabed critical angle :math:`\psi_\mathrm{c}`,
         in degrees. Use ``90`` for the ideal totally reflecting waveguide.
     :param reflection_loss_gradient_value_np_per_rad: Override :math:`\eta`, in Np/rad.
@@ -358,7 +358,7 @@ def weston_regime_boundaries(
     """
     f = require_positive(frequency_hz, "frequency_hz")
     h = require_positive(water_depth, "water_depth")
-    c = require_positive(sound_speed, "sound_speed")
+    c = require_positive(speed_of_sound, "speed_of_sound")
     bed = _seabed(seabed)
     psi_c, eta = _angle_and_gradient(
         bed, f, critical_angle_deg, reflection_loss_gradient_value_np_per_rad
@@ -558,7 +558,7 @@ def weston_propagation_loss(
     water_depth: float,
     *,
     seabed: str | WestonSeabed = "sand",
-    sound_speed: float = 1500.0,
+    speed_of_sound: float = 1500.0,
     source_depth: float | None = None,
     receiver_depth: float | None = None,
     critical_angle_deg: float | None = None,
@@ -576,7 +576,7 @@ def weston_propagation_loss(
     :param frequency_hz: Acoustic frequency, in Hz.
     :param water_depth: Water-column depth ``H``, in metres.
     :param seabed: ``"sand"``, ``"mud"`` or a :class:`WestonSeabed`.
-    :param sound_speed: Water sound speed ``c_w``, in m/s.
+    :param speed_of_sound: Water sound speed ``c_w``, in m/s.
     :param source_depth: Source depth ``z0``, in metres; defaults to ``H/2``
         (used only by the single-mode formula).
     :param receiver_depth: Receiver depth ``z``, in metres; defaults to ``H/2``.
@@ -590,7 +590,7 @@ def weston_propagation_loss(
     """
     f = require_positive(frequency_hz, "frequency_hz")
     h = require_positive(water_depth, "water_depth")
-    c = require_positive(sound_speed, "sound_speed")
+    c = require_positive(speed_of_sound, "speed_of_sound")
     r = np.atleast_1d(np.asarray(range_m, dtype=np.float64))
     if r.size == 0 or not np.all(np.isfinite(r)):
         msg = "'range_m' must be finite and non-empty."
@@ -610,7 +610,7 @@ def weston_propagation_loss(
         f,
         h,
         seabed=bed,
-        sound_speed=c,
+        speed_of_sound=c,
         critical_angle_deg=critical_angle_deg,
         reflection_loss_gradient_value_np_per_rad=reflection_loss_gradient_value_np_per_rad,
     )

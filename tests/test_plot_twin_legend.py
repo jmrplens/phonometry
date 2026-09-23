@@ -411,7 +411,7 @@ def _transfer_matrix() -> Axes:
     series = (rho_c * 10.0 * (1.0 - u)).astype(np.complex128)
     shunt = (1.0 / (rho_c * (1.0 + 5.0 * (1.0 - u)))).astype(np.complex128)
     matrix = ph.materials.TransferMatrix(one, series, shunt, one)
-    return matrix.plot(frequency=f, characteristic_impedance=rho_c)
+    return matrix.plot(frequencies=f, characteristic_impedance=rho_c)
 
 
 def _room_to_room() -> Axes:
@@ -455,7 +455,7 @@ def _intensity() -> Axes:
     lp = np.linspace(80.0, 60.0, freqs.size)
     li = lp - np.linspace(1.0, 10.0, freqs.size)
     result = ph.emission.IntensityResult(
-        frequency=freqs,
+        frequencies=freqs,
         intensity=1.0e-12 * 10.0 ** (li / 10.0),
         intensity_level=li,
         pressure_level=lp,

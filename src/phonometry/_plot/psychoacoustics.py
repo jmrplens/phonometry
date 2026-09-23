@@ -143,7 +143,7 @@ def plot_zwicker_loudness(
     """Specific loudness N'(z) over the Bark scale (ISO 532-1).
 
     When the result carries the time-varying loudness trace
-    (``time`` / ``loudness_vs_time``) *and* ``ax`` is ``None``, a second
+    (``times`` / ``loudness_vs_time``) *and* ``ax`` is ``None``, a second
     panel with loudness vs time is added and an array of two axes is
     returned; otherwise (a stationary result, or an ``ax`` was supplied) a
     single axes is returned.
@@ -159,7 +159,7 @@ def plot_zwicker_loudness(
     specific = np.asarray(result.specific, dtype=np.float64)
     bark = np.arange(1, specific.size + 1) * 0.1
     time_varying = (
-        result.time is not None and result.loudness_vs_time is not None and ax is None
+        result.times is not None and result.loudness_vs_time is not None and ax is None
     )
 
     if time_varying:
@@ -211,7 +211,7 @@ def plot_zwicker_loudness_time(
 
     :param result: A time-varying
         :class:`~phonometry.psychoacoustics.loudness.zwicker.ZwickerLoudness` (with
-        ``time`` / ``loudness_vs_time``).
+        ``times`` / ``loudness_vs_time``).
     :param ax: Existing axes to draw on, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the loudness-trace ``plot`` call.
@@ -220,14 +220,14 @@ def plot_zwicker_loudness_time(
     """
     from .._i18n import format_number, localize_axes
 
-    if result.time is None or result.loudness_vs_time is None:
+    if result.times is None or result.loudness_vs_time is None:
         msg = (
             "plot_zwicker_loudness_time() needs a time-varying result with "
-            "'time' and 'loudness_vs_time'."
+            "'times' and 'loudness_vs_time'."
         )
         raise ValueError(msg)
     ax_time = ax if ax is not None else _new_axes()
-    time = np.asarray(result.time, dtype=np.float64)
+    time = np.asarray(result.times, dtype=np.float64)
     lvt = np.asarray(result.loudness_vs_time, dtype=np.float64)
     style_default(kwargs, "color", _C_TERTIARY)
     kwargs.setdefault("label", "$N(t)$")
@@ -318,7 +318,7 @@ def plot_ecma_loudness(
         return ax_specific
 
     ax_time = cast("Axes", axes[1])
-    time = np.asarray(result.time, dtype=np.float64)
+    time = np.asarray(result.times, dtype=np.float64)
     lvt = np.asarray(result.loudness_vs_time, dtype=np.float64)
     ax_time.plot(time, lvt, color=_C_TERTIARY, label="$N(l)$")
     ax_time.set_xlabel(_t(_AXIS_TIME, language))
@@ -391,7 +391,7 @@ def plot_moore_glasberg_time_loudness(
     """
     from .._i18n import format_number, localize_axes
 
-    time = np.asarray(result.time, dtype=np.float64)
+    time = np.asarray(result.times, dtype=np.float64)
     stl = np.asarray(result.short_term_loudness, dtype=np.float64)
     ltl = np.asarray(result.long_term_loudness, dtype=np.float64)
     ax = ax if ax is not None else _new_axes()
@@ -488,7 +488,7 @@ def plot_ecma_tonality(
         return ax_specific
 
     ax_time = cast("Axes", axes[1])
-    time = np.asarray(result.time, dtype=np.float64)
+    time = np.asarray(result.times, dtype=np.float64)
     tvt = np.asarray(result.tonality_vs_time, dtype=np.float64)
     ax_time.plot(time, tvt, color=_C_QUATERNARY, label="$T(l)$")
     ax_time.set_xlabel(_t(_AXIS_TIME, language))
@@ -584,7 +584,7 @@ def plot_ecma_roughness(
     # figures (tonality is red); kept literal on purpose, see the module
     # color-constant note.
     return _plot_hms_time_and_heatmap(
-        np.asarray(result.time, dtype=np.float64),
+        np.asarray(result.times, dtype=np.float64),
         np.asarray(result.roughness_vs_time, dtype=np.float64),
         np.asarray(result.specific_roughness_vs_time, dtype=np.float64),
         np.asarray(result.bark, dtype=np.float64),
@@ -628,7 +628,7 @@ def plot_ecma_fluctuation_strength(
     # documentation figures (roughness is brown, tonality red); kept literal
     # on purpose, see the module color-constant note.
     return _plot_hms_time_and_heatmap(
-        np.asarray(result.time, dtype=np.float64),
+        np.asarray(result.times, dtype=np.float64),
         np.asarray(result.fluctuation_strength_vs_time, dtype=np.float64),
         np.asarray(result.specific_fluctuation_strength_vs_time, dtype=np.float64),
         np.asarray(result.bark, dtype=np.float64),

@@ -134,7 +134,7 @@ rectangular tubes (see [`tube_attenuation_constant`](/phonometry/reference/api/m
 
 ```python
 ImpedanceTubeResult(
-    frequency: Real,
+    frequencies: Real,
     reflection: Complex,
     surface_impedance: Complex,
     normalized_impedance: Complex,
@@ -149,7 +149,7 @@ ImpedanceTubeResult(
 
 Two-microphone impedance-tube result (ISO 10534-2:2001).
 
-All arrays share the shape of `frequency`. `reflection` is the complex
+All arrays share the shape of `frequencies`. `reflection` is the complex
 reflection factor `r` at the sample surface (Eq. (17)),
 `surface_impedance` the absolute surface impedance `Z` in rayls
 (Eq. (19)), `normalized_impedance` the ratio $Z/(\rho c_0)$

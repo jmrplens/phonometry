@@ -66,7 +66,7 @@ def _impedance_tube(language: str) -> Axes:
     reflection = np.full(_FREQUENCIES.shape, 0.4 - 0.3j)
     normalized = (1.0 + reflection) / (1.0 - reflection)
     result = ImpedanceTubeResult(
-        frequency=_FREQUENCIES,
+        frequencies=_FREQUENCIES,
         reflection=reflection,
         surface_impedance=_RHO_C * normalized,
         normalized_impedance=normalized,
@@ -111,7 +111,7 @@ def _transfer_matrix(language: str) -> Axes:
         t22=ones,
     )
     return matrix.plot(
-        frequency=_FREQUENCIES, characteristic_impedance=_RHO_C, language=language
+        frequencies=_FREQUENCIES, characteristic_impedance=_RHO_C, language=language
     )
 
 

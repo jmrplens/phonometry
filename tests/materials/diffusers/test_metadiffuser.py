@@ -274,7 +274,7 @@ def test_result_plots_render_and_validate() -> None:
         assert ax.patches
         plt.close(ax.figure)
     bare = MetadiffuserResult(
-        frequency=f,
+        frequencies=f,
         reflection=result.reflection,
         absorption=result.absorption,
         well_absorption=result.well_absorption,

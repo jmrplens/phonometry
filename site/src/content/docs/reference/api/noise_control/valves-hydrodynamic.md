@@ -506,7 +506,7 @@ HydrodynamicValveNoise(
     cavitation_transmission_loss: float | None,
     transmission_loss: float,
     external_level: float,
-    frequency: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
     band_internal_level: NDArray[np.float64],
     band_transmission_loss: NDArray[np.float64],
     band_external_level: NDArray[np.float64],
@@ -541,7 +541,7 @@ What IEC 60534-8-4 says about one operating point on a liquid line.
 | `cavitation_transmission_loss` | $TL_{cav}$ of Equation (17), in dB, or `None` in the turbulent regime. |
 | `transmission_loss` | whichever of the two the regime calls for, which is what Equation (18a) or (18b) uses. |
 | `external_level` | $L_{pAe,1m}$ of Equation (18a) or (18b), in dB at 1 m from the pipe wall. The standard calls it A-weighted, but neither equation applies a weighting: the label describes what the fit was made against, not an operation on this number. |
-| `frequency` | The band centres of 5.4.1, in Hz. |
+| `frequencies` | The band centres of 5.4.1, in Hz. |
 | `band_internal_level` | $L_{pi}(f_i)$ of Equation (19a) or (19b), in dB. |
 | `band_transmission_loss` | $TL(f_i)$ of Equation (22a), in dB. |
 | `band_external_level` | $L_{pe,1m}(f_i)$ of Equation (21), in dB, unweighted. |
@@ -598,7 +598,7 @@ internal_sound_pressure_level(
     *,
     sound_power: float,
     density: float,
-    sound_speed: float,
+    speed_of_sound: float,
     internal_diameter_m: float,
 ) -> float
 ```
@@ -627,7 +627,7 @@ $\rho_L$ intact, which settles it.
 | :--- | :--- |
 | `sound_power` | $W_a$ of Equation (7a) or (7b), in W. |
 | `density` | $\rho_L$ of the liquid, in kg/m³. |
-| `sound_speed` | $c_L$ in the liquid, in m/s. |
+| `speed_of_sound` | $c_L$ in the liquid, in m/s. |
 | `internal_diameter_m` | $D_i$ of the downstream pipe, in m. |
 
 **Returns:** $L_{pi}$, in dB re 2 × 10⁻⁵ Pa.
@@ -783,7 +783,7 @@ LiquidPipe(
     internal_diameter_m: float,
     wall_thickness: float,
     density: float,
-    sound_speed: float = 5000.0,
+    speed_of_sound: float = 5000.0,
     air_density: float = 1.293,
     air_sound_speed: float = 343.0,
 )
@@ -798,7 +798,7 @@ The pipe the noise comes out of, and the air around it.
 | `internal_diameter_m` | $D_i$, in m. |
 | `wall_thickness` | $t_p$, in m. |
 | `density` | $\rho_p$ of the pipe material, in kg/m³. |
-| `sound_speed` | $c_p$ in the pipe wall, in m/s. |
+| `speed_of_sound` | $c_p$ in the pipe wall, in m/s. |
 | `air_density` | $\rho_o$ outside the pipe, in kg/m³. |
 | `air_sound_speed` | $c_o$ outside the pipe, in m/s. |
 
@@ -811,7 +811,7 @@ LiquidStream(
     outlet_pressure_pa: float,
     vapour_pressure_pa: float,
     density: float,
-    sound_speed: float,
+    speed_of_sound: float,
 )
 ```
 
@@ -826,7 +826,7 @@ The liquid and the operating point, which Clause 4.1 reads first.
 | `outlet_pressure_pa` | $p_2$, absolute, in Pa. |
 | `vapour_pressure_pa` | $p_v$ of the liquid at the inlet temperature, absolute, in Pa. |
 | `density` | $\rho_L$, in kg/m³. |
-| `sound_speed` | $c_L$, in m/s. |
+| `speed_of_sound` | $c_L$, in m/s. |
 
 ## LiquidTrim
 
@@ -1191,7 +1191,7 @@ page renders it as a bare 1, which flattens the low-frequency side.
 ## turbulent_efficiency
 
 ```python
-turbulent_efficiency(velocity: float, sound_speed: float) -> float
+turbulent_efficiency(velocity: float, speed_of_sound: float) -> float
 ```
 
 Equation (8): the acoustical efficiency of the turbulent jet.
@@ -1212,7 +1212,7 @@ in the $10^{-6}$ range: one part in a million of the stream power.
 | Name | Description |
 | :--- | :--- |
 | `velocity` | $U_{vc}$, in m/s. |
-| `sound_speed` | $c_L$ in the liquid, in m/s. |
+| `speed_of_sound` | $c_L$ in the liquid, in m/s. |
 
 **Returns:** $\eta_{turb}$, dimensionless.
 

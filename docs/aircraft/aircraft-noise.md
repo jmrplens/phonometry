@@ -175,7 +175,7 @@ report = aircraft.verify_aircraft_noise_system(
     directional={4000.0: {30: 0.4, 60: 0.9, 90: 1.9, 120: 2.4, 150: 2.4}},
     frequency_response={1000.0: 1.2},
 )
-print(report.passed, report.checks)
+print(report.passes, report.checks)
 ```
 
 ## 5. Atmospheric absorption (SAE ARP 5534)
@@ -209,9 +209,9 @@ for s in (1000.0, 7620.0):
     att = aircraft.sae_band_attenuation(
         freqs, s, temperature_c=25.0, relative_humidity_percent=70.0
     )
-    line, = ax.semilogx(att.frequency, att.band_attenuation, marker="o",
+    line, = ax.semilogx(att.frequencies, att.band_attenuation, marker="o",
                         markersize=3, label=f"SAE band ({s:.0f} m)")
-    ax.semilogx(att.frequency, att.midband_attenuation, "--", alpha=0.6,
+    ax.semilogx(att.frequencies, att.midband_attenuation, "--", alpha=0.6,
                 color=line.get_color())
 ax.set(xlabel="Frequency [Hz]", ylabel="Attenuation [dB]",
        title="Aircraft atmospheric absorption at 25 °C, 70% RH")

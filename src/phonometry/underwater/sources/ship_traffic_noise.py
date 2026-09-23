@@ -173,7 +173,7 @@ def _wales_heitmeyer(f: NDArray[np.float64]) -> NDArray[np.float64]:
 class ShipTrafficSpectrum:
     r"""Predicted ship source-level spectrum.
 
-    :ivar frequency: Frequencies, in Hz.
+    :ivar frequencies: Frequencies, in Hz.
     :ivar source_psd: Source pressure spectral-density level, in dB re 1 µPa²/Hz
         at 1 m (equivalent monopole).
     :ivar band_level: Decidecade-band source level, in dB re 1 µPa m
@@ -184,7 +184,7 @@ class ShipTrafficSpectrum:
     :ivar length_m: Length used, in metres (``None`` if the model ignores it).
     """
 
-    frequency: NDArray[np.float64]
+    frequencies: NDArray[np.float64]
     source_psd: NDArray[np.float64]
     band_level: NDArray[np.float64]
     model: str
@@ -201,7 +201,7 @@ class ShipTrafficSpectrum:
         :math:`10 \log_{10}(0.231 f)`, worth about 4 dB in the 10 Hz band and
         about 39 dB in the 31.5 kHz band of the default set. Nothing records
         which band a level was converted at except its position beside
-        :attr:`frequency`, so a level array of another length publishes a
+        :attr:`frequencies`, so a level array of another length publishes a
         spectral-density level and a band level that refer to different
         bands, as one spectrum.
 
@@ -213,9 +213,9 @@ class ShipTrafficSpectrum:
 
         :raises ValueError: if a level array disagrees with the frequency axis.
         """
-        require_ranks(self, frequency=1, source_psd=1, band_level=1)
+        require_ranks(self, frequencies=1, source_psd=1, band_level=1)
         require_same_length(
-            self, "frequency", "source_psd", "band_level", axis="frequency"
+            self, "frequencies", "source_psd", "band_level", axis="frequency"
         )
 
     def plot(
@@ -275,7 +275,7 @@ def ship_source_spectrum(
         raise ValueError(msg)
     band = psd + 10.0 * np.log10(0.231 * f)
     return ShipTrafficSpectrum(
-        frequency=f,
+        frequencies=f,
         source_psd=psd,
         band_level=np.asarray(band, dtype=np.float64),
         model=key,

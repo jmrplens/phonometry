@@ -382,7 +382,7 @@ class TransferStiffnessResult:
         return np.asarray(np.abs(self.transfer_stiffness), dtype=np.float64)
 
     @property
-    def level(self) -> np.ndarray:
+    def levels(self) -> np.ndarray:
         """Transfer-stiffness level ``L_k`` re 1 N/m, in dB (3.17)."""
         return transfer_stiffness_level(self.transfer_stiffness)
 

@@ -203,7 +203,7 @@ Each route has failure modes the standard is explicit about:
   masking and the reception threshold act on the *absolute* band levels at the
   listener. Play the test signal at the system's operating level (the
   standard's Annex J practice sets it 3 dB above the $L_\mathrm{Aeq}$ of continuous
-  speech at the position) and pass `level=` and `ambient=` so the analysis
+  speech at the position) and pass `levels=` and `ambient=` so the analysis
   includes them; an impulse response measured loud and rescaled afterwards
   misses these effects entirely. Section 3 moves a measurement made at one
   level and noise condition to another.
@@ -211,7 +211,7 @@ Each route has failure modes the standard is explicit about:
   during a direct measurement corrupts the measured modulation depths
   (clause 7.13). The standard's remedy is the indirect route: average the
   impulse response with MLS or sweeps for a noise-free MTF, then add the noise
-  degradation back via `snr=` or `level=`/`ambient=`. A quick sanity check is
+  degradation back via `snr=` or `levels=`/`ambient=`. A quick sanity check is
   to run the analyzer with the source off; the residual STI should stay below
   0.20.
 - **Statistical spread.** The STIPA signal is pseudo-random noise, so repeated
@@ -227,8 +227,8 @@ Each route has failure modes the standard is explicit about:
 | `ir` / `x` | 1D array | any / Pa | non-empty | IR (indirect) or STIPA recording (direct) |
 | `fs` | int | Hz | > 0 | |
 | `snr` | float or 7-vector, optional | dB | default `None` | Adds steady-noise degradation |
-| `level` | 7-vector, optional | dB SPL | default `None` | Enables auditory masking + reception threshold (Tables A.2/A.3) |
-| `ambient` | 7-vector, optional | dB SPL | needs `level` | Ambient noise band levels |
+| `levels` | 7-vector, optional | dB SPL | default `None` | Enables auditory masking + reception threshold (Tables A.2/A.3) |
+| `ambient` | 7-vector, optional | dB SPL | needs `levels` | Ambient noise band levels |
 | `reference` | 1D array, optional (`stipa`) | — | default `None` | Measured source signal instead of the nominal $m = 0.55$ |
 
 Both return `STIResult`: `sti`, `mti` (7 bands), `mtf` (7×14 or 7×2),
@@ -344,20 +344,20 @@ speech_empty = band_shape - 10 * np.log10(np.sum(10 ** (band_shape / 10))) + 68.
 noise_empty = np.array([42.0, 36.0, 31.0, 28.0, 25.0, 23.0, 21.0])
 
 empty = speech.sti_from_impulse_response(
-    ir, fs, level=speech_empty, ambient=noise_empty
+    ir, fs, levels=speech_empty, ambient=noise_empty
 )
 print(f"{empty.sti:.2f} ({empty.rating})")            # 0.60 (D)
 
 # The audience in, and the announcement left where it was.
 noise_occupied = np.array([54.0, 50.0, 47.0, 44.0, 40.0, 35.0, 30.0])
 occupied = empty.adjusted_for_levels(
-    operational_level=speech_empty, operational_ambient=noise_occupied
+    operational_levels=speech_empty, operational_ambient=noise_occupied
 )
 print(f"{occupied.sti:.2f} ({occupied.rating})")      # 0.56 (F)
 
 # The same room with the announcement 6 dB louder.
 louder = empty.adjusted_for_levels(
-    operational_level=speech_empty + 6.0, operational_ambient=noise_occupied
+    operational_levels=speech_empty + 6.0, operational_ambient=noise_occupied
 )
 print(f"{louder.sti:.2f} ({louder.rating})")          # 0.59 (E)
 ```
@@ -369,7 +369,7 @@ rather than after the complaint: the empty hall passed.
 
 `STIResult.adjusted_for_levels()` reads the measurement condition off the
 result, which is why it needs only the operational one and why it refuses a
-result computed without `level=`: such a result carries at most the flat
+result computed without `levels=`: such a result carries at most the flat
 `snr=` noise factor, none of the level-dependent masking and threshold, and
 no spectra to re-derive them from, so dividing the full correction out would
 silently lower the answer. Where the matrix
@@ -400,12 +400,12 @@ talker = shape - 10 * np.log10(np.sum(10 ** (shape / 10))) + 68.0
 empty_noise = np.array([42.0, 36.0, 31.0, 28.0, 25.0, 23.0, 21.0])
 full_noise = np.array([54.0, 50.0, 47.0, 44.0, 40.0, 35.0, 30.0])
 
-measured = speech.sti_from_impulse_response(ir, fs, level=talker, ambient=empty_noise)
+measured = speech.sti_from_impulse_response(ir, fs, levels=talker, ambient=empty_noise)
 occupied = measured.adjusted_for_levels(
-    operational_level=talker, operational_ambient=full_noise
+    operational_levels=talker, operational_ambient=full_noise
 )
 louder = measured.adjusted_for_levels(
-    operational_level=talker + 6.0, operational_ambient=full_noise
+    operational_levels=talker + 6.0, operational_ambient=full_noise
 )
 
 # One line: the adjusted result is an STIResult, so it draws its own bars.
@@ -459,7 +459,7 @@ one. Neither of those is visible in the index.
   noise (clause 7.13) applies to the condition being simulated as much as to
   the one being measured.
 - **The measurement's own spectra are what step 2 removes.** A wrong
-  `measured_level` or `measured_ambient` takes out the wrong correction, and
+  `measured_levels` or `measured_ambient` takes out the wrong correction, and
   step 3 has no way to notice; the adjusted matrix is then wrong in a direction
   nothing downstream reports. That is why `STIResult.adjusted_for_levels()`
   reads them off the result instead of asking again.
@@ -472,9 +472,9 @@ one. Neither of those is visible in the index.
 | Parameter | Type | Units | Range / default | Notes |
 | :--- | :--- | :--- | :--- | :--- |
 | `mtf` | (7, n) array | — | ≥ 0, finite | The matrix as measured, noise and masking included; values above 1 are truncated to 1, and above 1.3 warn that the measurement is likely invalid (A.5.3 NOTE 1) |
-| `measured_level` | 7-vector | dB SPL | required | Speech band levels during the measurement |
+| `measured_levels` | 7-vector | dB SPL | required | Speech band levels during the measurement |
 | `measured_ambient` | 7-vector, optional | dB SPL | default `None` | Background-noise band levels during the measurement |
-| `operational_level` | 7-vector | dB SPL | required | Speech band levels of the condition simulated |
+| `operational_levels` | 7-vector | dB SPL | required | Speech band levels of the condition simulated |
 | `operational_ambient` | 7-vector, optional | dB SPL | default `None` | Occupancy-noise band levels of that condition |
 
 > [!IMPORTANT]

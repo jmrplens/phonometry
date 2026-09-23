@@ -232,7 +232,7 @@ Layer = (
 class LayeredAbsorberResult:
     r"""Oblique-incidence prediction of a layered absorber.
 
-    All arrays share the shape of ``frequency``. ``surface_impedance`` is the
+    All arrays share the shape of ``frequencies``. ``surface_impedance`` is the
     specific impedance :math:`Z_\mathrm{s} = p / u_n` at the front face (may be
     ``inf`` for a lossless-sheet stack over a rigid wall), ``reflection``
     the complex plane-wave reflection factor :math:`R(\theta)`,
@@ -247,7 +247,7 @@ class LayeredAbsorberResult:
     hand-built results.
     """
 
-    frequency: Real
+    frequencies: Real
     angle_rad: float
     surface_impedance: Complex
     normalized_impedance: Complex
@@ -298,7 +298,7 @@ class DiffuseFieldAbsorptionResult:
     :math:`\sin^2(\theta_{\mathrm{limit}})`.
     """
 
-    frequency: Real
+    frequencies: Real
     absorption: Real
     angle_limit_rad: float
 
@@ -531,7 +531,7 @@ def _chain_matrix(terms: list[tuple[str, Complex, Complex]], f: Real) -> Complex
 
 def _check_medium_grid(medium: PorousMediumResult, f: Real, owner: str) -> None:
     """Reject a medium evaluated on a different frequency vector."""
-    if not np.array_equal(np.asarray(medium.frequency), f):
+    if not np.array_equal(np.asarray(medium.frequencies), f):
         msg = (
             f"{owner}.medium was evaluated on a different frequency "
             "vector; rebuild the medium on the solver grid."
@@ -789,7 +789,7 @@ def layered_absorber(
     r = (cos_t - rc * g) / (cos_t + rc * g)
     alpha = 1.0 - np.abs(r) ** 2
     return LayeredAbsorberResult(
-        frequency=f,
+        frequencies=f,
         angle_rad=theta,
         surface_impedance=np.asarray(zs, dtype=np.complex128),
         normalized_impedance=np.asarray(zs / rc, dtype=np.complex128),
@@ -860,7 +860,7 @@ def diffuse_field_absorption(
         total += wt * res.absorption * np.cos(th) * np.sin(th)
     alpha_dif = 2.0 * total / np.sin(lim) ** 2
     return DiffuseFieldAbsorptionResult(
-        frequency=f,
+        frequencies=f,
         absorption=np.asarray(alpha_dif, dtype=np.float64),
         angle_limit_rad=lim,
     )

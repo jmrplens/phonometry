@@ -105,7 +105,7 @@ def generate_intensity_demo(output_dir: str) -> None:
         (ax2, standing, "Standing wave: reactive field"),
     ]:
         ax.semilogx(
-            res.frequency,
+            res.frequencies,
             res.pressure_level,
             marker="o",
             markersize=5,
@@ -116,7 +116,7 @@ def generate_intensity_demo(output_dir: str) -> None:
             label="Pressure level $L_p$",
         )
         ax.semilogx(
-            res.frequency,
+            res.frequencies,
             res.intensity_level,
             marker="s",
             markersize=5,
@@ -803,14 +803,14 @@ def generate_quasi_peak_meter(output_dir: str) -> None:
 
     _fig, ax = plt.subplots(figsize=(11.0, 5.6))
     ax.plot(
-        result.time,
+        result.times,
         rectified,
         color=theme_line(COLOR_MUTED, ax, quiet=0.55),
         linewidth=0.6,
         label="Rectified 468-weighted signal",
     )
     ax.plot(
-        result.time,
+        result.times,
         result.trace,
         color=COLOR_PRIMARY,
         linewidth=2.2,
@@ -853,7 +853,7 @@ def generate_quasi_peak_meter(output_dir: str) -> None:
             "edgecolor": COLOR_GRID,
         },
     )
-    ax.set_xlim(0.0, float(result.time[-1]))
+    ax.set_xlim(0.0, float(result.times[-1]))
     ax.set_ylim(0.0, 1.95 * float(rectified.max()))
     ax.set_xlabel("Time [s]")
     ax.set_ylabel("Quasi-peak reading [V]")
@@ -3079,11 +3079,11 @@ def generate_spacer_bandwidth(output_dir: str) -> None:
         # bias_correction is the compensating factor (k dr)/sin(k dr); the bias
         # itself is its reciprocal in decibels. Drop the bands the library
         # clamps at k dr = pi/2 so the curve stays the physics.
-        assert res.frequency is not None, "band analysis returns its frequencies"
+        assert res.frequencies is not None, "band analysis returns its frequencies"
         assert res.bias_correction is not None, "the result must carry the bias"
-        usable = res.frequency < c / (4.0 * dr)
+        usable = res.frequencies < c / (4.0 * dr)
         axt.semilogx(
-            res.frequency[usable],
+            res.frequencies[usable],
             -10.0 * np.log10(res.bias_correction[usable]),
             color=colour,
             linewidth=2.0,
@@ -3104,8 +3104,8 @@ def generate_spacer_bandwidth(output_dir: str) -> None:
         # 10 lg(x/25) of its own Note 1.
         margin = 10.0 * np.log10(dr / 0.025)
         axb.semilogx(
-            res.frequency,
-            np.full(res.frequency.shape, margin),
+            res.frequencies,
+            np.full(res.frequencies.shape, margin),
             color=colour,
             linewidth=2.2,
         )
@@ -6391,7 +6391,7 @@ def generate_valve_cavitation_noise(output_dir: str) -> None:
         "inlet_pressure_pa": 1.0e6,
         "vapour_pressure_pa": 2.32e3,
         "density": 997.0,
-        "sound_speed": 1400.0,
+        "speed_of_sound": 1400.0,
     }
     trim: dict[str, Any] = {
         "flow_coefficient": 90.0,
@@ -6500,7 +6500,7 @@ def generate_valve_cavitation_noise(output_dir: str) -> None:
         msg = "Example 2 of Annex A cavitates; its cavitation terms are not None."
         raise RuntimeError(msg)
     share = efficiency / (cavitating.turbulent_efficiency + efficiency)
-    bands = np.asarray(cavitating.frequency)
+    bands = np.asarray(cavitating.frequencies)
     turbulent_hump = (
         cavitating.internal_level
         + 10.0 * math.log10(1.0 - share)
@@ -6738,7 +6738,7 @@ def generate_control_valve_noise(output_dir: str) -> None:
         trim,
         pipe,
     )
-    bands = np.asarray(result.frequency)
+    bands = np.asarray(result.frequencies)
     ax2.plot(
         bands,
         np.asarray(result.band_internal_level),

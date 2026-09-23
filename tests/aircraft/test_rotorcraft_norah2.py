@@ -375,7 +375,7 @@ def _assert_geometry(rows: np.ndarray, res: object) -> None:
     assert np.max(np.abs(res.polar - ref_theta)) < 0.01
     # The prototype clamps the printed azimuth to the +-90 deg hemisphere span.
     assert np.max(np.abs(np.clip(res.azimuth, -90.0, 90.0) - ref_phi)) < 0.01
-    assert np.max(np.abs(res.distance - ref_dist)) < 0.05
+    assert np.max(np.abs(res.distances - ref_dist)) < 0.05
     # 346.1 m/s (Doc 32) vs the prototype's temperature-derived 346.19 m/s.
     assert np.max(np.abs(res.times - ref_trec)) < 0.02
 
@@ -502,7 +502,7 @@ def test_case4_hover_ogh_event(norah_root: pathlib.Path) -> None:
     # 10*lg(0.5/10) duration correction, which measures its printing
     # convention rather than the event chain.
     assert nadir is not None
-    assert nadir.distance[0] == pytest.approx(rows[0, 5], abs=0.05)  # DOBS
+    assert nadir.distances[0] == pytest.approx(rows[0, 5], abs=0.05)  # DOBS
     assert nadir.polar[0] == pytest.approx(rows[0, 6], abs=0.01)  # THETAOBS
     assert nadir.azimuth[0] == pytest.approx(rows[0, 7], abs=0.01)  # PHIOBSAC
     assert nadir.times[0] - nadir.emission_times[0] == pytest.approx(
@@ -627,8 +627,8 @@ def test_case2_contour_grid(norah_root: pathlib.Path, r22_set: dict) -> None:
         for mic in sub:
             i = int(np.nonzero(ys == mic[1])[0][0])
             j = int(np.nonzero(xs == mic[0])[0][0])
-            d_sel.append(sel.level[i, j] - mic[9])
-            d_max.append(lam.level[i, j] - mic[8])
+            d_sel.append(sel.levels[i, j] - mic[9])
+            d_max.append(lam.levels[i, j] - mic[8])
         assert np.max(np.abs(d_sel)) < tol_sel, sigma
         assert np.max(np.abs(d_max)) < tol_max, sigma
         assert np.percentile(np.abs(d_sel), 50) < 0.3
@@ -728,10 +728,10 @@ def test_case3_contour_with_elevation_grid(
         metric="maximum",
         **kwargs,
     )
-    assert np.nanmax(np.abs(sel.level - ref_sel)) < 0.15
-    assert np.nanmax(np.abs(lam.level - ref_max)) < 0.4
-    assert np.nanpercentile(np.abs(sel.level - ref_sel), 50) < 0.05
-    assert np.nanpercentile(np.abs(lam.level - ref_max), 50) < 0.05
+    assert np.nanmax(np.abs(sel.levels - ref_sel)) < 0.15
+    assert np.nanmax(np.abs(lam.levels - ref_max)) < 0.4
+    assert np.nanpercentile(np.abs(sel.levels - ref_sel), 50) < 0.05
+    assert np.nanpercentile(np.abs(lam.levels - ref_max), 50) < 0.05
 
 
 def test_case2_contour_single_call_with_sigma_map(
@@ -794,6 +794,6 @@ def test_case2_contour_single_call_with_sigma_map(
     )
     # Tolerances follow the per-class PR-2 measurements (the soft class
     # carries the documented far-tail interference divergence into SEL).
-    assert np.nanmax(np.abs(sel.level - ref_sel)) < 0.7
-    assert np.nanmax(np.abs(lam.level - ref_max)) < 0.7
-    assert np.nanpercentile(np.abs(sel.level - ref_sel), 50) < 0.3
+    assert np.nanmax(np.abs(sel.levels - ref_sel)) < 0.7
+    assert np.nanmax(np.abs(lam.levels - ref_max)) < 0.7
+    assert np.nanpercentile(np.abs(sel.levels - ref_sel), 50) < 0.3

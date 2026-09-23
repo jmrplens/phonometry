@@ -215,7 +215,7 @@ def generate_zwicker_time_varying(output_dir: str) -> None:
     x = _zwicker_burst_train(fs)
     res = psychoacoustics.loudness_zwicker(x, fs)
     trace = np.asarray(res.loudness_vs_time, dtype=float)
-    times = np.asarray(res.time, dtype=float)
+    times = np.asarray(res.times, dtype=float)
     n5, n10 = float(res.n5 or 0.0), float(res.n10 or 0.0)
     stationary = psychoacoustics.loudness_zwicker(x, fs, stationary=True)
 
@@ -576,7 +576,7 @@ def generate_sottek_specific_roughness(output_dir: str) -> None:
         "sottek_specific_roughness.svg",
         bark=np.asarray(result.bark),
         specific=np.asarray(result.specific_roughness),
-        time=np.asarray(result.time),
+        time=np.asarray(result.times),
         trace=np.asarray(result.roughness_vs_time),
         single=float(result.roughness),
         unit="asper",
@@ -599,7 +599,7 @@ def generate_sottek_specific_fluctuation(output_dir: str) -> None:
         "sottek_specific_fluctuation.svg",
         bark=np.asarray(result.bark),
         specific=np.asarray(result.specific_fluctuation_strength),
-        time=np.asarray(result.time),
+        time=np.asarray(result.times),
         trace=np.asarray(result.fluctuation_strength_vs_time),
         single=float(result.fluctuation_strength),
         unit="vacil_HMS",
@@ -1376,10 +1376,10 @@ def _tonality_data() -> tuple[
     tin = tonality_ecma(tone + noise, _FS_PSY)
     pn = tonality_ecma(noise, _FS_PSY)
     return (
-        tin.time.copy(),
+        tin.times.copy(),
         tin.tonality_vs_time.copy(),
         float(tin.tonality),
-        pn.time.copy(),
+        pn.times.copy(),
         pn.tonality_vs_time.copy(),
         float(pn.tonality),
     )
@@ -2066,7 +2066,11 @@ def _time_loudness_data() -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         * np.sin(2.0 * np.pi * 1000.0 * t[on])
     )
     tv = loudness_moore_glasberg_time(sig, _FS_PSY)
-    return (tv.time.copy(), tv.short_term_loudness.copy(), tv.long_term_loudness.copy())
+    return (
+        tv.times.copy(),
+        tv.short_term_loudness.copy(),
+        tv.long_term_loudness.copy(),
+    )
 
 
 def generate_moore_glasberg_time_loudness(output_dir: str) -> None:
@@ -3445,7 +3449,7 @@ def generate_sti_level_dependence(output_dir: str) -> None:
     corrected = np.array(
         [
             speech.sti_from_impulse_response(
-                ir, fs, level=shape - shape_total + t, ambient=ambient
+                ir, fs, levels=shape - shape_total + t, ambient=ambient
             ).sti
             for t in totals
         ]
@@ -3840,13 +3844,13 @@ def generate_sti_occupancy_adjustment(output_dir: str) -> None:
     full_noise = np.array([54.0, 50.0, 47.0, 44.0, 40.0, 35.0, 30.0])
 
     measured = speech.sti_from_impulse_response(
-        ir, fs, level=talker, ambient=empty_noise
+        ir, fs, levels=talker, ambient=empty_noise
     )
     occupied = measured.adjusted_for_levels(
-        operational_level=talker, operational_ambient=full_noise
+        operational_levels=talker, operational_ambient=full_noise
     )
     louder = measured.adjusted_for_levels(
-        operational_level=talker + 6.0, operational_ambient=full_noise
+        operational_levels=talker + 6.0, operational_ambient=full_noise
     )
 
     series = (

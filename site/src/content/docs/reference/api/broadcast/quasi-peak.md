@@ -192,7 +192,7 @@ Time constants of the quasi-peak chain, in seconds.
 ```python
 QuasiPeakDynamicsResult(
     fs: float,
-    passed: bool,
+    passes: bool,
     worst_margin_db: float,
     worst_deviation_db: float,
     stimuli: tuple[dict[str, Any], ...],
@@ -210,7 +210,7 @@ run at.
 | Name | Description |
 | :--- | :--- |
 | `fs` | Sample rate the stimuli were run at, in Hz. |
-| `passed` | Whether every reading fell inside its window. |
+| `passes` | Whether every reading fell inside its window. |
 | `worst_margin_db` | The smallest of the eleven margins, negative when one reading is outside its window. |
 | `worst_deviation_db` | The largest departure from a printed reference reading. It is a regression bound, not conformance: the reference is printed to two significant figures on nine of the eleven cells. |
 | `stimuli` | The eleven rows, `{"stimulus", "table", "reading_percent", "lower_percent", "reference_percent", "upper_percent", "deviation_db", "margin_db"}` each. |
@@ -288,7 +288,7 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 
 **Returns:** The axes.
 
-### QuasiPeakResult.time
+### QuasiPeakResult.times
 
 *property*
 

@@ -65,7 +65,7 @@ def _sae_band(delta_t: NDArray[np.float64]) -> NDArray[np.float64]:
 class AircraftBandAttenuation:
     r"""One-third-octave-band atmospheric attenuation over a path (SAE ARP 5534).
 
-    :ivar frequency: Nominal one-third-octave-band centre frequencies, in Hz.
+    :ivar frequencies: Nominal one-third-octave-band centre frequencies, in Hz.
     :ivar band_attenuation: SAE-Method band attenuation ``δ_B`` per band, in dB.
     :ivar midband_attenuation: Pure-tone mid-band path-length attenuation
         :math:`\delta_\mathrm{t} = \alpha \cdot s` per band, in dB (ISO 9613-1
@@ -78,7 +78,7 @@ class AircraftBandAttenuation:
     :ivar atmospheric_pressure_kpa: Ambient atmospheric pressure, in kPa.
     """
 
-    frequency: NDArray[np.float64]
+    frequencies: NDArray[np.float64]
     band_attenuation: NDArray[np.float64]
     midband_attenuation: NDArray[np.float64]
     coefficient: NDArray[np.float64]
@@ -95,7 +95,7 @@ class AircraftBandAttenuation:
         the pure-tone mid-band attenuation it was regressed from, and the
         coefficient behind that. Which field is wrong decides how loud the
         mistake is. The figure draws ``band_attenuation`` and
-        ``midband_attenuation`` against ``frequency``, so any disagreement
+        ``midband_attenuation`` against ``frequencies``, so any disagreement
         among those three stops it, with matplotlib's complaint about an x and
         a y that name neither field. ``coefficient`` reaches no figure and no
         reader in this library: it leaves as dB/m for the caller to multiply
@@ -113,14 +113,14 @@ class AircraftBandAttenuation:
         """
         require_ranks(
             self,
-            frequency=1,
+            frequencies=1,
             band_attenuation=1,
             midband_attenuation=1,
             coefficient=1,
         )
         require_same_length(
             self,
-            "frequency",
+            "frequencies",
             "band_attenuation",
             "midband_attenuation",
             "coefficient",
@@ -179,7 +179,7 @@ def sae_band_attenuation(
     delta_t = alpha * s
     delta_b = _sae_band(delta_t)
     return AircraftBandAttenuation(
-        frequency=f,
+        frequencies=f,
         band_attenuation=delta_b,
         midband_attenuation=np.asarray(delta_t, dtype=np.float64),
         coefficient=np.asarray(alpha, dtype=np.float64),

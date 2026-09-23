@@ -85,7 +85,7 @@ def test_power_extrapolation() -> None:
 def test_npd_curve_result_and_plot() -> None:
     res = npd_curve(_P, _D, _L, 1500.0)
     assert isinstance(res, NpdLevelResult)
-    assert res.distance.shape == res.level.shape
+    assert res.distances.shape == res.levels.shape
     assert res.table_distances.shape == res.table_levels.shape
     # tabulated levels at P=1500 are the row means
     assert np.allclose(res.table_levels, [105.0, 99.0, 93.0, 87.0])
@@ -101,9 +101,9 @@ def test_npd_curve_levels_are_pinned_to_their_own_distances() -> None:
     which of the two axes it belonged to, are left for the reader to work out.
     """
     res = npd_curve(_P, _D, _L, 1500.0)
-    short_sweep = res.level[:-1]
-    with pytest.raises(ValueError, match=r"'level'.*one value per query distance"):
-        dataclasses.replace(res, level=short_sweep)
+    short_sweep = res.levels[:-1]
+    with pytest.raises(ValueError, match=r"'levels'.*one value per query distance"):
+        dataclasses.replace(res, levels=short_sweep)
     short_table = res.table_levels[:-1]
     with pytest.raises(
         ValueError, match=r"'table_levels'.*one value per tabulated distance"
@@ -584,10 +584,10 @@ def test_noise_contour_shape_and_plot() -> None:
         y=np.linspace(-4000.0, 4000.0, 20),
     )
     assert isinstance(res, NoiseContourResult)
-    assert res.level.shape == (20, 24)
+    assert res.levels.shape == (20, 24)
     # Highest level is near the track (y = 0); much lower far to the side.
     iy0 = int(np.argmin(np.abs(res.y)))
-    assert np.max(res.level[iy0]) > np.max(res.level[0])
+    assert np.max(res.levels[iy0]) > np.max(res.levels[0])
     assert res.plot() is not None
 
 
@@ -618,17 +618,17 @@ def test_noise_contour_grid_is_pinned_to_both_axes() -> None:
         x=np.linspace(-2000.0, 16000.0, 7),
         y=np.linspace(-4000.0, 4000.0, 5),
     )
-    short_rows = res.level[:-1]
-    with pytest.raises(ValueError, match=r"'level'.*one value per grid row"):
-        dataclasses.replace(res, level=short_rows)
-    short_columns = res.level[:, :-1]
+    short_rows = res.levels[:-1]
+    with pytest.raises(ValueError, match=r"'levels'.*one value per grid row"):
+        dataclasses.replace(res, levels=short_rows)
+    short_columns = res.levels[:, :-1]
     with pytest.raises(
-        ValueError, match=r"'level \(axis 1\)'.*one value per grid column"
+        ValueError, match=r"'levels \(axis 1\)'.*one value per grid column"
     ):
-        dataclasses.replace(res, level=short_columns)
-    flattened = res.level.ravel()
-    with pytest.raises(ValueError, match=r"'level' must have 2 axes"):
-        dataclasses.replace(res, level=flattened)
+        dataclasses.replace(res, levels=short_columns)
+    flattened = res.levels.ravel()
+    with pytest.raises(ValueError, match=r"'levels' must have 2 axes"):
+        dataclasses.replace(res, levels=flattened)
 
 
 def test_noise_contour_metric_outside_the_two_the_type_states_is_refused() -> None:
@@ -928,8 +928,8 @@ def test_noise_contour_accepts_bank() -> None:
         path, _NP, _ND, _NSEL, _NMAX, segments=FlightSegmentState(bank=[10.0]), **kw
     )
     level = noise_contour(path, _NP, _ND, _NSEL, _NMAX, **kw)
-    assert banked.level[0, 0] != pytest.approx(banked.level[1, 0])
-    assert level.level[0, 0] == pytest.approx(level.level[1, 0])
+    assert banked.levels[0, 0] != pytest.approx(banked.levels[1, 0])
+    assert level.levels[0, 0] == pytest.approx(level.levels[1, 0])
     mismatched_bank = FlightSegmentState(bank=[1.0, 2.0])
     with pytest.raises(
         ValueError, match=r"'bank' must have length \d+ \(one per segment\)"
@@ -982,7 +982,7 @@ def test_contour_grid_matches_scalar_event_level() -> None:
                         mounting=mounting,
                         segments=segments,
                     ).level
-                    assert res.level[iy, ix] == pytest.approx(ref, abs=1e-9), (
+                    assert res.levels[iy, ix] == pytest.approx(ref, abs=1e-9), (
                         metric,
                         mounting,
                         xv,
@@ -1010,4 +1010,4 @@ def test_contour_grid_matches_scalar_event_level() -> None:
             ref = event_level(
                 land, [xv, yv, 0.0], _NP, _ND, _NSEL, _NMAX, segments=lmask
             ).level
-            assert res.level[iy, ix] == pytest.approx(ref, abs=1e-9)
+            assert res.levels[iy, ix] == pytest.approx(ref, abs=1e-9)

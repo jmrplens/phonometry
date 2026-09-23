@@ -208,7 +208,7 @@ class EcmaFluctuationStrength:
     strength F'(z) in vacil_HMS/Bark_HMS over the 53 auditory bands
     (Clause 9.1.12), with ``bark`` the critical-band-rate scale z
     (0.5..26.5 Bark_HMS) and ``centre_frequencies`` the band centre
-    frequencies F(z). ``time`` and ``fluctuation_strength_vs_time`` hold the
+    frequencies F(z). ``times`` and ``fluctuation_strength_vs_time`` hold the
     time-dependent fluctuation strength F(l50) at 50 Hz (Formula 169);
     ``specific_fluctuation_strength_vs_time`` is the time-dependent specific
     fluctuation strength F'(l50, z) (Formula 168) of shape
@@ -219,7 +219,7 @@ class EcmaFluctuationStrength:
     specific_fluctuation_strength: np.ndarray
     bark: np.ndarray
     centre_frequencies: np.ndarray
-    time: np.ndarray
+    times: np.ndarray
     fluctuation_strength_vs_time: np.ndarray
     specific_fluctuation_strength_vs_time: np.ndarray
     field: str
@@ -233,7 +233,7 @@ class EcmaFluctuationStrength:
         separately; the time-dependent specific fluctuation strength is the
         one field measured along both.
 
-        The time trace is a single ``plot`` call pairing ``time`` with
+        The time trace is a single ``plot`` call pairing ``times`` with
         ``fluctuation_strength_vs_time``. A length short or long by one
         reaches matplotlib, which raises about x and y differing in their
         first dimension and names neither field, from a call several frames
@@ -254,7 +254,7 @@ class EcmaFluctuationStrength:
         axis passes every count: the specific table averaged down to one axis
         leaves the time trace untouched and only ``pcolormesh`` notices,
         unpacking its shape into two names and reporting that it got one
-        value; a ``time`` of one column plots against the trace by broadcast,
+        value; a ``times`` of one column plots against the trace by broadcast,
         and it is the shaded fill underneath that stops, naming matplotlib's
         own ``'x'`` rather than the field that carried the extra axis.
 
@@ -265,7 +265,7 @@ class EcmaFluctuationStrength:
             specific_fluctuation_strength=1,
             bark=1,
             centre_frequencies=1,
-            time=1,
+            times=1,
             fluctuation_strength_vs_time=1,
             specific_fluctuation_strength_vs_time=2,
         )
@@ -279,7 +279,7 @@ class EcmaFluctuationStrength:
         )
         require_same_length(
             self,
-            "time",
+            "times",
             "fluctuation_strength_vs_time",
             "specific_fluctuation_strength_vs_time",
             axis="50 Hz frame",
@@ -973,7 +973,7 @@ def fluctuation_strength_ecma(
         specific_fluctuation_strength=f_spec,
         bark=_Z.copy(),
         centre_frequencies=_F_CENTRE.copy(),
-        time=grid,
+        times=grid,
         fluctuation_strength_vs_time=f_vs_time,
         specific_fluctuation_strength_vs_time=f_time,
         field=field,

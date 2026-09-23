@@ -294,7 +294,7 @@ class RigidMassCalibrationResult:
         (mobility).
     :ivar deviation: Relative deviation ``measured/expected - 1`` per frequency.
     :ivar within_tolerance: Per-frequency pass flag ``|deviation| <= tolerance``.
-    :ivar passed: ``True`` if every frequency is within the tolerance.
+    :ivar passes: ``True`` if every frequency is within the tolerance.
     :ivar mass: Mass ``m`` of the calibration block, in kg.
     :ivar quantity: FRF kind checked (``"accelerance"`` or ``"mobility"``).
     :ivar tolerance: Relative tolerance applied (the standard's is 0.05).
@@ -306,7 +306,7 @@ class RigidMassCalibrationResult:
     deviation: np.ndarray
     within_tolerance: np.ndarray
     _: KW_ONLY
-    passed: bool
+    passes: bool
     mass: float
     quantity: str
     tolerance: float
@@ -320,7 +320,7 @@ class RigidMassCalibrationResult:
         and colours the rest as failures, so a mask of another length is
         numpy's complaint about a boolean index that does not match the array
         it indexes, raised from inside the plotter and naming neither field.
-        :attr:`passed` protests less: nothing re-derives it, so a mask
+        :attr:`passes` protests less: nothing re-derives it, so a mask
         covering part of the measured range leaves an overall pass standing
         over the frequencies it happened to reach, and the drift the
         calibration exists to catch sits in the ones it did not.
@@ -422,7 +422,7 @@ def rigid_mass_calibration_check(
         expected=np.asarray(expected, dtype=np.float64),
         deviation=np.asarray(deviation, dtype=np.float64),
         within_tolerance=within,
-        passed=bool(np.all(within)),
+        passes=bool(np.all(within)),
         mass=mass,
         quantity=quantity,
         tolerance=tolerance,

@@ -475,7 +475,7 @@ def _positive_area(value: float, name: str) -> float:
 
 @overload
 def adaptation_term_kc(
-    freq: Sequence[float] | np.ndarray,
+    frequencies: Sequence[float] | np.ndarray,
     *,
     boundary_area: float,
     volume: float,
@@ -483,11 +483,11 @@ def adaptation_term_kc(
 
 
 @overload
-def adaptation_term_kc(freq: Sequence[float] | np.ndarray) -> np.ndarray: ...
+def adaptation_term_kc(frequencies: Sequence[float] | np.ndarray) -> np.ndarray: ...
 
 
 def adaptation_term_kc(
-    freq: Sequence[float] | np.ndarray,
+    frequencies: Sequence[float] | np.ndarray,
     *,
     boundary_area: float | None = None,
     volume: float | None = None,
@@ -507,21 +507,21 @@ def adaptation_term_kc(
       (B.1) for the reference room :math:`S_{\mathrm{b}2} = 117` m²,
       :math:`V_2 = 81` m³.
 
-    :param freq: One-third-octave midband frequencies, in Hz.
+    :param frequencies: One-third-octave midband frequencies, in Hz.
     :param boundary_area: Total boundary-surface area ``Sb2`` of the
         receiving room, in m². Supply together with ``volume`` for (B.1).
     :param volume: Receiving-room volume ``V2``, in m³.
     :return: The adaptation term ``Kc`` per band, in dB.
-    :raises ValueError: If ``freq`` is not positive/finite, if only one of
+    :raises ValueError: If ``frequencies`` is not positive/finite, if only one of
         ``boundary_area`` / ``volume`` is supplied, or if either is not
         positive.
     """
-    f = np.asarray(freq, dtype=np.float64)
+    f = np.asarray(frequencies, dtype=np.float64)
     if f.ndim != 1:
-        msg = "'freq' must be one-dimensional."
+        msg = "'frequencies' must be one-dimensional."
         raise ValueError(msg)
     if not np.all(np.isfinite(f)) or np.any(f <= 0.0):
-        msg = "'freq' must contain positive, finite values."
+        msg = "'frequencies' must contain positive, finite values."
         raise ValueError(msg)
 
     if boundary_area is None and volume is None:

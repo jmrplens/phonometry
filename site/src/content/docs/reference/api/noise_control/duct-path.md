@@ -345,7 +345,7 @@ DuctPathStage(
     attenuation: np.ndarray,
     attenuated: np.ndarray,
     self_noise: np.ndarray,
-    level: np.ndarray,
+    levels: np.ndarray,
 )
 ```
 
@@ -364,4 +364,4 @@ what the element puts back and where the path stands afterwards.
 | `attenuation` | Attenuation of the element as a positive loss, dB. |
 | `attenuated` | Level after subtracting the attenuation (the *Sum* row), dB. |
 | `self_noise` | Regenerated sound power level of the element, dB re 1 pW, after the self-noise floor has been applied. |
-| `level` | Level leaving the element, the energy sum of `attenuated` and `self_noise` (the *Combined* row), dB. |
+| `levels` | Level leaving the element, the energy sum of `attenuated` and `self_noise` (the *Combined* row), dB. |

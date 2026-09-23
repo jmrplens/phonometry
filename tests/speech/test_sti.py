@@ -226,16 +226,16 @@ def test_level_corrections_reduce_sti() -> None:
     plain = speech.sti_from_impulse_response(ir, fs)
     # Comfortable speech levels: masking/threshold effects are small.
     comfortable = speech.sti_from_impulse_response(
-        ir, fs, level=[62, 62, 59, 53, 47, 41, 35]
+        ir, fs, levels=[62, 62, 59, 53, 47, 41, 35]
     )
     # Very quiet speech: the absolute reception threshold dominates.
-    quiet = speech.sti_from_impulse_response(ir, fs, level=[20, 20, 17, 11, 5, -1, -7])
+    quiet = speech.sti_from_impulse_response(ir, fs, levels=[20, 20, 17, 11, 5, -1, -7])
     assert comfortable.sti <= plain.sti
     assert quiet.sti < comfortable.sti - 0.05
     assert comfortable.band_levels is not None
     # Ambient noise at the listener degrades further.
     noisy = speech.sti_from_impulse_response(
-        ir, fs, level=[62, 62, 59, 53, 47, 41, 35], ambient=[55] * 7
+        ir, fs, levels=[62, 62, 59, 53, 47, 41, 35], ambient=[55] * 7
     )
     assert noisy.sti < comfortable.sti
 
@@ -388,9 +388,9 @@ def test_invalid_inputs_raise() -> None:
     with pytest.raises(ValueError, match=r"Impulse response 'ir' is silent"):
         speech.sti_from_impulse_response(silent_ir, FS)
     with pytest.raises(
-        ValueError, match=r"'level' must contain exactly .* octave-band values"
+        ValueError, match=r"'levels' must contain exactly .* octave-band values"
     ):
-        speech.sti_from_impulse_response(ir, FS, level=[60.0, 60.0, 60.0])
+        speech.sti_from_impulse_response(ir, FS, levels=[60.0, 60.0, 60.0])
     with pytest.raises(ValueError, match="'snr' must be a scalar or a vector"):
         speech.sti_from_impulse_response(ir, FS, snr=[10.0, 10.0])
     with pytest.raises(ValueError, match="requires the speech octave-band levels"):
@@ -399,7 +399,7 @@ def test_invalid_inputs_raise() -> None:
         ValueError, match=r"Provide either 'snr' or 'ambient' noise levels, not both"
     ):
         speech.sti_from_impulse_response(
-            ir, FS, snr=10.0, level=[60.0] * 7, ambient=[40.0] * 7
+            ir, FS, snr=10.0, levels=[60.0] * 7, ambient=[40.0] * 7
         )
 
     two_dimensional_signal = np.zeros((2, FS))
@@ -554,9 +554,9 @@ def _annex_m_result() -> speech.STIResult:
     """The adjusted result of Table M.1, from step 1 to step 4."""
     return speech.sti_adjusted_for_levels(
         _annex_m_matrix(IEC60268_16_ANNEX_M_MEASURED_MTF),
-        measured_level=IEC60268_16_ANNEX_M_MEASURED_LEVEL,
+        measured_levels=IEC60268_16_ANNEX_M_MEASURED_LEVEL,
         measured_ambient=IEC60268_16_ANNEX_M_MEASURED_AMBIENT,
-        operational_level=IEC60268_16_ANNEX_M_OPERATIONAL_LEVEL,
+        operational_levels=IEC60268_16_ANNEX_M_OPERATIONAL_LEVEL,
         operational_ambient=IEC60268_16_ANNEX_M_OPERATIONAL_AMBIENT,
     )
 
@@ -794,9 +794,9 @@ def test_annex_m_adjustment_to_the_same_levels_is_the_measurement() -> None:
     measured = _annex_m_matrix(IEC60268_16_ANNEX_M_MEASURED_MTF)
     unmoved = speech.sti_adjusted_for_levels(
         measured,
-        measured_level=IEC60268_16_ANNEX_M_MEASURED_LEVEL,
+        measured_levels=IEC60268_16_ANNEX_M_MEASURED_LEVEL,
         measured_ambient=IEC60268_16_ANNEX_M_MEASURED_AMBIENT,
-        operational_level=IEC60268_16_ANNEX_M_MEASURED_LEVEL,
+        operational_levels=IEC60268_16_ANNEX_M_MEASURED_LEVEL,
         operational_ambient=IEC60268_16_ANNEX_M_MEASURED_AMBIENT,
     )
     np.testing.assert_allclose(unmoved.mtf, measured, atol=1e-12, rtol=0.0)
@@ -825,7 +825,7 @@ def test_annex_m_adjustment_from_a_measured_result() -> None:
         rtol=0.0,
     )
     occupied = measured.adjusted_for_levels(
-        operational_level=IEC60268_16_ANNEX_M_OPERATIONAL_LEVEL,
+        operational_levels=IEC60268_16_ANNEX_M_OPERATIONAL_LEVEL,
         operational_ambient=IEC60268_16_ANNEX_M_OPERATIONAL_AMBIENT,
     )
     np.testing.assert_allclose(
@@ -837,9 +837,9 @@ def test_annex_m_adjustment_from_a_measured_result() -> None:
     assert round(occupied.sti, 2) == IEC60268_16_ANNEX_M_STI
     by_hand = speech.sti_adjusted_for_levels(
         measured.mtf,
-        measured_level=IEC60268_16_ANNEX_M_MEASURED_LEVEL,
+        measured_levels=IEC60268_16_ANNEX_M_MEASURED_LEVEL,
         measured_ambient=IEC60268_16_ANNEX_M_MEASURED_AMBIENT,
-        operational_level=IEC60268_16_ANNEX_M_OPERATIONAL_LEVEL,
+        operational_levels=IEC60268_16_ANNEX_M_OPERATIONAL_LEVEL,
         operational_ambient=IEC60268_16_ANNEX_M_OPERATIONAL_AMBIENT,
     )
     assert occupied.sti == pytest.approx(by_hand.sti, abs=1e-12)
@@ -856,13 +856,18 @@ def test_annex_m_needs_the_levels_the_measurement_was_corrected_with() -> None:
     assert result.band_levels is None
     with pytest.raises(ValueError, match="needs the speech band levels"):
         result.adjusted_for_levels(
-            operational_level=IEC60268_16_ANNEX_M_OPERATIONAL_LEVEL
+            operational_levels=IEC60268_16_ANNEX_M_OPERATIONAL_LEVEL
         )
 
 
 @pytest.mark.parametrize(
     "name",
-    ["measured_level", "measured_ambient", "operational_level", "operational_ambient"],
+    [
+        "measured_levels",
+        "measured_ambient",
+        "operational_levels",
+        "operational_ambient",
+    ],
 )
 def test_annex_m_adjustment_rejects_a_level_vector_of_the_wrong_length(
     name: str,
@@ -870,8 +875,8 @@ def test_annex_m_adjustment_rejects_a_level_vector_of_the_wrong_length(
     """Each of the four spectra is seven octave bands, named when it is not."""
     measured = _annex_m_matrix(IEC60268_16_ANNEX_M_MEASURED_MTF)
     spectra: dict[str, Sequence[float]] = {
-        "measured_level": IEC60268_16_ANNEX_M_MEASURED_LEVEL,
-        "operational_level": IEC60268_16_ANNEX_M_OPERATIONAL_LEVEL,
+        "measured_levels": IEC60268_16_ANNEX_M_MEASURED_LEVEL,
+        "operational_levels": IEC60268_16_ANNEX_M_OPERATIONAL_LEVEL,
         name: [70.0, 70.0],
     }
     with pytest.raises(
@@ -889,12 +894,12 @@ def test_annex_m_adjustment_rejects_a_non_finite_level(bad: float) -> None:
     """
     measured = _annex_m_matrix(IEC60268_16_ANNEX_M_MEASURED_MTF)
     with pytest.raises(
-        ValueError, match=r"'operational_level' must contain only finite dB"
+        ValueError, match=r"'operational_levels' must contain only finite dB"
     ):
         speech.sti_adjusted_for_levels(
             measured,
-            measured_level=IEC60268_16_ANNEX_M_MEASURED_LEVEL,
-            operational_level=[70.0] * 6 + [bad],
+            measured_levels=IEC60268_16_ANNEX_M_MEASURED_LEVEL,
+            operational_levels=[70.0] * 6 + [bad],
         )
 
 

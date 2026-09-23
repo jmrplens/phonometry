@@ -34,7 +34,7 @@ LIQUID: dict[str, Any] = {
     "inlet_pressure_pa": 1.0e6,
     "vapour_pressure_pa": 2.32e3,
     "density": 997.0,
-    "sound_speed": 1400.0,
+    "speed_of_sound": 1400.0,
 }
 VALVE: dict[str, Any] = {
     "flow_coefficient": 90.0,
@@ -102,7 +102,7 @@ def _run(index: int) -> hydro.HydrodynamicValveNoise:
 
 def _band(result: hydro.HydrodynamicValveNoise, values: NDArray[np.float64]) -> float:
     """``values`` at the 8 kHz band, which is the one the annex prints."""
-    index = int(np.argmin(np.abs(result.frequency - BAND_HZ)))
+    index = int(np.argmin(np.abs(result.frequencies - BAND_HZ)))
     return float(values[index])
 
 
@@ -325,7 +325,7 @@ class TestInternalLevel:
         with_density = hydro.internal_sound_pressure_level(
             sound_power=0.00234,
             density=997.0,
-            sound_speed=1400.0,
+            speed_of_sound=1400.0,
             internal_diameter_m=0.1071,
         )
         assert with_density == pytest.approx(149.596, abs=5e-3)
@@ -585,7 +585,7 @@ class TestBandRoute:
     """Equations (19a), (19b), (20a), (20b) and (21)."""
 
     def test_the_default_bands_are_the_printed_range(self) -> None:
-        bands = _run(1).frequency
+        bands = _run(1).frequencies
         assert bands[0] == pytest.approx(50.0)
         assert bands[-1] == pytest.approx(20000.0)
 
@@ -596,7 +596,7 @@ class TestBandRoute:
             incipient=INCIPIENT,
             frequency=[63.0, 125.0, 250.0],
         )
-        assert result.frequency.tolist() == [63.0, 125.0, 250.0]
+        assert result.frequencies.tolist() == [63.0, 125.0, 250.0]
         assert result.band_external_level.shape == (3,)
 
     @pytest.mark.parametrize(("index", "expected"), [(1, -33.34), (2, -29.69)])

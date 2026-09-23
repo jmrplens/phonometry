@@ -7,6 +7,8 @@ shipping noise, and the marine-mammal weighting the impact criteria apply.
 Everything here is embedded by a page under ``underwater/``.
 """
 
+from typing import TYPE_CHECKING
+
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -23,6 +25,9 @@ from .theme import (
     COLOR_TERTIARY,
     save_figure,
 )
+
+if TYPE_CHECKING:
+    from phonometry.underwater import AmbientNoiseResult
 
 
 def generate_ship_source_level(output_dir: str) -> None:
@@ -420,10 +425,10 @@ def generate_underwater_sound_speed(output_dir: str) -> None:
     # then an isothermal deep layer; the pressure term then lifts c with depth.
     temps = 4.0 + 14.0 / (1.0 + (np.maximum(depths - 80.0, 0.0) / 250.0) ** 2)
     prof = underwater.sound_speed_profile(depths, temps, 35.0, model="unesco")
-    axis_depth = depths[int(np.argmin(prof.sound_speed))]
+    axis_depth = depths[int(np.argmin(prof.speed_of_sound))]
     _fig, ax = plt.subplots(figsize=(7, 8))
     ax.plot(
-        prof.sound_speed,
+        prof.speed_of_sound,
         prof.depth,
         color=COLOR_PRIMARY,
         linewidth=2.0,
@@ -616,12 +621,16 @@ def generate_ocean_ambient_noise(output_dir: str) -> None:
 
 
 def _plot_ambient_curve(
-    res: object, wind_speed: float, color: str, *, label_components: bool = False
+    res: "AmbientNoiseResult",
+    wind_speed: float,
+    color: str,
+    *,
+    label_components: bool = False,
 ) -> None:
     ax = plt.gca()
     ax.plot(
-        res.frequency,  # type: ignore[attr-defined]
-        res.spectrum_level,  # type: ignore[attr-defined]
+        res.frequencies,
+        res.spectrum_level,
         color=color,
         linewidth=2.0,
         label=f"Total ({wind_speed:.0f} kn)",
@@ -629,16 +638,16 @@ def _plot_ambient_curve(
     # The wind component is a part of the total drawn above it: same colour,
     # one shade back. Opacity would take the red component off the dark page.
     ax.plot(
-        res.frequency,  # type: ignore[attr-defined]
-        res.wind,  # type: ignore[attr-defined]
+        res.frequencies,
+        res.wind,
         color=theme_line(color, ax, quiet=0.6),
         linewidth=1.0,
         linestyle="--",
         label="Wind" if label_components else None,
     )
     ax.plot(
-        res.frequency,  # type: ignore[attr-defined]
-        res.thermal,  # type: ignore[attr-defined]
+        res.frequencies,
+        res.thermal,
         color="#8c8c8c",
         linewidth=1.0,
         linestyle=":",
@@ -661,7 +670,7 @@ def generate_ship_traffic_noise(output_dir: str) -> None:
     for vessel_class, speed, length, color in cases:
         s = underwater.ship_source_spectrum(speed, length, vessel_class=vessel_class)
         ax.plot(
-            s.frequency,
+            s.frequencies,
             s.source_psd,
             color=color,
             linewidth=2.0,
@@ -673,7 +682,7 @@ def generate_ship_traffic_noise(output_dir: str) -> None:
     ax.set_title("Ship Traffic Source Level (JOMOPANS-ECHO)", pad=12)
     ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.5, which="both")
     ax.set_axisbelow(True)
-    _sf = np.asarray(s.frequency, dtype=float)
+    _sf = np.asarray(s.frequencies, dtype=float)
     format_frequency_axis(ax, float(_sf.min()), float(_sf.max()), language=_LANG)
     ax.legend(loc="upper right", fontsize=9)
     plt.tight_layout()
@@ -886,7 +895,7 @@ def generate_sound_speed_models(output_dir: str) -> None:
     colors = (COLOR_PRIMARY, COLOR_SECONDARY, COLOR_TERTIARY, "#8c8c8c")
     profiles = {
         m: np.asarray(
-            underwater.sound_speed_profile(depths, temps, 35.0, model=m).sound_speed,
+            underwater.sound_speed_profile(depths, temps, 35.0, model=m).speed_of_sound,
             dtype=float,
         )
         for m in models

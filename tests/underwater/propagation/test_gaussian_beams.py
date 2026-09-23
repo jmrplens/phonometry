@@ -761,7 +761,7 @@ def test_a_lossy_seabed_is_the_image_sum_with_R_at_each_images_own_angle() -> No
         range_step=2.5,
         bottom=FluidSeabed(
             density=_SEABED["rho2"],
-            sound_speed=_SEABED["c2"],
+            speed_of_sound=_SEABED["c2"],
             water_density=_SEABED["rho1"],
         ),
     )
@@ -845,7 +845,7 @@ def test_the_perfect_default_is_the_seabed_machinery_off_state() -> None:
         [0.0, _GUIDE["water_depth"]],
         [_C, _C],
         **kwargs,
-        bottom=FluidSeabed(density=_SEABED["rho2"], sound_speed=_SEABED["c2"]),
+        bottom=FluidSeabed(density=_SEABED["rho2"], speed_of_sound=_SEABED["c2"]),
     )
     assert not np.array_equal(default.pressure, lossy.pressure)
 
@@ -855,12 +855,12 @@ def test_a_malformed_seabed_is_rejected() -> None:
     nonphysical one, each field with its own message.
     """
     iso = ([0.0, 1000.0], [_C, _C])
-    airy = FluidSeabed(density=-1.0, sound_speed=1700.0)
-    still = FluidSeabed(density=1800.0, sound_speed=0.0)
-    dry = FluidSeabed(density=1800.0, sound_speed=1700.0, water_density=0.0)
+    airy = FluidSeabed(density=-1.0, speed_of_sound=1700.0)
+    still = FluidSeabed(density=1800.0, speed_of_sound=0.0)
+    dry = FluidSeabed(density=1800.0, speed_of_sound=1700.0, water_density=0.0)
     with pytest.raises(ValueError, match=r"'density' must be positive"):
         gaussian_beams(200.0, *iso, source_depth=500.0, bottom=airy)
-    with pytest.raises(ValueError, match=r"'sound_speed' must be positive"):
+    with pytest.raises(ValueError, match=r"'speed_of_sound' must be positive"):
         gaussian_beams(200.0, *iso, source_depth=500.0, bottom=still)
     with pytest.raises(ValueError, match=r"'water_density' must be positive"):
         gaussian_beams(200.0, *iso, source_depth=500.0, bottom=dry)

@@ -194,7 +194,7 @@ $\rho_a = \phi \rho_0 (\alpha_\infty - 1)$ (Eq. (6.44)):
 
 ```python
 BiotWavesResult(
-    frequency: Real,
+    frequencies: Real,
     porosity: float,
     tortuosity: float,
     frame_density: float,
@@ -217,7 +217,7 @@ BiotWavesResult(
 
 The three Biot waves of an isotropic air-saturated porous material.
 
-All arrays share the shape of `frequency`. `compressional_wavenumber_1`
+All arrays share the shape of `frequencies`. `compressional_wavenumber_1`
 and `compressional_wavenumber_2` are `delta1` and `delta2` of
 Eqs. (6.67)-(6.68) (the branch with $-\sqrt{\Delta}$ first, as
 printed, with $\sqrt{\Delta}$ taken on the root with non-positive

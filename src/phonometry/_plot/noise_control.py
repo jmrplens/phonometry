@@ -242,7 +242,7 @@ def _cascade_series(result: DuctPathResult) -> list[tuple[str, np.ndarray]]:
     series: list[tuple[str, np.ndarray]] = [
         (result.source_label, np.asarray(result.source_level))
     ]
-    series += [(stage.label, np.asarray(stage.level)) for stage in result.stages]
+    series += [(stage.label, np.asarray(stage.levels)) for stage in result.stages]
     return series
 
 

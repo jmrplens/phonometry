@@ -118,7 +118,7 @@ class ZwickerLoudness:
     specific loudness N' in sone/Bark at 0.1-Bark steps (240 values; for
     the time-varying method it is the pattern at the instant of maximum
     loudness).  ``n5``/``n10`` are the percentile loudness values N5/N10
-    and ``time``/``loudness_vs_time`` the 500 Hz loudness-vs-time trace
+    and ``times``/``loudness_vs_time`` the 500 Hz loudness-vs-time trace
     (clause 6.5); these four are ``None`` for stationary results.
     ``field`` records the sound field the calculation assumed (``"free"``
     or ``"diffuse"``), one of the items clause 7 requires a loudness report
@@ -131,14 +131,14 @@ class ZwickerLoudness:
     specific: np.ndarray
     n5: float | None = None
     n10: float | None = None
-    time: np.ndarray | None = None
+    times: np.ndarray | None = None
     loudness_vs_time: np.ndarray | None = None
     field: str | None = None
 
     def __post_init__(self) -> None:
         """Reject a misshapen specific-loudness pattern or loudness-vs-time trace.
 
-        ``time`` and ``loudness_vs_time`` are one axis written down twice: the
+        ``times`` and ``loudness_vs_time`` are one axis written down twice: the
         constructor decimates the 2000 Hz weighted series to 500 Hz and builds
         both from the same ``num_out`` (clause 6.5). Everything that reads them
         reads them as a pair, and only as a pair, so a disagreement is never
@@ -161,7 +161,7 @@ class ZwickerLoudness:
         ``loudness_vs_time`` of shape (300, 2) has 300 rows and passes any
         count, and matplotlib reads a two-column y as two series: the N(t)
         panel comes out with two curves, both labelled ``$N(t)$``, and
-        ``.report()`` renders the full PDF without a word. A ``time`` of shape
+        ``.report()`` renders the full PDF without a word. A ``times`` of shape
         (300, 2) does the same. Hence the rank pin beside the length one: the
         count alone cannot tell a trace from a pair of them.
 
@@ -199,12 +199,12 @@ class ZwickerLoudness:
         recorded) is allowed and stays unstated.
 
         :raises ValueError: if ``specific`` is not one-dimensional, if
-            ``time`` and ``loudness_vs_time`` are not both one-dimensional and
+            ``times`` and ``loudness_vs_time`` are not both one-dimensional and
             of one length, if a loudness quantity is not finite, or if
             ``field`` is given and is neither ``'free'`` nor ``'diffuse'``.
         """
-        require_ranks(self, specific=1, time=1, loudness_vs_time=1)
-        require_same_length(self, "time", "loudness_vs_time", axis="time step")
+        require_ranks(self, specific=1, times=1, loudness_vs_time=1)
+        require_same_length(self, "times", "loudness_vs_time", axis="time step")
         for name in ("loudness", "loudness_level", "n5", "n10"):
             value = getattr(self, name)
             if value is not None and not math.isfinite(float(value)):
@@ -919,7 +919,7 @@ def loudness_zwicker(
         :func:`loudness_zwicker_from_spectrum`.  Time-varying:
         ``loudness`` is the maximum loudness Nmax, ``loudness_level`` its
         phon mapping, ``specific`` the pattern at the loudness maximum,
-        ``n5``/``n10`` the percentile values and ``time`` /
+        ``n5``/``n10`` the percentile values and ``times`` /
         ``loudness_vs_time`` the loudness trace at 500 Hz.
     """
     diffuse = _validate_field(field)
@@ -990,7 +990,7 @@ def loudness_zwicker(
 
     # Loudness-vs-time output at 500 Hz (clause 6.5): plain decimation of
     # the 0.5 ms (2000 Hz) series, as in the reference main program. This decimated
-    # trace remains the public ``time``/``loudness_vs_time`` contract.
+    # trace remains the public ``times``/``loudness_vs_time`` contract.
     dec_factor = _SR_LEVEL // _SR_LOUDNESS
     num_out = loudness.size // dec_factor
     loudness_out = loudness[: num_out * dec_factor : dec_factor].copy()
@@ -1015,7 +1015,7 @@ def loudness_zwicker(
         specific=specific_at_max,
         n5=n5,
         n10=n10,
-        time=time,
+        times=time,
         loudness_vs_time=loudness_out,
         field=field,
     )

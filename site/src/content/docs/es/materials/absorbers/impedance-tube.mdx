@@ -828,7 +828,7 @@ tm = materials.TransferMatrix(t11=chain[0, 0], t12=chain[0, 1],
                               t21=chain[1, 0], t22=chain[1, 1])
 print(np.round(float(tm.transmission_loss(407.0)[-1]), 1))   # 9.7 dB a 1,6 kHz
 # TL(f) con la absorción con respaldo rígido superpuesta
-tm.plot(frequency=f, characteristic_impedance=407.0)
+tm.plot(frequencies=f, characteristic_impedance=407.0)
 ```
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/transfer_matrix_tl.svg" alt="Magnitudes de la matriz de transferencia ASTM E2611 de una capa porosa de 50 mm: la pérdida de transmisión a incidencia normal sube desde unos 6,6 dB a 200 Hz hasta más de 9 dB a 1,6 kHz en el eje izquierdo, y el coeficiente de absorción con respaldo rígido sube de 0,19 a 0,97 en el eje derecho" width="80%" />
@@ -872,7 +872,7 @@ tm = materials.TransferMatrix(t11=chain[0, 0], t12=chain[0, 1],
                               t21=chain[1, 0], t22=chain[1, 1])
 
 # Una línea: TL(f) en el eje izquierdo, absorción con respaldo rígido a la derecha.
-tm.plot(frequency=f, characteristic_impedance=407.0, language="es")
+tm.plot(frequencies=f, characteristic_impedance=407.0, language="es")
 plt.show()
 
 # A mano, desde los métodos de la matriz:

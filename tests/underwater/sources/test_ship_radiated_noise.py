@@ -37,7 +37,7 @@ def test_surface_correction_independent_anchors(
 ) -> None:
     # With c = 2π and d_s = 1 m, u = k·d_s = (2πf/c)·1 = f, so f = u sets u exactly.
     delta_l = _surface_correction(
-        np.array([u]), source_depth=1.0, sound_speed=2.0 * np.pi
+        np.array([u]), source_depth=1.0, speed_of_sound=2.0 * np.pi
     )
     assert float(delta_l[0]) == pytest.approx(expected_delta_l, abs=1e-7)
 
@@ -64,7 +64,7 @@ def test_surface_correction_matches_formula() -> None:
     draught, c, f = 10.0, 1500.0, 200.0
     ds = 0.7 * draught
     u = 2 * np.pi * f / c * ds
-    res = underwater.monopole_source_level(120.0, f, draught, c=c)
+    res = underwater.monopole_source_level(120.0, f, draught, speed_of_sound=c)
     assert res.source_depth == pytest.approx(ds)
     assert float(res.surface_correction[0]) == pytest.approx(_delta_l(u), rel=1e-9)
     assert float(res.source_level[0]) == pytest.approx(120.0 + _delta_l(u), rel=1e-9)
@@ -72,7 +72,7 @@ def test_surface_correction_matches_formula() -> None:
 
 def test_surface_correction_high_frequency_limit() -> None:
     # As u -> infinity, ratio -> 2, so ΔL -> -10 lg(2) = -3.0103 dB.
-    res = underwater.monopole_source_level(100.0, 1e6, 20.0, c=1500.0)
+    res = underwater.monopole_source_level(100.0, 1e6, 20.0, speed_of_sound=1500.0)
     assert float(res.surface_correction[0]) == pytest.approx(-3.010299957, abs=1e-3)
 
 

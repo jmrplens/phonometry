@@ -105,7 +105,7 @@ EcmaFluctuationStrength(
     specific_fluctuation_strength: np.ndarray,
     bark: np.ndarray,
     centre_frequencies: np.ndarray,
-    time: np.ndarray,
+    times: np.ndarray,
     fluctuation_strength_vs_time: np.ndarray,
     specific_fluctuation_strength_vs_time: np.ndarray,
     field: str,
@@ -120,7 +120,7 @@ strength F in vacil_HMS (the 90th percentile of F(l50), Clause 9.1.14).
 strength F'(z) in vacil_HMS/Bark_HMS over the 53 auditory bands
 (Clause 9.1.12), with `bark` the critical-band-rate scale z
 (0.5..26.5 Bark_HMS) and `centre_frequencies` the band centre
-frequencies F(z). `time` and `fluctuation_strength_vs_time` hold the
+frequencies F(z). `times` and `fluctuation_strength_vs_time` hold the
 time-dependent fluctuation strength F(l50) at 50 Hz (Formula 169);
 `specific_fluctuation_strength_vs_time` is the time-dependent specific
 fluctuation strength F'(l50, z) (Formula 168) of shape

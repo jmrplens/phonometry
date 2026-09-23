@@ -232,7 +232,7 @@ def plot_quasi_peak(
     style_default(kwargs, "color", _C_PRIMARY)
     style_default(kwargs, "linewidth", 1.8)
     kwargs.setdefault("label", _t("Quasi-peak trace", language))
-    ax.plot(result.time, result.trace, **kwargs)
+    ax.plot(result.times, result.trace, **kwargs)
     reading = format_number(result.reading, language, decimals=4)
     level = format_number(result.level_db, language, decimals=2)
     ax.axhline(

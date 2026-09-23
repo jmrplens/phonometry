@@ -386,7 +386,7 @@ def verify_intensity_class(
     return IntensityInstrumentComplianceResult(
         overall_class=overall,
         bands=tuple(bands),
-        frequency=np.asarray([b["freq"] for b in bands], dtype=np.float64),
+        frequencies=np.asarray([b["freq"] for b in bands], dtype=np.float64),
         residual_index=np.asarray(
             [b["residual_index_db"] for b in bands], dtype=np.float64
         ),
@@ -415,7 +415,7 @@ class IntensityInstrumentComplianceResult:
         ``None`` when at least one band meets neither. It is the *largest*
         per-band class, because a band meeting class 1 meets class 2 as well.
     :ivar bands: The per-band verdicts, as an immutable tuple.
-    :ivar frequency: Nominal band centre frequencies, in Hz.
+    :ivar frequencies: Nominal band centre frequencies, in Hz.
     :ivar residual_index: Measured ``delta_pI0`` per band, in dB.
     :ivar limit_class1: Class 1 minimum ``delta_pI0`` per band, in dB, already
         rescaled to ``spacing``.
@@ -431,7 +431,7 @@ class IntensityInstrumentComplianceResult:
 
     overall_class: int | None
     bands: tuple[dict[str, Any], ...]
-    frequency: np.ndarray
+    frequencies: np.ndarray
     residual_index: np.ndarray
     limit_class1: np.ndarray
     limit_class2: np.ndarray
@@ -472,7 +472,7 @@ class IntensityInstrumentComplianceResult:
         _check_device(self.device)
         require_ranks(
             self,
-            frequency=1,
+            frequencies=1,
             residual_index=1,
             limit_class1=1,
             limit_class2=1,
@@ -480,12 +480,12 @@ class IntensityInstrumentComplianceResult:
         require_same_length(
             self,
             "bands",
-            "frequency",
+            "frequencies",
             "residual_index",
             "limit_class1",
             "limit_class2",
         )
-        for name in ("frequency", "residual_index", "limit_class1", "limit_class2"):
+        for name in ("frequencies", "residual_index", "limit_class1", "limit_class2"):
             if not np.all(np.isfinite(getattr(self, name))):
                 msg = f"'{name}' must be finite."
                 raise ValueError(msg)
@@ -538,7 +538,7 @@ class IntensityInstrumentComplianceResult:
         key = f"margin_class{cls}_db"
         return [float(b["freq"]) for b in self.bands if float(b[key]) < 0.0]
 
-    def phase_mismatch(self, c: float = 343.0) -> np.ndarray:
+    def phase_mismatch(self, speed_of_sound: float = 343.0) -> np.ndarray:
         """Equivalent channel phase mismatch per band, in degrees.
 
         Converts the measured ``delta_pI0`` spectrum with
@@ -546,10 +546,13 @@ class IntensityInstrumentComplianceResult:
         microphone separation, so the verdict can be read as the phase-matching
         the chain achieves.
 
-        :param c: Speed of sound in m/s (default 343.0).
+        :param speed_of_sound: Speed of sound in m/s (default 343.0).
         """
         return phase_mismatch_from_residual_index(
-            self.residual_index, self.frequency, self.spacing, c=c
+            self.residual_index,
+            self.frequencies,
+            self.spacing,
+            speed_of_sound=speed_of_sound,
         )
 
     def plot(
@@ -626,7 +629,7 @@ def _plane_wave_phase_deg(
         msg = "'spacing' must be a positive, finite distance in metres."
         raise ValueError(msg)
     if not np.isfinite(c) or c <= 0.0:
-        msg = "'c' must be a positive, finite speed of sound."
+        msg = "'speed_of_sound' must be a positive, finite speed of sound."
         raise ValueError(msg)
     freq = np.asarray(frequency, dtype=np.float64)
     if np.any(~np.isfinite(freq)) or np.any(freq <= 0.0):
@@ -639,7 +642,7 @@ def phase_mismatch_from_residual_index(
     residual_index: float | list[float] | np.ndarray,
     frequency: float | list[float] | np.ndarray,
     spacing: float,
-    c: float = 343.0,
+    speed_of_sound: float = 343.0,
 ) -> np.ndarray:
     r"""Channel phase mismatch equivalent to a pressure-residual intensity index.
 
@@ -661,17 +664,19 @@ def phase_mismatch_from_residual_index(
     :param frequency: Frequency in Hz (scalar or array, broadcast against
         ``residual_index``).
     :param spacing: Microphone separation in metres.
-    :param c: Speed of sound in m/s (default 343.0).
+    :param speed_of_sound: Speed of sound in m/s (default 343.0).
     :return: The equivalent phase mismatch in degrees, as a
         :class:`numpy.ndarray` (0-d for scalar inputs).
-    :raises ValueError: If ``spacing``, ``c`` or ``frequency`` are not positive
+    :raises ValueError: If ``spacing``, ``speed_of_sound`` or ``frequency`` are not positive
         and finite, or if ``residual_index`` is not finite.
     """
     index = np.asarray(residual_index, dtype=np.float64)
     if np.any(~np.isfinite(index)):
         msg = "'residual_index' must be finite."
         raise ValueError(msg)
-    kd_deg = _plane_wave_phase_deg(np.asarray(frequency, dtype=np.float64), spacing, c)
+    kd_deg = _plane_wave_phase_deg(
+        np.asarray(frequency, dtype=np.float64), spacing, speed_of_sound
+    )
     return np.asarray(kd_deg * 10.0 ** (-index / 10.0), dtype=np.float64)
 
 
@@ -679,7 +684,7 @@ def residual_index_from_phase_mismatch(
     phase_mismatch: float | list[float] | np.ndarray,
     frequency: float | list[float] | np.ndarray,
     spacing: float,
-    c: float = 343.0,
+    speed_of_sound: float = 343.0,
 ) -> np.ndarray:
     r"""Pressure-residual intensity index of a given channel phase mismatch.
 
@@ -704,15 +709,17 @@ def residual_index_from_phase_mismatch(
     :param frequency: Frequency in Hz (scalar or array, broadcast against
         ``phase_mismatch``).
     :param spacing: Microphone separation in metres.
-    :param c: Speed of sound in m/s (default 343.0).
+    :param speed_of_sound: Speed of sound in m/s (default 343.0).
     :return: ``delta_pI0`` in decibels, as a :class:`numpy.ndarray` (0-d for
         scalar inputs).
     :raises ValueError: If ``phase_mismatch`` is not positive and finite, or
-        if ``spacing``, ``c`` or ``frequency`` are not positive and finite.
+        if ``spacing``, ``speed_of_sound`` or ``frequency`` are not positive and finite.
     """
     phi = np.asarray(phase_mismatch, dtype=np.float64)
     if np.any(~np.isfinite(phi)) or np.any(phi <= 0.0):
         msg = "'phase_mismatch' must be finite and positive, in degrees."
         raise ValueError(msg)
-    kd_deg = _plane_wave_phase_deg(np.asarray(frequency, dtype=np.float64), spacing, c)
+    kd_deg = _plane_wave_phase_deg(
+        np.asarray(frequency, dtype=np.float64), spacing, speed_of_sound
+    )
     return np.asarray(10.0 * np.log10(kd_deg / phi), dtype=np.float64)

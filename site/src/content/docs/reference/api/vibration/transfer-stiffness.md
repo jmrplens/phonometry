@@ -349,7 +349,7 @@ A dynamic transfer stiffness over frequency (ISO 10846).
 | `transfer_stiffness` | Complex $k_{2,1}$ per frequency, in N/m. |
 | `blocking_mass` | Blocking mass `m2` used (indirect method), in kg, or `None` for the direct method. |
 
-### TransferStiffnessResult.level
+### TransferStiffnessResult.levels
 
 *property*
 

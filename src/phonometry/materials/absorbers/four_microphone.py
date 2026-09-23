@@ -374,7 +374,7 @@ class TransferMatrix:
     The trailing fields retain the measurement context when the matrix comes
     out of :func:`transfer_matrix_two_load` / :func:`transfer_matrix_one_load`
     (tube geometry ``l1``/``s1``/``l2``/``s2``, specimen ``thickness``, tube
-    ``diameter_m`` and canonical cross-section ``shape``, the ``frequency``
+    ``diameter_m`` and canonical cross-section ``shape``, the ``frequencies``
     vector when supplied to the solver, and the air
     ``air_characteristic_impedance`` ``rho c``); all default to ``None`` so a
     hand-built matrix (for example :func:`air_layer_transfer_matrix`) is
@@ -393,7 +393,7 @@ class TransferMatrix:
     thickness: float | None = None
     diameter_m: float | None = None
     shape: str | None = None
-    frequency: Real | None = None
+    frequencies: Real | None = None
     air_characteristic_impedance: float | None = None
 
     def determinant(self) -> Complex:
@@ -484,7 +484,7 @@ class TransferMatrix:
         self,
         ax: Axes | None = None,
         *,
-        frequency: ArrayLike | None = None,
+        frequencies: ArrayLike | None = None,
         characteristic_impedance: float | None = None,
         language: str = "en",
         **kwargs: Any,
@@ -496,10 +496,10 @@ class TransferMatrix:
         (Eq. (26), the primary curve, left axis) and the hard-backed
         absorption coefficient ``alpha(f)`` (Eq. (28), a muted companion on a
         0..1 right axis). The four-pole entries carry no frequency axis of
-        their own, so the plot needs the measurement's ``frequency`` vector
+        their own, so the plot needs the measurement's ``frequencies`` vector
         (matching the shape of the entries) and the air characteristic
         impedance ``rho c``. A matrix built by the solvers retains both
-        (``self.frequency`` / ``self.air_characteristic_impedance``), so
+        (``self.frequencies`` / ``self.air_characteristic_impedance``), so
         ``plot()`` takes no arguments there; only a hand-built matrix (for
         example :func:`air_layer_transfer_matrix`) must supply them.
 
@@ -507,24 +507,24 @@ class TransferMatrix:
         :class:`~matplotlib.axes.Axes` of the transmission-loss curve.
 
         :param ax: Existing axes, or ``None`` to create a figure.
-        :param frequency: Frequency vector ``f``, in hertz, matching the shape
-            of the matrix entries; ``None`` uses the stored ``frequency``.
+        :param frequencies: Frequency vector ``f``, in hertz, matching the shape
+            of the matrix entries; ``None`` uses the stored ``frequencies``.
         :param characteristic_impedance: Characteristic impedance ``rho c`` of
             the air in the tube, in rayls; ``None`` uses the stored
             ``air_characteristic_impedance``.
         :param language: Plot language: ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the transmission-loss ``plot`` call.
         :return: The axes.
-        :raises ValueError: If ``frequency`` or ``characteristic_impedance``
+        :raises ValueError: If ``frequencies`` or ``characteristic_impedance``
             is neither supplied nor stored on the matrix.
         """
-        if frequency is None:
-            frequency = self.frequency
+        if frequencies is None:
+            frequencies = self.frequencies
         if characteristic_impedance is None:
             characteristic_impedance = self.air_characteristic_impedance
-        if frequency is None or characteristic_impedance is None:
+        if frequencies is None or characteristic_impedance is None:
             msg = (
-                "'frequency' and 'characteristic_impedance' must be supplied "
+                "'frequencies' and 'characteristic_impedance' must be supplied "
                 "when the matrix does not retain them (hand-built matrices)."
             )
             raise ValueError(msg)
@@ -534,7 +534,7 @@ class TransferMatrix:
         check_language(language)
         return plot_transfer_matrix(
             self,
-            frequency,
+            frequencies,
             characteristic_impedance,
             ax=ax,
             language=language,
@@ -677,7 +677,7 @@ def _measurement_context(
     thickness: float,
     diameter_m: float | None,
     shape: str,
-    frequency: ArrayLike | None,
+    frequencies: ArrayLike | None,
     characteristic_impedance: float,
 ) -> dict[str, Any]:
     """Context fields a solver retains on the :class:`TransferMatrix`."""
@@ -689,8 +689,10 @@ def _measurement_context(
         "thickness": thickness,
         "diameter_m": diameter_m,
         "shape": shape if diameter_m is not None else None,
-        "frequency": (
-            np.asarray(frequency, dtype=np.float64) if frequency is not None else None
+        "frequencies": (
+            np.asarray(frequencies, dtype=np.float64)
+            if frequencies is not None
+            else None
         ),
         "air_characteristic_impedance": characteristic_impedance,
     }
@@ -707,7 +709,7 @@ def transfer_matrix_two_load(
     thickness: float,
     wavenumber: ArrayLike,
     characteristic_impedance: float,
-    frequency: ArrayLike | None = None,
+    frequencies: ArrayLike | None = None,
     diameter_m: float | None = None,
     shape: str = "circular",
 ) -> TransferMatrix:
@@ -736,7 +738,7 @@ def transfer_matrix_two_load(
     :param thickness: Specimen thickness ``d``, in metres.
     :param wavenumber: Air wavenumber ``k``.
     :param characteristic_impedance: Characteristic impedance ``rho c``.
-    :param frequency: Optional frequency vector ``f``, in hertz, retained on
+    :param frequencies: Optional frequency vector ``f``, in hertz, retained on
         the result so :meth:`TransferMatrix.plot` needs no arguments.
     :param diameter_m: Optional tube diameter (circular) or largest section
         dimension (rectangular/square), in metres, that activates the
@@ -798,7 +800,7 @@ def transfer_matrix_two_load(
             thickness=thickness,
             diameter_m=diameter_m,
             shape=canonical,
-            frequency=frequency,
+            frequencies=frequencies,
             characteristic_impedance=characteristic_impedance,
         ),
     )
@@ -814,7 +816,7 @@ def transfer_matrix_one_load(
     thickness: float,
     wavenumber: ArrayLike,
     characteristic_impedance: float,
-    frequency: ArrayLike | None = None,
+    frequencies: ArrayLike | None = None,
     diameter_m: float | None = None,
     shape: str = "circular",
 ) -> TransferMatrix:
@@ -841,7 +843,7 @@ def transfer_matrix_one_load(
     :param thickness: Specimen thickness ``d``, in metres.
     :param wavenumber: Air wavenumber ``k``.
     :param characteristic_impedance: Characteristic impedance ``rho c``.
-    :param frequency: Optional frequency vector ``f``, in hertz, retained on
+    :param frequencies: Optional frequency vector ``f``, in hertz, retained on
         the result so :meth:`TransferMatrix.plot` needs no arguments.
     :param diameter_m: Optional tube diameter (circular) or largest section
         dimension (rectangular/square), in metres, that activates the
@@ -893,7 +895,7 @@ def transfer_matrix_one_load(
             thickness=thickness,
             diameter_m=diameter_m,
             shape=canonical,
-            frequency=frequency,
+            frequencies=frequencies,
             characteristic_impedance=characteristic_impedance,
         ),
     )

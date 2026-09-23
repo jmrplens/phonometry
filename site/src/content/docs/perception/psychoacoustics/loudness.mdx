@@ -251,7 +251,7 @@ $N(t)$ traces stay inside the standard's per-sample 5 % tolerance band.
 | `calibration_factor` | float | Pa per digital unit | default `1.0` | From `sensitivity()` |
 
 Returns a `ZwickerLoudness` dataclass: `loudness_level` (phon), `specific`
-($N'(z)$, 240 bins of 0.1 Bark), and for time-varying runs `n5`, `n10`, `time`
+($N'(z)$, 240 bins of 0.1 Bark), and for time-varying runs `n5`, `n10`, `times`
 and `loudness_vs_time` (500 Hz trace). `loudness` ($N$, sones) changes meaning
 with `stationary`: with `stationary=True` it is the single stationary $N$ of
 clause 5, and with the default `stationary=False` it is the peak
@@ -282,7 +282,7 @@ returns 10.0 sone, a fifth quantity again.*
 import matplotlib.pyplot as plt
 
 # `bursts` and `tv` come from the snippet above.
-plt.plot(tv.time, tv.loudness_vs_time, label="N(t)")
+plt.plot(tv.times, tv.loudness_vs_time, label="N(t)")
 for value, label in [(tv.loudness, "Nmax"), (tv.n5, "N5"), (tv.n10, "N10")]:
     plt.axhline(value, linestyle="--", label=f"{label} = {value:.1f} sone")
 plt.xlabel("Time [s]")
@@ -297,7 +297,7 @@ Because $N_5$ is a percentage of the analysis window, lengthening or shortening
 the record moves it. Quote the measurement time beside $N_5$, keep it identical
 across the sounds being compared (clause 6.4 requires as much), and do not use
 $N_5$ for isolated impulses at all: that is exactly the case the trace above
-caricatures. `loudness_vs_time` and `time` carry the trace, so a record can be
+caricatures. `loudness_vs_time` and `times` carry the trace, so a record can be
 trimmed to the operating state of interest before the percentile is read, and
 the measurement interval belongs in `ReportMetadata`, since the fiche prints
 $N_5$ without one.

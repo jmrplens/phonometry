@@ -288,9 +288,9 @@ def test_result_structure(
 ) -> None:
     res = ref_calibration
     assert res.specific_fluctuation_strength.shape == res.bark.shape == (53,)
-    assert res.fluctuation_strength_vs_time.shape == res.time.shape
+    assert res.fluctuation_strength_vs_time.shape == res.times.shape
     assert res.specific_fluctuation_strength_vs_time.shape == (
-        res.time.size,
+        res.times.size,
         res.bark.size,
     )
     assert np.all(res.specific_fluctuation_strength >= 0.0)
@@ -390,8 +390,8 @@ def test_a_time_axis_with_a_second_axis_is_refused(
     fill underneath is what stops, with ``'x' is not 1-dimensional`` -- naming
     matplotlib's own parameter, not the field that carried the extra axis.
     """
-    with pytest.raises(ValueError, match="'time' must have one axis"):
-        dataclasses.replace(ref_calibration, time=ref_calibration.time[:, None])
+    with pytest.raises(ValueError, match="'times' must have one axis"):
+        dataclasses.replace(ref_calibration, times=ref_calibration.times[:, None])
 
 
 def test_invalid_field_raises() -> None:

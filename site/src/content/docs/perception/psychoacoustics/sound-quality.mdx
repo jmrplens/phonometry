@@ -341,7 +341,7 @@ test is the ECMA-418-1 tone-to-noise and prominence ratio of
 
 Returns an `EcmaTonality`: `tonality` ($T$, tu_HMS), `specific_tonality`
 ($T'(z)$, 53 bands), `bark`, `centre_frequencies`, `tonal_frequencies`
-($f_{\text{ton},z}$), `time`, `tonality_vs_time` ($T(l)$),
+($f_{\text{ton},z}$), `times`, `tonality_vs_time` ($T(l)$),
 `tonal_frequency_vs_time`,
 `field`.
 
@@ -414,9 +414,9 @@ for fm in fmods:
     r.append(psychoacoustics.roughness_ecma(am, fs).roughness)
 
 fig, (ax0, ax1) = plt.subplots(2, 1, figsize=(10, 8.5))
-ax0.plot(tin.time, tin.tonality_vs_time,
+ax0.plot(tin.times, tin.tonality_vs_time,
          label=f"Tone in noise (T = {tin.tonality:.2f} tu_HMS)")   # 1.19
-ax0.plot(pn.time, pn.tonality_vs_time,
+ax0.plot(pn.times, pn.tonality_vs_time,
          label=f"Pure noise (T = {pn.tonality:.2f} tu_HMS)")       # 0.02
 ax0.set(xlabel="Time [s]", ylabel="Tonality T [tu_HMS]")
 ax0.legend()
@@ -458,7 +458,7 @@ fig, (ax0, ax1) = plt.subplots(1, 2, figsize=(12, 4.8))
 ax0.plot(res.bark, res.specific_roughness)
 ax0.set(xlabel="Critical-band rate z [Bark_HMS]",
         ylabel="Specific roughness R'(z) [asper/Bark_HMS]")
-ax1.plot(res.time, res.roughness_vs_time)
+ax1.plot(res.times, res.roughness_vs_time)
 ax1.axhline(res.roughness, linestyle="--")     # the 90th percentile
 ax1.set(xlabel="Time [s]", ylabel="Roughness R [asper]")
 plt.show()
@@ -476,7 +476,7 @@ plt.show()
 
 Returns an `EcmaRoughness`: `roughness` ($R$, asper, the 90th percentile of
 $R(l_{50})$), `specific_roughness` ($R'(z)$, 53 bands), `bark`,
-`centre_frequencies`, `time`, `roughness_vs_time` ($R(l_{50})$),
+`centre_frequencies`, `times`, `roughness_vs_time` ($R(l_{50})$),
 `specific_roughness_vs_time` ((n_times, 53) array), `field`.
 
 ## Fluctuation strength in vacil_HMS (ECMA-418-2)
@@ -578,7 +578,7 @@ plt.show()
 
 Returns an `EcmaFluctuationStrength`: `fluctuation_strength` ($F$, vacil_HMS,
 the 90th percentile of $F(l_{50})$), `specific_fluctuation_strength`
-($F'(z)$, 53 bands), `bark`, `centre_frequencies`, `time`,
+($F'(z)$, 53 bands), `bark`, `centre_frequencies`, `times`,
 `fluctuation_strength_vs_time` ($F(l_{50})$),
 `specific_fluctuation_strength_vs_time` ((n_times, 53) array), `field`.
 

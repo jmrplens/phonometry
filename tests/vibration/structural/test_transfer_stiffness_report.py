@@ -80,7 +80,7 @@ def test_low_frequency_plateau_oracle() -> None:
     """At the 20 Hz plateau |k2,1| = k and L_k = 120 dB (module oracle)."""
     res = _direct_result()
     assert float(res.magnitude[0]) == pytest.approx(_K, rel=1e-4)
-    assert float(res.level[0]) == pytest.approx(
+    assert float(res.levels[0]) == pytest.approx(
         float(vibration.transfer_stiffness_level(_K)), abs=1e-3
     )
     assert float(vibration.transfer_stiffness_level(_K)) == pytest.approx(

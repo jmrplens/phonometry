@@ -239,7 +239,7 @@ def test_a_lossy_seabed_charges_R_at_each_arrivals_own_angle_as_printed() -> Non
         trace,
         receiver_range=_GUIDE["r"],
         receiver_depth=_GUIDE["zr"],
-        bottom=FluidSeabed(density=rho2, sound_speed=c2, water_density=rho1),
+        bottom=FluidSeabed(density=rho2, speed_of_sound=c2, water_density=rho1),
         n_steps=_GUIDE_STEPS,
     )
     assert np.array_equal(lossy.travel_times, soft.travel_times)
@@ -499,8 +499,8 @@ def test_invalid_inputs_rejected() -> None:
         eigenrays(trace, receiver_range=500.0, receiver_depth=46.0, max_arrivals=0)
     with pytest.raises(ValueError, match=r"'n_steps' must be at least"):
         eigenrays(trace, receiver_range=500.0, receiver_depth=46.0, n_steps=1)
-    slow = FluidSeabed(density=1800.0, sound_speed=-1700.0)
-    with pytest.raises(ValueError, match=r"'sound_speed' must be positive"):
+    slow = FluidSeabed(density=1800.0, speed_of_sound=-1700.0)
+    with pytest.raises(ValueError, match=r"'speed_of_sound' must be positive"):
         eigenrays(trace, receiver_range=500.0, receiver_depth=46.0, bottom=slow)
     with pytest.raises(ValueError, match=r"'bottom' must be one of"):
         eigenrays(trace, receiver_range=500.0, receiver_depth=46.0, bottom="sandy")

@@ -538,7 +538,7 @@ def mechanical_stream_power(
 # --------------------------------------------------------------------------
 
 
-def turbulent_efficiency(velocity: float, sound_speed: float) -> float:
+def turbulent_efficiency(velocity: float, speed_of_sound: float) -> float:
     r"""Equation (8): the acoustical efficiency of the turbulent jet.
 
     .. math::
@@ -553,17 +553,17 @@ def turbulent_efficiency(velocity: float, sound_speed: float) -> float:
     in the :math:`10^{-6}` range: one part in a million of the stream power.
 
     :param velocity: :math:`U_{vc}`, in m/s.
-    :param sound_speed: :math:`c_L` in the liquid, in m/s.
+    :param speed_of_sound: :math:`c_L` in the liquid, in m/s.
     :return: :math:`\eta_{turb}`, dimensionless.
     :raises ValueError: If a value is not positive and finite.
     """
     speed = require_positive(velocity, "velocity")
-    sonic = require_positive(sound_speed, "sound_speed")
+    sonic = require_positive(speed_of_sound, "speed_of_sound")
     if speed > sonic:
         msg = (
             "Equation (8) reaches its constant when the jet reaches the "
             "speed of sound in the liquid, which a control valve does not "
-            f"do; got {velocity!r} m/s against {sound_speed!r} m/s. Check "
+            f"do; got {velocity!r} m/s against {speed_of_sound!r} m/s. Check "
             "the two are not the other way round."
         )
         raise ValueError(msg)
@@ -643,7 +643,7 @@ def internal_sound_pressure_level(
     *,
     sound_power: float,
     density: float,
-    sound_speed: float,
+    speed_of_sound: float,
     internal_diameter_m: float,
 ) -> float:
     r"""Equation (10): the level inside, at the pipe wall.
@@ -667,14 +667,14 @@ def internal_sound_pressure_level(
 
     :param sound_power: :math:`W_a` of Equation (7a) or (7b), in W.
     :param density: :math:`\rho_L` of the liquid, in kg/m³.
-    :param sound_speed: :math:`c_L` in the liquid, in m/s.
+    :param speed_of_sound: :math:`c_L` in the liquid, in m/s.
     :param internal_diameter_m: :math:`D_i` of the downstream pipe, in m.
     :return: :math:`L_{pi}`, in dB re 2 × 10⁻⁵ Pa.
     :raises ValueError: If a value is not positive and finite.
     """
     power = require_positive(sound_power, "sound_power")
     rho = require_positive(density, "density")
-    sonic = require_positive(sound_speed, "sound_speed")
+    sonic = require_positive(speed_of_sound, "speed_of_sound")
     bore = require_positive(internal_diameter_m, "internal_diameter_m")
     return float(
         10.0 * math.log10(_INTERNAL_LEVEL_COEFFICIENT * power * rho * sonic / bore**2)
@@ -1184,7 +1184,7 @@ class HydrodynamicValveNoise:
         dB at 1 m from the pipe wall. The standard calls it A-weighted, but
         neither equation applies a weighting: the label describes what the
         fit was made against, not an operation on this number.
-    :ivar frequency: The band centres of 5.4.1, in Hz.
+    :ivar frequencies: The band centres of 5.4.1, in Hz.
     :ivar band_internal_level: :math:`L_{pi}(f_i)` of Equation (19a) or
         (19b), in dB.
     :ivar band_transmission_loss: :math:`TL(f_i)` of Equation (22a), in dB.
@@ -1214,7 +1214,7 @@ class HydrodynamicValveNoise:
     cavitation_transmission_loss: float | None
     transmission_loss: float
     external_level: float
-    frequency: NDArray[np.float64]
+    frequencies: NDArray[np.float64]
     band_internal_level: NDArray[np.float64]
     band_transmission_loss: NDArray[np.float64]
     band_external_level: NDArray[np.float64]
@@ -1239,7 +1239,7 @@ class LiquidStream:
     :ivar vapour_pressure_pa: :math:`p_v` of the liquid at the inlet
         temperature, absolute, in Pa.
     :ivar density: :math:`\rho_L`, in kg/m³.
-    :ivar sound_speed: :math:`c_L`, in m/s.
+    :ivar speed_of_sound: :math:`c_L`, in m/s.
     """
 
     mass_flow: float
@@ -1247,7 +1247,7 @@ class LiquidStream:
     outlet_pressure_pa: float
     vapour_pressure_pa: float
     density: float
-    sound_speed: float
+    speed_of_sound: float
 
 
 @dataclass(frozen=True)
@@ -1287,7 +1287,7 @@ class LiquidPipe:
     :ivar internal_diameter_m: :math:`D_i`, in m.
     :ivar wall_thickness: :math:`t_p`, in m.
     :ivar density: :math:`\rho_p` of the pipe material, in kg/m³.
-    :ivar sound_speed: :math:`c_p` in the pipe wall, in m/s.
+    :ivar speed_of_sound: :math:`c_p` in the pipe wall, in m/s.
     :ivar air_density: :math:`\rho_o` outside the pipe, in kg/m³.
     :ivar air_sound_speed: :math:`c_o` outside the pipe, in m/s.
     """
@@ -1295,7 +1295,7 @@ class LiquidPipe:
     internal_diameter_m: float
     wall_thickness: float
     density: float
-    sound_speed: float = PIPE_SOUND_SPEED_M_S
+    speed_of_sound: float = PIPE_SOUND_SPEED_M_S
     air_density: float = AIR_DENSITY_KG_M3
     air_sound_speed: float = AIR_SOUND_SPEED_M_S
 
@@ -1343,7 +1343,7 @@ def valve_hydrodynamic_noise(
     outlet_pressure_pa = stream.outlet_pressure_pa
     vapour_pressure_pa = stream.vapour_pressure_pa
     liquid_density = stream.density
-    liquid_sound_speed = stream.sound_speed
+    liquid_sound_speed = stream.speed_of_sound
     flow_coefficient = valve.flow_coefficient
     style_modifier = valve.style_modifier
     pressure_recovery = valve.pressure_recovery
@@ -1355,7 +1355,7 @@ def valve_hydrodynamic_noise(
     internal_diameter_m = pipe.internal_diameter_m
     wall_thickness = pipe.wall_thickness
     pipe_density = pipe.density
-    pipe_sound_speed = pipe.sound_speed
+    pipe_sound_speed = pipe.speed_of_sound
     air_density = pipe.air_density
     air_sound_speed = pipe.air_sound_speed
     p1 = require_positive(inlet_pressure_pa, "inlet_pressure_pa")
@@ -1410,7 +1410,7 @@ def valve_hydrodynamic_noise(
     internal = internal_sound_pressure_level(
         sound_power=sound_power,
         density=rho,
-        sound_speed=sonic,
+        speed_of_sound=sonic,
         internal_diameter_m=bore,
     )
 
@@ -1499,7 +1499,7 @@ def valve_hydrodynamic_noise(
         ),
         transmission_loss=float(loss),
         external_level=float(internal + loss - spreading),
-        frequency=bands,
+        frequencies=bands,
         band_internal_level=band_internal,
         band_transmission_loss=np.asarray(band_loss, dtype=np.float64),
         band_external_level=np.asarray(

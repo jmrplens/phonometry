@@ -96,7 +96,7 @@ linkwitz_riley(
     x: Signal,
     fs: int | None = ...,
     *,
-    freq: float,
+    frequency: float,
     order: int = ...,
 ) -> tuple[Signal, Signal]
 
@@ -104,7 +104,7 @@ linkwitz_riley(
     x: list[float] | np.ndarray,
     fs: int,
     *,
-    freq: float,
+    frequency: float,
     order: int = ...,
 ) -> tuple[np.ndarray, np.ndarray]
 ```
@@ -118,7 +118,7 @@ Splits signal into low and high bands with flat sum response.
 | :--- | :--- |
 | `x` | Input signal, or a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) read from a measurement file. A calibrated Signal is split in pascals, so both bands come back in pascals. |
 | `fs` | Sample rate. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises. |
-| `freq` | Crossover frequency, in Hz. Keyword-only and required: it sits behind an optional `fs`, and a default here would be a signature that lies about what the call needs. |
+| `frequency` | Crossover frequency, in Hz. Keyword-only and required: it sits behind an optional `fs`, and a default here would be a signature that lies about what the call needs. |
 | `order` | Total order (must be even, typically 2 or 4). |
 
 **Returns:** (low_pass_signal, high_pass_signal)

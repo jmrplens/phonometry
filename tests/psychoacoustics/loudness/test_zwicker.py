@@ -398,9 +398,9 @@ def test_n5_n10_use_full_rate_series(monkeypatch: pytest.MonkeyPatch) -> None:
 def test_time_varying_outputs() -> None:
     x = _tone(1000.0, 70.0, seconds=0.5)
     res = psychoacoustics.loudness_zwicker(x, FS)
-    assert res.time is not None
+    assert res.times is not None
     assert res.loudness_vs_time is not None
-    assert res.time.shape == res.loudness_vs_time.shape
+    assert res.times.shape == res.loudness_vs_time.shape
     assert res.n5 is not None
     assert res.n10 is not None
     assert res.n5 >= res.n10
@@ -434,13 +434,13 @@ def test_an_extra_axis_on_the_trace_is_refused() -> None:
     fiche without a word.
     """
     res = psychoacoustics.loudness_zwicker(_tone(1000.0, 70.0, seconds=0.5), FS)
-    assert res.time is not None
+    assert res.times is not None
     assert res.loudness_vs_time is not None
     two_axes = np.column_stack([res.loudness_vs_time] * 2)
     with pytest.raises(ValueError, match="'loudness_vs_time' must have one axis"):
         dataclasses.replace(res, loudness_vs_time=two_axes)
-    with pytest.raises(ValueError, match="'time' must have one axis"):
-        dataclasses.replace(res, time=res.time[:, None])
+    with pytest.raises(ValueError, match="'times' must have one axis"):
+        dataclasses.replace(res, times=res.times[:, None])
 
 
 def test_an_extra_axis_on_the_specific_pattern_is_refused() -> None:
@@ -466,7 +466,7 @@ def test_stationary_result_keeps_its_absent_trace() -> None:
         psychoacoustics.loudness_zwicker_from_spectrum(np.full(28, 60.0)),
         psychoacoustics.loudness_zwicker(_tone(1000.0, 70.0), FS, stationary=True),
     ):
-        assert res.time is None
+        assert res.times is None
         assert res.loudness_vs_time is None
 
 
@@ -591,7 +591,7 @@ def test_non_finite_loudness_quantities_refused(name: str, bad: float) -> None:
     """
     result = psychoacoustics.loudness_zwicker_from_spectrum(np.full(28, 60.0))
     trace = {
-        "time": np.linspace(0.0, 1.0, 8),
+        "times": np.linspace(0.0, 1.0, 8),
         "loudness_vs_time": np.linspace(1.0, 2.0, 8),
         "n5": 1.9,
         "n10": 1.8,

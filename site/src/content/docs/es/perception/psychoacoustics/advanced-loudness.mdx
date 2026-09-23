@@ -450,7 +450,7 @@ plt.show()
 | `presentation` | str | — | `'binaural'` (por defecto) / `'diotic'` / `'monaural'` | Suma binaural |
 | `percentiles` | secuencia | porcentaje | por defecto `(1, 5, 10, 50, 90, 95)` | Niveles de sonoridad de largo plazo excedidos |
 
-Devuelve un `MooreGlasbergTimeVaryingLoudness`: `time` (rejilla de 1 ms),
+Devuelve un `MooreGlasbergTimeVaryingLoudness`: `times` (rejilla de 1 ms),
 `short_term_loudness` / `long_term_loudness` (sonios), sus `_level` en fonios,
 `n_max`, `loudness_level_max`, un dict `percentiles`, `field`, `presentation`.
 
@@ -535,7 +535,7 @@ plt.show()
 | `field` | str | — | `'free'` (por defecto) / `'diffuse'` | Filtro del oído externo/medio (apartado 5.1.3) |
 
 Devuelve un `EcmaLoudness`: `loudness` ($N$, sone_HMS), `specific_loudness`
-($N'(z)$, 53 bandas), `bark`, `centre_frequencies`, `time`, `loudness_vs_time`
+($N'(z)$, 53 bandas), `bark`, `centre_frequencies`, `times`, `loudness_vs_time`
 ($N(l)$ a 187,5 Hz), `field`.
 
 ## Qué cubre esta guía

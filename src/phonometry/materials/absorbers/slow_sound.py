@@ -498,7 +498,7 @@ def helmholtz_resonator_impedance(
 class SlitResonatorAbsorberResult:
     r"""Prediction of a slit panel loaded with Helmholtz resonators.
 
-    All spectra share the shape of ``frequency``. ``surface_impedance`` is
+    All spectra share the shape of ``frequencies``. ``surface_impedance`` is
     the acoustic surface impedance :math:`Z = T_{11} / T_{21}` in Pa s/m3 of
     the rigidly backed panel, ``normalized_impedance`` its ratio to
     :math:`Z_0 = \rho_0 c_0 / S_0`, ``reflection`` the plane-wave reflection
@@ -514,7 +514,7 @@ class SlitResonatorAbsorberResult:
     the original fields and default to ``None`` for hand-built results.
     """
 
-    frequency: Real
+    frequencies: Real
     angle_rad: float
     surface_impedance: Complex
     normalized_impedance: Complex
@@ -742,7 +742,7 @@ def slit_helmholtz_absorber(
     k_eff = np.arccos((t11 + t22) / 2.0) / length
     z_eff = np.sqrt(t12 / t21)
     return SlitResonatorAbsorberResult(
-        frequency=f,
+        frequencies=f,
         angle_rad=theta,
         surface_impedance=np.asarray(z_in, dtype=np.complex128),
         normalized_impedance=np.asarray(z_in / z0, dtype=np.complex128),

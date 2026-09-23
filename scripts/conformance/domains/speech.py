@@ -112,9 +112,9 @@ def _chk_sti_annex_m_adjustment() -> Outcome:
     """
     result = ph.speech.sti_adjusted_for_levels(
         np.asarray(ref.IEC60268_16_ANNEX_M_MEASURED_MTF, dtype=float).T,
-        measured_level=ref.IEC60268_16_ANNEX_M_MEASURED_LEVEL,
+        measured_levels=ref.IEC60268_16_ANNEX_M_MEASURED_LEVEL,
         measured_ambient=ref.IEC60268_16_ANNEX_M_MEASURED_AMBIENT,
-        operational_level=ref.IEC60268_16_ANNEX_M_OPERATIONAL_LEVEL,
+        operational_levels=ref.IEC60268_16_ANNEX_M_OPERATIONAL_LEVEL,
         operational_ambient=ref.IEC60268_16_ANNEX_M_OPERATIONAL_AMBIENT,
     )
     mtf_delta = float(
@@ -421,9 +421,9 @@ def _chk_sti_annex_m_step4_effective_snr() -> Outcome:
     """
     result = ph.speech.sti_adjusted_for_levels(
         np.asarray(ref.IEC60268_16_ANNEX_M_MEASURED_MTF, dtype=float).T,
-        measured_level=ref.IEC60268_16_ANNEX_M_MEASURED_LEVEL,
+        measured_levels=ref.IEC60268_16_ANNEX_M_MEASURED_LEVEL,
         measured_ambient=ref.IEC60268_16_ANNEX_M_MEASURED_AMBIENT,
-        operational_level=ref.IEC60268_16_ANNEX_M_OPERATIONAL_LEVEL,
+        operational_levels=ref.IEC60268_16_ANNEX_M_OPERATIONAL_LEVEL,
         operational_ambient=ref.IEC60268_16_ANNEX_M_OPERATIONAL_AMBIENT,
     )
     with np.errstate(divide="ignore"):

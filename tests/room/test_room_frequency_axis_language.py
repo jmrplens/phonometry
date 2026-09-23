@@ -51,7 +51,7 @@ def _band_categories(language: str) -> Axes:
     """The third-octave band axis of the ISO 3382 decay-time figure."""
     n = 3
     result = room.RoomAcousticsResult(
-        frequency=np.array([1000.0, 1250.0, 1600.0]),
+        frequencies=np.array([1000.0, 1250.0, 1600.0]),
         edt=np.full(n, 0.6),
         t20=np.full(n, 0.6),
         t30=np.full(n, 0.6),
@@ -112,7 +112,7 @@ def test_the_band_categories_are_unchanged_in_english() -> None:
 
 def _decay_title(language: str) -> str:
     time = np.linspace(0.0, 1.0, 100)
-    curve = room.DecayCurve(time=time, level=-60.0 * time, band=1250.0)
+    curve = room.DecayCurve(times=time, levels=-60.0 * time, band=1250.0)
     return curve.plot(language=language).get_title()
 
 

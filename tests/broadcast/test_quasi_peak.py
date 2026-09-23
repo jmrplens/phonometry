@@ -144,7 +144,7 @@ def test_every_window_is_met_at_every_sample_rate(
 ) -> None:
     """The verifier's own verdict, at each rate, with the margin it reports."""
     report = dynamics[fs]
-    assert report.passed
+    assert report.passes
     assert report.fs == fs
     margin = report.worst_margin_db
     assert isinstance(margin, float)
@@ -349,7 +349,7 @@ def test_the_trace_is_the_needle_over_the_record_the_caller_gave() -> None:
     burst = tone_burst(FS, BS468_BURST_HZ, 500, post_silence=0.5).signal
     result = quasi_peak_meter(burst, FS)
     assert result.trace.shape == burst.shape
-    assert result.time.size == burst.size
+    assert result.times.size == burst.size
     assert result.reading == float(result.trace.max())
     assert result.fs == FS
     assert result.weighted
@@ -615,7 +615,7 @@ def test_each_published_edge_is_a_conforming_instrument(field: str) -> None:
         outcome = verify_quasi_peak_dynamics(
             48000.0, ballistics=replace(BS468_BALLISTICS, **{field: value})
         )
-        assert outcome.passed, (
+        assert outcome.passes, (
             f"{field} = {value * 1e3:g} ms is published as an edge of the "
             f"identified range and does not conform: worst margin "
             f"{outcome.worst_margin_db:+.4f} dB"
@@ -630,7 +630,7 @@ def test_the_published_range_is_not_quietly_wider(field: str) -> None:
         outcome = verify_quasi_peak_dynamics(
             48000.0, ballistics=replace(BS468_BALLISTICS, **{field: value})
         )
-        assert not outcome.passed, (
+        assert not outcome.passes, (
             f"{field} = {value * 1e3:g} ms lies outside the published range "
             f"and conforms, so the range is understated"
         )
@@ -644,7 +644,7 @@ def test_two_constants_at_their_edges_leave_the_region() -> None:
     """
     corner = replace(BS468_BALLISTICS, charge=1.02e-3, reading_device=96.0e-3)
     outcome = verify_quasi_peak_dynamics(48000.0, ballistics=corner)
-    assert not outcome.passed
+    assert not outcome.passes
     assert outcome.worst_margin_db < -1.0
 
 
@@ -656,9 +656,9 @@ def test_the_verifier_answers_for_the_ballistics_it_is_given() -> None:
     then the fitted set, which must still conform.
     """
     outside = replace(BS468_BALLISTICS, charge=0.3e-3)
-    assert not verify_quasi_peak_dynamics(48000.0, ballistics=outside).passed
-    assert verify_quasi_peak_dynamics(48000.0, ballistics=BS468_BALLISTICS).passed
-    assert verify_quasi_peak_dynamics(48000.0).passed
+    assert not verify_quasi_peak_dynamics(48000.0, ballistics=outside).passes
+    assert verify_quasi_peak_dynamics(48000.0, ballistics=BS468_BALLISTICS).passes
+    assert verify_quasi_peak_dynamics(48000.0).passes
 
 
 # ---------------------------------------------------------------------------
@@ -670,7 +670,7 @@ def test_a_verdict_over_no_stimulus_is_rejected() -> None:
     """Clause 2 has eleven windows; none of them is not a conformance run."""
     report = verify_quasi_peak_dynamics()
     with pytest.raises(ValueError, match=r"cannot be attested over no stimulus"):
-        replace(report, stimuli=(), passed=False)
+        replace(report, stimuli=(), passes=False)
 
 
 def test_a_non_positive_sample_rate_is_rejected() -> None:
@@ -681,7 +681,7 @@ def test_a_non_positive_sample_rate_is_rejected() -> None:
 
 @pytest.mark.parametrize(
     ("field", "value"),
-    [("passed", False), ("worst_margin_db", 99.0), ("worst_deviation_db", 0.0)],
+    [("passes", False), ("worst_margin_db", 99.0), ("worst_deviation_db", 0.0)],
 )
 def test_a_summary_the_rows_do_not_derive_is_rejected(field: str, value: float) -> None:
     """The three summaries are the conjunction, the minimum and the maximum.

@@ -173,7 +173,7 @@ def test_time_varying_fiche_reports_nmax_percentiles_and_nt(tmp_path: Path) -> N
     )
     result = psychoacoustics.loudness_zwicker(x, fs, field="diffuse")
     assert result.n5 is not None
-    assert result.time is not None
+    assert result.times is not None
     assert result.field == "diffuse"
     out = tmp_path / "tv.pdf"
     result.report(str(out), metadata=ReportMetadata(requirement=result.loudness + 1.0))

@@ -346,15 +346,15 @@ def _interp_distance(
 class NpdLevelResult:
     """NPD event level over a distance sweep at one power (ECAC Doc 29).
 
-    :ivar distance: Slant distances, in metres.
-    :ivar level: Interpolated event level per distance, in dB.
+    :ivar distances: Slant distances, in metres.
+    :ivar levels: Interpolated event level per distance, in dB.
     :ivar power: The engine power setting queried.
     :ivar table_distances: The tabulated slant distances, in metres.
     :ivar table_levels: The tabulated levels at the queried power, in dB.
     """
 
-    distance: NDArray[np.float64]
-    level: NDArray[np.float64]
+    distances: NDArray[np.float64]
+    levels: NDArray[np.float64]
     power: float
     table_distances: NDArray[np.float64]
     table_levels: NDArray[np.float64]
@@ -373,8 +373,8 @@ class NpdLevelResult:
 
         :raises ValueError: if a level array disagrees with its own distances.
         """
-        require_ranks(self, distance=1, level=1, table_distances=1, table_levels=1)
-        require_same_length(self, "distance", "level", axis="query distance")
+        require_ranks(self, distances=1, levels=1, table_distances=1, table_levels=1)
+        require_same_length(self, "distances", "levels", axis="query distance")
         require_same_length(
             self, "table_distances", "table_levels", axis="tabulated distance"
         )
@@ -458,8 +458,8 @@ def npd_curve(
     level = npd_level(p, d, lv, power, dq)
     row = npd_level(p, d, lv, power, d)  # tabulated levels at the queried power
     return NpdLevelResult(
-        distance=dq,
-        level=level,
+        distances=dq,
+        levels=level,
         power=float(power),
         table_distances=d,
         table_levels=row,
@@ -1408,13 +1408,13 @@ class NoiseContourResult:
 
     :ivar x: Grid x coordinates, in metres.
     :ivar y: Grid y coordinates, in metres.
-    :ivar level: Event level over the grid ``(len(y), len(x))``, in dB.
+    :ivar levels: Event level over the grid ``(len(y), len(x))``, in dB.
     :ivar metric: ``"exposure"`` (SEL) or ``"maximum"`` (LAmax).
     """
 
     x: NDArray[np.float64]
     y: NDArray[np.float64]
-    level: NDArray[np.float64]
+    levels: NDArray[np.float64]
     metric: EventMetric
 
     def __post_init__(self) -> None:
@@ -1437,9 +1437,9 @@ class NoiseContourResult:
         :raises ValueError: if the level grid disagrees with the x or y axis,
             or ``metric`` is not ``"exposure"`` or ``"maximum"``.
         """
-        require_ranks(self, x=1, y=1, level=2)
-        require_same_length(self, "y", ("level", 0), axis="grid row")
-        require_same_length(self, "x", ("level", 1), axis="grid column")
+        require_ranks(self, x=1, y=1, levels=2)
+        require_same_length(self, "y", ("levels", 0), axis="grid row")
+        require_same_length(self, "x", ("levels", 1), axis="grid column")
         require_choice(self.metric, "metric", ("exposure", "maximum"))
 
     def plot(
@@ -1519,5 +1519,5 @@ def noise_contour(
         pts, obs, p, d, le, lm, vref, imp, mounting, key, gr, lr, bk
     )
     return NoiseContourResult(
-        x=gx, y=gy, level=levels.reshape(gy.size, gx.size), metric=key
+        x=gx, y=gy, levels=levels.reshape(gy.size, gx.size), metric=key
     )

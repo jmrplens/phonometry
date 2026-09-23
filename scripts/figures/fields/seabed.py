@@ -149,9 +149,7 @@ def _seabed_fields() -> tuple[Any, ...]:
         rho_map[i_bed:, :] = rho2
         sim = fdtd2d.FDTD2D(c_map, _SB_DX, rho=rho_map, sponge_width=_SB_SPONGE)
         sim.add_source(
-            fdtd2d.SignalSource(
-                ix=ix_src, iy=iy_src, samples=burst, sample_rate=sample_rate
-            )
+            fdtd2d.SignalSource(ix=ix_src, iy=iy_src, samples=burst, fs=sample_rate)
         )
         flux = np.zeros(n_vis)
         ps: list[Any] = []

@@ -853,7 +853,7 @@ report = aircraft.verify_aircraft_noise_system(
     directional={4000.0: {30: 0.4, 60: 0.9, 90: 1.9, 120: 2.4, 150: 2.4}},
     frequency_response={1000.0: 1.2},
 )
-print(report.passed, report.checks)
+print(report.passes, report.checks)
 ```
 
 ## 5. Atmospheric absorption (SAE ARP 5534)
@@ -887,9 +887,9 @@ for s in (1000.0, 7620.0):
     att = aircraft.sae_band_attenuation(
         freqs, s, temperature_c=25.0, relative_humidity_percent=70.0
     )
-    line, = ax.semilogx(att.frequency, att.band_attenuation, marker="o",
+    line, = ax.semilogx(att.frequencies, att.band_attenuation, marker="o",
                         markersize=3, label=f"SAE band ({s:.0f} m)")
-    ax.semilogx(att.frequency, att.midband_attenuation, "--", alpha=0.6,
+    ax.semilogx(att.frequencies, att.midband_attenuation, "--", alpha=0.6,
                 color=line.get_color())
 ax.set(xlabel="Frequency [Hz]", ylabel="Attenuation [dB]",
        title="Aircraft atmospheric absorption at 25 °C, 70% RH")
@@ -1044,7 +1044,7 @@ levels = [[98.5, 92.0, 88.2, 83.6, 76.8, 69.4, 63.9, 56.8],
 fig, ax = plt.subplots()
 for p in (20000.0, 12000.0):
     curve = aircraft.npd_curve(powers, distances, levels, power=p)
-    line, = ax.semilogx(curve.distance, curve.level, label=f"P = {p:.0f} N")
+    line, = ax.semilogx(curve.distances, curve.levels, label=f"P = {p:.0f} N")
     ax.semilogx(curve.table_distances, curve.table_levels, "o", markersize=4,
                 color=line.get_color())
 ax.set(xlabel="Slant distance [m]", ylabel="Event level [dB]",
@@ -1557,7 +1557,7 @@ contour = aircraft.load_anp_database().aircraft("747100").noise_contour(
     x=np.linspace(-2000.0, 12000.0, 40),
     y=np.linspace(-3000.0, 3000.0, 30),
 )
-print(contour.level.shape)      # (30, 40): one SEL per grid point, indexed (y, x)
+print(contour.levels.shape)      # (30, 40): one SEL per grid point, indexed (y, x)
 contour.plot()
 ```
 
@@ -6380,7 +6380,7 @@ freqs = [100, 125, 160, 200, 250, 315, 400, 500, 630,
 dv = np.array([4.5, 4.8, 5.2, 5.6, 6.0, 6.5, 7.0, 7.6, 8.1, 8.7,
                9.2, 9.8, 10.3, 10.9, 11.4, 11.9, 12.3, 12.7])
 res = building.vibration_reduction_index(
-    dv, junction_length=4.0, area_i=12.0, area_j=10.0, frequency=freqs,
+    dv, junction_length=4.0, area_i=12.0, area_j=10.0, frequencies=freqs,
     structural_reverberation_time_i=0.35, structural_reverberation_time_j=0.40,
 )
 print(res.single_number)   # mean Kij over 200-1250 Hz (Annex A)
@@ -6419,7 +6419,7 @@ dv_ji = [6.4, 6.8, 7.3, 7.8, 8.4, 8.9, 9.5, 10.0, 10.6]  # element j excited (dB
 
 # Kij from both excitation directions (symmetric via the direction average):
 dbar = building.direction_averaged_level_difference(dv_ij, dv_ji)
-res = building.vibration_reduction_index(dbar, lij, s_i, s_j, frequency=freqs,
+res = building.vibration_reduction_index(dbar, lij, s_i, s_j, frequencies=freqs,
                                 structural_reverberation_time_i=ts,
                                 structural_reverberation_time_j=ts)
 res.k_ij           # Kij per band (Formula (13))
@@ -6431,7 +6431,7 @@ dnf = building.normalized_flanking_level_difference(np.full(9, 75.0), np.full(9,
                                            absorption_area=np.full(9, 12.0))
 m = building.modal_overlap_factor(s_i, critical_frequency=85.0,
                          structural_reverberation_time=ts)
-res_m = building.vibration_reduction_index(dbar, lij, s_i, s_j, frequency=freqs,
+res_m = building.vibration_reduction_index(dbar, lij, s_i, s_j, frequencies=freqs,
                                   modal_overlap=m)   # M < 0.25 bands bracketed
 res_m.bracketed    # per-band flags; bracketed bands leave the single number
 
@@ -6631,7 +6631,7 @@ dv = np.array([4.5, 4.8, 5.2, 5.6, 6.0, 6.5, 7.0, 7.6, 8.1, 8.7,
                9.2, 9.8, 10.3, 10.9, 11.4, 11.9, 12.3, 12.7])
 m = np.full(18, 1.0); m[:3] = 0.1                        # bracket the low bands
 kij = building.vibration_reduction_index(
-    dv, junction_length=4.0, area_i=12.0, area_j=10.0, frequency=freqs,
+    dv, junction_length=4.0, area_i=12.0, area_j=10.0, frequencies=freqs,
     structural_reverberation_time_i=0.35, structural_reverberation_time_j=0.40,
     modal_overlap=m,
 )
@@ -6821,7 +6821,7 @@ print(list(zip(freqs, lower, upper))[0])          # (31.5, 46.0, 48.0)
 
 # A calibration run: five measured octave-band LFE against the printed table.
 check = building.check_heavy_impact_source([39.4, 30.2, 23.6, 18.5, 12.9])
-print(check.passed, list(check.within_tolerance))
+print(check.passes, list(check.within_tolerance))
 check.plot()   # measured LFE over the tolerance band (needs matplotlib)
 ```
 
@@ -6854,7 +6854,7 @@ print([round(v, 1) for v in lfe])   # [-1.4, 14.0, 22.1, 20.2, 17.1]
 
 # Those five go to the conformance check; this synthetic half-sine is not a
 # rubber ball, so it does not conform:
-#   check_heavy_impact_source(lfe).passed  ->  False
+#   check_heavy_impact_source(lfe).passes  ->  False
 ```
 
 The construction examples the two standards give are informative, not
@@ -7883,7 +7883,7 @@ background by 10 dB.
 | `measurement_area` | float | m² | > 0 | Measurement-surface area $S_\mathrm{m}$ |
 | `area` | float | m² | > 0 | Specimen area $S$ |
 | `kc` | 1D array | dB | one per band / `None` | Adaptation term for the modified index |
-| `freq` | 1D array | Hz | > 0 | Midband frequencies (`adaptation_term_kc`) |
+| `frequencies` | 1D array | Hz | > 0 | Midband frequencies (`adaptation_term_kc`) |
 | `boundary_area` / `volume` | float | m² / m³ | > 0, both or neither | Room $S_{\mathrm{b}2}$ / $V_2$ for Formula (B.1) |
 
 `intensity_sound_reduction()` returns an `IntensityReductionResult` (`r_i`,
@@ -11796,7 +11796,7 @@ print(round(float(res.ts[0]) * 1000, 0))             # 72 ms
 
 # Octave bands 125 Hz - 4 kHz (ISO 3382-1 default); use fraction=3 for thirds
 octaves = room.room_parameters(ir, fs)
-print(octaves.frequency)                             # ~[126, 251, 501, 1000, 1995, 3981]
+print(octaves.frequencies)                             # ~[126, 251, 501, 1000, 1995, 3981]
 print(octaves.t30_valid)                             # per-band dynamic-range flags
 
 octaves.plot()               # per-band EDT/T20/T30 + C50/C80 bars (needs matplotlib)
@@ -11882,7 +11882,7 @@ plt.show()
 fig, ax = plt.subplots()
 ax.bar(np.arange(octaves.t30.size), octaves.t30)
 ax.set_xticks(np.arange(octaves.t30.size))
-ax.set_xticklabels([f"{f:g}" for f in octaves.frequency])
+ax.set_xticklabels([f"{f:g}" for f in octaves.frequencies])
 ax.set_xlabel("Octave-band centre frequency [Hz]")
 ax.set_ylabel("T30 [s]")
 plt.show()
@@ -11955,7 +11955,7 @@ nodal pattern.
 | `fraction` | int | — | `1` (octave, default) / `3` (third) | Bandwidth fraction |
 | `zero_phase` | bool | — | default `False` | Forward-backward octave filtering (ISO 3382-2 §7.3 NOTE, which relaxes $BT > 16$ to $BT > 4$); removes the filter group delay before the backward integration and roughly halves the 125 Hz short-decay T30 bias (~+4.9 % → +2.4 % at $T$ = 0.2 s). `decay_curve` accepts it too |
 
-Returns a `RoomAcousticsResult`: `frequency` (band centres, or `None`
+Returns a `RoomAcousticsResult`: `frequencies` (band centres, or `None`
 broadband), `edt`/`t20`/`t30` (s), `c50`/`c80` (dB), `d50`, `ts` (s),
 `dynamic_range` (dB), the `edt_valid`/`t20_valid`/`t30_valid` flags (ISO
 3382-1 §5.3.3: noise ≥ 25 dB below the peak for EDT, tightened to 46 dB for
@@ -13382,7 +13382,7 @@ ir *= np.sqrt(2.8 / np.sum(ir**2))
 ir[480] += 0.5
 
 res = room.sound_strength(ir, reference, fs)
-print(res.frequency.round(0))              # [ 126.  251.  501. 1000. 1995. 3981.]
+print(res.frequencies.round(0))              # [ 126.  251.  501. 1000. 1995. 3981.]
 print(res.strength.round(1))               # [5.9 4.1 4.  4.8 4.7 4.9]  dB
 
 res.plot()      # G against the Table A.1 typical range (needs matplotlib)
@@ -15089,7 +15089,7 @@ the same chain's steady reading.
 from phonometry import broadcast
 
 report = broadcast.verify_quasi_peak_dynamics(48000.0)
-print(report.passed, round(report.worst_margin_db, 3))   # True 0.259
+print(report.passes, round(report.worst_margin_db, 3))   # True 0.259
 row = report.stimuli[0]
 print(row["stimulus"], round(row["reading_percent"], 2))       # 1 ms 16.94
 ```
@@ -17079,7 +17079,7 @@ p2 = np.concatenate(([0.0], p1[:-1]))   # p2 = p1 delayed one sample
 res = emission.sound_intensity(p1, p2, fs, spacing=0.012, fraction=3,
                       limits=[100, 2500])
 print(res.total_intensity_level, res.total_direction)      # LI [dB], ±1
-print(res.frequency, res.intensity_level)                  # per band
+print(res.frequencies, res.intensity_level)                  # per band
 res.plot()   # Lp vs LI per band + the pressure-intensity index (needs matplotlib)
 ```
 
@@ -17117,13 +17117,13 @@ plt.show()
 # By hand, from the per-band fields the result carries — mirroring what
 # IntensityResult.plot() draws (bar label, merged twin-axis legend, δpI title):
 fig, ax = plt.subplots()
-ax.semilogx(res.frequency, res.pressure_level, "o-", label="Pressure level Lp")
-ax.semilogx(res.frequency, res.intensity_level, "s--", label="Intensity level LI")
+ax.semilogx(res.frequencies, res.pressure_level, "o-", label="Pressure level Lp")
+ax.semilogx(res.frequencies, res.intensity_level, "s--", label="Intensity level LI")
 ax.set_xlabel("Frequency [Hz]")
 ax.set_ylabel("Level [dB]")
 twin = ax.twinx()
-twin.bar(res.frequency, res.pressure_intensity_index,
-         width=res.frequency * 0.2, color="#2ca02c", alpha=0.25,
+twin.bar(res.frequencies, res.pressure_intensity_index,
+         width=res.frequencies * 0.2, color="#2ca02c", alpha=0.25,
          label="δpI = Lp − LI")
 twin.set_ylabel("Pressure-intensity index δpI [dB]")
 # Merge both axes' handles into a single legend, exactly as .plot() does:
@@ -17278,14 +17278,14 @@ plt.show()
 # By hand, from the per-band fields the result carries — mirroring what
 # FieldIndicators.plot() draws (Ld step line, merged twin-axis legend):
 fig, ax = plt.subplots()
-ax.plot(fi.frequency, fi.f2, "o-", label="F2 (surface pressure-intensity)")
-ax.plot(fi.frequency, fi.f3, "s--", label="F3 (negative partial power)")
-ax.plot(fi.frequency, np.full(fi.frequency.size, ld), ":",
+ax.plot(fi.frequencies, fi.f2, "o-", label="F2 (surface pressure-intensity)")
+ax.plot(fi.frequencies, fi.f3, "s--", label="F3 (negative partial power)")
+ax.plot(fi.frequencies, np.full(fi.frequencies.size, ld), ":",
         drawstyle="steps-mid", label="Dynamic capability Ld")
 ax.set_xlabel("Frequency [Hz]")
 ax.set_ylabel("Indicator [dB]")
 twin = ax.twinx()
-twin.bar(fi.frequency, fi.f4, width=fi.frequency * 0.2, alpha=0.25,
+twin.bar(fi.frequencies, fi.f4, width=fi.frequencies * 0.2, alpha=0.25,
          color="#2ca02c", label="F4 (non-uniformity)")
 twin.set_ylabel("Field non-uniformity F4")
 lines, labels = ax.get_legend_handles_labels()
@@ -17801,8 +17801,8 @@ the microphones alone.
 | `p1`, `p2` | 1D arrays | Pa | equal length | Microphone closer to the source first; reversing them flips the sign |
 | `fs` | int | Hz | > 0 | |
 | `spacing` | float | m | > 0 | Microphone separation $\Delta r$ (typ. 6/12/50 mm) |
-| `rho` | float | kg/m³ | default `1.204` | Air density |
-| `c` | float | m/s | default `343.0` | Speed of sound (bias/validity estimates) |
+| `density` | float | kg/m³ | default `1.204` | Air density |
+| `speed_of_sound` | float | m/s | default `343.0` | Speed of sound (bias/validity estimates) |
 | `fraction` | int, optional | — | `1`, `3` or `None` (default) | Octave/third-octave band integration |
 | `limits` | list, optional | Hz | default library band range | Band analysis limits |
 | `bias_correct` | bool | — | default `False` | Apply the per-bin $(k\Delta r)/\sin(k\Delta r)$ correction (IEC 61043 §7.3) before summing, so band/broadband totals stop under-reading as $f \to$ `max_valid_frequency`; bins past the first null are left uncorrected. The per-band `bias_correction` factor is reported either way |
@@ -25231,7 +25231,7 @@ res = noise_control.valve_hydrodynamic_noise(
         outlet_pressure_pa=6.5e5,
         vapour_pressure_pa=2.32e3,
         density=997.0,                 # kg/m3
-        sound_speed=1400.0,            # m/s
+        speed_of_sound=1400.0,            # m/s
     ),
     noise_control.LiquidTrim(
         flow_coefficient=90.0,         # C_v
@@ -25294,7 +25294,7 @@ and gives the wall a frequency-dependent loss with Equation (22a):
 ```python
 import numpy as np
 
-band = int(np.argmin(np.abs(res.frequency - 8000.0)))
+band = int(np.argmin(np.abs(res.frequencies - 8000.0)))
 print(round(float(res.band_internal_level[band]), 1))     # 141.9
 print(round(float(res.band_transmission_loss[band]), 2))  # -51.76
 print(round(float(res.band_external_level[band]), 1))     # 77.4
@@ -32158,7 +32158,7 @@ tm = materials.TransferMatrix(t11=chain[0, 0], t12=chain[0, 1],
                               t21=chain[1, 0], t22=chain[1, 1])
 print(np.round(float(tm.transmission_loss(407.0)[-1]), 1))   # 9.7 dB at 1.6 kHz
 # TL(f) with the hard-backed absorption overlaid
-tm.plot(frequency=f, characteristic_impedance=407.0)
+tm.plot(frequencies=f, characteristic_impedance=407.0)
 ```
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/transfer_matrix_tl_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/transfer_matrix_tl.svg" alt="ASTM E2611 transfer-matrix quantities of a 50 mm porous layer: the normal-incidence transmission loss rising from about 6.6 dB at 200 Hz to over 9 dB at 1.6 kHz on the left axis, and the hard-backed absorption coefficient rising from 0.19 to about 0.97 on the right axis" width="80%"></picture>
@@ -32183,7 +32183,7 @@ tm = materials.TransferMatrix(t11=chain[0, 0], t12=chain[0, 1],
                               t21=chain[1, 0], t22=chain[1, 1])
 
 # One line: TL(f) on the left axis, hard-backed absorption on the right.
-tm.plot(frequency=f, characteristic_impedance=407.0)
+tm.plot(frequencies=f, characteristic_impedance=407.0)
 plt.show()
 
 # By hand, from the matrix methods:
@@ -37524,8 +37524,8 @@ plt.show()
 
 # Or plot them directly to see the fast STL vs the slow LTL:
 fig, ax = plt.subplots()
-ax.plot(res.time, res.short_term_loudness, label="Short-term S'(t)")
-ax.plot(res.time, res.long_term_loudness, label="Long-term S''(t)")
+ax.plot(res.times, res.short_term_loudness, label="Short-term S'(t)")
+ax.plot(res.times, res.long_term_loudness, label="Long-term S''(t)")
 ax.set_xlabel("Time [s]")
 ax.set_ylabel("Loudness [sone]")
 ax.legend()
@@ -37544,7 +37544,7 @@ plt.show()
 | `presentation` | str | — | `'binaural'` (default) / `'diotic'` / `'monaural'` | Binaural summation |
 | `percentiles` | sequence | percent | default `(1, 5, 10, 50, 90, 95)` | Exceeded long-term loudness levels |
 
-Returns a `MooreGlasbergTimeVaryingLoudness`: `time` (1 ms grid),
+Returns a `MooreGlasbergTimeVaryingLoudness`: `times` (1 ms grid),
 `short_term_loudness` / `long_term_loudness` (sone), their `_level` in phon,
 `n_max`, `loudness_level_max`, a `percentiles` dict, `field`, `presentation`.
 
@@ -37615,7 +37615,7 @@ plt.show()
 | `field` | str | — | `'free'` (default) / `'diffuse'` | Outer/middle-ear filter (Clause 5.1.3) |
 
 Returns an `EcmaLoudness`: `loudness` ($N$, sone_HMS), `specific_loudness`
-($N'(z)$, 53 bands), `bark`, `centre_frequencies`, `time`, `loudness_vs_time`
+($N'(z)$, 53 bands), `bark`, `centre_frequencies`, `times`, `loudness_vs_time`
 ($N(l)$ at 187.5 Hz), `field`.
 
 ## Quick answers
@@ -37907,7 +37907,7 @@ $N(t)$ traces stay inside the standard's per-sample 5 % tolerance band.
 
 Returns a `ZwickerLoudness` dataclass: `loudness` ($N$, sones), `loudness_level`
 (phon), `specific` ($N'(z)$, 240 bins of 0.1 Bark), and for time-varying runs
-`n5`, `n10`, `time`, `loudness_vs_time` (500 Hz trace).
+`n5`, `n10`, `times`, `loudness_vs_time` (500 Hz trace).
 
 ### ISO 532-1 report (`.report()`)
 
@@ -38584,7 +38584,7 @@ is where an intermittent tone shows up.
 
 Returns an `EcmaTonality`: `tonality` ($T$, tu_HMS), `specific_tonality`
 ($T'(z)$, 53 bands), `bark`, `centre_frequencies`, `tonal_frequencies`
-($f_{\text{ton},z}$), `time`, `tonality_vs_time` ($T(l)$),
+($f_{\text{ton},z}$), `times`, `tonality_vs_time` ($T(l)$),
 `tonal_frequency_vs_time`,
 `field`.
 
@@ -38664,7 +38664,7 @@ plt.show()
 
 Returns an `EcmaRoughness`: `roughness` ($R$, asper, the 90th percentile of
 $R(l_{50})$), `specific_roughness` ($R'(z)$, 53 bands), `bark`,
-`centre_frequencies`, `time`, `roughness_vs_time` ($R(l_{50})$),
+`centre_frequencies`, `times`, `roughness_vs_time` ($R(l_{50})$),
 `specific_roughness_vs_time` ((n_times, 53) array), `field`.
 
 All three ECMA-418-2 entry points on this page are monaural. The binaural
@@ -38753,7 +38753,7 @@ plt.show()
 
 Returns an `EcmaFluctuationStrength`: `fluctuation_strength` ($F$, vacil_HMS,
 the 90th percentile of $F(l_{50})$), `specific_fluctuation_strength`
-($F'(z)$, 53 bands), `bark`, `centre_frequencies`, `time`,
+($F'(z)$, 53 bands), `bark`, `centre_frequencies`, `times`,
 `fluctuation_strength_vs_time` ($F(l_{50})$),
 `specific_fluctuation_strength_vs_time` ((n_times, 53) array), `field`.
 
@@ -40338,7 +40338,7 @@ and each is blind to what the other captures:
 The same space can pass one and fail the other. A quiet, highly reverberant
 atrium is an SII near 1 with a poor STI; a dry office flooded by ventilation
 noise can rate an acceptable STI from its impulse response while the SII (and
-the noise-aware STI, via `snr=` or `level=`) reveals that little of the speech
+the noise-aware STI, via `snr=` or `levels=`) reveals that little of the speech
 spectrum clears the noise. When both mechanisms are in play, compute both; the
 inputs are cheap once the room and the noise have been measured. See the
 [Speech Transmission Index guide](https://jmrplens.github.io/phonometry/perception/speech/speech-transmission/) for the STI side.
@@ -40664,7 +40664,7 @@ Each route has failure modes the standard is explicit about:
   masking and the reception threshold act on the *absolute* band levels at the
   listener. Play the test signal at the system's operating level (the
   standard's Annex J practice sets it 3 dB above the $L_\mathrm{Aeq}$ of continuous
-  speech at the position) and pass `level=` and `ambient=` so the analysis
+  speech at the position) and pass `levels=` and `ambient=` so the analysis
   includes them; an impulse response measured loud and rescaled afterwards
   misses these effects entirely. Section 3 moves a measurement made at one
   level and noise condition to another.
@@ -40672,7 +40672,7 @@ Each route has failure modes the standard is explicit about:
   during a direct measurement corrupts the measured modulation depths
   (clause 7.13). The standard's remedy is the indirect route: average the
   impulse response with MLS or sweeps for a noise-free MTF, then add the noise
-  degradation back via `snr=` or `level=`/`ambient=`. A quick sanity check is
+  degradation back via `snr=` or `levels=`/`ambient=`. A quick sanity check is
   to run the analyzer with the source off; the residual STI should stay below
   0.20.
 - **Statistical spread.** The STIPA signal is pseudo-random noise, so repeated
@@ -40688,8 +40688,8 @@ Each route has failure modes the standard is explicit about:
 | `ir` / `x` | 1D array | any / Pa | non-empty | IR (indirect) or STIPA recording (direct) |
 | `fs` | int | Hz | > 0 | |
 | `snr` | float or 7-vector, optional | dB | default `None` | Adds steady-noise degradation |
-| `level` | 7-vector, optional | dB SPL | default `None` | Enables auditory masking + reception threshold (Tables A.2/A.3) |
-| `ambient` | 7-vector, optional | dB SPL | needs `level` | Ambient noise band levels |
+| `levels` | 7-vector, optional | dB SPL | default `None` | Enables auditory masking + reception threshold (Tables A.2/A.3) |
+| `ambient` | 7-vector, optional | dB SPL | needs `levels` | Ambient noise band levels |
 | `reference` | 1D array, optional (`stipa`) | — | default `None` | Measured source signal instead of the nominal $m = 0.55$ |
 
 Both return `STIResult`: `sti`, `mti` (7 bands), `mtf` (7×14 or 7×2),
@@ -40805,20 +40805,20 @@ speech_empty = band_shape - 10 * np.log10(np.sum(10 ** (band_shape / 10))) + 68.
 noise_empty = np.array([42.0, 36.0, 31.0, 28.0, 25.0, 23.0, 21.0])
 
 empty = speech.sti_from_impulse_response(
-    ir, fs, level=speech_empty, ambient=noise_empty
+    ir, fs, levels=speech_empty, ambient=noise_empty
 )
 print(f"{empty.sti:.2f} ({empty.rating})")            # 0.60 (D)
 
 # The audience in, and the announcement left where it was.
 noise_occupied = np.array([54.0, 50.0, 47.0, 44.0, 40.0, 35.0, 30.0])
 occupied = empty.adjusted_for_levels(
-    operational_level=speech_empty, operational_ambient=noise_occupied
+    operational_levels=speech_empty, operational_ambient=noise_occupied
 )
 print(f"{occupied.sti:.2f} ({occupied.rating})")      # 0.56 (F)
 
 # The same room with the announcement 6 dB louder.
 louder = empty.adjusted_for_levels(
-    operational_level=speech_empty + 6.0, operational_ambient=noise_occupied
+    operational_levels=speech_empty + 6.0, operational_ambient=noise_occupied
 )
 print(f"{louder.sti:.2f} ({louder.rating})")          # 0.59 (E)
 ```
@@ -40830,7 +40830,7 @@ rather than after the complaint: the empty hall passed.
 
 `STIResult.adjusted_for_levels()` reads the measurement condition off the
 result, which is why it needs only the operational one and why it refuses a
-result computed without `level=`: such a result carries at most the flat
+result computed without `levels=`: such a result carries at most the flat
 `snr=` noise factor, none of the level-dependent masking and threshold, and
 no spectra to re-derive them from, so dividing the full correction out would
 silently lower the answer. Where the matrix
@@ -40861,12 +40861,12 @@ talker = shape - 10 * np.log10(np.sum(10 ** (shape / 10))) + 68.0
 empty_noise = np.array([42.0, 36.0, 31.0, 28.0, 25.0, 23.0, 21.0])
 full_noise = np.array([54.0, 50.0, 47.0, 44.0, 40.0, 35.0, 30.0])
 
-measured = speech.sti_from_impulse_response(ir, fs, level=talker, ambient=empty_noise)
+measured = speech.sti_from_impulse_response(ir, fs, levels=talker, ambient=empty_noise)
 occupied = measured.adjusted_for_levels(
-    operational_level=talker, operational_ambient=full_noise
+    operational_levels=talker, operational_ambient=full_noise
 )
 louder = measured.adjusted_for_levels(
-    operational_level=talker + 6.0, operational_ambient=full_noise
+    operational_levels=talker + 6.0, operational_ambient=full_noise
 )
 
 # One line: the adjusted result is an STIResult, so it draws its own bars.
@@ -40920,7 +40920,7 @@ one. Neither of those is visible in the index.
   noise (clause 7.13) applies to the condition being simulated as much as to
   the one being measured.
 - **The measurement's own spectra are what step 2 removes.** A wrong
-  `measured_level` or `measured_ambient` takes out the wrong correction, and
+  `measured_levels` or `measured_ambient` takes out the wrong correction, and
   step 3 has no way to notice; the adjusted matrix is then wrong in a direction
   nothing downstream reports. That is why `STIResult.adjusted_for_levels()`
   reads them off the result instead of asking again.
@@ -40933,9 +40933,9 @@ one. Neither of those is visible in the index.
 | Parameter | Type | Units | Range / default | Notes |
 | :--- | :--- | :--- | :--- | :--- |
 | `mtf` | (7, n) array | — | ≥ 0, finite | The matrix as measured, noise and masking included; values above 1 are truncated to 1, and above 1.3 warn that the measurement is likely invalid (A.5.3 NOTE 1) |
-| `measured_level` | 7-vector | dB SPL | required | Speech band levels during the measurement |
+| `measured_levels` | 7-vector | dB SPL | required | Speech band levels during the measurement |
 | `measured_ambient` | 7-vector, optional | dB SPL | default `None` | Background-noise band levels during the measurement |
-| `operational_level` | 7-vector | dB SPL | required | Speech band levels of the condition simulated |
+| `operational_levels` | 7-vector | dB SPL | required | Speech band levels of the condition simulated |
 | `operational_ambient` | 7-vector, optional | dB SPL | default `None` | Occupancy-noise band levels of that condition |
 
 > [!IMPORTANT]
@@ -41082,7 +41082,7 @@ documents, one page per module.
 | `lex_8h` | `function` | **Daily exposure LEX,8h / LEP,d.**<br>• Same params as `sound_exposure` | `lex = signals.lex_8h(x, fs, duration_hours=4)`<br><br>• Normalized 8 h level [dB] |
 | `loudness_zwicker` | `function` | **Zwicker loudness (ISO 532-1:2017).**<br>• `x`: Calibrated signal in Pa (1D)<br>• `fs`: Sample rate [Hz]<br>• `field`: 'free' or 'diffuse' (Default: 'free')<br>• `stationary`: Clause 5 stationary method (Default: False)<br>• `time_skip`: seconds excluded from the stationary mean square (Annex B.1 uses 0.2 s; Default: 0.0)<br>• `calibration_factor`: Digital units to Pa (Default: 1.0) | `res = psychoacoustics.loudness_zwicker(x, fs)`<br><br>• `ZwickerLoudness`; time-varying runs add N5/N10 and the 500 Hz N(t) trace |
 | `loudness_zwicker_from_spectrum` | `function` | **Stationary loudness from band levels.**<br>• `levels`: 28 one-third-octave levels, 25 Hz-12.5 kHz [dB SPL]<br>• `field`: 'free' or 'diffuse' (Default: 'free') | `res = psychoacoustics.loudness_zwicker_from_spectrum(levels)`<br><br>• `res.loudness` [sone], `res.loudness_level` [phon] |
-| `ZwickerLoudness` | `dataclass` | **Loudness result.**<br>• `loudness`: N [sone]<br>• `loudness_level`: LN [phon]<br>• `specific`: N′(z), 240 bins of 0.1 Bark<br>• `n5` / `n10`: percentile loudness (time-varying only)<br>• `time` / `loudness_vs_time`: 500 Hz trace<br>• `field`: sound field assumed ('free'/'diffuse') | `res.loudness, res.n5`<br><br>• Time-varying fields are `None` for stationary results |
+| `ZwickerLoudness` | `dataclass` | **Loudness result.**<br>• `loudness`: N [sone]<br>• `loudness_level`: LN [phon]<br>• `specific`: N′(z), 240 bins of 0.1 Bark<br>• `n5` / `n10`: percentile loudness (time-varying only)<br>• `times` / `loudness_vs_time`: 500 Hz trace<br>• `field`: sound field assumed ('free'/'diffuse') | `res.loudness, res.n5`<br><br>• Time-varying fields are `None` for stationary results |
 | `sharpness_din` | `function` | **Sharpness in acum (DIN 45692).**<br>• `x`: Signal (1D)<br>• `fs`: Sample rate [Hz]<br>• `field`: 'free' or 'diffuse' (Default: 'free')<br>• `method`: 'din', 'aures' or 'bismarck' (Default: 'din')<br>• `calibration_factor`: Digital units to Pa (Default: 1.0) | `s = psychoacoustics.sharpness_din(x, fs)`<br><br>• `s`: sharpness [acum] |
 | `sharpness_din_from_specific` | `function` | **Sharpness from a specific-loudness pattern.**<br>• `specific`: N′(z), 240 values at 0.1 Bark (e.g. `ZwickerLoudness.specific`)<br>• `method`: 'din', 'aures' or 'bismarck' (Default: 'din') | `s = psychoacoustics.sharpness_din_from_specific(res.specific)`<br><br>• `s`: sharpness [acum] |
 | `erb_bandwidth` | `function` | **Auditory-filter equivalent rectangular bandwidth ERB_N (Glasberg & Moore 1990; Moore 6e p. 76).**<br>• `frequency` [Hz] (scalar or array, ≥ 0)<br>• `ERB_N = 24.673(0.004368 f + 1)` [Hz] | `erb_bandwidth(1000.0)  # 132.4` |
@@ -41093,15 +41093,15 @@ documents, one page per module.
 | `loudness_moore_glasberg_from_third_octave` | `function` | **Loudness from 29 one-third-octave band levels (ISO 532-2 §5.5).**<br>• `band_levels`: 29 levels, 25 Hz–16 kHz [dB SPL]<br>• `field` / `presentation`: as above | `res = psychoacoustics.loudness_moore_glasberg_from_third_octave(levels)`<br><br>• `MooreGlasbergLoudness` |
 | `MooreGlasbergLoudness` | `dataclass` | **Moore-Glasberg loudness result.**<br>• `loudness`: N [sone]<br>• `loudness_level`: LN [phon]<br>• `specific`: N′(i), 372 bins of 0.1 Cam<br>• `erb_number` / `centre_frequencies`: Cam / Hz axes<br>• `field` / `presentation`<br>• `.plot()`: specific loudness N′(i) over Cam | `res.loudness, res.loudness_level` |
 | `loudness_moore_glasberg_time` | `function` | **Time-varying loudness (ISO 532-3:2023).**<br>• `signal`: Calibrated Pa; 1D (diotic) or (n, 2) ears<br>• `fs`: Sample rate [Hz]<br>• `field`: 'free'/'diffuse'/'eardrum' (Default: 'free')<br>• `presentation`: (Default: 'binaural')<br>• `percentiles`: exceedance % (Default: (1,5,10,50,90,95)) | `res = psychoacoustics.loudness_moore_glasberg_time(x, fs)`<br><br>• `MooreGlasbergTimeVaryingLoudness` |
-| `MooreGlasbergTimeVaryingLoudness` | `dataclass` | **Time-varying loudness result.**<br>• `time`: 1 ms grid [s]<br>• `short_term_loudness` / `long_term_loudness`: S′(t)/S″(t) [sone]<br>• `short_term_loudness_level` / `long_term_loudness_level` [phon]<br>• `n_max` / `loudness_level_max`: peak long-term loudness<br>• `percentiles`: dict {percent: sone}<br>• `.plot()`: STL and LTL vs time | `res.n_max, res.percentiles[5.0]` |
+| `MooreGlasbergTimeVaryingLoudness` | `dataclass` | **Time-varying loudness result.**<br>• `times`: 1 ms grid [s]<br>• `short_term_loudness` / `long_term_loudness`: S′(t)/S″(t) [sone]<br>• `short_term_loudness_level` / `long_term_loudness_level` [phon]<br>• `n_max` / `loudness_level_max`: peak long-term loudness<br>• `percentiles`: dict {percent: sone}<br>• `.plot()`: STL and LTL vs time | `res.n_max, res.percentiles[5.0]` |
 | `loudness_ecma` | `function` | **Sottek Hearing Model loudness (ECMA-418-2:2025).**<br>• `signal_in`: Calibrated signal in Pa (1D)<br>• `fs`: Sample rate [Hz] (resampled to 48 kHz)<br>• `field`: 'free' or 'diffuse' (Default: 'free') | `res = psychoacoustics.loudness_ecma(x, fs)`<br><br>• `EcmaLoudness`; 1 kHz/40 dB ≈ 1 sone_HMS |
-| `EcmaLoudness` | `dataclass` | **Sottek loudness result.**<br>• `loudness`: N [sone_HMS]<br>• `specific_loudness`: N′(z), 53 Bark_HMS bands<br>• `bark` / `centre_frequencies`: z / Hz axes<br>• `time` / `loudness_vs_time`: N(l) at 187.5 Hz<br>• `field`<br>• `.plot()`: N′(z) + N(l) | `res.loudness, res.specific_loudness` |
+| `EcmaLoudness` | `dataclass` | **Sottek loudness result.**<br>• `loudness`: N [sone_HMS]<br>• `specific_loudness`: N′(z), 53 Bark_HMS bands<br>• `bark` / `centre_frequencies`: z / Hz axes<br>• `times` / `loudness_vs_time`: N(l) at 187.5 Hz<br>• `field`<br>• `.plot()`: N′(z) + N(l) | `res.loudness, res.specific_loudness` |
 | `tonality_ecma` | `function` | **Sottek tonality (ECMA-418-2:2025).**<br>• `signal_in`: Calibrated signal in Pa (1D)<br>• `fs`: Sample rate [Hz] (resampled to 48 kHz)<br>• `field`: 'free' or 'diffuse' (Default: 'free')<br>• `f_low` / `f_high`: optional user band [Hz] (Default: None) | `res = psychoacoustics.tonality_ecma(x, fs)`<br><br>• `EcmaTonality`; 1 kHz/40 dB ≈ 1 tu_HMS |
-| `EcmaTonality` | `dataclass` | **Sottek tonality result.**<br>• `tonality`: T [tu_HMS]<br>• `specific_tonality`: T′(z), 53 bands<br>• `tonal_frequencies`: f_ton,z per band [Hz]<br>• `bark` / `centre_frequencies`<br>• `time` / `tonality_vs_time` / `tonal_frequency_vs_time`: T(l), f_ton(l)<br>• `field`<br>• `.plot()`: T′(z) + T(l) | `res.tonality, res.tonal_frequencies` |
+| `EcmaTonality` | `dataclass` | **Sottek tonality result.**<br>• `tonality`: T [tu_HMS]<br>• `specific_tonality`: T′(z), 53 bands<br>• `tonal_frequencies`: f_ton,z per band [Hz]<br>• `bark` / `centre_frequencies`<br>• `times` / `tonality_vs_time` / `tonal_frequency_vs_time`: T(l), f_ton(l)<br>• `field`<br>• `.plot()`: T′(z) + T(l) | `res.tonality, res.tonal_frequencies` |
 | `roughness_ecma` | `function` | **Sottek roughness (ECMA-418-2:2025), new capability.**<br>• `signal_in`: Calibrated signal in Pa (1D)<br>• `fs`: Sample rate [Hz] (resampled to 48 kHz)<br>• `field`: 'free' or 'diffuse' (Default: 'free') | `res = psychoacoustics.roughness_ecma(x, fs)`<br><br>• `EcmaRoughness`; 1 kHz/70 Hz/100 %-AM/60 dB ≈ 1 asper |
-| `EcmaRoughness` | `dataclass` | **Sottek roughness result.**<br>• `roughness`: R [asper] (90th percentile of R(l50))<br>• `specific_roughness`: R′(z), 53 bands<br>• `bark` / `centre_frequencies`<br>• `time` / `roughness_vs_time`: R(l50) at 50 Hz<br>• `specific_roughness_vs_time`: (n_times, 53)<br>• `field`<br>• `.plot()`: R(l50) + specific-roughness heatmap | `res.roughness, res.specific_roughness` |
+| `EcmaRoughness` | `dataclass` | **Sottek roughness result.**<br>• `roughness`: R [asper] (90th percentile of R(l50))<br>• `specific_roughness`: R′(z), 53 bands<br>• `bark` / `centre_frequencies`<br>• `times` / `roughness_vs_time`: R(l50) at 50 Hz<br>• `specific_roughness_vs_time`: (n_times, 53)<br>• `field`<br>• `.plot()`: R(l50) + specific-roughness heatmap | `res.roughness, res.specific_roughness` |
 | `fluctuation_strength_ecma` | `function` | **Sottek fluctuation strength (ECMA-418-2:2025 Clause 9), new capability.**<br>• `signal_in`: Calibrated signal in Pa (1D)<br>• `fs`: Sample rate [Hz] (resampled to 48 kHz)<br>• `field`: 'free' or 'diffuse' (Default: 'free') | `res = psychoacoustics.fluctuation_strength_ecma(x, fs)`<br><br>• `EcmaFluctuationStrength`; 1 kHz/4 Hz/100 %-AM/60 dB ≈ 1 vacil_HMS |
-| `EcmaFluctuationStrength` | `dataclass` | **Sottek fluctuation-strength result.**<br>• `fluctuation_strength`: F [vacil_HMS] (90th percentile of F(l50))<br>• `specific_fluctuation_strength`: F′(z), 53 bands<br>• `bark` / `centre_frequencies`<br>• `time` / `fluctuation_strength_vs_time`: F(l50) at 50 Hz<br>• `specific_fluctuation_strength_vs_time`: (n_times, 53)<br>• `field`<br>• `.plot()`: F(l50) + specific-fluctuation-strength heatmap | `res.fluctuation_strength, res.specific_fluctuation_strength` |
+| `EcmaFluctuationStrength` | `dataclass` | **Sottek fluctuation-strength result.**<br>• `fluctuation_strength`: F [vacil_HMS] (90th percentile of F(l50))<br>• `specific_fluctuation_strength`: F′(z), 53 bands<br>• `bark` / `centre_frequencies`<br>• `times` / `fluctuation_strength_vs_time`: F(l50) at 50 Hz<br>• `specific_fluctuation_strength_vs_time`: (n_times, 53)<br>• `field`<br>• `.plot()`: F(l50) + specific-fluctuation-strength heatmap | `res.fluctuation_strength, res.specific_fluctuation_strength` |
 | `psychoacoustic_annoyance` | `function` | **Psychoacoustic annoyance PA (Fastl & Zwicker Eqs 16.2–16.4), exact model.**<br>• `n5`: percentile loudness N5 [sone]<br>• `sharpness` S [acum]<br>• `fluctuation_strength` F [vacil]<br>• `roughness` R [asper] | `res = psychoacoustics.psychoacoustic_annoyance(30, 2.0, 0.5, 0.3)`<br><br>• `PsychoacousticAnnoyanceResult`; `res.annoyance == 37.0478` |
 | `psychoacoustic_annoyance_from_signal` | `function` | **PA from a calibrated signal (convenience, engineering estimate).**<br>• `x`: Calibrated signal in Pa (1D)<br>• `fs`: Sample rate [Hz]<br>• `field`: 'free' or 'diffuse' (Default: 'free')<br>• `calibration_factor` (Default: 1.0)<br>Mixes Zwicker N5/S + Sottek R + Osses F. | `res = psychoacoustics.psychoacoustic_annoyance_from_signal(x, fs)`<br><br>• `PsychoacousticAnnoyanceResult` |
 | `PsychoacousticAnnoyanceResult` | `dataclass` | **Psychoacoustic annoyance result.**<br>• `annoyance`: PA<br>• `n5` [sone] / `sharpness` [acum] / `fluctuation_strength` [vacil] / `roughness` [asper]: the four inputs<br>• `w_s`: sharpness weighting wS<br>• `w_fr`: roughness/fluctuation weighting wFR<br>• `.plot()`: term-contribution bar | `res.annoyance, res.w_s, res.w_fr` |
@@ -41135,14 +41135,14 @@ documents, one page per module.
 | `ToneAudibilityResult` | `dataclass` | **Tonal audibility of a spectrum's tones (ISO/PAS 20065).**<br>• `audibilities` ΔL, `critical_band_levels` LG, `masking_indices` av [dB]<br>• `critical_bandwidths` Δfc, `lower_corners`/`upper_corners` [Hz]<br>• `audible`: ΔL > 0 mask<br>• `extended_uncertainties`: Clause 5.4 U per tone [dB]<br>• `group_sizes`: 1 = single tone, N ≥ 2 = Step 3 FG entry (None from `assess_tones`)<br>• `decisive_audibility` / `decisive_frequency`<br>• `.plot()`: per-tone ΔL vs frequency | `res.decisive_audibility, res.audible` |
 | `HANNING_BANDWIDTH_FACTOR` | `float` | **Hanning effective-bandwidth factor Δfe/Δf (ISO/PAS 20065 Annex A).**<br>1.5 | `HANNING_BANDWIDTH_FACTOR  # 1.5` |
 | `NO_TONE_AUDIBILITY` | `float` | **Audibility reported when no tone is found [dB] (ISO/PAS 20065 Formula 21).**<br>-10.0 | `NO_TONE_AUDIBILITY  # -10.0` |
-| `sti_from_impulse_response` | `function` | **Full STI, indirect method (IEC 60268-16 Ed. 5).**<br>• `ir`: Impulse response (1D)<br>• `fs`: Sample rate [Hz] (>= 22500)<br>• `snr`: SNR [dB], scalar or 7 bands (Default: None)<br>• `level`: 7 speech band levels [dB SPL]; enables masking + reception threshold (Default: None)<br>• `ambient`: 7 noise band levels [dB SPL]; requires `level` | `res = speech.sti_from_impulse_response(ir, fs, snr=25.0)`<br><br>• `STIResult` with `mtf` (7×14) |
-| `stipa` | `function` | **STIPA direct method (Annex B).**<br>• `x`: Recorded STIPA signal (1D), 15-25 s<br>• `fs`: Sample rate [Hz] (>= 22500)<br>• `reference`: Measured source signal instead of the nominal m = 0.55 (Default: None)<br>• `level` / `ambient`: as `sti_from_impulse_response`<br>• warns (`UserWarning`) if the recording is < 15 s (STI biased low) | `res = speech.stipa(recording, fs)`<br><br>• `STIResult` with `mtf` (7×2) |
+| `sti_from_impulse_response` | `function` | **Full STI, indirect method (IEC 60268-16 Ed. 5).**<br>• `ir`: Impulse response (1D)<br>• `fs`: Sample rate [Hz] (>= 22500)<br>• `snr`: SNR [dB], scalar or 7 bands (Default: None)<br>• `levels`: 7 speech band levels [dB SPL]; enables masking + reception threshold (Default: None)<br>• `ambient`: 7 noise band levels [dB SPL]; requires `levels` | `res = speech.sti_from_impulse_response(ir, fs, snr=25.0)`<br><br>• `STIResult` with `mtf` (7×14) |
+| `stipa` | `function` | **STIPA direct method (Annex B).**<br>• `x`: Recorded STIPA signal (1D), 15-25 s<br>• `fs`: Sample rate [Hz] (>= 22500)<br>• `reference`: Measured source signal instead of the nominal m = 0.55 (Default: None)<br>• `levels` / `ambient`: as `sti_from_impulse_response`<br>• warns (`UserWarning`) if the recording is < 15 s (STI biased low) | `res = speech.stipa(recording, fs)`<br><br>• `STIResult` with `mtf` (7×2) |
 | `stipa_signal` | `function` | **STIPA test-signal generator (A.4/A.6.1).**<br>• `fs`: Sample rate [Hz] (>= 22500)<br>• `seconds`: Duration [s] (Default: 18.0)<br>• `level_db`: RMS level [dB SPL] (Default: None → RMS 0.1)<br>• `seed`: Pink-noise seed (Default: None) | `sig = speech.stipa_signal(48000, seconds=18.0)`<br><br>• 1D test signal, Ed. 5 male spectrum |
-| `sti_adjusted_for_levels` | `function` | **Occupancy-noise and speech-level adjustment (Ed. 4 Annex M).**<br>• `mtf`: measured m matrix (7×n), noise and masking included<br>• `measured_level`: 7 band levels [dB SPL] during the measurement<br>• `measured_ambient`: same, background noise (Default: None)<br>• `operational_level`: 7 band levels [dB SPL] of the condition simulated<br>• `operational_ambient`: same, occupancy noise (Default: None) | `res = speech.sti_adjusted_for_levels(mtf, measured_level=lm, measured_ambient=nm, operational_level=lo, operational_ambient=no)`<br><br>• `STIResult` at the operational levels |
-| `STIResult` | `dataclass` | **STI result.**<br>• `sti`: 0 to 1<br>• `mti`: band indices (7,)<br>• `mtf`: corrected m values (7×14 or 7×2)<br>• `band_levels` / `ambient_levels`: levels used or None<br>• `rating`: Annex F letter 'A+'…'U'<br>• `.adjusted_for_levels(operational_level=…, operational_ambient=…)`: the same result at another condition (Annex M) | `res = speech.stipa(x, fs)`<br>`print(res.sti, res.rating)` |
-| `sound_intensity` | `function` | **p-p sound intensity (IEC 61043).**<br>• `p1`, `p2`: Microphone signals [Pa], equal length<br>• `fs`: Sample rate [Hz]<br>• `spacing`: Microphone separation Δr [m]<br>• `rho`: Air density (Default: 1.204)<br>• `c`: Speed of sound (Default: 343.0)<br>• `fraction`: None, 1 or 3 (Default: None)<br>• `limits`: [f_min, f_max] (Default: [12, 20000])<br>• `bias_correct`: undo finite-difference under-read of band/broadband totals near `max_valid_frequency` (Default: False) | `res = emission.sound_intensity(p1, p2, fs, spacing=0.012, fraction=3)`<br><br>• `IntensityResult` |
+| `sti_adjusted_for_levels` | `function` | **Occupancy-noise and speech-level adjustment (Ed. 4 Annex M).**<br>• `mtf`: measured m matrix (7×n), noise and masking included<br>• `measured_levels`: 7 band levels [dB SPL] during the measurement<br>• `measured_ambient`: same, background noise (Default: None)<br>• `operational_levels`: 7 band levels [dB SPL] of the condition simulated<br>• `operational_ambient`: same, occupancy noise (Default: None) | `res = speech.sti_adjusted_for_levels(mtf, measured_levels=lm, measured_ambient=nm, operational_levels=lo, operational_ambient=no)`<br><br>• `STIResult` at the operational levels |
+| `STIResult` | `dataclass` | **STI result.**<br>• `sti`: 0 to 1<br>• `mti`: band indices (7,)<br>• `mtf`: corrected m values (7×14 or 7×2)<br>• `band_levels` / `ambient_levels`: levels used or None<br>• `rating`: Annex F letter 'A+'…'U'<br>• `.adjusted_for_levels(operational_levels=…, operational_ambient=…)`: the same result at another condition (Annex M) | `res = speech.stipa(x, fs)`<br>`print(res.sti, res.rating)` |
+| `sound_intensity` | `function` | **p-p sound intensity (IEC 61043).**<br>• `p1`, `p2`: Microphone signals [Pa], equal length<br>• `fs`: Sample rate [Hz]<br>• `spacing`: Microphone separation Δr [m]<br>• `density`: Air density (Default: 1.204)<br>• `speed_of_sound`: Speed of sound (Default: 343.0)<br>• `fraction`: None, 1 or 3 (Default: None)<br>• `limits`: [f_min, f_max] (Default: [12, 20000])<br>• `bias_correct`: undo finite-difference under-read of band/broadband totals near `max_valid_frequency` (Default: False) | `res = emission.sound_intensity(p1, p2, fs, spacing=0.012, fraction=3)`<br><br>• `IntensityResult` |
 | `plot_pp_probe_geometry` | `function` | **Face-to-face p-p probe to scale.**<br>• `spacing` dr [m] (Default: 12 mm)<br>• `language` | `plot_pp_probe_geometry()`<br><br>• Also `IntensityResult.plot_geometry()` |
-| `IntensityResult` | `dataclass` | **Intensity result.**<br>• Per band (with `fraction`): `frequency`, `intensity` [W/m²], `intensity_level`, `pressure_level`, `pressure_intensity_index`, `direction` (±1), `bias_correction`<br>• Broadband: `total_*` counterparts<br>• `max_valid_frequency`: 0.1·c/Δr | `res.total_intensity_level`<br>`res.total_direction` |
+| `IntensityResult` | `dataclass` | **Intensity result.**<br>• Per band (with `fraction`): `frequencies`, `intensity` [W/m²], `intensity_level`, `pressure_level`, `pressure_intensity_index`, `direction` (±1), `bias_correction`<br>• Broadband: `total_*` counterparts<br>• `max_valid_frequency`: 0.1·c/Δr | `res.total_intensity_level`<br>`res.total_direction` |
 | `field_indicators` | `function` | **ISO 9614-1 Annex A field indicators.**<br>• `pressure_levels`: Lpi per position [dB]<br>• `normal_intensity`: Signed Ini per position [W/m²]<br>• `temporal_intensity`: optional M short-time Ink samples at one fixed position, filling `f1` | `fi = emission.field_indicators(lp, i_n)`<br><br>• `FieldIndicators(f2, f3, f4, f1)` |
 | `FieldIndicators` | `dataclass` | **ISO 9614-1 Annex A indicators.**<br>• `f1`: temporal variability indicator (Eq. A.1), or `None` when no `temporal_intensity` was given<br>• `f2`: surface pressure-intensity indicator (Eq. A.3)<br>• `f3`: negative partial power indicator (Eq. A.6)<br>• `f4`: field non-uniformity indicator (Eq. A.8)<br>• f3 − f2 > 0 reveals negative partial power<br>• `.field_is_stationary(limit=0.6)`: Table B.3 check on F1 | `fi.f2, fi.f3, fi.f4`<br><br>• Criteria: Ld > F2, N > C·F4² |
 | `dynamic_capability_index` | `function` | **Dynamic capability Ld (ISO 9614-1 §3.12).**<br>• `pressure_residual_intensity_index`: δpI0 [dB]<br>• `bias_error_factor`: K [dB] (Default: 10.0) | `ld = emission.dynamic_capability_index(18.0)`<br><br>• Adequate when `Ld > F2` (criterion 1) |
@@ -41150,10 +41150,10 @@ documents, one page per module.
 | `TEMPORAL_VARIABILITY_LIMIT` | `constant` | **ISO 9614-1 Table B.3 limit on F1** (0.6): above it the field is too variable and action code (e) applies | `fi.field_is_stationary(TEMPORAL_VARIABILITY_LIMIT)` |
 | `residual_index_limits` | `function` | **IEC 61043 Table 2 minimum δpI0.**<br>• `device`: `'probe'`, `'processor'` or `'instrument'` (Default: `'instrument'`)<br>• `spacing`: microphone separation [m] (Default: 0.025; Note 1 adds 10 lg(x/25))<br>• `frequencies`: bands to report (Default: all 22, 50 Hz to 6.3 kHz) | `f, c1, c2 = emission.residual_index_limits("probe", spacing=0.012)`<br><br>• `(frequencies, class1, class2)` minima [dB] |
 | `verify_intensity_class` | `function` | **IEC 61043 Table 2 class check.**<br>• `residual_index`: measured δpI0 per band [dB]<br>• `frequencies`: band centres [Hz]<br>• keyword-only: `device`, `spacing`, as above | `res = emission.verify_intensity_class(d, f, spacing=0.012)`<br>`res.report("iec61043.pdf")`<br><br>• `IntensityInstrumentComplianceResult` |
-| `IntensityInstrumentComplianceResult` | `dataclass` | **IEC 61043 instrument class verdict.**<br>• `overall_class`: loosest class every band meets (1/2), or `None`<br>• `bands`, `frequency`, `residual_index`, `limit_class1`, `limit_class2`<br>• `spacing`, `spacing_offset_db`, `device`, `range_limited`<br>• `.binding_margin()` / `.failing_bands()` / `.reference_class()`<br>• `.phase_mismatch(c=343.0)`: equivalent channel phase error per band [deg]<br>• `.plot()`: measured δpI0 over the two Table 2 masks<br>• `.report(path, *, metadata=None)`: one-page PDF fiche | `res.overall_class, res.binding_margin()` |
+| `IntensityInstrumentComplianceResult` | `dataclass` | **IEC 61043 instrument class verdict.**<br>• `overall_class`: loosest class every band meets (1/2), or `None`<br>• `bands`, `frequencies`, `residual_index`, `limit_class1`, `limit_class2`<br>• `spacing`, `spacing_offset_db`, `device`, `range_limited`<br>• `.binding_margin()` / `.failing_bands()` / `.reference_class()`<br>• `.phase_mismatch(speed_of_sound=343.0)`: equivalent channel phase error per band [deg]<br>• `.plot()`: measured δpI0 over the two Table 2 masks<br>• `.report(path, *, metadata=None)`: one-page PDF fiche | `res.overall_class, res.binding_margin()` |
 | `instrument_class_from_components` | `function` | **IEC 61043 clause 8 combination rule.**<br>• `probe_class`, `processor_class`: 1 or 2 | `instrument_class_from_components(1, 2)`<br><br>• 1 only when both are class 1, else 2 |
-| `phase_mismatch_from_residual_index` | `function` | **δpI0 → channel phase mismatch.**<br>• `residual_index`: δpI0 [dB]<br>• `frequency` [Hz], `spacing` [m], `c` (Default: 343.0)<br>• φs = kd·10^(−δpI0/10) | `phase_mismatch_from_residual_index(20.0, 1000.0, 0.025)`<br><br>• 0.26 degrees |
-| `residual_index_from_phase_mismatch` | `function` | **Channel phase mismatch → δpI0.**<br>• `phase_mismatch`: φs [deg], > 0<br>• `frequency` [Hz], `spacing` [m], `c` (Default: 343.0)<br>• δpI0 = 10 lg(kd/φs) | `residual_index_from_phase_mismatch(0.05, 1000.0, 0.012)`<br><br>• 24.0 dB |
+| `phase_mismatch_from_residual_index` | `function` | **δpI0 → channel phase mismatch.**<br>• `residual_index`: δpI0 [dB]<br>• `frequency` [Hz], `spacing` [m], `speed_of_sound` (Default: 343.0)<br>• φs = kd·10^(−δpI0/10) | `phase_mismatch_from_residual_index(20.0, 1000.0, 0.025)`<br><br>• 0.26 degrees |
+| `residual_index_from_phase_mismatch` | `function` | **Channel phase mismatch → δpI0.**<br>• `phase_mismatch`: φs [deg], > 0<br>• `frequency` [Hz], `spacing` [m], `speed_of_sound` (Default: 343.0)<br>• δpI0 = 10 lg(kd/φs) | `residual_index_from_phase_mismatch(0.05, 1000.0, 0.012)`<br><br>• 24.0 dB |
 | `CalibrationWarning` | `warning class` | **Unreliable calibration recording.**<br>Emitted by `sensitivity` (with `fs` given and `validate=True`) when the tone is unstable (IEC 60942 limit) or too short | `warnings.simplefilter("error", CalibrationWarning)` |
 | `lden` | `function` | **Day-evening-night level (ISO 1996-1 §3.6.4).**<br>• `lday`/`levening`/`lnight`: LAeq per period [dB]<br>• `hours`: Period durations (Default: (12, 4, 8)) | `l = environment.lden(63.2, 58.1, 51.4)` |
 | `ldn` | `function` | **Day-night level (ISO 1996-1 §3.6.5).**<br>• `lday`/`lnight`: LAeq per period [dB]<br>• `hours`: Default (15, 9) | `l = environment.ldn(63.2, 51.4)` |
@@ -41201,7 +41201,7 @@ documents, one page per module.
 | `ResidualCorrectionResult` | `dataclass` | **Residual-corrected level (ISO 1996-2).**<br>• `corrected_level` [dB], `reportable_upper_bound` = measured L' [dB], `margin` [dB], `reliable` (> 3 dB; when False report the upper bound, not the correction) | `res.corrected_level, res.reliable` |
 | `EnvironmentalMeasurementWarning` | `warning class` | **Unreliable environmental-noise determination (ISO 1996-2:2017).**<br>• Residual within 3 dB of the measured level: no correction is allowed and only `reportable_upper_bound` may be reported (10.4)<br>• Repeated levels spreading more than 3 dB: `approximate_uncertainty` (Formula (20)) is unreliable there (10.5 Note 2)<br>• Subclass of `PhonometryWarning` | `warnings.simplefilter('error', EnvironmentalMeasurementWarning)`<br>Emitted by `environment.assessment.measurement` |
 | `RepeatedMeasurementResult` | `dataclass` | **Repeat-measurement mean & uncertainty (ISO 1996-2).**<br>• `mean_level`, `standard_uncertainty` (Formulae (17)+(19)), `approximate_uncertainty` (Formula (20)) [dB], `n` | `res.mean_level, res.standard_uncertainty` |
-| `linkwitz_riley` | `function` | **Audio crossover.**<br>• `x`: Signal array<br>• `fs`: Sample rate [Hz]<br>• `freq`: Crossover frequency [Hz]<br>• `order`: Any even number (Default: 4) | `lo, hi = filters.linkwitz_riley(x, fs, freq=1000, order=4)`<br><br>• `lo`: Low-pass filtered signal<br>• `hi`: High-pass filtered signal |
+| `linkwitz_riley` | `function` | **Audio crossover.**<br>• `x`: Signal array<br>• `fs`: Sample rate [Hz]<br>• `frequency`: Crossover frequency [Hz]<br>• `order`: Any even number (Default: 4) | `lo, hi = filters.linkwitz_riley(x, fs, frequency=1000, order=4)`<br><br>• `lo`: Low-pass filtered signal<br>• `hi`: High-pass filtered signal |
 | `parametric_eq` | `function` | **Parametric EQ, one shot (RBJ Audio EQ Cookbook).**<br>• `x`: Signal array (1D or 2D `[channels, samples]`)<br>• `fs`: Sample rate [Hz]<br>• `sections`: an `EQSection` or a sequence of them | `y = filters.parametric_eq(x, fs, sections=filters.EQSection("peaking", 1000, gain_db=6.0))` |
 | `ParametricEQ` | `class` | **Reusable parametric-EQ cascade (RBJ Audio EQ Cookbook).**<br>• `fs`: Sample rate [Hz]<br>• `sections`: `EQSection` or sequence of them (cascade order)<br>• `stateful`: Block processing (Default: False)<br>• `steady_ic`: Steady-state initial conditions (Default: False)<br>• `.sos`: the designed cascade, `.filter(x)`, `.response()` | `eq = filters.ParametricEQ(fs, sections)`<br>`y = eq.filter(x)`<br>`res = eq.response()` |
 | `EQSection` | `dataclass` | **One cookbook biquad specification.**<br>• `filter_type`: 'peaking', 'lowshelf', 'highshelf', 'lowpass', 'highpass', 'bandpass', 'bandpass_skirt', 'notch', 'allpass'<br>• `f0`: Centre/corner frequency [Hz]<br>• `gain_db`: Gain (peaking/shelves) [dB]<br>• One of `q` (Default: 1/√2), `bw` [octaves] or `slope` (shelves) | `EQSection("peaking", 1000.0, gain_db=-6.0, bw=1.0)` |
@@ -41241,35 +41241,35 @@ documents, one page per module.
 | `ShapedSweepResult` | `dataclass` | **Synthesized shaped sweep.**<br>• `signal`, `fs`, `frequencies`, `magnitude` (imposed, peak 1), `group_delay` [s], `f_range`, `crest_factor_db`<br>• array-like: usable directly as the deconvolution reference<br>• `.plot()`: waveform + Welch spectrum vs target | `ir = room.impulse_response(rec, np.asarray(sweep), fs)` |
 | `ImpulseResponseWarning` | `warning class` | **Suspect recovered impulse response.**<br>Emitted e.g. for MLS aliasing in the recovery | `warnings.simplefilter('error', ImpulseResponseWarning)` |
 | `plot_excitation` | `function` | **Plot an excitation signal.**<br>• `signal`: sweep or MLS samples (1D)<br>• `fs`: Sample rate [Hz]<br>• `kind`: `'sweep'` (default) or `'mls'` | `plot_excitation(sweep, fs, kind="sweep")`<br><br>• waveform + spectrogram / spectrum axes |
-| `decay_curve` | `function` | **Schroeder decay curve (ISO 3382-1 5.3.3).**<br>• `ir`: Impulse response (1D)<br>• `fs`: Sample rate [Hz]<br>• `band`: Band centre [Hz] (Default: None → broadband)<br>• `fraction`: 1 or 3 (Default: 1)<br>• `zero_phase`: forward-backward band filtering, halves the 125 Hz short-T bias (Default: False) | `dc = room.decay_curve(ir, fs)` → `DecayCurve`<br>`time, level = dc` still unpacks (`time` [s], `level` [dB], 0 dB at t=0)<br>`dc.plot()` draws the decay + EDT/T20/T30 fits |
-| `DecayCurve` | `dataclass` | **Schroeder decay curve (ISO 3382-1 5.3.3).**<br>• `time`: from the direct sound [s]<br>• `level`: decay [dB], 0 dB at t = 0, up to the noise truncation point<br>• `band`: centre [Hz] or None (broadband)<br>• iterable: unpacks as `time, level`<br>• `.plot()`: decay + EDT/T20/T30 fits | `dc = room.decay_curve(ir, fs)`<br>`dc.time, dc.level, dc.band` |
+| `decay_curve` | `function` | **Schroeder decay curve (ISO 3382-1 5.3.3).**<br>• `ir`: Impulse response (1D)<br>• `fs`: Sample rate [Hz]<br>• `band`: Band centre [Hz] (Default: None → broadband)<br>• `fraction`: 1 or 3 (Default: 1)<br>• `zero_phase`: forward-backward band filtering, halves the 125 Hz short-T bias (Default: False) | `dc = room.decay_curve(ir, fs)` → `DecayCurve`<br>`times, levels = dc` still unpacks (`times` [s], `levels` [dB], 0 dB at t=0)<br>`dc.plot()` draws the decay + EDT/T20/T30 fits |
+| `DecayCurve` | `dataclass` | **Schroeder decay curve (ISO 3382-1 5.3.3).**<br>• `times`: from the direct sound [s]<br>• `levels`: decay [dB], 0 dB at t = 0, up to the noise truncation point<br>• `band`: centre [Hz] or None (broadband)<br>• iterable: unpacks as `times, levels`<br>• `.plot()`: decay + EDT/T20/T30 fits | `dc = room.decay_curve(ir, fs)`<br>`dc.times, dc.levels, dc.band` |
 | `room_parameters` | `function` | **Room acoustics (ISO 3382-1/2).**<br>• `ir`: Impulse response (1D)<br>• `fs`: Sample rate [Hz]<br>• `limits`: (f_min, f_max) or None (Default: (125, 4000))<br>• `fraction`: 1 or 3 (Default: 1)<br>• `zero_phase`: forward-backward octave filtering, halves the 125 Hz short-T T30 bias (Default: False) | `res = room.room_parameters(ir, fs)`<br><br>• `RoomAcousticsResult` per band |
-| `RoomAcousticsResult` | `dataclass` | **Per-band room parameters.**<br>• `frequency` [Hz]<br>• `edt`, `t20`, `t30` [s]<br>• `c50`, `c80` [dB], `d50`, `ts` [s]<br>• `dynamic_range` [dB]<br>• `edt_valid`/`t20_valid`/`t30_valid`<br>• `curvature` [%] | `res.t30, res.c80, res.t30_valid`<br><br>• Arrays with one entry per band |
+| `RoomAcousticsResult` | `dataclass` | **Per-band room parameters.**<br>• `frequencies` [Hz]<br>• `edt`, `t20`, `t30` [s]<br>• `c50`, `c80` [dB], `d50`, `ts` [s]<br>• `dynamic_range` [dB]<br>• `edt_valid`/`t20_valid`/`t30_valid`<br>• `curvature` [%] | `res.t30, res.c80, res.t30_valid`<br><br>• Arrays with one entry per band |
 | `sound_strength` | `function` | **Sound strength G (ISO 3382-1 A.2.1, Eq. (A.1)).**<br>• `ir`: hall impulse response (1D)<br>• `reference_ir`: same source at 10 m in a free field (1D)<br>• `fs`: Sample rate [Hz]<br>• `reference_level`: L_pE,10 [dB] instead of `reference_ir` (exactly one of the two)<br>• `limits`: (f_min, f_max) or None (Default: (125, 4000))<br>• `fraction`: 1 or 3 (Default: 1) | `res = room.sound_strength(ir, ref, fs)`<br><br>• `SoundStrengthResult` per band |
-| `SoundStrengthResult` | `dataclass` | **Per-band sound strength.**<br>• `frequency` [Hz] or None<br>• `strength`: G [dB]<br>• `exposure_level`: L_pE [dB]<br>• `reference_level`: L_pE,10 [dB]<br>• `.plot()`: G against the Table A.1 typical range | `res.strength, res.exposure_level`<br><br>• `strength == exposure_level - reference_level` |
+| `SoundStrengthResult` | `dataclass` | **Per-band sound strength.**<br>• `frequencies` [Hz] or None<br>• `strength`: G [dB]<br>• `exposure_level`: L_pE [dB]<br>• `reference_level`: L_pE,10 [dB]<br>• `.plot()`: G against the Table A.1 typical range | `res.strength, res.exposure_level`<br><br>• `strength == exposure_level - reference_level` |
 | `sound_pressure_exposure_level` | `function` | **L_pE of an impulse response (ISO 3382-1 Eq. (A.2)).**<br>• `ir`: Impulse response (1D)<br>• `fs`: Sample rate [Hz]<br>• `limits`: (f_min, f_max) or None (Default: (125, 4000))<br>• `fraction`: 1 or 3 (Default: 1) | `lpe = room.sound_pressure_exposure_level(ir, fs)`<br><br>• [dB] re 20 uPa, one per band |
 | `free_field_reference_level` | `function` | **Refer a free-field level to 10 m (ISO 3382-1 Eqs. (A.4)/(A.8)).**<br>• `level`: measured level [dB]<br>• `distance`: of that measurement [m], printed for >= 3 m | `room.free_field_reference_level(75.03, 5.0)`<br><br>• `69.0094` dB |
 | `reverberation_room_reference_level` | `function` | **Free-field reference from a diffuse-field reading (ISO 3382-1 Eq. (A.5)).**<br>• `reverberation_room_level`: spatial-average L_pE in that room [dB]<br>• `absorption_area`: A [m2] | `room.reverberation_room_reference_level(80.0, 10.0)`<br><br>• `53.0` dB |
 | `sound_strength_from_power` | `function` | **G from the source's power level (ISO 3382-1 Eq. (A.9)).**<br>• `pressure_level`: L_p in the room [dB]<br>• `power_level`: L_W of the source [dB] | `room.sound_strength_from_power(80.0, 100.0)`<br><br>• `11.0` dB |
 | `directivity_energy_average` | `function` | **Energy mean over bearings round the source (ISO 3382-1, note to Eq. (A.4)).**<br>• `levels`: one per bearing [dB], evenly spaced over a full turn, at least 29 | `room.directivity_energy_average(levels)`<br><br>• [dB]; raises below 29 bearings |
 | `early_lateral_energy_fraction` | `function` | **Early lateral energy fraction (ISO 3382-1 Eqs. (A.14)/(A.15)).**<br>• `ir`: omnidirectional response at the point (1D), which also sets t = 0<br>• `lateral_ir`: figure-of-eight response at the same point (1D)<br>• `fs`: Sample rate [Hz]<br>• `weighting`: 'squared' (J_LF) or 'cosine' (J_LFC)<br>• `limits`: (f_min, f_max) or None (Default: (125, 4000))<br>• `fraction`: 1 or 3 (Default: 1) | `res = room.early_lateral_energy_fraction(omni, fig8, fs)`<br><br>• `LateralEnergyResult` per band |
-| `LateralEnergyResult` | `dataclass` | **Per-band lateral energy fraction.**<br>• `frequency` [Hz] or None<br>• `energy_fraction`: J_LF or J_LFC, dimensionless<br>• `weighting`: which of the two was computed<br>• `.plot()`: against the Table A.1 range | `res.energy_fraction, res.weighting` |
+| `LateralEnergyResult` | `dataclass` | **Per-band lateral energy fraction.**<br>• `frequencies` [Hz] or None<br>• `energy_fraction`: J_LF or J_LFC, dimensionless<br>• `weighting`: which of the two was computed<br>• `.plot()`: against the Table A.1 range | `res.energy_fraction, res.weighting` |
 | `LATERAL_WEIGHTINGS` | `constant` | **('squared', 'cosine')**, the two angular weightings Eqs. (A.14) and (A.15) print. | `room.LATERAL_WEIGHTINGS` |
 | `EARLY_LATERAL_WINDOW_S` | `constant` | **(0.005, 0.080) s**, the numerator window of Eqs. (A.14)/(A.15) from the direct sound. | `room.EARLY_LATERAL_WINDOW_S` |
 | `EARLY_ENERGY_LIMIT_S` | `constant` | **0.080 s**, the upper limit of their denominator. | `room.EARLY_ENERGY_LIMIT_S` |
 | `late_lateral_sound_level` | `function` | **Late lateral sound level (ISO 3382-1 Eq. (A.16)).**<br>• `ir`: omnidirectional response at the point (1D), for t = 0<br>• `lateral_ir`: figure-of-eight response at the same point (1D)<br>• `reference_ir`: same source at 10 m in a free field (1D)<br>• `fs`: Sample rate [Hz]<br>• `reference_level`: L_pE,10 [dB] instead of `reference_ir`<br>• `limits`, `fraction`: as above | `res = room.late_lateral_sound_level(omni, fig8, ref, fs)`<br><br>• `LateLateralResult` per band |
-| `LateLateralResult` | `dataclass` | **Per-band late lateral level.**<br>• `frequency` [Hz] or None<br>• `level`: L_J [dB]<br>• `reference_level`: L_pE,10 [dB]<br>• `.plot()`: against the Table A.1 range, with the Eq. (A.17) average | `res.level, res.reference_level` |
+| `LateLateralResult` | `dataclass` | **Per-band late lateral level.**<br>• `frequencies` [Hz] or None<br>• `levels`: L_J [dB]<br>• `reference_level`: L_pE,10 [dB]<br>• `.plot()`: against the Table A.1 range, with the Eq. (A.17) average | `res.levels, res.reference_level` |
 | `late_lateral_average` | `function` | **Energy average of L_J over four octave bands (ISO 3382-1 Eq. (A.17)).**<br>• `levels`: the 125 Hz, 250 Hz, 500 Hz and 1 kHz values [dB], exactly four | `room.late_lateral_average([-8.0] * 4)`<br><br>• `-8.0` dB; four equal values are unchanged |
 | `LATE_LATERAL_START_S` | `constant` | **0.080 s**, where the numerator of Eq. (A.16) starts. | `room.LATE_LATERAL_START_S` |
 | `LATE_LATERAL_AVERAGE_BANDS_HZ` | `constant` | **(125, 250, 500, 1000) Hz**, the four bands Eq. (A.17) averages. | `room.LATE_LATERAL_AVERAGE_BANDS_HZ` |
 | `interaural_cross_correlation` | `function` | **Interaural cross correlation (ISO 3382-1 Eqs. (B.1)/(B.2)).**<br>• `left`, `right`: ear-canal responses (1D, same length)<br>• `fs`: Sample rate [Hz]<br>• `window`: (t1, t2) [s] from the direct sound, t2 None for the end (Default: (0.0, None))<br>• `limits`, `fraction`: as above | `res = room.interaural_cross_correlation(left, right, fs)`<br><br>• `InterauralCorrelationResult` per band |
-| `InterauralCorrelationResult` | `dataclass` | **Per-band interaural correlation.**<br>• `frequency` [Hz] or None<br>• `coefficient`: IACC<br>• `delay`: lag of the maximum [s], positive when the right ear lags<br>• `lag` [s] and `correlation`: the function itself, one row per band<br>• `.plot()`: the function over the search window | `res.coefficient, res.delay` |
+| `InterauralCorrelationResult` | `dataclass` | **Per-band interaural correlation.**<br>• `frequencies` [Hz] or None<br>• `coefficient`: IACC<br>• `delay`: lag of the maximum [s], positive when the right ear lags<br>• `lag` [s] and `correlation`: the function itself, one row per band<br>• `.plot()`: the function over the search window | `res.coefficient, res.delay` |
 | `IACC_SEARCH_S` | `constant` | **0.001 s**, the half-width of the Eq. (B.2) search window. | `room.IACC_SEARCH_S` |
 | `IACC_EARLY_WINDOW_S` | `constant` | **(0.0, 0.080) s**, the early window of B.4. | `room.IACC_EARLY_WINDOW_S` |
 | `IACC_LATE_START_S` | `constant` | **0.080 s**, where B.4's reverberant window starts. | `room.IACC_LATE_START_S` |
 | `IACC_JND` | `constant` | **0.075**, the just-noticeable difference B.4 assumes for IACC. | `room.IACC_JND` |
 | `stage_support` | `function` | **Early and late stage support (ISO 3382-1 Eqs. (C.1)/(C.2)).**<br>• `ir`: platform response 1,0 m from the source (1D)<br>• `fs`: Sample rate [Hz]<br>• `limits`: (f_min, f_max) or None (Default: (250, 2000), the bands C.2.4 averages)<br>• `fraction`: 1 or 3 (Default: 1) | `res = room.stage_support(ir, fs)`<br><br>• `StageSupportResult` per band |
-| `StageSupportResult` | `dataclass` | **Per-band stage support.**<br>• `frequency` [Hz] or None<br>• `early`: ST_Early [dB]<br>• `late`: ST_Late [dB]<br>• `.plot()`: both against the Table C.1 ranges | `res.early, res.late` |
+| `StageSupportResult` | `dataclass` | **Per-band stage support.**<br>• `frequencies` [Hz] or None<br>• `early`: ST_Early [dB]<br>• `late`: ST_Late [dB]<br>• `.plot()`: both against the Table C.1 ranges | `res.early, res.late` |
 | `STAGE_DIRECT_WINDOW_S` | `constant` | **(0.0, 0.010) s**, the direct-sound window both equations divide by. | `room.STAGE_DIRECT_WINDOW_S` |
 | `EARLY_SUPPORT_WINDOW_S` | `constant` | **(0.020, 0.100) s**, the numerator of Eq. (C.1); it starts at 20 ms, not at 10 ms. | `room.EARLY_SUPPORT_WINDOW_S` |
 | `LATE_SUPPORT_WINDOW_S` | `constant` | **(0.100, 1.000) s**, the numerator of Eq. (C.2); it stops at one second. | `room.LATE_SUPPORT_WINDOW_S` |
@@ -41314,7 +41314,7 @@ documents, one page per module.
 | `OpenPlanResult` | `dataclass` | **Open-plan single numbers.**<br>• `d2s`: Spatial decay rate [dB/doubling]<br>• `lp_as_4m`: Speech level at 4 m [dB]<br>• `rd`: Distraction distance [m]<br>• `rp`: Privacy distance [m] | `m.d2s, m.rd, m.rp`<br><br>• `nan` when undefined |
 | `image_source_rir` | `function` | **Image-source room impulse response (Kuttruff 4.1 / Vorländer 11).**<br>• `dimensions`: `(Lx, Ly, Lz)` [m]<br>• `source`/`receiver`: `(x, y, z)` [m]<br>• `absorption`: scalar / (6,) per-wall / per-band / (6, n) [0, 1]<br>• `fs` [Hz], `max_order` (Default: 20)<br>• `air_attenuation`: intensity `m` [1/m]<br>• `frequencies` [Hz] for a per-band RIR | `res = room.image_source_rir((7,5,3), (2,1.6,1.5), (5.2,3.4,1.7), 0.12, fs=48000)`<br><br>• `ImageSourceResult` |
 | `ImageSourceResult` | `dataclass` | **Synthetic RIR by image sources.**<br>• `ir`: sampled RIR (1D or per-band)<br>• exact reflection table `times`/`distances`/`orders`/`amplitudes`/`image_positions`<br>• `direct_time` [s]<br>• `.plot()`, `.plot_geometry()` (room plan with the image lattice): reflectogram | `res.ir, res.times, res.orders`<br>`res.plot()` |
-| `audible_image_count` / `reflection_density` | `function` | **Shoebox image count (Kuttruff Eq. 9.23) and reflection density (Eq. 4.6).**<br>• `audible_image_count(order)`: `(2/3)(2i³+3i²+4i)`<br>• `reflection_density(t, volume, c=343)`: `4πc³t²/V` | `audible_image_count(10)  # 1560`<br>`reflection_density(0.1, 120.0)` |
+| `audible_image_count` / `reflection_density` | `function` | **Shoebox image count (Kuttruff Eq. 9.23) and reflection density (Eq. 4.6).**<br>• `audible_image_count(order)`: `(2/3)(2i³+3i²+4i)`<br>• `reflection_density(t, volume, speed_of_sound=343)`: `4πc³t²/V` | `audible_image_count(10)  # 1560`<br>`reflection_density(0.1, 120.0)` |
 | `steady_state_field` | `function` | **Steady-state room field (Bies 6.4).**<br>• `sound_power_level` `Lw` [dB]<br>• `surface_area` `S` [m²], `mean_absorption` `ᾱ` (0, 1)<br>• `distances` [m] (Default: 0.1–10 rc)<br>• `directivity` `Q` (Default: 1)<br>• `characteristic_impedance` [Pa·s/m] for the ρc term | `f = room.steady_state_field(90.0, 100.0, 0.2)`<br><br>• `SteadyFieldResult` |
 | `SteadyFieldResult` | `dataclass` | **SPL vs distance, direct/reverberant/total.**<br>• `distances` [m]<br>• `direct`/`reverberant`/`total` [dB]<br>• `critical_distance` [m], `room_constant` [m²]<br>• `.plot()` | `f.total, f.critical_distance`<br>`f.plot()` |
 | `room_constant` / `sabine_absorption_area` / `critical_distance` / `schroeder_frequency` / `steady_state_spl` / `SOURCE_POWER_MODELS` | `function` / `mapping` | **Steady-field building blocks (Bies 6.43/6.44, Kuttruff 3.44/5.44, VDI 2081-1 Eq. 36/37).**<br>• `room_constant(S, ᾱ)` = `Sᾱ/(1-ᾱ)` [m²]<br>• `sabine_absorption_area(V, T, speed_of_sound=343)` = `24 ln10/c₀ · V/T` [m²]<br>• `critical_distance(R \| absorption_area=A, directivity=1)` = `√(QR/16π)`, or `√(QA/16π)` from the absorption area [m]<br>• `schroeder_frequency(T, V)` = `2000√(T/V)` [Hz]<br>• `steady_state_spl(Lw, r, R \| absorption_area=A, directivity=1, source_model='constant_power')` = `Lw + 10 lg(Q/4πr² + 4/R)`, with `4/A` in place of `4/R` from the absorption area [dB]; `r=None` gives the reverberant field alone; exactly one absorption measure, `directivity` scalar or per band<br>• `SOURCE_POWER_MODELS`: `'constant_power'` / `'constant_volume'` (Π₀Q, conservative) / `'constant_pressure'` (Π₀/Q), Norton Table 4.5 | `R = room.room_constant(100, 0.2)`<br>`critical_distance(R)`<br>`steady_state_spl(90, None, R)` |
@@ -41391,14 +41391,14 @@ documents, one page per module.
 | `corner_level` | `function` | **Corner level L_Corner (ISO 16283-1 (12) / -2 (15)).**<br>• `corner_levels`: (corners, bands) or (positions, corners, bands) [dB]<br>• Highest corner per band, then energy-averaged over source positions | `lc = building.corner_level(corners)` |
 | `low_frequency_level` | `function` | **Combination L_LF (ISO 16283-1 (13) / -2 (16) / -3 (5)).**<br>• `level`: Default-procedure L [dB]<br>• `corner`: L_Corner [dB]<br>• `10 lg[(10^(0,1 Lc) + 2·10^(0,1 L))/3]` | `llf = building.low_frequency_level(l, lc)` |
 | `apply_low_frequency_procedure` | `function` | **Run the procedure over a whole band vector.**<br>• `level`, `frequencies`, `procedure`<br>• `reverberation_time`: measured T per band (receiving room)<br>• `room`: 'receiving' (Clause 10.4 applies) or 'source' | `res = building.apply_low_frequency_procedure(l2, f, lf, reverberation_time=t2)` |
-| `LowFrequencyResult` | `dataclass` | **What the procedure did to one room.**<br>• `level`, `reverberation_time`: full band vectors after substitution<br>• `l_default`, `l_corner`, `l_lf`: the three-band chain [dB]<br>• `low_frequency_bands` [Hz], `volume` [m³], `reverberation_63_octave` [s]<br>• `.plot()` | `res.l_lf, res.reverberation_time` |
+| `LowFrequencyResult` | `dataclass` | **What the procedure did to one room.**<br>• `levels`, `reverberation_time`: full band vectors after substitution<br>• `l_default`, `l_corner`, `l_lf`: the three-band chain [dB]<br>• `low_frequency_bands` [Hz], `volume` [m³], `reverberation_63_octave` [s]<br>• `.plot()` | `res.l_lf, res.reverberation_time` |
 | `LOW_FREQUENCY_BANDS` | `tuple` | **The three one-third-octave bands the procedure covers** (50, 63, 80 Hz). | `building.LOW_FREQUENCY_BANDS` |
 | `LOW_FREQUENCY_VOLUME_LIMIT` | `float` | **Room volume the procedure stops at**, 25 m³ to the nearest cubic metre, strictly. | `building.LOW_FREQUENCY_VOLUME_LIMIT  # 25.0` |
 | `LowFrequencyWarning` | `warning class` | **An ISO 16283 low-frequency requirement the measurement does not meet.**<br>• Fewer corners than the printed minimum of four; the arithmetic is unaffected<br>• A room under the 25 m³ trigger whose 50/63/80 Hz bands are about to be answered from the default procedure alone, which Clause 8.1 forbids and which does move the number<br>• Filter the two apart by message, not by class | `warnings.simplefilter('error', building.LowFrequencyWarning)`<br>Emitted by `building.measurement.low_frequency` |
 | `lab_airborne_insulation` | `function` | **Laboratory airborne insulation (ISO 10140-2).**<br>• `l1`/`l2`: Source/receiving levels [dB], 1D or (positions, bands)<br>• `t2`: Receiving-room T per band [s]<br>• `area`: Free test-opening S [m²]<br>• `volume`: Receiving V [m³] | `lab = building.lab_airborne_insulation(l1, l2, t2, area=10, volume=50)`<br><br>• `LabAirborneInsulationResult` |
 | `lab_impact_insulation` | `function` | **Laboratory impact insulation (ISO 10140-3).**<br>• `li`: Tapping-machine impact SPL [dB], 1D or (positions, bands)<br>• `t2`: Receiving-room T per band [s]<br>• `volume`: Receiving V [m³] | `imp = building.lab_impact_insulation(li, t2, volume=50)`<br><br>• `LabImpactInsulationResult` |
 | `intensity_sound_reduction` | `function` | **Intensity sound reduction index RI (ISO 15186-1 Formula (7)).**<br>• `lp1`: Source-room level [dB], 1D or (positions, bands)<br>• `l_in`: Normal intensity level over the surface [dB]<br>• `measurement_area`: Surface Sm [m²], `area`: Specimen S [m²]<br>• `kc`: Adaptation term per band [dB] for RI,M (Default: None) | `res = building.intensity_sound_reduction(lp1, l_in, measurement_area=12, area=10)`<br><br>• `IntensityReductionResult` (`r_i`, `r_i_modified`, `rating`, `rating_modified`) |
-| `adaptation_term_kc` | `function` | **Adaptation term Kc (ISO 15186-1 Annex B).**<br>• `freq`: Midband frequencies [Hz]<br>• `boundary_area`/`volume`: Room Sb2/V2 for Formula (B.1); omit both for the 10 lg(1+61,4/f) approximation (B.2) | `kc = building.adaptation_term_kc(freqs)`<br><br>• Kc per band [dB] |
+| `adaptation_term_kc` | `function` | **Adaptation term Kc (ISO 15186-1 Annex B).**<br>• `frequencies`: Midband frequencies [Hz]<br>• `boundary_area`/`volume`: Room Sb2/V2 for Formula (B.1); omit both for the 10 lg(1+61,4/f) approximation (B.2) | `kc = building.adaptation_term_kc(freqs)`<br><br>• Kc per band [dB] |
 | `intensity_element_normalized_difference` | `function` | **Intensity element normalized level difference DI,n,e (ISO 15186-1 Formula (8)).**<br>• `lp1`/`l_in`: Source level / surface intensity level [dB]<br>• `measurement_area`: Surface Sm [m²]<br>• `n`: Element units N (Default: 1) | `d = building.intensity_element_normalized_difference(lp1, l_in, measurement_area=10)`<br><br>• `IntensityElementNormalizedResult` (`d_i_n_e`, `rating`) |
 | `surface_pressure_intensity_indicator` / `combine_subareas` | `function` | **Surface indicator FpI and subarea combination (ISO 15186-1 Formulas (10)-(12)).**<br>• `lp`/`l_in`: Surface pressure / intensity levels [dB]<br>• `combine_subareas(l_in, measurement_area)`: `(subareas, bands)` levels + per-subarea areas (negative area = reverse-flow subarea, Clause 6.4.6) | `fpi = building.surface_pressure_intensity_indicator(lp, l_in)`<br><br>• `FpI` array; `(LIn, Sm = Σ abs(Smi))` |
 | `IntensityReductionResult` / `IntensityElementNormalizedResult` | `dataclass` | **ISO 15186-1 intensity insulation results.**<br>• `r_i` / `r_i_modified` per band with `rating` / `rating_modified`<br>• `d_i_n_e` per band with `rating` | `res = building.intensity_sound_reduction(...)` |
@@ -41491,11 +41491,11 @@ documents, one page per module.
 | `detailed_airborne_prediction` / `detailed_impact_prediction` | `function` | **Combine the paths into R' / L'n per band (ISO 12354-1 Formulae 1-4 / -2 Formula 1).**<br>• `frequencies` [Hz]<br>• `direct_index` RDd or `direct_level` Ln,d [dB]<br>• `flanking_paths`: sequence of `BandPath`, `direct_label`, `bands` | `res = building.detailed_airborne_prediction(f, direct_index=rdd, flanking_paths=paths)` (`rdd` from `direct_reduction_index`, `paths` of `BandPath`)<br><br>• `DetailedAirborneResult` / `DetailedImpactResult` |
 | `DetailedAirborneResult` / `DetailedImpactResult` | `dataclass` | **Per-band detailed prediction (ISO 12354-1/-2:2017 Clause 4.2).**<br>• `r_prime` or `l_prime_n` per band [dB]<br>• `paths`: tuple of `BandPath` (direct first), `fractions`: energy share per path and band<br>• `dominant`: the leading path in each band<br>• `rating`: `WeightedRatingResult` / `ImpactRatingResult` or None<br>• `.plot()`: per-band path-contribution bars<br>• `.report(path, ...)`: one-page EN/ISO 12354 detailed prediction fiche → PDF | `res.r_prime, res.dominant, res.rating.rating` |
 | `PathContribution` | `dataclass` | **A path with its energy share.**<br>• `label`, `kind`: 'Dd'/'Ff'/'Df'/'Fd'<br>• `r_w`: Path index [dB]<br>• `fraction`: share of transmitted energy (0–1) | `c.r_w, c.fraction` |
-| `vibration_reduction_index` | `function` | **Measured vibration reduction index Kij (ISO 10848 Formula 13/14).**<br>• `velocity_level_difference`: direction-averaged D̄v,ij [dB]<br>• `junction_length` lij [m], `area_i`/`area_j` [m²]<br>• `frequency` [Hz], `structural_reverberation_time_i`/`_j` [s] (both → Formula 13; else simplified 14)<br>• `speed_of_sound` (Default: 343)<br>• `modal_overlap`: per-band M; M < 0.25 bands bracketed and excluded from K̄ij (ISO 10848-4 Clause 9) | `res = building.vibration_reduction_index(dbar, 4.0, 12.0, 10.0, frequency=f, structural_reverberation_time_i=0.35, structural_reverberation_time_j=0.40)`<br><br>• `VibrationReductionResult` |
+| `vibration_reduction_index` | `function` | **Measured vibration reduction index Kij (ISO 10848 Formula 13/14).**<br>• `velocity_level_difference`: direction-averaged D̄v,ij [dB]<br>• `junction_length` lij [m], `area_i`/`area_j` [m²]<br>• `frequencies` [Hz], `structural_reverberation_time_i`/`_j` [s] (both → Formula 13; else simplified 14)<br>• `speed_of_sound` (Default: 343)<br>• `modal_overlap`: per-band M; M < 0.25 bands bracketed and excluded from K̄ij (ISO 10848-4 Clause 9) | `res = building.vibration_reduction_index(dbar, 4.0, 12.0, 10.0, frequencies=f, structural_reverberation_time_i=0.35, structural_reverberation_time_j=0.40)`<br><br>• `VibrationReductionResult` |
 | `direction_averaged_level_difference` | `function` | **Direction average D̄v,ij = ½(Dv,ij+Dv,ji) (ISO 10848 Formula 11).**<br>• `dv_ij`, `dv_ji` [dB] | `dbar = building.direction_averaged_level_difference(dv_ij, dv_ji)` |
 | `velocity_level_difference` | `function` | **Velocity level difference Dv,ij = Lv,i−Lv,j (ISO 10848 Formula 8).**<br>• `source_level`, `receive_level` [dB] | `dv = building.velocity_level_difference(lv_i, lv_j)` |
-| `equivalent_absorption_length` | `function` | **Equivalent absorption length aj (ISO 10848 Formula 12).**<br>• `area` Sj [m²], `structural_reverberation_time` Ts [s], `frequency` [Hz]<br>• `speed_of_sound` (Default: 343) | `a = building.equivalent_absorption_length(10.0, 0.5, f)` |
-| `total_loss_factor` | `function` | **Total loss factor η = 2.2/(f·Ts) (ISO 10848 Clause 7.3.1).**<br>• `frequency` [Hz], `structural_reverberation_time` [s] | `eta = building.total_loss_factor(f, ts)` |
+| `equivalent_absorption_length` | `function` | **Equivalent absorption length aj (ISO 10848 Formula 12).**<br>• `area` Sj [m²], `structural_reverberation_time` Ts [s], `frequencies` [Hz]<br>• `speed_of_sound` (Default: 343) | `a = building.equivalent_absorption_length(10.0, 0.5, f)` |
+| `total_loss_factor` | `function` | **Total loss factor η = 2.2/(f·Ts) (ISO 10848 Clause 7.3.1).**<br>• `frequencies` [Hz], `structural_reverberation_time` [s] | `eta = building.total_loss_factor(f, ts)` |
 | `normalized_flanking_level_difference` | `function` | **Airborne Dn,f = L1−L2−10 lg(A/A0) (ISO 10848 Formula 4).**<br>• `source_level` L1, `receive_level` L2 [dB]<br>• `absorption_area` A [m²]<br>• `reference_area` A0 (Default: 10) | `res = building.normalized_flanking_level_difference(l1, l2, a)`<br><br>• `FlankingLevelDifferenceResult` |
 | `normalized_flanking_impact_level` | `function` | **Impact Ln,f = L2+10 lg(A/A0) (ISO 10848 Formula 5).**<br>• `receive_level` L2 [dB], `absorption_area` A [m²]<br>• `reference_area` A0 (Default: 10) | `res = building.normalized_flanking_impact_level(l2, a)`<br><br>• `FlankingImpactLevelResult` |
 | `vibration_reduction_index_from_flanking` | `function` | **Indirect Kij from Dn,f (ISO 10848 Clause 4.3.1).**<br>• `normalized_flanking_level_difference` Dn,f, `reduction_index_i`/`_j` Ri/Rj [dB]<br>• `junction_length`, `area_i`/`area_j`, `absorption_length_i`/`_j` | `k = building.vibration_reduction_index_from_flanking(dnf, ri, rj, 2.0, 10.0, 12.0, ai, aj)`<br><br>• Kij [dB] |
@@ -41503,7 +41503,7 @@ documents, one page per module.
 | `strong_coupling_satisfied` | `function` | **Strong-coupling validity check (ISO 10848 Formula 15).**<br>• `velocity_level_difference` D̄v,ij [dB]<br>• `mass_i`/`mass_j` [kg/m²], `critical_frequency_i`/`_j` [Hz] | `ok = building.strong_coupling_satisfied(dbar, 20, 20, 100, 100)`<br><br>• bool per band |
 | `modal_density` | `function` | **Modal density n = π·S·fc/c0² (ISO 10848-4 Formula 5).**<br>• `area` S [m²], `critical_frequency` fc [Hz]<br>• `speed_of_sound` (Default: 343) | `n = building.modal_density(10.0, 200.0)` |
 | `modal_overlap_factor` | `function` | **Modal overlap M = 2.2·n/Ts (ISO 10848-4 Formula 6).**<br>• `area`, `critical_frequency`, `structural_reverberation_time` [s] | `m = building.modal_overlap_factor(10.0, 200.0, ts)  # feed building.vibration_reduction_index(modal_overlap=m)` |
-| `band_mode_count` | `function` | **In-band mode count N = 0.23·f·n (ISO 10848-4 Formula 4).**<br>• `frequency` [Hz], `area`, `critical_frequency` | `n5 = building.band_mode_count(f, 10.0, 200.0)  # N≥5 OK` |
+| `band_mode_count` | `function` | **In-band mode count N = 0.23·f·n (ISO 10848-4 Formula 4).**<br>• `frequencies` [Hz], `area`, `critical_frequency` | `n5 = building.band_mode_count(f, 10.0, 200.0)  # N≥5 OK` |
 | `VibrationReductionResult` | `dataclass` | **Measured Kij (ISO 10848).**<br>• `frequencies` [Hz] (or None), `k_ij` [dB]<br>• `single_number`: mean K̄ij 200–1250 Hz (thirds) / 125–1000 Hz (octaves), or None<br>• `bracketed`: M < 0.25 flags (or None)<br>• `.octave_bands()`, `.plot()` | `res.k_ij, res.single_number` |
 | `FlankingLevelDifferenceResult` | `dataclass` | **Normalized flanking level difference Dn,f (ISO 10848).**<br>• `d_n_f` [dB], `rating`: Dn,f,w (or None)<br>• `.plot()` | `res.d_n_f, res.rating` |
 | `FlankingImpactLevelResult` | `dataclass` | **Normalized flanking impact level Ln,f (ISO 10848).**<br>• `l_n_f` [dB], `rating`: Ln,f,w (or None)<br>• `.plot()` | `res.l_n_f, res.rating` |
@@ -41523,8 +41523,8 @@ documents, one page per module.
 | `orthotropic_plate_resonance` | `function` | **Eigenfrequency of a simply supported orthotropic plate (Vigran Eq. 3.113 = Bies Eq. 7.27, Hearmon 1959).**<br>• `mode_x` i, `mode_z` n (≥ 1)<br>• `length_x` a, `length_z` b [m], `mass_per_area` m'' [kg/m²]<br>• `bending_stiffness_x` / `_z` / `_xz` [N·m]<br>• the panel TL models are valid above ≈ 1.5·f₁,₁ | `orthotropic_plate_resonance(1, 1, length_x=1.0, length_z=1.0, mass_per_area=7.8, bending_stiffness_x=b, bending_stiffness_z=b, bending_stiffness_xz=b)`<br><br>• [Hz] |
 | `double_wall_transmission_loss` / `mass_spring_mass_resonance` | `function` | **Double-wall R (Bies 7.2.6, Eq. 7.62-7.64).**<br>• `mass1`/`mass2` [kg/m²], `gap` d [m]<br>• `cavity_medium`: porous fill (`PorousMediumResult`) lowers f0<br>• below f0 = total-mass law; f0 = mass-air-mass resonance | `r = building.double_wall_transmission_loss(f, 12, 12, 0.1)`<br><br>• `SoundReductionResult` |
 | `heavy_impact_source_specification` / `heavy_impact_source_limits` / `HeavyImpactSourceSpec` / `HEAVY_IMPACT_SOURCES` / `HEAVY_IMPACT_OCTAVE_BANDS` | `function` / `dataclass` / `mapping` / `tuple` | **Standard heavy and soft impact source (ISO 16283-2 Table A.1, JIS A 1418-2 Tables A.1/A.2).**<br>• `source`: 'rubber_ball' / 'bang_machine'<br>• printed LFE per octave 31.5-500 Hz with tolerance, drop height, effective mass, restitution, 20 ± 2 ms contact time | `spec = building.heavy_impact_source_specification('rubber_ball')`<br>`f, lo, hi = building.heavy_impact_source_limits('bang_machine')` |
-| `check_heavy_impact_source` / `HeavyImpactSourceCheck` | `function` / `dataclass` | **Source conformance against the printed spectrum.**<br>• `force_exposure_level`: five octave-band LFE [dB re 1 N]<br>• `source`: 'rubber_ball' / 'bang_machine'<br>• `.plot()` | `chk = building.check_heavy_impact_source([39, 31, 23, 17, 12.5])`<br><br>• `HeavyImpactSourceCheck` (`passed`, `deviation`, `within_tolerance`) |
-| `impact_force_exposure_level` | `function` | **Impact force exposure level LFE (ISO 16283-2 Formula (A.1)).**<br>• `force` F(t) [N] (1-D record of one impact), `sample_rate` [Hz]<br>• `reference_force` F0 (Default: 1 N), `reference_time` Tref (Default: 1 s) | `lfe = building.impact_force_exposure_level(force, 200_000)`<br><br>• [dB re 1 N] |
+| `check_heavy_impact_source` / `HeavyImpactSourceCheck` | `function` / `dataclass` | **Source conformance against the printed spectrum.**<br>• `force_exposure_level`: five octave-band LFE [dB re 1 N]<br>• `source`: 'rubber_ball' / 'bang_machine'<br>• `.plot()` | `chk = building.check_heavy_impact_source([39, 31, 23, 17, 12.5])`<br><br>• `HeavyImpactSourceCheck` (`passes`, `deviation`, `within_tolerance`) |
+| `impact_force_exposure_level` | `function` | **Impact force exposure level LFE (ISO 16283-2 Formula (A.1)).**<br>• `force` F(t) [N] (1-D record of one impact), `fs` [Hz]<br>• `reference_force` F0 (Default: 1 N), `reference_time` Tref (Default: 1 s) | `lfe = building.impact_force_exposure_level(force, 200_000)`<br><br>• [dB re 1 N] |
 | `standardized_maximum_impact_level` / `fast_reverberation_correction` / `StandardizedMaximumImpactResult` | `function` / `dataclass` | **Standardized maximum impact level L'i,Fmax,V,T (ISO 16283-2 Formulae (4)-(6)).**<br>• `level` Li,Fmax [dB], `volume` V [m³], `reverberation_time` T [s]<br>• `reference_time` T0 (Default: 0.5 s), `reference_volume` V0 (Default: 50 m³)<br>• the Fast correction is exactly 0 dB at T = T0<br>• `.plot()` | `res = building.standardized_maximum_impact_level(li, 41.4, t)`<br><br>• `StandardizedMaximumImpactResult` |
 | `heavy_impact_octave_levels` | `function` | **One-third-octave to octave synthesis (ISO 16283-2 Formula (20)).**<br>• `level`: thirds in ascending order, length a multiple of 3 | `oct = building.heavy_impact_octave_levels(thirds)`<br><br>• [dB] |
 | `a_weighted_maximum_impact_level` / `HEAVY_IMPACT_A_WEIGHTING` / `AWeightedMaximumImpactResult` | `function` / `mapping` / `dataclass` | **A-weighted maximum impact level XiA,Fmax (ISO 717-2 Annex D, Formula (D.1)).**<br>• `level`: 12 thirds (50-630 Hz) or 4 octaves (63-500 Hz) [dB]<br>• `band`: 'third' / 'octave' (inferred from the length)<br>• Table D.3 corrections, rounded half-up<br>• `.plot()` | `res = building.a_weighted_maximum_impact_level([65.3, 64.5, 58.0, 55.8])`<br><br>• `AWeightedMaximumImpactResult` (`rating` = 55 dB) |
@@ -41780,7 +41780,7 @@ documents, one page per module.
 | `sii_procedure` | `function` | **Tabulated band table of one ANSI S3.5-1997 band procedure (Tables 1–4).**<br>• `method`: one of `SII_METHODS` (Default: 'one-third-octave') | `proc = speech.sii_procedure('octave')`<br><br>• `SIIProcedure`; `proc.plot()` |
 | `SIIProcedure` | `dataclass` | **ANSI S3.5-1997 band-procedure constants.**<br>• `method`: the procedure name<br>• `frequencies`: nominal band centres [Hz]<br>• `band_edges`: band limits [Hz], one more than the band count<br>• `band_importance`: `Ii`<br>• `internal_noise`: `Xi` [dB SPL]<br>• `speech_spectrum`: `Ui`, normal vocal effort [dB SPL]<br>• `.plot()`: `Ii` stepped over the band limits | `proc.band_importance, proc.band_edges` |
 | `stoi` | `function` | **Short-time objective intelligibility STOI / ESTOI (Taal et al. 2011; Jensen & Taal 2016).**<br>• `clean`: clean reference (1D)<br>• `degraded`: degraded/processed signal (1D, same length)<br>• `fs` [Hz] (resampled to 10 kHz internally)<br>• `extended`: use ESTOI (Default: False) | `d = speech.stoi(clean, degraded, fs)`<br><br>• `STOIResult`; `d.value` in ~[0, 1] (1 if identical) |
-| `STOIResult` | `dataclass` | **STOI / ESTOI result.**<br>• `value`: the intelligibility index<br>• `extended`: True for ESTOI<br>• `segment_scores`: per-segment intermediate<br>• `band_scores`: per-band mean correlation (STOI; None for ESTOI)<br>• `band_frequencies` [Hz]<br>• `sample_rate` (10 kHz)<br>• `.plot()` | `res.value, res.band_scores` |
+| `STOIResult` | `dataclass` | **STOI / ESTOI result.**<br>• `value`: the intelligibility index<br>• `extended`: True for ESTOI<br>• `segment_scores`: per-segment intermediate<br>• `band_scores`: per-band mean correlation (STOI; None for ESTOI)<br>• `band_frequencies` [Hz]<br>• `fs` (10 kHz)<br>• `.plot()` | `res.value, res.band_scores` |
 | `thd` | `function` | **Total harmonic distortion (IEC 60268-3 14.12.2–3).**<br>• `signal` (1D), `fs` [Hz]<br>• `fundamental` [Hz] (Default: None → largest peak)<br>• `kind`: 'F' rel. fundamental or 'R' rel. total RMS (Default: 'F')<br>• `n_harmonics` (Default: 10)<br>• `window` (Default: 'hann') | `thd(sig, fs, 1000.0, kind="F")`<br><br>• ratio (0..) |
 | `harmonic_distortion` | `function` | **nth-order harmonic distortion dₙ (IEC 60268-3 14.12.5).**<br>• `signal`, `fs`, `fundamental` [Hz], `order` n (≥ 2) | `harmonic_distortion(sig, fs, fundamental=1000.0, order=2)`<br><br>• ratio (aₙ rel. total RMS) |
 | `thd_plus_noise` | `function` | **THD+N ratio (AES17-2015 6.3.1).**<br>• `signal`, `fs`, `fundamental` (Default: None)<br>• `notch_q`: effective Q of the applied notch, 1.2–3 (Default: 2.0)<br>• `bandwidth`: AES17 chain upper edge [Hz] (Default: 20000; None = full Nyquist); 20 Hz high-pass included<br>• `as_db`: 20·lg(ratio) dB (Default: False)<br>• `window`: FFT window for auto-detection (Default: 'hann') | `thd_plus_noise(sig, fs, 1000.0)`<br><br>• ratio, or dB if `as_db` |
@@ -41841,9 +41841,9 @@ documents, one page per module.
 | `measurement_reproducibility` / `measurement_expanded_uncertainty` / `ISO7235_REPRODUCIBILITY` / `ISO7235_COVERAGE_FACTOR` | `function` / `function` / `table` / `constant` | **ISO 7235 Table 7 and 7.9: how repeatable the measurement is, and the uncertainty that goes on the report.**<br>• `frequency` [Hz], `quantity`: `'insertion_loss'` (Default), `'transmission_loss'` or `'intensity'`<br>• insertion loss 1.5/1/2/3 dB by band range, transmission loss a flat 3, intensity 3/1.5/1/1 and stopping at 5 kHz<br>• the expanded uncertainty is `ISO7235_COVERAGE_FACTOR = 2` times the deviation, for 95 % coverage | `noise_control.measurement_expanded_uncertainty(4000.0)  # 6.0 dB` |
 | `survey_reproducibility` / `ISO11691_REPRODUCIBILITY` | `function` / `constant` | **ISO 11691 Table 1: 2 dB up to the 1.25 kHz one-third octave and 3 dB above it.**<br>• `frequency` [Hz]<br>• the standard offers no interlaboratory result of its own and says this estimate is what makes it a survey method | `noise_control.survey_reproducibility(1000.0)  # 2.0 dB` |
 | `substitution_area_ratio` / `SURVEY_AREA_RATIO_RANGE` / `SURVEY_MAX_VELOCITY_M_S` / `SURVEY_DIAMETER_RANGE_M` / `SURVEY_BAND_RANGE_HZ` / `SilencerMeasurementWarning` | `function` / `range` / `constant` / `range` / `range` / `warning class` | **The scope ISO 11691 writes for its own survey method.**<br>• `substitution_area_ratio(duct_area, element_area)` [m²], warning outside the 0.6 to 1.7 of 4.5<br>• design velocity up to 15 m/s (1.1), circular diameters 80 mm to 2 m, one-third octaves from 50 Hz to 10 kHz | `noise_control.substitution_area_ratio(0.09, 0.09)  # 1.0`<br>Emitted by `noise_control.silencer_measurement` |
-| `open_end_transmission_loss` / `open_end_reflection_coefficient` / `RADIATION_SOLID_ANGLES` | `function` / `function` / `mapping` | **ISO 7235 Eqs. (B.3) and (B.4): what the open end of a duct keeps in, and the reflection that is the same fact said the other way.**<br>• `frequency` [Hz], `area` S [m²], `solid_angle_sr` Ω [sr] (Default: 2π), `sound_speed` [m/s]<br>• `D_td = 10 lg[1 + Ω/(4πf√S/c)²]`, `r = [(1/Ω)(4πf√S/c)² + 1]^(−1/2)`, and the two close through `D_td = −10 lg(1 − r²)`<br>• `RADIATION_SOLID_ANGLES` is Table B.1, the same five values as ISO 5135 Table 1: A 2π, B π, C 4π, D 2π, E 4π<br>• the same physics as `end_reflection_loss_closed_form`, which raises the same argument to 1.88 rather than to 2 | `noise_control.open_end_transmission_loss(bands, 0.0962)` |
+| `open_end_transmission_loss` / `open_end_reflection_coefficient` / `RADIATION_SOLID_ANGLES` | `function` / `function` / `mapping` | **ISO 7235 Eqs. (B.3) and (B.4): what the open end of a duct keeps in, and the reflection that is the same fact said the other way.**<br>• `frequency` [Hz], `area` S [m²], `solid_angle_sr` Ω [sr] (Default: 2π), `speed_of_sound` [m/s]<br>• `D_td = 10 lg[1 + Ω/(4πf√S/c)²]`, `r = [(1/Ω)(4πf√S/c)² + 1]^(−1/2)`, and the two close through `D_td = −10 lg(1 − r²)`<br>• `RADIATION_SOLID_ANGLES` is Table B.1, the same five values as ISO 5135 Table 1: A 2π, B π, C 4π, D 2π, E 4π<br>• the same physics as `end_reflection_loss_closed_form`, which raises the same argument to 1.88 rather than to 2 | `noise_control.open_end_transmission_loss(bands, 0.0962)` |
 | `measured_transmission_loss` / `flow_noise_power_level` | `function` | **ISO 7235 Eqs. (6) and (7): the two quantities the open-end loss is needed for.**<br>• `measured_transmission_loss(insertion_loss, open_end_loss)`: `D_t = D_i + D_td`, the transmission loss of an air-terminal unit<br>• `flow_noise_power_level(pressure_level, open_end_loss, room_correction)`: `L_W = L_p + D_td + C`, with `L_p` uncorrected for background as 6.4 requires and `C` from ISO 3741 | `noise_control.measured_transmission_loss(d_i, d_td)` |
-| `modal_filter_cut_on` / `CIRCULAR_CUT_ON_COEFFICIENT` / `RECTANGULAR_CUT_ON_COEFFICIENT` / `MODAL_FILTER_ATTENUATION_DB` | `function` / `constant` / `constant` / `constant` | **ISO 7235 Eqs. (4) and (5): where higher-order modes start in the duct the modal filter is connected to.**<br>• exactly one of `diameter_m` d or `larger_dimension` H [m], plus `sound_speed`<br>• `0.59 c/d` and `0.5 c/H`; the rectangular constant is exact, the circular one sits 0.67 % above the Bessel eigenvalue that `circular_duct_cut_on` uses<br>• `MODAL_FILTER_ATTENUATION_DB = (3.0, 5.0)`, the minimum longitudinal attenuation of 5.2.2.3 below and above it | `noise_control.modal_filter_cut_on(diameter_m=0.4)  # 506 Hz` |
+| `modal_filter_cut_on` / `CIRCULAR_CUT_ON_COEFFICIENT` / `RECTANGULAR_CUT_ON_COEFFICIENT` / `MODAL_FILTER_ATTENUATION_DB` | `function` / `constant` / `constant` / `constant` | **ISO 7235 Eqs. (4) and (5): where higher-order modes start in the duct the modal filter is connected to.**<br>• exactly one of `diameter_m` d or `larger_dimension` H [m], plus `speed_of_sound`<br>• `0.59 c/d` and `0.5 c/H`; the rectangular constant is exact, the circular one sits 0.67 % above the Bessel eigenvalue that `circular_duct_cut_on` uses<br>• `MODAL_FILTER_ATTENUATION_DB = (3.0, 5.0)`, the minimum longitudinal attenuation of 5.2.2.3 below and above it | `noise_control.modal_filter_cut_on(diameter_m=0.4)  # 506 Hz` |
 | `normal_air_density` / `ISO7235_GAS_CONSTANT` / `ISO7235_ABSOLUTE_ZERO_OFFSET` | `function` / `constant` / `constant` | **ISO 7235 Eqs. (10), (21) and (22): the gas law with the standard's own two constants.**<br>• `static_gauge_pressure_pa` p_s1 [Pa, relative to ambient], `ambient_pressure_pa` p_a [Pa absolute], `temperature_c` θ [°C]<br>• `R = 287` and `θ + 273`, both as printed rather than 287.05 and 273.15; together 0.069 % high at 20 °C, and both cancel in the pressure loss coefficient | `noise_control.normal_air_density(200.0, 101325.0, 20.0)  # 1.2073` |
 | `volume_flow_rate` / `dynamic_pressure` / `total_pressure` / `DENSITY_RATIO_RANGE` | `function` / `function` / `function` / `constant` | **ISO 7235 Eqs. (8), (9), (11), (13), (16), (19) and (20): the flow quantities the pressure loss coefficient is built from.**<br>• `volume_flow_rate(mass_flow, density)`: q_V = q_m/ρ, with ρ the normalised density of Eq. (10) when the meter and the object leave `DENSITY_RATIO_RANGE` (0.98 to 1.02)<br>• `dynamic_pressure(volume_flow, area, density)`: `(ρ/2)(q_V/S)²`, the velocity head<br>• `total_pressure(static_pressure, volume_flow, area, density)`: static plus dynamic in one plane | `noise_control.dynamic_pressure(1.0, 0.0962, 1.2)  # 64.8 Pa` |
 | `total_pressure_loss` / `pressure_loss_coefficient` / `average_pressure_loss_coefficient` | `function` | **ISO 7235 Eqs. (12), (14), (17) and (18): what an object costs to push air through, in velocity heads.**<br>• `total_pressure_loss(static_pressure_loss_pa, inlet_dynamic_pressure_pa, inlet_area, outlet_area)`: adds `p_d1[1 − (S_1/S_2)²]`, which vanishes when the two ducts match<br>• `pressure_loss_coefficient(total_loss, inlet_dynamic_pressure_pa)`: ζ, the same number at every flow rate the object sees the same flow pattern at, warning at 10 Pa and below<br>• `average_pressure_loss_coefficient(object_static, object_dynamic, substitution_static, substitution_dynamic)`: Eq. (18), a substitution average over each series' own flow rates, warning below five points | `noise_control.pressure_loss_coefficient(45.0, 64.8)  # 0.694` |
@@ -41872,7 +41872,7 @@ documents, one page per module.
 | `air_terminal_velocity_limit` / `air_terminal_damper_correction` | `function` | **Screening checks for grilles, registers and diffusers (ASHRAE 2019 Ch. 49 Tables 9/10); a measured device spectrum to ASHRAE Standard 70 beats both.**<br>• `air_terminal_velocity_limit(design_criterion, opening='supply'/'return')` [m/s]<br>• `air_terminal_damper_correction(pressure_ratio, location='diffuser_neck'/'plenum_inlet'/'supply_duct')` [dB] | `air_terminal_velocity_limit(30)  # 2.2 m/s` |
 | `room_effect` | `function` | **Room effect: the drop from the sound power at the terminal device to the level in the room (Long Eq. 14.40, VDI 2081-1 Eq. 36), as a positive attenuation.**<br>• `distance` r [m]<br>• `room_constant` R [m²] or `absorption_area` A [m²], exactly one, scalar or per band<br>• `directivity` Q (Default: 2, flush in a ceiling), scalar or per band | `room_effect(3.0, room.room_constant(S, alpha))`<br>`room_effect(1.5, absorption_area=20.0, directivity=q_per_band)` |
 | `duct_path` | `function` | **End-to-end duct-borne cascade, fan to room (Long Table 14.9; AHRI 885 Table 8).**<br>• `frequencies`, `source_level` L_W, `elements` (`DuctElement` list)<br>• `room_effect`, `criterion` 'NC'/'RC', `target`, `self_noise_floor` (Default: 0 dB)<br>• `section`/`flow_velocity` → plane-wave validity warning | `duct_path(bands, lw, elements, room_effect=6.0, target=30)`<br><br>• `DuctPathResult` |
-| `DuctElement` / `DuctPathStage` | `dataclass` | **One path element and its computed rows.**<br>• `DuctElement`: `label`, `attenuation` (positive loss; scalar, array or `HvacSpectrumResult`), `self_noise` L_W, `code`<br>• `DuctPathStage`: `attenuation`, `attenuated` (the *Sum* row), `self_noise`, `level` (the *Combined* row) | `DuctElement('Silencer', il, sn, code='3')` |
+| `DuctElement` / `DuctPathStage` | `dataclass` | **One path element and its computed rows.**<br>• `DuctElement`: `label`, `attenuation` (positive loss; scalar, array or `HvacSpectrumResult`), `self_noise` L_W, `code`<br>• `DuctPathStage`: `attenuation`, `attenuated` (the *Sum* row), `self_noise`, `levels` (the *Combined* row) | `DuctElement('Silencer', il, sn, code='3')` |
 | `DuctPathResult` | `dataclass` | **Duct-borne noise path result.**<br>• `received_level`, `stages`, `room_effect`, `criterion`, `target`, `contributions`<br>• `.rating` (NC/RC), `.criterion_curve`, `.exceedance`, `.meets_target`<br>• `.table()`: the printed sheet, row by row<br>• `.plot()`: the cascade vs the criterion curve; `.report()`: one-page sheet | `res.meets_target` |
 | `combine_duct_paths` | `function` | **Energy sum of the received spectra of several paths (supply + return).**<br>• `paths`, `criterion`, `target`, `label` | `combine_duct_paths([supply, ret])`<br><br>• `DuctPathResult` with `contributions` |
 | `room_to_room_transmission` | `function` | **Room-to-room chain: source-room level → partition TL → receiving-room absorption → criterion (Norton Eq. 4.101, `NR = TL − 10 lg[S_w/(S₂α₂ + τS_w)]`).**<br>• `frequencies`, `transmission_loss`, `partition_area` S_w [m²], `receiving_absorption` S₂α₂ [m²]<br>• `source`: `SourceRoom`<br>• `include_partition_transmission` (the τS_w term)<br>• `criterion`: `DesignCriterion`, `label`<br>• `receiver_distance_m` [m]: adds the direct field of the partition at that distance, Barron (2003) Eqs. (7-71) and (7-72), g = 1/4 inside r* = (S_w/2π)^½ and S_w/(8πr₂²) beyond it; `None` (Default) is the reverberant field alone | `room_to_room_transmission(bands, tl, 24.0, a2, source=noise_control.SourceRoom(level=lp1), criterion=noise_control.DesignCriterion(target=45))`<br><br>• `RoomToRoomResult` |
@@ -41925,20 +41925,20 @@ documents, one page per module.
 | `ISO11821_BAND_RANGE_HZ` / `OPERATOR_HEIGHT_M` / `OPERATOR_HEIGHT_TOLERANCE_M` / `OUTDOOR_RANGE_M` / `ENGINEERING_STANDARD_DEVIATION_DB` | `mapping` / `constant` | **The conditions ISO 11821 states as numbers.**<br>• 100 Hz to 5 kHz in one-third octaves, 125 Hz to 4 kHz in octaves<br>• a microphone stands at 1,55 m ± 0,075 m where no operator height is given, in the sphere of 0,3 m radius the cabin standard also prints<br>• outdoors the method reaches 25 m from the screen, and its standard deviation of reproducibility is 2 dB, which is engineering grade | `noise_control.ISO11821_BAND_RANGE_HZ[3]  # (100.0, 5000.0)` |
 | `ScreenInSituWarning` | `warning class` | **The measurement is outside a condition ISO 11821 states.**<br>• a screen smaller than 1,5 m, a spread of repeats past 3 dB, a distance past the 25 m the outdoor method reaches | `warnings.catch_warnings()`<br>Emitted by `noise_control.screen_in_situ` |
 | `valve_aerodynamic_noise` | `function` | **Control valve aerodynamic noise, the whole of IEC 60534-8-3 Clause 5.**<br>• `stream`: a `GasStream`, `valve`: a `ValveTrim`, `pipe`: a `DownstreamPipe`<br>• the three groups are the standard's own reading order: the operating point, the valve at that travel, and the pipe the noise comes out of | `res = noise_control.valve_aerodynamic_noise(stream, valve, pipe)`<br><br>• `AerodynamicValveNoise` |
-| `AerodynamicValveNoise` | `dataclass` | **What Clause 5 says about one operating point.**<br>• `regime` (1 to 5), `boundaries`, `pressure_ratio` x, `vena_contracta_pressure_pa` [Pa]<br>• `jet_diameter_m` [m], `mach`, `acoustical_efficiency`, `stream_power` / `sound_power` [W], `sound_power_level` [dB]<br>• `peak_frequency` [Hz], `outlet_mach`, `pipe_mach`, `velocity_correction` [dB], `internal_level` [dB]<br>• `frequency` and the three band arrays, plus `external_level`, the A-weighted single number of Eq. (25) [dB(A)] at 1 m | `res.regime, res.external_level` |
-| `GasStream` / `ValveTrim` / `DownstreamPipe` | `dataclass` | **The three groups of input IEC 60534-8-3 reads.**<br>• `GasStream`: `mass_flow` [kg/s], `inlet_pressure_pa` / `outlet_pressure_pa` [Pa], `inlet_density` [kg/m3], `inlet_temperature_k` [K], `specific_heat_ratio`, `molecular_mass` [kg/kmol]<br>• `ValveTrim`: `flow_coefficient` C, `style_modifier` F_d, `pressure_recovery` F_L or F_LP/F_p, `outlet_diameter_m` D [m], `efficiency_correction` A_eta and `strouhal_number` St_p from Table 4, `coefficient` 'Cv' (Default) or 'Kv'<br>• `DownstreamPipe`: `internal_diameter_m` D_i [m], `wall_thickness` t_S [m], `density` [kg/m3], and the printed defaults `sound_speed`, `air_sound_speed`, `atmospheric_pressure_pa`, `standard_pressure_pa` | `noise_control.ValveTrim(flow_coefficient=90.0, ...)` |
+| `AerodynamicValveNoise` | `dataclass` | **What Clause 5 says about one operating point.**<br>• `regime` (1 to 5), `boundaries`, `pressure_ratio` x, `vena_contracta_pressure_pa` [Pa]<br>• `jet_diameter_m` [m], `mach`, `acoustical_efficiency`, `stream_power` / `sound_power` [W], `sound_power_level` [dB]<br>• `peak_frequency` [Hz], `outlet_mach`, `pipe_mach`, `velocity_correction` [dB], `internal_level` [dB]<br>• `frequencies` and the three band arrays, plus `external_level`, the A-weighted single number of Eq. (25) [dB(A)] at 1 m | `res.regime, res.external_level` |
+| `GasStream` / `ValveTrim` / `DownstreamPipe` | `dataclass` | **The three groups of input IEC 60534-8-3 reads.**<br>• `GasStream`: `mass_flow` [kg/s], `inlet_pressure_pa` / `outlet_pressure_pa` [Pa], `inlet_density` [kg/m3], `inlet_temperature_k` [K], `specific_heat_ratio`, `molecular_mass` [kg/kmol]<br>• `ValveTrim`: `flow_coefficient` C, `style_modifier` F_d, `pressure_recovery` F_L or F_LP/F_p, `outlet_diameter_m` D [m], `efficiency_correction` A_eta and `strouhal_number` St_p from Table 4, `coefficient` 'Cv' (Default) or 'Kv'<br>• `DownstreamPipe`: `internal_diameter_m` D_i [m], `wall_thickness` t_S [m], `density` [kg/m3], and the printed defaults `speed_of_sound`, `air_sound_speed`, `atmospheric_pressure_pa`, `standard_pressure_pa` | `noise_control.ValveTrim(flow_coefficient=90.0, ...)` |
 | `pressure_ratio_boundaries` / `RegimeBoundaries` | `function` / `dataclass` | **The four pressure ratios of Eqs. (3) to (7) that cut Clause 5.2 into five regimes.**<br>• `specific_heat_ratio`, `pressure_recovery`<br>• `vena_contracta` x_vcc, `critical` x_C, `break_point` x_B, `constant_efficiency` x_CE, `recovery` alpha | `noise_control.pressure_ratio_boundaries(1.22, 0.8)` |
 | `flow_regime` | `function` | **Which of the five regimes a pressure ratio falls in (Clause 5.2).**<br>• `pressure_ratio` x, `boundaries`<br>• Each interval closed at the top; regime V starts strictly above x_CE, as the clause prints it and not as Table 3 does | `noise_control.flow_regime(0.52, bounds)  # 3` |
 | `valve_style_modifier` | `function` | **F_d of Eqs. (8a) to (8c): the hydraulic diameter of one passage over the diameter of the equivalent single orifice.**<br>• `passage_area` A [m2], `wetted_perimeter` l_w [m], `passages` N_o | `noise_control.valve_style_modifier(0.00137, 0.181, 6)  # 0.30` |
 | `jet_diameter_m` | `function` | **D_j of Eq. (9), the length scale the peak frequency is set by.**<br>• `flow_coefficient` C, `style_modifier` F_d, `pressure_recovery`<br>• `coefficient`: 'Cv' (Default) or 'Kv' | `noise_control.jet_diameter_m(90.0, 0.30, 0.805)  # m` |
-| `internal_spectrum` | `function` | **Eq. (19): the internal level spread over the third-octave bands around the peak.**<br>• `internal_level` [dB], `peak_frequency` [Hz], `frequency` [Hz]<br>• Falls as f^-2.5 above the peak and f^1.7 below it | `noise_control.internal_spectrum(155.3, 7778.0, bands)` |
-| `pipe_transmission_loss` | `function` | **Eq. (20a): what the pipe wall keeps in, band by band (negative).**<br>• `frequency` [Hz]<br>• `internal_diameter_m`, `wall_thickness`, `valve_outlet_diameter_m` [m]<br>• `downstream_density` [kg/m3], `downstream_sound_speed` [m/s], `pipe_density` [kg/m3]<br>• `pipe_sound_speed`, `air_sound_speed`, `atmospheric_pressure_pa`, `standard_pressure_pa` | `noise_control.pipe_transmission_loss(bands, internal_diameter_m=0.2, ...)` |
+| `internal_spectrum` | `function` | **Eq. (19): the internal level spread over the third-octave bands around the peak.**<br>• `internal_level` [dB], `peak_frequency` [Hz], `frequencies` [Hz]<br>• Falls as f^-2.5 above the peak and f^1.7 below it | `noise_control.internal_spectrum(155.3, 7778.0, bands)` |
+| `pipe_transmission_loss` | `function` | **Eq. (20a): what the pipe wall keeps in, band by band (negative).**<br>• `frequencies` [Hz]<br>• `internal_diameter_m`, `wall_thickness`, `valve_outlet_diameter_m` [m]<br>• `downstream_density` [kg/m3], `downstream_sound_speed` [m/s], `pipe_density` [kg/m3]<br>• `pipe_sound_speed`, `air_sound_speed`, `atmospheric_pressure_pa`, `standard_pressure_pa` | `noise_control.pipe_transmission_loss(bands, internal_diameter_m=0.2, ...)` |
 | `coincidence_frequencies` / `PipeFrequencies` | `function` / `dataclass` | **The ring and two coincidence frequencies of Eqs. (21) to (23) that shape the transmission loss.**<br>• `internal_diameter_m`, `wall_thickness`, `downstream_sound_speed`<br>• `ring` f_r, `internal_coincidence` f_o, `external_coincidence` f_g | `noise_control.coincidence_frequencies(0.2, 0.008, 408.0)` |
 | `multistage_trim_conditions` / `MultistageConditions` | `function` / `dataclass` | **Clause 6.3: what a multistage trim hands Clause 5 in place of the valve inlet (Eqs. (27) to (29)).**<br>• `inlet_pressure_pa`, `outlet_pressure_pa` [Pa], `inlet_density` [kg/m3]<br>• `flow_coefficient` C of the valve, `last_stage_coefficient` C_n<br>• result: `flow_coefficient`, `stagnation_pressure_pa` p_n, `stagnation_density` rho_n, and `equation`: which of '28a', '28b', '28c' NOTE 3 selected | `noise_control.multistage_trim_conditions(inlet_pressure_pa=7e6, ...)` |
 | `last_stage_flow_coefficient` / `LAST_STAGE_AREA_CONSTANTS` | `function` / `constant` | **Eq. (27): C_n = N_16 A_n, the flow coefficient of the last stage from its total flow area.**<br>• `total_area` A_n [m2]<br>• `coefficient`: 'Cv' (Default) or 'Kv', selecting N_16 from Table 1<br>6.3 asks for this only when the manufacturer states no C_n | `noise_control.last_stage_flow_coefficient(6.44e-3)` → `315` |
 | `multiple_passage_jet_diameter` / `MAXIMUM_PASSAGE_ASPECT` | `function` / `constant` | **Eq. (26): the jet diameter of a single-stage, many-passage trim, where [0.9 - 0.06 l/d] replaces the pressure recovery factor.**<br>• `flow_coefficient`, `style_modifier`, `passage_length` l [m], `passage_diameter_m` d [m]<br>• `coefficient`: 'Cv' (Default) or 'Kv'<br>• l/d capped at **4** by NOTE 1, since the bracket would reach zero at 15 | `noise_control.multiple_passage_jet_diameter(90.0, 0.094, 0.02, 0.01)` |
 | `stage_level_correction` | `function` | **Eq. (31): what the stages before the last one add back.**<br>• `last_stage_level` L_pi,n [dB], `stages` n (≥ 2), `inlet_pressure_pa` p_1, `stagnation_pressure_pa` p_n [Pa]<br>`L_pi = L_pi,n + 10 lg(p_1/p_n)/(n-1)^0.125`, so the stage count barely moves it | `noise_control.stage_level_correction(150.0, 3, 7e6, 2.1e6)` |
-| `expander_noise` / `ExpanderNoise` | `function` / `dataclass` | **Clause 7: what the flow leaving the valve outlet makes (Eqs. (34) to (42)).**<br>• `frequency` [Hz]<br>• `mass_flow`, `downstream_density`, `downstream_sound_speed`<br>• `internal_diameter_m` D_i, `throat_diameter_m` d_i (the smaller of valve outlet and expander inlet) [m]<br>• `velocity_correction` L_g [dB], `expander`<br>• result: `pipe_velocity` (capped at Mach 0.8), `inlet_velocity` (capped at c_2), `mach`, `stream_power`, `acoustical_efficiency`, `sound_power`, `peak_frequency`, `internal_level`, `band_internal_level` | `noise_control.expander_noise(bands, mass_flow=0.89, ...)` |
+| `expander_noise` / `ExpanderNoise` | `function` / `dataclass` | **Clause 7: what the flow leaving the valve outlet makes (Eqs. (34) to (42)).**<br>• `frequencies` [Hz]<br>• `mass_flow`, `downstream_density`, `downstream_sound_speed`<br>• `internal_diameter_m` D_i, `throat_diameter_m` d_i (the smaller of valve outlet and expander inlet) [m]<br>• `velocity_correction` L_g [dB], `expander`<br>• result: `pipe_velocity` (capped at Mach 0.8), `inlet_velocity` (capped at c_2), `mach`, `stream_power`, `acoustical_efficiency`, `sound_power`, `peak_frequency`, `internal_level`, `band_internal_level` | `noise_control.expander_noise(bands, mass_flow=0.89, ...)` |
 | `Expander` / `DEFAULT_EXPANDER` | `dataclass` / `constant` | **The transition piece downstream of the valve, limited by 7.1 to 30 degrees of total included angle.**<br>• `contraction` beta (Default: 0.93, the NOTE 1 figure for straight pattern globe valves; some rotary valves reach 0.7)<br>• `efficiency_correction` A_eta (Default: -3.0, Table 4's own *expander* row)<br>• `strouhal_number` St_p (Default: 0.2) | `noise_control.Expander(contraction=0.7)` |
 | `combine_internal_levels` | `function` | **Eq. (43): two spectra at the same pipe wall, added in energy.**<br>• `*levels`: two or more band level arrays of one shape [dB]<br>The valve trim and the outlet flow are two sources inside one pipe, and only the sum crosses the wall | `noise_control.combine_internal_levels(trim, outlet)` |
 | `ValveNoiseWarning` | `warning class` | **A valve read outside the conditions IEC 60534-8-3 prints for it.**<br>• emitted when the valve outlet passes the Mach 0.3 of NOTE 1 to Eq. (15) and no `expander` was given, so the second source is missing from the answer | `warnings.simplefilter('error', noise_control.ValveNoiseWarning)` |
@@ -41952,13 +41952,13 @@ documents, one page per module.
 | `STRUCTURAL_LOSS_REFERENCE_HZ` / `UNIVERSAL_GAS_CONSTANT` | `constant` | **1.0 Hz**, the f_s of Eq. (20c) that the equation never names again, and **8314 J/(kmol K)**, paired with a molecular mass in kg/kmol as Eqs. (10) and (14) are written for. | `noise_control.UNIVERSAL_GAS_CONSTANT` |
 | `REGIME_SUBSONIC` / `REGIME_CHOKED` / `REGIME_SUPERSONIC` / `REGIME_SHOCK` / `REGIME_CONSTANT_EFFICIENCY` / `REGIME_COUNT` | `constant` | **1 to 5**, the five regimes of Clause 5.2 by the number it prints, and their count. | `res.regime == noise_control.REGIME_SHOCK` |
 | `valve_hydrodynamic_noise` | `function` | **Control valve hydrodynamic noise, the whole of IEC 60534-8-4 Clauses 4 and 5.**<br>• `stream`: a `LiquidStream`, `valve`: a `LiquidTrim`, `pipe`: a `LiquidPipe`<br>• `strouhal_form`: 'annex' (Default) or 'clause', the two printings of Eq. (12)<br>• `frequency` (Default: the 50 Hz to 20 kHz thirds of 5.4.1) | `res = noise_control.valve_hydrodynamic_noise(stream, valve, pipe)`<br><br>• `HydrodynamicValveNoise` |
-| `LiquidStream` / `LiquidTrim` / `LiquidPipe` | `dataclass` | **The three groups of input IEC 60534-8-4 reads.**<br>• `LiquidStream`: `mass_flow` [kg/s], `inlet_pressure_pa` / `outlet_pressure_pa` / `vapour_pressure_pa` [Pa], `density` [kg/m3], `sound_speed` [m/s]<br>• `LiquidTrim`: `flow_coefficient` C, `style_modifier` F_d, `pressure_recovery` F_L, `incipient_ratio` x_Fz, `power_ratio` r_W (Table 2), `valve_diameter_m` d and `seat_diameter_m` d_o [m], `coefficient` 'Cv' (Default) or 'Kv'<br>• `LiquidPipe`: `internal_diameter_m` D_i [m], `wall_thickness` t_p [m], `density` [kg/m3], and the printed defaults `sound_speed`, `air_density`, `air_sound_speed` | `noise_control.LiquidTrim(flow_coefficient=90.0, ...)` |
-| `HydrodynamicValveNoise` | `dataclass` | **What IEC 60534-8-4 says about one operating point on a liquid line.**<br>• `regime` ('turbulent' / 'cavitating'), `pressure_ratio` x_F, `differential` and `cavitation_differential` [Pa], `incipient_ratio` / `corrected_ratio`<br>• `jet_diameter_m` [m], `velocity` U_vc [m/s], `stream_power` / `sound_power` [W], `turbulent_efficiency` / `cavitation_efficiency`<br>• `internal_level` [dB], `strouhal_number`, `turbulent_peak` / `cavitation_peak` [Hz]<br>• `pipe_ring_frequency` [Hz], `reference_transmission_loss`, `turbulent_transmission_loss`, `cavitation_transmission_loss`, `transmission_loss` [dB]<br>• `frequency` and the three band arrays, plus `external_level` at 1 m, which the standard labels A-weighted although neither Eq. (18a) nor (18b) applies a weighting | `res.regime, res.external_level` |
+| `LiquidStream` / `LiquidTrim` / `LiquidPipe` | `dataclass` | **The three groups of input IEC 60534-8-4 reads.**<br>• `LiquidStream`: `mass_flow` [kg/s], `inlet_pressure_pa` / `outlet_pressure_pa` / `vapour_pressure_pa` [Pa], `density` [kg/m3], `speed_of_sound` [m/s]<br>• `LiquidTrim`: `flow_coefficient` C, `style_modifier` F_d, `pressure_recovery` F_L, `incipient_ratio` x_Fz, `power_ratio` r_W (Table 2), `valve_diameter_m` d and `seat_diameter_m` d_o [m], `coefficient` 'Cv' (Default) or 'Kv'<br>• `LiquidPipe`: `internal_diameter_m` D_i [m], `wall_thickness` t_p [m], `density` [kg/m3], and the printed defaults `speed_of_sound`, `air_density`, `air_sound_speed` | `noise_control.LiquidTrim(flow_coefficient=90.0, ...)` |
+| `HydrodynamicValveNoise` | `dataclass` | **What IEC 60534-8-4 says about one operating point on a liquid line.**<br>• `regime` ('turbulent' / 'cavitating'), `pressure_ratio` x_F, `differential` and `cavitation_differential` [Pa], `incipient_ratio` / `corrected_ratio`<br>• `jet_diameter_m` [m], `velocity` U_vc [m/s], `stream_power` / `sound_power` [W], `turbulent_efficiency` / `cavitation_efficiency`<br>• `internal_level` [dB], `strouhal_number`, `turbulent_peak` / `cavitation_peak` [Hz]<br>• `pipe_ring_frequency` [Hz], `reference_transmission_loss`, `turbulent_transmission_loss`, `cavitation_transmission_loss`, `transmission_loss` [dB]<br>• `frequencies` and the three band arrays, plus `external_level` at 1 m, which the standard labels A-weighted although neither Eq. (18a) nor (18b) applies a weighting | `res.regime, res.external_level` |
 | `differential_pressure_ratio` / `cavitation_differential` | `function` | **Eqs. (1) and (2): how far towards flashing the operating point is, and the differential the jet velocity is computed from.**<br>• keyword-only: `inlet_pressure_pa`, `outlet_pressure_pa`, `vapour_pressure_pa` [Pa]; the second also takes `pressure_recovery`<br>• x_F = (p1 - p2)/(p1 - p_v); Delta p_c is the lesser of p1 - p2 and F_L^2 (p1 - p_v) | `noise_control.differential_pressure_ratio(inlet_pressure_pa=1e6, outlet_pressure_pa=8e5, vapour_pressure_pa=2320.0)  # 0.2005` |
 | `incipient_cavitation_ratio` / `multihole_incipient_cavitation_ratio` / `corrected_incipient_ratio` | `function` | **Eqs. (3a), (3b) and (3c): where cavitation becomes audible.**<br>• (3a): `flow_coefficient`, `style_modifier`, `pressure_recovery`, `coefficient` 'Cv' (Default) / 'Kv'<br>• (3b): `passages` N_o, `hole_diameter_m` d_H [m], `pressure_recovery`<br>• (3c) moves x_Fz from the 6e5 Pa the charts are drawn at to the working `inlet_pressure_pa`<br>4.2 asks for a value measured to IEC 60534-8-2; these are the estimates it offers instead | `noise_control.incipient_cavitation_ratio(90.0, 0.42, 0.92)  # 0.2543` |
 | `vena_contracta_velocity` / `mechanical_stream_power` | `function` | **Eqs. (5) and (6): the jet velocity and the stream power it carries.**<br>• `differential` Delta p_c [Pa], `density` [kg/m3], `pressure_recovery`<br>• `mass_flow` [kg/s], `velocity` [m/s], `pressure_recovery` | `noise_control.vena_contracta_velocity(2e5, 997.0, 0.92)  # 21.77 m/s` |
-| `turbulent_efficiency` / `cavitation_efficiency` | `function` | **Eqs. (8) and (9): the two acoustical efficiencies the sound power is a fraction of.**<br>• turbulent: `velocity`, `sound_speed`; 1e-4 at U_vc = c_L and linear below it<br>• cavitating (keyword-only): `turbulent`, `differential`, `choked_differential`, `pressure_ratio`, `corrected_ratio`<br>Exactly zero on the threshold, so the two regimes meet without a step | `noise_control.turbulent_efficiency(21.77, 1400.0)  # 1.555e-6` |
-| `internal_sound_pressure_level` | `function` | **Eq. (10): the level inside, at the pipe wall.**<br>• keyword-only: `sound_power` W_a [W], `density` and `sound_speed` of the liquid, `internal_diameter_m` D_i [m]<br>The liquid's impedance is in the numerator, which is why a water line runs 150 dB inside | `noise_control.internal_sound_pressure_level(sound_power=0.00234, density=997.0, sound_speed=1400.0, internal_diameter_m=0.1071)` |
+| `turbulent_efficiency` / `cavitation_efficiency` | `function` | **Eqs. (8) and (9): the two acoustical efficiencies the sound power is a fraction of.**<br>• turbulent: `velocity`, `speed_of_sound`; 1e-4 at U_vc = c_L and linear below it<br>• cavitating (keyword-only): `turbulent`, `differential`, `choked_differential`, `pressure_ratio`, `corrected_ratio`<br>Exactly zero on the threshold, so the two regimes meet without a step | `noise_control.turbulent_efficiency(21.77, 1400.0)  # 1.555e-6` |
+| `internal_sound_pressure_level` | `function` | **Eq. (10): the level inside, at the pipe wall.**<br>• keyword-only: `sound_power` W_a [W], `density` and `speed_of_sound` of the liquid, `internal_diameter_m` D_i [m]<br>The liquid's impedance is in the numerator, which is why a water line runs 150 dB inside | `noise_control.internal_sound_pressure_level(sound_power=0.00234, density=997.0, speed_of_sound=1400.0, internal_diameter_m=0.1071)` |
 | `jet_strouhal_number` / `turbulent_peak_frequency` / `cavitation_peak_frequency` | `function` | **Eqs. (12), (11) and (13): where the noise sits in frequency.**<br>• `jet_strouhal_number` (keyword-only): `flow_coefficient`, `style_modifier`, `pressure_recovery`, `corrected_ratio`, `valve_diameter_m`, `seat_diameter_m`, `inlet_pressure_pa`, `vapour_pressure_pa`, `coefficient`, `form` 'annex' (Default) / 'clause'<br>• `turbulent_peak_frequency(strouhal_number, velocity, jet)`<br>• `cavitation_peak_frequency(turbulent_peak, pressure_ratio, corrected_ratio)`: six times the turbulent peak on the threshold, falling from there | `noise_control.cavitation_peak_frequency(654.35, 0.3508, 0.2386)` |
 | `pipe_ring_frequency` / `reference_transmission_loss` / `transmission_loss_correction` | `function` | **Eqs. (14), (15), (16b) and (22b): the pipe wall.**<br>• `pipe_ring_frequency(internal_diameter_m, pipe_sound_speed=5000)`<br>• `reference_transmission_loss(internal_diameter_m, wall_thickness, pipe_density=…, air_density=…, …)`, negative by construction and therefore added downstream<br>• `transmission_loss_correction(frequency, ring)`: one expression for both printed equations, scalar or per band | `noise_control.reference_transmission_loss(0.1071, 0.0036, pipe_density=7800.0)  # -44.7 dB` |
 | `cavitation_transmission_loss` | `function` | **Eq. (17): what cavitation does to the wall.**<br>• `turbulent_loss` [dB]; keyword-only `turbulent_peak`, `cavitation_peak` [Hz], `efficiency_ratio`<br>• `pressure_ratio` and `corrected_ratio` apply the NOTE's floor, which keeps the cavitating loss from falling below the turbulent one within 0.1 of the threshold | `noise_control.cavitation_transmission_loss(-71.84, turbulent_peak=654.35, cavitation_peak=1088.94, efficiency_ratio=0.377)` |
@@ -41980,9 +41980,9 @@ documents, one page per module.
 | `ProgramLoudnessResult` | `dataclass` | **EBU Mode measurement result.**<br>• `integrated` [LUFS], `loudness_range` [LU], `true_peak` [dBTP]<br>• `momentary` / `short_term` series with `momentary_time` / `short_term_time` [s]<br>• `max_momentary` / `max_short_term` [LUFS]<br>• `relative_threshold`, `lra_low` / `lra_high` [LUFS]<br>• `true_peak_per_channel` [dBTP], `channel_weights`, `fs`<br>• `.plot()`: M/S over time with I and LRA annotated<br>• `.report(path, *, tolerance='qc'/'live')`: R 128 fiche (±0.2 LU item i / ±1.0 LU item h) | `res.integrated, res.loudness_range` |
 | `KWeightingResponse` | `dataclass` | **K-weighting magnitude frequency response (BS.1770-5 Annex 1).**<br>• `frequencies` [Hz], `magnitude_db` (combined) [dB]<br>• `shelf_db` (stage 1, +4 dB shelf), `highpass_db` (stage 2, RLB) [dB]<br>• `fs` [Hz]<br>• `.plot()`: magnitude vs frequency (log axis) with the two stages | `k_weighting_response().magnitude_db` |
 | `quasi_peak_meter` | `function` | **ITU-R BS.468-4 clause 2 quasi-peak reading of a record, in dBqps.**<br>• `x`: 1-D record, or a `Signal`<br>• `fs` [Hz]<br>• `weighted`: run the clause 1 network first (Default: True; False is the clause 2.4 mode)<br>• `reference`: level reference in the record's own unit (Default: None → 0.775 V; required for a calibrated Signal, whose samples are pascals)<br>Reading = the maximum of the needle over the record, so the record must include the decay | `res = broadcast.quasi_peak_meter(x, fs)`<br><br>• `QuasiPeakResult` |
-| `QuasiPeakResult` | `dataclass` | **Quasi-peak reading of one record (BS.468-4 clause 2).**<br>• `reading` (record's unit), `level_db`, `reference`<br>• `trace`: the needle, sample for sample with the record<br>• `fs` [Hz], `weighted`<br>• `.time` [s], `.level_unit`: `'dBqps'` only against the 0.775 V of clause 2.6<br>• `.plot()`: the trace with the reading marked<br>• no `.report()`: BS.468-4 prescribes no report format | `res.reading, res.level_unit` |
+| `QuasiPeakResult` | `dataclass` | **Quasi-peak reading of one record (BS.468-4 clause 2).**<br>• `reading` (record's unit), `level_db`, `reference`<br>• `trace`: the needle, sample for sample with the record<br>• `fs` [Hz], `weighted`<br>• `.times` [s], `.level_unit`: `'dBqps'` only against the 0.775 V of clause 2.6<br>• `.plot()`: the trace with the reading marked<br>• no `.report()`: BS.468-4 prescribes no report format | `res.reading, res.level_unit` |
 | `verify_quasi_peak_dynamics` | `function` | **Check the detector against the eleven acceptance windows of Tables 2 and 3.**<br>• `fs` [Hz] (Default: 48000)<br>• keyword-only: `ballistics`, the chain to check (Default: `BS468_BALLISTICS`)<br>Builds the clause 2.1 and 2.2 stimuli (5 kHz, integral periods, through the network) and reads each against the steady tone | `rep = broadcast.verify_quasi_peak_dynamics()`<br><br>• `QuasiPeakDynamicsResult` |
-| `QuasiPeakDynamicsResult` | `dataclass` | **The eleven acceptance windows of clause 2, read on one chain.**<br>• `fs` [Hz], `passed`<br>• `worst_margin_db`: smallest of the eleven margins [dB]<br>• `worst_deviation_db`: largest departure from a printed reference [dB]<br>• `stimuli`: eleven rows of `stimulus`, `table`, `reading_percent`, `lower_percent`, `reference_percent`, `upper_percent`, `deviation_db`, `margin_db`<br>• no `.report()`: BS.468-4 prescribes no report format | `rep.passed, rep.worst_margin_db` |
+| `QuasiPeakDynamicsResult` | `dataclass` | **The eleven acceptance windows of clause 2, read on one chain.**<br>• `fs` [Hz], `passes`<br>• `worst_margin_db`: smallest of the eleven margins [dB]<br>• `worst_deviation_db`: largest departure from a printed reference [dB]<br>• `stimuli`: eleven rows of `stimulus`, `table`, `reading_percent`, `lower_percent`, `reference_percent`, `upper_percent`, `deviation_db`, `margin_db`<br>• no `.report()`: BS.468-4 prescribes no report format | `rep.passes, rep.worst_margin_db` |
 | `BS468_BALLISTICS` / `QuasiPeakBallistics` | `constant` / `dataclass` | **The three time constants of the quasi-peak chain, in seconds (a fit to the eleven reference readings, printed nowhere in BS.468-4).**<br>• `charge` 1.4096 ms, `discharge` 293.20 ms (the peak rectifier)<br>• `reading_device` 139.99 ms (clause 2.5's symmetric indicator)<br>The tables identify them only to within a factor of 1.88, 1.61 and 2.09 -- marginal ranges, not a box | `BS468_BALLISTICS.discharge` |
 | `DBQPS_REFERENCE` | `float` | **The 0.775 V r.m.s. of clause 2.6**, the steady 1 kHz sine that reads 0 dBqps and fixes the scale of the whole instrument | `DBQPS_REFERENCE  # 0.775` |
 | `sound_pressure_level` | `function` | **Underwater SPL (ISO 18405), dB re 1 µPa.**<br>• `pressure`: signal (1D) [Pa]<br>• `reference`: p₀ (Default: 1e-6) | `sound_pressure_level(p)` |
@@ -41993,14 +41993,14 @@ documents, one page per module.
 | `radiated_noise_level` | `function` | **Ship radiated noise level (ISO 17208-1), dB re 1 µPa·m.**<br>• `rms_pressure_pa` [Pa]<br>• `distance` [m]<br>= 20·lg(p/p₀)+20·lg(r/r₀) | `radiated_noise_level(2e-6, 100.0)` |
 | `hydrophone_depths` | `function` | **ISO 17208-1 hydrophone depths from depression angles_deg.**<br>• `cpa_distance` [m]<br>• `angles_deg` (Default: (15,30,45)) [deg]<br>= cpa·tan(angle_deg) | `hydrophone_depths(100.0)` |
 | `source_level_uncertainty` | `function` | **Tabulated source-level uncertainty (ISO 17208-2).**<br>• `frequency` [Hz]<br>5 dB ≤100 Hz / 3 dB 125 Hz–16 kHz / 4 dB >16 kHz | `source_level_uncertainty(1000.0)  # 3.0` |
-| `monopole_source_level` | `function` | **Equivalent monopole source level (ISO 17208-2).**<br>• `rnl`: RNL [dB re 1 µPa·m] (scalar/array)<br>• `frequency` [Hz]<br>• `draught` D [m]<br>• `c` (Default: 1500) [m/s]<br>Ls = LRN + ΔL, d_s = 0.7·D | `res = underwater.monopole_source_level(rnl, f, 6.0)`<br><br>• `ShipSourceLevelResult` |
-| `ShipSourceLevelResult` | `dataclass` | **Ship source-level result.**<br>• `frequencies` [Hz]<br>• `radiated_noise_level` / `surface_correction` / `source_level` [dB]<br>• `source_depth` [m] / `sound_speed` [m/s]<br>• `.plot()`: RNL/Ls/ΔL vs frequency | `res.source_level, res.surface_correction` |
+| `monopole_source_level` | `function` | **Equivalent monopole source level (ISO 17208-2).**<br>• `rnl`: RNL [dB re 1 µPa·m] (scalar/array)<br>• `frequency` [Hz]<br>• `draught` D [m]<br>• `speed_of_sound` (Default: 1500) [m/s]<br>Ls = LRN + ΔL, d_s = 0.7·D | `res = underwater.monopole_source_level(rnl, f, 6.0)`<br><br>• `ShipSourceLevelResult` |
+| `ShipSourceLevelResult` | `dataclass` | **Ship source-level result.**<br>• `frequencies` [Hz]<br>• `radiated_noise_level` / `surface_correction` / `source_level` [dB]<br>• `source_depth` [m] / `speed_of_sound` [m/s]<br>• `.plot()`: RNL/Ls/ΔL vs frequency | `res.source_level, res.surface_correction` |
 | `single_strike_sel` | `function` | **Single-strike SEL (ISO 18406), dB re 1 µPa²·s.**<br>• `pressure`: one strike (1D) [Pa]<br>• `fs` [Hz] | `single_strike_sel(p, fs)` |
 | `cumulative_sel` | `function` | **Cumulative SEL over strikes (ISO 18406).**<br>• `single_sels`: per-strike SELs [dB]<br>= 10·lg(Σ 10^(SELₙ/10)) | `cumulative_sel([170, 176, 173])` |
 | `cumulative_sel_identical` | `function` | **Cumulative SEL of N identical strikes.**<br>• `sel_ss` [dB]<br>• `n_strikes` N (≥ 1)<br>= sel_ss + 10·lg(N) | `cumulative_sel_identical(180.0, 50)` |
 | `pile_strike_metrics` | `function` | **Per-strike pile-driving metrics (ISO 18406).**<br>• `pressure`: one strike (1D) [Pa]<br>• `fs` [Hz] | `res = underwater.pile_strike_metrics(p, fs)`<br><br>• `PileStrikeResult` |
 | `sound_speed_profile` | `function` | **Sound-speed profile over a depth column.**<br>• `depths` (1D, increasing) [m]<br>• `temperatures_c` / `salinities`: array or scalar<br>• `model` / `latitude` | `sound_speed_profile(z, T, S)`<br><br>• `SoundSpeedProfile` |
-| `SoundSpeedProfile` | `dataclass` | **Sound-speed profile.**<br>• `depth` [m] / `sound_speed` [m/s] / `gradient_per_s` [(m/s)/m]<br>• `model`<br>• `.plot()`: speed vs depth (depth down) | `prof.sound_speed, prof.gradient_per_s` |
+| `SoundSpeedProfile` | `dataclass` | **Sound-speed profile.**<br>• `depth` [m] / `speed_of_sound` [m/s] / `gradient_per_s` [(m/s)/m]<br>• `model`<br>• `.plot()`: speed vs depth (depth down) | `prof.speed_of_sound, prof.gradient_per_s` |
 | `spreading_loss` | `function` | **Geometrical spreading loss, dB.**<br>• `range_m` [m] (scalar/array)<br>• `law`: `"spherical"` / `"cylindrical"` / `"practical"`<br>• `transition_range` [m] (for `"practical"`) | `spreading_loss(1000.0)` |
 | `seawater_absorption` | `function` | **Volume absorption α, dB/km.**<br>• `frequency_hz` [Hz] (scalar/array)<br>• `temperature_c` [°C] / `salinity` [ppt] / `depth` [m] / `ph`<br>• `model`: `"francois-garrison"` (default) / `"ainslie-mccolm"` / `"thorp"` | `seawater_absorption(10e3)` |
 | `propagation_loss` | `function` | **Propagation loss PL = spreading + α·R, α in dB/km and R in km.**<br>• `range_m` [m] / `frequency_hz` [Hz]<br>• `law` / `temperature_c` / `salinity` / `depth` / `ph` / `model` / `transition_range` | `propagation_loss(r, 10e3)`<br><br>• `PropagationLossResult` |
@@ -42017,18 +42017,18 @@ documents, one page per module.
 | `seabed_reflection` | `function` | **Plottable seabed reflection coefficient (Rayleigh).**<br>• `grazing_angle_deg` [°]<br>• `rho1` (Default: 1000) / `c1` (Default: 1500) / `rho2` / `c2` | `seabed_reflection(phi, rho2=1900, c2=1650)`<br><br>• `SeabedReflection` |
 | `SeabedReflection` | `dataclass` | **Seabed reflection-coefficient result.**<br>• `grazing_angle_deg` [°] / `reflection_coefficient` [complex]<br>• `magnitude` \|R\| / `bottom_loss` [dB] / `critical_angle_deg` [° or None]<br>• `rho1` / `c1` / `rho2` / `c2`<br>• `.plot()`: \|R\| vs grazing angle | `res.magnitude, res.critical_angle_deg` |
 | `wind_noise_spectrum` | `function` | **Wenz wind noise (rule of fives), dB re 1 µPa²/Hz.**<br>• `frequency_hz` [Hz] / `wind_speed_knots` [kn] | `wind_noise_spectrum(1000, 5)` |
-| `thermal_noise_spectrum` | `function` | **Mellen thermal noise, dB re 1 µPa²/Hz.**<br>• `frequency_hz` [Hz]<br>• `temperature_c` (Default: 16.85) / `density` (Default: 1025) / `sound_speed` (Default: 1500) | `thermal_noise_spectrum(5e4)` |
-| `ocean_ambient_noise` | `function` | **Composite ambient-noise spectrum (wind + thermal [+ shipping]).**<br>• `frequency_hz` [Hz] / `wind_speed_knots` [kn]<br>• `shipping` [dB or None] / `temperature_c` / `density` / `sound_speed` | `ocean_ambient_noise(f, wind_speed_knots=10)`<br><br>• `AmbientNoiseResult` |
-| `AmbientNoiseResult` | `dataclass` | **Ambient-noise result.**<br>• `frequency` [Hz] / `spectrum_level` [dB re 1 µPa²/Hz]<br>• `wind` / `thermal` / `shipping` [dB or None]<br>• `wind_speed_knots` [kn]<br>• `.plot()`: composite + components vs frequency | `res.spectrum_level` |
+| `thermal_noise_spectrum` | `function` | **Mellen thermal noise, dB re 1 µPa²/Hz.**<br>• `frequency_hz` [Hz]<br>• `temperature_c` (Default: 16.85) / `density` (Default: 1025) / `speed_of_sound` (Default: 1500) | `thermal_noise_spectrum(5e4)` |
+| `ocean_ambient_noise` | `function` | **Composite ambient-noise spectrum (wind + thermal [+ shipping]).**<br>• `frequency_hz` [Hz] / `wind_speed_knots` [kn]<br>• `shipping` [dB or None] / `temperature_c` / `density` / `speed_of_sound` | `ocean_ambient_noise(f, wind_speed_knots=10)`<br><br>• `AmbientNoiseResult` |
+| `AmbientNoiseResult` | `dataclass` | **Ambient-noise result.**<br>• `frequencies` [Hz] / `spectrum_level` [dB re 1 µPa²/Hz]<br>• `wind` / `thermal` / `shipping` [dB or None]<br>• `wind_speed_knots` [kn]<br>• `.plot()`: composite + components vs frequency | `res.spectrum_level` |
 | `ship_source_spectrum` | `function` | **Predicted ship source-level spectrum.**<br>• `speed_knots` (Default: 12) / `length_m` (Default: 100)<br>• `vessel_class` (Default: `"containership"`) / `model`: `"jomopans-echo"` (default) / `"randi"` / `"wales-heitmeyer"`<br>• `frequency_hz` (Default: decidecade 10 Hz–31.5 kHz) | `ship_source_spectrum(18, 300, vessel_class="containership")`<br><br>• `ShipTrafficSpectrum` |
-| `ShipTrafficSpectrum` | `dataclass` | **Ship source-spectrum result.**<br>• `frequency` [Hz] / `source_psd` [dB re 1 µPa²/Hz at 1 m] / `band_level` [dB re 1 µPa m]<br>• `model` / `vessel_class` / `speed_knots` / `length_m`<br>• `.plot()`: source PSD vs frequency | `res.source_psd, res.band_level` |
+| `ShipTrafficSpectrum` | `dataclass` | **Ship source-spectrum result.**<br>• `frequencies` [Hz] / `source_psd` [dB re 1 µPa²/Hz at 1 m] / `band_level` [dB re 1 µPa m]<br>• `model` / `vessel_class` / `speed_knots` / `length_m`<br>• `.plot()`: source PSD vs frequency | `res.source_psd, res.band_level` |
 | `VESSEL_CLASSES` | `tuple` | **The 13 JOMOPANS-ECHO vessel classes.** | `"bulker" in VESSEL_CLASSES` |
 | `normal_modes` | `function` | **Normal-mode propagation loss (range-independent).**<br>• `frequency_hz` / `depths` [m] / `sound_speeds` [m/s]<br>• `source_depth` / `receiver_depth` [m] / `ranges_m` / `density` / `bottom`: `"pressure-release"`\|`"rigid"` / `n_depth_points` | `normal_modes(50, [0,200], [1500,1500], source_depth=50, receiver_depth=100)`<br><br>• `NormalModeResult` |
 | `ray_trace` | `function` | **Ray tracing and travel times through a sound-speed profile (vectorised).**<br>• `depths` [m] / `sound_speeds` [m/s]<br>• `source_depth` [m] / `launch_angles_deg` / `max_range` [m] / `n_steps`<br>• `bathymetry`: a `(ranges_m, depths_m)` polyline pair, or `None` for a level bottom | `ray_trace(z, c, source_depth=1000, launch_angles_deg=[-10,0,10])`<br><br>• `RayTraceResult` |
 | `eigenrays` | `function` | **Eigenrays connecting a traced fan's source to one receiver.**<br>• `trace`: a `RayTraceResult` / `receiver_range` [m] / `receiver_depth` [m]<br>• `bottom`: `"pressure-release"`\|`"rigid"`\|`FluidSeabed`<br>• `max_arrivals` (earliest kept) / `n_steps` | `eigenrays(fan, receiver_range=5e3, receiver_depth=60)`<br><br>• `EigenrayResult` |
 | `gaussian_beams` | `function` | **Gaussian beam PL field: finite at caustics, graded into shadow zones.**<br>• `frequency_hz` / `depths` [m] / `sound_speeds` [m/s]<br>• `source_depth` [m] / `max_range` [m] / `range_step` [m] / `ranges_m` / `receiver_depths_m`<br>• `fan`: a `BeamFan` / `bottom`: `"pressure-release"`\|`"rigid"`\|`FluidSeabed`<br>• `absorption`: model name\|`VolumeAbsorption`\|`None` / `bathymetry`: `(ranges_m, depths_m)`\|`None` | `gaussian_beams(300, [0,1000], [1500,1500], source_depth=300)`<br><br>• `GaussianBeamResult` |
 | `BeamFan` | `dataclass` | **The launch fan of `gaussian_beams`.**<br>• `max_angle_deg` (Default: 80) / `n_beams` (Default: overlap condition) / `beam_width` W₀ [m] (Default: per launch angle) | `BeamFan(max_angle_deg=45.0)` |
-| `FluidSeabed` | `dataclass` | **A lossy fluid seabed, passed as the `bottom` of `eigenrays`/`gaussian_beams`.**<br>• `density` ρ₂ [kg/m³] / `sound_speed` c₂ [m/s] / `water_density` ρ₁ (Default: 1000) | `FluidSeabed(density=1800, sound_speed=1700)` |
+| `FluidSeabed` | `dataclass` | **A lossy fluid seabed, passed as the `bottom` of `eigenrays`/`gaussian_beams`.**<br>• `density` ρ₂ [kg/m³] / `speed_of_sound` c₂ [m/s] / `water_density` ρ₁ (Default: 1000) | `FluidSeabed(density=1800, speed_of_sound=1700)` |
 | `VolumeAbsorption` | `dataclass` | **Seawater volume absorption: a model and its water.**<br>• `model`: `"francois-garrison"`\|`"ainslie-mccolm"`\|`"thorp"`<br>• `temperature_c` [°C] / `salinity` [ppt] / `ph` | `VolumeAbsorption("thorp")` |
 | `parabolic_equation` | `function` | **Split-step Fourier parabolic-equation PL field.**<br>• `frequency_hz` / `depths` [m] / `sound_speeds` [m/s]<br>• `source_depth` [m] / `max_range` [m] / `range_step` [m] / `n_depth_points` | `parabolic_equation(50, [0,200], [1500,1500], source_depth=50)`<br><br>• `ParabolicEquationResult` |
 | `NormalModeResult` | `dataclass` | **Normal-mode result.**<br>• `frequency` / `wavenumbers` [rad/m] / `mode_depths` [m] / `mode_functions`<br>• `ranges` [m] / `propagation_loss` [dB] / `receiver_depth` / `source_depth`<br>• `.plot()`: PL vs range | `res.wavenumbers, res.propagation_loss` |
@@ -42039,14 +42039,14 @@ documents, one page per module.
 | `PileStrikeResult` | `dataclass` | **Pile-strike result.**<br>• `single_strike_sel` [dB re 1 µPa²·s]<br>• `peak_spl` / `spl` [dB re 1 µPa]<br>• `pulse_duration` [s]<br>• `pressure` [Pa] / `fs` [Hz]<br>• `.plot()`: waveform + cumulative energy | `res.single_strike_sel, res.peak_spl` |
 | `strike_sel_spectrum` | `function` | **Band-resolved single-strike SEL (ISO 18406).**<br>• `pressure`: one strike (1D) [Pa] / `fs` [Hz]<br>• `fraction`: 1 or 3 (Default: 3) / `limits` [Hz] (Default: (10, 20000))<br>Parseval band split of ∫p²dt | `strike_sel_spectrum(p, fs)`<br><br>• `StrikeSelSpectrum` |
 | `StrikeSelSpectrum` | `dataclass` | **Band-resolved strike SEL.**<br>• `frequencies` [Hz] / `band_sel` [dB re 1 µPa²·s]<br>• `total_sel` / `broadband_sel` [dB] / `fraction` / `fs` [Hz]<br>• `.plot()`: band SEL vs frequency | `spec.frequencies, spec.band_sel` |
-| `weston_propagation_loss` | `function` | **Weston shallow-water regimes: PL = −10·lg F (Ainslie §9.1.1.2).**<br>• `range_m` [m] / `frequency_hz` [Hz] / `water_depth` H [m]<br>• `seabed`: `"sand"` (default) / `"mud"` / `WestonSeabed`<br>• `sound_speed` (Default: 1500) / `source_depth` / `receiver_depth` [m]<br>• `critical_angle_deg` [°] / `reflection_loss_gradient_value_np_per_rad` [Np/rad] overrides | `weston_propagation_loss(r, 250, 50)`<br><br>• `WestonPropagationResult` |
+| `weston_propagation_loss` | `function` | **Weston shallow-water regimes: PL = −10·lg F (Ainslie §9.1.1.2).**<br>• `range_m` [m] / `frequency_hz` [Hz] / `water_depth` H [m]<br>• `seabed`: `"sand"` (default) / `"mud"` / `WestonSeabed`<br>• `speed_of_sound` (Default: 1500) / `source_depth` / `receiver_depth` [m]<br>• `critical_angle_deg` [°] / `reflection_loss_gradient_value_np_per_rad` [Np/rad] overrides | `weston_propagation_loss(r, 250, 50)`<br><br>• `WestonPropagationResult` |
 | `WestonPropagationResult` | `dataclass` | **Weston regime result.**<br>• `range_m` [m] / `propagation_loss` [dB re 1 m²] / `propagation_factor` [m⁻²] / `regime`<br>• `spherical` / `cylindrical` / `mode_stripping` / `single_mode` / `multipath` [dB]<br>• `boundaries` / `frequency` / `water_depth` / `source_depth` / `receiver_depth` / `seabed`<br>• `.plot()`: composite loss + each regime law | `res.propagation_loss, res.regime` |
-| `weston_regime_boundaries` | `function` | **Range boundaries of the four Weston regimes.**<br>• `frequency_hz` [Hz] / `water_depth` [m]<br>• `seabed` / `sound_speed` / `critical_angle_deg` / `reflection_loss_gradient_value_np_per_rad` | `weston_regime_boundaries(250, 50)`<br><br>• `WestonRegimeBoundaries` |
+| `weston_regime_boundaries` | `function` | **Range boundaries of the four Weston regimes.**<br>• `frequency_hz` [Hz] / `water_depth` [m]<br>• `seabed` / `speed_of_sound` / `critical_angle_deg` / `reflection_loss_gradient_value_np_per_rad` | `weston_regime_boundaries(250, 50)`<br><br>• `WestonRegimeBoundaries` |
 | `WestonRegimeBoundaries` | `dataclass` | **Weston regime boundaries.**<br>• `spherical_to_cylindrical` / `cylindrical_to_mode_stripping` / `mode_stripping_to_single_mode` [m]<br>• `critical_angle_deg` [rad] / `reflection_loss_gradient` [Np/rad] / `effective_depth` [m]<br>• `cutoff_frequency` [Hz] / `mode_count` | `b.cylindrical_to_mode_stripping` |
 | `reflection_loss_gradient` | `function` | **Seabed reflection loss gradient η (Ainslie Eqs. 9.51/9.53), Np/rad.**<br>• `seabed`: `"sand"` (default) / `"mud"` / `WestonSeabed`<br>• `frequency_hz` [Hz] (refracting seabeds only) | `reflection_loss_gradient("sand")  # 0.278` |
 | `critical_grazing_angle` | `function` | **ψc = arccos(c_w/c_sed), radians (0 when none exists).**<br>• `sound_speed_ratio` c_sed/c_w | `critical_grazing_angle(1.20)` |
-| `effective_depth` | `function` | **Weston effective water depth He (Ainslie Eq. 9.55), m.**<br>• `water_depth` [m] / `frequency_hz` [Hz]<br>• `seabed` / `sound_speed` | `effective_depth(50, 250)` |
-| `waveguide_cutoff_frequency` | `function` | **Shallow-water cut-off frequency fc (Ainslie Eq. 9.60), Hz.**<br>• `water_depth` [m]<br>• `seabed` / `sound_speed` | `waveguide_cutoff_frequency(50)` |
+| `effective_depth` | `function` | **Weston effective water depth He (Ainslie Eq. 9.55), m.**<br>• `water_depth` [m] / `frequency_hz` [Hz]<br>• `seabed` / `speed_of_sound` | `effective_depth(50, 250)` |
+| `waveguide_cutoff_frequency` | `function` | **Shallow-water cut-off frequency fc (Ainslie Eq. 9.60), Hz.**<br>• `water_depth` [m]<br>• `seabed` / `speed_of_sound` | `waveguide_cutoff_frequency(50)` |
 | `loss_parameter` | `function` | **Sediment loss parameter ε = β/(40·π·lg e) (Ainslie Eq. 9.23).**<br>• `attenuation_db_per_wavelength` β [dB/λ] | `loss_parameter(0.88)  # 0.0161` |
 | `WestonSeabed` | `dataclass` | **Characteristic seabed (Ainslie Table 9.1).**<br>• `name` / `grain_size` Mz / `sound_speed_ratio` / `density_ratio`<br>• `attenuation_db_per_wavelength` [dB/λ] / `loss_parameter` ε / `sound_speed_gradient_per_s` c′ [s⁻¹] | `WESTON_SEABEDS["sand"].density_ratio` |
 | `WESTON_SEABEDS` | `dict` | **Ainslie Table 9.1 seabeds: `"sand"` (Mz 1.5) and `"mud"` (Mz 8).** | `WESTON_SEABEDS["mud"]` |
@@ -42080,12 +42080,12 @@ documents, one page per module.
 | `epnl_from_pnlt` | `function` | **EPNL + 10 dB-down limits from a PNLT series (ICAO Annex 16).**<br>• `pnlt`: PNLT(k) [PNdB]<br>• `dt` (Default: 0.5) [s]<br>• `reference_time` (Default: 10) [s] | `epnl, pnltm, kf, kl = aircraft.epnl_from_pnlt(pnlt)` |
 | `EPNLResult` | `dataclass` | **EPNL result.**<br>• `frequencies` [Hz] / `times` [s]<br>• `pnl` / `tone_correction` / `pnlt` [PNdB, dB]<br>• `pnltm` / `duration_correction` / `epnl`<br>• `band_limits` (kF, kL)<br>• `.plot()`: PNL/PNLT time history | `res.epnl, res.pnltm, res.band_limits` |
 | `verify_aircraft_noise_system` | `function` | **IEC 61265 measurement-system verification.**<br>• `directional`: {f: {angle: \|Δsens\| dB}} (Table 1)<br>• `frequency_response` / `linearity` / `resolution`<br>filters via `verify_filter_class` | `res = verify_aircraft_noise_system(directional=meas)`<br><br>• `AircraftSystemComplianceResult` |
-| `AircraftSystemComplianceResult` | `dataclass` | **IEC 61265 verdict on a measurement chain.**<br>• `passed`: conjunction of the checks, `False` over no measurement<br>• `checks`: one entry per checked quantity, with `quantity`, `limit`, `value` and `ok` | `res.passed, res.checks` |
+| `AircraftSystemComplianceResult` | `dataclass` | **IEC 61265 verdict on a measurement chain.**<br>• `passes`: conjunction of the checks, `False` over no measurement<br>• `checks`: one entry per checked quantity, with `quantity`, `limit`, `value` and `ok` | `res.passes, res.checks` |
 | `sae_band_attenuation` | `function` | **One-third-octave-band atmospheric absorption (SAE ARP 5534).**<br>• `frequencies` [Hz] / `path_length` [m]<br>• `temperature_c` (Default: 25) / `relative_humidity_percent` (Default: 70) / `atmospheric_pressure_kpa` (Default: 101.325)<br>δ_B from pure-tone δ_t=α·s (α from ISO 9613-1) | `sae_band_attenuation(freqs, 7620.0)`<br><br>• `AircraftBandAttenuation` |
-| `AircraftBandAttenuation` | `dataclass` | **Aircraft band-absorption result.**<br>• `frequency` [Hz] / `band_attenuation` [dB] / `midband_attenuation` [dB] / `coefficient` [dB/m]<br>• `path_length` / `temperature_c` / `relative_humidity_percent` / `atmospheric_pressure_kpa`<br>• `.plot()`: band vs pure-tone mid-band | `res.band_attenuation` |
+| `AircraftBandAttenuation` | `dataclass` | **Aircraft band-absorption result.**<br>• `frequencies` [Hz] / `band_attenuation` [dB] / `midband_attenuation` [dB] / `coefficient` [dB/m]<br>• `path_length` / `temperature_c` / `relative_humidity_percent` / `atmospheric_pressure_kpa`<br>• `.plot()`: band vs pure-tone mid-band | `res.band_attenuation` |
 | `npd_level` | `function` | **NPD event-level interpolation (ECAC Doc 29 §4.2).**<br>• `powers` / `distances` [m] / `levels` [dB] (shape P×D)<br>• `power` / `distance` [m]<br>linear in power (Eq. 4-3), log-linear in distance (Eq. 4-4) | `npd_level(P, D, L, 16000, 1500)` |
 | `npd_curve` | `function` | **NPD level over a distance sweep at one power.**<br>• `powers` / `distances` / `levels`<br>• `power` / `query_distances` (Default: log sweep) | `npd_curve(P, D, L, 20000)`<br><br>• `NpdLevelResult` |
-| `NpdLevelResult` | `dataclass` | **NPD distance-sweep result.**<br>• `distance` [m] / `level` [dB] / `power`<br>• `table_distances` / `table_levels`<br>• `.plot()`: level vs slant distance | `res.distance, res.level` |
+| `NpdLevelResult` | `dataclass` | **NPD distance-sweep result.**<br>• `distances` [m] / `levels` [dB] / `power`<br>• `table_distances` / `table_levels`<br>• `.plot()`: level vs slant distance | `res.distances, res.levels` |
 | `lateral_attenuation` | `function` | **Excess lateral attenuation Λ(β,ℓ) (ECAC Doc 29 Eq. 4-18/4-19).**<br>• `elevation_deg` β / `lateral_m` ℓ | `lateral_attenuation(10, 500)` |
 | `engine_installation_correction` | `function` | **Engine-install lateral directivity ΔI(φ) (Eq. 4-15/4-16).**<br>• `depression_deg` φ / `mounting`: `"wing"`\|`"fuselage"`\|`"propeller"` | `engine_installation_correction(20, "wing")` |
 | `duration_correction` | `function` | **Duration correction ΔV = 10·lg(Vref/Vseg) (Eq. 4-14).**<br>• `reference_speed` / `segment_speed` | `duration_correction(82.3, 90)` |
@@ -42097,7 +42097,7 @@ documents, one page per module.
 | `event_level` | `function` | **Single-event SEL/LAmax of a flight path at a receiver (Eq. 4-8/4-10/4-11).**<br>• `path` (N,5): x,y,z,power,speed / `observer` (x,y,z)<br>• NPD `powers` / `distances` / `exposure_levels` / `maximum_levels`<br>• `reference_speed` / `mounting` / `metric`: `"exposure"`\|`"maximum"`<br>• `atmosphere`: `AerodromeAtmosphere` / `segments`: `FlightSegmentState` | `event_level(path, obs, P, D, SEL, LMAX)`<br><br>• `FlyoverResult` |
 | `noise_contour` | `function` | **Single-event noise level over a ground grid → contour.**<br>• `path` / NPD tables / `x` / `y` grids [m]<br>• `reference_speed` / `mounting` / `metric`<br>• `atmosphere`: `AerodromeAtmosphere` / `segments`: `FlightSegmentState` | `noise_contour(path, P, D, SEL, LMAX, x=gx, y=gy)`<br><br>• `NoiseContourResult` |
 | `FlyoverResult` | `dataclass` | **Single-event result.**<br>• `level` [dB] / `metric` / `segment_levels` [dB] / `observer`<br>• `.plot()`: per-segment contributions | `res.level` |
-| `NoiseContourResult` | `dataclass` | **Ground-grid contour result.**<br>• `x` / `y` [m] / `level` [dB] (Ny×Nx) / `metric`<br>• `.plot()`: filled contours | `res.level` |
+| `NoiseContourResult` | `dataclass` | **Ground-grid contour result.**<br>• `x` / `y` [m] / `levels` [dB] (Ny×Nx) / `metric`<br>• `.plot()`: filled contours | `res.levels` |
 | `load_anp_database` | `function` | **Load an EASA ANP fleet database (NPD curves + default profiles).**<br>• `path`: CSV export directory, or `None` for the bundled curated subset | `db = aircraft.load_anp_database()`<br><br>• `AnpDatabase` |
 | `AnpDatabase` | `class` | **Parsed ANP database wiring real aircraft into the Doc 29 chain.**<br>• `.aircraft(id)` / `.aircraft_ids` / `.npd_curves(id, op, metric)` / `.profile(id, op, profile_id=)`<br>• `.event_level(id, obs, op)` / `.noise_contour(id, op, x=, y=)` | `db.noise_contour("747100", "departure", x=gx, y=gy)`<br><br>• `AnpAircraft` |
 | `AnpAircraft` | `dataclass` | **One ANP aircraft type: metadata + NPD/profile access + Doc 29 wiring.**<br>• `aircraft_id` / `description` / `engine_type` / `num_engines` / `weight_class` / `mounting` / `npd_id`<br>• `.npd_curves(op, metric)` / `.profile(op)` / `.event_level(obs, op)` / `.noise_contour(op, x=, y=)` | `db.aircraft("747100").mounting` |
@@ -42132,7 +42132,7 @@ documents, one page per module.
 | `rotorcraft_event_level` | `function` | **Single-event time history and metrics at a receiver (Doc 32 §6.1).**<br>• `hemispheres` + conditions / `times` / `positions` / `receiver` (x,y)<br>• `level_offset` [dB] (Eq. 2 substitution)<br>• `ground`: `RotorcraftGround` / `atmosphere`: `RotorcraftAtmosphere`<br>• `track_state`: `RotorcraftTrackState` / `interpolation`: `FlightConditionInterpolation` | `rotorcraft_event_level(hs, V, G, t, xyz, (x, y))`<br><br>• `RotorcraftEventResult` |
 | `RotorcraftEventResult` | `dataclass` | **Single-event result.**<br>• `times` (recorded) / `band_levels` / `a_levels` [dB(A)]<br>• `la_max` / `sel` / `sel_10db` / `pnlt` / `pnltm` / `epnl`<br>• `.plot()`: LA(t) history with the 10 dB-down window | `res.sel, res.epnl` |
 | `rotorcraft_noise_contour` | `function` | **Single-event SEL/LASmax over a ground grid (Doc 32 §6.3).**<br>• event inputs + `x` / `y` grids [m]<br>• `metric`: `"exposure"`\|`"maximum"`<br>• `ground`: `RotorcraftGround`, whose `flow_resistivity` / `ground_elevation` also take one value per grid point | `rotorcraft_noise_contour(hs, V, G, t, xyz, x=gx, y=gy)`<br><br>• `RotorcraftNoiseContourResult` |
-| `RotorcraftNoiseContourResult` | `dataclass` | **Rotorcraft ground-grid contour result.**<br>• `x` / `y` [m] / `level` [dB(A)] (Ny×Nx) / `metric`<br>• `.plot()`: filled contours | `res.level` |
+| `RotorcraftNoiseContourResult` | `dataclass` | **Rotorcraft ground-grid contour result.**<br>• `x` / `y` [m] / `levels` [dB(A)] (Ny×Nx) / `metric`<br>• `.plot()`: filled contours | `res.levels` |
 | `mean_ground_plane` | `function` | **Mean ground plane of a terrain section (NORAH2 Eq. 36-40).**<br>• `distances` / `heights` [m] (polyline)<br>• continuous least squares in closed form | `mean_ground_plane(d, z)`<br><br>• `MeanGroundPlaneResult` |
 | `MeanGroundPlaneResult` | `dataclass` | **Fitted plane.**<br>• `slope` a / `intercept` b [m]<br>• `.height(d)` / `.equivalent_height(d, z)` (orthogonal)<br>• `.plot()`: section + plane | `res.slope` |
 | `mean_flow_resistivity` | `function` | **Log-mean flow resistivity along a path (Eq. 41).**<br>• `lengths` [m] / `resistivities` [Pa·s/m²] per segment | `mean_flow_resistivity(d, sig)` |
@@ -42220,7 +42220,7 @@ documents, one page per module.
 | `sdof_receptance` / `sdof_mobility` / `sdof_accelerance` | `function` | **Closed-form SDOF resonator FRFs (ISO 7626-1 Table 1 / 3.1.2 definitions).**<br>• `frequency` f [Hz] (scalar/array)<br>• `mass` m [kg], `stiffness` k [N/m], `damping` c [N·s/m]<br>H = 1/(k − ω²m + jωc); Y = jωH; A = −ω²H | `sdof_mobility(10.07, 2.0, 8000.0, 5.0)  # |Y|=1/c on resonance` |
 | `resonance_frequency` | `function` | **Undamped SDOF natural frequency (closed form).**<br>• `mass` m [kg], `stiffness` k [N/m]<br>f0 = (1/2π)√(k/m) | `resonance_frequency(2.0, 8000.0)  # 10.07 Hz` |
 | `rigid_mass_calibration_check` | `function` | **Operational rigid-mass calibration (ISO 7626-2 7.5.2).**<br>• `frf`: measured FRF (complex or magnitude)<br>• `frequencies` [Hz], `mass` m [kg]<br>• `quantity`: 'accelerance' (\|A\| = 1/m) / 'mobility' (\|Y\| = 1/(ωm))<br>• `tolerance` (Default: 0.05 = ±5 %) | `res = vibration.rigid_mass_calibration_check(frf, f, 10.0)`<br><br>• `RigidMassCalibrationResult` |
-| `RigidMassCalibrationResult` | `dataclass` | **Rigid-mass calibration verdict (ISO 7626-2 7.5.2).**<br>• `frequencies` [Hz], `measured`/`expected`/`deviation` per band<br>• `within_tolerance`: per-band flags, `passed`: overall<br>• `mass` [kg], `quantity`, `tolerance` | `res.passed, res.deviation` |
+| `RigidMassCalibrationResult` | `dataclass` | **Rigid-mass calibration verdict (ISO 7626-2 7.5.2).**<br>• `frequencies` [Hz], `measured`/`expected`/`deviation` per band<br>• `within_tolerance`: per-band flags, `passes`: overall<br>• `mass` [kg], `quantity`, `tolerance` | `res.passes, res.deviation` |
 | `random_error_percent` | `function` | **Normalized random error of an averaged FRF (ISO 7626-2 Annex A).**<br>• `coherence`: γ² per frequency, in (0, 1]<br>• `n_averages`: n ≥ 1<br>ε = √((1−γ²)/(2nγ²)) [%]; 8.1.3 requires < 5 % at resonances | `random_error_percent(0.8, 75)  # 4.08 %` |
 | `sdof_mobility_result` | `function` | **SDOF driving-point mobility → result.**<br>• `frequency` f [Hz] (array)<br>• `mass`, `stiffness`, `damping` | `res = vibration.sdof_mobility_result(f, 2.0, 8000.0, 5.0)`<br><br>• `MobilityResult` |
 | `MobilityResult` | `dataclass` | **Mobility FRF over frequency (ISO 7626-1).**<br>• `frequencies` [Hz], `mobility` Y [m/(N·s)]<br>• `driving_point`: bool (i = j)<br>• `.magnitude` / `.phase`<br>• `.to(target)`: any Table-1 kind<br>• `.plot()`: |Y(f)| with the resonance marked | `res.magnitude, res.to("impedance")` |
@@ -42232,7 +42232,7 @@ documents, one page per module.
 | `blocking_force_ratio` | `function` | **Delivered/blocking force ratio (ISO 10846-1 Eq. 6).**<br>• `driving_point_stiffness` k₂,₂ [N/m] (complex)<br>• `termination_stiffness` k_t [N/m] (complex, non-zero)<br>F₂/F₂,b = 1/(1 + k₂,₂/k_t); within 10 % of 1 for \|k₂,₂\| < 0.1\|k_t\| | `blocking_force_ratio(1e5, 1e6)  # 0.909` |
 | `base_transmissibility` | `function` | **Mass-loaded Kelvin-Voigt transmissibility (model).**<br>• `frequency` f [Hz]<br>• `mass` m [kg], `stiffness` k [N/m], `damping` c [N·s/m] (Default: 0.0)<br>T = (k+jωc)/(k−ω²m+jωc) | `base_transmissibility(f, 8.0, 1e6, 120.0)` |
 | `indirect_transfer_stiffness_result` | `function` | **Indirect-method sweep → result.**<br>• `frequency` f [Hz] (array)<br>• `transmissibility` T (complex)<br>• `blocking_mass` m₂ [kg], `flange_mass` (Default: 0.0) | `res = vibration.indirect_transfer_stiffness_result(f, t, 8.0)`<br><br>• `TransferStiffnessResult` |
-| `TransferStiffnessResult` | `dataclass` | **Dynamic transfer stiffness over frequency (ISO 10846).**<br>• `frequencies` [Hz], `transfer_stiffness` k₂,₁ [N/m]<br>• `blocking_mass` m₂ [kg] or None<br>• `.magnitude` / `.level` (dB re 1 N/m) / `.loss_factor`<br>• `.to(target)`: "impedance"/"apparent_mass"<br>• `.plot()`: Lₖ(f) | `res.level, res.loss_factor` |
+| `TransferStiffnessResult` | `dataclass` | **Dynamic transfer stiffness over frequency (ISO 10846).**<br>• `frequencies` [Hz], `transfer_stiffness` k₂,₁ [N/m]<br>• `blocking_mass` m₂ [kg] or None<br>• `.magnitude` / `.levels` (dB re 1 N/m) / `.loss_factor`<br>• `.to(target)`: "impedance"/"apparent_mass"<br>• `.plot()`: Lₖ(f) | `res.levels, res.loss_factor` |
 | `infinite_plate_impedance` / `infinite_plate_mobility` / `infinite_plate_point_mobility` | `function` | **Thin-plate point mobility Z = C√(B'm'') (Cremer Table 5.1).**<br>• `bending_stiffness` B' [N·m], `mass_per_area` m'' [kg/m²]<br>• `location`: 'centre' (C=8) / 'edge' (C=3.5); real, frequency-independent | `infinite_plate_impedance(1e4, 10)`<br><br>• float or `MobilityResult` |
 | `infinite_beam_mobility` / `infinite_beam_impedance` / `infinite_beam_moment_mobility` / `infinite_beam_point_mobility` | `function` | **Slender-beam point mobility Y = (1−j)/(4m'cB) (Cremer Table 5.1).**<br>• `frequency` [Hz], `bending_stiffness` B [N·m²], `mass_per_length` m' [kg/m]<br>• `location`: 'centre'/'end'; 45°, ∝ ω^−½ | `infinite_beam_mobility(100, 200, 5)`<br><br>• complex or `MobilityResult` |
 | `beam_bending_wave_speed` / `plate_bending_wave_speed` | `function` | **Free bending wave speed, cB = (B ω²/m')^¼ for a beam and (B' ω²/m'')^¼ for a plate.**<br>• `frequency` [Hz]<br>• beam: `bending_stiffness` B = EI [N·m²], `mass_per_length` m' [kg/m]<br>• plate: `bending_stiffness` B' [N·m], `mass_per_area` m'' [kg/m²]<br>• ∝ √f, so it crosses the speed of sound at fc | `plate_bending_wave_speed(500.0, 4.2e3, 20.0)` |
@@ -42342,7 +42342,7 @@ documents, one page per module.
 | `plate_longitudinal_speed` / `youngs_modulus_from_plate_speed` | `function` / `function` | **Quasi-longitudinal wave speed along a plate, and back (Hopkins Eq. 2.21).**<br>• `youngs_modulus_pa` E [Pa] or `longitudinal_speed_m_s` cL [m/s]<br>• `density_kg_m3` ρ, `poisson_ratio` ν between -1 and 1<br>• cL = sqrt(E / (ρ (1 - ν²))): the value the building-acoustics tables print | `solids.plate_longitudinal_speed(2.0e11, density_kg_m3=7800.0, poisson_ratio=0.28)  # 5274.6` |
 | `beam_longitudinal_speed` / `youngs_modulus_from_beam_speed` | `function` / `function` | **Quasi-longitudinal wave speed along a beam, and back (Hopkins Eq. 2.20).**<br>• `youngs_modulus_pa` E [Pa] or `longitudinal_speed_m_s` cL [m/s]<br>• `density_kg_m3` ρ<br>• cL = sqrt(E / ρ): a beam is unconstrained on its sides, so ν does not appear | `solids.beam_longitudinal_speed(2.0e11, density_kg_m3=7800.0)  # 5063.7` |
 | `bulk_longitudinal_speed` / `youngs_modulus_from_bulk_speed` | `function` / `function` | **Pure longitudinal wave speed in an unbounded solid, and back (Norton & Karczub Eq. 1.225).**<br>• `youngs_modulus_pa` E [Pa] or `longitudinal_speed_m_s` cL' [m/s]<br>• `density_kg_m3` ρ, `poisson_ratio` ν between -1 and 0.5<br>• cL' = sqrt(E (1 - ν) / (ρ (1 + ν)(1 - 2ν))): the speed an elastic solver integrates, not the one a plate table prints | `solids.bulk_longitudinal_speed(2.0e11, density_kg_m3=7800.0, poisson_ratio=0.28)  # 5724.8` |
-| `thickness_critical_frequency_product` / `DEFAULT_SPEED_OF_SOUND_M_S` | `function` / `float` | **The `h f_c` column of a materials table, from the plate wave speed.**<br>• `plate_speed_m_s` cL,p [m/s]<br>• `speed_of_sound_m_s` c0 [m/s] (Default: 343)<br>• h f_c = c0² sqrt(12) / (2 π cL,p), the exact constant: the rounded 1.8 of ISO 12354-1 misses Hopkins Table A2 by 0.8 % | `solids.thickness_critical_frequency_product(5270.0)  # 12.31 m Hz, Table A2 prints 12.3` |
+| `thickness_critical_frequency_product` / `DEFAULT_SPEED_OF_SOUND_M_S` | `function` / `float` | **The `h f_c` column of a materials table, from the plate wave speed.**<br>• `plate_speed_m_s` cL,p [m/s]<br>• `speed_of_sound` c0 [m/s] (Default: 343)<br>• h f_c = c0² sqrt(12) / (2 π cL,p), the exact constant: the rounded 1.8 of ISO 12354-1 misses Hopkins Table A2 by 0.8 % | `solids.thickness_critical_frequency_product(5270.0)  # 12.31 m Hz, Table A2 prints 12.3` |
 | `SolidMaterial` | `dataclass` | **One row of a published materials table, with what the cell said.**<br>• Every quantity optional, because no two books print the same columns; `.why_missing(field)` says what the page had instead<br>• Three speeds are three fields: `bar_longitudinal_speed_m_s`, `plate_longitudinal_speed_m_s` and `bulk_longitudinal_speed_m_s`, and `longitudinal_speed_m_s` holds the one a page prints without saying which, because at ν = 0,3 the plate speed is 4,8 % above the bar speed and the bulk speed 16 % above it<br>• Four loss factors: `flexural_loss_factor`, `longitudinal_loss_factor`, `in_situ_loss_factor`, and `loss_factor` for a page that prints one and does not say which<br>• `estimated`, `approximate`, `ranges`, `bounded_above`, `unquantified`: what the cell was, when it was not a value<br>• `derived`: field → how this library computed it; `borrowed`: field → the material a book took it from<br>• `attributed_to`: per-cell credit; `variant`: which specimen, when a page prints several under one name<br>• `.is_estimate(field)`, `.is_approximate(field)`, `.is_derived(field)`, `.printed(field)` to narrow or be refused | `steel = solids.PUBLISHED_SOLIDS['hopkins-2007-table-a2/steel']`<br>`steel.youngs_modulus_pa  # 1.996e11, derived`<br><br>• `steel.attributed_to['flexural_loss_factor']  # 'Heckl, 1981'` |
 | `PUBLISHED_SOLIDS` | `mapping` | **Two hundred and nineteen published solids from six books, keyed `'<table>/<row>'`.**<br>• Hopkins **Table A2**, twenty-five building materials (PDF pages 635-636)<br>• Cremer 3e **Table 4.3**, thirteen metals over fifteen rows (PDF page 201), the one table that prints E, G, ν and both speeds together<br>• Mechel **Table 3**, thirty-eight construction materials, plastics and metals (PDF pages 544-545), with no Poisson ratio, so its rows stop at the bar speed<br>• Bies 5e **Table C.1**, one hundred and five metals, building materials, woods, plastics and honeycomb panels (PDF pages 747-750), whose loss factor column is two quantities and not a range<br>• Long 2e **Table 12.1**, eighteen building materials credited to Beranek and Ver (PDF page 487), and Arau-Puchades **Table 4.1**, seventeen over eighteen rows (PDF page 129), neither of which says which longitudinal wave it prints<br>• The key names the table because four of them print a steel and they are not the same steel<br>• Only four of Hopkins' twenty-five Poisson ratios are measurements; the rest carry the book's 'Estimate' footnote and say so<br>• Not a specification: block densities vary by manufacturer, which is why the pages print ranges | `solids.PUBLISHED_SOLIDS['cremer-2005-table-4-3/gold']`<br><br>• `SolidMaterial`, `solids_named` |
 | `solids_named` | `function` | **Every published row for a material, across the books.**<br>• Matches `SolidMaterial.name` without regard to case; empty when no page names it<br>• Comparing two books has to be a deliberate act: a lookup returning one steel would be choosing between published values for you | `solids.solids_named('Steel')  # two rows, two tables`<br><br>• `PUBLISHED_SOLIDS` |
@@ -42468,7 +42468,7 @@ documents, one page per module.
 | `normalized_surface_impedance` | `function` | **Normalised surface impedance Z/(ρc0) (Eq. 19).**<br>• `reflection`: complex r | `normalized_surface_impedance(0.5)  # 3.0` |
 | `normalized_surface_admittance` | `function` | **Normalised surface admittance Gρc0 (Eq. 20).**<br>• `reflection`: complex r | `normalized_surface_admittance(0.5)  # 0.333`<br><br>• (1 − r)/(1 + r) |
 | `two_microphone_impedance` | `function` | **Full two-microphone reduction (ISO 10534-2 Clause 7).**<br>• `h12`: corrected transfer function<br>• `frequency` f [Hz]<br>• `spacing` s [m], `x1` [m]<br>• `speed_of_sound` c0 [m/s], `characteristic_impedance` ρc0 [rayl]<br>• `attenuation`: k0″ [Np/m] (Default: None)<br>• `diameter_m` + `shape`: activate the plane-wave range check | `res = materials.two_microphone_impedance(h12, frequency=f, spacing=0.05, x1=0.15, speed_of_sound=343.2, characteristic_impedance=407.0)`<br><br>• `ImpedanceTubeResult` |
-| `ImpedanceTubeResult` | `dataclass` | **Two-microphone result per frequency.**<br>• `frequency` [Hz]<br>• `reflection`: complex r (Eq. 17)<br>• `surface_impedance` [rayl], `normalized_impedance` (Eq. 19)<br>• `absorption`: α = 1 − \|r\|² (Eq. 18)<br>• Retains `spacing`, `x1`, `diameter_m`, `shape` when supplied | `res.absorption, res.normalized_impedance` |
+| `ImpedanceTubeResult` | `dataclass` | **Two-microphone result per frequency.**<br>• `frequencies` [Hz]<br>• `reflection`: complex r (Eq. 17)<br>• `surface_impedance` [rayl], `normalized_impedance` (Eq. 19)<br>• `absorption`: α = 1 − \|r\|² (Eq. 18)<br>• Retains `spacing`, `x1`, `diameter_m`, `shape` when supplied | `res.absorption, res.normalized_impedance` |
 | `ImpedanceTubeWarning` | `warning class` | **ISO 10534-2 advisory.**<br>Emitted by `two_microphone_impedance` for frequencies outside the plane-wave working range (Eqs. 1–4); the results are still returned | `warnings.simplefilter('error', ImpedanceTubeWarning)` |
 | `standing_wave_ratio_from_level` | `function` | **Standing-wave ratio from ΔL (ISO 10534-1 Eq. 15).**<br>• `level_difference`: Lmax − Lmin [dB] | `standing_wave_ratio_from_level(20.0)  # 10.0`<br><br>• s = 10^(ΔL/20) |
 | `standing_wave_reflection_magnitude` | `function` | **Reflection magnitude from the SWR (Eq. 14).**<br>• `swr`: s ≥ 1 | `standing_wave_reflection_magnitude(10.0)  # 0.818`<br><br>• \|r\| = (s − 1)/(s + 1) |
@@ -42477,10 +42477,10 @@ documents, one page per module.
 | `standing_wave_normalized_impedance` | `function` | **Normalised impedance from the standing wave (Eqs. 24–26).**<br>• `swr`, `first_min_distance` [m], `wavelength` [m] | `standing_wave_normalized_impedance(10.0, 0.05, 0.4)`<br><br>• 0.198 − 0.98j |
 | `wave_decomposition` | `function` | **Decompose the field into (A, B, C, D) (ASTM E2611-19 Eqs. 17–20).**<br>• `h1`…`h4`: microphone transfer functions<br>• `l1`, `s1`, `l2`, `s2`: geometry [m]<br>• `wavenumber` k<br>• `diameter_m` + `shape`: activate the plane-wave range check | `A, B, C, D = materials.wave_decomposition(h1, h2, h3, h4, l1=0.2, s1=0.05, l2=0.2, s2=0.05, wavenumber=k)`<br><br>• Forward/backward amplitudes, both sides |
 | `face_quantities` | `function` | **Face pressures and velocities (Eq. 21).**<br>• `a`, `b`, `c`, `d`: wave amplitudes<br>• `wavenumber` k, `thickness` d [m], `characteristic_impedance` ρc | `p0, pd, u0, ud = materials.face_quantities(A, B, C, D, wavenumber=k, thickness=0.05, characteristic_impedance=407.0)` |
-| `transfer_matrix_two_load` | `function` | **Two-load transfer matrix (ASTM E2611-19 Eqs. 17–22).**<br>• `load_a`, `load_b`: (H1, H2, H3, H4) per termination<br>• `l1`, `s1`, `l2`, `s2`, `thickness` [m]<br>• `wavenumber`, `characteristic_impedance`<br>• `frequency` (retained for `.plot()`), `diameter_m` + `shape`: range check | `T = materials.transfer_matrix_two_load(load_a, load_b, l1=0.2, s1=0.05, l2=0.2, s2=0.05, thickness=0.05, wavenumber=k, characteristic_impedance=407.0)`<br><br>• `TransferMatrix` |
+| `transfer_matrix_two_load` | `function` | **Two-load transfer matrix (ASTM E2611-19 Eqs. 17–22).**<br>• `load_a`, `load_b`: (H1, H2, H3, H4) per termination<br>• `l1`, `s1`, `l2`, `s2`, `thickness` [m]<br>• `wavenumber`, `characteristic_impedance`<br>• `frequencies` (retained for `.plot()`), `diameter_m` + `shape`: range check | `T = materials.transfer_matrix_two_load(load_a, load_b, l1=0.2, s1=0.05, l2=0.2, s2=0.05, thickness=0.05, wavenumber=k, characteristic_impedance=407.0)`<br><br>• `TransferMatrix` |
 | `transfer_matrix_one_load` | `function` | **One-load transfer matrix, symmetric specimen (Eqs. 23–24).**<br>• `load`: (H1, H2, H3, H4)<br>• Same geometry/frequency/range-check parameters as `transfer_matrix_two_load` | `T = materials.transfer_matrix_one_load(load, l1=0.2, s1=0.05, l2=0.2, s2=0.05, thickness=0.05, wavenumber=k, characteristic_impedance=407.0)`<br><br>• Requires reciprocity + symmetry |
 | `air_layer_transfer_matrix` | `function` | **Analytic loss-free air-layer matrix (validation reference).**<br>• `wavenumber` k<br>• `thickness` d [m]<br>• `characteristic_impedance` ρc [rayl] | `T = materials.air_layer_transfer_matrix(k, 0.05, 407.0)`<br><br>• det(T) = 1, T11 = T22 |
-| `TransferMatrix` | `dataclass` | **Acoustic transfer matrix [[T11, T12], [T21, T22]] (ASTM E2611-19 Eq. 16).**<br>• `t11`, `t12`, `t21`, `t22`: complex, scalar or per frequency<br>• Solver-built matrices retain `l1`/`s1`/`l2`/`s2`, `thickness`, `diameter_m`, `shape`, `frequency`, `air_characteristic_impedance` (so `.plot()` needs no arguments) | `T.t11, T.t12` |
+| `TransferMatrix` | `dataclass` | **Acoustic transfer matrix [[T11, T12], [T21, T22]] (ASTM E2611-19 Eq. 16).**<br>• `t11`, `t12`, `t21`, `t22`: complex, scalar or per frequency<br>• Solver-built matrices retain `l1`/`s1`/`l2`/`s2`, `thickness`, `diameter_m`, `shape`, `frequencies`, `air_characteristic_impedance` (so `.plot()` needs no arguments) | `T.t11, T.t12` |
 | `airflow_resistance` | `function` | **Airflow resistance R = Δp/qv (ISO 9053-1:2018 §3.1).**<br>• `pressure_drop_pa` Δp [Pa]<br>• `volume_flow_rate` qv [m³/s] | `airflow_resistance(2.0, 0.0005)  # 4000.0`<br><br>• [Pa·s/m³] |
 | `specific_airflow_resistance` | `function` | **Specific airflow resistance Rs (§3.2).**<br>• `resistance` R + `area` A, **or** `pressure_drop_pa` Δp + `velocity` u | `specific_airflow_resistance(4000.0, 0.01)  # 40.0`<br><br>• Rs = R·A = Δp/u [Pa·s/m] |
 | `airflow_resistivity` | `function` | **Airflow resistivity σ = Rs/d (§3.3).**<br>• `specific_resistance` Rs [Pa·s/m]<br>• `thickness` d [m] | `airflow_resistivity(40.0, 0.05)  # 800.0`<br><br>• [Pa·s/m²] |
@@ -42586,7 +42586,7 @@ documents, one page per module.
 | `BASE_PLATE_BANDS` | `tuple` | **ISO 17497-1 base-plate check bands [Hz].**<br>100 Hz to 5000 Hz (18 one-third octaves) | `BASE_PLATE_BANDS[0]  # 100` |
 | `BASE_PLATE_MAX_SCATTERING` | `mapping` | **Table 1 base-plate scattering limits (read-only).**<br>Keyed by band [Hz] → maximum s | `BASE_PLATE_MAX_SCATTERING[500]  # 0.05` |
 | `reverberation_time_uncertainty` | `function` | **Standard uncertainty of a mean T (ISO 17497-1 Eq. A.1).**<br>• `times`: N ≥ 2 spatially-averaged measurements [s] | `reverberation_time_uncertainty([2.31, 2.28, 2.35])  # 0.0203`<br><br>• Standard error of the mean [s] |
-| `absorption_coefficient_uncertainty` | `function` | **Uncertainty of a Sabine coefficient (Eqs. A.3/A.4).**<br>• `volume`, `area`<br>• `c` [m/s]<br>• `T_a`/`u_a`, `T_b`/`u_b`: the two situations [s] | `u_alpha = materials.absorption_coefficient_uncertainty(200.0, 10.8, c=343.2, t_a=2.5, u_a=0.02, t_b=1.8, u_b=0.02)` |
+| `absorption_coefficient_uncertainty` | `function` | **Uncertainty of a Sabine coefficient (Eqs. A.3/A.4).**<br>• `volume`, `area`<br>• `speed_of_sound` [m/s]<br>• `T_a`/`u_a`, `T_b`/`u_b`: the two situations [s] | `u_alpha = materials.absorption_coefficient_uncertainty(200.0, 10.8, speed_of_sound=343.2, t_a=2.5, u_a=0.02, t_b=1.8, u_b=0.02)` |
 | `scattering_coefficient_uncertainty` | `function` | **Uncertainty of the scattering coefficient (Eq. A.5).**<br>• `alpha_spec`, `alpha_s`<br>• `u_alpha_spec`, `u_alpha_s` | `u = materials.scattering_coefficient_uncertainty(0.45, 0.30, 0.02, 0.02)`<br><br>• `ScatteringUncertainty` (U = 2u, 95 %) |
 | `ScatteringUncertainty` | `dataclass` | **Scattering uncertainty result.**<br>• `u_scattering`: combined standard u_s<br>• `expanded`: U = 2u_s | `u.u_scattering, u.expanded` |
 | `PUBLISHED_SCATTERING` | `mapping` | **Forty-six measured surfaces from a published table, keyed `'<table>/<row>'`.**<br>• Cox & D'Antonio 3e **Appendix D**, nine groups from sinusoidal corrugation and battens through blocks, pyramids and grooves to hemispheres and vegetation<br>• measured at full or model scale according to **ISO 17497-1**, and credited row by row to the seven papers the appendix lists; the book says nothing else about them<br>• the only one of the book's four appendices whose numbers were measured rather than computed<br>• how wide the method is: the same battens read 0.28 and 0.44 at 630 Hz in two papers, and one cell of the table is 1.17<br>• the transcription was made twice, from the rendered pages, by readers who never saw each other's work | `row = materials.PUBLISHED_SCATTERING['cox-2017-appendix-d/pyramids_h_30_5_cm_l_b_h']`<br>`row.spectrum()[2000]  # 0.58`<br><br>• `ScatteringCoefficientSpectrum`, `scattering_named` |
@@ -42759,7 +42759,7 @@ documents, one page per module.
 | `GaussianPulse` | `dataclass` | **Gaussian pulse source for the FDTD solver.**<br>• `ix` / `iy`: source cell<br>• `width` [s] / `t0` [s] (Default: `4*width`) / `amplitude` [Pa] | `GaussianPulse(ix=60, iy=100, half_width_s=3e-4)` |
 | `PlaneWaveSource` | `dataclass` | **Sustained one-way plane wave injected on a line (TF/SF style).**<br>• `direction`: 'down'/'up'/'left'/'right' (travel)<br>• `waveform`: callable t → p_inc(t) [Pa] (reuse a point source's `.value`)<br>• `offset`: line position in cells from the launch edge (place it just inside a sponge)<br>• `amplitude` (Default: 1.0) | `sim.add_source(simulation.PlaneWaveSource('down', simulation.CWSource(0, 0, frequency=1000.0).value, offset=22))`<br><br>• Transversely plane to machine precision; ~1e-4 residual behind the line |
 | `CWSource` | `dataclass` | **Continuous sine source with raised-cosine onset for the FDTD solver.**<br>• `ix` / `iy`: source cell<br>• `frequency` [Hz] / `amplitude` [Pa] / `ramp_cycles` | `CWSource(ix=25, iy=25, frequency=170)` |
-| `SignalSource` | `dataclass` | **Arbitrary sampled waveform source for the FDTD solver.**<br>• `ix` / `iy`: source cell<br>• `samples` [Pa] / `sample_rate` [Hz] / `amplitude`<br>Linearly interpolated onto the simulation time steps | `SignalSource(ix=60, iy=100, samples=sig, sample_rate=48000)` |
+| `SignalSource` | `dataclass` | **Arbitrary sampled waveform source for the FDTD solver.**<br>• `ix` / `iy`: source cell<br>• `samples` [Pa] / `fs` [Hz] / `amplitude`<br>Linearly interpolated onto the simulation time steps | `SignalSource(ix=60, iy=100, samples=sig, fs=48000)` |
 | `ContourProbe` | `class` | **On-the-fly DFT of `p` and `v_n` on a closed rectangular contour.**<br>Created by `FDTD2D.add_contour_probe`; complex accumulators per point and frequency, so CW runs store no time histories<br>• `positions` / `normals` / `frequencies` / `samples`<br>• `.reset()`: restart accumulation once the field is steady<br>• `.phasors(frequency)`: the captured `ContourPhasors` | `probe = sim.add_contour_probe(90, 470, 90, 345, frequencies=[2000.0])`<br>`sim.run(steps); probe.reset(); sim.run(window)`<br>`ph = probe.phasors(2000.0)` |
 | `ContourPhasors` | `dataclass` | **Steady-state `p` and `v_n` phasors on a closed contour (`exp(+jωt)`).**<br>• `frequency` [Hz] / `positions` `(n, 2)` [m] / `normals` (outward)<br>• `pressure` [Pa] / `normal_velocity` [m/s] (complex) / `segment` [m]<br>• `.subtract(reference)`: scattered = total − incident phasors | `scattered = total.subtract(reference)` |
 | `far_field_from_contour` | `function` | **2D near-to-far-field transformation (Kirchhoff-Helmholtz integral).**<br>• `contour`: `ContourPhasors`<br>• `angles_deg` [deg]: observation directions `(cos a, sin a)` in grid axes<br>• `distance`: `None` (far-field pattern `F(a)`, `p → F e^{−jkr}/√r`) or a radius [m] for the exact Hankel evaluation<br>• `origin`: phase-reference point<br>• `fluid`: `Fluid` (Default: `SIMULATION_AIR`, the medium the solver runs in) | `F = simulation.far_field_from_contour(ph, np.arange(-180, 180, 2), origin=(xc, yc))`<br><br>• Complex pattern, one value per angle_deg |
@@ -48415,7 +48415,7 @@ recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
 
 # Split the recording into Low and High bands at 1000 Hz
 order = 4
-low, high = filters.linkwitz_riley(recording, fs, freq=1000, order=order)
+low, high = filters.linkwitz_riley(recording, fs, frequency=1000, order=order)
 # Flat recombination: sum for order/2 even, difference for order/2 odd
 recombined = low + high if (order // 2) % 2 == 0 else low - high
 ```
@@ -48435,7 +48435,7 @@ from phonometry import filters
 fs = 48000
 impulse = np.zeros(fs)
 impulse[0] = 1.0
-low, high = filters.linkwitz_riley(impulse, fs, freq=1000, order=4)
+low, high = filters.linkwitz_riley(impulse, fs, frequency=1000, order=4)
 
 w, h_lp = freqz(low, worN=8192, fs=fs)
 _, h_hp = freqz(high, worN=8192, fs=fs)
@@ -58006,6 +58006,34 @@ Now it is a `TypeError`, which is what it always should have been.
 print(round(float(leq(x, dbfs=True)), 3))
 ```
 
+## One spelling per concept
+
+The public names had drifted into several spellings of the same quantity, and
+4.0 keeps the one the majority already used. The rule for the quantities
+counted in the plural is the one most of the API followed: a field or a
+parameter that holds an array is `frequencies`, `times`, `distances` or
+`levels`, and one that holds a single value is singular. A vectorised argument
+that takes either a number or an array keeps its name.
+
+| 3.3.0 or 4.0.0rc1 | 4.0 |
+| --- | --- |
+| `sound_speed` (control valves, silencer measurement, Weston regimes, ambient noise, `FluidSeabed`, `SoundSpeedProfile`, `ShipSourceLevelResult`) | `speed_of_sound` |
+| `c=` and `rho=` on `sound_intensity`, `c=` on the two phase-mismatch conversions, `phase_mismatch()`, `absorption_coefficient_uncertainty` and `monopole_source_level` | `speed_of_sound=`, `density=` |
+| `speed_of_sound_m_s=` on `thickness_critical_frequency_product` | `speed_of_sound=` |
+| `sample_rate` on the FDTD `SignalSource`, `STOIResult` and `impact_force_exposure_level` | `fs` |
+| `freq=` on `linkwitz_riley` and `adaptation_term_kc` | `frequency=` and `frequencies=` |
+| `.frequency` on the results that carry a frequency axis: `IntensityResult`, `FieldIndicators`, `IntensityInstrumentComplianceResult`, `RoomAcousticsResult`, the five auditorium results, `ImpedanceTubeResult`, `PorousMediumResult`, `LayeredAbsorberResult`, `DiffuseFieldAbsorptionResult`, `BiotWavesResult`, `SlitResonatorAbsorberResult`, `MetadiffuserResult`, `TransferMatrix`, the two valve-noise results, `AircraftBandAttenuation`, `AmbientNoiseResult`, `ShipTrafficSpectrum` | `.frequencies` |
+| `frequency=` holding an array: the flanking-transmission functions, `internal_spectrum`, `pipe_transmission_loss`, `expander_noise`, `transfer_matrix_one_load`, `transfer_matrix_two_load`, `TransferMatrix.plot` | `frequencies=` |
+| `.time` on `ZwickerLoudness`, `EcmaLoudness`, `MooreGlasbergTimeVaryingLoudness`, the ECMA-418-2 tonality, roughness and fluctuation-strength results, `DecayCurve`, `QuasiPeakResult` | `.times` |
+| `.level` on `DecayCurve`, `NpdLevelResult`, `NoiseContourResult`, `RotorcraftNoiseContourResult`, `LowFrequencyResult`, `DuctPathStage`, `LateLateralResult`, `TransferStiffnessResult` | `.levels` |
+| `.distance` on `NpdLevelResult` and `RotorcraftEventResult` | `.distances` |
+| `level=`, `measured_level=`, `operational_level=` on `sti_from_impulse_response`, `stipa`, `sti_adjusted_for_levels` and `STIResult.adjusted_for_levels` | `levels=`, `measured_levels=`, `operational_levels=` |
+| `.passed` on `AircraftSystemComplianceResult`, `QuasiPeakDynamicsResult`, `HeavyImpactSourceCheck`, `RigidMassCalibrationResult` | `.passes`, as on every other verifier |
+
+`times, levels = decay_curve(ir, fs)` still unpacks the decay curve, in the
+same order. The FDTD solvers keep `c` and `rho`, which name the maps their
+equations are written in.
+
 ## Every `.plot()` takes the axes first
 
 Every result's `.plot()` now reads `plot(ax=None, *, ...)`: the axes first,
@@ -58017,7 +58045,7 @@ parameter:
 | --- | --- |
 | `LoudspeakerCharacteristics.plot("impedance", ax)` | `.plot(ax, quantity="impedance")` |
 | `MicrophoneCharacteristics.plot("noise", ax)` | `.plot(ax, quantity="noise")` |
-| `TransferMatrix.plot(f, rho_c, ax)` | `.plot(ax, frequency=f, characteristic_impedance=rho_c)` |
+| `TransferMatrix.plot(f, rho_c, ax)` | `.plot(ax, frequencies=f, characteristic_impedance=rho_c)` |
 
 Six results that are newer than 3.3.0 took `language` by position in
 4.0.0rc1: the four hearing-protector ratings and the two low-frequency
@@ -58036,8 +58064,8 @@ since the verifier now returns the object itself.
 | `verify_filter_class(bank)["overall_class"]` | `verify_filter_class(bank).overall_class` |
 | `verify_weighting_class(wf)["overall_class"]` | `verify_weighting_class(wf).overall_class` |
 | `verify_intensity_class(...)["bands"]` | `verify_intensity_class(...).bands` |
-| `verify_quasi_peak_dynamics()["passed"]` | `verify_quasi_peak_dynamics().passed` |
-| `verify_aircraft_noise_system(...)["passed"]` | `verify_aircraft_noise_system(...).passed` |
+| `verify_quasi_peak_dynamics()["passed"]` | `verify_quasi_peak_dynamics().passes` |
+| `verify_aircraft_noise_system(...)["passed"]` | `verify_aircraft_noise_system(...).passes` |
 | `filter_class_compliance(bank)` | `verify_filter_class(bank)`, which returns the same `FilterComplianceResult` |
 
 ```python
@@ -59698,7 +59726,7 @@ freqs = np.logspace(2, 5.5, 300)
 fig, ax = plt.subplots()
 for u in (5.0, 20.0):
     noise = underwater.ocean_ambient_noise(freqs, wind_speed_knots=u)
-    ax.semilogx(noise.frequency, noise.spectrum_level, label=f"Total ({u:.0f} kn)")
+    ax.semilogx(noise.frequencies, noise.spectrum_level, label=f"Total ({u:.0f} kn)")
 ax.semilogx(freqs, underwater.thermal_noise_spectrum(freqs), ":", label="Thermal")
 ax.set(xlabel="Frequency [Hz]", ylabel="Spectrum level [dB re 1 µPa²/Hz]")
 ax.legend()
@@ -59755,7 +59783,7 @@ for vessel_class, speed, length in (("containership", 18.0, 300.0),
                                     ("cruise", 17.1, 250.0),
                                     ("tug", 3.7, 30.0)):
     s = underwater.ship_source_spectrum(speed, length, vessel_class=vessel_class)
-    ax.semilogx(s.frequency, s.source_psd,
+    ax.semilogx(s.frequencies, s.source_psd,
                 label=f"{vessel_class} ({speed:.0f} kn, {length:.0f} m)")
 ax.set(xlabel="Frequency [Hz]",
        ylabel="Source spectral density [dB re 1 µPa²/Hz at 1 m]")
@@ -59776,7 +59804,7 @@ ship.plot()                     # source spectral density vs frequency
 print(underwater.VESSEL_CLASSES)        # the 13 JOMOPANS-ECHO vessel classes
 
 # Feed the predicted spectrum into the ambient noise as the shipping term:
-noise = underwater.ocean_ambient_noise(ship.frequency, wind_speed_knots=10.0,
+noise = underwater.ocean_ambient_noise(ship.frequencies, wind_speed_knots=10.0,
                                shipping=ship.source_psd)
 ```
 
@@ -67747,7 +67775,7 @@ from phonometry import vibration
 # A 10 kg calibration block: |A| must be 1/m = 0.100 1/kg at every frequency.
 f = np.array([20.0, 100.0, 500.0])
 res = vibration.rigid_mass_calibration_check([0.100, 0.102, 0.097], f, mass=10.0)
-print(res.passed, res.within_tolerance.tolist())   # True [True, True, True]
+print(res.passes, res.within_tolerance.tolist())   # True [True, True, True]
 
 # The Annex A example: coherence 0.8 needs about 75 averages for < 5 %.
 print(round(float(vibration.random_error_percent(0.8, 75)), 2))   # 4.08  %
@@ -67770,7 +67798,7 @@ f = np.logspace(np.log10(20.0), np.log10(5000.0), 400)
 drift = 0.05 * (f / 2500.0) ** 2                          # high-frequency drift
 measured = (1.0 / m) * (1.0 + 0.015 * np.sin(2 * np.pi * np.log10(f)) + drift)
 res = vibration.rigid_mass_calibration_check(measured, f, mass=m)
-print(res.passed)                                         # False (drift exceeds 5 %)
+print(res.passes)                                         # False (drift exceeds 5 %)
 res.plot()
 ```
 
@@ -68357,12 +68385,12 @@ print(f"{abs(complex(k)):.3e}")            # 9.870e+05  N/m
 f = np.logspace(1.5, 3.3, 200)
 t = vibration.base_transmissibility(f, mass=8.0, stiffness=1e6, damping=120.0)
 res = vibration.indirect_transfer_stiffness_result(f, t, blocking_mass=8.0)
-print(round(float(res.level[-1]), 1))      # ~126  dB re 1 N/m (high-f)
+print(round(float(res.levels[-1]), 1))      # ~126  dB re 1 N/m (high-f)
 
 res.plot()   # the Lk(f) level spectrum, as in the figure above (needs matplotlib)
 ```
 
-The `TransferStiffnessResult` carries the complex $k_{2,1}$ and exposes `.level`,
+The `TransferStiffnessResult` carries the complex $k_{2,1}$ and exposes `.levels`,
 `.loss_factor`, `.magnitude`, `.to("impedance"/"apparent_mass")` and `.plot()`.
 
 **Test-report fiche.** `TransferStiffnessResult.report(path)` renders a one-page

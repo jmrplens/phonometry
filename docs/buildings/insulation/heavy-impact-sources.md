@@ -65,7 +65,7 @@ print(list(zip(freqs, lower, upper))[0])          # (31.5, 46.0, 48.0)
 
 # A calibration run: five measured octave-band LFE against the printed table.
 check = building.check_heavy_impact_source([39.4, 30.2, 23.6, 18.5, 12.9])
-print(check.passed, list(check.within_tolerance))
+print(check.passes, list(check.within_tolerance))
 check.plot()   # measured LFE over the tolerance band (needs matplotlib)
 ```
 
@@ -98,7 +98,7 @@ print([round(v, 1) for v in lfe])   # [-1.4, 14.0, 22.1, 20.2, 17.1]
 
 # Those five go to the conformance check; this synthetic half-sine is not a
 # rubber ball, so it does not conform:
-#   check_heavy_impact_source(lfe).passed  ->  False
+#   check_heavy_impact_source(lfe).passes  ->  False
 ```
 
 The construction examples the two standards give are informative, not

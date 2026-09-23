@@ -92,7 +92,7 @@ effective_depth(
     frequency_hz: float,
     *,
     seabed: str | WestonSeabed = 'sand',
-    sound_speed: float = 1500.0,
+    speed_of_sound: float = 1500.0,
 ) -> float
 ```
 
@@ -109,7 +109,7 @@ seabed. Only meaningful for a seabed with a critical angle.
 | `water_depth` | Water-column depth `H`, in metres. |
 | `frequency_hz` | Acoustic frequency, in Hz. |
 | `seabed` | `"sand"`, `"mud"` or a [`WestonSeabed`](/phonometry/reference/api/underwater/weston-regimes/#westonseabed). |
-| `sound_speed` | Water sound speed `c_w`, in m/s. |
+| `speed_of_sound` | Water sound speed `c_w`, in m/s. |
 
 **Returns:** The effective depth `He`, in metres.
 
@@ -187,7 +187,7 @@ waveguide_cutoff_frequency(
     water_depth: float,
     *,
     seabed: str | WestonSeabed = 'sand',
-    sound_speed: float = 1500.0,
+    speed_of_sound: float = 1500.0,
 ) -> float
 ```
 
@@ -203,7 +203,7 @@ and ducted propagation does not occur.
 | :--- | :--- |
 | `water_depth` | Water-column depth `H`, in metres. |
 | `seabed` | `"sand"`, `"mud"` or a [`WestonSeabed`](/phonometry/reference/api/underwater/weston-regimes/#westonseabed). |
-| `sound_speed` | Water sound speed `c_w`, in m/s. |
+| `speed_of_sound` | Water sound speed `c_w`, in m/s. |
 
 **Returns:** The cut-off frequency, in Hz.
 
@@ -222,7 +222,7 @@ weston_propagation_loss(
     water_depth: float,
     *,
     seabed: str | WestonSeabed = 'sand',
-    sound_speed: float = 1500.0,
+    speed_of_sound: float = 1500.0,
     source_depth: float | None = None,
     receiver_depth: float | None = None,
     critical_angle_deg: float | None = None,
@@ -245,7 +245,7 @@ whole range grid so the transitions can be drawn.
 | `frequency_hz` | Acoustic frequency, in Hz. |
 | `water_depth` | Water-column depth `H`, in metres. |
 | `seabed` | `"sand"`, `"mud"` or a [`WestonSeabed`](/phonometry/reference/api/underwater/weston-regimes/#westonseabed). |
-| `sound_speed` | Water sound speed `c_w`, in m/s. |
+| `speed_of_sound` | Water sound speed `c_w`, in m/s. |
 | `source_depth` | Source depth `z0`, in metres; defaults to `H/2` (used only by the single-mode formula). |
 | `receiver_depth` | Receiver depth `z`, in metres; defaults to `H/2`. |
 | `critical_angle_deg` | Override $\psi_\mathrm{c}$, in degrees (`90` for an ideal totally reflecting waveguide). |
@@ -267,7 +267,7 @@ weston_regime_boundaries(
     water_depth: float,
     *,
     seabed: str | WestonSeabed = 'sand',
-    sound_speed: float = 1500.0,
+    speed_of_sound: float = 1500.0,
     critical_angle_deg: float | None = None,
     reflection_loss_gradient_value_np_per_rad: float | None = None,
 ) -> WestonRegimeBoundaries
@@ -282,7 +282,7 @@ Regime boundaries of a shallow-water waveguide (Ainslie §9.1.1.2).
 | `frequency_hz` | Acoustic frequency, in Hz. |
 | `water_depth` | Water-column depth `H`, in metres. |
 | `seabed` | `"sand"`, `"mud"` or a [`WestonSeabed`](/phonometry/reference/api/underwater/weston-regimes/#westonseabed). |
-| `sound_speed` | Water sound speed `c_w`, in m/s. |
+| `speed_of_sound` | Water sound speed `c_w`, in m/s. |
 | `critical_angle_deg` | Override the seabed critical angle $\psi_\mathrm{c}$, in degrees. Use `90` for the ideal totally reflecting waveguide. |
 | `reflection_loss_gradient_value_np_per_rad` | Override $\eta$, in Np/rad. Use `0` for a lossless bottom (no mode stripping, no single-mode regime). |
 

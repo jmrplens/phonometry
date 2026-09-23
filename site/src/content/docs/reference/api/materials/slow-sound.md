@@ -435,7 +435,7 @@ only the front air impedance carries `cos(theta)`.
 
 ```python
 SlitResonatorAbsorberResult(
-    frequency: Real,
+    frequencies: Real,
     angle_rad: float,
     surface_impedance: Complex,
     normalized_impedance: Complex,
@@ -454,7 +454,7 @@ SlitResonatorAbsorberResult(
 
 Prediction of a slit panel loaded with Helmholtz resonators.
 
-All spectra share the shape of `frequency`. `surface_impedance` is
+All spectra share the shape of `frequencies`. `surface_impedance` is
 the acoustic surface impedance $Z = T_{11} / T_{21}$ in Pa s/m3 of
 the rigidly backed panel, `normalized_impedance` its ratio to
 $Z_0 = \rho_0 c_0 / S_0$, `reflection` the plane-wave reflection

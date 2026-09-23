@@ -112,7 +112,7 @@ def _impedance_tube() -> ImpedanceTubeResult:
     absorption = 1.0 - np.abs(reflection) ** 2
     normalized = (1.0 + reflection) / (1.0 - reflection)
     return ImpedanceTubeResult(
-        frequency=f,
+        frequencies=f,
         reflection=reflection,
         surface_impedance=_RC * normalized,
         normalized_impedance=normalized,

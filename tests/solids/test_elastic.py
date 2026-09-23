@@ -123,7 +123,7 @@ def test_every_row_of_table_a2_reproduces_its_own_h_fc(
 ) -> None:
     """Twenty-five materials against the column, at the printed precision."""
     got = solids.thickness_critical_frequency_product(
-        plate_speed, speed_of_sound_m_s=ref.HOPKINS_A2_SPEED_OF_SOUND_M_S
+        plate_speed, speed_of_sound=ref.HOPKINS_A2_SPEED_OF_SOUND_M_S
     )
 
     assert got == pytest.approx(printed, abs=0.05), material

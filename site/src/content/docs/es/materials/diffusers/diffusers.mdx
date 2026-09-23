@@ -405,10 +405,10 @@ u = {k: float(materials.reverberation_time_uncertainty(v))
 print(round(u["t1"], 4), round(u["t4"], 4))    # 0.0347 0.025
 
 u_alpha_s = materials.absorption_coefficient_uncertainty(   # ec. (A.3)
-    200.0, 10.0, c=343.2, t_a=np.mean(t2), u_a=u["t2"],
+    200.0, 10.0, speed_of_sound=343.2, t_a=np.mean(t2), u_a=u["t2"],
                           t_b=np.mean(t1), u_b=u["t1"])
 u_alpha_spec = materials.absorption_coefficient_uncertainty(   # ec. (A.4)
-    200.0, 10.0, c=343.2, t_a=np.mean(t4), u_a=u["t4"],
+    200.0, 10.0, speed_of_sound=343.2, t_a=np.mean(t4), u_a=u["t4"],
                           t_b=np.mean(t3), u_b=u["t3"])
 unc = materials.scattering_coefficient_uncertainty(   # ec. (A.5)
     0.2148, 0.1343, u_alpha_spec, u_alpha_s)

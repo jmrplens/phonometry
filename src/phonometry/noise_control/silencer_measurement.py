@@ -275,7 +275,7 @@ RECTANGULAR_CUT_ON_COEFFICIENT = 0.5
 #: The speed of sound in air the two standards work at, in m/s. ISO 7235 B.2.3
 #: writes 340 m/s into its two-microphone spacing rule; the value here is the
 #: library's own 20 degree Celsius figure, and every function that uses it
-#: takes a ``sound_speed`` argument.
+#: takes a ``speed_of_sound`` argument.
 _SOUND_SPEED_M_S = 343.0
 
 #: ISO 7235:2003, Equation (10). The specific gas constant of air as the
@@ -681,7 +681,7 @@ def open_end_transmission_loss(
     area: float,
     *,
     solid_angle_sr: float = 2.0 * math.pi,
-    sound_speed: float = _SOUND_SPEED_M_S,
+    speed_of_sound: float = _SOUND_SPEED_M_S,
 ) -> NDArray[np.float64]:
     r"""ISO 7235 Equation (B.3): what the open end of a duct keeps in.
 
@@ -723,14 +723,14 @@ def open_end_transmission_loss(
         duct end, in sr. The five configurations of Table B.1 are in
         :data:`RADIATION_SOLID_ANGLES`; the default is a duct flush with one
         surface.
-    :param sound_speed: :math:`c`, in m/s.
+    :param speed_of_sound: :math:`c`, in m/s.
     :return: :math:`D_\mathrm{td}`, in dB, one value per frequency.
     :raises ValueError: If a value is not positive and finite.
     """
     bands = require_positive_array(frequency, "frequency")
     section = require_positive(area, "area")
     angle = require_positive(solid_angle_sr, "solid_angle_sr")
-    speed = require_positive(sound_speed, "sound_speed")
+    speed = require_positive(speed_of_sound, "speed_of_sound")
     mouth = 4.0 * math.pi * bands * math.sqrt(section) / speed
     return np.asarray(10.0 * np.log10(1.0 + angle / mouth**2), dtype=np.float64)
 
@@ -740,7 +740,7 @@ def open_end_reflection_coefficient(
     area: float,
     *,
     solid_angle_sr: float = 2.0 * math.pi,
-    sound_speed: float = _SOUND_SPEED_M_S,
+    speed_of_sound: float = _SOUND_SPEED_M_S,
 ) -> NDArray[np.float64]:
     r"""ISO 7235 Equation (B.4): the pressure reflection coefficient there.
 
@@ -762,14 +762,14 @@ def open_end_reflection_coefficient(
     :param frequency: Band centre frequencies :math:`f`, in Hz.
     :param area: :math:`S`, the cross-sectional area of the duct, in m².
     :param solid_angle_sr: :math:`\Omega`, in sr.
-    :param sound_speed: :math:`c`, in m/s.
+    :param speed_of_sound: :math:`c`, in m/s.
     :return: :math:`r`, dimensionless, one value per frequency.
     :raises ValueError: If a value is not positive and finite.
     """
     bands = require_positive_array(frequency, "frequency")
     section = require_positive(area, "area")
     angle = require_positive(solid_angle_sr, "solid_angle_sr")
-    speed = require_positive(sound_speed, "sound_speed")
+    speed = require_positive(speed_of_sound, "speed_of_sound")
     mouth = 4.0 * math.pi * bands * math.sqrt(section) / speed
     return np.asarray((mouth**2 / angle + 1.0) ** -0.5, dtype=np.float64)
 
@@ -852,7 +852,7 @@ def modal_filter_cut_on(
     *,
     diameter_m: float | None = None,
     larger_dimension: float | None = None,
-    sound_speed: float = _SOUND_SPEED_M_S,
+    speed_of_sound: float = _SOUND_SPEED_M_S,
 ) -> float:
     r"""ISO 7235 Equations (4) and (5): where higher-order modes start.
 
@@ -880,12 +880,12 @@ def modal_filter_cut_on(
         two dimensions is given.
     :param larger_dimension: :math:`H`, the larger cross-sectional dimension
         of a rectangular duct, in m.
-    :param sound_speed: :math:`c`, in m/s.
+    :param speed_of_sound: :math:`c`, in m/s.
     :return: :math:`f_{Cd}` or :math:`f_{CH}`, in Hz.
     :raises ValueError: If neither dimension or both are given, or if a value
         is not positive and finite.
     """
-    speed = require_positive(sound_speed, "sound_speed")
+    speed = require_positive(speed_of_sound, "speed_of_sound")
     if diameter_m is not None and larger_dimension is None:
         return float(
             CIRCULAR_CUT_ON_COEFFICIENT

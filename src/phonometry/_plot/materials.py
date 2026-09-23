@@ -581,7 +581,7 @@ def plot_impedance_tube(
     from .._i18n import localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    freqs = np.asarray(result.frequency, dtype=np.float64)
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
     alpha = np.asarray(result.absorption, dtype=np.float64)
     style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("label", _t(r"Absorption $\alpha$", language))
@@ -806,7 +806,7 @@ def plot_porous_medium(
     from .._i18n import decimal_comma, localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    freqs = np.asarray(result.frequency, dtype=np.float64)
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
     zn = np.asarray(result.normalized_impedance, dtype=np.complex128)
     kn = np.asarray(result.normalized_wavenumber, dtype=np.complex128)
     style_default(kwargs, "color", _C_PRIMARY)
@@ -864,7 +864,7 @@ def plot_biot_waves(
     from .._i18n import localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    freqs = np.asarray(result.frequency, dtype=np.float64)
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
     style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("label", _t("Airborne", language) + _BIOT_REAL_PART)
     ax.semilogx(freqs, result.airborne_wavenumber.real, **kwargs)
@@ -933,7 +933,7 @@ def plot_layered_absorber(
         title = f"Layered absorber prediction ($\\theta$ = {angle_deg:.0f}°)"
     return _absorption_reflection_axes(
         ax,
-        np.asarray(result.frequency, dtype=np.float64),
+        np.asarray(result.frequencies, dtype=np.float64),
         np.asarray(result.absorption, dtype=np.float64),
         np.asarray(result.reflection, dtype=np.complex128),
         title=title,
@@ -971,7 +971,7 @@ def plot_slit_resonator_absorber(
         title = f"Slit panel with Helmholtz resonators ($\\theta$ = {angle_deg:.0f}°)"
     return _absorption_reflection_axes(
         ax,
-        np.asarray(result.frequency, dtype=np.float64),
+        np.asarray(result.frequencies, dtype=np.float64),
         np.asarray(result.absorption, dtype=np.float64),
         np.asarray(result.reflection, dtype=np.complex128),
         title=title,
@@ -1007,7 +1007,7 @@ def plot_diffuse_field_absorption(
     kwargs.setdefault("label", _t(r"Absorption $\alpha_{\mathrm{dif}}$", language))
     ax = _absorption_spectrum_axes(
         ax,
-        np.asarray(result.frequency, dtype=np.float64),
+        np.asarray(result.frequencies, dtype=np.float64),
         np.asarray(result.absorption, dtype=np.float64),
         title=title,
         language=language,
@@ -1098,7 +1098,7 @@ def plot_transfer_matrix(
     :param ax: Existing axes, or ``None`` to create a figure.
     :param kwargs: Forwarded to the transmission-loss ``plot`` call.
     :return: The axes carrying the transmission-loss curve.
-    :raises ValueError: if ``frequency`` does not match the shape of the
+    :raises ValueError: if ``frequencies`` does not match the shape of the
         spectra the four-pole entries produce.
     """
     from .._i18n import localize_axes
@@ -1117,7 +1117,7 @@ def plot_transfer_matrix(
     # otherwise report two anonymous shapes from inside its own plot call.
     require_equal_shapes(
         "TransferMatrix.plot",
-        {"frequency": freqs.shape, "transmission_loss": tl.shape},
+        {"frequencies": freqs.shape, "transmission_loss": tl.shape},
         "frequency",
     )
     style_default(kwargs, "color", _C_PRIMARY)
@@ -1166,7 +1166,7 @@ def plot_metadiffuser_absorption(
     :param kwargs: Forwarded to the face-average ``plot`` call.
     :return: The axes.
     """
-    freqs = np.asarray(result.frequency, dtype=np.float64)
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
     kwargs.setdefault("label", _t("Panel average", language))
     ax = _absorption_spectrum_axes(
         ax,

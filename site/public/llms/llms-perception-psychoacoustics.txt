@@ -240,7 +240,7 @@ $N(t)$ traces stay inside the standard's per-sample 5 % tolerance band.
 
 Returns a `ZwickerLoudness` dataclass: `loudness` ($N$, sones), `loudness_level`
 (phon), `specific` ($N'(z)$, 240 bins of 0.1 Bark), and for time-varying runs
-`n5`, `n10`, `time`, `loudness_vs_time` (500 Hz trace).
+`n5`, `n10`, `times`, `loudness_vs_time` (500 Hz trace).
 
 ### ISO 532-1 report (`.report()`)
 
@@ -666,8 +666,8 @@ plt.show()
 
 # Or plot them directly to see the fast STL vs the slow LTL:
 fig, ax = plt.subplots()
-ax.plot(res.time, res.short_term_loudness, label="Short-term S'(t)")
-ax.plot(res.time, res.long_term_loudness, label="Long-term S''(t)")
+ax.plot(res.times, res.short_term_loudness, label="Short-term S'(t)")
+ax.plot(res.times, res.long_term_loudness, label="Long-term S''(t)")
 ax.set_xlabel("Time [s]")
 ax.set_ylabel("Loudness [sone]")
 ax.legend()
@@ -686,7 +686,7 @@ plt.show()
 | `presentation` | str | — | `'binaural'` (default) / `'diotic'` / `'monaural'` | Binaural summation |
 | `percentiles` | sequence | percent | default `(1, 5, 10, 50, 90, 95)` | Exceeded long-term loudness levels |
 
-Returns a `MooreGlasbergTimeVaryingLoudness`: `time` (1 ms grid),
+Returns a `MooreGlasbergTimeVaryingLoudness`: `times` (1 ms grid),
 `short_term_loudness` / `long_term_loudness` (sone), their `_level` in phon,
 `n_max`, `loudness_level_max`, a `percentiles` dict, `field`, `presentation`.
 
@@ -757,7 +757,7 @@ plt.show()
 | `field` | str | — | `'free'` (default) / `'diffuse'` | Outer/middle-ear filter (Clause 5.1.3) |
 
 Returns an `EcmaLoudness`: `loudness` ($N$, sone_HMS), `specific_loudness`
-($N'(z)$, 53 bands), `bark`, `centre_frequencies`, `time`, `loudness_vs_time`
+($N'(z)$, 53 bands), `bark`, `centre_frequencies`, `times`, `loudness_vs_time`
 ($N(l)$ at 187.5 Hz), `field`.
 
 ## Quick answers
@@ -971,7 +971,7 @@ is where an intermittent tone shows up.
 
 Returns an `EcmaTonality`: `tonality` ($T$, tu_HMS), `specific_tonality`
 ($T'(z)$, 53 bands), `bark`, `centre_frequencies`, `tonal_frequencies`
-($f_{\text{ton},z}$), `time`, `tonality_vs_time` ($T(l)$),
+($f_{\text{ton},z}$), `times`, `tonality_vs_time` ($T(l)$),
 `tonal_frequency_vs_time`,
 `field`.
 
@@ -1051,7 +1051,7 @@ plt.show()
 
 Returns an `EcmaRoughness`: `roughness` ($R$, asper, the 90th percentile of
 $R(l_{50})$), `specific_roughness` ($R'(z)$, 53 bands), `bark`,
-`centre_frequencies`, `time`, `roughness_vs_time` ($R(l_{50})$),
+`centre_frequencies`, `times`, `roughness_vs_time` ($R(l_{50})$),
 `specific_roughness_vs_time` ((n_times, 53) array), `field`.
 
 All three ECMA-418-2 entry points on this page are monaural. The binaural
@@ -1140,7 +1140,7 @@ plt.show()
 
 Returns an `EcmaFluctuationStrength`: `fluctuation_strength` ($F$, vacil_HMS,
 the 90th percentile of $F(l_{50})$), `specific_fluctuation_strength`
-($F'(z)$, 53 bands), `bark`, `centre_frequencies`, `time`,
+($F'(z)$, 53 bands), `bark`, `centre_frequencies`, `times`,
 `fluctuation_strength_vs_time` ($F(l_{50})$),
 `specific_fluctuation_strength_vs_time` ((n_times, 53) array), `field`.
 

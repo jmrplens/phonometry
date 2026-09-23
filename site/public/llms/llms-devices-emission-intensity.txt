@@ -551,7 +551,7 @@ p2 = np.concatenate(([0.0], p1[:-1]))   # p2 = p1 delayed one sample
 res = emission.sound_intensity(p1, p2, fs, spacing=0.012, fraction=3,
                       limits=[100, 2500])
 print(res.total_intensity_level, res.total_direction)      # LI [dB], ±1
-print(res.frequency, res.intensity_level)                  # per band
+print(res.frequencies, res.intensity_level)                  # per band
 res.plot()   # Lp vs LI per band + the pressure-intensity index (needs matplotlib)
 ```
 
@@ -589,13 +589,13 @@ plt.show()
 # By hand, from the per-band fields the result carries — mirroring what
 # IntensityResult.plot() draws (bar label, merged twin-axis legend, δpI title):
 fig, ax = plt.subplots()
-ax.semilogx(res.frequency, res.pressure_level, "o-", label="Pressure level Lp")
-ax.semilogx(res.frequency, res.intensity_level, "s--", label="Intensity level LI")
+ax.semilogx(res.frequencies, res.pressure_level, "o-", label="Pressure level Lp")
+ax.semilogx(res.frequencies, res.intensity_level, "s--", label="Intensity level LI")
 ax.set_xlabel("Frequency [Hz]")
 ax.set_ylabel("Level [dB]")
 twin = ax.twinx()
-twin.bar(res.frequency, res.pressure_intensity_index,
-         width=res.frequency * 0.2, color="#2ca02c", alpha=0.25,
+twin.bar(res.frequencies, res.pressure_intensity_index,
+         width=res.frequencies * 0.2, color="#2ca02c", alpha=0.25,
          label="δpI = Lp − LI")
 twin.set_ylabel("Pressure-intensity index δpI [dB]")
 # Merge both axes' handles into a single legend, exactly as .plot() does:
@@ -750,14 +750,14 @@ plt.show()
 # By hand, from the per-band fields the result carries — mirroring what
 # FieldIndicators.plot() draws (Ld step line, merged twin-axis legend):
 fig, ax = plt.subplots()
-ax.plot(fi.frequency, fi.f2, "o-", label="F2 (surface pressure-intensity)")
-ax.plot(fi.frequency, fi.f3, "s--", label="F3 (negative partial power)")
-ax.plot(fi.frequency, np.full(fi.frequency.size, ld), ":",
+ax.plot(fi.frequencies, fi.f2, "o-", label="F2 (surface pressure-intensity)")
+ax.plot(fi.frequencies, fi.f3, "s--", label="F3 (negative partial power)")
+ax.plot(fi.frequencies, np.full(fi.frequencies.size, ld), ":",
         drawstyle="steps-mid", label="Dynamic capability Ld")
 ax.set_xlabel("Frequency [Hz]")
 ax.set_ylabel("Indicator [dB]")
 twin = ax.twinx()
-twin.bar(fi.frequency, fi.f4, width=fi.frequency * 0.2, alpha=0.25,
+twin.bar(fi.frequencies, fi.f4, width=fi.frequencies * 0.2, alpha=0.25,
          color="#2ca02c", label="F4 (non-uniformity)")
 twin.set_ylabel("Field non-uniformity F4")
 lines, labels = ax.get_legend_handles_labels()
@@ -1273,8 +1273,8 @@ the microphones alone.
 | `p1`, `p2` | 1D arrays | Pa | equal length | Microphone closer to the source first; reversing them flips the sign |
 | `fs` | int | Hz | > 0 | |
 | `spacing` | float | m | > 0 | Microphone separation $\Delta r$ (typ. 6/12/50 mm) |
-| `rho` | float | kg/m³ | default `1.204` | Air density |
-| `c` | float | m/s | default `343.0` | Speed of sound (bias/validity estimates) |
+| `density` | float | kg/m³ | default `1.204` | Air density |
+| `speed_of_sound` | float | m/s | default `343.0` | Speed of sound (bias/validity estimates) |
 | `fraction` | int, optional | — | `1`, `3` or `None` (default) | Octave/third-octave band integration |
 | `limits` | list, optional | Hz | default library band range | Band analysis limits |
 | `bias_correct` | bool | — | default `False` | Apply the per-bin $(k\Delta r)/\sin(k\Delta r)$ correction (IEC 61043 §7.3) before summing, so band/broadband totals stop under-reading as $f \to$ `max_valid_frequency`; bins past the first null are left uncorrected. The per-band `bias_correction` factor is reported either way |

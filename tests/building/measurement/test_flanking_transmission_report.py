@@ -90,7 +90,7 @@ def _kij_result() -> building.VibrationReductionResult:
         junction_length=4.0,
         area_i=12.0,
         area_j=10.0,
-        frequency=_FREQS,
+        frequencies=_FREQS,
         structural_reverberation_time_i=0.35,
         structural_reverberation_time_j=0.40,
         modal_overlap=modal_overlap,
@@ -179,7 +179,7 @@ def test_kij_fiche_distinguishes_all_bracketed_from_out_of_range(
         junction_length=4.0,
         area_i=12.0,
         area_j=10.0,
-        frequency=_FREQS,
+        frequencies=_FREQS,
         modal_overlap=0.1,  # every band bracketed -> no single number
     )
     assert result.single_number is None
@@ -202,7 +202,7 @@ def test_kij_fiche_states_no_bands_in_annex_a_range(tmp_path: Path) -> None:
         junction_length=4.0,
         area_i=12.0,
         area_j=10.0,
-        frequency=high_freqs,
+        frequencies=high_freqs,
     )
     assert result.single_number is None
     out = tmp_path / "kij_out_of_range.pdf"

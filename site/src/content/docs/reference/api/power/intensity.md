@@ -150,7 +150,7 @@ FieldIndicators(
     f2: float | np.ndarray,
     f3: float | np.ndarray,
     f4: float | np.ndarray,
-    frequency: np.ndarray | None = None,
+    frequencies: np.ndarray | None = None,
     f1: float | np.ndarray | None = None,
 )
 ```
@@ -176,8 +176,8 @@ requires action when it exceeds [`TEMPORAL_VARIABILITY_LIMIT`](/phonometry/refer
 
 With per-position *and* per-band input (2D arrays passed to
 [`field_indicators`](/phonometry/reference/api/power/intensity/#field_indicators)) the indicators are per-band arrays and
-`frequency` carries the band centres; with 1D per-position input they
-are scalars and `frequency` is `None`.
+`frequencies` carries the band centres; with 1D per-position input they
+are scalars and `frequencies` is `None`.
 
 ### FieldIndicators.field_is_stationary()
 
@@ -249,7 +249,7 @@ Requires per-band data (call [`field_indicators`](/phonometry/reference/api/powe
 
 ```python
 IntensityResult(
-    frequency: np.ndarray | None,
+    frequencies: np.ndarray | None,
     intensity: np.ndarray | None,
     intensity_level: np.ndarray | None,
     pressure_level: np.ndarray | None,
@@ -364,8 +364,8 @@ sound_intensity(
     fs: int | None = None,
     *,
     spacing: float,
-    rho: float = 1.204,
-    c: float = 343.0,
+    density: float = 1.204,
+    speed_of_sound: float = 343.0,
     fraction: int | None = None,
     limits: list[float] | None = None,
     bias_correct: bool = False,
@@ -414,8 +414,8 @@ by the factor $\sin(k \Delta r)/(k \Delta r)$ (IEC 61043:1993,
 | `p2` | Pressure signal of microphone 2, in pascals (1D). Same treatment as `p1`. |
 | `fs` | Sample rate in Hz. Required when both records are bare arrays; either may be a [`Signal`](/phonometry/reference/api/io/io/#signal) and supply it, and two Signals recorded at different rates are refused rather than arbitrated. |
 | `spacing` | Microphone separation $\Delta r$, in metres. |
-| `rho` | Air density, in kg/m^3. Default 1.204 (20 degC). |
-| `c` | Speed of sound, in m/s. Default 343.0. |
+| `density` | Air density, in kg/m^3. Default 1.204 (20 degC). |
+| `speed_of_sound` | Speed of sound, in m/s. Default 343.0. |
 | `fraction` | `None` (broadband only), 1 (octave bands) or 3 (one-third octave bands). |
 | `limits` | [f_min, f_max] band limits in Hz (default [12, 20000], as in [`phonometry.filters.nominal_frequencies`](/phonometry/reference/api/filters/frequencies/#nominal_frequencies)). |
 | `bias_correct` | If True, apply the per-bin finite-difference correction $(k \Delta r)/\sin(k \Delta r)$ (IEC 61043:1993, 7.3) to the intensity spectral density before summing the band and broadband totals, so the totals no longer under-read as the frequency approaches `max_valid_frequency`. The reciprocal diverges as $k \Delta r \to \pi$ (the first spatial-aliasing null at $c/(2 \Delta r)$, inside the default band range for close spacings), so it is applied only over the probe's usable range (up to $k \Delta r = \pi/2$) and held constant beyond, keeping the totals bounded instead of letting a few near-null bins dominate them. Default False keeps the exact legacy totals; the per-band `bias_correction` factor (same clamped definition) is reported either way. |

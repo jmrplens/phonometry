@@ -654,7 +654,7 @@ def test_the_seabed_pair_and_a_slope_are_rejected_together() -> None:
     """One grazing angle per beam is a level-bottom fact, and the solver
     refuses to pretend otherwise rather than quietly mis-charging bounces.
     """
-    seabed = FluidSeabed(density=1800.0, sound_speed=1700.0)
+    seabed = FluidSeabed(density=1800.0, speed_of_sound=1700.0)
     with pytest.raises(ValueError, match="lossy fluid seabed"):
         gaussian_beams(
             150.0,

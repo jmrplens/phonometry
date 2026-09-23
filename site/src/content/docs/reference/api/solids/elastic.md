@@ -163,7 +163,7 @@ critical frequency of a wall or floor is computed from.
 thickness_critical_frequency_product(
     plate_speed_m_s: float,
     *,
-    speed_of_sound_m_s: float = 343.0,
+    speed_of_sound: float = 343.0,
 ) -> float
 ```
 
@@ -193,7 +193,7 @@ because there it is the standard's own arithmetic and not the material's.
 | Name | Description |
 | :--- | :--- |
 | `plate_speed_m_s` | Plate wave speed `cL,p`, in m/s (> 0). |
-| `speed_of_sound_m_s` | Speed of sound in air `c0`, in m/s (> 0). |
+| `speed_of_sound` | Speed of sound in air `c0`, in m/s (> 0). |
 
 **Returns:** The product `h f_c`, in Hz m.
 

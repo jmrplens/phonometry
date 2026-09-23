@@ -954,7 +954,7 @@ def test_transfer_matrix_retains_measurement_context() -> None:
         thickness=THICKNESS,
         wavenumber=k,
         characteristic_impedance=RC,
-        frequency=f,
+        frequencies=f,
         diameter_m=0.10,
         shape="square",
         **GEOM,
@@ -966,16 +966,16 @@ def test_transfer_matrix_retains_measurement_context() -> None:
     assert rec.thickness == pytest.approx(THICKNESS)
     assert rec.diameter_m == pytest.approx(0.10)
     assert rec.shape == "rectangular"
-    assert rec.frequency is not None
-    assert np.allclose(rec.frequency, f)
+    assert rec.frequencies is not None
+    assert np.allclose(rec.frequencies, f)
     assert rec.air_characteristic_impedance == pytest.approx(RC)
     # A hand-built matrix retains nothing and plot() demands the arguments.
     bare = air_layer_transfer_matrix(k, THICKNESS, RC)
-    assert bare.frequency is None
+    assert bare.frequencies is None
     assert bare.air_characteristic_impedance is None
     with pytest.raises(
         ValueError,
-        match=r"'frequency' and 'characteristic_impedance' must be supplied",
+        match=r"'frequencies' and 'characteristic_impedance' must be supplied",
     ):
         bare.plot()
 

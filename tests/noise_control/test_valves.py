@@ -323,7 +323,7 @@ class TestInternalSpectrum:
 
     def test_the_band_levels_peak_near_the_peak_frequency(self) -> None:
         result = _run(1)
-        loudest = result.frequency[int(np.argmax(result.band_internal_level))]
+        loudest = result.frequencies[int(np.argmax(result.band_internal_level))]
         assert loudest == pytest.approx(result.peak_frequency, rel=0.35)
 
     def test_the_spectrum_falls_off_faster_above_the_peak_than_below(self) -> None:
@@ -394,7 +394,7 @@ class TestPipeTransmission:
                     outlet_diameter_m=0.1,
                 ),
                 valves.DownstreamPipe(**PIPE, internal_diameter_m=0.2031),
-            ).frequency
+            ).frequencies
         )
         loss = valves.pipe_transmission_loss(bands, **self.PIPE)
         for index, expected in enumerate(self.PRINTED):
@@ -451,12 +451,12 @@ class TestWholeChain:
 
     def test_the_result_carries_all_thirty_three_bands(self) -> None:
         result = _run(1)
-        assert result.frequency.shape == (33,)
+        assert result.frequencies.shape == (33,)
         assert result.band_internal_level.shape == (33,)
         assert result.band_transmission_loss.shape == (33,)
         assert result.band_external_level.shape == (33,)
-        assert result.frequency[0] == pytest.approx(12.5)
-        assert result.frequency[-1] == pytest.approx(20000.0)
+        assert result.frequencies[0] == pytest.approx(12.5)
+        assert result.frequencies[-1] == pytest.approx(20000.0)
 
     def test_the_a_weighting_table_covers_the_same_bands(self) -> None:
         assert len(valves.AERODYNAMIC_A_WEIGHTING_DB) == 33

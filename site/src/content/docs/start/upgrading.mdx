@@ -254,6 +254,34 @@ Now it is a `TypeError`, which is what it always should have been.
 print(round(float(leq(x, dbfs=True)), 3))
 ```
 
+## One spelling per concept
+
+The public names had drifted into several spellings of the same quantity, and
+4.0 keeps the one the majority already used. The rule for the quantities
+counted in the plural is the one most of the API followed: a field or a
+parameter that holds an array is `frequencies`, `times`, `distances` or
+`levels`, and one that holds a single value is singular. A vectorised argument
+that takes either a number or an array keeps its name.
+
+| 3.3.0 or 4.0.0rc1 | 4.0 |
+| --- | --- |
+| `sound_speed` (control valves, silencer measurement, Weston regimes, ambient noise, `FluidSeabed`, `SoundSpeedProfile`, `ShipSourceLevelResult`) | `speed_of_sound` |
+| `c=` and `rho=` on `sound_intensity`, `c=` on the two phase-mismatch conversions, `phase_mismatch()`, `absorption_coefficient_uncertainty` and `monopole_source_level` | `speed_of_sound=`, `density=` |
+| `speed_of_sound_m_s=` on `thickness_critical_frequency_product` | `speed_of_sound=` |
+| `sample_rate` on the FDTD `SignalSource`, `STOIResult` and `impact_force_exposure_level` | `fs` |
+| `freq=` on `linkwitz_riley` and `adaptation_term_kc` | `frequency=` and `frequencies=` |
+| `.frequency` on the results that carry a frequency axis: `IntensityResult`, `FieldIndicators`, `IntensityInstrumentComplianceResult`, `RoomAcousticsResult`, the five auditorium results, `ImpedanceTubeResult`, `PorousMediumResult`, `LayeredAbsorberResult`, `DiffuseFieldAbsorptionResult`, `BiotWavesResult`, `SlitResonatorAbsorberResult`, `MetadiffuserResult`, `TransferMatrix`, the two valve-noise results, `AircraftBandAttenuation`, `AmbientNoiseResult`, `ShipTrafficSpectrum` | `.frequencies` |
+| `frequency=` holding an array: the flanking-transmission functions, `internal_spectrum`, `pipe_transmission_loss`, `expander_noise`, `transfer_matrix_one_load`, `transfer_matrix_two_load`, `TransferMatrix.plot` | `frequencies=` |
+| `.time` on `ZwickerLoudness`, `EcmaLoudness`, `MooreGlasbergTimeVaryingLoudness`, the ECMA-418-2 tonality, roughness and fluctuation-strength results, `DecayCurve`, `QuasiPeakResult` | `.times` |
+| `.level` on `DecayCurve`, `NpdLevelResult`, `NoiseContourResult`, `RotorcraftNoiseContourResult`, `LowFrequencyResult`, `DuctPathStage`, `LateLateralResult`, `TransferStiffnessResult` | `.levels` |
+| `.distance` on `NpdLevelResult` and `RotorcraftEventResult` | `.distances` |
+| `level=`, `measured_level=`, `operational_level=` on `sti_from_impulse_response`, `stipa`, `sti_adjusted_for_levels` and `STIResult.adjusted_for_levels` | `levels=`, `measured_levels=`, `operational_levels=` |
+| `.passed` on `AircraftSystemComplianceResult`, `QuasiPeakDynamicsResult`, `HeavyImpactSourceCheck`, `RigidMassCalibrationResult` | `.passes`, as on every other verifier |
+
+`times, levels = decay_curve(ir, fs)` still unpacks the decay curve, in the
+same order. The FDTD solvers keep `c` and `rho`, which name the maps their
+equations are written in.
+
 ## Every `.plot()` takes the axes first
 
 Every result's `.plot()` now reads `plot(ax=None, *, ...)`: the axes first,
@@ -265,7 +293,7 @@ parameter:
 | --- | --- |
 | `LoudspeakerCharacteristics.plot("impedance", ax)` | `.plot(ax, quantity="impedance")` |
 | `MicrophoneCharacteristics.plot("noise", ax)` | `.plot(ax, quantity="noise")` |
-| `TransferMatrix.plot(f, rho_c, ax)` | `.plot(ax, frequency=f, characteristic_impedance=rho_c)` |
+| `TransferMatrix.plot(f, rho_c, ax)` | `.plot(ax, frequencies=f, characteristic_impedance=rho_c)` |
 
 Six results that are newer than 3.3.0 took `language` by position in
 4.0.0rc1: the four hearing-protector ratings and the two low-frequency
@@ -284,8 +312,8 @@ since the verifier now returns the object itself.
 | `verify_filter_class(bank)["overall_class"]` | `verify_filter_class(bank).overall_class` |
 | `verify_weighting_class(wf)["overall_class"]` | `verify_weighting_class(wf).overall_class` |
 | `verify_intensity_class(...)["bands"]` | `verify_intensity_class(...).bands` |
-| `verify_quasi_peak_dynamics()["passed"]` | `verify_quasi_peak_dynamics().passed` |
-| `verify_aircraft_noise_system(...)["passed"]` | `verify_aircraft_noise_system(...).passed` |
+| `verify_quasi_peak_dynamics()["passed"]` | `verify_quasi_peak_dynamics().passes` |
+| `verify_aircraft_noise_system(...)["passed"]` | `verify_aircraft_noise_system(...).passes` |
 | `filter_class_compliance(bank)` | `verify_filter_class(bank)`, which returns the same `FilterComplianceResult` |
 
 ```python

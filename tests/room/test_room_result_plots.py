@@ -94,8 +94,8 @@ def test_decay_curve_is_dataclass_and_unpacks_like_tuple() -> None:
     dc = ph.room.decay_curve(ir, FS)
     assert isinstance(dc, ph.room.DecayCurve)
     time, level = ph.room.decay_curve(ir, FS)  # backward-compatible unpacking
-    np.testing.assert_array_equal(time, dc.time)
-    np.testing.assert_array_equal(level, dc.level)
+    np.testing.assert_array_equal(time, dc.times)
+    np.testing.assert_array_equal(level, dc.levels)
     assert dc.band is None
 
 
@@ -107,7 +107,7 @@ def test_decay_curve_records_band() -> None:
 def test_decay_curve_plot_has_curve_and_fit_overlays() -> None:
     dc = ph.room.decay_curve(_exp_ir(seconds=1.0, t60=0.6), FS)
     ax = dc.plot()
-    np.testing.assert_allclose(ax.lines[0].get_ydata(), dc.level)
+    np.testing.assert_allclose(ax.lines[0].get_ydata(), dc.levels)
     labels = [ln.get_label() for ln in ax.lines]
     assert any("fit" in str(lbl) for lbl in labels)
     assert "s]" in ax.get_xlabel()

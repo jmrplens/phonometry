@@ -515,7 +515,7 @@ def _warn_frequency_range(
 class ImpedanceTubeResult:
     r"""Two-microphone impedance-tube result (ISO 10534-2:2001).
 
-    All arrays share the shape of ``frequency``. ``reflection`` is the complex
+    All arrays share the shape of ``frequencies``. ``reflection`` is the complex
     reflection factor ``r`` at the sample surface (Eq. (17)),
     ``surface_impedance`` the absolute surface impedance ``Z`` in rayls
     (Eq. (19)), ``normalized_impedance`` the ratio :math:`Z/(\rho c_0)`
@@ -530,7 +530,7 @@ class ImpedanceTubeResult:
     :func:`two_microphone_impedance`.
     """
 
-    frequency: Real
+    frequencies: Real
     reflection: Complex
     surface_impedance: Complex
     normalized_impedance: Complex
@@ -562,21 +562,21 @@ class ImpedanceTubeResult:
         ``alpha`` in the accredited per-frequency table with nothing on the
         page qualifying it.
 
-        :raises ValueError: if ``frequency`` is empty or not one-dimensional,
+        :raises ValueError: if ``frequencies`` is empty or not one-dimensional,
             if the per-frequency fields disagree with it in rank or length, or
             if any of them carries a non-finite value.
         """
-        freq = np.asarray(self.frequency)
+        freq = np.asarray(self.frequencies)
         if freq.ndim != 1 or freq.size == 0:
             msg = (
-                f"{type(self).__name__}: 'frequency' must be a non-empty 1-D "
+                f"{type(self).__name__}: 'frequencies' must be a non-empty 1-D "
                 f"array (one entry per measured frequency); got shape "
                 f"{freq.shape}."
             )
             raise ValueError(msg)
         require_ranks(
             self,
-            frequency=1,
+            frequencies=1,
             reflection=1,
             surface_impedance=1,
             normalized_impedance=1,
@@ -584,7 +584,7 @@ class ImpedanceTubeResult:
         )
         require_same_length(
             self,
-            "frequency",
+            "frequencies",
             "reflection",
             "surface_impedance",
             "normalized_impedance",
@@ -592,7 +592,7 @@ class ImpedanceTubeResult:
             axis="frequency",
         )
         for name in (
-            "frequency",
+            "frequencies",
             "reflection",
             "surface_impedance",
             "normalized_impedance",
@@ -745,7 +745,7 @@ def two_microphone_impedance(
         )
         _warn_frequency_range(f, f_lower, f_upper, stacklevel=2)
     return ImpedanceTubeResult(
-        frequency=f,
+        frequencies=f,
         reflection=r,
         surface_impedance=surface_impedance(r, characteristic_impedance),
         normalized_impedance=normalized_surface_impedance(r),

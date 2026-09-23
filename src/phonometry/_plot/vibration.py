@@ -756,7 +756,7 @@ def plot_rigid_mass_calibration(
     axm.set_ylabel(mag_ylabel)
     axm.grid(visible=True, which="both", alpha=0.3)
     axm.legend(loc="best", fontsize="small")
-    if result.passed:
+    if result.passes:
         verdict = "CORRECTO" if language == "es" else "PASS"
     else:
         verdict = "INCORRECTO" if language == "es" else "FAIL"
@@ -789,7 +789,7 @@ def plot_transfer_stiffness(
 
     ax = ax if ax is not None else _new_axes()
     freq = np.asarray(result.frequencies, dtype=np.float64)
-    level = np.asarray(result.level, dtype=np.float64)
+    level = np.asarray(result.levels, dtype=np.float64)
     style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("label", r"$L_k = 20\,\log_{10}(|k_{2,1}|/k_0)$")
     ax.semilogx(freq, level, **kwargs)

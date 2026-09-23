@@ -137,7 +137,7 @@ def test_unknown_language_rejected(tmp_path: Path) -> None:
 
 
 @pytest.mark.parametrize(
-    "field", ["frequency", "absorption", "reflection", "normalized_impedance"]
+    "field", ["frequencies", "absorption", "reflection", "normalized_impedance"]
 )
 def test_short_per_frequency_array_rejected(field: str) -> None:
     """One short per-frequency array is refused when the result is built.
@@ -161,7 +161,7 @@ def test_short_per_frequency_array_rejected(field: str) -> None:
 @pytest.mark.parametrize(
     "field",
     [
-        "frequency",
+        "frequencies",
         "reflection",
         "surface_impedance",
         "normalized_impedance",
@@ -193,9 +193,9 @@ def test_scalar_per_frequency_fields_are_refused() -> None:
     died with numpy's "iteration over a 0-d array", naming no field of this
     result and no fix.
     """
-    with pytest.raises(ValueError, match=r"'frequency' must be a non-empty 1-D"):
+    with pytest.raises(ValueError, match=r"'frequencies' must be a non-empty 1-D"):
         ImpedanceTubeResult(
-            frequency=500.0,
+            frequencies=500.0,
             reflection=0.5 + 0.1j,
             surface_impedance=1200.0 + 300.0j,
             normalized_impedance=2.9 + 0.7j,
@@ -214,9 +214,9 @@ def test_all_empty_result_is_refused() -> None:
     """
     empty = np.array([])
     empty_complex = np.array([], dtype=np.complex128)
-    with pytest.raises(ValueError, match=r"'frequency' must be a non-empty 1-D"):
+    with pytest.raises(ValueError, match=r"'frequencies' must be a non-empty 1-D"):
         ImpedanceTubeResult(
-            frequency=empty,
+            frequencies=empty,
             reflection=empty_complex,
             surface_impedance=empty_complex,
             normalized_impedance=empty_complex,
@@ -297,7 +297,7 @@ def test_a_table_longer_than_the_page_is_refused(tmp_path: Path, points: int) ->
     LayoutError naming a flowable and a frame in points.
     """
     base = result_factories._impedance_tube()
-    size = np.size(base.frequency)
+    size = np.size(base.frequencies)
     trimmed = dataclasses.replace(
         base,
         **{

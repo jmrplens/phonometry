@@ -86,7 +86,7 @@ def test_effective_depth_matches_equation_9_55() -> None:
     k = 2.0 * np.pi * f / c
     psi_c = np.arccos(1.0 / 1.20)
     expected = h + 2.1 / (k * np.sin(psi_c))
-    assert effective_depth(h, f, seabed="sand", sound_speed=c) == pytest.approx(
+    assert effective_depth(h, f, seabed="sand", speed_of_sound=c) == pytest.approx(
         expected, rel=1e-12
     )
 
@@ -96,16 +96,16 @@ def test_cutoff_frequency_matches_equation_9_60() -> None:
     h, c = 50.0, 1500.0
     psi_c = np.arccos(1.0 / 1.20)
     expected = (np.pi - 2.1) / (2.0 * np.pi * np.sin(psi_c)) * c / h
-    assert waveguide_cutoff_frequency(h, seabed="sand", sound_speed=c) == pytest.approx(
-        expected, rel=1e-12
-    )
+    assert waveguide_cutoff_frequency(
+        h, seabed="sand", speed_of_sound=c
+    ) == pytest.approx(expected, rel=1e-12)
 
 
 def test_cutoff_frequency_admits_exactly_one_mode() -> None:
     """At f = fc, Eq. (9.58) gives N = 1: (ω/c)·He·sin ψc = π."""
     h, c = 50.0, 1500.0
-    fc = waveguide_cutoff_frequency(h, seabed="sand", sound_speed=c)
-    bounds = weston_regime_boundaries(fc, h, seabed="sand", sound_speed=c)
+    fc = waveguide_cutoff_frequency(h, seabed="sand", speed_of_sound=c)
+    bounds = weston_regime_boundaries(fc, h, seabed="sand", speed_of_sound=c)
     assert bounds.mode_count == pytest.approx(1.0, abs=1e-9)
 
 
@@ -136,7 +136,7 @@ def test_mode_stripping_boundary_equates_theta_eff_with_mode_3_over_2() -> None:
     this pins the derivation-consistent value (see ``docs/ERRATA.md``).
     """
     h, f, c = 50.0, 250.0, 1500.0
-    b = weston_regime_boundaries(f, h, seabed="sand", sound_speed=c)
+    b = weston_regime_boundaries(f, h, seabed="sand", speed_of_sound=c)
     k = 2.0 * np.pi * f / c
     eta = b.reflection_loss_gradient_np_per_rad
     r = b.mode_stripping_to_single_mode
@@ -167,9 +167,9 @@ def test_composite_loss_and_the_boundary_use_the_same_effective_angle() -> None:
     loss is evaluating.
     """
     h, f, c = 50.0, 250.0, 1500.0
-    b = weston_regime_boundaries(f, h, seabed="sand", sound_speed=c)
+    b = weston_regime_boundaries(f, h, seabed="sand", speed_of_sound=c)
     r = b.mode_stripping_to_single_mode
-    res = weston_propagation_loss(r, f, h, seabed="sand", sound_speed=c)
+    res = weston_propagation_loss(r, f, h, seabed="sand", speed_of_sound=c)
     # Recover θ_eff from the printed Eq. (9.46) F_MP = (2·θ_eff/(r·H))·erf(...)
     # by inverting the closed form the module evaluates.
     theta_eff = np.sqrt(np.pi * h / (4.0 * b.reflection_loss_gradient_np_per_rad * r))
@@ -364,7 +364,7 @@ def test_plot_returns_axes() -> None:
     ("kwargs", "message"),
     [
         ({"seabed": "gravel"}, "seabed"),
-        ({"sound_speed": 0.0}, "sound_speed"),
+        ({"speed_of_sound": 0.0}, "speed_of_sound"),
         ({"critical_angle_deg": 0.0}, "critical_angle_deg"),
         ({"critical_angle_deg": 120.0}, "critical_angle_deg"),
         (

@@ -162,15 +162,15 @@ class TestSoundStrength:
 
     def test_it_carries_the_band_centres(self) -> None:
         result = room.sound_strength(noisy_decay(1.0, 2.0), anechoic_ir(), FS)
-        assert result.frequency is not None
-        assert result.frequency.shape == (6,)
-        assert result.frequency[0] == pytest.approx(125.0, rel=0.01)
+        assert result.frequencies is not None
+        assert result.frequencies.shape == (6,)
+        assert result.frequencies[0] == pytest.approx(125.0, rel=0.01)
 
     def test_a_broadband_measurement_has_no_band_axis(self) -> None:
         result = room.sound_strength(
             noisy_decay(1.0, 2.0), anechoic_ir(), FS, limits=None
         )
-        assert result.frequency is None
+        assert result.frequencies is None
         assert result.strength.shape == (1,)
 
     def test_it_wants_the_reference_exactly_once(self) -> None:

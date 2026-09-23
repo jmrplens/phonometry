@@ -155,7 +155,7 @@ is where an intermittent tone shows up.
 
 Returns an `EcmaTonality`: `tonality` ($T$, tu_HMS), `specific_tonality`
 ($T'(z)$, 53 bands), `bark`, `centre_frequencies`, `tonal_frequencies`
-($f_{\text{ton},z}$), `time`, `tonality_vs_time` ($T(l)$),
+($f_{\text{ton},z}$), `times`, `tonality_vs_time` ($T(l)$),
 `tonal_frequency_vs_time`,
 `field`.
 
@@ -235,7 +235,7 @@ plt.show()
 
 Returns an `EcmaRoughness`: `roughness` ($R$, asper, the 90th percentile of
 $R(l_{50})$), `specific_roughness` ($R'(z)$, 53 bands), `bark`,
-`centre_frequencies`, `time`, `roughness_vs_time` ($R(l_{50})$),
+`centre_frequencies`, `times`, `roughness_vs_time` ($R(l_{50})$),
 `specific_roughness_vs_time` ((n_times, 53) array), `field`.
 
 All three ECMA-418-2 entry points on this page are monaural. The binaural
@@ -324,7 +324,7 @@ plt.show()
 
 Returns an `EcmaFluctuationStrength`: `fluctuation_strength` ($F$, vacil_HMS,
 the 90th percentile of $F(l_{50})$), `specific_fluctuation_strength`
-($F'(z)$, 53 bands), `bark`, `centre_frequencies`, `time`,
+($F'(z)$, 53 bands), `bark`, `centre_frequencies`, `times`,
 `fluctuation_strength_vs_time` ($F(l_{50})$),
 `specific_fluctuation_strength_vs_time` ((n_times, 53) array), `field`.
 

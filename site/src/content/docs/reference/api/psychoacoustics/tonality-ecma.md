@@ -42,7 +42,7 @@ EcmaTonality(
     bark: np.ndarray,
     centre_frequencies: np.ndarray,
     tonal_frequencies: np.ndarray,
-    time: np.ndarray,
+    times: np.ndarray,
     tonality_vs_time: np.ndarray,
     tonal_frequency_vs_time: np.ndarray,
     field: str,
@@ -56,7 +56,7 @@ Result of an ECMA-418-2:2025 (Sottek) tonality calculation.
 T'(z) in tu_HMS over the 53 auditory bands (Formula 53), with `bark`
 the critical-band-rate scale z (0.5..26.5 Bark_HMS), `centre_frequencies`
 the band centre frequencies F(z) and `tonal_frequencies` the per-band
-tonal frequency f_ton,z(z) (Formula 55). `time` and `tonality_vs_time`
+tonal frequency f_ton,z(z) (Formula 55). `times` and `tonality_vs_time`
 hold the time-dependent tonality T(l) at 187.5 Hz (Formula 61) and
 `tonal_frequency_vs_time` its frequency f_ton(l) (Formula 62). `field`
 records the assumed sound field.

@@ -215,7 +215,7 @@ def _parameter_table(result: RoomAcousticsResult, language: str = "en") -> Table
         leading=8.6,
     )
 
-    freq = result.frequency
+    freq = result.frequencies
     t20 = np.asarray(result.t20, dtype=np.float64)
     t30 = np.asarray(result.t30, dtype=np.float64)
     edt = np.asarray(result.edt, dtype=np.float64)
@@ -350,7 +350,7 @@ def _reverberation_descriptor(
     was not averaged over those bands and always names the band the fallback
     value came from.
     """
-    freq = result.frequency
+    freq = result.frequencies
     arr = np.asarray(values, dtype=np.float64)
     if freq is not None:
         wanted = (
@@ -388,7 +388,7 @@ def _statement(
     EDT term picks its "EDT_mid" vs "EDT" form from EDT's own band coverage,
     which can differ from T30's when a mid band's EDT is not evaluable.
     """
-    fraction = _band_fraction(result.frequency)
+    fraction = _band_fraction(result.frequencies)
     t_value, t_is_mid, t_band = _reverberation_descriptor(
         result, np.asarray(result.t30, dtype=np.float64), fraction
     )
@@ -464,7 +464,7 @@ def _verdict(
     those centres are present, and their T30 are both finite; only then does
     the verdict name T_mid. Every other case compares a single band's T30 and
     the verdict says plain "T30", with no "500-1000 Hz" claim: a broadband
-    result (``frequency`` is ``None``) has only its one T30, and a banded
+    result (``frequencies`` is ``None``) has only its one T30, and a banded
     result that does not reach both mid centres, or reaches them with a NaN
     T30 in either (the ISO 3382-1:2009, 5.3.3 evaluation range was unreachable
     in that band alone, which the per-band decay fit leaves NaN band by band),
@@ -488,7 +488,7 @@ def _verdict(
     t_value, is_mid, _ = _reverberation_descriptor(
         result,
         np.asarray(result.t30, dtype=np.float64),
-        _band_fraction(result.frequency),
+        _band_fraction(result.frequencies),
     )
     if not math.isfinite(t_value):
         return None
@@ -590,7 +590,7 @@ def render_iso3382_report(
     # Full-width per-band parameter table, then the landscape decay-time plot
     # drawn by the result's own single-panel plot(ax=...).
     flow.append(
-        fiche_paragraph(_fraction_label(result.frequency, language), caption_style)
+        fiche_paragraph(_fraction_label(result.frequencies, language), caption_style)
     )
     flow.append(_parameter_table(result, language))
     flow.append(Spacer(1, gap))

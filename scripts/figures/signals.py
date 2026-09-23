@@ -702,7 +702,7 @@ def generate_crossover_plot(output_dir: str) -> None:
     # Measure response using IR
     impulse = np.zeros(fs)
     impulse[0] = 1.0
-    lp_ir, hp_ir = filters.linkwitz_riley(impulse, fs, freq=1000, order=4)
+    lp_ir, hp_ir = filters.linkwitz_riley(impulse, fs, frequency=1000, order=4)
 
     w, h_lp = scipy_signal.freqz(lp_ir, worN=8192, fs=fs)
     _, h_hp = scipy_signal.freqz(hp_ir, worN=8192, fs=fs)

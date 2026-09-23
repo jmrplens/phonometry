@@ -443,7 +443,7 @@ turned away from the source does not move it.
 
 ```python
 InterauralCorrelationResult(
-    frequency: NDArray[np.float64] | None,
+    frequencies: NDArray[np.float64] | None,
     coefficient: NDArray[np.float64],
     delay: NDArray[np.float64],
     lag: NDArray[np.float64],
@@ -453,7 +453,7 @@ InterauralCorrelationResult(
 
 Per-band interaural cross correlation (ISO 3382-1:2009, Annex B).
 
-`frequency` holds the exact band centre frequencies in Hz, or is
+`frequencies` holds the exact band centre frequencies in Hz, or is
 `None` for a broadband measurement. `coefficient` is the IACC of
 Equation (B.2), the largest magnitude the normalised correlation
 function reaches inside the +/-1 ms search window, and `delay` the lag
@@ -602,16 +602,16 @@ LATE_SUPPORT_WINDOW_S = (0.1, 1.0)
 
 ```python
 LateLateralResult(
-    frequency: NDArray[np.float64] | None,
-    level: NDArray[np.float64],
+    frequencies: NDArray[np.float64] | None,
+    levels: NDArray[np.float64],
     reference_level: NDArray[np.float64],
 )
 ```
 
 Per-band late lateral sound level (ISO 3382-1:2009, A.2.5).
 
-`frequency` holds the exact band centre frequencies in Hz, or is
-`None` for a broadband measurement. `level` is
+`frequencies` holds the exact band centre frequencies in Hz, or is
+`None` for a broadband measurement. `levels` is
 $L_J$ in dB (Equation (A.16)) and `reference_level` the sound
 pressure exposure level of the free-field response at 10 m it is
 referred to, however that was obtained. Table A.1 gives
@@ -646,7 +646,7 @@ LATERAL_WEIGHTINGS = ('squared', 'cosine')
 
 ```python
 LateralEnergyResult(
-    frequency: NDArray[np.float64] | None,
+    frequencies: NDArray[np.float64] | None,
     energy_fraction: NDArray[np.float64],
     weighting: str,
 )
@@ -654,7 +654,7 @@ LateralEnergyResult(
 
 Per-band early lateral energy fraction (ISO 3382-1:2009, A.2.4).
 
-`frequency` holds the exact band centre frequencies in Hz, or is
+`frequencies` holds the exact band centre frequencies in Hz, or is
 `None` for a broadband measurement. `energy_fraction` is
 $J_\mathrm{LF}$ or $J_\mathrm{LFC}$ depending on
 `weighting`, which is `"squared"` for Equation (A.14) and
@@ -1099,7 +1099,7 @@ SOUND_STRENGTH_POWER_OFFSET_DB = 31.0
 
 ```python
 SoundStrengthResult(
-    frequency: NDArray[np.float64] | None,
+    frequencies: NDArray[np.float64] | None,
     strength: NDArray[np.float64],
     exposure_level: NDArray[np.float64],
     reference_level: NDArray[np.float64],
@@ -1108,7 +1108,7 @@ SoundStrengthResult(
 
 Per-band sound strength G and the two levels it is the difference of.
 
-`frequency` holds the exact band centre frequencies in Hz, or is
+`frequencies` holds the exact band centre frequencies in Hz, or is
 `None` for a broadband measurement, in which case every array has
 length 1. `strength` is G in dB (ISO 3382-1:2009, Equation (A.1)),
 `exposure_level` the sound pressure exposure level of the response
@@ -1270,7 +1270,7 @@ STAGE_SUPPORT_STANDARD_DEVIATION_DB = 1.0
 
 ```python
 StageSupportResult(
-    frequency: NDArray[np.float64] | None,
+    frequencies: NDArray[np.float64] | None,
     early: NDArray[np.float64],
     late: NDArray[np.float64],
 )
@@ -1278,7 +1278,7 @@ StageSupportResult(
 
 Per-band stage support (ISO 3382-1:2009, Annex C).
 
-`frequency` holds the exact band centre frequencies in Hz, or is
+`frequencies` holds the exact band centre frequencies in Hz, or is
 `None` for a broadband measurement. `early` is
 $ST_\mathrm{Early}$ in dB (Equation (C.1)) and `late`
 $ST_\mathrm{Late}$ in dB (Equation (C.2)), both referred to the

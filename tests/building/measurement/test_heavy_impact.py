@@ -221,7 +221,7 @@ def test_bang_machine_construction_example() -> None:
 def test_check_source_accepts_the_nominal_spectrum() -> None:
     """A source exactly on the printed nominal conforms in every band."""
     check = building.check_heavy_impact_source([v for v, _ in RUBBER_BALL_LFE])
-    assert check.passed
+    assert check.passes
     assert bool(np.all(check.within_tolerance))
     np.testing.assert_allclose(check.deviation, 0.0)
 
@@ -231,7 +231,7 @@ def test_check_source_rejects_a_band_outside_the_tolerance() -> None:
     measured = [v for v, _ in RUBBER_BALL_LFE]
     measured[-1] += 2.1
     check = building.check_heavy_impact_source(measured)
-    assert not check.passed
+    assert not check.passes
     assert list(check.within_tolerance) == [True, True, True, True, False]
 
 
@@ -239,14 +239,14 @@ def test_check_source_accepts_the_tolerance_edge() -> None:
     """The printed tolerance is inclusive: 31,0 - 1,5 dB at 63 Hz still conforms."""
     measured = [v for v, _ in RUBBER_BALL_LFE]
     measured[1] -= 1.5
-    assert building.check_heavy_impact_source(measured).passed
+    assert building.check_heavy_impact_source(measured).passes
 
 
 def test_bang_machine_spectrum_fails_the_rubber_ball_check() -> None:
     """The two characteristics differ by far more than their tolerances."""
     bang = [v for v, _ in BANG_MACHINE_LFE]
-    assert building.check_heavy_impact_source(bang, "bang_machine").passed
-    assert not building.check_heavy_impact_source(bang, "rubber_ball").passed
+    assert building.check_heavy_impact_source(bang, "bang_machine").passes
+    assert not building.check_heavy_impact_source(bang, "rubber_ball").passes
 
 
 def test_check_source_rejects_a_wrong_band_count() -> None:

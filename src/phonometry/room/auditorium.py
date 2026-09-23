@@ -523,7 +523,7 @@ def sound_strength_from_power(
 class SoundStrengthResult:
     """Per-band sound strength G and the two levels it is the difference of.
 
-    ``frequency`` holds the exact band centre frequencies in Hz, or is
+    ``frequencies`` holds the exact band centre frequencies in Hz, or is
     ``None`` for a broadband measurement, in which case every array has
     length 1. ``strength`` is G in dB (ISO 3382-1:2009, Equation (A.1)),
     ``exposure_level`` the sound pressure exposure level of the response
@@ -533,7 +533,7 @@ class SoundStrengthResult:
     ``exposure_level - reference_level``.
     """
 
-    frequency: NDArray[np.float64] | None
+    frequencies: NDArray[np.float64] | None
     strength: NDArray[np.float64]
     exposure_level: NDArray[np.float64]
     reference_level: NDArray[np.float64]
@@ -637,7 +637,7 @@ def sound_strength(
             raise ValueError(msg) from exc
 
     return SoundStrengthResult(
-        frequency=frequency,
+        frequencies=frequency,
         strength=levels - reference,
         exposure_level=levels,
         reference_level=reference,
@@ -716,7 +716,7 @@ def _window_energy(
 class LateralEnergyResult:
     r"""Per-band early lateral energy fraction (ISO 3382-1:2009, A.2.4).
 
-    ``frequency`` holds the exact band centre frequencies in Hz, or is
+    ``frequencies`` holds the exact band centre frequencies in Hz, or is
     ``None`` for a broadband measurement. ``energy_fraction`` is
     :math:`J_\mathrm{LF}` or :math:`J_\mathrm{LFC}` depending on
     ``weighting``, which is ``"squared"`` for Equation (A.14) and
@@ -725,7 +725,7 @@ class LateralEnergyResult:
     0,05 to 0,35 over the 125 Hz to 1 kHz octave bands.
     """
 
-    frequency: NDArray[np.float64] | None
+    frequencies: NDArray[np.float64] | None
     energy_fraction: NDArray[np.float64]
     weighting: str
 
@@ -846,7 +846,7 @@ def early_lateral_energy_fraction(
         )
 
     return LateralEnergyResult(
-        frequency=frequency, energy_fraction=fractions, weighting=weighting
+        frequencies=frequency, energy_fraction=fractions, weighting=weighting
     )
 
 
@@ -854,8 +854,8 @@ def early_lateral_energy_fraction(
 class LateLateralResult:
     """Per-band late lateral sound level (ISO 3382-1:2009, A.2.5).
 
-    ``frequency`` holds the exact band centre frequencies in Hz, or is
-    ``None`` for a broadband measurement. ``level`` is
+    ``frequencies`` holds the exact band centre frequencies in Hz, or is
+    ``None`` for a broadband measurement. ``levels`` is
     :math:`L_J` in dB (Equation (A.16)) and ``reference_level`` the sound
     pressure exposure level of the free-field response at 10 m it is
     referred to, however that was obtained. Table A.1 gives
@@ -863,8 +863,8 @@ class LateLateralResult:
     octave bands and no just-noticeable difference at all: "Not known".
     """
 
-    frequency: NDArray[np.float64] | None
-    level: NDArray[np.float64]
+    frequencies: NDArray[np.float64] | None
+    levels: NDArray[np.float64]
     reference_level: NDArray[np.float64]
 
     def plot(
@@ -999,8 +999,8 @@ def late_lateral_sound_level(
             raise ValueError(msg) from exc
 
     return LateLateralResult(
-        frequency=frequency,
-        level=levels - reference,
+        frequencies=frequency,
+        levels=levels - reference,
         reference_level=reference,
     )
 
@@ -1045,7 +1045,7 @@ def late_lateral_average(levels: ArrayLike) -> float:
 class InterauralCorrelationResult:
     r"""Per-band interaural cross correlation (ISO 3382-1:2009, Annex B).
 
-    ``frequency`` holds the exact band centre frequencies in Hz, or is
+    ``frequencies`` holds the exact band centre frequencies in Hz, or is
     ``None`` for a broadband measurement. ``coefficient`` is the IACC of
     Equation (B.2), the largest magnitude the normalised correlation
     function reaches inside the +/-1 ms search window, and ``delay`` the lag
@@ -1058,7 +1058,7 @@ class InterauralCorrelationResult:
     B.4 assumes a just-noticeable difference of 0,075.
     """
 
-    frequency: NDArray[np.float64] | None
+    frequencies: NDArray[np.float64] | None
     coefficient: NDArray[np.float64]
     delay: NDArray[np.float64]
     lag: NDArray[np.float64]
@@ -1193,7 +1193,7 @@ def interaural_cross_correlation(
 
     peak = np.argmax(np.abs(curves), axis=1)
     return InterauralCorrelationResult(
-        frequency=frequency,
+        frequencies=frequency,
         coefficient=np.abs(curves[np.arange(curves.shape[0]), peak]),
         delay=lags[peak] / fs,
         lag=lags / fs,
@@ -1291,7 +1291,7 @@ STAGE_SUPPORT_SINGLE_NUMBER_STANDARD_DEVIATION_DB = 0.3
 class StageSupportResult:
     r"""Per-band stage support (ISO 3382-1:2009, Annex C).
 
-    ``frequency`` holds the exact band centre frequencies in Hz, or is
+    ``frequencies`` holds the exact band centre frequencies in Hz, or is
     ``None`` for a broadband measurement. ``early`` is
     :math:`ST_\mathrm{Early}` in dB (Equation (C.1)) and ``late``
     :math:`ST_\mathrm{Late}` in dB (Equation (C.2)), both referred to the
@@ -1300,7 +1300,7 @@ class StageSupportResult:
     just-noticeable differences, so this module has none.
     """
 
-    frequency: NDArray[np.float64] | None
+    frequencies: NDArray[np.float64] | None
     early: NDArray[np.float64]
     late: NDArray[np.float64]
 
@@ -1394,7 +1394,7 @@ def stage_support(
             _window_energy(p2, fs, *LATE_SUPPORT_WINDOW_S) / direct
         )
 
-    return StageSupportResult(frequency=frequency, early=early, late=late)
+    return StageSupportResult(frequencies=frequency, early=early, late=late)
 
 
 #: Maximum deviation of source directivity in dB, by octave band centre in

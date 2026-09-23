@@ -474,7 +474,7 @@ class TestModalFilterCutOn:
         from phonometry.noise_control import rectangular_duct_cut_on
 
         exact = rectangular_duct_cut_on(0.5, 0.2, speed_of_sound=343.0, count=1)
-        found = sm.modal_filter_cut_on(larger_dimension=0.5, sound_speed=343.0)
+        found = sm.modal_filter_cut_on(larger_dimension=0.5, speed_of_sound=343.0)
         assert found == pytest.approx(float(exact.cut_on_no_flow[0]))
 
     def test_the_circular_constant_is_rounded_high(self) -> None:
@@ -483,7 +483,7 @@ class TestModalFilterCutOn:
         from phonometry.noise_control import circular_duct_cut_on
 
         exact = circular_duct_cut_on(0.4, speed_of_sound=343.0, count=1)
-        found = sm.modal_filter_cut_on(diameter_m=0.4, sound_speed=343.0)
+        found = sm.modal_filter_cut_on(diameter_m=0.4, speed_of_sound=343.0)
         ratio = found / float(exact.cut_on_no_flow[0])
         assert ratio == pytest.approx(1.0067, abs=5e-5)
 

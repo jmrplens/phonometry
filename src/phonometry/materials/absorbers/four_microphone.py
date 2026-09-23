@@ -482,10 +482,10 @@ class TransferMatrix:
 
     def plot(
         self,
-        frequency: ArrayLike | None = None,
-        characteristic_impedance: float | None = None,
         ax: Axes | None = None,
         *,
+        frequency: ArrayLike | None = None,
+        characteristic_impedance: float | None = None,
         language: str = "en",
         **kwargs: Any,
     ) -> Axes:
@@ -506,12 +506,12 @@ class TransferMatrix:
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes` of the transmission-loss curve.
 
+        :param ax: Existing axes, or ``None`` to create a figure.
         :param frequency: Frequency vector ``f``, in hertz, matching the shape
             of the matrix entries; ``None`` uses the stored ``frequency``.
         :param characteristic_impedance: Characteristic impedance ``rho c`` of
             the air in the tube, in rayls; ``None`` uses the stored
             ``air_characteristic_impedance``.
-        :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Plot language: ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the transmission-loss ``plot`` call.
         :return: The axes.

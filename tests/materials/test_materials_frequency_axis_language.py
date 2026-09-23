@@ -110,7 +110,9 @@ def _transfer_matrix(language: str) -> Axes:
         t21=np.zeros_like(ones),
         t22=ones,
     )
-    return matrix.plot(_FREQUENCIES, _RHO_C, language=language)
+    return matrix.plot(
+        frequency=_FREQUENCIES, characteristic_impedance=_RHO_C, language=language
+    )
 
 
 _FIGURES: list[Callable[[str], Axes]] = [

@@ -2984,7 +2984,7 @@ def generate_transfer_matrix_tl(output_dir: str) -> None:
     tm = materials.TransferMatrix(
         t11=chain[0, 0], t12=chain[0, 1], t21=chain[1, 0], t22=chain[1, 1]
     )
-    tm.plot(f, 407.0, language=_LANG)
+    tm.plot(frequency=f, characteristic_impedance=407.0, language=_LANG)
     plt.gcf().set_size_inches(10, 6)
     plt.tight_layout()
     save_figure(output_dir, "transfer_matrix_tl.svg")

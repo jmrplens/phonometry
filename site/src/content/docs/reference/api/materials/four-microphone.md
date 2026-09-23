@@ -386,10 +386,10 @@ $k' = \arccos(T_{11}) / d$ (complex `arccos`).
 
 ```python
 TransferMatrix.plot(
-    frequency: ArrayLike | None = None,
-    characteristic_impedance: float | None = None,
     ax: Axes | None = None,
     *,
+    frequency: ArrayLike | None = None,
+    characteristic_impedance: float | None = None,
     language: str = 'en',
     **kwargs: Any,
 ) -> Axes
@@ -416,9 +416,9 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 
 | Name | Description |
 | :--- | :--- |
+| `ax` | Existing axes, or `None` to create a figure. |
 | `frequency` | Frequency vector `f`, in hertz, matching the shape of the matrix entries; `None` uses the stored `frequency`. |
 | `characteristic_impedance` | Characteristic impedance `rho c` of the air in the tube, in rayls; `None` uses the stored `air_characteristic_impedance`. |
-| `ax` | Existing axes, or `None` to create a figure. |
 | `language` | Plot language: `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the transmission-loss `plot` call. |
 

@@ -261,6 +261,24 @@ un `TypeError`, que es lo que siempre debió ser.
 print(round(float(leq(x, dbfs=True)), 3))
 ```
 
+## Todo `.plot()` toma primero los ejes
+
+El `.plot()` de cada resultado se lee ahora `plot(ax=None, *, ...)`: primero
+los ejes, y todo lo demás por su nombre, `language` incluido. Tres no empezaban
+por los ejes en la 3.3.0, así que `plot(ax)` les entregaba los ejes al
+parámetro equivocado:
+
+| 3.3.0 | 4.0 |
+| --- | --- |
+| `LoudspeakerCharacteristics.plot("impedance", ax)` | `.plot(ax, quantity="impedance")` |
+| `MicrophoneCharacteristics.plot("noise", ax)` | `.plot(ax, quantity="noise")` |
+| `TransferMatrix.plot(f, rho_c, ax)` | `.plot(ax, frequency=f, characteristic_impedance=rho_c)` |
+
+Seis resultados posteriores a la 3.3.0 tomaban `language` por posición en la
+4.0.0rc1: las cuatro valoraciones de protectores auditivos y los dos resultados
+de intensimetría en baja frecuencia. `plot(ax, "es")` sobre ellos es ahora
+`plot(ax, language="es")`, como en todos los demás.
+
 ## Los veredictos son objetos de resultado, no diccionarios
 
 Las cinco funciones `verify_*` devolvían `dict[str, Any]` y ahora devuelven una
@@ -389,6 +407,6 @@ que devolvía su predecesor. Si un resultado se mueve después de que termines d
 actualizar, eso es un defecto y merece la pena
 [avisar](https://github.com/jmrplens/phonometry/issues).
 
-`.plot()`, `.report()` y el contrato de `Signal` están intactos, y también lo
-está cada fórmula. La 4.0 recolocó los muebles y puso la unidad en la etiqueta;
-no recalculó nada.
+Lo que dibuja cada `.plot()` y lo que imprime cada `.report()` están
+intactos, el contrato de `Signal` también, y lo mismo cada fórmula. La 4.0
+recolocó los muebles y puso la unidad en la etiqueta; no recalculó nada.

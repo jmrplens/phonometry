@@ -353,6 +353,80 @@ def test_every_plot_forwards_kwargs_to_primary_artist(
 
 
 # --------------------------------------------------------------------------
+# One signature for every .plot(): ax first, everything else by name
+# --------------------------------------------------------------------------
+def _public_plot_methods() -> dict[str, Callable[..., object]]:
+    """Every ``plot`` a caller can reach on a class the package publishes.
+
+    Walks the imported package rather than the source, so a class published
+    from a private module (``io._signal.Signal``) counts under the public name
+    that reaches it, and a ``plot`` inherited from a phonometry base class is
+    held to the rule on every subclass that exposes it.
+    """
+    import importlib
+    import pkgutil
+
+    found: dict[str, Callable[..., object]] = {}
+    for info in pkgutil.walk_packages(ph.__path__, "phonometry."):
+        if any(part.startswith("_") for part in info.name.split(".")[1:]):
+            continue
+        module = importlib.import_module(info.name)
+        for name, obj in vars(module).items():
+            if name.startswith("_") or not inspect.isclass(obj):
+                continue
+            if not obj.__module__.startswith("phonometry"):
+                continue
+            try:
+                method = inspect.getattr_static(obj, "plot")
+            except AttributeError:
+                continue
+            if isinstance(method, staticmethod | classmethod):
+                method = method.__func__
+            if inspect.isfunction(method):
+                found.setdefault(f"{obj.__module__}.{obj.__qualname__}", method)
+    return found
+
+
+#: The parameter kinds a call can fill by position.
+_BY_POSITION = (
+    inspect.Parameter.POSITIONAL_ONLY,
+    inspect.Parameter.POSITIONAL_OR_KEYWORD,
+    inspect.Parameter.VAR_POSITIONAL,
+)
+
+
+def test_every_plot_takes_ax_first_and_the_rest_by_name() -> None:
+    """``result.plot(ax)`` draws into ``ax``, on every result in the library.
+
+    Two shapes broke it. Three results put a choice before the axes
+    (``plot(quantity, ax)``, ``plot(frequency, characteristic_impedance,
+    ax)``), so the call every other result accepts raised or, worse, bound the
+    axes to a frequency vector. Six took ``language`` by position, so
+    ``plot(ax, "es")`` worked on those six and nowhere else. The rule is the
+    one every other result keeps: the axes first, and every other
+    argument, ``language`` included, keyword-only.
+    """
+    methods = _public_plot_methods()
+    assert len(methods) > 200, "the walk found too few plot methods to mean anything"
+    offenders: list[str] = []
+    for owner, method in sorted(methods.items()):
+        parameters = list(inspect.signature(method).parameters.values())[1:]
+        if not parameters or parameters[0].name != "ax":
+            first = parameters[0].name if parameters else None
+            offenders.append(f"{owner}.plot: first parameter is {first!r}, not 'ax'")
+            continue
+        offenders.extend(
+            f"{owner}.plot: {parameter.name!r} can be passed by position"
+            for parameter in parameters[1:]
+            if parameter.kind in _BY_POSITION and parameter.name != "language"
+        )
+        language = next((p for p in parameters if p.name == "language"), None)
+        if language is not None and language.kind is not inspect.Parameter.KEYWORD_ONLY:
+            offenders.append(f"{owner}.plot: 'language' is not keyword-only")
+    assert not offenders, "\n".join(offenders)
+
+
+# --------------------------------------------------------------------------
 # Common contract: ax=None creates a figure; passing ax composes
 # --------------------------------------------------------------------------
 def test_single_axes_plots_accept_external_ax() -> None:

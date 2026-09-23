@@ -632,9 +632,9 @@ class MicrophoneCharacteristics:
 
     def plot(
         self,
-        quantity: str = "response",
         ax: Axes | None = None,
         *,
+        quantity: str = "response",
         language: str = "en",
         **kwargs: Any,
     ) -> Axes:
@@ -648,9 +648,9 @@ class MicrophoneCharacteristics:
         band-level spectrum) and ``"distortion"`` (total harmonic distortion
         against sound pressure level).
 
-        :param quantity: Which characteristic to plot (see above).
         :param ax: Existing axes to draw on, or ``None`` for a fresh figure (a
             polar axes is created for ``"directivity"``).
+        :param quantity: Which characteristic to plot (see above).
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :return: The axes the characteristic was drawn on.
         :raises ValueError: If ``quantity`` or ``language`` is unknown, or the

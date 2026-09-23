@@ -741,6 +741,7 @@ The Clause 6.4.2 limit on `FpI` that this result was judged by.
 ```python
 LowFrequencyElementResult.plot(
     ax: Axes | None = None,
+    *,
     language: str = 'en',
     **kwargs: Any,
 ) -> Axes
@@ -808,6 +809,7 @@ does not have to restate which of the two limits applies.
 ```python
 LowFrequencyIntensityResult.plot(
     ax: Axes | None = None,
+    *,
     language: str = 'en',
     **kwargs: Any,
 ) -> Axes

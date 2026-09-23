@@ -254,6 +254,24 @@ Now it is a `TypeError`, which is what it always should have been.
 print(round(float(leq(x, dbfs=True)), 3))
 ```
 
+## Every `.plot()` takes the axes first
+
+Every result's `.plot()` now reads `plot(ax=None, *, ...)`: the axes first,
+and every other argument by name, `language` included. Three did not start
+with the axes in 3.3.0, so `plot(ax)` on them handed the axes to the wrong
+parameter:
+
+| 3.3.0 | 4.0 |
+| --- | --- |
+| `LoudspeakerCharacteristics.plot("impedance", ax)` | `.plot(ax, quantity="impedance")` |
+| `MicrophoneCharacteristics.plot("noise", ax)` | `.plot(ax, quantity="noise")` |
+| `TransferMatrix.plot(f, rho_c, ax)` | `.plot(ax, frequency=f, characteristic_impedance=rho_c)` |
+
+Six results that are newer than 3.3.0 took `language` by position in
+4.0.0rc1: the four hearing-protector ratings and the two low-frequency
+intensity results. `plot(ax, "es")` on those is `plot(ax, language="es")`
+now, as it is everywhere else.
+
 ## Verdicts are result objects, not dictionaries
 
 The five `verify_*` functions returned `dict[str, Any]` and now return a
@@ -377,6 +395,6 @@ every rename above was checked to return what its predecessor returned. If a
 result moves after you finish the upgrade, that is a defect and it is worth
 [reporting](https://github.com/jmrplens/phonometry/issues).
 
-`.plot()`, `.report()` and the `Signal` contract are untouched, and so is
-every formula. 4.0 rearranged the furniture and put the unit on the label; it
-did not recompute anything.
+What each `.plot()` draws and each `.report()` prints is untouched, the
+`Signal` contract too, and so is every formula. 4.0 rearranged the furniture
+and put the unit on the label; it did not recompute anything.

@@ -1183,7 +1183,9 @@ class LowFrequencyIntensityResult:
             absorbing_specimen_surface=self.absorbing_specimen_surface
         )
 
-    def plot(self, ax: Axes | None = None, language: str = "en", **kwargs: Any) -> Axes:
+    def plot(
+        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    ) -> Axes:
         """Draw the index per band, hatching any band Clause 6.4.2 refuses.
 
         :param ax: Existing axes, or ``None`` to create a figure.
@@ -1379,7 +1381,9 @@ class LowFrequencyElementResult:
             absorbing_specimen_surface=self.absorbing_specimen_surface
         )
 
-    def plot(self, ax: Axes | None = None, language: str = "en", **kwargs: Any) -> Axes:
+    def plot(
+        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    ) -> Axes:
         """Draw ``DI,n,e`` per band, hatching any band Clause 6.4.2 refuses.
 
         :param ax: Existing axes, or ``None`` to create a figure.

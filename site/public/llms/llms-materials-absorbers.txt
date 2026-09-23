@@ -1578,7 +1578,8 @@ chain = layer.transfer_matrix                       # shape (2, 2, len(f))
 tm = materials.TransferMatrix(t11=chain[0, 0], t12=chain[0, 1],
                               t21=chain[1, 0], t22=chain[1, 1])
 print(np.round(float(tm.transmission_loss(407.0)[-1]), 1))   # 9.7 dB at 1.6 kHz
-tm.plot(f, 407.0)   # TL(f) with the hard-backed absorption overlaid
+# TL(f) with the hard-backed absorption overlaid
+tm.plot(frequency=f, characteristic_impedance=407.0)
 ```
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/transfer_matrix_tl_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/transfer_matrix_tl.svg" alt="ASTM E2611 transfer-matrix quantities of a 50 mm porous layer: the normal-incidence transmission loss rising from about 6.6 dB at 200 Hz to over 9 dB at 1.6 kHz on the left axis, and the hard-backed absorption coefficient rising from 0.19 to about 0.97 on the right axis" width="80%"></picture>
@@ -1603,7 +1604,7 @@ tm = materials.TransferMatrix(t11=chain[0, 0], t12=chain[0, 1],
                               t21=chain[1, 0], t22=chain[1, 1])
 
 # One line: TL(f) on the left axis, hard-backed absorption on the right.
-tm.plot(f, 407.0)
+tm.plot(frequency=f, characteristic_impedance=407.0)
 plt.show()
 
 # By hand, from the matrix methods:

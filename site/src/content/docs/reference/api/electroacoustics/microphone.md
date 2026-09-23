@@ -196,9 +196,9 @@ plane-wave sensitivity level minus the directivity index (13.2).
 
 ```python
 MicrophoneCharacteristics.plot(
-    quantity: str = 'response',
     ax: Axes | None = None,
     *,
+    quantity: str = 'response',
     language: str = 'en',
     **kwargs: Any,
 ) -> Axes
@@ -218,8 +218,8 @@ against sound pressure level).
 
 | Name | Description |
 | :--- | :--- |
-| `quantity` | Which characteristic to plot (see above). |
 | `ax` | Existing axes to draw on, or `None` for a fresh figure (a polar axes is created for `"directivity"`). |
+| `quantity` | Which characteristic to plot (see above). |
 | `language` | Label language, `"en"` (default) or `"es"`. |
 
 **Returns:** The axes the characteristic was drawn on.

@@ -411,7 +411,7 @@ def _transfer_matrix() -> Axes:
     series = (rho_c * 10.0 * (1.0 - u)).astype(np.complex128)
     shunt = (1.0 / (rho_c * (1.0 + 5.0 * (1.0 - u)))).astype(np.complex128)
     matrix = ph.materials.TransferMatrix(one, series, shunt, one)
-    return matrix.plot(f, rho_c)
+    return matrix.plot(frequency=f, characteristic_impedance=rho_c)
 
 
 def _room_to_room() -> Axes:

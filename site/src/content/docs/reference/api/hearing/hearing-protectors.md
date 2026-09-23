@@ -142,6 +142,7 @@ Assumed protection values of a hearing protector (Clause 5).
 ```python
 AssumedProtectionResult.plot(
     ax: Axes | None = None,
+    *,
     language: str = 'en',
     **kwargs: Any,
 ) -> Axes
@@ -327,6 +328,7 @@ The three `HML` attenuation values of a protector (Clause 7.2).
 ```python
 HMLRatingResult.plot(
     ax: Axes | None = None,
+    *,
     language: str = 'en',
     **kwargs: Any,
 ) -> Axes
@@ -433,6 +435,7 @@ The A-weighted level left at the ear behind a protector.
 ```python
 ProtectedLevelResult.plot(
     ax: Axes | None = None,
+    *,
     language: str = 'en',
     **kwargs: Any,
 ) -> Axes
@@ -610,6 +613,7 @@ The single number rating of a protector (Clause 8.2).
 ```python
 SNRRatingResult.plot(
     ax: Axes | None = None,
+    *,
     language: str = 'en',
     **kwargs: Any,
 ) -> Axes

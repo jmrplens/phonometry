@@ -238,6 +238,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- **Every `.plot()` takes the axes first and the rest by name.** Two hundred
+  and fifty-four results read `plot(ax=None, *, language=..., ...)`, and nine
+  did not. `LoudspeakerCharacteristics.plot` and `MicrophoneCharacteristics.plot`
+  put `quantity` before the axes and `TransferMatrix.plot` put the frequency
+  vector and the characteristic impedance there, so the `plot(ax)` every other
+  result accepts handed the axes to the wrong parameter. They are
+  `plot(ax, *, quantity=...)` and
+  `plot(ax, *, frequency=..., characteristic_impedance=...)` now. The four
+  hearing-protector ratings and the two low-frequency intensity results took
+  `language` by position, so `plot(ax, "es")` worked on those six and nowhere
+  else; it is keyword-only there too. A test walks every public class of the
+  installed package and fails on a `plot` whose first parameter is not `ax`
+  or whose other parameters can be passed by position.
+
 - **`vibration.verify_running_rms_decay` returns a verdict object.** It was
   the last `verify_*` still answering with a bare `bool`, so a caller learnt
   whether a meter passed and lost the printed interval and the measured time

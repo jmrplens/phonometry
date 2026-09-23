@@ -379,16 +379,19 @@ class ResilientLayer(CatalogueRow):
     stiffness ``s'`` of the installed layer, whose pore air cannot, by way of
     the lateral airflow resistivity ``r`` and the enclosed-gas stiffness
     ``s'a``. Formula 2 takes ``s'``. A source that prints ``s'`` fills
-    :attr:`dynamic_stiffness_n_m3`, which is what Hopkins Table A3 does; a test
-    report that gives only ``s't`` fills :attr:`apparent_dynamic_stiffness_n_m3`,
-    and :meth:`natural_frequency` then needs ``r`` to go on.
+    :attr:`dynamic_stiffness_n_m3`, which is what Hopkins Table A3 does. A test
+    report gives ``s't`` and ``s'a``, and ``s'`` only "if possible" (clause
+    9 e)); one that leaves ``s'`` out, like a sheet that gives ``s't`` alone,
+    fills :attr:`apparent_dynamic_stiffness_n_m3`, and :meth:`natural_frequency`
+    then needs ``r``, and below 100 kPa.s/m2 the report's ``s'a``, to go on.
 
     :ivar dynamic_stiffness_n_m3: ``s'``, the dynamic stiffness per unit area
         of the installed layer (clause 8.2), in N/m3.
     :ivar apparent_dynamic_stiffness_n_m3: ``s't``, the apparent dynamic
         stiffness per unit area of the test specimen (Formula 4), in N/m3. Not
         ``s'``: for an air-permeable layer the two differ by the enclosed-gas
-        term, which is often the larger part.
+        term ``s'a``, which "often forms a significant percentage of ``s'``"
+        (Hopkins 2007, printed p. 360).
     :ivar density_kg_m3: Specimen density, in kg/m3.
     :ivar thickness_mm: Nominal uncompressed thickness, in millimetres.
     """
@@ -438,17 +441,26 @@ class ResilientLayer(CatalogueRow):
         :return: The natural frequency ``f0``, in hertz.
         :raises CatalogueError: for a row that gives only ``s't`` when no
             resistivity is passed, saying that ``s't`` is not ``s'`` and what
-            to pass.
+            to pass; and for a row with no value of either stiffness whose
+            ``s't`` cell holds something else, such as a declared bound, which
+            it names.
         :raises ValueError: for a row that gives neither stiffness, naming
-            what its source had in that cell; for a row that gives ``s'`` when
-            a keyword is passed; for a resistivity below 100 kPa.s/m2 with no
-            ``s'a``; and for a non-positive mass or resistivity.
+            what its source had in the ``s'`` cell; for a row that gives
+            ``s'`` when either keyword is passed; for a resistivity below
+            100 kPa.s/m2 with no ``s'a``; and for a non-positive mass or
+            resistivity.
         """
         mass_per_area_kg_m2 = require_positive(
             mass_per_area_kg_m2, "mass_per_area_kg_m2"
         )
         apparent = self.apparent_dynamic_stiffness_n_m3
-        if self.dynamic_stiffness_n_m3 is not None or apparent is None:
+        if self.dynamic_stiffness_n_m3 is None and apparent is not None:
+            stiffness = self._installed(
+                apparent, airflow_resistivity_pa_s_m2, gas_stiffness_n_m3
+            )
+            if math.isnan(stiffness):
+                return float("nan")
+        else:
             if self.dynamic_stiffness_n_m3 is not None and (
                 airflow_resistivity_pa_s_m2 is not None
                 or gas_stiffness_n_m3 is not None
@@ -461,14 +473,49 @@ class ResilientLayer(CatalogueRow):
                     "read them here."
                 )
                 raise ValueError(msg)
+            self._refuse_a_hedged_apparent_stiffness()
             stiffness = self.printed("dynamic_stiffness_n_m3", wanted_by=_FORMULA_2)
-        else:
-            stiffness = self._installed(
-                apparent, airflow_resistivity_pa_s_m2, gas_stiffness_n_m3
-            )
-            if math.isnan(stiffness):
-                return float("nan")
         return float(natural_frequency(stiffness, mass_per_area_kg_m2))
+
+    def _refuse_a_hedged_apparent_stiffness(self) -> None:
+        """Refuse a row whose only stiffness cell holds something but a value.
+
+        A row with a value of neither stiffness is refused by
+        :meth:`~phonometry.io.CatalogueRow.printed` for ``s'``, the quantity
+        Formula 2 takes. When the page has nothing in the ``s'`` cell and
+        something other than a number in the ``s't`` cell, such as the bound
+        a product declaration prints, that refusal would say the page gives
+        no stiffness at all; this one names the ``s't`` cell and what it
+        holds instead, and says why no keyword turns it into ``s'``.
+
+        :raises CatalogueError: for such a row.
+        """
+        installed = "dynamic_stiffness_n_m3"
+        field_name = "apparent_dynamic_stiffness_n_m3"
+        if self._holds_a_hedge(installed) or not self._holds_a_hedge(field_name):
+            return
+        msg = (
+            f"{self.name!r} gives no value of the apparent dynamic stiffness "
+            f"s't that {_FORMULA_2} would take through clause 8.2, "
+            f"and no dynamic stiffness s' either: for {field_name}, "
+            f"{self.why_missing(field_name)}. s't is not s', and what that cell "
+            "holds is not a value of either, so no airflow_resistivity_pa_s_m2 "
+            f"or gas_stiffness_n_m3 can turn it into s' ({self.source})."
+        )
+        raise CatalogueError(msg)
+
+    def _holds_a_hedge(self, field_name: str) -> bool:
+        """Whether the page has something other than a value in this cell."""
+        return any(
+            field_name in hedge
+            for hedge in (
+                self.ranges,
+                self.reported,
+                self.unquantified,
+                self.not_derivable,
+                self.misprinted,
+            )
+        )
 
     def _installed(
         self,

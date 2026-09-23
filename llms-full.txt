@@ -35437,29 +35437,41 @@ compliance calculation. The softest row in the table, 40 mm glass wool at
 polyethylene foam at 115 MN/m³, at 155.8 Hz; that spread is the whole design
 question.
 
-**A layer that gives only $s'_\mathrm{t}$.** A test report can give the apparent
-stiffness of its specimen and nothing else, and $s'_\mathrm{t}$ is not the $s'$
-that Formula 2 takes: for an air-permeable layer the enclosed gas is often the
-larger part of $s'$. A `ResilientLayer` built from such a report holds it in
+**A layer that gives only $s'_\mathrm{t}$.** A test report to EN 29052-1 gives
+the apparent stiffness $s'_\mathrm{t}$ of its specimen and the enclosed-gas
+stiffness $s'_\mathrm{a}$, and it gives $s'$ only "if possible" (clause 9 e));
+a sheet that quotes $s'_\mathrm{t}$ alone gives less than the report it came
+from. Either way $s'_\mathrm{t}$ is not the $s'$ that Formula 2 takes: for an
+air-permeable layer the enclosed gas adds to it, and Hopkins notes that it
+often forms a significant percentage of $s'$ (printed p. 360). A
+`ResilientLayer` built from such a source holds it in
 `apparent_dynamic_stiffness_n_m3`, and its `natural_frequency` refuses to go on
 until it is given the lateral airflow resistivity, in Pa·s/m² as ISO 9053
-reports it, and, below 100 kPa·s/m², the enclosed-gas stiffness of Formula 7.
-With them it takes the clause 8.2 branch that resistivity picks:
+reports it, and, below 100 kPa·s/m², the enclosed-gas stiffness: the
+$s'_\mathrm{a}$ the report states, or Formula 7 on the thickness under the
+test load, which clause 9 b) has the report state as well and which is not the
+nominal thickness a product sheet prints. With them it takes the clause 8.2
+branch that resistivity picks:
 
 ```python
 from phonometry import io, materials
 
 report = materials.ResilientLayer(
-    name="Example layer 30",
+    name="Example layer",
     source="Example Acoustics Ltd test report 26-014, p. 2",
     apparent_dynamic_stiffness_n_m3=6.0e6,
-    thickness_mm=30.0,
 )
 try:
     report.natural_frequency(mass_per_area_kg_m2=120.0)
 except io.CatalogueError as refusal:
-    print(refusal)   # s't is not s': pass airflow_resistivity_pa_s_m2, gas_stiffness_n_m3
+    print(refusal)
+# 'Example layer' gives the apparent dynamic stiffness s't of a test specimen,
+# 6 MN/m3, and not the dynamic stiffness s' of the installed layer [...]: pass
+# airflow_resistivity_pa_s_m2 and, below 100 kPa.s/m2 (100000 Pa.s/m2),
+# gas_stiffness_n_m3, the enclosed-gas stiffness s'a of Formula 7 [...]
 
+# d = 30 mm under the test load, from the report (clause 9 b)); an s'a the
+# report states (clause 9 e)) goes in as gas_stiffness_n_m3 the same way.
 gas = materials.enclosed_gas_stiffness(thickness_m=0.030, porosity=0.9)   # 3.7 MN/m3
 f0 = report.natural_frequency(
     mass_per_area_kg_m2=120.0,
@@ -58360,7 +58372,9 @@ credited the way the others are:
 Hopkins Table A3 prints $s'$, the stiffness of the installed layer as the
 book's own list of symbols defines it, so its fifteen rows still hold
 `dynamic_stiffness_n_m3` and return the natural frequencies they returned
-before.
+before. Four of them hold a density the page prints once for their block and
+leaves blank on their own line, and `layer.carried["density_kg_m3"]` now
+names the row that prints it; the density is the same.
 
 ```python
 from phonometry import materials

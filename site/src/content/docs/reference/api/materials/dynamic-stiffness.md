@@ -443,16 +443,18 @@ pore air escapes at its sides (Formula 4); clause 8.2 turns it into the
 stiffness `s'` of the installed layer, whose pore air cannot, by way of
 the lateral airflow resistivity `r` and the enclosed-gas stiffness
 `s'a`. Formula 2 takes `s'`. A source that prints `s'` fills
-`dynamic_stiffness_n_m3`, which is what Hopkins Table A3 does; a test
-report that gives only `s't` fills `apparent_dynamic_stiffness_n_m3`,
-and [`natural_frequency`](/phonometry/reference/api/materials/dynamic-stiffness/#natural_frequency) then needs `r` to go on.
+`dynamic_stiffness_n_m3`, which is what Hopkins Table A3 does. A test
+report gives `s't` and `s'a`, and `s'` only "if possible" (clause
+9 e)); one that leaves `s'` out, like a sheet that gives `s't` alone,
+fills `apparent_dynamic_stiffness_n_m3`, and [`natural_frequency`](/phonometry/reference/api/materials/dynamic-stiffness/#natural_frequency)
+then needs `r`, and below 100 kPa.s/m2 the report's `s'a`, to go on.
 
 **Attributes**
 
 | Name | Description |
 | :--- | :--- |
 | `dynamic_stiffness_n_m3` | `s'`, the dynamic stiffness per unit area of the installed layer (clause 8.2), in N/m3. |
-| `apparent_dynamic_stiffness_n_m3` | `s't`, the apparent dynamic stiffness per unit area of the test specimen (Formula 4), in N/m3. Not `s'`: for an air-permeable layer the two differ by the enclosed-gas term, which is often the larger part. |
+| `apparent_dynamic_stiffness_n_m3` | `s't`, the apparent dynamic stiffness per unit area of the test specimen (Formula 4), in N/m3. Not `s'`: for an air-permeable layer the two differ by the enclosed-gas term `s'a`, which "often forms a significant percentage of `s'`" (Hopkins 2007, printed p. 360). |
 | `density_kg_m3` | Specimen density, in kg/m3. |
 | `thickness_mm` | Nominal uncompressed thickness, in millimetres. |
 | `name` | The material as the table names it, attribution stripped. |
@@ -482,7 +484,10 @@ and [`natural_frequency`](/phonometry/reference/api/materials/dynamic-stiffness/
 ResilientLayer.basis_of(field_name: str) -> str
 ```
 
-What the source says this field is: measured, declared, estimated.
+What the source says this field is, one of [`CATALOGUE_BASES`](/phonometry/reference/api/io/io/#catalogue_bases).
+
+The five are `measured`, `declared`, `calculated`, `estimated`
+and `extended`.
 
 **Parameters**
 
@@ -490,7 +495,7 @@ What the source says this field is: measured, declared, estimated.
 | :--- | :--- |
 | `field_name` | One of the field names of this class. |
 
-**Returns:** The field's own entry in `basis`, else the row's, else the empty string, which means the source does not say. Otherwise one of [`CATALOGUE_BASES`](/phonometry/reference/api/io/io/#catalogue_bases).
+**Returns:** The field's own entry in `basis`, else the row's, else the empty string, which means the source does not say.
 
 ### ResilientLayer.is_approximate()
 
@@ -571,8 +576,8 @@ resistivity passed picks.
 
 | Exception | When |
 | :--- | :--- |
-| CatalogueError | for a row that gives only `s't` when no resistivity is passed, saying that `s't` is not `s'` and what to pass. |
-| ValueError | for a row that gives neither stiffness, naming what its source had in that cell; for a row that gives `s'` when a keyword is passed; for a resistivity below 100 kPa.s/m2 with no `s'a`; and for a non-positive mass or resistivity. |
+| CatalogueError | for a row that gives only `s't` when no resistivity is passed, saying that `s't` is not `s'` and what to pass; and for a row with no value of either stiffness whose `s't` cell holds something else, such as a declared bound, which it names. |
+| ValueError | for a row that gives neither stiffness, naming what its source had in the `s'` cell; for a row that gives `s'` when either keyword is passed; for a resistivity below 100 kPa.s/m2 with no `s'a`; and for a non-positive mass or resistivity. |
 
 ### ResilientLayer.printed()
 

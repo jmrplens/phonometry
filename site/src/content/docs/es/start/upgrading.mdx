@@ -521,7 +521,10 @@ clave y la atribución de las demás:
 La Tabla A3 de Hopkins imprime $s'$, la rigidez de la capa instalada tal como
 la define la lista de símbolos del propio libro, así que sus quince filas
 siguen guardando `dynamic_stiffness_n_m3` y devuelven las frecuencias
-naturales que devolvían.
+naturales que devolvían. Cuatro de ellas guardan una densidad que la página
+imprime una sola vez para su bloque y deja en blanco en su propia línea, y
+`layer.carried["density_kg_m3"]` nombra ahora la fila que la imprime; la
+densidad es la misma.
 
 ```python
 from phonometry import materials

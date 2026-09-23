@@ -388,15 +388,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `apparent_dynamic_stiffness_n_m3`, the apparent stiffness `s't` of a test
   specimen, beside `dynamic_stiffness_n_m3`, the `s'` of the installed layer
   that Formula 2 takes; for an air-permeable layer the two differ by the
-  enclosed-gas term, which is often the larger part. The heading of Table A3
-  prints `s'`, which the book's list of symbols defines as the installed
-  stiffness, so its fifteen rows keep their values where they were and
-  return the natural frequencies they returned. A layer that gives only `s't`
+  enclosed-gas term, which Hopkins notes often forms a significant percentage
+  of `s'`. The heading of Table A3 prints `s'`, which the book's list of
+  symbols defines as the installed stiffness, so its fifteen rows keep their
+  values where they were and return the natural frequencies they returned.
+  The four density cells the table prints once for a block and leaves blank
+  on another row of it now say so in `carried`, naming the row that prints
+  the figure; the densities are the same. A layer that gives only `s't`
   goes through clause 8.2: `natural_frequency` takes the lateral airflow
   resistivity as `airflow_resistivity_pa_s_m2`, in the unit every catalogue
   holds it in, and below 100 kPa·s/m² the enclosed-gas stiffness as
   `gas_stiffness_n_m3`, and without the resistivity it refuses with
-  `io.CatalogueError`, saying that `s't` is not `s'` and what to pass. The
+  `io.CatalogueError`, saying that `s't` is not `s'` and what to pass. A row
+  whose `s't` cell holds a declared bound rather than a value is refused by
+  name, bound included. The
   module's functions carry their units in their parameter names:
   `resonant_frequency_hz`, `total_mass_per_area_kg_m2`, `thickness_m`,
   `apparent_stiffness_n_m3`, `airflow_resistivity_kpa_s_m2`,

@@ -505,7 +505,9 @@ credited the way the others are:
 Hopkins Table A3 prints $s'$, the stiffness of the installed layer as the
 book's own list of symbols defines it, so its fifteen rows still hold
 `dynamic_stiffness_n_m3` and return the natural frequencies they returned
-before.
+before. Four of them hold a density the page prints once for their block and
+leaves blank on their own line, and `layer.carried["density_kg_m3"]` now
+names the row that prints it; the density is the same.
 
 ```python
 from phonometry import materials

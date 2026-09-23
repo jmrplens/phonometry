@@ -317,13 +317,39 @@ def one_row_shape(
 RESILIENT_LAYER_TABLE = "hopkins-2007-table-a3"
 
 
-def _resilient_layer_row(row: Row) -> Row:
+#: The density cells Table A3 prints blank, with the row of their block that
+#: prints the figure. The rows held the figure before as if each printed it.
+RESILIENT_LAYER_CARRIED: dict[str, str] = {
+    "mineral_wool_glass_36_25": (
+        "carried down the blank cell of Table A3 from the 13 mm glass-wool row "
+        "above it, which prints 36 kg/m3 once for the two rows of its block"
+    ),
+    "mineral_wool_glass_75_40": (
+        "carried down the blank cell of Table A3 from the 25 mm glass-wool row "
+        "above it, which prints 75 kg/m3 once for the two rows of its block"
+    ),
+    "rebond_foam_64_15": (
+        "carried up the blank cell of Table A3 from the 20 mm rebond-foam row "
+        "below it, which prints 64 kg/m3 once, level with the middle of the "
+        "three rows of its block"
+    ),
+    "rebond_foam_64_25": (
+        "carried down the blank cell of Table A3 from the 20 mm rebond-foam row "
+        "above it, which prints 64 kg/m3 once, level with the middle of the "
+        "three rows of its block"
+    ),
+}
+
+
+def _resilient_layer_row(key: str, row: Row) -> Row:
     """One resilient layer taken through the change that made it a catalogue row."""
     row = dict(row)
     row["table"] = RESILIENT_LAYER_TABLE
     credit = row.pop("attributed_to", "")
     if credit:
         row["attributed_to"] = {"row": credit}
+    if key in RESILIENT_LAYER_CARRIED:
+        row["carried"] = {"density_kg_m3": RESILIENT_LAYER_CARRIED[key]}
     return row
 
 
@@ -333,14 +359,18 @@ def resilient_layer_row(
     """The dump taken through the change that made the resilient layers rows.
 
     Hopkins Table A3 moved out of the module into a packaged data file and
-    its fifteen rows became catalogue rows like every other. Three things
-    moved in each of them, and nothing else may:
+    its fifteen rows became catalogue rows like every other. Four things
+    moved, and nothing else may:
 
     * the key gained the table half every catalogue key has,
       ``"hopkins-2007-table-a3/<row>"``, in the same order;
     * ``table`` names that table;
     * ``attributed_to``, a string on the four rebond foams, became the mapping
-      every other row holds, the credit covering the whole row.
+      every other row holds, the credit covering the whole row;
+    * the four rows whose density cell the page prints blank, under or over
+      the row of their block that prints it, gained a ``carried`` entry for
+      ``density_kg_m3`` naming that row (:data:`RESILIENT_LAYER_CARRIED`).
+      The density itself did not change.
 
     Every quantity became optional and none changed. The stiffness stays in
     ``dynamic_stiffness_n_m3``: the heading of Table A3 prints ``s'``, which
@@ -349,7 +379,7 @@ def resilient_layer_row(
     """
     out = {name: dict(rows) for name, rows in catalogues.items()}
     out["PUBLISHED_RESILIENT_LAYERS"] = {
-        f"{RESILIENT_LAYER_TABLE}/{key}": _resilient_layer_row(row)
+        f"{RESILIENT_LAYER_TABLE}/{key}": _resilient_layer_row(key, row)
         for key, row in catalogues["PUBLISHED_RESILIENT_LAYERS"].items()
     }
     return out

@@ -318,9 +318,9 @@ medido.
 **Ojo al prefijo.** $r$ es la magnitud que la ISO 9053 llama $\sigma$ y da
 en Pa·s/m², mientras que la EN 29052-1 la escribe $r$ y pone sus umbrales en
 **kPa·s/m²**. La biblioteca sigue a la norma y lleva la unidad en el nombre
-del argumento, `airflow_resistivity_kpa_s_m2`, el único de esta página que no
-está en SI puro, y solo lo acepta por nombre, para que la unidad quede escrita
-en la línea que lo pasa. Una lana mineral medida en 50 000 Pa·s/m² entra
+del argumento, `airflow_resistivity_kpa_s_m2`, el único argumento de las
+funciones de la EN 29052-1 que no está en SI puro, y solo lo acepta por
+nombre, para que la unidad quede escrita en la línea que lo pasa. Una lana mineral medida en 50 000 Pa·s/m² entra
 como `50.0`, no como `50000.0`; un
 [resultado de ISO 9053](/phonometry/es/materials/absorbers/airflow-resistance/)
 se convierte con `sigma / 1000`. Pasar el número en Pa·s/m² caería en la
@@ -439,30 +439,41 @@ vidrio de 40 mm con 7 MN/m³, deja esa misma losa en 38,4 Hz, y la más rígida,
 espuma de polietileno de celda cerrada de 5 mm con 115 MN/m³, en 155,8 Hz; ese
 margen es toda la cuestión de diseño.
 
-**Una capa que solo da $s'_\mathrm{t}$.** Un informe de ensayo puede dar la
-rigidez aparente de su probeta y nada más, y $s'_\mathrm{t}$ no es la $s'$ que
-toma la Fórmula 2: en una capa permeable al aire el gas encerrado suele ser la
-mayor parte de $s'$. Una `ResilientLayer` construida a partir de ese informe la
-guarda en `apparent_dynamic_stiffness_n_m3`, y su `natural_frequency` se niega
-a seguir hasta que recibe la resistividad al flujo lateral, en Pa·s/m² como la
-da la ISO 9053, y, por debajo de 100 kPa·s/m², la rigidez del gas encerrado de
-la Fórmula 7. Con ellas toma la rama del apartado 8.2 que elige esa
-resistividad:
+**Una capa que solo da $s'_\mathrm{t}$.** Un informe de ensayo según la
+EN 29052-1 da la rigidez aparente $s'_\mathrm{t}$ de su probeta y la rigidez
+del gas encerrado $s'_\mathrm{a}$, y solo da $s'$ «si es posible» (apartado
+9 e)); una ficha que cita $s'_\mathrm{t}$ sola da menos que el informe del que
+sale. En los dos casos $s'_\mathrm{t}$ no es la $s'$ que toma la Fórmula 2: en
+una capa permeable al aire el gas encerrado se le suma, y Hopkins señala que a
+menudo es un porcentaje significativo de $s'$ (p. 360 impresa). Una
+`ResilientLayer` construida a partir de esa fuente la guarda en
+`apparent_dynamic_stiffness_n_m3`, y su `natural_frequency` se niega a seguir
+hasta que recibe la resistividad al flujo lateral, en Pa·s/m² como la da la
+ISO 9053, y, por debajo de 100 kPa·s/m², la rigidez del gas encerrado: la
+$s'_\mathrm{a}$ que da el informe, o la Fórmula 7 con el espesor bajo la carga
+de ensayo, que el apartado 9 b) también pide al informe y que no es el espesor
+nominal que imprime una ficha de producto. Con ellas toma la rama del apartado
+8.2 que elige esa resistividad:
 
 ```python
 from phonometry import io, materials
 
 report = materials.ResilientLayer(
-    name="Example layer 30",
+    name="Example layer",
     source="Example Acoustics Ltd test report 26-014, p. 2",
     apparent_dynamic_stiffness_n_m3=6.0e6,
-    thickness_mm=30.0,
 )
 try:
     report.natural_frequency(mass_per_area_kg_m2=120.0)
 except io.CatalogueError as refusal:
-    print(refusal)   # s't no es s': pasa airflow_resistivity_pa_s_m2, gas_stiffness_n_m3
+    print(refusal)
+# 'Example layer' gives the apparent dynamic stiffness s't of a test specimen,
+# 6 MN/m3, and not the dynamic stiffness s' of the installed layer [...]: pass
+# airflow_resistivity_pa_s_m2 and, below 100 kPa.s/m2 (100000 Pa.s/m2),
+# gas_stiffness_n_m3, the enclosed-gas stiffness s'a of Formula 7 [...]
 
+# d = 30 mm bajo la carga de ensayo, del informe (apartado 9 b)); una s'a
+# que da el informe (apartado 9 e)) entra igual, como gas_stiffness_n_m3.
 gas = materials.enclosed_gas_stiffness(thickness_m=0.030, porosity=0.9)   # 3,7 MN/m3
 f0 = report.natural_frequency(
     mass_per_area_kg_m2=120.0,

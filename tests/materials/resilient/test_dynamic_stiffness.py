@@ -361,6 +361,29 @@ class TestResilientLayerStiffness:
             "the page does not give it"
         )
 
+    def test_a_density_printed_once_for_a_block_is_carried(self) -> None:
+        """A blank density cell holds its block's figure and says which row prints it.
+
+        Table A3 prints 36, 75 and 64 kg/m3 once for the rows of their block
+        and leaves the cell blank on the others. Those rows hold the figure,
+        marked ``carried`` with the row it was read from, as every packaged
+        table does with a cell left blank under a block; no other row, and no
+        other field, carries anything.
+        """
+        layers = list(materials.PUBLISHED_RESILIENT_LAYERS.values())
+        for position, layer in enumerate(layers):
+            printing = ref.HOPKINS_TABLE_A3_BLANK_DENSITY.get(position)
+            if printing is None:
+                assert not layer.carried, layer.name
+                continue
+            assert list(layer.carried) == ["density_kg_m3"], position
+            _, density, thickness, _ = ref.HOPKINS_TABLE_A3_MN_PER_M3[printing]
+            assert layer.density_kg_m3 == density
+            text = layer.carried["density_kg_m3"]
+            assert f"from the {int(thickness)} mm" in text, text
+            assert f"prints {int(density)} kg/m3 once" in text, text
+            assert not layer.is_derived("density_kg_m3")
+
     def test_the_key_says_which_table_and_which_specimen(self) -> None:
         """``<table>/<material>_<density>_<thickness>``, because the print does not.
 
@@ -426,11 +449,22 @@ class TestResilientLayerStiffness:
                 assert layer.natural_frequency(mass) == before, (key, mass)
                 assert layer.natural_frequency(mass_per_area_kg_m2=mass) == before
 
-    def test_a_row_with_s_prime_refuses_the_resistivity(self) -> None:
-        """``r`` only turns ``s't`` into ``s'``; on an ``s'`` row nothing reads it."""
+    @pytest.mark.parametrize(
+        "keyword",
+        [
+            {"airflow_resistivity_pa_s_m2": 50_000.0},
+            {"gas_stiffness_n_m3": 3.0e6},
+            {"airflow_resistivity_pa_s_m2": 50_000.0, "gas_stiffness_n_m3": 3.0e6},
+        ],
+        ids=["r", "s'a", "both"],
+    )
+    def test_a_row_with_s_prime_refuses_the_keywords(
+        self, keyword: dict[str, float]
+    ) -> None:
+        """``r`` and ``s'a`` only turn ``s't`` into ``s'``; on an ``s'`` row nothing reads them."""
         layer = materials.resilient_layer(_ROCK_60_30)
         with pytest.raises(ValueError, match=r"which Formula 2 takes as it is"):
-            layer.natural_frequency(100.0, airflow_resistivity_pa_s_m2=50_000.0)
+            layer.natural_frequency(100.0, **keyword)
 
     def test_lookup_accepts_a_key_or_a_layer(self) -> None:
         layer = materials.resilient_layer(f"{_TABLE_A3}/mineral_wool_glass_75_40")
@@ -461,7 +495,7 @@ class TestResilientLayerStiffness:
 
     def test_the_credit_is_frozen(self) -> None:
         layer = materials.PUBLISHED_RESILIENT_LAYERS[f"{_TABLE_A3}/rebond_foam_64_20"]
-        with pytest.raises(TypeError):
+        with pytest.raises(TypeError, match=r"does not support item assignment"):
             layer.attributed_to["row"] = "someone else"  # type: ignore[index]
 
     def test_a_layer_is_a_catalogue_row(self) -> None:
@@ -512,8 +546,10 @@ class TestResilientLayerStiffness:
 # ---------------------------------------------------------------------------
 
 #: A test report's apparent stiffness, and the floor and the layer it is for:
-#: a 30 mm layer of porosity 0.9 under a 120 kg/m2 screed, the standard's
-#: 0,1 MPa atmosphere. Nothing below is read from the library but the result.
+#: a layer 30 mm thick under the test load (the ``d`` of Formula 7, which
+#: clause 9 b) has the report state), of porosity 0.9, under a 120 kg/m2
+#: screed, in the standard's 0,1 MPa atmosphere. Nothing below is read from
+#: the library but the result.
 _S_T = 6.0e6
 _FLOOR = 120.0
 _P0 = 1.0e5
@@ -522,12 +558,11 @@ _EPSILON = 0.9
 
 
 def _apparent_only() -> materials.ResilientLayer:
-    """A layer as a test report that gives ``s't`` and nothing else prints it."""
+    """A layer whose source gives ``s't`` and leaves ``s'`` out."""
     return materials.ResilientLayer(
         name="Example layer 30",
         source="Example Acoustics Ltd test report 26-014, p. 2",
         apparent_dynamic_stiffness_n_m3=_S_T,
-        thickness_mm=30.0,
     )
 
 
@@ -661,6 +696,54 @@ class TestApparentStiffnessRow:
         )
         with pytest.raises(
             ValueError, match=r"prints an upper bound of 9e\+06 and no value"
+        ):
+            layer.natural_frequency(_FLOOR)
+
+    @pytest.mark.parametrize(
+        "keyword",
+        [{}, {"airflow_resistivity_pa_s_m2": 50_000.0, "gas_stiffness_n_m3": 3.0e6}],
+        ids=["bare", "with r and s'a"],
+    )
+    def test_a_bound_on_s_t_is_named_and_is_not_s_prime(
+        self, keyword: dict[str, float]
+    ) -> None:
+        """A declared bound on ``s't`` is refused by name, keywords or not.
+
+        No value of either stiffness is on the row, so there is nothing for
+        ``r`` and ``s'a`` to act on; the refusal names the ``s't`` cell and
+        its bound rather than saying the page gives no stiffness at all.
+        """
+        layer = materials.ResilientLayer(
+            name="Example layer 25",
+            source="Example Acoustics Ltd declaration of performance, p. 1",
+            ranges={"apparent_dynamic_stiffness_n_m3": (None, 9.0e6)},
+            bounded_above=frozenset({"apparent_dynamic_stiffness_n_m3"}),
+        )
+        with pytest.raises(
+            CatalogueError,
+            match=(
+                r"for apparent_dynamic_stiffness_n_m3, the page prints an upper "
+                r"bound of 9e\+06 and no value\. s't is not s'"
+            ),
+        ):
+            layer.natural_frequency(_FLOOR, **keyword)
+
+    def test_a_bound_on_s_prime_is_named_before_one_on_s_t(self) -> None:
+        """With both cells hedged, the refusal is the one for ``s'``, which Formula 2 takes."""
+        layer = materials.ResilientLayer(
+            name="Example layer 25",
+            source="Example Acoustics Ltd declaration of performance, p. 1",
+            ranges={
+                "dynamic_stiffness_n_m3": (None, 9.0e6),
+                "apparent_dynamic_stiffness_n_m3": (None, 7.0e6),
+            },
+            bounded_above=frozenset(
+                {"dynamic_stiffness_n_m3", "apparent_dynamic_stiffness_n_m3"}
+            ),
+        )
+        with pytest.raises(
+            ValueError,
+            match=r"has no dynamic_stiffness_n_m3, .*upper bound of 9e\+06",
         ):
             layer.natural_frequency(_FLOOR)
 

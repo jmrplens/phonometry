@@ -116,12 +116,12 @@ def test_table_2_and_the_counts_of_7_3_and_9_3() -> None:
 
 
 def test_table_2_intervals_are_about_two_standard_errors() -> None:
-    """The printed intervals are what their NOTE's vehicle counts give.
+    """The printed intervals follow from their NOTE's vehicle counts, roughly.
 
-    About 1,96 standard deviations over the root of 100 cars and of 40 heavy
-    vehicles of each type; that the heavy ones print 0,7 rather than 0,6 is
-    the pre-normative research the clause quotes, which a line read away from
-    its mean speed widens.
+    1,96 standard deviations over the root of 100 cars rounds to the printed
+    0,3 dB. Over the root of 40 heavy vehicles it gives 0,62 dB where 0,7 dB
+    is printed: 9.6 reports the findings of research rather than this
+    arithmetic, so the heavy intervals are only held to be the next tenth up.
     """
     car = 1.96 * SPB_VEHICLE_STANDARD_DEVIATIONS_DB["1"] / math.sqrt(100)
     heavy = 1.96 * SPB_VEHICLE_STANDARD_DEVIATIONS_DB["2a"] / math.sqrt(40)

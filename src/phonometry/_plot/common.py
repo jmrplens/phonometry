@@ -33,8 +33,10 @@ if TYPE_CHECKING:
     from types import ModuleType
 
     from matplotlib.axes import Axes
+    from matplotlib.collections import Collection
     from matplotlib.container import BarContainer
     from matplotlib.legend import Legend
+    from matplotlib.lines import Line2D
     from matplotlib.path import Path
     from matplotlib.transforms import Bbox
     from matplotlib.typing import ColorType, LegendLocType
@@ -1504,9 +1506,46 @@ _NO_MARKER: Final = frozenset({"", " ", "None", "none"})
 _POINTS_PER_INCH: Final = 72.0
 
 
-def _drawn_marks(
-    ax: Axes, pixels_per_point: float
-) -> tuple[list[tuple[Path | None, np.ndarray, float]], list[Bbox]]:
+#: One mark a legend box can close over: the path it can cross (``None`` for
+#: markers, which have no line between them), the vertices it can cover, and
+#: how far a vertex reaches past its centre in display units.
+type _Mark = tuple[Path | None, np.ndarray, float]
+
+
+def _line_marks(line: Line2D, pixels_per_point: float) -> list[_Mark]:
+    """The stroke of *line* and, when it draws them, its markers."""
+    transform = line.get_transform()
+    # The path of a stepped line already runs through its steps.
+    stroke = transform.transform_path(line.get_path())
+    marks: list[_Mark] = [(stroke, np.asarray(stroke.vertices), 0.0)]
+    if str(line.get_marker()) not in _NO_MARKER:
+        size = line.get_markersize() + line.get_markeredgewidth()
+        centres = transform.transform(np.asarray(line.get_xydata()))
+        marks.append((None, centres, 0.5 * size * pixels_per_point))
+    return marks
+
+
+def _collection_marks(collection: Collection, pixels_per_point: float) -> list[_Mark]:
+    """The outlines of a line or polygon collection, or the markers of a scatter."""
+    from matplotlib.collections import LineCollection, PathCollection, PolyCollection
+
+    if isinstance(collection, LineCollection | PolyCollection):
+        transform = collection.get_transform()
+        outlines = [transform.transform_path(path) for path in collection.get_paths()]
+        return [(outline, np.asarray(outline.vertices), 0.0) for outline in outlines]
+    offsets = np.ma.filled(
+        np.ma.asarray(collection.get_offsets(), dtype=np.float64), np.nan
+    ).reshape(-1, 2)
+    reach = 0.0
+    if isinstance(collection, PathCollection) and collection.get_sizes().size:
+        # A scatter size is the area of the marker in square points.
+        side = float(np.sqrt(np.max(collection.get_sizes())))
+        reach = 0.5 * side * pixels_per_point
+    centres = collection.get_offset_transform().transform(offsets)
+    return [(None, centres, reach)]
+
+
+def _drawn_marks(ax: Axes, pixels_per_point: float) -> tuple[list[_Mark], list[Bbox]]:
     """What *ax* has drawn, in display coordinates, for a legend box to avoid.
 
     Every artist is read through its own transform, which is what puts the
@@ -1522,22 +1561,13 @@ def _drawn_marks(
         corner of a line. The extents are those of the bars and of the texts.
         A hidden artist and an empty text are left out, since neither is drawn.
     """
-    from matplotlib.collections import LineCollection, PathCollection, PolyCollection
     from matplotlib.patches import Rectangle
 
-    marks: list[tuple[Path | None, np.ndarray, float]] = []
+    marks: list[_Mark] = []
     extents: list[Bbox] = []
     for line in ax.lines:
-        if not line.get_visible():
-            continue
-        transform = line.get_transform()
-        # The path of a stepped line already runs through its steps.
-        stroke = transform.transform_path(line.get_path())
-        marks.append((stroke, np.asarray(stroke.vertices), 0.0))
-        if str(line.get_marker()) not in _NO_MARKER:
-            size = line.get_markersize() + line.get_markeredgewidth()
-            centres = transform.transform(np.asarray(line.get_xydata()))
-            marks.append((None, centres, 0.5 * size * pixels_per_point))
+        if line.get_visible():
+            marks.extend(_line_marks(line, pixels_per_point))
     for patch in ax.patches:
         if not patch.get_visible():
             continue
@@ -1547,24 +1577,8 @@ def _drawn_marks(
             outline = patch.get_transform().transform_path(patch.get_path())
             marks.append((outline, np.asarray(outline.vertices), 0.0))
     for collection in ax.collections:
-        if not collection.get_visible():
-            continue
-        if isinstance(collection, LineCollection | PolyCollection):
-            transform = collection.get_transform()
-            for path in collection.get_paths():
-                outline = transform.transform_path(path)
-                marks.append((outline, np.asarray(outline.vertices), 0.0))
-            continue
-        offsets = np.ma.filled(
-            np.ma.asarray(collection.get_offsets(), dtype=np.float64), np.nan
-        ).reshape(-1, 2)
-        reach = 0.0
-        if isinstance(collection, PathCollection) and collection.get_sizes().size:
-            # A scatter size is the area of the marker in square points.
-            side = float(np.sqrt(np.max(collection.get_sizes())))
-            reach = 0.5 * side * pixels_per_point
-        centres = collection.get_offset_transform().transform(offsets)
-        marks.append((None, centres, reach))
+        if collection.get_visible():
+            marks.extend(_collection_marks(collection, pixels_per_point))
     extents.extend(
         text.get_window_extent()
         for text in ax.texts
@@ -1573,11 +1587,7 @@ def _drawn_marks(
     return marks, extents
 
 
-def _legend_badness(
-    box: Bbox,
-    marks: list[tuple[Path | None, np.ndarray, float]],
-    extents: list[Bbox],
-) -> int:
+def _legend_badness(box: Bbox, marks: list[_Mark], extents: list[Bbox]) -> int:
     """How much of what is drawn a legend at *box* would close over.
 
     matplotlib's own count for ``loc="best"``: one for every vertex inside the

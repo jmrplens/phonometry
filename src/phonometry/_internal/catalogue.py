@@ -323,6 +323,25 @@ class CatalogueRow:
         for name in _MAPPINGS:
             object.__setattr__(self, name, MappingProxyType(dict(getattr(self, name))))
         self._check_range_ends()
+        self._check_basis()
+
+    def _check_basis(self) -> None:
+        """Refuse a basis outside :data:`CATALOGUE_BASES`.
+
+        The catalogue page and every reader of :meth:`basis_of` act on these
+        five words only, so any other one would reach them as a claim nobody
+        can read, and a misspelt ``"estimate"`` would publish an estimate as
+        a printed number.
+
+        :raises CatalogueError: naming the field and the word.
+        """
+        for field_name, basis in self.basis.items():
+            if basis not in CATALOGUE_BASES:
+                msg = (
+                    f"{self.name!r}: the basis of {field_name!r} is {basis!r}, "
+                    f"which is not one of {', '.join(CATALOGUE_BASES)}"
+                )
+                raise CatalogueError(msg)
 
     def _check_range_ends(self) -> None:
         """Refuse a range missing the end the page printed.

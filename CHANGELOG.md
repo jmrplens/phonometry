@@ -356,7 +356,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `io.CATALOGUE_BASES`. A row gains `basis`, which says what the source
   claims a value is (measured, declared, calculated, estimated or extended)
   and which `basis_of(field)` reads, answering with an empty string where the
-  source does not say. The estimate had two spellings, `SolidMaterial.estimated`
+  source does not say; a row built with any other word there raises
+  `CatalogueError`. The estimate had two spellings, `SolidMaterial.estimated`
   with `is_estimate` and `OrthotropicWood.estimated` with `is_estimated`; both
   are gone, and the 35 cells Hopkins Table A2 and Rossing Table 15.5 mark as
   estimates hold `"estimated"` in `basis`. A value the page gives in a unit

@@ -118,6 +118,15 @@ def test_no_row_class_is_slotted(cls: type) -> None:
     assert "__slots__" not in vars(cls)
 
 
+@pytest.mark.parametrize("word", ["estimate", "Measured", ""])
+def test_a_basis_outside_the_five_words_is_refused(word: str) -> None:
+    """A misspelt estimate would otherwise reach the page as a printed number."""
+    fields = {"name": "Panel core", "source": "a datasheet", "basis": {"row": word}}
+
+    with pytest.raises(io.CatalogueError, match="the basis of 'row' is"):
+        io.CatalogueRow(**fields)  # type: ignore[arg-type]
+
+
 def test_basis_answers_for_the_field_then_the_row_then_not_at_all() -> None:
     row = io.CatalogueRow(
         name="Panel core",

@@ -57,8 +57,11 @@ _WIND_REF_KNOTS = 5.0
 #: Rule-of-fives anchor at 1 kHz / 5 kn, re 1 µPa²/Hz. Wenz/Knudsen state
 #: "25 dB (5 × 5)" **re 0.0002 dyn/cm² = 20 µPa** (the historical reference
 #: pressure); converting to the ISO 18405 1 µPa reference adds
-#: ``20·lg(20) ≈ 26.02`` dB.
-_WIND_ANCHOR_DB = 25.0 + 20.0 * np.log10(20.0)
+#: ``20·lg(20) ≈ 26.02`` dB, the step between the two pressures of
+#: ISO 1683:2015 Tables 1 and 2 (note b of Table 2).
+_WIND_ANCHOR_DB = 25.0 + 20.0 * np.log10(
+    ISO1683_REFERENCE_VALUES["gas"]["sound_pressure"].value / _P_REF
+)
 
 
 def wind_noise_spectrum(

@@ -96,7 +96,10 @@ from .flanking_transmission import total_loss_factor
 
 #: EN 15657 vibratory velocity reference ``v0`` (= ISO 1683 10^-9 m/s), m/s.
 REFERENCE_VELOCITY: float = ISO1683_REFERENCE_VALUES["solid"]["velocity"].value
-#: Reference sound power ``P0``, W (ISO 1683:2015 Table 1).
+#: Reference structure-borne sound power ``P0``, W: the 10⁻¹² W EN 15657:2018
+#: clause 7.1 counts the power level ``L_Ws`` from. ISO 1683 lists no
+#: structure-borne power; the number is the airborne 1 pW of its Table 1, and
+#: it is read from there.
 REFERENCE_SOUND_POWER: float = ISO1683_REFERENCE_VALUES["gas"]["sound_power"].value
 #: Reference mobility ``Y0`` of EN 15657 Formulae (15)/(17)/(18), m/(N.s).
 REFERENCE_MOBILITY: float = 1.0

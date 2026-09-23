@@ -169,7 +169,10 @@ _HALF_BAND_RATIO: dict[str, float] = {"third": 10.0**0.05, "octave": 10.0**0.15}
 #: (Hopkins Eq. 3.92); the exact value from Eqs. (3.90)/(3.91) is 3,925.
 _SHORT_PULSE_COEFFICIENT: float = 3.9
 
-#: Reference power of the power-input level, in W (ISO 1683:2015 Table 1).
+#: Reference power of the power-input level, in W: the ``W0 = 10⁻¹² W``
+#: Hopkins (2007) Table 2.1 gives for structure-borne sound power. ISO 1683
+#: lists no structure-borne power; the number is the airborne 1 pW of its
+#: Table 1, and it is read from there.
 _POWER_REFERENCE: float = ISO1683_REFERENCE_VALUES["gas"]["sound_power"].value
 
 #: Constant of ISO 12354-2:2017 Formula (C.2), ``fo = 160 √(s'/m')`` with ``s'``

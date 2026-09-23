@@ -40,11 +40,11 @@ The values were transcribed from the Spanish text UNE-EN ISO 1683:2016, which
 adopts ISO 1683:2015 unchanged, PDF pages 8 and 9 (printed folios 8 and 9),
 and the quantity names are given here in English. A module that counts its
 decibels from a different reference keeps it, and names the document it comes
-from beside it: the railway vibration of DIN 45672-2 is referred to the
-5·10⁻⁸ m/s of DIN EN 21683 (ISO 1683:1983), and the surface velocity of
-ISO/TS 7849 and ISO 9611 to the same 5·10⁻⁸ m/s. ``scripts/check_reference_values.py``
-holds the tree to that: a reference value declared in the package either
-points at this table or says where it was read.
+from beside it: DIN 45672-2 defines its own 5·10⁻⁸ m/s for railway vibration
+(Formula (2)), and ISO/TS 7849 and ISO 9611 refer the surface velocity to the
+same 5·10⁻⁸ m/s, which is the 50 nm/s of note b of Table 3.
+``scripts/check_reference_values.py`` holds the tree to that: a reference value
+declared in the package either points at this table or says where it was read.
 """
 
 from __future__ import annotations

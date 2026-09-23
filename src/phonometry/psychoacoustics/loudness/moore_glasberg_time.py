@@ -98,7 +98,7 @@ _I_MIN, _I_MAX, _I_STEP = 1.75, 39.0, 0.25
 _I_GRID = np.round(np.arange(_I_MIN, _I_MAX + _I_STEP / 2.0, _I_STEP), 4)
 _FC_GRID = _fc_from_cam(_I_GRID)
 _ERB_GRID = _erb_bandwidth(_FC_GRID)
-_P_REF = 4.0 * _FC_GRID / _ERB_GRID  # p_u and p_l(51 dB, fc) per filter
+_P51 = 4.0 * _FC_GRID / _ERB_GRID  # p_u and p_l(51 dB, fc) per filter
 _PL51_1K = 4.0 * 1000.0 / _erb_bandwidth(np.array([1000.0]))[0]  # p_l(51 dB, 1 kHz)
 _ROEX_G_MAX = 4.0  # Formula (4): drop upper-side components g > 4 (clause 7.4)
 
@@ -517,10 +517,10 @@ def _excitation(comp_f: np.ndarray, comp_pow: np.ndarray) -> np.ndarray:
     x_source = 10.0 * np.log10(np.maximum(cumulative[hi] - cumulative[lo], 1e-300))
     g = np.abs(comp_f[None, :] - _FC_GRID[:, None]) / _FC_GRID[:, None]
     upper = comp_f[None, :] > _FC_GRID[:, None]
-    p_ref = _P_REF[:, None]
-    p_lower = p_ref - _ROEX_D * (p_ref / _PL51_1K) * (x_source[None, :] - 51.0)
+    p51 = _P51[:, None]
+    p_lower = p51 - _ROEX_D * (p51 / _PL51_1K) * (x_source[None, :] - 51.0)
     np.clip(p_lower, 0.1, 1e4, out=p_lower)
-    p = np.where(upper, p_ref, p_lower)
+    p = np.where(upper, p51, p_lower)
     weight = (1.0 + p * g) * np.exp(-p * g)
     weight[upper & (g > _ROEX_G_MAX)] = 0.0
     return np.asarray(weight @ comp_pow, dtype=np.float64)

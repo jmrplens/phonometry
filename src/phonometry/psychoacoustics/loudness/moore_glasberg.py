@@ -694,13 +694,13 @@ def _excitation_pattern(freqs: np.ndarray, levels_cochlea: np.ndarray) -> np.nda
     for k in range(_FC_GRID.size):
         fc = _FC_GRID[k]
         erb = _ERB_GRID[k]
-        p_ref = 4.0 * fc / erb  # p_u and p_l(51 dB, fc)
+        p51 = 4.0 * fc / erb  # p_u and p_l(51 dB, fc)
         g = np.abs(freqs - fc) / fc
         upper = freqs > fc
         # Lower skirt slope from the per-component source level (Formula 5).
-        p_lower = p_ref - _ROEX_D * (p_ref / _PL51_1K) * (x_source - 51.0)
+        p_lower = p51 - _ROEX_D * (p51 / _PL51_1K) * (x_source - 51.0)
         np.clip(p_lower, 0.1, 1e4, out=p_lower)
-        p = np.where(upper, p_ref, p_lower)
+        p = np.where(upper, p51, p_lower)
         weight = (1.0 + p * g) * np.exp(-p * g)
         # Integration ranges of Formula (4): drop upper-side components g > 4.
         weight = np.where(upper & (g > _ROEX_G_MAX), 0.0, weight)

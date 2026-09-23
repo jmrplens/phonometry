@@ -119,6 +119,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   same measurement found two polar plots whose radial labels, strung along
   one ray, ran together: `cnossos_rail_directivity` and `diffuser_modulation`
   keep every ring and now label every other one.
+- **A legend over two scales no longer lands on the second one.** Fourteen
+  `.plot()` methods draw two quantities against two vertical scales (the two
+  of ISO 15186-3 when the indicator was measured) and give them one legend,
+  and they asked matplotlib for the best place to put it. matplotlib looks for
+  that place among what the legend's own axes has drawn, and the second scale
+  is another axes, so its curves and bars did not count: the box could sit on
+  them as readily as on blank paper, and they were then drawn over it. The
+  legend is now placed by the same search run over both scales, so it goes
+  where it covers least of the absorption of `TransferMatrix.plot`, the noise
+  reduction of a room-to-room chain, the pressure-intensity index and the
+  field indicators of ISO 9614, the surface correction of ISO 17208-2, the
+  difference drawn by the enclosure, cabin, screen and barrier measurements,
+  the total of the detailed building predictions, the ISO 15186-3 indicator
+  and its limit, and the traffic noise spectrum of EN 1793, together with
+  what the first scale draws, and clear of all of it wherever the panel
+  leaves such a place. The place is fixed when `.plot()` returns and is the
+  same on every run; a caller who then draws more on the axes, changes their
+  limits or resizes them can move the box with `ax.get_legend().set_loc(...)`.
 - **Every fluid table carried the hedge of the first one.** The loader for
   `fluids.PUBLISHED_FLUIDS` attached Bies's warning that Table C.1 is
   "representative only" to every state it read, as a constant in the module,

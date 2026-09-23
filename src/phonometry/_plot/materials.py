@@ -20,6 +20,7 @@ from .common import (
     _new_axes,
     _plot_rating,
     format_frequency_axis,
+    place_legend_clear,
     style_default,
     style_get,
     theme_fill_alpha,
@@ -1139,7 +1140,8 @@ def plot_transfer_matrix(
     ax.set_title(_t("ASTM E2611 transfer-matrix quantities", language))
     lines, labels = ax.get_legend_handles_labels()
     tlines, tlabels = twin.get_legend_handles_labels()
-    ax.legend(lines + tlines, labels + tlabels, loc="best", fontsize="small")
+    legend = ax.legend(lines + tlines, labels + tlabels, fontsize="small")
+    place_legend_clear(legend, twin)
     ax.grid(visible=True, which="both", alpha=0.3)
     localize_axes(ax, language)
     localize_axes(twin, language)

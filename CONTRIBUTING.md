@@ -612,6 +612,25 @@ plot that reaches below zero with explicit labels, since its formatter ignores
 a hyphen in front of a number; a hyphen that is not a sign, such as the part
 number in "ISO 9053-1/-2", goes in its `ALLOWED` table with the reason.
 
+The Spanish words are read too:
+
+```bash
+python scripts/check_spanish_accents.py   # or: make spanish-accents
+```
+
+Write every Spanish string with its accents and eñes. A translation typed
+without the Spanish keyboard layout reads fine to every other gate, and
+twenty-nine labels of the building-acoustics figures shipped as "Correccion",
+"medicion" and "aqui". The check reads the translation tables of the figures,
+the diagrams and the library's renderers, with the `language == "es"` branches
+of the renderers, and fails on a form that is never correct Spanish without
+its mark: a singular in -ción or -sión, `aquí`, `señal`, `límite`, `número`,
+`máximo` and the rest of its `NEEDS_MARK` list. It leaves alone what a list
+cannot decide (`si` and `sí`, `aun` and `aún`, `mas` and `más`), so those stay
+with the author. A listed form that really is a verb, such as `limite` in "que
+limite la banda", goes in its `ALLOWED` table keyed by the string and the word,
+with the reason; an entry that no longer matches fails.
+
 ### 7c. Defaulting a style the caller may spell either way
 
 Matplotlib gives seven artist properties two names: `color` is also `c`,

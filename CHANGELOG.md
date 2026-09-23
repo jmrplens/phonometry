@@ -107,6 +107,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **The Spanish building-acoustics figures have their accents and eñes
+  back.** Twenty-nine Spanish labels of six figures had been typed without
+  them: `background_correction_regimes` read "Correccion por ruido de fondo",
+  "limite de medicion (1,3 dB fijos, senalar la banda)", "la regla in situ
+  termina aqui" and "Margen senal-fondo", and
+  `insulation_adaptation_terms`, `fast_reverberation_correction`,
+  `lab_versus_field_insulation`, `composite_facade_weak_element` and
+  `intensity_field_indicator` carried "indice", "especificacion", "hormigon",
+  "Numero", "trafico", "caida", "maximo", "energetico", "terminos",
+  "reverberacion", "transmision", "debil", "geometria", "Calificacion",
+  "Formula", "despues", "absorcion" and "presion", with "por si solo", "aun
+  subiendo" and "mas de 1 dB" where the sentence needs sí, aún and más. The
+  Spanish of those six figures now reads as Spanish, and every other Spanish
+  table of the figures, the plates and the library's plots and report fiches
+  was read word by word against a Spanish dictionary without finding another.
+  `make spanish-accents` reads the translation tables of the figures, the
+  diagrams and the library's renderers and fails on a form that is never
+  correct Spanish without its accent or eñe (a singular in -ción or -sión,
+  aquí, señal, límite, número, máximo and the rest of its list), with an
+  allow-list for the verb a listed noun can also spell that fails when an
+  entry no longer matches.
 - **No label sits on a tick label, on another label or under a line any
   more.** A label placed by hand could land on anything near it, and on 132
   drawings, 82 plates and 50 plots, one did. The "U = 1.0 dB" of

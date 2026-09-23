@@ -8,7 +8,7 @@ ISO 1996-1/-2 rating levels and adjustments.
 Two bodies of work sit with them because they are the same arithmetic applied
 by law and by a room: the Spanish noise regulation RD 1367/2007 and building
 code CTE DB-HR, whose oracles are the printed limit tables and the worked
-examples of Aviles Lopez & Perera Martin; and reverberation-time prediction
+examples of Avilés López & Perera Martín; and reverberation-time prediction
 (Sabine, Eyring, Millington, Fitzroy, Arau-Puchades), which no source carries
 as a machine-readable worked example, so those checks anchor on hand-computed
 closed-form values and on the identities the models must satisfy against each
@@ -107,8 +107,8 @@ def _chk_iso1996_2_uncertainty() -> Outcome:
 # ---------------------------------------------------------------------------
 # Spanish noise regulation (RD 1367/2007) and building code (CTE DB-HR).
 # Oracles: the printed limit tables and procedures of the two legal texts, and
-# the worked examples of Aviles Lopez & Perera Martin, "Manual de acustica
-# ambiental y arquitectonica" (Paraninfo), Ejemplos 3.1-3.3 and 7.2 / 7.4.
+# the worked examples of Avilés López & Perera Martín, "Manual de acústica
+# ambiental y arquitectónica" (Paraninfo), Ejemplos 3.1-3.3 and 7.2 / 7.4.
 # ---------------------------------------------------------------------------
 #: Manual Ejemplo 3.1: the day period of an activity on residential land,
 #: split into 2 h shut down, 6 h with the noisy machine (LAeq 50 dB, Kt 6,
@@ -257,7 +257,7 @@ def _chk_dbhr_d2m_nt_atr() -> Outcome:
 
 @register(
     "Room & building acoustics",
-    "Manual de acustica ambiental y arquitectonica, Ejemplo 7.1",
+    "Manual de acústica ambiental y arquitectónica, Ejemplo 7.1",
     "Reported R'A of the field-test wall (printed 51 dBA = R'w 52 + C -1)",
 )
 def _chk_dbhr_route_agreement() -> Outcome:
@@ -271,7 +271,7 @@ def _chk_dbhr_route_agreement() -> Outcome:
 
 @register(
     "Room & building acoustics",
-    "Manual de acustica ambiental y arquitectonica, Ejemplo 7.1",
+    "Manual de acústica ambiental y arquitectónica, Ejemplo 7.1",
     "Reported R'A,tr of the same wall (printed 47 dBA = R'w 52 + Ctr -5)",
 )
 def _chk_dbhr_ra_tr() -> Outcome:
@@ -281,7 +281,7 @@ def _chk_dbhr_ra_tr() -> Outcome:
 
 @register(
     "Room & building acoustics",
-    "CTE Catalogo de Elementos Constructivos",
+    "CTE Catálogo de Elementos Constructivos",
     "Window size correction of RA (Manual Ejemplo 7.4: 4 m2 window, -2 dB)",
 )
 def _chk_dbhr_window_correction() -> Outcome:

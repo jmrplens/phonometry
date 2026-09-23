@@ -14,7 +14,7 @@ Three families of source, and they are not of equal weight:
   of clause 9.1.5 as a worked table, in the sister standard on silencer
   guidelines. It is the only oracle here that comes from an ISO document.
 * **Holgado Palacios (2014)**, a master's thesis at the Universidad
-  Politecnica de Madrid, measured three splitter silencers in a reverberation
+  Politécnica de Madrid, measured three splitter silencers in a reverberation
   suite following UNE-EN ISO 11820 and printed the whole reduction: six
   microphone positions per band, the reverberation times, the areas and the
   resulting insertion loss. It is measured data, so its three silencers are
@@ -97,12 +97,12 @@ ISO14163_TABLE_B1_OCTAVE_ATTENUATION_DB: dict[str, float] = {
 }
 
 # ---------------------------------------------------------------------------
-# Holgado Palacios (2014), TFM, Universidad Politecnica de Madrid
+# Holgado Palacios (2014), TFM, Universidad Politécnica de Madrid
 # ---------------------------------------------------------------------------
-# Elena Holgado Palacios, "Diseno de laboratorio de ensayo para la evaluacion
-# de silenciadores in situ", Trabajo Fin de Master, Master en Ingenieria
-# Acustica de la Edificacion y Medio Ambiente, E.T.S.I. y Sistemas de
-# Telecomunicacion, Universidad Politecnica de Madrid, 2014 (oa.upm.es record
+# Elena Holgado Palacios, "Diseño de laboratorio de ensayo para la evaluación
+# de silenciadores in situ", Trabajo Fin de Máster, Máster en Ingeniería
+# Acústica de la Edificación y Medio Ambiente, E.T.S.I. y Sistemas de
+# Telecomunicación, Universidad Politécnica de Madrid, 2014 (oa.upm.es record
 # 35222). Spanish. Three splitter silencers of Transformados Acuter, types
 # 100-200, 150-200 and 200-200, measured on 29/11/2013 in the two adjacent
 # reverberation rooms of the laboratory, six microphone positions, one-third
@@ -119,7 +119,7 @@ ISO14163_TABLE_B1_OCTAVE_ATTENUATION_DB: dict[str, float] = {
 HOLGADO_ROOM_VOLUME_M3: float = 201.23
 
 # Tabla XL, printed folio 121 (PDF page 149): "Nivel de ruido recibido en las
-# distintas posiciones de microfono con silenciador de Tipo 100-200 de
+# distintas posiciones de micrófono con silenciador de Tipo 100-200 de
 # Transformados Acuter instalado en sistema". Six positions per band and the
 # energy mean of them, which the table heads "L_Is medio".
 #
@@ -465,8 +465,8 @@ FUCHS_TABLE_13_4: tuple[tuple[float, float, int, int], ...] = (
 #: The two blockage ratios of Fig. 13.25, printed on folio 542.
 FUCHS_BLOCKAGE_RATIOS: dict[str, float] = {"a": 2.0, "b": 0.5}
 
-#: Instituto Nacional de Seguridad e Higiene en el Trabajo, Nota Tecnica de
-#: Prevencion NTP 668, "Medicion del caudal en sistemas de extraccion
+#: Instituto Nacional de Seguridad e Higiene en el Trabajo, Nota Técnica de
+#: Prevención NTP 668, "Medición del caudal en sistemas de extracción
 #: localizada", 2004, Ec. 2 on PDF page 3 and Ec. 3 on the first line of PDF
 #: page 4. The web-published note carries no printed folio. The two equations
 #: are ISO 11820 Equation (28) with the unit conversion folded into the

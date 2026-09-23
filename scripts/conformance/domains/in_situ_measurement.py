@@ -33,7 +33,7 @@ same margin, and the energy subtraction itself.
 works the one-third-octave to octave conversion of 9.1.5 through three spectra
 and prints the answer, which is the only worked example of an ISO 11820
 quantity printed by ISO. Beside it are a 2014 master's thesis at the
-Universidad Politecnica de Madrid, which measured three splitter silencers to
+Universidad Politécnica de Madrid, which measured three splitter silencers to
 UNE-EN ISO 11820 and printed the whole reduction, and the textbook and
 guideline examples of the closed forms ISO 11820 shares with the rest of the
 field: the energy mean, the background subtraction, the Sabine area, the area
@@ -82,13 +82,13 @@ correction.
 
 Those documents are W. Lindeman, "Comparison of Noise Barrier Insertion-Loss
 Methodologies", Transportation Research Record 1033, Transportation Research
-Board, 1985; R. Cordero and others, "Metodologia experimental para medida
-perdidas por insercion de pantallas acusticas de carretera", 41 Congreso
-Nacional de Acustica, Leon, 2010, paper AAM_026; A. Jagniatinskis, B. Fiks and
+Board, 1985; R. Cordero and others, "Metodología experimental para medida
+pérdidas por inserción de pantallas acústicas de carretera", 41 Congreso
+Nacional de Acústica, León, 2010, paper AAM_026; A. Jagniatinskis, B. Fiks and
 M. Mickaitis, "Determination of Insertion Loss of Acoustic Barriers under
-Specific Conditions", Procedia Engineering 187, 2017; L. Rodino and F. Masson,
-"Diseno e implementacion de una barrera acustica para motores fuera de borda",
-XIII Congreso Argentino de Acustica, Buenos Aires, 2015, paper AdAA2015-A009;
+Specific Conditions", Procedia Engineering 187, 2017; L. Rodiño and F. Masson,
+"Diseño e implementación de una barrera acústica para motores fuera de borda",
+XIII Congreso Argentino de Acústica, Buenos Aires, 2015, paper AdAA2015-A009;
 and C. S. Y. Lee and G. G. Fleming, Measurement of Highway-Related Noise,
 FHWA-PD-96-046, Federal Highway Administration, May 1996. Two further
 documents corroborate constants ISO 10847 prints without an example of its
@@ -1727,7 +1727,7 @@ def _chk_jagniatinskis_campaign() -> Outcome:
 
 @register(
     _IN_SITU,
-    "Rodino & Masson (2015) Tabla 2, printed folio 7 (PDF page 7)",
+    "Rodiño & Masson (2015) Tabla 2, printed folio 7 (PDF page 7)",
     "Six printed insertion losses of a screen measured with no reference "
     "microphone, where 8.2.1 degenerates to the plain level difference",
 )

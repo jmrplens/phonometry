@@ -1146,8 +1146,8 @@ def generate_barrier_insertion_loss_methods(output_dir: str) -> None:
 def generate_rd1367_activity_assessment(output_dir: str) -> None:
     """RD 1367/2007 activity assessment against the Annex III Table B1 limits.
 
-    The worked case of Aviles Lopez & Perera Martin, Manual de acustica
-    ambiental y arquitectonica, Ejemplos 3.1 to 3.3: an activity on residential
+    The worked case of Avilés López & Perera Martín, Manual de acústica
+    ambiental y arquitectónica, Ejemplos 3.1 to 3.3: an activity on residential
     land whose day period splits into 2 h shut down, 6 h with a noisy machine
     (LKeq,Ti = 59 dB) and 4 h with the remaining sources (54 dB), giving
     LKeq,d = 57 dB and, over 303 operating days, LK,d = 56 dB. Against the

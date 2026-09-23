@@ -3,20 +3,20 @@
 
 Renders a
 :class:`~phonometry.environment.assessment.spain.ActivityAssessment` to a
-one-page PDF laid out like a Spanish *informe de ensayo acustico* / *acta de
-inspeccion acustica* of an activity.
+one-page PDF laid out like a Spanish *informe de ensayo acústico* / *acta de
+inspección acústica* of an activity.
 
 The layout follows the format that real Spanish documents converge on, rather
 than an invented one. Two families were used. The **legally prescribed content
 lists** of the municipal noise ordinances fix which fields must appear: Annex
-VIII of the Sevilla ordinance and the equivalent Annex VIII of the Almeria one
-("Contenido de los informes sobre ensayos acusticos") enumerate the inspector,
+VIII of the Sevilla ordinance and the equivalent Annex VIII of the Almería one
+("Contenido de los informes sobre ensayos acústicos") enumerate the inspector,
 the activity data (expediente, holder, location), the area under study and its
 acoustic-area type, the reference standards, the applicable limits and the rule
 that governs them, the instrumentation with its calibration check, the
 methodology and ambient conditions, the results, and the conclusions; article
 50 of the Madrid ordinance prescribes the same minimum content for the *acta de
-inspeccion*. The **per-point one-page fiche** of ENAC-accredited laboratory
+inspección*. The **per-point one-page fiche** of ENAC-accredited laboratory
 reports supplies the geometry: an identification strip, a *fases de ruido*
 result table carrying the ``Kt``/``Kf``/``Ki`` corrections next to the
 ``LKeq,Ti`` they produce, and a separate conformity table in which each

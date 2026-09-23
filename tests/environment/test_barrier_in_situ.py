@@ -451,9 +451,9 @@ PRINTED_TENTH_DB = 0.05
 
 
 def test_the_cordero_campaign_reports_its_two_insertion_losses() -> None:
-    # Cordero and others, "Metodologia experimental para medida perdidas por
-    # insercion de pantallas acusticas de carretera", 41 Congreso Nacional de
-    # Acustica, Leon, 2010, paper AAM_026. Tabla 1 on printed folio 5 (PDF
+    # Cordero and others, "Metodología experimental para medida pérdidas por
+    # inserción de pantallas acústicas de carretera", 41 Congreso Nacional de
+    # Acústica, León, 2010, paper AAM_026. Tabla 1 on printed folio 5 (PDF
     # page 5) prints all four levels of two cases, and Tabla 2 on folio 6 the
     # insertion loss each gives; the running text prints them too, "13 dBA"
     # and "9,5 dBA". The screened object is a window rather than a barrier, so
@@ -677,9 +677,9 @@ def test_the_jagniatinskis_campaign_uses_only_the_printed_difference() -> None:
 
 
 def test_a_campaign_with_no_reference_microphone_is_the_plain_difference() -> None:
-    # L. Rodino and F. Masson, "Diseno e implementacion de una barrera
-    # acustica para motores fuera de borda", XIII Congreso Argentino de
-    # Acustica, Buenos Aires, 2015, paper AdAA2015-A009. Tabla 2 on printed
+    # L. Rodiño and F. Masson, "Diseño e implementación de una barrera
+    # acústica para motores fuera de borda", XIII Congreso Argentino de
+    # Acústica, Buenos Aires, 2015, paper AdAA2015-A009. Tabla 2 on printed
     # folio 7 (PDF page 7): the level at the crew position without the screen
     # and with it, for three engine settings, unweighted and A-weighted. No
     # reference microphone was used, so 8.2.1 degenerates to the plain

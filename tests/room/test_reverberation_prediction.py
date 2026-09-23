@@ -1,7 +1,7 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
 """Tests for the reverberation-time prediction models.
 
-The source texts (Arau-Puchades 1988; Carrion Isbert; Everest) carry worked
+The source texts (Arau-Puchades 1988; Carrión Isbert; Everest) carry worked
 examples, but none is machine-readable as a clean oracle, so the suite anchors
 on hand-computed values of the closed-form expressions and on the structural
 identities that relate the models: every model collapses to Eyring for a
@@ -520,8 +520,8 @@ def test_plot_returns_axes() -> None:
 
 
 def test_sabine_manual_es_classroom_chain() -> None:
-    # Aviles Lopez & Perera Martin, Manual de acustica ambiental y
-    # arquitectonica (Paraninfo), Ejemplos 8.1 (pp. 524-525, equivalent
+    # Avilés López & Perera Martín, Manual de acústica ambiental y
+    # arquitectónica (Paraninfo), Ejemplos 8.1 (pp. 524-525, equivalent
     # absorption areas) and 8.2 (p. 549, Sabine reverberation times) for a
     # 6.0 x 10.2 m classroom: V = 214.2 m3 with the original plaster ceiling
     # and 189.7 m3 with the absorbent false ceiling. Octave bands

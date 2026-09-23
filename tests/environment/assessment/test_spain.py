@@ -10,7 +10,7 @@ tables of Annex IV A.3.3, the evaluation periods of Annex I A.1 and the
 compliance criteria of Article 25. Every table value below is transcribed from
 that text.
 
-**Aviles Lopez & Perera Martin, Manual de acustica ambiental y arquitectonica
+**Avilés López & Perera Martín, Manual de acústica ambiental y arquitectónica
 (Paraninfo), Ejemplos 3.1 to 3.3** (printed pages 171 to 175): a complete
 worked assessment of one activity, from the per-phase corrections through the
 period integration and the annual average to the Article 25 verdict. The
@@ -75,7 +75,7 @@ def test_phase_corrections_match_ejemplo_3_1() -> None:
 
 
 def test_total_correction_is_capped_at_nine_decibels() -> None:
-    """Annex IV A.3.3: "El valor maximo de la suma Kt + Kf + Ki no sera superior a 9 dB"."""
+    """Annex IV A.3.3: "El valor máximo de la corrección resultante de la suma Kt + Kf + Ki no será superior a 9 dB"."""
     assert rd.total_correction(6.0, 6.0, 6.0) == rd.RD1367_MAX_CORRECTION == 9.0
     assert rd.total_correction(6.0, 3.0, 0.0) == 9.0
     assert rd.corrected_level(50.0, kt=6.0, kf=6.0, ki=6.0) == pytest.approx(59.0)

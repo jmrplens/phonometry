@@ -132,6 +132,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   accent or eñe (a singular in -ción or -sión, aquí, señal, límite, número,
   máximo and the rest of its list), with an allow-list for the verb a listed
   noun can also spell that fails when an entry no longer matches.
+- **Spanish documents are cited under the titles they print.** The API
+  reference of `building.regulation.spain` named the *Documento Basico HR
+  Proteccion frente al ruido* of the Codigo Tecnico de la Edificacion, its
+  Catalogo de Elementos Constructivos and the worked examples of Aviles Lopez
+  and Perera Martin, and the conformance report cited their Manual de
+  acustica ambiental y arquitectonica, the Catalogo again and a paper of
+  Rodiño and Masson as "Rodino". They now read *Documento Básico HR
+  Protección frente al ruido*, Código Técnico de la Edificación, Catálogo de
+  Elementos Constructivos, Avilés López and Perera Martín, Manual de acústica
+  ambiental y arquitectónica and Rodiño & Masson, as the documents print them,
+  and so do the docstrings and comments that cite them. A conformance id now
+  writes an accented letter as its base letter, so
+  `manual-de-acustica-ambiental-y-arquitectonica-ejemplo-7-1` is still the id
+  of those rows and no id in the report moved; the 1261 checks and their
+  results are unchanged.
 - **No label sits on a tick label, on another label or under a line any
   more.** A label placed by hand could land on anything near it, and on 132
   drawings, 82 plates and 50 plots, one did. The "U = 1.0 dB" of

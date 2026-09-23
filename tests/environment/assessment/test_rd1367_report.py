@@ -10,8 +10,8 @@ all three evaluation periods still fits one page. The assessment maths itself is
 validated against the regulation and the published worked examples elsewhere
 (tests/environment/assessment/test_spain.py).
 
-The case rendered here is the worked example of Aviles Lopez & Perera Martin,
-Manual de acustica ambiental y arquitectonica, Ejemplos 3.1 to 3.3: an activity
+The case rendered here is the worked example of Avilés López & Perera Martín,
+Manual de acústica ambiental y arquitectónica, Ejemplos 3.1 to 3.3: an activity
 on residential land whose day period reaches LKeq,d = 57 dB and LK,d = 56 dB
 against a 55 dB limit, so a new activity does not comply.
 """

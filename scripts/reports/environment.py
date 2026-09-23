@@ -306,8 +306,8 @@ def _barrier_insertion_loss_example() -> tuple[object, ReportMetadata, str]:
 def _rd1367_example() -> tuple[object, ReportMetadata, str, dict[str, Any]]:
     """RD 1367/2007 fiche: the noise assessment of an activity.
 
-    The published worked case of Aviles Lopez & Perera Martin, Manual de
-    acustica ambiental y arquitectonica, Ejemplos 3.1 to 3.3: an activity on
+    The published worked case of Avilés López & Perera Martín, Manual de
+    acústica ambiental y arquitectónica, Ejemplos 3.1 to 3.3: an activity on
     residential land (acoustic area type a) open from 9 h to 21 h, with a noisy
     machine running from 9 h to 15 h. The two measured noise phases are
     LAeq,5s = 50 dB with Kt = 6 and Kf = 3 dB (so LKeq,5s = 59 dB) and

@@ -620,8 +620,8 @@ def test_composite_r_long_slot_under_door() -> None:
 
 
 def test_composite_r_manual_es_facade() -> None:
-    # Aviles Lopez & Perera Martin, Manual de acustica ambiental y
-    # arquitectonica (Paraninfo), Ejemplo 7.5 (p. 410): 8 m2 facade with a
+    # Avilés López & Perera Martín, Manual de acústica ambiental y
+    # arquitectónica (Paraninfo), Ejemplo 7.5 (p. 410): 8 m2 facade with a
     # 2 m2 window; blind part RA = 40 dBA, window RA = 26 dBA ->
     # Rg = 10 lg[8 / (6*10^-4.0 + 2*10^-2.6)] = 31.5 dBA (printed to 0.1 dB).
     res = building.facade_sound_reduction(

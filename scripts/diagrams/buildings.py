@@ -5017,7 +5017,7 @@ def _d_db_hr_requirements(s: SVG, th: Theme) -> None:
     and the rounding of 3.1.3.1 point 4, which names the two quantities it
     applies to. Two side routes skip the sum: the ISO 717-2 curve of
     Table A.1 for impact sound and the window-size correction of the
-    Catalogo de Elementos Constructivos. The quantity names are set as the
+    Catálogo de Elementos Constructivos. The quantity names are set as the
     module spells them rather than as math runs, because the composer keys
     the slope of a subscript on its letter run and would set nT and A in
     italic, where the guide sets them upright.

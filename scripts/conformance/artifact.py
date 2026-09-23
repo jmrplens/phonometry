@@ -35,6 +35,7 @@ from __future__ import annotations
 import json
 import math
 import re
+import unicodedata
 from typing import TYPE_CHECKING, Any
 
 from .compare import document_problems
@@ -69,14 +70,36 @@ _FALLBACK_SIGNIFICANT = 3
 
 _SLUG_STRIP = re.compile(r"[^a-z0-9]+")
 
+#: The marks a Latin letter carries in the spelling of a cited title: grave,
+#: acute, tilde, diaeresis and cedilla. A letter that carries only these is
+#: slugged as its base letter, so "Catálogo" gives ``catalogo`` rather than
+#: ``cat-logo``, and a Spanish title written with its accents keeps the id it
+#: had when it was written without them. The circumflex is not among them on
+#: purpose: in this registry it is the hat of a quantity (``â``, the peak
+#: acceleration), which is notation rather than spelling, and a letter carrying
+#: it is dropped as it always was.
+_SPELLING_MARKS = frozenset({"\u0300", "\u0301", "\u0303", "\u0308", "\u0327"})
+
+
+def _unmarked(char: str) -> str:
+    """*char* without its spelling marks, or *char* itself if it has others."""
+    decomposed = unicodedata.normalize("NFD", char)
+    if len(decomposed) > 1 and all(mark in _SPELLING_MARKS for mark in decomposed[1:]):
+        return decomposed[0]
+    return char
+
 
 def slug(text: str) -> str:
     """Reduce a title, citation or quantity to an id fragment.
 
     :param text: Any of the three strings a check registers under.
-    :return: Lowercase, hyphen-separated, ASCII.
+    :return: Lowercase, hyphen-separated, ASCII. A letter spelt with an accent,
+        a tilde, a diaeresis or a cedilla keeps its base letter (see
+        :data:`_SPELLING_MARKS`); any other character outside ``a-z0-9`` is a
+        separator.
     """
-    return _SLUG_STRIP.sub("-", text.lower()).strip("-")
+    unmarked = "".join(_unmarked(char) for char in text)
+    return _SLUG_STRIP.sub("-", unmarked.lower()).strip("-")
 
 
 def check_id(check: Check) -> str:

@@ -128,8 +128,11 @@ DuctWallSpectrum(
     source: str,
     table: str = '',
     variant: str = '',
+    basis: Mapping[str, str] = ...,
     approximate: frozenset[str] = frozenset(),
     derived: Mapping[str, str] = ...,
+    converted: Mapping[str, tuple[str, str]] = ...,
+    carried: Mapping[str, str] = ...,
     ranges: Mapping[str, tuple[float | None, float | None]] = ...,
     bounded_above: frozenset[str] = frozenset(),
     bounded_below: frozenset[str] = frozenset(),
@@ -185,14 +188,17 @@ transmission loss, never both, and `direction` is what says which.
 | `sheet_metal_gauge` | The gauge of the sheet, exactly as printed, including the asterisk that marks an internally lined duct. It is a US sheet-metal gauge number, and the chapter converts one of the six these tables use, "16 ga (1.6 mm thickness)" in the running text of folio 49.37, and none of the other five, so no thickness is offered here. |
 | `first_side_mm` | The first of the two sides a rectangular or flat oval duct prints, in millimetres. The page does not say which side is the width, and it does not print them in one order: the rectangular tables put the smaller first and the flat oval tables the larger. |
 | `second_side_mm` | The second of those two sides, in millimetres. |
-| `diameter_mm` | The diameter of a round or circular duct, in millimetres. In one block of one table a printed diameter covers three consecutive rows, and the two whose cell the page leaves blank carry it down as a derivation rather than as a number read off the page: `is_derived("diameter_mm")` answers `True` for them and `derived` says where it comes from. |
+| `diameter_mm` | The diameter of a round or circular duct, in millimetres. In one block of one table a printed diameter covers three consecutive rows, and the two whose cell the page leaves blank carry it down from the row that prints it: `carried["diameter_mm"]` names that row, and `is_derived("diameter_mm")` answers `False`, because the number is the page's and this library computed nothing. |
 | `duct_length_m` | The length of the duct that was measured, in metres, for the two tables that print one per row. The four tables that do not say in a note that their data are for a length of 6.1 m, which is how the page writes it. |
 | `name` | The material as the table names it, attribution stripped. |
 | `variant` | Which specimen or condition this row is, when the page prints several under one name: `"chemically pure"`, `"direction x"`, `"0.68 mm diameter"`. Empty when the page prints one. |
 | `source` | Document, table, PDF page and printed folio. |
 | `table` | The data file this row was read from, without the extension, which is also the first half of its key in the catalogue that holds it. |
+| `basis` | What the source says a value is: a field name, or `"row"` for the whole row, to one of [`CATALOGUE_BASES`](/phonometry/reference/api/io/io/#catalogue_bases). Hopkins marks most of his Poisson ratios "Estimate", and those cells hold `"estimated"`; a datasheet that declares a class under a product standard would hold `"declared"`. A field with no entry takes the row's, and a row with neither is one whose source does not say, which is a different answer from any of the five. `basis_of` reads it. Independent of `derived`: this is what the source claims for a cell, that is what this library computed. |
 | `approximate` | Fields the page prints with a `~`. Not an estimate and not an interval: a number the author rounded on purpose. |
-| `derived` | Field to how it was computed, for the ones this library worked out from the cells the page did print. A derived value is never stored as if it had been read. |
+| `derived` | Field to how it was computed, for the ones this library worked out from the cells the page did print. A derived value is never stored as if it had been read, and it always follows again from the row's own cells. A value converted from the unit the page prints is not derived (`converted` holds it), and neither is one the page carries from another row (`carried` does). |
+| `converted` | Field to `(figure, unit)`, the number and the unit the page prints, for a value this row holds in another unit. Ver and Beranek print their damping materials in degrees Fahrenheit and pounds per square inch, and the row holds degrees Celsius and pascals, so `("3e5", "psi")` sits beside a modulus in pascals. The figure is kept as the page writes it, so the cell can always be read back in the page's own terms. |
+| `carried` | Field to where the page carries it from, for a cell the page leaves blank because the value is printed once for a block of rows: a figure on the first row of a group, or "Parecido al anterior". The value is the page's, and this says which of its rows prints it. |
 | `ranges` | `(low, high)` for each field the page prints as an interval rather than a value. One end is `None` only for a bound whose open side the quantity has no limit on; the end the page prints is always a number, and a two-sided interval has two. |
 | `bounded_above` | The subset of `ranges` the page prints as `< x` or `<= x`, where the low end is a floor and not a measurement. |
 | `bounded_below` | The subset of `ranges` the page prints as `> x` or `>= x`, where the high end is the ceiling the quantity cannot pass and not a measurement: Cox gives an aerogel a porosity of `>0.75`, and the 1 beside it is what a porosity is, not what anybody measured. A quantity with no such ceiling leaves that end `None` rather than borrowing a number for it: ASHRAE prints `>45` for a duct wall whose radiated sound the background swamped, and a transmission loss has no value it cannot pass, so the open end is empty. It is never an infinity, which is not a number the page has and not a token JSON can carry. |
@@ -212,6 +218,22 @@ DuctWallSpectrum.bands() -> tuple[int, ...]
 ```
 
 The bands this row prints a value for, in hertz.
+
+### DuctWallSpectrum.basis_of()
+
+```python
+DuctWallSpectrum.basis_of(field_name: str) -> str
+```
+
+What the source says this field is: measured, declared, estimated.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `field_name` | One of the field names of this class. |
+
+**Returns:** The field's own entry in `basis`, else the row's, else the empty string, which means the source does not say. Otherwise one of [`CATALOGUE_BASES`](/phonometry/reference/api/io/io/#catalogue_bases).
 
 ### DuctWallSpectrum.is_approximate()
 
@@ -255,7 +277,7 @@ Whether this library computed this field instead of reading it.
 | :--- | :--- |
 | `field_name` | One of the numeric field names of this class. |
 
-**Returns:** `True` when the page did not print it and the value follows from cells that it did. `derived` says how.
+**Returns:** `True` when the page did not print it and the value follows from cells that it did. `derived` says how. A value the page prints in another unit, or prints on another row and leaves blank on this one, answers `False`: the number is the page's, and `converted` or `carried` says so.
 
 ### DuctWallSpectrum.printed()
 
@@ -301,7 +323,7 @@ The row as `{band_hz: value}` over the bands it prints.
 
 A band the page left empty, or printed as something other than a
 number, is left out rather than filled with a zero;
-`why_missing` on that band's field says which it
+[`why_missing`](/phonometry/reference/api/io/io/#cataloguerowwhy_missing) on that band's field says which it
 was.
 
 ### DuctWallSpectrum.transmission_loss_db()
@@ -319,7 +341,7 @@ Which of the two transmission losses it is follows from
 
 | Name | Description |
 | :--- | :--- |
-| `band_hz` | An octave-band centre frequency between 63 Hz and 8 kHz; `bands` says which ones this row fills. |
+| `band_hz` | An octave-band centre frequency between 63 Hz and 8 kHz; [`bands`](/phonometry/reference/api/io/io/#bandedrowbands) says which ones this row fills. |
 
 **Returns:** The printed transmission loss, in decibels.
 

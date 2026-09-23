@@ -95,7 +95,9 @@ def test_the_speed_and_hfc_columns_agree_with_the_older_oracle(
 # ---------------------------------------------------------------------------
 def test_only_four_poisson_ratios_are_measurements() -> None:
     """The other twenty-one carry the footnote that reads "Estimate"."""
-    measured = {key for key, m in HOPKINS.items() if not m.is_estimate("poisson_ratio")}
+    measured = {
+        key for key, m in HOPKINS.items() if m.basis_of("poisson_ratio") != "estimated"
+    }
 
     assert measured == set(ref.HOPKINS_A2_MEASURED_POISSON)
 
@@ -103,7 +105,9 @@ def test_only_four_poisson_ratios_are_measurements() -> None:
 def test_the_estimated_loss_factors_are_marked_as_such() -> None:
     """Twelve of them, and the rest are either measured or absent."""
     estimated = {
-        key for key, m in HOPKINS.items() if m.is_estimate("flexural_loss_factor")
+        key
+        for key, m in HOPKINS.items()
+        if m.basis_of("flexural_loss_factor") == "estimated"
     }
 
     assert estimated == set(ref.HOPKINS_A2_ESTIMATED_LOSS_FACTOR)

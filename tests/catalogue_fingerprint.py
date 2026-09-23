@@ -25,6 +25,7 @@ import importlib
 import json
 import pathlib
 import pkgutil
+import re
 from collections.abc import Callable, Mapping
 from typing import Any, cast
 
@@ -152,8 +153,111 @@ def baseline() -> dict[str, dict[str, Row]]:
 # The changes, in the order they were made. Each one takes a dump forward.
 # ---------------------------------------------------------------------------
 
+#: How the page's own figure was written into the hand-written ``derived`` of
+#: the rows that only converted it, and the unit it was printed in. The
+#: ``degrees F`` and ``psi`` wordings are Ver and Beranek Table 14.1's; the
+#: two ``sabins`` wordings are what ``_metric`` wrote for Long Table 7.1.
+_CONVERSION_WORDINGS = (
+    (
+        re.compile(
+            r"^(?P<figure>\S+) degrees F as the page prints it, by \(5/9\)\(F - 32\)$"
+        ),
+        "°F",
+    ),
+    (
+        re.compile(
+            r"^(?P<figure>\S+) psi as the page prints it, "
+            r"by the exact 6894\.757293 Pa/psi$"
+        ),
+        "psi",
+    ),
+    (
+        re.compile(
+            r"^from the (?P<figure>\S+) sabins per 1000 cubic feet the page prints, "
+        ),
+        "sabins per 1000 ft3",
+    ),
+    (re.compile(r"^from the (?P<figure>\S+) sabins the page prints, "), "sabins"),
+)
+
+#: The rows whose hand-written ``derived`` said the page leaves the cell blank
+#: and carries it from another row, by mapping.
+CARRIED_ROWS = {
+    "PUBLISHED_FLOW_RESISTANCE": (
+        "ver-beranek-2006-table-8-7/sintered_fm_127",
+        "ver-beranek-2006-table-8-7/sintered_fm_185",
+        "ver-beranek-2006-table-8-7/sintered_347_10_20_ac3a_a",
+        "ver-beranek-2006-table-8-7/sintered_347_10_30_ac3a_a",
+        "ver-beranek-2006-table-8-7/sintered_fm_802",
+        "ver-beranek-2006-table-8-7/sintered_fm_126",
+        "ver-beranek-2006-table-8-7/sintered_fm_190",
+        "ver-beranek-2006-table-8-7/sintered_347_50_30_ac3a_a",
+    ),
+    "PUBLISHED_DUCT_TRANSMISSION_LOSS": (
+        "ashrae-2019-tables-29-to-34/t30_spiral_wound_610_gage_24_lined",
+        "ashrae-2019-tables-29-to-34/t30_spiral_wound_610_gage_16",
+    ),
+    "PUBLISHED_IMPACT_INSULATION": (
+        "harris-1995-tables-32-1-to-32-8/29",
+        "harris-1995-tables-32-1-to-32-8/32",
+        "harris-1995-tables-32-1-to-32-8/34B",
+    ),
+}
+
+
+def _one_row_shape(name: str, key: str, row: Row) -> Row:
+    """One row taken through the change that gave every row one shape.
+
+    Two things moved, and nothing else may:
+
+    * ``estimated``, a set the solids and the orthotropic woods each kept,
+      became an entry of ``basis`` per field, with the value
+      ``"estimated"``;
+    * a hand-written ``derived`` that recorded a unit conversion became
+      ``converted``, the printed figure and the printed unit, and one that
+      recorded a cell the page leaves blank and carries from another row
+      became ``carried``, word for word. ``derived`` keeps only what the
+      library computes.
+    """
+    row = dict(row)
+    estimated = row.pop("estimated", [])
+    if estimated:
+        row["basis"] = dict.fromkeys(estimated, "estimated")
+    derived = dict(row.pop("derived", {}))
+    converted: dict[str, list[str]] = {}
+    carried: dict[str, str] = {}
+    for field, wording in list(derived.items()):
+        if key in CARRIED_ROWS.get(name, ()):
+            carried[field] = derived.pop(field)
+            continue
+        for pattern, unit in _CONVERSION_WORDINGS:
+            match = pattern.match(wording)
+            if match:
+                converted[field] = [match["figure"], unit]
+                del derived[field]
+                break
+    for hedge, entries in (
+        ("derived", derived),
+        ("converted", converted),
+        ("carried", carried),
+    ):
+        if entries:
+            row[hedge] = entries
+    return row
+
+
+def one_row_shape(
+    catalogues: Mapping[str, Mapping[str, Row]],
+) -> dict[str, dict[str, Row]]:
+    """The whole dump taken through :func:`_one_row_shape`."""
+    return {
+        name: {key: _one_row_shape(name, key, row) for key, row in rows.items()}
+        for name, rows in catalogues.items()
+    }
+
+
 #: Every change since the baseline, oldest first.
-CHANGES: tuple[Change, ...] = ()
+CHANGES: tuple[Change, ...] = (one_row_shape,)
 
 
 def expected() -> dict[str, dict[str, Row]]:

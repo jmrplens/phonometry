@@ -286,21 +286,23 @@ def test_the_one_interval_of_table_32_8_is_held_as_a_range() -> None:
     )
 
 
-def test_the_three_deduced_references_say_they_were_deduced() -> None:
+def test_the_three_carried_references_say_where_they_come_from() -> None:
     """Three rows print "Parecido al anterior" and no row number.
 
     For them the row referred to follows from the position on the page and not
-    from anything printed, so the row says so rather than presenting a deduced
-    number as a reading.
+    from anything printed, so the row says so in ``carried`` rather than
+    presenting the number as a reading. It is not a derivation: nothing is
+    computed, and ``is_derived`` answers ``False``.
     """
-    deduced = [row for row in _floors() if row.is_derived("refers_to_row")]
-    assert [row.refers_to_row for row in deduced] == ["28", "31", "34A"]
-    for row in deduced:
-        assert "Parecido al anterior" in row.derived["refers_to_row"]
+    carried = [row for row in _floors() if "refers_to_row" in row.carried]
+    assert [row.refers_to_row for row in carried] == ["28", "31", "34A"]
+    for row in carried:
+        assert "Parecido al anterior" in row.carried["refers_to_row"]
+        assert not row.is_derived("refers_to_row")
     printed_reference = [
         row
         for row in _floors()
-        if row.refers_to_row and not row.is_derived("refers_to_row")
+        if row.refers_to_row and "refers_to_row" not in row.carried
     ]
     assert len(printed_reference) == 9
 

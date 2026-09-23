@@ -347,6 +347,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- **Every catalogue row has one shape, and says what its source claims for
+  each cell.** The rows of every published catalogue share one base,
+  `io.CatalogueRow` (with `io.BandedRow` for a row printed band by band),
+  which `phonometry.io` now publishes together with `io.CatalogueError`, the
+  error a catalogue raises when its cells contradict each other, and
+  `io.CATALOGUE_BASES`. A row gains `basis`, which says what the source
+  claims a value is (measured, declared, calculated, estimated or extended)
+  and which `basis_of(field)` reads, answering with an empty string where the
+  source does not say. The estimate had two spellings, `SolidMaterial.estimated`
+  with `is_estimate` and `OrthotropicWood.estimated` with `is_estimated`; both
+  are gone, and the 35 cells Hopkins Table A2 and Rossing Table 15.5 mark as
+  estimates hold `"estimated"` in `basis`. A value the page prints in another
+  unit is no longer marked derived: the 116 cells of Ver & Beranek Table 14.1
+  printed in degrees Fahrenheit and psi and the nine of Long Table 7.1
+  printed in sabins keep the figure and the unit the page prints in
+  `converted`, as `("3e5", "psi")`. A cell the page leaves blank and prints on
+  another row (Ver & Beranek Table 8.7, ASHRAE Table 30, Harris Chapter 32)
+  says which row in `carried`. `is_derived` now answers only for what the
+  library computes, and the published catalogues page marks a converted cell
+  with the figure the page prints and a carried cell as carried.
+  `OrthotropicWood` and `PlateauMaterial` take their fields by name only, as
+  every other row does, and no row class is slotted any more, because on
+  Python 3.13 a slotted dataclass cannot call `super()` without arguments
+  from its own methods. No published value changes; a
+  new test pins every cell of the 1982 published rows to its last digit
+  against a baseline and lists each change made to it.
+
 - **The ITU-R BS.468-4 curve has one name.** `MicrophoneNoise.weighting` took
   `"CCIR"` for the quasi-peak inherent-noise figure while
   `filters.weighting_filter` and `electroacoustics.weighted_thd` take `"468"`

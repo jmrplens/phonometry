@@ -57,3 +57,38 @@ def test_every_published_row_is_the_baseline_carried_through_the_changes() -> No
         for key, row in rows.items():
             built = live[name][key]
             assert built == row, f"{name}[{key!r}]: {_first_difference(row, built)}"
+
+
+def test_one_row_shape_moves_the_cells_it_lists_and_no_others() -> None:
+    """The step that gave every row one shape moved 54 rows, and this is which.
+
+    Thirty-five estimated cells in twenty-two rows (Hopkins Table A2 and the
+    maple of Rossing Table 15.5) became ``basis``; the 116 Fahrenheit and psi
+    cells of Ver and Beranek Table 14.1 and the nine sabin cells of Long
+    Table 7.1 became ``converted``; the 21 cells the pages carry down a block
+    became ``carried``. A step that grew to touch one more row would fail
+    here before it failed anywhere else.
+    """
+    before = fp.baseline()
+    after = fp.one_row_shape(before)
+    moved: dict[tuple[str, str], list[int]] = {}
+    for name, rows in after.items():
+        for row in rows.values():
+            for hedge in ("basis", "converted", "carried"):
+                if hedge in row:
+                    count = moved.setdefault((hedge, name), [0, 0])
+                    count[0] += 1
+                    count[1] += len(row[hedge])
+    assert moved == {
+        ("basis", "PUBLISHED_ORTHOTROPIC_WOOD"): [1, 2],
+        ("basis", "PUBLISHED_SOLIDS"): [21, 33],
+        ("carried", "PUBLISHED_DUCT_TRANSMISSION_LOSS"): [2, 2],
+        ("carried", "PUBLISHED_FLOW_RESISTANCE"): [8, 16],
+        ("carried", "PUBLISHED_IMPACT_INSULATION"): [3, 3],
+        ("converted", "PUBLISHED_ABSORPTION_AREAS"): [2, 9],
+        ("converted", "PUBLISHED_DAMPING"): [17, 116],
+    }
+    changed = sum(
+        before[name][key] != after[name][key] for name in before for key in before[name]
+    )
+    assert changed == 54

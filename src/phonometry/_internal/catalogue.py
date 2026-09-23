@@ -1,5 +1,5 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
-"""Reading a published table out of a data file (private).
+"""Reading a published table out of a data file, and the row every table holds.
 
 A catalogue row is data, not code. Keeping the rows in JSON beside the module
 that publishes them means a new table is a new file rather than a longer
@@ -20,6 +20,14 @@ a catalogue that flattened any of those into a float would be claiming a
 measurement the page does not make. The hedges are the same across the
 catalogues because the pages are: a range in a table of solids is a range in
 a table of porous materials.
+
+The reader stays private. :class:`CatalogueRow`, :class:`BandedRow`,
+:class:`CatalogueError` and :data:`CATALOGUE_BASES` are public, from
+:mod:`phonometry.io`, because every catalogue of the library hands out rows
+built on them, and a caller has to be able to name the type of what it holds
+and catch what the constructor raises. They are defined here and not there
+because the domain packages that publish the rows import them, and
+:mod:`phonometry.io` importing a domain would close a cycle.
 """
 
 from __future__ import annotations
@@ -34,9 +42,27 @@ if TYPE_CHECKING:
 
 _REQUIRED = ("source", "about", "rows")
 
+#: What a source can say a value is, and nothing else: a test result it
+#: gives (``"measured"``), a value, bound or class declared under a product
+#: standard or a CE marking (``"declared"``), a figure it worked out itself,
+#: by a standard's model, a program or a formula (``"calculated"``), its own
+#: estimate (``"estimated"``), or the result of an extended application of a
+#: test (``"extended"``). A source that does not say is left without an
+#: entry rather than given one of these.
+CATALOGUE_BASES: tuple[str, ...] = (
+    "measured",
+    "declared",
+    "calculated",
+    "estimated",
+    "extended",
+)
+
 #: The mappings every row holds and does not own, frozen at construction.
 _MAPPINGS = (
+    "basis",
     "derived",
+    "converted",
+    "carried",
     "ranges",
     "reported",
     "unquantified",
@@ -48,7 +74,13 @@ _MAPPINGS = (
 
 
 class CatalogueError(ValueError):
-    """A packaged table that does not say what the reader needs to trust it."""
+    """A catalogue that does not say what a reader needs to trust it.
+
+    Raised for a table document that is missing what every table needs (a
+    citation, an ``about``, rows, a key per row) and for a row whose cells
+    contradict each other, such as a bound with no printed end. A
+    :class:`ValueError`, because the data is wrong and not the call.
+    """
 
 
 def _reject(filename: str, what: str) -> None:
@@ -105,6 +137,9 @@ def take(row: Mapping[str, Any], *, frozen: tuple[str, ...] = ()) -> dict[str, A
     ranges = fields.get("ranges")
     if ranges is not None:
         fields["ranges"] = {name: tuple(pair) for name, pair in ranges.items()}
+    converted = fields.get("converted")
+    if converted is not None:
+        fields["converted"] = {name: tuple(pair) for name, pair in converted.items()}
     reported = fields.get("reported")
     if reported is not None:
         fields["reported"] = {
@@ -137,6 +172,13 @@ class CatalogueRow:
     is not left to guess whether the material has no such property, whether
     the book left the cell empty, or whether it printed three numbers.
 
+    Every row of every published catalogue is one of these, a frozen and
+    keyword-only dataclass. A subclass written to hold a quantity no
+    catalogue of the library publishes is the same, and it leaves out
+    ``slots=True``: on Python 3.13 a slotted dataclass that calls ``super()``
+    without arguments, as a ``__post_init__`` does, raises :class:`TypeError`
+    when it is built.
+
     :ivar name: The material as the table names it, attribution stripped.
     :ivar variant: Which specimen or condition this row is, when the page
         prints several under one name: ``"chemically pure"``, ``"direction
@@ -145,11 +187,35 @@ class CatalogueRow:
     :ivar table: The data file this row was read from, without the
         extension, which is also the first half of its key in the catalogue
         that holds it.
+    :ivar basis: What the source says a value is: a field name, or ``"row"``
+        for the whole row, to one of :data:`CATALOGUE_BASES`. Hopkins marks
+        most of his Poisson ratios "Estimate", and those cells hold
+        ``"estimated"``; a datasheet that declares a class under a product
+        standard would hold ``"declared"``. A field with no entry takes the
+        row's, and a row with neither is one whose source does not say,
+        which is a different answer from any of the five. :meth:`basis_of`
+        reads it. Independent of :attr:`derived`: this is what the source
+        claims for a cell, that is what this library computed.
     :ivar approximate: Fields the page prints with a ``~``. Not an estimate
         and not an interval: a number the author rounded on purpose.
     :ivar derived: Field to how it was computed, for the ones this library
         worked out from the cells the page did print. A derived value is never
-        stored as if it had been read.
+        stored as if it had been read, and it always follows again from the
+        row's own cells. A value converted from the unit the page prints is
+        not derived (:attr:`converted` holds it), and neither is one the page
+        carries from another row (:attr:`carried` does).
+    :ivar converted: Field to ``(figure, unit)``, the number and the unit the
+        page prints, for a value this row holds in another unit. Ver and
+        Beranek print their damping materials in degrees Fahrenheit and
+        pounds per square inch, and the row holds degrees Celsius and
+        pascals, so ``("3e5", "psi")`` sits beside a modulus in pascals. The
+        figure is kept as the page writes it, so the cell can always be read
+        back in the page's own terms.
+    :ivar carried: Field to where the page carries it from, for a cell the
+        page leaves blank because the value is printed once for a block of
+        rows: a figure on the first row of a group, or "Parecido al
+        anterior". The value is the page's, and this says which of its rows
+        prints it.
     :ivar ranges: ``(low, high)`` for each field the page prints as an
         interval rather than a value. One end is ``None`` only for a bound
         whose open side the quantity has no limit on; the end the page prints
@@ -215,8 +281,11 @@ class CatalogueRow:
     source: str
     table: str = ""
     variant: str = ""
+    basis: Mapping[str, str] = field(default_factory=dict)
     approximate: frozenset[str] = frozenset()
     derived: Mapping[str, str] = field(default_factory=dict)
+    converted: Mapping[str, tuple[str, str]] = field(default_factory=dict)
+    carried: Mapping[str, str] = field(default_factory=dict)
     ranges: Mapping[str, tuple[float | None, float | None]] = field(
         default_factory=dict
     )
@@ -284,9 +353,22 @@ class CatalogueRow:
 
         :param field_name: One of the numeric field names of this class.
         :return: ``True`` when the page did not print it and the value follows
-            from cells that it did. :attr:`derived` says how.
+            from cells that it did. :attr:`derived` says how. A value the
+            page prints in another unit, or prints on another row and leaves
+            blank on this one, answers ``False``: the number is the page's,
+            and :attr:`converted` or :attr:`carried` says so.
         """
         return field_name in self.derived
+
+    def basis_of(self, field_name: str) -> str:
+        """What the source says this field is: measured, declared, estimated.
+
+        :param field_name: One of the field names of this class.
+        :return: The field's own entry in :attr:`basis`, else the row's, else
+            the empty string, which means the source does not say. Otherwise
+            one of :data:`CATALOGUE_BASES`.
+        """
+        return self.basis.get(field_name, self.basis.get("row", ""))
 
     def printed(self, field_name: str, *, wanted_by: str = "the caller") -> float:
         """One quantity this page prints, or a refusal that says what it had.

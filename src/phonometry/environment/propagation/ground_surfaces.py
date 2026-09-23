@@ -69,7 +69,7 @@ class GroundSurface(CatalogueRow):
 
     Every quantity is optional, because the three tables print three different
     sets of columns, and a quantity the page did not print answers ``None``
-    with :meth:`~phonometry._internal.catalogue.CatalogueRow.why_missing`
+    with :meth:`~phonometry.io.CatalogueRow.why_missing`
     saying what the cell held instead.
 
     :ivar flow_resistivity_pa_s_m2: Effective flow resistivity ``R_1`` or

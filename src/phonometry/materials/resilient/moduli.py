@@ -56,12 +56,12 @@ __all__ = [
 ]
 
 
-@dataclass(frozen=True, slots=True, kw_only=True)
+@dataclass(frozen=True, kw_only=True)
 class ResilientMaterial(CatalogueRow):
     """One resilient material's dynamic modulus, as a page printed it.
 
     :ivar density_kg_m3: Density, in kg/m3. Printed as a range on most rows,
-        which :attr:`~phonometry._internal.catalogue.CatalogueRow.ranges`
+        which :attr:`~phonometry.io.CatalogueRow.ranges`
         holds.
     :ivar dynamic_youngs_modulus_pa: The dynamic modulus of elasticity of the
         material under :attr:`static_load_pa`, in pascals. Printed as a range on

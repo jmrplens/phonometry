@@ -23,9 +23,9 @@ What the row carries
 --------------------
 Each octave band is a field of its own, ``transmission_loss_500_db`` and so
 on, with the band's centre frequency in hertz and the unit in the name. Every
-hedge of :class:`~phonometry._internal.catalogue.CatalogueRow` works on a band
+hedge of :class:`~phonometry.io.CatalogueRow` works on a band
 the way it works on any other field, so a band the page leaves empty says so
-through :meth:`~phonometry._internal.catalogue.CatalogueRow.why_missing`
+through :meth:`~phonometry.io.CatalogueRow.why_missing`
 rather than answering zero. The thickness and the surface density the page
 prints beside the description are fields of their own, because they are what a
 reader compares two constructions by, and because the mass law needs the
@@ -73,8 +73,8 @@ row and the band, because the page printed nothing there.
 Most of those tables print one construction under several conditions, as
 columns: the plasterboard layers and the cavity absorbent of Table 31.2, the
 sealing of the doors of Table 31.6. A column is a row here, the construction
-is its :attr:`~phonometry._internal.catalogue.CatalogueRow.name` and the
-column its :attr:`~phonometry._internal.catalogue.CatalogueRow.variant`,
+is its :attr:`~phonometry.io.CatalogueRow.name` and the
+column its :attr:`~phonometry.io.CatalogueRow.variant`,
 composed from the printed headings above the cell. The window table is
 printed the other way round, with the ratings as rows and the glazings as
 cells, and is turned so that a row is a window. A row the page leaves blank
@@ -149,7 +149,7 @@ class TransmissionLossSpectrum(BandedRow):
         instead of repeating itself, named by the number the table prints.
         Harris Table 31.9 prints three floors once and the rows after them as
         "Igual que 8"; the printed text is kept whole in
-        :attr:`~phonometry._internal.catalogue.CatalogueRow.name`, and this is
+        :attr:`~phonometry.io.CatalogueRow.name`, and this is
         the row it inherits from, resolved as
         ``PUBLISHED_TRANSMISSION_LOSS[f"{row.table}/{row.refers_to_row}"]``.
         Empty when the description stands on its own.

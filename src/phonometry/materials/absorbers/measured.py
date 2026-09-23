@@ -30,10 +30,10 @@ The band is the field
 Each octave band is a field of its own, ``absorption_coefficient_125`` and so
 on, with the band's centre frequency in hertz as the suffix. That is not the
 tidiest shape for a spectrum and it is the right one for a catalogue: every
-hedge of :class:`~phonometry._internal.catalogue.CatalogueRow` is keyed by
+hedge of :class:`~phonometry.io.CatalogueRow` is keyed by
 field name, so a cell the page prints as a range, or leaves empty, or prints
 wrong, is handled the way the same cell is handled in every other catalogue,
-and :meth:`~phonometry._internal.catalogue.CatalogueRow.why_missing` answers
+and :meth:`~phonometry.io.CatalogueRow.why_missing` answers
 for a band the way it answers for a modulus. :meth:`AbsorptionSpectrum.bands`
 and :meth:`AbsorptionSpectrum.spectrum` give the row back as a spectrum for
 the caller who wants one.
@@ -55,8 +55,8 @@ its numbers, the ``about`` of its data file quotes it.
 Long sets his table in inches, pounds and ounces, and his two rows that are
 areas are in sabins, square feet of perfect absorption. The names keep the
 inches, because a name is what the page prints; the areas are converted to
-square metres at load and marked derived, because a field named ``m2`` holds
-square metres or it lies.
+square metres at load, because a field named ``m2`` holds square metres or it
+lies, and each converted cell keeps the figure and the unit the page prints.
 """
 
 from __future__ import annotations
@@ -89,7 +89,7 @@ ABSORPTION_BANDS_HZ: tuple[int, ...] = (63, 125, 250, 500, 1000, 2000, 4000, 800
 class AbsorptionSpectrum(BandedRow):
     """One finish of a published table, with its coefficient in each band.
 
-    The hedges of :class:`~phonometry._internal.catalogue.CatalogueRow` apply
+    The hedges of :class:`~phonometry.io.CatalogueRow` apply
     to each band as to any other field, and the material's thickness,
     density or mounting are part of :attr:`name`, as the page prints them,
     because the books print them there and pulling them into fields would
@@ -207,22 +207,16 @@ _SQUARE_FOOT_M2 = 0.09290304
 _THOUSAND_CUBIC_FEET_M3 = 28.316846592
 
 #: The imperial suffixes a data file may write an area field with, each with
-#: the factor that takes the printed number to the metric field and the
-#: wording that goes into :attr:`~phonometry._internal.catalogue.CatalogueRow.derived`.
+#: the factor that takes the printed number to the metric field and the unit
+#: the page prints, which :attr:`~phonometry.io.CatalogueRow.converted` keeps
+#: beside the printed figure.
 _IMPERIAL_AREAS = (
     (
         "_ft2_per_1000_ft3",
         _SQUARE_FOOT_M2 / _THOUSAND_CUBIC_FEET_M3,
-        "from the {printed} sabins per 1000 cubic feet the page prints, at "
-        "0.092 903 04 m² to the square foot and 28.316 846 592 m³ to the "
-        "thousand cubic feet",
+        "sabins per 1000 ft3",
     ),
-    (
-        "_ft2",
-        _SQUARE_FOOT_M2,
-        "from the {printed} sabins the page prints, at 0.092 903 04 m² to "
-        "the square foot",
-    ),
+    ("_ft2", _SQUARE_FOOT_M2, "sabins"),
 )
 
 
@@ -245,24 +239,24 @@ def _metric(fields: dict[str, Any]) -> dict[str, Any]:
     page. The row holds square metres, because every other row does and
     because a caller adding an audience to a room in metres cannot be handed
     square feet under a field that says ``m2``. The conversion is done here,
-    once, and the field is marked derived with the printed number in the
-    wording, so the page's own figure is never more than a lookup away and
-    :meth:`~phonometry._internal.catalogue.CatalogueRow.is_derived` says
-    which cells were converted.
+    once, and :attr:`~phonometry.io.CatalogueRow.converted` keeps the figure
+    and the unit the page prints, so the page's own number is never more than
+    a lookup away. It is not a derivation: the value is the page's, in
+    another unit.
     """
-    converted = dict(fields)
-    derived = dict(fields.get("derived", {}))
+    metric_fields = dict(fields)
+    converted = dict(fields.get("converted", {}))
     for name, value in fields.items():
-        for suffix, factor, wording in _IMPERIAL_AREAS:
+        for suffix, factor, unit in _IMPERIAL_AREAS:
             if name.startswith("absorption_area_") and name.endswith(suffix):
                 metric = f"{name.removesuffix(suffix)}_m2"
-                del converted[name]
-                converted[metric] = value * factor
-                derived[metric] = wording.format(printed=value)
+                del metric_fields[name]
+                metric_fields[metric] = value * factor
+                converted[metric] = (repr(value), unit)
                 break
-    if derived:
-        converted["derived"] = derived
-    return converted
+    if converted:
+        metric_fields["converted"] = converted
+    return metric_fields
 
 
 def _load() -> tuple[dict[str, AbsorptionSpectrum], dict[str, AbsorptionAreaSpectrum]]:

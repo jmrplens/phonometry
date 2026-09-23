@@ -32,10 +32,26 @@ normalization. :func:`convert` moves a measurement between lossless
 containers with samples, provenance and sidecar intact, and the calibration
 travels in a versioned JSON sidecar (:class:`CalibrationSidecar`) next to the
 audio, where the audio formats themselves have no field for it.
+
+The rows of the library's published tables of materials are data read from a
+file too, and the type they share lives here: :class:`CatalogueRow`, with
+:class:`BandedRow` for a row that prints one value per frequency band. Every
+``PUBLISHED_*`` catalogue of every package hands out subclasses of it, so a
+row keeps the same hedges (a range, a bound, a word, a value converted from
+the unit the page prints, a cell carried from another row) and says what
+its source claims for each cell through :meth:`CatalogueRow.basis_of`, one of
+:data:`CATALOGUE_BASES`. :class:`CatalogueError` is what a catalogue raises
+when its cells contradict each other.
 """
 
 from __future__ import annotations
 
+from .._internal.catalogue import (
+    CATALOGUE_BASES,
+    BandedRow,
+    CatalogueError,
+    CatalogueRow,
+)
 from ._backends import LossyCompressionWarning, info, read
 from ._blocks import read_blocks
 from ._chunks import BroadcastMetadata, CuePoint
@@ -51,9 +67,13 @@ from ._wav import AudioFileInfo
 from ._write import ClippingWarning, write
 
 __all__ = [
+    "CATALOGUE_BASES",
     "AudioFileInfo",
+    "BandedRow",
     "BroadcastMetadata",
     "CalibrationSidecar",
+    "CatalogueError",
+    "CatalogueRow",
     "ClippingWarning",
     "CuePoint",
     "LossyCompressionWarning",

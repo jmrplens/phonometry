@@ -377,7 +377,7 @@ def test_the_turned_table_is_the_printed_one(wood: str) -> None:
             assert getattr(row, field) == pytest.approx(
                 float(text.rstrip("*")) * scale
             ), symbol
-            assert row.is_estimated(field) is text.endswith("*"), symbol
+            assert (row.basis_of(field) == "estimated") is text.endswith("*"), symbol
         else:
             assert row.relative_scaling_factor == pytest.approx(float(text))
 
@@ -385,10 +385,11 @@ def test_the_turned_table_is_the_printed_one(wood: str) -> None:
 def test_only_the_two_asterisked_maple_cells_are_estimates() -> None:
     maple = solids.orthotropic_wood_named("maple")[0]
     spruce = solids.orthotropic_wood_named("spruce")[0]
-    assert maple.estimated == frozenset(
-        {"plate_stiffness_d2_pa", "plate_stiffness_d4_pa"}
-    )
-    assert spruce.estimated == frozenset()
+    assert dict(maple.basis) == {
+        "plate_stiffness_d2_pa": "estimated",
+        "plate_stiffness_d4_pa": "estimated",
+    }
+    assert dict(spruce.basis) == {}
     assert len(PUBLISHED_ORTHOTROPIC_WOOD) == 2
 
 

@@ -15,9 +15,9 @@ Atalla print thirty-odd such rows across nineteen tables, every one of them
 the input to a worked example, and one of the rows prints the word ``model``
 in three of its cells because the quantity there is frequency dependent and no
 single number stands for it. A catalogue that turned that word into a float
-would be inventing a tortuosity nobody published, so :attr:`CatalogueRow.
-unquantified` carries the word instead and :meth:`CatalogueRow.why_missing`
-hands it back.
+would be inventing a tortuosity nobody published, so
+:attr:`~phonometry.io.CatalogueRow.unquantified` carries the word instead and
+:meth:`~phonometry.io.CatalogueRow.why_missing` hands it back.
 
 The same applies to the elastic constants. Table 6.1 prints a complex shear
 modulus, ``220(1 + j0.1)`` N/cm2, and Table 11.8 prints the same specimen as a
@@ -111,7 +111,7 @@ class PorousMaterial(CatalogueRow):
     modulus, and the one anisotropic table prints two flow resistivities and
     no elastic constant the isotropic models can take. A field is ``None``
     when the page had nothing to put there, and
-    :meth:`~phonometry._internal.catalogue.CatalogueRow.why_missing` says what
+    :meth:`~phonometry.io.CatalogueRow.why_missing` says what
     it had instead.
 
     The name, the citation, the variant and the hedges a cell can carry
@@ -194,7 +194,7 @@ class PorousMaterial(CatalogueRow):
         modulus and the loss factor the row stores separately. A row whose
         page printed a Young's modulus instead has had its shear modulus
         derived through the Poisson ratio, and
-        :attr:`~phonometry._internal.catalogue.CatalogueRow.derived` says so.
+        :attr:`~phonometry.io.CatalogueRow.derived` says so.
 
         :return: ``(shear_modulus_pa, poisson_ratio)``, the first complex.
         :raises ValueError: when the source prints no elastic constants.
@@ -264,7 +264,7 @@ class PorousMaterial(CatalogueRow):
 
 
 #: How a field this library computed is described in
-#: :attr:`~phonometry._internal.catalogue.CatalogueRow.derived`. The wording
+#: :attr:`~phonometry.io.CatalogueRow.derived`. The wording
 #: names the cells it came from, so a reader of a derived number can go back
 #: to the ones that were read.
 _FROM_E_NU = "from the Young's modulus and the Poisson ratio"

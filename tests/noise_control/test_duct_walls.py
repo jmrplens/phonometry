@@ -101,7 +101,7 @@ def _assert_the_row_is_the_one_the_label_names(
         inherited = ref.ASHRAE_49_INHERITED_DIAMETERS[index]
         assert row.name == f"{inherited} mm"
         assert row.diameter_mm == float(inherited)
-        assert row.is_derived("diameter_mm")
+        assert "diameter_mm" in row.carried
         return
     assert row.name == f"{label} mm"
     printed = _printed_millimetres(label)
@@ -111,7 +111,7 @@ def _assert_the_row_is_the_one_the_label_names(
     else:
         assert row.diameter_mm == printed[0]
         assert (row.first_side_mm, row.second_side_mm) == (None, None)
-    assert not row.is_derived("diameter_mm")
+    assert "diameter_mm" not in row.carried
 
 
 # ---------------------------------------------------------------------------
@@ -206,36 +206,38 @@ def test_every_cell_is_the_mark_the_second_reader_read(
             assert f"The {band} Hz cell is printed" not in row.note
 
 
-def test_a_diameter_the_page_leaves_blank_is_derived_and_never_served_as_read() -> None:
+def test_a_diameter_the_page_leaves_blank_is_carried_and_never_served_as_read() -> None:
     """One printed 610 mm covers three rows, and two of them did not read it.
 
     The page prints the diameter once and leaves the cell empty on the two
     rows below it. A transcription that carried the blank into the catalogue
     would publish two duct walls of no diameter; one that stored the number as
     if the cell held it would be publishing a reading nobody made. The two
-    rows carry it in ``derived``, which is what the row contract has for a
-    value this library worked out, so ``is_derived`` answers for them and the
-    published table marks the cell as ours rather than the chapter's.
+    rows keep it in ``carried``, which is what the row has for a value the
+    page prints on another row, so the published table marks the cell as
+    carried down rather than read. Nothing is computed, so ``is_derived``
+    answers ``False``.
     """
     blanks = ref.ASHRAE_49_INHERITED_DIAMETERS
     assert len(blanks) == 2
     for index, diameter in blanks.items():
         row = _rows()[index]
         assert row.diameter_mm == float(diameter)
-        assert row.is_derived("diameter_mm")
-        assert "carried down" in row.derived["diameter_mm"]
-        assert "Table 30" in row.derived["diameter_mm"]
+        assert not row.is_derived("diameter_mm")
+        assert "carried down" in row.carried["diameter_mm"]
+        assert "Table 30" in row.carried["diameter_mm"]
     printed_it = [
         row
         for row in _of("Table 30")
-        if row.diameter_mm == 610 and not row.is_derived("diameter_mm")
+        if row.diameter_mm == 610 and "diameter_mm" not in row.carried
     ]
     assert len(printed_it) == 1
     assert len([row for row in _of("Table 30") if row.diameter_mm == 610]) == 3
-    derived_elsewhere = [
-        row for row in _rows() if row.derived and row.diameter_mm != 610
+    carried_elsewhere = [
+        row for row in _rows() if row.carried and row.diameter_mm != 610
     ]
-    assert derived_elsewhere == []
+    assert carried_elsewhere == []
+    assert [row for row in _rows() if row.derived] == []
 
 
 def test_a_band_a_table_prints_no_column_for_is_not_a_band_it_left_empty() -> None:

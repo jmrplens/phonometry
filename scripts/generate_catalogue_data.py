@@ -817,7 +817,9 @@ def cell(
     :param style: How the column is written, from :func:`column_style`. The
         default writes plain digits in the unit the quantity is stored in.
     :return: ``text`` to print, ``kind`` for the component to style by, and
-        ``note`` for the hedge a reader needs to read the number correctly.
+        ``note`` for the hedge a reader needs to read the number correctly;
+        a ``converted`` cell also carries ``printed``, the figure and the unit
+        the page prints, which the component words in the reader's language.
     """
     style = style or Style("")
     written = functools.partial(
@@ -829,23 +831,36 @@ def cell(
     if field == "year" and value is not None:
         return {"text": str(int(value)), "kind": "printed", "note": ""}
     if value is not None:
-        derived = row.is_derived(field)
-        kind = "derived" if derived else "printed"
-        note = row.derived.get(field, "")
+        # Three ways a served number is not simply what the cell printed, and
+        # the row names each one in a mapping of its own: this library worked
+        # it out (``derived``), the page prints it in another unit
+        # (``converted``, with the printed figure and unit), or the page
+        # prints it on another row and leaves this cell blank (``carried``).
+        # A converted value is written like a derived one, to the figures its
+        # inputs had, because the conversion is ours; a carried one is the
+        # page's own number and keeps every digit.
+        extra: dict[str, str] = {}
+        kind, note = "printed", ""
+        if row.is_derived(field):
+            kind, note = "derived", row.derived[field]
+        elif field in row.converted:
+            figure, unit = row.converted[field]
+            kind, extra = "converted", {"printed": f"{figure} {unit}"}
+        elif field in row.carried:
+            kind, note = "carried", row.carried[field]
+        computed = kind in {"derived", "converted"}
         if row.is_approximate(field):
             kind, note = "approximate", "the page prints it with a tilde"
-        # The solids and the orthotropic woods carry this hedge: a number the
-        # page prints and marks as the author's guess. It is served, so the
+        # A number the source marks as its own estimate is served, so the
         # cell is not empty, and it is not a measurement, so it is not
-        # "printed" either. Both rows keep the hedged fields in a field named
-        # ``estimated``, and that field is what is read here: the method that
-        # answers for it is spelled ``is_estimate`` on one row and
-        # ``is_estimated`` on the other, and asking for one spelling showed
-        # every estimated solid as printed. The note stays empty so that the
-        # page reads the kind's own words, which it has in both languages.
-        if field in getattr(row, "estimated", frozenset()):
-            kind, note = "estimated", ""
-        text = written(value, exact=not derived)
+        # "printed" either. What the source claims for a cell is its basis,
+        # asked here the way every row answers it, so no catalogue can reach
+        # the page with an estimate read as a reading. The note stays empty so
+        # that the page reads the kind's own words, which it has in both
+        # languages.
+        if row.basis_of(field) == "estimated":
+            kind, note, extra = "estimated", "", {}
+        text = written(value, exact=not computed)
         # The plus-or-minus a page prints beside the value is written in the
         # cell, in the same unit, rather than left to a note nobody opens. It
         # is written the way every number here is, so a trailing zero the page
@@ -853,7 +868,7 @@ def cell(
         spread = row.uncertainty.get(field)
         if spread is not None:
             text = f"{text} ± {written(spread)}"
-        return {"text": text, "kind": kind, "note": note}
+        return {"text": text, "kind": kind, "note": note, **extra}
     interval = row.ranges.get(field)
     if interval is not None:
         low, high = interval
@@ -1458,6 +1473,8 @@ def render_types() -> str:
         "\t| 'printed'\n"
         "\t| 'fixed'\n"
         "\t| 'derived'\n"
+        "\t| 'converted'\n"
+        "\t| 'carried'\n"
         "\t| 'approximate'\n"
         "\t| 'estimated'\n"
         "\t| 'range'\n"
@@ -1470,6 +1487,8 @@ def render_types() -> str:
         "\ttext: string;\n"
         "\tkind: CatalogueCellKind;\n"
         "\tnote: string;\n"
+        "\t/** The figure and the unit the page prints, on a converted cell. */\n"
+        "\tprinted?: string;\n"
         "}\n"
         "\n"
         "export interface CatalogueColumn {\n"

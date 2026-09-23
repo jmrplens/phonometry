@@ -1,6 +1,6 @@
 {
   "source": "Hopkins (2007) Table A2, PDF pages 635-636 (no printed folio; between folios 607 and 610)",
-  "about": "Every row of Hopkins Table A2, in the order the page prints them. The two pages are landscape and carry no folio of their own, which is why the citation names the folios either side. A cell the table leaves empty is absent here rather than zero, a cell it prints as an interval is in \"ranges\", and a cell its footnote marks \"Estimate\" is named in \"estimated\".",
+  "about": "Every row of Hopkins Table A2, in the order the page prints them. The two pages are landscape and carry no folio of their own, which is why the citation names the folios either side. A cell the table leaves empty is absent here rather than zero, a cell it prints as an interval is in \"ranges\", and a cell its footnote marks \"Estimate\" holds \"estimated\" in \"basis\".",
   "rows": [
     {
       "key": "aircrete",
@@ -9,9 +9,9 @@
       "poisson_ratio": 0.2,
       "flexural_loss_factor": 0.0125,
       "thickness_critical_frequency_product_m_hz": 34.1,
-      "estimated": [
-        "poisson_ratio"
-      ],
+      "basis": {
+        "poisson_ratio": "estimated"
+      },
       "ranges": {
         "density_kg_m3": [
           400.0,
@@ -54,10 +54,10 @@
       "poisson_ratio": 0.2,
       "flexural_loss_factor": 0.01,
       "thickness_critical_frequency_product_m_hz": 24.0,
-      "estimated": [
-        "flexural_loss_factor",
-        "poisson_ratio"
-      ],
+      "basis": {
+        "flexural_loss_factor": "estimated",
+        "poisson_ratio": "estimated"
+      },
       "ranges": {
         "density_kg_m3": [
           1500.0,
@@ -76,9 +76,9 @@
       "poisson_ratio": 0.2,
       "flexural_loss_factor": 0.01,
       "thickness_critical_frequency_product_m_hz": 25.9,
-      "estimated": [
-        "poisson_ratio"
-      ],
+      "basis": {
+        "poisson_ratio": "estimated"
+      },
       "attributed_to": {
         "row": "Schmitz et al., 1999"
       }
@@ -91,10 +91,10 @@
       "poisson_ratio": 0.3,
       "flexural_loss_factor": 0.01,
       "thickness_critical_frequency_product_m_hz": 29.5,
-      "estimated": [
-        "flexural_loss_factor",
-        "poisson_ratio"
-      ],
+      "basis": {
+        "flexural_loss_factor": "estimated",
+        "poisson_ratio": "estimated"
+      },
       "attributed_to": {
         "row": "Hopkins"
       }
@@ -107,10 +107,10 @@
       "poisson_ratio": 0.2,
       "flexural_loss_factor": 0.01,
       "thickness_critical_frequency_product_m_hz": 35.1,
-      "estimated": [
-        "flexural_loss_factor",
-        "poisson_ratio"
-      ],
+      "basis": {
+        "flexural_loss_factor": "estimated",
+        "poisson_ratio": "estimated"
+      },
       "attributed_to": {
         "row": "Rindel, 1994"
       }
@@ -123,10 +123,10 @@
       "poisson_ratio": 0.2,
       "flexural_loss_factor": 0.01,
       "thickness_critical_frequency_product_m_hz": 29.5,
-      "estimated": [
-        "flexural_loss_factor",
-        "poisson_ratio"
-      ],
+      "basis": {
+        "flexural_loss_factor": "estimated",
+        "poisson_ratio": "estimated"
+      },
       "attributed_to": {
         "row": "Rindel, 1994"
       }
@@ -139,10 +139,10 @@
       "poisson_ratio": 0.2,
       "flexural_loss_factor": 0.01,
       "thickness_critical_frequency_product_m_hz": 34.0,
-      "estimated": [
-        "flexural_loss_factor",
-        "poisson_ratio"
-      ],
+      "basis": {
+        "flexural_loss_factor": "estimated",
+        "poisson_ratio": "estimated"
+      },
       "attributed_to": {
         "row": "Rindel, 1994"
       }
@@ -155,10 +155,10 @@
       "poisson_ratio": 0.2,
       "flexural_loss_factor": 0.005,
       "thickness_critical_frequency_product_m_hz": 17.1,
-      "estimated": [
-        "flexural_loss_factor",
-        "poisson_ratio"
-      ],
+      "basis": {
+        "flexural_loss_factor": "estimated",
+        "poisson_ratio": "estimated"
+      },
       "attributed_to": {
         "row": "Hopkins"
       }
@@ -171,10 +171,10 @@
       "poisson_ratio": 0.2,
       "flexural_loss_factor": 0.01,
       "thickness_critical_frequency_product_m_hz": 20.3,
-      "estimated": [
-        "flexural_loss_factor",
-        "poisson_ratio"
-      ],
+      "basis": {
+        "flexural_loss_factor": "estimated",
+        "poisson_ratio": "estimated"
+      },
       "attributed_to": {
         "row": "Hopkins"
       }
@@ -187,10 +187,10 @@
       "poisson_ratio": 0.2,
       "flexural_loss_factor": 0.007,
       "thickness_critical_frequency_product_m_hz": 28.2,
-      "estimated": [
-        "flexural_loss_factor",
-        "poisson_ratio"
-      ],
+      "basis": {
+        "flexural_loss_factor": "estimated",
+        "poisson_ratio": "estimated"
+      },
       "attributed_to": {
         "row": "Hopkins"
       }
@@ -220,10 +220,10 @@
       "poisson_ratio": 0.2,
       "flexural_loss_factor": 0.01,
       "thickness_critical_frequency_product_m_hz": 29.5,
-      "estimated": [
-        "flexural_loss_factor",
-        "poisson_ratio"
-      ],
+      "basis": {
+        "flexural_loss_factor": "estimated",
+        "poisson_ratio": "estimated"
+      },
       "attributed_to": {
         "row": "Hopkins"
       }
@@ -236,10 +236,10 @@
       "poisson_ratio": 0.3,
       "flexural_loss_factor": 0.01,
       "thickness_critical_frequency_product_m_hz": 25.3,
-      "estimated": [
-        "flexural_loss_factor",
-        "poisson_ratio"
-      ],
+      "basis": {
+        "flexural_loss_factor": "estimated",
+        "poisson_ratio": "estimated"
+      },
       "attributed_to": {
         "row": "Hopkins"
       }
@@ -264,10 +264,10 @@
       "poisson_ratio": 0.3,
       "flexural_loss_factor": 0.01,
       "thickness_critical_frequency_product_m_hz": 25.2,
-      "estimated": [
-        "flexural_loss_factor",
-        "poisson_ratio"
-      ],
+      "basis": {
+        "flexural_loss_factor": "estimated",
+        "poisson_ratio": "estimated"
+      },
       "ranges": {
         "plate_longitudinal_speed_m_s": [
           2200.0,
@@ -286,9 +286,9 @@
       "plate_longitudinal_speed_m_s": 2350.0,
       "poisson_ratio": 0.3,
       "thickness_critical_frequency_product_m_hz": 27.6,
-      "estimated": [
-        "poisson_ratio"
-      ],
+      "basis": {
+        "poisson_ratio": "estimated"
+      },
       "attributed_to": {
         "row": "Hopkins"
       }
@@ -301,10 +301,10 @@
       "poisson_ratio": 0.2,
       "flexural_loss_factor": 0.012,
       "thickness_critical_frequency_product_m_hz": 40.3,
-      "estimated": [
-        "flexural_loss_factor",
-        "poisson_ratio"
-      ],
+      "basis": {
+        "flexural_loss_factor": "estimated",
+        "poisson_ratio": "estimated"
+      },
       "attributed_to": {
         "row": "Hopkins"
       }
@@ -317,9 +317,9 @@
       "poisson_ratio": 0.3,
       "flexural_loss_factor": 0.0141,
       "thickness_critical_frequency_product_m_hz": 43.5,
-      "estimated": [
-        "poisson_ratio"
-      ],
+      "basis": {
+        "poisson_ratio": "estimated"
+      },
       "attributed_to": {
         "row": "Hopkins, 1999"
       }
@@ -332,9 +332,9 @@
       "poisson_ratio": 0.3,
       "flexural_loss_factor": 0.0125,
       "thickness_critical_frequency_product_m_hz": 35.8,
-      "estimated": [
-        "poisson_ratio"
-      ],
+      "basis": {
+        "poisson_ratio": "estimated"
+      },
       "attributed_to": {
         "row": "Hopkins, 1999"
       }
@@ -346,9 +346,9 @@
       "plate_longitudinal_speed_m_s": 2010.0,
       "poisson_ratio": 0.3,
       "thickness_critical_frequency_product_m_hz": 32.3,
-      "estimated": [
-        "poisson_ratio"
-      ],
+      "basis": {
+        "poisson_ratio": "estimated"
+      },
       "attributed_to": {
         "row": "Hopkins"
       }
@@ -361,9 +361,9 @@
       "poisson_ratio": 0.3,
       "flexural_loss_factor": 0.016,
       "thickness_critical_frequency_product_m_hz": 16.8,
-      "estimated": [
-        "poisson_ratio"
-      ],
+      "basis": {
+        "poisson_ratio": "estimated"
+      },
       "attributed_to": {
         "row": "Hopkins"
       }
@@ -376,9 +376,9 @@
       "poisson_ratio": 0.2,
       "flexural_loss_factor": 0.01,
       "thickness_critical_frequency_product_m_hz": 20.0,
-      "estimated": [
-        "poisson_ratio"
-      ],
+      "basis": {
+        "poisson_ratio": "estimated"
+      },
       "attributed_to": {
         "row": "Hopkins"
       }
@@ -412,9 +412,9 @@
       "plate_longitudinal_speed_m_s": 5000.0,
       "poisson_ratio": 0.3,
       "thickness_critical_frequency_product_m_hz": 13.0,
-      "estimated": [
-        "poisson_ratio"
-      ],
+      "basis": {
+        "poisson_ratio": "estimated"
+      },
       "attributed_to": {
         "row": "Hopkins"
       }

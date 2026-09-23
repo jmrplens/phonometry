@@ -54,7 +54,7 @@ __all__ = [
 ]
 
 
-@dataclass(frozen=True, slots=True, kw_only=True)
+@dataclass(frozen=True, kw_only=True)
 class SolidNonlinearity(CatalogueRow):
     """One solid's ultrasonic nonlinearity parameter, as a page printed it.
 

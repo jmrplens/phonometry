@@ -6,6 +6,8 @@ export type CatalogueCellKind =
 	| 'printed'
 	| 'fixed'
 	| 'derived'
+	| 'converted'
+	| 'carried'
 	| 'approximate'
 	| 'estimated'
 	| 'range'
@@ -18,6 +20,8 @@ export interface CatalogueCell {
 	text: string;
 	kind: CatalogueCellKind;
 	note: string;
+	/** The figure and the unit the page prints, on a converted cell. */
+	printed?: string;
 }
 
 export interface CatalogueColumn {

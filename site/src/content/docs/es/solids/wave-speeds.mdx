@@ -288,11 +288,16 @@ de los coeficientes de Poisson de Hopkins y de sus factores de pérdidas llevan
 una nota al pie cuyo texto completo es «Estimate»: de las veinticinco filas,
 sólo el aluminio, el vidrio, el mortero y el acero imprimen un Poisson que el
 libro respalda. El catálogo conserva esa distinción, porque un 0,2 leído como
-medida se creerá más de lo que se lo cree Hopkins.
+medida se creerá más de lo que se lo cree Hopkins. Lo que la fuente afirma de
+una celda es su `basis`, y `basis_of` lo lee: `"estimated"` en una celda con
+la nota al pie, y una cadena vacía donde la página no dice cómo se obtuvo el
+número.
 
 ```python
-print(board.is_estimate("poisson_ratio"), board.is_estimate("flexural_loss_factor"))
-# True False
+print(board.basis_of("poisson_ratio"))
+# estimated
+print(board.basis_of("flexural_loss_factor") or "no consta")
+# no consta
 ```
 
 Otras tres cosas que las páginas dicen y que no son números sueltos, y que la

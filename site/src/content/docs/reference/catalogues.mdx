@@ -29,6 +29,12 @@ rather than choosing between them.
 modulus and a density has printed a bar speed without writing it down, so the
 row carries it; but it is shown in italics, and what it was computed from is
 one hover away. No derived value is ever stored as if it had been read.
+Two other kinds of cell hold the page's own number and say how it got there:
+a value the page prints in another unit, degrees Fahrenheit, psi or sabins, is
+converted, and the mark names the figure and the unit it prints; and a cell
+the page leaves blank because it prints the value once for a block of rows is
+carried, and the mark names the row that prints it. A value the source itself
+calls an estimate is marked as one.
 
 A material marked with an asterisk carries a note its page made about it, and
 the note reads on the name. So does the reason behind any cell that is not a

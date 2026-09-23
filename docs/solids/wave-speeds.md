@@ -177,7 +177,9 @@ nineteen per cent apart on steel.
 A materials table is not a list of measurements, and these say so. Most of
 Hopkins' Poisson ratios and loss factors carry a footnote whose whole text is
 "Estimate", and only aluminium, glass, mortar and steel print a Poisson ratio
-the book stands behind; that is in `estimated`, readable through `is_estimate`.
+the book stands behind; each footnoted cell holds `"estimated"` in `basis`,
+which `basis_of(field)` reads, and a cell whose page says nothing about how the
+number was obtained answers with an empty string.
 A cell printed as an interval is in `ranges` and the field is `None`, with
 `why_missing` saying which; a cell printed as a bound is in `bounded_above` too;
 a cell the author rounded on purpose, like Cremer's `≈ 3 · 10⁻⁴` for gold, is in

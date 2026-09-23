@@ -153,9 +153,9 @@ class DuctWallSpectrum(BandedRow):
     :ivar diameter_mm: The diameter of a round or circular duct, in
         millimetres. In one block of one table a printed diameter covers three
         consecutive rows, and the two whose cell the page leaves blank carry it
-        down as a derivation rather than as a number read off the page:
-        ``is_derived("diameter_mm")`` answers ``True`` for them and ``derived``
-        says where it comes from.
+        down from the row that prints it: ``carried["diameter_mm"]`` names
+        that row, and ``is_derived("diameter_mm")`` answers ``False``, because
+        the number is the page's and this library computed nothing.
     :ivar duct_length_m: The length of the duct that was measured, in metres,
         for the two tables that print one per row. The four tables that do not
         say in a note that their data are for a length of 6.1 m, which is how
@@ -202,7 +202,7 @@ class DuctWallSpectrum(BandedRow):
         :attr:`direction`, and the two are never mixed in one row.
 
         :param band_hz: An octave-band centre frequency between 63 Hz and
-            8 kHz; :meth:`~phonometry._internal.catalogue.BandedRow.bands` says
+            8 kHz; :meth:`~phonometry.io.BandedRow.bands` says
             which ones this row fills.
         :return: The printed transmission loss, in decibels.
         :raises ValueError: when the page has no number in that band, naming

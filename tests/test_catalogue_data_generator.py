@@ -20,8 +20,8 @@ from collections.abc import Mapping
 
 import pytest
 
-from phonometry._internal.catalogue import CatalogueRow
 from phonometry.fluids import PUBLISHED_FLUIDS
+from phonometry.io import CatalogueRow
 
 _SCRIPTS = str(pathlib.Path(__file__).resolve().parent.parent / "scripts")
 if _SCRIPTS not in sys.path:
@@ -244,35 +244,96 @@ def test_a_derived_cell_says_what_it_came_from() -> None:
     assert cell["note"] == "from the speed and the density"
 
 
-def test_every_cell_a_page_marks_as_an_estimate_reads_as_one() -> None:
-    """Every published catalogue, not the one row a defect was found on.
+def test_a_converted_cell_carries_the_figure_the_page_prints() -> None:
+    row = _row(
+        density_kg_m3=2700.0,
+        converted={"density_kg_m3": ("168.6", "lb/ft3")},
+    )
 
-    The generator asked each row for ``is_estimated``, which the woods
-    spell and the solids do not (theirs is ``is_estimate``), so the 33
-    estimated cells of 21 solids reached the page as printed numbers, among
-    them the Poisson's ratio 0.2 of the aircrete of Hopkins Table A2. The
-    walk covers every catalogue the generator publishes, so a row type that
-    gains the hedge later is held to it as well.
-    """
+    cell = gcd.cell(row, "density_kg_m3")
+
+    assert cell["kind"] == "converted"
+    assert cell["printed"] == "168.6 lb/ft3"
+    assert cell["note"] == ""
+
+
+def test_a_carried_cell_says_where_the_page_prints_it() -> None:
+    row = _row(
+        density_kg_m3=2700.0,
+        carried={"density_kg_m3": "carried down from the row above"},
+    )
+
+    cell = gcd.cell(row, "density_kg_m3")
+
+    assert cell["kind"] == "carried"
+    assert cell["note"] == "carried down from the row above"
+    assert "printed" not in cell
+
+
+def test_an_estimate_for_the_whole_row_marks_every_cell_of_it() -> None:
+    row = _row(density_kg_m3=2700.0, basis={"row": "estimated"})
+
+    assert gcd.cell(row, "density_kg_m3")["kind"] == "estimated"
+
+
+def _published_cells() -> list[tuple[str, CatalogueRow, str]]:
+    """Every numeric cell of every catalogue the generator publishes."""
     catalogues = [
         catalogue
         for name, catalogue in vars(gcd).items()
         if name.startswith("PUBLISHED_") and isinstance(catalogue, Mapping)
     ]
-    estimated = [
-        (key, row, field)
+    return [
+        (key, row, field.name)
         for catalogue in catalogues
         for key, row in catalogue.items()
-        for field in getattr(row, "estimated", ())
+        if isinstance(row, CatalogueRow)
+        for field in dataclasses.fields(row)
+        if isinstance(getattr(row, field.name), (int, float))
+        and not isinstance(getattr(row, field.name), bool)
     ]
 
-    assert len(estimated) >= 35
-    wrong = [
-        f"{key}: {field}"
-        for key, row, field in estimated
-        if gcd.cell(row, field)["kind"] != "estimated"
-    ]
+
+def test_every_hedged_cell_reaches_the_page_as_its_own_kind() -> None:
+    """Every published catalogue, not the one row a defect was found on.
+
+    The generator once asked each row for ``is_estimated``, which the woods
+    spelled and the solids did not, so the 33 estimated cells of 21 solids
+    reached the page as printed numbers, among them the Poisson's ratio 0.2
+    of the aircrete of Hopkins Table A2. Since then the estimate is one
+    entry of ``basis``, and a value the page prints in another unit or on
+    another row has a mapping of its own. The walk covers every numeric cell
+    of every catalogue the generator publishes and asks each hedge the way
+    the row answers it, so a row type that gains a hedge later is held to it
+    as well, and a hedge whose cell reads as printed fails here.
+    """
+    estimated: list[str] = []
+    converted: list[str] = []
+    carried: list[str] = []
+    wrong: list[str] = []
+    for key, row, field in _published_cells():
+        cell = gcd.cell(row, field)
+        where = f"{key}: {field}"
+        if row.basis_of(field) == "estimated":
+            estimated.append(where)
+            if cell["kind"] != "estimated":
+                wrong.append(f"{where} reads as {cell['kind']}, not estimated")
+        elif row.is_approximate(field):
+            continue
+        elif field in row.converted:
+            converted.append(where)
+            figure, unit = row.converted[field]
+            if (cell["kind"], cell.get("printed")) != ("converted", f"{figure} {unit}"):
+                wrong.append(f"{where} reads as {cell['kind']}, not converted")
+        elif field in row.carried:
+            carried.append(where)
+            if (cell["kind"], cell["note"]) != ("carried", row.carried[field]):
+                wrong.append(f"{where} reads as {cell['kind']}, not carried")
+
     assert not wrong, wrong
+    assert len(estimated) == 35
+    assert len(converted) == 125
+    assert len(carried) == 18
 
 
 def test_an_interval_stays_an_interval() -> None:

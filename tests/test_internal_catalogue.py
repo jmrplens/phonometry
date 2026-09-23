@@ -118,13 +118,15 @@ def test_take_drops_the_key_and_keeps_everything_else() -> None:
 
 def test_take_freezes_the_named_sets() -> None:
     """A list in JSON implies an order a set does not have."""
-    fields = take({"key": "x", "estimated": ["poisson_ratio"]}, frozen=("estimated",))
-    assert fields["estimated"] == frozenset({"poisson_ratio"})
+    fields = take(
+        {"key": "x", "approximate": ["poisson_ratio"]}, frozen=("approximate",)
+    )
+    assert fields["approximate"] == frozenset({"poisson_ratio"})
 
 
 def test_take_leaves_a_set_absent_rather_than_inventing_an_empty_one() -> None:
     """The dataclass default says what a missing field means, not this."""
-    assert take({"key": "x"}, frozen=("estimated",)) == {}
+    assert take({"key": "x"}, frozen=("approximate",)) == {}
 
 
 def test_take_turns_each_range_into_a_pair() -> None:
@@ -231,6 +233,9 @@ def test_the_hedges_of_a_shared_row_cannot_be_edited_in_place() -> None:
         derived={"youngs_modulus_pa": "from the shear modulus"},
         ranges={"porosity": (0.9, 0.99)},
         attributed_to={"row": "Someone, 1990"},
+        basis={"row": "measured"},
+        converted={"porosity": ("99", "%")},
+        carried={"tortuosity": "from the row above"},
     )
     for mapping in (
         row.reported,
@@ -238,6 +243,9 @@ def test_the_hedges_of_a_shared_row_cannot_be_edited_in_place() -> None:
         row.derived,
         row.ranges,
         row.attributed_to,
+        row.basis,
+        row.converted,
+        row.carried,
     ):
         with pytest.raises(TypeError):
             mapping["porosity"] = "edited"  # type: ignore[index]

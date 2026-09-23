@@ -107,28 +107,38 @@ CONVERTED_FIELDS = (
 )
 
 
-def test_the_converted_cells_say_they_were_converted() -> None:
-    """A degree Celsius this library worked out is never served as a reading.
+def test_the_converted_cells_keep_the_figure_the_page_prints() -> None:
+    """A degree Celsius converted from the page is never served as a reading.
 
     Every cell of this table but the loss factor is a value converted out of
-    degrees Fahrenheit or pounds per square inch, and ``derived`` is the only
-    thing that stops it being read as a figure off the page: it is what makes
-    the published table call the cell worked out rather than printed, and what
-    keeps the printed figure beside it. So the marker is asserted on every
-    converted cell of every row rather than on a sample. Checking one row and
-    two fields left the rest free to lose their marker, or their printed
-    figure, without a test going red.
+    degrees Fahrenheit or pounds per square inch, and ``converted`` is what
+    stops it being read as a figure off the page: it keeps the printed figure
+    and its unit beside the value, and the published table reads it as a
+    conversion. It is not a derivation, because the number is the page's,
+    so ``is_derived`` answers ``False``. The marker is asserted on every
+    converted cell of every row rather than on a sample, and the figure it
+    keeps is converted again here and compared with the value held, so a
+    marker that drifted from its cell would fail too.
     """
     checked = 0
     for row in PUBLISHED_DAMPING.values():
-        assert not row.is_derived("max_loss_factor"), row.name
+        assert "max_loss_factor" not in row.converted, row.name
         for field in CONVERTED_FIELDS:
             if getattr(row, field) is None:
                 # A cell the page corrupted is refused, not converted.
                 assert row.why_missing(field), f"{row.name}.{field}"
                 continue
-            assert row.is_derived(field), f"{row.name}.{field}"
-            assert "as the page prints it" in row.derived[field]
+            assert not row.is_derived(field), f"{row.name}.{field}"
+            figure, unit = row.converted[field]
+            printed = float(figure.replace("−", "-"))
+            if field.endswith("_c"):
+                assert unit == "°F", f"{row.name}.{field}"
+                expected = (printed - 32.0) * 5.0 / 9.0
+                assert getattr(row, field) == pytest.approx(expected, abs=1e-6)
+            else:
+                assert unit == "psi", f"{row.name}.{field}"
+                expected = printed * PASCAL_PER_PSI
+                assert getattr(row, field) == pytest.approx(expected, rel=1e-8)
             checked += 1
     assert checked == 116
 

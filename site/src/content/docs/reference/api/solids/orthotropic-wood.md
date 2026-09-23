@@ -47,9 +47,11 @@ What the asterisks mean
 Two of maple's four constants carry an asterisk, and the table's caption
 calls the asterisked values "intelligent guesses in the absence of
 experimental data". They are served, because the page prints them as numbers
-and a reader who wants the author's best estimate should have it, but
-[`OrthotropicWood.is_estimated`](/phonometry/reference/api/solids/orthotropic-wood/#orthotropicwoodis_estimated) answers for them so that a caller who
-wants measurements can tell the two apart without reading the caption.
+and a reader who wants the author's best estimate should have it, but each
+holds `"estimated"` in [`OrthotropicWood.basis`](/phonometry/reference/api/solids/orthotropic-wood/#orthotropicwood), and
+[`basis_of`](/phonometry/reference/api/io/io/#cataloguerowbasis_of) answers for them, so that a
+caller who wants measurements can tell the two apart without reading the
+caption.
 
 Where the rows live
 -------------------
@@ -79,20 +81,16 @@ Every row whose printed name contains *name*, case insensitively.
 
 ```python
 OrthotropicWood(
-    density_kg_m3: float | None = None,
-    plate_stiffness_d1_pa: float | None = None,
-    plate_stiffness_d2_pa: float | None = None,
-    plate_stiffness_d3_pa: float | None = None,
-    plate_stiffness_d4_pa: float | None = None,
-    relative_scaling_factor: float | None = None,
-    estimated: frozenset[str] = ...,
     *,
     name: str,
     source: str,
     table: str = '',
     variant: str = '',
+    basis: Mapping[str, str] = ...,
     approximate: frozenset[str] = frozenset(),
     derived: Mapping[str, str] = ...,
+    converted: Mapping[str, tuple[str, str]] = ...,
+    carried: Mapping[str, str] = ...,
     ranges: Mapping[str, tuple[float | None, float | None]] = ...,
     bounded_above: frozenset[str] = frozenset(),
     bounded_below: frozenset[str] = frozenset(),
@@ -104,10 +102,20 @@ OrthotropicWood(
     attributed_to: Mapping[str, str] = ...,
     group: str = '',
     note: str = '',
+    density_kg_m3: float | None = None,
+    plate_stiffness_d1_pa: float | None = None,
+    plate_stiffness_d2_pa: float | None = None,
+    plate_stiffness_d3_pa: float | None = None,
+    plate_stiffness_d4_pa: float | None = None,
+    relative_scaling_factor: float | None = None,
 )
 ```
 
 One wood's plate stiffnesses, as a page printed them.
+
+A constant the caption calls an intelligent guess holds `"estimated"`
+in [`basis`](/phonometry/reference/api/io/io/#cataloguerow), which
+[`basis_of`](/phonometry/reference/api/io/io/#cataloguerowbasis_of) reads.
 
 **Attributes**
 
@@ -119,13 +127,15 @@ One wood's plate stiffnesses, as a page printed them.
 | `plate_stiffness_d3_pa` | D3 = Ey/12mu, across the grain, in pascals. |
 | `plate_stiffness_d4_pa` | D4 = Gxy/3, the twisting stiffness, in pascals: the only term of the plate's energy a pure twisting mode involves. |
 | `relative_scaling_factor` | The fourth root of D1 over D3, which the page prints for each wood: how much wider across the grain a plate of this wood behaves than it is, if its flexural vibrations are read as those of an equivalent isotropic plate. Rossing puts it at "almost double the relative width" for a violin's spruce front plate. It scales one wood's two directions, not one wood against the other. Dimensionless. |
-| `estimated` | Fields the page marks as the author's estimate rather than a measurement. `is_estimated` reads it. |
 | `name` | The material as the table names it, attribution stripped. |
 | `variant` | Which specimen or condition this row is, when the page prints several under one name: `"chemically pure"`, `"direction x"`, `"0.68 mm diameter"`. Empty when the page prints one. |
 | `source` | Document, table, PDF page and printed folio. |
 | `table` | The data file this row was read from, without the extension, which is also the first half of its key in the catalogue that holds it. |
+| `basis` | What the source says a value is: a field name, or `"row"` for the whole row, to one of [`CATALOGUE_BASES`](/phonometry/reference/api/io/io/#catalogue_bases). Hopkins marks most of his Poisson ratios "Estimate", and those cells hold `"estimated"`; a datasheet that declares a class under a product standard would hold `"declared"`. A field with no entry takes the row's, and a row with neither is one whose source does not say, which is a different answer from any of the five. `basis_of` reads it. Independent of `derived`: this is what the source claims for a cell, that is what this library computed. |
 | `approximate` | Fields the page prints with a `~`. Not an estimate and not an interval: a number the author rounded on purpose. |
-| `derived` | Field to how it was computed, for the ones this library worked out from the cells the page did print. A derived value is never stored as if it had been read. |
+| `derived` | Field to how it was computed, for the ones this library worked out from the cells the page did print. A derived value is never stored as if it had been read, and it always follows again from the row's own cells. A value converted from the unit the page prints is not derived (`converted` holds it), and neither is one the page carries from another row (`carried` does). |
+| `converted` | Field to `(figure, unit)`, the number and the unit the page prints, for a value this row holds in another unit. Ver and Beranek print their damping materials in degrees Fahrenheit and pounds per square inch, and the row holds degrees Celsius and pascals, so `("3e5", "psi")` sits beside a modulus in pascals. The figure is kept as the page writes it, so the cell can always be read back in the page's own terms. |
+| `carried` | Field to where the page carries it from, for a cell the page leaves blank because the value is printed once for a block of rows: a figure on the first row of a group, or "Parecido al anterior". The value is the page's, and this says which of its rows prints it. |
 | `ranges` | `(low, high)` for each field the page prints as an interval rather than a value. One end is `None` only for a bound whose open side the quantity has no limit on; the end the page prints is always a number, and a two-sided interval has two. |
 | `bounded_above` | The subset of `ranges` the page prints as `< x` or `<= x`, where the low end is a floor and not a measurement. |
 | `bounded_below` | The subset of `ranges` the page prints as `> x` or `>= x`, where the high end is the ceiling the quantity cannot pass and not a measurement: Cox gives an aerogel a porosity of `>0.75`, and the 1 beside it is what a porosity is, not what anybody measured. A quantity with no such ceiling leaves that end `None` rather than borrowing a number for it: ASHRAE prints `>45` for a duct wall whose radiated sound the background swamped, and a transmission loss has no value it cannot pass, so the open end is empty. It is never an infinity, which is not a number the page has and not a token JSON can carry. |
@@ -137,6 +147,22 @@ One wood's plate stiffnesses, as a page printed them.
 | `attributed_to` | Credit for a cell the book takes from someone else. Keyed by field name, or by `"row"` or `"table"` when the credit covers all of one. |
 | `group` | The heading of the block this row sits under, when the table prints its rows in named groups: Cox files each material under `"Fibrous materials"`, `"Cellular materials"`, `"Granular materials"` or `"Other"`. Empty for a table that prints one list. |
 | `note` | What the page says about this row beyond its numbers. |
+
+### OrthotropicWood.basis_of()
+
+```python
+OrthotropicWood.basis_of(field_name: str) -> str
+```
+
+What the source says this field is: measured, declared, estimated.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `field_name` | One of the field names of this class. |
+
+**Returns:** The field's own entry in `basis`, else the row's, else the empty string, which means the source does not say. Otherwise one of [`CATALOGUE_BASES`](/phonometry/reference/api/io/io/#catalogue_bases).
 
 ### OrthotropicWood.is_approximate()
 
@@ -168,23 +194,7 @@ Whether this library computed this field instead of reading it.
 | :--- | :--- |
 | `field_name` | One of the numeric field names of this class. |
 
-**Returns:** `True` when the page did not print it and the value follows from cells that it did. `derived` says how.
-
-### OrthotropicWood.is_estimated()
-
-```python
-OrthotropicWood.is_estimated(field_name: str) -> bool
-```
-
-Whether the page marked this field as an estimate.
-
-**Parameters**
-
-| Name | Description |
-| :--- | :--- |
-| `field_name` | The attribute name, as `plate_stiffness_d2_pa`. |
-
-**Returns:** `True` when the table's caption calls the value a guess rather than a measurement.
+**Returns:** `True` when the page did not print it and the value follows from cells that it did. `derived` says how. A value the page prints in another unit, or prints on another row and leaves blank on this one, answers `False`: the number is the page's, and `converted` or `carried` says so.
 
 ### OrthotropicWood.printed()
 

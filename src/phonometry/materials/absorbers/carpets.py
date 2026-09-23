@@ -53,13 +53,13 @@ __all__ = [
 ]
 
 
-@dataclass(frozen=True, slots=True, kw_only=True)
+@dataclass(frozen=True, kw_only=True)
 class Carpet(CatalogueRow):
     """One carpet as a page printed it: its pile, what it is laid on, and its NRC.
 
-    The :attr:`~phonometry._internal.catalogue.CatalogueRow.name` is the
+    The :attr:`~phonometry.io.CatalogueRow.name` is the
     construction the page prints, woven, knitted or knotted, and the
-    :attr:`~phonometry._internal.catalogue.CatalogueRow.variant` is the pile
+    :attr:`~phonometry.io.CatalogueRow.variant` is the pile
     surface and the fibre, which is what tells two rows of one construction
     apart.
 

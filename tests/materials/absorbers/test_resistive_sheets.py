@@ -186,8 +186,8 @@ def test_every_sintered_cell_is_the_printed_one_or_the_one_carried_down(
     back a row with no flow resistance at all for eight of the eleven sheets.
     What is checked here is not only that such a cell was filled: it is that
     it was filled with the value of its own block, from the row the sentence
-    in ``derived`` names. Those eight values are the only numbers this
-    catalogue holds that no reader read off a cell.
+    in ``carried`` names. Those eight values are the only numbers this
+    catalogue holds that no reader read off their own cell.
     """
     row = _row(name)
     cells = _cells(ref.VER_BERANEK_8_7_COLUMNS, values)
@@ -195,11 +195,12 @@ def test_every_sintered_cell_is_the_printed_one_or_the_one_carried_down(
         printed = cells[column]
         if printed == "":
             head, carried = _block_head(name, column)
-            assert row.is_derived(field), f"{name}.{field} lost its block value"
+            assert field in row.carried, f"{name}.{field} lost its block value"
+            assert not row.is_derived(field), f"{name}.{field}"
             assert getattr(row, field) == pytest.approx(float(carried)), (
                 f"{name}.{field} carries the value of another block"
             )
-            reason = row.derived[field]
+            reason = row.carried[field]
             assert f"from the {head} row" in reason, f"{name}.{field}"
             assert f"prints {carried} " in reason, f"{name}.{field}"
             continue
@@ -408,11 +409,11 @@ def test_the_carried_down_cells_name_the_row_they_came_from() -> None:
     carried = [
         row
         for row in _of(TABLE_8_7)
-        if row.is_derived("specific_flow_resistance_pa_s_m")
+        if "specific_flow_resistance_pa_s_m" in row.carried
     ]
     assert len(carried) == 8
     heads = {
-        row.derived["specific_flow_resistance_pa_s_m"].split(" row")[0]
+        row.carried["specific_flow_resistance_pa_s_m"].split(" row")[0]
         for row in carried
     }
     assert heads == {

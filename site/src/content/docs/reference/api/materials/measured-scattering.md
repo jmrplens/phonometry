@@ -34,9 +34,9 @@ The band is the field
 These tables are set in one-third octave bands, so each band is a field of
 its own, `scattering_coefficient_1000` and so on, with the band's centre
 frequency in hertz as the suffix and no unit because the quantity has none.
-Every hedge of `CatalogueRow` is keyed
+Every hedge of [`CatalogueRow`](/phonometry/reference/api/io/io/#cataloguerow) is keyed
 by field name, so a band the page leaves empty says so through
-`why_missing` rather than
+[`why_missing`](/phonometry/reference/api/io/io/#cataloguerowwhy_missing) rather than
 answering zero, and a zero here would read as a perfectly specular surface.
 [`ScatteringCoefficientSpectrum.bands`](/phonometry/reference/api/materials/measured-scattering/#scatteringcoefficientspectrumbands) and
 [`spectrum`](/phonometry/reference/api/materials/measured-scattering/#scatteringcoefficientspectrumspectrum) hand the row back as a
@@ -55,7 +55,7 @@ times and puts no ceiling on the result.
 
 The surfaces are described, not named. A row reads `"h = w = 10 cm,
 L = 2h"` and means nothing without the group heading above it, so
-`group` carries that
+[`group`](/phonometry/reference/api/io/io/#cataloguerow) carries that
 heading and [`scattering_named`](/phonometry/reference/api/materials/measured-scattering/#scattering_named) matches on either.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
@@ -97,8 +97,11 @@ ScatteringCoefficientSpectrum(
     source: str,
     table: str = '',
     variant: str = '',
+    basis: Mapping[str, str] = ...,
     approximate: frozenset[str] = frozenset(),
     derived: Mapping[str, str] = ...,
+    converted: Mapping[str, tuple[str, str]] = ...,
+    carried: Mapping[str, str] = ...,
     ranges: Mapping[str, tuple[float | None, float | None]] = ...,
     bounded_above: frozenset[str] = frozenset(),
     bounded_below: frozenset[str] = frozenset(),
@@ -133,8 +136,8 @@ ScatteringCoefficientSpectrum(
 
 One measured surface of a published table, band by band.
 
-The geometry is part of `name`, as the page prints
-it, and the family it belongs to is `group`: pulling
+The geometry is part of [`name`](/phonometry/reference/api/io/io/#cataloguerow), as the page prints
+it, and the family it belongs to is [`group`](/phonometry/reference/api/io/io/#cataloguerow): pulling
 `h` and `L` into fields would mean deciding what the height of a
 randomly arranged array of blocks is, and the pages do not agree on which
 letters they use.
@@ -172,8 +175,11 @@ caller narrowing on the type gets a straight answer.
 | `variant` | Which specimen or condition this row is, when the page prints several under one name: `"chemically pure"`, `"direction x"`, `"0.68 mm diameter"`. Empty when the page prints one. |
 | `source` | Document, table, PDF page and printed folio. |
 | `table` | The data file this row was read from, without the extension, which is also the first half of its key in the catalogue that holds it. |
+| `basis` | What the source says a value is: a field name, or `"row"` for the whole row, to one of [`CATALOGUE_BASES`](/phonometry/reference/api/io/io/#catalogue_bases). Hopkins marks most of his Poisson ratios "Estimate", and those cells hold `"estimated"`; a datasheet that declares a class under a product standard would hold `"declared"`. A field with no entry takes the row's, and a row with neither is one whose source does not say, which is a different answer from any of the five. `basis_of` reads it. Independent of `derived`: this is what the source claims for a cell, that is what this library computed. |
 | `approximate` | Fields the page prints with a `~`. Not an estimate and not an interval: a number the author rounded on purpose. |
-| `derived` | Field to how it was computed, for the ones this library worked out from the cells the page did print. A derived value is never stored as if it had been read. |
+| `derived` | Field to how it was computed, for the ones this library worked out from the cells the page did print. A derived value is never stored as if it had been read, and it always follows again from the row's own cells. A value converted from the unit the page prints is not derived (`converted` holds it), and neither is one the page carries from another row (`carried` does). |
+| `converted` | Field to `(figure, unit)`, the number and the unit the page prints, for a value this row holds in another unit. Ver and Beranek print their damping materials in degrees Fahrenheit and pounds per square inch, and the row holds degrees Celsius and pascals, so `("3e5", "psi")` sits beside a modulus in pascals. The figure is kept as the page writes it, so the cell can always be read back in the page's own terms. |
+| `carried` | Field to where the page carries it from, for a cell the page leaves blank because the value is printed once for a block of rows: a figure on the first row of a group, or "Parecido al anterior". The value is the page's, and this says which of its rows prints it. |
 | `ranges` | `(low, high)` for each field the page prints as an interval rather than a value. One end is `None` only for a bound whose open side the quantity has no limit on; the end the page prints is always a number, and a two-sided interval has two. |
 | `bounded_above` | The subset of `ranges` the page prints as `< x` or `<= x`, where the low end is a floor and not a measurement. |
 | `bounded_below` | The subset of `ranges` the page prints as `> x` or `>= x`, where the high end is the ceiling the quantity cannot pass and not a measurement: Cox gives an aerogel a porosity of `>0.75`, and the 1 beside it is what a porosity is, not what anybody measured. A quantity with no such ceiling leaves that end `None` rather than borrowing a number for it: ASHRAE prints `>45` for a duct wall whose radiated sound the background swamped, and a transmission loss has no value it cannot pass, so the open end is empty. It is never an infinity, which is not a number the page has and not a token JSON can carry. |
@@ -193,6 +199,22 @@ ScatteringCoefficientSpectrum.bands() -> tuple[int, ...]
 ```
 
 The bands this row prints a value for, in hertz.
+
+### ScatteringCoefficientSpectrum.basis_of()
+
+```python
+ScatteringCoefficientSpectrum.basis_of(field_name: str) -> str
+```
+
+What the source says this field is: measured, declared, estimated.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `field_name` | One of the field names of this class. |
+
+**Returns:** The field's own entry in `basis`, else the row's, else the empty string, which means the source does not say. Otherwise one of [`CATALOGUE_BASES`](/phonometry/reference/api/io/io/#catalogue_bases).
 
 ### ScatteringCoefficientSpectrum.is_approximate()
 
@@ -224,7 +246,7 @@ Whether this library computed this field instead of reading it.
 | :--- | :--- |
 | `field_name` | One of the numeric field names of this class. |
 
-**Returns:** `True` when the page did not print it and the value follows from cells that it did. `derived` says how.
+**Returns:** `True` when the page did not print it and the value follows from cells that it did. `derived` says how. A value the page prints in another unit, or prints on another row and leaves blank on this one, answers `False`: the number is the page's, and `converted` or `carried` says so.
 
 ### ScatteringCoefficientSpectrum.printed()
 
@@ -292,7 +314,7 @@ The row as `{band_hz: value}` over the bands it prints.
 
 A band the page left empty, or printed as something other than a
 number, is left out rather than filled with a zero;
-`why_missing` on that band's field says which it
+[`why_missing`](/phonometry/reference/api/io/io/#cataloguerowwhy_missing) on that band's field says which it
 was.
 
 ### ScatteringCoefficientSpectrum.why_missing()

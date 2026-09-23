@@ -1,6 +1,6 @@
 {
   "source": "Vér & Beranek 2e TABLE 8.7, PDF page 267 (printed p. 263)",
-  "about": "Eleven sintered porous metal sheets from TABLE 8.7 of chapter 8, \"Sound-Absorbing Materials and Sound Absorbers\". The quantity is the one the chapter introduces for a thin layer on printed folio 262: “The acoustical properties of such thin layers are characterized by their flow resistance R_s = Δp/v and their mass per unit area ρ_s.” That is a resistance per unit area, in N s/m3, which is a pascal second per metre and what an older literature calls an mks rayl. It is not the flow resistivity of a bulk absorber, which is per metre of thickness and lives in PUBLISHED_POROUS.\n\nNothing here is converted. The thickness and the mass per unit area are printed twice, once in SI and once in US customary units, and this file keeps the SI printing of each pair. The flow resistance is printed twice as well, but the second printing is not a restatement of the first in another unit: it is the same resistance divided by the characteristic impedance of air, and both are kept, because dividing one by the other is what recovers the impedance this table normalized by.\n\nThe two flow-resistance columns are printed once per block of rows and left blank beneath, in blocks of six, one and four. The value is carried down here, marked derived, naming the row it was read from: a literal cell-by-cell reading would leave eight of the eleven sheets with no flow resistance at all.\n\nThe column spanner states the only measurement condition printed on any of the three tables of this chapter, “Specific Flow Resistance Air, 70°F”, and every row's note carries it. The credit is the table's and no row's, so every row carries it under the key \"table\": the title names the Brunswick Corporation and footnote a reads “Courtesy of Brunswick Corporation.” Footnote a also gives the material, type 347 stainless steel except FM 802, which is Hastelloy X, and footnote b defines the nonlinearity factor as the ratio of the flow resistances “obtained at flow velocities of 500 and 20 cm/s”. The table gives no measurement method, no laboratory and no standard; the running text says that sintered porous metals “remain linear up to high sound pressure levels and for high-Mach-number grazing flow”, which is why this table prints a nonlinearity factor where the two cloth tables carry a warning about the particle velocity instead.",
+  "about": "Eleven sintered porous metal sheets from TABLE 8.7 of chapter 8, \"Sound-Absorbing Materials and Sound Absorbers\". The quantity is the one the chapter introduces for a thin layer on printed folio 262: “The acoustical properties of such thin layers are characterized by their flow resistance R_s = Δp/v and their mass per unit area ρ_s.” That is a resistance per unit area, in N s/m3, which is a pascal second per metre and what an older literature calls an mks rayl. It is not the flow resistivity of a bulk absorber, which is per metre of thickness and lives in PUBLISHED_POROUS.\n\nNothing here is converted. The thickness and the mass per unit area are printed twice, once in SI and once in US customary units, and this file keeps the SI printing of each pair. The flow resistance is printed twice as well, but the second printing is not a restatement of the first in another unit: it is the same resistance divided by the characteristic impedance of air, and both are kept, because dividing one by the other is what recovers the impedance this table normalized by.\n\nThe two flow-resistance columns are printed once per block of rows and left blank beneath, in blocks of six, one and four. The value is carried down here, marked carried, naming the row it was read from: a literal cell-by-cell reading would leave eight of the eleven sheets with no flow resistance at all.\n\nThe column spanner states the only measurement condition printed on any of the three tables of this chapter, “Specific Flow Resistance Air, 70°F”, and every row's note carries it. The credit is the table's and no row's, so every row carries it under the key \"table\": the title names the Brunswick Corporation and footnote a reads “Courtesy of Brunswick Corporation.” Footnote a also gives the material, type 347 stainless steel except FM 802, which is Hastelloy X, and footnote b defines the nonlinearity factor as the ratio of the flow resistances “obtained at flow velocities of 500 and 20 cm/s”. The table gives no measurement method, no laboratory and no standard; the running text says that sintered porous metals “remain linear up to high sound pressure levels and for high-Mach-number grazing flow”, which is why this table prints a nonlinearity factor where the two cloth tables carry a warning about the particle velocity instead.",
   "rows": [
     {
       "key": "sintered_fm_125",
@@ -27,7 +27,7 @@
         "table": "the Brunswick Corporation, named in the title of TABLE 8.7, “Specific (Unit-Area) Flow Resistance R_s, Thickness, and Mass per Unit Area of Sintered Porous Metals Manufactured by the Brunswick Corporation”, and credited in its footnote a, “Courtesy of Brunswick Corporation.” The page credits no row of the table separately."
       },
       "note": "Type 347 stainless steel, per footnote a. The flow resistance is for air at 70°F, per the column spanner, “Specific Flow Resistance Air, 70°F”.",
-      "derived": {
+      "carried": {
         "normalized_flow_resistance": "carried down the blank cells of TABLE 8.7 from the FM 125 row, which prints 0.25 times rho0 c0 for the six rows of its block",
         "specific_flow_resistance_pa_s_m": "carried down the blank cells of TABLE 8.7 from the FM 125 row, which prints 100 N s/m3 for the six rows of its block"
       }
@@ -44,7 +44,7 @@
         "table": "the Brunswick Corporation, named in the title of TABLE 8.7, “Specific (Unit-Area) Flow Resistance R_s, Thickness, and Mass per Unit Area of Sintered Porous Metals Manufactured by the Brunswick Corporation”, and credited in its footnote a, “Courtesy of Brunswick Corporation.” The page credits no row of the table separately."
       },
       "note": "Type 347 stainless steel, per footnote a. The flow resistance is for air at 70°F, per the column spanner, “Specific Flow Resistance Air, 70°F”.",
-      "derived": {
+      "carried": {
         "normalized_flow_resistance": "carried down the blank cells of TABLE 8.7 from the FM 125 row, which prints 0.25 times rho0 c0 for the six rows of its block",
         "specific_flow_resistance_pa_s_m": "carried down the blank cells of TABLE 8.7 from the FM 125 row, which prints 100 N s/m3 for the six rows of its block"
       }
@@ -61,7 +61,7 @@
         "table": "the Brunswick Corporation, named in the title of TABLE 8.7, “Specific (Unit-Area) Flow Resistance R_s, Thickness, and Mass per Unit Area of Sintered Porous Metals Manufactured by the Brunswick Corporation”, and credited in its footnote a, “Courtesy of Brunswick Corporation.” The page credits no row of the table separately."
       },
       "note": "Type 347 stainless steel, per footnote a. The flow resistance is for air at 70°F, per the column spanner, “Specific Flow Resistance Air, 70°F”.",
-      "derived": {
+      "carried": {
         "normalized_flow_resistance": "carried down the blank cells of TABLE 8.7 from the FM 125 row, which prints 0.25 times rho0 c0 for the six rows of its block",
         "specific_flow_resistance_pa_s_m": "carried down the blank cells of TABLE 8.7 from the FM 125 row, which prints 100 N s/m3 for the six rows of its block"
       }
@@ -78,7 +78,7 @@
         "table": "the Brunswick Corporation, named in the title of TABLE 8.7, “Specific (Unit-Area) Flow Resistance R_s, Thickness, and Mass per Unit Area of Sintered Porous Metals Manufactured by the Brunswick Corporation”, and credited in its footnote a, “Courtesy of Brunswick Corporation.” The page credits no row of the table separately."
       },
       "note": "Type 347 stainless steel, per footnote a. The flow resistance is for air at 70°F, per the column spanner, “Specific Flow Resistance Air, 70°F”.",
-      "derived": {
+      "carried": {
         "normalized_flow_resistance": "carried down the blank cells of TABLE 8.7 from the FM 125 row, which prints 0.25 times rho0 c0 for the six rows of its block",
         "specific_flow_resistance_pa_s_m": "carried down the blank cells of TABLE 8.7 from the FM 125 row, which prints 100 N s/m3 for the six rows of its block"
       }
@@ -95,7 +95,7 @@
         "table": "the Brunswick Corporation, named in the title of TABLE 8.7, “Specific (Unit-Area) Flow Resistance R_s, Thickness, and Mass per Unit Area of Sintered Porous Metals Manufactured by the Brunswick Corporation”, and credited in its footnote a, “Courtesy of Brunswick Corporation.” The page credits no row of the table separately."
       },
       "note": "Hastelloy X, the one material footnote a excepts. The flow resistance is for air at 70°F, per the column spanner, “Specific Flow Resistance Air, 70°F”.",
-      "derived": {
+      "carried": {
         "normalized_flow_resistance": "carried down the blank cells of TABLE 8.7 from the FM 125 row, which prints 0.25 times rho0 c0 for the six rows of its block",
         "specific_flow_resistance_pa_s_m": "carried down the blank cells of TABLE 8.7 from the FM 125 row, which prints 100 N s/m3 for the six rows of its block"
       }
@@ -138,7 +138,7 @@
         "table": "the Brunswick Corporation, named in the title of TABLE 8.7, “Specific (Unit-Area) Flow Resistance R_s, Thickness, and Mass per Unit Area of Sintered Porous Metals Manufactured by the Brunswick Corporation”, and credited in its footnote a, “Courtesy of Brunswick Corporation.” The page credits no row of the table separately."
       },
       "note": "Type 347 stainless steel, per footnote a. The flow resistance is for air at 70°F, per the column spanner, “Specific Flow Resistance Air, 70°F”.",
-      "derived": {
+      "carried": {
         "normalized_flow_resistance": "carried down the blank cells of TABLE 8.7 from the FM 122 row, which prints 1.25 times rho0 c0 for the four rows of its block",
         "specific_flow_resistance_pa_s_m": "carried down the blank cells of TABLE 8.7 from the FM 122 row, which prints 500 N s/m3 for the four rows of its block"
       }
@@ -155,7 +155,7 @@
         "table": "the Brunswick Corporation, named in the title of TABLE 8.7, “Specific (Unit-Area) Flow Resistance R_s, Thickness, and Mass per Unit Area of Sintered Porous Metals Manufactured by the Brunswick Corporation”, and credited in its footnote a, “Courtesy of Brunswick Corporation.” The page credits no row of the table separately."
       },
       "note": "Type 347 stainless steel, per footnote a. The flow resistance is for air at 70°F, per the column spanner, “Specific Flow Resistance Air, 70°F”.",
-      "derived": {
+      "carried": {
         "normalized_flow_resistance": "carried down the blank cells of TABLE 8.7 from the FM 122 row, which prints 1.25 times rho0 c0 for the four rows of its block",
         "specific_flow_resistance_pa_s_m": "carried down the blank cells of TABLE 8.7 from the FM 122 row, which prints 500 N s/m3 for the four rows of its block"
       }
@@ -172,7 +172,7 @@
         "table": "the Brunswick Corporation, named in the title of TABLE 8.7, “Specific (Unit-Area) Flow Resistance R_s, Thickness, and Mass per Unit Area of Sintered Porous Metals Manufactured by the Brunswick Corporation”, and credited in its footnote a, “Courtesy of Brunswick Corporation.” The page credits no row of the table separately."
       },
       "note": "Type 347 stainless steel, per footnote a. The flow resistance is for air at 70°F, per the column spanner, “Specific Flow Resistance Air, 70°F”.",
-      "derived": {
+      "carried": {
         "normalized_flow_resistance": "carried down the blank cells of TABLE 8.7 from the FM 122 row, which prints 1.25 times rho0 c0 for the four rows of its block",
         "specific_flow_resistance_pa_s_m": "carried down the blank cells of TABLE 8.7 from the FM 122 row, which prints 500 N s/m3 for the four rows of its block"
       }

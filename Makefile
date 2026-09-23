@@ -263,6 +263,15 @@ fence-names:
 dead-constants:
 	$(PYTHON) scripts/check_dead_constants.py
 
+# Every level is a ratio to an ISO 1683 reference value, and the package
+# publishes them once, in phonometry.metrology.ISO1683_REFERENCE_VALUES. This
+# fails on a reference value in src that is typed out again instead of read
+# from the table, and on one that differs from it without naming the document
+# it comes from. On the tree it was written against it found forty-three.
+# Stdlib only.
+reference-values:
+	$(PYTHON) scripts/check_reference_values.py
+
 # A pressure of 101 325 and a pressure of 101.325 are both legitimate values
 # in this tree, so a bare `pressure` loses its unit the moment a caller types
 # a number. This holds every public pressure, temperature and humidity to a
@@ -621,6 +630,6 @@ check: lint security test
 	llms pypi-readme api-docs site-reports conformance install-hooks test test-perf test-gpu coverage check \
 	snippets snippets-static claims subscripts docstring-math language-forwarding \
 	fence-names decimal-comma spanish-accents figure-decimal-point figure-legends figure-tick-clearance \
-	figure-text-clearance figure-minus-sign control-characters hazards dead-constants \
+	figure-text-clearance figure-minus-sign control-characters hazards dead-constants reference-values \
 	conformance-rows conformance-vocabulary parameter-units frozen-constants published-sources \
 	solid-agreement shared-sources catalogue-data published-catalogues

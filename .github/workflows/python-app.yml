@@ -852,6 +852,31 @@ jobs:
     - name: Check that every private constant is read somewhere
       run: python scripts/check_dead_constants.py
 
+  # A level is a ratio to a reference value, and ISO 1683 fixes one per
+  # quantity. The package publishes them once, as
+  # phonometry.metrology.ISO1683_REFERENCE_VALUES; before that the same 20 µPa
+  # was typed out seventeen times and one name meant a pressure in four modules
+  # and a power in two. This fails on a reference value in src that repeats a
+  # value of the table instead of reading it, and on one that differs from it
+  # without naming the document it comes from. Deciding what a reference is
+  # needs the name, the value and the comment beside it, so it is an AST walk
+  # rather than a grep. Static and dependency-free, so it runs on its own.
+  reference-values:
+    name: Every reference value points at ISO 1683 or names its source
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+    - uses: actions/checkout@v7
+      with:
+        persist-credentials: false
+    - name: Set up Python 3.13
+      uses: actions/setup-python@v7
+      with:
+        python-version: "3.13"
+    - name: Check that no reference value is a copy or has no document
+      run: python scripts/check_reference_values.py
+
   # A conformance row states what a standard prints and what this library
   # computes. A row that computes the expected value itself, from the same
   # constants, compares a formula with a second copy of it and reports Pass

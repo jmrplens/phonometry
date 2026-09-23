@@ -344,17 +344,17 @@ C -2.45 -1.42 -2.74 -0.73 -2.74 0
 C -2.74 0.73 -2.45 1.42 -1.94 1.94 
 C -1.42 2.45 -0.73 2.74 0 2.74 
 z
-" style="stroke: #1f77b4"/></defs><g clip-path="url(#pd31d1be8c1)"><use xlink:href="#ma4c4d70484" x="315.51" y="220.62" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#ma4c4d70484" x="181.68" y="215.89" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#ma4c4d70484" x="249.86" y="173.58" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#ma4c4d70484" x="360.15" y="269.55" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#ma4c4d70484" x="137.14" y="261.5" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#ma4c4d70484" x="251.4" y="192.38" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#ma4c4d70484" x="321.47" y="253.47" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#ma4c4d70484" x="179.11" y="248.21" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#ma4c4d70484" x="293.38" y="346.86" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#ma4c4d70484" x="204.62" y="344.32" style="fill: #1f77b4; stroke: #1f77b4"/></g></g><g id="text_23"><g id="patch_6"><path d="M 362.34 352.46 
-L 430.35 352.46 
-Q 431.31 352.46 431.31 351.5 
-L 431.31 343.5 
-Q 431.31 342.54 430.35 342.54 
-L 362.34 342.54 
-Q 361.38 342.54 361.38 343.5 
-L 361.38 351.5 
-Q 361.38 352.46 362.34 352.46 
+" style="stroke: #1f77b4"/></defs><g clip-path="url(#pd31d1be8c1)"><use xlink:href="#ma4c4d70484" x="315.51" y="220.62" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#ma4c4d70484" x="181.68" y="215.89" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#ma4c4d70484" x="249.86" y="173.58" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#ma4c4d70484" x="360.15" y="269.55" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#ma4c4d70484" x="137.14" y="261.5" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#ma4c4d70484" x="251.4" y="192.38" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#ma4c4d70484" x="321.47" y="253.47" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#ma4c4d70484" x="179.11" y="248.21" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#ma4c4d70484" x="293.38" y="346.86" style="fill: #1f77b4; stroke: #1f77b4"/><use xlink:href="#ma4c4d70484" x="204.62" y="344.32" style="fill: #1f77b4; stroke: #1f77b4"/></g></g><g id="text_23"><g id="patch_6"><path d="M 36.74 317.66 
+L 104.76 317.66 
+Q 105.72 317.66 105.72 316.7 
+L 105.72 308.7 
+Q 105.72 307.74 104.76 307.74 
+L 36.74 307.74 
+Q 35.78 307.74 35.78 308.7 
+L 35.78 316.7 
+Q 35.78 317.66 36.74 317.66 
 z
-" style="fill: #ffffff; opacity: 0.72"/></g><!-- Plano reflectante --><g transform="translate(362.34 349.58) scale(0.08 -0.08)"><defs><path id="DejaVuSans-33" d="M 1259 4147 
+" style="fill: #ffffff; opacity: 0.72"/></g><!-- Plano reflectante --><g transform="translate(36.74 314.78) scale(0.08 -0.08)"><defs><path id="DejaVuSans-33" d="M 1259 4147 
 L 1259 2394 
 L 2053 2394 
 Q 2494 2394 2734 2622 

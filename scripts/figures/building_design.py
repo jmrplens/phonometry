@@ -1360,6 +1360,8 @@ def generate_single_panel_rating(output_dir: str) -> None:
         ),
         r"6 mm float glass, $m^{\prime\prime}$ = 15 kg/m², $\eta$ = 0.024",
     ]
+    # Above the coincidence line (zorder 4), which ran through the box and
+    # both of its lines.
     ax.text(
         0.985,
         0.03,
@@ -1369,6 +1371,7 @@ def generate_single_panel_rating(output_dir: str) -> None:
         ha="right",
         fontsize=10,
         color=COLOR_FG,
+        zorder=5,
         bbox={
             "boxstyle": "round,pad=0.5",
             "facecolor": COLOR_PANEL,
@@ -1460,6 +1463,8 @@ def generate_plateau_transmission_loss(output_dir: str) -> None:
         ),
         "identical below $A$; the plateau replaces the whole coincidence region",
     ]
+    # Above the critical-frequency line (zorder 4), which ran through the
+    # box and its last two lines.
     ax.text(
         0.985,
         0.03,
@@ -1469,6 +1474,7 @@ def generate_plateau_transmission_loss(output_dir: str) -> None:
         ha="right",
         fontsize=9,
         color=COLOR_FG,
+        zorder=6,
         bbox={"boxstyle": "round,pad=0.5", "facecolor": panel, "edgecolor": COLOR_GRID},
     )
     plt.tight_layout()
@@ -1694,7 +1700,9 @@ def generate_coupling_term_regimes(output_dir: str) -> None:
     ax.annotate(
         f"pump on a concrete slab: {pump_dc:.1f} dB",
         xy=(7.0710678, pump_dc),
-        xytext=(30.0, pump_dc - 12.0),
+        # From a mobility ratio of 10: from 30 the Spanish wording ran out
+        # through the right spine.
+        xytext=(10.0, pump_dc - 12.0),
         fontsize=9,
         color=COLOR_FG,
         arrowprops={"arrowstyle": "->", "lw": 1.0},
@@ -1965,15 +1973,18 @@ def generate_detailed_impact_paths(output_dir: str) -> None:
             f"({_fmt_minus(res.rating.ci)}) dB"
         ),
     ]
-    ax.text(
+    # On the twin, which is drawn after the bars, and above its f0 line: set
+    # on the host, the dotted line ran through the box and both its lines.
+    twin.text(
         0.015,
         0.03,
         "\n".join(info),
-        transform=ax.transAxes,
+        transform=twin.transAxes,
         va="bottom",
         ha="left",
         fontsize=10,
         color=COLOR_FG,
+        zorder=6,
         bbox={
             "boxstyle": "round,pad=0.5",
             "facecolor": COLOR_PANEL,

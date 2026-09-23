@@ -68,7 +68,9 @@ def _d_surfaces(s: SVG, th: Theme) -> None:
 
     # Reflecting plane (hatched line through the equator / footprint centre).
     s.ground(gy, 55, 430)
-    s.text(70, gy + 34, "Reflecting plane", 15, th.muted, anchor="start")
+    # Under the footprint ellipse, which ran through the words at gy + 34;
+    # the two captions below move down to make room.
+    s.text(60, gy + 62, "Reflecting plane", 15, th.muted, anchor="start")
 
     # Hemisphere: dashed footprint ellipse + solid dome silhouette.
     ky = 0.30
@@ -101,8 +103,10 @@ def _d_surfaces(s: SVG, th: Theme) -> None:
     # radius r drawn to position 8 (a mid-height point on the surface).
     r8 = pts[7]
     s.line(cx, gy, r8[0], r8[1], th.accent, 1.6, dash="6,4")
+    # Just outside the dome, level with the middle of the radius: beside the
+    # radius itself, the dome ran through the label.
     s.text(
-        (cx + r8[0]) / 2 + 10,
+        cx + R + 10,
         (gy + r8[1]) / 2 + 4,
         "radius $r ≥ 2 d_0$",
         15,
@@ -114,8 +118,8 @@ def _d_surfaces(s: SVG, th: Theme) -> None:
         s.circle(px, py, 2.2, th.bg)
         if i in labelled:
             s.text(px, py - 12, str(i), 14, th.fg, bold=True)
-    s.text(cx, gy + 62, "10 key positions (Table B.1)", 15, th.muted)
-    s.text(cx, gy + 86, "one plane · $S = 2πr^2$", 15, th.primary, bold=True)
+    s.text(cx, gy + 88, "10 key positions (Table B.1)", 15, th.muted)
+    s.text(cx, gy + 112, "one plane · $S = 2πr^2$", 15, th.primary, bold=True)
 
     # ===== Right panel: parallelepiped measurement surface =====
     bx2, gy2 = 675.0, 420.0
@@ -131,7 +135,18 @@ def _d_surfaces(s: SVG, th: Theme) -> None:
     # Measurement distance d: vertical clearance between the source top face
     # and the enveloping measurement surface (labelled arrow + caption above).
     s.text(bx2, 208, "measurement distance $d$", 15, th.secondary, bold=True)
-    s.dim(bx2, gy2 - 108, bx2, gy2 - 58, "$d$", offset=0, size=17, label_side="right")
+    # On the source's front-left edge, left of its top face: drawn at the
+    # middle, the top face's back edge ran through the "d".
+    s.dim(
+        bx2 - 46,
+        gy2 - 108,
+        bx2 - 46,
+        gy2 - 58,
+        "$d$",
+        offset=0,
+        size=17,
+        label_side="left",
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -498,13 +513,18 @@ def _d_precision_anechoic(s: SVG, th: Theme) -> None:
 
     # Reflecting floor (hemi-anechoic room).
     s.ground(gy, x0, x1)
-    s.text(70, gy - 8, "Reflecting plane (hemi-anechoic)", 13, th.muted, anchor="start")
+    # Under the floor at the right, where the base circle of the hemisphere
+    # has drawn in: above the floor at the left, the hemisphere's edge and
+    # its base circle ran through the words.
+    s.text(x1, gy + 26, "Reflecting plane (hemi-anechoic)", 12, th.muted, anchor="end")
 
     # Source (DUT) at the centre of the reflecting plane.
     cx, R = 450.0, 200.0
     _box_solid(s, th, cx, gy, 34, 26, 40)
     s.circle(cx, gy, 3.4, th.fg)
-    s.text(cx + 52, gy - 14, "Source (DUT)", 15, th.fg, bold=True, anchor="start")
+    # Over the source, inside the hemisphere: beside it, the base circle ran
+    # through the words.
+    s.text(cx, gy - 66, "Source (DUT)", 15, th.fg, bold=True)
 
     # Hemispherical measurement surface of radius r.
     s.ellipse(cx, gy, R, R * 0.16, "none", th.muted, 1.3, dash="5,4")
@@ -537,15 +557,17 @@ def _d_precision_anechoic(s: SVG, th: Theme) -> None:
     for px, py in pts:
         s.circle(px, py, 6.5, th.secondary)
         s.circle(px, py, 2.2, th.bg)
-    s.text(688, 300, "20 / 40 mic positions", 14, th.muted, anchor="start")
+    # Ending short of the side wall's wedges, which it ran into.
+    s.text(804, 300, "20 / 40 mic positions", 14, th.muted, anchor="end")
 
     # Governing relations.
+    # Starting lower, clear of the base circle, which touched the first line.
     for y, txt, col, bold in (
-        (514, "$L_W = ⟨L_p⟩ + 10 log_{10}(S/S_0) + C_1 + C_2 + C_3$", th.fg, True),
-        (540, "$S = 2πr^2$ (hemi-anechoic) · $4πr^2$ (anechoic)", th.primary, True),
-        (564, "$K_1$: per-position background correction", th.muted, False),
+        (520, "$L_W = ⟨L_p⟩ + 10 log_{10}(S/S_0) + C_1 + C_2 + C_3$", th.fg, True),
+        (545, "$S = 2πr^2$ (hemi-anechoic) · $4πr^2$ (anechoic)", th.primary, True),
+        (568, "$K_1$: per-position background correction", th.muted, False),
         (
-            587,
+            591,
             ("$C_1$, $C_2$, $C_3$: meteorological corrections ($p_s$, $θ$, $a(f)$)"),
             th.muted,
             False,
@@ -566,7 +588,8 @@ def _d_intensity_scan(s: SVG, th: Theme) -> None:
     # Measurement surface (dashed wireframe) enclosing the source.
     _box_wire(s, th, bx, gy, 150, 120, 240, th.primary)
     _box_solid(s, th, bx, gy, 45, 34, 70)
-    s.text(bx, gy - 82, "Source", 15, th.fg, bold=True)
+    # Above the box's back edge, which ran through the word 12 px lower.
+    s.text(bx, gy - 94, "Source", 15, th.fg, bold=True)
     # Above the wireframe's topmost edge rather than across its back
     # corners: the caption is 325 px in Spanish and 305 in English, and
     # both reach the box's slanted edges where it used to sit.
@@ -578,7 +601,8 @@ def _d_intensity_scan(s: SVG, th: Theme) -> None:
         s.line(gx, ft, gx, fb, th.muted, 1.2, dash="4,4")
     for gyy in (ft + 80, ft + 160):
         s.line(fl, gyy, fr, gyy, th.muted, 1.2, dash="4,4")
-    s.text(fl + 50, ft + 46, "$S_i$", 15, th.fg, bold=True)
+    # Under the first scan run, which ran through the label on the row above.
+    s.text(fl + 50, ft + 70, "$S_i$", 15, th.fg, bold=True)
 
     # Serpentine scan path across the segment-row centres.
     ys = (ft + 40, ft + 120, ft + 200)
@@ -593,14 +617,18 @@ def _d_intensity_scan(s: SVG, th: Theme) -> None:
     for (ax, ay), (bxx, byy) in itertools.pairwise(px):
         s.line(ax, ay, bxx, byy, th.accent, 2.0, dash="2,3")
     s.arrow(px[-2][0] + 60, px[-1][1], px[-1][0], px[-1][1], th.accent, 2.0)
-    s.text(fr + 8, ys[2] + 6, "serpentine scan", 13, th.accent, anchor="start")
+    # Beyond the surface's slanted lower edge, which ran through the words
+    # when they started just past the front face.
+    s.text(fr + 62, ys[2] + 6, "serpentine scan", 13, th.accent, anchor="start")
 
     # A p-p intensity probe on the scan path.
     ppx, ppy = bx, ys[1]
     s.line(ppx, ppy, ppx + 46, ppy - 26, th.fg, 2.2)
     s.circle(ppx, ppy - 6, 5, th.fg)
     s.circle(ppx, ppy + 6, 5, th.fg)
-    s.text(ppx + 52, ppy - 30, "p-p probe", 13, th.fg, anchor="start")
+    # 12 px, between the segment line and the scan's vertical run, which the
+    # Spanish reached at 13.
+    s.text(ppx + 54, ppy - 30, "p-p probe", 12, th.fg, anchor="start")
 
     # Normal-intensity arrows exiting the left column of segments.
     for yy in ys:
@@ -694,9 +722,12 @@ def _d_reverberation_power(s: SVG, th: Theme) -> None:
 
     sx, sy = mp(ax, *_REV_SOURCE)
     for i, (mx, my) in enumerate(_REV_MICS, start=1):
-        mic(*mp(ax, mx, my), str(i))
+        mic(*mp(ax, mx, my), str(i) if i != 4 else "")
     # The three clearances, each measured on the position that binds it.
     m4x, m4y = mp(ax, *_REV_MICS[3])
+    # Position 4 is numbered under its circle: above it, the 1,0 m line to
+    # the wall ran through the number, and beside it the traverse does.
+    s.text(m4x, m4y + 22, "4", 13, th.fg, bold=True)
     s.line(m4x, m4y, m4x, base - 272, th.muted, 1.0, dash="4,3")
     s.text(m4x + 8, (m4y + base - 272) / 2, "> 1,0 m", 13, th.fg, anchor="start")
     m1x, m1y = mp(ax, *_REV_MICS[0])
@@ -727,7 +758,9 @@ def _d_reverberation_power(s: SVG, th: Theme) -> None:
     )
     for mx, my in _REV_MICS:
         mic(*mp(bx, mx, my))
-    rx_, ry_ = mp(bx, 4.2, 3.2)
+    # At x = 3,9 m rather than 4,2, so that its two-line name ends inside the
+    # room: the Spanish ran into the right-hand wall.
+    rx_, ry_ = mp(bx, 3.9, 3.2)
     s.circle(rx_, ry_, 15.0, th.accent)
     s.circle(rx_, ry_, 6.0, th.bg)
     s.text(
@@ -873,7 +906,21 @@ def _d_sound_power_in_situ(s: SVG, th: Theme) -> None:
 
     # The lines of sight, under the machine, so the screened one is cut by it.
     s.line(m4x, m4y, rx, ry, th.muted, 1.3, dash="5,4")
-    s.line(m1x, m1y, bx0 + bw, by0, th.muted, 1.2, dash="4,4")
+    # The sight line from position 1 to the box's corner breaks around the
+    # label of the 0.5 m clearance, which it ran straight through.
+    gap_top, gap_bot = (by0 + ry) / 2 - 6, (by0 + ry) / 2 + 10
+    for y_from, y_to in ((m1y, gap_top), (gap_bot, by0)):
+        t_from = (y_from - m1y) / (by0 - m1y)
+        t_to = (y_to - m1y) / (by0 - m1y)
+        s.line(
+            m1x + (bx0 + bw - m1x) * t_from,
+            y_from,
+            m1x + (bx0 + bw - m1x) * t_to,
+            y_to,
+            th.muted,
+            1.2,
+            dash="4,4",
+        )
     s.line(m1x, m1y, rx, ry, th.accent, 1.3, dash="5,4")
     s.line(m2x, m2y, rx, ry, th.accent, 1.3, dash="5,4")
 
@@ -1078,9 +1125,12 @@ def _d_box_array(s: SVG, th: Theme) -> None:
     s.rect(tx, ty, tw, td, th.bg, th.accent, sw=2.2, dash="7,5")
     rw, rd = 1.4 * sc, 0.9 * sc  # reference box, in plan
     s.rect(tx + (tw - rw) / 2, ty + (td - rd) / 2, rw, rd, th.panel, th.fg, sw=2.0)
-    s.text(tx + tw / 2, ty + (td + rd) / 2 + 20, "reference box", 13, th.fg)
-    # The partial-area split of the top face and its key positions.
-    s.line(tx + tw / 2, ty, tx + tw / 2, ty + td, th.muted, 1.4, dash="4,4")
+    label_y = ty + (td + rd) / 2 + 20
+    s.text(tx + tw / 2, label_y, "reference box", 13, th.fg)
+    # The partial-area split of the top face and its key positions. The split
+    # breaks around the box's name, which it ran straight through.
+    for y_from, y_to in ((ty, label_y - 14), (label_y + 7, ty + td)):
+        s.line(tx + tw / 2, y_from, tx + tw / 2, y_to, th.muted, 1.4, dash="4,4")
     for px, py in (
         (tx, ty),
         (tx + tw / 2, ty),
@@ -1123,11 +1173,13 @@ def _d_box_array(s: SVG, th: Theme) -> None:
     # One position of each kind carries its reference direction: the top-face
     # centre normal to its face, the corner aimed at the origin O.
     key(ex + ew / 2, gy - eh, (0.0, 34.0))
+    # 11 px in English, whose 12 px line ran into the surface's right edge.
+    normal = "normal to the face"
     s.text(
         ex + ew / 2 + 10,
         gy - eh + 24,
-        "normal to the face",
-        12,
+        normal,
+        s.fit_size([normal], [12, 11], 104),
         th.muted,
         anchor="start",
     )
@@ -1269,7 +1321,8 @@ def _d_radiation_factor(s: SVG, th: Theme) -> None:
         (238, "normal velocity, same bands", th.muted, False),
     ):
         s.text(lx, y, txt, 14 if bold else 13, col, anchor="start", bold=bold)
-    s.rect(lx - 10, 268, 260, 118, th.panel, th.secondary, rx=10, sw=2.0)
+    # 272 px wide: at 260 the longest Spanish line ran into the right edge.
+    s.rect(lx - 10, 268, 272, 118, th.panel, th.secondary, rx=10, sw=2.0)
     for k, txt in enumerate(
         (
             "one machine, one run:",
@@ -1661,20 +1714,24 @@ def _d_swept_sine(s: SVG, th: Theme) -> None:
     def box(x0: float, x1: float, y0: float, l1: str, l2: str, color: str) -> None:
         s.rect(x0, y0, x1 - x0, 76.0, th.panel, color, rx=10, sw=2)
         s.text((x0 + x1) / 2, y0 + 32.0, l1, 15, th.fg, bold=True)
-        s.text((x0 + x1) / 2, y0 + 56.0, l2, 12, th.muted)
+        # The second line drops a size where the box would not hold it.
+        size = s.fit_size([l2], [12, 11, 10], x1 - x0 - 20)
+        s.text((x0 + x1) / 2, y0 + 56.0, l2, size, th.muted)
 
-    box(60, 300, 64, "Exponential sweep $x(t)$", "20 Hz → 6 kHz in $T$ = 4 s", th.fg)
+    # The middle box 280 px wide: at 220 the Spanish of its second line ran
+    # out through both sides.
+    box(40, 280, 64, "Exponential sweep $x(t)$", "20 Hz → 6 kHz in $T$ = 4 s", th.fg)
     box(
-        340,
-        560,
+        310,
+        590,
         64,
         "Device under test",
         "weakly nonlinear: gain + harmonics",
         th.primary,
     )
-    box(600, 840, 64, "Recording $y(t)$", "sweep + distortion products", th.fg)
-    s.arrow(300.0, 102.0, 336.0, 102.0, th.fg, 2.0)
-    s.arrow(560.0, 102.0, 596.0, 102.0, th.fg, 2.0)
+    box(620, 860, 64, "Recording $y(t)$", "sweep + distortion products", th.fg)
+    s.arrow(280.0, 102.0, 306.0, 102.0, th.fg, 2.0)
+    s.arrow(590.0, 102.0, 616.0, 102.0, th.fg, 2.0)
     box(
         520,
         840,
@@ -1683,7 +1740,7 @@ def _d_swept_sine(s: SVG, th: Theme) -> None:
         "time-reversed sweep with a +6 dB/octave tilt",
         th.secondary,
     )
-    s.arrow(720.0, 140.0, 720.0, 176.0, th.fg, 2.0)
+    s.arrow(740.0, 140.0, 740.0, 176.0, th.fg, 2.0)
     s.arrow(660.0, 256.0, 648.0, 298.0, th.fg, 2.0)
 
     # --- impulse-response timeline -----------------------------------------
@@ -3023,7 +3080,11 @@ def _d_sweep_bench(s: SVG, th: Theme) -> None:
     fx = (sx + mx) / 2
     s.line(sx, hy, fx, gy, th.secondary, 1.8, dash="8,5")
     s.line(fx, gy, mx, hy, th.secondary, 1.8, dash="8,5")
-    s.text(fx, gy - 10, "reflected path 2.60 m", 12, th.secondary)
+    # Inside the V of the reflected path, under the direct one, and 11 px in
+    # Spanish to fit between the legs: set at the floor, both legs of the V
+    # ran through it.
+    reflected = "reflected path 2.60 m"
+    s.text(fx, hy + 14, reflected, s.fit_size([reflected], [12, 11], 156), th.secondary)
 
     # ---- what the room costs, under both panels ---------------------------
     s.text(
@@ -3156,7 +3217,8 @@ def _d_loudspeaker_polar(s: SVG, th: Theme) -> None:
             stroke=th.muted,
             sw=1.0,
         )
-    s.text(58, 110, "Anechoic room, plan view", 13, th.muted, anchor="start")
+    # Clear of the wall's wedges, whose tips reach x = 66.
+    s.text(72, 110, "Anechoic room, plan view", 13, th.muted, anchor="start")
 
     # The measuring arc the microphone is stepped along.
     s.path(
@@ -3168,9 +3230,11 @@ def _d_loudspeaker_polar(s: SVG, th: Theme) -> None:
     for ang in (30, 60, 90, 120, 150):
         a = math.radians(ang)
         s.circle(cx + r * math.cos(a), cy - r * math.sin(a), 3.6, th.accent)
-    s.text(cx - r + 4, cy - 14, "180°", 12, th.accent)
-    s.text(cx, cy - r - 14, "90°", 12, th.accent)
-    s.text(cx + 122, cy - 116, "$θ$ stepped by 10° or 15°", 12, th.accent)
+    # Outside the arc's end rather than on it, and the step inside the arc:
+    # both labels sat where the arc ran through them.
+    s.text(cx - r - 8, cy - 4, "180°", 12, th.accent, anchor="end")
+    s.text(cx + 8, cy - r - 6, "90°", 12, th.accent, anchor="start")
+    s.text(cx + 70, cy - 88, "$θ$ stepped by 10° or 15°", 12, th.accent)
 
     # Turntable, with the reference point over the rotation axis.
     s.ellipse(cx, cy, 70, 28, th.panel, th.muted, sw=1.8)
@@ -3182,26 +3246,35 @@ def _d_loudspeaker_polar(s: SVG, th: Theme) -> None:
 
     # Reference axis at 0 degrees, out to the fixed microphone.
     s.line(cx, cy, cx + r + 40, cy, th.muted, 1.6, dash="8,5")
-    s.text(cx + 96, cy - 14, "reference axis  0°", 13, th.muted)
+    # Both names under the axis, clear of the turntable and of the arc's end
+    # (above the axis, the arc ran through the first) and inside the wall's
+    # wedges (centred under the microphone, they ran through the second).
+    s.text(cx + 80, cy + 22, "reference axis  0°", 13, th.muted, anchor="start")
     mx = cx + r
     s.rect(mx - 2, cy - 8, 38, 16, th.primary, rx=5)
     s.rect(mx - 16, cy - 5, 14, 10, th.fg, rx=3)
-    s.text(mx + 16, cy + 32, "measuring microphone", 12, th.fg)
+    s.text(mx + 52, cy + 44, "measuring microphone", 12, th.fg, anchor="end")
 
     # The two facts the geometry exists to guarantee.
     s.line(cx - 30, cy + 22, cx - 116, cy + 78, th.muted, 1.2, dash="4,4")
+    # 11 px, so that the Spanish ends short of the witness line under the
+    # rotation axis.
     s.text(
-        60,
+        72,
         cy + 116,
         "reference point on the rotation axis:",
-        12,
+        11,
         th.muted,
         anchor="start",
     )
     s.text(
-        60, cy + 134, "$r$ never changes as $θ$ is swept", 12, th.muted, anchor="start"
+        72, cy + 134, "$r$ never changes as $θ$ is swept", 11, th.muted, anchor="start"
     )
-    s.dim(cx, cy, mx - 16, cy, "$r$ = 2 m", offset=150, size=14)
+    # Witness lines from below the two names down to the dimension, so that
+    # they do not run through them.
+    s.dim(cx, cy + 150, mx - 16, cy + 150, "$r$ = 2 m", offset=0, size=14)
+    for witness in (cx, mx - 16):
+        s.line(witness, cy + 56, witness, cy + 150, th.muted, 0.9, dash="3,3")
 
     # The drive rule that makes the cut a pattern rather than a response.
     s.rect(596, 62, 264, 128, th.panel, th.secondary, rx=10, sw=2.0)
@@ -3217,8 +3290,10 @@ def _d_loudspeaker_polar(s: SVG, th: Theme) -> None:
     for k, frac in enumerate((1.0, 0.8, 0.6, 0.4, 0.2)):
         s.circle(ix, iy, ir * frac, "none", th.muted, 1.0)
         if k:
+            # Just outside its ring: inside it, the small rings curve down
+            # through their own labels.
             s.text(
-                ix + 5, iy - ir * frac + 13, f"−{k * 5}", 10, th.muted, anchor="start"
+                ix + 5, iy - ir * frac - 3, f"−{k * 5}", 10, th.muted, anchor="start"
             )
     s.line(ix - ir - 12, iy, ix + ir + 12, iy, th.muted, 1.0)
     s.line(ix, iy - ir - 12, ix, iy + ir + 12, th.muted, 1.0)
@@ -3288,40 +3363,43 @@ def _d_microphone_references(s: SVG, th: Theme) -> None:
     s.arrow(x0 + 118, cy, x0 + 140, cy, th.primary, 1.8)
     capsule(cx, cy)
     s.line(cx - 18, cy, x0 + 246, cy, th.muted, 1.2, dash="7,5")
-    s.text(x0 + w / 2, cy + 78, "one source on the reference axis,", 12, th.muted)
-    s.text(x0 + w / 2, cy + 96, "far enough that $r ≥ d$,", 12, th.muted)
-    s.text(x0 + w / 2, cy + 114, "$r ≥ d^2/λ$ and $r$ ≥ 3 × the source", 12, th.muted)
-    s.text(
-        x0 + w / 2, cy + 144, "$M_{ff}$ : the undisturbed", 14, th.primary, bold=True
-    )
-    s.text(x0 + w / 2, cy + 164, "pressure of the plane wave", 13, th.muted)
+    # The captions of all three panels start at yc, below the diffuse
+    # field's lowest rays, which ran through its first line at 254.
+    yc = 262.0
+    s.text(x0 + w / 2, yc, "one source on the reference axis,", 12, th.muted)
+    s.text(x0 + w / 2, yc + 18, "far enough that $r ≥ d$,", 12, th.muted)
+    s.text(x0 + w / 2, yc + 36, "$r ≥ d^2/λ$ and $r$ ≥ 3 × the source", 12, th.muted)
+    s.text(x0 + w / 2, yc + 64, "$M_{ff}$ : the undisturbed", 14, th.primary, bold=True)
+    s.text(x0 + w / 2, yc + 83, "pressure of the plane wave", 13, th.muted)
 
     # --- 2: diffuse field, rays from every direction ------------------------
     x1 = tops[1]
-    cx, cy = x1 + 130.0, 176.0
+    # The star a little higher and 78 px across rather than 96, so that its
+    # lowest rays end above the captions.
+    cx, cy = x1 + 130.0, 170.0
     for ang in range(0, 360, 30):
         a = math.radians(ang)
         s.arrow(
-            cx + 96 * math.cos(a),
-            cy + 96 * math.sin(a),
+            cx + 78 * math.cos(a),
+            cy + 78 * math.sin(a),
             cx + 40 * math.cos(a),
             cy + 40 * math.sin(a),
             th.accent,
             1.4,
         )
     capsule(cx - 22, cy)
-    s.text(x1 + w / 2, cy + 78, "sound from every direction,", 12, th.muted)
-    s.text(x1 + w / 2, cy + 96, "with equal probability", 12, th.muted)
-    s.text(x1 + w / 2, cy + 114, "(a reverberation room)", 12, th.muted)
+    s.text(x1 + w / 2, yc, "sound from every direction,", 12, th.muted)
+    s.text(x1 + w / 2, yc + 18, "with equal probability", 12, th.muted)
+    s.text(x1 + w / 2, yc + 36, "(a reverberation room)", 12, th.muted)
     s.text(
         x1 + w / 2,
-        cy + 144,
+        yc + 64,
         "$M_{diff}$ : the r.m.s. of $M(θ)$",
         14,
         th.accent,
         bold=True,
     )
-    s.text(x1 + w / 2, cy + 164, "$D = 20 lg(M_0 / M_{diff})$", 13, th.muted)
+    s.text(x1 + w / 2, yc + 83, "$D = 20 lg(M_0 / M_{diff})$", 13, th.muted)
 
     # --- 3: pressure, the capsule closed into a coupler ---------------------
     x2 = tops[2]
@@ -3331,11 +3409,11 @@ def _d_microphone_references(s: SVG, th: Theme) -> None:
     s.arrow(cx - 92, cy + 30, cx - 92, cy - 30, th.secondary, 1.6)
     capsule(cx, cy)
     s.text(cx - 56, cy - 62, "cavity small against $λ$", 12, th.muted)
-    s.text(x2 + w / 2, cy + 78, "a coupler or a calibrator:", 12, th.muted)
-    s.text(x2 + w / 2, cy + 96, "the pressure the capsule", 12, th.muted)
-    s.text(x2 + w / 2, cy + 114, "itself replaces", 12, th.muted)
-    s.text(x2 + w / 2, cy + 144, "$M_p$ : pressure at", 14, th.secondary, bold=True)
-    s.text(x2 + w / 2, cy + 164, "the acoustic entry", 13, th.muted)
+    s.text(x2 + w / 2, yc, "a coupler or a calibrator:", 12, th.muted)
+    s.text(x2 + w / 2, yc + 18, "the pressure the capsule", 12, th.muted)
+    s.text(x2 + w / 2, yc + 36, "itself replaces", 12, th.muted)
+    s.text(x2 + w / 2, yc + 64, "$M_p$ : pressure at", 14, th.secondary, bold=True)
+    s.text(x2 + w / 2, yc + 83, "the acoustic entry", 13, th.muted)
 
     # --- the bench the first two are realised on ----------------------------
     s.rect(34, 380, 832, 116, th.panel, th.primary, rx=12, sw=2.0)
@@ -4510,13 +4588,15 @@ def _d_valve_noise_place(s: SVG, th: Theme) -> None:
     s.arrow(mic_x, top_wall - 2, mic_x, mic_y + 30, th.secondary, 1.8)
     s.rect(mic_x - 5, mic_y, 10, 26, th.primary, th.primary, rx=4, sw=1.0)
     s.text(mic_x, mic_y - 14, "$L_{pAe,1m}$", 15, th.primary, bold=True)
+    # Past the height dimension, low beside it: left of the arrow, the
+    # Spanish ran back into the valve body and the witness line beside it.
     s.text(
-        mic_x - 14,
-        top_wall - 24,
+        mic_x + 74,
+        top_wall - 14,
         "through the wall",
         11,
         th.secondary,
-        anchor="end",
+        anchor="start",
     )
     s.line(body_x1, top_wall - 68, body_x1, top_wall, th.muted, 0.9, dash="3,3")
     s.dim(body_x1, top_wall - 58, mic_x, top_wall - 58, "1 m", offset=0, size=12)

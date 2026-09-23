@@ -113,7 +113,8 @@ def _d_aircraft_certification(s: SVG, th: Theme) -> None:
             s.circle(lxp, 278.0, 5.0, th.bg, th.fg, 1.5)
     s.text(540.0, 306.0, "Lateral reference line", 14, th.fg, bold=True)
     s.text(540.0, 326.0, "where take-off noise is greatest", 12, th.muted)
-    s.dim(620.0, yc, 620.0, 278.0, "450 m", offset=0, size=13, label_side="right")
+    # Left of the flyover point's name, which runs past x = 600 in Spanish.
+    s.dim(580.0, yc, 580.0, 278.0, "450 m", offset=0, size=13, label_side="right")
     s.line(340.0, 92.0, 740.0, 92.0, th.muted, 1.0, dash="3,5")
     s.circle(560.0, 92.0, 5.0, th.bg, th.fg, 1.5)
     s.text(
@@ -137,7 +138,8 @@ def _d_aircraft_certification(s: SVG, th: Theme) -> None:
         stroke=th.muted,
         sw=1.2,
     )
-    s.text(xg - 52.0, gy - 14.0, "3°", 11, th.muted)
+    # Low in the angle, under the glide path rather than on it.
+    s.text(xg - 56.0, gy - 5.0, "3°", 11, th.muted)
     s.mic(x_app, gy - 24.0, gy, 0.7)
     s.dim(
         x_app + 22,
@@ -373,9 +375,9 @@ def _d_doc29_segment_geometry(s: SVG, th: Theme) -> None:
     s.line(118.0, ya, ox, oy, th.muted, 1.2, dash="5,4")  # d1
     s.line(118.0 + 464.0 * sc, ya, ox, oy, th.muted, 1.2, dash="5,4")  # d2
     s.line(ox, ya, ox, oy, th.primary, 2.0)  # dp
-    s.text(
-        ox + 20.0, (ya + oy) / 2 + 5.0, "$d_p$ = 526 m", 13, th.primary, anchor="start"
-    )
+    # Low, where the d2 line has drawn in towards O: at mid-height it ran
+    # through the words.
+    s.text(ox + 26.0, oy - 30.0, "$d_p$ = 526 m", 13, th.primary, anchor="start")
     s.text(150.0, (ya + oy) / 2 + 26.0, "$d_1$ = 568 m", 12, th.muted, anchor="end")
     s.text(300.0, (ya + oy) / 2 + 26.0, "$d_2$ = 582 m", 12, th.muted, anchor="start")
     s.dim(118.0, ya - 32.0, ox, ya - 32.0, "$q$ = 214 m", offset=0, size=12)
@@ -419,7 +421,7 @@ def _d_doc29_segment_geometry(s: SVG, th: Theme) -> None:
     obx, oby = _segment_panel(s, th, x_s1b, ya, -300.0 * sc, 520.0 * sc, 464.0 * sc)
     s.line(x_s1b, ya, obx, oby, th.secondary, 2.0)  # ds = d1
     s.text(
-        obx + 22.0,
+        obx + 48.0,
         (ya + oby) / 2 + 30.0,
         "$d_s = d_1$ = 600 m",
         13,
@@ -506,7 +508,9 @@ def _d_doc29_segment_geometry(s: SVG, th: Theme) -> None:
     s.text(rx - 4.0, ry - 12.0, "$O$", 13, th.fg, bold=True, anchor="end")
     _arc(s, cx, cy, 36.0, 0.0, 120.0, th.fg, 1.4)
     s.text(cx + 18.0, cy - 46.0, "$ψ$ = 120°", 13, th.fg, anchor="start")
-    s.text(cx - 66.0, cy - 26.0, "$d_{SOR}$", 12, th.secondary, anchor="end")
+    # Beside the line it names, where no ring runs: between the two rings on
+    # the left, the outer one ran through the "d".
+    s.text(cx - 24.0, cy - 64.0, "$d_{SOR}$", 12, th.secondary, anchor="start")
     s.line(cx, cy, cx - 110.0, cy, th.muted, 1.0, dash="3,4")
     s.text(cx - 118.0, cy + 5.0, "180°", 11, th.muted, anchor="end")
     s.text(cx + 150.0, cy + 30.0, "0° nose", 11, th.muted, anchor="middle")
@@ -952,13 +956,15 @@ def _d_aircraft_noise_station(s: SVG, th: Theme) -> None:
             1.4,
             dash="6,5",
         )
+    # Above the right-hand ray and short of the tree: at gy - 38 the ray ran
+    # up through the words, and the trunk of the tree through their end.
     s.text(
-        mx + 140.0,
-        gy - 38.0,
+        590.0,
+        gy - 60.0,
         "80° half-angle about the vertical",
         12,
         th.accent,
-        anchor="start",
+        anchor="end",
     )
     # A tree clear of the cone, and one that breaks into it.
     for tx, ok in ((150.0, True), (612.0, False)):
@@ -1143,9 +1149,10 @@ def _d_rotorcraft_hemisphere(s: SVG, th: Theme) -> None:
     s.text(ax, ay + r + 26.0, "$θ$ = 90 beneath", 12, th.fg)
     _arc(s, ax, ay, r - 20.0, -40.0, -140.0, th.accent, 5.0)
     s.line(*_polar(ax, ay, r * 0.30, -52.0), *_polar(ax, ay, r, -52.0), th.primary, 1.4)
-    s.text(
-        *_polar(ax, ay, r * 0.68, -52.0), "$r_h$ = 60 m", 12, th.primary, anchor="start"
-    )
+    # Past the rim, beyond the end of the radius it names: set on the radius
+    # itself, the line ran through the words.
+    rim_x, rim_y = _polar(ax, ay, r, -52.0)
+    s.text(rim_x + 12.0, rim_y + 12.0, "$r_h$ = 60 m", 12, th.primary, anchor="start")
     s.text(ax, ay + r + 50.0, "measured polar band $θ_{t1}$ … $θ_{t2}$,", 11, th.accent)
     s.text(ax, ay + r + 68.0, "the two 10 dB-down instants", 11, th.muted)
     _heli_glyph(s=s, x=ax, y=ay, side=True, scale=1.0)
@@ -1168,8 +1175,9 @@ def _d_rotorcraft_hemisphere(s: SVG, th: Theme) -> None:
     for ang in (-30.0, -150.0):
         px, py = _polar(bx, by, r + 20.0, ang)
         s.text(px, py + 6.0, "60°", 11, th.accent)
-    s.text(bx + r, by + 26.0, "$φ$ = +90 starboard", 12, th.fg)
-    s.text(bx - r, by + 26.0, "$φ$ = −90 port", 12, th.fg)
+    # Above the ends of the diameter: below them, the rim ran through both.
+    s.text(bx + r, by - 10.0, "$φ$ = +90 starboard", 12, th.fg)
+    s.text(bx - r, by - 10.0, "$φ$ = −90 port", 12, th.fg)
     s.text(bx, by + r + 26.0, "$φ$ = 0 beneath", 12, th.fg)
     s.text(bx, by + r + 50.0, "measured lateral band $−60° ≤ φ ≤ 60°$,", 11, th.accent)
     s.text(bx, by + r + 68.0, "outside it the bins are gap-filled", 11, th.muted)

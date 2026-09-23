@@ -243,9 +243,11 @@ def generate_floating_floor_transmissibility(output_dir: str) -> None:
             label=label,
         )
     ax_r.axhline(0.0, color=COLOR_FG, linewidth=1.0, zorder=1)
+    # Beside the shaded band rather than inside it, where the dip of the
+    # ideal mass-spring curve ran through the words.
     ax_r.annotate(
         f"amplification below\n$\\sqrt{{2}}\\,f_0$ = {np.sqrt(2) * f0_hard:.0f} Hz",
-        (34.0, -14.0),
+        (75.0, -8.0),
         fontsize=9,
         color=COLOR_FG,
         ha="left",
@@ -560,8 +562,10 @@ def generate_absorption_rating(output_dir: str) -> None:
         label=r"Practical absorption $\alpha_\mathrm{p}$",
     )
 
-    # alpha_w is the shifted reference read at 500 Hz.
-    ax.axvline(500, color=COLOR_FG, linestyle=":", alpha=0.4)
+    # alpha_w is the shifted reference read at 500 Hz. The guide stops above
+    # the block of results low on the left, which it ran straight through;
+    # the 500 Hz gridline carries the reading down to its tick.
+    ax.axvline(500, ymin=0.33, color=COLOR_FG, linestyle=":", alpha=0.4)
     ax.plot(500, result.alpha_w, "D", color=COLOR_SECONDARY, markersize=9, zorder=6)
     ax.annotate(
         f"$\\alpha_\\mathrm{{w}}$ = {result.rating_label}",
@@ -699,8 +703,10 @@ def generate_airflow_resistance(output_dir: str) -> None:
             ),
         ),
     ):
+        # Starting right of the 0.5 mm/s line, which ran through the first
+        # letter of each line at 0.03.
         ax.text(
-            0.03,
+            0.06,
             dy,
             text,
             transform=ax.transAxes,
@@ -2202,10 +2208,12 @@ def generate_qrd_working_band(output_dir: str) -> None:
     ax.annotate(
         "$N f_0$ = 3500 Hz: every well\nback in phase, flat again",
         (n_seq * f0, 0.05),
-        xytext=(n_seq * f0 - 500.0, 0.30),
+        # In one column with the f_max note above it: ending at 3000 Hz, the
+        # longer Spanish wording reached back across the f_max line.
+        xytext=(f_max + 130.0, 0.30),
         fontsize=9,
         color=COLOR_FG,
-        ha="right",
+        ha="left",
         arrowprops={"arrowstyle": "->", "color": COLOR_SECONDARY},
     )
     ax.annotate(
@@ -2772,9 +2780,10 @@ def generate_insitu_method_windows(output_dir: str) -> None:
             zorder=4,
         )
     ax_b.axvspan(315.0, 1600.0, color=theme_fill(COLOR_TERTIARY, ax_b), zorder=0)
+    # High enough that its second line clears the top of the bar under it.
     ax_b.annotate(
         "315-1600 Hz: the interval in which\nPart 2 expects the two to agree",
-        (330.0, 1.55),
+        (330.0, 1.72),
         fontsize=9,
         color=COLOR_FG,
         ha="left",
@@ -2817,13 +2826,17 @@ def generate_insitu_method_windows(output_dir: str) -> None:
         s=70,
         zorder=6,
     )
+    # Under the curve to the left of the point, with a pointer to it: to the
+    # right, the dotted ceiling line ran through both lines of the note.
     ax_d.annotate(
         "the 100 mm bore of the worked\nexample: 1989 Hz",
-        (102.0, 1989.4),
+        xy=(100.0, 1989.4),
+        xytext=(57.0, 1850.0),
         fontsize=9,
         color=COLOR_FG,
         ha="left",
         va="bottom",
+        arrowprops={"arrowstyle": "->", "color": COLOR_FG, "lw": 0.9},
     )
     ax_d.annotate(
         f"1800 Hz, the top edge of the 1600 Hz band:\n"
@@ -3638,7 +3651,11 @@ def generate_standing_wave_envelope(output_dir: str) -> None:
 
     # x_min,1 of the worked sample, and the quarter-wavelength ruler.
     x_min1 = 0.12
-    ax.axvline(x_min1, color=COLOR_GRID, linestyle="--", linewidth=1.2)
+    # Stopping at 6 dB, under the ruler: to the top of the panel the guide
+    # ran through the ruler's "17.2 cm".
+    ax.axvline(
+        x_min1, ymax=26.0 / 35.0, color=COLOR_GRID, linestyle="--", linewidth=1.2
+    )
     ax.annotate(
         r"$x_{\min,1}$ = 12 cm",
         xy=(x_min1, -6.0),
@@ -3783,7 +3800,9 @@ def generate_porous_model_comparison(output_dir: str) -> None:
         "Delany-Bazley returns a NEGATIVE resistance\n"
         "below 74.6 Hz: a passive layer generating energy",
         xy=(40.0, -3.0),
-        xytext=(150.0, -5.4),
+        # Starting just past the shaded band: from 150 Hz the longer Spanish
+        # wording ran out through the right spine.
+        xytext=(78.0, -5.4),
         fontsize=9.5,
         color=COLOR_FG,
         arrowprops={"arrowstyle": "->", "lw": 1.0, "color": COLOR_FG},
@@ -3873,7 +3892,9 @@ def generate_biot_waves(output_dir: str) -> None:
         "the fluid moves "
         "and the frame barely does",
         xy=(700.0, float(np.interp(700.0, freq, mu_a))),
-        xytext=(300.0, 6.0),
+        # Starting at 110 Hz: from 300 Hz the Spanish wording ran out through
+        # the right spine.
+        xytext=(110.0, 6.0),
         fontsize=9.5,
         color=COLOR_FG,
         arrowprops={"arrowstyle": "->", "lw": 1.0, "color": COLOR_FG},
@@ -3989,9 +4010,10 @@ def generate_oblique_absorption(output_dir: str) -> None:
         label=r"$\alpha(0°)$  what the tube reads",
     )
     ax_f.axhline(0.951, color=COLOR_FG, linestyle=":", linewidth=1.2)
+    # Clear of the tube curve, whose peak near 2 kHz reaches 0.975.
     ax_f.text(
         3900.0,
-        0.975,
+        0.99,
         "0.951 ceiling of the closed form",
         fontsize=9,
         color=COLOR_FG,

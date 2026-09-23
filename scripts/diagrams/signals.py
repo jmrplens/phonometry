@@ -135,8 +135,21 @@ def _d_calibration_coupling(s: SVG, th: Theme) -> None:
     s.rect(cx - half, dia_y, 2 * half, 7, th.fg, rx=2)  # diaphragm
     s.rect(cx - half, ref_y, 2 * half, 132, th.panel, th.primary, rx=6, sw=2)
     s.line(cx - half - wall, ref_y, cx + half + wall, ref_y, th.secondary, 2.6)
-    s.text(cx, ref_y + 52, "1/2 in capsule", 16, th.fg, bold=True)
-    s.text(cx, ref_y + 76, "+ preamplifier", 16, th.muted)
+    # Each line a size smaller where the capsule is narrower than it, as the
+    # Spanish of both is at 16 px.
+    capsule, preamp = "1/2 in capsule", "+ preamplifier"
+    inner = 2 * half - 12
+    s.text(
+        cx,
+        ref_y + 52,
+        capsule,
+        s.fit_size([capsule], [16, 15, 14, 13], inner, bold=True),
+        th.fg,
+        bold=True,
+    )
+    s.text(
+        cx, ref_y + 76, preamp, s.fit_size([preamp], [16, 15, 14, 13], inner), th.muted
+    )
     s.line(cx, ref_y + 132, cx, 470, th.fg, 2.2)
     s.dim(cx - half, ref_y + 104, cx + half, ref_y + 104, "12.7 mm", size=15)
 
@@ -164,8 +177,10 @@ def _d_calibration_coupling(s: SVG, th: Theme) -> None:
     s.rect(ax0 - 30, 150, 60, 24, th.panel, th.fg, sw=1.6)  # adaptor sleeve
     s.rect(ax0 - aq, 174, 2 * aq, 66, th.panel, th.primary, rx=3, sw=1.8)
     s.line(ax0 - 30, 150, ax0 + 30, 150, th.secondary, 2.2)
-    s.text(548, 266, "the adaptor is part of", 13, th.fg)
-    s.text(548, 288, "the calibrator (5.1.1)", 13, th.fg)
+    adaptor = ("the adaptor is part of", "the calibrator (5.1.1)")
+    size = s.fit_size(list(adaptor), [13, 12, 11], 148)
+    s.text(548, 266, adaptor[0], size, th.fg)
+    s.text(548, 288, adaptor[1], size, th.fg)
 
     # -- Windscreen, off to one side ---------------------------------------
     # Set left of the panel it would otherwise reach: "la verificación,
@@ -430,9 +445,12 @@ def _d_uncertainty_sources(s: SVG, th: Theme) -> None:
         size=13,
     )
 
-    # -- Calibrator lying beside the meter ---------------------------------
-    s.rect(340, gy - 52, 22, 48, th.panel, th.secondary, rx=5, sw=1.8)
-    s.text(351, 380, "calibrator", 13, th.secondary)
+    # -- Calibrator standing beside the meter ------------------------------
+    # Past the right-hand position, named above itself: nearer the meter,
+    # the leaders from the meter and from that position ran through its
+    # name on their way to the budget.
+    s.rect(410, gy - 52, 22, 48, th.panel, th.secondary, rx=5, sw=1.8)
+    s.text(421, gy - 62, "calibrator", 13, th.secondary)
 
     # -- Weather station, high on the facade side --------------------------
     s.rect(300, 104, 154, 74, th.panel, th.fg, rx=8, sw=1.6)
@@ -465,7 +483,7 @@ def _d_uncertainty_sources(s: SVG, th: Theme) -> None:
             "Calibrator class tolerance",
             "Type B - rectangular, $a$ = 0.4 dB",
             th.secondary,
-            (362.0, gy - 30),
+            (432.0, gy - 30),
         ),
     )
     s.rect(bx, by, bw, 252, "none", th.fg, rx=10, sw=1.8)
@@ -515,12 +533,23 @@ def _d_time_weighting(s: SVG, th: Theme) -> None:
         ("$10·log_{10}(·/p_0^2)$", "to decibels", th.accent, 15),
         ("$L_{τ}(t)$", "time-weighted level", th.secondary, 18),
     ]
-    bw, bh, gap = 150.0, 90.0, 12.0
-    total = len(stages) * bw + (len(stages) - 1) * gap
+    # Each box as wide as its longer line needs, 120 px at least: at a
+    # common 150 px the Spanish of the last one ran out through both sides.
+    widths = [
+        max(
+            120.0,
+            s.text_width(title, size, bold=True) + 24,
+            s.text_width(sub, 12) + 24,
+        )
+        for title, sub, _color, size in stages
+    ]
+    bh, gap = 90.0, 12.0
+    total = sum(widths) + (len(stages) - 1) * gap
     x = (900 - total) / 2
     y = 108.0
     last = len(stages) - 1
     for i, (title, sub, color, size) in enumerate(stages):
+        bw = widths[i]
         fill = "none" if i in (0, last) else th.panel
         s.rect(x, y, bw, bh, fill, color, rx=12, sw=2.2)
         s.text(x + bw / 2, y + 38, title, size, th.fg, "middle", bold=True)
@@ -1120,7 +1149,21 @@ def _d_equal_loudness_weighting(s: SVG, th: Theme) -> None:
         # Label each contour above its 160 Hz point, where the curves spread.
         yl = l_fy(_iso226_spl(0.391, -4.6, 17.9, phon)) - 10
         if main:
-            s.text(l_fx(160.0), yl, "40 phon", 12, th.primary, "middle", bold=True)
+            # Centred on 500 Hz, halfway between its own contour and the
+            # 60 phon one, where both lie nearly flat: 10 px over the curve
+            # at 160 Hz, the contour ran through the first letters where it
+            # climbs to the left.
+            y40 = l_fy(_iso226_spl(0.320, 0.0, 4.4, 40))
+            y60 = l_fy(_iso226_spl(0.320, 0.0, 4.4, 60))
+            s.text(
+                l_fx(500.0),
+                (y40 + y60) / 2 + 5,
+                "40 phon",
+                12,
+                th.primary,
+                "middle",
+                bold=True,
+            )
         else:
             s.text(l_fx(160.0), yl, str(phon), 10, th.muted, "middle")
 
@@ -1392,7 +1435,9 @@ def _d_test_signals(s: SVG, th: Theme) -> None:
     def spectrum_axes(x: float, y: float) -> None:
         s.line(x, y, x + 190.0, y, th.muted, 1.2)
         s.line(x, y, x, y - 58.0, th.muted, 1.2)
-        s.text(x + 190.0, y + 15.0, "$log_{10} f$", 10, th.muted, anchor="end")
+        # Over the end of the axis: under it, the MLS tile's caption ran
+        # into the label.
+        s.text(x + 190.0, y - 5.0, "$log_{10} f$", 10, th.muted, anchor="end")
 
     # --- white noise -------------------------------------------------------
     tile(55, 62, 250, "White noise")
@@ -1933,10 +1978,14 @@ def _d_echo_geometry(s: SVG, th: Theme) -> None:
     s.line(bounce_x, gy, mx, top - 8, th.secondary, 2.2)
     s.line(sx, iy, mx, top - 8, th.muted, 1.0, dash="4,4")
     s.circle(bounce_x, gy, 4, th.secondary)
-    s.text(bounce_x - 70, gy - 46, "$r_r$ = 2.60 m", 14, th.secondary, bold=True)
+    # Left of the image-source line, which ran through the label centred on it.
+    s.text(sx - 8, gy - 46, "$r_r$ = 2.60 m", 14, th.secondary, bold=True, anchor="end")
     s.dim(mx + 46, top, mx + 46, gy, "1.20 m", size=14, label_side="right")
     s.line(mx, top - 8, mx + 46, top, th.muted, 0.9, dash="3,3")
-    s.dim(sx, gy + 44, mx, gy + 44, "1.00 m", size=14)
+    # The label past the dimension's end: over its middle, the unfolded
+    # path from the image source ran through it.
+    s.dim(sx, gy + 44, mx, gy + 44, "", size=14)
+    s.text(mx + 10, gy + 49, "1.00 m", 14, th.fg, anchor="start")
 
     box_x = 500.0
     s.rect(box_x, 120, 356, 150, "none", th.fg, rx=10, sw=1.6)
@@ -1961,8 +2010,13 @@ def _d_echo_geometry(s: SVG, th: Theme) -> None:
     s.text(box_x + 178, 352, "$Δd = c · 8 ms$ = 2.74 m", 15, th.fg)
     s.text(box_x + 178, 380, "a side wall 1.37 m from the direct path", 15, th.fg)
     s.text(box_x + 178, 408, "$R = a · r_r / r_d = 3.74 a ≤ 1$", 15, th.fg)
+    specular = "so $a > 0.27$ is not one specular reflection"
     s.text(
-        box_x + 178, 436, "so $a > 0.27$ is not one specular reflection", 14, th.muted
+        box_x + 178,
+        436,
+        specular,
+        s.fit_size([specular], [14, 13, 12], 336),
+        th.muted,
     )
 
     s.text(
@@ -2107,16 +2161,21 @@ def _d_miso_setup(s: SVG, th: Theme) -> None:
     for k in (-1, 1):
         s.rect(ax + k * 26 - 8, ay + 40, 16, 9, th.muted, rx=2)
     s.rect(ax + 26 - 7, ay + 26, 14, 14, th.secondary, th.fg, rx=2, sw=1.2)
-    s.text(ax + 6, ay + 74, "ref 1", 14, th.secondary, bold=True)
+    # Under the sensor and clear of the 3.0 m dimension's arrowhead, which it
+    # sat on.
+    s.text(ax + 26, ay + 66, "ref 1", 14, th.secondary, bold=True)
 
     # -- Machine B: a compressor -------------------------------------------
     bx, by = ax + 3.0 * scale, ay
     s.rect(bx - 36, by - 36, 72, 72, th.bg, th.primary, rx=6, sw=2.2)
     s.rect(bx - 20, by - 16, 40, 32, th.panel, th.primary, rx=3, sw=1.4)
-    s.text(bx, by - 48, "B: compressor", 15, th.fg, bold=True)
+    # Its name is set further down, over the propagation paths that cross it.
     mic2_x = bx + 36 + 0.3 * scale
     s.circle(mic2_x, by, 7, th.bg, th.secondary, 2.0)
-    s.dim(bx + 36, by + 52, mic2_x, by + 52, "0.3 m", size=13)
+    # The label beside the short span, which it overran into the box's
+    # corner and the witness line.
+    s.dim(bx + 36, by + 52, mic2_x, by + 52, "", size=13)
+    s.text(mic2_x + 8, by + 57, "0.3 m", 13, th.fg, "start")
     s.line(mic2_x, by + 10, mic2_x, by + 50, th.muted, 0.9, dash="3,3")
     s.text(mic2_x + 20, by + 6, "ref 2", 14, th.secondary, bold=True, anchor="start")
     s.dim(ax, y0 + room_h - 22, bx, y0 + room_h - 22, "3.0 m", size=14)
@@ -2129,10 +2188,18 @@ def _d_miso_setup(s: SVG, th: Theme) -> None:
     s.line(ax, ay, rx_, ry, th.accent, 1.2, dash="6,5")
     s.line(bx, by, rx_, ry, th.accent, 1.2, dash="6,5")
     s.dim(ax, ay - 74, rx_, ry - 40, "4.0 m", size=13)
+    # The compressor's name on a backing of the room's own colour, because
+    # the path from the fan to the receiver runs through where it stands.
+    name = "B: compressor"
+    width = s.text_width(name, 15, bold=True)
+    s.rect(bx - width / 2 - 3, by - 62, width + 6, 19, th.panel)
+    s.text(bx, by - 48, name, 15, th.fg, bold=True)
 
     # -- The leakage that correlates the two references --------------------
     s.arrow(ax + 44, ay + 16, mic2_x - 11, by + 6, th.secondary, 1.8)
-    s.text((ax + mic2_x) / 2 + 10, ay + 40, "leakage", 13, th.secondary, bold=True)
+    # Under the leakage arrow, between the two machines: further right it
+    # ran into the compressor's box.
+    s.text(ax + 72, ay + 40, "leakage", 13, th.secondary, bold=True)
 
     # -- Legend under the room ---------------------------------------------
     ly = y0 + room_h + 26
@@ -2200,22 +2267,20 @@ def _d_tsa_setup(s: SVG, th: Theme) -> None:
     """
     import math
 
+    # The housing starts 70 px in from the sheet's margin, which leaves the
+    # accelerometer's labels room outside it: set against the margin, the
+    # housing's wall ran through all three, and the bearing and the tacho
+    # head were narrower than their own names.
     gy = 400.0
-    s.ground(gy, 40, 470)
-    s.rect(70, 140, 380, gy - 140, th.panel, th.fg, rx=6, sw=2.2)
-    s.text(80, 164, "Gearbox: elevation", 15, th.muted, anchor="start")
+    x0 = 144.0
+    s.ground(gy, 40, 530)
+    s.rect(x0, 140, 380, gy - 140, th.panel, th.fg, rx=6, sw=2.2)
+    s.text(x0, 128, "Gearbox: elevation", 15, th.muted, anchor="start")
 
     shaft_y = 252.0
-    px, pr = 214.0, 38.0
-    wx, wr = 330.0, 78.0
-    # The pinion's caption drops past the wheel instead of stopping beside
-    # it: at 138 px in Spanish it does not fit the 128 px between the
-    # pedestal bearing and the wheel's tooth circle, at any size the row
-    # can be set in.
-    for cx, r, label, dy in (
-        (px, pr, "pinion, 37 teeth", 128.0),
-        (wx, wr, "wheel, 89 teeth", wr + 26),
-    ):
+    px, pr = 316.0, 38.0
+    wx, wr = 432.0, 78.0
+    for cx, r in ((px, pr), (wx, wr)):
         s.circle(cx, shaft_y, r, th.bg, th.primary, 2.2)
         s.circle(cx, shaft_y, 6, th.fg)
         for k in range(24):
@@ -2228,25 +2293,31 @@ def _d_tsa_setup(s: SVG, th: Theme) -> None:
                 th.primary,
                 1.4,
             )
-        s.text(cx, shaft_y + dy, label, 14, th.fg, bold=True)
+    # The pinion's caption drops past the wheel instead of stopping beside
+    # it, and starts clear of the pedestal bearing.
+    s.text(240, shaft_y + 128, "pinion, 37 teeth", 14, th.fg, bold=True, anchor="start")
+    s.text(wx, shaft_y + wr + 26, "wheel, 89 teeth", 14, th.fg, bold=True)
 
-    # Input shaft, the reflective tape and the optical tacho head.
-    s.line(78, shaft_y, px, shaft_y, th.fg, 4.0)
-    s.rect(150, shaft_y - 9, 12, 18, th.secondary, rx=2)
-    s.text(156, shaft_y - 18, "tape", 13, th.secondary, bold=True)
-    s.rect(130, shaft_y - 86, 52, 32, th.panel, th.secondary, rx=5, sw=1.8)
-    s.text(156, shaft_y - 64, "tacho", 13, th.secondary, bold=True)
-    s.arrow(156, shaft_y - 52, 156, shaft_y - 16, th.secondary, 1.6)
-    s.dim(196, shaft_y - 52, 196, shaft_y - 14, "20 mm", size=12, label_side="right")
+    # Input shaft, the reflective tape and the optical tacho head, each
+    # named where nothing else is drawn: the tacho above its head, the tape
+    # under the shaft, clear of the tacho's arrow and of the 20 mm
+    # dimension, which both ran through the tape's name above it.
+    s.line(x0 + 8, shaft_y, px, shaft_y, th.fg, 4.0)
+    s.rect(240, shaft_y - 9, 12, 18, th.secondary, rx=2)
+    s.text(246, shaft_y + 26, "tape", 13, th.secondary, bold=True)
+    s.rect(220, shaft_y - 86, 52, 32, th.panel, th.secondary, rx=5, sw=1.8)
+    s.text(246, shaft_y - 94, "tacho", 13, th.secondary, bold=True)
+    s.arrow(246, shaft_y - 52, 246, shaft_y - 16, th.secondary, 1.6)
+    s.dim(208, shaft_y - 52, 208, shaft_y - 14, "20 mm", size=12, label_side="left")
 
     # Pedestal bearing on the input shaft, with the accelerometer on its face.
-    s.rect(96, shaft_y + 10, 36, gy - shaft_y - 10, th.bg, th.fg, rx=3, sw=1.8)
-    s.text(114, gy - 12, "bearing", 12, th.muted)
-    s.rect(74, shaft_y + 46, 22, 26, th.primary, th.fg, rx=3, sw=1.4)
-    s.arrow(72, shaft_y + 59, 44, shaft_y + 59, th.primary, 1.8)
-    s.text(42, shaft_y + 96, "accel.", 13, th.fg, bold=True, anchor="start")
-    s.text(42, shaft_y + 114, "(stud)", 12, th.muted, anchor="start")
-    s.text(44, shaft_y + 44, "load direction", 13, th.primary, anchor="start")
+    s.rect(168, shaft_y + 10, 52, gy - shaft_y - 10, th.bg, th.fg, rx=3, sw=1.8)
+    s.text(194, gy - 12, "bearing", 12, th.muted)
+    s.rect(146, shaft_y + 46, 22, 26, th.primary, th.fg, rx=3, sw=1.4)
+    s.arrow(144, shaft_y + 59, 116, shaft_y + 59, th.primary, 1.8)
+    s.text(138, shaft_y + 96, "accel.", 13, th.fg, bold=True, anchor="end")
+    s.text(138, shaft_y + 114, "(stud)", 12, th.muted, anchor="end")
+    s.text(138, shaft_y + 44, "load direction", 13, th.primary, anchor="end")
 
     s.text(
         260, 442, "1800 r/min  →  $T$ = 33.3 ms per revolution", 15, th.fg, bold=True
@@ -2897,15 +2968,6 @@ def _d_infrasound_chain(s: SVG, th: Theme) -> None:
     ):
         s.text(fx(f_tick), py + ph + 22, label, 13, th.muted, mono=True)
     s.text(px + pw / 2, py + ph + 46, "Frequency [Hz]", 14, th.muted)
-    s.text(
-        fx(0.27),
-        fy(-55.0),
-        "A.2: 0,25 - 315 Hz",
-        13,
-        th.accent,
-        bold=True,
-        anchor="start",
-    )
     s.arrow(fx(0.45), fy(-33.0), fx(0.45), fy(-16.0), th.secondary, 1.5)
     s.text(fx(0.12), fy(-40.0), "lost", 13, th.secondary, bold=True, anchor="start")
     s.text(px + pw / 2, py + ph + 70, "green: the G weighting", 13, th.accent)
@@ -2919,7 +2981,10 @@ def _d_infrasound_chain(s: SVG, th: Theme) -> None:
     s.text(
         px + pw / 2, py + ph + 116, "usable band = the overlap", 15, th.fg, bold=True
     )
-    s.text(px + pw / 2, py + ph + 138, "ISO 7196:1995, Annex A", 14, th.muted)
+    # The span of the shaded band, named with the captions: inside the plot
+    # the G curve and the corner line ran through it wherever it went.
+    s.text(px + pw / 2, py + ph + 138, "A.2: 0,25 - 315 Hz", 13, th.accent, bold=True)
+    s.text(px + pw / 2, py + ph + 160, "ISO 7196:1995, Annex A", 14, th.muted)
 
 
 # ---------------------------------------------------------------------------
@@ -2946,7 +3011,10 @@ def _d_multichannel_capture(s: SVG, th: Theme) -> None:
         s.text(x, gy + 24, f"P{i + 1}", 15, th.fg, bold=True)
         s.text(x, gy + 44, mv, 12, th.muted, mono=True)
     s.text(172, gy + 66, "mV/Pa, one per capsule", 12, th.muted)
-    s.dim(40, cap_y, 40, gy, "1,2 m", size=13, label_side="right")
+    # The label over the top of the dimension: beside it, the first stand
+    # ran through it.
+    s.dim(40, cap_y, 40, gy, "", size=13, label_side="right")
+    s.text(40, cap_y - 10, "1,2 m", 13, th.fg)
 
     # Calibrator coupled onto P2 and moved along the row.
     s.rect(xs[1] - 22, cap_y - 56, 44, 56, th.panel, th.secondary, rx=6, sw=2)
@@ -2965,22 +3033,40 @@ def _d_multichannel_capture(s: SVG, th: Theme) -> None:
     # -- Middle: one preamplifier, one interface, one clock -----------------
     bx, bw = 352.0, 214.0
     s.rect(bx, 150, bw, 82, th.panel, th.primary, rx=10, sw=2)
-    s.text(bx + bw / 2, 196, "4-channel preamplifier", 16, th.fg, bold=True)
+    # A size smaller where the box would not hold it, as the Spanish at 16.
+    preamp = "4-channel preamplifier"
+    s.text(
+        bx + bw / 2,
+        196,
+        preamp,
+        s.fit_size([preamp], [16, 15, 14, 13], bw - 16, bold=True),
+        th.fg,
+        bold=True,
+    )
     for i, x in enumerate(xs):
         s.arrow(x + 10, gy - 46, bx - 6, 168 + i * 16, th.muted, 1.2)
 
     s.rect(bx, 268, bw, 96, th.panel, th.primary, rx=10, sw=2)
     s.text(bx + bw / 2, 298, "audio interface", 16, th.fg, bold=True)
-    s.rect(bx + 14, 312, bw - 28, 34, th.panel, th.accent, rx=6, sw=2)
+    # 40 px tall, which keeps the subscript off the box's lower edge.
+    s.rect(bx + 14, 312, bw - 28, 40, th.panel, th.accent, rx=6, sw=2)
     s.text(bx + bw / 2, 328, "single sample clock", 14, th.accent, bold=True)
-    s.text(bx + bw / 2, 344, "$f_s$ = 48 kHz", 13, th.accent)
+    s.text(bx + bw / 2, 343, "$f_s$ = 48 kHz", 13, th.accent)
     s.arrow(bx + bw / 2, 236, bx + bw / 2, 262, th.fg, 2)
 
-    s.rect(bx + 24, 400, bw - 48, 60, th.panel, th.muted, rx=10, sw=2, dash="6,5")
-    s.text(bx + bw / 2, 428, "a second interface", 13, th.muted)
-    s.text(bx + bw / 2, 448, "= two clocks, not one array", 13, th.muted)
-    s.line(bx + 24, 400, bx + bw - 24, 460, th.secondary, 2.4)
-    s.line(bx + 24, 460, bx + bw - 24, 400, th.secondary, 2.4)
+    # The cross strikes out the arrangement and stops at its words, which it
+    # ran through: each line sits on a backing of the box's own colour. The
+    # box is as wide as the ones above, and its lines a size smaller where
+    # they would not fit: the Spanish ran out through both sides.
+    s.rect(bx + 4, 400, bw - 8, 60, th.panel, th.muted, rx=10, sw=2, dash="6,5")
+    s.line(bx + 4, 400, bx + bw - 4, 460, th.secondary, 2.4)
+    s.line(bx + 4, 460, bx + bw - 4, 400, th.secondary, 2.4)
+    second = ("a second interface", "= two clocks, not one array")
+    size = s.fit_size(list(second), [13, 12], bw - 20)
+    for baseline, line in zip((428, 448), second, strict=True):
+        width = s.text_width(line, size)
+        s.rect(bx + bw / 2 - width / 2 - 3, baseline - 12, width + 6, 16, th.panel)
+        s.text(bx + bw / 2, baseline, line, size, th.muted)
 
     # -- Right: the array, row by row --------------------------------------
     ax0, row_h = 620.0, 44.0

@@ -833,115 +833,20 @@ L 707.47 28.8
 L 707.47 390.8 
 " style="fill: none; stroke: #ffffff; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/></g><g id="patch_6"><path d="M 42.63 28.8 
 L 707.47 28.8 
-" style="fill: none; stroke: #ffffff; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/></g><g id="text_24"><g id="patch_7"><path d="M 446.79 384.94 
-L 697.49 384.94 
-Q 702.49 384.94 702.49 379.94 
-L 702.49 355.44 
-Q 702.49 350.44 697.49 350.44 
-L 446.79 350.44 
-Q 441.79 350.44 441.79 355.44 
-L 441.79 379.94 
-Q 441.79 384.94 446.79 384.94 
+" style="fill: none; stroke: #ffffff; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/></g><g id="text_24"><!-- Aislamiento previsto de panel simple evaluado según ISO 717-1 --><g style="fill: #ffffff" transform="translate(182.85 16.8) scale(0.12 -0.12)"><defs><path id="DejaVuSans-24" d="M 2188 4044 
+L 1331 1722 
+L 3047 1722 
+L 2188 4044 
 z
-" style="fill: #1c2128; stroke: #555555; stroke-linejoin: miter"/></g><!-- $R_\mathrm{w}$($C$;$C_\mathrm{tr}$) = 32(−1;−4) dB --><g style="fill: #ffffff" transform="translate(568.99 364.04) scale(0.1 -0.1)"><defs><path id="DejaVuSans-5a" d="M 269 3500 
-L 844 3500 
-L 1563 769 
-L 2278 3500 
-L 2956 3500 
-L 3675 769 
-L 4391 3500 
-L 4966 3500 
-L 4050 0 
-L 3372 0 
-L 2619 2869 
-L 1863 0 
-L 1184 0 
-L 269 3500 
-z
-" transform="scale(0.015625)"/><path id="DejaVuSans-Oblique-26" d="M 4447 4306 
-L 4319 3641 
-Q 4019 3944 3683 4091 
-Q 3347 4238 2956 4238 
-Q 2422 4238 2017 3981 
-Q 1613 3725 1319 3200 
-Q 1131 2863 1032 2486 
-Q 934 2109 934 1728 
-Q 934 1091 1264 756 
-Q 1594 422 2222 422 
-Q 2656 422 3056 561 
-Q 3456 700 3834 978 
-L 3688 231 
-Q 3316 72 2936 -9 
-Q 2556 -91 2175 -91 
-Q 1278 -91 773 396 
-Q 269 884 269 1753 
-Q 269 2309 461 2846 
-Q 653 3384 1013 3828 
-Q 1394 4300 1883 4525 
-Q 2372 4750 3022 4750 
-Q 3422 4750 3780 4639 
-Q 4138 4528 4447 4306 
-z
-" transform="scale(0.015625)"/><path id="DejaVuSans-1e" d="M 750 3309 
-L 1409 3309 
-L 1409 2516 
-L 750 2516 
-L 750 3309 
-z
-M 750 794 
-L 1409 794 
-L 1409 256 
-L 897 -744 
-L 494 -744 
-L 750 256 
-L 750 794 
-z
-" transform="scale(0.015625)"/><path id="DejaVuSans-20" d="M 678 2906 
-L 4684 2906 
-L 4684 2381 
-L 678 2381 
-L 678 2906 
-z
-M 678 1631 
-L 4684 1631 
-L 4684 1100 
-L 678 1100 
-L 678 1631 
-z
-" transform="scale(0.015625)"/><path id="DejaVuSans-c9c" d="M 678 2272 
-L 4684 2272 
-L 4684 1741 
-L 678 1741 
-L 678 2272 
-z
-" transform="scale(0.015625)"/></defs><use xlink:href="#DejaVuSans-Oblique-35" transform="translate(0 0.02)"/><use xlink:href="#DejaVuSans-5a" transform="translate(69.48 -14.98) scale(0.7)"/><use xlink:href="#DejaVuSans-b" transform="translate(129.47 0.02)"/><use xlink:href="#DejaVuSans-Oblique-26" transform="translate(168.48 0.02)"/><use xlink:href="#DejaVuSans-1e" transform="translate(238.31 0.02)"/><use xlink:href="#DejaVuSans-Oblique-26" transform="translate(272 0.02)"/><use xlink:href="#DejaVuSans-57" transform="translate(341.82 -14.98) scale(0.7)"/><use xlink:href="#DejaVuSans-55" transform="translate(369.27 -14.98) scale(0.7)"/><use xlink:href="#DejaVuSans-c" transform="translate(400.78 0.02)"/><use xlink:href="#DejaVuSans-3" transform="translate(439.79 0.02)"/><use xlink:href="#DejaVuSans-20" transform="translate(471.58 0.02)"/><use xlink:href="#DejaVuSans-3" transform="translate(555.37 0.02)"/><use xlink:href="#DejaVuSans-16" transform="translate(587.16 0.02)"/><use xlink:href="#DejaVuSans-15" transform="translate(650.78 0.02)"/><use xlink:href="#DejaVuSans-b" transform="translate(714.4 0.02)"/><use xlink:href="#DejaVuSans-c9c" transform="translate(753.42 0.02)"/><use xlink:href="#DejaVuSans-14" transform="translate(837.21 0.02)"/><use xlink:href="#DejaVuSans-1e" transform="translate(900.83 0.02)"/><use xlink:href="#DejaVuSans-c9c" transform="translate(934.52 0.02)"/><use xlink:href="#DejaVuSans-17" transform="translate(1018.31 0.02)"/><use xlink:href="#DejaVuSans-c" transform="translate(1081.93 0.02)"/><use xlink:href="#DejaVuSans-3" transform="translate(1120.95 0.02)"/><use xlink:href="#DejaVuSans-47" transform="translate(1152.73 0.02)"/><use xlink:href="#DejaVuSans-25" transform="translate(1216.21 0.02)"/></g><!-- vidrio flotado de 6 mm, $m^{\prime\prime}$ = 15 kg/m², $\eta$ = 0,024 --><g style="fill: #ffffff" transform="translate(446.79 376.54) scale(0.1 -0.1)"><defs><path id="DejaVuSans-59" d="M 191 3500 
-L 800 3500 
-L 1894 563 
-L 2988 3500 
-L 3597 3500 
-L 2284 0 
-L 1503 0 
-L 191 3500 
-z
-" transform="scale(0.015625)"/><path id="DejaVuSans-49" d="M 2375 4863 
-L 2375 4384 
-L 1825 4384 
-Q 1516 4384 1395 4259 
-Q 1275 4134 1275 3809 
-L 1275 3500 
-L 2222 3500 
-L 2222 3053 
-L 1275 3053 
-L 1275 0 
-L 697 0 
-L 697 3053 
-L 147 3053 
-L 147 3500 
-L 697 3500 
-L 697 3744 
-Q 697 4328 969 4595 
-Q 1241 4863 1831 4863 
-L 2375 4863 
+M 1831 4666 
+L 2547 4666 
+L 4325 0 
+L 3669 0 
+L 3244 1197 
+L 1141 1197 
+L 716 0 
+L 50 0 
+L 1831 4666 
 z
 " transform="scale(0.015625)"/><path id="DejaVuSans-4f" d="M 603 4863 
 L 1178 4863 
@@ -949,74 +854,14 @@ L 1178 0
 L 603 0 
 L 603 4863 
 z
-" transform="scale(0.015625)"/><path id="DejaVuSans-f" d="M 750 794 
-L 1409 794 
-L 1409 256 
-L 897 -744 
-L 494 -744 
-L 750 256 
-L 750 794 
-z
-" transform="scale(0.015625)"/><path id="DejaVuSans-Oblique-50" d="M 5747 2113 
-L 5338 0 
-L 4763 0 
-L 5166 2094 
-Q 5191 2228 5203 2325 
-Q 5216 2422 5216 2491 
-Q 5216 2772 5059 2928 
-Q 4903 3084 4622 3084 
-Q 4203 3084 3875 2770 
-Q 3547 2456 3450 1953 
-L 3066 0 
-L 2491 0 
-L 2900 2094 
-Q 2925 2209 2937 2307 
-Q 2950 2406 2950 2484 
-Q 2950 2769 2794 2926 
-Q 2638 3084 2363 3084 
-Q 1938 3084 1609 2770 
-Q 1281 2456 1184 1953 
-L 800 0 
-L 225 0 
-L 909 3500 
-L 1484 3500 
-L 1375 2956 
-Q 1609 3263 1923 3423 
-Q 2238 3584 2597 3584 
-Q 2978 3584 3223 3384 
-Q 3469 3184 3519 2828 
-Q 3781 3197 4126 3390 
-Q 4472 3584 4856 3584 
-Q 5306 3584 5551 3325 
-Q 5797 3066 5797 2591 
-Q 5797 2488 5784 2364 
-Q 5772 2241 5747 2113 
-z
-" transform="scale(0.015625)"/><path id="Cmsy10-49" d="M 225 347 
-Q 184 359 184 409 
-L 966 3316 
-Q 1003 3434 1093 3506 
-Q 1184 3578 1300 3578 
-Q 1450 3578 1564 3479 
-Q 1678 3381 1678 3231 
-Q 1678 3166 1644 3084 
-L 488 319 
-Q 466 275 428 275 
-Q 394 275 320 306 
-Q 247 338 225 347 
-z
-" transform="scale(0.015625)"/><path id="DejaVuSans-4e" d="M 581 4863 
-L 1159 4863 
-L 1159 1991 
-L 2875 3500 
-L 3609 3500 
-L 1753 1863 
-L 3688 0 
-L 2938 0 
-L 1159 1709 
-L 1159 0 
-L 581 0 
-L 581 4863 
+" transform="scale(0.015625)"/><path id="DejaVuSans-59" d="M 191 3500 
+L 800 3500 
+L 1894 563 
+L 2988 3500 
+L 3597 3500 
+L 2284 0 
+L 1503 0 
+L 191 3500 
 z
 " transform="scale(0.015625)"/><path id="DejaVuSans-4a" d="M 2906 1791 
 Q 2906 2416 2648 2759 
@@ -1050,64 +895,6 @@ Q 2728 3278 2906 2969
 L 2906 3500 
 L 3481 3500 
 L 3481 434 
-z
-" transform="scale(0.015625)"/><path id="DejaVuSans-12" d="M 1625 4666 
-L 2156 4666 
-L 531 -594 
-L 0 -594 
-L 1625 4666 
-z
-" transform="scale(0.015625)"/><path id="DejaVuSans-74" d="M 838 2444 
-L 2163 2444 
-L 2163 2088 
-L 294 2088 
-L 294 2431 
-Q 400 2528 597 2703 
-Q 1672 3656 1672 3950 
-Q 1672 4156 1509 4282 
-Q 1347 4409 1081 4409 
-Q 919 4409 728 4354 
-Q 538 4300 313 4191 
-L 313 4575 
-Q 553 4663 761 4706 
-Q 969 4750 1147 4750 
-Q 1600 4750 1872 4544 
-Q 2144 4338 2144 4000 
-Q 2144 3566 1109 2678 
-Q 934 2528 838 2444 
-z
-" transform="scale(0.015625)"/><path id="DejaVuSans-Oblique-34b" d="M 3703 2113 
-L 3034 -1331 
-L 2459 -1331 
-L 3125 2094 
-Q 3222 2591 3075 2838 
-Q 2931 3084 2544 3084 
-Q 2078 3084 1750 2788 
-Q 1425 2491 1325 1978 
-L 941 0 
-L 363 0 
-L 1044 3500 
-L 1622 3500 
-L 1516 2956 
-Q 1781 3272 2094 3428 
-Q 2403 3584 2769 3584 
-Q 3372 3584 3609 3213 
-Q 3844 2838 3703 2113 
-z
-" transform="scale(0.015625)"/></defs><use xlink:href="#DejaVuSans-59" transform="translate(0 0.57)"/><use xlink:href="#DejaVuSans-4c" transform="translate(59.18 0.57)"/><use xlink:href="#DejaVuSans-47" transform="translate(86.96 0.57)"/><use xlink:href="#DejaVuSans-55" transform="translate(150.44 0.57)"/><use xlink:href="#DejaVuSans-4c" transform="translate(191.55 0.57)"/><use xlink:href="#DejaVuSans-52" transform="translate(219.34 0.57)"/><use xlink:href="#DejaVuSans-3" transform="translate(280.52 0.57)"/><use xlink:href="#DejaVuSans-49" transform="translate(312.3 0.57)"/><use xlink:href="#DejaVuSans-4f" transform="translate(347.51 0.57)"/><use xlink:href="#DejaVuSans-52" transform="translate(375.29 0.57)"/><use xlink:href="#DejaVuSans-57" transform="translate(436.47 0.57)"/><use xlink:href="#DejaVuSans-44" transform="translate(475.68 0.57)"/><use xlink:href="#DejaVuSans-47" transform="translate(536.96 0.57)"/><use xlink:href="#DejaVuSans-52" transform="translate(600.44 0.57)"/><use xlink:href="#DejaVuSans-3" transform="translate(661.62 0.57)"/><use xlink:href="#DejaVuSans-47" transform="translate(693.41 0.57)"/><use xlink:href="#DejaVuSans-48" transform="translate(756.88 0.57)"/><use xlink:href="#DejaVuSans-3" transform="translate(818.41 0.57)"/><use xlink:href="#DejaVuSans-19" transform="translate(850.2 0.57)"/><use xlink:href="#DejaVuSans-3" transform="translate(913.82 0.57)"/><use xlink:href="#DejaVuSans-50" transform="translate(945.61 0.57)"/><use xlink:href="#DejaVuSans-50" transform="translate(1043.02 0.57)"/><use xlink:href="#DejaVuSans-f" transform="translate(1140.43 0.57)"/><use xlink:href="#DejaVuSans-3" transform="translate(1172.22 0.57)"/><use xlink:href="#DejaVuSans-Oblique-50" transform="translate(1204 0.57)"/><use xlink:href="#Cmsy10-49" transform="translate(1306.07 41.87) scale(0.7)"/><use xlink:href="#Cmsy10-49" transform="translate(1325.31 41.87) scale(0.7)"/><use xlink:href="#DejaVuSans-3" transform="translate(1347.29 0.57)"/><use xlink:href="#DejaVuSans-20" transform="translate(1379.07 0.57)"/><use xlink:href="#DejaVuSans-3" transform="translate(1462.86 0.57)"/><use xlink:href="#DejaVuSans-14" transform="translate(1494.65 0.57)"/><use xlink:href="#DejaVuSans-18" transform="translate(1558.27 0.57)"/><use xlink:href="#DejaVuSans-3" transform="translate(1621.9 0.57)"/><use xlink:href="#DejaVuSans-4e" transform="translate(1653.68 0.57)"/><use xlink:href="#DejaVuSans-4a" transform="translate(1711.59 0.57)"/><use xlink:href="#DejaVuSans-12" transform="translate(1775.07 0.57)"/><use xlink:href="#DejaVuSans-50" transform="translate(1808.76 0.57)"/><use xlink:href="#DejaVuSans-74" transform="translate(1906.17 0.57)"/><use xlink:href="#DejaVuSans-f" transform="translate(1946.26 0.57)"/><use xlink:href="#DejaVuSans-3" transform="translate(1978.05 0.57)"/><use xlink:href="#DejaVuSans-Oblique-34b" transform="translate(2009.84 0.57)"/><use xlink:href="#DejaVuSans-3" transform="translate(2073.21 0.57)"/><use xlink:href="#DejaVuSans-20" transform="translate(2105 0.57)"/><use xlink:href="#DejaVuSans-3" transform="translate(2188.79 0.57)"/><use xlink:href="#DejaVuSans-13" transform="translate(2220.58 0.57)"/><use xlink:href="#DejaVuSans-f" transform="translate(2284.2 0.57)"/><use xlink:href="#DejaVuSans-13" transform="translate(2315.99 0.57)"/><use xlink:href="#DejaVuSans-15" transform="translate(2379.61 0.57)"/><use xlink:href="#DejaVuSans-17" transform="translate(2443.23 0.57)"/></g></g><g id="text_25"><!-- Aislamiento previsto de panel simple evaluado según ISO 717-1 --><g style="fill: #ffffff" transform="translate(182.85 16.8) scale(0.12 -0.12)"><defs><path id="DejaVuSans-24" d="M 2188 4044 
-L 1331 1722 
-L 3047 1722 
-L 2188 4044 
-z
-M 1831 4666 
-L 2547 4666 
-L 4325 0 
-L 3669 0 
-L 3244 1197 
-L 1141 1197 
-L 716 0 
-L 50 0 
-L 1831 4666 
 z
 " transform="scale(0.015625)"/><path id="DejaVuSans-2c" d="M 628 4666 
 L 1259 4666 
@@ -1229,7 +1016,220 @@ L 2.5 2.5
 L 2.5 -2.5 
 L -2.5 -2.5 
 z
-" style="stroke: #ffffff; stroke-linejoin: miter"/></defs><g clip-path="url(#pd5fc7fff15)"><use xlink:href="#m0e8f10f845" x="72.85" y="374.35" style="fill: #ffffff; stroke: #ffffff; stroke-linejoin: miter"/><use xlink:href="#m0e8f10f845" x="113.14" y="331.42" style="fill: #ffffff; stroke: #ffffff; stroke-linejoin: miter"/><use xlink:href="#m0e8f10f845" x="153.43" y="288.5" style="fill: #ffffff; stroke: #ffffff; stroke-linejoin: miter"/><use xlink:href="#m0e8f10f845" x="193.73" y="245.57" style="fill: #ffffff; stroke: #ffffff; stroke-linejoin: miter"/><use xlink:href="#m0e8f10f845" x="234.02" y="202.65" style="fill: #ffffff; stroke: #ffffff; stroke-linejoin: miter"/><use xlink:href="#m0e8f10f845" x="274.31" y="159.72" style="fill: #ffffff; stroke: #ffffff; stroke-linejoin: miter"/><use xlink:href="#m0e8f10f845" x="314.61" y="116.8" style="fill: #ffffff; stroke: #ffffff; stroke-linejoin: miter"/><use xlink:href="#m0e8f10f845" x="354.9" y="102.49" style="fill: #ffffff; stroke: #ffffff; stroke-linejoin: miter"/><use xlink:href="#m0e8f10f845" x="395.19" y="88.18" style="fill: #ffffff; stroke: #ffffff; stroke-linejoin: miter"/><use xlink:href="#m0e8f10f845" x="435.49" y="73.87" style="fill: #ffffff; stroke: #ffffff; stroke-linejoin: miter"/><use xlink:href="#m0e8f10f845" x="475.78" y="59.56" style="fill: #ffffff; stroke: #ffffff; stroke-linejoin: miter"/><use xlink:href="#m0e8f10f845" x="516.07" y="45.25" style="fill: #ffffff; stroke: #ffffff; stroke-linejoin: miter"/><use xlink:href="#m0e8f10f845" x="556.37" y="45.25" style="fill: #ffffff; stroke: #ffffff; stroke-linejoin: miter"/><use xlink:href="#m0e8f10f845" x="596.66" y="45.25" style="fill: #ffffff; stroke: #ffffff; stroke-linejoin: miter"/><use xlink:href="#m0e8f10f845" x="636.95" y="45.25" style="fill: #ffffff; stroke: #ffffff; stroke-linejoin: miter"/><use xlink:href="#m0e8f10f845" x="677.25" y="45.25" style="fill: #ffffff; stroke: #ffffff; stroke-linejoin: miter"/></g></g><g id="legend_1"><g id="patch_8"><path d="M 48.93 90 
+" style="stroke: #ffffff; stroke-linejoin: miter"/></defs><g clip-path="url(#pd5fc7fff15)"><use xlink:href="#m0e8f10f845" x="72.85" y="374.35" style="fill: #ffffff; stroke: #ffffff; stroke-linejoin: miter"/><use xlink:href="#m0e8f10f845" x="113.14" y="331.42" style="fill: #ffffff; stroke: #ffffff; stroke-linejoin: miter"/><use xlink:href="#m0e8f10f845" x="153.43" y="288.5" style="fill: #ffffff; stroke: #ffffff; stroke-linejoin: miter"/><use xlink:href="#m0e8f10f845" x="193.73" y="245.57" style="fill: #ffffff; stroke: #ffffff; stroke-linejoin: miter"/><use xlink:href="#m0e8f10f845" x="234.02" y="202.65" style="fill: #ffffff; stroke: #ffffff; stroke-linejoin: miter"/><use xlink:href="#m0e8f10f845" x="274.31" y="159.72" style="fill: #ffffff; stroke: #ffffff; stroke-linejoin: miter"/><use xlink:href="#m0e8f10f845" x="314.61" y="116.8" style="fill: #ffffff; stroke: #ffffff; stroke-linejoin: miter"/><use xlink:href="#m0e8f10f845" x="354.9" y="102.49" style="fill: #ffffff; stroke: #ffffff; stroke-linejoin: miter"/><use xlink:href="#m0e8f10f845" x="395.19" y="88.18" style="fill: #ffffff; stroke: #ffffff; stroke-linejoin: miter"/><use xlink:href="#m0e8f10f845" x="435.49" y="73.87" style="fill: #ffffff; stroke: #ffffff; stroke-linejoin: miter"/><use xlink:href="#m0e8f10f845" x="475.78" y="59.56" style="fill: #ffffff; stroke: #ffffff; stroke-linejoin: miter"/><use xlink:href="#m0e8f10f845" x="516.07" y="45.25" style="fill: #ffffff; stroke: #ffffff; stroke-linejoin: miter"/><use xlink:href="#m0e8f10f845" x="556.37" y="45.25" style="fill: #ffffff; stroke: #ffffff; stroke-linejoin: miter"/><use xlink:href="#m0e8f10f845" x="596.66" y="45.25" style="fill: #ffffff; stroke: #ffffff; stroke-linejoin: miter"/><use xlink:href="#m0e8f10f845" x="636.95" y="45.25" style="fill: #ffffff; stroke: #ffffff; stroke-linejoin: miter"/><use xlink:href="#m0e8f10f845" x="677.25" y="45.25" style="fill: #ffffff; stroke: #ffffff; stroke-linejoin: miter"/></g></g><g id="text_25"><g id="patch_7"><path d="M 446.79 384.94 
+L 697.49 384.94 
+Q 702.49 384.94 702.49 379.94 
+L 702.49 355.44 
+Q 702.49 350.44 697.49 350.44 
+L 446.79 350.44 
+Q 441.79 350.44 441.79 355.44 
+L 441.79 379.94 
+Q 441.79 384.94 446.79 384.94 
+z
+" style="fill: #1c2128; stroke: #555555; stroke-linejoin: miter"/></g><!-- $R_\mathrm{w}$($C$;$C_\mathrm{tr}$) = 32(−1;−4) dB --><g style="fill: #ffffff" transform="translate(568.99 364.04) scale(0.1 -0.1)"><defs><path id="DejaVuSans-5a" d="M 269 3500 
+L 844 3500 
+L 1563 769 
+L 2278 3500 
+L 2956 3500 
+L 3675 769 
+L 4391 3500 
+L 4966 3500 
+L 4050 0 
+L 3372 0 
+L 2619 2869 
+L 1863 0 
+L 1184 0 
+L 269 3500 
+z
+" transform="scale(0.015625)"/><path id="DejaVuSans-Oblique-26" d="M 4447 4306 
+L 4319 3641 
+Q 4019 3944 3683 4091 
+Q 3347 4238 2956 4238 
+Q 2422 4238 2017 3981 
+Q 1613 3725 1319 3200 
+Q 1131 2863 1032 2486 
+Q 934 2109 934 1728 
+Q 934 1091 1264 756 
+Q 1594 422 2222 422 
+Q 2656 422 3056 561 
+Q 3456 700 3834 978 
+L 3688 231 
+Q 3316 72 2936 -9 
+Q 2556 -91 2175 -91 
+Q 1278 -91 773 396 
+Q 269 884 269 1753 
+Q 269 2309 461 2846 
+Q 653 3384 1013 3828 
+Q 1394 4300 1883 4525 
+Q 2372 4750 3022 4750 
+Q 3422 4750 3780 4639 
+Q 4138 4528 4447 4306 
+z
+" transform="scale(0.015625)"/><path id="DejaVuSans-1e" d="M 750 3309 
+L 1409 3309 
+L 1409 2516 
+L 750 2516 
+L 750 3309 
+z
+M 750 794 
+L 1409 794 
+L 1409 256 
+L 897 -744 
+L 494 -744 
+L 750 256 
+L 750 794 
+z
+" transform="scale(0.015625)"/><path id="DejaVuSans-20" d="M 678 2906 
+L 4684 2906 
+L 4684 2381 
+L 678 2381 
+L 678 2906 
+z
+M 678 1631 
+L 4684 1631 
+L 4684 1100 
+L 678 1100 
+L 678 1631 
+z
+" transform="scale(0.015625)"/><path id="DejaVuSans-c9c" d="M 678 2272 
+L 4684 2272 
+L 4684 1741 
+L 678 1741 
+L 678 2272 
+z
+" transform="scale(0.015625)"/></defs><use xlink:href="#DejaVuSans-Oblique-35" transform="translate(0 0.02)"/><use xlink:href="#DejaVuSans-5a" transform="translate(69.48 -14.98) scale(0.7)"/><use xlink:href="#DejaVuSans-b" transform="translate(129.47 0.02)"/><use xlink:href="#DejaVuSans-Oblique-26" transform="translate(168.48 0.02)"/><use xlink:href="#DejaVuSans-1e" transform="translate(238.31 0.02)"/><use xlink:href="#DejaVuSans-Oblique-26" transform="translate(272 0.02)"/><use xlink:href="#DejaVuSans-57" transform="translate(341.82 -14.98) scale(0.7)"/><use xlink:href="#DejaVuSans-55" transform="translate(369.27 -14.98) scale(0.7)"/><use xlink:href="#DejaVuSans-c" transform="translate(400.78 0.02)"/><use xlink:href="#DejaVuSans-3" transform="translate(439.79 0.02)"/><use xlink:href="#DejaVuSans-20" transform="translate(471.58 0.02)"/><use xlink:href="#DejaVuSans-3" transform="translate(555.37 0.02)"/><use xlink:href="#DejaVuSans-16" transform="translate(587.16 0.02)"/><use xlink:href="#DejaVuSans-15" transform="translate(650.78 0.02)"/><use xlink:href="#DejaVuSans-b" transform="translate(714.4 0.02)"/><use xlink:href="#DejaVuSans-c9c" transform="translate(753.42 0.02)"/><use xlink:href="#DejaVuSans-14" transform="translate(837.21 0.02)"/><use xlink:href="#DejaVuSans-1e" transform="translate(900.83 0.02)"/><use xlink:href="#DejaVuSans-c9c" transform="translate(934.52 0.02)"/><use xlink:href="#DejaVuSans-17" transform="translate(1018.31 0.02)"/><use xlink:href="#DejaVuSans-c" transform="translate(1081.93 0.02)"/><use xlink:href="#DejaVuSans-3" transform="translate(1120.95 0.02)"/><use xlink:href="#DejaVuSans-47" transform="translate(1152.73 0.02)"/><use xlink:href="#DejaVuSans-25" transform="translate(1216.21 0.02)"/></g><!-- vidrio flotado de 6 mm, $m^{\prime\prime}$ = 15 kg/m², $\eta$ = 0,024 --><g style="fill: #ffffff" transform="translate(446.79 376.54) scale(0.1 -0.1)"><defs><path id="DejaVuSans-49" d="M 2375 4863 
+L 2375 4384 
+L 1825 4384 
+Q 1516 4384 1395 4259 
+Q 1275 4134 1275 3809 
+L 1275 3500 
+L 2222 3500 
+L 2222 3053 
+L 1275 3053 
+L 1275 0 
+L 697 0 
+L 697 3053 
+L 147 3053 
+L 147 3500 
+L 697 3500 
+L 697 3744 
+Q 697 4328 969 4595 
+Q 1241 4863 1831 4863 
+L 2375 4863 
+z
+" transform="scale(0.015625)"/><path id="DejaVuSans-f" d="M 750 794 
+L 1409 794 
+L 1409 256 
+L 897 -744 
+L 494 -744 
+L 750 256 
+L 750 794 
+z
+" transform="scale(0.015625)"/><path id="DejaVuSans-Oblique-50" d="M 5747 2113 
+L 5338 0 
+L 4763 0 
+L 5166 2094 
+Q 5191 2228 5203 2325 
+Q 5216 2422 5216 2491 
+Q 5216 2772 5059 2928 
+Q 4903 3084 4622 3084 
+Q 4203 3084 3875 2770 
+Q 3547 2456 3450 1953 
+L 3066 0 
+L 2491 0 
+L 2900 2094 
+Q 2925 2209 2937 2307 
+Q 2950 2406 2950 2484 
+Q 2950 2769 2794 2926 
+Q 2638 3084 2363 3084 
+Q 1938 3084 1609 2770 
+Q 1281 2456 1184 1953 
+L 800 0 
+L 225 0 
+L 909 3500 
+L 1484 3500 
+L 1375 2956 
+Q 1609 3263 1923 3423 
+Q 2238 3584 2597 3584 
+Q 2978 3584 3223 3384 
+Q 3469 3184 3519 2828 
+Q 3781 3197 4126 3390 
+Q 4472 3584 4856 3584 
+Q 5306 3584 5551 3325 
+Q 5797 3066 5797 2591 
+Q 5797 2488 5784 2364 
+Q 5772 2241 5747 2113 
+z
+" transform="scale(0.015625)"/><path id="Cmsy10-49" d="M 225 347 
+Q 184 359 184 409 
+L 966 3316 
+Q 1003 3434 1093 3506 
+Q 1184 3578 1300 3578 
+Q 1450 3578 1564 3479 
+Q 1678 3381 1678 3231 
+Q 1678 3166 1644 3084 
+L 488 319 
+Q 466 275 428 275 
+Q 394 275 320 306 
+Q 247 338 225 347 
+z
+" transform="scale(0.015625)"/><path id="DejaVuSans-4e" d="M 581 4863 
+L 1159 4863 
+L 1159 1991 
+L 2875 3500 
+L 3609 3500 
+L 1753 1863 
+L 3688 0 
+L 2938 0 
+L 1159 1709 
+L 1159 0 
+L 581 0 
+L 581 4863 
+z
+" transform="scale(0.015625)"/><path id="DejaVuSans-12" d="M 1625 4666 
+L 2156 4666 
+L 531 -594 
+L 0 -594 
+L 1625 4666 
+z
+" transform="scale(0.015625)"/><path id="DejaVuSans-74" d="M 838 2444 
+L 2163 2444 
+L 2163 2088 
+L 294 2088 
+L 294 2431 
+Q 400 2528 597 2703 
+Q 1672 3656 1672 3950 
+Q 1672 4156 1509 4282 
+Q 1347 4409 1081 4409 
+Q 919 4409 728 4354 
+Q 538 4300 313 4191 
+L 313 4575 
+Q 553 4663 761 4706 
+Q 969 4750 1147 4750 
+Q 1600 4750 1872 4544 
+Q 2144 4338 2144 4000 
+Q 2144 3566 1109 2678 
+Q 934 2528 838 2444 
+z
+" transform="scale(0.015625)"/><path id="DejaVuSans-Oblique-34b" d="M 3703 2113 
+L 3034 -1331 
+L 2459 -1331 
+L 3125 2094 
+Q 3222 2591 3075 2838 
+Q 2931 3084 2544 3084 
+Q 2078 3084 1750 2788 
+Q 1425 2491 1325 1978 
+L 941 0 
+L 363 0 
+L 1044 3500 
+L 1622 3500 
+L 1516 2956 
+Q 1781 3272 2094 3428 
+Q 2403 3584 2769 3584 
+Q 3372 3584 3609 3213 
+Q 3844 2838 3703 2113 
+z
+" transform="scale(0.015625)"/></defs><use xlink:href="#DejaVuSans-59" transform="translate(0 0.57)"/><use xlink:href="#DejaVuSans-4c" transform="translate(59.18 0.57)"/><use xlink:href="#DejaVuSans-47" transform="translate(86.96 0.57)"/><use xlink:href="#DejaVuSans-55" transform="translate(150.44 0.57)"/><use xlink:href="#DejaVuSans-4c" transform="translate(191.55 0.57)"/><use xlink:href="#DejaVuSans-52" transform="translate(219.34 0.57)"/><use xlink:href="#DejaVuSans-3" transform="translate(280.52 0.57)"/><use xlink:href="#DejaVuSans-49" transform="translate(312.3 0.57)"/><use xlink:href="#DejaVuSans-4f" transform="translate(347.51 0.57)"/><use xlink:href="#DejaVuSans-52" transform="translate(375.29 0.57)"/><use xlink:href="#DejaVuSans-57" transform="translate(436.47 0.57)"/><use xlink:href="#DejaVuSans-44" transform="translate(475.68 0.57)"/><use xlink:href="#DejaVuSans-47" transform="translate(536.96 0.57)"/><use xlink:href="#DejaVuSans-52" transform="translate(600.44 0.57)"/><use xlink:href="#DejaVuSans-3" transform="translate(661.62 0.57)"/><use xlink:href="#DejaVuSans-47" transform="translate(693.41 0.57)"/><use xlink:href="#DejaVuSans-48" transform="translate(756.88 0.57)"/><use xlink:href="#DejaVuSans-3" transform="translate(818.41 0.57)"/><use xlink:href="#DejaVuSans-19" transform="translate(850.2 0.57)"/><use xlink:href="#DejaVuSans-3" transform="translate(913.82 0.57)"/><use xlink:href="#DejaVuSans-50" transform="translate(945.61 0.57)"/><use xlink:href="#DejaVuSans-50" transform="translate(1043.02 0.57)"/><use xlink:href="#DejaVuSans-f" transform="translate(1140.43 0.57)"/><use xlink:href="#DejaVuSans-3" transform="translate(1172.22 0.57)"/><use xlink:href="#DejaVuSans-Oblique-50" transform="translate(1204 0.57)"/><use xlink:href="#Cmsy10-49" transform="translate(1306.07 41.87) scale(0.7)"/><use xlink:href="#Cmsy10-49" transform="translate(1325.31 41.87) scale(0.7)"/><use xlink:href="#DejaVuSans-3" transform="translate(1347.29 0.57)"/><use xlink:href="#DejaVuSans-20" transform="translate(1379.07 0.57)"/><use xlink:href="#DejaVuSans-3" transform="translate(1462.86 0.57)"/><use xlink:href="#DejaVuSans-14" transform="translate(1494.65 0.57)"/><use xlink:href="#DejaVuSans-18" transform="translate(1558.27 0.57)"/><use xlink:href="#DejaVuSans-3" transform="translate(1621.9 0.57)"/><use xlink:href="#DejaVuSans-4e" transform="translate(1653.68 0.57)"/><use xlink:href="#DejaVuSans-4a" transform="translate(1711.59 0.57)"/><use xlink:href="#DejaVuSans-12" transform="translate(1775.07 0.57)"/><use xlink:href="#DejaVuSans-50" transform="translate(1808.76 0.57)"/><use xlink:href="#DejaVuSans-74" transform="translate(1906.17 0.57)"/><use xlink:href="#DejaVuSans-f" transform="translate(1946.26 0.57)"/><use xlink:href="#DejaVuSans-3" transform="translate(1978.05 0.57)"/><use xlink:href="#DejaVuSans-Oblique-34b" transform="translate(2009.84 0.57)"/><use xlink:href="#DejaVuSans-3" transform="translate(2073.21 0.57)"/><use xlink:href="#DejaVuSans-20" transform="translate(2105 0.57)"/><use xlink:href="#DejaVuSans-3" transform="translate(2188.79 0.57)"/><use xlink:href="#DejaVuSans-13" transform="translate(2220.58 0.57)"/><use xlink:href="#DejaVuSans-f" transform="translate(2284.2 0.57)"/><use xlink:href="#DejaVuSans-13" transform="translate(2315.99 0.57)"/><use xlink:href="#DejaVuSans-15" transform="translate(2379.61 0.57)"/><use xlink:href="#DejaVuSans-17" transform="translate(2443.23 0.57)"/></g></g><g id="legend_1"><g id="patch_8"><path d="M 48.93 90 
 L 201.87 90 
 Q 203.67 90 203.67 88.2 
 L 203.67 35.1 

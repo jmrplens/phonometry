@@ -2023,10 +2023,14 @@ def generate_dose_exchange(output_dir: str) -> None:
         fontsize=9,
         arrowprops={"arrowstyle": "->", "lw": 0.9},
     )
+    # Ending inside the right of the frame, low enough to pass under the
+    # 80 dB line: started at 1.15 h, the longer Spanish wording ran out
+    # through the right spine.
     ax.annotate(
         "+3 dB for every halving of the duration",
         xy=(2.0, 88.0),
-        xytext=(1.15, 79.0),
+        xytext=(7.5, 78.0),
+        ha="right",
         fontsize=9,
         arrowprops={"arrowstyle": "->", "lw": 0.9},
     )
@@ -2594,7 +2598,9 @@ def generate_leakage_floor(output_dir: str) -> None:
         "here the skirt has fallen below the noise:\n"
         "these bands are measuring the sound",
         xy=(11000.0, 22.5),
-        xytext=(1500.0, 10.0),
+        # From 700 Hz: from 1.5 kHz the Spanish wording ran out through the
+        # right spine.
+        xytext=(700.0, 10.0),
         fontsize=10,
         arrowprops={"arrowstyle": "->", "lw": 0.9},
     )

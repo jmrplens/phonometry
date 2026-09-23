@@ -47,8 +47,10 @@ def _d_insulation_setup(s: SVG, th: Theme) -> None:
     s.text(486, top + 32, "Receiving room", 19, th.fg, bold=True, anchor="start")
     s.text(486, top + 58, "$L_2$ , $T$", 17, th.muted, anchor="start")
 
-    # Loudspeaker in a corner of the source room (bottom-left).
-    lsx, lsy = 150.0, 405.0
+    # Loudspeaker in a corner of the source room (bottom-left), far enough in
+    # from the wall for the 1.0 m dimension's label to sit between the two:
+    # at x = 150 the wall ran through it.
+    lsx, lsy = 210.0, 405.0
     for r in (40, 66, 92):
         s.path(
             f"M {lsx + r * 0.22:.1f} {lsy - r:.1f} "
@@ -63,7 +65,7 @@ def _d_insulation_setup(s: SVG, th: Theme) -> None:
     s.text(lsx, lsy + 52, "Loudspeaker", 17, th.fg, bold=True)
 
     # Microphone positions (five per room, in the central zone).
-    src_mics = [(150, 315), (255, 250), (360, 300), (300, 360), (390, 205)]
+    src_mics = [(lsx, 315), (255, 250), (360, 300), (320, 370), (390, 205)]
     rec_mics = [(590, 160), (653, 160), (560, 290), (690, 380), (785, 300)]
     for mics in (src_mics, rec_mics):
         for mx, my in mics:
@@ -73,10 +75,14 @@ def _d_insulation_setup(s: SVG, th: Theme) -> None:
     s.text(636, 430, "microphone positions", 15, th.muted)
 
     # Normative minimum separations (ISO 16283-1, 7.6 and 7.2.2).
-    s.dim(150, 395, 150, 317, "≥ 1.0 m", offset=-42, size=17)  # 7.6c
-    s.dim(178, 405, 443, 405, "≥ 1.0 m", offset=0, size=17)  # 7.2.2
-    s.dim(590, 160, 653, 160, "≥ 0.7 m", offset=42, size=17)  # 7.6a
-    s.dim(785, 300, 830, 300, "≥ 0.5 m", offset=-46, size=17)  # 7.6b
+    s.dim(lsx, 395, lsx, 317, "≥ 1.0 m", offset=-42, size=17)  # 7.6c
+    s.dim(lsx + 28, 405, 443, 405, "≥ 1.0 m", offset=0, size=17)  # 7.2.2
+    # The two short spans are narrower than their labels, which ran across
+    # the witness lines and the wall: each label goes beside its span.
+    s.dim(590, 160, 653, 160, "", offset=42, size=17)  # 7.6a
+    s.text(621.5, 224, "≥ 0.7 m", 17, th.fg)
+    s.dim(785, 300, 830, 300, "", offset=-46, size=17)  # 7.6b
+    s.text(776, 260, "≥ 0.5 m", 17, th.fg, "end")
 
     # Clause legend.
     for y, txt in (
@@ -323,16 +329,19 @@ def _d_sweep_budget(s: SVG, th: Theme) -> None:
         s.text(
             xx, y3 - height - 8, f"$H_{order:d}$", 12, th.secondary, "middle", bold=True
         )
-    # The linear impulse response and its decaying tail.
-    s.line(zero, y3, zero, y3 - 92, th.primary, 3.0)
+    # The linear impulse response and its decaying tail, short enough to stay
+    # under the lane's heading: at 92 px it ran up through the words.
+    peak = 70.0
+    s.line(zero, y3, zero, y3 - peak, th.primary, 3.0)
     tail = "M " + " L ".join(
-        f"{zero + t * ppm:.1f} {y3 - 92 * math.exp(-3.0 * t):.1f}"
+        f"{zero + t * ppm:.1f} {y3 - peak * math.exp(-3.0 * t):.1f}"
         for t in [i * 0.05 for i in range(1, 25)]
     )
     s.path(tail, stroke=th.primary, sw=1.6)
-    # Down to the end of the tick mark and no further: to y3 + 16 its last dash
-    # stood on the "0" under it.
-    s.line(zero, y3 - 118, zero, y3 + 7, th.fg, 1.6, dash="6,4")
+    # From just under the heading, which it crossed when it rose to y3 - 118,
+    # down to the end of the tick mark and no further: to y3 + 16 its last
+    # dash stood on the "0" under it.
+    s.line(zero, y3 - peak - 8, zero, y3 + 7, th.fg, 1.6, dash="6,4")
     # Below the numbers of the time axis, not level with them: at y3 + 34 the
     # two captions ran through the "−1", the "0" and the "1".
     s.text(
@@ -549,8 +558,10 @@ def _d_flanking(s: SVG, th: Theme) -> None:
     s.circle(lsx, lsy - 8, 4, th.bg)
     s.circle(lsx, lsy + 14, 6, th.fg)
     s.text(lsx, lsy + 50, "Loudspeaker", 15, th.fg, bold=True)
-    s.mic(786.0, 236.0, room_bot, 0.9)
-    s.text(786.0, 220.0, "Microphone", 15, th.fg, bold=True)
+    # Far enough in from the room's right wall for its label to stay inside:
+    # at x = 786 the wall ran through the "e".
+    s.mic(770.0, 236.0, room_bot, 0.9)
+    s.text(770.0, 220.0, "Microphone", 15, th.fg, bold=True)
 
     # --- transmission paths -------------------------------------------------
     # Dd: straight through the separating element, well above the slab.
@@ -576,7 +587,8 @@ def _d_flanking(s: SVG, th: Theme) -> None:
     s.line(456.0, 296.0, 456.0, slab_cy, c_df, 2.8)
     s.line(456.0, slab_cy, 614.0, slab_cy, c_df, 2.8)
     s.arrow(614.0, slab_cy, 614.0, 316.0, c_df, 2.8)
-    s.text(626.0, 322.0, "Df", 21, c_df, bold=True, anchor="start")
+    # Left of its own arrow: to the right, the Ff arrow ran through the "f".
+    s.text(606.0, 322.0, "Df", 21, c_df, bold=True, anchor="end")
 
     # Junction node on top of everything.
     s.circle(jx, jy, 6.5, th.bg, th.fg, 2.2)
@@ -668,23 +680,35 @@ def _d_room_measurement(s: SVG, th: Theme) -> None:
     ]
     for mx, my, label in mics:
         s.circle(mx, my, 7, th.secondary, th.fg, 1.4)
-        s.text(mx + 12, my + 6, label, 15, th.fg, "start", bold=True)
+        if label == "M1":
+            # Above its circle: to the right, the 2 m line to M2 ran through
+            # the middle of the name, and to the left the line from S1.
+            s.text(mx, my - 12, label, 15, th.fg, "middle", bold=True)
+        else:
+            s.text(mx + 12, my + 6, label, 15, th.fg, "start", bold=True)
 
     # The position the standard tells you not to take: on a symmetry axis.
     gx, gy = rx + rw / 2, ry + 104.0
     s.circle(gx, gy, 7, "none", th.muted, 1.4)
     s.line(gx - 10, gy - 10, gx + 10, gy + 10, th.muted, 1.8)
     s.line(gx - 10, gy + 10, gx + 10, gy - 10, th.muted, 1.8)
-    s.text(gx + 16, gy - 8, "avoid symmetry lines", 13, th.muted, "start")
+    # 12 px in Spanish, which at 13 reached M3's circle.
+    avoid = "avoid symmetry lines"
+    s.text(
+        gx + 16, gy - 8, avoid, s.fit_size([avoid], [13, 12], 170), th.muted, "start"
+    )
 
     # Spacing annotations.
     s.line(250.0, 150.0, 390.0, 150.0, th.accent, 1.6, dash="5,4")
-    s.text(320.0, 142.0, "≥ 2 m", 15, th.accent, "middle", bold=True)
+    # Right of the symmetry axis, which stood through the label at x = 320.
+    s.text(350.0, 142.0, "≥ 2 m", 15, th.accent, "middle", bold=True)
     s.arrow(160.0, 299.0, 160.0, ry + rh, th.muted, 1.4)
     s.text(152.0, 350.0, "≥ 1 m", 14, th.fg, "end")
     # The source-receiver distance, dimensioned outside the exclusion circle.
     s.line(s1[0], s1[1], 250.0, 150.0, th.primary, 1.3, dash="4,4")
-    s.text(212.0, 182.0, "2.4 m $> d_{min}$", 13, th.primary, "middle")
+    # Under the line and inside the circle: at x = 212 the circle ran
+    # through the label.
+    s.text(175.0, 200.0, "2.4 m $> d_{min}$", 13, th.primary, "middle")
 
     # Legend + ISO 3382-1 rules, to the right of the plan.
     # 32 px off the room, not 24: the source-clearance circle bulges 30 px
@@ -837,12 +861,17 @@ def _d_open_plan_setup(s: SVG, th: Theme) -> None:
     for index, (px, py) in enumerate(pts, start=1):
         s.circle(px, py, 6, th.secondary, th.fg, 1.3)
         s.text(px, py - 12, f"P{index:d}", 11, th.fg, "middle", bold=True)
-    s.text(x0 + band + 8, y1 - band - 22, "1.2 m screens", 12, th.secondary, "start")
+    # The screens are named at the top right, over the upper row, which
+    # leaves the strip under the lower row to the one note about P1: the
+    # two of them did not fit there, the first touching the desks and the
+    # second running along the keep-out band. In 11 px the Spanish stays
+    # inside the left-hand zone, whose boundary it crossed at 12.
+    s.text(x1 - band - 8, y0 + band + 18, "1.2 m screens", 12, th.secondary, "end")
     s.text(
         x0 + band + 8,
-        y1 - band - 2,
+        y1 - band - 12,
         "P1 at the nearest workstation; the path need not be straight",
-        12,
+        11,
         th.primary,
         "start",
     )
@@ -896,11 +925,13 @@ def _d_open_plan_setup(s: SVG, th: Theme) -> None:
     # The omnidirectional source at head height, radiating pink noise.
     src_x, src_y = x0 + 90, floor_y - 1.2 * hpm
     s.circle(src_x, src_y, 17, th.panel, th.primary, 2.0)
+    # The waves go out towards the listener, level with the source: rising
+    # to the upper right, the outer one ran up into the panel's title.
     for radius in (30.0, 46.0):
         s.path(
-            f"M {src_x + radius * 0.28:.1f} {src_y - radius:.1f} "
-            f"A {radius} {radius} 0 0 1 {src_x + radius:.1f} "
-            f"{src_y - radius * 0.28:.1f}",
+            f"M {src_x + radius * 0.82:.1f} {src_y - radius * 0.57:.1f} "
+            f"A {radius} {radius} 0 0 1 {src_x + radius * 0.82:.1f} "
+            f"{src_y + radius * 0.57:.1f}",
             stroke=th.primary,
             sw=1.2,
             dash="4,4",
@@ -1025,7 +1056,9 @@ def _d_room_measurement_section(s: SVG, th: Theme) -> None:
         size=13,
         label_side="left",
     )
-    s.text(src_x + 32, src_y + 5, "acoustic centre", 12, th.secondary, "start")
+    # Below and right of the source, inside the d_min circle: level with the
+    # centre, the circle ran through the end of the label.
+    s.text(src_x + 8, src_y + 42, "acoustic centre", 12, th.secondary, "start")
 
     # --- The d_min exclusion zone, clipped to the room ---------------------
     d_min = 2.0 * ppm
@@ -1036,14 +1069,11 @@ def _d_room_measurement_section(s: SVG, th: Theme) -> None:
     )
     s.circle(src_x, src_y, d_min, "none", th.secondary, 1.6)
     s.add("</g>")
+    # Under the floor, below the point where the circle meets it: inside the
+    # room the circle ran through the label.
+    foot = src_x + (d_min**2 - (floor_y - src_y) ** 2) ** 0.5
     s.text(
-        src_x + d_min - 6,
-        floor_y - 16,
-        "$d_{min}$ = 2.0 m",
-        13,
-        th.secondary,
-        "end",
-        bold=True,
+        foot, floor_y + 34, "$d_{min}$ = 2.0 m", 13, th.secondary, "middle", bold=True
     )
 
     # --- Two microphones at seated-ear height ------------------------------
@@ -1063,6 +1093,8 @@ def _d_room_measurement_section(s: SVG, th: Theme) -> None:
         label_side="right",
     )
     # Quarter-wavelength clearances: the floor counts as a surface too.
+    # Its label on the microphone's side, clear of the d_min circle, which
+    # ran through it on the other.
     s.dim(
         m1_x - 34,
         mic_y,
@@ -1071,7 +1103,7 @@ def _d_room_measurement_section(s: SVG, th: Theme) -> None:
         "≥ 1 m",
         offset=0,
         size=13,
-        label_side="left",
+        label_side="right",
     )
     s.arrow(m2_x, mic_y + 8, m2_x, floor_y - 6, th.muted, 1.3)
     s.arrow(m2_x + 8, mic_y, x1 - 4, mic_y, th.muted, 1.3)
@@ -1217,7 +1249,8 @@ def _d_room_noise_setup(s: SVG, th: Theme) -> None:
     # --- Room shell, plenum and the air-handling plant ----------------------
     s.rect(x0, ceil_y, x1 - x0, floor_y - ceil_y, th.panel, th.fg, sw=2.6)
     s.rect(x0, ceil_y - 42, x1 - x0, 42, th.bg, th.muted, sw=1.6)
-    s.text(x1 - 10, ceil_y - 15, "ceiling plenum", 12, th.muted, "end")
+    # Over the plenum rather than in it, where the Spanish ran into the duct.
+    s.text(x1 - 10, ceil_y - 50, "ceiling plenum", 12, th.muted, "end")
     s.ground(floor_y, x0 - 22, x1 + 22)
 
     # Duct run in the plenum, branching into one diffuser.
@@ -1248,7 +1281,9 @@ def _d_room_noise_setup(s: SVG, th: Theme) -> None:
     s.line(x0 - 58, ceil_y - 5, x0 - 36, ceil_y + 17, th.secondary, 1.6)
     s.line(x0 - 58, ceil_y + 17, x0 - 36, ceil_y - 5, th.secondary, 1.6)
     s.text(x0 - 47, ceil_y + 62, "air handler", 12, th.secondary, "middle")
-    s.text(x0 - 47, ceil_y + 80, "design condition", 10, th.muted, "middle")
+    # Left of centre and 9 px in Spanish, which at 10 ran into the wall.
+    design = "design condition"
+    s.text(x0 - 58, ceil_y + 80, design, s.fit_size([design], [10, 9], 100), th.muted)
 
     # --- Standoff exclusion zones (clause 5.2.5) ----------------------------
     # 0.6 m from any single reflecting surface: a band under the ceiling.
@@ -1263,7 +1298,9 @@ def _d_room_noise_setup(s: SVG, th: Theme) -> None:
         sw=1.4,
         dash="5,4",
     )
-    s.text(x1 - 40, floor_y - 34, "1.2 m", 13, th.accent, "middle", bold=True)
+    # Above the zone's chord: inside the zone, the chord or the arc ran
+    # through it wherever it went.
+    s.text(x1 - 64, floor_y - 56, "1.2 m", 13, th.accent, "middle", bold=True)
     # 2.4 m from a trihedral corner: the left wall meeting floor and end wall.
     r3 = 2.4 * ppm
     s.path(
@@ -1842,8 +1879,10 @@ def _d_insulation_lab(s: SVG, th: Theme) -> None:
         s.circle(pxm, pym, 7.5, th.secondary)
         s.circle(pxm, pym, 2.6, th.bg)
         _rot_arrow(s, mcx, mcy, sc + 12, -78, -8, th.accent, 1.8)
-    s.text(285, 298, "moving microphone", 14, th.fg)
-    s.text(285, 320, "sweep radius ≥ 1 m", 13, th.muted)
+    # Set right of the sweep circle's centre, clear of the loudspeaker's
+    # outer wave, which ran through the start of both lines.
+    s.text(310, 298, "moving microphone", 14, th.fg)
+    s.text(310, 320, "sweep radius ≥ 1 m", 13, th.muted)
     s.text(640, 313, "moving microphone", 14, th.fg)
 
     # Dimensions (72 px per metre).
@@ -2389,7 +2428,8 @@ def _d_room_image_sources(s: SVG, th: Theme) -> None:
     sx_, sy_ = x(2.0), y(1.6)
     rx_, ry_ = x(5.2), y(3.4)
     s.line(sx_, sy_, rx_, ry_, th.fg, 1.5)
-    s.text((sx_ + rx_) / 2 + 4, (sy_ + ry_) / 2 + 18, "10.7 ms", 12, th.fg, mono=True)
+    # Clear below the path it times, which rose through the "1" at + 4, + 18.
+    s.text((sx_ + rx_) / 2 + 14, (sy_ + ry_) / 2 + 22, "10.7 ms", 12, th.fg, mono=True)
     s.circle(sx_, sy_, 7.0, th.secondary)
     s.text(sx_ - 12, sy_ + 5, "$S$", 15, th.secondary, bold=True, anchor="end")
     s.path(
@@ -2506,11 +2546,13 @@ def _d_reception_plate_rigs(s: SVG, th: Theme) -> None:
         size=13,
         label_side="right",
     )
+    # Far enough below the plate for the label above the line to clear the
+    # plate's edge, which ran along the top of its digits at 18 px.
     s.dim(
         px0,
-        py0 + ph + 18,
+        py0 + ph + 28,
         px0 + pw,
-        py0 + ph + 18,
+        py0 + ph + 28,
         "3,15 m x 2,23 m",
         offset=0,
         size=14,
@@ -2662,8 +2704,9 @@ def _d_iso16251_mockup(s: SVG, th: Theme) -> None:
         s.rect(bx - 18, slab_top + slab_h, 36, 22, th.panel, th.accent, rx=3, sw=2.0)
     s.ground(slab_top + slab_h + 22, sx0 - 10, sx0 + sw_ + 10)
 
-    # Tapping machine standing wholly on the specimen (five hammers).
-    mx = sx0 + 186.0
+    # Tapping machine standing wholly on the specimen (five hammers), right
+    # of the specimen's label: at sx0 + 186 its legs ran through the Spanish.
+    mx = sx0 + 230.0
     body_y = slab_top - 78.0
     s.rect(mx - 66, body_y, 132, 30, th.primary, th.fg, rx=5, sw=2)
     for hx in range(-44, 45, 22):
@@ -2736,7 +2779,8 @@ def _d_iso16251_mockup(s: SVG, th: Theme) -> None:
         for dx in (-26, -13, 0, 13, 26):
             s.circle(fx + dx, fy + tilt * dx / 42.0, 3.4, th.primary)
     s.line(qx0 + 82, qy0 + 62, qx0 + 232, qy0 + 158, th.muted, 1.0, dash="4,4")
-    s.text(qx0 + 160, qy0 + 104, "≥ 300 mm", 13, th.fg)
+    # Above the line it measures, which ran through the label set on it.
+    s.text(qx0 + 200, qy0 + 96, "≥ 300 mm", 13, th.fg)
 
     # Four accelerometer positions on the underside: random, off the axes.
     for ax_, ay_ in (
@@ -2839,7 +2883,9 @@ def _d_en12354_6_takeoff(s: SVG, th: Theme) -> None:
         s.line(a[0], a[1], b[0], b[1], th.primary, 0.9, dash="4,4")
 
     s.dim(*pt(0, 0, 0), *pt(1, 0, 0), "4.54 m", offset=40, size=13)
-    s.dim(*pt(0, 0, 0), *pt(0, 0, 1), "2.40 m", offset=-40, size=12, label_side="right")
+    # Far enough out that the label between the line and the room clears the
+    # room's front edge, which ran through the "m" at offset -40.
+    s.dim(*pt(0, 0, 0), *pt(0, 0, 1), "2.40 m", offset=-60, size=12, label_side="right")
     s.dim(*pt(1, 0, 0), *pt(1, 1, 0), "2.73 m", offset=34, size=13)
     s.text(183, 94, "$V$ = 29.75 m³", 15, th.fg, "middle", bold=True)
     s.text(183, 112, "1000 Hz octave band", 10, th.muted, "middle")
@@ -3091,15 +3137,18 @@ def _d_decay_range(s: SVG, th: Theme) -> None:
         x_cross, y_of(noise), x_cross + 92.0, y_of(-70.0), th.primary, 1.6, dash="6,4"
     )
     s.line(x0, y_of(noise), x1, y_of(noise), th.secondary, 2.2, dash="9,5")
+    # Clear of the INR bracket, whose line stood through the first letter.
     s.text(
-        x0 + 8, y_of(noise) - 10, "background noise", 13, th.secondary, anchor="start"
+        x0 + 24, y_of(noise) - 10, "background noise", 13, th.secondary, anchor="start"
     )
 
-    # The compensated tail: everything past the crossing.
+    # The compensated tail: everything past the crossing, run on past the end
+    # of the axis far enough to hold the Spanish caption inside its border.
+    tail_end = x1 + 24.0
     s.rect(
         x_cross,
         y_of(noise),
-        x1 - x_cross,
+        tail_end - x_cross,
         y1 - y_of(noise),
         th.panel,
         th.muted,
@@ -3116,14 +3165,14 @@ def _d_decay_range(s: SVG, th: Theme) -> None:
         anchor="end",
     )
     s.text(
-        x_cross + (x1 - x_cross) / 2,
+        (x_cross + tail_end) / 2,
         y_of(noise) + 26,
         "tail compensated as",
         12,
         th.muted,
     )
     s.text(
-        x_cross + (x1 - x_cross) / 2,
+        (x_cross + tail_end) / 2,
         y_of(noise) + 46,
         "an exponential decay (C)",
         12,
@@ -3207,12 +3256,15 @@ def _d_junction_catalogue(s: SVG, th: Theme) -> None:
     c_through = th.primary  # K13, the 'through' branch
     c_corner = "#f0a94e" if dark else "#d9820e"  # K12 = K23, the 'corner' branch
     c_leaf = th.secondary  # K24, the double-leaf branch
-    t_el = 13.0  # drawn element thickness
+    # Drawn element thickness: at 13 px a bold digit, 9.5 px tall, left no
+    # room between the two faces, and the lower one ran along its foot.
+    t_el = 15.0
     arm = 58.0
 
     def element(x: float, y: float, w: float, h: float, tag: str) -> None:
         s.rect(x, y, w, h, th.panel, th.fg, sw=1.8)
-        s.text(x + w / 2, y + h / 2 + 6, tag, 13, th.fg, bold=True)
+        # Half the digits' height below the centre, so they sit centred.
+        s.text(x + w / 2, y + h / 2 + 4.75, tag, 13, th.fg, bold=True)
 
     def title(cx: float, cy: float, name: str) -> None:
         s.text(cx, cy - arm - 36, name, 15, th.fg, bold=True)
@@ -3241,7 +3293,8 @@ def _d_junction_catalogue(s: SVG, th: Theme) -> None:
     element(cx + t_el / 2, cy - t_el / 2, arm - t_el / 2, t_el, "3")
     element(cx - t_el / 2, cy - arm, t_el, arm - t_el / 2, "2")
     element(cx - t_el / 2, cy + t_el / 2, t_el, arm - t_el / 2, "4")
-    branch(cx - 48, cy + 34, cx + 48, cy + 34, c_through, "$K_{13}$", cx + 30, cy + 54)
+    # Close under the arms, above the "4": at cy + 34 it ran through it.
+    branch(cx - 48, cy + 20, cx + 48, cy + 20, c_through, "$K_{13}$", cx + 30, cy + 40)
     branch(
         cx - 40,
         cy - 16,
@@ -3312,21 +3365,22 @@ def _d_junction_catalogue(s: SVG, th: Theme) -> None:
     # (6) Lightweight double leaf meeting a homogeneous floor: the K24 branch.
     cx, cy = col[2], row[1]
     title(cx, cy, "lightweight double leaf")
-    element(cx - arm, cy - t_el / 2, arm - 18, t_el, "1")
-    element(cx + 18, cy - t_el / 2, arm - 18, t_el, "3")
-    element(cx - 18, cy - arm, 9, arm - t_el / 2, "2")
-    element(cx + 9, cy - arm, 9, arm - t_el / 2, "4")
+    # Leaves 14 px thick: at 9 px their faces ran through the "2" and "4".
+    element(cx - arm, cy - t_el / 2, arm - 22, t_el, "1")
+    element(cx + 22, cy - t_el / 2, arm - 22, t_el, "3")
+    element(cx - 22, cy - arm, 14, arm - t_el / 2, "2")
+    element(cx + 8, cy - arm, 14, arm - t_el / 2, "4")
     for hy in range(int(cy - arm) + 8, int(cy) - 12, 12):
-        s.line(cx - 9, hy, cx + 9, hy + 5, th.muted, 0.8)
+        s.line(cx - 8, hy, cx + 8, hy + 5, th.muted, 0.8)
     branch(cx - 48, cy + 30, cx + 48, cy + 30, c_through, "$K_{13}$", cx, cy + 48)
     branch(
-        cx - 14,
+        cx - 15,
         cy - arm + 14,
-        cx + 14,
+        cx + 15,
         cy - arm + 14,
         c_leaf,
         "$K_{24}$",
-        cx + 24,
+        cx + 28,
         cy - arm + 18,
         "start",
     )
@@ -3337,8 +3391,10 @@ def _d_junction_catalogue(s: SVG, th: Theme) -> None:
         (70.0, 468.0, "rigid cross", "'rigid_cross', 'through' / 'corner'"),
         (70.0, 492.0, "rigid T", "'rigid_t', 'through' / 'corner'"),
         (70.0, 516.0, "flexible T", "'flexible_t', 'through' / 'corner'"),
-        (532.0, 468.0, "corner", "'corner', 'corner'"),
-        (532.0, 492.0, "thickness change", "'thickness_change', 'through'"),
+        # The right column far enough left for its longest pair to end inside
+        # the frame, whose edge ran through the last quote.
+        (512.0, 468.0, "corner", "'corner', 'corner'"),
+        (512.0, 492.0, "thickness change", "'thickness_change', 'through'"),
     )
     for xx, yy, name, args in pairs:
         s.text(xx, yy, f"{name}:", 12, th.fg, anchor="start", bold=True)
@@ -3419,11 +3475,14 @@ def _d_facade_setup(s: SVG, th: Theme) -> None:
 
     s.arrow(lx + 26, ly - 22, cx - 6, cy + 4, th.accent, 2.6)
     s.line(lx + 26, ly - 22, 560, ly - 22, th.muted, 1.0, dash="4,4")
-    s.text(300, ly - 34, "45° ± 5°", 18, th.accent, bold=True)
+    # In the wedge between the ray and the horizontal: at ly - 34 the ray ran
+    # across the top of the "4".
+    s.text(330, ly - 28, "45° ± 5°", 18, th.accent, bold=True)
     s.text(430, 250, "$r ≥ 5$ m element / ≥ 7 m global", 16, th.accent, anchor="middle")
 
-    # D, the perpendicular distance from the facade plane.
-    s.line(lx, gy, lx, gy + 110, th.muted, 0.9, dash="3,3")
+    # D, the perpendicular distance from the facade plane. The witness line
+    # under the loudspeaker starts below its two labels, which it cut.
+    s.line(lx, gy + 66, lx, gy + 110, th.muted, 0.9, dash="3,3")
     s.line(cx, gy, cx, gy + 110, th.muted, 0.9, dash="3,3")
     s.dim(
         lx,
@@ -3467,12 +3526,17 @@ def _d_facade_setup(s: SVG, th: Theme) -> None:
     )
     s.line(gmx, gmy + 4, gmx, 292, th.muted, 0.9, dash="3,3")
     s.line(fx, cy, fx, 292, th.muted, 0.9, dash="3,3")
-    s.dim(gmx, 288, fx, 288, "(2.0 ± 0.2) m", offset=0, size=16)
+    # The label under the dimension line, where the leader from the element
+    # method's box does not pass: above it, the leader ran through the "m".
+    s.dim(gmx, 288, fx, 288, "", offset=0, size=16)
+    s.text((gmx + fx) / 2, 306, "(2.0 ± 0.2) m", 16, th.fg)
     s.line(gmx + 12, gmy + 4, 566, gmy + 4, th.muted, 0.9, dash="3,3")
     s.line(fx, floor_y, 566, floor_y, th.muted, 0.9, dash="3,3")
     s.dim(562, gmy + 4, 562, floor_y, "1.5 m", offset=0, size=16, label_side="left")
-    s.text(556, 424, "above the", 14, th.muted, anchor="end")
-    s.text(556, 444, "receiving-room floor", 14, th.muted, anchor="end")
+    # Left of the microphone's stand, which ran through the second line, and
+    # under the 45° reference, which ran along the top of the first.
+    s.text(gmx - 12, 432, "above the", 14, th.muted, anchor="end")
+    s.text(gmx - 12, 452, "receiving-room floor", 14, th.muted, anchor="end")
 
     for y, txt in (
         (
@@ -3536,7 +3600,10 @@ def _d_heavy_impact_sources(s: SVG, th: Theme) -> None:
         s.rect(hx - 7, body_y + 44, 14, 18, th.primary, th.fg, sw=1.2)
         s.line(hx, body_y + 62, hx, slab_top - 12, th.muted, 1.0, dash="3,3")
     s.line(ax - 100, slab_top, ax - 100, body_y + 44, th.muted, 0.9, dash="3,3")
-    s.dim(ax - 112, body_y + 62, ax - 112, slab_top, "40 mm", offset=0, size=15)
+    # The 12 px drop is too short to hold its label beside the middle of it:
+    # there the label sat on the slab's edge. It goes just above the slab.
+    s.dim(ax - 112, body_y + 62, ax - 112, slab_top, "", offset=0, size=15)
+    s.text(ax - 121, slab_top - 9, "40 mm", 15, th.fg, "end")
     s.text(ax, 300, "5 hammers, 500 g each", 15, th.fg)
     s.text(ax, 322, "(100 ± 20) ms apart", 15, th.fg)
 
@@ -3578,14 +3645,17 @@ def _d_heavy_impact_sources(s: SVG, th: Theme) -> None:
     s.dim(
         bx - 88, ball_cy + ball_r, bx - 88, slab_top, "(100 ± 1) cm", offset=0, size=15
     )
+    # Under the start of the red line it explains, and clear of the 100 cm
+    # dimension: centred on the line's end, both the dimension and the drop
+    # arrow ran through the words.
     s.text(
-        bx - 100,
+        bx - 96,
         ball_cy + ball_r + 22,
         "from the ball's BOTTOM",
         14,
         th.secondary,
         bold=True,
-        anchor="middle",
+        anchor="end",
     )
 
     # (c) bang machine: a car tyre dropped 85 cm.
@@ -3704,14 +3774,19 @@ def _d_survey_sweep(s: SVG, th: Theme) -> None:
     s.circle(lx, ly, 13, th.primary)
     s.circle(lx, ly, 5, th.bg)
     s.arrow(lx - 14, ly - 14, x0 + 16, y0 + 16, th.primary, 2.0)
-    s.dim(x0, ly + 34, lx - 26, ly + 34, "≥ 0.5 m", offset=0, size=15)
+    # The 48 px gap is narrower than its label, which ran across the wall and
+    # the loudspeaker's box: the label goes under the dimension instead.
+    s.dim(x0, ly + 34, lx - 26, ly + 34, "", offset=0, size=15)
+    s.text(x0 + 8, ly + 54, "≥ 0.5 m", 15, th.fg, anchor="start")
     s.dim(
         lx + 34, y0, lx + 34, ly - 26, "≥ 0.5 m", offset=0, size=15, label_side="right"
     )
+    # Higher and a size smaller, where the sweep's arc is further off: lower
+    # down it ran through the end of both lines.
     s.text(
-        x0 + 14, ly + 96, "corner opposite the element,", 15, th.muted, anchor="start"
+        x0 + 8, ly + 76, "corner opposite the element,", 14, th.muted, anchor="start"
     )
-    s.text(x0 + 14, ly + 116, "facing into the corner", 15, th.muted, anchor="start")
+    s.text(x0 + 8, ly + 94, "facing into the corner", 14, th.muted, anchor="start")
 
     # Operator near the centre, facing away from the loudspeaker.
     ox, oy = (x0 + x1) / 2 + 52.0, (y0 + y1) / 2 + 46.0
@@ -3730,7 +3805,8 @@ def _d_survey_sweep(s: SVG, th: Theme) -> None:
     s.line(ox, oy, ox - r, oy, th.fg, 2.0)
     s.circle(ox - r, oy, 8, th.fg)
     s.circle(ox - r, oy, 3, th.bg)
-    s.dim(ox, oy + 30, ox - r, oy + 30, "arm's length", offset=0, size=15)
+    # Low enough for its label to clear the operator and the arrow off them.
+    s.dim(ox, oy + 44, ox - r, oy + 44, "arm's length", offset=0, size=15)
     s.text(ox + 16, oy - r - 18, "180° × 4 traverses,", 16, th.accent, bold=True)
     s.text(ox + 16, oy + r + 32, "≈ 30 s in total", 16, th.accent, bold=True)
 
@@ -3808,8 +3884,11 @@ def _d_iso12354_annexl(s: SVG, th: Theme) -> None:
     s.rect(lx + wall_t, y_floor - 12, rx - lx - 2 * wall_t, 5, th.accent, th.fg, sw=1.0)
     s.rect(lx + wall_t, y_floor - 7, rx - lx - 2 * wall_t, 7, th.panel, th.fg, sw=1.0)
 
-    s.text(ax0 + aw / 2, y_top + 34, "source dwelling", 15, th.fg)
-    s.text(ax0 + aw / 2, y_bot - 24, "receiving dwelling", 15, th.fg)
+    # Centred in the wider room of each storey: across the middle of the
+    # section, the internal wall stood through both names.
+    room_mid = (lx + wall_t + ix) / 2
+    s.text(room_mid, y_top + 34, "source dwelling", 15, th.fg)
+    s.text(room_mid, y_bot - 24, "receiving dwelling", 15, th.fg)
 
     # The junction nodes, tagged with the letter the key explains.
     for nx, tag in (
@@ -3952,7 +4031,16 @@ def _d_resilient_buildups(s: SVG, th: Theme) -> None:
         s.rect(
             wx + (12 if wx == ax else -6), slab_y - 44, 6, 30, th.accent, th.fg, sw=1.0
         )
-    s.text(ax + cw / 2, slab_y - 60, "edge strip, both sides", 12, th.accent)
+    # Between the bridge arrow and the far wall: the Spanish, set in 12 px and
+    # centred on the floor, ran across the arrow.
+    strip = "edge strip, both sides"
+    s.text(
+        ax + cw / 2 + 4,
+        slab_y - 60,
+        strip,
+        s.fit_size([strip], [12, 11], 196),
+        th.accent,
+    )
     s.arrow(ax + 24, slab_y - 100, ax + 16, slab_y - 34, th.secondary, 2.0)
     s.text(
         ax + 30, slab_y - 106, "any rigid bridge here", 12, th.secondary, anchor="start"

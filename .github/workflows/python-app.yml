@@ -643,6 +643,16 @@ jobs:
       # for anything drawn over a tick label, through the clip it is drawn
       # with, so it needs no rendering stack.
       run: python scripts/check_figure_tick_clearance.py
+    - name: Fail if a label is drawn over a tick label, another label or a line
+      # The step above measures the marks drawn over a tick label, not a
+      # text, and the annotation step leaves the plates out. A note placed by
+      # hand landed on the numbers of the axis beside it, the heading of a
+      # plate lane was crossed by the impulse it names, and a note that ran
+      # out of its axes was struck through by the spine. This reads the
+      # committed SVGs, figures and plates, glyph by glyph, so a label turned
+      # on a 3-D plate is read along its own baseline; the leader of an
+      # annotation, the grid and a line behind a chip pass.
+      run: python scripts/check_figure_text_clearance.py
     - name: Fail if a figure signs a number with a hyphen
       # The corpus signs its negative numbers with U+2212, and a polar angle
       # formatter that ignores axes.unicode_minus, a reading built with an

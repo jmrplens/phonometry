@@ -433,7 +433,12 @@ def _d_loudness_capture(s: SVG, th: Theme) -> None:
     s.rect(ax0 + 40, gy - 70, 78, 70, th.panel, th.primary, rx=6, sw=2)
     s.text(ax0 + 79, gy - 30, "EUT", 16, th.primary, bold=True)
     s.rect(ax0 + 32, gy - 80, 94, 80, "none", th.muted, rx=4, sw=1.4, dash="5,4")
-    s.text(ax0 + 79, gy - 92, "reference box", 12, th.muted)
+    # Sized to end short of the incidence arrow and inside the panel, which
+    # the Spanish crossed at 12 px.
+    box_name = "reference box"
+    s.text(
+        ax0 + 83, gy - 92, box_name, s.fit_size([box_name], [12, 11, 10], 150), th.muted
+    )
 
     # Microphone at the point the listener's head would occupy.
     mx = ax0 + 236.0
@@ -446,8 +451,9 @@ def _d_loudness_capture(s: SVG, th: Theme) -> None:
     s.text(ax0 + 36, gy - 118, "frontal incidence, 0°", 12, th.primary, "start")
 
     s.dim(ax0 + 126, gy - 80, mx, cap, "1.00 m", offset=64, size=15)
-    s.dim(mx + 122, gy, mx + 122, cap, "1.50 m", offset=0, size=15, label_side="right")
-    s.line(mx + 6, cap, mx + 122, cap, th.muted, 0.9, dash="3,3")
+    # Far enough in from the panel's edge for its label, which ran into it.
+    s.dim(mx + 110, gy, mx + 110, cap, "1.50 m", offset=0, size=15, label_side="right")
+    s.line(mx + 6, cap, mx + 110, cap, th.muted, 0.9, dash="3,3")
     s.text(
         ax0 + pw / 2, 366, 'field="free"  →  quote N as NF', 14, th.primary, mono=True
     )
@@ -517,14 +523,17 @@ def _d_loudness_capture(s: SVG, th: Theme) -> None:
     s.text(365, hy - 18, "Equalization matched", 13, th.fg, bold=True)
     s.text(365, hy + 2, "to the room:", 13, th.fg)
     s.text(365, hy + 24, "free-field / diffuse-field / ID", 12, th.primary, mono=True)
+    # The channel boxes 160 px wide, which leaves the result room to sit
+    # clear of the arrows and inside the panel: the Spanish of its second
+    # line ran into both.
     for k, ear in enumerate(("left channel", "right channel")):
         by = hy - 44 + k * 44
-        s.rect(552, by, 186, 36, th.bg, th.secondary, rx=8, sw=1.8)
-        s.text(645, by + 24, ear, 13, th.fg)
+        s.rect(552, by, 160, 36, th.bg, th.secondary, rx=8, sw=1.8)
+        s.text(632, by + 24, ear, 13, th.fg)
         s.arrow(494, hy - 4, 548, by + 18, th.fg, 1.6)
-        s.arrow(742, by + 18, 784, hy - 4, th.fg, 1.6)
-    s.text(818, hy - 10, "NL, NR", 15, th.fg, bold=True)
-    s.text(818, hy + 12, "both reported", 12, th.muted)
+        s.arrow(716, by + 18, 758, hy - 4, th.fg, 1.6)
+    s.text(812, hy - 10, "NL, NR", 15, th.fg, bold=True)
+    s.text(812, hy + 12, "both reported", 12, th.muted)
 
     s.text(
         450,
@@ -650,15 +659,10 @@ def _d_mg_capture_routes(s: SVG, th: Theme) -> None:
     s.circle(hx + 58, hy, 5, th.primary)
     s.line(hx + 58, hy, hx + 132, hy + 12, th.primary, 1.6)
     s.text(hx + 138, hy + 16, "probe microphone", 11, th.primary, "start")
-    s.dim(
-        hx + 30,
-        hy + 17,
-        hx + 58,
-        hy + 17,
-        "10 mm (5 mm above 3 kHz)",
-        offset=32,
-        size=12,
-    )
+    # The 28 px span is far narrower than its label, which ran across both
+    # witness lines: the label goes beside the dimension, just above it.
+    s.dim(hx + 30, hy + 17, hx + 58, hy + 17, "", offset=32, size=12)
+    s.text(hx + 66, hy + 45, "10 mm (5 mm above 3 kHz)", 12, th.fg, "start")
     result(
         y,
         'field="eardrum"',
@@ -683,14 +687,16 @@ def _d_mg_capture_routes(s: SVG, th: Theme) -> None:
     s.ellipse(hx - 22, hy - 14, 5, 9, th.bg, th.secondary, 1.6)
     s.ellipse(hx + 22, hy - 14, 5, 9, th.bg, th.secondary, 1.6)
     s.arrow(hx + 36, hy - 12, 152, hy - 12, th.fg, 1.6)
+    # The diamond taller and a little wider, so that its two lines sit inside
+    # it: in the smaller one, its sides ran through their ends.
     s.path(
-        f"M 240 {hy - 42} L 326 {hy - 12} L 240 {hy + 18} L 154 {hy - 12} Z",
+        f"M 240 {hy - 48} L 328 {hy - 12} L 240 {hy + 24} L 152 {hy - 12} Z",
         fill=th.bg,
         stroke=th.primary,
         sw=1.8,
     )
-    s.text(240, hy - 18, "accurate model of", 11, th.fg)
-    s.text(240, hy - 2, "an average adult?", 11, th.fg)
+    s.text(240, hy - 17, "accurate model of", 11, th.fg)
+    s.text(240, hy + 1, "an average adult?", 11, th.fg)
     s.text(336, hy - 22, "yes: no correction", 11, th.accent, "start")
     s.text(336, hy + 4, "no: correction file,", 11, th.secondary, "start")
     s.text(336, hy + 22, "not implemented", 11, th.secondary, "start")
@@ -1366,7 +1372,10 @@ def _d_soundfield_audiometry(s: SVG, th: Theme) -> None:
     s.line(lx, ref_y + 42, lx, gy, th.fg, 2.2)
     s.line(lx - 18, gy, lx + 18, gy, th.fg, 2.2)
     s.line(sx + 36, ref_y, lx - 24, ref_y, th.primary, 1.2, dash="7,4")
-    s.dim(sx, ref_y - 40, lx, ref_y - 40, "≥ 1 m", offset=-52, size=15)
+    # Under the reference line, from the absent head to the loudspeaker's
+    # stand: drawn above, its witness line and the dimension itself ran
+    # through the two lines of the caption.
+    s.dim(sx, ref_y + 50, lx, ref_y + 50, "≥ 1 m", offset=0, size=15)
     meas_mic(sx, ref_y)
     s.text(xa + 104, 148, "level measured here,", 11, th.primary)
     s.text(xa + 104, 166, "subject and chair absent", 11, th.primary)
@@ -1396,8 +1405,10 @@ def _d_soundfield_audiometry(s: SVG, th: Theme) -> None:
             1.2,
         )
     meas_mic(sx, ref_y)
-    s.text(xb + pw / 2, 148, "the same reference point,", 11, th.primary)
-    s.text(xb + pw / 2, 166, "the same absent subject", 11, th.primary)
+    # Between the two upper loudspeakers, above the rays they send down:
+    # lower, the rays ran through both lines.
+    s.text(sx - 4, 130, "the same reference point,", 11, th.primary)
+    s.text(sx - 4, 146, "the same absent subject", 11, th.primary)
     notes(
         xb,
         th.accent,
@@ -1505,17 +1516,21 @@ def _d_slm_workstation(s: SVG, th: Theme) -> None:
     s.line(mx, ref + 26, mx, gy, th.muted, 1.8, dash="6,4")
     s.mic(mx, ref, gy, 1.0)
     s.arrow(mx - 26, ref, mx - 104, ref, th.primary, 2.0)
-    s.text(mx - 64, ref + 24, "axis ∥ line of sight", 12, th.primary)
+    # Left of the microphone's dashed outline, which ran through the label
+    # centred under the arrow.
+    s.text(mx - 28, ref + 27, "axis ∥ line of sight", 12, th.primary, "end")
     s.dim(mx + 68, gy, mx + 68, ref, "1.55 m", offset=0, size=15, label_side="right")
     s.line(mx + 10, ref, mx + 68, ref, th.muted, 0.9, dash="3,3")
     # Plan inset: the constant-speed sweep along an infinity-shaped path.
     ix, iy = xa + 22.0, 126.0
     s.rect(ix, iy, 148, 84, th.panel, th.accent, rx=8, sw=1.6)
     s.text(ix + 74, iy + 20, "or sweep in plan:", 12, th.accent)
+    # A flatter figure of eight, a little higher, so that its lower lobe
+    # clears the caption under it, which it ran through.
     s.path(
-        f"M {ix + 32:.0f} {iy + 54:.0f} c 10 -26 40 -26 50 0 "
-        f"c 10 26 40 26 50 0 c -10 -26 -40 -26 -50 0 "
-        f"c -10 26 -40 26 -50 0 z",
+        f"M {ix + 32:.0f} {iy + 50:.0f} c 10 -20 40 -20 50 0 "
+        f"c 10 20 40 20 50 0 c -10 -20 -40 -20 -50 0 "
+        f"c -10 20 -40 20 -50 0 z",
         stroke=th.accent,
         sw=2.2,
     )
@@ -1543,9 +1558,11 @@ def _d_slm_workstation(s: SVG, th: Theme) -> None:
     s.dim(ear_x, ear_y - 34, hx, ear_y - 34, "0.1 m to 0.4 m", offset=-16, size=14)
     s.line(ear_x, ear_y - 12, ear_x, ear_y - 50, th.muted, 0.9, dash="3,3")
     s.line(hx, ear_y - 17, hx, ear_y - 50, th.muted, 0.9, dash="3,3")
-    s.line(hx + 15, ear_y, xb + pw - 24, ear_y + 62, th.secondary, 1.0, dash="4,3")
-    s.text(xb + pw - 20, ear_y + 68, "60 mm", 12, th.secondary, "end")
-    s.text(xb + pw - 20, ear_y + 86, "windscreen", 12, th.secondary, "end")
+    # Low enough to be past the end of the arm holding the meter, which ran
+    # through the Spanish of the second line.
+    s.line(hx + 15, ear_y, xb + pw - 24, ear_y + 96, th.secondary, 1.0, dash="4,3")
+    s.text(xb + pw - 20, ear_y + 110, "60 mm", 12, th.secondary, "end")
+    s.text(xb + pw - 20, ear_y + 128, "windscreen", 12, th.secondary, "end")
     notes(
         xb,
         th.secondary,
@@ -1628,9 +1645,14 @@ def _d_sti_setup(s: SVG, th: Theme) -> None:
     )
     s.line(tx, mouth + 20, tx, gy, th.fg, 2.2)
     s.line(tx - 16, gy, tx + 16, gy, th.fg, 2.2)
-    s.text(tx + 34, mouth - 52, "artificial mouth", 12, th.primary)
-    s.text(tx + 34, mouth - 36, "(ITU-T P.51 directivity)", 10, th.muted)
-    s.dim(tx - 44, gy, tx - 44, mouth, "1.5 m", offset=0, size=13)
+    # Centred a little further left, so that the second line ends short of
+    # the 1 m reference line, which ran through its end in Spanish.
+    s.text(tx + 22, mouth - 52, "artificial mouth", 12, th.primary)
+    s.text(tx + 22, mouth - 36, "(ITU-T P.51 directivity)", 10, th.muted)
+    # The height's label over the top of the dimension: beside it, the
+    # room's wall ran through the label.
+    s.dim(tx - 44, gy, tx - 44, mouth, "", offset=0, size=13)
+    s.text(tx - 44, mouth - 10, "1.5 m", 13, th.fg)
     s.line(tx - 18, mouth, tx - 44, mouth, th.muted, 0.9, dash="3,3")
     # The 1 m reference point where the fallback level is defined.
     s.line(tx + m, mouth - 34, tx + m, mouth + 34, th.secondary, 1.2, dash="5,4")
@@ -1677,7 +1699,8 @@ def _d_sti_setup(s: SVG, th: Theme) -> None:
             sw=1.2,
             dash="5,4",
         )
-    s.text(xb + pw / 2, ceil + 42, "ceiling loudspeaker line", 12, th.accent)
+    # Under the coverage cones, which ran through the words among them.
+    s.text(xb + pw / 2, ceil + 72, "ceiling loudspeaker line", 12, th.accent)
     # Electrical injection into the system input, down at the rack.
     rack_y = gy - 104.0
     s.rect(xb + 18, rack_y, 62, 48, th.panel, th.fg, rx=6, sw=2)

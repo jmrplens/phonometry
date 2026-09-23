@@ -1546,10 +1546,13 @@ def generate_hms_modulation_bandpass(output_dir: str) -> None:
         color=COLOR_FG,
         arrowprops={"arrowstyle": "->", "lw": 0.9, "color": COLOR_FG},
     )
+    # Ending just inside the right of the frame, higher than the F note:
+    # started at 1.5 times the peak rate, it ran out through the spine.
     ax.annotate(
         f"$R$ = {r_vals[i_r]:.2f} asper @ {fm_r[i_r]:.0f} Hz",
         xy=(float(fm_r[i_r]), float(r_vals[i_r])),
-        xytext=(float(fm_r[i_r]) * 1.5, float(r_vals[i_r]) * 1.06),
+        xytext=(245.0, float(r_vals[i_r]) * 1.1),
+        ha="right",
         fontsize=10,
         color=COLOR_FG,
         arrowprops={"arrowstyle": "->", "lw": 0.9, "color": COLOR_FG},
@@ -2682,8 +2685,15 @@ def generate_age_threshold_sex_and_spread(output_dir: str) -> None:
         arrowprops={"arrowstyle": "->", "lw": 1.0},
     )
     cross = ages[np.argmax(s_u < s_l)]
+    # And it starts above the crossing note at the bottom, which it ran
+    # through as well.
     ax_spread.axvline(
-        70.0, ymax=0.84, color=COLOR_SECONDARY, linewidth=1.4, linestyle=":"
+        70.0,
+        ymin=0.25,
+        ymax=0.84,
+        color=COLOR_SECONDARY,
+        linewidth=1.4,
+        linestyle=":",
     )
     ax_spread.axvspan(
         70.0, ages[-1], color=theme_fill(COLOR_SECONDARY, ax_spread), zorder=0
@@ -2818,7 +2828,21 @@ def generate_htlan_compression(output_dir: str) -> None:
     lines = ax.contour(
         hh, nn, removed, levels=levels[::2], colors=ink, linewidths=0.7, alpha=0.55
     )
-    ax.clabel(lines, fmt="%.0f dB", fontsize=9, colors=ink)
+    # Labelled down one column, at H = 50 dB, where no other ink is: left to
+    # place themselves, two labels went under the worked-case box and the
+    # 0 dB one onto the left spine, which is where that contour runs.
+    # HN/120 = L puts the L contour at N = 120 L / H; the 24 dB one leaves
+    # the plot below H = 50 dB, so it is labelled at H = 56 dB.
+    labelled = [(4.0, 50.0), (8.0, 50.0), (12.0, 50.0), (16.0, 50.0), (20.0, 50.0)]
+    labelled.append((24.0, 56.0))
+    ax.clabel(
+        lines,
+        levels=[level for level, _ in labelled],
+        fmt="%.0f dB",
+        fontsize=9,
+        colors=ink,
+        manual=[(h, 120.0 * level / h) for level, h in labelled],
+    )
     ax.grid(visible=False)
     cbar = _fig.colorbar(cs, ax=ax)
     cbar.set_label("Decibels removed by $HN/120$")
@@ -2917,11 +2941,13 @@ def generate_exposure_budget(output_dir: str) -> None:
         )
         bottom += col
     total = float(bottom[-1])
+    # Ending over the right edge of the last bar: centred on it, the result
+    # ran out through the right spine.
     ax_b.text(
-        xs[-1],
+        xs[-1] + 0.36,
         total + 0.12,
         f"$u$ = {np.sqrt(total):.2f} dB → $U$ = {1.65 * np.sqrt(total):.1f} dB",
-        ha="center",
+        ha="right",
         fontsize=11,
         fontweight="bold",
     )
@@ -3085,6 +3111,10 @@ def generate_stoi_segment_scores(output_dir: str) -> None:
         },
     )
     dropped = int(np.count_nonzero(~keep))
+    # Headroom over the loudest burst for the note along the top, which the
+    # bursts reached into at the default limits.
+    peak = float(np.max(np.abs(clean)))
+    ax_w.set_ylim(-1.15 * peak, 1.55 * peak)
     ax_w.text(
         0.02,
         0.94,

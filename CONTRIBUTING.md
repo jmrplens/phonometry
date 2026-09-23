@@ -187,6 +187,19 @@ to clear their labels as well as the data. `make figure-tick-clearance` reads
 the committed figures for a legend, a stroke or a marker over any tick label;
 see `scripts/check_figure_tick_clearance.py`.
 
+A label you place by hand must not land on a tick label, on another label or
+under a line. The Spanish wording is longer, so anchor a note near the right
+of the axes by its right end (`ha="right"`) rather than letting it run out
+through the spine; stop a guide line short of the words above or below it
+(`axvline(..., ymin=..., ymax=...)`); and where a line has to pass behind a
+note, give the note a chip and a `zorder` above the line. The same holds for
+the headings and values of a plate. `make figure-text-clearance` reads the
+committed figures and plates for a text over a tick label or over another
+text, and for a stroke run across a text or into its letters; the leader of an
+annotation, the grid and a line behind a chip pass. A text that has to stay
+where it is goes in the exemption list of
+`scripts/check_figure_text_clearance.py` with its reason.
+
 When adding a feature with visual output, write its `generate_*` function in the
 package the two commands are a front end for, not in the command itself:
 

@@ -2675,11 +2675,13 @@ def generate_precision_positions_arrays(output_dir: str) -> None:
             )
         )
         badge.get_bbox_patch().set_boxstyle("round,pad=0.12")
-    # The plane's own label is anchored on the rim of the disc, which on this
-    # array is exactly where position 21 sits; take it out to the edge of the
-    # plane it names, clear of that chip.
+    # The plane's own label is anchored on the rim at the left of the default
+    # view, which from this lower, turned view is exactly where position 23
+    # sits; take it out to the front edge of the plane it names, running
+    # outwards from there, clear of the chip of position 21.
     plane = next(t for t in axl.texts if not t.get_text().isdigit())
     plane.set_position_3d((1.35, 0.0, 0.0))
+    plane.set_horizontalalignment("left")
     axl.set_title("Hemisphere, 40 positions (Table E.1)")
     axl.legend(
         handles=[
@@ -2768,7 +2770,9 @@ def generate_k1_k2_corrections(output_dir: str) -> None:
     axl.axvline(6.0, color=COLOR_SECONDARY, linestyle="--", linewidth=1.4)
     axl.axvline(3.0, color=COLOR_TERTIARY, linestyle=":", linewidth=1.4)
     axl.text(6.2, 2.4, "ISO 3744 criterion\n6 dB", fontsize=9, color=COLOR_SECONDARY)
-    axl.text(0.4, 3.4, "capped:\nupper bound", fontsize=9, color=COLOR_SECONDARY)
+    # Three short lines, so the note ends before the ISO 3746 line at 3 dB,
+    # which ran through "upper bound" on two.
+    axl.text(0.3, 3.2, "capped:\nupper\nbound", fontsize=9, color=COLOR_SECONDARY)
     axl.text(3.15, 0.9, "ISO 3746\n3 dB", fontsize=9, color=COLOR_TERTIARY)
     for m, label in ((15.0, "0.14 dB"), (10.0, "0.46 dB"), (6.0, "1.26 dB")):
         value = float(np.interp(m, margins, k1))
@@ -3318,11 +3322,15 @@ def generate_channel_weight_map(output_dir: str) -> None:
     )
     for name, a, e in speakers:
         ax.plot([a], [e], "o", color=COLOR_SECONDARY, markersize=8)
+        # Rs sits 10 degrees inside the edge of its region, so its label goes
+        # to the left of it, into the region, rather than across the edge.
+        left = name == "Rs"
         ax.annotate(
             f"{name}  ({broadcast.channel_weight(a, e):.2f})",
             (a, e),
             textcoords="offset points",
-            xytext=(9, -16),
+            xytext=(-9 if left else 9, -16),
+            ha="right" if left else "left",
             fontsize=9,
             color=COLOR_SECONDARY,
         )
@@ -3389,6 +3397,10 @@ def generate_sound_power_grades_declaration(output_dir: str) -> None:
     )
     axl.set_xticks(range(len(grades)))
     axl.set_xticklabels([name for name, _ in grades], fontsize=9)
+    # Half a grade of room either side: at the default margins the outer two
+    # "U =" readings ran out across the spines, the first over the "90" of
+    # the level axis.
+    axl.set_xlim(-0.5, len(grades) - 0.5)
     axl.set_ylabel("$L_{W\\!\\mathrm{A}}$ [dB re 1 pW]")
     axl.set_ylim(84.0, 101.0)
     axl.set_title(
@@ -5341,12 +5353,14 @@ def generate_swept_sine_methods(output_dir: str) -> None:
         color=COLOR_FG,
     )
     ax_mag.axvline(2 * f2, color=COLOR_PRIMARY, linestyle=":", linewidth=1.2)
+    # Inside the octave between the two lines, lower than the f_2 note: to
+    # the right of 12 kHz the label ran out through the right spine.
     ax_mag.annotate(
         "$2 f_2$ = 12 kHz",
-        xy=(2 * f2, -40.0),
-        xytext=(8, 0),
+        xy=(2 * f2, -50.0),
+        xytext=(-6, 0),
         textcoords="offset points",
-        ha="left",
+        ha="right",
         fontsize=9,
         color=COLOR_PRIMARY,
     )
@@ -6547,9 +6561,11 @@ def generate_valve_cavitation_noise(output_dir: str) -> None:
         (cavitation_peak, "$f_{p,cav}$", "left"),
     ):
         ax2.axvline(frequency, color=COLOR_MUTED, ls=":", lw=1.4)
+        # Above the humps: at 118 dB the arrow of the note below ran
+        # through the cavitating peak's name.
         ax2.text(
             frequency * (0.93 if side == "right" else 1.07),
-            118.0,
+            155.0,
             name,
             fontsize=10,
             color=COLOR_MUTED,
@@ -7347,10 +7363,10 @@ def generate_in_situ_noise_control(output_dir: str) -> None:
     positions = np.array([noise_control.microphone_distances_m(h) for h in heights])
     for index, (name, colour, style) in enumerate(
         (
-            ("A quarter of the screen height", COLOR_PRIMARY, "-"),
-            ("Half the screen height", COLOR_SECONDARY, "--"),
-            ("The screen height itself", COLOR_TERTIARY, "-."),
-            ("Twice the screen height", COLOR_QUATERNARY, ":"),
+            ("A quarter of\nthe screen height", COLOR_PRIMARY, "-"),
+            ("Half the\nscreen height", COLOR_SECONDARY, "--"),
+            ("The screen\nheight itself", COLOR_TERTIARY, "-."),
+            ("Twice the\nscreen height", COLOR_QUATERNARY, ":"),
         )
     ):
         ax2.plot(
@@ -7384,6 +7400,8 @@ def generate_in_situ_noise_control(output_dir: str) -> None:
         ls=":",
         zorder=4,
     )
+    # The curves' names are set in two lines: in one, the Spanish ran out of
+    # the panel through its right spine.
     ax2.set_xlim(1.5, 17.2)
     ax2.set_ylim(0.0, 21.0)
     ax2.set_xticks([2, 4, 6, 8, 10])

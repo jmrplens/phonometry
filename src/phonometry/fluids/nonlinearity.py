@@ -23,11 +23,11 @@ and that is not decoration: at 30 °C water
 prints four values between 5.18 and 5.38 from four papers, and toluene prints
 5.6 at 20 °C from one paper and 8.929 at 30 °C from another. A caller who
 wants "the" B/A of a liquid has to choose, and the row carries in
-:attr:`~phonometry._internal.catalogue.CatalogueRow.attributed_to` the full
+:attr:`~phonometry.io.CatalogueRow.attributed_to` the full
 reference the chapter's list gives for that number, so that the choice can be
 made on the paper and not on the digits. Where the page prints a
 plus-or-minus beside the value it is in
-:attr:`~phonometry._internal.catalogue.CatalogueRow.uncertainty`.
+:attr:`~phonometry.io.CatalogueRow.uncertainty`.
 
 Table 8.2 is the only one that prints a pressure, from 0.1 to 50 MPa, and its
 rows carry it; the other three say "at atmospheric pressure" in the caption and
@@ -68,7 +68,7 @@ __all__ = [
 ]
 
 
-@dataclass(frozen=True, slots=True, kw_only=True)
+@dataclass(frozen=True, kw_only=True)
 class NonlinearityParameter(CatalogueRow):
     """One published value of B/A, with the conditions it was measured at.
 

@@ -23,23 +23,23 @@ A table of absorption coefficients usually carries a few rows that are not
 coefficients at all. Bies prints an audience "per person seated" as
 $S\bar{\alpha}$ in square metres, an absorption area, in the same
 columns as the coefficients above it, and Long prints a musician with
-instrument the same way, in sabins. A coefficient is dimensionless and
-bounded by the surface it belongs to; an area per person is a quantity in
-square metres that is added, not multiplied. Holding both under one field
-name would put a number in square metres behind a name that says otherwise,
-so they are two classes and two catalogues, [`PUBLISHED_ABSORPTION`](/phonometry/reference/api/materials/measured/#published_absorption) and
-[`PUBLISHED_ABSORPTION_AREAS`](/phonometry/reference/api/materials/measured/#published_absorption_areas), and the data file tells them apart by
-the fields each row carries.
+instrument the same way, in figures that are sabins. A coefficient is
+dimensionless and bounded by the surface it belongs to; an area per person
+is a quantity in square metres that is added, not multiplied. Holding both
+under one field name would put a number in square metres behind a name that
+says otherwise, so they are two classes and two catalogues,
+[`PUBLISHED_ABSORPTION`](/phonometry/reference/api/materials/measured/#published_absorption) and [`PUBLISHED_ABSORPTION_AREAS`](/phonometry/reference/api/materials/measured/#published_absorption_areas), and the
+data file tells them apart by the fields each row carries.
 
 The band is the field
 ---------------------
 Each octave band is a field of its own, `absorption_coefficient_125` and so
 on, with the band's centre frequency in hertz as the suffix. That is not the
 tidiest shape for a spectrum and it is the right one for a catalogue: every
-hedge of `CatalogueRow` is keyed by
+hedge of [`CatalogueRow`](/phonometry/reference/api/io/io/#cataloguerow) is keyed by
 field name, so a cell the page prints as a range, or leaves empty, or prints
 wrong, is handled the way the same cell is handled in every other catalogue,
-and `why_missing` answers
+and [`why_missing`](/phonometry/reference/api/io/io/#cataloguerowwhy_missing) answers
 for a band the way it answers for a modulus. [`AbsorptionSpectrum.bands`](/phonometry/reference/api/materials/measured/#absorptionspectrumbands)
 and [`AbsorptionSpectrum.spectrum`](/phonometry/reference/api/materials/measured/#absorptionspectrumspectrum) give the row back as a spectrum for
 the caller who wants one.
@@ -59,10 +59,12 @@ not a specification of any product. Where a page says more than that about
 its numbers, the `about` of its data file quotes it.
 
 Long sets his table in inches, pounds and ounces, and his two rows that are
-areas are in sabins, square feet of perfect absorption. The names keep the
-inches, because a name is what the page prints; the areas are converted to
-square metres at load and marked derived, because a field named `m2` holds
-square metres or it lies.
+areas are in sabins, square feet of perfect absorption: the air names its
+sabins, and the musician prints bare figures that are read in the same unit,
+as its note explains. The names keep the inches, because a name is what the
+page prints; the areas are converted to square metres at load, because a
+field named `m2` holds square metres or it lies, and each converted cell
+keeps the page's figure and its unit.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
@@ -107,8 +109,11 @@ AbsorptionAreaSpectrum(
     source: str,
     table: str = '',
     variant: str = '',
+    basis: Mapping[str, str] = ...,
     approximate: frozenset[str] = frozenset(),
     derived: Mapping[str, str] = ...,
+    converted: Mapping[str, tuple[str, str]] = ...,
+    carried: Mapping[str, str] = ...,
     ranges: Mapping[str, tuple[float | None, float | None]] = ...,
     bounded_above: frozenset[str] = frozenset(),
     bounded_below: frozenset[str] = frozenset(),
@@ -156,8 +161,11 @@ that a number from here cannot be mistaken for a coefficient.
 | `variant` | Which specimen or condition this row is, when the page prints several under one name: `"chemically pure"`, `"direction x"`, `"0.68 mm diameter"`. Empty when the page prints one. |
 | `source` | Document, table, PDF page and printed folio. |
 | `table` | The data file this row was read from, without the extension, which is also the first half of its key in the catalogue that holds it. |
+| `basis` | What the source says a value is: a field name, or `"row"` for the whole row, to one of [`CATALOGUE_BASES`](/phonometry/reference/api/io/io/#catalogue_bases). Hopkins marks most of his Poisson ratios "Estimate", and those cells hold `"estimated"`; a datasheet that declares a class under a product standard would hold `"declared"`. A field with no entry takes the row's, and a row with neither is one whose source does not say, which is a different answer from any of the five. `basis_of` reads it. Independent of `derived`: this is what the source claims for a cell, that is what this library computed. |
 | `approximate` | Fields the page prints with a `~`. Not an estimate and not an interval: a number the author rounded on purpose. |
-| `derived` | Field to how it was computed, for the ones this library worked out from the cells the page did print. A derived value is never stored as if it had been read. |
+| `derived` | Field to how it was computed, for the ones this library worked out from the cells the page did print. A derived value is never stored as if it had been read, and it always follows again from the row's own cells. A value converted from the unit the page prints is not derived (`converted` holds it), and neither is one the page gives by reference to another of its rows (`carried` does). |
+| `converted` | Field to `(figure, unit)`, the page's figure and the unit it is in, for a value this row holds in a unit the page does not use. Ver and Beranek print their damping materials in degrees Fahrenheit and pounds per square inch, and the row holds degrees Celsius and pascals, so `("3e5", "psi")` sits beside a modulus in pascals. The figure is kept as the page writes it, so the cell can always be read back in the page's own terms. The unit is the one the page prints with the figure or over its column. Long prints the figures of his musician bare, and the sabins recorded for them are a reading of the table, which is set in inches and pounds and names sabins on the next row; that row's note says so. A figure a packaged table prints with another SI prefix, such as the megapascals of Rossing Table 15.5, is held in the base unit with no entry here, and the table's `about` says so. |
+| `carried` | Field to where the page gives it from, for a value the page gives by reference to another of its rows rather than on this one: a cell left blank under a block whose first row prints the figure, as in Ver and Beranek Table 8.7, or a description that reads "Parecido al anterior" and prints no row number, as three rows of Harris Chapter 32 do, which refers to the row above it. The value is the page's, and this says which of its rows gives it. |
 | `ranges` | `(low, high)` for each field the page prints as an interval rather than a value. One end is `None` only for a bound whose open side the quantity has no limit on; the end the page prints is always a number, and a two-sided interval has two. |
 | `bounded_above` | The subset of `ranges` the page prints as `< x` or `<= x`, where the low end is a floor and not a measurement. |
 | `bounded_below` | The subset of `ranges` the page prints as `> x` or `>= x`, where the high end is the ceiling the quantity cannot pass and not a measurement: Cox gives an aerogel a porosity of `>0.75`, and the 1 beside it is what a porosity is, not what anybody measured. A quantity with no such ceiling leaves that end `None` rather than borrowing a number for it: ASHRAE prints `>45` for a duct wall whose radiated sound the background swamped, and a transmission loss has no value it cannot pass, so the open end is empty. It is never an infinity, which is not a number the page has and not a token JSON can carry. |
@@ -177,6 +185,25 @@ AbsorptionAreaSpectrum.bands() -> tuple[int, ...]
 ```
 
 The bands this row prints a value for, in hertz.
+
+### AbsorptionAreaSpectrum.basis_of()
+
+```python
+AbsorptionAreaSpectrum.basis_of(field_name: str) -> str
+```
+
+What the source says this field is, one of [`CATALOGUE_BASES`](/phonometry/reference/api/io/io/#catalogue_bases).
+
+The five are `measured`, `declared`, `calculated`, `estimated`
+and `extended`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `field_name` | One of the field names of this class. |
+
+**Returns:** The field's own entry in `basis`, else the row's, else the empty string, which means the source does not say.
 
 ### AbsorptionAreaSpectrum.is_approximate()
 
@@ -208,7 +235,7 @@ Whether this library computed this field instead of reading it.
 | :--- | :--- |
 | `field_name` | One of the numeric field names of this class. |
 
-**Returns:** `True` when the page did not print it and the value follows from cells that it did. `derived` says how.
+**Returns:** `True` when the page did not print it and the value follows from cells that it did. `derived` says how. A value the page prints in another unit, or gives by reference to another of its rows, answers `False`: the number is the page's, and `converted` or `carried` says so.
 
 ### AbsorptionAreaSpectrum.printed()
 
@@ -254,7 +281,7 @@ The row as `{band_hz: value}` over the bands it prints.
 
 A band the page left empty, or printed as something other than a
 number, is left out rather than filled with a zero;
-`why_missing` on that band's field says which it
+[`why_missing`](/phonometry/reference/api/io/io/#cataloguerowwhy_missing) on that band's field says which it
 was.
 
 ### AbsorptionAreaSpectrum.why_missing()
@@ -293,8 +320,11 @@ AbsorptionSpectrum(
     source: str,
     table: str = '',
     variant: str = '',
+    basis: Mapping[str, str] = ...,
     approximate: frozenset[str] = frozenset(),
     derived: Mapping[str, str] = ...,
+    converted: Mapping[str, tuple[str, str]] = ...,
+    carried: Mapping[str, str] = ...,
     ranges: Mapping[str, tuple[float | None, float | None]] = ...,
     bounded_above: frozenset[str] = frozenset(),
     bounded_below: frozenset[str] = frozenset(),
@@ -320,7 +350,7 @@ AbsorptionSpectrum(
 
 One finish of a published table, with its coefficient in each band.
 
-The hedges of `CatalogueRow` apply
+The hedges of [`CatalogueRow`](/phonometry/reference/api/io/io/#cataloguerow) apply
 to each band as to any other field, and the material's thickness,
 density or mounting are part of `name`, as the page prints them,
 because the books print them there and pulling them into fields would
@@ -343,8 +373,11 @@ mean deciding what "heavy carpet on concrete" is a thickness of.
 | `variant` | Which specimen or condition this row is, when the page prints several under one name: `"chemically pure"`, `"direction x"`, `"0.68 mm diameter"`. Empty when the page prints one. |
 | `source` | Document, table, PDF page and printed folio. |
 | `table` | The data file this row was read from, without the extension, which is also the first half of its key in the catalogue that holds it. |
+| `basis` | What the source says a value is: a field name, or `"row"` for the whole row, to one of [`CATALOGUE_BASES`](/phonometry/reference/api/io/io/#catalogue_bases). Hopkins marks most of his Poisson ratios "Estimate", and those cells hold `"estimated"`; a datasheet that declares a class under a product standard would hold `"declared"`. A field with no entry takes the row's, and a row with neither is one whose source does not say, which is a different answer from any of the five. `basis_of` reads it. Independent of `derived`: this is what the source claims for a cell, that is what this library computed. |
 | `approximate` | Fields the page prints with a `~`. Not an estimate and not an interval: a number the author rounded on purpose. |
-| `derived` | Field to how it was computed, for the ones this library worked out from the cells the page did print. A derived value is never stored as if it had been read. |
+| `derived` | Field to how it was computed, for the ones this library worked out from the cells the page did print. A derived value is never stored as if it had been read, and it always follows again from the row's own cells. A value converted from the unit the page prints is not derived (`converted` holds it), and neither is one the page gives by reference to another of its rows (`carried` does). |
+| `converted` | Field to `(figure, unit)`, the page's figure and the unit it is in, for a value this row holds in a unit the page does not use. Ver and Beranek print their damping materials in degrees Fahrenheit and pounds per square inch, and the row holds degrees Celsius and pascals, so `("3e5", "psi")` sits beside a modulus in pascals. The figure is kept as the page writes it, so the cell can always be read back in the page's own terms. The unit is the one the page prints with the figure or over its column. Long prints the figures of his musician bare, and the sabins recorded for them are a reading of the table, which is set in inches and pounds and names sabins on the next row; that row's note says so. A figure a packaged table prints with another SI prefix, such as the megapascals of Rossing Table 15.5, is held in the base unit with no entry here, and the table's `about` says so. |
+| `carried` | Field to where the page gives it from, for a value the page gives by reference to another of its rows rather than on this one: a cell left blank under a block whose first row prints the figure, as in Ver and Beranek Table 8.7, or a description that reads "Parecido al anterior" and prints no row number, as three rows of Harris Chapter 32 do, which refers to the row above it. The value is the page's, and this says which of its rows gives it. |
 | `ranges` | `(low, high)` for each field the page prints as an interval rather than a value. One end is `None` only for a bound whose open side the quantity has no limit on; the end the page prints is always a number, and a two-sided interval has two. |
 | `bounded_above` | The subset of `ranges` the page prints as `< x` or `<= x`, where the low end is a floor and not a measurement. |
 | `bounded_below` | The subset of `ranges` the page prints as `> x` or `>= x`, where the high end is the ceiling the quantity cannot pass and not a measurement: Cox gives an aerogel a porosity of `>0.75`, and the 1 beside it is what a porosity is, not what anybody measured. A quantity with no such ceiling leaves that end `None` rather than borrowing a number for it: ASHRAE prints `>45` for a duct wall whose radiated sound the background swamped, and a transmission loss has no value it cannot pass, so the open end is empty. It is never an infinity, which is not a number the page has and not a token JSON can carry. |
@@ -387,6 +420,25 @@ AbsorptionSpectrum.bands() -> tuple[int, ...]
 
 The bands this row prints a value for, in hertz.
 
+### AbsorptionSpectrum.basis_of()
+
+```python
+AbsorptionSpectrum.basis_of(field_name: str) -> str
+```
+
+What the source says this field is, one of [`CATALOGUE_BASES`](/phonometry/reference/api/io/io/#catalogue_bases).
+
+The five are `measured`, `declared`, `calculated`, `estimated`
+and `extended`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `field_name` | One of the field names of this class. |
+
+**Returns:** The field's own entry in `basis`, else the row's, else the empty string, which means the source does not say.
+
 ### AbsorptionSpectrum.is_approximate()
 
 ```python
@@ -417,7 +469,7 @@ Whether this library computed this field instead of reading it.
 | :--- | :--- |
 | `field_name` | One of the numeric field names of this class. |
 
-**Returns:** `True` when the page did not print it and the value follows from cells that it did. `derived` says how.
+**Returns:** `True` when the page did not print it and the value follows from cells that it did. `derived` says how. A value the page prints in another unit, or gives by reference to another of its rows, answers `False`: the number is the page's, and `converted` or `carried` says so.
 
 ### AbsorptionSpectrum.printed()
 
@@ -463,7 +515,7 @@ The row as `{band_hz: value}` over the bands it prints.
 
 A band the page left empty, or printed as something other than a
 number, is left out rather than filled with a zero;
-`why_missing` on that band's field says which it
+[`why_missing`](/phonometry/reference/api/io/io/#cataloguerowwhy_missing) on that band's field says which it
 was.
 
 ### AbsorptionSpectrum.why_missing()

@@ -17,11 +17,13 @@ speeds with a note that the material is orthotropic and the figure quoted is
 an effective value. A catalogue that flattened all of that into floats would
 be claiming twenty-five measured Poisson ratios where the page offers four.
 
-So every row carries what the cell actually said: :attr:`SolidMaterial.estimated`
-names the fields the page marks as estimates, :attr:`SolidMaterial.ranges`
-carries the seven cells printed as an interval (two densities, two speeds and
-three loss factors), :attr:`SolidMaterial.bounded_above` names the two of those
-loss factors the page prints as an upper bound rather than a band, and
+So every row carries what the cell actually said: :attr:`SolidMaterial.basis`
+holds ``"estimated"`` for each field the page marks as an estimate, which
+:meth:`~phonometry.io.CatalogueRow.basis_of` reads back,
+:attr:`SolidMaterial.ranges` carries the seven cells printed as an interval
+(two densities, two speeds and three loss factors),
+:attr:`SolidMaterial.bounded_above` names the two of those loss factors the
+page prints as an upper bound rather than a band, and
 :attr:`SolidMaterial.attributed_to` carries the per-cell credit for the rows
 whose columns come from different authors. A field the table leaves
 empty is ``None`` and not a guess.
@@ -105,10 +107,14 @@ class SolidMaterial(CatalogueRow):
     three, which is what :attr:`loss_factor` holds.
 
     The name, the citation, the variant and the hedges a cell can carry
-    instead of a number (``ranges``, ``reported``, ``unquantified``,
-    ``approximate``, ``derived``, ``attributed_to``) are the ones every
-    catalogue row has; two are this catalogue's own and are described
-    below.
+    instead of a number (``basis``, ``ranges``, ``reported``,
+    ``unquantified``, ``approximate``, ``derived``, ``converted``,
+    ``carried``, ``attributed_to``) are the ones every catalogue row has;
+    one is this catalogue's own and is described below. A cell the page
+    marks as an estimate holds ``"estimated"`` in
+    :attr:`SolidMaterial.basis`, and ``row.basis_of(field) == "estimated"``
+    is the question to ask before reading it as a measurement, which is the
+    mistake this catalogue exists to prevent.
 
     :ivar density_kg_m3: Density ``rho``, in kg/m3.
     :ivar youngs_modulus_pa: Young's modulus ``E``, in pascals.
@@ -138,9 +144,6 @@ class SolidMaterial(CatalogueRow):
     :ivar thickness_critical_frequency_product_m_hz: The ``h.f_c`` column, in
         m Hz, a property of the material alone and the cheapest cross-check
         there is between books that share no other column.
-    :ivar estimated: Fields the page marks as an estimate rather than a
-        measurement. Reading one of these as a measurement is the mistake this
-        catalogue exists to prevent.
     :ivar borrowed: Field to the material it was taken from, for the cells a
         book fills from a similar material rather than leaving empty.
     """
@@ -159,21 +162,12 @@ class SolidMaterial(CatalogueRow):
     longitudinal_loss_factor: float | None = None
     in_situ_loss_factor: float | None = None
     thickness_critical_frequency_product_m_hz: float | None = None
-    estimated: frozenset[str] = frozenset()
     borrowed: Mapping[str, str] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         """Freeze the one mapping this class adds to the shared ones."""
         super().__post_init__()
         object.__setattr__(self, "borrowed", MappingProxyType(dict(self.borrowed)))
-
-    def is_estimate(self, field_name: str) -> bool:
-        """Whether the page marks this field as an estimate rather than a value.
-
-        :param field_name: One of the numeric field names of this class.
-        :return: ``True`` when the page carries an estimate footnote there.
-        """
-        return field_name in self.estimated
 
 
 #: How a field this library computed is described in
@@ -330,7 +324,7 @@ def _complete(fields: dict[str, Any]) -> dict[str, Any]:
 
 
 #: The row fields the data files write as a list and the row holds as a set.
-_SETS = ("estimated", "approximate", "bounded_above")
+_SETS = ("approximate", "bounded_above")
 
 #: The published tables this catalogue reads, in the order a reader should
 #: meet them: the one whose columns the library was built around first, then

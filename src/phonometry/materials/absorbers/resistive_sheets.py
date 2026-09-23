@@ -47,7 +47,7 @@ found: the finest wire mesh of TABLE 8.5 is printed as 0.31 kg/m2 beside
 cell is one place too far right, and the entry in ``docs/ERRATA.md`` argues it.
 The row keeps the kilogramme cell, which the column above it and the weave of
 the mesh both support, and its
-:attr:`~phonometry._internal.catalogue.CatalogueRow.note` records the pound
+:attr:`~phonometry.io.CatalogueRow.note` records the pound
 cell. The note and not a hedge, because the defective cell is the restatement:
 this catalogue holds no customary column, so there is no cell here to refuse.
 
@@ -70,7 +70,7 @@ In ``absorbers/data/``, one file per printed table:
 reader in ``phonometry._internal``, the same as every other catalogue here.
 One file per published table is what makes a key mean something: a row of the
 glass cloth table is keyed ``"ver-beranek-2006-table-8-6/glass_cloth_120"``,
-and its :attr:`~phonometry._internal.catalogue.CatalogueRow.source` names that
+and its :attr:`~phonometry.io.CatalogueRow.source` names that
 table, that PDF page and that printed folio and nothing else.
 
 What it is not

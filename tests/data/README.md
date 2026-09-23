@@ -90,4 +90,5 @@ Four sections, following `tests/data/iso532_1/README.md`:
 | `cnossos/` | derived + transcribed | 13 kB | CIRCABC CNOSSOS-EU emission test workbooks (10 MB) |
 | `iso532_1/` | extract + derived | 4,6 MB | ISO 532-1:2017 electronic attachment |
 | `norah2/` | extract | 676 kB | NORAH2 V2.0.74 public release |
+| `published_catalogues/` | derived | 1,3 MB | The library's own `PUBLISHED_*` catalogues, dumped once as the baseline of the fingerprint |
 | `stipa/` | extract | 5,8 MB | stipa.info IEC 60268-16 verification bench (133 MB) |

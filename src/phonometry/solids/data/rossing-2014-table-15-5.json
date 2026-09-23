@@ -24,10 +24,10 @@
       "plate_stiffness_d3_pa": 170000000.0,
       "plate_stiffness_d4_pa": 230000000.0,
       "relative_scaling_factor": 1.4,
-      "estimated": [
-        "plate_stiffness_d2_pa",
-        "plate_stiffness_d4_pa"
-      ],
+      "basis": {
+        "plate_stiffness_d2_pa": "estimated",
+        "plate_stiffness_d4_pa": "estimated"
+      },
       "note": "Two of this row's four plate constants, D2 and D4, carry the table's asterisk, which the caption explains as “intelligent guesses in the absence of experimental data”: they are the author's estimates and not measurements. They are served, because the page prints them as numbers, but they are marked as estimates so that a caller who wants measurements can tell them apart. The relative scaling factor the page prints for maple, 1.4, does not follow from this row: the same row prints the relation as the fourth root of D1 over D3, and maple's D1 of 860 MPa and D3 of 170 MPa, neither of them asterisked, give 1.50. Spruce's 1.9 does follow from its own row. The factor is served as printed and the defect is registered in docs/ERRATA.md under “Rossing (2014), Table 15.5”.",
       "attributed_to": {
         "table": "Woodhouse [15.77]"

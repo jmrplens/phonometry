@@ -288,7 +288,7 @@ SOURCED: dict[tuple[str, str], str] = {
     ): (
         "Bies 5e Table 6.2, the two audience rows it prints as an absorption "
         "area per person; "
-        "Long 2e Table 7.1, the musician and the air it prints in sabins"
+        "Long 2e Table 7.1, the musician and the air, in sabins"
     ),
     (
         "building/catalogue.py",

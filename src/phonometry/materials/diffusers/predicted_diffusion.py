@@ -23,7 +23,7 @@ against without something like this.
 The angle is a row, not a column
 ---------------------------------
 The page prints three lines per surface, headed 0, 57 and Random, so a surface
-is three rows here and :attr:`~phonometry._internal.catalogue.CatalogueRow.variant`
+is three rows here and :attr:`~phonometry.io.CatalogueRow.variant`
 says which. The first two carry :attr:`NormalizedDiffusionSpectrum.angle_of_incidence_deg`;
 the random one has none to carry, because it is an arithmetic mean over ten
 angles and belongs to no single one, and asking it for the field gets that
@@ -109,7 +109,7 @@ class NormalizedDiffusionSpectrum(BandedRow):
     :ivar angle_of_incidence_deg: The angle the row was computed at, in
         degrees from the normal, as the page heads its line. ``None`` on a
         random incidence row, which is a mean over ten angles and is not one
-        of them; :meth:`~phonometry._internal.catalogue.CatalogueRow.why_missing`
+        of them; :meth:`~phonometry.io.CatalogueRow.why_missing`
         says so rather than leaving the caller to guess at a zero.
     """
 

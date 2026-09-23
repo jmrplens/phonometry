@@ -120,8 +120,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   orthotropic plate, D1 along the grain, D3 across it, D2 the coupling and D4
   the twisting stiffness. Every other solid here is isotropic and cannot say
   that spruce is thirteen times stiffer along the grain than across it.
-  `OrthotropicWood.is_estimated` answers for the two maple cells the table's
-  caption calls intelligent guesses, and the published catalogue marks them.
+  The two maple cells the table's caption calls intelligent guesses hold
+  `"estimated"` in `basis`, which `basis_of` reads, and the published
+  catalogue marks them.
 - **The plateau method's three constants, in one place.**
   `solids.PUBLISHED_PLATEAU_DATA` holds Norton & Karczub Table 3.1: for eight
   materials, the mass a millimetre brings, the height of the plateau and its
@@ -135,12 +136,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   The published catalogues page showed the 33 cells of Hopkins Table A2 that
   the book marks as estimates, the Poisson's ratio of all 21 of its solids
   (0.2 for the aircrete, for one) and 12 of their flexural loss factors, as
-  numbers the page prints. The page generator asked each row
-  for `is_estimated`, which is how the orthotropic woods spell the question,
-  while `SolidMaterial` spells it `is_estimate`, so only the two estimated
-  wood cells were ever marked. It now reads the `estimated` field both rows
-  carry, and a test walks every estimated cell of every published catalogue,
-  so a row type that gains the hedge later is held to it too. The values
+  numbers the page prints. The page generator asked each row for an estimate
+  under the spelling the orthotropic woods used, which the solids spelled
+  differently, so only the two estimated wood cells were ever marked. It now
+  asks each row's `basis_of`, and a test walks every estimated cell of every
+  published catalogue, so a row type that gains the hedge later is held to it
+  too. The values
   themselves, and what the library serves for them, do not change.
 - **The Spanish building-acoustics figures have their accents and eñes
   back.** Twenty-nine Spanish labels of six figures had been typed without
@@ -347,6 +348,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- **Every catalogue row has one shape, and says what its source claims for
+  each cell.** The rows of every published catalogue share one base,
+  `io.CatalogueRow` (with `io.BandedRow` for a row printed band by band),
+  which `phonometry.io` now publishes together with `io.CatalogueError`, the
+  error a catalogue raises when its cells contradict each other, and
+  `io.CATALOGUE_BASES`. A row gains `basis`, which says what the source
+  claims a value is (measured, declared, calculated, estimated or extended)
+  and which `basis_of(field)` reads, answering with an empty string where the
+  source does not say; a row built with any other word there raises
+  `CatalogueError`. The estimate had two spellings, `SolidMaterial.estimated`
+  with `is_estimate` and `OrthotropicWood.estimated` with `is_estimated`; both
+  are gone, and the 35 cells Hopkins Table A2 and Rossing Table 15.5 mark as
+  estimates hold `"estimated"` in `basis`. A value the page gives in a unit
+  the row does not hold is no longer marked derived: the 116 cells of Ver &
+  Beranek Table 14.1 printed in degrees Fahrenheit and psi and the nine of
+  Long Table 7.1 in sabins keep the page's figure and its unit in
+  `converted`, as `("3e5", "psi")`. A value the page gives by reference to
+  another of its rows, a cell left blank under a block (Ver & Beranek Table
+  8.7, ASHRAE Table 30) or a description that reads "Parecido al anterior"
+  (Harris Chapter 32), says which row in `carried`. `is_derived` now answers
+  only for what the library computes, and the published catalogues page marks
+  a converted cell with the page's figure and a carried cell as carried.
+  Long's musician row, whose figures the page prints with no unit, says in
+  its note why they are read as sabins.
+  `OrthotropicWood` and `PlateauMaterial` take their fields by name only, as
+  every other row does, and no row class is slotted any more, because on
+  Python 3.13 a slotted dataclass cannot call `super()` without arguments
+  from its own methods. No published value changes; a
+  new test pins every cell of the 1982 published rows to its last digit
+  against a baseline and lists each change made to it.
+
 - **The ITU-R BS.468-4 curve has one name.** `MicrophoneNoise.weighting` took
   `"CCIR"` for the quasi-peak inherent-noise figure while
   `filters.weighting_filter` and `electroacoustics.weighted_thd` take `"468"`
@@ -518,10 +550,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   Fifteen finishes are printed on two mounts and are two rows here: the same
   board laid on the test-room floor and hung over a 400 mm airspace is 0,03
   and 0,65 at 125 Hz, and a catalogue that kept one of them would be hiding
-  the mounting's effect rather than showing it. The two rows the page prints
+  the mounting's effect rather than showing it. The two rows that are areas
   in sabins, a musician with his instrument and the air itself, join
-  `PUBLISHED_ABSORPTION_AREAS` converted to square metres and marked derived,
-  with the printed figure in the wording. Read twice from the pages like every
+  `PUBLISHED_ABSORPTION_AREAS` converted to square metres, with the page's
+  figure and its unit kept in `converted`. Read twice from the pages like every
   other table, cell by cell, mount included.
 - **A compilation of twenty-nine sources, credited row by row.**
   Cox & D'Antonio 3e Appendix A adds a hundred and sixty-one rows in

@@ -447,6 +447,45 @@ hace falta antes de serializar una tabla con pickle, copiarla en profundidad o
 escribirla como JSON, porque un mapeo de sólo lectura no admite ninguna de las
 tres cosas.
 
+## Una fila de catálogo dice lo que su fuente afirma de cada celda
+
+Los catálogos publicados de materiales son nuevos en la 4.0: ni la 3.3.0 ni
+la 4.0.0rc1 los tenían. Cambiaron de forma una vez de camino a la versión
+final, y el código escrito contra la rama principal entretanto necesita los
+cambios de abajo. Todas las filas de todos los catálogos comparten ahora una
+base, `io.CatalogueRow` (con `io.BandedRow` para una fila que imprime un valor
+por banda), y las mismas tres preguntas tienen la misma respuesta en
+cualquiera de ellas.
+
+| Antes | 4.0 |
+| --- | --- |
+| `SolidMaterial.estimated`, `OrthotropicWood.estimated` | `row.basis`, que asigna `"estimated"` a cada campo con la nota al pie |
+| `SolidMaterial.is_estimate(field)`, `OrthotropicWood.is_estimated(field)` | `row.basis_of(field) == "estimated"` |
+| `row.is_derived(field)` en un valor que la página da en una unidad que la fila no guarda (los °F y psi de la Tabla 14.1 de Ver & Beranek, los sabines de la Tabla 7.1 de Long) | `field in row.converted`; `row.converted[field]` es la cifra de la página y su unidad, como `("3e5", "psi")` |
+| `row.is_derived(field)` en un valor que la página da por referencia a otra de sus filas: una celda en blanco bajo un bloque (Tabla 8.7 de Ver & Beranek, Tabla 30 de ASHRAE) o una descripción que dice «Parecido al anterior» (capítulo 32 de Harris) | `field in row.carried`; `row.carried[field]` nombra la fila |
+| `OrthotropicWood(...)` y `PlateauMaterial(...)` con sus propios campos por posición | todos los campos por nombre, como en cualquier otra fila |
+| `from phonometry._internal.catalogue import CatalogueRow` | `from phonometry.io import CatalogueRow` |
+
+`is_derived` responde ahora sólo por lo que calcula la biblioteca y podría
+volver a calcular con las celdas de la propia fila, como una velocidad de
+barra obtenida de un módulo y una densidad. Un valor que la página da en otra
+unidad sigue siendo el número de la página, y también lo es uno que da por
+referencia a otra de sus filas, así que ninguno de los dos es ya derivado. `basis_of` responde con la entrada del propio campo, si no
+con la de la fila, y si no con una cadena vacía, que quiere decir que la
+fuente no dice cómo se obtuvo el número; las cinco cosas que puede afirmar una
+fuente están en `io.CATALOGUE_BASES`.
+
+```python
+from phonometry import solids
+
+board = solids.PUBLISHED_SOLIDS["hopkins-2007-table-a2/plasterboard_natural_gypsum"]
+ear = solids.damping_named("EAR C-1002")[0]
+print(board.basis_of("poisson_ratio"))
+# estimated
+print(ear.converted["youngs_modulus_max_pa"], ear.is_derived("youngs_modulus_max_pa"))
+# ('3e5', 'psi') False
+```
+
 ## Los diez nombres que ya no están
 
 Todo lo demás se movió. Estos diez no existen en ningún módulo público:

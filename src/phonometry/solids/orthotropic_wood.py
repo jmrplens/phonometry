@@ -41,9 +41,11 @@ What the asterisks mean
 Two of maple's four constants carry an asterisk, and the table's caption
 calls the asterisked values "intelligent guesses in the absence of
 experimental data". They are served, because the page prints them as numbers
-and a reader who wants the author's best estimate should have it, but
-:meth:`OrthotropicWood.is_estimated` answers for them so that a caller who
-wants measurements can tell the two apart without reading the caption.
+and a reader who wants the author's best estimate should have it, but each
+holds ``"estimated"`` in :attr:`OrthotropicWood.basis`, and
+:meth:`~phonometry.io.CatalogueRow.basis_of` answers for them, so that a
+caller who wants measurements can tell the two apart without reading the
+caption.
 
 Where the rows live
 -------------------
@@ -54,7 +56,7 @@ catalogue here.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING
 
@@ -70,9 +72,13 @@ __all__ = [
 ]
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True, kw_only=True)
 class OrthotropicWood(CatalogueRow):
     """One wood's plate stiffnesses, as a page printed them.
+
+    A constant the caption calls an intelligent guess holds ``"estimated"``
+    in :attr:`~phonometry.io.CatalogueRow.basis`, which
+    :meth:`~phonometry.io.CatalogueRow.basis_of` reads.
 
     :ivar density_kg_m3: Density, in kg/m3.
     :ivar plate_stiffness_d1_pa: D1 = Ex/12mu, along the grain, in pascals.
@@ -89,8 +95,6 @@ class OrthotropicWood(CatalogueRow):
         double the relative width" for a violin's spruce front plate. It
         scales one wood's two directions, not one wood against the other.
         Dimensionless.
-    :ivar estimated: Fields the page marks as the author's estimate rather
-        than a measurement. :meth:`is_estimated` reads it.
     """
 
     density_kg_m3: float | None = None
@@ -99,23 +103,13 @@ class OrthotropicWood(CatalogueRow):
     plate_stiffness_d3_pa: float | None = None
     plate_stiffness_d4_pa: float | None = None
     relative_scaling_factor: float | None = None
-    estimated: frozenset[str] = field(default_factory=frozenset)
-
-    def is_estimated(self, field_name: str) -> bool:
-        """Whether the page marked this field as an estimate.
-
-        :param field_name: The attribute name, as ``plate_stiffness_d2_pa``.
-        :return: ``True`` when the table's caption calls the value a guess
-            rather than a measurement.
-        """
-        return field_name in self.estimated
 
 
 #: The published tables this catalogue reads, in the order it reads them.
 _TABLES = ("rossing-2014-table-15-5",)
 
 #: The row fields that arrive as a list and are held as a set.
-_SETS = ("estimated",)
+_SETS = ("approximate", "bounded_above", "bounded_below")
 
 
 def _load() -> dict[str, OrthotropicWood]:

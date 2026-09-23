@@ -95,7 +95,7 @@ from phonometry.solids import (  # noqa: E402
 if TYPE_CHECKING:
     from collections.abc import Iterable, Iterator, Mapping
 
-    from phonometry._internal.catalogue import CatalogueRow
+    from phonometry.io import CatalogueRow
 
 #: Where the site imports the catalogues from.
 OUTPUT = (
@@ -807,6 +807,65 @@ def column_style(unit: str, numbers: Iterable[float]) -> Style:
     return Style(f"{prefix}{unit}", exponent)
 
 
+#: The hedges that each give a served value a kind of its own, in the order
+#: :func:`cell` asks for them.
+_VALUE_HEDGES = ("derived", "converted", "carried", "approximate", "estimated")
+
+#: The hedges :func:`cell` can show only on a single value. An interval, a
+#: bound, a list of readings or a word reads with a kind of its own, and the
+#: page has no way yet to say that one of those is also an estimate, a
+#: conversion or carried from another row.
+_SINGLE_VALUE_HEDGES = ("converted", "carried", "estimated")
+
+
+def _hedges(row: CatalogueRow, field: str) -> list[str]:
+    """The hedges of :data:`_VALUE_HEDGES` that *row* holds for *field*."""
+    held = {
+        "derived": row.is_derived(field),
+        "converted": field in row.converted,
+        "carried": field in row.carried,
+        "approximate": row.is_approximate(field),
+        "estimated": row.basis_of(field) == "estimated",
+    }
+    return [hedge for hedge in _VALUE_HEDGES if held[hedge]]
+
+
+def _refuse_unshowable(row: CatalogueRow, field: str, value: object) -> None:
+    """Refuse a cell whose hedges the page cannot show, rather than drop one.
+
+    A cell has one kind, and the component styles and words it by that kind.
+    Two hedges on one value, or a hedge that only a value can carry on a cell
+    that holds an interval, a list or a word, would reach the page with one of
+    them silently gone (a tilde on an interval or on a list of readings is
+    written into its text, so ``approximate`` is refused only on a word): an estimated interval read as a plain range, or a
+    converted bound whose note gives the converted number as what the page
+    prints. No published cell does either today; the first one to do so stops
+    the generator here, so that how it should read is decided rather than
+    lost.
+
+    :raises ValueError: naming the row, the field and the hedges.
+    """
+    hedges = _hedges(row, field)
+    if value is not None:
+        clash = hedges if len(hedges) > 1 else []
+    else:
+        spoken = (
+            field in row.ranges or field in row.reported or field in row.unquantified
+        )
+        clash = [h for h in hedges if h in _SINGLE_VALUE_HEDGES] if spoken else []
+        # An interval or a list of readings carries its tilde in the text; a
+        # printed word has nowhere to put one.
+        if field in row.unquantified and "approximate" in hedges:
+            clash.append("approximate")
+    if clash:
+        what = "a value" if value is not None else "a cell with no single value"
+        msg = (
+            f"{row.name!r}: {field} is {' and '.join(clash)} on {what}, and a "
+            "cell of the published page can show only one hedge, on a value"
+        )
+        raise ValueError(msg)
+
+
 def cell(
     row: CatalogueRow, field: str, *, style: Style | None = None
 ) -> dict[str, Any]:
@@ -817,7 +876,11 @@ def cell(
     :param style: How the column is written, from :func:`column_style`. The
         default writes plain digits in the unit the quantity is stored in.
     :return: ``text`` to print, ``kind`` for the component to style by, and
-        ``note`` for the hedge a reader needs to read the number correctly.
+        ``note`` for the hedge a reader needs to read the number correctly;
+        a ``converted`` cell also carries ``printed``, the page's figure and
+        its unit, which the component words in the reader's language.
+    :raises ValueError: for a cell whose hedges the page cannot show, which
+        :func:`_refuse_unshowable` describes.
     """
     style = style or Style("")
     written = functools.partial(
@@ -828,24 +891,39 @@ def cell(
     # print 1 989.
     if field == "year" and value is not None:
         return {"text": str(int(value)), "kind": "printed", "note": ""}
+    _refuse_unshowable(row, field, value)
     if value is not None:
-        derived = row.is_derived(field)
-        kind = "derived" if derived else "printed"
-        note = row.derived.get(field, "")
+        # Three ways a served number is not simply what the cell printed, and
+        # the row names each one in a mapping of its own: this library worked
+        # it out (``derived``), the page gives it in another unit
+        # (``converted``, with the page's figure and its unit), or the page
+        # gives it by reference to another of its rows (``carried``). A
+        # converted value is written like a derived one, to the figures its
+        # inputs had, because the conversion is ours; a carried one is the
+        # page's own number and keeps every digit. At most one of them, or of
+        # the tilde and the estimate below, is on any cell that gets here.
+        extra: dict[str, str] = {}
+        kind, note = "printed", ""
+        if row.is_derived(field):
+            kind, note = "derived", row.derived[field]
+        elif field in row.converted:
+            figure, unit = row.converted[field]
+            kind, extra = "converted", {"printed": f"{figure} {unit}"}
+        elif field in row.carried:
+            kind, note = "carried", row.carried[field]
+        computed = kind in {"derived", "converted"}
         if row.is_approximate(field):
             kind, note = "approximate", "the page prints it with a tilde"
-        # The solids and the orthotropic woods carry this hedge: a number the
-        # page prints and marks as the author's guess. It is served, so the
+        # A number the source marks as its own estimate is served, so the
         # cell is not empty, and it is not a measurement, so it is not
-        # "printed" either. Both rows keep the hedged fields in a field named
-        # ``estimated``, and that field is what is read here: the method that
-        # answers for it is spelled ``is_estimate`` on one row and
-        # ``is_estimated`` on the other, and asking for one spelling showed
-        # every estimated solid as printed. The note stays empty so that the
-        # page reads the kind's own words, which it has in both languages.
-        if field in getattr(row, "estimated", frozenset()):
-            kind, note = "estimated", ""
-        text = written(value, exact=not derived)
+        # "printed" either. What the source claims for a cell is its basis,
+        # asked here the way every row answers it, so no catalogue can reach
+        # the page with an estimate read as a reading. The note stays empty so
+        # that the page reads the kind's own words, which it has in both
+        # languages.
+        if row.basis_of(field) == "estimated":
+            kind, note, extra = "estimated", "", {}
+        text = written(value, exact=not computed)
         # The plus-or-minus a page prints beside the value is written in the
         # cell, in the same unit, rather than left to a note nobody opens. It
         # is written the way every number here is, so a trailing zero the page
@@ -853,7 +931,7 @@ def cell(
         spread = row.uncertainty.get(field)
         if spread is not None:
             text = f"{text} ± {written(spread)}"
-        return {"text": text, "kind": kind, "note": note}
+        return {"text": text, "kind": kind, "note": note, **extra}
     interval = row.ranges.get(field)
     if interval is not None:
         low, high = interval
@@ -868,6 +946,12 @@ def cell(
         else:
             text = " to ".join(written(end) for end in interval if end is not None)
             kind = "range"
+        if row.is_approximate(field):
+            # The page prints this interval with a tilde, as Cox Table 6.5 does
+            # for the porosity of granular vermiculite. The range and bound
+            # kinds have no mark of their own for it, so the tilde goes into
+            # the text instead of being dropped.
+            text = f"~{text}"
         return {"text": text, "kind": kind, "note": row.why_missing(field)}
     if field in row.reported:
         listed = ", ".join(
@@ -876,6 +960,9 @@ def cell(
             else written(entry)
             for entry in row.reported[field]
         )
+        if row.is_approximate(field):
+            # Same as an interval: the kind has no mark of its own for a tilde.
+            listed = f"~{listed}"
         return {"text": listed, "kind": "reported", "note": row.why_missing(field)}
     if field in row.unquantified:
         return {
@@ -1160,7 +1247,7 @@ def transcribed(
     """A catalogue whose cells are numbers and nothing else.
 
     Most of these catalogues are rows of
-    :class:`~phonometry._internal.catalogue.CatalogueRow`, which carries the
+    :class:`~phonometry.io.CatalogueRow`, which carries the
     intervals, the bounds, the listed readings and the words a page can print
     where a number would go, and :func:`section` reads all of that back. Two
     are not: the resilient layers are a plain record of three measured numbers
@@ -1458,6 +1545,8 @@ def render_types() -> str:
         "\t| 'printed'\n"
         "\t| 'fixed'\n"
         "\t| 'derived'\n"
+        "\t| 'converted'\n"
+        "\t| 'carried'\n"
         "\t| 'approximate'\n"
         "\t| 'estimated'\n"
         "\t| 'range'\n"
@@ -1470,6 +1559,8 @@ def render_types() -> str:
         "\ttext: string;\n"
         "\tkind: CatalogueCellKind;\n"
         "\tnote: string;\n"
+        "\t/** The figure and the unit the page prints, on a converted cell. */\n"
+        "\tprinted?: string;\n"
         "}\n"
         "\n"
         "export interface CatalogueColumn {\n"

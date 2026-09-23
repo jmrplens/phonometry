@@ -48,20 +48,20 @@ __all__ = [
 ]
 
 
-@dataclass(frozen=True, slots=True, kw_only=True)
+@dataclass(frozen=True, kw_only=True)
 class DampingTreatment(CatalogueRow):
     """One damping treatment, rated on the chapter's standard panel.
 
     :ivar decay_rate_db_s: The decay rate of the vibration of the treated
         standard panel, in decibels per second. Printed as a range on most
-        rows, which :attr:`~phonometry._internal.catalogue.CatalogueRow.ranges`
+        rows, which :attr:`~phonometry.io.CatalogueRow.ranges`
         holds.
     :ivar temperature_c: The temperature of the measurement, in degrees
         Celsius, which the table prints once, in the decay rate's heading.
     :ivar adhered_area_percent: The percentage of the panel the treatment is
         bonded over. Two rows print the word "No" instead, for a treatment laid
         without adhesive, which
-        :meth:`~phonometry._internal.catalogue.CatalogueRow.why_missing` hands
+        :meth:`~phonometry.io.CatalogueRow.why_missing` hands
         back.
     :ivar surface_density_kg_m2: The weight of the treatment, in kg/m2.
     """

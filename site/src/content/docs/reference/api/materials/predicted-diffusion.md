@@ -29,7 +29,7 @@ against without something like this.
 The angle is a row, not a column
 ---------------------------------
 The page prints three lines per surface, headed 0, 57 and Random, so a surface
-is three rows here and `variant`
+is three rows here and [`variant`](/phonometry/reference/api/io/io/#cataloguerow)
 says which. The first two carry [`NormalizedDiffusionSpectrum.angle_of_incidence_deg`](/phonometry/reference/api/materials/predicted-diffusion/#normalizeddiffusionspectrum);
 the random one has none to carry, because it is an arithmetic mean over ten
 angles and belongs to no single one, and asking it for the field gets that
@@ -80,8 +80,11 @@ NormalizedDiffusionSpectrum(
     source: str,
     table: str = '',
     variant: str = '',
+    basis: Mapping[str, str] = ...,
     approximate: frozenset[str] = frozenset(),
     derived: Mapping[str, str] = ...,
+    converted: Mapping[str, tuple[str, str]] = ...,
+    carried: Mapping[str, str] = ...,
     ranges: Mapping[str, tuple[float | None, float | None]] = ...,
     bounded_above: frozenset[str] = frozenset(),
     bounded_below: frozenset[str] = frozenset(),
@@ -139,13 +142,16 @@ One surface at one angle of incidence, with its coefficient in each band.
 | `diffusion_coefficient_3150` | The same in the 3.15 kHz band. |
 | `diffusion_coefficient_4000` | The same in the 4 kHz band. |
 | `diffusion_coefficient_5000` | The same in the 5 kHz band. |
-| `angle_of_incidence_deg` | The angle the row was computed at, in degrees from the normal, as the page heads its line. `None` on a random incidence row, which is a mean over ten angles and is not one of them; `why_missing` says so rather than leaving the caller to guess at a zero. |
+| `angle_of_incidence_deg` | The angle the row was computed at, in degrees from the normal, as the page heads its line. `None` on a random incidence row, which is a mean over ten angles and is not one of them; [`why_missing`](/phonometry/reference/api/io/io/#cataloguerowwhy_missing) says so rather than leaving the caller to guess at a zero. |
 | `name` | The material as the table names it, attribution stripped. |
 | `variant` | Which specimen or condition this row is, when the page prints several under one name: `"chemically pure"`, `"direction x"`, `"0.68 mm diameter"`. Empty when the page prints one. |
 | `source` | Document, table, PDF page and printed folio. |
 | `table` | The data file this row was read from, without the extension, which is also the first half of its key in the catalogue that holds it. |
+| `basis` | What the source says a value is: a field name, or `"row"` for the whole row, to one of [`CATALOGUE_BASES`](/phonometry/reference/api/io/io/#catalogue_bases). Hopkins marks most of his Poisson ratios "Estimate", and those cells hold `"estimated"`; a datasheet that declares a class under a product standard would hold `"declared"`. A field with no entry takes the row's, and a row with neither is one whose source does not say, which is a different answer from any of the five. `basis_of` reads it. Independent of `derived`: this is what the source claims for a cell, that is what this library computed. |
 | `approximate` | Fields the page prints with a `~`. Not an estimate and not an interval: a number the author rounded on purpose. |
-| `derived` | Field to how it was computed, for the ones this library worked out from the cells the page did print. A derived value is never stored as if it had been read. |
+| `derived` | Field to how it was computed, for the ones this library worked out from the cells the page did print. A derived value is never stored as if it had been read, and it always follows again from the row's own cells. A value converted from the unit the page prints is not derived (`converted` holds it), and neither is one the page gives by reference to another of its rows (`carried` does). |
+| `converted` | Field to `(figure, unit)`, the page's figure and the unit it is in, for a value this row holds in a unit the page does not use. Ver and Beranek print their damping materials in degrees Fahrenheit and pounds per square inch, and the row holds degrees Celsius and pascals, so `("3e5", "psi")` sits beside a modulus in pascals. The figure is kept as the page writes it, so the cell can always be read back in the page's own terms. The unit is the one the page prints with the figure or over its column. Long prints the figures of his musician bare, and the sabins recorded for them are a reading of the table, which is set in inches and pounds and names sabins on the next row; that row's note says so. A figure a packaged table prints with another SI prefix, such as the megapascals of Rossing Table 15.5, is held in the base unit with no entry here, and the table's `about` says so. |
+| `carried` | Field to where the page gives it from, for a value the page gives by reference to another of its rows rather than on this one: a cell left blank under a block whose first row prints the figure, as in Ver and Beranek Table 8.7, or a description that reads "Parecido al anterior" and prints no row number, as three rows of Harris Chapter 32 do, which refers to the row above it. The value is the page's, and this says which of its rows gives it. |
 | `ranges` | `(low, high)` for each field the page prints as an interval rather than a value. One end is `None` only for a bound whose open side the quantity has no limit on; the end the page prints is always a number, and a two-sided interval has two. |
 | `bounded_above` | The subset of `ranges` the page prints as `< x` or `<= x`, where the low end is a floor and not a measurement. |
 | `bounded_below` | The subset of `ranges` the page prints as `> x` or `>= x`, where the high end is the ceiling the quantity cannot pass and not a measurement: Cox gives an aerogel a porosity of `>0.75`, and the 1 beside it is what a porosity is, not what anybody measured. A quantity with no such ceiling leaves that end `None` rather than borrowing a number for it: ASHRAE prints `>45` for a duct wall whose radiated sound the background swamped, and a transmission loss has no value it cannot pass, so the open end is empty. It is never an infinity, which is not a number the page has and not a token JSON can carry. |
@@ -165,6 +171,25 @@ NormalizedDiffusionSpectrum.bands() -> tuple[int, ...]
 ```
 
 The bands this row prints a value for, in hertz.
+
+### NormalizedDiffusionSpectrum.basis_of()
+
+```python
+NormalizedDiffusionSpectrum.basis_of(field_name: str) -> str
+```
+
+What the source says this field is, one of [`CATALOGUE_BASES`](/phonometry/reference/api/io/io/#catalogue_bases).
+
+The five are `measured`, `declared`, `calculated`, `estimated`
+and `extended`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `field_name` | One of the field names of this class. |
+
+**Returns:** The field's own entry in `basis`, else the row's, else the empty string, which means the source does not say.
 
 ### NormalizedDiffusionSpectrum.diffusion_coefficient()
 
@@ -218,7 +243,7 @@ Whether this library computed this field instead of reading it.
 | :--- | :--- |
 | `field_name` | One of the numeric field names of this class. |
 
-**Returns:** `True` when the page did not print it and the value follows from cells that it did. `derived` says how.
+**Returns:** `True` when the page did not print it and the value follows from cells that it did. `derived` says how. A value the page prints in another unit, or gives by reference to another of its rows, answers `False`: the number is the page's, and `converted` or `carried` says so.
 
 ### NormalizedDiffusionSpectrum.printed()
 
@@ -264,7 +289,7 @@ The row as `{band_hz: value}` over the bands it prints.
 
 A band the page left empty, or printed as something other than a
 number, is left out rather than filled with a zero;
-`why_missing` on that band's field says which it
+[`why_missing`](/phonometry/reference/api/io/io/#cataloguerowwhy_missing) on that band's field says which it
 was.
 
 ### NormalizedDiffusionSpectrum.why_missing()

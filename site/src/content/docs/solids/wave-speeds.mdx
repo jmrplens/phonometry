@@ -279,11 +279,15 @@ Hopkins' Poisson ratios and most of his loss factors carry a footnote whose
 whole text is "Estimate": of the twenty-five rows, only aluminium, glass,
 mortar and steel print a Poisson ratio the book stands behind. The catalogue
 keeps that distinction, because a 0,2 read as a measurement will be trusted
-further than Hopkins trusts it.
+further than Hopkins trusts it. What a source claims for a cell is its
+`basis`, and `basis_of` reads it: `"estimated"` for a footnoted cell, and an
+empty string where the page says nothing about how the number was obtained.
 
 ```python
-print(board.is_estimate("poisson_ratio"), board.is_estimate("flexural_loss_factor"))
-# True False
+print(board.basis_of("poisson_ratio"))
+# estimated
+print(board.basis_of("flexural_loss_factor") or "not stated")
+# not stated
 ```
 
 Three more things the pages say are not single numbers, and the row carries

@@ -191,7 +191,7 @@ class Gas(CatalogueRow):
     a book measured, a row here is every condition its two constants close under
     the ideal-gas relations.
 
-    The hedges of :class:`~phonometry._internal.catalogue.CatalogueRow` apply
+    The hedges of :class:`~phonometry.io.CatalogueRow` apply
     unchanged. A cell printed as an interval is a range and not a value, which
     is what saturated steam is in the table this reads first.
 

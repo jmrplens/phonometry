@@ -62,8 +62,11 @@ DampingTreatment(
     source: str,
     table: str = '',
     variant: str = '',
+    basis: Mapping[str, str] = ...,
     approximate: frozenset[str] = frozenset(),
     derived: Mapping[str, str] = ...,
+    converted: Mapping[str, tuple[str, str]] = ...,
+    carried: Mapping[str, str] = ...,
     ranges: Mapping[str, tuple[float | None, float | None]] = ...,
     bounded_above: frozenset[str] = frozenset(),
     bounded_below: frozenset[str] = frozenset(),
@@ -88,16 +91,19 @@ One damping treatment, rated on the chapter's standard panel.
 
 | Name | Description |
 | :--- | :--- |
-| `decay_rate_db_s` | The decay rate of the vibration of the treated standard panel, in decibels per second. Printed as a range on most rows, which `ranges` holds. |
+| `decay_rate_db_s` | The decay rate of the vibration of the treated standard panel, in decibels per second. Printed as a range on most rows, which [`ranges`](/phonometry/reference/api/io/io/#cataloguerow) holds. |
 | `temperature_c` | The temperature of the measurement, in degrees Celsius, which the table prints once, in the decay rate's heading. |
-| `adhered_area_percent` | The percentage of the panel the treatment is bonded over. Two rows print the word "No" instead, for a treatment laid without adhesive, which `why_missing` hands back. |
+| `adhered_area_percent` | The percentage of the panel the treatment is bonded over. Two rows print the word "No" instead, for a treatment laid without adhesive, which [`why_missing`](/phonometry/reference/api/io/io/#cataloguerowwhy_missing) hands back. |
 | `surface_density_kg_m2` | The weight of the treatment, in kg/m2. |
 | `name` | The material as the table names it, attribution stripped. |
 | `variant` | Which specimen or condition this row is, when the page prints several under one name: `"chemically pure"`, `"direction x"`, `"0.68 mm diameter"`. Empty when the page prints one. |
 | `source` | Document, table, PDF page and printed folio. |
 | `table` | The data file this row was read from, without the extension, which is also the first half of its key in the catalogue that holds it. |
+| `basis` | What the source says a value is: a field name, or `"row"` for the whole row, to one of [`CATALOGUE_BASES`](/phonometry/reference/api/io/io/#catalogue_bases). Hopkins marks most of his Poisson ratios "Estimate", and those cells hold `"estimated"`; a datasheet that declares a class under a product standard would hold `"declared"`. A field with no entry takes the row's, and a row with neither is one whose source does not say, which is a different answer from any of the five. `basis_of` reads it. Independent of `derived`: this is what the source claims for a cell, that is what this library computed. |
 | `approximate` | Fields the page prints with a `~`. Not an estimate and not an interval: a number the author rounded on purpose. |
-| `derived` | Field to how it was computed, for the ones this library worked out from the cells the page did print. A derived value is never stored as if it had been read. |
+| `derived` | Field to how it was computed, for the ones this library worked out from the cells the page did print. A derived value is never stored as if it had been read, and it always follows again from the row's own cells. A value converted from the unit the page prints is not derived (`converted` holds it), and neither is one the page gives by reference to another of its rows (`carried` does). |
+| `converted` | Field to `(figure, unit)`, the page's figure and the unit it is in, for a value this row holds in a unit the page does not use. Ver and Beranek print their damping materials in degrees Fahrenheit and pounds per square inch, and the row holds degrees Celsius and pascals, so `("3e5", "psi")` sits beside a modulus in pascals. The figure is kept as the page writes it, so the cell can always be read back in the page's own terms. The unit is the one the page prints with the figure or over its column. Long prints the figures of his musician bare, and the sabins recorded for them are a reading of the table, which is set in inches and pounds and names sabins on the next row; that row's note says so. A figure a packaged table prints with another SI prefix, such as the megapascals of Rossing Table 15.5, is held in the base unit with no entry here, and the table's `about` says so. |
+| `carried` | Field to where the page gives it from, for a value the page gives by reference to another of its rows rather than on this one: a cell left blank under a block whose first row prints the figure, as in Ver and Beranek Table 8.7, or a description that reads "Parecido al anterior" and prints no row number, as three rows of Harris Chapter 32 do, which refers to the row above it. The value is the page's, and this says which of its rows gives it. |
 | `ranges` | `(low, high)` for each field the page prints as an interval rather than a value. One end is `None` only for a bound whose open side the quantity has no limit on; the end the page prints is always a number, and a two-sided interval has two. |
 | `bounded_above` | The subset of `ranges` the page prints as `< x` or `<= x`, where the low end is a floor and not a measurement. |
 | `bounded_below` | The subset of `ranges` the page prints as `> x` or `>= x`, where the high end is the ceiling the quantity cannot pass and not a measurement: Cox gives an aerogel a porosity of `>0.75`, and the 1 beside it is what a porosity is, not what anybody measured. A quantity with no such ceiling leaves that end `None` rather than borrowing a number for it: ASHRAE prints `>45` for a duct wall whose radiated sound the background swamped, and a transmission loss has no value it cannot pass, so the open end is empty. It is never an infinity, which is not a number the page has and not a token JSON can carry. |
@@ -109,6 +115,25 @@ One damping treatment, rated on the chapter's standard panel.
 | `attributed_to` | Credit for a cell the book takes from someone else. Keyed by field name, or by `"row"` or `"table"` when the credit covers all of one. |
 | `group` | The heading of the block this row sits under, when the table prints its rows in named groups: Cox files each material under `"Fibrous materials"`, `"Cellular materials"`, `"Granular materials"` or `"Other"`. Empty for a table that prints one list. |
 | `note` | What the page says about this row beyond its numbers. |
+
+### DampingTreatment.basis_of()
+
+```python
+DampingTreatment.basis_of(field_name: str) -> str
+```
+
+What the source says this field is, one of [`CATALOGUE_BASES`](/phonometry/reference/api/io/io/#catalogue_bases).
+
+The five are `measured`, `declared`, `calculated`, `estimated`
+and `extended`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `field_name` | One of the field names of this class. |
+
+**Returns:** The field's own entry in `basis`, else the row's, else the empty string, which means the source does not say.
 
 ### DampingTreatment.is_approximate()
 
@@ -140,7 +165,7 @@ Whether this library computed this field instead of reading it.
 | :--- | :--- |
 | `field_name` | One of the numeric field names of this class. |
 
-**Returns:** `True` when the page did not print it and the value follows from cells that it did. `derived` says how.
+**Returns:** `True` when the page did not print it and the value follows from cells that it did. `derived` says how. A value the page prints in another unit, or gives by reference to another of its rows, answers `False`: the number is the page's, and `converted` or `carried` says so.
 
 ### DampingTreatment.printed()
 

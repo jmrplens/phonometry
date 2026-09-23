@@ -34881,7 +34881,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "0,65 to 0,68",
+            "text": "~0,65 to 0,68",
             "kind": "range",
             "note": "the page prints 0.65 to 0.68 and no value"
           },
@@ -50298,33 +50298,39 @@ export const catalogues = {
           },
           {
             "text": "-3,889",
-            "kind": "derived",
-            "note": "25 degrees F as the page prints it, by (5/9)(F - 32)"
+            "kind": "converted",
+            "note": "",
+            "printed": "25 °F"
           },
           {
             "text": "23,89",
-            "kind": "derived",
-            "note": "75 degrees F as the page prints it, by (5/9)(F - 32)"
+            "kind": "converted",
+            "note": "",
+            "printed": "75 °F"
           },
           {
             "text": "48,89",
-            "kind": "derived",
-            "note": "120 degrees F as the page prints it, by (5/9)(F - 32)"
+            "kind": "converted",
+            "note": "",
+            "printed": "120 °F"
           },
           {
             "text": "2,068",
-            "kind": "derived",
-            "note": "3e5 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+            "kind": "converted",
+            "note": "",
+            "printed": "3e5 psi"
           },
           {
             "text": "8,274",
-            "kind": "derived",
-            "note": "1.2e3 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+            "kind": "converted",
+            "note": "",
+            "printed": "1.2e3 psi"
           },
           {
             "text": "131",
-            "kind": "derived",
-            "note": "1.9e4 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+            "kind": "converted",
+            "note": "",
+            "printed": "1.9e4 psi"
           },
           {
             "text": "",
@@ -50358,38 +50364,45 @@ export const catalogues = {
           },
           {
             "text": "10",
-            "kind": "derived",
-            "note": "50 degrees F as the page prints it, by (5/9)(F - 32)"
+            "kind": "converted",
+            "note": "",
+            "printed": "50 °F"
           },
           {
             "text": "26,67",
-            "kind": "derived",
-            "note": "80 degrees F as the page prints it, by (5/9)(F - 32)"
+            "kind": "converted",
+            "note": "",
+            "printed": "80 °F"
           },
           {
             "text": "51,67",
-            "kind": "derived",
-            "note": "125 degrees F as the page prints it, by (5/9)(F - 32)"
+            "kind": "converted",
+            "note": "",
+            "printed": "125 °F"
           },
           {
             "text": "11,03",
-            "kind": "derived",
-            "note": "1.6e6 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+            "kind": "converted",
+            "note": "",
+            "printed": "1.6e6 psi"
           },
           {
             "text": "206,8",
-            "kind": "derived",
-            "note": "3e4 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+            "kind": "converted",
+            "note": "",
+            "printed": "3e4 psi"
           },
           {
             "text": "1 517",
-            "kind": "derived",
-            "note": "2.2e5 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+            "kind": "converted",
+            "note": "",
+            "printed": "2.2e5 psi"
           },
           {
             "text": "758,4",
-            "kind": "derived",
-            "note": "1.1e5 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+            "kind": "converted",
+            "note": "",
+            "printed": "1.1e5 psi"
           }
         ]
       },
@@ -50418,38 +50431,45 @@ export const catalogues = {
           },
           {
             "text": "-40",
-            "kind": "derived",
-            "note": "−40 degrees F as the page prints it, by (5/9)(F - 32)"
+            "kind": "converted",
+            "note": "",
+            "printed": "−40 °F"
           },
           {
             "text": "-31,67",
-            "kind": "derived",
-            "note": "−25 degrees F as the page prints it, by (5/9)(F - 32)"
+            "kind": "converted",
+            "note": "",
+            "printed": "−25 °F"
           },
           {
             "text": "-23,33",
-            "kind": "derived",
-            "note": "−10 degrees F as the page prints it, by (5/9)(F - 32)"
+            "kind": "converted",
+            "note": "",
+            "printed": "−10 °F"
           },
           {
             "text": "4,137",
-            "kind": "derived",
-            "note": "6e5 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+            "kind": "converted",
+            "note": "",
+            "printed": "6e5 psi"
           },
           {
             "text": "20,68",
-            "kind": "derived",
-            "note": "3e3 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+            "kind": "converted",
+            "note": "",
+            "printed": "3e3 psi"
           },
           {
             "text": "289,6",
-            "kind": "derived",
-            "note": "4.2e4 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+            "kind": "converted",
+            "note": "",
+            "printed": "4.2e4 psi"
           },
           {
             "text": "234,4",
-            "kind": "derived",
-            "note": "3.4e4 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+            "kind": "converted",
+            "note": "",
+            "printed": "3.4e4 psi"
           }
         ]
       },
@@ -50478,38 +50498,45 @@ export const catalogues = {
           },
           {
             "text": "15,56",
-            "kind": "derived",
-            "note": "60 degrees F as the page prints it, by (5/9)(F - 32)"
+            "kind": "converted",
+            "note": "",
+            "printed": "60 °F"
           },
           {
             "text": "26,67",
-            "kind": "derived",
-            "note": "80 degrees F as the page prints it, by (5/9)(F - 32)"
+            "kind": "converted",
+            "note": "",
+            "printed": "80 °F"
           },
           {
             "text": "43,33",
-            "kind": "derived",
-            "note": "110 degrees F as the page prints it, by (5/9)(F - 32)"
+            "kind": "converted",
+            "note": "",
+            "printed": "110 °F"
           },
           {
             "text": "0,1517",
-            "kind": "derived",
-            "note": "2.2e4 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+            "kind": "converted",
+            "note": "",
+            "printed": "2.2e4 psi"
           },
           {
             "text": "2,068",
-            "kind": "derived",
-            "note": "3e2 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+            "kind": "converted",
+            "note": "",
+            "printed": "3e2 psi"
           },
           {
             "text": "17,93",
-            "kind": "derived",
-            "note": "2.6e3 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+            "kind": "converted",
+            "note": "",
+            "printed": "2.6e3 psi"
           },
           {
             "text": "10,34",
-            "kind": "derived",
-            "note": "1.5e3 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+            "kind": "converted",
+            "note": "",
+            "printed": "1.5e3 psi"
           }
         ]
       },
@@ -50538,38 +50565,45 @@ export const catalogues = {
           },
           {
             "text": "-5",
-            "kind": "derived",
-            "note": "23 degrees F as the page prints it, by (5/9)(F - 32)"
+            "kind": "converted",
+            "note": "",
+            "printed": "23 °F"
           },
           {
             "text": "12,78",
-            "kind": "derived",
-            "note": "55 degrees F as the page prints it, by (5/9)(F - 32)"
+            "kind": "converted",
+            "note": "",
+            "printed": "55 °F"
           },
           {
             "text": "32,22",
-            "kind": "derived",
-            "note": "90 degrees F as the page prints it, by (5/9)(F - 32)"
+            "kind": "converted",
+            "note": "",
+            "printed": "90 °F"
           },
           {
             "text": "2,068",
-            "kind": "derived",
-            "note": "3e5 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+            "kind": "converted",
+            "note": "",
+            "printed": "3e5 psi"
           },
           {
             "text": "1,379",
-            "kind": "derived",
-            "note": "2e2 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+            "kind": "converted",
+            "note": "",
+            "printed": "2e2 psi"
           },
           {
             "text": "53,09",
-            "kind": "derived",
-            "note": "7.7e3 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+            "kind": "converted",
+            "note": "",
+            "printed": "7.7e3 psi"
           },
           {
             "text": "103,4",
-            "kind": "derived",
-            "note": "1.5e4 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+            "kind": "converted",
+            "note": "",
+            "printed": "1.5e4 psi"
           }
         ]
       },
@@ -50598,38 +50632,45 @@ export const catalogues = {
           },
           {
             "text": "7,222",
-            "kind": "derived",
-            "note": "45 degrees F as the page prints it, by (5/9)(F - 32)"
+            "kind": "converted",
+            "note": "",
+            "printed": "45 °F"
           },
           {
             "text": "21,11",
-            "kind": "derived",
-            "note": "70 degrees F as the page prints it, by (5/9)(F - 32)"
+            "kind": "converted",
+            "note": "",
+            "printed": "70 °F"
           },
           {
             "text": "37,78",
-            "kind": "derived",
-            "note": "100 degrees F as the page prints it, by (5/9)(F - 32)"
+            "kind": "converted",
+            "note": "",
+            "printed": "100 °F"
           },
           {
             "text": "5,516",
-            "kind": "derived",
-            "note": "8e5 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+            "kind": "converted",
+            "note": "",
+            "printed": "8e5 psi"
           },
           {
             "text": "4,137",
-            "kind": "derived",
-            "note": "6e2 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+            "kind": "converted",
+            "note": "",
+            "printed": "6e2 psi"
           },
           {
             "text": "151,7",
-            "kind": "derived",
-            "note": "2.2e4 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+            "kind": "converted",
+            "note": "",
+            "printed": "2.2e4 psi"
           },
           {
             "text": "151,7",
-            "kind": "derived",
-            "note": "2.2e4 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+            "kind": "converted",
+            "note": "",
+            "printed": "2.2e4 psi"
           }
         ]
       },
@@ -50658,38 +50699,45 @@ export const catalogues = {
           },
           {
             "text": "10",
-            "kind": "derived",
-            "note": "50 degrees F as the page prints it, by (5/9)(F - 32)"
+            "kind": "converted",
+            "note": "",
+            "printed": "50 °F"
           },
           {
             "text": "26,67",
-            "kind": "derived",
-            "note": "80 degrees F as the page prints it, by (5/9)(F - 32)"
+            "kind": "converted",
+            "note": "",
+            "printed": "80 °F"
           },
           {
             "text": "51,67",
-            "kind": "derived",
-            "note": "125 degrees F as the page prints it, by (5/9)(F - 32)"
+            "kind": "converted",
+            "note": "",
+            "printed": "125 °F"
           },
           {
             "text": "20,68",
-            "kind": "derived",
-            "note": "3e6 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+            "kind": "converted",
+            "note": "",
+            "printed": "3e6 psi"
           },
           {
             "text": "22,75",
-            "kind": "derived",
-            "note": "3.3e3 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+            "kind": "converted",
+            "note": "",
+            "printed": "3.3e3 psi"
           },
           {
             "text": "689,5",
-            "kind": "derived",
-            "note": "1e5 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+            "kind": "converted",
+            "note": "",
+            "printed": "1e5 psi"
           },
           {
             "text": "482,6",
-            "kind": "derived",
-            "note": "7e4 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+            "kind": "converted",
+            "note": "",
+            "printed": "7e4 psi"
           }
         ]
       },
@@ -50718,38 +50766,45 @@ export const catalogues = {
           },
           {
             "text": "-9,444",
-            "kind": "derived",
-            "note": "15 degrees F as the page prints it, by (5/9)(F - 32)"
+            "kind": "converted",
+            "note": "",
+            "printed": "15 °F"
           },
           {
             "text": "10",
-            "kind": "derived",
-            "note": "50 degrees F as the page prints it, by (5/9)(F - 32)"
+            "kind": "converted",
+            "note": "",
+            "printed": "50 °F"
           },
           {
             "text": "23,89",
-            "kind": "derived",
-            "note": "75 degrees F as the page prints it, by (5/9)(F - 32)"
+            "kind": "converted",
+            "note": "",
+            "printed": "75 °F"
           },
           {
             "text": "2,068",
-            "kind": "derived",
-            "note": "3e5 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+            "kind": "converted",
+            "note": "",
+            "printed": "3e5 psi"
           },
           {
             "text": "1,034",
-            "kind": "derived",
-            "note": "1.5e2 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+            "kind": "converted",
+            "note": "",
+            "printed": "1.5e2 psi"
           },
           {
             "text": "46,19",
-            "kind": "derived",
-            "note": "6.7e3 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+            "kind": "converted",
+            "note": "",
+            "printed": "6.7e3 psi"
           },
           {
             "text": "46,19",
-            "kind": "derived",
-            "note": "6.7e3 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+            "kind": "converted",
+            "note": "",
+            "printed": "6.7e3 psi"
           }
         ]
       },
@@ -50778,18 +50833,21 @@ export const catalogues = {
           },
           {
             "text": "21,11",
-            "kind": "derived",
-            "note": "70 degrees F as the page prints it, by (5/9)(F - 32)"
+            "kind": "converted",
+            "note": "",
+            "printed": "70 °F"
           },
           {
             "text": "37,78",
-            "kind": "derived",
-            "note": "100 degrees F as the page prints it, by (5/9)(F - 32)"
+            "kind": "converted",
+            "note": "",
+            "printed": "100 °F"
           },
           {
             "text": "54,44",
-            "kind": "derived",
-            "note": "130 degrees F as the page prints it, by (5/9)(F - 32)"
+            "kind": "converted",
+            "note": "",
+            "printed": "130 °F"
           },
           {
             "text": "",
@@ -50798,18 +50856,21 @@ export const catalogues = {
           },
           {
             "text": "0,8274",
-            "kind": "derived",
-            "note": "1.2e2 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+            "kind": "converted",
+            "note": "",
+            "printed": "1.2e2 psi"
           },
           {
             "text": "41,37",
-            "kind": "derived",
-            "note": "6e3 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+            "kind": "converted",
+            "note": "",
+            "printed": "6e3 psi"
           },
           {
             "text": "41,37",
-            "kind": "derived",
-            "note": "6e3 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+            "kind": "converted",
+            "note": "",
+            "printed": "6e3 psi"
           }
         ]
       },
@@ -50838,38 +50899,45 @@ export const catalogues = {
           },
           {
             "text": "51,67",
-            "kind": "derived",
-            "note": "125 degrees F as the page prints it, by (5/9)(F - 32)"
+            "kind": "converted",
+            "note": "",
+            "printed": "125 °F"
           },
           {
             "text": "65,56",
-            "kind": "derived",
-            "note": "150 degrees F as the page prints it, by (5/9)(F - 32)"
+            "kind": "converted",
+            "note": "",
+            "printed": "150 °F"
           },
           {
             "text": "85",
-            "kind": "derived",
-            "note": "185 degrees F as the page prints it, by (5/9)(F - 32)"
+            "kind": "converted",
+            "note": "",
+            "printed": "185 °F"
           },
           {
             "text": "1,379",
-            "kind": "derived",
-            "note": "2e5 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+            "kind": "converted",
+            "note": "",
+            "printed": "2e5 psi"
           },
           {
             "text": "4,137",
-            "kind": "derived",
-            "note": "6e2 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+            "kind": "converted",
+            "note": "",
+            "printed": "6e2 psi"
           },
           {
             "text": "75,84",
-            "kind": "derived",
-            "note": "1.1e4 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+            "kind": "converted",
+            "note": "",
+            "printed": "1.1e4 psi"
           },
           {
             "text": "75,84",
-            "kind": "derived",
-            "note": "1.1e4 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+            "kind": "converted",
+            "note": "",
+            "printed": "1.1e4 psi"
           }
         ]
       },
@@ -50898,38 +50966,45 @@ export const catalogues = {
           },
           {
             "text": "-9,444",
-            "kind": "derived",
-            "note": "15 degrees F as the page prints it, by (5/9)(F - 32)"
+            "kind": "converted",
+            "note": "",
+            "printed": "15 °F"
           },
           {
             "text": "-1,111",
-            "kind": "derived",
-            "note": "30 degrees F as the page prints it, by (5/9)(F - 32)"
+            "kind": "converted",
+            "note": "",
+            "printed": "30 °F"
           },
           {
             "text": "21,11",
-            "kind": "derived",
-            "note": "70 degrees F as the page prints it, by (5/9)(F - 32)"
+            "kind": "converted",
+            "note": "",
+            "printed": "70 °F"
           },
           {
             "text": "2,068",
-            "kind": "derived",
-            "note": "3e5 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+            "kind": "converted",
+            "note": "",
+            "printed": "3e5 psi"
           },
           {
             "text": "0,4826",
-            "kind": "derived",
-            "note": "7e1 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+            "kind": "converted",
+            "note": "",
+            "printed": "7e1 psi"
           },
           {
             "text": "31,72",
-            "kind": "derived",
-            "note": "4.6e3 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+            "kind": "converted",
+            "note": "",
+            "printed": "4.6e3 psi"
           },
           {
             "text": "47,57",
-            "kind": "derived",
-            "note": "6.9e3 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+            "kind": "converted",
+            "note": "",
+            "printed": "6.9e3 psi"
           }
         ]
       },
@@ -50958,38 +51033,45 @@ export const catalogues = {
           },
           {
             "text": "26,67",
-            "kind": "derived",
-            "note": "80 degrees F as the page prints it, by (5/9)(F - 32)"
+            "kind": "converted",
+            "note": "",
+            "printed": "80 °F"
           },
           {
             "text": "46,11",
-            "kind": "derived",
-            "note": "115 degrees F as the page prints it, by (5/9)(F - 32)"
+            "kind": "converted",
+            "note": "",
+            "printed": "115 °F"
           },
           {
             "text": "65,56",
-            "kind": "derived",
-            "note": "150 degrees F as the page prints it, by (5/9)(F - 32)"
+            "kind": "converted",
+            "note": "",
+            "printed": "150 °F"
           },
           {
             "text": "0,2068",
-            "kind": "derived",
-            "note": "3e4 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+            "kind": "converted",
+            "note": "",
+            "printed": "3e4 psi"
           },
           {
             "text": "0,2068",
-            "kind": "derived",
-            "note": "3e1 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+            "kind": "converted",
+            "note": "",
+            "printed": "3e1 psi"
           },
           {
             "text": "6,895",
-            "kind": "derived",
-            "note": "1e3 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+            "kind": "converted",
+            "note": "",
+            "printed": "1e3 psi"
           },
           {
             "text": "11,72",
-            "kind": "derived",
-            "note": "1.7e3 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+            "kind": "converted",
+            "note": "",
+            "printed": "1.7e3 psi"
           }
         ]
       },
@@ -51018,38 +51100,45 @@ export const catalogues = {
           },
           {
             "text": "-12,22",
-            "kind": "derived",
-            "note": "10 degrees F as the page prints it, by (5/9)(F - 32)"
+            "kind": "converted",
+            "note": "",
+            "printed": "10 °F"
           },
           {
             "text": "4,444",
-            "kind": "derived",
-            "note": "40 degrees F as the page prints it, by (5/9)(F - 32)"
+            "kind": "converted",
+            "note": "",
+            "printed": "40 °F"
           },
           {
             "text": "26,67",
-            "kind": "derived",
-            "note": "80 degrees F as the page prints it, by (5/9)(F - 32)"
+            "kind": "converted",
+            "note": "",
+            "printed": "80 °F"
           },
           {
             "text": "0,8963",
-            "kind": "derived",
-            "note": "1.3e5 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+            "kind": "converted",
+            "note": "",
+            "printed": "1.3e5 psi"
           },
           {
             "text": "0,5516",
-            "kind": "derived",
-            "note": "8e1 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+            "kind": "converted",
+            "note": "",
+            "printed": "8e1 psi"
           },
           {
             "text": "22,06",
-            "kind": "derived",
-            "note": "3.2e3 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+            "kind": "converted",
+            "note": "",
+            "printed": "3.2e3 psi"
           },
           {
             "text": "26,89",
-            "kind": "derived",
-            "note": "3.9e3 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+            "kind": "converted",
+            "note": "",
+            "printed": "3.9e3 psi"
           }
         ]
       },
@@ -51078,38 +51167,45 @@ export const catalogues = {
           },
           {
             "text": "-42,78",
-            "kind": "derived",
-            "note": "−45 degrees F as the page prints it, by (5/9)(F - 32)"
+            "kind": "converted",
+            "note": "",
+            "printed": "−45 °F"
           },
           {
             "text": "-28,89",
-            "kind": "derived",
-            "note": "−20 degrees F as the page prints it, by (5/9)(F - 32)"
+            "kind": "converted",
+            "note": "",
+            "printed": "−20 °F"
           },
           {
             "text": "-9,444",
-            "kind": "derived",
-            "note": "15 degrees F as the page prints it, by (5/9)(F - 32)"
+            "kind": "converted",
+            "note": "",
+            "printed": "15 °F"
           },
           {
             "text": "1,034",
-            "kind": "derived",
-            "note": "1.5e5 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+            "kind": "converted",
+            "note": "",
+            "printed": "1.5e5 psi"
           },
           {
             "text": "2,068",
-            "kind": "derived",
-            "note": "3e2 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+            "kind": "converted",
+            "note": "",
+            "printed": "3e2 psi"
           },
           {
             "text": "1,448",
-            "kind": "derived",
-            "note": "2.1e2 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+            "kind": "converted",
+            "note": "",
+            "printed": "2.1e2 psi"
           },
           {
             "text": "1,586",
-            "kind": "derived",
-            "note": "2.3e2 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+            "kind": "converted",
+            "note": "",
+            "printed": "2.3e2 psi"
           }
         ]
       },
@@ -51138,38 +51234,45 @@ export const catalogues = {
           },
           {
             "text": "-9,444",
-            "kind": "derived",
-            "note": "15 degrees F as the page prints it, by (5/9)(F - 32)"
+            "kind": "converted",
+            "note": "",
+            "printed": "15 °F"
           },
           {
             "text": "10",
-            "kind": "derived",
-            "note": "50 degrees F as the page prints it, by (5/9)(F - 32)"
+            "kind": "converted",
+            "note": "",
+            "printed": "50 °F"
           },
           {
             "text": "29,44",
-            "kind": "derived",
-            "note": "85 degrees F as the page prints it, by (5/9)(F - 32)"
+            "kind": "converted",
+            "note": "",
+            "printed": "85 °F"
           },
           {
             "text": "0,9653",
-            "kind": "derived",
-            "note": "1.4e5 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+            "kind": "converted",
+            "note": "",
+            "printed": "1.4e5 psi"
           },
           {
             "text": "0,2068",
-            "kind": "derived",
-            "note": "3e1 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+            "kind": "converted",
+            "note": "",
+            "printed": "3e1 psi"
           },
           {
             "text": "13,79",
-            "kind": "derived",
-            "note": "2e3 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+            "kind": "converted",
+            "note": "",
+            "printed": "2e3 psi"
           },
           {
             "text": "11,03",
-            "kind": "derived",
-            "note": "1.6e3 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+            "kind": "converted",
+            "note": "",
+            "printed": "1.6e3 psi"
           }
         ]
       },
@@ -51198,38 +51301,45 @@ export const catalogues = {
           },
           {
             "text": "-59,44",
-            "kind": "derived",
-            "note": "−75 degrees F as the page prints it, by (5/9)(F - 32)"
+            "kind": "converted",
+            "note": "",
+            "printed": "−75 °F"
           },
           {
             "text": "-45,56",
-            "kind": "derived",
-            "note": "−50 degrees F as the page prints it, by (5/9)(F - 32)"
+            "kind": "converted",
+            "note": "",
+            "printed": "−50 °F"
           },
           {
             "text": "-28,89",
-            "kind": "derived",
-            "note": "−20 degrees F as the page prints it, by (5/9)(F - 32)"
+            "kind": "converted",
+            "note": "",
+            "printed": "−20 °F"
           },
           {
             "text": "1,379",
-            "kind": "derived",
-            "note": "2e5 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+            "kind": "converted",
+            "note": "",
+            "printed": "2e5 psi"
           },
           {
             "text": "1,034",
-            "kind": "derived",
-            "note": "1.5e2 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+            "kind": "converted",
+            "note": "",
+            "printed": "1.5e2 psi"
           },
           {
             "text": "37,92",
-            "kind": "derived",
-            "note": "5.5e3 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+            "kind": "converted",
+            "note": "",
+            "printed": "5.5e3 psi"
           },
           {
             "text": "37,92",
-            "kind": "derived",
-            "note": "5.5e3 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+            "kind": "converted",
+            "note": "",
+            "printed": "5.5e3 psi"
           }
         ]
       },
@@ -51258,18 +51368,21 @@ export const catalogues = {
           },
           {
             "text": "10",
-            "kind": "derived",
-            "note": "50 degrees F as the page prints it, by (5/9)(F - 32)"
+            "kind": "converted",
+            "note": "",
+            "printed": "50 °F"
           },
           {
             "text": "26,67",
-            "kind": "derived",
-            "note": "80 degrees F as the page prints it, by (5/9)(F - 32)"
+            "kind": "converted",
+            "note": "",
+            "printed": "80 °F"
           },
           {
             "text": "51,67",
-            "kind": "derived",
-            "note": "125 degrees F as the page prints it, by (5/9)(F - 32)"
+            "kind": "converted",
+            "note": "",
+            "printed": "125 °F"
           },
           {
             "text": "",
@@ -51278,18 +51391,21 @@ export const catalogues = {
           },
           {
             "text": "34,47",
-            "kind": "derived",
-            "note": "5e3 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+            "kind": "converted",
+            "note": "",
+            "printed": "5e3 psi"
           },
           {
             "text": "268,9",
-            "kind": "derived",
-            "note": "3.9e4 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+            "kind": "converted",
+            "note": "",
+            "printed": "3.9e4 psi"
           },
           {
             "text": "241,3",
-            "kind": "derived",
-            "note": "3.5e4 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+            "kind": "converted",
+            "note": "",
+            "printed": "3.5e4 psi"
           }
         ]
       }
@@ -60467,12 +60583,12 @@ export const catalogues = {
         "cells": [
           {
             "text": "100",
-            "kind": "derived",
+            "kind": "carried",
             "note": "carried down the blank cells of TABLE 8.7 from the FM 125 row, which prints 100 N s/m3 for the six rows of its block"
           },
           {
             "text": "0,25",
-            "kind": "derived",
+            "kind": "carried",
             "note": "carried down the blank cells of TABLE 8.7 from the FM 125 row, which prints 0.25 times rho0 c0 for the six rows of its block"
           },
           {
@@ -60529,12 +60645,12 @@ export const catalogues = {
         "cells": [
           {
             "text": "100",
-            "kind": "derived",
+            "kind": "carried",
             "note": "carried down the blank cells of TABLE 8.7 from the FM 125 row, which prints 100 N s/m3 for the six rows of its block"
           },
           {
             "text": "0,25",
-            "kind": "derived",
+            "kind": "carried",
             "note": "carried down the blank cells of TABLE 8.7 from the FM 125 row, which prints 0.25 times rho0 c0 for the six rows of its block"
           },
           {
@@ -60591,12 +60707,12 @@ export const catalogues = {
         "cells": [
           {
             "text": "100",
-            "kind": "derived",
+            "kind": "carried",
             "note": "carried down the blank cells of TABLE 8.7 from the FM 125 row, which prints 100 N s/m3 for the six rows of its block"
           },
           {
             "text": "0,25",
-            "kind": "derived",
+            "kind": "carried",
             "note": "carried down the blank cells of TABLE 8.7 from the FM 125 row, which prints 0.25 times rho0 c0 for the six rows of its block"
           },
           {
@@ -60653,12 +60769,12 @@ export const catalogues = {
         "cells": [
           {
             "text": "100",
-            "kind": "derived",
+            "kind": "carried",
             "note": "carried down the blank cells of TABLE 8.7 from the FM 125 row, which prints 100 N s/m3 for the six rows of its block"
           },
           {
             "text": "0,25",
-            "kind": "derived",
+            "kind": "carried",
             "note": "carried down the blank cells of TABLE 8.7 from the FM 125 row, which prints 0.25 times rho0 c0 for the six rows of its block"
           },
           {
@@ -60715,12 +60831,12 @@ export const catalogues = {
         "cells": [
           {
             "text": "100",
-            "kind": "derived",
+            "kind": "carried",
             "note": "carried down the blank cells of TABLE 8.7 from the FM 125 row, which prints 100 N s/m3 for the six rows of its block"
           },
           {
             "text": "0,25",
-            "kind": "derived",
+            "kind": "carried",
             "note": "carried down the blank cells of TABLE 8.7 from the FM 125 row, which prints 0.25 times rho0 c0 for the six rows of its block"
           },
           {
@@ -60901,12 +61017,12 @@ export const catalogues = {
         "cells": [
           {
             "text": "500",
-            "kind": "derived",
+            "kind": "carried",
             "note": "carried down the blank cells of TABLE 8.7 from the FM 122 row, which prints 500 N s/m3 for the four rows of its block"
           },
           {
             "text": "1,25",
-            "kind": "derived",
+            "kind": "carried",
             "note": "carried down the blank cells of TABLE 8.7 from the FM 122 row, which prints 1.25 times rho0 c0 for the four rows of its block"
           },
           {
@@ -60963,12 +61079,12 @@ export const catalogues = {
         "cells": [
           {
             "text": "500",
-            "kind": "derived",
+            "kind": "carried",
             "note": "carried down the blank cells of TABLE 8.7 from the FM 122 row, which prints 500 N s/m3 for the four rows of its block"
           },
           {
             "text": "1,25",
-            "kind": "derived",
+            "kind": "carried",
             "note": "carried down the blank cells of TABLE 8.7 from the FM 122 row, which prints 1.25 times rho0 c0 for the four rows of its block"
           },
           {
@@ -61025,12 +61141,12 @@ export const catalogues = {
         "cells": [
           {
             "text": "500",
-            "kind": "derived",
+            "kind": "carried",
             "note": "carried down the blank cells of TABLE 8.7 from the FM 122 row, which prints 500 N s/m3 for the four rows of its block"
           },
           {
             "text": "1,25",
-            "kind": "derived",
+            "kind": "carried",
             "note": "carried down the blank cells of TABLE 8.7 from the FM 122 row, which prints 1.25 times rho0 c0 for the four rows of its block"
           },
           {
@@ -113014,14 +113130,14 @@ export const catalogues = {
         "weave": "",
         "bonding": "",
         "source": "ASHRAE (2019) HVAC Applications Handbook Chapter 49 Tables 29 to 34, PDF pages 914-916 (printed pp. 49.30-49.32)",
-        "note": "The diameter cell is blank on the page, so the 610 mm this row carries was not read from it and is held as a derivation rather than as a printed number. The gauge carries the asterisk of the footnote printed under Table 30: “*Ducts internally lined with 25 mm thick 24 kg/m3 fiberglass with 0.6 mm perforated sheet metal inner liner.” (the page sets the 3 of the density as a superscript).",
+        "note": "The diameter cell is blank on the page, and the 610 mm this row serves is carried down from the row of its block that prints it rather than read from this row. The gauge carries the asterisk of the footnote printed under Table 30: “*Ducts internally lined with 25 mm thick 24 kg/m3 fiberglass with 0.6 mm perforated sheet metal inner liner.” (the page sets the 3 of the density as a superscript).",
         "attributedTo": {
           "table": "Cummings 1983, 1985 and Lilly 1987, credited in the running text on PDF page 913 (folio 49.29), which reads: “Values of TLout for rectangular ducts are given in Table 29, for round ducts in Table 30, and for flat oval ducts in Table 31 (Cummings 1983, 1985; Lilly 1987).” The table itself carries no source line."
         },
         "cells": [
           {
             "text": "610",
-            "kind": "derived",
+            "kind": "carried",
             "note": "carried down from the 610 mm printed one row above it. The page prints the diameter once for that part of the Spiral Wound Ducts block of Table 30 and leaves the cell blank on the two rows below it, which print their own length and gauge."
           },
           {
@@ -113096,14 +113212,14 @@ export const catalogues = {
         "weave": "",
         "bonding": "",
         "source": "ASHRAE (2019) HVAC Applications Handbook Chapter 49 Tables 29 to 34, PDF pages 914-916 (printed pp. 49.30-49.32)",
-        "note": "The diameter cell is blank on the page, so the 610 mm this row carries was not read from it and is held as a derivation rather than as a printed number. The length is printed as a bare “3”, with no decimal, where every other length in Tables 30 and 32 carries one. The 63 Hz cell is printed “>48”, a lower bound and not a value; the page gives no ceiling for it and none is invented.",
+        "note": "The diameter cell is blank on the page, and the 610 mm this row serves is carried down from the row of its block that prints it rather than read from this row. The length is printed as a bare “3”, with no decimal, where every other length in Tables 30 and 32 carries one. The 63 Hz cell is printed “>48”, a lower bound and not a value; the page gives no ceiling for it and none is invented.",
         "attributedTo": {
           "table": "Cummings 1983, 1985 and Lilly 1987, credited in the running text on PDF page 913 (folio 49.29), which reads: “Values of TLout for rectangular ducts are given in Table 29, for round ducts in Table 30, and for flat oval ducts in Table 31 (Cummings 1983, 1985; Lilly 1987).” The table itself carries no source line."
         },
         "cells": [
           {
             "text": "610",
-            "kind": "derived",
+            "kind": "carried",
             "note": "carried down from the 610 mm printed two rows above it. The page prints the diameter once for that part of the Spiral Wound Ducts block of Table 30 and leaves the cell blank on the two rows below it, which print their own length and gauge."
           },
           {
@@ -145138,38 +145254,44 @@ export const catalogues = {
         "weave": "",
         "bonding": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
-        "note": "",
+        "note": "The page prints these six figures with no unit. They are held as sabins, square feet of absorption per person: the row is priced per person in a table set in inches and pounds, its figures run from 4.0 to 15.0 where no coefficient of the table passes 1.33, and the row below it names its sabins.",
         "attributedTo": {},
         "cells": [
           {
             "text": "0,3716",
-            "kind": "derived",
-            "note": "from the 4.0 sabins the page prints, at 0.092 903 04 m² to the square foot"
+            "kind": "converted",
+            "note": "",
+            "printed": "4.0 sabins"
           },
           {
             "text": "0,7897",
-            "kind": "derived",
-            "note": "from the 8.5 sabins the page prints, at 0.092 903 04 m² to the square foot"
+            "kind": "converted",
+            "note": "",
+            "printed": "8.5 sabins"
           },
           {
             "text": "1,068",
-            "kind": "derived",
-            "note": "from the 11.5 sabins the page prints, at 0.092 903 04 m² to the square foot"
+            "kind": "converted",
+            "note": "",
+            "printed": "11.5 sabins"
           },
           {
             "text": "1,301",
-            "kind": "derived",
-            "note": "from the 14.0 sabins the page prints, at 0.092 903 04 m² to the square foot"
+            "kind": "converted",
+            "note": "",
+            "printed": "14.0 sabins"
           },
           {
             "text": "1,394",
-            "kind": "derived",
-            "note": "from the 15.0 sabins the page prints, at 0.092 903 04 m² to the square foot"
+            "kind": "converted",
+            "note": "",
+            "printed": "15.0 sabins"
           },
           {
             "text": "1,115",
-            "kind": "derived",
-            "note": "from the 12.0 sabins the page prints, at 0.092 903 04 m² to the square foot"
+            "kind": "converted",
+            "note": "",
+            "printed": "12.0 sabins"
           }
         ]
       },
@@ -145208,18 +145330,21 @@ export const catalogues = {
           },
           {
             "text": "0,002953",
-            "kind": "derived",
-            "note": "from the 0.9 sabins per 1000 cubic feet the page prints, at 0.092 903 04 m² to the square foot and 28.316 846 592 m³ to the thousand cubic feet"
+            "kind": "converted",
+            "note": "",
+            "printed": "0.9 sabins per 1000 ft3"
           },
           {
             "text": "0,007546",
-            "kind": "derived",
-            "note": "from the 2.3 sabins per 1000 cubic feet the page prints, at 0.092 903 04 m² to the square foot and 28.316 846 592 m³ to the thousand cubic feet"
+            "kind": "converted",
+            "note": "",
+            "printed": "2.3 sabins per 1000 ft3"
           },
           {
             "text": "0,02362",
-            "kind": "derived",
-            "note": "from the 7.2 sabins per 1000 cubic feet the page prints, at 0.092 903 04 m² to the square foot and 28.316 846 592 m³ to the thousand cubic feet"
+            "kind": "converted",
+            "note": "",
+            "printed": "7.2 sabins per 1000 ft3"
           }
         ]
       }

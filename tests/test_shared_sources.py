@@ -16,7 +16,7 @@ import sys
 
 import pytest
 
-from phonometry._internal.catalogue import CatalogueRow
+from phonometry.io import CatalogueRow
 
 _SCRIPTS = str(pathlib.Path(__file__).resolve().parent.parent / "scripts")
 if _SCRIPTS not in sys.path:

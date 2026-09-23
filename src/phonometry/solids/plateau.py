@@ -68,7 +68,7 @@ __all__ = [
 ]
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True, kw_only=True)
 class PlateauMaterial(CatalogueRow):
     """One material's plateau-method constants, as a page printed them.
 

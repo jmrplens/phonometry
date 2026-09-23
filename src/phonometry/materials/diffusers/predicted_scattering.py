@@ -82,7 +82,7 @@ class PredictedScatteringSpectrum(ScatteringBands):
         degrees from the normal. ``None`` where the page prints a word
         instead of a number: "Random" on an average over angles, "All/any" on
         the plane surface that scatters nothing at any of them, and
-        :meth:`~phonometry._internal.catalogue.CatalogueRow.why_missing` says
+        :meth:`~phonometry.io.CatalogueRow.why_missing` says
         which.
     :ivar model: The solver behind the row, as the table's own title and the
         section that describes it give it: a two-dimensional or a

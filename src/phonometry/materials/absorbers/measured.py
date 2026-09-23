@@ -17,23 +17,23 @@ A table of absorption coefficients usually carries a few rows that are not
 coefficients at all. Bies prints an audience "per person seated" as
 :math:`S\bar{\alpha}` in square metres, an absorption area, in the same
 columns as the coefficients above it, and Long prints a musician with
-instrument the same way, in sabins. A coefficient is dimensionless and
-bounded by the surface it belongs to; an area per person is a quantity in
-square metres that is added, not multiplied. Holding both under one field
-name would put a number in square metres behind a name that says otherwise,
-so they are two classes and two catalogues, :data:`PUBLISHED_ABSORPTION` and
-:data:`PUBLISHED_ABSORPTION_AREAS`, and the data file tells them apart by
-the fields each row carries.
+instrument the same way, in figures that are sabins. A coefficient is
+dimensionless and bounded by the surface it belongs to; an area per person
+is a quantity in square metres that is added, not multiplied. Holding both
+under one field name would put a number in square metres behind a name that
+says otherwise, so they are two classes and two catalogues,
+:data:`PUBLISHED_ABSORPTION` and :data:`PUBLISHED_ABSORPTION_AREAS`, and the
+data file tells them apart by the fields each row carries.
 
 The band is the field
 ---------------------
 Each octave band is a field of its own, ``absorption_coefficient_125`` and so
 on, with the band's centre frequency in hertz as the suffix. That is not the
 tidiest shape for a spectrum and it is the right one for a catalogue: every
-hedge of :class:`~phonometry._internal.catalogue.CatalogueRow` is keyed by
+hedge of :class:`~phonometry.io.CatalogueRow` is keyed by
 field name, so a cell the page prints as a range, or leaves empty, or prints
 wrong, is handled the way the same cell is handled in every other catalogue,
-and :meth:`~phonometry._internal.catalogue.CatalogueRow.why_missing` answers
+and :meth:`~phonometry.io.CatalogueRow.why_missing` answers
 for a band the way it answers for a modulus. :meth:`AbsorptionSpectrum.bands`
 and :meth:`AbsorptionSpectrum.spectrum` give the row back as a spectrum for
 the caller who wants one.
@@ -53,10 +53,12 @@ not a specification of any product. Where a page says more than that about
 its numbers, the ``about`` of its data file quotes it.
 
 Long sets his table in inches, pounds and ounces, and his two rows that are
-areas are in sabins, square feet of perfect absorption. The names keep the
-inches, because a name is what the page prints; the areas are converted to
-square metres at load and marked derived, because a field named ``m2`` holds
-square metres or it lies.
+areas are in sabins, square feet of perfect absorption: the air names its
+sabins, and the musician prints bare figures that are read in the same unit,
+as its note explains. The names keep the inches, because a name is what the
+page prints; the areas are converted to square metres at load, because a
+field named ``m2`` holds square metres or it lies, and each converted cell
+keeps the page's figure and its unit.
 """
 
 from __future__ import annotations
@@ -89,7 +91,7 @@ ABSORPTION_BANDS_HZ: tuple[int, ...] = (63, 125, 250, 500, 1000, 2000, 4000, 800
 class AbsorptionSpectrum(BandedRow):
     """One finish of a published table, with its coefficient in each band.
 
-    The hedges of :class:`~phonometry._internal.catalogue.CatalogueRow` apply
+    The hedges of :class:`~phonometry.io.CatalogueRow` apply
     to each band as to any other field, and the material's thickness,
     density or mounting are part of :attr:`name`, as the page prints them,
     because the books print them there and pulling them into fields would
@@ -198,8 +200,8 @@ _TABLES = (
 )
 
 #: A square foot in square metres, exact since the 1959 definition of the
-#: yard. Long prints his two absorption areas in sabins, which in a table set
-#: in inches and pounds are square feet of perfect absorption.
+#: yard. Long's two absorption areas are in sabins, which in a table set in
+#: inches and pounds are square feet of perfect absorption.
 _SQUARE_FOOT_M2 = 0.09290304
 
 #: A thousand cubic feet in cubic metres, exact for the same reason. Long
@@ -207,22 +209,16 @@ _SQUARE_FOOT_M2 = 0.09290304
 _THOUSAND_CUBIC_FEET_M3 = 28.316846592
 
 #: The imperial suffixes a data file may write an area field with, each with
-#: the factor that takes the printed number to the metric field and the
-#: wording that goes into :attr:`~phonometry._internal.catalogue.CatalogueRow.derived`.
+#: the factor that takes the page's figure to the metric field and the unit
+#: the figure is in, which :attr:`~phonometry.io.CatalogueRow.converted` keeps
+#: beside it.
 _IMPERIAL_AREAS = (
     (
         "_ft2_per_1000_ft3",
         _SQUARE_FOOT_M2 / _THOUSAND_CUBIC_FEET_M3,
-        "from the {printed} sabins per 1000 cubic feet the page prints, at "
-        "0.092 903 04 m² to the square foot and 28.316 846 592 m³ to the "
-        "thousand cubic feet",
+        "sabins per 1000 ft3",
     ),
-    (
-        "_ft2",
-        _SQUARE_FOOT_M2,
-        "from the {printed} sabins the page prints, at 0.092 903 04 m² to "
-        "the square foot",
-    ),
+    ("_ft2", _SQUARE_FOOT_M2, "sabins"),
 )
 
 
@@ -241,28 +237,30 @@ def _metric(fields: dict[str, Any]) -> dict[str, Any]:
     """The area fields of a row in square metres, converted where printed otherwise.
 
     A data file writes what the page prints, so a table set in feet writes
-    ``absorption_area_125_ft2`` and the number beside it is the sabins on the
-    page. The row holds square metres, because every other row does and
-    because a caller adding an audience to a room in metres cannot be handed
-    square feet under a field that says ``m2``. The conversion is done here,
-    once, and the field is marked derived with the printed number in the
-    wording, so the page's own figure is never more than a lookup away and
-    :meth:`~phonometry._internal.catalogue.CatalogueRow.is_derived` says
-    which cells were converted.
+    ``absorption_area_125_ft2`` and the number beside it is the page's
+    figure, in sabins. The row holds square metres, because every other row
+    does and because a caller adding an audience to a room in metres cannot
+    be handed square feet under a field that says ``m2``. The conversion is
+    done here, once, and :attr:`~phonometry.io.CatalogueRow.converted` keeps
+    the page's figure and its unit, so the page's own number is never more
+    than a lookup away. It is not a derivation: the value is the page's, in
+    another unit. The unit is the suffix the data file writes, and a page
+    that prints its figures bare, as Long does for his musician, says in the
+    row's note why they are sabins.
     """
-    converted = dict(fields)
-    derived = dict(fields.get("derived", {}))
+    metric_fields = dict(fields)
+    converted = dict(fields.get("converted", {}))
     for name, value in fields.items():
-        for suffix, factor, wording in _IMPERIAL_AREAS:
+        for suffix, factor, unit in _IMPERIAL_AREAS:
             if name.startswith("absorption_area_") and name.endswith(suffix):
                 metric = f"{name.removesuffix(suffix)}_m2"
-                del converted[name]
-                converted[metric] = value * factor
-                derived[metric] = wording.format(printed=value)
+                del metric_fields[name]
+                metric_fields[metric] = value * factor
+                converted[metric] = (repr(value), unit)
                 break
-    if derived:
-        converted["derived"] = derived
-    return converted
+    if converted:
+        metric_fields["converted"] = converted
+    return metric_fields
 
 
 def _load() -> tuple[dict[str, AbsorptionSpectrum], dict[str, AbsorptionAreaSpectrum]]:

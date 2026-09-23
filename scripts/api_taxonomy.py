@@ -633,6 +633,14 @@ OBJECT_MODULE_OVERRIDES: dict[str, str] = {
     "sidecar_path": "phonometry.io",
     "write": "phonometry.io",
     "write_sidecar": "phonometry.io",
+    # The catalogue row types are defined in phonometry._internal.catalogue,
+    # because the domain packages whose tables hand out rows import them and
+    # io importing a domain would close a cycle; io publishes them, as it
+    # publishes Signal, and they are documented there.
+    "CATALOGUE_BASES": "phonometry.io",
+    "BandedRow": "phonometry.io",
+    "CatalogueError": "phonometry.io",
+    "CatalogueRow": "phonometry.io",
     # Defined in phonometry.emission._shared, where the three sound power
     # standards share it; documented with the free-field method that raises it
     # most often.

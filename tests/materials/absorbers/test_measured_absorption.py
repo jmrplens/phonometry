@@ -178,8 +178,8 @@ def test_each_long_row_holds_what_the_second_reader_read(
 ) -> None:
     """Cell by cell, the mount included, with the sabins converted on this side.
 
-    The oracle keeps the sabins the page prints; the catalogue holds square
-    metres. The conversion is redone here from the foot, so a wrong factor in
+    The oracle keeps the page's figures, which are sabins; the catalogue
+    holds square metres. The conversion is redone here from the foot, so a wrong factor in
     the library and a wrong factor in this test would have to agree to pass.
     """
     matches = [
@@ -201,16 +201,18 @@ def test_each_long_row_holds_what_the_second_reader_read(
         return
     assert isinstance(row, AbsorptionAreaSpectrum)
     factor = SQUARE_FOOT_M2
+    unit = "sabins"
     if "per 1000 cubic feet" in name:
         factor /= THOUSAND_CUBIC_FEET_M3
+        unit = "sabins per 1000 ft3"
     for band, printed in zip(ref.LONG_7_1_BANDS_HZ, values, strict=True):
         held = getattr(row, f"absorption_area_{band}_m2")
         if printed is None:
             assert held is None
             continue
         assert held == pytest.approx(printed * factor, rel=1e-12)
-        assert row.is_derived(f"absorption_area_{band}_m2")
-        assert str(printed) in row.derived[f"absorption_area_{band}_m2"]
+        assert not row.is_derived(f"absorption_area_{band}_m2")
+        assert row.converted[f"absorption_area_{band}_m2"] == (repr(printed), unit)
 
 
 def test_the_mount_is_printed_on_sixty_two_rows_and_on_none_of_bies() -> None:
@@ -242,14 +244,20 @@ def test_a_thickness_printed_alone_is_held_under_its_heading() -> None:
     assert all(not row.mounting for row in liners)
 
 
-def test_the_musician_is_an_area_per_person_in_square_metres_marked_derived() -> None:
-    """The page prints sabins; the field says m2 and holds m2, and says so."""
+def test_the_musician_is_an_area_per_person_in_square_metres_marked_converted() -> None:
+    """The page prints bare figures read as sabins; the field holds m2 and says so.
+
+    Long prints the musician's six figures with no unit (PDF page 290, folio
+    286), and only the row below names its sabins, so the row's note says why
+    the unit recorded beside the page's figure is the sabin.
+    """
     row = PUBLISHED_ABSORPTION_AREAS[f"{LONG}/musician_per_person_with_instrument"]
+    assert row.note.startswith("The page prints these six figures with no unit.")
     assert row.per == "person"
     assert row.bands() == (125, 250, 500, 1000, 2000, 4000)
     assert row.spectrum()[125] == pytest.approx(4.0 * SQUARE_FOOT_M2)
-    assert row.is_derived("absorption_area_125_m2")
-    assert "4.0 sabins" in row.derived["absorption_area_125_m2"]
+    assert row.converted["absorption_area_125_m2"] == ("4.0", "sabins")
+    assert not row.is_derived("absorption_area_125_m2")
     assert not hasattr(row, "absorption_area_125_ft2")
 
 
@@ -263,7 +271,7 @@ def test_the_air_is_an_area_per_cubic_metre_in_the_three_bands_the_page_fills() 
     assert row.spectrum()[1000] == pytest.approx(
         0.9 * SQUARE_FOOT_M2 / THOUSAND_CUBIC_FEET_M3
     )
-    assert "0.9 sabins per 1000 cubic feet" in row.derived["absorption_area_1000_m2"]
+    assert row.converted["absorption_area_1000_m2"] == ("0.9", "sabins per 1000 ft3")
     assert "does not give it" in row.why_missing("absorption_area_125_m2")
 
 

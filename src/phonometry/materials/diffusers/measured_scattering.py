@@ -28,9 +28,9 @@ The band is the field
 These tables are set in one-third octave bands, so each band is a field of
 its own, ``scattering_coefficient_1000`` and so on, with the band's centre
 frequency in hertz as the suffix and no unit because the quantity has none.
-Every hedge of :class:`~phonometry._internal.catalogue.CatalogueRow` is keyed
+Every hedge of :class:`~phonometry.io.CatalogueRow` is keyed
 by field name, so a band the page leaves empty says so through
-:meth:`~phonometry._internal.catalogue.CatalogueRow.why_missing` rather than
+:meth:`~phonometry.io.CatalogueRow.why_missing` rather than
 answering zero, and a zero here would read as a perfectly specular surface.
 :meth:`ScatteringCoefficientSpectrum.bands` and
 :meth:`~ScatteringCoefficientSpectrum.spectrum` hand the row back as a
@@ -49,7 +49,7 @@ times and puts no ceiling on the result.
 
 The surfaces are described, not named. A row reads ``"h = w = 10 cm,
 L = 2h"`` and means nothing without the group heading above it, so
-:attr:`~phonometry._internal.catalogue.CatalogueRow.group` carries that
+:attr:`~phonometry.io.CatalogueRow.group` carries that
 heading and :func:`scattering_named` matches on either.
 """
 

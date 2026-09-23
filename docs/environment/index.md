@@ -11,8 +11,10 @@ method stops being enough.
 
 The **assessment** pages handle what happens once the sound has arrived: the
 ISO 1996 rating level and the day-evening-night indicators, their Spanish
-application in RD 1367/2007, and the NT ACOU 112 adjustment that quantifies when
-impulsive character makes a received sound more annoying than its LAeq suggests.
+application in RD 1367/2007, the NT ACOU 112 adjustment that quantifies when
+impulsive character makes a received sound more annoying than its LAeq suggests,
+and the ISO 13474 distribution that says how often a distant blast is heard at
+each sound exposure level as the weather between source and receiver changes.
 
 The **source** pages handle the other end: what emits, described the way an
 environmental model wants it. CNOSSOS-EU gives road traffic and railways a
@@ -55,6 +57,10 @@ What the received sound is rated against, once it has arrived.
 - [Impulsive-sound prominence (NT ACOU 112)](assessment/impulsive-sound.md):
   the predicted prominence of impulsive sounds and the graduated adjustment
   added to LAeq.
+- [Impulsive Sound Exposure Statistics (ISO 13474)](assessment/sel-distribution.md):
+  how often a distant blast is how loud: the long-term and rating levels of
+  its sound exposure level over the replica atmospheres, the distribution
+  spread for turbulence and the level exceeded by any share of the events.
 
 ## [Outdoor sound](propagation/index.md)
 

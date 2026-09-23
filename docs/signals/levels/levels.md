@@ -485,9 +485,10 @@ The same pressure reads $10\lg(20^2/1^2) \approx 26.0$ dB higher against the
 1 µPa of water than against the 20 µPa of air (note b of Table 2), which is
 the step `underwater.in_air_to_underwater_spl` applies. Where a standard
 counts from another value, the module that implements it keeps that value and
-names the document beside it: DIN 45672-2 refers railway vibration to the
-$5\cdot10^{-8}$ m/s of DIN EN 21683 (ISO 1683:1983), and ISO/TS 7849 and
-ISO 9611 use the 50 nm/s of note b.
+names the document beside it: DIN 45672-2 defines its own
+$5\cdot10^{-8}$ m/s for the velocity level of railway vibration, and ISO/TS 7849
+and ISO 9611 count the surface velocity from the same value, which is the
+50 nm/s that note b of Table 3 says is also used for structure-borne sound.
 
 ```python
 from phonometry import metrology

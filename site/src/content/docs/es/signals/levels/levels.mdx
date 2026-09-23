@@ -851,7 +851,7 @@ La balística de envolvente Fast/Slow/Impulse de la IEC 61672-1:2013 que hay
 tras los niveles percentiles, el pico ponderado C del apartado 5.13
 (`lc_peak`, verificado frente a la Tabla 5) y el nivel de exposición sonora
 (`sel`, verificado frente a la columna $L_{\mathrm{A}E}$ de la Tabla 4); la exposición
-sonora y el LEX,8h de la IEC 61252:1993 (`sound_exposure`, `lex_8h`); y el
+sonora y el LEX,8h de la IEC 61252:1993 (`sound_exposure`, `lex_8h`); el
 espectrograma en bandas de fracción de octava de
 `OctaveFilterBank.spectrogram`; y los valores de referencia de la
 ISO 1683:2015 desde los que se cuenta cada nivel, publicados como
@@ -929,9 +929,11 @@ La misma presión se lee $10\lg(20^2/1^2) \approx 26{,}0$ dB más alta frente
 al 1 µPa del agua que frente a los 20 µPa del aire (nota b de la Tabla 2), que
 es el paso que aplica `underwater.in_air_to_underwater_spl`. Cuando una norma
 cuenta desde otro valor, el módulo que la implementa conserva ese valor y
-nombra el documento a su lado: la DIN 45672-2 refiere la vibración ferroviaria
-a los $5\cdot10^{-8}$ m/s de la DIN EN 21683 (ISO 1683:1983), y la
-ISO/TS 7849 y la ISO 9611 usan los 50 nm/s de la nota b.
+nombra el documento a su lado: la DIN 45672-2 define sus propios
+$5\cdot10^{-8}$ m/s para el nivel de velocidad de la vibración ferroviaria, y la
+ISO/TS 7849 y la ISO 9611 cuentan la velocidad superficial desde el mismo
+valor, que son los 50 nm/s que la nota b de la Tabla 3 dice que también se
+usan para el ruido estructural.
 
 ```python
 from phonometry import metrology

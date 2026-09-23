@@ -25,6 +25,12 @@ references:
     note: "Las referencias de 1 µPa (presión) y 1 µPa²·s (exposición) y las definiciones de nivel de presión acústica, nivel de exposición sonora y nivel de pico."
   - type: standard
     organization: "International Organization for Standardization"
+    year: 2015
+    title: "Acoustics. Preferred reference values for acoustical and vibratory levels"
+    designation: "ISO 1683:2015"
+    note: "Los 20 µPa de la Tabla 1 y el 1 µPa de la Tabla 2 entre los que la sección 1 re-referencia un nivel, y la nota b de la Tabla 2, los 26,0 dB entre ellos; publicados como metrology.ISO1683_REFERENCE_VALUES. Leída en la adopción española UNE-EN ISO 1683:2016."
+  - type: standard
+    organization: "International Organization for Standardization"
     year: 2016
     title: "Underwater acoustics — Quantities and procedures for description and measurement of underwater sound from ships — Part 1: Requirements for precision measurements in deep water used for comparison purposes"
     designation: "ISO 17208-1:2016"
@@ -105,6 +111,14 @@ Para re-referenciar un nivel entre las convenciones submarina (1 µPa) y aérea
 equivalencia de energía/intensidad, usa `underwater_to_in_air_spl` /
 `in_air_to_underwater_spl`. Para restar el ruido de fondo, reutiliza el
 `background_noise_correction` ($K_1$) de la ISO 3744.
+
+Las dos referencias son presiones acústicas de la ISO 1683:2015, los 20 µPa de
+la Tabla 1 para los gases y el 1 µPa de la Tabla 2 para los líquidos, y la
+nota b de la Tabla 2 imprime el salto entre ellas como aproximadamente 26,0 dB.
+La biblioteca las publica, con el resto de los valores de referencia de esa
+norma, como `metrology.ISO1683_REFERENCE_VALUES`; la
+[guía de niveles](/phonometry/es/signals/levels/levels/#desde-qué-valor-de-referencia-se-cuenta-cada-nivel)
+las recoge todas.
 
 ## 2. Ruido radiado y nivel de fuente de buques (ISO 17208-1/-2)
 

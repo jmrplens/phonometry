@@ -834,13 +834,16 @@ def cell(
         note = row.derived.get(field, "")
         if row.is_approximate(field):
             kind, note = "approximate", "the page prints it with a tilde"
-        # Only the orthotropic woods carry this hedge: a number the page prints
-        # and marks as the author's guess. It is served, so the cell is not
-        # empty, and it is not a measurement, so it is not "printed" either.
-        is_estimated = getattr(row, "is_estimated", None)
-        # The note stays empty so that the page reads the kind's own words,
-        # which it has in both languages.
-        if is_estimated is not None and is_estimated(field):
+        # The solids and the orthotropic woods carry this hedge: a number the
+        # page prints and marks as the author's guess. It is served, so the
+        # cell is not empty, and it is not a measurement, so it is not
+        # "printed" either. Both rows keep the hedged fields in a field named
+        # ``estimated``, and that field is what is read here: the method that
+        # answers for it is spelled ``is_estimate`` on one row and
+        # ``is_estimated`` on the other, and asking for one spelling showed
+        # every estimated solid as printed. The note stays empty so that the
+        # page reads the kind's own words, which it has in both languages.
+        if field in getattr(row, "estimated", frozenset()):
             kind, note = "estimated", ""
         text = written(value, exact=not derived)
         # The plus-or-minus a page prints beside the value is written in the

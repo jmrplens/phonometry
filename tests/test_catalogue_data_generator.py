@@ -16,6 +16,7 @@ from __future__ import annotations
 import dataclasses
 import pathlib
 import sys
+from collections.abc import Mapping
 
 import pytest
 
@@ -241,6 +242,37 @@ def test_a_derived_cell_says_what_it_came_from() -> None:
 
     assert cell["kind"] == "derived"
     assert cell["note"] == "from the speed and the density"
+
+
+def test_every_cell_a_page_marks_as_an_estimate_reads_as_one() -> None:
+    """Every published catalogue, not the one row a defect was found on.
+
+    The generator asked each row for ``is_estimated``, which the woods
+    spell and the solids do not (theirs is ``is_estimate``), so the 33
+    estimated cells of 21 solids reached the page as printed numbers, among
+    them the Poisson's ratio 0.2 of the aircrete of Hopkins Table A2. The
+    walk covers every catalogue the generator publishes, so a row type that
+    gains the hedge later is held to it as well.
+    """
+    catalogues = [
+        catalogue
+        for name, catalogue in vars(gcd).items()
+        if name.startswith("PUBLISHED_") and isinstance(catalogue, Mapping)
+    ]
+    estimated = [
+        (key, row, field)
+        for catalogue in catalogues
+        for key, row in catalogue.items()
+        for field in getattr(row, "estimated", ())
+    ]
+
+    assert len(estimated) >= 35
+    wrong = [
+        f"{key}: {field}"
+        for key, row, field in estimated
+        if gcd.cell(row, field)["kind"] != "estimated"
+    ]
+    assert not wrong, wrong
 
 
 def test_an_interval_stays_an_interval() -> None:

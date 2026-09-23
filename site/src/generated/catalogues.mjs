@@ -126,7 +126,7 @@ export const catalogues = {
           },
           {
             "text": "0,2",
-            "kind": "printed",
+            "kind": "estimated",
             "note": ""
           },
           {
@@ -310,7 +310,7 @@ export const catalogues = {
           },
           {
             "text": "0,2",
-            "kind": "printed",
+            "kind": "estimated",
             "note": ""
           },
           {
@@ -345,7 +345,7 @@ export const catalogues = {
           },
           {
             "text": "0,01",
-            "kind": "printed",
+            "kind": "estimated",
             "note": ""
           },
           {
@@ -402,7 +402,7 @@ export const catalogues = {
           },
           {
             "text": "0,2",
-            "kind": "printed",
+            "kind": "estimated",
             "note": ""
           },
           {
@@ -494,7 +494,7 @@ export const catalogues = {
           },
           {
             "text": "0,3",
-            "kind": "printed",
+            "kind": "estimated",
             "note": ""
           },
           {
@@ -529,7 +529,7 @@ export const catalogues = {
           },
           {
             "text": "0,01",
-            "kind": "printed",
+            "kind": "estimated",
             "note": ""
           },
           {
@@ -586,7 +586,7 @@ export const catalogues = {
           },
           {
             "text": "0,2",
-            "kind": "printed",
+            "kind": "estimated",
             "note": ""
           },
           {
@@ -621,7 +621,7 @@ export const catalogues = {
           },
           {
             "text": "0,01",
-            "kind": "printed",
+            "kind": "estimated",
             "note": ""
           },
           {
@@ -678,7 +678,7 @@ export const catalogues = {
           },
           {
             "text": "0,2",
-            "kind": "printed",
+            "kind": "estimated",
             "note": ""
           },
           {
@@ -713,7 +713,7 @@ export const catalogues = {
           },
           {
             "text": "0,01",
-            "kind": "printed",
+            "kind": "estimated",
             "note": ""
           },
           {
@@ -770,7 +770,7 @@ export const catalogues = {
           },
           {
             "text": "0,2",
-            "kind": "printed",
+            "kind": "estimated",
             "note": ""
           },
           {
@@ -805,7 +805,7 @@ export const catalogues = {
           },
           {
             "text": "0,01",
-            "kind": "printed",
+            "kind": "estimated",
             "note": ""
           },
           {
@@ -862,7 +862,7 @@ export const catalogues = {
           },
           {
             "text": "0,2",
-            "kind": "printed",
+            "kind": "estimated",
             "note": ""
           },
           {
@@ -897,7 +897,7 @@ export const catalogues = {
           },
           {
             "text": "0,005",
-            "kind": "printed",
+            "kind": "estimated",
             "note": ""
           },
           {
@@ -954,7 +954,7 @@ export const catalogues = {
           },
           {
             "text": "0,2",
-            "kind": "printed",
+            "kind": "estimated",
             "note": ""
           },
           {
@@ -989,7 +989,7 @@ export const catalogues = {
           },
           {
             "text": "0,01",
-            "kind": "printed",
+            "kind": "estimated",
             "note": ""
           },
           {
@@ -1046,7 +1046,7 @@ export const catalogues = {
           },
           {
             "text": "0,2",
-            "kind": "printed",
+            "kind": "estimated",
             "note": ""
           },
           {
@@ -1081,7 +1081,7 @@ export const catalogues = {
           },
           {
             "text": "0,007",
-            "kind": "printed",
+            "kind": "estimated",
             "note": ""
           },
           {
@@ -1230,7 +1230,7 @@ export const catalogues = {
           },
           {
             "text": "0,2",
-            "kind": "printed",
+            "kind": "estimated",
             "note": ""
           },
           {
@@ -1265,7 +1265,7 @@ export const catalogues = {
           },
           {
             "text": "0,01",
-            "kind": "printed",
+            "kind": "estimated",
             "note": ""
           },
           {
@@ -1322,7 +1322,7 @@ export const catalogues = {
           },
           {
             "text": "0,3",
-            "kind": "printed",
+            "kind": "estimated",
             "note": ""
           },
           {
@@ -1357,7 +1357,7 @@ export const catalogues = {
           },
           {
             "text": "0,01",
-            "kind": "printed",
+            "kind": "estimated",
             "note": ""
           },
           {
@@ -1506,7 +1506,7 @@ export const catalogues = {
           },
           {
             "text": "0,3",
-            "kind": "printed",
+            "kind": "estimated",
             "note": ""
           },
           {
@@ -1541,7 +1541,7 @@ export const catalogues = {
           },
           {
             "text": "0,01",
-            "kind": "printed",
+            "kind": "estimated",
             "note": ""
           },
           {
@@ -1598,7 +1598,7 @@ export const catalogues = {
           },
           {
             "text": "0,3",
-            "kind": "printed",
+            "kind": "estimated",
             "note": ""
           },
           {
@@ -1690,7 +1690,7 @@ export const catalogues = {
           },
           {
             "text": "0,2",
-            "kind": "printed",
+            "kind": "estimated",
             "note": ""
           },
           {
@@ -1725,7 +1725,7 @@ export const catalogues = {
           },
           {
             "text": "0,012",
-            "kind": "printed",
+            "kind": "estimated",
             "note": ""
           },
           {
@@ -1782,7 +1782,7 @@ export const catalogues = {
           },
           {
             "text": "0,3",
-            "kind": "printed",
+            "kind": "estimated",
             "note": ""
           },
           {
@@ -1874,7 +1874,7 @@ export const catalogues = {
           },
           {
             "text": "0,3",
-            "kind": "printed",
+            "kind": "estimated",
             "note": ""
           },
           {
@@ -1966,7 +1966,7 @@ export const catalogues = {
           },
           {
             "text": "0,3",
-            "kind": "printed",
+            "kind": "estimated",
             "note": ""
           },
           {
@@ -2058,7 +2058,7 @@ export const catalogues = {
           },
           {
             "text": "0,3",
-            "kind": "printed",
+            "kind": "estimated",
             "note": ""
           },
           {
@@ -2150,7 +2150,7 @@ export const catalogues = {
           },
           {
             "text": "0,2",
-            "kind": "printed",
+            "kind": "estimated",
             "note": ""
           },
           {
@@ -2336,7 +2336,7 @@ export const catalogues = {
           },
           {
             "text": "0,3",
-            "kind": "printed",
+            "kind": "estimated",
             "note": ""
           },
           {

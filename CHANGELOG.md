@@ -107,6 +107,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **An estimate in the solids catalogue reads as an estimate on the page.**
+  The published catalogues page showed the 33 cells of Hopkins Table A2 that
+  the book marks as estimates, the Poisson's ratio of all 21 of its solids
+  (0.2 for the aircrete, for one) and 12 of their flexural loss factors, as
+  numbers the page prints. The page generator asked each row
+  for `is_estimated`, which is how the orthotropic woods spell the question,
+  while `SolidMaterial` spells it `is_estimate`, so only the two estimated
+  wood cells were ever marked. It now reads the `estimated` field both rows
+  carry, and a test walks every estimated cell of every published catalogue,
+  so a row type that gains the hedge later is held to it too. The values
+  themselves, and what the library serves for them, do not change.
 - **The Spanish building-acoustics figures have their accents and eñes
   back.** Twenty-nine Spanish labels of six figures had been typed without
   them: `background_correction_regimes` read "Correccion por ruido de fondo",

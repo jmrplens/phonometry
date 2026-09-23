@@ -10,6 +10,7 @@ import numpy as np
 
 from .._internal.warnings import PhonometryWarning
 from ..io._resolve import SignalInput, resolve_optional_fs, resolve_samples
+from .reference_values import ISO1683_REFERENCE_VALUES
 
 # IEC 60942:2017 Table 2 (p. 16) row edges in Hz for the class 1 short-term
 # level fluctuation limits; outside the specified span the strictest limit
@@ -20,6 +21,8 @@ _TABLE2_STRICT_ROW_MIN_HZ = 160.0  # at and above, the strictest 0.07 dB applies
 # Minimum sample count for the Hann-windowed coherent (Goertzel) tone
 # estimate; a shorter take falls back to broadband RMS.
 _MIN_COHERENT_SAMPLES = 4
+#: Reference sound pressure in air, 20 µPa (ISO 1683:2015 Table 1).
+_P0 = ISO1683_REFERENCE_VALUES["gas"]["sound_pressure"].value
 
 
 class CalibrationWarning(PhonometryWarning):
@@ -75,7 +78,7 @@ def sensitivity(
 def sensitivity(
     ref_signal: SignalInput,
     target_spl: float = 94.0,
-    reference_pressure_pa: float = 2e-5,
+    reference_pressure_pa: float = _P0,
     fs: int | None = None,
     *,
     validate: bool = True,

@@ -3,13 +3,13 @@
   "library": "4.0.0rc1",
   "generator": "scripts/conformance_report.py",
   "counts": {
-    "checks": 1261,
-    "passing": 1261,
+    "checks": 1281,
+    "passing": 1281,
     "failing": 0,
     "domains": 87,
-    "standards": 461,
-    "citations": 862,
-    "designations": 179,
+    "standards": 462,
+    "citations": 867,
+    "designations": 180,
     "sources": 114
   },
   "units": [
@@ -20,15 +20,18 @@
     "Cam",
     "EPNdB",
     "Hz",
+    "J",
     "LKFS",
     "LU",
     "LUFS",
     "MN/m³",
     "MPa",
+    "N",
     "N/m",
     "Np/rad",
     "N·s/m",
     "Pa",
+    "Pa²·s",
     "Pa·s/m²",
     "W",
     "W/m²",
@@ -101,8 +104,8 @@
     {
       "id": "levels-dosimetry",
       "title": "Levels & dosimetry",
-      "checks": 9,
-      "passing": 9
+      "checks": 29,
+      "passing": 29
     },
     {
       "id": "room-building-acoustics",
@@ -2292,6 +2295,780 @@
         "value": 0.0
       },
       "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "levels-dosimetry/iso-1683-2015-table-1/reference-sound-pressure-air-and-other-gases-20-pa",
+      "domain": "levels-dosimetry",
+      "reference": {
+        "cite": "ISO 1683:2015 Table 1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 1683",
+            "edition": "2015",
+            "clause": "Table 1"
+          }
+        ]
+      },
+      "quantity": "Reference sound pressure, air and other gases (20 µPa)",
+      "kind": "record",
+      "expected": {
+        "label": "20 µPa = 2e-05 Pa",
+        "record": {
+          "sound_pressure": 2e-05
+        }
+      },
+      "computed": {
+        "label": "2e-05 Pa (20 µPa)",
+        "record": {
+          "sound_pressure": 2e-05
+        }
+      },
+      "unit": "Pa",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "levels-dosimetry/iso-1683-2015-table-1/reference-sound-exposure-air-and-other-gases-20-pa-s",
+      "domain": "levels-dosimetry",
+      "reference": {
+        "cite": "ISO 1683:2015 Table 1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 1683",
+            "edition": "2015",
+            "clause": "Table 1"
+          }
+        ]
+      },
+      "quantity": "Reference sound exposure, air and other gases ((20 µPa)² s)",
+      "kind": "record",
+      "expected": {
+        "label": "(20 µPa)² s = 4e-10 Pa²·s",
+        "record": {
+          "sound_exposure": 4e-10
+        }
+      },
+      "computed": {
+        "label": "4e-10 Pa²·s ((20 µPa)² s)",
+        "record": {
+          "sound_exposure": 4e-10
+        }
+      },
+      "unit": "Pa²·s",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "levels-dosimetry/iso-1683-2015-table-1/reference-sound-power-air-and-other-gases-1-pw",
+      "domain": "levels-dosimetry",
+      "reference": {
+        "cite": "ISO 1683:2015 Table 1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 1683",
+            "edition": "2015",
+            "clause": "Table 1"
+          }
+        ]
+      },
+      "quantity": "Reference sound power, air and other gases (1 pW)",
+      "kind": "record",
+      "expected": {
+        "label": "1 pW = 1e-12 W",
+        "record": {
+          "sound_power": 1e-12
+        }
+      },
+      "computed": {
+        "label": "1e-12 W (1 pW)",
+        "record": {
+          "sound_power": 1e-12
+        }
+      },
+      "unit": "W",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "levels-dosimetry/iso-1683-2015-table-1/reference-sound-energy-air-and-other-gases-1-pj",
+      "domain": "levels-dosimetry",
+      "reference": {
+        "cite": "ISO 1683:2015 Table 1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 1683",
+            "edition": "2015",
+            "clause": "Table 1"
+          }
+        ]
+      },
+      "quantity": "Reference sound energy, air and other gases (1 pJ)",
+      "kind": "record",
+      "expected": {
+        "label": "1 pJ = 1e-12 J",
+        "record": {
+          "sound_energy": 1e-12
+        }
+      },
+      "computed": {
+        "label": "1e-12 J (1 pJ)",
+        "record": {
+          "sound_energy": 1e-12
+        }
+      },
+      "unit": "J",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "levels-dosimetry/iso-1683-2015-table-1/reference-sound-intensity-air-and-other-gases-1-pw-m",
+      "domain": "levels-dosimetry",
+      "reference": {
+        "cite": "ISO 1683:2015 Table 1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 1683",
+            "edition": "2015",
+            "clause": "Table 1"
+          }
+        ]
+      },
+      "quantity": "Reference sound intensity, air and other gases (1 pW/m²)",
+      "kind": "record",
+      "expected": {
+        "label": "1 pW/m² = 1e-12 W/m²",
+        "record": {
+          "sound_intensity": 1e-12
+        }
+      },
+      "computed": {
+        "label": "1e-12 W/m² (1 pW/m²)",
+        "record": {
+          "sound_intensity": 1e-12
+        }
+      },
+      "unit": "W/m²",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "levels-dosimetry/iso-1683-2015-table-2/reference-sound-pressure-water-and-other-liquids-1-pa",
+      "domain": "levels-dosimetry",
+      "reference": {
+        "cite": "ISO 1683:2015 Table 2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 1683",
+            "edition": "2015",
+            "clause": "Table 2"
+          }
+        ]
+      },
+      "quantity": "Reference sound pressure, water and other liquids (1 µPa)",
+      "kind": "record",
+      "expected": {
+        "label": "1 µPa = 1e-06 Pa",
+        "record": {
+          "sound_pressure": 1e-06
+        }
+      },
+      "computed": {
+        "label": "1e-06 Pa (1 µPa)",
+        "record": {
+          "sound_pressure": 1e-06
+        }
+      },
+      "unit": "Pa",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "levels-dosimetry/iso-1683-2015-table-2/reference-sound-exposure-water-and-other-liquids-1-pa-s",
+      "domain": "levels-dosimetry",
+      "reference": {
+        "cite": "ISO 1683:2015 Table 2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 1683",
+            "edition": "2015",
+            "clause": "Table 2"
+          }
+        ]
+      },
+      "quantity": "Reference sound exposure, water and other liquids (1 µPa² s)",
+      "kind": "record",
+      "expected": {
+        "label": "1 µPa² s = 1e-12 Pa²·s",
+        "record": {
+          "sound_exposure": 1e-12
+        }
+      },
+      "computed": {
+        "label": "1e-12 Pa²·s (1 µPa² s)",
+        "record": {
+          "sound_exposure": 1e-12
+        }
+      },
+      "unit": "Pa²·s",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "levels-dosimetry/iso-1683-2015-table-2/reference-sound-power-water-and-other-liquids-1-pw",
+      "domain": "levels-dosimetry",
+      "reference": {
+        "cite": "ISO 1683:2015 Table 2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 1683",
+            "edition": "2015",
+            "clause": "Table 2"
+          }
+        ]
+      },
+      "quantity": "Reference sound power, water and other liquids (1 pW)",
+      "kind": "record",
+      "expected": {
+        "label": "1 pW = 1e-12 W",
+        "record": {
+          "sound_power": 1e-12
+        }
+      },
+      "computed": {
+        "label": "1e-12 W (1 pW)",
+        "record": {
+          "sound_power": 1e-12
+        }
+      },
+      "unit": "W",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "levels-dosimetry/iso-1683-2015-table-2/reference-sound-energy-water-and-other-liquids-1-pj",
+      "domain": "levels-dosimetry",
+      "reference": {
+        "cite": "ISO 1683:2015 Table 2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 1683",
+            "edition": "2015",
+            "clause": "Table 2"
+          }
+        ]
+      },
+      "quantity": "Reference sound energy, water and other liquids (1 pJ)",
+      "kind": "record",
+      "expected": {
+        "label": "1 pJ = 1e-12 J",
+        "record": {
+          "sound_energy": 1e-12
+        }
+      },
+      "computed": {
+        "label": "1e-12 J (1 pJ)",
+        "record": {
+          "sound_energy": 1e-12
+        }
+      },
+      "unit": "J",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "levels-dosimetry/iso-1683-2015-table-2/reference-sound-intensity-water-and-other-liquids-1-pw-m",
+      "domain": "levels-dosimetry",
+      "reference": {
+        "cite": "ISO 1683:2015 Table 2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 1683",
+            "edition": "2015",
+            "clause": "Table 2"
+          }
+        ]
+      },
+      "quantity": "Reference sound intensity, water and other liquids (1 pW/m²)",
+      "kind": "record",
+      "expected": {
+        "label": "1 pW/m² = 1e-12 W/m²",
+        "record": {
+          "sound_intensity": 1e-12
+        }
+      },
+      "computed": {
+        "label": "1e-12 W/m² (1 pW/m²)",
+        "record": {
+          "sound_intensity": 1e-12
+        }
+      },
+      "unit": "W/m²",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "levels-dosimetry/iso-1683-2015-table-2/reference-sound-particle-displacement-liquids-1-pm",
+      "domain": "levels-dosimetry",
+      "reference": {
+        "cite": "ISO 1683:2015 Table 2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 1683",
+            "edition": "2015",
+            "clause": "Table 2"
+          }
+        ]
+      },
+      "quantity": "Reference sound particle displacement, liquids (1 pm)",
+      "kind": "record",
+      "expected": {
+        "label": "1 pm = 1e-12 m",
+        "record": {
+          "particle_displacement": 1e-12
+        }
+      },
+      "computed": {
+        "label": "1e-12 m (1 pm)",
+        "record": {
+          "particle_displacement": 1e-12
+        }
+      },
+      "unit": "m",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "levels-dosimetry/iso-1683-2015-table-2/reference-sound-particle-velocity-liquids-1-nm-s",
+      "domain": "levels-dosimetry",
+      "reference": {
+        "cite": "ISO 1683:2015 Table 2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 1683",
+            "edition": "2015",
+            "clause": "Table 2"
+          }
+        ]
+      },
+      "quantity": "Reference sound particle velocity, liquids (1 nm/s)",
+      "kind": "record",
+      "expected": {
+        "label": "1 nm/s = 1e-09 m/s",
+        "record": {
+          "particle_velocity": 1e-09
+        }
+      },
+      "computed": {
+        "label": "1e-09 m/s (1 nm/s)",
+        "record": {
+          "particle_velocity": 1e-09
+        }
+      },
+      "unit": "m/s",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "levels-dosimetry/iso-1683-2015-table-2/reference-sound-particle-acceleration-liquids-1-m-s",
+      "domain": "levels-dosimetry",
+      "reference": {
+        "cite": "ISO 1683:2015 Table 2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 1683",
+            "edition": "2015",
+            "clause": "Table 2"
+          }
+        ]
+      },
+      "quantity": "Reference sound particle acceleration, liquids (1 µm/s²)",
+      "kind": "record",
+      "expected": {
+        "label": "1 µm/s² = 1e-06 m/s²",
+        "record": {
+          "particle_acceleration": 1e-06
+        }
+      },
+      "computed": {
+        "label": "1e-06 m/s² (1 µm/s²)",
+        "record": {
+          "particle_acceleration": 1e-06
+        }
+      },
+      "unit": "m/s²",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "levels-dosimetry/iso-1683-2015-table-2/reference-distance-for-compound-quantities-liquids-1-m",
+      "domain": "levels-dosimetry",
+      "reference": {
+        "cite": "ISO 1683:2015 Table 2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 1683",
+            "edition": "2015",
+            "clause": "Table 2"
+          }
+        ]
+      },
+      "quantity": "Reference distance for compound quantities, liquids (1 m)",
+      "kind": "record",
+      "expected": {
+        "label": "1 m",
+        "record": {
+          "distance": 1.0
+        }
+      },
+      "computed": {
+        "label": "1 m",
+        "record": {
+          "distance": 1.0
+        }
+      },
+      "unit": "m",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "levels-dosimetry/iso-1683-2015-table-3/reference-vibratory-displacement-1-pm",
+      "domain": "levels-dosimetry",
+      "reference": {
+        "cite": "ISO 1683:2015 Table 3",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 1683",
+            "edition": "2015",
+            "clause": "Table 3"
+          }
+        ]
+      },
+      "quantity": "Reference vibratory displacement (1 pm)",
+      "kind": "record",
+      "expected": {
+        "label": "1 pm = 1e-12 m",
+        "record": {
+          "displacement": 1e-12
+        }
+      },
+      "computed": {
+        "label": "1e-12 m (1 pm)",
+        "record": {
+          "displacement": 1e-12
+        }
+      },
+      "unit": "m",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "levels-dosimetry/iso-1683-2015-table-3/reference-vibratory-velocity-1-nm-s",
+      "domain": "levels-dosimetry",
+      "reference": {
+        "cite": "ISO 1683:2015 Table 3",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 1683",
+            "edition": "2015",
+            "clause": "Table 3"
+          }
+        ]
+      },
+      "quantity": "Reference vibratory velocity (1 nm/s)",
+      "kind": "record",
+      "expected": {
+        "label": "1 nm/s = 1e-09 m/s",
+        "record": {
+          "velocity": 1e-09
+        }
+      },
+      "computed": {
+        "label": "1e-09 m/s (1 nm/s)",
+        "record": {
+          "velocity": 1e-09
+        }
+      },
+      "unit": "m/s",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "levels-dosimetry/iso-1683-2015-table-3/reference-vibratory-acceleration-1-m-s",
+      "domain": "levels-dosimetry",
+      "reference": {
+        "cite": "ISO 1683:2015 Table 3",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 1683",
+            "edition": "2015",
+            "clause": "Table 3"
+          }
+        ]
+      },
+      "quantity": "Reference vibratory acceleration (1 µm/s²)",
+      "kind": "record",
+      "expected": {
+        "label": "1 µm/s² = 1e-06 m/s²",
+        "record": {
+          "acceleration": 1e-06
+        }
+      },
+      "computed": {
+        "label": "1e-06 m/s² (1 µm/s²)",
+        "record": {
+          "acceleration": 1e-06
+        }
+      },
+      "unit": "m/s²",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "levels-dosimetry/iso-1683-2015-table-3/reference-vibratory-force-1-n",
+      "domain": "levels-dosimetry",
+      "reference": {
+        "cite": "ISO 1683:2015 Table 3",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 1683",
+            "edition": "2015",
+            "clause": "Table 3"
+          }
+        ]
+      },
+      "quantity": "Reference vibratory force (1 µN)",
+      "kind": "record",
+      "expected": {
+        "label": "1 µN = 1e-06 N",
+        "record": {
+          "force": 1e-06
+        }
+      },
+      "computed": {
+        "label": "1e-06 N (1 µN)",
+        "record": {
+          "force": 1e-06
+        }
+      },
+      "unit": "N",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "levels-dosimetry/iso-1683-2015-table-3-note-b/alternative-vibratory-velocity-for-structure-borne-sound-50-nm-s",
+      "domain": "levels-dosimetry",
+      "reference": {
+        "cite": "ISO 1683:2015 Table 3, note b",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 1683",
+            "edition": "2015",
+            "clause": "Table 3, note b"
+          }
+        ]
+      },
+      "quantity": "Alternative vibratory velocity for structure-borne sound (50 nm/s)",
+      "kind": "record",
+      "expected": {
+        "label": "50 nm/s = 5e-08 m/s",
+        "record": {
+          "velocity_alternative": 5e-08
+        }
+      },
+      "computed": {
+        "label": "5e-08 m/s (50 nm/s)",
+        "record": {
+          "velocity_alternative": 5e-08
+        }
+      },
+      "unit": "m/s",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "levels-dosimetry/iso-1683-2015-table-2-note-b/level-re-1-pa-minus-level-re-20-pa-10-lg-20-1-printed-26-0-db",
+      "domain": "levels-dosimetry",
+      "reference": {
+        "cite": "ISO 1683:2015 Table 2, note b",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 1683",
+            "edition": "2015",
+            "clause": "Table 2, note b"
+          }
+        ]
+      },
+      "quantity": "Level re 1 µPa minus level re 20 µPa, 10 lg(20²/1²), printed ≈ 26.0 dB",
+      "kind": "scalar",
+      "expected": {
+        "value": 26.0
+      },
+      "computed": {
+        "value": 26.02
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.05
+      },
+      "deviation": {
+        "value": 0.021
+      },
+      "precision": 2,
       "verdict": "pass"
     },
     {

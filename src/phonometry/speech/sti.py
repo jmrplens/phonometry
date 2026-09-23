@@ -51,6 +51,10 @@ from .._internal.warnings import PhonometryWarning
 from ..filters.core import OctaveFilterBank
 from ..filters.frequencies import nominal_frequencies
 from ..io._resolve import apply_calibration, resolve_fs, resolve_pair_fs
+from ..metrology.reference_values import ISO1683_REFERENCE_VALUES
+
+#: Reference sound pressure in air, 20 µPa (ISO 1683:2015 Table 1).
+_P0 = ISO1683_REFERENCE_VALUES["gas"]["sound_pressure"].value
 
 
 class STIWarning(PhonometryWarning):
@@ -1094,4 +1098,4 @@ def stipa_signal(
     rms = float(np.sqrt(np.mean(out**2)))
     if level_db is None:
         return out * (0.1 / rms)
-    return np.asarray(out * (2e-5 * 10.0 ** (level_db / 20.0) / rms))
+    return np.asarray(out * (_P0 * 10.0 ** (level_db / 20.0) / rms))

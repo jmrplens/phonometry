@@ -9,6 +9,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- **The ISO 1683 reference values, published once and read by every level.**
+  `metrology.ISO1683_REFERENCE_VALUES` holds ISO 1683:2015 Tables 1 to 3,
+  the reference values for sound in gases, sound in liquids and vibration,
+  and the 50 nm/s that note b of Table 3 says is also used for structure-borne
+  sound, keyed by medium (`"gas"`, `"liquid"`, `"solid"`) and quantity. Each
+  row is a `metrology.ReferenceValue` with the value in SI, its unit, the
+  value as the table prints it (`"20 µPa"`) and the table it comes from. The
+  package used to type these numbers out wherever it needed one, the 20 µPa
+  seventeen times and the 1 pW seven, and every one of those copies now reads
+  the table; a module that counts from another reference, such as the
+  5·10⁻⁸ m/s that ISO/TS 7849, ISO 9611 and DIN 45672-2 count their velocity
+  levels from, keeps it and names the document beside it.
+  `scripts/check_reference_values.py` (`make reference-values`, and a job of
+  its own in CI) fails on a reference value that repeats the table instead of
+  reading it, on one that differs from it without naming its document and
+  being listed with its value, and on a table value written into the
+  arithmetic of a level (`log10(w / 1e-12)`, `10 ** (L / 10) * 1e-6`). Every
+  printed value of the three tables is a conformance row, with the 26.0 dB of
+  note b of Table 2 checked against `underwater.in_air_to_underwater_spl`, and
+  the integrated-levels and underwater acoustics guides point at the table
+  where a reader of a level looks for its reference. The railway vibration
+  guide no longer says DIN 45672-2 takes its 5·10⁻⁸ m/s from ISO 1683:1983:
+  the standard defines it in Formula (2) without naming a source. No number
+  the library returns changes.
 - **Three small catalogues a floor, a panel and a room need.**
   `materials.PUBLISHED_RESILIENT_MODULI` holds Vigran (2008) Table 8.3, the
   dynamic modulus of six resilient materials under a static load of about

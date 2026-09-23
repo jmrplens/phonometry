@@ -29,16 +29,21 @@ from typing import TYPE_CHECKING
 import numpy as np
 
 from ..io._resolve import SignalInput, apply_calibration, resolve_fs
+from ..metrology.reference_values import ISO1683_REFERENCE_VALUES
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
 
-#: Underwater reference sound pressure ``p₀`` (Pa), i.e. 1 µPa (ISO 18405).
-UNDERWATER_REFERENCE_PRESSURE = 1e-6
-#: Underwater reference sound exposure ``E₀`` (Pa²·s), i.e. 1 µPa²·s (ISO 18405).
-UNDERWATER_REFERENCE_EXPOSURE = 1e-12
-#: In-air reference sound pressure (Pa), i.e. 20 µPa.
-_IN_AIR_REFERENCE_PRESSURE = 20e-6
+#: ISO 1683:2015 Table 2, the reference values for sound in liquids.
+_LIQUID = ISO1683_REFERENCE_VALUES["liquid"]
+#: Underwater reference sound pressure ``p₀`` (Pa), i.e. 1 µPa (ISO 18405;
+#: ISO 1683:2015 Table 2).
+UNDERWATER_REFERENCE_PRESSURE = _LIQUID["sound_pressure"].value
+#: Underwater reference sound exposure ``E₀`` (Pa²·s), i.e. 1 µPa²·s (ISO 18405;
+#: ISO 1683:2015 Table 2).
+UNDERWATER_REFERENCE_EXPOSURE = _LIQUID["sound_exposure"].value
+#: In-air reference sound pressure (Pa), i.e. 20 µPa (ISO 1683:2015 Table 1).
+_IN_AIR_REFERENCE_PRESSURE = ISO1683_REFERENCE_VALUES["gas"]["sound_pressure"].value
 #: Level offset between the 20 µPa and 1 µPa references, ``20·lg(20)`` dB.
 _REFERENCE_OFFSET_DB = 20.0 * np.log10(
     _IN_AIR_REFERENCE_PRESSURE / UNDERWATER_REFERENCE_PRESSURE

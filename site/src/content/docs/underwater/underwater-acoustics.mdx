@@ -25,6 +25,12 @@ references:
     note: "The 1 µPa sound-pressure and 1 µPa²·s sound-exposure references and the definitions of sound pressure level, sound exposure level and peak sound pressure level."
   - type: standard
     organization: "International Organization for Standardization"
+    year: 2015
+    title: "Acoustics. Preferred reference values for acoustical and vibratory levels"
+    designation: "ISO 1683:2015"
+    note: "The 20 µPa of Table 1 and the 1 µPa of Table 2 between which section 1 re-references a level, and note b of Table 2, the 26.0 dB between them; published as metrology.ISO1683_REFERENCE_VALUES. Read in the Spanish adoption UNE-EN ISO 1683:2016."
+  - type: standard
+    organization: "International Organization for Standardization"
     year: 2016
     title: "Underwater acoustics — Quantities and procedures for description and measurement of underwater sound from ships — Part 1: Requirements for precision measurements in deep water used for comparison purposes"
     designation: "ISO 17208-1:2016"
@@ -103,6 +109,13 @@ conventions (a $20\log_{10}(20) \approx 26.02$ dB shift, **not** an energy/inten
 equivalence), use `underwater_to_in_air_spl` / `in_air_to_underwater_spl`. For
 background-noise subtraction, reuse the ISO 3744 `background_noise_correction`
 ($K_1$) helper.
+
+Both references are sound pressures of ISO 1683:2015, the 20 µPa of Table 1
+for gases and the 1 µPa of Table 2 for liquids, and note b of Table 2 prints
+the step between them as about 26.0 dB. The library publishes them, with the
+rest of the reference values of that standard, as
+`metrology.ISO1683_REFERENCE_VALUES`; the
+[levels guide](/phonometry/signals/levels/levels/#which-reference-value-is-each-level-counted-from) lists them all.
 
 ## 2. Ship radiated noise and source level (ISO 17208-1/-2)
 

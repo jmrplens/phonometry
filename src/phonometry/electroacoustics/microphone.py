@@ -76,6 +76,7 @@ from .._internal.validation import (
     require_ranks,
     require_same_length,
 )
+from ..metrology.reference_values import ISO1683_REFERENCE_VALUES
 from .loudspeaker import (
     _as_curve,
     _require_frequency_pair,
@@ -88,8 +89,9 @@ if TYPE_CHECKING:
 
     from .._report.metadata import ReportMetadata
 
-#: Standard reference sound pressure, 20 uPa (IEC 60268-4 17.2 e).
-_P_REF = 20e-6
+#: Standard reference sound pressure, 20 uPa (IEC 60268-4 17.2 e), which
+#: is the ISO 1683:2015 Table 1 value.
+_P_REF = ISO1683_REFERENCE_VALUES["gas"]["sound_pressure"].value
 #: Reference sensitivity M_r = 1 V/Pa (IEC 60268-4 11.1).
 _M_REF = 1.0
 #: Standard reference frequency for the rated sensitivity, Hz (11.3).

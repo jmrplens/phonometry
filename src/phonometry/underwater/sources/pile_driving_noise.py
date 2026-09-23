@@ -43,6 +43,7 @@ from ...io._resolve import (
     resolve_fs,
 )
 from ..acoustics import (
+    UNDERWATER_REFERENCE_EXPOSURE,
     UNDERWATER_REFERENCE_PRESSURE,
     _positive,
     _validate_pressure,
@@ -525,7 +526,7 @@ def strike_sel_spectrum(
             for f_lo, f_hi in zip(lower, upper, strict=True)
         ]
     )
-    e0 = 1e-12  # 1 µPa²·s in Pa²·s
+    e0 = UNDERWATER_REFERENCE_EXPOSURE  # 1 µPa²·s in Pa²·s
     # An empty band (narrower than the bin spacing fs/n) carries no energy, so
     # its level is -inf: the neutral element of the energy sum downstream.
     with np.errstate(divide="ignore"):

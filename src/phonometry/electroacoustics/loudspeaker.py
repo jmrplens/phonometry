@@ -61,6 +61,7 @@ from .._internal.validation import (
     require_ranks,
     require_same_length,
 )
+from ..metrology.reference_values import ISO1683_REFERENCE_VALUES
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -70,8 +71,9 @@ if TYPE_CHECKING:
     from .piston import RadiatingPistonResult
     from .swept_sine import SweptSineDistortionResult
 
-#: Standard reference sound pressure, 20 uPa (IEC 60268-5 20.2).
-_P_REF = 20e-6
+#: Standard reference sound pressure, 20 uPa (IEC 60268-5 20.2), which is
+#: the ISO 1683:2015 Table 1 value.
+_P_REF = ISO1683_REFERENCE_VALUES["gas"]["sound_pressure"].value
 #: One-octave half-width factor sqrt(2): a one-octave band centred at ``f`` is
 #: ``[f / sqrt(2), f * sqrt(2)]`` (IEC 60268-5 21.2 reference band).
 _OCTAVE_HALF = float(np.sqrt(2.0))

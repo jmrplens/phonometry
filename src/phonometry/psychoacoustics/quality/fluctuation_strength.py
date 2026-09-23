@@ -53,12 +53,16 @@ import numpy as np
 
 from ..._internal.validation import require_ranks, require_same_length
 from ...io._resolve import apply_calibration, resolve_fs
+from ...metrology.reference_values import ISO1683_REFERENCE_VALUES
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
 
     from ...io._signal import Signal
+
+#: Reference sound pressure in air, 20 µPa (ISO 1683:2015 Table 1).
+_P0 = ISO1683_REFERENCE_VALUES["gas"]["sound_pressure"].value
 
 # --------------------------------------------------------------------------- #
 # Closed form: AM broadband noise (Fastl & Zwicker Eq. 10.2)
@@ -339,7 +343,7 @@ def _band_envelopes(
     """
     n = frame.size
     fs_v = float(_FS_SAMPLE_RATE)
-    p_ref = 2e-5
+    p_ref = _P0
     # Excitation patterns in the frequency domain.
     spec = np.fft.rfft(frame * np.hanning(n))
     freqs = np.asarray(np.fft.rfftfreq(n, d=1.0 / fs_v), dtype=np.float64)
@@ -478,7 +482,7 @@ def _reference_signal(seconds: float = 2.0) -> NDArray[np.float64]:
     """
     t = np.arange(round(seconds * _FS_SAMPLE_RATE)) / float(_FS_SAMPLE_RATE)
     x = (1.0 + np.sin(2.0 * np.pi * 4.0 * t)) * np.sin(2.0 * np.pi * 1000.0 * t)
-    x = x / np.sqrt(np.mean(x**2)) * 2e-5 * 10.0 ** (60.0 / 20.0)
+    x = x / np.sqrt(np.mean(x**2)) * _P0 * 10.0 ** (60.0 / 20.0)
     return np.asarray(x, dtype=np.float64)
 
 

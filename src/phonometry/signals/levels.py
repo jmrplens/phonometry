@@ -31,13 +31,15 @@ from ..io._resolve import (
 from ..io._resolve import (
     resolve_samples as _resolve_samples_raw,
 )
+from ..metrology.reference_values import ISO1683_REFERENCE_VALUES
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
     from ..io._signal import Signal
 
-_REF_PRESSURE = 2e-5
+#: Reference sound pressure in air, 20 µPa (ISO 1683:2015 Table 1).
+_REF_PRESSURE = ISO1683_REFERENCE_VALUES["gas"]["sound_pressure"].value
 
 
 def _level_db(

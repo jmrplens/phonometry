@@ -72,6 +72,7 @@ if TYPE_CHECKING:
     from ...io._signal import Signal
 
 from ..._internal.validation import require_ranks, require_same_length
+from ...metrology.reference_values import ISO1683_REFERENCE_VALUES
 from .moore_glasberg import (
     _ERB_C1,
     _ERB_C2,
@@ -97,7 +98,7 @@ _I_MIN, _I_MAX, _I_STEP = 1.75, 39.0, 0.25
 _I_GRID = np.round(np.arange(_I_MIN, _I_MAX + _I_STEP / 2.0, _I_STEP), 4)
 _FC_GRID = _fc_from_cam(_I_GRID)
 _ERB_GRID = _erb_bandwidth(_FC_GRID)
-_P_REF = 4.0 * _FC_GRID / _ERB_GRID  # p_u and p_l(51 dB, fc) per filter
+_P51 = 4.0 * _FC_GRID / _ERB_GRID  # p_u and p_l(51 dB, fc) per filter
 _PL51_1K = 4.0 * 1000.0 / _erb_bandwidth(np.array([1000.0]))[0]  # p_l(51 dB, 1 kHz)
 _ROEX_G_MAX = 4.0  # Formula (4): drop upper-side components g > 4 (clause 7.4)
 
@@ -274,7 +275,8 @@ _WINDOWS: tuple[tuple[float, float, float], ...] = (
 # normalisation used here it is set so a 1 kHz tone at 40 dB SPL binaural free
 # field yields exactly 1.000 sone, exactly as the standard derives the 3.32 dB.
 _SPECTRAL_CAL_DB = -0.9252
-_P0 = 2e-5  # reference sound pressure [Pa]
+# Reference sound pressure [Pa], 20 uPa (ISO 1683:2015 Table 1).
+_P0 = ISO1683_REFERENCE_VALUES["gas"]["sound_pressure"].value
 _PRUNE_DB = 80.0  # drop components > 80 dB below the frame's loudest component
 _N_EARS = 2  # ear channels of a two-channel (left, right) input
 
@@ -515,10 +517,10 @@ def _excitation(comp_f: np.ndarray, comp_pow: np.ndarray) -> np.ndarray:
     x_source = 10.0 * np.log10(np.maximum(cumulative[hi] - cumulative[lo], 1e-300))
     g = np.abs(comp_f[None, :] - _FC_GRID[:, None]) / _FC_GRID[:, None]
     upper = comp_f[None, :] > _FC_GRID[:, None]
-    p_ref = _P_REF[:, None]
-    p_lower = p_ref - _ROEX_D * (p_ref / _PL51_1K) * (x_source[None, :] - 51.0)
+    p51 = _P51[:, None]
+    p_lower = p51 - _ROEX_D * (p51 / _PL51_1K) * (x_source[None, :] - 51.0)
     np.clip(p_lower, 0.1, 1e4, out=p_lower)
-    p = np.where(upper, p_ref, p_lower)
+    p = np.where(upper, p51, p_lower)
     weight = (1.0 + p * g) * np.exp(-p * g)
     weight[upper & (g > _ROEX_G_MAX)] = 0.0
     return np.asarray(weight @ comp_pow, dtype=np.float64)

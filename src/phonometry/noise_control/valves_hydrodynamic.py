@@ -171,7 +171,8 @@ ACOUSTIC_POWER_RATIOS = MappingProxyType(
 #: day.
 AIR_DENSITY_KG_M3 = 1.293
 
-#: The inlet pressure Equation (3a) and Figures 4 to 9 are drawn for, in Pa.
+#: The inlet pressure IEC 60534-8-4 Equation (3a) and Figures 4 to 9 are
+#: drawn for, in Pa.
 #: Equation (3c) moves :math:`x_{Fz}` from here to the working pressure.
 REFERENCE_INLET_PRESSURE_PA = 6.0e5
 

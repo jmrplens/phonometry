@@ -170,7 +170,8 @@ def noise_fraction(q: float, segment_length: float, scaled_distance: float) -> f
 #: (Eq. 4-6). #: Air impedance at the standard atmosphere (δ = θ = 1), Eq. 4-7.
 _ZC_REF = 409.81
 _ZC_STD = 416.86
-#: Standard mean-sea-level pressure (kPa) and temperature (°C), Eq. 4-7.
+#: Standard mean-sea-level pressure (kPa) and temperature (°C) of ECAC Doc 29
+#: Eq. 4-7.
 _P0_KPA = 101.325
 _T0_C = 15.0
 

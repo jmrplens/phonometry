@@ -95,6 +95,7 @@ from ..._internal.validation import (
     require_ranks,
     require_same_length,
 )
+from ...metrology.reference_values import ISO1683_REFERENCE_VALUES
 from .resilient_layers import TAPPING_HAMMER_MASS
 
 #: Reference area ``S0 = A0`` of EN 12354-5 (Formula 18a), m^2.
@@ -638,6 +639,11 @@ def typical_element_mobility(
 # are re 1e-6 N, the reference force of ISO 1683 that EN 15657:2018 Formula
 # (15) also uses. See docs/ERRATA.md. The tabulated numbers are unaffected.
 
+#: The ``10^-12`` the closed form under Table F.1 divides by, in N²: the square
+#: of the 1 µN reference force of ISO 1683:2015 Table 3, which is why the force
+#: level it gives is re 1e-6 N.
+_FORCE_REFERENCE_SQUARED = ISO1683_REFERENCE_VALUES["solid"]["force"].value ** 2
+
 #: EN 12354-5, Table F.1: the nominal octave-band centre frequencies of the
 #: header row, in hertz. The standard prints the first as "31".
 TABLE_F1_OCTAVE_BANDS: tuple[float, ...] = (
@@ -718,7 +724,9 @@ def tapping_machine_force_level_estimate(
     band = require_choice(bandwidth, "bandwidth", tuple(_TAPPING_MACHINE_COEFFICIENT))
     f = _positive_values(frequency, "frequency")
     coefficient = _TAPPING_MACHINE_COEFFICIENT[band]
-    return np.asarray(10.0 * np.log10(coefficient * f / 1.0e-12), dtype=np.float64)
+    return np.asarray(
+        10.0 * np.log10(coefficient * f / _FORCE_REFERENCE_SQUARED), dtype=np.float64
+    )
 
 
 def tapping_machine_characteristic_power_level(

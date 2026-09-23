@@ -116,6 +116,7 @@ from .._internal.validation import (
 from ..filters.weighting import weighting_filter
 from ..io._resolve import SignalInput, resolve_fs, resolve_samples
 from ..io._signal import Signal
+from ..metrology.reference_values import ISO1683_REFERENCE_VALUES
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -138,8 +139,8 @@ DBQPS_REFERENCE = 0.775
 #: Reference sound pressure, in pascals. BS.468-4 has none: it is here only
 #: so that :attr:`QuasiPeakResult.level_unit` can name the scale a caller
 #: gets by reading a pressure record against 20 uPa, which is a quasi-peak
-#: sound pressure level and is not dBqps.
-_P_REF = 20e-6
+#: sound pressure level and is not dBqps. The 20 uPa is ISO 1683:2015's.
+_P_REF = ISO1683_REFERENCE_VALUES["gas"]["sound_pressure"].value
 
 #: Carrier of the clause 2.1 and 2.2 stimuli, in Hz.
 _BURST_HZ = 5000.0

@@ -1645,6 +1645,43 @@ to 8 h. The anchor worth memorizing: 3.2 Pa²h corresponds to exactly 90 dB
 over 8 h. Half the dose is -3 dB, and double duration at the same level is
 +3 dB.
 
+### Which reference value is each level counted from?
+
+A level in decibels is a ratio to a reference value, so it means nothing
+until the reference is named. ISO 1683:2015 fixes one per quantity, and the
+library counts every level from it unless the standard a function implements
+names another. The table is published as
+`metrology.ISO1683_REFERENCE_VALUES`, keyed by medium and then by quantity:
+
+| Quantity | Gases (Table 1) | Liquids (Table 2) | Vibration (Table 3) |
+|:---|:---|:---|:---|
+| Sound pressure | 20 µPa | 1 µPa | |
+| Sound exposure | (20 µPa)² s | 1 µPa² s | |
+| Sound power | 1 pW | 1 pW | |
+| Sound energy | 1 pJ | 1 pJ | |
+| Sound intensity | 1 pW/m² | 1 pW/m² | |
+| Displacement | | 1 pm | 1 pm |
+| Velocity | | 1 nm/s | 1 nm/s, or 50 nm/s (note b) |
+| Acceleration | | 1 µm/s² | 1 µm/s² |
+| Force | | | 1 µN |
+| Distance, for compound quantities | | 1 m | |
+
+The same pressure reads $10\lg(20^2/1^2) \approx 26.0$ dB higher against the
+1 µPa of water than against the 20 µPa of air (note b of Table 2), which is
+the step `underwater.in_air_to_underwater_spl` applies. Where a standard
+counts from another value, the module that implements it keeps that value and
+names the document beside it: DIN 45672-2 defines its own
+$5\cdot10^{-8}$ m/s for the velocity level of railway vibration, and ISO/TS 7849
+and ISO 9611 count the surface velocity from the same value, which is the
+50 nm/s that note b of Table 3 says is also used for structure-borne sound.
+
+```python
+from phonometry import metrology
+
+p0 = metrology.ISO1683_REFERENCE_VALUES["gas"]["sound_pressure"]
+print(p0.value, p0.unit, p0.printed)  # 2e-05 Pa 20 µPa
+```
+
 ## See also
 
 - [Environmental Levels (ISO 1996-1/-2)](https://jmrplens.github.io/phonometry/environment/assessment/environmental-levels/): the $L_\mathrm{den}$/$L_\mathrm{dn}$ indicators, rating levels and the ISO 1996-2 determination chain built on the levels of this page.
@@ -1652,7 +1689,7 @@ over 8 h. Half the dose is -3 dB, and double duration at the same level is
 - [Calibration](https://jmrplens.github.io/phonometry/signals/metrology/calibration/): the sensitivity factor that turns digital units into the pascals every level here assumes.
 - [Occupational exposure (ISO 9612)](https://jmrplens.github.io/phonometry/perception/hearing/occupational-exposure/): the workplace measurement strategies the dose measures feed.
 - [Multichannel and Performance](https://jmrplens.github.io/phonometry/signals/filters/multichannel/): per-channel levels and how to combine them energetically.
-- API reference: [`signals.levels`](https://jmrplens.github.io/phonometry/reference/api/signals/levels/).
+- API reference: [`signals.levels`](https://jmrplens.github.io/phonometry/reference/api/signals/levels/), and [`metrology.reference_values`](https://jmrplens.github.io/phonometry/reference/api/metrology/reference-values/) for the ISO 1683 table.
 - Theory: [Event and dose metrics](https://jmrplens.github.io/phonometry/reference/theory/signal-analysis/#event-and-dose-metrics): the energy definitions behind Leq, SEL and the exposure quantities, and how the percentile levels relate to them.
 
 ## References
@@ -1682,7 +1719,11 @@ Part 1: Specifications*: the Fast/Slow/Impulse envelope ballistics behind
 bursts) and the sound exposure level verified against the Table 4 LAE column.
 IEC 61252, *Electroacoustics — Specifications for personal sound exposure
 meters*: the sound exposure E in Pa²h and the normalized 8 h level LEX,8h
-(≡ LEP,d), anchored at 3.2 Pa²h ⇔ exactly 90 dB. The ISO 1996-1/-2
+(≡ LEP,d), anchored at 3.2 Pa²h ⇔ exactly 90 dB.
+ISO 1683:2015, *Acoustics. Preferred reference values for acoustical and
+vibratory levels*: Tables 1 to 3, the reference value every level here is
+counted from, published as `metrology.ISO1683_REFERENCE_VALUES`, and note b of
+Table 2, the 26.0 dB between the air and water pressure references. The ISO 1996-1/-2
 environmental indicators and determination procedures are covered in
 [Environmental levels](https://jmrplens.github.io/phonometry/environment/assessment/environmental-levels/).
 

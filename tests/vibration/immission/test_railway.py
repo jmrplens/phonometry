@@ -48,7 +48,7 @@ def _passage(freq_hz: float = 16.0, amplitude: float = 1.0) -> np.ndarray:
 
 
 def test_the_velocity_reference_is_the_one_emission_uses() -> None:
-    """Formula (2): 5·10⁻⁸ m/s, the DIN EN 21683 value, here in mm/s."""
+    """Formula (2): the 5·10⁻⁸ m/s DIN 45672-2 defines itself, here in mm/s."""
     assert im.VELOCITY_LEVEL_REFERENCE_MM_S == pytest.approx(
         emission.REFERENCE_VELOCITY * 1000.0, rel=1e-12
     )

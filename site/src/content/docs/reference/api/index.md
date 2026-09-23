@@ -59,6 +59,7 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | [`metrology.calibration`](/phonometry/reference/api/metrology/calibration/) | Calibration utilities for mapping digital signals to physical SPL levels. |
 | [`metrology.uncertainty`](/phonometry/reference/api/metrology/uncertainty/) | Measurement uncertainty by the GUM and its Monte Carlo supplement. |
 | [`metrology.data_qualification`](/phonometry/reference/api/metrology/data-qualification/) | Random-data qualification: stationarity tests and Rice crossing statistics. |
+| [`metrology.reference_values`](/phonometry/reference/api/metrology/reference-values/) | Preferred reference values for acoustical and vibratory levels (ISO 1683:2015). |
 
 ## Fluids
 

@@ -92,6 +92,7 @@ _SECTION_LIST: tuple[Section, ...] = (
             "phonometry.metrology.calibration",
             "phonometry.metrology.uncertainty",
             "phonometry.metrology.data_qualification",
+            "phonometry.metrology.reference_values",
         ),
     ),
     Section(
@@ -606,6 +607,10 @@ OBJECT_MODULE_OVERRIDES: dict[str, str] = {
     "TAIL_TOLERANCE_PERCENT": "phonometry.vibration.human.instrumentation",
     "REFERENCE_FREQUENCY_HZ": "phonometry.vibration.human.instrumentation",
     "REFERENCE_ACCELERATION_M_S2": "phonometry.vibration.human.instrumentation",
+    # The ISO 1683 table is a mapping, so a scan by module finds no owner for
+    # it; it belongs to the module that publishes it, which is where every
+    # private reference value in the package points.
+    "ISO1683_REFERENCE_VALUES": "phonometry.metrology.reference_values",
     # Defined in phonometry._internal.warnings, exported at the top level.
     "PhonometryWarning": "phonometry",
     # The io subpackage keeps its implementation modules private and
@@ -670,6 +675,9 @@ OBJECT_MODULE_OVERRIDES: dict[str, str] = {
     # Defined in underwater.acoustics, also re-exported by
     # underwater.ship_radiated_noise (identity scan is ambiguous).
     "UNDERWATER_REFERENCE_PRESSURE": "phonometry.underwater.acoustics",
+    # Likewise the exposure reference, which the pile-driving SEL spectrum
+    # imports for its band levels.
+    "UNDERWATER_REFERENCE_EXPOSURE": "phonometry.underwater.acoustics",
     # Defined in the private phonometry._report package; documented with the
     # building insulation ratings whose report() method it drives.
     "ReportMetadata": "phonometry.building.measurement.insulation",

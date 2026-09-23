@@ -76,6 +76,7 @@ from ..._internal.validation import (
 )
 from ..._internal.warnings import PhonometryWarning
 from ...io._resolve import SignalInput, resolve_fs, resolve_samples
+from ...metrology.reference_values import ISO1683_REFERENCE_VALUES
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from collections.abc import Callable
@@ -131,8 +132,8 @@ __all__ = [
 # Reference constants.
 # ---------------------------------------------------------------------------
 #: Reference acceleration ``a0 = 10^-6 m/s2`` for vibration levels
-#: (ISO 8041-1:2017, 3.1.2.2, after ISO 1683).
-REFERENCE_ACCELERATION = 1e-6
+#: (ISO 8041-1:2017, 3.1.2.2, after ISO 1683:2015 Table 3).
+REFERENCE_ACCELERATION = ISO1683_REFERENCE_VALUES["solid"]["acceleration"].value
 
 #: Reference duration ``T0 = 8 h = 28 800 s`` of the daily exposure ``A(8)``
 #: (ISO 5349-1:2001, 3.2; ISO 2631-1:1997, B.1).

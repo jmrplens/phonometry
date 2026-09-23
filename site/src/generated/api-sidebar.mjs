@@ -43,6 +43,7 @@ export const apiSections = {
       'reference/api/metrology/calibration',
       'reference/api/metrology/uncertainty',
       'reference/api/metrology/data-qualification',
+      'reference/api/metrology/reference-values',
     ],
   },
   'fluids': {

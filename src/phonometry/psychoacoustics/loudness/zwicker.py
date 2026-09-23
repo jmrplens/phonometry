@@ -59,7 +59,9 @@ from ._zwicker_data import (
 
 # Reference intensity for band levels: I_REF = (20 uPa)^2, so that
 # L = 10*lg(p^2 / I_REF) equals the SPL re 20 uPa of a pressure signal
-# expressed in pascals (Annex A, constant I_REF).
+# expressed in pascals (ISO 532-1:2017 Annex A, constant I_REF). It is a
+# squared pressure in Pa^2, written as the program prints it, and not the
+# 1 pW/m^2 intensity of ISO 1683.
 _I_REF = 4e-10
 # Additive floor preventing lg(0) in the level calculation (Annex A).
 _TINY_VALUE = 1e-12

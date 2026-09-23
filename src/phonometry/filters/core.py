@@ -25,11 +25,15 @@ from ..io._resolve import (
     resolve_samples,
 )
 from ..io._signal import Signal
+from ..metrology.reference_values import ISO1683_REFERENCE_VALUES
 from .design import _cheby2_headroom, _design_sos_filter
 from .frequencies import _genfreqs
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
+
+#: Reference sound pressure in air, 20 µPa (ISO 1683:2015 Table 1).
+_P0 = ISO1683_REFERENCE_VALUES["gas"]["sound_pressure"].value
 
 
 class FilterBankWarning(PhonometryWarning):
@@ -751,7 +755,7 @@ class OctaveFilterBank:
 
         # Physical SPL: apply sensitivity and use 20uPa reference
         pressure_pa = val_linear * self.calibration_factor
-        return cast(np.ndarray, 20 * np.log10(np.maximum(pressure_pa, eps) / 2e-5))
+        return cast(np.ndarray, 20 * np.log10(np.maximum(pressure_pa, eps) / _P0))
 
 
 @lru_cache(maxsize=32)

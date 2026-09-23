@@ -60,6 +60,7 @@ from ..._internal.validation import (
     require_ranks,
     require_same_length,
 )
+from ...metrology.reference_values import ISO1683_REFERENCE_VALUES
 from .insulation import (
     impact_improvement_adaptation_term,
     weighted_impact_improvement,
@@ -80,8 +81,9 @@ __all__ = [
     "improvement_octave_bands",
 ]
 
-#: Reference acceleration ``a0`` for the acceleration level (Formula (1)): 1e-6 m/s².
-_ACCELERATION_REFERENCE = 1e-6
+#: Reference acceleration ``a0`` for the acceleration level (Formula (1)): 1e-6 m/s²,
+#: the ISO 1683:2015 Table 3 value.
+_ACCELERATION_REFERENCE = ISO1683_REFERENCE_VALUES["solid"]["acceleration"].value
 
 #: Background-correction thresholds (Formula (2)), in dB.
 _MARGIN_NEGLIGIBLE = 15.0

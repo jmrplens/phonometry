@@ -59,6 +59,7 @@ from ..._internal.validation import (
     require_finite_array,
     require_positive,
 )
+from ...metrology.reference_values import ISO1683_REFERENCE_VALUES
 from .vibration_meter import (
     KB_TIME_CONSTANT_S,
     _exponential_running_rms,
@@ -108,8 +109,9 @@ __all__ = [
 
 #: The reference acceleration of Formula (3), in metres per second squared:
 #: the :math:`10^{-6}` m/s² of DIN EN 21683, the same number
-#: ``vibration.REFERENCE_ACCELERATION`` publishes for human exposure.
-_ACCELERATION_REFERENCE_M_S2 = 1.0e-6
+#: ``vibration.REFERENCE_ACCELERATION`` publishes for human exposure and
+#: ISO 1683:2015 keeps in Table 3.
+_ACCELERATION_REFERENCE_M_S2 = ISO1683_REFERENCE_VALUES["solid"]["acceleration"].value
 
 #: The reference velocity of Formula (2), in millimetres per second: the
 #: :math:`5 \cdot 10^{-8}` m/s the standard takes from DIN EN 21683

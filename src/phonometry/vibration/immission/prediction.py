@@ -259,10 +259,11 @@ _MID_RISE_HZ = (8.0, 12.0)
 #: Two storeys are printed in both ranges of the clause: the union.
 _TWO_STOREY_HZ = (8.0, 15.0)
 _HIGH_RISE_HZ = (0.0, 8.0)
-#: The reference charge and distance of Formula (5) and the reference energy
-#: of Formula (6): 1 kg, 1 m and 1 kJ.
+#: The reference charge and distance of DIN 4150-1:2001-06 Formula (5): 1 kg
+#: and 1 m.
 _REFERENCE_CHARGE_KG = 1.0
 _REFERENCE_DISTANCE_M = 1.0
+#: The reference energy of DIN 4150-1:2001-06 Formula (6): 1 kJ.
 _REFERENCE_ENERGY_KJ = 1.0
 #: The energy in a fall: a weight in kilonewtons through a height in metres
 #: is that many kilojoules.

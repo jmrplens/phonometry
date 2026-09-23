@@ -85,6 +85,7 @@ from ..._internal.validation import (
     require_ranks,
     require_same_length,
 )
+from ...metrology.reference_values import ISO1683_REFERENCE_VALUES
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -168,8 +169,8 @@ _HALF_BAND_RATIO: dict[str, float] = {"third": 10.0**0.05, "octave": 10.0**0.15}
 #: (Hopkins Eq. 3.92); the exact value from Eqs. (3.90)/(3.91) is 3,925.
 _SHORT_PULSE_COEFFICIENT: float = 3.9
 
-#: Reference power of the power-input level, in W.
-_POWER_REFERENCE: float = 1e-12
+#: Reference power of the power-input level, in W (ISO 1683:2015 Table 1).
+_POWER_REFERENCE: float = ISO1683_REFERENCE_VALUES["gas"]["sound_power"].value
 
 #: Constant of ISO 12354-2:2017 Formula (C.2), ``fo = 160 √(s'/m')`` with ``s'``
 #: in MN/m³. The exact mass-spring value is ``1000/(2 π) = 159,15``; the

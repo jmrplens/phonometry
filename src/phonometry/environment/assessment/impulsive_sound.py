@@ -72,6 +72,7 @@ from ..._internal.validation import (
 )
 from ..._internal.warnings import PhonometryWarning
 from ...io._resolve import SignalInput, resolve_fs, resolve_samples
+from ...metrology.reference_values import ISO1683_REFERENCE_VALUES
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -439,8 +440,8 @@ class ImpulsiveSoundWarning(PhonometryWarning):
 # Normative constants (ISO/PAS 1996-3:2022).
 # ---------------------------------------------------------------------------
 
-#: Reference sound pressure, in pascal (20 uPa).
-REFERENCE_PRESSURE: float = 2e-5
+#: Reference sound pressure, in pascal (20 uPa, ISO 1683:2015 Table 1).
+REFERENCE_PRESSURE: float = ISO1683_REFERENCE_VALUES["gas"]["sound_pressure"].value
 
 #: Gradient, in dB/s, that the positive slope of ``LpAF`` must exceed for a
 #: point to belong to an onset (Clauses 3.3 and 4, procedures a-d).

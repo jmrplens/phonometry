@@ -60,6 +60,7 @@ import numpy as np
 from .._internal.validation import require_choice, require_finite_array
 from .._internal.warnings import PhonometryWarning
 from ..io._resolve import resolve_fs
+from ..metrology.reference_values import ISO1683_REFERENCE_VALUES
 from ._shared import (
     noise_power,
     onset_index,
@@ -74,8 +75,9 @@ if TYPE_CHECKING:
 
     from ..io._signal import Signal
 
-#: Reference sound pressure, 20 uPa (ISO 3382-1:2009, A.2.1).
-_P0 = 2.0e-5
+#: Reference sound pressure, 20 uPa (ISO 3382-1:2009, A.2.1), the value of
+#: ISO 1683:2015 Table 1.
+_P0 = ISO1683_REFERENCE_VALUES["gas"]["sound_pressure"].value
 
 #: Reference time, 1 s, of the sound pressure exposure level
 #: (ISO 3382-1:2009, Equations (A.2) and (A.3)).

@@ -110,10 +110,12 @@ from .._internal.validation import (
     require_ranks,
     require_same_length,
 )
+from ..metrology.reference_values import ISO1683_REFERENCE_VALUES
 from ._shared import SoundPowerWarning, _a_weighting_corrections, _check_grade
 from .intensity import dynamic_capability_index
 
-_P0 = 1.0e-12  #: Reference sound power, in watts (ISO 9614-2, 3.6.3).
+#: Reference sound power, in watts (ISO 9614-2, 3.6.3; ISO 1683:2015 Table 1).
+_W0 = ISO1683_REFERENCE_VALUES["gas"]["sound_power"].value
 _S0 = 1.0  #: Reference surface area, in square metres (ISO 9614-2, A.2.1).
 
 #: Rejection message for a 'frequencies' vector that does not span the bands.
@@ -369,7 +371,7 @@ def _level_magnitude(values: np.ndarray) -> np.ndarray:
     guard for zeros.
     """
     guarded = np.maximum(np.abs(values), np.finfo(float).tiny)
-    return np.asarray(10.0 * np.log10(guarded / _P0), dtype=np.float64)
+    return np.asarray(10.0 * np.log10(guarded / _W0), dtype=np.float64)
 
 
 def _as_2d(name: str, arr: np.ndarray, n_seg: int, n_bands: int) -> np.ndarray:
@@ -528,7 +530,7 @@ def sound_power_intensity(
     with np.errstate(divide="ignore", invalid="ignore"):
         sound_power_level = np.where(
             total_power > 0.0,
-            10.0 * np.log10(np.maximum(total_power, np.finfo(float).tiny) / _P0),
+            10.0 * np.log10(np.maximum(total_power, np.finfo(float).tiny) / _W0),
             np.nan,
         )
     s_total = float(np.sum(seg))
@@ -536,7 +538,7 @@ def sound_power_intensity(
     # --- field indicators ----------------------------------------------------
     abs_total = np.abs(total_power)
     guarded_abs = np.maximum(abs_total, np.finfo(float).tiny)
-    lw_magnitude = 10.0 * np.log10(guarded_abs / _P0)
+    lw_magnitude = 10.0 * np.log10(guarded_abs / _W0)
 
     fpi: np.ndarray | None = None
     if pressure_levels is not None:
@@ -755,8 +757,8 @@ def _a_weighted_total(
 # normalized sound power level LW0 (Eq. 10).
 # ===========================================================================
 
-_P0_INTENSITY = 1.0e-12  #: Reference sound power, in watts (3.6.3).
-_I0 = 1.0e-12  #: Reference sound intensity, in W/m^2 (3.5).
+#: Reference sound intensity, in W/m^2 (3.5; ISO 1683:2015 Table 1).
+_I0 = ISO1683_REFERENCE_VALUES["gas"]["sound_intensity"].value
 _K_9614_3 = 10.0  #: Bias-error factor K, in dB (def. 3.11).
 _FS_LIMIT = 2.0  #: Criterion 4 field-non-uniformity limit (Eq. C.4).
 _F_PI_DIFF_LIMIT = 3.0  #: Criterion 3 signed-minus-unsigned limit, dB (Eq. C.3).
@@ -1468,8 +1470,7 @@ def sound_power_intensity_precision(
     with np.errstate(divide="ignore", invalid="ignore"):
         lw = np.where(
             total_power > 0.0,
-            10.0
-            * np.log10(np.maximum(total_power, np.finfo(float).tiny) / _P0_INTENSITY),
+            10.0 * np.log10(np.maximum(total_power, np.finfo(float).tiny) / _W0),
             np.nan,
         )
 

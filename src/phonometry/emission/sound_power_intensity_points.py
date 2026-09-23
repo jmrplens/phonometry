@@ -135,6 +135,7 @@ from .._internal.validation import (
     require_ranks,
     require_same_length,
 )
+from ..metrology.reference_values import ISO1683_REFERENCE_VALUES
 from ._shared import SoundPowerWarning, _a_weighting_corrections
 from .intensity import (
     _F4_NON_POSITIVE,
@@ -158,8 +159,10 @@ __all__ = [
     "sound_power_intensity_points",
 ]
 
-_P0 = 1.0e-12  #: Reference sound power, in watts (clause 3.6.3).
-_I0 = 1.0e-12  #: Reference sound intensity, in W/m^2 (clause 3.5).
+#: Reference sound power, in watts (clause 3.6.3; ISO 1683:2015 Table 1).
+_W0 = ISO1683_REFERENCE_VALUES["gas"]["sound_power"].value
+#: Reference sound intensity, in W/m^2 (clause 3.5; ISO 1683:2015 Table 1).
+_I0 = ISO1683_REFERENCE_VALUES["gas"]["sound_intensity"].value
 
 #: The three accuracy grades of ISO 9614-1, in the library's shared spelling.
 #: ``"precision"`` is grade 1, ``"engineering"`` grade 2 and ``"survey"``
@@ -1814,7 +1817,7 @@ def sound_power_intensity_points(
     with np.errstate(divide="ignore", invalid="ignore"):
         sound_power_level = np.where(
             applicable,
-            10.0 * np.log10(np.maximum(sound_power, np.finfo(float).tiny) / _P0),
+            10.0 * np.log10(np.maximum(sound_power, np.finfo(float).tiny) / _W0),
             np.nan,
         )
     surface_area = float(np.sum(seg))

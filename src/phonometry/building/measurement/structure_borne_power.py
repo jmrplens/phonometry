@@ -91,21 +91,27 @@ from ..._internal.validation import (
     require_ranks,
     require_same_length,
 )
+from ...metrology.reference_values import ISO1683_REFERENCE_VALUES
 from .flanking_transmission import total_loss_factor
 
 #: EN 15657 vibratory velocity reference ``v0`` (= ISO 1683 10^-9 m/s), m/s.
-REFERENCE_VELOCITY: float = 1.0e-9
-#: Reference sound power ``P0``, W.
-REFERENCE_SOUND_POWER: float = 1.0e-12
+REFERENCE_VELOCITY: float = ISO1683_REFERENCE_VALUES["solid"]["velocity"].value
+#: Reference sound power ``P0``, W (ISO 1683:2015 Table 1).
+REFERENCE_SOUND_POWER: float = ISO1683_REFERENCE_VALUES["gas"]["sound_power"].value
 #: Reference mobility ``Y0`` of EN 15657 Formulae (15)/(17)/(18), m/(N.s).
 REFERENCE_MOBILITY: float = 1.0
-#: Reference force ``F0`` of the equivalent blocked force level (EN 15657), N.
-REFERENCE_FORCE: float = 1.0e-6
+#: Reference force ``F0`` of the equivalent blocked force level (EN 15657), N:
+#: the 1 µN of ISO 1683:2015 Table 3.
+REFERENCE_FORCE: float = ISO1683_REFERENCE_VALUES["solid"]["force"].value
 #: Characteristic mobility ``Y_R,inf,low`` of the standard 10 cm concrete
 #: reception plate (EN 15657:2018, clause 7.2.4), m/(N.s).
 CHARACTERISTIC_PLATE_MOBILITY: float = 5.0e-6
-#: ISO 9611:1996 free-velocity reference ``v0`` (clause 7), m/s.
+#: ISO 9611:1996 free-velocity reference ``v0`` (clause 7), m/s: the 50 nm/s
+#: ISO 1683:2015 keeps for structure-borne sound in note b of Table 3.
 FREE_VELOCITY_REFERENCE: float = 5.0e-8
+#: The constant of Formula 19, ``(v0 / F0)^2`` in (m/(N.s))^2: 1e-6 for the
+#: 1 nm/s and 1 µN references the two levels are counted from.
+_MOBILITY_LEVEL_CONSTANT = (REFERENCE_VELOCITY / REFERENCE_FORCE) ** 2
 
 
 def spatial_mean_velocity_level(levels: ArrayLike) -> float:
@@ -569,7 +575,8 @@ def source_mobility_from_levels(
         )
         raise ValueError(msg) from None
     return np.asarray(
-        REFERENCE_MOBILITY * np.sqrt(10.0 ** ((lv - lf) / 10.0) * 1.0e-6),
+        REFERENCE_MOBILITY
+        * np.sqrt(10.0 ** ((lv - lf) / 10.0) * _MOBILITY_LEVEL_CONSTANT),
         dtype=np.float64,
     )
 

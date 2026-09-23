@@ -72,6 +72,7 @@ if TYPE_CHECKING:
     from ...io._signal import Signal
 
 from ..._internal.validation import require_ranks, require_same_length
+from ...metrology.reference_values import ISO1683_REFERENCE_VALUES
 from .moore_glasberg import (
     _ERB_C1,
     _ERB_C2,
@@ -274,7 +275,8 @@ _WINDOWS: tuple[tuple[float, float, float], ...] = (
 # normalisation used here it is set so a 1 kHz tone at 40 dB SPL binaural free
 # field yields exactly 1.000 sone, exactly as the standard derives the 3.32 dB.
 _SPECTRAL_CAL_DB = -0.9252
-_P0 = 2e-5  # reference sound pressure [Pa]
+# Reference sound pressure [Pa], 20 uPa (ISO 1683:2015 Table 1).
+_P0 = ISO1683_REFERENCE_VALUES["gas"]["sound_pressure"].value
 _PRUNE_DB = 80.0  # drop components > 80 dB below the frame's loudest component
 _N_EARS = 2  # ear channels of a two-channel (left, right) input
 

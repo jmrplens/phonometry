@@ -78,6 +78,7 @@ from .._internal.validation import (
     require_same_length,
 )
 from ..filters.frequencies import _genfreqs
+from ..metrology.reference_values import ISO1683_REFERENCE_VALUES
 from ..signals.spectra import (
     _MIN_SAMPLES,
     _default_nperseg,
@@ -89,10 +90,11 @@ from ..signals.spectra import (
 #: exceeds 0,6 calls for action code (e) before the surface is measured.
 TEMPORAL_VARIABILITY_LIMIT = 0.6
 
-#: Reference sound intensity, in watts per square metre (ISO 9614-1, A.2.3).
-_I0 = 1.0e-12
-#: Reference sound pressure, in pascals.
-_P0 = 2.0e-5
+#: Reference sound intensity, in watts per square metre (ISO 9614-1, A.2.3),
+#: the 1 pW/m² of ISO 1683:2015 Table 1.
+_I0 = ISO1683_REFERENCE_VALUES["gas"]["sound_intensity"].value
+#: Reference sound pressure, in pascals (ISO 1683:2015 Table 1).
+_P0 = ISO1683_REFERENCE_VALUES["gas"]["sound_pressure"].value
 #: Upper ``k*dr`` bound (rad) for the finite-difference bias correction. The
 #: exact reciprocal ``(k*dr)/sin(k*dr)`` diverges as ``k*dr -> pi`` (the first
 #: spatial-aliasing null, ``f = c/(2*dr)``), so a handful of near-null bins

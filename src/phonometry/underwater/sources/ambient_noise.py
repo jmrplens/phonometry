@@ -42,6 +42,7 @@ from ..._internal.validation import (
     require_ranks,
     require_same_length,
 )
+from ...metrology.reference_values import ISO1683_REFERENCE_VALUES
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -49,8 +50,8 @@ if TYPE_CHECKING:
 
 #: Boltzmann constant ``k`` (J/K).
 _BOLTZMANN = 1.380649e-23
-#: Underwater reference pressure ``p₀`` (Pa), i.e. 1 µPa.
-_P_REF = 1e-6
+#: Underwater reference pressure ``p₀`` (Pa), i.e. 1 µPa (ISO 1683:2015 Table 2).
+_P_REF = ISO1683_REFERENCE_VALUES["liquid"]["sound_pressure"].value
 #: Wind-noise reference wind speed for the rule of fives (knots).
 _WIND_REF_KNOTS = 5.0
 #: Rule-of-fives anchor at 1 kHz / 5 kn, re 1 µPa²/Hz. Wenz/Knudsen state

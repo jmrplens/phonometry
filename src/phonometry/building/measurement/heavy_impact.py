@@ -196,7 +196,8 @@ HEAVY_IMPACT_A_WEIGHTING: Mapping[str, Mapping[float, float]] = MappingProxyType
     }
 )
 
-#: Reference force ``F0`` of Formula (A.1), in newtons.
+#: Reference force ``F0`` of ISO 16283-2:2020 Formula (A.1), in newtons: 1 N,
+#: not the 1 µN of ISO 1683.
 _FORCE_REFERENCE = 1.0
 #: Reference time interval ``Tref`` of Formula (A.1), in seconds.
 _TIME_REFERENCE = 1.0

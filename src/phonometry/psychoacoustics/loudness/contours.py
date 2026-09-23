@@ -65,6 +65,9 @@ _PHON_MIN = 20.0
 _PHON_MAX = 90.0
 _PHON_MAX_ABOVE_4KHZ = 80.0
 _F_MAX_ABOVE_80_PHON = 4000.0  # Hz
+#: The 4·10⁻¹⁰ ISO 226:2023 Formulae (1) and (2) print, in Pa²: the square of
+#: the 20 µPa reference, written as the standard writes it.
+_P0_SQUARED_PA2 = 4.0e-10
 
 
 def _params(frequency: float) -> tuple[float, float, float]:
@@ -88,9 +91,9 @@ def _params(frequency: float) -> tuple[float, float, float]:
 def _spl_from_phon(frequency: float, phon: float) -> float:
     """ISO 226:2023 Formula (1), clause 4.1 (p. 2)."""
     alpha_f, l_u, t_f = _params(frequency)
-    term = (4.0e-10) ** (0.3 - alpha_f) * (10 ** (0.03 * phon) - 10**0.072) + 10 ** (
-        alpha_f * (t_f + l_u) / 10
-    )
+    term = _P0_SQUARED_PA2 ** (0.3 - alpha_f) * (
+        10 ** (0.03 * phon) - 10**0.072
+    ) + 10 ** (alpha_f * (t_f + l_u) / 10)
     return float(10 / alpha_f * np.log10(term) - l_u)
 
 
@@ -134,9 +137,9 @@ def loudness_level(spl: float, frequency: float) -> float:
         4 kHz) are extrapolations the standard labels as informative only.
     """
     alpha_f, l_u, t_f = _params(frequency)
-    b = (10 ** (alpha_f * (spl + l_u) / 10) - 10 ** (alpha_f * (t_f + l_u) / 10)) / (
-        4.0e-10
-    ) ** (0.3 - alpha_f) + 10**0.072
+    b = (
+        10 ** (alpha_f * (spl + l_u) / 10) - 10 ** (alpha_f * (t_f + l_u) / 10)
+    ) / _P0_SQUARED_PA2 ** (0.3 - alpha_f) + 10**0.072
     return float(100.0 / 3.0 * np.log10(b))
 
 

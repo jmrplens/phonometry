@@ -66,15 +66,18 @@ from .._internal.validation import (
     require_ranks,
     require_same_length,
 )
+from ..metrology.reference_values import ISO1683_REFERENCE_VALUES
 
-#: Reference vibratory velocity ``v0`` (ISO/TS 7849, Equation 3), m/s.
+#: Reference vibratory velocity ``v0`` (ISO/TS 7849-1:2009, Equation 3), m/s:
+#: the 50 nm/s ISO 1683:2015 keeps for structure-borne sound in note b of
+#: Table 3, not its 1 nm/s.
 REFERENCE_VELOCITY: float = 5.0e-8
 #: Normalized characteristic impedance ``Z_c,n`` at 23 degC, 101.3 kPa, N.s/m3.
 NORMALIZED_IMPEDANCE: float = 411.0
 #: Reference acoustic impedance of air ``Z_c,0``, N.s/m3.
 REFERENCE_IMPEDANCE: float = 400.0
-#: Reference sound power ``P0``, W.
-REFERENCE_SOUND_POWER: float = 1.0e-12
+#: Reference sound power ``P0``, W (ISO 1683:2015 Table 1).
+REFERENCE_SOUND_POWER: float = ISO1683_REFERENCE_VALUES["gas"]["sound_power"].value
 #: Reference area ``S0``, m2.
 REFERENCE_AREA: float = 1.0
 

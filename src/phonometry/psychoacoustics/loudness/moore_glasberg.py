@@ -57,7 +57,11 @@ from ..._internal.validation import (
     require_ranks,
     require_same_length,
 )
+from ...metrology.reference_values import ISO1683_REFERENCE_VALUES
 from ..erb_scale import CAM_C, ERB_C1, ERB_C2, erb_bandwidth, frequency_from_cam
+
+#: Reference sound pressure in air, 20 µPa (ISO 1683:2015 Table 1).
+_P0 = ISO1683_REFERENCE_VALUES["gas"]["sound_pressure"].value
 
 # ---------------------------------------------------------------------------
 # Fixed transfer functions (clauses 7.2, 7.3, Table 1)
@@ -995,7 +999,7 @@ def _signal_components(pressure: np.ndarray, fs: float) -> np.ndarray:
     # Single-sided mean-square contribution of each FFT bin (Parseval).
     power = np.abs(spectrum) ** 2 / (n * window_power)
     power[1:] *= 2.0
-    levels = 10.0 * np.log10(np.maximum(power, 1e-300) / (2e-5) ** 2)
+    levels = 10.0 * np.log10(np.maximum(power, 1e-300) / _P0**2)
     audible = (freqs >= _AUDIBLE_LO) & (freqs <= _AUDIBLE_HI)
     keep = audible & (levels > levels.max() - _SIGNAL_FLOOR_DB)
     return np.column_stack((freqs[keep], levels[keep])).astype(np.float64)

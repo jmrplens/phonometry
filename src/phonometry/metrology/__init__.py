@@ -1,8 +1,9 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
 """metrology domain of phonometry (see module docstrings).
 
-Narrowed in 4.0 to the transverse metrology: calibration, GUM uncertainty and
-data qualification. The filter banks and weightings moved to
+Narrowed in 4.0 to the transverse metrology: calibration, GUM uncertainty,
+data qualification and the ISO 1683 reference values every level is counted
+from. The filter banks and weightings moved to
 :mod:`phonometry.filters`, the general signal analysis to
 :mod:`phonometry.signals` and the IEC 61043 intensity-instrument class check
 to :mod:`phonometry.emission.intensity_compliance`, which is what it verifies.
@@ -21,6 +22,7 @@ from .data_qualification import (
     stationarity_test,
     trend_test,
 )
+from .reference_values import ISO1683_REFERENCE_VALUES, ReferenceValue
 from .uncertainty import (
     MonteCarloResult,
     Quantity,
@@ -36,11 +38,13 @@ from .uncertainty import (
 )
 
 __all__ = [
+    "ISO1683_REFERENCE_VALUES",
     "CalibrationWarning",
     "LevelCrossingResult",
     "MonteCarloResult",
     "PeakStatisticsResult",
     "Quantity",
+    "ReferenceValue",
     "StationarityTestResult",
     "TrendTestResult",
     "UncertaintyResult",

@@ -64,13 +64,15 @@ from ..._internal.validation import (
     require_ranks,
     require_same_length,
 )
+from ...metrology.reference_values import ISO1683_REFERENCE_VALUES
 
 # --------------------------------------------------------------------------
 # Global constants (Clause 5)
 # --------------------------------------------------------------------------
 
 _FS = 48000  # normative sampling rate r_s (Clause 5.1.1)
-_P0 = 2e-5  # reference pressure p~_0 = 20 uPa (Clause 5.1.8)
+# Reference pressure p~_0 = 20 uPa (Clause 5.1.8), the ISO 1683 value.
+_P0 = ISO1683_REFERENCE_VALUES["gas"]["sound_pressure"].value
 _EPS = 1e-12  # additive constant used throughout the standard
 
 _N_FADE = 240  # 5 ms fade-in, n_fadein = 0.005 * 48000 (Formula 1)

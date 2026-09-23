@@ -69,6 +69,7 @@ from .._internal.validation import (
     require_positive,
 )
 from .._internal.warnings import PhonometryWarning
+from ..metrology.reference_values import ISO1683_REFERENCE_VALUES
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from collections.abc import Mapping
@@ -247,8 +248,9 @@ AERODYNAMIC_A_WEIGHTING_DB = (
     -4.3, -6.6, -9.3,
 )  # fmt: skip
 
-#: The reference sound power of NOTE 5 to Clause 4, in W.
-_REFERENCE_SOUND_POWER_W = 1e-12
+#: The reference sound power of NOTE 5 to Clause 4, in W: the 1 pW of
+#: ISO 1683:2015 Table 1.
+_REFERENCE_SOUND_POWER_W = ISO1683_REFERENCE_VALUES["gas"]["sound_power"].value
 
 #: Equation (18)'s leading coefficient, which carries the reference pressure
 #: and the pipe geometry together.

@@ -1499,7 +1499,7 @@ _LEGEND_ANCHORS: Final[tuple[tuple[LegendLocType, tuple[float, float]], ...]] = 
     ("center", (0.5, 0.5)),
 )
 
-#: The marker spellings matplotlib draws as no marker at all.
+#: The spellings matplotlib draws as no marker, or as no line, at all.
 _NO_MARKER: Final = frozenset({"", " ", "None", "none"})
 
 #: Points to the inch: marker and font sizes are given in points.
@@ -1513,11 +1513,18 @@ type _Mark = tuple[Path | None, np.ndarray, float]
 
 
 def _line_marks(line: Line2D, pixels_per_point: float) -> list[_Mark]:
-    """The stroke of *line* and, when it draws them, its markers."""
+    """The stroke of *line*, when it draws one, and its markers, when it draws them.
+
+    A marker-only line still carries a path through its points, and matplotlib
+    draws none of it: ``linestyle=""`` is stored as ``"None"``, so that path is
+    not a stroke the box has to avoid.
+    """
     transform = line.get_transform()
-    # The path of a stepped line already runs through its steps.
-    stroke = transform.transform_path(line.get_path())
-    marks: list[_Mark] = [(stroke, np.asarray(stroke.vertices), 0.0)]
+    marks: list[_Mark] = []
+    if str(line.get_linestyle()) not in _NO_MARKER:
+        # The path of a stepped line already runs through its steps.
+        stroke = transform.transform_path(line.get_path())
+        marks.append((stroke, np.asarray(stroke.vertices), 0.0))
     if str(line.get_marker()) not in _NO_MARKER:
         size = line.get_markersize() + line.get_markeredgewidth()
         centres = transform.transform(np.asarray(line.get_xydata()))

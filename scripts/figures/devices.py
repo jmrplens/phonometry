@@ -4562,12 +4562,13 @@ def generate_room_to_room_chain(output_dir: str) -> None:
     result = _norton_plant_room_chain()
 
     _fig, ax = plt.subplots(figsize=(10, 6))
+    # The level scale is fixed before the result draws, so the renderer places
+    # its legend against the limits the figure is published with rather than
+    # against its own autoscaled ones.
+    ax.set_ylim(20.0, 115.0)
     # The result's own .plot() draws both reverberant spectra, the criterion
     # curve and the band-by-band noise reduction on the twin axis.
     result.plot(ax=ax, language=_LANG)
-    # The renderer placed the legend clear of both scales at its own limits,
-    # in the middle of the right-hand half, and these keep that strip empty.
-    ax.set_ylim(20.0, 115.0)
     ax.set_title(
         "Plant room to operator room: what the wall delivers, and NC 45",
         pad=10,

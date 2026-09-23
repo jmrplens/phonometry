@@ -329,6 +329,17 @@ def test_a_marker_counts_once_its_edge_is_under_the_box(size: float) -> None:
     assert (under > 0) is (size > 10.0)
 
 
+@pytest.mark.parametrize("style", ["", "None", "-"])
+def test_a_line_drawn_as_markers_alone_has_no_stroke_to_avoid(style: str) -> None:
+    """``linestyle=""`` or ``"None"`` keeps a path through the points, undrawn."""
+    ax = _unit_panel()
+    # Two markers far apart, and a box on the segment between them that only
+    # the stroke would reach.
+    ax.plot([0.1, 0.9], [0.5, 0.5], marker="o", ms=4, linestyle=style)
+    under = _badness(ax, _box(ax, 0.4, 0.45, 0.6, 0.55))
+    assert (under > 0) is (style == "-")
+
+
 @pytest.mark.parametrize("area", [400.0, 4.0])
 def test_a_scattered_marker_counts_once_its_edge_is_under_the_box(
     area: float,

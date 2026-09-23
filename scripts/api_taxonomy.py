@@ -299,6 +299,7 @@ _SECTION_LIST: tuple[Section, ...] = (
         modules=(
             "phonometry.environment.propagation.outdoor_propagation",
             "phonometry.environment.sources.cnossos_road",
+            "phonometry.environment.sources.statistical_pass_by",
             "phonometry.environment.propagation.ground_barriers",
             "phonometry.environment.propagation.ground_surfaces",
             "phonometry.environment.propagation.noise_reducing_devices",

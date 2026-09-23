@@ -159,6 +159,23 @@ def _cnossos_road() -> ph.environment.RoadEmissionResult:
     )
 
 
+def _statistical_pass_by() -> ph.environment.StatisticalPassByResult:
+    """The ISO 11819-1 method on the pass-bys whose lines Annex E prints."""
+    from reference_data import statistical_pass_by as spb
+
+    categories: list[str] = []
+    speeds: list[float] = []
+    levels: list[float] = []
+    for category in ph.environment.SPB_VEHICLE_CATEGORIES:
+        v, level = spb.annex_e_pass_bys(category)
+        categories += [category] * len(v)
+        speeds += v
+        levels += level
+    return ph.environment.statistical_pass_by(
+        categories, speeds, levels, road_speed_category="medium"
+    )
+
+
 def _porous_medium() -> ph.materials.PorousMediumResult:
     f = np.linspace(400.0, 4000.0, 40)
     return ph.materials.miki(f, 20000.0)

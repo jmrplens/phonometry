@@ -17,6 +17,7 @@ from .common import (
     _C_TERTIARY,
     _new_axes,
     _plot_two_runs,
+    clearest_legend_loc,
     format_frequency_axis,
     style_default,
     theme_fill,
@@ -395,10 +396,9 @@ def plot_room_to_room(
     twin.grid(visible=False)
     handles, labels = ax.get_legend_handles_labels()
     extra_handles, extra_labels = twin.get_legend_handles_labels()
-    ax.legend(
+    legend = ax.legend(
         handles + extra_handles,
         labels + extra_labels,
-        loc="best",
         fontsize="small",
         framealpha=0.85,
         ncol=2,
@@ -408,6 +408,8 @@ def plot_room_to_room(
     ax.set_xlabel(_t(_FREQ_LABEL, language))
     format_frequency_axis(ax, language=language)
     format_frequency_axis(twin, language=language)
+    # Placed once both scales are final, clear of the curves of each.
+    legend.set_loc(clearest_legend_loc(legend, twin))
     localize_axes(ax, language)
     localize_axes(twin, language)
     return ax

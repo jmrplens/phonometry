@@ -26,6 +26,7 @@ from .common import (
     _plot_insulation_bands,
     _plot_rating,
     _require_rating_curve,
+    clearest_legend_loc,
     format_frequency_axis,
     style_default,
     theme_fill,
@@ -1186,13 +1187,13 @@ def _plot_path_shares(
     twin.set_ylabel(_t(ylabel, language))
     handles, texts = ax.get_legend_handles_labels()
     extra_handles, extra_texts = twin.get_legend_handles_labels()
-    ax.legend(
+    legend = ax.legend(
         handles + extra_handles,
         texts + extra_texts,
-        loc="best",
         fontsize="small",
         ncol=2,
     )
+    legend.set_loc(clearest_legend_loc(legend, twin))
     ax.grid(visible=True, axis="y", alpha=0.3)
     localize_axes(ax, language)
     localize_axes(twin, language)
@@ -2328,6 +2329,7 @@ def _plot_low_frequency(
     handles, texts = ax.get_legend_handles_labels()
     # The indicator only exists where the receiving-side pressure was measured
     # alongside the intensity, so the twin axis is drawn only then.
+    twins: list[Axes] = []
     if result.surface_pressure_intensity_indicator is not None:
         limit = result.indicator_limit
         twin = ax.twinx()
@@ -2354,7 +2356,9 @@ def _plot_low_frequency(
         handles += extra_handles
         texts += extra_texts
         localize_axes(twin, language)
-    ax.legend(handles, texts, loc="best", fontsize="small")
+        twins.append(twin)
+    legend = ax.legend(handles, texts, fontsize="small")
+    legend.set_loc(clearest_legend_loc(legend, *twins))
     ax.grid(visible=True, axis="y", alpha=0.3)
     localize_axes(ax, language)
     return ax

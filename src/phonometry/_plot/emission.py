@@ -21,6 +21,7 @@ from .common import (
     _new_axes,
     _plot_band_level_bars,
     _sound_power_designation,
+    clearest_legend_loc,
     format_frequency_axis,
     style_default,
     theme_fill,
@@ -537,7 +538,8 @@ def plot_intensity(
 
     lines, labels = ax.get_legend_handles_labels()
     tlines, tlabels = twin.get_legend_handles_labels()
-    ax.legend(lines + tlines, labels + tlabels, loc="best", fontsize="small")
+    legend = ax.legend(lines + tlines, labels + tlabels, fontsize="small")
+    legend.set_loc(clearest_legend_loc(legend, twin))
     ax.set_title(
         "ISO 9614 $L_p$ vs $L_I$  "
         r"(total $\delta_{pI}$ = "
@@ -655,7 +657,8 @@ def plot_field_indicators(
 
     lines, labels = ax.get_legend_handles_labels()
     tlines, tlabels = twin.get_legend_handles_labels()
-    ax.legend(lines + tlines, labels + tlabels, loc="best", fontsize="small")
+    legend = ax.legend(lines + tlines, labels + tlabels, fontsize="small")
+    legend.set_loc(clearest_legend_loc(legend, twin))
     ax.set_title(_t("ISO 9614-1 field indicators", language))
     localize_axes(ax, language)
     localize_axes(twin, language)

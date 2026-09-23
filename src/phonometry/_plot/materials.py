@@ -19,6 +19,7 @@ from .common import (
     _import_pyplot,
     _new_axes,
     _plot_rating,
+    clearest_legend_loc,
     format_frequency_axis,
     style_default,
     style_get,
@@ -1139,7 +1140,8 @@ def plot_transfer_matrix(
     ax.set_title(_t("ASTM E2611 transfer-matrix quantities", language))
     lines, labels = ax.get_legend_handles_labels()
     tlines, tlabels = twin.get_legend_handles_labels()
-    ax.legend(lines + tlines, labels + tlabels, loc="best", fontsize="small")
+    legend = ax.legend(lines + tlines, labels + tlabels, fontsize="small")
+    legend.set_loc(clearest_legend_loc(legend, twin))
     ax.grid(visible=True, which="both", alpha=0.3)
     localize_axes(ax, language)
     localize_axes(twin, language)

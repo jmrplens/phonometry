@@ -34,7 +34,10 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
     from matplotlib.container import BarContainer
-    from matplotlib.typing import ColorType
+    from matplotlib.legend import Legend
+    from matplotlib.path import Path
+    from matplotlib.transforms import Bbox
+    from matplotlib.typing import ColorType, LegendLocType
 
     from ..building.measurement.insulation import (
         ImpactRatingResult,
@@ -1468,6 +1471,185 @@ _ABSORPTION_QUANTITY_LABELS: Final = {
 }
 
 
+# ---------------------------------------------------------------------------
+# One legend over two scales. ``loc="best"`` scores its candidate boxes against
+# the artists of the axes that carries the legend, and an axes made by
+# ``twinx()`` or ``twiny()`` is a separate axes with artists of its own, so the
+# second scale is invisible to that search and the box lands on its curves as
+# readily as on blank paper. The twin is also drawn after its host, which puts
+# those curves on top of the legend rather than under it.
+# ---------------------------------------------------------------------------
+
+#: The fixed locations ``loc="best"`` chooses between, in the order it tries
+#: them, each with the corner of the axes it pins the box to, as fractions of
+#: the width and the height. The order is what settles a tie, and it settles
+#: it the way ``"best"`` does. matplotlib also tries ``"right"``, which is the
+#: same box as ``"center right"``, in the slot ``"center right"`` takes here.
+_LEGEND_ANCHORS: Final[tuple[tuple[LegendLocType, tuple[float, float]], ...]] = (
+    ("upper right", (1.0, 1.0)),
+    ("upper left", (0.0, 1.0)),
+    ("lower left", (0.0, 0.0)),
+    ("lower right", (1.0, 0.0)),
+    ("center right", (1.0, 0.5)),
+    ("center left", (0.0, 0.5)),
+    ("lower center", (0.5, 0.0)),
+    ("upper center", (0.5, 1.0)),
+    ("center", (0.5, 0.5)),
+)
+
+#: The marker spellings matplotlib draws as no marker at all.
+_NO_MARKER: Final = frozenset({"", " ", "None", "none"})
+
+#: Points to the inch: marker and font sizes are given in points.
+_POINTS_PER_INCH: Final = 72.0
+
+
+def _drawn_marks(
+    ax: Axes, pixels_per_point: float
+) -> tuple[list[tuple[Path | None, np.ndarray, float]], list[Bbox]]:
+    """What *ax* has drawn, in display coordinates, for a legend box to avoid.
+
+    Every artist is read through its own transform, which is what puts the
+    curves of a twin in the same frame as those of its host: the two share the
+    frame of the figure and nothing else.
+
+    :param ax: The axes whose lines, patches, collections and texts are read.
+    :param pixels_per_point: The figure's scale, for marker sizes.
+    :return: The marks a box can close over and the extents it can overlap.
+        Each mark is a path the box can cross (``None`` for scattered markers,
+        which have no line between them), the vertices it can cover, and how
+        far a vertex reaches past its centre: half its marker, or nothing for a
+        bare line. The extents are those of the bars and of the texts.
+    """
+    from matplotlib.cbook import STEP_LOOKUP_MAP
+    from matplotlib.collections import LineCollection, PathCollection, PolyCollection
+    from matplotlib.patches import Rectangle
+    from matplotlib.path import Path
+
+    marks: list[tuple[Path | None, np.ndarray, float]] = []
+    extents: list[Bbox] = []
+    for line in ax.lines:
+        if not line.get_visible():
+            continue
+        transform = line.get_transform()
+        xy = np.asarray(line.get_xydata(), dtype=np.float64).reshape(-1, 2)
+        # A stepped line is drawn through corners its data does not hold, and
+        # the default style is the identity in the same table.
+        stroke = Path(np.column_stack(STEP_LOOKUP_MAP[line.get_drawstyle()](*xy.T)))
+        reach = 0.0
+        if str(line.get_marker()) not in _NO_MARKER:
+            size = line.get_markersize() + line.get_markeredgewidth()
+            reach = 0.5 * size * pixels_per_point
+        marks.append((transform.transform_path(stroke), transform.transform(xy), reach))
+    for patch in ax.patches:
+        if not patch.get_visible():
+            continue
+        if isinstance(patch, Rectangle):
+            extents.append(patch.get_bbox().transformed(patch.get_data_transform()))
+        else:
+            outline = patch.get_transform().transform_path(patch.get_path())
+            marks.append((outline, np.asarray(outline.vertices), 0.0))
+    for collection in ax.collections:
+        if not collection.get_visible():
+            continue
+        if isinstance(collection, LineCollection | PolyCollection):
+            transform = collection.get_transform()
+            for path in collection.get_paths():
+                outline = transform.transform_path(path)
+                marks.append((outline, np.asarray(outline.vertices), 0.0))
+            continue
+        offsets = np.ma.filled(
+            np.ma.asarray(collection.get_offsets(), dtype=np.float64), np.nan
+        ).reshape(-1, 2)
+        reach = 0.0
+        if isinstance(collection, PathCollection) and collection.get_sizes().size:
+            # A scatter size is the area of the marker in square points.
+            side = float(np.sqrt(np.max(collection.get_sizes())))
+            reach = 0.5 * side * pixels_per_point
+        centres = collection.get_offset_transform().transform(offsets)
+        marks.append((None, centres, reach))
+    extents.extend(
+        text.get_window_extent()
+        for text in ax.texts
+        if text.get_visible() and text.get_text()
+    )
+    return marks, extents
+
+
+def _legend_badness(
+    box: Bbox,
+    marks: list[tuple[Path | None, np.ndarray, float]],
+    extents: list[Bbox],
+) -> int:
+    """How much of what is drawn a legend at *box* would close over.
+
+    matplotlib's own count for ``loc="best"``: one for every vertex inside the
+    box, one for every path that crosses it and one for every bar or text it
+    overlaps. One thing is counted more strictly: a vertex that carries a
+    marker counts as soon as the marker reaches under the box, not only once
+    its centre does, because half a marker under a legend is a reading lost.
+    """
+    badness = box.count_overlaps(extents) if extents else 0
+    for path, vertices, reach in marks:
+        badness += box.padded(reach).count_contains(vertices)
+        if path is not None and path.intersects_bbox(box, filled=False):
+            badness += 1
+    return int(badness)
+
+
+def clearest_legend_loc(legend: Legend, *twins: Axes) -> LegendLocType:
+    """The fixed location where *legend* covers least of every scale's data.
+
+    The same search as ``loc="best"``, over the same candidate boxes and in the
+    same order, scored against what the legend's own axes and every one of
+    *twins* have drawn, all read in display coordinates, the one frame the
+    scales share. It returns the first candidate that covers nothing, or else
+    the one that covers least, the earlier of two equals, so the choice is the
+    same on every run. The count is the one :func:`_legend_badness` keeps, and
+    it reads lines as they are drawn: a stepped line through its steps, and
+    ``hlines`` and ``vlines`` as the strokes they are.
+
+    The answer holds for the limits the axes have when it is asked, so the call
+    belongs after the last change to them. Limits that are still waiting on a
+    pending autoscale are brought up to date first, which is all the first
+    draw would have done to them, and nothing is added to or taken from any
+    axes: the answer is the same before the figure is ever drawn and after.
+
+    :param legend: The legend, already made on its axes, whose size the
+        candidate boxes take.
+    :param twins: The axes made from the legend's axes by ``twinx()`` or
+        ``twiny()``, whose data the legend must also avoid.
+    :return: A location for ``legend.set_loc``, or for ``loc=``.
+    """
+    from matplotlib.transforms import Bbox
+
+    panels = (legend.axes, *twins)
+    for panel in panels:
+        # Autoscaling is lazy: the limits a transform reads are updated at the
+        # first draw or the first time something asks for them.
+        panel.get_ylim()
+    pixels_per_point = legend.figure.dpi / _POINTS_PER_INCH
+    marks: list[tuple[Path | None, np.ndarray, float]] = []
+    extents: list[Bbox] = []
+    for panel in panels:
+        panel_marks, panel_extents = _drawn_marks(panel, pixels_per_point)
+        marks += panel_marks
+        extents += panel_extents
+    width, height = legend.get_window_extent().size
+    box = Bbox.from_bounds(0.0, 0.0, width, height)
+    # The gap matplotlib keeps between a fixed legend and the edge of the axes.
+    inset = legend.borderaxespad * legend.prop.get_size_in_points() * pixels_per_point
+    container = legend.get_bbox_to_anchor().padded(-inset)
+    scored: list[tuple[int, LegendLocType]] = []
+    for loc, corner in _LEGEND_ANCHORS:
+        badness = _legend_badness(box.anchored(corner, container), marks, extents)
+        if badness == 0:
+            return loc
+        scored.append((badness, loc))
+    # `min` keeps the first of equals, which is the order `"best"` tries.
+    return min(scored, key=lambda entry: entry[0])[1]
+
+
 def _plot_two_runs(
     ax: Axes | None,
     frequencies: np.ndarray | None,
@@ -1557,10 +1739,9 @@ def _plot_two_runs(
     twin.grid(visible=False)
     handles, names = ax.get_legend_handles_labels()
     extra_handles, extra_names = twin.get_legend_handles_labels()
-    ax.legend(
+    legend = ax.legend(
         handles + extra_handles,
         names + extra_names,
-        loc="best",
         fontsize="small",
         framealpha=1.0,
     )
@@ -1575,6 +1756,8 @@ def _plot_two_runs(
     else:
         ax.set_xlabel(band_label)
         ax.set_xticks(x)
+    # After the frequency axis turns logarithmic, which moves every curve.
+    legend.set_loc(clearest_legend_loc(legend, twin))
     localize_axes(ax, language)
     localize_axes(twin, language)
     return ax

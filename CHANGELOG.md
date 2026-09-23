@@ -107,6 +107,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **Tick labels no longer run into each other.** A generator that puts band
+  labels on a logarithmic axis with `set_xticks` and leaves the minor formatter
+  where the scale put it gets matplotlib's own minor labels between its bands,
+  so the octave axis of `enclosed_space_absorption` read "2 × 10²50 4 × 10²500"
+  under both panels, in both languages. The library's axis helpers clear the
+  minor formatter; that generator did not, and now does. The generation run
+  now measures every axis of every figure as it is saved, and
+  `make figure-ticks` fails on minor ticks labelled by the scale beside major
+  ticks set by hand, and on any two labels of one axis whose boxes touch. The
+  same measurement found two polar plots whose radial labels, strung along
+  one ray, ran together: `cnossos_rail_directivity` and `diffuser_modulation`
+  keep every ring and now label every other one.
 - **Every fluid table carried the hedge of the first one.** The loader for
   `fluids.PUBLISHED_FLUIDS` attached Bies's warning that Table C.1 is
   "representative only" to every state it read, as a constant in the module,

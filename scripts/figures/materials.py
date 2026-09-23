@@ -2291,6 +2291,12 @@ def generate_diffuser_modulation(output_dir: str) -> None:
     polar.set_thetagrids(
         np.arange(-90, 91, 30), [f"{_fmt_minus(a, '.0f')}°" for a in range(-90, 91, 30)]
     )
+    # A ring every 5 dB and a label on every other one: along the one edge
+    # the nine labels touched and read as "−10−15−20".
+    rings = np.arange(-40.0, 0.1, 5.0)
+    polar.set_rgrids(
+        rings, [_fmt_minus(r, ".0f") if i % 2 == 0 else "" for i, r in enumerate(rings)]
+    )
     polar.set_title("Reflected polar response at 1 kHz", pad=18)
     polar.legend(loc="lower center", bbox_to_anchor=(0.5, -0.17), fontsize=9)
 

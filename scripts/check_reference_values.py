@@ -289,13 +289,33 @@ class FileResult(NamedTuple):
     different_used: set[tuple[str, str]]
 
 
-def _literal(node: ast.expr, name: str) -> object:
-    """The literal a keyword of a table row was written with."""
+def _literal(node: ast.expr, name: str, constants: dict[str, object]) -> object:
+    """The literal a keyword of a table row was written with.
+
+    A keyword may also name a constant the module binds to a literal at its
+    top level, such as ``table=_TABLE_1``.
+    """
+    if isinstance(node, ast.Name) and node.id in constants:
+        return constants[node.id]
     try:
         return ast.literal_eval(node)
     except ValueError as error:  # pragma: no cover - the table is literal
         msg = f"{TABLE_MODULE}: the {name!r} of a row is not a literal"
         raise ValueError(msg) from error
+
+
+def _module_constants(tree: ast.Module) -> dict[str, object]:
+    """The names a module binds to a literal at its top level."""
+    constants: dict[str, object] = {}
+    for statement in tree.body:
+        if (
+            isinstance(statement, ast.Assign)
+            and len(statement.targets) == 1
+            and isinstance(statement.targets[0], ast.Name)
+            and isinstance(statement.value, ast.Constant)
+        ):
+            constants[statement.targets[0].id] = statement.value.value
+    return constants
 
 
 def table_rows(source: pathlib.Path = SOURCE) -> list[TableRow]:
@@ -308,6 +328,7 @@ def table_rows(source: pathlib.Path = SOURCE) -> list[TableRow]:
         comparison vacuous.
     """
     tree = ast.parse((source / TABLE_MODULE).read_text(encoding="utf-8"))
+    constants = _module_constants(tree)
     rows: list[TableRow] = []
     for node in ast.walk(tree):
         if not isinstance(node, ast.Dict):
@@ -319,7 +340,10 @@ def table_rows(source: pathlib.Path = SOURCE) -> list[TableRow]:
                 and getattr(value.func, "id", "") == "ReferenceValue"
             ):
                 continue
-            fields = {kw.arg: _literal(kw.value, str(kw.arg)) for kw in value.keywords}
+            fields = {
+                kw.arg: _literal(kw.value, str(kw.arg), constants)
+                for kw in value.keywords
+            }
             number_field = fields["value"]
             if isinstance(number_field, bool) or not isinstance(
                 number_field, int | float

@@ -59,6 +59,12 @@ if TYPE_CHECKING:
 __all__ = ["ISO1683_REFERENCE_VALUES", "ReferenceValue"]
 
 
+#: Where each row is printed in ISO 1683:2015.
+_TABLE_1 = "Table 1"
+_TABLE_2 = "Table 2"
+_TABLE_3 = "Table 3"
+
+
 @dataclass(frozen=True)
 class ReferenceValue:
     """One reference value of ISO 1683:2015, with what it is a reference of.
@@ -100,7 +106,7 @@ ISO1683_REFERENCE_VALUES: Mapping[str, Mapping[str, ReferenceValue]] = MappingPr
                     value=20e-6,
                     unit="Pa",
                     printed="20 µPa",
-                    table="Table 1",
+                    table=_TABLE_1,
                 ),
                 "sound_exposure": ReferenceValue(
                     quantity="sound exposure",
@@ -108,7 +114,7 @@ ISO1683_REFERENCE_VALUES: Mapping[str, Mapping[str, ReferenceValue]] = MappingPr
                     value=4e-10,
                     unit="Pa²·s",
                     printed="(20 µPa)² s",
-                    table="Table 1",
+                    table=_TABLE_1,
                 ),
                 "sound_power": ReferenceValue(
                     quantity="sound power",
@@ -116,7 +122,7 @@ ISO1683_REFERENCE_VALUES: Mapping[str, Mapping[str, ReferenceValue]] = MappingPr
                     value=1e-12,
                     unit="W",
                     printed="1 pW",
-                    table="Table 1",
+                    table=_TABLE_1,
                 ),
                 "sound_energy": ReferenceValue(
                     quantity="sound energy",
@@ -124,7 +130,7 @@ ISO1683_REFERENCE_VALUES: Mapping[str, Mapping[str, ReferenceValue]] = MappingPr
                     value=1e-12,
                     unit="J",
                     printed="1 pJ",
-                    table="Table 1",
+                    table=_TABLE_1,
                 ),
                 "sound_intensity": ReferenceValue(
                     quantity="sound intensity",
@@ -132,7 +138,7 @@ ISO1683_REFERENCE_VALUES: Mapping[str, Mapping[str, ReferenceValue]] = MappingPr
                     value=1e-12,
                     unit="W/m²",
                     printed="1 pW/m²",
-                    table="Table 1",
+                    table=_TABLE_1,
                 ),
             }
         ),
@@ -144,7 +150,7 @@ ISO1683_REFERENCE_VALUES: Mapping[str, Mapping[str, ReferenceValue]] = MappingPr
                     value=1e-6,
                     unit="Pa",
                     printed="1 µPa",
-                    table="Table 2",
+                    table=_TABLE_2,
                 ),
                 "sound_exposure": ReferenceValue(
                     quantity="sound exposure",
@@ -152,7 +158,7 @@ ISO1683_REFERENCE_VALUES: Mapping[str, Mapping[str, ReferenceValue]] = MappingPr
                     value=1e-12,
                     unit="Pa²·s",
                     printed="1 µPa² s",
-                    table="Table 2",
+                    table=_TABLE_2,
                 ),
                 "sound_power": ReferenceValue(
                     quantity="sound power",
@@ -160,7 +166,7 @@ ISO1683_REFERENCE_VALUES: Mapping[str, Mapping[str, ReferenceValue]] = MappingPr
                     value=1e-12,
                     unit="W",
                     printed="1 pW",
-                    table="Table 2",
+                    table=_TABLE_2,
                 ),
                 "sound_energy": ReferenceValue(
                     quantity="sound energy",
@@ -168,7 +174,7 @@ ISO1683_REFERENCE_VALUES: Mapping[str, Mapping[str, ReferenceValue]] = MappingPr
                     value=1e-12,
                     unit="J",
                     printed="1 pJ",
-                    table="Table 2",
+                    table=_TABLE_2,
                 ),
                 "sound_intensity": ReferenceValue(
                     quantity="sound intensity",
@@ -176,7 +182,7 @@ ISO1683_REFERENCE_VALUES: Mapping[str, Mapping[str, ReferenceValue]] = MappingPr
                     value=1e-12,
                     unit="W/m²",
                     printed="1 pW/m²",
-                    table="Table 2",
+                    table=_TABLE_2,
                 ),
                 "particle_displacement": ReferenceValue(
                     quantity="sound particle displacement",
@@ -184,7 +190,7 @@ ISO1683_REFERENCE_VALUES: Mapping[str, Mapping[str, ReferenceValue]] = MappingPr
                     value=1e-12,
                     unit="m",
                     printed="1 pm",
-                    table="Table 2",
+                    table=_TABLE_2,
                 ),
                 "particle_velocity": ReferenceValue(
                     quantity="sound particle velocity",
@@ -192,7 +198,7 @@ ISO1683_REFERENCE_VALUES: Mapping[str, Mapping[str, ReferenceValue]] = MappingPr
                     value=1e-9,
                     unit="m/s",
                     printed="1 nm/s",
-                    table="Table 2",
+                    table=_TABLE_2,
                 ),
                 "particle_acceleration": ReferenceValue(
                     quantity="sound particle acceleration",
@@ -200,7 +206,7 @@ ISO1683_REFERENCE_VALUES: Mapping[str, Mapping[str, ReferenceValue]] = MappingPr
                     value=1e-6,
                     unit="m/s²",
                     printed="1 µm/s²",
-                    table="Table 2",
+                    table=_TABLE_2,
                 ),
                 "distance": ReferenceValue(
                     quantity="distance",
@@ -208,7 +214,7 @@ ISO1683_REFERENCE_VALUES: Mapping[str, Mapping[str, ReferenceValue]] = MappingPr
                     value=1.0,
                     unit="m",
                     printed="1 m",
-                    table="Table 2",
+                    table=_TABLE_2,
                 ),
             }
         ),
@@ -220,7 +226,7 @@ ISO1683_REFERENCE_VALUES: Mapping[str, Mapping[str, ReferenceValue]] = MappingPr
                     value=1e-12,
                     unit="m",
                     printed="1 pm",
-                    table="Table 3",
+                    table=_TABLE_3,
                 ),
                 "velocity": ReferenceValue(
                     quantity="vibratory velocity",
@@ -228,7 +234,7 @@ ISO1683_REFERENCE_VALUES: Mapping[str, Mapping[str, ReferenceValue]] = MappingPr
                     value=1e-9,
                     unit="m/s",
                     printed="1 nm/s",
-                    table="Table 3",
+                    table=_TABLE_3,
                 ),
                 "acceleration": ReferenceValue(
                     quantity="vibratory acceleration",
@@ -236,7 +242,7 @@ ISO1683_REFERENCE_VALUES: Mapping[str, Mapping[str, ReferenceValue]] = MappingPr
                     value=1e-6,
                     unit="m/s²",
                     printed="1 µm/s²",
-                    table="Table 3",
+                    table=_TABLE_3,
                 ),
                 "force": ReferenceValue(
                     quantity="vibratory force",
@@ -244,7 +250,7 @@ ISO1683_REFERENCE_VALUES: Mapping[str, Mapping[str, ReferenceValue]] = MappingPr
                     value=1e-6,
                     unit="N",
                     printed="1 µN",
-                    table="Table 3",
+                    table=_TABLE_3,
                 ),
                 "velocity_alternative": ReferenceValue(
                     quantity="vibratory velocity",

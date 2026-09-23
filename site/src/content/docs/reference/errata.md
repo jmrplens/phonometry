@@ -6423,6 +6423,69 @@ in the same order.
   readings round to the tenth Table B.6 prints.
 - **Status:** not reported.
 
+## ISO 11819-1:1997, Annex E (speed spreads that do not fit the regression printed beside them)
+
+- **Location:** Annex E (informative), the example test report, table "Sound
+  level and speed regression data (uncorrected for temperature)" on printed
+  page 26 (PDF page 34). The print read here is BS EN ISO 11819-1:2001, which
+  is identical to ISO 11819-1:1997.
+- **The print:** for cars, dual-axle and multi-axle heavy vehicles the table
+  gives regression slopes of 32,55, 18,76 and 26,74, correlation coefficients
+  of 0,79, 0,51 and 0,49, standard deviations of sound level of 2,2, 2,5 and
+  2,3 dB, average speeds of 88,5, 75,8 and 73,7 km/h and standard deviations
+  of speed of 13,3, 7,5 and 6,4 km/h, the last two rows marked "Value
+  converted from the logarithm of speed".
+- **The problem:** a least-squares line of level on $\lg v$ obeys
+  $b = r\,s_L / s_{\lg v}$ exactly, so the slope, the correlation and the
+  level spread printed in one column fix the spread of $\lg v$ of that column:
+  $s_{\lg v} = r\,s_L/b$ = 0,0534 for the cars, 0,0680 for the dual-axle and
+  0,0421 for the multi-axle heavy vehicles (0,0518 to 0,0550, 0,0659 to 0,0700
+  and 0,0408 to 0,0435 across the rounding of the three printed inputs). The
+  dual-axle vehicles therefore have the widest spread of speed of the three,
+  and any conversion to km/h that scales with the mean speed and grows with
+  that spread keeps them the widest. The printed standard deviations divided
+  by the printed means give 0,150 for the cars, 0,099 for the dual-axle and
+  0,087 for the multi-axle vehicles, with the cars the widest: no single
+  conversion yields both orderings. To first order,
+  $s_v \approx \bar v \ln 10 \, s_{\lg v}$ gives 10,9, 11,9 and 7,2 km/h where
+  13,3, 7,5 and 6,4 km/h are printed.
+- **Evidence:** the other columns of the same table agree with one another.
+  The line through the mean speed gives the mean level printed beside it
+  ($16{,}6 + 32{,}55 \lg 88{,}5 = 79{,}97$, printed 80,0; 81,76 and 84,44,
+  printed 81,8 and 84,4), which also shows the average speed to be
+  $10^{\overline{\lg v}}$; and $s_L\sqrt{1 - r^2}$ gives 1,35, 2,15 and
+  2,00 dB, the residual standard deviations printed as 1,3, 2,1 and 2,0 dB.
+  Only the row of speed spreads is out of step. Verified on PDF page 34
+  (printed p. 26) of BS EN ISO 11819-1:2001.
+- **Consequence for the standard's own example:** none for the vehicle sound
+  levels, which need only the intercepts and the slopes. The 9.3 check the
+  example passes still passes with the spreads the regression implies: the
+  reference speeds of 80 and 70 km/h fall inside 73,6 to 106,4, 64,8 to 88,6
+  and 66,9 to 81,2 km/h.
+- **Library behaviour:**
+  [`PassByRegression`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/environment/sources/statistical_pass_by.py)
+  reports the spread of $\lg v$ and the 9.3 window in km/h it gives, and the
+  conformance suite does not use the printed speed spreads as an oracle.
+- **Status:** unreported.
+
+## ISO 11819-1:1997, Annex D (a table numbered after the next annex)
+
+- **Location:** Annex D (informative), "Example of a normalized reference
+  surface", printed page 22 (PDF page 30).
+- **The print:** the one table of Annex D is captioned "Table E.1 — Example of
+  surfaces, with sound level data, used to establish a normalized reference
+  case for the medium speed range".
+- **The problem:** a table of an ISO annex is numbered after the annex it
+  stands in, so this one is Table D.1. Annex E, which the number points to,
+  holds a report form whose boxes carry no table numbers, so the label names a
+  table that does not exist.
+- **Evidence:** Verified on PDF page 30 (printed p. 22) and PDF pages 31 to 34
+  (printed pp. 23 to 26) of BS EN ISO 11819-1:2001.
+- **Library behaviour:** none needed.
+  `SPB_ANNEX_D_SURFACES_DB` cites the table by its annex and says it is
+  printed as "Table E.1".
+- **Status:** unreported.
+
 ## Mechel (2008), Table 3 (a wall impedance its own Equation (11) does not give)
 
 - **Location:** Table 3, "Density and elastic constants of materials", the row

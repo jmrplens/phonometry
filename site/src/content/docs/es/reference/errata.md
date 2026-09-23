@@ -6847,6 +6847,73 @@ dos ediciones con las mismas entradas y en el mismo orden.
   B.6.
 - **Estado:** no reportada.
 
+## ISO 11819-1:1997, anexo E (dispersiones de velocidad que no encajan con la regresión impresa a su lado)
+
+- **Ubicación:** anexo E (informativo), el ejemplo de informe de ensayo, tabla
+  "Sound level and speed regression data (uncorrected for temperature)" en la
+  página impresa 26 (página 34 del PDF). La edición leída es la BS EN ISO
+  11819-1:2001, idéntica a la ISO 11819-1:1997.
+- **Lo impreso:** para turismos, pesados de dos ejes y pesados de más de dos
+  ejes, la tabla da pendientes de regresión de 32,55, 18,76 y 26,74,
+  coeficientes de correlación de 0,79, 0,51 y 0,49, desviaciones típicas del
+  nivel sonoro de 2,2, 2,5 y 2,3 dB, velocidades medias de 88,5, 75,8 y
+  73,7 km/h y desviaciones típicas de la velocidad de 13,3, 7,5 y 6,4 km/h;
+  las dos últimas filas llevan la marca "Value converted from the logarithm of
+  speed".
+- **El problema:** una recta de mínimos cuadrados del nivel frente a $\lg v$
+  cumple exactamente $b = r\,s_L / s_{\lg v}$, así que la pendiente, la
+  correlación y la dispersión del nivel impresas en una columna fijan la
+  dispersión de $\lg v$ de esa columna: $s_{\lg v} = r\,s_L/b$ = 0,0534 para
+  los turismos, 0,0680 para los pesados de dos ejes y 0,0421 para los de más
+  de dos ejes (de 0,0518 a 0,0550, de 0,0659 a 0,0700 y de 0,0408 a 0,0435
+  dentro del redondeo de los tres datos impresos). Los pesados de dos ejes
+  tienen por tanto la dispersión de velocidad más ancha de las tres, y
+  cualquier conversión a km/h que escale con la velocidad media y crezca con
+  esa dispersión los mantiene como los más anchos. Las desviaciones típicas
+  impresas divididas por las medias impresas dan 0,150 para los turismos,
+  0,099 para los pesados de dos ejes y 0,087 para los de más de dos ejes, con
+  los turismos como los más anchos: ninguna conversión única da las dos
+  ordenaciones. A primer orden, $s_v \approx \bar v \ln 10 \, s_{\lg v}$ da
+  10,9, 11,9 y 7,2 km/h donde se imprimen 13,3, 7,5 y 6,4 km/h.
+- **Evidencia:** las demás columnas de la misma tabla concuerdan entre sí. La
+  recta en la velocidad media da el nivel medio impreso a su lado
+  ($16{,}6 + 32{,}55 \lg 88{,}5 = 79{,}97$, impreso 80,0; 81,76 y 84,44,
+  impresos 81,8 y 84,4), lo que muestra además que la velocidad media es
+  $10^{\overline{\lg v}}$; y $s_L\sqrt{1 - r^2}$ da 1,35, 2,15 y 2,00 dB, las
+  desviaciones típicas de los residuos impresas como 1,3, 2,1 y 2,0 dB. Solo
+  la fila de dispersiones de velocidad desentona. Verificado en la página 34
+  del PDF (p. 26 impresa) de la BS EN ISO 11819-1:2001.
+- **Consecuencia para el propio ejemplo de la norma:** ninguna para los
+  niveles sonoros de vehículo, que solo necesitan las ordenadas en el origen y
+  las pendientes. La comprobación del apartado 9.3 que el ejemplo supera se
+  sigue superando con las dispersiones que implica la regresión: las
+  velocidades de referencia de 80 y 70 km/h quedan dentro de 73,6 a 106,4,
+  64,8 a 88,6 y 66,9 a 81,2 km/h.
+- **Comportamiento de la biblioteca:**
+  [`PassByRegression`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/environment/sources/statistical_pass_by.py)
+  da la dispersión de $\lg v$ y la ventana del apartado 9.3 en km/h que se
+  deriva de ella, y la batería de conformidad no usa como oráculo las
+  dispersiones de velocidad impresas.
+- **Estado:** no reportada.
+
+## ISO 11819-1:1997, anexo D (una tabla numerada según el anexo siguiente)
+
+- **Ubicación:** anexo D (informativo), "Example of a normalized reference
+  surface", página impresa 22 (página 30 del PDF).
+- **Lo impreso:** la única tabla del anexo D lleva por título "Table E.1 —
+  Example of surfaces, with sound level data, used to establish a normalized
+  reference case for the medium speed range".
+- **El problema:** una tabla de un anexo ISO se numera según el anexo en el
+  que está, así que esta es la tabla D.1. El anexo E, al que apunta el número,
+  contiene un formulario de informe cuyos recuadros no llevan número de tabla,
+  así que la etiqueta nombra una tabla que no existe.
+- **Evidencia:** verificado en la página 30 del PDF (p. 22 impresa) y en las
+  páginas 31 a 34 del PDF (pp. 23 a 26 impresas) de la BS EN ISO 11819-1:2001.
+- **Comportamiento de la biblioteca:** no hace falta ninguno.
+  `SPB_ANNEX_D_SURFACES_DB` cita la tabla por su anexo y dice que va impresa
+  como "Table E.1".
+- **Estado:** no reportada.
+
 ## Mechel (2008), Tabla 3 (una impedancia de pared que su propia Ecuación (11) no da)
 
 - **Localización:** Tabla 3, "Density and elastic constants of materials", la

@@ -57,9 +57,11 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 #: branch is read too, since a renderer writes its few one-off Spanish strings
 #: there instead of in its ``_STRINGS`` table. Every entry must yield at least
 #: one value: a table that has been renamed would otherwise empty the gate
-#: without a word.
+#: without a word. The two tables of the figures are two entries, so the exact
+#: table cannot keep the pattern table's absence from being noticed.
 SOURCES: tuple[tuple[str, tuple[str, ...]], ...] = (
-    ("scripts/figures/i18n.py", ("_ES_EXACT", "_ES_PATTERNS")),
+    ("scripts/figures/i18n.py", ("_ES_EXACT",)),
+    ("scripts/figures/i18n.py", ("_ES_PATTERNS",)),
     ("scripts/diagrams/i18n.py", ("_ES",)),
     ("src/phonometry/_plot", ("_STRINGS",)),
     ("src/phonometry/_report", ("_STRINGS",)),
@@ -498,7 +500,7 @@ def read_sources(
             for value in spanish_values(path, names, branches=target.is_dir())
         ]
         if not found:
-            empty.append(where)
+            empty.append(f"{where} ({', '.join(names)})")
         values.extend(found)
     for where in builders:
         found = [

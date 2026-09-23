@@ -162,7 +162,18 @@ def test_a_renamed_table_empties_no_gate_silently(tmp_path: pathlib.Path) -> Non
         builders=(),
     )
     assert len(values) == 2
-    assert empty == ["tables.py"]
+    assert empty == ["tables.py (_RENAMED)"]
+
+
+def test_each_table_of_one_file_must_yield_on_its_own(tmp_path: pathlib.Path) -> None:
+    """A file with two tables: the one that still yields cannot hide the other."""
+    _module(tmp_path, '_ES_EXACT = {"below": "por debajo"}\n')
+    _values, empty = csa.read_sources(
+        (("tables.py", ("_ES_EXACT",)), ("tables.py", ("_ES_PATTERNS",))),
+        root=tmp_path,
+        builders=(),
+    )
+    assert empty == ["tables.py (_ES_PATTERNS)"]
 
 
 _BUILDERS = """

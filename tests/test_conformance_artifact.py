@@ -1459,3 +1459,8 @@ def test_a_spanish_title_keeps_the_id_it_had_without_its_accents() -> None:
     assert artifact.slug("Calibration L_v from â = 9,81 m/s²") == (
         "calibration-l-v-from-9-81-m-s"
     )
+
+
+def test_a_decomposed_accent_reduces_to_the_same_id() -> None:
+    """ "á" and "a" with a combining acute are one letter, so one slug."""
+    assert artifact.slug("Catálogo") == artifact.slug("Catálogo") == "catalogo"

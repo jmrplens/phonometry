@@ -98,7 +98,10 @@ def slug(text: str) -> str:
         :data:`_SPELLING_MARKS`); any other character outside ``a-z0-9`` is a
         separator.
     """
-    unmarked = "".join(_unmarked(char) for char in text)
+    # Composed first: "a" followed by a combining acute is the same letter as
+    # "á", and must reduce to the same id.
+    composed = unicodedata.normalize("NFC", text)
+    unmarked = "".join(_unmarked(char) for char in composed)
     return _SLUG_STRIP.sub("-", unmarked.lower()).strip("-")
 
 

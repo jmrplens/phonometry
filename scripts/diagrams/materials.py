@@ -46,17 +46,28 @@ def _d_impedance_tube(s: SVG, th: Theme) -> None:
     s.rect(spec_l, tube_top, spec_w, tube_bot - tube_top, th.panel, th.secondary, sw=2)
     for hx in range(int(spec_l) + 8, int(spec_l + spec_w), 11):
         s.line(hx, tube_bot - 4, hx - 16, tube_top + 4, th.secondary, 1.0)
+    # Starting past the x1 dimension's witness line on the specimen's face,
+    # which ran through the name centred on the specimen.
     s.text(
-        spec_l + spec_w / 2, tube_top - 14, "Test specimen", 16, th.secondary, bold=True
+        spec_l + 8,
+        tube_top - 14,
+        "Test specimen",
+        16,
+        th.secondary,
+        bold=True,
+        anchor="start",
     )
     s.text(tube_r - back_w / 2, tube_bot + 42, "Rigid backing", 15, th.muted)
 
     # Two microphones flush in the top wall (mic 1 = farther from specimen).
     m1x, m2x = 460.0, 555.0
-    for mx, lab in ((m1x, "Mic 1"), (m2x, "Mic 2")):
+    # Each name beside its microphone, on the outer side of the pair: above
+    # it, the x1 dimension's witness line ran through the first.
+    for mx, lab, side in ((m1x, "Mic 1", -1.0), (m2x, "Mic 2", 1.0)):
         s.rect(mx - 7, tube_top - 20, 14, 20, th.fg, rx=3)
         s.circle(mx, tube_top, 5, th.primary)
-        s.text(mx, tube_top - 28, lab, 15, th.fg, bold=True)
+        anchor = "end" if side < 0 else "start"
+        s.text(mx + 13 * side, tube_top - 6, lab, 15, th.fg, bold=True, anchor=anchor)
 
     # Plane-wave arrows inside the tube.
     s.arrow(tube_l + 30, mid - 18, spec_l - 16, mid - 18, th.accent, 2.2)
@@ -148,10 +159,12 @@ def _d_astm_tube(s: SVG, th: Theme) -> None:
     )
 
     # Four microphones flush in the top wall (1,2 upstream; 3,4 downstream).
+    # Each name beside its microphone: above them, the witness lines of l1
+    # and l2 ran through the names of microphones 2 and 3.
     for mx, lab in ((m1x, "Mic 1"), (m2x, "Mic 2"), (m3x, "Mic 3"), (m4x, "Mic 4")):
         s.rect(mx - 6, tube_top - 18, 12, 18, th.fg, rx=3)
         s.circle(mx, tube_top, 5, th.primary)
-        s.text(mx, tube_top - 26, lab, 14, th.fg, bold=True)
+        s.text(mx - 12, tube_top - 6, lab, 14, th.fg, bold=True, anchor="end")
 
     # Up- and downstream travelling waves.
     s.arrow(tube_l + 26, mid - 16, spec_l - 8, mid - 16, th.accent, 2.0)
@@ -228,7 +241,17 @@ def _d_airflow(s: SVG, th: Theme) -> None:
     s.rect(holder_l - 6, spec_y, 8, spec_h, th.accent)
     s.rect(holder_r - 2, spec_y, 8, spec_h, th.accent)
     s.text(holder_l - 12, spec_y + 26, "seal", 13, th.accent, bold=True, anchor="end")
-    s.text(cx - 6, spec_y - 30, "specimen  $A$, $d$", 14, th.secondary, bold=True)
+    # Right of the thickness gauge: centred over the cell, both of its walls
+    # and the gauge's stem ran through the name.
+    s.text(
+        holder_r + 38,
+        spec_y - 30,
+        "specimen  $A$, $d$",
+        14,
+        th.secondary,
+        bold=True,
+        anchor="start",
+    )
     # Perforated support under the specimen.
     for gx in range(int(holder_l) + 8, int(holder_r) - 2, 12):
         s.line(gx, spec_y + spec_h + 22, gx, spec_y + spec_h + 34, th.fg, 2.0)
@@ -239,7 +262,9 @@ def _d_airflow(s: SVG, th: Theme) -> None:
     s.arrow(cx, spec_y - 46, cx, top_y + 26, th.accent, 2.4)
     s.rect(cx - 44, bot_y + 8, 88, 36, th.bg, th.accent, rx=8, sw=2)
     s.text(cx, bot_y + 32, "$q_v$", 15, th.accent, bold=True)
-    s.rect(cx - 44, bot_y + 56, 88, 34, th.bg, th.muted, rx=8, sw=1.6)
+    # 120 px wide, which holds the Spanish name that ran out through the
+    # sides of the 88 px box.
+    s.rect(cx - 60, bot_y + 56, 120, 34, th.bg, th.muted, rx=8, sw=1.6)
     s.text(cx, bot_y + 78, "flow source", 13, th.muted)
     # Differential manometer across the specimen (pressure taps).
     tap_x = holder_r + 34
@@ -253,16 +278,19 @@ def _d_airflow(s: SVG, th: Theme) -> None:
     s.line(cx + 62, top_y + 56, cx + 62, spec_y - 2, th.muted, 1.6, dash="4,3")
     s.line(cx + 30, spec_y - 2, cx + 70, spec_y - 2, th.muted, 1.8)
     # The free space Clause 5.2 asks for ahead of the specimen.
+    # Its label over the top of the dimension: beside it, the panel's edge
+    # ran through the label.
     s.dim(
         holder_l - 26,
         spec_y,
         holder_l - 26,
         top_y,
-        "≥ 1 bore",
+        "",
         offset=0,
         size=12,
         label_side="left",
     )
+    s.text(holder_l - 26, top_y - 10, "≥ 1 bore", 12, th.fg)
 
     for yy, txt in (
         (546, "cell ≥ 29 mm bore, ≥ 1 bore of free space above"),
@@ -464,10 +492,12 @@ def _d_diffusion_goniometer(s: SVG, th: Theme) -> None:
         s.circle(px, py, 6.5, th.primary)
         s.circle(px, py, 2.2, th.bg)
     # Label the two horizon receivers and the zenith one.
-    s.text(cx + R + 4, gy - 4, "$L_n$", 15, th.fg, anchor="start")
-    s.text(cx - R - 4, gy - 4, "$L_1$", 15, th.fg, anchor="end")
+    # Raised clear of the ground line, which the subscripts touched.
+    s.text(cx + R + 4, gy - 10, "$L_n$", 15, th.fg, anchor="start")
+    s.text(cx - R - 4, gy - 10, "$L_1$", 15, th.fg, anchor="end")
     s.text(cx, gy - R - 14, "$L_i$", 15, th.fg)
-    s.text(cx + 150, gy - 250, "receiver arc (5° steps)", 14, th.muted)
+    # Just outside the arc it names, which ran through it inside.
+    s.text(cx + 176, gy - 250, "receiver arc (5° steps)", 14, th.muted, anchor="start")
     _ = ends
 
     # Polar (scattered) response lobe about the sample centre.
@@ -496,7 +526,8 @@ def _d_diffusion_goniometer(s: SVG, th: Theme) -> None:
     s.text(cx, gy - 20, "Test sample", 14, th.secondary, bold=True)
     s.ellipse(cx, gy + 8, 88, 12, "none", th.primary, 1.8)
     _rot_arrow(s, cx, gy + 8, 88, 200, 340, th.primary, 1.8, ry=12)
-    s.text(cx + 150, gy + 12, "Turntable", 14, th.fg, bold=True, anchor="start")
+    # Below the ground's hatching, which ran through the word at gy + 12.
+    s.text(cx + 150, gy + 26, "Turntable", 14, th.fg, bold=True, anchor="start")
 
     # Governing relations. Formula 5 stays plain for now: its 10^(L_i/10)
     # terms put a subscript inside the exponent, one script level more than
@@ -904,12 +935,16 @@ def _d_insitu_subtraction(s: SVG, th: Theme) -> None:
     # Microphone at dm above the surface.
     s.rect(sx - 6, mic_y - 9, 12, 18, th.fg, rx=3)
     s.circle(sx, mic_y - 9, 5, th.primary)
-    s.text(sx + 16, mic_y + 5, "Microphone", 13, th.fg, anchor="start")
+    # Left of the microphone: on its right, the d_m witness line ran through
+    # the word and the reflected ray's head into it.
+    s.text(sx - 14, mic_y + 5, "Microphone", 13, th.fg, anchor="end")
 
     # Direct ray (source -> mic), drawn offset to the left of the axis.
     s.arrow(sx - 7, src_y + 22, sx - 7, mic_y - 12, th.accent, 2.0)
+    # Against the arrow it names, clear of the d_s dimension, which moves
+    # out to make room: at x = sx - 72 it ran through the label.
     s.text(
-        sx - 60, (src_y + mic_y) / 2, "direct  $d_s−d_m$", 13, th.accent, anchor="end"
+        sx - 14, (src_y + mic_y) / 2, "direct  $d_s−d_m$", 13, th.accent, anchor="end"
     )
     # Road-reflected ray: source -> surface point -> mic (shallow V, offset).
     gpx = sx + 74.0
@@ -919,22 +954,22 @@ def _d_insitu_subtraction(s: SVG, th: Theme) -> None:
     # Dashed continuation toward the image source below the plane.
     s.line(gpx, gy, sx + 34, gy + 66, th.muted, 1.2, dash="5,4")
     s.text(
-        sx + 40, gy + 60, "to image source ($d_s$ below)", 12, th.muted, anchor="start"
+        sx + 52, gy + 60, "to image source ($d_s$ below)", 12, th.muted, anchor="start"
     )
 
     # Height dimensions ds and dm.
     s.dim(
-        sx - 72,
+        sx - 150,
         gy,
-        sx - 72,
+        sx - 150,
         src_y,
         "$d_s$ = 1.25 m",
         offset=0,
-        label_side="left",
+        label_side="right",
         size=15,
     )
-    s.line(sx - 72, gy, sx, gy, th.muted, 0.9, dash="3,3")
-    s.line(sx - 72, src_y, sx - 30, src_y, th.muted, 0.9, dash="3,3")
+    s.line(sx - 150, gy, sx, gy, th.muted, 0.9, dash="3,3")
+    s.line(sx - 150, src_y, sx - 30, src_y, th.muted, 0.9, dash="3,3")
     s.dim(
         sx + 122,
         gy,
@@ -949,7 +984,9 @@ def _d_insitu_subtraction(s: SVG, th: Theme) -> None:
 
     # --- Free-field reference (right): source + mic high, no ground -------
     s.line(615, 90, 615, gy + 40, th.muted, 1.2, dash="6,5")
-    fx = 730.0
+    # Centred far enough right that its last caption, 11 px in Spanish,
+    # stays clear of the divider it ran across at x = 730.
+    fx = 760.0
     fs_y, fm_y = 150.0, 292.0
     s.rect(fx - 28, fs_y - 26, 56, 52, th.panel, th.primary, rx=6, sw=2)
     s.circle(fx, fs_y, 11, th.primary)
@@ -958,7 +995,8 @@ def _d_insitu_subtraction(s: SVG, th: Theme) -> None:
     s.circle(fx, fm_y - 9, 5, th.primary)
     s.arrow(fx, fs_y + 28, fx, fm_y - 14, th.accent, 2.0)
     s.text(fx, fs_y - 40, "Free-field reference", 15, th.fg, bold=True)
-    s.text(fx, fm_y + 34, "$H_i$: no ground reflection in the window", 12, th.muted)
+    window = "$H_i$: no ground reflection in the window"
+    s.text(fx, fm_y + 34, window, s.fit_size([window], [12, 11], 266), th.muted)
 
     # Governing relations.
     s.text(
@@ -1018,26 +1056,30 @@ def _d_spot_tube(s: SVG, th: Theme) -> None:
     for my, lab in ((m1y, "Mic 1"), (m2y, "Mic 2")):
         s.rect(cx + hw - 4, my - 7, 12, 14, th.fg, rx=3)
         s.circle(cx + hw, my, 4, th.primary)
-        s.text(cx + hw + 16, my + 5, lab, 13, th.fg, anchor="start")
+        # Above the witness line to the spacing dimension, which ran through
+        # the name level with the microphone.
+        s.text(cx + hw + 16, my - 6, lab, 13, th.fg, anchor="start")
 
     # Plane-wave travel down and reflection back up.
     s.arrow(cx - 34, y_top + 16, cx - 34, gy - 26, th.accent, 2.0)
     s.arrow(cx - 8, gy - 26, cx - 8, y_top + 16, th.secondary, 2.0)
 
     # Dimensions: tube diameter d (across) and mic spacing s (down).
-    s.dim(cx - hw, y_top + 18, cx + hw, y_top + 18, "$d$", offset=0, size=15)
+    # Low enough for its label to clear the loudspeaker cap's edge.
+    s.dim(cx - hw, y_top + 26, cx + hw, y_top + 26, "$d$", offset=0, size=15)
+    # Far enough out for the microphones' names to end before its arrows.
     s.dim(
-        cx + hw + 62,
+        cx + hw + 90,
         m1y,
-        cx + hw + 62,
+        cx + hw + 90,
         m2y,
         "$s$",
         offset=0,
         label_side="right",
         size=15,
     )
-    s.line(cx + hw + 10, m1y, cx + hw + 62, m1y, th.muted, 0.9, dash="3,3")
-    s.line(cx + hw + 10, m2y, cx + hw + 62, m2y, th.muted, 0.9, dash="3,3")
+    s.line(cx + hw + 10, m1y, cx + hw + 90, m1y, th.muted, 0.9, dash="3,3")
+    s.line(cx + hw + 10, m2y, cx + hw + 90, m2y, th.muted, 0.9, dash="3,3")
 
     # Right panel: usable frequency range and DSP method.
     s.rect(430, 118, 430, 300, "none", th.muted, rx=12, dash="6,5")
@@ -1050,13 +1092,9 @@ def _d_spot_tube(s: SVG, th: Theme) -> None:
         (344, "→ ISO 10534-2 decomposition → $α(f)$", th.primary),
     ):
         s.text(645, y, txt, 15, col, bold=(col is th.primary))
-    s.text(
-        645,
-        396,
-        "Tube sealed onto the road; plane waves only below $f_u$",
-        13,
-        th.muted,
-    )
+    # 12 px in Spanish, which at 13 ran out through the box's left edge.
+    sealed = "Tube sealed onto the road; plane waves only below $f_u$"
+    s.text(645, 396, sealed, s.fit_size([sealed], [13, 12], 410), th.muted)
 
 
 def _d_iso11654(s: SVG, th: Theme) -> None:
@@ -1423,7 +1461,9 @@ def _d_porous_layer(s: SVG, th: Theme) -> None:
         # Clip fibre ends into the circle by shortening long excursions.
         s.line(cx - dx, cy - dy, cx + dx, cy + dy, th.secondary, 3.0)
     s.text(170, 80, "microstructure (zoom)", 14, th.fg, bold=True)
-    s.text(96, 300, "fibre frame", 13, th.secondary, anchor="start")
+    # Starting further left, so that the Spanish ends short of the leader
+    # from the next label, which ran through its last word.
+    s.text(64, 304, "fibre frame", 13, th.secondary, anchor="start")
     s.line(120.0, 292.0, 140.0, 252.0, th.muted, 1.0)
     s.text(190, 322, "air in the pores: $φ$ = 0.98", 13, th.fg, anchor="start")
     s.line(214.0, 314.0, 200.0, 262.0, th.muted, 1.0)
@@ -1823,7 +1863,16 @@ def _d_suspended_ceiling_specimen(s: SVG, th: Theme) -> None:
     s.text(410, back + 34, "deflection ≤ 5 mm at any point", 12, th.secondary)
     s.text(410, floor - 18, "closed air space, no partitions", 12, th.muted)
     s.dim(150, floor, 150, face, "200 mm", size=13, label_side="right")
-    s.text(159, (floor + face) / 2 + 24, "overall depth", 12, th.muted, anchor="start")
+    # 11 px in Spanish, so that it ends short of the leader to the profile.
+    depth = "overall depth"
+    s.text(
+        159,
+        (floor + face) / 2 + 24,
+        depth,
+        s.fit_size([depth], [12, 11], 96),
+        th.muted,
+        anchor="start",
+    )
     s.dim(86, face, 302, face, "≈ 0.6 m", offset=-24, size=12)
     s.dim(302, face, 518, face, "≈ 0.6 m", offset=-24, size=12)
     s.text(
@@ -1840,7 +1889,7 @@ def _d_suspended_ceiling_specimen(s: SVG, th: Theme) -> None:
     # support unit, in both bays, so neither heading can be read as naming
     # the column it sits under.
     s.path(
-        f"M 234 {floor + 28} L 252 {floor - 56} L 296 {back + 20}",
+        f"M 234 {floor + 28} L 274 {floor - 56} L 296 {back + 20}",
         stroke=th.primary,
         sw=1.0,
     )
@@ -2002,16 +2051,19 @@ def _d_standing_wave_tube(s: SVG, th: Theme) -> None:
         py = y_of(envelope(px))
         s.circle(px, py, 5.5, th.secondary)
         s.text(px, py - 14, lab, 13, th.secondary, bold=True)
+    # The label under the dimension's foot: level with its middle, the
+    # envelope ran through it.
     s.dim(
         x_max1 - 46,
         y_of(envelope(x_max1)),
         x_max1 - 46,
         y_of(envelope(x_min1)),
-        "$ΔL$ = 9.54 dB",
+        "",
         offset=0,
         size=14,
         label_side="left",
     )
+    s.text(x_max1 - 54, y_of(envelope(x_min1)) + 16, "$ΔL$ = 9.54 dB", 14, th.fg, "end")
     s.line(
         x_max1 - 52,
         y_of(envelope(x_max1)),
@@ -2030,15 +2082,10 @@ def _d_standing_wave_tube(s: SVG, th: Theme) -> None:
         0.9,
         dash="3,3",
     )
-    s.dim(
-        x_min1,
-        tube_bot + 14,
-        face,
-        tube_bot + 14,
-        "$x_{min,1}$ = 12 cm",
-        offset=46,
-        size=14,
-    )
+    # The label under the dimension, which is narrower than it: above, the
+    # two witness lines ran through it.
+    s.dim(x_min1, tube_bot + 14, face, tube_bot + 14, "", offset=46, size=14)
+    s.text((x_min1 + face) / 2, tube_bot + 80, "$x_{min,1}$ = 12 cm", 14, th.fg)
     s.text(
         340,
         tube_bot + 104,

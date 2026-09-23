@@ -208,7 +208,10 @@ def _d_ntff_contour(s: SVG, th: Theme) -> None:
 
     # Two clearances worth drafting; the other two are in the notes.
     s.dim(gx(178), cy0, gx(178), py_t, "40", offset=0, label_side="left", size=13)
-    s.dim(gx(sponge), gy(300), cx0, gy(300), "60", offset=0, size=13)
+    # The label beside the witness line, just above the sponge: the span is
+    # narrower than the "60", which sat on the sponge's hatching and edge.
+    s.dim(gx(sponge), gy(300), cx0, gy(300), "", offset=0, size=13)
+    s.text(cx0 + 8, gy(284), "60", 13, th.fg, "start")
     s.line(cx0, cy1, cx0, gy(304), th.muted, 0.9, dash="3,3")
     s.line(gx(sponge), gy(sponge), gx(sponge), gy(304), th.muted, 0.9, dash="3,3")
 
@@ -256,7 +259,9 @@ def _d_ntff_contour(s: SVG, th: Theme) -> None:
                 anc,
                 bold=True,
             )
-    s.line(ox, oy, ox, oy - 0.6 * r, th.accent, 1.0, dash="4,4")
+    # The normal through the origin starts above the two labels centred on
+    # it, which it ran straight through from the panel face.
+    s.line(ox, y_src + 20, ox, oy - 0.6 * r, th.accent, 1.0, dash="4,4")
     s.text(
         ox,
         oy - r - 40,
@@ -396,7 +401,7 @@ def _d_elastic_fluid_solid(s: SVG, th: Theme) -> None:
 
     # --- (b) oblique incidence with mode conversion -----------------------
     bx = 470.0
-    s.line(bx, top + 8, bx, bot - 8, th.muted, 0.9, dash="4,4")
+    s.line(bx, top + 30, bx, bot - 8, th.muted, 0.9, dash="4,4")
     th_i, r_in = math.radians(22.0), 122.0
     s.arrow(
         bx - r_in * math.sin(th_i),
@@ -428,8 +433,10 @@ def _d_elastic_fluid_solid(s: SVG, th: Theme) -> None:
         )
     s.text(bx - 12, y_if - 58, "$θ$", 14, th.fg, "end")
     s.circle(bx, y_if - 96, 5.5, th.primary)
-    s.text(bx + 12, y_if - 116, "probe on the normal,", 11, th.primary, "start")
-    s.text(bx + 12, y_if - 100, "0.12 m up", 11, th.primary, "start")
+    # One line across the top of the panel, above the normal and both rays:
+    # beside the probe, the reflected ray ran through the second of its two
+    # lines, and the incident ray would on the other side.
+    s.text(bx, top + 20, "probe on the normal, 0.12 m up", 11, th.primary)
 
     # --- (c) the Scholte case ---------------------------------------------
     cx = 755.0
@@ -450,7 +457,9 @@ def _d_elastic_fluid_solid(s: SVG, th: Theme) -> None:
 
     # --- Where the interface physically is --------------------------------
     ix0, iy0 = 190.0, 556.0
-    s.rect(ix0, iy0, 520, 96, th.panel, th.muted, rx=10, sw=1.4, dash="6,5")
+    # 640 px wide: the Spanish of the three lines beside the sketch ran out
+    # through the right-hand side at 520.
+    s.rect(ix0 - 40, iy0, 640, 96, th.panel, th.muted, rx=10, sw=1.4, dash="6,5")
     s.line(ix0 + 26, iy0 + 48, ix0 + 146, iy0 + 48, th.primary, 2.6)
     for k in range(4):
         s.line(
@@ -560,7 +569,9 @@ def _d_immersed_plate_tl(s: SVG, th: Theme) -> None:
     )
 
     # --- What the two probes record ---------------------------------------
-    tx0, tw = 408.0, 420.0
+    # Starting 22 px further right, so that the probes' names end clear of
+    # the 0.75 m dimension, whose line ran through their first letters.
+    tx0, tw = 430.0, 398.0
     ta, tb = 192.0, 300.0
 
     def _pulse(cus: float, base: float, colour: str, amp: float) -> None:

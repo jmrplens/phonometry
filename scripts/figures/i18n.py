@@ -1574,7 +1574,7 @@ _ES_EXACT = {
     "Background correction $K_1$ [dB]": "Corrección por ruido de fondo $K_1$ [dB]",
     "Environmental correction $K_2$ [dB]": "Corrección ambiental $K_2$ [dB]",
     "ISO 3744 criterion\n6 dB": "Criterio de ISO 3744\n6 dB",
-    "capped:\nupper bound": "acotada:\ncota superior",
+    "capped:\nupper\nbound": "acotada:\ncota\nsuperior",
     "$A$ known to ±20 %": "$A$ conocida a ±20 %",
     # reverberation_correction_terms: ISO 3741 Eq. 20, term by term
     "The five terms of ISO 3741 Eq. 20": "Los cinco términos de la Ec. 20 de ISO 3741",
@@ -3582,10 +3582,10 @@ _ES_EXACT = {
         "y por debajo de su propio umbral ninguna corrige nada: la\n"
         "medición se rechaza"
     ),
-    "A quarter of the screen height": "Un cuarto de la altura de la pantalla",
-    "Half the screen height": "La mitad de la altura de la pantalla",
-    "The screen height itself": "La altura de la pantalla",
-    "Twice the screen height": "El doble de la altura de la pantalla",
+    "A quarter of\nthe screen height": "Un cuarto de la\naltura de la pantalla",
+    "Half the\nscreen height": "La mitad de la\naltura de la pantalla",
+    "The screen\nheight itself": "La altura de\nla pantalla",
+    "Twice the\nscreen height": "El doble de la\naltura de la pantalla",
     "Screen height [m]": "Altura de la pantalla [m]",
     "Distance from the screen [m]": "Distancia a la pantalla [m]",
     "Where the microphones stand": "Dónde se colocan los micrófonos",

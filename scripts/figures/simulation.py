@@ -375,8 +375,21 @@ def generate_fdtd_room_modes(output_dir: str) -> None:
             zorder=2,
             label="Analytic mode frequencies" if i == 0 else None,
         )
+        # Chipped and above the peaks: set bare on the mode's own line, the
+        # line ran through the middle of the label.
         ax.annotate(
-            f"({mx},{my})", xy=(f_mode, 1.5), ha="center", fontsize=9, color=COLOR_FG
+            f"({mx},{my})",
+            xy=(f_mode, 3.5),
+            ha="center",
+            va="center",
+            fontsize=9,
+            color=COLOR_FG,
+            zorder=4,
+            bbox={
+                "boxstyle": "round,pad=0.25",
+                "facecolor": COLOR_PANEL,
+                "edgecolor": COLOR_GRID,
+            },
         )
     ax.set_title("Rigid-box FDTD probe spectrum vs analytic modes", pad=14)
     ax.set_xlabel(LABEL_FREQ_HZ)
@@ -777,15 +790,18 @@ def generate_elastic_probe_traces(output_dir: str) -> None:
         label="probe pressure, 7.5 m below the source",
     )
     ax.axhline(0.0, color=COLOR_GRID, linewidth=1.0)
-    for t_mark, lab, col in (
-        (t_direct, "incident", COLOR_FG),
-        (t_echo, "echo off the steel", COLOR_SECONDARY),
+    # The echo's note stands to the left of its line: to the right, with the
+    # echo this close to the end of the record, it ran out through the spine.
+    for t_mark, lab, col, side in (
+        (t_direct, "incident", COLOR_FG, 1.0),
+        (t_echo, "echo off the steel", COLOR_SECONDARY, -1.0),
     ):
         ax.axvline(t_mark, color=col, linestyle=":", linewidth=1.2)
         ax.annotate(
             f"{lab}\n{t_mark:.2f} ms",
             xy=(t_mark, -0.42),
-            xytext=(t_mark + 0.08, -0.72),
+            xytext=(t_mark + side * 0.08, -0.72),
+            ha="left" if side > 0 else "right",
             fontsize=9,
             color=col,
             arrowprops={"arrowstyle": "->", "color": col, "lw": 0.9},

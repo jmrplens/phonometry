@@ -41,15 +41,19 @@ def _d_human_vibration(s: SVG, th: Theme) -> None:
     s.line(184, 442, 184, gy, th.fg, 2.4)  # pedestal
     # A wavy "vibration" arrow rising into the seat base.
     s.arrow(184, gy - 4, 184, 452, th.secondary, 2.4)
-    s.text(184, gy - 12, "vibration input", 15, th.secondary, "middle", italic=True)
+    # Left of the pedestal: centred on it, the pedestal, the arrow up it and
+    # the person's shin all ran through the words.
+    s.text(172, gy - 16, "vibration input", 15, th.secondary, "end", italic=True)
     s.person(178, gy, 176, seated=True)
     # Triaxial accelerometer at the seat/body interface with its x, y, z axes.
     ox, oy = 176.0, 420.0
     s.rect(ox - 9, oy - 8, 18, 16, th.secondary, th.fg, rx=2, sw=1.5)
     s.arrow(ox, oy - 8, ox, oy - 58, th.accent, 2.0)  # z (vertical)
-    s.text(ox + 8, oy - 54, "$z$", 15, th.accent, "start", bold=True)
+    # Left of the axis and below the head, which it sat on at the top.
+    s.text(ox - 8, oy - 30, "$z$", 15, th.accent, "end", bold=True)
     s.arrow(ox + 9, oy, ox + 62, oy, th.accent, 2.0)  # x (fore-aft)
-    s.text(ox + 66, oy + 5, "$x$", 15, th.accent, "start", bold=True)
+    # Above the arrow's head, clear of the cushion's edge it sat on.
+    s.text(ox + 62, oy - 8, "$x$", 15, th.accent, "start", bold=True)
     s.arrow(ox - 7, oy + 6, ox - 44, oy + 34, th.accent, 2.0)  # y (lateral)
     s.text(ox - 52, oy + 44, "$y$", 15, th.accent, "end", bold=True)
     s.text(150, gy + 34, "Seat/body interface", 15, th.fg, "middle")
@@ -1359,11 +1363,13 @@ def _d_machine_diagnostics(s: SVG, th: Theme) -> None:
 
     # --- Mounting: the usable upper frequency -------------------------------
     s.rect(48, 356, 396, 244, "none", th.fg, rx=10, sw=1.6)
+    # A size smaller where the box would not hold it, as the Spanish at 15.
+    mounting = "Mounting sets the usable upper frequency"
     s.text(
         70,
         386,
-        "Mounting sets the usable upper frequency",
-        15,
+        mounting,
+        s.fit_size([mounting], [15, 14, 13], 360, bold=True),
         th.fg,
         anchor="start",
         bold=True,
@@ -1580,8 +1586,11 @@ def _d_transfer_stiffness_rig(s: SVG, th: Theme) -> None:
     """ISO 10846: isolator between the driven input mass and a blocked output
     (direct, force transducer) or a blocking mass (indirect).
     """
+    # The direct rig 30 px right of where it stood, so that the note on the
+    # transverse check fits to its left: there, the spring and the force
+    # transducer ran through the Spanish of both lines.
     for cx, head in (
-        (250.0, "Direct method (Part 2)"),
+        (280.0, "Direct method (Part 2)"),
         (650.0, "Indirect method (Part 3)"),
     ):
         s.text(cx, 78, head, 19, th.fg, bold=True)
@@ -1599,18 +1608,20 @@ def _d_transfer_stiffness_rig(s: SVG, th: Theme) -> None:
         # Isolator under test.
         _spring_v(s, cx, 202, 310, th.accent, coils=4)
         s.text(cx + 28, 260, "isolator under test", 14, th.accent, anchor="start")
-    s.text(
-        48, 296, "$a′_1$: unwanted transverse input,", 12, th.secondary, anchor="start"
+    transverse = (
+        "$a′_1$: unwanted transverse input,",
+        "≥ 15 dB below $a_1$ (Inequality 3)",
     )
-    s.text(
-        48, 314, "≥ 15 dB below $a_1$ (Inequality 3)", 12, th.secondary, anchor="start"
-    )
-    s.line(150, 286, 310, 202, th.muted, 1.0, dash="3,3")
+    size = s.fit_size(list(transverse), [12, 11], 240)
+    s.text(24, 280, transverse[0], size, th.secondary, anchor="start")
+    s.text(24, 297, transverse[1], size, th.secondary, anchor="start")
+    s.line(150, 270, 340, 204, th.muted, 1.0, dash="3,3")
 
     # ===== Direct output: blocked, force transducer on a rigid foundation ===
-    cx = 250.0
+    cx = 280.0
     s.rect(cx - 30, 310, 60, 18, th.secondary, th.fg, rx=3, sw=1.6)
-    s.text(cx + 52, 326, "force transducer", 13, th.secondary, anchor="start")
+    # Clear of the top of the foundation, which ran along the letters at 326.
+    s.text(cx + 52, 321, "force transducer", 13, th.secondary, anchor="start")
     s.rect(cx - 105, 328, 210, 26, th.panel, th.fg, sw=2)
     s.ground(354, cx - 125, cx + 125)
     s.text(cx, 388, "Rigid foundation", 13, th.muted)
@@ -1698,12 +1709,15 @@ def _d_transfer_stiffness_rig(s: SVG, th: Theme) -> None:
     s.line(500, 706, 820, 706, th.fg, 2.6)  # frame traverse
     s.line(500, 706, 500, 822, th.fg, 2.2)
     s.line(820, 706, 820, 822, th.fg, 2.2)
-    s.rect(628, 712, 64, 34, th.panel, th.secondary, rx=4, sw=2.0)
+    # The actuator a little left of the spring's axis and its note a size
+    # smaller where needed, right-aligned on the frame's own leg: with the
+    # box centred on the axis, the note ran into it in both languages.
+    s.rect(604, 712, 64, 34, th.panel, th.secondary, rx=4, sw=2.0)
     s.arrow(660, 748, 660, 768, th.secondary, 2.2)
-    # Right-aligned on the frame's own leg: set from the left, the Spanish
-    # second line runs through it.
-    s.text(812, 734, "actuator: 100 % of the", 12, th.secondary, anchor="end")
-    s.text(812, 752, "permissible static load", 12, th.secondary, anchor="end")
+    actuator = ("actuator: 100 % of the", "permissible static load")
+    size = s.fit_size(list(actuator), [12, 11], 136)
+    s.text(812, 734, actuator[0], size, th.secondary, anchor="end")
+    s.text(812, 752, actuator[1], size, th.secondary, anchor="end")
     _spring_v(s, 660, 768, 800, th.accent, coils=3, width=10.0, sw=2.0)
     s.rect(600, 800, 120, 26, th.panel, th.fg, rx=4, sw=2.2)
     s.text(660, 818, "$m_2$", 13, th.fg)
@@ -1802,9 +1816,11 @@ def _d_junction_rig(s: SVG, th: Theme) -> None:
     _accel(s, 588, 422)
     _accel_wall(s, 685, 290)
     _accel(s, 762, 384)
-    s.text(533, 423, "$i$", 19, th.primary, bold=True)
+    # Both floor labels on the top face, between its edges and the paths:
+    # the i sat on the face's slanted left edge and the j on its right end.
+    s.text(556, 424, "$i$", 19, th.primary, bold=True)
     s.text(658, 200, "$j$", 19, th.secondary, bold=True)
-    s.text(806, 400, "$j$", 19, th.secondary, bold=True)
+    s.text(720, 396, "$j$", 19, th.secondary, bold=True)
     s.path("M 612 418 Q 690 434 756 400", stroke=th.accent, sw=2.0)
     s.arrow(742.0, 407.0, 760.0, 398.0, th.accent, 2.0)
     s.path("M 606 406 Q 646 394 654 330", stroke=th.accent, sw=2.0)
@@ -1872,7 +1888,8 @@ def _d_power_injection_rig(s: SVG, th: Theme) -> None:
         s.line(x0 + 52, gy, x0 + 52 + dxo, gy - dyo, th.accent, 2.6)
         s.line(x0 + 100, 250, x0 + 156, 156, th.muted, 1.0, dash="3,3")
         s.text(x0 + 160, 150, "subsystem 2", 15, th.secondary, anchor="start")
-        s.text(x0 + 248, gy + 44, "subsystem 1", 15, th.primary)
+        # Beyond the plate's right end, clear of the impedance head's name.
+        s.text(x0 + 312, gy + 44, "subsystem 1", 15, th.primary, anchor="start")
         # Accelerometer positions: several per subsystem, off the edges and
         # off the drive point, because the band energy uses a space average.
         for ax in (108.0, 152.0, 216.0, 252.0):
@@ -1885,8 +1902,10 @@ def _d_power_injection_rig(s: SVG, th: Theme) -> None:
             s.rect(x0 + 120, gy + 2, 26, 13, th.secondary, th.fg, rx=3, sw=1.4)
             s.line(x0 + 133, gy + 15, x0 + 133, gy + 40, th.fg, 2.2)
             s.rect(x0 + 96, gy + 40, 74, 42, th.panel, th.primary, rx=9, sw=2)
+            # Clear below the plate's front face, whose lower edge ran along
+            # the top of the words at gy + 20.
             s.text(
-                x0 + 176, gy + 20, "impedance head", 13, th.secondary, anchor="start"
+                x0 + 176, gy + 28, "impedance head", 13, th.secondary, anchor="start"
             )
             s.text(x0 + 180, gy + 68, "shaker", 14, th.fg, anchor="start")
         else:
@@ -1981,7 +2000,9 @@ def _d_machine_vibration_positions(s: SVG, th: Theme) -> None:
         s.rect(x, shaft_y - 52, w, 104, th.panel, th.primary, rx=8, sw=2.2)
         s.text(x + w / 2, shaft_y + 6, label, size)
     s.rect(402, shaft_y - 16, 38, 32, th.bg, th.accent, rx=3, sw=2)  # coupling
-    s.text(421, shaft_y - 28, "coupling", 13, th.accent)
+    # Under the two bodies, above the baseplate: over the coupling, the name
+    # ran across the corners of both bodies.
+    s.text(421, shaft_y + 72, "coupling", 13, th.accent)
     for bx in bearing_x:
         s.rect(bx - 30, shaft_y - 26, 60, 26, th.secondary, th.fg, rx=4, sw=1.6)
         s.rect(bx - 22, shaft_y + 12, 44, gy - 24 - shaft_y - 12, th.panel, th.fg, 2)
@@ -2959,9 +2980,11 @@ def _d_railway_cross_section(s: SVG, th: Theme) -> None:
     quarter = a0 * 1.25 / 4
     for t0, t1 in ((4.6, 8.6), (21.4, 25.4)):
         s.line(tx(t0), y0 - quarter, tx(t1), y0 - quarter, th.primary, 1.2, dash="2,2")
+    # Level with the quarter line rather than dropped onto it: 4 px lower,
+    # its descenders sat on the start of the trace.
     s.text(
         tx(4.6) - 4,
-        y0 - quarter + 4,
+        y0 - quarter,
         "≈ ¼ of the most frequent maxima",
         11,
         th.primary,

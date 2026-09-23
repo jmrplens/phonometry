@@ -297,12 +297,14 @@ def plot_sound_reinforcement_geometry(
         linestyle="none",
         zorder=6,
     )
+    # Up and to the left of the microphone: on the right, the feedback path
+    # climbs away through where the name would stand.
     ax.text(
-        m_xy[0] + 0.15,
+        m_xy[0] - 0.15,
         0.82,
         _t("Microphone (M)", language),
         fontsize=8,
-        ha="left",
+        ha="right",
         va="bottom",
     )
     ax.add_patch(
@@ -363,18 +365,21 @@ def plot_sound_reinforcement_geometry(
     kwargs.setdefault("label", _t("Feedback path", language))
     ax.plot([h_xy[0], m_xy[0]], [h_xy[1], 0.62], zorder=4, **kwargs)
 
-    for (x0, y0), (x1, y1), value, dy in (
-        (t_xy, (m_xy[0], 0.5), d_tm, 0.16),
-        ((h_xy[0], h_xy[1]), (m_xy[0], 0.62), d_hm, 0.12),
-        (h_xy, l_xy, d_hl, 0.12),
+    # Each length beside its own path. The steep feedback path takes its
+    # length on its left, not above its middle, where the path runs on up
+    # through the words.
+    for (x0, y0), (x1, y1), value, dx, dy, ha, va in (
+        (t_xy, (m_xy[0], 0.5), d_tm, 0.0, 0.16, "center", "bottom"),
+        ((h_xy[0], h_xy[1]), (m_xy[0], 0.62), d_hm, -0.25, 0.0, "right", "center"),
+        (h_xy, l_xy, d_hl, 0.0, 0.12, "center", "bottom"),
     ):
         ax.text(
-            0.5 * (x0 + x1),
+            0.5 * (x0 + x1) + dx,
             0.5 * (y0 + y1) + dy,
             _metres(value, language),
             fontsize=8,
-            ha="center",
-            va="bottom",
+            ha=ha,
+            va=va,
         )
 
     ax.set_ylim(-0.9, 3.6)

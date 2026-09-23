@@ -838,10 +838,12 @@ def generate_seawater_absorption(output_dir: str) -> None:
     # factor of its own ordinate leaves the axes near the top: at 500 kHz the
     # absorption is already within a factor of seven of the ceiling, and "pure
     # water" was drawn astride the top spine, which struck through its
-    # descenders. Each label is offset by the same factor and then held one
-    # tenth of a decade inside the axis, so the three keep a common look and
-    # none of them lands on the frame.
-    top = float(np.max(alpha["francois-garrison"])) * 10.0
+    # descenders. Each label is offset by the same factor and then held
+    # three tenths of a decade under the ceiling the axis actually has (a
+    # ceiling guessed at ten times the largest value sat above the real one,
+    # and the label with it), so the three keep a common look and none of
+    # them lands on the frame.
+    top = float(ax_a.get_ylim()[1])
     for f_mark, label in (
         (300.0, "boric acid"),
         (30e3, r"$\mathrm{MgSO_4}$"),
@@ -851,7 +853,7 @@ def generate_seawater_absorption(output_dir: str) -> None:
         ax_a.annotate(
             label,
             xy=(f_mark, a_mark),
-            xytext=(f_mark * 0.32, min(a_mark * 7.0, top / 1.26)),
+            xytext=(f_mark * 0.32, min(a_mark * 7.0, top / 2.0)),
             fontsize=9,
             color=COLOR_FG,
             arrowprops={"arrowstyle": "->", "color": COLOR_MUTED, "linewidth": 1.0},
@@ -1251,6 +1253,9 @@ def generate_sonar_budget(output_dir: str) -> None:
             )
             ax.plot([r50], [fom], "o", color=color, markersize=5, zorder=5)
             step = 13 if dy > 0 else -13
+            # Chipped and above the curves: each range sits on its own drop
+            # line, and the curves of the other cases run through where the
+            # labels stack, so bare letters had lines through them.
             ax.annotate(
                 f"{r50:.1f} km",
                 xy=(r50, fom),
@@ -1259,6 +1264,12 @@ def generate_sonar_budget(output_dir: str) -> None:
                 fontsize=8.5,
                 color=color,
                 ha="center",
+                zorder=6,
+                bbox={
+                    "boxstyle": "round,pad=0.25",
+                    "facecolor": COLOR_PANEL,
+                    "edgecolor": COLOR_GRID,
+                },
             )
     ax.set_ylim(40.0, 126.0)
     ax.invert_yaxis()
@@ -2189,14 +2200,17 @@ def generate_piling_campaign_accumulation(output_dir: str) -> None:
             if curve[0] < level <= curve[-1]:
                 n_cross = float(np.interp(level, curve, counts.astype(float)))
                 ax.plot([n_cross], [level], "o", color=color, markersize=5, zorder=5)
+                # Under the crossing: the criteria of the other groups lie
+                # a few decibels above it, and one ran along the digits.
                 ax.annotate(
                     f"{n_cross:.0f}",
                     xy=(n_cross, level),
-                    xytext=(0, 6),
+                    xytext=(0, -6),
                     textcoords="offset points",
                     fontsize=8.5,
                     color=color,
                     ha="center",
+                    va="top",
                 )
     vhf = underwater.weighted_exposure(
         spectrum.frequencies,

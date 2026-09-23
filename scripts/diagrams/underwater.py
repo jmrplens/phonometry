@@ -71,7 +71,9 @@ def _d_hydrophone_deployment(s: SVG, th: Theme) -> None:
         s.text(bx + 16, hy + 5, dlab, 13, th.fg, anchor="start", mono=True)
         lx_ = 305.0
         ly_ = surf + (lx_ - shx) * math.tan(math.radians(ang))
-        s.text(lx_, ly_ - 7, f"{ang}°", 13, th.muted)
+        # Just right of the ray at its end, where it cannot pass under the
+        # label: centred on the ray, the steep 45° one ran through it.
+        s.text(lx_ + 2, ly_ - 7, f"{ang}°", 13, th.muted, anchor="start")
     s.text(
         bx + 16,
         surf + 100 * math.tan(math.radians(30)) * sc + 32,
@@ -109,9 +111,10 @@ def _d_hydrophone_deployment(s: SVG, th: Theme) -> None:
     s.text(852, 156, "course", 12, th.muted, anchor="end")
     s.rect(676, 162, 28, 14, th.panel, th.fg, rx=3, sw=1.4)
     s.circle(750, 170, 3.5, th.fg)
-    # dCPA line drawn in two runs so it does not cross the label below.
+    # dCPA line drawn in three runs so it crosses none of the labels on it.
     s.line(750, 170, 750, 184, th.muted, 1.1, dash="5,4")
-    s.line(750, 234, 750, 330, th.muted, 1.1, dash="5,4")
+    s.line(750, 208, 750, 282, th.muted, 1.1, dash="5,4")
+    s.line(750, 302, 750, 330, th.muted, 1.1, dash="5,4")
     s.text(758, 256, "dCPA", 12, th.fg, anchor="start", mono=True)
     s.circle(750, 330, 6, th.secondary)
     s.circle(750, 330, 2.2, th.bg)
@@ -121,7 +124,9 @@ def _d_hydrophone_deployment(s: SVG, th: Theme) -> None:
     s.text(750, 296, "±30°", 12, th.muted)
     s.line(750 - win, 178, 750 + win, 178, th.accent, 3.0)
     s.text(750, 200, "data window", 13, th.accent)
-    s.text(750, 220, "lDW = 2 dCPA tan 30°", 12, th.fg, mono=True)
+    # Under the apex, outside the window: inside it, the window's two rays
+    # ran through both ends of the line.
+    s.text(750, 354, "lDW = 2 dCPA tan 30°", 12, th.fg, mono=True)
 
     # Run schedule: what the data window sits inside (Clause 5.5-5.6).
     s.text(752, 384, "Run schedule (not to scale)", 15, th.fg, bold=True)
@@ -130,9 +135,13 @@ def _d_hydrophone_deployment(s: SVG, th: Theme) -> None:
         s.line(tx, 420, tx, 440, th.fg, 1.6)
         s.text(tx, 412, tlab, 12, th.fg)
     s.line(722, 430, 784, 430, th.accent, 4.0)
-    s.text(753, 458, "data window", 12, th.accent)
-    s.dim(640, 444, 722, 444, "≥ 2 × DWL", offset=0, size=11)
-    s.dim(784, 444, 866, 444, "≥ 2 × DWL", offset=0, size=11)
+    # The window named over the line and the two run-ins under their
+    # dimensions: set over them, the timeline ran through both.
+    s.text(753, 422, "data window", 12, th.accent)
+    s.dim(640, 444, 722, 444, "", offset=0, size=11)
+    s.dim(784, 444, 866, 444, "", offset=0, size=11)
+    s.text(681, 460, "≥ 2 × DWL", 11, th.fg)
+    s.text(825, 460, "≥ 2 × DWL", 11, th.fg)
     s.path("M 866 430 Q 890 452 866 470 L 640 470", stroke=th.muted, sw=1.4, dash="6,4")
     s.arrow(660, 470, 640, 470, th.muted, 1.4)
     s.text(752, 490, "reverse course; 4 runs, 2 per side", 12, th.fg)
@@ -300,7 +309,10 @@ def _d_pile_driving_deployment(s: SVG, th: Theme) -> None:
     s.text(300, bed + 30, "seabed", 12, th.muted)
 
     # Water depth, inside the 4 m to 100 m scope of Clause 1.
-    s.dim(left + 22, surf, left + 22, bed, "30 m", offset=0, size=14)
+    # Its label above the dimension's top, clear of the bubble curtain whose
+    # waves ran through it beside the middle.
+    s.dim(left + 22, surf, left + 22, bed, "", offset=0, size=14)
+    s.text(px_ - 16, surf - 10, "30 m", 14, th.fg, anchor="end")
 
     # Monopile with its hydraulic hammer, driven below the bed.
     s.rect(px_ - 11, 118, 22, bed - 118 + 44, th.panel, th.fg, sw=2)
@@ -329,8 +341,10 @@ def _d_pile_driving_deployment(s: SVG, th: Theme) -> None:
             yb -= 18
             d += f" Q {px_ + dx * 1.4:.0f} {yb + 9:.0f} {px_ + dx:.0f} {yb:.0f}"
         s.path(d, stroke=th.muted, sw=1.2, dash="4,5")
-    s.text(px_ + 52, 330, "bubble curtain, if used", 12, th.muted, anchor="start")
-    s.line(px_ + 48, 326, px_ + 34, 312, th.muted, 0.9)
+    # Under the note on the vessel, clear of the arrow from it to the vessel,
+    # which ran through the words at y = 330.
+    s.text(px_ + 52, 426, "bubble curtain, if used", 12, th.muted, anchor="start")
+    s.line(px_ + 48, 421, px_ + 36, 410, th.muted, 0.9)
 
     # Range break: 750 m does not fit the depth scale, so the surface is cut.
     for bx in (286.0, 306.0):
@@ -381,7 +395,9 @@ def _d_pile_driving_deployment(s: SVG, th: Theme) -> None:
         hy = surf + 30.0 * frac * ppm
         s.circle(rx_, hy, 7, th.secondary)
         s.circle(rx_, hy, 2.5, th.bg)
-        s.text(rx_ + 14, hy + 5, lab, 12, th.fg, anchor="start", mono=True)
+        # Below and right of the hydrophone: level with it, the depth band's
+        # top edge ran through the ½-depth label.
+        s.text(rx_ + 12, hy + 17, lab, 12, th.fg, anchor="start", mono=True)
     s.text(rx_ + 2, bed + 34, "bottom-mounted recorder", 12, th.muted)
 
     # Survey vessel and the noise the deployment itself makes.
@@ -416,7 +432,9 @@ def _d_pile_driving_deployment(s: SVG, th: Theme) -> None:
     s.ellipse(cx_, cy_, 142, 142, "none", th.muted, 1.2, dash="6,5")
     s.circle(cx_, cy_, 9, th.panel, th.fg, 2)
     s.circle(cx_, cy_, 3, th.fg)
-    s.text(cx_, cy_ - 18, "pile", 12, th.fg)
+    # Under the pile, where no radius runs: above it, the one to the 750 m
+    # position ran through the word.
+    s.text(cx_, cy_ + 24, "pile", 12, th.fg)
     for ang, rr, col in (
         (-58.0, 100.0, th.secondary),
         (28.0, 142.0, th.accent),
@@ -429,7 +447,9 @@ def _d_pile_driving_deployment(s: SVG, th: Theme) -> None:
         s.circle(hx, hy, 2.2, th.bg)
     s.text(cx_, cy_ + 58, "3 × water depth = 90 m:", 11, th.muted)
     s.text(cx_, cy_ + 74, "nothing inside", 11, th.muted)
-    s.text(cx_ + 64, cy_ - 92, "750 m", 13, th.secondary, anchor="start", mono=True)
+    # Inside the circle it names, near its top: outside it, the dashed outer
+    # circle ran through the label.
+    s.text(cx_, cy_ - 80, "750 m", 13, th.secondary, mono=True)
     s.text(cx_, cy_ + 176, "further positions on a transect,", 13, th.fg)
     s.text(cx_, cy_ + 196, "clear of banks and trenches", 13, th.fg)
     s.text(cx_, cy_ + 216, "(radii not to scale)", 11, th.muted)

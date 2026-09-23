@@ -706,6 +706,12 @@ def plot_terrain_screening(
     ax.annotate(
         "$R$", rcv, textcoords="offset points", xytext=(0, 8), ha="center", fontsize=10
     )
+    # Room over the highest of the ground, the source and the receiver for
+    # the S and R written above their points: with the default margin a
+    # source at the top of the section had its S on the top of the frame.
+    top = max(float(z.max()), float(src[1]), float(rcv[1]))
+    low = ax.get_ylim()[0]
+    ax.set_ylim(low, top + 0.2 * (top - low))
     ax.set_xlabel(_t(_SECTION_DISTANCE_LABEL, language))
     ax.set_ylabel(_t(_HEIGHT_LABEL, language))
     ax.set_title(_t("Terrain screening (ECAC Doc 32 / NORAH2 guidance)", language))

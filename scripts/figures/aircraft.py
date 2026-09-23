@@ -298,15 +298,18 @@ def generate_airport_sor(output_dir: str) -> None:
         # keeps a translucent fill; only its opacity follows the page.
         ax.fill(dx, dy, color=color, alpha=theme_fill_alpha(color, ax), zorder=1)
         ax.plot(dx, dy, color=color, linewidth=2.2, zorder=3, label=label)
-    for g in (0.0, -4.0, -8.0, -12.0):  # radial dB labels down the centre
+    # Radial dB labels along the top edge, each just outside the end of its
+    # own ring: down the centre spoke, the rings ran through the digits and
+    # the jet lobe's apex through the -12, which also left no room beside it.
+    for g in (0.0, -4.0, -8.0, -12.0):
         ax.text(
-            0.6,
-            -(g - r0),
+            (g - r0) + 0.3,
+            -0.4,
             _fmt_minus(g, ".0f"),
             fontsize=8,
             color=COLOR_FG,
             ha="left",
-            va="center",
+            va="top",
             zorder=4,
         )
     ax.set_aspect("equal")
@@ -1579,6 +1582,8 @@ def generate_rotorcraft_flight_conditions(output_dir: str) -> None:
             zorder=2,
             label="database conditions",
         )
+        # Chipped and above the mesh: beside each corner the triangulation's
+        # edges ran through the bare weights.
         for (_i, weight), (px, py) in zip(weights, corner, strict=True):
             axis.annotate(
                 f"{weight:.2f}",
@@ -1588,6 +1593,12 @@ def generate_rotorcraft_flight_conditions(output_dir: str) -> None:
                 fontsize=9,
                 color=COLOR_TERTIARY,
                 fontweight="bold",
+                zorder=4,
+                bbox={
+                    "boxstyle": "round,pad=0.15",
+                    "facecolor": COLOR_PANEL,
+                    "edgecolor": COLOR_GRID,
+                },
             )
         axis.plot(
             [qi[0]],

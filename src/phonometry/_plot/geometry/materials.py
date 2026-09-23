@@ -1378,7 +1378,11 @@ def plot_insitu_geometry(
     ax.plot(
         [0.0, 0.0], [0.0, source_height], color=_C_MUTED, linewidth=1.0, linestyle=":"
     )
-    _loudspeaker(ax, 0.0, source_height, 0.28 * source_height, language)
+    # The direct path runs down from the cone's mouth, so the label ends
+    # short of it instead of straddling it.
+    _loudspeaker(
+        ax, 0.0, source_height, 0.28 * source_height, language, label_ha="right"
+    )
     _microphone(ax, 0.0, mic_height, 0.22 * source_height, "")
     # Direct and reflected paths to the microphone.
     ax.plot([0.0, 0.0], [source_height, mic_height], color=_C_PRIMARY, linewidth=1.6)

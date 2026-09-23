@@ -1324,6 +1324,9 @@ def generate_spinal_response_peaks(output_dir: str) -> None:
             fontsize=9,
             color=COLOR_FG,
         )
+    # Headroom for the largest peak's figures, which otherwise sat on the
+    # top of the frame.
+    ax_p.set_ylim(ax_p.get_ylim()[0], float(peaks[largest]) + 5.0)
     ax_p.set_ylabel(r"$A_\mathrm{z}$ [m/s²]")
     ax_p.set_xlabel("Time [s]")
     ax_p.set_title(
@@ -2041,7 +2044,7 @@ def generate_envelope_chain_steps(output_dir: str) -> None:
         pad=8,
     )
     top = float(np.max(np.abs(narrow[window])))
-    axes[1].set_ylim(-1.35 * top, 1.35 * top)
+    axes[1].set_ylim(-1.35 * top, 1.6 * top)
     for k in range(11):  # one impact per BPFO period
         axes[1].axvline(
             1e3 * k / bpfo, color=COLOR_MUTED, linewidth=0.8, alpha=0.55, zorder=0
@@ -2049,17 +2052,26 @@ def generate_envelope_chain_steps(output_dir: str) -> None:
     t0 = 1e3 / bpfo * 3.0
     axes[1].annotate(
         "",
-        xy=(t0, 1.06 * top),
-        xytext=(t0 + 1e3 / bpfo, 1.06 * top),
+        xy=(t0, 1.1 * top),
+        xytext=(t0 + 1e3 / bpfo, 1.1 * top),
         arrowprops={"arrowstyle": "<->", "color": COLOR_SECONDARY},
     )
+    # Chipped, and high enough over its arrow that the chip leaves it clear:
+    # the label is wider than the period it names, so the impact lines
+    # either side of it ran through its first and last characters.
     axes[1].text(
         t0 + 0.5e3 / bpfo,
-        1.14 * top,
+        1.3 * top,
         rf"$1/\mathrm{{BPFO}}$ = {1e3 / bpfo:.2f} ms",
         ha="center",
         fontsize=9,
         color=COLOR_SECONDARY,
+        zorder=4,
+        bbox={
+            "boxstyle": "round,pad=0.15",
+            "facecolor": COLOR_PANEL,
+            "edgecolor": COLOR_GRID,
+        },
     )
 
     axes[2].plot(
@@ -3056,10 +3068,13 @@ def generate_machine_alarm_trip(output_dir: str) -> None:
         )
         capped = alarm >= cap - 1.0e-9
         note = "ALARM (capped)" if capped else "ALARM"
-        ax.text(
-            x + 0.28,
-            alarm,
+        # Two points above the level: a capped alarm sits on the dotted cap
+        # line, and the parentheses of the note came down onto it.
+        ax.annotate(
             f"{note}: {alarm:.3g} mm/s",
+            xy=(x + 0.28, alarm),
+            xytext=(0.0, 2.0),
+            textcoords="offset points",
             ha="left",
             va="bottom",
             fontsize=9,
@@ -6603,7 +6618,9 @@ def generate_railway_change_example(output_dir: str) -> None:
         )
     ax.annotate(
         "25 % above the existing exposure,\nthe least increase people notice",
-        xy=(x[1] - 0.45, before[1] * 1.25),
+        # Pointing a little way along the dashed line rather than at its left
+        # end, so the arrow passes clear of the day's "A_r = 0.1".
+        xy=(x[1] - 0.3, before[1] * 1.25),
         xytext=(x[0] + 0.35, 0.117),
         fontsize=9,
         color=COLOR_FG,

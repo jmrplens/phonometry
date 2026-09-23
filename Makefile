@@ -218,6 +218,17 @@ figure-legends:
 figure-tick-clearance:
 	$(PYTHON) scripts/check_figure_tick_clearance.py
 
+# A label placed by hand can land on a tick label, on another label, or under
+# a curve, a guide line or the spine a note runs out through, and the tick
+# gate measures marks over a tick label but not a text, while the annotation
+# audit leaves the plates out. This reads the committed SVGs, figures and
+# plates alike, glyph by glyph, so a label turned on a 3-D plate is read along
+# its own baseline, and fails on a text drawn over another or a stroke run
+# across one; the leader of an annotation, the grid and a line behind a chip
+# pass. Needs no `make graphs` first. Stdlib only.
+figure-text-clearance:
+	$(PYTHON) scripts/check_figure_text_clearance.py
+
 # The corpus signs a negative number with U+2212, and three things still wrote
 # the hyphen-minus: the polar angle formatter, which ignores
 # axes.unicode_minus; a reading built with an f-string; and the plates, which
@@ -369,6 +380,7 @@ figures:
 	$(MAKE) figure-decimal-point
 	$(MAKE) figure-legends
 	$(MAKE) figure-tick-clearance
+	$(MAKE) figure-text-clearance
 	$(MAKE) figure-minus-sign
 	$(PYTHON) scripts/check_figures.py
 
@@ -600,6 +612,6 @@ check: lint security test
 	llms pypi-readme api-docs site-reports conformance install-hooks test test-perf test-gpu coverage check \
 	snippets snippets-static claims subscripts docstring-math language-forwarding \
 	fence-names decimal-comma figure-decimal-point figure-legends figure-tick-clearance \
-	figure-minus-sign control-characters hazards dead-constants \
+	figure-text-clearance figure-minus-sign control-characters hazards dead-constants \
 	conformance-rows conformance-vocabulary parameter-units frozen-constants published-sources \
 	solid-agreement shared-sources catalogue-data published-catalogues

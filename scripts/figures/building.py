@@ -126,8 +126,9 @@ def generate_insulation_rating(output_dir: str) -> None:
         label=r"Measured $R^{\prime}$ (third octave)",
     )
 
-    # Rw is the shifted reference read at 500 Hz.
-    ax.axvline(500, color=COLOR_FG, linestyle=":", alpha=0.4)
+    # Rw is the shifted reference read at 500 Hz. The guide stops under the
+    # three lines of figures at the top, which it used to run through.
+    ax.axvline(500, ymax=0.77, color=COLOR_FG, linestyle=":", alpha=0.4)
     ax.plot(500, result.rating, "D", color=COLOR_SECONDARY, markersize=9, zorder=6)
     ax.annotate(
         rf"$R_\mathrm{{w}}$ = {result.rating} dB",
@@ -300,8 +301,9 @@ def generate_impact_rating(output_dir: str) -> None:
         label=r"Measured $L_\mathrm{n}$ (third octave)",
     )
 
-    # Ln,w is the shifted reference read at 500 Hz.
-    ax.axvline(500, color=COLOR_FG, linestyle=":", alpha=0.4)
+    # Ln,w is the shifted reference read at 500 Hz. The guide stops under the
+    # three lines of figures at the top, which it used to run through.
+    ax.axvline(500, ymax=0.77, color=COLOR_FG, linestyle=":", alpha=0.4)
     ax.plot(500, result.rating, "D", color=COLOR_SECONDARY, markersize=9, zorder=6)
     # The annotation sits in the clear gap between the rising measured curve
     # and the flat low-frequency reference plateau; the string is identical
@@ -350,7 +352,10 @@ def generate_impact_rating(output_dir: str) -> None:
     ax.set_ylabel(r"Normalized impact sound pressure level $L_\mathrm{n}$ [dB]")
     ax.set_xscale("log")
     ax.set_xlim(90, 3600)
-    ax.set_ylim(55, 86)
+    # Room above the 81 dB plateau of the reference curve for the three lines
+    # of figures: with the axis ending at 86 dB the plateau ran along the top
+    # of the third.
+    ax.set_ylim(55, 90)
     from matplotlib.ticker import NullFormatter
 
     ax.xaxis.set_minor_formatter(NullFormatter())
@@ -2548,7 +2553,9 @@ def generate_background_correction_regimes(output_dir: str) -> None:
         rf"$6 - 10\,\mathrm{{lg}}(10^{{0{{,}}6}} - 1)$"
         rf" = {formula[margin.searchsorted(6.0)]:.2f} dB",
         xy=(6.0, cap),
-        xytext=(7.4, cap + 0.62),
+        # Between the 10 and 15 dB lines: from 7.4 the 10 dB one ran through
+        # the formula.
+        xytext=(10.4, cap + 0.62),
         fontsize=9,
         color=COLOR_FG,
         arrowprops={"arrowstyle": "->", "lw": 1.0},
@@ -2561,10 +2568,13 @@ def generate_background_correction_regimes(output_dir: str) -> None:
         color=COLOR_FG,
         arrowprops={"arrowstyle": "->", "lw": 1.0},
     )
+    # Right of the 15 dB line, which ran through the note set across it, and
+    # ending on the right spine rather than past it in Spanish.
     ax.annotate(
         "the laboratory rule stops here",
         xy=(15.0, 0.0),
-        xytext=(12.4, 0.95),
+        xytext=(19.8, 0.55),
+        ha="right",
         fontsize=9,
         color=COLOR_FG,
         arrowprops={"arrowstyle": "->", "lw": 1.0},

@@ -107,6 +107,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **No label sits on a tick label, on another label or under a line any
+  more.** A label placed by hand could land on anything near it, and on 132
+  drawings, 82 plates and 50 plots, one did. The "U = 1.0 dB" of
+  `sound_power_grades_declaration` stood on the "90" of the axis beside it and
+  the "Reflecting plane" of `microphone_positions_hemisphere` reached the "1"
+  of its y axis. The heading of the last lane of `diagram_sweep_budget` was
+  crossed by the impulse it names and by the dashed zero line under it, and
+  plate after plate had a leader, a dimension line or the outline of a part
+  run through a caption. Notes that fit in English ran out through the right
+  spine in Spanish (`swept_sine_methods`, `dose_exchange`, `biot_waves`,
+  `porous_model_comparison`, `coupling_term_regimes` and others), and guide
+  lines ran through the notes above them (the 500 Hz line of
+  `insulation_rating` and `impact_rating`, the critical distance of
+  `source_distance_bias`). Every one is moved, re-anchored or given a chip
+  and a place above the line; the one label dropped is the "0 dB" of
+  `htlan_compression`, whose contour is the frame itself and whose label sat
+  on the spine, where the colour bar already reads it. Four of them came
+  from the library, and the fix is there for every caller:
+  `emission.plot_microphone_positions` writes the name of the reflecting
+  plane on the left rim of the disc,
+  `electroacoustics.plot_sound_reinforcement_geometry` writes the microphone
+  label and the length of the feedback path clear of the path,
+  `materials.plot_insitu_geometry` ends the loudspeaker label short of the
+  direct path, and the `.plot()` of a terrain screening result leaves room
+  above the section for the S and R of the source and the receiver.
+  `make figure-text-clearance` reads every committed figure and plate, glyph
+  by glyph, and fails on a text over a tick label or over another text, and
+  on a stroke run across a text or into its letters; the leader of an
+  annotation, the grid and a line behind a chip pass, and a label turned on a
+  3-D plate is read along its own baseline.
 - **Nothing is drawn over a tick label any more.** The half disc of
   `cnossos_rail_directivity` had its legend over the radial "15" and the
   "−90°", and the dipole beside it ran its lobe through "−10.0". The polar

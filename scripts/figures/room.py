@@ -481,12 +481,15 @@ def generate_sweep_distortion_separation(output_dir: str) -> None:
                 "edgecolor": COLOR_GRID,
             },
         )
+    # Ending at the right edge of the plot rather than starting near it, and
+    # above 0 dB: from t = 0.35 s the note ran out through the right spine,
+    # and at -6 dB the impulse and its first reflections ran through it.
     ax.annotate(
         "causal part: what impulse_response() returns",
-        xy=(0.35, -6.0),
+        xy=(0.41, 8.0),
         fontsize=10,
         color=COLOR_FG,
-        ha="left",
+        ha="right",
     )
     ax.set_title("Harmonic distortion lands before $t$ = 0 (ISO 18233 B.5)", pad=18)
     ax.set_xlabel("Arrival time relative to the linear impulse response [s]")
@@ -556,9 +559,13 @@ def generate_source_distance_bias(output_dir: str) -> None:
     ax_c.set_xlabel("Source–receiver distance [m]")
     ax_c.set_ylim(8.0, 20.0)
 
-    for axis in (ax_t, ax_c):
+    # On the decay panel the critical-distance line stops under the
+    # "excluded" note, which it used to run through.
+    for axis, top in ((ax_t, 0.86), (ax_c, 1.0)):
         axis.axvspan(0.0, d_min, color=theme_fill(COLOR_SECONDARY, axis), zorder=0)
-        axis.axvline(r_c, color=COLOR_FG, linestyle=":", linewidth=1.3, zorder=1)
+        axis.axvline(
+            r_c, ymax=top, color=COLOR_FG, linestyle=":", linewidth=1.3, zorder=1
+        )
         axis.grid(color=COLOR_GRID, linestyle="--", alpha=0.5)
         axis.set_xlim(0.0, 7.4)
         axis.legend(loc="lower right", fontsize=9)
@@ -1195,7 +1202,9 @@ def generate_absorption_per_table(output_dir: str) -> None:
     ax_w.annotate(
         f"this layout: {r_t / r_s:.2f}, {upper - lower:.1f} m² wide",
         xy=(r_t / r_s, upper - lower),
-        xytext=(1.02, 9.6),
+        # Right of the closing line and above the curve: from 1.02 the note
+        # ran across the dashed line at 1.41.
+        xytext=(1.46, 12.2),
         fontsize=9,
         color=COLOR_TERTIARY,
         arrowprops={"arrowstyle": "->", "color": COLOR_TERTIARY},
@@ -2995,10 +3004,12 @@ def generate_decay_range_bias(output_dir: str) -> None:
         (54.0, "flag T30", COLOR_SECONDARY),
     ):
         ax.axvline(limit, color=colour, linestyle="--", linewidth=1.3, zorder=4)
-        ax.text(
-            limit,
-            9.4,
+        # Two points clear of its own line, which it otherwise touched.
+        ax.annotate(
             label,
+            xy=(limit, 9.4),
+            xytext=(-2.0, 0.0),
+            textcoords="offset points",
             rotation=90,
             fontsize=8,
             ha="right",

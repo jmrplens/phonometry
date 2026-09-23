@@ -83,14 +83,16 @@ def generate_gcc_phat_delay(output_dir: str) -> None:
     ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.5)
     ax.set_axisbelow(True)
     ax.legend(loc="upper left", fontsize=9)
+    # Under the legend, on the empty left: at the top right the Spanish ran
+    # into the peak and the true-delay line.
     ax.text(
-        0.985,
-        0.965,
+        0.015,
+        0.72,
         "colored signal: the plain correlator smears the peak,\n"
         "PHAT prewhitens the cross-spectrum and restores it",
         transform=ax.transAxes,
         va="top",
-        ha="right",
+        ha="left",
         fontsize=8.5,
         color=COLOR_FG,
     )

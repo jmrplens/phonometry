@@ -234,12 +234,17 @@ def plot_microphone_positions(
             alpha=min(1.0, 2.2 * theme_fill_alpha(_C_SECONDARY_LIGHT, ax)),
             shade=False,
         )
+        # On the rim at the left of the default view (azimuth -60 degrees),
+        # running outwards into the open side of the box: on the +x rim the
+        # name sat on the y-axis numbers, and turned inwards the wireframe
+        # ran through it.
         ax.text(
-            1.1 * r,
-            0.0,
+            1.2 * r * np.cos(np.radians(210.0)),
+            1.2 * r * np.sin(np.radians(210.0)),
             0.0,
             _t("Reflecting plane", language),
             fontsize=8,
+            ha="right",
             bbox={
                 "boxstyle": "round,pad=0.12",
                 "facecolor": _page_color(ax, None),

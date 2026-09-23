@@ -104,9 +104,10 @@ def _d_outdoor(s: SVG, th: Theme) -> None:
     ex, ey = 450.0, 150.0
     bw = 16.0
     s.rect(ex - bw / 2, ey, bw, gy - ey, th.secondary, th.fg, sw=2)
+    # Below the blocked direct path, which ran through the word at mid-height.
     s.text(
         ex + 16.0,
-        (ey + gy) / 2 + 6.0,
+        (ey + gy) / 2 + 30.0,
         "Barrier",
         17,
         th.secondary,
@@ -356,11 +357,13 @@ def _d_wind_turbine(s: SVG, th: Theme) -> None:
         f"L {p1x:.0f} {p1y + 7:.0f} L {p1x - 7:.0f} {p1y:.0f} Z",
         fill=th.secondary,
     )
-    s.text(p1x + 13, p1y + 5, "1", 13, th.secondary, anchor="start", bold=True)
+    # Positions 1 and 3 sit where the circle runs level, so their numbers go
+    # just outside it: beside them, the circle ran through the digit.
+    s.text(p1x + 12, p1y + 16, "1", 13, th.secondary, anchor="start", bold=True)
     # Optional positions 2 and 4 at ±60° from downwind, 3 upwind.
     for lbl, adeg, lx, ly, anch in (
         ("2", 150.0, -12.0, 4.0, "end"),
-        ("3", 270.0, 12.0, 4.0, "start"),
+        ("3", 270.0, 12.0, -6.0, "start"),
         ("4", 30.0, 12.0, 4.0, "start"),
     ):
         pxx = pcx + pr * math.cos(math.radians(adeg))
@@ -436,7 +439,9 @@ def _d_ground_reflection(s: SVG, th: Theme) -> None:
     # Receiver: measurement microphone.
     s.mic(rx, ry, gy, 1.0)
     s.text(rx, ry - 18.0, "Receiver", 17, th.fg, bold=True)
-    s.text(rx - 18, ry + 10.0, "$R$", 13, th.fg, anchor="end")
+    # Under the rays that arrive at the capsule, which ran through it level
+    # with the tip.
+    s.text(rx - 16, ry + 32.0, "$R$", 13, th.fg, anchor="end")
 
     # Direct ray r1.
     s.arrow(sx + 10, sy, rx - 8, ry - 2, th.primary, 2.6)
@@ -540,8 +545,10 @@ def _d_atmospheric_refraction(s: SVG, th: Theme) -> None:
         188.0, 414.0, "acoustic shadow", 13, th.secondary, italic=True, anchor="start"
     )
     s.line(184.0, 410.0, 105.0, 395.0, th.muted, 1.0)
-    # Shadow-boundary marker at the grazing point.
-    s.line(232.0, 452.0, 232.0, 386.0, th.muted, 1.1, dash="4,4")
+    # Shadow-boundary marker at the grazing point, broken around the label
+    # it ran through.
+    s.line(232.0, 452.0, 232.0, 422.0, th.muted, 1.1, dash="4,4")
+    s.line(232.0, 400.0, 232.0, 386.0, th.muted, 1.1, dash="4,4")
     s.text(232.0, 370.0, "≈ 220 m", 12, th.muted)
 
     # --- downwind side (right): rays curve down, ground bounce -------------
@@ -757,10 +764,18 @@ def _d_ground_regions(s: SVG, th: Theme) -> None:
     s.text(x1 - 12, gy - hs - 18, "$h_r$ = 1,5 m", 15, th.muted, anchor="end")
     s.line(x0, gy - hs, x1, gy - hs, th.muted, 1.4, dash="7,5")
 
-    # Region dimensions along the ground.
-    s.dim(x0, gy + 44, src_end, gy + 44, "source region  $30 h_s$ = 45 m", 0, 15)
+    # Region dimensions along the ground. The two end regions are narrower
+    # than their names, which ran across the witness lines on one line, so
+    # each name goes in two lines under its dimension.
+    s.dim(x0, gy + 44, src_end, gy + 44, "", 0, 15)
     s.dim(src_end, gy + 80, rec_start, gy + 80, "middle region  110 m", 0, 15)
-    s.dim(rec_start, gy + 44, x1, gy + 44, "receiver region  $30 h_r$ = 45 m", 0, 15)
+    s.dim(rec_start, gy + 44, x1, gy + 44, "", 0, 15)
+    for left, right, name, extent in (
+        (x0, src_end, "source region", "$30 h_s$ = 45 m"),
+        (rec_start, x1, "receiver region", "$30 h_r$ = 45 m"),
+    ):
+        s.text((left + right) / 2, gy + 64, name, 15, th.fg)
+        s.text((left + right) / 2, gy + 83, extent, 15, th.fg)
     for xv in (x0, src_end, rec_start, x1):
         s.line(xv, gy + 28, xv, gy + 92, th.muted, 0.9, dash="3,3")
     s.dim(x0, gy + 118, x1, gy + 118, "$d_p$ = 200 m", 0, 16)
@@ -836,14 +851,18 @@ def _d_barrier_in_situ(s: SVG, th: Theme) -> None:
     direct method needs the site before the barrier was built; the indirect one
     borrows that campaign from an equivalent site and says so.
     """
-    for row, (base, title, built) in enumerate(
+    # The first title in two lines: in one, the Spanish ran on into the
+    # reference microphone and its dimension.
+    for row, (base, titles, built) in enumerate(
         (
-            (250.0, "Before: no barrier, or an equivalent site", False),
-            (500.0, "After: the barrier as built", True),
+            (250.0, ("Before: no barrier,", "or an equivalent site"), False),
+            (500.0, ("After: the barrier as built",), True),
         )
     ):
         colour = th.secondary if row == 0 else th.primary
-        s.text(60, base - 150, title, 15, colour, bold=True, anchor="start")
+        for k, title in enumerate(titles):
+            y = base - 150 + (k - (len(titles) - 1) / 2) * 20
+            s.text(60, y, title, 15, colour, bold=True, anchor="start")
         s.ground(base, 55, 860)
 
         # The source region, which is a road or a yard rather than a point.
@@ -895,14 +914,12 @@ def _d_barrier_in_situ(s: SVG, th: Theme) -> None:
         13,
         th.muted,
     )
-    s.text(
-        450,
-        698,
-        "both campaigns within 2 m/s on the wind component and 10 \u00b0C on the temperature, "
-        "and never above 5 m/s",
-        13,
-        th.secondary,
+    # 12 px where 13 would run out of the box, as the Spanish did.
+    weather = (
+        "both campaigns within 2 m/s on the wind component and 10 \u00b0C on the "
+        "temperature, and never above 5 m/s"
     )
+    s.text(450, 698, weather, s.fit_size([weather], [13, 12], 740), th.secondary)
 
 
 def _d_barrier_four_paths(s: SVG, th: Theme) -> None:
@@ -982,9 +999,11 @@ def _d_barrier_four_paths(s: SVG, th: Theme) -> None:
         )
         s.text(lx + 66, yy, label, 15, th.fg, anchor="start")
 
-    # Inset: the two-edge (thick) case.
-    tx, ty = 580.0, 430.0
-    s.rect(tx, ty, 250, 128, th.panel, th.muted, rx=8, sw=1.2)
+    # Inset: the two-edge (thick) case, 290 px wide, which holds the Spanish
+    # heading that ran out through the right side of the 250 px box. The
+    # drawing inside keeps its place in the middle of the box.
+    tx, ty = 560.0, 430.0
+    s.rect(tx, ty, 290, 128, th.panel, th.muted, rx=8, sw=1.2)
     s.text(
         tx + 14,
         ty + 26,
@@ -994,11 +1013,11 @@ def _d_barrier_four_paths(s: SVG, th: Theme) -> None:
         anchor="start",
         bold=True,
     )
-    bx0, bx1, by0 = tx + 60, tx + 130, ty + 96
+    bx0, bx1, by0 = tx + 80, tx + 150, ty + 96
     s.rect(bx0, ty + 56, bx1 - bx0, by0 - ty - 56, th.bg, th.fg, sw=1.6)
     s.path(
-        f"M {tx + 20} {ty + 84} L {bx0} {ty + 56} L {bx1} {ty + 56} "
-        f"L {tx + 226} {ty + 88}",
+        f"M {tx + 40} {ty + 84} L {bx0} {ty + 56} L {bx1} {ty + 56} "
+        f"L {tx + 246} {ty + 88}",
         stroke=th.primary,
         sw=2.0,
     )
@@ -1053,14 +1072,16 @@ def _d_cnossos_road(s: SVG, th: Theme) -> None:
         s.line(rx0 + i * seg, cy - 9, rx0 + i * seg, cy + 9, th.muted, 1.2)
     hx = rx0 + 5.5 * seg
     s.circle(hx, cy, 8, th.secondary)
-    s.dim(rx0 + 5 * seg, cy + 30, rx0 + 6 * seg, cy + 30, "dL = 20 m", 0, 15)
+    # Far enough below the road for the label to clear its edge, which ran
+    # along the top of the label at cy + 30.
+    s.dim(rx0 + 5 * seg, cy + 44, rx0 + 6 * seg, cy + 44, "dL = 20 m", 0, 15)
     # The per-segment level stays uncomposed for now: Directive (EU)
     # 2015/996 Eq. (2.2.1) prints the whole subscript chain (W',eq,line,
     # i,m) in italic while _ROMAN_SCRIPTS pins "eq" upright, so the
     # composer can reproduce neither the source nor the house style.
     s.text(
         rx0,
-        cy + 62,
+        cy + 70,
         "each segment carries L'W,eq,line,i + 10 lg(dL)",
         15,
         th.fg,
@@ -1082,8 +1103,10 @@ def _d_cnossos_road(s: SVG, th: Theme) -> None:
     s.dim(hx, py - lane - 23, jx, py - lane - 23, "$x$ = 60 m", 0, 15)
     s.line(hx, py - lane - 29, hx, py - lane - 4, th.muted, 0.9, dash="3,3")
 
-    # A small inline graph of the taper, clear of the road.
-    gx0, gx1, gy0 = 720.0, 850.0, 300.0
+    # A small inline graph of the taper, clear of the road, and high enough
+    # to leave the receiver's label room under it: at gy0 = 300 its box sat
+    # on the label.
+    gx0, gx1, gy0 = 720.0, 850.0, 290.0
     s.rect(gx0 - 16, gy0 - 74, (gx1 - gx0) + 46, 106, th.panel, th.muted, rx=6, sw=1.1)
     s.line(gx0, gy0, gx1, gy0, th.muted, 1.4)
     s.line(gx0, gy0, gx0, gy0 - 48, th.muted, 1.4)
@@ -1181,7 +1204,8 @@ def _d_cnossos_rail(s: SVG, th: Theme) -> None:
     s.line(cx, ay, rx, ry, th.primary, 1.8)
     s.line(cx, by, rx, ry, th.accent, 1.8)
     s.line(cx, ay, rx + 10, ay, th.muted, 1.2, dash="5,4")
-    s.text(cx + 250, ay - 14, "$ψ > 0$", 16, th.primary)
+    # Above the line of sight, which ran through the label set on it.
+    s.text(cx + 250, ay - 30, "$ψ > 0$", 16, th.primary)
     s.text(
         782,
         ay + 34,
@@ -1213,11 +1237,13 @@ def _d_cnossos_rail(s: SVG, th: Theme) -> None:
     s.arrow(ox, py, ox + 140, py - 78, th.primary, 1.8)
     s.text(ox + 148, py - 82, "receiver bearing", 15, th.primary, anchor="start")
     s.text(ox + 56, py - 18, "$φ$", 17, th.primary, bold=True)
-    s.rect(600.0, py - 140, 280, 112, th.panel, th.muted, rx=8, sw=1.2)
-    s.text(614.0, py - 110, "Impact noise applies from 50 m", 14, th.fg, anchor="start")
-    s.text(614.0, py - 90, "before a joint to 50 m after it", 14, th.fg, anchor="start")
-    s.text(614.0, py - 60, "Curve squeal needs ≥ 50 m", 14, th.fg, anchor="start")
-    s.text(614.0, py - 40, "of continuous curve", 14, th.fg, anchor="start")
+    # The note sits low, under the bearing's label: level with it, the box
+    # ran through the end of the Spanish.
+    s.rect(600.0, py - 40, 280, 112, th.panel, th.muted, rx=8, sw=1.2)
+    s.text(614.0, py - 10, "Impact noise applies from 50 m", 14, th.fg, anchor="start")
+    s.text(614.0, py + 10, "before a joint to 50 m after it", 14, th.fg, anchor="start")
+    s.text(614.0, py + 40, "Curve squeal needs ≥ 50 m", 14, th.fg, anchor="start")
+    s.text(614.0, py + 60, "of continuous curve", 14, th.fg, anchor="start")
 
 
 # ---------------------------------------------------------------------------
@@ -1235,8 +1261,15 @@ def _d_wind_turbine_board(s: SVG, th: Theme) -> None:
     s.text(cx + r + 54, cy + 6, "to the turbine", 15, th.secondary, anchor="start")
     # The optional split, off the centre line and parallel to the axis.
     s.line(cx - r * 0.86, cy - 46, cx + r * 0.86, cy - 46, th.primary, 2.0, dash="8,5")
+    # Beside the plate, level with the split it names: over the split, the
+    # plate's edge ran through both ends of the line.
     s.text(
-        cx, cy - 58, "split (if any): off centre, parallel, gap < 1 mm", 14, th.primary
+        cx + r + 12,
+        cy - 41,
+        "split (if any): off centre, parallel, gap < 1 mm",
+        14,
+        th.primary,
+        anchor="start",
     )
     s.text(cx, cy - r - 24, "Plan", 17, th.fg, bold=True)
 
@@ -1245,7 +1278,7 @@ def _d_wind_turbine_board(s: SVG, th: Theme) -> None:
     bx0, bx1 = 470.0, 830.0
     s.ground(gy, 440.0, 860.0)
     s.rect(bx0, gy - 12, bx1 - bx0, 12, th.panel, th.fg, sw=2.0)
-    s.text((bx0 + bx1) / 2, gy + 86, "plywood ≥ 12,0 mm  ·  metal ≥ 2,5 mm", 15, th.fg)
+    s.text((bx0 + bx1) / 2, gy + 108, "plywood ≥ 12,0 mm  ·  metal ≥ 2,5 mm", 15, th.fg)
     # Soil fillet at the edges.
     s.path(f"M {bx0 - 34} {gy} L {bx0} {gy - 12} L {bx0} {gy} Z", fill=th.muted)
     s.path(f"M {bx1 + 34} {gy} L {bx1} {gy - 12} L {bx1} {gy} Z", fill=th.muted)
@@ -1254,7 +1287,7 @@ def _d_wind_turbine_board(s: SVG, th: Theme) -> None:
     # Capsule with its diaphragm in the plane of the board.
     mcx = (bx0 + bx1) / 2
     s.rect(mcx - 22, gy - 12, 44, 10, th.fg, rx=3)
-    s.text(mcx, gy + 58, "capsule diaphragm in the board plane, ≤ 13 mm", 14, th.fg)
+    s.text(mcx, gy + 82, "capsule diaphragm in the board plane, ≤ 13 mm", 14, th.fg)
     # Primary windscreen: a foam half-sphere ~90 mm across.
     s.path(
         f"M {mcx - 68} {gy - 12} A 68 68 0 0 1 {mcx + 68} {gy - 12} Z",
@@ -1262,7 +1295,9 @@ def _d_wind_turbine_board(s: SVG, th: Theme) -> None:
         stroke=th.fg,
         sw=1.6,
     )
-    s.text(mcx, gy - 96, "primary windscreen ≈ 90 mm", 15, th.fg)
+    # Named under the board with the other parts: over the dome, the
+    # secondary screen's outline ran through the name.
+    s.text(mcx, gy + 56, "primary windscreen ≈ 90 mm", 15, th.fg)
     # Ghosted secondary windscreen.
     s.path(
         f"M {mcx - 116} {gy - 12} A 116 116 0 0 1 {mcx + 116} {gy - 12}",
@@ -1327,13 +1362,15 @@ def _d_rd1367_chain(s: SVG, th: Theme) -> None:
         (15.0, 19.0, "4 h, rest"),
     )
     for a, b, label in phases:
-        s.rect(
-            x0 + w * a / 24.0, py, w * (b - a) / 24.0, 34, th.panel, th.muted, sw=1.2
-        )
-        s.text(x0 + w * (a + b) / 48.0, py + 23, label, 14, th.fg)
+        cell = w * (b - a) / 24.0
+        s.rect(x0 + w * a / 24.0, py, cell, 34, th.panel, th.muted, sw=1.2)
+        # A name wider than its cell goes under it: the Spanish of the 2 h
+        # phase ran out through both sides of its 63 px cell.
+        inside = s.text_width(label, 14) <= cell - 12
+        s.text(x0 + w * (a + b) / 48.0, py + (23 if inside else 52), label, 14, th.fg)
     s.text(
         x0,
-        py + 58,
+        py + 76,
         "noise phases $T_i$ of uniformly perceived level",
         15,
         th.muted,

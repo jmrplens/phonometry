@@ -337,9 +337,20 @@ def _microphone(ax: Axes, x: float, y: float, size: float, label: str) -> None:
 
 
 def _loudspeaker(
-    ax: Axes, x: float, y_centre: float, size: float, language: str
+    ax: Axes,
+    x: float,
+    y_centre: float,
+    size: float,
+    language: str,
+    *,
+    label_ha: str = "center",
 ) -> None:
-    """A loudspeaker driver: magnet box + cone opening toward +x."""
+    """A loudspeaker driver: magnet box + cone opening toward +x.
+
+    The label is centred under the driver, or with ``label_ha="right"`` ends
+    short of the cone's mouth, for a set-up that draws a path straight down
+    from the mouth.
+    """
     from matplotlib.patches import Polygon, Rectangle
 
     ax.add_patch(
@@ -367,11 +378,11 @@ def _loudspeaker(
         )
     )
     ax.text(
-        x - 0.42 * size,
+        x - (0.1 if label_ha == "right" else 0.42) * size,
         y_centre - 0.62 * size,
         _t("Loudspeaker", language),
         fontsize=8,
-        ha="center",
+        ha=label_ha,
         va="top",
     )
 

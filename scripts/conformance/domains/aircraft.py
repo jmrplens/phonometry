@@ -510,7 +510,7 @@ def _chk_doc32_retarded_time() -> Outcome:
         (0.0, 0.0),
         ground=ph.aircraft.RotorcraftGround(receiver_height=1.2, flow_resistivity="H"),
     )
-    k = int(np.argmin(res.distance))
+    k = int(np.argmin(res.distances))
     return numeric(
         0.288934, float(res.times[k] - res.emission_times[k]), 1e-5, unit="s", places=6
     )

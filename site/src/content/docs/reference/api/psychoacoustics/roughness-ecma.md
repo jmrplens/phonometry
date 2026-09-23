@@ -60,7 +60,7 @@ EcmaRoughness(
     specific_roughness: np.ndarray,
     bark: np.ndarray,
     centre_frequencies: np.ndarray,
-    time: np.ndarray,
+    times: np.ndarray,
     roughness_vs_time: np.ndarray,
     specific_roughness_vs_time: np.ndarray,
     field: str,
@@ -74,7 +74,7 @@ Result of an ECMA-418-2:2025 (Sottek) roughness calculation.
 average specific roughness R'(z) in asper/Bark_HMS over the 53 auditory
 bands (Clause 7.1.8), with `bark` the critical-band-rate scale z
 (0.5..26.5 Bark_HMS) and `centre_frequencies` the band centre
-frequencies F(z). `time` and `roughness_vs_time` hold the
+frequencies F(z). `times` and `roughness_vs_time` hold the
 time-dependent roughness R(l50) at 50 Hz (Formula 111);
 `specific_roughness_vs_time` is the time-dependent specific roughness
 R'(l50, z) (Formula 109) of shape `(n_times, 53)`. `field` records the

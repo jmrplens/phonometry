@@ -1,7 +1,7 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
 """Psophometric quasi-peak meter (ITU-R BS.468-4 clause 2).
 
-The detector half of the CCIR/ITU noise meter. Clause 2 prints no time
+The detector half of the ITU-R BS.468-4 noise meter. Clause 2 prints no time
 constant, no rise time and no transfer function: it says the dynamic
 performance "may be realized in a variety of ways" and then defines it
 entirely through eleven acceptance windows. Table 2 reads a single 5 kHz

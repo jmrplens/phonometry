@@ -254,6 +254,53 @@ Now it is a `TypeError`, which is what it always should have been.
 print(round(float(leq(x, dbfs=True)), 3))
 ```
 
+## One spelling per concept
+
+The public names had drifted into several spellings of the same quantity, and
+4.0 keeps the one the majority already used. The rule for the quantities
+counted in the plural is the one most of the API followed: a field or a
+parameter that holds an array is `frequencies`, `times`, `distances` or
+`levels`, and one that holds a single value is singular. A vectorised argument
+that takes either a number or an array keeps its name.
+
+| 3.3.0 or 4.0.0rc1 | 4.0 |
+| --- | --- |
+| `sound_speed` (control valves, silencer measurement, Weston regimes, ambient noise, `FluidSeabed`, `SoundSpeedProfile`, `ShipSourceLevelResult`) | `speed_of_sound` |
+| `c=` and `rho=` on `sound_intensity`, `c=` on the two phase-mismatch conversions, `phase_mismatch()`, `absorption_coefficient_uncertainty` and `monopole_source_level` | `speed_of_sound=`, `density=` |
+| `speed_of_sound_m_s=` on `thickness_critical_frequency_product` | `speed_of_sound=` |
+| `sample_rate` on the FDTD `SignalSource`, `STOIResult` and `impact_force_exposure_level` | `fs` |
+| `freq=` on `linkwitz_riley` and `adaptation_term_kc` | `frequency=` and `frequencies=` |
+| `.frequency` on the results that carry a frequency axis: `IntensityResult`, `FieldIndicators`, `IntensityInstrumentComplianceResult`, `RoomAcousticsResult`, the five auditorium results, `ImpedanceTubeResult`, `PorousMediumResult`, `LayeredAbsorberResult`, `DiffuseFieldAbsorptionResult`, `BiotWavesResult`, `SlitResonatorAbsorberResult`, `MetadiffuserResult`, `TransferMatrix`, the two valve-noise results, `AircraftBandAttenuation`, `AmbientNoiseResult`, `ShipTrafficSpectrum` | `.frequencies` |
+| `frequency=` holding an array: the flanking-transmission functions, `internal_spectrum`, `pipe_transmission_loss`, `expander_noise`, `transfer_matrix_one_load`, `transfer_matrix_two_load`, `TransferMatrix.plot` | `frequencies=` |
+| `.time` on `ZwickerLoudness`, `EcmaLoudness`, `MooreGlasbergTimeVaryingLoudness`, the ECMA-418-2 tonality, roughness and fluctuation-strength results, `DecayCurve`, `QuasiPeakResult` | `.times` |
+| `.level` on `DecayCurve`, `NpdLevelResult`, `NoiseContourResult`, `RotorcraftNoiseContourResult`, `LowFrequencyResult`, `DuctPathStage`, `LateLateralResult`, `TransferStiffnessResult` | `.levels` |
+| `.distance` on `NpdLevelResult` and `RotorcraftEventResult` | `.distances` |
+| `level=`, `measured_level=`, `operational_level=` on `sti_from_impulse_response`, `stipa`, `sti_adjusted_for_levels` and `STIResult.adjusted_for_levels` | `levels=`, `measured_levels=`, `operational_levels=` |
+| `.passed` on `AircraftSystemComplianceResult`, `QuasiPeakDynamicsResult`, `HeavyImpactSourceCheck`, `RigidMassCalibrationResult` | `.passes`, as on every other verifier |
+| `MicrophoneNoise(weighting="CCIR")` | `MicrophoneNoise(weighting="468")`, the spelling `weighting_filter` and `weighted_thd` use for the ITU-R BS.468-4 curve |
+
+`times, levels = decay_curve(ir, fs)` still unpacks the decay curve, in the
+same order. The FDTD solvers keep `c` and `rho`, which name the maps their
+equations are written in.
+
+## Every `.plot()` takes the axes first
+
+Every result's `.plot()` now reads `plot(ax=None, *, ...)`: the axes first,
+and every other argument by name, `language` included. Three did not start
+with the axes in 3.3.0, so `plot(ax)` on them handed the axes to the wrong
+parameter:
+
+| 3.3.0 | 4.0 |
+| --- | --- |
+| `LoudspeakerCharacteristics.plot("impedance", ax)` | `.plot(ax, quantity="impedance")` |
+| `MicrophoneCharacteristics.plot("noise", ax)` | `.plot(ax, quantity="noise")` |
+| `TransferMatrix.plot(f, rho_c, ax)` | `.plot(ax, frequencies=f, characteristic_impedance=rho_c)` |
+
+Six results that are newer than 3.3.0 took `language` by position in
+4.0.0rc1: the four hearing-protector ratings and the two low-frequency
+intensity results. `plot(ax, "es")` on those is `plot(ax, language="es")`
+now, as it is everywhere else.
+
 ## Verdicts are result objects, not dictionaries
 
 The five `verify_*` functions returned `dict[str, Any]` and now return a
@@ -266,8 +313,8 @@ since the verifier now returns the object itself.
 | `verify_filter_class(bank)["overall_class"]` | `verify_filter_class(bank).overall_class` |
 | `verify_weighting_class(wf)["overall_class"]` | `verify_weighting_class(wf).overall_class` |
 | `verify_intensity_class(...)["bands"]` | `verify_intensity_class(...).bands` |
-| `verify_quasi_peak_dynamics()["passed"]` | `verify_quasi_peak_dynamics().passed` |
-| `verify_aircraft_noise_system(...)["passed"]` | `verify_aircraft_noise_system(...).passed` |
+| `verify_quasi_peak_dynamics()["passed"]` | `verify_quasi_peak_dynamics().passes` |
+| `verify_aircraft_noise_system(...)["passed"]` | `verify_aircraft_noise_system(...).passes` |
 | `filter_class_compliance(bank)` | `verify_filter_class(bank)`, which returns the same `FilterComplianceResult` |
 
 ```python
@@ -276,6 +323,15 @@ from phonometry.filters import OctaveFilterBank, verify_filter_class
 verdict = verify_filter_class(OctaveFilterBank(48000, fraction=1, limits=[125, 4000]))
 print(verdict.overall_class, len(verdict.bands))
 ```
+
+`verify_running_rms_decay` is newer than 3.3.0, and in 4.0.0rc1 it returned a
+bare `bool`, which threw away the printed interval and the measured time it
+had judged. It now returns a `RunningRmsDecayVerification` that keeps both:
+the verdict is `.passes`, beside `.measured_time_s`, `.printed_time_s`,
+`.tolerance_s` and the interval as `.lower_time_s` and `.upper_time_s`. The
+object refuses to be read as a truth value, so an
+`if verify_running_rms_decay(...):` written against the release candidate
+raises `TypeError` instead of passing every meter.
 
 ## The filter bank returns a result, not a tuple
 
@@ -315,6 +371,38 @@ The result also draws itself, so the band spectrum is one call:
 ```python
 ax = result.plot()
 ```
+
+## Waveforms inside results come back as the `Signal` they came from
+
+A transform handed a `Signal` has returned a `Signal` since the contract was
+written, but five result objects still stored their waveform as a bare array
+next to a loose `fs`. They now keep the type the input arrived as:
+
+| Field | Is a `Signal` when the input was one |
+| --- | --- |
+| `envelope(...).signal` | at the input's rate |
+| `time_synchronous_average(...).period_waveform` | at the input's rate |
+| `resample_signal(...).signal` | at `fs_new`, which then has to be a whole number of hertz |
+| `align_impulse_responses(...).aligned`, `.reference` | each one if its own input was |
+| `underwater.pile_strike_metrics(...).pressure` | at the input's rate |
+
+A bare array in still gives a bare array out, so code that passes arrays does
+not notice. Code that passes a `Signal` and does arithmetic on one of these
+fields goes through `np.asarray`, as it does for any `Signal`, and a
+calibrated input comes back with `calibration_factor=1.0`, so the field feeds
+the next function in pascals without the factor being applied again.
+
+## A block stream yields `Signal` blocks
+
+`io.read_blocks` is newer than 3.3.0, and in 4.0.0rc1 it yielded bare float64
+arrays. It now yields a `Signal` per block, carrying the rate, the
+calibration, the channel labels and the provenance `io.read` gives, and it
+takes the same `calibration_factor=` and reads the same sidecar. Two things
+change for a loop written against the release candidate. A block from a
+calibrated file reaches the filters and the level functions in pascals, so a
+`calibration_factor` applied by hand on top of it counts twice. And
+arithmetic on a block, or on what a filter returns for one, goes through
+`np.asarray`, as it does for any `Signal`.
 
 ## Published tables refuse writes
 
@@ -368,6 +456,9 @@ every rename above was checked to return what its predecessor returned. If a
 result moves after you finish the upgrade, that is a defect and it is worth
 [reporting](https://github.com/jmrplens/phonometry/issues).
 
-`.plot()`, `.report()` and the `Signal` contract are untouched, and so is
-every formula. 4.0 rearranged the furniture and put the unit on the label; it
-did not recompute anything.
+What each `.plot()` draws is untouched, and so is what each `.report()`
+prints but one label: the microphone fiche writes dB(468) where it wrote
+dB(CCIR). The `Signal` contract is the one it was, now kept in two more
+places, the blocks of `read_blocks` and the waveforms inside five results.
+Every formula is untouched too. 4.0 rearranged the furniture and put the unit
+on the label; it did not recompute anything.

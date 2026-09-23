@@ -36,7 +36,7 @@ absorption_coefficient_uncertainty(
     volume: float,
     area: float,
     *,
-    c: ArrayLike,
+    speed_of_sound: ArrayLike,
     t_a: ArrayLike,
     u_a: ArrayLike,
     t_b: ArrayLike,
@@ -60,7 +60,7 @@ the standard is taken as a single (mean) speed of sound.
 | :--- | :--- |
 | `volume` | Reverberation-room volume `V`, in cubic metres. |
 | `area` | Test-sample area `S`, in square metres. |
-| `c` | Speed of sound `c`, in m/s. |
+| `speed_of_sound` | Speed of sound `c`, in m/s. |
 | `t_a` | Reverberation time of the first situation, in seconds. |
 | `u_a` | Standard uncertainty of `t_a` (Eq. (A.1)), in seconds. |
 | `t_b` | Reverberation time of the second situation, in seconds. |

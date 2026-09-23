@@ -87,7 +87,7 @@ def test_source_check_plot_marks_the_failing_band() -> None:
     """A band outside its tolerance gets its own marker series."""
     measured = [39.0, 31.0, 23.0, 17.0, 20.0]
     res = ph.building.check_heavy_impact_source(measured)
-    assert not res.passed
+    assert not res.passes
     ax = res.plot()
     marked = [ln for ln in ax.lines if ln.get_marker() == "X"]
     assert len(marked) == 1

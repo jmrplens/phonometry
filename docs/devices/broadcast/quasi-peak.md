@@ -203,7 +203,7 @@ the same chain's steady reading.
 from phonometry import broadcast
 
 report = broadcast.verify_quasi_peak_dynamics(48000.0)
-print(report.passed, round(report.worst_margin_db, 3))   # True 0.259
+print(report.passes, round(report.worst_margin_db, 3))   # True 0.259
 row = report.stimuli[0]
 print(row["stimulus"], round(row["reading_percent"], 2))       # 1 ms 16.94
 ```
@@ -287,7 +287,7 @@ fitted. The conformity evidence is real and it is published, in
 - [Test signals](../../signals/spectra/test-signals.md): `tone_burst`, the
   IEC 60268-1 generator that builds the clause 2.1 and 2.2 stimuli.
 - [Microphones (IEC 60268-4)](../electroacoustics/microphones.md): where a
-  stated dB(CCIR) self-noise figure comes from, and why it stays a
+  stated dB(468) self-noise figure comes from, and why it stays a
   declaration.
 - [Broadcast](index.md): the section overview.
 

@@ -544,7 +544,7 @@ class LowFrequencyResult:
 
     :ivar frequencies: Band centre frequencies of the whole measurement, in Hz,
         as supplied.
-    :ivar level: The energy-average levels of the whole measurement, in dB,
+    :ivar levels: The energy-average levels of the whole measurement, in dB,
         with the 50 Hz, 63 Hz and 80 Hz bands replaced by
         :math:`L_\mathrm{LF}` and every other band untouched.
     :ivar reverberation_time: The reverberation times of the whole
@@ -565,7 +565,7 @@ class LowFrequencyResult:
     """
 
     frequencies: np.ndarray
-    level: np.ndarray
+    levels: np.ndarray
     reverberation_time: np.ndarray | None
     low_frequency_bands: np.ndarray
     l_default: np.ndarray
@@ -775,7 +775,7 @@ def apply_low_frequency_procedure(
 
     return LowFrequencyResult(
         frequencies=freqs,
-        level=corrected,
+        levels=corrected,
         reverberation_time=substituted,
         low_frequency_bands=freqs[indices],
         l_default=l_default,

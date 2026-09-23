@@ -221,7 +221,7 @@ def plot_ship_source_level(
     ax.set_title(
         f"{_t('ISO 17208-2 equivalent monopole source level', language)} "
         rf"($d_\mathrm{{s}}$ = {format_number(result.source_depth, language)} m, "
-        rf"$c$ = {format_number(result.sound_speed, language, decimals=0)} m/s)"
+        rf"$c$ = {format_number(result.speed_of_sound, language, decimals=0)} m/s)"
     )
     localize_axes(ax, language)
     localize_axes(twin, language)
@@ -249,8 +249,13 @@ def plot_pile_strike(
     :return: The waveform axes (``ax`` given) or the array of two axes.
     """
     from .._i18n import format_number, localize_axes
+    from ..io._resolve import apply_calibration
 
-    pressure = np.asarray(result.pressure, dtype=np.float64)
+    # In pascals whatever the stored type: the same reading the result's own
+    # metrics were checked against, so the marker and its label agree.
+    pressure = apply_calibration(
+        result.pressure, np.asarray(result.pressure, dtype=np.float64)
+    )
     fs = float(result.fs)
     t = np.arange(pressure.size) / fs
     energy = np.cumsum(pressure**2)
@@ -323,7 +328,7 @@ def plot_sound_speed_profile(
 
     ax = ax if ax is not None else _new_axes()
     depth = np.asarray(result.depth, dtype=np.float64)
-    speed = np.asarray(result.sound_speed, dtype=np.float64)
+    speed = np.asarray(result.speed_of_sound, dtype=np.float64)
     label = f"{result.model} $c(z)$"
     ax.plot(speed, depth, **styled(kwargs, color=_C_PRIMARY, lw=1.4, label=label))
     if not ax.yaxis_inverted():
@@ -543,7 +548,7 @@ def plot_ambient_noise(
     from .._i18n import format_number, localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    f = np.asarray(result.frequency, dtype=np.float64)
+    f = np.asarray(result.frequencies, dtype=np.float64)
     label = f"{_t('Total', language)} ({format_number(result.wind_speed_knots, language)} kn)"
     ax.plot(
         f,
@@ -604,7 +609,7 @@ def plot_ship_traffic_spectrum(
     from .._i18n import localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    f = np.asarray(result.frequency, dtype=np.float64)
+    f = np.asarray(result.frequencies, dtype=np.float64)
     psd = np.asarray(result.source_psd, dtype=np.float64)
     if result.vessel_class is not None:
         label = f"{result.model} ({result.vessel_class})"

@@ -165,7 +165,7 @@ class TestEarlyLateralEnergyFraction:
         lateral = 0.5 * decaying_noise(1.0, 2.0, 12)
         result = room.early_lateral_energy_fraction(omni, lateral, FS)
         assert result.energy_fraction.shape == (6,)
-        assert result.frequency is not None
+        assert result.frequencies is not None
 
 
 class TestLateLateralSoundLevel:
@@ -181,7 +181,7 @@ class TestLateLateralSoundLevel:
         result = room.late_lateral_sound_level(
             omni, lateral, reference, FS, limits=None
         )
-        assert result.level[0] == pytest.approx(20.0 * np.log10(0.25), abs=1e-9)
+        assert result.levels[0] == pytest.approx(20.0 * np.log10(0.25), abs=1e-9)
 
     def test_energy_before_eighty_milliseconds_does_not_count(self) -> None:
         omni, lateral = reflection_pair([90.0], [0.5], [0.020], seconds=0.5)
@@ -194,7 +194,7 @@ class TestLateLateralSoundLevel:
         noisy = room.late_lateral_sound_level(
             omni, loud_early, reference, FS, limits=None
         )
-        assert noisy.level[0] == pytest.approx(quiet.level[0], abs=1e-12)
+        assert noisy.levels[0] == pytest.approx(quiet.levels[0], abs=1e-12)
 
     def test_the_two_reference_routes_agree(self) -> None:
         omni = decaying_noise(1.0, 2.0, 21)
@@ -206,7 +206,7 @@ class TestLateLateralSoundLevel:
         from_level = room.late_lateral_sound_level(
             omni, lateral, fs=FS, reference_level=levels
         )
-        assert from_level.level == pytest.approx(from_ir.level, abs=1e-12)
+        assert from_level.levels == pytest.approx(from_ir.levels, abs=1e-12)
 
     def test_it_wants_the_reference_exactly_once(self) -> None:
         omni = decaying_noise(1.0, 2.0, 23)
@@ -390,7 +390,7 @@ class TestPlots:
         omni, lateral, reference = self._responses()
         result = room.late_lateral_sound_level(omni, lateral, reference, FS)
         ax = result.plot()
-        expected = room.late_lateral_average(result.level[:4])
+        expected = room.late_lateral_average(result.levels[:4])
         flat = [
             line
             for line in ax.get_lines()

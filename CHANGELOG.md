@@ -238,6 +238,107 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- **The ITU-R BS.468-4 curve has one name.** `MicrophoneNoise.weighting` took
+  `"CCIR"` for the quasi-peak inherent-noise figure while
+  `filters.weighting_filter` and `electroacoustics.weighted_thd` take `"468"`
+  for the same curve, so a value that worked in one place raised in the
+  other. It takes `"468"` now, the microphone fiche prints dB(468), and
+  `"CCIR"` is refused. The prose follows: the curve is ITU-R BS.468-4
+  throughout, and CCIR Recommendation 468 appears only where a sentence
+  explains why IEC 60268-1 and older datasheets still use it. The AES17
+  CCIR-RMS weighting keeps its name, which is the standard's own for a
+  different quantity.
+
+- **One spelling per concept across the public names.** A census of every
+  public field, parameter and property found the same quantity spelled
+  several ways, and the minority now spells it the way the majority does,
+  with no alias. `sound_speed` becomes `speed_of_sound` (seventeen places
+  against eighty), and so do the `c` of `sound_intensity`, the phase-mismatch
+  conversions, `absorption_coefficient_uncertainty` and
+  `monopole_source_level` and the `speed_of_sound_m_s` of
+  `thickness_critical_frequency_product`; the `rho` of `sound_intensity`
+  becomes `density`. `sample_rate` becomes `fs` on the FDTD `SignalSource`,
+  `STOIResult` and `impact_force_exposure_level`. `freq` becomes `frequency`
+  on `linkwitz_riley` and `frequencies` on `adaptation_term_kc`. A verifier's
+  verdict is `passes` everywhere: `AircraftSystemComplianceResult`,
+  `QuasiPeakDynamicsResult`, `HeavyImpactSourceCheck` and
+  `RigidMassCalibrationResult` said `passed`. And an array of a quantity is
+  named in the plural, as some two hundred and twenty already were: fifty-five
+  fields, parameters and properties that held an array under `frequency`,
+  `time`, `distance` or `level` are `frequencies`, `times`, `distances` and
+  `levels` now, among them the frequency axis of the intensity, room
+  acoustics, auditorium, absorber and valve-noise results, the time axis of
+  the time-varying loudness and ECMA-418-2 results, `DecayCurve.times` and
+  `.levels`, and the STI band levels (`levels=`, `measured_levels=`,
+  `operational_levels=`). A vectorised argument that takes one value or many
+  keeps its name, compounds such as `air_sound_speed` are left as their
+  standards write them, and the FDTD solvers keep `c` and `rho` for the maps
+  their equations are written in. Three tests walk the installed package and
+  fail on a minority spelling, a symbol used as a parameter name outside the
+  solvers, and an array named in the singular or a single value in the
+  plural.
+
+- **Waveforms inside result objects come back as the `Signal` they came
+  from.** The transforms have returned a `Signal` for a `Signal` since the
+  contract was written, and the result objects that carry a record of
+  pressure were left behind with a bare array beside a loose `fs`.
+  `envelope(...).signal`, `time_synchronous_average(...).period_waveform`,
+  `resample_signal(...).signal` (at its new rate), the `aligned` and
+  `reference` of `align_impulse_responses` and the `pressure` of
+  `underwater.pile_strike_metrics` now keep the type their input arrived as:
+  a `Signal` for a `Signal`, carrying `calibration_factor=1.0` when the input
+  was calibrated, and a bare array for a bare array. `resample_signal` refuses
+  a fractional target rate for a `Signal`, whose rate is a whole number of
+  hertz, and each of these results refuses a `Signal` field at a rate other
+  than the one it states. Three waveform fields computed from an input stay
+  arrays on purpose and say why: `SynchronousAverageResult.residual` joins
+  periods shifted onto the grid and is not one uniformly sampled record,
+  `SweptSineDistortionResult.harmonic_irs` holds one row per harmonic order
+  with time zero mid-window, and `ImpulseResponseResult.ir` is a transfer
+  function whose rate may be unknown. Generated signals, synthesised
+  responses, the quasi-peak detector's trace and the FDTD source samples have
+  no input to take a type from and stay arrays too. A test walks every public
+  result that carries a rate and fails on a waveform field that is neither a
+  `Signal` nor listed with its reason.
+
+- **`io.read_blocks` yields `Signal` blocks.** `io.read` returns a `Signal`
+  and its streaming twin yielded bare float64 arrays, so a block lost the
+  rate, the calibration, the channel labels and the provenance the whole-file
+  read carries, and the docstring had to tell the caller to apply the
+  calibration by hand. Each block is now a `Signal`: `read(path)` cropped to
+  its span, samples and metadata alike. `read_blocks` takes the same
+  `calibration_factor=` as `read` and applies the sidecar by the same
+  precedence, so a block from a calibrated file reaches the filters and the
+  level functions in pascals, and a factor applied by hand on top of it
+  counts twice. Arithmetic on a block goes through `np.asarray`, as it does
+  for any `Signal`. The block-streaming guide printed 66.42 dB for a loop
+  that computes 67.29 dB; it prints what the loop computes now.
+
+- **Every `.plot()` takes the axes first and the rest by name.** Two hundred
+  and fifty-four results read `plot(ax=None, *, language=..., ...)`, and nine
+  did not. `LoudspeakerCharacteristics.plot` and `MicrophoneCharacteristics.plot`
+  put `quantity` before the axes and `TransferMatrix.plot` put the frequency
+  vector and the characteristic impedance there, so the `plot(ax)` every other
+  result accepts handed the axes to the wrong parameter. They are
+  `plot(ax, *, quantity=...)` and
+  `plot(ax, *, frequencies=..., characteristic_impedance=...)` now. The four
+  hearing-protector ratings and the two low-frequency intensity results took
+  `language` by position, so `plot(ax, "es")` worked on those six and nowhere
+  else; it is keyword-only there too. A test walks every public class of the
+  installed package and fails on a `plot` whose first parameter is not `ax`
+  or whose other parameters can be passed by position.
+
+- **`vibration.verify_running_rms_decay` returns a verdict object.** It was
+  the last `verify_*` still answering with a bare `bool`, so a caller learnt
+  whether a meter passed and lost the printed interval and the measured time
+  it had been judged on. It returns a frozen `RunningRmsDecayVerification`
+  now, like its ISO 8041-1 siblings: `passes`, the row it was held to
+  (`printed_time_s`, `tolerance_s`, `lower_time_s`, `upper_time_s`), the
+  `measured_time_s` it was given and `deviation_s`, and a `.plot()` that
+  draws the reading on the 10 % rule inside the printed span. The object has
+  no truth value, so an `if verify_running_rms_decay(...):` left over from
+  4.0.0rc1 raises `TypeError` rather than passing every meter.
+
 - **Every published table refuses writes.** Module-level tables were plain
   dictionaries, even where the annotation said `Mapping`, so
   `GUIDE_VALUES["residential"] = ...` or `REFERENCE_CURVE[500] = 0.0` changed

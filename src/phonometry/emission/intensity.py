@@ -205,7 +205,7 @@ class IntensityResult:
     results.
     """
 
-    frequency: np.ndarray | None
+    frequencies: np.ndarray | None
     intensity: np.ndarray | None
     intensity_level: np.ndarray | None
     pressure_level: np.ndarray | None
@@ -223,7 +223,7 @@ class IntensityResult:
     def __post_init__(self) -> None:
         r"""Reject a measurement whose own fields contradict one another.
 
-        The band figure draws Lp and LI against ``frequency`` and lays the
+        The band figure draws Lp and LI against ``frequencies`` and lays the
         pressure-intensity index over them as one bar per band. A bar chart
         takes a single height for a whole row of bars without objecting, so
         an index of one value paints every band with the reactivity of one of
@@ -271,7 +271,7 @@ class IntensityResult:
         """
         require_ranks(
             self,
-            frequency=1,
+            frequencies=1,
             intensity=1,
             intensity_level=1,
             pressure_level=1,
@@ -281,7 +281,7 @@ class IntensityResult:
         )
         require_same_length(
             self,
-            "frequency",
+            "frequencies",
             "intensity",
             "intensity_level",
             "pressure_level",
@@ -362,20 +362,20 @@ class FieldIndicators:
 
     With per-position *and* per-band input (2D arrays passed to
     :func:`field_indicators`) the indicators are per-band arrays and
-    ``frequency`` carries the band centres; with 1D per-position input they
-    are scalars and ``frequency`` is ``None``.
+    ``frequencies`` carries the band centres; with 1D per-position input they
+    are scalars and ``frequencies`` is ``None``.
     """
 
     f2: float | np.ndarray
     f3: float | np.ndarray
     f4: float | np.ndarray
-    frequency: np.ndarray | None = None
+    frequencies: np.ndarray | None = None
     f1: float | np.ndarray | None = None
 
     def __post_init__(self) -> None:
         """Reject indicators that do not all describe the same bands.
 
-        The figure draws F2 and F3 against ``frequency`` and puts F4 and F1
+        The figure draws F2 and F3 against ``frequencies`` and puts F4 and F1
         on the twin axis, where a short indicator is not read as short: F4
         arrives as one bar per band and a bar chart takes a single height for
         the whole row, while F1 is broadcast onto the band axis outright, so
@@ -409,7 +409,7 @@ class FieldIndicators:
         """
         owner = type(self).__name__
         counts: dict[str, int] = {}
-        for name in ("frequency", "f1", "f2", "f3", "f4"):
+        for name in ("frequencies", "f1", "f2", "f3", "f4"):
             value = getattr(self, name)
             if value is None:
                 continue
@@ -553,10 +553,10 @@ def _validate_probe_medium(fs: int, spacing: float, rho: float, c: float) -> Non
         msg = "Microphone 'spacing' must be positive."
         raise ValueError(msg)
     if rho <= 0:
-        msg = "Air density 'rho' must be positive."
+        msg = "Air 'density' must be positive."
         raise ValueError(msg)
     if c <= 0:
-        msg = "Speed of sound 'c' must be positive."
+        msg = "'speed_of_sound' must be positive."
         raise ValueError(msg)
 
 
@@ -583,8 +583,8 @@ def sound_intensity(
     fs: int | None = None,
     *,
     spacing: float,
-    rho: float = 1.204,
-    c: float = 343.0,
+    density: float = 1.204,
+    speed_of_sound: float = 343.0,
     fraction: int | None = None,
     limits: list[float] | None = None,
     bias_correct: bool = False,
@@ -636,8 +636,8 @@ def sound_intensity(
         it, and two Signals recorded at different rates are refused rather
         than arbitrated.
     :param spacing: Microphone separation :math:`\Delta r`, in metres.
-    :param rho: Air density, in kg/m^3. Default 1.204 (20 degC).
-    :param c: Speed of sound, in m/s. Default 343.0.
+    :param density: Air density, in kg/m^3. Default 1.204 (20 degC).
+    :param speed_of_sound: Speed of sound, in m/s. Default 343.0.
     :param fraction: ``None`` (broadband only), 1 (octave bands) or
         3 (one-third octave bands).
     :param limits: [f_min, f_max] band limits in Hz (default
@@ -663,7 +663,7 @@ def sound_intensity(
     x1 = apply_calibration(p1, _typesignal(p1, name="p1"))
     x2 = apply_calibration(p2, _typesignal(p2, name="p2"))
     _validate_probe_signals(x1, x2)
-    _validate_probe_medium(fs, spacing, rho, c)
+    _validate_probe_medium(fs, spacing, density, speed_of_sound)
     _validate_band_options(fraction, limits)
     if x1.size < _MIN_SAMPLES:
         msg = f"Signals too short for a spectral estimate: {x1.size} samples."
@@ -679,7 +679,7 @@ def sound_intensity(
     pos = f > 0
     fpos = f[pos]
     # I(f) = -Im{G12(f)} / (2*pi*f*rho*dr) per frequency bin (W/m^2/Hz).
-    i_density = -np.imag(g12[pos]) / (2.0 * np.pi * fpos * rho * spacing)
+    i_density = -np.imag(g12[pos]) / (2.0 * np.pi * fpos * density * spacing)
     p_density = spp[pos]
 
     if bias_correct:
@@ -687,7 +687,7 @@ def sound_intensity(
         # sin(k*dr)/(k*dr) per bin. The reciprocal is clamped at k*dr = pi/2
         # (see _finite_difference_correction) so bins near the first null do
         # not diverge and dominate the totals.
-        k_dr_full = 2.0 * np.pi * fpos * spacing / c
+        k_dr_full = 2.0 * np.pi * fpos * spacing / speed_of_sound
         i_density = i_density * _finite_difference_correction(k_dr_full)
 
     if limits is not None:
@@ -722,11 +722,11 @@ def sound_intensity(
         # with k*dr = 2*pi*f*dr/c; the reported correction is its reciprocal,
         # clamped at k*dr = pi/2 to match the applied bias_correct path and to
         # avoid diverging near the first null (_finite_difference_correction).
-        k_dr = 2.0 * np.pi * frequency * spacing / c
+        k_dr = 2.0 * np.pi * frequency * spacing / speed_of_sound
         bias_correction = _finite_difference_correction(k_dr)
 
     return IntensityResult(
-        frequency=frequency,
+        frequencies=frequency,
         intensity=intensity,
         intensity_level=intensity_level,
         pressure_level=pressure_level,
@@ -738,7 +738,7 @@ def sound_intensity(
         total_pressure_level=total_lp,
         total_pressure_intensity_index=total_lp - total_li,
         total_direction=1 if total_i >= 0.0 else -1,
-        max_valid_frequency=0.1 * c / spacing,
+        max_valid_frequency=0.1 * speed_of_sound / spacing,
         spacing=float(spacing),
     )
 
@@ -1014,12 +1014,12 @@ def field_indicators(
 
     if lp.ndim == 1:
         f2, f3, f4 = _field_indicators_1d(lp, i_n)
-        return FieldIndicators(f2=f2, f3=f3, f4=f4, frequency=freqs, f1=f1)
+        return FieldIndicators(f2=f2, f3=f3, f4=f4, frequencies=freqs, f1=f1)
 
     per_band = [_field_indicators_1d(lp[:, b], i_n[:, b]) for b in range(lp.shape[1])]
     values = np.asarray(per_band, dtype=np.float64)
     return FieldIndicators(
-        f2=values[:, 0], f3=values[:, 1], f4=values[:, 2], frequency=freqs, f1=f1
+        f2=values[:, 0], f3=values[:, 1], f4=values[:, 2], frequencies=freqs, f1=f1
     )
 
 

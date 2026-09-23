@@ -280,7 +280,7 @@ def test_signal_source_reproduces_gaussian_pulse() -> None:
             ix=20,
             iy=20,
             samples=np.array([0.0, *(pulse.value(ti) for ti in t)]),
-            sample_rate=1.0 / sim_b.dt,
+            fs=1.0 / sim_b.dt,
         )
     )
     sim_b.run(200)
@@ -289,7 +289,7 @@ def test_signal_source_reproduces_gaussian_pulse() -> None:
 
 def test_signal_source_is_zero_outside_its_span() -> None:
     src = SignalSource(
-        ix=0, iy=0, samples=np.array([1.0, 2.0, 3.0]), sample_rate=10.0, amplitude=2.0
+        ix=0, iy=0, samples=np.array([1.0, 2.0, 3.0]), fs=10.0, amplitude=2.0
     )
     assert src.value(-0.01) == 0.0
     assert src.value(0.0) == 2.0
@@ -302,17 +302,17 @@ def test_signal_source_is_zero_outside_its_span() -> None:
     ("kwargs", "match"),
     [
         (
-            {"samples": np.zeros((2, 3)), "sample_rate": 8000.0},
+            {"samples": np.zeros((2, 3)), "fs": 8000.0},
             "samples must be a 1D array",
         ),
-        ({"samples": np.zeros(0), "sample_rate": 8000.0}, "samples must not be empty"),
+        ({"samples": np.zeros(0), "fs": 8000.0}, "samples must not be empty"),
         (
-            {"samples": np.array([np.nan]), "sample_rate": 8000.0},
+            {"samples": np.array([np.nan]), "fs": 8000.0},
             "samples must be finite",
         ),
-        ({"samples": np.zeros(4), "sample_rate": 0.0}, "sample_rate must be positive"),
+        ({"samples": np.zeros(4), "fs": 0.0}, "fs must be positive"),
         (
-            {"samples": np.zeros(4), "sample_rate": 8000.0, "amplitude": np.inf},
+            {"samples": np.zeros(4), "fs": 8000.0, "amplitude": np.inf},
             "amplitude must be finite",
         ),
     ],

@@ -111,7 +111,7 @@ def test_layered_result_retains_layers_and_draws() -> None:
     assert res.layers == tuple(layers)
     assert res.plot_geometry() is not None
     bare = m.LayeredAbsorberResult(
-        frequency=res.frequency,
+        frequencies=res.frequencies,
         angle_rad=res.angle_rad,
         surface_impedance=res.surface_impedance,
         normalized_impedance=res.normalized_impedance,

@@ -570,7 +570,7 @@ print(round(float(res.ts[0]) * 1000, 0))             # 72 ms
 
 # Octave bands 125 Hz - 4 kHz (ISO 3382-1 default); use fraction=3 for thirds
 octaves = room.room_parameters(ir, fs)
-print(octaves.frequency)                             # ~[126, 251, 501, 1000, 1995, 3981]
+print(octaves.frequencies)                             # ~[126, 251, 501, 1000, 1995, 3981]
 print(octaves.t30_valid)                             # per-band dynamic-range flags
 
 octaves.plot()               # per-band EDT/T20/T30 + C50/C80 bars (needs matplotlib)
@@ -656,7 +656,7 @@ plt.show()
 fig, ax = plt.subplots()
 ax.bar(np.arange(octaves.t30.size), octaves.t30)
 ax.set_xticks(np.arange(octaves.t30.size))
-ax.set_xticklabels([f"{f:g}" for f in octaves.frequency])
+ax.set_xticklabels([f"{f:g}" for f in octaves.frequencies])
 ax.set_xlabel("Octave-band centre frequency [Hz]")
 ax.set_ylabel("T30 [s]")
 plt.show()
@@ -729,7 +729,7 @@ nodal pattern.
 | `fraction` | int | — | `1` (octave, default) / `3` (third) | Bandwidth fraction |
 | `zero_phase` | bool | — | default `False` | Forward-backward octave filtering (ISO 3382-2 §7.3 NOTE, which relaxes $BT > 16$ to $BT > 4$); removes the filter group delay before the backward integration and roughly halves the 125 Hz short-decay T30 bias (~+4.9 % → +2.4 % at $T$ = 0.2 s). `decay_curve` accepts it too |
 
-Returns a `RoomAcousticsResult`: `frequency` (band centres, or `None`
+Returns a `RoomAcousticsResult`: `frequencies` (band centres, or `None`
 broadband), `edt`/`t20`/`t30` (s), `c50`/`c80` (dB), `d50`, `ts` (s),
 `dynamic_range` (dB), the `edt_valid`/`t20_valid`/`t30_valid` flags (ISO
 3382-1 §5.3.3: noise ≥ 25 dB below the peak for EDT, tightened to 46 dB for

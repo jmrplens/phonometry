@@ -347,7 +347,7 @@ RigidMassCalibrationResult(
     deviation: np.ndarray,
     within_tolerance: np.ndarray,
     *,
-    passed: bool,
+    passes: bool,
     mass: float,
     quantity: str,
     tolerance: float,
@@ -365,7 +365,7 @@ Operational rigid-mass calibration check (ISO 7626-2:2015, 7.5.2).
 | `expected` | Known correct magnitude of the rigid calibration block per frequency: $1/m$ (accelerance) or $1/(2 \pi f m)$ (mobility). |
 | `deviation` | Relative deviation `measured/expected - 1` per frequency. |
 | `within_tolerance` | Per-frequency pass flag `\|deviation\| <= tolerance`. |
-| `passed` | `True` if every frequency is within the tolerance. |
+| `passes` | `True` if every frequency is within the tolerance. |
 | `mass` | Mass `m` of the calibration block, in kg. |
 | `quantity` | FRF kind checked (`"accelerance"` or `"mobility"`). |
 | `tolerance` | Relative tolerance applied (the standard's is 0.05). |

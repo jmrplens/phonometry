@@ -302,7 +302,7 @@ def _chk_transmission_loss() -> Outcome:
     The loss depends on the pipe and on the fluid leaving the valve, not on
     the trim, so this row runs example 7's pipe without example 7's valve.
     """
-    bands = np.asarray(_example(1).frequency, dtype=np.float64)
+    bands = np.asarray(_example(1).frequencies, dtype=np.float64)
     loss = ph.noise_control.pipe_transmission_loss(bands, **_EXAMPLE_7_PIPE)
     deltas = [
         abs(float(loss[i]) - expected)

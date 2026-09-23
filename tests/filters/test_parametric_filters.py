@@ -404,7 +404,7 @@ def test_linkwitz_riley_sum() -> None:
     x = rng.standard_normal(fs)
 
     # Split at 1000 Hz
-    lp, hp = filters.linkwitz_riley(x, fs, freq=1000, order=4)
+    lp, hp = filters.linkwitz_riley(x, fs, frequency=1000, order=4)
 
     # Sum of bands
     y_sum = lp + hp

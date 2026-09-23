@@ -260,7 +260,7 @@ ponderación) y lee cada uno frente a la lectura permanente de la misma cadena.
 from phonometry import broadcast
 
 report = broadcast.verify_quasi_peak_dynamics(48000.0)
-print(report.passed, round(report.worst_margin_db, 3))   # True 0.259
+print(report.passes, round(report.worst_margin_db, 3))   # True 0.259
 row = report.stimuli[0]
 print(row["stimulus"], round(row["reading_percent"], 2))       # 1 ms 16.94
 ```
@@ -401,7 +401,7 @@ no se modelan. No hay ficha `.report()`, por lo que dice el apartado 6.
   `tone_burst`, el generador de IEC 60268-1 que construye los estímulos de los
   apartados 2.1 y 2.2.
 - [Micrófonos (IEC 60268-4)](/phonometry/es/devices/electroacoustics/microphones/):
-  de dónde sale una cifra declarada de ruido propio en dB(CCIR) y por qué sigue
+  de dónde sale una cifra declarada de ruido propio en dB(468) y por qué sigue
   siendo una declaración.
 - [Radiodifusión](/phonometry/es/devices/broadcast/): el resumen de la sección.
 - Referencia de la API: [`broadcast.quasi_peak`](/phonometry/es/reference/api/broadcast/quasi-peak/).

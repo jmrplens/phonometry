@@ -393,3 +393,252 @@ def test_the_envelope_plot_takes_a_caller_supplied_label() -> None:
     stereo = Signal(np.stack([_RECORD, 2.0 * _RECORD]), FS, calibration_factor=CAL)
     axes = time_weighting(stereo, mode="fast").plot(label="mine")
     assert [line.get_label() for line in axes.get_lines()] == ["mine", "mine"]
+
+
+# ---------------------------------------------------------------------------
+# Result objects that carry a pressure record: the same rule, on a field
+# ---------------------------------------------------------------------------
+
+
+def _envelope(x: Signal | np.ndarray, fs: float | None) -> object:
+    from phonometry.signals import envelope
+
+    return envelope(x, fs)
+
+
+def _average(x: Signal | np.ndarray, fs: float | None) -> object:
+    from phonometry.signals import time_synchronous_average
+
+    return time_synchronous_average(x, fs, period_s=0.01)
+
+
+def _resample(x: Signal | np.ndarray, fs: float | None) -> object:
+    from phonometry.signals import resample_signal
+
+    return resample_signal(x, fs, fs_new=FS // 2)
+
+
+def _align(x: Signal | np.ndarray, fs: float | None) -> object:
+    from phonometry.signals import align_impulse_responses
+
+    reference: Signal | np.ndarray
+    if isinstance(x, Signal):
+        reference = Signal(
+            np.roll(np.asarray(x.data[0]), 3),
+            FS,
+            calibration_factor=x.calibration_factor,
+        )
+    else:
+        reference = np.roll(x, 3)
+    return align_impulse_responses(x, reference, fs)
+
+
+def _strike(x: Signal | np.ndarray, fs: float | None) -> object:
+    from phonometry.underwater import pile_strike_metrics
+
+    return pile_strike_metrics(x, fs)
+
+
+#: The result fields that hold a record of pressure at the input's rate, with
+#: the call that makes them and the rate the record comes back at. Kept by
+#: hand, like TRANSFORMS, so a field leaving the set is removed deliberately.
+RESULT_FIELDS = [
+    ("envelope.signal", _envelope, ("signal",), FS),
+    ("time_synchronous_average.period_waveform", _average, ("period_waveform",), FS),
+    ("resample_signal.signal", _resample, ("signal",), FS // 2),
+    ("align_impulse_responses", _align, ("aligned", "reference"), FS),
+    ("pile_strike_metrics.pressure", _strike, ("pressure",), FS),
+]
+FIELD_IDS = [name for name, *_ in RESULT_FIELDS]
+
+
+@pytest.mark.parametrize(
+    ("name", "call", "names", "rate"), RESULT_FIELDS, ids=FIELD_IDS
+)
+def test_a_result_field_comes_back_as_the_signal_it_came_from(
+    name: str,
+    call: Callable[[Signal | np.ndarray, float | None], object],
+    names: tuple[str, ...],
+    rate: int,
+) -> None:
+    """Calibrated in, a Signal in pascals out, marked as already converted."""
+    result = call(Signal(_RECORD, FS, calibration_factor=CAL), None)
+    pre_scaled = call(CAL * _RECORD, FS)
+    for field in names:
+        out = getattr(result, field)
+        assert isinstance(out, Signal), f"{name}: {field}"
+        assert out.calibration_factor == 1.0
+        assert out.fs == rate
+        assert np.array_equal(np.asarray(out), np.asarray(getattr(pre_scaled, field)))
+        # The second hop: the level of the field is the level of its pascals.
+        assert leq(out) == pytest.approx(leq(getattr(pre_scaled, field)), abs=1e-9)
+
+
+@pytest.mark.parametrize(
+    ("name", "call", "names", "rate"), RESULT_FIELDS, ids=FIELD_IDS
+)
+def test_a_result_field_keeps_the_type_a_bare_array_gave_it(
+    name: str,
+    call: Callable[[Signal | np.ndarray, float | None], object],
+    names: tuple[str, ...],
+    rate: int,
+) -> None:
+    """A bare array in is a bare array out, and an uncalibrated Signal stays so."""
+    del rate
+    bare = call(_RECORD, FS)
+    uncalibrated = call(Signal(_RECORD, FS), None)
+    for field in names:
+        assert isinstance(getattr(bare, field), np.ndarray), f"{name}: {field}"
+        assert getattr(uncalibrated, field).calibration_factor is None
+
+
+def test_a_signal_is_resampled_only_to_a_whole_number_of_hertz() -> None:
+    """A Signal's rate is an integer, so a fractional target has no Signal to be.
+
+    The bare array still goes to any rational rate, as it always did.
+    """
+    from phonometry.signals import resample_signal
+
+    record = Signal(_RECORD, FS)
+    with pytest.raises(ValueError, match=r"whole number of hertz"):
+        resample_signal(record, fs_new=FS / 7)
+    assert isinstance(resample_signal(_RECORD, FS, fs_new=FS / 7).signal, np.ndarray)
+
+
+#: Field names that hold a time waveform on a result that carries a rate.
+_WAVEFORM_NAMES = frozenset(
+    {
+        "signal",
+        "waveform",
+        "period_waveform",
+        "residual",
+        "aligned",
+        "reference",
+        "pressure",
+        "ir",
+        "harmonic_irs",
+        "trace",
+        "samples",
+        "record",
+    }
+)
+
+#: Waveform fields that stay bare arrays, each for a reason a Signal would
+#: misstate. Adding one here is a decision, and the reason goes with it.
+_BARE_ON_PURPOSE = {
+    "phonometry.signals.synchronous_average.SynchronousAverageResult.residual": (
+        "periods shifted onto the grid and joined: not one uniformly sampled record"
+    ),
+    "phonometry.electroacoustics.swept_sine.SweptSineDistortionResult.harmonic_irs": (
+        "rows are harmonic orders, not channels, and time zero is mid-window"
+    ),
+    "phonometry.room.impulse_response.ImpulseResponseResult.ir": (
+        "a transfer function whose rate may be unknown; the result is itself "
+        "the array stand-in"
+    ),
+    "phonometry.room.impulse_response.ShapedSweepResult.signal": (
+        "a generated excitation: no input to take a type from"
+    ),
+    "phonometry.signals.test_signals.ToneBurstResult.signal": (
+        "a generated test signal: no input to take a type from"
+    ),
+    "phonometry.room.image_source.ImageSourceResult.ir": (
+        "a synthesised response: no input to take a type from"
+    ),
+    "phonometry.broadcast.quasi_peak.QuasiPeakResult.trace": (
+        "a detector reading, not a pressure record"
+    ),
+    "phonometry.simulation.fdtd.SignalSource.samples": (
+        "an excitation the caller supplies, not a result"
+    ),
+}
+
+
+def test_no_result_carries_a_rate_beside_an_unexplained_bare_waveform() -> None:
+    """Close the class: a new waveform field is a Signal or says why not.
+
+    Walks every public dataclass of the installed package that carries a
+    sample rate, and every field of it whose name says it is a time
+    waveform. Each has to be typed to come back as a Signal, or be listed
+    above with the reason it cannot.
+    """
+    import dataclasses
+    import importlib
+    import inspect
+    import pkgutil
+
+    import phonometry
+
+    seen: dict[str, str] = {}
+    for info in pkgutil.walk_packages(phonometry.__path__, "phonometry."):
+        if any(part.startswith("_") for part in info.name.split(".")[1:]):
+            continue
+        module = importlib.import_module(info.name)
+        for name, obj in vars(module).items():
+            if name.startswith("_") or not inspect.isclass(obj):
+                continue
+            if not dataclasses.is_dataclass(obj) or obj is Signal:
+                continue
+            owner = f"{obj.__module__}.{obj.__qualname__}"
+            fields = {f.name: str(f.type) for f in dataclasses.fields(obj)}
+            if not {"fs", "signal_fs", "sample_rate"} & fields.keys():
+                continue
+            for field, annotation in fields.items():
+                # A waveform is an array; a float of the same name (a dB
+                # reference, say) is not one.
+                if field in _WAVEFORM_NAMES and (
+                    "ndarray" in annotation.lower() or "Signal" in annotation
+                ):
+                    seen[f"{owner}.{field}"] = annotation
+    offenders = sorted(
+        key
+        for key, annotation in seen.items()
+        if "Signal" not in annotation and key not in _BARE_ON_PURPOSE
+    )
+    stale = sorted(key for key in _BARE_ON_PURPOSE if key not in seen)
+    assert not offenders, f"bare waveform fields with no stated reason: {offenders}"
+    assert not stale, f"exemptions that no longer match a field: {stale}"
+
+
+@pytest.mark.parametrize(
+    ("name", "call", "names", "rate"), RESULT_FIELDS, ids=FIELD_IDS
+)
+def test_a_result_refuses_a_signal_field_at_another_rate(
+    name: str,
+    call: Callable[[Signal | np.ndarray, float | None], object],
+    names: tuple[str, ...],
+    rate: int,
+) -> None:
+    """The waveform and the rate the result states are one number.
+
+    A result changed with ``dataclasses.replace`` could otherwise carry a
+    record at one rate beside metrics and a time axis computed at another.
+    """
+    import dataclasses
+
+    result = call(Signal(_RECORD, FS, calibration_factor=CAL), None)
+    for field in names:
+        stored = getattr(result, field)
+        moved = Signal(stored.data, 2 * rate, calibration_factor=1.0)
+        with pytest.raises(ValueError, match=rf"'{field}' is a Signal recorded at"):
+            dataclasses.replace(result, **{field: moved})
+    del name
+
+
+def test_the_strike_is_drawn_in_the_pascals_its_metrics_were_checked_in() -> None:
+    """A hand-built factor reaches the figure as it reaches the metrics."""
+    import dataclasses
+
+    import matplotlib as mpl
+
+    mpl.use("Agg")
+    from phonometry.underwater import pile_strike_metrics
+
+    pressure = 1e3 * _RECORD
+    result = pile_strike_metrics(pressure, FS)
+    halved = dataclasses.replace(
+        result, pressure=Signal(pressure / 2.0, FS, calibration_factor=2.0)
+    )
+    ax = halved.plot()[0]
+    drawn = np.asarray(ax.get_lines()[0].get_ydata())
+    assert np.allclose(drawn, pressure)

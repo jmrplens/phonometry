@@ -34,13 +34,13 @@ class SoundSpeedProfile:
     """Sound-speed profile ``c(z)`` over a column of water.
 
     :ivar depth: Depths, in metres (increasing downward).
-    :ivar sound_speed: Sound speed at each depth, in m/s.
+    :ivar speed_of_sound: Sound speed at each depth, in m/s.
     :ivar gradient_per_s: Vertical sound-speed gradient ``dc/dz``, in (m/s)/m.
     :ivar model: The equation used.
     """
 
     depth: NDArray[np.float64]
-    sound_speed: NDArray[np.float64]
+    speed_of_sound: NDArray[np.float64]
     gradient_per_s: NDArray[np.float64]
     model: str
 
@@ -52,7 +52,7 @@ class SoundSpeedProfile:
         onto ``depths``, evaluates the equation there, and hands the same array
         to ``np.gradient``. Nothing else in the library builds this result.
 
-        The loud half of a mismatch is ``sound_speed``, which the figure draws
+        The loud half of a mismatch is ``speed_of_sound``, which the figure draws
         against ``depth``: matplotlib stops both a short and a long one, but
         with its own ``x and y must have same first dimension, but have shapes
         (120,) and (121,)``, which names neither column and arrives from the
@@ -70,17 +70,17 @@ class SoundSpeedProfile:
         radius of 89 km instead of 46 km.
 
         The ranks are pinned as well because a count alone passes an extra
-        axis on. Two scenarios stacked column-wise into ``sound_speed`` as an
+        axis on. Two scenarios stacked column-wise into ``speed_of_sound`` as an
         ``(n, 2)`` array carry one value per depth by every measure, and the
         figure quietly draws two curves under the one legend entry that names
         a single model.
 
-        :raises ValueError: if ``sound_speed`` or ``gradient_per_s`` disagrees with
+        :raises ValueError: if ``speed_of_sound`` or ``gradient_per_s`` disagrees with
             ``depth``, or if a column carries more than one axis.
         """
-        require_ranks(self, depth=1, sound_speed=1, gradient_per_s=1)
+        require_ranks(self, depth=1, speed_of_sound=1, gradient_per_s=1)
         require_same_length(
-            self, "depth", "sound_speed", "gradient_per_s", axis="depth"
+            self, "depth", "speed_of_sound", "gradient_per_s", axis="depth"
         )
 
     def plot(
@@ -143,7 +143,7 @@ def sound_speed_profile(
     gradient_per_s = np.gradient(c, z)
     return SoundSpeedProfile(
         depth=z,
-        sound_speed=c,
+        speed_of_sound=c,
         gradient_per_s=gradient_per_s,
         model=model.strip().lower(),
     )

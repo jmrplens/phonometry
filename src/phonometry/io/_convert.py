@@ -191,7 +191,9 @@ def _quantised_blocks(
     clipped_total = 0
     peak_dbfs = float("-inf")
     for block in read_blocks(src, block_size):
-        block2d = np.atleast_2d(block)
+        # The digital samples, whatever calibration the block carries: a
+        # conversion copies codes, and the calibration travels in the sidecar.
+        block2d = block.data
         if is_float_target:
             yield block2d
             continue

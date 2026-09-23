@@ -16,6 +16,8 @@ from typing import Any
 
 import numpy as np
 
+from phonometry.io import Signal
+
 
 def assert_same(a: Any, b: Any, path: str = "result") -> None:  # noqa: ANN401 - deep-compares results of any shape: dataclasses, dicts, sequences, arrays, scalars
     """Assert two results are identical, walking result objects field by field.
@@ -33,6 +35,12 @@ def assert_same(a: Any, b: Any, path: str = "result") -> None:  # noqa: ANN401 -
     :param path: Field path reached so far, for the failure message.
     :raises AssertionError: On the first field that differs, naming the path.
     """
+    if isinstance(a, Signal) != isinstance(b, Signal):
+        # A waveform field comes back in the type its input arrived as, so the
+        # Signal call holds a Signal where the bare-array call holds an array.
+        # The contract is that the samples are the same ones, to the bit.
+        assert_same(np.asarray(a), np.asarray(b), path)
+        return
     if is_dataclass(a) and not isinstance(a, type):
         assert type(a) is type(b), path
         for f in fields(a):

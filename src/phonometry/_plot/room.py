@@ -329,7 +329,7 @@ def plot_room_acoustics(
     :return: The axes, or an array of two axes for the default figure.
     """
     n = np.asarray(result.t30, dtype=np.float64).size
-    labels, use_freq_axis = _band_labels(result.frequency, n, language)
+    labels, use_freq_axis = _band_labels(result.frequencies, n, language)
     positions = np.arange(n, dtype=np.float64)
     single = ax is not None
     if ax is not None:
@@ -435,7 +435,7 @@ def plot_sound_strength(
     :return: The axes, or an array of two axes for the default figure.
     """
     strength = np.asarray(result.strength, dtype=np.float64)
-    labels, use_freq_axis = _band_labels(result.frequency, strength.size, language)
+    labels, use_freq_axis = _band_labels(result.frequencies, strength.size, language)
     positions = np.arange(strength.size, dtype=np.float64)
 
     single = ax is not None
@@ -453,7 +453,7 @@ def plot_sound_strength(
         alpha=0.3,
         label=_t(_TABLE_A1_RANGE_LABEL, language),
     )
-    single_number = _single_number(result.frequency, strength)
+    single_number = _single_number(result.frequencies, strength)
     if single_number is not None:
         ax_strength.axhline(
             single_number,
@@ -526,7 +526,7 @@ def plot_lateral_energy(
     :return: The axes.
     """
     values = np.asarray(result.energy_fraction, dtype=np.float64)
-    labels, use_freq_axis = _band_labels(result.frequency, values.size, language)
+    labels, use_freq_axis = _band_labels(result.frequencies, values.size, language)
     positions = np.arange(values.size, dtype=np.float64)
     ax = ax if ax is not None else _new_axes()
 
@@ -539,7 +539,7 @@ def plot_lateral_energy(
         label=_t(_TABLE_A1_RANGE_LABEL, language),
     )
     single_number = _single_number(
-        result.frequency, values, _LATERAL_SINGLE_NUMBER_BANDS_HZ
+        result.frequencies, values, _LATERAL_SINGLE_NUMBER_BANDS_HZ
     )
     if single_number is not None:
         ax.axhline(
@@ -597,8 +597,8 @@ def plot_late_lateral(
         late_lateral_average,
     )
 
-    values = np.asarray(result.level, dtype=np.float64)
-    labels, use_freq_axis = _band_labels(result.frequency, values.size, language)
+    values = np.asarray(result.levels, dtype=np.float64)
+    labels, use_freq_axis = _band_labels(result.frequencies, values.size, language)
     positions = np.arange(values.size, dtype=np.float64)
     ax = ax if ax is not None else _new_axes()
 
@@ -610,7 +610,7 @@ def plot_late_lateral(
         alpha=0.3,
         label=_t(_TABLE_A1_RANGE_LABEL, language),
     )
-    picked = _band_indices(result.frequency, LATE_LATERAL_AVERAGE_BANDS_HZ)
+    picked = _band_indices(result.frequencies, LATE_LATERAL_AVERAGE_BANDS_HZ)
     if picked is not None:
         ax.axhline(
             late_lateral_average(values[picked]),
@@ -654,7 +654,7 @@ def plot_stage_support(
     """
     early = np.asarray(result.early, dtype=np.float64)
     late = np.asarray(result.late, dtype=np.float64)
-    labels, use_freq_axis = _band_labels(result.frequency, early.size, language)
+    labels, use_freq_axis = _band_labels(result.frequencies, early.size, language)
     positions = np.arange(early.size, dtype=np.float64)
     ax = ax if ax is not None else _new_axes()
 
@@ -716,7 +716,7 @@ def plot_interaural_correlation(
 
     curves = np.asarray(result.correlation, dtype=np.float64)
     lag_ms = np.asarray(result.lag, dtype=np.float64) * 1000.0
-    labels, _ = _band_labels(result.frequency, curves.shape[0], language)
+    labels, _ = _band_labels(result.frequencies, curves.shape[0], language)
     ax = ax if ax is not None else _new_axes()
 
     palette = (
@@ -768,8 +768,8 @@ def plot_decay_curve(
     from .._i18n import localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    time = np.asarray(result.time, dtype=np.float64)
-    level = np.asarray(result.level, dtype=np.float64)
+    time = np.asarray(result.times, dtype=np.float64)
+    level = np.asarray(result.levels, dtype=np.float64)
     style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("label", _t(_SCHROEDER_DECAY_LABEL, language))
     ax.plot(time, level, **kwargs)

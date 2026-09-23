@@ -609,7 +609,7 @@ for dist in (0.6, 1.0, 2.0, 4.0, 7.0):
             max_order=40,      # c x 0.58 T / L_min, not the default 20
         )
         par = room.room_parameters(res.ir, res.fs, limits=(125.0, 4000.0))
-        mid = (par.frequency > 400.0) & (par.frequency < 1200.0)
+        mid = (par.frequencies > 400.0) & (par.frequencies < 1200.0)
         band.append([np.mean(par.edt[mid]), np.mean(par.t30[mid]),
                      np.mean(par.c80[mid])])
     print(dist, np.round(np.mean(band, axis=0), 2))

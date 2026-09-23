@@ -157,7 +157,7 @@ from phonometry import vibration
 # A 10 kg calibration block: |A| must be 1/m = 0.100 1/kg at every frequency.
 f = np.array([20.0, 100.0, 500.0])
 res = vibration.rigid_mass_calibration_check([0.100, 0.102, 0.097], f, mass=10.0)
-print(res.passed, res.within_tolerance.tolist())   # True [True, True, True]
+print(res.passes, res.within_tolerance.tolist())   # True [True, True, True]
 
 # The Annex A example: coherence 0.8 needs about 75 averages for < 5 %.
 print(round(float(vibration.random_error_percent(0.8, 75)), 2))   # 4.08  %
@@ -180,7 +180,7 @@ f = np.logspace(np.log10(20.0), np.log10(5000.0), 400)
 drift = 0.05 * (f / 2500.0) ** 2                          # high-frequency drift
 measured = (1.0 / m) * (1.0 + 0.015 * np.sin(2 * np.pi * np.log10(f)) + drift)
 res = vibration.rigid_mass_calibration_check(measured, f, mass=m)
-print(res.passed)                                         # False (drift exceeds 5 %)
+print(res.passes)                                         # False (drift exceeds 5 %)
 res.plot()
 ```
 

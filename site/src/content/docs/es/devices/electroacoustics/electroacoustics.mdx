@@ -1,6 +1,6 @@
 ---
 title: "Electroacústica: distorsión y respuesta en frecuencia"
-description: "Distorsión IEC 60268-3: distorsión armónica total y de orden n, THD+N y SINAD a través del ancho de banda de medición AES17, la intermodulación por órdenes de modulación y por diferencia de frecuencias, la intermodulación dinámica (DIM) y la THD ponderada ITU-R 468, el rango dinámico y el ruido de canal en reposo de AES17 (ponderación CCIR-RMS), más los estimadores de respuesta en frecuencia H1/H2 de Bendat y Piersol y la coherencia ordinaria."
+description: "Distorsión IEC 60268-3: distorsión armónica total y de orden n, THD+N y SINAD a través del ancho de banda de medición AES17, la intermodulación por órdenes de modulación y por diferencia de frecuencias, la intermodulación dinámica (DIM) y la THD ponderada UIT-R BS.468-4, el rango dinámico y el ruido de canal en reposo de AES17 (ponderación CCIR-RMS), más los estimadores de respuesta en frecuencia H1/H2 de Bendat y Piersol y la coherencia ordinaria."
 references:
   - type: standard
     organization: "International Electrotechnical Commission"
@@ -44,7 +44,7 @@ prueba, y qué **respuesta en frecuencia** revela una medición de entrada/salid
 Esta página cubre el conjunto de distorsión de la IEC 60268-3: distorsión
 armónica total y de orden n, THD+N y SINAD a través del ancho de banda de
 medición AES17, la intermodulación por órdenes de modulación y por diferencia
-de frecuencias, la intermodulación dinámica (DIM) y la THD ponderada ITU-R 468,
+de frecuencias, la intermodulación dinámica (DIM) y la THD ponderada UIT-R BS.468-4,
 y los estimadores de respuesta en frecuencia $H_1$/$H_2$ de Bendat y
 Piersol con la coherencia ordinaria $\gamma^2$. Toda magnitud tiene un oráculo
 analítico exacto (señales sintéticas con amplitudes armónicas y de
@@ -298,7 +298,7 @@ ponderada solo es válida para frecuencias fundamentales entre 31,5 Hz y 400 Hz:
 ```python
 from phonometry import electroacoustics
 
-print(electroacoustics.weighted_thd(signal, fs, 100.0))                  # red ITU-R 468
+print(electroacoustics.weighted_thd(signal, fs, 100.0))                  # red UIT-R BS.468-4
 print(electroacoustics.weighted_thd(signal, fs, 100.0, weighting="A"))   # variante ponderada A
 print(electroacoustics.itu_r_468_weighting([6300.0]))                    # [+12.2167] dB
 ```
@@ -339,7 +339,7 @@ plt.show()
 ## 3. Rango dinámico y ruido de canal en reposo (AES17-2015 6.4)
 
 Las dos cifras de catálogo de cualquier conversor reutilizan la muesca de la
-sección 2 y la curva ITU-R 468 de la sección 2.1, pero la excitación es
+sección 2 y la curva UIT-R BS.468-4 de la sección 2.1, pero la excitación es
 distinta, y por eso el apartado 6.4 es hermano del apartado de THD+N y no hijo
 suyo. Ambas comparten la ponderación AES17 **CCIR-RMS** (5.2.7): la curva
 ITU-R BS.468-4 desplazada un valor plano de -5,63 dB para que sea unidad a

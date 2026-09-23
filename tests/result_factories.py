@@ -305,7 +305,7 @@ def _intensity_wide() -> ph.emission.IntensityResult:
     # 1 uW/m^2 is 60 dB re 1 pW/m^2 exactly, the level the bands and the
     # broadband total both carry here.
     return ph.emission.IntensityResult(
-        frequency=freqs,
+        frequencies=freqs,
         intensity=np.full(n, 1.0e-6),
         intensity_level=np.full(n, 60.0),
         pressure_level=np.full(n, 62.0),
@@ -487,7 +487,7 @@ def _room_with_one_invalid_band() -> ph.room.RoomAcousticsResult:
     ones = np.ones(3)
     valid = np.array([True, False, True])  # 500 Hz band invalid
     return ph.room.RoomAcousticsResult(
-        frequency=freq,
+        frequencies=freq,
         edt=ones.copy(),
         t20=ones.copy(),
         t30=ones.copy(),

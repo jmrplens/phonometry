@@ -155,7 +155,7 @@ def run_airport_contour() -> np.ndarray:
         x=a["grid_x"],
         y=a["grid_y"],
     )
-    return np.asarray(res.level)
+    return np.asarray(res.levels)
 
 
 def run_event_level() -> np.ndarray:

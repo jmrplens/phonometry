@@ -246,7 +246,7 @@ class STIResult:
     def adjusted_for_levels(
         self,
         *,
-        operational_level: Sequence[float] | np.ndarray,
+        operational_levels: Sequence[float] | np.ndarray,
         operational_ambient: Sequence[float] | np.ndarray | None = None,
     ) -> STIResult:
         """This result moved to another speech and noise condition (Annex M).
@@ -258,7 +258,7 @@ class STIResult:
         :func:`sti_adjusted_for_levels`, which does the work and states the
         edition the procedure comes from.
 
-        :param operational_level: Speech octave-band levels of the condition
+        :param operational_levels: Speech octave-band levels of the condition
             being simulated, in dB SPL (7 values).
         :param operational_ambient: Occupancy-noise octave-band levels of
             that condition, in dB SPL (7 values); ``None`` simulates a
@@ -272,15 +272,15 @@ class STIResult:
             msg = (
                 "Adjusting to other levels needs the speech band levels the "
                 "measurement was corrected with, and this STIResult carries "
-                "none: recompute it with 'level' (and 'ambient'), or call "
+                "none: recompute it with 'levels' (and 'ambient'), or call "
                 "sti_adjusted_for_levels on the measured matrix directly."
             )
             raise ValueError(msg)
         return sti_adjusted_for_levels(
             self.mtf,
-            measured_level=self.band_levels,
+            measured_levels=self.band_levels,
             measured_ambient=self.ambient_levels,
-            operational_level=operational_level,
+            operational_levels=operational_levels,
             operational_ambient=operational_ambient,
         )
 
@@ -495,7 +495,7 @@ def _corrected_mtf(
     if level is None:
         if ambient is not None:
             msg = (
-                "'ambient' requires the speech octave-band levels 'level' to "
+                "'ambient' requires the speech octave-band levels 'levels' to "
                 "form the intensity-domain correction; pass 'snr' instead."
             )
             raise ValueError(msg)
@@ -506,7 +506,7 @@ def _corrected_mtf(
         # reception threshold corrections are skipped.
         return m, None, None
 
-    band_levels = _validate_band_vector(level, "level")
+    band_levels = _validate_band_vector(level, "levels")
     if ambient is not None:
         ambient_arr = _validate_band_vector(ambient, "ambient")
     elif snr_arr is not None:
@@ -570,9 +570,9 @@ def _sti_from_mtf(
     Noise handling: ``snr`` alone multiplies ``m`` by
     :math:`1/(1 + 10^{-SNR/10})`,
     which is exactly the :math:`I_k/(I_k + I_{\mathrm{n},k})` factor of the standard.
-    When ``level`` is provided the full intensity-domain correction
+    When ``levels`` is provided the full intensity-domain correction
     :math:`m' = m \cdot I_k / (I_k + I_{\mathrm{am},k} + I_{\mathrm{rt},k} + I_{\mathrm{n},k})` is used
-    instead, with ``ambient`` (or ``level - snr``) defining :math:`I_{\mathrm{n},k}`,
+    instead, with ``ambient`` (or ``levels - snr``) defining :math:`I_{\mathrm{n},k}`,
     so the noise degradation is never applied twice.
     """
     m = _truncated_mtf(mtf)
@@ -589,9 +589,9 @@ def _sti_from_mtf(
 def sti_adjusted_for_levels(
     mtf: np.ndarray,
     *,
-    measured_level: Sequence[float] | np.ndarray,
+    measured_levels: Sequence[float] | np.ndarray,
     measured_ambient: Sequence[float] | np.ndarray | None = None,
-    operational_level: Sequence[float] | np.ndarray,
+    operational_levels: Sequence[float] | np.ndarray,
     operational_ambient: Sequence[float] | np.ndarray | None = None,
 ) -> STIResult:
     r"""STI of a measured MTF matrix moved to other speech and noise levels.
@@ -603,7 +603,7 @@ def sti_adjusted_for_levels(
 
     1. acquire the modulation transfer matrix together with the speech and
        background-noise octave-band levels that were present during the
-       measurement (``mtf``, ``measured_level``, ``measured_ambient``);
+       measurement (``mtf``, ``measured_levels``, ``measured_ambient``);
     2. divide out the correction those levels produced, which removes the
        background noise, the auditory masking and the reception threshold
        and leaves the matrix of the transmission channel alone;
@@ -629,19 +629,19 @@ def sti_adjusted_for_levels(
     .. note:: ``mtf`` is the matrix *as measured*, with the noise, masking
        and threshold of the measurement still in it, which is what
        :attr:`STIResult.mtf` holds after a measurement run
-       with ``level`` and ``ambient``. Feeding a matrix that never had them
+       with ``levels`` and ``ambient``. Feeding a matrix that never had them
        applied removes what was never added and lowers the result.
        :meth:`STIResult.adjusted_for_levels` takes the measurement levels
        from the result itself and is the safe route.
 
     :param mtf: Measured modulation transfer matrix, shape
         (7, n_modulation_frequencies).
-    :param measured_level: Speech octave-band levels during the
+    :param measured_levels: Speech octave-band levels during the
         measurement, dB SPL (7 values).
     :param measured_ambient: Background-noise octave-band levels during the
         measurement, dB SPL (7 values); ``None`` for a measurement whose
         matrix carries masking and threshold but no noise.
-    :param operational_level: Speech octave-band levels of the condition
+    :param operational_levels: Speech octave-band levels of the condition
         being simulated, dB SPL (7 values).
     :param operational_ambient: Occupancy-noise octave-band levels of that
         condition, dB SPL (7 values); ``None`` simulates a silent room.
@@ -651,13 +651,13 @@ def sti_adjusted_for_levels(
         a (7, n) matrix of finite non-negative values.
     """
     measured = _level_correction(
-        _validate_band_vector(measured_level, "measured_level"),
+        _validate_band_vector(measured_levels, "measured_levels"),
         None
         if measured_ambient is None
         else _validate_band_vector(measured_ambient, "measured_ambient"),
     )
     operational = _level_correction(
-        _validate_band_vector(operational_level, "operational_level"),
+        _validate_band_vector(operational_levels, "operational_levels"),
         None
         if operational_ambient is None
         else _validate_band_vector(operational_ambient, "operational_ambient"),
@@ -676,7 +676,7 @@ def sti_from_impulse_response(
     ir: Signal | list[float] | np.ndarray,
     fs: int | None,
     snr: None,
-    level: Sequence[float] | np.ndarray,
+    levels: Sequence[float] | np.ndarray,
     ambient: Sequence[float] | np.ndarray,
 ) -> STIResult: ...
 
@@ -687,7 +687,7 @@ def sti_from_impulse_response(
     fs: int | None = ...,
     snr: None = ...,
     *,
-    level: Sequence[float] | np.ndarray,
+    levels: Sequence[float] | np.ndarray,
     ambient: Sequence[float] | np.ndarray,
 ) -> STIResult: ...
 
@@ -697,7 +697,7 @@ def sti_from_impulse_response(
     ir: Signal | list[float] | np.ndarray,
     fs: int | None = ...,
     snr: float | Sequence[float] | np.ndarray | None = ...,
-    level: Sequence[float] | np.ndarray | None = ...,
+    levels: Sequence[float] | np.ndarray | None = ...,
 ) -> STIResult: ...
 
 
@@ -705,7 +705,7 @@ def sti_from_impulse_response(
     ir: Signal | list[float] | np.ndarray,
     fs: int | None = None,
     snr: float | Sequence[float] | np.ndarray | None = None,
-    level: Sequence[float] | np.ndarray | None = None,
+    levels: Sequence[float] | np.ndarray | None = None,
     ambient: Sequence[float] | np.ndarray | None = None,
 ) -> STIResult:
     r"""Full STI from a room/system impulse response (indirect method).
@@ -725,7 +725,7 @@ def sti_from_impulse_response(
     threshold correction, effective SNR clipped to +/-15 dB, transmission
     indices, band MTIs and the male-weighted STI (Ed.5 Table A.1).
 
-    When neither ``level`` nor ``ambient`` is given the level-dependent
+    When neither ``levels`` nor ``ambient`` is given the level-dependent
     auditory masking and the absolute reception threshold corrections are
     skipped (they require absolute band levels), matching the common
     "noise-free indirect measurement" use of the standard.
@@ -746,7 +746,7 @@ def sti_from_impulse_response(
         samples and then cancels: every modulation index is normalised by
         the total intensity of its own band, so a factor on the record
         moves neither the transfer values nor the STI. The absolute levels
-        the noise corrections need arrive through ``level`` and
+        the noise corrections need arrive through ``levels`` and
         ``ambient``, in dB, not from the samples.
     :param fs: Sample rate in Hz (>= 22,5 kHz so the 8 kHz band fits).
         Required for a bare array; a :class:`~phonometry.io.Signal` brings
@@ -754,14 +754,14 @@ def sti_from_impulse_response(
         instead of silently winning.
     :param snr: Optional signal-to-noise ratio in dB, scalar or one value
         per octave band. Degrades m by 1/(1 + 10^(-SNR/10)); combined
-        with ``level`` it is interpreted as ambient levels
-        ``level - snr`` so noise is not applied twice. Mutually
+        with ``levels`` it is interpreted as ambient levels
+        ``levels - snr`` so noise is not applied twice. Mutually
         exclusive with ``ambient``.
-    :param level: Optional speech octave-band levels in dB SPL (7 values)
+    :param levels: Optional speech octave-band levels in dB SPL (7 values)
         at the listener position; enables the auditory masking (Ed.5
         Table A.2) and reception threshold (Ed.5 Table A.3) corrections.
     :param ambient: Optional ambient noise octave-band levels in dB SPL
-        (7 values); requires ``level``.
+        (7 values); requires ``levels``.
     :return: :class:`STIResult` with ``mtf`` of shape (7, 14).
     """
     fs = resolve_fs(ir, fs, name="ir")
@@ -796,7 +796,7 @@ def sti_from_impulse_response(
     for j, fm in enumerate(_MOD_FREQS):
         kernel = np.exp(-2j * np.pi * fm * t)
         mtf[:, j] = np.abs(p_bands @ kernel) / denom
-    return _sti_from_mtf(mtf, snr=snr, level=level, ambient=ambient)
+    return _sti_from_mtf(mtf, snr=snr, level=levels, ambient=ambient)
 
 
 def _intensity_envelopes(x: np.ndarray, fs: int) -> np.ndarray:
@@ -880,7 +880,7 @@ def stipa(
     x: Signal | list[float] | np.ndarray,
     fs: int | None,
     reference: Signal | list[float] | np.ndarray | None,
-    level: Sequence[float] | np.ndarray,
+    levels: Sequence[float] | np.ndarray,
     ambient: Sequence[float] | np.ndarray,
 ) -> STIResult: ...
 
@@ -891,7 +891,7 @@ def stipa(
     fs: int | None = ...,
     reference: Signal | list[float] | np.ndarray | None = ...,
     *,
-    level: Sequence[float] | np.ndarray,
+    levels: Sequence[float] | np.ndarray,
     ambient: Sequence[float] | np.ndarray,
 ) -> STIResult: ...
 
@@ -901,7 +901,7 @@ def stipa(
     x: Signal | list[float] | np.ndarray,
     fs: int | None = ...,
     reference: Signal | list[float] | np.ndarray | None = ...,
-    level: Sequence[float] | np.ndarray | None = ...,
+    levels: Sequence[float] | np.ndarray | None = ...,
 ) -> STIResult: ...
 
 
@@ -909,7 +909,7 @@ def stipa(
     x: Signal | list[float] | np.ndarray,
     fs: int | None = None,
     reference: Signal | list[float] | np.ndarray | None = None,
-    level: Sequence[float] | np.ndarray | None = None,
+    levels: Sequence[float] | np.ndarray | None = None,
     ambient: Sequence[float] | np.ndarray | None = None,
 ) -> STIResult:
     """STIPA on a recorded test signal (direct method, Annex B).
@@ -925,7 +925,7 @@ def stipa(
     threshold / TI / STI chain as the full method.
 
     Physical background noise is already contained in the recording; use
-    ``level`` (and optionally ``ambient``) only to enable the absolute
+    ``levels`` (and optionally ``ambient``) only to enable the absolute
     level-dependent corrections, which are otherwise skipped.
 
     An :class:`STIWarning` is emitted when the recording is shorter than
@@ -939,7 +939,7 @@ def stipa(
         samples and then cancels: every modulation index is normalised by
         the total intensity of its own band, so a factor on the record
         moves neither the transfer values nor the STI. The absolute levels
-        the noise corrections need arrive through ``level`` and
+        the noise corrections need arrive through ``levels`` and
         ``ambient``, in dB, not from the samples.
     :param fs: Sample rate in Hz (>= 22,5 kHz). Required for a bare array;
         a :class:`~phonometry.io.Signal` brings its own, and an explicit
@@ -954,10 +954,10 @@ def stipa(
         for a mismatch. Its calibration is applied like any other record's,
         and then cancels, because what is taken from it is a modulation
         depth and those are normalised.
-    :param level: Optional speech octave-band levels in dB SPL (7 values)
+    :param levels: Optional speech octave-band levels in dB SPL (7 values)
         enabling auditory masking and reception threshold corrections.
     :param ambient: Optional ambient noise octave-band levels in dB SPL
-        (7 values); requires ``level``.
+        (7 values); requires ``levels``.
     :return: :class:`STIResult` with ``mtf`` of shape (7, 2).
     """
     # The reference is a second recording of the same test signal, so it has
@@ -1006,7 +1006,7 @@ def stipa(
         mtf = mdr / mdt
     else:
         mtf = mdr / _STIPA_MOD_INDEX
-    return _sti_from_mtf(mtf, level=level, ambient=ambient)
+    return _sti_from_mtf(mtf, level=levels, ambient=ambient)
 
 
 def _pink_noise(n: int, rng: np.random.Generator) -> np.ndarray:

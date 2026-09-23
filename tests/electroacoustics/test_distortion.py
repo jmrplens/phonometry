@@ -640,7 +640,7 @@ def test_itu_r_468_matches_aes17_ccir_rms_table() -> None:
 
 
 def test_weighted_thd_468_emphasises_6khz_products() -> None:
-    # IEC 60268-3 14.12.11 requires the IEC 60268-1 (ITU-R 468) network: a
+    # IEC 60268-3 14.12.11 requires the IEC 60268-1 (ITU-R BS.468-4) network: a
     # distortion product near the +12.2 dB peak is emphasised accordingly,
     # where A-weighting leaves it nearly unchanged (~+0.1 dB).
     x = _tone(100.0) + _tone(6300.0, 0.01)

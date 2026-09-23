@@ -84,7 +84,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from .._internal.validation import require_ranks, require_same_length
-from ..io._resolve import resolve_fs
+from ..io._resolve import like_input, require_signal_rate, resolve_fs
 from .spectra import _positive
 from .test_signals import _validate_1d_finite, fractional_delay
 
@@ -165,7 +165,10 @@ class SynchronousAverageResult:
     r"""Time synchronous average of a periodic waveform in noise.
 
     :ivar period_waveform: The averaged periodic waveform, one period of
-        :attr:`samples_per_period` samples.
+        :attr:`samples_per_period` samples on the input's sampling grid, in
+        the type the input arrived as: a :class:`~phonometry.io.Signal` when
+        it was one (in pascals and carrying ``calibration_factor=1.0`` when it
+        was calibrated), a bare array otherwise.
     :ivar times: Time axis of :attr:`period_waveform`, in seconds: the
         sampling grid :math:`m/f_\mathrm{s}`, :math:`m = 0 \ldots M-1` (the
         averaged samples stay on the :math:`1/f_\mathrm{s}` grid; see the module
@@ -174,7 +177,10 @@ class SynchronousAverageResult:
     :ivar residual: Input minus the periodic reconstruction, over the
         analysed span (``n_averages * samples_per_period`` samples, aligned
         to the integer period grid): what is left after the synchronous
-        component is removed.
+        component is removed. Always a bare array: when ``fs * T`` is not an
+        integer each period is shifted onto the grid before the blocks are
+        joined, so the joined record is not one uniformly sampled recording
+        and a :class:`~phonometry.io.Signal` would claim that it is.
     :ivar n_averages: Number of periods averaged, ``N``.
     :ivar samples_per_period: Integer samples per period ``M`` after any
         alignment.
@@ -191,7 +197,7 @@ class SynchronousAverageResult:
         :attr:`comb_frequencies`.
     """
 
-    period_waveform: NDArray[np.float64]
+    period_waveform: Signal | NDArray[np.float64]
     times: NDArray[np.float64]
     residual: NDArray[np.float64]
     n_averages: int
@@ -241,8 +247,9 @@ class SynchronousAverageResult:
         nothing downstream would ever report.
 
         :raises ValueError: if the waveform disagrees with its time axis, the
-            comb response with its frequency axis, or any of the five carries
-            an axis it should not.
+            comb response with its frequency axis, any of the five carries
+            an axis it should not, or the waveform is a Signal at a rate other
+            than :attr:`fs`.
         """
         require_ranks(
             self,
@@ -253,6 +260,7 @@ class SynchronousAverageResult:
             comb_response=1,
         )
         require_same_length(self, "times", "period_waveform", axis="period sample")
+        require_signal_rate(self, "period_waveform", self.fs)
         require_same_length(
             self, "comb_frequencies", "comb_response", axis="comb-filter frequency"
         )
@@ -365,8 +373,9 @@ def time_synchronous_average(
 
     :param x: Signal, 1-D, containing the periodic component plus noise. Accepts a :class:`phonometry.io.Signal`, whose
         calibration is applied to the samples, so the period waveform, the
-        residual and its RMS come out in Pa. The noise reduction in dB is a
-        ratio and does not move.
+        residual and its RMS come out in Pa, and the period waveform comes
+        back as a Signal. The noise reduction in dB is a ratio and does not
+        move.
     :param fs: Sample rate, in Hz. Required for a bare array; a
         :class:`~phonometry.io.Signal` brings its own, and an explicit value
         that disagrees with it raises instead of silently winning.
@@ -409,7 +418,7 @@ def time_synchronous_average(
     times = np.arange(m_int, dtype=np.float64) / fs_v
 
     return SynchronousAverageResult(
-        period_waveform=period_waveform,
+        period_waveform=like_input(x, period_waveform),
         times=times,
         residual=residual,
         n_averages=n_avg,

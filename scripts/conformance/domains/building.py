@@ -268,7 +268,7 @@ def _chk_iso3382_1_late_lateral_level() -> Outcome:
     reference[480] = 1.0
     res = ph.room.late_lateral_sound_level(omni, lateral, reference, _FS, limits=None)
     return numeric(
-        20.0 * math.log10(0.25), float(res.level[0]), 1e-9, unit="dB", places=6
+        20.0 * math.log10(0.25), float(res.levels[0]), 1e-9, unit="dB", places=6
     )
 
 
@@ -531,7 +531,7 @@ def _chk_iso3382_1_third_octave_mid() -> Outcome:
     rng = np.random.default_rng(3382)
     decay = rng.standard_normal(t.size) * np.exp(-0.5 * _A60 * t / t60)
     res = ph.room.room_parameters(decay, _FS, limits=(100.0, 5000.0), fraction=3)
-    freqs = np.asarray(res.frequency, dtype=np.float64)
+    freqs = np.asarray(res.frequencies, dtype=np.float64)
     picked = [
         float(freqs[int(np.argmin(np.abs(freqs - band)))])
         for band in ph.room.MID_FREQUENCY_THIRD_OCTAVES_HZ
@@ -1605,7 +1605,7 @@ def _chk_iso16283_2_rubber_ball_spectrum() -> Outcome:
         computed=" / ".join(f"{v:g}".replace(".", ",") for v in nominal) + " dB re 1 N",
         delta=f"max |dev| {float(np.max(np.abs(check.deviation))):.3f} dB",
         passed=bool(
-            check.passed
+            check.passes
             and np.allclose(freqs, ph.building.HEAVY_IMPACT_OCTAVE_BANDS)
             and np.allclose(upper - lower, [2.0, 3.0, 3.0, 4.0, 4.0])
         ),
@@ -1818,7 +1818,7 @@ def _chk_iso7626_2_rigid_mass_accelerance() -> Outcome:
     res = ph.vibration.rigid_mass_calibration_check(
         [ref.ISO7626_2_CAL_ACCELERANCE], [100.0], ref.ISO7626_2_CAL_MASS_KG
     )
-    value = float(res.expected[0]) if res.passed else math.nan
+    value = float(res.expected[0]) if res.passes else math.nan
     return numeric(ref.ISO7626_2_CAL_ACCELERANCE, value, 1e-9, unit="1/kg", places=3)
 
 
@@ -1834,7 +1834,7 @@ def _chk_iso7626_2_rigid_mass_mobility() -> Outcome:
         ref.ISO7626_2_CAL_MASS_KG,
         quantity="mobility",
     )
-    value = float(res.expected[0]) if res.passed else math.nan
+    value = float(res.expected[0]) if res.passes else math.nan
     return numeric(
         ref.ISO7626_2_CAL_MOBILITY_100HZ,
         value,

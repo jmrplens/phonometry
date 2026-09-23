@@ -529,7 +529,7 @@ def generate_source_distance_bias(output_dir: str) -> None:
                 max_order=40,  # c*0.58*T/L_min, not the default
             )
             par = room.room_parameters(res.ir, res.fs, limits=(125.0, 4000.0))
-            centres = np.asarray(par.frequency, dtype=np.float64)
+            centres = np.asarray(par.frequencies, dtype=np.float64)
             mid = (centres > 400.0) & (centres < 1200.0)
             band.append(
                 (

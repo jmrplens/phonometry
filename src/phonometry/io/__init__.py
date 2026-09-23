@@ -23,8 +23,8 @@ because a level computed from a lossy codec is not metrologically defensible.
 
 :func:`info` answers from the headers alone -- format, rate, channels, valid
 bits, duration, ``bext``, cue points -- without decoding a single sample, so
-it is safe on a 12-hour RF64. :func:`read_blocks` streams the same samples
-:func:`read` would return, block by block, into the library's stateful
+it is safe on a 12-hour RF64. :func:`read_blocks` streams what :func:`read`
+would return, one :class:`Signal` per block, into the library's stateful
 filters. :func:`write` produces WAV/BWF (and FLAC with the extra) with exact
 integer codes, loud clipping (:class:`ClippingWarning`), optional TPDF dither
 at 16 bits, a ``bext`` chunk written field by field, and never a silent

@@ -88,12 +88,12 @@ _RESULT = room_parameters(_W, _FS, limits=(100.0, 5000.0), fraction=3)
 
 
 def _index(band: int) -> int:
-    frequency = np.asarray(_RESULT.frequency)
+    frequency = np.asarray(_RESULT.frequencies)
     return int(np.argmin(np.abs(frequency - band)))
 
 
 def test_band_layout_matches_the_published_table() -> None:
-    frequency = np.asarray(_RESULT.frequency)
+    frequency = np.asarray(_RESULT.frequencies)
     assert frequency.shape == (len(_BANDS),)
     assert np.allclose(frequency, _BANDS, rtol=0.06)
 

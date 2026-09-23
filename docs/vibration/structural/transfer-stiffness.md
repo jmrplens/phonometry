@@ -119,12 +119,12 @@ print(f"{abs(complex(k)):.3e}")            # 9.870e+05  N/m
 f = np.logspace(1.5, 3.3, 200)
 t = vibration.base_transmissibility(f, mass=8.0, stiffness=1e6, damping=120.0)
 res = vibration.indirect_transfer_stiffness_result(f, t, blocking_mass=8.0)
-print(round(float(res.level[-1]), 1))      # ~126  dB re 1 N/m (high-f)
+print(round(float(res.levels[-1]), 1))      # ~126  dB re 1 N/m (high-f)
 
 res.plot()   # the Lk(f) level spectrum, as in the figure above (needs matplotlib)
 ```
 
-The `TransferStiffnessResult` carries the complex $k_{2,1}$ and exposes `.level`,
+The `TransferStiffnessResult` carries the complex $k_{2,1}$ and exposes `.levels`,
 `.loss_factor`, `.magnitude`, `.to("impedance"/"apparent_mass")` and `.plot()`.
 
 **Test-report fiche.** `TransferStiffnessResult.report(path)` renders a one-page

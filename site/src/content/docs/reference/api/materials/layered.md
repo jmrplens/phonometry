@@ -99,7 +99,7 @@ truncate the integral at 75-87 degrees instead of 90 (Sect. D.5); set
 
 ```python
 DiffuseFieldAbsorptionResult(
-    frequency: Real,
+    frequencies: Real,
     absorption: Real,
     angle_limit_rad: float,
 )
@@ -184,7 +184,7 @@ extremely attenuating layers); the raw chain matrix is still returned in
 
 ```python
 LayeredAbsorberResult(
-    frequency: Real,
+    frequencies: Real,
     angle_rad: float,
     surface_impedance: Complex,
     normalized_impedance: Complex,
@@ -197,7 +197,7 @@ LayeredAbsorberResult(
 
 Oblique-incidence prediction of a layered absorber.
 
-All arrays share the shape of `frequency`. `surface_impedance` is the
+All arrays share the shape of `frequencies`. `surface_impedance` is the
 specific impedance $Z_\mathrm{s} = p / u_n$ at the front face (may be
 `inf` for a lossless-sheet stack over a rigid wall), `reflection`
 the complex plane-wave reflection factor $R(\theta)$,

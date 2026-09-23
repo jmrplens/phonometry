@@ -273,7 +273,7 @@ def test_result_bundle() -> None:
     assert res.blocking_mass == 8.0
     # level is the level of the bundled stiffness
     assert np.allclose(
-        res.level, vibration.transfer_stiffness_level(res.transfer_stiffness)
+        res.levels, vibration.transfer_stiffness_level(res.transfer_stiffness)
     )
     # .to("impedance") = k/(jw)
     z = res.to("impedance")

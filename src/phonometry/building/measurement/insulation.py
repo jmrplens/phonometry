@@ -1095,7 +1095,7 @@ def airborne_insulation(
             source_lf = apply_low_frequency_procedure(
                 l1_bands, freqs, source_low_frequency, room="source"
             )
-            l1_bands = source_lf.level
+            l1_bands = source_lf.levels
         if receiver_low_frequency is not None:
             _check_low_frequency_volume(
                 receiver_low_frequency, volume, "airborne_insulation"
@@ -1107,7 +1107,7 @@ def airborne_insulation(
                 reverberation_time=t,
                 room="receiving",
             )
-            l2_bands = receiver_lf.level
+            l2_bands = receiver_lf.levels
             # `reverberation_time=` was passed, so the substituted vector is
             # never None on this branch; the test narrows the type rather than
             # guarding against a case the call above has already excluded.
@@ -1235,7 +1235,7 @@ def impact_insulation(
         low_frequency_result = apply_low_frequency_procedure(
             li_bands, freqs, low_frequency, reverberation_time=t, room="receiving"
         )
-        li_bands = low_frequency_result.level
+        li_bands = low_frequency_result.levels
         substituted = low_frequency_result.reverberation_time
         if substituted is not None:
             t = substituted
@@ -1443,7 +1443,7 @@ def facade_insulation(
         low_frequency_result = apply_low_frequency_procedure(
             l2_bands, freqs_lf, low_frequency, reverberation_time=t, room="receiving"
         )
-        l2_bands = low_frequency_result.level
+        l2_bands = low_frequency_result.levels
         substituted = low_frequency_result.reverberation_time
         if substituted is not None:
             t = substituted

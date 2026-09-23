@@ -440,7 +440,7 @@ baja distorsión a menos de 5 dB del nivel de calibración e ir escalonándola e
 intervalos de 5 dB, afinados a 1 dB alrededor de los extremos del margen lineal y
 del punto de sobrecarga. El ensayo periódico se hace y se informa en un entorno
 controlado (19-25 °C, 100-102 kPa, 40-70 % de humedad relativa) con un calibrador
-trazable a patrones nacionales. `report.passed` se lee como un veredicto sobre
+trazable a patrones nacionales. `report.passes` se lee como un veredicto sobre
 los datos que has aportado: una comprobación fallida invalida los datos de
 certificación, no es una corrección que aplicar. La conformidad de los filtros de
 banda es asunto aparte: el §3.7.3 del Anexo 16 exige clase 1 de IEC 61260, y la
@@ -454,7 +454,7 @@ report = aircraft.verify_aircraft_noise_system(
     directional={4000.0: {30: 0.4, 60: 0.9, 90: 1.9, 120: 2.4, 150: 2.4}},
     frequency_response={1000.0: 1.2},
 )
-print(report.passed, report.checks)
+print(report.passes, report.checks)
 ```
 
 ## Absorción atmosférica (SAE ARP 5534)
@@ -505,9 +505,9 @@ for s in (1000.0, 7620.0):
     att = aircraft.sae_band_attenuation(
         freqs, s, temperature_c=25.0, relative_humidity_percent=70.0
     )
-    line, = ax.semilogx(att.frequency, att.band_attenuation, marker="o",
+    line, = ax.semilogx(att.frequencies, att.band_attenuation, marker="o",
                         markersize=3, label=f"Banda SAE ({s:.0f} m)")
-    ax.semilogx(att.frequency, att.midband_attenuation, "--", alpha=0.6,
+    ax.semilogx(att.frequencies, att.midband_attenuation, "--", alpha=0.6,
                 color=line.get_color())
 ax.set(xlabel="Frecuencia [Hz]", ylabel="Atenuación [dB]",
        title="Absorción atmosférica aeronáutica a 25 °C, 70% HR")

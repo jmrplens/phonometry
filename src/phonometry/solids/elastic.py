@@ -208,7 +208,7 @@ def youngs_modulus_from_bulk_speed(
 def thickness_critical_frequency_product(
     plate_speed_m_s: float,
     *,
-    speed_of_sound_m_s: float = DEFAULT_SPEED_OF_SOUND_M_S,
+    speed_of_sound: float = DEFAULT_SPEED_OF_SOUND_M_S,
 ) -> float:
     r"""The ``h f_c`` a materials table prints, from the plate wave speed.
 
@@ -232,10 +232,10 @@ def thickness_critical_frequency_product(
     because there it is the standard's own arithmetic and not the material's.
 
     :param plate_speed_m_s: Plate wave speed ``cL,p``, in m/s (> 0).
-    :param speed_of_sound_m_s: Speed of sound in air ``c0``, in m/s (> 0).
+    :param speed_of_sound: Speed of sound in air ``c0``, in m/s (> 0).
     :return: The product ``h f_c``, in Hz m.
     :raises ValueError: for a non-positive input.
     """
     speed = require_positive(plate_speed_m_s, "plate_speed_m_s")
-    air = require_positive(speed_of_sound_m_s, "speed_of_sound_m_s")
+    air = require_positive(speed_of_sound, "speed_of_sound")
     return air**2 * math.sqrt(12.0) / (2.0 * math.pi * speed)

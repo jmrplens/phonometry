@@ -499,14 +499,14 @@ def plot_intensity(
     """
     from .._i18n import format_number, localize_axes
 
-    if result.frequency is None:
+    if result.frequencies is None:
         msg = (
             "plot() needs per-band intensity data; call sound_intensity(...) "
             "with a 'fraction' to obtain it."
         )
         raise ValueError(msg)
     ax = ax if ax is not None else _new_axes()
-    freqs = np.asarray(result.frequency, dtype=np.float64)
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
     lp = np.asarray(result.pressure_level, dtype=np.float64)
     li = np.asarray(result.intensity_level, dtype=np.float64)
     index = np.asarray(result.pressure_intensity_index, dtype=np.float64)
@@ -583,14 +583,14 @@ def plot_field_indicators(
     from .._i18n import localize_axes
 
     f2 = np.atleast_1d(np.asarray(result.f2, dtype=np.float64))
-    if result.frequency is None or f2.size < _MIN_BANDS:
+    if result.frequencies is None or f2.size < _MIN_BANDS:
         msg = (
             "plot() needs per-band indicators; call field_indicators(...) with "
             "2D (positions, bands) arrays and 'frequencies'."
         )
         raise ValueError(msg)
     ax = ax if ax is not None else _new_axes()
-    freqs = np.asarray(result.frequency, dtype=np.float64)
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
     f3 = np.atleast_1d(np.asarray(result.f3, dtype=np.float64))
     f4 = np.atleast_1d(np.asarray(result.f4, dtype=np.float64))
 
@@ -733,7 +733,7 @@ def plot_intensity_class(
     from .._i18n import decimal_comma, localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    freqs = np.asarray(result.frequency, dtype=np.float64)
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
     measured = np.asarray(result.residual_index, dtype=np.float64)
     class1 = np.asarray(result.limit_class1, dtype=np.float64)
     class2 = np.asarray(result.limit_class2, dtype=np.float64)

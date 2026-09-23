@@ -118,7 +118,7 @@ $N(t)$ traces stay inside the standard's per-sample 5 % tolerance band.
 
 Returns a `ZwickerLoudness` dataclass: `loudness` ($N$, sones), `loudness_level`
 (phon), `specific` ($N'(z)$, 240 bins of 0.1 Bark), and for time-varying runs
-`n5`, `n10`, `time`, `loudness_vs_time` (500 Hz trace).
+`n5`, `n10`, `times`, `loudness_vs_time` (500 Hz trace).
 
 ### ISO 532-1 report (`.report()`)
 

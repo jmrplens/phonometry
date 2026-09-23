@@ -169,7 +169,7 @@ standard's definitions (see the module docstring).
 | `rated_impedance` | Rated (internal) impedance, in ohm (10.2), or `None`. |
 | `minimum_load_impedance` | Rated minimum permitted load impedance, in ohm (10.3), or `None`. |
 | `equivalent_noise_level_db` | Equivalent sound pressure level due to inherent noise, in dB SPL with `noise_weighting` weighting (17), or `None`. |
-| `noise_weighting` | Weighting of the inherent-noise measurement (IEC 60268-1), `"A"` by default. |
+| `noise_weighting` | Weighting of the inherent-noise measurement (IEC 60268-1), `"A"` by default or `"468"`. |
 | `max_spl_db` | Overload sound pressure level at `max_spl_thd_percent` total harmonic distortion, in dB SPL (15.2), or `None`. |
 | `max_spl_thd_percent` | Distortion limit defining `max_spl_db`, in % (15.2.1). |
 | `distortion_spl_db` | Distortion-curve sound-pressure-level axis, in dB SPL (14.2), or `None`. |
@@ -196,9 +196,9 @@ plane-wave sensitivity level minus the directivity index (13.2).
 
 ```python
 MicrophoneCharacteristics.plot(
-    quantity: str = 'response',
     ax: Axes | None = None,
     *,
+    quantity: str = 'response',
     language: str = 'en',
     **kwargs: Any,
 ) -> Axes
@@ -218,8 +218,8 @@ against sound pressure level).
 
 | Name | Description |
 | :--- | :--- |
-| `quantity` | Which characteristic to plot (see above). |
 | `ax` | Existing axes to draw on, or `None` for a fresh figure (a polar axes is created for `"directivity"`). |
+| `quantity` | Which characteristic to plot (see above). |
 | `language` | Label language, `"en"` (default) or `"es"`. |
 
 **Returns:** The axes the characteristic was drawn on.
@@ -365,7 +365,7 @@ output voltage, and the band spectrum that voltage was measured over.
 | :--- | :--- |
 | `voltage` | Weighted r.m.s. output voltage due to inherent noise, in V (17.2 b); the equivalent noise level is computed from it. |
 | `equivalent_level_db` | Stated equivalent sound pressure level due to inherent noise, in dB SPL (17.1), when not computed from `voltage`. |
-| `weighting` | Weighting of the inherent-noise measurement: `"A"` (default, the IEC 60268-1 6.2.1 A-weighted r.m.s. recommendation) or `"CCIR"` (the 6.2.2 psophometric quasi-peak measurement to CCIR Recommendation 468). These are the two weighted wide-band noise measurements IEC 60268-1 defines; the unweighted band spectrum of 6.2.3 travels in `spectrum` instead. |
+| `weighting` | Weighting of the inherent-noise measurement: `"A"` (default, the IEC 60268-1 6.2.1 A-weighted r.m.s. recommendation) or `"468"` (the 6.2.2 psophometric quasi-peak measurement to ITU-R BS.468-4, which IEC 60268-1 still cites by its earlier name, CCIR Recommendation 468, and which older datasheets quote as dB(CCIR)). These are the two weighted wide-band noise measurements IEC 60268-1 defines; the unweighted band spectrum of 6.2.3 travels in `spectrum` instead. `"468"` is the spelling [`weighting_filter`](/phonometry/reference/api/filters/weighting/#weighting_filter) and [`weighted_thd`](/phonometry/reference/api/electroacoustics/distortion/#weighted_thd) use for the same curve. |
 | `spectrum` | Inherent-noise spectrum as `(frequencies, band_levels_db)` in (Hz, dB SPL) (17.2 b). |
 
 ## MicrophoneOverload

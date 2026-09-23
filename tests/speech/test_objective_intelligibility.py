@@ -95,7 +95,7 @@ def test_result_fields_and_plot() -> None:
     y = _add_noise(x, 8.0, seed=12)
     res = speech.stoi(x, y, FS)
     assert res.extended is False
-    assert res.sample_rate == FS
+    assert res.fs == FS
     assert res.band_frequencies.shape == (15,)
     assert res.band_scores is not None
     assert res.band_scores.shape == (15,)

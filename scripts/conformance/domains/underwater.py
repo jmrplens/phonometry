@@ -97,7 +97,7 @@ def _chk_uw_delta_l() -> Outcome:
     ds = 0.7 * draught
     u = 2.0 * math.pi * f / c * ds
     expected = -10.0 * math.log10((2 * u**4 + 14 * u**2) / (14 + 2 * u**2 + u**4))
-    res = ph.underwater.monopole_source_level(120.0, f, draught, c=c)
+    res = ph.underwater.monopole_source_level(120.0, f, draught, speed_of_sound=c)
     return numeric(expected, float(res.surface_correction[0]), 1e-4, places=4)
 
 
@@ -297,7 +297,7 @@ def _chk_uwp_thermal_noise() -> Outcome:
     expected = 10.0 * math.log10(p2 / (1e-6) ** 2)
     got = float(
         ph.underwater.thermal_noise_spectrum(
-            f, temperature_c=t, density=rho, sound_speed=c
+            f, temperature_c=t, density=rho, speed_of_sound=c
         )[0]
     )
     return numeric(expected, got, 1e-6, unit="dB", places=4)
@@ -313,7 +313,9 @@ def _chk_uwp_ship_traffic() -> Outcome:
     s = ph.underwater.ship_source_spectrum(
         13.5, 211.0, vessel_class="bulker", model="jomopans-echo"
     )
-    idx = int(min(range(len(s.frequency)), key=lambda i: abs(s.frequency[i] - 1000.0)))
+    idx = int(
+        min(range(len(s.frequencies)), key=lambda i: abs(s.frequencies[i] - 1000.0))
+    )
     return numeric(161.394, float(s.band_level[idx]), 1e-2, unit="dB", places=3)
 
 

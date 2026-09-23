@@ -1148,7 +1148,7 @@ def generate_flanking_transmission(output_dir: str) -> None:
         junction_length=4.0,
         area_i=12.0,
         area_j=10.0,
-        frequency=freqs,
+        frequencies=freqs,
         structural_reverberation_time_i=0.35,
         structural_reverberation_time_j=0.40,
     )

@@ -95,10 +95,10 @@ class TestStageSupport:
         response = rng.standard_normal(t.size) * np.exp(-0.5 * A60 * t / 1.6) * 0.02
         response[DIRECT] += 1.0
         result = room.stage_support(response, FS)
-        assert result.frequency is not None
-        assert result.frequency.size == len(room.STAGE_SUPPORT_BANDS_HZ)
-        assert result.frequency[0] == pytest.approx(250.0, rel=0.01)
-        assert result.frequency[-1] == pytest.approx(2000.0, rel=0.01)
+        assert result.frequencies is not None
+        assert result.frequencies.size == len(room.STAGE_SUPPORT_BANDS_HZ)
+        assert result.frequencies[0] == pytest.approx(250.0, rel=0.01)
+        assert result.frequencies[-1] == pytest.approx(2000.0, rel=0.01)
 
     def test_it_refuses_a_response_that_cannot_reach_one_second(self) -> None:
         response = platform_response([(0.050, 0.2)], seconds=0.5)

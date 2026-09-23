@@ -216,7 +216,7 @@ def _assert_path(
         _assert_sheet(stage.attenuation, _row(loss), f"{where} attenuation")
         _assert_sheet(stage.attenuated, row_sum, f"{where} Sum")
         _assert_sheet(stage.self_noise, self_noise, f"{where} Self-Noise")
-        _assert_sheet(stage.level, combined, f"{where} Combined")
+        _assert_sheet(stage.levels, combined, f"{where} Combined")
     assert result.room_effect is not None
     _assert_sheet(result.room_effect, _row(room_effect), f"{what} room effect")
     _assert_sheet(result.received_level, received, f"{what} received")
@@ -429,7 +429,7 @@ def test_combine_of_one_path_is_that_path() -> None:
 # --------------------------------------------------------------------------
 @pytest.mark.parametrize(
     "field_name",
-    ["attenuation", "attenuated", "self_noise", "level"],
+    ["attenuation", "attenuated", "self_noise", "levels"],
 )
 @pytest.mark.parametrize("trim", [True, False], ids=["short", "long"])
 def test_a_stage_row_off_the_band_axis_is_refused(

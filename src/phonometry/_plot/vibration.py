@@ -58,6 +58,7 @@ if TYPE_CHECKING:
     )
     from ..vibration.human.instrumentation import (
         PhaseVerification,
+        RunningRmsDecayVerification,
         WeightingVerification,
     )
     from ..vibration.human.multiple_shock import MultipleShockResult
@@ -114,6 +115,10 @@ _DEVIATION_LABEL = "Deviation [%]"
 _ISO8041_BAND_LABEL = "ISO 8041-1 tolerance"
 _WITHIN_LABEL = "within tolerance"
 _OUTSIDE_LABEL = "outside tolerance"
+#: The clause 5.13 decay figure: the criterion rule and the closed-form trace
+#: it is read against, named once for the same reason as the labels above.
+_DECAY_CRITERION_LABEL = "10 % of the initial value"
+_DECAY_DESIGN_LABEL = "closed-form decay"
 #: The DIN 45669-1 reading figure: its time axis, its ordinate and the two
 #: numbers a meter displays, named once so the label a line carries and the
 #: key its translation is filed under cannot drift apart.
@@ -240,6 +245,13 @@ _STRINGS: dict[str, str] = {
     "{w} weighting against ISO 8041-1: {verdict}": "Ponderación {w} frente a ISO 8041-1: {verdict}",
     "Characteristic phase deviation [deg]": "Desviación característica de fase [grados]",
     "{w} characteristic phase deviation against ISO 8041-1: {verdict}": "Desviación característica de fase de {w} frente a ISO 8041-1: {verdict}",
+    _DECAY_CRITERION_LABEL: "10 % del valor inicial",
+    _DECAY_DESIGN_LABEL: "decaimiento en forma cerrada",
+    "Time since the signal was cut [s]": "Tiempo desde el corte de la señal [s]",
+    "Indication, relative to its initial value [dB]": "Indicación, relativa a su valor inicial [dB]",
+    "linear": "lineal",
+    "exponential": "exponencial",
+    "Running r.m.s. decay (ISO 8041-1): {verdict}\n{method} average, $\\tau$ = {tau} s": "Decaimiento del valor eficaz móvil (ISO 8041-1): {verdict}\npromedio {method}, $\\tau$ = {tau} s",
     "PASS": "CUMPLE",  # nosec B105 - verdict label, not a password
     "FAIL": "NO CUMPLE",
     "measured {v} mm/s at {f} Hz": "medido {v} mm/s a {f} Hz",
@@ -744,7 +756,7 @@ def plot_rigid_mass_calibration(
     axm.set_ylabel(mag_ylabel)
     axm.grid(visible=True, which="both", alpha=0.3)
     axm.legend(loc="best", fontsize="small")
-    if result.passed:
+    if result.passes:
         verdict = "CORRECTO" if language == "es" else "PASS"
     else:
         verdict = "INCORRECTO" if language == "es" else "FAIL"
@@ -777,7 +789,7 @@ def plot_transfer_stiffness(
 
     ax = ax if ax is not None else _new_axes()
     freq = np.asarray(result.frequencies, dtype=np.float64)
-    level = np.asarray(result.level, dtype=np.float64)
+    level = np.asarray(result.levels, dtype=np.float64)
     style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("label", r"$L_k = 20\,\log_{10}(|k_{2,1}|/k_0)$")
     ax.semilogx(freq, level, **kwargs)
@@ -1059,6 +1071,99 @@ def plot_phase_verification(
         ).format(w=result.weighting, verdict=verdict)
     )
     ax.grid(visible=True, which="both", alpha=0.3)
+    ax.legend(loc="best", fontsize="small")
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_running_rms_decay_verification(
+    result: RunningRmsDecayVerification,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """A measured running r.m.s. decay time inside the interval ISO 8041-1 prints.
+
+    The clause 5.13 test on one axis: the indication in decibels below the
+    value it started from, the 10 % criterion as a rule at -20 dB, the printed
+    interval of Table 10 or 11 as a shaded span, and the measured time as a
+    point on the rule, green inside the span and red outside it. The
+    closed-form decay of :func:`~phonometry.vibration.running_rms_decay_time`
+    is drawn behind it as the reference the printed row is centred on; it is
+    not the verdict, which is read on the span alone.
+
+    :param result: A
+        :class:`~phonometry.vibration.human.instrumentation.RunningRmsDecayVerification`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the measured-point ``plot`` call.
+    :return: The axes.
+    """
+    from .._i18n import format_number, localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    tau = result.integration_time_s
+    criterion_db = 20.0 * np.log10(0.1)
+    span_end = 1.25 * max(result.upper_time_s, result.measured_time_s)
+    t = np.linspace(0.0, span_end, 512)
+    if result.method == "linear":
+        # The window keeps (tau - t) / tau of the mean square, so the level
+        # has no value once the window has emptied, one time constant on.
+        remaining = np.clip((tau - t) / tau, 0.0, None)
+        level = np.full(t.shape, np.nan)
+        level[remaining > 0.0] = 10.0 * np.log10(remaining[remaining > 0.0])
+    else:
+        level = -20.0 * np.log10(np.e) * t / (2.0 * tau)
+
+    ax.axvspan(
+        result.lower_time_s,
+        result.upper_time_s,
+        color=_C_PRIMARY,
+        alpha=0.15,
+        label=_t(_ISO8041_BAND_LABEL, language),
+    )
+    ax.plot(t, level, color=_C_PRIMARY, lw=1.6, label=_t(_DECAY_DESIGN_LABEL, language))
+    ax.axhline(
+        criterion_db,
+        color=_C_MUTED,
+        lw=1.0,
+        ls="--",
+        label=_t(_DECAY_CRITERION_LABEL, language),
+    )
+    # One reading, so one marker in the colour of its verdict: the shared
+    # verifier helper would also list the empty half of the pair.
+    style = dict(kwargs)
+    if result.passes:
+        style_default(style, "color", _C_TERTIARY)
+        style.setdefault("marker", "o")
+        style_default(style, "markersize", 6)
+        style.setdefault("label", _t(_WITHIN_LABEL, language))
+    else:
+        style_default(style, "color", _C_REFERENCE)
+        style.setdefault("marker", "X")
+        style_default(style, "markersize", 9)
+        style.setdefault("label", _t(_OUTSIDE_LABEL, language))
+    style_default(style, "linestyle", "none")
+    ax.plot([result.measured_time_s], [criterion_db], **style)
+
+    ax.set_xlim(0.0, span_end)
+    ax.set_ylim(1.7 * criterion_db, 2.0)
+    ax.set_xlabel(_t("Time since the signal was cut [s]", language))
+    ax.set_ylabel(_t("Indication, relative to its initial value [dB]", language))
+    verdict = _t("PASS" if result.passes else "FAIL", language)
+    ax.set_title(
+        _t(
+            "Running r.m.s. decay (ISO 8041-1): {verdict}\n"
+            "{method} average, $\\tau$ = {tau} s",
+            language,
+        ).format(
+            method=_t(result.method, language),
+            tau=format_number(tau, language, decimals=3, trim=True),
+            verdict=verdict,
+        )
+    )
+    ax.grid(visible=True, alpha=0.3)
     ax.legend(loc="best", fontsize="small")
     localize_axes(ax, language)
     return ax

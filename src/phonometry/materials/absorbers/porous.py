@@ -230,7 +230,7 @@ PUBLISHED_AIR = Fluid(
 class PorousMediumResult:
     r"""Equivalent-fluid characterisation of a porous material.
 
-    All arrays share the shape of ``frequency``. ``characteristic_impedance``
+    All arrays share the shape of ``frequencies``. ``characteristic_impedance``
     is the complex characteristic impedance ``Zc`` in Pa s/m as seen from the
     material surface, ``wavenumber`` the complex wavenumber ``k`` in rad/m
     (:math:`\operatorname{Im}(k) < 0` for the :math:`e^{+j \omega t}`
@@ -241,7 +241,7 @@ class PorousMediumResult:
     :math:`k = \omega \sqrt{\rho_\mathrm{e} / K_\mathrm{e}}` for every model.
     """
 
-    frequency: Real
+    frequencies: Real
     characteristic_impedance: Complex
     wavenumber: Complex
     effective_density: Complex
@@ -262,7 +262,7 @@ class PorousMediumResult:
         r"""Wavenumber normalised by the free-air wavenumber
         :math:`k_0 = \omega / c`.
         """
-        k0 = 2.0 * np.pi * self.frequency / self.speed_of_sound
+        k0 = 2.0 * np.pi * self.frequencies / self.speed_of_sound
         return np.asarray(self.wavenumber / k0, dtype=np.complex128)
 
     def plot(
@@ -293,7 +293,7 @@ def _medium_from_zc_k(
     """Package ``(Zc, k)`` into a :class:`PorousMediumResult`."""
     omega = 2.0 * np.pi * f
     return PorousMediumResult(
-        frequency=f,
+        frequencies=f,
         characteristic_impedance=zc,
         wavenumber=k,
         effective_density=np.asarray(zc * k / omega, dtype=np.complex128),
@@ -515,7 +515,7 @@ def johnson_champoux_allard(
     zc = np.sqrt(k_e * rho_e)
     k = omega * np.sqrt(rho_e / k_e)
     return PorousMediumResult(
-        frequency=f,
+        frequencies=f,
         characteristic_impedance=np.asarray(zc, dtype=np.complex128),
         wavenumber=np.asarray(k, dtype=np.complex128),
         effective_density=np.asarray(rho_e, dtype=np.complex128),
@@ -672,11 +672,11 @@ def limp_frame(
     # Apparent total density of the limp medium, A&A Eq. (11.55).
     rho_t = rho1 + phi * rho0
     rho_limp = (rho_t * rho_eq - rho0**2) / (rho_t + rho_eq - 2.0 * rho0)
-    omega = 2.0 * np.pi * medium.frequency
+    omega = 2.0 * np.pi * medium.frequencies
     zc = np.sqrt(k_e * rho_limp)
     k = omega * np.sqrt(rho_limp / k_e)
     return PorousMediumResult(
-        frequency=medium.frequency,
+        frequencies=medium.frequencies,
         characteristic_impedance=np.asarray(zc, dtype=np.complex128),
         wavenumber=np.asarray(k, dtype=np.complex128),
         effective_density=np.asarray(rho_limp, dtype=np.complex128),

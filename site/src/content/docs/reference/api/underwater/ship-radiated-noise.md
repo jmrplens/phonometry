@@ -68,7 +68,7 @@ monopole_source_level(
     frequency: float | NDArray[np.float64] | list[float],
     draught: float,
     *,
-    c: float = 1500.0,
+    speed_of_sound: float = 1500.0,
 ) -> ShipSourceLevelResult
 ```
 
@@ -91,7 +91,7 @@ depth is $d_\mathrm{s} = 0.7 D$ (Formula 1).
 | `rnl` | Radiated noise level per frequency, in dB re 1 µPa·m (scalar or array; array length must match `frequency`). |
 | `frequency` | Frequency or frequencies, in Hz. |
 | `draught` | Ship draught `D` (mean of bow and stern), in m. |
-| `c` | Speed of sound in sea water, in m/s (default 1500). |
+| `speed_of_sound` | Speed of sound in sea water, in m/s (default 1500). |
 
 **Returns:** A [`ShipSourceLevelResult`](/phonometry/reference/api/underwater/ship-radiated-noise/#shipsourcelevelresult).
 
@@ -137,7 +137,7 @@ ShipSourceLevelResult(
     surface_correction: NDArray[np.float64],
     source_level: NDArray[np.float64],
     source_depth: float,
-    sound_speed: float,
+    speed_of_sound: float,
 )
 ```
 
@@ -152,7 +152,7 @@ Equivalent monopole source level of a ship (ISO 17208-2).
 | `surface_correction` | Lloyd's-mirror correction $\Delta L$ per frequency, dB. |
 | `source_level` | Equivalent monopole source level $L_\mathrm{s} = L_{\mathrm{RN}} + \Delta L$, in dB re 1 µPa·m. |
 | `source_depth` | Nominal source depth $d_\mathrm{s} = 0.7 D$, in m. |
-| `sound_speed` | Speed of sound used, in m/s. |
+| `speed_of_sound` | Speed of sound used, in m/s. |
 
 ### ShipSourceLevelResult.plot()
 

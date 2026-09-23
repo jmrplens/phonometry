@@ -1118,13 +1118,13 @@ class TimeWeighting:
 
 @overload
 def linkwitz_riley(
-    x: Signal, fs: int | None = ..., *, freq: float, order: int = ...
+    x: Signal, fs: int | None = ..., *, frequency: float, order: int = ...
 ) -> tuple[Signal, Signal]: ...
 
 
 @overload
 def linkwitz_riley(
-    x: list[float] | np.ndarray, fs: int, *, freq: float, order: int = ...
+    x: list[float] | np.ndarray, fs: int, *, frequency: float, order: int = ...
 ) -> tuple[np.ndarray, np.ndarray]: ...
 
 
@@ -1132,7 +1132,7 @@ def linkwitz_riley(
     x: Signal | list[float] | np.ndarray,
     fs: int | None = None,
     *,
-    freq: float,
+    frequency: float,
     order: int = 4,
 ) -> tuple[Signal, Signal] | tuple[np.ndarray, np.ndarray]:
     """Linkwitz-Riley crossover filter (Butterworth squared).
@@ -1144,7 +1144,7 @@ def linkwitz_riley(
     :param fs: Sample rate. Required for a bare array; a
         :class:`~phonometry.io.Signal` brings its own, and an explicit value
         that disagrees with it raises.
-    :param freq: Crossover frequency, in Hz. Keyword-only and required: it
+    :param frequency: Crossover frequency, in Hz. Keyword-only and required: it
         sits behind an optional ``fs``, and a default here would be a
         signature that lies about what the call needs.
     :param order: Total order (must be even, typically 2 or 4).
@@ -1164,15 +1164,15 @@ def linkwitz_riley(
             f"'order' must be a positive even integer (typically 2 or 4); got {order}."
         )
         raise ValueError(msg)
-    freq = require_positive(freq, "freq")
+    frequency = require_positive(frequency, "frequency")
     nyquist = fs / 2
-    if freq >= nyquist:
-        msg = f"'freq' must be below the Nyquist frequency ({nyquist:g} Hz); got {freq:g}."
+    if frequency >= nyquist:
+        msg = f"'frequency' must be below the Nyquist frequency ({nyquist:g} Hz); got {frequency:g}."
         raise ValueError(msg)
 
     # A Linkwitz-Riley filter of order N is two Butterworth filters of order N/2 in series
     half_order = order // 2
-    wn = freq / nyquist
+    wn = frequency / nyquist
 
     sos_lp = signal.butter(half_order, wn, btype="low", output="sos")
     sos_hp = signal.butter(half_order, wn, btype="high", output="sos")

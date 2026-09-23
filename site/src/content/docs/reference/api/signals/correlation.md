@@ -78,8 +78,8 @@ measurements taken at slightly different distances.
 
 | Name | Description |
 | :--- | :--- |
-| `ir` | Impulse response to align, 1-D. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples, so the aligned pair comes out in Pa. The delay between them is scale-free and does not move. |
-| `reference` | Reference impulse response, same length. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples, so the aligned pair comes out in Pa. The delay between them is scale-free and does not move. |
+| `ir` | Impulse response to align, 1-D. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples, so the aligned pair comes out in Pa and each record comes back as a Signal if it went in as one. The delay between them is scale-free and does not move. |
+| `reference` | Reference impulse response, same length. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples, so the aligned pair comes out in Pa and each record comes back as a Signal if it went in as one. The delay between them is scale-free and does not move. |
 | `fs` | Sample rate, in Hz. Required when both records are bare arrays; either may be a [`Signal`](/phonometry/reference/api/io/io/#signal) and supply it, and two Signals recorded at different rates are refused rather than arbitrated. |
 | `interpolation` | `'parabolic'` (default) or `'none'`. |
 | `upsample` | Integer local-upsampling factor (default 8). |
@@ -96,8 +96,8 @@ measurements taken at slightly different distances.
 
 ```python
 AlignedImpulseResponseResult(
-    aligned: NDArray[np.float64],
-    reference: NDArray[np.float64],
+    aligned: Signal | NDArray[np.float64],
+    reference: Signal | NDArray[np.float64],
     delay: float,
     delay_samples: float,
     fs: float,
@@ -115,6 +115,11 @@ An impulse response aligned onto a reference.
 | `delay` | Estimated delay removed from the IR, in seconds. |
 | `delay_samples` | The same delay in (fractional) samples. |
 | `fs` | Sample rate, in Hz. |
+
+Each record comes back in the type it arrived as: a
+[`Signal`](/phonometry/reference/api/io/io/#signal) when it was one (in pascals and carrying
+`calibration_factor=1.0` when it was calibrated), a bare array
+otherwise.
 
 ### AlignedImpulseResponseResult.plot()
 

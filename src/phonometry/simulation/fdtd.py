@@ -184,9 +184,9 @@ class CWSource:
 class SignalSource:
     """An arbitrary sampled waveform injected at one cell.
 
-    The samples are interpreted as the source signal at ``sample_rate`` and
+    The samples are interpreted as the source signal at ``fs`` and
     linearly interpolated onto the simulation time steps; outside the sampled
-    span the source is zero. ``sample_rate`` therefore does not need to match
+    span the source is zero. ``fs`` therefore does not need to match
     the simulation rate ``1/dt``, although a rate well above the highest
     frequency of interest avoids interpolation roll-off.
 
@@ -194,19 +194,19 @@ class SignalSource:
     :ivar iy: Source row (y) index.
     :ivar samples: Source signal samples [Pa] (stored as a read-only 1D
         float64 array).
-    :ivar sample_rate: Sampling rate of ``samples`` [Hz].
+    :ivar fs: Sampling rate of ``samples`` [Hz].
     :ivar amplitude: Scale factor applied to the samples.
     """
 
     ix: int
     iy: int
     samples: NDArray[np.float64]
-    sample_rate: float
+    fs: float
     amplitude: float = 1.0
 
     def __post_init__(self) -> None:
-        """Require a positive ``sample_rate`` and freeze finite 1D ``samples``."""
-        _positive_finite("sample_rate", self.sample_rate)
+        """Require a positive ``fs`` and freeze finite 1D ``samples``."""
+        _positive_finite("fs", self.fs)
         _finite("amplitude", self.amplitude)
         arr = np.array(self.samples, dtype=np.float64)
         if arr.ndim != 1:
@@ -223,7 +223,7 @@ class SignalSource:
 
     def value(self, t: float) -> float:
         """Source waveform at time ``t`` (seconds), zero outside the span."""
-        pos = t * self.sample_rate
+        pos = t * self.fs
         last = self.samples.size - 1
         if pos < 0.0 or pos > last:
             return 0.0

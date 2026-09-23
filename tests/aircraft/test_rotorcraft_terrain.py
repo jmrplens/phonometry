@@ -360,9 +360,9 @@ def test_event_terrain_sets_receiver_elevation() -> None:
         (300.0, 0.0),
         ground=aircraft.RotorcraftGround(terrain=dem, terrain_resolution=100.0),
     )
-    k = int(np.argmin(res.distance))
+    k = int(np.argmin(res.distances))
     # CPA slant: track (x=0, z=60) to mic (x=300, z=30+1.2).
-    assert res.distance[k] == pytest.approx(np.hypot(300.0, 60.0 - 31.2), abs=0.5)
+    assert res.distances[k] == pytest.approx(np.hypot(300.0, 60.0 - 31.2), abs=0.5)
 
 
 def test_event_and_contour_array_argument_validation() -> None:
@@ -552,7 +552,7 @@ def test_contour_mixed_sigma_matches_stitched_scalar_runs() -> None:
         y=y,
         ground=aircraft.RotorcraftGround(flow_resistivity=8.0e5),
     )
-    assert np.array_equal(mixed.level, np.where(sig == 2.0e5, lo.level, hi.level))
+    assert np.array_equal(mixed.levels, np.where(sig == 2.0e5, lo.levels, hi.levels))
 
 
 def test_contour_mixed_elevation_matches_stitched_scalar_runs() -> None:
@@ -590,7 +590,7 @@ def test_contour_mixed_elevation_matches_stitched_scalar_runs() -> None:
         y=y,
         ground=aircraft.RotorcraftGround(ground_elevation=5.0),
     )
-    assert np.array_equal(mixed.level, np.where(ge == 0.0, lo.level, hi.level))
+    assert np.array_equal(mixed.levels, np.where(ge == 0.0, lo.levels, hi.levels))
 
 
 def test_contour_with_terrain_smoke() -> None:
@@ -609,4 +609,4 @@ def test_contour_with_terrain_smoke() -> None:
     base = aircraft.rotorcraft_noise_contour(
         hems, spd, ang, t, pos, x=[-100.0, 100.0], y=[-100.0, 100.0]
     )
-    assert np.allclose(res.level, base.level, atol=1e-9)
+    assert np.allclose(res.levels, base.levels, atol=1e-9)

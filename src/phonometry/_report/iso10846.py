@@ -81,7 +81,7 @@ def _low_frequency_values(
     freq = np.asarray(result.frequencies, dtype=np.float64)
     index = int(np.argmin(freq))
     magnitude = float(np.asarray(result.magnitude, dtype=np.float64)[index])
-    level = float(np.asarray(result.level, dtype=np.float64)[index])
+    level = float(np.asarray(result.levels, dtype=np.float64)[index])
     # Reuse the result's own loss-factor property (eta = Im/Re, ISO 10846-1 3.8)
     # rather than recomputing it, so the fiche shares the single definition and
     # its validation (a purely imaginary stiffness is rejected there).

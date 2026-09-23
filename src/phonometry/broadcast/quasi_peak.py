@@ -488,7 +488,7 @@ class QuasiPeakResult:
             raise ValueError(msg)
 
     @property
-    def time(self) -> np.ndarray:
+    def times(self) -> np.ndarray:
         """Time of each sample of :attr:`trace`, in seconds."""
         return np.arange(self.trace.size) / self.fs
 
@@ -727,7 +727,7 @@ class QuasiPeakDynamicsResult:
     run at.
 
     :ivar fs: Sample rate the stimuli were run at, in Hz.
-    :ivar passed: Whether every reading fell inside its window.
+    :ivar passes: Whether every reading fell inside its window.
     :ivar worst_margin_db: The smallest of the eleven margins, negative when
         one reading is outside its window.
     :ivar worst_deviation_db: The largest departure from a printed reference
@@ -739,7 +739,7 @@ class QuasiPeakDynamicsResult:
     """
 
     fs: float
-    passed: bool
+    passes: bool
     worst_margin_db: float
     worst_deviation_db: float
     stimuli: tuple[dict[str, Any], ...]
@@ -767,7 +767,7 @@ class QuasiPeakDynamicsResult:
         margins = [float(row["margin_db"]) for row in self.stimuli]
         deviations = [abs(float(row["deviation_db"])) for row in self.stimuli]
         for field, stated, derived in (
-            ("passed", self.passed, all(m >= 0.0 for m in margins)),
+            ("passes", self.passes, all(m >= 0.0 for m in margins)),
             ("worst_margin_db", self.worst_margin_db, min(margins)),
             ("worst_deviation_db", self.worst_deviation_db, max(deviations)),
         ):
@@ -851,7 +851,7 @@ def verify_quasi_peak_dynamics(
     ]
     return QuasiPeakDynamicsResult(
         fs=float(fs),
-        passed=all(row["margin_db"] >= 0.0 for row in rows),
+        passes=all(row["margin_db"] >= 0.0 for row in rows),
         worst_margin_db=min(row["margin_db"] for row in rows),
         worst_deviation_db=max(abs(row["deviation_db"]) for row in rows),
         stimuli=tuple(rows),

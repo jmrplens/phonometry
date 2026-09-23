@@ -319,7 +319,7 @@ recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
 
 # Split the recording into Low and High bands at 1000 Hz
 order = 4
-low, high = filters.linkwitz_riley(recording, fs, freq=1000, order=order)
+low, high = filters.linkwitz_riley(recording, fs, frequency=1000, order=order)
 # Flat recombination: sum for order/2 even, difference for order/2 odd
 recombined = low + high if (order // 2) % 2 == 0 else low - high
 ```
@@ -339,7 +339,7 @@ from phonometry import filters
 fs = 48000
 impulse = np.zeros(fs)
 impulse[0] = 1.0
-low, high = filters.linkwitz_riley(impulse, fs, freq=1000, order=4)
+low, high = filters.linkwitz_riley(impulse, fs, frequency=1000, order=4)
 
 w, h_lp = freqz(low, worN=8192, fs=fs)
 _, h_hp = freqz(high, worN=8192, fs=fs)

@@ -205,7 +205,7 @@ transfer_matrix_one_load(
     thickness: float,
     wavenumber: ArrayLike,
     characteristic_impedance: float,
-    frequency: ArrayLike | None = None,
+    frequencies: ArrayLike | None = None,
     diameter_m: float | None = None,
     shape: str = 'circular',
 ) -> TransferMatrix
@@ -233,7 +233,7 @@ $$
 | `thickness` | Specimen thickness `d`, in metres. |
 | `wavenumber` | Air wavenumber `k`. |
 | `characteristic_impedance` | Characteristic impedance `rho c`. |
-| `frequency` | Optional frequency vector `f`, in hertz, retained on the result so [`TransferMatrix.plot`](/phonometry/reference/api/materials/four-microphone/#transfermatrixplot) needs no arguments. |
+| `frequencies` | Optional frequency vector `f`, in hertz, retained on the result so [`TransferMatrix.plot`](/phonometry/reference/api/materials/four-microphone/#transfermatrixplot) needs no arguments. |
 | `diameter_m` | Optional tube diameter (circular) or largest section dimension (rectangular/square), in metres, that activates the plane-wave working-range check (6.2.3-6.2.5, 6.5.4). |
 | `shape` | Tube cross-section, `"circular"`, `"rectangular"` or `"square"`. |
 
@@ -253,7 +253,7 @@ transfer_matrix_two_load(
     thickness: float,
     wavenumber: ArrayLike,
     characteristic_impedance: float,
-    frequency: ArrayLike | None = None,
+    frequencies: ArrayLike | None = None,
     diameter_m: float | None = None,
     shape: str = 'circular',
 ) -> TransferMatrix
@@ -282,7 +282,7 @@ $$
 | `thickness` | Specimen thickness `d`, in metres. |
 | `wavenumber` | Air wavenumber `k`. |
 | `characteristic_impedance` | Characteristic impedance `rho c`. |
-| `frequency` | Optional frequency vector `f`, in hertz, retained on the result so [`TransferMatrix.plot`](/phonometry/reference/api/materials/four-microphone/#transfermatrixplot) needs no arguments. |
+| `frequencies` | Optional frequency vector `f`, in hertz, retained on the result so [`TransferMatrix.plot`](/phonometry/reference/api/materials/four-microphone/#transfermatrixplot) needs no arguments. |
 | `diameter_m` | Optional tube diameter (circular) or largest section dimension (rectangular/square), in metres, that activates the plane-wave working-range check (6.2.3-6.2.5, 6.5.4). |
 | `shape` | Tube cross-section, `"circular"`, `"rectangular"` or `"square"`. |
 
@@ -304,7 +304,7 @@ TransferMatrix(
     thickness: float | None = None,
     diameter_m: float | None = None,
     shape: str | None = None,
-    frequency: Real | None = None,
+    frequencies: Real | None = None,
     air_characteristic_impedance: float | None = None,
 )
 ```
@@ -318,7 +318,7 @@ may be scalar or a per-frequency array of matching shape.
 The trailing fields retain the measurement context when the matrix comes
 out of [`transfer_matrix_two_load`](/phonometry/reference/api/materials/four-microphone/#transfer_matrix_two_load) / [`transfer_matrix_one_load`](/phonometry/reference/api/materials/four-microphone/#transfer_matrix_one_load)
 (tube geometry `l1`/`s1`/`l2`/`s2`, specimen `thickness`, tube
-`diameter_m` and canonical cross-section `shape`, the `frequency`
+`diameter_m` and canonical cross-section `shape`, the `frequencies`
 vector when supplied to the solver, and the air
 `air_characteristic_impedance` `rho c`); all default to `None` so a
 hand-built matrix (for example [`air_layer_transfer_matrix`](/phonometry/reference/api/materials/four-microphone/#air_layer_transfer_matrix)) is
@@ -386,10 +386,10 @@ $k' = \arccos(T_{11}) / d$ (complex `arccos`).
 
 ```python
 TransferMatrix.plot(
-    frequency: ArrayLike | None = None,
-    characteristic_impedance: float | None = None,
     ax: Axes | None = None,
     *,
+    frequencies: ArrayLike | None = None,
+    characteristic_impedance: float | None = None,
     language: str = 'en',
     **kwargs: Any,
 ) -> Axes
@@ -402,10 +402,10 @@ laboratory quotes: the normal-incidence transmission loss `TLn(f)`
 (Eq. (26), the primary curve, left axis) and the hard-backed
 absorption coefficient `alpha(f)` (Eq. (28), a muted companion on a
 0..1 right axis). The four-pole entries carry no frequency axis of
-their own, so the plot needs the measurement's `frequency` vector
+their own, so the plot needs the measurement's `frequencies` vector
 (matching the shape of the entries) and the air characteristic
 impedance `rho c`. A matrix built by the solvers retains both
-(`self.frequency` / `self.air_characteristic_impedance`), so
+(`self.frequencies` / `self.air_characteristic_impedance`), so
 `plot()` takes no arguments there; only a hand-built matrix (for
 example [`air_layer_transfer_matrix`](/phonometry/reference/api/materials/four-microphone/#air_layer_transfer_matrix)) must supply them.
 
@@ -416,9 +416,9 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 
 | Name | Description |
 | :--- | :--- |
-| `frequency` | Frequency vector `f`, in hertz, matching the shape of the matrix entries; `None` uses the stored `frequency`. |
-| `characteristic_impedance` | Characteristic impedance `rho c` of the air in the tube, in rayls; `None` uses the stored `air_characteristic_impedance`. |
 | `ax` | Existing axes, or `None` to create a figure. |
+| `frequencies` | Frequency vector `f`, in hertz, matching the shape of the matrix entries; `None` uses the stored `frequencies`. |
+| `characteristic_impedance` | Characteristic impedance `rho c` of the air in the tube, in rayls; `None` uses the stored `air_characteristic_impedance`. |
 | `language` | Plot language: `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the transmission-loss `plot` call. |
 
@@ -428,7 +428,7 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If `frequency` or `characteristic_impedance` is neither supplied nor stored on the matrix. |
+| ValueError | If `frequencies` or `characteristic_impedance` is neither supplied nor stored on the matrix. |
 
 ### TransferMatrix.plot_geometry()
 

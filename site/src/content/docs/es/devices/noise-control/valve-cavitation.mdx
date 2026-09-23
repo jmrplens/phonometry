@@ -179,7 +179,7 @@ res = noise_control.valve_hydrodynamic_noise(
         outlet_pressure_pa=6.5e5,
         vapour_pressure_pa=2.32e3,
         density=997.0,                 # kg/m3
-        sound_speed=1400.0,            # m/s
+        speed_of_sound=1400.0,            # m/s
     ),
     noise_control.LiquidTrim(
         flow_coefficient=90.0,         # C_v
@@ -244,7 +244,7 @@ Ecuación (22a):
 ```python
 import numpy as np
 
-band = int(np.argmin(np.abs(res.frequency - 8000.0)))
+band = int(np.argmin(np.abs(res.frequencies - 8000.0)))
 print(round(float(res.band_internal_level[band]), 1))     # 141.9
 print(round(float(res.band_transmission_loss[band]), 2))  # -51.76
 print(round(float(res.band_external_level[band]), 1))     # 77.4

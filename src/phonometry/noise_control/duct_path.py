@@ -128,7 +128,7 @@ class DuctPathStage:
         dB.
     :ivar self_noise: Regenerated sound power level of the element, dB re 1 pW,
         after the self-noise floor has been applied.
-    :ivar level: Level leaving the element, the energy sum of ``attenuated``
+    :ivar levels: Level leaving the element, the energy sum of ``attenuated``
         and ``self_noise`` (the *Combined* row), dB.
     """
 
@@ -137,7 +137,7 @@ class DuctPathStage:
     attenuation: np.ndarray
     attenuated: np.ndarray
     self_noise: np.ndarray
-    level: np.ndarray
+    levels: np.ndarray
 
 
 @dataclass(frozen=True)
@@ -227,7 +227,7 @@ class DuctPathResult:
         owner = type(self).__name__
         bands = require_axis_count(self.frequencies, owner, "frequencies", rank=None)
         for i, stage in enumerate(self.stages):
-            for name in ("attenuation", "attenuated", "self_noise", "level"):
+            for name in ("attenuation", "attenuated", "self_noise", "levels"):
                 label = f"stages[{i}].{name}"
                 require_equal_counts(
                     owner,
@@ -343,7 +343,7 @@ class DuctPathResult:
                     "code": "",
                     "label": "Combined",
                     "kind": "level",
-                    "values": stage.level,
+                    "values": stage.levels,
                 }
             )
         if self.contributions:
@@ -558,7 +558,7 @@ def duct_path(
                 attenuation=attenuation,
                 attenuated=attenuated,
                 self_noise=self_noise,
-                level=level,
+                levels=level,
             )
         )
 

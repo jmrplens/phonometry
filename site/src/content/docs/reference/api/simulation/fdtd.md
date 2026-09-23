@@ -593,16 +593,16 @@ SignalSource(
     ix: int,
     iy: int,
     samples: NDArray[np.float64],
-    sample_rate: float,
+    fs: float,
     amplitude: float = 1.0,
 )
 ```
 
 An arbitrary sampled waveform injected at one cell.
 
-The samples are interpreted as the source signal at `sample_rate` and
+The samples are interpreted as the source signal at `fs` and
 linearly interpolated onto the simulation time steps; outside the sampled
-span the source is zero. `sample_rate` therefore does not need to match
+span the source is zero. `fs` therefore does not need to match
 the simulation rate `1/dt`, although a rate well above the highest
 frequency of interest avoids interpolation roll-off.
 
@@ -613,7 +613,7 @@ frequency of interest avoids interpolation roll-off.
 | `ix` | Source column (x) index. |
 | `iy` | Source row (y) index. |
 | `samples` | Source signal samples [Pa] (stored as a read-only 1D float64 array). |
-| `sample_rate` | Sampling rate of `samples` [Hz]. |
+| `fs` | Sampling rate of `samples` [Hz]. |
 | `amplitude` | Scale factor applied to the samples. |
 
 ### SignalSource.value()

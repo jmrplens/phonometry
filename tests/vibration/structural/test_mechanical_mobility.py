@@ -175,7 +175,7 @@ def test_rigid_mass_calibration_accelerance_passes() -> None:
     f = np.array([10.0, 100.0, 1000.0])
     res = vibration.rigid_mass_calibration_check(np.full(3, 0.1), f, 10.0)
     assert isinstance(res, vibration.RigidMassCalibrationResult)
-    assert res.passed
+    assert res.passes
     assert np.allclose(res.expected, 0.100)
     assert np.allclose(res.deviation, 0.0)
 
@@ -187,7 +187,7 @@ def test_rigid_mass_calibration_mobility_expected_value() -> None:
         [y], [100.0], 10.0, quantity="mobility"
     )
     assert res.expected[0] == pytest.approx(1.59155e-4, rel=1e-5)
-    assert res.passed
+    assert res.passes
 
 
 def test_rigid_mass_calibration_flags_out_of_tolerance_bands() -> None:
@@ -196,7 +196,7 @@ def test_rigid_mass_calibration_flags_out_of_tolerance_bands() -> None:
     frf = np.array([0.104, 0.093])
     res = vibration.rigid_mass_calibration_check(frf, f, 10.0)
     assert res.within_tolerance.tolist() == [True, False]
-    assert not res.passed
+    assert not res.passes
     assert res.deviation[0] == pytest.approx(0.04)
 
 
@@ -204,7 +204,7 @@ def test_rigid_mass_calibration_accepts_complex_frf() -> None:
     # The criterion applies to the magnitude; phase is irrelevant.
     frf = 0.1 * np.exp(1j * np.linspace(0.0, 1.0, 4))
     res = vibration.rigid_mass_calibration_check(frf, [10.0, 20.0, 40.0, 80.0], 10.0)
-    assert res.passed
+    assert res.passes
 
 
 def test_rigid_mass_calibration_validation() -> None:

@@ -184,7 +184,7 @@ freqs = [100, 125, 160, 200, 250, 315, 400, 500, 630,
 dv = np.array([4.5, 4.8, 5.2, 5.6, 6.0, 6.5, 7.0, 7.6, 8.1, 8.7,
                9.2, 9.8, 10.3, 10.9, 11.4, 11.9, 12.3, 12.7])
 res = building.vibration_reduction_index(
-    dv, junction_length=4.0, area_i=12.0, area_j=10.0, frequency=freqs,
+    dv, junction_length=4.0, area_i=12.0, area_j=10.0, frequencies=freqs,
     structural_reverberation_time_i=0.35, structural_reverberation_time_j=0.40,
 )
 print(res.single_number)   # mean Kij over 200-1250 Hz (Annex A)
@@ -217,7 +217,7 @@ dv_ji = [6.4, 6.8, 7.3, 7.8, 8.4, 8.9, 9.5, 10.0, 10.6]  # element j excited (dB
 
 # Kij from both excitation directions (symmetric via the direction average):
 dbar = building.direction_averaged_level_difference(dv_ij, dv_ji)
-res = building.vibration_reduction_index(dbar, lij, s_i, s_j, frequency=freqs,
+res = building.vibration_reduction_index(dbar, lij, s_i, s_j, frequencies=freqs,
                                 structural_reverberation_time_i=ts,
                                 structural_reverberation_time_j=ts)
 res.k_ij           # Kij per band (Formula (13))
@@ -229,7 +229,7 @@ dnf = building.normalized_flanking_level_difference(np.full(9, 75.0), np.full(9,
                                            absorption_area=np.full(9, 12.0))
 m = building.modal_overlap_factor(s_i, critical_frequency=85.0,
                          structural_reverberation_time=ts)
-res_m = building.vibration_reduction_index(dbar, lij, s_i, s_j, frequency=freqs,
+res_m = building.vibration_reduction_index(dbar, lij, s_i, s_j, frequencies=freqs,
                                   modal_overlap=m)   # M < 0.25 bands bracketed
 res_m.bracketed    # per-band flags; bracketed bands leave the single number
 
@@ -556,7 +556,7 @@ dv = np.array([4.5, 4.8, 5.2, 5.6, 6.0, 6.5, 7.0, 7.6, 8.1, 8.7,
                9.2, 9.8, 10.3, 10.9, 11.4, 11.9, 12.3, 12.7])
 m = np.full(18, 1.0); m[:3] = 0.1                        # bracket the low bands
 kij = building.vibration_reduction_index(
-    dv, junction_length=4.0, area_i=12.0, area_j=10.0, frequency=freqs,
+    dv, junction_length=4.0, area_i=12.0, area_j=10.0, frequencies=freqs,
     structural_reverberation_time_i=0.35, structural_reverberation_time_j=0.40,
     modal_overlap=m,
 )

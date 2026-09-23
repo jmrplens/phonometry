@@ -260,8 +260,8 @@ plt.show()
 
 # Or plot them directly to see the fast STL vs the slow LTL:
 fig, ax = plt.subplots()
-ax.plot(res.time, res.short_term_loudness, label="Short-term S'(t)")
-ax.plot(res.time, res.long_term_loudness, label="Long-term S''(t)")
+ax.plot(res.times, res.short_term_loudness, label="Short-term S'(t)")
+ax.plot(res.times, res.long_term_loudness, label="Long-term S''(t)")
 ax.set_xlabel("Time [s]")
 ax.set_ylabel("Loudness [sone]")
 ax.legend()
@@ -280,7 +280,7 @@ plt.show()
 | `presentation` | str | — | `'binaural'` (default) / `'diotic'` / `'monaural'` | Binaural summation |
 | `percentiles` | sequence | percent | default `(1, 5, 10, 50, 90, 95)` | Exceeded long-term loudness levels |
 
-Returns a `MooreGlasbergTimeVaryingLoudness`: `time` (1 ms grid),
+Returns a `MooreGlasbergTimeVaryingLoudness`: `times` (1 ms grid),
 `short_term_loudness` / `long_term_loudness` (sone), their `_level` in phon,
 `n_max`, `loudness_level_max`, a `percentiles` dict, `field`, `presentation`.
 
@@ -351,7 +351,7 @@ plt.show()
 | `field` | str | — | `'free'` (default) / `'diffuse'` | Outer/middle-ear filter (Clause 5.1.3) |
 
 Returns an `EcmaLoudness`: `loudness` ($N$, sone_HMS), `specific_loudness`
-($N'(z)$, 53 bands), `bark`, `centre_frequencies`, `time`, `loudness_vs_time`
+($N'(z)$, 53 bands), `bark`, `centre_frequencies`, `times`, `loudness_vs_time`
 ($N(l)$ at 187.5 Hz), `field`.
 
 ## Quick answers

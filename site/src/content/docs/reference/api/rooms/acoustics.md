@@ -76,7 +76,7 @@ integrated impulse response, Clause 6).
 | `fraction` | Bandwidth fraction of the band filter (1 = octave, 3 = one-third octave). Only used when `band` is not None. |
 | `zero_phase` | If True, filter the band with forward-backward (zero-phase) filtering, removing the octave filter's group delay before the backward integration. ISO 3382-2:2008 Clause 7.3 NOTE permits time-reversed filtering (it relaxes the B\*T > 16 rule to B\*T > 4); it roughly halves the low-frequency short-decay bias at 125 Hz. Only used when `band` is not None. Default False (causal). |
 
-**Returns:** A [`DecayCurve`](/phonometry/reference/api/rooms/acoustics/#decaycurve) with `time` in seconds from the direct sound and `level` in dB (0 dB at time zero), up to the noise truncation point. It unpacks as `time, level = decay_curve(...)` for backward compatibility and exposes [`DecayCurve.plot`](/phonometry/reference/api/rooms/acoustics/#decaycurveplot).
+**Returns:** A [`DecayCurve`](/phonometry/reference/api/rooms/acoustics/#decaycurve) with `times` in seconds from the direct sound and `levels` in dB (0 dB at time zero), up to the noise truncation point. It unpacks as `times, levels = decay_curve(...)` for backward compatibility and exposes [`DecayCurve.plot`](/phonometry/reference/api/rooms/acoustics/#decaycurveplot).
 
 ## DECAY_UNCERTAINTY_COEFFICIENTS
 
@@ -89,13 +89,13 @@ DECAY_UNCERTAINTY_COEFFICIENTS = {20.0: (0.88, 1.9), 30.0: (0.55, 1.52)}
 ## DecayCurve
 
 ```python
-DecayCurve(time: np.ndarray, level: np.ndarray, band: float | None = None)
+DecayCurve(times: np.ndarray, levels: np.ndarray, band: float | None = None)
 ```
 
 Schroeder backward-integrated decay curve of an impulse response.
 
-`time` holds the sample times in seconds from the direct sound and
-`level` the decay levels in dB (0 dB at time zero), up to the noise
+`times` holds the sample times in seconds from the direct sound and
+`levels` the decay levels in dB (0 dB at time zero), up to the noise
 truncation point (ISO 3382-1:2009, 5.3.3). `band` is the
 octave/third-octave band centre in Hz, or `None` for a broadband decay.
 
@@ -319,7 +319,7 @@ Table A.1).
 | :--- | :--- |
 | `ir` | Measured impulse response (1D). Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples and then cancels: every parameter here is a decay time, a ratio of energies or a centre time, and none of them moves with a factor on the record. |
 | `fs` | Sample rate in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
-| `limits` | `(f_min, f_max)` band-centre limits in Hz; default octave bands 125 Hz to 4 kHz (ISO 3382-1:2009, 5.1). Use `(100.0, 5000.0)` with `fraction=3` for the one-third-octave engineering/precision range. `None` analyses the broadband response as a single band (`frequency` is then `None`). |
+| `limits` | `(f_min, f_max)` band-centre limits in Hz; default octave bands 125 Hz to 4 kHz (ISO 3382-1:2009, 5.1). Use `(100.0, 5000.0)` with `fraction=3` for the one-third-octave engineering/precision range. `None` analyses the broadband response as a single band (`frequencies` is then `None`). |
 | `fraction` | Bandwidth fraction (1 = octave, 3 = one-third octave). Default 1. |
 | `zero_phase` | If True, use forward-backward (zero-phase) octave filtering, removing the filter group delay before the backward integration. ISO 3382-2:2008 Clause 7.3 NOTE permits time-reversed filtering (relaxing B\*T > 16 to B\*T > 4); it roughly halves the 125 Hz short-decay T30 bias (about +4.9 % -> +2.4 % at T = 0.2 s). The benefit is small next to the ~10 % measurement variance but is free and standards-sanctioned. Default False (causal filtering). |
 
@@ -329,7 +329,7 @@ Table A.1).
 
 ```python
 RoomAcousticsResult(
-    frequency: np.ndarray | None,
+    frequencies: np.ndarray | None,
     edt: np.ndarray,
     t20: np.ndarray,
     t30: np.ndarray,
@@ -347,7 +347,7 @@ RoomAcousticsResult(
 
 Per-band room acoustic parameters from one impulse response.
 
-All arrays have one entry per analysis band (`frequency` holds the
+All arrays have one entry per analysis band (`frequencies` holds the
 exact band centre frequencies; it is `None` for a broadband
 analysis, in which case the arrays have length 1). `edt`, `t20`
 and `t30` are decay times in seconds extrapolated to 60 dB
@@ -413,7 +413,7 @@ characterisation standards with no intrinsic pass/fail, so the verdict
 row appears only when a target T is supplied through
 `metadata.requirement` (read as the maximum acceptable value of
 whichever descriptor the box carries). A broadband result
-(`frequency` is `None`) has no 500 Hz and 1000 Hz bands to average,
+(`frequencies` is `None`) has no 500 Hz and 1000 Hz bands to average,
 so the box and the verdict fall back to the plain broadband T30 instead
 of a mid-frequency average, with no "500-1000 Hz" label; so does a
 banded result that does not span both mid bands, or that spans them

@@ -30,7 +30,7 @@ Data*, Eqs. 7-10; the pure-tone coefficient is ISO 9613-1:1993.
 
 ```python
 AircraftBandAttenuation(
-    frequency: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
     band_attenuation: NDArray[np.float64],
     midband_attenuation: NDArray[np.float64],
     coefficient: NDArray[np.float64],
@@ -47,7 +47,7 @@ One-third-octave-band atmospheric attenuation over a path (SAE ARP 5534).
 
 | Name | Description |
 | :--- | :--- |
-| `frequency` | Nominal one-third-octave-band centre frequencies, in Hz. |
+| `frequencies` | Nominal one-third-octave-band centre frequencies, in Hz. |
 | `band_attenuation` | SAE-Method band attenuation `δ_B` per band, in dB. |
 | `midband_attenuation` | Pure-tone mid-band path-length attenuation $\delta_\mathrm{t} = \alpha \cdot s$ per band, in dB (ISO 9613-1 coefficient). |
 | `coefficient` | Pure-tone mid-band attenuation coefficient `α` per band, in dB/m. |

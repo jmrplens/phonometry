@@ -137,10 +137,10 @@ def test_result_structure(ref_1k_40: psychoacoustics.EcmaLoudness) -> None:
     assert ref_1k_40.bark[0] == pytest.approx(0.5)
     assert ref_1k_40.bark[-1] == pytest.approx(26.5)
     assert ref_1k_40.centre_frequencies.shape == (53,)
-    assert ref_1k_40.time.shape == ref_1k_40.loudness_vs_time.shape
+    assert ref_1k_40.times.shape == ref_1k_40.loudness_vs_time.shape
     assert ref_1k_40.field == "free"
     # Time-dependent loudness is sampled at 187.5 Hz (Clause 6.2.6).
-    dt = np.diff(ref_1k_40.time)
+    dt = np.diff(ref_1k_40.times)
     assert np.allclose(dt, 1.0 / 187.5)
 
 

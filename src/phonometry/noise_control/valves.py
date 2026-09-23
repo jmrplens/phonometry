@@ -572,7 +572,7 @@ def _peak_frequency(
 
 
 def internal_spectrum(
-    internal_level: float, peak_frequency: float, frequency: NDArray[np.float64]
+    internal_level: float, peak_frequency: float, frequencies: NDArray[np.float64]
 ) -> NDArray[np.float64]:
     r"""Equation (19): the internal level spread over the third-octave bands.
 
@@ -590,21 +590,21 @@ def internal_spectrum(
 
     :param internal_level: :math:`L_{pi}` of Equation (18), in dB.
     :param peak_frequency: :math:`f_p` from Table 3, in Hz.
-    :param frequency: The band centre frequencies, in Hz.
+    :param frequencies: The band centre frequencies, in Hz.
     :return: The internal level in each band, in dB.
     :raises ValueError: If the peak frequency is not positive and finite, or
         a band centre is not.
     """
     peak = require_positive(peak_frequency, "peak_frequency")
-    bands = np.asarray(frequency, dtype=np.float64)
+    bands = np.asarray(frequencies, dtype=np.float64)
     if not math.isfinite(peak):
         msg = "'peak_frequency' must be a positive, finite frequency in Hz."
         raise ValueError(msg)
     if bands.ndim != 1 or bands.size == 0:
-        msg = "'frequency' must be a non-empty one-dimensional band axis in Hz."
+        msg = "'frequencies' must be a non-empty one-dimensional band axis in Hz."
         raise ValueError(msg)
     if not np.all(np.isfinite(bands)) or np.any(bands <= 0.0):
-        msg = "'frequency' must carry positive, finite band centres in Hz."
+        msg = "'frequencies' must carry positive, finite band centres in Hz."
         raise ValueError(msg)
     high = (bands / (2.0 * peak)) ** _SPECTRUM_HIGH_EXPONENT
     low = (peak / (2.0 * bands)) ** _SPECTRUM_LOW_EXPONENT
@@ -714,7 +714,7 @@ def _damping_factor(valve_outlet_diameter_m: float) -> float:
 
 
 def pipe_transmission_loss(
-    frequency: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
     *,
     internal_diameter_m: float,
     wall_thickness: float,
@@ -742,7 +742,7 @@ def pipe_transmission_loss(
     The result is a large negative number, and Equation (24) *adds* it to the
     internal level, so the sign is not a convention this module chose.
 
-    :param frequency: The band centre frequencies, in Hz.
+    :param frequencies: The band centre frequencies, in Hz.
     :param internal_diameter_m: :math:`D_i`, in m.
     :param wall_thickness: :math:`t_S`, in m.
     :param valve_outlet_diameter_m: :math:`D`, in m, which selects the damping
@@ -757,17 +757,17 @@ def pipe_transmission_loss(
     :return: The transmission loss in each band, in dB, negative.
     :raises ValueError: If an argument is not positive and finite.
     """
-    bands = np.asarray(frequency, dtype=np.float64)
+    bands = np.asarray(frequencies, dtype=np.float64)
     if bands.ndim != 1 or bands.size == 0:
-        msg = "'frequency' must be a non-empty one-dimensional band axis in Hz."
+        msg = "'frequencies' must be a non-empty one-dimensional band axis in Hz."
         raise ValueError(msg)
     if not np.all(np.isfinite(bands)) or np.any(bands <= 0.0):
-        msg = "'frequency' must carry positive, finite band centres in Hz."
+        msg = "'frequencies' must carry positive, finite band centres in Hz."
         raise ValueError(msg)
     thickness = require_positive(wall_thickness, "wall_thickness")
     outlet = require_positive(valve_outlet_diameter_m, "valve_outlet_diameter_m")
     density = require_positive(downstream_density, "downstream_density")
-    sound_speed = require_positive(downstream_sound_speed, "downstream_sound_speed")
+    speed_of_sound = require_positive(downstream_sound_speed, "downstream_sound_speed")
     wall_density = require_positive(pipe_density, "pipe_density")
     ambient = require_positive(atmospheric_pressure_pa, "atmospheric_pressure_pa")
     reference = require_positive(standard_pressure_pa, "standard_pressure_pa")
@@ -775,17 +775,17 @@ def pipe_transmission_loss(
     pipe = coincidence_frequencies(
         internal_diameter_m,
         thickness,
-        sound_speed,
+        speed_of_sound,
         pipe_sound_speed=pipe_sound_speed,
         air_sound_speed=air_sound_speed,
     )
     g_x, g_y = _frequency_factors(bands, pipe)
     structural = np.sqrt(STRUCTURAL_LOSS_REFERENCE_HZ / (100.0 * bands))
     stiffness = (
-        density * sound_speed
+        density * speed_of_sound
         + 2.0 * math.pi * thickness * bands * wall_density * structural
     ) / (_AIR_IMPEDANCE * g_y)
-    ratio = (sound_speed / (thickness * bands)) ** 2
+    ratio = (speed_of_sound / (thickness * bands)) ** 2
     inside = _TRANSMISSION_COEFFICIENT * ratio * g_x / (stiffness + 1.0)
     loss = 10.0 * np.log10(inside * (ambient / reference))
     return np.asarray(loss - _damping_factor(outlet), dtype=np.float64)
@@ -1075,7 +1075,7 @@ class ExpanderNoise:
 
 
 def expander_noise(  # noqa: PLR0913
-    frequency: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
     *,
     mass_flow: float,
     downstream_density: float,
@@ -1106,7 +1106,7 @@ def expander_noise(  # noqa: PLR0913
     :math:`U_R` to the sonic velocity, so a step that would otherwise be
     computed as supersonic is computed at Mach one instead.
 
-    :param frequency: The band centre frequencies, in Hz.
+    :param frequencies: The band centre frequencies, in Hz.
     :param mass_flow: :math:`\dot m`, in kg/s.
     :param downstream_density: :math:`\rho_2`, in kg/m³.
     :param downstream_sound_speed: :math:`c_2`, in m/s.
@@ -1123,7 +1123,7 @@ def expander_noise(  # noqa: PLR0913
         velocity correction of Equation (16) are both signed, and the
         expander's own row prints :math:`A_\eta = -3{,}0`.
     """
-    bands = np.asarray(frequency, dtype=np.float64)
+    bands = np.asarray(frequencies, dtype=np.float64)
     flow = require_positive(mass_flow, "mass_flow")
     rho2 = require_positive(downstream_density, "downstream_density")
     c2 = require_positive(downstream_sound_speed, "downstream_sound_speed")
@@ -1237,7 +1237,7 @@ class AerodynamicValveNoise:
     :ivar pipe_mach: :math:`M_2` of Equation (17), before the 0,3 limit.
     :ivar velocity_correction: :math:`L_g` of Equation (16), in dB.
     :ivar internal_level: :math:`L_{pi}` of Equation (18), in dB.
-    :ivar frequency: The 33 one-third-octave band centres of Table 5, in Hz.
+    :ivar frequencies: The 33 one-third-octave band centres of Table 5, in Hz.
     :ivar band_internal_level: :math:`L_{pi}(f_i)` of Equation (19), in dB.
     :ivar band_transmission_loss: :math:`TL(f_i)` of Equation (20a), in dB.
     :ivar band_external_level: :math:`L_{pe,1m}(f_i)` of Equation (24), in dB.
@@ -1267,7 +1267,7 @@ class AerodynamicValveNoise:
     pipe_mach: float
     velocity_correction: float
     internal_level: float
-    frequency: NDArray[np.float64]
+    frequencies: NDArray[np.float64]
     band_internal_level: NDArray[np.float64]
     band_transmission_loss: NDArray[np.float64]
     band_external_level: NDArray[np.float64]
@@ -1344,7 +1344,7 @@ class DownstreamPipe:
     :ivar internal_diameter_m: :math:`D_i`, in m.
     :ivar wall_thickness: :math:`t_S`, in m.
     :ivar density: :math:`\rho_s` of the pipe material, in kg/m³.
-    :ivar sound_speed: :math:`c_s` in the pipe wall, in m/s.
+    :ivar speed_of_sound: :math:`c_s` in the pipe wall, in m/s.
     :ivar air_sound_speed: :math:`c_a` outside the pipe, in m/s.
     :ivar atmospheric_pressure_pa: :math:`p_a`, in Pa.
     :ivar standard_pressure_pa: :math:`p_s`, in Pa.
@@ -1354,7 +1354,7 @@ class DownstreamPipe:
     wall_thickness: float
     density: float
     _: KW_ONLY
-    sound_speed: float = PIPE_SOUND_SPEED_M_S
+    speed_of_sound: float = PIPE_SOUND_SPEED_M_S
     air_sound_speed: float = AIR_SOUND_SPEED_M_S
     atmospheric_pressure_pa: float = STANDARD_ATMOSPHERE_PA
     standard_pressure_pa: float = STANDARD_ATMOSPHERE_PA
@@ -1408,7 +1408,7 @@ def valve_aerodynamic_noise(
     internal_diameter_m = pipe.internal_diameter_m
     wall_thickness = pipe.wall_thickness
     pipe_density = pipe.density
-    pipe_sound_speed = pipe.sound_speed
+    pipe_sound_speed = pipe.speed_of_sound
     air_sound_speed = pipe.air_sound_speed
     atmospheric_pressure_pa = pipe.atmospheric_pressure_pa
     standard_pressure_pa = pipe.standard_pressure_pa
@@ -1550,7 +1550,7 @@ def valve_aerodynamic_noise(
         pipe_mach=float(pipe_mach),
         velocity_correction=float(velocity_correction),
         internal_level=float(internal_level),
-        frequency=bands,
+        frequencies=bands,
         band_internal_level=band_internal,
         band_transmission_loss=band_loss,
         band_external_level=np.asarray(band_external, dtype=np.float64),

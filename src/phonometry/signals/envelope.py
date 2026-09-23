@@ -54,7 +54,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from .._internal.validation import require_ranks, require_same_length
-from ..io._resolve import resolve_fs
+from ..io._resolve import like_input, require_signal_rate, resolve_fs
 from .spectra import _positive, _validate_signal
 
 if TYPE_CHECKING:
@@ -88,7 +88,10 @@ class EnvelopeResult:
         (Eq. 13.19), differentiated at full rate before any decimation.
     :ivar fs: Sample rate of the outputs, in Hz (``signal_fs`` divided by
         :attr:`decimation_factor`).
-    :ivar signal: The analysed record, at full rate.
+    :ivar signal: The analysed record, at full rate, in the type it arrived
+        as: a :class:`~phonometry.io.Signal` when the input was one (in
+        pascals and carrying ``calibration_factor=1.0`` when the input was
+        calibrated), a bare array otherwise.
     :ivar signal_fs: Sample rate of :attr:`signal`, in Hz.
     :ivar decimation_factor: Integer decimation applied to the outputs
         (1: none).
@@ -100,7 +103,7 @@ class EnvelopeResult:
     phase: NDArray[np.float64]
     instantaneous_frequency: NDArray[np.float64]
     fs: float
-    signal: NDArray[np.float64]
+    signal: Signal | NDArray[np.float64]
     signal_fs: float
     decimation_factor: int
     _: KW_ONLY
@@ -124,7 +127,8 @@ class EnvelopeResult:
         :attr:`times` only when no decimation was asked for, and pinning the
         two together would reject every decimated result the module produces.
 
-        :raises ValueError: if an output disagrees with the time axis.
+        :raises ValueError: if an output disagrees with the time axis, or
+            :attr:`signal` is a Signal at a rate other than :attr:`signal_fs`.
         """
         require_ranks(
             self,
@@ -142,6 +146,7 @@ class EnvelopeResult:
             "instantaneous_frequency",
             axis="output sample",
         )
+        require_signal_rate(self, "signal", self.signal_fs, rate_field="signal_fs")
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -201,8 +206,8 @@ def envelope(
 
     :param x: Signal, 1-D. Accepts a :class:`phonometry.io.Signal`, whose
         calibration is applied to the samples, so the envelope and the
-        carried waveform come out in Pa. The phase and the instantaneous
-        frequency do not move.
+        carried waveform come out in Pa, and the carried waveform comes back
+        as a Signal. The phase and the instantaneous frequency do not move.
     :param fs: Sample rate, in Hz. Required for a bare array; a
         :class:`~phonometry.io.Signal` brings its own, and an explicit value
         that disagrees with it raises instead of silently winning.
@@ -242,7 +247,7 @@ def envelope(
         phase=phase,
         instantaneous_frequency=inst_freq,
         fs=out_fs,
-        signal=xa.copy(),
+        signal=like_input(x, xa.copy()),
         signal_fs=fs_v,
         decimation_factor=factor,
         antialias=bool(antialias),

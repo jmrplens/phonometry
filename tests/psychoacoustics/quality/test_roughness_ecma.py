@@ -133,9 +133,9 @@ def test_result_structure(
 ) -> None:
     res = ref_calibration
     assert res.specific_roughness.shape == res.bark.shape == (53,)
-    assert res.roughness_vs_time.shape == res.time.shape
+    assert res.roughness_vs_time.shape == res.times.shape
     assert res.specific_roughness_vs_time.shape == (
-        res.time.size,
+        res.times.size,
         res.bark.size,
     )
     assert np.all(res.specific_roughness >= 0.0)
@@ -155,9 +155,9 @@ def test_a_time_grid_that_does_not_match_its_curves_is_refused(
     figure is drawn, and a caller who supplies an ``ax`` never draws that
     panel at all.
     """
-    short_grid = ref_calibration.time[:-1]
-    with pytest.raises(ValueError, match=rf"'time' \({short_grid.size}\)"):
-        dataclasses.replace(ref_calibration, time=short_grid)
+    short_grid = ref_calibration.times[:-1]
+    with pytest.raises(ValueError, match=rf"'times' \({short_grid.size}\)"):
+        dataclasses.replace(ref_calibration, times=short_grid)
     long_trace = np.append(ref_calibration.roughness_vs_time, 0.0)
     with pytest.raises(ValueError, match=rf"'roughness_vs_time' \({long_trace.size}\)"):
         dataclasses.replace(ref_calibration, roughness_vs_time=long_trace)

@@ -4,10 +4,12 @@ r"""Block streaming: feed hours of recording through a constant memory window.
 A night of environmental monitoring at 48 kHz/24-bit/2 channels grows past
 4 GiB on disk in under four hours and costs about 5.5 GiB of RAM *per
 hour* once decoded to float64: whole-file :func:`phonometry.io.read` is
-the wrong tool for it. :func:`read_blocks` yields the same samples as
-``read`` -- identical scaling, identical channel order, sample for
-sample -- in ``(channels, block)`` pieces sized by the caller, which is
-exactly the shape the library's stateful block machinery consumes
+the wrong tool for it. :func:`read_blocks` yields what ``read`` returns,
+cut into pieces: each block is a :class:`~phonometry.io.Signal` with the
+same scaling, the same channel order, sample for sample, and the same
+rate, calibration, channel labels, provenance and origin, in
+``(channels, block)`` pieces sized by the caller. That is exactly what the
+library's stateful block machinery consumes
 (``BlockProcessing(stateful=True)`` on the filter banks and weightings;
 see the block-processing guide): the loop over a memory array becomes a
 loop over this generator and nothing else changes.
@@ -36,23 +38,29 @@ left over are only ones already delivered (``remaining <= overlap``).
 
 from __future__ import annotations
 
+import math
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 import numpy as np
 
-from ._backends import _import_soundfile, _sniff, _soundfile_lossy, _warn_lossy
+from ._backends import _import_soundfile, _sniff, _warn_lossy, soundfile_stamp
 from ._chunks import (
     WAVE_FORMAT_IEEE_FLOAT,
     WAVE_FORMAT_PCM,
     FormatChunk,
     parse_wav_chunks,
 )
+from ._sidecar import read_sidecar
+from ._signal import Signal
+from ._wav import linear_wav_origin
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
     from numpy.typing import NDArray
+
+    from ._chunks import WavChunks
 
 # Bit depths that pick the linear decoder's branch, per the scaling
 # convention of :mod:`phonometry.io._wav`.
@@ -94,19 +102,21 @@ def _decode_linear_frames(raw: bytes, fmt: FormatChunk) -> NDArray[np.float64]:
     return np.ascontiguousarray(frames.T)
 
 
-def _squeeze(block: NDArray[np.float64]) -> NDArray[np.float64]:
-    """Mono blocks go out 1-D, matching read()/Signal's array view."""
-    return block[0] if block.shape[0] == 1 else block
-
-
 def _iter_wav_blocks(
-    path: str | Path, block_size: int, overlap: int
-) -> Iterator[NDArray[np.float64]]:
+    path: str | Path,
+    chunks: WavChunks,
+    block_size: int,
+    overlap: int,
+    *,
+    calibration_factor: float | None,
+    channel_labels: tuple[str, ...] | None,
+) -> Iterator[Signal]:
     """The base-install block reader for linear WAV/BWF/RF64/BW64."""
-    chunks = parse_wav_chunks(path)
     fmt = chunks.fmt
     total = chunks.frames
     step = block_size - overlap
+    origin = linear_wav_origin(path, chunks)
+    labels = channel_labels if channel_labels is not None else fmt.channel_labels()
     with Path(path).open("rb") as fh:
         start = 0
         while total - start > overlap or start == 0 and total > 0:
@@ -119,18 +129,33 @@ def _iter_wav_blocks(
                     f"bytes short of frame {start + n}"
                 )
                 raise ValueError(msg)
-            yield _squeeze(_decode_linear_frames(raw, fmt))
+            yield Signal(
+                data=_decode_linear_frames(raw, fmt),
+                fs=int(fmt.fs),
+                calibration_factor=calibration_factor,
+                channel_labels=labels,
+                provenance=chunks.bext,
+                source=origin,
+            )
             start += step
 
 
 def _iter_soundfile_blocks(
-    path: str | Path, format_name: str, block_size: int, overlap: int
-) -> Iterator[NDArray[np.float64]]:
+    path: str | Path,
+    format_name: str,
+    block_size: int,
+    overlap: int,
+    *,
+    calibration_factor: float | None,
+    channel_labels: tuple[str, ...] | None,
+    chunks: WavChunks | None = None,
+) -> Iterator[Signal]:
     """The ``[audio]`` block reader: everything libsndfile can stream."""
     sf = _import_soundfile(format_name)
-    subtype = str(sf.info(str(path)).subtype)
-    if _soundfile_lossy(subtype):
-        _warn_lossy(f"{format_name} ({subtype})", path)
+    stamp = soundfile_stamp(sf, path, format_name, chunks)
+    if stamp.source.lossy:
+        _warn_lossy(f"{format_name} ({stamp.source.format_name})", path)
+    labels = channel_labels if channel_labels is not None else stamp.channel_labels
     for block in sf.blocks(
         str(path),
         blocksize=block_size,
@@ -138,33 +163,52 @@ def _iter_soundfile_blocks(
         dtype="float64",
         always_2d=True,
     ):
-        yield _squeeze(np.ascontiguousarray(block.T))
+        yield Signal(
+            data=np.ascontiguousarray(block.T),
+            fs=stamp.fs,
+            calibration_factor=calibration_factor,
+            channel_labels=labels,
+            provenance=stamp.provenance,
+            source=stamp.source,
+        )
 
 
 def read_blocks(
-    path: str | Path, block_size: int, *, overlap: int = 0
-) -> Iterator[NDArray[np.float64]]:
-    """Stream an audio file as float64 blocks of ``block_size`` frames.
+    path: str | Path,
+    block_size: int,
+    *,
+    overlap: int = 0,
+    calibration_factor: float | None = None,
+) -> Iterator[Signal]:
+    """Stream an audio file as :class:`~phonometry.io.Signal` blocks.
 
     Yields what :func:`phonometry.io.read` would return for the same
-    file, cut into consecutive ``(channels, block_size)`` pieces (1-D for
-    mono, like the ``Signal`` array view; the last piece may be shorter),
-    while holding only one block in memory -- the way an overnight RF64
-    flows through ``BlockProcessing(stateful=True)`` filters without ever
-    existing as an array. See the module docstring for the per-backend
-    mechanics and the exact overlap rule.
-
-    No calibration rides on bare blocks: apply ``calibration_factor``
-    where the level is computed, as the block-processing guide shows.
+    file, cut into consecutive pieces of ``block_size`` frames (the last
+    piece may be shorter), while holding only one block in memory -- the
+    way an overnight RF64 flows through ``BlockProcessing(stateful=True)``
+    filters without ever existing as an array. Each block is a ``Signal``
+    carrying what the whole-file read would carry: the rate, the
+    calibration (from ``calibration_factor`` or the sidecar, by the same
+    precedence as ``read``), the channel labels, the ``bext`` provenance
+    and the origin record. So a block is ``read(path)`` cropped to its own
+    span, which is also why its provenance still describes the file, as a
+    :meth:`~phonometry.io.Signal.crop` does. See the module docstring for
+    the per-backend mechanics and the exact overlap rule.
 
     :param path: The file to stream.
     :param block_size: Frames per block (at least 1).
     :param overlap: Frames each block shares with its predecessor
         (``0 <= overlap < block_size``).
-    :return: An iterator of float64 blocks.
-    :raises ValueError: If the geometry is invalid, the file matches no
-        known audio format, or the data chunk is shorter than its header
-        claims.
+    :param calibration_factor: Digital-to-pascal multiplier to attach to
+        every block, as in :func:`~phonometry.io.read`. ``None`` (the
+        default) takes the sidecar's factor when a sidecar exists, and
+        otherwise leaves the blocks in digital full-scale units.
+    :return: An iterator of Signal blocks.
+    :raises ValueError: If the geometry is invalid, ``calibration_factor`` is
+        not a positive finite number, the file matches no known audio
+        format, or a sidecar exists but is invalid (all at the call), or the
+        data chunk is shorter than its header claims (at the block that
+        reaches the end of it).
     :raises ImportError: If the format needs the ``[audio]`` extra and it
         is not installed.
     """
@@ -179,12 +223,47 @@ def read_blocks(
             f"{overlap} against {block_size}"
         )
         raise ValueError(msg)
+    # Refused here rather than at the first block, as io.read refuses it at
+    # the call: a generator would otherwise hand back an iterator that fails
+    # only when the loop starts.
+    if calibration_factor is not None and (
+        not math.isfinite(calibration_factor) or calibration_factor <= 0
+    ):
+        msg = (
+            "calibration_factor must be a positive finite number; "
+            f"got {calibration_factor}"
+        )
+        raise ValueError(msg)
+    sidecar = read_sidecar(path)
+    if sidecar is not None and calibration_factor is None:
+        calibration_factor = sidecar.calibration_factor
+    labels = sidecar.channel_labels if sidecar is not None else None
     format_name = _sniff(path)
     if format_name is None:
-        fmt = parse_wav_chunks(path).fmt
-        if fmt.resolved_tag in (WAVE_FORMAT_PCM, WAVE_FORMAT_IEEE_FLOAT):
-            return _iter_wav_blocks(path, block_size, overlap)
+        chunks = parse_wav_chunks(path)
+        if chunks.fmt.resolved_tag in (WAVE_FORMAT_PCM, WAVE_FORMAT_IEEE_FLOAT):
+            return _iter_wav_blocks(
+                path,
+                chunks,
+                block_size,
+                overlap,
+                calibration_factor=calibration_factor,
+                channel_labels=labels,
+            )
         return _iter_soundfile_blocks(
-            path, f"WAV {fmt.format_name}", block_size, overlap
+            path,
+            f"WAV {chunks.fmt.format_name}",
+            block_size,
+            overlap,
+            calibration_factor=calibration_factor,
+            channel_labels=labels,
+            chunks=chunks,
         )
-    return _iter_soundfile_blocks(path, format_name, block_size, overlap)
+    return _iter_soundfile_blocks(
+        path,
+        format_name,
+        block_size,
+        overlap,
+        calibration_factor=calibration_factor,
+        channel_labels=labels,
+    )

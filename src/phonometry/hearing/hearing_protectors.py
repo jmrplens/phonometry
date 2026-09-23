@@ -289,7 +289,9 @@ class AssumedProtectionResult:
     frequencies: np.ndarray
     subjects: int
 
-    def plot(self, ax: Axes | None = None, language: str = "en", **kwargs: Any) -> Axes:
+    def plot(
+        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    ) -> Axes:
         """Draw the mean attenuation, its spread and the assumed protection.
 
         :param ax: Existing axes, or ``None`` to create a figure.
@@ -425,7 +427,9 @@ class ProtectedLevelResult:
         """
         return _round_half_up(self.effective_level)
 
-    def plot(self, ax: Axes | None = None, language: str = "en", **kwargs: Any) -> Axes:
+    def plot(
+        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    ) -> Axes:
         """Draw the band levels the protector leaves, where there are any.
 
         :param ax: Existing axes, or ``None`` to create a figure.
@@ -597,7 +601,9 @@ class HMLRatingResult:
             _round_half_up(self.low),
         )
 
-    def plot(self, ax: Axes | None = None, language: str = "en", **kwargs: Any) -> Axes:
+    def plot(
+        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    ) -> Axes:
         """Draw the predicted noise level reduction against ``LpC - LpA``.
 
         :param ax: Existing axes, or ``None`` to create a figure.
@@ -793,7 +799,9 @@ class SNRRatingResult:
         """
         return _round_half_up(self.snr)
 
-    def plot(self, ax: Axes | None = None, language: str = "en", **kwargs: Any) -> Axes:
+    def plot(
+        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    ) -> Axes:
         """Draw the per-subject ratings the single number was reduced from.
 
         :param ax: Existing axes, or ``None`` to create a figure.

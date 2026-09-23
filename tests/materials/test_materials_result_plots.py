@@ -50,7 +50,7 @@ def test_impedance_tube_plot_alpha_and_reflection() -> None:
 
 def test_transfer_matrix_plot_tl_and_absorption() -> None:
     tm, f, rho_c = _transfer_matrix()
-    ax = tm.plot(f, rho_c)
+    ax = tm.plot(frequencies=f, characteristic_impedance=rho_c)
     # Primary axis: the Eq. (26) transmission loss (0 dB for a pure air layer).
     np.testing.assert_allclose(
         ax.lines[0].get_ydata(), tm.transmission_loss(rho_c), atol=1e-12
@@ -71,7 +71,9 @@ def test_transfer_matrix_plot_tl_and_absorption() -> None:
 
 def test_transfer_matrix_plot_forwards_kwargs_and_composes() -> None:
     tm, f, rho_c = _transfer_matrix()
-    ax = tm.plot(f, rho_c, linewidth=2, color="red")
+    ax = tm.plot(
+        frequencies=f, characteristic_impedance=rho_c, linewidth=2, color="red"
+    )
     line = ax.lines[0]
     assert line.get_linewidth() == 2.0
     assert plt.matplotlib.colors.to_rgba(line.get_color()) == (
@@ -79,19 +81,19 @@ def test_transfer_matrix_plot_forwards_kwargs_and_composes() -> None:
     )
     plt.close("all")
     fig, external = plt.subplots()
-    out = tm.plot(f, rho_c, ax=external)
+    out = tm.plot(frequencies=f, characteristic_impedance=rho_c, ax=external)
     assert out is external
     plt.close(fig)
 
 
 def test_transfer_matrix_plot_spanish_and_bad_language() -> None:
     tm, f, rho_c = _transfer_matrix()
-    ax = tm.plot(f, rho_c, language="es")
+    ax = tm.plot(frequencies=f, characteristic_impedance=rho_c, language="es")
     assert "ASTM E2611" in ax.get_title()
     assert "matriz de transferencia" in ax.get_title()
     plt.close("all")
     with pytest.raises(ValueError, match=r"Unknown language"):
-        tm.plot(f, rho_c, language="fr")
+        tm.plot(frequencies=f, characteristic_impedance=rho_c, language="fr")
 
 
 def test_layered_absorber_plot_alpha_and_reflection() -> None:
@@ -133,8 +135,8 @@ def test_transfer_matrix_plot_rejects_mismatched_frequency() -> None:
     # caller's vector to them by name instead of letting matplotlib report
     # two anonymous shapes.
     tm, f, rho_c = _transfer_matrix()
-    with pytest.raises(ValueError, match=r"TransferMatrix\.plot: 'frequency'"):
-        tm.plot(f[:-3], rho_c)
+    with pytest.raises(ValueError, match=r"TransferMatrix\.plot: 'frequencies'"):
+        tm.plot(frequencies=f[:-3], characteristic_impedance=rho_c)
     plt.close("all")
 
 
@@ -143,7 +145,7 @@ def test_transfer_matrix_plot_rejects_nan_impedance() -> None:
     # axes under the ASTM title); require_positive refuses it by name.
     tm, f, _rho_c = _transfer_matrix()
     with pytest.raises(ValueError, match="'characteristic_impedance' must be positive"):
-        tm.plot(f, float("nan"))
+        tm.plot(frequencies=f, characteristic_impedance=float("nan"))
     plt.close("all")
 
 

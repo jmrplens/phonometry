@@ -261,7 +261,7 @@ def test_steady_tone_gives_flat_trace() -> None:
     res = psychoacoustics.loudness_moore_glasberg_time(
         _tone(1000.0, 50.0, duration=1.5), FS
     )
-    steady = res.long_term_loudness[res.time > 0.8]
+    steady = res.long_term_loudness[res.times > 0.8]
     assert steady.std() < 0.02
     assert res.long_term_loudness[-1] == pytest.approx(res.n_max, rel=1e-3)
 
@@ -272,7 +272,7 @@ def test_short_term_reacts_faster_than_long_term() -> None:
     stl, ltl, time = (
         res.short_term_loudness,
         res.long_term_loudness,
-        res.time,
+        res.times,
     )
     half = 0.5 * ltl[-1]
     t_stl = time[np.argmax(stl >= half)]
@@ -292,7 +292,7 @@ def test_release_is_slower_than_attack() -> None:
     stl, ltl, time = (
         res.short_term_loudness,
         res.long_term_loudness,
-        res.time,
+        res.times,
     )
     offset = int(np.argmin(np.abs(time - 0.3)))
 
@@ -340,7 +340,7 @@ def test_result_fields_and_percentiles() -> None:
         _tone(1000.0, 60.0), FS, percentiles=(5.0, 50.0, 95.0)
     )
     assert isinstance(res, psychoacoustics.MooreGlasbergTimeVaryingLoudness)
-    n = res.time.size
+    n = res.times.size
     assert res.short_term_loudness.shape == (n,)
     assert res.long_term_loudness.shape == (n,)
     assert res.short_term_loudness_level.shape == (n,)
@@ -547,7 +547,7 @@ def test_n_max_left_behind_by_a_cropped_trace_is_refused(mg_tone: MgTone) -> Non
     res = mg_tone(1000.0, 40.0)
     head = slice(0, 50)  # the attack, well below the settled peak
     cropped = {
-        "time": res.time[head],
+        "times": res.times[head],
         "short_term_loudness": res.short_term_loudness[head],
         "long_term_loudness": res.long_term_loudness[head],
         "short_term_loudness_level": res.short_term_loudness_level[head],
@@ -622,7 +622,7 @@ def test_producer_pair_survives_and_an_empty_trace_peaks_at_zero(
     empty = np.empty(0, dtype=np.float64)
     blank = dataclasses.replace(
         res,
-        time=empty,
+        times=empty,
         short_term_loudness=empty,
         long_term_loudness=empty,
         short_term_loudness_level=empty,

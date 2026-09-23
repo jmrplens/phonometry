@@ -78,10 +78,14 @@ for typical microphone noise it comes out roughly 10 dB above the
 A-weighted number for the same capsule. Neither is wrong: they are
 different weightings of the same voltage, and comparing a dB(A) figure from
 one datasheet with a dB(468) figure from another silently flatters the
-first by that margin. The signal-to-noise ratio re 1 Pa (94 dB SPL) is
+first by that margin. IEC 60268-1 still cites the curve by its earlier name,
+CCIR Recommendation 468, which is why older datasheets print the same figure
+as dB(CCIR); the library calls it by the current document and spells the
+weighting `"468"` wherever it takes one. The signal-to-noise ratio re 1 Pa
+(94 dB SPL) is
 derived from the same equivalent noise level, and the overload sound
 pressure level (clause 15.2) bounds the usable range from above. The
-BS.468 weighting curve itself is exposed as `itu_r_468_weighting` in the
+ITU-R BS.468-4 weighting curve itself is exposed as `itu_r_468_weighting` in the
 [electroacoustics distortion set](electroacoustics.md), where it also
 weights THD. The quasi-peak detector is implemented too, as
 `broadcast.quasi_peak_meter`
@@ -90,7 +94,7 @@ weights THD. The quasi-peak detector is implemented too, as
 inherent-noise level computed from the network and an r.m.s. sum is still
 not a dBqps figure. Clause 17 has no waveform to hand it either (it takes
 the stated voltage or level from the data sheet), so
-`MicrophoneNoise(weighting="CCIR")` stays what it always was, metadata
+`MicrophoneNoise(weighting="468")` stays what it always was, metadata
 recording how the supplier measured their figure rather than a measurement
 this library made.
 
@@ -301,7 +305,7 @@ conventions.*
 ## See also
 
 - [Electroacoustics](electroacoustics.md): the IEC 60268-3 distortion set,
-  THD+N and SINAD, the ITU-R 468 weighted THD and the H1/H2
+  THD+N and SINAD, the ITU-R BS.468-4 weighted THD and the H1/H2
   frequency-response estimators that produce the measured curves.
 - [Loudspeaker Characterisation (IEC 60268-5)](loudspeakers.md): the
   companion rated-characteristics report for the reproducing side of the

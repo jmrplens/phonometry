@@ -294,10 +294,15 @@ class MicrophoneNoise:
         :attr:`voltage`.
     :ivar weighting: Weighting of the inherent-noise measurement: ``"A"``
         (default, the IEC 60268-1 6.2.1 A-weighted r.m.s. recommendation) or
-        ``"CCIR"`` (the 6.2.2 psophometric quasi-peak measurement to CCIR
-        Recommendation 468). These are the two weighted wide-band noise
-        measurements IEC 60268-1 defines; the unweighted band spectrum of
-        6.2.3 travels in :attr:`spectrum` instead.
+        ``"468"`` (the 6.2.2 psophometric quasi-peak measurement to ITU-R
+        BS.468-4, which IEC 60268-1 still cites by its earlier name, CCIR
+        Recommendation 468, and which older datasheets quote as dB(CCIR)).
+        These are the two weighted wide-band noise measurements IEC 60268-1
+        defines; the unweighted band spectrum of 6.2.3 travels in
+        :attr:`spectrum` instead. ``"468"`` is the spelling
+        :func:`~phonometry.filters.weighting_filter` and
+        :func:`~phonometry.electroacoustics.weighted_thd` use for the same
+        curve.
     :ivar spectrum: Inherent-noise spectrum as
         ``(frequencies, band_levels_db)`` in (Hz, dB SPL) (17.2 b).
     """
@@ -312,10 +317,10 @@ class MicrophoneNoise:
 _DEFAULT_NOISE = MicrophoneNoise()
 
 #: The weighted wide-band inherent-noise measurements IEC 60268-1 defines:
-#: A-weighted r.m.s. (6.2.1) and psophometric quasi-peak to CCIR
-#: Recommendation 468 (6.2.2). The fiche prints the tag inside ``dB(...)``
-#: markup, so an arbitrary string is refused rather than interpolated.
-_NOISE_WEIGHTINGS = ("A", "CCIR")
+#: A-weighted r.m.s. (6.2.1) and psophometric quasi-peak to ITU-R BS.468-4
+#: (6.2.2). The fiche prints the tag inside ``dB(...)`` markup, so an
+#: arbitrary string is refused rather than interpolated.
+_NOISE_WEIGHTINGS = ("A", "468")
 
 
 @dataclass(frozen=True)
@@ -402,7 +407,7 @@ class MicrophoneCharacteristics:
         inherent noise, in dB SPL with :attr:`noise_weighting` weighting (17),
         or ``None``.
     :ivar noise_weighting: Weighting of the inherent-noise measurement
-        (IEC 60268-1), ``"A"`` by default.
+        (IEC 60268-1), ``"A"`` by default or ``"468"``.
     :ivar max_spl_db: Overload sound pressure level at
         :attr:`max_spl_thd_percent` total harmonic distortion, in dB SPL
         (15.2), or ``None``.
@@ -632,9 +637,9 @@ class MicrophoneCharacteristics:
 
     def plot(
         self,
-        quantity: str = "response",
         ax: Axes | None = None,
         *,
+        quantity: str = "response",
         language: str = "en",
         **kwargs: Any,
     ) -> Axes:
@@ -648,9 +653,9 @@ class MicrophoneCharacteristics:
         band-level spectrum) and ``"distortion"`` (total harmonic distortion
         against sound pressure level).
 
-        :param quantity: Which characteristic to plot (see above).
         :param ax: Existing axes to draw on, or ``None`` for a fresh figure (a
             polar axes is created for ``"directivity"``).
+        :param quantity: Which characteristic to plot (see above).
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :return: The axes the characteristic was drawn on.
         :raises ValueError: If ``quantity`` or ``language`` is unknown, or the

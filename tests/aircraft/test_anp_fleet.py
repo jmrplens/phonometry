@@ -138,11 +138,11 @@ def test_noise_contour_smoke() -> None:
     x = np.linspace(-2000.0, 8000.0, 30)
     y = np.linspace(-3000.0, 3000.0, 25)
     contour = _DB.noise_contour("747100", "departure", x=x, y=y, metric="exposure")
-    assert contour.level.shape == (y.size, x.size)
-    assert np.isfinite(contour.level).all()
+    assert contour.levels.shape == (y.size, x.size)
+    assert np.isfinite(contour.levels).all()
     # Loudest near the track (y = 0), quieter far to the side.
-    near = contour.level[np.argmin(np.abs(y)), np.argmin(np.abs(x - 4000.0))]
-    far = contour.level[0, np.argmin(np.abs(x - 4000.0))]
+    near = contour.levels[np.argmin(np.abs(y)), np.argmin(np.abs(x - 4000.0))]
+    far = contour.levels[0, np.argmin(np.abs(x - 4000.0))]
     assert near > far
 
 

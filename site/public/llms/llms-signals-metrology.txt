@@ -813,9 +813,9 @@ fits an acceptance mask; these are handed numbers somebody measured on a
 bench, and report whether *that instrument, on the day it was measured*, meets
 the standard it is sold against. There are no classes and no decibel margins
 in them: the verdict is a pass or a fail, in the unit its own standard writes
-its tolerances in. Four of them return a result object whose `passes` says so
-and whose other fields say where and by how much; `verify_running_rms_decay`
-grades one printed row and returns the `bool`.
+its tolerances in. All five return a result object whose verdict says so and
+whose other fields say where and by how much, down to `verify_running_rms_decay`,
+which grades one printed row and keeps it.
 
 | What is graded | Verifier | Acceptance limits |
 | :--- | :--- | :--- |

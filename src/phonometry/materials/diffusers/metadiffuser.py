@@ -106,7 +106,7 @@ class MetadiffuserResult:
     ``None`` for hand-built results.
     """
 
-    frequency: Real
+    frequencies: Real
     reflection: Complex
     absorption: Real
     well_absorption: Real
@@ -230,7 +230,7 @@ def metadiffuser_reflection(
         rows[i] = prediction.reflection
     well_alpha = 1.0 - np.abs(rows) ** 2
     return MetadiffuserResult(
-        frequency=f,
+        frequencies=f,
         reflection=rows,
         absorption=np.asarray(well_alpha.mean(axis=0), dtype=np.float64),
         well_absorption=np.asarray(well_alpha, dtype=np.float64),

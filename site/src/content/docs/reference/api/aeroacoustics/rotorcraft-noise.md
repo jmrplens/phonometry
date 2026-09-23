@@ -570,7 +570,7 @@ RotorcraftEventResult(
     frequencies: NDArray[np.float64],
     emission_times: NDArray[np.float64],
     times: NDArray[np.float64],
-    distance: NDArray[np.float64],
+    distances: NDArray[np.float64],
     azimuth: NDArray[np.float64],
     polar: NDArray[np.float64],
     band_levels: NDArray[np.float64],
@@ -593,7 +593,7 @@ A rotorcraft single-event time history at a receiver (Doc 32 §6.1).
 | `frequencies` | Band centre frequencies, in Hz, shape `(F,)`. |
 | `emission_times` | Emission times `t_e`, in s, shape `(K,)`. |
 | `times` | Recorded times $t_\mathrm{r} = t_\mathrm{e} + r/c$ (Eq. 22), in s, shape `(K,)`. |
-| `distance` | Slant distance `r` per step, in metres, shape `(K,)`. |
+| `distances` | Slant distance `r` per step, in metres, shape `(K,)`. |
 | `azimuth` | Emission azimuth `φ` per step, in degrees, shape `(K,)`. |
 | `polar` | Emission polar angle `θ` per step, in degrees, shape `(K,)`. |
 | `band_levels` | Received (unweighted) band levels, in dB, shape `(K, F)`. |
@@ -709,7 +709,7 @@ Plot the hemisphere directivity for one band (polar section).
 RotorcraftNoiseContourResult(
     x: NDArray[np.float64],
     y: NDArray[np.float64],
-    level: NDArray[np.float64],
+    levels: NDArray[np.float64],
     metric: str,
 )
 ```
@@ -722,7 +722,7 @@ Rotorcraft single-event noise level over a ground grid (Doc 32 §6.3).
 | :--- | :--- |
 | `x` | Grid x coordinates, in metres, shape `(nx,)`. |
 | `y` | Grid y coordinates, in metres, shape `(ny,)`. |
-| `level` | Event level over the grid, in dB(A), shape `(ny, nx)`. |
+| `levels` | Event level over the grid, in dB(A), shape `(ny, nx)`. |
 | `metric` | `"exposure"` (SEL) or `"maximum"` (LASmax). |
 
 ### RotorcraftNoiseContourResult.plot()

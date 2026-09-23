@@ -36,9 +36,9 @@ what those pages add beside this procedure is unknown here.
 sti_adjusted_for_levels(
     mtf: np.ndarray,
     *,
-    measured_level: Sequence[float] | np.ndarray,
+    measured_levels: Sequence[float] | np.ndarray,
     measured_ambient: Sequence[float] | np.ndarray | None = None,
-    operational_level: Sequence[float] | np.ndarray,
+    operational_levels: Sequence[float] | np.ndarray,
     operational_ambient: Sequence[float] | np.ndarray | None = None,
 ) -> STIResult
 ```
@@ -52,7 +52,7 @@ it without measuring again:
 
 1. acquire the modulation transfer matrix together with the speech and
    background-noise octave-band levels that were present during the
-   measurement (`mtf`, `measured_level`, `measured_ambient`);
+   measurement (`mtf`, `measured_levels`, `measured_ambient`);
 2. divide out the correction those levels produced, which removes the
    background noise, the auditory masking and the reception threshold
    and leaves the matrix of the transmission channel alone;
@@ -79,7 +79,7 @@ here.
 `mtf` is the matrix *as measured*, with the noise, masking
 and threshold of the measurement still in it, which is what
 [`STIResult.mtf`](/phonometry/reference/api/speech/sti/#stiresult) holds after a measurement run
-with `level` and `ambient`. Feeding a matrix that never had them
+with `levels` and `ambient`. Feeding a matrix that never had them
 applied removes what was never added and lowers the result.
 [`STIResult.adjusted_for_levels`](/phonometry/reference/api/speech/sti/#stiresultadjusted_for_levels) takes the measurement levels
 from the result itself and is the safe route.
@@ -90,9 +90,9 @@ from the result itself and is the safe route.
 | Name | Description |
 | :--- | :--- |
 | `mtf` | Measured modulation transfer matrix, shape (7, n_modulation_frequencies). |
-| `measured_level` | Speech octave-band levels during the measurement, dB SPL (7 values). |
+| `measured_levels` | Speech octave-band levels during the measurement, dB SPL (7 values). |
 | `measured_ambient` | Background-noise octave-band levels during the measurement, dB SPL (7 values); `None` for a measurement whose matrix carries masking and threshold but no noise. |
-| `operational_level` | Speech octave-band levels of the condition being simulated, dB SPL (7 values). |
+| `operational_levels` | Speech octave-band levels of the condition being simulated, dB SPL (7 values). |
 | `operational_ambient` | Occupancy-noise octave-band levels of that condition, dB SPL (7 values); `None` simulates a silent room. |
 
 **Returns:** [`STIResult`](/phonometry/reference/api/speech/sti/#stiresult) at the operational levels, carrying them in `band_levels` and `ambient_levels`.
@@ -110,7 +110,7 @@ sti_from_impulse_response(
     ir: Signal | list[float] | np.ndarray,
     fs: int | None,
     snr: None,
-    level: Sequence[float] | np.ndarray,
+    levels: Sequence[float] | np.ndarray,
     ambient: Sequence[float] | np.ndarray,
 ) -> STIResult
 
@@ -119,7 +119,7 @@ sti_from_impulse_response(
     fs: int | None = ...,
     snr: None = ...,
     *,
-    level: Sequence[float] | np.ndarray,
+    levels: Sequence[float] | np.ndarray,
     ambient: Sequence[float] | np.ndarray,
 ) -> STIResult
 
@@ -127,7 +127,7 @@ sti_from_impulse_response(
     ir: Signal | list[float] | np.ndarray,
     fs: int | None = ...,
     snr: float | Sequence[float] | np.ndarray | None = ...,
-    level: Sequence[float] | np.ndarray | None = ...,
+    levels: Sequence[float] | np.ndarray | None = ...,
 ) -> STIResult
 ```
 
@@ -147,7 +147,7 @@ degradation, optional auditory masking and absolute reception
 threshold correction, effective SNR clipped to +/-15 dB, transmission
 indices, band MTIs and the male-weighted STI (Ed.5 Table A.1).
 
-When neither `level` nor `ambient` is given the level-dependent
+When neither `levels` nor `ambient` is given the level-dependent
 auditory masking and the absolute reception threshold corrections are
 skipped (they require absolute band levels), matching the common
 "noise-free indirect measurement" use of the standard.
@@ -169,11 +169,11 @@ STI itself stays within ~0.001.
 
 | Name | Description |
 | :--- | :--- |
-| `ir` | Impulse response (1D). Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples and then cancels: every modulation index is normalised by the total intensity of its own band, so a factor on the record moves neither the transfer values nor the STI. The absolute levels the noise corrections need arrive through `level` and `ambient`, in dB, not from the samples. |
+| `ir` | Impulse response (1D). Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples and then cancels: every modulation index is normalised by the total intensity of its own band, so a factor on the record moves neither the transfer values nor the STI. The absolute levels the noise corrections need arrive through `levels` and `ambient`, in dB, not from the samples. |
 | `fs` | Sample rate in Hz (>= 22,5 kHz so the 8 kHz band fits). Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
-| `snr` | Optional signal-to-noise ratio in dB, scalar or one value per octave band. Degrades m by 1/(1 + 10^(-SNR/10)); combined with `level` it is interpreted as ambient levels `level - snr` so noise is not applied twice. Mutually exclusive with `ambient`. |
-| `level` | Optional speech octave-band levels in dB SPL (7 values) at the listener position; enables the auditory masking (Ed.5 Table A.2) and reception threshold (Ed.5 Table A.3) corrections. |
-| `ambient` | Optional ambient noise octave-band levels in dB SPL (7 values); requires `level`. |
+| `snr` | Optional signal-to-noise ratio in dB, scalar or one value per octave band. Degrades m by 1/(1 + 10^(-SNR/10)); combined with `levels` it is interpreted as ambient levels `levels - snr` so noise is not applied twice. Mutually exclusive with `ambient`. |
+| `levels` | Optional speech octave-band levels in dB SPL (7 values) at the listener position; enables the auditory masking (Ed.5 Table A.2) and reception threshold (Ed.5 Table A.3) corrections. |
+| `ambient` | Optional ambient noise octave-band levels in dB SPL (7 values); requires `levels`. |
 
 **Returns:** [`STIResult`](/phonometry/reference/api/speech/sti/#stiresult) with `mtf` of shape (7, 14).
 
@@ -184,7 +184,7 @@ stipa(
     x: Signal | list[float] | np.ndarray,
     fs: int | None,
     reference: Signal | list[float] | np.ndarray | None,
-    level: Sequence[float] | np.ndarray,
+    levels: Sequence[float] | np.ndarray,
     ambient: Sequence[float] | np.ndarray,
 ) -> STIResult
 
@@ -193,7 +193,7 @@ stipa(
     fs: int | None = ...,
     reference: Signal | list[float] | np.ndarray | None = ...,
     *,
-    level: Sequence[float] | np.ndarray,
+    levels: Sequence[float] | np.ndarray,
     ambient: Sequence[float] | np.ndarray,
 ) -> STIResult
 
@@ -201,7 +201,7 @@ stipa(
     x: Signal | list[float] | np.ndarray,
     fs: int | None = ...,
     reference: Signal | list[float] | np.ndarray | None = ...,
-    level: Sequence[float] | np.ndarray | None = ...,
+    levels: Sequence[float] | np.ndarray | None = ...,
 ) -> STIResult
 ```
 
@@ -218,7 +218,7 @@ actually emitted signal is supplied - and feed the same masking /
 threshold / TI / STI chain as the full method.
 
 Physical background noise is already contained in the recording; use
-`level` (and optionally `ambient`) only to enable the absolute
+`levels` (and optionally `ambient`) only to enable the absolute
 level-dependent corrections, which are otherwise skipped.
 
 An [`STIWarning`](/phonometry/reference/api/speech/sti/#stiwarning) is emitted when the recording is shorter than
@@ -231,11 +231,11 @@ biased low (an ideal loopback gives STI ~0.956 at 5 s vs ~0.998 at 18 s).
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Recorded STIPA signal (1D), 15 s to 25 s recommended. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples and then cancels: every modulation index is normalised by the total intensity of its own band, so a factor on the record moves neither the transfer values nor the STI. The absolute levels the noise corrections need arrive through `level` and `ambient`, in dB, not from the samples. |
+| `x` | Recorded STIPA signal (1D), 15 s to 25 s recommended. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples and then cancels: every modulation index is normalised by the total intensity of its own band, so a factor on the record moves neither the transfer values nor the STI. The absolute levels the noise corrections need arrive through `levels` and `ambient`, in dB, not from the samples. |
 | `fs` | Sample rate in Hz (>= 22,5 kHz). Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `reference` | Optional reference recording of the undistorted test signal; its measured modulation depths replace the nominal 0,55 as normalization (useful for non-conformant sources). Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal). It is a second recording of the same test signal, so it has to share the rate: two Signals that disagree are refused rather than arbitrated, and measuring the reference on a rate that is not its own would return a perfect STI for a mismatch. Its calibration is applied like any other record's, and then cancels, because what is taken from it is a modulation depth and those are normalised. |
-| `level` | Optional speech octave-band levels in dB SPL (7 values) enabling auditory masking and reception threshold corrections. |
-| `ambient` | Optional ambient noise octave-band levels in dB SPL (7 values); requires `level`. |
+| `levels` | Optional speech octave-band levels in dB SPL (7 values) enabling auditory masking and reception threshold corrections. |
+| `ambient` | Optional ambient noise octave-band levels in dB SPL (7 values); requires `levels`. |
 
 **Returns:** [`STIResult`](/phonometry/reference/api/speech/sti/#stiresult) with `mtf` of shape (7, 2).
 
@@ -305,7 +305,7 @@ be moved to another speech and occupancy-noise condition.
 ```python
 STIResult.adjusted_for_levels(
     *,
-    operational_level: Sequence[float] | np.ndarray,
+    operational_levels: Sequence[float] | np.ndarray,
     operational_ambient: Sequence[float] | np.ndarray | None = None,
 ) -> STIResult
 ```
@@ -323,7 +323,7 @@ edition the procedure comes from.
 
 | Name | Description |
 | :--- | :--- |
-| `operational_level` | Speech octave-band levels of the condition being simulated, in dB SPL (7 values). |
+| `operational_levels` | Speech octave-band levels of the condition being simulated, in dB SPL (7 values). |
 | `operational_ambient` | Occupancy-noise octave-band levels of that condition, in dB SPL (7 values); `None` simulates a silent room. |
 
 **Returns:** A new [`STIResult`](/phonometry/reference/api/speech/sti/#stiresult) at the operational levels.

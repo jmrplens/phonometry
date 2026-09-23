@@ -101,6 +101,6 @@ def test_intensity_bar_width_scales_with_frequency_on_log_axis() -> None:
 def test_intensity_without_band_data_raises() -> None:
     p1 = RNG.standard_normal(FS)
     res = ph.emission.sound_intensity(p1, np.roll(p1, 1), FS, spacing=0.012)
-    assert res.frequency is None
+    assert res.frequencies is None
     with pytest.raises(ValueError, match=r"plot\(\) needs per-band intensity data"):
         res.plot()

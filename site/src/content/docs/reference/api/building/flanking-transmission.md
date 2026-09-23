@@ -79,7 +79,7 @@ are bracketed and excluded from the single-number mean when the per-band
 
 ```python
 band_mode_count(
-    frequency: Sequence[float] | np.ndarray,
+    frequencies: Sequence[float] | np.ndarray,
     area: float,
     critical_frequency: float,
     *,
@@ -99,7 +99,7 @@ band is
 
 | Name | Description |
 | :--- | :--- |
-| `frequency` | Band centre frequency `f`, in Hz, per band. |
+| `frequencies` | Band centre frequency `f`, in Hz, per band. |
 | `area` | Element area `S`, in m². |
 | `critical_frequency` | Critical frequency `fc`, in Hz. |
 | `speed_of_sound` | Speed of sound in air `c0`, in m/s. |
@@ -196,7 +196,7 @@ $\overline{D}_{v,ij} = \frac{1}{2}(D_{v,ij} + D_{v,ji})$ with
 equivalent_absorption_length(
     area: float,
     structural_reverberation_time: float | Sequence[float] | np.ndarray,
-    frequency: Sequence[float] | np.ndarray,
+    frequencies: Sequence[float] | np.ndarray,
     *,
     speed_of_sound: float = 343.0,
 ) -> np.ndarray
@@ -216,7 +216,7 @@ with $f_{\mathrm{ref}} = 1000$ Hz.
 | :--- | :--- |
 | `area` | Element surface area `Sj`, in m². |
 | `structural_reverberation_time` | Structural reverberation time `Ts,j`, in s, per band (or a single value broadcast to all bands). |
-| `frequency` | Band centre frequency `f`, in Hz, per band. |
+| `frequencies` | Band centre frequency `f`, in Hz, per band. |
 | `speed_of_sound` | Speed of sound in air `c0`, in m/s (default 343 m/s). |
 
 **Returns:** Equivalent absorption length `aj`, in m, per band.
@@ -553,7 +553,7 @@ $\overline{D}_{v,ij} \ge 3 - 10 \log_{10}\frac{m_i f_{\mathrm{c}j}}{m_j f_{\math
 
 ```python
 total_loss_factor(
-    frequency: Sequence[float] | np.ndarray,
+    frequencies: Sequence[float] | np.ndarray,
     structural_reverberation_time: float | Sequence[float] | np.ndarray,
 ) -> np.ndarray
 ```
@@ -564,7 +564,7 @@ Total loss factor $\eta = 2.2 / (f \, T_\mathrm{s})$ (Clause 7.3.1).
 
 | Name | Description |
 | :--- | :--- |
-| `frequency` | Band centre frequency `f`, in Hz, per band. |
+| `frequencies` | Band centre frequency `f`, in Hz, per band. |
 | `structural_reverberation_time` | Structural reverberation time `Ts`, in s, per band (or a single value broadcast to all bands). |
 
 **Returns:** Total loss factor `η` (dimensionless) per band.
@@ -610,7 +610,7 @@ vibration_reduction_index(
     area_i: float,
     area_j: float,
     *,
-    frequency: Sequence[float] | np.ndarray | None = None,
+    frequencies: Sequence[float] | np.ndarray | None = None,
     structural_reverberation_time_i: float | Sequence[float] | np.ndarray | None = None,
     structural_reverberation_time_j: float | Sequence[float] | np.ndarray | None = None,
     speed_of_sound: float = 343.0,
@@ -637,8 +637,8 @@ is used.
 | `junction_length` | Common-edge junction length `lij`, in m. |
 | `area_i` | Area `Si` of element `i`, in m². |
 | `area_j` | Area `Sj` of element `j`, in m². |
-| `frequency` | Band centre frequencies, in Hz. Required for Formula (12) and for the single-number mean; optional for the simplified form. |
-| `structural_reverberation_time_i` | `Ts,i` per band (or a single value), in s. Supply together with `structural_reverberation_time_j` and `frequency` to use Formula (12); omit for the simplified form. |
+| `frequencies` | Band centre frequencies, in Hz. Required for Formula (12) and for the single-number mean; optional for the simplified form. |
+| `structural_reverberation_time_i` | `Ts,i` per band (or a single value), in s. Supply together with `structural_reverberation_time_j` and `frequencies` to use Formula (12); omit for the simplified form. |
 | `structural_reverberation_time_j` | `Ts,j` per band (or a single value), in s. |
 | `speed_of_sound` | Speed of sound in air `c0`, in m/s. |
 | `modal_overlap` | Modal overlap factor `M` per band for the heavier (least-overlapped) of the two elements (see [`modal_overlap_factor`](/phonometry/reference/api/building/flanking-transmission/#modal_overlap_factor)). When supplied, bands with $M < 0.25$ are flagged as bracketed and excluded from the single-number `K̄ij` (ISO 10848-4:2010, Clause 9). |

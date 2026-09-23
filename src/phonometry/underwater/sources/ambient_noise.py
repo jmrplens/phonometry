@@ -98,7 +98,7 @@ def thermal_noise_spectrum(
     *,
     temperature_c: float = 16.85,
     density: float = 1025.0,
-    sound_speed: float = 1500.0,
+    speed_of_sound: float = 1500.0,
 ) -> NDArray[np.float64]:
     r"""Molecular thermal-noise spectrum level (Mellen 1952), dB re 1 µPa²/Hz.
 
@@ -109,7 +109,7 @@ def thermal_noise_spectrum(
     :param temperature_c: Water temperature, in degrees Celsius (default 16.85 °C
         = 290 K).
     :param density: Water density :math:`\rho`, in kg/m³ (default 1025).
-    :param sound_speed: Sound speed ``c``, in m/s (default 1500).
+    :param speed_of_sound: Sound speed ``c``, in m/s (default 1500).
     :return: Thermal-noise spectrum level per frequency, in dB re 1 µPa²/Hz.
     :raises ValueError: If the inputs are invalid.
     """
@@ -118,7 +118,7 @@ def thermal_noise_spectrum(
         require_above_absolute_zero(float(temperature_c), "temperature_c") + 273.15
     )
     rho = require_positive(density, "density")
-    c = require_positive(sound_speed, "sound_speed")
+    c = require_positive(speed_of_sound, "speed_of_sound")
     p2 = 4.0 * np.pi * _BOLTZMANN * t_kelvin * rho * f**2 / c
     return np.asarray(10.0 * np.log10(p2 / _P_REF**2), dtype=np.float64)
 
@@ -127,7 +127,7 @@ def thermal_noise_spectrum(
 class AmbientNoiseResult:
     """Composite ambient-noise spectrum (Wenz framework).
 
-    :ivar frequency: Frequencies, in Hz.
+    :ivar frequencies: Frequencies, in Hz.
     :ivar spectrum_level: Composite spectrum level (energy sum of the enabled
         components), in dB re 1 µPa²/Hz.
     :ivar wind: Wind-noise component per frequency, in dB re 1 µPa²/Hz.
@@ -136,7 +136,7 @@ class AmbientNoiseResult:
     :ivar wind_speed_knots: The wind speed used, in knots.
     """
 
-    frequency: NDArray[np.float64]
+    frequencies: NDArray[np.float64]
     spectrum_level: NDArray[np.float64]
     wind: NDArray[np.float64]
     thermal: NDArray[np.float64]
@@ -164,11 +164,11 @@ class AmbientNoiseResult:
         :raises ValueError: if a component disagrees with the frequency axis.
         """
         require_ranks(
-            self, frequency=1, spectrum_level=1, wind=1, thermal=1, shipping=1
+            self, frequencies=1, spectrum_level=1, wind=1, thermal=1, shipping=1
         )
         require_same_length(
             self,
-            "frequency",
+            "frequencies",
             "spectrum_level",
             "wind",
             "thermal",
@@ -195,7 +195,7 @@ def ocean_ambient_noise(
     shipping: NDArray[np.float64] | list[float] | None = None,
     temperature_c: float = 16.85,
     density: float = 1025.0,
-    sound_speed: float = 1500.0,
+    speed_of_sound: float = 1500.0,
 ) -> AmbientNoiseResult:
     """Composite deep-water ambient-noise spectrum (wind + thermal [+ shipping]).
 
@@ -208,14 +208,14 @@ def ocean_ambient_noise(
         re 1 µPa²/Hz (same length as ``frequency_hz``), or ``None``.
     :param temperature_c: Water temperature, in degrees Celsius.
     :param density: Water density, in kg/m³.
-    :param sound_speed: Sound speed, in m/s.
+    :param speed_of_sound: Sound speed, in m/s.
     :return: An :class:`AmbientNoiseResult`.
     :raises ValueError: If the inputs are invalid.
     """
     f = require_positive_array(frequency_hz, "frequency_hz")
     wind = wind_noise_spectrum(f, wind_speed_knots)
     thermal = thermal_noise_spectrum(
-        f, temperature_c=temperature_c, density=density, sound_speed=sound_speed
+        f, temperature_c=temperature_c, density=density, speed_of_sound=speed_of_sound
     )
     energies = 10.0 ** (wind / 10.0) + 10.0 ** (thermal / 10.0)
     ship_arr: NDArray[np.float64] | None = None
@@ -229,7 +229,7 @@ def ocean_ambient_noise(
         energies = energies + 10.0 ** (ship_arr / 10.0)
     spectrum = 10.0 * np.log10(energies)
     return AmbientNoiseResult(
-        frequency=f,
+        frequencies=f,
         spectrum_level=np.asarray(spectrum, dtype=np.float64),
         wind=wind,
         thermal=thermal,

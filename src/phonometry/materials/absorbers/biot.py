@@ -236,7 +236,7 @@ def frame_quarter_wave_resonance(
 class BiotWavesResult:
     r"""The three Biot waves of an isotropic air-saturated porous material.
 
-    All arrays share the shape of ``frequency``. ``compressional_wavenumber_1``
+    All arrays share the shape of ``frequencies``. ``compressional_wavenumber_1``
     and ``compressional_wavenumber_2`` are ``delta1`` and ``delta2`` of
     Eqs. (6.67)-(6.68) (the branch with :math:`-\sqrt{\Delta}` first, as
     printed, with :math:`\sqrt{\Delta}` taken on the root with non-positive
@@ -258,7 +258,7 @@ class BiotWavesResult:
     rather than the numbered ones.
     """
 
-    frequency: Real
+    frequencies: Real
     porosity: float
     tortuosity: float
     frame_density: float
@@ -445,7 +445,7 @@ def biot_waves(
     n_mod = _require_shear_modulus(shear_modulus, "shear_modulus")
     nu = _require_poisson_ratio(poisson_ratio)
 
-    f = np.asarray(medium.frequency, dtype=np.float64)
+    f = np.asarray(medium.frequencies, dtype=np.float64)
     omega = 2.0 * np.pi * f
     rho0 = medium.air_density
     rho_eq = np.asarray(medium.effective_density, dtype=np.complex128)
@@ -490,7 +490,7 @@ def biot_waves(
     mu3 = -rho12 / rho22
 
     return BiotWavesResult(
-        frequency=f,
+        frequencies=f,
         porosity=phi,
         tortuosity=alpha_inf,
         frame_density=rho1,
@@ -548,7 +548,7 @@ def biot_surface_impedance(waves: BiotWavesResult, thickness: float) -> Complex:
     """
     length = require_positive(thickness, "thickness")
     phi = waves.porosity
-    omega = 2.0 * np.pi * np.asarray(waves.frequency, dtype=np.float64)
+    omega = 2.0 * np.pi * np.asarray(waves.frequencies, dtype=np.float64)
     d1 = waves.compressional_wavenumber_1
     d2 = waves.compressional_wavenumber_2
     mu1 = waves.velocity_ratio_1
@@ -584,7 +584,7 @@ def _gamma(
     ``mu1``, ``D1`` and ``E1`` of the same columns make :math:`k_{13}` the
     only consistent reading; that reading is implemented here.
     """
-    omega = 2.0 * np.pi * np.asarray(waves.frequency, dtype=np.float64)
+    omega = 2.0 * np.pi * np.asarray(waves.frequencies, dtype=np.float64)
     k_t = np.asarray(transverse_wavenumber, dtype=np.complex128)
     n_mod = waves.shear_modulus
     p_coef, q_coef, r_coef = waves.elastic_p, waves.elastic_q, waves.elastic_r

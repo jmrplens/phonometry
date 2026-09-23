@@ -302,7 +302,7 @@ def test_velocity_ratios_satisfy_the_second_printed_form() -> None:
     well as the ratio.
     """
     waves = _glass_wool_waves(np.geomspace(20.0, 5000.0, 40))
-    omega = 2.0 * np.pi * waves.frequency
+    omega = 2.0 * np.pi * waves.frequencies
     for delta, mu in (
         (waves.compressional_wavenumber_1, waves.velocity_ratio_1),
         (waves.compressional_wavenumber_2, waves.velocity_ratio_2),
@@ -321,7 +321,7 @@ def test_compressional_wavenumbers_solve_the_characteristic_equation() -> None:
     ``Delta`` itself (Eq. (6.69)) breaks it.
     """
     waves = _glass_wool_waves(np.geomspace(20.0, 5000.0, 40))
-    omega = 2.0 * np.pi * waves.frequency
+    omega = 2.0 * np.pi * waves.frequencies
     p_c, q_c, r_c = waves.elastic_p, waves.elastic_q, waves.elastic_r
     r11, r12, r22 = waves.density_11, waves.density_12, waves.density_22
     det_m = p_c * r_c - q_c**2
@@ -345,7 +345,7 @@ def test_shear_velocity_ratio_matches_the_corrected_second_printed_form() -> Non
     eigenvalue as well as the ratio. Recorded in ``docs/ERRATA.md``.
     """
     waves = _glass_wool_waves(np.geomspace(20.0, 5000.0, 40))
-    omega = 2.0 * np.pi * waves.frequency
+    omega = 2.0 * np.pi * waves.frequencies
     corrected = (
         waves.shear_modulus * waves.shear_wavenumber**2 - omega**2 * waves.density_11
     ) / (omega**2 * waves.density_12)
@@ -367,7 +367,7 @@ def test_modified_densities_reproduce_the_printed_sum_rules() -> None:
     (6.39) with the viscous term cancelling between the pair).
     """
     waves = _glass_wool_waves(np.geomspace(20.0, 5000.0, 25))
-    rho0 = _glass_wool_medium(waves.frequency).air_density
+    rho0 = _glass_wool_medium(waves.frequencies).air_density
     assert np.allclose(
         waves.density_11 + waves.density_12, TABLE_6_1_FRAME_DENSITY, rtol=1e-12
     )
@@ -528,7 +528,7 @@ def _reference_field(
     passes through the table, so agreement pins every one of its 36 entries,
     including the ``kt`` terms that vanish at normal incidence.
     """
-    omega = 2.0 * np.pi * float(waves.frequency[0])
+    omega = 2.0 * np.pi * float(waves.frequencies[0])
     d1, d2 = (
         complex(waves.compressional_wavenumber_1[0]),
         complex(waves.compressional_wavenumber_2[0]),

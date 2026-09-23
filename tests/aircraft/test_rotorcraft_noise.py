@@ -1328,12 +1328,12 @@ def _flyover(
 
 def test_event_geometry_overhead() -> None:
     _t, _pos, res = _flyover(bands=[31.5])
-    k = int(np.argmin(res.distance))
-    assert res.distance[k] == pytest.approx(100.0, abs=1e-9)
+    k = int(np.argmin(res.distances))
+    assert res.distances[k] == pytest.approx(100.0, abs=1e-9)
     assert res.polar[k] == pytest.approx(90.0, abs=1e-6)
     assert abs(res.azimuth[k]) == pytest.approx(0.0, abs=1e-6)
     # Retarded time (Eq. 22) with c = 346.1 m/s, at every step.
-    assert np.allclose(res.times, res.emission_times + res.distance / 346.1)
+    assert np.allclose(res.times, res.emission_times + res.distances / 346.1)
     # Approaching rows look forward (theta < 90), receding rows rearward.
     assert np.all(res.polar[:k] < 90.0)
     assert np.all(res.polar[k + 1 :] > 90.0)
@@ -1346,7 +1346,7 @@ def test_event_bank_tilt_moves_azimuth() -> None:
     _, _, banked = _flyover(
         bands=[31.5], track_state=RotorcraftTrackState(bank_angle_deg=25.0)
     )
-    k = int(np.argmin(level_res.distance))
+    k = int(np.argmin(level_res.distances))
     assert level_res.azimuth[k] == pytest.approx(0.0, abs=1e-6)
     assert banked.azimuth[k] == pytest.approx(25.0, abs=1e-6)
 
@@ -1363,7 +1363,7 @@ def test_event_lamax_assembles_the_propagation_chain() -> None:
     # At the closest approach the received level is the source level plus
     # dLs + dLa + dLg + A, each from the public primitives.
     _, _, res = _flyover(bands=[31.5])
-    k = int(np.argmin(res.distance))
+    k = int(np.argmin(res.distances))
     freqs = np.array([31.5])
     expected = (
         100.0
@@ -1443,7 +1443,7 @@ def test_event_epnl_on_the_standard_grid() -> None:
     assert np.isfinite(res.epnl)
     assert np.isfinite(res.pnltm)
     assert res.pnltm >= np.nanmax(res.pnlt) - 1e-9
-    k = int(np.argmin(res.distance))
+    k = int(np.argmin(res.distances))
     assert np.isfinite(res.pnlt[k])
 
 
@@ -1506,9 +1506,9 @@ def test_event_history_and_spectrum_must_line_up() -> None:
     # that takes the step of LASmax reads the geometry back out at that index;
     # the band axis of `band_levels` is pinned by `frequencies` the same way.
     _t, _pos, res = _flyover(bands=[31.5], span=1000.0)
-    short_distance = res.distance[:-1]
-    with pytest.raises(ValueError, match=r"'distance'.*per emission step"):
-        dataclasses.replace(res, distance=short_distance)
+    short_distance = res.distances[:-1]
+    with pytest.raises(ValueError, match=r"'distances'.*per emission step"):
+        dataclasses.replace(res, distances=short_distance)
     extra_band = np.append(res.frequencies, 63.0)
     with pytest.raises(ValueError, match=r"'frequencies'.*per band"):
         dataclasses.replace(res, frequencies=extra_band)
@@ -1542,7 +1542,7 @@ def test_an_empty_history_keeps_its_undetermined_peak() -> None:
         frequencies=empty,
         emission_times=empty,
         times=empty,
-        distance=empty,
+        distances=empty,
         azimuth=empty,
         polar=empty,
         band_levels=np.zeros((0, 0)),
@@ -1615,11 +1615,11 @@ def test_contour_matches_per_point_events() -> None:
     y = np.array([-300.0, 100.0])
     for metric, attr in (("exposure", "sel"), ("maximum", "la_max")):
         res = rotorcraft_noise_contour(hems, spd, ang, t, pos, x=x, y=y, metric=metric)
-        assert res.level.shape == (2, 3)
+        assert res.levels.shape == (2, 3)
         for i, yy in enumerate(y):
             for j, xx in enumerate(x):
                 ev = rotorcraft_event_level(hems, spd, ang, t, pos, (xx, yy))
-                assert res.level[i, j] == pytest.approx(getattr(ev, attr), abs=1e-9), (
+                assert res.levels[i, j] == pytest.approx(getattr(ev, attr), abs=1e-9), (
                     metric,
                     xx,
                     yy,
@@ -1631,7 +1631,7 @@ def test_contour_is_symmetric_across_the_track() -> None:
     x = np.array([-400.0, -100.0, 100.0, 400.0])
     y = np.array([-200.0, 0.0, 200.0])
     res = rotorcraft_noise_contour(hems, spd, ang, t, pos, x=x, y=y)
-    assert np.allclose(res.level[:, [0, 1]], res.level[:, [3, 2]], atol=1e-9)
+    assert np.allclose(res.levels[:, [0, 1]], res.levels[:, [3, 2]], atol=1e-9)
 
 
 def test_contour_validation() -> None:

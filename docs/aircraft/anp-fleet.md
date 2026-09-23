@@ -275,7 +275,7 @@ contour = aircraft.load_anp_database().aircraft("747100").noise_contour(
     x=np.linspace(-2000.0, 12000.0, 40),
     y=np.linspace(-3000.0, 3000.0, 30),
 )
-print(contour.level.shape)      # (30, 40): one SEL per grid point, indexed (y, x)
+print(contour.levels.shape)      # (30, 40): one SEL per grid point, indexed (y, x)
 contour.plot()
 ```
 

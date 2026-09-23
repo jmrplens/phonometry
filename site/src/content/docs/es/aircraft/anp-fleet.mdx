@@ -419,7 +419,7 @@ contour = ac.noise_contour(
     x=np.linspace(-2000.0, 12000.0, 40),
     y=np.linspace(-3000.0, 3000.0, 30),
 )
-print(contour.level.shape)      # (30, 40): un SEL por punto de la malla
+print(contour.levels.shape)      # (30, 40): un SEL por punto de la malla
 contour.plot(language="es")
 ```
 

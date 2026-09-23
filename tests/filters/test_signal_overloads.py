@@ -63,7 +63,7 @@ def test_the_signals_rate_is_used_when_none_is_given() -> None:
     [
         (weighting_filter, {}),
         (time_weighting, {}),
-        (linkwitz_riley, {"freq": 800.0}),
+        (linkwitz_riley, {"frequency": 800.0}),
         (octave_filter, {"fraction": 3}),
         (parametric_eq, {"sections": EQSection("peaking", 1000.0, 3.0, 1.0)}),
     ],
@@ -84,7 +84,7 @@ def test_a_conflicting_rate_is_refused_a_matching_one_is_not(
     [
         (weighting_filter, {}),
         (time_weighting, {}),
-        (linkwitz_riley, {"freq": 800.0}),
+        (linkwitz_riley, {"frequency": 800.0}),
         (octave_filter, {"fraction": 3}),
         (parametric_eq, {"sections": EQSection("peaking", 1000.0, 3.0, 1.0)}),
     ],
@@ -120,8 +120,8 @@ def test_time_weighting_envelope_is_in_pascals_squared() -> None:
 
 def test_linkwitz_riley_splits_the_calibrated_signal() -> None:
     x = _tone()
-    low, high = linkwitz_riley(Signal(x, FS, calibration_factor=CAL), freq=800.0)
-    low_ref, high_ref = linkwitz_riley(CAL * x, FS, freq=800.0)
+    low, high = linkwitz_riley(Signal(x, FS, calibration_factor=CAL), frequency=800.0)
+    low_ref, high_ref = linkwitz_riley(CAL * x, FS, frequency=800.0)
     assert np.array_equal(low, low_ref)
     assert np.array_equal(high, high_ref)
 
@@ -249,7 +249,8 @@ def test_the_arguments_behind_fs_are_keyword_only_and_required() -> None:
     sig = Signal(_tone(), FS)
     section = EQSection("peaking", 1000.0, 3.0, 1.0)
     with pytest.raises(
-        TypeError, match=r"linkwitz_riley\(\).*required keyword-only argument: 'freq'"
+        TypeError,
+        match=r"linkwitz_riley\(\).*required keyword-only argument: 'frequency'",
     ):
         linkwitz_riley(sig)  # type: ignore[call-arg]
     with pytest.raises(
@@ -269,8 +270,8 @@ def test_the_arguments_behind_fs_are_keyword_only_and_required() -> None:
 def test_the_rate_may_still_be_positional() -> None:
     """``fs`` keeps its slot; only what sits behind it is keyword-only."""
     x = _tone()
-    low, high = linkwitz_riley(x, FS, freq=800.0)
-    low_kw, high_kw = linkwitz_riley(x, fs=FS, freq=800.0)
+    low, high = linkwitz_riley(x, FS, frequency=800.0)
+    low_kw, high_kw = linkwitz_riley(x, fs=FS, frequency=800.0)
     assert np.array_equal(low, low_kw)
     assert np.array_equal(high, high_kw)
 

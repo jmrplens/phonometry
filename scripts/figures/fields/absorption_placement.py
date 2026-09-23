@@ -174,7 +174,7 @@ def _absorption_placement_fields() -> tuple[Any, ...]:
                 ix=round(_AP_SRC[0] / _AP_DX),
                 iy=round(_AP_SRC[1] / _AP_DX),
                 samples=burst,
-                sample_rate=fs,
+                fs=fs,
             )
         )
         beta = float(np.exp(-sim.dt * _AP_F0 / 2.0))

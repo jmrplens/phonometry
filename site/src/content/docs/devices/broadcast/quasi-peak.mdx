@@ -255,7 +255,7 @@ the same chain's steady reading.
 from phonometry import broadcast
 
 report = broadcast.verify_quasi_peak_dynamics(48000.0)
-print(report.passed, round(report.worst_margin_db, 3))   # True 0.259
+print(report.passes, round(report.worst_margin_db, 3))   # True 0.259
 row = report.stimuli[0]
 print(row["stimulus"], round(row["reading_percent"], 2))       # 1 ms 16.94
 ```
@@ -388,7 +388,7 @@ the 600 Ω termination) are hardware and are not modelled. There is no
 - [Test signals](/phonometry/signals/spectra/test-signals/): `tone_burst`, the
   IEC 60268-1 generator that builds the clause 2.1 and 2.2 stimuli.
 - [Microphones (IEC 60268-4)](/phonometry/devices/electroacoustics/microphones/):
-  where a stated dB(CCIR) self-noise figure comes from, and why it stays a
+  where a stated dB(468) self-noise figure comes from, and why it stays a
   declaration.
 - [Broadcast](/phonometry/devices/broadcast/): the section overview.
 - API reference: [`broadcast.quasi_peak`](/phonometry/reference/api/broadcast/quasi-peak/).

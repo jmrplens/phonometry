@@ -255,7 +255,7 @@ class EcmaLoudness:
     (Formula 117).  ``specific_loudness`` is the average specific loudness
     N'(z) in sone_HMS/Bark_HMS over the 53 auditory bands (Formula 115),
     with ``bark`` the critical-band-rate scale z (0,5..26,5 Bark_HMS) and
-    ``centre_frequencies`` the band centre frequencies F(z).  ``time`` and
+    ``centre_frequencies`` the band centre frequencies F(z).  ``times`` and
     ``loudness_vs_time`` hold the time-dependent loudness N(l) at 187,5 Hz
     (Formula 116).  ``field`` records the assumed sound field.
     """
@@ -264,7 +264,7 @@ class EcmaLoudness:
     specific_loudness: np.ndarray
     bark: np.ndarray
     centre_frequencies: np.ndarray
-    time: np.ndarray
+    times: np.ndarray
     loudness_vs_time: np.ndarray
     field: str
 
@@ -294,7 +294,7 @@ class EcmaLoudness:
             specific_loudness=1,
             bark=1,
             centre_frequencies=1,
-            time=1,
+            times=1,
             loudness_vs_time=1,
         )
         require_same_length(
@@ -304,7 +304,7 @@ class EcmaLoudness:
             "centre_frequencies",
             axis="auditory band",
         )
-        require_same_length(self, "time", "loudness_vs_time", axis="time block")
+        require_same_length(self, "times", "loudness_vs_time", axis="time block")
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -759,7 +759,7 @@ def loudness_ecma(
         specific_loudness=n_spec,
         bark=_Z.copy(),
         centre_frequencies=_F_CENTRE.copy(),
-        time=time,
+        times=time,
         loudness_vs_time=n_time,
         field=field,
     )

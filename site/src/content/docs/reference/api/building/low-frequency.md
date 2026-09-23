@@ -302,7 +302,7 @@ neither; Parts 2 and 3 have only a receiving room.
 ```python
 LowFrequencyResult(
     frequencies: np.ndarray,
-    level: np.ndarray,
+    levels: np.ndarray,
     reverberation_time: np.ndarray | None,
     low_frequency_bands: np.ndarray,
     l_default: np.ndarray,
@@ -320,7 +320,7 @@ What the low-frequency procedure did to one room's band values.
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | Band centre frequencies of the whole measurement, in Hz, as supplied. |
-| `level` | The energy-average levels of the whole measurement, in dB, with the 50 Hz, 63 Hz and 80 Hz bands replaced by $L_\mathrm{LF}$ and every other band untouched. |
+| `levels` | The energy-average levels of the whole measurement, in dB, with the 50 Hz, 63 Hz and 80 Hz bands replaced by $L_\mathrm{LF}$ and every other band untouched. |
 | `reverberation_time` | The reverberation times of the whole measurement, in seconds, with those same three bands replaced by the 63 Hz octave value; `None` for a source room, which Clause 10.4 does not speak about. |
 | `low_frequency_bands` | The three band centres the procedure was applied at, in Hz, as they were spelled in `frequencies`. |
 | `l_default` | The default-procedure levels at those three bands, in dB, before the combination. |

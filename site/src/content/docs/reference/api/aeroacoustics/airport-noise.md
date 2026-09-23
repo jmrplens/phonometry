@@ -368,7 +368,7 @@ Finite-segment correction (noise fraction) `ΔF` (Eq. 4-20, exposure only).
 NoiseContourResult(
     x: NDArray[np.float64],
     y: NDArray[np.float64],
-    level: NDArray[np.float64],
+    levels: NDArray[np.float64],
     metric: EventMetric,
 )
 ```
@@ -381,7 +381,7 @@ Single-event noise level over a ground grid (ECAC Doc 29).
 | :--- | :--- |
 | `x` | Grid x coordinates, in metres. |
 | `y` | Grid y coordinates, in metres. |
-| `level` | Event level over the grid `(len(y), len(x))`, in dB. |
+| `levels` | Event level over the grid `(len(y), len(x))`, in dB. |
 | `metric` | `"exposure"` (SEL) or `"maximum"` (LAmax). |
 
 ### NoiseContourResult.plot()
@@ -469,8 +469,8 @@ tabulated envelope are extrapolated from the terminal segments.
 
 ```python
 NpdLevelResult(
-    distance: NDArray[np.float64],
-    level: NDArray[np.float64],
+    distances: NDArray[np.float64],
+    levels: NDArray[np.float64],
     power: float,
     table_distances: NDArray[np.float64],
     table_levels: NDArray[np.float64],
@@ -483,8 +483,8 @@ NPD event level over a distance sweep at one power (ECAC Doc 29).
 
 | Name | Description |
 | :--- | :--- |
-| `distance` | Slant distances, in metres. |
-| `level` | Interpolated event level per distance, in dB. |
+| `distances` | Slant distances, in metres. |
+| `levels` | Interpolated event level per distance, in dB. |
 | `power` | The engine power setting queried. |
 | `table_distances` | The tabulated slant distances, in metres. |
 | `table_levels` | The tabulated levels at the queried power, in dB. |

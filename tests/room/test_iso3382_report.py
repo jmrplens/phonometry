@@ -99,8 +99,8 @@ def _full_metadata(**overrides: float) -> ReportMetadata:
 def test_synthetic_decay_matches_closed_form() -> None:
     """T20 = T30 = EDT = T per band (within +/-1 %, far below the 5 % JND)."""
     res = _result()
-    assert res.frequency is not None
-    assert len(res.frequency) == len(_BANDS)
+    assert res.frequencies is not None
+    assert len(res.frequencies) == len(_BANDS)
     np.testing.assert_allclose(res.t20, _T60, rtol=0.01)
     np.testing.assert_allclose(res.t30, _T60, rtol=0.01)
     np.testing.assert_allclose(res.edt, _T60, rtol=0.01)
@@ -203,7 +203,7 @@ def _synthetic_result(
     finite_t30 = np.isfinite(t30)
     finite_edt = np.isfinite(edt)
     return room.RoomAcousticsResult(
-        frequency=frequency,
+        frequencies=frequency,
         edt=edt,
         t20=t30.copy(),
         t30=t30,
@@ -265,8 +265,8 @@ def test_third_octave_verdict_uses_the_six_band_mean(tmp_path: Path) -> None:
 def test_band_range_without_mid_octaves_names_the_band(tmp_path: Path) -> None:
     """A range missing the mid bands boxes the first finite T30 band by name."""
     res = room.room_parameters(_synthetic_ir(), _FS, limits=(2000.0, 4000.0))
-    assert res.frequency is not None
-    assert len(res.frequency) == 2
+    assert res.frequencies is not None
+    assert len(res.frequencies) == 2
     out = tmp_path / "high_bands.pdf"
     res.report(str(out), metadata=_full_metadata())
     text = _extract_text(str(out))
@@ -359,8 +359,8 @@ def test_single_band_is_not_labeled_broadband(tmp_path: Path) -> None:
     so the caption must read "Single-band parameters", never "Broadband".
     """
     res = room.room_parameters(_synthetic_ir(), _FS, limits=(490.0, 510.0), fraction=1)
-    assert res.frequency is not None
-    assert len(res.frequency) == 1
+    assert res.frequencies is not None
+    assert len(res.frequencies) == 1
     out = tmp_path / "single_band.pdf"
     res.report(str(out))
     assert_one_page(str(out))
@@ -377,8 +377,8 @@ def test_octave_report_many_bands_renders(tmp_path: Path) -> None:
     by octave, not by spurious one-third-octave triplets.
     """
     res = room.room_parameters(_synthetic_ir(), _FS, limits=(16.0, 16000.0), fraction=1)
-    assert res.frequency is not None
-    assert len(res.frequency) > 6
+    assert res.frequencies is not None
+    assert len(res.frequencies) > 6
     out = tmp_path / "octave_wide.pdf"
     res.report(str(out), metadata=_full_metadata())
     assert_one_page(str(out))
@@ -388,7 +388,7 @@ def test_octave_report_many_bands_renders(tmp_path: Path) -> None:
 def test_broadband_report_renders(tmp_path: Path) -> None:
     """A broadband (single-band) analysis renders a one-page fiche."""
     res = room.room_parameters(_synthetic_ir(), _FS, limits=None)
-    assert res.frequency is None
+    assert res.frequencies is None
     out = tmp_path / "broadband.pdf"
     res.report(str(out))
     assert_one_page(str(out))
@@ -403,7 +403,7 @@ def test_broadband_makes_no_mid_frequency_claim(tmp_path: Path) -> None:
     neither the result box nor the verdict may claim "500-1000 Hz".
     """
     res = room.room_parameters(_synthetic_ir(), _FS, limits=None)
-    assert res.frequency is None
+    assert res.frequencies is None
     out = tmp_path / "broadband_claim.pdf"
     res.report(str(out), metadata=_full_metadata(requirement=1.30))
     text = _extract_text(str(out))

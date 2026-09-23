@@ -105,7 +105,7 @@ ir *= np.sqrt(2.8 / np.sum(ir**2))
 ir[480] += 0.5
 
 res = room.sound_strength(ir, reference, fs)
-print(res.frequency.round(0))              # [ 126.  251.  501. 1000. 1995. 3981.]
+print(res.frequencies.round(0))              # [ 126.  251.  501. 1000. 1995. 3981.]
 print(res.strength.round(1))               # [5.9 4.1 4.  4.8 4.7 4.9]  dB
 
 res.plot()      # G frente al rango habitual de la Tabla A.1 (necesita matplotlib)

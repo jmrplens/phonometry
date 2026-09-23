@@ -341,7 +341,7 @@ def heavy_impact_source_limits(
 
 def impact_force_exposure_level(
     force: SignalInput,
-    sample_rate: float | None = None,
+    fs: float | None = None,
     *,
     reference_force: float = _FORCE_REFERENCE,
     reference_time: float = _TIME_REFERENCE,
@@ -371,7 +371,7 @@ def impact_force_exposure_level(
         Accepts a :class:`phonometry.io.Signal` for its rate; a calibration
         factor it carries is deliberately not applied, because this record
         is a force in newtons and not a pressure.
-    :param sample_rate: Sampling rate of *force*, in hertz (> 0). Required
+    :param fs: Sampling rate of *force*, in hertz (> 0). Required
         for a bare array; a :class:`~phonometry.io.Signal` brings its own,
         and an explicit value that disagrees with it raises instead of
         silently winning.
@@ -381,7 +381,7 @@ def impact_force_exposure_level(
     :return: The impact force exposure level ``LFE``, in dB re 1 N.
     :raises ValueError: for a malformed record or a non-positive parameter.
     """
-    sample_rate = resolve_fs(force, sample_rate, name="force", rate="sample_rate")
+    rate = resolve_fs(force, fs, name="force")
     # calibrate=False: a Signal may carry a digital-to-pascal factor and
     # this record is a force in newtons. See phonometry.io._resolve.
     f = require_finite_array(
@@ -390,7 +390,7 @@ def impact_force_exposure_level(
     if f.size < _MIN_TRAPEZOID_SAMPLES:
         msg = "'force' must be a 1-D record of at least two samples."
         raise ValueError(msg)
-    fs = require_positive(sample_rate, "sample_rate")
+    fs = require_positive(rate, "fs")
     f0 = require_positive(reference_force, "reference_force")
     tref = require_positive(reference_time, "reference_time")
     energy = float(np.trapezoid((f / f0) ** 2, dx=1.0 / fs))
@@ -411,7 +411,7 @@ class HeavyImpactSourceCheck:
     :ivar tolerance: Printed tolerance per band, in dB.
     :ivar deviation: ``measured - nominal`` per band, in dB.
     :ivar within_tolerance: Per-band boolean mask of conforming bands.
-    :ivar passed: ``True`` when every band conforms.
+    :ivar passes: ``True`` when every band conforms.
     """
 
     source: str
@@ -422,7 +422,7 @@ class HeavyImpactSourceCheck:
     deviation: np.ndarray
     within_tolerance: np.ndarray
     _: KW_ONLY
-    passed: bool
+    passes: bool
 
     def __post_init__(self) -> None:
         """Reject a check whose measurement and printed spectrum differ in length.
@@ -528,7 +528,7 @@ def check_heavy_impact_source(
         tolerance=tol,
         deviation=deviation,
         within_tolerance=within,
-        passed=bool(np.all(within)),
+        passes=bool(np.all(within)),
     )
 
 

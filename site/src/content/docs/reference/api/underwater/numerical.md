@@ -270,7 +270,7 @@ it to keep everything the fan bracketed.
 ```python
 FluidSeabed(
     density: float,
-    sound_speed: float,
+    speed_of_sound: float,
     water_density: float = 1000.0,
 )
 ```
@@ -291,7 +291,7 @@ sound-speed profile, so it is not repeated here.
 | Name | Description |
 | :--- | :--- |
 | `density` | Sediment density $\rho_2$, in the same unit as `water_density` (kg/m³ by convention; only the ratio enters). |
-| `sound_speed` | Sediment sound speed $c_2$, in m/s. A sediment faster than the water at the bottom has a critical grazing angle, below which the reflection is total in magnitude and lossy in phase alone. |
+| `speed_of_sound` | Sediment sound speed $c_2$, in m/s. A sediment faster than the water at the bottom has a critical grazing angle, below which the reflection is total in magnitude and lossy in phase alone. |
 | `water_density` | Water density $\rho_1$ above the seabed (default 1000 kg/m³). It enters only through the impedance ratio, the fields themselves being density-normalised already. |
 
 ## gaussian_beams

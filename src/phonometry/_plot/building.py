@@ -1769,7 +1769,7 @@ def plot_heavy_impact_source(
         )
     ax.set_ylabel(_t("Impact force exposure level $L_{FE}$ [dB re 1 N]", language))
     verdict = (
-        _t("conforms", language) if result.passed else _t("does not conform", language)
+        _t("conforms", language) if result.passes else _t("does not conform", language)
     )
     source = _t(_HEAVY_IMPACT_SOURCE_LABELS[result.source], language)
     ax.set_title(

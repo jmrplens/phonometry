@@ -790,7 +790,7 @@ Advisory for porous-model use outside the published fit range.
 
 ```python
 PorousMediumResult(
-    frequency: Real,
+    frequencies: Real,
     characteristic_impedance: Complex,
     wavenumber: Complex,
     effective_density: Complex,
@@ -804,7 +804,7 @@ PorousMediumResult(
 
 Equivalent-fluid characterisation of a porous material.
 
-All arrays share the shape of `frequency`. `characteristic_impedance`
+All arrays share the shape of `frequencies`. `characteristic_impedance`
 is the complex characteristic impedance `Zc` in Pa s/m as seen from the
 material surface, `wavenumber` the complex wavenumber `k` in rad/m
 ($\operatorname{Im}(k) < 0$ for the $e^{+j \omega t}$

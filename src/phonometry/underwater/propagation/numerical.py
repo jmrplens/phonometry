@@ -250,7 +250,7 @@ class FluidSeabed:
 
     :ivar density: Sediment density :math:`\rho_2`, in the same unit as
         ``water_density`` (kg/m³ by convention; only the ratio enters).
-    :ivar sound_speed: Sediment sound speed :math:`c_2`, in m/s. A sediment
+    :ivar speed_of_sound: Sediment sound speed :math:`c_2`, in m/s. A sediment
         faster than the water at the bottom has a critical grazing angle,
         below which the reflection is total in magnitude and lossy in phase
         alone.
@@ -260,7 +260,7 @@ class FluidSeabed:
     """
 
     density: float
-    sound_speed: float
+    speed_of_sound: float
     water_density: float = 1000.0
 
 
@@ -281,7 +281,7 @@ def _resolve_boundary(
         return "pressure-release", (
             require_positive(bottom.water_density, "water_density"),
             require_positive(bottom.density, "density"),
-            require_positive(bottom.sound_speed, "sound_speed"),
+            require_positive(bottom.speed_of_sound, "speed_of_sound"),
         )
     key = bottom.strip().lower()
     if key not in _BOTTOM_TYPES:

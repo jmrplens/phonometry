@@ -354,7 +354,7 @@ _LOG_T5_SONE = np.log10(_T5_SONE)
 class MooreGlasbergTimeVaryingLoudness:
     """Result of an ISO 532-3:2023 time-varying loudness calculation.
 
-    ``time`` is the frame time axis in seconds (1 ms spacing, clause 7.3).
+    ``times`` is the frame time axis in seconds (1 ms spacing, clause 7.3).
     ``short_term_loudness`` and ``long_term_loudness`` are the binaural
     short-term ``S'(t)`` (clause 7.8) and long-term ``S''(t)`` (clause 7.9)
     loudness traces in sone; ``short_term_loudness_level`` and
@@ -369,7 +369,7 @@ class MooreGlasbergTimeVaryingLoudness:
     ``presentation`` echo the listening conditions.
     """
 
-    time: np.ndarray
+    times: np.ndarray
     short_term_loudness: np.ndarray
     long_term_loudness: np.ndarray
     short_term_loudness_level: np.ndarray
@@ -433,7 +433,7 @@ class MooreGlasbergTimeVaryingLoudness:
         """
         require_ranks(
             self,
-            time=1,
+            times=1,
             short_term_loudness=1,
             long_term_loudness=1,
             short_term_loudness_level=1,
@@ -441,7 +441,7 @@ class MooreGlasbergTimeVaryingLoudness:
         )
         require_same_length(
             self,
-            "time",
+            "times",
             "short_term_loudness",
             "long_term_loudness",
             "short_term_loudness_level",
@@ -828,7 +828,7 @@ def loudness_moore_glasberg_time(
     time = np.arange(n_frames, dtype=np.float64) * (_FRAME_MS * 1e-3)
     n_max = float(ltl.max()) if n_frames else 0.0
     return MooreGlasbergTimeVaryingLoudness(
-        time=time,
+        times=time,
         short_term_loudness=stl,
         long_term_loudness=ltl,
         short_term_loudness_level=np.asarray(_loudness_level(stl)),

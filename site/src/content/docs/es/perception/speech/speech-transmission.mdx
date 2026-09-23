@@ -309,7 +309,7 @@ un STI medido es exactamente lo que hace que una sala parezca aceptable sobre el
 papel. Mide una vez el espectro ambiente, mide o estima el espectro del habla en
 la posición y pasa la diferencia banda a banda; o, cuando importan los niveles
 absolutos porque entran en juego el enmascaramiento auditivo y el umbral de
-recepción, pasa `level=` y `ambient=` en su lugar para que se apliquen las etapas
+recepción, pasa `levels=` y `ambient=` en su lugar para que se apliquen las etapas
 dependientes del nivel de la norma en vez de un cociente puro.
 
 Venga de donde venga, conviene leer el resultado banda a banda antes de citar
@@ -483,7 +483,7 @@ Cada vía tiene modos de fallo que la norma hace explícitos:
   enmascaramiento auditivo y el umbral de recepción actúan sobre los niveles
   de banda *absolutos* en el oyente. Reproduce la señal de ensayo al nivel de
   operación del sistema (la práctica del Anexo J de la norma la fija 3 dB por
-  encima del $L_\mathrm{Aeq}$ del habla continua en la posición) y pasa `level=` y
+  encima del $L_\mathrm{Aeq}$ del habla continua en la posición) y pasa `levels=` y
   `ambient=` para que el análisis los incluya; una respuesta al impulso medida
   a nivel alto y reescalada después pierde estos efectos por completo. La
   sección 3 lleva una medición hecha en una condición de nivel y ruido a
@@ -493,7 +493,7 @@ Cada vía tiene modos de fallo que la norma hace explícitos:
   modulación medidas (apartado 7.13). El remedio de la norma es la vía
   indirecta: promedia la respuesta al impulso con MLS o barridos para obtener
   una MTF sin ruido y añade después la degradación por ruido mediante `snr=` o
-  `level=`/`ambient=`. Una comprobación rápida es ejecutar el analizador con
+  `levels=`/`ambient=`. Una comprobación rápida es ejecutar el analizador con
   la fuente apagada; el STI residual debería quedar por debajo de 0,20.
 - **Dispersión estadística.** La señal STIPA es ruido pseudoaleatorio, así que
   mediciones directas repetidas se dispersan hasta alrededor de 0,03 STI
@@ -531,7 +531,7 @@ shape_total = 10 * np.log10(np.sum(10 ** (shape / 10)))
 
 totals = np.arange(40.0, 100.5, 2.5)
 curve = [speech.sti_from_impulse_response(
-    ir, fs, level=shape - shape_total + t, ambient=ambient).sti for t in totals]
+    ir, fs, levels=shape - shape_total + t, ambient=ambient).sti for t in totals]
 print(round(min(curve), 3), round(max(curve), 3))          # 0.246 0.604
 print(round(speech.sti_from_impulse_response(ir, fs).sti, 3))   # 0.609
 
@@ -552,8 +552,8 @@ plt.show()
 | `ir` / `x` | array 1D | cualquiera / Pa | no vacío | Respuesta al impulso (indirecto) o grabación STIPA (directo) |
 | `fs` | int | Hz | > 0 | |
 | `snr` | float o vector de 7, opcional | dB | por defecto `None` | Añade la degradación por ruido estacionario |
-| `level` | vector de 7, opcional | dB SPL | por defecto `None` | Activa el enmascaramiento auditivo + umbral de recepción (Tablas A.2/A.3) |
-| `ambient` | vector de 7, opcional | dB SPL | requiere `level` | Niveles de banda del ruido ambiente |
+| `levels` | vector de 7, opcional | dB SPL | por defecto `None` | Activa el enmascaramiento auditivo + umbral de recepción (Tablas A.2/A.3) |
+| `ambient` | vector de 7, opcional | dB SPL | requiere `levels` | Niveles de banda del ruido ambiente |
 | `reference` | array 1D, opcional (`stipa`) | — | por defecto `None` | Señal de la fuente medida en lugar del $m = 0{,}55$ nominal |
 
 Ambas devuelven `STIResult`: `sti`, `mti` (7 bandas), `mtf` (7×14 o 7×2),
@@ -678,20 +678,20 @@ speech_empty = band_shape - 10 * np.log10(np.sum(10 ** (band_shape / 10))) + 68.
 noise_empty = np.array([42.0, 36.0, 31.0, 28.0, 25.0, 23.0, 21.0])
 
 empty = speech.sti_from_impulse_response(
-    ir, fs, level=speech_empty, ambient=noise_empty
+    ir, fs, levels=speech_empty, ambient=noise_empty
 )
 print(f"{empty.sti:.2f} ({empty.rating})")            # 0.60 (D)
 
 # Con el público dentro y el aviso donde estaba.
 noise_occupied = np.array([54.0, 50.0, 47.0, 44.0, 40.0, 35.0, 30.0])
 occupied = empty.adjusted_for_levels(
-    operational_level=speech_empty, operational_ambient=noise_occupied
+    operational_levels=speech_empty, operational_ambient=noise_occupied
 )
 print(f"{occupied.sti:.2f} ({occupied.rating})")      # 0.56 (F)
 
 # La misma sala con el aviso 6 dB más alto.
 louder = empty.adjusted_for_levels(
-    operational_level=speech_empty + 6.0, operational_ambient=noise_occupied
+    operational_levels=speech_empty + 6.0, operational_ambient=noise_occupied
 )
 print(f"{louder.sti:.2f} ({louder.rating})")          # 0.59 (E)
 ```
@@ -702,7 +702,7 @@ y no después de la queja: la sala vacía cumplía.
 
 `STIResult.adjusted_for_levels()` lee la condición de medición del propio
 resultado, por eso solo necesita la operativa y por eso rechaza un resultado
-calculado sin `level=`: ese resultado lleva como mucho el factor plano de
+calculado sin `levels=`: ese resultado lleva como mucho el factor plano de
 ruido de `snr=`, nada del enmascaramiento ni del umbral dependientes del
 nivel, y ningún espectro del que volver a deducirlos, así que dividir por la
 corrección completa bajaría la respuesta en silencio. Cuando la
@@ -738,12 +738,12 @@ talker = shape - 10 * np.log10(np.sum(10 ** (shape / 10))) + 68.0
 empty_noise = np.array([42.0, 36.0, 31.0, 28.0, 25.0, 23.0, 21.0])
 full_noise = np.array([54.0, 50.0, 47.0, 44.0, 40.0, 35.0, 30.0])
 
-measured = speech.sti_from_impulse_response(ir, fs, level=talker, ambient=empty_noise)
+measured = speech.sti_from_impulse_response(ir, fs, levels=talker, ambient=empty_noise)
 occupied = measured.adjusted_for_levels(
-    operational_level=talker, operational_ambient=full_noise
+    operational_levels=talker, operational_ambient=full_noise
 )
 louder = measured.adjusted_for_levels(
-    operational_level=talker + 6.0, operational_ambient=full_noise
+    operational_levels=talker + 6.0, operational_ambient=full_noise
 )
 
 # En una línea: el resultado ajustado es un STIResult, así que dibuja sus barras.
@@ -798,7 +798,7 @@ alrededor de la mitad de la de 1 kHz. Ninguna de las dos cosas se ve en el
   norma sobre el ruido fluctuante (apartado 7.13) vale para la condición que se
   simula tanto como para la que se mide.
 - **Los espectros de la propia medición son lo que quita el paso 2.** Un
-  `measured_level` o un `measured_ambient` equivocados sacan la corrección
+  `measured_levels` o un `measured_ambient` equivocados sacan la corrección
   equivocada, y el paso 3 no tiene forma de notarlo; la matriz ajustada queda
   entonces mal en una dirección que nada aguas abajo informa. Por eso
   `STIResult.adjusted_for_levels()` los lee del propio resultado en vez de
@@ -812,9 +812,9 @@ alrededor de la mitad de la de 1 kHz. Ninguna de las dos cosas se ve en el
 | Parámetro | Tipo | Unidades | Rango / valor por defecto | Notas |
 | :--- | :--- | :--- | :--- | :--- |
 | `mtf` | array (7, n) | — | ≥ 0, finito | La matriz tal y como se midió, ruido y enmascaramiento incluidos; los valores por encima de 1 se truncan a 1, y por encima de 1,3 avisan de que la medición es probablemente inválida (NOTA 1 de A.5.3) |
-| `measured_level` | vector de 7 | dB SPL | obligatorio | Niveles de banda del habla durante la medición |
+| `measured_levels` | vector de 7 | dB SPL | obligatorio | Niveles de banda del habla durante la medición |
 | `measured_ambient` | vector de 7, opcional | dB SPL | por defecto `None` | Niveles de banda del ruido de fondo durante la medición |
-| `operational_level` | vector de 7 | dB SPL | obligatorio | Niveles de banda del habla de la condición simulada |
+| `operational_levels` | vector de 7 | dB SPL | obligatorio | Niveles de banda del habla de la condición simulada |
 | `operational_ambient` | vector de 7, opcional | dB SPL | por defecto `None` | Niveles de banda del ruido de ocupación de esa condición |
 
 :::caution
@@ -844,7 +844,7 @@ completo desde una respuesta al impulso medida mediante
 mediante `speech.stipa_signal()` y `speech.stipa()`, el espectro de la señal
 de ensayo masculina de la Ed.5 del apartado A.6.1, las correcciones de
 enmascaramiento auditivo dependiente del nivel y de umbral de recepción de las
-Tablas A.2 y A.3 (`level=` y `ambient=`), las letras de valoración del Anexo
+Tablas A.2 y A.3 (`levels=` y `ambient=`), las letras de valoración del Anexo
 F devueltas como `STIResult.rating`, y el ajuste del Anexo M de la Edición 4
 de un resultado medido a ruido de ocupación y a otro nivel de habla mediante
 `speech.sti_adjusted_for_levels()` y `STIResult.adjusted_for_levels()`.

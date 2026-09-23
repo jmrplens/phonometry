@@ -94,7 +94,7 @@ def test_rt_exponential_broadband(t60: float) -> None:
     # rel. 5 % for EDT / reverberation).
     ir = exponential_ir(t60, 3.0 * t60)
     res = room.room_parameters(ir, FS, limits=None)
-    assert res.frequency is None
+    assert res.frequencies is None
     assert res.edt[0] == pytest.approx(t60, rel=0.01)
     assert res.t20[0] == pytest.approx(t60, rel=0.01)
     assert res.t30[0] == pytest.approx(t60, rel=0.01)
@@ -111,8 +111,8 @@ def test_rt_exponential_per_octave_band() -> None:
     centers = [125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0]
     ir = multitone_ir(t60, 3.0, centers)
     res = room.room_parameters(ir, FS)
-    assert res.frequency is not None
-    assert len(res.frequency) == 6
+    assert res.frequencies is not None
+    assert len(res.frequencies) == 6
     np.testing.assert_allclose(res.t20, t60, rtol=0.01)
     np.testing.assert_allclose(res.t30, t60, rtol=0.01)
     np.testing.assert_allclose(res.edt, t60, rtol=0.01)
@@ -292,8 +292,8 @@ def test_third_octave_bands_option() -> None:
     rng = np.random.default_rng(3)
     ir = exponential_ir(0.8, 2.0) * rng.standard_normal(int(2.0 * FS))
     res = room.room_parameters(ir, FS, limits=(100.0, 5000.0), fraction=3)
-    assert res.frequency is not None
-    assert len(res.frequency) == 18  # 100 Hz..5 kHz one-third octaves
+    assert res.frequencies is not None
+    assert len(res.frequencies) == 18  # 100 Hz..5 kHz one-third octaves
     assert res.t20.shape == (18,)
     assert isinstance(res, room.RoomAcousticsResult)
 
@@ -302,9 +302,9 @@ def test_default_bands_are_octaves_125_to_4k() -> None:
     rng = np.random.default_rng(5)
     ir = exponential_ir(0.8, 2.0) * rng.standard_normal(int(2.0 * FS))
     res = room.room_parameters(ir, FS)
-    assert res.frequency is not None
+    assert res.frequencies is not None
     np.testing.assert_allclose(
-        res.frequency,
+        res.frequencies,
         [
             125.89254117941672,
             251.188643150958,
@@ -395,15 +395,15 @@ def test_parameters_off_the_band_axis_are_refused() -> None:
 def test_decay_curve_halves_of_different_length_are_refused() -> None:
     """The curve is one sampled decay read off by position.
 
-    ``time`` and ``level`` are paired by index by every fit and by the plot,
+    ``times`` and ``levels`` are paired by index by every fit and by the plot,
     and the dataclass unpacks into two loose arrays that nothing re-pairs, so
     a truncated half is refused here rather than reported as a pair of shapes
     from inside whatever finally drew them.
     """
     curve = room.decay_curve(exponential_ir(1.0, 3.0), FS)
-    truncated = curve.level[:-1]
-    with pytest.raises(ValueError, match=r"'level'.*one value per sample"):
-        dataclasses.replace(curve, level=truncated)
+    truncated = curve.levels[:-1]
+    with pytest.raises(ValueError, match=r"'levels'.*one value per sample"):
+        dataclasses.replace(curve, levels=truncated)
 
 
 def test_constant_noise_no_decay_is_finite_and_invalid() -> None:

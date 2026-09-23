@@ -40,7 +40,7 @@ _ECHO_ORACLE = [
 
 
 def _at(spectrum: ShipTrafficSpectrum, freq: float) -> tuple[float, float]:
-    idx = int(np.argmin(np.abs(spectrum.frequency - freq)))
+    idx = int(np.argmin(np.abs(spectrum.frequencies - freq)))
     return float(spectrum.source_psd[idx]), float(spectrum.band_level[idx])
 
 
@@ -67,7 +67,7 @@ def test_cargo_low_frequency_hump_present() -> None:
     # Cargo vessels have an extra LF peak below 100 Hz; a tug (non-cargo) does not.
     bulker = ship_source_spectrum(13.9, 200.0, vessel_class="bulker")
     # Peak of the spectrum sits below 100 Hz for the cargo hump.
-    peak_f = float(bulker.frequency[int(np.argmax(bulker.source_psd))])
+    peak_f = float(bulker.frequencies[int(np.argmax(bulker.source_psd))])
     assert peak_f < 100.0
 
 

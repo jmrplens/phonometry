@@ -568,7 +568,7 @@ modal_filter_cut_on(
     *,
     diameter_m: float | None = None,
     larger_dimension: float | None = None,
-    sound_speed: float = 343.0,
+    speed_of_sound: float = 343.0,
 ) -> float
 ```
 
@@ -598,7 +598,7 @@ the mean-flow correction this equation does not have.
 | :--- | :--- |
 | `diameter_m` | $d$ of a circular duct, in m. Exactly one of the two dimensions is given. |
 | `larger_dimension` | $H$, the larger cross-sectional dimension of a rectangular duct, in m. |
-| `sound_speed` | $c$, in m/s. |
+| `speed_of_sound` | $c$, in m/s. |
 
 **Returns:** $f_{Cd}$ or $f_{CH}$, in Hz.
 
@@ -706,7 +706,7 @@ open_end_reflection_coefficient(
     area: float,
     *,
     solid_angle_sr: float = 6.283185307179586,
-    sound_speed: float = 343.0,
+    speed_of_sound: float = 343.0,
 ) -> NDArray[np.float64]
 ```
 
@@ -733,7 +733,7 @@ reflection coefficient is no greater than 0,3.
 | `frequency` | Band centre frequencies $f$, in Hz. |
 | `area` | $S$, the cross-sectional area of the duct, in m². |
 | `solid_angle_sr` | $\Omega$, in sr. |
-| `sound_speed` | $c$, in m/s. |
+| `speed_of_sound` | $c$, in m/s. |
 
 **Returns:** $r$, dimensionless, one value per frequency.
 
@@ -751,7 +751,7 @@ open_end_transmission_loss(
     area: float,
     *,
     solid_angle_sr: float = 6.283185307179586,
-    sound_speed: float = 343.0,
+    speed_of_sound: float = 343.0,
 ) -> NDArray[np.float64]
 ```
 
@@ -794,7 +794,7 @@ the middle.
 | `frequency` | Band centre frequencies $f$, in Hz. |
 | `area` | $S$, the cross-sectional area of the duct, in m². |
 | `solid_angle_sr` | $\Omega$, the solid angle of radiation at the duct end, in sr. The five configurations of Table B.1 are in [`RADIATION_SOLID_ANGLES`](/phonometry/reference/api/noise_control/silencer-measurement/#radiation_solid_angles); the default is a duct flush with one surface. |
-| `sound_speed` | $c$, in m/s. |
+| `speed_of_sound` | $c$, in m/s. |
 
 **Returns:** $D_\mathrm{td}$, in dB, one value per frequency.
 

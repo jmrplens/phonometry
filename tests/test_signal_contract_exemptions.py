@@ -276,13 +276,9 @@ def test_a_non_pressure_record_still_resolves_the_rate(
     """An acceleration is not a pressure, and it still needs a sample rate."""
     sig = Signal(_RECORD, FS)
     assert_same(func(sig, **kwargs), func(_RECORD, FS, **kwargs))
-    with pytest.raises(
-        ValueError, match=r"(fs|sample_rate)=\d+ conflicts with the Signal's own fs"
-    ):
+    with pytest.raises(ValueError, match=r"fs=\d+ conflicts with the Signal's own fs"):
         func(sig, FS + 1, **kwargs)
-    with pytest.raises(
-        ValueError, match=r"(fs|sample_rate) is required when '\w+' is a bare array"
-    ):
+    with pytest.raises(ValueError, match=r"fs is required when '\w+' is a bare array"):
         func(_RECORD, **kwargs)
 
 

@@ -8,7 +8,7 @@ response** an input/output measurement reveals. This page covers the IEC 60268-3
 distortion set: total and nth-order harmonic distortion, THD+N and SINAD
 through the AES17 measurement bandwidth, the per-order modulation and
 difference-frequency intermodulation, dynamic intermodulation (DIM) and the
-ITU-R 468 weighted THD, and the Bendat & Piersol frequency-response estimators
+ITU-R BS.468-4 weighted THD, and the Bendat & Piersol frequency-response estimators
 $H_1$/$H_2$ with the ordinary coherence $\gamma^2$. Every quantity has an exact analytic
 oracle, so the numbers are verifiable rather than tuned. The transducer
 data sheets these measurements feed have their own guides:
@@ -135,7 +135,7 @@ between 31.5 Hz and 400 Hz:
 ```python
 from phonometry import electroacoustics
 
-print(electroacoustics.weighted_thd(signal, fs, 100.0))                  # ITU-R 468 network
+print(electroacoustics.weighted_thd(signal, fs, 100.0))                  # ITU-R BS.468-4 network
 print(electroacoustics.weighted_thd(signal, fs, 100.0, weighting="A"))   # A-weighted variant
 print(electroacoustics.itu_r_468_weighting([6300.0]))                    # [+12.2167] dB
 ```
@@ -162,7 +162,7 @@ dr = electroacoustics.dynamic_range(output, fs, 997.0)     # dB CCIR-RMS
 icn = electroacoustics.idle_channel_noise(idle_output, fs)  # dBFS CCIR-RMS
 ```
 
-Both reuse the notch and the ITU-R 468 curve of the THD+N chain, and both are
+Both reuse the notch and the ITU-R BS.468-4 curve of the THD+N chain, and both are
 measured through the AES17 band (a 20 Hz high-pass plus the standard low-pass
 at `bandwidth`). Because the CCIR-RMS filter reads -5.63 dB at 1 kHz, a 1 kHz
 tone measures its own dBFS minus 5.63 dB, which pins the weighting exactly.

@@ -48,7 +48,7 @@ _LIQUID: dict[str, Any] = {
     "inlet_pressure_pa": 1.0e6,
     "vapour_pressure_pa": 2.32e3,
     "density": 997.0,
-    "sound_speed": 1400.0,
+    "speed_of_sound": 1400.0,
 }
 _VALVE: dict[str, Any] = {
     "flow_coefficient": 90.0,
@@ -110,7 +110,7 @@ def _cavitating(value: float | None, name: str) -> float:
 def _at_band(index: int, attribute: str) -> float:
     """One band array of column ``index``, read at 8 kHz."""
     found = _example(index)
-    band = int(np.argmin(np.abs(found.frequency - _BAND_HZ)))
+    band = int(np.argmin(np.abs(found.frequencies - _BAND_HZ)))
     return float(getattr(found, attribute)[band])
 
 

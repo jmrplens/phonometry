@@ -106,7 +106,7 @@ _T30_RANGE = (5.0, 35.0)
 class RoomAcousticsResult:
     """Per-band room acoustic parameters from one impulse response.
 
-    All arrays have one entry per analysis band (``frequency`` holds the
+    All arrays have one entry per analysis band (``frequencies`` holds the
     exact band centre frequencies; it is ``None`` for a broadband
     analysis, in which case the arrays have length 1). ``edt``, ``t20``
     and ``t30`` are decay times in seconds extrapolated to 60 dB
@@ -127,7 +127,7 @@ class RoomAcousticsResult:
     above 10 % indicate an unreliable, non-straight decay.
     """
 
-    frequency: np.ndarray | None
+    frequencies: np.ndarray | None
     edt: np.ndarray
     t20: np.ndarray
     t30: np.ndarray
@@ -146,13 +146,13 @@ class RoomAcousticsResult:
 
         The ISO 3382 fiche prints one row per band, taking the row count from
         ``t30`` and reading every other parameter at that row's index, with
-        the band label of the row taken from ``frequency``. A parameter one
+        the band label of the row taken from ``frequencies``. A parameter one
         entry longer than the rest is dropped off the end of the table; one
         entry shorter raises an index error out of the row builder itself,
         while the rows are still plain lists, naming neither the field nor
         the two lengths. Worse than either, the boxed mid-frequency
         reverberation time is read by looking the 500 Hz and 1000 Hz bands up
-        in ``frequency`` and taking ``t30`` at the index found there, so a
+        in ``frequencies`` and taking ``t30`` at the index found there, so a
         band axis that has slipped against the parameters quotes another
         band's decay time under the "500-1000 Hz" label, on a sheet that
         renders without complaint and whose verdict row then compares that
@@ -168,7 +168,7 @@ class RoomAcousticsResult:
         """
         require_ranks(
             self,
-            frequency=1,
+            frequencies=1,
             edt=1,
             t20=1,
             t30=1,
@@ -184,7 +184,7 @@ class RoomAcousticsResult:
         )
         require_same_length(
             self,
-            "frequency",
+            "frequencies",
             "edt",
             "t20",
             "t30",
@@ -239,7 +239,7 @@ class RoomAcousticsResult:
         row appears only when a target T is supplied through
         ``metadata.requirement`` (read as the maximum acceptable value of
         whichever descriptor the box carries). A broadband result
-        (``frequency`` is ``None``) has no 500 Hz and 1000 Hz bands to average,
+        (``frequencies`` is ``None``) has no 500 Hz and 1000 Hz bands to average,
         so the box and the verdict fall back to the plain broadband T30 instead
         of a mid-frequency average, with no "500-1000 Hz" label; so does a
         banded result that does not span both mid bands, or that spans them
@@ -371,8 +371,8 @@ def _band_parameters(x: np.ndarray, fs: int) -> tuple[float, ...]:
 class DecayCurve:
     """Schroeder backward-integrated decay curve of an impulse response.
 
-    ``time`` holds the sample times in seconds from the direct sound and
-    ``level`` the decay levels in dB (0 dB at time zero), up to the noise
+    ``times`` holds the sample times in seconds from the direct sound and
+    ``levels`` the decay levels in dB (0 dB at time zero), up to the noise
     truncation point (ISO 3382-1:2009, 5.3.3). ``band`` is the
     octave/third-octave band centre in Hz, or ``None`` for a broadband decay.
 
@@ -381,17 +381,17 @@ class DecayCurve:
     ``time, level = decay_curve(...)``.
     """
 
-    time: np.ndarray
-    level: np.ndarray
+    times: np.ndarray
+    levels: np.ndarray
     band: float | None = None
 
     def __post_init__(self) -> None:
         """Reject a curve whose two halves are not the same curve.
 
-        ``time`` and ``level`` are one sampled decay read off by position:
+        ``times`` and ``levels`` are one sampled decay read off by position:
         the plot draws the levels against the times point for point, and each
-        straight-line fit cuts its evaluation range as a mask over ``level``
-        and indexes ``time`` with it, so a decay time is only ever as right as
+        straight-line fit cuts its evaluation range as a mask over ``levels``
+        and indexes ``times`` with it, so a decay time is only ever as right as
         the pairing. Nothing downstream re-establishes it, and the dataclass
         unpacks as ``time, level = decay_curve(...)``, which sends the two
         arrays on into code that never sees this class again. Left to be
@@ -403,15 +403,15 @@ class DecayCurve:
         ``band`` is a single centre frequency labelling the whole curve, not
         an axis, and is left out.
 
-        :raises ValueError: if ``time`` and ``level`` differ in length.
+        :raises ValueError: if ``times`` and ``levels`` differ in length.
         """
-        require_ranks(self, time=1, level=1)
-        require_same_length(self, "time", "level", axis="sample")
+        require_ranks(self, times=1, levels=1)
+        require_same_length(self, "times", "levels", axis="sample")
 
     def __iter__(self) -> Iterator[np.ndarray]:
-        """Yield ``time`` then ``level`` so the result unpacks like a tuple."""
-        yield self.time
-        yield self.level
+        """Yield ``times`` then ``levels`` so the result unpacks like a tuple."""
+        yield self.times
+        yield self.levels
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -468,9 +468,9 @@ def decay_curve(
         permits time-reversed filtering (it relaxes the B*T > 16 rule to
         B*T > 4); it roughly halves the low-frequency short-decay bias at
         125 Hz. Only used when ``band`` is not None. Default False (causal).
-    :return: A :class:`DecayCurve` with ``time`` in seconds from the direct
-        sound and ``level`` in dB (0 dB at time zero), up to the noise
-        truncation point. It unpacks as ``time, level = decay_curve(...)``
+    :return: A :class:`DecayCurve` with ``times`` in seconds from the direct
+        sound and ``levels`` in dB (0 dB at time zero), up to the noise
+        truncation point. It unpacks as ``times, levels = decay_curve(...)``
         for backward compatibility and exposes :meth:`DecayCurve.plot`.
     """
     fs = resolve_fs(ir, fs, name="ir")
@@ -513,7 +513,7 @@ def decay_curve(
         raise ValueError(msg)
     p2 = p2[onset_index(p2) :]
     time, level, _, _, _, _ = _schroeder(p2, fs)
-    return DecayCurve(time=time, level=level, band=band)
+    return DecayCurve(times=time, levels=level, band=band)
 
 
 def room_parameters(
@@ -558,7 +558,7 @@ def room_parameters(
         octave bands 125 Hz to 4 kHz (ISO 3382-1:2009, 5.1). Use
         ``(100.0, 5000.0)`` with ``fraction=3`` for the one-third-octave
         engineering/precision range. ``None`` analyses the broadband
-        response as a single band (``frequency`` is then ``None``).
+        response as a single band (``frequencies`` is then ``None``).
     :param fraction: Bandwidth fraction (1 = octave, 3 = one-third
         octave). Default 1.
     :param zero_phase: If True, use forward-backward (zero-phase) octave
@@ -581,7 +581,7 @@ def room_parameters(
     with np.errstate(invalid="ignore"):
         curvature = 100.0 * (t30 / t20 - 1.0)
     return RoomAcousticsResult(
-        frequency=frequency,
+        frequencies=frequency,
         edt=edt,
         t20=t20,
         t30=t30,

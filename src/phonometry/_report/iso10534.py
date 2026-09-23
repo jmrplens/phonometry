@@ -104,7 +104,7 @@ def _metadata_pairs(
     temperature_c = md.temperature_c
     static_pressure_kpa = md.static_pressure_kpa
 
-    freqs = np.asarray(result.frequency, dtype=np.float64)
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
     freq_range = None
     if freqs.size:
         freq_range = t("{lo} to {hi}", language).format(
@@ -174,7 +174,7 @@ def _value_table(
     from ._layout import fiche_paragraph
 
     head_style = band_table_header_style()
-    freqs = np.asarray(result.frequency, dtype=np.float64)
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
     alpha = np.asarray(result.absorption, dtype=np.float64)
     z = np.asarray(result.normalized_impedance, dtype=np.complex128)
     r_mag = np.abs(np.asarray(result.reflection, dtype=np.complex128))
@@ -222,7 +222,7 @@ def _value_table(
 
 def _statement(result: ImpedanceTubeResult, language: str = "en") -> str:
     """The boxed characterisation headline (ISO 10534-2 has no single number)."""
-    freqs = np.asarray(result.frequency, dtype=np.float64)
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
     lo = round(float(freqs.min())) if freqs.size else 0
     hi = round(float(freqs.max())) if freqs.size else 0
     return t(
@@ -301,7 +301,7 @@ def render_iso10534_report(
 
     :param result: An
         :class:`~phonometry.materials.absorbers.impedance_tube.ImpedanceTubeResult`
-        carrying the ``frequency`` vector, the normal-incidence ``absorption``,
+        carrying the ``frequencies`` vector, the normal-incidence ``absorption``,
         the complex ``reflection`` factor and the ``normalized_impedance``.
     :param path: Destination path of the PDF file.
     :param metadata: Optional :class:`ReportMetadata`; ``None`` renders the body
@@ -329,14 +329,14 @@ def render_iso10534_report(
     # frozen dataclass, so every per-frequency array the table and the figure
     # consume has to be checked here (a short one would otherwise cut the
     # fiche table).
-    freqs = np.asarray(result.frequency, dtype=np.float64)
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
     alpha = np.asarray(result.absorption, dtype=np.float64)
     reflection = np.asarray(result.reflection, dtype=np.complex128)
     z = np.asarray(result.normalized_impedance, dtype=np.complex128)
     require_equal_shapes(
         "ImpedanceTubeResult.report",
         {
-            "frequency": freqs.shape,
+            "frequencies": freqs.shape,
             "absorption": alpha.shape,
             "reflection": reflection.shape,
             "normalized_impedance": z.shape,

@@ -249,7 +249,9 @@ def test_reverberation_time_uncertainty_a1() -> None:
 def test_absorption_uncertainty_a3() -> None:
     ua, ub, Ta, Tb = 0.02, 0.03, 8.0, 6.0
     expected = K * V / (C * S) * math.sqrt((ub / Tb**2) ** 2 + (ua / Ta**2) ** 2)
-    u = absorption_coefficient_uncertainty(V, S, c=C, t_a=Ta, u_a=ua, t_b=Tb, u_b=ub)
+    u = absorption_coefficient_uncertainty(
+        V, S, speed_of_sound=C, t_a=Ta, u_a=ua, t_b=Tb, u_b=ub
+    )
     assert float(u) == pytest.approx(expected)
     assert float(u) == pytest.approx(0.0028681248003840053)
 

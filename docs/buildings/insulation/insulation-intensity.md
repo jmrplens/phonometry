@@ -144,7 +144,7 @@ background by 10 dB.
 | `measurement_area` | float | m² | > 0 | Measurement-surface area $S_\mathrm{m}$ |
 | `area` | float | m² | > 0 | Specimen area $S$ |
 | `kc` | 1D array | dB | one per band / `None` | Adaptation term for the modified index |
-| `freq` | 1D array | Hz | > 0 | Midband frequencies (`adaptation_term_kc`) |
+| `frequencies` | 1D array | Hz | > 0 | Midband frequencies (`adaptation_term_kc`) |
 | `boundary_area` / `volume` | float | m² / m³ | > 0, both or neither | Room $S_{\mathrm{b}2}$ / $V_2$ for Formula (B.1) |
 
 `intensity_sound_reduction()` returns an `IntensityReductionResult` (`r_i`,

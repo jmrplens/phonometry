@@ -106,7 +106,7 @@ reduces to the looser of the two component classes.
 IntensityInstrumentComplianceResult(
     overall_class: int | None,
     bands: tuple[dict[str, Any], ...],
-    frequency: np.ndarray,
+    frequencies: np.ndarray,
     residual_index: np.ndarray,
     limit_class1: np.ndarray,
     limit_class2: np.ndarray,
@@ -130,7 +130,7 @@ result can redraw itself and render an accredited fiche.
 | :--- | :--- |
 | `overall_class` | The strictest class every band meets (1 or 2), or `None` when at least one band meets neither. It is the *largest* per-band class, because a band meeting class 1 meets class 2 as well. |
 | `bands` | The per-band verdicts, as an immutable tuple. |
-| `frequency` | Nominal band centre frequencies, in Hz. |
+| `frequencies` | Nominal band centre frequencies, in Hz. |
 | `residual_index` | Measured `delta_pI0` per band, in dB. |
 | `limit_class1` | Class 1 minimum `delta_pI0` per band, in dB, already rescaled to `spacing`. |
 | `limit_class2` | Class 2 minimum per band, in dB, likewise rescaled. |
@@ -181,7 +181,7 @@ Nominal centre frequencies of the bands that miss a class, in Hz.
 
 ```python
 IntensityInstrumentComplianceResult.phase_mismatch(
-    c: float = 343.0,
+    speed_of_sound: float = 343.0,
 ) -> np.ndarray
 ```
 
@@ -196,7 +196,7 @@ the chain achieves.
 
 | Name | Description |
 | :--- | :--- |
-| `c` | Speed of sound in m/s (default 343.0). |
+| `speed_of_sound` | Speed of sound in m/s (default 343.0). |
 
 ### IntensityInstrumentComplianceResult.plot()
 
@@ -279,7 +279,7 @@ phase_mismatch_from_residual_index(
     residual_index: float | list[float] | np.ndarray,
     frequency: float | list[float] | np.ndarray,
     spacing: float,
-    c: float = 343.0,
+    speed_of_sound: float = 343.0,
 ) -> np.ndarray
 ```
 
@@ -306,7 +306,7 @@ angular unit $k d$ is expressed in; degrees are used here.
 | `residual_index` | `delta_pI0` in decibels (scalar or array). |
 | `frequency` | Frequency in Hz (scalar or array, broadcast against `residual_index`). |
 | `spacing` | Microphone separation in metres. |
-| `c` | Speed of sound in m/s (default 343.0). |
+| `speed_of_sound` | Speed of sound in m/s (default 343.0). |
 
 **Returns:** The equivalent phase mismatch in degrees, as a `numpy.ndarray` (0-d for scalar inputs).
 
@@ -314,7 +314,7 @@ angular unit $k d$ is expressed in; degrees are used here.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If `spacing`, `c` or `frequency` are not positive and finite, or if `residual_index` is not finite. |
+| ValueError | If `spacing`, `speed_of_sound` or `frequency` are not positive and finite, or if `residual_index` is not finite. |
 
 ## residual_index_from_phase_mismatch
 
@@ -323,7 +323,7 @@ residual_index_from_phase_mismatch(
     phase_mismatch: float | list[float] | np.ndarray,
     frequency: float | list[float] | np.ndarray,
     spacing: float,
-    c: float = 343.0,
+    speed_of_sound: float = 343.0,
 ) -> np.ndarray
 ```
 
@@ -352,7 +352,7 @@ table requires.
 | `phase_mismatch` | $\phi_s$ in degrees (scalar or array, > 0). |
 | `frequency` | Frequency in Hz (scalar or array, broadcast against `phase_mismatch`). |
 | `spacing` | Microphone separation in metres. |
-| `c` | Speed of sound in m/s (default 343.0). |
+| `speed_of_sound` | Speed of sound in m/s (default 343.0). |
 
 **Returns:** `delta_pI0` in decibels, as a `numpy.ndarray` (0-d for scalar inputs).
 
@@ -360,7 +360,7 @@ table requires.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If `phase_mismatch` is not positive and finite, or if `spacing`, `c` or `frequency` are not positive and finite. |
+| ValueError | If `phase_mismatch` is not positive and finite, or if `spacing`, `speed_of_sound` or `frequency` are not positive and finite. |
 
 ## residual_index_limits
 

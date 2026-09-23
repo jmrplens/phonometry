@@ -83,7 +83,7 @@ def _metadata_pairs(
 
 def _is_time_varying(result: ZwickerLoudness) -> bool:
     """Whether the result came from the time-varying method (clause 6)."""
-    return result.time is not None and result.loudness_vs_time is not None
+    return result.times is not None and result.loudness_vs_time is not None
 
 
 def _loudness_symbol(result: ZwickerLoudness) -> str:

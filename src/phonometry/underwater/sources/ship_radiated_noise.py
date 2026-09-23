@@ -132,10 +132,10 @@ def source_level_uncertainty(frequency: float) -> float:
 
 
 def _surface_correction(
-    frequency: NDArray[np.float64], source_depth: float, sound_speed: float
+    frequency: NDArray[np.float64], source_depth: float, speed_of_sound: float
 ) -> NDArray[np.float64]:
     """Lloyd's-mirror RNL-to-source-level correction ΔL (ISO 17208-2 Formula 3)."""
-    k = 2.0 * np.pi * frequency / sound_speed
+    k = 2.0 * np.pi * frequency / speed_of_sound
     u = k * source_depth
     u2 = u**2
     u4 = u2**2
@@ -154,7 +154,7 @@ class ShipSourceLevelResult:
     :ivar source_level: Equivalent monopole source level
         :math:`L_\mathrm{s} = L_{\mathrm{RN}} + \Delta L`, in dB re 1 µPa·m.
     :ivar source_depth: Nominal source depth :math:`d_\mathrm{s} = 0.7 D`, in m.
-    :ivar sound_speed: Speed of sound used, in m/s.
+    :ivar speed_of_sound: Speed of sound used, in m/s.
     """
 
     frequencies: NDArray[np.float64]
@@ -162,7 +162,7 @@ class ShipSourceLevelResult:
     surface_correction: NDArray[np.float64]
     source_level: NDArray[np.float64]
     source_depth: float
-    sound_speed: float
+    speed_of_sound: float
 
     def __post_init__(self) -> None:
         """Reject a source-level spectrum whose curves disagree on frequency.
@@ -213,7 +213,7 @@ def monopole_source_level(
     frequency: float | NDArray[np.float64] | list[float],
     draught: float,
     *,
-    c: float = _DEFAULT_SOUND_SPEED,
+    speed_of_sound: float = _DEFAULT_SOUND_SPEED,
 ) -> ShipSourceLevelResult:
     r"""Equivalent monopole source level from radiated noise level
     (ISO 17208-2).
@@ -232,12 +232,12 @@ def monopole_source_level(
         array; array length must match ``frequency``).
     :param frequency: Frequency or frequencies, in Hz.
     :param draught: Ship draught ``D`` (mean of bow and stern), in m.
-    :param c: Speed of sound in sea water, in m/s (default 1500).
+    :param speed_of_sound: Speed of sound in sea water, in m/s (default 1500).
     :return: A :class:`ShipSourceLevelResult`.
     :raises ValueError: If the inputs are invalid or the shapes mismatch.
     """
     d = _positive(draught, "draught")
-    speed = _positive(c, "c")
+    speed = _positive(speed_of_sound, "speed_of_sound")
     # The shared guards also reject the empty array, which used to pass the
     # sign and finiteness predicates vacuously and come back as a zero-band
     # result whose .plot() died in a numpy reduction naming no argument.
@@ -258,5 +258,5 @@ def monopole_source_level(
         surface_correction=delta_l,
         source_level=rnl_arr + delta_l,
         source_depth=source_depth,
-        sound_speed=speed,
+        speed_of_sound=speed,
     )

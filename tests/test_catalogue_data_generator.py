@@ -276,22 +276,56 @@ def test_an_estimate_for_the_whole_row_marks_every_cell_of_it() -> None:
     assert gcd.cell(row, "density_kg_m3")["kind"] == "estimated"
 
 
-def _published_cells() -> list[tuple[str, CatalogueRow, str]]:
-    """Every numeric cell of every catalogue the generator publishes."""
+def _holds_a_cell(row: CatalogueRow, field: str) -> bool:
+    """Whether *field* of *row* is something the page would print in a cell.
+
+    A number, or an interval, a list of readings or a word the page printed
+    where a number would go. A text field such as a name is not a cell, and
+    neither is a flag.
+    """
+    value = getattr(row, field)
+    number = isinstance(value, (int, float)) and not isinstance(value, bool)
+    return (
+        number
+        or field in row.ranges
+        or field in row.reported
+        or field in row.unquantified
+    )
+
+
+def _hedged_cells() -> list[tuple[str, CatalogueRow, str]]:
+    """Every field of every published row that carries a hedge the page shows.
+
+    Walked from the hedges rather than from the cells, so that a hedge on a
+    cell with no single value is found as surely as one on a number: every
+    key of ``converted`` and ``carried``, every field ``basis`` calls an
+    estimate, and, where ``basis`` calls the whole row one, every cell of the
+    row.
+    """
     catalogues = [
         catalogue
         for name, catalogue in vars(gcd).items()
         if name.startswith("PUBLISHED_") and isinstance(catalogue, Mapping)
     ]
-    return [
-        (key, row, field.name)
-        for catalogue in catalogues
-        for key, row in catalogue.items()
-        if isinstance(row, CatalogueRow)
-        for field in dataclasses.fields(row)
-        if isinstance(getattr(row, field.name), (int, float))
-        and not isinstance(getattr(row, field.name), bool)
-    ]
+    found: list[tuple[str, CatalogueRow, str]] = []
+    for catalogue in catalogues:
+        for key, row in catalogue.items():
+            if not isinstance(row, CatalogueRow):
+                continue
+            fields = set(row.converted) | set(row.carried)
+            fields |= {
+                name
+                for name, basis in row.basis.items()
+                if name != "row" and basis == "estimated"
+            }
+            if row.basis.get("row") == "estimated":
+                fields |= {
+                    field.name
+                    for field in dataclasses.fields(row)
+                    if _holds_a_cell(row, field.name)
+                }
+            found.extend((key, row, field) for field in sorted(fields))
+    return found
 
 
 def test_every_hedged_cell_reaches_the_page_as_its_own_kind() -> None:
@@ -301,25 +335,33 @@ def test_every_hedged_cell_reaches_the_page_as_its_own_kind() -> None:
     spelled and the solids did not, so the 33 estimated cells of 21 solids
     reached the page as printed numbers, among them the Poisson's ratio 0.2
     of the aircrete of Hopkins Table A2. Since then the estimate is one
-    entry of ``basis``, and a value the page prints in another unit or on
-    another row has a mapping of its own. The walk covers every numeric cell
-    of every catalogue the generator publishes and asks each hedge the way
-    the row answers it, so a row type that gains a hedge later is held to it
-    as well, and a hedge whose cell reads as printed fails here.
+    entry of ``basis``, and a value the page gives in another unit or by
+    reference to another row has a mapping of its own. The walk starts from
+    every hedge of every row the generator publishes, whatever the cell it
+    sits on holds, so a hedge on an interval, or two hedges on one value, is
+    found here too: :func:`gcd.cell` refuses those, and the refusal fails
+    this test before the page could drop one of them.
+
+    The three carried fields that are text (the row a Harris description
+    refers to, where the page prints "Parecido al anterior" and no number)
+    have no column on the page, and are counted apart so that the set cannot
+    grow unseen.
     """
     estimated: list[str] = []
     converted: list[str] = []
     carried: list[str] = []
+    text: list[str] = []
     wrong: list[str] = []
-    for key, row, field in _published_cells():
-        cell = gcd.cell(row, field)
+    for key, row, field in _hedged_cells():
         where = f"{key}: {field}"
+        if isinstance(getattr(row, field), str):
+            text.append(where)
+            continue
+        cell = gcd.cell(row, field)
         if row.basis_of(field) == "estimated":
             estimated.append(where)
             if cell["kind"] != "estimated":
                 wrong.append(f"{where} reads as {cell['kind']}, not estimated")
-        elif row.is_approximate(field):
-            continue
         elif field in row.converted:
             converted.append(where)
             figure, unit = row.converted[field]
@@ -334,6 +376,81 @@ def test_every_hedged_cell_reaches_the_page_as_its_own_kind() -> None:
     assert len(estimated) == 35
     assert len(converted) == 125
     assert len(carried) == 18
+    assert {where.rpartition(": ")[2] for where in text} == {"refers_to_row"}
+    assert len(text) == 3
+
+
+@pytest.mark.parametrize(
+    ("hedges", "wanted"),
+    [
+        (
+            {
+                "ranges": {"density_kg_m3": (1000.0, 1200.0)},
+                "basis": {"density_kg_m3": "estimated"},
+            },
+            "density_kg_m3 is estimated on a cell with no single value",
+        ),
+        (
+            {
+                "ranges": {"density_kg_m3": (5000.0, None)},
+                "bounded_below": frozenset({"density_kg_m3"}),
+                "converted": {"density_kg_m3": ("5", "g/cm3")},
+            },
+            "density_kg_m3 is converted on a cell with no single value",
+        ),
+        (
+            {
+                "ranges": {"density_kg_m3": (1000.0, 1200.0)},
+                "basis": {"row": "estimated"},
+            },
+            "density_kg_m3 is estimated on a cell with no single value",
+        ),
+        (
+            {
+                "density_kg_m3": 5000.0,
+                "approximate": frozenset({"density_kg_m3"}),
+                "converted": {"density_kg_m3": ("5", "g/cm3")},
+            },
+            "density_kg_m3 is converted and approximate on a value",
+        ),
+        (
+            {
+                "density_kg_m3": 5000.0,
+                "converted": {"density_kg_m3": ("5", "g/cm3")},
+                "basis": {"density_kg_m3": "estimated"},
+            },
+            "density_kg_m3 is converted and estimated on a value",
+        ),
+    ],
+    ids=[
+        "estimated interval",
+        "converted bound",
+        "estimated row with an interval",
+        "approximate conversion",
+        "estimated conversion",
+    ],
+)
+def test_a_hedge_the_page_cannot_show_stops_the_generator(
+    hedges: dict[str, object], wanted: str
+) -> None:
+    """Refused, rather than published with one of its hedges gone."""
+    row = _row(**hedges)
+
+    with pytest.raises(ValueError, match=wanted):
+        gcd.cell(row, "density_kg_m3")
+
+
+def test_an_approximate_interval_is_still_an_interval() -> None:
+    """The tilde on a cell that only holds an interval is not refused.
+
+    Cox prints one, and a tilde is not a hedge that needs a single value.
+    """
+    row = _row(
+        ranges={"density_kg_m3": (400.0, 800.0)},
+        approximate=frozenset({"density_kg_m3"}),
+    )
+
+    assert gcd.cell(row, "density_kg_m3")["kind"] == "range"
 
 
 def test_an_interval_stays_an_interval() -> None:

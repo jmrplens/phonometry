@@ -420,7 +420,7 @@ def test_every_row_of_table_32_8_carries_the_footnote_of_its_table() -> None:
 def test_the_two_blank_ratings_say_their_column_was_printed_for_them() -> None:
     """A blank cell in a column that exists is not a column that does not.
 
-    :meth:`~phonometry._internal.catalogue.CatalogueRow.why_missing` answers the
+    :meth:`~phonometry.io.CatalogueRow.why_missing` answers the
     same sentence for both, because the contract has no hedge for "the column
     is there and this cell is blank": what distinguishes them is on the row's
     note, where the page's own silence can be described without inventing a

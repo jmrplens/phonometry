@@ -95,7 +95,7 @@ from phonometry.solids import (  # noqa: E402
 if TYPE_CHECKING:
     from collections.abc import Iterable, Iterator, Mapping
 
-    from phonometry._internal.catalogue import CatalogueRow
+    from phonometry.io import CatalogueRow
 
 #: Where the site imports the catalogues from.
 OUTPUT = (
@@ -807,6 +807,60 @@ def column_style(unit: str, numbers: Iterable[float]) -> Style:
     return Style(f"{prefix}{unit}", exponent)
 
 
+#: The hedges that each give a served value a kind of its own, in the order
+#: :func:`cell` asks for them.
+_VALUE_HEDGES = ("derived", "converted", "carried", "approximate", "estimated")
+
+#: The hedges :func:`cell` can show only on a single value. An interval, a
+#: bound, a list of readings or a word reads with a kind of its own, and the
+#: page has no way yet to say that one of those is also an estimate, a
+#: conversion or carried from another row.
+_SINGLE_VALUE_HEDGES = ("converted", "carried", "estimated")
+
+
+def _hedges(row: CatalogueRow, field: str) -> list[str]:
+    """The hedges of :data:`_VALUE_HEDGES` that *row* holds for *field*."""
+    held = {
+        "derived": row.is_derived(field),
+        "converted": field in row.converted,
+        "carried": field in row.carried,
+        "approximate": row.is_approximate(field),
+        "estimated": row.basis_of(field) == "estimated",
+    }
+    return [hedge for hedge in _VALUE_HEDGES if held[hedge]]
+
+
+def _refuse_unshowable(row: CatalogueRow, field: str, value: object) -> None:
+    """Refuse a cell whose hedges the page cannot show, rather than drop one.
+
+    A cell has one kind, and the component styles and words it by that kind.
+    Two hedges on one value, or a hedge that only a value can carry on a cell
+    that holds an interval, a list or a word, would reach the page with one of
+    them silently gone: an estimated interval read as a plain range, or a
+    converted bound whose note gives the converted number as what the page
+    prints. No published cell does either today; the first one to do so stops
+    the generator here, so that how it should read is decided rather than
+    lost.
+
+    :raises ValueError: naming the row, the field and the hedges.
+    """
+    hedges = _hedges(row, field)
+    if value is not None:
+        clash = hedges if len(hedges) > 1 else []
+    else:
+        spoken = (
+            field in row.ranges or field in row.reported or field in row.unquantified
+        )
+        clash = [h for h in hedges if h in _SINGLE_VALUE_HEDGES] if spoken else []
+    if clash:
+        what = "a value" if value is not None else "a cell with no single value"
+        msg = (
+            f"{row.name!r}: {field} is {' and '.join(clash)} on {what}, and a "
+            "cell of the published page can show only one hedge, on a value"
+        )
+        raise ValueError(msg)
+
+
 def cell(
     row: CatalogueRow, field: str, *, style: Style | None = None
 ) -> dict[str, Any]:
@@ -818,8 +872,10 @@ def cell(
         default writes plain digits in the unit the quantity is stored in.
     :return: ``text`` to print, ``kind`` for the component to style by, and
         ``note`` for the hedge a reader needs to read the number correctly;
-        a ``converted`` cell also carries ``printed``, the figure and the unit
-        the page prints, which the component words in the reader's language.
+        a ``converted`` cell also carries ``printed``, the page's figure and
+        its unit, which the component words in the reader's language.
+    :raises ValueError: for a cell whose hedges the page cannot show, which
+        :func:`_refuse_unshowable` describes.
     """
     style = style or Style("")
     written = functools.partial(
@@ -830,15 +886,17 @@ def cell(
     # print 1 989.
     if field == "year" and value is not None:
         return {"text": str(int(value)), "kind": "printed", "note": ""}
+    _refuse_unshowable(row, field, value)
     if value is not None:
         # Three ways a served number is not simply what the cell printed, and
         # the row names each one in a mapping of its own: this library worked
-        # it out (``derived``), the page prints it in another unit
-        # (``converted``, with the printed figure and unit), or the page
-        # prints it on another row and leaves this cell blank (``carried``).
-        # A converted value is written like a derived one, to the figures its
+        # it out (``derived``), the page gives it in another unit
+        # (``converted``, with the page's figure and its unit), or the page
+        # gives it by reference to another of its rows (``carried``). A
+        # converted value is written like a derived one, to the figures its
         # inputs had, because the conversion is ours; a carried one is the
-        # page's own number and keeps every digit.
+        # page's own number and keeps every digit. At most one of them, or of
+        # the tilde and the estimate below, is on any cell that gets here.
         extra: dict[str, str] = {}
         kind, note = "printed", ""
         if row.is_derived(field):
@@ -1175,7 +1233,7 @@ def transcribed(
     """A catalogue whose cells are numbers and nothing else.
 
     Most of these catalogues are rows of
-    :class:`~phonometry._internal.catalogue.CatalogueRow`, which carries the
+    :class:`~phonometry.io.CatalogueRow`, which carries the
     intervals, the bounds, the listed readings and the words a page can print
     where a number would go, and :func:`section` reads all of that back. Two
     are not: the resilient layers are a plain record of three measured numbers

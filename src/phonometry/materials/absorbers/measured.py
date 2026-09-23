@@ -17,13 +17,13 @@ A table of absorption coefficients usually carries a few rows that are not
 coefficients at all. Bies prints an audience "per person seated" as
 :math:`S\bar{\alpha}` in square metres, an absorption area, in the same
 columns as the coefficients above it, and Long prints a musician with
-instrument the same way, in sabins. A coefficient is dimensionless and
-bounded by the surface it belongs to; an area per person is a quantity in
-square metres that is added, not multiplied. Holding both under one field
-name would put a number in square metres behind a name that says otherwise,
-so they are two classes and two catalogues, :data:`PUBLISHED_ABSORPTION` and
-:data:`PUBLISHED_ABSORPTION_AREAS`, and the data file tells them apart by
-the fields each row carries.
+instrument the same way, in figures that are sabins. A coefficient is
+dimensionless and bounded by the surface it belongs to; an area per person
+is a quantity in square metres that is added, not multiplied. Holding both
+under one field name would put a number in square metres behind a name that
+says otherwise, so they are two classes and two catalogues,
+:data:`PUBLISHED_ABSORPTION` and :data:`PUBLISHED_ABSORPTION_AREAS`, and the
+data file tells them apart by the fields each row carries.
 
 The band is the field
 ---------------------
@@ -53,10 +53,12 @@ not a specification of any product. Where a page says more than that about
 its numbers, the ``about`` of its data file quotes it.
 
 Long sets his table in inches, pounds and ounces, and his two rows that are
-areas are in sabins, square feet of perfect absorption. The names keep the
-inches, because a name is what the page prints; the areas are converted to
-square metres at load, because a field named ``m2`` holds square metres or it
-lies, and each converted cell keeps the figure and the unit the page prints.
+areas are in sabins, square feet of perfect absorption: the air names its
+sabins, and the musician prints bare figures that are read in the same unit,
+as its note explains. The names keep the inches, because a name is what the
+page prints; the areas are converted to square metres at load, because a
+field named ``m2`` holds square metres or it lies, and each converted cell
+keeps the page's figure and its unit.
 """
 
 from __future__ import annotations
@@ -198,8 +200,8 @@ _TABLES = (
 )
 
 #: A square foot in square metres, exact since the 1959 definition of the
-#: yard. Long prints his two absorption areas in sabins, which in a table set
-#: in inches and pounds are square feet of perfect absorption.
+#: yard. Long's two absorption areas are in sabins, which in a table set in
+#: inches and pounds are square feet of perfect absorption.
 _SQUARE_FOOT_M2 = 0.09290304
 
 #: A thousand cubic feet in cubic metres, exact for the same reason. Long
@@ -207,9 +209,9 @@ _SQUARE_FOOT_M2 = 0.09290304
 _THOUSAND_CUBIC_FEET_M3 = 28.316846592
 
 #: The imperial suffixes a data file may write an area field with, each with
-#: the factor that takes the printed number to the metric field and the unit
-#: the page prints, which :attr:`~phonometry.io.CatalogueRow.converted` keeps
-#: beside the printed figure.
+#: the factor that takes the page's figure to the metric field and the unit
+#: the figure is in, which :attr:`~phonometry.io.CatalogueRow.converted` keeps
+#: beside it.
 _IMPERIAL_AREAS = (
     (
         "_ft2_per_1000_ft3",
@@ -235,14 +237,16 @@ def _metric(fields: dict[str, Any]) -> dict[str, Any]:
     """The area fields of a row in square metres, converted where printed otherwise.
 
     A data file writes what the page prints, so a table set in feet writes
-    ``absorption_area_125_ft2`` and the number beside it is the sabins on the
-    page. The row holds square metres, because every other row does and
-    because a caller adding an audience to a room in metres cannot be handed
-    square feet under a field that says ``m2``. The conversion is done here,
-    once, and :attr:`~phonometry.io.CatalogueRow.converted` keeps the figure
-    and the unit the page prints, so the page's own number is never more than
-    a lookup away. It is not a derivation: the value is the page's, in
-    another unit.
+    ``absorption_area_125_ft2`` and the number beside it is the page's
+    figure, in sabins. The row holds square metres, because every other row
+    does and because a caller adding an audience to a room in metres cannot
+    be handed square feet under a field that says ``m2``. The conversion is
+    done here, once, and :attr:`~phonometry.io.CatalogueRow.converted` keeps
+    the page's figure and its unit, so the page's own number is never more
+    than a lookup away. It is not a derivation: the value is the page's, in
+    another unit. The unit is the suffix the data file writes, and a page
+    that prints its figures bare, as Long does for his musician, says in the
+    row's note why they are sabins.
     """
     metric_fields = dict(fields)
     converted = dict(fields.get("converted", {}))

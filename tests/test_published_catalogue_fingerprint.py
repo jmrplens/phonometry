@@ -14,13 +14,24 @@ import json
 import catalogue_fingerprint as fp
 
 
+def _text(value: object) -> str:
+    """*value* as the baseline writes it, so a type change is a change.
+
+    Python holds ``2700 == 2700.0`` and ``True == 1``, so comparing the parsed
+    dumps would let a published float turn into an integer, or a flag into a
+    number, without a word. Their text differs, and the text is what the
+    baseline file holds.
+    """
+    return json.dumps(value, ensure_ascii=False, sort_keys=True)
+
+
 def _first_difference(expected: dict[str, object], live: dict[str, object]) -> str:
     """The first field two dumps of one row disagree on, for the message."""
     for field in sorted(set(expected) | set(live)):
-        if expected.get(field) != live.get(field):
+        if _text(expected.get(field)) != _text(live.get(field)):
             return (
-                f"{field}: expected {json.dumps(expected.get(field), ensure_ascii=False)}"
-                f", built {json.dumps(live.get(field), ensure_ascii=False)}"
+                f"{field}: expected {_text(expected.get(field))}"
+                f", built {_text(live.get(field))}"
             )
     return "no field differs"
 
@@ -48,7 +59,10 @@ def test_every_published_row_is_the_baseline_carried_through_the_changes() -> No
 
     ``generate_catalogue_data.py --check`` catches a number the page would
     print differently; this catches the last digit of a float, which the page
-    never shows, and a hedge moved from one field to another.
+    never shows, a float served as an integer, which the page prints the
+    same, and a hedge moved from one field to another. Rows are compared as
+    the text the baseline holds, not as parsed values, for the reason
+    :func:`_text` gives.
     """
     expected = fp.expected()
     live = fp.dump()
@@ -56,7 +70,19 @@ def test_every_published_row_is_the_baseline_carried_through_the_changes() -> No
         assert list(live[name]) == list(rows), f"{name}: the keys or their order moved"
         for key, row in rows.items():
             built = live[name][key]
-            assert built == row, f"{name}[{key!r}]: {_first_difference(row, built)}"
+            assert _text(built) == _text(row), (
+                f"{name}[{key!r}]: {_first_difference(row, built)}"
+            )
+
+
+def test_a_float_served_as_an_integer_is_a_change() -> None:
+    """The comparison sees the type of a number, not only its value."""
+    row = {"density_kg_m3": 2700.0, "flag": True}
+    served = {"density_kg_m3": 2700, "flag": 1}
+
+    assert row == served
+    assert _text(row) != _text(served)
+    assert _first_difference(row, served).startswith("density_kg_m3: expected 2700.0")
 
 
 def test_one_row_shape_moves_the_cells_it_lists_and_no_others() -> None:
@@ -65,9 +91,11 @@ def test_one_row_shape_moves_the_cells_it_lists_and_no_others() -> None:
     Thirty-five estimated cells in twenty-two rows (Hopkins Table A2 and the
     maple of Rossing Table 15.5) became ``basis``; the 116 Fahrenheit and psi
     cells of Ver and Beranek Table 14.1 and the nine sabin cells of Long
-    Table 7.1 became ``converted``; the 21 cells the pages carry down a block
-    became ``carried``. A step that grew to touch one more row would fail
-    here before it failed anywhere else.
+    Table 7.1 became ``converted``; the 21 values the pages give by reference
+    to another row, 18 cells left blank under a block and the three rows of
+    Harris that print "Parecido al anterior" and no row number, became
+    ``carried``. A step that grew to touch one more row would fail here
+    before it failed anywhere else.
     """
     before = fp.baseline()
     after = fp.one_row_shape(before)

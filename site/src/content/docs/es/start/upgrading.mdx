@@ -461,17 +461,16 @@ cualquiera de ellas.
 | --- | --- |
 | `SolidMaterial.estimated`, `OrthotropicWood.estimated` | `row.basis`, que asigna `"estimated"` a cada campo con la nota al pie |
 | `SolidMaterial.is_estimate(field)`, `OrthotropicWood.is_estimated(field)` | `row.basis_of(field) == "estimated"` |
-| `row.is_derived(field)` en un valor que la página imprime en otra unidad (los °F y psi de la Tabla 14.1 de Ver & Beranek, los sabinios de la Tabla 7.1 de Long) | `field in row.converted`; `row.converted[field]` es la cifra y la unidad que imprime la página, como `("3e5", "psi")` |
-| `row.is_derived(field)` en una celda que la página deja en blanco e imprime en otra fila (Tabla 8.7 de Ver & Beranek, Tabla 30 de ASHRAE, capítulo 32 de Harris) | `field in row.carried`; `row.carried[field]` nombra la fila |
+| `row.is_derived(field)` en un valor que la página da en una unidad que la fila no guarda (los °F y psi de la Tabla 14.1 de Ver & Beranek, los sabines de la Tabla 7.1 de Long) | `field in row.converted`; `row.converted[field]` es la cifra de la página y su unidad, como `("3e5", "psi")` |
+| `row.is_derived(field)` en un valor que la página da por referencia a otra de sus filas: una celda en blanco bajo un bloque (Tabla 8.7 de Ver & Beranek, Tabla 30 de ASHRAE) o una descripción que dice «Parecido al anterior» (capítulo 32 de Harris) | `field in row.carried`; `row.carried[field]` nombra la fila |
 | `OrthotropicWood(...)` y `PlateauMaterial(...)` con sus propios campos por posición | todos los campos por nombre, como en cualquier otra fila |
 | `from phonometry._internal.catalogue import CatalogueRow` | `from phonometry.io import CatalogueRow` |
 
 `is_derived` responde ahora sólo por lo que calcula la biblioteca y podría
 volver a calcular con las celdas de la propia fila, como una velocidad de
-barra obtenida de un módulo y una densidad. Un valor que la página imprime en
-otra unidad sigue siendo el número de la página, y también lo es uno que la
-página imprime una sola vez para un bloque de filas, así que ninguno de los
-dos es ya derivado. `basis_of` responde con la entrada del propio campo, si no
+barra obtenida de un módulo y una densidad. Un valor que la página da en otra
+unidad sigue siendo el número de la página, y también lo es uno que da por
+referencia a otra de sus filas, así que ninguno de los dos es ya derivado. `basis_of` responde con la entrada del propio campo, si no
 con la de la fila, y si no con una cadena vacía, que quiere decir que la
 fuente no dice cómo se obtuvo el número; las cinco cosas que puede afirmar una
 fuente están en `io.CATALOGUE_BASES`.

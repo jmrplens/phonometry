@@ -446,16 +446,16 @@ questions have the same answer on any of them.
 | --- | --- |
 | `SolidMaterial.estimated`, `OrthotropicWood.estimated` | `row.basis`, which maps each footnoted field to `"estimated"` |
 | `SolidMaterial.is_estimate(field)`, `OrthotropicWood.is_estimated(field)` | `row.basis_of(field) == "estimated"` |
-| `row.is_derived(field)` on a value the page prints in another unit (the °F and psi of Ver & Beranek Table 14.1, the sabins of Long Table 7.1) | `field in row.converted`; `row.converted[field]` is the figure and the unit the page prints, such as `("3e5", "psi")` |
-| `row.is_derived(field)` on a cell the page leaves blank and prints on another row (Ver & Beranek Table 8.7, ASHRAE Table 30, Harris Chapter 32) | `field in row.carried`; `row.carried[field]` names the row |
+| `row.is_derived(field)` on a value the page gives in a unit the row does not hold (the °F and psi of Ver & Beranek Table 14.1, the sabins of Long Table 7.1) | `field in row.converted`; `row.converted[field]` is the page's figure and its unit, such as `("3e5", "psi")` |
+| `row.is_derived(field)` on a value the page gives by reference to another of its rows: a cell left blank under a block (Ver & Beranek Table 8.7, ASHRAE Table 30) or a description that reads "Parecido al anterior" (Harris Chapter 32) | `field in row.carried`; `row.carried[field]` names the row |
 | `OrthotropicWood(...)` and `PlateauMaterial(...)` with their own fields by position | every field by name, as on every other row |
 | `from phonometry._internal.catalogue import CatalogueRow` | `from phonometry.io import CatalogueRow` |
 
 `is_derived` now answers only for what the library computes and could compute
 again from the row's own cells, such as a bar speed worked out from a modulus
-and a density. A value the page prints in another unit is still the page's
-number, and so is one the page prints once for a block of rows, so neither is
-derived any more. `basis_of` answers with the field's own entry, else the
+and a density. A value the page gives in another unit is still the page's
+number, and so is one it gives by reference to another of its rows, so neither
+is derived any more. `basis_of` answers with the field's own entry, else the
 row's, else an empty string, which means the source does not say how the
 number was obtained; the five things a source can claim are in
 `io.CATALOGUE_BASES`.

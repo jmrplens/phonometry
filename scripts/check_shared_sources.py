@@ -60,7 +60,7 @@ from phonometry.solids import PUBLISHED_SOLIDS  # noqa: E402
 if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping
 
-    from phonometry._internal.catalogue import CatalogueRow
+    from phonometry.io import CatalogueRow
 
 #: The catalogues to walk, and the quantities worth comparing in each. A
 #: quantity only one of the two books prints is skipped, so the list can be

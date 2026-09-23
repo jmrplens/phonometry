@@ -205,21 +205,76 @@ CARRIED_ROWS = {
 }
 
 
+#: The row notes that said what the old hedges said, as the sentence each
+#: had and the sentence it has now. ``None`` for a note the row did not have:
+#: the musician of Long Table 7.1 prints its figures with no unit, which the
+#: sabins recorded in ``converted`` would otherwise claim it prints.
+NOTE_CHANGES: dict[tuple[str, str], tuple[str | None, str]] = {
+    **{
+        ("PUBLISHED_DUCT_TRANSMISSION_LOSS", key): (
+            "The diameter cell is blank on the page, so the 610 mm this row "
+            "carries was not read from it and is held as a derivation rather "
+            "than as a printed number.",
+            "The diameter cell is blank on the page, and the 610 mm this row "
+            "serves is carried down from the row of its block that prints it "
+            "rather than read from this row.",
+        )
+        for key in CARRIED_ROWS["PUBLISHED_DUCT_TRANSMISSION_LOSS"]
+    },
+    (
+        "PUBLISHED_ABSORPTION_AREAS",
+        "long-2014-table-7-1/musician_per_person_with_instrument",
+    ): (
+        None,
+        "The page prints these six figures with no unit. They are held as "
+        "sabins, square feet of absorption per person: the row is priced per "
+        "person in a table set in inches and pounds, its figures run from 4.0 "
+        "to 15.0 where no coefficient of the table passes 1.33, and the row "
+        "below it names its sabins.",
+    ),
+}
+
+
+def _renoted(name: str, key: str, row: Row) -> None:
+    """Rewrite the note of *row* as :data:`NOTE_CHANGES` lists, in place.
+
+    :raises ValueError: when the sentence the change replaces is not in the
+        note, so that a step can never claim a rewrite it did not make.
+    """
+    change = NOTE_CHANGES.get((name, key))
+    if change is None:
+        return
+    before, after = change
+    note = row.get("note", "")
+    if before is None:
+        if note:
+            msg = f"{name}[{key!r}] already has a note"
+            raise ValueError(msg)
+        row["note"] = after
+        return
+    if before not in note:
+        msg = f"{name}[{key!r}]: the note does not say {before!r}"
+        raise ValueError(msg)
+    row["note"] = note.replace(before, after)
+
+
 def _one_row_shape(name: str, key: str, row: Row) -> Row:
     """One row taken through the change that gave every row one shape.
 
-    Two things moved, and nothing else may:
+    Three things moved, and nothing else may:
 
     * ``estimated``, a set the solids and the orthotropic woods each kept,
       became an entry of ``basis`` per field, with the value
       ``"estimated"``;
     * a hand-written ``derived`` that recorded a unit conversion became
-      ``converted``, the printed figure and the printed unit, and one that
-      recorded a cell the page leaves blank and carries from another row
-      became ``carried``, word for word. ``derived`` keeps only what the
-      library computes.
+      ``converted``, the page's figure and its unit, and one that recorded a
+      value the page gives by reference to another row became ``carried``,
+      word for word. ``derived`` keeps only what the library computes;
+    * the notes of :data:`NOTE_CHANGES` stopped saying what the old hedge
+      said, or started saying what the new one could not.
     """
     row = dict(row)
+    _renoted(name, key, row)
     estimated = row.pop("estimated", [])
     if estimated:
         row["basis"] = dict.fromkeys(estimated, "estimated")

@@ -113130,7 +113130,7 @@ export const catalogues = {
         "weave": "",
         "bonding": "",
         "source": "ASHRAE (2019) HVAC Applications Handbook Chapter 49 Tables 29 to 34, PDF pages 914-916 (printed pp. 49.30-49.32)",
-        "note": "The diameter cell is blank on the page, so the 610 mm this row carries was not read from it and is held as a derivation rather than as a printed number. The gauge carries the asterisk of the footnote printed under Table 30: “*Ducts internally lined with 25 mm thick 24 kg/m3 fiberglass with 0.6 mm perforated sheet metal inner liner.” (the page sets the 3 of the density as a superscript).",
+        "note": "The diameter cell is blank on the page, and the 610 mm this row serves is carried down from the row of its block that prints it rather than read from this row. The gauge carries the asterisk of the footnote printed under Table 30: “*Ducts internally lined with 25 mm thick 24 kg/m3 fiberglass with 0.6 mm perforated sheet metal inner liner.” (the page sets the 3 of the density as a superscript).",
         "attributedTo": {
           "table": "Cummings 1983, 1985 and Lilly 1987, credited in the running text on PDF page 913 (folio 49.29), which reads: “Values of TLout for rectangular ducts are given in Table 29, for round ducts in Table 30, and for flat oval ducts in Table 31 (Cummings 1983, 1985; Lilly 1987).” The table itself carries no source line."
         },
@@ -113212,7 +113212,7 @@ export const catalogues = {
         "weave": "",
         "bonding": "",
         "source": "ASHRAE (2019) HVAC Applications Handbook Chapter 49 Tables 29 to 34, PDF pages 914-916 (printed pp. 49.30-49.32)",
-        "note": "The diameter cell is blank on the page, so the 610 mm this row carries was not read from it and is held as a derivation rather than as a printed number. The length is printed as a bare “3”, with no decimal, where every other length in Tables 30 and 32 carries one. The 63 Hz cell is printed “>48”, a lower bound and not a value; the page gives no ceiling for it and none is invented.",
+        "note": "The diameter cell is blank on the page, and the 610 mm this row serves is carried down from the row of its block that prints it rather than read from this row. The length is printed as a bare “3”, with no decimal, where every other length in Tables 30 and 32 carries one. The 63 Hz cell is printed “>48”, a lower bound and not a value; the page gives no ceiling for it and none is invented.",
         "attributedTo": {
           "table": "Cummings 1983, 1985 and Lilly 1987, credited in the running text on PDF page 913 (folio 49.29), which reads: “Values of TLout for rectangular ducts are given in Table 29, for round ducts in Table 30, and for flat oval ducts in Table 31 (Cummings 1983, 1985; Lilly 1987).” The table itself carries no source line."
         },
@@ -145254,7 +145254,7 @@ export const catalogues = {
         "weave": "",
         "bonding": "",
         "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
-        "note": "",
+        "note": "The page prints these six figures with no unit. They are held as sabins, square feet of absorption per person: the row is priced per person in a table set in inches and pounds, its figures run from 4.0 to 15.0 where no coefficient of the table passes 1.33, and the row below it names its sabins.",
         "attributedTo": {},
         "cells": [
           {

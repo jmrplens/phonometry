@@ -137,8 +137,8 @@ const copy = {
 			printed: 'as the page prints it',
 			fixed: 'what the model or the standard beside it fixes',
 			derived: 'worked out by this library',
-			converted: 'converted from what the page prints',
-			carried: 'the page leaves this cell blank and prints the value on another row',
+			converted: 'converted from the page\'s figure',
+			carried: 'the page gives this value on another of its rows',
 			approximate: 'the page prints it with a tilde',
 			estimated: 'the page marks it as an estimate, not a measurement',
 			range: 'the page prints an interval',
@@ -204,8 +204,8 @@ const copy = {
 			printed: 'tal como lo imprime la página',
 			fixed: 'lo que fija el modelo o la norma que lleva al lado',
 			derived: 'calculado por esta biblioteca',
-			converted: 'convertido de lo que imprime la página',
-			carried: 'la página deja esta celda en blanco e imprime el valor en otra fila',
+			converted: 'convertido desde la cifra de la página',
+			carried: 'la página da este valor en otra de sus filas',
 			approximate: 'la página lo imprime con una tilde',
 			estimated: 'la página lo marca como estimación, no como medida',
 			range: 'la página imprime un intervalo',
@@ -452,9 +452,9 @@ const textColumns = (
 										   are the ones that are not a plain number, and
 										   "as the page prints it" on every other cell would
 										   bury them. It keeps its `cursor: auto` for the same
-										   reason. A converted cell names the figure and the
-										   unit the page prints after the kind's own words, so
-										   the reader gets them in the page's language. */
+										   reason. A converted cell names the page's figure and
+										   its unit after the kind's own words, so the reader
+										   gets them in the page's language. */
 										<span
 											class={`cell cell-${cell.kind}`}
 											title={

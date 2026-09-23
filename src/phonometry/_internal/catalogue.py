@@ -203,19 +203,28 @@ class CatalogueRow:
         stored as if it had been read, and it always follows again from the
         row's own cells. A value converted from the unit the page prints is
         not derived (:attr:`converted` holds it), and neither is one the page
-        carries from another row (:attr:`carried` does).
-    :ivar converted: Field to ``(figure, unit)``, the number and the unit the
-        page prints, for a value this row holds in another unit. Ver and
-        Beranek print their damping materials in degrees Fahrenheit and
-        pounds per square inch, and the row holds degrees Celsius and
-        pascals, so ``("3e5", "psi")`` sits beside a modulus in pascals. The
-        figure is kept as the page writes it, so the cell can always be read
-        back in the page's own terms.
-    :ivar carried: Field to where the page carries it from, for a cell the
-        page leaves blank because the value is printed once for a block of
-        rows: a figure on the first row of a group, or "Parecido al
-        anterior". The value is the page's, and this says which of its rows
-        prints it.
+        gives by reference to another of its rows (:attr:`carried` does).
+    :ivar converted: Field to ``(figure, unit)``, the page's figure and the
+        unit it is in, for a value this row holds in a unit the page does
+        not use. Ver and Beranek print their damping materials in degrees
+        Fahrenheit and pounds per square inch, and the row holds degrees
+        Celsius and pascals, so ``("3e5", "psi")`` sits beside a modulus in
+        pascals. The figure is kept as the page writes it, so the cell can
+        always be read back in the page's own terms. The unit is the one the
+        page prints with the figure or over its column. Long prints the
+        figures of his musician bare, and the sabins recorded for them are a
+        reading of the table, which is set in inches and pounds and names
+        sabins on the next row; that row's note says so. A figure a
+        packaged table prints with another SI prefix, such as the megapascals
+        of Rossing Table 15.5, is held in the base unit with no entry here,
+        and the table's ``about`` says so.
+    :ivar carried: Field to where the page gives it from, for a value the
+        page gives by reference to another of its rows rather than on this
+        one: a cell left blank under a block whose first row prints the
+        figure, as in Ver and Beranek Table 8.7, or a description that reads
+        "Parecido al anterior" and prints no row number, as three rows of
+        Harris Chapter 32 do, which refers to the row above it. The value is
+        the page's, and this says which of its rows gives it.
     :ivar ranges: ``(low, high)`` for each field the page prints as an
         interval rather than a value. One end is ``None`` only for a bound
         whose open side the quantity has no limit on; the end the page prints
@@ -354,9 +363,9 @@ class CatalogueRow:
         :param field_name: One of the numeric field names of this class.
         :return: ``True`` when the page did not print it and the value follows
             from cells that it did. :attr:`derived` says how. A value the
-            page prints in another unit, or prints on another row and leaves
-            blank on this one, answers ``False``: the number is the page's,
-            and :attr:`converted` or :attr:`carried` says so.
+            page prints in another unit, or gives by reference to another of
+            its rows, answers ``False``: the number is the page's, and
+            :attr:`converted` or :attr:`carried` says so.
         """
         return field_name in self.derived
 

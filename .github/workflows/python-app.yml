@@ -729,9 +729,10 @@ jobs:
       # A translation typed without the Spanish keyboard layout reads fine to
       # every other gate, and twenty-nine figure labels shipped as
       # "Correccion", "medicion" and "aqui". This reads the translation tables
-      # of the figures, the diagrams and the library's renderers and fails on a
-      # form that is never correct Spanish without its mark. Static, stdlib
-      # only, so it runs here with the other checks on published text.
+      # of the figures, the diagrams and the library's renderers, and the
+      # example fiches built in Spanish, and fails on a form that is never
+      # correct Spanish without its mark. Static, stdlib only, so it runs here
+      # with the other checks on published text.
       run: python scripts/check_spanish_accents.py
 
   # A form feed is one invisible byte, and inside a raw docstring it is the

@@ -157,10 +157,55 @@ def test_a_renamed_table_empties_no_gate_silently(tmp_path: pathlib.Path) -> Non
     """A source that yields nothing is reported, not passed."""
     _module(tmp_path)
     values, empty = csa.read_sources(
-        (("tables.py", ("_ES_EXACT",)), ("tables.py", ("_RENAMED",))), root=tmp_path
+        (("tables.py", ("_ES_EXACT",)), ("tables.py", ("_RENAMED",))),
+        root=tmp_path,
+        builders=(),
     )
     assert len(values) == 2
     assert empty == ["tables.py"]
+
+
+_BUILDERS = """
+def _spanish_example():
+    \"\"\"A docstring is not printed: the medicion here is never read.\"\"\"
+    metadata = ReportMetadata(test_room="punto de evaluacion", client="Example client")
+    return result, metadata, "spanish.pdf", {"language": "es"}
+
+
+def _spanish_call_example():
+    return render(result, language="es", title="Maquina ruidosa activa")
+
+
+def _english_example():
+    metadata = ReportMetadata(notes="Transmission and precision of the version")
+    return result, metadata, "english.pdf"
+"""
+
+
+def test_a_builder_that_asks_for_spanish_is_read(tmp_path: pathlib.Path) -> None:
+    """Both ways of naming the language, the docstring left out."""
+    path = tmp_path / "builders.py"
+    path.write_text(_BUILDERS, encoding="utf-8")
+    texts = [v.text for v in csa.builder_values(path)]
+    assert "punto de evaluacion" in texts
+    assert "Maquina ruidosa activa" in texts
+    assert not any("medicion" in text for text in texts)
+    assert not any("Transmission" in text for text in texts)
+    offences, _stale = csa.check(csa.builder_values(path), allowed={})
+    assert [o.word for o in offences] == ["evaluacion", "Maquina"]
+
+
+def test_a_builder_directory_without_spanish_is_reported(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A Spanish fiche that stops naming its language cannot leave silently."""
+    (tmp_path / "reports").mkdir()
+    (tmp_path / "reports" / "english.py").write_text(
+        "def _example():\n    return 1, 2, 'x.pdf'\n", encoding="utf-8"
+    )
+    values, empty = csa.read_sources((), root=tmp_path, builders=("reports",))
+    assert values == []
+    assert empty == ["reports"]
 
 
 def test_the_report_names_file_line_word_and_spelling(tmp_path: pathlib.Path) -> None:

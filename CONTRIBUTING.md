@@ -623,13 +623,17 @@ without the Spanish keyboard layout reads fine to every other gate, and
 twenty-nine labels of the building-acoustics figures shipped as "Correccion",
 "medicion" and "aqui". The check reads the translation tables of the figures,
 the diagrams and the library's renderers, with the `language == "es"` branches
-of the renderers, and fails on a form that is never correct Spanish without
-its mark: a singular in -ción or -sión, `aquí`, `señal`, `límite`, `número`,
-`máximo` and the rest of its `NEEDS_MARK` list. It leaves alone what a list
-cannot decide (`si` and `sí`, `aun` and `aún`, `mas` and `más`), so those stay
-with the author. A listed form that really is a verb, such as `limite` in "que
-limite la banda", goes in its `ALLOWED` table keyed by the string and the word,
-with the reason; an entry that no longer matches fails.
+of the renderers and the builders in `scripts/reports` that ask for a Spanish
+fiche, and fails on a form that is never correct Spanish without its mark: a
+singular in -ción or -sión, `aquí`, `señal`, `límite`, `número`, `máximo` and
+the rest of its `NEEDS_MARK` list. It leaves alone what a list cannot decide
+(`si` and `sí`, `aun` and `aún`, `mas` and `más`), so those stay with the
+author. A listed form that really is a verb, such as `limite` in "que limite la
+banda", goes in its `ALLOWED` table keyed by the string and the word, with the
+reason; an entry that no longer matches fails. An example fiche built in
+Spanish names its language (`{"language": "es"}` among the keywords its
+builder returns) even where that is the renderer's default, because that is
+how the check finds the header and labels the builder writes into the page.
 
 ### 7c. Defaulting a style the caller may spell either way
 

@@ -8,7 +8,11 @@ without the Spanish layout reads fine to every other gate: the language gate
 sees a translated string, the parity check sees a pair, and the figure matches
 its generator. Twenty-nine entries of the building-acoustics figures shipped
 that way ("Correccion por ruido de fondo", "limite de medicion (1,3 dB fijos,
-senalar la banda)", "la regla in situ termina aqui") with every gate green.
+senalar la banda)", "la regla in situ termina aqui") with every gate green,
+and so did the RD 1367/2007 example fiche, whose builder writes its phase
+labels and header straight into the page ("Maquina ruidosa activa",
+"Sonometro integrador-promediador"). The example builders that ask for a
+Spanish fiche are therefore read as well (:data:`BUILDERS`).
 
 A spelling check proper would need a dictionary, and a dictionary is exactly
 what cannot tell ``limite`` the verb from ``límite`` the noun. So the rule is
@@ -60,6 +64,14 @@ SOURCES: tuple[tuple[str, tuple[str, ...]], ...] = (
     ("src/phonometry/_plot", ("_STRINGS",)),
     ("src/phonometry/_report", ("_STRINGS",)),
 )
+
+#: The example fiches: their builders write metadata and labels straight into
+#: the page, past every table. A builder is read, docstring aside, when it
+#: asks for the Spanish fiche by name (``language="es"`` in a call, or
+#: ``"language": "es"`` among the ``report()`` keywords it returns), which is
+#: why a builder of a Spanish fiche names the language even where it is the
+#: renderer's default. The directory must hold at least one such builder.
+BUILDERS: tuple[str, ...] = ("scripts/reports",)
 
 #: Unaccented forms that are never correct Spanish in this corpus, with the
 #: spelling each one stands for. Only a form that is not also a common word
@@ -409,6 +421,49 @@ def spanish_values(
     return [Value(name, c.lineno, str(c.value)) for c in constants]
 
 
+def _names_spanish(function: ast.FunctionDef) -> bool:
+    """Whether *function* asks for a Spanish fiche by name."""
+    for node in ast.walk(function):
+        if (
+            isinstance(node, ast.keyword)
+            and node.arg == "language"
+            and isinstance(node.value, ast.Constant)
+            and node.value.value == "es"
+        ):
+            return True
+        if isinstance(node, ast.Dict) and any(
+            isinstance(key, ast.Constant)
+            and key.value == "language"
+            and isinstance(item, ast.Constant)
+            and item.value == "es"
+            for key, item in zip(node.keys, node.values, strict=True)
+        ):
+            return True
+    return False
+
+
+def builder_values(path: pathlib.Path) -> list[Value]:
+    """The strings of every example builder in *path* that asks for Spanish.
+
+    :param path: A module of example-fiche builders.
+    :return: One :class:`Value` per string of each such top-level function,
+        its docstring left out, in source order.
+    """
+    tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+    name = _named(path)
+    constants: list[ast.Constant] = []
+    for function in tree.body:
+        if not isinstance(function, ast.FunctionDef) or not _names_spanish(function):
+            continue
+        body = function.body
+        if ast.get_docstring(function) is not None:
+            body = body[1:]
+        for statement in body:
+            constants.extend(_strings(statement))
+    constants.sort(key=lambda c: (c.lineno, c.col_offset))
+    return [Value(name, c.lineno, str(c.value)) for c in constants]
+
+
 def _named(path: pathlib.Path) -> str:
     """The path as a report prints it: relative to the tree, forward slashes."""
     try:
@@ -420,12 +475,15 @@ def _named(path: pathlib.Path) -> str:
 def read_sources(
     sources: tuple[tuple[str, tuple[str, ...]], ...] = SOURCES,
     root: pathlib.Path = ROOT,
+    builders: tuple[str, ...] = BUILDERS,
 ) -> tuple[list[Value], list[str]]:
     """Every Spanish value of the tables, and the sources that yielded none.
 
     :param sources: Pairs of a file or directory (relative to *root*) and the
         table names to read in it.
     :param root: The tree the paths are relative to.
+    :param builders: Directories of example-fiche builders (relative to
+        *root*), read with :func:`builder_values`.
     :return: The values, and the source paths that gave no value at all.
     """
     values: list[Value] = []
@@ -438,6 +496,15 @@ def read_sources(
             for path in files
             if path.is_file()
             for value in spanish_values(path, names, branches=target.is_dir())
+        ]
+        if not found:
+            empty.append(where)
+        values.extend(found)
+    for where in builders:
+        found = [
+            value
+            for path in sorted((root / where).rglob("*.py"))
+            for value in builder_values(path)
         ]
         if not found:
             empty.append(where)
@@ -478,11 +545,11 @@ def main(argv: list[str] | None = None) -> int:
     if not offences and not stale and not empty:
         print(
             f"Every accent and eñe is in place: {len(values)} Spanish values "
-            f"across {len(SOURCES)} sources."
+            f"across {len(SOURCES) + len(BUILDERS)} sources."
         )
         return 0
     for where in empty:
-        print(f"::error::no Spanish table found in {where}; was it renamed?")
+        print(f"::error::no Spanish found in {where}; was a table renamed?")
     if offences:
         print(f"::error::{len(offences)} Spanish word(s) without their accent or eñe")
         for offence in offences:

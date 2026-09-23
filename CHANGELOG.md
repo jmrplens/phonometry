@@ -122,12 +122,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   Spanish of those six figures now reads as Spanish, and every other Spanish
   table of the figures, the plates and the library's plots and report fiches
   was read word by word against a Spanish dictionary without finding another.
+  The RD 1367/2007 example fiche had the same defect in the header and the
+  phase labels its example writes into the page ("Maquina ruidosa activa",
+  "punto de evaluacion mas desfavorable", "Sonometro integrador-promediador",
+  "Verificacion antes y despues, desviacion"), and now prints them correctly.
   `make spanish-accents` reads the translation tables of the figures, the
-  diagrams and the library's renderers and fails on a form that is never
-  correct Spanish without its accent or eñe (a singular in -ción or -sión,
-  aquí, señal, límite, número, máximo and the rest of its list), with an
-  allow-list for the verb a listed noun can also spell that fails when an
-  entry no longer matches.
+  diagrams and the library's renderers, and the example fiches built in
+  Spanish, and fails on a form that is never correct Spanish without its
+  accent or eñe (a singular in -ción or -sión, aquí, señal, límite, número,
+  máximo and the rest of its list), with an allow-list for the verb a listed
+  noun can also spell that fails when an entry no longer matches.
 - **No label sits on a tick label, on another label or under a line any
   more.** A label placed by hand could land on anything near it, and on 132
   drawings, 82 plates and 50 plots, one did. The "U = 1.0 dB" of

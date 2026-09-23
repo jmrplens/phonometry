@@ -91,6 +91,7 @@ from __future__ import annotations
 
 import math
 import warnings
+from collections.abc import Mapping
 from dataclasses import dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any
@@ -107,8 +108,6 @@ from ..._internal.validation import (
 from ..._internal.warnings import PhonometryWarning
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
-    from collections.abc import Mapping
-
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
@@ -851,12 +850,12 @@ def statistical_pass_by(
         )
     reference_index: float | None = None
     if reference_db is not None:
-        if isinstance(reference_db, int | float):
-            reference_index = require_finite(float(reference_db), "reference_db")
-        else:
+        if isinstance(reference_db, Mapping):
             reference_index = statistical_pass_by_index(
                 reference_db, road_speed_category=road, weighting_factors=weights
             )
+        else:
+            reference_index = require_finite(float(reference_db), "reference_db")
     return StatisticalPassByResult(
         road_speed_category=road,
         regressions=MappingProxyType(regressions),

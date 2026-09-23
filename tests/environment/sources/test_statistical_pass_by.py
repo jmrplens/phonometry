@@ -262,6 +262,15 @@ def test_reference_as_levels_is_indexed_with_the_same_weights() -> None:
     assert result.corrected_difference_db is None
 
 
+def test_reference_index_may_be_any_real_number() -> None:
+    """A numpy integer is an index, not a mapping of levels."""
+    result = statistical_pass_by(
+        *_annex_e_rows(), road_speed_category="medium", reference_db=np.int64(77)
+    )
+    assert result.reference_index_db == pytest.approx(77.0)
+    assert result.difference_db == pytest.approx(result.index_db - 77.0)
+
+
 def test_no_reference_leaves_the_differences_out() -> None:
     result = statistical_pass_by(*_annex_e_rows(), road_speed_category="medium")
     assert result.difference_db is None

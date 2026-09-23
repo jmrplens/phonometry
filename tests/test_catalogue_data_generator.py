@@ -375,7 +375,9 @@ def test_every_hedged_cell_reaches_the_page_as_its_own_kind() -> None:
     assert not wrong, wrong
     assert len(estimated) == 35
     assert len(converted) == 125
-    assert len(carried) == 18
+    # 16 on Ver and Beranek Table 8.7, 2 on ASHRAE Table 30, and the 4
+    # densities Hopkins Table A3 prints once for a block of rows.
+    assert len(carried) == 22
     assert {where.rpartition(": ")[2] for where in text} == {"refers_to_row"}
     assert len(text) == 3
 

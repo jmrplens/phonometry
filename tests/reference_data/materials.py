@@ -482,15 +482,23 @@ ALLARD_TABLE_11_8_LOSS_FACTOR = 0.1  # eta_s
 # "Dynamic stiffness per unit area of resilient materials measured according to
 # ISO 9052-1". All fifteen rows as
 # (material, density in kg/m3, nominal uncompressed thickness in mm,
-#  s't in MN/m3), in the printed order and the printed units.
+#  s' in MN/m3), in the printed order and the printed units. The heading prints
+# s', which the book's List of symbols (PDF page 23, printed p. xxii) defines
+# as the dynamic stiffness per unit area of the installed material, apart from
+# the apparent s't of the test specimen.
 #
-# The density cell is merged over the rows that share it (one 36 and one 75 for
-# the glass wool, one 64 over the first three rebond rows), which is why the
-# library keys the rows by density and thickness: the printed table distinguishes
-# them by position and a lookup name cannot.
+# The page prints some densities once for a block and leaves the cell blank on
+# the block's other rows: 36 on the 13 mm glass-wool row and not on the 25 mm
+# row below it, 75 on the first 25 mm glass-wool row and not on the 40 mm row,
+# and 64 on the 20 mm rebond row, level with the middle of the three rows it
+# spans. The rows below hold the block's density on every row, and
+# HOPKINS_TABLE_A3_BLANK_DENSITY names the four whose printed cell is blank.
+# The library keys the rows by density and thickness because the printed table
+# distinguishes them by position and a lookup name cannot.
 #
 # There is one copy of each printed digit and it is here. The library stores the
-# same fifteen rows in N/m3 as PUBLISHED_RESILIENT_LAYERS, and
+# same fifteen rows in N/m3 as PUBLISHED_RESILIENT_LAYERS, read from
+# materials/resilient/data/hopkins-2007-table-a3.json, and
 # tests/materials/resilient/test_dynamic_stiffness.py asserts that it is this
 # table times 1e6, which is what makes two representations one copy and pins the
 # conversion that is the real risk.
@@ -512,6 +520,11 @@ HOPKINS_TABLE_A3_MN_PER_M3: tuple[tuple[str, float, float, float], ...] = (
     ("Rebond foam (reconstituted open cell foam)", 64.0, 25.0, 7.0),
     ("Rebond foam (reconstituted open cell foam)", 96.0, 15.0, 16.0),
 )
+
+#: The rows of HOPKINS_TABLE_A3_MN_PER_M3 whose density cell the page prints
+#: blank, by position, each to the position of the row of its block that prints
+#: the figure.
+HOPKINS_TABLE_A3_BLANK_DENSITY: dict[int, int] = {8: 7, 10: 9, 11: 12, 13: 12}
 
 #: How many of the fifteen the book gives as its own measurements; the last four
 #: it credits to Hopkins and Hall (2006) in the material cell.

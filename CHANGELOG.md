@@ -379,6 +379,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   new test pins every cell of the 1982 published rows to its last digit
   against a baseline and lists each change made to it.
 
+- **A resilient layer is a catalogue row, and the EN 29052-1 functions name
+  their units.** `materials.ResilientLayer` is an `io.CatalogueRow` like every
+  other row: its quantities are optional, it holds the hedges a page can print
+  in place of a number, and Hopkins Table A3 moved into a packaged data file,
+  so `PUBLISHED_RESILIENT_LAYERS` is keyed `"hopkins-2007-table-a3/<row>"` and
+  the credit of the four rebond foams is `attributed_to["row"]`. The row gains
+  `apparent_dynamic_stiffness_n_m3`, the apparent stiffness `s't` of a test
+  specimen, beside `dynamic_stiffness_n_m3`, the `s'` of the installed layer
+  that Formula 2 takes; for an air-permeable layer the two differ by the
+  enclosed-gas term, which Hopkins notes often forms a significant percentage
+  of `s'`. The heading of Table A3 prints `s'`, which the book's list of
+  symbols defines as the installed stiffness, so its fifteen rows keep their
+  values where they were and return the natural frequencies they returned.
+  The four density cells the table prints once for a block and leaves blank
+  on another row of it now say so in `carried`, naming the row that prints
+  the figure; the densities are the same. A layer that gives only `s't`
+  goes through clause 8.2: `natural_frequency` takes the lateral airflow
+  resistivity as `airflow_resistivity_pa_s_m2`, in the unit every catalogue
+  holds it in, and below 100 kPa·s/m² the enclosed-gas stiffness as
+  `gas_stiffness_n_m3`, and without the resistivity it refuses with
+  `io.CatalogueError`, saying that `s't` is not `s'` and what to pass. A row
+  whose `s't` cell holds a declared bound rather than a value is refused by
+  name, bound included. The
+  module's functions carry their units in their parameter names:
+  `resonant_frequency_hz`, `total_mass_per_area_kg_m2`, `thickness_m`,
+  `apparent_stiffness_n_m3`, `airflow_resistivity_kpa_s_m2`,
+  `gas_stiffness_n_m3`, `dynamic_stiffness_n_m3`, `mass_per_area_kg_m2` and
+  `floor_mass_per_area_kg_m2`. The resistivity of `installed_dynamic_stiffness`
+  is taken by name only, because it is the one quantity here in kPa·s/m² and a
+  Pa·s/m² figure passed by position landed in the wrong branch of clause 8.2
+  without a word; and below 100 kPa·s/m² a missing gas term is no longer read
+  as zero, which returned Formula 6 without its second term. The migration
+  guide lists every rename.
+
 - **The ITU-R BS.468-4 curve has one name.** `MicrophoneNoise.weighting` took
   `"CCIR"` for the quasi-peak inherent-noise figure while
   `filters.weighting_filter` and `electroacoustics.weighted_thd` take `"468"`

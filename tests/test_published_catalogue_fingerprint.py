@@ -129,3 +129,43 @@ def test_one_row_shape_moves_the_cells_it_lists_and_no_others() -> None:
             kept_before = {f: v for f, v in row.items() if f not in moves}
             kept_after = {f: v for f, v in after[name][key].items() if f not in moves}
             assert kept_after == kept_before, f"{name}[{key!r}]"
+
+
+def test_resilient_layer_row_moves_the_fifteen_layers_and_no_others() -> None:
+    """The step that made the resilient layers rows touched their fifteen only.
+
+    Each row of Hopkins Table A3 gained the table half of its key and a
+    ``table``, the credit of the four rebond foams became a mapping, and the
+    four density cells the page prints blank say which row prints them; every
+    other mapping comes out of the step as it went in, and so does every
+    number of the fifteen.
+    """
+    before = fp.one_row_shape(fp.baseline())
+    after = fp.resilient_layer_row(before)
+    assert {name for name in before if before[name] != after[name]} == {
+        "PUBLISHED_RESILIENT_LAYERS"
+    }
+    old = before["PUBLISHED_RESILIENT_LAYERS"]
+    new = after["PUBLISHED_RESILIENT_LAYERS"]
+    assert list(new) == [f"hopkins-2007-table-a3/{key}" for key in old]
+    moved = {"table", "attributed_to", "carried"}
+    for key, row in old.items():
+        built = new[f"hopkins-2007-table-a3/{key}"]
+        assert built["table"] == "hopkins-2007-table-a3"
+        assert _text({f: v for f, v in built.items() if f not in moved}) == _text(
+            {f: v for f, v in row.items() if f not in moved}
+        )
+        assert "apparent_dynamic_stiffness_n_m3" not in built
+    credited = [row["attributed_to"] for row in new.values() if "attributed_to" in row]
+    assert credited == [{"row": "Hopkins and Hall (2006)"}] * 4
+    carried = {key: row["carried"] for key, row in new.items() if "carried" in row}
+    assert carried == {
+        f"hopkins-2007-table-a3/{key}": {"density_kg_m3": text}
+        for key, text in fp.RESILIENT_LAYER_CARRIED.items()
+    }
+    assert sorted(fp.RESILIENT_LAYER_CARRIED) == [
+        "mineral_wool_glass_36_25",
+        "mineral_wool_glass_75_40",
+        "rebond_foam_64_15",
+        "rebond_foam_64_25",
+    ]

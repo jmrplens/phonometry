@@ -65,6 +65,7 @@ are explicitly excluded there.
 
 from __future__ import annotations
 
+import math
 import warnings
 from dataclasses import dataclass
 from types import MappingProxyType
@@ -81,6 +82,7 @@ if TYPE_CHECKING:
     from ..._report.metadata import ReportMetadata
 
 
+from ..._internal.catalogue import CatalogueError, CatalogueRow, read_table, take
 from ..._internal.types import as_float_or_array
 from ..._internal.validation import check_engine, require_non_negative, require_positive
 from ..._internal.warnings import PhonometryWarning
@@ -102,21 +104,12 @@ _LOW_RESISTIVITY = 10.0
 _TWO_PI = 2.0 * np.pi
 _FOUR_PI_SQ = 4.0 * np.pi**2
 
-#: Where every row of :data:`PUBLISHED_RESILIENT_LAYERS` was read, written once
-#: because fifteen rows come off one page and a citation repeated fifteen times
-#: is fifteen chances to mistype it.
-_TABLE_A3 = "Hopkins (2007) Table A3, PDF page 637 (printed p. 610)"
-
-#: What the four rebond-foam cells of that table print under the material name.
-_HOPKINS_AND_HALL = "Hopkins and Hall (2006)"
-
-#: The three material names Table A3 prints once and spans over four rows each.
-#: Written here rather than in the rows for the same reason as the citation
-#: above: the table groups them, and four copies of a name are four chances to
-#: part one row from its group.
-_MINERAL_WOOL_ROCK = "Mineral wool, rock"
-_MINERAL_WOOL_GLASS = "Mineral wool, glass"
-_REBOND_FOAM = "Rebond foam (reconstituted open cell foam)"
+#: Pascal seconds per square metre in one kilopascal second per square metre.
+#: A catalogue row holds a flow resistivity in the first and clause 8.2 states
+#: its thresholds in the second; dividing by it moves a resistivity across
+#: without moving it across either threshold (see
+#: :meth:`ResilientLayer.natural_frequency`).
+_PA_PER_KPA = 1000.0
 
 
 class DynamicStiffnessWarning(PhonometryWarning):
@@ -129,32 +122,34 @@ class DynamicStiffnessWarning(PhonometryWarning):
 
 
 def apparent_dynamic_stiffness(
-    resonant_frequency: ArrayLike, total_mass_per_area: float
+    resonant_frequency_hz: ArrayLike, total_mass_per_area_kg_m2: float
 ) -> np.ndarray | float:
     r"""Apparent dynamic stiffness per unit area ``s't`` (Formula 4).
 
     Inverts the test resonance :math:`f_\mathrm{r} = (1/2\pi)\sqrt{s'_\mathrm{t}/m'_\mathrm{t}}` to
     :math:`s'_\mathrm{t} = 4 \pi^2 m'_\mathrm{t} f_\mathrm{r}^2`.
 
-    :param resonant_frequency: Extrapolated resonant frequency ``fr``, in hertz
-        (scalar or array).
-    :param total_mass_per_area: Total mass per unit area used during the test
-        ``m't``, in kg/m2 (the load plate plus fittings over the 0,04 m2
+    :param resonant_frequency_hz: Extrapolated resonant frequency ``fr``, in
+        hertz (scalar or array).
+    :param total_mass_per_area_kg_m2: Total mass per unit area used during the
+        test ``m't``, in kg/m2 (the load plate plus fittings over the 0,04 m2
         specimen; the standard's plate gives
         :math:`m'_\mathrm{t} = 8~\text{kg} / 0.04~\text{m}^2 = 200` kg/m2).
     :return: The apparent dynamic stiffness per unit area ``s't``, in N/m3
         (numerically MN/m3 when divided by 1e6).
     """
-    total_mass_per_area = require_positive(total_mass_per_area, "total_mass_per_area")
-    fr = np.asarray(resonant_frequency, dtype=np.float64)
+    total_mass_per_area_kg_m2 = require_positive(
+        total_mass_per_area_kg_m2, "total_mass_per_area_kg_m2"
+    )
+    fr = np.asarray(resonant_frequency_hz, dtype=np.float64)
     if np.any(fr <= 0.0):
-        msg = "'resonant_frequency' must be positive."
+        msg = "'resonant_frequency_hz' must be positive."
         raise ValueError(msg)
-    return as_float_or_array(_FOUR_PI_SQ * total_mass_per_area * fr**2)
+    return as_float_or_array(_FOUR_PI_SQ * total_mass_per_area_kg_m2 * fr**2)
 
 
 def enclosed_gas_stiffness(
-    thickness: ArrayLike,
+    thickness_m: ArrayLike,
     porosity: float,
     *,
     atmospheric_pressure_pa: float = STANDARD_ATMOSPHERIC_PRESSURE,
@@ -164,8 +159,8 @@ def enclosed_gas_stiffness(
     The isothermal compression of the pore air adds a stiffness in parallel
     with the material's structure: :math:`s'_\mathrm{a} = p_0 / (d\,\epsilon)`.
 
-    :param thickness: Thickness ``d`` of the specimen under the static load, in
-        **metres** (scalar or array).
+    :param thickness_m: Thickness ``d`` of the specimen under the static load,
+        in metres (scalar or array).
     :param porosity: Porosity ``epsilon`` of the specimen (0-1).
     :param atmospheric_pressure_pa: Atmospheric pressure ``p0``, in pascals
         (default :data:`STANDARD_ATMOSPHERIC_PRESSURE`, the standard's 0,1 MPa).
@@ -182,18 +177,18 @@ def enclosed_gas_stiffness(
     if not 0.0 < porosity <= 1.0:
         msg = "'porosity' must be in the range (0, 1]."
         raise ValueError(msg)
-    d = np.asarray(thickness, dtype=np.float64)
+    d = np.asarray(thickness_m, dtype=np.float64)
     if np.any(d <= 0.0):
-        msg = "'thickness' must be positive."
+        msg = "'thickness_m' must be positive."
         raise ValueError(msg)
     return as_float_or_array(atmospheric_pressure_pa / (d * porosity))
 
 
 def installed_dynamic_stiffness(
-    apparent_stiffness: float,
-    airflow_resistivity: float,
+    apparent_stiffness_n_m3: float,
     *,
-    gas_stiffness: float = 0.0,
+    airflow_resistivity_kpa_s_m2: float,
+    gas_stiffness_n_m3: float | None = None,
 ) -> float:
     r"""Dynamic stiffness per unit area ``s'`` of the installed material (clause 8.2).
 
@@ -211,28 +206,52 @@ def installed_dynamic_stiffness(
       be stated in the test report); above it the result is ``nan``, as the
       method cannot resolve ``s'``.
 
-    :param apparent_stiffness: Apparent dynamic stiffness ``s't``, in N/m3.
-    :param airflow_resistivity: Lateral airflow resistivity ``r``, in kPa.s/m2
-        (ISO 9053).
-    :param gas_stiffness: Enclosed-gas dynamic stiffness ``s'a``, in N/m3 (see
-        :func:`enclosed_gas_stiffness`); needed for :math:`r < 100` kPa.s/m2.
+    The airflow resistivity is in kilopascal seconds per square metre, the
+    unit clause 8.2 states its thresholds in, and it is asked for by name
+    because the flow resistivities this library holds elsewhere
+    (:attr:`~phonometry.materials.PorousMaterial.flow_resistivity_pa_s_m2`) are
+    in pascal seconds per square metre, a thousand times smaller a unit.
+
+    :param apparent_stiffness_n_m3: Apparent dynamic stiffness ``s't``, in
+        N/m3.
+    :param airflow_resistivity_kpa_s_m2: Lateral airflow resistivity ``r``, in
+        kPa.s/m2 (ISO 9053).
+    :param gas_stiffness_n_m3: Enclosed-gas dynamic stiffness ``s'a``, in N/m3
+        (see :func:`enclosed_gas_stiffness`). Required below 100 kPa.s/m2,
+        where Formula 6 adds it and case c) weighs it against ``s't``; above,
+        Formula 5 does not use it.
     :return: The installed dynamic stiffness per unit area ``s'``, in N/m3
         (``nan`` when the method cannot resolve it).
+    :raises ValueError: for a non-positive ``s't`` or ``r``, a negative
+        ``s'a``, or no ``s'a`` below 100 kPa.s/m2, where an absent gas term
+        is not a zero one.
     """
-    apparent_stiffness = require_positive(apparent_stiffness, "apparent_stiffness")
-    if airflow_resistivity <= 0.0:
-        msg = "'airflow_resistivity' must be positive."
+    apparent_stiffness_n_m3 = require_positive(
+        apparent_stiffness_n_m3, "apparent_stiffness_n_m3"
+    )
+    # Written so that a NaN fails it too: an infinite resistivity is the
+    # non-porous limit and is allowed, a NaN is no resistivity at all.
+    if not airflow_resistivity_kpa_s_m2 > 0.0:
+        msg = "'airflow_resistivity_kpa_s_m2' must be positive."
         raise ValueError(msg)
-    if gas_stiffness < 0.0:
-        msg = "'gas_stiffness' must be non-negative."
+    if gas_stiffness_n_m3 is not None:
+        gas_stiffness_n_m3 = require_non_negative(
+            gas_stiffness_n_m3, "gas_stiffness_n_m3"
+        )
+    if airflow_resistivity_kpa_s_m2 >= _HIGH_RESISTIVITY:
+        return apparent_stiffness_n_m3
+    if gas_stiffness_n_m3 is None:
+        msg = (
+            "'gas_stiffness_n_m3' is required below 100 kPa.s/m2: clause 8.2 "
+            "adds the enclosed-gas stiffness s'a to s't between 10 and 100 "
+            "kPa.s/m2 and weighs it against s't below 10; pass the s'a of "
+            "Formula 7, from enclosed_gas_stiffness()."
+        )
         raise ValueError(msg)
-
-    if airflow_resistivity >= _HIGH_RESISTIVITY:
-        return apparent_stiffness
-    if airflow_resistivity >= _LOW_RESISTIVITY:
-        return apparent_stiffness + gas_stiffness
+    if airflow_resistivity_kpa_s_m2 >= _LOW_RESISTIVITY:
+        return apparent_stiffness_n_m3 + gas_stiffness_n_m3
     # r < 10 kPa.s/m2: the enclosed gas is only negligible for a firm structure.
-    if gas_stiffness > 0.1 * apparent_stiffness:
+    if gas_stiffness_n_m3 > 0.1 * apparent_stiffness_n_m3:
         warnings.warn(
             "for airflow resistivity below 10 kPa.s/m2 with a non-negligible "
             "enclosed-gas stiffness, EN 29052-1 cannot resolve s' (clause 8.2); "
@@ -249,28 +268,30 @@ def installed_dynamic_stiffness(
         DynamicStiffnessWarning,
         stacklevel=2,
     )
-    return apparent_stiffness
+    return apparent_stiffness_n_m3
 
 
 def natural_frequency(
-    dynamic_stiffness: ArrayLike, mass_per_area: float
+    dynamic_stiffness_n_m3: ArrayLike, mass_per_area_kg_m2: float
 ) -> np.ndarray | float:
     r"""Natural frequency ``f0`` of the resiliently supported floor (Formula 2).
 
     :math:`f_0 = (1/2\pi)\sqrt{s'/m'}`.
 
-    :param dynamic_stiffness: Dynamic stiffness per unit area ``s'``, in N/m3
-        (scalar or array).
-    :param mass_per_area: Mass per unit area of the supported floor ``m'``, in
-        kg/m2.
+    :param dynamic_stiffness_n_m3: Dynamic stiffness per unit area ``s'`` of
+        the installed layer, in N/m3 (scalar or array). The apparent ``s't``
+        of a test specimen is not it; :func:`installed_dynamic_stiffness`
+        turns one into the other.
+    :param mass_per_area_kg_m2: Mass per unit area of the supported floor
+        ``m'``, in kg/m2.
     :return: The natural frequency ``f0``, in hertz.
     """
-    mass_per_area = require_positive(mass_per_area, "mass_per_area")
-    s = np.asarray(dynamic_stiffness, dtype=np.float64)
+    mass_per_area_kg_m2 = require_positive(mass_per_area_kg_m2, "mass_per_area_kg_m2")
+    s = np.asarray(dynamic_stiffness_n_m3, dtype=np.float64)
     if np.any(s <= 0.0):
-        msg = "'dynamic_stiffness' must be positive."
+        msg = "'dynamic_stiffness_n_m3' must be positive."
         raise ValueError(msg)
-    return as_float_or_array(np.sqrt(s / mass_per_area) / _TWO_PI)
+    return as_float_or_array(np.sqrt(s / mass_per_area_kg_m2) / _TWO_PI)
 
 
 # ---------------------------------------------------------------------------
@@ -282,9 +303,10 @@ def natural_frequency(
 # library and no page of it is reproduced here.
 #
 # Contents. One table, Table A3, of the four the book's appendix prints. Its
-# three data columns are transcribed row by row and the stiffness is converted
-# from the printed MN/m3 into the N/m3 the functions above take, so what is
-# stored is the argument list rather than the printed table.
+# three data columns are transcribed row by row into
+# materials/resilient/data/hopkins-2007-table-a3.json, and the stiffness is
+# held in the N/m3 the functions above take rather than the printed MN/m3, so
+# what is stored is the argument list rather than the printed table.
 #
 # Holdings from this one source, counted so the statement below is about what
 # is actually here: Table A3 entire (fifteen rows, three columns) here;
@@ -318,14 +340,16 @@ def natural_frequency(
 #    carries document, table, PDF page and printed folio, plus `attributed_to`
 #    wherever the book credits the number to someone else.
 # 3. Values are stored in library units. The printed unit is stated in the
-#    banner and the conversion is pinned by an assertion against
+#    data file's `about` and the conversion is pinned by an assertion against
 #    `tests/reference_data`, never left as a comment.
 # 4. A row whose table already ships anywhere in the tree does not ship twice;
 #    where it overlaps, it is tied to the existing constant by an explicit
 #    consistency assertion.
 # 5. One key, one dimension, one spelling. A quantity that appears in two
 #    dimensions gets two field names: the stiffness per unit area here is N/m3
-#    and the per-tie stiffness of Table A4 is N/m, and they are two names.
+#    and the per-tie stiffness of Table A4 is N/m, and they are two names. The
+#    installed s' and the apparent s't of EN 29052-1 share a dimension and are
+#    two quantities, so they are two names as well.
 # 6. The copyright decision is reopened by how much of one source is here,
 #    not by how many of its tables are touched: when the rows from a single
 #    source stop being the arguments a published function takes and start
@@ -334,184 +358,257 @@ def natural_frequency(
 #    piece of work. Hopkins is at three tables and the answer above is the
 #    reopened decision, not the original one.
 # ---------------------------------------------------------------------------
-@dataclass(frozen=True, kw_only=True)
-class ResilientLayer:
-    """A resilient layer as its source prints it, in library units.
 
-    :ivar name: The material as the table names it, without the attribution
-        the printed cell carries.
-    :ivar dynamic_stiffness_n_m3: ``s'`` per unit area, in N/m3 (the book
-        prints MN/m3).
+#: What :meth:`ResilientLayer.natural_frequency` is, in a refusal.
+_FORMULA_2 = "the natural frequency of EN 29052-1 Formula 2"
+
+
+@dataclass(frozen=True, kw_only=True)
+class ResilientLayer(CatalogueRow):
+    """A resilient layer under a floating floor, as its source prints it.
+
+    A row of a catalogue like every other (:class:`~phonometry.io.CatalogueRow`):
+    every quantity is optional, because a source prints some columns and not
+    others, and a cell that holds something other than a number, such as the
+    bound ``s' <= 9 MN/m3`` a product declaration prints, is held by the row's
+    hedges rather than turned into one.
+
+    EN 29052-1 names two stiffnesses per unit area, and they are two fields
+    here. The test measures the apparent stiffness ``s't`` of a specimen whose
+    pore air escapes at its sides (Formula 4); clause 8.2 turns it into the
+    stiffness ``s'`` of the installed layer, whose pore air cannot, by way of
+    the lateral airflow resistivity ``r`` and the enclosed-gas stiffness
+    ``s'a``. Formula 2 takes ``s'``. A source that prints ``s'`` fills
+    :attr:`dynamic_stiffness_n_m3`, which is what Hopkins Table A3 does. A test
+    report gives ``s't`` and ``s'a``, and ``s'`` only "if possible" (clause
+    9 e)); one that leaves ``s'`` out, like a sheet that gives ``s't`` alone,
+    fills :attr:`apparent_dynamic_stiffness_n_m3`, and :meth:`natural_frequency`
+    then needs ``r``, and below 100 kPa.s/m2 the report's ``s'a``, to go on.
+
+    :ivar dynamic_stiffness_n_m3: ``s'``, the dynamic stiffness per unit area
+        of the installed layer (clause 8.2), in N/m3.
+    :ivar apparent_dynamic_stiffness_n_m3: ``s't``, the apparent dynamic
+        stiffness per unit area of the test specimen (Formula 4), in N/m3. Not
+        ``s'``: for an air-permeable layer the two differ by the enclosed-gas
+        term ``s'a``, which "often forms a significant percentage of ``s'``"
+        (Hopkins 2007, printed p. 360).
     :ivar density_kg_m3: Specimen density, in kg/m3.
     :ivar thickness_mm: Nominal uncompressed thickness, in millimetres.
-    :ivar source: Document, table, PDF page and printed folio.
-    :ivar attributed_to: The source the book itself credits, empty when the
-        number is the book's own.
     """
 
-    name: str
-    dynamic_stiffness_n_m3: float
-    density_kg_m3: float
-    thickness_mm: float
-    source: str
-    attributed_to: str = ""
+    dynamic_stiffness_n_m3: float | None = None
+    apparent_dynamic_stiffness_n_m3: float | None = None
+    density_kg_m3: float | None = None
+    thickness_mm: float | None = None
 
-    def natural_frequency(self, mass_per_area: float) -> float:
+    def natural_frequency(
+        self,
+        mass_per_area_kg_m2: float,
+        *,
+        airflow_resistivity_pa_s_m2: float | None = None,
+        gas_stiffness_n_m3: float | None = None,
+    ) -> float:
         r"""``f0`` of a floor of this mass per unit area on this layer.
 
         :math:`f_0 = (1/2\pi)\sqrt{s'/m'}` (Formula 2), through the module's
         :func:`natural_frequency`.
 
-        :param mass_per_area: Mass per unit area of the supported floor ``m'``,
-            in kg/m2.
+        A row that gives ``s'`` is used as it is, and the two keywords are
+        refused, because nothing would read them. A row that gives only the
+        apparent ``s't`` goes through :func:`installed_dynamic_stiffness`
+        first, which is clause 8.2: ``s' = s't`` at or above 100 kPa.s/m2,
+        ``s' = s't + s'a`` from 10 up to 100, and below 10 ``s' = s't`` only
+        while ``s'a`` is negligible (``nan``, with a
+        :class:`DynamicStiffnessWarning`, when it is not).
+
+        The resistivity is taken in pascal seconds per square metre, the unit
+        every flow resistivity of this library's catalogues is held in, and
+        divided by a thousand for the kilopascal thresholds of clause 8.2.
+        The division is correctly rounded and never decreases as its input
+        grows, so it carries no resistivity across either threshold: exactly
+        100 000 or 10 000 Pa.s/m2 lands on 100 or 10, and the largest float
+        below either lands below it. The formula chosen is always the one the
+        resistivity passed picks.
+
+        :param mass_per_area_kg_m2: Mass per unit area of the supported floor
+            ``m'``, in kg/m2.
+        :param airflow_resistivity_pa_s_m2: Lateral airflow resistivity ``r``
+            of the layer (ISO 9053), in Pa.s/m2, for a row that gives only
+            ``s't``.
+        :param gas_stiffness_n_m3: Enclosed-gas stiffness ``s'a`` of the layer
+            (Formula 7, :func:`enclosed_gas_stiffness`), in N/m3, for a row
+            that gives only ``s't`` and a resistivity below 100 kPa.s/m2.
         :return: The natural frequency ``f0``, in hertz.
+        :raises CatalogueError: for a row that gives only ``s't`` when no
+            resistivity is passed, saying that ``s't`` is not ``s'`` and what
+            to pass; and for a row with no value of either stiffness whose
+            ``s't`` cell holds something else, such as a declared bound, which
+            it names.
+        :raises ValueError: for a row that gives neither stiffness, naming
+            what its source had in the ``s'`` cell; for a row that gives
+            ``s'`` when either keyword is passed; for a resistivity below
+            100 kPa.s/m2 with no ``s'a``; and for a non-positive mass or
+            resistivity.
         """
-        return float(natural_frequency(self.dynamic_stiffness_n_m3, mass_per_area))
+        mass_per_area_kg_m2 = require_positive(
+            mass_per_area_kg_m2, "mass_per_area_kg_m2"
+        )
+        apparent = self.apparent_dynamic_stiffness_n_m3
+        if self.dynamic_stiffness_n_m3 is None and apparent is not None:
+            stiffness = self._installed(
+                apparent, airflow_resistivity_pa_s_m2, gas_stiffness_n_m3
+            )
+            if math.isnan(stiffness):
+                return float("nan")
+        else:
+            if self.dynamic_stiffness_n_m3 is not None and (
+                airflow_resistivity_pa_s_m2 is not None
+                or gas_stiffness_n_m3 is not None
+            ):
+                msg = (
+                    f"{self.name!r} gives the dynamic stiffness s' of the "
+                    "installed layer, which Formula 2 takes as it is; "
+                    "airflow_resistivity_pa_s_m2 and gas_stiffness_n_m3 are for "
+                    "a row that gives only the apparent s't, and nothing would "
+                    "read them here."
+                )
+                raise ValueError(msg)
+            self._refuse_a_hedged_apparent_stiffness()
+            stiffness = self.printed("dynamic_stiffness_n_m3", wanted_by=_FORMULA_2)
+        return float(natural_frequency(stiffness, mass_per_area_kg_m2))
+
+    def _refuse_a_hedged_apparent_stiffness(self) -> None:
+        """Refuse a row whose only stiffness cell holds something but a value.
+
+        A row with a value of neither stiffness is refused by
+        :meth:`~phonometry.io.CatalogueRow.printed` for ``s'``, the quantity
+        Formula 2 takes. When the page has nothing in the ``s'`` cell and
+        something other than a number in the ``s't`` cell, such as the bound
+        a product declaration prints, that refusal would say the page gives
+        no stiffness at all; this one names the ``s't`` cell and what it
+        holds instead, and says why no keyword turns it into ``s'``.
+
+        :raises CatalogueError: for such a row.
+        """
+        installed = "dynamic_stiffness_n_m3"
+        field_name = "apparent_dynamic_stiffness_n_m3"
+        if self._holds_a_hedge(installed) or not self._holds_a_hedge(field_name):
+            return
+        msg = (
+            f"{self.name!r} gives no value of the apparent dynamic stiffness "
+            f"s't that {_FORMULA_2} would take through clause 8.2, "
+            f"and no dynamic stiffness s' either: for {field_name}, "
+            f"{self.why_missing(field_name)}. s't is not s', and what that cell "
+            "holds is not a value of either, so no airflow_resistivity_pa_s_m2 "
+            f"or gas_stiffness_n_m3 can turn it into s' ({self.source})."
+        )
+        raise CatalogueError(msg)
+
+    def _holds_a_hedge(self, field_name: str) -> bool:
+        """Whether the page has something other than a value in this cell."""
+        return any(
+            field_name in hedge
+            for hedge in (
+                self.ranges,
+                self.reported,
+                self.unquantified,
+                self.not_derivable,
+                self.misprinted,
+            )
+        )
+
+    def _installed(
+        self,
+        apparent: float,
+        airflow_resistivity_pa_s_m2: float | None,
+        gas_stiffness_n_m3: float | None,
+    ) -> float:
+        """``s'`` from this row's ``s't`` by clause 8.2, or a refusal.
+
+        :raises CatalogueError: when no resistivity is passed.
+        :raises ValueError: for a non-positive resistivity, and from
+            :func:`installed_dynamic_stiffness`.
+        """
+        if airflow_resistivity_pa_s_m2 is None:
+            msg = (
+                f"{self.name!r} gives the apparent dynamic stiffness s't of a "
+                f"test specimen, {apparent / 1e6:g} MN/m3, and not the dynamic "
+                "stiffness s' of the installed layer that "
+                f"{_FORMULA_2} takes. EN 29052-1 clause 8.2 gives s' from s't by "
+                "the lateral airflow resistivity r: pass "
+                "airflow_resistivity_pa_s_m2 and, below 100 kPa.s/m2 "
+                "(100000 Pa.s/m2), gas_stiffness_n_m3, the enclosed-gas "
+                f"stiffness s'a of Formula 7 ({self.source})."
+            )
+            raise CatalogueError(msg)
+        # Written so that a NaN fails it too.
+        if not airflow_resistivity_pa_s_m2 > 0.0:
+            msg = "'airflow_resistivity_pa_s_m2' must be positive."
+            raise ValueError(msg)
+        return installed_dynamic_stiffness(
+            apparent,
+            airflow_resistivity_kpa_s_m2=airflow_resistivity_pa_s_m2 / _PA_PER_KPA,
+            gas_stiffness_n_m3=gas_stiffness_n_m3,
+        )
 
 
-#: Fifteen resilient layers, each carrying the dynamic stiffness per unit area
-#: ``s't`` measured on it, transcribed digit-for-digit from Hopkins (2007)
-#: **Table A3** (PDF page 637, printed p. 610), whose caption states they were
-#: measured according to ISO 9052-1, the standard this module implements as
-#: EN 29052-1. The book prints ``s't`` in MN/m3, the density in kg/m3 and the
-#: thickness in mm; the stiffness is stored here in N/m3 and the other two as
+#: The row fields the data files write as a list and the row holds as a set.
+_SETS = ("approximate", "bounded_above", "bounded_below")
+
+#: The published tables this catalogue reads.
+_TABLES = ("hopkins-2007-table-a3",)
+
+
+def _load() -> dict[str, ResilientLayer]:
+    """Every row of every packaged table, keyed by table and row."""
+    out: dict[str, ResilientLayer] = {}
+    for table in _TABLES:
+        citation, rows = read_table("phonometry.materials.resilient", f"{table}.json")
+        for row in rows:
+            out[f"{table}/{row['key']}"] = ResilientLayer(
+                source=citation, table=table, **take(row, frozen=_SETS)
+            )
+    return out
+
+
+#: The resilient layers this library has read from a page, keyed
+#: ``"<table>/<row>"``: fifteen from Hopkins (2007) Table A3, PDF page 637
+#: (printed p. 610), in ``materials/resilient/data/hopkins-2007-table-a3.json``,
+#: whose caption states they were measured according to ISO 9052-1, the
+#: standard this module implements as EN 29052-1. The column heading prints
+#: ``s'``, which the book's List of symbols defines as the dynamic stiffness
+#: per unit area of the installed material, so every row fills
+#: :attr:`ResilientLayer.dynamic_stiffness_n_m3` and none fills the apparent
+#: ``s't``. The book prints ``s'`` in MN/m3, the density in kg/m3 and the
+#: thickness in mm; the stiffness is held in N/m3 and the other two as
 #: printed, and the conversion is asserted against the printed digits in
 #: tests/materials/resilient/test_dynamic_stiffness.py.
 #:
 #: Eleven rows are the author's own measurements; the four rebond-foam rows
-#: the book credits to Hopkins and Hall (2006), which is what
-#: :attr:`ResilientLayer.attributed_to` carries. Four rock-wool rows and four
-#: glass-wool rows differ only by density and thickness, which is why the key
-#: is ``<material>_<density in kg/m3>_<thickness in mm>``: the printed table
-#: separates them by position in a merged cell, and a key has to say which
-#: specimen it is.
+#: the book credits to Hopkins and Hall (2006), which is what their
+#: :attr:`~phonometry.io.CatalogueRow.attributed_to` carries for the whole row.
+#: Four rock-wool rows and four glass-wool rows differ only by density and
+#: thickness, which is why the row half of each key is
+#: ``<material>_<density in kg/m3>_<thickness in mm>``: the printed table
+#: separates them by position under a name it prints once, and a key has to
+#: say which specimen it is.
 #:
 #: These are **measured specimens, not declared product values**. A floating
 #: floor is designed with the manufacturer's ``s'`` declared to EN 29052-1;
 #: these rows are the order of magnitude for when there is none, in the sense
 #: :data:`~phonometry.noise_control.ROOM_ABSORPTION_ESTIMATES` is for when
 #: nobody measured an absorption coefficient.
-PUBLISHED_RESILIENT_LAYERS: Mapping[str, ResilientLayer] = MappingProxyType(
-    {
-        "closed_cell_polyethylene_foam_45_5": ResilientLayer(
-            name="Closed-cell polyethylene foam",
-            dynamic_stiffness_n_m3=115e6,
-            density_kg_m3=45.0,
-            thickness_mm=5.0,
-            source=_TABLE_A3,
-        ),
-        "expanded_polystyrene_14_50": ResilientLayer(
-            name="Expanded polystyrene",
-            dynamic_stiffness_n_m3=78e6,
-            density_kg_m3=14.0,
-            thickness_mm=50.0,
-            source=_TABLE_A3,
-        ),
-        "expanded_polystyrene_precompressed_10_50": ResilientLayer(
-            name="Expanded polystyrene, pre-compressed",
-            dynamic_stiffness_n_m3=68e6,
-            density_kg_m3=10.0,
-            thickness_mm=50.0,
-            source=_TABLE_A3,
-        ),
-        "mineral_wool_rock_60_30": ResilientLayer(
-            name=_MINERAL_WOOL_ROCK,
-            dynamic_stiffness_n_m3=10e6,
-            density_kg_m3=60.0,
-            thickness_mm=30.0,
-            source=_TABLE_A3,
-        ),
-        "mineral_wool_rock_80_30": ResilientLayer(
-            name=_MINERAL_WOOL_ROCK,
-            dynamic_stiffness_n_m3=11e6,
-            density_kg_m3=80.0,
-            thickness_mm=30.0,
-            source=_TABLE_A3,
-        ),
-        "mineral_wool_rock_100_30": ResilientLayer(
-            name=_MINERAL_WOOL_ROCK,
-            dynamic_stiffness_n_m3=14e6,
-            density_kg_m3=100.0,
-            thickness_mm=30.0,
-            source=_TABLE_A3,
-        ),
-        "mineral_wool_rock_140_30": ResilientLayer(
-            name=_MINERAL_WOOL_ROCK,
-            dynamic_stiffness_n_m3=19e6,
-            density_kg_m3=140.0,
-            thickness_mm=30.0,
-            source=_TABLE_A3,
-        ),
-        "mineral_wool_glass_36_13": ResilientLayer(
-            name=_MINERAL_WOOL_GLASS,
-            dynamic_stiffness_n_m3=28e6,
-            density_kg_m3=36.0,
-            thickness_mm=13.0,
-            source=_TABLE_A3,
-        ),
-        "mineral_wool_glass_36_25": ResilientLayer(
-            name=_MINERAL_WOOL_GLASS,
-            dynamic_stiffness_n_m3=11e6,
-            density_kg_m3=36.0,
-            thickness_mm=25.0,
-            source=_TABLE_A3,
-        ),
-        "mineral_wool_glass_75_25": ResilientLayer(
-            name=_MINERAL_WOOL_GLASS,
-            dynamic_stiffness_n_m3=12e6,
-            density_kg_m3=75.0,
-            thickness_mm=25.0,
-            source=_TABLE_A3,
-        ),
-        "mineral_wool_glass_75_40": ResilientLayer(
-            name=_MINERAL_WOOL_GLASS,
-            dynamic_stiffness_n_m3=7e6,
-            density_kg_m3=75.0,
-            thickness_mm=40.0,
-            source=_TABLE_A3,
-        ),
-        "rebond_foam_64_15": ResilientLayer(
-            name=_REBOND_FOAM,
-            dynamic_stiffness_n_m3=12e6,
-            density_kg_m3=64.0,
-            thickness_mm=15.0,
-            source=_TABLE_A3,
-            attributed_to=_HOPKINS_AND_HALL,
-        ),
-        "rebond_foam_64_20": ResilientLayer(
-            name=_REBOND_FOAM,
-            dynamic_stiffness_n_m3=9e6,
-            density_kg_m3=64.0,
-            thickness_mm=20.0,
-            source=_TABLE_A3,
-            attributed_to=_HOPKINS_AND_HALL,
-        ),
-        "rebond_foam_64_25": ResilientLayer(
-            name=_REBOND_FOAM,
-            dynamic_stiffness_n_m3=7e6,
-            density_kg_m3=64.0,
-            thickness_mm=25.0,
-            source=_TABLE_A3,
-            attributed_to=_HOPKINS_AND_HALL,
-        ),
-        "rebond_foam_96_15": ResilientLayer(
-            name=_REBOND_FOAM,
-            dynamic_stiffness_n_m3=16e6,
-            density_kg_m3=96.0,
-            thickness_mm=15.0,
-            source=_TABLE_A3,
-            attributed_to=_HOPKINS_AND_HALL,
-        ),
-    }
-)
+PUBLISHED_RESILIENT_LAYERS: Mapping[str, ResilientLayer] = MappingProxyType(_load())
 
 
 def resilient_layer(layer: str | ResilientLayer) -> ResilientLayer:
-    """Look up a resilient layer in Hopkins Table A3.
+    """Look up a published resilient layer, or pass one through.
 
     :param layer: A key of :data:`PUBLISHED_RESILIENT_LAYERS`, spelled
-        ``<material>_<density in kg/m3>_<thickness in mm>``, or a
-        :class:`ResilientLayer` already in hand.
+        ``"<table>/<row>"`` like every catalogue key, as
+        ``"hopkins-2007-table-a3/mineral_wool_rock_60_30"``, or a
+        :class:`ResilientLayer` already in hand, such as one built from a
+        product's test report.
     :return: The :class:`ResilientLayer`.
     :raises ValueError: for an unknown layer name, listing the keys there are.
     """
@@ -654,58 +751,63 @@ class DynamicStiffnessResult:
 
 
 def floating_floor_resonance(
-    resonant_frequency: float,
-    total_mass_per_area: float,
-    floor_mass_per_area: float,
+    resonant_frequency_hz: float,
+    total_mass_per_area_kg_m2: float,
+    floor_mass_per_area_kg_m2: float,
     *,
-    airflow_resistivity: float = float("inf"),
-    thickness: float | None = None,
+    airflow_resistivity_kpa_s_m2: float = float("inf"),
+    thickness_m: float | None = None,
     porosity: float | None = None,
     atmospheric_pressure_pa: float = STANDARD_ATMOSPHERIC_PRESSURE,
 ) -> DynamicStiffnessResult:
     r"""Full EN 29052-1 chain: measured resonance -> installed ``s'`` and ``f0``.
 
     Chains the apparent dynamic stiffness (Formula 4), the enclosed-gas term
-    (Formula 7, when ``thickness`` and ``porosity`` are given), the airflow
+    (Formula 7, when ``thickness_m`` and ``porosity`` are given), the airflow
     resistivity combination (clause 8.2) and the installed-floor natural
     frequency (Formula 2).
 
-    :param resonant_frequency: Measured resonant frequency ``fr``, in hertz.
-    :param total_mass_per_area: Test total mass per unit area ``m't``, kg/m2.
-    :param floor_mass_per_area: Supported-floor mass per unit area ``m'``, kg/m2.
-    :param airflow_resistivity: Lateral airflow resistivity ``r``, in kPa.s/m2
-        (default ``inf`` -> the high-resistivity case :math:`s' = s'_\mathrm{t}`).
-    :param thickness: Specimen thickness ``d`` under load, in metres. Required
-        together with ``porosity`` for the enclosed-gas term, which applies
-        when :math:`r < 100` kPa.s/m2. That condition is on the *value* of
-        ``airflow_resistivity`` rather than on a literal, so a signature
-        cannot state it: it is checked here and raises.
+    :param resonant_frequency_hz: Measured resonant frequency ``fr``, in hertz.
+    :param total_mass_per_area_kg_m2: Test total mass per unit area ``m't``,
+        in kg/m2.
+    :param floor_mass_per_area_kg_m2: Supported-floor mass per unit area
+        ``m'``, in kg/m2.
+    :param airflow_resistivity_kpa_s_m2: Lateral airflow resistivity ``r``, in
+        kPa.s/m2 (default ``inf`` -> the high-resistivity case
+        :math:`s' = s'_\mathrm{t}`).
+    :param thickness_m: Specimen thickness ``d`` under load, in metres.
+        Required together with ``porosity`` for the enclosed-gas term, which
+        applies when :math:`r < 100` kPa.s/m2. That condition is on the
+        *value* of ``airflow_resistivity_kpa_s_m2`` rather than on a literal,
+        so a signature cannot state it: it is checked here and raises.
     :param porosity: Specimen porosity ``epsilon``, required with
-        ``thickness`` (see above).
+        ``thickness_m`` (see above).
     :param atmospheric_pressure_pa: Atmospheric pressure ``p0``, in pascals.
     :return: The :class:`DynamicStiffnessResult`.
     """
     s_apparent = float(
-        apparent_dynamic_stiffness(resonant_frequency, total_mass_per_area)
+        apparent_dynamic_stiffness(resonant_frequency_hz, total_mass_per_area_kg_m2)
     )
     s_gas = 0.0
-    if airflow_resistivity < _HIGH_RESISTIVITY:
-        if thickness is None or porosity is None:
+    if airflow_resistivity_kpa_s_m2 < _HIGH_RESISTIVITY:
+        if thickness_m is None or porosity is None:
             msg = (
-                "'thickness' and 'porosity' are required for the enclosed-gas "
-                "term when airflow_resistivity < 100 kPa.s/m2."
+                "'thickness_m' and 'porosity' are required for the enclosed-gas "
+                "term when airflow_resistivity_kpa_s_m2 < 100 kPa.s/m2."
             )
             raise ValueError(msg)
         s_gas = float(
             enclosed_gas_stiffness(
-                thickness, porosity, atmospheric_pressure_pa=atmospheric_pressure_pa
+                thickness_m, porosity, atmospheric_pressure_pa=atmospheric_pressure_pa
             )
         )
     s_installed = installed_dynamic_stiffness(
-        s_apparent, airflow_resistivity, gas_stiffness=s_gas
+        s_apparent,
+        airflow_resistivity_kpa_s_m2=airflow_resistivity_kpa_s_m2,
+        gas_stiffness_n_m3=s_gas,
     )
     f0 = (
-        float(natural_frequency(s_installed, floor_mass_per_area))
+        float(natural_frequency(s_installed, floor_mass_per_area_kg_m2))
         if np.isfinite(s_installed)
         else float("nan")
     )
@@ -713,7 +815,7 @@ def floating_floor_resonance(
         apparent_stiffness=s_apparent,
         gas_stiffness=s_gas,
         dynamic_stiffness=s_installed,
-        resonant_frequency=float(resonant_frequency),
-        floor_mass_per_area=float(floor_mass_per_area),
+        resonant_frequency=float(resonant_frequency_hz),
+        floor_mass_per_area=float(floor_mass_per_area_kg_m2),
         natural_frequency=f0,
     )

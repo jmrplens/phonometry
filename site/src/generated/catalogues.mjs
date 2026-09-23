@@ -61510,8 +61510,8 @@ export const catalogues = {
           },
           {
             "text": "36",
-            "kind": "printed",
-            "note": ""
+            "kind": "carried",
+            "note": "carried down the blank cell of Table A3 from the 13 mm glass-wool row above it, which prints 36 kg/m3 once for the two rows of its block"
           },
           {
             "text": "25",
@@ -61580,8 +61580,8 @@ export const catalogues = {
           },
           {
             "text": "75",
-            "kind": "printed",
-            "note": ""
+            "kind": "carried",
+            "note": "carried down the blank cell of Table A3 from the 25 mm glass-wool row above it, which prints 75 kg/m3 once for the two rows of its block"
           },
           {
             "text": "40",
@@ -61617,8 +61617,8 @@ export const catalogues = {
           },
           {
             "text": "64",
-            "kind": "printed",
-            "note": ""
+            "kind": "carried",
+            "note": "carried up the blank cell of Table A3 from the 20 mm rebond-foam row below it, which prints 64 kg/m3 once, level with the middle of the three rows of its block"
           },
           {
             "text": "15",
@@ -61691,8 +61691,8 @@ export const catalogues = {
           },
           {
             "text": "64",
-            "kind": "printed",
-            "note": ""
+            "kind": "carried",
+            "note": "carried down the blank cell of Table A3 from the 20 mm rebond-foam row above it, which prints 64 kg/m3 once, level with the middle of the three rows of its block"
           },
           {
             "text": "25",

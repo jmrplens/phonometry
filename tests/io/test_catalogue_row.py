@@ -81,6 +81,7 @@ def test_every_published_row_class_is_found() -> None:
         "NonlinearityParameter",
         "Carpet",
         "ResilientMaterial",
+        "ResilientLayer",
         "PorousMaterial",
     } <= names
     assert len(ROW_CLASSES) >= 20

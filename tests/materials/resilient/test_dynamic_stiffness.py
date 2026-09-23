@@ -18,7 +18,12 @@ import pytest
 import reference_data as ref
 
 from phonometry import materials
+from phonometry.io import CatalogueError, CatalogueRow
 from phonometry.materials.resilient.dynamic_stiffness import DynamicStiffnessWarning
+
+#: The packaged table the published layers are read from, and one of its rows.
+_TABLE_A3 = "hopkins-2007-table-a3"
+_ROCK_60_30 = f"{_TABLE_A3}/mineral_wool_rock_60_30"
 
 
 # ---------------------------------------------------------------------------
@@ -98,13 +103,28 @@ def test_natural_frequency_scales() -> None:
 # Airflow-resistivity combination (clause 8.2)
 # ---------------------------------------------------------------------------
 def test_high_resistivity_uses_apparent_only() -> None:
-    assert materials.installed_dynamic_stiffness(20e6, 150.0, gas_stiffness=3e6) == 20e6
+    assert (
+        materials.installed_dynamic_stiffness(
+            20e6, airflow_resistivity_kpa_s_m2=150.0, gas_stiffness_n_m3=3e6
+        )
+        == 20e6
+    )
 
 
 def test_intermediate_resistivity_adds_gas() -> None:
-    assert materials.installed_dynamic_stiffness(20e6, 50.0, gas_stiffness=3e6) == 23e6
+    assert (
+        materials.installed_dynamic_stiffness(
+            20e6, airflow_resistivity_kpa_s_m2=50.0, gas_stiffness_n_m3=3e6
+        )
+        == 23e6
+    )
     # boundary at 10 kPa.s/m2 is inclusive of the intermediate branch
-    assert materials.installed_dynamic_stiffness(20e6, 10.0, gas_stiffness=3e6) == 23e6
+    assert (
+        materials.installed_dynamic_stiffness(
+            20e6, airflow_resistivity_kpa_s_m2=10.0, gas_stiffness_n_m3=3e6
+        )
+        == 23e6
+    )
 
 
 def test_low_resistivity_negligible_gas_warns_and_uses_apparent() -> None:
@@ -113,7 +133,7 @@ def test_low_resistivity_negligible_gas_warns_and_uses_apparent() -> None:
         match=r"s' is taken as s't with the enclosed-gas term disregarded",
     ):
         s = materials.installed_dynamic_stiffness(
-            20e6, 5.0, gas_stiffness=1e6
+            20e6, airflow_resistivity_kpa_s_m2=5.0, gas_stiffness_n_m3=1e6
         )  # 5 % of s't
     assert s == 20e6
 
@@ -124,7 +144,7 @@ def test_low_resistivity_significant_gas_is_unresolvable() -> None:
         match=r"non-negligible enclosed-gas stiffness, EN 29052-1 cannot resolve",
     ):
         s = materials.installed_dynamic_stiffness(
-            20e6, 5.0, gas_stiffness=5e6
+            20e6, airflow_resistivity_kpa_s_m2=5.0, gas_stiffness_n_m3=5e6
         )  # 25 % of s't
     assert math.isnan(s)
 
@@ -134,7 +154,12 @@ def test_low_resistivity_significant_gas_is_unresolvable() -> None:
 # ---------------------------------------------------------------------------
 def test_floating_floor_resonance_chain() -> None:
     res = materials.floating_floor_resonance(
-        25.0, 200.0, 100.0, airflow_resistivity=50.0, thickness=0.02, porosity=0.9
+        25.0,
+        200.0,
+        100.0,
+        airflow_resistivity_kpa_s_m2=50.0,
+        thickness_m=0.02,
+        porosity=0.9,
     )
     assert isinstance(res, materials.DynamicStiffnessResult)
     assert res.apparent_stiffness == pytest.approx(4_934_802.2, rel=1e-6)
@@ -157,23 +182,39 @@ def test_chain_high_resistivity_ignores_gas() -> None:
 def test_chain_requires_gas_inputs_below_100() -> None:
     with pytest.raises(
         ValueError,
-        match=r"'thickness' and 'porosity' are required for the enclosed-gas term",
+        match=r"'thickness_m' and 'porosity' are required for the enclosed-gas term",
     ):
-        materials.floating_floor_resonance(25.0, 200.0, 100.0, airflow_resistivity=50.0)
+        materials.floating_floor_resonance(
+            25.0, 200.0, 100.0, airflow_resistivity_kpa_s_m2=50.0
+        )
 
 
 # ---------------------------------------------------------------------------
 # Validation
 # ---------------------------------------------------------------------------
 def test_non_positive_inputs_raise() -> None:
-    with pytest.raises(ValueError, match=r"'resonant_frequency' must be positive"):
+    with pytest.raises(ValueError, match=r"'resonant_frequency_hz' must be positive"):
         materials.apparent_dynamic_stiffness(0.0, 200.0)
-    with pytest.raises(ValueError, match=r"'total_mass_per_area' must be positive"):
+    with pytest.raises(
+        ValueError, match=r"'total_mass_per_area_kg_m2' must be positive"
+    ):
         materials.apparent_dynamic_stiffness(25.0, 0.0)
-    with pytest.raises(ValueError, match=r"'mass_per_area' must be positive"):
+    with pytest.raises(ValueError, match=r"'mass_per_area_kg_m2' must be positive"):
         materials.natural_frequency(10e6, 0.0)
-    with pytest.raises(ValueError, match=r"'airflow_resistivity' must be positive"):
-        materials.installed_dynamic_stiffness(20e6, 0.0)
+    with pytest.raises(ValueError, match=r"'dynamic_stiffness_n_m3' must be positive"):
+        materials.natural_frequency(0.0, 100.0)
+    with pytest.raises(
+        ValueError, match=r"'airflow_resistivity_kpa_s_m2' must be positive"
+    ):
+        materials.installed_dynamic_stiffness(20e6, airflow_resistivity_kpa_s_m2=0.0)
+    with pytest.raises(
+        ValueError, match=r"'airflow_resistivity_kpa_s_m2' must be positive"
+    ):
+        materials.installed_dynamic_stiffness(
+            20e6, airflow_resistivity_kpa_s_m2=float("nan")
+        )
+    with pytest.raises(ValueError, match=r"'thickness_m' must be positive"):
+        materials.enclosed_gas_stiffness(0.0, 0.9)
 
 
 @pytest.mark.parametrize(
@@ -219,8 +260,8 @@ def test_the_unresolved_installed_stiffness_is_kept_not_refused() -> None:
             25.0,
             200.0,
             100.0,
-            airflow_resistivity=5.0,
-            thickness=0.02,
+            airflow_resistivity_kpa_s_m2=5.0,
+            thickness_m=0.02,
             porosity=0.9,
         )
     assert math.isnan(res.dynamic_stiffness)
@@ -276,8 +317,9 @@ class TestResilientLayerStiffness:
     """``PUBLISHED_RESILIENT_LAYERS`` against Hopkins Table A3 as printed.
 
     The printed digits live once, in ``tests/reference_data``, in the MN/m3 the
-    book prints; the N/m3 values live once, in ``src``. These assertions are
-    what makes the two one copy and what pins the factor of 1e6 between them.
+    book prints; the N/m3 values live once, in the packaged data file. These
+    assertions are what makes the two one copy and what pins the factor of 1e6
+    between them.
     """
 
     def test_every_printed_row_ships_once(self) -> None:
@@ -300,20 +342,63 @@ class TestResilientLayerStiffness:
                 stiffness_mn * 1.0e6, rel=1e-12
             )
 
-    def test_the_key_says_which_specimen_the_row_is(self) -> None:
-        """``<material>_<density>_<thickness>``, because the print does not.
+    def test_the_page_prints_the_installed_stiffness_and_no_apparent_one(
+        self,
+    ) -> None:
+        """The heading of Table A3 is ``s'``, which the book defines as installed.
 
-        Four rock-wool rows and four glass-wool rows differ only by those two
-        numbers, and the printed table separates them by position in a merged
-        cell.
+        Hopkins keeps ``s'`` (installed) and ``s't`` (apparent) apart in his
+        List of symbols and in Section 3.11.3.1.2, and the table prints the
+        first. So every row fills ``dynamic_stiffness_n_m3``, none fills the
+        apparent field, and a caller asking for it hears that the page does not
+        give it.
         """
         for key, layer in materials.PUBLISHED_RESILIENT_LAYERS.items():
-            assert key.endswith(
-                f"_{int(layer.density_kg_m3)}_{int(layer.thickness_mm)}"
-            ), key
-        assert len(set(materials.PUBLISHED_RESILIENT_LAYERS)) == len(
-            materials.PUBLISHED_RESILIENT_LAYERS
+            assert layer.dynamic_stiffness_n_m3 is not None, key
+            assert layer.apparent_dynamic_stiffness_n_m3 is None, key
+        layer = materials.resilient_layer(_ROCK_60_30)
+        assert layer.why_missing("apparent_dynamic_stiffness_n_m3").startswith(
+            "the page does not give it"
         )
+
+    def test_a_density_printed_once_for_a_block_is_carried(self) -> None:
+        """A blank density cell holds its block's figure and says which row prints it.
+
+        Table A3 prints 36, 75 and 64 kg/m3 once for the rows of their block
+        and leaves the cell blank on the others. Those rows hold the figure,
+        marked ``carried`` with the row it was read from, as every packaged
+        table does with a cell left blank under a block; no other row, and no
+        other field, carries anything.
+        """
+        layers = list(materials.PUBLISHED_RESILIENT_LAYERS.values())
+        for position, layer in enumerate(layers):
+            printing = ref.HOPKINS_TABLE_A3_BLANK_DENSITY.get(position)
+            if printing is None:
+                assert not layer.carried, layer.name
+                continue
+            assert list(layer.carried) == ["density_kg_m3"], position
+            _, density, thickness, _ = ref.HOPKINS_TABLE_A3_MN_PER_M3[printing]
+            assert layer.density_kg_m3 == density
+            text = layer.carried["density_kg_m3"]
+            assert f"from the {int(thickness)} mm" in text, text
+            assert f"prints {int(density)} kg/m3 once" in text, text
+            assert not layer.is_derived("density_kg_m3")
+
+    def test_the_key_says_which_table_and_which_specimen(self) -> None:
+        """``<table>/<material>_<density>_<thickness>``, because the print does not.
+
+        The table half is the packaged file, as in every catalogue. Four
+        rock-wool rows and four glass-wool rows differ only by the two numbers
+        of the row half, and the printed table separates them by position
+        under a name it prints once.
+        """
+        for key, layer in materials.PUBLISHED_RESILIENT_LAYERS.items():
+            table, _, row = key.partition("/")
+            assert table == _TABLE_A3 == layer.table, key
+            density, thickness = layer.density_kg_m3, layer.thickness_mm
+            assert density is not None
+            assert thickness is not None
+            assert row.endswith(f"_{int(density)}_{int(thickness)}"), key
 
     def test_second_level_attribution_is_a_field_not_a_name(self) -> None:
         """Eleven rows are the book's own; the four rebond rows are credited."""
@@ -324,9 +409,9 @@ class TestResilientLayerStiffness:
         ]
         first_hand = len(materials.PUBLISHED_RESILIENT_LAYERS) - len(credited)
         assert first_hand == ref.HOPKINS_TABLE_A3_FIRST_HAND_ROWS
-        assert {layer.attributed_to for layer in credited} == {
-            "Hopkins and Hall (2006)"
-        }
+        assert [dict(layer.attributed_to) for layer in credited] == [
+            {"row": "Hopkins and Hall (2006)"}
+        ] * 4
         assert all(layer.name.startswith("Rebond foam") for layer in credited)
         # The attribution is out of the name, which is what lets the key exist.
         assert not any(
@@ -341,27 +426,80 @@ class TestResilientLayerStiffness:
             ), key
 
     def test_natural_frequency_is_formula_2_on_the_stored_stiffness(self) -> None:
-        layer = materials.PUBLISHED_RESILIENT_LAYERS["mineral_wool_rock_60_30"]
-        expected = materials.natural_frequency(layer.dynamic_stiffness_n_m3, 100.0)
+        layer = materials.PUBLISHED_RESILIENT_LAYERS[_ROCK_60_30]
+        stiffness = layer.dynamic_stiffness_n_m3
+        assert stiffness is not None
+        expected = materials.natural_frequency(stiffness, 100.0)
         assert layer.natural_frequency(100.0) == pytest.approx(expected, rel=1e-12)
         # 10 MN/m3 under 100 kg/m2: f0 = sqrt(1e7/100)/(2 pi) = 50,3 Hz.
         assert layer.natural_frequency(100.0) == pytest.approx(50.33, abs=0.01)
 
+    def test_a_row_with_s_prime_returns_what_it_always_returned(self) -> None:
+        """Every published row, to the last bit, is Formula 2 on its printed ``s'``.
+
+        The row became a catalogue row and its method learnt a second path,
+        and neither may move a number the first path served. The expression
+        on the right is the one the method evaluated before, written out.
+        """
+        for mass in (40.0, 100.0, 120.0, 250.0):
+            for key, layer in materials.PUBLISHED_RESILIENT_LAYERS.items():
+                stiffness = layer.dynamic_stiffness_n_m3
+                assert stiffness is not None
+                before = float(np.sqrt(stiffness / mass) / (2.0 * np.pi))
+                assert layer.natural_frequency(mass) == before, (key, mass)
+                assert layer.natural_frequency(mass_per_area_kg_m2=mass) == before
+
+    @pytest.mark.parametrize(
+        "keyword",
+        [
+            {"airflow_resistivity_pa_s_m2": 50_000.0},
+            {"gas_stiffness_n_m3": 3.0e6},
+            {"airflow_resistivity_pa_s_m2": 50_000.0, "gas_stiffness_n_m3": 3.0e6},
+        ],
+        ids=["r", "s'a", "both"],
+    )
+    def test_a_row_with_s_prime_refuses_the_keywords(
+        self, keyword: dict[str, float]
+    ) -> None:
+        """``r`` and ``s'a`` only turn ``s't`` into ``s'``; on an ``s'`` row nothing reads them."""
+        layer = materials.resilient_layer(_ROCK_60_30)
+        with pytest.raises(ValueError, match=r"which Formula 2 takes as it is"):
+            layer.natural_frequency(100.0, **keyword)
+
     def test_lookup_accepts_a_key_or_a_layer(self) -> None:
-        layer = materials.resilient_layer("mineral_wool_glass_75_40")
+        layer = materials.resilient_layer(f"{_TABLE_A3}/mineral_wool_glass_75_40")
         assert layer.dynamic_stiffness_n_m3 == pytest.approx(7.0e6)
         assert materials.resilient_layer(layer) is layer
 
     def test_lookup_names_the_keys_there_are(self) -> None:
         with pytest.raises(ValueError, match=r"Unknown resilient layer 'rockwool'"):
             materials.resilient_layer("rockwool")
-        with pytest.raises(ValueError, match=r"mineral_wool_rock_60_30"):
+
+    def test_lookup_lists_the_keys_in_the_refusal(self) -> None:
+        with pytest.raises(ValueError, match=rf"{_TABLE_A3}/mineral_wool_rock_60_30"):
             materials.resilient_layer("rockwool")
 
+    def test_the_short_keys_are_gone(self) -> None:
+        """4.0 keys every catalogue ``"<table>/<row>"``, with no alias for the old."""
+        with pytest.raises(
+            ValueError, match=r"Unknown resilient layer 'mineral_wool_rock_60_30'"
+        ):
+            materials.resilient_layer("mineral_wool_rock_60_30")
+
     def test_the_layers_are_frozen(self) -> None:
-        layer = materials.PUBLISHED_RESILIENT_LAYERS["expanded_polystyrene_14_50"]
+        layer = materials.PUBLISHED_RESILIENT_LAYERS[
+            f"{_TABLE_A3}/expanded_polystyrene_14_50"
+        ]
         with pytest.raises(dataclasses.FrozenInstanceError):
             layer.dynamic_stiffness_n_m3 = 1.0  # type: ignore[misc]
+
+    def test_the_credit_is_frozen(self) -> None:
+        layer = materials.PUBLISHED_RESILIENT_LAYERS[f"{_TABLE_A3}/rebond_foam_64_20"]
+        with pytest.raises(TypeError, match=r"does not support item assignment"):
+            layer.attributed_to["row"] = "someone else"  # type: ignore[index]
+
+    def test_a_layer_is_a_catalogue_row(self) -> None:
+        assert issubclass(materials.ResilientLayer, CatalogueRow)
 
     def test_no_function_defaults_to_a_published_layer(self) -> None:
         """Removing the table costs no capability (the removal policy)."""
@@ -369,6 +507,7 @@ class TestResilientLayerStiffness:
             materials.natural_frequency,
             materials.installed_dynamic_stiffness,
             materials.floating_floor_resonance,
+            materials.ResilientLayer.natural_frequency,
         ):
             defaults = [
                 parameter.default
@@ -399,3 +538,250 @@ class TestResilientLayerStiffness:
         }
         a4 = {stiffness for _, stiffness in building.WALL_TIE_STIFFNESS.values()}
         assert not (a3 & a4)
+
+
+# ---------------------------------------------------------------------------
+# A layer that gives only the apparent stiffness: clause 8.2 on the way to
+# Formula 2, checked against the standard's formulas written out by hand
+# ---------------------------------------------------------------------------
+
+#: A test report's apparent stiffness, and the floor and the layer it is for:
+#: a layer 30 mm thick under the test load (the ``d`` of Formula 7, which
+#: clause 9 b) has the report state), of porosity 0.9, under a 120 kg/m2
+#: screed, in the standard's 0,1 MPa atmosphere. Nothing below is read from
+#: the library but the result.
+_S_T = 6.0e6
+_FLOOR = 120.0
+_P0 = 1.0e5
+_D = 0.030
+_EPSILON = 0.9
+
+
+def _apparent_only() -> materials.ResilientLayer:
+    """A layer whose source gives ``s't`` and leaves ``s'`` out."""
+    return materials.ResilientLayer(
+        name="Example layer 30",
+        source="Example Acoustics Ltd test report 26-014, p. 2",
+        apparent_dynamic_stiffness_n_m3=_S_T,
+    )
+
+
+def _formula_2(stiffness: float, mass: float) -> float:
+    """``f0 = (1/2 pi) sqrt(s'/m')``, EN 29052-1 Formula 2, by hand."""
+    return math.sqrt(stiffness / mass) / (2.0 * math.pi)
+
+
+def _formula_7(p0: float, d: float, epsilon: float) -> float:
+    """``s'a = p0 / (d epsilon)``, EN 29052-1 Formula 7, by hand."""
+    return p0 / (d * epsilon)
+
+
+class TestApparentStiffnessRow:
+    """Option (b): ``r`` and ``s'a`` take an ``s't`` row through clause 8.2."""
+
+    def test_s_t_is_not_s_prime_and_the_refusal_says_what_to_pass(self) -> None:
+        layer = _apparent_only()
+        with pytest.raises(
+            CatalogueError,
+            match=(
+                r"'Example layer 30' gives the apparent dynamic stiffness s't .*"
+                r"6 MN/m3.* pass airflow_resistivity_pa_s_m2 .*gas_stiffness_n_m3"
+            ),
+        ):
+            layer.natural_frequency(_FLOOR)
+
+    def test_the_refusal_is_a_value_error_too(self) -> None:
+        """A caller who catches ``ValueError`` around Formula 2 still catches it."""
+        assert issubclass(CatalogueError, ValueError)
+
+    def test_high_resistivity_is_formula_5(self) -> None:
+        """``r >= 100 kPa.s/m2``: ``s' = s't`` (Formula 5), no ``s'a`` needed."""
+        f0 = _apparent_only().natural_frequency(
+            _FLOOR, airflow_resistivity_pa_s_m2=150_000.0
+        )
+        assert f0 == pytest.approx(_formula_2(_S_T, _FLOOR), rel=1e-12)
+        # sqrt(6e6 / 120) / (2 pi) = sqrt(50 000) / (2 pi) = 35,588 Hz.
+        assert f0 == pytest.approx(35.588, abs=5e-4)
+
+    def test_intermediate_resistivity_is_formula_6(self) -> None:
+        """``10 <= r < 100``: ``s' = s't + s'a`` (Formula 6), ``s'a`` by Formula 7."""
+        gas = _formula_7(_P0, _D, _EPSILON)
+        # The standard's NOTE: s'a = 111/d MN/m3 with d in mm, 111/30 = 3,7.
+        assert gas / 1e6 == pytest.approx(111.0 / 30.0, rel=2e-3)
+        f0 = _apparent_only().natural_frequency(
+            _FLOOR,
+            airflow_resistivity_pa_s_m2=50_000.0,
+            gas_stiffness_n_m3=gas,
+        )
+        assert f0 == pytest.approx(_formula_2(_S_T + gas, _FLOOR), rel=1e-12)
+        # s' = 6 + 3,7037 = 9,7037 MN/m3: f0 = sqrt(9,7037e6/120)/(2 pi) = 45,26 Hz.
+        assert f0 == pytest.approx(45.258, abs=5e-4)
+
+    def test_the_module_s_formula_7_is_the_hand_one(self) -> None:
+        assert materials.enclosed_gas_stiffness(
+            _D, _EPSILON, atmospheric_pressure_pa=_P0
+        ) == pytest.approx(_formula_7(_P0, _D, _EPSILON), rel=1e-15)
+
+    def test_intermediate_resistivity_without_s_a_is_refused(self) -> None:
+        """An absent gas term is not a zero one."""
+        layer = _apparent_only()
+        with pytest.raises(ValueError, match=r"'gas_stiffness_n_m3' is required"):
+            layer.natural_frequency(_FLOOR, airflow_resistivity_pa_s_m2=50_000.0)
+
+    def test_low_resistivity_negligible_gas_is_case_c(self) -> None:
+        """``r < 10`` with ``s'a`` small against ``s't``: ``s' = s't``, and a warning."""
+        layer = _apparent_only()
+        with pytest.warns(DynamicStiffnessWarning, match=r"s' is taken as s't"):
+            f0 = layer.natural_frequency(
+                _FLOOR, airflow_resistivity_pa_s_m2=5_000.0, gas_stiffness_n_m3=3e5
+            )
+        assert f0 == pytest.approx(_formula_2(_S_T, _FLOOR), rel=1e-12)
+
+    def test_low_resistivity_significant_gas_has_no_answer(self) -> None:
+        """Clause 8.2 NOTE: ``s'`` cannot be determined, so neither can ``f0``."""
+        layer = _apparent_only()
+        gas = _formula_7(_P0, _D, _EPSILON)
+        with pytest.warns(DynamicStiffnessWarning, match=r"cannot resolve s'"):
+            f0 = layer.natural_frequency(
+                _FLOOR, airflow_resistivity_pa_s_m2=5_000.0, gas_stiffness_n_m3=gas
+            )
+        assert math.isnan(f0)
+
+    @pytest.mark.parametrize(
+        ("resistivity_pa_s_m2", "formula"),
+        [
+            (100_000.0, "5"),
+            (float(np.nextafter(100_000.0, 0.0)), "6"),
+            (10_000.0, "6"),
+        ],
+        ids=["100 kPa is Formula 5", "just below 100 is Formula 6", "10 kPa is 6"],
+    )
+    def test_the_conversion_to_kilopascals_moves_no_threshold(
+        self, resistivity_pa_s_m2: float, formula: str
+    ) -> None:
+        """The largest float below a threshold stays below it once in kPa."""
+        gas = _formula_7(_P0, _D, _EPSILON)
+        f0 = _apparent_only().natural_frequency(
+            _FLOOR,
+            airflow_resistivity_pa_s_m2=resistivity_pa_s_m2,
+            gas_stiffness_n_m3=gas,
+        )
+        expected = _S_T + gas if formula == "6" else _S_T
+        assert f0 == pytest.approx(_formula_2(expected, _FLOOR), rel=1e-12)
+
+    def test_just_below_ten_kilopascals_is_case_c(self) -> None:
+        layer = _apparent_only()
+        with pytest.warns(DynamicStiffnessWarning, match=r"s' is taken as s't"):
+            f0 = layer.natural_frequency(
+                _FLOOR,
+                airflow_resistivity_pa_s_m2=float(np.nextafter(10_000.0, 0.0)),
+                gas_stiffness_n_m3=3e5,
+            )
+        assert f0 == pytest.approx(_formula_2(_S_T, _FLOOR), rel=1e-12)
+
+    def test_a_non_positive_resistivity_is_refused(self) -> None:
+        layer = _apparent_only()
+        with pytest.raises(
+            ValueError, match=r"'airflow_resistivity_pa_s_m2' must be positive"
+        ):
+            layer.natural_frequency(_FLOOR, airflow_resistivity_pa_s_m2=0.0)
+
+    def test_a_layer_with_neither_stiffness_says_what_its_page_had(self) -> None:
+        """A declared bound is held as a bound, and Formula 2 refuses it by name."""
+        layer = materials.ResilientLayer(
+            name="Example layer 20",
+            source="Example Acoustics Ltd declaration of performance, p. 1",
+            ranges={"dynamic_stiffness_n_m3": (None, 9.0e6)},
+            bounded_above=frozenset({"dynamic_stiffness_n_m3"}),
+        )
+        with pytest.raises(
+            ValueError, match=r"prints an upper bound of 9e\+06 and no value"
+        ):
+            layer.natural_frequency(_FLOOR)
+
+    @pytest.mark.parametrize(
+        "keyword",
+        [{}, {"airflow_resistivity_pa_s_m2": 50_000.0, "gas_stiffness_n_m3": 3.0e6}],
+        ids=["bare", "with r and s'a"],
+    )
+    def test_a_bound_on_s_t_is_named_and_is_not_s_prime(
+        self, keyword: dict[str, float]
+    ) -> None:
+        """A declared bound on ``s't`` is refused by name, keywords or not.
+
+        No value of either stiffness is on the row, so there is nothing for
+        ``r`` and ``s'a`` to act on; the refusal names the ``s't`` cell and
+        its bound rather than saying the page gives no stiffness at all.
+        """
+        layer = materials.ResilientLayer(
+            name="Example layer 25",
+            source="Example Acoustics Ltd declaration of performance, p. 1",
+            ranges={"apparent_dynamic_stiffness_n_m3": (None, 9.0e6)},
+            bounded_above=frozenset({"apparent_dynamic_stiffness_n_m3"}),
+        )
+        with pytest.raises(
+            CatalogueError,
+            match=(
+                r"for apparent_dynamic_stiffness_n_m3, the page prints an upper "
+                r"bound of 9e\+06 and no value\. s't is not s'"
+            ),
+        ):
+            layer.natural_frequency(_FLOOR, **keyword)
+
+    def test_a_bound_on_s_prime_is_named_before_one_on_s_t(self) -> None:
+        """With both cells hedged, the refusal is the one for ``s'``, which Formula 2 takes."""
+        layer = materials.ResilientLayer(
+            name="Example layer 25",
+            source="Example Acoustics Ltd declaration of performance, p. 1",
+            ranges={
+                "dynamic_stiffness_n_m3": (None, 9.0e6),
+                "apparent_dynamic_stiffness_n_m3": (None, 7.0e6),
+            },
+            bounded_above=frozenset(
+                {"dynamic_stiffness_n_m3", "apparent_dynamic_stiffness_n_m3"}
+            ),
+        )
+        with pytest.raises(
+            ValueError,
+            match=r"has no dynamic_stiffness_n_m3, .*upper bound of 9e\+06",
+        ):
+            layer.natural_frequency(_FLOOR)
+
+    def test_a_layer_that_gives_both_uses_s_prime(self) -> None:
+        """A test report may give ``s't``, ``s'a`` and ``s'`` (clause 9 e)."""
+        layer = materials.ResilientLayer(
+            name="Example layer 30",
+            source="Example Acoustics Ltd test report 26-014, p. 2",
+            apparent_dynamic_stiffness_n_m3=_S_T,
+            dynamic_stiffness_n_m3=10.0e6,
+        )
+        assert layer.natural_frequency(_FLOOR) == pytest.approx(
+            _formula_2(10.0e6, _FLOOR), rel=1e-12
+        )
+
+
+def test_installed_stiffness_needs_the_gas_term_below_100() -> None:
+    """Formula 6 adds ``s'a``; leaving it out used to add a silent zero."""
+    with pytest.raises(ValueError, match=r"'gas_stiffness_n_m3' is required"):
+        materials.installed_dynamic_stiffness(20e6, airflow_resistivity_kpa_s_m2=50.0)
+
+
+def test_installed_stiffness_needs_the_gas_term_below_10() -> None:
+    """Case c) weighs ``s'a`` against ``s't``, so it cannot be left out there either."""
+    with pytest.raises(ValueError, match=r"'gas_stiffness_n_m3' is required"):
+        materials.installed_dynamic_stiffness(20e6, airflow_resistivity_kpa_s_m2=5.0)
+
+
+def test_installed_stiffness_takes_the_resistivity_by_name() -> None:
+    """kPa here and Pa in every catalogue: the unit has to be on the call line."""
+    parameter = inspect.signature(materials.installed_dynamic_stiffness).parameters[
+        "airflow_resistivity_kpa_s_m2"
+    ]
+    assert parameter.kind is inspect.Parameter.KEYWORD_ONLY
+
+
+def test_installed_stiffness_refuses_a_negative_gas_term_above_100() -> None:
+    with pytest.raises(ValueError, match=r"'gas_stiffness_n_m3' must be non-negative"):
+        materials.installed_dynamic_stiffness(
+            20e6, airflow_resistivity_kpa_s_m2=150.0, gas_stiffness_n_m3=-1.0
+        )

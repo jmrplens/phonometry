@@ -140,8 +140,8 @@ peak = np.array([25.6, 25.0, 24.4])           # Hz, leídos de la respuesta
 
 slope, intercept = np.polyfit(force, peak, 1)
 print(round(float(intercept), 2))             # 26.0  Hz con F -> 0
-s_t = materials.apparent_dynamic_stiffness(resonant_frequency=intercept,
-                                           total_mass_per_area=200.0)
+s_t = materials.apparent_dynamic_stiffness(resonant_frequency_hz=intercept,
+                                           total_mass_per_area_kg_m2=200.0)
 print(round(s_t / 1e6, 3))                    # 5.337  MN/m3
 # Tomar en su lugar el barrido más excitado tal cual da 4.701 MN/m3, un 12 %
 # por debajo, y con él una f0 de suelo flotante un 5 % por debajo.
@@ -200,7 +200,7 @@ from phonometry import materials
 
 # Placa de carga normalizada de 8 kg sobre la probeta de 0,04 m2 -> m't = 200 kg/m2;
 # la resonancia fundamental se mide en 25 Hz.
-s_t = materials.apparent_dynamic_stiffness(resonant_frequency=25.0, total_mass_per_area=200.0)
+s_t = materials.apparent_dynamic_stiffness(resonant_frequency_hz=25.0, total_mass_per_area_kg_m2=200.0)
 print(round(s_t / 1e6, 3))                              # 4.935  MN/m3
 
 # Instalada sobre una losa flotante de 120 kg/m2 con s' = 10 MN/m3:
@@ -243,7 +243,7 @@ $s'_\mathrm{a} = 111/d$ MN/m³ con $d$ en milímetros:
 ```python
 from phonometry import materials
 
-print(round(materials.enclosed_gas_stiffness(thickness=0.020, porosity=0.9) / 1e6, 2))
+print(round(materials.enclosed_gas_stiffness(thickness_m=0.020, porosity=0.9) / 1e6, 2))
 # 5.56  MN/m3   (los 111/20 = 5.55 MN/m3 de la NOTA)
 ```
 
@@ -274,7 +274,7 @@ import numpy as np
 # bajo carga, con el término de esqueleto fijo en los 4,94 MN/m3 de la
 # determinación resuelta.
 d_mm = np.logspace(np.log10(5.0), np.log10(60.0), 300)
-s_gas = np.array([materials.enclosed_gas_stiffness(thickness=d * 1e-3,
+s_gas = np.array([materials.enclosed_gas_stiffness(thickness_m=d * 1e-3,
                                                    porosity=0.9) / 1e6
                   for d in d_mm])
 fig, ax = plt.subplots()
@@ -317,15 +317,19 @@ medido.
 
 **Ojo al prefijo.** $r$ es la magnitud que la ISO 9053 llama $\sigma$ y da
 en Pa·s/m², mientras que la EN 29052-1 la escribe $r$ y pone sus umbrales en
-**kPa·s/m²**. La biblioteca sigue a la norma, así que `airflow_resistivity` va
-en kPa·s/m²: el único argumento de esta página que no está en SI puro. Una lana
-mineral medida en 50 000 Pa·s/m² entra como `50.0`, no como `50000.0`; un
+**kPa·s/m²**. La biblioteca sigue a la norma y lleva la unidad en el nombre
+del argumento, `airflow_resistivity_kpa_s_m2`, el único argumento de las
+funciones de la EN 29052-1 que no está en SI puro, y solo lo acepta por
+nombre, para que la unidad quede escrita en la línea que lo pasa. Una lana mineral medida en 50 000 Pa·s/m² entra
+como `50.0`, no como `50000.0`; un
 [resultado de ISO 9053](/phonometry/es/materials/absorbers/airflow-resistance/)
-se convierte con `sigma / 1000`. Pasar el número en Pa·s/m² cae en silencio en
-la rama $r \ge 100$, que descarta el término del gas encerrado: para la
+se convierte con `sigma / 1000`. Pasar el número en Pa·s/m² caería en la
+rama $r \ge 100$, que descarta el término del gas encerrado: para la
 determinación de abajo eso convierte $s' = 10{,}49$ MN/m³ en 4,93 MN/m³ y la
 frecuencia natural de diseño de 47,1 Hz en 32,3 Hz, sin ningún aviso, porque la
-rama equivocada es una rama válida.
+rama equivocada es una rama válida. Una `ResilientLayer` (más abajo) recibe
+esa misma resistividad como `airflow_resistivity_pa_s_m2`, en los Pa·s/m² en
+que la guardan todos los catálogos de la biblioteca, y la convierte ella.
 
 `floating_floor_resonance` encadena toda la determinación:
 
@@ -333,10 +337,10 @@ rama equivocada es una rama válida.
 from phonometry import materials
 
 res = materials.floating_floor_resonance(
-    resonant_frequency=25.0, total_mass_per_area=200.0,
-    floor_mass_per_area=120.0,
-    airflow_resistivity=50.0,   # kPa.s/m2 (= 50000 Pa.s/m2 de la ISO 9053)
-    thickness=0.020, porosity=0.9,
+    resonant_frequency_hz=25.0, total_mass_per_area_kg_m2=200.0,
+    floor_mass_per_area_kg_m2=120.0,
+    airflow_resistivity_kpa_s_m2=50.0,   # kPa.s/m2 (= 50000 Pa.s/m2 de la ISO 9053)
+    thickness_m=0.020, porosity=0.9,
 )
 print(round(res.dynamic_stiffness / 1e6, 2), round(res.natural_frequency, 1))
 # 10.49 47.1
@@ -370,10 +374,10 @@ $f_0(s')$, por lo que requiere los extras de informes y de gráficos
 from phonometry import ReportMetadata, materials
 
 res = materials.floating_floor_resonance(
-    resonant_frequency=45.0, total_mass_per_area=200.0,
-    floor_mass_per_area=110.0,
-    airflow_resistivity=50.0,   # kPa.s/m2 (= 50000 Pa.s/m2 de la ISO 9053)
-    thickness=0.020, porosity=0.9,
+    resonant_frequency_hz=45.0, total_mass_per_area_kg_m2=200.0,
+    floor_mass_per_area_kg_m2=110.0,
+    airflow_resistivity_kpa_s_m2=50.0,   # kPa.s/m2 (= 50000 Pa.s/m2 de la ISO 9053)
+    thickness_m=0.020, porosity=0.9,
 )
 res.report(
     "dynamic_stiffness.pdf",
@@ -398,28 +402,34 @@ res.report(
 El diseño de un suelo flotante parte del $s'$ del fabricante, declarado según
 la EN 29052-1 para ese producto. Cuando no lo hay, se publican quince capas
 medidas en `PUBLISHED_RESILIENT_LAYERS`, transcritas de la tabla A3 de Hopkins
-(p. impresa 610), cuyo pie dice que se midieron según la ISO 9052-1. Cada fila
-lleva la página de la que se leyó, y las cuatro espumas rebond llevan la
-atribución de segundo nivel que les da la celda impresa.
+(p. impresa 610), cuyo pie dice que se midieron según la ISO 9052-1. La
+cabecera de la columna imprime $s'$, que la lista de símbolos del propio libro
+define como la rigidez dinámica de la capa instalada y separa de la aparente
+$s'_\mathrm{t}$, así que todas las filas llevan `dynamic_stiffness_n_m3` y su
+frecuencia natural no necesita más que la masa del suelo. Cada capa es una
+fila de catálogo como las de cualquier otra tabla publicada: lleva la página
+de la que se leyó, y las cuatro espumas rebond llevan la atribución de segundo
+nivel que les da la celda impresa.
 
-La clave dice de qué probeta es cada fila,
+La clave es `"<tabla>/<fila>"`, como en todos los catálogos: la tabla
+empaquetada, `hopkins-2007-table-a3`, y después de qué probeta es la fila,
 `<material>_<densidad>_<espesor>`, porque cuatro filas de lana de roca y cuatro
 de lana de vidrio solo se diferencian en esos dos números y la tabla impresa
-las separa por su posición dentro de una celda combinada.
+las separa por su posición bajo un nombre que imprime una sola vez.
 
 ```python
 from phonometry import materials
 
-layer = materials.resilient_layer("mineral_wool_rock_60_30")
+layer = materials.resilient_layer("hopkins-2007-table-a3/mineral_wool_rock_60_30")
 print(layer.name, layer.density_kg_m3, layer.thickness_mm)   # Mineral wool, rock 60.0 30.0
 print(layer.source)
 # Hopkins (2007) Table A3, PDF page 637 (printed p. 610)
 print(round(layer.dynamic_stiffness_n_m3 / 1e6, 1))          # 10.0 MN/m3, como se imprime
-print(round(layer.natural_frequency(120.0), 1))              # 45.9 Hz bajo una losa de 120 kg/m2
+print(round(layer.natural_frequency(mass_per_area_kg_m2=120.0), 1))   # 45.9 Hz bajo una losa de 120 kg/m2
 
-rebond = materials.PUBLISHED_RESILIENT_LAYERS["rebond_foam_64_20"]
-print(rebond.attributed_to)                                  # Hopkins and Hall (2006)
-print(round(rebond.natural_frequency(120.0), 1))             # 43.6
+rebond = materials.PUBLISHED_RESILIENT_LAYERS["hopkins-2007-table-a3/rebond_foam_64_20"]
+print(rebond.attributed_to["row"])                           # Hopkins and Hall (2006)
+print(round(rebond.natural_frequency(mass_per_area_kg_m2=120.0), 1))  # 43.6
 ```
 
 Son probetas medidas y no valores declarados de producto: sirven para
@@ -428,6 +438,53 @@ entrada de un cálculo de cumplimiento. La fila más blanda de la tabla, lana de
 vidrio de 40 mm con 7 MN/m³, deja esa misma losa en 38,4 Hz, y la más rígida,
 espuma de polietileno de celda cerrada de 5 mm con 115 MN/m³, en 155,8 Hz; ese
 margen es toda la cuestión de diseño.
+
+**Una capa que solo da $s'_\mathrm{t}$.** Un informe de ensayo según la
+EN 29052-1 da la rigidez aparente $s'_\mathrm{t}$ de su probeta y la rigidez
+del gas encerrado $s'_\mathrm{a}$, y solo da $s'$ «si es posible» (apartado
+9 e)); una ficha que cita $s'_\mathrm{t}$ sola da menos que el informe del que
+sale. En los dos casos $s'_\mathrm{t}$ no es la $s'$ que toma la Fórmula 2: en
+una capa permeable al aire el gas encerrado se le suma, y Hopkins señala que a
+menudo es un porcentaje significativo de $s'$ (p. 360 impresa). Una
+`ResilientLayer` construida a partir de esa fuente la guarda en
+`apparent_dynamic_stiffness_n_m3`, y su `natural_frequency` se niega a seguir
+hasta que recibe la resistividad al flujo lateral, en Pa·s/m² como la da la
+ISO 9053, y, por debajo de 100 kPa·s/m², la rigidez del gas encerrado: la
+$s'_\mathrm{a}$ que da el informe, o la Fórmula 7 con el espesor bajo la carga
+de ensayo, que el apartado 9 b) también pide al informe y que no es el espesor
+nominal que imprime una ficha de producto. Con ellas toma la rama del apartado
+8.2 que elige esa resistividad:
+
+```python
+from phonometry import io, materials
+
+report = materials.ResilientLayer(
+    name="Example layer",
+    source="Example Acoustics Ltd test report 26-014, p. 2",
+    apparent_dynamic_stiffness_n_m3=6.0e6,
+)
+try:
+    report.natural_frequency(mass_per_area_kg_m2=120.0)
+except io.CatalogueError as refusal:
+    print(refusal)
+# 'Example layer' gives the apparent dynamic stiffness s't of a test specimen,
+# 6 MN/m3, and not the dynamic stiffness s' of the installed layer [...]: pass
+# airflow_resistivity_pa_s_m2 and, below 100 kPa.s/m2 (100000 Pa.s/m2),
+# gas_stiffness_n_m3, the enclosed-gas stiffness s'a of Formula 7 [...]
+
+# d = 30 mm bajo la carga de ensayo, del informe (apartado 9 b)); una s'a
+# que da el informe (apartado 9 e)) entra igual, como gas_stiffness_n_m3.
+gas = materials.enclosed_gas_stiffness(thickness_m=0.030, porosity=0.9)   # 3,7 MN/m3
+f0 = report.natural_frequency(
+    mass_per_area_kg_m2=120.0,
+    airflow_resistivity_pa_s_m2=50_000.0,   # 50 kPa.s/m2: Fórmula 6, s' = s't + s'a
+    gas_stiffness_n_m3=gas,
+)
+print(round(f0, 1))                                              # 45.3 Hz
+```
+
+Leídos como si fueran $s'$, esos mismos 6 MN/m³ habrían dejado la losa en
+35,6 Hz, casi 10 Hz por debajo.
 
 ## 3. Qué supone el método de resonancia, y dónde muerde
 
@@ -531,7 +588,9 @@ relaciones de resonancia de las Fórmulas 2-4 (`apparent_dynamic_stiffness`,
 apartado 8.2, Fórmulas 5-6 (`installed_dynamic_stiffness`), encadenados de
 principio a fin por `floating_floor_resonance`.
 `DynamicStiffnessResult.report` genera la ficha de informe de ensayo del
-apartado 9.
+apartado 9. `ResilientLayer.natural_frequency` aplica la Fórmula 2 a una capa
+publicada o construida por el usuario, pasando por el apartado 8.2 cuando la
+capa solo da $s'_\mathrm{t}$.
 </ScopeClaim>
 
 <ScopeClaim status="not-covered" label="No cubierto">
@@ -542,8 +601,9 @@ ya extrapolada, obtenida como describe la sección 1.1 (la extrapolación en sí
 es un ajuste por recta, que la sección 1.1 muestra). La resistividad al flujo
 lateral $r$ del apartado 8.2 también se toma como entrada en lugar de medirse;
 los métodos estático y alterno de la ISO 9053 están implementados aparte, en
-`materials.absorbers.airflow_resistance`, y dan $\sigma$ en Pa·s/m² mientras
-que el argumento `airflow_resistivity` de esta página va en kPa·s/m². El
+`materials.absorbers.airflow_resistance`, y dan $\sigma$ en Pa·s/m², la
+unidad que toma `ResilientLayer.natural_frequency`, mientras que
+`airflow_resistivity_kpa_s_m2` va en kPa·s/m². El
 requisito de selección de probetas del apartado 6 (al menos tres probetas de
 200 mm × 200 mm) no se aplica, y tampoco el contenido de informe de la
 apartado 9: la ficha de abajo lleva la disposición de excitación y el tipo de

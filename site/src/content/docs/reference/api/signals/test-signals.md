@@ -185,7 +185,7 @@ default.
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Input record, 1-D. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples, so the resampled record comes out in Pa. |
+| `x` | Input record, 1-D. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples, so the resampled record comes out in Pa and comes back as a Signal at the new rate. |
 | `fs` | Sample rate of `x`, in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `fs_new` | Target sample rate, in Hz. The ratio `fs_new/fs` must be a rational number with denominator at most `max_denominator` (e.g. 48000/44100 = 160/147). |
 | `stopband_attenuation_db` | Anti-alias stopband attenuation, in dB (at least 30). |
@@ -198,13 +198,13 @@ default.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If the inputs or parameters are invalid, or if the rate ratio is not rational within `max_denominator`. |
+| ValueError | If the inputs or parameters are invalid, if the rate ratio is not rational within `max_denominator`, or if `x` is a Signal and `fs_new` is not a whole number of hertz, which is the only kind of rate a Signal carries. |
 
 ## ResampledSignalResult
 
 ```python
 ResampledSignalResult(
-    signal: NDArray[np.float64],
+    signal: Signal | NDArray[np.float64],
     fs: float,
     original_fs: float,
     up: int,
@@ -228,7 +228,7 @@ can be verified against the filter itself.
 
 | Name | Description |
 | :--- | :--- |
-| `signal` | The resampled record. |
+| `signal` | The resampled record, in the type the input arrived as: a [`Signal`](/phonometry/reference/api/io/io/#signal) at the new rate when it was one (in pascals and carrying `calibration_factor=1.0` when it was calibrated), a bare array otherwise. |
 | `fs` | Sample rate of `signal`, in Hz. |
 | `original_fs` | Sample rate of the input, in Hz. |
 | `up` | Interpolation factor of the rational ratio `up/down`. |

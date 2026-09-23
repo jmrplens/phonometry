@@ -61,7 +61,12 @@ from .._internal.validation import (
     require_ranks,
     require_same_length,
 )
-from ..io._resolve import resolve_fs, resolve_pair_fs
+from ..io._resolve import (
+    like_input,
+    require_signal_rate,
+    resolve_fs,
+    resolve_pair_fs,
+)
 from ..io._signal import Signal
 from .spectra import (
     _coherence_from_spectra,
@@ -942,13 +947,19 @@ class AlignedImpulseResponseResult:
         fractional shift applied as a frequency-domain phase ramp over a
         zero-padded record, so nothing wraps around).
     :ivar reference: The reference IR.
+
+    Each record comes back in the type it arrived as: a
+    :class:`~phonometry.io.Signal` when it was one (in pascals and carrying
+    ``calibration_factor=1.0`` when it was calibrated), a bare array
+    otherwise.
+
     :ivar delay: Estimated delay removed from the IR, in seconds.
     :ivar delay_samples: The same delay in (fractional) samples.
     :ivar fs: Sample rate, in Hz.
     """
 
-    aligned: NDArray[np.float64]
-    reference: NDArray[np.float64]
+    aligned: Signal | NDArray[np.float64]
+    reference: Signal | NDArray[np.float64]
     delay: float
     delay_samples: float
     fs: float
@@ -974,11 +985,14 @@ class AlignedImpulseResponseResult:
         same extra axis is loud, because the time axis is built from its
         total number of elements and so comes out as long as the whole grid.
 
-        :raises ValueError: if the two records differ in length, or either
-            carries a second axis.
+        :raises ValueError: if the two records differ in length, either
+            carries a second axis, or either is a Signal at a rate other than
+            :attr:`fs`.
         """
         require_ranks(self, aligned=1, reference=1)
         require_same_length(self, "aligned", "reference", axis="sample")
+        require_signal_rate(self, "aligned", self.fs)
+        require_signal_rate(self, "reference", self.fs)
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -1012,10 +1026,12 @@ def align_impulse_responses(
 
     :param ir: Impulse response to align, 1-D. Accepts a :class:`phonometry.io.Signal`, whose
         calibration is applied to the samples, so the aligned pair comes out
-        in Pa. The delay between them is scale-free and does not move.
+        in Pa and each record comes back as a Signal if it went in as one.
+        The delay between them is scale-free and does not move.
     :param reference: Reference impulse response, same length. Accepts a :class:`phonometry.io.Signal`, whose
         calibration is applied to the samples, so the aligned pair comes out
-        in Pa. The delay between them is scale-free and does not move.
+        in Pa and each record comes back as a Signal if it went in as one.
+        The delay between them is scale-free and does not move.
     :param fs: Sample rate, in Hz. Required when both records are bare
         arrays; either may be a :class:`~phonometry.io.Signal` and supply it,
         and two Signals recorded at different rates are refused rather than
@@ -1042,8 +1058,8 @@ def align_impulse_responses(
     )
     aligned = _fractional_advance(ira, delay * fs_v)
     return AlignedImpulseResponseResult(
-        aligned=aligned,
-        reference=refa.copy(),
+        aligned=like_input(ir, aligned),
+        reference=like_input(reference, refa.copy()),
         delay=delay,
         delay_samples=delay * fs_v,
         fs=fs_v,

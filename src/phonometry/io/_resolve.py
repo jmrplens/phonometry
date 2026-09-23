@@ -56,6 +56,7 @@ The rules, identical everywhere:
 
 from __future__ import annotations
 
+import math
 from collections.abc import Sequence
 from typing import overload
 
@@ -321,6 +322,35 @@ def like_input(
         provenance=x.provenance,
         source=x.source,
     )
+
+
+def require_signal_rate(
+    owner: object, field: str, rate: float, *, rate_field: str = "fs"
+) -> None:
+    """Refuse a result whose Signal field disagrees with the rate it states.
+
+    A result that hands a waveform back as the Signal it came from also keeps
+    the rate as a field of its own, which is what a bare-array call reads.
+    The two have to be one number: a result built by hand, or changed with
+    :func:`dataclasses.replace`, could otherwise carry a record at one rate
+    beside metrics and a time axis computed at another.
+
+    :param owner: The result being built.
+    :param field: Name of the waveform field.
+    :param rate: The rate the result states, in Hz.
+    :param rate_field: Name of that rate field, for the message.
+    :raises ValueError: If the field is a Signal at another rate.
+    """
+    value = getattr(owner, field)
+    if isinstance(value, Signal) and not math.isclose(
+        float(value.fs), float(rate), rel_tol=1e-12, abs_tol=0.0
+    ):
+        msg = (
+            f"{type(owner).__name__}: '{field}' is a Signal recorded at "
+            f"{value.fs} Hz and '{rate_field}' is {rate} Hz; a record has one "
+            "rate."
+        )
+        raise ValueError(msg)
 
 
 def _agreed_pair(x: SignalInput, y: SignalInput, names: tuple[str, str]) -> SignalInput:

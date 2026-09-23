@@ -249,8 +249,13 @@ def plot_pile_strike(
     :return: The waveform axes (``ax`` given) or the array of two axes.
     """
     from .._i18n import format_number, localize_axes
+    from ..io._resolve import apply_calibration
 
-    pressure = np.asarray(result.pressure, dtype=np.float64)
+    # In pascals whatever the stored type: the same reading the result's own
+    # metrics were checked against, so the marker and its label agree.
+    pressure = apply_calibration(
+        result.pressure, np.asarray(result.pressure, dtype=np.float64)
+    )
     fs = float(result.fs)
     t = np.arange(pressure.size) / fs
     energy = np.cumsum(pressure**2)

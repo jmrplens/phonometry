@@ -352,6 +352,28 @@ llamada:
 ax = result.plot()
 ```
 
+## Las formas de onda dentro de los resultados vuelven como el `Signal` del que salieron
+
+Una transformación a la que se le entrega un `Signal` devuelve un `Signal`
+desde que se escribió el contrato, pero cinco objetos de resultado todavía
+guardaban su forma de onda como un array desnudo junto a un `fs` suelto. Ahora
+conservan el tipo con el que llegó la entrada:
+
+| Campo | Es un `Signal` cuando la entrada lo era |
+| --- | --- |
+| `envelope(...).signal` | a la frecuencia de muestreo de la entrada |
+| `time_synchronous_average(...).period_waveform` | a la frecuencia de muestreo de la entrada |
+| `resample_signal(...).signal` | a `fs_new`, que entonces tiene que ser un número entero de hercios |
+| `align_impulse_responses(...).aligned`, `.reference` | cada uno si su propia entrada lo era |
+| `underwater.pile_strike_metrics(...).pressure` | a la frecuencia de muestreo de la entrada |
+
+Un array desnudo sigue devolviendo un array desnudo, así que el código que
+pasa arrays no lo nota. El código que pasa un `Signal` y hace aritmética con
+uno de estos campos pasa por `np.asarray`, como con cualquier `Signal`, y una
+entrada calibrada vuelve con `calibration_factor=1.0`, así que el campo
+alimenta a la función siguiente en pascales sin que el factor se aplique otra
+vez.
+
 ## Un flujo por bloques entrega bloques `Signal`
 
 `io.read_blocks` es posterior a la 3.3.0, y en la 4.0.0rc1 entregaba arrays

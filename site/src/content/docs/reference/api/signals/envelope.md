@@ -89,7 +89,7 @@ same time axis.
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Signal, 1-D. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples, so the envelope and the carried waveform come out in Pa. The phase and the instantaneous frequency do not move. |
+| `x` | Signal, 1-D. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples, so the envelope and the carried waveform come out in Pa, and the carried waveform comes back as a Signal. The phase and the instantaneous frequency do not move. |
 | `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `decimation_factor` | Integer output decimation (default 1: off). |
 | `antialias` | Anti-alias filter the decimated envelope (default `True`). |
@@ -183,7 +183,7 @@ EnvelopeResult(
     phase: NDArray[np.float64],
     instantaneous_frequency: NDArray[np.float64],
     fs: float,
-    signal: NDArray[np.float64],
+    signal: Signal | NDArray[np.float64],
     signal_fs: float,
     decimation_factor: int,
     *,
@@ -205,7 +205,7 @@ All output arrays share the (possibly decimated) time axis
 | `phase` | Unwrapped instantaneous phase $\theta(t)$, in radians (Eq. 13.18). |
 | `instantaneous_frequency` | $f(t) = (1/2\pi) \, d\theta/dt$, in Hz (Eq. 13.19), differentiated at full rate before any decimation. |
 | `fs` | Sample rate of the outputs, in Hz (`signal_fs` divided by `decimation_factor`). |
-| `signal` | The analysed record, at full rate. |
+| `signal` | The analysed record, at full rate, in the type it arrived as: a [`Signal`](/phonometry/reference/api/io/io/#signal) when the input was one (in pascals and carrying `calibration_factor=1.0` when the input was calibrated), a bare array otherwise. |
 | `signal_fs` | Sample rate of `signal`, in Hz. |
 | `decimation_factor` | Integer decimation applied to the outputs (1: none). |
 | `antialias` | Whether the decimation was anti-alias filtered. |

@@ -59,14 +59,19 @@ import numpy as np
 
 from .._internal.validation import require_ranks, require_same_length
 from .._internal.warnings import PhonometryWarning
-from ..io._resolve import apply_calibration, like_input, resolve_fs
+from ..io._resolve import (
+    apply_calibration,
+    like_input,
+    require_signal_rate,
+    resolve_fs,
+)
+from ..io._signal import Signal
 from .spectra import _positive
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
 
-    from ..io._signal import Signal
 
 __all__ = [
     "ResampledSignalResult",
@@ -481,7 +486,10 @@ class ResampledSignalResult:
     from the two numbers below; the filter taps are returned so the spec
     can be verified against the filter itself.
 
-    :ivar signal: The resampled record.
+    :ivar signal: The resampled record, in the type the input arrived as: a
+        :class:`~phonometry.io.Signal` at the new rate when it was one (in
+        pascals and carrying ``calibration_factor=1.0`` when it was
+        calibrated), a bare array otherwise.
     :ivar fs: Sample rate of :attr:`signal`, in Hz.
     :ivar original_fs: Sample rate of the input, in Hz.
     :ivar up: Interpolation factor of the rational ratio ``up/down``.
@@ -503,7 +511,7 @@ class ResampledSignalResult:
         smaller Nyquist frequency.
     """
 
-    signal: NDArray[np.float64]
+    signal: Signal | NDArray[np.float64]
     fs: float
     original_fs: float
     up: int
@@ -538,9 +546,10 @@ class ResampledSignalResult:
         as the resampled series.
 
         :raises ValueError: if the record or the taps carry more than one
-            axis.
+            axis, or the record is a Signal at a rate other than :attr:`fs`.
         """
         require_ranks(self, signal=1, filter_taps=1)
+        require_signal_rate(self, "signal", self.fs)
 
     @property
     def n_taps(self) -> int:
@@ -591,7 +600,7 @@ def resample_signal(
 
     :param x: Input record, 1-D. Accepts a :class:`phonometry.io.Signal`, whose
         calibration is applied to the samples, so the resampled record comes
-        out in Pa.
+        out in Pa and comes back as a Signal at the new rate.
     :param fs: Sample rate of ``x``, in Hz. Required for a bare array; a
         :class:`~phonometry.io.Signal` brings its own, and an explicit value
         that disagrees with it raises instead of silently winning.
@@ -605,8 +614,10 @@ def resample_signal(
     :param max_denominator: Largest denominator accepted for the rational
         rate ratio.
     :return: A :class:`ResampledSignalResult`.
-    :raises ValueError: If the inputs or parameters are invalid, or if
-        the rate ratio is not rational within ``max_denominator``.
+    :raises ValueError: If the inputs or parameters are invalid, if the
+        rate ratio is not rational within ``max_denominator``, or if ``x`` is
+        a Signal and ``fs_new`` is not a whole number of hertz, which is the
+        only kind of rate a Signal carries.
     """
     from fractions import Fraction
 
@@ -625,6 +636,13 @@ def resample_signal(
     if max_den < 1:
         msg = "'max_denominator' must be a positive integer."
         raise ValueError(msg)
+    if isinstance(x, Signal) and not float(fs_new_v).is_integer():
+        msg = (
+            f"'fs_new' must be a whole number of hertz to resample a Signal, "
+            f"whose rate is one; got {fs_new_v!r}. Pass the samples as an "
+            "array to resample to a fractional rate."
+        )
+        raise ValueError(msg)
 
     ratio = Fraction(fs_new_v / fs_v).limit_denominator(max_den)
     up, down = ratio.numerator, ratio.denominator
@@ -637,7 +655,7 @@ def resample_signal(
 
     if up == down:  # Same rate: nothing to do, and nothing to filter.
         return ResampledSignalResult(
-            signal=xa.copy(),
+            signal=like_input(x, xa.copy(), round(fs_new_v)),
             fs=fs_new_v,
             original_fs=fs_v,
             up=1,
@@ -673,7 +691,7 @@ def resample_signal(
         sp_signal.resample_poly(xa, up, down, window=taps), dtype=np.float64
     )
     return ResampledSignalResult(
-        signal=resampled,
+        signal=like_input(x, resampled, round(fs_new_v)),
         fs=fs_new_v,
         original_fs=fs_v,
         up=up,

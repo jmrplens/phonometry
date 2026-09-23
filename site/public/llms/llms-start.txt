@@ -938,6 +938,26 @@ The result also draws itself, so the band spectrum is one call:
 ax = result.plot()
 ```
 
+## Waveforms inside results come back as the `Signal` they came from
+
+A transform handed a `Signal` has returned a `Signal` since the contract was
+written, but five result objects still stored their waveform as a bare array
+next to a loose `fs`. They now keep the type the input arrived as:
+
+| Field | Is a `Signal` when the input was one |
+| --- | --- |
+| `envelope(...).signal` | at the input's rate |
+| `time_synchronous_average(...).period_waveform` | at the input's rate |
+| `resample_signal(...).signal` | at `fs_new`, which then has to be a whole number of hertz |
+| `align_impulse_responses(...).aligned`, `.reference` | each one if its own input was |
+| `underwater.pile_strike_metrics(...).pressure` | at the input's rate |
+
+A bare array in still gives a bare array out, so code that passes arrays does
+not notice. Code that passes a `Signal` and does arithmetic on one of these
+fields goes through `np.asarray`, as it does for any `Signal`, and a
+calibrated input comes back with `calibration_factor=1.0`, so the field feeds
+the next function in pascals without the factor being applied again.
+
 ## A block stream yields `Signal` blocks
 
 `io.read_blocks` is newer than 3.3.0, and in 4.0.0rc1 it yielded bare float64

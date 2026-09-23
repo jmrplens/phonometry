@@ -130,6 +130,17 @@ llamada.
 | Un espectro de amplitud: `zoom_fft`, `envelope_spectrum` | Pa |
 | Un filtro inverso: `regularized_inverse_filter` | 1/Pa |
 
+Una forma de onda vuelve con el tipo con el que entró. `weighting_filter`,
+`linkwitz_riley`, `parametric_eq` y `fractional_delay` devuelven un `Signal`
+para un `Signal`, y los objetos de resultado llevan el suyo del mismo modo:
+`envelope(...).signal`, `time_synchronous_average(...).period_waveform`,
+`resample_signal(...).signal` a su nueva frecuencia de muestreo, los
+`aligned` y `reference` de `align_impulse_responses`, y la `pressure` de
+`underwater.pile_strike_metrics`. Un `Signal` devuelto lleva
+`calibration_factor=1.0` cuando la entrada estaba calibrada, lo que dice que
+la conversión a pascales ya está hecha, así que pasarlo a otra función no
+aplica el factor dos veces. Un array desnudo entra y sale desnudo.
+
 Las razones y los tiempos no tienen escala y no se mueven en absoluto: toda
 coherencia, todo coeficiente de correlación normalizado, toda fase y todo
 retardo en segundos o en muestras, y por eso `time_delay`,

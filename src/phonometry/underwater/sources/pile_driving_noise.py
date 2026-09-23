@@ -35,7 +35,13 @@ from ..._internal.validation import (
     require_ranks,
     require_same_length,
 )
-from ...io._resolve import SignalInput, resolve_fs
+from ...io._resolve import (
+    SignalInput,
+    apply_calibration,
+    like_input,
+    require_signal_rate,
+    resolve_fs,
+)
 from ..acoustics import (
     UNDERWATER_REFERENCE_PRESSURE,
     _positive,
@@ -48,6 +54,8 @@ from ..acoustics import (
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
+
+    from ...io._signal import Signal
 
 #: Lower/upper cumulative-energy fractions defining the 90 % pulse duration.
 _ENERGY_LOW = 0.05
@@ -158,7 +166,12 @@ def _require_metrics_restate(result: PileStrikeResult) -> None:
     :raises ValueError: if any of the four does not restate ``pressure``, or
         ``pulse_duration`` does not restate it at ``fs``.
     """
-    trace = result.pressure
+    # In pascals whatever the stored type: a Signal presents its samples
+    # through its own calibration, which is 1.0 on the ones this module
+    # builds and may be anything on one built by hand.
+    trace = apply_calibration(
+        result.pressure, np.asarray(result.pressure, dtype=np.float64)
+    )
     # A trace carrying no energy has no exposure and no pressure level, and
     # the two entry points that compute them say so by refusing outright. The
     # peak and the duration do answer for it, at minus infinity and zero. So
@@ -242,7 +255,10 @@ class PileStrikeResult:
     :ivar peak_spl: Zero-to-peak sound pressure level, in dB re 1 µPa.
     :ivar spl: Sound pressure level (Leq over the record), in dB re 1 µPa.
     :ivar pulse_duration: 90 %-energy pulse duration, in s.
-    :ivar pressure: The strike pressure waveform, in Pa.
+    :ivar pressure: The strike pressure waveform, in Pa, in the type it
+        arrived as: a :class:`~phonometry.io.Signal` when the input was one
+        (carrying ``calibration_factor=1.0`` when it was calibrated), a bare
+        array otherwise.
     :ivar fs: Sample rate, in Hz.
     """
 
@@ -250,7 +266,7 @@ class PileStrikeResult:
     peak_spl: float
     spl: float
     pulse_duration: float
-    pressure: NDArray[np.float64]
+    pressure: Signal | NDArray[np.float64]
     fs: float
 
     def __post_init__(self) -> None:
@@ -279,8 +295,8 @@ class PileStrikeResult:
         over the last bit.
 
         :raises ValueError: if ``pressure`` is not a non-empty, finite,
-            one-dimensional trace, or any of the four stored metrics does not
-            restate it.
+            one-dimensional trace, is a Signal at a rate other than ``fs``, or
+            any of the four stored metrics does not restate it.
         """
         trace = np.asarray(self.pressure)
         # The rank helper waives its pin when every field it was given is a
@@ -297,6 +313,7 @@ class PileStrikeResult:
             )
             raise ValueError(msg)
         require_ranks(self, pressure=1)
+        require_signal_rate(self, "pressure", self.fs)
         if trace.size == 0:
             msg = (
                 "PileStrikeResult: 'pressure' must carry at least one sample; "
@@ -555,6 +572,6 @@ def pile_strike_metrics(
         peak_spl=peak_sound_pressure_level(sig),
         spl=sound_pressure_level(sig),
         pulse_duration=_pulse_duration(sig, fs_v),
-        pressure=sig,
+        pressure=like_input(pressure, sig),
         fs=fs_v,
     )

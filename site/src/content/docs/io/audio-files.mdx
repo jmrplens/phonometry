@@ -128,6 +128,17 @@ unit: what the calibration buys depends on what the call hands back.
 | An amplitude spectrum: `zoom_fft`, `envelope_spectrum` | Pa |
 | An inverse filter: `regularized_inverse_filter` | 1/Pa |
 
+A waveform comes back in the type it went in as. `weighting_filter`,
+`linkwitz_riley`, `parametric_eq` and `fractional_delay` return a `Signal` for
+a `Signal`, and the result objects carry theirs the same way:
+`envelope(...).signal`, `time_synchronous_average(...).period_waveform`,
+`resample_signal(...).signal` at its new rate, the `aligned` and `reference`
+of `align_impulse_responses`, and the `pressure` of
+`underwater.pile_strike_metrics`. A returned `Signal` carries
+`calibration_factor=1.0` when the input was calibrated, which says the
+conversion to pascals is already done, so handing it on does not apply the
+factor twice. A bare array in is a bare array out.
+
 Ratios and times are scale-free and do not move at all: every coherence,
 every normalized correlation coefficient, every phase, and every delay in
 seconds or samples, which is why `time_delay`, `impulse_response_delay` and

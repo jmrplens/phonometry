@@ -238,6 +238,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- **Waveforms inside result objects come back as the `Signal` they came
+  from.** The transforms have returned a `Signal` for a `Signal` since the
+  contract was written, and the result objects that carry a record of
+  pressure were left behind with a bare array beside a loose `fs`.
+  `envelope(...).signal`, `time_synchronous_average(...).period_waveform`,
+  `resample_signal(...).signal` (at its new rate), the `aligned` and
+  `reference` of `align_impulse_responses` and the `pressure` of
+  `underwater.pile_strike_metrics` now keep the type their input arrived as:
+  a `Signal` for a `Signal`, carrying `calibration_factor=1.0` when the input
+  was calibrated, and a bare array for a bare array. `resample_signal` refuses
+  a fractional target rate for a `Signal`, whose rate is a whole number of
+  hertz, and each of these results refuses a `Signal` field at a rate other
+  than the one it states. Three waveform fields computed from an input stay
+  arrays on purpose and say why: `SynchronousAverageResult.residual` joins
+  periods shifted onto the grid and is not one uniformly sampled record,
+  `SweptSineDistortionResult.harmonic_irs` holds one row per harmonic order
+  with time zero mid-window, and `ImpulseResponseResult.ir` is a transfer
+  function whose rate may be unknown. Generated signals, synthesised
+  responses, the quasi-peak detector's trace and the FDTD source samples have
+  no input to take a type from and stay arrays too. A test walks every public
+  result that carries a rate and fails on a waveform field that is neither a
+  `Signal` nor listed with its reason.
+
 - **`io.read_blocks` yields `Signal` blocks.** `io.read` returns a `Signal`
   and its streaming twin yielded bare float64 arrays, so a block lost the
   rate, the calibration, the channel labels and the provenance the whole-file

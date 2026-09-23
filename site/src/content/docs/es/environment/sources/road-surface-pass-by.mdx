@@ -1,0 +1,386 @@
+---
+title: "Ruido y pavimento: el método estadístico de paso"
+description: "Cuánto añade un pavimento al ruido del tráfico que circula por él, medido como lo hace la ISO 11819-1: el nivel máximo de cada turismo y cada camión que pasa frente al logaritmo de su velocidad, el nivel sonoro de vehículo a las velocidades de referencia de la tabla 1, el índice estadístico de paso y su diferencia con un pavimento de referencia, con el redondeo que usa su propio ejemplo."
+references:
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 1997
+    title: "Acoustics — Measurement of the influence of road surfaces on traffic noise — Part 1: Statistical Pass-By method"
+    designation: "ISO 11819-1:1997"
+    primary: true
+    note: "La edición implementada: las categorías de vehículo y de velocidad de la vía del apartado 3, los mínimos de 7.3, la regresión de 9.1, el nivel sonoro de vehículo y la tabla 1 de 9.2, la ventana de velocidad de 9.3, el índice de 9.5, los errores aleatorios de la tabla 2, los casos de referencia del apartado 10 y los ejemplos de los anexos D y E. Leída de la BS EN ISO 11819-1:2001, idéntica a ella."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 1994
+    title: "Acoustics — Test surface for road vehicle noise measurement"
+    designation: "ISO 10844:1994"
+    note: "Los límites de textura y de absorción que tiene que cumplir el pavimento de referencia general de 10.1."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 1997
+    title: "Acoustics — Characterization of pavement texture by use of surface profiles — Part 1: Determination of Mean Profile Depth"
+    designation: "ISO 13473-1:1997"
+    note: "La profundidad de la macrotextura que 10.1 acota entre 0,50 mm y 1,00 mm, medida sobre el pavimento de referencia."
+---
+
+import Scope from '../../../../../components/Scope.astro';
+import ScopeClaim from '../../../../../components/ScopeClaim.astro';
+import SeeAlso from '../../../../../components/SeeAlso.astro';
+import ThemeImage from '../../../../../components/ThemeImage.astro';
+
+Un pavimento no hace ruido por sí mismo, y sin embargo el mismo tráfico puede
+sonar hasta 15 dB más fuerte sobre uno que sobre otro (es el margen que da la
+introducción de la ISO 11819-1). La textura y la porosidad cambian las dos
+cuánto ruido hacen los neumáticos, y la porosidad cambia además cómo se propaga
+cerca del suelo. La ISO 11819-1 es el método que lo mide y que ordena los pavimentos
+por ello. Lo hace sin elegir ningún vehículo: mide el tráfico que pasa por la
+vía, de vehículo aislado en vehículo aislado, y deja que la estadística quite
+de en medio a los vehículos.
+
+<ThemeImage
+  src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/statistical_pass_by.svg"
+  alt="Nivel máximo ponderado A frente a la velocidad del vehículo en un eje logarítmico de unos 55 a 125 km/h en un emplazamiento de velocidad media: una nube de 120 turismos, 40 pesados de dos ejes y 50 pesados de más de dos ejes, cada nube con su recta de mínimos cuadrados y un rombo sobre cada recta a la velocidad de referencia, 80 km/h para los turismos y 70 km/h para las dos categorías de pesados; la leyenda da los niveles sonoros de vehículo de 78,9, 81,0 y 83,7 dB y el título el índice estadístico de paso de 80,2 dB"
+  width="92%"
+  loading="eager"
+/>
+
+*Un emplazamiento, tres categorías de vehículo, tres rectas en el logaritmo de
+la velocidad, y los tres puntos sobre ellas con los que se forma el índice.*
+
+## 1. Qué se mide, y sobre qué vehículos
+
+Cada vehículo medido se asigna a una de tres categorías (3.4): **turismos
+(1)**, **pesados de dos ejes (2a)**, camiones, autobuses y autocares con dos
+ejes y más de cuatro ruedas, y **pesados de más de dos ejes (2b)**. Las
+furgonetas, los turismos con remolque y las motocicletas no se usan, porque no
+aportan nada sobre el pavimento (apartado 4), y un vehículo que no se pueda
+clasificar sin duda se descarta (7.1).
+
+La vía se asigna a una de tres categorías de velocidad (3.3), según la
+velocidad media de su tráfico: **baja**, de 45 km/h a 64 km/h, normalmente
+urbana; **media**, de 65 km/h a 99 km/h, vías periurbanas y carreteras
+interurbanas; **alta**, turismos a 100 km/h o más, normalmente autopistas. Cada
+categoría de velocidad fija una velocidad de referencia por categoría de
+vehículo, la velocidad a la que se lleva cada nivel, y el peso que cada
+categoría recibe en el índice (tabla 1).
+
+| Categoría de vehículo | Baja: velocidad | Baja: $W_x$ | Media: velocidad | Media: $W_x$ | Alta: velocidad | Alta: $W_x$ |
+| :--- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Turismos (1) | 50 km/h | 0,900 | 80 km/h | 0,800 | 110 km/h | 0,700 |
+| Pesados de dos ejes (2a) | 50 km/h | 0,075 | 70 km/h | 0,100 | 85 km/h | 0,075 |
+| Pesados de más de dos ejes (2b) | 50 km/h | 0,025 | 70 km/h | 0,100 | 85 km/h | 0,225 |
+
+La tabla es `environment.SPB_REFERENCE_SPEEDS_KMH` y
+`environment.SPB_WEIGHTING_FACTORS`, indexadas por la categoría de velocidad de
+la vía y luego por la categoría de vehículo.
+
+### Cómo se hace la medida
+
+| Requisito | Valor | Apartado |
+| :--- | :--- | :--- |
+| Micrófono | A 7,5 m ± 0,1 m del centro del carril de ensayo y a 1,2 m ± 0,1 m sobre él, con el eje horizontal y hacia los vehículos | 8.1 |
+| Nivel | Nivel máximo de presión sonora ponderado A, ponderación temporal F, de cada paso; sonómetro de tipo 1, pantalla antiviento, calibración comprobada antes y después, y una deriva de más de 0,5 dB invalida la serie | 5.1, 5.3, 8.2 |
+| Velocidad | En el instante en que el centro del vehículo pasa frente al micrófono, con incertidumbre típica inferior al 3 %; las lecturas de radar se corrigen por el ángulo; nada de dispositivos sobre el pavimento | 5.4, 8.4 |
+| Qué pasos | El nivel, al menos 6 dB más bajo justo antes y justo después del vehículo; ningún adelantamiento ni tráfico en sentido contrario en el pico; velocidad constante; posición lateral normal; sin ruidos de carrocería, escapes averiados ni sirenas | 7.2 |
+| Cuántos | Al menos 100 turismos, 30 de dos ejes, 30 de más de dos ejes y 80 pesados en total, para clasificar el pavimento | 7.3 |
+| El emplazamiento | Llano y recto 30 m a cada lado del micrófono (50 m en una vía de velocidad alta); reflexiones al menos 10 dB por debajo del sonido directo, unos 25 m libres de objetos reflectantes; al menos la mitad del terreno hasta el micrófono acústicamente como la vía | 6.1, 6.3, 6.5 |
+| Meteorología | Viento en el micrófono de 5 m/s como mucho; aire de 5 °C a 30 °C; pavimento de 5 °C a 50 °C; la superficie seca, poros incluidos | 11 |
+| Ruido de fondo | Al menos 10 dB por debajo del paso más silencioso que se conserve | 12 |
+
+## 2. El nivel sonoro de vehículo
+
+En cada categoría de vehículo los pasos se ajustan por mínimos cuadrados con
+una recta en el logaritmo de la velocidad (9.1),
+
+$$
+L_{\mathrm{AFmax}} = a + b \lg \frac{v}{1\ \mathrm{km/h}},
+$$
+
+y la recta se lee a la velocidad de referencia de la tabla 1. Esa ordenada es
+el **nivel sonoro de vehículo** $L_\mathrm{veh}$ de la categoría (9.2): lo que
+emite un vehículo típico de ella a esa velocidad sobre este pavimento. El
+logaritmo de la velocidad es el eje en el que ajusta el apartado, y por eso la
+figura dibuja la velocidad en escala logarítmica, donde cada nube es una franja
+y su ajuste, una recta.
+
+```python
+import numpy as np
+from phonometry import environment
+
+rng = np.random.default_rng(11819)
+# Un emplazamiento de velocidad media: por categoría, el número de pasos, la
+# velocidad media (km/h), la dispersión de lg v, y la recta y la dispersión (dB)
+# alrededor de las que se generan.
+site = {
+    "1": (120, 88.0, 0.055, 16.6, 32.6, 1.4),
+    "2a": (40, 76.0, 0.050, 46.5, 18.8, 2.0),
+    "2b": (50, 74.0, 0.045, 34.5, 26.7, 2.0),
+}
+categories, speeds, levels = [], [], []
+for category, (n, mean_kmh, spread, a, b, scatter) in site.items():
+    lg_v = np.log10(mean_kmh) + spread * rng.standard_normal(n)
+    categories += [category] * n
+    speeds += (10.0**lg_v).tolist()
+    levels += (a + b * lg_v + scatter * rng.standard_normal(n)).tolist()
+
+result = environment.statistical_pass_by(
+    categories, speeds, levels, road_speed_category="medium"
+)
+print(dict(result.reported_vehicle_sound_levels_db))
+# {'1': 78.9, '2a': 81.0, '2b': 83.7}   dB, a 80, 70 y 70 km/h
+cars = result.regressions["1"]
+print(round(cars.slope_db_per_decade, 2), round(cars.correlation, 2))
+# 28.22 0.75
+print(round(cars.residual_standard_deviation_db, 2), round(cars.mean_speed_kmh, 1))
+# 1.4 86.9
+```
+
+Cada regresión lleva lo que el apartado 13 pide informar sobre ella (punto 29):
+la pendiente y la ordenada en el origen, la desviación típica de las
+velocidades y la de los residuos alrededor de la recta, y la velocidad media.
+La velocidad media es $10^{\overline{\lg v}}$, la media de la variable en la que
+se ajusta la recta devuelta a km/h, que es también lo que imprime el anexo E
+bajo "Value converted from the logarithm of speed". La desviación típica de las
+velocidades se da en esa misma variable, `lg_speed_standard_deviation`, porque
+es en la que se ajusta la recta y en la que se juzga 9.3.
+
+<ThemeImage
+  src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/pass_by_regression.svg"
+  alt="Los 120 turismos del emplazamiento solos, nivel máximo frente a velocidad en un eje logarítmico, con su recta de regresión, una franja sombreada de unos 72 a 105 km/h que marca la ventana del apartado 9.3 y un rombo naranja sobre la recta a la velocidad de referencia de 80 km/h que da un nivel sonoro de vehículo de 78,9 dB"
+  width="88%"
+/>
+
+*La recta solo se lee a una velocidad que el tráfico medido cubra de verdad: la
+ventana sombreada es donde 9.3 permite que esté la velocidad de referencia.*
+
+<details>
+<summary>Mostrar el código de estas figuras</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+result.plot(language="es")                    # las tres categorías y el índice
+result.regressions["1"].plot(language="es")   # una categoría, su ventana y L_veh
+plt.show()
+```
+
+</details>
+
+**Dos condiciones, juzgadas y no impuestas.** Una regresión solo es una forma
+justa de llevar niveles a una velocidad de referencia si el tráfico pasó cerca
+de ella. Por eso 9.3 pide que la velocidad de referencia esté a menos de una
+desviación típica de la velocidad media medida para los pesados, y de una y
+media para los turismos. La biblioteca lo juzga en la variable del ajuste,
+$\overline{\lg v} \pm k\,s_{\lg v}$, da la ventana en km/h como
+`speed_window_kmh` y el veredicto como `reference_speed_in_window`. El apartado
+7.3 pide 100 turismos, 30 vehículos de cada categoría de pesados y 80 pesados
+en total cuando el fin es clasificar el pavimento. Las dos cosas quedan en el
+resultado y, cuando alguna falla, se emiten como `StatisticalPassByWarning` en
+lugar de lanzarse como error: un estudio de antes y después de un mismo
+emplazamiento (6.6) sigue siendo una medida por pasos, aunque no una
+clasificación.
+
+## 3. El índice
+
+Los tres niveles sonoros de vehículo se suman en energía en un solo número, el
+**índice estadístico de paso** (SPBI, 9.5):
+
+$$
+\mathrm{SPBI} = 10 \lg \left[ W_1 \, 10^{L_1/10}
+  + W_{2a} \frac{v_1}{v_{2a}} 10^{L_{2a}/10}
+  + W_{2b} \frac{v_1}{v_{2b}} 10^{L_{2b}/10} \right] \ \mathrm{dB}.
+$$
+
+Los pesos son las proporciones supuestas de las tres categorías, y los
+cocientes de velocidades están ahí porque el índice representa la energía de un
+flujo: un camión a 70 km/h se oye más tiempo que un turismo a 80 km/h, en la
+proporción de las dos velocidades. Por eso el índice queda cerca de la media de
+los tres niveles, pero no es el nivel equivalente de ningún tráfico real (nota
+de 9.5); compara pavimentos bajo una composición normalizada y no predice lo
+que medirá una calle.
+
+```python
+print(round(result.index_db, 3), result.reported_index_db)
+# 80.153 80.2   dB
+```
+
+La tabla 1 es la composición normalizada. El apartado 9.5 reconoce que las
+composiciones nacionales difieren y admite otros factores, siempre que se
+declaren; `weighting_factors` los recibe y rechaza factores que no sean
+proporciones (negativos, o que no sumen 1). Como todos los $L_\mathrm{veh}$ se
+han de informar, cualquiera puede recalcular el índice con su propia
+composición a partir de un informe, con `statistical_pass_by_index`.
+
+## 4. Frente a un pavimento de referencia
+
+El índice se usa casi siempre como diferencia con un **pavimento de referencia**
+(9.5, apartado 10), y el apartado 10 ofrece cuatro: un hormigón asfáltico denso
+real de árido máximo de 11 mm a 16 mm, con al menos un año de tráfico y la
+textura y la absorción acotadas por la ISO 10844 y la ISO 13473-1 (10.1, el
+caso general); un **caso de referencia normalizado** (10.2), un pavimento
+ficticio cuyos niveles se fijan por convenio, normalmente la media de muchos de
+esos pavimentos; el mismo pavimento general con la misma edad que el ensayado
+(10.3); y cualquier pavimento que elija quien ensaya (10.4), que solo compara
+los pavimentos medidos juntos.
+
+El anexo D muestra cómo se construye un caso normalizado, a partir de siete
+pavimentos suecos para el rango de velocidad media, e imprime su media.
+`normalized_reference_levels` promedia de la misma forma cualquier conjunto de
+pavimentos, y las filas del anexo D y su media se publican como
+`SPB_ANNEX_D_SURFACES_DB` y `SPB_NORMALIZED_REFERENCE_DB`. La referencia se
+pasa a `statistical_pass_by` como índice o como sus tres niveles:
+
+```python
+result = environment.statistical_pass_by(
+    categories,
+    speeds,
+    levels,
+    road_speed_category="medium",
+    reference_db=environment.SPB_NORMALIZED_REFERENCE_DB,
+)
+print(round(result.reference_index_db, 2), round(result.difference_db, 2))
+# 78.92 1.23   dB: este pavimento está 1,2 dB por encima de la referencia del anexo D
+```
+
+Los pavimentos del anexo D son un ejemplo de cómo construir una referencia, no
+una referencia que fije la norma: el anexo pide conservar la relación de los
+pavimentos que forman cada versión de una referencia, para que una diferencia
+dada frente a ella se pueda rastrear.
+
+## 5. La temperatura
+
+El ruido de rodadura depende de la temperatura, y 9.4 pide corregir los niveles
+sonoros de vehículo a una temperatura del aire de 20 °C, pero dice en el mismo
+apartado que "a suitable method is at present under consideration" y solo hace
+obligatorios los niveles sin corregir. Aquí no se inventa ninguna corrección.
+Los niveles corregidos con el método que se elija entran como
+`corrected_vehicle_sound_levels_db`, y el índice se calcula también para ellos
+(`corrected_index_db`), que es lo que el apartado 13 pide informar junto al no
+corregido. Donde la temperatura del aire se tomó en cada paso, 9.4 prefiere
+corregir cada nivel medido; se corrige `max_levels_db` y se vuelve a llamar al
+método.
+
+## 6. Qué precisión tiene
+
+La tabla 2 da el error aleatorio que encontró la investigación prenormativa:
+los vehículos individuales se dispersan alrededor de $L_\mathrm{veh}$ con
+1,5 dB para los turismos y 2,0 dB para los pesados, lo que deja un intervalo de
+confianza del 95 % de 0,3 dB y 0,7 dB sobre el nivel sonoro de vehículo para
+100 turismos y 40 pesados de cada tipo (`SPB_VEHICLE_STANDARD_DEVIATIONS_DB`,
+`SPB_CONFIDENCE_INTERVALS_DB`). Describen las categorías de velocidad media y
+alta; la baja es sensible a las aceleraciones y hay que tratarla con cautela
+(9.6).
+
+Una medida lleva además su propio intervalo. `confidence_interval_db` es el
+intervalo del 95 % de la recta ajustada a la velocidad de referencia, con la
+distribución de Student de $n - 2$ grados de libertad, que se ensancha cuanto
+más se aleja la velocidad de referencia de la velocidad media. La norma dice
+que el error aleatorio del índice es "a combination of these errors according
+to the chosen weighting factors" y no da fórmula;
+`index_confidence_interval_db` combina los tres intervalos a través de la
+sensibilidad del índice a cada nivel, $\partial\,\mathrm{SPBI}/\partial L_x$,
+y toma las tres categorías como independientes.
+
+```python
+print([round(r.confidence_interval_db, 2) for r in result.regressions.values()])
+# [0.3, 0.71, 0.69]   dB, los turismos y las dos categorías de pesados
+print(round(result.index_confidence_interval_db, 2))
+# 0.27   dB
+```
+
+Además del error aleatorio, 9.6 enumera los sistemáticos: unos ±1 dB por el
+sistema de instrumentos de precisión, y de 0,3 dB a 0,8 dB por la variación del
+parque de vehículos dentro de un país. El anexo C añade que no cabe esperar que
+los resultados sigan siendo válidos más de unos cinco años, porque los
+vehículos y los neumáticos cambian.
+
+## 7. El ejemplo del anexo E, y el redondeo que usa
+
+El anexo E es un informe de ensayo completo de un tratamiento superficial
+monocapa sueco en una vía de velocidad media. Imprime la recta de cada
+categoría, los niveles sonoros de vehículo 78,5, 81,1 y 83,8 dB, el índice
+79,9 dB, el índice de los niveles corregidos por temperatura (78,8, 81,1 y
+83,8 dB) 80,1 dB, y una diferencia de 2,8 dB con un índice de referencia de
+77,3 dB. La batería de conformidad lo reproduce todo, pero qué 79,9 sale
+depende de un redondeo que el apartado deja abierto.
+
+El apartado 9.2 termina: "All levels shall be calculated to two decimal places
+and rounded to one decimal place." Las rectas impresas dan los niveles sonoros
+de vehículo como 78,546, 81,114 y 83,838 dB. Llevados al índice sin redondear,
+como hace esta biblioteca, dan 79,985 dB, que se informa como **80,0**; el
+índice de los tres niveles tal como se imprimen, a un decimal, es 79,946 dB,
+que es el **79,9** que imprime el anexo E. Así que el ejemplo alimenta el
+índice con los niveles a un decimal de su propio informe, y redondea el índice
+una sola vez: 79,946 dB llevado primero a dos decimales, 79,95, y luego a uno
+también daría 80,0.
+
+```python
+import math
+
+printed = {"1": 78.5, "2a": 81.1, "2b": 83.8}
+print(round(environment.statistical_pass_by_index(printed, road_speed_category="medium"), 3))
+# 79.946   la cadena del ejemplo: el anexo E imprime 79,9
+lines = {"1": (16.6, 32.55, 80.0), "2a": (46.5, 18.76, 70.0), "2b": (34.5, 26.74, 70.0)}
+unrounded = {k: a + b * math.log10(v) for k, (a, b, v) in lines.items()}
+print(round(environment.statistical_pass_by_index(unrounded, road_speed_category="medium"), 3))
+# 79.985   los niveles sin redondear: 80,0 una vez informado
+```
+
+La biblioteca lleva cada nivel a precisión completa y solo redondea lo que se
+informa (las propiedades `reported_`, a un decimal, con el medio hacia arriba),
+porque un nivel redondeado antes de usarlo es un nivel calculado a un decimal,
+no a dos. Las dos cadenas son usos legítimos del método, y 9.5 describe la
+segunda él mismo: los niveles informados son lo que permite a cualquiera
+recalcular el índice. La diferencia es de 0,04 dB, por debajo de cualquier
+precisión que el método reclame, pero basta para mover la última cifra
+impresa; la fila de conformidad que fija los 79,9 dB ejecuta la cadena del
+propio ejemplo.
+
+Hay dos cosas más del anexo E que conviene saber antes de usarlo como
+comprobación. Su índice de referencia de 77,3 dB se describe como un caso de
+referencia normalizado de siete pavimentos, tres de mezcla bituminosa tipo SMA
+y cuatro de hormigón asfáltico, que es exactamente la composición del anexo D;
+pero los niveles del anexo D dan un índice de 78,92 dB con los mismos pesos, no
+77,3. La norma no dice que sean la misma base de datos, así que la biblioteca
+trata los 77,3 dB como el dato de entrada que se imprime. Y sus dispersiones de
+velocidad (13,3, 7,5 y 6,4 km/h) no encajan con las pendientes, las
+correlaciones y las dispersiones de nivel impresas a su lado; el
+[registro de erratas](/phonometry/es/reference/errata/) tiene la aritmética.
+Los niveles sonoros de vehículo no dependen de ninguna de las dos cosas.
+
+## Qué cubre esta guía
+
+<Scope>
+<ScopeClaim status="covered" label="Cubierto">
+El cálculo de la ISO 11819-1:1997 a partir de una lista de pasos medidos:
+`pass_by_regression` (9.1, 9.2 y la ventana de 9.3), `statistical_pass_by`
+(las tres categorías, los mínimos de 7.3, el índice de 9.5, los niveles
+corregidos por temperatura como entrada, y la diferencia con un pavimento de
+referencia dado como índice o como niveles), `statistical_pass_by_index` para
+niveles ya informados, y `normalized_reference_levels` para una referencia
+construida como en 10.2 y el anexo D. Las tablas 1 y 2, los mínimos de 7.3 y
+los factores de 9.3 se publican como tablas de solo lectura, y los dos
+resultados se dibujan con `.plot()`.
+</ScopeClaim>
+
+<ScopeClaim status="not-covered" label="No cubierto">
+La medida en sí: reconocer la categoría de un vehículo, filtrar los pasos por
+los valles de 6 dB de 7.2, y los requisitos de emplazamiento y meteorología de
+los apartados 6, 11 y 12, que se documentan arriba como condiciones y son cosa
+de quien ensaya. Una corrección por temperatura, que la norma no da. El método
+de proximidad de la ISO 11819-2, que trabaja con neumáticos de referencia en
+lugar de con el tráfico (anexo C, nota 3). No se han consultado ediciones
+posteriores de la ISO 11819-1; esta página implementa el texto de 1997.
+</ScopeClaim>
+</Scope>
+
+<SeeAlso>
+
+## Véase también
+
+- [Emisión de la fuente de tráfico viario CNOSSOS-EU](/phonometry/es/environment/sources/cnossos-road-emission/): el lado de la predicción del mismo ruido, donde un pavimento entra como una corrección por categoría de vehículo.
+- [Absorción in situ de pavimentos de carretera](/phonometry/es/materials/surfaces/road-absorption/): la absorción del propio pavimento según la ISO 13472, la otra mitad de lo que un pavimento poroso hace con el ruido.
+- [Niveles ambientales](/phonometry/es/environment/assessment/environmental-levels/): en qué se convierte en una vivienda el tráfico que circula sobre el pavimento.
+- Referencia de la API: [`environment.sources.statistical_pass_by`](/phonometry/es/reference/api/environment/statistical-pass-by/).
+
+</SeeAlso>

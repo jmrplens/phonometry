@@ -15,6 +15,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from phonometry._plot.common import format_frequency_axis, theme_fill
+from phonometry.environment import StatisticalPassByResult
 
 from .i18n import _LANG, _fmt_minus
 from .theme import (
@@ -491,6 +492,60 @@ def generate_cnossos_road_speed_law(output_dir: str) -> None:
     ax.legend(loc="lower right", fontsize=9, ncol=2)
     plt.tight_layout()
     save_figure(output_dir, "cnossos_road_speed_law.png")
+    plt.close()
+
+
+def _statistical_pass_by_site() -> StatisticalPassByResult:
+    """The medium-speed site the road-surface guide measures, seeded.
+
+    The same pass-bys the guide's code block draws: per category a count, a
+    mean speed, a spread of ``lg v`` and the line and scatter they are drawn
+    around, so the figure and the printed numbers are one measurement.
+    """
+    from phonometry import environment
+
+    rng = np.random.default_rng(11819)
+    site = {
+        "1": (120, 88.0, 0.055, 16.6, 32.6, 1.4),
+        "2a": (40, 76.0, 0.050, 46.5, 18.8, 2.0),
+        "2b": (50, 74.0, 0.045, 34.5, 26.7, 2.0),
+    }
+    categories: list[str] = []
+    speeds: list[float] = []
+    levels: list[float] = []
+    for category, (n, mean_kmh, spread, a, b, scatter) in site.items():
+        lg_v = np.log10(mean_kmh) + spread * rng.standard_normal(n)
+        categories += [category] * n
+        speeds += (10.0**lg_v).tolist()
+        levels += (a + b * lg_v + scatter * rng.standard_normal(n)).tolist()
+    return environment.statistical_pass_by(
+        categories,
+        speeds,
+        levels,
+        road_speed_category="medium",
+        reference_db=environment.SPB_NORMALIZED_REFERENCE_DB,
+    )
+
+
+def generate_statistical_pass_by(output_dir: str) -> None:
+    """ISO 11819-1: the three clouds of a site, their lines and the index."""
+    print("Generating statistical_pass_by...")
+    result = _statistical_pass_by_site()
+    _fig, ax = plt.subplots(figsize=(10, 6.2))
+    result.plot(ax=ax, language=_LANG)
+    plt.tight_layout()
+    save_figure(output_dir, "statistical_pass_by.svg")
+    plt.close()
+
+
+def generate_pass_by_regression(output_dir: str) -> None:
+    """ISO 11819-1: one category's line, the 9.3 window and L_veh."""
+    print("Generating pass_by_regression...")
+    result = _statistical_pass_by_site()
+    _fig, ax = plt.subplots(figsize=(10, 6.2))
+    result.regressions["1"].plot(ax=ax, language=_LANG)
+    plt.tight_layout()
+    save_figure(output_dir, "pass_by_regression.svg")
     plt.close()
 
 

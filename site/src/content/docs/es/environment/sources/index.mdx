@@ -1,6 +1,6 @@
 ---
 title: "Fuentes ambientales"
-description: "Los descriptores de fuente de los que parte una predicción ambiental: la emisión de carretera y ferrocarril de CNOSSOS-EU según el Anexo II de la Directiva 2002/49/CE, y la potencia acústica aparente y la audibilidad tonal de un aerogenerador según IEC 61400-11."
+description: "Los descriptores de fuente de los que parte una predicción ambiental: la emisión de carretera y ferrocarril de CNOSSOS-EU según el Anexo II de la Directiva 2002/49/CE, el método estadístico de paso de la ISO 11819-1 que mide lo que añade un pavimento, y la potencia acústica aparente y la audibilidad tonal de un aerogenerador según IEC 61400-11."
 ---
 
 import Scope from '../../../../../components/Scope.astro';
@@ -45,6 +45,15 @@ juntas y desvíos, el chirrido en curva, la tracción, el ruido aerodinámico po
 encima de 200 km/h y un término de puente se asignan cada uno a la altura desde
 la que radian.
 
+[Ruido y pavimento: el método estadístico de
+paso](/phonometry/es/environment/sources/road-surface-pass-by/)
+es la única página de aquí que mide lo que aporta un **pavimento** en lugar de
+lo que emite una fuente. La ISO 11819-1 registra el nivel máximo y la velocidad
+de turismos y pesados aislados, ajusta cada categoría con una recta en el
+logaritmo de la velocidad, la lee a las velocidades de referencia de su tabla 1
+y suma los tres niveles sonoros de vehículo en el índice estadístico de paso,
+que se da casi siempre como diferencia con un pavimento de referencia.
+
 [Ruido de aerogeneradores: potencia y audibilidad
 tonal](/phonometry/es/environment/sources/wind-turbine-noise/)
 es la IEC 61400-11, donde el descriptor se **mide** en vez de tabularse. Con el
@@ -67,6 +76,10 @@ ferrocarril reutiliza. La de aerogeneradores es independiente de ambas.
   las potencias acústicas de rodadura y propulsión por categoría de vehículo,
   sus correcciones por pavimento, temperatura, neumáticos con clavos, pendiente
   y cruces, y la potencia direccional por metro de línea fuente.
+- [Ruido y pavimento: el método estadístico de paso](/phonometry/es/environment/sources/road-surface-pass-by/):
+  la regresión de la ISO 11819-1 de cada categoría de vehículo frente a la
+  velocidad, los niveles sonoros de vehículo a las velocidades de referencia de
+  la tabla 1, el índice y su diferencia con un pavimento de referencia.
 - [Emisión de la fuente ferroviaria CNOSSOS-EU](/phonometry/es/environment/sources/cnossos-rail-emission/):
   de la rugosidad y las funciones de transferencia a las dos líneas fuente
   equivalentes a 0,5 m y 4,0 m, con los términos de impacto, chirrido,

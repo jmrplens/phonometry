@@ -237,6 +237,7 @@ limits a noise map is drawn against.
 
 - [Wind-turbine noise: apparent sound power & tonal audibility](environment/sources/wind-turbine-noise.md): the IEC 61400-11 apparent sound power level referred to the rotor centre and the tonal-audibility chain (Zwicker critical band, masking-noise level and audibility criterion)
 - [CNOSSOS-EU railway source emission](environment/sources/cnossos-rail-emission.md): the common EU method for railway noise emission (Directive 2002/49/EC Annex II, section 2.3 and Appendix G): rail and wheel roughness with the contact filter and the transfer functions, impact noise, curve squeal, traction, aerodynamic noise, bridges, the source directivity and the two equivalent source lines at 0,5 m and 4,0 m
+- [Road-surface noise: the statistical pass-by method](environment/sources/road-surface-pass-by.md): the ISO 11819-1 regression of the maximum level of each passing car and heavy vehicle on the logarithm of its speed, the vehicle sound levels at the reference speeds of Table 1, the Statistical Pass-By Index and its difference from a reference surface
 - [CNOSSOS-EU road traffic source emission](environment/sources/cnossos-road-emission.md): the common EU road source of Annex II to Directive 2002/49/EC (section 2.2 and Appendix F): rolling and propulsion sound power per vehicle category with the corrections for road surface, air temperature, studded tyres, gradient and junctions, and the directional sound power per metre of source line
 
 **[Assessment and regulation](environment/assessment/index.md)**

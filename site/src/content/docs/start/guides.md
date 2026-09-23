@@ -1,6 +1,6 @@
 ---
 title: "Guides"
-description: "The 138 guides of phonometry, grouped into the thirteen topics the library covers: what each area is for, the standards implemented in it, and a one-line summary of every guide inside it."
+description: "The 139 guides of phonometry, grouped into the thirteen topics the library covers: what each area is for, the standards implemented in it, and a one-line summary of every guide inside it."
 head:
   - tag: script
     attrs:
@@ -117,7 +117,7 @@ makes, then runnable code and the figure it draws. Nothing here is a survey of
 the field; each page is the working documentation of a module, written so that
 a result can be defended clause by clause rather than trusted.
 
-This page is the map. A hundred and thirty-eight guides sit in thirteen topics, and each topic has its
+This page is the map. A hundred and thirty-nine guides sit in thirteen topics, and each topic has its
 own overview page with the longer story of how its pieces fit together. If you
 are arriving without a specific question, read
 [Getting Started](/phonometry/start/getting-started/) first: it runs one signal
@@ -651,6 +651,10 @@ regulatory mapping.
 - [CNOSSOS-EU road traffic source emission](/phonometry/environment/sources/cnossos-road-emission/):
   the common EU road source of Annex II 2.2: rolling and propulsion sound power
   per vehicle category and the directional power per metre of source line.
+- [Road-surface noise: the statistical pass-by method](/phonometry/environment/sources/road-surface-pass-by/):
+  what a road surface adds to the traffic on it, from the maximum level of each
+  passing vehicle against its speed to the Statistical Pass-By Index of
+  ISO 11819-1 and its difference from a reference surface.
 - [CNOSSOS-EU railway source emission](/phonometry/environment/sources/cnossos-rail-emission/):
   the rail source of Annex II 2.3: roughness and the contact filter, impact
   noise, curve squeal, traction and aerodynamic noise, and the two equivalent

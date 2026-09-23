@@ -400,6 +400,7 @@ export const topics = [
         items: [
           { slug: 'environment/sources', label: 'Overview', translations: { es: 'Resumen' } },
           'environment/sources/cnossos-road-emission',
+          'environment/sources/road-surface-pass-by',
           'environment/sources/cnossos-rail-emission',
           'environment/sources/wind-turbine-noise',
         ],

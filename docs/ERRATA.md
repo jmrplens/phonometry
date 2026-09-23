@@ -2040,6 +2040,74 @@ in the same order.
   which is also the NT ACOU 112:2002 form the PAS carries over.
 - **Status:** unreported.
 
+## ISO 13474:2009, Annex A.2 (the shift of Equation (22) printed as 1,04 dB)
+
+- **Location:** Annex A (informative), A.2, the paragraph below Figure A.1 that
+  spreads the class density for turbulence.
+- **The print:** the paragraph opens with "a normal distribution having a
+  standard deviation equal to 5 dB" and continues "In this example, the mean
+  value was shifted by an amount, Δµ, equal to 1,04 dB [from Equation (22)]";
+  Figure A.3 repeats $\sigma = 5{,}0$ dB.
+- **The problem:** Equation (22) is the mean of a lognormal variable and
+  evaluates to $\Delta\mu = \sigma^2 \ln 10 / 20$, which is $2{,}878$ dB at
+  $\sigma = 5$ dB. $1{,}04$ dB is its value at $\sigma = 3$ dB ($1{,}036$ dB),
+  a standard deviation the annex does not use. The rest of the annex was
+  computed with $2{,}878$ dB. The shift keeps the energetic mean of every
+  subclass at its centre, which is why the printed LT2 of 37,0 dB agrees with
+  the printed LT1 of 37,0 dB; with $\Delta\mu = 1{,}04$ dB and $\sigma = 5$ dB
+  every level of the spread distribution moves up by $1{,}84$ dB, LT2 reads
+  38,8 dB, the peak of Figure A.2 moves from about 30,5 dB to 32,3 dB, and
+  $L_{50}$ reads 33,3 dB against the printed 31,5 dB.
+- **Evidence:** the paragraph read on PDF page 42 (printed p. 34), Equation
+  (22) on PDF page 21 (printed p. 13), Figures A.2 and A.3 on PDF pages 43
+  and 44 (printed pp. 35 and 36), all of BS ISO 13474:2009, which reproduces
+  ISO 13474:2009 (first edition, 2009-06-15). Every value was recomputed from
+  Table A.3 on PDF page 40 (printed p. 32) of the same edition.
+- **Library behaviour:** the shift is Equation (22) in closed form,
+  [`turbulence_level_shift`](../src/phonometry/environment/assessment/exposure_distribution.py),
+  $2{,}878$ dB at 5 dB, and it is not a parameter a caller can set. The
+  conformance check "ISO 13474:2009 Equation (22)" holds it against the
+  printed integral evaluated by quadrature, and "ISO 13474:2009 Equation
+  (A.4), Figure A.3" holds LT2 at the printed 37,0 dB.
+- **Status:** unreported.
+
+## ISO 13474:2009, Annex A.2, Figure A.3 (exceedance levels that are not the roots of Equation (25))
+
+- **Location:** Annex A (informative), Figure A.3, the exceedance levels
+  printed beside the cumulative curve.
+- **The print:** $L_{95} = 21{,}7$ dB, $L_{50} = 31{,}5$ dB,
+  $L_{10} = 40{,}6$ dB, $L_{5} = 43{,}2$ dB and $L_{1} = 48{,}0$ dB, beside
+  $\sigma = 5{,}0$ dB.
+- **The problem:** Equation (24) defines the probability that the level
+  exceeds $x$ as $\int_x^{\infty} \rho^{*}(x')\,\mathrm{d}x'$ and Equation (25)
+  the $n$-percent exceedance level as its root. On the distribution of Table
+  A.4 spread as A.2 describes, they give 21,6; 31,5; 40,5; 43,0 and 47,5 dB:
+  $L_{50}$ agrees and the other four print 0,1 dB to 0,5 dB higher, the more
+  so the rarer the level. All five printed values are reproduced to the
+  printed digit by a cumulative curve formed from the lower end of the plotted
+  axis rather than from minus infinity,
+  $1 - \int_{15}^{x} \rho^{*}(x')\,\mathrm{d}x'$, with the 07:00 to 19:00
+  column of Table A.3 as printed: 21,69; 31,49; 40,58; 43,16 and 47,97 dB.
+  That curve counts the probability below 15 dB, 0,21 %, in every exceedance,
+  which moves the levels at the smallest percentages most. Figures A.2 and A.3
+  both start at 15 dB, and the curve of Figure A.3 starts there at exactly 1,
+  where Equation (24) gives 0,998.
+- **Evidence:** Figure A.3 on PDF page 44 (printed p. 36), Figure A.2 on PDF
+  page 43 (printed p. 35) and Equations (24) and (25) on PDF page 21 (printed
+  p. 13), all of BS ISO 13474:2009, which reproduces ISO 13474:2009 (first
+  edition, 2009-06-15). The levels were recomputed from Table A.3 on PDF page
+  40 (printed p. 32) of the same edition.
+- **Library behaviour:** `SelDistribution.exceedance` evaluates Equation (24)
+  to infinity in closed form and `SelDistribution.exceedance_level` solves
+  Equation (25)
+  ([`exposure_distribution.py`](../src/phonometry/environment/assessment/exposure_distribution.py)),
+  so the example returns 21,6; 31,5; 40,5; 43,0 and 47,5 dB. The conformance
+  check "ISO 13474:2009 Equation (25), Figure A.3" holds $L_{50}$ at the
+  printed 31,5 dB, and "ISO 13474:2009 Equation (24), Figure A.3" reproduces
+  all five printed levels by the reading above, from the library's exceedance
+  and the 15 dB of the figure.
+- **Status:** unreported.
+
 ## ISO 3744:2010, H.4.2.7 (the altitude correction and the divisor under it)
 
 - **Location:** Annex H (informative), H.4.2.7 "Meteorological and radiation

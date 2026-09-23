@@ -751,8 +751,8 @@ def test_a_weighting_outside_iec_60268_1_is_refused_at_construction(
 ) -> None:
     """The tag reaches the fiche inside ``dB(...)`` markup, so it is pinned.
 
-    IEC 60268-1 defines the A-weighted r.m.s. and the CCIR quasi-peak
-    wide-band inherent-noise measurements, and the fiche interpolates whatever
+    IEC 60268-1 defines the A-weighted r.m.s. and the ITU-R BS.468-4
+    quasi-peak wide-band inherent-noise measurements, and the fiche interpolates whatever
     it is given between the parentheses of its noise rows and its verdict. An
     arbitrary tag was at best a wrong accredited label; a tag-like one reached
     reportlab's paragraph parser and ended the render with ``parse ended with
@@ -768,7 +768,7 @@ def test_a_weighting_outside_iec_60268_1_is_refused_at_construction(
         )
 
 
-def test_the_ccir_quasi_peak_weighting_is_accepted(tmp_path: Path) -> None:
+def test_the_bs468_quasi_peak_weighting_is_accepted(tmp_path: Path) -> None:
     """The other measurement of IEC 60268-1 6.2 still renders its own label.
 
     The guard pins the tag to the two wide-band measurements the standard
@@ -783,9 +783,80 @@ def test_the_ccir_quasi_peak_weighting_is_accepted(tmp_path: Path) -> None:
         _M_MV,
         tolerance_db=_TOL,
         noise=electroacoustics.MicrophoneNoise(
-            equivalent_level_db=14.0, weighting="CCIR"
+            equivalent_level_db=14.0, weighting="468"
         ),
     )
-    out = tmp_path / "ccir.pdf"
+    out = tmp_path / "bs468.pdf"
     result.report(str(out))
-    assert "dB(CCIR)" in _extract_text(str(out))
+    assert "dB(468)" in _extract_text(str(out))
+
+
+def test_the_legacy_ccir_name_is_refused_for_the_one_the_library_uses() -> None:
+    """``"CCIR"`` was this field's spelling of the curve the rest calls ``"468"``.
+
+    One curve had two names in one library: ``weighting_filter`` and
+    ``weighted_thd`` take ``"468"`` and this field took ``"CCIR"``, so a
+    value that worked in one place raised in the other.
+    """
+    f, rel = _flat_response()
+    noise = electroacoustics.MicrophoneNoise(equivalent_level_db=14.0, weighting="CCIR")
+    with pytest.raises(ValueError, match=r"'noise_weighting' must be one of"):
+        electroacoustics.microphone_characteristics(
+            f, rel, _M_MV, tolerance_db=_TOL, noise=noise
+        )
+
+
+def test_every_weighting_name_the_api_takes_is_a_curve_the_filter_knows() -> None:
+    """One curve, one name: a noise or THD weighting is spelled as a filter curve.
+
+    ``weighting_filter`` is where the library names its curves, so a weighting
+    another surface accepts has to be one of them. ``"CCIR"`` was not, and the
+    same measurement raised on one surface and passed on the other.
+    """
+    import inspect
+    import re
+
+    from phonometry.electroacoustics import microphone, weighted_thd
+    from phonometry.filters import weighting as filter_weighting
+
+    curves = set(filter_weighting._PROTOTYPE_CURVES) | {"Z"}
+    accepted = set(microphone._NOISE_WEIGHTINGS)
+    annotation = str(inspect.signature(weighted_thd).parameters["weighting"].annotation)
+    accepted |= set(re.findall(r"['\"]([^'\"]+)['\"]", annotation))
+    assert accepted, "no accepted weighting name was read"
+    assert accepted <= curves, sorted(accepted - curves)
+
+
+def test_no_code_in_the_library_spells_the_curve_ccir() -> None:
+    """The legacy name survives only in prose that explains it, never as a value.
+
+    AES17's CCIR-RMS is a different quantity with its own name, so only the
+    bare string is refused.
+    """
+    import ast
+    import pathlib
+
+    import phonometry
+
+    root = pathlib.Path(phonometry.__file__).parent
+    offenders: list[str] = []
+    for path in sorted(root.rglob("*.py")):
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        docstrings = {
+            id(node.body[0].value)
+            for node in ast.walk(tree)
+            if isinstance(
+                node, ast.Module | ast.ClassDef | ast.FunctionDef | ast.AsyncFunctionDef
+            )
+            and node.body
+            and isinstance(node.body[0], ast.Expr)
+            and isinstance(node.body[0].value, ast.Constant)
+        }
+        offenders.extend(
+            f"{path.relative_to(root)}:{node.lineno}"
+            for node in ast.walk(tree)
+            if isinstance(node, ast.Constant)
+            and node.value == "CCIR"
+            and id(node) not in docstrings
+        )
+    assert not offenders, offenders

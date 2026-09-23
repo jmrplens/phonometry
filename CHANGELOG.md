@@ -238,6 +238,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- **The ITU-R BS.468-4 curve has one name.** `MicrophoneNoise.weighting` took
+  `"CCIR"` for the quasi-peak inherent-noise figure while
+  `filters.weighting_filter` and `electroacoustics.weighted_thd` take `"468"`
+  for the same curve, so a value that worked in one place raised in the
+  other. It takes `"468"` now, the microphone fiche prints dB(468), and
+  `"CCIR"` is refused. The prose follows: the curve is ITU-R BS.468-4
+  throughout, and CCIR Recommendation 468 appears only where a sentence
+  explains why IEC 60268-1 and older datasheets still use it. The AES17
+  CCIR-RMS weighting keeps its name, which is the standard's own for a
+  different quantity.
+
 - **One spelling per concept across the public names.** A census of every
   public field, parameter and property found the same quantity spelled
   several ways, and the minority now spells it the way the majority does,

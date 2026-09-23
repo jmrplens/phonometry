@@ -872,6 +872,7 @@ that takes either a number or an array keeps its name.
 | `.distance` on `NpdLevelResult` and `RotorcraftEventResult` | `.distances` |
 | `level=`, `measured_level=`, `operational_level=` on `sti_from_impulse_response`, `stipa`, `sti_adjusted_for_levels` and `STIResult.adjusted_for_levels` | `levels=`, `measured_levels=`, `operational_levels=` |
 | `.passed` on `AircraftSystemComplianceResult`, `QuasiPeakDynamicsResult`, `HeavyImpactSourceCheck`, `RigidMassCalibrationResult` | `.passes`, as on every other verifier |
+| `MicrophoneNoise(weighting="CCIR")` | `MicrophoneNoise(weighting="468")`, the spelling `weighting_filter` and `weighted_thd` use for the ITU-R BS.468-4 curve |
 
 `times, levels = decay_curve(ir, fs)` still unpacks the decay curve, in the
 same order. The FDTD solvers keep `c` and `rho`, which name the maps their
@@ -1050,9 +1051,12 @@ every rename above was checked to return what its predecessor returned. If a
 result moves after you finish the upgrade, that is a defect and it is worth
 [reporting](https://github.com/jmrplens/phonometry/issues).
 
-What each `.plot()` draws and each `.report()` prints is untouched, the
-`Signal` contract too, and so is every formula. 4.0 rearranged the furniture
-and put the unit on the label; it did not recompute anything.
+What each `.plot()` draws is untouched, and so is what each `.report()`
+prints but one label: the microphone fiche writes dB(468) where it wrote
+dB(CCIR). The `Signal` contract is the one it was, now kept in two more
+places, the blocks of `read_blocks` and the waveforms inside five results.
+Every formula is untouched too. 4.0 rearranged the furniture and put the unit
+on the label; it did not recompute anything.
 
 ---
 

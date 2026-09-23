@@ -1,6 +1,6 @@
 ---
 title: "Electroacoustics: distortion and frequency response"
-description: "IEC 60268-3 distortion: total and nth-order harmonic distortion, THD+N and SINAD through the AES17 measurement bandwidth, the per-order modulation and difference-frequency intermodulation, dynamic intermodulation (DIM) and the ITU-R 468 weighted THD, the AES17 dynamic range and idle channel noise (CCIR-RMS weighting), plus the Bendat & Piersol H1/H2 frequency-response estimators and ordinary coherence."
+description: "IEC 60268-3 distortion: total and nth-order harmonic distortion, THD+N and SINAD through the AES17 measurement bandwidth, the per-order modulation and difference-frequency intermodulation, dynamic intermodulation (DIM) and the ITU-R BS.468-4 weighted THD, the AES17 dynamic range and idle channel noise (CCIR-RMS weighting), plus the Bendat & Piersol H1/H2 frequency-response estimators and ordinary coherence."
 references:
   - type: standard
     organization: "International Electrotechnical Commission"
@@ -44,7 +44,7 @@ response** an input/output measurement reveals. This page covers the IEC 60268-3
 distortion set: total and nth-order harmonic distortion, THD+N and SINAD
 through the AES17 measurement bandwidth, the per-order modulation and
 difference-frequency intermodulation, dynamic intermodulation (DIM) and the
-ITU-R 468 weighted THD, and the Bendat & Piersol frequency-response estimators
+ITU-R BS.468-4 weighted THD, and the Bendat & Piersol frequency-response estimators
 $H_1$/$H_2$ with the ordinary coherence $\gamma^2$. Every quantity has an exact analytic
 oracle (synthetic signals with known harmonic and intermodulation amplitudes, a
 clipped-sine Fourier oracle, a full DIM test-signal synthesis, and a known LTI
@@ -280,7 +280,7 @@ between 31.5 Hz and 400 Hz:
 ```python
 from phonometry import electroacoustics
 
-print(electroacoustics.weighted_thd(signal, fs, 100.0))                  # ITU-R 468 network
+print(electroacoustics.weighted_thd(signal, fs, 100.0))                  # ITU-R BS.468-4 network
 print(electroacoustics.weighted_thd(signal, fs, 100.0, weighting="A"))   # A-weighted variant
 print(electroacoustics.itu_r_468_weighting([6300.0]))                    # [+12.2167] dB
 ```
@@ -320,7 +320,7 @@ plt.show()
 ## 3. Dynamic range and idle channel noise (AES17-2015 6.4)
 
 The two catalogue figures of any converter reuse the notch of section 2 and the
-ITU-R 468 curve of section 2.1, but the excitation is different, which is why
+ITU-R BS.468-4 curve of section 2.1, but the excitation is different, which is why
 clause 6.4 is a sibling of the THD+N clause and not a child of it. Both share
 the AES17 **CCIR-RMS** weighting (5.2.7): the ITU-R BS.468-4 curve shifted by a
 flat -5.63 dB so it is unity at 2 kHz. **Dynamic range** (6.4.1) drives the

@@ -241,10 +241,14 @@ ruido típico de un micrófono sale aproximadamente 10 dB por encima del
 número ponderado A de la misma cápsula. Ninguna es errónea: son
 ponderaciones distintas de la misma tensión, y comparar un dB(A) de una
 hoja de características con un dB(468) de otra favorece en silencio a la primera por
-ese margen. La relación señal-ruido re 1 Pa (94 dB SPL) se deriva del mismo
+ese margen. La IEC 60268-1 todavía cita la curva por su nombre anterior,
+Recomendación 468 del CCIR, y por eso las hojas de características antiguas
+imprimen la misma cifra como dB(CCIR); la biblioteca la llama por el documento
+vigente y escribe la ponderación `"468"` allí donde toma una. La relación
+señal-ruido re 1 Pa (94 dB SPL) se deriva del mismo
 nivel de ruido equivalente, y el nivel de presión acústica de sobrecarga
 (apartado 15.2) acota el rango útil por arriba. La propia curva de
-ponderación BS.468 está expuesta como `itu_r_468_weighting` en el
+ponderación ITU-R BS.468-4 está expuesta como `itu_r_468_weighting` en el
 [conjunto de distorsión de
 electroacústica](/phonometry/es/devices/electroacoustics/electroacoustics/),
 donde también pondera la THD.
@@ -254,7 +258,7 @@ donde también pondera la THD.
 *Cuánta parte de esa diferencia explica la red por sí sola depende de la forma
 del ruido de cada cápsula: 2,4 dB para el espectro 1/f decreciente del ejemplo y
 8,3 dB para una cápsula más siseante. El resto de los 10 dB de costumbre viene
-del **detector de cuasipico** de la ITU-R 468, que lee un ruido más alto que un
+del **detector de cuasipico** de la ITU-R BS.468-4, que lee un ruido más alto que un
 detector de valor eficaz; ese detector es
 [`broadcast.quasi_peak_meter`](/phonometry/es/devices/broadcast/quasi-peak/) y
 lee un registro, mientras que `itu_r_468_weighting` es solo la red, así que un
@@ -279,7 +283,7 @@ salida medida sea **menor que un tercio** del valor medido con el micrófono, de
 modo que la instrumentación y cualquier sonido externo residual inflen el
 resultado menos de un 10 %. Informa de qué ponderación y qué detector
 produjeron la cifra: valor eficaz ponderado A (IEC 60268-1 6.2.1), cuasipico
-ITU-R 468 (6.2.2) o tercios de octava sin ponderar (6.2.3), porque los tres
+ITU-R BS.468-4 (6.2.2) o tercios de octava sin ponderar (6.2.3), porque los tres
 difieren en unos 10 dB sobre la misma cápsula y el apartado pide que la medición
 de cuasipico esté entre ellos.
 
@@ -430,7 +434,7 @@ Hay una trampa que la API reproduce y que la página tiene que cerrar:
 red de ponderación**, no un valor eficaz de banda ancha en bruto, y `weighting=`
 registra qué red fue esa. Toma en silencio el valor por defecto `'A'`
 (IEC 60268-1 6.2.1). El campo es una *etiqueta, no un filtro*: la función no
-vuelve a ponderar nada, así que declarar `weighting="CCIR"` mientras se le pasa
+vuelve a ponderar nada, así que declarar `weighting="468"` mientras se le pasa
 una tensión ponderada A produce un nivel correctamente calculado con el nombre
 equivocado encima, que es exactamente el error del que avisa la sección 3, ahora
 impreso en un informe. Eso sigue siendo cierto ahora que existe el detector de
@@ -633,9 +637,9 @@ fuente de nivel alto que produce un campo de 140 dB y el plato giratorio. Las
 *condiciones* que esos instrumentos tienen que cumplir están en las secciones
 1.1, 3 y 3.1, porque son lo que significan los números presentados; la
 adquisición en sí no está implementada aquí. El detector de cuasipico de la
-ITU-R 468 ahora sí lo está, en [Medidor de
+ITU-R BS.468-4 ahora sí lo está, en [Medidor de
 cuasipico](/phonometry/es/devices/broadcast/quasi-peak/), pero lee un registro y
-el apartado 17 toma una tensión o un nivel declarados, así que `weighting="CCIR"`
+el apartado 17 toma una tensión o un nivel declarados, así que `weighting="468"`
 en esta página sigue siendo una etiqueta sobre la cifra de un fabricante, y un
 nivel de ruido propio calculado con `itu_r_468_weighting` y una suma en valor
 eficaz sigue sin ser una cifra en dBqps. La
@@ -651,7 +655,7 @@ dBFS](/phonometry/es/signals/metrology/calibration/).
 ## Véase también
 
 - [Electroacústica](/phonometry/es/devices/electroacoustics/electroacoustics/): el conjunto de
-  distorsión de IEC 60268-3, THD+N y SINAD, la THD ponderada ITU-R 468 y
+  distorsión de IEC 60268-3, THD+N y SINAD, la THD ponderada ITU-R BS.468-4 y
   los estimadores de respuesta en frecuencia H1/H2 que producen las curvas
   medidas.
 - [Caracterización de altavoces (IEC 60268-5)](/phonometry/es/devices/electroacoustics/loudspeakers/):

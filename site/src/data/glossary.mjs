@@ -726,8 +726,8 @@ export const glossary = [
       {
         id: "itu-r-468",
         name: {
-          en: "ITU-R 468 weighting",
-          es: "Ponderación ITU-R 468",
+          en: "ITU-R BS.468-4 weighting",
+          es: "Ponderación UIT-R BS.468-4",
         },
         unit: "dB",
         standard: {

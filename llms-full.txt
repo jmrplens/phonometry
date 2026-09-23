@@ -15173,7 +15173,7 @@ fitted. The conformity evidence is real and it is published, in
 - [Test signals](https://jmrplens.github.io/phonometry/signals/spectra/test-signals/): `tone_burst`, the
   IEC 60268-1 generator that builds the clause 2.1 and 2.2 stimuli.
 - [Microphones (IEC 60268-4)](https://jmrplens.github.io/phonometry/devices/electroacoustics/microphones/): where a
-  stated dB(CCIR) self-noise figure comes from, and why it stays a
+  stated dB(468) self-noise figure comes from, and why it stays a
   declaration.
 - [Broadcast](https://jmrplens.github.io/phonometry/devices/broadcast/): the section overview.
 
@@ -15217,7 +15217,7 @@ response** an input/output measurement reveals. This page covers the IEC 60268-3
 distortion set: total and nth-order harmonic distortion, THD+N and SINAD
 through the AES17 measurement bandwidth, the per-order modulation and
 difference-frequency intermodulation, dynamic intermodulation (DIM) and the
-ITU-R 468 weighted THD, and the Bendat & Piersol frequency-response estimators
+ITU-R BS.468-4 weighted THD, and the Bendat & Piersol frequency-response estimators
 $H_1$/$H_2$ with the ordinary coherence $\gamma^2$. Every quantity has an exact analytic
 oracle, so the numbers are verifiable rather than tuned. The transducer
 data sheets these measurements feed have their own guides:
@@ -15344,7 +15344,7 @@ between 31.5 Hz and 400 Hz:
 ```python
 from phonometry import electroacoustics
 
-print(electroacoustics.weighted_thd(signal, fs, 100.0))                  # ITU-R 468 network
+print(electroacoustics.weighted_thd(signal, fs, 100.0))                  # ITU-R BS.468-4 network
 print(electroacoustics.weighted_thd(signal, fs, 100.0, weighting="A"))   # A-weighted variant
 print(electroacoustics.itu_r_468_weighting([6300.0]))                    # [+12.2167] dB
 ```
@@ -15371,7 +15371,7 @@ dr = electroacoustics.dynamic_range(output, fs, 997.0)     # dB CCIR-RMS
 icn = electroacoustics.idle_channel_noise(idle_output, fs)  # dBFS CCIR-RMS
 ```
 
-Both reuse the notch and the ITU-R 468 curve of the THD+N chain, and both are
+Both reuse the notch and the ITU-R BS.468-4 curve of the THD+N chain, and both are
 measured through the AES17 band (a 20 Hz high-pass plus the standard low-pass
 at `bandwidth`). Because the CCIR-RMS filter reads -5.63 dB at 1 kHz, a 1 kHz
 tone measures its own dBFS minus 5.63 dB, which pins the weighting exactly.
@@ -16261,10 +16261,14 @@ for typical microphone noise it comes out roughly 10 dB above the
 A-weighted number for the same capsule. Neither is wrong: they are
 different weightings of the same voltage, and comparing a dB(A) figure from
 one datasheet with a dB(468) figure from another silently flatters the
-first by that margin. The signal-to-noise ratio re 1 Pa (94 dB SPL) is
+first by that margin. IEC 60268-1 still cites the curve by its earlier name,
+CCIR Recommendation 468, which is why older datasheets print the same figure
+as dB(CCIR); the library calls it by the current document and spells the
+weighting `"468"` wherever it takes one. The signal-to-noise ratio re 1 Pa
+(94 dB SPL) is
 derived from the same equivalent noise level, and the overload sound
 pressure level (clause 15.2) bounds the usable range from above. The
-BS.468 weighting curve itself is exposed as `itu_r_468_weighting` in the
+ITU-R BS.468-4 weighting curve itself is exposed as `itu_r_468_weighting` in the
 [electroacoustics distortion set](https://jmrplens.github.io/phonometry/devices/electroacoustics/electroacoustics/), where it also
 weights THD. The quasi-peak detector is implemented too, as
 `broadcast.quasi_peak_meter`
@@ -16273,7 +16277,7 @@ weights THD. The quasi-peak detector is implemented too, as
 inherent-noise level computed from the network and an r.m.s. sum is still
 not a dBqps figure. Clause 17 has no waveform to hand it either (it takes
 the stated voltage or level from the data sheet), so
-`MicrophoneNoise(weighting="CCIR")` stays what it always was, metadata
+`MicrophoneNoise(weighting="468")` stays what it always was, metadata
 recording how the supplier measured their figure rather than a measurement
 this library made.
 
@@ -16484,7 +16488,7 @@ conventions.*
 ## See also
 
 - [Electroacoustics](https://jmrplens.github.io/phonometry/devices/electroacoustics/electroacoustics/): the IEC 60268-3 distortion set,
-  THD+N and SINAD, the ITU-R 468 weighted THD and the H1/H2
+  THD+N and SINAD, the ITU-R BS.468-4 weighted THD and the H1/H2
   frequency-response estimators that produce the measured curves.
 - [Loudspeaker Characterisation (IEC 60268-5)](https://jmrplens.github.io/phonometry/devices/electroacoustics/loudspeakers/): the
   companion rated-characteristics report for the reproducing side of the
@@ -41820,7 +41824,7 @@ documents, one page per module.
 | `DEFAULT_STABILITY_MARGIN` / `CARDIOID_RELATIVE_DIRECTIVITY` | `constant` | **Reinforcement defaults (Long Ch. 18).**<br>• 10 dB feedback stability margin for an equalised system<br>• −2 dB cardioid directivity toward the loudspeaker relative to the talker | `feedback_stability(-6.0, 78.0, 80.0, microphone_directivity=CARDIOID_RELATIVE_DIRECTIVITY)` |
 | `microphone_characteristics` | `function` | **Rated microphone characteristics for an IEC 60268-4 report.**<br>• `frequencies`, `response_db` (free-field, re the reference frequency), `sensitivity_mv_per_pa` M [mV/Pa]<br>• `reference_frequency` (Default: 1 kHz), `tolerance_db` (Default: 2)<br>• `directivity`: `MicrophoneDirectivity` (13), `noise`: `MicrophoneNoise` (17), `overload`: `MicrophoneOverload` (14.2/15.2), `electrical`: `MicrophoneElectrical` (9/10) | `res = electroacoustics.microphone_characteristics(f, resp, 12.5)`<br><br>• `MicrophoneCharacteristics` |
 | `MicrophoneDirectivity` | `dataclass` | **Directional characteristics of the microphone (IEC 60268-4 Clause 13).**<br>• `polar` = (angles_deg, relative_db) (13.1)<br>• `frequency` [Hz], `index_db` (directivity index, 13.2; computed from `polar` when omitted) | `MicrophoneDirectivity(polar=(ang, cardioid), frequency=1000.0)` |
-| `MicrophoneNoise` | `dataclass` | **Inherent noise of the microphone (IEC 60268-4 Clause 17).**<br>• `voltage` U_N [V] (17.2 b) **or** `equivalent_level_db` [dB SPL] (17.1), not both<br>• `weighting` (Default: "A"), `spectrum` = (frequencies, band_levels_db) | `MicrophoneNoise(voltage=1.25e-6)` |
+| `MicrophoneNoise` | `dataclass` | **Inherent noise of the microphone (IEC 60268-4 Clause 17).**<br>• `voltage` U_N [V] (17.2 b) **or** `equivalent_level_db` [dB SPL] (17.1), not both<br>• `weighting`: "A" (Default) or "468", the ITU-R BS.468-4 quasi-peak figure; `spectrum` = (frequencies, band_levels_db) | `MicrophoneNoise(voltage=1.25e-6)` |
 | `MicrophoneOverload` | `dataclass` | **Overload sound pressure and the distortion it is read from (IEC 60268-4 14.2/15.2).**<br>• `distortion` = (spl_db, thd_percent) (14.2)<br>• `thd_percent` limit (Default: 1), `spl_db` (stated overload level; read off the curve when omitted) | `MicrophoneOverload(distortion=(spl, thd), thd_percent=0.5)` |
 | `MicrophoneElectrical` | `dataclass` | **Electrical impedance and rated power supply (IEC 60268-4 Clauses 10/9).**<br>• `rated_impedance` [Ω] (10.2), `minimum_load_impedance` [Ω] (10.3)<br>• `powering` (9.1), `supply_current_ma` [mA] (9.1) | `MicrophoneElectrical(rated_impedance=150.0, powering="Phantom P48 (IEC 61938)")` |
 | `MicrophoneCharacteristics` | `dataclass` | **Microphone rated-characteristics result (IEC 60268-4).**<br>• `sensitivity_level_db` = 20·lg(M / 1 V/Pa) (11.1), `effective_range` (12.2), `directivity_index_db` (13.2.2), `equivalent_noise_level_db` (17.2), `max_spl_db` (15.2), `signal_to_noise_ratio_db`, `diffuse_field_sensitivity_level_db`<br>• `.report()`: IEC 60268-4 fiche (graphs to IEC 60263) | `res.sensitivity_level_db` |
@@ -44498,7 +44502,7 @@ check that pins each quantity to its standard's own expected value.
 | F, S, I | Fast, Slow and Impulse exponential time weightings: the detector ballistics that produce a displayed level. | s (time constant) | IEC 61672-1:2013 | [Time Weighting](https://jmrplens.github.io/phonometry/signals/levels/time-weighting/) |
 | Performance class (0, 1, 2) | Performance class of a filter or an instrument: the width of the tolerance corridor its response has to stay inside, band by band. Class 1 and class 2 share the same design goals and differ in the acceptance limits and in the operating temperature range, class 2 being the looser; class 0, the laboratory reference grade, comes from the withdrawn IEC 61260:1995 and ANSI S1.11-2004 and the current edition no longer defines it. A class is a property of the response, not of the result: a class 2 bank does not make a measurement wrong, it makes its band levels less certain. | dB (tolerance) | IEC 61260-1:2014, 1.2 and Table 1 | [Filter Class Verification (IEC 61260-1)](https://jmrplens.github.io/phonometry/signals/filters/filter-compliance/) |
 | K | K-weighting: the programme-loudness curve, a two-stage pre-filter that models the high-frequency boost a spherical head gives and then applies the revised low-frequency B-curve high-pass. It is applied per channel before the channel mean squares are summed and gated, and the LKFS designation records it. | dB | ITU-R BS.1770-5, Annex 1 | [Programme loudness and true peak (BS.1770 / EBU R 128)](https://jmrplens.github.io/phonometry/devices/broadcast/program-loudness/) |
-| ITU-R 468 weighting | The broadcast noise weighting: zero at 1 kHz, peaking at $+12{,}2$ dB at 6,3 kHz and falling to $-29{,}9$ dB at 31,5 Hz, shaped to how audible a noise is rather than how loud a tone is. The Recommendation pairs it with a quasi-peak detector and quotes results as dB(468); AES17 reuses the same curve with an r.m.s. detector, which is a different number from the same filter. | dB | Recommendation ITU-R BS.468-4, Table 1 | [Electroacoustics: distortion and frequency response](https://jmrplens.github.io/phonometry/devices/electroacoustics/electroacoustics/) |
+| ITU-R BS.468-4 weighting | The broadcast noise weighting: zero at 1 kHz, peaking at $+12{,}2$ dB at 6,3 kHz and falling to $-29{,}9$ dB at 31,5 Hz, shaped to how audible a noise is rather than how loud a tone is. The Recommendation pairs it with a quasi-peak detector and quotes results as dB(468); AES17 reuses the same curve with an r.m.s. detector, which is a different number from the same filter. | dB | Recommendation ITU-R BS.468-4, Table 1 | [Electroacoustics: distortion and frequency response](https://jmrplens.github.io/phonometry/devices/electroacoustics/electroacoustics/) |
 | $W_\mathrm{b}$, $W_\mathrm{c}$, $W_\mathrm{d}$, $W_\mathrm{e}$, $W_\mathrm{f}$, $W_\mathrm{j}$, $W_\mathrm{k}$, $W_\mathrm{m}$ (whole-body) | The whole-body frequency weightings, one parameter row each of the same four-stage filter: $W_\mathrm{k}$ for the vertical axis and $W_\mathrm{d}$ for the two horizontal ones in health and comfort, with $W_\mathrm{b}$, $W_\mathrm{c}$, $W_\mathrm{e}$, $W_\mathrm{f}$, $W_\mathrm{j}$ and $W_\mathrm{m}$ for ride comfort, the seat back, rotational axes, motion sickness and the head. The weighted acceleration $a_\mathrm{w}$ is what comes out of them; the standard that names the curve is not the one that says where to apply it. | dimensionless | ISO 8041-1:2017, 5.6.1, Formulae (1) to (5) and Table 3 | [Human Vibration](https://jmrplens.github.io/phonometry/vibration/human/human-vibration/) |
 | $W_\mathrm{h}$ (hand-arm) | The hand-arm frequency weighting: one curve, band-limited from 8 Hz to 1 kHz, applied to each of the three axes before they are combined into the vibration total value. Unlike the whole-body case there is no axis multiplier, so the three weighted values enter the total on equal terms. | dimensionless | ISO 8041-1:2017, 5.6.1, Formulae (1) to (5) and Table 3 | [Human Vibration](https://jmrplens.github.io/phonometry/vibration/human/human-vibration/) |
 
@@ -58029,6 +58033,7 @@ that takes either a number or an array keeps its name.
 | `.distance` on `NpdLevelResult` and `RotorcraftEventResult` | `.distances` |
 | `level=`, `measured_level=`, `operational_level=` on `sti_from_impulse_response`, `stipa`, `sti_adjusted_for_levels` and `STIResult.adjusted_for_levels` | `levels=`, `measured_levels=`, `operational_levels=` |
 | `.passed` on `AircraftSystemComplianceResult`, `QuasiPeakDynamicsResult`, `HeavyImpactSourceCheck`, `RigidMassCalibrationResult` | `.passes`, as on every other verifier |
+| `MicrophoneNoise(weighting="CCIR")` | `MicrophoneNoise(weighting="468")`, the spelling `weighting_filter` and `weighted_thd` use for the ITU-R BS.468-4 curve |
 
 `times, levels = decay_curve(ir, fs)` still unpacks the decay curve, in the
 same order. The FDTD solvers keep `c` and `rho`, which name the maps their
@@ -58207,9 +58212,12 @@ every rename above was checked to return what its predecessor returned. If a
 result moves after you finish the upgrade, that is a defect and it is worth
 [reporting](https://github.com/jmrplens/phonometry/issues).
 
-What each `.plot()` draws and each `.report()` prints is untouched, the
-`Signal` contract too, and so is every formula. 4.0 rearranged the furniture
-and put the unit on the label; it did not recompute anything.
+What each `.plot()` draws is untouched, and so is what each `.report()`
+prints but one label: the microphone fiche writes dB(468) where it wrote
+dB(CCIR). The `Signal` contract is the one it was, now kept in two more
+places, the blocks of `read_blocks` and the waveforms inside five results.
+Every formula is untouched too. 4.0 rearranged the furniture and put the unit
+on the label; it did not recompute anything.
 
 ---
 

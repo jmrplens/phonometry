@@ -287,7 +287,7 @@ fitted. The conformity evidence is real and it is published, in
 - [Test signals](../../signals/spectra/test-signals.md): `tone_burst`, the
   IEC 60268-1 generator that builds the clause 2.1 and 2.2 stimuli.
 - [Microphones (IEC 60268-4)](../electroacoustics/microphones.md): where a
-  stated dB(CCIR) self-noise figure comes from, and why it stays a
+  stated dB(468) self-noise figure comes from, and why it stays a
   declaration.
 - [Broadcast](index.md): the section overview.
 

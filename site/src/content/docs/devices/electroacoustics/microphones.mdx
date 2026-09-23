@@ -229,10 +229,14 @@ for typical microphone noise it comes out roughly 10 dB above the
 A-weighted number for the same capsule. Neither is wrong: they are
 different weightings of the same voltage, and comparing a dB(A) figure from
 one datasheet with a dB(468) figure from another silently flatters the
-first by that margin. The signal-to-noise ratio re 1 Pa (94 dB SPL) is
+first by that margin. IEC 60268-1 still cites the curve by its earlier name,
+CCIR Recommendation 468, which is why older datasheets print the same figure
+as dB(CCIR); the library calls it by the current document and spells the
+weighting `"468"` wherever it takes one. The signal-to-noise ratio re 1 Pa
+(94 dB SPL) is
 derived from the same equivalent noise level, and the overload sound
 pressure level (clause 15.2) bounds the usable range from above. The
-BS.468 weighting curve itself is exposed as `itu_r_468_weighting` in the
+ITU-R BS.468-4 weighting curve itself is exposed as `itu_r_468_weighting` in the
 [electroacoustics distortion set](/phonometry/devices/electroacoustics/electroacoustics/),
 where it also weights THD.
 
@@ -240,7 +244,7 @@ where it also weights THD.
 
 *How much of the gap the network alone accounts for depends on the shape of
 that capsule's noise: 2.4 dB for the falling 1/f spectrum of the example, 8.3 dB
-for a hissier capsule. The rest of the customary 10 dB comes from the ITU-R 468
+for a hissier capsule. The rest of the customary 10 dB comes from the ITU-R BS.468-4
 **quasi-peak detector**, which reads a noise higher than an r.m.s. detector
 does; that detector is
 [`broadcast.quasi_peak_meter`](/phonometry/devices/broadcast/quasi-peak/) and it
@@ -265,7 +269,7 @@ its rated impedance and require the measured output to be **less than one
 third** of the value measured with the microphone, so that the instrumentation
 and any residual external sound inflate the result by less than 10 %. Report
 which weighting and detector produced the figure: A-weighted r.m.s.
-(IEC 60268-1 6.2.1), ITU-R 468 quasi-peak (6.2.2), or unweighted third octaves
+(IEC 60268-1 6.2.1), ITU-R BS.468-4 quasi-peak (6.2.2), or unweighted third octaves
 (6.2.3), because the three differ by about 10 dB on the same capsule and the
 clause asks for the quasi-peak measurement to be among them.
 
@@ -408,7 +412,7 @@ One trap the API reproduces and the page has to close: `MicrophoneNoise.voltage`
 is the inherent-noise voltage **as measured through the weighting network**, not
 a raw wideband r.m.s., and `weighting=` records which network that was. It
 defaults silently to `'A'` (IEC 60268-1 6.2.1). The field is a *label, not a
-filter*: the function re-weights nothing, so declaring `weighting="CCIR"` while
+filter*: the function re-weights nothing, so declaring `weighting="468"` while
 passing an A-weighted voltage produces a correctly computed level with the
 wrong name on it, exactly the error section 3 warns about, now printed on a
 report. That stays true now that the quasi-peak detector exists: clause 17
@@ -604,9 +608,9 @@ the reference microphone and its calibration certificate, the high-level
 source that produces a 140 dB field, and the turntable. The *conditions* those
 instruments have to satisfy are in sections 1.1, 3 and 3.1, because they are
 what the reported numbers mean; the acquisition itself is not implemented
-here. The ITU-R 468 quasi-peak detector now is, in [Quasi-peak programme
+here. The ITU-R BS.468-4 quasi-peak detector now is, in [Quasi-peak programme
 meter](/phonometry/devices/broadcast/quasi-peak/), but it reads a recording and
-clause 17 takes a stated voltage or level, so `weighting="CCIR"` on this page
+clause 17 takes a stated voltage or level, so `weighting="468"` on this page
 stays a label on a supplier's figure, and an inherent-noise level computed from
 `itu_r_468_weighting` and an r.m.s. sum is still not a dBqps figure. The implemented edition is frozen at IEC 60268-4:2014; the superseding
 2018 revision is not the one checked. Acoustic calibration of a working chain,
@@ -620,7 +624,7 @@ dBFS](/phonometry/signals/metrology/calibration/).
 ## See also
 
 - [Electroacoustics](/phonometry/devices/electroacoustics/electroacoustics/): the IEC 60268-3
-  distortion set, THD+N and SINAD, the ITU-R 468 weighted THD and the H1/H2
+  distortion set, THD+N and SINAD, the ITU-R BS.468-4 weighted THD and the H1/H2
   frequency-response estimators that produce the measured curves.
 - [Loudspeaker Characterisation (IEC 60268-5)](/phonometry/devices/electroacoustics/loudspeakers/):
   the companion rated-characteristics report for the reproducing side of

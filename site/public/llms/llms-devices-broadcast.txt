@@ -859,7 +859,7 @@ fitted. The conformity evidence is real and it is published, in
 - [Test signals](https://jmrplens.github.io/phonometry/signals/spectra/test-signals/): `tone_burst`, the
   IEC 60268-1 generator that builds the clause 2.1 and 2.2 stimuli.
 - [Microphones (IEC 60268-4)](https://jmrplens.github.io/phonometry/devices/electroacoustics/microphones/): where a
-  stated dB(CCIR) self-noise figure comes from, and why it stays a
+  stated dB(468) self-noise figure comes from, and why it stays a
   declaration.
 - [Broadcast](https://jmrplens.github.io/phonometry/devices/broadcast/): the section overview.
 

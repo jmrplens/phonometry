@@ -5089,7 +5089,7 @@ def generate_microphone_noise_weightings(output_dir: str) -> None:
     """How much of the dB(A)-to-dB(468) gap the *weighting* accounts for.
 
     The customary "about 10 dB" mixes two effects: the network, which is what
-    the library implements and what this figure computes, and the ITU-R 468
+    the library implements and what this figure computes, and the ITU-R BS.468-4
     quasi-peak detector, which it does not. Separating them also shows that
     the weighting half is not a constant: it depends on the shape of the
     particular capsule's noise.

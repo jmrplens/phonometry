@@ -380,12 +380,21 @@ FLOW_RESISTANCE_COLUMNS = (
 
 #: The resilient layers of a floating floor. The stiffness is per unit area,
 #: which is what the N/m³ of the heading says, and the density and the
-#: thickness beside it are what tell four rows of one material apart.
+#: thickness beside it are what tell four rows of one material apart. The
+#: apparent stiffness of a test specimen is a column of its own, because it is
+#: not the stiffness of the installed layer; no published table prints one
+#: today, and a column no row fills is not shown.
 RESILIENT_LAYER_COLUMNS = (
     (
         "dynamic_stiffness_n_m3",
         "Dynamic stiffness per unit area",
         "Rigidez dinámica por unidad de superficie",
+        "N/m³",
+    ),
+    (
+        "apparent_dynamic_stiffness_n_m3",
+        "Apparent dynamic stiffness per unit area",
+        "Rigidez dinámica aparente por unidad de superficie",
         "N/m³",
     ),
     ("density_kg_m3", "Density", "Densidad", "kg/m³"),
@@ -1216,16 +1225,12 @@ def fluids() -> tuple[list[dict[str, str]], list[dict[str, Any]]]:
     return columns, out
 
 
-#: Where the resilient layers were read, spelled the way a packaged data file
-#: of that table would be named. They are the one catalogue held inline in the
-#: module that computes with them rather than in a data file of its own, so
-#: they carry no table name to key them by and the page needs one: the filter
-#: that picks a published table reads it, and a row without one would be filed
-#: under the empty string.
-RESILIENT_LAYER_TABLE = "hopkins-2007-table-a3"
-
-#: The same for the air attenuation, whose rows are the six conditions the
-#: standard tabulates rather than six materials.
+#: Where the air attenuation was read, spelled the way a packaged data file of
+#: that table would be named. Its rows are the six conditions the standard
+#: tabulates rather than six materials, held as a mapping of arrays in the
+#: module that computes with them, so they carry no table name to key them by
+#: and the page needs one: the filter that picks a published table reads it,
+#: and a row without one would be filed under the empty string.
 AIR_ATTENUATION_TABLE = "en-12354-6-table-1"
 
 #: Significant figures the air attenuation table prints, which is what its
@@ -1249,13 +1254,12 @@ def transcribed(
     Most of these catalogues are rows of
     :class:`~phonometry.io.CatalogueRow`, which carries the
     intervals, the bounds, the listed readings and the words a page can print
-    where a number would go, and :func:`section` reads all of that back. Two
-    are not: the resilient layers are a plain record of three measured numbers
-    and the air attenuation is a mapping of arrays. Their pages hedge nothing,
-    so there is nothing for the hedges to carry, and what they need is the
-    column styles and the number formatting the rest of the page is written
-    in. That is what this is, and it is why it is not a second set of rules:
-    a cell here goes through the same :func:`column_style` and the same
+    where a number would go, and :func:`section` reads all of that back. One
+    is not: the air attenuation is a mapping of arrays. Its page hedges
+    nothing, so there is nothing for the hedges to carry, and what it needs is
+    the column styles and the number formatting the rest of the page is
+    written in. That is what this is, and it is why it is not a second set of
+    rules: a cell here goes through the same :func:`column_style` and the same
     :func:`number` as every other cell on the page.
 
     :param records: One per row: its ``key``, the ``table`` it belongs to, its
@@ -1322,28 +1326,6 @@ def transcribed(
             for record in records
         ],
     }
-
-
-def resilient_layers() -> list[dict[str, Any]]:
-    """The fifteen resilient layers, as records :func:`transcribed` can write.
-
-    :return: One record per layer, in the order the table prints them.
-    """
-    return [
-        {
-            "key": f"{RESILIENT_LAYER_TABLE}/{key}",
-            "table": RESILIENT_LAYER_TABLE,
-            "name": layer.name,
-            "source": layer.source,
-            "attributedTo": {"row": layer.attributed_to} if layer.attributed_to else {},
-            "values": {
-                "dynamic_stiffness_n_m3": layer.dynamic_stiffness_n_m3,
-                "density_kg_m3": layer.density_kg_m3,
-                "thickness_mm": layer.thickness_mm,
-            },
-        }
-        for key, layer in PUBLISHED_RESILIENT_LAYERS.items()
-    ]
 
 
 def air_conditions() -> list[dict[str, Any]]:
@@ -1475,7 +1457,7 @@ def render() -> str:
             PUBLISHED_SOLID_NONLINEARITY, SOLID_NONLINEARITY_COLUMNS
         ),
         "flowResistance": section(PUBLISHED_FLOW_RESISTANCE, FLOW_RESISTANCE_COLUMNS),
-        "resilientLayers": transcribed(resilient_layers(), RESILIENT_LAYER_COLUMNS),
+        "resilientLayers": section(PUBLISHED_RESILIENT_LAYERS, RESILIENT_LAYER_COLUMNS),
         "resilientModuli": section(
             PUBLISHED_RESILIENT_MODULI, RESILIENT_MODULUS_COLUMNS
         ),

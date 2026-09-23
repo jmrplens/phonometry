@@ -220,6 +220,26 @@ and numerical-propagation results. `ReactiveSilencerResult` and
 `SoundReductionResult` still call theirs `transmission_loss=`, correctly:
 that is what the standards behind them call it.
 
+The EN 29052-1 functions of `materials` follow the same rule, with the unit
+of each quantity at the end of its name:
+
+| 3.3.0 | 4.0 |
+| --- | --- |
+| `apparent_dynamic_stiffness(resonant_frequency=, total_mass_per_area=)` | `resonant_frequency_hz=`, `total_mass_per_area_kg_m2=` |
+| `enclosed_gas_stiffness(thickness=)` | `thickness_m=` |
+| `installed_dynamic_stiffness(apparent_stiffness, airflow_resistivity, gas_stiffness=)` | `apparent_stiffness_n_m3`, `airflow_resistivity_kpa_s_m2=` by name only, `gas_stiffness_n_m3=` |
+| `natural_frequency(dynamic_stiffness=, mass_per_area=)` | `dynamic_stiffness_n_m3=`, `mass_per_area_kg_m2=` |
+| `floating_floor_resonance(resonant_frequency=, total_mass_per_area=, floor_mass_per_area=, airflow_resistivity=, thickness=)` | `resonant_frequency_hz=`, `total_mass_per_area_kg_m2=`, `floor_mass_per_area_kg_m2=`, `airflow_resistivity_kpa_s_m2=`, `thickness_m=` |
+
+The airflow resistivity is the one that earns the keyword. EN 29052-1
+thresholds it in kPa·s/m², and every other flow resistivity in the library is
+in Pa·s/m², a unit a thousand times smaller, so a Pa·s/m² figure passed by
+position landed in the wrong branch of clause 8.2 without a word; it is
+written by name now. And below 100 kPa·s/m², `installed_dynamic_stiffness` no
+longer reads a missing gas term as zero: 3.3.0 returned $s'_\mathrm{t}$ from
+`installed_dynamic_stiffness(20e6, 50.0)`, Formula 6 with its second term
+dropped, and 4.0 raises and asks for $s'_\mathrm{a}$.
+
 ## Conditions and flags are written by name
 
 Two rules made 37 signatures keyword-only. A condition or an option that
@@ -469,6 +489,30 @@ print(board.basis_of("poisson_ratio"))
 # estimated
 print(ear.converted["youngs_modulus_max_pa"], ear.is_derived("youngs_modulus_max_pa"))
 # ('3e5', 'psi') False
+```
+
+The resilient layers became catalogue rows in the same change. A
+`ResilientLayer` is an `io.CatalogueRow` like every other row, keyed and
+credited the way the others are:
+
+| Before | 4.0 |
+| --- | --- |
+| `PUBLISHED_RESILIENT_LAYERS["mineral_wool_rock_60_30"]`, `resilient_layer("mineral_wool_rock_60_30")` | `"hopkins-2007-table-a3/mineral_wool_rock_60_30"`, the `"<table>/<row>"` key of every catalogue |
+| `layer.attributed_to`, a string | `layer.attributed_to["row"]`, a mapping as on every row |
+| `ResilientLayer(...)` with the stiffness, the density and the thickness required | every quantity optional, and `apparent_dynamic_stiffness_n_m3` beside `dynamic_stiffness_n_m3` for a source that gives only the apparent $s'_\mathrm{t}$ |
+| `layer.natural_frequency(mass_per_area=...)` | `layer.natural_frequency(mass_per_area_kg_m2=...)`; a layer that holds only $s'_\mathrm{t}$ also takes `airflow_resistivity_pa_s_m2=` and `gas_stiffness_n_m3=`, and raises `io.CatalogueError` without the first |
+
+Hopkins Table A3 prints $s'$, the stiffness of the installed layer as the
+book's own list of symbols defines it, so its fifteen rows still hold
+`dynamic_stiffness_n_m3` and return the natural frequencies they returned
+before.
+
+```python
+from phonometry import materials
+
+rebond = materials.resilient_layer("hopkins-2007-table-a3/rebond_foam_64_20")
+print(rebond.attributed_to["row"], round(rebond.natural_frequency(mass_per_area_kg_m2=120.0), 1))
+# Hopkins and Hall (2006) 43.6
 ```
 
 ## The ten names that are gone

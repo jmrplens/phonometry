@@ -1,0 +1,123 @@
+{
+  "source": "Hopkins (2007) Table A3, PDF page 637 (printed p. 610)",
+  "about": "Fifteen resilient layers for floating floors, from Table A3, \"Dynamic stiffness per unit area of resilient materials measured according to ISO 9052-1\", each with its density, its nominal uncompressed thickness and its dynamic stiffness per unit area. The column heading prints s′, which the book's List of symbols (PDF page 23, printed p. xxii) defines as the dynamic stiffness per unit area of an installed resilient material and keeps apart from s′t, the apparent dynamic stiffness per unit area; Section 3.11.3.1.2 (PDF page 387, printed p. 360) uses the same two symbols for the clause 8.2 combination s′ = s′t + s′a. The values are therefore held as s′, and no row holds an s′t. The page prints s′ in MN/m3 and it is held in N/m3, a change of SI prefix only, which is why no row carries a converted entry; the density in kg/m3 and the thickness in mm are held as printed.\n\nThe table prints each material name once over the rows it covers, and the densities of the glass wool and of the rebond foam once over the two or three rows they span; every row holds the name and the density of its block. Four rock-wool rows and four glass-wool rows differ only by density and thickness, which is why the keys carry both. The names drop the attribution the printed cell carries: eleven rows are the author's own, printed \"(Hopkins)\", and the four rebond foams are credited to Hopkins and Hall (2006), which is what their attributed_to holds. The page writes \"Mineral wool – rock\" and \"Expanded polystyrene – pre-compressed\" with a dash, held here with a comma.\n\nThese are measured specimens, not declared product values: a floating floor is designed with the s′ a manufacturer declares to EN 29052-1 for its product.",
+  "rows": [
+    {
+      "key": "closed_cell_polyethylene_foam_45_5",
+      "name": "Closed-cell polyethylene foam",
+      "dynamic_stiffness_n_m3": 115000000.0,
+      "density_kg_m3": 45.0,
+      "thickness_mm": 5.0
+    },
+    {
+      "key": "expanded_polystyrene_14_50",
+      "name": "Expanded polystyrene",
+      "dynamic_stiffness_n_m3": 78000000.0,
+      "density_kg_m3": 14.0,
+      "thickness_mm": 50.0
+    },
+    {
+      "key": "expanded_polystyrene_precompressed_10_50",
+      "name": "Expanded polystyrene, pre-compressed",
+      "dynamic_stiffness_n_m3": 68000000.0,
+      "density_kg_m3": 10.0,
+      "thickness_mm": 50.0
+    },
+    {
+      "key": "mineral_wool_rock_60_30",
+      "name": "Mineral wool, rock",
+      "dynamic_stiffness_n_m3": 10000000.0,
+      "density_kg_m3": 60.0,
+      "thickness_mm": 30.0
+    },
+    {
+      "key": "mineral_wool_rock_80_30",
+      "name": "Mineral wool, rock",
+      "dynamic_stiffness_n_m3": 11000000.0,
+      "density_kg_m3": 80.0,
+      "thickness_mm": 30.0
+    },
+    {
+      "key": "mineral_wool_rock_100_30",
+      "name": "Mineral wool, rock",
+      "dynamic_stiffness_n_m3": 14000000.0,
+      "density_kg_m3": 100.0,
+      "thickness_mm": 30.0
+    },
+    {
+      "key": "mineral_wool_rock_140_30",
+      "name": "Mineral wool, rock",
+      "dynamic_stiffness_n_m3": 19000000.0,
+      "density_kg_m3": 140.0,
+      "thickness_mm": 30.0
+    },
+    {
+      "key": "mineral_wool_glass_36_13",
+      "name": "Mineral wool, glass",
+      "dynamic_stiffness_n_m3": 28000000.0,
+      "density_kg_m3": 36.0,
+      "thickness_mm": 13.0
+    },
+    {
+      "key": "mineral_wool_glass_36_25",
+      "name": "Mineral wool, glass",
+      "dynamic_stiffness_n_m3": 11000000.0,
+      "density_kg_m3": 36.0,
+      "thickness_mm": 25.0
+    },
+    {
+      "key": "mineral_wool_glass_75_25",
+      "name": "Mineral wool, glass",
+      "dynamic_stiffness_n_m3": 12000000.0,
+      "density_kg_m3": 75.0,
+      "thickness_mm": 25.0
+    },
+    {
+      "key": "mineral_wool_glass_75_40",
+      "name": "Mineral wool, glass",
+      "dynamic_stiffness_n_m3": 7000000.0,
+      "density_kg_m3": 75.0,
+      "thickness_mm": 40.0
+    },
+    {
+      "key": "rebond_foam_64_15",
+      "name": "Rebond foam (reconstituted open cell foam)",
+      "dynamic_stiffness_n_m3": 12000000.0,
+      "density_kg_m3": 64.0,
+      "thickness_mm": 15.0,
+      "attributed_to": {
+        "row": "Hopkins and Hall (2006)"
+      }
+    },
+    {
+      "key": "rebond_foam_64_20",
+      "name": "Rebond foam (reconstituted open cell foam)",
+      "dynamic_stiffness_n_m3": 9000000.0,
+      "density_kg_m3": 64.0,
+      "thickness_mm": 20.0,
+      "attributed_to": {
+        "row": "Hopkins and Hall (2006)"
+      }
+    },
+    {
+      "key": "rebond_foam_64_25",
+      "name": "Rebond foam (reconstituted open cell foam)",
+      "dynamic_stiffness_n_m3": 7000000.0,
+      "density_kg_m3": 64.0,
+      "thickness_mm": 25.0,
+      "attributed_to": {
+        "row": "Hopkins and Hall (2006)"
+      }
+    },
+    {
+      "key": "rebond_foam_96_15",
+      "name": "Rebond foam (reconstituted open cell foam)",
+      "dynamic_stiffness_n_m3": 16000000.0,
+      "density_kg_m3": 96.0,
+      "thickness_mm": 15.0,
+      "attributed_to": {
+        "row": "Hopkins and Hall (2006)"
+      }
+    }
+  ]
+}

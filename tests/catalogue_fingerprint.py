@@ -311,8 +311,52 @@ def one_row_shape(
     }
 
 
+#: The packaged table the resilient layers are read from since they became
+#: catalogue rows. Before, they were written out in the module and keyed by
+#: the row half alone.
+RESILIENT_LAYER_TABLE = "hopkins-2007-table-a3"
+
+
+def _resilient_layer_row(row: Row) -> Row:
+    """One resilient layer taken through the change that made it a catalogue row."""
+    row = dict(row)
+    row["table"] = RESILIENT_LAYER_TABLE
+    credit = row.pop("attributed_to", "")
+    if credit:
+        row["attributed_to"] = {"row": credit}
+    return row
+
+
+def resilient_layer_row(
+    catalogues: Mapping[str, Mapping[str, Row]],
+) -> dict[str, dict[str, Row]]:
+    """The dump taken through the change that made the resilient layers rows.
+
+    Hopkins Table A3 moved out of the module into a packaged data file and
+    its fifteen rows became catalogue rows like every other. Three things
+    moved in each of them, and nothing else may:
+
+    * the key gained the table half every catalogue key has,
+      ``"hopkins-2007-table-a3/<row>"``, in the same order;
+    * ``table`` names that table;
+    * ``attributed_to``, a string on the four rebond foams, became the mapping
+      every other row holds, the credit covering the whole row.
+
+    Every quantity became optional and none changed. The stiffness stays in
+    ``dynamic_stiffness_n_m3``: the heading of Table A3 prints ``s'``, which
+    the book defines as the stiffness of the installed layer, so the apparent
+    ``s't`` field the rows gained stays empty and the dump leaves it out.
+    """
+    out = {name: dict(rows) for name, rows in catalogues.items()}
+    out["PUBLISHED_RESILIENT_LAYERS"] = {
+        f"{RESILIENT_LAYER_TABLE}/{key}": _resilient_layer_row(row)
+        for key, row in catalogues["PUBLISHED_RESILIENT_LAYERS"].items()
+    }
+    return out
+
+
 #: Every change since the baseline, oldest first.
-CHANGES: tuple[Change, ...] = (one_row_shape,)
+CHANGES: tuple[Change, ...] = (one_row_shape, resilient_layer_row)
 
 
 def expected() -> dict[str, dict[str, Row]]:

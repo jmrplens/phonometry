@@ -288,7 +288,7 @@ def generate_enclosed_gas_stiffness(output_dir: str) -> None:
     s_frame = np.full_like(d_mm, 4.935)
     s_gas = np.array(
         [
-            float(materials.enclosed_gas_stiffness(thickness=d * 1e-3, porosity=0.9))
+            float(materials.enclosed_gas_stiffness(thickness_m=d * 1e-3, porosity=0.9))
             / 1e6
             for d in d_mm
         ]

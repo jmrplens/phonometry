@@ -482,7 +482,10 @@ ALLARD_TABLE_11_8_LOSS_FACTOR = 0.1  # eta_s
 # "Dynamic stiffness per unit area of resilient materials measured according to
 # ISO 9052-1". All fifteen rows as
 # (material, density in kg/m3, nominal uncompressed thickness in mm,
-#  s't in MN/m3), in the printed order and the printed units.
+#  s' in MN/m3), in the printed order and the printed units. The heading prints
+# s', which the book's List of symbols (PDF page 23, printed p. xxii) defines
+# as the dynamic stiffness per unit area of the installed material, apart from
+# the apparent s't of the test specimen.
 #
 # The density cell is merged over the rows that share it (one 36 and one 75 for
 # the glass wool, one 64 over the first three rebond rows), which is why the
@@ -490,7 +493,8 @@ ALLARD_TABLE_11_8_LOSS_FACTOR = 0.1  # eta_s
 # them by position and a lookup name cannot.
 #
 # There is one copy of each printed digit and it is here. The library stores the
-# same fifteen rows in N/m3 as PUBLISHED_RESILIENT_LAYERS, and
+# same fifteen rows in N/m3 as PUBLISHED_RESILIENT_LAYERS, read from
+# materials/resilient/data/hopkins-2007-table-a3.json, and
 # tests/materials/resilient/test_dynamic_stiffness.py asserts that it is this
 # table times 1e6, which is what makes two representations one copy and pins the
 # conversion that is the real risk.

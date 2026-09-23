@@ -47,11 +47,11 @@ _RESISTIVITY = 50.0
 
 def _result() -> materials.DynamicStiffnessResult:
     return materials.floating_floor_resonance(
-        resonant_frequency=_FR,
-        total_mass_per_area=_MT,
-        floor_mass_per_area=_MFLOOR,
-        airflow_resistivity=_RESISTIVITY,
-        thickness=_THICKNESS,
+        resonant_frequency_hz=_FR,
+        total_mass_per_area_kg_m2=_MT,
+        floor_mass_per_area_kg_m2=_MFLOOR,
+        airflow_resistivity_kpa_s_m2=_RESISTIVITY,
+        thickness_m=_THICKNESS,
         porosity=_POROSITY,
     )
 
@@ -153,9 +153,9 @@ def test_high_resistivity_omits_gas_term(tmp_path: Path) -> None:
     """For r >= 100 kPa.s/m2 the installed s' equals s't and no s'a row shows."""
     out = tmp_path / "dyn_hi.pdf"
     result = materials.floating_floor_resonance(
-        resonant_frequency=_FR,
-        total_mass_per_area=_MT,
-        floor_mass_per_area=_MFLOOR,
+        resonant_frequency_hz=_FR,
+        total_mass_per_area_kg_m2=_MT,
+        floor_mass_per_area_kg_m2=_MFLOOR,
     )
     result.report(str(out), metadata=_metadata())
     assert_one_page(str(out))

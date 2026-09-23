@@ -490,11 +490,11 @@ def _dynamic_stiffness_example() -> tuple[object, ReportMetadata, str]:
     f0 = (1/2pi) sqrt(s'/m') = 70.4 Hz (Formula 2).
     """
     result = ph.materials.floating_floor_resonance(
-        resonant_frequency=45.0,
-        total_mass_per_area=200.0,
-        floor_mass_per_area=110.0,
-        airflow_resistivity=50.0,
-        thickness=0.020,
+        resonant_frequency_hz=45.0,
+        total_mass_per_area_kg_m2=200.0,
+        floor_mass_per_area_kg_m2=110.0,
+        airflow_resistivity_kpa_s_m2=50.0,
+        thickness_m=0.020,
         porosity=0.9,
     )
     metadata = ReportMetadata(

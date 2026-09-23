@@ -8,7 +8,7 @@ references:
     title: "Acoustics — Framework for calculating a distribution of sound exposure levels for impulsive sound events for the purposes of environmental noise assessment"
     designation: "ISO 13474:2009"
     primary: true
-    note: "El núcleo estadístico implementado: el nivel ponderado en frecuencia de la Ecuación (5), el nivel medio a largo plazo y el nivel de evaluación de las Ecuaciones (7) y (8), las clases ordenadas de las Ecuaciones (10) a (16), las subclases y la dispersión gaussiana de las Ecuaciones (17) a (23), la superación de las Ecuaciones (24) y (25) y el nivel a largo plazo de la Ecuación (A.4). Leída en BS ISO 13474:2009, que la reproduce sin modificaciones; su Anexo A es el ejemplo que ejecuta esta página."
+    note: "El núcleo estadístico implementado: el nivel ponderado en frecuencia de la Ecuación (5), el nivel medio a largo plazo y el nivel de evaluación de las Ecuaciones (7) y (8), las clases ordenadas de las Ecuaciones (10) a (16), las subclases y la dispersión gaussiana de las Ecuaciones (17) a (23), la superación de las Ecuaciones (24) y (25) y el nivel a largo plazo de la Ecuación (A.4). Leída en BS ISO 13474:2009, la adopción británica de la norma, cuyas páginas llevan el texto de ISO 13474:2009(E); su Anexo A es el ejemplo que ejecuta esta página."
   - type: standard
     organization: "International Organization for Standardization"
     year: 2016
@@ -44,10 +44,10 @@ Esta página es ese núcleo estadístico, ejecutado sobre el ejemplo que la norm
 imprime en su Anexo A: un lanzador de misiles contracarro TOW oído a
 3 020 m con 27 clases de atenuación en exceso.
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sel_distribution_density.svg" alt="Dos paneles para el lanzador TOW del Anexo A de ISO 13474. Izquierda: la densidad escalonada de las 27 clases antes de la dispersión turbulenta, frente al nivel de exposición sonora del suceso de 27 a 47 dB; una clase alta y estrecha cerca de 30,8 dB llega a 1,24 por decibelio, un segundo grupo de clases estrechas está cerca de 31,8 dB y unos escalones bajos y anchos se extienden hasta 46 dB. Derecha: la misma distribución dispersada por una distribución normal de 5 dB de desviación típica, una campana suave con el máximo cerca de 30,5 dB en unos 0,061 por decibelio y una cola larga hacia los niveles altos, y una línea vertical discontinua en el nivel a largo plazo de 37,0 dB" width="100%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sel_distribution_density.svg" alt="Dos paneles para el lanzador TOW del Anexo A de ISO 13474. Izquierda: la densidad escalonada de las 27 clases antes de la dispersión turbulenta, frente al nivel de exposición sonora del suceso de 27 a 47 dB; una clase alta y estrecha cerca de 30,8 dB llega a 1,24 por decibelio, un segundo grupo de clases estrechas está cerca de 31,8 dB y unos escalones bajos y anchos se extienden hasta 46 dB. Derecha: la misma distribución dispersada por una distribución normal de 5 dB de desviación típica, una campana suave con el máximo cerca de 30,5 dB en unos 0,061 por decibelio y una cola larga hacia los niveles altos, y una línea vertical discontinua en el nivel a largo plazo LT2 de 37,0 dB" width="100%" />
 
 *Las clases del Anexo A antes de la dispersión (izquierda, Figura A.1 de la
-norma) y después de ella (derecha, Figura A.2), con el nivel a largo plazo
+norma) y después de ella (derecha, Figura A.2), con el nivel a largo plazo LT2
 marcado.*
 
 ## 1. Un número por atmósfera réplica
@@ -155,12 +155,12 @@ y la tabla imprime 1,2399. Y dos pares de clases comparten nivel, 30,8 dB
 (filas 8 y 20 de la Tabla A.3) y 31,8 dB (filas 9 y 10). La Ecuación (11) pone
 su límite común en ese nivel y cada una conserva su mitad a su lado, así que
 la tabla mantiene las dos, y `replicas` dice de qué entrada viene cada una. La
-norma dice que una clase solo queda indefinida cuando tres niveles
-consecutivos son iguales, porque la del medio no tiene anchura, y manda
-combinar las clases del mismo nivel; un par en cualquiera de los dos extremos
-de la lista tiene el mismo problema a través de la Ecuación (12) o (13).
-`sel_distribution` combina exactamente esas rachas y deja todos los demás
-pares como los deja el Anexo A.
+norma nombra el caso de tres niveles consecutivos iguales, cuya clase del
+medio no tiene anchura, y para él manda combinar las clases del mismo nivel;
+un par en cualquiera de los dos extremos de la lista tiene el mismo problema a
+través de la Ecuación (12) o (13), que la norma no menciona y la biblioteca
+trata igual. `sel_distribution` combina exactamente esas rachas y deja todos
+los demás pares como los deja el Anexo A.
 
 ## 4. La dispersión por turbulencia
 
@@ -222,19 +222,24 @@ coincidencia que el anexo ofrece como comprobación. La probabilidad de que un
 suceso supere el nivel a largo plazo es del 21 %: uno de cada cinco sucesos
 suena más que el nivel que los representa a todos.
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sel_distribution_exceedance.svg" alt="La probabilidad de que el nivel de exposición sonora del suceso del lanzador TOW supere x, que baja de 1 por debajo de 15 dB a 0 por encima de 50 dB, con cinco puntos marcados: L95 en 21,6 dB, L50 en 31,5 dB, L10 en 40,5 dB, L5 en 43,0 dB y L1 en 47,5 dB, y una línea vertical discontinua en el nivel a largo plazo de 37,0 dB" width="88%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sel_distribution_exceedance.svg" alt="La probabilidad de que el nivel de exposición sonora del suceso del lanzador TOW supere x, que baja de 1 por debajo de 15 dB a 0 por encima de 50 dB, con cinco puntos marcados: L95 en 21,6 dB, L50 en 31,5 dB, L10 en 40,5 dB, L5 en 43,0 dB y L1 en 47,5 dB, y una línea vertical discontinua en el nivel a largo plazo LT2 de 37,0 dB" width="88%" />
 
-*La curva de superación del ejemplo del Anexo A con los cinco niveles que
-lista la Figura A.3, dibujada con `dist.plot(view="exceedance")`.*
+*La curva de superación del ejemplo del Anexo A con los cinco percentiles que
+lista la Figura A.3, tal como los da la Ecuación (25), dibujada con
+`dist.plot(view="exceedance")`.*
 
 La Figura A.3 imprime esos cinco niveles como 21,7; 31,5; 40,6; 43,2 y
 48,0 dB. $L_{50}$ coincide; los otros cuatro se imprimen entre 0,1 dB y 0,5 dB
-más altos, tanto más cuanto más raro es el nivel. Son los valores de una curva
-acumulada desde los 15 dB en que empieza el eje de la figura y no desde menos
-infinito, que cuenta el 0,2 % de los sucesos por debajo de 15 dB en cada
-superación: esa lectura reproduce los cinco al dígito impreso, y el informe de
-conformidad la contrasta con la página. La biblioteca evalúa la Ecuación (24)
-tal como está escrita.
+más altos, tanto más cuanto más raro es el nivel, y el anexo no dice cómo los
+calculó. Son compatibles con una curva acumulada desde los 15 dB en que
+empieza la curva dibujada (el eje empieza en 10 dB), y no desde menos
+infinito, cuando esa curva se alimenta con la columna de 07:00 a 19:00 de la
+Tabla A.3 tal como se imprime: entonces salen los cinco al dígito impreso.
+Alimentada con las probabilidades a precisión completa que reproducen la
+Tabla A.4, como la `dist` de arriba, la misma lectura da 48,05 dB para
+$L_1$, que se imprimiría como 48,1 dB, así que se queda en hipótesis. El
+[registro de erratas](/phonometry/es/reference/errata/) tiene la entrada, y
+la biblioteca evalúa la Ecuación (24) tal como está escrita.
 
 <details>
 <summary>Ver el código de estas figuras</summary>
@@ -301,5 +306,6 @@ que es donde empezaría el nivel de una réplica.
 - [Niveles integrados y estadísticos](/phonometry/es/signals/levels/levels/):
   el nivel de exposición sonora de un suceso medido y los niveles percentiles
   de un registro, que esta página predice en lugar de medir.
+- Referencia de la API: [`environment.assessment.exposure_distribution`](/phonometry/es/reference/api/environment/exposure-distribution/).
 
 </SeeAlso>

@@ -8,11 +8,11 @@ class by day, by night and over 07:00 to 19:00, the probability density of
 the classes, and the exceedance levels and long-term levels read from the
 distribution once it has been spread for turbulence.
 
-Every number was read on the rasterized page of BS ISO 13474:2009, which
-reproduces ISO 13474:2009 (first edition, 2009-06-15) without modification:
-Table A.3 on printed folio 32 (PDF page 40), Table A.4 on folio 33 (PDF page
-41), the running text of Annex A on folio 34 (PDF page 42) and Figure A.3 on
-folio 36 (PDF page 44).
+Every number was read on the printed page of BS ISO 13474:2009, the UK
+implementation of ISO 13474:2009 (first edition, 2009-06-15), whose pages
+carry the ISO 13474:2009(E) text: Table A.3 on printed folio 32 (PDF page 40),
+Table A.4 on folio 33 (PDF page 41), the running text of Annex A on folio 34
+(PDF page 42) and Figure A.3 on folio 36 (PDF page 44).
 
 Stdlib only, like every module of this package.
 """
@@ -101,7 +101,7 @@ ISO13474_ANNEX_A_SIGMA_DB: float = 5.0
 ISO13474_ANNEX_A_SUBCLASSES: int = 10
 
 #: Folio 34 (PDF page 42): "In this example, the mean value was shifted by an
-#: amount, Δµ, equal to 1,04 dB [from Equation (22)]". Equation (22) gives
+#: amount, Δμ, equal to 1,04 dB [from Equation (22)]". Equation (22) gives
 #: σ² ln 10 / 20 = 2,878 dB at the 5 dB of the same paragraph; 1,04 dB is its
 #: value at σ = 3 dB. The long-term level LT2 and the curve of Figure A.2 were
 #: computed with 2,878 dB (see docs/ERRATA.md).
@@ -124,9 +124,12 @@ ISO13474_FIGURE_A3_EXCEEDANCE_DB: dict[int, float] = {
 ISO13474_FIGURE_A3_LT1_DB: float = 37.0
 ISO13474_FIGURE_A3_LT2_DB: float = 37.0
 
-#: Figures A.2 and A.3 (folios 35 and 36) draw their curves from x = 15 dB,
-#: where the cumulative curve of Figure A.3 starts at exactly 1. The printed
-#: exceedance levels are reproduced to the printed digit when the curve is
-#: accumulated from this lower limit, 1 - ∫₁₅ˣ ρ*(x') dx', rather than as the
-#: integral of Equation (24) to infinity (see docs/ERRATA.md).
+#: Figures A.2 and A.3 (folios 35 and 36) draw their curves from x = 15 dB;
+#: their axes start at 10 dB. A curve accumulated from this lower limit,
+#: 1 - ∫₁₅ˣ ρ*(x') dx', rather than as the integral of Equation (24) to
+#: infinity, is consistent with the printed exceedance levels when it is fed
+#: the 07:00 to 19:00 column of Table A.3 as printed; fed the full-precision
+#: probabilities that reproduce Table A.4, it gives L1 = 48,05 dB, which would
+#: print 48,1. It is a hypothesis, not how the annex says it computed them
+#: (see docs/ERRATA.md).
 ISO13474_FIGURE_A3_LOWER_LIMIT_DB: float = 15.0

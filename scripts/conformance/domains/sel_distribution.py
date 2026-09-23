@@ -9,19 +9,20 @@ boundaries and densities; Figure A.3 prints the two long-term levels and five
 exceedance levels of the distribution once it has been spread for turbulence.
 Every row below starts from Table A.3.
 
-Oracle: BS ISO 13474:2009, which reproduces ISO 13474:2009 without
-modification: Tables A.3 and A.4 on printed folios 32 and 33 (PDF pages 40
-and 41), the running text on folio 34 (PDF page 42), Figure A.3 on folio 36
-(PDF page 44).
+Oracle: BS ISO 13474:2009, the UK implementation of ISO 13474:2009, whose
+pages carry the ISO 13474:2009(E) text: Tables A.3 and A.4 on printed folios
+32 and 33 (PDF pages 40 and 41), the running text on folio 34 (PDF page 42),
+Figure A.3 on folio 36 (PDF page 44).
 
 Two printed defects sit in this oracle and both are recorded in
 ``docs/ERRATA.md``. The running text gives the shift of Equation (22) as
 1,04 dB with a standard deviation of 5 dB, where the equation gives 2,878 dB;
 LT2 and the curve of Figure A.2 were computed with 2,878 dB, so the rows use
 the equation. And four of the five exceedance levels of Figure A.3 are not
-the roots of Equation (25): they are reproduced to the printed digit by a
-curve accumulated from the 15 dB its axis starts at, which the row for them
-states and the row for the 50 % level does not need.
+the roots of Equation (25): solved on this distribution it gives 21,6 / 40,5 /
+43,0 / 47,5 dB where the figure prints 21,7 / 40,6 / 43,2 / 48,0 dB. How the
+figure arrived at them is not stated, so those four have no row; the 50 %
+level, which Equation (25) does reproduce, has one.
 """
 
 from __future__ import annotations
@@ -30,7 +31,7 @@ import math
 
 import numpy as np
 import reference_data as ref
-from scipy import integrate, optimize
+from scipy import integrate
 
 from phonometry import environment
 
@@ -46,8 +47,6 @@ _PERIOD = ref.ISO13474_ANNEX_A_DAY_FRACTION * np.array(
 ) + ref.ISO13474_ANNEX_A_NIGHT_FRACTION * np.array(
     [row[3] for row in ref.ISO13474_TABLE_A3]
 )
-#: The 07:00 to 19:00 column as printed, rounded to four decimals.
-_PRINTED_PERIOD = np.array([row[4] for row in ref.ISO13474_TABLE_A3])
 
 
 def _annex_a(probabilities: np.ndarray) -> environment.SelDistribution:
@@ -141,15 +140,28 @@ def _chk_lt1() -> Outcome:
     "Long-term level LT2 from the distribution spread with sigma = 5 dB",
 )
 def _chk_lt2() -> Outcome:
-    """The long-term level taken again over the continuous density.
+    """Equation (A.4) as printed, integrated over the library's spread density.
 
-    The shift of Equation (22) keeps the energy of every subclass, so LT2
-    differs from LT1 only by the spreading of each class over its width,
+    The row does not read the closed form the result carries: it integrates
+    ``SelDistribution.density``, the sum of the shifted Gaussians of Equation
+    (23), weighted by 10^(0,1 x), so the sign and size of the shift, the
+    normalisation of each Gaussian and the weight it carries all reach the
+    number. The shift of Equation (22) keeps the energy of every subclass, so
+    LT2 differs from LT1 only by the spreading of each class over its width,
     about 0,05 dB here, and both print 37,0 dB. With the 1,04 dB the running
     text gives for the shift, every level would move up by 1,84 dB and LT2
     would read 38,8 dB.
     """
-    value = _annex_a(_PERIOD).distribution_long_term_level_db
+    dist = _annex_a(_PERIOD)
+    energy, _ = integrate.quad(
+        lambda x: float(dist.density(x)) * 10.0 ** (0.1 * x),
+        -60.0,
+        160.0,
+        limit=400,
+        epsabs=0.0,
+        epsrel=1e-12,
+    )
+    value = 10.0 * math.log10(energy)
     return numeric(ref.ISO13474_FIGURE_A3_LT2_DB, value, 0.05, unit="dB", places=2)
 
 
@@ -194,46 +206,4 @@ def _chk_l50() -> Outcome:
     value = float(_annex_a(_PERIOD).exceedance_level(50.0))
     return numeric(
         ref.ISO13474_FIGURE_A3_EXCEEDANCE_DB[50], value, 0.05, unit="dB", places=2
-    )
-
-
-@register(
-    _ISO13474,
-    "ISO 13474:2009 Equation (24), Figure A.3",
-    "The five printed exceedance levels, with the curve accumulated from 15 dB",
-)
-def _chk_figure_a3_exceedance_levels() -> Outcome:
-    """L95, L50, L10, L5 and L1 as Figure A.3 prints them.
-
-    Solved exactly, Equation (25) gives 21,6 / 31,5 / 40,5 / 43,0 / 47,5 dB,
-    and the figure prints 21,7 / 31,5 / 40,6 / 43,2 / 48,0 dB. The five are
-    reproduced to the printed digit, with the 07:00 to 19:00 column as printed,
-    when the cumulative curve is formed from the lower end of the plotted range
-    rather than from minus infinity: 1 minus the integral of the density from
-    15 dB to x. The probability below 15 dB, about 0,2 %, is then counted in
-    every exceedance, which moves the rarest levels most, 0,5 dB at L1. The
-    curve of Figure A.3 starts at 15 dB at exactly 1, which is what that
-    reading draws. The row takes the exceedance from the library and the
-    15 dB from the figure, and records each level's distance from the print.
-    """
-    dist = _annex_a(_PRINTED_PERIOD)
-    floor = float(dist.exceedance(ref.ISO13474_FIGURE_A3_LOWER_LIMIT_DB))
-    worst = 0.0
-    for percent, printed in ref.ISO13474_FIGURE_A3_EXCEEDANCE_DB.items():
-        target = percent / 100.0
-        level = optimize.brentq(
-            lambda x, p=target: 1.0 - (floor - float(dist.exceedance(x))) - p,
-            ref.ISO13474_FIGURE_A3_LOWER_LIMIT_DB + 1e-6,
-            100.0,
-            xtol=1e-10,
-        )
-        worst = max(worst, abs(level - printed))
-    return numeric(
-        0.0,
-        worst,
-        0.05,
-        unit="dB",
-        places=3,
-        expected_label="L95/L50/L10/L5/L1 = 21.7/31.5/40.6/43.2/48.0 dB (+/-0.05 dB)",
-        computed_label=f"largest difference {worst:.3f} dB",
     )

@@ -114,8 +114,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   Annex A do not follow from its own equations and are in the errata register:
   the shift is printed as 1,04 dB where Equation (22) gives 2,878 dB at the
   5 dB the annex uses, and four of the five exceedance levels of Figure A.3
-  come from a curve accumulated from the 15 dB its axis starts at. A new guide
-  in English and Spanish runs the whole example.
+  are 0,1 dB to 0,5 dB above the roots of Equation (25). Those four are
+  consistent with a curve accumulated from 15 dB, where the drawn curve
+  begins, when it is fed the rounded 07:00 to 19:00 column of Table A.3, but
+  not with the full-precision probabilities that reproduce Table A.4, so the
+  register gives that reading as a hypothesis. The register also records that
+  the paragraph above Table A.3 credits the level of each class to Equations
+  (7) and (8), the long-term averages, where Equations (4) and (5) give it. A
+  new guide in English and Spanish runs the whole example.
 - **The ISO 1683 reference values, published once and read by every level.**
   `metrology.ISO1683_REFERENCE_VALUES` holds ISO 1683:2015 Tables 1 to 3,
   the reference values for sound in gases, sound in liquids and vibration,

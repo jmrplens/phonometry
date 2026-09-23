@@ -11,6 +11,7 @@ prints them, which shares no code with the closed forms.
 
 from __future__ import annotations
 
+import dataclasses
 import math
 
 import matplotlib as mpl
@@ -54,6 +55,12 @@ def _annex_a(probabilities: np.ndarray = _PERIOD) -> sd.SelDistribution:
         probabilities,
         sigma_db=ISO13474_ANNEX_A_SIGMA_DB,
         subclasses=ISO13474_ANNEX_A_SUBCLASSES,
+    )
+
+
+def _annex_a_one_subclass() -> sd.SelDistribution:
+    return sd.sel_distribution(
+        _LEVELS, _PERIOD, sigma_db=ISO13474_ANNEX_A_SIGMA_DB, subclasses=1
     )
 
 
@@ -129,17 +136,27 @@ def test_lt2_matches_quadrature_of_equation_a4() -> None:
     assert round(dist.distribution_long_term_level_db, 1) == ISO13474_FIGURE_A3_LT2_DB
 
 
-def test_lt2_differs_from_lt1_by_the_class_widths_only() -> None:
-    """With N_sub = 1 each subclass sits at the class centre, not the class level.
+def test_lt2_with_one_subclass_is_the_energy_mean_of_the_class_centres() -> None:
+    """With N_sub = 1 each subclass sits at the centre of its class.
 
     The shift of Equation (22) preserves the energy of every subclass, so what
-    separates LT2 from LT1 is where the subclass centres sit, and nothing else.
+    separates LT2 from LT1 is where the subclass centres sit and nothing else.
+    With one subclass per class that centre is half-way between the printed
+    boundaries of Table A.4, which gives the expected value without the
+    library's subclass arithmetic.
     """
+    dist = _annex_a_one_subclass()
+    order = np.argsort(_LEVELS, kind="stable")
+    centres = 0.5 * (_column(3) + _column(4))
+    expected = 10.0 * math.log10(
+        float(np.sum(_PERIOD[order] * 10.0 ** (0.1 * centres)))
+    )
+    assert dist.distribution_long_term_level_db == pytest.approx(expected, abs=1e-9)
+
+
+def test_lt2_sits_below_lt1_in_the_annex_example() -> None:
+    """Spread over their widths, the classes lose energy against their levels."""
     dist = _annex_a()
-    centres = dist.subclass_centres_db.ravel()
-    weights = np.repeat(dist.probabilities / dist.subclasses, dist.subclasses)
-    expected = 10.0 * math.log10(float(np.sum(weights * 10.0 ** (0.1 * centres))))
-    assert dist.distribution_long_term_level_db == pytest.approx(expected, abs=1e-12)
     assert dist.distribution_long_term_level_db < dist.long_term_level_db
 
 
@@ -148,28 +165,79 @@ def test_fifty_percent_level_matches_figure_a3() -> None:
     assert round(dist.exceedance_level(50.0), 1) == ISO13474_FIGURE_A3_EXCEEDANCE_DB[50]
 
 
-def test_figure_a3_levels_follow_from_a_curve_accumulated_from_15_db() -> None:
-    """All five printed exceedance levels, read the way the figure was drawn.
+def test_figure_a3_levels_other_than_l50_are_not_the_roots_of_equation_25() -> None:
+    """Equation (25) gives 21,6 / 40,5 / 43,0 / 47,5 dB; the figure prints higher.
 
-    Equation (24) integrates to infinity and gives 21,6 / 31,5 / 40,5 / 43,0 /
-    47,5 dB. The figure prints 21,7 / 31,5 / 40,6 / 43,2 / 48,0 dB, which are
-    reproduced to the printed digit when the curve is accumulated from the
-    15 dB its axis starts at, 1 - (P(L > 15) - P(L > x)), fed the rounded
-    07:00 to 19:00 column (see docs/ERRATA.md).
+    The roots are checked against a bracketing root search on the quadrature
+    of the density, which shares no code with ``exceedance_level``. The
+    printed 21,7 / 40,6 / 43,2 / 48,0 dB are the erratum in docs/ERRATA.md,
+    whichever of the two probability columns feeds the distribution.
     """
-    dist = _annex_a(_PRINTED_PERIOD)
+    percents = (95.0, 10.0, 5.0, 1.0)
+    for probabilities in (_PERIOD, _PRINTED_PERIOD):
+        dist = _annex_a(probabilities)
+        total = float(np.sum(probabilities))
+        roots = []
+        for percent in percents:
+            target = percent / 100.0
+
+            def tail(
+                x: float,
+                target: float = target,
+                d: sd.SelDistribution = dist,
+                whole: float = total,
+            ) -> float:
+                below, _ = integrate.quad(
+                    lambda t: float(d.density(t)), -60.0, x, limit=400, epsabs=1e-14
+                )
+                return whole - below - target
+
+            roots.append(optimize.brentq(tail, 10.0, 60.0, xtol=1e-9))
+        np.testing.assert_allclose(dist.exceedance_level(percents), roots, atol=1e-6)
+        np.testing.assert_array_equal(np.round(roots, 1), [21.6, 40.5, 43.0, 47.5])
+        printed = [ISO13474_FIGURE_A3_EXCEEDANCE_DB[int(p)] for p in percents]
+        assert np.all(np.asarray(printed) - np.asarray(roots) > 0.05)
+
+
+def _accumulated_from_the_drawn_start(
+    dist: sd.SelDistribution, percent: float
+) -> float:
+    """The level where 1 - (P(L > 15) - P(L > x)) falls to the percentage."""
     floor = float(dist.exceedance(ISO13474_FIGURE_A3_LOWER_LIMIT_DB))
-
-    def printed_curve(x: float) -> float:
-        return 1.0 - (floor - float(dist.exceedance(x)))
-
-    for percent, printed in ISO13474_FIGURE_A3_EXCEEDANCE_DB.items():
-        level = optimize.brentq(
-            lambda x, p=percent: printed_curve(x) - p / 100.0, 16.0, 80.0
+    return float(
+        optimize.brentq(
+            lambda x: 1.0 - (floor - float(dist.exceedance(x))) - percent / 100.0,
+            ISO13474_FIGURE_A3_LOWER_LIMIT_DB + 1e-6,
+            80.0,
+            xtol=1e-10,
         )
+    )
+
+
+def test_the_15_db_reading_matches_figure_a3_only_with_the_rounded_column() -> None:
+    """What the errata entry says of the hypothesis, and where it stops.
+
+    Accumulated from 15 dB, where the drawn curve of Figure A.3 begins (its
+    axis starts at 10 dB), the curve reproduces all five printed levels when
+    fed the 07:00 to 19:00 column of Table A.3 as printed, which sums to
+    1,0004. Fed the full-precision probabilities that reproduce Table A.4, it
+    gives 48,05 dB for L1, which would print 48,1 dB. With the printed column
+    the reading adds about 0,17 % to every exceedance: the 0,21 % below 15 dB
+    less the 0,04 % by which the column exceeds one.
+    """
+    rounded = _annex_a(_PRINTED_PERIOD)
+    for percent, printed in ISO13474_FIGURE_A3_EXCEEDANCE_DB.items():
+        level = _accumulated_from_the_drawn_start(rounded, percent)
         assert level == pytest.approx(printed, abs=0.05), percent
-    exact = dist.exceedance_level([95.0, 10.0, 5.0, 1.0])
-    np.testing.assert_allclose(np.round(exact, 1), [21.6, 40.5, 43.0, 47.5])
+    below = float(np.sum(_PRINTED_PERIOD)) - float(
+        rounded.exceedance(ISO13474_FIGURE_A3_LOWER_LIMIT_DB)
+    )
+    offset = 1.0 - float(rounded.exceedance(ISO13474_FIGURE_A3_LOWER_LIMIT_DB))
+    assert round(100.0 * below, 2) == pytest.approx(0.21)
+    assert round(100.0 * offset, 2) == pytest.approx(0.17)
+    full = _accumulated_from_the_drawn_start(_annex_a(), 1.0)
+    assert full == pytest.approx(48.0549, abs=1e-4)
+    assert round(full, 1) == pytest.approx(48.1)
 
 
 def test_printed_level_shift_is_not_equation_22_at_5_db() -> None:
@@ -189,11 +257,17 @@ def test_printed_level_shift_is_not_equation_22_at_5_db() -> None:
 
 
 def test_figure_a2_peak_sits_where_the_printed_curve_peaks() -> None:
-    """Figure A.2 peaks near 30,5 dB at about 0,061/dB."""
+    """The crest of Figure A.2, to what the page resolves.
+
+    Read off the drawn curve (folio 35), the crest is flat to its line width
+    from about 30,2 dB to 30,8 dB and sits at 0,0607/dB, a height the page
+    gives to a few units in the fifth decimal. The check holds the computed
+    peak to that span and that height, and no closer.
+    """
     dist = _annex_a()
     x = np.linspace(25.0, 36.0, 11001)
     density = np.asarray(dist.density(x))
-    assert x[np.argmax(density)] == pytest.approx(30.47, abs=0.02)
+    assert x[np.argmax(density)] == pytest.approx(30.5, abs=0.3)
     assert float(density.max()) == pytest.approx(0.0607, abs=5e-4)
 
 
@@ -310,8 +384,23 @@ def test_sigma_and_subclasses_default_to_the_annex() -> None:
 
 def test_result_arrays_are_read_only() -> None:
     dist = _annex_a()
+    arrays = {
+        field.name: getattr(dist, field.name)
+        for field in dataclasses.fields(dist)
+        if isinstance(getattr(dist, field.name), np.ndarray)
+    }
+    assert set(arrays) == {
+        "levels_db",
+        "probabilities",
+        "lower_bounds_db",
+        "upper_bounds_db",
+        "class_densities_per_db",
+        "subclass_centres_db",
+    }
+    writable = [name for name, array in arrays.items() if array.flags.writeable]
+    assert writable == []
     with pytest.raises(ValueError, match="read-only"):
-        dist.levels_db[0] = 0.0
+        dist.subclass_centres_db[0, 0] = 0.0
 
 
 # ---------------------------------------------------------------------------
@@ -436,6 +525,28 @@ def test_refuses_probabilities_that_do_not_sum_to_one() -> None:
     percent = [50.0, 50.0]
     with pytest.raises(ValueError, match="sum to one"):
         sd.long_term_sel([40.0, 44.0], percent)
+
+
+@pytest.mark.parametrize("total", [0.98, 1.02])
+def test_refuses_a_set_of_classes_two_percent_from_one(total: float) -> None:
+    """A class left out, or one counted twice, is refused and not renormalised."""
+    probs = _PERIOD * (total / float(np.sum(_PERIOD)))
+    with pytest.raises(ValueError, match="sum to one"):
+        sd.sel_distribution(_LEVELS, probs)
+
+
+@pytest.mark.parametrize("total", [0.995, 1.0004, 1.005])
+def test_accepts_probabilities_rounded_to_a_printed_table(total: float) -> None:
+    """Table A.3 prints a 07:00 to 19:00 column that sums to 1,000 4."""
+    probs = _PERIOD * (total / float(np.sum(_PERIOD)))
+    dist = sd.sel_distribution(_LEVELS, probs)
+    assert float(np.sum(dist.probabilities)) == pytest.approx(total)
+
+
+def test_accepts_the_printed_period_column_of_table_a3() -> None:
+    assert float(np.sum(_PRINTED_PERIOD)) == pytest.approx(1.0004, abs=1e-12)
+    level = sd.long_term_sel(_LEVELS, _PRINTED_PERIOD)
+    assert round(float(level), 1) == ISO13474_FIGURE_A3_LT1_DB
 
 
 def test_refuses_a_single_distinct_level() -> None:
@@ -565,7 +676,7 @@ def test_density_view_draws_the_continuous_density_and_lt2() -> None:
     curve, marker = ax.lines
     np.testing.assert_allclose(curve.get_ydata(), dist.density(curve.get_xdata()))
     assert marker.get_xdata()[0] == pytest.approx(dist.distribution_long_term_level_db)
-    assert "37.0 dB" in marker.get_label()
+    assert marker.get_label() == "LT2 (long-term level) 37.0 dB"
     plt.close("all")
 
 
@@ -583,7 +694,7 @@ def test_exceedance_view_marks_the_five_figure_a3_levels() -> None:
         [float(p.get_ydata()[0]) for p in points], [0.95, 0.5, 0.1, 0.05, 0.01]
     )
     assert "31,5 dB" in points[1].get_label()
-    assert "nivel a largo plazo" in marker.get_label()
+    assert marker.get_label() == "LT2 (nivel a largo plazo) 37,0 dB"
     assert ax.get_xlabel().startswith("Nivel de exposición sonora")
     plt.close("all")
 

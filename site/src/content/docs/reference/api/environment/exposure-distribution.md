@@ -59,13 +59,14 @@ Two readings the text leaves to the implementer
 levels, so two equal levels share a boundary at that level and each keeps a
 class of non-zero width on its own side; Annex A does exactly that with its
 two classes at 30,8 dB and its two at 31,8 dB, and so does this module. The
-standard says a class is undefined only when three consecutive levels are
-equal, since the middle one then has no width, and that "classes with the same
-level shall be combined". A run of two equal levels at either end of the list
-leaves a class of no width in the same way, through Equation (12) or (13).
-Every run of equal levels that would leave a class of no width is therefore
-combined into one class carrying the sum of their probabilities; every other
-run is left as the standard writes it.
+standard names one case, three consecutive equal levels, whose middle class
+then has no width and no defined density, and for it says "classes with the
+same level shall be combined". A run of two equal levels at either end of the
+list leaves a class of no width in the same way, through Equation (12) or
+(13); the standard does not mention it, and this module reads it as the same
+case. Every run of equal levels that would leave a class of no width is
+therefore combined into one class carrying the sum of their probabilities;
+every other run is left as the standard writes it.
 
 **The integrals.** Equations (22), (24) and (A.4) are integrals of Gaussian
 functions and are evaluated here in closed form, not by quadrature: the shift

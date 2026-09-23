@@ -15,7 +15,7 @@ level exceeded by any percentage of the events are read. This page is that
 statistical core, run on the example of Annex A: a TOW anti-tank missile
 launcher heard at 3 020 m under 27 excess-attenuation classes.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sel_distribution_density_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sel_distribution_density.svg" alt="The step density of the 27 classes of the Annex A example before the turbulent spread, and the smooth density after a 5 dB Gaussian spread, peaking near 30,5 dB with the long-term level of 37,0 dB marked" width="88%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sel_distribution_density_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sel_distribution_density.svg" alt="The step density of the 27 classes of the Annex A example before the turbulent spread, and the smooth density after a 5 dB Gaussian spread, peaking near 30,5 dB with the long-term level LT2 of 37,0 dB marked" width="88%"></picture>
 
 ## One number per replica atmosphere
 
@@ -96,17 +96,21 @@ print(round(dist.distribution_long_term_level_db, 2))                 # 36.96
 dist.plot(view="exceedance")
 ```
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sel_distribution_exceedance_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sel_distribution_exceedance.svg" alt="The probability that the single-event level exceeds x, with L95, L50, L10, L5 and L1 marked and the long-term level of 37,0 dB" width="88%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sel_distribution_exceedance_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sel_distribution_exceedance.svg" alt="The probability that the single-event level exceeds x, with L95, L50, L10, L5 and L1 marked as Equation (25) gives them and the long-term level LT2 of 37,0 dB" width="88%"></picture>
 
 Two things in Annex A do not follow from its own equations, and both are in
 the [errata register](../../ERRATA.md). The running text gives the shift of
 Equation (22) as 1,04 dB with a standard deviation of 5 dB; the equation gives
 2,878 dB there, 1,04 dB is its value at 3 dB, and the printed LT2 of 37,0 dB and
 the curve of Figure A.2 were computed with 2,878 dB. And Figure A.3 prints
-21,7; 31,5; 40,6; 43,2 and 48,0 dB for the five exceedance levels: those are
-reproduced to the printed digit by a curve accumulated from the 15 dB its axis
-starts at rather than from minus infinity. The library evaluates Equations
-(22), (24) and (25) as written.
+21,7; 31,5; 40,6; 43,2 and 48,0 dB for the five exceedance levels, where
+Equation (25) gives 21,6; 31,5; 40,5; 43,0 and 47,5 dB. The printed values are
+consistent with a curve accumulated from 15 dB, where the drawn curve begins
+(the axis starts at 10 dB), when it is fed the 07:00 to 19:00 column of
+Table A.3 as printed; fed the full-precision probabilities that reproduce
+Table A.4, that reading gives 48,05 dB for `L_1`, which would print 48,1 dB, so
+it stays a hypothesis. The library evaluates Equations (22), (24) and (25) as
+written.
 
 ## What this guide covers
 

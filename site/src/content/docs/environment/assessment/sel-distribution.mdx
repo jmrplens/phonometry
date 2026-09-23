@@ -8,7 +8,7 @@ references:
     title: "Acoustics — Framework for calculating a distribution of sound exposure levels for impulsive sound events for the purposes of environmental noise assessment"
     designation: "ISO 13474:2009"
     primary: true
-    note: "The implemented statistical core: the frequency-weighted level of Equation (5), the long-term average and rating level of Equations (7) and (8), the ordered classes of Equations (10) to (16), the subclasses and Gaussian spread of Equations (17) to (23), the exceedance of Equations (24) and (25), and the long-term level of Equation (A.4). Read from BS ISO 13474:2009, which reproduces it without modification; its Annex A is the worked example this page runs."
+    note: "The implemented statistical core: the frequency-weighted level of Equation (5), the long-term average and rating level of Equations (7) and (8), the ordered classes of Equations (10) to (16), the subclasses and Gaussian spread of Equations (17) to (23), the exceedance of Equations (24) and (25), and the long-term level of Equation (A.4). Read from BS ISO 13474:2009, the UK implementation of the standard, whose pages carry the ISO 13474:2009(E) text; its Annex A is the worked example this page runs."
   - type: standard
     organization: "International Organization for Standardization"
     year: 2016
@@ -42,10 +42,10 @@ This page is that statistical core, run on the example the standard prints in
 its Annex A: a TOW anti-tank missile launcher heard at 3 020 m under 27
 excess-attenuation classes.
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sel_distribution_density.svg" alt="Two panels for the TOW launcher of ISO 13474 Annex A. Left: the step density of the 27 classes before the turbulent spread, against the single-event sound exposure level from 27 to 47 dB; a tall narrow class near 30,8 dB reaches 1,24 per decibel, a second group of narrow classes sits near 31,8 dB, and low wide steps run out to 46 dB. Right: the same distribution spread by a normal distribution of 5 dB standard deviation, a smooth bell peaking near 30,5 dB at about 0,061 per decibel with a long tail towards high levels, and a dashed vertical line at the long-term level of 37,0 dB" width="100%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sel_distribution_density.svg" alt="Two panels for the TOW launcher of ISO 13474 Annex A. Left: the step density of the 27 classes before the turbulent spread, against the single-event sound exposure level from 27 to 47 dB; a tall narrow class near 30,8 dB reaches 1,24 per decibel, a second group of narrow classes sits near 31,8 dB, and low wide steps run out to 46 dB. Right: the same distribution spread by a normal distribution of 5 dB standard deviation, a smooth bell peaking near 30,5 dB at about 0,061 per decibel with a long tail towards high levels, and a dashed vertical line at the long-term level LT2 of 37,0 dB" width="100%" />
 
 *The classes of Annex A before the spread (left, Figure A.1 of the standard)
-and after it (right, Figure A.2), with the long-term level marked.*
+and after it (right, Figure A.2), with the long-term level LT2 marked.*
 
 ## 1. One number per replica atmosphere
 
@@ -147,12 +147,12 @@ probabilities over the widths, not the rounded column printed beside them:
 pairs of classes share a level, 30,8 dB (Table A.3 rows 8 and 20) and 31,8 dB
 (rows 9 and 10). Equation (11) puts their common boundary at that level and
 each keeps its half on its own side, so the table keeps both, and
-`replicas` says which input each came from. The standard says a class is
-undefined only when three consecutive levels are equal, since the middle one
-has no width, and tells you to combine classes of the same level; a pair at
-either end of the list has the same problem through Equation (12) or (13).
-`sel_distribution` combines exactly those runs and leaves every other pair as
-Annex A does.
+`replicas` says which input each came from. The standard names the case of
+three consecutive equal levels, whose middle class has no width, and for it
+tells you to combine classes of the same level; a pair at either end of the
+list has the same problem through Equation (12) or (13), which the standard
+does not mention and the library treats the same way. `sel_distribution`
+combines exactly those runs and leaves every other pair as Annex A does.
 
 ## 4. Spreading for turbulence
 
@@ -212,18 +212,22 @@ offers as its check. The probability that one event exceeds the long-term
 level is 21 %: one event in five is louder than the level that stands for all
 of them.
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sel_distribution_exceedance.svg" alt="The probability that the single-event sound exposure level of the TOW launcher exceeds x, falling from 1 below 15 dB to 0 above 50 dB, with five marked points: L95 at 21,6 dB, L50 at 31,5 dB, L10 at 40,5 dB, L5 at 43,0 dB and L1 at 47,5 dB, and a dashed vertical line at the long-term level of 37,0 dB" width="88%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sel_distribution_exceedance.svg" alt="The probability that the single-event sound exposure level of the TOW launcher exceeds x, falling from 1 below 15 dB to 0 above 50 dB, with five marked points: L95 at 21,6 dB, L50 at 31,5 dB, L10 at 40,5 dB, L5 at 43,0 dB and L1 at 47,5 dB, and a dashed vertical line at the long-term level LT2 of 37,0 dB" width="88%" />
 
-*The exceedance curve of the Annex A example with the five levels Figure A.3
-lists, from `dist.plot(view="exceedance")`.*
+*The exceedance curve of the Annex A example with the five percentiles Figure
+A.3 lists, as Equation (25) gives them, from `dist.plot(view="exceedance")`.*
 
 Figure A.3 prints those five levels as 21,7; 31,5; 40,6; 43,2 and 48,0 dB.
 $L_{50}$ agrees; the other four are 0,1 dB to 0,5 dB higher in print, the more
-so the rarer the level. They are the values of a curve accumulated from the
-15 dB where the figure's axis starts rather than from minus infinity, which
-counts the 0,2 % of the events below 15 dB in every exceedance: that reading
-reproduces all five to the printed digit, and the conformance report holds it
-against the page. The library evaluates Equation (24) as written.
+so the rarer the level, and the annex does not say how it computed them. They
+are consistent with a curve accumulated from 15 dB, where the drawn curve
+begins (the axis starts at 10 dB), rather than from minus infinity, when that
+curve is fed the 07:00 to 19:00 column of Table A.3 as printed: all five then
+come out to the printed digit. Fed the full-precision probabilities that
+reproduce Table A.4, as `dist` above is, the same reading gives 48,05 dB for
+$L_1$, which would print 48,1 dB, so it stays a hypothesis. The
+[errata register](/phonometry/reference/errata/) has the entry, and the
+library evaluates Equation (24) as written.
 
 <details>
 <summary>Show the code for these figures</summary>
@@ -289,5 +293,6 @@ would start.
 - [Integrated and Statistical Levels](/phonometry/signals/levels/levels/):
   the sound exposure level of a measured event and the percentile levels of a
   record, which this page predicts rather than measures.
+- API reference: [`environment.assessment.exposure_distribution`](/phonometry/reference/api/environment/exposure-distribution/).
 
 </SeeAlso>

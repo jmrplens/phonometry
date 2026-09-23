@@ -2303,8 +2303,10 @@ def generate_pole_migration(output_dir: str) -> None:
         ax.legend(loc="lower center", ncol=2, fontsize=8)
 
     # The zoom that makes the collapsed pair visible.  Its top stays clear of
-    # the parent's top spine so the inset title has a line of its own.
-    inset = ax_a.inset_axes((0.52, 0.60, 0.44, 0.34))
+    # the parent's top spine so the inset title has a line of its own, and it
+    # stands far enough left that the circle passes clear of the "1.0000"
+    # under its right end.
+    inset = ax_a.inset_axes((0.47, 0.60, 0.44, 0.34))
     inset.plot(
         np.real(p_full),
         np.imag(p_full),

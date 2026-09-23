@@ -107,6 +107,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **Nothing is drawn over a tick label any more.** The half disc of
+  `cnossos_rail_directivity` had its legend over the radial "15" and the
+  "−90°", and the dipole beside it ran its lobe through "−10.0". The polar
+  panel of `directivity_and_tables` ran its 4 kHz lobes through "−3" and "−6"
+  and its rim through "6", the unit circle of `pole_migration` ran through the
+  "1.0000" of its zoom, and the three cepstra of `cepstrum_variants` ran along
+  the "0.0" of theirs. The legend now stands beside the half disc, the radial
+  labels of both polar plots sit on a ray the curves leave clear (the
+  directivity panel labels every other ring, since its eight lobes leave no ray
+  that all five labels clear), and both zooms moved off the curves of the panel
+  they sit in. On the `diagram_sweep_budget` plate the two captions of the last
+  lane ran through the "−1", "0" and "1" of its time axis and the dashed zero
+  line stood on the "0"; the captions now sit below the numbers and the line
+  stops at its tick. `make figure-tick-clearance` reads the committed plots
+  for a legend, a stroke or a marker over any tick label and fails on one; the
+  plates draw their axes by hand and have no tick labels for it to read.
+- **Every figure signs a negative number with the minus sign.** The corpus
+  writes U+2212, and five figures still wrote the hyphen-minus: the angle
+  labels of the `cnossos_rail_directivity` half disc ("-30°", which
+  matplotlib's polar angle formatter writes whatever `axes.unicode_minus`
+  says), the `c_3 = -0.6` of `vdi2081_fan_assemblies`, and the level axes of
+  three plates, `diagram_decay_range`, `diagram_equal_loudness_weighting` and
+  `diagram_sweep_budget`. The plates now format their numbers through a
+  `signed` helper of their canvas, and `make figure-minus-sign` reads every
+  committed figure, in all four variants, and fails on a hyphen in front of a
+  number that is not a designation, a range or an exponent.
 - **Tick labels no longer run into each other.** A generator that puts band
   labels on a logarithmic axis with `set_xticks` and leaves the minor formatter
   where the scale put it gets matplotlib's own minor labels between its bands,

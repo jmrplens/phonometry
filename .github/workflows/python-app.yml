@@ -633,6 +633,24 @@ jobs:
       # the mark under the box is a rail rather than a reading with the reason
       # each one is a decision.
       run: python scripts/check_figure_legends.py
+    - name: Fail if a legend, a curve or a marker covers a tick label
+      # A legend can land on a tick label as well as on a point, and a curve
+      # can run through one: the radial labels of a polar plot sit inside it,
+      # strung along one ray, and an inset writes its labels over the data of
+      # the panel it sits in. The tick step above measures the labels of one
+      # axis against each other and the annotation step the labels a
+      # generator places, so neither sees it. This reads the committed SVGs
+      # for anything drawn over a tick label, through the clip it is drawn
+      # with, so it needs no rendering stack.
+      run: python scripts/check_figure_tick_clearance.py
+    - name: Fail if a figure signs a number with a hyphen
+      # The corpus signs its negative numbers with U+2212, and a polar angle
+      # formatter that ignores axes.unicode_minus, a reading built with an
+      # f-string and a plate that sets the characters it is handed each wrote
+      # the hyphen-minus instead, a shorter, lower glyph beside the proper one.
+      # This reads the string every committed SVG records beside its outlines,
+      # all four variants, figures and plates alike.
+      run: python scripts/check_figure_minus_sign.py
 
   # The Python snippets printed in the guides must run. They are the first
   # thing a reader copies, and nothing executed them until this job existed:

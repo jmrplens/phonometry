@@ -5729,7 +5729,7 @@ def generate_vdi2081_fan_assemblies(output_dir: str) -> None:
             style,
             color=colour,
             lw=1.8,
-            label=f"{label.split(',')[0]}, $c_3$ = {c3:g}",
+            label=f"{label.split(',')[0]}, $c_3$ = {_fmt_minus(c3, 'g')}",
         )
         # Equation (13) gives the overall level the correction is applied to,
         # which is not the energy sum of the eight bands it produces; recover

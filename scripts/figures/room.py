@@ -3594,7 +3594,15 @@ def generate_directivity_and_tables(output_dir: str) -> None:
         )
     ax.set_theta_zero_location("N")
     ax.set_rlim(-6.5, 6.5)
-    ax.set_rticks([-6, -3, 0, 3, 6])
+    # A ring every 3 dB and a label on every other one, on a ray between two
+    # lobes: the eight lobes of the 4 kHz survey leave no ray that all five
+    # labels clear, and their flanks run through the "−3" wherever it goes.
+    rings = [-6, -3, 0, 3, 6]
+    ax.set_rgrids(
+        rings,
+        [_fmt_minus(r, "d") if r % 6 == 0 else "" for r in rings],
+        angle=74.0,
+    )
     ax.set_title("A source measured every 5 degrees")
     ax.grid(color=COLOR_GRID, ls="--", alpha=0.6)
     ax.legend(loc="lower left", bbox_to_anchor=(-0.15, -0.12), fontsize=9)

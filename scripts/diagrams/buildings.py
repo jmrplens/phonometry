@@ -14,6 +14,7 @@ from __future__ import annotations
 import math
 from typing import TYPE_CHECKING
 
+from .canvas import signed
 from .parts import _accel, _accel_wall, _rot_arrow, _spring_v
 
 if TYPE_CHECKING:
@@ -173,7 +174,7 @@ def _d_sweep_budget(s: SVG, th: Theme) -> None:
         while value <= last + 1e-9:
             xx = x0 + (value - origin) * ppm
             s.line(xx, y, xx, y + 7, th.fg, 1.4)
-            s.text(xx, y + 25, f"{value:g}", 12, th.muted, "middle")
+            s.text(xx, y + 25, signed(value, "g"), 12, th.muted, "middle")
             value += step
 
     # --- Lane 1: the sweep and the silence that follows it -----------------
@@ -329,10 +330,14 @@ def _d_sweep_budget(s: SVG, th: Theme) -> None:
         for t in [i * 0.05 for i in range(1, 25)]
     )
     s.path(tail, stroke=th.primary, sw=1.6)
-    s.line(zero, y3 - 118, zero, y3 + 16, th.fg, 1.6, dash="6,4")
+    # Down to the end of the tick mark and no further: to y3 + 16 its last dash
+    # stood on the "0" under it.
+    s.line(zero, y3 - 118, zero, y3 + 7, th.fg, 1.6, dash="6,4")
+    # Below the numbers of the time axis, not level with them: at y3 + 34 the
+    # two captions ran through the "−1", the "0" and the "1".
     s.text(
         zero + 10,
-        y3 + 34,
+        y3 + 44,
         "kept by default: the linear impulse response and its tail",
         13,
         th.primary,
@@ -340,7 +345,7 @@ def _d_sweep_budget(s: SVG, th: Theme) -> None:
         bold=True,
     )
     s.text(
-        zero - 14, y3 + 34, "discarded, or read as distortion", 13, th.secondary, "end"
+        zero - 14, y3 + 44, "discarded, or read as distortion", 13, th.secondary, "end"
     )
     # The deconvolution's own noise tail, decaying and low-passed.
     late = "M " + " L ".join(
@@ -359,7 +364,7 @@ def _d_sweep_budget(s: SVG, th: Theme) -> None:
     tick_axis(y3, -1.0, 4.0, 1.0, origin=-origin)
     s.text(
         x1,
-        y3 + 58,
+        y3 + 64,
         "Arrival time relative to the linear impulse response [s]",
         13,
         th.fg,
@@ -3073,7 +3078,7 @@ def _d_decay_range(s: SVG, th: Theme) -> None:
     for level in range(0, -71, -10):
         yy = y_of(float(level))
         s.line(x0 - 6, yy, x0, yy, th.muted, 1.2)
-        s.text(x0 - 12, yy + 5, f"{level}", 12, th.muted, anchor="end")
+        s.text(x0 - 12, yy + 5, signed(level), 12, th.muted, anchor="end")
     s.text(x0 - 12, y0 - 24, "Level [dB]", 14, th.fg, anchor="end")
 
     # ===== The band-filtered squared impulse response =====

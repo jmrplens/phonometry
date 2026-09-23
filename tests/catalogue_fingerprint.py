@@ -385,8 +385,75 @@ def resilient_layer_row(
     return out
 
 
+#: The six ground surfaces whose porosity Cox Table 6.7 prints in per cent,
+#: in a column that prints a fraction on every other row and states no unit.
+GROUND_POROSITY_IN_PER_CENT = (
+    "cox-2017-table-6-7/mineral_layer_beneath_mixed_deciduous_forest",
+    "cox-2017-table-6-7/humus_on_pine_forest_floor",
+    "cox-2017-table-6-7/pine_forest_litter",
+    "cox-2017-table-6-7/grass_root_layer_in_loamy_sand",
+    "cox-2017-table-6-7/loamy_sand",
+    "cox-2017-table-6-7/bare_sandy_plain",
+)
+
+#: The sentence each of those six notes had, and the one it has now.
+GROUND_POROSITY_NOTE = (
+    "on the page it is plainly a percentage, but it is transcribed exactly as printed.",
+    "on the page it is plainly a percentage, so it is held as printed in "
+    "porosity_percent and not in porosity, which is a fraction (docs/ERRATA.md).",
+)
+
+
+def _porosity_in_per_cent(name: str, key: str, row: Row) -> Row:
+    """One of the six ground surfaces with its porosity moved to per cent.
+
+    :raises ValueError: when the row holds no porosity to move, or its note
+        does not say the sentence the step rewrites.
+    """
+    row = dict(row)
+    if "porosity" not in row:
+        msg = f"{name}[{key!r}] holds no porosity to move"
+        raise ValueError(msg)
+    row["porosity_percent"] = row.pop("porosity")
+    uncertainty = dict(row.get("uncertainty", {}))
+    if "porosity" in uncertainty:
+        uncertainty["porosity_percent"] = uncertainty.pop("porosity")
+        row["uncertainty"] = uncertainty
+    before, after = GROUND_POROSITY_NOTE
+    if before not in row.get("note", ""):
+        msg = f"{name}[{key!r}]: the note does not say {before!r}"
+        raise ValueError(msg)
+    row["note"] = row["note"].replace(before, after)
+    return row
+
+
+def row_contract(
+    catalogues: Mapping[str, Mapping[str, Row]],
+) -> dict[str, dict[str, Row]]:
+    """The dump taken through the change that made every row check itself.
+
+    Every row is now held, when it is built, to the contract
+    ``CatalogueRow.__post_init__`` describes, and every packaged row but six
+    already met it. Those six are ground surfaces of Cox Table 6.7 whose
+    porosity the page prints in per cent (26.9 to 58.1) in a column of
+    fractions, and a porosity above 1 is refused. One thing moved for them,
+    and nothing else may:
+
+    * ``porosity`` became ``porosity_percent``, the same number, and the
+      ``48 ± 4`` of the grass root layer took its uncertainty with it; the
+      six notes say where the value is now held.
+    """
+    out = {name: dict(rows) for name, rows in catalogues.items()}
+    name = "PUBLISHED_GROUND"
+    ground = dict(out[name])
+    for key in GROUND_POROSITY_IN_PER_CENT:
+        ground[key] = _porosity_in_per_cent(name, key, ground[key])
+    out[name] = ground
+    return out
+
+
 #: Every change since the baseline, oldest first.
-CHANGES: tuple[Change, ...] = (one_row_shape, resilient_layer_row)
+CHANGES: tuple[Change, ...] = (one_row_shape, resilient_layer_row, row_contract)
 
 
 def expected() -> dict[str, dict[str, Row]]:

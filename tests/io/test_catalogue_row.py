@@ -119,6 +119,35 @@ def test_no_row_class_is_slotted(cls: type) -> None:
     assert "__slots__" not in vars(cls)
 
 
+@pytest.mark.parametrize("cls", ROW_CLASSES, ids=lambda cls: cls.__name__)
+def test_every_field_of_every_row_class_is_classified(cls: type) -> None:
+    """Number, flag, text, set or mapping: no field escapes the row contract.
+
+    ``typing.get_type_hints`` could not resolve these classes on its own,
+    because the modules import ``Mapping`` for the type checker only; the
+    contract supplies it, so every field is classified by its resolved type
+    and never by the text of its annotation.
+    """
+    shape = private._shape(cls)
+    names = [item.name for item in dataclasses.fields(cls)]
+    assert [name for name, _ in shape.checks] == names
+    frozen = set(names) - shape.values
+    assert {"approximate", "bounded_above", "ranges", "basis", "carried"} <= frozen
+    assert shape.texts >= {"name", "source", "table", "variant", "group", "note"}
+    assert not shape.numeric & shape.texts
+    assert shape.numeric <= shape.values
+
+
+def test_a_flag_is_a_kind_of_its_own() -> None:
+    """``has_section_drawing`` is neither a number nor a text."""
+    from phonometry.building import ImpactInsulation
+    from phonometry.fluids import NonlinearityParameter
+
+    shape = private._shape(ImpactInsulation)
+    assert "has_section_drawing" in shape.values - shape.numeric - shape.texts
+    assert "year" in private._shape(NonlinearityParameter).numeric
+
+
 @pytest.mark.parametrize("word", ["estimate", "Measured", ""])
 def test_a_basis_outside_the_five_words_is_refused(word: str) -> None:
     """A misspelt estimate would otherwise reach the page as a printed number."""
@@ -129,47 +158,54 @@ def test_a_basis_outside_the_five_words_is_refused(word: str) -> None:
 
 
 def test_basis_answers_for_the_field_then_the_row_then_not_at_all() -> None:
-    row = io.CatalogueRow(
+    from phonometry.solids import SolidMaterial
+
+    row = SolidMaterial(
         name="Panel core",
         source="a datasheet",
         basis={"row": "measured", "poisson_ratio": "estimated"},
     )
     assert row.basis_of("poisson_ratio") == "estimated"
     assert row.basis_of("density_kg_m3") == "measured"
-    assert io.CatalogueRow(name="x", source="y").basis_of("density_kg_m3") == ""
+    assert SolidMaterial(name="x", source="y").basis_of("density_kg_m3") == ""
 
 
 def test_a_converted_or_carried_value_is_not_derived() -> None:
     """The number is the page's in both cases; the library computed nothing."""
-    row = io.CatalogueRow(
+    from phonometry.solids import SolidMaterial
+
+    row = SolidMaterial(
         name="x",
         source="y",
-        converted={"variant": ("25", "°F")},
-        carried={"note": "carried down from the row above"},
-        derived={"group": "from the other cells"},
+        density_kg_m3=1150.0,
+        youngs_modulus_pa=2.0e6,
+        poisson_ratio=0.45,
+        converted={"youngs_modulus_pa": ("290", "psi")},
+        carried={"density_kg_m3": "carried down from the row above"},
+        derived={"poisson_ratio": "from the other cells"},
     )
-    assert not row.is_derived("variant")
-    assert not row.is_derived("note")
-    assert row.is_derived("group")
+    assert not row.is_derived("youngs_modulus_pa")
+    assert not row.is_derived("density_kg_m3")
+    assert row.is_derived("poisson_ratio")
 
 
 def test_the_three_new_hedges_are_frozen_mappings() -> None:
-    row = io.CatalogueRow(
+    from phonometry.materials import PorousMaterial
+
+    row = PorousMaterial(
         name="x",
         source="y",
+        thickness_mm=40.0,
+        ranges={"flow_resistivity_pa_s_m2": (5000.0, None)},
+        bounded_below=["flow_resistivity_pa_s_m2"],
         basis={"row": "declared"},
-        converted={"variant": ("5", "kPa s/m2")},
-        carried={"note": "from the row above"},
+        converted={"flow_resistivity_pa_s_m2": ["5", "kPa s/m2"]},
+        carried={"thickness_mm": "from the row above"},
     )
     for mapping in (row.basis, row.converted, row.carried):
         assert isinstance(mapping, MappingProxyType)
-    assert row.converted["variant"] == ("5", "kPa s/m2")
-
-
-def test_take_reads_a_converted_pair_as_a_tuple() -> None:
-    """JSON has lists, and a pair the row holds is a tuple all the way down."""
-    fields = private.take({"key": "x", "converted": {"density_kg_m3": ["5", "g/cm3"]}})
-    assert fields["converted"] == {"density_kg_m3": ("5", "g/cm3")}
+    assert row.converted["flow_resistivity_pa_s_m2"] == ("5", "kPa s/m2")
+    assert row.bounded_below == frozenset({"flow_resistivity_pa_s_m2"})
 
 
 @pytest.mark.parametrize("gone", ["estimated", "is_estimate", "is_estimated"])

@@ -188,9 +188,6 @@ class TransmissionLossSpectrum(BandedRow):
         return self._in_band(band_hz)
 
 
-#: The hedges these tables spell as a set rather than a mapping.
-_SETS = ("approximate", "bounded_above", "bounded_below")
-
 #: The published tables this catalogue reads, one data file per table.
 _TABLES = (
     "bies-2017-table-7-6",
@@ -214,7 +211,7 @@ def _load() -> dict[str, TransmissionLossSpectrum]:
         for record in records:
             key = f"{table}/{record['key']}"
             rows[key] = TransmissionLossSpectrum(
-                table=table, source=source, **take(record, frozen=_SETS)
+                table=table, source=source, **take(record)
             )
     return rows
 

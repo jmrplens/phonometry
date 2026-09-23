@@ -76,9 +76,6 @@ class ResilientMaterial(CatalogueRow):
     static_load_pa: float | None = None
 
 
-#: The row fields the data files write as a list and the row holds as a set.
-_SETS = ("approximate",)
-
 #: The published tables this catalogue reads.
 _TABLES = ("vigran-2008-table-8-3",)
 
@@ -90,7 +87,7 @@ def _load() -> dict[str, ResilientMaterial]:
         citation, rows = read_table("phonometry.materials.resilient", f"{table}.json")
         for row in rows:
             out[f"{table}/{row['key']}"] = ResilientMaterial(
-                source=citation, table=table, **take(row, frozen=_SETS)
+                source=citation, table=table, **take(row)
             )
     return out
 

@@ -52,7 +52,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass, field
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, ClassVar
 
 from .._internal.catalogue import CatalogueRow, read_table, take
 from .elastic import (
@@ -145,8 +145,15 @@ class SolidMaterial(CatalogueRow):
         m Hz, a property of the material alone and the cheapest cross-check
         there is between books that share no other column.
     :ivar borrowed: Field to the material it was taken from, for the cells a
-        book fills from a similar material rather than leaving empty.
+        book fills from a similar material rather than leaving empty. A
+        hedge like the shared ones: its keys name numeric fields of this
+        class, and it is frozen when the row is built.
     """
+
+    _number_hedges: ClassVar[tuple[str, ...]] = (
+        *CatalogueRow._number_hedges,
+        "borrowed",
+    )
 
     density_kg_m3: float | None = None
     youngs_modulus_pa: float | None = None
@@ -163,11 +170,6 @@ class SolidMaterial(CatalogueRow):
     in_situ_loss_factor: float | None = None
     thickness_critical_frequency_product_m_hz: float | None = None
     borrowed: Mapping[str, str] = field(default_factory=dict)
-
-    def __post_init__(self) -> None:
-        """Freeze the one mapping this class adds to the shared ones."""
-        super().__post_init__()
-        object.__setattr__(self, "borrowed", MappingProxyType(dict(self.borrowed)))
 
 
 #: How a field this library computed is described in
@@ -323,9 +325,6 @@ def _complete(fields: dict[str, Any]) -> dict[str, Any]:
     return fields
 
 
-#: The row fields the data files write as a list and the row holds as a set.
-_SETS = ("approximate", "bounded_above")
-
 #: The published tables this catalogue reads, in the order a reader should
 #: meet them: the one whose columns the library was built around first, then
 #: the one that over-determines the elastic constants and so checks it.
@@ -356,7 +355,7 @@ def _load() -> dict[str, SolidMaterial]:
     for table in _TABLES:
         source, records = read_table("phonometry.solids", f"{table}.json")
         for record in records:
-            fields = _complete(take(record, frozen=_SETS))
+            fields = _complete(take(record))
             rows[f"{table}/{record['key']}"] = SolidMaterial(
                 table=table, source=source, **fields
             )

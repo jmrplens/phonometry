@@ -243,10 +243,6 @@ class Gas(CatalogueRow):
         )
 
 
-#: The hedges a gas table spells as a set rather than a mapping.
-_SETS = ("approximate", "bounded_above", "bounded_below")
-
-
 def _gases() -> dict[str, Gas]:
     """Every row of every packaged gas table, keyed by table and row.
 
@@ -258,7 +254,7 @@ def _gases() -> dict[str, Gas]:
         source, records = read_table(_PACKAGE, f"{table}.json")
         for record in records:
             rows[f"{table}/{record['key']}"] = Gas(
-                table=table, source=source, **take(record, frozen=_SETS)
+                table=table, source=source, **take(record)
             )
     return rows
 

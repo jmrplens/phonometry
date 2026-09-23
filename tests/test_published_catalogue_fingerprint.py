@@ -169,3 +169,48 @@ def test_resilient_layer_row_moves_the_fifteen_layers_and_no_others() -> None:
         "rebond_foam_64_15",
         "rebond_foam_64_25",
     ]
+
+
+def test_row_contract_moves_the_six_percent_porosities_and_no_others() -> None:
+    """The step that made rows check themselves moved six cells, and no number.
+
+    Cox Table 6.7 prints six porosities in per cent in a column of fractions;
+    each moved from ``porosity`` to ``porosity_percent`` with its digits, the
+    one ``± 4`` with it. Every other mapping and every other row comes out of
+    the step as it went in.
+    """
+    before = fp.resilient_layer_row(fp.one_row_shape(fp.baseline()))
+    after = fp.row_contract(before)
+    assert {name for name in before if before[name] != after[name]} == {
+        "PUBLISHED_GROUND"
+    }
+    old, new = before["PUBLISHED_GROUND"], after["PUBLISHED_GROUND"]
+    assert list(new) == list(old)
+    changed = sorted(key for key in old if old[key] != new[key])
+    assert changed == sorted(fp.GROUND_POROSITY_IN_PER_CENT)
+    moved = {
+        key: (new[key]["porosity_percent"], new[key].get("uncertainty", {}))
+        for key in changed
+    }
+    assert {key: value for key, (value, _) in moved.items()} == {
+        key: old[key]["porosity"] for key in changed
+    }
+    for key in changed:
+        assert "porosity" not in new[key]
+        assert "porosity" not in new[key].get("uncertainty", {})
+        kept = {"porosity", "porosity_percent", "uncertainty", "note"}
+        assert _text({f: v for f, v in new[key].items() if f not in kept}) == _text(
+            {f: v for f, v in old[key].items() if f not in kept}
+        )
+    assert sorted(value for value, _ in moved.values()) == [
+        26.9,
+        36.5,
+        37.5,
+        38.9,
+        48.0,
+        58.1,
+    ]
+    assert new["cox-2017-table-6-7/grass_root_layer_in_loamy_sand"]["uncertainty"] == {
+        "flow_resistivity_pa_s_m2": 90000.0,
+        "porosity_percent": 4.0,
+    }

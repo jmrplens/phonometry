@@ -159,7 +159,7 @@ mistake this catalogue exists to prevent.
 | `longitudinal_loss_factor` | Internal loss factor measured with longitudinal waves. |
 | `in_situ_loss_factor` | Loss factor of a panel of this material as installed, which combines the internal, support and radiation losses and is therefore not a material constant. |
 | `thickness_critical_frequency_product_m_hz` | The `h.f_c` column, in m Hz, a property of the material alone and the cheapest cross-check there is between books that share no other column. |
-| `borrowed` | Field to the material it was taken from, for the cells a book fills from a similar material rather than leaving empty. |
+| `borrowed` | Field to the material it was taken from, for the cells a book fills from a similar material rather than leaving empty. A hedge like the shared ones: its keys name numeric fields of this class, and it is frozen when the row is built. |
 | `name` | The material as the table names it, attribution stripped. |
 | `variant` | Which specimen or condition this row is, when the page prints several under one name: `"chemically pure"`, `"direction x"`, `"0.68 mm diameter"`. Empty when the page prints one. |
 | `source` | Document, table, PDF page and printed folio. |

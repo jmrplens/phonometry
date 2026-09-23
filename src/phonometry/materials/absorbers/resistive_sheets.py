@@ -108,9 +108,6 @@ __all__ = [
     "resistive_sheet_named",
 ]
 
-#: The row fields the data file writes as a list and the row holds as a set.
-_SETS = ("approximate", "bounded_above", "bounded_below")
-
 #: The published tables this catalogue reads, in the order the book prints
 #: them, one file per printed table.
 _TABLES = (
@@ -223,9 +220,7 @@ def _rows() -> dict[str, ResistiveSheet]:
         )
         for row in rows:
             key = f"{filename}/{row['key']}"
-            out[key] = ResistiveSheet(
-                source=citation, table=filename, **take(row, frozen=_SETS)
-            )
+            out[key] = ResistiveSheet(source=citation, table=filename, **take(row))
     return out
 
 

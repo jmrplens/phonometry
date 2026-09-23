@@ -77,7 +77,14 @@ class GroundSurface(CatalogueRow):
         rayl/m, which is this unit under another name; the conversion is
         pinned in the data file's ``about``.
     :ivar porosity: Open porosity, where the fit that produced the resistivity
-        also produced one.
+        also produced one, as the fraction of the volume that is open, from 0
+        to 1.
+    :ivar porosity_percent: Open porosity in per cent, for a surface whose
+        page prints it that way. Cox's Table 6.7 prints six of its porosities
+        as 26.9 to 58.1 in a column that everywhere else prints fractions and
+        states no unit, and a porosity of 36.5 is not a porosity, so those
+        six are held here, as printed, and :attr:`porosity` is left empty on
+        them rather than holding a number it cannot be.
     :ivar water_content_percent: Water content of the specimen, per cent, for
         the sands Cox tabulates wet and dry. The resistivity of a sand is not
         monotonic in it, which is the point of printing it.
@@ -95,6 +102,7 @@ class GroundSurface(CatalogueRow):
 
     flow_resistivity_pa_s_m2: float | None = None
     porosity: float | None = None
+    porosity_percent: float | None = None
     water_content_percent: float | None = None
     porosity_decay_rate_per_m: float | None = None
     iso_9613_ground_factor: float | None = None
@@ -116,9 +124,6 @@ class GroundSurface(CatalogueRow):
 #    including the cell Cox prints with two decimal points in it.
 # ---------------------------------------------------------------------------
 
-#: The row fields the data files write as a list and the row holds as a set.
-_SETS = ("approximate", "bounded_above", "bounded_below")
-
 #: The published tables this catalogue reads.
 _TABLES = (
     "bies-2017-table-5-1",
@@ -136,7 +141,7 @@ def _transcribed() -> dict[str, GroundSurface]:
         )
         for row in published:
             rows[f"{table}/{row['key']}"] = GroundSurface(
-                source=source, table=table, **take(row, frozen=_SETS)
+                source=source, table=table, **take(row)
             )
     return rows
 

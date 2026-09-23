@@ -582,6 +582,7 @@ GROUND_COLUMNS = (
         "Pa·s/m²",
     ),
     ("porosity", "Porosity", "Porosidad", ""),
+    ("porosity_percent", "Porosity", "Porosidad", "%"),
     ("water_content_percent", "Water content", "Contenido de agua", "%"),
     (
         "porosity_decay_rate_per_m",

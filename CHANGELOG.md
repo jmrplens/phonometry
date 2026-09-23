@@ -413,6 +413,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   as zero, which returned Formula 6 without its second term. The migration
   guide lists every rename.
 
+- **A catalogue row checks itself when it is built.** Every `io.CatalogueRow`,
+  packaged or built by hand, is checked in its constructor and refuses with
+  `io.CatalogueError`, naming the row and the field, a cell nothing
+  downstream could read: a name or a source left empty; a number that is
+  `NaN`, infinite, a `bool` or a text such as `"0,97"`; a whole-number field
+  holding a fraction, a flag field holding `1`; a hedge keyed by a field the
+  class does not have, or a hedge on a number keyed by a text field; a bound
+  on a field with no range; a range whose ends are not finite or run
+  backwards; an uncertainty below zero; a value beside `misprinted`,
+  `unquantified`, `not_derivable` or `reported`, which say the page has none,
+  and a `converted` or `carried` cell with nothing behind it; and a quantity
+  below zero whose unit cannot be negative (a density, a mass, a speed, a
+  pressure or modulus, a flow resistivity, a stiffness per area, a length, an
+  area), a porosity outside 0 to 1, or a share of a whole outside 0 to 100 per
+  cent. A Celsius temperature, a decay rate per metre and a level in decibels
+  stay signed, and no limit is a limit on size. Sets and mappings are frozen
+  from the row's annotations all the way down, so `Carpet(approximate=[...])`
+  no longer keeps the list it was given, and a subclass that annotates a field
+  as anything other than `float | None`, `int | None`, `bool`, `str`,
+  `frozenset[str]` or a `Mapping[str, ...]` of those raises `TypeError` the
+  first time it is built. The packaged data files are read as strict JSON: a
+  `NaN`, an infinity, a name written twice in one object or a `/` in a row key
+  is refused naming the file and the row. `PorousMaterial.frame_constants`
+  refuses a row without a structural loss factor instead of reading it as a
+  lossless frame; every published row with both moduli prints one, so no
+  result moves. The contract found six porosities in Cox & D'Antonio Table 6.7
+  printed in per cent in a column of fractions; `GroundSurface` gains
+  `porosity_percent`, which holds them with the digits the page prints, and
+  `porosity` is left empty on those six rows. The defect is in the errata
+  registry, and no published number changes.
+
 - **The ITU-R BS.468-4 curve has one name.** `MicrophoneNoise.weighting` took
   `"CCIR"` for the quasi-peak inherent-noise figure while
   `filters.weighting_filter` and `electroacoustics.weighted_thd` take `"468"`

@@ -6615,6 +6615,40 @@ in the same order.
   lets a reader see the contradiction.
 - **Status:** not reported.
 
+## Cox & D'Antonio, Acoustic Absorbers and Diffusers 3e (2017), Table 6.7 (six porosities printed in per cent in a column of fractions)
+
+- **Location:** Table 6.7, "Effective flow resistivity values for ground
+  surfaces and other parameters", the column "Porosity", on printed pages 200
+  and 201 (PDF pages 257 and 258). Non-normative source: a textbook.
+- **The print:** the column is headed "Porosity" and states no unit, where
+  the column beside it is headed "Water content (%)". Every porosity it prints
+  is a fraction between 0.15 and 1 ("0.5–0.9" for snow, "0.24" for the sports
+  field, "0.44" for fine sand, "0.34–1" and the like for the fitted grasses),
+  except on six rows: "Mineral layer beneath mixed deciduous forest" 36.5,
+  "Humus on pine forest floor" 58.1, "Pine forest litter (6–7 cm thick)" 38.9,
+  "Grass root layer in loamy sand" 48 ± 4, "Loamy sand" 37.5 and "Bare sandy
+  plain" 26.9.
+- **The problem:** a porosity is the fraction of a volume that is open, so it
+  cannot pass 1, and these six are percentages printed in a column that states
+  no unit and holds fractions everywhere else. Read in the column's own unit
+  they are porosities of 26.9 to 58.1, which no material has; read as per cent
+  they are 0.269 to 0.581, which is what soils like these are. The page leaves
+  the reader to work out which, and a program that reads the column as printed
+  takes the impossible value.
+- **Evidence:** Verified on PDF page 257 (printed p. 200) and PDF page 258
+  (printed p. 201) of Cox and D'Antonio (2017), *Acoustic Absorbers and
+  Diffusers*, third edition: the heading prints no unit, and the six cells
+  print the values quoted, the fourth as "48 ± 4".
+- **Library behaviour:** in
+  [`PUBLISHED_GROUND`](../src/phonometry/environment/propagation/ground_surfaces.py)
+  the six rows hold their values as printed in `GroundSurface.porosity_percent`,
+  the ± 4 in its uncertainty, and leave `porosity`, which is a fraction from 0
+  to 1, empty; every catalogue row checks when it is built that a porosity is
+  a fraction. `test_the_six_percent_porosities_of_cox_are_held_as_printed` in
+  [`tests/io/test_catalogue_row_contract.py`](../tests/io/test_catalogue_row_contract.py)
+  pins the six.
+- **Status:** unreported.
+
 ## Ver & Beranek 2e (2006), TABLE 14.1 (three moduli whose e-notation is corrupted in the printing)
 
 - **Location:** TABLE 14.1, "Properties of Some Commercial Damping Materials",

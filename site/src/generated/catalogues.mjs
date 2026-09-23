@@ -43426,6 +43426,12 @@ export const catalogues = {
         "unit": ""
       },
       {
+        "field": "porosity_percent",
+        "heading": "Porosity",
+        "headingEs": "Porosidad",
+        "unit": "%"
+      },
+      {
         "field": "water_content_percent",
         "heading": "Water content",
         "headingEs": "Contenido de agua",
@@ -43475,6 +43481,11 @@ export const catalogues = {
             "text": "10 to 30",
             "kind": "range",
             "note": "the page prints 10000 to 30000 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           },
           {
             "text": "",
@@ -43552,6 +43563,11 @@ export const catalogues = {
             "text": "",
             "kind": "absent",
             "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           }
         ]
       },
@@ -43578,6 +43594,11 @@ export const catalogues = {
           {
             "text": "40",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -43656,6 +43677,11 @@ export const catalogues = {
             "text": "",
             "kind": "absent",
             "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           }
         ]
       },
@@ -43708,6 +43734,11 @@ export const catalogues = {
             "text": "",
             "kind": "absent",
             "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           }
         ]
       },
@@ -43734,6 +43765,11 @@ export const catalogues = {
           {
             "text": "160",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -43812,6 +43848,11 @@ export const catalogues = {
             "text": "",
             "kind": "absent",
             "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           }
         ]
       },
@@ -43838,6 +43879,11 @@ export const catalogues = {
           {
             "text": "100",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -43916,6 +43962,11 @@ export const catalogues = {
             "text": "",
             "kind": "absent",
             "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           }
         ]
       },
@@ -43942,6 +43993,11 @@ export const catalogues = {
           {
             "text": "100",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -44020,6 +44076,11 @@ export const catalogues = {
             "text": "",
             "kind": "absent",
             "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           }
         ]
       },
@@ -44046,6 +44107,11 @@ export const catalogues = {
           {
             "text": "250",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -44124,6 +44190,11 @@ export const catalogues = {
             "text": "",
             "kind": "absent",
             "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           }
         ]
       },
@@ -44150,6 +44221,11 @@ export const catalogues = {
           {
             "text": "40",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -44228,6 +44304,11 @@ export const catalogues = {
             "text": "",
             "kind": "absent",
             "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           }
         ]
       },
@@ -44255,6 +44336,11 @@ export const catalogues = {
             "text": "630 to 2 000",
             "kind": "range",
             "note": "the page prints 630000 to 2e+06 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           },
           {
             "text": "",
@@ -44332,6 +44418,11 @@ export const catalogues = {
             "text": "",
             "kind": "absent",
             "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           }
         ]
       },
@@ -44358,6 +44449,11 @@ export const catalogues = {
           {
             "text": "250",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -44436,6 +44532,11 @@ export const catalogues = {
             "text": "",
             "kind": "absent",
             "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           }
         ]
       },
@@ -44463,6 +44564,11 @@ export const catalogues = {
             "text": "160 to 250",
             "kind": "range",
             "note": "the page prints 160000 to 250000 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           },
           {
             "text": "",
@@ -44540,6 +44646,11 @@ export const catalogues = {
             "text": "",
             "kind": "absent",
             "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           }
         ]
       },
@@ -44592,6 +44703,11 @@ export const catalogues = {
             "text": "",
             "kind": "absent",
             "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           }
         ]
       },
@@ -44618,6 +44734,11 @@ export const catalogues = {
           {
             "text": "1 500",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -44696,6 +44817,11 @@ export const catalogues = {
             "text": "",
             "kind": "absent",
             "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           }
         ]
       },
@@ -44723,6 +44849,11 @@ export const catalogues = {
             "text": "250 to 500",
             "kind": "range",
             "note": "the page prints 250000 to 500000 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           },
           {
             "text": "",
@@ -44800,6 +44931,11 @@ export const catalogues = {
             "text": "",
             "kind": "absent",
             "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           }
         ]
       },
@@ -44827,6 +44963,11 @@ export const catalogues = {
             "text": "800 to 2 500",
             "kind": "range",
             "note": "the page prints 800000 to 2.5e+06 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           },
           {
             "text": "",
@@ -44904,6 +45045,11 @@ export const catalogues = {
             "text": "",
             "kind": "absent",
             "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           }
         ]
       },
@@ -44956,6 +45102,11 @@ export const catalogues = {
             "text": "",
             "kind": "absent",
             "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           }
         ]
       },
@@ -44982,6 +45133,11 @@ export const catalogues = {
           {
             "text": "2 000",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -45060,6 +45216,11 @@ export const catalogues = {
             "text": "",
             "kind": "absent",
             "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           }
         ]
       },
@@ -45112,6 +45273,11 @@ export const catalogues = {
             "text": "",
             "kind": "absent",
             "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           }
         ]
       },
@@ -45138,6 +45304,11 @@ export const catalogues = {
           {
             "text": "30 000",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -45216,6 +45387,11 @@ export const catalogues = {
             "text": "",
             "kind": "absent",
             "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           }
         ]
       },
@@ -45242,6 +45418,11 @@ export const catalogues = {
           {
             "text": "12,5",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -45312,6 +45493,11 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "1",
             "kind": "printed",
             "note": ""
@@ -45346,6 +45532,11 @@ export const catalogues = {
           {
             "text": "80",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -45416,6 +45607,11 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "1",
             "kind": "printed",
             "note": ""
@@ -45450,6 +45646,11 @@ export const catalogues = {
           {
             "text": "500",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -45520,6 +45721,11 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "0",
             "kind": "printed",
             "note": ""
@@ -45572,6 +45778,11 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "0",
             "kind": "printed",
             "note": ""
@@ -45606,6 +45817,11 @@ export const catalogues = {
           {
             "text": "200 000",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -45684,6 +45900,11 @@ export const catalogues = {
             "text": "",
             "kind": "absent",
             "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           }
         ]
       },
@@ -45716,6 +45937,11 @@ export const catalogues = {
             "text": "0,5 to 0,9",
             "kind": "range",
             "note": "the page prints 0.5 to 0.9 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           },
           {
             "text": "",
@@ -45788,6 +46014,11 @@ export const catalogues = {
             "text": "",
             "kind": "absent",
             "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           }
         ]
       },
@@ -45820,6 +46051,11 @@ export const catalogues = {
             "text": "0,64 to 0,88",
             "kind": "range",
             "note": "the page prints 0.64 to 0.88 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           },
           {
             "text": "",
@@ -45871,6 +46107,11 @@ export const catalogues = {
           {
             "text": "0,5",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -45944,6 +46185,11 @@ export const catalogues = {
             "text": "",
             "kind": "absent",
             "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           }
         ]
       },
@@ -45971,6 +46217,11 @@ export const catalogues = {
             "text": "20 to 80",
             "kind": "range",
             "note": "the page prints 20000 to 80000 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           },
           {
             "text": "",
@@ -46035,6 +46286,11 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "0 to 40",
             "kind": "range",
             "note": "the page prints 0 to 40 and no value"
@@ -46066,7 +46322,7 @@ export const catalogues = {
         "weave": "",
         "bonding": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
-        "note": "Flow resistivity printed \"(540 ± 92) × 10^3\". Name wrapped over two printed lines. Porosity decay cell prints a dash. The Porosity column prints this value as a number far above 1 while every other row of the column prints a fraction; on the page it is plainly a percentage, but it is transcribed exactly as printed.",
+        "note": "Flow resistivity printed \"(540 ± 92) × 10^3\". Name wrapped over two printed lines. Porosity decay cell prints a dash. The Porosity column prints this value as a number far above 1 while every other row of the column prints a fraction; on the page it is plainly a percentage, so it is held as printed in porosity_percent and not in porosity, which is a fraction (docs/ERRATA.md).",
         "attributedTo": {
           "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
         },
@@ -46074,6 +46330,11 @@ export const catalogues = {
           {
             "text": "540 ± 92",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -46118,7 +46379,7 @@ export const catalogues = {
         "weave": "",
         "bonding": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
-        "note": "Flow resistivity printed \"(230 ± 220) × 10^3\"; the stated uncertainty is almost as large as the value. Porosity decay cell prints a dash. The Porosity column prints this value as a number far above 1 while every other row of the column prints a fraction; on the page it is plainly a percentage, but it is transcribed exactly as printed.",
+        "note": "Flow resistivity printed \"(230 ± 220) × 10^3\"; the stated uncertainty is almost as large as the value. Porosity decay cell prints a dash. The Porosity column prints this value as a number far above 1 while every other row of the column prints a fraction; on the page it is plainly a percentage, so it is held as printed in porosity_percent and not in porosity, which is a fraction (docs/ERRATA.md).",
         "attributedTo": {
           "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
         },
@@ -46126,6 +46387,11 @@ export const catalogues = {
           {
             "text": "230 ± 220",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -46204,6 +46470,11 @@ export const catalogues = {
             "text": "",
             "kind": "absent",
             "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           }
         ]
       },
@@ -46222,7 +46493,7 @@ export const catalogues = {
         "weave": "",
         "bonding": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
-        "note": "Flow resistivity printed \"(9 ± 5) × 10^3\"; the en dash of \"6–7 cm\" as printed. Porosity decay cell prints a dash. The Porosity column prints this value as a number far above 1 while every other row of the column prints a fraction; on the page it is plainly a percentage, but it is transcribed exactly as printed.",
+        "note": "Flow resistivity printed \"(9 ± 5) × 10^3\"; the en dash of \"6–7 cm\" as printed. Porosity decay cell prints a dash. The Porosity column prints this value as a number far above 1 while every other row of the column prints a fraction; on the page it is plainly a percentage, so it is held as printed in porosity_percent and not in porosity, which is a fraction (docs/ERRATA.md).",
         "attributedTo": {
           "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
         },
@@ -46230,6 +46501,11 @@ export const catalogues = {
           {
             "text": "9 ± 5",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -46295,6 +46571,11 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "0",
             "kind": "printed",
             "note": ""
@@ -46347,6 +46628,11 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "-270",
             "kind": "printed",
             "note": ""
@@ -46386,6 +46672,11 @@ export const catalogues = {
           {
             "text": "510",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -46464,6 +46755,11 @@ export const catalogues = {
             "text": "",
             "kind": "absent",
             "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           }
         ]
       },
@@ -46496,6 +46792,11 @@ export const catalogues = {
             "text": "0,34 to 1",
             "kind": "range",
             "note": "the page prints 0.34 to 1 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           },
           {
             "text": "",
@@ -46543,6 +46844,11 @@ export const catalogues = {
             "text": "120 to 310",
             "kind": "range",
             "note": "the page prints 120000 to 310000 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           },
           {
             "text": "",
@@ -46620,6 +46926,11 @@ export const catalogues = {
             "text": "",
             "kind": "absent",
             "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           }
         ]
       },
@@ -46652,6 +46963,11 @@ export const catalogues = {
             "text": "0,38 to 1",
             "kind": "range",
             "note": "the page prints 0.38 to 1 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           },
           {
             "text": "",
@@ -46699,6 +47015,11 @@ export const catalogues = {
             "text": "37 to 85",
             "kind": "range",
             "note": "the page prints 37000 to 85000 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           },
           {
             "text": "",
@@ -46776,6 +47097,11 @@ export const catalogues = {
             "text": "",
             "kind": "absent",
             "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           }
         ]
       },
@@ -46808,6 +47134,11 @@ export const catalogues = {
             "text": "0,3 to 0,7",
             "kind": "range",
             "note": "the page prints 0.3 to 0.7 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           },
           {
             "text": "",
@@ -46867,6 +47198,11 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "-400 to 80",
             "kind": "range",
             "note": "the page prints -400 to 80 and no value"
@@ -46907,6 +47243,11 @@ export const catalogues = {
             "text": "100 to 950",
             "kind": "range",
             "note": "the page prints 100000 to 950000 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           },
           {
             "text": "",
@@ -46984,6 +47325,11 @@ export const catalogues = {
             "text": "",
             "kind": "absent",
             "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           }
         ]
       },
@@ -47036,6 +47382,11 @@ export const catalogues = {
             "text": "",
             "kind": "absent",
             "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           }
         ]
       },
@@ -47054,7 +47405,7 @@ export const catalogues = {
         "weave": "",
         "bonding": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
-        "note": "Flow resistivity printed \"(150 ± 90) × 10^3\" and porosity printed \"48 ± 4\", the only porosity cell in the table with a stated uncertainty. Water content and porosity decay cells print a dash. The Porosity column prints this value as a number far above 1 while every other row of the column prints a fraction; on the page it is plainly a percentage, but it is transcribed exactly as printed.",
+        "note": "Flow resistivity printed \"(150 ± 90) × 10^3\" and porosity printed \"48 ± 4\", the only porosity cell in the table with a stated uncertainty. Water content and porosity decay cells print a dash. The Porosity column prints this value as a number far above 1 while every other row of the column prints a fraction; on the page it is plainly a percentage, so it is held as printed in porosity_percent and not in porosity, which is a fraction (docs/ERRATA.md).",
         "attributedTo": {
           "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
         },
@@ -47062,6 +47413,11 @@ export const catalogues = {
           {
             "text": "150 ± 90",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -47140,6 +47496,11 @@ export const catalogues = {
             "text": "",
             "kind": "absent",
             "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           }
         ]
       },
@@ -47171,6 +47532,11 @@ export const catalogues = {
           {
             "text": "0,4",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -47218,6 +47584,11 @@ export const catalogues = {
           {
             "text": "390",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -47296,6 +47667,11 @@ export const catalogues = {
             "text": "",
             "kind": "absent",
             "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           }
         ]
       },
@@ -47328,6 +47704,11 @@ export const catalogues = {
             "text": "0,36 to 0,52",
             "kind": "range",
             "note": "the page prints 0.36 to 0.52 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           },
           {
             "text": "",
@@ -47400,6 +47781,11 @@ export const catalogues = {
             "text": "",
             "kind": "absent",
             "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           }
         ]
       },
@@ -47432,6 +47818,11 @@ export const catalogues = {
             "text": "0,15 to 1",
             "kind": "range",
             "note": "the page prints 0.15 to 1 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           },
           {
             "text": "",
@@ -47479,6 +47870,11 @@ export const catalogues = {
             "text": "75 to 1 600",
             "kind": "range",
             "note": "the page prints 75000 to 1.6e+06 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           },
           {
             "text": "",
@@ -47556,6 +47952,11 @@ export const catalogues = {
             "text": "",
             "kind": "absent",
             "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           }
         ]
       },
@@ -47608,6 +48009,11 @@ export const catalogues = {
             "text": "",
             "kind": "absent",
             "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           }
         ]
       },
@@ -47634,6 +48040,11 @@ export const catalogues = {
           {
             "text": "40 000",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -47699,6 +48110,11 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "17 to 33",
             "kind": "range",
             "note": "the page prints 17 to 33 and no value"
@@ -47739,6 +48155,11 @@ export const catalogues = {
             "text": "180 to 260",
             "kind": "range",
             "note": "the page prints 180000 to 260000 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           },
           {
             "text": "",
@@ -47816,6 +48237,11 @@ export const catalogues = {
             "text": "",
             "kind": "absent",
             "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           }
         ]
       },
@@ -47843,6 +48269,11 @@ export const catalogues = {
             "text": "300 to 800",
             "kind": "range",
             "note": "the page prints 300000 to 800000 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           },
           {
             "text": "",
@@ -47920,6 +48351,11 @@ export const catalogues = {
             "text": "",
             "kind": "absent",
             "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           }
         ]
       },
@@ -47947,6 +48383,11 @@ export const catalogues = {
             "text": "2 000 to 4 000",
             "kind": "range",
             "note": "the page prints 2e+06 to 4e+06 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           },
           {
             "text": "",
@@ -48024,6 +48465,11 @@ export const catalogues = {
             "text": "",
             "kind": "absent",
             "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           }
         ]
       },
@@ -48051,6 +48497,11 @@ export const catalogues = {
             "text": "5 000 to 20 000",
             "kind": "range",
             "note": "the page prints 5e+06 to 2e+07 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           },
           {
             "text": "",
@@ -48128,6 +48579,11 @@ export const catalogues = {
             "text": "",
             "kind": "absent",
             "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           }
         ]
       },
@@ -48160,6 +48616,11 @@ export const catalogues = {
             "text": "0,15 to 0,3",
             "kind": "range",
             "note": "the page prints 0.15 to 0.3 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           },
           {
             "text": "",
@@ -48219,6 +48680,11 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "0 to 25",
             "kind": "range",
             "note": "the page prints 0 to 25 and no value"
@@ -48258,6 +48724,11 @@ export const catalogues = {
           {
             "text": "35",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -48336,6 +48807,11 @@ export const catalogues = {
             "text": "",
             "kind": "absent",
             "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           }
         ]
       },
@@ -48362,6 +48838,11 @@ export const catalogues = {
           {
             "text": "50",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -48422,6 +48903,11 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "11",
             "kind": "printed",
             "note": ""
@@ -48474,6 +48960,11 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "51",
             "kind": "printed",
             "note": ""
@@ -48518,6 +49009,11 @@ export const catalogues = {
           {
             "text": "90",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -48596,6 +49092,11 @@ export const catalogues = {
             "text": "",
             "kind": "absent",
             "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           }
         ]
       },
@@ -48622,6 +49123,11 @@ export const catalogues = {
           {
             "text": "150",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -48682,6 +49188,11 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "15",
             "kind": "printed",
             "note": ""
@@ -48726,6 +49237,11 @@ export const catalogues = {
           {
             "text": "150",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -48786,6 +49302,11 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "95",
             "kind": "printed",
             "note": ""
@@ -48822,7 +49343,7 @@ export const catalogues = {
         "weave": "",
         "bonding": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
-        "note": "Flow resistivity printed \"(420 ± 17) × 10^3\". Porosity decay cell prints a dash. The Porosity column prints this value as a number far above 1 while every other row of the column prints a fraction; on the page it is plainly a percentage, but it is transcribed exactly as printed.",
+        "note": "Flow resistivity printed \"(420 ± 17) × 10^3\". Porosity decay cell prints a dash. The Porosity column prints this value as a number far above 1 while every other row of the column prints a fraction; on the page it is plainly a percentage, so it is held as printed in porosity_percent and not in porosity, which is a fraction (docs/ERRATA.md).",
         "attributedTo": {
           "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
         },
@@ -48830,6 +49351,11 @@ export const catalogues = {
           {
             "text": "420 ± 17",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -48874,7 +49400,7 @@ export const catalogues = {
         "weave": "",
         "bonding": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
-        "note": "Flow resistivity printed \"(370 ± 110) × 10^3\". Last row of the table. Porosity decay cell prints a dash. The Porosity column prints this value as a number far above 1 while every other row of the column prints a fraction; on the page it is plainly a percentage, but it is transcribed exactly as printed.",
+        "note": "Flow resistivity printed \"(370 ± 110) × 10^3\". Last row of the table. Porosity decay cell prints a dash. The Porosity column prints this value as a number far above 1 while every other row of the column prints a fraction; on the page it is plainly a percentage, so it is held as printed in porosity_percent and not in porosity, which is a fraction (docs/ERRATA.md).",
         "attributedTo": {
           "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
         },
@@ -48882,6 +49408,11 @@ export const catalogues = {
           {
             "text": "370 ± 110",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {

@@ -7038,6 +7038,42 @@ dos ediciones con las mismas entradas y en el mismo orden.
   permite a quien lea ver la contradicción.
 - **Estado:** no reportado.
 
+## Cox & D'Antonio, Acoustic Absorbers and Diffusers 3e (2017), Tabla 6.7 (seis porosidades impresas en tanto por ciento en una columna de fracciones)
+
+- **Localización:** Tabla 6.7, «Effective flow resistivity values for ground
+  surfaces and other parameters», la columna «Porosity», en las páginas
+  impresas 200 y 201 (PDF 257 y 258). Fuente no normativa: un libro de texto.
+- **Lo impreso:** la columna se encabeza «Porosity» y no dice su unidad,
+  mientras la de al lado se encabeza «Water content (%)». Todas las
+  porosidades que imprime son fracciones entre 0,15 y 1 («0.5–0.9» para la
+  nieve, «0.24» para el campo deportivo, «0.44» para la arena fina, «0.34–1» y
+  otras así para las hierbas ajustadas), salvo en seis filas: «Mineral layer
+  beneath mixed deciduous forest» «36.5», «Humus on pine forest floor»
+  «58.1», «Pine forest litter (6–7 cm thick)» «38.9», «Grass root layer in
+  loamy sand» «48 ± 4», «Loamy sand» «37.5» y «Bare sandy plain» «26.9».
+- **El problema:** una porosidad es la fracción de un volumen que está
+  abierta, así que no puede pasar de 1, y estas seis son porcentajes impresos
+  en una columna que no dice su unidad y que en todas las demás filas lleva
+  fracciones. Leídas en la unidad de la propia columna son porosidades de 26,9
+  a 58,1, que ningún material tiene; leídas como tanto por ciento son de 0,269
+  a 0,581, que es lo que son suelos como estos. La página deja que quien lee
+  averigüe cuál de las dos, y un programa que lea la columna tal como se
+  imprime se queda con el valor imposible.
+- **Evidencia:** verificado en la página PDF 257 (página impresa 200) y en la
+  página PDF 258 (página impresa 201) de Cox y D'Antonio (2017), *Acoustic
+  Absorbers and Diffusers*, tercera edición: el encabezado no imprime unidad,
+  y las seis celdas imprimen los valores citados, la cuarta como «48 ± 4».
+- **Comportamiento de la biblioteca:** en
+  [`PUBLISHED_GROUND`](../src/phonometry/environment/propagation/ground_surfaces.py)
+  las seis filas guardan sus valores tal como se imprimen en
+  `GroundSurface.porosity_percent`, con el ± 4 en su incertidumbre, y dejan
+  vacío `porosity`, que es una fracción de 0 a 1; toda fila de catálogo
+  comprueba al construirse que una porosidad es una fracción.
+  `test_the_six_percent_porosities_of_cox_are_held_as_printed` de
+  [`tests/io/test_catalogue_row_contract.py`](../tests/io/test_catalogue_row_contract.py)
+  fija las seis.
+- **Estado:** sin notificar.
+
 ## Ver & Beranek 2e (2006), TABLA 14.1 (tres módulos con la notación e corrompida en la impresión)
 
 - **Dónde:** TABLA 14.1, «Properties of Some Commercial Damping Materials», en

@@ -3,13 +3,13 @@
   "library": "4.0.0rc1",
   "generator": "scripts/conformance_report.py",
   "counts": {
-    "checks": 1349,
-    "passing": 1349,
+    "checks": 1360,
+    "passing": 1360,
     "failing": 0,
-    "domains": 92,
-    "standards": 468,
-    "citations": 915,
-    "designations": 187,
+    "domains": 93,
+    "standards": 469,
+    "citations": 926,
+    "designations": 188,
     "sources": 114
   },
   "units": [
@@ -221,6 +221,12 @@
       "title": "Saw-tooth signal burst (ISO 8041-1 5.9)",
       "checks": 17,
       "passing": 17
+    },
+    {
+      "id": "personal-vibration-exposure-meters-iso-8041-2",
+      "title": "Personal vibration exposure meters (ISO 8041-2)",
+      "checks": 11,
+      "passing": 11
     },
     {
       "id": "machine-vibration-evaluation-iso-20816",
@@ -16716,6 +16722,484 @@
         "value": 0.0
       },
       "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "personal-vibration-exposure-meters-iso-8041-2/iso-8041-2-2021-table-7-1-2017-table-7/signal-burst-response-hand-arm-every-printed-cell",
+      "domain": "personal-vibration-exposure-meters-iso-8041-2",
+      "reference": {
+        "cite": "ISO 8041-2:2021 Table 7 / -1:2017 Table 7",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 8041-2",
+            "edition": "2021",
+            "clause": "Table 7"
+          },
+          {
+            "kind": "standard",
+            "designation": "ISO 8041-1",
+            "edition": "2017",
+            "clause": "Table 7",
+            "lead": " / ",
+            "relation": "corroborates",
+            "written": "-1"
+          }
+        ]
+      },
+      "quantity": "Signal-burst response, hand-arm: every printed cell",
+      "kind": "count",
+      "expected": {
+        "value": 12.0,
+        "label": "12 cells inside the printed tolerance"
+      },
+      "computed": {
+        "value": 12.0,
+        "label": "12/12 printed cells"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "personal-vibration-exposure-meters-iso-8041-2/iso-8041-2-2021-table-8-1-2017-table-8/signal-burst-response-whole-body-every-printed-cell",
+      "domain": "personal-vibration-exposure-meters-iso-8041-2",
+      "reference": {
+        "cite": "ISO 8041-2:2021 Table 8 / -1:2017 Table 8",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 8041-2",
+            "edition": "2021",
+            "clause": "Table 8"
+          },
+          {
+            "kind": "standard",
+            "designation": "ISO 8041-1",
+            "edition": "2017",
+            "clause": "Table 8",
+            "lead": " / ",
+            "relation": "corroborates",
+            "written": "-1"
+          }
+        ]
+      },
+      "quantity": "Signal-burst response, whole-body: every printed cell",
+      "kind": "count",
+      "expected": {
+        "value": 192.0,
+        "label": "192 cells inside the printed tolerance"
+      },
+      "computed": {
+        "value": 192.0,
+        "label": "192/192 printed cells"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "personal-vibration-exposure-meters-iso-8041-2/iso-8041-2-2021-table-9-1-2017-table-9/signal-burst-response-low-frequency-whole-body-every-printed-cell",
+      "domain": "personal-vibration-exposure-meters-iso-8041-2",
+      "reference": {
+        "cite": "ISO 8041-2:2021 Table 9 / -1:2017 Table 9",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 8041-2",
+            "edition": "2021",
+            "clause": "Table 9"
+          },
+          {
+            "kind": "standard",
+            "designation": "ISO 8041-1",
+            "edition": "2017",
+            "clause": "Table 9",
+            "lead": " / ",
+            "relation": "corroborates",
+            "written": "-1"
+          }
+        ]
+      },
+      "quantity": "Signal-burst response, low-frequency-whole-body: every printed cell",
+      "kind": "count",
+      "expected": {
+        "value": 24.0,
+        "label": "24 cells inside the printed tolerance"
+      },
+      "computed": {
+        "value": 24.0,
+        "label": "24/24 printed cells"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "personal-vibration-exposure-meters-iso-8041-2/iso-8041-2-2021-table-7-vs-1-2017-table-7/printed-cells-identical-to-part-1-hand-arm",
+      "domain": "personal-vibration-exposure-meters-iso-8041-2",
+      "reference": {
+        "cite": "ISO 8041-2:2021 Table 7 vs -1:2017 Table 7",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 8041-2",
+            "edition": "2021",
+            "clause": "Table 7"
+          },
+          {
+            "kind": "standard",
+            "designation": "ISO 8041-1",
+            "edition": "2017",
+            "clause": "Table 7",
+            "lead": " vs ",
+            "relation": "compares",
+            "written": "-1"
+          }
+        ]
+      },
+      "quantity": "Printed cells identical to Part 1, hand-arm",
+      "kind": "count",
+      "expected": {
+        "value": 12.0,
+        "label": "12 cells, indication and tolerance, as ISO 8041-1 prints them"
+      },
+      "computed": {
+        "value": 12.0,
+        "label": "12/12 cells"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "personal-vibration-exposure-meters-iso-8041-2/iso-8041-2-2021-table-8-vs-1-2017-table-8/printed-cells-identical-to-part-1-whole-body",
+      "domain": "personal-vibration-exposure-meters-iso-8041-2",
+      "reference": {
+        "cite": "ISO 8041-2:2021 Table 8 vs -1:2017 Table 8",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 8041-2",
+            "edition": "2021",
+            "clause": "Table 8"
+          },
+          {
+            "kind": "standard",
+            "designation": "ISO 8041-1",
+            "edition": "2017",
+            "clause": "Table 8",
+            "lead": " vs ",
+            "relation": "compares",
+            "written": "-1"
+          }
+        ]
+      },
+      "quantity": "Printed cells identical to Part 1, whole-body",
+      "kind": "count",
+      "expected": {
+        "value": 192.0,
+        "label": "192 cells, indication and tolerance, as ISO 8041-1 prints them"
+      },
+      "computed": {
+        "value": 192.0,
+        "label": "192/192 cells"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "personal-vibration-exposure-meters-iso-8041-2/iso-8041-2-2021-table-9-vs-1-2017-table-9/printed-cells-identical-to-part-1-low-frequency-whole-body",
+      "domain": "personal-vibration-exposure-meters-iso-8041-2",
+      "reference": {
+        "cite": "ISO 8041-2:2021 Table 9 vs -1:2017 Table 9",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 8041-2",
+            "edition": "2021",
+            "clause": "Table 9"
+          },
+          {
+            "kind": "standard",
+            "designation": "ISO 8041-1",
+            "edition": "2017",
+            "clause": "Table 9",
+            "lead": " vs ",
+            "relation": "compares",
+            "written": "-1"
+          }
+        ]
+      },
+      "quantity": "Printed cells identical to Part 1, low-frequency-whole-body",
+      "kind": "count",
+      "expected": {
+        "value": 24.0,
+        "label": "24 cells, indication and tolerance, as ISO 8041-1 prints them"
+      },
+      "computed": {
+        "value": 24.0,
+        "label": "24/24 cells"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "personal-vibration-exposure-meters-iso-8041-2/iso-8041-2-2021-table-6-vs-1-2017-table-6/saw-tooth-test-signal-identical-to-part-1-18-fields",
+      "domain": "personal-vibration-exposure-meters-iso-8041-2",
+      "reference": {
+        "cite": "ISO 8041-2:2021 Table 6 vs -1:2017 Table 6",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 8041-2",
+            "edition": "2021",
+            "clause": "Table 6"
+          },
+          {
+            "kind": "standard",
+            "designation": "ISO 8041-1",
+            "edition": "2017",
+            "clause": "Table 6",
+            "lead": " vs ",
+            "relation": "compares",
+            "written": "-1"
+          }
+        ]
+      },
+      "quantity": "Saw-tooth test signal identical to Part 1, 18 fields",
+      "kind": "count",
+      "expected": {
+        "value": 18.0,
+        "label": "18/18 fields"
+      },
+      "computed": {
+        "value": 18.0,
+        "label": "18/18 fields"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "personal-vibration-exposure-meters-iso-8041-2/iso-8041-2-2021-table-2/tolerances-of-indication-of-a-pvem-2-rows",
+      "domain": "personal-vibration-exposure-meters-iso-8041-2",
+      "reference": {
+        "cite": "ISO 8041-2:2021 Table 2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 8041-2",
+            "edition": "2021",
+            "clause": "Table 2"
+          }
+        ]
+      },
+      "quantity": "Tolerances of indication of a PVEM, 2 rows, %",
+      "kind": "record",
+      "expected": {
+        "label": "indication = 4 %; low-frequency indication = 5 %; weighting consistency = 3 %",
+        "record": {
+          "indication": 4.0,
+          "low-frequency indication": 5.0,
+          "weighting consistency": 3.0
+        }
+      },
+      "computed": {
+        "label": "indication = 4 %; low-frequency indication = 5 %; weighting consistency = 3 %",
+        "record": {
+          "indication": 4.0,
+          "low-frequency indication": 5.0,
+          "weighting consistency": 3.0
+        }
+      },
+      "unit": "%",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "personal-vibration-exposure-meters-iso-8041-2/iso-8041-2-2021-12-11/maximum-expanded-uncertainties-of-the-frequency-response-tests",
+      "domain": "personal-vibration-exposure-meters-iso-8041-2",
+      "reference": {
+        "cite": "ISO 8041-2:2021 12.11",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 8041-2",
+            "edition": "2021",
+            "clause": "12.11"
+          }
+        ]
+      },
+      "quantity": "Maximum expanded uncertainties of the frequency-response tests, %",
+      "kind": "record",
+      "expected": {
+        "label": "12.11.2 = 4.5 %; 12.11.3 = 3 %; 12.11.4 = 5 %",
+        "record": {
+          "12.11.2": 4.5,
+          "12.11.3": 3.0,
+          "12.11.4": 5.0
+        }
+      },
+      "computed": {
+        "label": "12.11.2 = 4.5 %; 12.11.3 = 3 %; 12.11.4 = 5 %",
+        "record": {
+          "12.11.2": 4.5,
+          "12.11.3": 3.0,
+          "12.11.4": 5.0
+        }
+      },
+      "unit": "%",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "personal-vibration-exposure-meters-iso-8041-2/iso-8041-2-2021-clauses-12-and-13/maximum-expanded-uncertainties-of-measurement-11-figures-over-10-clauses",
+      "domain": "personal-vibration-exposure-meters-iso-8041-2",
+      "reference": {
+        "cite": "ISO 8041-2:2021 Clauses 12 and 13",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 8041-2",
+            "edition": "2021",
+            "clause": "Clauses 12 and 13"
+          }
+        ]
+      },
+      "quantity": "Maximum expanded uncertainties of measurement, 11 figures over 10 clauses, %",
+      "kind": "record",
+      "expected": {
+        "label": "12.7 = 2 %; 12.10.1 = 2 %; 12.10.2 = 3 %; 12.10.2 additional ranges = 4 %; 12.11.2 = 4.5 %; 12.11.3 = 3 %; 12.11.4 = 5 %; 12.13 = 3 %; 12.14 = 2 %; 12.18 = 0.01 %; 13.9 = 5 %",
+        "record": {
+          "12.7": 2.0,
+          "12.10.1": 2.0,
+          "12.10.2": 3.0,
+          "12.10.2 additional ranges": 4.0,
+          "12.11.2": 4.5,
+          "12.11.3": 3.0,
+          "12.11.4": 5.0,
+          "12.13": 3.0,
+          "12.14": 2.0,
+          "12.18": 0.01,
+          "13.9": 5.0
+        }
+      },
+      "computed": {
+        "label": "12.7 = 2 %; 12.10.1 = 2 %; 12.10.2 = 3 %; 12.10.2 additional ranges = 4 %; 12.11.2 = 4.5 %; 12.11.3 = 3 %; 12.11.4 = 5 %; 12.13 = 3 %; 12.14 = 2 %; 12.18 = 0.01 %; 13.9 = 5 %",
+        "record": {
+          "12.7": 2.0,
+          "12.10.1": 2.0,
+          "12.10.2": 3.0,
+          "12.10.2 additional ranges": 4.0,
+          "12.11.2": 4.5,
+          "12.11.3": 3.0,
+          "12.11.4": 5.0,
+          "12.13": 3.0,
+          "12.14": 2.0,
+          "12.18": 0.01,
+          "13.9": 5.0
+        }
+      },
+      "unit": "%",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "personal-vibration-exposure-meters-iso-8041-2/iso-8041-2-2021-12-1-and-13-1/coverage-factor-of-the-expanded-uncertainty",
+      "domain": "personal-vibration-exposure-meters-iso-8041-2",
+      "reference": {
+        "cite": "ISO 8041-2:2021 12.1 and 13.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 8041-2",
+            "edition": "2021",
+            "clause": "12.1 and 13.1"
+          }
+        ]
+      },
+      "quantity": "Coverage factor of the expanded uncertainty",
+      "kind": "scalar",
+      "expected": {
+        "value": 2.0
+      },
+      "computed": {
+        "value": 2.0
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
       "verdict": "pass"
     },
     {

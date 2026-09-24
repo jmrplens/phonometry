@@ -5512,7 +5512,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
 
 ## ISO 8041-1:2017, apartado 12.7 («the appropriate weighting factor (see Table 1)» para `Wf`)
 
-- **Localización:** apartado 12.7, folio impreso 30 (página 30 del PDF en la
+- **Ubicación:** apartado 12.7, folio impreso 30 (página 30 del PDF en la
   edición de ISO, página 38 del PDF de la copia leída aquí), párrafo cuarto. El
   apartado empieza en el folio impreso 29.
 - **Lo impreso:** «For each frequency weighting provided, a steady sinusoidal
@@ -5538,10 +5538,11 @@ dos ediciones con las mismas entradas y en el mismo orden.
   Tabla 3 en 0,08 Hz y 0,63 Hz. Ahí la ponderación de limitación de banda vale
   0,928 078 y la global 0,388 848, valores que la Tabla B.5 imprime como
   0,927 9 y 0,388 4 en el centro de banda vecino de 0,398 1 Hz. Leído como el
-  0,388 8 de la Tabla 1, el ensayo le pide a un vibrómetro `Wf` conforme un
-  valor que dista un 7,75 % del que muestra, frente al ±5 % que la Tabla 2
-  permite a la vibración de cuerpo entero de baja frecuencia: la mitad otra vez
-  por encima del límite, en un instrumento sin defecto. Leído como el cociente
+  0,388 8 de la Tabla 1, el ensayo exige un valor que la indicación de un
+  vibrómetro `Wf` conforme supera en un 7,76 % de ese valor exigido
+  ($0{,}418\,982 / 0{,}388\,8 - 1$), frente al ±5 % que la Tabla 2 permite a
+  la vibración de cuerpo entero de baja frecuencia: la mitad otra vez por
+  encima del límite, en un instrumento sin defecto. Leído como el cociente
   0,418 982, el ensayo es cierto por construcción.
 - **Consecuencia:** ninguna para las tablas de la propia norma. El anexo B
   tabula la ponderación de limitación de banda y la global en columnas
@@ -5561,7 +5562,121 @@ dos ediciones con las mismas entradas y en el mismo orden.
   para las nueve ponderaciones, de modo que un informe pueda decir cuál usó.
   `reference_indication` devuelve el producto de la Tabla 1, que es la otra
   magnitud y la que trata la fila de condiciones de referencia de esa tabla.
-- **Estado:** sin comunicar.
+- **Estado:** sin notificar.
+
+## ISO 8041-2:2021, apartado 12.7 («the appropriate weighting factor (see Table 1)» para `Wf`, heredado de la parte 1)
+
+- **Ubicación:** apartado 12.7, folio impreso 26 (página 34 del PDF), el
+  segundo párrafo de ese folio. El apartado empieza en el folio impreso 25.
+- **Lo impreso:** la frase del apartado 12.7 de la ISO 8041-1:2017 que recoge
+  la entrada anterior, palabra por palabra: «With an input signal adjusted to
+  indicate the reference vibration value on the reference measurement range
+  with band-limiting frequency weighting, the indicated frequency-weighted
+  vibration values shall equal the indicated band-limited weighted vibration
+  value multiplied by the appropriate weighting factor (see Table 1) within
+  the tolerance limits of Table 2.» La Tabla 1 de este documento imprime el
+  mismo factor de ponderación de `Wf` a 2,5 rad/s, 0,388 8, y la Tabla 3 los
+  mismos parámetros de `Wf`, con las esquinas de limitación de banda en
+  0,08 Hz y 0,63 Hz.
+- **El problema:** el defecto de la ISO 8041-1:2017, trasladado al medidor
+  personal de exposición a vibraciones. La parte 2 mantiene `Wf` entre las
+  ponderaciones que puede ofrecer un PVEM, con la misma frecuencia de
+  referencia dentro de la misma falda de limitación de banda, así que la
+  aritmética de la entrada anterior vale sin cambios: leído como el 0,388 8 de
+  la Tabla 1, el párrafo exige un valor que la indicación de un vibrómetro
+  `Wf` conforme supera en un 7,76 % de ese valor exigido
+  ($0{,}418\,982 / 0{,}388\,8 - 1$), fuera del ±3 % que la segunda fila de la
+  Tabla 2 permite a la diferencia y fuera del ±5 % que su primera fila permite
+  a una indicación de cuerpo entero de baja frecuencia. Leído como el cociente
+  entre la ponderación global y la de limitación de banda en la frecuencia de
+  referencia, 0,418 982, el párrafo es cierto por construcción.
+- **Evidencia:** el apartado impreso frente a la Tabla 1 (folio impreso 5) y
+  las Tablas 2 y 3 (folio impreso 8), cuya fila de `Wf` lleva los parámetros
+  que imprime la ISO 8041-1:2017. Verificado en las páginas 13, 16 y 34 del
+  PDF (pp. impresas 5, 8 y 26) de ISO 8041-2:2021(E).
+- **Consecuencia:** ninguna para las tablas de la propia norma, igual que en
+  la parte 1.
+- **Comportamiento de la biblioteca:** esta entrada no lo cambia.
+  [`band_limited_weighting_factor`](../src/phonometry/vibration/human/instrumentation.py)
+  devuelve el cociente, y sirve a las dos partes porque la parte 2 imprime las
+  mismas ponderaciones. La fila de conformidad «ISO 8041-2:2021 Table 2»
+  recoge las tolerancias frente a las que se juzga este párrafo.
+- **Estado:** sin notificar.
+
+## ISO 8041-2:2021, apartado 12.7 (ponderaciones temporales juzgadas frente a una fila que la Tabla 2 ya no imprime)
+
+- **Ubicación:** apartado 12.7, folio impreso 26 (página 34 del PDF), el
+  tercer párrafo de ese folio; leído frente a la Tabla 2 del folio impreso 8,
+  al apartado 5.13 del folio impreso 15, al apartado 5.1.2 del folio impreso 6
+  y a la Tabla 8 de los folios impresos 13 y 14.
+- **Lo impreso:** «For an instrument where time weightings are provided, a
+  steady sinusoidal electrical signal shall be applied to the electrical input
+  facility at the reference frequency. [...] With the same input signal, the
+  indicated vibration values on each time weighting shall equal the indicated
+  reference vibration value within the tolerance limits of Table 2.» La
+  Tabla 2 imprime dos filas: la tolerancia de indicación a la frecuencia de
+  referencia (±4 %, y ±5 % para la vibración de cuerpo entero de baja
+  frecuencia) y la diferencia entre una indicación ponderada en frecuencia y
+  la limitada en banda multiplicada por el factor de ponderación (±3 %). El
+  apartado 5.13, «Running RMS acceleration», dice entero: «Not applicable for
+  PVEM.»
+- **El problema:** el párrafo es el que la ISO 8041-1:2017 imprime en su
+  propio 12.7 (folio impreso 30 de ese documento), con «the vibration meter»
+  cambiado por «the PVEM», y allí el límite al que apunta es la tercera fila
+  de la Tabla 2 de la parte 1: la indicación del valor eficaz móvil frente a
+  la promediada linealmente en el tiempo, ±2 %. La ponderación temporal de esta
+  familia de normas es ese valor eficaz móvil; la parte 1 titula sus Tablas 10
+  y 11 «Time-weighting decay rates». La parte 2 quitó la fila, porque su 5.13
+  declara que el valor eficaz móvil no aplica, y conservó el párrafo que lo
+  juzga, así que el párrafo remite ahora a una tabla en la que ninguna fila
+  fija un límite para una indicación con ponderación temporal. Y el propio
+  documento deja que un PVEM la tenga: su 5.1.2 (folio impreso 6) permite a un
+  PVEM de cuerpo entero «optionally, measure exposure characteristics based on
+  maximum transient vibration value (MTVV)», que la ISO 8041-1:2017 3.1.2.4,
+  adoptada por el apartado 3, define como el «maximum value of the running
+  r.m.s. vibration acceleration value when the integration time is equal to
+  1 s», y su Tabla 8 (folios impresos 13 y 14) califica en la ráfaga el «MTVV
+  linear» y el «MTVV exponential» de ese valor eficaz móvil. Para un PVEM sin
+  ponderación temporal el párrafo queda vacío; para uno que da el MTVV, el
+  documento no dice a qué límite se somete la indicación en cada ponderación
+  temporal.
+- **Evidencia:** los tres pasajes impresos entre sí, frente al 5.1.2 y la
+  Tabla 8, y frente al 12.7 de la ISO 8041-1:2017 y su Tabla 2, que imprimen la
+  fila del valor eficaz móvil para la que se escribió este párrafo. Verificado
+  en las páginas 14, 16, 21, 22, 23 y 34 del PDF (pp. impresas 6, 8, 13, 14,
+  15 y 26) de ISO 8041-2:2021(E), y en las páginas 13, 20, 28 y 38 del PDF
+  (pp. impresas 5, 12, 20 y 30) de ISO 8041-1:2017(E) para la definición del
+  MTVV, la Tabla 2 de la parte 1, el título de su Tabla 10 y su 12.7.
+- **Consecuencia:** ninguna para las tablas de la propia norma. El defecto es
+  una remisión que sobrevivió a su fila.
+- **Comportamiento de la biblioteca:**
+  [`PVEM_INDICATION_TOLERANCES_PERCENT`](../src/phonometry/vibration/human/instrumentation.py)
+  publica las dos filas que imprime la parte 2 y ninguna fila del valor eficaz
+  móvil, así que nada en la biblioteca juzga un PVEM con este párrafo; la fila
+  de la parte 1 sigue siendo `RUNNING_RMS_CONSISTENCY_TOLERANCE_PERCENT`,
+  documentada como solo de la parte 1. La fila de conformidad «ISO 8041-2:2021
+  Table 2» recoge las dos filas.
+- **Estado:** sin notificar.
+
+## ISO 8041-2:2021, apartado 12.22 («exited» por «excited»)
+
+- **Ubicación:** apartado 12.22, «Logging capabilities», folio impreso 36
+  (página 44 del PDF), el primer párrafo del apartado.
+- **Lo impreso:** «Part A of the PVEM shall be placed on a shaker and be
+  exited 2 times for at least 300 s each.»
+- **El problema:** «exited» (salido) donde el sentido es «excited» (excitado):
+  la parte A se coloca en un excitador para hacerla vibrar dos veces, una a
+  cada extremo de la pasada de 12 h, y el párrafo siguiente, en el folio
+  impreso 37, cuenta las 600 muestras registradas que «correspond to the
+  vibration magnitude», que son esas dos excitaciones de 300 s a una muestra
+  por segundo. Tal como está impreso, el verbo dice que la parte sale dos veces
+  del excitador.
+- **Evidencia:** página 44 del PDF (p. impresa 36) de ISO 8041-2:2021(E), y
+  página 45 del PDF (p. impresa 37) para las 600 muestras.
+- **Consecuencia:** ninguna para las tablas de la propia norma.
+- **Comportamiento de la biblioteca:** no le afecta. El ensayo de registro de
+  12 h del 12.22 es un ensayo sobre un medidor físico y no está implementado.
+- **Estado:** sin notificar (tipográfico, sin consecuencia numérica).
 
 ## DIN 45669-1:2010-09, Tabla 9 (una fila de velocidad de pico que contradice la fórmula (5), y la fila KB_F que tiene al lado)
 

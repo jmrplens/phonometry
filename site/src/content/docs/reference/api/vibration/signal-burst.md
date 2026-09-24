@@ -72,9 +72,14 @@ that also grades indication, linearity, overload, timing and environmental
 behaviour. A verdict here says the time response of the weighting chain
 matches the printed table, and nothing else.
 
-ISO 8041-2:2021 5.9 (folio 11) repeats this clause for personal vibration
-exposure meters with the same Table 6 and the same Tables 7 to 9, so one
-implementation covers both parts.
+**The personal meter of Part 2.** ISO 8041-2:2021 5.9 (folio 11) repeats
+this clause for personal vibration exposure meters, and its 12.13 (folio 31)
+repeats the acceptance test with the same maximum expanded uncertainty of
+3 %. Its Table 6 (folio 12) is this Table 6 row for row, and its Tables 7, 8
+and 9 (folios 12 to 14) are these tables cell for cell: read off the Part 2
+pages and compared with [`SIGNAL_BURST_RESPONSE`](/phonometry/reference/api/vibration/signal-burst/#signal_burst_response), all 228 indications
+and all 228 tolerances beside them are the same numbers. One implementation
+therefore covers both parts, and a verdict here is a verdict against either.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
@@ -340,7 +345,10 @@ Verify measured burst indications against ISO 8041-1 Tables 7 to 9.
 The acceptance test of 12.13 (folio 36): "The vibration values indicated
 in response to the signal bursts, relative to the values of the vibration
 amplitude of the input signal, shall be as specified in Table 7, 8 or 9",
-within the tolerance printed beside each column.
+within the tolerance printed beside each column. A personal vibration
+exposure meter is graded by the same sentence, ISO 8041-2:2021 12.13
+(folio 31), against Tables 7 to 9 of that document, which print the same
+cells.
 
 5.9 (folio 16) says the printed responses "are relative to a 1 m/s2
 amplitude signal and shall be multiplied by the amplitude of the actual

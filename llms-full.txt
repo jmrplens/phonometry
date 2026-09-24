@@ -1,8 +1,8 @@
 # phonometry
 
-> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1349 numerical conformance checks against 468 standards enforced in CI.
+> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1360 numerical conformance checks against 469 standards enforced in CI.
 
-phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1349 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 92 domains.
+phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1360 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 93 domains.
 
 The project was published as **PyOctaveBand** until version 3.0.0. Third-party references and dependency pins still using that name refer to this library.
 
@@ -43777,10 +43777,12 @@ documents, one page per module.
 | `characteristic_phase_deviation` / `peak_deviation_percent` | `function` | **The two formulae the phase criterion is made of.**<br>• Formula (6): `abs((f_n Δφ_{n+1} − f_{n+1} Δφ_n) / (f_{n+1} − f_n))` [degrees], N − 1 values<br>• Formula (H.4): the peak-value deviation that costs, `0,48 sin Δφ0 × 100 %`, an approximation Annex H limits to Δφ0 below 30° | `vibration.peak_deviation_percent(12.0)  # 9.98 %` |
 | `NOMINAL_FREQUENCY_RANGE_HZ` | `constant` | **The nominal frequency range of each weighting (ISO 8041-1 Table 1).**<br>• `Wh` 8 to 1 000, whole-body 0,5 to 80, `Wm` 1 to 80, `Wf` 0,1 to 0,5<br>• the printed round numbers, not the band centres `10**(k/10)` Annex B tabulates at | `vibration.NOMINAL_FREQUENCY_RANGE_HZ['Wm']  # (1.0, 80.0)` |
 | `ISO8041_COVERAGE_FACTOR` / `MAX_EXPANDED_UNCERTAINTY_PERCENT` | `constant` | **What a testing laboratory's uncertainty is expanded with, and how far it may reach.**<br>• `k = 2` (13.1 and 14.1; 12.1 prints "no less than 2"), named for its standard because `hearing.COVERAGE_FACTOR` is a different one (1,65, ISO 9612)<br>• the maximum permitted expanded uncertainty per test clause, e.g. 4,5 % for 12.11.2 and 0,01 % for the timing clauses | `vibration.MAX_EXPANDED_UNCERTAINTY_PERCENT['12.13']  # 3.0 %` |
+| `PVEM_MAX_EXPANDED_UNCERTAINTY_PERCENT` | `constant` | **The same limits for a personal vibration exposure meter (ISO 8041-2:2021 clauses 12 and 13).**<br>• keyed by the Part 2 clause number: 11 figures over 10 clauses (12.10.2 prints one for the reference range and one for the other ranges), each 12.x figure the one Part 1 prints for the same clause<br>• 13.9 is Part 2's periodic verification (5 %), not Part 1's one-off indication test (2 %), which is why each part has its own table | `vibration.PVEM_MAX_EXPANDED_UNCERTAINTY_PERCENT['12.11.2']  # 4.5 %` |
 | `weighting_tolerance_percent` / `phase_tolerance_degrees` | `function` | **The band ISO 8041-1 Table 5 allows, region by region.**<br>• `+12 %` / `−11 %` in the central region, `+26 %` / `−21 %` in the skirts, no lower limit in the tails<br>• the phase band applies only to a meter reporting a parameter not based on r.m.s. values (Table 5 footnote a), which is why it is a separate call | `vibration.weighting_tolerance_percent('Wk', [16.0])  # (12.0, -11.0)` |
 | `TRANSITION_FREQUENCIES_HZ` / `CENTRAL_TOLERANCE_PERCENT` / `SKIRT_TOLERANCE_PERCENT` / `TAIL_TOLERANCE_PERCENT` / `UNCONSTRAINED_BELOW` | `constant` | **Tables 4 and 5 of ISO 8041-1, as data.**<br>• the four transition frequencies per weighting, built from the printed `10**(k/10)` exponents<br>• the three bands, each `(upper %, lower %, phase °)`<br>• `−100 %`, which is the absence of a lower limit rather than a wide one | `vibration.TRANSITION_FREQUENCIES_HZ['Wk']`<br><br>• (0.251, 0.631, 63.1, 158.5) Hz |
 | `REFERENCE_FREQUENCY_HZ` / `REFERENCE_ACCELERATION_M_S2` / `reference_indication` | `constant` / `function` | **The ISO 8041-1 Table 1 reference conditions.**<br>• the calibration frequency per weighting, from the radians per second the standard prints<br>• the reference r.m.s. acceleration, 1 m/s² whole-body, 10 hand-transmitted, 0,1 low-frequency<br>• `reference_indication(name)` is their product with the weighting factor there, which is what a conforming meter shows | `vibration.reference_indication('Wh')  # 2.02 m/s²` |
 | `indication_tolerance_percent` / `INDICATION_TOLERANCE_PERCENT` / `LOW_FREQUENCY_INDICATION_TOLERANCE_PERCENT` / `LOW_FREQUENCY_WEIGHTING` | `function` / `constant` | **How far the indication itself may sit from the truth (ISO 8041-1 Table 2).**<br>• 4 % at the reference frequency, and 5 % for the low-frequency whole-body case, which is `Wf` | `vibration.indication_tolerance_percent('Wf')  # 5.0` |
+| `PVEM_INDICATION_TOLERANCES_PERCENT` | `constant` | **Table 2 of a personal vibration exposure meter (ISO 8041-2:2021).**<br>• `'indication'` 4 %, `'low-frequency indication'` 5 %, `'weighting consistency'` 3 %: the first two rows of the Part 1 table<br>• no running r.m.s. row, because Part 2 5.13 declares the running r.m.s. not applicable to a PVEM | `vibration.PVEM_INDICATION_TOLERANCES_PERCENT['weighting consistency']  # 3.0` |
 | `band_limiting_response` / `band_limiting_factors` / `apply_band_limiting` | `function` | **The band-limiting stage of a weighting on its own (ISO 8041-1 Formulae (1) and (2)).**<br>• the two-pole Butterworth high-pass and low-pass pair every weighting starts with, without the transition and step stages<br>• `apply_band_limiting(signal, fs=None, *, name)` filters with it, which is what the band-limiting row of the burst tables is measured on | `vibration.band_limiting_factors('Wk', [1.0])`<br><br>• 0.9874 |
 | `band_limited_weighting_factor` / `WEIGHTING_CONSISTENCY_TOLERANCE_PERCENT` | `function` / `constant` | **The weighting factor a band-limited channel actually shows (ISO 8041-1 Table 2, row 2).**<br>• the design goal times the band-limiting response, which is what a meter indicates when both stages are in the path<br>• the 3 % row 2 allows between the two | `vibration.band_limited_weighting_factor('Wk', [16.0])` |
 | `running_rms_decay_time` | `function` | **How long the running r.m.s. takes to fall to 10 % of its steady value (ISO 8041-1 5.13).**<br>• `integration_time_s`, and `method` selecting linear or exponential averaging<br>• the quantity Table 11 prints, timed from the moment the signal is shut off | `vibration.running_rms_decay_time(1.0, method='linear')` |
@@ -58848,7 +58850,7 @@ the normative PDF fiche.
 - [Filter Architecture Gallery](https://jmrplens.github.io/phonometry/signals/filters/filter-gallery/): choose an architecture and inspect responses
 - [Calibration and dBFS](https://jmrplens.github.io/phonometry/signals/metrology/calibration/): get real-world SPL values
 - [Why phonometry](https://jmrplens.github.io/phonometry/start/why-phonometry/): the conformance-first design philosophy
-- [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): the expected and computed value of all 1349 checks
+- [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): the expected and computed value of all 1360 checks
 - [API Reference](https://jmrplens.github.io/phonometry/reference/api/): every parameter of every function
 - [Bibliography](https://jmrplens.github.io/phonometry/reference/bibliography/): the books and papers behind every guide, each with a verified link
 
@@ -59820,7 +59822,7 @@ sample from the metrology core:
 | IEC 61252:1993 | The personal sound exposure quantities, `sound_exposure()` and the normalized 8 h level `lex_8h()`; IEC 61252:2025 has since superseded this print, and the transcription still targets the 1993+A2 text | `tests/signals/test_levels.py` |
 
 The same discipline applies far beyond the metrology core: today the suite runs
-1349 numerical conformance checks across 92 domains and 468 standards, covering
+1360 numerical conformance checks across 93 domains and 469 standards, covering
 psychoacoustics and speech intelligibility, room, building and materials
 acoustics, human and machine vibration, environmental, aircraft, rotorcraft
 and underwater noise, electroacoustics, broadcast loudness, industrial noise
@@ -62741,7 +62743,8 @@ analysis](https://jmrplens.github.io/phonometry/signals/) section.
 - [Verifying a human-vibration meter (ISO 8041-1)](https://jmrplens.github.io/phonometry/vibration/human/meter-verification/):
   the tolerance band around each frequency weighting, the characteristic phase
   deviation, the running r.m.s. decay and the saw-tooth burst indications a
-  conforming meter has to reproduce.
+  conforming meter has to reproduce, and the personal vibration exposure
+  meter of ISO 8041-2, graded with the same burst tables.
 
 ## What this section does not cover
 
@@ -62798,7 +62801,8 @@ The **human** in that name is load-bearing. The standard specifies instruments
 response to vibration" (clause 1), for hand-transmitted vibration (ISO 5349-1),
 whole-body vibration (ISO 2631-1, ISO 2631-2 and ISO 2631-4) and low-frequency
 whole-body vibration from 0,1 Hz to 0,5 Hz. **General purpose** separates it
-from ISO 8041-2, which specifies personal vibration exposure meters, and not
+from ISO 8041-2, which specifies personal vibration exposure meters with most
+of the same tables (section 11 says which), and not
 from some other kind of vibration meter: an instrument for machine condition
 monitoring or for damage to buildings is graded against other documents, and
 nothing on this page applies to it.
@@ -64093,7 +64097,118 @@ printed cells, is 2.3 % at worst against printed tolerances of 10 % and 12 %.
 And what a pass means is still narrow: the time response of one weighting chain
 matches the printed table on the day it was measured.
 
-## 11. The same check on the other side of the fence
+## 11. The personal meter of ISO 8041-2
+
+Everything above is ISO 8041-1, the general-purpose meter an engineer carries
+to a machine or a seat. ISO 8041-2:2021 specifies the other instrument a
+human-vibration survey uses, the **personal vibration exposure meter**
+(PVEM): the one left unattended to log a worker's exposure through a full
+working day, at least 12 h without anyone touching it (5.1 and 5.12), with its
+transducer fitted to the worker, to the seat, or to the machine or power tool
+(5.1.2 and 5.1.3). It measures the same quantities through the same
+weightings, and Part 2 does not write a second set of tables for it. It prints
+the Part 1 tables again wherever it can, so the question for this section is
+which of the numbers above a PVEM is held to, and which are its own.
+
+**The same burst, to the digit.** Part 2 5.9 repeats the saw-tooth signal
+burst of section 10. Its Table 6 defines the same test signal, and its
+Tables 7, 8 and 9 print 228 indications with a tolerance beside each. Read off
+the Part 2 pages and set beside `SIGNAL_BURST_RESPONSE`, every one of the 228
+indications and every one of the 228 tolerances is the Part 1 number, and
+12.13 of Part 2 grades them with the same sentence and the same 3 % maximum
+uncertainty. So one implementation serves both parts: the snippets of
+section 10 are the Part 2 test as they are written, and the conformance report
+grades the library against the Part 2 page in a section of its own, which also
+holds every Part 2 cell against its Part 1 twin.
+
+```python
+from phonometry import vibration
+
+# The table section 10 reproduces is the Part 2 table too: 72 printed lines
+# and 228 cells, the Wk row of Table 8 among them.
+cells = vibration.SIGNAL_BURST_RESPONSE
+print(len(cells), sum(len(row) for row in cells.values()))   # 72 228
+print(dict(cells["whole-body", "Wk", 4]))
+# {'rms': 0.0577, 'vdv': 0.455, 'mtvv_linear': 0.182, 'mtvv_exponential': 0.171}
+```
+
+**Table 2 loses a row.** The tolerances of indication of Part 2 are the first
+two rows of the Part 1 table, number for number: 4 % on the indication at the
+reference frequency, 5 % for low-frequency whole-body vibration, and 3 %
+between a frequency-weighted indication and the band-limited one times the
+weighting factor. The third row, the 2 % between the running r.m.s. and the
+linear average, is gone, because Part 2 5.13 reads in full "Not applicable for
+PVEM". Nor does Part 2 print a decay-time table, so section 9 has no
+counterpart in it. The running r.m.s. does not leave the instrument
+altogether, though: 5.1.2 still lets a whole-body PVEM report the MTVV, the
+largest value its running r.m.s. reaches, and Table 8 grades that MTVV in
+the burst exactly as section 10 does.
+`PVEM_INDICATION_TOLERANCES_PERCENT` is that table, so a check that walks it
+grades a PVEM on what Part 2 prints and on nothing else:
+
+```python
+from phonometry import vibration
+
+print(dict(vibration.PVEM_INDICATION_TOLERANCES_PERCENT))
+# {'indication': 4.0, 'low-frequency indication': 5.0, 'weighting consistency': 3.0}
+
+# The row Part 2 does not print stays where Part 1 put it.
+print(vibration.RUNNING_RMS_CONSISTENCY_TOLERANCE_PERCENT)   # 2.0
+```
+
+Two paragraphs of Part 2 12.7 came over from Part 1 unchanged, and neither
+fits the meter it now describes. The weighting-consistency test still points
+at "the appropriate weighting factor (see Table 1)", and the Part 2 Table 1
+still prints 0,388 8 for `Wf`, so the caveat of section 6 applies to a PVEM
+word for word: `band_limited_weighting_factor` is the factor that makes the row
+satisfiable. And the paragraph after it still grades "each time weighting"
+against "the tolerance limits of Table 2", whose time-weighting row Part 2 no
+longer prints. Both are in the [errata registry](https://jmrplens.github.io/phonometry/reference/errata/).
+
+**Its own uncertainties.** Part 2 prints the maximum expanded uncertainty each
+of its test clauses allows a laboratory, and in clause 12, pattern evaluation,
+every figure is the one Part 1 prints under the same number: 4,5 % for the
+mechanical frequency response of 12.11.2, 3 % for the electrical one of
+12.11.3, 5 % for the overall response of 12.11.4, 3 % for the signal burst of
+12.13. Clause 13 is where the two documents part. Part 2 has no validation of
+a one-off instrument, which is clause 13 of Part 1, and its periodic
+verification is clause 13 rather than 14: the 13.9 of Part 2 is the 5 % of a
+periodic verification, the counterpart of the Part 1 14.9, while the 13.9 of
+Part 1 is the 2 % of a different test. A clause number names a different test
+in each document, which is why the two tables are kept apart:
+
+```python
+from phonometry import vibration
+
+pvem = vibration.PVEM_MAX_EXPANDED_UNCERTAINTY_PERCENT
+general = vibration.MAX_EXPANDED_UNCERTAINTY_PERCENT
+for clause in ("12.11.2", "12.11.3", "12.11.4", "12.13"):
+    print(clause, pvem[clause], general[clause])
+# 12.11.2 4.5 4.5
+# 12.11.3 3.0 3.0
+# 12.11.4 5.0 5.0
+# 12.13 3.0 3.0
+print(pvem["13.9"], general["13.9"], general["14.9"])   # 5.0 2.0 5.0
+print(sorted(set(general) - set(pvem)))
+# ['13.11', '13.14', '13.15', '14.9']
+print(vibration.ISO8041_COVERAGE_FACTOR)                # 2.0
+```
+
+The decision rule of section 4 does not change: Part 2 12.1 and 13.1 print the
+sentence and the coverage factor Part 1 prints, so `verify_weighting` with the
+laboratory's own `expanded_uncertainty_percent` is the PVEM verdict too, with
+the Part 2 figure as the ceiling on what the laboratory may declare.
+
+What Part 2 adds beyond these tables is not here. The arithmetic of its
+12.11, Formulae (9) to (13), splits a frequency-response error between the
+transducer and the electrical part of the instrument and combines the
+apparent error with the laboratory's uncertainty; the logging test of 12.22
+runs the meter for 12 h, with a shaker run at each end, and reads its log file
+sample by sample; and logging, operator detection, the detection of transient
+artefacts (Annex A) and contact force (Annex B) are properties of the
+hardware.
+
+## 12. The same check on the other side of the fence
 
 A sound level meter gets exactly this treatment, from a different committee
 and in a different unit. IEC 61672-1 prints design goals for the A, C and Z
@@ -64161,6 +64276,11 @@ The **reference conditions** of Table 1 and the **tolerance of indication** of
 Table 2, published as the window an indication has to land in. They are
 published, not checked: reading a display is a bench measurement.
 
+The **personal vibration exposure meter** of ISO 8041-2:2021: its 228 burst
+cells of Tables 7 to 9, the Part 1 cells to the digit, graded in the
+conformance report against the Part 2 page; its two-row Table 2; and the
+maximum expanded uncertainties its clauses 12 and 13 print.
+
 **No bench, anywhere.** Every criterion here is one side of a comparison whose
 other side somebody has to measure on hardware. Accuracy of indication,
 linearity, instrument noise, overload, cross-talk, transducer characteristics,
@@ -64172,6 +64292,11 @@ is a statement about that clause. Pattern evaluation, periodic verification
 and the in situ check are procedures on a physical meter, and nothing here
 carries a serial number.
 
+**The rest of ISO 8041-2.** The frequency-response arithmetic of its 12.11
+(Formulae (9) to (13)), the 12 h logging test of 12.22, and the logging,
+operator detection, artefact detection (Annex A) and contact force (Annex B)
+clauses are not implemented.
+
 ## See also
 
 - [Human vibration exposure (ISO 2631, ISO 5349)](https://jmrplens.github.io/phonometry/vibration/human/human-vibration/): the
@@ -64181,7 +64306,7 @@ carries a serial number.
   the other verifiers, and what only a laboratory can attest.
 - [Frequency Weighting (A, C, Z)](https://jmrplens.github.io/phonometry/signals/levels/weighting/): the
   sound level meter's weightings and the IEC 61672-1 acceptance limits of
-  section 11.
+  section 12.
 - [Calibration and dBFS](https://jmrplens.github.io/phonometry/signals/metrology/calibration/): the
   before-and-after check that an in situ verification is built on, and the
   traceability a type test is reported with.
@@ -64205,6 +64330,14 @@ carries a serial number.
   compliance of 13.1 and 14.1, the tabulated design-goal weightings and phases
   of Annex B, and the phase argument of Annex H with its Formulae (H.1),
   (H.3) and (H.4).
+- International Organization for Standardization. (2021). *Human response to
+  vibration — Measuring instrumentation — Part 2: Personal vibration exposure
+  meters* (ISO 8041-2:2021).
+  The personal vibration exposure meter: the 12 h of 5.1 and 5.12, Table 2
+  with its two rows and the "Not applicable for PVEM" of 5.13, the saw-tooth
+  signal burst of 5.9 with its Table 6 and the printed responses of Tables 7
+  to 9, the maximum expanded uncertainties of clauses 12 and 13, and the
+  decision rule of 12.1 and 13.1.
 - Griffin, M. J. (1996). *Handbook of human vibration*. Academic Press.
   ISBN 978-0-12-303041-2.
   [Publisher page](https://shop.elsevier.com/books/handbook-of-human-vibration/griffin/978-0-12-303041-2).
@@ -64239,6 +64372,15 @@ the verdict as `verify_signal_burst_response`. The frequency weightings
 themselves (Table 3 and clause 5.6) are covered in
 [human vibration exposure](https://jmrplens.github.io/phonometry/vibration/human/human-vibration/).
 
+ISO 8041-2:2021, *Human response to vibration — Measuring instrumentation —
+Part 2: Personal vibration exposure meters*: the saw-tooth signal burst of 5.9
+and 12.13, whose Table 6 and Tables 7 to 9 are the Part 1 tables cell for cell
+and are served by the same functions; Table 2, with its two rows and without
+the running r.m.s. row 5.13 declares not applicable, as
+`PVEM_INDICATION_TOLERANCES_PERCENT`; and the maximum expanded uncertainties
+of clauses 12 and 13 as `PVEM_MAX_EXPANDED_UNCERTAINTY_PERCENT`, with the
+coverage factor of 12.1 and 13.1 as `ISO8041_COVERAGE_FACTOR`.
+
 **Two decisions rather than deductions.** The printed burst tables come from a
 simulation nobody published, so two of its conventions were fixed by measuring
 which reading reproduces the page: the continuous row runs from `t = 0` and
@@ -64255,9 +64397,10 @@ documentation of Annex G and the uncertainty estimates of Annex I. Applying a
 signal to a transducer and reading a display is laboratory work for the burst,
 the decay and the frequency response alike; what is here is the other side of
 each comparison. The pattern evaluation, periodic verification and in situ
-check procedures of the document are not carried out, and neither are the
-personal vibration exposure meters of ISO 8041-2:2021 implemented, although
-its 5.9 repeats this clause with the same Table 6 and the same Tables 7 to 9.
+check procedures of the document are not carried out. Of ISO 8041-2:2021, the
+frequency-response arithmetic of 12.11 (Formulae (9) to (13)), the 12 h
+logging test of 12.22, and the logging, operator detection, artefact detection
+(Annex A) and contact force (Annex B) clauses are not implemented.
 A passing verdict on any one of these clauses is a statement about that clause,
 never a conformity certificate for an instrument.
 
@@ -67277,7 +67420,8 @@ risk.
 - [Verifying a human-vibration meter (ISO 8041-1)](https://jmrplens.github.io/phonometry/vibration/human/meter-verification/):
   the tolerance band on each frequency weighting, the characteristic phase
   deviation, the running r.m.s. decay and the saw-tooth burst indications a
-  conforming meter has to reproduce.
+  conforming meter has to reproduce, and the personal vibration exposure
+  meter of ISO 8041-2, graded with the same burst tables.
 
 ## [Machinery](https://jmrplens.github.io/phonometry/vibration/machinery/)
 

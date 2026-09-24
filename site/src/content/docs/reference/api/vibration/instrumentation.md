@@ -58,6 +58,21 @@ quantity. Formula (6) (folio 15) turns a pair of adjacent phase errors into
 the characteristic phase deviation the table actually grades, and
 [`verify_phase_response`](/phonometry/reference/api/vibration/instrumentation/#verify_phase_response) is that comparison.
 
+**The personal meter of Part 2.** ISO 8041-2:2021 specifies the personal
+vibration exposure meter (PVEM), the instrument left unattended to log a
+worker's exposure through a full working day, with its transducer on the
+worker, the seat or the machine (5.1.1 to 5.1.3, folios 4 and 6), and it
+grades that instrument with the tables of Part 1 wherever it can: the
+weightings of Table 3, the bands of Tables 4 and 5 and the saw-tooth burst of
+Tables 6 to 9 are printed again unchanged, which is why every function here
+serves both parts. Two things differ, and each has a table of its own. Its
+Table 2 (folio 8) keeps the first two rows of the Part 1 table and drops the
+third, because its 5.13 (folio 15) declares the running r.m.s. "Not
+applicable for PVEM": [`PVEM_INDICATION_TOLERANCES_PERCENT`](/phonometry/reference/api/vibration/instrumentation/#pvem_indication_tolerances_percent). And its
+clauses 12 and 13 print their own maximum expanded uncertainties, the same
+figures as Part 1 on a shorter list of clauses:
+[`PVEM_MAX_EXPANDED_UNCERTAINTY_PERCENT`](/phonometry/reference/api/vibration/instrumentation/#pvem_max_expanded_uncertainty_percent).
+
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
 ## band_limited_weighting_factor
@@ -106,11 +121,11 @@ band-limiting weighting is 0,928 078 there and the overall weighting
 0,388 848, values Table B.5 prints as 0,927 9 and 0,388 4 at the
 neighbouring 0,398 1 Hz band centre. Reading "the appropriate weighting
 factor" as the 0,388 8 of Table 1 makes a *conforming* `Wf` meter miss
-the row by 7,75 %, half again over the ±5 % Table 2 allows it; reading it
-as the ratio 0,418 982 makes the row true by construction. The standard
-does not define the phrase, and the "(see Table 1)" of 12.7 points at the
-reading that cannot be satisfied; the ambiguity is registered in
-`docs/ERRATA.md`.
+the row by 7,76 % of the value it demands, half again over the ±5 %
+Table 2 allows it; reading it as the ratio 0,418 982 makes the row true
+by construction. The standard does not define the phrase, and the
+"(see Table 1)" of 12.7 points at the reading that cannot be satisfied;
+the ambiguity is registered in `docs/ERRATA.md`.
 
 **Parameters**
 
@@ -414,6 +429,22 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 | `ax` | Existing axes, or `None` to create a figure. |
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to `phonometry._plot.vibration.plot_phase_verification`. |
+
+## PVEM_INDICATION_TOLERANCES_PERCENT
+
+*Constant* (`mapping`).
+
+```python
+PVEM_INDICATION_TOLERANCES_PERCENT = {'indication': 4.0, 'low-frequency indication': 5.0, 'weighting consistency': 3.0}
+```
+
+## PVEM_MAX_EXPANDED_UNCERTAINTY_PERCENT
+
+*Constant* (`mapping`).
+
+```python
+PVEM_MAX_EXPANDED_UNCERTAINTY_PERCENT = {'12.7': 2.0, '12.10.1': 2.0, '12.10.2': 3.0, '12.10.2 additional ranges': 4.0, '12.11.2': 4.5, '12.11.3': 3.0, '12.11.4': 5.0, '12.13': 3.0, '12.14': 2.0, '12.18': 0.01, '13.9': 5.0}
+```
 
 ## REFERENCE_ACCELERATION_M_S2
 

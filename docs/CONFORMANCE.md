@@ -19,7 +19,7 @@
 
 ## Numerical conformance report
 
-**1349/1349 conformance checks pass** across 92 domains and 468 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+**1360/1360 conformance checks pass** across 93 domains and 469 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub><b>&#916;</b> is the difference between the computed value and the one the standard publishes. <b>Used</b> is how much of that clause's published tolerance the difference consumes: 100 % means it sits exactly on the limit, 5 % means it uses a twentieth of the allowance, and a dash means the clause states no two-sided tolerance for the quantity, so there is no budget to spend. It is reported and never used to decide a verdict, which is settled at full precision before any rounding.</sub>
 
@@ -720,6 +720,25 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO 8041-1:2017 Table 6 | Saw-tooth frequency of the hand-arm burst, Hz | 79.58 Hz (+/-0.01%) | 79.5775 Hz | -0.0025 Hz | 31 % | ![Pass][cv-pass] Pass |
 | ISO 8041-1:2017 Table 6 | Saw-tooth frequency of the low-frequency whole-body burst, Hz | 0.3979 Hz (+/-0.01%) | 0.3979 Hz | 0 Hz | 32 % | ![Pass][cv-pass] Pass |
 | ISO 8041-1:2017 12.13 | Largest fall time of the whole-body saw-tooth generator, s | 0.002 s (+/-0.000001 s) | 0.002 s | 0 s | 0 % | ![Pass][cv-pass] Pass |
+
+</details>
+
+<details>
+<summary><b>Personal vibration exposure meters (ISO 8041-2)</b>: 100% (11/11)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
+|:---|:---|:---|:---|:---|:---:|:---:|
+| ISO 8041-2:2021 Table 7 / -1:2017 Table 7 | Signal-burst response, hand-arm: every printed cell | 12 cells inside the printed tolerance | 12/12 printed cells | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 8041-2:2021 Table 8 / -1:2017 Table 8 | Signal-burst response, whole-body: every printed cell | 192 cells inside the printed tolerance | 192/192 printed cells | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 8041-2:2021 Table 9 / -1:2017 Table 9 | Signal-burst response, low-frequency-whole-body: every printed cell | 24 cells inside the printed tolerance | 24/24 printed cells | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 8041-2:2021 Table 7 vs -1:2017 Table 7 | Printed cells identical to Part 1, hand-arm | 12 cells, indication and tolerance, as ISO 8041-1 prints them | 12/12 cells | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 8041-2:2021 Table 8 vs -1:2017 Table 8 | Printed cells identical to Part 1, whole-body | 192 cells, indication and tolerance, as ISO 8041-1 prints them | 192/192 cells | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 8041-2:2021 Table 9 vs -1:2017 Table 9 | Printed cells identical to Part 1, low-frequency-whole-body | 24 cells, indication and tolerance, as ISO 8041-1 prints them | 24/24 cells | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 8041-2:2021 Table 6 vs -1:2017 Table 6 | Saw-tooth test signal identical to Part 1, 18 fields | 18/18 fields | 18/18 fields | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 8041-2:2021 Table 2 | Tolerances of indication of a PVEM, 2 rows, % | indication = 4 %; low-frequency indication = 5 %; weighting consistency = 3 % | indication = 4 %; low-frequency indication = 5 %; weighting consistency = 3 % | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 8041-2:2021 12.11 | Maximum expanded uncertainties of the frequency-response tests, % | 12.11.2 = 4.5 %; 12.11.3 = 3 %; 12.11.4 = 5 % | 12.11.2 = 4.5 %; 12.11.3 = 3 %; 12.11.4 = 5 % | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 8041-2:2021 Clauses 12 and 13 | Maximum expanded uncertainties of measurement, 11 figures over 10 clauses, % | 12.7 = 2 %; 12.10.1 = 2 %; 12.10.2 = 3 %; 12.10.2 additional ranges = 4 %; 12.11.2 = 4.5 %; 12.11.3 = 3 %; 12.11.4 = 5 %; 12.13 = 3 %; 12.14 = 2 %; 12.18 = 0.01 %; 13.9 = 5 % | 12.7 = 2 %; 12.10.1 = 2 %; 12.10.2 = 3 %; 12.10.2 additional ranges = 4 %; 12.11.2 = 4.5 %; 12.11.3 = 3 %; 12.11.4 = 5 %; 12.13 = 3 %; 12.14 = 2 %; 12.18 = 0.01 %; 13.9 = 5 % | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 8041-2:2021 12.1 and 13.1 | Coverage factor of the expanded uncertainty | 2 (+/-0) | 2 | 0 | 0 % | ![Pass][cv-pass] Pass |
 
 </details>
 

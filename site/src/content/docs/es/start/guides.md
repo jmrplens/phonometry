@@ -544,7 +544,7 @@ uniones y vibración en humanos. El área cubre el camino que sigue una máquina
 al entrar en una estructura y volver a salir como sonido aéreo, y la cuestión
 aparte de qué le hace la vibración a la persona expuesta. Implementa
 ISO 7626-1/-2, ISO 10846-1/-2/-3, ISO 9611, ISO/TS 7849-1/-2, EN 15657,
-EN 12354-5, ISO 2631-1/-2/-4/-5, ISO 5349-1/-2, ISO 8041-1 y DIN 4150-3.
+EN 12354-5, ISO 2631-1/-2/-4/-5, ISO 5349-1/-2, ISO 8041-1/-2 y DIN 4150-3.
 
 **[Fuentes de ruido estructural](/phonometry/es/vibration/structural/)**
 
@@ -595,7 +595,8 @@ EN 12354-5, ISO 2631-1/-2/-4/-5, ISO 5349-1/-2, ISO 8041-1 y DIN 4150-3.
 - [Verificación del vibrómetro de vibración en humanos (ISO 8041-1)](/phonometry/es/vibration/human/meter-verification/):
   la banda de tolerancia de cada ponderación frecuencial, la desviación
   característica de fase, el decaimiento del valor eficaz móvil y las indicaciones
-  de la ráfaga en diente de sierra.
+  de la ráfaga en diente de sierra, y el medidor personal de exposición de la
+  ISO 8041-2, que se califica con las mismas tablas de ráfaga.
 
 **[Maquinaria](/phonometry/es/vibration/machinery/)**
 

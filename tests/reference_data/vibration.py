@@ -967,6 +967,165 @@ ISO8041_1_TABLE11_DECAY_RATE_DB_PER_S: tuple[tuple[float, float, float], ...] = 
     (8.0, 0.48, 0.62),
 )
 
+# ---------------------------------------------------------------------------
+# ISO 8041-2:2021, personal vibration exposure meters (PVEM). Read off the
+# printed pages of the 2021 edition, whose PDF page index is the printed folio
+# plus 8, and typed here from those pages rather than copied from the ISO
+# 8041-1 tables the library holds: the point of this block is to find out
+# whether Part 2 prints the same numbers, so it cannot start from them.
+# ---------------------------------------------------------------------------
+
+# Table 6 (folio 12): per application, the weightings, the angular frequency
+# in rad/s, the start time in s, the burst lengths in cycles, the repeat time
+# in s and the measurement duration in s.
+ISO8041_2_TABLE6: dict[
+    str, tuple[tuple[str, ...], float, float, tuple[int, ...], float, float]
+] = {
+    "hand-arm": (("Wh",), 500.0, 0.2, (1, 2, 4, 8, 16), 2.0, 12.0),
+    "whole-body": (
+        ("Wb", "Wc", "Wd", "We", "Wj", "Wk", "Wm"),
+        100.0,
+        1.0,
+        (1, 2, 4, 8, 16),
+        10.0,
+        60.0,
+    ),
+    "low-frequency-whole-body": (("Wf",), 2.5, 40.0, (1, 2, 4, 8, 16), 400.0, 2400.0),
+}
+
+# Tables 7, 8 and 9 (folios 12, 13 and 14): every printed line, keyed by
+# (row, burst length) with None for the "Continuous" line and "band-limiting"
+# for the "Band limiting" row, holding one (indication, tolerance %) pair per
+# printed column in printed order. The tolerance is typed per cell, as the
+# page prints it, rather than once per column.
+ISO8041_2_TABLE7_COLUMNS: tuple[str, ...] = ("rms",)
+ISO8041_2_TABLE7: dict[tuple[str, int | None], tuple[tuple[float, float], ...]] = {
+    ("band-limiting", 1): ((0.0448, 10.0),),
+    ("band-limiting", 2): ((0.0633, 10.0),),
+    ("band-limiting", 4): ((0.0895, 10.0),),
+    ("band-limiting", 8): ((0.127, 10.0),),
+    ("band-limiting", 16): ((0.179, 10.0),),
+    ("band-limiting", None): ((0.565, 10.0),),
+    ("Wh", 1): ((0.0103, 10.0),),
+    ("Wh", 2): ((0.0133, 10.0),),
+    ("Wh", 4): ((0.0168, 10.0),),
+    ("Wh", 8): ((0.0224, 10.0),),
+    ("Wh", 16): ((0.0309, 10.0),),
+    ("Wh", None): ((0.0946, 10.0),),
+}
+
+# Table 8 spans folios 13 and 14: the Wm row is the "Table 8 (continued)" at
+# the head of folio 14.
+ISO8041_2_TABLE8_COLUMNS: tuple[str, ...] = (
+    "rms",
+    "vdv",
+    "mtvv_linear",
+    "mtvv_exponential",
+)
+ISO8041_2_TABLE8: dict[tuple[str, int | None], tuple[tuple[float, float], ...]] = {
+    ("band-limiting", 1): ((0.0433, 10.0), (0.498, 12.0), (0.137, 10.0), (0.135, 10.0)),
+    ("band-limiting", 2): ((0.0612, 10.0), (0.593, 12.0), (0.193, 10.0), (0.188, 10.0)),
+    ("band-limiting", 4): ((0.0865, 10.0), (0.705, 12.0), (0.274, 10.0), (0.258, 10.0)),
+    ("band-limiting", 8): ((0.122, 10.0), (0.838, 12.0), (0.387, 10.0), (0.344, 10.0)),
+    ("band-limiting", 16): ((0.173, 10.0), (0.996, 12.0), (0.547, 10.0), (0.437, 10.0)),
+    ("band-limiting", None): (
+        (0.546, 10.0),
+        (1.77, 12.0),
+        (0.547, 10.0),
+        (0.549, 10.0),
+    ),
+    ("Wb", 1): ((0.0314, 10.0), (0.342, 12.0), (0.0991, 10.0), (0.0968, 10.0)),
+    ("Wb", 2): ((0.0435, 10.0), (0.403, 12.0), (0.137, 10.0), (0.132, 10.0)),
+    ("Wb", 4): ((0.0614, 10.0), (0.482, 12.0), (0.194, 10.0), (0.182, 10.0)),
+    ("Wb", 8): ((0.0867, 10.0), (0.575, 12.0), (0.274, 10.0), (0.243, 10.0)),
+    ("Wb", 16): ((0.123, 10.0), (0.685, 12.0), (0.387, 10.0), (0.309, 10.0)),
+    ("Wb", None): ((0.387, 10.0), (1.22, 12.0), (0.388, 10.0), (0.388, 10.0)),
+    ("Wc", 1): ((0.0222, 10.0), (0.244, 12.0), (0.0703, 10.0), (0.0684, 10.0)),
+    ("Wc", 2): ((0.0292, 10.0), (0.275, 12.0), (0.0923, 10.0), (0.0885, 10.0)),
+    ("Wc", 4): ((0.0397, 10.0), (0.318, 12.0), (0.126, 10.0), (0.117, 10.0)),
+    ("Wc", 8): ((0.055, 10.0), (0.374, 12.0), (0.174, 10.0), (0.153, 10.0)),
+    ("Wc", 16): ((0.077, 10.0), (0.445, 12.0), (0.243, 10.0), (0.192, 10.0)),
+    ("Wc", None): ((0.24, 10.0), (0.788, 12.0), (0.243, 10.0), (0.242, 10.0)),
+    ("Wd", 1): ((0.00669, 10.0), (0.0779, 12.0), (0.0212, 10.0), (0.0197, 10.0)),
+    ("Wd", 2): ((0.00906, 10.0), (0.0852, 12.0), (0.0286, 10.0), (0.0264, 10.0)),
+    ("Wd", 4): ((0.0116, 10.0), (0.0923, 12.0), (0.0366, 10.0), (0.033, 10.0)),
+    ("Wd", 8): ((0.0148, 10.0), (0.101, 12.0), (0.0469, 10.0), (0.04, 10.0)),
+    ("Wd", 16): ((0.0197, 10.0), (0.115, 12.0), (0.0611, 10.0), (0.0481, 10.0)),
+    ("Wd", None): ((0.059, 10.0), (0.197, 12.0), (0.0611, 10.0), (0.0594, 10.0)),
+    ("We", 1): ((0.00342, 10.0), (0.0409, 12.0), (0.0108, 10.0), (0.00992, 10.0)),
+    ("We", 2): ((0.00478, 10.0), (0.0452, 12.0), (0.0151, 10.0), (0.0135, 10.0)),
+    ("We", 4): ((0.00637, 10.0), (0.0493, 12.0), (0.0201, 10.0), (0.0176, 10.0)),
+    ("We", 8): ((0.00816, 10.0), (0.0535, 12.0), (0.0255, 10.0), (0.0214, 10.0)),
+    ("We", 16): ((0.0102, 10.0), (0.0592, 12.0), (0.0311, 10.0), (0.0244, 10.0)),
+    ("We", None): ((0.0295, 10.0), (0.0987, 12.0), (0.0311, 10.0), (0.0297, 10.0)),
+    ("Wj", 1): ((0.0435, 10.0), (0.517, 12.0), (0.138, 10.0), (0.135, 10.0)),
+    ("Wj", 2): ((0.0616, 10.0), (0.609, 12.0), (0.195, 10.0), (0.189, 10.0)),
+    ("Wj", 4): ((0.0874, 10.0), (0.723, 12.0), (0.277, 10.0), (0.261, 10.0)),
+    ("Wj", 8): ((0.124, 10.0), (0.859, 12.0), (0.392, 10.0), (0.349, 10.0)),
+    ("Wj", 16): ((0.175, 10.0), (1.02, 12.0), (0.554, 10.0), (0.443, 10.0)),
+    ("Wj", None): ((0.554, 10.0), (1.81, 12.0), (0.555, 10.0), (0.557, 10.0)),
+    ("Wk", 1): ((0.0299, 10.0), (0.323, 12.0), (0.0944, 10.0), (0.0922, 10.0)),
+    ("Wk", 2): ((0.0411, 10.0), (0.38, 12.0), (0.13, 10.0), (0.125, 10.0)),
+    ("Wk", 4): ((0.0577, 10.0), (0.455, 12.0), (0.182, 10.0), (0.171, 10.0)),
+    ("Wk", 8): ((0.0814, 10.0), (0.543, 12.0), (0.257, 10.0), (0.228, 10.0)),
+    ("Wk", 16): ((0.115, 10.0), (0.648, 12.0), (0.363, 10.0), (0.289, 10.0)),
+    ("Wk", None): ((0.362, 10.0), (1.15, 12.0), (0.364, 10.0), (0.363, 10.0)),
+    ("Wm", 1): ((0.0149, 10.0), (0.165, 12.0), (0.0472, 10.0), (0.0456, 10.0)),
+    ("Wm", 2): ((0.0197, 10.0), (0.185, 12.0), (0.0623, 10.0), (0.0594, 10.0)),
+    ("Wm", 4): ((0.0264, 10.0), (0.211, 12.0), (0.0836, 10.0), (0.0775, 10.0)),
+    ("Wm", 8): ((0.0363, 10.0), (0.247, 12.0), (0.115, 10.0), (0.101, 10.0)),
+    ("Wm", 16): ((0.0507, 10.0), (0.294, 12.0), (0.16, 10.0), (0.126, 10.0)),
+    ("Wm", None): ((0.158, 10.0), (0.52, 12.0), (0.16, 10.0), (0.159, 10.0)),
+}
+
+ISO8041_2_TABLE9_COLUMNS: tuple[str, ...] = ("rms", "msdv")
+ISO8041_2_TABLE9: dict[tuple[str, int | None], tuple[tuple[float, float], ...]] = {
+    ("band-limiting", 1): ((0.0341, 10.0), (1.671, 10.0)),
+    ("band-limiting", 2): ((0.0487, 10.0), (2.386, 10.0)),
+    ("band-limiting", 4): ((0.069, 10.0), (3.38, 10.0)),
+    ("band-limiting", 8): ((0.0982, 10.0), (4.811, 10.0)),
+    ("band-limiting", 16): ((0.139, 10.0), (6.81, 10.0)),
+    ("band-limiting", None): ((0.439, 10.0), (21.51, 10.0)),
+    ("Wf", 1): ((0.0197, 10.0), (0.9651, 10.0)),
+    ("Wf", 2): ((0.0236, 10.0), (1.156, 10.0)),
+    ("Wf", 4): ((0.0304, 10.0), (1.489, 10.0)),
+    ("Wf", 8): ((0.0416, 10.0), (2.038, 10.0)),
+    ("Wf", 16): ((0.0571, 10.0), (2.797, 10.0)),
+    ("Wf", None): ((0.176, 10.0), (8.622, 10.0)),
+}
+
+# Table 2 (folio 8): the two rows a PVEM prints, in per cent. The first row
+# carries one tolerance per application; the running r.m.s. row of ISO 8041-1
+# Table 2 is not printed, and 5.13 (folio 15) reads "Not applicable for PVEM".
+ISO8041_2_TABLE2_INDICATION_PERCENT = 4.0  # hand-transmitted and whole-body
+ISO8041_2_TABLE2_LOW_FREQUENCY_INDICATION_PERCENT = 5.0  # low-frequency
+ISO8041_2_TABLE2_WEIGHTING_CONSISTENCY_PERCENT = 3.0
+
+# The maximum expanded uncertainties of measurement clauses 12 and 13 print,
+# in per cent, keyed by clause: 12.7 (folio 26, the same 2 % three times),
+# 12.10.1 (folio 27, 2 % on the reference range and 2 % on the others),
+# 12.10.2 (folio 28, 3 % on the reference range, 4 % on the others), 12.11.2
+# (folio 29), 12.11.3 (folio 30), 12.11.4 and 12.13 (folio 31), 12.14 and
+# 12.18 (folio 32), and 13.9 (folio 41, the same 5 % for linearity and for
+# frequency response). 12.20.2 prints 0,5 degC and 10 % relative humidity,
+# uncertainties of an environmental condition rather than of a deviation.
+ISO8041_2_MAX_EXPANDED_UNCERTAINTY_PERCENT: dict[str, float] = {
+    "12.7": 2.0,
+    "12.10.1": 2.0,
+    "12.10.2": 3.0,
+    "12.10.2 additional ranges": 4.0,
+    "12.11.2": 4.5,
+    "12.11.3": 3.0,
+    "12.11.4": 5.0,
+    "12.13": 3.0,
+    "12.14": 2.0,
+    "12.18": 0.01,
+    "13.9": 5.0,
+}
+# 12.1 (folio 23) prints "a coverage factor of no less than 2"; 13.1 (folio
+# 37) prints "the coverage factor k = 2".
+ISO8041_2_COVERAGE_FACTOR = 2.0
+
 # ISO 5349-2:2001 Annex E worked-example daily exposures A(8), m/s^2.
 ISO5349_2_E21_A8 = 4.1  # E.2.1 single tool: 7,4*sqrt(2,5/8)
 ISO5349_2_E3_A8 = 3.6  # E.3 forestry three-task combination

@@ -519,7 +519,7 @@ junctions and human vibration. The area covers the path a machine takes into a
 structure and out again as airborne sound, and the separate question of what
 vibration does to the person exposed to it. Implements ISO 7626-1/-2,
 ISO 10846-1/-2/-3, ISO 9611, ISO/TS 7849-1/-2, EN 15657, EN 12354-5,
-ISO 2631-1/-2/-4/-5, ISO 5349-1/-2, ISO 8041-1 and DIN 4150-3.
+ISO 2631-1/-2/-4/-5, ISO 5349-1/-2, ISO 8041-1/-2 and DIN 4150-3.
 
 **[Structure-borne sources](/phonometry/vibration/structural/)**
 
@@ -567,7 +567,9 @@ ISO 2631-1/-2/-4/-5, ISO 5349-1/-2, ISO 8041-1 and DIN 4150-3.
   input and the transmissibility at resonance.
 - [Verifying a human-vibration meter (ISO 8041-1)](/phonometry/vibration/human/meter-verification/):
   the tolerance band on each frequency weighting, the characteristic phase
-  deviation, the running r.m.s. decay and the saw-tooth burst indications.
+  deviation, the running r.m.s. decay and the saw-tooth burst indications,
+  and the personal vibration exposure meter of ISO 8041-2 graded with the
+  same burst tables.
 
 **[Machinery](/phonometry/vibration/machinery/)**
 

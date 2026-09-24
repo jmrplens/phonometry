@@ -224,6 +224,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   compliance guides no longer say the calibrator goes ungraded, and the
   plain-Markdown calibration guide no longer attributes the class 1 tolerance
   to Table 1, which lists the classes.
+- **The personal vibration exposure meter of ISO 8041-2:2021.** A PVEM, the
+  meter left unattended to log a worker's exposure through a full working
+  day, is graded with the tables of ISO 8041-1 wherever Part 2 prints them
+  again, and the library now shows
+  that it does, cell for cell: the 228 saw-tooth burst indications of Part 2
+  Tables 7 to 9 and the 228 tolerances beside them, read off the Part 2 pages,
+  are the Part 1 cells `vibration.SIGNAL_BURST_RESPONSE` already holds, and so
+  is its Table 6 test signal, which makes `signal_burst_indications` and
+  `verify_signal_burst_response` the Part 2 test as they stand. The two things
+  Part 2 prints differently are tables of their own.
+  `vibration.PVEM_INDICATION_TOLERANCES_PERCENT` is its Table 2: 4 % on the
+  indication (5 % for low-frequency whole-body vibration) and 3 % between a
+  frequency-weighted and a band-limited indication, and no running r.m.s.
+  row, because Part 2 5.13 declares the running r.m.s. not applicable to a
+  PVEM. `vibration.PVEM_MAX_EXPANDED_UNCERTAINTY_PERCENT` holds the maximum
+  expanded uncertainty each clause of Part 2 permits a testing laboratory,
+  among them 4,5 % for the mechanical frequency response (12.11.2), 3 % for
+  the electrical one (12.11.3) and 5 % for the overall response (12.11.4); its
+  13.9, periodic verification, is not the 13.9 of Part 1. The conformance
+  report has a section for Part 2: the library reproduces every printed cell
+  of Tables 7 to 9 inside the Part 2 tolerance, each table matches Part 1's,
+  and the Table 2 and uncertainty rows are checked against the page. The
+  human-vibration meter guide has a section on the PVEM, and three defects in
+  Part 2 are registered: in 12.7, the `Wf` weighting-factor pointer of Part 1,
+  carried over, and a paragraph that grades time weightings against a Table 2
+  row Part 2 no longer prints; in 12.22, "exited" printed for "excited".
 - **The ISO 1683 reference values, published once and read by every level.**
   `metrology.ISO1683_REFERENCE_VALUES` holds ISO 1683:2015 Tables 1 to 3,
   the reference values for sound in gases, sound in liquids and vibration,

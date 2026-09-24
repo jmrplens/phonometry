@@ -51,6 +51,21 @@ a constant group delay is a large phase error that changes no measured
 quantity. Formula (6) (folio 15) turns a pair of adjacent phase errors into
 the characteristic phase deviation the table actually grades, and
 :func:`verify_phase_response` is that comparison.
+
+**The personal meter of Part 2.** ISO 8041-2:2021 specifies the personal
+vibration exposure meter (PVEM), the instrument left unattended to log a
+worker's exposure through a full working day, with its transducer on the
+worker, the seat or the machine (5.1.1 to 5.1.3, folios 4 and 6), and it
+grades that instrument with the tables of Part 1 wherever it can: the
+weightings of Table 3, the bands of Tables 4 and 5 and the saw-tooth burst of
+Tables 6 to 9 are printed again unchanged, which is why every function here
+serves both parts. Two things differ, and each has a table of its own. Its
+Table 2 (folio 8) keeps the first two rows of the Part 1 table and drops the
+third, because its 5.13 (folio 15) declares the running r.m.s. "Not
+applicable for PVEM": :data:`PVEM_INDICATION_TOLERANCES_PERCENT`. And its
+clauses 12 and 13 print their own maximum expanded uncertainties, the same
+figures as Part 1 on a shorter list of clauses:
+:data:`PVEM_MAX_EXPANDED_UNCERTAINTY_PERCENT`.
 """
 
 from __future__ import annotations
@@ -200,8 +215,10 @@ NOMINAL_FREQUENCY_RANGE_HZ: Mapping[str, tuple[float, float]] = MappingProxyType
 #: is calculated with. 13.1 (folio 42) and 14.1 (folio 48) both print
 #: ``k = 2``; 12.1 (folio 28) prints "a coverage factor of no less than 2",
 #: so 2 is the floor for pattern evaluation and the exact value for the other
-#: two clauses. It carries the number of its standard because it is not the
-#: only coverage factor the library publishes:
+#: two clauses. ISO 8041-2:2021 prints the same pair of sentences, 12.1 on
+#: folio 23 and 13.1 on folio 37, so it is the coverage factor of a personal
+#: vibration exposure meter too. It carries the number of its standard because
+#: it is not the only coverage factor the library publishes:
 #: :data:`phonometry.hearing.COVERAGE_FACTOR` is the 1,65 of ISO 9612, and a
 #: bare ``COVERAGE_FACTOR`` in a second domain would read as the same number.
 ISO8041_COVERAGE_FACTOR = 2.0
@@ -240,6 +257,41 @@ MAX_EXPANDED_UNCERTAINTY_PERCENT: Mapping[str, float] = MappingProxyType(
     }
 )
 
+#: The same table for a personal vibration exposure meter: the maximum
+#: expanded uncertainty of measurement, in per cent, that each test clause of
+#: ISO 8041-2:2021 permits a testing laboratory, keyed by clause number of
+#: that document. 12.1 (folio 23) and 13.1 (folio 37) print the same decision
+#: rule as Part 1, and so the same coverage factor,
+#: :data:`ISO8041_COVERAGE_FACTOR`.
+#:
+#: Every figure clause 12 prints is the figure Part 1 prints for the same clause
+#: number; what differs is clause 13. Part 2 has no validation of a one-off
+#: instrument, which is clause 13 of Part 1, and its periodic verification is
+#: clause 13 rather than 14: its 13.9 prints 5 % for linearity and 5 % for
+#: frequency response, the counterpart of the Part 1 ``14.9``, while the Part 1
+#: ``13.9`` is the 2 % of a different test. The same clause number names two
+#: tests in the two documents, which is why each part has a table of its own,
+#: and why the Part 1 keys ``13.11`` to ``14.9`` have no key here. The same
+#: rules as the Part 1 table apply to the keys: a clause absent from it prints
+#: no figure, 12.10.2 carries a second key because it prints two figures, and
+#: 12.20.2 is absent because its ``0,5 °C`` and ``10 %`` relative humidity are
+#: uncertainties of an environmental condition.
+PVEM_MAX_EXPANDED_UNCERTAINTY_PERCENT: Mapping[str, float] = MappingProxyType(
+    {
+        "12.7": 2.0,  # folio 26, printed three times, once per paragraph
+        "12.10.1": 2.0,  # folio 27, reference range and additional ranges
+        "12.10.2": 3.0,  # folio 28, mechanical linearity, reference range
+        "12.10.2 additional ranges": 4.0,  # folio 28, the other ranges
+        "12.11.2": 4.5,  # folio 29, mechanical frequency response
+        "12.11.3": 3.0,  # folio 30, electrical frequency response
+        "12.11.4": 5.0,  # folio 31, the overall response that combines them
+        "12.13": 3.0,  # folio 31, signal-burst response
+        "12.14": 2.0,  # folio 32, overload indication
+        "12.18": 0.01,  # folio 32, timing facilities
+        "13.9": 5.0,  # folio 41, linearity and frequency response, periodic
+    }
+)
+
 #: Table 2: how far the indication itself may sit from the true value at the
 #: reference frequency, in per cent. The low-frequency whole-body case (Wf)
 #: is allowed the wider one.
@@ -262,8 +314,35 @@ WEIGHTING_CONSISTENCY_TOLERANCE_PERCENT = 3.0
 #: time-averaged r.m.s. value, both with the band-limiting weighting, may
 #: differ by 2 % over any measurement time. Part 1 only: the Table 2 of
 #: ISO 8041-2 (folio 8) has two rows rather than three, because its 5.13
-#: declares the running r.m.s. "Not applicable for PVEM".
+#: declares the running r.m.s. "Not applicable for PVEM", and
+#: :data:`PVEM_INDICATION_TOLERANCES_PERCENT` is that table.
 RUNNING_RMS_CONSISTENCY_TOLERANCE_PERCENT = 2.0
+
+#: ISO 8041-2:2021 Table 2 (folio 8), the Table 2 of a personal vibration
+#: exposure meter, in per cent: every tolerance it prints, keyed by what it
+#: grades. Its first row carries two tolerances, one per application, and has
+#: a key for each (``"indication"`` for hand-transmitted and whole-body
+#: vibration, ``"low-frequency indication"`` for low-frequency whole-body
+#: vibration); its second row is ``"weighting consistency"``, the indicated
+#: frequency-weighted value against the band-limited one times the weighting
+#: factor.
+#:
+#: The numbers are those of the first two rows of the Part 1 table, which
+#: :func:`indication_tolerance_percent` and
+#: :data:`WEIGHTING_CONSISTENCY_TOLERANCE_PERCENT` publish. The difference is
+#: the row that is not here: Part 2 prints no running r.m.s. row, because its
+#: 5.13 (folio 15) reads "Not applicable for PVEM", so a check that walks this
+#: table grades a PVEM on what Part 2 prints and on nothing else. Its 12.7
+#: (folio 26) still grades "each time weighting" against "the tolerance limits
+#: of Table 2", a paragraph carried over from Part 1 whose row Part 2 no longer
+#: prints; ``docs/ERRATA.md`` records it.
+PVEM_INDICATION_TOLERANCES_PERCENT: Mapping[str, float] = MappingProxyType(
+    {
+        "indication": 4.0,
+        "low-frequency indication": 5.0,
+        "weighting consistency": 3.0,
+    }
+)
 
 
 def indication_tolerance_percent(name: str) -> float:
@@ -1016,11 +1095,11 @@ def band_limited_weighting_factor(name: str) -> float:
     0,388 848, values Table B.5 prints as 0,927 9 and 0,388 4 at the
     neighbouring 0,398 1 Hz band centre. Reading "the appropriate weighting
     factor" as the 0,388 8 of Table 1 makes a *conforming* ``Wf`` meter miss
-    the row by 7,75 %, half again over the ±5 % Table 2 allows it; reading it
-    as the ratio 0,418 982 makes the row true by construction. The standard
-    does not define the phrase, and the "(see Table 1)" of 12.7 points at the
-    reading that cannot be satisfied; the ambiguity is registered in
-    ``docs/ERRATA.md``.
+    the row by 7,76 % of the value it demands, half again over the ±5 %
+    Table 2 allows it; reading it as the ratio 0,418 982 makes the row true
+    by construction. The standard does not define the phrase, and the
+    "(see Table 1)" of 12.7 points at the reading that cannot be satisfied;
+    the ambiguity is registered in ``docs/ERRATA.md``.
 
     :param name: One of :data:`~phonometry.vibration.WEIGHTING_NAMES`.
     :return: ``|H(f_ref)| / |H_BL(f_ref)|``, dimensionless.

@@ -90,6 +90,8 @@ _SECTION_LIST: tuple[Section, ...] = (
         label_es="Calibración e incertidumbre",
         modules=(
             "phonometry.metrology.calibration",
+            "phonometry.metrology.sound_calibrator",
+            "phonometry.metrology.conformance",
             "phonometry.metrology.uncertainty",
             "phonometry.metrology.data_qualification",
             "phonometry.metrology.reference_values",
@@ -619,6 +621,29 @@ OBJECT_MODULE_OVERRIDES: dict[str, str] = {
     # it; it belongs to the module that publishes it, which is where every
     # private reference value in the package points.
     "ISO1683_REFERENCE_VALUES": "phonometry.metrology.reference_values",
+    # The IEC 60942:2017 tables are tuples and read-only mappings, so a scan
+    # by module finds no owner; they belong to the module that grades a
+    # calibrator against them.
+    "ABBREVIATED_FREQUENCY_ACCEPTANCE_LIMITS_PERCENT": "phonometry.metrology.sound_calibrator",
+    "ABBREVIATED_LEVEL_REDUCTIONS_DB": "phonometry.metrology.sound_calibrator",
+    "CALIBRATOR_CLASSES": "phonometry.metrology.sound_calibrator",
+    "CALIBRATOR_REQUIREMENTS": "phonometry.metrology.sound_calibrator",
+    "DISTORTION_ACCEPTANCE_LIMITS_PERCENT": "phonometry.metrology.sound_calibrator",
+    "DISTORTION_MAX_UNCERTAINTY_PERCENT": "phonometry.metrology.sound_calibrator",
+    "ENVIRONMENTAL_FREQUENCY_ACCEPTANCE_LIMITS_PERCENT": "phonometry.metrology.sound_calibrator",
+    "ENVIRONMENTAL_FREQUENCY_MAX_UNCERTAINTY_PERCENT": "phonometry.metrology.sound_calibrator",
+    "ENVIRONMENTAL_LEVEL_ACCEPTANCE_LIMITS_DB": "phonometry.metrology.sound_calibrator",
+    "ENVIRONMENTAL_LEVEL_MAX_UNCERTAINTY_DB": "phonometry.metrology.sound_calibrator",
+    "FIELD_IMMUNITY_ACCEPTANCE_LIMITS_DB": "phonometry.metrology.sound_calibrator",
+    "FIELD_IMMUNITY_MAX_UNCERTAINTY_DB": "phonometry.metrology.sound_calibrator",
+    "FLUCTUATION_ACCEPTANCE_LIMITS_DB": "phonometry.metrology.sound_calibrator",
+    "FLUCTUATION_MAX_UNCERTAINTY_DB": "phonometry.metrology.sound_calibrator",
+    "FREQUENCY_ACCEPTANCE_LIMITS_PERCENT": "phonometry.metrology.sound_calibrator",
+    "FREQUENCY_MAX_UNCERTAINTY_PERCENT": "phonometry.metrology.sound_calibrator",
+    "LEVEL_ACCEPTANCE_LIMITS_DB": "phonometry.metrology.sound_calibrator",
+    "LEVEL_MAX_UNCERTAINTY_DB": "phonometry.metrology.sound_calibrator",
+    "SUPPLY_VOLTAGE_ACCEPTANCE_LIMITS_DB": "phonometry.metrology.sound_calibrator",
+    "SUPPLY_VOLTAGE_MAX_UNCERTAINTY_DB": "phonometry.metrology.sound_calibrator",
     # Defined in phonometry._internal.warnings, exported at the top level.
     "PhonometryWarning": "phonometry",
     # The io subpackage keeps its implementation modules private and

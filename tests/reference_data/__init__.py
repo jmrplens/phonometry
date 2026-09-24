@@ -359,6 +359,29 @@ from .building import ISO16283_LF_DEFAULT_LEVELS as ISO16283_LF_DEFAULT_LEVELS
 from .building import ISO16283_LF_T63_OCTAVE_S as ISO16283_LF_T63_OCTAVE_S
 from .building import ISO16283_LF_TRIGGER_CASES as ISO16283_LF_TRIGGER_CASES
 from .building import ISO16283_LF_VOLUME_LIMIT_M3 as ISO16283_LF_VOLUME_LIMIT_M3
+from .calibrators import (
+    IEC60942_ABBREVIATED_FREQUENCY as IEC60942_ABBREVIATED_FREQUENCY,
+)
+from .calibrators import (
+    IEC60942_ABBREVIATED_REDUCTIONS as IEC60942_ABBREVIATED_REDUCTIONS,
+)
+from .calibrators import IEC60942_FIELD_IMMUNITY as IEC60942_FIELD_IMMUNITY
+from .calibrators import IEC60942_FIELD_IMMUNITY_MAX_U as IEC60942_FIELD_IMMUNITY_MAX_U
+from .calibrators import IEC60942_SUPPLY_VOLTAGE_MAX_U as IEC60942_SUPPLY_VOLTAGE_MAX_U
+from .calibrators import IEC60942_TABLE2 as IEC60942_TABLE2
+from .calibrators import IEC60942_TABLE3 as IEC60942_TABLE3
+from .calibrators import IEC60942_TABLE4 as IEC60942_TABLE4
+from .calibrators import IEC60942_TABLE5 as IEC60942_TABLE5
+from .calibrators import IEC60942_TABLE6 as IEC60942_TABLE6
+from .calibrators import IEC60942_TABLE7 as IEC60942_TABLE7
+from .calibrators import IEC60942_TABLE_A1 as IEC60942_TABLE_A1
+from .calibrators import IEC60942_TABLE_A2 as IEC60942_TABLE_A2
+from .calibrators import IEC60942_TABLE_A3 as IEC60942_TABLE_A3
+from .calibrators import IEC60942_TABLE_A4 as IEC60942_TABLE_A4
+from .calibrators import IEC60942_TABLE_A5 as IEC60942_TABLE_A5
+from .calibrators import IEC60942_TABLE_E1 as IEC60942_TABLE_E1
+from .calibrators import IEC61672_1_TABLE_C1 as IEC61672_1_TABLE_C1
+from .calibrators import TC29_REASONS as TC29_REASONS
 from .damping import VER_BERANEK_14_1 as VER_BERANEK_14_1
 from .damping import VER_BERANEK_14_1_COLUMNS as VER_BERANEK_14_1_COLUMNS
 from .diffusion import COX_B_BANDS_HZ as COX_B_BANDS_HZ

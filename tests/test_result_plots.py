@@ -46,6 +46,7 @@ from result_factories import (
     _assessment_velocity,
     _band_uncertainty,
     _cnossos_road,
+    _conformance_verification,
     _diffuse_absorption,
     _double_wall,
     _exp_ir,
@@ -75,6 +76,7 @@ from result_factories import (
     _sel_distribution,
     _single_panel,
     _slit_aperture,
+    _sound_calibrator,
     _sound_energy,
     _sound_power,
     _static_airflow,
@@ -217,6 +219,13 @@ _KWARG_PLOT_CASES = [
         ),
         "line",
     ),
+    ("conformance_verification", _conformance_verification, "line"),
+    (
+        "sound_calibrator_requirement",
+        lambda: _sound_calibrator().requirement("environmental_level"),
+        "line",
+    ),
+    ("sound_calibrator_verification", _sound_calibrator, "bar"),
     ("assessment_velocity", _assessment_velocity, "line"),
     ("train_passage", _train_passage, "line"),
     ("people_assessment", _people_assessment, "bar"),
@@ -514,6 +523,9 @@ def test_single_axes_plots_accept_external_ax() -> None:
         ph.vibration.verify_running_rms_decay(
             4.7, integration_time_s=1.0, method="exponential"
         ),
+        _conformance_verification(),
+        _sound_calibrator(),
+        _sound_calibrator().requirement("level"),
         ph.aircraft.load_anp_database().flight_profile(
             "A320-211", "departure", aerodrome=ph.aircraft.Aerodrome(elevation_ft=0.0)
         ),

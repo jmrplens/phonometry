@@ -631,3 +631,27 @@ def _train_passage() -> object:
         + 0.03 * rng.standard_normal(t.size)
     )
     return evaluate_train_passage(record, fs, t2_s=(3.0, 9.0))
+
+
+def _sound_calibrator() -> ph.metrology.SoundCalibratorVerification:
+    """IEC 60942:2017: a class 1 calibrator at 1 kHz, one environmental reading out."""
+    record = ph.metrology.SoundCalibratorMeasurements(
+        level_deviation_db=0.12,
+        level_uncertainty_db=0.10,
+        frequency_deviation_percent=-0.1,
+        frequency_uncertainty_percent=0.05,
+        distortion_percent=0.8,
+        distortion_uncertainty_percent=0.3,
+        environmental_level_deviation_db=[0.10, 0.30],
+        environmental_level_uncertainty_db=0.12,
+    )
+    return ph.metrology.verify_sound_calibrator(
+        "1", record, nominal_frequency_hz=1000.0
+    )
+
+
+def _conformance_verification() -> ph.metrology.ConformanceVerification:
+    """IEC 61672-1:2013 Table C.1 example 6: -0,5 dB against +1,0; -1,2 dB."""
+    return ph.metrology.verify_conformance(
+        -0.5, uncertainty=0.3, acceptance_limits=(-1.2, 1.0), max_uncertainty=0.5
+    )

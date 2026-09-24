@@ -10,11 +10,16 @@ import numpy as np
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from ..metrology.conformance import ConformanceVerification
     from ..metrology.data_qualification import (
         LevelCrossingResult,
         PeakStatisticsResult,
         StationarityTestResult,
         TrendTestResult,
+    )
+    from ..metrology.sound_calibrator import (
+        SoundCalibratorRequirement,
+        SoundCalibratorVerification,
     )
     from ..metrology.uncertainty import MonteCarloResult, UncertaintyResult
 
@@ -23,9 +28,13 @@ from .common import (
     _C_PRIMARY,
     _C_PRIMARY_LIGHT,
     _C_REFERENCE,
+    _C_SECONDARY,
+    _C_TERTIARY,
     _LEGEND_UPPER_RIGHT,
+    _import_pyplot,
     _new_axes,
     style_default,
+    theme_fill,
 )
 
 #: Legend label of the Rice peak-height curve, parameterised by the
@@ -74,6 +83,30 @@ _STRINGS: dict[str, str] = {
     r"Standardized peak height $z = a/\sigma_x$": r"Altura de pico estandarizada $z = a/\sigma_x$",
     "Prob[peak > $z$]": "Prob[pico > $z$]",
     "Peak-height distribution (Bendat & Piersol 5.5.4)": "Distribución de alturas de pico (Bendat y Piersol 5.5.4)",
+    "Upper acceptance limit": "Límite de aceptación superior",
+    "Lower acceptance limit": "Límite de aceptación inferior",
+    "Acceptance limits": "Límites de aceptación",
+    "Conforms": "Conforme",
+    "Does not conform": "No conforme",
+    "Actual uncertainty": "Incertidumbre real",
+    "Maximum-permitted uncertainty": "Incertidumbre máxima permitida",
+    "Deviation from design goal [{unit}]": "Desviación respecto al objetivo de diseño [{unit}]",
+    "Measurement": "Medida",
+    "conforms": "conforme",
+    "does not conform": "no conforme",
+    "Conformance rule of IEC TC 29: {verdict}": "Regla de conformidad del IEC TC 29: {verdict}",
+    "Sound calibrator (IEC 60942:2017): {verdict}\nclass {cls} at {freq} Hz": "Calibrador acústico (IEC 60942:2017): {verdict}\nclase {cls} a {freq} Hz",
+    "Deviation / acceptance limit": "Desviación / límite de aceptación",
+    "Uncertainty / maximum permitted": "Incertidumbre / máxima permitida",
+    "Share of the allowance used [%]": "Parte del margen consumida [%]",
+    "Generated level": "Nivel generado",
+    "Short-term fluctuation": "Fluctuación a corto plazo",
+    "Frequency": "Frecuencia",
+    "Total distortion + noise": "Distorsión total + ruido",
+    "Supply voltage": "Tensión de alimentación",
+    "Environmental level": "Nivel en condiciones ambientales",
+    "Environmental frequency": "Frecuencia en condiciones ambientales",
+    "Field immunity": "Inmunidad a campos",
 }
 
 
@@ -452,5 +485,355 @@ def plot_peak_statistics(
     ax.set_ylabel(_t("Prob[peak > $z$]", language))
     ax.grid(visible=True, alpha=0.3)
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
+    localize_axes(ax, language)
+    return ax
+
+
+# --------------------------------------------------------------------------
+# The conformance rule of IEC TC 29 and the IEC 60942 sound calibrator
+# --------------------------------------------------------------------------
+
+#: The requirement names of :data:`phonometry.metrology.CALIBRATOR_REQUIREMENTS`
+#: as the figures word them.
+_REQUIREMENT_LABELS: dict[str, str] = {
+    "level": "Generated level",
+    "fluctuation": "Short-term fluctuation",
+    "frequency": "Frequency",
+    "distortion": "Total distortion + noise",
+    "supply_voltage": "Supply voltage",
+    "environmental_level": "Environmental level",
+    "environmental_frequency": "Environmental frequency",
+    "field_immunity": "Field immunity",
+}
+
+#: Half the width of the band a maximum-permitted uncertainty is drawn as, in
+#: units of the measurement axis, where one measurement takes one unit.
+_BAND_HALF_WIDTH = 0.14
+
+#: The share of an allowance at which a bar crosses its limit, in per cent.
+_FULL_SHARE = 100.0
+
+
+def _verdict_word(*, passes: bool, language: str) -> str:
+    """``conforms`` or ``does not conform``, localised."""
+    return _t("conforms" if passes else "does not conform", language)
+
+
+def _draw_limits(
+    ax: Axes,
+    verifications: tuple[ConformanceVerification, ...],
+    positions: np.ndarray,
+    language: str,
+) -> None:
+    """The acceptance limits: two lines when shared, short bars when not."""
+    lowers = {v.lower_limit for v in verifications}
+    uppers = {v.upper_limit for v in verifications}
+    if len(lowers) == 1 and len(uppers) == 1:
+        ax.axhline(
+            next(iter(uppers)),
+            color=_C_SECONDARY,
+            lw=2.2,
+            label=_t("Upper acceptance limit", language),
+        )
+        ax.axhline(
+            next(iter(lowers)),
+            color=_C_SECONDARY,
+            lw=2.2,
+            ls="--",
+            label=_t("Lower acceptance limit", language),
+        )
+        return
+    for k, (x, v) in enumerate(zip(positions, verifications, strict=True)):
+        ax.hlines(
+            [v.lower_limit, v.upper_limit],
+            x - 0.4,
+            x + 0.4,
+            color=_C_SECONDARY,
+            lw=2.2,
+            label=_t("Acceptance limits", language) if k == 0 else "_nolegend_",
+        )
+
+
+def _draw_uncertainties(
+    ax: Axes,
+    verifications: tuple[ConformanceVerification, ...],
+    positions: np.ndarray,
+    language: str,
+) -> None:
+    """The shaded maximum-permitted band and the actual-uncertainty error bar."""
+    band = theme_fill(_C_MUTED, ax)
+    for k, (x, v) in enumerate(zip(positions, verifications, strict=True)):
+        ax.bar(
+            x,
+            2.0 * v.max_uncertainty,
+            bottom=v.deviation - v.max_uncertainty,
+            width=2.0 * _BAND_HALF_WIDTH,
+            color=band,
+            zorder=1,
+            label=(
+                _t("Maximum-permitted uncertainty", language)
+                if k == 0
+                else "_nolegend_"
+            ),
+        )
+        ax.errorbar(
+            x,
+            v.deviation,
+            yerr=v.uncertainty,
+            fmt="none",
+            ecolor=_C_PRIMARY,
+            elinewidth=1.6,
+            capsize=5,
+            zorder=3,
+            label=_t("Actual uncertainty", language) if k == 0 else "_nolegend_",
+        )
+
+
+def _draw_verdicts(
+    ax: Axes,
+    verifications: tuple[ConformanceVerification, ...],
+    positions: np.ndarray,
+    language: str,
+    kwargs: dict[str, Any],
+) -> None:
+    """A diamond where a measurement conforms and a cross where it does not."""
+    shown: set[bool] = set()
+    user_label = "label" in kwargs
+    for k, (x, v) in enumerate(zip(positions, verifications, strict=True)):
+        style = dict(kwargs)
+        if v.passes:
+            style_default(style, "color", _C_TERTIARY)
+            style.setdefault("marker", "D")
+            style_default(style, "markersize", 8)
+        else:
+            style_default(style, "color", _C_REFERENCE)
+            style.setdefault("marker", "X")
+            style_default(style, "markersize", 10)
+        if user_label:
+            if k > 0:
+                style["label"] = "_nolegend_"
+        elif v.passes in shown:
+            style["label"] = "_nolegend_"
+        else:
+            style["label"] = _t(
+                "Conforms" if v.passes else "Does not conform", language
+            )
+            shown.add(v.passes)
+        style_default(style, "linestyle", "none")
+        ax.plot([x], [v.deviation], zorder=4, **style)
+
+
+def _draw_conformance(
+    ax: Axes,
+    verifications: tuple[ConformanceVerification, ...],
+    language: str,
+    kwargs: dict[str, Any],
+) -> None:
+    """The picture of Figure E.1: limits, band, error bar and verdict marker.
+
+    One measurement per unit of the horizontal axis, starting at 1.
+    """
+    positions = np.arange(1, len(verifications) + 1, dtype=float)
+    _draw_limits(ax, verifications, positions, language)
+    _draw_uncertainties(ax, verifications, positions, language)
+    _draw_verdicts(ax, verifications, positions, language, kwargs)
+    reach = [max(v.uncertainty, v.max_uncertainty) for v in verifications]
+    low = min(
+        min(v.lower_limit, v.deviation - r)
+        for v, r in zip(verifications, reach, strict=True)
+    )
+    high = max(
+        max(v.upper_limit, v.deviation + r)
+        for v, r in zip(verifications, reach, strict=True)
+    )
+    pad = 0.15 * (high - low)
+    ax.set_ylim(low - pad, high + 2.6 * pad)
+    ax.set_xlim(0.4, len(verifications) + 0.6)
+    ax.set_xticks(positions)
+    ax.set_xticklabels([str(k) for k in range(1, len(verifications) + 1)])
+    unit = verifications[0].unit
+    ax.set_ylabel(_t("Deviation from design goal [{unit}]", language, unit=unit))
+    ax.grid(visible=True, axis="y", alpha=0.3)
+    ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small", ncols=2)
+
+
+def plot_conformance_verification(
+    result: ConformanceVerification,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """One measured deviation read by the conformance rule of IEC TC 29.
+
+    Drawn the way Figure E.1 of IEC 60942:2017 and Figure C.1 of IEC
+    61672-1:2013 draw their examples: the acceptance limits as heavy lines,
+    the deviation as a diamond when it conforms and a cross when it does not,
+    the actual uncertainty as the error bar and the maximum-permitted one as
+    the shaded band behind it.
+
+    :param result: A
+        :class:`~phonometry.metrology.conformance.ConformanceVerification`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the verdict marker.
+    :return: The axes.
+    """
+    from .._i18n import localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    _draw_conformance(ax, (result,), language, kwargs)
+    ax.set_xticks([])
+    ax.set_title(
+        _t(
+            "Conformance rule of IEC TC 29: {verdict}",
+            language,
+            verdict=_verdict_word(passes=result.passes, language=language),
+        )
+    )
+    localize_axes(ax, language)
+    return ax
+
+
+def _requirement_label(name: str, clause: str, language: str) -> str:
+    """``Generated level (5.3.2)``, localised."""
+    return f"{_t(_REQUIREMENT_LABELS[name], language)} ({clause})"
+
+
+def plot_sound_calibrator_requirement(
+    result: SoundCalibratorRequirement,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """Every measurement of one IEC 60942 requirement against its limits.
+
+    The same picture as :func:`plot_conformance_verification`, one
+    measurement per position, with the limits and the maximum-permitted
+    uncertainty the class and the nominal frequency select.
+
+    :param result: A
+        :class:`~phonometry.metrology.sound_calibrator.SoundCalibratorRequirement`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the verdict markers.
+    :return: The axes.
+    """
+    from .._i18n import localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    _draw_conformance(ax, result.verifications, language, kwargs)
+    ax.set_xlabel(_t("Measurement", language))
+    verdict = _verdict_word(passes=result.passes, language=language)
+    ax.set_title(
+        f"{_requirement_label(result.name, result.clause, language)}: {verdict}"
+    )
+    localize_axes(ax, language)
+    return ax
+
+
+def _allowance_shares(
+    result: SoundCalibratorVerification, language: str
+) -> tuple[list[str], list[float], list[float]]:
+    """One label and the two shares, in per cent, per measurement."""
+    labels: list[str] = []
+    deviation_share: list[float] = []
+    uncertainty_share: list[float] = []
+    for requirement in result.requirements:
+        base = _requirement_label(requirement.name, requirement.clause, language)
+        count = len(requirement.verifications)
+        for k, v in enumerate(requirement.verifications, start=1):
+            labels.append(f"{base} #{k}" if count > 1 else base)
+            deviation_share.append(_FULL_SHARE * abs(v.share_of_acceptance_limit))
+            uncertainty_share.append(_FULL_SHARE * v.share_of_max_uncertainty)
+    return labels, deviation_share, uncertainty_share
+
+
+def plot_sound_calibrator_verification(
+    result: SoundCalibratorVerification,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """How much of each allowance every measurement of a calibrator uses.
+
+    One pair of horizontal bars per measurement: the deviation as a share of
+    the acceptance limit on its side, and the actual uncertainty as a share
+    of the maximum permitted. A measurement demonstrates conformance when
+    both bars stop at or before the 100 % line; a bar past it is drawn in
+    red.
+
+    :param result: A
+        :class:`~phonometry.metrology.sound_calibrator.SoundCalibratorVerification`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the deviation bars.
+    :return: The axes.
+    :raises ValueError: when no requirement was measured.
+    """
+    from .._i18n import format_number, localize_axes
+
+    labels, deviation_share, uncertainty_share = _allowance_shares(result, language)
+    if not labels:
+        msg = "plot() needs at least one measured requirement to draw."
+        raise ValueError(msg)
+    if ax is None:
+        # One row per measurement, and room on the left for the requirement
+        # names, which are the whole point of the axis.
+        _fig, ax = _import_pyplot().subplots(
+            figsize=(9.0, 1.6 + 0.42 * len(labels)), layout="constrained"
+        )
+    finite = [d for d in deviation_share if np.isfinite(d)]
+    ceiling = max([*finite, *uncertainty_share, _FULL_SHARE])
+    deviation_share = [d if np.isfinite(d) else 1.1 * ceiling for d in deviation_share]
+    y = np.arange(len(labels), dtype=float)
+    height = 0.38
+    caller_colour = "color" in kwargs or "c" in kwargs
+    style = dict(kwargs)
+    style_default(style, "color", _C_PRIMARY)
+    style.setdefault("label", _t("Deviation / acceptance limit", language))
+    bars = ax.barh(y - height / 2, deviation_share, height=height, **style)
+    spread = ax.barh(
+        y + height / 2,
+        uncertainty_share,
+        height=height,
+        color=_C_SECONDARY,
+        label=_t("Uncertainty / maximum permitted", language),
+    )
+    over = [(bar, share) for bar, share in zip(bars, deviation_share, strict=True)]
+    if caller_colour:
+        over = []
+    over += list(zip(spread, uncertainty_share, strict=True))
+    for bar, share in over:
+        if share > _FULL_SHARE:
+            bar.set_facecolor(_C_REFERENCE)
+    ax.axvline(_FULL_SHARE, color=_C_MUTED, lw=1.4, ls="--")
+    ax.set_yticks(y)
+    ax.set_yticklabels(labels)
+    ax.invert_yaxis()
+    ax.set_xlim(0.0, 1.25 * ceiling)
+    ax.set_xlabel(_t("Share of the allowance used [%]", language))
+    freq = format_number(result.nominal_frequency_hz, language, decimals=1, trim=True)
+    ax.set_title(
+        _t(
+            "Sound calibrator (IEC 60942:2017): {verdict}\nclass {cls} at {freq} Hz",
+            language,
+            cls=result.calibrator_class,
+            freq=freq,
+            verdict=_verdict_word(passes=result.passes, language=language),
+        )
+    )
+    ax.grid(visible=True, axis="x", alpha=0.3)
+    # Below the axes, where no bar can be: inside them the legend would sit on
+    # whichever requirement happened to be drawn last.
+    ax.legend(
+        loc="upper center",
+        bbox_to_anchor=(0.5, -0.12),
+        ncols=2,
+        fontsize="small",
+        frameon=False,
+    )
     localize_axes(ax, language)
     return ax

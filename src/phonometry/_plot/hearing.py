@@ -88,6 +88,8 @@ _ANR_TITLE = (
 _EXTERNAL_LEVEL_LABEL = "External A-weighted level [dB]"
 _STEP_LABEL = "Step at the ear, 125 Hz octave [dB]"
 _LINEARITY_TITLE = "ISO 4869-6 linear operation: up to {level} dB"
+_APV84_LABEL = "$APV_{f84}$"
+_STEP_TOLERANCE_LABEL = r"5 dB $\pm$ 1 dB"
 
 _STRINGS: dict[str, str] = {
     _FREQ_LABEL: "Frecuencia [Hz]",
@@ -158,8 +160,8 @@ _STRINGS: dict[str, str] = {
     "active insertion loss": "pérdida por inserción activa",
     "total, one-third octaves": "total, tercios de octava",
     "total, octaves (Formula (1))": "total, octavas (Fórmula (1))",
-    "$APV_{f84}$": "$APV_{f84}$",
-    r"5 dB $\pm$ 1 dB": r"5 dB $\pm$ 1 dB",
+    _APV84_LABEL: _APV84_LABEL,
+    _STEP_TOLERANCE_LABEL: _STEP_TOLERANCE_LABEL,
     "each ear": "cada oído",
     "median over the ears": "mediana de los oídos",
     "highest linear level": "nivel lineal más alto",
@@ -1067,7 +1069,7 @@ def plot_anr_total_attenuation(
         color=_C_REFERENCE,
         ms=6,
         zorder=4,
-        label=_t("$APV_{f84}$", language),
+        label=_t(_APV84_LABEL, language),
     )
     ax.axhline(0.0, color=_C_EDGE, lw=0.8, zorder=0)
     _freq_axis(ax, octaves, language=language)
@@ -1118,7 +1120,7 @@ def plot_anr_linearity(
         steps + 1.0,
         color=theme_fill(_C_TERTIARY, ax),
         zorder=0,
-        label=_t(r"5 dB $\pm$ 1 dB", language),
+        label=_t(_STEP_TOLERANCE_LABEL, language),
     )
     ax.plot(
         np.repeat(upper_ends[None, :], increments.shape[0], axis=0).ravel(),

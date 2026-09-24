@@ -268,6 +268,61 @@ def _levels(values: ArrayLike, name: str) -> np.ndarray:
     return grid
 
 
+def _lower_ear_from_insertion_loss(
+    insertion_loss_db: ArrayLike,
+) -> tuple[np.ndarray | None, np.ndarray]:
+    """The per-ear grid, if one was given, and the lower ear of each subject."""
+    grid = np.asarray(insertion_loss_db, dtype=np.float64)
+    if grid.ndim == _PER_EAR_RANK:
+        per_ear = _levels(grid, "insertion_loss_db")
+        return per_ear, per_ear.min(axis=1)
+    if grid.ndim != _GRID_RANK:
+        msg = (
+            "'insertion_loss_db' must be a (subjects, 2, bands) grid per "
+            "ear or a (subjects, bands) grid of the lower ear."
+        )
+        raise ValueError(msg)
+    if grid.shape[0] < _MINIMUM_SUBJECTS or grid.shape[1] == 0:
+        msg = (
+            "'insertion_loss_db' needs at least two subjects and one "
+            "band; 5.4.1 asks for sixteen subjects."
+        )
+        raise ValueError(msg)
+    if not np.all(np.isfinite(grid)):
+        msg = "'insertion_loss_db' must contain only finite values, in dB."
+        raise ValueError(msg)
+    return None, np.array(grid, dtype=np.float64)
+
+
+def _insertion_loss_from_levels(
+    passive_levels_db: ArrayLike, active_levels_db: ArrayLike
+) -> np.ndarray:
+    """The insertion loss of each ear, passive minus active level (5.4.1)."""
+    passive = _levels(passive_levels_db, "passive_levels_db")
+    active = _levels(active_levels_db, "active_levels_db")
+    if passive.shape != active.shape:
+        msg = (
+            "'passive_levels_db' and 'active_levels_db' must cover the same "
+            f"subjects, ears and bands; got {passive.shape} and {active.shape}."
+        )
+        raise ValueError(msg)
+    return np.asarray(passive - active, dtype=np.float64)
+
+
+def _band_frequencies(frequencies: ArrayLike | None, count: int) -> np.ndarray:
+    """The centre frequencies given, or the default grid for *count* bands."""
+    if frequencies is None:
+        return _default_bands(count, "active_insertion_loss")
+    freqs = np.asarray(frequencies, dtype=np.float64)
+    if freqs.ndim != 1 or freqs.size != count or not np.all(np.isfinite(freqs)):
+        msg = (
+            "active_insertion_loss: 'frequencies' must be one centre "
+            f"frequency per band; got {freqs.size} for {count} bands."
+        )
+        raise ValueError(msg)
+    return freqs
+
+
 def active_insertion_loss(
     insertion_loss_db: ArrayLike | None = None,
     *,
@@ -318,42 +373,13 @@ def active_insertion_loss(
     levels_given = passive_levels_db is not None or active_levels_db is not None
     per_ear: np.ndarray | None
     if insertion_loss_db is not None and not levels_given:
-        grid = np.asarray(insertion_loss_db, dtype=np.float64)
-        if grid.ndim == _PER_EAR_RANK:
-            per_ear = _levels(grid, "insertion_loss_db")
-            lower = per_ear.min(axis=1)
-        elif grid.ndim == _GRID_RANK:
-            per_ear = None
-            if grid.shape[0] < _MINIMUM_SUBJECTS or grid.shape[1] == 0:
-                msg = (
-                    "'insertion_loss_db' needs at least two subjects and one "
-                    "band; 5.4.1 asks for sixteen subjects."
-                )
-                raise ValueError(msg)
-            if not np.all(np.isfinite(grid)):
-                msg = "'insertion_loss_db' must contain only finite values, in dB."
-                raise ValueError(msg)
-            lower = np.array(grid, dtype=np.float64)
-        else:
-            msg = (
-                "'insertion_loss_db' must be a (subjects, 2, bands) grid per "
-                "ear or a (subjects, bands) grid of the lower ear."
-            )
-            raise ValueError(msg)
+        per_ear, lower = _lower_ear_from_insertion_loss(insertion_loss_db)
     elif (
         insertion_loss_db is None
         and passive_levels_db is not None
         and active_levels_db is not None
     ):
-        passive = _levels(passive_levels_db, "passive_levels_db")
-        active = _levels(active_levels_db, "active_levels_db")
-        if passive.shape != active.shape:
-            msg = (
-                "'passive_levels_db' and 'active_levels_db' must cover the same "
-                f"subjects, ears and bands; got {passive.shape} and {active.shape}."
-            )
-            raise ValueError(msg)
-        per_ear = passive - active
+        per_ear = _insertion_loss_from_levels(passive_levels_db, active_levels_db)
         lower = per_ear.min(axis=1)
     else:
         msg = (
@@ -361,17 +387,7 @@ def active_insertion_loss(
             "'active_levels_db' (5.4.1), and not both forms."
         )
         raise ValueError(msg)
-    count = lower.shape[1]
-    if frequencies is None:
-        freqs = _default_bands(count, "active_insertion_loss")
-    else:
-        freqs = np.asarray(frequencies, dtype=np.float64)
-        if freqs.ndim != 1 or freqs.size != count or not np.all(np.isfinite(freqs)):
-            msg = (
-                "active_insertion_loss: 'frequencies' must be one centre "
-                f"frequency per band; got {freqs.size} for {count} bands."
-            )
-            raise ValueError(msg)
+    freqs = _band_frequencies(frequencies, lower.shape[1])
     subjects = int(lower.shape[0])
     mean = np.asarray(lower.mean(axis=0), dtype=np.float64)
     spread = np.asarray(lower.std(axis=0, ddof=1), dtype=np.float64)

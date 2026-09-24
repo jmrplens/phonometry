@@ -593,10 +593,15 @@ def _draw_limits(
     """The acceptance limits: two lines when shared, short bars when not.
 
     A one-sided requirement, a magnitude with a maximum, has only the upper
-    one: its lower bound of zero is not a limit the standard prints.
+    one: its lower bound of zero is not a limit the standard prints. An open
+    end of an interval (the ``+inf`` of a stop-band minimum) is no line at
+    all.
     """
     lowers = {v.lower_limit for v in verifications}
     uppers = {v.upper_limit for v in verifications}
+    if any(math.isinf(limit) for limit in lowers | uppers):
+        _draw_open_limits(ax, verifications, positions, language)
+        return
     if one_sided and len(uppers) == 1:
         ax.axhline(
             next(iter(uppers)),
@@ -640,6 +645,31 @@ def _draw_limits(
             lw=2.2,
             label=_t("Acceptance limits", language) if k == 0 else "_nolegend_",
         )
+
+
+def _draw_open_limits(
+    ax: Axes,
+    verifications: tuple[ConformanceVerification, ...],
+    positions: np.ndarray,
+    language: str,
+) -> None:
+    """Short bars at the finite limits of intervals open on one side.
+
+    A stop-band row of IEC 61260-1:2014 Table 1 prints a minimum and
+    ``+inf``; the open end bounds nothing and draws nothing.
+    """
+    first = True
+    for x, v in zip(positions, verifications, strict=True):
+        finite = [lim for lim in (v.lower_limit, v.upper_limit) if math.isfinite(lim)]
+        ax.hlines(
+            finite,
+            x - 0.4,
+            x + 0.4,
+            color=_C_SECONDARY,
+            lw=2.2,
+            label=_t("Acceptance limits", language) if first else "_nolegend_",
+        )
+        first = False
 
 
 def _draw_uncertainties(
@@ -711,6 +741,11 @@ def _draw_verdicts(
         ax.plot([x], [v.deviation], zorder=4, **style)
 
 
+def _finite_or(limit: float, fallback: float) -> float:
+    """*limit*, or *fallback* when the limit is an open end of the interval."""
+    return limit if math.isfinite(limit) else fallback
+
+
 def _draw_conformance(
     ax: Axes,
     verifications: tuple[ConformanceVerification, ...],
@@ -737,12 +772,14 @@ def _draw_conformance(
     _draw_uncertainties(ax, verifications, positions, language)
     _draw_verdicts(ax, verifications, positions, language, kwargs)
     reach = [max(v.uncertainty, v.max_uncertainty) for v in verifications]
+    # An open end of an interval is no extent of the axis: only the finite
+    # limits and the deviations with their bands decide it.
     low = min(
-        min(v.lower_limit, v.deviation - r)
+        min(_finite_or(v.lower_limit, v.deviation), v.deviation - r)
         for v, r in zip(verifications, reach, strict=True)
     )
     high = max(
-        max(v.upper_limit, v.deviation + r)
+        max(_finite_or(v.upper_limit, v.deviation), v.deviation + r)
         for v, r in zip(verifications, reach, strict=True)
     )
     pad = 0.15 * (high - low)

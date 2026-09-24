@@ -626,12 +626,14 @@ def document_styles(
 
 def two_panel_body(
     left_cell: Flowable | list[Flowable],
-    plot_drawing: Drawing,
+    plot_drawing: Drawing | list[Flowable],
     *,
     left_width_mm: float = 56.0,
     plot_width_mm: float = 118.0,
 ) -> Table:
     """Assemble the two-panel body: a left cell beside the result's plot.
+
+    The right cell may also be a list: the plot and what goes under it.
 
     Every fiche puts a table or metrics list on the left and the result's own
     vector plot on the right; the cell alignment is shared and the column

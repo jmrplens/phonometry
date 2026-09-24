@@ -18,12 +18,18 @@ from phonometry import ReportMetadata
 def _filter_class_example() -> tuple[object, ReportMetadata, str]:
     """Filter-compliance fiche: an IEC 61260-1 octave-band class verification.
 
-    The library default (Butterworth order 6) octave bank from 125 Hz to
-    4 kHz clears class 1 across every band, so the fiche boxes a Class 1
-    COMPLIES result and passes the required-class-1 verdict.
+    A Butterworth order-6 octave bank from 125 Hz to 4 kHz filtering every
+    band at the full rate clears class 1 on the Table 1 mask, the effective
+    bandwidth deviation of 5.12 and the summation of 5.16, so the fiche boxes
+    a Class 1 COMPLIES result and passes the required-class-1 verdict. The
+    decimated default sums its adjacent octave outputs only within class 2.
     """
     bank = ph.filters.OctaveFilterBank(
-        fs=48000, fraction=1, order=6, limits=[125, 4000]
+        fs=48000,
+        fraction=1,
+        order=6,
+        limits=[125, 4000],
+        design=ph.filters.FilterDesign(resample=False),
     )
     result = ph.filters.verify_filter_class(bank)
     metadata = ReportMetadata(

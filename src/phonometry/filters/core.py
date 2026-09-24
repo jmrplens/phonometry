@@ -696,6 +696,8 @@ class OctaveFilterBank:
         self, x: np.ndarray, idx: int, *, zero_phase: bool = False
     ) -> np.ndarray:
         """Resample and filter for a specific band (vectorized)."""
+        if not zero_phase and not self.stateful:
+            return _decimate_and_filter(x, self.sos[idx], int(self.factor[idx]))
         if self.factor[idx] > 1:
             # axis=-1 is default for resample_poly, but being explicit is good
             sd = signal.resample_poly(x, 1, self.factor[idx], axis=-1)
@@ -708,7 +710,9 @@ class OctaveFilterBank:
             n_sections = self.sos[idx].shape[0]
             padlen = min(3 * (2 * n_sections + 1), max(sd.shape[-1] - 2, 0))
             y = signal.sosfiltfilt(self.sos[idx], sd, axis=-1, padlen=padlen)
-        elif self.stateful:
+        else:
+            # Stateful forward filtering: the stateless forward path left
+            # through _decimate_and_filter above.
             n_channels = sd.shape[0]
             # Lazy init: allocate zi with correct channel count on first use
             if (
@@ -726,8 +730,6 @@ class OctaveFilterBank:
             y, self.zi[idx] = signal.sosfilt(
                 self.sos[idx], sd, axis=-1, zi=self.zi[idx]
             )
-        else:
-            y = signal.sosfilt(self.sos[idx], sd, axis=-1)
 
         # sosfilt supports axis=-1 by default
         return cast(np.ndarray, y)
@@ -756,6 +758,25 @@ class OctaveFilterBank:
         # Physical SPL: apply sensitivity and use 20uPa reference
         pressure_pa = val_linear * self.calibration_factor
         return cast(np.ndarray, 20 * np.log10(np.maximum(pressure_pa, eps) / _P0))
+
+
+def _decimate_and_filter(x: np.ndarray, sos: np.ndarray, factor: int) -> np.ndarray:
+    """One band of a stateless bank: decimate by ``factor``, then filter.
+
+    The forward, stateless path of :meth:`OctaveFilterBank.filter`, kept at
+    module level so that the time-invariance test of
+    :func:`phonometry.filters.verify_time_invariance` runs its sweep through
+    the very same two calls the bank makes, the polyphase anti-aliasing of
+    :func:`scipy.signal.resample_poly` included, without touching the
+    carried state of a stateful bank.
+
+    :param x: The input, samples on the last axis.
+    :param sos: The band's second-order sections, designed at ``fs / factor``.
+    :param factor: The band's decimation factor (1 filters at full rate).
+    :return: The band output at the decimated rate.
+    """
+    sd = signal.resample_poly(x, 1, factor, axis=-1) if factor > 1 else x
+    return cast(np.ndarray, signal.sosfilt(sos, sd, axis=-1))
 
 
 @lru_cache(maxsize=32)

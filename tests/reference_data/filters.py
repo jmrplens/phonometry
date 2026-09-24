@@ -104,6 +104,105 @@ IEC61260_TABLE_F1: dict[float, tuple[float, float]] = {
     3.0: (3.05365, 0.32748),
     4.0: (5.39195, 0.18546),
 }
+# IEC 61260-3:2016 Table C.1 (printed p. 22, PDF page 24): the normalized
+# test frequencies Omega_k = f/f_m for one-third-octave-band filters,
+# k = -7 .. 7, to five decimals, with the minimum; maximum acceptance limits on
+# relative attenuation for class 1 and class 2, dB. A maximum printed "+inf"
+# is None. Read on the rasterized page.
+IEC61260_3_TABLE_C1: dict[
+    int, tuple[float, tuple[float, float | None], tuple[float, float | None]]
+] = {
+    -7: (0.18546, (70.0, None), (60.0, None)),
+    -6: (0.32748, (60.0, None), (54.0, None)),
+    -5: (0.53143, (40.5, None), (39.5, None)),
+    -4: (0.77257, (16.6, None), (15.6, None)),
+    -3: (0.91958, (-0.4, 1.4), (-0.6, 1.7)),
+    -2: (0.94719, (-0.4, 0.7), (-0.6, 0.9)),
+    -1: (0.97402, (-0.4, 0.5), (-0.6, 0.7)),
+    0: (1.00000, (-0.4, 0.4), (-0.6, 0.6)),
+    1: (1.02667, (-0.4, 0.5), (-0.6, 0.7)),
+    2: (1.05575, (-0.4, 0.7), (-0.6, 0.9)),
+    3: (1.08746, (-0.4, 1.4), (-0.6, 1.7)),
+    4: (1.29437, (16.6, None), (15.6, None)),
+    5: (1.88173, (40.5, None), (39.5, None)),
+    6: (3.05365, (60.0, None), (54.0, None)),
+    7: (5.39195, (70.0, None), (60.0, None)),
+}
+# IEC 61260-3:2016 Table 1 (printed p. 13, PDF page 15): the frequency
+# parameter R_k as the exponent of G, and the class 1 and class 2 minimum;
+# maximum acceptance limits, dB, for k = 0 .. 7. None is the printed "+inf".
+IEC61260_3_TABLE_1: dict[
+    int, tuple[float, tuple[float, float | None], tuple[float, float | None]]
+] = {
+    0: (0.0, (-0.4, 0.4), (-0.6, 0.6)),
+    1: (1 / 8, (-0.4, 0.5), (-0.6, 0.7)),
+    2: (1 / 4, (-0.4, 0.7), (-0.6, 0.9)),
+    3: (3 / 8, (-0.4, 1.4), (-0.6, 1.7)),
+    4: (1.0, (16.6, None), (15.6, None)),
+    5: (2.0, (40.5, None), (39.5, None)),
+    6: (3.0, (60.0, None), (54.0, None)),
+    7: (4.0, (70.0, None), (60.0, None)),
+}
+# IEC 61260-3:2016 C.2, Formulas (C.3) and (C.4) (printed p. 21, PDF page 23):
+# Omega_1 ~ 1,026 67 and Omega_-1 = 1/Omega_1 ~ 0,974 02.
+IEC61260_3_C2 = (1.02667, 0.97402)
+# IEC 61260-2:2016 A.3.5 (printed p. 21, PDF page 23) = IEC 61260-3:2016 A.3.5
+# (printed p. 18, PDF page 20): the input level is constant within 0,03 dB and
+# read on a 0,1 dB display, so u_Lin = sqrt((0,1/(2 sqrt 3))^2 + 0,03^2)
+# ~ 0,042 dB; T_sweep = 20 s (u 0,05 s), T_avg = 20 s (u 0,02 s),
+# f_end = 50 000 Hz (u 5 Hz), f_start = 0,5 Hz (u 0,05 Hz). Printed:
+# u_Lc ~ 0,057 dB, expanded 0,115 dB, 0,128 dB with a 0,1 dB display.
+IEC61260_A35_INPUTS = {
+    "level_resolution_db": 0.1,
+    "level_constancy_db": 0.03,
+    "sweep_duration_s": 20.0,
+    "sweep_duration_uncertainty_s": 0.05,
+    "averaging_time_s": 20.0,
+    "averaging_time_uncertainty_s": 0.02,
+    "end_frequency_hz": 50000.0,
+    "end_frequency_uncertainty_hz": 5.0,
+    "start_frequency_hz": 0.5,
+    "start_frequency_uncertainty_hz": 0.05,
+    "display_resolution_db": 0.1,
+}
+IEC61260_A35_PRINTED = {
+    "u_lin_db": 0.042,
+    "u_lc_db": 0.057,
+    "expanded_db": 0.115,
+    "expanded_with_display_db": 0.128,
+}
+# IEC 61260-2:2016 Annex B (printed pp. 22-23, PDF pages 24-25) = IEC
+# 61260-3:2016 Annex B (printed pp. 19-20, PDF pages 21-22): one-third-octave
+# filters, L_in = 127 dB re 1 uV, A_ref = 0 dB, T_sweep = T_avg = 30 s, sweep
+# 0,01 Hz to 1 MHz. Formula (B.5): L_c = 127 dB - 19,03 dB = 107,97 dB.
+IEC61260_B5 = {
+    "input_level_db": 127.0,
+    "fraction": 3,
+    "sweep_duration_s": 30.0,
+    "averaging_time_s": 30.0,
+    "start_frequency_hz": 0.01,
+    "end_frequency_hz": 1.0e6,
+    "correction_db": -19.03,
+    "expected_level_db": 107.97,
+}
+# IEC 61260-1:2014 Table C.1 (printed p. 31, PDF page 33): example number,
+# measured deviation from design goal, the acceptance limits "+1,0; -1,2" as
+# (upper, lower), actual and maximum-permitted uncertainty (all dB), whether
+# it conforms, and the outcome number of C.2.2 whose reason the table prints.
+IEC61260_1_TABLE_C1: list[
+    tuple[int, float, tuple[float, float], float, float, bool, int]
+] = [
+    (1, 1.7, (1.0, -1.2), 0.3, 0.5, False, 3),
+    (2, 1.1, (1.0, -1.2), 0.3, 0.5, False, 3),
+    (3, 1.0, (1.0, -1.2), 0.3, 0.5, True, 1),
+    (4, 0.0, (1.0, -1.2), 0.3, 0.5, True, 1),
+    (5, 0.0, (1.0, -1.2), 0.9, 0.5, False, 2),
+    (6, -0.5, (1.0, -1.2), 0.3, 0.5, True, 1),
+    (7, -1.2, (1.0, -1.2), 0.3, 0.5, True, 1),
+    (8, -1.3, (1.0, -1.2), 0.3, 0.5, False, 3),
+    (9, -2.0, (1.0, -1.2), 0.3, 0.5, False, 3),
+    (10, -2.0, (1.0, -1.2), 0.7, 0.5, False, 4),
+]
 # IEC 61260-1:2014 E.3.4 worked rounding examples (nominal frequencies for
 # b = 24): 41,567 Hz -> 41,6 Hz (MSD 4: three significant figures) and
 # 8 785,2 Hz -> 8 800 Hz (MSD 8: two significant figures).

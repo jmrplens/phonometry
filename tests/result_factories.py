@@ -809,3 +809,25 @@ def _conformance_verification() -> ph.metrology.ConformanceVerification:
     return ph.metrology.verify_conformance(
         -0.5, uncertainty=0.3, acceptance_limits=(-1.2, 1.0), max_uncertainty=0.5
     )
+
+
+def _filter_periodic() -> ph.filters.FilterPeriodicVerification:
+    """IEC 61260-3:2016: a class 1 one-third-octave filter, every clause graded."""
+    row = [75.0, 62.0, 45.0, 20.0, 0.8, 0.3, 0.1, 0.0, 0.1, 0.2, 0.7, 19.0, 44.0, 63.0]
+    row_u = [0.4, 0.4, 0.4, 0.25, 0.15, 0.15, 0.15, 0.15, 0.15, 0.15, 0.15, 0.25]
+    record = ph.filters.FilterPeriodicMeasurements(
+        midband_attenuations_db=[0.1, -0.2, 0.05],
+        midband_uncertainties_db=[0.15, 0.15, 0.25],
+        linearity_deviations_db=[0.1, 0.2, 0.3],
+        linearity_levels_below_upper_db=[0.0, 20.0, 45.0],
+        linearity_uncertainties_db=[0.1, 0.1, 0.2],
+        relative_attenuations_db=[[*row, 76.0]],
+        relative_attenuation_uncertainties_db=[[*row_u, 0.4, 0.4, 0.4]],
+    )
+    return ph.filters.verify_filter_periodic(1, record, fraction=3)
+
+
+def _time_invariance() -> ph.filters.TimeInvarianceResult:
+    """IEC 61260-1:2014 5.14: a small octave bank swept at 5 s per decade."""
+    bank = ph.filters.OctaveFilterBank(48000, fraction=1, order=6, limits=[500, 2000])
+    return ph.filters.verify_time_invariance(bank, seconds_per_decade=(5.0,))

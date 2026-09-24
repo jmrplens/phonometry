@@ -61,6 +61,8 @@ _SECTION_LIST: tuple[Section, ...] = (
             "phonometry.filters.equalizer",
             "phonometry.filters.frequencies",
             "phonometry.filters.compliance",
+            "phonometry.filters.time_invariance",
+            "phonometry.filters.periodic_tests",
             "phonometry.filters.weighting_compliance",
         ),
     ),
@@ -651,6 +653,9 @@ OBJECT_MODULE_OVERRIDES: dict[str, str] = {
     # IEC 61183 Table B.1 is a mapping as well, owned by the module whose
     # diffuse-field routes read their defaults from it.
     "IEC61183_TABLE_B1": "phonometry.metrology.random_incidence",
+    # The IEC 61260-3:2016 Table 1 limits are a read-only mapping, so a scan
+    # by module finds no owner; they belong to the periodic tests they grade.
+    "PERIODIC_TEST_ATTENUATION_LIMITS_DB": "phonometry.filters.periodic_tests",
     # Defined in phonometry._internal.warnings, exported at the top level.
     "PhonometryWarning": "phonometry",
     # The io subpackage keeps its implementation modules private and

@@ -77,6 +77,7 @@ _SENSITIVITY_LEVEL_LABEL = "Sensitivity level [dB]"
 _FREQUENCY_LABEL = "Frequency [Hz]"
 _DIFFUSE_DEVIATION_LABEL = r"$\Delta G_\mathrm{D} = L_\mathrm{D} - L_\mathrm{D,ref}$"
 _CORRECTION_AXIS_LABEL = "Correction [dB]"
+_REFERENCE_MIC_LABEL = r"$C_\mathrm{FF,RM}$, reference microphone"
 
 _STRINGS: dict[str, str] = {
     r"Contribution to combined uncertainty $|c_i|\,u(x_i)$": r"Contribución a la incertidumbre combinada $|c_i|\,u(x_i)$",
@@ -175,7 +176,7 @@ _STRINGS: dict[str, str] = {
     r"$C_\mathrm{FF,SLM}$, Formula (D.7)": r"$C_\mathrm{FF,SLM}$, Fórmula (D.7)",
     r"$C_\mathrm{FF,SLM}$, Formula (E.6)": r"$C_\mathrm{FF,SLM}$, Fórmula (E.6)",
     r"$C_\mathrm{N,FF,SLM}$, Formula (F.13)": r"$C_\mathrm{N,FF,SLM}$, Fórmula (F.13)",
-    r"$C_\mathrm{FF,RM}$, reference microphone": r"$C_\mathrm{FF,RM}$, micrófono de referencia",
+    _REFERENCE_MIC_LABEL: r"$C_\mathrm{FF,RM}$, micrófono de referencia",
     r"$S_\mathrm{N,RM} + G_\mathrm{N,RC}$, reference channel": r"$S_\mathrm{N,RM} + G_\mathrm{N,RC}$, canal de referencia",
     "Free-field correction on a sound calibrator (IEC 62585)": "Corrección de campo libre con calibrador acústico (IEC 62585)",
     "Free-field correction in a comparison coupler (IEC 62585)": "Corrección de campo libre en acoplador de comparación (IEC 62585)",
@@ -1514,8 +1515,8 @@ _CORRECTION_LABELS = {
 
 #: The label of what the reference contributes, by source.
 _REFERENCE_TERM_LABELS = {
-    "sound_calibrator": r"$C_\mathrm{FF,RM}$, reference microphone",
-    "comparison_coupler": r"$C_\mathrm{FF,RM}$, reference microphone",
+    "sound_calibrator": _REFERENCE_MIC_LABEL,
+    "comparison_coupler": _REFERENCE_MIC_LABEL,
     "electrostatic_actuator": r"$S_\mathrm{N,RM} + G_\mathrm{N,RC}$, reference channel",
 }
 

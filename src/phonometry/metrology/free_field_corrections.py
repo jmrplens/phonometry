@@ -1578,6 +1578,19 @@ def _static_pressure_component(
     )
 
 
+def _repeatability_dof(value: float) -> float:
+    """The degrees of freedom of the repeatability (a15), checked.
+
+    Positive, and infinite for a standard deviation known rather than
+    estimated; NaN is refused.
+    """
+    dof = float(value)
+    if math.isnan(dof) or dof <= 0.0:
+        msg = f"'repeatability_dof' must be positive; got {value!r}."
+        raise ValueError(msg)
+    return dof
+
+
 def correction_uncertainty_budget(
     values_db: Mapping[str, float],
     *,
@@ -1649,10 +1662,7 @@ def correction_uncertainty_budget(
         )
         raise ValueError(msg)
     frequency = require_positive(frequency_hz, "frequency_hz")
-    dof = float(repeatability_dof)
-    if not dof > 0.0:
-        msg = f"'repeatability_dof' must be positive; got {repeatability_dof!r}."
-        raise ValueError(msg)
+    dof = _repeatability_dof(repeatability_dof)
     quantities: list[Quantity] = []
     descriptors: list[str] = []
     symbols: list[str] = []

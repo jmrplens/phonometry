@@ -10,8 +10,9 @@ sound power level in its three one-third octave bands (12,5, 16 and 20 kHz)
 or in the narrow bands that hold its discrete tones.
 
 Four methods are specified. Three of them use a reverberation test room with
-a microphone on a rotating boom pointed away from the source (clauses 5.4 and
-5.5), and one uses a hemi-anechoic room (clause 9).
+a microphone on a rotating boom, pointing upwards so that the equipment is
+heard at grazing incidence (clauses 5.4 and 5.5), and one uses a
+hemi-anechoic room (clause 9).
 
 **Mean level.** The time-averaged band level over the four orientations of
 the equipment (:math:`N = 4`), or over three revolutions of the boom

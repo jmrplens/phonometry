@@ -633,9 +633,14 @@ máscara de la Tabla 1, así que la clase de un banco es la más estricta que
 cumple en los tres. Sus márgenes de la Tabla 1 y un veredicto con
 `edition="1995"` son los números que eran.
 
+Los bancos de filtros diezmados son la otra: cada banda conserva ahora su
+frecuencia de Nyquist de proceso en dieciséis veces su borde superior, así que
+el nivel de una banda se mueve hasta 0,07 dB con ruido blanco, como dice la
+misma sección.
+
 Lo que dibuja cada `.plot()` está intacto, y también lo que imprime cada
 `.report()` salvo una etiqueta: la ficha del micrófono escribe dB(468) donde
 escribía dB(CCIR). El contrato de `Signal` es el que era, ahora cumplido en dos
 sitios más, los bloques de `read_blocks` y las formas de onda dentro de cinco
 resultados. Cada fórmula está intacta también. La 4.0 recolocó los muebles y
-puso la unidad en la etiqueta; salvo ese veredicto, no recalculó nada.
+puso la unidad en la etiqueta; salvo esas dos, no recalculó nada.

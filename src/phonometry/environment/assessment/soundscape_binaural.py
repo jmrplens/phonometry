@@ -131,6 +131,15 @@ class BinauralParameter:
     reference: str
 
 
+#: The Table D.1 symbols the tables and the results of this module are keyed
+#: by, written once each.
+_LAEQ = "LAeq,T"
+_LCEQ = "LCeq,T"
+_LAF5 = "LAF5,T"
+_LAF95 = "LAF95,T"
+_N5_N95 = "N5/N95"
+
+
 #: ISO/TS 12913-3:2019 Table D.1, keyed by the name :func:`binaural_indicators`
 #: takes in ``parameters``. For every row the representative single value is
 #: the higher of the left and right metric values; all but the first also
@@ -143,13 +152,13 @@ BINAURAL_PARAMETERS: Mapping[str, BinauralParameter] = MappingProxyType(
     {
         "sound_pressure_level": BinauralParameter(
             parameter="Sound pressure level",
-            metrics=("LAeq,T", "LCeq,T", "LAF5,T", "LAF95,T"),
+            metrics=(_LAEQ, _LCEQ, _LAF5, _LAF95),
             average_allowed=False,
             reference="ISO 1996-1",
         ),
         "loudness": BinauralParameter(
             parameter="Loudness (time-variant loudness)",
-            metrics=("N5", "Naverage", "Nrmc", "N95", "N5/N95"),
+            metrics=("N5", "Naverage", "Nrmc", "N95", _N5_N95),
             average_allowed=True,
             reference="ISO 532-1",
         ),
@@ -209,12 +218,12 @@ _SHARPNESS_REASON = (
 #: The methods each metric is computed with, as reported in the result.
 _METHODS: Mapping[str, str] = MappingProxyType(
     {
-        "LAeq,T": "IEC 61672-1 A-weighting, energy mean over the record (ISO 1996-1)",
-        "LCeq,T": "IEC 61672-1 C-weighting, energy mean over the record (ISO 1996-1)",
-        "LAF5,T": (
+        _LAEQ: "IEC 61672-1 A-weighting, energy mean over the record (ISO 1996-1)",
+        _LCEQ: "IEC 61672-1 C-weighting, energy mean over the record (ISO 1996-1)",
+        _LAF5: (
             "A-weighted, time weighting F, level exceeded 5 % of the time (ISO 1996-1)"
         ),
-        "LAF95,T": (
+        _LAF95: (
             "A-weighted, time weighting F, level exceeded 95 % of the time (ISO 1996-1)"
         ),
         "N5": (
@@ -227,7 +236,7 @@ _METHODS: Mapping[str, str] = MappingProxyType(
             "(the formula of the NOTE under ISO/TS 12913-2 A.3 f))"
         ),
         "N95": "ISO 532-1:2017 time-varying loudness, loudness exceeded 95 % of the time",
-        "N5/N95": "ratio of N5 to N95 (ISO/TS 12913-3 D.2)",
+        _N5_N95: "ratio of N5 to N95 (ISO/TS 12913-3 D.2)",
         "T": "ECMA-418-2:2025 psychoacoustic tonality, Formula (63)",
         "R10": (
             "ECMA-418-2:2025 roughness, value of R(l50) exceeded 10 % of the time "
@@ -245,15 +254,15 @@ _METHODS: Mapping[str, str] = MappingProxyType(
 #: The unit of each metric.
 _UNITS: Mapping[str, str] = MappingProxyType(
     {
-        "LAeq,T": "dB",
-        "LCeq,T": "dB",
-        "LAF5,T": "dB",
-        "LAF95,T": "dB",
+        _LAEQ: "dB",
+        _LCEQ: "dB",
+        _LAF5: "dB",
+        _LAF95: "dB",
         "N5": "sone",
         "Naverage": "sone",
         "Nrmc": "sone",
         "N95": "sone",
-        "N5/N95": "1",
+        _N5_N95: "1",
         "T": "tu_HMS",
         "R10": "asper",
         "R50": "asper",
@@ -263,7 +272,7 @@ _UNITS: Mapping[str, str] = MappingProxyType(
 )
 
 #: The results ISO/TS 12913-2 A.3 f) requires a report to give.
-_REPORTED_RESULTS = ("LAeq,T", "LCeq,T", "LAF5,T", "LAF95,T", "N5", "N95", "Nrmc")
+_REPORTED_RESULTS = (_LAEQ, _LCEQ, _LAF5, _LAF95, "N5", "N95", "Nrmc")
 
 
 @dataclass(frozen=True)
@@ -486,10 +495,10 @@ def _sound_pressure_levels(
     l95 = np.atleast_1d(percentiles[95])
     parameter = "sound_pressure_level"
     return [
-        _metric("LAeq,T", parameter, a_eq[0], a_eq[1]),
-        _metric("LCeq,T", parameter, c_eq[0], c_eq[1]),
-        _metric("LAF5,T", parameter, l5[0], l5[1]),
-        _metric("LAF95,T", parameter, l95[0], l95[1]),
+        _metric(_LAEQ, parameter, a_eq[0], a_eq[1]),
+        _metric(_LCEQ, parameter, c_eq[0], c_eq[1]),
+        _metric(_LAF5, parameter, l5[0], l5[1]),
+        _metric(_LAF95, parameter, l95[0], l95[1]),
     ]
 
 
@@ -523,8 +532,8 @@ def _loudness(
         values["Naverage"].append(float(np.mean(trace)))
         values["Nrmc"].append(float(np.cbrt(np.mean(trace**3))))
         values["N95"].append(n95)
-        values["N5/N95"].append(n5 / n95 if n95 > 0.0 else math.inf)
-    for symbol in ("N5", "N95", "N5/N95"):
+        values[_N5_N95].append(n5 / n95 if n95 > 0.0 else math.inf)
+    for symbol in ("N5", "N95", _N5_N95):
         if not all(math.isfinite(v) for v in values[symbol]):
             msg = (
                 "The loudness exceeded 95 % of the time is zero at an ear, so the "

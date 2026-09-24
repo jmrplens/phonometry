@@ -1821,6 +1821,74 @@ def plot_method_a_summary(
     return ax
 
 
+#: The loudness variability ratio of ISO/TS 12913-3 D.2, as the binaural
+#: result keys it.
+_N5_N95 = "N5/N95"
+
+
+def _toward(value: float, positive: str, negative: str) -> str:
+    """Where a label past an arrow tip anchors, away from the centre.
+
+    :param value: The cosine (for the horizontal anchor) or sine (for the
+        vertical one) of the arrow's angle.
+    :param positive: The anchor when the arrow points that way clearly.
+    :param negative: The anchor when it points the other way clearly.
+    :return: ``positive``, ``negative`` or ``"center"`` for an arrow closer to
+        the other axis.
+    """
+    if value > _LABEL_SLANT:
+        return positive
+    if value < -_LABEL_SLANT:
+        return negative
+    return "center"
+
+
+def _draw_attribute_axes(ax: Axes, reach: float, language: str) -> None:
+    """The eight attribute arrows of Figure A.1, named past their tips."""
+    ink = theme_line(ax.xaxis.label.get_color(), ax, quiet=0.7)
+    for label, angle, solid in _PAQ_AXES:
+        rad = math.radians(angle)
+        end = (reach * math.cos(rad), reach * math.sin(rad))
+        ax.annotate(
+            "",
+            xy=end,
+            xytext=(0.0, 0.0),
+            arrowprops={
+                "arrowstyle": "-|>",
+                "color": ink,
+                "lw": 1.0,
+                "ls": "-" if solid else "--",
+                "shrinkA": 0.0,
+                "shrinkB": 0.0,
+            },
+        )
+        cos, sin = math.cos(rad), math.sin(rad)
+        ax.annotate(
+            _t(label, language),
+            end,
+            xytext=(4.0 * _sign_of(cos), 4.0 * _sign_of(sin)),
+            textcoords="offset points",
+            ha=_toward(cos, "left", "right"),
+            va=_toward(sin, "bottom", "top"),
+            fontsize="small",
+            color=ink,
+        )
+
+
+def _draw_respondents(ax: Axes, result: PleasantnessEventfulness, scale: float) -> None:
+    """Every respondent, faintly, in the colour of their site."""
+    respondent_sites = np.asarray(result.respondent_sites, dtype=object)
+    for k, site in enumerate(result.sites):
+        own = respondent_sites == site
+        ax.plot(
+            result.respondent_pleasantness[own] * scale,
+            result.respondent_eventfulness[own] * scale,
+            ".",
+            color=theme_line(_SITE_COLORS[k % len(_SITE_COLORS)], ax, quiet=0.6),
+            ms=3,
+        )
+
+
 def plot_pleasantness_eventfulness(
     result: PleasantnessEventfulness,
     ax: Axes | None = None,
@@ -1867,53 +1935,9 @@ def plot_pleasantness_eventfulness(
         ax = own_figure.add_subplot()
     scale = 1.0 / PLEASANTNESS_EVENTFULNESS_RANGE if normalized else 1.0
     reach = PLEASANTNESS_EVENTFULNESS_RANGE * scale
-    ink = theme_line(ax.xaxis.label.get_color(), ax, quiet=0.7)
-    for label, angle, solid in _PAQ_AXES:
-        rad = math.radians(angle)
-        end = (reach * math.cos(rad), reach * math.sin(rad))
-        ax.annotate(
-            "",
-            xy=end,
-            xytext=(0.0, 0.0),
-            arrowprops={
-                "arrowstyle": "-|>",
-                "color": ink,
-                "lw": 1.0,
-                "ls": "-" if solid else "--",
-                "shrinkA": 0.0,
-                "shrinkB": 0.0,
-            },
-        )
-        cos, sin = math.cos(rad), math.sin(rad)
-        ax.annotate(
-            _t(label, language),
-            end,
-            xytext=(4.0 * _sign_of(cos), 4.0 * _sign_of(sin)),
-            textcoords="offset points",
-            ha="left"
-            if cos > _LABEL_SLANT
-            else "right"
-            if cos < -_LABEL_SLANT
-            else "center",
-            va="bottom"
-            if sin > _LABEL_SLANT
-            else "top"
-            if sin < -_LABEL_SLANT
-            else "center",
-            fontsize="small",
-            color=ink,
-        )
+    _draw_attribute_axes(ax, reach, language)
     if respondents:
-        respondent_sites = np.asarray(result.respondent_sites, dtype=object)
-        for k, site in enumerate(result.sites):
-            own = respondent_sites == site
-            ax.plot(
-                result.respondent_pleasantness[own] * scale,
-                result.respondent_eventfulness[own] * scale,
-                ".",
-                color=theme_line(_SITE_COLORS[k % len(_SITE_COLORS)], ax, quiet=0.6),
-                ms=3,
-            )
+        _draw_respondents(ax, result, scale)
     # Each site a marker of its own, named in a legend under the axes: sites
     # of one study sit close together, and names written beside the points
     # would run into each other and across the attribute arrows.
@@ -2168,7 +2192,7 @@ def plot_binaural_indicators(
     # The ratio N5/N95 has no unit and a scale of its own, so it is named in
     # the title rather than drawn beside four loudnesses in sone.
     metrics = [
-        result.metrics[s] for s in row.metrics if s in result.metrics and s != "N5/N95"
+        result.metrics[s] for s in row.metrics if s in result.metrics and s != _N5_N95
     ]
     x = np.arange(len(metrics), dtype=np.float64)
     left = np.asarray([m.left for m in metrics])
@@ -2203,8 +2227,8 @@ def plot_binaural_indicators(
         low = float(min(left.min(), right.min()))
         ax.set_ylim(max(0.0, 10.0 * math.floor(low / 10.0) - 10.0), None)
     title = f"{_t('ISO/TS 12913-3 Table D.1', language)}: {_t(row.parameter, language)}"
-    if "N5/N95" in result.metrics and parameter == "loudness":
-        ratio = result.metrics["N5/N95"]
+    if _N5_N95 in result.metrics and parameter == "loudness":
+        ratio = result.metrics[_N5_N95]
         title += (
             f"\n$N_5/N_{{95}}$ = {format_number(ratio.left, language, decimals=2)} "
             f"({_t('left ear', language)}), "

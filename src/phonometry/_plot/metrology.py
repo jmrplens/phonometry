@@ -696,8 +696,10 @@ def plot_conformance_verification(
 
 
 def _requirement_label(name: str, clause: str, language: str) -> str:
-    """``Generated level (5.3.2)``, localised."""
-    return f"{_t(_REQUIREMENT_LABELS[name], language)} ({clause})"
+    """``Generated level (§5.3.2)``, localised; the section sign keeps the
+    clause number a reference, not a decimal, in the Spanish figures.
+    """
+    return f"{_t(_REQUIREMENT_LABELS[name], language)} (§{clause})"
 
 
 def plot_sound_calibrator_requirement(

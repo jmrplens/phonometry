@@ -1,11 +1,12 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
 r"""The conformance rule of IEC TC 29: a deviation, its limits and its uncertainty.
 
-Every instrument standard IEC technical committee 29 has written since 2013
-decides conformance the same way, and says so in the same sentence. IEC
-60942:2017 (sound calibrators) prints it in 5.1.15, A.1.2 and B.1.3, and IEC
-61672-1:2013 (sound level meters) in 5.1.21: conformance to a performance
-specification is demonstrated when **both** of the following hold,
+The instrument standards IEC technical committee 29 has written since 2013
+decide conformance the same way, and say so in the same sentence. IEC
+60942:2017 (sound calibrators) prints it in 5.1.15, A.1.2 and B.1.3, IEC
+61672-1:2013 (sound level meters) in 5.1.21, IEC 61672-3:2013 in 4.1 and IEC
+61260-2 and -3:2016 (band filters) in their introductions: conformance to a
+performance specification is demonstrated when **both** of the following hold,
 
 (a) the measured deviation from the design goal does not exceed the applicable
     acceptance limits, **and**

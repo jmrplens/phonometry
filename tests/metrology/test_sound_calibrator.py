@@ -505,7 +505,7 @@ def test_the_verification_plot_draws_two_bars_per_measurement() -> None:
     assert len(reds) == 1, "only the 0,30 dB environmental reading exceeds its limit"
     assert reds[0].get_width() == pytest.approx(120.0)
     labels = [t.get_text() for t in ax.get_yticklabels()]
-    assert "Environmental level (5.5) #2" in labels
+    assert "Environmental level (§5.5) #2" in labels
     assert "does not conform" in ax.get_title()
     plt.close("all")
 
@@ -516,7 +516,7 @@ def test_the_verification_plot_in_spanish() -> None:
     )
     ax = result.plot(language="es")
     assert ax.get_title().startswith("Calibrador acústico (IEC 60942:2017): conforme")
-    assert "Nivel generado (5.3.2)" in [t.get_text() for t in ax.get_yticklabels()]
+    assert "Nivel generado (§5.3.2)" in [t.get_text() for t in ax.get_yticklabels()]
     assert ax.get_xlabel() == "Parte del margen consumida [%]"
     plt.close("all")
 
@@ -541,5 +541,5 @@ def test_the_requirement_plot_draws_every_measurement() -> None:
     assert len(diamonds) == 2
     assert len(crosses) == 1
     assert crosses[0].get_xdata()[0] == 3.0
-    assert ax.get_title() == "Environmental level (5.5): does not conform"
+    assert ax.get_title() == "Environmental level (§5.5): does not conform"
     plt.close("all")

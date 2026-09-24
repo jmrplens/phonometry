@@ -13,18 +13,17 @@ the manufacturer is applied (5.1.5, Table 1).
 **What is graded.** Every requirement of the standard that is a measured
 number with an acceptance limit and a maximum-permitted uncertainty:
 
-======================== ========== ======================= ==================
-Requirement              Clause     Acceptance limit        Maximum uncertainty
-======================== ========== ======================= ==================
-``level``                5.3.2      Table 2                 Table A.1
-``fluctuation``          5.3.3      Table 2                 Table A.1
-``frequency``            5.4.2      Table 4                 Table A.2
-``distortion``           5.6        Table 7                 Table A.3
-``supply_voltage``       5.3.4      Table 3                 A.5.5.7, A.5.5.8
-``environmental_level``  5.5        Table 5 (or A.6.4.7)    Table A.4
-``environmental_frequency`` 5.5     Table 6 (or A.6.4.7)    Table A.5
-``field_immunity``       5.9.4.2    5.9.4.2                 A.7.4.8
-======================== ========== ======================= ==================
+* ``level`` (5.3.2): Table 2, with the maximum uncertainty of Table A.1;
+* ``fluctuation`` (5.3.3): Table 2, with Table A.1;
+* ``frequency`` (5.4.2): Table 4, with Table A.2;
+* ``distortion`` (5.6): Table 7, with Table A.3;
+* ``supply_voltage`` (5.3.4): Table 3, with the maximum A.5.5.7 and A.5.5.8
+  print in their text;
+* ``environmental_level`` (5.5): Table 5, or the reduced limits of A.6.4.7,
+  with Table A.4;
+* ``environmental_frequency`` (5.5): Table 6, or A.6.4.7, with Table A.5;
+* ``field_immunity`` (5.9.4.2): the limits 5.9.4.2 prints, with the maximum of
+  A.7.4.8.
 
 Each is judged by the conformance rule of IEC TC 29
 (:func:`phonometry.metrology.verify_conformance`, 5.1.15): the measured

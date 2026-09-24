@@ -1,6 +1,6 @@
 ---
 title: "Calibration and dBFS"
-description: "The sensitivity factor that turns digital units into pascals: deriving it from an IEC 60942 calibrator tone, coupling the calibrator, the short-term level-fluctuation check of clause 5.3.3, the arithmetic route from a rated microphone sensitivity, how the calibrator's class tolerance chains into every derived level, the field-check and drift schedule, and the digital dBFS frame for chains that never had a calibrated front end."
+description: "The sensitivity factor that turns digital units into pascals: deriving it from an IEC 60942 calibrator tone, coupling the calibrator, the short-term level-fluctuation check of clause 5.3.3, the arithmetic route from a rated microphone sensitivity, how the calibrator's class tolerance chains into every derived level, the field-check and drift schedule, the IEC 60942:2017 verdict on the calibrator itself from a laboratory's measurements, and the digital dBFS frame for chains that never had a calibrated front end."
 references:
   - type: standard
     organization: "International Electrotechnical Commission"
@@ -8,7 +8,7 @@ references:
     title: "Electroacoustics — Sound calibrators"
     designation: "IEC 60942:2017"
     url: "https://webstore.iec.ch/en/publication/30045"
-    note: "The calibrator level and class assumptions behind sensitivity() (the principal level of clause 5.3.1.3, the Table 2 acceptance limits with the Table A.1 maximum-permitted uncertainties they combine with under Annex D) and the short-term level-fluctuation stability check of the reference recording (clause 5.3.3, Table 2 class 1 limits per nominal frequency)."
+    note: "The calibrator level and class assumptions behind sensitivity() (the principal level of clause 5.3.1.3, the Table 2 acceptance limits with the Table A.1 maximum-permitted uncertainties they combine with under Annex D) and the short-term level-fluctuation stability check of the reference recording (clause 5.3.3, Table 2 limits per class and nominal frequency), and every requirement with an acceptance limit and a maximum-permitted uncertainty that verify_sound_calibrator grades a calibrator against (Tables 2 to 7 and A.1 to A.5) by the conformance rule of clause 5.1.15."
   - type: standard
     organization: "Audio Engineering Society"
     year: 2020
@@ -260,9 +260,11 @@ When you pass the sample rate (and `validate=True`, the default),
 `sensitivity(ref, fs=fs)` checks the recording the way
 IEC 60942:2017 checks the calibrator itself (5.3.3): the *short-term level
 fluctuation*, the absolute difference between each of the maximum and minimum
-F-time-weighted levels and the mean level, must not exceed the Table 2 class 1
-limit for the calibrator's nominal frequency. Table 2 gives three disjoint rows,
-and they must not be read as overlapping ranges:
+F-time-weighted levels and the mean level, must not exceed the Table 2 limit
+for the calibrator's class and nominal frequency, read from the published
+`metrology.FLUCTUATION_ACCEPTANCE_LIMITS_DB`. For class 1, the default,
+Table 2 gives three disjoint rows, and they must not be read as overlapping
+ranges:
 
 | Nominal frequency | Class 1 limit | |
 | :--- | :---: | :--- |
@@ -273,7 +275,11 @@ and they must not be read as overlapping ranges:
 Table 2 spans 31.5 Hz to 16 kHz and specifies nothing outside it, so a
 `frequency` below 31.5 Hz or above 16 kHz falls back to the strict 0.07 dB
 rather than to the relaxed low-frequency rows. Pass `frequency=` to select the
-right row for non-1 kHz calibrators. A `CalibrationWarning` flags badly coupled microphones or handling
+right row for non-1 kHz calibrators, and `calibrator_class=` to select the
+column: a class LS calibrator is held to 0.03 dB and a class 2 one to 0.15 dB,
+both specified from 160 Hz to 1.25 kHz only, and outside that span the
+strictest figure of the class's own column applies, as it does for class 1.
+A `CalibrationWarning` flags badly coupled microphones or handling
 noise before they silently corrupt every calibrated level. The recording must
 be at least 2 s long (1 s for the F-integrator to settle plus 1 s of settled
 envelope); shorter recordings get a warning instead of an unreliable verdict.
@@ -394,8 +400,9 @@ plt.show()
 | `reference_pressure_pa` | float | Pa | default `2e-5` | Reference pressure $p_0$; rarely changed |
 | `fs` | int, optional | Hz | > 0; default `None` | Required for the stability validation; omit to skip it |
 | `validate` | bool | — | default `True` | Emit `CalibrationWarning` on unstable/short recordings; needs `fs`, and does nothing without it |
-| `max_fluctuation_db` | float, optional | dB | default `None` → Table 2 class 1 | Explicit override of the stability limit |
+| `max_fluctuation_db` | float, optional | dB | default `None` → Table 2, by class and frequency | Explicit override of the stability limit |
 | `frequency` | float | Hz | default `1000.0` | Calibrator's nominal frequency; selects the IEC 60942 Table 2 row |
+| `calibrator_class` | str | — | `'LS'`, `'LS/M'`, `'1'`, `'1/M'`, `'2'`; default `'1'` | Calibrator's class designation (Table 1); selects the Table 2 column |
 | `narrowband` | bool | — | default `False` | Estimate the tone with a coherent Goertzel detector near `frequency` (needs `fs`) instead of full-band RMS; rejects broadband hum/noise that otherwise inflates the RMS and shrinks every later level (−0.41 dB at 10 dB SNR, −0.04 dB at 20 dB; see the figure above). Enable for noisy coupler recordings |
 
 Returns the sensitivity factor (float) to pass as `calibration_factor=` to
@@ -529,6 +536,157 @@ chain with a class 2 calibrator silently downgrades every derived level to
 class 2 accuracy, because the calibrator's wider level tolerance enters
 $S$ directly.
 
+## Verifying the calibrator itself (IEC 60942:2017)
+
+A field check compares the chain with the calibrator and trusts the calibrator.
+What earns that trust is a laboratory's verdict on the calibrator, and
+IEC 60942:2017 says how the verdict is reached: every requirement is a measured
+deviation with an acceptance limit, and the laboratory has to have measured it
+with an expanded uncertainty no larger than a maximum the standard also prints.
+`metrology.verify_sound_calibrator` takes what the laboratory measured and gives
+that verdict, one requirement at a time. It measures nothing itself: the
+numbers come off a certificate or off a bench, and the verdict is only as good
+as they are.
+
+| Requirement | Clause | What is measured | Acceptance limit | Maximum uncertainty | Class 1 at 1 kHz |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `level` | 5.3.2 | generated minus specified level, the mean of three couplings | Table 2 | Table A.1 | ±0.25 dB; 0.15 dB |
+| `fluctuation` | 5.3.3 | the larger of the maximum and minimum F-weighted level against their mean, over 60 s | Table 2 | Table A.1 | 0.07 dB; 0.03 dB |
+| `frequency` | 5.4.2 | generated minus specified frequency | Table 4 | Table A.2 | ±0.7 %; 0.2 % |
+| `distortion` | 5.6 | total distortion + noise, 22.4 Hz to 22.4 kHz | Table 7 | Table A.3 | 2.5 %; 0.5 % |
+| `supply_voltage` | 5.3.4 | level at an end of the supply range minus level at the nominal voltage | Table 3 | A.5.5.7 | ±0.06 dB; 0.04 dB |
+| `environmental_level` | 5.5 | level at a condition outside the band of 5.3.2 minus level at reference conditions | Table 5 | Table A.4 | ±0.25 dB; 0.15 dB |
+| `environmental_frequency` | 5.5 | frequency at that condition minus frequency at reference conditions | Table 6 | Table A.5 | ±0.7 %; 0.2 % |
+| `field_immunity` | 5.9.4.2 | level in a power- or radio-frequency field minus level without it | 5.9.4.2 | A.7.4.8 | ±0.25 dB; 0.05 dB |
+
+Each is judged by the conformance rule every IEC TC 29 standard now shares
+(5.1.15): the deviation within its acceptance limit **and** the uncertainty
+within its maximum, both inclusive. The rule on its own is
+`metrology.verify_conformance`, and
+[Compliance and verification](/phonometry/signals/metrology/compliance-verification/#the-conformance-rule-of-iec-tc-29)
+works it through the examples the standards print.
+
+```python
+from phonometry import metrology
+
+# A laboratory's results for a class 1 calibrator at its 1 kHz setting:
+# each deviation with the expanded uncertainty it was measured with.
+record = metrology.SoundCalibratorMeasurements(
+    level_deviation_db=0.12, level_uncertainty_db=0.10,
+    fluctuation_db=0.02, fluctuation_uncertainty_db=0.02,
+    frequency_deviation_percent=-0.05, frequency_uncertainty_percent=0.02,
+    distortion_percent=0.9, distortion_uncertainty_percent=0.3,
+)
+result = metrology.verify_sound_calibrator("1", record, nominal_frequency_hz=1000.0)
+print(result.passes)                                     # True
+level = result.requirement("level")
+print(level.acceptance_limits, level.max_uncertainty)    # (-0.25, 0.25) 0.15
+
+# The same 0.12 dB, measured elsewhere with 0.17 dB of expanded uncertainty.
+other_lab = metrology.SoundCalibratorMeasurements(
+    level_deviation_db=0.12, level_uncertainty_db=0.17)
+verdict = metrology.verify_sound_calibrator("1", other_lab, nominal_frequency_hz=1000.0)
+print(verdict.passes)                                    # False
+print(verdict.requirement("level").verifications[0].reason)
+# Deviation within acceptance limits BUT uncertainty exceeds maximum-permitted
+```
+
+The second verdict is the rule doing its job, not the calibrator failing. The
+deviation is the same 0.12 dB, but a laboratory that measured it with 0.17 dB of
+expanded uncertainty cannot demonstrate anything about a class 1 level, whose
+maximum is 0.15 dB (Table A.1), and 5.1.16 says such a measurement shall not be
+used. Another laboratory may pass the same calibrator. The reason is worded as
+the "Reasons" column of Table E.1 words it, and the object has no truth value:
+`if verify_sound_calibrator(...):` raises instead of passing every calibrator.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/calibrator_verification.svg" alt="Horizontal bars for a class 1 calibrator at 1 kHz, two per measurement: the deviation as a share of its acceptance limit and the expanded uncertainty as a share of its maximum. Every bar stops short of the 100 percent line except the third environmental level reading, 0.28 dB against the 0.25 dB of Table 5, whose bar reaches 112 percent and is drawn in red, so the calibrator does not conform" width="92%" />
+
+*`result.plot()` on a pattern-evaluation record with every requirement in it.
+One pair of bars per measurement: the deviation as a share of the acceptance
+limit on its side, and the uncertainty as a share of the maximum permitted. A
+measurement conforms when both bars stop at or before the dashed line. Here one
+environmental reading, 0.28 dB against 0.25 dB, is the whole verdict.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+from phonometry import metrology
+
+record = metrology.SoundCalibratorMeasurements(
+    level_deviation_db=0.12, level_uncertainty_db=0.10,
+    fluctuation_db=0.02, fluctuation_uncertainty_db=0.02,
+    frequency_deviation_percent=-0.05, frequency_uncertainty_percent=0.02,
+    distortion_percent=0.9, distortion_uncertainty_percent=0.3,
+    supply_voltage_deviation_db=[0.01, -0.03], supply_voltage_uncertainty_db=0.03,
+    environmental_level_deviation_db=[0.10, -0.18, 0.28],
+    environmental_level_uncertainty_db=0.12,
+    environmental_frequency_deviation_percent=[0.12, -0.20],
+    environmental_frequency_uncertainty_percent=0.10,
+    field_immunity_deviation_db=0.06, field_immunity_uncertainty_db=0.04,
+)
+result = metrology.verify_sound_calibrator("1", record, nominal_frequency_hz=1000.0)
+print(result.failed)                                     # ('environmental_level',)
+result.plot()
+plt.show()
+```
+
+</details>
+
+**The tables.** Every limit is read from a published, read-only table:
+`LEVEL_ACCEPTANCE_LIMITS_DB` and `FLUCTUATION_ACCEPTANCE_LIMITS_DB` (Table 2),
+`SUPPLY_VOLTAGE_ACCEPTANCE_LIMITS_DB` (Table 3),
+`FREQUENCY_ACCEPTANCE_LIMITS_PERCENT` (Table 4),
+`ENVIRONMENTAL_LEVEL_ACCEPTANCE_LIMITS_DB` (Table 5),
+`ENVIRONMENTAL_FREQUENCY_ACCEPTANCE_LIMITS_PERCENT` (Table 6),
+`DISTORTION_ACCEPTANCE_LIMITS_PERCENT` (Table 7) and the six maximum
+uncertainties of Annex A beside them. A row of a table keyed by frequency keeps
+which ends of its printed range it includes, because the page writes "31,5 to
+63" in one row and "> 63 to < 160" in the next, and a dash stays `None`. Classes
+LS and 2 are specified from 160 Hz to 1.25 kHz only, and 5.1.2 forbids stating
+conformance where the standard gives no limit, so at any other nominal
+frequency the verifier refuses the class rather than borrowing a neighbour's
+row. One call judges one setting: a calibrator with several frequencies is
+verified once per frequency.
+
+**Pistonphones need their correction as an input.** A class LS/M or 1/M
+pistonphone meets its class only once the manufacturer's static-pressure
+correction is applied (5.1.5), and that correction depends on the barometer
+reading and on data only the manual has. It goes into the record, and is added
+to the measured level before the level is graded (5.3.2, B.4.3.2). Every other
+calibrator shall need no correction at all (5.1.7), and is refused one:
+
+```python
+from phonometry import metrology
+
+# The level measured at the laboratory's pressure, and the manual's correction
+# to the reference 101.325 kPa for the barometer reading of the day.
+piston = metrology.SoundCalibratorMeasurements(
+    level_deviation_db=0.31, level_uncertainty_db=0.08,
+    static_pressure_correction_db=-0.12,
+)
+result = metrology.verify_sound_calibrator("1/M", piston, nominal_frequency_hz=250.0)
+print(f"{result.requirement('level').verifications[0].deviation:.2f}")   # 0.19
+print(result.passes)                                                      # True
+```
+
+**The abbreviated environmental test.** A.6.4 lets a laboratory replace the
+temperature and humidity sweeps with a few combined conditions judged against
+tighter limits: Table 5 less 0.05 dB for classes LS and 1 and less 0.10 dB for
+class 2, and 0.5 %, 0.5 % and 1.3 % for the frequency (A.6.4.7).
+`environmental_test="abbreviated"` applies them. A calibrator that fails them
+is not thereby non-conforming: the full tests of A.6.5 to A.6.7 are then due
+(A.6.1.2), which is what a failed abbreviated verdict means.
+
+**What the verdict is not.** Full conformance needs the model to pass the
+pattern evaluation of Annex A and the specimen to pass the periodic tests of
+Annex B (5.1.18), and a periodic certificate says which it rests on (B.6 g and
+h). The requirements that are not a number with a tolerance, the markings and
+manual of Clause 6, the stabilization time of 5.1.10, the supply indicator of
+5.7, the radio-frequency emissions of 5.9.2 and the electrostatic discharges
+of 5.9.3, are hardware and paperwork checks outside the verdict.
+
 ## Digital analysis (dBFS)
 
 If you are working with digital audio files (e.g., WAV, FLAC) and want to
@@ -656,15 +814,23 @@ anything else.
 IEC 60942:2017 as far as it constrains the *sensitivity factor*: the principal
 calibrator level that `target_spl` assumes, the Table 2 and Table A.1 class
 tolerances quoted in the uncertainty discussion above, and the short-term
-level-fluctuation check of clause 5.3.3 against the class 1 limits of Table 2,
-which `sensitivity(ref, fs=fs)` runs on the reference recording.
+level-fluctuation check of clause 5.3.3 against the Table 2 limit of the
+calibrator's class, which `sensitivity(ref, fs=fs)` runs on the reference
+recording. And the calibrator itself: `verify_sound_calibrator` grades a
+laboratory's measurements of it against every requirement of IEC 60942:2017
+that has an acceptance limit and a maximum-permitted uncertainty (Tables 2 to 7,
+Tables A.1 to A.5, 5.9.4.2 and the reduced limits of A.6.4.7), for classes LS, 1
+and 2 and the pistonphone designations LS/M and 1/M, by the conformance rule of
+5.1.15.
 </ScopeClaim>
 
 <ScopeClaim status="not-covered" label="Not covered">
-The conformance tests of the calibrator itself (generated level, frequency,
-distortion, and the environmental corrections for static pressure and
-temperature) are not implemented, so pass an already corrected `target_spl`
-when the calibrator's manual asks for one. The IEC 61672-3 periodic tests are
+No test of IEC 60942:2017 is performed here: `verify_sound_calibrator` grades
+numbers measured on hardware, and the static-pressure correction of an /M
+pistonphone is taken from its manual, not computed, so pass an already corrected
+`target_spl` to `sensitivity()` when the manual asks for one. The markings, the
+stabilization time, the supply indicator, the radio-frequency emissions and the
+electrostatic discharges of IEC 60942 are not graded. The IEC 61672-3 periodic tests are
 cited as laboratory practice, not run: nothing here verifies a sound level
 meter or assigns it a class. The dBFS half of the page sits outside any
 standard and makes no physical claim.
@@ -679,7 +845,8 @@ standard and makes no physical claim.
 - [Levels](/phonometry/signals/levels/levels/): every metric that consumes the `calibration_factor` derived here.
 - [Multichannel and Performance](/phonometry/signals/filters/multichannel/): one sensitivity per channel when the channels differ.
 - [GUM uncertainty](/phonometry/signals/metrology/gum-uncertainty/): propagating the calibrator tolerance and drift bound into a level's uncertainty.
-- API reference: [`metrology.calibration`](/phonometry/reference/api/metrology/calibration/) and [`phonometry`](/phonometry/reference/api/filters/phonometry/).
+- [Compliance and verification](/phonometry/signals/metrology/compliance-verification/): the conformance rule of IEC TC 29 the calibrator verdict is reached by, on the examples IEC 60942 and IEC 61672-1 print.
+- API reference: [`metrology.calibration`](/phonometry/reference/api/metrology/calibration/), [`metrology.sound_calibrator`](/phonometry/reference/api/metrology/sound-calibrator/), [`metrology.conformance`](/phonometry/reference/api/metrology/conformance/) and [`phonometry`](/phonometry/reference/api/filters/phonometry/).
 
 </SeeAlso>
 
@@ -692,6 +859,10 @@ The usual choice is 94 dB SPL at 1 kHz (1 Pa RMS), which is what `sensitivity()`
 ### How much drift between the pre and post calibration checks is acceptable?
 
 Derive the sensitivity before each measurement series and check it again at the end: a common criterion invalidates the series when the two differ by more than 0.5 dB. A healthy class 1 chain drifts a few hundredths of a dB over a session, so a half-decibel pre/post difference signals damage rather than weather. Whatever the threshold, carry the difference into the uncertainty budget rather than assuming zero.
+
+### How do I check that my calibrator conforms to IEC 60942?
+
+Take the laboratory's results (each measured deviation with the expanded uncertainty it was measured with) into a `metrology.SoundCalibratorMeasurements` and call `metrology.verify_sound_calibrator` with the class and the nominal frequency. Each requirement is judged by the conformance rule of 5.1.15: the deviation within the Table 2 to 7 limit and the uncertainty within the Annex A maximum, both inclusive. A deviation inside its limit measured with too large an uncertainty does not conform, because 5.1.16 says such a measurement cannot demonstrate anything.
 
 ### Can I calibrate a class 1 chain with a class 2 calibrator?
 

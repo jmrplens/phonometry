@@ -17,7 +17,8 @@ SPL**, established from a recorded calibrator tone (the IEC 60942 field
 ritual), and digital **dBFS**, levels relative to full scale, appropriate when
 no physical reference exists or when characterising the digital chain itself.
 The page explains how each mode is set up and, just as important, which
-quantities are meaningful in which frame.
+quantities are meaningful in which frame, and it grades the calibrator itself
+against IEC 60942:2017 from what a laboratory measured on it.
 
 [Measurement uncertainty (GUM and Monte Carlo)](gum-uncertainty.md)
 handles the second, implementing the *Guide to the Expression of Uncertainty
@@ -34,7 +35,8 @@ diverge and why.
 carries the evidence story: what a performance class actually claims in
 IEC 61672-1 and IEC 61260-1 (same design goals, different acceptance limits),
 which public verifier grades each stage of a measurement chain against its
-tolerance tables, how to read and cite the numerical conformance report the
+tolerance tables, the conformance rule of IEC TC 29 that grades a measured
+instrument, how to read and cite the numerical conformance report the
 site publishes, and the honest boundary against the pattern-evaluation and
 periodic tests of IEC 61672-2/-3 and IEC 61260-2/-3, which need an
 instrument in a laboratory rather than a library.
@@ -63,11 +65,13 @@ budgets that are specialisations of the GUM machinery described here.
 
 - [Calibration and dBFS](calibration.md): physical SPL
   calibration from a calibrator tone, the stability check it applies to that
-  recording, and the digital full-scale mode.
+  recording, the IEC 60942:2017 verdict on the calibrator itself, and the
+  digital full-scale mode.
 - [Compliance and verification](compliance-verification.md):
   what a performance class asserts, the verifiers that grade weightings,
   filter banks and intensity spectra against their tolerance tables, the
-  conformance report, and the scope of IEC 61672-2/-3 and IEC 61260-2/-3.
+  conformance rule of IEC TC 29, the conformance report, and the scope of
+  IEC 61672-2/-3 and IEC 61260-2/-3.
 - [Measurement uncertainty (GUM and Monte Carlo)](gum-uncertainty.md):
   the law of propagation of uncertainty and the Monte Carlo method, expanded
   uncertainty and coverage intervals.
@@ -77,11 +81,12 @@ budgets that are specialisations of the GUM machinery described here.
 
 ## What this section does not cover
 
-Nothing here checks an instrument or a calibrator. The IEC 60942 conformance
-tests of the calibrator itself (generated level, frequency, distortion, and
-the corrections for static pressure and temperature) are not implemented, so
-pass an already corrected `target_spl` when the manual asks for one, and the
-IEC 61672-3 periodic tests are cited as laboratory practice rather than run;
+Nothing here measures an instrument or a calibrator. No IEC 60942 test is
+performed: `verify_sound_calibrator` grades the numbers a laboratory measured
+on a calibrator, and the static-pressure correction of an LS/M or 1/M
+pistonphone comes from its manual, so pass an already corrected `target_spl`
+when the manual asks for one; the IEC 61672-3 periodic tests are cited as
+laboratory practice rather than run;
 [Compliance and
 verification](compliance-verification.md) draws
 that boundary precisely, part by part. The dBFS half of the calibration page

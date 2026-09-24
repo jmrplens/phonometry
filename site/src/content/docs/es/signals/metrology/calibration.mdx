@@ -1,6 +1,6 @@
 ---
 title: "Calibración y dBFS"
-description: "El factor de sensibilidad que convierte unidades digitales en pascales: cómo obtenerlo del tono de un calibrador IEC 60942, cómo acoplar el calibrador, la comprobación de fluctuación de nivel a corto plazo del apartado 5.3.3, la vía aritmética a partir de la sensibilidad nominal de un micrófono, cómo la tolerancia de clase del calibrador se encadena en todo nivel derivado, el calendario de comprobaciones de campo y deriva, y el marco digital dBFS para cadenas que nunca tuvieron un front-end calibrado."
+description: "El factor de sensibilidad que convierte unidades digitales en pascales: cómo obtenerlo del tono de un calibrador IEC 60942, cómo acoplar el calibrador, la comprobación de fluctuación de nivel a corto plazo del apartado 5.3.3, la vía aritmética a partir de la sensibilidad nominal de un micrófono, cómo la tolerancia de clase del calibrador se encadena en todo nivel derivado, el calendario de comprobaciones de campo y deriva, el veredicto de IEC 60942:2017 sobre el propio calibrador a partir de las medidas de un laboratorio, y el marco digital dBFS para cadenas que nunca tuvieron un front-end calibrado."
 references:
   - type: standard
     organization: "International Electrotechnical Commission"
@@ -8,7 +8,7 @@ references:
     title: "Electroacoustics — Sound calibrators"
     designation: "IEC 60942:2017"
     url: "https://webstore.iec.ch/en/publication/30045"
-    note: "Los supuestos de nivel y clase del calibrador en sensitivity() (el nivel principal del apartado 5.3.1.3, los límites de aceptación de la Tabla 2 con las incertidumbres máximas permitidas de la Tabla A.1 con las que se combinan según el Anexo D) y la comprobación de estabilidad por fluctuación de nivel a corto plazo de la grabación de referencia (apartado 5.3.3, límites de clase 1 de la Tabla 2 según la frecuencia nominal)."
+    note: "Los supuestos de nivel y clase del calibrador en sensitivity() (el nivel principal del apartado 5.3.1.3, los límites de aceptación de la Tabla 2 con las incertidumbres máximas permitidas de la Tabla A.1 con las que se combinan según el Anexo D) y la comprobación de estabilidad por fluctuación de nivel a corto plazo de la grabación de referencia (apartado 5.3.3, límites de la Tabla 2 según la clase y la frecuencia nominal), y cada requisito con límite de aceptación e incertidumbre máxima permitida frente al que verify_sound_calibrator califica un calibrador (Tablas 2 a 7 y A.1 a A.5) con la regla de conformidad del apartado 5.1.15."
   - type: standard
     organization: "Audio Engineering Society"
     year: 2020
@@ -273,8 +273,10 @@ Si pasas la frecuencia de muestreo (y `validate=True`, el valor por defecto),
 IEC 60942:2017 comprueba el calibrador (5.3.3): la *fluctuación de nivel a
 corto plazo*, el valor absoluto de la diferencia entre cada uno de los niveles
 máximo y mínimo con ponderación temporal F y el nivel medio, no debe superar
-el límite de clase 1 de la Tabla 2 para la frecuencia nominal del calibrador.
-La Tabla 2 da tres filas disjuntas, y no deben leerse como rangos solapados:
+el límite de la Tabla 2 para la clase y la frecuencia nominal del calibrador,
+leído de la tabla publicada `metrology.FLUCTUATION_ACCEPTANCE_LIMITS_DB`. Para
+la clase 1, la de defecto, la Tabla 2 da tres filas disjuntas, y no deben
+leerse como rangos solapados:
 
 | Frecuencia nominal | Límite de clase 1 | |
 | :--- | :---: | :--- |
@@ -286,7 +288,11 @@ La Tabla 2 abarca de 31,5 Hz a 16 kHz y no especifica nada fuera de ese rango,
 así que una `frequency` por debajo de 31,5 Hz o por encima de 16 kHz recae en
 los 0,07 dB estrictos y no en las filas relajadas de baja frecuencia. Pasa
 `frequency=` para seleccionar la fila correcta en calibradores que no sean de
-1 kHz. Un `CalibrationWarning` delata micrófonos mal acoplados o ruido de manipulación
+1 kHz, y `calibrator_class=` para seleccionar la columna: un calibrador de
+clase LS se juzga con 0,03 dB y uno de clase 2 con 0,15 dB, ambos
+especificados solo de 160 Hz a 1,25 kHz, y fuera de ese tramo se aplica la
+cifra más estricta de la propia columna de la clase, igual que en la clase 1.
+Un `CalibrationWarning` delata micrófonos mal acoplados o ruido de manipulación
 antes de que corrompan silenciosamente todos los niveles calibrados. La
 grabación debe durar al menos 2 s (1 s para que el integrador F se asiente más
 1 s de envolvente estable); con grabaciones más cortas se avisa en lugar de dar
@@ -409,8 +415,9 @@ plt.show()
 | `reference_pressure_pa` | float | Pa | defecto `2e-5` | Presión de referencia $p_0$; rara vez se cambia |
 | `fs` | int, opcional | Hz | > 0; defecto `None` | Necesario para la validación de estabilidad; omítelo para saltarla |
 | `validate` | bool | — | defecto `True` | Emite `CalibrationWarning` con grabaciones inestables/cortas; necesita `fs` y sin él no hace nada |
-| `max_fluctuation_db` | float, opcional | dB | defecto `None` → Tabla 2 clase 1 | Sobrescritura explícita del límite de estabilidad |
+| `max_fluctuation_db` | float, opcional | dB | defecto `None` → Tabla 2, según clase y frecuencia | Sobrescritura explícita del límite de estabilidad |
 | `frequency` | float | Hz | defecto `1000.0` | Frecuencia nominal del calibrador; elige la fila de la Tabla 2 de IEC 60942 |
+| `calibrator_class` | str | — | `'LS'`, `'LS/M'`, `'1'`, `'1/M'`, `'2'`; defecto `'1'` | Designación de clase del calibrador (Tabla 1); elige la columna de la Tabla 2 |
 | `narrowband` | bool | — | defecto `False` | Estima el tono con un detector coherente (Goertzel) cerca de `frequency` (requiere `fs`) en lugar del RMS de banda completa; rechaza el zumbido/ruido de banda ancha que si no infla el RMS y reduce todos los niveles posteriores (−0,41 dB a 10 dB de SNR, −0,04 dB a 20 dB; ver la figura de arriba). Actívalo para grabaciones de acoplador ruidosas |
 
 Devuelve el factor de sensibilidad (float) para pasarlo como
@@ -559,6 +566,161 @@ calibrar una cadena de clase 1 con un calibrador de clase 2 degrada en
 silencio todos los niveles derivados a exactitud de clase 2, porque la
 tolerancia de nivel más ancha del calibrador entra directamente en $S$.
 
+## Verificar el propio calibrador (IEC 60942:2017)
+
+Una comprobación de campo compara la cadena con el calibrador y se fía del
+calibrador. Lo que justifica esa confianza es el veredicto de un laboratorio
+sobre el calibrador, y la IEC 60942:2017 dice cómo se llega a él: cada requisito
+es una desviación medida con su límite de aceptación, y el laboratorio tiene que
+haberla medido con una incertidumbre expandida no mayor que un máximo que la
+norma también imprime. `metrology.verify_sound_calibrator` toma lo que midió el
+laboratorio y da ese veredicto, requisito a requisito. No mide nada por sí
+mismo: los números salen de un certificado o de un banco, y el veredicto vale lo
+que valgan ellos.
+
+| Requisito | Apartado | Qué se mide | Límite de aceptación | Incertidumbre máxima | Clase 1 a 1 kHz |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `level` | 5.3.2 | nivel generado menos nivel especificado, media de tres acoplamientos | Tabla 2 | Tabla A.1 | ±0,25 dB; 0,15 dB |
+| `fluctuation` | 5.3.3 | la mayor de las diferencias entre los niveles F máximo y mínimo y su media, en 60 s | Tabla 2 | Tabla A.1 | 0,07 dB; 0,03 dB |
+| `frequency` | 5.4.2 | frecuencia generada menos frecuencia especificada | Tabla 4 | Tabla A.2 | ±0,7 %; 0,2 % |
+| `distortion` | 5.6 | distorsión total + ruido, de 22,4 Hz a 22,4 kHz | Tabla 7 | Tabla A.3 | 2,5 %; 0,5 % |
+| `supply_voltage` | 5.3.4 | nivel en un extremo del rango de alimentación menos nivel a la tensión nominal | Tabla 3 | A.5.5.7 | ±0,06 dB; 0,04 dB |
+| `environmental_level` | 5.5 | nivel en una condición fuera de la banda de 5.3.2 menos nivel en condiciones de referencia | Tabla 5 | Tabla A.4 | ±0,25 dB; 0,15 dB |
+| `environmental_frequency` | 5.5 | frecuencia en esa condición menos frecuencia en condiciones de referencia | Tabla 6 | Tabla A.5 | ±0,7 %; 0,2 % |
+| `field_immunity` | 5.9.4.2 | nivel dentro de un campo de frecuencia industrial o de radiofrecuencia menos nivel sin él | 5.9.4.2 | A.7.4.8 | ±0,25 dB; 0,05 dB |
+
+Cada uno se juzga con la regla de conformidad que ya comparten todas las normas
+del IEC TC 29 (5.1.15): la desviación dentro de su límite de aceptación **y** la
+incertidumbre dentro de su máximo, ambos inclusive. La regla por sí sola es
+`metrology.verify_conformance`, y
+[Conformidad y verificación](/phonometry/es/signals/metrology/compliance-verification/#la-regla-de-conformidad-del-iec-tc-29)
+la recorre sobre los ejemplos que imprimen las normas.
+
+```python
+from phonometry import metrology
+
+# Resultados de un laboratorio para un calibrador de clase 1 en su ajuste de
+# 1 kHz: cada desviación con la incertidumbre expandida con la que se midió.
+record = metrology.SoundCalibratorMeasurements(
+    level_deviation_db=0.12, level_uncertainty_db=0.10,
+    fluctuation_db=0.02, fluctuation_uncertainty_db=0.02,
+    frequency_deviation_percent=-0.05, frequency_uncertainty_percent=0.02,
+    distortion_percent=0.9, distortion_uncertainty_percent=0.3,
+)
+result = metrology.verify_sound_calibrator("1", record, nominal_frequency_hz=1000.0)
+print(result.passes)                                     # True
+level = result.requirement("level")
+print(level.acceptance_limits, level.max_uncertainty)    # (-0.25, 0.25) 0.15
+
+# Los mismos 0,12 dB, medidos en otro sitio con 0,17 dB de incertidumbre expandida.
+other_lab = metrology.SoundCalibratorMeasurements(
+    level_deviation_db=0.12, level_uncertainty_db=0.17)
+verdict = metrology.verify_sound_calibrator("1", other_lab, nominal_frequency_hz=1000.0)
+print(verdict.passes)                                    # False
+print(verdict.requirement("level").verifications[0].reason)
+# Deviation within acceptance limits BUT uncertainty exceeds maximum-permitted
+```
+
+El segundo veredicto es la regla haciendo su trabajo, no el calibrador
+fallando. La desviación es la misma, 0,12 dB, pero un laboratorio que la midió
+con 0,17 dB de incertidumbre expandida no puede demostrar nada sobre un nivel de
+clase 1, cuyo máximo es 0,15 dB (Tabla A.1), y el apartado 5.1.16 dice que esa
+medida no se usará. Otro laboratorio puede dar por bueno el mismo calibrador. El
+motivo se redacta como lo redacta la columna «Reasons» de la Tabla E.1, y el
+objeto no tiene valor de verdad: `if verify_sound_calibrator(...):` lanza una
+excepción en lugar de aprobar todos los calibradores.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/calibrator_verification.svg" alt="Barras horizontales para un calibrador de clase 1 a 1 kHz, dos por medida: la desviación como fracción de su límite de aceptación y la incertidumbre expandida como fracción de su máximo. Todas las barras se quedan antes de la línea del 100 % salvo la tercera lectura de nivel en condiciones ambientales, 0,28 dB frente a los 0,25 dB de la Tabla 5, cuya barra llega al 112 % y se dibuja en rojo, así que el calibrador no es conforme" width="92%" />
+
+*`result.plot()` sobre un registro de ensayo de tipo con todos los requisitos.
+Un par de barras por medida: la desviación como fracción del límite de
+aceptación de su lado, y la incertidumbre como fracción de la máxima
+permitida. Una medida es conforme cuando las dos barras se quedan en la línea
+discontinua o antes. Aquí una lectura ambiental, 0,28 dB frente a 0,25 dB, es
+todo el veredicto.*
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+from phonometry import metrology
+
+record = metrology.SoundCalibratorMeasurements(
+    level_deviation_db=0.12, level_uncertainty_db=0.10,
+    fluctuation_db=0.02, fluctuation_uncertainty_db=0.02,
+    frequency_deviation_percent=-0.05, frequency_uncertainty_percent=0.02,
+    distortion_percent=0.9, distortion_uncertainty_percent=0.3,
+    supply_voltage_deviation_db=[0.01, -0.03], supply_voltage_uncertainty_db=0.03,
+    environmental_level_deviation_db=[0.10, -0.18, 0.28],
+    environmental_level_uncertainty_db=0.12,
+    environmental_frequency_deviation_percent=[0.12, -0.20],
+    environmental_frequency_uncertainty_percent=0.10,
+    field_immunity_deviation_db=0.06, field_immunity_uncertainty_db=0.04,
+)
+result = metrology.verify_sound_calibrator("1", record, nominal_frequency_hz=1000.0)
+print(result.failed)                                     # ('environmental_level',)
+result.plot(language="es")
+plt.show()
+```
+
+</details>
+
+**Las tablas.** Cada límite se lee de una tabla publicada de solo lectura:
+`LEVEL_ACCEPTANCE_LIMITS_DB` y `FLUCTUATION_ACCEPTANCE_LIMITS_DB` (Tabla 2),
+`SUPPLY_VOLTAGE_ACCEPTANCE_LIMITS_DB` (Tabla 3),
+`FREQUENCY_ACCEPTANCE_LIMITS_PERCENT` (Tabla 4),
+`ENVIRONMENTAL_LEVEL_ACCEPTANCE_LIMITS_DB` (Tabla 5),
+`ENVIRONMENTAL_FREQUENCY_ACCEPTANCE_LIMITS_PERCENT` (Tabla 6),
+`DISTORTION_ACCEPTANCE_LIMITS_PERCENT` (Tabla 7) y, junto a ellas, las seis
+incertidumbres máximas del Anexo A. Una fila de una tabla organizada por
+frecuencia guarda qué extremos de su rango impreso incluye, porque la página
+escribe «31,5 to 63» en una fila y «> 63 to < 160» en la siguiente, y un guion
+se queda en `None`. Las clases LS y 2 solo están especificadas de 160 Hz a
+1,25 kHz, y el apartado 5.1.2 prohíbe declarar conformidad donde la norma no da
+límite, así que a cualquier otra frecuencia nominal el verificador rechaza la
+clase en lugar de tomar prestada la fila vecina. Cada llamada juzga un ajuste:
+un calibrador con varias frecuencias se verifica una vez por frecuencia.
+
+**Los pistófonos necesitan su corrección como dato.** Un pistófono de clase
+LS/M o 1/M solo cumple su clase una vez aplicada la corrección por presión
+estática del fabricante (5.1.5), y esa corrección depende de la lectura del
+barómetro y de datos que solo tiene el manual. Va en el registro, y se suma al
+nivel medido antes de juzgarlo (5.3.2, B.4.3.2). Ningún otro calibrador puede
+necesitar corrección alguna (5.1.7), y se le rechaza:
+
+```python
+from phonometry import metrology
+
+# El nivel medido a la presión del laboratorio y la corrección del manual a
+# la referencia de 101,325 kPa para la lectura del barómetro de ese día.
+piston = metrology.SoundCalibratorMeasurements(
+    level_deviation_db=0.31, level_uncertainty_db=0.08,
+    static_pressure_correction_db=-0.12,
+)
+result = metrology.verify_sound_calibrator("1/M", piston, nominal_frequency_hz=250.0)
+print(f"{result.requirement('level').verifications[0].deviation:.2f}")   # 0.19
+print(result.passes)                                                      # True
+```
+
+**El ensayo ambiental abreviado.** El apartado A.6.4 permite a un laboratorio
+sustituir los barridos de temperatura y humedad por unas pocas condiciones
+combinadas juzgadas con límites más estrictos: la Tabla 5 menos 0,05 dB para las
+clases LS y 1 y menos 0,10 dB para la clase 2, y 0,5 %, 0,5 % y 1,3 % para la
+frecuencia (A.6.4.7). `environmental_test="abbreviated"` los aplica. Un
+calibrador que no los cumple no es por ello no conforme: le tocan entonces los
+ensayos completos de A.6.5 a A.6.7 (A.6.1.2), y eso es lo que significa un
+veredicto abreviado fallido.
+
+**Lo que el veredicto no es.** La conformidad completa exige que el modelo
+supere el ensayo de tipo del Anexo A y que el ejemplar supere los ensayos
+periódicos del Anexo B (5.1.18), y un certificado periódico dice en cuál de los
+dos se apoya (B.6 g y h). Los requisitos que no son un número con tolerancia,
+las marcas y el manual del capítulo 6, el tiempo de estabilización de 5.1.10, el
+indicador de alimentación de 5.7, las emisiones de radiofrecuencia de 5.9.2 y
+las descargas electrostáticas de 5.9.3, son comprobaciones de hardware y de
+documentación que quedan fuera del veredicto.
+
 ## Análisis digital (dBFS)
 
 Si trabajas con archivos de audio digital (WAV, FLAC…) y quieres analizar
@@ -695,16 +857,23 @@ de nada.
 La IEC 60942:2017 en lo que condiciona el *factor de sensibilidad*: el nivel
 principal del calibrador que supone `target_spl`, las tolerancias de clase de
 la Tabla 2 y la Tabla A.1 citadas arriba en la discusión de incertidumbre y la
-comprobación de fluctuación de nivel a corto plazo del apartado 5.3.3 frente a
-los límites de clase 1 de la Tabla 2, que `sensitivity(ref, fs=fs)` ejecuta
-sobre la grabación de referencia.
+comprobación de fluctuación de nivel a corto plazo del apartado 5.3.3 frente al
+límite de la Tabla 2 para la clase del calibrador, que `sensitivity(ref, fs=fs)`
+ejecuta sobre la grabación de referencia. Y el propio calibrador:
+`verify_sound_calibrator` juzga las medidas que un laboratorio hizo de él frente
+a cada requisito de la IEC 60942:2017 que tiene límite de aceptación e
+incertidumbre máxima permitida (Tablas 2 a 7, Tablas A.1 a A.5, 5.9.4.2 y los
+límites reducidos de A.6.4.7), para las clases LS, 1 y 2 y las designaciones de
+pistófono LS/M y 1/M, con la regla de conformidad del apartado 5.1.15.
 </ScopeClaim>
 
 <ScopeClaim status="not-covered" label="No cubierto">
-Los ensayos de conformidad del propio calibrador (nivel generado, frecuencia,
-distorsión y las correcciones ambientales por presión estática y temperatura)
-no están implementados, así que pasa un `target_spl` ya corregido cuando el
-manual del calibrador lo pida. Los ensayos periódicos de la IEC 61672-3 se
+Aquí no se realiza ningún ensayo de la IEC 60942:2017: `verify_sound_calibrator`
+juzga números medidos sobre hardware, y la corrección por presión estática de un
+pistófono /M se toma de su manual, no se calcula, así que pasa a `sensitivity()`
+un `target_spl` ya corregido cuando el manual lo pida. Las marcas, el tiempo de
+estabilización, el indicador de alimentación, las emisiones de radiofrecuencia y
+las descargas electrostáticas de la IEC 60942 no se juzgan. Los ensayos periódicos de la IEC 61672-3 se
 citan como práctica de laboratorio, no se ejecutan: aquí nada verifica un
 sonómetro ni le asigna una clase. La parte de dBFS de esta página queda fuera
 de cualquier norma y no hace ninguna afirmación física.
@@ -719,7 +888,8 @@ de cualquier norma y no hace ninguna afirmación física.
 - [Niveles](/phonometry/es/signals/levels/levels/): todas las métricas que consumen el `calibration_factor` derivado aquí.
 - [Multicanal y rendimiento](/phonometry/es/signals/filters/multichannel/): una sensibilidad por canal cuando los canales difieren.
 - [Incertidumbre de medida (GUM y Monte Carlo)](/phonometry/es/signals/metrology/gum-uncertainty/): propagar la tolerancia del calibrador y la cota de deriva a la incertidumbre de un nivel.
-- Referencia de la API: [`metrology.calibration`](/phonometry/es/reference/api/metrology/calibration/) y [`phonometry`](/phonometry/es/reference/api/filters/phonometry/).
+- [Conformidad y verificación](/phonometry/es/signals/metrology/compliance-verification/): la regla de conformidad del IEC TC 29 con la que se alcanza el veredicto sobre el calibrador, sobre los ejemplos que imprimen IEC 60942 e IEC 61672-1.
+- Referencia de la API: [`metrology.calibration`](/phonometry/es/reference/api/metrology/calibration/), [`metrology.sound_calibrator`](/phonometry/es/reference/api/metrology/sound-calibrator/), [`metrology.conformance`](/phonometry/es/reference/api/metrology/conformance/) y [`phonometry`](/phonometry/es/reference/api/filters/phonometry/).
 
 </SeeAlso>
 
@@ -737,6 +907,10 @@ más de 0,5 dB. Una cadena de clase 1 sana deriva unas centésimas de dB en una
 sesión, así que una diferencia antes/después de medio decibelio señala un daño
 y no el clima. Sea cual sea el umbral, lleva la diferencia al balance de
 incertidumbre en lugar de suponerla cero.
+
+### ¿Cómo compruebo que mi calibrador es conforme con IEC 60942?
+
+Lleva los resultados del laboratorio (cada desviación medida con la incertidumbre expandida con la que se midió) a un `metrology.SoundCalibratorMeasurements` y llama a `metrology.verify_sound_calibrator` con la clase y la frecuencia nominal. Cada requisito se juzga con la regla de conformidad del apartado 5.1.15: la desviación dentro del límite de las Tablas 2 a 7 y la incertidumbre dentro del máximo del Anexo A, ambos inclusive. Una desviación dentro de su límite medida con una incertidumbre demasiado grande no es conforme, porque el apartado 5.1.16 dice que esa medida no puede demostrar nada.
 
 ### ¿Puedo calibrar una cadena de clase 1 con un calibrador de clase 2?
 

@@ -27,8 +27,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   result marks the tones within 10 dB of the highest that the report has to
   carry. `minimum_analyzer_bandwidth_hz` and `tone_level_from_sidebands` are
   the bandwidth a moving microphone needs and the sideband sum when the FFT is
-  narrower (Formulae (2) and (3)), and `free_field_absorption_correction` the
-  $K = r\alpha$ of the free-field method beyond 2 m (Formula (10)).
+  narrower (Formulae (2) and (3)), `free_field_absorption_correction` the
+  $K_\alpha = r\alpha$ of the free-field method beyond 2 m (Formula (10)), and
+  `high_frequency_levels_to_determine` reads Table 3: which levels a report
+  gives for each type of noise below 8 kHz and in the 16 kHz octave.
   `air_absorption_np_per_m` is Annex A, the ISO 9613-1 attenuation in nepers
   per metre, evaluated up to 22.4 kHz without the advisory ISO 9613-1 raises
   above 10 kHz. Every result has `.plot()`, and a new guide in both languages
@@ -36,7 +38,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   the standard are pinned cell by cell: 581 of the 624 are Annex A to the
   fourth decimal, computed with the temperature converted as
   $\theta + 273.16$ K, and in the other 43 a 0 that Annex A gives is
-  printed as another digit, registered in the errata with the full list.
+  printed as another digit, registered in the errata with the full list,
+  next to the digit zero that Formula (A.5) writes for the oxygen relaxation
+  frequency.
 - **What an active noise reduction earmuff adds, its uncertainty and where it
   stops being linear (ISO 4869-6:2019).** `hearing.active_insertion_loss` takes
   the levels at both ears with the circuit off and on (or the insertion loss

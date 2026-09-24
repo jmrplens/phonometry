@@ -88,12 +88,12 @@ bandwidth analyser puts it back into the band, Formula (9):
 **Method with a free field over a reflecting plane** (clause 9) is ISO 3744
 (:func:`~phonometry.emission.sound_power.sound_power_pressure`) with the three
 one-third octave bands of the 16 kHz octave; beyond a measurement radius of
-2 m the surface level takes the absorption correction of Formula (10), with
-:math:`\alpha` in decibels per metre:
+2 m the surface level takes the absorption correction :math:`K_\alpha` of
+Formula (10), with :math:`\alpha` in decibels per metre:
 
 .. math::
 
-   K = r \cdot \alpha \tag{10}
+   K_\alpha = r \cdot \alpha \tag{10}
 
 **Reference meteorological conditions.** Clause 10.1 carries the levels of
 the reverberation-room methods to 101,325 kPa and 23,0 °C "de acuerdo con la
@@ -101,6 +101,10 @@ Norma ISO 3741", which is the reference-quantity correction :math:`C_1` and
 the radiation-impedance correction :math:`C_2` of ISO 3741:2010 clause 9.1.4
 for a direct method and :math:`C_2` alone for the comparison with a reference
 source, exactly as ISO 3741 Formulae (20) and (21) apply them.
+
+**What to determine.** Table 3 says which sound power levels a report
+carries for each type of noise, in the octave bands from 125 Hz to 8 kHz and
+in the 16 kHz octave: :func:`high_frequency_levels_to_determine` reads it.
 
 Formulae (4) to (10) carry no worked example in the standard and are pinned
 in closed form; Tables 1 and 2 are the numeric oracle of Annex A.
@@ -110,6 +114,7 @@ from __future__ import annotations
 
 import warnings
 from dataclasses import dataclass
+from types import MappingProxyType
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -163,7 +168,7 @@ _MAX_FFT_BANDWIDTH_HZ = 112.0
 #: (clause 9.8).
 _ABSORPTION_CORRECTION_RADIUS_M = 2.0
 #: How far below the highest tonal level a tone is still reported, in dB
-#: (clause 13 c) and Table 3).
+#: (clause 13 c) and the multiple-tone rows of Table 3).
 _TONE_REPORTING_RANGE_DB = 10.0
 
 #: The rank of a levels array that holds the N orientations (or revolutions)
@@ -410,13 +415,13 @@ def free_field_absorption_correction(
 ) -> NDArray[np.float64]:
     r"""Air absorption correction of the free-field method (ISO 9295 Formula (10)).
 
-    :math:`K = r \cdot \alpha`, with :math:`\alpha` the air absorption in
+    :math:`K_\alpha = r \cdot \alpha`, with :math:`\alpha` the air absorption in
     decibels per metre (Annex A times 8,686). Clause 9.8 adds it to the
     surface sound pressure level of ISO 3744 before the sound power is
     determined, and only when the measurement radius exceeds 2 m; at 2 m
     or less the clause asks for no correction and this returns zero. The
     surface level and the sound power level differ by the constant
-    :math:`10 \lg(S/S_0)`, so adding ``K`` to the band levels
+    :math:`10 \lg(S/S_0)`, so adding :math:`K_\alpha` to the band levels
     :func:`~phonometry.emission.sound_power.sound_power_pressure` returns
     is the same thing.
 
@@ -426,7 +431,7 @@ def free_field_absorption_correction(
     :param relative_humidity_percent: Relative humidity, in percent.
     :param static_pressure_kpa: Static pressure, in kilopascals (default
         101,325 kPa).
-    :return: ``K`` per frequency, in decibels.
+    :return: :math:`K_\alpha` per frequency, in decibels.
     :raises ValueError: for a non-positive radius or the atmospheric inputs
         :func:`air_absorption_np_per_m` refuses.
     """
@@ -756,3 +761,92 @@ def high_frequency_sound_power_comparison(
         method="comparison",
         tonal=bandwidth is not None,
     )
+
+
+# --- Table 3: what to determine for each type of noise -------------------------
+
+#: The noise types Table 3 distinguishes in the octave bands from 125 Hz to
+#: 8 kHz: "Ruido de banda ancha o de banda estrecha" (one row for both) and
+#: "Ningún ruido significativo".
+_NOISE_125_HZ_TO_8_KHZ = ("broadband", "narrowband", "none")
+#: The noise types Table 3 distinguishes in the 16 kHz octave band: "Ningún
+#: ruido significativo", "Ruido de banda ancha", "Tono discreto" and "Tonos
+#: múltiples".
+_NOISE_16_KHZ_OCTAVE = ("none", "broadband", "discrete_tone", "multiple_tones")
+
+#: What Table 3 asks to determine, one identifier per quantity.
+_A_WEIGHTED_LEVEL = "a_weighted_sound_power_level"
+_THIRD_OCTAVE_LEVELS = "one_third_octave_band_levels"
+_TONE_LEVEL = "tone_level_and_frequency"
+_TONE_LEVELS = "tone_levels_within_10_db"
+
+#: ISO 9295:2015 Table 3 (UNE-EN ISO 9295:2015, PDF page 24, printed folio
+#: 24): (significant noise from 125 Hz to 8 kHz, noise in the 16 kHz octave)
+#: -> the sound power levels to determine. The table has six rows; the two
+#: combinations it does not print (no significant noise anywhere, or broadband
+#: noise in the 16 kHz octave alone) are not in it.
+_TABLE_3: MappingProxyType[tuple[bool, str], tuple[str, ...]] = MappingProxyType(
+    {
+        (True, "none"): (_A_WEIGHTED_LEVEL,),
+        (True, "broadband"): (_A_WEIGHTED_LEVEL, _THIRD_OCTAVE_LEVELS),
+        (True, "discrete_tone"): (_A_WEIGHTED_LEVEL, _TONE_LEVEL),
+        (True, "multiple_tones"): (_A_WEIGHTED_LEVEL, _TONE_LEVELS),
+        (False, "discrete_tone"): (_TONE_LEVEL,),
+        (False, "multiple_tones"): (_TONE_LEVELS,),
+    }
+)
+
+
+def high_frequency_levels_to_determine(
+    *, noise_125_hz_to_8_khz: str, noise_16_khz_octave: str
+) -> tuple[str, ...]:
+    """The sound power levels to determine for a type of noise (ISO 9295 Table 3).
+
+    Table 3 of ISO 9295:2015 pairs the noise of the equipment in the octave
+    bands from 125 Hz to 8 kHz with its noise in the 16 kHz octave band and
+    says what the determination has to give. The answer is a tuple of these
+    identifiers, in the order the table names them:
+
+    - ``"a_weighted_sound_power_level"``: the A-weighted sound power level
+      from the octave bands of 125 Hz to 8 kHz, by ISO 3741 or ISO 3744 as
+      appropriate (footnote a lets the one-third-octave and octave band levels
+      of that range be given as well);
+    - ``"one_third_octave_band_levels"``: the sound power level in each
+      one-third octave band of the 16 kHz octave, by this standard
+      (:func:`high_frequency_sound_power` or
+      :func:`high_frequency_sound_power_comparison`);
+    - ``"tone_level_and_frequency"``: the level and the frequency of the
+      discrete tone in the 16 kHz octave;
+    - ``"tone_levels_within_10_db"``: the levels and frequencies of every tone
+      in the 16 kHz octave within 10 dB of the highest tonal level, the tones
+      :attr:`HighFrequencySoundPowerResult.within_10_db_of_maximum` marks.
+
+    With no significant noise from 125 Hz to 8 kHz, footnote b notes that
+    the noise lies outside the scope of ISO 3741 and ISO 3744, so only this
+    standard applies and no A-weighted level is asked for.
+
+    :param noise_125_hz_to_8_khz: The noise in the octave bands from 125 Hz
+        to 8 kHz: ``"broadband"`` or ``"narrowband"`` (one row of the table),
+        or ``"none"`` for no significant noise.
+    :param noise_16_khz_octave: The noise in the 16 kHz octave band:
+        ``"none"``, ``"broadband"``, ``"discrete_tone"`` or
+        ``"multiple_tones"``.
+    :return: The identifiers of the levels to determine.
+    :raises ValueError: for a noise type the table does not name, or for a
+        combination it has no row for: no significant noise in either range,
+        or broadband noise in the 16 kHz octave with none below it.
+    """
+    below = require_choice(
+        noise_125_hz_to_8_khz, "noise_125_hz_to_8_khz", _NOISE_125_HZ_TO_8_KHZ
+    )
+    octave = require_choice(
+        noise_16_khz_octave, "noise_16_khz_octave", _NOISE_16_KHZ_OCTAVE
+    )
+    key = (below != "none", octave)
+    if key not in _TABLE_3:
+        msg = (
+            f"ISO 9295:2015 Table 3 has no row for noise_125_hz_to_8_khz={below!r} "
+            f"with noise_16_khz_octave={octave!r}."
+        )
+        raise ValueError(msg)
+    return _TABLE_3[key]

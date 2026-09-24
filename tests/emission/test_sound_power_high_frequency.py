@@ -16,6 +16,7 @@ Normative anchors (UNE-EN ISO 9295:2015, the Spanish adoption):
 - Formula (10), PDF page 21: K = r alpha (alpha in dB/m) when r > 2 m.
 - Clause 10.1, PDF page 21: reference meteorological conditions per ISO 3741,
   C1 + C2 for a direct method and C2 for the comparison.
+- Table 3, PDF page 24: the levels to determine for each type of noise.
 - Annex A, PDF pages 25 and 26: ISO 9613-1 in Np/m (8,686 converts to dB/m).
 """
 
@@ -32,8 +33,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pytest
 import reference_data as ref
+from matplotlib.colors import to_rgba
 
 from phonometry import emission
+from phonometry._plot.common import _C_MUTED, _C_PRIMARY
 from phonometry.environment.propagation import air_attenuation
 from phonometry.environment.propagation.air_absorption import (
     AtmosphericAbsorptionWarning,
@@ -216,6 +219,72 @@ def test_iso_9613_1_itself_still_advises_above_10_khz() -> None:
         air_attenuation(16_000.0)
 
 
+def test_annex_a_advises_just_past_22_4_khz() -> None:
+    with pytest.warns(AtmosphericAbsorptionWarning, match="ISO 9295:2015 Annex A"):
+        emission.air_absorption_np_per_m(
+            22_401.0, temperature_c=23.0, relative_humidity_percent=50.0
+        )
+
+
+def test_annex_a_follows_the_static_pressure() -> None:
+    """At 90 kPa Annex A is still ISO 9613-1 in nepers, and not the 101,325 kPa value."""
+    frequencies = np.array([1000.0, 4000.0, 8000.0])
+    nepers = emission.air_absorption_np_per_m(
+        frequencies,
+        temperature_c=23.0,
+        relative_humidity_percent=50.0,
+        static_pressure_kpa=90.0,
+    )
+    decibels = air_attenuation(
+        frequencies,
+        temperature_c=23.0,
+        relative_humidity_percent=50.0,
+        atmospheric_pressure_kpa=90.0,
+    )
+    np.testing.assert_allclose(8.686 * nepers, decibels, rtol=1e-14)
+    reference = emission.air_absorption_np_per_m(
+        frequencies, temperature_c=23.0, relative_humidity_percent=50.0
+    )
+    assert np.all(np.abs(nepers / reference - 1.0) > 1e-3)
+
+
+def test_formula_7_follows_the_static_pressure() -> None:
+    volume, surface = 200.0, 210.0
+    alpha = emission.air_absorption_np_per_m(
+        THIRDS,
+        temperature_c=23.0,
+        relative_humidity_percent=50.0,
+        static_pressure_kpa=90.0,
+    )
+    room = emission.room_constant_from_air_absorption(
+        THIRDS,
+        volume_m3=volume,
+        surface_area_m2=surface,
+        temperature_c=23.0,
+        relative_humidity_percent=50.0,
+        static_pressure_kpa=90.0,
+    )
+    expected = 8.0 * alpha * volume / (1.0 - 8.0 * alpha * volume / surface)
+    np.testing.assert_allclose(room, expected, rtol=1e-14)
+
+
+def test_formula_10_follows_the_static_pressure() -> None:
+    alpha = emission.air_absorption_np_per_m(
+        THIRDS,
+        temperature_c=23.0,
+        relative_humidity_percent=50.0,
+        static_pressure_kpa=90.0,
+    )
+    k = emission.free_field_absorption_correction(
+        THIRDS,
+        radius_m=4.0,
+        temperature_c=23.0,
+        relative_humidity_percent=50.0,
+        static_pressure_kpa=90.0,
+    )
+    np.testing.assert_allclose(k, 4.0 * 8.686 * alpha, rtol=1e-15)
+
+
 def test_annex_a_refuses_a_humidity_above_saturation() -> None:
     with pytest.raises(ValueError, match="relative_humidity_percent"):
         emission.air_absorption_np_per_m(
@@ -239,6 +308,23 @@ def test_room_constant_from_reverberation_time_is_formula_4() -> None:
         0.16, volume_m3=200.0, surface_area_m2=200.0
     )
     assert float(room[0]) == pytest.approx(200.0 * (math.e - 1.0), rel=1e-14)
+
+
+def test_formulae_4_and_5_keep_the_volume_and_the_surface_apart() -> None:
+    """V = 200 m3, S = 210 m2, T = 0,70 s: V and S enter where the formulae put them."""
+    alpha_room = 1.0 - math.exp(-0.16 * 200.0 / (210.0 * 0.70))
+    alpha = emission.room_absorption_coefficient(
+        0.70, volume_m3=200.0, surface_area_m2=210.0
+    )
+    room = emission.room_constant_from_reverberation_time(
+        0.70, volume_m3=200.0, surface_area_m2=210.0
+    )
+    assert float(alpha[0]) == pytest.approx(alpha_room, rel=1e-15)
+    assert float(alpha[0]) == pytest.approx(0.19562, abs=5e-6)
+    assert float(room[0]) == pytest.approx(
+        210.0 * alpha_room / (1.0 - alpha_room), rel=1e-14
+    )
+    assert float(room[0]) == pytest.approx(51.07, abs=5e-3)
 
 
 def test_room_constant_is_per_band() -> None:
@@ -318,6 +404,46 @@ def test_formula_7_advises_below_10_khz() -> None:
         )
 
 
+def test_formula_7_holds_at_10_khz_itself() -> None:
+    """Clause 7.2: "a frecuencias de 10 kHz o superiores", so 10 kHz is inside."""
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        emission.room_constant_from_air_absorption(
+            [10_000.0],
+            volume_m3=200.0,
+            surface_area_m2=210.0,
+            temperature_c=23.0,
+            relative_humidity_percent=50.0,
+        )
+
+
+def test_formula_7_advises_just_below_10_khz() -> None:
+    with pytest.warns(emission.SoundPowerWarning, match="below 10 kHz"):
+        emission.room_constant_from_air_absorption(
+            [9_999.0],
+            volume_m3=200.0,
+            surface_area_m2=210.0,
+            temperature_c=23.0,
+            relative_humidity_percent=50.0,
+        )
+
+
+def test_formula_7_refuses_8_alpha_v_over_s_equal_to_one() -> None:
+    volume = 200.0
+    alpha = emission.air_absorption_np_per_m(
+        [20_000.0], temperature_c=23.0, relative_humidity_percent=50.0
+    )
+    surface = float(8.0 * alpha[0] * volume)  # 8 alpha V / S is exactly 1
+    with pytest.raises(ValueError, match="Formula \\(7\\)"):
+        emission.room_constant_from_air_absorption(
+            [20_000.0],
+            volume_m3=volume,
+            surface_area_m2=surface,
+            temperature_c=23.0,
+            relative_humidity_percent=50.0,
+        )
+
+
 # --- Formula (6): the direct method -------------------------------------------
 
 
@@ -373,6 +499,67 @@ def test_direct_method_advises_outside_the_octave() -> None:
         emission.high_frequency_sound_power(
             [60.0], frequencies_hz=[8_000.0], room_constant_m2=4.0
         )
+
+
+@pytest.mark.parametrize("frequency", [11_200.0, 22_400.0])
+def test_the_octave_edges_are_inside(frequency: float) -> None:
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        emission.high_frequency_sound_power(
+            [60.0], frequencies_hz=[frequency], room_constant_m2=4.0
+        )
+
+
+@pytest.mark.parametrize("frequency", [11_199.0, 22_401.0])
+def test_just_past_the_octave_edges_advises(frequency: float) -> None:
+    with pytest.warns(emission.SoundPowerWarning, match="16 kHz octave band"):
+        emission.high_frequency_sound_power(
+            [60.0], frequencies_hz=[frequency], room_constant_m2=4.0
+        )
+
+
+def _meteorological_corrections(
+    temperature_c: float, static_pressure_kpa: float
+) -> tuple[float, float]:
+    """C1 and C2 of ISO 3741:2010 clause 9.1.4 (PDF page 31, printed folio 22)."""
+    pressure = -10.0 * math.log10(static_pressure_kpa / 101.325)
+    kelvin = 273.15 + temperature_c
+    return (
+        pressure + 5.0 * math.log10(kelvin / 314.0),
+        pressure + 15.0 * math.log10(kelvin / 296.0),
+    )
+
+
+def test_formula_6_at_30_degc_and_90_kpa_adds_c1_and_c2() -> None:
+    c1, c2 = _meteorological_corrections(30.0, 90.0)
+    res = emission.high_frequency_sound_power(
+        [60.0, 58.0, 55.0],
+        frequencies_hz=THIRDS,
+        room_constant_m2=4.0,
+        temperature_c=30.0,
+        static_pressure_kpa=90.0,
+    )
+    assert res.c1 == pytest.approx(c1, abs=1e-12)
+    assert res.c2 == pytest.approx(c2, abs=1e-12)
+    assert c1 + c2 == pytest.approx(1.109, abs=5e-4)  # 0.438 + 0.670 dB
+    np.testing.assert_allclose(
+        res.sound_power_level, np.array([60.0, 58.0, 55.0]) + c1 + c2, atol=1e-12
+    )
+
+
+def test_a_tonal_direct_determination_is_marked_and_drawn_as_stems() -> None:
+    res = emission.high_frequency_sound_power(
+        [55.0, 48.0],
+        frequencies_hz=[15_625.0, 17_000.0],
+        room_constant_m2=40.0,
+        tonal=True,
+    )
+    assert res.tonal
+    assert res.method == "direct"
+    ax = res.plot()
+    assert "kHz" in ax.get_xlabel()
+    assert not ax.patches  # stems, not bars
+    plt.close("all")
 
 
 def test_the_whole_chain_reproduces_formulae_6_and_7_by_hand() -> None:
@@ -442,6 +629,60 @@ def test_formula_9_advises_an_fft_wider_than_112_hz() -> None:
         )  # fmt: skip
 
 
+def test_formula_9_admits_an_fft_of_112_hz() -> None:
+    """Clause 8.5.2: "debe ser de 112 Hz o inferior"."""
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        emission.high_frequency_sound_power_comparison(
+            [55.0], frequencies_hz=[16_000.0],
+            reference_pressure_levels_db=[45.0], reference_sound_power_levels_db=[50.0],
+            noise_bandwidth_hz=112.0,
+        )  # fmt: skip
+
+
+def test_formula_9_advises_an_fft_just_wider_than_112_hz() -> None:
+    with pytest.warns(emission.SoundPowerWarning, match="112 Hz"):
+        emission.high_frequency_sound_power_comparison(
+            [55.0], frequencies_hz=[16_000.0],
+            reference_pressure_levels_db=[45.0], reference_sound_power_levels_db=[50.0],
+            noise_bandwidth_hz=112.5,
+        )  # fmt: skip
+
+
+def test_formula_8_at_30_degc_and_90_kpa_adds_c2_alone() -> None:
+    _, c2 = _meteorological_corrections(30.0, 90.0)
+    res = emission.high_frequency_sound_power_comparison(
+        [60.0, 58.0, 55.0],
+        frequencies_hz=THIRDS,
+        reference_pressure_levels_db=[70.0, 69.0, 66.0],
+        reference_sound_power_levels_db=[80.0, 79.0, 76.0],
+        temperature_c=30.0,
+        static_pressure_kpa=90.0,
+    )
+    assert res.c2 == pytest.approx(c2, abs=1e-12)
+    np.testing.assert_allclose(
+        res.sound_power_level, np.array([70.0, 68.0, 65.0]) + c2, atol=1e-12
+    )
+
+
+def test_formula_1_averages_the_reference_source_as_well() -> None:
+    reference = np.array([[70.0, 69.0, 66.0], [72.0, 71.0, 68.0]])
+    res = emission.high_frequency_sound_power_comparison(
+        [60.0, 58.0, 55.0],
+        frequencies_hz=THIRDS,
+        reference_pressure_levels_db=reference,
+        reference_sound_power_levels_db=[80.0, 79.0, 76.0],
+    )
+    by_hand = 10.0 * np.log10(np.mean(10.0 ** (0.1 * reference), axis=0))
+    np.testing.assert_allclose(res.reference_pressure_level, by_hand, atol=1e-12)
+    c2 = 15.0 * math.log10(296.15 / 296.0)
+    np.testing.assert_allclose(
+        res.sound_power_level,
+        np.array([80.0, 79.0, 76.0]) - by_hand + np.array([60.0, 58.0, 55.0]) + c2,
+        atol=1e-12,
+    )
+
+
 def test_comparison_refuses_reference_levels_of_another_length() -> None:
     with pytest.raises(ValueError, match="reference_pressure_levels_db"):
         emission.high_frequency_sound_power_comparison(
@@ -500,6 +741,16 @@ def test_the_tones_within_10_db_of_the_highest_are_marked() -> None:
     np.testing.assert_array_equal(_tones().within_10_db_of_maximum, [True, True, False])
 
 
+def test_a_tone_exactly_10_db_below_the_highest_is_reported() -> None:
+    fields = {
+        **_tones().__dict__,
+        "frequencies": np.array([15_625.0, 17_000.0, 20_500.0]),
+        "sound_power_level": np.array([60.0, 50.0, 49.5]),
+    }
+    res = emission.HighFrequencySoundPowerResult(**fields)
+    np.testing.assert_array_equal(res.within_10_db_of_maximum, [True, True, False])
+
+
 def test_a_result_with_disagreeing_bands_cannot_be_built() -> None:
     good = _tones()
     fields = {**good.__dict__, "mean_pressure_level": np.array([1.0, 2.0])}
@@ -525,6 +776,58 @@ def test_broadband_plot_draws_one_bar_per_third(language: str) -> None:
     plt.close("all")
 
 
+def test_broadband_plot_marks_the_mean_room_level_of_each_band() -> None:
+    res = emission.high_frequency_sound_power(
+        [62.0, 60.0, 55.0], frequencies_hz=THIRDS, room_constant_m2=40.0
+    )
+    ax = res.plot()
+    dots = [line for line in ax.lines if line.get_marker() == "o"]
+    assert len(dots) == 1
+    np.testing.assert_allclose(dots[0].get_ydata(), res.mean_pressure_level)
+    plt.close("all")
+
+
+def test_tonal_plot_marks_the_mean_room_level_of_each_tone() -> None:
+    res = _tones()
+    ax = res.plot()
+    means = [
+        c
+        for c in ax.collections
+        if len(c.get_offsets())
+        and np.allclose(np.asarray(c.get_offsets())[:, 1], res.mean_pressure_level)
+    ]
+    assert len(means) == 1
+    np.testing.assert_allclose(
+        np.asarray(means[0].get_offsets())[:, 0], res.frequencies / 1000.0
+    )
+    plt.close("all")
+
+
+def test_tonal_plot_mutes_the_tone_below_the_reporting_range() -> None:
+    res = _tones()
+    ax = res.plot()
+    stems = next(c for c in ax.collections if len(c.get_segments()) == 3)
+    colours = [to_rgba(c) for c in stems.get_colors()]
+    reported = res.within_10_db_of_maximum
+    assert colours == [to_rgba(_C_PRIMARY if keep else _C_MUTED) for keep in reported]
+    labels = [text.get_text() for text in ax.get_legend().get_texts()]
+    assert "Tone below the reporting range" in labels
+    plt.close("all")
+
+
+def test_tonal_plot_names_no_unreported_tone_when_every_tone_is_reported() -> None:
+    res = emission.high_frequency_sound_power_comparison(
+        [55.0, 50.0], frequencies_hz=[15_625.0, 17_000.0],
+        reference_pressure_levels_db=[45.0, 44.0],
+        reference_sound_power_levels_db=[50.0, 49.5],
+        noise_bandwidth_hz=12.5,
+    )  # fmt: skip
+    ax = res.plot()
+    labels = [text.get_text() for text in ax.get_legend().get_texts()]
+    assert "Tone below the reporting range" not in labels
+    plt.close("all")
+
+
 @pytest.mark.parametrize("language", ["en", "es"])
 def test_tonal_plot_draws_the_reporting_line(language: str) -> None:
     res = _tones()
@@ -534,3 +837,59 @@ def test_tonal_plot_draws_the_reporting_line(language: str) -> None:
     assert horizontal, "the line 10 dB below the highest tone is missing"
     assert "kHz" in ax.get_xlabel()
     plt.close("all")
+
+
+# --- Table 3: what to determine --------------------------------------------------
+
+A_WEIGHTED = "a_weighted_sound_power_level"
+THIRD_OCTAVES = "one_third_octave_band_levels"
+TONE = "tone_level_and_frequency"
+TONES = "tone_levels_within_10_db"
+
+
+@pytest.mark.parametrize(
+    ("below", "octave", "expected"),
+    [
+        ("broadband", "none", (A_WEIGHTED,)),
+        ("broadband", "broadband", (A_WEIGHTED, THIRD_OCTAVES)),
+        ("broadband", "discrete_tone", (A_WEIGHTED, TONE)),
+        ("broadband", "multiple_tones", (A_WEIGHTED, TONES)),
+        ("none", "discrete_tone", (TONE,)),
+        ("none", "multiple_tones", (TONES,)),
+    ],
+)
+def test_table_3_reads_its_six_rows(
+    below: str, octave: str, expected: tuple[str, ...]
+) -> None:
+    levels = emission.high_frequency_levels_to_determine(
+        noise_125_hz_to_8_khz=below, noise_16_khz_octave=octave
+    )
+    assert levels == expected
+
+
+@pytest.mark.parametrize(
+    "octave", ["none", "broadband", "discrete_tone", "multiple_tones"]
+)
+def test_table_3_puts_narrowband_on_the_broadband_row(octave: str) -> None:
+    narrow = emission.high_frequency_levels_to_determine(
+        noise_125_hz_to_8_khz="narrowband", noise_16_khz_octave=octave
+    )
+    broad = emission.high_frequency_levels_to_determine(
+        noise_125_hz_to_8_khz="broadband", noise_16_khz_octave=octave
+    )
+    assert narrow == broad
+
+
+@pytest.mark.parametrize("octave", ["none", "broadband"])
+def test_table_3_has_no_row_without_noise_below_8_khz_or_a_tone(octave: str) -> None:
+    with pytest.raises(ValueError, match="Table 3 has no row"):
+        emission.high_frequency_levels_to_determine(
+            noise_125_hz_to_8_khz="none", noise_16_khz_octave=octave
+        )
+
+
+def test_table_3_refuses_a_noise_type_it_does_not_name() -> None:
+    with pytest.raises(ValueError, match="noise_16_khz_octave"):
+        emission.high_frequency_levels_to_determine(
+            noise_125_hz_to_8_khz="broadband", noise_16_khz_octave="impulsive"
+        )

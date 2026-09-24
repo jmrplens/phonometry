@@ -499,8 +499,9 @@ def plot_high_frequency_sound_power(
     r"""ISO 9295 band levels, with the mean room level they came from.
 
     Broadband noise is one bar of :math:`L_W` per one-third octave band, with
-    :math:`\overline{L_p}` beside it so the room term of Formula (6) (or the
-    reference-source term of Formula (8)) reads as the gap between the two.
+    :math:`\overline{L_p}` beside it, so that the gap between the two reads
+    as the room term of Formula (6) plus :math:`C_1` and :math:`C_2` (or the
+    reference-source term of Formula (8) plus :math:`C_2`).
     A tonal determination is one stem per tone on a frequency axis in
     kilohertz, with the line 10 dB below the highest tone: clause 13 c)
     reports every tone above it, and the tones below it are drawn muted.

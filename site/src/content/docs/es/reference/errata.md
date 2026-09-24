@@ -5643,8 +5643,9 @@ dos ediciones con las mismas entradas y en el mismo orden.
 ## ISO 8041-2:2021, apartado 12.7 (ponderaciones temporales juzgadas frente a una fila que la Tabla 2 ya no imprime)
 
 - **Localización:** apartado 12.7, folio impreso 26 (página 34 del PDF), el
-  tercer párrafo de ese folio; leído frente a la Tabla 2 del folio impreso 8 y
-  al apartado 5.13 del folio impreso 15.
+  tercer párrafo de ese folio; leído frente a la Tabla 2 del folio impreso 8,
+  al apartado 5.13 del folio impreso 15, al apartado 5.1.2 del folio impreso 6
+  y a la Tabla 8 de los folios impresos 13 y 14.
 - **Lo impreso:** «For an instrument where time weightings are provided, a
   steady sinusoidal electrical signal shall be applied to the electrical input
   facility at the reference frequency. [...] With the same input signal, the
@@ -5665,15 +5666,24 @@ dos ediciones con las mismas entradas y en el mismo orden.
   y 11 «Time-weighting decay rates». La parte 2 quitó la fila, porque su 5.13
   declara que el valor eficaz móvil no aplica, y conservó el párrafo que lo
   juzga, así que el párrafo remite ahora a una tabla en la que ninguna fila
-  fija un límite para una indicación con ponderación temporal. Para un PVEM
-  sin ponderación temporal el párrafo queda vacío; para uno que la ofrezca de
-  todos modos, el documento no dice a qué se somete.
-- **Evidencia:** los tres pasajes impresos entre sí, y frente al 12.7 de la
-  ISO 8041-1:2017 y su Tabla 2, que imprimen la fila del valor eficaz móvil
-  para la que se escribió este párrafo. Verificado en las páginas 16, 23 y 34
-  del PDF (pp. impresas 8, 15 y 26) de ISO 8041-2:2021(E), y en las páginas
-  20, 28 y 38 del PDF (pp. impresas 12, 20 y 30) de ISO 8041-1:2017(E) para la
-  Tabla 2 de la parte 1, el título de su Tabla 10 y su 12.7.
+  fija un límite para una indicación con ponderación temporal. Y el propio
+  documento deja que un PVEM la tenga: su 5.1.2 (folio impreso 6) permite a un
+  PVEM de cuerpo entero «optionally, measure exposure characteristics based on
+  maximum transient vibration value (MTVV)», que la ISO 8041-1:2017 3.1.2.4,
+  adoptada por el apartado 3, define como el «maximum value of the running
+  r.m.s. vibration acceleration value when the integration time is equal to
+  1 s», y su Tabla 8 (folios impresos 13 y 14) califica en la ráfaga el «MTVV
+  linear» y el «MTVV exponential» de ese valor eficaz móvil. Para un PVEM sin
+  ponderación temporal el párrafo queda vacío; para uno que da el MTVV, el
+  documento no dice a qué límite se somete la indicación en cada ponderación
+  temporal.
+- **Evidencia:** los tres pasajes impresos entre sí, frente al 5.1.2 y la
+  Tabla 8, y frente al 12.7 de la ISO 8041-1:2017 y su Tabla 2, que imprimen la
+  fila del valor eficaz móvil para la que se escribió este párrafo. Verificado
+  en las páginas 14, 16, 21, 22, 23 y 34 del PDF (pp. impresas 6, 8, 13, 14,
+  15 y 26) de ISO 8041-2:2021(E), y en las páginas 13, 20, 28 y 38 del PDF
+  (pp. impresas 5, 12, 20 y 30) de ISO 8041-1:2017(E) para la definición del
+  MTVV, la Tabla 2 de la parte 1, el título de su Tabla 10 y su 12.7.
 - **Consecuencia:** ninguna para las tablas de la propia norma. El defecto es
   una remisión que sobrevivió a su fila.
 - **Comportamiento de la biblioteca:**
@@ -5684,6 +5694,26 @@ dos ediciones con las mismas entradas y en el mismo orden.
   documentada como solo de la parte 1. La fila de conformidad «ISO 8041-2:2021
   Table 2» recoge las dos filas.
 - **Estado:** sin comunicar.
+
+## ISO 8041-2:2021, apartado 12.22 («exited» por «excited»)
+
+- **Localización:** apartado 12.22, «Logging capabilities», folio impreso 36
+  (página 44 del PDF), el primer párrafo del apartado.
+- **Lo impreso:** «Part A of the PVEM shall be placed on a shaker and be
+  exited 2 times for at least 300 s each.»
+- **El problema:** «exited» (salido) donde el sentido es «excited» (excitado):
+  la parte A se coloca en un excitador para hacerla vibrar dos veces, una a
+  cada extremo de la pasada de 12 h, y el párrafo siguiente, en el folio
+  impreso 37, cuenta las 600 muestras registradas que «correspond to the
+  vibration magnitude», que son esas dos excitaciones de 300 s a una muestra
+  por segundo. Tal como está impreso, el verbo dice que la parte sale dos veces
+  del excitador.
+- **Evidencia:** página 44 del PDF (p. impresa 36) de ISO 8041-2:2021(E), y
+  página 45 del PDF (p. impresa 37) para las 600 muestras.
+- **Consecuencia:** ninguna para las tablas de la propia norma.
+- **Comportamiento de la biblioteca:** no le afecta. El ensayo de registro de
+  12 h del 12.22 es un ensayo sobre un medidor físico y no está implementado.
+- **Estado:** sin notificar (tipográfico, sin consecuencia numérica).
 
 ## DIN 45669-1:2010-09, Tabla 9 (una fila de velocidad de pico que contradice la fórmula (5), y la fila KB_F que tiene al lado)
 

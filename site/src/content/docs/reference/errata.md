@@ -5270,8 +5270,9 @@ in the same order.
 ## ISO 8041-2:2021, clause 12.7 (time weightings graded against a row Table 2 no longer prints)
 
 - **Location:** clause 12.7, printed folio 26 (PDF page 34), the third
-  paragraph on that folio; read against Table 2 on printed folio 8 and
-  clause 5.13 on printed folio 15.
+  paragraph on that folio; read against Table 2 on printed folio 8, clause
+  5.13 on printed folio 15, clause 5.1.2 on printed folio 6 and Table 8 on
+  printed folios 13 and 14.
 - **The print:** "For an instrument where time weightings are provided, a
   steady sinusoidal electrical signal shall be applied to the electrical input
   facility at the reference frequency. [...] With the same input signal, the
@@ -5291,14 +5292,22 @@ in the same order.
   decay rates". Part 2 dropped the row, since its 5.13 declares the running
   r.m.s. not applicable, and kept the paragraph that grades it, so the
   paragraph now sends the reader to a table in which no row states a limit for
-  a time-weighted indication. For a PVEM that provides no time weighting the
-  paragraph is empty; for one that provides them anyway, the document does not
-  say what they are held to.
-- **Evidence:** the three printed passages against each other, and against
-  ISO 8041-1:2017 12.7 and its Table 2, which print the running r.m.s. row
-  this paragraph was written for. Verified on PDF pages 16, 23 and 34
-  (printed pp. 8, 15 and 26) of ISO 8041-2:2021(E), and on PDF pages 20, 28
-  and 38 (printed pp. 12, 20 and 30) of ISO 8041-1:2017(E) for the Part 1
+  a time-weighted indication. And the document itself lets a PVEM carry one:
+  its 5.1.2 (printed folio 6) allows a whole-body PVEM to "optionally, measure
+  exposure characteristics based on maximum transient vibration value (MTVV)",
+  which ISO 8041-1:2017 3.1.2.4, adopted by clause 3, defines as the "maximum
+  value of the running r.m.s. vibration acceleration value when the
+  integration time is equal to 1 s", and its Table 8 (printed folios 13 and
+  14) grades the "MTVV linear" and "MTVV exponential" of that running r.m.s.
+  in the burst. For a PVEM that provides no time weighting the paragraph is
+  empty; for one that reports the MTVV, the document does not say what limit
+  the indication on each time weighting is held to.
+- **Evidence:** the three printed passages against each other, against 5.1.2
+  and Table 8, and against ISO 8041-1:2017 12.7 and its Table 2, which print
+  the running r.m.s. row this paragraph was written for. Verified on PDF
+  pages 14, 16, 21, 22, 23 and 34 (printed pp. 6, 8, 13, 14, 15 and 26) of
+  ISO 8041-2:2021(E), and on PDF pages 13, 20, 28 and 38 (printed pp. 5, 12,
+  20 and 30) of ISO 8041-1:2017(E) for the definition of the MTVV, the Part 1
   Table 2, the title of its Table 10 and its 12.7.
 - **Consequence for the standard's own tables:** none. The defect is a
   cross-reference that outlived its row.
@@ -5309,6 +5318,25 @@ in the same order.
   `RUNNING_RMS_CONSISTENCY_TOLERANCE_PERCENT`, documented as Part 1 only. The
   conformance row "ISO 8041-2:2021 Table 2" records the two rows.
 - **Status:** unreported.
+
+## ISO 8041-2:2021, clause 12.22 ("exited" for "excited")
+
+- **Location:** clause 12.22, "Logging capabilities", printed folio 36 (PDF
+  page 44), the first paragraph of the clause.
+- **The print:** "Part A of the PVEM shall be placed on a shaker and be exited
+  2 times for at least 300 s each."
+- **The problem:** "exited" where the sense is "excited": the part is put on a
+  shaker to be vibrated twice, once at each end of the 12 h run, and the
+  paragraph that follows on printed folio 37 counts the 600 logged samples
+  that "correspond to the vibration magnitude", which is those two 300 s
+  excitations at one sample per second. As printed, the verb says the part
+  leaves the shaker twice.
+- **Evidence:** PDF page 44 (printed p. 36) of ISO 8041-2:2021(E), and PDF
+  page 45 (printed p. 37) for the 600 samples.
+- **Consequence for the standard's own tables:** none.
+- **Library behaviour:** unaffected. The 12 h logging test of 12.22 is a test
+  on a physical meter and is not implemented.
+- **Status:** unreported (typographic, no numerical consequence).
 
 ## DIN 45669-1:2010-09, Table 9 (a peak-velocity row that contradicts Formula (5), and the KB_F row beside it)
 

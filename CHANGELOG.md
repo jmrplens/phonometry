@@ -245,10 +245,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   report has a section for Part 2: the library reproduces every printed cell
   of Tables 7 to 9 inside the Part 2 tolerance, each table matches Part 1's,
   and the Table 2 and uncertainty rows are checked against the page. The
-  human-vibration meter guide has a section on the PVEM, and two defects in
-  Part 2 12.7 are registered: the `Wf` weighting-factor pointer of Part 1,
+  human-vibration meter guide has a section on the PVEM, and three defects in
+  Part 2 are registered: in 12.7, the `Wf` weighting-factor pointer of Part 1,
   carried over, and a paragraph that grades time weightings against a Table 2
-  row Part 2 no longer prints.
+  row Part 2 no longer prints; in 12.22, "exited" printed for "excited".
 - **The ISO 1683 reference values, published once and read by every level.**
   `metrology.ISO1683_REFERENCE_VALUES` holds ISO 1683:2015 Tables 1 to 3,
   the reference values for sound in gases, sound in liquids and vibration,

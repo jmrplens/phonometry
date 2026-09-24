@@ -1448,9 +1448,12 @@ de cuerpo entero de baja frecuencia, y un 3 % entre una indicación ponderada en
 frecuencia y la limitada en banda multiplicada por el factor de ponderación.
 La tercera fila, el 2 % entre el valor eficaz móvil y el promedio lineal, ha
 desaparecido, porque el apartado 5.13 de la parte 2 dice entero «Not
-applicable for PVEM». La parte 2 no le pide a un medidor personal ningún valor
-eficaz móvil, así que los tiempos de decaimiento de la sección 9 tampoco
-tienen equivalente en ella. `PVEM_INDICATION_TOLERANCES_PERCENT` es esa tabla,
+applicable for PVEM». Tampoco imprime la parte 2 una tabla de tiempos de
+decaimiento, así que la sección 9 no tiene equivalente en ella. Eso no saca
+del todo el valor eficaz móvil del instrumento: el 5.1.2 sigue dejando que un
+PVEM de cuerpo entero dé el MTVV, el mayor valor que alcanza su valor eficaz
+móvil, y la Tabla 8 califica ese MTVV en la ráfaga igual que la sección 10.
+`PVEM_INDICATION_TOLERANCES_PERCENT` es esa tabla,
 de modo que una comprobación que la recorra califica un PVEM con lo que
 imprime la parte 2 y con nada más:
 

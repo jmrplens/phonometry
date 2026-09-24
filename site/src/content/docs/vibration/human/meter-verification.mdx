@@ -1396,8 +1396,11 @@ reference frequency, 5 % for low-frequency whole-body vibration, and 3 %
 between a frequency-weighted indication and the band-limited one times the
 weighting factor. The third row, the 2 % between the running r.m.s. and the
 linear average, is gone, because Part 2 5.13 reads in full "Not applicable for
-PVEM". Part 2 does not ask a personal meter for a running r.m.s. at all, so the
-decay times of section 9 have no counterpart in it either.
+PVEM". Nor does Part 2 print a decay-time table, so section 9 has no
+counterpart in it. The running r.m.s. does not leave the instrument
+altogether, though: 5.1.2 still lets a whole-body PVEM report the MTVV, the
+largest value its running r.m.s. reaches, and Table 8 grades that MTVV in
+the burst exactly as section 10 does.
 `PVEM_INDICATION_TOLERANCES_PERCENT` is that table, so a check that walks it
 grades a PVEM on what Part 2 prints and on nothing else:
 

@@ -19,7 +19,7 @@
 
 ## Numerical conformance report
 
-**1387/1387 conformance checks pass** across 94 domains and 473 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+**1395/1395 conformance checks pass** across 95 domains and 474 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub><b>&#916;</b> is the difference between the computed value and the one the standard publishes. <b>Used</b> is how much of that clause's published tolerance the difference consumes: 100 % means it sits exactly on the limit, 5 % means it uses a twentieth of the allowance, and a dash means the clause states no two-sided tolerance for the quantity, so there is no budget to spend. It is reported and never used to decide a verdict, which is settled at full precision before any rounding.</sub>
 
@@ -1836,6 +1836,22 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | Long, Architectural Acoustics 2e, Eq. (18.21) | Omnidirectional mic at Zs = -6 dB: L(H-M) <= L(H-L) - 4 dB | 76 dB (+/-0 dB) | 76 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 | Long, Architectural Acoustics 2e, Eq. (18.22) | Cardioid mic (DM = -2 dB) at Zs = -6 dB: L(H-M) <= L(H-L) - 2 dB | 78 dB (+/-0 dB) | 78 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 | Long, Architectural Acoustics 2e, Eq. (18.23) | Number-of-open-microphones correction 10 lg Nm at Nm = 4 | 6.0206 dB (+/-0 dB) | 6.0206 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+
+</details>
+
+<details>
+<summary><b>Random-incidence and diffuse-field sensitivity (IEC 61183)</b>: 100% (8/8)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
+|:---|:---|:---|:---|:---|:---:|:---:|
+| IEC 61183:1994 Formulas (A.1), (A.2), Table A.1 | Adjustment factors K(phi) of all 36 angles, 10° steps in two planes | 36/36 angles of Table A.1 | 36/36 angles of Table A.1 | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61183:1994 A.6 NOTE 2, Table A.1 | Four planes at 45° take half the factors of Table A.1 | 36/36 halved factors of Table A.1 | 36/36 halved factors of Table A.1 | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61183:1994 A.1.7 | Largest of the 70 elements of 10° steps in two planes, about 2,2 % of the sphere | 2.2 % (+/-0.05 %) | 2.179 % | -0.021 % | 42 % | ![Pass][cv-pass] Pass |
+| IEC 61183:1994 Formula (A.3), Table A.1 | The 72 factors of two planes sum to one with the poles in both sums | 1 (+/-0) | 1 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61183:1994 Formulas (A.3), (1) | An omnidirectional instrument has 10 lg gamma = 0 dB, so G_RI = G_F | 0 dB (+/-0 dB) | 0 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61183:1994 note to A.1.8 | Directions of the 38 equal-area elements, to the 0,1° printed | 18/18 printed angles other than 77,9° and 282,1° | 18/18 printed angles other than 77,9° and 282,1° | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61183:1994 note to A.1.8, Formula (A.5) | Each of the 38 equal-area elements is 2,6 % of the sphere | 2.6 % (+/-0.05 %) | 2.632 % | 0.032 % | 64 % | ![Pass][cv-pass] Pass |
+| IEC 61183:1994 Formulas (10), (11), Table B.1 | Reference corrections of an LS2aP/LS2F microphone, 25 Hz to 20 kHz | 30/30 printed cells of Table B.1 | 30/30 printed cells of Table B.1 | exact | 0 % | ![Pass][cv-pass] Pass |
 
 </details>
 

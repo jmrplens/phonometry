@@ -3,13 +3,13 @@
   "library": "4.0.0rc1",
   "generator": "scripts/conformance_report.py",
   "counts": {
-    "checks": 1387,
-    "passing": 1387,
+    "checks": 1395,
+    "passing": 1395,
     "failing": 0,
-    "domains": 94,
-    "standards": 473,
-    "citations": 952,
-    "designations": 192,
+    "domains": 95,
+    "standards": 474,
+    "citations": 960,
+    "designations": 193,
     "sources": 114
   },
   "units": [
@@ -587,6 +587,12 @@
       "title": "Electroacoustics",
       "checks": 9,
       "passing": 9
+    },
+    {
+      "id": "random-incidence-and-diffuse-field-sensitivity-iec-61183",
+      "title": "Random-incidence and diffuse-field sensitivity (IEC 61183)",
+      "checks": 8,
+      "passing": 8
     },
     {
       "id": "industrial-noise-control",
@@ -37251,6 +37257,273 @@
         "value": 0.0
       },
       "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "random-incidence-and-diffuse-field-sensitivity-iec-61183/iec-61183-1994-formulas-a-1-a-2-table-a-1/adjustment-factors-k-phi-of-all-36-angles-10-steps-in-two-planes",
+      "domain": "random-incidence-and-diffuse-field-sensitivity-iec-61183",
+      "reference": {
+        "cite": "IEC 61183:1994 Formulas (A.1), (A.2), Table A.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61183",
+            "edition": "1994",
+            "clause": "Formulas (A.1), (A.2), Table A.1"
+          }
+        ]
+      },
+      "quantity": "Adjustment factors K(phi) of all 36 angles, 10° steps in two planes",
+      "kind": "count",
+      "expected": {
+        "value": 36.0,
+        "label": "36/36 angles of Table A.1"
+      },
+      "computed": {
+        "value": 36.0,
+        "label": "36/36 angles of Table A.1"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "random-incidence-and-diffuse-field-sensitivity-iec-61183/iec-61183-1994-a-6-note-2-table-a-1/four-planes-at-45-take-half-the-factors-of-table-a-1",
+      "domain": "random-incidence-and-diffuse-field-sensitivity-iec-61183",
+      "reference": {
+        "cite": "IEC 61183:1994 A.6 NOTE 2, Table A.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61183",
+            "edition": "1994",
+            "clause": "A.6 NOTE 2, Table A.1"
+          }
+        ]
+      },
+      "quantity": "Four planes at 45° take half the factors of Table A.1",
+      "kind": "count",
+      "expected": {
+        "value": 36.0,
+        "label": "36/36 halved factors of Table A.1"
+      },
+      "computed": {
+        "value": 36.0,
+        "label": "36/36 halved factors of Table A.1"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "random-incidence-and-diffuse-field-sensitivity-iec-61183/iec-61183-1994-a-1-7/largest-of-the-70-elements-of-10-steps-in-two-planes-about-2-2-of-the-sphere",
+      "domain": "random-incidence-and-diffuse-field-sensitivity-iec-61183",
+      "reference": {
+        "cite": "IEC 61183:1994 A.1.7",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61183",
+            "edition": "1994",
+            "clause": "A.1.7"
+          }
+        ]
+      },
+      "quantity": "Largest of the 70 elements of 10° steps in two planes, about 2,2 % of the sphere",
+      "kind": "scalar",
+      "expected": {
+        "value": 2.2
+      },
+      "computed": {
+        "value": 2.179
+      },
+      "unit": "%",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.05
+      },
+      "deviation": {
+        "value": -0.021
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "random-incidence-and-diffuse-field-sensitivity-iec-61183/iec-61183-1994-formula-a-3-table-a-1/the-72-factors-of-two-planes-sum-to-one-with-the-poles-in-both-sums",
+      "domain": "random-incidence-and-diffuse-field-sensitivity-iec-61183",
+      "reference": {
+        "cite": "IEC 61183:1994 Formula (A.3), Table A.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61183",
+            "edition": "1994",
+            "clause": "Formula (A.3), Table A.1"
+          }
+        ]
+      },
+      "quantity": "The 72 factors of two planes sum to one with the poles in both sums",
+      "kind": "scalar",
+      "expected": {
+        "value": 1.0
+      },
+      "computed": {
+        "value": 1.0
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": -1.11e-16
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "random-incidence-and-diffuse-field-sensitivity-iec-61183/iec-61183-1994-formulas-a-3-1/an-omnidirectional-instrument-has-10-lg-gamma-0-db-so-g-ri-g-f",
+      "domain": "random-incidence-and-diffuse-field-sensitivity-iec-61183",
+      "reference": {
+        "cite": "IEC 61183:1994 Formulas (A.3), (1)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61183",
+            "edition": "1994",
+            "clause": "Formulas (A.3), (1)"
+          }
+        ]
+      },
+      "quantity": "An omnidirectional instrument has 10 lg gamma = 0 dB, so G_RI = G_F",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0
+      },
+      "computed": {
+        "value": 0.0
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "random-incidence-and-diffuse-field-sensitivity-iec-61183/iec-61183-1994-note-to-a-1-8/directions-of-the-38-equal-area-elements-to-the-0-1-printed",
+      "domain": "random-incidence-and-diffuse-field-sensitivity-iec-61183",
+      "reference": {
+        "cite": "IEC 61183:1994 note to A.1.8",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61183",
+            "edition": "1994",
+            "clause": "note to A.1.8"
+          }
+        ]
+      },
+      "quantity": "Directions of the 38 equal-area elements, to the 0,1° printed",
+      "kind": "count",
+      "expected": {
+        "value": 18.0,
+        "label": "18/18 printed angles other than 77,9° and 282,1°"
+      },
+      "computed": {
+        "value": 18.0,
+        "label": "18/18 printed angles other than 77,9° and 282,1°"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "random-incidence-and-diffuse-field-sensitivity-iec-61183/iec-61183-1994-note-to-a-1-8-formula-a-5/each-of-the-38-equal-area-elements-is-2-6-of-the-sphere",
+      "domain": "random-incidence-and-diffuse-field-sensitivity-iec-61183",
+      "reference": {
+        "cite": "IEC 61183:1994 note to A.1.8, Formula (A.5)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61183",
+            "edition": "1994",
+            "clause": "note to A.1.8, Formula (A.5)"
+          }
+        ]
+      },
+      "quantity": "Each of the 38 equal-area elements is 2,6 % of the sphere",
+      "kind": "scalar",
+      "expected": {
+        "value": 2.6
+      },
+      "computed": {
+        "value": 2.632
+      },
+      "unit": "%",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.05
+      },
+      "deviation": {
+        "value": 0.032
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "random-incidence-and-diffuse-field-sensitivity-iec-61183/iec-61183-1994-formulas-10-11-table-b-1/reference-corrections-of-an-ls2ap-ls2f-microphone-25-hz-to-20-khz",
+      "domain": "random-incidence-and-diffuse-field-sensitivity-iec-61183",
+      "reference": {
+        "cite": "IEC 61183:1994 Formulas (10), (11), Table B.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61183",
+            "edition": "1994",
+            "clause": "Formulas (10), (11), Table B.1"
+          }
+        ]
+      },
+      "quantity": "Reference corrections of an LS2aP/LS2F microphone, 25 Hz to 20 kHz",
+      "kind": "count",
+      "expected": {
+        "value": 30.0,
+        "label": "30/30 printed cells of Table B.1"
+      },
+      "computed": {
+        "value": 30.0,
+        "label": "30/30 printed cells of Table B.1"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
       "verdict": "pass"
     },
     {

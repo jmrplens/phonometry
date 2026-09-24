@@ -6828,13 +6828,16 @@ dos ediciones con las mismas entradas y en el mismo orden.
   los turismos, 0,0680 para los pesados de dos ejes y 0,0421 para los de más
   de dos ejes (de 0,0518 a 0,0550, de 0,0659 a 0,0700 y de 0,0408 a 0,0435
   dentro del redondeo de los tres datos impresos). Los pesados de dos ejes
-  tienen por tanto la dispersión de velocidad más ancha de las tres, y
-  cualquier conversión a km/h que escale con la velocidad media y crezca con
-  esa dispersión los mantiene como los más anchos. Las desviaciones típicas
-  impresas divididas por las medias impresas dan 0,150 para los turismos,
-  0,099 para los pesados de dos ejes y 0,087 para los de más de dos ejes, con
-  los turismos como los más anchos: ninguna conversión única da las dos
-  ordenaciones. A primer orden, $s_v \approx \bar v \ln 10 \, s_{\lg v}$ da
+  tienen por tanto la dispersión de $\lg v$ más ancha de las tres. El
+  cociente entre la desviación típica de la velocidad y su media depende sólo
+  de esa dispersión: a primer orden es $\ln 10 \, s_{\lg v}$, que da 0,123
+  para los turismos, 0,157 para los pesados de dos ejes y 0,097 para los de
+  más de dos ejes, y para una velocidad lognormal es
+  $\sqrt{\exp[(\ln 10 \, s_{\lg v})^2] - 1}$, que da 0,123, 0,158 y 0,097,
+  con los pesados de dos ejes como los más anchos en los dos casos. Las
+  desviaciones típicas impresas divididas por las medias impresas dan 0,150,
+  0,099 y 0,087, con los turismos como los más anchos, así que las dos columnas
+  no pueden salir de las mismas pasadas. A primer orden, $s_v \approx \bar v \ln 10 \, s_{\lg v}$ da
   10,9, 11,9 y 7,2 km/h donde se imprimen 13,3, 7,5 y 6,4 km/h.
 - **Evidencia:** las demás columnas de la misma tabla concuerdan entre sí. La
   recta en la velocidad media da el nivel medio impreso a su lado

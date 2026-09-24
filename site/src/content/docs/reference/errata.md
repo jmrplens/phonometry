@@ -6441,12 +6441,16 @@ in the same order.
   $s_{\lg v} = r\,s_L/b$ = 0,0534 for the cars, 0,0680 for the dual-axle and
   0,0421 for the multi-axle heavy vehicles (0,0518 to 0,0550, 0,0659 to 0,0700
   and 0,0408 to 0,0435 across the rounding of the three printed inputs). The
-  dual-axle vehicles therefore have the widest spread of speed of the three,
-  and any conversion to km/h that scales with the mean speed and grows with
-  that spread keeps them the widest. The printed standard deviations divided
-  by the printed means give 0,150 for the cars, 0,099 for the dual-axle and
-  0,087 for the multi-axle vehicles, with the cars the widest: no single
-  conversion yields both orderings. To first order,
+  dual-axle vehicles therefore have the widest spread of $\lg v$ of the
+  three. The ratio of the standard deviation of the speed to its mean depends
+  on that spread alone: to first order it is $\ln 10 \, s_{\lg v}$, which
+  gives 0,123 for the cars, 0,157 for the dual-axle and 0,097 for the
+  multi-axle vehicles, and for a log-normal speed it is
+  $\sqrt{\exp[(\ln 10 \, s_{\lg v})^2] - 1}$, which gives 0,123, 0,158 and
+  0,097, with the dual-axle vehicles the widest either way. The printed
+  standard deviations divided by the printed means give 0,150, 0,099 and
+  0,087, with the cars the widest, so the two columns cannot come from the
+  same pass-bys. To first order,
   $s_v \approx \bar v \ln 10 \, s_{\lg v}$ gives 10,9, 11,9 and 7,2 km/h where
   13,3, 7,5 and 6,4 km/h are printed.
 - **Evidence:** the other columns of the same table agree with one another.

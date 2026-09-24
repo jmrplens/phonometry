@@ -1,8 +1,8 @@
 # phonometry
 
-> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1387 numerical conformance checks against 473 standards enforced in CI.
+> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1395 numerical conformance checks against 474 standards enforced in CI.
 
-phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1387 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 94 domains.
+phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1395 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 95 domains.
 
 The project was published as **PyOctaveBand** until version 3.0.0. Third-party references and dependency pins still using that name refer to this library.
 
@@ -87,6 +87,7 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 - [Measurement uncertainty (GUM and Monte Carlo)](https://jmrplens.github.io/phonometry/signals/metrology/gum-uncertainty/)
 - [Compliance and verification](https://jmrplens.github.io/phonometry/signals/metrology/compliance-verification/)
 - [Data qualification: stationarity, level crossings and peaks (Bendat & Piersol)](https://jmrplens.github.io/phonometry/signals/metrology/data-qualification/)
+- [Random-incidence and diffuse-field response (IEC 61183)](https://jmrplens.github.io/phonometry/signals/metrology/random-incidence/)
 
 ## The medium
 
@@ -570,6 +571,7 @@ The generated API reference, one page per module. Fetch these only when a specif
 - [metrology/calibration](https://jmrplens.github.io/phonometry/reference/api/metrology/calibration/)
 - [metrology/conformance](https://jmrplens.github.io/phonometry/reference/api/metrology/conformance/)
 - [metrology/data-qualification](https://jmrplens.github.io/phonometry/reference/api/metrology/data-qualification/)
+- [metrology/random-incidence](https://jmrplens.github.io/phonometry/reference/api/metrology/random-incidence/)
 - [metrology/reference-values](https://jmrplens.github.io/phonometry/reference/api/metrology/reference-values/)
 - [metrology/sound-calibrator](https://jmrplens.github.io/phonometry/reference/api/metrology/sound-calibrator/)
 - [metrology/uncertainty](https://jmrplens.github.io/phonometry/reference/api/metrology/uncertainty/)
@@ -43725,6 +43727,20 @@ documents, one page per module.
 | `FIELD_IMMUNITY_MAX_UNCERTAINTY_DB` | `mapping` | **IEC 60942:2017 A.7.4.8, that level change** [dB, 95 %]: 0.05 for every class, the field measurement excluded | `metrology.FIELD_IMMUNITY_MAX_UNCERTAINTY_DB['LS']  # 0.05` |
 | `ABBREVIATED_LEVEL_REDUCTIONS_DB` | `mapping` | **IEC 60942:2017 A.6.4.7, reduction of the Table 5 limits in the abbreviated test** [dB]: LS 0.05, 1 0.05, 2 0.10 | `metrology.ABBREVIATED_LEVEL_REDUCTIONS_DB['2']  # 0.1` |
 | `ABBREVIATED_FREQUENCY_ACCEPTANCE_LIMITS_PERCENT` | `mapping` | **IEC 60942:2017 A.6.4.7, frequency limits of the abbreviated test** [%]: LS 0.5, 1 0.5, 2 1.3 | `metrology.ABBREVIATED_FREQUENCY_ACCEPTANCE_LIMITS_PERCENT['2']  # 1.3` |
+| `adjustment_factors` | `function` | **Adjustment factors K(φ) of one plane of readings (IEC 61183:1994 Formulas (6), (7), (A.1), (A.2)).**<br>• `step_deg`: the angular step Δφ [°], dividing 180° into at least two steps<br>• `planes`: the number of planes n, Δα = 180°/n (Default: 2, the X-Y and X-Z planes of Annex A; 4 halves every factor, NOTE 2 of A.6; 1 doubles it, Formula (A.4))<br>• the 360/Δφ factors from 0°, read-only; with the poles in every plane's sum they add up to 1<br>• warns `SphereDivisionWarning` above the 3 % of A.1.6 | `metrology.adjustment_factors(10.0)[[0, 1, 9]].round(5)`<br><br>• `[0.00095 0.00378 0.02179]`, Table A.1 |
+| `largest_element_fraction` | `function` | **The largest element a set of incidence angles divides the sphere into (IEC 61183 A.1.6, A.1.7).**<br>• `step_deg` [°], `planes` (Default: 2)<br>• the ring element nearest 90° or the polar cap, whichever is larger; one plane is judged on the two-plane division it stands for | `metrology.largest_element_fraction(10.0)  # 0.02179, the 2,2 % of A.1.7` |
+| `SphereDivisionWarning` | `warning class` | **The angular step leaves an element larger than 3 % of the sphere.**<br>Emitted by `adjustment_factors`, `directivity_factor` and `axisymmetric_directivity_factor` (IEC 61183 A.1.6) | `warnings.simplefilter('error', metrology.SphereDivisionWarning)` |
+| `directivity_factor` | `function` | **Directivity factor from readings in two or more planes (IEC 61183 Formula (A.3)).**<br>• `levels_db`: L(φ) [dB], one row per plane, each at φ = 0, Δφ, …, 360° − Δφ: `(2, 36)` for Annex A<br>• `reference_level_db`: L_rd [dB] (Default: None → the first plane's reading at 0°)<br>• the readings at 0° and 180° enter every plane's sum, so an omnidirectional meter reads γ = 1; counted once, 10 lg γ would come out 0,008 dB high for that meter and more for a directional one | `d = metrology.directivity_factor(levels)`<br><br>• `DirectivityFactor`; `d.directivity_index_db` |
+| `axisymmetric_directivity_factor` | `function` | **Directivity factor of a rotationally symmetric meter from one plane (IEC 61183 Formula (A.4)).**<br>• `levels_db`: L(φ, h) [dB], 1-D, at φ = 0, Δφ, …<br>• `reference_level_db` [dB] (Default: None → the reading at 0°) | `metrology.axisymmetric_directivity_factor(levels[0])`<br><br>• `DirectivityFactor` |
+| `equal_area_directivity_factor` | `function` | **Directivity factor from 38 equal-area elements (IEC 61183 Formula (A.5)).**<br>• `horizontal_levels_db`: 20 readings [dB] at the directions of `equal_area_incidence_angles`<br>• `vertical_levels_db`: 18 readings [dB], the same without the poles<br>• `reference_level_db` [dB] (Default: None → the horizontal reading at 0°) | `metrology.equal_area_directivity_factor(h_db, v_db)`<br><br>• `DirectivityFactor`, every weight 1/38 |
+| `equal_area_incidence_angles` | `function` | **The 38 directions of the equal-area division (IEC 61183, note to A.1.8).**<br>• each direction halves its element's area in polar angle: φk = arccos[1 − (4k − 1)/19]<br>• returns (horizontal, vertical) [°], 20 and 18, read-only<br>• the note prints 77,9° and 282,1° where this gives 77,85° and 282,15° (errata) | `h, v = metrology.equal_area_incidence_angles()`<br>`h[4].round(1)  # 77.8` |
+| `DirectivityFactor` | `dataclass` | **The directivity factor of a meter at one frequency.**<br>• `incidence_angles_deg`, `plane_angles_deg` [°], `levels_db` [dB], `weights`: one entry per reading, read-only<br>• `reference_level_db` [dB], `gamma`, `largest_element_fraction`, `formula` ('A.3' / 'A.4' / 'A.5'), each checked when built<br>• `.directivity_index_db` = 10 lg γ [dB], `.relative_levels_db` [dB]<br>• `.plot(view=)`: 'response' (polar, one curve per plane) / 'weights' | `d.gamma, d.directivity_index_db` |
+| `random_incidence_sensitivity` | `function` | **Random-incidence sensitivity level, band by band (IEC 61183 Formulas (1), (A.6)).**<br>• `frequencies_hz` [Hz], increasing<br>• `free_field_level_db`: G_F = L_rd − L_o [dB]<br>• `directivity_index_db`: 10 lg γ [dB]; either may be one value for every band<br>• G_RI = G_F − 10 lg γ | `r = metrology.random_incidence_sensitivity([1000, 8000], 0.0, [0.05, 2.45])`<br><br>• `RandomIncidenceSensitivity` |
+| `RandomIncidenceSensitivity` | `dataclass` | **G_F, 10 lg γ and G_RI at each frequency.**<br>• `frequencies_hz` [Hz], `free_field_level_db`, `directivity_index_db`, `random_incidence_level_db` [dB], read-only<br>• `.correction_db` = G_RI − G_F [dB]<br>• `.plot(view=)`: 'levels' / 'correction' | `r.correction_db  # [-0.05 -2.45]` |
+| `diffuse_field_sensitivity` | `function` | **Diffuse-field sensitivity level by comparison with a reference meter (IEC 61183 Formulas (8) to (11)).**<br>• `frequencies_hz` [Hz]; `indicated_level_db` L_D and `reference_indicated_level_db` L_D,ref [dB]<br>• exactly one of `reference_random_incidence_level_db` (9), `reference_free_field_level_db` (10) or `reference_pressure_level_db` (11) [dB]<br>• `reference_directivity_index_db` with (10), `reference_diffuse_pressure_difference_db` with (11) [dB] (Default: None → `IEC61183_TABLE_B1` at each preferred frequency) | `metrology.diffuse_field_sensitivity(f, l_d, l_ref, reference_pressure_level_db=0.0)`<br><br>• `DiffuseFieldSensitivity` |
+| `DiffuseFieldSensitivity` | `dataclass` | **The comparison of IEC 61183 clause 5, route by route.**<br>• `frequencies_hz` [Hz], `indicated_level_db`, `reference_indicated_level_db`, `reference_sensitivity_level_db`, `reference_correction_db` [dB], `route` ('random_incidence' / 'free_field' / 'pressure')<br>• `.level_difference_db` ΔG_D, `.reference_diffuse_field_level_db` G_D,ref, `.diffuse_field_level_db` G_D [dB]<br>• `.plot()`: the three against frequency | `dd.diffuse_field_level_db` |
+| `IEC61183_TABLE_B1` | `mapping` | **IEC 61183:1994 Table B.1, the type LS2aP/LS2F microphone, keyed by preferred frequency [Hz].**<br>• 25 Hz to 20 kHz; the row printed "25 to 800" at each preferred frequency it covers<br>• each value a `ReferenceMicrophoneRow`; rounded to 0,05 dB by the table | `metrology.IEC61183_TABLE_B1[8000.0].directivity_index_db  # 2.45` |
+| `ReferenceMicrophoneRow` | `dataclass` | **One row of Table B.1.**<br>• `directivity_index_db`: 10 lg γ_ref [dB]<br>• `diffuse_pressure_difference_db`: Δ_DP, diffuse-field less pressure sensitivity level [dB] | `metrology.IEC61183_TABLE_B1[16000.0].diffuse_pressure_difference_db  # 3.05` |
 | `combine_uncertainty` | `function` | **GUM law of propagation of uncertainty (ISO/IEC Guide 98-3 clause 5).**<br>• `model`: measurement function f(x1…xN)<br>• `quantities`: input `Quantity` objects, in argument order<br>• `correlation`: optional N×N matrix r_ij (Default: None → uncorrelated; non-identity with finite input dof → effective dof undefined, `expanded()` needs `coverage_factor_override`) | `u = metrology.combine_uncertainty(lambda a, b: a*b, [metrology.Quantity(10.0, 0.1), metrology.Quantity(5.0, 0.2)])`<br><br>• `UncertaintyResult`; uc = 2.062 |
 | `monte_carlo` | `function` | **Monte Carlo propagation (Guide 98-3-1, Supplement 1).**<br>• `model`: vectorised f(x1…xN)<br>• `quantities`: input `Quantity` objects<br>• `trials`: M ≥ 2 (Default: 1000000; fixed, no adaptive 7.9)<br>• `coverage`: interval probability (Default: 0.95)<br>• `seed`: reproducibility (Default: None)<br>• inputs sampled independently (no 6.4.8 multivariate path) | `mc = metrology.monte_carlo(model, quantities, seed=1)`<br><br>• `MonteCarloResult` (mean, u, coverage interval) |
 | `rectangular` | `function` | **Type B quantity, rectangular PDF (GUM 4.3.7).**<br>• `value`, `half_width` a, `name` | `rectangular(20.0, 0.5)`<br><br>• `Quantity` with u = a/√3 = 0.289 |
@@ -44142,7 +44158,7 @@ documents, one page per module.
 | `TonalityWarning` | `warning class` | **Tonality advisory.**<br>Emitted for biased tonality estimates (e.g. coarse FFT resolution) | `warnings.simplefilter('error', TonalityWarning)` |
 | `STIWarning` | `warning class` | **STI/STIPA advisory.**<br>Emitted for suspect speech-intelligibility measurements or inputs | `warnings.simplefilter('error', STIWarning)` |
 | `__version__` | `str` | **Package version string.**<br>(no parameters) | `phonometry.__version__  # '4.0.0rc1'` |
-| `.plot()` | `method` | **One-line canonical figure on every result object (soft matplotlib dependency).**<br>Available on `ZwickerLoudness`, `MooreGlasbergLoudness`, `MooreGlasbergTimeVaryingLoudness`, `EcmaLoudness`, `EcmaTonality`, `EcmaRoughness`, `PsychoacousticAnnoyanceResult`, `FluctuationStrengthResult`, `ProgramLoudnessResult`, `KWeightingResponse`, `STIResult`, `SIIResult`, `SIIProcedure`, `StandardSpeechSpectrum`, `NCResult`, `RCResult`, `AgeThresholdResult`, `NiptsResult`, `HtlanResult`, `ImpulseProminenceResult`, `ImpulsiveSoundResult`, `SelDistribution`, `MultipleShockResult`, `ImpulseResponseResult`, `DecayCurve`, `RoomAcousticsResult`, `ReverberationResult`, `ReverberationModelResult`, `DynamicStiffnessResult`, `MobilityResult`, `TransferStiffnessResult`, `BandAveragedStiffness`, `LevelDifferenceCheck`, `OutputMassCheck`, `EffectiveBlockingMass`, `DrivingPointStiffnessResult`, `DrivingPointUncertainty`, `VibrationSoundPowerResult`, `StructureBornePowerResult`, `InstalledSourceResult`, `WeightedRatingResult`, `ImpactRatingResult`, `FacadeInsulationResult`, `LabAirborneInsulationResult`, `LabImpactInsulationResult`, `SoundPowerResult`, `SoundEnergyResult`, `ReverberationSoundPowerResult`, `ReverberationSoundEnergyResult`, `InSituSoundPowerResult`, `InDuctSoundPowerResult`, `HighFrequencySoundPowerResult`, `SoundPowerIntensityResult`, `DiscretePointIntensityResult`, `PrecisionSoundPowerResult`, `PrecisionIntensityResult`, `IntensityResult`, `UncertaintyResult`, `AbsorptionRatingResult`, `ScatteringResult`, `DiffusionResult`, `DiffusionSpectrum`, `InsituAbsorptionResult`, `WeightingResponse`, `WeightedSpectrum`, `Signal` and `DailyVibrationExposure`.<br>• `ax`: existing Axes, or None to build a fresh figure (Default: None)<br>• returns the Matplotlib `Axes` (an array of Axes for multi-panel figures); never calls `plt.show()`<br>• needs matplotlib (`pip install phonometry[plot]`) | `res.plot()`<br>`decay_curve(ir, fs).plot()` |
+| `.plot()` | `method` | **One-line canonical figure on every result object (soft matplotlib dependency).**<br>Available on `ZwickerLoudness`, `MooreGlasbergLoudness`, `MooreGlasbergTimeVaryingLoudness`, `EcmaLoudness`, `EcmaTonality`, `EcmaRoughness`, `PsychoacousticAnnoyanceResult`, `FluctuationStrengthResult`, `ProgramLoudnessResult`, `KWeightingResponse`, `STIResult`, `SIIResult`, `SIIProcedure`, `StandardSpeechSpectrum`, `NCResult`, `RCResult`, `AgeThresholdResult`, `NiptsResult`, `HtlanResult`, `ImpulseProminenceResult`, `ImpulsiveSoundResult`, `SelDistribution`, `DirectivityFactor`, `RandomIncidenceSensitivity`, `DiffuseFieldSensitivity`, `MultipleShockResult`, `ImpulseResponseResult`, `DecayCurve`, `RoomAcousticsResult`, `ReverberationResult`, `ReverberationModelResult`, `DynamicStiffnessResult`, `MobilityResult`, `TransferStiffnessResult`, `BandAveragedStiffness`, `LevelDifferenceCheck`, `OutputMassCheck`, `EffectiveBlockingMass`, `DrivingPointStiffnessResult`, `DrivingPointUncertainty`, `VibrationSoundPowerResult`, `StructureBornePowerResult`, `InstalledSourceResult`, `WeightedRatingResult`, `ImpactRatingResult`, `FacadeInsulationResult`, `LabAirborneInsulationResult`, `LabImpactInsulationResult`, `SoundPowerResult`, `SoundEnergyResult`, `ReverberationSoundPowerResult`, `ReverberationSoundEnergyResult`, `InSituSoundPowerResult`, `InDuctSoundPowerResult`, `HighFrequencySoundPowerResult`, `SoundPowerIntensityResult`, `DiscretePointIntensityResult`, `PrecisionSoundPowerResult`, `PrecisionIntensityResult`, `IntensityResult`, `UncertaintyResult`, `AbsorptionRatingResult`, `ScatteringResult`, `DiffusionResult`, `DiffusionSpectrum`, `InsituAbsorptionResult`, `WeightingResponse`, `WeightedSpectrum`, `Signal` and `DailyVibrationExposure`.<br>• `ax`: existing Axes, or None to build a fresh figure (Default: None)<br>• returns the Matplotlib `Axes` (an array of Axes for multi-panel figures); never calls `plt.show()`<br>• needs matplotlib (`pip install phonometry[plot]`) | `res.plot()`<br>`decay_curve(ir, fs).plot()` |
 
 ## Notes
 
@@ -50353,6 +50369,9 @@ What the numbers mean and how much to trust them.
 - [Data qualification](https://jmrplens.github.io/phonometry/signals/metrology/data-qualification/): the reverse
   arrangement and runs stationarity tests on segment statistics, and the Rice
   level-crossing and peak statistics with the irregularity factor.
+- [Random-Incidence and Diffuse-Field Response (IEC 61183)](https://jmrplens.github.io/phonometry/signals/metrology/random-incidence/):
+  the directivity factor of a sound level meter and its random-incidence and
+  diffuse-field sensitivity levels.
 
 ## What this section does not cover
 
@@ -53596,6 +53615,13 @@ statistics of level crossings and peaks - apparent frequency, peak rates,
 the irregularity factor - that characterise a qualified Gaussian record and
 screen for one that is not.
 
+[Random-incidence and diffuse-field response](https://jmrplens.github.io/phonometry/signals/metrology/random-incidence/)
+takes the calibration of the meter itself beyond its reference direction: the
+IEC 61183 directivity factor from readings in an anechoic room, the
+random-incidence sensitivity level that follows from it, and the
+diffuse-field level by comparison with a reference meter in a reverberation
+room.
+
 The same discipline extends into the frequency domain: the
 [Signals and spectra](https://jmrplens.github.io/phonometry/signals/spectra/) pages
 apply the Bendat & Piersol error analysis to Welch spectral estimates, so
@@ -53624,6 +53650,10 @@ budgets that are specialisations of the GUM machinery described here.
 - [Data qualification](https://jmrplens.github.io/phonometry/signals/metrology/data-qualification/): the reverse
   arrangement and runs stationarity tests on segment statistics, and the
   Rice level-crossing and peak statistics with the irregularity factor.
+- [Random-Incidence and Diffuse-Field Response (IEC 61183)](https://jmrplens.github.io/phonometry/signals/metrology/random-incidence/):
+  the directivity factor of a sound level meter from readings in two planes,
+  one plane or 38 equal-area elements, its random-incidence and diffuse-field
+  sensitivity levels, and Table B.1 of the reference microphone.
 
 ## What this section does not cover
 
@@ -53646,6 +53676,239 @@ invents the terms. Where a standard publishes its own budget the guides say
 so, as ISO 9612 does for [occupational
 exposure](https://jmrplens.github.io/phonometry/perception/hearing/occupational-exposure/) and ISO
 12999-1 for [sound insulation](https://jmrplens.github.io/phonometry/buildings/insulation/).
+
+---
+
+
+<!-- source: docs/signals/metrology/random-incidence.md | canonical: https://jmrplens.github.io/phonometry/signals/metrology/random-incidence/ -->
+Source: https://jmrplens.github.io/phonometry/signals/metrology/random-incidence/
+
+# Random-incidence and diffuse-field response (IEC 61183)
+
+A sound level meter is calibrated for sound arriving from one direction, its
+reference direction, and most of the sound it measures arrives from all of
+them. Its microphone and its case are not transparent at high frequency, so a
+meter that reads a plane wave from the front correctly reads a field from
+every direction low. IEC 61183:1994 gives the two ways of finding by how much:
+the **free-field method** rotates the instrument in an anechoic room and
+weights the reading for each direction by the share of the sphere it stands
+for, and the **diffuse-field method** compares the instrument with a reference
+instrument in a reverberation room. This page runs both on a synthetic meter:
+a microphone whose pattern has, at each frequency, the directivity Table B.1
+prints for a type LS2aP/LS2F laboratory standard microphone, on a case that
+narrows it in the plane the case sits in.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/random_incidence_directivity_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/random_incidence_directivity.svg" alt="The synthetic meter at 8 kHz: its polar response in the X-Y and X-Z planes relative to the reference direction, with 10 lg gamma = 2.66 dB, and the weight of each 10 degree reading, from 0.10 % at the poles to 2.18 % at 90 degrees" width="88%"></picture>
+
+## The directivity factor
+
+The directivity factor of Formulas (2) and (3) is the ratio of what the meter
+reads for a plane wave from its reference direction to what it reads, on
+average over the sphere, for the same wave from every direction:
+`gamma = 4 pi / integral of 10^(-0,1 [L_rd - L(phi, alpha)]) |sin phi| d alpha d phi`.
+An omnidirectional meter has `gamma = 1`. The random-incidence sensitivity
+level is the free-field sensitivity level for the reference direction less the
+directivity index, `G_RI = G_F - 10 lg gamma` with `G_F = L_rd - L_o`
+(Formula (1)); `G_F` depends on the individual meter and `gamma` only on its
+geometry, so one measurement of `gamma` serves every meter of a model (4.2).
+
+### How the measurement goes
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_random_incidence_setup_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_random_incidence_setup.svg" alt="The two calibrations of IEC 61183: in an anechoic room the meter is turned on a turntable in front of a fixed source, its microphone on the axis of rotation, reading L_o, L_rd, L(phi, h) and L(phi, v); in a reverberation room the reference meter and the meter under test are moved in turn along the same circular path, reading L_D,ref and L_D" width="92%"></picture>
+
+| Requirement | Value | Clause |
+| :--- | :--- | :--- |
+| Anechoic room | Meets ISO 3745; pure tones or random noise, bands no wider than one-third octave, filters of IEC 61260 class 0 or 1 | 4.10 |
+| Source | Far enough that the level varies by less than ±1 dB within 0,3 m of the microphone | A.2.2 |
+| Signal | At least 20 dB above the background, and held constant during each rotation | A.2.3 |
+| Turntable | The acoustical centre of the microphone on the axis of rotation, the reference direction and the source in the plane of rotation | A.2.1, A.4.2 |
+| Rotations | 360° in the X-Y plane, then the meter turned 90° about its own axis and 360° again, the X-Z plane | A.4.5, A.4.6 |
+| Angular step | Small enough that no element of the sphere exceeds 3 %; 10° leaves 2,2 % | A.1.6, A.1.7 |
+| Pure tones | `G_F` and `gamma` may need the rms average of at least eight tones per one-third-octave band, spaced evenly on a logarithmic axis | 4.11 |
+| Reverberation room | Meets ISO 3741; broadband or filtered random noise, bands no wider than one-third octave | 5.6 |
+| Integration time | Long enough that repeated results scatter by less than 0,05 dB: 2 min from 500 Hz, 8 min from 250 Hz, 15 min from 125 Hz, longer below | 5.6, B.1.4 |
+| Microphone path | Both microphones moved in turn along the same circular path, not parallel to any wall, of radius the larger of 1 m and three times the largest dimension of the meter; two uncorrelated omnidirectional sources of about equal power help the diffusivity | B.1.3, B.1.4 |
+| Reference meter | A directivity factor as near unity as possible; a type LS2aP/LS2F or LS2bP microphone is recommended | B.1.1, B.1.2 |
+
+## Readings in two planes, and what each is worth
+
+Annex A rotates the meter through 360° in the X-Y plane and again in the X-Z
+plane, in equal steps. The elements of the sphere are rings cut into quarters
+by the planes, so each reading is weighted by the factor of Formulas (A.1) and
+(A.2), `K(phi) = (1/8)[cos(phi - dphi/2) - cos(phi + dphi/2)]` and
+`K(0) = K(180°) = (1/4)[1 - cos(dphi/2)]`:
+
+```python
+from phonometry import metrology
+
+k = metrology.adjustment_factors(10.0)   # 36 factors, 0° to 350°
+print(k[[0, 1, 9]].round(5))             # [0.00095 0.00378 0.02179]
+print(round(2 * k.sum(), 12))            # 1.0
+print(round(100 * metrology.largest_element_fraction(10.0), 2))  # 2.18
+```
+
+All ten rows of Table A.1 come out to the five decimals it prints. A.1.6 asks
+for the largest element to be no more than 3 % of the sphere; at 10° steps it
+is the one at 90°, 2,18 %, the "approximately 2,2 %" of A.1.7, and a step of
+15° (3,26 %) warns with a `SphereDivisionWarning`. `planes=4` gives the four
+planes at 45° of NOTE 2 of A.6, which halve every factor.
+
+The 72 factors sum to one only when the readings at 0° and 180° enter both
+sums of Formula (A.3). The paragraph under it says those readings "have only
+to be taken into account once": they have to be measured once. Counted in one
+sum only, the factors add up to 0,998 097 and `10 lg gamma` comes out high by
+`-10 lg(1 - gamma K(0) [10^(-0,1 [L_rd - L(0°)]) + 10^(-0,1 [L_rd - L(180°)])])`:
+0,008 dB for a meter that reads the same in every direction, about 0,02 dB at
+`10 lg gamma = 7 dB`. The library counts them in both sums, and the
+omnidirectional meter has `gamma = 1` exactly.
+
+```python
+import numpy as np
+
+def pattern_db(phi_deg, n, floor=0.02):
+    """L(phi) - L_rd of a meter whose squared pressure is (1 - b)[(1 + cos phi)/2]^n + b."""
+    lobe = ((1 + np.cos(np.radians(phi_deg))) / 2) ** n
+    return 10 * np.log10((1 - floor) * lobe + floor)
+
+phi = np.arange(0, 360, 10)
+levels = 94.0 + np.vstack((pattern_db(phi, 0.785),    # X-Y plane (h), 8 kHz
+                           pattern_db(phi, 0.98)))    # X-Z plane (v), the case narrows it
+d = metrology.directivity_factor(levels)
+print(round(d.gamma, 3), round(d.directivity_index_db, 2))   # 1.845 2.66
+d.plot()                  # the polar response, one curve per plane
+d.plot(view="weights")    # K(phi) of each reading
+```
+
+## One plane, or 38 equal elements
+
+A rotationally symmetric meter needs one rotation (Formula (A.4)), and the
+note to A.1.8 offers 38 directions of equal-area elements, 2,6 % of the sphere
+each, every reading weighing the same (Formula (A.5)):
+
+```python
+a = metrology.axisymmetric_directivity_factor(levels[0])
+print(round(a.directivity_index_db, 2))   # 2.45
+
+horizontal, vertical = metrology.equal_area_incidence_angles()
+print(horizontal[:6].round(1))   # [ 0.  32.6 50.8 65.1 77.8 90. ]
+e = metrology.equal_area_directivity_factor(
+    94.0 + pattern_db(horizontal, 0.785), 94.0 + pattern_db(vertical, 0.98)
+)
+print(round(e.directivity_index_db, 2))   # 2.66
+```
+
+The X-Y plane alone has the 2,45 dB Table B.1 prints for the microphone at
+8 kHz; the case adds the other 0,21 dB. Each equal-area direction halves its
+element's area in polar angle, which reproduces the list the note prints
+except 77,9° and 282,1°, where the construction gives 77,85° and 282,15°: all
+the other pairs of the printed list sum to 180,0° about the grazing direction,
+and 77,9° + 102,2° is 180,1°. The two are in the [errata register](https://jmrplens.github.io/phonometry/reference/errata/).
+
+## The random-incidence sensitivity level, band by band
+
+The synthetic meter at every preferred frequency Table B.1 prints, its X-Y
+plane given the `10 lg gamma` of the microphone at that band, and its
+free-field sensitivity level rolling off above 10 kHz:
+
+```python
+bands = sorted(metrology.IEC61183_TABLE_B1)   # the 30 preferred frequencies, 25 Hz to 20 kHz
+
+def meter(frequency_hz):
+    """The synthetic meter at one band: the X-Y plane has the 10 lg gamma Table B.1
+    prints for the microphone, and the case narrows the X-Z plane."""
+    target = metrology.IEC61183_TABLE_B1[frequency_hz].directivity_index_db
+    n = 0.98 / (10 ** (-target / 10) - 0.02) - 1   # the exponent with that index
+    return metrology.directivity_factor(
+        94.0 + np.vstack((pattern_db(phi, n), pattern_db(phi, 1.25 * n))))
+
+index = [meter(f).directivity_index_db for f in bands]
+g_f = -10 * np.log10(1 + (np.array(bands) / 25000) ** 4)   # L_rd - L_o at each band
+r = metrology.random_incidence_sensitivity(bands, g_f, index)
+shown = np.isin(r.frequencies_hz, [1000, 4000, 8000, 16000])
+print(r.correction_db[shown].round(2))              # [-0.06 -0.95 -2.66 -5.62]
+print(r.random_incidence_level_db[shown].round(2))  # [-0.06 -0.95 -2.71 -6.29]
+r.plot()
+r.plot(view="correction")
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/random_incidence_correction_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/random_incidence_correction.svg" alt="G_F of the synthetic meter from 25 Hz to 20 kHz, flat to 8 kHz and rolling off to -1.5 dB at 20 kHz, and G_RI on it up to 800 Hz and then falling to about -2.7 dB at 8 kHz and -8.5 dB at 20 kHz; and the correction between them, -7 dB at 20 kHz" width="88%"></picture>
+
+The correction is what a meter calibrated in a free field reads low in a
+random-incidence field: negligible up to about 1 kHz and several decibels by
+10 kHz. It is why a meter is specified for one field or the other:
+IEC 61672-1:2013 applies its frequency-weighting limits to the free-field or
+to the random-incidence response, as applicable (5.5.4), and has the
+random-incidence response determined by the free-field method of IEC 61183
+(5.5.5). One meter cannot be flat for both.
+
+## The diffuse-field method
+
+The meter under test and a reference meter are placed in turn at the same
+positions in a reverberation room; the difference of what they indicate,
+`dG_D = L_D - L_D,ref` (Formula (8)), is added to the diffuse-field
+sensitivity level of the reference: `G_RI,ref` for a reference calibrated by
+clause 4 (Formula (9)), `G_F,ref - 10 lg gamma_ref` for a free-field
+calibrated one (Formula (10)), `G_P,ref + Delta_DP` for a pressure calibrated
+one (Formula (11)). Annex B recommends a type LS2aP/LS2F or LS2bP microphone
+as the reference, Table B.1 prints `10 lg gamma` and `Delta_DP` of the first,
+and Formulas (10) and (11) take their
+correction from it unless told otherwise:
+
+In an 80 dB diffuse field the meter indicates the field plus its
+random-incidence level (1.2), and a reference LS2aP whose pressure sensitivity
+level is 0 dB the field plus its `Delta_DP`:
+
+```python
+print(metrology.IEC61183_TABLE_B1[8000.0])
+# ReferenceMicrophoneRow(directivity_index_db=2.45, diffuse_pressure_difference_db=1.2)
+
+delta_dp = np.array([metrology.IEC61183_TABLE_B1[f].diffuse_pressure_difference_db
+                     for f in bands])
+dd = metrology.diffuse_field_sensitivity(
+    bands,
+    80.0 + r.random_incidence_level_db,  # L_D, the meter under test
+    80.0 + delta_dp,                     # L_D,ref, a pressure-calibrated LS2aP
+    reference_pressure_level_db=0.0,     # G_P,ref; Delta_DP from Table B.1
+)
+print(dd.reference_correction_db[shown])            # [0.   0.25 1.2  3.05]
+print(dd.diffuse_field_level_db[shown].round(2))    # [-0.06 -0.95 -2.71 -6.29]
+dd.plot()
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diffuse_field_sensitivity_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diffuse_field_sensitivity.svg" alt="Formula (11) on the synthetic meter from 25 Hz to 20 kHz: Delta_DP of Table B.1 rising to 3.05 dB at 16 kHz, the level difference of Formula (8) falling to about -10.7 dB at 20 kHz, and their sum G_D retracing the random-incidence level" width="88%"></picture>
+
+The two methods meet: the diffuse-field sensitivity level may be used
+interchangeably with the random-incidence one (1.2), and the comparison in a
+room returns the level the anechoic measurement gave.
+
+## What this guide covers
+
+Implemented: the calculations of both methods of IEC 61183:1994, the
+adjustment factors of Formulas (6), (7), (A.1) and (A.2) for any step and any
+number of planes, with the halving of NOTE 2 of A.6; the 3 % criterion of
+A.1.6 as a warning; the directivity factor from two or more planes, from one
+plane under rotational symmetry and from 38 equal-area elements (Formulas
+(A.3) to (A.5)); the random-incidence sensitivity level of Formulas (1) and
+(A.6); the diffuse-field sensitivity level by the three routes of Formulas (8)
+to (11); and Table B.1. Not implemented: the measurements themselves (the
+ISO 3745 anechoic and ISO 3741 reverberation rooms, the source, the turntable,
+the signal-to-noise ratio of A.2.3 and the integration times of B.1.4), the
+averaging of at least eight tones per band (4.11), and the corrections of
+IEC 62585 for the case, the microphone and the windscreen, which bring a
+measurement made with a sound calibrator, a comparison coupler or an
+electrostatic actuator to the meter's free-field response.
+
+## See also
+
+- [Calibration and dBFS](https://jmrplens.github.io/phonometry/signals/metrology/calibration/): the calibrator tone that sets the
+  pressure sensitivity every level of a meter starts from.
+- [Compliance and verification](https://jmrplens.github.io/phonometry/signals/metrology/compliance-verification/): what the
+  IEC 61672-1 class of a meter asserts, and which of its tests the library
+  runs.
+- [Microphone characterisation](https://jmrplens.github.io/phonometry/devices/electroacoustics/microphones/):
+  the IEC 60268-4 directivity index of a microphone on its own.
+- [Errata in published sources](https://jmrplens.github.io/phonometry/reference/errata/): the two equal-area angles.
+- API reference: [`metrology.random_incidence`](https://jmrplens.github.io/phonometry/reference/api/metrology/random-incidence/).
 
 ---
 
@@ -59113,7 +59376,7 @@ the normative PDF fiche.
 - [Filter Architecture Gallery](https://jmrplens.github.io/phonometry/signals/filters/filter-gallery/): choose an architecture and inspect responses
 - [Calibration and dBFS](https://jmrplens.github.io/phonometry/signals/metrology/calibration/): get real-world SPL values
 - [Why phonometry](https://jmrplens.github.io/phonometry/start/why-phonometry/): the conformance-first design philosophy
-- [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): the expected and computed value of all 1387 checks
+- [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): the expected and computed value of all 1395 checks
 - [API Reference](https://jmrplens.github.io/phonometry/reference/api/): every parameter of every function
 - [Bibliography](https://jmrplens.github.io/phonometry/reference/bibliography/): the books and papers behind every guide, each with a verified link
 
@@ -60085,7 +60348,7 @@ sample from the metrology core:
 | IEC 61252:1993 | The personal sound exposure quantities, `sound_exposure()` and the normalized 8 h level `lex_8h()`; IEC 61252:2025 has since superseded this print, and the transcription still targets the 1993+A2 text | `tests/signals/test_levels.py` |
 
 The same discipline applies far beyond the metrology core: today the suite runs
-1387 numerical conformance checks across 94 domains and 473 standards, covering
+1395 numerical conformance checks across 95 domains and 474 standards, covering
 psychoacoustics and speech intelligibility, room, building and materials
 acoustics, human and machine vibration, environmental, aircraft, rotorcraft
 and underwater noise, electroacoustics, broadcast loudness, industrial noise

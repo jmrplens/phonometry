@@ -164,6 +164,9 @@ What the numbers mean and how much to trust them.
 - [Data qualification](metrology/data-qualification.md): the reverse
   arrangement and runs stationarity tests on segment statistics, and the Rice
   level-crossing and peak statistics with the irregularity factor.
+- [Random-Incidence and Diffuse-Field Response (IEC 61183)](metrology/random-incidence.md):
+  the directivity factor of a sound level meter and its random-incidence and
+  diffuse-field sensitivity levels.
 
 ## What this section does not cover
 

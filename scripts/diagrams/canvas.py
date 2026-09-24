@@ -180,6 +180,10 @@ _ROMAN_SCRIPTS = frozenset(
         "high",
         "limit",
         "ref",
+        # rd/RI: the reference direction and the random incidence of
+        # IEC 61183:1994, printed upright in L_rd, G_RI and G_RI,ref.
+        "rd",
+        "RI",
         "rms",
         "tot",
         "TOT",

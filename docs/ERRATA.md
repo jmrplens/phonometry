@@ -1766,6 +1766,42 @@ in the same order.
   ([`tests/emission/test_intensity_compliance.py`](../tests/emission/test_intensity_compliance.py)).
 - **Status:** unreported (national translation, not the issuing body's text).
 
+## IEC 61183:1994, note to A.1.8 (two equal-area angles that break the list's own symmetry)
+
+- **Location:** Annex A, the NOTE after the symbol list of Formulas (A.1) and
+  (A.2), under A.1.8 (printed folio 10), which lists the directions of a
+  division of the sphere into 38 elements of equal area.
+- **The print:** "The angles of incidence will be 0°, 32,6°, 50,8°, 65,1°,
+  **77,9°**, 90°, 102,2°, 114,9°, 129,2°, 147,4°, 180°, 212,6°, 230,8°,
+  245,1°, 257,8°, 270°, **282,1°**, 294,9°, 309,2°, 327,4° in the horizontal
+  plane and the same angles with the exception of 0° and 180° in the vertical
+  plane."
+- **The problem:** the division is symmetric about the grazing direction: the
+  note places a single element on each pole and one at 90°, and 38 equal
+  elements with a cap at each pole leave nine rings of four elements each,
+  mirror images of one another about 90°. Every pair of the printed list obeys
+  that symmetry except one: $32{,}6 + 147{,}4$, $50{,}8 + 129{,}2$ and
+  $65{,}1 + 114{,}9$ are all $180{,}0°$, while $77{,}9 + 102{,}2 = 180{,}1°$.
+  The same slip appears on the second half of the circle, where $257{,}8°$ is
+  $180° + 77{,}8°$ but $282{,}1°$ is $360° - 77{,}9°$. The direction that
+  halves each element's area in polar angle, $\phi_k = \arccos[1 - (4k -
+  1)/19]$, reproduces all the other printed angles to their 0,1° and gives
+  $77{,}846°$ and $282{,}154°$ for the fourth ring, which read **77,8°** and
+  **282,2°**.
+- **Evidence:** the construction evaluated for the nine rings and compared
+  with the twenty printed angles. Verified on PDF page 14 (printed p. 10) of
+  BS EN 61183:1995, the English text of EN 61183:1994, which is IEC 1183:1994
+  (now IEC 61183:1994) unchanged.
+- **Library behaviour:** `metrology.equal_area_incidence_angles` computes the
+  directions from the construction instead of transcribing them, and the
+  conformance row on the note checks the other eighteen printed angles; the
+  tests pin the two corrected values
+  ([`tests/metrology/test_random_incidence.py`](../tests/metrology/test_random_incidence.py)).
+  Formula (A.5) weighs every reading by 1/38 whatever its direction, so a
+  directivity factor is not affected by the slip; only where the source is
+  placed is.
+- **Status:** unreported.
+
 ## UNE-EN ISO 9614-1:2010, clause 9.1 (the sign dropped from "signed magnitude" in translation)
 
 - **Location:** clause 9.1, the symbol list under Formula (11)

@@ -1902,6 +1902,42 @@ dos ediciones con las mismas entradas y en el mismo orden.
 - **Estado:** sin notificar (traducción nacional, no el texto del organismo
   emisor).
 
+## IEC 61183:1994, nota de A.1.8 (dos ángulos de igual área que rompen la simetría de su propia lista)
+
+- **Ubicación:** Anexo A, la NOTA que sigue a la lista de símbolos de las
+  Fórmulas (A.1) y (A.2), bajo A.1.8 (folio impreso 10), que enumera las
+  direcciones de una división de la esfera en 38 elementos de igual área.
+- **El impreso:** «The angles of incidence will be 0°, 32,6°, 50,8°, 65,1°,
+  **77,9°**, 90°, 102,2°, 114,9°, 129,2°, 147,4°, 180°, 212,6°, 230,8°,
+  245,1°, 257,8°, 270°, **282,1°**, 294,9°, 309,2°, 327,4° in the horizontal
+  plane and the same angles with the exception of 0° and 180° in the vertical
+  plane.»
+- **El problema:** la división es simétrica respecto de la dirección rasante:
+  la nota pone un solo elemento en cada polo y uno a 90°, y 38 elementos
+  iguales con un casquete en cada polo dejan nueve anillos de cuatro
+  elementos cada uno, imágenes especulares entre sí respecto de 90°. Todos los
+  pares de la lista impresa cumplen esa simetría salvo uno: $32{,}6 + 147{,}4$,
+  $50{,}8 + 129{,}2$ y $65{,}1 + 114{,}9$ dan todos $180{,}0°$, mientras que
+  $77{,}9 + 102{,}2 = 180{,}1°$. El mismo desliz aparece en la segunda mitad de
+  la circunferencia, donde $257{,}8°$ es $180° + 77{,}8°$ pero $282{,}1°$ es
+  $360° - 77{,}9°$. La dirección que divide en dos mitades el área de cada
+  elemento en ángulo polar, $\phi_k = \arccos[1 - (4k - 1)/19]$, reproduce
+  todos los demás ángulos impresos con su 0,1° y da $77{,}846°$ y $282{,}154°$
+  para el cuarto anillo, que se leen **77,8°** y **282,2°**.
+- **Evidencia:** la construcción evaluada para los nueve anillos y comparada
+  con los veinte ángulos impresos. Verificado en la página 14 del PDF (p. 10
+  impresa) de BS EN 61183:1995, el texto inglés de EN 61183:1994, que es
+  IEC 1183:1994 (hoy IEC 61183:1994) sin cambios.
+- **Comportamiento de la biblioteca:** `metrology.equal_area_incidence_angles`
+  calcula las direcciones a partir de la construcción en lugar de
+  transcribirlas, y la fila de conformidad de la nota comprueba los otros
+  dieciocho ángulos impresos; los tests fijan los dos valores corregidos
+  ([`tests/metrology/test_random_incidence.py`](../tests/metrology/test_random_incidence.py)).
+  La Fórmula (A.5) pondera cada lectura con 1/38 sea cual sea su dirección,
+  así que el desliz no afecta a ningún factor de directividad; solo a dónde se
+  coloca la fuente.
+- **Estado:** sin notificar.
+
 ## UNE-EN ISO 9614-1:2010, apartado 9.1 (el signo perdido de «signed magnitude» en la traducción)
 
 - **Ubicación:** apartado 9.1, la lista de símbolos bajo la Fórmula (11)

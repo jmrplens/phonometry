@@ -362,6 +362,9 @@ from .metrology import (
     generate_calibrator_verification,
     generate_conformance_rule_examples,
     generate_dbfs_versus_spl,
+    generate_diffuse_field_sensitivity,
+    generate_random_incidence_correction,
+    generate_random_incidence_directivity,
     generate_rice_level_crossings,
     generate_rice_nongaussian_screen,
     generate_rice_peak_distribution,
@@ -978,6 +981,11 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     generate_uncertainty,
     generate_uncertainty_gum_vs_mc,
     generate_uncertainty_correlation,
+    # IEC 61183: the random-incidence and diffuse-field sensitivity of a
+    # sound level meter, drawn by the results' own .plot().
+    generate_random_incidence_directivity,
+    generate_random_incidence_correction,
+    generate_diffuse_field_sensitivity,
     generate_stationarity_glide_blind_spot,
     generate_rice_nongaussian_screen,
     # Psychoacoustics / open-plan plots (sharpness weighting, spatial decay)

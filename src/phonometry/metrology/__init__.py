@@ -4,9 +4,10 @@
 Narrowed in 4.0 to the transverse metrology: calibration, GUM uncertainty,
 data qualification, the ISO 1683 reference values every level is counted
 from, the conformance rule the IEC TC 29 instrument standards written since
-2013 grade an instrument by, and the IEC 60942 verdict on the sound
-calibrator every calibration starts from. The filter banks and weightings
-moved to :mod:`phonometry.filters`, the general signal analysis to
+2013 grade an instrument by, the IEC 60942 verdict on the sound calibrator
+every calibration starts from, and the IEC 61183 random-incidence and
+diffuse-field sensitivity of a sound level meter. The filter banks and
+weightings moved to :mod:`phonometry.filters`, the general signal analysis to
 :mod:`phonometry.signals` and the IEC 61043 intensity-instrument class check
 to :mod:`phonometry.emission.intensity_compliance`, which is what it verifies.
 """
@@ -24,6 +25,22 @@ from .data_qualification import (
     peak_statistics,
     stationarity_test,
     trend_test,
+)
+from .random_incidence import (
+    IEC61183_TABLE_B1,
+    DiffuseFieldSensitivity,
+    DirectivityFactor,
+    RandomIncidenceSensitivity,
+    ReferenceMicrophoneRow,
+    SphereDivisionWarning,
+    adjustment_factors,
+    axisymmetric_directivity_factor,
+    diffuse_field_sensitivity,
+    directivity_factor,
+    equal_area_directivity_factor,
+    equal_area_incidence_angles,
+    largest_element_fraction,
+    random_incidence_sensitivity,
 )
 from .reference_values import ISO1683_REFERENCE_VALUES, ReferenceValue
 from .sound_calibrator import (
@@ -84,6 +101,7 @@ __all__ = [
     "FLUCTUATION_MAX_UNCERTAINTY_DB",
     "FREQUENCY_ACCEPTANCE_LIMITS_PERCENT",
     "FREQUENCY_MAX_UNCERTAINTY_PERCENT",
+    "IEC61183_TABLE_B1",
     "ISO1683_REFERENCE_VALUES",
     "LEVEL_ACCEPTANCE_LIMITS_DB",
     "LEVEL_MAX_UNCERTAINTY_DB",
@@ -92,24 +110,37 @@ __all__ = [
     "CalibrationWarning",
     "CalibratorTableRow",
     "ConformanceVerification",
+    "DiffuseFieldSensitivity",
+    "DirectivityFactor",
     "LevelCrossingResult",
     "MonteCarloResult",
     "PeakStatisticsResult",
     "Quantity",
+    "RandomIncidenceSensitivity",
+    "ReferenceMicrophoneRow",
     "ReferenceValue",
     "SoundCalibratorMeasurements",
     "SoundCalibratorRequirement",
     "SoundCalibratorVerification",
+    "SphereDivisionWarning",
     "StationarityTestResult",
     "TrendTestResult",
     "UncertaintyResult",
     "UncertaintyWarning",
+    "adjustment_factors",
+    "axisymmetric_directivity_factor",
     "combine_uncertainty",
     "coverage_factor",
+    "diffuse_field_sensitivity",
+    "directivity_factor",
+    "equal_area_directivity_factor",
+    "equal_area_incidence_angles",
     "expanded_uncertainty",
+    "largest_element_fraction",
     "level_crossing_rate",
     "monte_carlo",
     "peak_statistics",
+    "random_incidence_sensitivity",
     "rectangular",
     "sensitivity",
     "stationarity_test",

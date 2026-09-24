@@ -31,6 +31,8 @@ from .theme import (
 if TYPE_CHECKING:
     from collections.abc import Callable
 
+    from phonometry.metrology import DirectivityFactor, RandomIncidenceSensitivity
+
 
 def generate_calibration_stability(output_dir: str) -> None:
     """Stable vs unstable calibration tone against the IEC 60942 limit."""
@@ -1277,4 +1279,136 @@ def generate_runs_test(output_dir: str) -> None:
         frameon=False,
     )
     save_figure(output_dir, "runs_test.svg")
+    plt.close()
+
+
+# ---------------------------------------------------------------------------
+# IEC 61183: the random-incidence and diffuse-field sensitivity of a meter
+# ---------------------------------------------------------------------------
+#
+# The three figures of the guide signals/metrology/random-incidence, built with
+# the code the guide prints, step for step, so that its "Show the code for
+# these figures" block draws them exactly: the synthetic meter at 8 kHz, then
+# the same meter at every preferred frequency of Table B.1, then the
+# diffuse-field comparison of that meter with a pressure-calibrated LS2aP.
+
+#: The rear floor of the synthetic meter: the squared pressure it picks up
+#: from straight behind, 17 dB down (the guide's ``floor``).
+_METER_REAR_FLOOR = 0.02
+
+#: How much narrower the X-Z plane of that meter is than its X-Y plane,
+#: where the case below the microphone shadows it (the guide's ``1.25``).
+_METER_CASE_SHADOW = 1.25
+
+#: The exponents of the guide's 8 kHz example: 0.785 in the X-Y plane, which
+#: gives the 2,45 dB Table B.1 prints at 8 kHz, and 1.25 times it, 0.98, in
+#: the X-Z plane.
+_METER_8K_EXPONENTS = (0.785, 0.98)
+
+#: Where the free-field sensitivity level of the synthetic meter rolls off,
+#: as a second-order low-pass, -10 lg[1 + (f/f_c)^4]: flat to 0,05 dB up to
+#: 8 kHz, 0,7 dB down at 16 kHz and 1,5 dB at 20 kHz.
+_METER_ROLL_OFF_HZ = 25000.0
+
+#: The diffuse field both instruments are placed in, in dB.
+_DIFFUSE_FIELD_DB = 80.0
+
+
+def _pattern_db(phi_deg: np.ndarray, n: float) -> np.ndarray:
+    r"""L(phi) - L_rd of the synthetic meter, the guide's ``pattern_db``.
+
+    The squared pressure falls off as :math:`(1 - b)[(1 + \cos\phi)/2]^n + b`,
+    whose directivity index over the sphere is :math:`-10\lg[(1 - b)/(n + 1)
+    + b]`.
+    """
+    b = _METER_REAR_FLOOR
+    lobe = ((1.0 + np.cos(np.radians(phi_deg))) / 2.0) ** n
+    levels: np.ndarray = 10.0 * np.log10((1.0 - b) * lobe + b)
+    return levels
+
+
+def _meter(frequency_hz: float) -> "DirectivityFactor":
+    """The synthetic meter at one band, 10° steps in the two planes of Annex A.
+
+    The guide's ``meter``: the X-Y exponent is the one whose directivity index
+    is what Table B.1 prints for an LS2aP/LS2F microphone at the band, and the
+    case narrows the X-Z plane.
+    """
+    from phonometry import metrology
+
+    b = _METER_REAR_FLOOR
+    target = metrology.IEC61183_TABLE_B1[frequency_hz].directivity_index_db
+    n = (1.0 - b) / (10.0 ** (-target / 10.0) - b) - 1.0
+    phi = np.arange(0, 360, 10)
+    return metrology.directivity_factor(
+        94.0
+        + np.vstack((_pattern_db(phi, n), _pattern_db(phi, _METER_CASE_SHADOW * n)))
+    )
+
+
+def _meter_sensitivity() -> "RandomIncidenceSensitivity":
+    """The guide's ``r``: G_F and 10 lg gamma of the meter at every band."""
+    from phonometry import metrology
+
+    bands = sorted(metrology.IEC61183_TABLE_B1)
+    index = [_meter(f).directivity_index_db for f in bands]
+    g_f = -10.0 * np.log10(1.0 + (np.array(bands) / _METER_ROLL_OFF_HZ) ** 4)
+    return metrology.random_incidence_sensitivity(bands, g_f, index)
+
+
+def generate_random_incidence_directivity(output_dir: str) -> None:
+    """IEC 61183: the response of a meter in two planes and the weights."""
+    print("Generating random_incidence_directivity...")
+    from phonometry import metrology
+
+    phi = np.arange(0, 360, 10)
+    h_exponent, v_exponent = _METER_8K_EXPONENTS
+    levels = 94.0 + np.vstack(
+        (_pattern_db(phi, h_exponent), _pattern_db(phi, v_exponent))
+    )
+    result = metrology.directivity_factor(levels)
+    fig = plt.figure(figsize=(13.5, 6.0))
+    result.plot(fig.add_subplot(1, 2, 1, projection="polar"), language=_LANG)
+    result.plot(fig.add_subplot(1, 2, 2), view="weights", language=_LANG)
+    fig.tight_layout()
+    save_figure(output_dir, "random_incidence_directivity.svg")
+    plt.close()
+
+
+def generate_random_incidence_correction(output_dir: str) -> None:
+    """IEC 61183: G_F and G_RI of the meter, and the correction between them."""
+    print("Generating random_incidence_correction...")
+    result = _meter_sensitivity()
+    fig, (ax_levels, ax_correction) = plt.subplots(1, 2, figsize=(13.5, 5.4))
+    result.plot(ax_levels, language=_LANG)
+    result.plot(ax_correction, view="correction", language=_LANG)
+    fig.tight_layout()
+    save_figure(output_dir, "random_incidence_correction.svg")
+    plt.close()
+
+
+def generate_diffuse_field_sensitivity(output_dir: str) -> None:
+    """IEC 61183 Formula (11): the meter against a pressure-calibrated LS2aP."""
+    print("Generating diffuse_field_sensitivity...")
+    from phonometry import metrology
+
+    meter = _meter_sensitivity()
+    bands = sorted(metrology.IEC61183_TABLE_B1)
+    delta_dp = np.array(
+        [metrology.IEC61183_TABLE_B1[f].diffuse_pressure_difference_db for f in bands]
+    )
+    # What the two instruments indicate in the same diffuse field: each reads
+    # the field plus its own diffuse-field sensitivity level, the meter's being
+    # its random-incidence level (1.2) and the reference's its pressure level
+    # of 0 dB plus Delta_DP.
+    result = metrology.diffuse_field_sensitivity(
+        bands,
+        _DIFFUSE_FIELD_DB + np.asarray(meter.random_incidence_level_db),
+        _DIFFUSE_FIELD_DB + delta_dp,
+        reference_pressure_level_db=0.0,
+    )
+    fig, ax = plt.subplots(figsize=(10, 6))
+    result.plot(ax, language=_LANG)
+    fig.tight_layout()
+    save_figure(output_dir, "diffuse_field_sensitivity.svg")
     plt.close()

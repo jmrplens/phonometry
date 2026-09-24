@@ -50,6 +50,13 @@ statistics of level crossings and peaks - apparent frequency, peak rates,
 the irregularity factor - that characterise a qualified Gaussian record and
 screen for one that is not.
 
+[Random-incidence and diffuse-field response](random-incidence.md)
+takes the calibration of the meter itself beyond its reference direction: the
+IEC 61183 directivity factor from readings in an anechoic room, the
+random-incidence sensitivity level that follows from it, and the
+diffuse-field level by comparison with a reference meter in a reverberation
+room.
+
 The same discipline extends into the frequency domain: the
 [Signals and spectra](../spectra/index.md) pages
 apply the Bendat & Piersol error analysis to Welch spectral estimates, so
@@ -78,6 +85,10 @@ budgets that are specialisations of the GUM machinery described here.
 - [Data qualification](data-qualification.md): the reverse
   arrangement and runs stationarity tests on segment statistics, and the
   Rice level-crossing and peak statistics with the irregularity factor.
+- [Random-Incidence and Diffuse-Field Response (IEC 61183)](random-incidence.md):
+  the directivity factor of a sound level meter from readings in two planes,
+  one plane or 38 equal-area elements, its random-incidence and diffuse-field
+  sensitivity levels, and Table B.1 of the reference microphone.
 
 ## What this section does not cover
 

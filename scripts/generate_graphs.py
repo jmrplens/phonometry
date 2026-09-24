@@ -228,6 +228,9 @@ from figures.materials import (
 )
 from figures.metrology import (
     generate_calibration_stability,
+    generate_diffuse_field_sensitivity,
+    generate_random_incidence_correction,
+    generate_random_incidence_directivity,
     generate_rice_level_crossings,
     generate_rice_peak_distribution,
     generate_runs_test,
@@ -541,6 +544,7 @@ __all__ = [
     "generate_decomposition_plot",
     "generate_detailed_prediction_paths",
     "generate_diffuse_field_absorption",
+    "generate_diffuse_field_sensitivity",
     "generate_diffuser_prediction",
     "generate_diffusion_goniometer_geometry",
     "generate_diffusion_polar",
@@ -689,6 +693,8 @@ __all__ = [
     "generate_quasi_peak_meter",
     "generate_radiated_power_outdoor",
     "generate_radiation_plate_geometry",
+    "generate_random_incidence_correction",
+    "generate_random_incidence_directivity",
     "generate_rd1367_activity_assessment",
     "generate_rectangular_room_modes",
     "generate_regularized_inversion",

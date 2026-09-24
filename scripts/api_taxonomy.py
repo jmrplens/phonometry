@@ -95,6 +95,7 @@ _SECTION_LIST: tuple[Section, ...] = (
             "phonometry.metrology.uncertainty",
             "phonometry.metrology.data_qualification",
             "phonometry.metrology.reference_values",
+            "phonometry.metrology.random_incidence",
         ),
     ),
     Section(
@@ -647,6 +648,9 @@ OBJECT_MODULE_OVERRIDES: dict[str, str] = {
     "LEVEL_MAX_UNCERTAINTY_DB": "phonometry.metrology.sound_calibrator",
     "SUPPLY_VOLTAGE_ACCEPTANCE_LIMITS_DB": "phonometry.metrology.sound_calibrator",
     "SUPPLY_VOLTAGE_MAX_UNCERTAINTY_DB": "phonometry.metrology.sound_calibrator",
+    # IEC 61183 Table B.1 is a mapping as well, owned by the module whose
+    # diffuse-field routes read their defaults from it.
+    "IEC61183_TABLE_B1": "phonometry.metrology.random_incidence",
     # Defined in phonometry._internal.warnings, exported at the top level.
     "PhonometryWarning": "phonometry",
     # The io subpackage keeps its implementation modules private and

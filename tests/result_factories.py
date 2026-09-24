@@ -327,6 +327,33 @@ def _binaural_indicators() -> ph.environment.BinauralIndicators:
         )
 
 
+def _directivity_factor() -> ph.metrology.DirectivityFactor:
+    """Two planes of 10° readings round a mildly directional meter (IEC 61183)."""
+    phi = np.radians(np.arange(36) * 10.0)
+    horizontal = 94.0 + 20.0 * np.log10(0.6 + 0.4 * np.cos(phi))
+    vertical = 94.0 + 20.0 * np.log10(0.7 + 0.3 * np.cos(phi))
+    return ph.metrology.directivity_factor(np.vstack((horizontal, vertical)))
+
+
+def _random_incidence() -> ph.metrology.RandomIncidenceSensitivity:
+    """G_F and 10 lg gamma of a meter at four bands (IEC 61183 Formula (1))."""
+    return ph.metrology.random_incidence_sensitivity(
+        [1000.0, 2000.0, 4000.0, 8000.0],
+        [0.1, 0.0, -0.3, -0.9],
+        [0.05, 0.2, 0.85, 2.45],
+    )
+
+
+def _diffuse_field() -> ph.metrology.DiffuseFieldSensitivity:
+    """A meter compared with a pressure-calibrated reference (IEC 61183 (11))."""
+    return ph.metrology.diffuse_field_sensitivity(
+        [1000.0, 2000.0, 4000.0, 8000.0],
+        [80.2, 80.4, 80.1, 79.0],
+        [80.0, 80.0, 80.0, 80.0],
+        reference_pressure_level_db=-26.0,
+    )
+
+
 def _static_airflow() -> ph.materials.StaticAirflowResult:
     u = np.array([0.2e-3, 0.4e-3, 0.6e-3, 0.8e-3, 1.0e-3])
     dp = 30000.0 * u + 4.0e6 * u**2

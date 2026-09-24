@@ -3,12 +3,15 @@
 
 from __future__ import annotations
 
+import math
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
+    from matplotlib.ticker import FuncFormatter
+    from numpy.typing import NDArray
 
     from ..metrology.conformance import ConformanceVerification
     from ..metrology.data_qualification import (
@@ -16,6 +19,11 @@ if TYPE_CHECKING:
         PeakStatisticsResult,
         StationarityTestResult,
         TrendTestResult,
+    )
+    from ..metrology.random_incidence import (
+        DiffuseFieldSensitivity,
+        DirectivityFactor,
+        RandomIncidenceSensitivity,
     )
     from ..metrology.sound_calibrator import (
         SoundCalibratorRequirement,
@@ -27,12 +35,14 @@ from .common import (
     _C_MUTED,
     _C_PRIMARY,
     _C_PRIMARY_LIGHT,
+    _C_QUATERNARY,
     _C_REFERENCE,
     _C_SECONDARY,
     _C_TERTIARY,
     _LEGEND_UPPER_RIGHT,
     _import_pyplot,
     _new_axes,
+    format_frequency_axis,
     style_default,
     theme_fill,
 )
@@ -50,6 +60,12 @@ _RICE_CURVE_LABEL = "Rice ($r$ = {r})"
 #: The legend entry of the acceptance limits in the conformity plots, named
 #: once so the translation table and the axes cannot drift apart.
 _ACCEPTANCE_LABEL = "Acceptance limit"
+
+#: Labels the IEC 61183 plots share with the translation table, written once.
+_RI_CORRECTION_LABEL = r"$G_\mathrm{RI} - G_\mathrm{F} = -10\,\lg\gamma$"
+_SENSITIVITY_LEVEL_LABEL = "Sensitivity level [dB]"
+_FREQUENCY_LABEL = "Frequency [Hz]"
+_DIFFUSE_DEVIATION_LABEL = r"$\Delta G_\mathrm{D} = L_\mathrm{D} - L_\mathrm{D,ref}$"
 
 _STRINGS: dict[str, str] = {
     r"Contribution to combined uncertainty $|c_i|\,u(x_i)$": r"Contribución a la incertidumbre combinada $|c_i|\,u(x_i)$",
@@ -117,6 +133,33 @@ _STRINGS: dict[str, str] = {
     "Level in the reference band": "Nivel en la banda de referencia",
     "Environmental frequency": "Frecuencia en condiciones ambientales",
     "Field immunity": "Inmunidad a campos",
+    # IEC 61183: random-incidence and diffuse-field sensitivity.
+    r"Directional response: $10\,\lg\gamma$ = {di} dB": r"Respuesta direccional: $10\,\lg\gamma$ = {di} dB",
+    r"X-Y plane (h), $\alpha$ = 0°": r"Plano X-Y (h), $\alpha$ = 0°",
+    r"X-Z plane (v), $\alpha$ = 90°": r"Plano X-Z (v), $\alpha$ = 90°",
+    r"Plane $\alpha$ = {alpha}°": r"Plano $\alpha$ = {alpha}°",
+    "One plane, rotational symmetry": "Un plano, simetría de revolución",
+    r"Weights of the readings: largest element {pct} % of the sphere": r"Pesos de las lecturas: elemento mayor {pct} % de la esfera",
+    r"Weights: two elements to a reading, the largest {pct} % of the sphere": r"Pesos: dos elementos por lectura, el mayor {pct} % de la esfera",
+    r"$K(\phi)$ in each plane": r"$K(\phi)$ en cada plano",
+    r"$2K(\phi)$, one plane for two": r"$2K(\phi)$, un plano que vale por dos",
+    "1/38 for every direction": "1/38 en cada dirección",
+    r"Angle of incidence $\phi$ [°]": r"Ángulo de incidencia $\phi$ [°]",
+    "Weight [% of the sphere]": "Peso [% de la esfera]",
+    r"$G_\mathrm{F}$, free field, reference direction": r"$G_\mathrm{F}$, campo libre, dirección de referencia",
+    r"$G_\mathrm{RI}$, random incidence": r"$G_\mathrm{RI}$, incidencia aleatoria",
+    _RI_CORRECTION_LABEL: _RI_CORRECTION_LABEL,
+    _SENSITIVITY_LEVEL_LABEL: "Nivel de sensibilidad [dB]",
+    "Correction [dB]": "Corrección [dB]",
+    "Random-incidence sensitivity level (IEC 61183)": "Nivel de sensibilidad en incidencia aleatoria (IEC 61183)",
+    "Random-incidence correction (IEC 61183)": "Corrección de incidencia aleatoria (IEC 61183)",
+    _FREQUENCY_LABEL: "Frecuencia [Hz]",
+    r"$G_\mathrm{D}$, instrument under test": r"$G_\mathrm{D}$, instrumento en ensayo",
+    r"$G_\mathrm{D,ref}$, reference, Formula (9)": r"$G_\mathrm{D,ref}$, referencia, Fórmula (9)",
+    r"$G_\mathrm{D,ref}$, reference, Formula (10)": r"$G_\mathrm{D,ref}$, referencia, Fórmula (10)",
+    r"$G_\mathrm{D,ref}$, reference, Formula (11)": r"$G_\mathrm{D,ref}$, referencia, Fórmula (11)",
+    _DIFFUSE_DEVIATION_LABEL: _DIFFUSE_DEVIATION_LABEL,
+    "Diffuse-field sensitivity level (IEC 61183)": "Nivel de sensibilidad en campo difuso (IEC 61183)",
 }
 
 
@@ -968,5 +1011,382 @@ def plot_sound_calibrator_verification(
         fontsize="small",
         frameon=False,
     )
+    localize_axes(ax, language)
+    return ax
+
+
+# ---------------------------------------------------------------------------
+# IEC 61183: random-incidence and diffuse-field sensitivity of a sound level
+# meter
+# ---------------------------------------------------------------------------
+
+#: The colours of the planes of a directivity measurement, in plane order.
+_PLANE_COLOURS = (_C_PRIMARY, _C_SECONDARY, _C_TERTIARY, _C_QUATERNARY)
+
+#: The two planes of Annex A, which the legend names by their axes.
+_ANNEX_A_PLANES = 2
+
+#: The curve label of the weights view, by the formula the result applied.
+_WEIGHT_LABELS = {
+    "A.3": r"$K(\phi)$ in each plane",
+    "A.4": r"$2K(\phi)$, one plane for two",
+    "A.5": "1/38 for every direction",
+}
+
+#: The reference-term label of the diffuse-field plot, by route.
+_DIFFUSE_REFERENCE_LABELS = {
+    "random_incidence": r"$G_\mathrm{D,ref}$, reference, Formula (9)",
+    "free_field": r"$G_\mathrm{D,ref}$, reference, Formula (10)",
+    "pressure": r"$G_\mathrm{D,ref}$, reference, Formula (11)",
+}
+
+#: The directions every plane through the reference direction holds.
+_POLES_DEG = (0.0, 180.0)
+
+#: The smallest radial span of the polar response, in dB below and above the
+#: reference level, so a nearly omnidirectional instrument reads as a circle
+#: rather than as noise magnified to fill the plot.
+_POLAR_FLOOR_DB = -5.0
+_POLAR_CEILING_DB = 1.0
+
+#: The legend of the polar response sits below the disc, clear of the angle
+#: labels round its rim.
+_POLAR_LEGEND_ANCHOR = (0.5, -0.2)
+
+#: The top of the weights view over the largest weight.
+_WEIGHTS_HEADROOM = 1.35
+
+#: How far past the outermost radial label the polar range reaches, in radial
+#: steps, so the frame circle clears that label.
+_POLAR_FRAME_MARGIN = 0.8
+
+
+def _plane_label(result: DirectivityFactor, plane_angle: float, language: str) -> str:
+    """The legend entry of one plane of a directivity measurement."""
+    from .._i18n import format_number
+
+    if result.formula == "A.4":
+        return _t("One plane, rotational symmetry", language)
+    if np.unique(result.plane_angles_deg).size == _ANNEX_A_PLANES:
+        if abs(plane_angle) < 1.0:
+            return _t(r"X-Y plane (h), $\alpha$ = 0°", language)
+        return _t(r"X-Z plane (v), $\alpha$ = 90°", language)
+    alpha = format_number(plane_angle, language, decimals=1, trim=True)
+    return _t(r"Plane $\alpha$ = {alpha}°", language, alpha=alpha)
+
+
+def _new_polar() -> Axes:
+    """A fresh figure with one polar axes.
+
+    The figure lays itself out with the legend under the disc inside it: a
+    plain figure places the axes first and leaves the legend, anchored below
+    the rim, hanging off the bottom edge.
+    """
+    from typing import cast
+
+    plt = _import_pyplot()
+    _fig, ax = plt.subplots(subplot_kw={"projection": "polar"}, layout="constrained")
+    return cast("Axes", ax)
+
+
+def _plane_curve(
+    angles: NDArray[np.float64],
+    relative: NDArray[np.float64],
+    planes: NDArray[np.float64],
+    plane: float,
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
+    """The readings of one plane in angle order, with both poles on it.
+
+    The directions at 0° and 180° lie on every plane through the reference
+    direction, and the 38 equal-area readings of Formula (A.5) take them in
+    the horizontal plane only: a plane that lacks one borrows it from the
+    plane that has it, so its curve runs through the pole rather than
+    cutting a chord across it.
+    """
+    mask = np.isclose(planes, plane)
+    theta = angles[mask]
+    level = relative[mask]
+    for pole in _POLES_DEG:
+        if np.any(np.isclose(theta, pole)):
+            continue
+        shared = np.flatnonzero(np.isclose(angles, pole))
+        if shared.size:
+            theta = np.append(theta, pole)
+            level = np.append(level, relative[shared[0]])
+    order = np.argsort(theta)
+    return theta[order], level[order]
+
+
+def _radial_formatter(top: float, language: str) -> FuncFormatter:
+    """Radial tick labels in dB: the numbers, with the unit on the outermost."""
+    from matplotlib.ticker import FuncFormatter
+
+    from .._i18n import format_number
+
+    def _label(value: float, _pos: int | None = None) -> str:
+        text = format_number(value, language, decimals=1, trim=True)
+        return f"{text} dB" if math.isclose(value, top, abs_tol=1e-9) else text
+
+    return FuncFormatter(_label)
+
+
+def _plot_directivity_response(
+    result: DirectivityFactor, ax: Axes | None, language: str, **kwargs: Any
+) -> Axes:
+    r"""Polar :math:`L(\phi) - L_\mathrm{rd}`, one closed curve per plane."""
+    from matplotlib.ticker import MaxNLocator
+
+    from .._i18n import format_number, localize_axes
+    from .electroacoustics import _sign_theta_labels
+
+    if ax is not None and getattr(ax, "name", None) != "polar":
+        msg = (
+            "'ax' must be a polar axes (subplot_kw={'projection': 'polar'}) for "
+            "the response view; pass ax=None to create one."
+        )
+        raise ValueError(msg)
+    ax = ax if ax is not None else _new_polar()
+    polar: Any = ax
+    polar.set_theta_zero_location("N")
+    polar.set_theta_direction(-1)
+    _sign_theta_labels(polar)
+    relative = np.asarray(result.relative_levels_db, dtype=np.float64)
+    angles = np.asarray(result.incidence_angles_deg, dtype=np.float64)
+    planes = np.asarray(result.plane_angles_deg, dtype=np.float64)
+    for index, plane in enumerate(np.unique(planes)):
+        degrees, level = _plane_curve(angles, relative, planes, float(plane))
+        theta = np.radians(degrees)
+        style: dict[str, Any] = dict(kwargs) if index == 0 else {}
+        style_default(style, "color", _PLANE_COLOURS[index % len(_PLANE_COLOURS)])
+        style_default(style, "lw", 1.5)
+        style_default(style, "marker", "o")
+        style_default(style, "ms", 2.5)
+        style.setdefault("label", _plane_label(result, float(plane), language))
+        ax.plot(np.append(theta, theta[0]), np.append(level, level[0]), **style)
+    low = min(_POLAR_FLOOR_DB, float(np.floor(relative.min())) - 1.0)
+    top = max(0.0, float(np.ceil(relative.max())))
+    locator = MaxNLocator(nbins=6, steps=[1, 2, 2.5, 5, 10])
+    ticks = np.asarray(locator.tick_values(low, top), dtype=np.float64)
+    ticks = ticks[(ticks >= low) & (ticks <= top)]
+    step = float(ticks[1] - ticks[0]) if ticks.size > 1 else 1.0
+    # The frame of a polar axes is a circle drawn at the top of the radial
+    # range, and the outermost radial label sits on its own ray just inside
+    # it: the range reaches a fraction of a step past that label, so the
+    # frame does not run through it.
+    high = max(_POLAR_CEILING_DB, float(ticks[-1]) + _POLAR_FRAME_MARGIN * step)
+    ax.set_ylim(low, high)
+    ax.set_yticks(ticks)
+    # The radius is L(phi) - L_rd: the outermost label carries its unit, as
+    # the piston directivity of the electroacoustics plots does.
+    ax.yaxis.set_major_formatter(_radial_formatter(float(ticks[-1]), language))
+    ax.tick_params(axis="both", labelsize="x-small")
+    ax.grid(visible=True, ls=":", lw=0.4, alpha=0.7)
+    di = format_number(result.directivity_index_db, language, decimals=2)
+    ax.set_title(
+        _t(r"Directional response: $10\,\lg\gamma$ = {di} dB", language, di=di)
+    )
+    ax.legend(
+        loc="lower center",
+        bbox_to_anchor=_POLAR_LEGEND_ANCHOR,
+        ncol=2,
+        fontsize="small",
+    )
+    localize_axes(ax, language)
+    return ax
+
+
+def _plot_directivity_weights(
+    result: DirectivityFactor, ax: Axes | None, language: str, **kwargs: Any
+) -> Axes:
+    """The weight of each reading of the first plane, in per cent of the sphere."""
+    from .._i18n import format_number, localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    angles = np.asarray(result.incidence_angles_deg, dtype=np.float64)
+    planes = np.asarray(result.plane_angles_deg, dtype=np.float64)
+    weights = np.asarray(result.weights, dtype=np.float64)
+    first = np.isclose(planes, planes[0])
+    order = np.argsort(angles[first])
+    style_default(kwargs, "color", _C_PRIMARY)
+    style_default(kwargs, "lw", 1.2)
+    style_default(kwargs, "marker", "o")
+    style_default(kwargs, "ms", 3.0)
+    kwargs.setdefault("label", _t(_WEIGHT_LABELS[result.formula], language))
+    ax.plot(angles[first][order], 100.0 * weights[first][order], **kwargs)
+    ax.set_xlim(0.0, 360.0)
+    ax.set_xticks(np.arange(0.0, 361.0, 45.0))
+    # Headroom over the two humps at 90° and 270°, so the legend at the top
+    # centre sits over the dip at 180° and covers no reading.
+    ax.set_ylim(0.0, _WEIGHTS_HEADROOM * 100.0 * float(np.max(weights)))
+    ax.set_xlabel(_t(r"Angle of incidence $\phi$ [°]", language))
+    ax.set_ylabel(_t("Weight [% of the sphere]", language))
+    pct = format_number(100.0 * result.largest_element_fraction, language, decimals=2)
+    # One plane under rotational symmetry weighs each reading 2K: it stands
+    # for the same direction in both planes of Annex A, two elements of the
+    # division the largest element is judged on.
+    title = (
+        r"Weights: two elements to a reading, the largest {pct} % of the sphere"
+        if result.formula == "A.4"
+        else r"Weights of the readings: largest element {pct} % of the sphere"
+    )
+    ax.set_title(_t(title, language, pct=pct))
+    ax.grid(visible=True, alpha=0.3)
+    ax.legend(loc="upper center", fontsize="small")
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_directivity_factor(
+    result: DirectivityFactor,
+    ax: Axes | None = None,
+    *,
+    view: str = "response",
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    r"""The directional response or the weights of an IEC 61183 measurement.
+
+    :param result: A
+        :class:`~phonometry.metrology.random_incidence.DirectivityFactor`.
+    :param ax: Existing axes, or ``None`` to create a figure; the response
+        view needs a polar axes.
+    :param view: ``"response"`` (polar :math:`L(\phi) - L_\mathrm{rd}`, one
+        curve per plane) or ``"weights"`` (the factor of each reading of the
+        first plane against its angle).
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the curve of the first plane.
+    :return: The axes.
+    :raises ValueError: if ``ax`` is not polar for the response view.
+    """
+    if view == "weights":
+        return _plot_directivity_weights(result, ax, language, **kwargs)
+    return _plot_directivity_response(result, ax, language, **kwargs)
+
+
+def plot_random_incidence_sensitivity(
+    result: RandomIncidenceSensitivity,
+    ax: Axes | None = None,
+    *,
+    view: str = "levels",
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    r"""The IEC 61183 random-incidence sensitivity level against frequency.
+
+    :param result: A
+        :class:`~phonometry.metrology.random_incidence.RandomIncidenceSensitivity`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param view: ``"levels"`` (:math:`G_\mathrm{F}` and
+        :math:`G_\mathrm{RI}`) or ``"correction"`` (their difference,
+        :math:`-10\lg\gamma`).
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the first curve drawn.
+    :return: The axes.
+    """
+    from .._i18n import localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    frequencies = np.asarray(result.frequencies_hz, dtype=np.float64)
+    style_default(kwargs, "color", _C_PRIMARY)
+    style_default(kwargs, "lw", 1.5)
+    style_default(kwargs, "marker", "o")
+    style_default(kwargs, "ms", 3.0)
+    if view == "correction":
+        kwargs.setdefault("label", _t(_RI_CORRECTION_LABEL, language))
+        ax.plot(frequencies, result.correction_db, **kwargs)
+        ax.axhline(0.0, color=_C_MUTED, lw=0.8, ls="--")
+        ax.set_ylabel(_t("Correction [dB]", language))
+        ax.set_title(_t("Random-incidence correction (IEC 61183)", language))
+    else:
+        kwargs.setdefault(
+            "label", _t(r"$G_\mathrm{F}$, free field, reference direction", language)
+        )
+        ax.plot(frequencies, result.free_field_level_db, **kwargs)
+        # Open markers on a dashed line: up to about 1 kHz the correction is
+        # nil and G_RI lies on G_F, which must stay visible underneath.
+        ax.plot(
+            frequencies,
+            result.random_incidence_level_db,
+            color=_C_REFERENCE,
+            lw=1.5,
+            ls="--",
+            marker="s",
+            ms=4.5,
+            mfc="none",
+            label=_t(r"$G_\mathrm{RI}$, random incidence", language),
+        )
+        ax.set_ylabel(_t(_SENSITIVITY_LEVEL_LABEL, language))
+        ax.set_title(_t("Random-incidence sensitivity level (IEC 61183)", language))
+    ax.set_xscale("log")
+    format_frequency_axis(ax, language=language)
+    ax.set_xlabel(_t(_FREQUENCY_LABEL, language))
+    ax.grid(visible=True, which="both", alpha=0.3)
+    ax.legend(loc="lower left", fontsize="small")
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_diffuse_field_sensitivity(
+    result: DiffuseFieldSensitivity,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    r"""The IEC 61183 diffuse-field sensitivity level against frequency.
+
+    Draws :math:`G_\mathrm{D}` of the instrument under test, the
+    diffuse-field sensitivity level of the reference it was compared with,
+    and the difference of Formula (8) that joins them.
+
+    :param result: A
+        :class:`~phonometry.metrology.random_incidence.DiffuseFieldSensitivity`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the :math:`G_\mathrm{D}` curve.
+    :return: The axes.
+    """
+    from .._i18n import localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    frequencies = np.asarray(result.frequencies_hz, dtype=np.float64)
+    style_default(kwargs, "color", _C_PRIMARY)
+    style_default(kwargs, "lw", 1.5)
+    style_default(kwargs, "marker", "o")
+    style_default(kwargs, "ms", 3.0)
+    kwargs.setdefault("label", _t(r"$G_\mathrm{D}$, instrument under test", language))
+    ax.plot(frequencies, result.diffuse_field_level_db, **kwargs)
+    # Open markers on the other two: at low frequency the reference corrects
+    # nothing and all three curves can lie on one another.
+    ax.plot(
+        frequencies,
+        result.reference_diffuse_field_level_db,
+        color=_C_SECONDARY,
+        lw=1.2,
+        ls="--",
+        marker="s",
+        ms=4.5,
+        mfc="none",
+        label=_t(_DIFFUSE_REFERENCE_LABELS[result.route], language),
+    )
+    ax.plot(
+        frequencies,
+        result.level_difference_db,
+        color=_C_TERTIARY,
+        lw=1.2,
+        ls=":",
+        marker="^",
+        ms=6.0,
+        mfc="none",
+        label=_t(_DIFFUSE_DEVIATION_LABEL, language),
+    )
+    ax.axhline(0.0, color=_C_MUTED, lw=0.8)
+    ax.set_xscale("log")
+    format_frequency_axis(ax, language=language)
+    ax.set_xlabel(_t(_FREQUENCY_LABEL, language))
+    ax.set_ylabel(_t(_SENSITIVITY_LEVEL_LABEL, language))
+    ax.set_title(_t("Diffuse-field sensitivity level (IEC 61183)", language))
+    ax.grid(visible=True, which="both", alpha=0.3)
+    ax.legend(loc="lower left", fontsize="small")
     localize_axes(ax, language)
     return ax

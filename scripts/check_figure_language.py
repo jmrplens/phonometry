@@ -169,6 +169,9 @@ ENGLISH_BY_DESIGN: dict[str, str] = {
     "reader would type them (calibration data-flow plate)",
     "laeq · sel · lc_peak": "the level functions of the API, listed as the reader would type "
     "them (sound-level-meter pipeline plate)",
+    r"$\Delta G_\mathrm{D} = L_\mathrm{D} - L_\mathrm{D,ref}$": "Formula (8) of IEC 61183 in "
+    "the standard's own symbols; the ref subscript is the one the standard prints, "
+    "and a subscript follows its source (diffuse_field_sensitivity)",
 }
 
 # A run of at least three letters, in any alphabet: shorter runs are unit and

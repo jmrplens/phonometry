@@ -3725,3 +3725,213 @@ def _d_verification_regimes(s: SVG, th: Theme) -> None:
         12,
         th.muted,
     )
+
+
+# ---------------------------------------------------------------------------
+# IEC 61183: the two calibrations of a sound level meter in a field from
+# every direction (clauses 4 and 5, Annexes A and B)
+# ---------------------------------------------------------------------------
+
+
+def _wedge_walls(s: SVG, th: Theme, x0: float, y0: float, w: float, h: float) -> None:
+    """A room in plan with absorbing wedges along its four walls."""
+    s.rect(x0, y0, w, h, th.bg, th.fg, sw=2.2)
+    tooth, depth = 24.0, 14.0
+    x = x0
+    while x + tooth <= x0 + w + 0.5:
+        s.path(
+            f"M {x} {y0} L {x + tooth} {y0} L {x + tooth / 2} {y0 + depth} Z",
+            fill=th.panel,
+            stroke=th.muted,
+            sw=0.9,
+        )
+        s.path(
+            f"M {x} {y0 + h} L {x + tooth} {y0 + h} L {x + tooth / 2} {y0 + h - depth} Z",
+            fill=th.panel,
+            stroke=th.muted,
+            sw=0.9,
+        )
+        x += tooth
+    y = y0 + depth
+    while y + tooth <= y0 + h - depth + 0.5:
+        s.path(
+            f"M {x0} {y} L {x0} {y + tooth} L {x0 + depth} {y + tooth / 2} Z",
+            fill=th.panel,
+            stroke=th.muted,
+            sw=0.9,
+        )
+        s.path(
+            f"M {x0 + w} {y} L {x0 + w} {y + tooth} L {x0 + w - depth} {y + tooth / 2} Z",
+            fill=th.panel,
+            stroke=th.muted,
+            sw=0.9,
+        )
+        y += tooth
+
+
+def _speaker(s: SVG, th: Theme, x: float, y: float, facing: float) -> None:
+    """A loudspeaker in plan, its cone opening towards ``facing`` (+1 or -1)."""
+    s.rect(x - 9, y - 13, 18, 26, th.panel, th.fg, rx=3, sw=1.6)
+    tip = x + facing * 9
+    mouth = x + facing * 23
+    s.path(
+        f"M {tip} {y - 6} L {mouth} {y - 15} L {mouth} {y + 15} L {tip} {y + 6} Z",
+        fill=th.panel,
+        stroke=th.fg,
+        sw=1.6,
+    )
+
+
+def _meter_plan(
+    s: SVG, th: Theme, cx: float, cy: float, heading_deg: float, length: float
+) -> None:
+    """A sound level meter in plan: microphone at (cx, cy), case behind it.
+
+    ``heading_deg`` is the reference direction, measured from +x towards -y
+    (counter-clockwise on the page); the case runs the opposite way.
+    """
+    a = math.radians(heading_deg)
+    ux, uy = math.cos(a), -math.sin(a)
+    px, py = -uy, ux
+    back_x, back_y = cx - length * ux, cy - length * uy
+    half = 11.0
+    neck = 4.0
+    s.path(
+        f"M {cx - 6 * ux + neck * px:.1f} {cy - 6 * uy + neck * py:.1f} "
+        f"L {cx - 26 * ux + half * px:.1f} {cy - 26 * uy + half * py:.1f} "
+        f"L {back_x + half * px:.1f} {back_y + half * py:.1f} "
+        f"L {back_x - half * px:.1f} {back_y - half * py:.1f} "
+        f"L {cx - 26 * ux - half * px:.1f} {cy - 26 * uy - half * py:.1f} "
+        f"L {cx - 6 * ux - neck * px:.1f} {cy - 6 * uy - neck * py:.1f} Z",
+        fill=th.primary,
+        stroke=th.fg,
+        sw=1.4,
+    )
+    s.circle(cx, cy, 5.5, th.fg)
+
+
+def _d_random_incidence_setup(s: SVG, th: Theme) -> None:
+    """IEC 61183: the free-field method (Annex A) beside the diffuse-field
+    method (Annex B), each with the readings it takes in order.
+    """
+    # ===== Free field: anechoic room, the meter on a turntable (A.2, A.4) ===
+    s.text(222, 64, "Free field: anechoic room (4.10, Annex A)", 15, th.fg, bold=True)
+    _wedge_walls(s, th, 22, 78, 400, 300)
+    cx, cy = 262.0, 224.0
+    sx = 58.0
+    _speaker(s, th, sx, cy, 1.0)
+    s.text(40, cy + 44, "source, fixed", 13, th.fg, anchor="start")
+
+    # The X axis: from the microphone towards the source.
+    s.line(sx + 28, cy, cx - 6, cy, th.muted, 1.4, dash="7,5")
+    s.text(96, cy - 10, "X axis", 12, th.muted, anchor="start")
+
+    # Turntable with the acoustical centre of the microphone on its axis.
+    s.circle(cx, cy, 56, th.panel, th.muted, 1.4)
+    phi = 34.0
+    _meter_plan(s, th, cx, cy, 180.0 - phi, 88.0)
+    # Above and to the right of the turntable, clear of its rim, with a leader
+    # to the microphone at its centre.
+    s.line(cx + 5, cy - 5, cx + 24, cy - 48, th.muted, 1.0, dash="3,3")
+    s.text(cx + 30, cy - 66, "microphone on the", 11, th.fg, anchor="start")
+    s.text(cx + 30, cy - 52, "axis of rotation", 11, th.fg, anchor="start")
+    # The reference direction, phi from the X axis.
+    a = math.radians(180.0 - phi)
+    reach = 122.0
+    s.line(
+        cx,
+        cy,
+        cx + reach * math.cos(a),
+        cy - reach * math.sin(a),
+        th.secondary,
+        1.6,
+        dash="5,4",
+    )
+    s.text(
+        cx + (reach + 8) * math.cos(a),
+        cy - (reach + 8) * math.sin(a) - 4,
+        "reference direction",
+        12,
+        th.secondary,
+    )
+    arc_r = 74.0
+    s.path(
+        f"M {cx - arc_r:.1f} {cy:.1f} A {arc_r} {arc_r} 0 0 1 "
+        f"{cx + arc_r * math.cos(a):.1f} {cy - arc_r * math.sin(a):.1f}",
+        stroke=th.secondary,
+        sw=1.6,
+    )
+    mid = math.radians(180.0 - phi / 2)
+    s.text(
+        cx + (arc_r + 14) * math.cos(mid),
+        cy - (arc_r + 14) * math.sin(mid) + 5,
+        "$φ$",
+        16,
+        th.secondary,
+    )
+    # The rotation, in steps, drawn under the turntable.
+    rot_r = 68.0
+    start, end = math.radians(-160.0), math.radians(-20.0)
+    s.path(
+        f"M {cx + rot_r * math.cos(start):.1f} {cy - rot_r * math.sin(start):.1f} "
+        f"A {rot_r} {rot_r} 0 0 0 {cx + rot_r * math.cos(end):.1f} "
+        f"{cy - rot_r * math.sin(end):.1f}",
+        stroke=th.accent,
+        sw=2.0,
+    )
+    hx, hy = cx + rot_r * math.cos(end), cy - rot_r * math.sin(end)
+    s.arrow(hx - 10, hy + 6, hx + 1, hy - 2, th.accent, 2.0)
+    s.text(cx, cy + 100, "turned through 360° in steps of $Δφ$", 13, th.accent)
+
+    # ===== Diffuse field: reverberation room, the two meters in turn ======
+    s.text(
+        672,
+        64,
+        "Diffuse field: reverberation room (5.6, Annex B)",
+        15,
+        th.fg,
+        bold=True,
+    )
+    s.path("M 470 84 L 876 96 L 862 378 L 482 364 Z", fill=th.bg, stroke=th.fg, sw=2.2)
+    _speaker(s, th, 506, 126, 1.0)
+    _speaker(s, th, 834, 336, -1.0)
+    s.text(540, 131, "two uncorrelated sources (B.1.4)", 12, th.muted, anchor="start")
+    # The circular path the microphones are moved along (B.1.3).
+    px, py = 666.0, 236.0
+    s.ellipse(px, py, 96, 46, "none", th.accent, 2.0, dash="7,5")
+    s.text(px, py - 58, "in turn, at the same positions (5.1)", 12, th.fg)
+    _meter_plan(s, th, px - 96, py, 180.0, 64.0)
+    s.text(px - 108, py - 4, "reference", 12, th.primary, anchor="end")
+    s.text(px - 108, py + 16, "$L_{D,ref}$", 13, th.primary, anchor="end")
+    _meter_plan(s, th, px + 96, py, 0.0, 64.0)
+    s.text(px + 108, py - 4, "under test", 12, th.primary, anchor="start")
+    s.text(px + 108, py + 16, "$L_D$", 13, th.primary, anchor="start")
+    s.text(px, py + 72, "circular path, not parallel to any wall,", 12, th.accent)
+    s.text(px, py + 88, "radius ≥ 1 m and ≥ 3 × the meter (B.1.3)", 12, th.accent)
+
+    # ===== The readings, in the order they are taken =======================
+    steps_free = (
+        "1  reference microphone at the centre: $L_o$ (A.3.2)",
+        "2  meter facing the source: $L_{rd}$; $G_F = L_{rd} − L_o$",
+        "3  turn it through 360°: $L(φ, h)$ in the X-Y plane",
+        "4  turn it 90° about its own axis, again: $L(φ, v)$",
+        "5  weight each reading by $K(φ)$: $γ$; $G_{RI} = G_F − 10 lg γ$",
+    )
+    steps_diffuse = (
+        "1  reference meter on the path: $L_{D,ref}$",
+        "2  meter under test on the same path: $L_D$",
+        "3  $ΔG_D = L_D − L_{D,ref}$, Formula (8)",
+        "4  add $G_{D,ref}$ by how the reference was calibrated:",
+        "Formula (9), (10) or (11)",
+    )
+    for k, text in enumerate(steps_free):
+        s.text(26, 414 + 24 * k, text, 13, th.fg, anchor="start")
+    for k, text in enumerate(steps_diffuse):
+        s.text(
+            474 + (22 if k == len(steps_diffuse) - 1 else 0),
+            414 + 24 * k,
+            text,
+            13,
+            th.fg,
+            anchor="start",
+        )

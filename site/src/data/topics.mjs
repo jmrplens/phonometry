@@ -120,6 +120,7 @@ export const topics = [
           'signals/metrology/compliance-verification',
           'signals/metrology/gum-uncertainty',
           'signals/metrology/data-qualification',
+          'signals/metrology/random-incidence',
         ],
       },
       apiGroup('filters', 'signals', 'metrology'),

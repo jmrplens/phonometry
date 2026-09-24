@@ -260,7 +260,7 @@ ISO 1996-1, IEC 60942, IEC 61183 y la GUM.
 - [Cualificación de datos](/phonometry/es/signals/metrology/data-qualification/): los tests
   de estacionariedad por inversiones de orden y por rachas, y las estadísticas
   de Rice de cruces por nivel y de picos con el factor de irregularidad.
-- [Respuesta en incidencia aleatoria y campo difuso (IEC 61183)](/phonometry/es/signals/metrology/random-incidence/):
+- [Incidencia aleatoria y campo difuso (IEC 61183)](/phonometry/es/signals/metrology/random-incidence/):
   el factor de directividad de un sonómetro a partir de lecturas en dos planos,
   en uno o en 38 elementos de igual área, y sus niveles de sensibilidad en
   incidencia aleatoria y en campo difuso.

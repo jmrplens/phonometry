@@ -424,7 +424,7 @@ def _real(value: object, where: str) -> object:
 
 
 def _names(value: object, where: str) -> frozenset[str]:
-    if type(value) is frozenset and all(type(item) is str for item in value):
+    if isinstance(value, frozenset) and all(type(item) is str for item in value):
         return value
     if isinstance(value, (list, tuple, AbstractSet)) and not isinstance(value, str):
         return frozenset(

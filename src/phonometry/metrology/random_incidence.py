@@ -77,7 +77,8 @@ in a pressure field with the difference between its diffuse-field and
 pressure sensitivity levels known. :func:`diffuse_field_sensitivity` takes
 any of the three and returns a :class:`DiffuseFieldSensitivity`. Table B.1
 prints both the directivity factor and that difference for a type LS2aP/LS2F
-laboratory standard microphone, the reference Annex B recommends;
+laboratory standard microphone, one of the two types Annex B
+recommends for the reference (the other is LS2bP);
 :data:`IEC61183_TABLE_B1` holds it and supplies them by default.
 
 Two readings the text leaves to the implementer
@@ -210,10 +211,10 @@ class ReferenceMicrophoneRow:
     r"""One row of IEC 61183:1994 Table B.1.
 
     The characteristics of a type LS2aP/LS2F laboratory standard microphone
-    (IEC 61094-1), the reference Annex B recommends for the diffuse-field
-    method, at one preferred frequency. The table rounds both to 0,05 dB,
-    determined with pure tones, with a measurement uncertainty of ±0,03 dB
-    (B.5).
+    (IEC 61094-1), one of the two types Annex B recommends for the
+    reference of the diffuse-field method, at one preferred frequency. The
+    table rounds both to 0,05 dB, determined with pure tones, with a
+    measurement uncertainty of ±0,03 dB (B.5).
 
     :ivar directivity_index_db: :math:`10\lg\gamma` of the microphone, in dB:
         the directivity factor Formula (10) takes as :math:`\gamma_\mathrm{ref}`.
@@ -1141,7 +1142,8 @@ def diffuse_field_sensitivity(
     ``reference_free_field_level_db`` and ``reference_pressure_level_db``
     selects the formula. For Formulas (10) and (11), the directivity factor
     and the diffuse-to-pressure difference of the reference default to Table
-    B.1, the type LS2aP/LS2F microphone Annex B recommends, at each preferred
+    B.1, the type LS2aP/LS2F microphone, one of the two types Annex B
+    recommends for the reference, at each preferred
     frequency from 25 Hz to 20 kHz.
 
     :param frequencies_hz: The band centres, in Hz, increasing.

@@ -75,7 +75,8 @@ in a pressure field with the difference between its diffuse-field and
 pressure sensitivity levels known. [`diffuse_field_sensitivity`](/phonometry/reference/api/metrology/random-incidence/#diffuse_field_sensitivity) takes
 any of the three and returns a [`DiffuseFieldSensitivity`](/phonometry/reference/api/metrology/random-incidence/#diffusefieldsensitivity). Table B.1
 prints both the directivity factor and that difference for a type LS2aP/LS2F
-laboratory standard microphone, the reference Annex B recommends;
+laboratory standard microphone, one of the two types Annex B
+recommends for the reference (the other is LS2bP);
 [`IEC61183_TABLE_B1`](/phonometry/reference/api/metrology/random-incidence/#iec61183_table_b1) holds it and supplies them by default.
 
 Two readings the text leaves to the implementer
@@ -241,7 +242,8 @@ Exactly one of `reference_random_incidence_level_db`,
 `reference_free_field_level_db` and `reference_pressure_level_db`
 selects the formula. For Formulas (10) and (11), the directivity factor
 and the diffuse-to-pressure difference of the reference default to Table
-B.1, the type LS2aP/LS2F microphone Annex B recommends, at each preferred
+B.1, the type LS2aP/LS2F microphone, one of the two types Annex B
+recommends for the reference, at each preferred
 frequency from 25 Hz to 20 kHz.
 
 **Parameters**
@@ -694,10 +696,10 @@ ReferenceMicrophoneRow(
 One row of IEC 61183:1994 Table B.1.
 
 The characteristics of a type LS2aP/LS2F laboratory standard microphone
-(IEC 61094-1), the reference Annex B recommends for the diffuse-field
-method, at one preferred frequency. The table rounds both to 0,05 dB,
-determined with pure tones, with a measurement uncertainty of ±0,03 dB
-(B.5).
+(IEC 61094-1), one of the two types Annex B recommends for the
+reference of the diffuse-field method, at one preferred frequency. The
+table rounds both to 0,05 dB, determined with pure tones, with a
+measurement uncertainty of ±0,03 dB (B.5).
 
 **Attributes**
 

@@ -1664,8 +1664,9 @@ positions in a reverberation room; the difference of what they indicate,
 sensitivity level of the reference: `G_RI,ref` for a reference calibrated by
 clause 4 (Formula (9)), `G_F,ref - 10 lg gamma_ref` for a free-field
 calibrated one (Formula (10)), `G_P,ref + Delta_DP` for a pressure calibrated
-one (Formula (11)). Table B.1 prints `10 lg gamma` and `Delta_DP` of the type
-LS2aP/LS2F microphone Annex B recommends, and Formulas (10) and (11) take their
+one (Formula (11)). Annex B recommends a type LS2aP/LS2F or LS2bP microphone
+as the reference, Table B.1 prints `10 lg gamma` and `Delta_DP` of the first,
+and Formulas (10) and (11) take their
 correction from it unless told otherwise:
 
 ```python

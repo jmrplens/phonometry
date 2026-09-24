@@ -150,7 +150,7 @@ _CHECK_FREQUENCY_HZ = 1000.0
 
 #: How far a frequency may sit from a frequency the text names (the check
 #: frequency, or a boundary such as "4 kHz") and still be read as it. An exact
-#: base-ten frequency is within 1 % of its nominal value (15 849 Hz against
+#: base-ten frequency is within 1 % of its nominal value (15 849 Hz against
 #: 16 kHz), and adjacent one-twelfth-octave frequencies are 6 % apart.
 _NOMINAL_TOLERANCE = 0.02
 
@@ -1600,8 +1600,8 @@ def _maximum_at(frequency: float, clause: int) -> float:
 
     A frequency within 2 % of a boundary the text names is read as that
     boundary, so an exact base-ten frequency falls in the band its nominal one
-    does: 3 981 Hz, the exact 4 kHz, is "up to and including 4 kHz", and
-    10 000 Hz is "at and above 10 kHz".
+    does: 3 981 Hz, the exact 4 kHz, is "up to and including 4 kHz", and
+    10 000 Hz is "at and above 10 kHz".
     """
     for boundary, inclusive, value in _MAXIMUM_UNCERTAINTY_DB[clause]:
         if inclusive and frequency <= boundary * (1.0 + _NOMINAL_TOLERANCE):

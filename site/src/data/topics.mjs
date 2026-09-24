@@ -121,6 +121,7 @@ export const topics = [
           'signals/metrology/gum-uncertainty',
           'signals/metrology/data-qualification',
           'signals/metrology/random-incidence',
+          'signals/metrology/free-field-corrections',
         ],
       },
       apiGroup('filters', 'signals', 'metrology'),

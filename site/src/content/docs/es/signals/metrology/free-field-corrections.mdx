@@ -1,0 +1,501 @@
+---
+title: "Correcciones de campo libre de un sonómetro (IEC 62585)"
+description: "Lo que la IEC 62585:2012 pide a las correcciones que necesita el ensayo periódico de un sonómetro: el valor de ajuste a la frecuencia de comprobación de la calibración, las correcciones de campo libre para un calibrador multifrecuencia, un acoplador de comparación y un actuador electrostático, el presupuesto de incertidumbre del Anexo I con su factor de cobertura de Welch-Satterthwaite, los máximos de los apartados 9 a 14 como dictamen y como ficha, y las frecuencias exactas del Anexo H."
+references:
+  - type: standard
+    organization: "International Electrotechnical Commission"
+    year: 2012
+    title: "Electroacoustics — Methods to determine corrections to obtain the free-field response of a sound level meter"
+    designation: "IEC 62585:2012"
+    primary: true
+    note: "Los métodos implementados: el valor de ajuste del Anexo A, las correcciones de las Fórmulas (D.7), (E.6) y (F.13), el presupuesto de incertidumbre del Anexo I (Tablas I.1 a I.3), las incertidumbres expandidas máximas de los apartados 9 a 14, la componente de presión estática del apartado 6 y las frecuencias exactas del Anexo H (Tabla H.1). Leída en BS EN 62585:2012, el texto inglés de EN 62585:2012, que es IEC 62585:2012 sin cambios."
+  - type: standard
+    organization: "International Electrotechnical Commission"
+    year: 2013
+    title: "Electroacoustics — Sound level meters — Part 1: Specifications"
+    designation: "IEC 61672-1:2013"
+    note: "Los límites de aceptación de la Tabla 3 con que el ejemplo pondera el ajuste del Anexo A, y las ponderaciones frecuenciales a las que sirven las correcciones."
+  - type: standard
+    organization: "International Electrotechnical Commission"
+    year: 2006
+    title: "Measurement microphones — Part 7: Values for the difference between free-field and pressure sensitivity levels of laboratory standard microphones"
+    designation: "IEC/TS 61094-7:2006"
+    note: "La corrección de campo libre del micrófono de referencia, C_FF,RM, que todos los métodos toman como entrada. Los valores de esta página son ilustrativos, no están leídos de ella."
+  - type: standard
+    organization: "Joint Committee for Guides in Metrology"
+    year: 2008
+    title: "Evaluation of measurement data — Guide to the expression of uncertainty in measurement"
+    designation: "JCGM 100:2008, the GUM"
+    publisher: "BIPM"
+    url: "https://www.bipm.org/documents/20126/2071204/JCGM_100_2008_E.pdf"
+    doi: "10.59161/JCGM100-2008E"
+    note: "La ley de propagación de la incertidumbre y los grados de libertad efectivos de Welch-Satterthwaite (anexo G.4) sobre los que se construye el presupuesto del Anexo I. Publicada también como ISO/IEC Guide 98-3:2008."
+---
+
+import ReportPreview from '../../../../../components/ReportPreview.astro';
+import Scope from '../../../../../components/Scope.astro';
+import ScopeClaim from '../../../../../components/ScopeClaim.astro';
+import SeeAlso from '../../../../../components/SeeAlso.astro';
+import ThemeImage from '../../../../../components/ThemeImage.astro';
+
+El ensayo periódico de un sonómetro según la IEC 61672-3 no mete el sonómetro
+en una cámara anecoica. Excita el micrófono con un calibrador acústico, un
+acoplador de comparación o un actuador electrostático, y ninguno de ellos es
+la onda plana progresiva para la que está especificado el sonómetro: el
+micrófono y la caja responden de otra manera a una presión en una cavidad
+pequeña, o a una fuerza electrostática sobre el diafragma, que a una onda que
+llega de frente. El ensayo necesita por eso, a cada frecuencia, la
+**corrección** que convierte lo que indica el sonómetro sobre esa fuente en lo
+que indicaría en un campo libre del mismo nivel, y el fabricante tiene que
+declararla en el manual. La IEC 62585:2012 da los métodos para obtener esas
+correcciones, la incertidumbre que pueden llevar y el valor de ajuste que el
+manual da a la frecuencia de comprobación de la calibración.
+
+Esta página recorre cada paso sobre un sonómetro sintético de clase 1 y sobre
+los dos presupuestos resueltos que imprime la norma.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/free_field_correction.svg" alt="Dos paneles frente a la frecuencia en las nueve octavas exactas de 63 Hz a 16 kHz. Izquierda: la corrección de campo libre de un sonómetro sintético con un calibrador multifrecuencia por la Fórmula (D.7), cerca de 0 dB hasta 1 kHz y subiendo a 0,6 dB a 4 kHz, 1,7 dB a 8 kHz y 5 dB a 16 kHz, una banda estrecha a su alrededor para el intervalo de tres micrófonos, y la corrección de campo libre del micrófono de referencia en trazos debajo. Derecha: la corrección del mismo sonómetro con un actuador electrostático por la Fórmula (F.13), nula a 1 kHz por construcción y subiendo a 7,4 dB a 16 kHz, con la sensibilidad normalizada del canal de referencia en trazos" width="100%" />
+
+*La corrección del sonómetro sintético con su calibrador (izquierda) y con un
+actuador electrostático (derecha), con el propio `.plot()` de los resultados.*
+
+## 1. El valor de ajuste a la frecuencia de comprobación de la calibración
+
+Un sonómetro se ajusta en uso aplicando su calibrador y fijando la lectura.
+Lo que debe leer no es el nivel declarado del calibrador, $L_1$: el fabricante
+fija antes la sensibilidad para que la **respuesta en campo libre** del
+sonómetro se aparte lo menos posible del nivel incidente en todo el intervalo
+de frecuencias, y solo entonces aplica el calibrador y lee $L_4$. El manual da
+el **valor de ajuste** (Anexo A)
+
+$$
+\Delta L = L_1 - L_4
+$$
+
+como un número fijo, sin incertidumbre (apartado 8), y puede dejar un desfase
+deliberado en la propia frecuencia de comprobación de la calibración, porque
+el ajuste se hace sobre todo el intervalo (NOTA 1 del apartado 8).
+
+El texto pide la sensibilidad que minimiza «the averaged deviation» y dice que
+los límites de tolerancia de la IEC 61672-1, que varían con la frecuencia,
+«shall be taken into account», pero no imprime ninguna fórmula.
+`metrology.adjustment_value` toma la lectura por mínimos cuadrados: el ajuste
+$s$ minimiza $\sum_i w_i (d_i + s)^2$, siendo $d_i$ la desviación a la
+frecuencia $i$ y $w_i = 1/t_i^2$ para una tolerancia $t_i$, de modo que una
+banda con tolerancia estrecha tira del ajuste más que una con tolerancia
+holgada:
+
+$$
+s = -\frac{\sum_i w_i d_i}{\sum_i w_i},
+\qquad
+L_4 = L_4' + s
+$$
+
+siendo $L_4'$ lo que el sonómetro lee sobre el calibrador con la sensibilidad
+con que se tomaron las lecturas en campo libre. Aquí las tolerancias son el
+lado más estrecho de los límites de aceptación de clase 1 de la Tabla 3 de la
+IEC 61672-1, que guarda `filters.weighting_class_limits`:
+
+```python
+import numpy as np
+from phonometry import filters, metrology
+
+f3 = metrology.exact_frequencies(63, 16000, fraction=3)   # 25 tercios de octava exactos
+nominal, lower, upper = filters.weighting_class_limits(1)  # IEC 61672-1 Tabla 3, clase 1
+band = (nominal >= 63) & (nominal <= 16000)
+tolerance = np.minimum(upper, -lower)[band]                # el lado más estrecho en cada banda
+
+x3 = f3 / 1000
+response = 0.4 + 0.12 * np.cos(3 * np.log(x3)) - 0.3 * (x3 / 8) ** 2   # indicación menos campo, dB
+a = metrology.adjustment_value(
+    f3,
+    94.0 + response,           # el sonómetro en un campo libre de 94 dB, antes del ajuste
+    94.35,                     # L4': el mismo sonómetro sobre su calibrador
+    calibrator_level_db=94.0,  # L1, declarado para el calibrador
+    tolerance_db=tolerance,
+)
+print(round(a.sensitivity_adjustment_db, 2), round(a.adjustment_db, 2))  # -0.37 0.02
+print(round(a.check_frequency_offset_db, 2))                           # 0.15
+a.plot(language="es")
+```
+
+El ajuste baja la sensibilidad 0,37 dB, el calibrador pasa a leer 93,98 dB y
+el manual da $\Delta L = 0{,}02$ dB. A 1 kHz el sonómetro ajustado lee un
+campo libre 0,15 dB alto, $L_2 - L_1$: es el desfase que eligió el ajuste para
+que la respuesta quede dentro de las tolerancias en todas las demás bandas.
+Una tolerancia `np.inf` deja una banda fuera del ajuste, y
+`pressure_indicated_level_db=` añade la respuesta en campo de presión, de la
+que salen `pressure_to_free_field_correction_db` y $L_3$.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/free_field_adjustment.svg" alt="La desviación de la indicación en campo libre del sonómetro sintético respecto del nivel incidente en los 25 tercios de octava de 63 Hz a 16 kHz, antes del ajuste (gris en trazos, de unos +0,3 a +0,5 dB hasta 8 kHz y bajando a -0,8 dB a 16 kHz) y después (continua, 0,37 dB más baja, a menos de 0,15 dB de cero hasta 6,3 kHz y -1,2 dB a 16 kHz), dentro de la banda sombreada de tolerancia de más o menos 1 dB que se estrecha a 0,7 dB a 1 kHz y se ensancha a 2,5 dB a 16 kHz, con una línea de puntos en la frecuencia de comprobación de la calibración de 1 kHz; el título dice Valor de ajuste Delta L = L1 - L4 = 0,02 dB" width="88%" />
+
+*La respuesta en campo libre antes y después del ajuste, dentro de las
+tolerancias de clase 1 con que se ponderó.*
+
+## 2. Cómo se hace la medida
+
+Todos los métodos comparan el sonómetro con un **micrófono patrón de
+laboratorio de tipo LS2P**, cuya corrección de campo libre $C_\mathrm{FF,RM}$
+se conoce por la IEC/TS 61094-7, primero en un campo libre progresivo y
+después sobre la fuente. La comparación es por sustitución (Anexo G): se mide
+el sonómetro, se retira y se coloca la referencia en su lugar, de modo que
+ninguno de los dos necesita una calibración absoluta.
+
+| Requisito | Valor | Apartado |
+| :--- | :--- | :--- |
+| Ambiente | De 80 kPa a 105 kPa, de 20 °C a 26 °C, de 25 % a 70 % de humedad relativa; por debajo de 97 kPa entra una componente más en el presupuesto | 6 |
+| Condiciones de referencia | 23 °C, 101,325 kPa, 50 % de humedad relativa | 4 |
+| Montaje en campo libre | Sobre una varilla del diámetro del micrófono; la fuente a más de 1 m y a no menos de seis veces la mayor dimensión del sonómetro; sonido en la dirección de referencia | 6 |
+| Soporte del sonómetro | Una varilla no vertical por detrás, métodos 1 o 2 de la Figura 1 (el 2 con menos de 60°); el método 3 no se usa | 6 |
+| Muestras | Tres calibradores, tres micrófonos y un sonómetro; cinco micrófonos para una respuesta típica, cinco pantallas antiviento | 7 |
+| Nivel de la fuente | De 70 dB a 125 dB en un calibrador o un acoplador, preferiblemente el nivel de referencia a 1 kHz; de 80 dB a 105 dB en la pantalla con un actuador | 12, 13, 14 |
+| Frecuencias | Octavas de 63 Hz a 16 kHz (clase 1) o 8 kHz (clase 2) para un micrófono; frecuencias exactas en base diez del Anexo H | 10, B.2, C.2 |
+| Determinaciones | Nueve para un calibrador (tres micrófonos con tres calibradores), tres micrófonos para un acoplador, las combinaciones del apartado 7 para un actuador; la corrección es su media | D.2, E.2, F.2 |
+
+## 3. Las correcciones para un calibrador, un acoplador y un actuador
+
+**Anexo D, un calibrador acústico multifrecuencia.** Cuatro lecturas (Figura
+D.1): el sonómetro en campo libre, $L_\mathrm{ind1}$; la referencia en su
+lugar, $L_\mathrm{ind2}$; el calibrador sobre el sonómetro, $L_\mathrm{ind3}$;
+el mismo calibrador sobre la referencia, $L_\mathrm{ind4}$. La corrección es la
+respuesta en campo libre del sonómetro respecto de su respuesta sobre el
+calibrador, trasladada desde la referencia:
+
+$$
+C_\mathrm{FF,SLM} = (L_\mathrm{ind1} - L_\mathrm{ind3})
+- (L_\mathrm{ind2} - L_\mathrm{ind4})
+- (L_{p,\mathrm{F1}} - L_{p,\mathrm{F2}})
++ (L_{p,\mathrm{P1}} - L_{p,\mathrm{P2}}) + C_\mathrm{FF,RM}
+\tag{D.7}
+$$
+
+donde las dos diferencias de nivel son la deriva del campo libre entre las dos
+primeras medidas y la diferencia del nivel del calibrador sobre los dos
+micrófonos, ambas nulas con fuentes estables. Cada lectura puede ser una fila
+por determinación, y el resultado las conserva todas:
+
+```python
+f = metrology.exact_frequencies(63, 16000, fraction=1)   # las nueve octavas exactas
+x = f / 1000
+c_ff_rm = 0.05 * x**1.3                        # C_FF,RM de la referencia: ilustrativa
+free = 0.1 * np.sin(np.log(x)) - 0.05 * x**1.2  # el sonómetro en campo libre, respecto del campo
+pressure = -0.1 * x**1.5                        # el sonómetro sobre el calibrador, respecto de su nivel
+spread = np.array([[0.0], [0.02], [-0.03]]) * x**0.8   # tres micrófonos del modelo
+
+c = metrology.sound_calibrator_correction(
+    f,
+    94.0 + free + spread,          # L_ind1: el sonómetro en campo libre
+    94.0 + c_ff_rm,                # L_ind2: la referencia en su lugar
+    94.0 + pressure + spread / 2,  # L_ind3: el calibrador sobre el sonómetro
+    94.0,                          # L_ind4: el calibrador sobre la referencia
+    reference_free_field_correction_db=c_ff_rm,
+)
+print(c.correction_db.round(2))  # [-0.04 -0.09 -0.1  -0.05  0.05  0.23  0.63  1.72  4.95]
+print(c.range_db.round(2))       # [0.   0.   0.01 0.01 0.02 0.04 0.08 0.13 0.23]
+print(c.clause, c.formula)       # 12 D.7
+c.plot(language="es")
+```
+
+Los valores de `c_ff_rm` solo ocupan el lugar de la corrección de campo libre
+de un micrófono de referencia real; la suya sale de la IEC/TS 61094-7 o de la
+calibración del micrófono. La corrección crece por encima de 2 kHz porque el
+calibrador presiona el diafragma, mientras que un campo libre además se
+difracta alrededor del micrófono y de la caja.
+
+**Anexo E, un acoplador de comparación.** El sonómetro y la referencia se
+enfrentan en las dos aberturas de una misma cavidad, así que la tercera medida
+lee los dos a la vez. `metrology.comparison_coupler_correction` toma las
+mismas lecturas en campo libre y las dos lecturas en el acoplador,
+`slm_coupler_level_db` y `reference_coupler_level_db`, nombradas por lo que
+mide cada una. Ese nombre es a propósito: la Figura E.1, su lista de símbolos y
+la Tabla I.1 llaman $L_\mathrm{ind3a}$ a la lectura de la referencia y
+$L_\mathrm{ind3b}$ a la del sonómetro, mientras que las Fórmulas (E.4) a (E.6)
+están escritas al revés, como las (D.5) a (D.7) para un calibrador. Leída con
+las etiquetas de la figura, la (E.6) impresa queda a dos veces la diferencia
+entre las dos respuestas de presión de la corrección, lo que llega a
+decibelios por encima de unos pocos kilohercios; el defecto está en el
+[registro de erratas](/phonometry/es/reference/errata/).
+
+**Anexo F, un actuador electrostático.** Un actuador no es una fuente
+absoluta, así que su corrección se **normaliza** a la frecuencia de
+comprobación de la calibración $f_0$, donde es nula, y la respuesta absoluta
+allí sale de un calibrador acústico (NOTA 2 de F.2). Cada término se refiere a
+$f_0$, $X_\mathrm{N} = X(f) - X(f_0)$, y la referencia aporta su sensibilidad
+en campo libre $S_\mathrm{RM}$ y la ganancia de su canal $G_\mathrm{RC}$:
+
+$$
+C_\mathrm{N,FF,SLM} = R_\mathrm{N,ind1} - R_\mathrm{N,ind2}
+- (R_\mathrm{N,p,F1} - R_\mathrm{N,p,F2}) + S_\mathrm{N,RM}
++ G_\mathrm{N,RC} - (R_\mathrm{N,ind3} - R_\mathrm{N,EA})
+\tag{F.13}
+$$
+
+```python
+e = metrology.electrostatic_actuator_correction(
+    f,
+    94.0 + free + spread,                  # L_ind1(f)
+    94.0 - 26.0 + c_ff_rm,                 # L_ind2(f): el canal de referencia, dB re 1 V
+    94.0 - 0.08 * x**1.7 + spread / 2,     # L_ind3(f): el actuador sobre el sonómetro
+    reference_sensitivity_level_db=-26.0 + c_ff_rm,   # S_RM(f), dB re 1 V/Pa
+)
+print(e.correction_db.round(2))  # [-0.07 -0.12 -0.13 -0.09  0.    0.18  0.64  2.16  7.39]
+```
+
+Se supone que la tensión de excitación del actuador no depende de la
+frecuencia, de modo que su nivel simulado es el mismo a $f$ y a $f_0$ (NOTA 4);
+se pasa `actuator_level_db=` cuando no es así, y `reference_channel_gain_db=`
+para un canal de referencia que no sea plano.
+
+## 4. El presupuesto de incertidumbre del Anexo I
+
+La Tabla I.1 enumera quince componentes probables de la incertidumbre de una
+corrección medida con un acoplador de comparación, cada una con la
+distribución que fija su divisor: la semianchura de una distribución
+rectangular entre $\sqrt{3}$ para la mayoría, la incertidumbre expandida de
+$C_\mathrm{FF,RM}$ según la IEC/TS 61094-7 entre 2, y la repetibilidad de las
+medidas repetidas entre 1, con sus grados de libertad. Las Tablas I.2 e I.3 la
+rellenan a 1 kHz y a 8 kHz. `metrology.correction_uncertainty_budget`
+construye el presupuesto sobre `metrology.combine_uncertainty`, con cada
+componente como una corrección que entra en la Fórmula (E.6) con coeficiente
+de sensibilidad $\pm 1$, y toma el factor de cobertura de los grados de
+libertad efectivos de Welch-Satterthwaite para un nivel de confianza del 95 %
+(apartado 5):
+
+$$
+u_\mathrm{c}^2 = \sum_{i=1}^{15} u_i^2,
+\qquad
+\nu_\mathrm{eff} = \frac{u_\mathrm{c}^4}{\sum_i u_i^4/\nu_i},
+\qquad
+U = t_{0{,}975}(\nu_\mathrm{eff})\, u_\mathrm{c}
+$$
+
+```python
+table_i2 = {
+    "a1": 0.005, "a2": 0.005, "a3": 0.005, "a4": 0.005,   # las cuatro lecturas de nivel
+    "a5": 0.05, "a6": 0.0,                                  # las dos diferencias de nivel
+    "a7": 0.06,                                             # U de C_FF,RM (k = 2)
+    "a8": 0.025, "a9": 0.025, "a10": 0.029,                 # ganancias y distancia
+    "a11": 0.013, "a12": 0.013, "a13": 0.0, "a14": 0.005,   # campo, soportes, diámetros, redondeo
+    "a15": 0.03,                                            # repetibilidad (k = 1)
+}
+b1 = metrology.correction_uncertainty_budget(table_i2, repeatability_dof=2, frequency_hz=1000)
+print(round(b1.combined_uncertainty_db, 4), round(b1.effective_dof, 2))   # 0.059 29.98
+print(round(b1.coverage_factor, 2), round(b1.expanded_uncertainty_db, 2))  # 2.04 0.12
+
+table_i3 = {**table_i2, "a7": 0.17, "a11": 0.104, "a12": 0.104, "a15": 0.06}
+b8 = metrology.correction_uncertainty_budget(table_i3, repeatability_dof=2, frequency_hz=8000)
+print(round(b8.combined_uncertainty_db, 3), round(b8.coverage_factor, 2),
+      round(b8.expanded_uncertainty_db, 2))                                # 0.14 2.0 0.28
+```
+
+Las dos tablas se reproducen: 0,0590 dB y 29,98 grados de libertad a 1 kHz,
+0,140 dB, $k = 2$ y 0,28 dB a 8 kHz. La Tabla I.2 imprime, sin embargo,
+$k = 2{,}11$, y ese no es el factor que dan sus propios 29,98 grados de
+libertad. Al 95 % el factor de Student para 29,98 es 2,04; 2,11 es el de unos
+17. La incertidumbre expandida que dan los números de la página es
+0,120 dB, que se imprime 0,12 en cualquier caso, pero el dígito de guarda de
+la tabla, 0,12(4), es obra del $k$ mal impreso; el caso está en el [registro
+de erratas](/phonometry/es/reference/errata/). Por debajo de 97 kPa,
+`static_pressure_kpa=` añade la componente del apartado 6 (0,15 dB hasta
+3 kHz, 0,25 dB por encima, $k = 2$), y `additional_components=` admite
+cualquier componente que necesite el método propio de un laboratorio, como la
+excitación de un actuador.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/free_field_uncertainty.svg" alt="Dos gráficos de barras de la incertidumbre típica de cada una de las quince componentes de la Tabla I.1 de la IEC 62585, rotuladas de a1 a a15. Izquierda, a 1000 Hz: las barras mayores son a7, la corrección de campo libre del micrófono de referencia, y a15, la repetibilidad, ambas de 0,030 dB, y después a5 con 0,029 dB; la incertidumbre típica combinada de 0,0590 dB se marca en trazos y el título dice nu_eff = 29,98, k = 2,04, U = 0,121 dB. Derecha, a 8000 Hz: a7 crece a 0,085 dB y a11 y a12, el campo libre y los soportes, a 0,060 dB cada una, con la repetibilidad en 0,060 dB; la incertidumbre típica combinada es 0,1400 dB y el título dice nu_eff = 59,33, k = 2,00, U = 0,280 dB. La barra de la repetibilidad lleva un segundo color como única componente de tipo A" width="100%" />
+
+*Los presupuestos de las Tablas I.2 e I.3, una barra por componente y la
+estadística aparte.*
+
+## 5. La incertidumbre máxima permitida, y el dictamen
+
+Cada apartado fija la mayor incertidumbre expandida que puede llevar una
+corrección y seguir usándose para el manual (apartado 5); una medición que
+supere alguna no se usa. El límite es inclusivo: «shall not exceed» deja pasar
+un valor igual a su máximo.
+
+| Apartado | Corrección para | Incertidumbre expandida máxima |
+| :--- | :--- | :--- |
+| 9 | Reflexiones en la caja, difracción alrededor del micrófono | 0,25 dB hasta 4 kHz inclusive; 0,35 dB por encima |
+| 10 | La desviación del micrófono respecto de una respuesta uniforme | 0,25 dB de 63 Hz a 4 kHz; 0,35 dB hasta 8 kHz; 0,45 dB por encima |
+| 11 | Pantallas antiviento y accesorios similares | 0,20 dB hasta 4 kHz inclusive; 0,30 dB por encima |
+| 12, 13, 14 | Un calibrador, un acoplador, un actuador | 0,25 dB hasta 4 kHz inclusive; 0,35 dB por debajo de 10 kHz; 0,50 dB desde 10 kHz |
+
+Los apartados 10 y 11 excluyen la variabilidad entre muestras del micrófono o
+del accesorio. Para un calibrador, un acoplador o un actuador, los apartados
+12 a 14 añaden un segundo requisito sobre el micrófono: si el intervalo de las
+correcciones medidas con tres micrófonos supera el máximo a una frecuencia, el
+micrófono no es adecuado para esa fuente salvo que más muestras demuestren lo
+contrario. `metrology.verify_correction_uncertainty` juzga los dos, y una
+frecuencia a menos del 2 % de un límite se lee como ese límite, así que los
+3 981 Hz exactos de la banda de 4 kHz quedan «hasta 4 kHz inclusive». Aquí cada
+octava de la corrección del calibrador recibe un presupuesto como el de la
+Tabla I.2 por debajo de 1 kHz, con una referencia, un campo y una repetibilidad
+que crecen por encima:
+
+```python
+print(metrology.maximum_expanded_uncertainty(f, clause=c.clause))
+# [0.25 0.25 0.25 0.25 0.25 0.25 0.25 0.35 0.5 ]
+
+a7 = [0.06, 0.06, 0.06, 0.06, 0.06, 0.08, 0.10, 0.17, 0.30]     # U de C_FF,RM, k = 2
+a11 = [0.013, 0.013, 0.013, 0.013, 0.013, 0.03, 0.06, 0.104, 0.18]  # campo y soportes
+a15 = [0.03, 0.03, 0.03, 0.03, 0.03, 0.04, 0.05, 0.06, 0.09]    # repetibilidad
+budgets = [
+    metrology.correction_uncertainty_budget(
+        {**table_i2, "a7": u7, "a11": u11, "a12": u11, "a15": u15},
+        repeatability_dof=2,
+        frequency_hz=fx,
+        correction_db=cx,
+    )
+    for fx, u7, u11, u15, cx in zip(f, a7, a11, a15, c.correction_db, strict=True)
+]
+v = metrology.verify_correction_uncertainty(
+    f,
+    [b.expanded_uncertainty_db for b in budgets],
+    clause=c.clause,
+    correction_db=c.correction_db,
+    coverage_factor=[b.coverage_factor for b in budgets],
+    correction_range_db=c.range_db,
+)
+print(v.passes)              # True
+print(v.margin_db.round(2))  # [0.13 0.13 0.13 0.13 0.13 0.1  0.06 0.07 0.04]
+v.plot(language="es")
+v.report("correcciones-campo-libre.pdf", language="es")
+```
+
+El dictamen es el objeto, no un booleano: `v.passes` es la respuesta,
+`failing_frequencies_hz` dice dónde falla y `bool(v)` lanza una excepción en
+lugar de dejar que `if verify_correction_uncertainty(...):` dé por buena
+cualquier medición. El margen más justo está a 16 kHz, 0,04 dB por debajo de
+los 0,50 dB del apartado 12.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/free_field_verification.svg" alt="La incertidumbre expandida de las correcciones del calibrador en las nueve octavas exactas de 63 Hz a 16 kHz, 0,12 dB hasta 1 kHz y subiendo a 0,28 dB a 8 kHz y 0,46 dB a 16 kHz, por debajo del máximo escalonado del apartado 12, 0,25 dB hasta 4 kHz, 0,35 dB por encima y 0,50 dB desde 10 kHz, con el intervalo de las correcciones entre los tres micrófonos por debajo de ambos, de 0,003 dB a 0,23 dB; el título dice Apartado 12: dentro del máximo en todas las frecuencias" width="88%" />
+
+*La incertidumbre expandida y el intervalo entre micrófonos, por debajo del
+máximo del apartado 12.*
+
+`.report()` genera lo que los puntos n) y o) del apartado 15 piden que emita
+el laboratorio: las correcciones con sus incertidumbres expandidas y sus
+factores de cobertura, y una declaración de si las incertidumbres están dentro
+de los valores máximos permitidos. La ficha de ejemplo se regenera con
+`make reports` y se guarda generada en el repositorio; pulse la vista previa
+para abrir el PDF.
+
+<ReportPreview
+	name="iec62585_free_field_correction_example"
+	title="Informe de ejemplo de correcciones de campo libre IEC 62585 (PDF)"
+	description="Ficha de una página para las correcciones de un sonómetro de clase 1 con su calibrador multifrecuencia: una cabecera de metadatos, la línea de base que cita el apartado 12 de la IEC 62585:2012, una tabla de las nueve octavas exactas de 63,1 Hz a 15 848,9 Hz con la corrección, la incertidumbre expandida, el factor de cobertura, el máximo, el intervalo entre tres micrófonos y el dictamen en cada una, el gráfico de la verificación al lado, la declaración recuadrada de que está dentro de los valores máximos permitidos del apartado 12 en las 9 frecuencias con un mayor U / Umáx de 0,92, y un dictamen PASS."
+	caption="Ficha de correcciones de campo libre (CorrectionUncertaintyVerification.report): las correcciones con su incertidumbre frente al máximo del apartado 12."
+/>
+
+## 6. Frecuencias exactas
+
+Las correcciones se miden y se dan a frecuencias **exactas** en base diez, no
+a las nominales (apartado 10, B.2, C.2). El Anexo H las da por la Fórmula
+(H.1),
+
+$$
+f_x = f_\mathrm{r}\, 10^{3x/(10b)},
+\qquad f_\mathrm{r} = 1000\ \mathrm{Hz}
+$$
+
+para todo entero $x$, con $b = 12$ para pasos de doceavo de octava; la Tabla
+H.1 imprime la década de 1 kHz a 10 kHz con siete cifras significativas.
+`metrology.exact_frequencies` la evalúa para cualquier designador, y las
+octavas y los tercios de arriba salieron de ella:
+
+```python
+h = metrology.exact_frequencies(1000, 10000)   # las 41 filas de la Tabla H.1
+print(h.size, (h[[1, 31, 40]] / 1000).round(6))   # 41 [ 1.059254  5.956621 10.      ]
+```
+
+Los 41 valores se reproducen. La columna de exponentes imprime $10^{31/80}$
+para el índice 31, cuando su propio valor es $10^{31/40}$; la biblioteca evalúa
+la fórmula y nunca lee esa columna.
+
+<details>
+<summary>Mostrar el código de estas figuras</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+fig, (ax_calibrator, ax_actuator) = plt.subplots(1, 2, figsize=(13.5, 5.6))
+c.plot(ax_calibrator, language="es")
+e.plot(ax_actuator, language="es")
+fig.tight_layout()
+
+fig, ax = plt.subplots(figsize=(10, 6))
+a.plot(ax, language="es")
+fig.tight_layout()
+
+fig, (ax_1k, ax_8k) = plt.subplots(1, 2, figsize=(13.5, 6.4))
+b1.plot(ax_1k, language="es")
+b8.plot(ax_8k, language="es")
+fig.tight_layout()
+
+fig, ax = plt.subplots(figsize=(10, 6))
+v.plot(ax, language="es")
+fig.tight_layout()
+plt.show()
+```
+
+</details>
+
+## Qué cubre esta guía
+
+<Scope>
+<ScopeClaim status="covered" label="Cubierto">
+**IEC 62585:2012, los cálculos de todos los métodos:** el valor de ajuste del
+Anexo A, con la corrección de presión a campo libre y los niveles $L_1$ a
+$L_4$ de la Figura A.1; las correcciones de campo libre para un calibrador
+acústico multifrecuencia (Fórmula (D.7)), un acoplador de comparación (Fórmula
+(E.6), con las lecturas nombradas por lo que miden) y un actuador
+electrostático (Fórmula (F.13), normalizada a la frecuencia de comprobación de
+la calibración), promediadas entre las determinaciones y conservando su
+intervalo; el presupuesto de incertidumbre del Anexo I con las quince
+componentes de la Tabla I.1, la componente de presión estática del apartado 6
+y el factor de cobertura de Welch-Satterthwaite; los máximos de los apartados
+9 a 14 y el requisito sobre el intervalo de los apartados 12 a 14 como
+dictamen y como ficha; y las frecuencias exactas del Anexo H. Las Tablas I.2,
+I.3 y H.1 se reproducen.
+</ScopeClaim>
+
+<ScopeClaim status="covered" label="Cubierto, con una lectura del texto">
+**El ajuste del Anexo A.** La norma pide la sensibilidad que minimiza la
+desviación promediada teniendo en cuenta las tolerancias, y no imprime ninguna
+fórmula; el ajuste por mínimos cuadrados ponderado con $1/t^2$ es la lectura
+de esta biblioteca, y un fabricante que optimice otro criterio declara otro
+valor de ajuste.
+</ScopeClaim>
+
+<ScopeClaim status="not-covered" label="No cubierto">
+Las mediciones en sí: el campo libre, el montaje del sonómetro y del
+micrófono, las técnicas de ventana temporal y de régimen estacionario del
+Anexo G, y la corrección de campo libre del micrófono de referencia, que sale
+de la IEC/TS 61094-7 o de su calibración y aquí es una entrada. La
+comparación de las correcciones declaradas con los límites de aceptación de la
+IEC 61672-1, que el punto p) del apartado 15 pide aparte, y el ensayo
+periódico de la IEC 61672-3 que usa las correcciones no se implementan en esta
+página.
+</ScopeClaim>
+</Scope>
+
+<SeeAlso>
+
+## Véase también
+
+- [Incidencia aleatoria y campo difuso](/phonometry/es/signals/metrology/random-incidence/):
+  la IEC 61183, la respuesta del sonómetro al sonido que llega de todas las
+  direcciones, a la que esta norma remite para un micrófono de incidencia
+  aleatoria.
+- [Incertidumbre de medida](/phonometry/es/signals/metrology/gum-uncertainty/):
+  la ley de propagación de la GUM y los grados de libertad de
+  Welch-Satterthwaite sobre los que se construye el presupuesto.
+- [Conformidad y verificación](/phonometry/es/signals/metrology/compliance-verification/):
+  lo que afirma la clase de un sonómetro según la IEC 61672-1, y cuáles de sus
+  ensayos ejecuta la biblioteca.
+- [Calibración y dBFS](/phonometry/es/signals/metrology/calibration/): el tono
+  del calibrador que fija la sensibilidad a la presión de la que parte todo
+  nivel de un sonómetro.
+- Referencia de la API: [`metrology.free_field_corrections`](/phonometry/es/reference/api/metrology/free-field-corrections/).
+
+</SeeAlso>

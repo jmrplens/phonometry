@@ -1946,7 +1946,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
 - **El impreso:** «(normal) **k = 2,11**» junto a «Effective degree of freedom
   = 29,98», con la incertidumbre expandida impresa «0,12» y un dígito de guarda
   en subíndice «(4)», es decir 0,124 dB, sobre una incertidumbre típica
-  combinada de «0,059 0» dB.
+  combinada de «0,059 0» dB.
 - **El problema:** el apartado 5 pide el factor de cobertura que da un nivel
   de confianza del 95 %, y el Anexo I calcula los grados de libertad efectivos
   por Welch-Satterthwaite «thereby enabling the coverage factor k to be
@@ -1976,7 +1976,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
 - **Ubicación:** Anexo H, Tabla H.1 «Exact frequencies for one-twelfth-octave
   steps over one decade» (folio impreso 35), la fila del índice 31.
 - **El impreso:** «Exact $f_x$» **$10^{31/80}$**, junto a «Exact $f_x$
-  calculated» 5,956 621 kHz.
+  calculated» 5,956 621 kHz.
 - **El problema:** todas las demás filas imprimen el exponente $x/40$, que es
   la Fórmula (H.1), $f_x = f_\mathrm{r} \cdot 10^{3x/10b}$ con $b = 12$, y el
   valor calculado a su lado es $10^{31/40} = 5{,}956\,621$. $10^{31/80}$ daría
@@ -2008,9 +2008,10 @@ dos ediciones con las mismas entradas y en el mismo orden.
   pressure level at sound level meter»; la Tabla I.1: «$L_\mathrm{ind3a}$ Level
   measurement – reference microphone in comparison coupler», «$L_\mathrm{ind3b}$
   Level measurement – sound level meter in comparison coupler». Y después
-  «$C_\mathrm{FF,SLM} = (L_\mathrm{ind1} - L_\mathrm{ind3a}) - (L_\mathrm{ind2}
-  - L_\mathrm{ind3b}) - (L_{p,\mathrm{F1}} - L_{p,\mathrm{F2}}) +
-  (L_{p,\mathrm{P1}} - L_{p,\mathrm{P2}}) + C_\mathrm{FF,RM}$ (E.6)».
+  «$C_\mathrm{FF,SLM} = (L_\mathrm{ind1} - L_\mathrm{ind3a}) -
+  (L_\mathrm{ind2} - L_\mathrm{ind3b}) - (L_{p,\mathrm{F1}} -
+  L_{p,\mathrm{F2}}) + (L_{p,\mathrm{P1}} - L_{p,\mathrm{P2}}) +
+  C_\mathrm{FF,RM}$ (E.6)».
 - **El problema:** la corrección es la respuesta del sonómetro en campo libre
   menos su respuesta en el acoplador, $\Delta L_\mathrm{F,SLM} -
   \Delta L_\mathrm{P,SLM}$, como dice (E.5), y con las definiciones de la

@@ -132,6 +132,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   ISO/TS 12913-3 is the one implemented; a 2025 edition revises Annex A. A new
   guide, in both languages, walks through a study from the questionnaire to
   the report.
+- **The corrections that bring a sound level meter on a calibrator, a coupler
+  or an actuator to its free-field response, with their uncertainty and the
+  verdict on it (IEC 62585:2012).** `metrology.adjustment_value` fits the
+  free-field response of a meter over the frequency range, weighted by the
+  tolerance at each frequency, and returns the adjustment value
+  `ΔL = L1 - L4` the manual states for the calibration check frequency (Annex
+  A), with the offset the fit leaves there, `L2` and `L3` of Figure A.1 and
+  the pressure-to-free-field correction; the text prints no formula for the
+  fit, and the weighted least-squares reading is documented as the library's.
+  `metrology.sound_calibrator_correction`,
+  `metrology.comparison_coupler_correction` and
+  `metrology.electrostatic_actuator_correction` apply Formulas (D.7), (E.6)
+  and (F.13), the last normalised to the check frequency, to readings given
+  one row per determination, and return a `metrology.FreeFieldCorrection`
+  with their mean, their range and the clause they belong to. The
+  free-field correction of the reference microphone, from IEC/TS 61094-7, is
+  an input. `metrology.correction_uncertainty_budget` builds the budget of
+  Table I.1 on `metrology.combine_uncertainty`, its fifteen components keyed
+  as the table prints them with the divisors of their distributions, adds
+  the static-pressure component of clause 6 below 97 kPa and any component a
+  laboratory's method needs, and takes the coverage factor from the
+  Welch-Satterthwaite effective degrees of freedom.
+  `metrology.maximum_expanded_uncertainty` gives the maxima of clauses 9 to
+  14, and `metrology.verify_correction_uncertainty` judges the expanded
+  uncertainties against them, and for clauses 12 to 14 the range of the
+  corrections over the microphones too, returning a verdict whose `passes`
+  is the answer and whose `bool()` raises; its `.report()` renders the
+  documentation of clause 15 n) and o) as a one-page fiche.
+  `metrology.exact_frequencies` evaluates Formula (H.1) for any step-width
+  designator. Every result has `.plot()`. Tables I.2 and I.3 and the 41
+  frequencies of Table H.1 are conformance rows. Three printed defects are in
+  the errata: Table I.2 prints `k = 2,11` beside its own 29,98 effective
+  degrees of freedom, for which the factor at 95 % is 2,04, so the row pins
+  2,04; Table H.1 prints the exponent of index 31 as 31/80; and Formulas
+  (E.4) to (E.6) exchange the two readings in the coupler that Figure E.1
+  defines, which the coupler function avoids by naming its inputs by what
+  each reading is of. A new guide under Calibration and uncertainty runs every
+  method on a synthetic meter and on the two worked budgets, in English and
+  Spanish.
 - **What a sound level meter reads when sound arrives from every direction
   (IEC 61183:1994).** `metrology.directivity_factor` takes the levels a meter
   indicates at equal angular steps in two planes (or four, as NOTE 2 of A.6

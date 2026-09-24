@@ -1,6 +1,6 @@
 ---
 title: "Guías"
-description: "Las 143 guías de phonometry, agrupadas en los trece temas que cubre la biblioteca: para qué sirve cada área, las normas que implementa y un resumen de una línea de cada guía que contiene."
+description: "Las 144 guías de phonometry, agrupadas en los trece temas que cubre la biblioteca: para qué sirve cada área, las normas que implementa y un resumen de una línea de cada guía que contiene."
 head:
   - tag: script
     attrs:
@@ -118,7 +118,7 @@ hay ninguna panorámica del campo: cada página es la documentación de trabajo 
 un módulo, escrita para que un resultado se pueda defender apartado por
 apartado en lugar de darlo por bueno.
 
-Esta página es el mapa. Ciento cuarenta y tres guías repartidas en trece temas, y cada
+Esta página es el mapa. Ciento cuarenta y cuatro guías repartidas en trece temas, y cada
 área tiene su propio índice con el relato largo de cómo encajan sus piezas. Si
 llegas sin una pregunta concreta, lee primero la
 [introducción](/phonometry/es/start/getting-started/): recorre una señal por toda la
@@ -157,7 +157,7 @@ sonoridad necesita niveles de banda calibrados, un parámetro de sala necesita
 una respuesta al impulso filtrada, una valoración ambiental es un $L_\mathrm{eq}$
 ajustado.
 Implementa IEC 61260-1, ANSI S1.11, IEC 61672-1, ISO 7196, IEC 61252,
-ISO 1996-1, IEC 60942, IEC 61183 y la GUM.
+ISO 1996-1, IEC 60942, IEC 61183, IEC 62585 y la GUM.
 
 - [Construye un sonómetro](/phonometry/es/signals/sound-level-meter/): el área
   entera montada de principio a fin en una sola página ejecutable, del tono del
@@ -267,6 +267,11 @@ ISO 1996-1, IEC 60942, IEC 61183 y la GUM.
   el factor de directividad de un sonómetro a partir de lecturas en dos planos,
   en uno o en 38 elementos de igual área, y sus niveles de sensibilidad en
   incidencia aleatoria y en campo difuso.
+- [Correcciones de campo libre de un sonómetro (IEC 62585)](/phonometry/es/signals/metrology/free-field-corrections/):
+  el valor de ajuste a la frecuencia de comprobación de la calibración, las
+  correcciones para un calibrador, un acoplador y un actuador, su presupuesto
+  de incertidumbre y los máximos de los apartados 9 a 14 como dictamen y como
+  ficha.
 
 ## [El medio](/phonometry/es/fluids/)
 

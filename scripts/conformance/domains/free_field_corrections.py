@@ -111,7 +111,7 @@ def _chk_i2_components() -> Outcome:
     "Combined standard uncertainty of the correction at 1 kHz",
 )
 def _chk_i2_combined() -> Outcome:
-    """The 15 components in quadrature, printed 0,059 0 dB."""
+    """The 15 components in quadrature, printed 0,059 0 dB."""
     return numeric(
         ref.IEC62585_TABLE_I2_COMBINED_DB,
         _budget_i2().combined_uncertainty_db,

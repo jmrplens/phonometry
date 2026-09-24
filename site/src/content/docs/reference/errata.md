@@ -1836,7 +1836,7 @@ in the same order.
 - **The print:** "(normal) **k = 2,11**" beside "Effective degree of freedom
   = 29,98", with the expanded uncertainty printed "0,12" and a subscript guard
   digit "(4)", that is 0,124 dB, over a combined standard uncertainty of
-  "0,059 0" dB.
+  "0,059 0" dB.
 - **The problem:** clause 5 asks for the coverage factor that gives a level of
   confidence of 95 %, and Annex I computes the effective degrees of freedom by
   Welch-Satterthwaite "thereby enabling the coverage factor k to be selected to
@@ -1864,7 +1864,7 @@ in the same order.
 - **Location:** Annex H, Table H.1 "Exact frequencies for one-twelfth-octave
   steps over one decade" (printed folio 35), the row of index 31.
 - **The print:** "Exact $f_x$" **$10^{31/80}$**, beside "Exact $f_x$
-  calculated" 5,956 621 kHz.
+  calculated" 5,956 621 kHz.
 - **The problem:** every other row prints the exponent $x/40$, which is
   Formula (H.1), $f_x = f_\mathrm{r} \cdot 10^{3x/10b}$ with $b = 12$, and the
   calculated value beside it is $10^{31/40} = 5{,}956\,621$. $10^{31/80}$ would
@@ -1894,9 +1894,10 @@ in the same order.
   pressure level at sound level meter"; Table I.1: "$L_\mathrm{ind3a}$ Level
   measurement – reference microphone in comparison coupler", "$L_\mathrm{ind3b}$
   Level measurement – sound level meter in comparison coupler". Then
-  "$C_\mathrm{FF,SLM} = (L_\mathrm{ind1} - L_\mathrm{ind3a}) - (L_\mathrm{ind2}
-  - L_\mathrm{ind3b}) - (L_{p,\mathrm{F1}} - L_{p,\mathrm{F2}}) +
-  (L_{p,\mathrm{P1}} - L_{p,\mathrm{P2}}) + C_\mathrm{FF,RM}$ (E.6)".
+  "$C_\mathrm{FF,SLM} = (L_\mathrm{ind1} - L_\mathrm{ind3a}) -
+  (L_\mathrm{ind2} - L_\mathrm{ind3b}) - (L_{p,\mathrm{F1}} -
+  L_{p,\mathrm{F2}}) + (L_{p,\mathrm{P1}} - L_{p,\mathrm{P2}}) +
+  C_\mathrm{FF,RM}$ (E.6)".
 - **The problem:** the correction is the meter's free-field response less its
   response in the coupler, $\Delta L_\mathrm{F,SLM} - \Delta L_\mathrm{P,SLM}$,
   as (E.5) states, and with the definitions of Figure E.1 that is

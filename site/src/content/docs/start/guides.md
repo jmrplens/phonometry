@@ -1,6 +1,6 @@
 ---
 title: "Guides"
-description: "The 143 guides of phonometry, grouped into the thirteen topics the library covers: what each area is for, the standards implemented in it, and a one-line summary of every guide inside it."
+description: "The 144 guides of phonometry, grouped into the thirteen topics the library covers: what each area is for, the standards implemented in it, and a one-line summary of every guide inside it."
 head:
   - tag: script
     attrs:
@@ -117,7 +117,7 @@ makes, then runnable code and the figure it draws. Nothing here is a survey of
 the field; each page is the working documentation of a module, written so that
 a result can be defended clause by clause rather than trusted.
 
-This page is the map. A hundred and forty-three guides sit in thirteen topics, and each topic has its
+This page is the map. A hundred and forty-four guides sit in thirteen topics, and each topic has its
 own overview page with the longer story of how its pieces fit together. If you
 are arriving without a specific question, read
 [Getting Started](/phonometry/start/getting-started/) first: it runs one signal
@@ -153,7 +153,7 @@ the chain that turns a digital signal into a standards-compliant number, and
 every other area consumes it: a loudness model needs calibrated band levels, a
 room parameter needs a filtered impulse response, an environmental rating is an
 adjusted $L_\mathrm{eq}$. Implements IEC 61260-1, ANSI S1.11, IEC 61672-1, ISO 7196,
-IEC 61252, ISO 1996-1, IEC 60942, IEC 61183 and the GUM.
+IEC 61252, ISO 1996-1, IEC 60942, IEC 61183, IEC 62585 and the GUM.
 
 - [Build a sound level meter](/phonometry/signals/sound-level-meter/):
   the whole area assembled end to end on one runnable page, from the
@@ -255,6 +255,10 @@ IEC 61252, ISO 1996-1, IEC 60942, IEC 61183 and the GUM.
   the directivity factor of a sound level meter from readings in two planes,
   one plane or 38 equal-area elements, and its random-incidence and
   diffuse-field sensitivity levels.
+- [Free-Field Corrections of a Sound Level Meter (IEC 62585)](/phonometry/signals/metrology/free-field-corrections/):
+  the adjustment value at the calibration check frequency, the corrections
+  for a calibrator, a coupler and an actuator, their uncertainty budget and
+  the maxima of clauses 9 to 14 as a verdict and a fiche.
 
 ## [The medium](/phonometry/fluids/)
 

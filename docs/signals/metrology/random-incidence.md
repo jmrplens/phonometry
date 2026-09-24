@@ -210,10 +210,10 @@ plane under rotational symmetry and from 38 equal-area elements (Formulas
 to (11); and Table B.1. Not implemented: the measurements themselves (the
 ISO 3745 anechoic and ISO 3741 reverberation rooms, the source, the turntable,
 the signal-to-noise ratio of A.2.3 and the integration times of B.1.4), the
-averaging of at least eight tones per band (4.11), and the corrections of
-IEC 62585 for the case, the microphone and the windscreen, which bring a
-measurement made with a sound calibrator, a comparison coupler or an
-electrostatic actuator to the meter's free-field response.
+averaging of at least eight tones per band (4.11). The corrections of
+IEC 62585, which bring a measurement made with a sound calibrator, a
+comparison coupler or an electrostatic actuator to the meter's free-field
+response, are on [their own page](free-field-corrections.md).
 
 ## See also
 

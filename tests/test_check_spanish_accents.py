@@ -256,3 +256,16 @@ def test_the_published_tables_carry_every_accent() -> None:
     assert offences == []
     assert stale == []
     assert len(values) > 5000
+
+
+@pytest.mark.parametrize(
+    ("text", "found"),
+    [
+        ("Decimación multitasa", [("Decimación", "Diezmado")]),
+        ("sin decimación", [("decimación", "diezmado")]),
+        ("a frecuencia decimada", [("decimada", "diezmada")]),
+    ],
+)
+def test_a_glossary_calque_is_found(text: str, found: list[tuple[str, str]]) -> None:
+    """Spanish says diezmado for decimation; the calque shipped once."""
+    assert csa.words_needing_marks(text) == found

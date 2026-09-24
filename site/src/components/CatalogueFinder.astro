@@ -223,10 +223,11 @@ const copy = {
 		) => {
 			active = group;
 			/* The panel goes where this catalogue's table starts: after its
-			   heading and the prose that introduces it, so the controls are
-			   the first thing above the rows they filter. It is outside every
-			   group's nodes, so hiding the other catalogues never hides it. */
-			group.tables[0].before(finder);
+			   heading, the prose that introduces it and the legend of the
+			   marks, directly above the rows it filters. It sits inside the
+			   shown catalogue, so hiding the others never hides it. */
+			const first = group.tables[0];
+			(first.querySelector(':scope > .table-scroll') ?? first).before(finder);
 			for (const other of catalogues) {
 				const hide = other !== group;
 				for (const node of other.nodes) node.classList.toggle('catalogue-hidden', hide);
@@ -330,11 +331,11 @@ const copy = {
 		background: color-mix(in srgb, var(--sl-color-text-accent) 82%, var(--sl-color-black));
 	}
 
+	/* No scroll margin of its own: Starlight's scroll padding already keeps
+	   what scrolls into view clear of its header and the table of contents
+	   bar, and a margin on top of it stopped the panel halfway down a phone. */
 	.finder {
 		margin-block: 1rem;
-		/* Clear of the sticky header when the button or the category
-		   control scrolls the panel to the top of the screen. */
-		scroll-margin-top: calc(var(--sl-nav-height, 3.5rem) + 1rem);
 		padding: 1rem 1.15rem 1.15rem;
 		border: 1px solid var(--sl-color-gray-5);
 		border-radius: 0.6rem;

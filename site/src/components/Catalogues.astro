@@ -732,8 +732,13 @@ const textColumns = (
 
 		document.addEventListener('click', (event) => {
 			if (!pinned) return;
-			const element = event.target instanceof Element ? event.target.closest('[data-catalogue]') : null;
-			if (!element) hide();
+			/* The finder's controls now sit inside the catalogue they filter, and
+			   reaching for them is leaving the table, so they close it too. */
+			const inside =
+				event.target instanceof Element &&
+				event.target.closest('[data-catalogue]') !== null &&
+				event.target.closest('[data-finder]') === null;
+			if (!inside) hide();
 		});
 		document.addEventListener('keydown', (event) => {
 			if (event.key !== 'Escape') return;

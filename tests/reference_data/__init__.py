@@ -1007,6 +1007,29 @@ from .psychoacoustics import PA_WORKED_INPUT as PA_WORKED_INPUT
 from .psychoacoustics import PA_WORKED_VALUE as PA_WORKED_VALUE
 from .psychoacoustics import PA_WORKED_WFR as PA_WORKED_WFR
 from .psychoacoustics import PA_WORKED_WS as PA_WORKED_WS
+from .random_incidence import (
+    IEC61183_A16_LIMIT_PERCENT as IEC61183_A16_LIMIT_PERCENT,
+)
+from .random_incidence import (
+    IEC61183_A17_LARGEST_PERCENT as IEC61183_A17_LARGEST_PERCENT,
+)
+from .random_incidence import IEC61183_A17_SUB_AREAS as IEC61183_A17_SUB_AREAS
+from .random_incidence import (
+    IEC61183_EQUAL_AREA_ELEMENT_PERCENT as IEC61183_EQUAL_AREA_ELEMENT_PERCENT,
+)
+from .random_incidence import (
+    IEC61183_EQUAL_AREA_ERRATA_DEG as IEC61183_EQUAL_AREA_ERRATA_DEG,
+)
+from .random_incidence import (
+    IEC61183_EQUAL_AREA_HORIZONTAL_DEG as IEC61183_EQUAL_AREA_HORIZONTAL_DEG,
+)
+from .random_incidence import IEC61183_TABLE_A1 as IEC61183_TABLE_A1
+from .random_incidence import (
+    IEC61183_TABLE_A1_STEP_DEG as IEC61183_TABLE_A1_STEP_DEG,
+)
+from .random_incidence import (
+    IEC61183_TABLE_B1_PRINTED as IEC61183_TABLE_B1_PRINTED,
+)
 from .resistive_sheets import VER_BERANEK_8_5 as VER_BERANEK_8_5
 from .resistive_sheets import VER_BERANEK_8_5_COLUMNS as VER_BERANEK_8_5_COLUMNS
 from .resistive_sheets import VER_BERANEK_8_6 as VER_BERANEK_8_6

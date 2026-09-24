@@ -165,6 +165,15 @@ _NO_BAND_LABEL = "no band holds five valid lines"
 _EXCLUDED_LINES_LABEL = "excluded: adequacy condition not met"
 _LEVEL_DIFFERENCE_LABEL = "level difference"
 
+#: Labels the ISO 10846-4 and -5 rig-check and driving-point plots share
+#: with the translation table, written once each.
+_CONDITION_NOT_MET_LABEL = "condition not met"
+_OUTPUT_MASS_LABEL = "$m_0$ = {mass} kg"
+_MASS_DEVIATION_LABEL = r"$\Delta L = 20\,\lg(m_{2,\mathrm{eff}}/m_2)$"
+_F3_LABEL = "$f_3$ = {f3} Hz"
+_FUL_LABEL = r"$f_\mathrm{{UL}}$ = {ful} Hz"
+_EXPANDED_U_LABEL = "$U = 2u$ = {u} dB"
+
 #: Spanish translations of the fixed strings rendered by the vibration
 #: ``.plot()`` renderers, keyed by their verbatim English text. ``_t``
 #: returns the English key unchanged for any language other than ``"es"``,
@@ -355,27 +364,27 @@ _STRINGS: dict[str, str] = {
     "ISO 10846 one-third-octave-band stiffness": "ISO 10846 rigidez en bandas de tercio de octava",
     "Level difference [dB]": "Diferencia de niveles [dB]",
     "limit {limit} dB": "límite {limit} dB",
-    "condition not met": "condición no cumplida",
+    _CONDITION_NOT_MET_LABEL: "condición no cumplida",
     r"ISO 10846 blocked output: $\Delta L_{1,2} = L_{a1} - L_{a2}$": r"ISO 10846 salida bloqueada: $\Delta L_{1,2} = L_{a1} - L_{a2}$",
     "ISO 10846 unwanted input: excitation minus unwanted direction": "ISO 10846 entrada no deseada: excitación menos dirección no deseada",
     "Mass [kg]": "Masa [kg]",
     r"limit $0.06\,|F_2|/|a_2|$": r"límite $0{,}06\,|F_2|/|a_2|$",
-    "$m_0$ = {mass} kg": "$m_0$ = {mass} kg",
+    _OUTPUT_MASS_LABEL: _OUTPUT_MASS_LABEL,
     "ISO 10846-4 Inequality (3): output mass $m_0$": "ISO 10846-4 Desigualdad (3): masa de salida $m_0$",
-    r"$\Delta L = 20\,\lg(m_{2,\mathrm{eff}}/m_2)$": r"$\Delta L = 20\,\lg(m_{2,\mathrm{eff}}/m_2)$",
+    _MASS_DEVIATION_LABEL: _MASS_DEVIATION_LABEL,
     r"$\pm$1 dB (Inequality (5))": r"$\pm$1 dB (Desigualdad (5))",
     "below 40 Hz: ignored": "por debajo de 40 Hz: se ignora",
-    "$f_3$ = {f3} Hz": "$f_3$ = {f3} Hz",
+    _F3_LABEL: _F3_LABEL,
     "Deviation from $m_2$ [dB]": "Desviación respecto de $m_2$ [dB]",
     "ISO 10846-4 effective blocking mass": "ISO 10846-4 masa de bloqueo efectiva",
     r"driving-point stiffness $L_{k_{1,1}}$": r"rigidez en el punto de excitación $L_{k_{1,1}}$",
     "low-frequency value (1 Hz to 20 Hz)": "valor de baja frecuencia (1 Hz a 20 Hz)",
     "2 dB below it": "2 dB por debajo",
-    r"$f_\mathrm{{UL}}$ = {ful} Hz": r"$f_\mathrm{{UL}}$ = {ful} Hz",
+    _FUL_LABEL: _FUL_LABEL,
     "excluded (Inequality (1) or (2))": "excluida (Desigualdad (1) o (2))",
     "Driving-point stiffness level [dB re 1 N/m]": "Nivel de rigidez en el punto de excitación [dB re 1 N/m]",
     "ISO 10846-5 driving-point stiffness": "ISO 10846-5 rigidez en el punto de excitación",
-    "$U = 2u$ = {u} dB": "$U = 2u$ = {u} dB",
+    _EXPANDED_U_LABEL: _EXPANDED_U_LABEL,
     r"ISO 10846-5 Annex B: $L_{{k,\mathrm{{av}}}}$ = {level} dB, $U$ = {u} dB": r"ISO 10846-5 Anexo B: $L_{{k,\mathrm{{av}}}}$ = {level} dB, $U$ = {u} dB",
 }
 
@@ -1013,7 +1022,7 @@ def plot_level_difference_check(
             "o",
             color=_C_SECONDARY,
             zorder=3,
-            label=_t("condition not met", language),
+            label=_t(_CONDITION_NOT_MET_LABEL, language),
         )
     title = (
         r"ISO 10846 blocked output: $\Delta L_{1,2} = L_{a1} - L_{a2}$"
@@ -1065,7 +1074,7 @@ def plot_output_mass_check(
         color=_C_REFERENCE,
         ls="--",
         lw=1.2,
-        label=_t("$m_0$ = {mass} kg", language).format(mass=mass),
+        label=_t(_OUTPUT_MASS_LABEL, language).format(mass=mass),
     )
     if not np.all(holds):
         ax.plot(
@@ -1074,7 +1083,7 @@ def plot_output_mass_check(
             "o",
             color=_C_SECONDARY,
             zorder=3,
-            label=_t("condition not met", language),
+            label=_t(_CONDITION_NOT_MET_LABEL, language),
         )
     format_frequency_axis(ax, float(freq.min()), float(freq.max()), language=language)
     ax.set_xlabel(_t(_FREQ_LABEL, language))
@@ -1128,9 +1137,7 @@ def plot_effective_blocking_mass(
             label=_t("below 40 Hz: ignored", language),
         )
     style_default(kwargs, "color", _C_PRIMARY)
-    kwargs.setdefault(
-        "label", _t(r"$\Delta L = 20\,\lg(m_{2,\mathrm{eff}}/m_2)$", language)
-    )
+    kwargs.setdefault("label", _t(_MASS_DEVIATION_LABEL, language))
     style_default(kwargs, "linewidth", 1.4)
     ax.semilogx(freq, deviation, "-", **kwargs)
     f3 = result.upper_frequency_limit_hz
@@ -1140,7 +1147,7 @@ def plot_effective_blocking_mass(
             color=_C_SECONDARY,
             ls=":",
             lw=1.4,
-            label=_t("$f_3$ = {f3} Hz", language).format(
+            label=_t(_F3_LABEL, language).format(
                 f3=format_number(f3, language, decimals=0)
             ),
         )
@@ -1205,7 +1212,7 @@ def plot_driving_point_stiffness(
             color=_C_SECONDARY,
             ls="-",
             lw=1.2,
-            label=_t(r"$f_\mathrm{{UL}}$ = {ful} Hz", language).format(
+            label=_t(_FUL_LABEL, language).format(
                 ful=format_number(f_ul, language, decimals=1, trim=True)
             ),
         )
@@ -1263,7 +1270,7 @@ def plot_driving_point_uncertainty(
         color=_C_SECONDARY,
         ls=":",
         lw=1.4,
-        label=_t("$U = 2u$ = {u} dB", language).format(u=expanded),
+        label=_t(_EXPANDED_U_LABEL, language).format(u=expanded),
     )
     ax.set_title(
         _t(

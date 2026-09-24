@@ -217,11 +217,14 @@ _METHODS: Mapping[str, str] = MappingProxyType(
         "LAF95,T": (
             "A-weighted, time weighting F, level exceeded 95 % of the time (ISO 1996-1)"
         ),
-        "N5": "ISO 532-1:2017 time-varying loudness, percentile of clause 6.5",
+        "N5": (
+            "ISO 532-1:2017 time-varying loudness, percentile loudness N5 "
+            "(term 3.21, clause 6.4)"
+        ),
         "Naverage": "ISO 532-1:2017 time-varying loudness, arithmetic mean over time",
         "Nrmc": (
             "ISO 532-1:2017 time-varying loudness, root mean cube over time "
-            "(ISO/TS 12913-2 A.3 f))"
+            "(the formula of the NOTE under ISO/TS 12913-2 A.3 f))"
         ),
         "N95": "ISO 532-1:2017 time-varying loudness, loudness exceeded 95 % of the time",
         "N5/N95": "ratio of N5 to N95 (ISO/TS 12913-3 D.2)",
@@ -498,8 +501,10 @@ def _loudness(
     ``N5`` is the library's ISO 532-1 value, taken on the full-rate series of
     the reference program. ``N95`` is the same percentile rule applied to the
     published 500 Hz loudness-versus-time trace, and ``Naverage`` and
-    ``Nrmc`` are its arithmetic mean and root mean cube (ISO/TS 12913-2 A.3
-    f)).
+    ``Nrmc`` are its arithmetic mean and root mean cube. ``Nrmc`` follows the
+    formula of the NOTE under ISO/TS 12913-2 A.3 f), the cube root of the mean
+    of the cubes; the text of that NOTE says the subsequent exponent is 3,
+    where the formula applies 1/3, a slip ``docs/ERRATA.md`` records.
     """
     values: dict[str, list[float]] = {
         s: [] for s in BINAURAL_PARAMETERS["loudness"].metrics

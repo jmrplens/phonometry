@@ -3,7 +3,7 @@ r"""How people hear a place: the soundscape questionnaire and its analysis
 (ISO/TS 12913-2:2018 Annexes A and C, ISO/TS 12913-3:2019 Annexes A and B).
 
 A soundscape is the acoustic environment as a person perceives it in context
-(ISO 12913-1). Its study "relies primarily upon human perception, and only
+(ISO 12913-1). Its study "relies primarily upon human perception and only
 then turns to physical measurement" (ISO/TS 12913-2, Introduction), which
 makes this the first module of the library whose input is not a signal but a
 **questionnaire**: the boxes people ticked on a soundwalk, turned into
@@ -66,10 +66,13 @@ formulas are applied to part 2, and the slip is in ``docs/ERRATA.md``.
 eventfulness) for each site" from the results of the questionnaire, and A.2
 makes the median the central tendency of every Method A scale. The site
 coordinates are therefore Formulas (A.1) and (A.2) applied to the site medians
-of the eight attributes. Because the formulas are linear, the alternative
-``central_tendency="mean"`` gives the same point as the mean of the
-respondents' own coordinates; the median of those coordinates is a third
-reading, which the per-respondent values let a caller form.
+of the eight attributes. When every respondent answered all eight attributes,
+the formulas being linear, the alternative ``central_tendency="mean"`` gives
+the same point as the mean of the respondents' own coordinates. A blank
+answer breaks that equality: each attribute mean is then taken over the
+respondents who answered that attribute, while a respondent with a blank in a
+formula has no coordinate of it. The median of the respondents' coordinates is
+a third reading, which the per-respondent values let a caller form.
 
 **Formula (A.3).** The page prints :math:`r = 1 - 1\,\frac{6\sum
 d_i^2}{n(n^2 - 1)}`, with a stray factor 1; read as a product it is the usual
@@ -84,10 +87,17 @@ of a sample standard deviation the coefficient would shrink by
 coefficient and its probability value without naming a test. Both use the
 Student :math:`t` statistic :math:`t = r\sqrt{(n - 2)/(1 - r^2)}` with
 :math:`n - 2` degrees of freedom, which is exact for Pearson's coefficient of
-bivariate normal data and the usual large-sample approximation for Spearman's. The 95 %
-confidence interval of Method B uses the Student distribution with
+bivariate normal data and the usual large-sample approximation for Spearman's.
+The 95 % confidence interval of Method B uses the Student distribution with
 :math:`n - 1` degrees of freedom about the mean, with the sample standard
 deviation.
+
+**The where-lists of Formulas (A.4) and (B.2).** The page defines
+:math:`t_j` as "the number of in :math:`t_j` tied ranks" and :math:`k(x)` as
+"the numbers of tied ranks"; the formula needs the size of the :math:`j`-th
+group of tied values and the number of such groups, which is what is
+implemented. Under (B.2) the mean is "of the array :math:`x_I`", for
+:math:`x_i`. Both slips are in ``docs/ERRATA.md``.
 """
 
 from __future__ import annotations
@@ -582,15 +592,20 @@ def method_a_scale_values(
     :param positions: The position of each ticked box, 1 (left) to 5 (right);
         ``NaN`` for a question left blank.
     :param part: The part of the questionnaire, 1 to 4.
-    :return: The scale values, a float for a scalar input.
+    :return: The scale values, a float for a scalar input; an array is always
+        a new one, never a view of *positions*.
     :raises ValueError: for a part other than 1 to 4 or a position that is
         not a whole number from 1 to 5.
     """
     scale = _method_a_scale(part)
     array = np.asarray(positions, dtype=np.float64)
     checked = _as_responses(array, "positions", integer=True).reshape(array.shape)
+    # Parts 1 and 4 keep the position as the value; copy it so the caller's
+    # positions and the returned values never share memory.
     values = (
-        checked if scale.scale_values == _ASCENDING else (_SCALE_MAX + 1.0) - checked
+        checked.copy()
+        if scale.scale_values == _ASCENDING
+        else (_SCALE_MAX + 1.0) - checked
     )
     return float(values) if values.ndim == 0 else values
 
@@ -646,7 +661,8 @@ class MethodASummary:
 
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
-        :param kwargs: Forwarded to the median markers.
+        :param kwargs: Forwarded to the median markers of the first site;
+            the other sites keep their own colour and style.
         :return: The axes. Requires matplotlib (``pip install phonometry[plot]``).
         """
         from ..._i18n import check_language
@@ -845,8 +861,11 @@ def pleasantness_eventfulness(
     answered all eight attributes gets a coordinate pair. Each site gets the
     pair of Formulas (A.1) and (A.2) applied to the site's median of each
     attribute (A.2 makes the median the central tendency of the scale), or to
-    its mean with ``central_tendency="mean"``, which is also the mean of the
-    respondents' coordinates since the formulas are linear.
+    its mean with ``central_tendency="mean"``. When every respondent answered
+    all eight attributes, that mean point is also the mean of the respondents'
+    coordinates, the formulas being linear; with blank answers it is not,
+    because each attribute mean is then taken over a different set of
+    respondents.
 
     Clause A.3 says the formulas process "the results from part 3"; the
     attributes they name are part 2, and that is what they are applied to
@@ -933,8 +952,8 @@ class SoundscapeCorrelation:
         from, :math:`r\sqrt{(n - 2)/(1 - r^2)}`; infinite for :math:`|r| = 1`.
     :ivar degrees_of_freedom: :math:`n - 2`.
     :ivar alternative: ``"two-sided"``, ``"greater"`` or ``"less"``.
-    :ivar x: The first variable, as given.
-    :ivar y: The second variable, as given.
+    :ivar x: The first variable, as given (a copy, read-only).
+    :ivar y: The second variable, as given (a copy, read-only).
     :ivar x_ranks: The ranks of ``x`` (average ranks for ties); ``None`` for
         Pearson.
     :ivar y_ranks: The ranks of ``y``; ``None`` for Pearson.
@@ -1003,7 +1022,10 @@ def _paired(
         if np.iscomplexobj(values):
             msg = f"'{name}' must be real."
             raise ValueError(msg)
-        array = np.asarray(values, dtype=np.float64).ravel()
+        # A copy, so the result never shares memory with the caller's array:
+        # a later change to it would otherwise rewrite the result's x and y
+        # and leave its coefficient and ranks describing other data.
+        array = np.array(values, dtype=np.float64).ravel()
         if not np.all(np.isfinite(array)):
             msg = f"'{name}' must be finite; drop the incomplete pairs first."
             raise ValueError(msg)
@@ -1070,9 +1092,10 @@ def spearman_rank_correlation(
        \qquad T = \frac{\sum_{j} (t_j^3 - t_j)}{12},
 
     where :math:`t_j` is the number of values in the :math:`j`-th group of
-    tied ranks of ``x`` and ``U`` is the same sum over ``y``. Formula (A.4)
-    is Pearson's coefficient of the average ranks, and reduces to (A.3) when
-    nothing is tied.
+    tied ranks of ``x`` and ``U`` is the same sum over ``y``. (The page's
+    where-list garbles these definitions, see ``docs/ERRATA.md``; this is the
+    reading the formula needs.) Formula (A.4) is Pearson's coefficient of the
+    average ranks, and reduces to (A.3) when nothing is tied.
 
     The probability value is that of the Student statistic
     :math:`r\sqrt{(n - 2)/(1 - r^2)}` with :math:`n - 2` degrees of freedom,
@@ -1269,7 +1292,8 @@ class MethodBSummary:
 
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
-        :param kwargs: Forwarded to the mean markers.
+        :param kwargs: Forwarded to the mean markers of the first site; the
+            other sites keep their own colour and style.
         :return: The axes. Requires matplotlib (``pip install phonometry[plot]``).
         """
         from ..._i18n import check_language
@@ -1404,7 +1428,8 @@ class SourceRanking:
 
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
-        :param kwargs: Forwarded to the bars.
+        :param kwargs: Forwarded to the bars of the first site; the other
+            sites keep their own colour and style.
         :return: The axes. Requires matplotlib (``pip install phonometry[plot]``).
         """
         from ..._i18n import check_language

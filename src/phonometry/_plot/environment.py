@@ -21,6 +21,7 @@ from .common import (
     _band_axis,
     _field_cmap,
     _freq_axis,
+    _import_pyplot,
     _new_axes,
     _plot_two_runs,
     format_frequency_axis,
@@ -33,6 +34,7 @@ from .common import (
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
+    from matplotlib.figure import Figure
 
     from ..environment.assessment.exposure_distribution import SelDistribution
     from ..environment.assessment.impulsive_sound import ImpulseProminenceResult
@@ -1647,7 +1649,7 @@ _SOUNDSCAPE_STRINGS_ES: dict[str, str] = {
     "Method A, part": "Método A, parte",
     "Method B, part 1": "Método B, parte 1",
     "mean": "media",
-    "confidence interval": "intervalo de confianza",
+    "{level} % confidence interval": "intervalo de confianza del {level} %",
     "Rank (1 = most noticeable)": "Rango (1 = la más perceptible)",
     "Method B, part 2: source ranking": "Método B, parte 2: orden de las fuentes",
     "Formula": "Fórmula",
@@ -1673,6 +1675,43 @@ _STRINGS.update(_SOUNDSCAPE_STRINGS_ES)
 #: Where an attribute label stops sitting on its axis and goes beside it: the
 #: cosine (or sine) of 60 degrees, so the diagonal labels sit off both axes.
 _LABEL_SLANT = 0.5
+
+#: The half-width and half-height of the Figure A.1 axes, in arrow lengths:
+#: room past the tips for a label written across (a word, "AGRADABLE") and for
+#: one written above or below (a line).
+_FIGURE_A1_WIDTH = 2.0
+_FIGURE_A1_HEIGHT = 1.55
+
+#: The size, in inches, of a figure the Figure A.1 renderer creates itself.
+_FIGURE_A1_SIZE_IN = (7.0, 7.0)
+
+#: Line height of a label, as a multiple of its font size.
+_LINE_HEIGHT = 1.25
+
+#: Space kept between the axis label and a legend under it, in points.
+_LEGEND_GAP_PT = 4.0
+
+
+def _under_x_axis_pt() -> float:
+    """Depth of the tick marks, tick labels and axis label under the axes,
+    in points, from the current style.
+    """
+    import matplotlib as mpl
+    from matplotlib.font_manager import FontProperties
+
+    rc = mpl.rcParams
+
+    def size(value: float | str) -> float:
+        return float(FontProperties(size=value).get_size_in_points())
+
+    tick = max(float(rc["xtick.major.size"]), 0.0) + float(rc["xtick.major.pad"])
+    return (
+        tick
+        + _LINE_HEIGHT * size(rc["xtick.labelsize"])
+        + float(rc["axes.labelpad"])
+        + _LINE_HEIGHT * size(rc["axes.labelsize"])
+        + _LEGEND_GAP_PT
+    )
 
 
 def _sign_of(value: float) -> float:
@@ -1768,10 +1807,12 @@ def plot_method_a_summary(
     ax.set_ylim(0.5, 5.5)
     ax.set_yticks([1, 2, 3, 4, 5])
     ax.set_ylabel(_t("Scale value (Table A.1)", language))
-    subject = _METHOD_A_SUBJECTS[result.part]
+    # Two lines: the longest subject, part 4, runs past a default figure on
+    # one line with the method and the statistics in front of it.
+    subject = _t(_METHOD_A_SUBJECTS[result.part], language)
     ax.set_title(
-        f"ISO/TS 12913-3, {_t('Method A, part', language)} {result.part}: "
-        f"{_t(subject, language)} ({_t('median, range', language)})"
+        f"ISO/TS 12913-3, {_t('Method A, part', language)} {result.part} "
+        f"({_t('median, range', language)})\n{subject[:1].upper()}{subject[1:]}"
     )
     ax.grid(visible=True, axis="y", alpha=0.3)
     legend = ax.legend(fontsize="small")
@@ -1794,7 +1835,11 @@ def plot_pleasantness_eventfulness(
     Pleasantness on the horizontal axis, eventfulness on the vertical one,
     the four main attribute axes solid and the four rotated ones dashed, as
     the figure draws them, and each site a point of its own, named in a
-    legend under the axes.
+    legend under the axes. The attribute names sit past the arrow tips, where
+    no site can fall, since the coordinates end at the tips. A figure the
+    renderer creates itself is square, with room for the legend, and laid out
+    by the constrained layout so the legend stays on the canvas; on axes the
+    caller passes, the caller lays the figure out (``plt.tight_layout()``).
 
     :param result: A
         :class:`~phonometry.environment.assessment.soundscape.PleasantnessEventfulness`.
@@ -1806,10 +1851,20 @@ def plot_pleasantness_eventfulness(
     :param kwargs: Forwarded to the site markers.
     :return: The axes.
     """
+    from matplotlib.transforms import offset_copy
+
     from .._i18n import localize_axes
     from ..environment.assessment.soundscape import PLEASANTNESS_EVENTFULNESS_RANGE
 
-    ax = ax if ax is not None else _new_axes()
+    own_figure = None
+    if ax is None:
+        # Square, for the square model, and tall enough for a legend of a few
+        # dozen sites under it; the layout engine keeps that legend on the
+        # canvas for a plain savefig() or plt.show().
+        own_figure = _import_pyplot().figure(
+            figsize=_FIGURE_A1_SIZE_IN, layout="constrained"
+        )
+        ax = own_figure.add_subplot()
     scale = 1.0 / PLEASANTNESS_EVENTFULNESS_RANGE if normalized else 1.0
     reach = PLEASANTNESS_EVENTFULNESS_RANGE * scale
     ink = theme_line(ax.xaxis.label.get_color(), ax, quiet=0.7)
@@ -1877,17 +1932,32 @@ def plot_pleasantness_eventfulness(
                 label=_site_label(site, language),
             ),
         )
+    # The legend hangs a fixed distance under the axes, the depth of the tick
+    # labels and the axis label, in points: an offset in axes fractions would
+    # move with the axes height, which the layout engine is still choosing,
+    # and a tall legend of many sites would then be laid out off the canvas.
+    placement: dict[str, Any] = {
+        "loc": "upper center",
+        "bbox_to_anchor": (0.5, 0.0),
+        "bbox_transform": offset_copy(
+            ax.transAxes,
+            fig=cast("Figure", ax.get_figure(root=True)),
+            y=-_under_x_axis_pt(),
+            units="points",
+        ),
+    }
     legend = ax.legend(
-        loc="upper center",
-        bbox_to_anchor=(0.5, -0.13),
         ncol=min(3, max(1, len(result.sites))),
         fontsize="small",
         frameon=False,
+        **placement,
     )
     legend.set_in_layout(True)
-    limit = 1.55 * reach
-    ax.set_xlim(-limit, limit)
-    ax.set_ylim(-limit, limit)
+    # The labels sit past the arrow tips, as in Figure A.1. Across the page
+    # they need the room of a word ("AGRADABLE", "MONOTONOUS"), up and down
+    # only that of a line, so the horizontal limits reach further.
+    ax.set_xlim(-_FIGURE_A1_WIDTH * reach, _FIGURE_A1_WIDTH * reach)
+    ax.set_ylim(-_FIGURE_A1_HEIGHT * reach, _FIGURE_A1_HEIGHT * reach)
     ax.set_aspect("equal")
     if normalized:
         ax.set_xlabel(_t(r"Pleasantness $P/(4+\sqrt{32})$", language))
@@ -1900,6 +1970,12 @@ def plot_pleasantness_eventfulness(
     )
     ax.grid(visible=True, alpha=0.3)
     localize_axes(ax, language)
+    if own_figure is not None:
+        # The constrained layout of an equal-aspect axes with a tall legend
+        # under it settles on its second pass; the first, taken here, keeps
+        # the caller's first savefig() or show() from drawing the unsettled
+        # one, with the legend and the title past the canvas.
+        own_figure.draw_without_rendering()
     return ax
 
 
@@ -1932,9 +2008,11 @@ def plot_soundscape_correlation(
         ax.set_xlabel("$x$")
         ax.set_ylabel("$y$")
     ax.plot(x, y, **styled(kwargs, color=_C_PRIMARY, marker="o", ls="none", ms=6))
-    name = "Spearman" if spearman else "Pearson"
+    # The symbols of the page: r_spearman in Formulas (A.3) and (A.4), plain r
+    # for Pearson's coefficient in B.3.
+    symbol = r"$r_\mathrm{spearman}$" if spearman else "Pearson $r$"
     ax.set_title(
-        f"{name}: $r$ = {format_number(result.coefficient, language, decimals=3)}, "
+        f"{symbol} = {format_number(result.coefficient, language, decimals=3)}, "
         f"$p$ = {format_number(result.p_value, language, decimals=3)} "
         f"({_t('Formula', language)} {result.formula}, $n$ = {result.n})"
     )
@@ -1993,9 +2071,12 @@ def plot_method_b_summary(
     ax.set_yticks([1, 2, 3, 4, 5])
     ax.set_ylabel(_t("Scale value (Table B.1)", language))
     level = format_number(100.0 * result.confidence_level, language, decimals=0)
+    # The level goes where each language puts it: "95 % confidence interval",
+    # "intervalo de confianza del 95 %".
+    interval = _t("{level} % confidence interval", language).format(level=level)
     ax.set_title(
         f"ISO/TS 12913-3, {_t('Method B, part 1', language)}: {_t('mean', language)}, "
-        f"{level} % {_t('confidence interval', language)}"
+        f"{interval}"
     )
     ax.grid(visible=True, axis="y", alpha=0.3)
     legend = ax.legend(fontsize="small")

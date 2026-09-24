@@ -30,7 +30,12 @@ from phonometry import environment, psychoacoustics, signals
 
 from ..registry import Outcome, count, numeric, register
 
-_SOUNDSCAPE = "Soundscape analysis (ISO/TS 12913-3)"
+#: The domain title carries the edition, because the report shows the title and
+#: not this docstring: the rows check the 2019 edition, and the 2025 edition
+#: revises Annex A, which they have not been compared with.
+_SOUNDSCAPE = (
+    "Soundscape analysis (ISO/TS 12913-3:2019; the 2025 edition revises Annex A)"
+)
 
 _ATTRIBUTES = environment.PERCEIVED_AFFECTIVE_QUALITY_ATTRIBUTES
 
@@ -249,6 +254,8 @@ def _chk_pearson() -> Outcome:
     """Site pleasantness against site LAeq of the 26 ISD locations."""
     medians = np.array([row[3] for row in ref.ISD_LOCATION_MEDIANS], dtype=float)
     laeq = np.array([row[4] for row in ref.ISD_LOCATION_MEDIANS])
+    # Each row is one location's medians, so the per-row coordinate is that
+    # location's P.
     pleasantness = environment.pleasantness_eventfulness(
         medians
     ).respondent_pleasantness
@@ -361,7 +368,9 @@ def _chk_root_mean_cubed_loudness() -> Outcome:
     """The cube root of the mean of the cubes of the ISO 532-1 loudness trace.
 
     The trace is the library's time-varying loudness of the ear; the row holds
-    the binaural analysis to the formula A.3 f) prints for it.
+    the binaural analysis to the formula the NOTE under A.3 f) prints for it
+    (its text says "the exponent 3" where the formula applies 1/3, a slip
+    ``docs/ERRATA.md`` records).
     """
     import warnings
 

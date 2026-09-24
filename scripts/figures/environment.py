@@ -859,7 +859,9 @@ def generate_sel_distribution_exceedance(output_dir: str) -> None:
 
 #: Eleven London sites of the International Soundscape Database v1.0 (Mitchell,
 #: Oberman, Aletta et al., Zenodo, DOI 10.5281/zenodo.10672568, CC BY 4.0),
-#: surveyed with the English questionnaire of ISO/TS 12913-2 Method A: the
+#: surveyed almost entirely with the English questionnaire of ISO/TS 12913-2
+#: Method A (ten of the answers, at four of the sites, were given on the
+#: Spanish version of the database's survey, and are counted as well): the
 #: median of the eight perceived affective quality answers per site (pleasant,
 #: chaotic, vibrant, uneventful, calm, annoying, eventful, monotonous) and the
 #: median LAeq of the site's recordings, in dB. Derived for the guide; the same

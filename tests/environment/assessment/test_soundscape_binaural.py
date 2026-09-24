@@ -335,6 +335,27 @@ def test_a_low_sampling_frequency_is_flagged() -> None:
     assert any("at least 3 min" in message for message in messages)
 
 
+@pytest.mark.parametrize(
+    ("duration_s", "fs", "flagged"),
+    [
+        (180.0, 44_100.0, ()),
+        (179.9, 44_100.0, ("at least 3 min",)),
+        (180.0, 44_099.0, ("44.1 kHz",)),
+    ],
+)
+def test_the_recording_thresholds_are_d3_and_d6(
+    duration_s: float, fs: float, flagged: tuple[str, ...]
+) -> None:
+    """3 min (ISO/TS 12913-2 D.3) and 44.1 kHz (D.6) exactly pass."""
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always", sb.SoundscapeWarning)
+        sb._check_recording(duration_s, fs)
+    messages = [str(w.message) for w in caught if w.category is sb.SoundscapeWarning]
+    assert len(messages) == len(flagged)
+    for expected, message in zip(flagged, messages, strict=True):
+        assert expected in message
+
+
 def test_a_single_channel_is_refused() -> None:
     mono = _noise(0.2, 0.1, 5)
     with pytest.raises(ValueError, match="binaural recording"):
@@ -393,6 +414,35 @@ def test_the_plot_draws_one_row_at_both_ears(
     ax = levels_and_loudness.plot(parameter="loudness", language="es")
     assert len(ax.patches) == 8  # N5, Naverage, Nrmc, N95 at two ears
     assert "N_5/N_{95}" in ax.get_title()
+    plt.close("all")
+
+
+def test_the_plot_marks_the_louder_ear_whichever_it_is() -> None:
+    """The bars are each ear's value and the rule the higher of the two, here
+    the right ear for one metric and the left for the other.
+    """
+    method = "stand-in"
+    result = sb.BinauralIndicators(
+        metrics={
+            "LAeq,T": sb.BinauralMetric(
+                "LAeq,T", "sound_pressure_level", 60.0, 66.0, "dB", method
+            ),
+            "LCeq,T": sb.BinauralMetric(
+                "LCeq,T", "sound_pressure_level", 71.0, 68.0, "dB", method
+            ),
+        },
+        not_implemented={},
+        parameters=("sound_pressure_level",),
+        fs=48_000.0,
+        duration_s=180.0,
+        field="free",
+    )
+    ax = result.plot()
+    left, right = ax.containers
+    assert [bar.get_height() for bar in left] == [60.0, 71.0]
+    assert [bar.get_height() for bar in right] == [66.0, 68.0]
+    (rule,) = ax.collections
+    assert [segment[0][1] for segment in rule.get_segments()] == [66.0, 71.0]
     plt.close("all")
 
 

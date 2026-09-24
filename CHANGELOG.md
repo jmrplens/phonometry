@@ -122,14 +122,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   Student interval). The International Soundscape Database v1.0 (CC BY 4.0)
   enters the tests as a consistency check, not an oracle: a derived subset of
   its site medians and of one site's answers is committed, and the
-  pleasantness of its 26 sites falls as their LAeq rises. Four defects are
+  pleasantness of its 26 sites falls as their LAeq rises. Seven defects are
   registered in the errata: A.3 says the formulas process part 3 where their
-  attributes are part 2, Formula (A.3) prints a stray factor 1, C.3.2.3 speaks
-  of three Method B scales where Figure C.7 prints four, and the
-  questionnaires print "extend" and "reponse". The 2019 edition of ISO/TS
-  12913-3 is the one implemented; a 2025 edition revises Annex A. A new guide,
-  in both languages, walks through a study from the questionnaire to the
-  report.
+  attributes are part 2, Formula (A.3) prints a stray factor 1, the where-list
+  of (A.4) garbles its tie counts and that of (B.2) prints x_I for x_i, the
+  NOTE on Nrmc in ISO/TS 12913-2 A.3 f) says "the exponent 3" over a cube
+  root, C.3.2.3 speaks of three Method B scales where Figure C.7 prints four,
+  and the questionnaires print "extend" and "reponse". The 2019 edition of
+  ISO/TS 12913-3 is the one implemented; a 2025 edition revises Annex A. A new
+  guide, in both languages, walks through a study from the questionnaire to
+  the report.
 - **What an active noise reduction earmuff adds, its uncertainty and where it
   stops being linear (ISO 4869-6:2019).** `hearing.active_insertion_loss` takes
   the levels at both ears with the circuit off and on (or the insertion loss

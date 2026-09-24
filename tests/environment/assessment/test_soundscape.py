@@ -19,6 +19,7 @@ from __future__ import annotations
 import dataclasses
 import math
 from types import MappingProxyType
+from typing import TYPE_CHECKING
 
 import matplotlib as mpl
 
@@ -38,6 +39,9 @@ from scipy import stats
 
 from phonometry import environment
 from phonometry.environment.assessment import soundscape as sc
+
+if TYPE_CHECKING:
+    from matplotlib.axes import Axes
 
 _ATTRIBUTES = sc.PERCEIVED_AFFECTIVE_QUALITY_ATTRIBUTES
 _RANGE = 4.0 + math.sqrt(32.0)
@@ -311,13 +315,38 @@ def test_site_coordinates_come_from_the_site_medians() -> None:
 
 
 def test_mean_central_tendency_is_the_mean_of_the_respondents() -> None:
-    """The formulas are linear, so the site point of the means is their mean."""
+    """With every attribute answered, the formulas being linear, the site
+    point of the means is the mean of the respondents' points.
+    """
     answers = _isd_answers()
     complete = answers[~np.isnan(answers).any(axis=1)]
     result = sc.pleasantness_eventfulness(complete, central_tendency="mean")
     assert result.pleasantness[0] == pytest.approx(
         float(np.mean(result.respondent_pleasantness))
     )
+    assert result.eventfulness[0] == pytest.approx(
+        float(np.mean(result.respondent_eventfulness))
+    )
+
+
+def test_a_blank_answer_parts_the_mean_point_from_the_mean_of_respondents() -> None:
+    """A blank makes each attribute mean run over its own set of respondents.
+
+    The site point is then not the mean of the respondents' points, which is
+    why the docstrings state the equality only for complete answers. The ISD
+    subset has two rows with a blank.
+    """
+    answers = _isd_answers()
+    assert np.isnan(answers).any(axis=1).sum() == 2
+    result = sc.pleasantness_eventfulness(answers, central_tendency="mean")
+    respondents_p = float(np.nanmean(result.respondent_pleasantness))
+    means = np.nanmean(answers, axis=0)
+    p, ch, v, _u, ca, a, _e, m = means
+    c = math.cos(math.radians(45.0))
+    assert result.pleasantness[0] == pytest.approx(
+        (p - a) + c * (ca - ch) + c * (v - m)
+    )
+    assert abs(result.pleasantness[0] - respondents_p) > 0.01
 
 
 def test_a_blank_answer_leaves_the_respondent_out() -> None:
@@ -368,7 +397,7 @@ def test_isd_sites_fall_in_pleasantness_as_their_level_rises() -> None:
 
     The louder sites of the database are the less pleasant ones: the rank
     correlation of the site pleasantness with the median LAeq of the site's
-    recordings is about -0,51 (p < 0,01), and with N5 about -0,55.
+    recordings is about -0.51 (p < 0.01), and with N5 about -0.55.
     """
     pleasantness, laeq, n5 = _isd_site_coordinates()
     with_level = sc.spearman_rank_correlation(pleasantness, laeq)
@@ -685,6 +714,16 @@ def test_a_field_study_needs_its_site_description() -> None:
         _environment(site_description=None)
 
 
+def test_a_recorded_environment_needs_its_site_description() -> None:
+    """A.3 g) asks it of "a study based on audio recordings" too."""
+    with pytest.raises(ValueError, match=r"A\.3 g\)"):
+        _environment(
+            environment_type="recorded",
+            site_description=None,
+            recording_and_reproduction="artificial head, played on headphones",
+        )
+
+
 def test_a_virtual_environment_needs_no_site_description() -> None:
     record = _environment(
         environment_type="virtual",
@@ -736,6 +775,31 @@ def test_published_arrays_of_results_are_read_only() -> None:
     assert not correlation.x.flags.writeable
 
 
+@pytest.mark.parametrize(
+    "correlate", [sc.spearman_rank_correlation, sc.pearson_correlation]
+)
+def test_a_correlation_holds_its_own_copies(correlate: object) -> None:
+    """A later change to the caller's arrays cannot rewrite the result."""
+    x = np.array([1.0, 2.0, 3.0, 4.0, 5.0])
+    y = np.array([2.0, 1.0, 4.0, 3.0, 5.0])
+    result = correlate(x, y)  # type: ignore[operator]
+    assert not np.shares_memory(result.x, x)
+    assert not np.shares_memory(result.y, y)
+    x[0] = 100.0
+    assert result.x[0] == 1.0
+    assert x.flags.writeable
+
+
+@pytest.mark.parametrize("part", [1, 2, 3, 4])
+def test_scale_values_are_a_new_array(part: int) -> None:
+    """Parts 1 and 4 keep the position as the value, in an array of its own."""
+    positions = np.array([1.0, 3.0, 5.0])
+    values = sc.method_a_scale_values(positions, part=part)
+    assert not np.shares_memory(values, positions)
+    values[0] = 4.0  # type: ignore[index]
+    np.testing.assert_array_equal(positions, [1.0, 3.0, 5.0])
+
+
 def test_result_shapes_are_checked_when_built() -> None:
     with pytest.raises(ValueError, match="'medians'"):
         sc.MethodASummary(
@@ -760,11 +824,177 @@ def test_the_figure_a1_plot_draws_the_eight_attributes() -> None:
     assert {"ANNOYING", "MONOTONOUS", "UNEVENTFUL", "CALM"} <= labels
     # Each site is a marker of its own, named in the legend.
     assert ax.get_legend_handles_labels()[1] == sites
-    assert ax.get_xlim() == pytest.approx((-1.55, 1.55))
+    assert ax.get_xlim() == pytest.approx((-2.0, 2.0))
+    assert ax.get_ylim() == pytest.approx((-1.55, 1.55))
     plt.close("all")
     ax = result.plot(normalized=False, respondents=True, language="es")
     assert "AGRADABLE" in {t.get_text() for t in ax.texts}
-    assert ax.get_xlim()[1] == pytest.approx(1.55 * _RANGE)
+    assert ax.get_xlim()[1] == pytest.approx(2.0 * _RANGE)
+    plt.close("all")
+
+
+def _site_markers(ax: object, sites: list[str]) -> list[object]:
+    return [line for line in ax.lines if line.get_label() in sites]  # type: ignore[attr-defined]
+
+
+@pytest.mark.parametrize("normalized", [True, False])
+def test_the_figure_a1_plot_puts_each_site_at_its_p_and_e(*, normalized: bool) -> None:
+    sites = [row[0] for row in ISD_LOCATION_MEDIANS]
+    medians = np.array([row[3] for row in ISD_LOCATION_MEDIANS], dtype=float)
+    result = sc.pleasantness_eventfulness(medians, sites=sites)
+    ax = result.plot(normalized=normalized)
+    markers = _site_markers(ax, sites)
+    x = np.concatenate([np.asarray(m.get_xdata(), dtype=float) for m in markers])
+    y = np.concatenate([np.asarray(m.get_ydata(), dtype=float) for m in markers])
+    scale = 1.0 / _RANGE if normalized else 1.0
+    np.testing.assert_allclose(x, result.pleasantness * scale, rtol=1e-12)
+    np.testing.assert_allclose(y, result.eventfulness * scale, rtol=1e-12)
+    plt.close("all")
+
+
+def test_the_figure_a1_legend_stays_on_its_own_figure() -> None:
+    """The renderer's own figure is laid out, so the legend under the axes
+    is not cut off by a plain savefig() or plt.show().
+    """
+    sites = [row[0] for row in ISD_LOCATION_MEDIANS]
+    medians = np.array([row[3] for row in ISD_LOCATION_MEDIANS], dtype=float)
+    ax = sc.pleasantness_eventfulness(medians, sites=sites).plot(language="es")
+    figure = ax.figure
+    figure.canvas.draw()
+    box = ax.get_legend().get_window_extent()
+    assert box.y0 >= 0.0
+    assert box.x0 >= 0.0
+    assert box.x1 <= figure.bbox.width
+    assert box.y1 < ax.xaxis.label.get_window_extent().y0
+    assert ax.title.get_window_extent().y1 <= figure.bbox.height
+    plt.close("all")
+
+
+def _figure_a1_axes(
+    result: sc.PleasantnessEventfulness, language: str, *, own: bool
+) -> Axes:
+    """The renderer's own figure, or a default one the caller lays out."""
+    if own:
+        return result.plot(language=language)
+    _fig, ax = plt.subplots()
+    result.plot(ax, language=language)
+    plt.tight_layout()
+    return ax
+
+
+@pytest.mark.parametrize(("n_sites", "own"), [(26, True), (11, False)])
+def test_the_figure_a1_labels_stay_inside_the_axes(*, n_sites: int, own: bool) -> None:
+    """The words written past the arrow tips never reach the frame: on the
+    renderer's own figure with the 26 sites of the database under it, and on
+    a default figure the caller lays out with the eleven of the guide.
+    """
+    sites = [row[0] for row in ISD_LOCATION_MEDIANS][:n_sites]
+    medians = np.array([row[3] for row in ISD_LOCATION_MEDIANS], dtype=float)
+    result = sc.pleasantness_eventfulness(medians[:n_sites], sites=sites)
+    for language in ("en", "es"):
+        ax = _figure_a1_axes(result, language, own=own)
+        ax.figure.canvas.draw()
+        frame = ax.get_window_extent()
+        for text in ax.texts:
+            if not text.get_text():
+                continue
+            box = text.get_window_extent()
+            assert frame.x0 < box.x0, text.get_text()
+            assert box.x1 < frame.x1, text.get_text()
+        plt.close("all")
+
+
+def test_the_method_a_plot_marks_the_median_over_the_range() -> None:
+    summary = sc.method_a_summary(
+        {"pleasant": [5, 4, 2, 1, 3], "annoying": [1, 2, 4, 5, 3]},
+        part=2,
+        sites=["a", "a", "b", "b", "b"],
+    )
+    ax = summary.plot(language="es")
+    markers = _site_markers(ax, ["a", "b"])
+    for k, marker in enumerate(markers):
+        np.testing.assert_array_equal(marker.get_ydata(), summary.medians[k])
+    for k, bars in enumerate(ax.collections):
+        segments = bars.get_segments()
+        np.testing.assert_array_equal([s[0][1] for s in segments], summary.minima[k])
+        np.testing.assert_array_equal([s[1][1] for s in segments], summary.maxima[k])
+    title = ax.get_title()
+    assert title.startswith("ISO/TS 12913-3, Método A, parte 2 (mediana, recorrido)\n")
+    assert title.endswith("Calidad afectiva percibida")
+    plt.close("all")
+
+
+def test_the_method_b_plot_marks_the_mean_within_its_interval() -> None:
+    summary = sc.method_b_summary(
+        np.array(
+            [
+                [3.9, 4.2, 2.2],
+                [4.4, 3.6, 2.8],
+                [2.0, 2.5, 4.1],
+                [3.3, 3.1, 3.9],
+                [2.9, 3.8, 4.4],
+            ]
+        ),
+        sites=["a", "a", "b", "b", "b"],
+    )
+    ax = summary.plot()
+    markers = _site_markers(ax, ["a", "b"])
+    for k, marker in enumerate(markers):
+        np.testing.assert_allclose(marker.get_ydata(), summary.means[k])
+    for k, bars in enumerate(ax.collections):
+        segments = bars.get_segments()
+        np.testing.assert_allclose(
+            [s[0][1] for s in segments], summary.confidence_lower[k]
+        )
+        np.testing.assert_allclose(
+            [s[1][1] for s in segments], summary.confidence_upper[k]
+        )
+    assert ax.get_title().endswith("mean, 95 % confidence interval")
+    plt.close("all")
+    ax = summary.plot(language="es")
+    assert ax.get_title().endswith("media, intervalo de confianza del 95 %")
+    plt.close("all")
+
+
+def test_the_spearman_plot_draws_the_ranks_under_its_symbol() -> None:
+    x = [3.0, 1.0, 2.0, 2.0, 5.0]
+    y = [10.0, 30.0, 20.0, 40.0, 50.0]
+    rho = sc.spearman_rank_correlation(x, y)
+    ax = rho.plot()
+    (points,) = ax.lines
+    np.testing.assert_array_equal(points.get_xdata(), rho.x_ranks)
+    np.testing.assert_array_equal(points.get_ydata(), rho.y_ranks)
+    assert ax.get_title().startswith(r"$r_\mathrm{spearman}$ = ")
+    plt.close("all")
+    r = sc.pearson_correlation(x, y)
+    ax = r.plot()
+    (points,) = ax.lines
+    np.testing.assert_array_equal(points.get_xdata(), r.x)
+    np.testing.assert_array_equal(points.get_ydata(), r.y)
+    assert ax.get_title().startswith("Pearson $r$ = ")
+    plt.close("all")
+
+
+def test_the_source_ranking_plot_draws_the_median_rank_and_its_range() -> None:
+    ranking = sc.method_b_source_ranking(
+        [["traffic", "voices", "birds"], ["birds", "traffic"], ["voices"], ["traffic"]],
+        sites=["a", "a", "b", "b"],
+    )
+    ax = ranking.plot()
+    for k, bars in enumerate(ax.containers):
+        widths = [patch.get_width() for patch in bars]
+        np.testing.assert_array_equal(
+            widths, np.nan_to_num(ranking.median_ranks[k], nan=0.0)
+        )
+    for k, spans in enumerate(ax.collections):
+        segments = spans.get_segments()
+        np.testing.assert_array_equal(
+            [s[0][0] for s in segments], np.nan_to_num(ranking.lowest_ranks[k], nan=0.0)
+        )
+        np.testing.assert_array_equal(
+            [s[1][0] for s in segments],
+            np.nan_to_num(ranking.highest_ranks[k], nan=0.0),
+        )
     plt.close("all")
 
 

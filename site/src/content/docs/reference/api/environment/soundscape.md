@@ -9,7 +9,7 @@ How people hear a place: the soundscape questionnaire and its analysis
 (ISO/TS 12913-2:2018 Annexes A and C, ISO/TS 12913-3:2019 Annexes A and B).
 
 A soundscape is the acoustic environment as a person perceives it in context
-(ISO 12913-1). Its study "relies primarily upon human perception, and only
+(ISO 12913-1). Its study "relies primarily upon human perception and only
 then turns to physical measurement" (ISO/TS 12913-2, Introduction), which
 makes this the first module of the library whose input is not a signal but a
 **questionnaire**: the boxes people ticked on a soundwalk, turned into
@@ -72,10 +72,13 @@ formulas are applied to part 2, and the slip is in `docs/ERRATA.md`.
 eventfulness) for each site" from the results of the questionnaire, and A.2
 makes the median the central tendency of every Method A scale. The site
 coordinates are therefore Formulas (A.1) and (A.2) applied to the site medians
-of the eight attributes. Because the formulas are linear, the alternative
-`central_tendency="mean"` gives the same point as the mean of the
-respondents' own coordinates; the median of those coordinates is a third
-reading, which the per-respondent values let a caller form.
+of the eight attributes. When every respondent answered all eight attributes,
+the formulas being linear, the alternative `central_tendency="mean"` gives
+the same point as the mean of the respondents' own coordinates. A blank
+answer breaks that equality: each attribute mean is then taken over the
+respondents who answered that attribute, while a respondent with a blank in a
+formula has no coordinate of it. The median of the respondents' coordinates is
+a third reading, which the per-respondent values let a caller form.
 
 **Formula (A.3).** The page prints $r = 1 - 1\,\frac{6\sum d_i^2}{n(n^2 - 1)}$, with a stray factor 1; read as a product it is the usual
 coefficient for untied ranks, which is what is implemented.
@@ -89,10 +92,17 @@ $(n - 1)/n$.
 coefficient and its probability value without naming a test. Both use the
 Student $t$ statistic $t = r\sqrt{(n - 2)/(1 - r^2)}$ with
 $n - 2$ degrees of freedom, which is exact for Pearson's coefficient of
-bivariate normal data and the usual large-sample approximation for Spearman's. The 95 %
-confidence interval of Method B uses the Student distribution with
+bivariate normal data and the usual large-sample approximation for Spearman's.
+The 95 % confidence interval of Method B uses the Student distribution with
 $n - 1$ degrees of freedom about the mean, with the sample standard
 deviation.
+
+**The where-lists of Formulas (A.4) and (B.2).** The page defines
+$t_j$ as "the number of in $t_j$ tied ranks" and $k(x)$ as
+"the numbers of tied ranks"; the formula needs the size of the $j$-th
+group of tied values and the number of such groups, which is what is
+implemented. Under (B.2) the mean is "of the array $x_I$", for
+$x_i$. Both slips are in `docs/ERRATA.md`.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
@@ -125,7 +135,7 @@ are 5 and the value is `6 - position`.
 | `positions` | The position of each ticked box, 1 (left) to 5 (right); `NaN` for a question left blank. |
 | `part` | The part of the questionnaire, 1 to 4. |
 
-**Returns:** The scale values, a float for a scalar input.
+**Returns:** The scale values, a float for a scalar input; an array is always a new one, never a view of *positions*.
 
 **Raises**
 
@@ -334,7 +344,7 @@ Plot the median of each item per site, with its range as a bar.
 | :--- | :--- |
 | `ax` | Existing axes, or `None` to create a figure. |
 | `language` | Label language, `"en"` (default) or `"es"`. |
-| `kwargs` | Forwarded to the median markers. |
+| `kwargs` | Forwarded to the median markers of the first site; the other sites keep their own colour and style. |
 
 **Returns:** The axes. Requires matplotlib (`pip install phonometry[plot]`).
 
@@ -397,7 +407,7 @@ Plot the mean of each scale per site with its confidence interval.
 | :--- | :--- |
 | `ax` | Existing axes, or `None` to create a figure. |
 | `language` | Label language, `"en"` (default) or `"es"`. |
-| `kwargs` | Forwarded to the mean markers. |
+| `kwargs` | Forwarded to the mean markers of the first site; the other sites keep their own colour and style. |
 
 **Returns:** The axes. Requires matplotlib (`pip install phonometry[plot]`).
 
@@ -470,8 +480,11 @@ converts box positions, which run the other way. Every respondent who
 answered all eight attributes gets a coordinate pair. Each site gets the
 pair of Formulas (A.1) and (A.2) applied to the site's median of each
 attribute (A.2 makes the median the central tendency of the scale), or to
-its mean with `central_tendency="mean"`, which is also the mean of the
-respondents' coordinates since the formulas are linear.
+its mean with `central_tendency="mean"`. When every respondent answered
+all eight attributes, that mean point is also the mean of the respondents'
+coordinates, the formulas being linear; with blank answers it is not,
+because each attribute mean is then taken over a different set of
+respondents.
 
 Clause A.3 says the formulas process "the results from part 3"; the
 attributes they name are part 2, and that is what they are applied to
@@ -690,8 +703,8 @@ value (ISO/TS 12913-3 A.4 and B.3).
 | `t_statistic` | The Student statistic the probability value comes from, $r\sqrt{(n - 2)/(1 - r^2)}$; infinite for $\vert r\vert  = 1$. |
 | `degrees_of_freedom` | $n - 2$. |
 | `alternative` | `"two-sided"`, `"greater"` or `"less"`. |
-| `x` | The first variable, as given. |
-| `y` | The second variable, as given. |
+| `x` | The first variable, as given (a copy, read-only). |
+| `y` | The second variable, as given (a copy, read-only). |
 | `x_ranks` | The ranks of `x` (average ranks for ties); `None` for Pearson. |
 | `y_ranks` | The ranks of `y`; `None` for Pearson. |
 
@@ -863,7 +876,7 @@ Plot the median rank of each source per site, with its range.
 | :--- | :--- |
 | `ax` | Existing axes, or `None` to create a figure. |
 | `language` | Label language, `"en"` (default) or `"es"`. |
-| `kwargs` | Forwarded to the bars. |
+| `kwargs` | Forwarded to the bars of the first site; the other sites keep their own colour and style. |
 
 **Returns:** The axes. Requires matplotlib (`pip install phonometry[plot]`).
 
@@ -896,9 +909,10 @@ r_\mathrm{spearman} = \frac{2\,\frac{n^3 - n}{12} - T - U - \sum d_i^2} {2\sqrt{
 $$
 
 where $t_j$ is the number of values in the $j$-th group of
-tied ranks of `x` and `U` is the same sum over `y`. Formula (A.4)
-is Pearson's coefficient of the average ranks, and reduces to (A.3) when
-nothing is tied.
+tied ranks of `x` and `U` is the same sum over `y`. (The page's
+where-list garbles these definitions, see `docs/ERRATA.md`; this is the
+reading the formula needs.) Formula (A.4) is Pearson's coefficient of the
+average ranks, and reduces to (A.3) when nothing is tied.
 
 The probability value is that of the Student statistic
 $r\sqrt{(n - 2)/(1 - r^2)}$ with $n - 2$ degrees of freedom,

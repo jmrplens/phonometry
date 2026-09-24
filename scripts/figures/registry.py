@@ -1242,8 +1242,8 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     generate_sel_distribution_density,
     generate_sel_distribution_exceedance,
     # ISO/TS 12913-3: how people hear a place. Eleven London sites of the
-    # International Soundscape Database on Figure A.1, and the metrics of
-    # Table D.1 at both ears of a synthetic street recording.
+    # International Soundscape Database on Figure A.1, and the level and
+    # loudness rows of Table D.1 at both ears of a synthetic street recording.
     generate_soundscape_pleasantness_eventfulness,
     generate_soundscape_binaural_indicators,
     generate_moore_glasberg_specific_loudness,

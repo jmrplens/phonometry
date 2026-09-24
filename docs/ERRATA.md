@@ -2227,8 +2227,9 @@ in the same order.
   names no part. The sentence should read "part 2 (see A.2 and Table A.1)".
 - **Evidence:** the sentence on PDF page 11 (printed p. 5), Table A.1 and the
   A.2 paragraphs on PDF page 10 (printed p. 4), both of ISO/TS 12913-3:2019
-  (first edition, 2019-12); C.3.1.3 and Figures C.4 and C.5 on PDF page 22
-  (printed p. 16) of ISO/TS 12913-2:2018 (first edition).
+  (first edition, 2019-12); C.3.1.3 on PDF page 21 (printed p. 15) and
+  Figures C.4 and C.5 on PDF page 22 (printed p. 16) of ISO/TS 12913-2:2018
+  (first edition).
 - **Library behaviour:** `pleasantness_eventfulness` applies Formulas (A.1)
   and (A.2) to the eight attributes of part 2, the only reading under which
   they can be evaluated
@@ -2259,6 +2260,79 @@ in the same order.
   with them; the conformance rows hold the first to Pearson's coefficient of
   the ranks and the second to `scipy.stats.spearmanr`
   ([`soundscape.py`](../src/phonometry/environment/assessment/soundscape.py)).
+  No change was required.
+- **Status:** unreported.
+
+## ISO/TS 12913-3:2019, Formula (A.4) (the where-list of the tie counts)
+
+- **Location:** Annex A (informative), A.4, the where-list under Formula
+  (A.4), Spearman's rank correlation coefficient for tied ranks.
+- **The print:** "$t_j$ is the number of in $t_j$ tied ranks of the variable
+  $x$; $u_j$ is the number of in $u_j$ tied ranks of the variable $y$;
+  $k(x)$ and $k(y)$ are the numbers of tied ranks of the variables $x$ and
+  $y$", under
+  $T = \sum_{j=1}^{k(x)} (t_j^3 - t_j)/12$ and
+  $U = \sum_{j=1}^{k(y)} (u_j^3 - u_j)/12$.
+- **The problem:** the first two definitions are not sentences ("the number
+  of in $t_j$ tied ranks") and define $t_j$ by itself. The sums need $t_j$
+  to be the number of values sharing the $j$-th tied rank of $x$ ($u_j$ the
+  same for $y$), and $k(x)$, $k(y)$ to be the number of such groups of ties
+  in each variable, which "the numbers of tied ranks" does not say. The
+  intended reading is the usual tie correction of Spearman's coefficient,
+  which is what makes (A.4) Pearson's coefficient of the average ranks.
+- **Evidence:** the where-list on PDF page 13 (printed p. 7), under Formula
+  (A.4) on PDF page 12 (printed p. 6), of ISO/TS 12913-3:2019 (first
+  edition, 2019-12).
+- **Library behaviour:** `spearman_rank_correlation` sums
+  $(t_j^3 - t_j)/12$ over the groups of equal values of each variable, and a
+  conformance row holds Formula (A.4) so read to `scipy.stats.spearmanr` on
+  93 real answers with heavy ties
+  ([`soundscape.py`](../src/phonometry/environment/assessment/soundscape.py)).
+  No change was required.
+- **Status:** unreported.
+
+## ISO/TS 12913-3:2019, Formula (B.2) ($x_I$ for $x_i$)
+
+- **Location:** Annex B (informative), B.3, the where-list under Formula
+  (B.2), the covariance of Pearson's correlation coefficient.
+- **The print:** "$\bar{x}$ is the arithmetic mean value of the array $x_I$;"
+  with a capital $I$, followed by "$\bar{y}$ is the arithmetic mean value of
+  the array $y_i$;".
+- **The problem:** the index is the lower-case $i$ of the sum in (B.2),
+  $\sum_{i=1}^{n} (x_i - \bar{x})(y_i - \bar{y})/n$, and of the line for
+  $\bar{y}$ just under it; $x_I$ names no array of the annex.
+- **Evidence:** the where-list on PDF page 15 (printed p. 9) of
+  ISO/TS 12913-3:2019 (first edition, 2019-12).
+- **Library behaviour:** `pearson_correlation` takes $\bar{x}$ as the mean of
+  the $x_i$ ([`soundscape.py`](../src/phonometry/environment/assessment/soundscape.py)).
+  No change was required.
+- **Status:** unreported.
+
+## ISO/TS 12913-2:2018, A.3 f), NOTE (exponent 3 for a cube root)
+
+- **Location:** Annex A (normative), A.3 f), the NOTE on the root mean cubed
+  loudness $N_\mathrm{rmc}$.
+- **The print:** "The root mean cubed loudness (cubic mean), Nrmc, is
+  computed by determining the mean of all loudness values raised to the power
+  of 3 with a subsequent application of the exponent 3 as shown in the
+  following formula:
+  $N_\mathrm{rmc} = \sqrt[3]{\frac{1}{n}\sum_{i=1}^{n} N_i^3}$".
+- **The problem:** the text and the formula under it disagree. The formula
+  takes the cube root of the mean of the cubes, a subsequent exponent of
+  $1/3$, which is what a cubic mean is and what returns a loudness in sone;
+  the text says the subsequent exponent is 3, which would give the mean cube
+  raised to the third power, $\left(\frac{1}{n}\sum N_i^3\right)^3$, in
+  sone to the ninth. The sentence should read "a subsequent application of
+  the exponent 1/3". ISO 532-1:2017, 6.4, NOTE, describes the energy mean of
+  the loudness level in the same shape and gets it right: a power of about
+  3,322 and then a power law "with the exponent lg(2)", its inverse.
+- **Evidence:** the NOTE and its formula on PDF page 14 (printed p. 8) of
+  ISO/TS 12913-2:2018 (first edition, 2018-08); ISO 532-1:2017, 6.4, on PDF
+  page 22 (printed p. 16).
+- **Library behaviour:** `binaural_indicators` computes $N_\mathrm{rmc}$ of
+  each ear by the formula, the cube root of the mean of the cubes of the
+  loudness over time, and a conformance row holds it to that formula
+  ([`soundscape_binaural.py`](../src/phonometry/environment/assessment/soundscape_binaural.py)).
   No change was required.
 - **Status:** unreported.
 

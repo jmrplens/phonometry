@@ -41,7 +41,7 @@ está allí lo encuentra agradable, animado, tranquilizador o molesto, y dos
 plazas con el mismo $L_\mathrm{Aeq}$ pueden oírse como lugares opuestos. El
 **paisaje sonoro** es el entorno acústico tal como lo percibe una persona, en
 su contexto (ISO 12913-1), y su estudio «relies primarily upon human
-perception, and only then turns to physical measurement» (ISO/TS 12913-2): se
+perception and only then turns to physical measurement» (ISO/TS 12913-2): se
 apoya primero en la percepción humana y solo después en la medición física.
 
 Eso hace de esta la primera página de la biblioteca cuya entrada no es una
@@ -57,12 +57,12 @@ publicado una edición de 2025 que revisa el Anexo A, donde están las fórmulas
 de agradabilidad y eventualidad; no se ha leído para esta implementación, así
 que un estudio que cite la edición de 2025 debe cotejar esas fórmulas con ella.
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/soundscape_pleasantness_eventfulness.svg" alt="Dos paneles. Izquierda: el modelo de dos dimensiones de la Figura A.1 de ISO/TS 12913-3, con la agradabilidad en el eje horizontal y la eventualidad en el vertical, ambas de menos 1 a más 1, los cuatro atributos principales sobre flechas continuas y caótico, vibrante, tranquilo y monótono sobre diagonales discontinuas; se dibujan once lugares de Londres, la mayoría en la mitad agradable, el jardín japonés de Regent's Park el más agradable y algo sin actividad, Camden Town y Euston Tap del lado molesto y con actividad. Derecha: el rango de la agradabilidad de cada lugar frente al rango de su LAeq, que baja de arriba a la izquierda a abajo a la derecha, con el título Spearman r = menos 0,638, p = 0,035, Fórmula (A.4), n = 11" width="100%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/soundscape_pleasantness_eventfulness.svg" alt="Dos paneles. Izquierda: el modelo de dos dimensiones de la Figura A.1 de ISO/TS 12913-3, con la agradabilidad en el eje horizontal y la eventualidad en el vertical, ambas de menos 1 a más 1, los cuatro atributos principales sobre flechas continuas y caótico, vibrante, tranquilo y monótono sobre diagonales discontinuas; se dibujan once lugares de Londres, la mayoría en la mitad agradable, el jardín japonés de Regent's Park el más agradable y algo sin actividad, Camden Town y Euston Tap del lado molesto y con actividad. Derecha: el rango de la agradabilidad de cada lugar frente al rango de su LAeq, que baja de arriba a la izquierda a abajo a la derecha, con el título r spearman = menos 0,638, p = 0,035, Fórmula (A.4), n = 11" width="100%" />
 
 *Once lugares de Londres de la International Soundscape Database sobre el
 modelo de la Figura A.1 (izquierda) y la correlación por rangos de su
 agradabilidad con su nivel (derecha), ambos dibujados por el propio `.plot()`
-de los resultados.*
+de los resultados, con los dos ejes de rango rotulados con lo que se ordenó.*
 
 ## 1. El cuestionario y sus valores de escala
 
@@ -149,7 +149,9 @@ los dos diagonales. Dividir por $4 + \sqrt{32}$ lleva las coordenadas a
 $\pm 1$.
 
 Los once lugares de Londres de la International Soundscape Database se
-encuestaron con el cuestionario inglés del Método A. Estas son las medianas por
+encuestaron casi por completo con el cuestionario inglés del Método A; diez
+respuestas, en cuatro de los lugares, se dieron con la versión española de la
+encuesta de la base de datos y también se cuentan. Estas son las medianas por
 lugar de sus respuestas y la mediana del $L_\mathrm{Aeq}$ de sus grabaciones:
 
 ```python
@@ -182,8 +184,11 @@ Con las respuestas de cada encuestado en lugar de las medianas,
 cada encuestado (`respondent_pleasantness`, `respondent_eventfulness`) y las
 del lugar. El punto del lugar son las fórmulas aplicadas a la **mediana del
 lugar** de cada atributo, porque A.2 hace de la mediana la tendencia central de
-la escala; `central_tendency="mean"` usa la media, que, al ser lineales las
-fórmulas, es la media de las coordenadas de los encuestados.
+la escala; `central_tendency="mean"` usa la media. Cuando todos los
+encuestados han contestado los ocho atributos, ese punto de medias es también
+la media de las coordenadas de los encuestados, al ser lineales las fórmulas;
+una respuesta en blanco rompe la igualdad, porque cada media de atributo se
+toma entonces sobre los encuestados que contestaron ese atributo.
 `pe.plot(respondents=True)` añade cada encuestado como un punto tenue del
 color de su lugar.
 
@@ -223,15 +228,21 @@ forma significativa. Sobre las 26 localizaciones de la base de datos la
 correlación por rangos es de unos $-0{,}51$ ($p < 0{,}01$). A.4 y B.3 piden la
 probabilidad sin nombrar ninguna prueba; las dos funciones usan el estadístico
 de Student $r\sqrt{(n-2)/(1-r^2)}$ con $n - 2$ grados de libertad, exacto para
-el coeficiente de Pearson de datos normales y la aproximación habitual para el
-de Spearman. `alternative="greater"` o `"less"` da el valor unilateral.
+el coeficiente de Pearson de datos normales bivariantes y la aproximación
+habitual para el de Spearman. `alternative="greater"` o `"less"` da el valor
+unilateral.
 
-Conviene saber dos detalles de la página. La Fórmula (A.3) se imprime como
+Conviene saber tres detalles de la página. La Fórmula (A.3) se imprime como
 $1 - 1\,\tfrac{6\sum d_i^2}{n(n^2-1)}$, con un factor 1 suelto que la
-biblioteca lee como el resto de composición que es. Y la Fórmula (B.2), la
-covarianza de Pearson para datos de intervalo, divide por $n$; las
-desviaciones típicas de (B.1) se toman entonces también con $n$, que es lo que
-hace de $r$ el coeficiente habitual. `rho.plot()` dibuja los pares ordenados
+biblioteca lee como el resto de composición que es. La lista de definiciones
+bajo la Fórmula (A.4) define $t_j$ como «the number of in $t_j$ tied ranks» y
+$k(x)$ como «the numbers of tied ranks»; la biblioteca las lee como el tamaño
+de cada grupo de valores empatados y el número de esos grupos, la corrección
+por empates habitual. Y la Fórmula (B.2), la covarianza de Pearson para datos
+de intervalo, divide por $n$; las desviaciones típicas de (B.1) se toman
+entonces también con $n$, que es lo que hace de $r$ el coeficiente habitual.
+Las dos primeras, y una mayúscula suelta en la lista de definiciones de (B.2),
+están en el [registro de erratas](/phonometry/es/reference/errata/). `rho.plot()` dibuja los pares ordenados
 por rango, el panel derecho de la figura de arriba.
 
 ## 5. Método B: escalas continuas y la ordenación de fuentes
@@ -325,7 +336,11 @@ métrica dice cuál en su `method`:
 | Intensidad de fluctuación | $F_{10}$, $F_{50}$ | `psychoacoustics.fluctuation_strength_ecma` (ECMA-418-2:2025) |
 
 $N_\mathrm{rmc}$ es la raíz cúbica de la media de los cubos de la sonoridad en
-el tiempo, que imprime A.3 f) de ISO/TS 12913-2; $N_5/N_{95}$ es la razón de
+el tiempo, tal como la imprime la fórmula de la NOTA bajo A.3 f) de
+ISO/TS 12913-2; el texto de esa NOTA llama al segundo paso «the exponent 3»
+donde la fórmula aplica $1/3$, y el
+[registro de erratas](/phonometry/es/reference/errata/) tiene la entrada.
+$N_5/N_{95}$ es la razón de
 variabilidad que sugiere D.2. La Tabla D.1 cita ECMA-74 para la tonalidad; la
 edición vigente de ECMA-74 remite su método de tonalidad psicoacústica al
 apartado 6 de ECMA-418-2, que es lo que implementa `tonality_ecma`. Para la
@@ -411,10 +426,14 @@ import matplotlib.pyplot as plt
 fig, (ax_model, ax_rank) = plt.subplots(1, 2, figsize=(14.0, 6.6))
 pe.plot(ax_model, language="es")    # la Figura A.1 con los once lugares
 rho.plot(ax_rank, language="es")    # los pares ordenados de la Fórmula (A.4)
+ax_rank.set_xlabel(r"Rango de la agradabilidad $P$ del lugar")
+ax_rank.set_ylabel(r"Rango del $L_\mathrm{Aeq}$ del lugar")
+plt.tight_layout()   # sitio para la leyenda de lugares bajo la Figura A.1
 
 fig, (ax_levels, ax_loudness) = plt.subplots(1, 2, figsize=(14.0, 5.8))
 bi.plot(ax_levels, parameter="sound_pressure_level", language="es")
 bi.plot(ax_loudness, parameter="loudness", language="es")
+plt.tight_layout()
 plt.show()
 ```
 

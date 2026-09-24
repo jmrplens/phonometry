@@ -14,16 +14,18 @@ consistency checks only, never as a calibration oracle. Source: A. Mitchell,
 T. Oberman, F. Aletta et al., "The International Soundscape Database (ISD)"
 v1.0, Zenodo, DOI 10.5281/zenodo.10672568, licensed CC BY 4.0. Changes made
 here: from the file "ISD v1.0 Data.csv" of that deposit, the median of each of
-the eight perceived affective quality answers per location, the number of
-responses and of recordings per location, and the median over a location's
-recordings of the published LAeq and N5 were computed; and the eight answers
-of the 93 responses at Regent's Park Japanese Garden (survey version
-engISO2018) are copied as they are, ``None`` for a blank. The survey codes
-each answer 1 to 5 with 5 for "strongly agree", which is the orientation of
-the scale values of ISO/TS 12913-3 Table A.1 for part 2; the location medians
-bear it out, "pleasant" being above "annoying" at every location but one. The
-audio of the database is not used: its recordings carry a per-channel
-normalisation that the deposit does not document.
+the eight perceived affective quality answers per location, over every
+response at the location whatever the language of its questionnaire, the
+number of responses and of recordings per location, and the median over a
+location's recordings of the published LAeq and N5 were computed; and the
+eight answers of the 93 responses at Regent's Park Japanese Garden (survey
+version engISO2018) are copied as they are, ``None`` for a blank. The survey
+codes each answer 1 to 5 with 5 for "strongly agree", which is the orientation
+of the scale values of ISO/TS 12913-3 Table A.1 for part 2; the location
+medians bear it out, "pleasant" being at or above "annoying" at every location
+but one, Euston Tap (above at 22, equal at 3). The audio of the database is
+not used: its recordings carry a per-channel normalisation that the deposit
+does not document.
 """
 
 #: ISO/TS 12913-3:2019 A.3 (PDF page 11, folio 5): "The range of the

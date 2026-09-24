@@ -2401,9 +2401,9 @@ dos ediciones con las mismas entradas y en el mismo orden.
   debería decir «part 2 (see A.2 and Table A.1)».
 - **Evidencia:** la frase en la página 11 del PDF (p. 5 impresa), la Tabla
   A.1 y los párrafos de A.2 en la página 10 del PDF (p. 4 impresa), ambas de
-  ISO/TS 12913-3:2019 (primera edición, 2019-12); C.3.1.3 y las Figuras C.4 y
-  C.5 en la página 22 del PDF (p. 16 impresa) de ISO/TS 12913-2:2018 (primera
-  edición).
+  ISO/TS 12913-3:2019 (primera edición, 2019-12); C.3.1.3 en la página 21 del
+  PDF (p. 15 impresa) y las Figuras C.4 y C.5 en la página 22 del PDF (p. 16
+  impresa) de ISO/TS 12913-2:2018 (primera edición).
 - **Comportamiento de la biblioteca:** `pleasantness_eventfulness` aplica las
   Fórmulas (A.1) y (A.2) a los ocho atributos de la parte 2, la única lectura
   con la que pueden evaluarse
@@ -2434,6 +2434,84 @@ dos ediciones con las mismas entradas y en el mismo orden.
   con ellos; las filas de conformidad ligan la primera al coeficiente de
   Pearson de los rangos y la segunda a `scipy.stats.spearmanr`
   ([`soundscape.py`](../src/phonometry/environment/assessment/soundscape.py)).
+  No hizo falta ningún cambio.
+- **Estado:** sin notificar.
+
+## ISO/TS 12913-3:2019, Fórmula (A.4) (la lista de definiciones de los empates)
+
+- **Ubicación:** Anexo A (informativo), A.4, la lista de definiciones bajo la
+  Fórmula (A.4), el coeficiente de correlación por rangos de Spearman para
+  rangos con empates.
+- **El impreso:** «$t_j$ is the number of in $t_j$ tied ranks of the variable
+  $x$; $u_j$ is the number of in $u_j$ tied ranks of the variable $y$;
+  $k(x)$ and $k(y)$ are the numbers of tied ranks of the variables $x$ and
+  $y$», bajo
+  $T = \sum_{j=1}^{k(x)} (t_j^3 - t_j)/12$ y
+  $U = \sum_{j=1}^{k(y)} (u_j^3 - u_j)/12$.
+- **El problema:** las dos primeras definiciones no son frases («the number
+  of in $t_j$ tied ranks») y definen $t_j$ por sí mismo. Las sumas necesitan
+  que $t_j$ sea el número de valores que comparten el $j$-ésimo rango empatado
+  de $x$ ($u_j$ lo mismo para $y$), y que $k(x)$, $k(y)$ sean el número de
+  esos grupos de empates en cada variable, que es lo que «the numbers of tied
+  ranks» no dice. La lectura buscada es la corrección por empates habitual del
+  coeficiente de Spearman, que es lo que hace de (A.4) el coeficiente de
+  Pearson de los rangos medios.
+- **Evidencia:** la lista de definiciones en la página 13 del PDF (p. 7
+  impresa), bajo la Fórmula (A.4) de la página 12 del PDF (p. 6 impresa), de
+  ISO/TS 12913-3:2019 (primera edición, 2019-12).
+- **Comportamiento de la biblioteca:** `spearman_rank_correlation` suma
+  $(t_j^3 - t_j)/12$ sobre los grupos de valores iguales de cada variable, y
+  una fila de conformidad liga la Fórmula (A.4) así leída a
+  `scipy.stats.spearmanr` sobre 93 respuestas reales con muchos empates
+  ([`soundscape.py`](../src/phonometry/environment/assessment/soundscape.py)).
+  No hizo falta ningún cambio.
+- **Estado:** sin notificar.
+
+## ISO/TS 12913-3:2019, Fórmula (B.2) ($x_I$ por $x_i$)
+
+- **Ubicación:** Anexo B (informativo), B.3, la lista de definiciones bajo la
+  Fórmula (B.2), la covarianza del coeficiente de correlación de Pearson.
+- **El impreso:** «$\bar{x}$ is the arithmetic mean value of the array $x_I$;»
+  con una $I$ mayúscula, seguido de «$\bar{y}$ is the arithmetic mean value of
+  the array $y_i$;».
+- **El problema:** el índice es la $i$ minúscula de la suma de (B.2),
+  $\sum_{i=1}^{n} (x_i - \bar{x})(y_i - \bar{y})/n$, y de la línea de
+  $\bar{y}$ justo debajo; $x_I$ no nombra ningún array del anexo.
+- **Evidencia:** la lista de definiciones en la página 15 del PDF (p. 9
+  impresa) de ISO/TS 12913-3:2019 (primera edición, 2019-12).
+- **Comportamiento de la biblioteca:** `pearson_correlation` toma $\bar{x}$
+  como la media de los $x_i$
+  ([`soundscape.py`](../src/phonometry/environment/assessment/soundscape.py)).
+  No hizo falta ningún cambio.
+- **Estado:** sin notificar.
+
+## ISO/TS 12913-2:2018, A.3 f), NOTA (exponente 3 por una raíz cúbica)
+
+- **Ubicación:** Anexo A (normativo), A.3 f), la NOTA sobre la sonoridad media
+  cúbica $N_\mathrm{rmc}$.
+- **El impreso:** «The root mean cubed loudness (cubic mean), Nrmc, is
+  computed by determining the mean of all loudness values raised to the power
+  of 3 with a subsequent application of the exponent 3 as shown in the
+  following formula:
+  $N_\mathrm{rmc} = \sqrt[3]{\frac{1}{n}\sum_{i=1}^{n} N_i^3}$».
+- **El problema:** el texto y la fórmula de debajo no coinciden. La fórmula
+  toma la raíz cúbica de la media de los cubos, un exponente posterior de
+  $1/3$, que es lo que es una media cúbica y lo que devuelve una sonoridad en
+  sone; el texto dice que el exponente posterior es 3, lo que daría la media
+  de los cubos elevada al cubo, $\left(\frac{1}{n}\sum N_i^3\right)^3$, en
+  sone a la novena. La frase debería decir «a subsequent application of the
+  exponent 1/3». ISO 532-1:2017, 6.4, NOTE, describe con la misma forma la
+  media energética del nivel de sonoridad y la acierta: una potencia de
+  aproximadamente 3,322 y después una ley de potencia «with the exponent
+  lg(2)», su inversa.
+- **Evidencia:** la NOTA y su fórmula en la página 14 del PDF (p. 8 impresa)
+  de ISO/TS 12913-2:2018 (primera edición, 2018-08); ISO 532-1:2017, 6.4, en
+  la página 22 del PDF (p. 16 impresa).
+- **Comportamiento de la biblioteca:** `binaural_indicators` calcula
+  $N_\mathrm{rmc}$ de cada oído con la fórmula, la raíz cúbica de la media de
+  los cubos de la sonoridad en el tiempo, y una fila de conformidad lo liga a
+  esa fórmula
+  ([`soundscape_binaural.py`](../src/phonometry/environment/assessment/soundscape_binaural.py)).
   No hizo falta ningún cambio.
 - **Estado:** sin notificar.
 

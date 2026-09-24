@@ -172,6 +172,14 @@ ENGLISH_BY_DESIGN: dict[str, str] = {
     r"$\Delta G_\mathrm{D} = L_\mathrm{D} - L_\mathrm{D,ref}$": "Formula (8) of IEC 61183 in "
     "the standard's own symbols; the ref subscript is the one the standard prints, "
     "and a subscript follows its source (diffuse_field_sensitivity)",
+    r"a1: $L_\mathrm{ind1}$": "the descriptor and symbol of IEC 62585 Table I.1, whose ind subscript the "
+    "standard prints; a subscript follows its source (correction_uncertainty_budget)",
+    r"a2: $L_\mathrm{ind2}$": "the descriptor and symbol of IEC 62585 Table I.1, whose ind subscript the "
+    "standard prints; a subscript follows its source (correction_uncertainty_budget)",
+    r"a3: $L_\mathrm{ind3a}$": "the descriptor and symbol of IEC 62585 Table I.1, whose ind subscript the "
+    "standard prints; a subscript follows its source (correction_uncertainty_budget)",
+    r"a4: $L_\mathrm{ind3b}$": "the descriptor and symbol of IEC 62585 Table I.1, whose ind subscript the "
+    "standard prints; a subscript follows its source (correction_uncertainty_budget)",
 }
 
 # A run of at least three letters, in any alphabet: shorter runs are unit and

@@ -3,8 +3,9 @@
 
 What an instrument is rated at and whether it meets its class: the octave-band
 filter class of IEC 61260-1 in both its editions, the class of a p-p intensity
-chain (IEC 61043), and the rated characteristics a loudspeaker (IEC 60268-5)
-and a microphone (IEC 60268-4) are declared with.
+chain (IEC 61043), the rated characteristics a loudspeaker (IEC 60268-5) and a
+microphone (IEC 60268-4) are declared with, and the free-field corrections of a
+sound level meter with the uncertainty they are judged on (IEC 62585).
 """
 
 from __future__ import annotations
@@ -255,3 +256,82 @@ def _microphone_example() -> tuple[object, ReportMetadata, str]:
         requirement=16.0,
     )
     return result, metadata, "iec60268_4_microphone_example.pdf"
+
+
+def _free_field_correction_example() -> tuple[object, ReportMetadata, str]:
+    """IEC 62585 fiche: a meter's corrections on its calibrator, clause 12.
+
+    The synthetic class 1 meter of the guide signals/metrology/
+    free-field-corrections, measured at the nine exact octaves from 63 Hz to
+    16 kHz with three microphones by Formula (D.7), each frequency given a
+    budget with the 15 components of Table I.1: the values of Table I.2 up
+    to 1 kHz, and a free-field correction of the reference, a field and
+    mountings and a repeatability that grow above it. Every expanded
+    uncertainty, and the range over the three microphones, is within the
+    maximum of clause 12, so the fiche states the corrections usable.
+    """
+    f = ph.metrology.exact_frequencies(63, 16000, fraction=1)
+    x = f / 1000
+    c_ff_rm = 0.05 * x**1.3
+    free = 0.1 * np.sin(np.log(x)) - 0.05 * x**1.2
+    pressure = -0.1 * x**1.5
+    spread = np.array([[0.0], [0.02], [-0.03]]) * x**0.8
+    correction = ph.metrology.sound_calibrator_correction(
+        f,
+        94.0 + free + spread,
+        94.0 + c_ff_rm,
+        94.0 + pressure + spread / 2,
+        94.0,
+        reference_free_field_correction_db=c_ff_rm,
+    )
+    table_i2 = {
+        "a1": 0.005,
+        "a2": 0.005,
+        "a3": 0.005,
+        "a4": 0.005,
+        "a5": 0.05,
+        "a6": 0.0,
+        "a7": 0.06,
+        "a8": 0.025,
+        "a9": 0.025,
+        "a10": 0.029,
+        "a11": 0.013,
+        "a12": 0.013,
+        "a13": 0.0,
+        "a14": 0.005,
+        "a15": 0.03,
+    }
+    a7 = (0.06, 0.06, 0.06, 0.06, 0.06, 0.08, 0.10, 0.17, 0.30)
+    a11 = (0.013, 0.013, 0.013, 0.013, 0.013, 0.03, 0.06, 0.104, 0.18)
+    a15 = (0.03, 0.03, 0.03, 0.03, 0.03, 0.04, 0.05, 0.06, 0.09)
+    budgets = [
+        ph.metrology.correction_uncertainty_budget(
+            {**table_i2, "a7": u7, "a11": u11, "a12": u11, "a15": u15},
+            repeatability_dof=2,
+            frequency_hz=frequency,
+            correction_db=value,
+        )
+        for frequency, u7, u11, u15, value in zip(
+            f, a7, a11, a15, correction.correction_db, strict=True
+        )
+    ]
+    result = ph.metrology.verify_correction_uncertainty(
+        f,
+        [b.expanded_uncertainty_db for b in budgets],
+        clause=correction.clause,
+        correction_db=correction.correction_db,
+        coverage_factor=[b.coverage_factor for b in budgets],
+        correction_range_db=correction.range_db,
+    )
+    metadata = ReportMetadata(
+        specimen="Class 1 sound level meter with its multi-frequency calibrator",
+        client="Example client",
+        manufacturer="Example instruments",
+        test_room="Free-field room (example)",
+        measurement_standard="IEC 62585:2012 Annex D",
+        test_date="2026-09-24",
+        laboratory="Phonometry reference example",
+        operator="phonometry",
+        report_id="EXAMPLE-62585",
+    )
+    return result, metadata, "iec62585_free_field_correction_example.pdf"

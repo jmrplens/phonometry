@@ -204,8 +204,8 @@ def plot_zwicker_loudness_time(
 ) -> Axes:
     """Loudness-versus-time function N(t) of a time-varying result (ISO 532-1).
 
-    Draws the 500 Hz total-loudness trace (clause 6.5) with the N5/N10
-    percentile levels marked; this is the "loudness time function in sones"
+    Draws the 500 Hz total-loudness trace (clause 6.3) with the N5/N10
+    percentile levels (clause 6.4) marked; this is the "loudness time function in sones"
     clause 7 requires a time-varying loudness report to state. Also used as
     the second panel of :func:`plot_zwicker_loudness`.
 

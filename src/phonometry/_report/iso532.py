@@ -281,7 +281,7 @@ def render_iso532_report(
 
         flow.append(
             fiche_paragraph(
-                t("Loudness versus time N(t) (clause 6.5)", language),
+                t("Loudness versus time N(t) (clause 6.4)", language),
                 caption_style,
             )
         )

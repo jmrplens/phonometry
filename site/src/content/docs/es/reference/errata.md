@@ -7918,18 +7918,22 @@ dos ediciones con las mismas entradas y en el mismo orden.
   cuarenta y tres de la misma manera: el valor que da el anexo A acaba en 0, y
   un 0 se imprime como otra cifra. En cuarenta es el cuarto decimal, impreso
   como el tercero repetido («0,027 7» donde el anexo A da 0,027 0). Las otras
-  tres son las celdas cuyo valor del anexo A acaba en dos ceros, y ahí es el
-  tercer decimal el que toma la cifra anterior: «0,033 0» donde el anexo A da
+  tres son celdas cuyo valor del anexo A acaba en dos ceros (otras dos celdas
+  así, ambas 0,020 0 en la tabla 1, a 10 500 Hz, 20 °C y 50 % y a
+  11 000 Hz, 18 °C y 60 %, están bien impresas), y ahí es el tercer decimal el
+  que toma la cifra anterior: «0,033 0» donde el anexo A da
   0,030 0, y «0,04 4» y «0,05 50», además con los grupos de cifras fuera de
   sitio, donde el anexo A da 0,040 0 y 0,050 0. El defecto se limita a
   los ceros y no es cuestión de redondeo: las otras 581 celdas son el anexo A hasta la
   última cifra (véase la evidencia más abajo), y de las 60 celdas cuyo valor
   del anexo A acaba en 0, estas 43 están mal impresas y 17 se imprimen con su
   0. Los errores van de una unidad del cuarto decimal, cuando la cifra
-  repetida es un 1 («0,051 1» por 0,051 0), a 0,003 0 Np/m, donde «0,033 0»
-  está por 0,030 0; llevada a la fórmula (7), esa celda hace un 10 % mayor el
-  área de absorción del aire, y la constante del recinto, y con ella el nivel
-  de potencia acústica de la fórmula (6), al menos 0,41 dB demasiado altos. Las
+  repetida es un 1 («0,051 1» por 0,051 0), a 0,005 0 Np/m, donde «0,05 50»
+  está por 0,050 0 a 21 500 Hz, 27 °C y 60 %. Las tres celdas cuyo valor del
+  anexo A acaba en dos ceros se imprimen exactamente un 10 % altas; llevada a
+  la fórmula (7), cualquiera de ellas hace un 10 % mayor el área de absorción
+  del aire, y la constante del recinto, y con ella el nivel de potencia
+  acústica de la fórmula (6), al menos 0,41 dB demasiado altos. Las
   celdas, por tabla y frecuencia:
   - **Tabla 1, 13 500 Hz** (página 15 del PDF, folio impreso 15): 20 °C y 60 %, «0,027 7» por 0,027 0; 21 °C y 40 %, «0,036 6» por 0,036 0; 21 °C y 60 %, «0,026 6» por 0,026 0; 22 °C y 40 %, «0,035 5» por 0,035 0.
   - **Tabla 1, 15 500 Hz** (página 15 del PDF, folio impreso 15): 22 °C y 40 %, «0,044 4» por 0,044 0.
@@ -7986,8 +7990,44 @@ dos ediciones con las mismas entradas y en el mismo orden.
   con las cuarenta y tres nombradas en `ISO9295_MISPRINTED_CELLS`;
   [`tests/emission/test_sound_power_high_frequency.py`](https://github.com/jmrplens/phonometry/blob/main/tests/emission/test_sound_power_high_frequency.py)
   y las comprobaciones de conformidad «ISO 9295:2015 Table 1» e «ISO
-  9295:2015 Table 2» fijan las 581 hasta la cifra y las cuarenta y tres al 0
-  que da el anexo A.
+  9295:2015 Table 2» fijan las 581 hasta la cifra y ciñen cada una de las
+  cuarenta y tres a lo que imprime la página: el anexo A con su primer 0 final
+  escrito como la cifra anterior.
+- **Estado:** sin comunicar.
+
+## UNE-EN ISO 9295:2015, fórmula (A.5) (la frecuencia de relajación del oxígeno escrita con un cero)
+
+- **Ubicación:** anexo A (normativo), «Cálculo del coeficiente de absorción
+  por el aire», fórmula (A.5) en el folio impreso 26 de la UNE-EN ISO
+  9295:2015 (octubre de 2015), versión oficial en español de la EN ISO
+  9295:2015, que adopta la ISO 9295:2015 sin modificación.
+- **Lo impreso:** la lista de símbolos del folio impreso 25 define
+  $f_{\mathrm{r,O}}$, «frecuencia de relajación del oxígeno», con la letra O, y
+  la fórmula (A.3), al principio del folio 26, la calcula con ese nombre. La
+  fórmula (A.5), que evalúa $\alpha$ a partir de ella, escribe la misma
+  frecuencia como $f_{\mathrm{r,0}}$, con la cifra cero, en los dos sitios
+  donde aparece: el denominador $f_{\mathrm{r,0}} + f^2/f_{\mathrm{r,0}}$ del
+  término del oxígeno.
+- **El problema:** el glifo de (A.5) es la cifra estrecha de
+  $p_{\mathrm{s0}}$ en la misma página, no la letra redonda de (A.3), y la capa
+  de texto del propio PDF coincide: «f r,O» en la lista de símbolos y en
+  (A.3), y «f r,0» dos veces en (A.5). Quien tome el subíndice al pie de la
+  letra busca una magnitud $f_{\mathrm{r,0}}$ que el anexo nunca define. La
+  fórmula es correcta en cuanto el símbolo se lee como la frecuencia de
+  relajación del oxígeno, que es la única frecuencia que da (A.3), así que
+  ningún valor de $\alpha$ cambia.
+- **Evidencia:** verificado en las páginas 25 y 26 del PDF (pp. impresas 25 y
+  26) de la UNE-EN ISO 9295:2015, en la imagen de la página y en la capa de
+  texto. El borrador de 2013, BS EN ISO 9295 (DPC 13/30264708), define
+  $f_{\mathrm{r,O}}$ en la página 24 del PDF (p. impresa 16) y escribe
+  $f_{\mathrm{r,0}}$ en (A.5) en la página 25 del PDF (p. impresa 17), así que
+  el desliz pasó del borrador a la norma.
+- **Comportamiento de la biblioteca:** no le afecta. `air_absorption_np_per_m`
+  en
+  [`sound_power_high_frequency`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/emission/sound_power_high_frequency.py)
+  evalúa el anexo A con la implementación de la ISO 9613-1 de la biblioteca,
+  que llama `fro` a la frecuencia de relajación del oxígeno, y las 581 celdas
+  bien impresas de las tablas 1 y 2 confirman esa lectura.
 - **Estado:** sin comunicar.
 
 ## Propiedades de las fuentes, relacionadas, que no son erratas

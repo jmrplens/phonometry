@@ -7456,18 +7456,22 @@ in the same order.
   in the same way: the value Annex A gives ends in 0, and a 0 is printed as
   another digit. In forty of them it is the fourth decimal, printed as the
   third repeated ("0,027 7" where Annex A gives 0,027 0). The other three are
-  the cells whose Annex A value ends in two zeros, and there it is the third
-  decimal that takes the digit before it: "0,033 0" where Annex A gives
+  cells whose Annex A value ends in two zeros (two more such cells, both
+  0,020 0 in Table 1, at 10 500 Hz, 20 °C and 50 % and at 11 000 Hz, 18 °C
+  and 60 %, are printed correctly), and there it is the third decimal that
+  takes the digit before it: "0,033 0" where Annex A gives
   0,030 0, and "0,04 4" and "0,05 50", with their digit groups set out of place
   as well, where Annex A gives 0,040 0 and 0,050 0. The defect is confined to
   zeros and is not a matter of rounding: the other 581 cells are Annex A to
   the last digit (see the evidence below), and of the 60 cells whose Annex A
   value ends in 0, these 43 are misprinted while 17 are printed with their 0.
   The errors run from one unit of the fourth decimal, where the repeated digit
-  is a 1 ("0,051 1" for 0,051 0), to 0,003 0 Np/m, where "0,033 0" stands for
-  0,030 0; read into Formula (7) that cell makes the air absorption area 10 %
-  too large, and the room constant, and with it the sound power level of
-  Formula (6), at least 0,41 dB too high. The cells, by table and frequency:
+  is a 1 ("0,051 1" for 0,051 0), to 0,005 0 Np/m, where "0,05 50" stands for
+  0,050 0 at 21 500 Hz, 27 °C and 60 %. The three cells whose Annex A value
+  ends in two zeros are each printed exactly 10 % high; read into Formula (7),
+  any of them makes the air absorption area 10 % too large, and the room
+  constant, and with it the sound power level of Formula (6), at least 0,41 dB
+  too high. The cells, by table and frequency:
   - **Table 1, 13 500 Hz** (PDF page 15, printed folio 15): 20 °C and 60 %, "0,027 7" for 0,027 0; 21 °C and 40 %, "0,036 6" for 0,036 0; 21 °C and 60 %, "0,026 6" for 0,026 0; 22 °C and 40 %, "0,035 5" for 0,035 0.
   - **Table 1, 15 500 Hz** (PDF page 15, printed folio 15): 22 °C and 40 %, "0,044 4" for 0,044 0.
   - **Table 1, 16 500 Hz** (PDF page 15, printed folio 15): 21 °C and 50 %, "0,043 3" for 0,043 0.
@@ -7523,7 +7527,39 @@ in the same order.
   with the forty-three named in `ISO9295_MISPRINTED_CELLS`;
   [`tests/emission/test_sound_power_high_frequency.py`](https://github.com/jmrplens/phonometry/blob/main/tests/emission/test_sound_power_high_frequency.py)
   and the conformance checks "ISO 9295:2015 Table 1" and "ISO 9295:2015 Table
-  2" pin the 581 to the digit and the forty-three to the 0 Annex A gives.
+  2" pin the 581 to the digit and hold each of the forty-three to what the page
+  prints: Annex A with its first trailing 0 set as the digit before it.
+- **Status:** unreported.
+
+## UNE-EN ISO 9295:2015, Formula (A.5) (the oxygen relaxation frequency set with a digit zero)
+
+- **Location:** Annex A (normative), "Cálculo del coeficiente de absorción
+  por el aire", Formula (A.5) on printed folio 26 of UNE-EN ISO 9295:2015
+  (October 2015), the Spanish version of EN ISO 9295:2015, which adopts ISO
+  9295:2015 without modification.
+- **The print:** the symbol list on printed folio 25 defines
+  $f_{\mathrm{r,O}}$, "frecuencia de relajación del oxígeno", with the letter
+  O, and Formula (A.3) at the top of folio 26 computes it under that name.
+  Formula (A.5), which evaluates $\alpha$ from it, sets the same frequency as
+  $f_{\mathrm{r,0}}$, with the digit zero, in both places it appears: the
+  denominator $f_{\mathrm{r,0}} + f^2/f_{\mathrm{r,0}}$ of the oxygen term.
+- **The problem:** the glyph in (A.5) is the narrow digit of $p_{\mathrm{s0}}$
+  on the same page, not the round letter of (A.3), and the PDF's own text
+  layer agrees, "f r,O" in the symbol list and in (A.3) and "f r,0" twice in
+  (A.5). A reader who takes the subscript at its word looks for a quantity
+  $f_{\mathrm{r,0}}$ that the annex never defines. The formula is right once
+  the symbol is read as the oxygen relaxation frequency, which is the only
+  frequency (A.3) gives, so no value of $\alpha$ changes.
+- **Evidence:** Verified on PDF pages 25 and 26 (printed pp. 25 and 26) of
+  UNE-EN ISO 9295:2015, on the page image and in the text layer. The 2013
+  draft, BS EN ISO 9295 (DPC 13/30264708), defines $f_{\mathrm{r,O}}$ on PDF
+  page 24 (printed p. 16) and sets $f_{\mathrm{r,0}}$ in (A.5) on PDF page 25
+  (printed p. 17), so the slip came through from the draft to the standard.
+- **Library behaviour:** unaffected. `air_absorption_np_per_m` in
+  [`sound_power_high_frequency`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/emission/sound_power_high_frequency.py)
+  evaluates Annex A through the library's ISO 9613-1 implementation, which
+  names the oxygen relaxation frequency `fro`, and the 581 correctly printed
+  cells of Tables 1 and 2 confirm the reading.
 - **Status:** unreported.
 
 ## Related source properties that are not errata

@@ -95,11 +95,11 @@ $$
 **Method with a free field over a reflecting plane** (clause 9) is ISO 3744
 ([`sound_power_pressure`](/phonometry/reference/api/power/sound-power/#sound_power_pressure)) with the three
 one-third octave bands of the 16 kHz octave; beyond a measurement radius of
-2 m the surface level takes the absorption correction of Formula (10), with
-$\alpha$ in decibels per metre:
+2 m the surface level takes the absorption correction $K_\alpha$ of
+Formula (10), with $\alpha$ in decibels per metre:
 
 $$
-K = r \cdot \alpha \tag{10}
+K_\alpha = r \cdot \alpha \tag{10}
 $$
 
 **Reference meteorological conditions.** Clause 10.1 carries the levels of
@@ -108,6 +108,10 @@ Norma ISO 3741", which is the reference-quantity correction $C_1$ and
 the radiation-impedance correction $C_2$ of ISO 3741:2010 clause 9.1.4
 for a direct method and $C_2$ alone for the comparison with a reference
 source, exactly as ISO 3741 Formulae (20) and (21) apply them.
+
+**What to determine.** Table 3 says which sound power levels a report
+carries for each type of noise, in the octave bands from 125 Hz to 8 kHz and
+in the 16 kHz octave: [`high_frequency_levels_to_determine`](/phonometry/reference/api/power/sound-power-high-frequency/#high_frequency_levels_to_determine) reads it.
 
 Formulae (4) to (10) carry no worked example in the standard and are pinned
 in closed form; Tables 1 and 2 are the numeric oracle of Annex A.
@@ -171,13 +175,13 @@ free_field_absorption_correction(
 
 Air absorption correction of the free-field method (ISO 9295 Formula (10)).
 
-$K = r \cdot \alpha$, with $\alpha$ the air absorption in
+$K_\alpha = r \cdot \alpha$, with $\alpha$ the air absorption in
 decibels per metre (Annex A times 8,686). Clause 9.8 adds it to the
 surface sound pressure level of ISO 3744 before the sound power is
 determined, and only when the measurement radius exceeds 2 m; at 2 m
 or less the clause asks for no correction and this returns zero. The
 surface level and the sound power level differ by the constant
-$10 \lg(S/S_0)$, so adding `K` to the band levels
+$10 \lg(S/S_0)$, so adding $K_\alpha$ to the band levels
 [`sound_power_pressure`](/phonometry/reference/api/power/sound-power/#sound_power_pressure) returns
 is the same thing.
 
@@ -191,13 +195,63 @@ is the same thing.
 | `relative_humidity_percent` | Relative humidity, in percent. |
 | `static_pressure_kpa` | Static pressure, in kilopascals (default 101,325 kPa). |
 
-**Returns:** `K` per frequency, in decibels.
+**Returns:** $K_\alpha$ per frequency, in decibels.
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive radius or the atmospheric inputs [`air_absorption_np_per_m`](/phonometry/reference/api/power/sound-power-high-frequency/#air_absorption_np_per_m) refuses. |
+
+## high_frequency_levels_to_determine
+
+```python
+high_frequency_levels_to_determine(
+    *,
+    noise_125_hz_to_8_khz: str,
+    noise_16_khz_octave: str,
+) -> tuple[str, ...]
+```
+
+The sound power levels to determine for a type of noise (ISO 9295 Table 3).
+
+Table 3 of ISO 9295:2015 pairs the noise of the equipment in the octave
+bands from 125 Hz to 8 kHz with its noise in the 16 kHz octave band and
+says what the determination has to give. The answer is a tuple of these
+identifiers, in the order the table names them:
+
+- `"a_weighted_sound_power_level"`: the A-weighted sound power level
+  from the octave bands of 125 Hz to 8 kHz, by ISO 3741 or ISO 3744 as
+  appropriate (footnote a lets the one-third-octave and octave band levels
+  of that range be given as well);
+- `"one_third_octave_band_levels"`: the sound power level in each
+  one-third octave band of the 16 kHz octave, by this standard
+  ([`high_frequency_sound_power`](/phonometry/reference/api/power/sound-power-high-frequency/#high_frequency_sound_power) or
+  [`high_frequency_sound_power_comparison`](/phonometry/reference/api/power/sound-power-high-frequency/#high_frequency_sound_power_comparison));
+- `"tone_level_and_frequency"`: the level and the frequency of the
+  discrete tone in the 16 kHz octave;
+- `"tone_levels_within_10_db"`: the levels and frequencies of every tone
+  in the 16 kHz octave within 10 dB of the highest tonal level, the tones
+  [`HighFrequencySoundPowerResult.within_10_db_of_maximum`](/phonometry/reference/api/power/sound-power-high-frequency/#highfrequencysoundpowerresultwithin_10_db_of_maximum) marks.
+
+With no significant noise from 125 Hz to 8 kHz, footnote b notes that
+the noise lies outside the scope of ISO 3741 and ISO 3744, so only this
+standard applies and no A-weighted level is asked for.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `noise_125_hz_to_8_khz` | The noise in the octave bands from 125 Hz to 8 kHz: `"broadband"` or `"narrowband"` (one row of the table), or `"none"` for no significant noise. |
+| `noise_16_khz_octave` | The noise in the 16 kHz octave band: `"none"`, `"broadband"`, `"discrete_tone"` or `"multiple_tones"`. |
+
+**Returns:** The identifiers of the levels to determine.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | for a noise type the table does not name, or for a combination it has no row for: no significant noise in either range, or broadband noise in the 16 kHz octave with none below it. |
 
 ## high_frequency_sound_power
 

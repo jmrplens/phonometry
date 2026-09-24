@@ -7949,8 +7949,11 @@ in the same order.
   frequency term is 0,0038 dB² instead of 0,0014 dB². As printed, (A.2) gives
   $u_{L_\mathrm{c}} = 0{,}075$ dB, an expanded uncertainty of 0,150 dB and
   0,161 dB with the display; with the square it gives 0,057 dB, 0,115 dB and
-  0,128 dB, the three values both parts print. The unsquared form is also not
-  in dB², so it changes with the unit of level.
+  0,128 dB, the three values both parts print. Both are computed with the
+  $u_{L_\mathrm{in}}$ the example derives, 0,0416 dB from a 0,1 dB display
+  resolution and a 0,03 dB constancy, not with the 0,042 dB it rounds it to,
+  which would give 0,058 dB. The unsquared form is also not in dB², so it
+  changes with the unit of level.
 - **Evidence:** a recomputation of the printed example both ways. Verified on
   PDF page 21 (printed p. 19) and PDF page 23 (printed p. 21) of
   IEC 61260-2:2016, and on PDF page 18 (printed p. 16) and PDF page 20

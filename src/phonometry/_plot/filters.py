@@ -56,6 +56,14 @@ _FREQ_LABEL = "Frequency [Hz]"
 #: Per-channel legend entry, shared by the two renderers that draw one
 #: line per channel. It is a format string: ``_t`` fills the ``n``.
 _CHANNEL_LABEL = "Channel {n}"
+#: Axis label of every plot drawn against the normalised frequency.
+_NORMALISED_FREQ_LABEL = r"Normalised frequency $f\,/\,f_{\mathrm{m}}$"
+#: Axis label of the plots drawn against the mid-band frequency.
+_MID_BAND_LABEL = "Mid-band frequency [Hz]"
+#: Legend entry of a result IEC 61260-3 5.3 makes unusable.
+_UNUSABLE_LABEL = "Unusable (§5.3)"
+#: Title of a periodic-test panel: ``_t`` fills the clause and the verdict.
+_PERIODIC_TITLE = "IEC 61260-3 {clause}: {verdict}"
 
 _STRINGS: dict[str, str] = {
     _FREQ_LABEL: "Frecuencia [Hz]",
@@ -64,7 +72,7 @@ _STRINGS: dict[str, str] = {
     "Class {cls} pass corridor": "Corredor de aceptación clase {cls}",
     r"Measured $\Delta A$": r"$\Delta A$ medida",
     "Out of tolerance": "Fuera de tolerancia",
-    r"Normalised frequency $f\,/\,f_{\mathrm{m}}$": r"Frecuencia normalizada $f\,/\,f_{\mathrm{m}}$",
+    _NORMALISED_FREQ_LABEL: r"Frecuencia normalizada $f\,/\,f_{\mathrm{m}}$",
     "Relative attenuation [dB]": "Atenuación relativa [dB]",
     # The mid-band subscript is upright (m abbreviates "mid-band", as
     # IEC 61260-1:2014 5.4.1 prints it); its braces are doubled because this
@@ -93,7 +101,7 @@ _STRINGS: dict[str, str] = {
     "Band level [dB]": "Nivel de banda [dB]",
     "Band levels": "Niveles de banda",
     "Band centre frequency [Hz]": "Frecuencia central de banda [Hz]",
-    "Mid-band frequency [Hz]": "Frecuencia central de banda [Hz]",
+    _MID_BAND_LABEL: "Frecuencia central de banda [Hz]",
     r"Effective bandwidth deviation $\Delta B$ [dB]": r"Desviación del ancho de banda efectivo $\Delta B$ [dB]",
     r"$\Delta B$ per band": r"$\Delta B$ por banda",
     "Class {cls} limits": "Límites clase {cls}",
@@ -112,10 +120,10 @@ _STRINGS: dict[str, str] = {
     "Acceptance limit": "Límite de aceptación",
     "Conforms": "Conforme",
     "Does not conform": "No conforme",
-    "Unusable (§5.3)": "No utilizable (§5.3)",
+    _UNUSABLE_LABEL: "No utilizable (§5.3)",
     "conforms": "conforme",
     "does not conform": "no conforme",
-    "IEC 61260-3 {clause}: {verdict}": "IEC 61260-3 {clause}: {verdict}",
+    _PERIODIC_TITLE: _PERIODIC_TITLE,
     "IEC 61260-3 periodic tests, class {cls}: {verdict}": "Ensayos periódicos IEC 61260-3, clase {cls}: {verdict}",
     "not usable (§5.3)": "no utilizable (§5.3)",
     "passed": "superados",
@@ -265,7 +273,7 @@ def plot_filter_class(
     _normalized_frequency_axis(ax, lo_x, hi_x, language)
     ax.set_xlim(lo_x, hi_x)
     ax.set_ylim(y_bot, y_top)
-    ax.set_xlabel(_t(r"Normalised frequency $f\,/\,f_{\mathrm{m}}$", language))
+    ax.set_xlabel(_t(_NORMALISED_FREQ_LABEL, language))
     ax.set_ylabel(_t("Relative attenuation [dB]", language))
     ax.set_title(
         _t(
@@ -378,7 +386,7 @@ def plot_filter_bandwidth(
     ax.set_ylim(*_cover(-1.6 * top, 1.6 * top, deviation))
     format_frequency_axis(ax, language=language)
     ax.axhline(0.0, color=_C_MUTED, lw=0.8)
-    ax.set_xlabel(_t("Mid-band frequency [Hz]", language))
+    ax.set_xlabel(_t(_MID_BAND_LABEL, language))
     ax.set_ylabel(_t(r"Effective bandwidth deviation $\Delta B$ [dB]", language))
     ax.set_title(
         _class_title(
@@ -480,7 +488,7 @@ def plot_filter_summation(
     bottom = min(limits[c][0] for c in limits)
     top = max(limits[c][1] for c in limits)
     ax.set_ylim(*_cover(bottom - 0.6, top + 1.4, np.concatenate(drawn)))
-    ax.set_xlabel(_t(r"Normalised frequency $f\,/\,f_{\mathrm{m}}$", language))
+    ax.set_xlabel(_t(_NORMALISED_FREQ_LABEL, language))
     ax.set_ylabel(_t(r"Summed output $\Delta P_j$ [dB]", language))
     ax.set_title(
         _class_title(
@@ -548,7 +556,7 @@ def plot_time_invariance(
     ax.set_ylim(*_cover(-1.0, 1.0, deviations))
     format_frequency_axis(ax, language=language)
     ax.axhline(0.0, color=_C_MUTED, lw=0.8)
-    ax.set_xlabel(_t("Mid-band frequency [Hz]", language))
+    ax.set_xlabel(_t(_MID_BAND_LABEL, language))
     ax.set_ylabel(_t(r"Deviation from $L_{\mathrm{c}}$ [dB]", language))
     ax.set_title(
         _class_title(
@@ -595,7 +603,7 @@ def _draw_margins(
         margin = _margin_db(v)
         style = dict(kwargs)
         if not v.uncertainty_within_maximum:
-            key = "Unusable (§5.3)"
+            key = _UNUSABLE_LABEL
             style_default(style, "color", _C_SECONDARY)
             style.setdefault("marker", "o")
             style_default(style, "markerfacecolor", "none")
@@ -723,7 +731,7 @@ def plot_periodic_clause(
             result.verifications,
             language,
             kwargs,
-            unusable_label=_t("Unusable (§5.3)", language),
+            unusable_label=_t(_UNUSABLE_LABEL, language),
         )
         ax.set_xlabel(_t("Measurement", language))
     else:
@@ -733,11 +741,11 @@ def plot_periodic_clause(
         lo, hi = float(np.min(omega)) / 1.15, float(np.max(omega)) * 1.15
         _normalized_frequency_axis(ax, lo, hi, language)
         ax.set_xlim(lo, hi)
-        ax.set_xlabel(_t(r"Normalised frequency $f\,/\,f_{\mathrm{m}}$", language))
+        ax.set_xlabel(_t(_NORMALISED_FREQ_LABEL, language))
         place_legend_clear(ax.legend(fontsize="small"))
     ax.set_title(
         _t(
-            "IEC 61260-3 {clause}: {verdict}",
+            _PERIODIC_TITLE,
             language,
             clause=f"§{result.clause}",
             verdict=verdict,

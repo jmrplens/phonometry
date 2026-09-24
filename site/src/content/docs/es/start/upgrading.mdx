@@ -626,9 +626,16 @@ que devolvía su predecesor. Si un resultado se mueve después de que termines d
 actualizar, eso es un defecto y merece la pena
 [avisar](https://github.com/jmrplens/phonometry/issues).
 
+Un veredicto es la excepción, y la sección sobre las clases de filtro de más
+arriba explica cómo: para la edición de 2014, `verify_filter_class` califica el
+ancho de banda efectivo del 5.12 y la suma de salidas del 5.16 además de la
+máscara de la Tabla 1, así que la clase de un banco es la más estricta que
+cumple en los tres. Sus márgenes de la Tabla 1 y un veredicto con
+`edition="1995"` son los números que eran.
+
 Lo que dibuja cada `.plot()` está intacto, y también lo que imprime cada
 `.report()` salvo una etiqueta: la ficha del micrófono escribe dB(468) donde
 escribía dB(CCIR). El contrato de `Signal` es el que era, ahora cumplido en dos
 sitios más, los bloques de `read_blocks` y las formas de onda dentro de cinco
 resultados. Cada fórmula está intacta también. La 4.0 recolocó los muebles y
-puso la unidad en la etiqueta; no recalculó nada.
+puso la unidad en la etiqueta; salvo ese veredicto, no recalculó nada.

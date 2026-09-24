@@ -607,9 +607,15 @@ every rename above was checked to return what its predecessor returned. If a
 result moves after you finish the upgrade, that is a defect and it is worth
 [reporting](https://github.com/jmrplens/phonometry/issues).
 
+One verdict is the exception, and the section on filter classes above says
+how: for the 2014 edition `verify_filter_class` grades the effective bandwidth
+of 5.12 and the summation of 5.16 as well as the Table 1 mask, so a bank's
+class is the strictest it meets on all three. Its Table 1 margins and a
+verdict for `edition="1995"` are the numbers they were.
+
 What each `.plot()` draws is untouched, and so is what each `.report()`
 prints but one label: the microphone fiche writes dB(468) where it wrote
 dB(CCIR). The `Signal` contract is the one it was, now kept in two more
 places, the blocks of `read_blocks` and the waveforms inside five results.
 Every formula is untouched too. 4.0 rearranged the furniture and put the unit
-on the label; it did not recompute anything.
+on the label; apart from that verdict, it did not recompute anything.

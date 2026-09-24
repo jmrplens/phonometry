@@ -60,6 +60,8 @@ _RICE_CURVE_LABEL = "Rice ($r$ = {r})"
 #: The legend entry of the acceptance limits in the conformity plots, named
 #: once so the translation table and the axes cannot drift apart.
 _ACCEPTANCE_LABEL = "Acceptance limit"
+#: Legend entry of the acceptance limits of several requirements at once.
+_ACCEPTANCE_LIMITS_LABEL = "Acceptance limits"
 
 #: Labels the IEC 61183 plots share with the translation table, written once.
 _RI_CORRECTION_LABEL = r"$G_\mathrm{RI} - G_\mathrm{F} = -10\,\lg\gamma$"
@@ -105,7 +107,7 @@ _STRINGS: dict[str, str] = {
     "Peak-height distribution (Bendat & Piersol 5.5.4)": "Distribución de alturas de pico (Bendat y Piersol 5.5.4)",
     "Upper acceptance limit": "Límite de aceptación superior",
     "Lower acceptance limit": "Límite de aceptación inferior",
-    "Acceptance limits": "Límites de aceptación",
+    _ACCEPTANCE_LIMITS_LABEL: "Límites de aceptación",
     _ACCEPTANCE_LABEL: "Límite de aceptación",
     "Conforms": "Conforme",
     "Does not conform": "No conforme",
@@ -643,7 +645,7 @@ def _draw_limits(
             x + 0.4,
             color=_C_SECONDARY,
             lw=2.2,
-            label=_t("Acceptance limits", language) if k == 0 else "_nolegend_",
+            label=_t(_ACCEPTANCE_LIMITS_LABEL, language) if k == 0 else "_nolegend_",
         )
 
 
@@ -665,7 +667,7 @@ def _draw_open_limits(
         for v in verifications
     ]
     single = all(len(bars) == 1 for bars in finite)
-    label = _t(_ACCEPTANCE_LABEL if single else "Acceptance limits", language)
+    label = _t(_ACCEPTANCE_LABEL if single else _ACCEPTANCE_LIMITS_LABEL, language)
     for k, (x, bars) in enumerate(zip(positions, finite, strict=True)):
         ax.hlines(
             bars,

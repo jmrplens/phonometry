@@ -180,7 +180,8 @@ canal in one-third-octave bands. Clause 5.5 interpolates the passive side into
 one-third octaves (linearly in hertz, as ISO's calculation workbook does it),
 keeps the ear with the lower insertion loss in each band, adds the two, folds
 each octave back with Formula (1) and rates the sixteen results with ISO 4869-2
-at 84 %.
+at 84 %. The methods are meant for steady noise exposures and do not apply to
+noise with impulsive components (Clause 1).
 
 ```python
 # ISO 4869-6 Table A.3: the lower-ear active insertion loss, 63 Hz to 8 kHz.

@@ -107,7 +107,7 @@ def _load() -> dict[str, NonlinearityParameter]:
     for table in _TABLES:
         citation, rows = read_table("phonometry.fluids", f"{table}.json")
         for row in rows:
-            out[f"{table}/{row['key']}"] = NonlinearityParameter(
+            out[f"{table}/{row['key']}"] = NonlinearityParameter.from_printed(
                 source=citation, table=table, **take(row)
             )
     return out

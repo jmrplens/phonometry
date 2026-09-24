@@ -476,8 +476,145 @@ def row_contract(
     return out
 
 
+#: The four areas of Long Table 7.1 whose last digit moved when the page's
+#: sabins began to be converted on their printed digits with the exact factor
+#: of the foot and rounded once, rather than multiplied as floats, keyed by
+#: row and field, with the value each held and the value it holds.
+EXACT_CONVERSION: Mapping[tuple[str, str], tuple[float, float]] = {
+    (
+        "long-2014-table-7-1/musician_per_person_with_instrument",
+        "absorption_area_500_m2",
+    ): (1.0683849600000002, 1.06838496),
+    (
+        "long-2014-table-7-1/musician_per_person_with_instrument",
+        "absorption_area_2000_m2",
+    ): (1.3935456000000002, 1.3935456),
+    (
+        "long-2014-table-7-1/musician_per_person_with_instrument",
+        "absorption_area_4000_m2",
+    ): (1.1148364800000001, 1.11483648),
+    (
+        "long-2014-table-7-1/air_sabins_per_1000_cubic_feet_at_50percent_rh",
+        "absorption_area_2000_m2",
+    ): (0.007545931758530183, 0.007545931758530184),
+}
+
+
+def exact_unit_conversion(
+    catalogues: Mapping[str, Mapping[str, Row]],
+) -> dict[str, dict[str, Row]]:
+    """The dump taken through the change that converts a figure exactly.
+
+    The areas Long Table 7.1 prints in sabins are taken to square metres on
+    the page's digits, times the exact factor of the 1959 foot, and rounded
+    to a float once; before, the figure and the factor were each a float and
+    their product was rounded a third time. One thing moved, and nothing
+    else may:
+
+    * the four cells of :data:`EXACT_CONVERSION` moved in their last digit,
+      each to the float nearest the exact product. The other five converted
+      cells of the two rows came out the same either way.
+
+    :raises ValueError: when a cell does not hold the value the step says it
+        replaces.
+    """
+    out = {name: dict(rows) for name, rows in catalogues.items()}
+    name = "PUBLISHED_ABSORPTION_AREAS"
+    areas = dict(out[name])
+    for (key, field), (before, after) in EXACT_CONVERSION.items():
+        row = dict(areas[key])
+        if repr(row.get(field)) != repr(before):
+            msg = f"{name}[{key!r}].{field} holds {row.get(field)!r}, not {before!r}"
+            raise ValueError(msg)
+        row[field] = after
+        areas[key] = row
+    out[name] = areas
+    return out
+
+
+#: The rows of Hopkins Table A2 whose Poisson ratio the page marks as an
+#: estimate and from whose cells this library derives the moduli and speeds.
+MIXED_BASIS_ROWS: tuple[str, ...] = tuple(
+    f"hopkins-2007-table-a2/{row}"
+    for row in (
+        "calcium_silicate_block",
+        "chipboard",
+        "clinker_concrete_block_1030",
+        "clinker_concrete_block_1720",
+        "clinker_concrete_slab",
+        "concrete_cast_in_situ",
+        "dense_aggregate_block",
+        "expanded_clay_block",
+        "lightweight_aggregate_block",
+        "mdf",
+        "osb",
+        "perspex",
+        "plaster_gypsum",
+        "plasterboard_natural_gypsum",
+        "plasterboard_flue_gas_gypsum",
+        "plasterboard_glass_fibre",
+        "plywood_birch",
+        "sand_cement_screed",
+        "timber_softwood",
+    )
+)
+
+#: What every derived text of those rows gained: the printed cells it rests
+#: on, and the basis the source gives each.
+MIXED_BASIS_CLAUSE = (
+    "; it rests on poisson_ratio (estimated) and on "
+    "plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source "
+    "does not state"
+)
+
+
+def derived_names_bases(
+    catalogues: Mapping[str, Mapping[str, Row]],
+) -> dict[str, dict[str, Row]]:
+    """The dump taken through the change that names the bases a value mixes.
+
+    A value this library derives rests on the printed cells it is worked
+    out from, followed back through the ones it derived first, and when the
+    source does not give all of them one basis, ``derived`` now says which
+    it gives each. In the published catalogues that happens in one place:
+    Hopkins marks the Poisson ratio of twenty-one rows of Table A2 as an
+    estimate, and on the nineteen of them that print a single density every
+    modulus and speed derived rests on it, beside a plate speed and a density
+    whose basis the page does not state. Aircrete and brick print their
+    density as a range, so nothing is derived on them.
+    One thing moved, and nothing else may:
+
+    * every ``derived`` text of the rows of :data:`MIXED_BASIS_ROWS` gained
+      :data:`MIXED_BASIS_CLAUSE`. No value moved.
+
+    :raises ValueError: when one of those rows derives nothing, so that the
+        step can never claim a rewrite it did not make.
+    """
+    out = {name: dict(rows) for name, rows in catalogues.items()}
+    name = "PUBLISHED_SOLIDS"
+    solids = dict(out[name])
+    for key in MIXED_BASIS_ROWS:
+        row = dict(solids[key])
+        if not row.get("derived"):
+            msg = f"{name}[{key!r}] derives nothing"
+            raise ValueError(msg)
+        row["derived"] = {
+            field: f"{text}{MIXED_BASIS_CLAUSE}"
+            for field, text in row["derived"].items()
+        }
+        solids[key] = row
+    out[name] = solids
+    return out
+
+
 #: Every change since the baseline, oldest first.
-CHANGES: tuple[Change, ...] = (one_row_shape, resilient_layer_row, row_contract)
+CHANGES: tuple[Change, ...] = (
+    one_row_shape,
+    resilient_layer_row,
+    row_contract,
+    exact_unit_conversion,
+    derived_names_bases,
+)
 
 
 def expected() -> dict[str, dict[str, Row]]:

@@ -92,7 +92,7 @@ def _load() -> dict[str, Carpet]:
     for table in _TABLES:
         citation, rows = read_table("phonometry.materials.absorbers", f"{table}.json")
         for row in rows:
-            out[f"{table}/{row['key']}"] = Carpet(
+            out[f"{table}/{row['key']}"] = Carpet.from_printed(
                 source=citation, table=table, **take(row)
             )
     return out

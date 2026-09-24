@@ -220,7 +220,9 @@ def _rows() -> dict[str, ResistiveSheet]:
         )
         for row in rows:
             key = f"{filename}/{row['key']}"
-            out[key] = ResistiveSheet(source=citation, table=filename, **take(row))
+            out[key] = ResistiveSheet.from_printed(
+                source=citation, table=filename, **take(row)
+            )
     return out
 
 

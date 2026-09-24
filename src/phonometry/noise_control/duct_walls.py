@@ -227,7 +227,9 @@ def _load() -> dict[str, DuctWallSpectrum]:
         source, records = read_table("phonometry.noise_control", f"{table}.json")
         for record in records:
             key = f"{table}/{record['key']}"
-            rows[key] = DuctWallSpectrum(table=table, source=source, **take(record))
+            rows[key] = DuctWallSpectrum.from_printed(
+                table=table, source=source, **take(record)
+            )
     return rows
 
 

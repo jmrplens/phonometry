@@ -138,8 +138,9 @@ print(round(board.youngs_modulus_pa / 1e9, 2))
 ```
 
 That modulus is not in the table: it is the inverse above run on the row's own
-cells, and `is_derived` and `derived` say so. A number this library computed is
-never stored as though a page had printed it.
+cells, and `is_derived` and `derived` say so, `derived` down to the Poisson
+ratio Hopkins marks as an estimate, which the modulus rests on. A number this
+library computed is never stored as though a page had printed it.
 
 `solids_named("Steel")` gives the steel of four books, from Hopkins' 199,6 GPa
 at a Poisson ratio of 0,28 to Cremer's 210 GPa at 0,31 and Long's row with no

@@ -122,6 +122,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   the paragraph above Table A.3 credits the level of each class to Equations
   (7) and (8), the long-term averages, where Equations (4) and (5) give it. A
   new guide in English and Spanish runs the whole example.
+- **One path builds a catalogue row from the cells its page prints.**
+  `io.CatalogueRow.from_printed(**cells)` checks the cells the way the
+  constructor does, converts a figure written in a unit the row class takes
+  as an alias of its own, fills what follows from the printed cells (a
+  modulus from a plate speed, a density and a Poisson ratio) and names each
+  filled value in `derived`. Every packaged catalogue is now built through
+  it, and `Cls(...)` stays literal: it holds what it is given and works
+  nothing out. Cells the arithmetic cannot take, such as a modulus and a
+  shear modulus that no isotropic solid has together, are refused with
+  `io.CatalogueError` naming them, rather than stored as a Poisson ratio of
+  4; a row whose cells are not meant to give a value says so in
+  `not_derivable`. `row.printed_fields()` gives back the cells the page
+  prints, the converted and the carried ones included and the derived ones
+  left out, so `type(row).from_printed(**row.printed_fields())` is the row
+  again for every row `from_printed` builds, and changing a cell there
+  before building it again is how a row is edited: `dataclasses.replace`
+  copies the derived values as they were, beside a cell they no longer
+  follow from. `io.BandedRow.values_at(frequencies_hz)`
+  reads a banded row at an array of frequencies, for the functions that take
+  one value per band by position, such as the surfaces of
+  `room.sabine_reverberation_time` or the transmission loss
+  `noise_control.enclosure_insertion_loss` calls with its own frequencies.
+  Each frequency matches the band whose centre is nearest on a logarithmic
+  scale, within a sixth of the spacing between bands, so a nominal, an exact
+  base-ten and an exact base-two centre read the same band, and a band the
+  row does not print is refused with what the page had there, never read as
+  zero.
 - **The ISO 1683 reference values, published once and read by every level.**
   `metrology.ISO1683_REFERENCE_VALUES` holds ISO 1683:2015 Tables 1 to 3,
   the reference values for sound in gases, sound in liquids and vibration,
@@ -541,6 +568,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   without a word; and below 100 kPa·s/m² a missing gas term is no longer read
   as zero, which returned Formula 6 without its second term. The migration
   guide lists every rename.
+
+- **A converted figure is rounded once, and a derived value says what it
+  rests on.** The sabins Long Table 7.1 prints for a musician and for air are
+  taken to square metres on the page's digits with the exact factor of the
+  foot and rounded once, rather than multiplied as floats: four of the nine
+  converted cells move in their last binary digit (`1.0683849600000002`
+  becomes `1.06838496`), and no printed digit moves. When the printed cells a
+  derived value rests on, followed back through the values derived first, do
+  not all have one basis, its `derived` text now names the basis of each: the
+  moduli and speeds of the nineteen rows of Hopkins Table A2 that derive them
+  from a Poisson ratio the page marks as an estimate say they rest on that
+  estimate and on a plate speed and a density whose basis the page does not
+  state. The page marks twenty-one; aircrete and brick print their density
+  as a range and derive nothing. A band no table prints is refused as "not an
+  octave band that absorption tables print".
 
 - **A catalogue row checks itself when it is built.** Every `io.CatalogueRow`,
   packaged or built by hand, is checked in its constructor and refuses with

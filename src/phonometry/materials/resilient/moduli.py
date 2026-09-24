@@ -86,7 +86,7 @@ def _load() -> dict[str, ResilientMaterial]:
     for table in _TABLES:
         citation, rows = read_table("phonometry.materials.resilient", f"{table}.json")
         for row in rows:
-            out[f"{table}/{row['key']}"] = ResilientMaterial(
+            out[f"{table}/{row['key']}"] = ResilientMaterial.from_printed(
                 source=citation, table=table, **take(row)
             )
     return out

@@ -258,7 +258,7 @@ def _gases() -> dict[str, Gas]:
     for table in _GAS_TABLES:
         source, records = read_table(_PACKAGE, f"{table}.json")
         for record in records:
-            rows[f"{table}/{record['key']}"] = Gas(
+            rows[f"{table}/{record['key']}"] = Gas.from_printed(
                 table=table, source=source, **take(record)
             )
     return rows

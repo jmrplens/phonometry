@@ -103,7 +103,7 @@ def _load() -> dict[str, ScatteringCoefficientSpectrum]:
         source, records = read_table("phonometry.materials.diffusers", f"{table}.json")
         for record in records:
             key = f"{table}/{record['key']}"
-            rows[key] = ScatteringCoefficientSpectrum(
+            rows[key] = ScatteringCoefficientSpectrum.from_printed(
                 table=table, source=source, **take(record)
             )
     return rows

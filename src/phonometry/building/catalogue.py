@@ -210,7 +210,7 @@ def _load() -> dict[str, TransmissionLossSpectrum]:
         source, records = read_table("phonometry.building", f"{table}.json")
         for record in records:
             key = f"{table}/{record['key']}"
-            rows[key] = TransmissionLossSpectrum(
+            rows[key] = TransmissionLossSpectrum.from_printed(
                 table=table, source=source, **take(record)
             )
     return rows

@@ -46,6 +46,10 @@ raises for a cell nothing downstream can read: a number that is not finite
 or is text, a hedge on a field the row does not have, a value beside a hedge
 that says there is none, a density below zero. A packaged table raises it
 too for text that is not strict JSON or a table missing its citation.
+:meth:`CatalogueRow.from_printed` builds a row from the cells its page prints
+and fills what follows from them, which is how every packaged catalogue is
+built; :meth:`CatalogueRow.printed_fields` gives those cells back, and
+:meth:`BandedRow.values_at` reads a banded row at an array of frequencies.
 """
 
 from __future__ import annotations

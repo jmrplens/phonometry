@@ -68,7 +68,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from ..._internal.catalogue import CatalogueRow, read_table, take
 from .porous import (
@@ -83,6 +83,7 @@ if TYPE_CHECKING:
 
     from numpy.typing import ArrayLike
 
+    from ..._internal.catalogue import Completion
     from ...fluids import Fluid
     from .porous import PorousMediumResult
 
@@ -99,6 +100,15 @@ __all__ = [
 #: returns the same double the literal ``90e-6`` parses to, which is what
 #: keeps every figure and every printed digit where it was.
 _MICROMETRES_PER_METRE = 1e6
+
+#: How a field this library computed is described in
+#: :attr:`~phonometry.io.CatalogueRow.derived`. The wording
+#: names the cells it came from, so a reader of a derived number can go back
+#: to the ones that were read, and
+#: :meth:`~phonometry.io.CatalogueRow.from_printed` adds the basis of each
+#: when they are not all one.
+_FROM_E_NU = "from the Young's modulus and the Poisson ratio"
+_FROM_N_NU = "from the shear modulus and the Poisson ratio"
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -177,6 +187,47 @@ class PorousMaterial(CatalogueRow):
     shear_modulus_pa: float | None = None
     poisson_ratio: float | None = None
     structural_loss_factor: float | None = None
+
+    def _complete(self, cells: Completion) -> None:
+        """Fill the one elastic constant that follows from the other two.
+
+        Every book prints the frame elasticity in the form its own chapter
+        needs: the Biot chapters print a shear modulus because the Biot
+        equations take one, and the transfer matrix chapters print a Young's
+        modulus because a plate does. With a Poisson ratio beside it, either
+        gives the other through ``E = 2 N (1 + nu)``, so a reader who needs
+        the other one does not have to do it in their head. Nothing else is
+        derived: the five parameters of the equivalent fluid are independent
+        and a page that leaves one out has left it out.
+
+        A field the row can already say something about is left alone, and
+        so is everything when the Poisson ratio is one. A page that printed a
+        modulus as an interval, or printed a word where the number would go,
+        has not printed a number, and a scalar worked back out of the other
+        two constants would sit beside that interval contradicting it: the
+        field would say one number and the row would say the book gave none.
+
+        :param cells: The row's cells as the completion fills them in.
+        """
+        nu = cells.get("poisson_ratio")
+        if nu is None or cells.is_hedged("poisson_ratio"):
+            return
+        modulus = cells.get("youngs_modulus_pa")
+        shear = cells.get("shear_modulus_pa")
+        if shear is None and modulus is not None:
+            cells.fill(
+                "shear_modulus_pa",
+                lambda: modulus / (2.0 * (1.0 + nu)),
+                _FROM_E_NU,
+                inputs=("youngs_modulus_pa", "poisson_ratio"),
+            )
+        elif modulus is None and shear is not None:
+            cells.fill(
+                "youngs_modulus_pa",
+                lambda: 2.0 * shear * (1.0 + nu),
+                _FROM_N_NU,
+                inputs=("shear_modulus_pa", "poisson_ratio"),
+            )
 
     def frame_constants(self) -> tuple[complex, float]:
         """The in-vacuo frame constants ``(N, nu)`` the source prints.
@@ -267,62 +318,6 @@ class PorousMaterial(CatalogueRow):
             / _MICROMETRES_PER_METRE,
             fluid=fluid,
         )
-
-
-#: How a field this library computed is described in
-#: :attr:`~phonometry.io.CatalogueRow.derived`. The wording
-#: names the cells it came from, so a reader of a derived number can go back
-#: to the ones that were read.
-_FROM_E_NU = "from the Young's modulus and the Poisson ratio"
-_FROM_N_NU = "from the shear modulus and the Poisson ratio"
-
-
-def _complete(fields: dict[str, Any]) -> dict[str, Any]:
-    """Fill the one elastic constant that follows from the other two.
-
-    Every book prints the frame elasticity in the form its own chapter needs:
-    the Biot chapters print a shear modulus because the Biot equations take
-    one, and the transfer matrix chapters print a Young's modulus because a
-    plate does. With a Poisson ratio beside it, either gives the other through
-    ``E = 2 N (1 + nu)``, so a reader who needs the other one does not have to
-    do it in their head. Nothing else is derived: the five parameters of the
-    equivalent fluid are independent and a page that leaves one out has left
-    it out.
-
-    A field the row can already say something about is left alone. A page that
-    printed a modulus as an interval, or printed a word where the number would
-    go, has not printed a number, and a scalar worked back out of the other
-    two constants would sit beside that interval contradicting it: the field
-    would say one number and the row would say the book gave none.
-
-    :param fields: One row as the data file wrote it.
-    :return: The same row with the derivable modulus added.
-    """
-    nu = fields.get("poisson_ratio")
-    modulus = fields.get("youngs_modulus_pa")
-    shear = fields.get("shear_modulus_pa")
-    spoken = (
-        set(fields.get("ranges", {}))
-        | set(fields.get("unquantified", {}))
-        | set(fields.get("not_derivable", {}))
-        | set(fields.get("misprinted", {}))
-    )
-    spoken |= set(fields.get("reported", {}))
-    if nu is None or "poisson_ratio" in spoken:
-        return fields
-    if shear is None and modulus is not None and "shear_modulus_pa" not in spoken:
-        fields["shear_modulus_pa"] = modulus / (2.0 * (1.0 + nu))
-        fields["derived"] = {
-            **fields.get("derived", {}),
-            "shear_modulus_pa": _FROM_E_NU,
-        }
-    elif modulus is None and shear is not None and "youngs_modulus_pa" not in spoken:
-        fields["youngs_modulus_pa"] = 2.0 * shear * (1.0 + nu)
-        fields["derived"] = {
-            **fields.get("derived", {}),
-            "youngs_modulus_pa": _FROM_N_NU,
-        }
-    return fields
 
 
 # ---------------------------------------------------------------------------
@@ -417,9 +412,8 @@ def _load() -> dict[str, PorousMaterial]:
     for table in _TABLES:
         source, records = read_table("phonometry.materials.absorbers", f"{table}.json")
         for record in records:
-            fields = _complete(take(record))
-            rows[f"{table}/{record['key']}"] = PorousMaterial(
-                table=table, source=source, **fields
+            rows[f"{table}/{record['key']}"] = PorousMaterial.from_printed(
+                table=table, source=source, **take(record)
             )
     return rows
 

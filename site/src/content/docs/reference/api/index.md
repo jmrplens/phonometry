@@ -256,6 +256,8 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | [`environment.sources.wind_turbine`](/phonometry/reference/api/environment/wind-turbine/) | Wind-turbine acoustic noise (IEC 61400-11:2012+A1:2018). |
 | [`environment.assessment.measurement`](/phonometry/reference/api/environment/measurement/) | Determination of environmental-noise sound pressure levels (ISO 1996-2:2017). |
 | [`environment.assessment.spain`](/phonometry/reference/api/environment/spain/) | Spanish noise regulation: the corrected level LKeq (Real Decreto 1367/2007). |
+| [`environment.assessment.soundscape`](/phonometry/reference/api/environment/soundscape/) | How people hear a place: the soundscape questionnaire and its analysis (ISO/TS 12913-2:2018 Annexes A and C, ISO/TS 12913-3:2019 Annexes A and B). |
+| [`environment.assessment.soundscape_binaural`](/phonometry/reference/api/environment/soundscape-binaural/) | What a soundscape sounds like at the ears: the binaural analysis of ISO/TS 12913-3:2019 Annex D and ISO/TS 12913-2:2018 Annex D. |
 
 ## Aircraft noise
 

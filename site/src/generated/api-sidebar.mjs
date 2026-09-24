@@ -262,6 +262,8 @@ export const apiSections = {
       'reference/api/environment/wind-turbine',
       'reference/api/environment/measurement',
       'reference/api/environment/spain',
+      'reference/api/environment/soundscape',
+      'reference/api/environment/soundscape-binaural',
     ],
   },
   'aeroacoustics': {

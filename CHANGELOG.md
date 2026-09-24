@@ -85,6 +85,51 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   the lowest valid line: an indirect result used to box the inflated stiffness
   of the resonance region that Inequality (2) rules out. `.plot()` draws the
   excluded lines apart, and `report()` refuses a result with no valid line.
+- **How the people at a place hear it, from the questionnaire they answer to a
+  binaural recording of what they heard (ISO/TS 12913-2:2018 and ISO/TS
+  12913-3:2019).** `environment.METHOD_A_SCALES`,
+  `environment.METHOD_A_ALTERNATIVE_PART_1` and `environment.METHOD_B_SCALES`
+  publish the questionnaires of ISO/TS 12913-2 Annex C as read-only tables,
+  text as printed, and `environment.method_a_scale_values` codes a ticked box
+  as Table A.1 does: parts 1 and 4 run 1 to 5 from the left, parts 2 and 3 run
+  5 to 1. `environment.method_a_summary` gives the median and range of every
+  item per site (A.2). `environment.pleasantness_eventfulness` applies
+  Formulas (A.1) and (A.2) to each respondent and to the site median (or mean)
+  of the eight attributes, raw and divided by 4 + √32, and draws the
+  two-dimensional model of Figure A.1. `environment.spearman_rank_correlation`
+  is Formula (A.3) without ties and (A.4) with them, and
+  `environment.pearson_correlation` Formulas (B.1) and (B.2), whose covariance
+  divides by n; both return the probability value of the Student statistic
+  with n - 2 degrees of freedom, which A.4 and B.3 ask for without naming a
+  test. `environment.method_b_scale_values`, `environment.method_b_summary`
+  and `environment.method_b_source_ranking` are the Method B statistics of
+  B.2: the scale value of a mark to one decimal, the mean, standard deviation
+  and 95 % confidence interval per site, and the median and range of the rank
+  each recognised source was given. `environment.binaural_indicators`
+  determines the metrics of Table D.1 at each ear with the library's own
+  levels, ISO 532-1 loudness and ECMA-418-2 tonality, roughness and
+  fluctuation strength, takes the higher ear as the representative value of
+  D.2, and lists the time-varying sharpness S5, Saverage and S95 as not
+  implemented, with the reason; a recording shorter than 3 min or sampled
+  below 44.1 kHz raises `environment.SoundscapeWarning` (ISO/TS 12913-2 D.3,
+  D.6). `environment.SoundscapeReport` is the minimum reporting record of
+  ISO/TS 12913-2 Annex A and refuses to be built with a required item missing,
+  naming its clause. Every result has `.plot()`. The standard prints no worked
+  example, so the conformance rows are the printed tables and closed forms
+  (the scale values, the printed range 9,66 and its normalisation, each
+  attribute moving the point along its own arrow of Figure A.1, the rule of
+  Table D.1) and independent implementations (SciPy's Spearman, Pearson and
+  Student interval). The International Soundscape Database v1.0 (CC BY 4.0)
+  enters the tests as a consistency check, not an oracle: a derived subset of
+  its site medians and of one site's answers is committed, and the
+  pleasantness of its 26 sites falls as their LAeq rises. Four defects are
+  registered in the errata: A.3 says the formulas process part 3 where their
+  attributes are part 2, Formula (A.3) prints a stray factor 1, C.3.2.3 speaks
+  of three Method B scales where Figure C.7 prints four, and the
+  questionnaires print "extend" and "reponse". The 2019 edition of ISO/TS
+  12913-3 is the one implemented; a 2025 edition revises Annex A. A new guide,
+  in both languages, walks through a study from the questionnaire to the
+  report.
 - **What an active noise reduction earmuff adds, its uncertainty and where it
   stops being linear (ISO 4869-6:2019).** `hearing.active_insertion_loss` takes
   the levels at both ears with the circuit off and on (or the insertion loss

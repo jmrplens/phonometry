@@ -381,6 +381,7 @@ export const topics = [
           'environment/assessment/spanish-noise-regulation',
           'environment/assessment/impulsive-sound',
           'environment/assessment/sel-distribution',
+          'environment/assessment/soundscape',
         ],
       },
       {

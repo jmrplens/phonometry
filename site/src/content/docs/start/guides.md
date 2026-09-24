@@ -624,8 +624,8 @@ Outdoor propagation, barriers, refraction, road, rail and wind-turbine
 sources, and the assessment built on them. Everything here concerns sound that
 has to travel a long way before it is assessed, so the atmosphere, the ground
 and the source's own motion all enter the answer. Implements ISO 9613-1/-2,
-ISO 1996-1/-2, ISO/PAS 1996-3, NT ACOU 112, ISO 13474, CNOSSOS-EU
-(2002/49/EC Annex II), ISO 11819-1 and IEC 61400-11.
+ISO 1996-1/-2, ISO/PAS 1996-3, NT ACOU 112, ISO 13474, ISO/TS 12913-2/-3,
+CNOSSOS-EU (2002/49/EC Annex II), ISO 11819-1 and IEC 61400-11.
 
 One scope boundary is worth stating here rather than one click away. Of
 CNOSSOS-EU, what is implemented is the **source** side of Annex II: the road
@@ -674,6 +674,10 @@ regulatory mapping.
 - [Impulsive Sound Exposure Statistics (ISO 13474)](/phonometry/environment/assessment/sel-distribution/):
   how often a distant blast is how loud: the long-term and rating levels,
   the ordered classes, the spread for turbulence and the exceedance levels.
+- [Soundscape Analysis (ISO/TS 12913)](/phonometry/environment/assessment/soundscape/):
+  how people hear a place: the questionnaire and its scale values, the
+  pleasantness and eventfulness of Figure A.1, the correlations with the
+  acoustic data and the binaural metrics of Table D.1 at both ears.
 
 - [Environmental Levels (ISO 1996-1/-2)](/phonometry/environment/assessment/environmental-levels/):
   $L_\mathrm{den}$, $L_\mathrm{dn}$ and the composite rating levels, the tonal adjustment, the

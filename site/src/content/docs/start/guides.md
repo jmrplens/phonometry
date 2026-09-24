@@ -621,8 +621,8 @@ Outdoor propagation, barriers, refraction, road, rail and wind-turbine
 sources, and the assessment built on them. Everything here concerns sound that
 has to travel a long way before it is assessed, so the atmosphere, the ground
 and the source's own motion all enter the answer. Implements ISO 9613-1/-2,
-ISO 1996-1/-2, ISO/PAS 1996-3, NT ACOU 112, CNOSSOS-EU (2002/49/EC Annex II)
-and IEC 61400-11.
+ISO 1996-1/-2, ISO/PAS 1996-3, NT ACOU 112, CNOSSOS-EU (2002/49/EC Annex II),
+ISO 11819-1 and IEC 61400-11.
 
 One scope boundary is worth stating here rather than one click away. Of
 CNOSSOS-EU, what is implemented is the **source** side of Annex II: the road

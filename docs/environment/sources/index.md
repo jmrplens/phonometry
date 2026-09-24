@@ -8,8 +8,8 @@ line carrying a sound power per metre at a standardised height; for a turbine it
 means an apparent sound power referred to an equivalent point source at the
 rotor centre. The height, the band range and the directivity are part of the
 definition, not details of the measurement, which is why an emission method is
-a standard in its own right and not a preliminary step. What every page here
-produces is that descriptor, in the form
+a standard in its own right and not a preliminary step. What every emission
+page here produces is that descriptor, in the form
 [Outdoor Sound Propagation](../propagation/outdoor-propagation.md)
 consumes.
 
@@ -42,8 +42,8 @@ is the one page here that measures what a **road surface** contributes rather
 than what a source emits. ISO 11819-1 records the maximum level and the speed of
 isolated cars and heavy vehicles, fits each category with a line in the
 logarithm of speed, reads it at the reference speeds of its Table 1 and adds the
-three vehicle sound levels into the Statistical Pass-By Index, usually quoted as
-a difference from a reference surface.
+three vehicle sound levels into the Statistical Pass-By Index, in many cases
+quoted as a difference from a reference surface.
 
 [Wind-turbine noise: sound power and tonal audibility](wind-turbine-noise.md)
 is IEC 61400-11, where the descriptor is **measured** rather than tabulated.
@@ -57,7 +57,8 @@ ends in a `.report()` assessment fiche.
 
 Read the road page first even for a railway job: it introduces the source-line
 bookkeeping and the Annex II layering that the rail page reuses. The turbine
-page is independent of both.
+page is independent of both, and so is the pass-by page, which feeds no
+propagation model: its index ranks surfaces.
 
 ## Pages in this section
 

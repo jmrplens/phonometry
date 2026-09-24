@@ -651,8 +651,8 @@ ferroviarias y de aerogenerador, y la valoración construida sobre ellas. Todo
 lo de aquí trata de sonido que tiene que recorrer una distancia larga antes de
 valorarse, así que la atmósfera, el suelo y el propio movimiento de la fuente
 entran en la respuesta. Implementa ISO 9613-1/-2, ISO 1996-1/-2,
-ISO/PAS 1996-3, NT ACOU 112, CNOSSOS-EU (Directiva 2002/49/CE, anexo II) e
-IEC 61400-11.
+ISO/PAS 1996-3, NT ACOU 112, CNOSSOS-EU (Directiva 2002/49/CE, anexo II),
+ISO 11819-1 e IEC 61400-11.
 
 Hay un límite de alcance que vale la pena decir aquí y no a un clic de
 distancia. De CNOSSOS-EU, lo implementado es el lado de la **fuente** del anexo

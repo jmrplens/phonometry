@@ -305,7 +305,8 @@ def _half_circle_steps(step_deg: float) -> int:
         f"two, so that both poles and a direction between them are measured; "
         f"got {step_deg!r}."
     )
-    if not step > 0.0:
+    # require_finite has already refused NaN, so this is the whole test.
+    if step <= 0.0:
         raise ValueError(msg)
     steps = 180.0 / step
     whole = round(steps)

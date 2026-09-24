@@ -61,6 +61,12 @@ _RICE_CURVE_LABEL = "Rice ($r$ = {r})"
 #: once so the translation table and the axes cannot drift apart.
 _ACCEPTANCE_LABEL = "Acceptance limit"
 
+#: Labels the IEC 61183 plots share with the translation table, written once.
+_RI_CORRECTION_LABEL = r"$G_\mathrm{RI} - G_\mathrm{F} = -10\,\lg\gamma$"
+_SENSITIVITY_LEVEL_LABEL = "Sensitivity level [dB]"
+_FREQUENCY_LABEL = "Frequency [Hz]"
+_DIFFUSE_DEVIATION_LABEL = r"$\Delta G_\mathrm{D} = L_\mathrm{D} - L_\mathrm{D,ref}$"
+
 _STRINGS: dict[str, str] = {
     r"Contribution to combined uncertainty $|c_i|\,u(x_i)$": r"Contribución a la incertidumbre combinada $|c_i|\,u(x_i)$",
     "GUM uncertainty budget: $y$ = {value}": "Presupuesto de incertidumbre (GUM): $y$ = {value}",
@@ -142,17 +148,17 @@ _STRINGS: dict[str, str] = {
     "Weight [% of the sphere]": "Peso [% de la esfera]",
     r"$G_\mathrm{F}$, free field, reference direction": r"$G_\mathrm{F}$, campo libre, dirección de referencia",
     r"$G_\mathrm{RI}$, random incidence": r"$G_\mathrm{RI}$, incidencia aleatoria",
-    r"$G_\mathrm{RI} - G_\mathrm{F} = -10\,\lg\gamma$": r"$G_\mathrm{RI} - G_\mathrm{F} = -10\,\lg\gamma$",
-    "Sensitivity level [dB]": "Nivel de sensibilidad [dB]",
+    _RI_CORRECTION_LABEL: _RI_CORRECTION_LABEL,
+    _SENSITIVITY_LEVEL_LABEL: "Nivel de sensibilidad [dB]",
     "Correction [dB]": "Corrección [dB]",
     "Random-incidence sensitivity level (IEC 61183)": "Nivel de sensibilidad en incidencia aleatoria (IEC 61183)",
     "Random-incidence correction (IEC 61183)": "Corrección de incidencia aleatoria (IEC 61183)",
-    "Frequency [Hz]": "Frecuencia [Hz]",
+    _FREQUENCY_LABEL: "Frecuencia [Hz]",
     r"$G_\mathrm{D}$, instrument under test": r"$G_\mathrm{D}$, instrumento en ensayo",
     r"$G_\mathrm{D,ref}$, reference, Formula (9)": r"$G_\mathrm{D,ref}$, referencia, Fórmula (9)",
     r"$G_\mathrm{D,ref}$, reference, Formula (10)": r"$G_\mathrm{D,ref}$, referencia, Fórmula (10)",
     r"$G_\mathrm{D,ref}$, reference, Formula (11)": r"$G_\mathrm{D,ref}$, referencia, Fórmula (11)",
-    r"$\Delta G_\mathrm{D} = L_\mathrm{D} - L_\mathrm{D,ref}$": r"$\Delta G_\mathrm{D} = L_\mathrm{D} - L_\mathrm{D,ref}$",
+    _DIFFUSE_DEVIATION_LABEL: _DIFFUSE_DEVIATION_LABEL,
     "Diffuse-field sensitivity level (IEC 61183)": "Nivel de sensibilidad en campo difuso (IEC 61183)",
 }
 
@@ -1286,9 +1292,7 @@ def plot_random_incidence_sensitivity(
     style_default(kwargs, "marker", "o")
     style_default(kwargs, "ms", 3.0)
     if view == "correction":
-        kwargs.setdefault(
-            "label", _t(r"$G_\mathrm{RI} - G_\mathrm{F} = -10\,\lg\gamma$", language)
-        )
+        kwargs.setdefault("label", _t(_RI_CORRECTION_LABEL, language))
         ax.plot(frequencies, result.correction_db, **kwargs)
         ax.axhline(0.0, color=_C_MUTED, lw=0.8, ls="--")
         ax.set_ylabel(_t("Correction [dB]", language))
@@ -1311,11 +1315,11 @@ def plot_random_incidence_sensitivity(
             mfc="none",
             label=_t(r"$G_\mathrm{RI}$, random incidence", language),
         )
-        ax.set_ylabel(_t("Sensitivity level [dB]", language))
+        ax.set_ylabel(_t(_SENSITIVITY_LEVEL_LABEL, language))
         ax.set_title(_t("Random-incidence sensitivity level (IEC 61183)", language))
     ax.set_xscale("log")
     format_frequency_axis(ax, language=language)
-    ax.set_xlabel(_t("Frequency [Hz]", language))
+    ax.set_xlabel(_t(_FREQUENCY_LABEL, language))
     ax.grid(visible=True, which="both", alpha=0.3)
     ax.legend(loc="lower left", fontsize="small")
     localize_axes(ax, language)
@@ -1374,13 +1378,13 @@ def plot_diffuse_field_sensitivity(
         marker="^",
         ms=6.0,
         mfc="none",
-        label=_t(r"$\Delta G_\mathrm{D} = L_\mathrm{D} - L_\mathrm{D,ref}$", language),
+        label=_t(_DIFFUSE_DEVIATION_LABEL, language),
     )
     ax.axhline(0.0, color=_C_MUTED, lw=0.8)
     ax.set_xscale("log")
     format_frequency_axis(ax, language=language)
-    ax.set_xlabel(_t("Frequency [Hz]", language))
-    ax.set_ylabel(_t("Sensitivity level [dB]", language))
+    ax.set_xlabel(_t(_FREQUENCY_LABEL, language))
+    ax.set_ylabel(_t(_SENSITIVITY_LEVEL_LABEL, language))
     ax.set_title(_t("Diffuse-field sensitivity level (IEC 61183)", language))
     ax.grid(visible=True, which="both", alpha=0.3)
     ax.legend(loc="lower left", fontsize="small")

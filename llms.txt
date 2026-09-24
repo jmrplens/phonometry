@@ -262,6 +262,7 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 - [Environmental Levels (ISO 1996-1/-2)](https://jmrplens.github.io/phonometry/environment/assessment/environmental-levels/)
 - [Impulsive-sound prominence (NT ACOU 112)](https://jmrplens.github.io/phonometry/environment/assessment/impulsive-sound/)
 - [Spanish Noise Regulation (RD 1367/2007)](https://jmrplens.github.io/phonometry/environment/assessment/spanish-noise-regulation/)
+- [Impulsive sound exposure statistics (ISO 13474)](https://jmrplens.github.io/phonometry/environment/assessment/sel-distribution/)
 
 ### Outdoor sound
 
@@ -499,6 +500,7 @@ The generated API reference, one page per module. Fetch these only when a specif
 - [environment/barrier-in-situ](https://jmrplens.github.io/phonometry/reference/api/environment/barrier-in-situ/)
 - [environment/cnossos-rail](https://jmrplens.github.io/phonometry/reference/api/environment/cnossos-rail/)
 - [environment/cnossos-road](https://jmrplens.github.io/phonometry/reference/api/environment/cnossos-road/)
+- [environment/exposure-distribution](https://jmrplens.github.io/phonometry/reference/api/environment/exposure-distribution/)
 - [environment/ground-barriers](https://jmrplens.github.io/phonometry/reference/api/environment/ground-barriers/)
 - [environment/ground-surfaces](https://jmrplens.github.io/phonometry/reference/api/environment/ground-surfaces/)
 - [environment/impulsive-sound](https://jmrplens.github.io/phonometry/reference/api/environment/impulsive-sound/)

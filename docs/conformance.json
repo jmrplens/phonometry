@@ -3,13 +3,13 @@
   "library": "4.0.0rc1",
   "generator": "scripts/conformance_report.py",
   "counts": {
-    "checks": 1302,
-    "passing": 1302,
+    "checks": 1309,
+    "passing": 1309,
     "failing": 0,
-    "domains": 90,
-    "standards": 465,
-    "citations": 887,
-    "designations": 183,
+    "domains": 91,
+    "standards": 466,
+    "citations": 894,
+    "designations": 184,
     "sources": 114
   },
   "units": [
@@ -346,6 +346,12 @@
       "title": "Sound absorption in enclosed spaces (EN 12354-6)",
       "checks": 2,
       "passing": 2
+    },
+    {
+      "id": "impulsive-sound-exposure-distribution-iso-13474",
+      "title": "Impulsive sound exposure distribution (ISO 13474)",
+      "checks": 7,
+      "passing": 7
     },
     {
       "id": "prominent-discrete-tones-ecma-418-1",
@@ -24775,6 +24781,240 @@
         "value": 0.003
       },
       "precision": 1,
+      "verdict": "pass"
+    },
+    {
+      "id": "impulsive-sound-exposure-distribution-iso-13474/iso-13474-2009-equations-10-to-13-table-a-4/sorted-levels-and-class-boundaries-of-the-27-classes",
+      "domain": "impulsive-sound-exposure-distribution-iso-13474",
+      "reference": {
+        "cite": "ISO 13474:2009 Equations (10) to (13), Table A.4",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 13474",
+            "edition": "2009",
+            "clause": "Equations (10) to (13), Table A.4"
+          }
+        ]
+      },
+      "quantity": "Sorted levels and class boundaries of the 27 classes",
+      "kind": "count",
+      "expected": {
+        "value": 81.0,
+        "label": "81/81 levels and boundaries of Table A.4"
+      },
+      "computed": {
+        "value": 81.0,
+        "label": "81/81 levels and boundaries of Table A.4"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "impulsive-sound-exposure-distribution-iso-13474/iso-13474-2009-equation-14-table-a-4/probability-of-each-class-over-07-00-to-19-00-sorted-with-its-level",
+      "domain": "impulsive-sound-exposure-distribution-iso-13474",
+      "reference": {
+        "cite": "ISO 13474:2009 Equation (14), Table A.4",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 13474",
+            "edition": "2009",
+            "clause": "Equation (14), Table A.4"
+          }
+        ]
+      },
+      "quantity": "Probability of each class over 07:00 to 19:00, sorted with its level",
+      "kind": "count",
+      "expected": {
+        "value": 27.0,
+        "label": "27/27 probabilities of Table A.4"
+      },
+      "computed": {
+        "value": 27.0,
+        "label": "27/27 probabilities of Table A.4"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "impulsive-sound-exposure-distribution-iso-13474/iso-13474-2009-equation-15-table-a-4/probability-density-of-each-class-in-1-db",
+      "domain": "impulsive-sound-exposure-distribution-iso-13474",
+      "reference": {
+        "cite": "ISO 13474:2009 Equation (15), Table A.4",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 13474",
+            "edition": "2009",
+            "clause": "Equation (15), Table A.4"
+          }
+        ]
+      },
+      "quantity": "Probability density of each class, in 1/dB",
+      "kind": "count",
+      "expected": {
+        "value": 27.0,
+        "label": "27/27 densities of Table A.4"
+      },
+      "computed": {
+        "value": 27.0,
+        "label": "27/27 densities of Table A.4"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "impulsive-sound-exposure-distribution-iso-13474/iso-13474-2009-equation-7-figure-a-3/long-term-average-single-event-level-lt1-of-the-tow-launcher",
+      "domain": "impulsive-sound-exposure-distribution-iso-13474",
+      "reference": {
+        "cite": "ISO 13474:2009 Equation (7), Figure A.3",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 13474",
+            "edition": "2009",
+            "clause": "Equation (7), Figure A.3"
+          }
+        ]
+      },
+      "quantity": "Long-term average single-event level LT1 of the TOW launcher",
+      "kind": "scalar",
+      "expected": {
+        "value": 37.0
+      },
+      "computed": {
+        "value": 37.01
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.05
+      },
+      "deviation": {
+        "value": 0.01
+      },
+      "precision": 2,
+      "verdict": "pass"
+    },
+    {
+      "id": "impulsive-sound-exposure-distribution-iso-13474/iso-13474-2009-equation-a-4-figure-a-3/long-term-level-lt2-from-the-distribution-spread-with-sigma-5-db",
+      "domain": "impulsive-sound-exposure-distribution-iso-13474",
+      "reference": {
+        "cite": "ISO 13474:2009 Equation (A.4), Figure A.3",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 13474",
+            "edition": "2009",
+            "clause": "Equation (A.4), Figure A.3"
+          }
+        ]
+      },
+      "quantity": "Long-term level LT2 from the distribution spread with sigma = 5 dB",
+      "kind": "scalar",
+      "expected": {
+        "value": 37.0
+      },
+      "computed": {
+        "value": 36.96
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.05
+      },
+      "deviation": {
+        "value": -0.042
+      },
+      "precision": 2,
+      "verdict": "pass"
+    },
+    {
+      "id": "impulsive-sound-exposure-distribution-iso-13474/iso-13474-2009-equation-22/shift-of-the-gaussian-subclasses-at-sigma-5-db-against-the-printed-integral",
+      "domain": "impulsive-sound-exposure-distribution-iso-13474",
+      "reference": {
+        "cite": "ISO 13474:2009 Equation (22)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 13474",
+            "edition": "2009",
+            "clause": "Equation (22)"
+          }
+        ]
+      },
+      "quantity": "Shift of the Gaussian subclasses at sigma = 5 dB, against the printed integral",
+      "kind": "scalar",
+      "expected": {
+        "value": 2.8782313662425585
+      },
+      "computed": {
+        "value": 2.878231366
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": -1.33e-15
+      },
+      "precision": 9,
+      "verdict": "pass"
+    },
+    {
+      "id": "impulsive-sound-exposure-distribution-iso-13474/iso-13474-2009-equation-25-figure-a-3/level-exceeded-by-50-of-the-events-l50",
+      "domain": "impulsive-sound-exposure-distribution-iso-13474",
+      "reference": {
+        "cite": "ISO 13474:2009 Equation (25), Figure A.3",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 13474",
+            "edition": "2009",
+            "clause": "Equation (25), Figure A.3"
+          }
+        ]
+      },
+      "quantity": "Level exceeded by 50 % of the events, L50",
+      "kind": "scalar",
+      "expected": {
+        "value": 31.5
+      },
+      "computed": {
+        "value": 31.46
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.05
+      },
+      "deviation": {
+        "value": -0.044
+      },
+      "precision": 2,
       "verdict": "pass"
     },
     {

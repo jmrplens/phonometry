@@ -73,7 +73,9 @@ blocks and multichannel arrays.
   filter architectures compared, the full response gallery and
   per-architecture usage, with the Linkwitz-Riley crossover.
 - [Filter Class Verification (IEC 61260-1)](/phonometry/signals/filters/filter-compliance/):
-  the Table 1 acceptance mask band by band, the class 0 of the withdrawn 1995
+  the Table 1 acceptance mask band by band, the effective bandwidth and the
+  summation of outputs of IEC 61260-2, the swept time-invariance test, the
+  grading of IEC 61260-3 periodic tests, the class 0 of the withdrawn 1995
   edition and the compliance fiche.
 - [Block Processing](/phonometry/signals/filters/block-processing/): stateful streaming
   analysis that carries filter state across buffers, for signals that never
@@ -183,9 +185,12 @@ so in its own "Not covered" block.
 `verify_weighting_class` check a designed digital response against the
 tolerance tables of IEC 61260-1 and IEC 61672-1; the IEC 61672-2
 pattern-evaluation tests a physical meter needs for type approval, the IEC
-61672-3 periodic tests it receives in service, and the IEC 60942 tests of the
-calibrator itself, are not run (a laboratory's calibrator results are graded by
-`metrology.verify_sound_calibrator`, which performs no physical test), so a class
+61672-3 periodic tests it receives in service, the IEC 61260-2 and IEC 61260-3
+tests of a physical band filter and the IEC 60942 tests of the calibrator
+itself, are not run (a laboratory's calibrator results are graded by
+`metrology.verify_sound_calibrator` and its filter periodic test results by
+`filters.verify_filter_periodic`, neither of which performs a physical test;
+the IEC 61260-2 tests that need no specimen are computed on the design), so a class
 verdict from the filter and weighting verifiers describes the algorithm and not a built device; [Compliance and
 verification](/phonometry/signals/metrology/compliance-verification/) draws
 that boundary part by part.

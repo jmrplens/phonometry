@@ -72,10 +72,12 @@ class WeightingDeviation:
 
 
 def _filter_class(arch: str, fraction: float) -> FilterClass:
-    """IEC 61260-1 class verification summary for one architecture.
+    """IEC 61260-1 Table 1 class verification summary for one architecture.
 
     The pass/fail verdict and margins come from the library's
-    ``verify_filter_class`` (authoritative). The binding measured value and
+    ``verify_filter_class`` (authoritative), read on the Table 1 mask alone:
+    the rows this feeds cite Table 1, and the effective bandwidth and the
+    summation of outputs have rows of their own in ``filter_tests``. The binding measured value and
     limit are re-derived here with the same public ``class_limits`` on the
     same designed SOS, so they cannot disagree with the library margin (a
     smoke-test guard asserts the re-derived margin equals the library's).
@@ -113,7 +115,7 @@ def _filter_class(arch: str, fraction: float) -> FilterClass:
         bind_side = "floor" if omega_h <= _pass_edge(bank.fraction) else "stop"
         bind_limit = float(minimum[j])
     return FilterClass(
-        overall_class=result.overall_class,
+        overall_class=result.requirement_class("relative_attenuation"),
         min_margin1=min(b["margin_class1_db"] for b in bands),
         min_margin2=min(b["margin_class2_db"] for b in bands),
         bind_freq=fm,

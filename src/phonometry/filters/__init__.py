@@ -23,6 +23,20 @@ from .frequencies import (
     nominal_frequencies,
     normalized_frequencies,
 )
+from .periodic_tests import (
+    PERIODIC_TEST_ATTENUATION_LIMITS_DB,
+    FilterPeriodicMeasurements,
+    FilterPeriodicVerification,
+    PeriodicTestClause,
+    periodic_test_frequencies,
+    verify_filter_periodic,
+)
+from .time_invariance import (
+    TimeInvarianceResult,
+    swept_band_level,
+    swept_level_uncertainty,
+    verify_time_invariance,
+)
 from .weighting import (
     TimeWeightedEnvelope,
     TimeWeighting,
@@ -38,17 +52,22 @@ from .weighting_compliance import (
 )
 
 __all__ = [
+    "PERIODIC_TEST_ATTENUATION_LIMITS_DB",
     "BlockProcessing",
     "EQResponseResult",
     "EQSection",
     "FilterBankWarning",
     "FilterComplianceResult",
     "FilterDesign",
+    "FilterPeriodicMeasurements",
+    "FilterPeriodicVerification",
     "LevelCalibration",
     "OctaveFilterBank",
     "OctaveFilterResult",
     "ParametricEQ",
+    "PeriodicTestClause",
     "ResponsePlot",
+    "TimeInvarianceResult",
     "TimeWeightedEnvelope",
     "TimeWeighting",
     "WeightingComplianceResult",
@@ -59,8 +78,13 @@ __all__ = [
     "normalized_frequencies",
     "octave_filter",
     "parametric_eq",
+    "periodic_test_frequencies",
+    "swept_band_level",
+    "swept_level_uncertainty",
     "time_weighting",
     "verify_filter_class",
+    "verify_filter_periodic",
+    "verify_time_invariance",
     "verify_weighting_class",
     "weighting_class_limits",
     "weighting_filter",

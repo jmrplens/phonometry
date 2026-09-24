@@ -25,9 +25,45 @@ are therefore kept as separate mask tables selected by the ``edition`` argument
 ANSI-2004 octave-band table was transcribed digit-for-digit and cross-checked
 between the two standards (they agree exactly).
 
-One subject: the class limits of a band filter, a mask around each mid-band
-frequency the filter's own relative attenuation is measured against. The
-acceptance limits of the A/B/C/AU/Z frequency weightings, which qualify a
+One subject: the class of a band-filter design, graded against what IEC
+61260-1:2014 requires of the transfer function of a set of filters and run the
+way IEC 61260-2:2016 (pattern evaluation) says the requirement is tested.
+Besides the Table 1 mask there are two more requirements, both computed from
+the same designed sections:
+
+* **Effective bandwidth deviation** (61260-1 5.11 and 5.12). The normalized
+  effective bandwidth :math:`B_\mathrm{e}` is the integral of Formula (13),
+  :math:`\int (1/\Omega)\,10^{-0.1\,\Delta A(\Omega)}\,\mathrm{d}\Omega`,
+  evaluated as IEC 61260-2 7.2.3.2 recommends: by the trapezoidal rule of its
+  Formula (2) over the test frequencies of its Formula (1),
+  :math:`\Omega_i = G^{i/(bS)}`, with :math:`S \ge 24` frequencies per
+  bandwidth (7.2.1.4). Its deviation from the reference
+  :math:`B_\mathrm{r} = (1/b)\ln G` (Formula (15)) is
+  :math:`\Delta B = 10\lg(B_\mathrm{e}/B_\mathrm{r})` (Formula (16)), within
+  :math:`\pm 0.4` dB for class 1 and :math:`\pm 0.6` dB for class 2 (5.12.2).
+* **Summation of output signals** (61260-1 5.16). At the test frequencies
+  :math:`\Omega_i`, :math:`|i| \le \lfloor S/2 \rfloor`, inside a band, the
+  outputs of that band and of its two neighbours are summed on an energy
+  basis, IEC 61260-2 Formula (3):
+  :math:`\Delta P_j = 10\lg\left[10^{-0.1\,\Delta A_{j-1}} +
+  10^{-0.1\,\Delta A_j} + 10^{-0.1\,\Delta A_{j+1}}\right]`, for every band
+  that has a neighbour on both sides (7.2.4.4). The limits are
+  :math:`+0.8` dB and :math:`-1.8` dB for class 1 and :math:`+1.8` dB and
+  :math:`-3.8` dB for class 2. They are applied to Formula (3) as printed,
+  as 7.2.4.5 instructs; the words of 7.2.4.3 and of 5.16 name the difference
+  the other way round, "input minus reference attenuation, and the summed
+  output", which with limits this asymmetric is not the same test (see the
+  errata registry).
+
+Both are graded for ``edition="2014"`` only, whose Part 2 prescribes them; a
+1995-edition verdict remains the Table 1 mask.
+
+The time-invariant operation of 5.14, tested with an exponential sweep
+(IEC 61260-2 7.4), is :func:`phonometry.filters.verify_time_invariance`: it
+runs the bank itself, decimation included, rather than reading its transfer
+functions.
+
+The acceptance limits of the A/B/C/AU/Z frequency weightings, which qualify a
 network applied to the whole signal against a design-goal response, live in
 :mod:`phonometry.filters.weighting_compliance`.
 """
@@ -45,6 +81,7 @@ from .._internal.validation import (
     check_engine,
     is_class_designation,
     require_choice,
+    require_count,
     require_ranks,
     require_same_length,
     require_summary_class,
@@ -66,6 +103,27 @@ _G = 10 ** (3 / 10)
 
 # Fewest per-band frequency-grid points the class verification accepts.
 _MIN_GRID_POINTS = 16
+
+#: IEC 61260-2:2016 7.2.1.4: the number S of test frequencies per filter
+#: bandwidth "shall be not less than 24".
+_MIN_POINTS_PER_BANDWIDTH = 24
+
+#: IEC 61260-1:2014 5.12.2: acceptance limits on the effective bandwidth
+#: deviation, +/- dB, per class.
+_BANDWIDTH_LIMITS_DB: dict[int, float] = {1: 0.4, 2: 0.6}
+
+#: IEC 61260-1:2014 5.16: acceptance limits (lower, upper) on the summation of
+#: output signals, dB, per class.
+_SUMMATION_LIMITS_DB: dict[int, tuple[float, float]] = {1: (-1.8, 0.8), 2: (-3.8, 1.8)}
+
+#: The names of the requirements a design verdict can carry, with the key
+#: template their per-band margins are stored under and the clause of IEC
+#: 61260-1:2014 that states them.
+_REQUIREMENTS: dict[str, tuple[str, str]] = {
+    "relative_attenuation": ("margin_class{c}_db", "5.10"),
+    "effective_bandwidth": ("bandwidth_margin_class{c}_db", "5.12"),
+    "summation": ("summation_margin_class{c}_db", "5.16"),
+}
 
 # BS EN 61260-1:2014 Table 1, high side (Omega >= 1), as exponents x of the
 # octave-band normalized frequency G**x with (min, max) limits per class.
@@ -227,6 +285,154 @@ def class_limits(
     return minimum, maximum
 
 
+def _test_frequencies(
+    fraction: float, points_per_bandwidth: int, first: int, last: int
+) -> np.ndarray:
+    r"""IEC 61260-2:2016 Formula (1): :math:`\Omega_i = G^{i/(bS)}`, ``first..last``.
+
+    :param fraction: The bandwidth designator denominator ``b``.
+    :param points_per_bandwidth: ``S``, the test frequencies per bandwidth.
+    :param first: The first index ``i`` (negative below the mid-band).
+    :param last: The last index ``i``, included.
+    :return: The normalized test frequencies, in ascending order.
+    """
+    i = np.arange(first, last + 1, dtype=np.float64)
+    return np.asarray(_G ** (i / (fraction * points_per_bandwidth)))
+
+
+def _band_relative_attenuation(
+    sos: np.ndarray, mid_hz: float, rate_hz: float, frequencies_hz: np.ndarray
+) -> np.ndarray:
+    """Relative attenuation of one designed band at arbitrary frequencies, dB.
+
+    Formula (8) of IEC 61260-1:2014 with the attenuation at the exact mid-band
+    frequency as reference, as :func:`verify_filter_class` reads the mask.
+    A frequency at or beyond the band's processing Nyquist frequency carries
+    no signal at the band's decimated rate (the multirate anti-aliasing
+    removes it), so it reads as infinite attenuation: its output is nothing.
+
+    :param sos: The band's second-order sections.
+    :param mid_hz: Its exact mid-band frequency.
+    :param rate_hz: The rate its sections run at, ``fs / factor``.
+    :param frequencies_hz: Where to evaluate it.
+    :return: The relative attenuation, ``+inf`` where no signal reaches.
+    """
+    eps = np.finfo(float).eps
+    freqs = np.asarray(frequencies_hz, dtype=np.float64)
+    out = np.full(freqs.shape, np.inf)
+    reachable = (freqs > 0.0) & (freqs < rate_hz / 2.0)
+    _, h_ref = signal.sosfreqz(sos, worN=np.array([mid_hz]), fs=rate_hz)
+    a_ref = -20.0 * np.log10(np.abs(h_ref[0]) + eps)
+    if np.any(reachable):
+        _, h = signal.sosfreqz(sos, worN=freqs[reachable], fs=rate_hz)
+        out[reachable] = -20.0 * np.log10(np.abs(h) + eps) - a_ref
+    return out
+
+
+def _effective_bandwidth(
+    omega: np.ndarray, relative_attenuation_db: np.ndarray
+) -> float:
+    r"""IEC 61260-2:2016 Formula (2): the trapezoidal :math:`B_\mathrm{e}`.
+
+    .. math::
+
+       B_\mathrm{e} = \sum_i \frac{2}{\Omega_i + \Omega_{i+1}}\,
+       \frac{1}{2}\left[10^{-0.1\,\Delta A(\Omega_i)} +
+       10^{-0.1\,\Delta A(\Omega_{i+1})}\right]
+       \left[\Omega_{i+1} - \Omega_i\right]
+
+    which is Formula (14) of IEC 61260-1:2014, the integral of
+    :math:`(1/\Omega)\,10^{-0.1\,\Delta A}`, with the weight
+    :math:`1/\Omega` taken at the arithmetic mean of each interval. An
+    infinite attenuation contributes nothing.
+
+    :param omega: The ascending normalized test frequencies.
+    :param relative_attenuation_db: :math:`\Delta A` at each of them.
+    :return: The normalized effective bandwidth.
+    """
+    power = 10.0 ** (-0.1 * np.asarray(relative_attenuation_db, dtype=np.float64))
+    lo, hi = omega[:-1], omega[1:]
+    return float(np.sum(2.0 / (lo + hi) * 0.5 * (power[:-1] + power[1:]) * (hi - lo)))
+
+
+def _reference_bandwidth(fraction: float) -> float:
+    r"""IEC 61260-1:2014 Formula (15): :math:`B_\mathrm{r} = (1/b)\ln G`."""
+    return math.log(_G) / fraction
+
+
+def _summation_deviation(relative_attenuations_db: np.ndarray) -> np.ndarray:
+    r"""IEC 61260-2:2016 Formula (3), point by point.
+
+    :math:`\Delta P_j = 10\lg\left[\sum 10^{-0.1\,\Delta A}\right]` over the
+    three filters :math:`j-1`, :math:`j`, :math:`j+1` at one frequency.
+
+    :param relative_attenuations_db: Shape ``(3, n)``: the relative
+        attenuation of the lower neighbour, the band and the upper neighbour
+        at the same ``n`` frequencies.
+    :return: :math:`\Delta P_j` at each frequency, dB.
+    """
+    power = 10.0 ** (-0.1 * np.asarray(relative_attenuations_db, dtype=np.float64))
+    return np.asarray(10.0 * np.log10(np.sum(power, axis=0)))
+
+
+def _bank_bandwidth_deviation(
+    sos: np.ndarray,
+    mid_hz: float,
+    rate_hz: float,
+    fraction: float,
+    points_per_bandwidth: int,
+) -> float:
+    r"""The effective bandwidth deviation :math:`\Delta B` of one designed band.
+
+    The Formula (1) grid runs from :math:`-N` to :math:`N + 1` with :math:`N`
+    at least :math:`2S` (7.2.3.2) and wide enough to reach the outermost
+    breakpoint of Table 1 (:math:`G^{\pm 4}` carried to the bandwidth), past
+    which the class 1 relative attenuation is at least 70 dB and leaves less
+    than one part in :math:`10^7` of the integral.
+    """
+    outermost = _map_breakpoint(_STOPBAND_MIN[-1][0], fraction)
+    reach = math.ceil(fraction * points_per_bandwidth * math.log(outermost, _G))
+    n = max(2 * points_per_bandwidth, reach)
+    omega = _test_frequencies(fraction, points_per_bandwidth, -n, n + 1)
+    delta_a = _band_relative_attenuation(sos, mid_hz, rate_hz, omega * mid_hz)
+    return 10.0 * math.log10(
+        _effective_bandwidth(omega, delta_a) / _reference_bandwidth(fraction)
+    )
+
+
+def _bank_summation(
+    sos: tuple[np.ndarray, ...] | list[np.ndarray],
+    mids_hz: np.ndarray,
+    rates_hz: np.ndarray,
+    fraction: float,
+    points_per_bandwidth: int,
+    band: int,
+) -> tuple[np.ndarray, np.ndarray]:
+    r"""The Formula (3) curve of one band: :math:`\Omega_i` and :math:`\Delta P_j`.
+
+    :math:`i` runs from :math:`-M` to :math:`M`, :math:`M = \lfloor S/2
+    \rfloor` (7.2.4.2), the frequencies between the band edges of the band.
+    Each of the three filters is evaluated at the same frequency in hertz,
+    which is the normalized frequency :math:`G^{i/(bS) \pm 1/b}` of 7.2.4.3
+    for the neighbours of a set whose mid-band frequencies step by
+    :math:`G^{1/b}`.
+
+    :return: ``(omega, delta_p_db)`` for the band.
+    """
+    half = points_per_bandwidth // 2
+    omega = _test_frequencies(fraction, points_per_bandwidth, -half, half)
+    freqs = omega * float(mids_hz[band])
+    rows = np.vstack(
+        [
+            _band_relative_attenuation(
+                sos[k], float(mids_hz[k]), float(rates_hz[k]), freqs
+            )
+            for k in (band - 1, band, band + 1)
+        ]
+    )
+    return omega, _summation_deviation(rows)
+
+
 def _verify_band(
     bank: OctaveFilterBank,
     idx: int,
@@ -291,8 +497,71 @@ def _verify_band(
     return band_entry, omega_nyq
 
 
+def _grade_pattern_requirements(
+    bank: OctaveFilterBank,
+    bands: list[dict[str, Any]],
+    classes_ordered: tuple[int, ...],
+    points_per_bandwidth: int,
+) -> None:
+    """Add the 5.12 and 5.16 requirements to every band entry, in place.
+
+    Each band gets its effective bandwidth deviation and its margin to each
+    class's limits; each band with a neighbour on both sides gets the range
+    of its Formula (3) curve and its margins too (7.2.4.4 leaves the two end
+    bands out, and they carry ``None``). The band's class is then the
+    strictest class it meets on every requirement graded.
+    """
+    rates = np.asarray([bank.fs / float(f) for f in bank.factor], dtype=np.float64)
+    mids = np.asarray(bank.freq, dtype=np.float64)
+    last = len(bands) - 1
+    for idx, band in enumerate(bands):
+        deviation = _bank_bandwidth_deviation(
+            bank.sos[idx],
+            float(mids[idx]),
+            float(rates[idx]),
+            bank.fraction,
+            points_per_bandwidth,
+        )
+        band["bandwidth_deviation_db"] = deviation
+        for cls in classes_ordered:
+            band[f"bandwidth_margin_class{cls}_db"] = _BANDWIDTH_LIMITS_DB[cls] - abs(
+                deviation
+            )
+        if 0 < idx < last:
+            _, curve = _bank_summation(
+                bank.sos, mids, rates, bank.fraction, points_per_bandwidth, idx
+            )
+            low, high = float(np.min(curve)), float(np.max(curve))
+            band["summation_min_db"] = low
+            band["summation_max_db"] = high
+            for cls in classes_ordered:
+                lower, upper = _SUMMATION_LIMITS_DB[cls]
+                band[f"summation_margin_class{cls}_db"] = min(low - lower, upper - high)
+        else:
+            band["summation_min_db"] = None
+            band["summation_max_db"] = None
+            for cls in classes_ordered:
+                band[f"summation_margin_class{cls}_db"] = None
+        band["class"] = _band_class(band, classes_ordered)
+
+
+def _band_class(band: dict[str, Any], classes_ordered: tuple[int, ...]) -> int | None:
+    """The strictest class one band meets on every requirement it carries."""
+    for cls in classes_ordered:
+        margins = [
+            band.get(template.format(c=cls)) for template, _ in _REQUIREMENTS.values()
+        ]
+        if all(m is None or m >= 0.0 for m in margins):
+            return cls
+    return None
+
+
 def verify_filter_class(
-    bank: OctaveFilterBank, *, num_points: int = 2**15, edition: str = "2014"
+    bank: OctaveFilterBank,
+    *,
+    num_points: int = 2**15,
+    edition: str = "2014",
+    points_per_bandwidth: int = _MIN_POINTS_PER_BANDWIDTH,
 ) -> FilterComplianceResult:
     """Verify a filter bank against the IEC 61260 class limits.
 
@@ -309,11 +578,23 @@ def verify_filter_class(
     band's stop-band mask extends beyond its processing Nyquist, and the
     per-band ``checked_to_omega`` records how far the check reached.
 
+    For ``edition="2014"`` two more requirements of IEC 61260-1:2014 are
+    graded on the same sections, the way IEC 61260-2:2016 tests them (see
+    the module docstring): the effective bandwidth deviation of every band
+    (5.12, Formulas (1) and (2) of Part 2) and the summation of the output
+    signals of every band that has a neighbour on each side (5.16, Formula
+    (3) of Part 2). A band's class, and so the bank's, is the strictest class
+    met on every requirement graded; :meth:`FilterComplianceResult.requirement_class`
+    gives the class of each requirement on its own.
+
     :param bank: The filter bank to verify (its designed SOS are analyzed;
         works for stateful and stateless banks alike).
     :param num_points: Number of frequency grid points per band (>= 16).
     :param edition: ``"2014"`` (IEC 61260-1:2014, classes 1/2) or ``"1995"``
-        (IEC 61260:1995 / ANSI S1.11-2004, adds the stricter class 0).
+        (IEC 61260:1995 / ANSI S1.11-2004, adds the stricter class 0; the
+        verdict is its Table 1 mask alone).
+    :param points_per_bandwidth: ``S``, the test frequencies per filter
+        bandwidth of IEC 61260-2:2016 Formula (1), at least 24 (7.2.1.4).
     :return: A :class:`FilterComplianceResult`, which carries the verdict
         together with the sections, mid-band frequencies, decimation factors
         and sampling rate it was measured through, so it can redraw the
@@ -323,6 +604,9 @@ def verify_filter_class(
     if num_points < _MIN_GRID_POINTS:
         msg = "'num_points' must be at least 16."
         raise ValueError(msg)
+    points_per_bandwidth = require_count(
+        points_per_bandwidth, "points_per_bandwidth", minimum=_MIN_POINTS_PER_BANDWIDTH
+    )
     spec = _FILTER_EDITIONS.get(edition)
     if spec is None:
         msg = "edition must be '2014' or '1995'."
@@ -353,6 +637,8 @@ def verify_filter_class(
         if omega_nyq < mask_top_omega:
             range_limited = True
         bands.append(band_entry)
+    if edition == "2014":
+        _grade_pattern_requirements(bank, bands, classes_ordered, points_per_bandwidth)
 
     if not bands:
         # No bands to verify: never report compliance vacuously.
@@ -375,6 +661,7 @@ def verify_filter_class(
         fs=float(bank.fs),
         num_points=int(num_points),
         range_limited=range_limited,
+        points_per_bandwidth=points_per_bandwidth,
     )
 
 
@@ -416,9 +703,37 @@ def _require_margin_classes(
             raise ValueError(msg)
 
 
+def _require_requirement_keys(
+    bands: tuple[dict[str, Any], ...], classes: list[int]
+) -> None:
+    """Every band carries the same requirements, or none of them does.
+
+    A requirement is graded for the whole set or not at all:
+    :attr:`FilterComplianceResult.requirements` reads the first band, and a
+    later band short of one of its margins would die in a bare ``KeyError``
+    in the fiche.
+
+    :raises ValueError: if the bands disagree on which requirements they
+        carry.
+    """
+    if not bands or not classes:
+        return
+    for name, (template, _) in _REQUIREMENTS.items():
+        key = template.format(c=classes[0])
+        carried = [key in band for band in bands]
+        if any(carried) and not all(carried):
+            missing = next(b for b, has in zip(bands, carried, strict=True) if not has)
+            msg = (
+                f"'bands' must carry the {name!r} requirement in every band or "
+                f"in none; the {missing.get('freq', math.nan):g} Hz entry has "
+                f"no {key!r}."
+            )
+            raise ValueError(msg)
+
+
 @dataclass(frozen=True)
 class FilterComplianceResult:
-    """IEC 61260-1 class-compliance verdict of an :class:`OctaveFilterBank`.
+    r"""IEC 61260-1 class-compliance verdict of an :class:`OctaveFilterBank`.
 
     What :func:`verify_filter_class` returns: the verdict together with the
     minimal filter-bank data needed to redraw the measured relative-attenuation
@@ -450,6 +765,24 @@ class FilterComplianceResult:
         anti-aliasing removes signal energy beyond it, but the limits are not
         demonstrated); the stated class then attests the verified frequency
         range and the ``.report()`` fiche prints a qualifying note.
+    :ivar points_per_bandwidth: ``S``, the test frequencies per bandwidth of
+        IEC 61260-2:2016 Formula (1) the effective bandwidth and the summation
+        were evaluated on.
+
+    For ``edition="2014"`` every band entry carries, besides its Table 1
+    margins ``margin_class<c>_db``, the two requirements IEC 61260-2 tests on
+    the same measurements:
+
+    * ``bandwidth_deviation_db``, the effective bandwidth deviation
+      :math:`\Delta B` of 5.12, and ``bandwidth_margin_class<c>_db``, its
+      distance to each class's limit;
+    * ``summation_min_db`` and ``summation_max_db``, the range of the
+      summation :math:`\Delta P_j` of 5.16 across the band, and
+      ``summation_margin_class<c>_db``, the nearer of its distances to each
+      class's two limits; all three are ``None`` on the first and the last
+      band, which have a neighbour on one side only (IEC 61260-2 7.2.4.4).
+
+    A band's ``class`` is then the strictest class it meets on all of them.
     """
 
     overall_class: int | None
@@ -463,6 +796,7 @@ class FilterComplianceResult:
     num_points: int
     _: KW_ONLY
     range_limited: bool = False
+    points_per_bandwidth: int = _MIN_POINTS_PER_BANDWIDTH
 
     def __post_init__(self) -> None:
         """Reject a verdict whose per-band entries disagree.
@@ -533,6 +867,7 @@ class FilterComplianceResult:
             )
             raise ValueError(msg)
         require_summary_class(self, self.bands, self.overall_class, expected)
+        _require_requirement_keys(self.bands, expected)
         for band in self.bands:
             for key, value in band.items():
                 if isinstance(value, float) and not math.isfinite(value):
@@ -558,6 +893,70 @@ class FilterComplianceResult:
             return []
         return _margin_classes(self.bands[0])
 
+    @property
+    def requirements(self) -> tuple[str, ...]:
+        """The requirements of IEC 61260-1:2014 this verdict graded.
+
+        ``"relative_attenuation"`` (5.10, Table 1) always; for the 2014
+        edition also ``"effective_bandwidth"`` (5.12) and, when the bank has
+        a band with a neighbour on each side, ``"summation"`` (5.16), which
+        IEC 61260-2:2016 7.2.4.4 grades on those bands only. Empty for a bank
+        with no bands.
+        """
+        if not self.bands:
+            return ()
+        classes = self.available_classes()
+        return tuple(
+            name
+            for name, (template, _) in _REQUIREMENTS.items()
+            if any(
+                band.get(template.format(c=classes[0])) is not None
+                for band in self.bands
+            )
+        )
+
+    def requirement_class(self, requirement: str) -> int | None:
+        """The strictest class every band meets on one requirement alone.
+
+        :param requirement: One of :attr:`requirements`.
+        :return: The class, or ``None`` when a band meets none. The bands a
+            requirement does not apply to (the end bands of the summation)
+            do not constrain it.
+        :raises KeyError: for a requirement this verdict did not grade.
+        """
+        template = self._requirement_template(requirement)
+        for cls in self.available_classes():
+            margins = [band[template.format(c=cls)] for band in self.bands]
+            if all(m is None or m >= 0.0 for m in margins):
+                return cls
+        return None
+
+    def binding_margin_db(self, requirement: str, filter_class: int) -> float:
+        """The smallest margin, in dB, of any band to one class on one requirement.
+
+        :param requirement: One of :attr:`requirements`.
+        :param filter_class: One of :meth:`available_classes`.
+        :return: The binding margin; negative when a band misses the class.
+        :raises KeyError: for a requirement this verdict did not grade, or a
+            class it carries no margins for.
+        """
+        template = self._requirement_template(requirement)
+        if filter_class not in self.available_classes():
+            msg = (
+                f"class {filter_class!r} is not one of {self.available_classes()} "
+                f"for edition {self.edition!r}"
+            )
+            raise KeyError(msg)
+        key = template.format(c=filter_class)
+        return float(min(band[key] for band in self.bands if band[key] is not None))
+
+    def _requirement_template(self, requirement: str) -> str:
+        """The per-band margin key template of a graded requirement."""
+        if requirement not in self.requirements:
+            msg = f"{requirement!r} was not graded; graded: {list(self.requirements)}"
+            raise KeyError(msg)
+        return _REQUIREMENTS[requirement][0]
+
     def reference_class(self) -> int:
         """The class whose corridor the fiche/plot overlays.
 
@@ -579,23 +978,46 @@ class FilterComplianceResult:
         return max(classes)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self,
+        ax: Axes | None = None,
+        *,
+        requirement: str = "relative_attenuation",
+        language: str = "en",
+        **kwargs: Any,
     ) -> Axes:
-        """Plot the worst-margin band against its class-limit corridor.
+        r"""Plot one graded requirement.
 
-        Draws the measured relative attenuation of the binding band over the
-        acceptance corridor of the achieved (or, when non-compliant, the
-        loosest) class; see :func:`phonometry._plot.filters.plot_filter_class`.
-        Requires matplotlib (``pip install phonometry[plot]``) and returns the
+        ``"relative_attenuation"`` (the default) draws the measured relative
+        attenuation of the binding band over the acceptance corridor of the
+        achieved (or, when non-compliant, the loosest) class; see
+        :func:`phonometry._plot.filters.plot_filter_class`.
+        ``"effective_bandwidth"`` draws :math:`\Delta B` of every band between
+        the limits of 5.12.2, and ``"summation"`` the Formula (3) curve of
+        every inner band between the limits of 5.16. Requires matplotlib
+        (``pip install phonometry[plot]``) and returns the
         :class:`~matplotlib.axes.Axes`.
 
+        :param ax: Existing axes, or ``None`` to create a figure.
+        :param requirement: One of :attr:`requirements`.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
+        :param kwargs: Forwarded to the renderer's measured curve.
+        :raises ValueError: for a requirement this verdict did not grade.
         """
         from .._i18n import check_language
-        from .._plot.filters import plot_filter_class
+        from .._plot.filters import (
+            plot_filter_bandwidth,
+            plot_filter_class,
+            plot_filter_summation,
+        )
 
         check_language(language)
-        return plot_filter_class(self, ax=ax, language=language, **kwargs)
+        require_choice(requirement, "requirement", self.requirements)
+        renderers = {
+            "relative_attenuation": plot_filter_class,
+            "effective_bandwidth": plot_filter_bandwidth,
+            "summation": plot_filter_summation,
+        }
+        return renderers[requirement](self, ax=ax, language=language, **kwargs)
 
     def report(
         self,

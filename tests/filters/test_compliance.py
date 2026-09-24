@@ -57,8 +57,36 @@ def test_butter_order6_third_octave_meets_class1() -> None:
     assert result.overall_class == 1, result
 
 
-def test_butter_order6_octave_meets_class1() -> None:
+def test_butter_order6_octave_meets_table1_class1_and_summation_class2() -> None:
+    """The multirate octave bank keeps the Table 1 and 5.12 class 1, and 5.16
+    grades it class 2.
+
+    Each band is decimated until its upper edge sits at 0.8 of its processing
+    Nyquist frequency, where the bilinear transform steepens the upper skirt:
+    adjacent octave bands then sum to +0.94 dB and -1.16 dB about the input,
+    past the +0.8 dB class 1 limit of IEC 61260-1:2014 5.16.
+    """
     bank = filters.OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[125, 4000])
+    result = filters.verify_filter_class(bank)
+    assert result.requirement_class("relative_attenuation") == 1
+    assert result.requirement_class("effective_bandwidth") == 1
+    assert result.requirement_class("summation") == 2
+    assert result.overall_class == 2, result
+    top = max(b["summation_max_db"] for b in result.bands[1:-1])
+    bottom = min(b["summation_min_db"] for b in result.bands[1:-1])
+    assert top == pytest.approx(0.94, abs=0.01)
+    assert bottom == pytest.approx(-1.16, abs=0.01)
+
+
+def test_undecimated_octave_bank_meets_class1_on_every_requirement() -> None:
+    """Without the decimation the octave bank sums within the class 1 limits."""
+    bank = filters.OctaveFilterBank(
+        fs=48000,
+        fraction=1,
+        order=6,
+        limits=[125, 4000],
+        design=filters.FilterDesign(resample=False),
+    )
     result = filters.verify_filter_class(bank)
     assert result.overall_class == 1, result
 
@@ -204,7 +232,9 @@ def test_butter_meets_class0_1995() -> None:
 
 
 def test_2014_default_unaffected_by_edition_support() -> None:
-    """The default edition still reports only classes 1/2 (no class-0 key)."""
+    """The default edition still reports only classes 1/2 (no class-0 key),
+    now with the 5.12 and 5.16 requirements of IEC 61260-2 beside Table 1.
+    """
     bank = filters.OctaveFilterBank(fs=48000, fraction=3, order=6)
     result = filters.verify_filter_class(bank)
     assert result.overall_class == 1
@@ -214,6 +244,13 @@ def test_2014_default_unaffected_by_edition_support() -> None:
         "checked_to_omega",
         "margin_class1_db",
         "margin_class2_db",
+        "bandwidth_deviation_db",
+        "bandwidth_margin_class1_db",
+        "bandwidth_margin_class2_db",
+        "summation_min_db",
+        "summation_max_db",
+        "summation_margin_class1_db",
+        "summation_margin_class2_db",
     }
 
 
@@ -344,9 +381,11 @@ def test_a_filter_verdict_refuses_a_later_band_short_of_a_margin_key() -> None:
     # cannot refuse a verdict a bank emitted.
     assert len({frozenset(band) for band in result.bands}) == 1
     bands = tuple(copy.deepcopy(band) for band in result.bands)
-    del bands[1][f"margin_class{result.reference_class()}_db"]
+    dropped = result.reference_class()
+    kept = [c for c in result.available_classes() if c != dropped]
+    del bands[1][f"margin_class{dropped}_db"]
     with pytest.raises(
-        ValueError, match=r"entry of 'bands' carries margins for classes \[2\]"
+        ValueError, match=rf"entry of 'bands' carries margins for classes \{kept}"
     ):
         dataclasses.replace(result, bands=bands)
 
@@ -428,7 +467,7 @@ def test_a_filter_verdict_refuses_a_class_its_bands_do_not_derive() -> None:
     from phonometry.filters.core import OctaveFilterBank
 
     result = filters.verify_filter_class(
-        OctaveFilterBank(fs=48000, fraction=1, order=4, limits=[500, 16000])
+        OctaveFilterBank(fs=48000, fraction=3, order=4, limits=[500, 2000])
     )
     assert result.overall_class == 1
     bands = tuple(copy.deepcopy(band) for band in result.bands)

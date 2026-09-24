@@ -140,10 +140,13 @@ class FilterDesign:
     sections, evaluated band by band on a decimated sample rate.
 
     :ivar filter_type: Type of filter ('butter', 'cheby1', 'cheby2', 'ellip',
-        'bessel'). Only ``butter`` meets IEC 61260-1:2014 class 1 with the
-        default parameters (``cheby2`` also does once ``attenuation`` >= 70 dB,
-        see below); ``cheby1``/``ellip``/``bessel`` fail on passband ripple or
-        roll-off regardless of parameters (default 'butter').
+        'bessel'). Only ``butter`` meets the class 1 mask of IEC 61260-1:2014
+        Table 1 with the default parameters (``cheby2`` also does once
+        ``attenuation`` >= 70 dB, see below); ``cheby1``/``ellip``/``bessel``
+        fail on passband ripple or roll-off regardless of parameters (default
+        'butter'). On the whole of that edition, as
+        :func:`~phonometry.filters.verify_filter_class` grades it, see
+        ``resample``.
     :ivar ripple: Passband ripple in dB, for cheby1 and ellip (default 0.1).
     :ivar attenuation: Stopband attenuation in dB (default 72.0). For the
         ``cheby2`` filter scipy pins the equiripple deep-stopband floor at
@@ -152,7 +155,11 @@ class FilterDesign:
         72 dB default clears class 1 with the same +0.400 dB passband margin
         as ``butter``.
     :ivar resample: If True, resampling is performed: each band is filtered on
-        a decimated sample rate (default True).
+        a decimated sample rate (default True). A decimated ``butter`` octave
+        bank sums its adjacent outputs to about +0.94 dB, past the +0.8 dB of
+        class 1 in IEC 61260-1:2014 5.16, and is class 2; filtered at the full
+        rate (``False``) it is class 1 on every requirement, and a
+        one-third-octave bank is class 1 either way.
     """
 
     filter_type: str = "butter"
@@ -206,8 +213,10 @@ class ResponsePlot:
     file: str | None = None
 
 
-#: The defaults of the bank and of :func:`octave_filter`: the IEC 61260-1
-#: class 1 design, no calibration, no carried state and no response plot.
+#: The defaults of the bank and of :func:`octave_filter`: the design that
+#: meets the class 1 mask of IEC 61260-1:2014 Table 1 (an octave bank so
+#: designed is class 2 on the summation of 5.16), no calibration, no carried
+#: state and no response plot.
 #: One shared instance each: the bundles are frozen, so a call cannot
 #: mutate them.
 _DEFAULT_DESIGN = FilterDesign()
@@ -351,10 +360,14 @@ class OctaveFilterBank:
         :param limits: Frequency limits [f_min, f_max].
         :param design: How the band filters are designed: family, ripple,
             stopband attenuation and multirate decimation
-            (:class:`FilterDesign`). Only ``butter`` meets IEC 61260-1:2014
-            class 1 with the default parameters (``cheby2`` also does once
-            ``attenuation`` >= 70 dB); ``cheby1``/``ellip``/``bessel`` fail on
-            passband ripple or roll-off regardless of parameters.
+            (:class:`FilterDesign`). Only ``butter`` meets the class 1 mask
+            of IEC 61260-1:2014 Table 1 with the default parameters
+            (``cheby2`` also does once ``attenuation`` >= 70 dB);
+            ``cheby1``/``ellip``/``bessel`` fail on passband ripple or
+            roll-off regardless of parameters. The decimated octave bank is
+            class 2 on the summation of outputs (5.16) and class 1 filtered
+            at the full rate (``FilterDesign(resample=False)``); the
+            one-third-octave bank is class 1 on every requirement.
         :param calibration: How band energy becomes a level: calibration
             factor and dBFS switch (:class:`LevelCalibration`).
         :param block_processing: Whether the bank carries its filter state
@@ -696,6 +709,8 @@ class OctaveFilterBank:
         self, x: np.ndarray, idx: int, *, zero_phase: bool = False
     ) -> np.ndarray:
         """Resample and filter for a specific band (vectorized)."""
+        if not zero_phase and not self.stateful:
+            return _decimate_and_filter(x, self.sos[idx], int(self.factor[idx]))
         if self.factor[idx] > 1:
             # axis=-1 is default for resample_poly, but being explicit is good
             sd = signal.resample_poly(x, 1, self.factor[idx], axis=-1)
@@ -708,7 +723,9 @@ class OctaveFilterBank:
             n_sections = self.sos[idx].shape[0]
             padlen = min(3 * (2 * n_sections + 1), max(sd.shape[-1] - 2, 0))
             y = signal.sosfiltfilt(self.sos[idx], sd, axis=-1, padlen=padlen)
-        elif self.stateful:
+        else:
+            # Stateful forward filtering: the stateless forward path left
+            # through _decimate_and_filter above.
             n_channels = sd.shape[0]
             # Lazy init: allocate zi with correct channel count on first use
             if (
@@ -726,8 +743,6 @@ class OctaveFilterBank:
             y, self.zi[idx] = signal.sosfilt(
                 self.sos[idx], sd, axis=-1, zi=self.zi[idx]
             )
-        else:
-            y = signal.sosfilt(self.sos[idx], sd, axis=-1)
 
         # sosfilt supports axis=-1 by default
         return cast(np.ndarray, y)
@@ -756,6 +771,25 @@ class OctaveFilterBank:
         # Physical SPL: apply sensitivity and use 20uPa reference
         pressure_pa = val_linear * self.calibration_factor
         return cast(np.ndarray, 20 * np.log10(np.maximum(pressure_pa, eps) / _P0))
+
+
+def _decimate_and_filter(x: np.ndarray, sos: np.ndarray, factor: int) -> np.ndarray:
+    """One band of a stateless bank: decimate by ``factor``, then filter.
+
+    The forward, stateless path of :meth:`OctaveFilterBank.filter`, kept at
+    module level so that the time-invariance test of
+    :func:`phonometry.filters.verify_time_invariance` runs its sweep through
+    the very same two calls the bank makes, the polyphase anti-aliasing of
+    :func:`scipy.signal.resample_poly` included, without touching the
+    carried state of a stateful bank.
+
+    :param x: The input, samples on the last axis.
+    :param sos: The band's second-order sections, designed at ``fs / factor``.
+    :param factor: The band's decimation factor (1 filters at full rate).
+    :return: The band output at the decimated rate.
+    """
+    sd = signal.resample_poly(x, 1, factor, axis=-1) if factor > 1 else x
+    return cast(np.ndarray, signal.sosfilt(sos, sd, axis=-1))
 
 
 @lru_cache(maxsize=32)
@@ -822,10 +856,12 @@ def octave_filter(
     :param nominal: If True, return IEC 61260-1 nominal frequency labels (List[str]) instead of exact floats.
     :param design: How the band filters are designed: family, ripple, stopband
         attenuation and multirate decimation (:class:`FilterDesign`). The
-        default 'butter' family is the only one that meets IEC 61260-1 class 1
-        with the default parameters; for ``cheby2`` scipy pins the
-        deep-stopband floor at exactly ``attenuation``, so it must be >= 70 dB
-        to clear the class 1 limit (matches :class:`OctaveFilterBank`).
+        default 'butter' family is the only one that meets the class 1 mask of
+        IEC 61260-1 Table 1 with the default parameters; for ``cheby2`` scipy
+        pins the deep-stopband floor at exactly ``attenuation``, so it must be
+        >= 70 dB to clear the class 1 limit (matches
+        :class:`OctaveFilterBank`, which also says how the decimated octave
+        bank grades on the summation of outputs).
     :param calibration: How band energy becomes a level: calibration factor
         and dBFS switch (:class:`LevelCalibration`). This is the explicit
         knob: when its ``factor`` is left at 1.0, a calibrated

@@ -49,6 +49,7 @@ from __future__ import annotations
 # isort: off
 from conformance.domains import (
     filters,
+    filter_tests,
     fluids,
     levels,
     calibrators,
@@ -221,6 +222,7 @@ __all__ = [
     "electroacoustics",
     "environmental_sources",
     "fdtd",
+    "filter_tests",
     "filters",
     "fluids",
     "ground_barriers",

@@ -8439,6 +8439,126 @@ dos ediciones con las mismas entradas y en el mismo orden.
   bien impresas de las tablas 1 y 2 confirman esa lectura.
 - **Estado:** sin comunicar.
 
+## IEC 61260-2:2016 / IEC 61260-3:2016, anexo A, Fórmula (A.2) (el coeficiente de los términos de frecuencia sin elevar al cuadrado)
+
+- **Ubicación:** anexo A (informativo), A.1.3, Fórmula (A.2), página impresa
+  19 de la IEC 61260-2:2016 y página impresa 16 de la IEC 61260-3:2016, y el
+  ejemplo resuelto del A.3.5 en las páginas impresas 21 y 18 respectivamente.
+  Las dos partes imprimen el mismo anexo.
+- **Lo impreso:** la Fórmula (A.1) es la suma de los coeficientes de
+  sensibilidad al cuadrado de la Fórmula (17) de la IEC 61260-1:2014 por las
+  incertidumbres típicas al cuadrado, y la Fórmula (A.2) se ofrece como su
+  simplificación,
+  $$u_{L_\mathrm{c}} = \left[u_{L_\mathrm{in}}^2 + \left(\frac{10}{\ln(10)}\right)^2\left(\frac{u_{T_\mathrm{sweep}}}{T_\mathrm{sweep}}\right)^2 + \left(\frac{10}{\ln(10)}\right)^2\left(\frac{u_{T_\mathrm{avg}}}{T_\mathrm{avg}}\right)^2 + \left(\frac{10}{\ln(f_\mathrm{end}/f_\mathrm{start})\times\ln(10)}\right)\times\left[\left(\frac{u_{f_\mathrm{end}}}{f_\mathrm{end}}\right)^2 + \left(\frac{u_{f_\mathrm{start}}}{f_\mathrm{start}}\right)^2\right]\right]^{1/2}\ \mathrm{dB},$$
+  en la que los dos primeros coeficientes llevan el exponente 2 y el tercero
+  no. El A.3.5 resuelve después un ejemplo con
+  $u_{L_\mathrm{in}} \approx 0{,}042$ dB, $T_\mathrm{sweep} = T_\mathrm{avg} = 20$ s
+  con 0,05 s y 0,02 s, $f_\mathrm{end} = 50\,000$ Hz con 5 Hz y
+  $f_\mathrm{start} = 0{,}5$ Hz con 0,05 Hz, e imprime
+  $u_{L_\mathrm{c}} \approx 0{,}057$ dB, una incertidumbre expandida de
+  0,115 dB y 0,128 dB con un visualizador de 0,1 dB de resolución.
+- **El problema:** la derivada de la Fórmula (17) respecto a $f_\mathrm{end}$
+  es $10/[\ln(f_\mathrm{end}/f_\mathrm{start})\ln(10)\,f_\mathrm{end}]$, y la
+  (A.1) la eleva al cuadrado como a todos los demás coeficientes. Sin elevar,
+  el coeficiente vale 0,377 para el barrido de cinco décadas del ejemplo, y su
+  término de frecuencia es 0,0038 dB² en vez de 0,0014 dB². Tal como está
+  impresa, la (A.2) da $u_{L_\mathrm{c}} = 0{,}075$ dB, una incertidumbre
+  expandida de 0,150 dB y 0,161 dB con el visualizador; con el cuadrado da
+  0,057 dB, 0,115 dB y 0,128 dB, los tres valores que imprimen las dos partes.
+  Los dos cálculos usan la $u_{L_\mathrm{in}}$ que deduce el ejemplo,
+  0,0416 dB a partir de una resolución de visualizador de 0,1 dB y una
+  constancia de 0,03 dB, no los 0,042 dB a los que la redondea, que darían
+  0,058 dB. La forma sin cuadrado tampoco está en dB², así que cambia con la
+  unidad del nivel.
+- **Evidencia:** un recálculo del ejemplo impreso de las dos maneras.
+  Verificado en la página 21 del PDF (p. 19 impresa) y en la página 23 del PDF
+  (p. 21 impresa) de la IEC 61260-2:2016, y en la página 18 del PDF (p. 16
+  impresa) y la página 20 del PDF (p. 18 impresa) de la IEC 61260-3:2016. La
+  versión consolidada IEC 61260-2:2016+AMD1:2017 (edición 1.1) imprime la misma
+  Fórmula (A.2) en la página 23 del PDF (p. 19 impresa) y los mismos 0,057 dB,
+  0,115 dB y 0,128 dB en la página 25 del PDF (p. 21 impresa): la modificación
+  solo añade la opción de guía de ondas TEM de la IEC 61000-4-20 al ensayo de
+  inmunidad a campos, y el defecto sigue en la edición vigente.
+- **Comportamiento de la biblioteca:**
+  [`swept_level_uncertainty`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/filters/time_invariance.py)
+  eleva el coeficiente al cuadrado, como hace la (A.1), y reproduce 0,057 dB,
+  0,115 dB y 0,128 dB; tres filas del informe de conformidad los fijan, y
+  `test_formula_a2_as_printed_would_not_reproduce_its_example` en
+  [`tests/filters/test_time_invariance.py`](https://github.com/jmrplens/phonometry/blob/main/tests/filters/test_time_invariance.py)
+  mantiene la forma impresa en los 0,075 dB que da.
+- **Estado:** no reportada.
+
+## IEC 61260-3:2016, B.2.6 (un periodo de promediado que acaba de 6 s a 7 s después de que el barrido pase por 6,3 Hz)
+
+- **Ubicación:** anexo B (informativo), B.2.6, página impresa 20.
+- **Lo impreso:** "The averaging period will end 6 s to 7 s after the sweep
+  frequency is equal to the lowest midband frequency, 6,3 Hz."
+- **El problema:** los propios ajustes del ejemplo lo hacen acabar de 18 s a
+  19 s después. El B.2.2 barre de 0,01 Hz a 1 MHz, ocho décadas, en 30 s, es
+  decir, 3,75 s por década, y el B.2.3 promedia durante 30 s desde un inicio
+  de 0,5 s a 1,5 s antes del barrido. El barrido llega a 6,3 Hz
+  $3{,}75 \lg(6{,}3/0{,}01) = 10{,}5$ s después de empezar, que son de 11,0 s a
+  12,0 s dentro del promediado, y el promediado acaba a los 30 s. El B.2.3
+  comprueba los mismos ajustes en el otro extremo y los acierta: el barrido
+  está en 398 kHz a 736 kHz cuando acaba el promediado. La IEC 61260-2:2016
+  imprime el mismo ejemplo y, en su propio B.2.6, "18 s to 20 s".
+- **Evidencia:** un recálculo a partir del B.2.2 y el B.2.3. Verificado en la
+  página 21 del PDF (p. 19 impresa) y en la página 22 del PDF (p. 20 impresa)
+  de la IEC 61260-3:2016, y en la página 25 del PDF (p. 23 impresa) de la
+  IEC 61260-2:2016.
+- **Comportamiento de la biblioteca:** no hace falta ninguno. La frase
+  argumenta que la respuesta al impulso del filtro más bajo se ha extinguido
+  cuando acaba el promediado, lo que 18 s refuerza, y ningún número del
+  ejemplo depende de ella.
+  [`verify_time_invariance`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/filters/time_invariance.py)
+  dimensiona el promediado a partir del polo más lento del banco que recibe.
+- **Estado:** no reportada.
+
+## IEC 61260-2:2016, 7.2.4.3 y Fórmula (3), con IEC 61260-1:2014, 5.16 (la diferencia de la suma tomada en los dos sentidos)
+
+- **Ubicación:** IEC 61260-2:2016, 7.2.4.3 y Fórmula (3) en la página impresa
+  11 y 7.2.4.5 en la página impresa 12; IEC 61260-1:2014, 5.16, página impresa
+  21.
+- **Lo impreso:** el 7.2.4.3 define $\Delta P_j(\Omega_i)$ como "the difference
+  between the input signal level minus the reference attenuation and the
+  level of the summed output signals" y da
+  $$\Delta P_j(\Omega_i) = 10\lg\left[10^{-0{,}1\,\Delta A_{j-1}} + 10^{-0{,}1\,\Delta A_j} + 10^{-0{,}1\,\Delta A_{j+1}}\right]\ \mathrm{dB}.$$
+  El 5.16 de la IEC 61260-1 fija los límites "for the difference between (a)
+  the level of the input signal minus the reference attenuation and (b) the
+  level of the sum of the time-mean-square output signals from adjacent
+  filters": +0,8 dB y −1,8 dB para la clase 1, +1,8 dB y −3,8 dB para la
+  clase 2. El 7.2.4.5 aplica esos límites a $\Delta P_j(\Omega_i)$
+  "calculated according to formula (3)".
+- **El problema:** con $\Delta A = A - A_\mathrm{ref}$ y
+  $A = L_\mathrm{in} - L_\mathrm{out}$, la Fórmula (3) es el nivel de las
+  salidas sumadas menos el nivel de entrada descontada la atenuación de
+  referencia, (b) menos (a). El texto de las dos partes nombra (a) menos (b),
+  el mismo número con el otro signo. Los límites no son simétricos, así que
+  son dos ensayos distintos: un juego cuyas salidas adyacentes suman 1,0 dB
+  por encima de la entrada no cumple la clase 1 según la Fórmula (3) y la
+  cumple según el texto, y uno cuyas salidas suman 1,0 dB por debajo la
+  cumple según la Fórmula (3) y no según el texto.
+- **Evidencia:** una comparación de la frase con la fórmula que introduce.
+  Verificado en la página 13 del PDF (p. 11 impresa) y en la página 14 del PDF
+  (p. 12 impresa) de la IEC 61260-2:2016, y en la página 23 del PDF (p. 21
+  impresa) de la BS EN 61260-1:2014. La versión consolidada
+  IEC 61260-2:2016+AMD1:2017 (edición 1.1) imprime las mismas palabras y la
+  misma Fórmula (3): el 7.2.4.3 va de la página 15 del PDF (p. 11 impresa) a la
+  página 16 del PDF (p. 12 impresa), con la Fórmula (3) y el 7.2.4.5 en esta
+  última; la modificación no toca el 7.2.4, y el conflicto sigue en la edición
+  vigente.
+- **Comportamiento de la biblioteca:**
+  [`verify_filter_class`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/filters/compliance.py) aplica los
+  límites del 5.16 a la Fórmula (3) tal como está impresa, como indica el
+  7.2.4.5. Los veredictos que da a los bancos de la propia biblioteca no
+  dependen de la lectura: el banco de octavas diezmado suma de −1,16 dB a
+  +0,94 dB y es clase 2 de las dos maneras, y el banco de tercios de octava
+  suma de −0,55 dB a +0,76 dB y es clase 1 de las dos maneras.
+  `test_the_summation_is_what_tones_through_the_bank_read` en
+  [`tests/filters/test_pattern_evaluation.py`](https://github.com/jmrplens/phonometry/blob/main/tests/filters/test_pattern_evaluation.py)
+  mantiene la Fórmula (3) en lo que lee el banco en marcha.
+- **Estado:** no reportada.
+
 ## Propiedades de las fuentes, relacionadas, que no son erratas
 
 Registradas aquí para prevenir futuros «arreglos» que romperían la

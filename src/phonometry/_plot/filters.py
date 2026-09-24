@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import math
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -13,17 +14,27 @@ if TYPE_CHECKING:
     from ..filters.compliance import FilterComplianceResult
     from ..filters.core import OctaveFilterResult
     from ..filters.equalizer import EQResponseResult
+    from ..filters.periodic_tests import (
+        FilterPeriodicVerification,
+        PeriodicTestClause,
+    )
+    from ..filters.time_invariance import TimeInvarianceResult
     from ..filters.weighting import TimeWeightedEnvelope
+    from ..metrology.conformance import ConformanceVerification
 
 from .common import (
+    _C_EDGE,
     _C_MUTED,
     _C_PRIMARY,
+    _C_QUATERNARY,
     _C_REFERENCE,
+    _C_SECONDARY,
     _C_TERTIARY,
     _LEGEND_UPPER_RIGHT,
     _new_axes,
     _new_axes_column,
     format_frequency_axis,
+    place_legend_clear,
     style_default,
     style_pop,
     theme_fill,
@@ -45,6 +56,14 @@ _FREQ_LABEL = "Frequency [Hz]"
 #: Per-channel legend entry, shared by the two renderers that draw one
 #: line per channel. It is a format string: ``_t`` fills the ``n``.
 _CHANNEL_LABEL = "Channel {n}"
+#: Axis label of every plot drawn against the normalised frequency.
+_NORMALISED_FREQ_LABEL = r"Normalised frequency $f\,/\,f_{\mathrm{m}}$"
+#: Axis label of the plots drawn against the mid-band frequency.
+_MID_BAND_LABEL = "Mid-band frequency [Hz]"
+#: Legend entry of a result IEC 61260-3 5.3 makes unusable.
+_UNUSABLE_LABEL = "Unusable (§5.3)"
+#: Title of a periodic-test panel: ``_t`` fills the clause and the verdict.
+_PERIODIC_TITLE = "IEC 61260-3 {clause}: {verdict}"
 
 _STRINGS: dict[str, str] = {
     _FREQ_LABEL: "Frecuencia [Hz]",
@@ -53,7 +72,7 @@ _STRINGS: dict[str, str] = {
     "Class {cls} pass corridor": "Corredor de aceptación clase {cls}",
     r"Measured $\Delta A$": r"$\Delta A$ medida",
     "Out of tolerance": "Fuera de tolerancia",
-    r"Normalised frequency $f\,/\,f_{\mathrm{m}}$": r"Frecuencia normalizada $f\,/\,f_{\mathrm{m}}$",
+    _NORMALISED_FREQ_LABEL: r"Frecuencia normalizada $f\,/\,f_{\mathrm{m}}$",
     "Relative attenuation [dB]": "Atenuación relativa [dB]",
     # The mid-band subscript is upright (m abbreviates "mid-band", as
     # IEC 61260-1:2014 5.4.1 prints it); its braces are doubled because this
@@ -82,6 +101,35 @@ _STRINGS: dict[str, str] = {
     "Band level [dB]": "Nivel de banda [dB]",
     "Band levels": "Niveles de banda",
     "Band centre frequency [Hz]": "Frecuencia central de banda [Hz]",
+    _MID_BAND_LABEL: "Frecuencia central de banda [Hz]",
+    r"Effective bandwidth deviation $\Delta B$ [dB]": r"Desviación del ancho de banda efectivo $\Delta B$ [dB]",
+    r"$\Delta B$ per band": r"$\Delta B$ por banda",
+    "Class {cls} limits": "Límites clase {cls}",
+    "IEC 61260-1 §5.12 effective bandwidth: class {cls}": "Ancho de banda efectivo IEC 61260-1 §5.12: clase {cls}",
+    "IEC 61260-1 §5.12 effective bandwidth: no class": "Ancho de banda efectivo IEC 61260-1 §5.12: ninguna clase",
+    r"Summed output $\Delta P_j$ [dB]": r"Salida sumada $\Delta P_j$ [dB]",
+    r"$\Delta P_j$ of each band": r"$\Delta P_j$ de cada banda",
+    r"Binding band, $f_{{\mathrm{{m}}}}$ = {fm} Hz": r"Banda determinante, $f_{{\mathrm{{m}}}}$ = {fm} Hz",
+    "IEC 61260-1 §5.16 summation of outputs: class {cls}": "Suma de salidas IEC 61260-1 §5.16: clase {cls}",
+    "IEC 61260-1 §5.16 summation of outputs: no class": "Suma de salidas IEC 61260-1 §5.16: ninguna clase",
+    r"Deviation from $L_{\mathrm{c}}$ [dB]": r"Desviación respecto a $L_{\mathrm{c}}$ [dB]",
+    "{rate} s per decade": "{rate} s por década",
+    "IEC 61260-1 §5.14 time-invariant operation: class {cls}": "Funcionamiento invariante en el tiempo IEC 61260-1 §5.14: clase {cls}",
+    "IEC 61260-1 §5.14 time-invariant operation: no class": "Funcionamiento invariante en el tiempo IEC 61260-1 §5.14: ninguna clase",
+    "Margin to the nearer acceptance limit [dB]": "Margen hasta el límite de aceptación más próximo [dB]",
+    "Acceptance limit": "Límite de aceptación",
+    "Conforms": "Conforme",
+    "Does not conform": "No conforme",
+    _UNUSABLE_LABEL: "No utilizable (§5.3)",
+    "conforms": "conforme",
+    "does not conform": "no conforme",
+    _PERIODIC_TITLE: _PERIODIC_TITLE,
+    "IEC 61260-3 periodic tests, class {cls}: {verdict}": "Ensayos periódicos IEC 61260-3, clase {cls}: {verdict}",
+    "not usable (§5.3)": "no utilizable (§5.3)",
+    "passed": "superados",
+    "not passed": "no superados",
+    "Clause": "Apartado",
+    "Measurement": "Medida",
 }
 
 
@@ -89,6 +137,12 @@ def _t(text: str, language: str = "en", **fmt: Any) -> str:
     """Localise a fixed string; English is returned verbatim (byte-identical)."""
     s = _STRINGS.get(text, text) if language == "es" else text
     return s.format(**fmt) if fmt else s
+
+
+#: The Table 1 breakpoint, as the exponent of G, past which the class figure
+#: of a band does not open its window: G**2, where the stop band asks for
+#: 40 dB and more.
+_WINDOW_EXPONENT = 2.0
 
 
 def _worst_band_index(result: FilterComplianceResult) -> int:
@@ -126,7 +180,7 @@ def plot_filter_class(
     from scipy import signal
 
     from .._i18n import format_number, localize_axes
-    from ..filters.compliance import class_limits
+    from ..filters.compliance import _map_breakpoint, class_limits
 
     ax = ax if ax is not None else _new_axes()
     cls = result.reference_class()
@@ -152,8 +206,14 @@ def plot_filter_class(
 
     lower, upper = class_limits(result.fraction, cls, omega, edition=result.edition)
 
-    # Symmetric log window centred on the mid-band (f / f_m = 1).
-    omega_max = float(omega[-1])
+    # Symmetric log window centred on the mid-band (f / f_m = 1), out to the
+    # band's processing Nyquist and no further than the G**2 breakpoint of
+    # Table 1 (Formula (9) carries it to 1/b): a band filtered at the full
+    # rate would otherwise open four decades, the pass-band corridor the
+    # figure is for would be a sliver, and its ratio labels would collide.
+    omega_max = min(
+        float(omega[-1]), _map_breakpoint(_WINDOW_EXPONENT, result.fraction)
+    )
     lo_x, hi_x = 1.0 / omega_max, omega_max
     win = (omega >= lo_x) & (omega <= hi_x)
     if not np.any(win):  # pragma: no cover - the bank designer rejects the band
@@ -213,7 +273,7 @@ def plot_filter_class(
     _normalized_frequency_axis(ax, lo_x, hi_x, language)
     ax.set_xlim(lo_x, hi_x)
     ax.set_ylim(y_bot, y_top)
-    ax.set_xlabel(_t(r"Normalised frequency $f\,/\,f_{\mathrm{m}}$", language))
+    ax.set_xlabel(_t(_NORMALISED_FREQ_LABEL, language))
     ax.set_ylabel(_t("Relative attenuation [dB]", language))
     ax.set_title(
         _t(
@@ -226,6 +286,520 @@ def plot_filter_class(
     ax.legend(loc="upper center", fontsize="small")
     ax.grid(visible=True, which="both", alpha=0.3)
     localize_axes(ax, language)
+    return ax
+
+
+#: Room above and below the data of a requirement figure, as a share of the
+#: span its limits and data cover.
+_DATA_PAD_SHARE = 0.08
+
+
+def _cover(
+    low: float, high: float, data: np.ndarray | list[float]
+) -> tuple[float, float]:
+    """A y-range that keeps *low* to *high* and every finite value of *data*.
+
+    A requirement figure is framed on its acceptance limits; a failing band
+    lies past them, and it is the one a reader plots the verdict to see.
+    """
+    values = np.asarray(data, dtype=np.float64)
+    values = values[np.isfinite(values)]
+    if values.size == 0:
+        return low, high
+    lo, hi = float(np.min(values)), float(np.max(values))
+    pad = _DATA_PAD_SHARE * (max(high, hi) - min(low, lo))
+    return min(low, lo - pad), max(high, hi + pad)
+
+
+def _class_title(met: str, unmet: str, cls: int | None, language: str) -> str:
+    """A requirement's title: *met* with its class, or *unmet* when none."""
+    if cls is None:
+        return _t(unmet, language)
+    return _t(met, language, cls=cls)
+
+
+def _limit_lines(
+    ax: Axes,
+    limits: dict[int, tuple[float, float]],
+    language: str,
+) -> None:
+    """Dashed horizontal acceptance limits, one colour per class."""
+    colours = {1: _C_TERTIARY, 2: _C_SECONDARY}
+    styles = {1: "--", 2: ":"}
+    for cls, (lower, upper) in limits.items():
+        ax.axhline(
+            upper,
+            color=colours.get(cls, _C_MUTED),
+            ls=styles.get(cls, "-."),
+            lw=1.4,
+            label=_t("Class {cls} limits", language, cls=cls),
+        )
+        ax.axhline(
+            lower,
+            color=colours.get(cls, _C_MUTED),
+            ls=styles.get(cls, "-."),
+            lw=1.4,
+        )
+
+
+def plot_filter_bandwidth(
+    result: FilterComplianceResult,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    r"""The effective bandwidth deviation of every band against 5.12.2.
+
+    One marker per band at its mid-band frequency, :math:`\Delta B` from
+    IEC 61260-2:2016 Formulas (1), (2) and IEC 61260-1:2014 Formula (16),
+    between the class 1 and class 2 acceptance limits.
+
+    :param result: A
+        :class:`~phonometry.filters.compliance.FilterComplianceResult` of the
+        2014 edition.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the marker ``plot`` call.
+    :return: The axes.
+    """
+    from .._i18n import localize_axes
+    from ..filters.compliance import _BANDWIDTH_LIMITS_DB
+
+    ax = ax if ax is not None else _new_axes()
+    freqs = np.asarray(result.band_frequencies, dtype=np.float64)
+    deviation = np.array([float(b["bandwidth_deviation_db"]) for b in result.bands])
+    limits = {
+        c: (-_BANDWIDTH_LIMITS_DB[c], _BANDWIDTH_LIMITS_DB[c])
+        for c in result.available_classes()
+    }
+    _limit_lines(ax, limits, language)
+    style_default(kwargs, "color", _C_PRIMARY)
+    style_default(kwargs, "marker", "o")
+    style_default(kwargs, "linestyle", "-")
+    style_default(kwargs, "lw", 1.0)
+    kwargs.setdefault("label", _t(r"$\Delta B$ per band", language))
+    ax.plot(freqs, deviation, **kwargs)
+    ax.set_xscale("log")
+    ax.set_xlim(freqs[0] / 1.1, freqs[-1] * 1.1)
+    top = max(limits[c][1] for c in limits)
+    ax.set_ylim(*_cover(-1.6 * top, 1.6 * top, deviation))
+    format_frequency_axis(ax, language=language)
+    ax.axhline(0.0, color=_C_MUTED, lw=0.8)
+    ax.set_xlabel(_t(_MID_BAND_LABEL, language))
+    ax.set_ylabel(_t(r"Effective bandwidth deviation $\Delta B$ [dB]", language))
+    ax.set_title(
+        _class_title(
+            "IEC 61260-1 §5.12 effective bandwidth: class {cls}",
+            "IEC 61260-1 §5.12 effective bandwidth: no class",
+            result.requirement_class("effective_bandwidth"),
+            language,
+        )
+    )
+    ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small", ncols=3)
+    ax.grid(visible=True, which="both", alpha=0.3)
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_filter_summation(
+    result: FilterComplianceResult,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """The summation of adjacent outputs across every inner band, against 5.16.
+
+    Each band that has a neighbour on both sides draws its Formula (3) curve
+    of IEC 61260-2:2016 over its own test frequencies, from its lower to its
+    upper band edge; the band that comes closest to a limit is drawn heavier.
+    The acceptance limits of IEC 61260-1:2014 5.16 are the dashed lines.
+
+    :param result: A
+        :class:`~phonometry.filters.compliance.FilterComplianceResult` of the
+        2014 edition with at least three bands.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the binding band's curve.
+    :return: The axes.
+    """
+    import matplotlib.ticker as mticker
+
+    from .._i18n import decimal_comma, format_number, localize_axes
+    from ..filters.compliance import _SUMMATION_LIMITS_DB, _bank_summation
+
+    ax = ax if ax is not None else _new_axes()
+    mids = np.asarray(result.band_frequencies, dtype=np.float64)
+    rates = np.asarray([result.fs / float(f) for f in result.factors])
+    inner = [
+        k for k, band in enumerate(result.bands) if band["summation_min_db"] is not None
+    ]
+    cls = result.requirement_class("summation")
+    reference = cls if cls is not None else max(result.available_classes())
+    key = f"summation_margin_class{reference}_db"
+    binding = min(inner, key=lambda k: float(result.bands[k][key]))
+    limits = {c: _SUMMATION_LIMITS_DB[c] for c in result.available_classes()}
+    _limit_lines(ax, limits, language)
+    shade = theme_line(_C_PRIMARY, ax, quiet=0.45)
+    first = True
+    drawn: list[np.ndarray] = []
+    for k in inner:
+        omega, curve = _bank_summation(
+            result.sos, mids, rates, result.fraction, result.points_per_bandwidth, k
+        )
+        drawn.append(curve)
+        if k == binding:
+            continue
+        ax.plot(
+            omega,
+            curve,
+            color=shade,
+            lw=0.9,
+            label=_t(r"$\Delta P_j$ of each band", language) if first else "_nolegend_",
+        )
+        first = False
+    omega, curve = _bank_summation(
+        result.sos, mids, rates, result.fraction, result.points_per_bandwidth, binding
+    )
+    style_default(kwargs, "color", _C_PRIMARY)
+    style_default(kwargs, "lw", 2.0)
+    kwargs.setdefault(
+        "label",
+        _t(
+            r"Binding band, $f_{{\mathrm{{m}}}}$ = {fm} Hz",
+            language,
+            fm=format_number(float(mids[binding]), language, decimals=0),
+        ),
+    )
+    ax.plot(omega, curve, **kwargs)
+    ax.axhline(0.0, color=_C_MUTED, lw=0.8)
+    lo_x, hi_x = float(omega[0]), float(omega[-1])
+    ax.set_xscale("log")
+    ax.set_xlim(lo_x, hi_x)
+    # The band edges and the mid-band: the three frequencies the test is
+    # about, whatever the bandwidth.
+    edges = (lo_x, 1.0, hi_x)
+    ax.xaxis.set_major_locator(mticker.FixedLocator(edges))
+    ax.xaxis.set_major_formatter(
+        mticker.FixedFormatter([decimal_comma(f"{e:.3g}", language) for e in edges])
+    )
+    ax.xaxis.set_minor_locator(mticker.NullLocator())
+    bottom = min(limits[c][0] for c in limits)
+    top = max(limits[c][1] for c in limits)
+    ax.set_ylim(*_cover(bottom - 0.6, top + 1.4, np.concatenate(drawn)))
+    ax.set_xlabel(_t(_NORMALISED_FREQ_LABEL, language))
+    ax.set_ylabel(_t(r"Summed output $\Delta P_j$ [dB]", language))
+    ax.set_title(
+        _class_title(
+            "IEC 61260-1 §5.16 summation of outputs: class {cls}",
+            "IEC 61260-1 §5.16 summation of outputs: no class",
+            cls,
+            language,
+        )
+    )
+    ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small", ncols=2)
+    ax.grid(visible=True, which="both", alpha=0.3)
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_time_invariance(
+    result: TimeInvarianceResult,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """Each band's swept output against Formula (17), one line per sweep rate.
+
+    :param result: A
+        :class:`~phonometry.filters.compliance.TimeInvarianceResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to every rate's ``plot`` call.
+    :return: The axes.
+    """
+    from .._i18n import decimal_comma, localize_axes
+    from ..filters.time_invariance import _TIME_INVARIANCE_LIMITS_DB
+
+    ax = ax if ax is not None else _new_axes()
+    freqs = np.asarray(result.band_frequencies, dtype=np.float64)
+    limits = {
+        c: (-_TIME_INVARIANCE_LIMITS_DB[c], _TIME_INVARIANCE_LIMITS_DB[c])
+        for c in (1, 2)
+    }
+    _limit_lines(ax, limits, language)
+    colours = (_C_PRIMARY, _C_QUATERNARY, _C_EDGE)
+    markers = ("o", "s", "^")
+    deviations = result.deviations_db
+    for k, rate in enumerate(result.seconds_per_decade):
+        style = dict(kwargs)
+        style_default(style, "color", colours[k % len(colours)])
+        style_default(style, "marker", markers[k % len(markers)])
+        style_default(style, "lw", 1.0)
+        if k > 0:
+            # Hollow, so a rate that reads the same as the first still shows.
+            style_default(style, "markerfacecolor", "none")
+            style_default(style, "markersize", 9)
+        style.setdefault(
+            "label",
+            _t(
+                "{rate} s per decade",
+                language,
+                rate=decimal_comma(f"{rate:g}", language),
+            ),
+        )
+        ax.plot(freqs, deviations[k], **style)
+    ax.set_xscale("log")
+    ax.set_xlim(freqs[0] / 1.1, freqs[-1] * 1.1)
+    ax.set_ylim(*_cover(-1.0, 1.0, deviations))
+    format_frequency_axis(ax, language=language)
+    ax.axhline(0.0, color=_C_MUTED, lw=0.8)
+    ax.set_xlabel(_t(_MID_BAND_LABEL, language))
+    ax.set_ylabel(_t(r"Deviation from $L_{\mathrm{c}}$ [dB]", language))
+    ax.set_title(
+        _class_title(
+            "IEC 61260-1 §5.14 time-invariant operation: class {cls}",
+            "IEC 61260-1 §5.14 time-invariant operation: no class",
+            result.overall_class,
+            language,
+        )
+    )
+    ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small", ncols=2)
+    ax.grid(visible=True, which="both", alpha=0.3)
+    localize_axes(ax, language)
+    return ax
+
+
+def _margin_db(verification: ConformanceVerification) -> float:
+    """The distance from a deviation to its nearer acceptance limit, dB.
+
+    Positive inside the limits, negative outside; an open end of the
+    interval (a stop-band ``+inf``) is no limit to be near.
+    """
+    margins = []
+    if math.isfinite(verification.lower_limit):
+        margins.append(verification.deviation - verification.lower_limit)
+    if math.isfinite(verification.upper_limit):
+        margins.append(verification.upper_limit - verification.deviation)
+    return min(margins)
+
+
+def _draw_margins(
+    ax: Axes,
+    positions: np.ndarray,
+    verifications: tuple[ConformanceVerification, ...],
+    language: str,
+    kwargs: dict[str, Any],
+    shown: set[str],
+) -> None:
+    """One marker per result at its margin, with its uncertainty as error bar.
+
+    A diamond conforms, a cross does not, and a hollow marker is a result
+    5.3 of IEC 61260-3 forbids using (its uncertainty exceeds the maximum).
+    """
+    for x, v in zip(positions, verifications, strict=True):
+        margin = _margin_db(v)
+        style = dict(kwargs)
+        if not v.uncertainty_within_maximum:
+            key = _UNUSABLE_LABEL
+            style_default(style, "color", _C_SECONDARY)
+            style.setdefault("marker", "o")
+            style_default(style, "markerfacecolor", "none")
+        elif v.passes:
+            key = "Conforms"
+            style_default(style, "color", _C_TERTIARY)
+            style.setdefault("marker", "D")
+        else:
+            key = "Does not conform"
+            style_default(style, "color", _C_REFERENCE)
+            style.setdefault("marker", "X")
+        style_default(style, "markersize", 7)
+        style_default(style, "linestyle", "none")
+        if "label" in kwargs:
+            # A caller's label names the whole series once, not each verdict.
+            style["label"] = "_nolegend_" if "label" in shown else kwargs["label"]
+            shown.add("label")
+        else:
+            style["label"] = "_nolegend_" if key in shown else _t(key, language)
+            shown.add(key)
+        ax.errorbar(
+            [x],
+            [margin],
+            yerr=[v.uncertainty],
+            ecolor=_C_MUTED,
+            elinewidth=1.0,
+            capsize=3,
+            zorder=3,
+            **style,
+        )
+
+
+#: The margins a periodic-test figure may mark, dB; those inside the axis
+#: range are the ticks.
+_MARGIN_TICKS_DB = (
+    -20.0,
+    -10.0,
+    -5.0,
+    -2.0,
+    -1.0,
+    -0.5,
+    0.0,
+    0.5,
+    1.0,
+    2.0,
+    5.0,
+    10.0,
+    20.0,
+    50.0,
+)
+
+
+def _margin_axis(
+    ax: Axes, verifications: list[ConformanceVerification], language: str
+) -> None:
+    """The zero line and a symmetric-log margin axis with plain labels.
+
+    Margins run from a few hundredths of a decibel in the pass band to tens
+    of decibels deep in the stop band; the axis is linear within one decibel
+    of the limit and logarithmic beyond it, labelled in decibels rather than
+    in powers of ten.
+    """
+    import matplotlib.ticker as mticker
+
+    from .._i18n import decimal_comma, fmt_minus
+
+    ax.axhline(
+        0.0, color=_C_REFERENCE, lw=1.4, ls="--", label=_t("Acceptance limit", language)
+    )
+    ax.set_yscale("symlog", linthresh=1.0)
+    reach = [
+        (_margin_db(v) - v.uncertainty, _margin_db(v) + v.uncertainty)
+        for v in verifications
+    ]
+    bottom = min(-0.5, min(lo for lo, _ in reach) * 1.3)
+    top = max(1.0, max(hi for _, hi in reach) * 1.6)
+    ax.set_ylim(bottom, top)
+    ticks = [t for t in _MARGIN_TICKS_DB if bottom <= t <= top]
+    ax.yaxis.set_major_locator(mticker.FixedLocator(ticks))
+    ax.yaxis.set_major_formatter(
+        mticker.FixedFormatter(
+            [decimal_comma(fmt_minus(t, "g"), language) for t in ticks]
+        )
+    )
+    ax.yaxis.set_minor_locator(mticker.NullLocator())
+    ax.set_ylabel(_t("Margin to the nearer acceptance limit [dB]", language))
+    ax.grid(visible=True, which="major", alpha=0.3)
+
+
+def plot_periodic_clause(
+    result: PeriodicTestClause,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """One clause of IEC 61260-3:2016 against its acceptance limits.
+
+    Clauses 10 and 11 as IEC 61260-1:2014 Figure C.1; clause 13 as each
+    result's margin to its nearer limit against its test frequency. A result
+    whose uncertainty exceeds its maximum is drawn hollow, as 5.3 forbids
+    using it, and the title says the clause does not conform only when a
+    usable result fails.
+
+    :param result: A
+        :class:`~phonometry.filters.periodic_tests.PeriodicTestClause`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the verdict markers.
+    :return: The axes.
+    """
+    from .._i18n import localize_axes
+    from .metrology import _draw_conformance
+
+    ax = ax if ax is not None else _new_axes()
+    if result.failed:
+        verdict = _t("does not conform", language)
+    elif result.unusable:
+        verdict = _t("not usable (§5.3)", language)
+    else:
+        verdict = _t("conforms", language)
+    if result.normalized_frequencies is None:
+        _draw_conformance(
+            ax,
+            result.verifications,
+            language,
+            kwargs,
+            unusable_label=_t(_UNUSABLE_LABEL, language),
+        )
+        ax.set_xlabel(_t("Measurement", language))
+    else:
+        omega = np.asarray(result.normalized_frequencies, dtype=np.float64)
+        _draw_margins(ax, omega, result.verifications, language, kwargs, set())
+        _margin_axis(ax, list(result.verifications), language)
+        lo, hi = float(np.min(omega)) / 1.15, float(np.max(omega)) * 1.15
+        _normalized_frequency_axis(ax, lo, hi, language)
+        ax.set_xlim(lo, hi)
+        ax.set_xlabel(_t(_NORMALISED_FREQ_LABEL, language))
+        place_legend_clear(ax.legend(fontsize="small"))
+    ax.set_title(
+        _t(
+            _PERIODIC_TITLE,
+            language,
+            clause=f"§{result.clause}",
+            verdict=verdict,
+        )
+    )
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_periodic_verification(
+    result: FilterPeriodicVerification,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """Every result of the periodic tests at its margin, grouped by clause.
+
+    :param result: A
+        :class:`~phonometry.filters.periodic_tests.FilterPeriodicVerification`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the verdict markers.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    shown: set[str] = set()
+    start = 1.0
+    centres: list[float] = []
+    names: list[str] = []
+    for k, clause in enumerate(result.clauses):
+        count = len(clause.verifications)
+        positions = start + np.arange(count, dtype=np.float64)
+        _draw_margins(ax, positions, clause.verifications, language, kwargs, shown)
+        centres.append(float(positions.mean()))
+        names.append(f"§{clause.clause}")
+        if k > 0:
+            ax.axvline(start - 1.0, color=_C_MUTED, lw=0.8, ls=":")
+        start += count + 1.0
+    _margin_axis(ax, [v for c in result.clauses for v in c.verifications], language)
+    ax.set_xlim(0.0, start - 1.0)
+    ax.set_xticks(centres)
+    ax.set_xticklabels(names)
+    ax.set_xlabel(_t("Clause", language))
+    verdict = _t("passed" if result.passes else "not passed", language)
+    ax.set_title(
+        _t(
+            "IEC 61260-3 periodic tests, class {cls}: {verdict}",
+            language,
+            cls=result.filter_class,
+            verdict=verdict,
+        )
+    )
+    place_legend_clear(ax.legend(fontsize="small", ncols=2))
     return ax
 
 

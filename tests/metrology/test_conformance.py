@@ -20,7 +20,12 @@ mpl.use("Agg")
 
 import matplotlib.pyplot as plt
 import pytest
-from reference_data import IEC60942_TABLE_E1, IEC61672_1_TABLE_C1, TC29_REASONS
+from reference_data import (
+    IEC60942_TABLE_E1,
+    IEC61260_1_TABLE_C1,
+    IEC61672_1_TABLE_C1,
+    TC29_REASONS,
+)
 
 from phonometry import metrology
 
@@ -260,3 +265,128 @@ def test_plot_in_spanish_and_a_bad_language() -> None:
     plt.close("all")
     with pytest.raises(ValueError, match="Unknown language"):
         result.plot(language="xx")
+
+
+# --------------------------------------------------------------------------
+# IEC 61260-1:2014 Table C.1 and the intervals open on one side
+# --------------------------------------------------------------------------
+@pytest.mark.parametrize(
+    ("example", "deviation", "limits", "uncertainty", "maximum", "conforms", "outcome"),
+    IEC61260_1_TABLE_C1,
+    ids=[f"61260-C.1-{row[0]}" for row in IEC61260_1_TABLE_C1],
+)
+def test_iec61260_1_table_c1(
+    example: int,
+    deviation: float,
+    limits: tuple[float, float],
+    uncertainty: float,
+    maximum: float,
+    conforms: bool,  # noqa: FBT001
+    outcome: int,
+) -> None:
+    """IEC 61260-1:2014 Table C.1 (folio 31) prints the ten examples again."""
+    upper, lower = limits
+    result = metrology.verify_conformance(
+        deviation,
+        uncertainty=uncertainty,
+        acceptance_limits=(lower, upper),
+        max_uncertainty=maximum,
+    )
+    assert result.passes is conforms, example
+    assert result.outcome == outcome, example
+    assert result.reason == TC29_REASONS[outcome], example
+
+
+def test_a_stop_band_minimum_is_an_interval_open_above() -> None:
+    """IEC 61260-1 Table 1 prints "+70; +inf": a minimum and no maximum."""
+    deep = metrology.verify_conformance(
+        75.0, uncertainty=0.4, acceptance_limits=(70.0, math.inf), max_uncertainty=0.5
+    )
+    shallow = metrology.verify_conformance(
+        65.0, uncertainty=0.4, acceptance_limits=(70.0, math.inf), max_uncertainty=0.5
+    )
+    assert deep.passes
+    assert deep.upper_limit == math.inf
+    assert deep.share_of_acceptance_limit == 0.0
+    assert not shallow.passes
+    assert shallow.outcome == 3
+    assert shallow.share_of_acceptance_limit == math.inf
+
+
+@pytest.mark.parametrize(
+    ("deviation", "limits"),
+    [(-5.0, (70.0, math.inf)), (-1.0, (16.6, math.inf)), (0.2, (0.5, 2.0))],
+)
+def test_a_deviation_outside_its_interval_reads_above_one(
+    deviation: float, limits: tuple[float, float]
+) -> None:
+    """A deviation below a positive minimum is outside, whatever its sign."""
+    result = metrology.verify_conformance(
+        deviation, uncertainty=0.4, acceptance_limits=limits, max_uncertainty=0.5
+    )
+    assert not result.passes
+    assert result.share_of_acceptance_limit > 1.0
+
+
+def test_a_deviation_past_a_finite_limit_keeps_its_share() -> None:
+    result = metrology.verify_conformance(
+        -2.4, uncertainty=0.3, acceptance_limits=(-1.2, 1.0), max_uncertainty=0.5
+    )
+    assert result.share_of_acceptance_limit == pytest.approx(2.0)
+
+
+def test_a_one_sided_interval_draws_one_acceptance_limit() -> None:
+    """A stop-band minimum is one limit, and its legend says so."""
+    ax = metrology.verify_conformance(
+        72.0, uncertainty=0.4, acceptance_limits=(70.0, math.inf), max_uncertainty=0.5
+    ).plot()
+    legend = [t.get_text() for t in ax.get_legend().get_texts()]
+    assert "Acceptance limit" in legend
+    assert "Acceptance limits" not in legend
+    plt.close("all")
+
+
+def test_an_interval_open_below_bounds_the_top_only() -> None:
+    """A level that shall not exceed a stated limit, and nothing more."""
+    result = metrology.verify_conformance(
+        -12.0, uncertainty=0.1, acceptance_limits=(-math.inf, 0.0), max_uncertainty=0.2
+    )
+    assert result.passes
+    assert result.lower_limit == -math.inf
+
+
+@pytest.mark.parametrize(
+    ("limits", "fragment"),
+    [
+        ((-math.inf, math.inf), "'lower_limit' and 'upper_limit' are both open"),
+        ((math.inf, 80.0), "acceptance_limits"),
+        ((10.0, -math.inf), "acceptance_limits"),
+        ((math.nan, 1.0), "acceptance_limits"),
+    ],
+)
+def test_an_interval_open_the_wrong_way_is_refused(
+    limits: tuple[float, float], fragment: str
+) -> None:
+    with pytest.raises(ValueError, match=fragment):
+        metrology.verify_conformance(
+            0.0, uncertainty=0.1, acceptance_limits=limits, max_uncertainty=0.2
+        )
+
+
+def test_a_symmetric_limit_stays_finite() -> None:
+    with pytest.raises(ValueError, match="'acceptance_limits' must be finite"):
+        metrology.verify_conformance(
+            0.0, uncertainty=0.1, acceptance_limits=math.inf, max_uncertainty=0.2
+        )
+
+
+def test_an_open_interval_plots_its_finite_limit_only() -> None:
+    result = metrology.verify_conformance(
+        75.0, uncertainty=0.4, acceptance_limits=(70.0, math.inf), max_uncertainty=0.5
+    )
+    ax = result.plot()
+    low, high = ax.get_ylim()
+    assert math.isfinite(low)
+    assert math.isfinite(high)
+    assert low < 70.0 < 75.0 < high
+    plt.close("all")

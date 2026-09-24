@@ -1395,6 +1395,110 @@ def generate_filter_class0_mask(output_dir: str) -> None:
     plt.close()
 
 
+def generate_filter_summation(output_dir: str) -> None:
+    """IEC 61260-1:2014 5.16 on the library's two default banks.
+
+    Formula (3) of IEC 61260-2:2016 across every inner band: the decimated
+    octave bank sums its neighbours up to +0.94 dB and down to -1.16 dB about
+    the input, past the +0.8 dB of class 1, where the one-third-octave bank
+    stays well inside. Drawn by ``FilterComplianceResult.plot``.
+    """
+    print("Generating filter_summation...")
+    octave = filters.verify_filter_class(
+        filters.OctaveFilterBank(48000, fraction=1, order=6, limits=[125, 4000])
+    )
+    third = filters.verify_filter_class(
+        filters.OctaveFilterBank(48000, fraction=3, order=6, limits=[125, 4000])
+    )
+    _fig, (ax_oct, ax_third) = plt.subplots(
+        1, 2, figsize=(13, 6.2), layout="constrained", sharey=True
+    )
+    octave.plot(ax=ax_oct, requirement="summation", language=_LANG)
+    third.plot(ax=ax_third, requirement="summation", language=_LANG)
+    ax_oct.set_title("Octave bank, decimated: class 2 on §5.16")
+    ax_third.set_title("One-third-octave bank: class 1 on §5.16")
+    ax_third.set_ylabel("")
+    save_figure(output_dir, "filter_summation.svg")
+    plt.close()
+
+
+def generate_filter_time_invariance(output_dir: str) -> None:
+    """IEC 61260-1:2014 5.14: an exponential sweep through the multirate bank.
+
+    The one-third-octave bank from 25 Hz to 10 kHz, swept at 2 s and at 5 s per
+    decade (IEC 61260-2:2016 7.4, Formulas (A.3) and (A.4)), every band's
+    time-averaged output against Formula (17). Drawn by
+    ``TimeInvarianceResult.plot``.
+    """
+    print("Generating filter_time_invariance...")
+    bank = filters.OctaveFilterBank(48000, fraction=3, order=6, limits=[25, 10000])
+    result = filters.verify_time_invariance(bank)
+    _fig, ax = plt.subplots(figsize=(10, 6.2), layout="constrained")
+    result.plot(ax=ax, language=_LANG)
+    save_figure(output_dir, "filter_time_invariance.svg")
+    plt.close()
+
+
+def generate_filter_periodic_verdict(output_dir: str) -> None:
+    """IEC 61260-3:2016: a laboratory's record, clause by clause.
+
+    A class 1 one-third-octave analyser, every result within its limits, but
+    one level-linearity reading taken with 0.25 dB of expanded uncertainty
+    where Annex B of IEC 61260-1 allows 0.20 dB: 5.3 forbids using it, and
+    the verdict is not passed until it is measured again. Drawn by
+    ``FilterPeriodicVerification.plot``.
+    """
+    print("Generating filter_periodic_verdict...")
+    row = [
+        76.0,
+        63.0,
+        45.0,
+        20.0,
+        0.8,
+        0.3,
+        0.1,
+        0.0,
+        0.1,
+        0.2,
+        0.7,
+        19.0,
+        44.0,
+        63.0,
+        77.0,
+    ]
+    row_u = [
+        0.4,
+        0.4,
+        0.4,
+        0.25,
+        0.15,
+        0.15,
+        0.15,
+        0.15,
+        0.15,
+        0.15,
+        0.15,
+        0.25,
+        0.4,
+        0.4,
+        0.4,
+    ]
+    record = filters.FilterPeriodicMeasurements(
+        midband_attenuations_db=[0.12, -0.05, 0.08, 0.02, -0.1, 0.15],
+        midband_uncertainties_db=[0.15] * 6,
+        linearity_deviations_db=[0.0, 0.1, 0.2, -0.3, 0.4],
+        linearity_levels_below_upper_db=[0.0, 10.0, 20.0, 45.0, 55.0],
+        linearity_uncertainties_db=[0.12, 0.12, 0.25, 0.2, 0.3],
+        relative_attenuations_db=[row, [x + 0.2 for x in row], row],
+        relative_attenuation_uncertainties_db=[row_u, row_u, row_u],
+    )
+    result = filters.verify_filter_periodic(1, record, fraction=3)
+    _fig, ax = plt.subplots(figsize=(11, 6.4), layout="constrained")
+    result.plot(ax=ax, language=_LANG)
+    save_figure(output_dir, "filter_periodic_verdict.svg")
+    plt.close()
+
+
 def generate_weighting_class_mask(output_dir: str) -> None:
     """A/C weighting deviation against the IEC 61672-1:2013 Table 3 mask."""
     print("Generating weighting_class_mask.png...")

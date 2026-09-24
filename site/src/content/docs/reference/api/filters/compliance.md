@@ -31,9 +31,44 @@ are therefore kept as separate mask tables selected by the `edition` argument
 ANSI-2004 octave-band table was transcribed digit-for-digit and cross-checked
 between the two standards (they agree exactly).
 
-One subject: the class limits of a band filter, a mask around each mid-band
-frequency the filter's own relative attenuation is measured against. The
-acceptance limits of the A/B/C/AU/Z frequency weightings, which qualify a
+One subject: the class of a band-filter design, graded against what IEC
+61260-1:2014 requires of the transfer function of a set of filters and run the
+way IEC 61260-2:2016 (pattern evaluation) says the requirement is tested.
+Besides the Table 1 mask there are two more requirements, both computed from
+the same designed sections:
+
+* **Effective bandwidth deviation** (61260-1 5.11 and 5.12). The normalized
+  effective bandwidth $B_\mathrm{e}$ is the integral of Formula (13),
+  $\int (1/\Omega)\,10^{-0.1\,\Delta A(\Omega)}\,\mathrm{d}\Omega$,
+  evaluated as IEC 61260-2 7.2.3.2 recommends: by the trapezoidal rule of its
+  Formula (2) over the test frequencies of its Formula (1),
+  $\Omega_i = G^{i/(bS)}$, with $S \ge 24$ frequencies per
+  bandwidth (7.2.1.4). Its deviation from the reference
+  $B_\mathrm{r} = (1/b)\ln G$ (Formula (15)) is
+  $\Delta B = 10\lg(B_\mathrm{e}/B_\mathrm{r})$ (Formula (16)), within
+  $\pm 0.4$ dB for class 1 and $\pm 0.6$ dB for class 2 (5.12.2).
+* **Summation of output signals** (61260-1 5.16). At the test frequencies
+  $\Omega_i$, $|i| \le \lfloor S/2 \rfloor$, inside a band, the
+  outputs of that band and of its two neighbours are summed on an energy
+  basis, IEC 61260-2 Formula (3):
+  $\Delta P_j = 10\lg\left[10^{-0.1\,\Delta A_{j-1}} + 10^{-0.1\,\Delta A_j} + 10^{-0.1\,\Delta A_{j+1}}\right]$, for every band
+  that has a neighbour on both sides (7.2.4.4). The limits are
+  $+0.8$ dB and $-1.8$ dB for class 1 and $+1.8$ dB and
+  $-3.8$ dB for class 2. They are applied to Formula (3) as printed,
+  as 7.2.4.5 instructs; the words of 7.2.4.3 and of 5.16 name the difference
+  the other way round, "input minus reference attenuation, and the summed
+  output", which with limits this asymmetric is not the same test (see the
+  errata registry).
+
+Both are graded for `edition="2014"` only, whose Part 2 prescribes them; a
+1995-edition verdict remains the Table 1 mask.
+
+The time-invariant operation of 5.14, tested with an exponential sweep
+(IEC 61260-2 7.4), is [`phonometry.filters.verify_time_invariance`](/phonometry/reference/api/filters/time-invariance/#verify_time_invariance): it
+runs the bank itself, decimation included, rather than reading its transfer
+functions.
+
+The acceptance limits of the A/B/C/AU/Z frequency weightings, which qualify a
 network applied to the whole signal against a design-goal response, live in
 [`phonometry.filters.weighting_compliance`](/phonometry/reference/api/filters/weighting-compliance/).
 
@@ -93,6 +128,7 @@ FilterComplianceResult(
     num_points: int,
     *,
     range_limited: bool = False,
+    points_per_bandwidth: int = 24,
 )
 ```
 
@@ -117,6 +153,22 @@ holding a reference to the (possibly stateful) bank.
 | `fs` | The bank's full sampling rate in Hz. |
 | `num_points` | Frequency grid points per band used by the verification, retained so the redrawn curve matches the analysed grid. |
 | `range_limited` | `True` when at least one band's stop-band mask extends beyond its processing Nyquist frequency, so the verification could not exercise the full Table 1 mask there (the multirate anti-aliasing removes signal energy beyond it, but the limits are not demonstrated); the stated class then attests the verified frequency range and the `.report()` fiche prints a qualifying note. |
+| `points_per_bandwidth` | `S`, the test frequencies per bandwidth of IEC 61260-2:2016 Formula (1) the effective bandwidth and the summation were evaluated on. |
+
+For `edition="2014"` every band entry carries, besides its Table 1
+margins `margin_class<c>_db`, the two requirements IEC 61260-2 tests on
+the same measurements:
+
+* `bandwidth_deviation_db`, the effective bandwidth deviation
+  $\Delta B$ of 5.12, and `bandwidth_margin_class<c>_db`, its
+  distance to each class's limit;
+* `summation_min_db` and `summation_max_db`, the range of the
+  summation $\Delta P_j$ of 5.16 across the band, and
+  `summation_margin_class<c>_db`, the nearer of its distances to each
+  class's two limits; all three are `None` on the first and the last
+  band, which have a neighbour on one side only (IEC 61260-2 7.2.4.4).
+
+A band's `class` is then the strictest class it meets on all of them.
 
 ### FilterComplianceResult.available_classes()
 
@@ -134,30 +186,70 @@ carries no verdicts, so this returns an empty list.
 The first band answers for all of them: construction pins every band
 to the same margin classes.
 
+### FilterComplianceResult.binding_margin_db()
+
+```python
+FilterComplianceResult.binding_margin_db(
+    requirement: str,
+    filter_class: int,
+) -> float
+```
+
+The smallest margin, in dB, of any band to one class on one requirement.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `requirement` | One of `requirements`. |
+| `filter_class` | One of `available_classes`. |
+
+**Returns:** The binding margin; negative when a band misses the class.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| KeyError | for a requirement this verdict did not grade, or a class it carries no margins for. |
+
 ### FilterComplianceResult.plot()
 
 ```python
 FilterComplianceResult.plot(
     ax: Axes | None = None,
     *,
+    requirement: str = 'relative_attenuation',
     language: str = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
 
-Plot the worst-margin band against its class-limit corridor.
+Plot one graded requirement.
 
-Draws the measured relative attenuation of the binding band over the
-acceptance corridor of the achieved (or, when non-compliant, the
-loosest) class; see `phonometry._plot.filters.plot_filter_class`.
-Requires matplotlib (`pip install phonometry[plot]`) and returns the
+`"relative_attenuation"` (the default) draws the measured relative
+attenuation of the binding band over the acceptance corridor of the
+achieved (or, when non-compliant, the loosest) class; see
+`phonometry._plot.filters.plot_filter_class`.
+`"effective_bandwidth"` draws $\Delta B$ of every band between
+the limits of 5.12.2, and `"summation"` the Formula (3) curve of
+every inner band between the limits of 5.16. Requires matplotlib
+(`pip install phonometry[plot]`) and returns the
 `Axes`.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
+| `ax` | Existing axes, or `None` to create a figure. |
+| `requirement` | One of `requirements`. |
 | `language` | Label language, `"en"` (default) or `"es"`. |
+| `kwargs` | Forwarded to the renderer's measured curve. |
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | for a requirement this verdict did not grade. |
 
 ### FilterComplianceResult.reference_class()
 
@@ -216,6 +308,40 @@ class-compliance result, an optional verdict row against a supplied
 | ValueError | If `engine` is not `"reportlab"`. |
 | ImportError | If reportlab is not installed (`pip install phonometry[report]`), or matplotlib is missing for the embedded figure (`pip install phonometry[plot]`). |
 
+### FilterComplianceResult.requirement_class()
+
+```python
+FilterComplianceResult.requirement_class(requirement: str) -> int | None
+```
+
+The strictest class every band meets on one requirement alone.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `requirement` | One of `requirements`. |
+
+**Returns:** The class, or `None` when a band meets none. The bands a requirement does not apply to (the end bands of the summation) do not constrain it.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| KeyError | for a requirement this verdict did not grade. |
+
+### FilterComplianceResult.requirements
+
+*property*
+
+The requirements of IEC 61260-1:2014 this verdict graded.
+
+`"relative_attenuation"` (5.10, Table 1) always; for the 2014
+edition also `"effective_bandwidth"` (5.12) and, when the bank has
+a band with a neighbour on each side, `"summation"` (5.16), which
+IEC 61260-2:2016 7.2.4.4 grades on those bands only. Empty for a bank
+with no bands.
+
 ## verify_filter_class
 
 ```python
@@ -224,6 +350,7 @@ verify_filter_class(
     *,
     num_points: int = 32768,
     edition: str = '2014',
+    points_per_bandwidth: int = 24,
 ) -> FilterComplianceResult
 ```
 
@@ -242,12 +369,22 @@ not demonstrated, the returned `range_limited` flag is set whenever a
 band's stop-band mask extends beyond its processing Nyquist, and the
 per-band `checked_to_omega` records how far the check reached.
 
+For `edition="2014"` two more requirements of IEC 61260-1:2014 are
+graded on the same sections, the way IEC 61260-2:2016 tests them (see
+the module docstring): the effective bandwidth deviation of every band
+(5.12, Formulas (1) and (2) of Part 2) and the summation of the output
+signals of every band that has a neighbour on each side (5.16, Formula
+(3) of Part 2). A band's class, and so the bank's, is the strictest class
+met on every requirement graded; [`FilterComplianceResult.requirement_class`](/phonometry/reference/api/filters/compliance/#filtercomplianceresultrequirement_class)
+gives the class of each requirement on its own.
+
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
 | `bank` | The filter bank to verify (its designed SOS are analyzed; works for stateful and stateless banks alike). |
 | `num_points` | Number of frequency grid points per band (>= 16). |
-| `edition` | `"2014"` (IEC 61260-1:2014, classes 1/2) or `"1995"` (IEC 61260:1995 / ANSI S1.11-2004, adds the stricter class 0). |
+| `edition` | `"2014"` (IEC 61260-1:2014, classes 1/2) or `"1995"` (IEC 61260:1995 / ANSI S1.11-2004, adds the stricter class 0; the verdict is its Table 1 mask alone). |
+| `points_per_bandwidth` | `S`, the test frequencies per filter bandwidth of IEC 61260-2:2016 Formula (1), at least 24 (7.2.1.4). |
 
 **Returns:** A [`FilterComplianceResult`](/phonometry/reference/api/filters/compliance/#filtercomplianceresult), which carries the verdict together with the sections, mid-band frequencies, decimation factors and sampling rate it was measured through, so it can redraw the relative attenuation and render an accredited `.report()` fiche without keeping a reference to the (possibly stateful) bank.

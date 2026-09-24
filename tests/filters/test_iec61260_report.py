@@ -28,8 +28,20 @@ if TYPE_CHECKING:
 
 
 def _class1_bank() -> filters.OctaveFilterBank:
-    """A default Butterworth octave bank that meets IEC 61260-1:2014 class 1."""
-    return filters.OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[125, 4000])
+    """A Butterworth octave bank that meets IEC 61260-1:2014 class 1 on every
+    requirement graded.
+
+    It filters every band at the full rate: the decimated default sums its
+    adjacent outputs only within class 2 (see
+    ``test_octave_bank_fiche_names_summation``).
+    """
+    return filters.OctaveFilterBank(
+        fs=48000,
+        fraction=1,
+        order=6,
+        limits=[125, 4000],
+        design=filters.FilterDesign(resample=False),
+    )
 
 
 def test_the_filter_verdict_carries_the_bank_data() -> None:
@@ -167,7 +179,9 @@ def test_range_limited_verdict_prints_qualifying_note(tmp_path: Path) -> None:
     band's processing Nyquist, so the result carries ``range_limited`` and
     the fiche prints the qualification next to the stated class.
     """
-    result = filters.verify_filter_class(_class1_bank())
+    result = filters.verify_filter_class(
+        filters.OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[125, 4000])
+    )
     assert result.range_limited is True
     for band in result.bands:
         assert band["checked_to_omega"] > 0.0
@@ -177,6 +191,25 @@ def test_range_limited_verdict_prints_qualifying_note(tmp_path: Path) -> None:
     assert "COMPLIES" in text
     assert "processing Nyquist frequency" in text
     assert "not demonstrated" in text
+
+
+def test_a_full_rate_bank_is_not_credited_with_anti_aliasing(tmp_path: Path) -> None:
+    """A bank with no decimation has no multirate stage to leave energy out."""
+    result = filters.verify_filter_class(
+        filters.OctaveFilterBank(
+            fs=48000,
+            fraction=1,
+            order=6,
+            limits=[125, 4000],
+            design=filters.FilterDesign(resample=False),
+        )
+    )
+    assert result.range_limited is True
+    out = tmp_path / "full_rate.pdf"
+    result.report(str(out))
+    text = _extract_text(str(out)).replace("\n", " ")
+    assert "half the sampling frequency" in text
+    assert "multirate" not in text
 
 
 def test_non_compliant_bank_renders(tmp_path: Path) -> None:
@@ -233,6 +266,68 @@ def test_spanish_report_renders_translated_fiche(tmp_path: Path) -> None:
     assert "CUMPLE" in text
     assert re.search(r"\d,\d", text) is not None  # comma decimal margins
     assert "margen" in text
+
+
+def test_fiche_prints_the_three_requirements(tmp_path: Path) -> None:
+    """A 2014 verdict boxes its class over three requirement rows.
+
+    The Table 1 mask, the effective bandwidth deviation of 5.12 and the
+    summation of 5.16, each with its class and binding margin, the last two
+    with the range of the deviation they grade.
+    """
+    result = filters.verify_filter_class(_class1_bank())
+    out = tmp_path / "requirements.pdf"
+    result.report(str(out))
+    assert_one_page(str(out))
+    text = _extract_text(str(out)).replace("\n", " ")
+    assert "Relative attenuation (5.10, Table 1)" in text
+    assert "Effective bandwidth deviation (5.12)" in text
+    assert "Summation of output signals (5.16)" in text
+    assert "graded as IEC 61260-2:2016 tests them" in text
+
+
+def test_octave_bank_fiche_names_summation(tmp_path: Path) -> None:
+    """The default octave bank is boxed class 2 and fails a required class 1.
+
+    Its Table 1 margin is the class 1 +0.40 dB, but its adjacent outputs sum
+    up to +0.94 dB about the input, past the +0.8 dB of 5.16; the fiche says
+    which requirement binds.
+    """
+    bank = filters.OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[125, 4000])
+    result = filters.verify_filter_class(bank)
+    assert result.overall_class == 2
+    out = tmp_path / "octave.pdf"
+    result.report(str(out), metadata=ReportMetadata(required_class=1))
+    assert_one_page(str(out))
+    text = _extract_text(str(out)).replace("\n", " ")
+    assert "Class 2" in text
+    assert "FAIL" in text
+    assert "Summation of output signals (5.16)" in text
+
+
+def test_fiche_of_a_bank_with_no_inner_band_cites_what_it_graded(
+    tmp_path: Path,
+) -> None:
+    """Two bands carry no summation, and the basis line does not claim 5.16."""
+    bank = filters.OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[500, 1000])
+    result = filters.verify_filter_class(bank)
+    out = tmp_path / "two_bands.pdf"
+    result.report(str(out))
+    assert_one_page(str(out))
+    text = _extract_text(str(out)).replace("\n", " ")
+    assert "Table 1 and 5.12" in text
+    assert "Summation of output signals" not in text
+
+
+def test_1995_fiche_carries_no_requirement_table(tmp_path: Path) -> None:
+    """The 1995 edition is graded on its Table 1 mask alone."""
+    bank = filters.OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[250, 4000])
+    result = filters.verify_filter_class(bank, edition="1995")
+    assert result.requirements == ("relative_attenuation",)
+    out = tmp_path / "1995.pdf"
+    result.report(str(out))
+    text = _extract_text(str(out)).replace("\n", " ")
+    assert "Summation of output signals" not in text
 
 
 def test_unknown_language_rejected(tmp_path: Path) -> None:

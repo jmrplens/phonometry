@@ -31,9 +31,11 @@ per-architecture usage, plus the Linkwitz-Riley crossover.
 
 Proving a designed bank against those tolerances is the job of
 [Filter Class Verification (IEC 61260-1)](/phonometry/signals/filters/filter-compliance/):
-the Table 1 acceptance mask band by band, the stricter class 0 of the
-withdrawn 1995 edition, what a performance class buys in a measurement, and
-the accredited one-page compliance fiche.
+the Table 1 acceptance mask band by band, the effective bandwidth and the
+summation of outputs as IEC 61260-2 tests them, the swept time-invariance
+test, the stricter class 0 of the withdrawn 1995 edition, what a performance
+class buys in a measurement, and the accredited one-page compliance fiche. The
+same guide grades a laboratory's IEC 61260-3 periodic test results.
 
 The other two pages scale that foundation along two independent axes.
 [Block Processing](/phonometry/signals/filters/block-processing/) scales it in *time*:
@@ -59,7 +61,8 @@ parameters) consumes the band signals or band levels these pages produce.
 - [Filter Architecture Gallery](/phonometry/signals/filters/filter-gallery/): the five
   architectures compared, the response gallery and per-architecture usage.
 - [Filter Class Verification (IEC 61260-1)](/phonometry/signals/filters/filter-compliance/):
-  the Table 1 acceptance mask, class 0 and the compliance fiche.
+  the Table 1 acceptance mask, effective bandwidth, summation and swept test,
+  periodic-test grading, class 0 and the compliance fiche.
 - [Block Processing](/phonometry/signals/filters/block-processing/): stateful streaming
   workflows with carried filter state.
 - [Multichannel and Performance](/phonometry/signals/filters/multichannel/): vectorized
@@ -70,10 +73,15 @@ parameters) consumes the band signals or band levels these pages produce.
 <Scope>
 <ScopeClaim status="not-covered">
 `verify_filter_class` checks a designed digital response against Table 1 of
-IEC 61260-1. The standard's conformance tests for the physical filter
-(overload recovery, linearity, the environmental influence quantities) apply
-to an instrument and are not implemented, so a class verdict here is a
-statement about the design and not about a device. Near Nyquist the bilinear
+IEC 61260-1 and grades the effective bandwidth (5.12) and the summation of
+outputs (5.16) on it as IEC 61260-2 computes them, and `verify_time_invariance`
+runs the swept test of 5.14 through the bank itself; a class verdict here is a
+statement about the design and not about a device. The tests IEC 61260-2 and
+IEC 61260-3 run on a physical filter (overload, linearity, self-generated
+noise, the environmental influence quantities) need the instrument in a
+laboratory and are not run here; `verify_filter_periodic` grades the results a
+laboratory brings back from the periodic tests, and says what they cannot
+show. Near Nyquist the bilinear
 transform warps the frequency axis and the bank carries no correction for it,
 unlike the fitted `high_accuracy` design of the weighting filters: the stopband
 beyond the processing Nyquist is reported as `range_limited` rather than

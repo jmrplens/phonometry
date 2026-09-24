@@ -559,6 +559,31 @@ print(carpet.approximate)
 # frozenset({'pile_height_mm'})
 ```
 
+## A filter bank's class reads every requirement of IEC 61260-1
+
+`verify_filter_class` graded the Table 1 mask alone. For the 2014 edition it
+now also grades the effective bandwidth deviation of 5.12 and the summation of
+output signals of 5.16, computed as IEC 61260-2:2016 computes them, and a
+band's `class` and the bank's `overall_class` are the strictest class met on
+all three. A verdict for `edition="1995"` is unchanged.
+
+| Before | 4.0 |
+| --- | --- |
+| `overall_class` 1 for the decimated octave bank (Butterworth, order 6, 48 kHz) | 2: its adjacent outputs sum up to +0.94 dB about the input, past the +0.8 dB of class 1 on 5.16; the same bank designed with `FilterDesign(resample=False)` is class 1 |
+| a band's `class` read off `margin_class{c}_db` | `class` over every requirement; `margin_class{c}_db` is still the Table 1 margin, beside `bandwidth_margin_class{c}_db` and `summation_margin_class{c}_db`, which is `None` on the two end bands |
+| one requirement to ask about | `requirements`, `requirement_class(name)` and `binding_margin_db(name, cls)` read each one on its own, and `plot(requirement="summation")` draws it |
+
+The one-third-octave bank keeps class 1.
+
+```python
+from phonometry import filters
+
+octave = filters.verify_filter_class(
+    filters.OctaveFilterBank(48000, fraction=1, limits=[125, 4000]))
+print(octave.overall_class, octave.requirement_class("relative_attenuation"))
+# 2 1
+```
+
 ## The ten names that are gone
 
 Everything else moved. These ten exist in no public module:
@@ -581,9 +606,15 @@ every rename above was checked to return what its predecessor returned. If a
 result moves after you finish the upgrade, that is a defect and it is worth
 [reporting](https://github.com/jmrplens/phonometry/issues).
 
+One verdict is the exception, and the section on filter classes above says
+how: for the 2014 edition `verify_filter_class` grades the effective bandwidth
+of 5.12 and the summation of 5.16 as well as the Table 1 mask, so a bank's
+class is the strictest it meets on all three. Its Table 1 margins and a
+verdict for `edition="1995"` are the numbers they were.
+
 What each `.plot()` draws is untouched, and so is what each `.report()`
 prints but one label: the microphone fiche writes dB(468) where it wrote
 dB(CCIR). The `Signal` contract is the one it was, now kept in two more
 places, the blocks of `read_blocks` and the waveforms inside five results.
 Every formula is untouched too. 4.0 rearranged the furniture and put the unit
-on the label; it did not recompute anything.
+on the label; apart from that verdict, it did not recompute anything.

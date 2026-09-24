@@ -12,6 +12,8 @@ export const apiSections = {
       'reference/api/filters/equalizer',
       'reference/api/filters/frequencies',
       'reference/api/filters/compliance',
+      'reference/api/filters/time-invariance',
+      'reference/api/filters/periodic-tests',
       'reference/api/filters/weighting-compliance',
     ],
   },

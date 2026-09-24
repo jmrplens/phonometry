@@ -174,8 +174,11 @@ ISO 1996-1, IEC 60942, IEC 61183 y la GUM.
   galería completa de respuestas y el uso de cada arquitectura, con el
   crossover Linkwitz-Riley.
 - [Verificación de clase de filtros (IEC 61260-1)](/phonometry/es/signals/filters/filter-compliance/):
-  la máscara de aceptación de la Tabla 1 banda a banda, la clase 0 de la
-  edición retirada de 1995 y la ficha de conformidad.
+  la máscara de aceptación de la Tabla 1 banda a banda, el ancho de banda
+  efectivo y la suma de salidas de IEC 61260-2, el ensayo de invariancia en el
+  tiempo con barrido, la calificación de los ensayos periódicos de
+  IEC 61260-3, la clase 0 de la edición retirada de 1995 y la ficha de
+  conformidad.
 - [Procesado por bloques](/phonometry/es/signals/filters/block-processing/): análisis en
   streaming con estado, que arrastra el estado de los filtros entre búferes,
   para señales que no caben en memoria.

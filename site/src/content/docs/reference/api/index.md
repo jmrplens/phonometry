@@ -32,6 +32,8 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | [`filters.equalizer`](/phonometry/reference/api/filters/equalizer/) | Parametric equalizer biquads per the RBJ Audio EQ Cookbook. |
 | [`filters.frequencies`](/phonometry/reference/api/filters/frequencies/) | Frequency calculation logic according to ANSI/IEC standards. |
 | [`filters.compliance`](/phonometry/reference/api/filters/compliance/) | IEC 61260-1:2014 band-filter class verification. |
+| [`filters.time_invariance`](/phonometry/reference/api/filters/time-invariance/) | The exponential-sweep test of a band filter: time-invariant operation. |
+| [`filters.periodic_tests`](/phonometry/reference/api/filters/periodic-tests/) | Periodic tests of band filters (IEC 61260-3:2016): test frequencies and verdict. |
 | [`filters.weighting_compliance`](/phonometry/reference/api/filters/weighting-compliance/) | IEC 61672-1:2013 frequency-weighting class verification. |
 
 ## Signal analysis

@@ -14,8 +14,12 @@ PDF laid out like an accredited electroacoustic type-test report:
   (mid-band frequency, achieved class and the binding margin to the overall
   class) and the mask-overlay plot on the right, drawn by the result's own
   ``plot(ax=...)`` so the curve is native to the library;
+* for the 2014 edition, a requirement table: the class and the binding
+  margin of the Table 1 mask (5.10), of the effective bandwidth deviation
+  (5.12) and of the summation of output signals (5.16), graded as
+  IEC 61260-2:2016 tests them, with the range of each deviation;
 * a boxed class-compliance result (``Class n - COMPLIES`` with the binding
-  margin, or a non-compliance statement);
+  margin over every requirement graded, or a non-compliance statement);
 * an optional verdict row when a required class is supplied; and
 * a footer identity/disclaimer block.
 
@@ -57,18 +61,86 @@ _HZ_PER_KHZ = 1000.0
 
 
 def _binding_margin(result: FilterComplianceResult, cls: int) -> float:
-    """Smallest per-band margin to class ``cls`` (the binding margin)."""
-    key = f"margin_class{cls}_db"
-    return min(float(band[key]) for band in result.bands)
+    """Smallest margin to class ``cls`` over every band and requirement."""
+    return min(result.binding_margin_db(req, cls) for req in result.requirements)
 
 
-def _basis(metadata: ReportMetadata | None, edition: str, language: str = "en") -> str:
-    """The standard-basis line for the fiche."""
-    table = (
-        t("IEC 61260-1:2014, Table 1", language)
-        if edition == "2014"
-        else t("IEC 61260:1995 / ANSI S1.11-2004, Table 1", language)
+def _band_margin(band: dict[str, Any], cls: int) -> float:
+    """One band's smallest margin to class ``cls`` over the requirements it carries."""
+    keys = (
+        f"margin_class{cls}_db",
+        f"bandwidth_margin_class{cls}_db",
+        f"summation_margin_class{cls}_db",
     )
+    return min(float(band[k]) for k in keys if band.get(k) is not None)
+
+
+#: The requirement rows of the fiche: the requirement, its label and the
+#: per-band keys of the range it quotes (``None`` for the Table 1 mask, whose
+#: margin is the reading).
+_REQUIREMENT_ROWS: tuple[tuple[str, str, tuple[str, str] | None], ...] = (
+    ("relative_attenuation", "Relative attenuation (5.10, Table 1)", None),
+    (
+        "effective_bandwidth",
+        "Effective bandwidth deviation (5.12)",
+        ("bandwidth_deviation_db", "bandwidth_deviation_db"),
+    ),
+    (
+        "summation",
+        "Summation of output signals (5.16)",
+        ("summation_min_db", "summation_max_db"),
+    ),
+)
+
+
+def _requirement_rows(
+    result: FilterComplianceResult, language: str = "en"
+) -> list[tuple[str, str]]:
+    """One row per requirement graded: its class, binding margin and range."""
+    from .._i18n import fmt_minus
+
+    rows: list[tuple[str, str]] = []
+    for name, label, span in _REQUIREMENT_ROWS:
+        if name not in result.requirements:
+            continue
+        cls = result.requirement_class(name)
+        reference = cls if cls is not None else max(result.available_classes())
+        margin = decimal_comma(
+            f"{result.binding_margin_db(name, reference):+.2f}", language
+        )
+        class_text = (
+            t("none", language)
+            if cls is None
+            else t("Class {n}", language).format(n=cls)
+        )
+        value = f"{class_text} ({margin} dB)"
+        if span is not None:
+            lows = [float(b[span[0]]) for b in result.bands if b[span[0]] is not None]
+            highs = [float(b[span[1]]) for b in result.bands if b[span[1]] is not None]
+            value += t(", {low} to {high} dB", language).format(
+                low=decimal_comma(fmt_minus(min(lows), "+.2f"), language),
+                high=decimal_comma(fmt_minus(max(highs), "+.2f"), language),
+            )
+        rows.append((t(label, language), value))
+    return rows
+
+
+def _basis(
+    metadata: ReportMetadata | None,
+    edition: str,
+    language: str = "en",
+    *,
+    requirements: tuple[str, ...] = ("relative_attenuation",),
+) -> str:
+    """The standard-basis line for the fiche: the clauses the verdict grades."""
+    if edition != "2014":
+        table = t("IEC 61260:1995 / ANSI S1.11-2004, Table 1", language)
+    elif "summation" in requirements:
+        table = t("IEC 61260-1:2014, Table 1, 5.12 and 5.16", language)
+    elif "effective_bandwidth" in requirements:
+        table = t("IEC 61260-1:2014, Table 1 and 5.12", language)
+    else:
+        table = t("IEC 61260-1:2014, Table 1", language)
     measurement_standard = (
         metadata.measurement_standard if metadata is not None else None
     )
@@ -126,9 +198,12 @@ def _band_label(exact_freq: float, fraction: int) -> str:
 def _metric_rows(
     result: FilterComplianceResult, language: str = "en"
 ) -> list[tuple[str, str]]:
-    """Per-band rows: nominal mid-band frequency vs achieved class and margin."""
+    """Per-band rows: nominal mid-band frequency vs achieved class and margin.
+
+    The margin is the band's binding one over every requirement graded, to
+    the class the verdict is read against.
+    """
     cls = result.reference_class()
-    key = f"margin_class{cls}_db"
     rows: list[tuple[str, str]] = []
     for band in result.bands:
         band_class = band["class"]
@@ -137,7 +212,7 @@ def _metric_rows(
             if band_class is None
             else t("Class {n}", language).format(n=band_class)
         )
-        margin = float(band[key])
+        margin = _band_margin(band, cls)
         freq = decimal_comma(
             _band_label(float(band["freq"]), result.fraction), language
         )
@@ -232,7 +307,12 @@ def render_iec61260_report(
 
     flow: list[Any] = [
         fiche_paragraph(title, title_style),
-        fiche_paragraph(_basis(metadata, result.edition, language), basis_style),
+        fiche_paragraph(
+            _basis(
+                metadata, result.edition, language, requirements=result.requirements
+            ),
+            basis_style,
+        ),
     ]
 
     if metadata is not None and not metadata.is_empty():
@@ -276,23 +356,40 @@ def render_iec61260_report(
     plot_drawing = render_figure_drawing(
         result.plot, 116 * mm, y_top=None, language=language
     )
-    flow.append(two_panel_body(left_cell, plot_drawing))
+    # The requirement table sits under the plot, in the space a long per-band
+    # table leaves beside it, so grading 5.12 and 5.16 costs the page no rows.
+    right_cell: Any = plot_drawing
+    requirement_rows = _requirement_rows(result, language)
+    if len(requirement_rows) > 1:
+        right_cell = [
+            plot_drawing,
+            Spacer(1, 4),
+            fiche_paragraph(
+                t(
+                    "Requirements of IEC 61260-1:2014, graded as IEC 61260-2:2016 tests them",
+                    language,
+                ),
+                caption_style,
+            ),
+            metrics_table(requirement_rows, col_widths=[56 * mm, 58 * mm]),
+        ]
+    flow.append(two_panel_body(left_cell, right_cell))
     flow.append(Spacer(1, 8))
 
     flow.append(result_box(_statement(result, language), styles, accent))
     if getattr(result, "range_limited", False):
-        # The multirate verifier cannot exercise the stop-band mask beyond a
-        # band's processing Nyquist (no decimated signal energy exists there),
-        # so the stated class attests the verified range and says so.
-        flow.append(
-            fiche_paragraph(
-                t(
-                    "Stop-band limits verified up to each band's processing Nyquist frequency; the multirate anti-aliasing leaves no signal energy beyond it, but the Table 1 limits there are not demonstrated, so the stated class attests the verified frequency range.",
-                    language,
-                ),
-                basis_strip_style,
-            )
+        # The verifier cannot exercise the stop-band mask beyond a band's
+        # processing Nyquist, so the stated class attests the verified range
+        # and says so. Why nothing reaches past it depends on the bank: a
+        # decimated band has its anti-aliasing filter, a band filtered at the
+        # full rate has no frequency above half the sampling rate at all.
+        decimated = max(result.factors) > 1
+        note = (
+            "Stop-band limits verified up to each band's processing Nyquist frequency; the multirate anti-aliasing leaves no signal energy beyond it, but the Table 1 limits there are not demonstrated, so the stated class attests the verified frequency range."
+            if decimated
+            else "Stop-band limits verified up to half the sampling frequency, above which a digital filter has no frequency to respond at; the Table 1 limits there are not demonstrated, so the stated class attests the verified frequency range."
         )
+        flow.append(fiche_paragraph(t(note, language), basis_strip_style))
     if metadata is not None and metadata.required_class is not None:
         if metadata.required_class not in result.available_classes():
             msg = (

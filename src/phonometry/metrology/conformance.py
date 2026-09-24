@@ -50,7 +50,11 @@ tables are reproduced to the letter as well as to the verdict.
 The limits may be symmetric, as IEC 60942 writes them (an acceptance limit on
 the *absolute* deviation), or asymmetric, as IEC 61672-1 writes most of its own
 (+1,0 dB; -1,2 dB in Table C.1). A symmetric limit is given as one number and
-an asymmetric pair as ``(lower, upper)``.
+an asymmetric pair as ``(lower, upper)``. One end of the pair may be open: the
+stop band of IEC 61260-1:2014 Table 1 prints a minimum relative attenuation
+and a maximum of :math:`+\infty` ("+70; +∞"), and that is an acceptance
+interval with no upper limit, given as ``(70.0, math.inf)``. An interval open
+at both ends bounds nothing and is refused.
 
 A deviation that reaches a limit through floating-point arithmetic, such as a
 measured 0,2 dB plus a correction of 0,1 dB against a limit of 0,3 dB, sums
@@ -113,6 +117,24 @@ def _at_most(value: float, bound: float) -> bool:
     )
 
 
+def _open_limit(value: float, name: str, *, upper: bool) -> float:
+    """An acceptance limit, finite or open on its own side.
+
+    The lower limit may be ``-inf`` and the upper one ``+inf``, which is how a
+    table writes an interval bounded on one side only; the other infinity, or
+    a NaN, bounds nothing and is refused.
+
+    :param value: The limit.
+    :param name: Its field name, for the message.
+    :param upper: ``True`` for the upper limit, ``False`` for the lower one.
+    :raises ValueError: for a NaN or an infinity on the wrong side.
+    """
+    limit = float(value)
+    if math.isinf(limit) and (limit > 0.0) is upper:
+        return limit
+    return require_finite(limit, name)
+
+
 @dataclass(frozen=True)
 class ConformanceVerification:
     """One measured deviation judged by the conformance rule of IEC TC 29.
@@ -126,8 +148,11 @@ class ConformanceVerification:
     :ivar uncertainty: The actual expanded uncertainty of that measurement,
         for a coverage probability of 95 %, as the testing laboratory
         calculated it.
-    :ivar lower_limit: The lower acceptance limit, inclusive.
-    :ivar upper_limit: The upper acceptance limit, inclusive.
+    :ivar lower_limit: The lower acceptance limit, inclusive, or ``-inf``
+        for an interval with no lower limit.
+    :ivar upper_limit: The upper acceptance limit, inclusive, or ``+inf``
+        for an interval with no upper limit (the stop band of IEC
+        61260-1:2014 Table 1).
     :ivar max_uncertainty: The maximum-permitted expanded uncertainty the
         standard prints for the test, inclusive.
     :ivar unit: The unit of the five numbers, a label for the figure
@@ -144,18 +169,29 @@ class ConformanceVerification:
     def __post_init__(self) -> None:
         """Refuse numbers the rule cannot be read on.
 
-        :raises ValueError: if a number is not finite, if the lower limit is
-            above the upper one, if the uncertainty is negative or if the
+        :raises ValueError: if a number is not finite (a limit may be infinite
+            on its own side only), if the lower limit is above the upper one,
+            if both limits are open, if the uncertainty is negative or if the
             maximum-permitted uncertainty is not positive.
         """
-        for name in (
-            "deviation",
-            "uncertainty",
-            "lower_limit",
-            "upper_limit",
-            "max_uncertainty",
-        ):
+        for name in ("deviation", "uncertainty", "max_uncertainty"):
             object.__setattr__(self, name, require_finite(getattr(self, name), name))
+        object.__setattr__(
+            self,
+            "lower_limit",
+            _open_limit(self.lower_limit, "lower_limit", upper=False),
+        )
+        object.__setattr__(
+            self,
+            "upper_limit",
+            _open_limit(self.upper_limit, "upper_limit", upper=True),
+        )
+        if math.isinf(self.lower_limit) and math.isinf(self.upper_limit):
+            msg = (
+                "'lower_limit' and 'upper_limit' are both open: an acceptance "
+                "interval needs at least one limit."
+            )
+            raise ValueError(msg)
         if self.lower_limit > self.upper_limit:
             msg = (
                 f"'lower_limit' ({self.lower_limit:g}) must not be above "
@@ -219,12 +255,28 @@ class ConformanceVerification:
         limits of +1,0 dB and -1,2 dB uses 0,5 of the lower one. Above 1 the
         deviation is outside the limits. A deviation on the far side of a
         limit of zero (a negative distortion against ``(0, 3)``) has no finite
-        share and reads as infinity.
+        share and reads as infinity. An open side is never used up: on it the
+        share is zero while the deviation is inside the interval. A deviation
+        outside the interval always reads above 1, on whichever side it
+        leaves: its share of the limit it crosses when that is above 1, and
+        infinity otherwise (a stop-band attenuation of 40 dB, or of -5 dB,
+        against ``(70, +inf)``).
         """
+        if not self.deviation_within_limits:
+            bound = (
+                self.lower_limit
+                if self.deviation < self.lower_limit
+                else self.upper_limit
+            )
+            if math.isfinite(bound) and abs(bound) > _BOUNDARY_ABS_TOL:
+                share = self.deviation / bound
+                if share > 1.0:
+                    return share
+            return math.inf
         bound = self.upper_limit if self.deviation >= 0.0 else self.lower_limit
-        if abs(bound) > _BOUNDARY_ABS_TOL:
+        if math.isfinite(bound) and abs(bound) > _BOUNDARY_ABS_TOL:
             return self.deviation / bound
-        return 0.0 if self.deviation_within_limits else math.inf
+        return 0.0
 
     @property
     def share_of_max_uncertainty(self) -> float:
@@ -274,6 +326,9 @@ class ConformanceVerification:
 def _limits(acceptance_limits: float | tuple[float, float]) -> tuple[float, float]:
     """The ``(lower, upper)`` pair of a symmetric limit or of an explicit pair.
 
+    A pair may leave one end open, ``-inf`` below or ``+inf`` above; a
+    symmetric limit is always finite.
+
     :raises ValueError: for a negative symmetric limit or a pair that is not
         two numbers.
     """
@@ -284,8 +339,8 @@ def _limits(acceptance_limits: float | tuple[float, float]) -> tuple[float, floa
             msg = "'acceptance_limits' must be one number or a (lower, upper) pair."
             raise ValueError(msg) from None
         return (
-            require_finite(float(lower), "acceptance_limits"),
-            require_finite(float(upper), "acceptance_limits"),
+            _open_limit(lower, "acceptance_limits", upper=False),
+            _open_limit(upper, "acceptance_limits", upper=True),
         )
     limit = require_finite(float(acceptance_limits), "acceptance_limits")
     if limit < 0.0:
@@ -327,7 +382,9 @@ def verify_conformance(
         a coverage probability of 95 %, in the same unit.
     :param acceptance_limits: One non-negative number for symmetric limits
         (``0.25`` is +/-0,25), or a ``(lower, upper)`` pair such as
-        ``(-1.2, 1.0)``. Both limits belong to the acceptance interval.
+        ``(-1.2, 1.0)``. Both limits belong to the acceptance interval. One
+        end of a pair may be open, ``(70.0, math.inf)`` for a minimum with no
+        maximum, as IEC 61260-1:2014 Table 1 writes its stop band.
     :param max_uncertainty: The maximum-permitted expanded uncertainty for a
         coverage probability of 95 %, in the same unit.
     :param unit: The unit of the numbers, used to label the figure
@@ -335,8 +392,9 @@ def verify_conformance(
     :return: The :class:`ConformanceVerification`, whose ``passes`` is the
         verdict and whose ``outcome`` and ``reason`` say which of the four
         outcomes it is.
-    :raises ValueError: for a non-finite number, a negative symmetric limit, a
-        lower limit above the upper one, a negative uncertainty or a
+    :raises ValueError: for a non-finite number (bar a limit open on its own
+        side), a negative symmetric limit, a lower limit above the upper one,
+        a pair open at both ends, a negative uncertainty or a
         maximum-permitted uncertainty that is not positive.
     """
     lower, upper = _limits(acceptance_limits)

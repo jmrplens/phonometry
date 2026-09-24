@@ -7952,6 +7952,117 @@ in the same order.
   cells of Tables 1 and 2 confirm the reading.
 - **Status:** unreported.
 
+## IEC 61260-2:2016 / IEC 61260-3:2016, Annex A, Formula (A.2) (the coefficient of the frequency terms left unsquared)
+
+- **Location:** Annex A (informative), A.1.3, Formula (A.2), printed p. 19 of
+  IEC 61260-2:2016 and printed p. 16 of IEC 61260-3:2016, and the worked
+  example of A.3.5 on printed p. 21 and printed p. 18 respectively. Both parts
+  print the same annex.
+- **The print:** Formula (A.1) is the sum of the squared sensitivity
+  coefficients of Formula (17) of IEC 61260-1:2014 times the squared standard
+  uncertainties, and Formula (A.2) is offered as its simplification,
+  $$u_{L_\mathrm{c}} = \left[u_{L_\mathrm{in}}^2 + \left(\frac{10}{\ln(10)}\right)^2\left(\frac{u_{T_\mathrm{sweep}}}{T_\mathrm{sweep}}\right)^2 + \left(\frac{10}{\ln(10)}\right)^2\left(\frac{u_{T_\mathrm{avg}}}{T_\mathrm{avg}}\right)^2 + \left(\frac{10}{\ln(f_\mathrm{end}/f_\mathrm{start})\times\ln(10)}\right)\times\left[\left(\frac{u_{f_\mathrm{end}}}{f_\mathrm{end}}\right)^2 + \left(\frac{u_{f_\mathrm{start}}}{f_\mathrm{start}}\right)^2\right]\right]^{1/2}\ \mathrm{dB},$$
+  in which the first two coefficients carry the exponent 2 and the third does
+  not. A.3.5 then works an example with $u_{L_\mathrm{in}} \approx 0{,}042$ dB,
+  $T_\mathrm{sweep} = T_\mathrm{avg} = 20$ s with 0,05 s and 0,02 s,
+  $f_\mathrm{end} = 50\,000$ Hz with 5 Hz and $f_\mathrm{start} = 0{,}5$ Hz
+  with 0,05 Hz, and prints $u_{L_\mathrm{c}} \approx 0{,}057$ dB, an expanded
+  uncertainty of 0,115 dB, and 0,128 dB with a display of 0,1 dB resolution.
+- **The problem:** the derivative of Formula (17) with respect to
+  $f_\mathrm{end}$ is $10/[\ln(f_\mathrm{end}/f_\mathrm{start})\ln(10)\,f_\mathrm{end}]$,
+  and (A.1) squares it with every other coefficient. Left unsquared, the
+  coefficient is 0,377 for the example's sweep of five decades, and its
+  frequency term is 0,0038 dB² instead of 0,0014 dB². As printed, (A.2) gives
+  $u_{L_\mathrm{c}} = 0{,}075$ dB, an expanded uncertainty of 0,150 dB and
+  0,161 dB with the display; with the square it gives 0,057 dB, 0,115 dB and
+  0,128 dB, the three values both parts print. Both are computed with the
+  $u_{L_\mathrm{in}}$ the example derives, 0,0416 dB from a 0,1 dB display
+  resolution and a 0,03 dB constancy, not with the 0,042 dB it rounds it to,
+  which would give 0,058 dB. The unsquared form is also not in dB², so it
+  changes with the unit of level.
+- **Evidence:** a recomputation of the printed example both ways. Verified on
+  PDF page 21 (printed p. 19) and PDF page 23 (printed p. 21) of
+  IEC 61260-2:2016, and on PDF page 18 (printed p. 16) and PDF page 20
+  (printed p. 18) of IEC 61260-3:2016. The consolidated
+  IEC 61260-2:2016+AMD1:2017 (Edition 1.1) prints the same Formula (A.2) on
+  PDF page 23 (printed p. 19) and the same 0,057 dB, 0,115 dB and 0,128 dB on
+  PDF page 25 (printed p. 21): the amendment adds only the TEM-waveguide
+  option of IEC 61000-4-20 to the field-immunity test, and the defect stands
+  in the current edition.
+- **Library behaviour:**
+  [`swept_level_uncertainty`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/filters/time_invariance.py)
+  squares the coefficient, as (A.1) does, and reproduces 0,057 dB, 0,115 dB
+  and 0,128 dB; three rows of the conformance report pin them, and
+  `test_formula_a2_as_printed_would_not_reproduce_its_example` in
+  [`tests/filters/test_time_invariance.py`](https://github.com/jmrplens/phonometry/blob/main/tests/filters/test_time_invariance.py)
+  holds the printed form to the 0,075 dB it gives.
+- **Status:** unreported.
+
+## IEC 61260-3:2016, B.2.6 (an averaging period that ends 6 s to 7 s after the sweep passes 6,3 Hz)
+
+- **Location:** Annex B (informative), B.2.6, printed p. 20.
+- **The print:** "The averaging period will end 6 s to 7 s after the sweep
+  frequency is equal to the lowest midband frequency, 6,3 Hz."
+- **The problem:** the example's own settings end it 18 s to 19 s later. B.2.2
+  sweeps from 0,01 Hz to 1 MHz, eight decades, in 30 s, which is 3,75 s per
+  decade, and B.2.3 averages for 30 s from a start 0,5 s to 1,5 s before the
+  sweep. The sweep reaches 6,3 Hz
+  $3{,}75 \lg(6{,}3/0{,}01) = 10{,}5$ s after it starts, which is 11,0 s to
+  12,0 s into the averaging, and the averaging ends at 30 s. B.2.3 checks the
+  same settings at the other end and gets them right: the sweep is at 398 kHz
+  to 736 kHz when the averaging ends. IEC 61260-2:2016 prints the same example
+  and, in its own B.2.6, "18 s to 20 s".
+- **Evidence:** a recomputation from B.2.2 and B.2.3. Verified on PDF page 21
+  (printed p. 19) and PDF page 22 (printed p. 20) of IEC 61260-3:2016, and on
+  PDF page 25 (printed p. 23) of IEC 61260-2:2016.
+- **Library behaviour:** none needed. The sentence argues that the impulse
+  response of the lowest filter has died away when the averaging ends, which
+  18 s makes stronger, and no number of the example depends on it.
+  [`verify_time_invariance`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/filters/time_invariance.py)
+  sizes the averaging from the slowest pole of the bank it is given.
+- **Status:** unreported.
+
+## IEC 61260-2:2016, 7.2.4.3 and Formula (3), with IEC 61260-1:2014, 5.16 (the summation difference taken both ways round)
+
+- **Location:** IEC 61260-2:2016, 7.2.4.3 and Formula (3) on printed p. 11 and
+  7.2.4.5 on printed p. 12; IEC 61260-1:2014, 5.16, printed p. 21.
+- **The print:** 7.2.4.3 defines $\Delta P_j(\Omega_i)$ as "the difference
+  between the input signal level minus the reference attenuation and the
+  level of the summed output signals" and gives
+  $$\Delta P_j(\Omega_i) = 10\lg\left[10^{-0{,}1\,\Delta A_{j-1}} + 10^{-0{,}1\,\Delta A_j} + 10^{-0{,}1\,\Delta A_{j+1}}\right]\ \mathrm{dB}.$$
+  5.16 of IEC 61260-1 sets the limits "for the difference between (a) the
+  level of the input signal minus the reference attenuation and (b) the level
+  of the sum of the time-mean-square output signals from adjacent filters":
+  +0,8 dB and −1,8 dB for class 1, +1,8 dB and −3,8 dB for class 2. 7.2.4.5
+  applies those limits to $\Delta P_j(\Omega_i)$ "calculated according to
+  formula (3)".
+- **The problem:** with $\Delta A = A - A_\mathrm{ref}$ and
+  $A = L_\mathrm{in} - L_\mathrm{out}$, Formula (3) is the level of the summed
+  outputs minus the input level less the reference attenuation, (b) minus (a).
+  The words of both parts name (a) minus (b), the same number with the other
+  sign. The limits are not symmetric, so the two are different tests: a set
+  whose adjacent outputs sum 1,0 dB above the input fails class 1 by
+  Formula (3) and passes by the words, and one whose outputs sum 1,0 dB below
+  it passes by Formula (3) and fails by the words.
+- **Evidence:** a comparison of the sentence with the formula it introduces.
+  Verified on PDF page 13 (printed p. 11) and PDF page 14 (printed p. 12) of
+  IEC 61260-2:2016, and on PDF page 23 (printed p. 21) of BS EN 61260-1:2014.
+  The consolidated IEC 61260-2:2016+AMD1:2017 (Edition 1.1) prints the same
+  words and Formula (3), 7.2.4.3 running from PDF page 15 (printed p. 11) to
+  PDF page 16 (printed p. 12) with Formula (3) and 7.2.4.5 on the latter; the
+  amendment does not touch 7.2.4, and the conflict stands in the current
+  edition.
+- **Library behaviour:**
+  [`verify_filter_class`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/filters/compliance.py) applies the
+  limits of 5.16 to Formula (3) as printed, as 7.2.4.5 instructs. The verdicts
+  it gives the library's own banks do not depend on the reading: the decimated
+  octave bank sums from −1,16 dB to +0,94 dB and is class 2 either way, and the
+  one-third-octave bank sums from −0,55 dB to +0,76 dB and is class 1 either
+  way. `test_the_summation_is_what_tones_through_the_bank_read` in
+  [`tests/filters/test_pattern_evaluation.py`](https://github.com/jmrplens/phonometry/blob/main/tests/filters/test_pattern_evaluation.py)
+  holds Formula (3) to what the running bank reads.
+- **Status:** unreported.
+
 ## Related source properties that are not errata
 
 Recorded here to prevent future "fixes" that would break agreement with the

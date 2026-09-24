@@ -19,7 +19,7 @@
 
 ## Numerical conformance report
 
-**1395/1395 conformance checks pass** across 95 domains and 474 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+**1431/1431 conformance checks pass** across 96 domains and 476 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub><b>&#916;</b> is the difference between the computed value and the one the standard publishes. <b>Used</b> is how much of that clause's published tolerance the difference consumes: 100 % means it sits exactly on the limit, 5 % means it uses a twentieth of the allowance, and a dash means the clause states no two-sided tolerance for the quantity, so there is no budget to spend. It is reported and never used to decide a verdict, which is settled at full precision before any rounding.</sub>
 
@@ -87,6 +87,50 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ANSI S1.4-1983 Tables IV/V | B-weighting (historical) deviation vs Type 0 limits (fs=48 kHz) | deviation within limits @ 200 Hz | -0.049 dB in [-0.70, +0.70] dB | headroom +0.651 dB | - | ![Pass][cv-pass] Pass |
 | IEC 61012:1990 Table 1 / 2.2 | AU-weighting deviation vs separate-unit tolerances (fs=96 kHz) | deviation within limits @ 158 Hz | +0.051 dB in [-1.00, +1.00] dB | headroom +0.949 dB | - | ![Pass][cv-pass] Pass |
 | IEC 537:1976 (withdrawn) via NASA CR-3406 Table SLD-I | D-weighting response vs the published tabulated curve (fs=48 kHz) | abs(response - table) <= 0.2 dB (0.45 dB at 1600/2500 Hz) | -0.281 dB @ 2500 Hz (bound 0.45 dB) | headroom +0.169 dB | - | ![Pass][cv-pass] Pass |
+
+</details>
+
+<details>
+<summary><b>Band-filter pattern evaluation and periodic tests (IEC 61260-2, IEC 61260-3)</b>: 100% (36/36)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
+|:---|:---|:---|:---|:---|:---:|:---:|
+| IEC 61260-3:2016 Table C.1 | One-third-octave test frequency Omega_k, k = -7 (below the mid-band, Formulas (1), (2)) | 0.18546 (+/-0.00001) | 0.18546 | 0 | 34 % | ![Pass][cv-pass] Pass |
+| IEC 61260-3:2016 Table C.1 | One-third-octave test frequency Omega_k, k = -6 (below the mid-band, Formulas (1), (2)) | 0.32748 (+/-0.00001) | 0.32748 | 0 | 65 % | ![Pass][cv-pass] Pass |
+| IEC 61260-3:2016 Table C.1 | One-third-octave test frequency Omega_k, k = -5 (below the mid-band, Formulas (1), (2)) | 0.53143 (+/-0.00001) | 0.53143 | 0 | 69 % | ![Pass][cv-pass] Pass |
+| IEC 61260-3:2016 Table C.1 | One-third-octave test frequency Omega_k, k = -4 (below the mid-band, Formulas (1), (2)) | 0.77257 (+/-0.00001) | 0.77257 | 0 | 83 % | ![Pass][cv-pass] Pass |
+| IEC 61260-3:2016 Table C.1 | One-third-octave test frequency Omega_k, k = -3 (below the mid-band, Formulas (1), (2)) | 0.91958 (+/-0.00001) | 0.91958 | 0 | 66 % | ![Pass][cv-pass] Pass |
+| IEC 61260-3:2016 Table C.1 | One-third-octave test frequency Omega_k, k = -2 (below the mid-band, Formulas (1), (2)) | 0.94719 (+/-0.00001) | 0.94719 | 0 | 1 % | ![Pass][cv-pass] Pass |
+| IEC 61260-3:2016 Table C.1, C.2 | One-third-octave test frequency Omega_k, k = -1 (below the mid-band, Formulas (1), (2)) | 0.97402 (+/-0.00001) | 0.97402 | 0 | 26 % | ![Pass][cv-pass] Pass |
+| IEC 61260-3:2016 Table C.1 | One-third-octave test frequency Omega_k, k = 0 (at the mid-band, Formulas (1), (2)) | 1 (+/-0.00001) | 1 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61260-3:2016 Table C.1, C.2 | One-third-octave test frequency Omega_k, k = +1 (above the mid-band, Formulas (1), (2)) | 1.02667 (+/-0.00001) | 1.02667 | 0 | 87 % | ![Pass][cv-pass] Pass |
+| IEC 61260-3:2016 Table C.1 | One-third-octave test frequency Omega_k, k = +2 (above the mid-band, Formulas (1), (2)) | 1.05575 (+/-0.00001) | 1.05575 | 0 | 86 % | ![Pass][cv-pass] Pass |
+| IEC 61260-3:2016 Table C.1 | One-third-octave test frequency Omega_k, k = +3 (above the mid-band, Formulas (1), (2)) | 1.08746 (+/-0.00001) | 1.08746 | 0 | 63 % | ![Pass][cv-pass] Pass |
+| IEC 61260-3:2016 Table C.1 | One-third-octave test frequency Omega_k, k = +4 (above the mid-band, Formulas (1), (2)) | 1.29437 (+/-0.00001) | 1.29437 | 0 | 82 % | ![Pass][cv-pass] Pass |
+| IEC 61260-3:2016 Table C.1 | One-third-octave test frequency Omega_k, k = +5 (above the mid-band, Formulas (1), (2)) | 1.88173 (+/-0.00001) | 1.88173 | 0 | 47 % | ![Pass][cv-pass] Pass |
+| IEC 61260-3:2016 Table C.1 | One-third-octave test frequency Omega_k, k = +6 (above the mid-band, Formulas (1), (2)) | 3.05365 (+/-0.00001) | 3.05365 | 0 | 41 % | ![Pass][cv-pass] Pass |
+| IEC 61260-3:2016 Table C.1 | One-third-octave test frequency Omega_k, k = +7 (above the mid-band, Formulas (1), (2)) | 5.39195 (+/-0.00001) | 5.39195 | 0 | 27 % | ![Pass][cv-pass] Pass |
+| IEC 61260-3:2016 Table 1 | Acceptance limits on relative attenuation, 8 frequency parameters x 2 classes | 32/32 cells | 32/32 cells | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61260-1:2014 Table C.1 | Example 1: deviation +1.7 dB, U 0.3 dB against +1.0; -1.2 dB and 0.5 dB | No: Deviation exceeds acceptance limits | No: Deviation exceeds acceptance limits | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61260-1:2014 Table C.1 | Example 2: deviation +1.1 dB, U 0.3 dB against +1.0; -1.2 dB and 0.5 dB | No: Deviation exceeds acceptance limits | No: Deviation exceeds acceptance limits | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61260-1:2014 Table C.1 | Example 3: deviation +1.0 dB, U 0.3 dB against +1.0; -1.2 dB and 0.5 dB | Yes: Deviation within acceptance limits AND uncertainty within maximum-permitted | Yes: Deviation within acceptance limits AND uncertainty within maximum-permitted | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61260-1:2014 Table C.1 | Example 4: deviation +0.0 dB, U 0.3 dB against +1.0; -1.2 dB and 0.5 dB | Yes: Deviation within acceptance limits AND uncertainty within maximum-permitted | Yes: Deviation within acceptance limits AND uncertainty within maximum-permitted | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61260-1:2014 Table C.1 | Example 5: deviation +0.0 dB, U 0.9 dB against +1.0; -1.2 dB and 0.5 dB | No: Deviation within acceptance limits BUT uncertainty exceeds maximum-permitted | No: Deviation within acceptance limits BUT uncertainty exceeds maximum-permitted | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61260-1:2014 Table C.1 | Example 6: deviation -0.5 dB, U 0.3 dB against +1.0; -1.2 dB and 0.5 dB | Yes: Deviation within acceptance limits AND uncertainty within maximum-permitted | Yes: Deviation within acceptance limits AND uncertainty within maximum-permitted | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61260-1:2014 Table C.1 | Example 7: deviation -1.2 dB, U 0.3 dB against +1.0; -1.2 dB and 0.5 dB | Yes: Deviation within acceptance limits AND uncertainty within maximum-permitted | Yes: Deviation within acceptance limits AND uncertainty within maximum-permitted | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61260-1:2014 Table C.1 | Example 8: deviation -1.3 dB, U 0.3 dB against +1.0; -1.2 dB and 0.5 dB | No: Deviation exceeds acceptance limits | No: Deviation exceeds acceptance limits | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61260-1:2014 Table C.1 | Example 9: deviation -2.0 dB, U 0.3 dB against +1.0; -1.2 dB and 0.5 dB | No: Deviation exceeds acceptance limits | No: Deviation exceeds acceptance limits | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61260-1:2014 Table C.1 | Example 10: deviation -2.0 dB, U 0.7 dB against +1.0; -1.2 dB and 0.5 dB | No: Deviation exceeds acceptance limits AND uncertainty exceeds maximum-permitted | No: Deviation exceeds acceptance limits AND uncertainty exceeds maximum-permitted | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61260-2:2016 / IEC 61260-3:2016 Annex B, Formula (B.5) | Swept output level L_c of a one-third-octave filter (Formula (17) of IEC 61260-1) | 107.97 dB (+/-0.01 dB) | 107.97 dB | -0.001 dB | 20 % | ![Pass][cv-pass] Pass |
+| IEC 61260-2:2016 / IEC 61260-3:2016 A.3.5, Formula (A.2) | Standard uncertainty u_Lc of the swept output level | 0.057 dB (+/-0.001 dB) | 0.057 dB | 0 dB | 77 % | ![Pass][cv-pass] Pass |
+| IEC 61260-2:2016 / IEC 61260-3:2016 A.3.5 | Expanded uncertainty of the test signal (k = 2) | 0.115 dB (+/-0.001 dB) | 0.115 dB | 0 dB | 46 % | ![Pass][cv-pass] Pass |
+| IEC 61260-2:2016 / IEC 61260-3:2016 A.3.5 | Expanded uncertainty read on a 0.1 dB display (k = 2) | 0.128 dB (+/-0.001 dB) | 0.128 dB | 0 dB | 95 % | ![Pass][cv-pass] Pass |
+| IEC 61260-2:2016 Formula (2) / IEC 61260-1:2014 Formulas (15), (16) | Ideal octave band: Delta B = 10 lg(tanh(x/2)/(x/2)), x = ln G / (bS), S = 24 (closed form) | -0.0003 dB (+/-0 dB) | -0.0003 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61260-2:2016 Formula (3) | Ideal bank: summed outputs restore the input inside a band and on its edges (closed form) | 0 dB (+/-0 dB) | max \|Delta P\| 4.8e-16 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61260-1:2014 5.12.2 / IEC 61260-2:2016 7.2.3 | One-third-octave Butterworth bank (fs=48 kHz): largest \|Delta B\| within the class 1 +/-0.4 dB | class 1 (\|Delta B\| <= 0.4 dB) | class 1 (\|Delta B\| <= 0.047 dB) | +0.353 dB | - | ![Pass][cv-pass] Pass |
+| IEC 61260-1:2014 5.16 / IEC 61260-2:2016 7.2.4 | One-third-octave Butterworth bank (fs=48 kHz): summed outputs within the class 1 +0.8/-1.8 dB | class 1 (-1.8 dB <= Delta P <= +0.8 dB) | class 1 (-0.552 dB to +0.625 dB) | +0.175 dB | - | ![Pass][cv-pass] Pass |
+| IEC 61260-1:2014 5.14.3 / IEC 61260-2:2016 7.4 | One-third-octave multirate bank swept at 2 and 5 s per decade: \|L_out - L_c\| within class 1 +/-0.4 dB | class 1 (\|L_out - L_c\| <= 0.4 dB) | class 1 (\|L_out - L_c\| <= 0.054 dB) | +0.346 dB | - | ![Pass][cv-pass] Pass |
+| IEC 61260-1:2014 Annex G, G.2.8 | Swept deviation of a time-invariant band equals its effective bandwidth deviation | 0 dB (+/-0.01 dB) | max \|(L_out - L_c) - Delta B\| 0.0068 dB | 0.0068 dB | 68 % | ![Pass][cv-pass] Pass |
 
 </details>
 

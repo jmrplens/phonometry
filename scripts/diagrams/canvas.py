@@ -184,6 +184,10 @@ _ROMAN_SCRIPTS = frozenset(
         # IEC 61183:1994, printed upright in L_rd, G_RI and G_RI,ref.
         "rd",
         "RI",
+        # FF/RM: the free field and the reference microphone of IEC 62585:2012,
+        # printed upright in C_FF,RM.
+        "FF",
+        "RM",
         "rms",
         "tot",
         "TOT",

@@ -140,10 +140,12 @@ IEC/TS 61094-7, first in a free progressive field and then on the source. The
 comparison is by substitution (Annex G): the meter is measured, removed, and
 the reference put in its place, so neither needs an absolute calibration.
 
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_free_field_corrections_setup.svg" alt="The readings of IEC 62585 in three columns, each by substitution. Left, a sound calibrator (Annex D): 1, the meter in a free field reading L_ind1; 2, the reference microphone of type LS2P in its place reading L_ind2; 3, the calibrator on the meter reading L_ind3; 4, the calibrator on the reference reading L_ind4; Formula (D.7) gives (L_ind1 - L_ind3) - (L_ind2 - L_ind4) + C_FF,RM. Middle, a comparison coupler (Annex E): the same two free-field readings, then the reference and the meter face to face on the coupler, read together as L_ind3a and L_ind3b; Formula (E.6), with the labels of Figure E.1, gives (L_ind1 - L_ind3b) - (L_ind2 - L_ind3a) + C_FF,RM. Right, an electrostatic actuator (Annex F): the two free-field readings as functions of frequency, then the actuator on the meter's diaphragm reading L_ind3(f); by Formula (F.13) every term is referred to f_0, where the correction is zero. The footer says each pair is read in turn at the same place (Annex G) and that C_FF,RM comes from IEC/TS 61094-7" width="100%" />
+
 | Requirement | Value | Clause |
 | :--- | :--- | :--- |
 | Environment | 80 kPa to 105 kPa, 20 °C to 26 °C, 25 % to 70 % relative humidity; below 97 kPa an extra component enters the budget | 6 |
-| Reference conditions | 23 °C, 101,325 kPa, 50 % relative humidity | 4 |
+| Reference conditions | 23 °C, 101.325 kPa, 50 % relative humidity | 4 |
 | Free-field mounting | On a rod of the microphone's diameter; source more than 1 m away and at least six times the largest dimension of the meter; sound in the reference direction | 6 |
 | Meter support | A non-vertical rod at the rear, method 1 or 2 of Figure 1 (method 2 at less than 60°); method 3 is not used | 6 |
 | Samples | Three calibrators, three microphones and one meter; five microphones for a typical response, five windscreens | 7 |

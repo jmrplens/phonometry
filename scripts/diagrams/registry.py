@@ -165,6 +165,7 @@ from .signals import (
     _d_echo_geometry,
     _d_equal_loudness_weighting,
     _d_filter_class_check,
+    _d_free_field_corrections_setup,
     _d_infrasound_chain,
     _d_levels_from_a_record,
     _d_miso_coherence,
@@ -240,6 +241,11 @@ DIAGRAMS = {
         _d_random_incidence_setup,
         "The two calibrations of IEC 61183: free field and diffuse field",
         540,
+    ),
+    "diagram_free_field_corrections_setup": (
+        _d_free_field_corrections_setup,
+        "The readings of IEC 62585: a meter and a reference, in turn",
+        522,
     ),
     "diagram_env_measurement": (
         _d_env_positions,

@@ -1856,6 +1856,8 @@ fit chose so the response sits inside the tolerances everywhere else.
 
 ## How the measurement goes
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_free_field_corrections_setup_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_free_field_corrections_setup.svg" alt="The readings of IEC 62585: a meter and a type LS2P reference microphone read the same free field in turn, then the same source, a sound calibrator (Formula (D.7)), a comparison coupler with both face to face (Formula (E.6)) or an electrostatic actuator on the meter (Formula (F.13))" width="92%"></picture>
+
 | Requirement | Value | Clause |
 | :--- | :--- | :--- |
 | Environment | 80 kPa to 105 kPa, 20 °C to 26 °C, 25 % to 70 % relative humidity; below 97 kPa an extra component enters the budget | 6 |

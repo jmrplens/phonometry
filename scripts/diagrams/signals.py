@@ -3972,3 +3972,178 @@ def _d_random_incidence_setup(s: SVG, th: Theme) -> None:
             th.fg,
             anchor="start",
         )
+
+
+# ---------------------------------------------------------------------------
+# IEC 62585: the substitution that gives a meter's correction on a source
+# (Annexes D, E and F, Figures D.1, E.1 and F.1)
+# ---------------------------------------------------------------------------
+
+
+#: The first two readings of every method are taken in the free field.
+_FREE_FIELD_READINGS = 2
+
+
+def _meter_side(s: SVG, th: Theme, x: float, y: float) -> None:
+    """A sound level meter from the side, its microphone at (x, y) facing left."""
+    s.line(x + 5, y, x + 16, y, th.fg, 3.0)
+    s.path(
+        f"M {x + 16} {y - 4} L {x + 32} {y - 13} L {x + 104} {y - 13} "
+        f"L {x + 104} {y + 13} L {x + 32} {y + 13} L {x + 16} {y + 4} Z",
+        fill=th.primary,
+        stroke=th.fg,
+        sw=1.4,
+    )
+    s.circle(x, y, 5.5, th.fg)
+
+
+def _reference_side(s: SVG, th: Theme, x: float, y: float, facing: float) -> None:
+    """A laboratory standard microphone on its preamplifier, the diaphragm at
+    (x, y), facing left (``facing`` = -1) or right (+1).
+    """
+    back = -facing
+    capsule_end = x + back * 14
+    body_end = x + back * 92
+    s.rect(min(x, capsule_end), y - 7, 14, 14, th.secondary, th.fg, rx=2, sw=1.3)
+    s.rect(min(capsule_end, body_end), y - 4.5, 78, 9, th.panel, th.fg, rx=2, sw=1.2)
+
+
+def _wave_in(s: SVG, th: Theme, x: float, y: float) -> None:
+    """A free progressive field arriving from the left: three parallel arrows."""
+    for dy in (-9.0, 0.0, 9.0):
+        s.arrow(x, y + dy, x + 36, y + dy, th.muted, 1.4)
+
+
+def _calibrator_on(s: SVG, th: Theme, x: float, y: float) -> None:
+    """A sound calibrator fitted over the microphone at (x, y)."""
+    s.rect(x - 44, y - 17, 40, 34, th.panel, th.fg, rx=3, sw=1.5)
+    s.rect(x - 8, y - 9, 8, 18, th.bg, th.fg, sw=1.2)
+
+
+def _actuator_on(s: SVG, th: Theme, x: float, y: float) -> None:
+    """An electrostatic actuator on the diaphragm at (x, y), with its lead."""
+    s.rect(x - 9, y - 15, 5, 30, th.accent, th.fg, sw=1.2)
+    s.path(
+        f"M {x - 9} {y} C {x - 24} {y} {x - 22} {y + 16} {x - 38} {y + 16}",
+        stroke=th.accent,
+        sw=1.6,
+    )
+
+
+def _step(s: SVG, th: Theme, x: float, y: float, number: str) -> None:
+    s.text(x, y + 5, number, 14, th.fg, bold=True)
+
+
+def _d_free_field_corrections_setup(s: SVG, th: Theme) -> None:
+    """IEC 62585: the readings of Annexes D, E and F, each by substitution.
+
+    The meter and a type LS2P reference microphone read the same free field
+    in turn, then the same source; the correction is the meter's free-field
+    response relative to its response on the source, carried over from the
+    reference's free-field correction.
+    """
+    columns = (
+        ("Sound calibrator", "Annex D", 150.0),
+        ("Comparison coupler", "Annex E", 450.0),
+        ("Electrostatic actuator", "Annex F", 750.0),
+    )
+    for heading, annex, cx in columns:
+        s.text(cx, 66, heading, 15, th.fg, bold=True)
+        s.text(cx, 86, annex, 13, th.muted)
+    for x in (300.0, 600.0):
+        s.line(x, 54, x, 424, th.muted, 1.0, dash="4,4")
+
+    rows_y = (126.0, 186.0, 246.0, 306.0)
+    # ----- Annex D: free field for both, then the calibrator on both ------
+    x0 = 14.0
+    for k, (y, label) in enumerate(
+        zip(
+            rows_y,
+            ("$L_{ind1}$", "$L_{ind2}$", "$L_{ind3}$", "$L_{ind4}$"),
+            strict=True,
+        )
+    ):
+        _step(s, th, x0 + 4, y, str(k + 1))
+        mic = x0 + 76
+        if k < _FREE_FIELD_READINGS:
+            _wave_in(s, th, x0 + 20, y)
+        else:
+            _calibrator_on(s, th, mic, y)
+        if k % 2 == 0:
+            _meter_side(s, th, mic, y)
+        else:
+            _reference_side(s, th, mic, y, -1.0)
+        s.text(x0 + 192, y + 5, label, 15, th.fg, anchor="start")
+
+    # ----- Annex E: free field for both, then both in the coupler ---------
+    x0 = 314.0
+    for k, (y, label) in enumerate(
+        zip(rows_y[:2], ("$L_{ind1}$", "$L_{ind2}$"), strict=True)
+    ):
+        _step(s, th, x0 + 4, y, str(k + 1))
+        _wave_in(s, th, x0 + 20, y)
+        mic = x0 + 76
+        if k == 0:
+            _meter_side(s, th, mic, y)
+        else:
+            _reference_side(s, th, mic, y, -1.0)
+        s.text(x0 + 192, y + 5, label, 15, th.fg, anchor="start")
+    y = 272.0
+    _step(s, th, x0 + 4, y, "3")
+    box_left, box_right = 426.0, 464.0
+    s.rect(box_left, y - 18, box_right - box_left, 36, th.panel, th.fg, rx=3, sw=1.5)
+    _reference_side(s, th, box_left - 2, y, 1.0)
+    _meter_side(s, th, box_right + 2, y)
+    s.text(372, y - 26, "$L_{ind3a}$", 15, th.fg)
+    s.text(528, y - 26, "$L_{ind3b}$", 15, th.fg)
+    s.text(450, y + 40, "face to face, read together", 12, th.muted)
+
+    # ----- Annex F: free field for both, then the actuator on the meter ---
+    x0 = 614.0
+    for k, (y, label) in enumerate(
+        zip(
+            rows_y[:3],
+            ("$L_{ind1}(f)$", "$L_{ind2}(f)$", "$L_{ind3}(f)$"),
+            strict=True,
+        )
+    ):
+        _step(s, th, x0 + 4, y, str(k + 1))
+        mic = x0 + 76
+        if k < _FREE_FIELD_READINGS:
+            _wave_in(s, th, x0 + 20, y)
+        else:
+            _actuator_on(s, th, mic, y)
+        if k == 1:
+            _reference_side(s, th, mic, y, -1.0)
+        else:
+            _meter_side(s, th, mic, y)
+        s.text(x0 + 192, y + 5, label, 15, th.fg, anchor="start")
+
+    # ----- What each column gives ----------------------------------------
+    s.text(150, 360, "Formula (D.7)", 13, th.fg, bold=True)
+    s.text(150, 380, "$(L_{ind1} − L_{ind3}) − (L_{ind2} − L_{ind4})$", 13, th.fg)
+    s.text(150, 400, "$+ C_{FF,RM}$", 13, th.fg)
+    s.text(450, 360, "Formula (E.6)", 13, th.fg, bold=True)
+    s.text(450, 380, "$(L_{ind1} − L_{ind3b}) − (L_{ind2} − L_{ind3a})$", 13, th.fg)
+    s.text(450, 400, "$+ C_{FF,RM}$", 13, th.fg)
+    s.text(450, 418, "with the labels of Figure E.1", 12, th.muted)
+    s.text(750, 360, "Formula (F.13)", 13, th.fg, bold=True)
+    s.text(750, 380, "every term referred to $f_0$,", 13, th.fg)
+    s.text(750, 400, "where the correction is zero", 13, th.fg)
+
+    # ----- Key -------------------------------------------------------------
+    ky = 458.0
+    _meter_side(s, th, 40, ky)
+    s.text(156, ky + 5, "sound level meter", 13, th.fg, anchor="start")
+    _reference_side(s, th, 330, ky, -1.0)
+    s.text(432, ky + 5, "reference microphone, type LS2P", 13, th.fg, anchor="start")
+    _wave_in(s, th, 690, ky)
+    s.text(736, ky + 5, "free field", 13, th.fg, anchor="start")
+    s.text(
+        450,
+        500,
+        "Each pair is read in turn at the same place (Annex G); "
+        "$C_{FF,RM}$ comes from IEC/TS 61094-7.",
+        13,
+        th.muted,
+    )

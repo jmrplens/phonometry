@@ -84,7 +84,7 @@ of a sample standard deviation the coefficient would shrink by
 coefficient and its probability value without naming a test. Both use the
 Student :math:`t` statistic :math:`t = r\sqrt{(n - 2)/(1 - r^2)}` with
 :math:`n - 2` degrees of freedom, which is exact for Pearson's coefficient of
-normal data and the usual large-sample approximation for Spearman's. The 95 %
+bivariate normal data and the usual large-sample approximation for Spearman's. The 95 %
 confidence interval of Method B uses the Student distribution with
 :math:`n - 1` degrees of freedom about the mean, with the sample standard
 deviation.
@@ -400,7 +400,7 @@ METHOD_B_SCALES: tuple[QuestionnaireScale, ...] = (
 METHOD_B_MAXIMUM_SOURCES = 8
 
 #: The half-range of the coordinates of Formulas (A.1) and (A.2) of
-#: ISO/TS 12913-3, :math:`4 + \sqrt{32} \approx 9{,}66`: every attribute at
+#: ISO/TS 12913-3, :math:`4 + \sqrt{32} \approx 9.66`: every attribute at
 #: one end of its scale and its opposite at the other gives
 #: :math:`4 + 2 \cdot 4\cos 45^\circ`. Dividing by it maps the coordinates to
 #: :math:`\pm 1`, as A.3 describes.
@@ -729,7 +729,7 @@ class PleasantnessEventfulness:
        E = (e - u) + \cos 45^\circ (ch - ca) + \cos 45^\circ (v - m)
 
     on the scale values of the eight attributes of part 2. The coordinates
-    range over :math:`\pm (4 + \sqrt{32}) = \pm 9{,}66`; the
+    range over :math:`\pm (4 + \sqrt{32}) \approx \pm 9.66`; the
     ``normalized_*`` properties divide by that, for the :math:`\pm 1` of A.3.
 
     :ivar sites: The sites, in the order they first appear.
@@ -810,7 +810,7 @@ class PleasantnessEventfulness:
         :param ax: Existing axes, or ``None`` to create a figure.
         :param normalized: Draw the coordinates divided by
             :math:`4 + \sqrt{32}` (default), in :math:`\pm 1`; ``False``
-            draws them raw, in :math:`\pm 9{,}66`.
+            draws them raw, in :math:`\pm 9.66`.
         :param respondents: Also draw every respondent, faintly, in the colour
             of their site.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -926,8 +926,9 @@ class SoundscapeCorrelation:
     :ivar formula: The formula that gave the coefficient: ``"(A.3)"`` for
         untied ranks, ``"(A.4)"`` for tied ranks, ``"(B.1)"`` for Pearson.
     :ivar coefficient: The correlation coefficient, in ``[-1, 1]``.
-    :ivar p_value: Probability of a coefficient at least this far from zero
-        under the null hypothesis of no correlation, against ``alternative``.
+    :ivar p_value: Probability, under the null hypothesis of no correlation,
+        of a coefficient at least as extreme as this one in the direction
+        ``alternative`` names (either sign for ``"two-sided"``).
     :ivar t_statistic: The Student statistic the probability value comes
         from, :math:`r\sqrt{(n - 2)/(1 - r^2)}`; infinite for :math:`|r| = 1`.
     :ivar degrees_of_freedom: :math:`n - 2`.
@@ -1138,7 +1139,7 @@ def pearson_correlation(
     of a sample standard deviation it would shrink by :math:`(n - 1)/n`. The
     probability value is that of the Student statistic
     :math:`r\sqrt{(n - 2)/(1 - r^2)}` with :math:`n - 2` degrees of freedom,
-    exact for normally distributed data.
+    exact for bivariate normal data.
 
     :param x: The first variable, for instance the mean Method B rating of
         each site.
@@ -1178,9 +1179,10 @@ def pearson_correlation(
 def method_b_scale_values(marked_fraction: ArrayLike) -> float | NDArray[np.float64]:
     """The scale value of a mark on a Method B scale (ISO/TS 12913-3 B.2).
 
-    A continuous-category scale of Figure C.7 runs from the "not at all"
-    tick, scale value 1, to the "extremely" tick, scale value 5, and a mark
-    may fall anywhere along it. Its position is measured with a ruler, or on
+    A continuous-category scale of Figure C.7 runs from its left-hand tick
+    ("not at all", or "never" on the fourth scale), scale value 1, to its
+    right-hand one ("extremely", or "very often"), scale value 5, and a
+    mark may fall anywhere along it. Its position is measured with a ruler, or on
     screen, as a fraction of the distance between the two end ticks, and the
     value is :math:`1 + 4f` rounded to one decimal, the resolution B.2
     requires ("determined at least with one decimal place").
@@ -1221,7 +1223,7 @@ class MethodBSummary:
     :ivar confidence_upper: Upper end of the confidence interval of the mean.
     :ivar medians: Median, the ordinal statistic.
     :ivar counts: Number of answers.
-    :ivar confidence_level: The level of the interval, 0,95 unless chosen.
+    :ivar confidence_level: The level of the interval, ``0.95`` unless chosen.
     """
 
     items: tuple[str, ...]
@@ -1290,16 +1292,16 @@ def method_b_summary(
     The confidence interval of the mean is
     :math:`\bar{x} \pm t_{(1+\gamma)/2,\,n-1}\, s/\sqrt{n}`, with :math:`s`
     the sample standard deviation and :math:`\gamma` the confidence level,
-    0,95 as B.2 asks.
+    95 % as B.2 asks.
 
-    :param scale_values: The scale values, 1,0 to 5,0 with at least one
-        decimal (:func:`method_b_scale_values`), ``NaN`` for a blank: a
+    :param scale_values: The scale values from 1 to 5, read to one
+        decimal by :func:`method_b_scale_values`, ``NaN`` for a blank: a
         mapping from scale name to one value per response, a 1-D array for one
         scale, or a 2-D array ``(responses, scales)`` whose three or four
         columns are the scales of Figure C.7 in their printed order.
     :param sites: The site of each response; ``None`` puts every response at
         one site named ``"all"``.
-    :param confidence_level: The level of the interval, 0,95 by default.
+    :param confidence_level: The level of the interval, ``0.95`` by default.
     :return: A :class:`MethodBSummary`.
     :raises ValueError: for a value outside 1 to 5, a confidence level not
         strictly between 0 and 1, or sites that do not match the responses.

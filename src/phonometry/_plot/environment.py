@@ -1635,11 +1635,11 @@ _SOUNDSCAPE_STRINGS_ES: dict[str, str] = {
     "visit again": "volver",
     "all": "todas",
     "Pleasantness $P$": "Agradabilidad $P$",
-    "Eventfulness $E$": "Actividad $E$",
+    "Eventfulness $E$": "Eventualidad $E$",
     r"Pleasantness $P/(4+\sqrt{32})$": r"Agradabilidad $P/(4+\sqrt{32})$",
-    r"Eventfulness $E/(4+\sqrt{32})$": r"Actividad $E/(4+\sqrt{32})$",
+    r"Eventfulness $E/(4+\sqrt{32})$": r"Eventualidad $E/(4+\sqrt{32})$",
     "ISO/TS 12913-3 Figure A.1: pleasantness and eventfulness": (
-        "ISO/TS 12913-3 Figura A.1: agradabilidad y actividad"
+        "ISO/TS 12913-3 Figura A.1: agradabilidad y eventualidad"
     ),
     "Scale value (Table A.1)": "Valor de escala (Tabla A.1)",
     "Scale value (Table B.1)": "Valor de escala (Tabla B.1)",
@@ -1793,7 +1793,8 @@ def plot_pleasantness_eventfulness(
 
     Pleasantness on the horizontal axis, eventfulness on the vertical one,
     the four main attribute axes solid and the four rotated ones dashed, as
-    the figure draws them, and each site a labelled point.
+    the figure draws them, and each site a point of its own, named in a
+    legend under the axes.
 
     :param result: A
         :class:`~phonometry.environment.assessment.soundscape.PleasantnessEventfulness`.
@@ -1848,13 +1849,16 @@ def plot_pleasantness_eventfulness(
             color=ink,
         )
     if respondents:
-        ax.plot(
-            result.respondent_pleasantness * scale,
-            result.respondent_eventfulness * scale,
-            ".",
-            color=theme_line(_C_MUTED, ax, quiet=0.6),
-            ms=3,
-        )
+        respondent_sites = np.asarray(result.respondent_sites, dtype=object)
+        for k, site in enumerate(result.sites):
+            own = respondent_sites == site
+            ax.plot(
+                result.respondent_pleasantness[own] * scale,
+                result.respondent_eventfulness[own] * scale,
+                ".",
+                color=theme_line(_SITE_COLORS[k % len(_SITE_COLORS)], ax, quiet=0.6),
+                ms=3,
+            )
     # Each site a marker of its own, named in a legend under the axes: sites
     # of one study sit close together, and names written beside the points
     # would run into each other and across the attribute arrows.
@@ -1894,7 +1898,7 @@ def plot_pleasantness_eventfulness(
     ax.set_title(
         _t("ISO/TS 12913-3 Figure A.1: pleasantness and eventfulness", language)
     )
-    ax.grid(visible=True, alpha=0.2)
+    ax.grid(visible=True, alpha=0.3)
     localize_axes(ax, language)
     return ax
 

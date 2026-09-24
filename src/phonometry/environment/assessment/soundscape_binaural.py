@@ -48,7 +48,7 @@ stationary value under a percentile's name.
 
 Recording requirements of ISO/TS 12913-2 Annex D that the signal itself can
 show are checked with a :class:`SoundscapeWarning`: a measurement interval
-of at least 3 min (D.3) and a sampling frequency of at least 44,1 kHz (D.6).
+of at least 3 min (D.3) and a sampling frequency of at least 44.1 kHz (D.6).
 The equalization (D.4), the position (D.2) and the calibration are the
 caller's: the channels are taken as equalized sound pressure, left first.
 
@@ -189,6 +189,9 @@ _MINIMUM_FS_HZ = 44_100.0
 
 #: A binaural recording has two channels, left and right.
 _CHANNELS = 2
+
+#: A recording is a matrix: one row per channel, one column per sample.
+_RECORDING_RANK = 2
 
 #: The sound fields the loudness and hearing-model metrics take.
 _Field = Literal["free", "diffuse"]
@@ -420,7 +423,7 @@ def _two_channels(
         msg = "'calibration_factor' must be a positive, finite number."
         raise ValueError(msg)
     samples = np.asarray(resolve_samples(x, calibrate=False), dtype=np.float64)
-    if samples.ndim != 2 or samples.shape[0] != _CHANNELS:  # noqa: PLR2004
+    if samples.ndim != _RECORDING_RANK or samples.shape[0] != _CHANNELS:
         msg = (
             "'x' must be a binaural recording of shape (2, samples), left ear "
             f"first; got shape {samples.shape}."
@@ -447,7 +450,7 @@ def _check_recording(duration_s: float, fs: float) -> None:
     if fs < _MINIMUM_FS_HZ:
         warnings.warn(
             f"The sampling frequency is {fs:g} Hz; ISO/TS 12913-2 D.6 requires at "
-            "least 44,1 kHz.",
+            "least 44.1 kHz.",
             SoundscapeWarning,
             stacklevel=3,
         )
@@ -622,7 +625,7 @@ def binaural_indicators(
         field or row, or a loudness exceeded 95 % of the time of zero, which
         leaves :math:`N_5/N_{95}` undefined.
     :warns SoundscapeWarning: for a recording shorter than the 3 min of
-        ISO/TS 12913-2 D.3 or sampled below the 44,1 kHz of D.6.
+        ISO/TS 12913-2 D.3 or sampled below the 44.1 kHz of D.6.
     """
     require_choice(field, "field", _FIELDS)
     if isinstance(parameters, str):

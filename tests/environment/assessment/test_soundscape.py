@@ -768,6 +768,40 @@ def test_the_figure_a1_plot_draws_the_eight_attributes() -> None:
     plt.close("all")
 
 
+def test_the_respondents_are_drawn_in_the_colour_of_their_site() -> None:
+    answers = np.array(
+        [
+            [5, 1, 4, 2, 5, 1, 3, 2],
+            [4, 2, 4, 2, 4, 2, 3, 2],
+            [2, 4, 3, 3, 2, 4, 4, 3],
+            [1, 5, 2, 3, 1, 5, 5, 3],
+            [2, 5, 2, 2, 2, 4, 4, 2],
+        ],
+        dtype=float,
+    )
+    result = sc.pleasantness_eventfulness(
+        answers, sites=["park", "park", "road", "road", "road"]
+    )
+    ax = result.plot(respondents=True)
+    dots = [line for line in ax.lines if line.get_marker() == "."]
+    sites = [line for line in ax.lines if line.get_label() in ("park", "road")]
+    # One faint series per site, holding that site's respondents only.
+    assert [line.get_xdata().size for line in dots] == [2, 3]
+    park_p = result.respondent_pleasantness[:2] / _RANGE
+    assert np.asarray(dots[0].get_xdata()) == pytest.approx(park_p)
+    # A dot is a quieter shade of its site's marker, never another site's hue.
+    for dot, site in zip(dots, sites, strict=True):
+        dot_rgb = np.asarray(mpl.colors.to_rgb(dot.get_color()))
+        own = np.asarray(mpl.colors.to_rgb(site.get_color()))
+        other = [
+            np.asarray(mpl.colors.to_rgb(s.get_color())) for s in sites if s is not site
+        ]
+        assert all(
+            np.linalg.norm(dot_rgb - own) < np.linalg.norm(dot_rgb - o) for o in other
+        )
+    plt.close("all")
+
+
 @pytest.mark.parametrize(
     "factory",
     [

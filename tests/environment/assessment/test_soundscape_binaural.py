@@ -156,7 +156,11 @@ def test_loudness_is_iso_532_1_of_each_ear(
 def test_loudness_statistics_are_ordered(
     levels_and_loudness: sb.BinauralIndicators,
 ) -> None:
-    """The power means order themselves: N95 <= Naverage <= Nrmc, and N5 above."""
+    """Naverage <= Nrmc always, by the power-mean inequality.
+
+    On this swinging noise the two percentiles bracket both: N95 below, N5
+    above.
+    """
     m = levels_and_loudness.metrics
     for ear in ("left", "right"):
         n95, average, rmc, n5 = (
@@ -327,7 +331,7 @@ def test_a_low_sampling_frequency_is_flagged() -> None:
         warnings.simplefilter("always", sb.SoundscapeWarning)
         sb.binaural_indicators(x, 24_000, parameters="sound_pressure_level")
     messages = [str(w.message) for w in caught if w.category is sb.SoundscapeWarning]
-    assert any("44,1 kHz" in message for message in messages)
+    assert any("44.1 kHz" in message for message in messages)
     assert any("at least 3 min" in message for message in messages)
 
 

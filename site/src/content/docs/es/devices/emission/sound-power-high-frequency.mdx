@@ -1,6 +1,6 @@
 ---
 title: "Potencia acústica en la octava de 16 kHz (ISO 9295)"
-description: "Los métodos de ISO 9295 para la banda de octava de 16 kHz: la constante de sala a partir del tiempo de reverberación medido o de la absorción del aire del anexo A, el nivel directo LW = Lp - 10 lg(4/R), la comparación con una fuente sonora de referencia para ruido de banda ancha y para tonos discretos, el ancho de banda que pide un micrófono en movimiento, la corrección de campo libre más allá de 2 m y las 43 celdas que las tablas 1 y 2 imprimen mal."
+description: "Los métodos de ISO 9295 para la banda de octava de 16 kHz: la constante de sala a partir del tiempo de reverberación medido o de la absorción del aire del anexo A, el nivel directo LW = Lp - 10 lg(4/R), la comparación con una fuente sonora de referencia para ruido de banda ancha y para tonos discretos, el ancho de banda que pide un micrófono en movimiento, la corrección de campo libre más allá de 2 m, lo que la tabla 3 pide determinar y las 43 celdas que las tablas 1 y 2 imprimen mal."
 references:
   - type: standard
     organization: "International Organization for Standardization"
@@ -41,8 +41,9 @@ el principal absorbente de una cámara reverberante, y eso es lo que da forma
 al método: esta guía cubre la constante de sala a partir del tiempo de
 reverberación medido o de la absorción del aire calculada, el nivel directo,
 la comparación con una fuente sonora de referencia para ruido de banda ancha y
-para tonos, la alternativa de campo libre y las erratas de las tablas que la
-norma imprime para la absorción del aire. Qué vía encaja con qué trabajo por
+para tonos, la alternativa de campo libre, lo que la tabla 3 pide determinar
+para cada tipo de ruido y las erratas de las tablas que la norma imprime para
+la absorción del aire. Qué vía encaja con qué trabajo por
 debajo de 10 kHz se sopesa en
 [Potencia acústica](/phonometry/es/devices/emission/sound-power/).
 
@@ -111,14 +112,14 @@ Una cámara reverberante convierte la presión cuadrática media en potencia
 acústica a través de su absorción. Por encima de 10 kHz esa absorción es lo
 bastante grande para que la aproximación de Sabine deje de valer, así que la
 norma escribe la constante de sala $R$ en sus dos métodos con el coeficiente de
-absorción de la sala, $\alpha_\mathrm{sala}$, y no con el área de Sabine. El
-método del apartado 6 obtiene $\alpha_\mathrm{sala}$ del tiempo de
+absorción de la sala, $\alpha_\mathrm{room}$, y no con el área de Sabine. El
+método del apartado 6 obtiene $\alpha_\mathrm{room}$ del tiempo de
 reverberación medido $T$ mediante la relación de Eyring, fórmulas (4) y (5),
 con $S$ la superficie total de la sala y $V$ su volumen:
 
 $$
-R = \frac{S\,\alpha_\mathrm{sala}}{1 - \alpha_\mathrm{sala}}, \qquad
-\alpha_\mathrm{sala} = 1 - \mathrm{e}^{-0{,}16\,V/(S T)}.
+R = \frac{S\,\alpha_\mathrm{room}}{1 - \alpha_\mathrm{room}}, \qquad
+\alpha_\mathrm{room} = 1 - \mathrm{e}^{-0{,}16\,V/(S T)}.
 $$
 
 El método del apartado 7 se ahorra la medida. A 10 kHz y por encima,
@@ -162,19 +163,22 @@ print(room_t.round(1))           # [ 51.1  91.8 167.4] m2
 Las dos constantes difieren en lo que absorben las paredes además del aire,
 0,25 dB en el nivel que dan. El término del aire se mueve mucho más con el
 tiempo atmosférico: la misma sala a 20 °C y 40 % tiene una constante de sala
-1,5 dB mayor a 12,5 kHz y 16 kHz, y por eso el apartado 5.2 pide que el
+1,6 dB mayor a 12,5 kHz y 1,5 dB mayor a 16 kHz, y por eso el apartado 5.2 pide que el
 producto de humedad y temperatura se mantenga durante la medida.
 `room_constant_from_air_absorption` avisa por debajo de 10 kHz, donde su
 premisa deja de valer, y rechaza una sala en la que $8\alpha V/S$ llegue a 1,
 donde el aire solo absorbería más de lo que puede la superficie de la sala.
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/high_frequency_air_absorption.svg" alt="Dos paneles. A la izquierda, el coeficiente de absorción del aire del anexo A de ISO 9295 en neperios por metro de 10 kHz a 22,4 kHz, tres curvas que crecen con la frecuencia: 18 grados y 40 % de 0,024 a 0,076, 23 grados y 50 % de 0,016 a 0,068, y 27 grados y 60 % de 0,012 a 0,054, cada una con las celdas impresas de su columna de las tablas 1 y 2 como marcadores huecos sobre la curva, salvo un marcador verde a 21,5 kHz que queda claramente por encima de la curva de 27 grados. A la derecha, cada una de las 624 celdas impresas como su diferencia con el anexo A en unidades del cuarto decimal, frente a la frecuencia: 581 puntos grises sobre la línea de cero y 43 cruces rojas por encima, la mayoría entre 1 y 8 unidades, y tres que destacan en 30, 40 y 50 unidades a 14,5, 17 y 21,5 kHz" width="100%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/high_frequency_air_absorption.svg" alt="Dos paneles. A la izquierda, el coeficiente de absorción del aire del anexo A de ISO 9295 en neperios por metro de 10 kHz a 22,4 kHz, tres curvas que crecen con la frecuencia: 18 grados y 40 % de 0,024 a 0,076, 23 grados y 50 % de 0,016 a 0,068, y 27 grados y 60 % de 0,012 a 0,054, cada una con las celdas impresas de su columna de las tablas 1 y 2 como marcadores huecos sobre la curva, salvo dos marcadores verdes por encima de la curva de 27 grados, uno justo encima a 18 kHz y otro claramente separado a 21,5 kHz. A la derecha, cada una de las 624 celdas impresas como su diferencia con el anexo A con la temperatura convertida como theta más 273,16 K, en unidades del cuarto decimal, frente a la frecuencia: 581 puntos grises sobre la línea de cero y 43 cruces rojas por encima, la mayoría entre 1 y 8 unidades, y tres que destacan en 30, 40 y 50 unidades a 14,5, 17 y 21,5 kHz" width="100%" />
 
 *El anexo A frente a la página. Las tablas imprimen $\alpha$ de 18 °C a
 27 °C, del 40 % al 60 % y de 10 000 Hz a 22 400 Hz, 624 celdas con cuatro
-decimales, y 581 son el anexo A hasta la última cifra. Las otras 43 son las
-erratas del párrafo siguiente: en todas, un 0 del anexo A se imprime como
-otra cifra.*
+decimales. Las curvas de la izquierda son el anexo A de la biblioteca, con la
+temperatura convertida como $\theta + 273{,}15$ K; el panel derecho mide cada
+celda frente al anexo A convertido como se calcularon las tablas,
+$\theta + 273{,}16$ K, y ahí 581 son el anexo A hasta la última cifra. Las
+otras 43 son las erratas del párrafo siguiente: en todas, un 0 del anexo A se
+imprime como otra cifra.*
 
 <details>
 <summary>Mostrar el código de esta figura</summary>
@@ -201,8 +205,11 @@ plt.show()
 No lea $\alpha$ en las tablas 1 y 2. Cuarenta y tres de sus celdas están mal
 impresas, y de la misma manera: un 0 que da el anexo A se imprime como otra
 cifra, casi siempre el cuarto decimal como el tercero repetido («0,027 7»
-donde el anexo A da 0,027 0). La mayor es «0,033 0» por 0,030 0 a 14 500 Hz, 25 °C y
-50 %, que llevada a la fórmula (7) sube el nivel al menos 0,41 dB. La lista
+donde el anexo A da 0,027 0). Tres celdas cuyo valor del anexo A acaba en
+dos ceros se imprimen un 10 % altas: «0,033 0» por 0,030 0, «0,04 4» por
+0,040 0 y «0,05 50» por 0,050 0. La última, a 21 500 Hz, 27 °C y 60 %, es
+el mayor error de las tablas, 0,005 0 Np/m, y llevada a la fórmula (7)
+cualquiera de las tres sube el nivel al menos 0,41 dB. La lista
 completa, celda a celda, está en el
 [registro de erratas](/phonometry/es/reference/errata/). Las 581 celdas
 correctas guardan una sorpresa menor: solo se reproducen cifra a cifra con la
@@ -216,7 +223,7 @@ lo que mueve 61 de ellas una unidad del cuarto decimal y ninguna más de
 | Función | Fórmula | Devuelve | Notas |
 | :--- | :--- | :--- | :--- |
 | `air_absorption_np_per_m(frequencies_hz, *, temperature_c, relative_humidity_percent, static_pressure_kpa=101.325)` | Anexo A | $\alpha$ [Np/m] | ISO 9613-1 sin el 8,686; aviso fuera de 50 Hz a 22,4 kHz y fuera de −20 °C a +50 °C |
-| `room_absorption_coefficient(reverberation_time_s, *, volume_m3, surface_area_m2)` | (5) | $\alpha_\mathrm{sala}$ | El 0,16 que imprime la fórmula |
+| `room_absorption_coefficient(reverberation_time_s, *, volume_m3, surface_area_m2)` | (5) | $\alpha_\mathrm{room}$ | El 0,16 que imprime la fórmula |
 | `room_constant_from_reverberation_time(reverberation_time_s, *, volume_m3, surface_area_m2)` | (4), (5) | $R$ [m²] | Apartado 6 |
 | `room_constant_from_air_absorption(frequencies_hz, *, volume_m3, surface_area_m2, temperature_c, relative_humidity_percent, static_pressure_kpa=101.325)` | (7) | $R$ [m²] | Apartado 7; avisa por debajo de 10 kHz, rechaza $8\alpha V/S \ge 1$ |
 
@@ -337,10 +344,11 @@ de comparación.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/high_frequency_sound_power.svg" alt="Dos paneles. A la izquierda, la impresora del ejemplo: una barra de nivel de potencia acústica por banda de tercio de octava de la octava de 16 kHz, 69,1 dB a 12,5 kHz, 69,5 dB a 16 kHz y 67,3 dB a 20 kHz, con un punto naranja en cada barra para el nivel medio de la sala de 58,5, 56,3 y 51,4 dB. A la derecha, la fuente de alimentación del ejemplo tonal: tres líneas verticales sobre un eje de frecuencia en kilohercios, 59,4 dB a 15,625 kHz y 52,2 dB a 17 kHz en azul, y 44,9 dB a 20,5 kHz en gris, cada una con una marca naranja corta para su nivel medio de sala, y una línea roja discontinua en 49,4 dB, 10 dB por debajo del tono más alto, que solo cruzan las dos primeras" width="100%" />
 
-*A la izquierda, la impresora de la sección 3: el término de sala de la
-fórmula (6) es la distancia entre cada barra y su punto: crece de 10,7 dB a 12,5 kHz a 15,9 dB a 20 kHz, porque
-el aire absorbe más en lo alto de la octava y la constante de sala crece con
-él. A la derecha, los tonos de arriba: el de 20,5 kHz queda más
+*A la izquierda, la impresora de la sección 3: la distancia entre cada barra
+y su punto es el término de sala de la fórmula (6), $-10 \lg(4/R)$, que crece
+de 10,8 dB a 12,5 kHz a 16,0 dB a 20 kHz porque el aire absorbe más en lo
+alto de la octava y la constante de sala crece con él, menos los 0,12 dB que
+quitan $C_1 + C_2$. A la derecha, los tonos de arriba: el de 20,5 kHz queda más
 de 10 dB por debajo del más alto y fuera de lo que el apartado 13 c) pide
 informar.*
 
@@ -367,9 +375,9 @@ tercio de octava de la octava de 16 kHz, y
 lo admite tal cual (sin `frequencies`, porque la tabla de ponderación A de
 ISO 3744 se detiene en 10 kHz). Lo que añade ISO 9295 es la fórmula (10): más
 allá de un radio de medida de 2 m el aire absorbe lo bastante en el camino
-para que el nivel de superficie lleve la corrección $K = r\,\alpha$, con
+para que el nivel de superficie lleve la corrección $K_\alpha = r\,\alpha$, con
 $\alpha$ en decibelios por metro (apartado 9.8). El nivel de superficie y el
-nivel de potencia acústica difieren en una constante, así que sumar $K$ a los
+nivel de potencia acústica difieren en una constante, así que sumar $K_\alpha$ a los
 niveles por banda es lo mismo.
 
 ```python
@@ -382,6 +390,37 @@ print((hemisphere.sound_power_level + k).round(1))       # [66.5 64.8 61.2] dB
 ```
 
 A 2 m o menos el apartado no pide corrección y la función devuelve cero.
+
+## 6. Qué determinar para cada tipo de ruido
+
+La tabla 3 de la norma decide qué da una determinación, a partir del ruido que
+emite el equipo en las bandas de octava de 125 Hz a 8 kHz y en la octava de
+16 kHz. Con ruido de banda ancha o de banda estrecha por debajo de 8 kHz, el
+nivel de potencia acústica ponderado A de ISO 3741 o ISO 3744 forma siempre
+parte de ella, y la octava de 16 kHz añade sus niveles por banda de tercio de
+octava si el ruido es de banda ancha, el nivel y la frecuencia de un tono
+discreto, o los niveles y las frecuencias de todos los tonos que queden a menos
+de 10 dB del más alto. Sin ruido significativo por debajo de 8 kHz, la nota b
+recuerda que el ruido queda fuera del campo de aplicación de ISO 3741 e
+ISO 3744, así que solo se aplica esta norma y solo se piden el tono o los tonos
+de la octava de 16 kHz. `high_frequency_levels_to_determine` lee la
+tabla: una fuente de alimentación como la de la sección 4, con tres tonos por
+encima de 8 kHz y un ventilador que llena de ruido de banda ancha las bandas de
+debajo, cae en la fila de tonos múltiples.
+
+```python
+print(emission.high_frequency_levels_to_determine(
+    noise_125_hz_to_8_khz="broadband", noise_16_khz_octave="multiple_tones"))
+# ('a_weighted_sound_power_level', 'tone_levels_within_10_db')
+print(emission.high_frequency_levels_to_determine(
+    noise_125_hz_to_8_khz="none", noise_16_khz_octave="discrete_tone"))
+# ('tone_level_and_frequency',)
+```
+
+La tabla no tiene fila para un equipo sin ningún ruido significativo, ni para
+uno con ruido de banda ancha en la octava de 16 kHz y nada por debajo, y la
+función rechaza esas dos combinaciones con un `ValueError` en lugar de adivinar
+lo que pediría la norma.
 
 ## Qué cubre esta guía
 
@@ -398,7 +437,9 @@ tablas 1 y 2), el nivel directo de la fórmula (6), la comparación con una
 fuente sonora de referencia para ruido de banda ancha y para tonos
 (fórmulas (8) y (9)), la corrección de campo libre de la fórmula (10), las
 condiciones meteorológicas de referencia del apartado 10.1 mediante las $C_1$
-y $C_2$ de ISO 3741, y el intervalo de 10 dB que informar del apartado 13 c).
+y $C_2$ de ISO 3741, el intervalo de 10 dB que informar del apartado 13 c), y
+los niveles que la tabla 3 pide determinar para cada tipo de ruido
+(`high_frequency_levels_to_determine`).
 </ScopeClaim>
 
 <ScopeClaim status="not-covered" label="No cubierto">
@@ -409,9 +450,8 @@ laboratorio, y la estabilidad de ±10 % de
 $h_\mathrm{r}(\theta + 5\ ^\circ\mathrm{C})$ no se vigila. La corrección de
 fondo es la de ISO 3741, aplicada a los niveles antes de pasarlos
 (`reverberation_background_correction`). El método de campo libre es ISO 3744
-tal como lo implementa la biblioteca, más la fórmula (10). La tabla 3, que dice
-qué determinar para cada tipo de ruido, es una guía para el informe y no se
-calcula, y la incertidumbre del apartado 11 es una declaración,
+tal como lo implementa la biblioteca, más la fórmula (10). La incertidumbre del
+apartado 11 es una declaración,
 $u(L_W) \approx \sigma_\mathrm{tot}$, con desviaciones típicas de
 reproducibilidad de 3 dB o menos en la octava de 16 kHz.
 </ScopeClaim>
@@ -432,7 +472,8 @@ reproducibilidad de 3 dB o menos en la octava de 16 kHz.
 - [Propagación en exteriores (ISO 9613-1 / ISO 9613-2)](/phonometry/es/environment/propagation/outdoor-propagation/):
   el coeficiente de atenuación a partir del que se escribe el anexo A.
 - [Erratas](/phonometry/es/reference/errata/): las 43 celdas mal impresas de las
-  tablas 1 y 2.
+  tablas 1 y 2, y la frecuencia de relajación del oxígeno que la fórmula (A.5)
+  escribe con un cero.
 - Referencia de la API: [`emission.sound_power_high_frequency`](/phonometry/es/reference/api/power/sound-power-high-frequency/).
 
 </SeeAlso>

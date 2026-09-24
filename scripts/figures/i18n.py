@@ -1624,7 +1624,7 @@ _ES_EXACT = {
     "581 cells printed as Annex A gives them": "581 celdas impresas como las da el anexo A",
     "43 cells where a 0 is printed as another digit": "43 celdas donde un 0 se imprime como otra cifra",
     "Printed less Annex A [$10^{-4}$ Np/m]": "Impreso menos anexo A [$10^{-4}$ Np/m]",
-    "All 624 cells of Tables 1 and 2": "Las 624 celdas de las tablas 1 y 2",
+    "All 624 cells, against Annex A at $\\theta$ + 273.16 K": "Las 624 celdas, frente al anexo A a $\\theta$ + 273,16 K",
     "Contribution to $L_W - \\bar{L}_p$ [dB]": "Aportación a $L_W - \\bar{L}_p$ [dB]",
     "Waterhouse": "Waterhouse",
     "the Waterhouse term rules the low bands\n"

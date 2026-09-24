@@ -13,8 +13,9 @@ itself is the main absorber of a reverberation room, and that is what shapes
 the method: this guide covers the room constant from the measured
 reverberation time or from the calculated air absorption, the direct level,
 the comparison with a reference sound source for broadband noise and for
-tones, the free-field alternative and the misprints of the tables the
-standard prints for the air absorption. Which route fits which job below
+tones, the free-field alternative, what Table 3 asks a report to determine
+for each type of noise, and the misprints of the tables the standard prints
+for the air absorption. Which route fits which job below
 10 kHz is weighed in [Sound Power](sound-power.md).
 
 ## 1. The 16 kHz octave band (ISO 9295)
@@ -130,18 +131,21 @@ print(room_t.round(1))           # [ 51.1  91.8 167.4] m2
 
 The two constants differ by what the walls absorb on top of the air, 0.25 dB
 in the level they give. The air term moves much more with the weather: the
-same room at 20 °C and 40 % has a room constant 1.5 dB larger at 12.5 kHz and
-16 kHz, which is why clause 5.2 holds the product of humidity and temperature
+same room at 20 °C and 40 % has a room constant 1.6 dB larger at 12.5 kHz and
+1.5 dB larger at 16 kHz, which is why clause 5.2 holds the product of humidity and temperature
 steady during a measurement. `room_constant_from_air_absorption` warns below
 10 kHz, where its premise no longer holds, and refuses a room where
 $8\alpha V/S$ reaches 1, where the air alone would absorb more than the room
 surface can.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/high_frequency_air_absorption_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/high_frequency_air_absorption.svg" alt="Two panels. On the left, the air absorption coefficient of ISO 9295 Annex A in nepers per metre from 10 kHz to 22.4 kHz, three curves rising with frequency: 18 degrees and 40 % from 0.024 to 0.076, 23 degrees and 50 % from 0.016 to 0.068, and 27 degrees and 60 % from 0.012 to 0.054, each with the printed cells of its column of Tables 1 and 2 as open markers sitting on the curve, except one green marker at 21.5 kHz standing clear above the 27 degree curve. On the right, every one of the 624 printed cells as its departure from Annex A in units of the fourth decimal, against frequency: 581 grey dots on the zero line, and 43 red crosses above it, most of them between 1 and 8 units, three standing out at 30, 40 and 50 units at 14.5, 17 and 21.5 kHz" width="100%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/high_frequency_air_absorption_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/high_frequency_air_absorption.svg" alt="Two panels. On the left, the air absorption coefficient of ISO 9295 Annex A in nepers per metre from 10 kHz to 22.4 kHz, three curves rising with frequency: 18 degrees and 40 % from 0.024 to 0.076, 23 degrees and 50 % from 0.016 to 0.068, and 27 degrees and 60 % from 0.012 to 0.054, each with the printed cells of its column of Tables 1 and 2 as open markers sitting on the curve, except two green markers above the 27 degree curve, one just above it at 18 kHz and one standing clear of it at 21.5 kHz. On the right, every one of the 624 printed cells as its departure from Annex A with the temperature converted as theta plus 273.16 K, in units of the fourth decimal, against frequency: 581 grey dots on the zero line, and 43 red crosses above it, most of them between 1 and 8 units, three standing out at 30, 40 and 50 units at 14.5, 17 and 21.5 kHz" width="100%"></picture>
 
 *Annex A against the page. The tables print $\alpha$ for 18 °C to 27 °C,
-40 % to 60 % and 10 000 Hz to 22 400 Hz, 624 cells to four decimals, and 581
-of them are Annex A to the last digit. The other 43 are the misprints of the
+40 % to 60 % and 10 000 Hz to 22 400 Hz, 624 cells to four decimals. The
+curves on the left are the library's Annex A, with the temperature converted
+as $\theta + 273.15$ K; the right panel measures each cell against Annex A
+converted as the tables were computed, $\theta + 273.16$ K, and there 581 of
+them are Annex A to the last digit. The other 43 are the misprints of the
 next paragraph: in every one of them a 0 of Annex A is printed as another
 digit.*
 
@@ -170,9 +174,11 @@ plt.show()
 Do not read $\alpha$ from Tables 1 and 2. Forty-three of their cells are
 misprinted, and in the same way: a 0 that Annex A gives is printed as
 another digit, most often the fourth decimal as the third repeated ("0,027 7"
-where Annex A gives 0,027 0). The largest is "0,033 0" for 0,030 0
-at 14 500 Hz, 25 °C and 50 %, which read into Formula (7) raises the level
-by at least 0.41 dB. The whole list, cell by cell, is in the
+where Annex A gives 0,027 0). Three cells whose Annex A value ends in two
+zeros are printed 10 % high: "0,033 0" for 0,030 0, "0,04 4" for 0,040 0
+and "0,05 50" for 0,050 0. The last of them, at 21 500 Hz, 27 °C and 60 %,
+is the largest error in the tables, 0,005 0 Np/m, and read into Formula (7)
+any of the three raises the level by at least 0.41 dB. The whole list, cell by cell, is in the
 [errata registry](../../ERRATA.md). The 581 correct cells hold a
 smaller surprise: they reproduce digit for digit only with the temperature
 converted as $\theta + 273.16$ K, the triple point of water, where the
@@ -305,10 +311,11 @@ method.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/high_frequency_sound_power_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/high_frequency_sound_power.svg" alt="Two panels. On the left, the printer of the example: one bar of sound power level per one-third-octave band of the 16 kHz octave, 69.1 dB at 12.5 kHz, 69.5 dB at 16 kHz and 67.3 dB at 20 kHz, with an orange dot in each bar for the mean room level of 58.5, 56.3 and 51.4 dB. On the right, the power supply of the tonal example: three stems on a frequency axis in kilohertz, 59.4 dB at 15.625 kHz and 52.2 dB at 17 kHz in blue, and 44.9 dB at 20.5 kHz in grey, each with a short orange mark for its mean room level, and a red dashed line at 49.4 dB, 10 dB below the highest tone, that only the first two stems cross" width="100%"></picture>
 
-*On the left, the printer of section 3: the room term of Formula (6) is the
-gap between each bar and its dot: it grows from 10.7 dB at 12.5 kHz to 15.9 dB at 20 kHz, because the
-air absorbs more at the top of the octave and the room constant grows with
-it. On the right, the tones above: the one at 20.5 kHz lies more
+*On the left, the printer of section 3: the gap between each bar and its dot
+is the room term of Formula (6), $-10 \lg(4/R)$, which grows from 10.8 dB at
+12.5 kHz to 16.0 dB at 20 kHz because the air absorbs more at the top of the
+octave and the room constant grows with it, less the 0.12 dB that $C_1 + C_2$
+take off. On the right, the tones above: the one at 20.5 kHz lies more
 than 10 dB below the highest and falls outside what clause 13 c) asks to be
 reported.*
 
@@ -335,9 +342,10 @@ one-third-octave bands of the 16 kHz octave, and
 takes it as it stands (without `frequencies`, since the A-weighting table of
 ISO 3744 stops at 10 kHz). What ISO 9295 adds is Formula (10): beyond a
 measurement radius of 2 m the air absorbs enough over the path that the
-surface level takes the correction $K = r\,\alpha$, with $\alpha$ in
+surface level takes the correction $K_\alpha = r\,\alpha$, with $\alpha$ in
 decibels per metre (clause 9.8). The surface level and the sound power level
-differ by a constant, so adding $K$ to the band levels is the same thing.
+differ by a constant, so adding $K_\alpha$ to the band levels is the same
+thing.
 
 ```python
 levels = np.array([[50.0, 48.0, 44.0]] * 10) + np.linspace(-1.0, 1.0, 10)[:, None]
@@ -351,6 +359,36 @@ print((hemisphere.sound_power_level + k).round(1))       # [66.5 64.8 61.2] dB
 At 2 m or less the clause asks for no correction and the function returns
 zero.
 
+## 6. What to determine for each type of noise
+
+Table 3 of the standard decides what a determination gives, from the noise
+the equipment makes in the octave bands from 125 Hz to 8 kHz and in the
+16 kHz octave. With broadband or narrow-band noise below 8 kHz, the
+A-weighted sound power level of ISO 3741 or ISO 3744 is always part of it,
+and the 16 kHz octave adds its one-third-octave band levels for broadband
+noise, the level and the frequency of a discrete tone, or the levels and the
+frequencies of every tone within 10 dB of the highest. With no significant
+noise below 8 kHz, footnote b notes that the noise lies outside the scope of
+ISO 3741 and ISO 3744, so only this standard applies and only the tone or the
+tones of the 16 kHz octave are asked for.
+`high_frequency_levels_to_determine` reads the table: a power supply like the
+one of section 4, with three tones above 8 kHz and a fan that fills the bands
+below with broadband noise, falls on the multiple-tone row.
+
+```python
+print(emission.high_frequency_levels_to_determine(
+    noise_125_hz_to_8_khz="broadband", noise_16_khz_octave="multiple_tones"))
+# ('a_weighted_sound_power_level', 'tone_levels_within_10_db')
+print(emission.high_frequency_levels_to_determine(
+    noise_125_hz_to_8_khz="none", noise_16_khz_octave="discrete_tone"))
+# ('tone_level_and_frequency',)
+```
+
+The table has no row for equipment with no significant noise anywhere, or with
+broadband noise in the 16 kHz octave and none below it, and the function
+refuses those two combinations with a `ValueError` rather than guess what the
+standard would ask.
+
 ## What this guide covers
 
 **Covered.** The ISO 9295:2015 determination of the sound power level in the 16 kHz
@@ -363,7 +401,9 @@ absorption of Annex A (Formula (7), `air_absorption_np_per_m`, pinned to the
 Formula (6), the comparison with a reference sound source for broadband noise
 and for tones (Formulae (8) and (9)), the free-field correction of
 Formula (10), the reference meteorological conditions of clause 10.1 through
-the $C_1$ and $C_2$ of ISO 3741, and the 10 dB reporting range of clause 13 c).
+the $C_1$ and $C_2$ of ISO 3741, the 10 dB reporting range of clause 13 c), and
+the levels Table 3 asks to determine for each type of noise
+(`high_frequency_levels_to_determine`).
 
 **Not covered.** The room, the boom and the instruments are assumed qualified: the ISO 3741
 qualification of the room, the flatness of the chain and the ISO 6926
@@ -372,9 +412,7 @@ $\pm 10$ % stability of $h_\mathrm{r}(\theta + 5\ ^\circ\mathrm{C})$ is not
 monitored. The background correction is ISO 3741's, applied to the levels
 before they are passed (`reverberation_background_correction`). The
 free-field method is ISO 3744 as the library implements it, plus
-Formula (10). Table 3, which says what to determine for each type of noise, is
-guidance for the report and is not computed, and the uncertainty of clause 11
-is a statement, $u(L_W) \approx \sigma_\mathrm{tot}$, with standard
+Formula (10). The uncertainty of clause 11 is a statement, $u(L_W) \approx \sigma_\mathrm{tot}$, with standard
 deviations of reproducibility of 3 dB or less in the 16 kHz octave.
 
 ## See also
@@ -388,7 +426,8 @@ deviations of reproducibility of 3 dB or less in the 16 kHz octave.
 - [Outdoor propagation (ISO 9613-1 / ISO 9613-2)](../../environment/propagation/outdoor-propagation.md):
   the attenuation coefficient Annex A is written from.
 - [Errata](../../ERRATA.md): the 43 misprinted cells of
-  Tables 1 and 2.
+  Tables 1 and 2, and the oxygen relaxation frequency that Formula (A.5)
+  sets with a digit zero.
 - API reference: [`emission.sound_power_high_frequency`](https://jmrplens.github.io/phonometry/reference/api/power/sound-power-high-frequency/).
 
 ## References
@@ -419,4 +458,5 @@ levels emitted by machinery and equipment*: the energy mean of Formula (1),
 the moving-microphone bandwidth and sideband sum of Formulae (2) and (3), the
 room constant of Formulae (4), (5) and (7) with the air absorption of Annex A,
 the sound power level of Formulae (6), (8) and (9), the free-field correction
-of Formula (10) and the reference meteorological conditions of clause 10.1.
+of Formula (10), the reference meteorological conditions of clause 10.1 and
+the levels to determine of Table 3.

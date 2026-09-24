@@ -5746,8 +5746,11 @@ def generate_high_frequency_air_absorption(output_dir: str) -> None:
     axa.legend(loc="upper left", fontsize=9)
 
     # Right: every cell's departure from Annex A as the tables computed it,
-    # in units of the fourth decimal. 581 sit on zero; the 43 do not, and
-    # every one of them is a cell whose Annex A value ends in 0.
+    # with the temperature converted as theta + 273,16 K (the left panel is
+    # the library's 273,15 K), in units of the fourth decimal. 581 sit on
+    # zero; the 43 do not, and every one of them is a cell whose Annex A value
+    # ends in 0. The title says which conversion, since at 273,15 K 61 of the
+    # 581 would sit one unit off.
     right: list[tuple[float, int]] = []
     wrong: list[tuple[float, int]] = []
     for _, f, t, rh, cell_value in cells:
@@ -5780,7 +5783,7 @@ def generate_high_frequency_air_absorption(output_dir: str) -> None:
     axd.set_ylim(-4.0, 56.0)
     axd.set_xlabel("Frequency [kHz]")
     axd.set_ylabel("Printed less Annex A [$10^{-4}$ Np/m]")
-    axd.set_title("All 624 cells of Tables 1 and 2", pad=10)
+    axd.set_title("All 624 cells, against Annex A at $\\theta$ + 273.16 K", pad=10)
     axd.grid(visible=True, color=COLOR_GRID, linestyle="--", alpha=0.5)
     axd.set_axisbelow(True)
     axd.legend(loc="upper left", fontsize=9)

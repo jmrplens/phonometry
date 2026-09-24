@@ -22,8 +22,9 @@ import numpy as np
 import reference_data as ref
 
 import phonometry as ph
+from phonometry.environment.propagation.air_absorption import _pure_tone_terms
 
-from ..registry import Outcome, numeric, record, register
+from ..registry import Outcome, count, numeric, record, register
 from .levels import _FS
 
 if TYPE_CHECKING:
@@ -851,6 +852,380 @@ def _chk_iso3747_excess_level() -> Outcome:
     free = lw - 11.0 - 20.0 * math.log10(r)
     computed = ph.emission.excess_sound_pressure_level(free + 7.0, lw, r)
     return numeric(7.0, float(computed), 1e-12, unit="dB", places=6)
+
+
+# ---------------------------------------------------------------------------
+# ISO 9295:2015, sound power in the 16 kHz octave band. Oracle: UNE-EN ISO
+# 9295:2015, the Spanish adoption of ISO 9295:2015 unchanged, Tables 1 and 2 on
+# PDF pages 15 and 16 (printed folios 15 and 16), read on the page. The tables
+# are Annex A rounded to four decimals with the temperature converted as
+# theta + 273,16 K; the library converts with 273,15 K, which moves 61 of the
+# correctly printed cells by one unit of the fourth decimal and none by more.
+# 43 cells are misprinted, each a 0 of Annex A set as another digit
+# (docs/ERRATA.md); the rows below pin the others and name those.
+# Formulae (4) to (10) print no worked example and are pinned in closed form.
+# ---------------------------------------------------------------------------
+_ISO9295_TABLES = {
+    1: (ref.ISO9295_TABLE_1_NP_PER_M, ref.ISO9295_TABLE_1_TEMPERATURES_C),
+    2: (ref.ISO9295_TABLE_2_NP_PER_M, ref.ISO9295_TABLE_2_TEMPERATURES_C),
+}
+_ISO9295_THIRDS = np.array([12500.0, 16000.0, 20000.0])
+#: The narrow no-break space ISO 80000-1 digit groups are held together with.
+_NNBSP = "\u202f"
+
+
+def _iso9295_cells(table: int) -> list[tuple[float, float, float, float]]:
+    """The printed cells of one table: (Hz, degC, %, alpha as printed)."""
+    rows, temperatures = _ISO9295_TABLES[table]
+    columns = [(t, rh) for t in temperatures for rh in ref.ISO9295_HUMIDITIES_PERCENT]
+    return [
+        (frequency, t, rh, printed)
+        for frequency, row in zip(ref.ISO9295_FREQUENCIES_HZ, rows, strict=True)
+        for (t, rh), printed in zip(columns, row, strict=True)
+    ]
+
+
+def _iso9295_at_table_conversion(frequency: float, t: float, rh: float) -> float:
+    """Annex A as the tables were computed: T = theta + 273,16 K, 101,325 kPa."""
+    f2, bracket = _pure_tone_terms(
+        np.asarray([frequency]), t + ref.ISO9295_TABLE_KELVIN_OFFSET, rh, 101.325
+    )
+    return round(float((f2 * bracket)[0]), 4)
+
+
+def _iso9295_printed_cells(table: int) -> Outcome:
+    """Every cell of one table the page prints correctly, to its four decimals."""
+    cells = [
+        cell
+        for cell in _iso9295_cells(table)
+        if (table, *cell[:3]) not in ref.ISO9295_MISPRINTED_CELLS
+    ]
+    matching = sum(
+        1
+        for f, t, rh, printed in cells
+        if _iso9295_at_table_conversion(f, t, rh) == printed
+    )
+    return count(matching, len(cells), subject=f"cells of Table {table}")
+
+
+def _iso9295_zero_set_as_digit_before(annex_a: float) -> float | None:
+    """Annex A to four decimals with its first trailing 0 set as the digit before.
+
+    0,027 0 becomes 0,027 7 and 0,030 0 becomes 0,033 0: the one pattern the
+    errata entry registers for all 43 misprints. ``None`` for a value that
+    does not end in 0, which no misprinted cell can be.
+    """
+    decimals = f"{annex_a:.4f}".split(".")[1]
+    kept = decimals.rstrip("0")
+    if len(kept) == len(decimals) or not kept:
+        return None
+    first_zero = len(kept)
+    pattern = decimals[:first_zero] + kept[-1] + decimals[first_zero + 1 :]
+    return int(pattern) / 1e4
+
+
+def _iso9295_misprints(table: int) -> Outcome:
+    """The misprinted cells of one table as the page prints them.
+
+    The expected side is what the page prints in each cell; the check counts
+    the cells where that print is the library's Annex A (at the tables'
+    theta + 273,16 K) with its first trailing 0 set as the digit before it,
+    the pattern docs/ERRATA.md registers. A change to Annex A or to the
+    transcription breaks the count.
+    """
+    printed = {
+        (table, f, t, rh): value
+        for f, t, rh, value in _iso9295_cells(table)
+        if (table, f, t, rh) in ref.ISO9295_MISPRINTED_CELLS
+    }
+    matching = sum(
+        1
+        for cell, value in printed.items()
+        if _iso9295_zero_set_as_digit_before(_iso9295_at_table_conversion(*cell[1:]))
+        == value
+    )
+
+    def name(cell: tuple[int, float, float, float]) -> str:
+        hertz = f"{int(cell[1]):,}".replace(",", _NNBSP)
+        text = ref.ISO9295_MISPRINTED_CELLS[cell][0].replace(" ", _NNBSP)
+        return f"{hertz} Hz, {cell[2]:g} degC, {cell[3]:g} %: {text}"
+
+    return count(
+        matching,
+        len(printed),
+        subject="printed cells that are Annex A with a 0 set as the digit before it",
+        expected_label="; ".join(name(cell) for cell in printed),
+    )
+
+
+@register(
+    "Intensity & sound power",
+    "ISO 9295:2015 Table 1 (UNE-EN ISO 9295:2015, PDF page 15, printed folio 15)",
+    "Air absorption alpha in Np/m, 18 degC to 22 degC, 40 % to 60 %, 10\u202f000 Hz "
+    "to 22\u202f400 Hz: Annex A at theta + 273,16 K, to the four decimals printed, "
+    "in the 303 cells the table prints correctly",
+)
+def _chk_iso9295_table1() -> Outcome:
+    return _iso9295_printed_cells(1)
+
+
+@register(
+    "Intensity & sound power",
+    "ISO 9295:2015 Table 2 (UNE-EN ISO 9295:2015, PDF page 16, printed folio 16)",
+    "Air absorption alpha in Np/m, 23 degC to 27 degC, 40 % to 60 %, 10\u202f000 Hz "
+    "to 22\u202f400 Hz: Annex A at theta + 273,16 K, to the four decimals printed, "
+    "in the 278 cells the table prints correctly",
+)
+def _chk_iso9295_table2() -> Outcome:
+    return _iso9295_printed_cells(2)
+
+
+@register(
+    "Intensity & sound power",
+    "ISO 9295:2015 Table 1 (UNE-EN ISO 9295:2015, PDF page 15, printed folio 15)",
+    "The 9 cells Table 1 misprints (docs/ERRATA.md), as printed: each is Annex A "
+    "at theta + 273,16 K with its first trailing 0 set as the digit before it",
+)
+def _chk_iso9295_table1_misprints() -> Outcome:
+    return _iso9295_misprints(1)
+
+
+@register(
+    "Intensity & sound power",
+    "ISO 9295:2015 Table 2 (UNE-EN ISO 9295:2015, PDF page 16, printed folio 16)",
+    "The 34 cells Table 2 misprints (docs/ERRATA.md), as printed: each is Annex A "
+    "at theta + 273,16 K with its first trailing 0 set as the digit before it",
+)
+def _chk_iso9295_table2_misprints() -> Outcome:
+    return _iso9295_misprints(2)
+
+
+@register(
+    "Intensity & sound power",
+    "ISO 9295:2015 Annex A / Tables 1 and 2",
+    "The published Annex A at theta + 273,15 K against the 581 correctly printed "
+    "cells: within one unit of the fourth decimal",
+)
+def _chk_iso9295_library_conversion() -> Outcome:
+    worst = 0.0
+    for table in _ISO9295_TABLES:
+        for f, t, rh, printed in _iso9295_cells(table):
+            if (table, f, t, rh) in ref.ISO9295_MISPRINTED_CELLS:
+                continue
+            alpha = ph.emission.air_absorption_np_per_m(
+                f, temperature_c=t, relative_humidity_percent=rh
+            )
+            worst = max(worst, abs(float(alpha) - printed))
+    return numeric(0.0, worst, 1e-4, unit="Np/m", places=6)
+
+
+@register(
+    "Intensity & sound power",
+    "ISO 9295:2015 Formulae (4) and (5)",
+    "Room absorption coefficient and room constant from the reverberation time, "
+    "V = 200 m3, S = 210 m2, T = 0,70 s: alpha_room = 1 - exp(-0,16 V/(S T)), "
+    "R = S alpha_room / (1 - alpha_room) (closed form)",
+)
+def _chk_iso9295_eyring_room_constant() -> Outcome:
+    volume, surface, time = 200.0, 210.0, 0.70
+    alpha_room = 1.0 - math.exp(-0.16 * volume / (surface * time))
+    alpha = ph.emission.room_absorption_coefficient(
+        time, volume_m3=volume, surface_area_m2=surface
+    )
+    room = ph.emission.room_constant_from_reverberation_time(
+        time, volume_m3=volume, surface_area_m2=surface
+    )
+    return record(
+        {
+            "alpha_room": round(alpha_room, 9),
+            "R (m2)": round(surface * alpha_room / (1.0 - alpha_room), 6),
+        },
+        {
+            "alpha_room": round(float(alpha[0]), 9),
+            "R (m2)": round(float(room[0]), 6),
+        },
+    )
+
+
+@register(
+    "Intensity & sound power",
+    "ISO 9295:2015 Formula (7)",
+    "Room constant from the air absorption, 8 alpha V / (1 - 8 alpha V / S), "
+    "at 16 kHz, 23 degC, 50 %, V = 200 m3, S = 210 m2 (closed form)",
+)
+def _chk_iso9295_air_room_constant() -> Outcome:
+    alpha = float(
+        ph.emission.air_absorption_np_per_m(
+            16000.0, temperature_c=23.0, relative_humidity_percent=50.0
+        )
+    )
+    expected = 8.0 * alpha * 200.0 / (1.0 - 8.0 * alpha * 200.0 / 210.0)
+    room = ph.emission.room_constant_from_air_absorption(
+        [16000.0],
+        volume_m3=200.0,
+        surface_area_m2=210.0,
+        temperature_c=23.0,
+        relative_humidity_percent=50.0,
+    )
+    return numeric(expected, float(room[0]), 1e-9, unit="m2", places=4)
+
+
+@register(
+    "Intensity & sound power",
+    "ISO 9295:2015 Formula (6) / 10.1",
+    "LW = Lp(ST) - 10 lg(4/R) + C1 + C2: R = 40 m2 raises Lp = 60 dB by 10 dB, "
+    "plus the C1 and C2 of ISO 3741 at 23 degC and 101,325 kPa and at 30 degC and "
+    "90 kPa",
+)
+def _chk_iso9295_direct_level() -> Outcome:
+    def corrections(theta: float, pressure_kpa: float) -> float:
+        pressure = -10.0 * math.log10(pressure_kpa / 101.325)
+        kelvin = 273.15 + theta
+        c1 = pressure + 5.0 * math.log10(kelvin / 314.0)
+        c2 = pressure + 15.0 * math.log10(kelvin / 296.0)
+        return c1 + c2
+
+    cases = {"23 degC, 101,325 kPa": (23.0, 101.325), "30 degC, 90 kPa": (30.0, 90.0)}
+    expected = {
+        name: round(70.0 + corrections(*state), 6) for name, state in cases.items()
+    }
+    computed = {
+        name: round(
+            float(
+                ph.emission.high_frequency_sound_power(
+                    [60.0, 58.0, 55.0],
+                    frequencies_hz=_ISO9295_THIRDS,
+                    room_constant_m2=40.0,
+                    temperature_c=theta,
+                    static_pressure_kpa=pressure_kpa,
+                ).sound_power_level[0]
+            ),
+            6,
+        )
+        for name, (theta, pressure_kpa) in cases.items()
+    }
+    return record(expected, computed, unit="dB")
+
+
+@register(
+    "Intensity & sound power",
+    "ISO 9295:2015 Formulae (8) and (9)",
+    "Reference source: LW(FAR) - Lp(FAR) + Lp(ST), and 10 lg(Delta F / 1 Hz) "
+    "more for a tone read with a 10 Hz noise bandwidth",
+)
+def _chk_iso9295_comparison() -> Outcome:
+    broadband = ph.emission.high_frequency_sound_power_comparison(
+        [55.0], frequencies_hz=[16000.0],
+        reference_pressure_levels_db=[45.0], reference_sound_power_levels_db=[50.0],
+    )  # fmt: skip
+    tonal = ph.emission.high_frequency_sound_power_comparison(
+        [55.0], frequencies_hz=[16000.0],
+        reference_pressure_levels_db=[45.0], reference_sound_power_levels_db=[50.0],
+        noise_bandwidth_hz=10.0,
+    )  # fmt: skip
+    c2 = 15.0 * math.log10(296.15 / 296.0)
+    return record(
+        {"Formula (8)": round(60.0 + c2, 6), "Formula (9)": round(70.0 + c2, 6)},
+        {
+            "Formula (8)": round(float(broadband.sound_power_level[0]), 6),
+            "Formula (9)": round(float(tonal.sound_power_level[0]), 6),
+        },
+        unit="dB",
+    )
+
+
+@register(
+    "Intensity & sound power",
+    "ISO 9295:2015 Formulae (2) and (3)",
+    "Moving microphone: Delta f = 2 f v / c at 16 kHz, 0,4 m/s, 345 m/s, and "
+    "three equal sidebands summing to 10 lg 3 above one",
+)
+def _chk_iso9295_tone_under_moving_microphone() -> Outcome:
+    bandwidth = ph.emission.minimum_analyzer_bandwidth_hz(
+        16000.0, microphone_speed_m_s=0.4, speed_of_sound=345.0
+    )
+    total = ph.emission.tone_level_from_sidebands([50.0, 50.0, 50.0])
+    return record(
+        {
+            "Delta f (Hz)": round(2.0 * 16000.0 * 0.4 / 345.0, 6),
+            "Ltot (dB)": round(50.0 + 10.0 * math.log10(3.0), 6),
+        },
+        {
+            "Delta f (Hz)": round(float(bandwidth[0]), 6),
+            "Ltot (dB)": round(total, 6),
+        },
+    )
+
+
+@register(
+    "Intensity & sound power",
+    "ISO 9295:2015 Formula (10)",
+    "Free-field absorption correction K_alpha = r alpha at r = 4 m, alpha in dB/m "
+    "(8,686 times Annex A), and none at r = 2 m",
+)
+def _chk_iso9295_free_field_correction() -> Outcome:
+    alpha = ph.emission.air_absorption_np_per_m(
+        _ISO9295_THIRDS, temperature_c=23.0, relative_humidity_percent=50.0
+    )
+    beyond = ph.emission.free_field_absorption_correction(
+        _ISO9295_THIRDS,
+        radius_m=4.0,
+        temperature_c=23.0,
+        relative_humidity_percent=50.0,
+    )
+    at_two = ph.emission.free_field_absorption_correction(
+        _ISO9295_THIRDS,
+        radius_m=2.0,
+        temperature_c=23.0,
+        relative_humidity_percent=50.0,
+    )
+    worst = max(
+        float(np.max(np.abs(beyond - 4.0 * 8.686 * alpha))),
+        float(np.max(np.abs(at_two))),
+    )
+    return numeric(
+        0.0, worst, 1e-12, unit="dB", places=9, expected_label="0 dB difference"
+    )
+
+
+#: ISO 9295:2015 Table 3 as printed: (noise from 125 Hz to 8 kHz, noise in the
+#: 16 kHz octave) -> the levels to determine, in the words of the
+#: identifiers ``high_frequency_levels_to_determine`` returns.
+_ISO9295_TABLE_3 = (
+    (("broadband", "none"), ("a_weighted_sound_power_level",)),
+    (
+        ("broadband", "broadband"),
+        ("a_weighted_sound_power_level", "one_third_octave_band_levels"),
+    ),
+    (
+        ("broadband", "discrete_tone"),
+        ("a_weighted_sound_power_level", "tone_level_and_frequency"),
+    ),
+    (
+        ("broadband", "multiple_tones"),
+        ("a_weighted_sound_power_level", "tone_levels_within_10_db"),
+    ),
+    (("none", "discrete_tone"), ("tone_level_and_frequency",)),
+    (("none", "multiple_tones"), ("tone_levels_within_10_db",)),
+)
+
+
+@register(
+    "Intensity & sound power",
+    "ISO 9295:2015 Table 3 (UNE-EN ISO 9295:2015, PDF page 24, printed folio 24)",
+    "The sound power levels to determine for each type of noise: the six rows, "
+    "from the A-weighted level alone to the tones within 10 dB of the highest",
+)
+def _chk_iso9295_table3() -> Outcome:
+    matching = sum(
+        1
+        for (below, octave), levels in _ISO9295_TABLE_3
+        if ph.emission.high_frequency_levels_to_determine(
+            noise_125_hz_to_8_khz=below, noise_16_khz_octave=octave
+        )
+        == levels
+    )
+    return count(matching, len(_ISO9295_TABLE_3), subject="rows of Table 3")
 
 
 # ---------------------------------------------------------------------------

@@ -5658,6 +5658,185 @@ def generate_in_situ_sound_power(output_dir: str) -> None:
     plt.close()
 
 
+def _iso9295_printed_cells() -> list[tuple[int, float, float, float, float]]:
+    """Every printed cell of ISO 9295 Tables 1 and 2: (table, Hz, degC, %, alpha).
+
+    Read from the shared oracle the tests and the conformance report read, so
+    the figure cannot drift from the rows that pin it.
+    """
+    import sys
+    from pathlib import Path
+
+    # parents[2] is the repository root from scripts/figures/<module>.py.
+    tests = str(Path(__file__).resolve().parents[2] / "tests")
+    if tests not in sys.path:
+        sys.path.insert(0, tests)
+    import reference_data as ref
+
+    cells = []
+    for table, rows, temperatures in (
+        (1, ref.ISO9295_TABLE_1_NP_PER_M, ref.ISO9295_TABLE_1_TEMPERATURES_C),
+        (2, ref.ISO9295_TABLE_2_NP_PER_M, ref.ISO9295_TABLE_2_TEMPERATURES_C),
+    ):
+        columns = [
+            (t, rh) for t in temperatures for rh in ref.ISO9295_HUMIDITIES_PERCENT
+        ]
+        for frequency, row in zip(ref.ISO9295_FREQUENCIES_HZ, rows, strict=True):
+            for (t, rh), printed in zip(columns, row, strict=True):
+                cells.append((table, frequency, t, rh, printed))
+    return cells
+
+
+def generate_high_frequency_air_absorption(output_dir: str) -> None:
+    """ISO 9295 Annex A against Tables 1 and 2, and the 43 cells they misprint."""
+    print("Generating high_frequency_air_absorption.svg...")
+    from phonometry import emission
+    from phonometry.environment.propagation.air_absorption import _pure_tone_terms
+
+    cells = _iso9295_printed_cells()
+    fig, (axa, axd) = plt.subplots(1, 2, figsize=(12.5, 5.4))
+
+    # Left: Annex A through the octave at the driest-coolest, the reference
+    # and the wettest-warmest corner of the tables, with the printed cells of
+    # those three columns on it.
+    grid = np.linspace(10_000.0, 22_400.0, 250)
+    corners = (
+        (18.0, 40.0, COLOR_SECONDARY, "o"),
+        (23.0, 50.0, COLOR_PRIMARY, "s"),
+        (27.0, 60.0, COLOR_TERTIARY, "D"),
+    )
+    for t, rh, color, marker in corners:
+        alpha = emission.air_absorption_np_per_m(
+            grid, temperature_c=t, relative_humidity_percent=rh
+        )
+        axa.plot(
+            grid / 1000.0,
+            alpha,
+            color=color,
+            linewidth=1.8,
+            label=f"Annex A, {t:g} °C and {rh:g} %",
+        )
+        printed = [(f, value) for _, f, tc, h, value in cells if tc == t and h == rh]
+        axa.plot(
+            [f / 1000.0 for f, _ in printed],
+            [value for _, value in printed],
+            marker,
+            color=color,
+            markersize=4.5,
+            markerfacecolor="white",
+            markeredgewidth=1.1,
+            linestyle="",
+        )
+    axa.plot(
+        [],
+        [],
+        "o",
+        color=COLOR_FG,
+        markerfacecolor="white",
+        markersize=4.5,
+        linestyle="",
+        label="Printed cells of that column",
+    )
+    axa.set_xlim(9.8, 22.6)
+    axa.set_xlabel("Frequency [kHz]")
+    axa.set_ylabel("Air absorption $\\alpha$ [Np/m]")
+    axa.set_title("Annex A through the 16 kHz octave", pad=10)
+    axa.grid(visible=True, color=COLOR_GRID, linestyle="--", alpha=0.5)
+    axa.set_axisbelow(True)
+    axa.legend(loc="upper left", fontsize=9)
+
+    # Right: every cell's departure from Annex A as the tables computed it,
+    # with the temperature converted as theta + 273,16 K (the left panel is
+    # the library's 273,15 K), in units of the fourth decimal. 581 sit on
+    # zero; the 43 do not, and every one of them is a cell whose Annex A value
+    # ends in 0. The title says which conversion, since at 273,15 K 61 of the
+    # 581 would sit one unit off.
+    right: list[tuple[float, int]] = []
+    wrong: list[tuple[float, int]] = []
+    for _, f, t, rh, cell_value in cells:
+        f2, bracket = _pure_tone_terms(np.asarray([f]), t + 273.16, rh, 101.325)
+        table_value = round(float((f2 * bracket)[0]), 4)
+        units = round((cell_value - table_value) * 1e4)
+        (wrong if units else right).append((f / 1000.0, units))
+    axd.axhline(0.0, color=COLOR_MUTED, linewidth=0.8, zorder=1)
+    axd.plot(
+        [f for f, _ in right],
+        [u for _, u in right],
+        "o",
+        color=COLOR_MUTED,
+        markersize=4,
+        linestyle="",
+        zorder=2,
+        label=f"{len(right)} cells printed as Annex A gives them",
+    )
+    axd.plot(
+        [f for f, _ in wrong],
+        [u for _, u in wrong],
+        "X",
+        color=COLOR_SECONDARY,
+        markersize=7,
+        linestyle="",
+        zorder=3,
+        label=f"{len(wrong)} cells where a 0 is printed as another digit",
+    )
+    axd.set_xlim(9.8, 22.6)
+    axd.set_ylim(-4.0, 56.0)
+    axd.set_xlabel("Frequency [kHz]")
+    axd.set_ylabel("Printed less Annex A [$10^{-4}$ Np/m]")
+    axd.set_title("All 624 cells, against Annex A at $\\theta$ + 273.16 K", pad=10)
+    axd.grid(visible=True, color=COLOR_GRID, linestyle="--", alpha=0.5)
+    axd.set_axisbelow(True)
+    axd.legend(loc="upper left", fontsize=9)
+    fig.tight_layout()
+    save_figure(output_dir, "high_frequency_air_absorption.svg")
+    plt.close()
+
+
+def generate_high_frequency_sound_power(output_dir: str) -> None:
+    """ISO 9295: a direct determination over the thirds, and three tones."""
+    print("Generating high_frequency_sound_power.svg...")
+    from phonometry import emission
+
+    # The guide's example: a printer in a 200 m3 reverberation room with a
+    # 210 m2 surface at 23 degC and 50 %, measured in the three thirds of the
+    # 16 kHz octave at four orientations, its room constant from the air
+    # absorption of clause 7; and a power supply whose three tones are read
+    # against a reference source with a 12,5 Hz FFT.
+    thirds = np.array([12500.0, 16000.0, 20000.0])
+    room = emission.room_constant_from_air_absorption(
+        thirds,
+        volume_m3=200.0,
+        surface_area_m2=210.0,
+        temperature_c=23.0,
+        relative_humidity_percent=50.0,
+    )
+    orientations = np.array(
+        [
+            [58.3, 56.1, 51.2],
+            [59.0, 56.8, 52.0],
+            [57.6, 55.7, 50.9],
+            [58.8, 56.5, 51.6],
+        ]
+    )
+    broadband = emission.high_frequency_sound_power(
+        orientations, frequencies_hz=thirds, room_constant_m2=room
+    )
+    tone = emission.tone_level_from_sidebands([42.9, 41.3, 38.0])
+    tones = emission.high_frequency_sound_power_comparison(
+        [tone, 38.5, 31.0],
+        frequencies_hz=[15625.0, 17000.0, 20500.0],
+        reference_pressure_levels_db=[41.8, 41.2, 40.1],
+        reference_sound_power_levels_db=[44.3, 43.9, 43.0],
+        noise_bandwidth_hz=12.5,
+    )
+    fig, (axb, axt) = plt.subplots(1, 2, figsize=(12.5, 5.6))
+    broadband.plot(ax=axb, language=_LANG)
+    tones.plot(ax=axt, language=_LANG)
+    fig.tight_layout()
+    save_figure(output_dir, "high_frequency_sound_power.svg")
+    plt.close()
+
+
 #: VDI 2081 Part 2:2005 Table 1: the octave bands the worked sheet is written
 #: in, and the A-weighting column it carries beside them.
 _VDI_BANDS = np.array([63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0])

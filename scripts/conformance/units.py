@@ -60,6 +60,7 @@ UNITS: frozenset[str] = frozenset(
         "N",
         "N/m",
         "N·s/m",
+        "Np/m",
         "Np/rad",
         "Pa·s/m²",
         "W",

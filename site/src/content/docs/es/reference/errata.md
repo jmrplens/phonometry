@@ -7900,6 +7900,136 @@ dos ediciones con las mismas entradas y en el mismo orden.
   `fluorite`, y su nota dice qué quiere decir.
 - **Estado:** sin comunicar.
 
+## UNE-EN ISO 9295:2015, tablas 1 y 2 (cuarenta y tres celdas donde un 0 del anexo A se imprime como otra cifra)
+
+- **Ubicación:** tablas 1 y 2, «Valores del coeficiente de absorción por el
+  aire», en los folios impresos 15 y 16 de la UNE-EN ISO 9295:2015 (octubre
+  de 2015), que se declara versión oficial en español de la EN ISO 9295:2015 y
+  adopta la ISO 9295:2015 sin modificación. Las dos tablas dan el coeficiente
+  de absorción por el aire $\alpha$ en Np/m a una presión estática de
+  101,325 kPa, en 26 frecuencias de 10 000 Hz a 22 400 Hz, a 18, 20, 21, 22,
+  23, 24, 25 y 27 °C y con humedades relativas del 40 %, el 50 % y el 60 %: 624
+  celdas. El apartado 7.2 lleva $\alpha$ de ellas a la constante del recinto de
+  la fórmula (7), y el anexo A, normativo, da las fórmulas con las que se
+  calculan.
+- **Lo impreso:** cada celda lleva cuatro decimales, con coma decimal y la
+  última cifra separada, «0,027 7».
+- **El problema:** cuarenta y tres celdas contradicen el anexo A, y las
+  cuarenta y tres de la misma manera: el valor que da el anexo A acaba en 0, y
+  un 0 se imprime como otra cifra. En cuarenta es el cuarto decimal, impreso
+  como el tercero repetido («0,027 7» donde el anexo A da 0,027 0). Las otras
+  tres son celdas cuyo valor del anexo A acaba en dos ceros (otras dos celdas
+  así, ambas 0,020 0 en la tabla 1, a 10 500 Hz, 20 °C y 50 % y a
+  11 000 Hz, 18 °C y 60 %, están bien impresas), y ahí es el tercer decimal el
+  que toma la cifra anterior: «0,033 0» donde el anexo A da
+  0,030 0, y «0,04 4» y «0,05 50», además con los grupos de cifras fuera de
+  sitio, donde el anexo A da 0,040 0 y 0,050 0. El defecto se limita a
+  los ceros y no es cuestión de redondeo: las otras 581 celdas son el anexo A hasta la
+  última cifra (véase la evidencia más abajo), y de las 60 celdas cuyo valor
+  del anexo A acaba en 0, estas 43 están mal impresas y 17 se imprimen con su
+  0. Los errores van de una unidad del cuarto decimal, cuando la cifra
+  repetida es un 1 («0,051 1» por 0,051 0), a 0,005 0 Np/m, donde «0,05 50»
+  está por 0,050 0 a 21 500 Hz, 27 °C y 60 %. Las tres celdas cuyo valor del
+  anexo A acaba en dos ceros se imprimen exactamente un 10 % altas; llevada a
+  la fórmula (7), cualquiera de ellas hace un 10 % mayor el área de absorción
+  del aire, y la constante del recinto, y con ella el nivel de potencia
+  acústica de la fórmula (6), al menos 0,41 dB demasiado altos. Las
+  celdas, por tabla y frecuencia:
+  - **Tabla 1, 13 500 Hz** (página 15 del PDF, folio impreso 15): 20 °C y 60 %, «0,027 7» por 0,027 0; 21 °C y 40 %, «0,036 6» por 0,036 0; 21 °C y 60 %, «0,026 6» por 0,026 0; 22 °C y 40 %, «0,035 5» por 0,035 0.
+  - **Tabla 1, 15 500 Hz** (página 15 del PDF, folio impreso 15): 22 °C y 40 %, «0,044 4» por 0,044 0.
+  - **Tabla 1, 16 500 Hz** (página 15 del PDF, folio impreso 15): 21 °C y 50 %, «0,043 3» por 0,043 0.
+  - **Tabla 1, 18 000 Hz** (página 15 del PDF, folio impreso 15): 20 °C y 60 %, «0,045 5» por 0,045 0.
+  - **Tabla 1, 19 000 Hz** (página 15 del PDF, folio impreso 15): 21 °C y 60 %, «0,048 8» por 0,048 0.
+  - **Tabla 1, 20 000 Hz** (página 15 del PDF, folio impreso 15): 22 °C y 60 %, «0,051 1» por 0,051 0.
+  - **Tabla 2, 10 000 Hz** (página 16 del PDF, folio impreso 16): 27 °C y 50 %, «0,014 4» por 0,014 0.
+  - **Tabla 2, 11 000 Hz** (página 16 del PDF, folio impreso 16): 25 °C y 50 %, «0,018 8» por 0,018 0.
+  - **Tabla 2, 11 500 Hz** (página 16 del PDF, folio impreso 16): 23 °C y 50 %, «0,021 1» por 0,021 0.
+  - **Tabla 2, 13 000 Hz** (página 16 del PDF, folio impreso 16): 25 °C y 60 %, «0,021 1» por 0,021 0.
+  - **Tabla 2, 13 500 Hz** (página 16 del PDF, folio impreso 16): 27 °C y 60 %, «0,021 1» por 0,021 0.
+  - **Tabla 2, 14 000 Hz** (página 16 del PDF, folio impreso 16): 24 °C y 40 %, «0,035 5» por 0,035 0; 24 °C y 60 %, «0,025 5» por 0,025 0.
+  - **Tabla 2, 14 500 Hz** (página 16 del PDF, folio impreso 16): 24 °C y 50 %, «0,031 1» por 0,031 0; 25 °C y 40 %, «0,036 6» por 0,036 0; 25 °C y 50 %, «0,033 0» por 0,030 0; 27 °C y 50 %, «0,028 8» por 0,028 0; 27 °C y 60 %, «0,024 4» por 0,024 0.
+  - **Tabla 2, 15 000 Hz** (página 16 del PDF, folio impreso 16): 24 °C y 50 %, «0,033 3» por 0,033 0.
+  - **Tabla 2, 15 500 Hz** (página 16 del PDF, folio impreso 16): 24 °C y 50 %, «0,035 5» por 0,035 0; 27 °C y 40 %, «0,038 8» por 0,038 0.
+  - **Tabla 2, 16 000 Hz** (página 16 del PDF, folio impreso 16): 24 °C y 40 %, «0,044 4» por 0,044 0; 24 °C y 60 %, «0,032 2» por 0,032 0.
+  - **Tabla 2, 16 500 Hz** (página 16 del PDF, folio impreso 16): 23 °C y 60 %, «0,035 5» por 0,035 0.
+  - **Tabla 2, 17 000 Hz** (página 16 del PDF, folio impreso 16): 25 °C y 50 %, «0,04 4» por 0,040 0.
+  - **Tabla 2, 18 000 Hz** (página 16 del PDF, folio impreso 16): 23 °C y 60 %, «0,041 1» por 0,041 0; 27 °C y 60 %, «0,036 6» por 0,036 0.
+  - **Tabla 2, 18 500 Hz** (página 16 del PDF, folio impreso 16): 24 °C y 40 %, «0,056 6» por 0,056 0; 24 °C y 50 %, «0,048 8» por 0,048 0.
+  - **Tabla 2, 19 500 Hz** (página 16 del PDF, folio impreso 16): 23 °C y 50 %, «0,054 4» por 0,054 0.
+  - **Tabla 2, 20 000 Hz** (página 16 del PDF, folio impreso 16): 24 °C y 60 %, «0,048 8» por 0,048 0.
+  - **Tabla 2, 20 500 Hz** (página 16 del PDF, folio impreso 16): 23 °C y 40 %, «0,067 7» por 0,067 0; 24 °C y 40 %, «0,066 6» por 0,066 0.
+  - **Tabla 2, 21 000 Hz** (página 16 del PDF, folio impreso 16): 23 °C y 60 %, «0,054 4» por 0,054 0.
+  - **Tabla 2, 21 500 Hz** (página 16 del PDF, folio impreso 16): 23 °C y 40 %, «0,072 2» por 0,072 0; 24 °C y 40 %, «0,071 1» por 0,071 0; 27 °C y 60 %, «0,05 50» por 0,050 0.
+  - **Tabla 2, 22 000 Hz** (página 16 del PDF, folio impreso 16): 24 °C y 60 %, «0,057 7» por 0,057 0; 25 °C y 50 %, «0,063 3» por 0,063 0.
+  - **Tabla 2, 22 400 Hz** (página 16 del PDF, folio impreso 16): 25 °C y 50 %, «0,065 5» por 0,065 0.
+- **Evidencia:** Verificado en las páginas 15 y 16 del PDF (pp. impresas 15 y
+  16) de la UNE-EN ISO 9295:2015, donde cada una de las cuarenta y tres celdas
+  se leyó en la página antes de entrar en la lista. El anexo A, en las páginas
+  25 y 26 del PDF (pp. impresas 25 y 26) de la misma edición, se evaluó en las
+  624 celdas: las 581 que no están en la lista se reproducen hasta el cuarto
+  decimal cuando la temperatura se convierte como $\theta + 273{,}16$ K, y de
+  las conversiones de $\theta + 273{,}15$ K a $\theta + 273{,}18$ K en pasos
+  de 0,002 K es la única que las reproduce todas, así que las tablas se
+  calcularon con los 273,16 K del punto triple donde la escala Celsius pone
+  273,15 K. Ese desplazamiento es una propiedad de las tablas, no una errata,
+  y pequeña: a $\theta + 273{,}15$ K, 61 de las 581 se mueven una unidad del
+  cuarto decimal y ninguna más de 0,000 063 Np/m. En una celda de la lista las
+  dos conversiones redondean distinto, 19 500 Hz a 23 °C y 50 %, que es
+  0,054 0 a 273,16 K y 0,054 1 a 273,15 K frente al 0,054 4 impreso; la
+  entrada da siempre la conversión de las propias tablas. El borrador de 2013,
+  BS EN ISO 9295 (DPC 13/30264708), imprime las mismas 624 celdas en las
+  páginas 15 y 16 del PDF (pp. impresas 7 y 8) de la ISO/DIS 9295, así que el
+  defecto pasó del borrador a la norma.
+- **Comportamiento de la biblioteca:** no lee las tablas.
+  `air_absorption_np_per_m` en
+  [`sound_power_high_frequency`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/emission/sound_power_high_frequency.py)
+  evalúa el anexo A con la implementación de la ISO 9613-1 de la biblioteca y
+  $T = \theta + 273{,}15$ K, y `room_constant_from_air_absorption` la lleva a
+  la fórmula (7). Las 624 celdas están transcritas en
+  [`tests/reference_data/emission.py`](https://github.com/jmrplens/phonometry/blob/main/tests/reference_data/emission.py),
+  con las cuarenta y tres nombradas en `ISO9295_MISPRINTED_CELLS`;
+  [`tests/emission/test_sound_power_high_frequency.py`](https://github.com/jmrplens/phonometry/blob/main/tests/emission/test_sound_power_high_frequency.py)
+  y las comprobaciones de conformidad «ISO 9295:2015 Table 1» e «ISO
+  9295:2015 Table 2» fijan las 581 hasta la cifra y ciñen cada una de las
+  cuarenta y tres a lo que imprime la página: el anexo A con su primer 0 final
+  escrito como la cifra anterior.
+- **Estado:** sin comunicar.
+
+## UNE-EN ISO 9295:2015, fórmula (A.5) (la frecuencia de relajación del oxígeno escrita con un cero)
+
+- **Ubicación:** anexo A (normativo), «Cálculo del coeficiente de absorción
+  por el aire», fórmula (A.5) en el folio impreso 26 de la UNE-EN ISO
+  9295:2015 (octubre de 2015), versión oficial en español de la EN ISO
+  9295:2015, que adopta la ISO 9295:2015 sin modificación.
+- **Lo impreso:** la lista de símbolos del folio impreso 25 define
+  $f_{\mathrm{r,O}}$, «frecuencia de relajación del oxígeno», con la letra O, y
+  la fórmula (A.3), al principio del folio 26, la calcula con ese nombre. La
+  fórmula (A.5), que evalúa $\alpha$ a partir de ella, escribe la misma
+  frecuencia como $f_{\mathrm{r,0}}$, con la cifra cero, en los dos sitios
+  donde aparece: el denominador $f_{\mathrm{r,0}} + f^2/f_{\mathrm{r,0}}$ del
+  término del oxígeno.
+- **El problema:** el glifo de (A.5) es la cifra estrecha de
+  $p_{\mathrm{s0}}$ en la misma página, no la letra redonda de (A.3), y la capa
+  de texto del propio PDF coincide: «f r,O» en la lista de símbolos y en
+  (A.3), y «f r,0» dos veces en (A.5). Quien tome el subíndice al pie de la
+  letra busca una magnitud $f_{\mathrm{r,0}}$ que el anexo nunca define. La
+  fórmula es correcta en cuanto el símbolo se lee como la frecuencia de
+  relajación del oxígeno, que es la única frecuencia que da (A.3), así que
+  ningún valor de $\alpha$ cambia.
+- **Evidencia:** verificado en las páginas 25 y 26 del PDF (pp. impresas 25 y
+  26) de la UNE-EN ISO 9295:2015, en la imagen de la página y en la capa de
+  texto. El borrador de 2013, BS EN ISO 9295 (DPC 13/30264708), define
+  $f_{\mathrm{r,O}}$ en la página 24 del PDF (p. impresa 16) y escribe
+  $f_{\mathrm{r,0}}$ en (A.5) en la página 25 del PDF (p. impresa 17), así que
+  el desliz pasó del borrador a la norma.
+- **Comportamiento de la biblioteca:** no le afecta. `air_absorption_np_per_m`
+  en
+  [`sound_power_high_frequency`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/emission/sound_power_high_frequency.py)
+  evalúa el anexo A con la implementación de la ISO 9613-1 de la biblioteca,
+  que llama `fro` a la frecuencia de relajación del oxígeno, y las 581 celdas
+  bien impresas de las tablas 1 y 2 confirman esa lectura.
+- **Estado:** sin comunicar.
+
 ## Propiedades de las fuentes, relacionadas, que no son erratas
 
 Registradas aquí para prevenir futuros «arreglos» que romperían la

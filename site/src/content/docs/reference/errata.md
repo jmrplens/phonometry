@@ -7439,6 +7439,129 @@ in the same order.
   note says what the word stands for.
 - **Status:** unreported.
 
+## UNE-EN ISO 9295:2015, Tables 1 and 2 (forty-three cells where a 0 of Annex A is printed as another digit)
+
+- **Location:** Tables 1 and 2, "Valores del coeficiente de absorción por el
+  aire", on printed folios 15 and 16 of UNE-EN ISO 9295:2015 (October 2015),
+  which declares itself the Spanish version of EN ISO 9295:2015 and adopts ISO
+  9295:2015 without modification. The two tables give the air absorption
+  coefficient $\alpha$ in Np/m at a static pressure of 101,325 kPa, for 26
+  frequencies from 10 000 Hz to 22 400 Hz, at 18, 20, 21, 22, 23, 24, 25 and
+  27 °C and at 40 %, 50 % and 60 % relative humidity: 624 cells. Clause 7.2
+  reads $\alpha$ from them into the room constant of Formula (7), and the
+  normative Annex A gives the formulae they are computed from.
+- **The print:** every cell carries four decimals, with the decimal comma and
+  the last digit set apart, "0,027 7".
+- **The problem:** forty-three cells contradict Annex A, and all forty-three
+  in the same way: the value Annex A gives ends in 0, and a 0 is printed as
+  another digit. In forty of them it is the fourth decimal, printed as the
+  third repeated ("0,027 7" where Annex A gives 0,027 0). The other three are
+  cells whose Annex A value ends in two zeros (two more such cells, both
+  0,020 0 in Table 1, at 10 500 Hz, 20 °C and 50 % and at 11 000 Hz, 18 °C
+  and 60 %, are printed correctly), and there it is the third decimal that
+  takes the digit before it: "0,033 0" where Annex A gives
+  0,030 0, and "0,04 4" and "0,05 50", with their digit groups set out of place
+  as well, where Annex A gives 0,040 0 and 0,050 0. The defect is confined to
+  zeros and is not a matter of rounding: the other 581 cells are Annex A to
+  the last digit (see the evidence below), and of the 60 cells whose Annex A
+  value ends in 0, these 43 are misprinted while 17 are printed with their 0.
+  The errors run from one unit of the fourth decimal, where the repeated digit
+  is a 1 ("0,051 1" for 0,051 0), to 0,005 0 Np/m, where "0,05 50" stands for
+  0,050 0 at 21 500 Hz, 27 °C and 60 %. The three cells whose Annex A value
+  ends in two zeros are each printed exactly 10 % high; read into Formula (7),
+  any of them makes the air absorption area 10 % too large, and the room
+  constant, and with it the sound power level of Formula (6), at least 0,41 dB
+  too high. The cells, by table and frequency:
+  - **Table 1, 13 500 Hz** (PDF page 15, printed folio 15): 20 °C and 60 %, "0,027 7" for 0,027 0; 21 °C and 40 %, "0,036 6" for 0,036 0; 21 °C and 60 %, "0,026 6" for 0,026 0; 22 °C and 40 %, "0,035 5" for 0,035 0.
+  - **Table 1, 15 500 Hz** (PDF page 15, printed folio 15): 22 °C and 40 %, "0,044 4" for 0,044 0.
+  - **Table 1, 16 500 Hz** (PDF page 15, printed folio 15): 21 °C and 50 %, "0,043 3" for 0,043 0.
+  - **Table 1, 18 000 Hz** (PDF page 15, printed folio 15): 20 °C and 60 %, "0,045 5" for 0,045 0.
+  - **Table 1, 19 000 Hz** (PDF page 15, printed folio 15): 21 °C and 60 %, "0,048 8" for 0,048 0.
+  - **Table 1, 20 000 Hz** (PDF page 15, printed folio 15): 22 °C and 60 %, "0,051 1" for 0,051 0.
+  - **Table 2, 10 000 Hz** (PDF page 16, printed folio 16): 27 °C and 50 %, "0,014 4" for 0,014 0.
+  - **Table 2, 11 000 Hz** (PDF page 16, printed folio 16): 25 °C and 50 %, "0,018 8" for 0,018 0.
+  - **Table 2, 11 500 Hz** (PDF page 16, printed folio 16): 23 °C and 50 %, "0,021 1" for 0,021 0.
+  - **Table 2, 13 000 Hz** (PDF page 16, printed folio 16): 25 °C and 60 %, "0,021 1" for 0,021 0.
+  - **Table 2, 13 500 Hz** (PDF page 16, printed folio 16): 27 °C and 60 %, "0,021 1" for 0,021 0.
+  - **Table 2, 14 000 Hz** (PDF page 16, printed folio 16): 24 °C and 40 %, "0,035 5" for 0,035 0; 24 °C and 60 %, "0,025 5" for 0,025 0.
+  - **Table 2, 14 500 Hz** (PDF page 16, printed folio 16): 24 °C and 50 %, "0,031 1" for 0,031 0; 25 °C and 40 %, "0,036 6" for 0,036 0; 25 °C and 50 %, "0,033 0" for 0,030 0; 27 °C and 50 %, "0,028 8" for 0,028 0; 27 °C and 60 %, "0,024 4" for 0,024 0.
+  - **Table 2, 15 000 Hz** (PDF page 16, printed folio 16): 24 °C and 50 %, "0,033 3" for 0,033 0.
+  - **Table 2, 15 500 Hz** (PDF page 16, printed folio 16): 24 °C and 50 %, "0,035 5" for 0,035 0; 27 °C and 40 %, "0,038 8" for 0,038 0.
+  - **Table 2, 16 000 Hz** (PDF page 16, printed folio 16): 24 °C and 40 %, "0,044 4" for 0,044 0; 24 °C and 60 %, "0,032 2" for 0,032 0.
+  - **Table 2, 16 500 Hz** (PDF page 16, printed folio 16): 23 °C and 60 %, "0,035 5" for 0,035 0.
+  - **Table 2, 17 000 Hz** (PDF page 16, printed folio 16): 25 °C and 50 %, "0,04 4" for 0,040 0.
+  - **Table 2, 18 000 Hz** (PDF page 16, printed folio 16): 23 °C and 60 %, "0,041 1" for 0,041 0; 27 °C and 60 %, "0,036 6" for 0,036 0.
+  - **Table 2, 18 500 Hz** (PDF page 16, printed folio 16): 24 °C and 40 %, "0,056 6" for 0,056 0; 24 °C and 50 %, "0,048 8" for 0,048 0.
+  - **Table 2, 19 500 Hz** (PDF page 16, printed folio 16): 23 °C and 50 %, "0,054 4" for 0,054 0.
+  - **Table 2, 20 000 Hz** (PDF page 16, printed folio 16): 24 °C and 60 %, "0,048 8" for 0,048 0.
+  - **Table 2, 20 500 Hz** (PDF page 16, printed folio 16): 23 °C and 40 %, "0,067 7" for 0,067 0; 24 °C and 40 %, "0,066 6" for 0,066 0.
+  - **Table 2, 21 000 Hz** (PDF page 16, printed folio 16): 23 °C and 60 %, "0,054 4" for 0,054 0.
+  - **Table 2, 21 500 Hz** (PDF page 16, printed folio 16): 23 °C and 40 %, "0,072 2" for 0,072 0; 24 °C and 40 %, "0,071 1" for 0,071 0; 27 °C and 60 %, "0,05 50" for 0,050 0.
+  - **Table 2, 22 000 Hz** (PDF page 16, printed folio 16): 24 °C and 60 %, "0,057 7" for 0,057 0; 25 °C and 50 %, "0,063 3" for 0,063 0.
+  - **Table 2, 22 400 Hz** (PDF page 16, printed folio 16): 25 °C and 50 %, "0,065 5" for 0,065 0.
+- **Evidence:** Verified on PDF pages 15 and 16 (printed pp. 15 and 16) of
+  UNE-EN ISO 9295:2015, where each of the forty-three cells was read on the
+  page before being listed. Annex A, on PDF pages 25 and 26 (printed pp. 25
+  and 26) of the same edition, was evaluated for all 624 cells: the 581 not
+  listed reproduce to the fourth decimal when the temperature is converted as
+  $\theta + 273{,}16$ K, and of the conversions from $\theta + 273{,}15$ K to
+  $\theta + 273{,}18$ K in steps of 0,002 K that is the only one that
+  reproduces all of them, so the tables were computed with the 273,16 K of
+  the triple point where the Celsius scale puts 273,15 K. That offset is a
+  property of the tables rather than a misprint, and a small one: at
+  $\theta + 273{,}15$ K, 61 of the 581 move by one unit of the fourth
+  decimal and none by more than 0,000 063 Np/m.
+  For one listed cell the two conversions round apart, 19 500 Hz at 23 °C and
+  50 %, which is 0,054 0 at 273,16 K and 0,054 1 at 273,15 K against the
+  0,054 4 printed; the entry gives the table's own conversion throughout. The
+  2013 draft, BS EN ISO 9295 (DPC 13/30264708), prints the same 624 cells on
+  PDF pages 15 and 16 (printed pp. 7 and 8) of ISO/DIS 9295, so the defect
+  came through from the draft to the standard.
+- **Library behaviour:** does not read the tables. `air_absorption_np_per_m`
+  in
+  [`sound_power_high_frequency`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/emission/sound_power_high_frequency.py)
+  evaluates Annex A with the library's ISO 9613-1 implementation and
+  $T = \theta + 273{,}15$ K, and `room_constant_from_air_absorption` feeds
+  it to Formula (7). The 624 cells are transcribed in
+  [`tests/reference_data/emission.py`](https://github.com/jmrplens/phonometry/blob/main/tests/reference_data/emission.py)
+  with the forty-three named in `ISO9295_MISPRINTED_CELLS`;
+  [`tests/emission/test_sound_power_high_frequency.py`](https://github.com/jmrplens/phonometry/blob/main/tests/emission/test_sound_power_high_frequency.py)
+  and the conformance checks "ISO 9295:2015 Table 1" and "ISO 9295:2015 Table
+  2" pin the 581 to the digit and hold each of the forty-three to what the page
+  prints: Annex A with its first trailing 0 set as the digit before it.
+- **Status:** unreported.
+
+## UNE-EN ISO 9295:2015, Formula (A.5) (the oxygen relaxation frequency set with a digit zero)
+
+- **Location:** Annex A (normative), "Cálculo del coeficiente de absorción
+  por el aire", Formula (A.5) on printed folio 26 of UNE-EN ISO 9295:2015
+  (October 2015), the Spanish version of EN ISO 9295:2015, which adopts ISO
+  9295:2015 without modification.
+- **The print:** the symbol list on printed folio 25 defines
+  $f_{\mathrm{r,O}}$, "frecuencia de relajación del oxígeno", with the letter
+  O, and Formula (A.3) at the top of folio 26 computes it under that name.
+  Formula (A.5), which evaluates $\alpha$ from it, sets the same frequency as
+  $f_{\mathrm{r,0}}$, with the digit zero, in both places it appears: the
+  denominator $f_{\mathrm{r,0}} + f^2/f_{\mathrm{r,0}}$ of the oxygen term.
+- **The problem:** the glyph in (A.5) is the narrow digit of $p_{\mathrm{s0}}$
+  on the same page, not the round letter of (A.3), and the PDF's own text
+  layer agrees, "f r,O" in the symbol list and in (A.3) and "f r,0" twice in
+  (A.5). A reader who takes the subscript at its word looks for a quantity
+  $f_{\mathrm{r,0}}$ that the annex never defines. The formula is right once
+  the symbol is read as the oxygen relaxation frequency, which is the only
+  frequency (A.3) gives, so no value of $\alpha$ changes.
+- **Evidence:** Verified on PDF pages 25 and 26 (printed pp. 25 and 26) of
+  UNE-EN ISO 9295:2015, on the page image and in the text layer. The 2013
+  draft, BS EN ISO 9295 (DPC 13/30264708), defines $f_{\mathrm{r,O}}$ on PDF
+  page 24 (printed p. 16) and sets $f_{\mathrm{r,0}}$ in (A.5) on PDF page 25
+  (printed p. 17), so the slip came through from the draft to the standard.
+- **Library behaviour:** unaffected. `air_absorption_np_per_m` in
+  [`sound_power_high_frequency`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/emission/sound_power_high_frequency.py)
+  evaluates Annex A through the library's ISO 9613-1 implementation, which
+  names the oxygen relaxation frequency `fro`, and the 581 correctly printed
+  cells of Tables 1 and 2 confirm the reading.
+- **Status:** unreported.
+
 ## Related source properties that are not errata
 
 Recorded here to prevent future "fixes" that would break agreement with the

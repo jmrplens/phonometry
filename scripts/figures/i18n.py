@@ -1614,6 +1614,17 @@ _ES_EXACT = {
     "Outlet side": "Lado de impulsión",
     "Sound power level $L_W$": "Nivel de potencia acústica $L_W$",
     "Measured in-duct level, before the corrections": "Nivel medido en el conducto, antes de las correcciones",
+    # ISO 9295 Annex A against the printed cells of Tables 1 and 2.
+    "Annex A, 18 °C and 40 %": "Anexo A, 18 °C y 40 %",
+    "Annex A, 23 °C and 50 %": "Anexo A, 23 °C y 50 %",
+    "Annex A, 27 °C and 60 %": "Anexo A, 27 °C y 60 %",
+    "Printed cells of that column": "Celdas impresas de esa columna",
+    "Air absorption $\\alpha$ [Np/m]": "Absorción del aire $\\alpha$ [Np/m]",
+    "Annex A through the 16 kHz octave": "El anexo A a lo largo de la octava de 16 kHz",
+    "581 cells printed as Annex A gives them": "581 celdas impresas como las da el anexo A",
+    "43 cells where a 0 is printed as another digit": "43 celdas donde un 0 se imprime como otra cifra",
+    "Printed less Annex A [$10^{-4}$ Np/m]": "Impreso menos anexo A [$10^{-4}$ Np/m]",
+    "All 624 cells, against Annex A at $\\theta$ + 273.16 K": "Las 624 celdas, frente al anexo A a $\\theta$ + 273,16 K",
     "Contribution to $L_W - \\bar{L}_p$ [dB]": "Aportación a $L_W - \\bar{L}_p$ [dB]",
     "Waterhouse": "Waterhouse",
     "the Waterhouse term rules the low bands\n"

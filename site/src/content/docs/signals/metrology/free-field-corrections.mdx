@@ -54,7 +54,7 @@ calibration check frequency.
 This page runs every step on a synthetic class 1 meter and on the two worked
 budgets the standard prints.
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/free_field_correction.svg" alt="Two panels against frequency at the nine exact octaves from 63 Hz to 16 kHz. Left: the free-field correction of a synthetic meter on a multi-frequency calibrator by Formula (D.7), near 0 dB up to 1 kHz and rising to 0.6 dB at 4 kHz, 1.7 dB at 8 kHz and 5 dB at 16 kHz, a thin band around it for the range of three microphones, and the free-field correction of the reference microphone dashed below it. Right: the correction of the same meter on an electrostatic actuator by Formula (F.13), zero at 1 kHz by construction and rising to 7.4 dB at 16 kHz, with the normalised sensitivity of the reference channel dashed" width="100%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/free_field_correction.svg" alt="Two panels against frequency at the nine exact octaves from 63 Hz to 16 kHz. Left: the free-field correction of a synthetic meter on a multi-frequency calibrator by Formula (D.7), near 0 dB up to 1 kHz and rising to 0.6 dB at 4 kHz, 1.7 dB at 8 kHz and 5 dB at 16 kHz, a thin band around it for the range of three microphones, and the free-field correction of the reference microphone dashed, above it up to 500 Hz, meeting it at 1 kHz and below it above. Right: the correction of the same meter on an electrostatic actuator by Formula (F.13), zero at 1 kHz by construction and rising to 7.4 dB at 16 kHz, with the normalised sensitivity of the reference channel dashed" width="100%" />
 
 *The correction of the synthetic meter on its calibrator (left) and on an
 electrostatic actuator (right), from the results' own `.plot()`.*
@@ -140,7 +140,7 @@ IEC/TS 61094-7, first in a free progressive field and then on the source. The
 comparison is by substitution (Annex G): the meter is measured, removed, and
 the reference put in its place, so neither needs an absolute calibration.
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_free_field_corrections_setup.svg" alt="The readings of IEC 62585 in three columns, each by substitution. Left, a sound calibrator (Annex D): 1, the meter in a free field reading L_ind1; 2, the reference microphone of type LS2P in its place reading L_ind2; 3, the calibrator on the meter reading L_ind3; 4, the calibrator on the reference reading L_ind4; Formula (D.7) gives (L_ind1 - L_ind3) - (L_ind2 - L_ind4) + C_FF,RM. Middle, a comparison coupler (Annex E): the same two free-field readings, then the reference and the meter face to face on the coupler, read together as L_ind3a and L_ind3b; Formula (E.6), with the labels of Figure E.1, gives (L_ind1 - L_ind3b) - (L_ind2 - L_ind3a) + C_FF,RM. Right, an electrostatic actuator (Annex F): the two free-field readings as functions of frequency, then the actuator on the meter's diaphragm reading L_ind3(f); by Formula (F.13) every term is referred to f_0, where the correction is zero. The footer says each pair is read in turn at the same place (Annex G) and that C_FF,RM comes from IEC/TS 61094-7" width="100%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_free_field_corrections_setup.svg" alt="The readings of IEC 62585 in three columns, the free-field ones by substitution. Left, a sound calibrator (Annex D): 1, the meter in a free field reading L_ind1; 2, the reference microphone of type LS2P in its place reading L_ind2; 3, the calibrator on the meter reading L_ind3; 4, the calibrator on the reference reading L_ind4; with stable sources (NOTEs 2 and 3), Formula (D.7) gives (L_ind1 - L_ind3) - (L_ind2 - L_ind4) + C_FF,RM. Middle, a comparison coupler (Annex E): the same two free-field readings, then the reference and the meter face to face on the coupler, read together or in turn as L_ind3a and L_ind3b; with the labels of Figure E.1, a stable source and equal levels in the coupler, Formula (E.6) gives (L_ind1 - L_ind3b) - (L_ind2 - L_ind3a) + C_FF,RM. Right, an electrostatic actuator (Annex F): the two free-field readings as functions of frequency, then the actuator on the meter's diaphragm reading L_ind3(f); by Formula (F.13) every term is referred to f_0, where the correction is zero. The footer says each free-field pair is read in turn at the same place (Annex G) and that C_FF,RM comes from IEC/TS 61094-7" width="100%" />
 
 | Requirement | Value | Clause |
 | :--- | :--- | :--- |
@@ -149,7 +149,7 @@ the reference put in its place, so neither needs an absolute calibration.
 | Free-field mounting | On a rod of the microphone's diameter; source more than 1 m away and at least six times the largest dimension of the meter; sound in the reference direction | 6 |
 | Meter support | A non-vertical rod at the rear, method 1 or 2 of Figure 1 (method 2 at less than 60°); method 3 is not used | 6 |
 | Samples | Three calibrators, three microphones and one meter; five microphones for a typical response, five windscreens | 7 |
-| Source level | 70 dB to 125 dB in a calibrator or coupler, preferably the reference level at 1 kHz; 80 dB to 105 dB on the display with an actuator | 12, 13, 14 |
+| Source level | 70 dB to 125 dB in a calibrator or coupler, preferably the reference level at 1 kHz; 80 dB to 105 dB on the display at 1 kHz with an actuator | 12, 13, 14 |
 | Frequencies | Octaves from 63 Hz to 16 kHz (class 1) or 8 kHz (class 2) for a microphone; exact base-ten frequencies of Annex H | 10, B.2, C.2 |
 | Determinations | Nine for a calibrator (three microphones on three calibrators), three microphones for a coupler, the combinations of clause 7 for an actuator; the correction is their mean | D.2, E.2, F.2 |
 
@@ -203,6 +203,15 @@ microphone's calibration. The correction climbs above 2 kHz because the
 calibrator presses on the diaphragm while a free field also diffracts round
 the microphone and the case.
 
+The three rows here are three microphones on one calibrator. D.2 step 6 asks
+for nine determinations, three microphones on three calibrators, and clause 12
+judges "the range of correction values at each frequency measured using a
+sample of three microphones", not the spread between the calibrators. Given
+nine rows, `microphones=[1, 1, 1, 2, 2, 2, 3, 3, 3]` says which rows share a
+microphone, and `range_db` is then the range of the three microphones' mean
+corrections, `microphone_corrections_db`. Without it every row counts as a
+microphone of its own, as the three rows above do.
+
 **Annex E, a comparison coupler.** The meter and the reference face each other
 in the two openings of one cavity, so the third measurement reads both at
 once. `metrology.comparison_coupler_correction` takes the same free-field
@@ -211,10 +220,15 @@ readings and the two readings in the coupler, `slm_coupler_level_db` and
 purpose: Figure E.1, its list of symbols and Table I.1 call the reference's
 reading $L_\mathrm{ind3a}$ and the meter's $L_\mathrm{ind3b}$, while Formulas
 (E.4) to (E.6) are written the other way round, as (D.5) to (D.7) are for a
-calibrator. Read with the figure's labels, the printed (E.6) comes out twice
-the difference of the two pressure responses away from the correction, which
-reaches decibels above a few kilohertz; the defect is in the [errata
-register](/phonometry/reference/errata/).
+calibrator. Read with the figure's labels, the printed (E.6) comes out
+$2(\Delta L_\mathrm{P,SLM} - \Delta L_\mathrm{P,RM})$ away from the
+correction, the deviations of the two channels' indications from the level in
+the coupler. The reference channel reads the output voltage of its microphone
+and the method needs no absolute calibration (E.1, E.2), so that difference
+carries the two channels' absolute sensitivities and is there at every
+frequency; only when both channels read sound pressure level does it shrink to
+twice the difference of the two pressure responses. The defect is in the
+[errata register](/phonometry/reference/errata/).
 
 **Annex F, an electrostatic actuator.** An actuator is not an absolute source,
 so its correction is **normalised** to the calibration check frequency
@@ -290,10 +304,11 @@ print(round(b8.combined_uncertainty_db, 3), round(b8.coverage_factor, 2),
 Both tables reproduce: 0,0590 dB and 29,98 degrees of freedom at 1 kHz,
 0,140 dB, $k = 2$ and 0,28 dB at 8 kHz. Table I.2 prints $k = 2{,}11$, though,
 and that is not the factor its own 29,98 degrees of freedom give. At 95 % the
-Student factor for 29,98 is 2,04; 2,11 is the one for about 17. The expanded
-uncertainty the page's numbers give is 0,120 dB, printed 0,12 either way, but
-the table's guard digit, 0,12(4), is the misprinted $k$ at work; the case is in
-the [errata register](/phonometry/reference/errata/). Below 97 kPa,
+Student factor for 29,98 is 2,042; 2,11 is the one for about 17. The expanded
+uncertainty the page's numbers give is $2{,}042 \times 0{,}059\,03 = 0{,}121$
+dB, printed 0,12 either way, but the table's guard digit, 0,12(4), is the
+misprinted $k$ at work; the case is in the [errata
+register](/phonometry/reference/errata/). Below 97 kPa,
 `static_pressure_kpa=` adds the component of clause 6 (0,15 dB up to 3 kHz,
 0,25 dB above, $k = 2$), and `additional_components=` takes any component a
 laboratory's own method needs, such as the drive of an actuator.
@@ -308,7 +323,8 @@ apart.*
 Each clause states the largest expanded uncertainty a correction may carry
 and still be used for the manual (clause 5); a measurement that exceeds one is
 not used. The range is inclusive: "shall not exceed" lets a value equal to its
-maximum pass.
+maximum pass, and one that reaches it through floating-point arithmetic too,
+by the same rule as the IEC TC 29 conformance verdict.
 
 | Clause | Correction for | Maximum expanded uncertainty |
 | :--- | :--- | :--- |
@@ -438,17 +454,18 @@ plt.show()
 
 <Scope>
 <ScopeClaim status="covered" label="Covered">
-**IEC 62585:2012, the calculations of every method:** the adjustment value of
-Annex A, with the pressure-to-free-field correction and the levels $L_1$ to
-$L_4$ of Figure A.1; the free-field corrections for a multi-frequency sound
-calibrator (Formula (D.7)), a comparison coupler (Formula (E.6), with the
-readings named by what they are of) and an electrostatic actuator (Formula
-(F.13), normalised to the calibration check frequency), averaged over the
-determinations with their range kept; the uncertainty budget of Annex I with
-the fifteen components of Table I.1, the static-pressure component of clause
-6 and the Welch-Satterthwaite coverage factor; the maxima of clauses 9 to 14
-and the range requirement of clauses 12 to 14 as a verdict and a fiche; and
-the exact frequencies of Annex H. Tables I.2, I.3 and H.1 are reproduced.
+**IEC 62585:2012, the calculations of Annexes A, D, E, F, H and I:** the
+adjustment value of Annex A, with the pressure-to-free-field correction and
+the levels $L_1$ to $L_4$ of Figure A.1; the free-field corrections for a
+multi-frequency sound calibrator (Formula (D.7)), a comparison coupler
+(Formula (E.6), with the readings named by what they are of) and an
+electrostatic actuator (Formula (F.13), normalised to the calibration check
+frequency), averaged over the determinations with their range over the
+microphones kept; the uncertainty budget of Annex I with the fifteen
+components of Table I.1, the static-pressure component of clause 6 and the
+Welch-Satterthwaite coverage factor; the maxima of clauses 9 to 14 and the
+range requirement of clauses 12 to 14 as a verdict and a fiche; and the exact
+frequencies of Annex H. Tables I.2, I.3 and H.1 are reproduced.
 </ScopeClaim>
 
 <ScopeClaim status="covered" label="Covered, by a reading of the text">
@@ -463,10 +480,17 @@ value.
 The measurements themselves: the free field, the mounting of the meter and the
 microphone, the time-selective and steady-state techniques of Annex G, and the
 free-field correction of the reference microphone, which comes from IEC/TS
-61094-7 or its calibration and is an input here. The comparison of the
-supplied corrections with the acceptance limits of IEC 61672-1, which clause
-15 p) asks for separately, and the periodic test of IEC 61672-3 that uses the
-corrections, are not implemented on this page.
+61094-7 or its calibration and is an input here. The corrections of clauses 9
+to 11 are judged against their maxima but not computed: the case and
+diffraction corrections of Annex B and the windscreen and accessory
+corrections of Annex C, each the difference between two set-ups; the typical
+microphone response of clause 10, the mean over at least five microphones
+with its maximum deviation; and the mean over at least four rotational
+positions that clauses 10 and 11 ask for when the reference direction is not
+the principal axis. The comparison of the supplied corrections with the
+acceptance limits of IEC 61672-1, which clause 15 p) asks for separately, and
+the periodic test of IEC 61672-3 that uses the corrections, are not
+implemented on this page.
 </ScopeClaim>
 </Scope>
 

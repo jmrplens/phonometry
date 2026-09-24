@@ -54,7 +54,7 @@ manual da a la frecuencia de comprobación de la calibración.
 Esta página recorre cada paso sobre un sonómetro sintético de clase 1 y sobre
 los dos presupuestos resueltos que imprime la norma.
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/free_field_correction.svg" alt="Dos paneles frente a la frecuencia en las nueve octavas exactas de 63 Hz a 16 kHz. Izquierda: la corrección de campo libre de un sonómetro sintético con un calibrador multifrecuencia por la Fórmula (D.7), cerca de 0 dB hasta 1 kHz y subiendo a 0,6 dB a 4 kHz, 1,7 dB a 8 kHz y 5 dB a 16 kHz, una banda estrecha a su alrededor para el intervalo de tres micrófonos, y la corrección de campo libre del micrófono de referencia en trazos debajo. Derecha: la corrección del mismo sonómetro con un actuador electrostático por la Fórmula (F.13), nula a 1 kHz por construcción y subiendo a 7,4 dB a 16 kHz, con la sensibilidad normalizada del canal de referencia en trazos" width="100%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/free_field_correction.svg" alt="Dos paneles frente a la frecuencia en las nueve octavas exactas de 63 Hz a 16 kHz. Izquierda: la corrección de campo libre de un sonómetro sintético con un calibrador multifrecuencia por la Fórmula (D.7), cerca de 0 dB hasta 1 kHz y subiendo a 0,6 dB a 4 kHz, 1,7 dB a 8 kHz y 5 dB a 16 kHz, una banda estrecha a su alrededor para el intervalo de tres micrófonos, y la corrección de campo libre del micrófono de referencia en trazos, por encima de ella hasta 500 Hz, igual a 1 kHz y por debajo más arriba. Derecha: la corrección del mismo sonómetro con un actuador electrostático por la Fórmula (F.13), nula a 1 kHz por construcción y subiendo a 7,4 dB a 16 kHz, con la sensibilidad normalizada del canal de referencia en trazos" width="100%" />
 
 *La corrección del sonómetro sintético con su calibrador (izquierda) y con un
 actuador electrostático (derecha), con el propio `.plot()` de los resultados.*
@@ -141,7 +141,7 @@ después sobre la fuente. La comparación es por sustitución (Anexo G): se mide
 el sonómetro, se retira y se coloca la referencia en su lugar, de modo que
 ninguno de los dos necesita una calibración absoluta.
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_free_field_corrections_setup.svg" alt="Las lecturas de IEC 62585 en tres columnas, cada una por sustitución. A la izquierda, un calibrador acústico (Anexo D): 1, el sonómetro en campo libre lee L_ind1; 2, el micrófono de referencia de tipo LS2P en su lugar lee L_ind2; 3, el calibrador sobre el sonómetro lee L_ind3; 4, el calibrador sobre la referencia lee L_ind4; la Fórmula (D.7) da (L_ind1 - L_ind3) - (L_ind2 - L_ind4) + C_FF,RM. En el centro, un acoplador de comparación (Anexo E): las mismas dos lecturas en campo libre, y después la referencia y el sonómetro enfrentados en el acoplador, leídos a la vez como L_ind3a y L_ind3b; la Fórmula (E.6), con las etiquetas de la Figura E.1, da (L_ind1 - L_ind3b) - (L_ind2 - L_ind3a) + C_FF,RM. A la derecha, un actuador electrostático (Anexo F): las dos lecturas en campo libre en función de la frecuencia, y después el actuador sobre la membrana del sonómetro lee L_ind3(f); por la Fórmula (F.13) cada término se refiere a f_0, donde la corrección es nula. El pie dice que cada par se lee por turnos en el mismo lugar (Anexo G) y que C_FF,RM sale de la IEC/TS 61094-7" width="100%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_free_field_corrections_setup.svg" alt="Las lecturas de IEC 62585 en tres columnas, las de campo libre por sustitución. A la izquierda, un calibrador acústico (Anexo D): 1, el sonómetro en campo libre lee L_ind1; 2, el micrófono de referencia de tipo LS2P en su lugar lee L_ind2; 3, el calibrador sobre el sonómetro lee L_ind3; 4, el calibrador sobre la referencia lee L_ind4; con fuentes estables (NOTAS 2 y 3), la Fórmula (D.7) da (L_ind1 - L_ind3) - (L_ind2 - L_ind4) + C_FF,RM. En el centro, un acoplador de comparación (Anexo E): las mismas dos lecturas en campo libre, y después la referencia y el sonómetro enfrentados en el acoplador, leídos a la vez o por turnos como L_ind3a y L_ind3b; con las etiquetas de la Figura E.1, una fuente estable y niveles iguales en el acoplador, la Fórmula (E.6) da (L_ind1 - L_ind3b) - (L_ind2 - L_ind3a) + C_FF,RM. A la derecha, un actuador electrostático (Anexo F): las dos lecturas en campo libre en función de la frecuencia, y después el actuador sobre la membrana del sonómetro lee L_ind3(f); por la Fórmula (F.13) cada término se refiere a f_0, donde la corrección es nula. El pie dice que cada par en campo libre se lee por turnos en el mismo lugar (Anexo G) y que C_FF,RM sale de la IEC/TS 61094-7" width="100%" />
 
 | Requisito | Valor | Apartado |
 | :--- | :--- | :--- |
@@ -150,7 +150,7 @@ ninguno de los dos necesita una calibración absoluta.
 | Montaje en campo libre | Sobre una varilla del diámetro del micrófono; la fuente a más de 1 m y a no menos de seis veces la mayor dimensión del sonómetro; sonido en la dirección de referencia | 6 |
 | Soporte del sonómetro | Una varilla no vertical por detrás, métodos 1 o 2 de la Figura 1 (el 2 con menos de 60°); el método 3 no se usa | 6 |
 | Muestras | Tres calibradores, tres micrófonos y un sonómetro; cinco micrófonos para una respuesta típica, cinco pantallas antiviento | 7 |
-| Nivel de la fuente | De 70 dB a 125 dB en un calibrador o un acoplador, preferiblemente el nivel de referencia a 1 kHz; de 80 dB a 105 dB en la pantalla con un actuador | 12, 13, 14 |
+| Nivel de la fuente | De 70 dB a 125 dB en un calibrador o un acoplador, preferiblemente el nivel de referencia a 1 kHz; de 80 dB a 105 dB en la pantalla a 1 kHz con un actuador | 12, 13, 14 |
 | Frecuencias | Octavas de 63 Hz a 16 kHz (clase 1) o 8 kHz (clase 2) para un micrófono; frecuencias exactas en base diez del Anexo H | 10, B.2, C.2 |
 | Determinaciones | Nueve para un calibrador (tres micrófonos con tres calibradores), tres micrófonos para un acoplador, las combinaciones del apartado 7 para un actuador; la corrección es su media | D.2, E.2, F.2 |
 
@@ -204,6 +204,15 @@ calibración del micrófono. La corrección crece por encima de 2 kHz porque el
 calibrador presiona el diafragma, mientras que un campo libre además se
 difracta alrededor del micrófono y de la caja.
 
+Las tres filas son aquí tres micrófonos con un calibrador. El paso 6 de D.2
+pide nueve determinaciones, tres micrófonos con tres calibradores, y el
+apartado 12 juzga «the range of correction values at each frequency measured
+using a sample of three microphones», no la dispersión entre los
+calibradores. Con nueve filas, `microphones=[1, 1, 1, 2, 2, 2, 3, 3, 3]` dice
+qué filas comparten micrófono, y `range_db` pasa a ser el intervalo de las
+correcciones medias de los tres micrófonos, `microphone_corrections_db`. Sin
+él, cada fila cuenta como un micrófono distinto, como las tres filas de arriba.
+
 **Anexo E, un acoplador de comparación.** El sonómetro y la referencia se
 enfrentan en las dos aberturas de una misma cavidad, así que la tercera medida
 lee los dos a la vez. `metrology.comparison_coupler_correction` toma las
@@ -213,10 +222,16 @@ mide cada una. Ese nombre es a propósito: la Figura E.1, su lista de símbolos 
 la Tabla I.1 llaman $L_\mathrm{ind3a}$ a la lectura de la referencia y
 $L_\mathrm{ind3b}$ a la del sonómetro, mientras que las Fórmulas (E.4) a (E.6)
 están escritas al revés, como las (D.5) a (D.7) para un calibrador. Leída con
-las etiquetas de la figura, la (E.6) impresa queda a dos veces la diferencia
-entre las dos respuestas de presión de la corrección, lo que llega a
-decibelios por encima de unos pocos kilohercios; el defecto está en el
-[registro de erratas](/phonometry/es/reference/errata/).
+las etiquetas de la figura, la (E.6) impresa queda a
+$2(\Delta L_\mathrm{P,SLM} - \Delta L_\mathrm{P,RM})$ de la corrección, las
+desviaciones de la indicación de cada canal respecto del nivel en el
+acoplador. El canal de referencia lee la tensión de salida de su micrófono y
+el método no necesita ninguna calibración absoluta (E.1, E.2), así que esa
+diferencia arrastra las sensibilidades absolutas de los dos canales y está en
+todas las frecuencias; solo cuando los dos canales leen nivel de presión
+sonora se reduce al doble de la diferencia entre las dos respuestas de
+presión. El defecto está en el [registro de
+erratas](/phonometry/es/reference/errata/).
 
 **Anexo F, un actuador electrostático.** Un actuador no es una fuente
 absoluta, así que su corrección se **normaliza** a la frecuencia de
@@ -293,9 +308,10 @@ print(round(b8.combined_uncertainty_db, 3), round(b8.coverage_factor, 2),
 Las dos tablas se reproducen: 0,0590 dB y 29,98 grados de libertad a 1 kHz,
 0,140 dB, $k = 2$ y 0,28 dB a 8 kHz. La Tabla I.2 imprime, sin embargo,
 $k = 2{,}11$, y ese no es el factor que dan sus propios 29,98 grados de
-libertad. Al 95 % el factor de Student para 29,98 es 2,04; 2,11 es el de unos
+libertad. Al 95 % el factor de Student para 29,98 es 2,042; 2,11 es el de unos
 17. La incertidumbre expandida que dan los números de la página es
-0,120 dB, que se imprime 0,12 en cualquier caso, pero el dígito de guarda de
+$2{,}042 \times 0{,}059\,03 = 0{,}121$ dB, que se imprime 0,12 en cualquier
+caso, pero el dígito de guarda de
 la tabla, 0,12(4), es obra del $k$ mal impreso; el caso está en el [registro
 de erratas](/phonometry/es/reference/errata/). Por debajo de 97 kPa,
 `static_pressure_kpa=` añade la componente del apartado 6 (0,15 dB hasta
@@ -313,7 +329,8 @@ estadística aparte.*
 Cada apartado fija la mayor incertidumbre expandida que puede llevar una
 corrección y seguir usándose para el manual (apartado 5); una medición que
 supere alguna no se usa. El límite es inclusivo: «shall not exceed» deja pasar
-un valor igual a su máximo.
+un valor igual a su máximo, y también uno que llega a él por la aritmética de
+coma flotante, con la misma regla que el dictamen de conformidad del IEC TC 29.
 
 | Apartado | Corrección para | Incertidumbre expandida máxima |
 | :--- | :--- | :--- |
@@ -446,19 +463,19 @@ plt.show()
 
 <Scope>
 <ScopeClaim status="covered" label="Cubierto">
-**IEC 62585:2012, los cálculos de todos los métodos:** el valor de ajuste del
-Anexo A, con la corrección de presión a campo libre y los niveles $L_1$ a
-$L_4$ de la Figura A.1; las correcciones de campo libre para un calibrador
-acústico multifrecuencia (Fórmula (D.7)), un acoplador de comparación (Fórmula
-(E.6), con las lecturas nombradas por lo que miden) y un actuador
-electrostático (Fórmula (F.13), normalizada a la frecuencia de comprobación de
-la calibración), promediadas entre las determinaciones y conservando su
-intervalo; el presupuesto de incertidumbre del Anexo I con las quince
-componentes de la Tabla I.1, la componente de presión estática del apartado 6
-y el factor de cobertura de Welch-Satterthwaite; los máximos de los apartados
-9 a 14 y el requisito sobre el intervalo de los apartados 12 a 14 como
-dictamen y como ficha; y las frecuencias exactas del Anexo H. Las Tablas I.2,
-I.3 y H.1 se reproducen.
+**IEC 62585:2012, los cálculos de los Anexos A, D, E, F, H e I:** el valor de
+ajuste del Anexo A, con la corrección de presión a campo libre y los niveles
+$L_1$ a $L_4$ de la Figura A.1; las correcciones de campo libre para un
+calibrador acústico multifrecuencia (Fórmula (D.7)), un acoplador de
+comparación (Fórmula (E.6), con las lecturas nombradas por lo que miden) y un
+actuador electrostático (Fórmula (F.13), normalizada a la frecuencia de
+comprobación de la calibración), promediadas entre las determinaciones y
+conservando su intervalo entre micrófonos; el presupuesto de incertidumbre del
+Anexo I con las quince componentes de la Tabla I.1, la componente de presión
+estática del apartado 6 y el factor de cobertura de Welch-Satterthwaite; los
+máximos de los apartados 9 a 14 y el requisito sobre el intervalo de los
+apartados 12 a 14 como dictamen y como ficha; y las frecuencias exactas del
+Anexo H. Las Tablas I.2, I.3 y H.1 se reproducen.
 </ScopeClaim>
 
 <ScopeClaim status="covered" label="Cubierto, con una lectura del texto">
@@ -473,8 +490,15 @@ valor de ajuste.
 Las mediciones en sí: el campo libre, el montaje del sonómetro y del
 micrófono, las técnicas de ventana temporal y de régimen estacionario del
 Anexo G, y la corrección de campo libre del micrófono de referencia, que sale
-de la IEC/TS 61094-7 o de su calibración y aquí es una entrada. La
-comparación de las correcciones declaradas con los límites de aceptación de la
+de la IEC/TS 61094-7 o de su calibración y aquí es una entrada. Las
+correcciones de los apartados 9 a 11 se juzgan frente a sus máximos pero no se
+calculan: las de la caja y la difracción del Anexo B y las de pantallas
+antiviento y accesorios del Anexo C, cada una la diferencia entre dos
+montajes; la respuesta típica del micrófono del apartado 10, la media de al
+menos cinco micrófonos con su desviación máxima; y la media de al menos cuatro
+posiciones de giro que piden los apartados 10 y 11 cuando la dirección de
+referencia no es el eje principal. La comparación de las correcciones
+declaradas con los límites de aceptación de la
 IEC 61672-1, que el punto p) del apartado 15 pide aparte, y el ensayo
 periódico de la IEC 61672-3 que usa las correcciones no se implementan en esta
 página.

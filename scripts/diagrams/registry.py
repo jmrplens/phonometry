@@ -244,7 +244,7 @@ DIAGRAMS = {
     ),
     "diagram_free_field_corrections_setup": (
         _d_free_field_corrections_setup,
-        "The readings of IEC 62585: a meter and a reference, in turn",
+        "The readings of IEC 62585: a meter compared with a reference",
         522,
     ),
     "diagram_env_measurement": (

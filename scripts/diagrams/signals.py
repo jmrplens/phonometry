@@ -4096,7 +4096,7 @@ def _d_free_field_corrections_setup(s: SVG, th: Theme) -> None:
     _meter_side(s, th, box_right + 2, y)
     s.text(372, y - 26, "$L_{ind3a}$", 15, th.fg)
     s.text(528, y - 26, "$L_{ind3b}$", 15, th.fg)
-    s.text(450, y + 40, "face to face, read together", 12, th.muted)
+    s.text(450, y + 40, "face to face, read together or in turn", 12, th.muted)
 
     # ----- Annex F: free field for both, then the actuator on the meter ---
     x0 = 614.0
@@ -4120,16 +4120,21 @@ def _d_free_field_corrections_setup(s: SVG, th: Theme) -> None:
         s.text(x0 + 192, y + 5, label, 15, th.fg, anchor="start")
 
     # ----- What each column gives ----------------------------------------
-    s.text(150, 360, "Formula (D.7)", 13, th.fg, bold=True)
-    s.text(150, 380, "$(L_{ind1} − L_{ind3}) − (L_{ind2} − L_{ind4})$", 13, th.fg)
-    s.text(150, 400, "$+ C_{FF,RM}$", 13, th.fg)
-    s.text(450, 360, "Formula (E.6)", 13, th.fg, bold=True)
-    s.text(450, 380, "$(L_{ind1} − L_{ind3b}) − (L_{ind2} − L_{ind3a})$", 13, th.fg)
-    s.text(450, 400, "$+ C_{FF,RM}$", 13, th.fg)
-    s.text(450, 418, "with the labels of Figure E.1", 12, th.muted)
-    s.text(750, 360, "Formula (F.13)", 13, th.fg, bold=True)
-    s.text(750, 380, "every term referred to $f_0$,", 13, th.fg)
-    s.text(750, 400, "where the correction is zero", 13, th.fg)
+    # (D.7) and (E.6) as they stand with stable sources: the drift of the
+    # free field and the difference of the levels on the source, the two
+    # terms the NOTEs let be zero, are left out.
+    s.text(150, 352, "Formula (D.7)", 13, th.fg, bold=True)
+    s.text(150, 371, "$(L_{ind1} − L_{ind3}) − (L_{ind2} − L_{ind4})$", 13, th.fg)
+    s.text(150, 390, "$+ C_{FF,RM}$", 13, th.fg)
+    s.text(150, 408, "with stable sources (NOTEs 2, 3)", 12, th.muted)
+    s.text(450, 352, "Formula (E.6)", 13, th.fg, bold=True)
+    s.text(450, 371, "$(L_{ind1} − L_{ind3b}) − (L_{ind2} − L_{ind3a})$", 13, th.fg)
+    s.text(450, 390, "$+ C_{FF,RM}$", 13, th.fg)
+    s.text(450, 408, "with the labels of Figure E.1,", 12, th.muted)
+    s.text(450, 424, "a stable source and equal coupler levels", 12, th.muted)
+    s.text(750, 352, "Formula (F.13)", 13, th.fg, bold=True)
+    s.text(750, 371, "every term referred to $f_0$,", 13, th.fg)
+    s.text(750, 390, "where the correction is zero", 13, th.fg)
 
     # ----- Key -------------------------------------------------------------
     ky = 458.0
@@ -4142,7 +4147,7 @@ def _d_free_field_corrections_setup(s: SVG, th: Theme) -> None:
     s.text(
         450,
         500,
-        "Each pair is read in turn at the same place (Annex G); "
+        "Each free-field pair is read in turn at the same place (Annex G); "
         "$C_{FF,RM}$ comes from IEC/TS 61094-7.",
         13,
         th.muted,

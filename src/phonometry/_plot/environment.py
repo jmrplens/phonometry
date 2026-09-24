@@ -26,6 +26,7 @@ from .common import (
     place_legend_clear,
     style_default,
     styled,
+    theme_fill,
 )
 
 if TYPE_CHECKING:
@@ -177,7 +178,7 @@ _STRINGS: dict[str, str] = {
     _SPB_CATEGORY_LABELS["2b"]: "Pesados de más de dos ejes (2b)",
     _SPB_SPEED_LABEL: "Velocidad del vehículo [km/h]",
     _SPB_LEVEL_LABEL: "Nivel máximo $L_\\mathrm{AFmax}$ [dB]",
-    "Pass-bys": "Pasadas",
+    "Pass-bys": "Pasos",
     "Regression line": "Recta de regresión",
     "Window of clause 9.3 for the reference speed": (
         "Ventana del apartado 9.3 para la velocidad de referencia"
@@ -1259,8 +1260,7 @@ def plot_pass_by_regression(
     ax.axvspan(
         low,
         high,
-        color=_C_PRIMARY_LIGHT,
-        alpha=0.25,
+        color=theme_fill(_C_PRIMARY, ax),
         label=_t("Window of clause 9.3 for the reference speed", language),
     )
     ax.plot(
@@ -1295,7 +1295,7 @@ def plot_pass_by_regression(
         zorder=5,
         label=(
             r"$L_\mathrm{veh}$ = "
-            f"{format_number(result.vehicle_sound_level_db, language)} dB, "
+            f"{format_number(result.reported_vehicle_sound_level_db, language)} dB, "
             f"{format_number(result.reference_speed_kmh, language, decimals=0)} km/h"
         ),
     )
@@ -1361,7 +1361,7 @@ def plot_statistical_pass_by(
             "label",
             f"{_t(_SPB_CATEGORY_LABELS[category], language)}: "
             r"$L_\mathrm{veh}$ = "
-            f"{format_number(regression.vehicle_sound_level_db, language)} dB",
+            f"{format_number(regression.reported_vehicle_sound_level_db, language)} dB",
         )
         ax.plot(line_x, line_y, **line_kwargs)
         ax.plot(
@@ -1377,7 +1377,7 @@ def plot_statistical_pass_by(
     _spb_speed_axis(ax, extent, language)
     ax.set_title(
         f"{_t('ISO 11819-1 statistical pass-by', language)}: SPBI = "
-        f"{format_number(result.index_db, language)} dB"
+        f"{format_number(result.reported_index_db, language)} dB"
     )
     ax.grid(visible=True, which="major", alpha=0.3)
     place_legend_clear(ax.legend(fontsize="small"))

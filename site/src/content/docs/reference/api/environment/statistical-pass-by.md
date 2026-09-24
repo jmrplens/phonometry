@@ -38,24 +38,35 @@ $$
 ([`statistical_pass_by_index`](/phonometry/reference/api/environment/statistical-pass-by/#statistical_pass_by_index)). The index is for comparing surfaces, not
 for predicting a traffic noise level (9.5 NOTE), and the comparison clause 10
 has in mind is a difference from a reference surface, of which Annex D gives an
-example built from seven Swedish surfaces ([`normalized_reference_levels`](/phonometry/reference/api/environment/statistical-pass-by/#normalized_reference_levels),
-[`SPB_NORMALIZED_REFERENCE_DB`](/phonometry/reference/api/environment/statistical-pass-by/#spb_normalized_reference_db)).
+example built from seven dense bituminous surfaces
+([`normalized_reference_levels`](/phonometry/reference/api/environment/statistical-pass-by/#normalized_reference_levels), [`SPB_NORMALIZED_REFERENCE_DB`](/phonometry/reference/api/environment/statistical-pass-by/#spb_normalized_reference_db)).
 
 **The rounding chain.** 9.2 ends "All levels shall be calculated to two decimal
-places and rounded to one decimal place." This module carries every level at
-full precision, which is at least the two decimal places the clause asks for,
-feeds the index with those unrounded vehicle sound levels, and rounds once, to
-one decimal, only what is reported (the `reported_` properties, rounded half
-up). The example of Annex E does something else: its index of 79,9 dB is the
-index of the three vehicle sound levels *as printed* to one decimal (78,5,
-81,1 and 83,8 dB give 79,946 dB). From the regression coefficients it prints,
-carried without intermediate rounding, the same three levels are 78,546,
-81,114 and 83,838 dB and the index is 79,985 dB, which reports as 80,0 dB. The
-two readings differ by 0,04 dB, enough to move the printed digit, and
-[`statistical_pass_by_index`](/phonometry/reference/api/environment/statistical-pass-by/#statistical_pass_by_index) handed the printed one-decimal levels
-reproduces the example exactly, which is also what 9.5 describes when it says
-the mandatory reporting of every $L_\mathrm{veh}$ lets others compute
-the index for their own weighting factors.
+places and rounded to one decimal place", and 9.5 defines the levels the index
+adds as "the Vehicle Sound Levels ... according to 9.2". The index is therefore
+the index of the three vehicle sound levels rounded to one decimal, the ones a
+report prints, which is what lets anyone recompute it from the report: 7.4 asks
+for "the sound levels Lveh and the SPBI calculated from them", and 9.5 says the
+mandatory reporting of every $L_\mathrm{veh}$ allows the index to be
+recalculated with other weighting factors. The regressions are carried at full
+precision, each level is rounded once, and the index is rounded once when it is
+reported (the `reported_` properties); both roundings are half up, a
+convention of this module, since 9.2 gives no rule for a level on the half.
+"Two decimal places" is read as the least precision of the calculation, not as
+a first rounding: rounded to 0,01 dB and then to 0,1 dB, 79,946 dB would print
+80,0 dB. Temperature-corrected levels and a reference given as levels enter
+their indices rounded the same way.
+
+The example of Annex E is reproduced by this chain: its levels 78,5, 81,1 and
+83,8 dB give 79,946 dB, printed 79,9 dB. Carried at full precision from the
+coefficients Annex E prints, the same levels are 78,546, 81,114 and 83,838 dB,
+and their index, 79,985 dB, would print 80,0 dB
+([`StatisticalPassByResult.full_precision_index_db`](/phonometry/reference/api/environment/statistical-pass-by/#statisticalpassbyresultfull_precision_index_db)). The printed
+coefficients are rounded too, so the page alone does not prove which chain the
+example was computed with: over every line that agrees with the intercept,
+slope, mean level, mean speed and vehicle sound level Annex E prints, to their
+last printed digit, the full-precision index spans 79,948 dB to 79,996 dB, and
+only the corner below 79,95 dB would also print 79,9 dB.
 
 **9.3 and 7.3, as warnings.** The regression is only used to normalize to the
 reference speed if that speed lies within one standard deviation of the
@@ -73,7 +84,8 @@ on the result and, when they fail, emitted as
 temperature of 20 °C, and the standard says a suitable method is under
 consideration. None is implemented here: temperature-corrected levels are an
 input (`corrected_vehicle_sound_levels_db`), and the index is then computed
-for both, which is what clause 13 asks to be reported.
+for both. Clause 13 lists the corrected levels and index as optional report
+items (26 and 28) beside the mandatory uncorrected ones (25 and 27).
 
 **9.6, the random errors.** Table 2 gives the spread expected of individual
 vehicles about $L_\mathrm{veh}$ and the 95 % confidence interval that
@@ -192,10 +204,15 @@ PassByRegression(
 The regression line of one vehicle category and what 9.2 reads off it.
 
 The line is $L = a + b \lg(v / 1\ \mathrm{km/h})$, fitted by least
-squares to the pass-bys of one category (9.1). Everything clause 13 item 29
-asks to be reported about it is here: the slope and the intercept, the mean
-and the standard deviation of the speeds and the standard deviation of the
-residuals.
+squares to the pass-bys of one category (9.1). Clause 13 item 29 asks for
+the slope and the intercept, the average and the standard deviation of the
+speeds and the standard deviation of the residuals. The spread of the
+speeds is given here as the standard deviation of $\lg v$, in
+decades, and not in km/h: the line is fitted in $\lg v$ and 9.3 is
+judged in it, and the standard gives no conversion. Annex E prints a
+spread in km/h "converted from the logarithm of speed" without saying how,
+and its three values do not agree with the slopes, correlations and level
+spreads printed beside them (the errata registry has the arithmetic).
 
 **Parameters**
 
@@ -413,10 +430,12 @@ The Statistical Pass-By method of ISO 11819-1 from a list of pass-bys.
 
 One row per vehicle that passed on its own: its category, its speed and its
 maximum A-weighted level. The rows are split by category, a line is fitted
-through each ([`pass_by_regression`](/phonometry/reference/api/environment/statistical-pass-by/#pass_by_regression)), each line is read at its Table 1
-reference speed, and the three vehicle sound levels are combined into the
-index ([`statistical_pass_by_index`](/phonometry/reference/api/environment/statistical-pass-by/#statistical_pass_by_index)) at full precision. The rounding to
-one decimal of 9.2 is left to the `reported_` properties of the result.
+through each ([`pass_by_regression`](/phonometry/reference/api/environment/statistical-pass-by/#pass_by_regression)), and each line is read at its
+Table 1 reference speed. The three vehicle sound levels are rounded to one
+decimal, as 9.2 has them reported, and combined into the index
+([`statistical_pass_by_index`](/phonometry/reference/api/environment/statistical-pass-by/#statistical_pass_by_index)), so that the index is the one anyone
+recomputes from the reported levels (9.5). The unrounded levels and their
+index stay on the result ([`StatisticalPassByResult.full_precision_index_db`](/phonometry/reference/api/environment/statistical-pass-by/#statisticalpassbyresultfull_precision_index_db)).
 
 The 7.3 counts (the two heavy categories together included) and the 9.3
 speed windows are judged, kept on the result and emitted as
@@ -430,8 +449,8 @@ speed windows are judged, kept on the result and emitted as
 | `speeds_kmh` | The speed of each pass-by, in km/h. |
 | `max_levels_db` | The maximum A-weighted level of each pass-by, time weighting F, in decibels. |
 | `road_speed_category` | `"low"`, `"medium"` or `"high"` (3.3). |
-| `corrected_vehicle_sound_levels_db` | Vehicle sound levels corrected to [`SPB_REFERENCE_AIR_TEMPERATURE_C`](/phonometry/reference/api/environment/statistical-pass-by/#spb_reference_air_temperature_c) by a method of the caller's choosing, keyed by category, for which the index is also computed. 9.4 gives no method. To correct each pass-by instead, which 9.4 prefers, correct `max_levels_db` and call this again. |
-| `reference_db` | The reference surface of clause 10: either its SPBI in decibels, or its three vehicle sound levels keyed by category (for instance [`SPB_NORMALIZED_REFERENCE_DB`](/phonometry/reference/api/environment/statistical-pass-by/#spb_normalized_reference_db)), whose index is then computed with the same weighting factors. |
+| `corrected_vehicle_sound_levels_db` | Vehicle sound levels corrected to [`SPB_REFERENCE_AIR_TEMPERATURE_C`](/phonometry/reference/api/environment/statistical-pass-by/#spb_reference_air_temperature_c) by a method of the caller's choosing, keyed by category, for which the index is also computed, from the levels rounded to one decimal. 9.4 gives no method. To correct each pass-by instead, which 9.4 prefers, correct `max_levels_db` and call this again. |
+| `reference_db` | The reference surface of clause 10: either its SPBI in decibels, used as given, or its three vehicle sound levels keyed by category (for instance [`SPB_NORMALIZED_REFERENCE_DB`](/phonometry/reference/api/environment/statistical-pass-by/#spb_normalized_reference_db)), whose index is then computed from the levels rounded to one decimal, with the same weighting factors. |
 | `weighting_factors` | Other proportions of the three categories (9.5); Table 1 when omitted. |
 
 **Returns:** The regressions, the levels and the index, as a [`StatisticalPassByResult`](/phonometry/reference/api/environment/statistical-pass-by/#statisticalpassbyresult).
@@ -461,14 +480,17 @@ $$
 
 with the reference speeds and the weighting factors of Table 1 for the road
 speed category. The heavy terms carry the ratio of the car reference speed
-to their own because the index stands for the equivalent level of a flow in
-which the cars pass faster than the lorries: a vehicle that goes slower is
-heard for longer.
+to their own because a vehicle that goes slower is heard for longer: the
+ratio weights each category by the time its vehicles take to pass, so that
+a difference in SPBI between two surfaces is the difference in equivalent
+level for the reference speeds and proportions of Table 1 (9.5). The index
+itself is not an equivalent level of traffic noise (9.5 NOTE).
 
 Whatever levels are handed in are used as they are. Handed the three levels
 a report prints to one decimal, this is the index a third party computes
-from a report, which 9.5 anticipates, and the chain the example of Annex E
-uses; [`statistical_pass_by`](/phonometry/reference/api/environment/statistical-pass-by/#statistical_pass_by) feeds it the unrounded levels instead.
+from the report, which 9.5 anticipates, and the index
+[`statistical_pass_by`](/phonometry/reference/api/environment/statistical-pass-by/#statistical_pass_by) reports, which rounds its levels that way
+before calling this.
 
 **Parameters**
 
@@ -511,10 +533,10 @@ The vehicle sound levels and the index of one road surface (ISO 11819-1).
 | `regressions` | The [`PassByRegression`](/phonometry/reference/api/environment/statistical-pass-by/#passbyregression) of each vehicle category, keyed `"1"`, `"2a"` and `"2b"`. |
 | `weighting_factors` | The $W_x$ the index was computed with. |
 | `vehicle_sound_levels_db` | $L_\mathrm{veh}$ of each category, uncorrected for temperature and unrounded, in decibels. |
-| `index_db` | The SPBI of those levels, unrounded, in decibels. |
-| `corrected_vehicle_sound_levels_db` | The temperature-corrected levels the caller supplied (9.4), or `None`. |
-| `corrected_index_db` | The SPBI of the corrected levels, or `None`. |
-| `reference_index_db` | The SPBI of the reference surface (clause 10), or `None` when no reference was given. |
+| `index_db` | The SPBI of those levels as 9.2 reports them, rounded to one decimal (`reported_vehicle_sound_levels_db`), in decibels. The index itself is not rounded; `reported_index_db` is. |
+| `corrected_vehicle_sound_levels_db` | The temperature-corrected levels the caller supplied (9.4), as supplied, or `None`. |
+| `corrected_index_db` | The SPBI of the corrected levels rounded to one decimal, or `None`. |
+| `reference_index_db` | The SPBI of the reference surface (clause 10): the index supplied, or that of the levels supplied rounded to one decimal; `None` when no reference was given. |
 
 ### StatisticalPassByResult.corrected_difference_db
 
@@ -528,8 +550,21 @@ The temperature-corrected SPBI less the reference one, or `None`.
 
 The SPBI less that of the reference surface, in decibels, or `None`.
 
-Positive for a surface louder than the reference. Unrounded; 9.5 names
-this difference as the usual way the index is presented.
+Positive for a surface louder than the reference. Unrounded; 9.5 says
+that in many cases the main use of the index is this difference.
+
+### StatisticalPassByResult.full_precision_index_db
+
+*property*
+
+The SPBI of the unrounded $L_\mathrm{veh}$, in decibels.
+
+Not the index the standard reports, which adds the levels of 9.2 as
+they are reported, to one decimal (`index_db`). The two never
+differ by more than 0,05 dB, the most a level moves when it is rounded,
+but that can be enough to move the reported digit: for the lines Annex
+E prints, this is 79,985 dB, which would print 80,0 dB, where the annex
+prints 79,9 dB.
 
 ### StatisticalPassByResult.heavy_vehicle_count
 
@@ -547,10 +582,11 @@ $$
 \sqrt{\sum_x \left( c_x \, \Delta_x \right)^2}, \qquad c_x = \frac{\partial \mathrm{SPBI}}{\partial L_x} = \frac{W'_x \, 10^{L_x/10}}{\sum_y W'_y \, 10^{L_y/10}}
 $$
 
-with $W'_x$ the weighting factor times the speed ratio of 9.5 and
-$\Delta_x$ each category's
-[`PassByRegression.confidence_interval_db`](/phonometry/reference/api/environment/statistical-pass-by/#passbyregressionconfidence_interval_db). The three categories
-are measured on different vehicles and are taken as independent.
+with $W'_x$ the weighting factor times the speed ratio of 9.5,
+$L_x$ the reported levels the index adds and $\Delta_x$
+each category's [`PassByRegression.confidence_interval_db`](/phonometry/reference/api/environment/statistical-pass-by/#passbyregressionconfidence_interval_db). The
+three categories are measured on different vehicles and are taken as
+independent.
 
 ### StatisticalPassByResult.meets_minimum_counts
 
@@ -599,6 +635,12 @@ The Table 1 reference speeds the levels are normalized to, in km/h.
 
 The temperature-corrected SPBI rounded to one decimal, or `None`.
 
+### StatisticalPassByResult.reported_corrected_vehicle_sound_levels_db
+
+*property*
+
+The temperature-corrected levels rounded to one decimal, or `None`.
+
 ### StatisticalPassByResult.reported_index_db
 
 *property*
@@ -610,6 +652,8 @@ The SPBI rounded to one decimal (9.2).
 *property*
 
 $L_\mathrm{veh}$ of each category rounded to one decimal (9.2).
+
+The levels the index is computed from, and the ones a report prints.
 
 ## StatisticalPassByWarning
 

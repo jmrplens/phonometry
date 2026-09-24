@@ -390,16 +390,14 @@ def _chk_spb_annex_e_vehicle_levels() -> Outcome:
 
 @register(
     _ROAD_SURFACE,
-    "ISO 11819-1:1997 9.5 and Annex E",
-    "SPBI not corrected for temperature, from the three L_veh as Annex E "
-    "prints them (78,5, 81,1 and 83,8 dB), dB",
+    "ISO 11819-1:1997 9.2, 9.5 and Annex E",
+    "SPBI not corrected for temperature, from pass-bys on the printed "
+    "regression lines through the L_veh of 9.2 to one decimal, dB",
 )
 def _chk_spb_annex_e_index() -> Outcome:
-    result = _spb_annex_e()
-    index = ph.environment.statistical_pass_by_index(
-        result.reported_vehicle_sound_levels_db, road_speed_category=_SPB_ROAD
+    return numeric(
+        spb.ANNEX_E_INDEX_DB, _spb_annex_e().index_db, 0.05, unit="dB", places=3
     )
-    return numeric(spb.ANNEX_E_INDEX_DB, index, 0.05, unit="dB", places=3)
 
 
 @register(

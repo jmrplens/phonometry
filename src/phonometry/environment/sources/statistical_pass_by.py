@@ -34,24 +34,35 @@ and the heavy ones by the ratio of the car reference speed to their own:
 (:func:`statistical_pass_by_index`). The index is for comparing surfaces, not
 for predicting a traffic noise level (9.5 NOTE), and the comparison clause 10
 has in mind is a difference from a reference surface, of which Annex D gives an
-example built from seven Swedish surfaces (:func:`normalized_reference_levels`,
-:data:`SPB_NORMALIZED_REFERENCE_DB`).
+example built from seven dense bituminous surfaces
+(:func:`normalized_reference_levels`, :data:`SPB_NORMALIZED_REFERENCE_DB`).
 
 **The rounding chain.** 9.2 ends "All levels shall be calculated to two decimal
-places and rounded to one decimal place." This module carries every level at
-full precision, which is at least the two decimal places the clause asks for,
-feeds the index with those unrounded vehicle sound levels, and rounds once, to
-one decimal, only what is reported (the ``reported_`` properties, rounded half
-up). The example of Annex E does something else: its index of 79,9 dB is the
-index of the three vehicle sound levels *as printed* to one decimal (78,5,
-81,1 and 83,8 dB give 79,946 dB). From the regression coefficients it prints,
-carried without intermediate rounding, the same three levels are 78,546,
-81,114 and 83,838 dB and the index is 79,985 dB, which reports as 80,0 dB. The
-two readings differ by 0,04 dB, enough to move the printed digit, and
-:func:`statistical_pass_by_index` handed the printed one-decimal levels
-reproduces the example exactly, which is also what 9.5 describes when it says
-the mandatory reporting of every :math:`L_\mathrm{veh}` lets others compute
-the index for their own weighting factors.
+places and rounded to one decimal place", and 9.5 defines the levels the index
+adds as "the Vehicle Sound Levels ... according to 9.2". The index is therefore
+the index of the three vehicle sound levels rounded to one decimal, the ones a
+report prints, which is what lets anyone recompute it from the report: 7.4 asks
+for "the sound levels Lveh and the SPBI calculated from them", and 9.5 says the
+mandatory reporting of every :math:`L_\mathrm{veh}` allows the index to be
+recalculated with other weighting factors. The regressions are carried at full
+precision, each level is rounded once, and the index is rounded once when it is
+reported (the ``reported_`` properties); both roundings are half up, a
+convention of this module, since 9.2 gives no rule for a level on the half.
+"Two decimal places" is read as the least precision of the calculation, not as
+a first rounding: rounded to 0,01 dB and then to 0,1 dB, 79,946 dB would print
+80,0 dB. Temperature-corrected levels and a reference given as levels enter
+their indices rounded the same way.
+
+The example of Annex E is reproduced by this chain: its levels 78,5, 81,1 and
+83,8 dB give 79,946 dB, printed 79,9 dB. Carried at full precision from the
+coefficients Annex E prints, the same levels are 78,546, 81,114 and 83,838 dB,
+and their index, 79,985 dB, would print 80,0 dB
+(:attr:`StatisticalPassByResult.full_precision_index_db`). The printed
+coefficients are rounded too, so the page alone does not prove which chain the
+example was computed with: over every line that agrees with the intercept,
+slope, mean level, mean speed and vehicle sound level Annex E prints, to their
+last printed digit, the full-precision index spans 79,948 dB to 79,996 dB, and
+only the corner below 79,95 dB would also print 79,9 dB.
 
 **9.3 and 7.3, as warnings.** The regression is only used to normalize to the
 reference speed if that speed lies within one standard deviation of the
@@ -69,7 +80,8 @@ on the result and, when they fail, emitted as
 temperature of 20 °C, and the standard says a suitable method is under
 consideration. None is implemented here: temperature-corrected levels are an
 input (``corrected_vehicle_sound_levels_db``), and the index is then computed
-for both, which is what clause 13 asks to be reported.
+for both. Clause 13 lists the corrected levels and index as optional report
+items (26 and 28) beside the mandatory uncorrected ones (25 and 27).
 
 **9.6, the random errors.** Table 2 gives the spread expected of individual
 vehicles about :math:`L_\mathrm{veh}` and the 95 % confidence interval that
@@ -239,8 +251,17 @@ _HEAVY_CATEGORIES: tuple[str, ...] = ("2a", "2b")
 
 
 def _round_tenth(value: float) -> float:
-    """Round a level to one decimal place, half up (9.2)."""
+    """Round a level to the one decimal place of 9.2.
+
+    A level on the half goes up. That is a convention of this module: 9.2 says
+    only "rounded to one decimal place" and gives no rule for the half.
+    """
     return math.floor(value * 10.0 + 0.5) / 10.0
+
+
+def _reported_levels(levels_db: Mapping[str, float]) -> dict[str, float]:
+    """Three vehicle sound levels as 9.2 reports them, to one decimal."""
+    return {key: _round_tenth(value) for key, value in levels_db.items()}
 
 
 def _road_category(road_speed_category: str) -> str:
@@ -320,14 +341,17 @@ def statistical_pass_by_index(
 
     with the reference speeds and the weighting factors of Table 1 for the road
     speed category. The heavy terms carry the ratio of the car reference speed
-    to their own because the index stands for the equivalent level of a flow in
-    which the cars pass faster than the lorries: a vehicle that goes slower is
-    heard for longer.
+    to their own because a vehicle that goes slower is heard for longer: the
+    ratio weights each category by the time its vehicles take to pass, so that
+    a difference in SPBI between two surfaces is the difference in equivalent
+    level for the reference speeds and proportions of Table 1 (9.5). The index
+    itself is not an equivalent level of traffic noise (9.5 NOTE).
 
     Whatever levels are handed in are used as they are. Handed the three levels
     a report prints to one decimal, this is the index a third party computes
-    from a report, which 9.5 anticipates, and the chain the example of Annex E
-    uses; :func:`statistical_pass_by` feeds it the unrounded levels instead.
+    from the report, which 9.5 anticipates, and the index
+    :func:`statistical_pass_by` reports, which rounds its levels that way
+    before calling this.
 
     :param vehicle_sound_levels_db: :math:`L_\mathrm{veh}` of cars, dual-axle
         and multi-axle heavy vehicles, in decibels, keyed ``"1"``, ``"2a"``
@@ -354,10 +378,15 @@ class PassByRegression:
     r"""The regression line of one vehicle category and what 9.2 reads off it.
 
     The line is :math:`L = a + b \lg(v / 1\ \mathrm{km/h})`, fitted by least
-    squares to the pass-bys of one category (9.1). Everything clause 13 item 29
-    asks to be reported about it is here: the slope and the intercept, the mean
-    and the standard deviation of the speeds and the standard deviation of the
-    residuals.
+    squares to the pass-bys of one category (9.1). Clause 13 item 29 asks for
+    the slope and the intercept, the average and the standard deviation of the
+    speeds and the standard deviation of the residuals. The spread of the
+    speeds is given here as the standard deviation of :math:`\lg v`, in
+    decades, and not in km/h: the line is fitted in :math:`\lg v` and 9.3 is
+    judged in it, and the standard gives no conversion. Annex E prints a
+    spread in km/h "converted from the logarithm of speed" without saying how,
+    and its three values do not agree with the slopes, correlations and level
+    spreads printed beside them (the errata registry has the arithmetic).
 
     :param vehicle_category: ``"1"``, ``"2a"`` or ``"2b"``.
     :param road_speed_category: ``"low"``, ``"medium"`` or ``"high"``.
@@ -630,12 +659,16 @@ class StatisticalPassByResult:
     :param weighting_factors: The :math:`W_x` the index was computed with.
     :param vehicle_sound_levels_db: :math:`L_\mathrm{veh}` of each category,
         uncorrected for temperature and unrounded, in decibels.
-    :param index_db: The SPBI of those levels, unrounded, in decibels.
+    :param index_db: The SPBI of those levels as 9.2 reports them, rounded to
+        one decimal (:attr:`reported_vehicle_sound_levels_db`), in decibels.
+        The index itself is not rounded; :attr:`reported_index_db` is.
     :param corrected_vehicle_sound_levels_db: The temperature-corrected levels
-        the caller supplied (9.4), or ``None``.
-    :param corrected_index_db: The SPBI of the corrected levels, or ``None``.
-    :param reference_index_db: The SPBI of the reference surface (clause 10),
-        or ``None`` when no reference was given.
+        the caller supplied (9.4), as supplied, or ``None``.
+    :param corrected_index_db: The SPBI of the corrected levels rounded to one
+        decimal, or ``None``.
+    :param reference_index_db: The SPBI of the reference surface (clause 10):
+        the index supplied, or that of the levels supplied rounded to one
+        decimal; ``None`` when no reference was given.
     """
 
     road_speed_category: str
@@ -672,15 +705,42 @@ class StatisticalPassByResult:
 
     @property
     def reported_vehicle_sound_levels_db(self) -> Mapping[str, float]:
-        r""":math:`L_\mathrm{veh}` of each category rounded to one decimal (9.2)."""
+        r""":math:`L_\mathrm{veh}` of each category rounded to one decimal (9.2).
+
+        The levels the index is computed from, and the ones a report prints.
+        """
+        return MappingProxyType(_reported_levels(self.vehicle_sound_levels_db))
+
+    @property
+    def reported_corrected_vehicle_sound_levels_db(self) -> Mapping[str, float] | None:
+        """The temperature-corrected levels rounded to one decimal, or ``None``."""
+        if self.corrected_vehicle_sound_levels_db is None:
+            return None
         return MappingProxyType(
-            {k: _round_tenth(v) for k, v in self.vehicle_sound_levels_db.items()}
+            _reported_levels(self.corrected_vehicle_sound_levels_db)
         )
 
     @property
     def reported_index_db(self) -> float:
         """The SPBI rounded to one decimal (9.2)."""
         return _round_tenth(self.index_db)
+
+    @property
+    def full_precision_index_db(self) -> float:
+        r"""The SPBI of the unrounded :math:`L_\mathrm{veh}`, in decibels.
+
+        Not the index the standard reports, which adds the levels of 9.2 as
+        they are reported, to one decimal (:attr:`index_db`). The two never
+        differ by more than 0,05 dB, the most a level moves when it is rounded,
+        but that can be enough to move the reported digit: for the lines Annex
+        E prints, this is 79,985 dB, which would print 80,0 dB, where the annex
+        prints 79,9 dB.
+        """
+        return statistical_pass_by_index(
+            self.vehicle_sound_levels_db,
+            road_speed_category=self.road_speed_category,
+            weighting_factors=self.weighting_factors,
+        )
 
     @property
     def reported_corrected_index_db(self) -> float | None:
@@ -693,8 +753,8 @@ class StatisticalPassByResult:
     def difference_db(self) -> float | None:
         """The SPBI less that of the reference surface, in decibels, or ``None``.
 
-        Positive for a surface louder than the reference. Unrounded; 9.5 names
-        this difference as the usual way the index is presented.
+        Positive for a surface louder than the reference. Unrounded; 9.5 says
+        that in many cases the main use of the index is this difference.
         """
         if self.reference_index_db is None:
             return None
@@ -717,13 +777,14 @@ class StatisticalPassByResult:
            c_x = \frac{\partial \mathrm{SPBI}}{\partial L_x}
                = \frac{W'_x \, 10^{L_x/10}}{\sum_y W'_y \, 10^{L_y/10}}
 
-        with :math:`W'_x` the weighting factor times the speed ratio of 9.5 and
-        :math:`\Delta_x` each category's
-        :attr:`PassByRegression.confidence_interval_db`. The three categories
-        are measured on different vehicles and are taken as independent.
+        with :math:`W'_x` the weighting factor times the speed ratio of 9.5,
+        :math:`L_x` the reported levels the index adds and :math:`\Delta_x`
+        each category's :attr:`PassByRegression.confidence_interval_db`. The
+        three categories are measured on different vehicles and are taken as
+        independent.
         """
         terms = _index_terms(
-            self.vehicle_sound_levels_db,
+            self.reported_vehicle_sound_levels_db,
             self.weighting_factors,
             self.road_speed_category,
         )
@@ -769,10 +830,12 @@ def statistical_pass_by(
 
     One row per vehicle that passed on its own: its category, its speed and its
     maximum A-weighted level. The rows are split by category, a line is fitted
-    through each (:func:`pass_by_regression`), each line is read at its Table 1
-    reference speed, and the three vehicle sound levels are combined into the
-    index (:func:`statistical_pass_by_index`) at full precision. The rounding to
-    one decimal of 9.2 is left to the ``reported_`` properties of the result.
+    through each (:func:`pass_by_regression`), and each line is read at its
+    Table 1 reference speed. The three vehicle sound levels are rounded to one
+    decimal, as 9.2 has them reported, and combined into the index
+    (:func:`statistical_pass_by_index`), so that the index is the one anyone
+    recomputes from the reported levels (9.5). The unrounded levels and their
+    index stay on the result (:attr:`StatisticalPassByResult.full_precision_index_db`).
 
     The 7.3 counts (the two heavy categories together included) and the 9.3
     speed windows are judged, kept on the result and emitted as
@@ -786,13 +849,15 @@ def statistical_pass_by(
     :param road_speed_category: ``"low"``, ``"medium"`` or ``"high"`` (3.3).
     :param corrected_vehicle_sound_levels_db: Vehicle sound levels corrected to
         :data:`SPB_REFERENCE_AIR_TEMPERATURE_C` by a method of the caller's
-        choosing, keyed by category, for which the index is also computed. 9.4
-        gives no method. To correct each pass-by instead, which 9.4 prefers,
-        correct ``max_levels_db`` and call this again.
+        choosing, keyed by category, for which the index is also computed,
+        from the levels rounded to one decimal. 9.4 gives no method. To correct
+        each pass-by instead, which 9.4 prefers, correct ``max_levels_db`` and
+        call this again.
     :param reference_db: The reference surface of clause 10: either its SPBI in
-        decibels, or its three vehicle sound levels keyed by category (for
-        instance :data:`SPB_NORMALIZED_REFERENCE_DB`), whose index is then
-        computed with the same weighting factors.
+        decibels, used as given, or its three vehicle sound levels keyed by
+        category (for instance :data:`SPB_NORMALIZED_REFERENCE_DB`), whose
+        index is then computed from the levels rounded to one decimal, with
+        the same weighting factors.
     :param weighting_factors: Other proportions of the three categories (9.5);
         Table 1 when omitted.
     :return: The regressions, the levels and the index, as a
@@ -835,7 +900,9 @@ def statistical_pass_by(
         key: regressions[key].vehicle_sound_level_db for key in SPB_VEHICLE_CATEGORIES
     }
     index = statistical_pass_by_index(
-        vehicle_levels, road_speed_category=road, weighting_factors=weights
+        _reported_levels(vehicle_levels),
+        road_speed_category=road,
+        weighting_factors=weights,
     )
     corrected_levels: Mapping[str, float] | None = None
     corrected_index: float | None = None
@@ -846,13 +913,18 @@ def statistical_pass_by(
             )
         )
         corrected_index = statistical_pass_by_index(
-            corrected_levels, road_speed_category=road, weighting_factors=weights
+            _reported_levels(corrected_levels),
+            road_speed_category=road,
+            weighting_factors=weights,
         )
     reference_index: float | None = None
     if reference_db is not None:
         if isinstance(reference_db, Mapping):
+            reference_levels = _per_category(reference_db, "reference_db")
             reference_index = statistical_pass_by_index(
-                reference_db, road_speed_category=road, weighting_factors=weights
+                _reported_levels(reference_levels),
+                road_speed_category=road,
+                weighting_factors=weights,
             )
         else:
             reference_index = require_finite(float(reference_db), "reference_db")

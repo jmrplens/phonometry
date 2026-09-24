@@ -217,14 +217,39 @@ def test_annex_e_index_is_the_index_of_the_printed_levels() -> None:
     assert round(index, 1) == ref.ANNEX_E_INDEX_DB
 
 
-def test_clause_chain_reports_80_0(annex_e: StatisticalPassByResult) -> None:
-    """Unrounded levels, as 9.2 has them calculated, give 80,0 dB, not 79,9."""
-    assert annex_e.index_db == pytest.approx(79.9852, abs=1e-4)
-    assert annex_e.reported_index_db == pytest.approx(80.0)
+def test_annex_e_index_end_to_end_is_the_printed_79_9(
+    annex_e: StatisticalPassByResult,
+) -> None:
+    """From pass-bys, the index adds the one-decimal levels of 9.2, as 9.5 has it."""
+    assert annex_e.index_db == pytest.approx(79.9464, abs=1e-4)
+    assert annex_e.reported_index_db == ref.ANNEX_E_INDEX_DB
+
+
+def test_the_unrounded_chain_would_print_80_0(
+    annex_e: StatisticalPassByResult,
+) -> None:
+    """Carried unrounded from the printed lines, the index would print 80,0 dB."""
+    assert annex_e.full_precision_index_db == pytest.approx(79.9852, abs=1e-4)
+    assert round(annex_e.full_precision_index_db, 1) == pytest.approx(80.0)
     two_decimals = {k: round(v, 2) for k, v in annex_e.vehicle_sound_levels_db.items()}
     literal = statistical_pass_by_index(two_decimals, road_speed_category="medium")
     assert literal == pytest.approx(79.9877, abs=1e-4)
     assert round(literal, 1) == pytest.approx(80.0)
+
+
+def test_the_index_is_rounded_once(annex_e: StatisticalPassByResult) -> None:
+    """79,946 dB taken to 79,95 dB first would print 80,0 dB, not Annex E's 79,9."""
+    two_steps = math.floor(round(annex_e.index_db, 2) * 10.0 + 0.5) / 10.0
+    assert two_steps == pytest.approx(80.0)
+    assert annex_e.reported_index_db == pytest.approx(79.9)
+
+
+def test_the_two_indices_differ_by_less_than_half_a_tenth(
+    annex_e: StatisticalPassByResult,
+) -> None:
+    """Rounding moves each level at most 0,05 dB, and the index follows."""
+    gap = abs(annex_e.full_precision_index_db - annex_e.index_db)
+    assert 0.0 < gap <= 0.05
 
 
 def test_annex_e_corrected_index_and_difference(
@@ -260,6 +285,64 @@ def test_reference_as_levels_is_indexed_with_the_same_weights() -> None:
     )
     assert result.reference_index_db == pytest.approx(78.9219, abs=1e-4)
     assert result.corrected_difference_db is None
+
+
+def _index_by_hand(levels: dict[str, float], weights: dict[str, float]) -> float:
+    """The 9.5 sum written out for the medium road, cars 80 km/h, heavy 70 km/h."""
+    return 10.0 * math.log10(
+        weights["1"] * 10.0 ** (levels["1"] / 10.0)
+        + weights["2a"] * (80.0 / 70.0) * 10.0 ** (levels["2a"] / 10.0)
+        + weights["2b"] * (80.0 / 70.0) * 10.0 ** (levels["2b"] / 10.0)
+    )
+
+
+def test_national_weights_reach_every_index_of_the_result() -> None:
+    """Weights of 9.5 other than Table 1 index the site, its correction and its reference."""
+    weights = {"1": 0.5, "2a": 0.3, "2b": 0.2}
+    corrected = {"1": 78.83, "2a": 81.14, "2b": 83.77}
+    reference = {"1": 76.44, "2a": 81.07, "2b": 83.96}
+    result = statistical_pass_by(
+        *_annex_e_rows(),
+        road_speed_category="medium",
+        corrected_vehicle_sound_levels_db=corrected,
+        reference_db=reference,
+        weighting_factors=weights,
+    )
+    assert dict(result.weighting_factors) == weights
+    assert result.index_db == pytest.approx(
+        _index_by_hand(ref.ANNEX_E_VEHICLE_SOUND_LEVELS_DB, weights), rel=1e-14
+    )
+    assert result.corrected_index_db == pytest.approx(
+        _index_by_hand({"1": 78.8, "2a": 81.1, "2b": 83.8}, weights), rel=1e-14
+    )
+    assert result.reference_index_db == pytest.approx(
+        _index_by_hand({"1": 76.4, "2a": 81.1, "2b": 84.0}, weights), rel=1e-14
+    )
+    assert dict(result.reported_corrected_vehicle_sound_levels_db or {}) == {
+        "1": 78.8,
+        "2a": 81.1,
+        "2b": 83.8,
+    }
+
+
+def test_national_weights_reach_the_index_interval() -> None:
+    weights = {"1": 0.5, "2a": 0.3, "2b": 0.2}
+    result = statistical_pass_by(
+        *_annex_e_rows(), road_speed_category="medium", weighting_factors=weights
+    )
+    reported = dict(result.reported_vehicle_sound_levels_db)
+    step = 1e-6
+    combined = 0.0
+    for category in _CATEGORIES:
+        moved = dict(reported)
+        moved[category] += step
+        derivative = (_index_by_hand(moved, weights) - result.index_db) / step
+        combined += (
+            derivative * result.regressions[category].confidence_interval_db
+        ) ** 2
+    assert result.index_confidence_interval_db == pytest.approx(
+        math.sqrt(combined), rel=1e-5
+    )
 
 
 def test_reference_index_may_be_any_real_number() -> None:
@@ -351,7 +434,7 @@ def test_index_interval_combines_the_three_by_sensitivity(
     step = 1e-6
     combined = 0.0
     for category in _CATEGORIES:
-        levels = dict(annex_e.vehicle_sound_levels_db)
+        levels = dict(annex_e.reported_vehicle_sound_levels_db)
         levels[category] += step
         derivative = (
             statistical_pass_by_index(levels, road_speed_category="medium")
@@ -426,6 +509,39 @@ def test_reference_speed_outside_the_window_warns() -> None:
     assert high > low
 
 
+def _placed_speeds(centre_lg: float, lg_sd: float, n: int = 11) -> np.ndarray:
+    """Speeds whose mean and sample standard deviation of lg v are given exactly."""
+    raw = np.linspace(-1.0, 1.0, n)
+    return 10.0 ** (centre_lg + lg_sd * raw / np.std(raw, ddof=1))
+
+
+def _nine_three_warnings(caught: list[warnings.WarningMessage]) -> list[str]:
+    return [str(w.message) for w in caught if "9.3" in str(w.message)]
+
+
+@pytest.mark.parametrize(
+    ("category", "k", "inside"), [("1", 1.5, True), ("2a", 1.0, False)]
+)
+def test_speed_window_is_k_deviations_of_lg_v_about_its_mean(
+    category: str, k: float, *, inside: bool
+) -> None:
+    """A reference speed 1,25 deviations off is inside the car window, outside the heavy one."""
+    lg_sd = 0.05
+    centre = math.log10(50.0) + 1.25 * lg_sd
+    speeds = _placed_speeds(centre, lg_sd)
+    levels = 30.0 + 25.0 * np.log10(speeds) + np.resize([0.5, -0.5], speeds.size)
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        regression = pass_by_regression(
+            speeds, levels, vehicle_category=category, road_speed_category="low"
+        )
+    low, high = regression.speed_window_kmh
+    assert low == pytest.approx(10.0 ** (centre - k * lg_sd), rel=1e-12)
+    assert high == pytest.approx(10.0 ** (centre + k * lg_sd), rel=1e-12)
+    assert regression.reference_speed_in_window is inside
+    assert bool(_nine_three_warnings(caught)) is not inside
+
+
 def test_too_few_vehicles_of_a_category_warns() -> None:
     speeds, levels = _cloud(
         20,
@@ -461,6 +577,61 @@ def test_too_few_heavy_vehicles_together_warns() -> None:
     with pytest.warns(StatisticalPassByWarning, match="heavy vehicles"):
         result = statistical_pass_by(*rows, road_speed_category="medium")
     assert result.heavy_vehicle_count == 60
+    assert not result.meets_minimum_counts
+
+
+def _site_rows(counts: dict[str, int]) -> tuple[list[str], list[float], list[float]]:
+    """Pass-bys centred on the medium reference speeds, so 9.3 is always met."""
+    rows: tuple[list[str], list[float], list[float]] = ([], [], [])
+    lines = {
+        "1": (80.0, 16.6, 32.6),
+        "2a": (70.0, 46.5, 18.8),
+        "2b": (70.0, 34.5, 26.7),
+    }
+    for seed, (category, n) in enumerate(counts.items(), start=20):
+        mean_kmh, a, b = lines[category]
+        speeds, levels = _cloud(
+            n,
+            mean_speed_kmh=mean_kmh,
+            lg_spread=0.05,
+            intercept_db=a,
+            slope_db=b,
+            residual_db=1.5,
+            seed=seed,
+        )
+        rows[0].extend([category] * n)
+        rows[1].extend(speeds.tolist())
+        rows[2].extend(levels.tolist())
+    return rows
+
+
+def test_the_7_3_counts_are_met_on_the_boundary() -> None:
+    """100 cars, 30 dual-axle and 50 multi-axle, 80 heavy: the 7.3 NOTE's own case."""
+    rows = _site_rows({"1": 100, "2a": 30, "2b": 50})
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", StatisticalPassByWarning)
+        result = statistical_pass_by(*rows, road_speed_category="medium")
+    assert result.heavy_vehicle_count == 80
+    assert all(r.meets_minimum_count for r in result.regressions.values())
+    assert result.meets_minimum_counts
+
+
+def test_one_car_short_of_7_3_warns() -> None:
+    rows = _site_rows({"1": 99, "2a": 30, "2b": 50})
+    with pytest.warns(StatisticalPassByWarning, match="category '1'"):
+        result = statistical_pass_by(*rows, road_speed_category="medium")
+    assert not result.regressions["1"].meets_minimum_count
+    assert not result.meets_minimum_counts
+
+
+def test_one_heavy_vehicle_short_of_7_3_warns() -> None:
+    """30 and 49 meet each heavy count, but 79 together fall one short of 80."""
+    rows = _site_rows({"1": 100, "2a": 30, "2b": 49})
+    with pytest.warns(StatisticalPassByWarning, match="80 heavy vehicles"):
+        result = statistical_pass_by(*rows, road_speed_category="medium")
+    assert result.regressions["2a"].meets_minimum_count
+    assert result.regressions["2b"].meets_minimum_count
+    assert result.heavy_vehicle_count == 79
     assert not result.meets_minimum_counts
 
 
@@ -554,7 +725,7 @@ def test_plot_draws_three_lines_and_the_index(
     labels = ax.get_legend_handles_labels()[1]
     assert len(labels) == 3
     assert "78.5 dB" in labels[0]
-    assert "SPBI = 80.0 dB" in ax.get_title()
+    assert "SPBI = 79.9 dB" in ax.get_title()
     assert ax.get_xscale() == "log"
     plt.close("all")
 
@@ -564,7 +735,7 @@ def test_plot_speaks_spanish(annex_e: StatisticalPassByResult) -> None:
     labels = ax.get_legend_handles_labels()[1]
     assert labels[0].startswith("Turismos (1)")
     assert "78,5 dB" in labels[0]
-    assert "80,0 dB" in ax.get_title()
+    assert "79,9 dB" in ax.get_title()
     assert ax.get_xlabel() == "Velocidad del vehículo [km/h]"
     plt.close("all")
 

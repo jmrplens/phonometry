@@ -1519,8 +1519,9 @@ def refuse_field_names(document: dict[str, Any]) -> None:
         for row in table["rows"]:
             texts = [row.get(field) for field in _SPANISH_FIELDS]
             texts += list(row.get("es", {}).values())
+            texts.append(row.get("gauge"))
             for cell in row["cells"]:
-                texts += [cell.get("note"), cell.get("noteEs")]
+                texts += [cell.get(key) for key in ("text", "textEs", "note", "noteEs")]
             found.extend(
                 f"{table_name} {row.get('name')!r}: {hit.group(1)}"
                 for text in texts

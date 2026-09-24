@@ -824,6 +824,7 @@ def test_a_field_name_in_a_note_stops_the_generator() -> None:
                     "cells": [
                         {"note": "it rests on plate_longitudinal_speed_m_s"},
                         {"note": "it rests on the plate speed"},
+                        {"kind": "unquantified", "text": "as for the plate speed"},
                     ],
                 }
             ],
@@ -831,5 +832,10 @@ def test_a_field_name_in_a_note_stops_the_generator() -> None:
     }
     with pytest.raises(gcd.FieldNameInProseError, match="plate_longitudinal_speed_m_s"):
         gcd.refuse_field_names(document)
-    document["solids"]["rows"][0]["cells"].pop(0)
+    cells = document["solids"]["rows"][0]["cells"]
+    cells.pop(0)
     gcd.refuse_field_names(document)
+    # The words a page prints where a number would go are shown too.
+    cells.append({"kind": "unquantified", "text": "see plate_longitudinal_speed_m_s"})
+    with pytest.raises(gcd.FieldNameInProseError, match="plate_longitudinal_speed_m_s"):
+        gcd.refuse_field_names(document)

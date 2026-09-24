@@ -166,9 +166,15 @@ def _iec_e3_round(f: float) -> float:
 
 @lru_cache(maxsize=4)
 def _extended_preferred(frac: int) -> list[float]:
-    """Cached expansion of the IEC preferred frequency table across decades."""
+    """Cached expansion of the IEC preferred frequency table across decades.
+
+    A decade below the table divides by the power of ten instead of
+    multiplying by its reciprocal, which binary cannot hold exactly:
+    ``31.5 / 10`` is the double nearest 3.15, ``31.5 * 0.1`` is
+    ``3.1500000000000004``.
+    """
     base = normalized_frequencies(frac)
-    return [f * (10**d) for d in range(-3, 4) for f in base]
+    return [f * 10**d if d >= 0 else f / 10**-d for d in range(-3, 4) for f in base]
 
 
 def _nominal_freq_for_band(exact_freq: float, fraction: float) -> float:

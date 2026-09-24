@@ -6,6 +6,7 @@ import pytest
 
 from phonometry import filters
 from phonometry.filters.frequencies import (
+    _extended_preferred,
     _format_nominal_freq,
     _iec_e3_round,
     _infer_band_fraction,
@@ -54,6 +55,20 @@ def test_nominal_freq_fraction1() -> None:
 def test_nominal_freq_fraction3() -> None:
     assert _nominal_freq_for_band(12.589, 3) == pytest.approx(12.5)
     assert _nominal_freq_for_band(1995.3, 3) == pytest.approx(2000.0)
+
+
+@pytest.mark.parametrize("fraction", [1, 3])
+def test_extended_table_holds_the_printed_numbers(fraction: int) -> None:
+    # Every nominal value is the double nearest the number the standard prints,
+    # in the decades below the base table too: scaling by 0.1 once gave
+    # 3.1500000000000004 for the 3.15 Hz band.
+    for value in _extended_preferred(fraction):
+        assert float(f"{value:.6g}") == value
+
+
+def test_nominal_freq_below_the_base_table() -> None:
+    assert _nominal_freq_for_band(3.162, 3) == 3.15
+    assert _nominal_freq_for_band(6.310, 3) == 6.3
 
 
 def test_nominal_freq_other_fraction() -> None:

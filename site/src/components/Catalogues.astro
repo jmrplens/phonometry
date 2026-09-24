@@ -39,7 +39,12 @@
  * fluids. The prose that introduces each catalogue is in the page for the same
  * reason it always is: it is prose, and it is translated as prose.
  */
-import { catalogues, type CatalogueRow } from '../generated/catalogues.mjs';
+import {
+	catalogues,
+	type CatalogueCell,
+	type CatalogueRow,
+	type CatalogueTextField,
+} from '../generated/catalogues.mjs';
 
 interface Props {
 	/** Which catalogue to render. */
@@ -73,12 +78,13 @@ interface Props {
 }
 const { catalogue: section, lang = 'en' } = Astro.props;
 
-// The three search placeholders are the same in both languages on purpose, and
-// translating them would break the filter. It matches what the row carries,
-// which is the material name as its book prints it, and every book behind these
-// tables prints English. "hierba" and "metano" found nothing; "grass" and
-// "methane" find eleven rows and one. The rest of this object is prose and is
-// translated as prose.
+// The search placeholders are suggestions a reader types, so each one has to
+// find rows on the page it is shown on. The Spanish page matches the Spanish
+// words the generator attached to every row as well as the book's own English,
+// so its suggestions are Spanish; they were English, on purpose, while the
+// Spanish page matched only the book's words and "hierba" found nothing.
+// tests/test_catalogue_data_generator.py checks that every word of every
+// suggestion still finds a row in its own catalogue, in each language.
 const copy = {
 	en: {
 		search: 'Filter by material',
@@ -97,7 +103,13 @@ const copy = {
 		solidNonlinearityPlaceholder: 'FCC, NaCl, ionic',
 		absorptionPlaceholder: 'carpet, plaster, velour',
 		partitionPlaceholder: 'brick, door, glass',
-		scatteringPlaceholder: 'pyramid, batten, hedge',
+		scatteringPlaceholder: 'pyramid, hemisphere, holly',
+		woodPlaceholder: 'spruce, maple',
+		plateauPlaceholder: 'steel, glass, brick',
+		porousPlaceholder: 'glass wool, foam, felt',
+		areaPlaceholder: 'audience, musician, air',
+		geometryPlaceholder: 'h/L = 20, w = 10 cm',
+		fluidPlaceholder: 'water, mercury, steam',
 		diffusionPlaceholder: 'semiellipse, triangle, QRD',
 		dampingPlaceholder: 'DYAD, ISD, Soundcoat',
 		facingPlaceholder: 'FM 125, 1584, 40',
@@ -154,23 +166,29 @@ const copy = {
 		searchFloor: 'Filtrar por suelo',
 		searchDuct: 'Filtrar por conducto',
 		searchCondition: 'Filtrar por condición',
-		searchPlaceholder: 'steel, foam, glass',
-		groundPlaceholder: 'grass, snow, asphalt',
-		gasPlaceholder: 'methane, argon, steam',
-		liquidPlaceholder: 'water, ethanol, mercury',
+		searchPlaceholder: 'acero, espuma, vidrio',
+		groundPlaceholder: 'hierba, nieve, asfalto',
+		gasPlaceholder: 'metano, argón, vapor',
+		liquidPlaceholder: 'agua, etanol, mercurio',
 		treatmentPlaceholder: 'muescado, alfombra',
 		carpetPlaceholder: 'nylon, lana, rizo',
-		resilientModulusPlaceholder: 'rock wool, cork',
-		solidNonlinearityPlaceholder: 'FCC, NaCl, ionic',
-		absorptionPlaceholder: 'carpet, plaster, velour',
-		partitionPlaceholder: 'brick, door, glass',
-		scatteringPlaceholder: 'pyramid, batten, hedge',
-		diffusionPlaceholder: 'semiellipse, triangle, QRD',
+		resilientModulusPlaceholder: 'lana de roca, corcho',
+		solidNonlinearityPlaceholder: 'FCC, NaCl, iónico',
+		absorptionPlaceholder: 'moqueta, yeso, terciopelo',
+		partitionPlaceholder: 'ladrillo, puerta, vidrio',
+		scatteringPlaceholder: 'pirámide, semiesfera, acebo',
+		woodPlaceholder: 'pícea, arce',
+		plateauPlaceholder: 'acero, vidrio, ladrillo',
+		porousPlaceholder: 'lana de vidrio, espuma, fieltro',
+		areaPlaceholder: 'público, músico, aire',
+		geometryPlaceholder: 'h/L = 20, w = 10 cm',
+		fluidPlaceholder: 'agua, mercurio, vapor',
+		diffusionPlaceholder: 'semielipse, triángulo, QRD',
 		dampingPlaceholder: 'DYAD, ISD, Soundcoat',
 		facingPlaceholder: 'FM 125, 1584, 40',
-		resilientPlaceholder: 'polystyrene, wool, foam',
+		resilientPlaceholder: 'poliestireno, lana, espuma',
 		floorPlaceholder: 'hormigón, moqueta, viguetas',
-		ductPlaceholder: '610, round, break-in',
+		ductPlaceholder: '610, circular, entrada',
 		conditionPlaceholder: '20 °C, 50-70',
 		empty: 'Ninguna fila coincide con ese filtro.',
 		material: 'Material',
@@ -238,7 +256,12 @@ const placeholders: Partial<Record<typeof section, string>> = {
 	ground: copy.groundPlaceholder,
 	gases: copy.gasPlaceholder,
 	absorption: copy.absorptionPlaceholder,
-	absorptionAreas: copy.absorptionPlaceholder,
+	absorptionAreas: copy.areaPlaceholder,
+	orthotropicWood: copy.woodPlaceholder,
+	plateau: copy.plateauPlaceholder,
+	porous: copy.porousPlaceholder,
+	predictedScattering: copy.geometryPlaceholder,
+	fluids: copy.fluidPlaceholder,
 	transmissionLoss: copy.partitionPlaceholder,
 	scattering: copy.scatteringPlaceholder,
 	diffusion: copy.diffusionPlaceholder,
@@ -290,6 +313,25 @@ const heading = (column: { heading: string; headingEs?: string }) =>
 /** The distinct published tables of a catalogue, for its filter. */
 const tablesOf = (rows: { table: string }[]) => [...new Set(rows.map((row) => row.table))].sort();
 
+/** A row's words on this page. The Spanish page prints the Spanish the
+    generator attached to the row, where there is one; the English page, and a
+    row whose book already prints Spanish, print what the row carries. */
+const say = (row: CatalogueRow, field: CatalogueTextField | 'gauge') =>
+	(lang === 'es' && field !== 'gauge' && row.es?.[field]) || row[field] || '';
+
+/** A cell's text and note on this page: a range reads "0,4 a 0,8" in Spanish. */
+const cellText = (cell: CatalogueCell) => (lang === 'es' && cell.textEs) || cell.text;
+const cellNote = (cell: CatalogueCell) => (lang === 'es' && cell.noteEs) || cell.note;
+
+/** Lower case and without accents, so "hormigon" finds "hormigón" and
+    "aluminium" still finds the row on the Spanish page. The finder folds what
+    the reader types the same way. */
+const folded = (text: string) =>
+	text
+		.normalize('NFD')
+		.replace(/\p{M}/gu, '')
+		.toLowerCase();
+
 /** What the filter matches against: everything a reader might type, which
     is the row's names and every word column the table shows for it. The word
     columns are read from `textColumns` rather than listed again here, so a
@@ -297,18 +339,20 @@ const tablesOf = (rows: { table: string }[]) => [...new Set(rows.map((row) => ro
     bonding of a solid and what an area is an area of, were shown and not
     matched while this was a second list. */
 const haystack = (row: CatalogueRow) =>
-	[
-		row.name,
-		row.variant,
-		row.group,
-		row.table,
-		row.source,
-		row.model,
-		...textColumns.map((column) => row[column.field]),
-	]
-		.filter(Boolean)
-		.join(' ')
-		.toLowerCase();
+	folded(
+		[
+			row.name,
+			row.variant,
+			row.group,
+			row.table,
+			row.source,
+			row.model,
+			...textColumns.map((column) => row[column.field]),
+			...(lang === 'es' ? Object.values(row.es ?? {}) : []),
+		]
+			.filter(Boolean)
+			.join(' '),
+	);
 
 const data = catalogues[section];
 const tables = tablesOf(data.rows);
@@ -405,14 +449,14 @@ const textColumns = (
 							<th
 								scope="row"
 								class={row.note ? 'name annotated' : 'name'}
-								title={row.note || undefined}
+								title={say(row, 'note') || undefined}
 							>
 								<span class="wrap">
-									{row.group && <span class="group">{row.group}</span>}
-									{row.name}
-									{row.variant && <span class="variant">{row.variant}</span>}
+									{row.group && <span class="group">{say(row, 'group')}</span>}
+									{say(row, 'name')}
+									{row.variant && <span class="variant">{say(row, 'variant')}</span>}
 								</span>
-								{row.note && <span class="note">{row.note}</span>}
+								{row.note && <span class="note">{say(row, 'note')}</span>}
 							</th>
 							{textColumns.map((column) => (
 								<td
@@ -420,7 +464,11 @@ const textColumns = (
 									data-label={column.label}
 									data-empty={row[column.field] ? undefined : true}
 								>
-									{column.wrap ? <span class="wrap">{row[column.field]}</span> : row[column.field]}
+									{column.wrap ? (
+										<span class="wrap">{say(row, column.field)}</span>
+									) : (
+										say(row, column.field)
+									)}
 								</td>
 							))}
 							{section === 'fluids' && (
@@ -444,7 +492,7 @@ const textColumns = (
 									data-label={heading(data.columns[index])}
 									data-unit={data.columns[index].unit || undefined}
 									data-empty={cell.text ? undefined : true}
-									title={(!cell.text && cell.note) || undefined}
+									title={(!cell.text && cellNote(cell)) || undefined}
 								>
 									{cell.text ? (
 										/* A number the page simply printed has nothing to
@@ -458,7 +506,7 @@ const textColumns = (
 										<span
 											class={`cell cell-${cell.kind}`}
 											title={
-												cell.note ||
+												cellNote(cell) ||
 												(cell.kind === 'printed' || cell.kind === 'absent'
 													? undefined
 													: cell.printed
@@ -466,7 +514,7 @@ const textColumns = (
 														: copy.kinds[cell.kind])
 											}
 										>
-											{cell.text}
+											{cellText(cell)}
 										</span>
 									) : (
 										<span class="cell-absent" aria-hidden="true">
@@ -479,7 +527,7 @@ const textColumns = (
 								class="source"
 								data-label={section === 'fluids' ? copy.fixedBy : copy.source}
 							>
-								<span class="wrap">{section === 'fluids' ? row.model : row.source}</span>
+								<span class="wrap">{say(row, section === 'fluids' ? 'model' : 'source')}</span>
 							</td>
 						</tr>
 					))
@@ -684,8 +732,13 @@ const textColumns = (
 
 		document.addEventListener('click', (event) => {
 			if (!pinned) return;
-			const element = event.target instanceof Element ? event.target.closest('[data-catalogue]') : null;
-			if (!element) hide();
+			/* The finder's controls now sit inside the catalogue they filter, and
+			   reaching for them is leaving the table, so they close it too. */
+			const inside =
+				event.target instanceof Element &&
+				event.target.closest('[data-catalogue]') !== null &&
+				event.target.closest('[data-finder]') === null;
+			if (!inside) hide();
 		});
 		document.addEventListener('keydown', (event) => {
 			if (event.key !== 'Escape') return;

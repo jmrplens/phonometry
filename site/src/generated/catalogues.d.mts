@@ -22,7 +22,27 @@ export interface CatalogueCell {
 	note: string;
 	/** The figure and the unit the page prints, on a converted cell. */
 	printed?: string;
+	/** The text on the Spanish page, where it differs: a range's "a". */
+	textEs?: string;
+	/** The note on the Spanish page, where it differs. */
+	noteEs?: string;
 }
+
+/** The fields of a row the page prints as words. */
+export type CatalogueTextField =
+	| 'name'
+	| 'variant'
+	| 'group'
+	| 'note'
+	| 'mounting'
+	| 'per'
+	| 'model'
+	| 'direction'
+	| 'shape'
+	| 'bonding'
+	| 'weave'
+	| 'source'
+	| 'validity';
 
 export interface CatalogueColumn {
 	field: string;
@@ -59,6 +79,8 @@ export interface CatalogueRow {
 	temperature?: string;
 	pressure?: string;
 	validity?: string;
+	/** The Spanish page's words, for each word field that differs. */
+	es?: Partial<Record<CatalogueTextField, string>>;
 }
 
 export interface CatalogueTable {

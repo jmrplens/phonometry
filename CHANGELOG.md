@@ -461,6 +461,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- **The published catalogues page reads in Spanish, and its controls sit on the table.**
+  The Spanish page printed every row's words in English: the 1227 material
+  names, their variants and groups, the notes on rows and cells, and the
+  citations. `scripts/generate_catalogue_data.py` now gives each row its
+  Spanish from `site/src/data/catalogue-es.json`, writes a range as
+  "0,4 a 0,8", and stops when a word the page prints has no Spanish or an
+  entry translates a row that is gone, so a new row cannot reach the Spanish
+  page in English. The book's name for a material stays on the row: the
+  library's lookups take it, and the search on the Spanish page matches it as
+  well as the Spanish, with or without accents. The catalogue, search and
+  table controls moved from the top of the page to where the chosen table
+  starts, so a reader who scrolled down a table changes it without scrolling
+  back up; the top keeps one button that lands on them. Every search
+  suggestion now finds rows of its own catalogue, which a test checks in both
+  languages: the wood, plateau, porous, area, predicted scattering and fluid
+  catalogues suggested materials none of their rows hold.
 - **Every catalogue row has one shape, and says what its source claims for
   each cell.** The rows of every published catalogue share one base,
   `io.CatalogueRow` (with `io.BandedRow` for a row printed band by band),

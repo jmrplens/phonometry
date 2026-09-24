@@ -71,7 +71,10 @@ se niega, nombrando la página y lo que había en la celda. Úsalo allí donde u
 número equivocado sea peor que una excepción.
 
 Preguntar por un nombre da todos los libros a la vez, que es la comparación que
-ningún libro por separado puede hacer:
+ningún libro por separado puede hacer. El nombre que se pregunta es el que
+imprime el libro, casi siempre en inglés: las tablas de esta página muestran
+los nombres, las notas y las fuentes en español, pero su buscador encuentra
+cada fila también por el nombre del libro, que es el que hay que escribir aquí.
 
 ```python
 for row in materials.porous_materials_named("Mineral wool"):
@@ -315,8 +318,8 @@ dos filas donde debería ir la fuente hay una raya: esas dos no dicen nada, en
 vez de tomar prestada la fuente de la fila de arriba.
 
 La cuarta tabla está en español, y sus filas conservan su idioma: la lista
-numerada de Arau es de donde salen `moqueta` y `hormigón`, y buscar `carpet` no
-las encuentra. Dos de sus filas imprimen un intervalo en lugar de un valor, y
+numerada de Arau imprime `moqueta` y `hormigón`, y en la versión inglesa de
+esta página buscar `carpet` no las encuentra. Dos de sus filas imprimen un intervalo en lugar de un valor, y
 como intervalo se guardan; una imprime un único intervalo a caballo de dos
 columnas sin decir a qué bandas corresponde, así que ninguna banda se lo queda
 y las seis dicen lo que hay impreso.

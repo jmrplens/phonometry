@@ -19,7 +19,7 @@
 
 ## Numerical conformance report
 
-**1295/1295 conformance checks pass** across 89 domains and 464 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+**1302/1302 conformance checks pass** across 90 domains and 465 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub><b>&#916;</b> is the difference between the computed value and the one the standard publishes. <b>Used</b> is how much of that clause's published tolerance the difference consumes: 100 % means it sits exactly on the limit, 5 % means it uses a twentieth of the allowance, and a dash means the clause states no two-sided tolerance for the quantity, so there is no budget to spend. It is reported and never used to decide a verdict, which is settled at full precision before any rounding.</sub>
 
@@ -1472,6 +1472,21 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | IEC 61400-11:2012 Formula 30 | Critical bandwidth about a 500 Hz tone, Hz | 117.255 Hz (+/-0 Hz) | 117.255 Hz | 0 Hz | 0 % | ![Pass][cv-pass] Pass |
 | IEC 61400-11:2012 Formula 26 | Apparent sound power level of a single band, dB re 1 pW | 148.5139 dB (+/-0.0001 dB) | 148.5139 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 | IEC 61400-11:2012 Formulae 31-34 | Tonal audibility of a synthetic clean tone, dB | 16.38 dB (+/-0.06 dB) | 16.38 dB | -0.001 dB | 2 % | ![Pass][cv-pass] Pass |
+
+</details>
+
+<details>
+<summary><b>Road-surface influence on traffic noise (ISO 11819-1)</b>: 100% (7/7)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
+|:---|:---|:---|:---|:---|:---:|:---:|
+| ISO 11819-1:1997 Table 1 | Reference speeds and weighting factors, 3 road speed categories x 3 vehicle categories x 2 | 18/18 printed cells | 18/18 printed cells | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 11819-1:1997 Table 2 | Expected random errors: standard deviation of individual vehicles and 95 % confidence interval around L_veh, 3 vehicle categories, dB | s 1 = 1.5 dB; s 2a = 2 dB; s 2b = 2 dB; CI 1 = 0.3 dB; CI 2a = 0.7 dB; CI 2b = 0.7 dB | s 1 = 1.5 dB; s 2a = 2 dB; s 2b = 2 dB; CI 1 = 0.3 dB; CI 2a = 0.7 dB; CI 2b = 0.7 dB | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 11819-1:1997 Annex E, regression data | L_veh of cars, dual-axle and multi-axle heavy vehicles at 80 and 70 km/h, from pass-bys on the printed regression lines, reported to one decimal, dB | 1 = 78.5 dB; 2a = 81.1 dB; 2b = 83.8 dB | 1 = 78.5 dB; 2a = 81.1 dB; 2b = 83.8 dB | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 11819-1:1997 9.2, 9.5 and Annex E | SPBI not corrected for temperature, from pass-bys on the printed regression lines through the L_veh of 9.2 to one decimal, dB | 79.9 dB (+/-0.05 dB) | 79.946 dB | 0.046 dB | 92 % | ![Pass][cv-pass] Pass |
+| ISO 11819-1:1997 9.5 and Annex E | SPBI corrected for temperature, from the corrected L_veh Annex E prints, dB | 80.1 dB (+/-0.05 dB) | 80.121 dB | 0.021 dB | 42 % | ![Pass][cv-pass] Pass |
+| ISO 11819-1:1997 clause 10 and Annex E | Difference of the temperature-corrected SPBI from the 77,3 dB of the reference surface, dB | 2.8 dB (+/-0.05 dB) | 2.821 dB | 0.021 dB | 42 % | ![Pass][cv-pass] Pass |
+| ISO 11819-1:1997 10.2 and Annex D | L_veh of the normalized reference surface for the medium speed range, the average of the seven surfaces printed, to one decimal, dB | 1 = 76.4 dB; 2a = 81 dB; 2b = 84 dB | 1 = 76.4 dB; 2a = 81 dB; 2b = 84 dB | exact | 0 % | ![Pass][cv-pass] Pass |
 
 </details>
 

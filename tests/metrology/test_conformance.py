@@ -313,6 +313,39 @@ def test_a_stop_band_minimum_is_an_interval_open_above() -> None:
     assert shallow.share_of_acceptance_limit == math.inf
 
 
+@pytest.mark.parametrize(
+    ("deviation", "limits"),
+    [(-5.0, (70.0, math.inf)), (-1.0, (16.6, math.inf)), (0.2, (0.5, 2.0))],
+)
+def test_a_deviation_outside_its_interval_reads_above_one(
+    deviation: float, limits: tuple[float, float]
+) -> None:
+    """A deviation below a positive minimum is outside, whatever its sign."""
+    result = metrology.verify_conformance(
+        deviation, uncertainty=0.4, acceptance_limits=limits, max_uncertainty=0.5
+    )
+    assert not result.passes
+    assert result.share_of_acceptance_limit > 1.0
+
+
+def test_a_deviation_past_a_finite_limit_keeps_its_share() -> None:
+    result = metrology.verify_conformance(
+        -2.4, uncertainty=0.3, acceptance_limits=(-1.2, 1.0), max_uncertainty=0.5
+    )
+    assert result.share_of_acceptance_limit == pytest.approx(2.0)
+
+
+def test_a_one_sided_interval_draws_one_acceptance_limit() -> None:
+    """A stop-band minimum is one limit, and its legend says so."""
+    ax = metrology.verify_conformance(
+        72.0, uncertainty=0.4, acceptance_limits=(70.0, math.inf), max_uncertainty=0.5
+    ).plot()
+    legend = [t.get_text() for t in ax.get_legend().get_texts()]
+    assert "Acceptance limit" in legend
+    assert "Acceptance limits" not in legend
+    plt.close("all")
+
+
 def test_an_interval_open_below_bounds_the_top_only() -> None:
     """A level that shall not exceed a stated limit, and nothing more."""
     result = metrology.verify_conformance(
@@ -325,7 +358,7 @@ def test_an_interval_open_below_bounds_the_top_only() -> None:
 @pytest.mark.parametrize(
     ("limits", "fragment"),
     [
-        ((-math.inf, math.inf), "both open"),
+        ((-math.inf, math.inf), "'lower_limit' and 'upper_limit' are both open"),
         ((math.inf, 80.0), "acceptance_limits"),
         ((10.0, -math.inf), "acceptance_limits"),
         ((math.nan, 1.0), "acceptance_limits"),

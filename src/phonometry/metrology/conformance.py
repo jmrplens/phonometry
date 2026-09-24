@@ -117,7 +117,7 @@ def _at_most(value: float, bound: float) -> bool:
     )
 
 
-def _open_limit(value: float, name: str, side: float) -> float:
+def _open_limit(value: float, name: str, *, upper: bool) -> float:
     """An acceptance limit, finite or open on its own side.
 
     The lower limit may be ``-inf`` and the upper one ``+inf``, which is how a
@@ -126,11 +126,11 @@ def _open_limit(value: float, name: str, side: float) -> float:
 
     :param value: The limit.
     :param name: Its field name, for the message.
-    :param side: ``-1.0`` for the lower limit, ``+1.0`` for the upper one.
+    :param upper: ``True`` for the upper limit, ``False`` for the lower one.
     :raises ValueError: for a NaN or an infinity on the wrong side.
     """
     limit = float(value)
-    if math.isinf(limit) and math.copysign(1.0, limit) == side:
+    if math.isinf(limit) and (limit > 0.0) is upper:
         return limit
     return require_finite(limit, name)
 
@@ -177,10 +177,14 @@ class ConformanceVerification:
         for name in ("deviation", "uncertainty", "max_uncertainty"):
             object.__setattr__(self, name, require_finite(getattr(self, name), name))
         object.__setattr__(
-            self, "lower_limit", _open_limit(self.lower_limit, "lower_limit", -1.0)
+            self,
+            "lower_limit",
+            _open_limit(self.lower_limit, "lower_limit", upper=False),
         )
         object.__setattr__(
-            self, "upper_limit", _open_limit(self.upper_limit, "upper_limit", 1.0)
+            self,
+            "upper_limit",
+            _open_limit(self.upper_limit, "upper_limit", upper=True),
         )
         if math.isinf(self.lower_limit) and math.isinf(self.upper_limit):
             msg = (
@@ -252,16 +256,27 @@ class ConformanceVerification:
         deviation is outside the limits. A deviation on the far side of a
         limit of zero (a negative distortion against ``(0, 3)``) has no finite
         share and reads as infinity. An open side is never used up: on it the
-        share is zero while the deviation is inside the interval and infinity
-        once it is not (a stop-band attenuation of 40 dB against
-        ``(70, +inf)``).
+        share is zero while the deviation is inside the interval. A deviation
+        outside the interval always reads above 1, on whichever side it
+        leaves: its share of the limit it crosses when that is above 1, and
+        infinity otherwise (a stop-band attenuation of 40 dB, or of -5 dB,
+        against ``(70, +inf)``).
         """
+        if not self.deviation_within_limits:
+            bound = (
+                self.lower_limit
+                if self.deviation < self.lower_limit
+                else self.upper_limit
+            )
+            if math.isfinite(bound) and abs(bound) > _BOUNDARY_ABS_TOL:
+                share = self.deviation / bound
+                if share > 1.0:
+                    return share
+            return math.inf
         bound = self.upper_limit if self.deviation >= 0.0 else self.lower_limit
-        if math.isinf(bound):
-            return 0.0 if self.deviation_within_limits else math.inf
-        if abs(bound) > _BOUNDARY_ABS_TOL:
+        if math.isfinite(bound) and abs(bound) > _BOUNDARY_ABS_TOL:
             return self.deviation / bound
-        return 0.0 if self.deviation_within_limits else math.inf
+        return 0.0
 
     @property
     def share_of_max_uncertainty(self) -> float:
@@ -324,8 +339,8 @@ def _limits(acceptance_limits: float | tuple[float, float]) -> tuple[float, floa
             msg = "'acceptance_limits' must be one number or a (lower, upper) pair."
             raise ValueError(msg) from None
         return (
-            _open_limit(lower, "acceptance_limits", -1.0),
-            _open_limit(upper, "acceptance_limits", 1.0),
+            _open_limit(lower, "acceptance_limits", upper=False),
+            _open_limit(upper, "acceptance_limits", upper=True),
         )
     limit = require_finite(float(acceptance_limits), "acceptance_limits")
     if limit < 0.0:

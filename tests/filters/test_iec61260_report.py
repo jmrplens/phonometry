@@ -193,6 +193,25 @@ def test_range_limited_verdict_prints_qualifying_note(tmp_path: Path) -> None:
     assert "not demonstrated" in text
 
 
+def test_a_full_rate_bank_is_not_credited_with_anti_aliasing(tmp_path: Path) -> None:
+    """A bank with no decimation has no multirate stage to leave energy out."""
+    result = filters.verify_filter_class(
+        filters.OctaveFilterBank(
+            fs=48000,
+            fraction=1,
+            order=6,
+            limits=[125, 4000],
+            design=filters.FilterDesign(resample=False),
+        )
+    )
+    assert result.range_limited is True
+    out = tmp_path / "full_rate.pdf"
+    result.report(str(out))
+    text = _extract_text(str(out)).replace("\n", " ")
+    assert "half the sampling frequency" in text
+    assert "multirate" not in text
+
+
 def test_non_compliant_bank_renders(tmp_path: Path) -> None:
     """A low-order bank that meets no class renders its non-compliance fiche."""
     bank = filters.OctaveFilterBank(fs=48000, fraction=1, order=1, limits=[500, 2000])

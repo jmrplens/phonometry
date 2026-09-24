@@ -203,6 +203,29 @@ IEC61260_1_TABLE_C1: list[
     (9, -2.0, (1.0, -1.2), 0.3, 0.5, False, 3),
     (10, -2.0, (1.0, -1.2), 0.7, 0.5, False, 4),
 ]
+# BS EN 61260-1:2014 5.12.2 (printed p. 19, PDF page 21): acceptance limits on
+# the effective bandwidth deviation, "+/- 0,4 dB for class 1 instruments and
+# +/- 0,6 dB for class 2 instruments".
+IEC61260_1_BANDWIDTH_LIMITS_DB = {1: 0.4, 2: 0.6}
+# BS EN 61260-1:2014 5.14.3 (printed p. 20, PDF page 22): acceptance limits on
+# the deviation of the swept time-averaged output from L_c, "+/- 0,4 dB for
+# class 1 instruments and +/- 0,6 dB for class 2 instruments".
+IEC61260_1_TIME_INVARIANCE_LIMITS_DB = {1: 0.4, 2: 0.6}
+# BS EN 61260-1:2014 5.16 (printed p. 21, PDF page 23): acceptance limits on
+# the summation of output signals, "+0,8 dB and -1,8 dB for class 1
+# instruments and +1,8 dB and -3,8 dB for class 2 instruments", as
+# (lower, upper).
+IEC61260_1_SUMMATION_LIMITS_DB = {1: (-1.8, 0.8), 2: (-3.8, 1.8)}
+# BS EN 61260-1:2014 Table B.1 (printed p. 29, PDF page 31): the
+# maximum-permitted expanded uncertainty of a relative attenuation, "0,20 dB
+# for DeltaA <= 2 dB, 0,30 dB for 2 dB < DeltaA <= 40 dB, 0,50 dB for
+# DeltaA > 40 dB", and of a level linearity deviation, "0,20 dB for
+# (L_u - L) <= 40 dB, 0,35 dB for (L_u - L) > 40 dB".
+IEC61260_1_TABLE_B1_ATTENUATION = ((2.0, 0.20), (40.0, 0.30), (math.inf, 0.50))
+IEC61260_1_TABLE_B1_LINEARITY = ((40.0, 0.20), (math.inf, 0.35))
+# BS EN 61260-1:2014 5.13.3 and 5.13.4 (printed p. 19, PDF page 21): level
+# linearity limits, +/- dB, down to 40 dB below the upper boundary and below.
+IEC61260_1_LINEARITY_LIMITS_DB = {1: (0.5, 0.7), 2: (0.6, 0.9)}
 # IEC 61260-1:2014 E.3.4 worked rounding examples (nominal frequencies for
 # b = 24): 41,567 Hz -> 41,6 Hz (MSD 4: three significant figures) and
 # 8 785,2 Hz -> 8 800 Hz (MSD 8: two significant figures).

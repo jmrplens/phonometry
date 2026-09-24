@@ -117,6 +117,7 @@ _STRINGS: dict[str, str] = {
     "does not conform": "no conforme",
     "IEC 61260-3 {clause}: {verdict}": "IEC 61260-3 {clause}: {verdict}",
     "IEC 61260-3 periodic tests, class {cls}: {verdict}": "Ensayos periódicos IEC 61260-3, clase {cls}: {verdict}",
+    "not usable (§5.3)": "no utilizable (§5.3)",
     "passed": "superados",
     "not passed": "no superados",
     "Clause": "Apartado",
@@ -128,6 +129,12 @@ def _t(text: str, language: str = "en", **fmt: Any) -> str:
     """Localise a fixed string; English is returned verbatim (byte-identical)."""
     s = _STRINGS.get(text, text) if language == "es" else text
     return s.format(**fmt) if fmt else s
+
+
+#: The Table 1 breakpoint, as the exponent of G, past which the class figure
+#: of a band does not open its window: G**2, where the stop band asks for
+#: 40 dB and more.
+_WINDOW_EXPONENT = 2.0
 
 
 def _worst_band_index(result: FilterComplianceResult) -> int:
@@ -165,7 +172,7 @@ def plot_filter_class(
     from scipy import signal
 
     from .._i18n import format_number, localize_axes
-    from ..filters.compliance import class_limits
+    from ..filters.compliance import _map_breakpoint, class_limits
 
     ax = ax if ax is not None else _new_axes()
     cls = result.reference_class()
@@ -191,8 +198,14 @@ def plot_filter_class(
 
     lower, upper = class_limits(result.fraction, cls, omega, edition=result.edition)
 
-    # Symmetric log window centred on the mid-band (f / f_m = 1).
-    omega_max = float(omega[-1])
+    # Symmetric log window centred on the mid-band (f / f_m = 1), out to the
+    # band's processing Nyquist and no further than the G**2 breakpoint of
+    # Table 1 (Formula (9) carries it to 1/b): a band filtered at the full
+    # rate would otherwise open four decades, the pass-band corridor the
+    # figure is for would be a sliver, and its ratio labels would collide.
+    omega_max = min(
+        float(omega[-1]), _map_breakpoint(_WINDOW_EXPONENT, result.fraction)
+    )
     lo_x, hi_x = 1.0 / omega_max, omega_max
     win = (omega >= lo_x) & (omega <= hi_x)
     if not np.any(win):  # pragma: no cover - the bank designer rejects the band
@@ -268,6 +281,28 @@ def plot_filter_class(
     return ax
 
 
+#: Room above and below the data of a requirement figure, as a share of the
+#: span its limits and data cover.
+_DATA_PAD_SHARE = 0.08
+
+
+def _cover(
+    low: float, high: float, data: np.ndarray | list[float]
+) -> tuple[float, float]:
+    """A y-range that keeps *low* to *high* and every finite value of *data*.
+
+    A requirement figure is framed on its acceptance limits; a failing band
+    lies past them, and it is the one a reader plots the verdict to see.
+    """
+    values = np.asarray(data, dtype=np.float64)
+    values = values[np.isfinite(values)]
+    if values.size == 0:
+        return low, high
+    lo, hi = float(np.min(values)), float(np.max(values))
+    pad = _DATA_PAD_SHARE * (max(high, hi) - min(low, lo))
+    return min(low, lo - pad), max(high, hi + pad)
+
+
 def _class_title(met: str, unmet: str, cls: int | None, language: str) -> str:
     """A requirement's title: *met* with its class, or *unmet* when none."""
     if cls is None:
@@ -340,7 +375,7 @@ def plot_filter_bandwidth(
     ax.set_xscale("log")
     ax.set_xlim(freqs[0] / 1.1, freqs[-1] * 1.1)
     top = max(limits[c][1] for c in limits)
-    ax.set_ylim(-1.6 * top, 1.6 * top)
+    ax.set_ylim(*_cover(-1.6 * top, 1.6 * top, deviation))
     format_frequency_axis(ax, language=language)
     ax.axhline(0.0, color=_C_MUTED, lw=0.8)
     ax.set_xlabel(_t("Mid-band frequency [Hz]", language))
@@ -400,10 +435,12 @@ def plot_filter_summation(
     _limit_lines(ax, limits, language)
     shade = theme_line(_C_PRIMARY, ax, quiet=0.45)
     first = True
+    drawn: list[np.ndarray] = []
     for k in inner:
         omega, curve = _bank_summation(
             result.sos, mids, rates, result.fraction, result.points_per_bandwidth, k
         )
+        drawn.append(curve)
         if k == binding:
             continue
         ax.plot(
@@ -442,7 +479,7 @@ def plot_filter_summation(
     ax.xaxis.set_minor_locator(mticker.NullLocator())
     bottom = min(limits[c][0] for c in limits)
     top = max(limits[c][1] for c in limits)
-    ax.set_ylim(bottom - 0.6, top + 1.4)
+    ax.set_ylim(*_cover(bottom - 0.6, top + 1.4, np.concatenate(drawn)))
     ax.set_xlabel(_t(r"Normalised frequency $f\,/\,f_{\mathrm{m}}$", language))
     ax.set_ylabel(_t(r"Summed output $\Delta P_j$ [dB]", language))
     ax.set_title(
@@ -508,7 +545,7 @@ def plot_time_invariance(
         ax.plot(freqs, deviations[k], **style)
     ax.set_xscale("log")
     ax.set_xlim(freqs[0] / 1.1, freqs[-1] * 1.1)
-    ax.set_ylim(-1.0, 1.0)
+    ax.set_ylim(*_cover(-1.0, 1.0, deviations))
     format_frequency_axis(ax, language=language)
     ax.axhline(0.0, color=_C_MUTED, lw=0.8)
     ax.set_xlabel(_t("Mid-band frequency [Hz]", language))
@@ -658,7 +695,10 @@ def plot_periodic_clause(
     """One clause of IEC 61260-3:2016 against its acceptance limits.
 
     Clauses 10 and 11 as IEC 61260-1:2014 Figure C.1; clause 13 as each
-    result's margin to its nearer limit against its test frequency.
+    result's margin to its nearer limit against its test frequency. A result
+    whose uncertainty exceeds its maximum is drawn hollow, as 5.3 forbids
+    using it, and the title says the clause does not conform only when a
+    usable result fails.
 
     :param result: A
         :class:`~phonometry.filters.periodic_tests.PeriodicTestClause`.
@@ -671,9 +711,20 @@ def plot_periodic_clause(
     from .metrology import _draw_conformance
 
     ax = ax if ax is not None else _new_axes()
-    verdict = _t("conforms" if result.passes else "does not conform", language)
+    if result.failed:
+        verdict = _t("does not conform", language)
+    elif result.unusable:
+        verdict = _t("not usable (§5.3)", language)
+    else:
+        verdict = _t("conforms", language)
     if result.normalized_frequencies is None:
-        _draw_conformance(ax, result.verifications, language, kwargs)
+        _draw_conformance(
+            ax,
+            result.verifications,
+            language,
+            kwargs,
+            unusable_label=_t("Unusable (§5.3)", language),
+        )
         ax.set_xlabel(_t("Measurement", language))
     else:
         omega = np.asarray(result.normalized_frequencies, dtype=np.float64)

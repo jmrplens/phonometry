@@ -378,18 +378,18 @@ def render_iec61260_report(
 
     flow.append(result_box(_statement(result, language), styles, accent))
     if getattr(result, "range_limited", False):
-        # The multirate verifier cannot exercise the stop-band mask beyond a
-        # band's processing Nyquist (no decimated signal energy exists there),
-        # so the stated class attests the verified range and says so.
-        flow.append(
-            fiche_paragraph(
-                t(
-                    "Stop-band limits verified up to each band's processing Nyquist frequency; the multirate anti-aliasing leaves no signal energy beyond it, but the Table 1 limits there are not demonstrated, so the stated class attests the verified frequency range.",
-                    language,
-                ),
-                basis_strip_style,
-            )
+        # The verifier cannot exercise the stop-band mask beyond a band's
+        # processing Nyquist, so the stated class attests the verified range
+        # and says so. Why nothing reaches past it depends on the bank: a
+        # decimated band has its anti-aliasing filter, a band filtered at the
+        # full rate has no frequency above half the sampling rate at all.
+        decimated = max(result.factors) > 1
+        note = (
+            "Stop-band limits verified up to each band's processing Nyquist frequency; the multirate anti-aliasing leaves no signal energy beyond it, but the Table 1 limits there are not demonstrated, so the stated class attests the verified frequency range."
+            if decimated
+            else "Stop-band limits verified up to half the sampling frequency, above which a digital filter has no frequency to respond at; the Table 1 limits there are not demonstrated, so the stated class attests the verified frequency range."
         )
+        flow.append(fiche_paragraph(t(note, language), basis_strip_style))
     if metadata is not None and metadata.required_class is not None:
         if metadata.required_class not in result.available_classes():
             msg = (

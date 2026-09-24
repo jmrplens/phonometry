@@ -25,6 +25,20 @@ from phonometry import filters
 from phonometry.filters import time_invariance
 
 
+@pytest.mark.parametrize(
+    ("worst_db", "expected"), [(0.4, 1), (0.41, 2), (0.6, 2), (0.61, None)]
+)
+def test_the_time_invariance_limits_are_5_14_3(
+    worst_db: float, expected: int | None
+) -> None:
+    """+/-0,4 dB for class 1 and +/-0,6 dB for class 2, inclusive."""
+    assert (
+        time_invariance._TIME_INVARIANCE_LIMITS_DB
+        == ref.IEC61260_1_TIME_INVARIANCE_LIMITS_DB
+    )
+    assert time_invariance._time_invariance_class(worst_db) == expected
+
+
 def _a35_uncertainty(*, display: bool) -> float:
     """Formula (A.2) on the A.3.5 example, with or without the display."""
     inputs = ref.IEC61260_A35_INPUTS
@@ -276,4 +290,22 @@ def test_the_verdict_plots_one_line_per_rate(
     rate_lines = [line for line in ax.lines if line.get_marker() in ("o", "s")]
     assert len(rate_lines) == 2
     assert "5.14" in ax.get_title()
+    plt.close("all")
+
+
+def test_a_band_past_both_classes_is_drawn_inside_the_axes(
+    swept: filters.TimeInvarianceResult,
+) -> None:
+    """The figure frames the limits and every deviation, a failing one too."""
+    import dataclasses
+
+    levels = np.array(swept.output_levels_db)
+    levels[0, 1] += 1.54
+    failing = dataclasses.replace(swept, output_levels_db=levels)
+    assert failing.overall_class is None
+    ax = failing.plot()
+    low, high = ax.get_ylim()
+    deviations = np.asarray(failing.deviations_db, dtype=float)
+    assert low <= float(np.min(deviations))
+    assert float(np.max(deviations)) <= high
     plt.close("all")

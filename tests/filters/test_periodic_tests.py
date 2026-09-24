@@ -61,21 +61,70 @@ _ROW_U = [
 ]
 
 
+#: The one-third-octave set of the record, 31.5 Hz to 16 kHz: 13.4 keeps its
+#: test frequencies above 15.75 Hz and below 24 kHz.
+_SET = [
+    31.5, 40.0, 50.0, 63.0, 80.0, 100.0, 125.0, 160.0, 200.0, 250.0, 315.0, 400.0,
+    500.0, 630.0, 800.0, 1000.0, 1250.0, 1600.0, 2000.0, 2500.0, 3150.0, 4000.0,
+    5000.0, 6300.0, 8000.0, 10000.0, 12500.0, 16000.0,
+]  # fmt: skip
+
+#: The three filters of 11.3, as it recommends them.
+_TESTED = [31.5, 1000.0, 16000.0]
+
+
+def _dropped(row: list[float], positions: tuple[int, ...]) -> list[float]:
+    """*row* with NaN at the positions 13.4 drops."""
+    return [_NAN if n in positions else v for n, v in enumerate(row)]
+
+
+#: 13.4 drops k = -7 and -6 of the 31.5 Hz filter (5.8 Hz and 10.3 Hz) and
+#: k = 5 to 7 of the 16 kHz one (30.1 kHz and up); the 1 kHz one keeps all 15.
+_LOW_DROPS = (0, 1)
+_HIGH_DROPS = (12, 13, 14)
+
+
+def _per_filter(values: dict[float, float], default: float) -> list[float]:
+    """One value per filter of the set, *default* but where *values* says."""
+    return [values.get(f, default) for f in _SET]
+
+
 def _record(**overrides: object) -> filters.FilterPeriodicMeasurements:
     """A complete record that conforms to class 1, with fields replaced."""
     fields: dict[str, object] = {
-        "midband_attenuations_db": [0.1, -0.2, 0.05],
-        "midband_uncertainties_db": [0.15, 0.15, 0.15],
-        "set_midband_frequencies_hz": [500.0, 1000.0, 2000.0],
-        "linearity_deviations_db": [0.1, 0.2, 0.3, -0.5],
-        "linearity_levels_below_upper_db": [0.0, 20.0, 40.0, 55.0],
-        "linearity_uncertainties_db": [0.1, 0.1, 0.15, 0.3],
-        "relative_attenuations_db": [_ROW, [_NAN, *_ROW[1:]], _ROW],
-        "relative_attenuation_uncertainties_db": [_ROW_U, [_NAN, *_ROW_U[1:]], _ROW_U],
-        "tested_midband_frequencies_hz": [31.5, 1000.0, 16000.0],
+        "midband_attenuations_db": _per_filter({500.0: 0.1, 1000.0: -0.2}, 0.05),
+        "midband_uncertainties_db": _per_filter({}, 0.15),
+        "set_midband_frequencies_hz": _SET,
+        "linearity_deviations_db": [0.1, 0.2, 0.3, -0.5] * 3,
+        "linearity_levels_below_upper_db": [0.0, 20.0, 40.0, 55.0] * 3,
+        "linearity_uncertainties_db": [0.1, 0.1, 0.15, 0.3] * 3,
+        "linearity_midband_frequencies_hz": [f for f in _TESTED for _ in range(4)],
+        "relative_attenuations_db": [
+            _dropped(_ROW, _LOW_DROPS),
+            _ROW,
+            _dropped(_ROW, _HIGH_DROPS),
+        ],
+        "relative_attenuation_uncertainties_db": [
+            _dropped(_ROW_U, _LOW_DROPS),
+            _ROW_U,
+            _dropped(_ROW_U, _HIGH_DROPS),
+        ],
+        "tested_midband_frequencies_hz": _TESTED,
     }
     fields.update(overrides)
     return filters.FilterPeriodicMeasurements(**fields)  # type: ignore[arg-type]
+
+
+def _one_linearity(
+    deviations: list[float], depths: list[float], uncertainties: list[float]
+) -> dict[str, object]:
+    """11.7 overrides with no filter labels, to grade the limits alone."""
+    return {
+        "linearity_deviations_db": deviations,
+        "linearity_levels_below_upper_db": depths,
+        "linearity_uncertainties_db": uncertainties,
+        "linearity_midband_frequencies_hz": None,
+    }
 
 
 # --------------------------------------------------------------------------
@@ -160,8 +209,11 @@ def test_a_conforming_record_passes_with_the_caveat_of_1_5() -> None:
     assert verdict.passes
     assert [c.clause for c in verdict.clauses] == ["10.2", "11.7", "13"]
     assert verdict.missing == ()
+    assert verdict.incomplete == ()
+    assert verdict.coverage_checked
     assert "no general statement or conclusion can be made" in verdict.statement
     assert "class 1 specifications" in verdict.statement
+    assert verdict.statement.endswith("specifications in IEC 61260-1:2014.")
 
 
 def test_a_public_pattern_approval_turns_the_statement_into_14_k() -> None:
@@ -177,11 +229,13 @@ def test_a_public_pattern_approval_turns_the_statement_into_14_k() -> None:
 def test_a_deviation_on_its_limit_conforms_and_past_it_fails() -> None:
     """The limits of 10.2.2 are inclusive, as the TC 29 rule makes them."""
     on = filters.verify_filter_periodic(
-        1, _record(midband_attenuations_db=[0.4, -0.4, 0.0]), fraction=3
+        1,
+        _record(midband_attenuations_db=_per_filter({500.0: 0.4, 1000.0: -0.4}, 0.0)),
+        fraction=3,
     )
     assert on.passes
     past = filters.verify_filter_periodic(
-        1, _record(midband_attenuations_db=[0.41, 0.0, 0.0]), fraction=3
+        1, _record(midband_attenuations_db=_per_filter({500.0: 0.41}, 0.0)), fraction=3
     )
     assert not past.passes
     assert past.failed == (("10.2", "500 Hz"),)
@@ -192,16 +246,39 @@ def test_a_deviation_on_its_limit_conforms_and_past_it_fails() -> None:
     assert "10.2 (500 Hz)" in past.statement
 
 
-def test_class_2_widens_every_limit() -> None:
-    record = _record(midband_attenuations_db=[0.55, 0.0, 0.0])
+def test_class_2_widens_the_mid_band_limits() -> None:
+    record = _record(midband_attenuations_db=_per_filter({500.0: 0.55}, 0.0))
     assert not filters.verify_filter_periodic(1, record, fraction=3).passes
     assert filters.verify_filter_periodic(2, record, fraction=3).passes
+
+
+@pytest.mark.parametrize(
+    ("deviation", "depth", "conforms"),
+    [
+        (0.6, 20.0, True),
+        (0.61, 20.0, False),
+        (0.9, 45.0, True),
+        (0.91, 45.0, False),
+    ],
+)
+def test_class_2_linearity_limits_are_5_13_3_and_5_13_4(
+    deviation: float, depth: float, *, conforms: bool
+) -> None:
+    """+/-0,6 dB within 40 dB of the upper boundary, +/-0,9 dB beyond it."""
+    near, far = ref.IEC61260_1_LINEARITY_LIMITS_DB[2]
+    assert (near, far) == (0.6, 0.9)
+    record = _record(**_one_linearity([deviation], [depth], [0.1]))
+    clause = filters.verify_filter_periodic(2, record, fraction=3).clause("11.7")
+    assert clause.verifications[0].upper_limit == (near if depth <= 40.0 else far)
+    assert clause.passes is conforms
 
 
 def test_an_uncertainty_above_its_maximum_makes_the_result_unusable() -> None:
     """5.3: such a result "shall not be used to evaluate conformance"."""
     verdict = filters.verify_filter_periodic(
-        1, _record(midband_uncertainties_db=[0.15, 0.25, 0.15]), fraction=3
+        1,
+        _record(midband_uncertainties_db=_per_filter({1000.0: 0.25}, 0.15)),
+        fraction=3,
     )
     assert not verdict.passes
     assert verdict.unusable == (("10.2", "1 kHz"),)
@@ -212,25 +289,27 @@ def test_an_uncertainty_above_its_maximum_makes_the_result_unusable() -> None:
 
 def test_linearity_limits_and_maxima_switch_40_db_below_the_upper_boundary() -> None:
     """5.13.3 within 40 dB of the upper boundary, 5.13.4 beyond; Annex B follows."""
-    near = _record(
-        linearity_deviations_db=[0.6],
-        linearity_levels_below_upper_db=[35.0],
-        linearity_uncertainties_db=[0.1],
-    )
-    far = _record(
-        linearity_deviations_db=[0.6],
-        linearity_levels_below_upper_db=[45.0],
-        linearity_uncertainties_db=[0.1],
-    )
+    near = _record(**_one_linearity([0.6], [35.0], [0.1]))
+    far = _record(**_one_linearity([0.6], [45.0], [0.1]))
     assert not filters.verify_filter_periodic(1, near, fraction=3).clause("11.7").passes
     assert filters.verify_filter_periodic(1, far, fraction=3).clause("11.7").passes
-    wide = _record(
-        linearity_deviations_db=[0.0, 0.0],
-        linearity_levels_below_upper_db=[30.0, 50.0],
-        linearity_uncertainties_db=[0.3, 0.3],
-    )
+    wide = _record(**_one_linearity([0.0, 0.0], [30.0, 50.0], [0.3, 0.3]))
     clause = filters.verify_filter_periodic(1, wide, fraction=3).clause("11.7")
     assert clause.unusable == ("30 dB below the upper boundary",)
+
+
+def test_40_db_below_the_upper_boundary_is_still_5_13_3() -> None:
+    """ "From the upper boundary ... to 40 dB less": 40 dB is near, as B.1 reads it."""
+    record = _record(
+        **_one_linearity([0.55, 0.55, 0.0], [40.0, 40.5, 40.0], [0.1, 0.1, 0.25])
+    )
+    clause = filters.verify_filter_periodic(1, record, fraction=3).clause("11.7")
+    at, past, unusable = clause.verifications
+    assert (at.upper_limit, at.max_uncertainty) == (0.5, 0.20)
+    assert (past.upper_limit, past.max_uncertainty) == (0.7, 0.35)
+    assert not at.passes
+    assert past.passes
+    assert not unusable.uncertainty_within_maximum
 
 
 def test_clause_13_reads_its_maximum_off_the_attenuation() -> None:
@@ -268,19 +347,120 @@ def test_clause_13_judges_the_stop_band_on_its_minimum_alone() -> None:
     assert stop.passes
 
 
+@pytest.mark.parametrize(
+    ("position", "attenuation", "maximum"),
+    [(7, 2.0, 0.20), (7, 2.01, 0.30), (11, 40.0, 0.30), (12, 40.01, 0.50)],
+)
+def test_the_annex_b_maxima_step_past_2_db_and_40_db(
+    position: int, attenuation: float, maximum: float
+) -> None:
+    """Table B.1: "0,20 dB for DeltaA <= 2 dB, 0,30 dB for 2 dB < DeltaA <= 40 dB"."""
+    steps = [bound for bound, _ in ref.IEC61260_1_TABLE_B1_ATTENUATION]
+    assert steps[:2] == [2.0, 40.0]
+    row = list(_ROW)
+    row[position] = attenuation
+    record = _record(
+        relative_attenuations_db=[row, _ROW, _ROW],
+        relative_attenuation_uncertainties_db=[_ROW_U, _ROW_U, _ROW_U],
+    )
+    clause = filters.verify_filter_periodic(2, record, fraction=3).clause("13")
+    label = f"31.5 Hz, k = {position - 7}"
+    graded = dict(zip(clause.labels, clause.verifications, strict=True))[label]
+    assert graded.max_uncertainty == maximum
+
+
+def test_a_mid_band_attenuation_past_2_db_is_a_failure_not_unusable() -> None:
+    """10.2 reads the Annex B maximum off the attenuation, as clause 13 does."""
+    record = _record(
+        midband_attenuations_db=_per_filter({500.0: 2.5}, 0.0),
+        midband_uncertainties_db=_per_filter({500.0: 0.25}, 0.15),
+    )
+    verdict = filters.verify_filter_periodic(1, record, fraction=3)
+    assert verdict.clause("10.2").verifications[12].max_uncertainty == 0.30
+    assert verdict.failed == (("10.2", "500 Hz"),)
+    assert verdict.unusable == ()
+    assert "did not successfully complete" in verdict.statement
+
+
 def test_clause_13_skips_the_frequencies_13_4_drops() -> None:
+    """13.4: above 0,5 times the lowest mid-band frequency, below 1,5 times the highest."""
     verdict = filters.verify_filter_periodic(1, _record(), fraction=3)
     labels = verdict.clause("13").labels
-    assert "1 kHz, k = -7" not in labels
-    assert len(labels) == 3 * 15 - 1
+    for dropped in (
+        "31.5 Hz, k = -7",
+        "31.5 Hz, k = -6",
+        "16 kHz, k = 5",
+        "16 kHz, k = 7",
+    ):
+        assert dropped not in labels
+    assert "31.5 Hz, k = -5" in labels
+    assert "16 kHz, k = 4" in labels
+    assert len(labels) == 3 * 15 - 5
+    assert verdict.incomplete == ()
+
+
+def test_a_frequency_13_4_requires_left_out_is_incomplete() -> None:
+    record = _record(
+        relative_attenuations_db=[_ROW, _dropped(_ROW, (0,)), _ROW],
+        relative_attenuation_uncertainties_db=[_ROW_U, _dropped(_ROW_U, (0,)), _ROW_U],
+    )
+    verdict = filters.verify_filter_periodic(1, record, fraction=3)
+    assert verdict.incomplete == (
+        ("13", "1 kHz, k = -7: not measured, and 13.4 requires it"),
+    )
+    assert not verdict.passes
+    assert verdict.statement.startswith(
+        "The periodic tests of IEC 61260-3 are incomplete"
+    )
+
+
+def test_fewer_than_three_filters_is_incomplete() -> None:
+    """11.3 and 13.1: level linearity and relative attenuation on three filters."""
+    record = _record(
+        linearity_deviations_db=[0.1, 0.2],
+        linearity_levels_below_upper_db=[0.0, 20.0],
+        linearity_uncertainties_db=[0.1, 0.1],
+        linearity_midband_frequencies_hz=[1000.0, 1000.0],
+        relative_attenuations_db=[_ROW],
+        relative_attenuation_uncertainties_db=[_ROW_U],
+        tested_midband_frequencies_hz=[1000.0],
+    )
+    verdict = filters.verify_filter_periodic(1, record, fraction=3)
+    assert verdict.incomplete == (
+        ("11.7", "measured on 1 filter, and 11.3 requires three"),
+        ("13", "measured on 1 filter, and 13.1 requires three"),
+    )
+    assert not verdict.passes
+    assert "11.7: measured on 1 filter," in verdict.statement
+
+
+def test_a_record_that_does_not_say_its_filters_passes_with_that_said() -> None:
+    """Without the frequency labels the coverage of 11.3 and 13.4 is not checked."""
+    record = _record(
+        set_midband_frequencies_hz=None,
+        tested_midband_frequencies_hz=None,
+        linearity_midband_frequencies_hz=None,
+    )
+    verdict = filters.verify_filter_periodic(1, record, fraction=3)
+    assert verdict.passes
+    assert not verdict.coverage_checked
+    assert verdict.statement.endswith(
+        "every test frequency 13.4 requires was not checked."
+    )
+    assert "the filter each level linearity result of 11.7" in verdict.statement
+
+
+def test_linearity_results_name_their_filter() -> None:
+    clause = filters.verify_filter_periodic(1, _record(), fraction=3).clause("11.7")
+    assert clause.labels[4] == "1 kHz, 0 dB below the upper boundary"
 
 
 def test_the_swept_test_of_10_3_replaces_10_2() -> None:
     record = _record(
         midband_attenuations_db=None,
         midband_uncertainties_db=None,
-        bandwidth_deviations_db=[0.05, 0.04, 0.06],
-        bandwidth_uncertainties_db=[0.12, 0.12, 0.12],
+        bandwidth_deviations_db=_per_filter({1000.0: 0.04}, 0.05),
+        bandwidth_uncertainties_db=_per_filter({}, 0.12),
     )
     verdict = filters.verify_filter_periodic(1, record, fraction=3)
     assert verdict.passes
@@ -310,14 +490,33 @@ def test_the_other_level_ranges_of_11_9_are_graded_30_db_down() -> None:
     ("overrides", "fragment"),
     [
         ({"midband_uncertainties_db": None}, "clause 10.2 needs"),
-        ({"midband_uncertainties_db": [0.1, 0.1]}, "must have the same length"),
-        ({"midband_uncertainties_db": [0.1, -0.1, 0.1]}, "must be non-negative"),
-        ({"midband_attenuations_db": [0.1, _NAN, 0.1]}, "must hold finite values"),
-        ({"set_midband_frequencies_hz": [500.0, 1000.0]}, "labels 2 filters"),
-        ({"relative_attenuations_db": [_ROW[:14]] * 3}, "one row of 15 values"),
+        (
+            {"midband_uncertainties_db": [0.1, 0.1]},
+            "'midband_uncertainties_db' must have the same length",
+        ),
+        (
+            {"midband_uncertainties_db": _per_filter({500.0: -0.1}, 0.1)},
+            "'midband_uncertainties_db' must be non-negative",
+        ),
+        (
+            {"midband_attenuations_db": _per_filter({500.0: _NAN}, 0.1)},
+            "'midband_attenuations_db' must hold finite values",
+        ),
+        (
+            {"set_midband_frequencies_hz": [500.0, 1000.0]},
+            "'set_midband_frequencies_hz' labels",
+        ),
+        (
+            {"linearity_midband_frequencies_hz": [1000.0]},
+            "'linearity_midband_frequencies_hz' labels",
+        ),
+        (
+            {"relative_attenuations_db": [_ROW[:14]] * 3},
+            "'relative_attenuations_db' must hold one row of",
+        ),
         (
             {"relative_attenuation_uncertainties_db": [_ROW_U, _ROW_U, _ROW_U]},
-            "must leave the same test frequencies out",
+            "'relative_attenuation_uncertainties_db' must leave the same test",
         ),
     ],
 )
@@ -330,10 +529,10 @@ def test_records_the_rule_cannot_be_read_on_are_refused(
 
 def test_the_verifier_refuses_a_foreign_class_and_an_empty_record() -> None:
     record = _record()
-    with pytest.raises(ValueError, match="'filter_class' must be 1 or 2"):
+    with pytest.raises(ValueError, match="'filter_class' must be"):
         filters.verify_filter_periodic(0, record, fraction=3)
     empty = filters.FilterPeriodicMeasurements()
-    with pytest.raises(ValueError, match="holds no result to grade"):
+    with pytest.raises(ValueError, match="'measurements' holds no result"):
         filters.verify_filter_periodic(1, empty, fraction=3)
 
 
@@ -372,9 +571,29 @@ def test_the_verdict_and_its_clauses_plot(language: str) -> None:
     plt.close("all")
 
 
+def test_a_clause_draws_an_unusable_result_as_the_verdict_does() -> None:
+    """5.3: neither figure calls a result it forbids using a failure."""
+    record = _record(**_one_linearity([0.0, 0.1], [0.0, 20.0], [0.1, 0.25]))
+    verdict = filters.verify_filter_periodic(1, record, fraction=3)
+    clause = verdict.clause("11.7")
+    assert clause.unusable == ("20 dB below the upper boundary",)
+    assert clause.failed == ()
+    ax = clause.plot()
+    assert ax.get_title() == "IEC 61260-3 §11.7: not usable (§5.3)"
+    legend = [t.get_text() for t in ax.get_legend().get_texts()]
+    assert "Unusable (§5.3)" in legend
+    assert "Does not conform" not in legend
+    plt.close("all")
+    ax = clause.plot(language="es")
+    assert ax.get_title().endswith("no utilizable (§5.3)")
+    plt.close("all")
+
+
 def test_an_unusable_result_is_drawn_hollow() -> None:
     verdict = filters.verify_filter_periodic(
-        1, _record(midband_uncertainties_db=[0.15, 0.25, 0.15]), fraction=3
+        1,
+        _record(midband_uncertainties_db=_per_filter({1000.0: 0.25}, 0.15)),
+        fraction=3,
     )
     ax = verdict.plot()
     hollow = [

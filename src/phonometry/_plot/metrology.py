@@ -656,20 +656,25 @@ def _draw_open_limits(
     """Short bars at the finite limits of intervals open on one side.
 
     A stop-band row of IEC 61260-1:2014 Table 1 prints a minimum and
-    ``+inf``; the open end bounds nothing and draws nothing.
+    ``+inf``; the open end bounds nothing and draws nothing. The legend names
+    one limit when every bar is a single limit, and limits when any
+    interval has both.
     """
-    first = True
-    for x, v in zip(positions, verifications, strict=True):
-        finite = [lim for lim in (v.lower_limit, v.upper_limit) if math.isfinite(lim)]
+    finite = [
+        [lim for lim in (v.lower_limit, v.upper_limit) if math.isfinite(lim)]
+        for v in verifications
+    ]
+    single = all(len(bars) == 1 for bars in finite)
+    label = _t(_ACCEPTANCE_LABEL if single else "Acceptance limits", language)
+    for k, (x, bars) in enumerate(zip(positions, finite, strict=True)):
         ax.hlines(
-            finite,
+            bars,
             x - 0.4,
             x + 0.4,
             color=_C_SECONDARY,
             lw=2.2,
-            label=_t("Acceptance limits", language) if first else "_nolegend_",
+            label=label if k == 0 else "_nolegend_",
         )
-        first = False
 
 
 def _draw_uncertainties(
@@ -713,30 +718,43 @@ def _draw_verdicts(
     positions: np.ndarray,
     language: str,
     kwargs: dict[str, Any],
+    *,
+    unusable_label: str | None = None,
 ) -> None:
-    """A diamond where a measurement conforms and a cross where it does not."""
-    shown: set[bool] = set()
+    """A diamond where a measurement conforms and a cross where it does not.
+
+    With an ``unusable_label`` a measurement whose uncertainty exceeds its
+    maximum is a hollow circle under that label instead: a standard that
+    forbids using such a result (IEC 61260-3:2016 5.3) reads it as neither.
+    """
+    shown: set[str] = set()
     user_label = "label" in kwargs
     for k, (x, v) in enumerate(zip(positions, verifications, strict=True)):
         style = dict(kwargs)
-        if v.passes:
+        if unusable_label is not None and not v.uncertainty_within_maximum:
+            key = unusable_label
+            style_default(style, "color", _C_SECONDARY)
+            style.setdefault("marker", "o")
+            style_default(style, "markerfacecolor", "none")
+            style_default(style, "markersize", 9)
+        elif v.passes:
+            key = _t("Conforms", language)
             style_default(style, "color", _C_TERTIARY)
             style.setdefault("marker", "D")
             style_default(style, "markersize", 8)
         else:
+            key = _t("Does not conform", language)
             style_default(style, "color", _C_REFERENCE)
             style.setdefault("marker", "X")
             style_default(style, "markersize", 10)
         if user_label:
             if k > 0:
                 style["label"] = "_nolegend_"
-        elif v.passes in shown:
+        elif key in shown:
             style["label"] = "_nolegend_"
         else:
-            style["label"] = _t(
-                "Conforms" if v.passes else "Does not conform", language
-            )
-            shown.add(v.passes)
+            style["label"] = key
+            shown.add(key)
         style_default(style, "linestyle", "none")
         ax.plot([x], [v.deviation], zorder=4, **style)
 
@@ -753,13 +771,15 @@ def _draw_conformance(
     kwargs: dict[str, Any],
     *,
     magnitude_axis_label: str | None = None,
+    unusable_label: str | None = None,
 ) -> None:
     """The picture of Figure E.1: limits, band, error bar and verdict marker.
 
     One measurement per unit of the horizontal axis, starting at 1. A
     ``magnitude_axis_label`` marks a one-sided requirement, a magnitude with a
     maximum, and names its vertical axis in place of the deviation from a
-    design goal.
+    design goal; an ``unusable_label`` draws a measurement whose uncertainty
+    exceeds its maximum as unusable rather than as not conforming.
     """
     positions = np.arange(1, len(verifications) + 1, dtype=float)
     _draw_limits(
@@ -770,7 +790,9 @@ def _draw_conformance(
         one_sided=magnitude_axis_label is not None,
     )
     _draw_uncertainties(ax, verifications, positions, language)
-    _draw_verdicts(ax, verifications, positions, language, kwargs)
+    _draw_verdicts(
+        ax, verifications, positions, language, kwargs, unusable_label=unusable_label
+    )
     reach = [max(v.uncertainty, v.max_uncertainty) for v in verifications]
     # An open end of an interval is no extent of the axis: only the finite
     # limits and the deviations with their bands decide it.

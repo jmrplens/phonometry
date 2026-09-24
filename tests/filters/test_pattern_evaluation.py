@@ -20,10 +20,13 @@ mpl.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 import pytest
+import reference_data as ref
 
 from phonometry import filters
+from phonometry.filters import compliance
 from phonometry.filters.compliance import (
     _G,
+    _band_class,
     _bank_summation,
     _effective_bandwidth,
     _reference_bandwidth,
@@ -55,7 +58,7 @@ def test_fewer_than_24_points_per_bandwidth_is_refused() -> None:
     """7.2.1.4: S "shall be not less than 24"."""
     bank = filters.OctaveFilterBank(fs=48000, fraction=3, order=6, limits=[500, 2000])
     with pytest.raises(
-        ValueError, match="'points_per_bandwidth' must be a whole number, at least 24"
+        ValueError, match="'points_per_bandwidth' must be a whole number"
     ):
         filters.verify_filter_class(bank, points_per_bandwidth=23)
 
@@ -136,6 +139,106 @@ def test_formula_3_adds_powers_not_levels() -> None:
         0.0, abs=1e-14
     )
     assert _summation_deviation(np.zeros((3, 1)))[0] == pytest.approx(third, rel=1e-14)
+
+
+# --------------------------------------------------------------------------
+# The acceptance limits of 5.12.2 and 5.16, as the verdict applies them
+# --------------------------------------------------------------------------
+#: A one-third-octave bank whose seven bands the limits below are graded on.
+_GRADED_BANK = filters.OctaveFilterBank(
+    fs=48000, fraction=3, order=6, limits=[500, 2000]
+)
+
+
+def test_the_pattern_limits_are_the_printed_ones() -> None:
+    """IEC 61260-1:2014 5.12.2 and 5.16, as the design verifier holds them."""
+    assert compliance._BANDWIDTH_LIMITS_DB == ref.IEC61260_1_BANDWIDTH_LIMITS_DB
+    assert compliance._SUMMATION_LIMITS_DB == ref.IEC61260_1_SUMMATION_LIMITS_DB
+
+
+@pytest.mark.parametrize(
+    ("deviation_db", "expected"),
+    [(0.4, 1), (-0.4, 1), (0.41, 2), (-0.6, 2), (0.61, None)],
+)
+def test_the_bandwidth_limits_grade_every_band(
+    monkeypatch: pytest.MonkeyPatch, deviation_db: float, expected: int | None
+) -> None:
+    """5.12.2: +/-0,4 dB for class 1 and +/-0,6 dB for class 2, inclusive."""
+    monkeypatch.setattr(
+        compliance, "_bank_bandwidth_deviation", lambda *_: deviation_db
+    )
+    result = filters.verify_filter_class(_GRADED_BANK)
+    assert result.requirement_class("effective_bandwidth") == expected
+
+
+def _flat_summation(delta_p_db: float) -> object:
+    """A stand-in for the Formula (3) curve: *delta_p_db* at every frequency."""
+
+    def curve(*_: object) -> tuple[np.ndarray, np.ndarray]:
+        omega = np.array([0.9, 1.0, 1.1])
+        return omega, np.full(omega.shape, delta_p_db)
+
+    return curve
+
+
+@pytest.mark.parametrize(
+    ("delta_p_db", "expected"),
+    [
+        (0.8, 1),
+        (0.81, 2),
+        (-1.8, 1),
+        (-1.81, 2),
+        (1.8, 2),
+        (1.81, None),
+        (-3.8, 2),
+        (-3.81, None),
+    ],
+)
+def test_the_summation_limits_grade_every_inner_band(
+    monkeypatch: pytest.MonkeyPatch, delta_p_db: float, expected: int | None
+) -> None:
+    """5.16: +0,8/-1,8 dB for class 1 and +1,8/-3,8 dB for class 2, inclusive."""
+    monkeypatch.setattr(compliance, "_bank_summation", _flat_summation(delta_p_db))
+    result = filters.verify_filter_class(_GRADED_BANK)
+    assert result.requirement_class("summation") == expected
+
+
+@pytest.mark.parametrize(("offset_db", "expected"), [(-1.0, 2), (1.0, 1)])
+def test_the_5_16_limits_bound_formula_3_as_printed(
+    monkeypatch: pytest.MonkeyPatch, offset_db: float, expected: int
+) -> None:
+    """7.2.4.5 applies +0,8/-1,8 dB to Delta P_j of Formula (3) as printed.
+
+    Three outputs each 10 lg 3 - 1 dB down sum 1 dB above the input: Formula
+    (3) reads +1 dB, past the +0,8 dB of class 1. Read with the sign the
+    words of 7.2.4.3 and 5.16 give it (docs/ERRATA.md) the same sum would be
+    -1 dB and class 1; the verifier follows the formula.
+    """
+    third = 10.0 * math.log10(3.0)
+    delta_p = _summation_deviation(np.full((3, 3), third + offset_db))
+    assert delta_p[0] == pytest.approx(-offset_db, abs=1e-12)
+
+    def curve(*_: object) -> tuple[np.ndarray, np.ndarray]:
+        return np.array([0.9, 1.0, 1.1]), delta_p
+
+    monkeypatch.setattr(compliance, "_bank_summation", curve)
+    result = filters.verify_filter_class(_GRADED_BANK)
+    assert result.requirement_class("summation") == expected
+
+
+def test_a_band_on_its_limit_meets_the_class() -> None:
+    """Every limit is inclusive: a margin of exactly zero meets the class."""
+    band = {
+        "margin_class1_db": 0.0,
+        "margin_class2_db": 0.2,
+        "bandwidth_margin_class1_db": 0.0,
+        "bandwidth_margin_class2_db": 0.2,
+        "summation_margin_class1_db": -1e-9,
+        "summation_margin_class2_db": 0.0,
+    }
+    assert _band_class(band, (1, 2)) == 2
+    band["summation_margin_class1_db"] = 0.0
+    assert _band_class(band, (1, 2)) == 1
 
 
 # --------------------------------------------------------------------------
@@ -301,6 +404,45 @@ def test_each_requirement_plots(requirement: str, language: str) -> None:
     if requirement == "summation":
         # The default octave bank is class 2 on 5.16.
         assert title.endswith(("class 2", "clase 2"))
+    plt.close("all")
+
+
+@pytest.mark.parametrize("requirement", ["effective_bandwidth", "summation"])
+def test_a_failing_requirement_is_drawn_inside_the_axes(requirement: str) -> None:
+    """A bank past both classes: every value it is graded on stays in view."""
+    bank = filters.OctaveFilterBank(
+        48000,
+        fraction=3,
+        order=2,
+        limits=[125, 1000],
+        design=filters.FilterDesign("cheby1", ripple=3.0),
+    )
+    result = filters.verify_filter_class(bank)
+    assert result.requirement_class(requirement) is None
+    ax = result.plot(requirement=requirement)
+    low, high = ax.get_ylim()
+    drawn = np.concatenate([np.asarray(line.get_ydata(), float) for line in ax.lines])
+    drawn = drawn[np.isfinite(drawn)]
+    assert low <= float(np.min(drawn))
+    assert float(np.max(drawn)) <= high
+    plt.close("all")
+
+
+def test_the_class_mask_of_a_full_rate_band_stops_at_g_squared() -> None:
+    """Filtered at the full rate, a band's window stops at the G**2 breakpoint."""
+    bank = filters.OctaveFilterBank(
+        48000,
+        fraction=1,
+        order=6,
+        limits=[125, 4000],
+        design=filters.FilterDesign(resample=False),
+    )
+    ax = filters.verify_filter_class(bank).plot()
+    low, high = ax.get_xlim()
+    assert high == pytest.approx(_G**2)
+    assert low == pytest.approx(_G**-2)
+    labels = [t.get_text() for t in ax.get_xticklabels()]
+    assert labels == ["0.5", "0.7", "1", "1.4", "2"]
     plt.close("all")
 
 

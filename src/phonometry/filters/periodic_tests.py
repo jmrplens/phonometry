@@ -36,8 +36,10 @@ it grades are the ones that are a measured deviation with such a pair:
 
 * **10.2**, the relative attenuation at the exact mid-band frequency of every
   filter of the set: :math:`\pm 0.4` dB (class 1) or :math:`\pm 0.6` dB
-  (class 2), with the Annex B maximum for a relative attenuation of 2 dB or
-  less, 0.20 dB;
+  (class 2), with the Annex B maximum Table B.1 sets for the relative
+  attenuation measured, 0.20 dB up to 2 dB and 0.30 dB above (a filter that
+  has drifted past 2 dB at its mid-band is a failure, not a result 5.3 makes
+  unusable);
 * **10.3**, the alternative for time-invariant filters: the deviation of the
   time-averaged output of an exponential sweep from Formula (17) of
   IEC 61260-1, within the same limits (10.3.6), with the Annex B maximum for
@@ -56,6 +58,20 @@ it grades are the ones that are a measured deviation with such a pair:
 
 A stop-band row of Table 1 prints a minimum and :math:`+\infty` ("+70; +∞"),
 an acceptance interval with no upper limit, which is how it is judged.
+
+**What a complete test covers.** 11.3 and 13.1 test the level linearity
+and the relative attenuation of three filters of the set, and 13.4 tests each
+of them at every :math:`k` from -7 to 7 whose frequency lies above 0.5 times
+the exact mid-band frequency of the lowest filter of the set and below 1.5
+times that of the highest. A record with fewer filters, or with a NaN at a
+frequency 13.4 requires, is incomplete
+(:attr:`FilterPeriodicVerification.incomplete`) and does not pass. The record
+says which filter a level linearity result was measured on
+(``linearity_midband_frequencies_hz``) and where the set and the tested
+filters lie (``set_midband_frequencies_hz``,
+``tested_midband_frequencies_hz``); without them that coverage cannot be
+checked, :attr:`FilterPeriodicVerification.coverage_checked` is false and the
+statement says so.
 
 **What 5.3 makes unusable.** A result whose actual uncertainty exceeds the
 maximum permitted "shall not be used to evaluate conformance to this standard
@@ -200,6 +216,16 @@ _MATRIX_RANK = 2
 #: One kilohertz, where a filter label switches to the "kHz" form.
 _HZ_PER_KHZ = 1000.0
 
+#: IEC 61260-3:2016 11.3 and 13.1: the number of filters of the set whose level
+#: linearity and relative attenuation a periodic test measures.
+_SELECTED_FILTERS = 3
+
+#: IEC 61260-3:2016 13.4: the test frequencies of Clause 13 lie above this
+#: multiple of the lowest mid-band frequency of the set and below the next
+#: multiple of the highest one.
+_COVERAGE_BELOW_LOWEST = 0.5
+_COVERAGE_ABOVE_HIGHEST = 1.5
+
 #: The clause groups a complete periodic test grades: 10 (10.2 or 10.3), 11.7
 #: and 13. 11.9 applies only to a filter with more than one level range.
 _REQUIRED = ("10", "11.7", "13")
@@ -302,7 +328,9 @@ class FilterPeriodicMeasurements:
         sweep from :math:`L_\mathrm{c}` of IEC 61260-1 Formula (17).
     :ivar bandwidth_uncertainties_db: Their uncertainties.
     :ivar set_midband_frequencies_hz: Optional labels for the 10.2 and 10.3
-        results: the exact mid-band frequency of each filter, in order.
+        results: the exact mid-band frequency of each filter of the set, in
+        order. Its lowest and highest bound the test frequencies 13.4
+        requires.
     :ivar linearity_deviations_db: 11.7: the level linearity deviations of
         the three selected filters on the reference level range, at every
         level measured.
@@ -311,6 +339,10 @@ class FilterPeriodicMeasurements:
         (:math:`L_\mathrm{u} - L`, negative above it), which decides between
         the limits of 5.13.3 and 5.13.4 and the maxima of Annex B.
     :ivar linearity_uncertainties_db: Their uncertainties.
+    :ivar linearity_midband_frequencies_hz: Optional: the exact mid-band
+        frequency of the filter each 11.7 result was measured on, in the same
+        order, which lets the verdict count the three filters 11.3 requires
+        and names the filter in each result's label.
     :ivar range_linearity_deviations_db: 11.9: the level linearity deviation
         30 dB below the upper boundary of every other level range.
     :ivar range_linearity_uncertainties_db: Their uncertainties.
@@ -320,8 +352,9 @@ class FilterPeriodicMeasurements:
         drops the frequency.
     :ivar relative_attenuation_uncertainties_db: The same shape, NaN in the
         same places.
-    :ivar tested_midband_frequencies_hz: Optional labels for the 11.7 and 13
-        results: the exact mid-band frequency of each selected filter.
+    :ivar tested_midband_frequencies_hz: Optional labels for the 13 results:
+        the exact mid-band frequency of each selected filter, one per row,
+        which places its test frequencies for 13.4.
     """
 
     midband_attenuations_db: Sequence[float] | None = None
@@ -332,6 +365,7 @@ class FilterPeriodicMeasurements:
     linearity_deviations_db: Sequence[float] | None = None
     linearity_levels_below_upper_db: Sequence[float] | None = None
     linearity_uncertainties_db: Sequence[float] | None = None
+    linearity_midband_frequencies_hz: Sequence[float] | None = None
     range_linearity_deviations_db: Sequence[float] | None = None
     range_linearity_uncertainties_db: Sequence[float] | None = None
     relative_attenuations_db: Sequence[Sequence[float]] | None = None
@@ -355,6 +389,7 @@ class FilterPeriodicMeasurements:
             "linearity_deviations_db",
             "linearity_levels_below_upper_db",
             "linearity_uncertainties_db",
+            "linearity_midband_frequencies_hz",
             "range_linearity_deviations_db",
             "range_linearity_uncertainties_db",
             "tested_midband_frequencies_hz",
@@ -421,6 +456,10 @@ class FilterPeriodicMeasurements:
             (
                 "set_midband_frequencies_hz",
                 ("midband_attenuations_db", "bandwidth_deviations_db"),
+            ),
+            (
+                "linearity_midband_frequencies_hz",
+                ("linearity_deviations_db",),
             ),
             (
                 "tested_midband_frequencies_hz",
@@ -570,6 +609,8 @@ class FilterPeriodicVerification:
     """The IEC 61260-3:2016 verdict on the periodic tests of a band filter.
 
     :ivar filter_class: The class the filter was tested as, 1 or 2.
+    :ivar fraction: The bandwidth designator denominator ``b`` of the filters
+        of Clause 13, which places their test frequencies.
     :ivar pattern_approval_public: Whether evidence is publicly available
         that the model passed the pattern evaluation of IEC 61260-2 (14 c).
     :ivar measurements: The record the verdict was reached on.
@@ -578,6 +619,7 @@ class FilterPeriodicVerification:
     """
 
     filter_class: int
+    fraction: float
     pattern_approval_public: bool
     measurements: FilterPeriodicMeasurements
     clauses: tuple[PeriodicTestClause, ...]
@@ -597,6 +639,88 @@ class FilterPeriodicVerification:
         return tuple(clause for clause in _REQUIRED if clause not in present)
 
     @property
+    def incomplete(self) -> tuple[tuple[str, str], ...]:
+        """``(clause, what is short)`` for every result a complete clause lacks.
+
+        11.3 and 13.1: the level linearity and the relative attenuation of
+        three filters; 13.4: each tested filter at every test frequency
+        above 0.5 times the exact mid-band frequency of the lowest filter of
+        the set and below 1.5 times that of the highest. A clause not
+        measured at all is in :attr:`missing` instead. What the record does
+        not say cannot be listed here, and :attr:`coverage_checked` tells
+        whether it said enough.
+        """
+        m = self.measurements
+        short: list[tuple[str, str]] = []
+        if m.linearity_midband_frequencies_hz is not None:
+            count = int(np.unique(np.asarray(m.linearity_midband_frequencies_hz)).size)
+            if count < _SELECTED_FILTERS:
+                short.append(("11.7", f"{_on_filters(count)}, and 11.3 requires three"))
+        rows = m.relative_attenuations_db
+        if rows is not None:
+            if len(rows) < _SELECTED_FILTERS:
+                short.append(
+                    ("13", f"{_on_filters(len(rows))}, and 13.1 requires three")
+                )
+            short.extend(("13", gap) for gap in self._frequencies_not_measured())
+        return tuple(short)
+
+    def _frequencies_not_measured(self) -> list[str]:
+        """The test frequencies 13.4 requires that a clause 13 row leaves out."""
+        m = self.measurements
+        rows = m.relative_attenuations_db
+        if rows is None or m.set_midband_frequencies_hz is None:
+            return []
+        tested = m.tested_midband_frequencies_hz
+        if tested is None:
+            return []
+        low = _COVERAGE_BELOW_LOWEST * min(m.set_midband_frequencies_hz)
+        high = _COVERAGE_ABOVE_HIGHEST * max(m.set_midband_frequencies_hz)
+        omega = periodic_test_frequencies(self.fraction)
+        half = len(_FREQUENCY_PARAMETER_EXPONENTS) - 1
+        gaps = []
+        for fm, row in zip(tested, rows, strict=True):
+            for position, value in enumerate(row):
+                frequency = float(omega[position]) * fm
+                if math.isnan(value) and low < frequency < high:
+                    gaps.append(
+                        f"{_hz_label(fm)}, k = {position - half}: not measured, "
+                        "and 13.4 requires it"
+                    )
+        return gaps
+
+    @property
+    def coverage_checked(self) -> bool:
+        """Whether the record says enough to check what a complete test covers.
+
+        The filter of every 11.7 result (``linearity_midband_frequencies_hz``)
+        and, for Clause 13, the mid-band frequencies of the set and of the
+        tested filters, without which :attr:`incomplete` cannot count the
+        three filters of 11.3 or the test frequencies of 13.4.
+        """
+        return not self._coverage_gaps()
+
+    def _coverage_gaps(self) -> list[str]:
+        """What the record leaves out that the coverage check needs."""
+        m = self.measurements
+        gaps = []
+        if (
+            m.linearity_deviations_db is not None
+            and m.linearity_midband_frequencies_hz is None
+        ):
+            gaps.append(
+                "the filter each level linearity result of 11.7 was measured on"
+            )
+        if m.relative_attenuations_db is not None and (
+            m.set_midband_frequencies_hz is None
+            or m.tested_midband_frequencies_hz is None
+        ):
+            gaps.append(
+                "the mid-band frequencies of the set and of the filters of Clause 13"
+            )
+        return gaps
+
+    @property
     def unusable(self) -> tuple[tuple[str, str], ...]:
         """``(clause, result)`` for every result 5.3 forbids using."""
         return tuple((c.clause, label) for c in self.clauses for label in c.unusable)
@@ -610,13 +734,15 @@ class FilterPeriodicVerification:
     def passes(self) -> bool:
         """Whether the filter completed the periodic tests successfully.
 
-        Every clause a complete test grades was measured, and every result
-        demonstrates conformance: no deviation outside its limits and no
-        uncertainty above its maximum.
+        Every clause a complete test grades was measured on the filters and
+        at the frequencies it requires (nothing :attr:`missing` or
+        :attr:`incomplete`), and every result demonstrates conformance: no
+        deviation outside its limits and no uncertainty above its maximum.
         """
         return (
             bool(self.clauses)
             and not self.missing
+            and not self.incomplete
             and all(c.passes for c in self.clauses)
         )
 
@@ -626,10 +752,12 @@ class FilterPeriodicVerification:
 
         14 m) when a result exceeds its acceptance limits, followed by the
         tests that did not complete and why; the 5.3 notice when results
-        cannot be used; a notice naming the clauses not measured; and
-        otherwise 14 k) with a public pattern approval or 14 l) without one,
-        which carries the caveat of 1.5: without it no general conclusion
-        about IEC 61260-1 can be drawn.
+        cannot be used; a notice naming the clauses not measured and the
+        filters and frequencies a clause lacks; and otherwise 14 k) with a
+        public pattern approval or 14 l) without one, which carries the
+        caveat of 1.5: without it no general conclusion about IEC 61260-1 can
+        be drawn. A pass on a record that does not say which filters and
+        frequencies it covers ends by saying that this was not checked.
         """
         y = self.filter_class
         if self.failed:
@@ -651,12 +779,31 @@ class FilterPeriodicVerification:
                 "uncertainty exceeds the maximum permitted by IEC 61260-1:2014 "
                 "Annex B (IEC 61260-3:2016, 5.3)."
             )
-        if self.missing:
+        if self.missing or self.incomplete:
+            parts = []
+            if self.missing:
+                parts.append(
+                    f"clause {', '.join(self.missing)} was not measured, and no "
+                    "test shall be omitted unless the filter lacks the feature it "
+                    "tests (9.1.1)"
+                )
+            parts.extend(f"{clause}: {what}" for clause, what in self.incomplete)
             return (
-                "The periodic tests of IEC 61260-3 are incomplete: clause "
-                f"{', '.join(self.missing)} was not measured, and no test shall "
-                "be omitted unless the filter lacks the feature it tests (9.1.1)."
+                f"The periodic tests of IEC 61260-3 are incomplete: {'; '.join(parts)}."
             )
+        return self._pass_statement()
+
+    def _pass_statement(self) -> str:
+        """14 k) or 14 l), and what the record did not let the verdict check."""
+        y = self.filter_class
+        gaps = self._coverage_gaps()
+        tail = (
+            f" The record does not give {' or '.join(gaps)}, so whether the tests "
+            "cover the three filters of 11.3 and 13.1 and every test frequency "
+            "13.4 requires was not checked."
+            if gaps
+            else ""
+        )
         head = (
             "The filter submitted for testing successfully completed the periodic "
             "tests of IEC 61260-3, for the environmental conditions under which "
@@ -670,7 +817,7 @@ class FilterPeriodicVerification:
                 "IEC 61260-2, to demonstrate that the model of filter fully "
                 f"conformed to the class {y} specifications in IEC 61260-1:2014 "
                 f"the filter submitted for testing conforms to the class {y} "
-                "specifications of IEC 61260-1:2014."
+                f"specifications of IEC 61260-1:2014.{tail}"
             )
         return (
             f"{head} However, no general statement or conclusion can be made about "
@@ -680,7 +827,7 @@ class FilterPeriodicVerification:
             "approvals, to demonstrate that the model of filter fully conformed "
             f"to the class {y} specifications in IEC 61260-1:2014 and (b) because "
             "the periodic tests of IEC 61260-3 cover only a limited subset of the "
-            "specifications in IEC 61260-1:2014."
+            f"specifications in IEC 61260-1:2014.{tail}"
         )
 
     def clause(self, clause: str) -> PeriodicTestClause:
@@ -743,6 +890,11 @@ def _attenuation_max_uncertainty_db(relative_attenuation_db: float) -> float:
     return large
 
 
+def _on_filters(count: int) -> str:
+    """``measured on 1 filter`` or ``measured on 2 filters``."""
+    return f"measured on {count} filter{'' if count == 1 else 's'}"
+
+
 def _hz_label(frequency_hz: float) -> str:
     """``1 kHz`` or ``125.9 Hz``: a filter named by its mid-band frequency."""
     if frequency_hz >= _HZ_PER_KHZ:
@@ -763,9 +915,13 @@ def _clause_10(
     uncertainties: Sequence[float],
     labels: list[str],
     filter_class: int,
-    max_uncertainty: float,
 ) -> PeriodicTestClause:
-    """10.2 or 10.3: one result per filter, +/-0.4 dB or +/-0.6 dB."""
+    """10.2 or 10.3: one result per filter, +/-0.4 dB or +/-0.6 dB.
+
+    10.2 is a relative attenuation, whose Annex B maximum Table B.1 sets by
+    the attenuation measured; 10.3 is the time-invariant operation test,
+    0.20 dB (9.2.3).
+    """
     limit = _MIDBAND_LIMITS_DB[filter_class]
     return PeriodicTestClause(
         clause=clause,
@@ -776,7 +932,11 @@ def _clause_10(
                 d,
                 uncertainty=u,
                 acceptance_limits=limit,
-                max_uncertainty=max_uncertainty,
+                max_uncertainty=(
+                    _attenuation_max_uncertainty_db(d)
+                    if clause == "10.2"
+                    else _TIME_INVARIANCE_MAX_UNCERTAINTY_DB
+                ),
             )
             for d, u in zip(deviations, uncertainties, strict=True)
         ),
@@ -792,9 +952,16 @@ def _clause_11_7(
     deviations = m.linearity_deviations_db or ()
     depths = m.linearity_levels_below_upper_db or ()
     uncertainties = m.linearity_uncertainties_db or ()
+    filters = (
+        [f"{_hz_label(f)}, " for f in m.linearity_midband_frequencies_hz]
+        if m.linearity_midband_frequencies_hz is not None
+        else [""] * len(deviations)
+    )
     verifications = []
     labels = []
-    for d, depth, u in zip(deviations, depths, uncertainties, strict=True):
+    for d, depth, u, name in zip(
+        deviations, depths, uncertainties, filters, strict=True
+    ):
         beyond = depth > _LINEARITY_SPLIT_DB
         verifications.append(
             verify_conformance(
@@ -804,7 +971,7 @@ def _clause_11_7(
                 max_uncertainty=far_u if beyond else near_u,
             )
         )
-        labels.append(f"{depth:g} dB below the upper boundary")
+        labels.append(f"{name}{depth:g} dB below the upper boundary")
     return PeriodicTestClause(
         clause="11.7",
         title=_CLAUSE_TITLES["11.7"],
@@ -888,7 +1055,8 @@ def verify_filter_periodic(
     maximum-permitted uncertainties of IEC 61260-1:2014 Annex B; see the
     module docstring for which clause reads which. The verdict passes when
     every clause a complete test grades was measured (10.2 or 10.3, 11.7 and
-    13) and every result conforms, and its :attr:`~FilterPeriodicVerification.statement`
+    13) on the three filters and at the test frequencies it requires, and
+    every result conforms; its :attr:`~FilterPeriodicVerification.statement`
     is the text Clause 14 prescribes for the case.
 
     :param filter_class: The class the filter is tested as, 1 or 2.
@@ -922,7 +1090,6 @@ def verify_filter_periodic(
                     m.set_midband_frequencies_hz, len(m.midband_attenuations_db)
                 ),
                 cls,
-                _ATTENUATION_MAX_UNCERTAINTY_DB[0],
             )
         )
     if (
@@ -938,7 +1105,6 @@ def verify_filter_periodic(
                     m.set_midband_frequencies_hz, len(m.bandwidth_deviations_db)
                 ),
                 cls,
-                _TIME_INVARIANCE_MAX_UNCERTAINTY_DB,
             )
         )
     if m.linearity_deviations_db is not None:
@@ -952,6 +1118,7 @@ def verify_filter_periodic(
         raise ValueError(msg)
     return FilterPeriodicVerification(
         filter_class=cls,
+        fraction=fraction,
         pattern_approval_public=bool(pattern_approval_public),
         measurements=m,
         clauses=tuple(clauses),

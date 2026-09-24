@@ -61,7 +61,7 @@ IEC61183_EQUAL_AREA_HORIZONTAL_DEG: tuple[float, ...] = (
 )  # fmt: skip
 
 #: The two printed angles of that list that break its symmetry about 90°
-#: (docs/ERRATA.md): 77,9° + 102,2° = 180,1° where every other pair sums to
+#: (docs/ERRATA.md): 77,9° + 102,2° = 180,1° where all the other pairs sum to
 #: 180,0°, and 282,1° mirrors 77,9°. The equal-area construction gives
 #: 77,846° and 282,154°, which round to 77,8° and 282,2°.
 IEC61183_EQUAL_AREA_ERRATA_DEG: dict[float, float] = {77.9: 77.8, 282.1: 282.2}

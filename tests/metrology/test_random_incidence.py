@@ -98,11 +98,20 @@ def test_the_factors_of_every_plane_together_sum_to_one(
     assert planes * float(np.sum(factors)) == pytest.approx(1.0, abs=1e-14)
 
 
-def test_counting_the_poles_once_leaves_a_bias_of_eight_thousandths_of_a_db() -> None:
+def _counted_once_index_db(result: ri.DirectivityFactor) -> float:
+    """10 lg gamma of Formula (A.3) with the second plane's poles left out."""
+    second = np.isclose(result.plane_angles_deg, 90.0)
+    pole = np.isclose(result.incidence_angles_deg % 180.0, 0.0)
+    kept = ~(second & pole)
+    energy = 10.0 ** (0.1 * (result.levels_db - result.reference_level_db))
+    return -10.0 * math.log10(float(np.sum(result.weights[kept] * energy[kept])))
+
+
+def test_counting_the_poles_once_leaves_an_omnidirectional_bias_of_0_008_db() -> None:
     """The paragraph under (A.3) says the pole readings are taken into account
-    once. Read as *counted* once, the 72 factors sum to 0,998097 and every
-    10 lg gamma comes out 0,0083 dB high; the library counts them in both
-    sums and its omnidirectional instrument reads exactly 0 dB.
+    once. Read as *counted* once, the 72 factors sum to 0,998097 and an
+    omnidirectional instrument's 10 lg gamma comes out 0,0083 dB high; the
+    library counts them in both sums and that instrument reads exactly 0 dB.
     """
     factors = metrology.adjustment_factors(10.0)
     counted_once = 2.0 * float(np.sum(factors)) - factors[0] - factors[18]
@@ -110,6 +119,27 @@ def test_counting_the_poles_once_leaves_a_bias_of_eight_thousandths_of_a_db() ->
     assert -10.0 * math.log10(counted_once) == pytest.approx(0.00827, abs=5e-6)
     omni = metrology.directivity_factor(_omni(2, 36))
     assert omni.directivity_index_db == pytest.approx(0.0, abs=1e-12)
+    assert _counted_once_index_db(omni) == pytest.approx(0.00827, abs=5e-6)
+
+
+def test_the_counted_once_bias_grows_with_the_directivity() -> None:
+    """Dropping the second plane's poles removes K(0) [p(0) + p(180)] from the
+    sum 1/gamma, so 10 lg gamma comes out high by
+    -10 lg(1 - gamma K(0) [p(0) + p(180)]): more than the 0,008 dB of an
+    omnidirectional instrument for a directional one. A cardioid squared twice
+    over, with a floor 30 dB down, has 10 lg gamma near 7 dB and a bias near
+    0,02 dB.
+    """
+    phi = np.radians(np.arange(36) * 10.0)
+    plane = 94.0 + 10.0 * np.log10(((1.0 + np.cos(phi)) / 2.0) ** 4 * 0.999 + 0.001)
+    result = metrology.directivity_factor(np.vstack((plane, plane)))
+    bias = _counted_once_index_db(result) - result.directivity_index_db
+    k0 = float(metrology.adjustment_factors(10.0)[0])
+    rear = 10.0 ** (0.1 * (plane[18] - 94.0))
+    expected = -10.0 * math.log10(1.0 - result.gamma * k0 * (1.0 + rear))
+    assert bias == pytest.approx(expected, rel=1e-9)
+    assert result.directivity_index_db == pytest.approx(7.0, abs=0.1)
+    assert bias == pytest.approx(0.02, abs=0.002)
 
 
 def test_four_planes_halve_table_a1() -> None:
@@ -138,7 +168,7 @@ def test_adjustment_factors_are_read_only() -> None:
 def test_a_step_that_does_not_divide_the_half_circle_is_refused(
     step_deg: float,
 ) -> None:
-    with pytest.raises(ValueError, match="step_deg"):
+    with pytest.raises(ValueError, match="'step_deg' must"):
         metrology.adjustment_factors(step_deg)
 
 
@@ -146,7 +176,7 @@ def test_a_step_that_does_not_divide_the_half_circle_is_refused(
 def test_a_number_of_planes_that_is_not_a_whole_number_is_refused(
     planes: object,
 ) -> None:
-    with pytest.raises(ValueError, match="planes"):
+    with pytest.raises(ValueError, match="'planes' must be a whole number"):
         metrology.adjustment_factors(10.0, planes=planes)  # type: ignore[arg-type]
 
 
@@ -163,8 +193,22 @@ def test_the_largest_of_the_70_elements_of_10_degree_steps_is_2_2_percent() -> N
     largest = metrology.largest_element_fraction(10.0)
     assert round(100.0 * largest, 1) == pytest.approx(ref.IEC61183_A17_LARGEST_PERCENT)
     assert largest == pytest.approx(metrology.adjustment_factors(10.0)[9], rel=1e-15)
-    # Two caps and four elements on each of the 17 rings between them.
-    assert 2 + 4 * 17 == ref.IEC61183_A17_SUB_AREAS
+
+
+def test_ten_degree_steps_in_two_planes_divide_the_sphere_into_70_elements() -> None:
+    """A.1.7: each reading off the poles is one element; the two readings of a
+    pole, one in each plane, together are its cap. 68 elements and 2 caps.
+    """
+    result = metrology.directivity_factor(_omni(2, 36))
+    angles = result.incidence_angles_deg
+    off_pole = ~np.isclose(angles % 180.0, 0.0)
+    caps = [
+        float(np.sum(result.weights[np.isclose(angles, pole)])) for pole in (0.0, 180.0)
+    ]
+    elements = [*result.weights[off_pole], *caps]
+    assert len(elements) == ref.IEC61183_A17_SUB_AREAS
+    assert math.fsum(elements) == pytest.approx(1.0, abs=1e-14)
+    assert max(elements) == pytest.approx(result.largest_element_fraction, rel=1e-15)
 
 
 def test_the_3_percent_criterion_falls_between_12_and_15_degree_steps() -> None:
@@ -186,6 +230,12 @@ def test_the_warning_points_at_the_caller() -> None:
     levels = _omni(2, 24)
     with pytest.warns(metrology.SphereDivisionWarning) as record:
         metrology.directivity_factor(levels)
+    assert record[0].filename == __file__
+
+
+def test_the_warning_of_the_factors_points_at_the_caller() -> None:
+    with pytest.warns(metrology.SphereDivisionWarning) as record:
+        metrology.adjustment_factors(15.0)
     assert record[0].filename == __file__
 
 
@@ -274,27 +324,29 @@ def test_the_sum_converges_to_the_integral_of_formula_3(
 
 def test_one_plane_goes_to_the_axisymmetric_function() -> None:
     levels = np.full(36, 94.0)
-    with pytest.raises(ValueError, match="axisymmetric_directivity_factor"):
+    with pytest.raises(ValueError, match="'levels_db' must hold one row per plane"):
         metrology.directivity_factor(levels)
 
 
 def test_several_planes_go_to_the_plane_function() -> None:
     levels = _omni(2, 36)
-    with pytest.raises(ValueError, match="directivity_factor"):
+    with pytest.raises(
+        ValueError, match="'levels_db' must be the readings of one plane"
+    ):
         metrology.axisymmetric_directivity_factor(levels)
 
 
 @pytest.mark.parametrize("per_plane", [35, 2])
 def test_a_plane_without_both_poles_is_refused(per_plane: int) -> None:
     levels = _omni(2, per_plane)
-    with pytest.raises(ValueError, match="even number of readings"):
+    with pytest.raises(ValueError, match="'levels_db' must hold an even number"):
         metrology.directivity_factor(levels)
 
 
 def test_a_reading_that_is_not_finite_is_refused() -> None:
     levels = _omni(2, 36)
     levels[1, 5] = math.nan
-    with pytest.raises(ValueError, match="levels_db"):
+    with pytest.raises(ValueError, match="'levels_db' must contain only finite values"):
         metrology.directivity_factor(levels)
 
 
@@ -314,46 +366,99 @@ def test_the_result_arrays_are_read_only_copies() -> None:
         assert not getattr(result, name).flags.writeable
 
 
+def _directivity_fields(**changes: object) -> dict[str, object]:
+    """The fields of a valid four-reading DirectivityFactor, with changes."""
+    fields: dict[str, object] = {
+        "incidence_angles_deg": np.arange(4) * 90.0,
+        "plane_angles_deg": np.zeros(4),
+        "levels_db": np.zeros(4),
+        "weights": np.full(4, 0.25),
+        "reference_level_db": 0.0,
+        "gamma": 1.0,
+        "largest_element_fraction": 0.3,
+        "formula": "A.3",
+    }
+    fields.update(changes)
+    return fields
+
+
 def test_the_result_refuses_columns_of_different_lengths() -> None:
-    with pytest.raises(ValueError, match="same length"):
-        ri.DirectivityFactor(
-            incidence_angles_deg=np.zeros(3),
-            plane_angles_deg=np.zeros(3),
-            levels_db=np.zeros(2),
-            weights=np.zeros(3),
-            reference_level_db=0.0,
-            gamma=1.0,
-            largest_element=0.02,
-            formula="A.3",
-        )
+    fields = _directivity_fields(levels_db=np.zeros(2))
+    with pytest.raises(
+        ValueError, match="'weights' must be 1-D arrays of the same length"
+    ):
+        ri.DirectivityFactor(**fields)  # type: ignore[arg-type]
 
 
 def test_the_result_refuses_a_gamma_that_is_not_positive() -> None:
-    with pytest.raises(ValueError, match="gamma"):
-        ri.DirectivityFactor(
-            incidence_angles_deg=np.zeros(3),
-            plane_angles_deg=np.zeros(3),
-            levels_db=np.zeros(3),
-            weights=np.zeros(3),
-            reference_level_db=0.0,
-            gamma=0.0,
-            largest_element=0.02,
-            formula="A.3",
-        )
+    fields = _directivity_fields(gamma=0.0)
+    with pytest.raises(ValueError, match="'gamma' must be positive"):
+        ri.DirectivityFactor(**fields)  # type: ignore[arg-type]
+
+
+def test_the_result_refuses_a_formula_it_does_not_draw() -> None:
+    """The weights view labels its curve by the formula: an unknown one would
+    reach it as a bare KeyError.
+    """
+    fields = _directivity_fields(formula="A.3 (sum)")
+    with pytest.raises(ValueError, match="'formula' must be one of"):
+        ri.DirectivityFactor(**fields)  # type: ignore[arg-type]
+
+
+def test_the_result_refuses_a_reference_level_that_is_not_finite() -> None:
+    fields = _directivity_fields(reference_level_db=math.nan)
+    with pytest.raises(ValueError, match="'reference_level_db' must be finite"):
+        ri.DirectivityFactor(**fields)  # type: ignore[arg-type]
+
+
+@pytest.mark.parametrize("fraction", [-5.0, 0.0, 1.5, math.inf])
+def test_the_result_refuses_a_largest_element_that_is_not_a_fraction(
+    fraction: float,
+) -> None:
+    fields = _directivity_fields(largest_element_fraction=fraction)
+    with pytest.raises(
+        ValueError, match="'largest_element_fraction' must be a fraction"
+    ):
+        ri.DirectivityFactor(**fields)  # type: ignore[arg-type]
+
+
+def test_the_result_accepts_a_whole_sphere_element() -> None:
+    result = ri.DirectivityFactor(**_directivity_fields(largest_element_fraction=1.0))  # type: ignore[arg-type]
+    assert result.largest_element_fraction == pytest.approx(1.0)
+
+
+def test_the_relative_levels_are_the_readings_less_the_reference() -> None:
+    """L(phi) - L_rd: a reading 3 dB below the reference is -3 dB."""
+    levels = _omni(2, 36)
+    levels[0, 9] = 91.0
+    result = metrology.directivity_factor(levels, reference_level_db=94.0)
+    assert result.relative_levels_db[0] == pytest.approx(0.0, abs=1e-12)
+    assert result.relative_levels_db[9] == pytest.approx(-3.0, abs=1e-12)
+    assert result.relative_levels_db[36 + 9] == pytest.approx(0.0, abs=1e-12)
 
 
 # --------------------------------------------------------------------------
 # Formula (A.5) and the directions of the note to A.1.8
 # --------------------------------------------------------------------------
 def test_the_equal_area_directions_are_the_printed_ones() -> None:
-    """36 of the 38 printed angles, to the 0,1° they are printed to."""
+    """18 of the 20 printed horizontal angles, to the 0,1° they are printed
+    to, and 16 of the 18 the vertical plane repeats without the poles: 34 of
+    the 38 directions. The other four are the two errata, printed in both
+    planes.
+    """
     horizontal, vertical = metrology.equal_area_incidence_angles()
     printed = np.array(ref.IEC61183_EQUAL_AREA_HORIZONTAL_DEG)
     errata = np.isin(printed, list(ref.IEC61183_EQUAL_AREA_ERRATA_DEG))
     np.testing.assert_allclose(np.round(horizontal[~errata], 1), printed[~errata])
+    poles = np.isclose(printed, 0.0) | np.isclose(printed, 180.0)
+    printed_vertical = printed[~poles]
+    vertical_errata = errata[~poles]
+    assert vertical.size == printed_vertical.size
     np.testing.assert_allclose(
-        np.round(vertical, 1),
-        np.round(horizontal[(horizontal > 0.0) & ~np.isclose(horizontal, 180.0)], 1),
+        np.round(vertical[~vertical_errata], 1), printed_vertical[~vertical_errata]
+    )
+    assert (
+        int(np.count_nonzero(~errata)) + int(np.count_nonzero(~vertical_errata)) == 34
     )
 
 
@@ -384,7 +489,7 @@ def test_equal_area_elements_are_2_6_percent() -> None:
     result = metrology.equal_area_directivity_factor(
         np.full(20, 90.0), np.full(18, 90.0)
     )
-    assert round(100.0 * result.largest_element, 1) == pytest.approx(
+    assert round(100.0 * result.largest_element_fraction, 1) == pytest.approx(
         ref.IEC61183_EQUAL_AREA_ELEMENT_PERCENT
     )
     assert result.gamma == pytest.approx(1.0, abs=1e-13)
@@ -413,10 +518,29 @@ def test_equal_area_converges_on_the_cardioid() -> None:
     assert result.gamma == pytest.approx(3.0, rel=0.02)
 
 
-def test_equal_area_refuses_the_wrong_number_of_readings() -> None:
-    horizontal = np.full(18, 90.0)
-    with pytest.raises(ValueError, match="20 in the"):
-        metrology.equal_area_directivity_factor(horizontal, horizontal)
+@pytest.mark.parametrize(("horizontal", "vertical"), [(18, 18), (19, 19), (21, 17)])
+def test_equal_area_refuses_the_wrong_number_of_readings(
+    horizontal: int, vertical: int
+) -> None:
+    """38 readings split other than 20 and 18 would sit at the wrong angles."""
+    h_levels = np.full(horizontal, 90.0)
+    v_levels = np.full(vertical, 90.0)
+    with pytest.raises(
+        ValueError, match="'horizontal_levels_db' and 'vertical_levels_db' must hold"
+    ):
+        metrology.equal_area_directivity_factor(h_levels, v_levels)
+
+
+def test_equal_area_readings_keep_their_planes() -> None:
+    result = metrology.equal_area_directivity_factor(
+        np.full(20, 90.0), np.full(18, 90.0)
+    )
+    np.testing.assert_array_equal(result.plane_angles_deg[:20], np.zeros(20))
+    np.testing.assert_array_equal(result.plane_angles_deg[20:], np.full(18, 90.0))
+    horizontal, vertical = metrology.equal_area_incidence_angles()
+    np.testing.assert_array_equal(
+        result.incidence_angles_deg, np.concatenate((horizontal, vertical))
+    )
 
 
 # --------------------------------------------------------------------------
@@ -436,12 +560,16 @@ def test_a_single_free_field_level_is_spread_over_the_bands() -> None:
 
 
 def test_random_incidence_refuses_a_column_of_the_wrong_length() -> None:
-    with pytest.raises(ValueError, match="directivity_index_db"):
+    with pytest.raises(
+        ValueError, match="'directivity_index_db' must hold one value per frequency"
+    ):
         metrology.random_incidence_sensitivity([1000.0, 2000.0], 0.0, [0.1, 0.2, 0.3])
 
 
 def test_random_incidence_refuses_frequencies_out_of_order() -> None:
-    with pytest.raises(ValueError, match="strictly increasing"):
+    with pytest.raises(
+        ValueError, match="'frequencies_hz' must be strictly increasing"
+    ):
         metrology.random_incidence_sensitivity([2000.0, 1000.0], 0.0, 0.1)
 
 
@@ -546,7 +674,9 @@ def test_table_b1_answers_an_exact_midband_frequency() -> None:
 
 def test_table_b1_refuses_a_frequency_it_does_not_print() -> None:
     frequencies = [20.0, 1000.0]
-    with pytest.raises(ValueError, match="Table B.1"):
+    with pytest.raises(
+        ValueError, match="pass 'reference_diffuse_pressure_difference_db' for it"
+    ):
         metrology.diffuse_field_sensitivity(
             frequencies, 0.0, 0.0, reference_pressure_level_db=0.0
         )
@@ -554,7 +684,9 @@ def test_table_b1_refuses_a_frequency_it_does_not_print() -> None:
 
 def test_a_frequency_between_the_rows_is_refused() -> None:
     frequencies = [1100.0]
-    with pytest.raises(ValueError, match="reference_directivity_index_db"):
+    with pytest.raises(
+        ValueError, match="pass 'reference_directivity_index_db' for it"
+    ):
         metrology.diffuse_field_sensitivity(
             frequencies, 0.0, 0.0, reference_free_field_level_db=0.0
         )
@@ -562,13 +694,19 @@ def test_a_frequency_between_the_rows_is_refused() -> None:
 
 def test_exactly_one_reference_calibration_is_needed() -> None:
     frequencies = [1000.0]
-    with pytest.raises(ValueError, match="exactly one calibration"):
+    with pytest.raises(
+        ValueError,
+        match="Give exactly one calibration of the reference instrument: 'reference_random",
+    ):
         metrology.diffuse_field_sensitivity(frequencies, 0.0, 0.0)
 
 
 def test_two_reference_calibrations_are_refused() -> None:
     frequencies = [1000.0]
-    with pytest.raises(ValueError, match="exactly one calibration"):
+    with pytest.raises(
+        ValueError,
+        match="Give exactly one calibration of the reference instrument: 'reference_random",
+    ):
         metrology.diffuse_field_sensitivity(
             frequencies,
             0.0,
@@ -580,7 +718,9 @@ def test_two_reference_calibrations_are_refused() -> None:
 
 def test_a_correction_of_another_route_is_refused() -> None:
     frequencies = [1000.0]
-    with pytest.raises(ValueError, match="reference_directivity_index_db"):
+    with pytest.raises(
+        ValueError, match="'reference_directivity_index_db' belongs to the free_field"
+    ):
         metrology.diffuse_field_sensitivity(
             frequencies,
             0.0,
@@ -592,9 +732,10 @@ def test_a_correction_of_another_route_is_refused() -> None:
 
 def test_the_diffuse_result_refuses_an_unknown_route() -> None:
     one = np.zeros(1)
-    with pytest.raises(ValueError, match="unknown route"):
+    frequencies = np.ones(1)
+    with pytest.raises(ValueError, match="'route' must be one of"):
         ri.DiffuseFieldSensitivity(
-            frequencies_hz=np.ones(1),
+            frequencies_hz=frequencies,
             indicated_level_db=one,
             reference_indicated_level_db=one,
             reference_sensitivity_level_db=one,
@@ -626,6 +767,64 @@ def test_the_response_is_one_closed_curve_per_plane() -> None:
         mask = np.isclose(result.plane_angles_deg, plane)
         np.testing.assert_allclose(radius[:-1], result.relative_levels_db[mask])
     assert "10\\,\\lg\\gamma" in ax.get_title()
+    plt.close("all")
+
+
+def test_the_response_names_its_radial_unit() -> None:
+    """The radius is L(phi) - L_rd in dB: the outermost label carries the unit."""
+    ax = _two_plane_result().plot(language="es")
+    ax.figure.canvas.draw()
+    labels = [label.get_text() for label in ax.get_yticklabels()]
+    assert labels[-1] == "0 dB"
+    assert all("dB" not in label for label in labels[:-1])
+    assert "−5" in labels
+    plt.close("all")
+
+
+def test_the_response_legend_stays_inside_its_own_figure() -> None:
+    """The legend below the disc is the only key to the planes."""
+    ax = _two_plane_result().plot()
+    figure = ax.figure
+    figure.canvas.draw()
+    legend = ax.get_legend().get_window_extent()
+    assert legend.y0 >= figure.bbox.y0
+    assert legend.y1 <= figure.bbox.y1
+    plt.close("all")
+
+
+def test_the_equal_area_vertical_curve_runs_through_the_poles() -> None:
+    """Formula (A.5) reads the poles in the horizontal plane only; the vertical
+    curve borrows them rather than cutting a chord across each pole.
+    """
+    horizontal, vertical = metrology.equal_area_incidence_angles()
+
+    def level(angle: np.ndarray) -> np.ndarray:
+        return 94.0 + 20.0 * np.log10(0.55 + 0.45 * np.cos(np.radians(angle)))
+
+    result = metrology.equal_area_directivity_factor(level(horizontal), level(vertical))
+    ax = result.plot()
+    curve = next(line for line in ax.lines if line.get_label().startswith("X-Z"))
+    theta, radius = curve.get_data()
+    degrees = np.degrees(theta[:-1])
+    assert len(degrees) == 20
+    for pole, index in ((0.0, 0), (180.0, 10)):
+        at_pole = np.isclose(degrees, pole)
+        assert radius[:-1][at_pole] == pytest.approx(result.relative_levels_db[index])
+    plt.close("all")
+
+
+def test_the_axisymmetric_weights_title_counts_two_elements_to_a_reading() -> None:
+    """One plane weighs each reading 2K: the curve peaks at twice the largest
+    element the title names.
+    """
+    result = metrology.axisymmetric_directivity_factor(_cardioid_levels(10.0))
+    ax = result.plot(view="weights")
+    _x, y = ax.lines[0].get_data()
+    assert "two elements to a reading" in ax.get_title()
+    assert "2.18 %" in ax.get_title()
+    assert float(np.max(y)) == pytest.approx(
+        2.0 * 100.0 * result.largest_element_fraction, rel=1e-12
+    )
     plt.close("all")
 
 

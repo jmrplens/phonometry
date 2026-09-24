@@ -72,6 +72,28 @@ $G_\mathrm{F}$ depends on the individual meter, $\gamma$ only on its dimensions
 and geometry, so one measurement of $\gamma$ serves every meter of a model
 (4.2).
 
+### How the measurement goes
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_random_incidence_setup.svg" alt="The two calibrations of IEC 61183 side by side. Left, the free-field method in plan: an anechoic room lined with wedges, a fixed source on the X axis, and the meter on a turntable with the microphone on the axis of rotation, its reference direction at an angle phi from the X axis, turned through 360 degrees in steps of delta phi. Right, the diffuse-field method: a reverberation room with two uncorrelated sources, and the reference meter and the meter under test placed in turn on the same circular path, not parallel to any wall, of radius at least 1 m and three times the meter, reading L_D,ref and L_D. Under each room, the readings in order: L_o with a reference microphone, L_rd with the meter facing the source, L(phi, h) in the X-Y plane, L(phi, v) after turning the meter 90 degrees about its own axis, and the weighted sum that gives gamma and G_RI; then L_D,ref, L_D, their difference by Formula (8), and G_D,ref added by Formula (9), (10) or (11)" width="100%" />
+
+*The meter is turned in front of a fixed source in an anechoic room (left),
+or compared with a reference on the same path in a reverberation room
+(right). The library takes over once the levels are read.*
+
+| Requirement | Value | Clause |
+| :--- | :--- | :--- |
+| Anechoic room | Meets ISO 3745; pure tones or random noise, bands no wider than one-third octave, filters of IEC 61260 class 0 or 1 | 4.10 |
+| Source | Far enough that the level varies by less than ±1 dB within 0,3 m of the microphone | A.2.2 |
+| Signal | At least 20 dB above the background, and held constant during each rotation | A.2.3 |
+| Turntable | The acoustical centre of the microphone on the axis of rotation, the reference direction and the source in the plane of rotation | A.2.1, A.4.2 |
+| Rotations | 360° in the X-Y plane, then the meter turned 90° about its own axis and 360° again, the X-Z plane | A.4.5, A.4.6 |
+| Angular step | Small enough that no element of the sphere exceeds 3 %; 10° leaves 2,2 % | A.1.6, A.1.7 |
+| Pure tones | $G_\mathrm{F}$ and $\gamma$ may need the rms average of at least eight tones per one-third-octave band, spaced evenly on a logarithmic axis | 4.11 |
+| Reverberation room | Meets ISO 3741; broadband or filtered random noise, bands no wider than one-third octave | 5.6 |
+| Integration time | Long enough that repeated results scatter by less than 0,05 dB: 2 min from 500 Hz, 8 min from 250 Hz, 15 min from 125 Hz, longer below | 5.6, B.1.4 |
+| Microphone path | Both microphones moved in turn along the same circular path, not parallel to any wall, of radius the larger of 1 m and three times the largest dimension of the meter; two uncorrelated omnidirectional sources of about equal power help the diffusivity | B.1.3, B.1.4 |
+| Reference meter | A directivity factor as near unity as possible; a type LS2aP/LS2F or LS2bP microphone is recommended | B.1.1, B.1.2 |
+
 ## 2. Readings in two planes, and what each is worth
 
 In practice the integral becomes a sum over a limited number of directions,
@@ -112,9 +134,13 @@ sums of Formula (A.3), and the paragraph under it could be read otherwise: it
 says those readings are the same in the two planes and "have only to be taken
 into account once". They have to be measured once. Each plane's pole factor
 covers half the polar cap, so counted in one sum only, the factors add up to
-0,998 097, and every $10\lg\gamma$ would come out 0,008 dB high. The library
-counts them in both, and a meter that reads the same in every direction has
-$\gamma = 1$ exactly.
+0,998 097: the sum loses $K(0)$ times the energy read at each pole, and
+$10\lg\gamma$ comes out high by
+$-10\lg\left(1 - \gamma K(0)\left[10^{-0{,}1[L_\mathrm{rd} - L(0°)]} + 10^{-0{,}1[L_\mathrm{rd} - L(180°)]}\right]\right)$.
+That is 0,008 dB for a meter that reads the same in every direction, and it
+grows with the directivity: about 0,02 dB at $10\lg\gamma = 7$ dB. The library
+counts the poles in both sums, and the omnidirectional meter has $\gamma = 1$
+exactly.
 
 The directivity factor is Formula (A.3), one row of readings per plane:
 
@@ -168,7 +194,7 @@ print(round(e.directivity_index_db, 2))   # 2.66
 ```
 
 The note prints 77,9° and 282,1° where the construction gives 77,85° and
-282,15°. Every other pair of the printed list sums to 180,0° about the grazing
+282,15°. All the other pairs of the printed list sum to 180,0° about the grazing
 direction, and 77,9° + 102,2° is 180,1°: the two are in the [errata
 register](/phonometry/reference/errata/). A tenth of a degree does not move a
 directivity factor, but the list is not symmetric as printed.
@@ -178,29 +204,48 @@ directivity factor, but the list is not symmetric as printed.
 With $\gamma$ measured at each band and $G_\mathrm{F}$ from the free-field
 calibration of A.3 ($L_\mathrm{rd}$ with the meter in place, $L_\mathrm{o}$
 with a free-field reference microphone in its stead), Formula (1) gives the
-random-incidence sensitivity level:
+random-incidence sensitivity level. Here the synthetic meter is measured at
+every preferred frequency Table B.1 prints, its X-Y plane given the
+$10\lg\gamma$ of the microphone at that band, and its free-field sensitivity
+level rolls off above 10 kHz:
 
 ```python
-bands = [1000.0, 4000.0, 8000.0, 16000.0]
-g_f = [0.1, 0.0, -0.2, -0.8]            # L_rd - L_o at each band
-index = [0.06, 0.95, 2.66, 5.62]        # d.directivity_index_db at each band
+bands = sorted(metrology.IEC61183_TABLE_B1)   # the 30 preferred frequencies, 25 Hz to 20 kHz
+
+def meter(frequency_hz):
+    """The synthetic meter at one band: the X-Y plane has the 10 lg gamma Table B.1
+    prints for the microphone, and the case narrows the X-Z plane."""
+    target = metrology.IEC61183_TABLE_B1[frequency_hz].directivity_index_db
+    n = 0.98 / (10 ** (-target / 10) - 0.02) - 1   # the exponent with that index
+    return metrology.directivity_factor(
+        94.0 + np.vstack((pattern_db(phi, n), pattern_db(phi, 1.25 * n))))
+
+index = [meter(f).directivity_index_db for f in bands]
+g_f = -10 * np.log10(1 + (np.array(bands) / 25000) ** 4)   # L_rd - L_o at each band
 r = metrology.random_incidence_sensitivity(bands, g_f, index)
-print(r.random_incidence_level_db.round(2))   # [ 0.04 -0.95 -2.86 -6.42]
-print(r.correction_db.round(2))               # [-0.06 -0.95 -2.66 -5.62]
-r.plot(view="correction")
+shown = np.isin(r.frequencies_hz, [1000, 4000, 8000, 16000])
+print(r.correction_db[shown].round(2))              # [-0.06 -0.95 -2.66 -5.62]
+print(r.random_incidence_level_db[shown].round(2))  # [-0.06 -0.95 -2.71 -6.29]
+r.plot()                      # G_F and G_RI
+r.plot(view="correction")     # G_RI - G_F = -10 lg gamma
 ```
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/random_incidence_correction.svg" alt="Two panels against frequency from 25 Hz to 20 kHz for the synthetic meter with a flat free-field sensitivity level of 0 dB. Left: G_F flat at 0 dB and G_RI equal to it up to 800 Hz, then falling to about -0.9 dB at 4 kHz, -2.7 dB at 8 kHz and -7 dB at 20 kHz. Right: the correction G_RI - G_F = -10 lg gamma, the same fall on its own" width="100%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/random_incidence_correction.svg" alt="Two panels against frequency from 25 Hz to 20 kHz for the synthetic meter. Left: G_F, flat at 0 dB up to 8 kHz and rolling off to -0.7 dB at 16 kHz and -1.5 dB at 20 kHz, and G_RI drawn dashed with open squares, on top of G_F up to 800 Hz and then falling below it to about -0.9 dB at 4 kHz, -2.7 dB at 8 kHz and -8.5 dB at 20 kHz. Right: the correction G_RI - G_F = -10 lg gamma, from 0 dB up to 800 Hz to -2.7 dB at 8 kHz and -7 dB at 20 kHz" width="100%" />
 
 *$G_\mathrm{F}$ and $G_\mathrm{RI}$ of the synthetic meter at every preferred
 frequency Table B.1 prints (left), and the correction between them (right).*
 
 The correction is what a meter calibrated in a free field reads low in a
 random-incidence field: negligible up to about 1 kHz, where the wavelength is
-large against the microphone, and several decibels by 10 kHz. It is also why
-the random-incidence response ANSI S1.4 specifies and the free-field response
-of IEC 61672-1 part company above a few kilohertz: one meter cannot be flat
-for both.
+large against the microphone, and several decibels by 10 kHz. It is why a
+meter is specified for one field or the other. IEC 61672-1:2013 applies its
+frequency-weighting limits to the free-field response or to the
+random-incidence response, as applicable (5.5.4), and has the random-incidence
+response determined by the free-field method of IEC 61183 (5.5.5), the method
+of this page. A meter flat for a plane wave from the front reads a
+random-incidence field low by this correction, and one flat in a
+random-incidence field reads that plane wave high by it: it cannot be flat for
+both.
 
 ## 5. The diffuse-field method
 
@@ -225,22 +270,29 @@ microphone as the reference, and Table B.1 prints, for the first, both its $10\l
 `metrology.IEC61183_TABLE_B1` holds the table, and Formulas (10) and (11) take
 their correction from it unless told otherwise:
 
+In an 80 dB diffuse field each instrument indicates the field plus its own
+diffuse-field sensitivity level: the meter its random-incidence level (1.2),
+and a reference LS2aP whose pressure sensitivity level is 0 dB its
+$\Delta_\mathrm{DP}$:
+
 ```python
 print(metrology.IEC61183_TABLE_B1[8000.0])
 # ReferenceMicrophoneRow(directivity_index_db=2.45, diffuse_pressure_difference_db=1.2)
 
+delta_dp = np.array([metrology.IEC61183_TABLE_B1[f].diffuse_pressure_difference_db
+                     for f in bands])
 dd = metrology.diffuse_field_sensitivity(
     bands,
-    [80.04, 79.05, 77.14, 73.58],        # L_D, the meter under test
-    [80.0, 80.25, 81.2, 83.05],          # L_D,ref, a pressure-calibrated LS2aP
+    80.0 + r.random_incidence_level_db,  # L_D, the meter under test
+    80.0 + delta_dp,                     # L_D,ref, a pressure-calibrated LS2aP
     reference_pressure_level_db=0.0,     # G_P,ref; Delta_DP from Table B.1
 )
-print(dd.reference_correction_db)            # [0.   0.25 1.2  3.05]
-print(dd.diffuse_field_level_db.round(2))    # [ 0.04 -0.95 -2.86 -6.42]
+print(dd.reference_correction_db[shown])            # [0.   0.25 1.2  3.05]
+print(dd.diffuse_field_level_db[shown].round(2))    # [-0.06 -0.95 -2.71 -6.29]
 dd.plot()
 ```
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diffuse_field_sensitivity.svg" alt="The diffuse-field sensitivity level of the synthetic meter against a pressure-calibrated LS2aP microphone from 25 Hz to 20 kHz: the reference's diffuse-field level, Delta_DP of Table B.1, rising from 0 dB below 1 kHz to 3.05 dB at 16 kHz and 2.2 dB at 20 kHz; the level difference of Formula (8) falling to about -9 dB at 20 kHz; and their sum, G_D, which retraces the random-incidence level of the previous figure" width="88%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diffuse_field_sensitivity.svg" alt="The diffuse-field sensitivity level of the synthetic meter against a pressure-calibrated LS2aP microphone from 25 Hz to 20 kHz, three curves that lie together at 0 dB up to 800 Hz: the reference's diffuse-field level, Delta_DP of Table B.1, rising to 3.05 dB at 16 kHz and 2.2 dB at 20 kHz; the level difference of Formula (8) falling to about -3.9 dB at 8 kHz and -10.7 dB at 20 kHz; and their sum, G_D, which retraces the random-incidence level of the previous figure, -8.5 dB at 20 kHz" width="88%" />
 
 *Formula (11) on the synthetic meter: the pressure-calibrated reference reads
 the diffuse field high by $\Delta_\mathrm{DP}$, and adding it back to the
@@ -265,12 +317,16 @@ import matplotlib.pyplot as plt
 fig = plt.figure(figsize=(13.5, 6.0))
 d.plot(fig.add_subplot(1, 2, 1, projection="polar"))
 d.plot(fig.add_subplot(1, 2, 2), view="weights")
+fig.tight_layout()
 
 fig, (ax_levels, ax_correction) = plt.subplots(1, 2, figsize=(13.5, 5.4))
 r.plot(ax_levels)
 r.plot(ax_correction, view="correction")
+fig.tight_layout()
 
-dd.plot()
+fig, ax = plt.subplots(figsize=(10, 6))
+dd.plot(ax)
+fig.tight_layout()
 plt.show()
 ```
 
@@ -297,12 +353,13 @@ note to A.1.8 are reproduced.
 <ScopeClaim status="not-covered" label="Not covered">
 The measurements themselves: the anechoic room of ISO 3745 and the
 reverberation room of ISO 3741 the standard requires, the placement of the
-source and of the meter on its turntable, the signal-to-noise ratio and the
-integration times of Annex B. The averaging of at least eight tones within a
-one-third-octave band of 4.11 is left to the caller, who passes the averaged
-level of each band. The corrections that turn a free-field measurement into
-the response of the meter alone, for its case and its windscreen, are the
-subject of IEC 62585 and are not implemented on this page.
+source and of the meter on its turntable, the signal-to-noise ratio of A.2.3
+and the integration times of B.1.4. The averaging of at least eight tones
+within a one-third-octave band of 4.11 is left to the caller, who passes the
+averaged level of each band. The corrections of IEC 62585 for the case, the
+microphone and the windscreen, which bring a measurement made with a sound
+calibrator, a comparison coupler or an electrostatic actuator to the meter's
+free-field response, are not implemented on this page.
 </ScopeClaim>
 </Scope>
 

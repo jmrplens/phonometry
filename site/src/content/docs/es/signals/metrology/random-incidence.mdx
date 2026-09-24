@@ -73,6 +73,29 @@ $G_\mathrm{F}$ depende del sonómetro concreto y $\gamma$ solo de sus
 dimensiones y su geometría, así que una medida de $\gamma$ sirve para todos
 los sonómetros de un modelo (4.2).
 
+### Cómo se hace la medida
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_random_incidence_setup.svg" alt="Las dos calibraciones de IEC 61183, una junto a otra. A la izquierda, el método en campo libre en planta: una cámara anecoica revestida de cuñas, una fuente fija en el eje X y el sonómetro en una plataforma giratoria con el micrófono sobre el eje de giro, su dirección de referencia a un ángulo phi del eje X, girado 360 grados en pasos de delta phi. A la derecha, el método en campo difuso: una cámara reverberante con dos fuentes no correladas, y el sonómetro de referencia y el sonómetro en ensayo colocados por turnos en la misma trayectoria circular, no paralela a ninguna pared, de radio de al menos 1 m y tres veces el sonómetro, que leen L_D,ref y L_D. Bajo cada sala, las lecturas en orden: L_o con un micrófono de referencia, L_rd con el sonómetro de cara a la fuente, L(phi, h) en el plano X-Y, L(phi, v) tras girar el sonómetro 90 grados sobre su eje, y la suma ponderada que da gamma y G_RI; después L_D,ref, L_D, su diferencia por la Fórmula (8), y G_D,ref sumado por la Fórmula (9), (10) u (11)" width="100%" />
+
+*El sonómetro se gira frente a una fuente fija en una cámara anecoica
+(izquierda), o se compara con una referencia en la misma trayectoria en una
+cámara reverberante (derecha). La biblioteca entra en juego una vez leídos los
+niveles.*
+
+| Requisito | Valor | Apartado |
+| :--- | :--- | :--- |
+| Cámara anecoica | Cumple ISO 3745; tonos puros o ruido aleatorio, bandas no más anchas que un tercio de octava, filtros de IEC 61260 clase 0 o 1 | 4.10 |
+| Fuente | Lo bastante lejos para que el nivel varíe menos de ±1 dB en 0,3 m alrededor del micrófono | A.2.2 |
+| Señal | Al menos 20 dB sobre el fondo, y constante durante cada giro | A.2.3 |
+| Plataforma giratoria | El centro acústico del micrófono sobre el eje de giro, la dirección de referencia y la fuente en el plano de giro | A.2.1, A.4.2 |
+| Giros | 360° en el plano X-Y; después el sonómetro girado 90° sobre su propio eje y otros 360°, el plano X-Z | A.4.5, A.4.6 |
+| Paso angular | Lo bastante fino para que ningún elemento de la esfera pase del 3 %; 10° dejan un 2,2 % | A.1.6, A.1.7 |
+| Tonos puros | $G_\mathrm{F}$ y $\gamma$ pueden necesitar el promedio eficaz de al menos ocho tonos por banda de tercio de octava, repartidos por igual en un eje logarítmico | 4.11 |
+| Cámara reverberante | Cumple ISO 3741; ruido aleatorio de banda ancha o filtrado, bandas no más anchas que un tercio de octava | 5.6 |
+| Tiempo de integración | Lo bastante largo para que los resultados repetidos se dispersen menos de 0,05 dB: 2 min desde 500 Hz, 8 min desde 250 Hz, 15 min desde 125 Hz, más por debajo | 5.6, B.1.4 |
+| Trayectoria del micrófono | Los dos micrófonos se mueven por turnos por la misma trayectoria circular, no paralela a ninguna pared, de radio el mayor de 1 m y tres veces la mayor dimensión del sonómetro; dos fuentes omnidireccionales no correladas de potencia parecida mejoran la difusividad | B.1.3, B.1.4 |
+| Sonómetro de referencia | Un factor de directividad lo más cercano posible a la unidad; se recomienda un micrófono de tipo LS2aP/LS2F o LS2bP | B.1.1, B.1.2 |
+
 ## 2. Lecturas en dos planos, y lo que vale cada una
 
 En la práctica la integral se convierte en una suma sobre un número limitado
@@ -113,9 +136,13 @@ sumas de la Fórmula (A.3), y el párrafo que la sigue se presta a otra lectura:
 dice que esas lecturas son las mismas en los dos planos y que «solo hay que
 tenerlas en cuenta una vez». Hay que medirlas una vez. El factor del polo de
 cada plano cubre la mitad del casquete polar, así que contadas en una sola
-suma los factores suman 0,998 097 y cada $10\lg\gamma$ saldría 0,008 dB por
-encima. La biblioteca las cuenta en las dos, y un sonómetro que lee lo mismo
-en todas las direcciones tiene exactamente $\gamma = 1$.
+suma los factores suman 0,998 097: la suma pierde $K(0)$ por la energía leída
+en cada polo, y $10\lg\gamma$ sale por encima en
+$-10\lg\left(1 - \gamma K(0)\left[10^{-0{,}1[L_\mathrm{rd} - L(0°)]} + 10^{-0{,}1[L_\mathrm{rd} - L(180°)]}\right]\right)$.
+Son 0,008 dB para un sonómetro que lee lo mismo en todas las direcciones, y la
+cifra crece con la directividad: unos 0,02 dB con $10\lg\gamma = 7$ dB. La
+biblioteca cuenta los polos en las dos sumas, y el sonómetro omnidireccional
+tiene exactamente $\gamma = 1$.
 
 El factor de directividad es la Fórmula (A.3), una fila de lecturas por plano:
 
@@ -137,7 +164,7 @@ d.plot(view="weights")    # K(phi) de cada lectura
 ```
 
 El nivel de referencia $L_\mathrm{rd}$ es por defecto la lectura a 0° en el
-primer plano, que A.4.4 toma con el sonómetro en esa misma posición; pase
+primer plano, que A.4.4 toma con el sonómetro en esa misma posición; pasa
 `reference_level_db=` cuando se haya medido aparte.
 
 ## 3. Un plano, o 38 elementos iguales
@@ -171,9 +198,9 @@ print(round(e.directivity_index_db, 2))   # 2.66
 ```
 
 La nota imprime 77,9° y 282,1° donde la construcción da 77,85° y 282,15°.
-Cada otro par de la lista impresa suma 180,0° respecto de la dirección
-rasante, y 77,9° + 102,2° da 180,1°: los dos están en el [registro de
-erratas](/phonometry/es/reference/errata/). Una décima de grado no mueve un
+Todos los demás pares de la lista impresa suman 180,0° respecto de la
+dirección rasante, y 77,9° + 102,2° da 180,1°: los dos están en el [registro
+de erratas](/phonometry/es/reference/errata/). Una décima de grado no mueve un
 factor de directividad, pero la lista, tal como está impresa, no es simétrica.
 
 ## 4. El nivel de sensibilidad en incidencia aleatoria, banda a banda
@@ -181,19 +208,33 @@ factor de directividad, pero la lista, tal como está impresa, no es simétrica.
 Con $\gamma$ medido en cada banda y $G_\mathrm{F}$ de la calibración en campo
 libre de A.3 ($L_\mathrm{rd}$ con el sonómetro en su sitio, $L_\mathrm{o}$ con
 un micrófono de referencia calibrado en campo libre en su lugar), la Fórmula
-(1) da el nivel de sensibilidad en incidencia aleatoria:
+(1) da el nivel de sensibilidad en incidencia aleatoria. Aquí el sonómetro
+sintético se mide en cada frecuencia preferente que imprime la Tabla B.1, con
+su plano X-Y ajustado al $10\lg\gamma$ del micrófono en esa banda, y su nivel
+de sensibilidad en campo libre cae por encima de 10 kHz:
 
 ```python
-bands = [1000.0, 4000.0, 8000.0, 16000.0]
-g_f = [0.1, 0.0, -0.2, -0.8]            # L_rd - L_o en cada banda
-index = [0.06, 0.95, 2.66, 5.62]        # d.directivity_index_db en cada banda
+bands = sorted(metrology.IEC61183_TABLE_B1)   # las 30 frecuencias preferentes, de 25 Hz a 20 kHz
+
+def meter(frequency_hz):
+    """El sonómetro sintético en una banda: el plano X-Y tiene el 10 lg gamma que la
+    Tabla B.1 imprime para el micrófono, y la carcasa estrecha el plano X-Z."""
+    target = metrology.IEC61183_TABLE_B1[frequency_hz].directivity_index_db
+    n = 0.98 / (10 ** (-target / 10) - 0.02) - 1   # el exponente que da ese índice
+    return metrology.directivity_factor(
+        94.0 + np.vstack((pattern_db(phi, n), pattern_db(phi, 1.25 * n))))
+
+index = [meter(f).directivity_index_db for f in bands]
+g_f = -10 * np.log10(1 + (np.array(bands) / 25000) ** 4)   # L_rd - L_o en cada banda
 r = metrology.random_incidence_sensitivity(bands, g_f, index)
-print(r.random_incidence_level_db.round(2))   # [ 0.04 -0.95 -2.86 -6.42]
-print(r.correction_db.round(2))               # [-0.06 -0.95 -2.66 -5.62]
-r.plot(view="correction")
+shown = np.isin(r.frequencies_hz, [1000, 4000, 8000, 16000])
+print(r.correction_db[shown].round(2))              # [-0.06 -0.95 -2.66 -5.62]
+print(r.random_incidence_level_db[shown].round(2))  # [-0.06 -0.95 -2.71 -6.29]
+r.plot(language="es")                      # G_F y G_RI
+r.plot(view="correction", language="es")   # G_RI - G_F = -10 lg gamma
 ```
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/random_incidence_correction.svg" alt="Dos paneles frente a la frecuencia de 25 Hz a 20 kHz para el sonómetro sintético con un nivel de sensibilidad en campo libre plano de 0 dB. Izquierda: G_F plano en 0 dB y G_RI igual a él hasta 800 Hz, que luego baja a unos -0,9 dB a 4 kHz, -2,7 dB a 8 kHz y -7 dB a 20 kHz. Derecha: la corrección G_RI - G_F = -10 lg gamma, la misma caída sola" width="100%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/random_incidence_correction.svg" alt="Dos paneles frente a la frecuencia de 25 Hz a 20 kHz para el sonómetro sintético. Izquierda: G_F, plano en 0 dB hasta 8 kHz y que cae a -0,7 dB a 16 kHz y -1,5 dB a 20 kHz, y G_RI en trazo discontinuo con cuadrados huecos, sobre G_F hasta 800 Hz y luego por debajo de él, a unos -0,9 dB a 4 kHz, -2,7 dB a 8 kHz y -8,5 dB a 20 kHz. Derecha: la corrección G_RI - G_F = -10 lg gamma, de 0 dB hasta 800 Hz a -2,7 dB a 8 kHz y -7 dB a 20 kHz" width="100%" />
 
 *$G_\mathrm{F}$ y $G_\mathrm{RI}$ del sonómetro sintético en cada frecuencia
 preferente que imprime la Tabla B.1 (izquierda), y la corrección entre ellos
@@ -202,10 +243,14 @@ preferente que imprime la Tabla B.1 (izquierda), y la corrección entre ellos
 La corrección es lo que un sonómetro calibrado en campo libre lee por debajo
 en un campo de incidencia aleatoria: despreciable hasta 1 kHz, donde la
 longitud de onda es grande frente al micrófono, y de varios decibelios a
-10 kHz. Es también la razón de que la respuesta en incidencia aleatoria que
-especifica ANSI S1.4 y la respuesta en campo libre de IEC 61672-1 se separen
-por encima de unos pocos kilohercios: un mismo sonómetro no puede ser plano
-para las dos.
+10 kHz. Por eso un sonómetro se especifica para un campo o para el otro.
+IEC 61672-1:2013 aplica sus límites de ponderación frecuencial a la respuesta
+en campo libre o a la respuesta en incidencia aleatoria, según corresponda
+(5.5.4), y manda determinar la respuesta en incidencia aleatoria por el método
+en campo libre de IEC 61183 (5.5.5), el de esta página. Un sonómetro plano para
+una onda plana de frente lee por debajo un campo de incidencia aleatoria en
+esta corrección, y uno plano en incidencia aleatoria lee por encima esa onda
+plana en la misma cantidad: no puede ser plano para las dos.
 
 ## 5. El método en campo difuso
 
@@ -231,22 +276,29 @@ tipo LS2aP/LS2F o LS2bP, y la Tabla B.1 imprime, para el primero, su $10\lg\gamm
 `metrology.IEC61183_TABLE_B1` contiene la tabla, y las Fórmulas (10) y (11)
 toman de ella su corrección salvo que se indique otra:
 
+En un campo difuso de 80 dB cada instrumento indica el campo más su propio
+nivel de sensibilidad en campo difuso: el sonómetro, su nivel en incidencia
+aleatoria (1.2), y un LS2aP de referencia cuyo nivel de sensibilidad en presión
+es 0 dB, su $\Delta_\mathrm{DP}$:
+
 ```python
 print(metrology.IEC61183_TABLE_B1[8000.0])
 # ReferenceMicrophoneRow(directivity_index_db=2.45, diffuse_pressure_difference_db=1.2)
 
+delta_dp = np.array([metrology.IEC61183_TABLE_B1[f].diffuse_pressure_difference_db
+                     for f in bands])
 dd = metrology.diffuse_field_sensitivity(
     bands,
-    [80.04, 79.05, 77.14, 73.58],        # L_D, el sonómetro en ensayo
-    [80.0, 80.25, 81.2, 83.05],          # L_D,ref, un LS2aP calibrado en presión
+    80.0 + r.random_incidence_level_db,  # L_D, el sonómetro en ensayo
+    80.0 + delta_dp,                     # L_D,ref, un LS2aP calibrado en presión
     reference_pressure_level_db=0.0,     # G_P,ref; Delta_DP de la Tabla B.1
 )
-print(dd.reference_correction_db)            # [0.   0.25 1.2  3.05]
-print(dd.diffuse_field_level_db.round(2))    # [ 0.04 -0.95 -2.86 -6.42]
-dd.plot()
+print(dd.reference_correction_db[shown])            # [0.   0.25 1.2  3.05]
+print(dd.diffuse_field_level_db[shown].round(2))    # [-0.06 -0.95 -2.71 -6.29]
+dd.plot(language="es")
 ```
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diffuse_field_sensitivity.svg" alt="El nivel de sensibilidad en campo difuso del sonómetro sintético frente a un micrófono LS2aP calibrado en presión de 25 Hz a 20 kHz: el nivel en campo difuso de la referencia, Delta_DP de la Tabla B.1, que sube de 0 dB por debajo de 1 kHz a 3,05 dB a 16 kHz y 2,2 dB a 20 kHz; la diferencia de niveles de la Fórmula (8), que baja a unos -9 dB a 20 kHz; y su suma, G_D, que recorre de nuevo el nivel en incidencia aleatoria de la figura anterior" width="88%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diffuse_field_sensitivity.svg" alt="El nivel de sensibilidad en campo difuso del sonómetro sintético frente a un micrófono LS2aP calibrado en presión de 25 Hz a 20 kHz, tres curvas que coinciden en 0 dB hasta 800 Hz: el nivel en campo difuso de la referencia, Delta_DP de la Tabla B.1, que sube a 3,05 dB a 16 kHz y 2,2 dB a 20 kHz; la diferencia de niveles de la Fórmula (8), que baja a unos -3,9 dB a 8 kHz y -10,7 dB a 20 kHz; y su suma, G_D, que recorre de nuevo el nivel en incidencia aleatoria de la figura anterior, -8,5 dB a 20 kHz" width="88%" />
 
 *La Fórmula (11) sobre el sonómetro sintético: la referencia calibrada en
 presión lee el campo difuso $\Delta_\mathrm{DP}$ por encima, y sumarlo a la
@@ -272,12 +324,16 @@ import matplotlib.pyplot as plt
 fig = plt.figure(figsize=(13.5, 6.0))
 d.plot(fig.add_subplot(1, 2, 1, projection="polar"), language="es")
 d.plot(fig.add_subplot(1, 2, 2), view="weights", language="es")
+fig.tight_layout()
 
 fig, (ax_levels, ax_correction) = plt.subplots(1, 2, figsize=(13.5, 5.4))
 r.plot(ax_levels, language="es")
 r.plot(ax_correction, view="correction", language="es")
+fig.tight_layout()
 
-dd.plot(language="es")
+fig, ax = plt.subplots(figsize=(10, 6))
+dd.plot(ax, language="es")
+fig.tight_layout()
 plt.show()
 ```
 
@@ -305,12 +361,14 @@ A.1.8.
 <ScopeClaim status="not-covered" label="No cubierto">
 Las medidas en sí: la cámara anecoica de ISO 3745 y la cámara reverberante de
 ISO 3741 que exige la norma, la colocación de la fuente y del sonómetro en su
-plataforma giratoria, la relación señal-ruido y los tiempos de integración del
-Anexo B. El promedio de al menos ocho tonos dentro de una banda de tercio de
-octava de 4.11 queda en manos de quien llama, que pasa el nivel promediado de
-cada banda. Las correcciones que convierten una medida en campo libre en la
-respuesta del sonómetro solo, por su carcasa y su pantalla antiviento, son el
-objeto de IEC 62585 y no están implementadas en esta página.
+plataforma giratoria, la relación señal-ruido de A.2.3 y los tiempos de
+integración de B.1.4. El promedio de al menos ocho tonos dentro de una banda
+de tercio de octava de 4.11 queda en manos de quien llama, que pasa el nivel
+promediado de cada banda. Las correcciones de IEC 62585 por la carcasa, el
+micrófono y la pantalla antiviento, que llevan una medida hecha con un
+calibrador acústico, un acoplador de comparación o un actuador electrostático
+a la respuesta en campo libre del sonómetro, no están implementadas en esta
+página.
 </ScopeClaim>
 </Scope>
 

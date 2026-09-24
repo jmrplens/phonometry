@@ -1785,7 +1785,7 @@ in the same order.
   The same slip appears on the second half of the circle, where $257{,}8°$ is
   $180° + 77{,}8°$ but $282{,}1°$ is $360° - 77{,}9°$. The direction that
   halves each element's area in polar angle, $\phi_k = \arccos[1 - (4k -
-  1)/19]$, reproduces every other printed angle to its 0,1° and gives
+  1)/19]$, reproduces all the other printed angles to their 0,1° and gives
   $77{,}846°$ and $282{,}154°$ for the fourth ring, which read **77,8°** and
   **282,2°**.
 - **Evidence:** the construction evaluated for the nine rings and compared

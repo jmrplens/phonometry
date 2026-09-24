@@ -102,7 +102,8 @@ def _chk_factor_sum() -> Outcome:
     """Each plane's pole factor covers half its cap, so both enter.
 
     Counted once, as a reading of the paragraph under (A.3) would have it,
-    the sum is 0,998097 and every 10 lg gamma comes out 0,008 dB high.
+    the sum is 0,998097: an omnidirectional instrument's 10 lg gamma comes out
+    0,008 dB high, and a directional one's by more.
     """
     total = 2.0 * float(np.sum(metrology.adjustment_factors(_STEP)))
     return numeric(1.0, total, 1e-12, places=6)
@@ -161,7 +162,7 @@ def _chk_equal_area_element() -> Outcome:
     )
     return numeric(
         ref.IEC61183_EQUAL_AREA_ELEMENT_PERCENT,
-        100.0 * result.largest_element,
+        100.0 * result.largest_element_fraction,
         0.05,
         unit="%",
         places=3,
@@ -171,35 +172,38 @@ def _chk_equal_area_element() -> Outcome:
 @register(
     _IEC61183,
     "IEC 61183:1994 Formulas (10), (11), Table B.1",
-    "Reference corrections of an LS2aP/LS2F microphone at the 30 preferred frequencies",
+    "Reference corrections of an LS2aP/LS2F microphone, 25 Hz to 20 kHz",
 )
 def _chk_table_b1_defaults() -> Outcome:
     """What the diffuse-field routes take from Table B.1 when not told.
 
     Formula (10) subtracts 10 lg gamma_ref and Formula (11) adds Delta_DP; with
     every other term zero, the diffuse-field level is the table's own cell.
-    The row printed "25 to 800" is checked at each preferred frequency it
-    covers.
+    The table prints 15 rows of two cells. The row printed "25 to 800" covers
+    16 preferred frequencies, and its cell counts as reproduced only when the
+    library returns it at every one of them.
     """
     frequencies = np.array(sorted(metrology.IEC61183_TABLE_B1))
     zero = np.zeros(frequencies.size)
-    free_field = metrology.diffuse_field_sensitivity(
+    free_field = -metrology.diffuse_field_sensitivity(
         frequencies, zero, zero, reference_free_field_level_db=0.0
-    )
+    ).diffuse_field_level_db
     pressure = metrology.diffuse_field_sensitivity(
         frequencies, zero, zero, reference_pressure_level_db=0.0
-    )
+    ).diffuse_field_level_db
     matching = 0
-    for index, frequency in enumerate(frequencies):
-        row = next(
-            row
-            for row in ref.IEC61183_TABLE_B1_PRINTED
-            if row[1] <= frequency <= row[2]
-        )
-        matching += math.isclose(
-            -free_field.diffuse_field_level_db[index], row[3], abs_tol=1e-12
-        )
-        matching += math.isclose(
-            pressure.diffuse_field_level_db[index], row[4], abs_tol=1e-12
-        )
-    return count(matching, 2 * frequencies.size, subject="cells of Table B.1")
+    for (
+        _label,
+        lowest,
+        highest,
+        index_db,
+        difference_db,
+    ) in ref.IEC61183_TABLE_B1_PRINTED:
+        covered = (frequencies >= lowest) & (frequencies <= highest)
+        for column, printed in ((free_field, index_db), (pressure, difference_db)):
+            matching += bool(
+                np.any(covered)
+                and np.allclose(column[covered], printed, rtol=0.0, atol=1e-12)
+            )
+    printed_cells = 2 * len(ref.IEC61183_TABLE_B1_PRINTED)
+    return count(matching, printed_cells, subject="printed cells of Table B.1")

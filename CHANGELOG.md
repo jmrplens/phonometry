@@ -145,7 +145,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `metrology.adjustment_factors` gives the weights of Formulas (6), (7), (A.1)
   and (A.2) for any angular step that divides 180° and any number of planes,
   `metrology.largest_element_fraction` the largest element of that division,
-  and a `metrology.SphereDivisionWarning` is raised above the 3 % of A.1.6.
+  and a `metrology.SphereDivisionWarning` is emitted above the 3 % of A.1.6.
   `metrology.random_incidence_sensitivity` applies Formula (1), and
   `metrology.diffuse_field_sensitivity` the three diffuse-field routes of
   Formulas (8) to (11), taking the directivity factor and the diffuse-to-pressure
@@ -155,13 +155,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   and the correction against frequency. The readings at 0° and 180° enter both
   plane sums of Formula (A.3), which is what makes the 72 factors of Table A.1
   sum to one; counted once, as the paragraph under the formula could be read,
-  they sum to 0,998 097 and every directivity index would come out 0,008 dB
-  high. The ten values of Table A.1 are a conformance row to their five
-  decimals, and so are the 2,2 % of A.1.7, the halving of NOTE 2 and the
-  equal-area directions. Two of those directions are printed as 77,9° and
-  282,1° where the symmetry of the list gives 77,8° and 282,2°, which is
-  registered in the errata. A new guide under Calibration and uncertainty runs
-  both methods on a synthetic meter, in English and Spanish.
+  they sum to 0,998 097, which puts the directivity index of an
+  omnidirectional meter 0,008 dB high and that of a directional one higher,
+  about 0,02 dB at 7 dB. The ten values of Table A.1 are a conformance row to
+  their five decimals, and so are the 2,2 % of A.1.7, the halving of NOTE 2,
+  the equal-area directions and the 30 printed cells of Table B.1. Two of those
+  directions are printed as 77,9° and 282,1° where the symmetry of the list
+  gives 77,8° and 282,2°, which is registered in the errata. A new guide under
+  Calibration and uncertainty runs both methods on a synthetic meter, with a
+  drawing of the two measurement set-ups, in English and Spanish.
 - **What an active noise reduction earmuff adds, its uncertainty and where it
   stops being linear (ISO 4869-6:2019).** `hearing.active_insertion_loss` takes
   the levels at both ears with the circuit off and on (or the insertion loss

@@ -172,6 +172,7 @@ from .signals import (
     _d_multichannel,
     _d_multichannel_capture,
     _d_multirate,
+    _d_random_incidence_setup,
     _d_signal_chain,
     _d_slm_chain,
     _d_slm_pipeline,
@@ -234,6 +235,11 @@ DIAGRAMS = {
         _d_calibration_coupling,
         "Coupling the calibrator (IEC 60942:2017)",
         580,
+    ),
+    "diagram_random_incidence_setup": (
+        _d_random_incidence_setup,
+        "The two calibrations of IEC 61183: free field and diffuse field",
+        540,
     ),
     "diagram_env_measurement": (
         _d_env_positions,

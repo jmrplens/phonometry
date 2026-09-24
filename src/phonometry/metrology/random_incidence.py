@@ -22,10 +22,11 @@ of the instrument, Formulas (1) and (A.6):
 
 where :math:`L_\mathrm{rd}` is what the instrument indicates for a plane wave
 from the reference direction and :math:`L_\mathrm{o}` the level of that wave
-without the instrument. The directivity factor :math:`\gamma` is the integral
-of Formula (2) over the sphere, with the direction written as the angle
-:math:`\phi` from the reference direction and the angle :math:`\alpha` about
-it in Formula (3):
+without the instrument. The directivity factor :math:`\gamma` of Formula (2)
+is :math:`4\pi` over the integral, across the sphere, of what the instrument
+indicates relative to :math:`L_\mathrm{rd}`; Formula (3) writes the direction
+as the angle :math:`\phi` from the reference direction and the angle
+:math:`\alpha` about it:
 
 .. math::
 
@@ -91,8 +92,18 @@ be *measured* once; they are *counted* in both sums. Each plane's pole factor
 of Formula (A.2) covers half of the polar cap, so the 72 factors of Table A.1
 sum to exactly one only with the poles in both sums, and an omnidirectional
 instrument then has :math:`\gamma = 1`. Counted once, the factors sum to
-0,998097, and every directivity factor comes out 0,19 % high: a bias of
-0,008 dB on :math:`10\lg\gamma` that this module does not make.
+0,998097: the sum of (A.3) loses the second plane's two pole terms, and
+:math:`10\lg\gamma` comes out high by
+
+.. math::
+
+   -10\lg\left(1 - \gamma\,K(0)\left[10^{-0{,}1[L_\mathrm{rd} - L(0°)]}
+   + 10^{-0{,}1[L_\mathrm{rd} - L(180°)]}\right]\right)
+
+which is 0,008 dB (0,19 % on :math:`\gamma`) for an omnidirectional
+instrument and grows with the directivity: about 0,02 dB at
+:math:`10\lg\gamma = 7` dB when little arrives from behind. This module does
+not make that error.
 
 **The angles of the equal-area elements.** The note to A.1.8 prints the 38
 directions to 0,1° without saying how they were placed. Each is the direction
@@ -101,7 +112,7 @@ that halves its element's area in polar angle: the cap about each pole takes
 four elements by the two planes. That construction reproduces the note's
 list of 20 angles to the 0,1° it is printed to, except two: 77,9° and its
 mirror 282,1° break the list's own symmetry about 90° (77,9° + 102,2° is
-180,1°, where every other pair sums to 180,0°), the construction gives 77,85°
+180,1°, where all the other pairs sum to 180,0°), the construction gives 77,85°
 and 282,15°, and the two are recorded in ``docs/ERRATA.md``.
 """
 
@@ -204,6 +215,10 @@ _SENSITIVITY_VIEWS = ("levels", "correction")
 #: The routes of clause 5, named by how the reference instrument was
 #: calibrated: Formulas (9), (10) and (11), in that order.
 _ROUTES = ("random_incidence", "free_field", "pressure")
+
+#: The formulas a :class:`DirectivityFactor` can come from: two or more planes,
+#: one plane under rotational symmetry, and 38 equal-area elements.
+_FORMULAS = ("A.3", "A.4", "A.5")
 
 
 @dataclass(frozen=True)
@@ -376,9 +391,10 @@ def adjustment_factors(step_deg: float, *, planes: int = 2) -> NDArray[np.float6
     halved, and with one plane, the rotationally symmetric instrument of
     Formula (A.4), doubled.
 
-    The factors of all the planes together sum to one: each pole factor covers
-    half the polar cap in its plane, so the pole readings enter every plane's
-    sum (see the module notes).
+    The factors of all the planes together sum to one: the pole factor of each
+    of the :math:`n` planes covers :math:`1/n` of the polar cap (half of it in
+    the two planes of Annex A), so the pole readings enter every plane's sum
+    (see the module notes).
 
     :param step_deg: The angular step :math:`\Delta\phi` in degrees. It has to
         divide 180° into a whole number of steps, at least two, so that both
@@ -389,8 +405,8 @@ def adjustment_factors(step_deg: float, *, planes: int = 2) -> NDArray[np.float6
     :raises ValueError: for a step that does not divide 180°, or a number of
         planes that is not a whole number of at least one.
     :warns SphereDivisionWarning: when the largest element is more than 3 %
-        of the sphere (A.1.6), which a step above about 13,8° gives in two
-        planes.
+        of the sphere (A.1.6), which the 15° step, and every coarser one that
+        divides 180°, gives in two planes.
     """
     half_steps = _half_circle_steps(step_deg)
     count = require_count(planes, "planes")
@@ -484,8 +500,11 @@ class DirectivityFactor:
     :ivar weights: :math:`K` of each reading, dimensionless; they sum to one.
     :ivar reference_level_db: :math:`L_\mathrm{rd}`, in dB.
     :ivar gamma: :math:`\gamma`, dimensionless.
-    :ivar largest_element: the largest element of the division, as a fraction
-        of the sphere (A.1.6).
+    :ivar largest_element_fraction: the largest element of the division, as a
+        fraction of the sphere between 0 and 1 (A.1.6). For one plane under
+        rotational symmetry it is the largest element of the two-plane
+        division that plane stands for, each of whose readings weighs two
+        elements.
     :ivar formula: the formula applied: ``"A.3"`` (planes), ``"A.4"``
         (one plane, rotational symmetry) or ``"A.5"`` (38 equal-area
         elements).
@@ -497,15 +516,24 @@ class DirectivityFactor:
     weights: NDArray[np.float64]
     reference_level_db: float
     gamma: float
-    largest_element: float
+    largest_element_fraction: float
     formula: str
 
     def __post_init__(self) -> None:
-        r"""Refuse columns that disagree, and publish them read-only.
+        r"""Refuse columns that disagree or a value out of its range, and
+        publish the columns read-only.
 
         :raises ValueError: if the per-reading columns differ in length, a
-            value is not finite, or :math:`\gamma` is not positive.
+            value is not finite, :math:`\gamma` is not positive, the largest
+            element is not a fraction of the sphere, or the formula is not one
+            of the three.
         """
+        if self.formula not in _FORMULAS:
+            msg = (
+                f"DirectivityFactor: 'formula' must be one of {_FORMULAS}; "
+                f"got {self.formula!r}."
+            )
+            raise ValueError(msg)
         columns = ("incidence_angles_deg", "plane_angles_deg", "levels_db", "weights")
         arrays = {
             name: np.array(getattr(self, name), dtype=np.float64) for name in columns
@@ -513,8 +541,9 @@ class DirectivityFactor:
         shapes = {name: array.shape for name, array in arrays.items()}
         if len(set(shapes.values())) != 1 or np.ndim(arrays["levels_db"]) != 1:
             msg = (
-                "DirectivityFactor: the per-reading columns must be 1-D arrays "
-                f"of the same length; got {shapes}."
+                "DirectivityFactor: 'incidence_angles_deg', 'plane_angles_deg', "
+                "'levels_db' and 'weights' must be 1-D arrays of the same length; "
+                f"got {shapes}."
             )
             raise ValueError(msg)
         for name, array in arrays.items():
@@ -522,8 +551,16 @@ class DirectivityFactor:
                 msg = f"DirectivityFactor: '{name}' must contain only finite values."
                 raise ValueError(msg)
             object.__setattr__(self, name, read_only(array))
+        require_finite(self.reference_level_db, "reference_level_db")
         if not (math.isfinite(self.gamma) and self.gamma > 0.0):
             msg = f"DirectivityFactor: 'gamma' must be positive and finite; got {self.gamma!r}."
+            raise ValueError(msg)
+        largest = self.largest_element_fraction
+        if not (math.isfinite(largest) and 0.0 < largest <= 1.0):
+            msg = (
+                "DirectivityFactor: 'largest_element_fraction' must be a fraction "
+                f"of the sphere, above 0 and at most 1; got {largest!r}."
+            )
             raise ValueError(msg)
 
     @property
@@ -638,7 +675,7 @@ def _from_planes(
         weights=weights,
         reference_level_db=lrd,
         gamma=_gamma(flat, weights, lrd),
-        largest_element=largest,
+        largest_element_fraction=largest,
         formula=formula,
     )
 
@@ -683,7 +720,8 @@ def directivity_factor(
     they have only to be taken into account once. They are measured once and
     enter every plane's sum here, which is what makes the factors sum to one
     and an omnidirectional instrument read :math:`\gamma = 1`; counted once,
-    every :math:`10\lg\gamma` would come out 0,008 dB high.
+    :math:`10\lg\gamma` would come out 0,008 dB high for an omnidirectional
+    instrument and more for a directional one (see the module notes).
 
     :param levels_db: :math:`L(\phi)` in dB, one row per plane (the first the
         X-Y plane, ``h``; the second the X-Z plane, ``v``), each at
@@ -783,9 +821,9 @@ def equal_area_directivity_factor(
     vertical_count = _EQUAL_AREA_ELEMENTS - _EQUAL_AREA_HORIZONTAL
     if horizontal.size != _EQUAL_AREA_HORIZONTAL or vertical.size != vertical_count:
         msg = (
-            "The 38 equal-area elements of IEC 61183 are read 20 in the "
-            f"horizontal plane and 18 in the vertical; got {horizontal.size} "
-            f"and {vertical.size}."
+            "'horizontal_levels_db' and 'vertical_levels_db' must hold the 20 "
+            "and 18 readings of the 38 equal-area elements of IEC 61183; got "
+            f"{horizontal.size} and {vertical.size}."
         )
         raise ValueError(msg)
     h_angles, v_angles = equal_area_incidence_angles()
@@ -801,7 +839,7 @@ def equal_area_directivity_factor(
         weights=weights,
         reference_level_db=lrd,
         gamma=_gamma(levels, weights, lrd),
-        largest_element=1.0 / _EQUAL_AREA_ELEMENTS,
+        largest_element_fraction=1.0 / _EQUAL_AREA_ELEMENTS,
         formula="A.5",
     )
 
@@ -1040,7 +1078,10 @@ class DiffuseFieldSensitivity:
             route is not one of the three.
         """
         if self.route not in _ROUTES:
-            msg = f"DiffuseFieldSensitivity: unknown route {self.route!r}; use one of {_ROUTES}."
+            msg = (
+                f"DiffuseFieldSensitivity: 'route' must be one of {_ROUTES}; "
+                f"got {self.route!r}."
+            )
             raise ValueError(msg)
         frequencies = _frequency_axis(self.frequencies_hz)
         object.__setattr__(self, "frequencies_hz", read_only(frequencies.copy()))

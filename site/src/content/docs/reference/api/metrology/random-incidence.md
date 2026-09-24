@@ -27,10 +27,11 @@ $$
 
 where $L_\mathrm{rd}$ is what the instrument indicates for a plane wave
 from the reference direction and $L_\mathrm{o}$ the level of that wave
-without the instrument. The directivity factor $\gamma$ is the integral
-of Formula (2) over the sphere, with the direction written as the angle
-$\phi$ from the reference direction and the angle $\alpha$ about
-it in Formula (3):
+without the instrument. The directivity factor $\gamma$ of Formula (2)
+is $4\pi$ over the integral, across the sphere, of what the instrument
+indicates relative to $L_\mathrm{rd}$; Formula (3) writes the direction
+as the angle $\phi$ from the reference direction and the angle
+$\alpha$ about it:
 
 $$
 \gamma = \frac{4\pi}{\displaystyle\int_0^{2\pi}\!\!\int_0^{\pi} 10^{-0{,}1[L_\mathrm{rd} - L(\phi,\alpha)]}\, |\sin\phi|\,\mathrm{d}\alpha\,\mathrm{d}\phi}
@@ -89,8 +90,17 @@ be *measured* once; they are *counted* in both sums. Each plane's pole factor
 of Formula (A.2) covers half of the polar cap, so the 72 factors of Table A.1
 sum to exactly one only with the poles in both sums, and an omnidirectional
 instrument then has $\gamma = 1$. Counted once, the factors sum to
-0,998097, and every directivity factor comes out 0,19 % high: a bias of
-0,008 dB on $10\lg\gamma$ that this module does not make.
+0,998097: the sum of (A.3) loses the second plane's two pole terms, and
+$10\lg\gamma$ comes out high by
+
+$$
+-10\lg\left(1 - \gamma\,K(0)\left[10^{-0{,}1[L_\mathrm{rd} - L(0°)]} + 10^{-0{,}1[L_\mathrm{rd} - L(180°)]}\right]\right)
+$$
+
+which is 0,008 dB (0,19 % on $\gamma$) for an omnidirectional
+instrument and grows with the directivity: about 0,02 dB at
+$10\lg\gamma = 7$ dB when little arrives from behind. This module does
+not make that error.
 
 **The angles of the equal-area elements.** The note to A.1.8 prints the 38
 directions to 0,1° without saying how they were placed. Each is the direction
@@ -99,7 +109,7 @@ that halves its element's area in polar angle: the cap about each pole takes
 four elements by the two planes. That construction reproduces the note's
 list of 20 angles to the 0,1° it is printed to, except two: 77,9° and its
 mirror 282,1° break the list's own symmetry about 90° (77,9° + 102,2° is
-180,1°, where every other pair sums to 180,0°), the construction gives 77,85°
+180,1°, where all the other pairs sum to 180,0°), the construction gives 77,85°
 and 282,15°, and the two are recorded in `docs/ERRATA.md`.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
@@ -132,9 +142,10 @@ for 10° steps; with the four planes of NOTE 2 of A.6 every factor is
 halved, and with one plane, the rotationally symmetric instrument of
 Formula (A.4), doubled.
 
-The factors of all the planes together sum to one: each pole factor covers
-half the polar cap in its plane, so the pole readings enter every plane's
-sum (see the module notes).
+The factors of all the planes together sum to one: the pole factor of each
+of the $n$ planes covers $1/n$ of the polar cap (half of it in
+the two planes of Annex A), so the pole readings enter every plane's sum
+(see the module notes).
 
 **Parameters**
 
@@ -155,7 +166,7 @@ sum (see the module notes).
 
 | Warning | When |
 | :--- | :--- |
-| SphereDivisionWarning | when the largest element is more than 3 % of the sphere (A.1.6), which a step above about 13,8° gives in two planes. |
+| SphereDivisionWarning | when the largest element is more than 3 % of the sphere (A.1.6), which the 15° step, and every coarser one that divides 180°, gives in two planes. |
 
 ## axisymmetric_directivity_factor
 
@@ -378,7 +389,8 @@ The readings at 0° and 180° are the same in every plane, and A.4.7 says
 they have only to be taken into account once. They are measured once and
 enter every plane's sum here, which is what makes the factors sum to one
 and an omnidirectional instrument read $\gamma = 1$; counted once,
-every $10\lg\gamma$ would come out 0,008 dB high.
+$10\lg\gamma$ would come out 0,008 dB high for an omnidirectional
+instrument and more for a directional one (see the module notes).
 
 **Parameters**
 
@@ -411,7 +423,7 @@ DirectivityFactor(
     weights: NDArray[np.float64],
     reference_level_db: float,
     gamma: float,
-    largest_element: float,
+    largest_element_fraction: float,
     formula: str,
 )
 ```
@@ -437,7 +449,7 @@ each was taken in.
 | `weights` | $K$ of each reading, dimensionless; they sum to one. |
 | `reference_level_db` | $L_\mathrm{rd}$, in dB. |
 | `gamma` | $\gamma$, dimensionless. |
-| `largest_element` | the largest element of the division, as a fraction of the sphere (A.1.6). |
+| `largest_element_fraction` | the largest element of the division, as a fraction of the sphere between 0 and 1 (A.1.6). For one plane under rotational symmetry it is the largest element of the two-plane division that plane stands for, each of whose readings weighs two elements. |
 | `formula` | the formula applied: `"A.3"` (planes), `"A.4"` (one plane, rotational symmetry) or `"A.5"` (38 equal-area elements). |
 
 ### DirectivityFactor.directivity_index_db

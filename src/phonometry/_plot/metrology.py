@@ -47,6 +47,10 @@ _RICE_CURVE_LABEL = "Rice ($r$ = {r})"
 #: returns the English key unchanged for any language other than ``"es"``,
 #: so the English output is byte-for-byte identical to the pre-i18n
 #: renderers.
+#: The legend entry of the acceptance limits in the conformity plots, named
+#: once so the translation table and the axes cannot drift apart.
+_ACCEPTANCE_LABEL = "Acceptance limit"
+
 _STRINGS: dict[str, str] = {
     r"Contribution to combined uncertainty $|c_i|\,u(x_i)$": r"Contribución a la incertidumbre combinada $|c_i|\,u(x_i)$",
     "GUM uncertainty budget: $y$ = {value}": "Presupuesto de incertidumbre (GUM): $y$ = {value}",
@@ -86,7 +90,7 @@ _STRINGS: dict[str, str] = {
     "Upper acceptance limit": "Límite de aceptación superior",
     "Lower acceptance limit": "Límite de aceptación inferior",
     "Acceptance limits": "Límites de aceptación",
-    "Acceptance limit": "Límite de aceptación",
+    _ACCEPTANCE_LABEL: "Límite de aceptación",
     "Conforms": "Conforme",
     "Does not conform": "No conforme",
     "Actual uncertainty": "Incertidumbre real",
@@ -555,7 +559,7 @@ def _draw_limits(
             next(iter(uppers)),
             color=_C_SECONDARY,
             lw=2.2,
-            label=_t("Acceptance limit", language),
+            label=_t(_ACCEPTANCE_LABEL, language),
         )
         return
     if one_sided:
@@ -566,7 +570,7 @@ def _draw_limits(
                 x + 0.4,
                 color=_C_SECONDARY,
                 lw=2.2,
-                label=_t("Acceptance limit", language) if k == 0 else "_nolegend_",
+                label=_t(_ACCEPTANCE_LABEL, language) if k == 0 else "_nolegend_",
             )
         return
     if len(lowers) == 1 and len(uppers) == 1:

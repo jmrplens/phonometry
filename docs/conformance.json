@@ -3,13 +3,13 @@
   "library": "4.0.0rc1",
   "generator": "scripts/conformance_report.py",
   "counts": {
-    "checks": 1337,
-    "passing": 1337,
+    "checks": 1349,
+    "passing": 1349,
     "failing": 0,
     "domains": 92,
-    "standards": 467,
-    "citations": 905,
-    "designations": 185,
+    "standards": 468,
+    "citations": 915,
+    "designations": 187,
     "sources": 114
   },
   "units": [
@@ -28,6 +28,7 @@
     "MPa",
     "N",
     "N/m",
+    "Np/m",
     "Np/rad",
     "N·s/m",
     "Pa",
@@ -146,8 +147,8 @@
     {
       "id": "intensity-sound-power",
       "title": "Intensity & sound power",
-      "checks": 37,
-      "passing": 37
+      "checks": 49,
+      "passing": 49
     },
     {
       "id": "emission-sound-pressure-level-iso-11200-group",
@@ -6339,6 +6340,483 @@
         "value": -1.78e-15
       },
       "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "intensity-sound-power/iso-9295-2015-table-1-une-en-iso-9295-2015-pdf-page-15-printed-folio-15/air-absorption-alpha-in-np-m-18-degc-to-22-degc-40-to-60-10-000-hz-to-22-400-hz-annex-a-at-theta-273-16-k-to-the-four-decimals-printed-in-the-303-cells-the-table-prints-correctly",
+      "domain": "intensity-sound-power",
+      "reference": {
+        "cite": "ISO 9295:2015 Table 1 (UNE-EN ISO 9295:2015, PDF page 15, printed folio 15)",
+        "tail": ")",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 9295",
+            "edition": "2015",
+            "clause": "Table 1"
+          },
+          {
+            "kind": "standard",
+            "designation": "UNE-EN ISO 9295",
+            "edition": "2015",
+            "clause": "PDF page 15, printed folio 15",
+            "lead": " (",
+            "relation": "mentions"
+          }
+        ]
+      },
+      "quantity": "Air absorption alpha in Np/m, 18 degC to 22 degC, 40 % to 60 %, 10 000 Hz to 22 400 Hz: Annex A at theta + 273,16 K, to the four decimals printed, in the 303 cells the table prints correctly",
+      "kind": "count",
+      "expected": {
+        "value": 303.0,
+        "label": "303/303 cells of Table 1"
+      },
+      "computed": {
+        "value": 303.0,
+        "label": "303/303 cells of Table 1"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "intensity-sound-power/iso-9295-2015-table-2-une-en-iso-9295-2015-pdf-page-16-printed-folio-16/air-absorption-alpha-in-np-m-23-degc-to-27-degc-40-to-60-10-000-hz-to-22-400-hz-annex-a-at-theta-273-16-k-to-the-four-decimals-printed-in-the-278-cells-the-table-prints-correctly",
+      "domain": "intensity-sound-power",
+      "reference": {
+        "cite": "ISO 9295:2015 Table 2 (UNE-EN ISO 9295:2015, PDF page 16, printed folio 16)",
+        "tail": ")",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 9295",
+            "edition": "2015",
+            "clause": "Table 2"
+          },
+          {
+            "kind": "standard",
+            "designation": "UNE-EN ISO 9295",
+            "edition": "2015",
+            "clause": "PDF page 16, printed folio 16",
+            "lead": " (",
+            "relation": "mentions"
+          }
+        ]
+      },
+      "quantity": "Air absorption alpha in Np/m, 23 degC to 27 degC, 40 % to 60 %, 10 000 Hz to 22 400 Hz: Annex A at theta + 273,16 K, to the four decimals printed, in the 278 cells the table prints correctly",
+      "kind": "count",
+      "expected": {
+        "value": 278.0,
+        "label": "278/278 cells of Table 2"
+      },
+      "computed": {
+        "value": 278.0,
+        "label": "278/278 cells of Table 2"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "intensity-sound-power/iso-9295-2015-table-1-une-en-iso-9295-2015-pdf-page-15-printed-folio-15/the-9-cells-table-1-misprints-docs-errata-md-as-printed-each-is-annex-a-at-theta-273-16-k-with-its-first-trailing-0-set-as-the-digit-before-it",
+      "domain": "intensity-sound-power",
+      "reference": {
+        "cite": "ISO 9295:2015 Table 1 (UNE-EN ISO 9295:2015, PDF page 15, printed folio 15)",
+        "tail": ")",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 9295",
+            "edition": "2015",
+            "clause": "Table 1"
+          },
+          {
+            "kind": "standard",
+            "designation": "UNE-EN ISO 9295",
+            "edition": "2015",
+            "clause": "PDF page 15, printed folio 15",
+            "lead": " (",
+            "relation": "mentions"
+          }
+        ]
+      },
+      "quantity": "The 9 cells Table 1 misprints (docs/ERRATA.md), as printed: each is Annex A at theta + 273,16 K with its first trailing 0 set as the digit before it",
+      "kind": "count",
+      "expected": {
+        "value": 9.0,
+        "label": "13 500 Hz, 20 degC, 60 %: 0,027 7; 13 500 Hz, 21 degC, 40 %: 0,036 6; 13 500 Hz, 21 degC, 60 %: 0,026 6; 13 500 Hz, 22 degC, 40 %: 0,035 5; 15 500 Hz, 22 degC, 40 %: 0,044 4; 16 500 Hz, 21 degC, 50 %: 0,043 3; 18 000 Hz, 20 degC, 60 %: 0,045 5; 19 000 Hz, 21 degC, 60 %: 0,048 8; 20 000 Hz, 22 degC, 60 %: 0,051 1"
+      },
+      "computed": {
+        "value": 9.0,
+        "label": "9/9 printed cells that are Annex A with a 0 set as the digit before it"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "intensity-sound-power/iso-9295-2015-table-2-une-en-iso-9295-2015-pdf-page-16-printed-folio-16/the-34-cells-table-2-misprints-docs-errata-md-as-printed-each-is-annex-a-at-theta-273-16-k-with-its-first-trailing-0-set-as-the-digit-before-it",
+      "domain": "intensity-sound-power",
+      "reference": {
+        "cite": "ISO 9295:2015 Table 2 (UNE-EN ISO 9295:2015, PDF page 16, printed folio 16)",
+        "tail": ")",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 9295",
+            "edition": "2015",
+            "clause": "Table 2"
+          },
+          {
+            "kind": "standard",
+            "designation": "UNE-EN ISO 9295",
+            "edition": "2015",
+            "clause": "PDF page 16, printed folio 16",
+            "lead": " (",
+            "relation": "mentions"
+          }
+        ]
+      },
+      "quantity": "The 34 cells Table 2 misprints (docs/ERRATA.md), as printed: each is Annex A at theta + 273,16 K with its first trailing 0 set as the digit before it",
+      "kind": "count",
+      "expected": {
+        "value": 34.0,
+        "label": "10 000 Hz, 27 degC, 50 %: 0,014 4; 11 000 Hz, 25 degC, 50 %: 0,018 8; 11 500 Hz, 23 degC, 50 %: 0,021 1; 13 000 Hz, 25 degC, 60 %: 0,021 1; 13 500 Hz, 27 degC, 60 %: 0,021 1; 14 000 Hz, 24 degC, 40 %: 0,035 5; 14 000 Hz, 24 degC, 60 %: 0,025 5; 14 500 Hz, 24 degC, 50 %: 0,031 1; 14 500 Hz, 25 degC, 40 %: 0,036 6; 14 500 Hz, 25 degC, 50 %: 0,033 0; 14 500 Hz, 27 degC, 50 %: 0,028 8; 14 500 Hz, 27 degC, 60 %: 0,024 4; 15 000 Hz, 24 degC, 50 %: 0,033 3; 15 500 Hz, 24 degC, 50 %: 0,035 5; 15 500 Hz, 27 degC, 40 %: 0,038 8; 16 000 Hz, 24 degC, 40 %: 0,044 4; 16 000 Hz, 24 degC, 60 %: 0,032 2; 16 500 Hz, 23 degC, 60 %: 0,035 5; 17 000 Hz, 25 degC, 50 %: 0,04 4; 18 000 Hz, 23 degC, 60 %: 0,041 1; 18 000 Hz, 27 degC, 60 %: 0,036 6; 18 500 Hz, 24 degC, 40 %: 0,056 6; 18 500 Hz, 24 degC, 50 %: 0,048 8; 19 500 Hz, 23 degC, 50 %: 0,054 4; 20 000 Hz, 24 degC, 60 %: 0,048 8; 20 500 Hz, 23 degC, 40 %: 0,067 7; 20 500 Hz, 24 degC, 40 %: 0,066 6; 21 000 Hz, 23 degC, 60 %: 0,054 4; 21 500 Hz, 23 degC, 40 %: 0,072 2; 21 500 Hz, 24 degC, 40 %: 0,071 1; 21 500 Hz, 27 degC, 60 %: 0,05 50; 22 000 Hz, 24 degC, 60 %: 0,057 7; 22 000 Hz, 25 degC, 50 %: 0,063 3; 22 400 Hz, 25 degC, 50 %: 0,065 5"
+      },
+      "computed": {
+        "value": 34.0,
+        "label": "34/34 printed cells that are Annex A with a 0 set as the digit before it"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "intensity-sound-power/iso-9295-2015-annex-a-tables-1-and-2/the-published-annex-a-at-theta-273-15-k-against-the-581-correctly-printed-cells-within-one-unit-of-the-fourth-decimal",
+      "domain": "intensity-sound-power",
+      "reference": {
+        "cite": "ISO 9295:2015 Annex A / Tables 1 and 2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 9295",
+            "edition": "2015",
+            "clause": "Annex A / Tables 1 and 2"
+          }
+        ]
+      },
+      "quantity": "The published Annex A at theta + 273,15 K against the 581 correctly printed cells: within one unit of the fourth decimal",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0
+      },
+      "computed": {
+        "value": 6.3e-05
+      },
+      "unit": "Np/m",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0001
+      },
+      "deviation": {
+        "value": 6.3e-05
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "intensity-sound-power/iso-9295-2015-formulae-4-and-5/room-absorption-coefficient-and-room-constant-from-the-reverberation-time-v-200-m3-s-210-m2-t-0-70-s-alpha-room-1-exp-0-16-v-s-t-r-s-alpha-room-1-alpha-room-closed-form",
+      "domain": "intensity-sound-power",
+      "reference": {
+        "cite": "ISO 9295:2015 Formulae (4) and (5)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 9295",
+            "edition": "2015",
+            "clause": "Formulae (4) and (5)"
+          }
+        ]
+      },
+      "quantity": "Room absorption coefficient and room constant from the reverberation time, V = 200 m3, S = 210 m2, T = 0,70 s: alpha_room = 1 - exp(-0,16 V/(S T)), R = S alpha_room / (1 - alpha_room) (closed form)",
+      "kind": "record",
+      "expected": {
+        "label": "alpha_room = 0.1956; R (m2) = 51.0716",
+        "record": {
+          "alpha_room": 0.195622888,
+          "R (m2)": 51.071576
+        }
+      },
+      "computed": {
+        "label": "alpha_room = 0.1956; R (m2) = 51.0716",
+        "record": {
+          "alpha_room": 0.195622888,
+          "R (m2)": 51.071576
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "intensity-sound-power/iso-9295-2015-formula-7/room-constant-from-the-air-absorption-8-alpha-v-1-8-alpha-v-s-at-16-khz-23-degc-50-v-200-m3-s-210-m2-closed-form",
+      "domain": "intensity-sound-power",
+      "reference": {
+        "cite": "ISO 9295:2015 Formula (7)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 9295",
+            "edition": "2015",
+            "clause": "Formula (7)"
+          }
+        ]
+      },
+      "quantity": "Room constant from the air absorption, 8 alpha V / (1 - 8 alpha V / S), at 16 kHz, 23 degC, 50 %, V = 200 m3, S = 210 m2 (closed form)",
+      "kind": "scalar",
+      "expected": {
+        "value": 86.55811166305745
+      },
+      "computed": {
+        "value": 86.5581
+      },
+      "unit": "m²",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "intensity-sound-power/iso-9295-2015-formula-6-10-1/lw-lp-st-10-lg-4-r-c1-c2-r-40-m2-raises-lp-60-db-by-10-db-plus-the-c1-and-c2-of-iso-3741-at-23-degc-and-101-325-kpa-and-at-30-degc-and-90-kpa",
+      "domain": "intensity-sound-power",
+      "reference": {
+        "cite": "ISO 9295:2015 Formula (6) / 10.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 9295",
+            "edition": "2015",
+            "clause": "Formula (6) / 10.1"
+          }
+        ]
+      },
+      "quantity": "LW = Lp(ST) - 10 lg(4/R) + C1 + C2: R = 40 m2 raises Lp = 60 dB by 10 dB, plus the C1 and C2 of ISO 3741 at 23 degC and 101,325 kPa and at 30 degC and 90 kPa",
+      "kind": "record",
+      "expected": {
+        "label": "23 degC, 101,325 kPa = 69.8762 dB; 30 degC, 90 kPa = 71.1086 dB",
+        "record": {
+          "23 degC, 101,325 kPa": 69.876211,
+          "30 degC, 90 kPa": 71.10861
+        }
+      },
+      "computed": {
+        "label": "23 degC, 101,325 kPa = 69.8762 dB; 30 degC, 90 kPa = 71.1086 dB",
+        "record": {
+          "23 degC, 101,325 kPa": 69.876211,
+          "30 degC, 90 kPa": 71.10861
+        }
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "intensity-sound-power/iso-9295-2015-formulae-8-and-9/reference-source-lw-far-lp-far-lp-st-and-10-lg-delta-f-1-hz-more-for-a-tone-read-with-a-10-hz-noise-bandwidth",
+      "domain": "intensity-sound-power",
+      "reference": {
+        "cite": "ISO 9295:2015 Formulae (8) and (9)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 9295",
+            "edition": "2015",
+            "clause": "Formulae (8) and (9)"
+          }
+        ]
+      },
+      "quantity": "Reference source: LW(FAR) - Lp(FAR) + Lp(ST), and 10 lg(Delta F / 1 Hz) more for a tone read with a 10 Hz noise bandwidth",
+      "kind": "record",
+      "expected": {
+        "label": "Formula (8) = 60.0033 dB; Formula (9) = 70.0033 dB",
+        "record": {
+          "Formula (8)": 60.0033,
+          "Formula (9)": 70.0033
+        }
+      },
+      "computed": {
+        "label": "Formula (8) = 60.0033 dB; Formula (9) = 70.0033 dB",
+        "record": {
+          "Formula (8)": 60.0033,
+          "Formula (9)": 70.0033
+        }
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "intensity-sound-power/iso-9295-2015-formulae-2-and-3/moving-microphone-delta-f-2-f-v-c-at-16-khz-0-4-m-s-345-m-s-and-three-equal-sidebands-summing-to-10-lg-3-above-one",
+      "domain": "intensity-sound-power",
+      "reference": {
+        "cite": "ISO 9295:2015 Formulae (2) and (3)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 9295",
+            "edition": "2015",
+            "clause": "Formulae (2) and (3)"
+          }
+        ]
+      },
+      "quantity": "Moving microphone: Delta f = 2 f v / c at 16 kHz, 0,4 m/s, 345 m/s, and three equal sidebands summing to 10 lg 3 above one",
+      "kind": "record",
+      "expected": {
+        "label": "Delta f (Hz) = 37.1014; Ltot (dB) = 54.7712",
+        "record": {
+          "Delta f (Hz)": 37.101449,
+          "Ltot (dB)": 54.771213
+        }
+      },
+      "computed": {
+        "label": "Delta f (Hz) = 37.1014; Ltot (dB) = 54.7712",
+        "record": {
+          "Delta f (Hz)": 37.101449,
+          "Ltot (dB)": 54.771213
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "intensity-sound-power/iso-9295-2015-formula-10/free-field-absorption-correction-k-alpha-r-alpha-at-r-4-m-alpha-in-db-m-8-686-times-annex-a-and-none-at-r-2-m",
+      "domain": "intensity-sound-power",
+      "reference": {
+        "cite": "ISO 9295:2015 Formula (10)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 9295",
+            "edition": "2015",
+            "clause": "Formula (10)"
+          }
+        ]
+      },
+      "quantity": "Free-field absorption correction K_alpha = r alpha at r = 4 m, alpha in dB/m (8,686 times Annex A), and none at r = 2 m",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0,
+        "label": "0 dB difference"
+      },
+      "computed": {
+        "value": 0.0
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 9,
+      "verdict": "pass"
+    },
+    {
+      "id": "intensity-sound-power/iso-9295-2015-table-3-une-en-iso-9295-2015-pdf-page-24-printed-folio-24/the-sound-power-levels-to-determine-for-each-type-of-noise-the-six-rows-from-the-a-weighted-level-alone-to-the-tones-within-10-db-of-the-highest",
+      "domain": "intensity-sound-power",
+      "reference": {
+        "cite": "ISO 9295:2015 Table 3 (UNE-EN ISO 9295:2015, PDF page 24, printed folio 24)",
+        "tail": ")",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 9295",
+            "edition": "2015",
+            "clause": "Table 3"
+          },
+          {
+            "kind": "standard",
+            "designation": "UNE-EN ISO 9295",
+            "edition": "2015",
+            "clause": "PDF page 24, printed folio 24",
+            "lead": " (",
+            "relation": "mentions"
+          }
+        ]
+      },
+      "quantity": "The sound power levels to determine for each type of noise: the six rows, from the A-weighted level alone to the tones within 10 dB of the highest",
+      "kind": "count",
+      "expected": {
+        "value": 6.0,
+        "label": "6/6 rows of Table 3"
+      },
+      "computed": {
+        "value": 6.0,
+        "label": "6/6 rows of Table 3"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
       "verdict": "pass"
     },
     {

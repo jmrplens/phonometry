@@ -380,6 +380,7 @@ export const topics = [
           'environment/assessment/environmental-levels',
           'environment/assessment/spanish-noise-regulation',
           'environment/assessment/impulsive-sound',
+          'environment/assessment/sel-distribution',
         ],
       },
       {

@@ -3,6 +3,14 @@
 
 from __future__ import annotations
 
+from .exposure_distribution import (
+    SelDistribution,
+    frequency_weighted_sel,
+    long_term_sel,
+    replica_probabilities,
+    sel_distribution,
+    turbulence_level_shift,
+)
 from .impulsive_sound import (
     ImpulseOnset,
     ImpulseProminenceResult,
@@ -91,6 +99,7 @@ __all__ = [
     "RegulationLimits",
     "RepeatedMeasurementResult",
     "ResidualCorrectionResult",
+    "SelDistribution",
     "TonalAssessmentResult",
     "TonalCorrectionResult",
     "activity_limits",
@@ -104,6 +113,7 @@ __all__ = [
     "detect_onsets",
     "evaluation_period_level",
     "environmental_expanded_uncertainty",
+    "frequency_weighted_sel",
     "gaussian_residual_level",
     "impulse_adjustment",
     "impulse_prominence",
@@ -114,14 +124,17 @@ __all__ = [
     "lden",
     "ldn",
     "long_term_corrected_level",
+    "long_term_sel",
     "low_frequency_correction",
     "max_infrastructure_limit",
     "outdoor_quality_objectives",
     "predicted_prominence",
     "rating_level",
+    "replica_probabilities",
     "residual_correction_uncertainty",
     "residual_sound_correction",
     "round_reported_level",
+    "sel_distribution",
     "sound_pressure_level_history",
     "tonal_adjustment",
     "tonal_adjustment_from_mean_audibility",
@@ -129,6 +142,7 @@ __all__ = [
     "tonal_correction",
     "tonal_seeking_survey",
     "total_correction",
+    "turbulence_level_shift",
     "uncertainty_from_repeated_measurements",
     "vibration_quality_objective",
 ]

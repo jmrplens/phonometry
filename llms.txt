@@ -1,8 +1,8 @@
 # phonometry
 
-> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1302 numerical conformance checks against 465 standards enforced in CI.
+> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1309 numerical conformance checks against 466 standards enforced in CI.
 
-phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1302 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 90 domains.
+phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1309 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 91 domains.
 
 The project was published as **PyOctaveBand** until version 3.0.0. Third-party references and dependency pins still using that name refer to this library.
 
@@ -262,6 +262,7 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 - [Environmental Levels (ISO 1996-1/-2)](https://jmrplens.github.io/phonometry/environment/assessment/environmental-levels/)
 - [Impulsive-sound prominence (NT ACOU 112)](https://jmrplens.github.io/phonometry/environment/assessment/impulsive-sound/)
 - [Spanish Noise Regulation (RD 1367/2007)](https://jmrplens.github.io/phonometry/environment/assessment/spanish-noise-regulation/)
+- [Impulsive sound exposure statistics (ISO 13474)](https://jmrplens.github.io/phonometry/environment/assessment/sel-distribution/)
 
 ### Outdoor sound
 
@@ -499,6 +500,7 @@ The generated API reference, one page per module. Fetch these only when a specif
 - [environment/barrier-in-situ](https://jmrplens.github.io/phonometry/reference/api/environment/barrier-in-situ/)
 - [environment/cnossos-rail](https://jmrplens.github.io/phonometry/reference/api/environment/cnossos-rail/)
 - [environment/cnossos-road](https://jmrplens.github.io/phonometry/reference/api/environment/cnossos-road/)
+- [environment/exposure-distribution](https://jmrplens.github.io/phonometry/reference/api/environment/exposure-distribution/)
 - [environment/ground-barriers](https://jmrplens.github.io/phonometry/reference/api/environment/ground-barriers/)
 - [environment/ground-surfaces](https://jmrplens.github.io/phonometry/reference/api/environment/ground-surfaces/)
 - [environment/impulsive-sound](https://jmrplens.github.io/phonometry/reference/api/environment/impulsive-sound/)

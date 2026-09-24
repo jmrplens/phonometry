@@ -1,8 +1,8 @@
 # phonometry
 
-> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1302 numerical conformance checks against 465 standards enforced in CI.
+> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1309 numerical conformance checks against 466 standards enforced in CI.
 
-phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1302 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 90 domains.
+phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1309 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 91 domains.
 
 The project was published as **PyOctaveBand** until version 3.0.0. Third-party references and dependency pins still using that name refer to this library.
 
@@ -262,6 +262,7 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 - [Environmental Levels (ISO 1996-1/-2)](https://jmrplens.github.io/phonometry/environment/assessment/environmental-levels/)
 - [Impulsive-sound prominence (NT ACOU 112)](https://jmrplens.github.io/phonometry/environment/assessment/impulsive-sound/)
 - [Spanish Noise Regulation (RD 1367/2007)](https://jmrplens.github.io/phonometry/environment/assessment/spanish-noise-regulation/)
+- [Impulsive sound exposure statistics (ISO 13474)](https://jmrplens.github.io/phonometry/environment/assessment/sel-distribution/)
 
 ### Outdoor sound
 
@@ -499,6 +500,7 @@ The generated API reference, one page per module. Fetch these only when a specif
 - [environment/barrier-in-situ](https://jmrplens.github.io/phonometry/reference/api/environment/barrier-in-situ/)
 - [environment/cnossos-rail](https://jmrplens.github.io/phonometry/reference/api/environment/cnossos-rail/)
 - [environment/cnossos-road](https://jmrplens.github.io/phonometry/reference/api/environment/cnossos-road/)
+- [environment/exposure-distribution](https://jmrplens.github.io/phonometry/reference/api/environment/exposure-distribution/)
 - [environment/ground-barriers](https://jmrplens.github.io/phonometry/reference/api/environment/ground-barriers/)
 - [environment/ground-surfaces](https://jmrplens.github.io/phonometry/reference/api/environment/ground-surfaces/)
 - [environment/impulsive-sound](https://jmrplens.github.io/phonometry/reference/api/environment/impulsive-sound/)
@@ -26373,9 +26375,19 @@ ISO 1996 a regulation typically restates, and which it replaces. Kf, the
 correction driven by the difference between the C-weighted and the A-weighted
 level, has no counterpart in ISO 1996 at all.
 
+[Impulsive Sound Exposure Statistics (ISO 13474)](https://jmrplens.github.io/phonometry/environment/assessment/sel-distribution/)
+is for the source whose level at the receiver is not one number: a blast or a
+shot kilometres away, heard ten decibels louder or quieter as the weather
+between them changes. From the level and probability of each replica
+atmosphere it builds the statistical distribution of the single-event sound
+exposure level, spreads it for turbulence, and reads off the long-term level,
+the rating level with the impulsive adjustment K, and the level exceeded by
+any percentage of the events.
+
 Read Environmental Levels first, then the impulsive-sound page as the
 adjustment that feeds it, then the Spanish regulation as the national assembly
-of both.
+of both. The exposure statistics page stands beside them for firing ranges,
+quarries and demolition, where the weather decides the level.
 
 ## Pages in this section
 
@@ -26386,6 +26398,10 @@ of both.
 - [Impulsive-sound prominence (NT ACOU 112)](https://jmrplens.github.io/phonometry/environment/assessment/impulsive-sound/):
   the predicted prominence of impulsive sounds, the graduated LAeq adjustment
   KI, the ISO/PAS 1996-3 measurement chain and the assessment fiche.
+- [Impulsive Sound Exposure Statistics (ISO 13474)](https://jmrplens.github.io/phonometry/environment/assessment/sel-distribution/):
+  the long-term and rating levels of a blast from its replica atmospheres, the
+  ordered classes and their densities, the spread for turbulence and the
+  exceedance levels.
 - [Spanish Noise Regulation (RD 1367/2007)](https://jmrplens.github.io/phonometry/environment/assessment/spanish-noise-regulation/):
   the corrected level LKeq, the Kt/Kf/Ki corrections, the evaluation periods
   and noise phases, and the immission limit tables.
@@ -26420,6 +26436,148 @@ appear only as the assessor's-judgement baseline the measurement replaces.
 Finally, no limit table other than the Spanish one is built in: a limit is
 national, and the library gives you the rating level to compare against
 whichever one applies.
+
+---
+
+
+<!-- source: docs/environment/assessment/sel-distribution.md | canonical: https://jmrplens.github.io/phonometry/environment/assessment/sel-distribution/ -->
+Source: https://jmrplens.github.io/phonometry/environment/assessment/sel-distribution/
+
+# Impulsive sound exposure statistics (ISO 13474)
+
+A blast, a shot or a detonation a few kilometres away is not heard at one
+level: the same charge fired twice reaches the same receiver ten decibels apart
+and more, because the wind, the temperature profile and the ground between
+them change, and at long range they decide more of the level than the distance
+does. ISO 13474:2009 therefore describes the weather as a set of **replica
+atmospheres**, each a combination of an atmospheric-absorption class and an
+excess-attenuation class with its probability of occurrence, computes the
+single-event sound exposure level for each, and turns the list into a
+distribution spread for turbulence, from which the long-term level and the
+level exceeded by any percentage of the events are read. This page is that
+statistical core, run on the example of Annex A: a TOW anti-tank missile
+launcher heard at 3 020 m under 27 excess-attenuation classes.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sel_distribution_density_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sel_distribution_density.svg" alt="The step density of the 27 classes of the Annex A example before the turbulent spread, and the smooth density after a 5 dB Gaussian spread, peaking near 30,5 dB with the long-term level LT2 of 37,0 dB marked" width="88%"></picture>
+
+## One number per replica atmosphere
+
+What the statistics work on is one frequency-weighted level per replica, the
+energy sum over the bands of Equation (5),
+`L_E,w = 10 lg sum_j 10^(0,1 [L_E(j) + w(j)])`, with whatever weighting the
+assessment uses. The probability of a replica is the product of the
+probabilities of its two classes (Equation (14)).
+
+```python
+import numpy as np
+
+from phonometry import environment
+
+source_db = [115.0, 119.0, 134.0, 135.0, 134.0, 136.0, 133.0, 126.0]  # Table A.1
+a_weighting_db = [-39.4, -26.2, -16.1, -8.6, -3.2, 0.0, 1.2, 1.0]
+print(round(environment.frequency_weighted_sel(source_db, a_weighting_db), 1))  # 139.5
+
+# Table A.3: the A-weighted level of each excess-attenuation class at the
+# receiver, and its probability by day and by night; 07:00 to 19:00 is 80 %
+# day and 20 % night.
+levels_db = [30.5, 31.2, 31.3, 36.1, 38.3, 38.8, 39.2,
+             30.8, 31.8, 31.8, 33.7, 40.2, 41.0, 41.6, 42.2, 42.4, 42.7, 43.1,
+             28.4, 30.8, 32.2, 42.3, 43.6, 44.5, 45.2, 45.5, 46.1]
+day = [0.0360, 0.0053, 0.0003, 0.0731, 0.0951, 0.0634, 0.0,
+       0.2037, 0.1087, 0.0184, 0.0279, 0.0001, 0.0, 0.0549, 0.0482, 0.0209, 0.0039, 0.0003,
+       0.0, 0.0356, 0.2042, 0.0001, 0.0, 0.0, 0.0, 0.0, 0.0]
+night = [0.0, 0.0, 0.0, 0.0664, 0.0966, 0.0962, 0.0,
+         0.1151, 0.0295, 0.0, 0.0268, 0.0084, 0.0, 0.0665, 0.0445, 0.0172, 0.0033, 0.0003,
+         0.0069, 0.0798, 0.2310, 0.0215, 0.0260, 0.0263, 0.0194, 0.0153, 0.0030]
+probabilities = 0.8 * np.asarray(day) + 0.2 * np.asarray(night)
+```
+
+## The long-term level, and the rating level with K
+
+Equation (7) is the energy mean over the replicas, and Equation (8) the same
+with the ISO 1996-1 adjustment `K` for highly impulsive sound inside the sum:
+the rating level the standard hands on to an ISO 1996-1 assessment.
+
+```python
+print(round(environment.long_term_sel(levels_db, probabilities), 1))  # 37.0
+print(round(environment.long_term_sel(levels_db, probabilities, rating_adjustment_db=12.0), 1))  # 49.0
+```
+
+## Classes, subclasses and the spread for turbulence
+
+The levels sorted in increasing order are `M` classes whose boundaries lie
+half-way between consecutive levels, the two outer ones mirrored about the end
+level (Equations (10) to (13)); each class spreads its probability evenly over
+its width (Equation (15)). Each class is then split into `N_sub` subclasses and
+each subclass replaced by a Gaussian of standard deviation `sigma` (typically
+5 dB), centred `delta_mu = sigma^2 ln 10 / 20` below the subclass so that its
+energetic mean stays where it was (Equations (17) to (23)).
+
+```python
+dist = environment.sel_distribution(levels_db, probabilities, sigma_db=5.0, subclasses=10)
+print(dist.lower_bounds_db[:4].round(2))                              # [27.35 29.45 30.65 30.8 ]
+print([round(float(r), 4) for r in dist.class_densities_per_db[:4]])  # [0.0007, 0.024, 1.2399, 0.2222]
+print(round(dist.level_shift_db, 3))                                  # 2.878
+```
+
+That is Table A.4 of the standard, all 27 rows digit for digit. Two pairs of
+classes share a level, 30,8 dB and 31,8 dB; Equation (11) puts their common
+boundary at that level and both classes are kept, as the table keeps them.
+Only a run of equal levels that would leave a class of no width (three in a
+row, or two at an end of the list) is combined into one class.
+
+## Exceedance levels
+
+The probability that an event exceeds `x` is the upper tail of the spread
+density (Equation (24)), and the `n`-percent exceedance level is its root
+(Equation (25)). The long-term level taken again over the continuous density is
+Equation (A.4), Annex A's LT2.
+
+```python
+print(dist.exceedance_level([95.0, 50.0, 10.0, 5.0, 1.0]).round(1))  # [21.6 31.5 40.5 43.  47.5]
+print(round(dist.distribution_long_term_level_db, 2))                 # 36.96
+dist.plot(view="exceedance")
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sel_distribution_exceedance_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sel_distribution_exceedance.svg" alt="The probability that the single-event level exceeds x, with L95, L50, L10, L5 and L1 marked as Equation (25) gives them and the long-term level LT2 of 37,0 dB" width="88%"></picture>
+
+Two things in Annex A do not follow from its own equations, and both are in
+the [errata register](https://jmrplens.github.io/phonometry/reference/errata/). The running text gives the shift of
+Equation (22) as 1,04 dB with a standard deviation of 5 dB; the equation gives
+2,878 dB there, 1,04 dB is its value at 3 dB, and the printed LT2 of 37,0 dB and
+the curve of Figure A.2 were computed with 2,878 dB. And Figure A.3 prints
+21,7; 31,5; 40,6; 43,2 and 48,0 dB for the five exceedance levels, where
+Equation (25) gives 21,6; 31,5; 40,5; 43,0 and 47,5 dB. The printed values are
+consistent with a curve accumulated from 15 dB, where the drawn curve begins
+(the axis starts at 10 dB), when it is fed the 07:00 to 19:00 column of
+Table A.3 as printed; fed the full-precision probabilities that reproduce
+Table A.4, that reading gives 48,05 dB for `L_1`, which would print 48,1 dB, so
+it stays a hypothesis. The library evaluates Equations (22), (24) and (25) as
+written.
+
+## What this guide covers
+
+Implemented: the statistical core of ISO 13474:2009, Equations (5), (7), (8),
+(10) to (25) and (A.4), with `.plot()` views of the class density, the spread
+density and the exceedance curve; Table A.4 of Annex A is reproduced digit for
+digit and LT1, LT2 and `L_50` match Figure A.3. Not implemented: the
+propagation that produces the level of each replica (clause 6), the
+classification of the atmosphere (clause 7), the class probabilities from
+meteorological data (clause 8), the ground impedances of Table 1, the source
+descriptors of clause 9, the equivalent level over a period of Equation (9)
+and the uncertainty budget of Annex B.
+
+## See also
+
+- [Impulsive-sound prominence (NT ACOU 112)](https://jmrplens.github.io/phonometry/environment/assessment/impulsive-sound/): the other
+  assessment of impulsive sound, the prominence of an impulse at a receiver.
+- [Environmental levels](https://jmrplens.github.io/phonometry/environment/assessment/environmental-levels/): the ISO 1996-1 rating
+  framework the long-term rating level is offered to.
+- [Atmospheric refraction](https://jmrplens.github.io/phonometry/environment/propagation/atmospheric-refraction/): the
+  excess attenuation of one sound speed profile, where a replica level starts.
+- [Errata in published sources](https://jmrplens.github.io/phonometry/reference/errata/): the shift printed as 1,04 dB
+  and the exceedance levels of Figure A.3.
+- API reference: [`environment.assessment.exposure_distribution`](https://jmrplens.github.io/phonometry/reference/api/environment/exposure-distribution/).
 
 ---
 
@@ -26788,8 +26946,10 @@ method stops being enough.
 
 The **assessment** pages handle what happens once the sound has arrived: the
 ISO 1996 rating level and the day-evening-night indicators, their Spanish
-application in RD 1367/2007, and the NT ACOU 112 adjustment that quantifies when
-impulsive character makes a received sound more annoying than its LAeq suggests.
+application in RD 1367/2007, the NT ACOU 112 adjustment that quantifies when
+impulsive character makes a received sound more annoying than its LAeq suggests,
+and the ISO 13474 distribution that says how often a distant blast is heard at
+each sound exposure level as the weather between source and receiver changes.
 
 The **source** pages handle the other end: what emits, described the way an
 environmental model wants it. CNOSSOS-EU gives road traffic and railways a
@@ -26832,6 +26992,10 @@ What the received sound is rated against, once it has arrived.
 - [Impulsive-sound prominence (NT ACOU 112)](https://jmrplens.github.io/phonometry/environment/assessment/impulsive-sound/):
   the predicted prominence of impulsive sounds and the graduated adjustment
   added to LAeq.
+- [Impulsive Sound Exposure Statistics (ISO 13474)](https://jmrplens.github.io/phonometry/environment/assessment/sel-distribution/):
+  how often a distant blast is how loud: the long-term and rating levels of
+  its sound exposure level over the replica atmospheres, the distribution
+  spread for turbulence and the level exceeded by any share of the events.
 
 ## [Outdoor sound](https://jmrplens.github.io/phonometry/environment/propagation/)
 
@@ -42576,6 +42740,12 @@ documents, one page per module.
 | `ImpulsiveSoundResult` | `dataclass` | **Objective impulsive-sound verdict (ISO/PAS 1996-3).**<br>• `times` [s], `levels`: LpAF [dB], `dt` [s]<br>• `onsets`: detected `ImpulseOnset`s<br>• `prominence`: governing P, `adjustment`: KI [dB]<br>• `category`: 'not impulsive' / 'regular impulsive' / 'highly impulsive'<br>• `laeq`, `adjusted_laeq` [dB]<br>• `.governing_onset`, `.plot()` | `r.adjustment, r.category` |
 | `ImpulseOnset` | `dataclass` | **A single detected LpAF onset (ISO/PAS 1996-3 Clause 3).**<br>• `index_start`/`index_end`, `time_start`/`time_end` [s]<br>• `level_start`/`level_end` [dB]<br>• `level_difference`: LD = Le − Ls [dB]<br>• `onset_rate`: OR [dB/s]<br>• `prominence`: P, `qualifies`: OR > 10 dB/s | `o.onset_rate, o.level_difference` |
 | `ImpulsiveSoundWarning` | `warning class` | **ISO/PAS 1996-3 advisory.**<br>Emitted when no onset with a gradient above 10 dB/s is found (adjustment is 0 dB) | `warnings.simplefilter('error', ImpulsiveSoundWarning)` |
+| `frequency_weighted_sel` | `function` | **Frequency-weighted single-event sound exposure level from band levels (ISO 13474:2009 Equation (5)).**<br>• `band_levels_db`: band levels L_E(j) [dB] on the last axis; leading axes kept, so `(N_atm, N_exc, n_bands)` gives every replica at once<br>• `weighting_db`: weighting w(j) of each band [dB] (A, C or any other) | `environment.frequency_weighted_sel(bands_db, a_weighting_db)`<br><br>• 10 lg Σ 10^(0.1 (L_E(j) + w(j))) [dB] |
+| `replica_probabilities` | `function` | **Probability of each replica atmosphere, the product of its two class probabilities (ISO 13474 Equation (14)).**<br>• `absorption_probabilities`: one per atmospheric-absorption class<br>• `excess_attenuation_probabilities`: one per excess-attenuation class | `p = environment.replica_probabilities([1.0], p_exc)`<br><br>• array `(N_atm, N_exc)` |
+| `long_term_sel` | `function` | **Long-term average single-event sound exposure level (ISO 13474 Equation (7)), or the rating level with K (Equation (8)).**<br>• `levels_db`: L_E,w,k,l of each replica [dB], any shape<br>• `probabilities`: same shape, summing to one<br>• `rating_adjustment_db`: K for highly impulsive sound [dB] (Default: 0) | `environment.long_term_sel(levels_db, p)`<br><br>• Annex A LT1 = 37.0 dB |
+| `turbulence_level_shift` | `function` | **Shift Δμ of each Gaussian subclass, σ² ln 10 / 20 (ISO 13474 Equation (22) in closed form).**<br>• `sigma_db`: standard deviation of the turbulent spread [dB] | `environment.turbulence_level_shift(5.0)  # 2.878`<br><br>• [dB] |
+| `sel_distribution` | `function` | **Statistical distribution of the single-event sound exposure level (ISO 13474:2009 clause 5, Equations (10) to (25)).**<br>• `levels_db`: L_E,w of each replica atmosphere [dB], any shape<br>• `probabilities`: same shape, summing to one<br>• `sigma_db`: turbulent spread [dB] (Default: 5.0, the value clause 5 says is typical)<br>• `subclasses`: N_sub per class (Default: 10, as Annex A) | `d = environment.sel_distribution(levels_db, p)`<br><br>• `SelDistribution` |
+| `SelDistribution` | `dataclass` | **The ISO 13474 distribution: sorted classes, their boundaries and densities, and the spread density.**<br>• `levels_db`, `probabilities`, `lower_bounds_db` / `upper_bounds_db` [dB], `class_densities_per_db` [1/dB] (Equations (10) to (15))<br>• `subclass_centres_db` [dB], `sigma_db`, `level_shift_db` [dB], `subclasses` (Equations (17) to (22))<br>• `long_term_level_db` (Equation (7), LT1) and `distribution_long_term_level_db` (Equation (A.4), LT2) [dB]<br>• `replicas`: the input replicas of each class<br>• `.class_density(x_db)`, `.density(x_db)`, `.exceedance(x_db)` (Equation (24)), `.exceedance_level(percent)` (Equation (25))<br>• `.plot(view='classes' / 'density' / 'exceedance')` | `d.exceedance_level(50.0)  # 31.5 dB`<br>`d.plot(view='exceedance')` |
 | `multiple_shock_assessment` | `function` | **Full multiple-shock assessment from seat acceleration (ISO 2631-5:2018).**<br>• `acceleration`: vertical seat az(t) [m/s²], `fs` [Hz]<br>• `start_age`: years, `years`: exposure years, `days_per_year`<br>• `exposure_time` / `measurement_time`: scale Dz to a daily dose (Default: None)<br>• `sex`: 'male'/'female' (Default: 'male')<br>• `mz`: MPa per m/s² (Default: sex-specific) | `res = vibration.multiple_shock_assessment(az, fs, start_age=25, years=30, days_per_year=220)`<br><br>• `MultipleShockResult` |
 | `seat_to_spine_transfer` | `function` | **Seat-to-spine transfer function H(ω) (clause 5.2 Formula 1).**<br>• `frequencies` [Hz] | `H = vibration.seat_to_spine_transfer(freqs)`<br><br>• Complex response; unity at 0 Hz |
 | `spinal_response` | `function` | **Vertical spinal response Az(t) (Formula 2).**<br>• `acceleration`: seat az(t) [m/s²]<br>• `fs` [Hz] | `Az = vibration.spinal_response(az, fs)`<br><br>• Same length as the input [m/s²] |
@@ -43181,7 +43351,7 @@ documents, one page per module.
 | `TonalityWarning` | `warning class` | **Tonality advisory.**<br>Emitted for biased tonality estimates (e.g. coarse FFT resolution) | `warnings.simplefilter('error', TonalityWarning)` |
 | `STIWarning` | `warning class` | **STI/STIPA advisory.**<br>Emitted for suspect speech-intelligibility measurements or inputs | `warnings.simplefilter('error', STIWarning)` |
 | `__version__` | `str` | **Package version string.**<br>(no parameters) | `phonometry.__version__  # '4.0.0rc1'` |
-| `.plot()` | `method` | **One-line canonical figure on every result object (soft matplotlib dependency).**<br>Available on `ZwickerLoudness`, `MooreGlasbergLoudness`, `MooreGlasbergTimeVaryingLoudness`, `EcmaLoudness`, `EcmaTonality`, `EcmaRoughness`, `PsychoacousticAnnoyanceResult`, `FluctuationStrengthResult`, `ProgramLoudnessResult`, `KWeightingResponse`, `STIResult`, `SIIResult`, `SIIProcedure`, `StandardSpeechSpectrum`, `NCResult`, `RCResult`, `AgeThresholdResult`, `NiptsResult`, `HtlanResult`, `ImpulseProminenceResult`, `ImpulsiveSoundResult`, `MultipleShockResult`, `ImpulseResponseResult`, `DecayCurve`, `RoomAcousticsResult`, `ReverberationResult`, `ReverberationModelResult`, `DynamicStiffnessResult`, `MobilityResult`, `TransferStiffnessResult`, `VibrationSoundPowerResult`, `StructureBornePowerResult`, `InstalledSourceResult`, `WeightedRatingResult`, `ImpactRatingResult`, `FacadeInsulationResult`, `LabAirborneInsulationResult`, `LabImpactInsulationResult`, `SoundPowerResult`, `SoundEnergyResult`, `ReverberationSoundPowerResult`, `ReverberationSoundEnergyResult`, `InSituSoundPowerResult`, `InDuctSoundPowerResult`, `SoundPowerIntensityResult`, `DiscretePointIntensityResult`, `PrecisionSoundPowerResult`, `PrecisionIntensityResult`, `IntensityResult`, `UncertaintyResult`, `AbsorptionRatingResult`, `ScatteringResult`, `DiffusionResult`, `DiffusionSpectrum`, `InsituAbsorptionResult`, `WeightingResponse`, `WeightedSpectrum`, `Signal` and `DailyVibrationExposure`.<br>• `ax`: existing Axes, or None to build a fresh figure (Default: None)<br>• returns the Matplotlib `Axes` (an array of Axes for multi-panel figures); never calls `plt.show()`<br>• needs matplotlib (`pip install phonometry[plot]`) | `res.plot()`<br>`decay_curve(ir, fs).plot()` |
+| `.plot()` | `method` | **One-line canonical figure on every result object (soft matplotlib dependency).**<br>Available on `ZwickerLoudness`, `MooreGlasbergLoudness`, `MooreGlasbergTimeVaryingLoudness`, `EcmaLoudness`, `EcmaTonality`, `EcmaRoughness`, `PsychoacousticAnnoyanceResult`, `FluctuationStrengthResult`, `ProgramLoudnessResult`, `KWeightingResponse`, `STIResult`, `SIIResult`, `SIIProcedure`, `StandardSpeechSpectrum`, `NCResult`, `RCResult`, `AgeThresholdResult`, `NiptsResult`, `HtlanResult`, `ImpulseProminenceResult`, `ImpulsiveSoundResult`, `SelDistribution`, `MultipleShockResult`, `ImpulseResponseResult`, `DecayCurve`, `RoomAcousticsResult`, `ReverberationResult`, `ReverberationModelResult`, `DynamicStiffnessResult`, `MobilityResult`, `TransferStiffnessResult`, `VibrationSoundPowerResult`, `StructureBornePowerResult`, `InstalledSourceResult`, `WeightedRatingResult`, `ImpactRatingResult`, `FacadeInsulationResult`, `LabAirborneInsulationResult`, `LabImpactInsulationResult`, `SoundPowerResult`, `SoundEnergyResult`, `ReverberationSoundPowerResult`, `ReverberationSoundEnergyResult`, `InSituSoundPowerResult`, `InDuctSoundPowerResult`, `SoundPowerIntensityResult`, `DiscretePointIntensityResult`, `PrecisionSoundPowerResult`, `PrecisionIntensityResult`, `IntensityResult`, `UncertaintyResult`, `AbsorptionRatingResult`, `ScatteringResult`, `DiffusionResult`, `DiffusionSpectrum`, `InsituAbsorptionResult`, `WeightingResponse`, `WeightedSpectrum`, `Signal` and `DailyVibrationExposure`.<br>• `ax`: existing Axes, or None to build a fresh figure (Default: None)<br>• returns the Matplotlib `Axes` (an array of Axes for multi-panel figures); never calls `plt.show()`<br>• needs matplotlib (`pip install phonometry[plot]`) | `res.plot()`<br>`decay_curve(ir, fs).plot()` |
 
 ## Notes
 
@@ -58008,7 +58178,7 @@ the normative PDF fiche.
 - [Filter Architecture Gallery](https://jmrplens.github.io/phonometry/signals/filters/filter-gallery/): choose an architecture and inspect responses
 - [Calibration and dBFS](https://jmrplens.github.io/phonometry/signals/metrology/calibration/): get real-world SPL values
 - [Why phonometry](https://jmrplens.github.io/phonometry/start/why-phonometry/): the conformance-first design philosophy
-- [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): the expected and computed value of all 1302 checks
+- [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): the expected and computed value of all 1309 checks
 - [API Reference](https://jmrplens.github.io/phonometry/reference/api/): every parameter of every function
 - [Bibliography](https://jmrplens.github.io/phonometry/reference/bibliography/): the books and papers behind every guide, each with a verified link
 
@@ -58980,7 +59150,7 @@ sample from the metrology core:
 | IEC 61252:1993 | The personal sound exposure quantities, `sound_exposure()` and the normalized 8 h level `lex_8h()`; IEC 61252:2025 has since superseded this print, and the transcription still targets the 1993+A2 text | `tests/signals/test_levels.py` |
 
 The same discipline applies far beyond the metrology core: today the suite runs
-1302 numerical conformance checks across 90 domains and 465 standards, covering
+1309 numerical conformance checks across 91 domains and 466 standards, covering
 psychoacoustics and speech intelligibility, room, building and materials
 acoustics, human and machine vibration, environmental, aircraft, rotorcraft
 and underwater noise, electroacoustics, broadcast loudness, industrial noise

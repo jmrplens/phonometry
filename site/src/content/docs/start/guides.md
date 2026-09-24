@@ -1,6 +1,6 @@
 ---
 title: "Guides"
-description: "The 139 guides of phonometry, grouped into the thirteen topics the library covers: what each area is for, the standards implemented in it, and a one-line summary of every guide inside it."
+description: "The 140 guides of phonometry, grouped into the thirteen topics the library covers: what each area is for, the standards implemented in it, and a one-line summary of every guide inside it."
 head:
   - tag: script
     attrs:
@@ -117,7 +117,7 @@ makes, then runnable code and the figure it draws. Nothing here is a survey of
 the field; each page is the working documentation of a module, written so that
 a result can be defended clause by clause rather than trusted.
 
-This page is the map. A hundred and thirty-nine guides sit in thirteen topics, and each topic has its
+This page is the map. A hundred and forty guides sit in thirteen topics, and each topic has its
 own overview page with the longer story of how its pieces fit together. If you
 are arriving without a specific question, read
 [Getting Started](/phonometry/start/getting-started/) first: it runs one signal
@@ -621,8 +621,8 @@ Outdoor propagation, barriers, refraction, road, rail and wind-turbine
 sources, and the assessment built on them. Everything here concerns sound that
 has to travel a long way before it is assessed, so the atmosphere, the ground
 and the source's own motion all enter the answer. Implements ISO 9613-1/-2,
-ISO 1996-1/-2, ISO/PAS 1996-3, NT ACOU 112, CNOSSOS-EU (2002/49/EC Annex II),
-ISO 11819-1 and IEC 61400-11.
+ISO 1996-1/-2, ISO/PAS 1996-3, NT ACOU 112, ISO 13474, CNOSSOS-EU
+(2002/49/EC Annex II), ISO 11819-1 and IEC 61400-11.
 
 One scope boundary is worth stating here rather than one click away. Of
 CNOSSOS-EU, what is implemented is the **source** side of Annex II: the road
@@ -668,6 +668,9 @@ regulatory mapping.
 - [Impulsive-sound prominence (NT ACOU 112)](/phonometry/environment/assessment/impulsive-sound/):
   the predicted prominence of each impulse from its onset rate and level
   difference, and the adjustment added to $L_\mathrm{Aeq}$.
+- [Impulsive Sound Exposure Statistics (ISO 13474)](/phonometry/environment/assessment/sel-distribution/):
+  how often a distant blast is how loud: the long-term and rating levels,
+  the ordered classes, the spread for turbulence and the exceedance levels.
 
 - [Environmental Levels (ISO 1996-1/-2)](/phonometry/environment/assessment/environmental-levels/):
   $L_\mathrm{den}$, $L_\mathrm{dn}$ and the composite rating levels, the tonal adjustment, the

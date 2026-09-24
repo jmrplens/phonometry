@@ -2241,6 +2241,117 @@ dos ediciones con las mismas entradas y en el mismo orden.
   que es además la forma de NT ACOU 112:2002 que el PAS arrastra.
 - **Estado:** sin notificar.
 
+## ISO 13474:2009, Anexo A.2 (el nivel de cada clase atribuido a las Ecuaciones (7) y (8))
+
+- **Ubicación:** Anexo A (informativo), A.2, el párrafo sobre la Tabla A.3
+  que dice cómo se obtuvieron sus niveles.
+- **El impreso:** «For each octave band, the sound exposure level at location
+  A was calculated using Equations (7) and (8). From this, the A-weighted
+  sound exposure level for each excess-attenuation class was determined.»
+- **El problema:** las Ecuaciones (7) y (8) son el nivel medio a largo plazo
+  de exposición sonora del suceso y su nivel de evaluación,
+  $10 \lg \left[\sum_{k}\sum_{l} \wp_{\mathrm{atm},k}\,\wp_{\mathrm{exc},l}\,10^{0{,}1 L_{E,\mathrm{w},k,l}}\right]$
+  dB, con $K$ sumado en el exponente de la Ecuación (8): un único número
+  sumado sobre todas las clases, a partir de niveles ya ponderados en
+  frecuencia, sin banda de octava ni clase que quede en él. El párrafo
+  describe un nivel por banda para cada clase de atenuación en exceso y
+  después el nivel ponderado A de cada clase obtenido de él, que son la
+  Ecuación (4), $L_{E,k,l}(j)$, y la Ecuación (5). El propio anexo usa la
+  Ecuación (7) un paso después, para el LT1, un único valor impreso en la
+  Figura A.3 del que dice «calculated using Equation (7)». La referencia
+  cruzada debería decir Ecuaciones (4) y (5).
+- **Evidencia:** el párrafo leído en la página 39 del PDF (p. 31 impresa), la
+  Ecuación (4) en la página 15 del PDF (p. 7 impresa), la Ecuación (5) en la
+  página 16 del PDF (p. 8 impresa), las Ecuaciones (7) y (8) en la página 17
+  del PDF (p. 9 impresa) y la frase del LT1 en la página 42 del PDF (p. 34
+  impresa), todo de BS ISO 13474:2009, la adopción británica de
+  ISO 13474:2009 (primera edición, 2009-06-15).
+- **Comportamiento de la biblioteca:** los niveles de la Tabla A.3 se toman
+  tal como se imprimen; `frequency_weighted_sel` evalúa la Ecuación (5) y
+  `long_term_sel` las Ecuaciones (7) y (8)
+  ([`exposure_distribution.py`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/environment/assessment/exposure_distribution.py)),
+  cada una con la ecuación que le da su apartado. No hizo falta ningún
+  cambio.
+- **Estado:** sin notificar.
+
+## ISO 13474:2009, Anexo A.2 (el desplazamiento de la Ecuación (22) impreso como 1,04 dB)
+
+- **Ubicación:** Anexo A (informativo), A.2, el párrafo bajo la Figura A.1 que
+  dispersa la densidad de las clases por la turbulencia.
+- **El impreso:** el párrafo empieza con «a normal distribution having a
+  standard deviation equal to 5 dB» y sigue «In this example, the mean value
+  was shifted by an amount, Δμ, equal to 1,04 dB [from Equation (22)]»; la
+  Figura A.3 repite $\sigma = 5{,}0$ dB.
+- **El problema:** la Ecuación (22) es la media de una variable lognormal y
+  vale $\Delta\mu = \sigma^2 \ln 10 / 20$, que son $2{,}878$ dB con
+  $\sigma = 5$ dB. $1{,}04$ dB es su valor con $\sigma = 3$ dB ($1{,}036$ dB),
+  una desviación típica que el anexo no usa. El resto del anexo se calculó con
+  $2{,}878$ dB. El desplazamiento mantiene la media energética de cada
+  subclase en su centro, y por eso el LT2 impreso de 37,0 dB coincide con el
+  LT1 impreso de 37,0 dB; con $\Delta\mu = 1{,}04$ dB y $\sigma = 5$ dB todos
+  los niveles de la distribución dispersada suben $1{,}84$ dB, el LT2 queda en
+  38,8 dB, el máximo de la Figura A.2 pasa de unos 30,5 dB a 32,3 dB y
+  $L_{50}$ queda en 33,3 dB frente a los 31,5 dB impresos.
+- **Evidencia:** el párrafo leído en la página 42 del PDF (p. 34 impresa), la
+  Ecuación (22) en la página 21 del PDF (p. 13 impresa), las Figuras A.2 y A.3
+  en las páginas 43 y 44 del PDF (pp. 35 y 36 impresas), todo de
+  BS ISO 13474:2009, la adopción británica de ISO 13474:2009 (primera
+  edición, 2009-06-15). Todos los valores se recalcularon a partir de la
+  Tabla A.3, en la página 40 del PDF (p. 32 impresa) del mismo documento.
+- **Comportamiento de la biblioteca:** el desplazamiento es la Ecuación (22)
+  en forma cerrada,
+  [`turbulence_level_shift`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/environment/assessment/exposure_distribution.py),
+  $2{,}878$ dB con 5 dB, y no es un parámetro que se pueda fijar. La
+  comprobación de conformidad «ISO 13474:2009 Equation (22)» lo contrasta con
+  la integral impresa evaluada por cuadratura, y «ISO 13474:2009 Equation
+  (A.4), Figure A.3» mantiene el LT2 en los 37,0 dB impresos.
+- **Estado:** sin notificar.
+
+## ISO 13474:2009, Anexo A.2, Figura A.3 (niveles de superación que no son las raíces de la Ecuación (25))
+
+- **Ubicación:** Anexo A (informativo), Figura A.3, los niveles de superación
+  impresos junto a la curva acumulada.
+- **El impreso:** $L_{95} = 21{,}7$ dB, $L_{50} = 31{,}5$ dB,
+  $L_{10} = 40{,}6$ dB, $L_{5} = 43{,}2$ dB y $L_{1} = 48{,}0$ dB, junto a
+  $\sigma = 5{,}0$ dB.
+- **El problema:** la Ecuación (24) define la probabilidad de que el nivel
+  supere $x$ como $\int_x^{\infty} \rho^{*}(x')\,\mathrm{d}x'$ y la Ecuación
+  (25) el nivel superado el $n$ % como su raíz. Sobre la distribución de la
+  Tabla A.4 dispersada como describe A.2, dan 21,6; 31,5; 40,5; 43,0 y
+  47,5 dB: $L_{50}$ coincide y los otros cuatro se imprimen entre 0,1 dB y
+  0,5 dB más altos, tanto más cuanto más raro es el nivel. El anexo no dice
+  cómo los calculó. Hay una lectura compatible con el impreso: una curva
+  acumulada formada desde 15 dB, donde empiezan las curvas dibujadas de las
+  Figuras A.2 y A.3 (sus ejes empiezan en 10 dB), y no desde menos infinito,
+  $1 - \int_{15}^{x} \rho^{*}(x')\,\mathrm{d}x'$; la curva dibujada de la
+  Figura A.3 empieza en 15 dB sobre la línea del 1, que es lo que dibuja esa
+  lectura y donde la Ecuación (24) da 0,998. Alimentada con la columna
+  de 07:00 a 19:00 de la Tabla A.3 tal como se imprime, que suma 1,0004, da
+  21,69; 31,49; 40,58; 43,16 y 47,97 dB, los cinco al dígito impreso; añade
+  entonces un 0,17 % a cada superación, el 0,21 % de la distribución por
+  debajo de 15 dB menos el 0,04 % en que la columna impresa pasa de uno, lo
+  que mueve más los niveles de los porcentajes más pequeños. Alimentada con
+  las probabilidades a precisión completa que reproducen la Tabla A.4, la
+  misma lectura da 21,69; 31,49; 40,59; 43,17 y 48,05 dB, y $L_{1}$ se
+  imprimiría como 48,1 dB. La lectura es por tanto una hipótesis y no una
+  reconstrucción de la figura; lo que queda establecido es que cuatro de los
+  cinco niveles impresos no son raíces de la Ecuación (25).
+- **Evidencia:** la Figura A.3 en la página 44 del PDF (p. 36 impresa), la
+  Figura A.2 en la página 43 del PDF (p. 35 impresa) y las Ecuaciones (24) y
+  (25) en la página 21 del PDF (p. 13 impresa), todo de BS ISO 13474:2009, la
+  adopción británica de ISO 13474:2009 (primera edición, 2009-06-15). Los
+  niveles se recalcularon a partir de la Tabla A.3, en la página 40 del PDF
+  (p. 32 impresa) del mismo documento.
+- **Comportamiento de la biblioteca:** `SelDistribution.exceedance` evalúa la
+  Ecuación (24) hasta infinito en forma cerrada y
+  `SelDistribution.exceedance_level` resuelve la Ecuación (25)
+  ([`exposure_distribution.py`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/environment/assessment/exposure_distribution.py)),
+  así que el ejemplo devuelve 21,6; 31,5; 40,5; 43,0 y 47,5 dB. La
+  comprobación de conformidad «ISO 13474:2009 Equation (25), Figure A.3»
+  mantiene $L_{50}$ en los 31,5 dB impresos; los otros cuatro niveles
+  impresos no tienen comprobación de conformidad.
+- **Estado:** sin notificar.
+
 ## ISO 3744:2010, H.4.2.7 (la corrección por altitud y el divisor que lleva debajo)
 
 - **Ubicación:** Anexo H (informativo), H.4.2.7 «Meteorological and radiation

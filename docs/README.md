@@ -245,6 +245,7 @@ limits a noise map is drawn against.
 - [Environmental levels](environment/assessment/environmental-levels.md): $L_\mathrm{den}$, $L_\mathrm{dn}$ and the composite rating levels of ISO 1996-1, with the ISO 1996-2 tonal adjustment, residual-noise correction and measurement uncertainty budget
 - [Spanish Noise Regulation (RD 1367/2007)](environment/assessment/spanish-noise-regulation.md): the corrected level $L_\mathrm{Keq}$ with its tonal, low-frequency and impulsive corrections, the evaluation periods split into noise phases, the acoustic quality objective and immission limit tables, and the Article 25 compliance check of an activity
 - [Impulsive-sound prominence](environment/assessment/impulsive-sound.md): the NT ACOU 112:2002 predicted prominence of impulsive sounds (onset rate and level difference) and the graduated adjustment $K_\mathrm{I}$ added to $L_\mathrm{Aeq}$
+- [Impulsive sound exposure statistics (ISO 13474)](environment/assessment/sel-distribution.md): how often a distant blast is how loud, the ISO 13474:2009 distribution of the single-event sound exposure level over replica atmospheres, with the long-term and rating levels, the spread for turbulence and the exceedance levels
 
 ### [Aircraft noise](aircraft/index.md)
 

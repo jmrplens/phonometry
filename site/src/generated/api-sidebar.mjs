@@ -255,6 +255,7 @@ export const apiSections = {
       'reference/api/environment/air-absorption',
       'reference/api/environment/cnossos-rail',
       'reference/api/environment/impulsive-sound',
+      'reference/api/environment/exposure-distribution',
       'reference/api/environment/rating',
       'reference/api/environment/wind-turbine',
       'reference/api/environment/measurement',

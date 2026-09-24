@@ -8,7 +8,7 @@ here is embedded by a page under ``environment/``.
 """
 
 import math
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -16,6 +16,9 @@ from numpy.typing import NDArray
 
 from phonometry._plot.common import format_frequency_axis, theme_fill
 from phonometry.environment import StatisticalPassByResult
+
+if TYPE_CHECKING:
+    from phonometry.environment import SelDistribution
 
 from .i18n import _LANG, _fmt_minus
 from .theme import (
@@ -804,6 +807,53 @@ def generate_impulse_prominence(output_dir: str) -> None:
 
     plt.tight_layout()
     save_figure(output_dir, "impulse_prominence.png")
+    plt.close()
+
+
+def _tow_launcher_distribution() -> "SelDistribution":
+    """ISO 13474 Annex A: the TOW launcher heard at 3 020 m (Table A.3).
+
+    The 27 A-weighted single-event levels and their 07:00 to 19:00
+    probabilities, formed from the day and night columns at the 80 % and
+    20 % the annex states.
+    """
+    from phonometry import environment
+
+    levels = [30.5, 31.2, 31.3, 36.1, 38.3, 38.8, 39.2, 30.8, 31.8, 31.8,
+              33.7, 40.2, 41.0, 41.6, 42.2, 42.4, 42.7, 43.1, 28.4, 30.8,
+              32.2, 42.3, 43.6, 44.5, 45.2, 45.5, 46.1]  # fmt: skip
+    day = [0.0360, 0.0053, 0.0003, 0.0731, 0.0951, 0.0634, 0.0, 0.2037,
+           0.1087, 0.0184, 0.0279, 0.0001, 0.0, 0.0549, 0.0482, 0.0209,
+           0.0039, 0.0003, 0.0, 0.0356, 0.2042, 0.0001, 0.0, 0.0, 0.0, 0.0,
+           0.0]  # fmt: skip
+    night = [0.0, 0.0, 0.0, 0.0664, 0.0966, 0.0962, 0.0, 0.1151, 0.0295,
+             0.0, 0.0268, 0.0084, 0.0, 0.0665, 0.0445, 0.0172, 0.0033,
+             0.0003, 0.0069, 0.0798, 0.2310, 0.0215, 0.0260, 0.0263,
+             0.0194, 0.0153, 0.0030]  # fmt: skip
+    period = 0.8 * np.asarray(day) + 0.2 * np.asarray(night)
+    return environment.sel_distribution(levels, period, sigma_db=5.0, subclasses=10)
+
+
+def generate_sel_distribution_density(output_dir: str) -> None:
+    """ISO 13474: the class density and the density spread for turbulence."""
+    print("Generating sel_distribution_density...")
+    dist = _tow_launcher_distribution()
+    _fig, (ax_classes, ax_density) = plt.subplots(1, 2, figsize=(13.5, 5.4))
+    dist.plot(ax_classes, view="classes", language=_LANG)
+    dist.plot(ax_density, view="density", language=_LANG)
+    plt.tight_layout()
+    save_figure(output_dir, "sel_distribution_density.svg")
+    plt.close()
+
+
+def generate_sel_distribution_exceedance(output_dir: str) -> None:
+    """ISO 13474: the exceedance curve with the Figure A.3 levels marked."""
+    print("Generating sel_distribution_exceedance...")
+    dist = _tow_launcher_distribution()
+    _fig, ax = plt.subplots(figsize=(10, 6))
+    dist.plot(ax, view="exceedance", language=_LANG)
+    plt.tight_layout()
+    save_figure(output_dir, "sel_distribution_exceedance.svg")
     plt.close()
 
 

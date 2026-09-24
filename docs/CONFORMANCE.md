@@ -19,7 +19,7 @@
 
 ## Numerical conformance report
 
-**1302/1302 conformance checks pass** across 90 domains and 465 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+**1309/1309 conformance checks pass** across 91 domains and 466 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub><b>&#916;</b> is the difference between the computed value and the one the standard publishes. <b>Used</b> is how much of that clause's published tolerance the difference consumes: 100 % means it sits exactly on the limit, 5 % means it uses a twentieth of the allowance, and a dash means the clause states no two-sided tolerance for the quantity, so there is no budget to spend. It is reported and never used to decide a verdict, which is settled at full precision before any rounding.</sub>
 
@@ -1146,6 +1146,21 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 |:---|:---|:---|:---|:---|:---:|:---:|
 | EN 12354-6:2003 Formula 1 | Equivalent absorption area, Annex E bare room | 2.26 m² (+/-0.01 m²) | 2.26 m² | 0.003 m² | 30 % | ![Pass][cv-pass] Pass |
 | EN 12354-6:2003 Formula 5 | Reverberation time, Annex E bare room | 2.1 s (+/-0.1 s) | 2.1 s | 0.003 s | 6 % | ![Pass][cv-pass] Pass |
+
+</details>
+
+<details>
+<summary><b>Impulsive sound exposure distribution (ISO 13474)</b>: 100% (7/7)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
+|:---|:---|:---|:---|:---|:---:|:---:|
+| ISO 13474:2009 Equations (10) to (13), Table A.4 | Sorted levels and class boundaries of the 27 classes | 81/81 levels and boundaries of Table A.4 | 81/81 levels and boundaries of Table A.4 | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 13474:2009 Equation (14), Table A.4 | Probability of each class over 07:00 to 19:00, sorted with its level | 27/27 probabilities of Table A.4 | 27/27 probabilities of Table A.4 | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 13474:2009 Equation (15), Table A.4 | Probability density of each class, in 1/dB | 27/27 densities of Table A.4 | 27/27 densities of Table A.4 | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 13474:2009 Equation (7), Figure A.3 | Long-term average single-event level LT1 of the TOW launcher | 37 dB (+/-0.05 dB) | 37.01 dB | 0.01 dB | 20 % | ![Pass][cv-pass] Pass |
+| ISO 13474:2009 Equation (A.4), Figure A.3 | Long-term level LT2 from the distribution spread with sigma = 5 dB | 37 dB (+/-0.05 dB) | 36.96 dB | -0.042 dB | 84 % | ![Pass][cv-pass] Pass |
+| ISO 13474:2009 Equation (22) | Shift of the Gaussian subclasses at sigma = 5 dB, against the printed integral | 2.878231366 dB (+/-0.000000001 dB) | 2.878231366 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| ISO 13474:2009 Equation (25), Figure A.3 | Level exceeded by 50 % of the events, L50 | 31.5 dB (+/-0.05 dB) | 31.46 dB | -0.044 dB | 88 % | ![Pass][cv-pass] Pass |
 
 </details>
 

@@ -72,6 +72,7 @@ from result_factories import (
     _reverb_energy,
     _reverb_power,
     _room,
+    _sel_distribution,
     _single_panel,
     _slit_aperture,
     _sound_energy,
@@ -206,6 +207,7 @@ _KWARG_PLOT_CASES = [
     ("diffuse_absorption", _diffuse_absorption, "line"),
     ("monte_carlo", _monte_carlo, "bar"),
     ("exposure", _exposure, "bar"),
+    ("sel_distribution", _sel_distribution, "line"),
     ("vibration_meter_reading", _vibration_meter_reading, "line"),
     ("vibration_meter_verification", _vibration_meter_verification, "line"),
     (
@@ -501,6 +503,7 @@ def test_single_axes_plots_accept_external_ax() -> None:
         _diffuse_absorption(),
         _monte_carlo(),
         _exposure(),
+        _sel_distribution(),
         _static_airflow(),
         _airborne_prediction(),
         _impact_prediction(),

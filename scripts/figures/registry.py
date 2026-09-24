@@ -232,6 +232,8 @@ from .environment import (
     generate_rd1367_vs_iso_tonal,
     generate_refraction_homogeneous_check,
     generate_road_device_ratings,
+    generate_sel_distribution_density,
+    generate_sel_distribution_exceedance,
     generate_shadow_zone_map,
     generate_statistical_pass_by,
     generate_tonal_audibility,
@@ -1219,6 +1221,10 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     generate_tone_prominence_assessment,
     generate_tone_audibility_levels,
     generate_impulsive_sound_onsets,
+    # ISO 13474: the statistical distribution of a blast's sound exposure
+    # level, the TOW launcher of Annex A drawn by the result's own .plot().
+    generate_sel_distribution_density,
+    generate_sel_distribution_exceedance,
     generate_moore_glasberg_specific_loudness,
     generate_sottek_specific_tonality,
     generate_fluctuation_strength_specific,

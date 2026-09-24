@@ -43,9 +43,19 @@ ISO 1996 a regulation typically restates, and which it replaces. Kf, the
 correction driven by the difference between the C-weighted and the A-weighted
 level, has no counterpart in ISO 1996 at all.
 
+[Impulsive Sound Exposure Statistics (ISO 13474)](sel-distribution.md)
+is for the source whose level at the receiver is not one number: a blast or a
+shot kilometres away, heard ten decibels louder or quieter as the weather
+between them changes. From the level and probability of each replica
+atmosphere it builds the statistical distribution of the single-event sound
+exposure level, spreads it for turbulence, and reads off the long-term level,
+the rating level with the impulsive adjustment K, and the level exceeded by
+any percentage of the events.
+
 Read Environmental Levels first, then the impulsive-sound page as the
 adjustment that feeds it, then the Spanish regulation as the national assembly
-of both.
+of both. The exposure statistics page stands beside them for firing ranges,
+quarries and demolition, where the weather decides the level.
 
 ## Pages in this section
 
@@ -56,6 +66,10 @@ of both.
 - [Impulsive-sound prominence (NT ACOU 112)](impulsive-sound.md):
   the predicted prominence of impulsive sounds, the graduated LAeq adjustment
   KI, the ISO/PAS 1996-3 measurement chain and the assessment fiche.
+- [Impulsive Sound Exposure Statistics (ISO 13474)](sel-distribution.md):
+  the long-term and rating levels of a blast from its replica atmospheres, the
+  ordered classes and their densities, the spread for turbulence and the
+  exceedance levels.
 - [Spanish Noise Regulation (RD 1367/2007)](spanish-noise-regulation.md):
   the corrected level LKeq, the Kt/Kf/Ki corrections, the evaluation periods
   and noise phases, and the immission limit tables.

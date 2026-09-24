@@ -94,6 +94,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   average, and two defects of the printed page are in the errata registry. A
   new guide covers the method in English and Spanish, with a diagram of the
   measurement site.
+- **How often a distant blast is how loud (ISO 13474).** A shot or a
+  detonation kilometres away reaches the same receiver ten decibels apart from
+  one event to the next as the weather changes, and ISO 13474:2009 turns the
+  levels of a set of replica atmospheres and their probabilities into a
+  statistical distribution. `environment.sel_distribution` sorts the levels
+  into classes with their boundaries and densities, splits them into
+  subclasses, spreads each for turbulence with a Gaussian shifted by
+  `environment.turbulence_level_shift` so that its energy is kept, and returns
+  a `SelDistribution` with the density, the probability of exceeding a level,
+  the level exceeded by any percentage of the events, both long-term levels of
+  Annex A and a `.plot()` of the class density, the spread density or the
+  exceedance curve. `environment.long_term_sel` gives the long-term average and
+  the rating level with the impulsive adjustment K, `frequency_weighted_sel`
+  the weighted level of a replica from its band levels, and
+  `replica_probabilities` the joint probability of its two classes. Table A.4
+  of the standard comes out digit for digit from Table A.3, and the long-term
+  levels and the median of Figure A.3 are conformance rows. Two things in
+  Annex A do not follow from its own equations and are in the errata register:
+  the shift is printed as 1,04 dB where Equation (22) gives 2,878 dB at the
+  5 dB the annex uses, and four of the five exceedance levels of Figure A.3
+  are 0,1 dB to 0,5 dB above the roots of Equation (25). Those four are
+  consistent with a curve accumulated from 15 dB, where the drawn curve
+  begins, when it is fed the rounded 07:00 to 19:00 column of Table A.3, but
+  not with the full-precision probabilities that reproduce Table A.4, so the
+  register gives that reading as a hypothesis. The register also records that
+  the paragraph above Table A.3 credits the level of each class to Equations
+  (7) and (8), the long-term averages, where Equations (4) and (5) give it. A
+  new guide in English and Spanish runs the whole example.
 - **The ISO 1683 reference values, published once and read by every level.**
   `metrology.ISO1683_REFERENCE_VALUES` holds ISO 1683:2015 Tables 1 to 3,
   the reference values for sound in gases, sound in liquids and vibration,

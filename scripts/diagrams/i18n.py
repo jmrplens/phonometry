@@ -982,7 +982,7 @@ _ES: dict[str, str] = {
     "Metrics": "Métricas",
     # Level symbols, the same in the Spanish edition.
     "$L_{eq}$, $L_N$…": "$L_{eq}$, $L_N$…",
-    "Multirate decimation in the octave filter bank": "Decimación multitasa en el banco de filtros de octava",
+    "Multirate decimation in the octave filter bank": "Diezmado multitasa en el banco de filtros de octava",
     # Unit symbols, the same in Spanish; "fs = 48 kHz" is shared with the
     # multichannel-capture plate.
     "$f_s$ = 48 kHz": "$f_s$ = 48 kHz",
@@ -991,9 +991,9 @@ _ES: dict[str, str] = {
     "16 kHz band": "Banda de 16 kHz",
     "250 Hz band": "Banda de 250 Hz",
     "63 Hz band": "Banda de 63 Hz",
-    "no decimation": "sin decimación",
+    "no decimation": "sin diezmado",
     "Anti-alias": "Antialias",
-    "Low bands are filtered at a decimated rate: the relative": "Las bandas graves se filtran a frecuencia decimada: el ancho",
+    "Low bands are filtered at a decimated rate: the relative": "Las bandas graves se filtran a frecuencia diezmada: el ancho",
     "bandwidth stays wide, so the SOS stays numerically healthy.": "relativo se mantiene amplio y las SOS siguen bien condicionadas.",
     "Two-microphone (p-p) intensity probe": "Sonda de intensidad p-p (dos micrófonos)",
     "measurement axis / intensity direction": "eje de medida / dirección de la intensidad",

@@ -258,6 +258,21 @@ NEEDS_MARK: dict[str, str] = {
     "moviles": "móviles",
 }
 
+#: Words the translation glossary replaces with another word rather than an
+#: accent. Signal processing says "diezmado" in Spanish for what English calls
+#: decimation, and the calque "decimación" once reached the multirate diagram
+#: through a table every other gate read as correct Spanish.
+GLOSSARY_TERMS: dict[str, str] = {
+    "decimación": "diezmado",
+    "decimacion": "diezmado",
+    "decimaciones": "diezmados",
+    "decimado": "diezmado",
+    "decimados": "diezmados",
+    "decimada": "diezmada",
+    "decimadas": "diezmadas",
+    "decimar": "diezmar",
+}
+
 #: A singular in -ción, -sión, -xión or -gión written without its accent. The
 #: plural (-ciones) ends in -es and is never matched, and ``guion`` (which the
 #: Real Academia writes without the accent since 2010) ends in -uion.
@@ -322,7 +337,7 @@ def prose(text: str) -> str:
 def _spelling(word: str) -> str | None:
     """The spelling *word* stands for, or None when it is correct as written."""
     lower = word.lower()
-    right = NEEDS_MARK.get(lower)
+    right = NEEDS_MARK.get(lower) or GLOSSARY_TERMS.get(lower)
     if right is None and _SINGULAR_ION.fullmatch(lower):
         right = lower[:-3] + "ión"
     if right is None:

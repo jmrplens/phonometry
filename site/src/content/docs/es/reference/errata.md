@@ -8465,8 +8465,11 @@ dos ediciones con las mismas entradas y en el mismo orden.
   impresa, la (A.2) da $u_{L_\mathrm{c}} = 0{,}075$ dB, una incertidumbre
   expandida de 0,150 dB y 0,161 dB con el visualizador; con el cuadrado da
   0,057 dB, 0,115 dB y 0,128 dB, los tres valores que imprimen las dos partes.
-  La forma sin cuadrado tampoco está en dB², así que cambia con la unidad del
-  nivel.
+  Los dos cálculos usan la $u_{L_\mathrm{in}}$ que deduce el ejemplo,
+  0,0416 dB a partir de una resolución de visualizador de 0,1 dB y una
+  constancia de 0,03 dB, no los 0,042 dB a los que la redondea, que darían
+  0,058 dB. La forma sin cuadrado tampoco está en dB², así que cambia con la
+  unidad del nivel.
 - **Evidencia:** un recálculo del ejemplo impreso de las dos maneras.
   Verificado en la página 21 del PDF (p. 19 impresa) y en la página 23 del PDF
   (p. 21 impresa) de la IEC 61260-2:2016, y en la página 18 del PDF (p. 16

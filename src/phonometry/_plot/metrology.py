@@ -70,11 +70,13 @@ _ACCEPTANCE_LABEL = "Acceptance limit"
 #: Legend entry of the acceptance limits of several requirements at once.
 _ACCEPTANCE_LIMITS_LABEL = "Acceptance limits"
 
-#: Labels the IEC 61183 plots share with the translation table, written once.
+#: Labels the IEC 61183 and IEC 62585 plots share with the translation table,
+#: written once.
 _RI_CORRECTION_LABEL = r"$G_\mathrm{RI} - G_\mathrm{F} = -10\,\lg\gamma$"
 _SENSITIVITY_LEVEL_LABEL = "Sensitivity level [dB]"
 _FREQUENCY_LABEL = "Frequency [Hz]"
 _DIFFUSE_DEVIATION_LABEL = r"$\Delta G_\mathrm{D} = L_\mathrm{D} - L_\mathrm{D,ref}$"
+_CORRECTION_AXIS_LABEL = "Correction [dB]"
 
 _STRINGS: dict[str, str] = {
     r"Contribution to combined uncertainty $|c_i|\,u(x_i)$": r"Contribución a la incertidumbre combinada $|c_i|\,u(x_i)$",
@@ -159,7 +161,7 @@ _STRINGS: dict[str, str] = {
     r"$G_\mathrm{RI}$, random incidence": r"$G_\mathrm{RI}$, incidencia aleatoria",
     _RI_CORRECTION_LABEL: _RI_CORRECTION_LABEL,
     _SENSITIVITY_LEVEL_LABEL: "Nivel de sensibilidad [dB]",
-    "Correction [dB]": "Corrección [dB]",
+    _CORRECTION_AXIS_LABEL: "Corrección [dB]",
     "Random-incidence sensitivity level (IEC 61183)": "Nivel de sensibilidad en incidencia aleatoria (IEC 61183)",
     "Random-incidence correction (IEC 61183)": "Corrección de incidencia aleatoria (IEC 61183)",
     _FREQUENCY_LABEL: "Frecuencia [Hz]",
@@ -205,6 +207,7 @@ _STRINGS: dict[str, str] = {
     "Range over the microphones": "Intervalo entre micrófonos",
     "Exceeds the maximum": "Supera el máximo",
     "Expanded uncertainty [dB]": "Incertidumbre expandida [dB]",
+    "Expanded uncertainty, range [dB]": "Incertidumbre expandida, intervalo [dB]",
     "Clause {n}: exceeds the maximum at {k} of {m} frequencies (IEC 62585)": "Apartado {n}: supera el máximo en {k} de {m} frecuencias (IEC 62585)",
     "Clause {n}: within the maximum at every frequency (IEC 62585)": "Apartado {n}: dentro del máximo en todas las frecuencias (IEC 62585)",
 }
@@ -1401,7 +1404,7 @@ def plot_random_incidence_sensitivity(
         kwargs.setdefault("label", _t(_RI_CORRECTION_LABEL, language))
         ax.plot(frequencies, result.correction_db, **kwargs)
         ax.axhline(0.0, color=_C_MUTED, lw=0.8, ls="--")
-        ax.set_ylabel(_t("Correction [dB]", language))
+        ax.set_ylabel(_t(_CORRECTION_AXIS_LABEL, language))
         ax.set_title(_t("Random-incidence correction (IEC 61183)", language))
     else:
         kwargs.setdefault(
@@ -1639,7 +1642,7 @@ def plot_adjustment_value(
     )
     ax.set_xscale("log")
     format_frequency_axis(ax, language=language)
-    ax.set_xlabel(_t("Frequency [Hz]", language))
+    ax.set_xlabel(_t(_FREQUENCY_LABEL, language))
     ax.set_ylabel(_t("Deviation from the incident level [dB]", language))
     delta = format_number(result.adjustment_db, language, decimals=2)
     ax.set_title(
@@ -1722,8 +1725,8 @@ def plot_free_field_correction(
         )
     ax.set_xscale("log")
     format_frequency_axis(ax, language=language)
-    ax.set_xlabel(_t("Frequency [Hz]", language))
-    ax.set_ylabel(_t("Correction [dB]", language))
+    ax.set_xlabel(_t(_FREQUENCY_LABEL, language))
+    ax.set_ylabel(_t(_CORRECTION_AXIS_LABEL, language))
     ax.set_title(_t(_CORRECTION_TITLES[result.source], language))
     ax.grid(visible=True, which="both", alpha=0.3)
     place_legend_clear(ax.legend(fontsize="small"))
@@ -1907,8 +1910,14 @@ def plot_correction_uncertainty_verification(
     ax.set_ylim(0.0, _VERIFICATION_HEADROOM * max(tops))
     ax.set_xscale("log")
     format_frequency_axis(ax, language=language)
-    ax.set_xlabel(_t("Frequency [Hz]", language))
-    ax.set_ylabel(_t("Expanded uncertainty [dB]", language))
+    ax.set_xlabel(_t(_FREQUENCY_LABEL, language))
+    # The range shares the axis: a spread of corrections, not an uncertainty.
+    ylabel = (
+        "Expanded uncertainty [dB]"
+        if result.correction_range_db is None
+        else "Expanded uncertainty, range [dB]"
+    )
+    ax.set_ylabel(_t(ylabel, language))
     failures = int(result.failing_frequencies_hz.size)
     if failures:
         title = _t(

@@ -118,15 +118,15 @@ def test_table_i2_coverage_factor_follows_from_its_own_dof() -> None:
     assert round(float(student.ppf(0.975, 17)), 2) == pytest.approx(
         ref.IEC62585_TABLE_I2_PRINTED_K, abs=1e-12
     )
-    assert round(budget.expanded_uncertainty_db, 2) == pytest.approx(
-        ref.IEC62585_TABLE_I2_EXPANDED_2DP_DB, abs=1e-12
+    # 2,042 times 0,05903 dB is 0,1206 dB: 0,12(1) to the printed guard digit.
+    assert round(budget.expanded_uncertainty_db, 3) == pytest.approx(
+        ref.IEC62585_TABLE_I2_EXPANDED_DB, abs=1e-12
     )
     # The printed guard digit, 0,12(4), follows from the printed k instead.
     printed = ref.IEC62585_TABLE_I2_PRINTED_K * ref.IEC62585_TABLE_I2_COMBINED_DB
     assert round(printed, 3) == pytest.approx(
         ref.IEC62585_TABLE_I2_PRINTED_EXPANDED_DB, abs=1e-12
     )
-    assert round(budget.expanded_uncertainty_db, 3) == pytest.approx(0.121, abs=1e-12)
 
 
 def test_table_i3_reproduces() -> None:
@@ -253,6 +253,20 @@ def test_budget_refuses_degrees_of_freedom_that_are_not_positive(dof: float) -> 
         )
 
 
+def test_budget_refuses_a_combination_its_columns_do_not_give() -> None:
+    budget = _budget_i2()
+    doubled = budget.values_db * 2.0
+    with pytest.raises(ValueError, match="'uncertainty' must be the combination"):
+        dataclasses.replace(budget, values_db=doubled)
+
+
+def test_budget_refuses_column_dofs_that_are_not_positive() -> None:
+    budget = _budget_i2()
+    dofs = np.where(np.isfinite(budget.dofs), 0.0, budget.dofs)
+    with pytest.raises(ValueError, match="'dofs' must be positive"):
+        dataclasses.replace(budget, dofs=dofs)
+
+
 def test_budget_columns_are_read_only() -> None:
     budget = _budget_i2()
     with pytest.raises(ValueError, match="read-only"):
@@ -310,6 +324,12 @@ def test_maxima_of_clauses_9_to_14(
     assert np.allclose(maxima, maximum_db, atol=1e-12)
 
 
+def test_a_frequency_within_two_percent_of_a_boundary_is_read_as_it() -> None:
+    """4,05 kHz is "4 kHz" to 2 %: up to and including 4 kHz, not above."""
+    near = metrology.maximum_expanded_uncertainty([4050.0, 4100.0], clause=12)
+    assert np.allclose(near, [0.25, 0.35], rtol=0.0, atol=1e-12)
+
+
 def test_clause_10_states_no_maximum_below_63_hz() -> None:
     with pytest.raises(ValueError, match="63 Hz"):
         metrology.maximum_expanded_uncertainty([50.0], clause=10)
@@ -336,6 +356,38 @@ def test_verdict_is_inclusive_at_the_maximum() -> None:
     assert np.allclose(verdict.margin_db, 0.0)
     assert verdict.failing_frequencies_hz.size == 0
     assert verdict.range_passes is None
+
+
+def test_verdict_forgives_a_maximum_reached_through_arithmetic() -> None:
+    """0,1 + 0,2 is 0,300 000 000 000 000 04 in binary: on 0,30 dB, not above."""
+    reached = 0.1 + 0.2
+    verdict = metrology.verify_correction_uncertainty([5000.0], [reached], clause=11)
+    assert reached > verdict.maximum_uncertainty_db[0]
+    assert verdict.passes
+    spread = 0.05 * 7
+    ranged = metrology.verify_correction_uncertainty(
+        [8000.0], [0.2], clause=12, correction_range_db=[spread]
+    )
+    assert spread > ranged.maximum_uncertainty_db[0]
+    assert ranged.passes
+
+
+def test_verdict_derives_its_maximum_from_the_clause() -> None:
+    verdict = metrology.CorrectionUncertaintyVerification(
+        clause=12, frequencies_hz=[1000.0, 10000.0], expanded_uncertainty_db=[0.3, 0.3]
+    )
+    assert np.allclose(verdict.maximum_uncertainty_db, [0.25, 0.5])
+    assert np.array_equal(verdict.failing_frequencies_hz, [1000.0])
+    assert "maximum_uncertainty_db" not in {
+        field.name for field in dataclasses.fields(verdict)
+    }
+
+
+def test_verdict_of_clause_10_refuses_a_frequency_below_63_hz() -> None:
+    with pytest.raises(ValueError, match="63 Hz"):
+        metrology.CorrectionUncertaintyVerification(
+            clause=10, frequencies_hz=[50.0], expanded_uncertainty_db=[0.1]
+        )
 
 
 def test_verdict_fails_above_the_maximum() -> None:
@@ -414,6 +466,45 @@ def test_equal_weights_take_the_mean_deviation() -> None:
     assert result.free_field_indicated_level_db == pytest.approx(94.0 + 0.1 + s)
     assert result.pressure_indicated_level_db is None
     assert result.pressure_to_free_field_correction_db is None
+
+
+def test_adjustment_value_is_l1_less_l4() -> None:
+    """ΔL = L1 - L4, added to what the adjusted meter reads on the calibrator."""
+    result = metrology.adjustment_value(
+        _A_FREQUENCIES, 94.0 + _A_DEVIATION, 93.7, calibrator_level_db=94.0
+    )
+    # s = +0,1 dB, so L4 = 93,7 + 0,1 = 93,8 dB and ΔL = 94,0 - 93,8 = +0,2 dB.
+    assert result.sensitivity_adjustment_db == pytest.approx(0.1, abs=1e-12)
+    assert result.calibrator_indicated_level_db == pytest.approx(93.8, abs=1e-12)
+    assert result.adjustment_db == pytest.approx(0.2, abs=1e-12)
+    assert result.adjustment_db > 0.0
+    assert result.calibrator_indicated_level_db + result.adjustment_db == (
+        pytest.approx(result.calibrator_level_db, abs=1e-12)
+    )
+
+
+def test_a_nominal_check_frequency_finds_its_exact_counterpart() -> None:
+    """250 Hz is the exact one-third-octave 251,19 Hz, to within 2 %."""
+    result = metrology.adjustment_value(
+        _THIRDS,
+        94.0,
+        94.0,
+        calibrator_level_db=94.0,
+        check_frequency_hz=250.0,
+    )
+    assert result.check_frequency_offset_db == pytest.approx(0.0, abs=1e-12)
+    actuator = metrology.electrostatic_actuator_correction(
+        _THIRDS,
+        94.0 + 0.01 * np.arange(_THIRDS.size),
+        94.0,
+        94.0,
+        reference_sensitivity_level_db=-26.0,
+        check_frequency_hz=250.0,
+    )
+    exact = float(_THIRDS[np.argmin(np.abs(_THIRDS - 250.0))])
+    assert actuator.check_frequency_hz == pytest.approx(exact)
+    assert exact == pytest.approx(251.188643, abs=1e-6)
+    assert actuator.correction_db[_THIRDS == exact][0] == 0.0
 
 
 def test_tolerances_weigh_the_fit() -> None:
@@ -613,6 +704,57 @@ def test_determinations_are_averaged_and_their_range_kept() -> None:
     assert np.allclose(result.range_db, 0.05)
     with pytest.raises(ValueError, match="read-only"):
         result.corrections_db[0, 0] = 0.0
+
+
+def _three_microphones_on_three_calibrators(
+    **kwargs: object,
+) -> metrology.FreeFieldCorrection:
+    """Nine determinations of identical microphones on calibrators that load
+    them 0, 0,15 and 0,30 dB apart (D.2 step 6, one row per combination).
+    """
+    loading = np.tile([0.0, 0.15, 0.30], 3)[:, None]
+    return metrology.sound_calibrator_correction(
+        _F,
+        94.0 + np.tile(_SLM_FREE, (9, 1)),
+        94.0 + _RM_FREE,
+        94.0 + _SLM_PRESSURE + loading,
+        94.0 + _RM_PRESSURE,
+        reference_free_field_correction_db=_REFERENCE_CORRECTION,
+        **kwargs,  # type: ignore[arg-type]
+    )
+
+
+def test_the_range_is_taken_over_the_microphones() -> None:
+    """Clause 12: the range of three microphones, not of the calibrators."""
+    grouped = _three_microphones_on_three_calibrators(
+        microphones=[1, 1, 1, 2, 2, 2, 3, 3, 3]
+    )
+    assert (grouped.determinations, grouped.microphone_count) == (9, 3)
+    assert grouped.microphone_corrections_db.shape == (3, _F.size)
+    assert np.allclose(grouped.range_db, 0.0, atol=1e-12)
+    assert np.allclose(grouped.correction_db, _TRUE_CORRECTION - 0.15)
+    assert grouped.microphones == (1, 1, 1, 2, 2, 2, 3, 3, 3)
+    verdict = metrology.verify_correction_uncertainty(
+        grouped.frequencies_hz,
+        0.2,
+        clause=grouped.clause,
+        correction_range_db=grouped.range_db,
+    )
+    assert verdict.passes
+    # Without the grouping every determination is a microphone of its own.
+    ungrouped = _three_microphones_on_three_calibrators()
+    assert ungrouped.microphone_count == 9
+    assert np.allclose(ungrouped.range_db, 0.30)
+
+
+def test_microphones_need_one_label_per_determination() -> None:
+    with pytest.raises(ValueError, match="one label per determination"):
+        _three_microphones_on_three_calibrators(microphones=[1, 2, 3])
+
+
+def test_microphones_are_labels_not_a_string() -> None:
+    with pytest.raises(ValueError, match="single string"):
+        _three_microphones_on_three_calibrators(microphones="111222333")
 
 
 def test_determinations_must_agree_in_number() -> None:

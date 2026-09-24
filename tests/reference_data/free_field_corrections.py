@@ -75,9 +75,11 @@ IEC62585_TABLE_I2_PRINTED_K = 2.11
 #: digit "(4)", 0,124 dB, which is 2,11 times 0,0590.
 IEC62585_TABLE_I2_PRINTED_EXPANDED_DB = 0.124
 
-#: Table I.2 rounded to the two decimals the correction is quoted to (a14),
-#: which the page's own numbers reproduce: 2,04 times 0,0590 is 0,120.
-IEC62585_TABLE_I2_EXPANDED_2DP_DB = 0.12
+#: Table I.2: the expanded uncertainty the page's own numbers give, to the
+#: guard digit the table prints it with: the Student factor for 95 % at the
+#: 29,98 effective degrees of freedom, 2,042, times the combined standard
+#: uncertainty, 0,05903 dB, is 0,1206 dB, that is 0,12(1).
+IEC62585_TABLE_I2_EXPANDED_DB = 0.121
 
 #: Table I.3, printed folio 39 (PDF page 41): the values at 8 kHz, which differ
 #: from those at 1 kHz in four components.
@@ -151,6 +153,15 @@ IEC62585_MAXIMA: tuple[tuple[int, float, float], ...] = (
 
 #: Clause 6, printed folio 10 (PDF page 12): below 97 kPa, "an expanded
 #: uncertainty (k=2) of 0,15 dB at frequencies less than and equal to 3 kHz
-#: and 0,25 dB for frequencies above 3 kHz".
+#: and 0,25 dB for frequencies above 3 kHz", as ``(frequency in Hz, value in
+#: dB)``: well inside each band, at the nominal 3 kHz, and at the exact
+#: one-twelfth-octave frequencies either side of it (Table H.1, 2,985 383 and
+#: 3,162 278 kHz).
 IEC62585_STATIC_PRESSURE_LIMIT_KPA = 97.0
-IEC62585_STATIC_PRESSURE_EXPANDED_DB = ((1000.0, 0.15), (8000.0, 0.25))
+IEC62585_STATIC_PRESSURE_EXPANDED_DB = (
+    (1000.0, 0.15),
+    (2985.383, 0.15),
+    (3000.0, 0.15),
+    (3162.278, 0.25),
+    (8000.0, 0.25),
+)

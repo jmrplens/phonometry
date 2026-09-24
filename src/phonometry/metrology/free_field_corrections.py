@@ -36,7 +36,8 @@ Formula (E.6) for a comparison coupler (:func:`comparison_coupler_correction`),
 and Formula (F.13), normalised to the calibration check frequency, for an
 electrostatic actuator (:func:`electrostatic_actuator_correction`). All three
 return a :class:`FreeFieldCorrection`, which averages the determinations of
-the combinations clause 7 asks for and keeps their range.
+the combinations clause 7 asks for and keeps the range of the corrections over
+the microphones, the quantity clauses 12 to 14 judge.
 
 **The uncertainty, Annex I and clauses 9 to 14.**
 :func:`correction_uncertainty_budget` builds the budget of Table I.1 on
@@ -81,9 +82,10 @@ each reading is of, so neither labelling reaches it, and the defect is in
 **The coverage factor of Table I.2.** The budget at 1 kHz reproduces the
 printed combined standard uncertainty, 0,0590 dB, and effective degrees of
 freedom, 29,98, but prints :math:`k = 2{,}11`, the Student factor for about 17
-degrees of freedom. For 29,98 it is 2,04, and the expanded uncertainty
-0,120 dB rather than the 0,124 dB the table prints to its guard digit. The
-budget here gives 2,04, and the defect is in ``docs/ERRATA.md``.
+degrees of freedom. For 29,98 it is 2,042, and the expanded uncertainty
+:math:`2{,}042 \times 0{,}05903 = 0{,}121` dB rather than the 0,124 dB the
+table prints to its guard digit. The budget here gives 2,042, and the defect
+is in ``docs/ERRATA.md``.
 """
 
 from __future__ import annotations
@@ -104,6 +106,7 @@ from .._internal.validation import (
     require_positive,
     require_positive_array,
 )
+from .conformance import _at_most
 from .uncertainty import (
     Quantity,
     UncertaintyResult,
@@ -112,7 +115,7 @@ from .uncertainty import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping, Sequence
+    from collections.abc import Hashable, Mapping, Sequence
 
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
@@ -190,6 +193,15 @@ _SOURCES: Mapping[str, tuple[str, int]] = MappingProxyType(
 #: Readings of several determinations are a matrix: one row each, one column
 #: per frequency.
 _MATRIX_RANK = 2
+
+#: How closely a budget's combination has to match the one its columns give:
+#: the numerical sensitivity coefficients of the GUM combination differ from
+#: the exact 1 in the last few bits, and one part in 10^9 leaves room for no
+#: other difference.
+_COMBINATION_REL_TOL = 1e-9
+
+#: The same, in absolute terms, for a budget whose every component is zero.
+_COMBINATION_ABS_TOL_DB = 1e-15
 
 
 @dataclass(frozen=True)
@@ -444,6 +456,35 @@ def _common_rows(named: Mapping[str, NDArray[np.float64]]) -> int:
     return rows.pop() if rows else 1
 
 
+def _microphone_labels(
+    microphones: Sequence[Hashable], determinations: int
+) -> tuple[Hashable, ...]:
+    """One hashable label per determination, as a tuple.
+
+    :raises ValueError: for a single string, labels that are not hashable, or
+        a count other than the number of determinations.
+    """
+    if isinstance(microphones, (str, bytes)):
+        msg = (
+            "'microphones' must hold one label per determination, not a single string."
+        )
+        raise ValueError(msg)
+    try:
+        labels = tuple(microphones)
+        for label in labels:
+            hash(label)
+    except TypeError as exc:
+        msg = "'microphones' must be a sequence of hashable labels."
+        raise ValueError(msg) from exc
+    if len(labels) != determinations:
+        msg = (
+            f"'microphones' must hold one label per determination ({determinations}); "
+            f"got {len(labels)}."
+        )
+        raise ValueError(msg)
+    return labels
+
+
 def _index_of(frequencies: NDArray[np.float64], target_hz: float, name: str) -> int:
     """The position of the frequency the text names among the given ones.
 
@@ -480,11 +521,11 @@ def exact_frequencies(
     one-twelfth-octave steps, whose decade from 1 kHz to 10 kHz Table H.1
     prints to seven significant digits; they are the band edges of
     one-twelfth-octave filters, so 1 kHz and every one-third-octave midband
-    frequency are among them. Clauses 10 and 12 to 14 and Annexes B and C
-    report the corrections at these exact frequencies rather than at the
-    nominal ones. :math:`b = 1` gives the exact octave midband frequencies
-    clause 10 measures a microphone at, and :math:`b = 3` the one-third-octave
-    ones.
+    frequency are among them. Clause 10 and Annexes B and C (B.2, C.2) require
+    the measurements to be made and reported at these exact frequencies
+    rather than at the nominal ones. :math:`b = 1` gives the exact octave
+    midband frequencies clause 10 measures a microphone at, and :math:`b = 3`
+    the one-third-octave ones.
 
     :param lowest_hz: The lowest frequency wanted, in Hz.
     :param highest_hz: The highest frequency wanted, in Hz, not below
@@ -833,8 +874,13 @@ class FreeFieldCorrection:
     One row of :attr:`corrections_db` per determination, one combination of
     microphone and source, and one column per frequency. The correction the
     manual states is their mean at each frequency (D.2 step 6, E.2 step 5,
-    F.2 step 5); clauses 12 to 14 judge the range over the microphones
-    against the maximum permitted expanded uncertainty.
+    F.2 step 5). Clauses 12 to 14 judge "the range of correction values at
+    each frequency measured using a sample of three microphones" against the
+    maximum permitted expanded uncertainty, :attr:`range_db`: over the
+    microphones, not over every determination, so that nine determinations
+    of three microphones on three calibrators (D.2 step 6) are not judged on
+    the spread between the calibrators. :attr:`microphones` says which
+    determinations share a microphone.
 
     :ivar frequencies_hz: the frequencies, in Hz.
     :ivar corrections_db: :math:`C_\mathrm{FF,SLM}`, or :math:`C_\mathrm{N,FF,SLM}`
@@ -848,6 +894,10 @@ class FreeFieldCorrection:
     :ivar check_frequency_hz: the normalisation frequency :math:`f_0` of an
         actuator's corrections, in Hz; ``None`` for the other two sources,
         whose corrections are absolute.
+    :ivar microphones: the microphone each determination was made with, one
+        label per row of :attr:`corrections_db` (a serial number or an
+        index), rows with the same label being the same microphone; ``None``
+        when every determination is a microphone of its own.
     """
 
     frequencies_hz: NDArray[np.float64]
@@ -855,6 +905,7 @@ class FreeFieldCorrection:
     reference_correction_db: NDArray[np.float64]
     source: str
     check_frequency_hz: float | None = None
+    microphones: tuple[Hashable, ...] | None = None
 
     def __post_init__(self) -> None:
         """Refuse an unknown source or columns that disagree, and publish them
@@ -862,8 +913,9 @@ class FreeFieldCorrection:
 
         :raises ValueError: if the source is not one of the three, the
             corrections are not one column per frequency, a value is not
-            finite, or the normalisation frequency is missing for an actuator,
-            given for another source, or not among the frequencies.
+            finite, the normalisation frequency is missing for an actuator,
+            given for another source, or not among the frequencies, or the
+            microphones are not one label per determination.
         """
         if self.source not in _SOURCES:
             msg = (
@@ -907,6 +959,12 @@ class FreeFieldCorrection:
             raise ValueError(msg)
         if self.check_frequency_hz is not None:
             _index_of(frequencies, self.check_frequency_hz, "check_frequency_hz")
+        if self.microphones is not None:
+            object.__setattr__(
+                self,
+                "microphones",
+                _microphone_labels(self.microphones, corrections.shape[0]),
+            )
 
     @property
     def correction_db(self) -> NDArray[np.float64]:
@@ -915,12 +973,40 @@ class FreeFieldCorrection:
         """
         return np.mean(self.corrections_db, axis=0)
 
+    def _microphone_rows(self) -> list[list[int]]:
+        """The rows of each microphone, in the order they first appear."""
+        labels = (
+            self.microphones
+            if self.microphones is not None
+            else tuple(range(self.determinations))
+        )
+        groups: dict[Hashable, list[int]] = {}
+        for row, label in enumerate(labels):
+            groups.setdefault(label, []).append(row)
+        return list(groups.values())
+
+    @property
+    def microphone_corrections_db(self) -> NDArray[np.float64]:
+        """The correction of each microphone, the mean over its
+        determinations, in dB, shape ``(microphones, frequencies)``.
+        """
+        return np.array(
+            [self.corrections_db[rows].mean(axis=0) for rows in self._microphone_rows()]
+        )
+
+    @property
+    def microphone_count(self) -> int:
+        """The number of microphones the determinations were made with."""
+        return len(self._microphone_rows())
+
     @property
     def range_db(self) -> NDArray[np.float64]:
-        """The range of the determinations at each frequency, largest less
-        smallest, in dB; zero for a single determination.
+        """The range of the corrections over the microphones at each
+        frequency, the largest less the smallest of
+        :attr:`microphone_corrections_db`, in dB: the range clauses 12 to 14
+        judge. Zero for a single microphone.
         """
-        return np.ptp(self.corrections_db, axis=0)
+        return np.ptp(self.microphone_corrections_db, axis=0)
 
     @property
     def determinations(self) -> int:
@@ -968,6 +1054,7 @@ def _substitution(
     source_level_difference_db: ArrayLike,
     source_difference_name: str,
     free_field_level_difference_db: ArrayLike,
+    microphones: Sequence[Hashable] | None,
 ) -> FreeFieldCorrection:
     """Formula (D.7) or (E.6): the two responses and the reference correction.
 
@@ -1009,6 +1096,11 @@ def _substitution(
         corrections_db=corrections,
         reference_correction_db=reference,
         source=source,
+        microphones=(
+            None
+            if microphones is None
+            else _microphone_labels(microphones, corrections.shape[0])
+        ),
     )
 
 
@@ -1022,6 +1114,7 @@ def sound_calibrator_correction(
     reference_free_field_correction_db: ArrayLike,
     free_field_level_difference_db: ArrayLike = 0.0,
     calibrator_level_difference_db: ArrayLike = 0.0,
+    microphones: Sequence[Hashable] | None = None,
 ) -> FreeFieldCorrection:
     r"""Free-field corrections for use with a multi-frequency sound calibrator
     (IEC 62585:2012, Annex D, Formula (D.7)).
@@ -1043,7 +1136,9 @@ def sound_calibrator_correction(
 
     Each reading may be one value per frequency or a matrix of one row per
     determination; D.2 step 6 asks for at least nine, three microphones on
-    three calibrators, and the correction is their mean.
+    three calibrators, and the correction is their mean. ``microphones``
+    names the microphone of each row, so that the range clause 12 judges is
+    taken over the three microphones and not over the calibrators as well.
 
     :param frequencies_hz: The frequencies, in Hz, increasing.
     :param slm_free_field_level_db: :math:`L_\mathrm{ind1}`, the meter in the
@@ -1064,10 +1159,15 @@ def sound_calibrator_correction(
     :param calibrator_level_difference_db: :math:`L_{p,\mathrm{P1}} -
         L_{p,\mathrm{P2}}`, the calibrator's level on the meter less that on
         the reference, in dB (Default: 0, a stable calibrator; NOTE 3).
+    :param microphones: The microphone of each determination, one label per
+        row, such as ``[1, 1, 1, 2, 2, 2, 3, 3, 3]`` for three microphones
+        each on three calibrators (Default: None, every determination a
+        microphone of its own).
     :return: The :class:`FreeFieldCorrection`.
     :raises ValueError: for a reading that is not finite, a column count that
-        is not the number of frequencies, or readings with different numbers
-        of determinations.
+        is not the number of frequencies, readings with different numbers of
+        determinations, or microphones that are not one label per
+        determination.
     """
     return _substitution(
         frequencies_hz,
@@ -1082,6 +1182,7 @@ def sound_calibrator_correction(
         source_level_difference_db=calibrator_level_difference_db,
         source_difference_name="calibrator_level_difference_db",
         free_field_level_difference_db=free_field_level_difference_db,
+        microphones=microphones,
     )
 
 
@@ -1095,6 +1196,7 @@ def comparison_coupler_correction(
     reference_free_field_correction_db: ArrayLike,
     free_field_level_difference_db: ArrayLike = 0.0,
     coupler_level_difference_db: ArrayLike = 0.0,
+    microphones: Sequence[Hashable] | None = None,
 ) -> FreeFieldCorrection:
     r"""Free-field corrections for use with a comparison coupler
     (IEC 62585:2012, Annex E, Formula (E.6)).
@@ -1136,6 +1238,8 @@ def comparison_coupler_correction(
         during measurement 2, in dB (Default: 0; NOTE 2).
     :param coupler_level_difference_db: the sound pressure level at the meter
         less that at the reference in the coupler, in dB (Default: 0).
+    :param microphones: The microphone of each determination, one label per
+        row (Default: None, every determination a microphone of its own).
     :return: The :class:`FreeFieldCorrection`.
     :raises ValueError: as :func:`sound_calibrator_correction`.
     """
@@ -1152,6 +1256,7 @@ def comparison_coupler_correction(
         source_level_difference_db=coupler_level_difference_db,
         source_difference_name="coupler_level_difference_db",
         free_field_level_difference_db=free_field_level_difference_db,
+        microphones=microphones,
     )
 
 
@@ -1166,6 +1271,7 @@ def electrostatic_actuator_correction(
     actuator_level_db: ArrayLike = 0.0,
     free_field_level_difference_db: ArrayLike = 0.0,
     check_frequency_hz: float = _CHECK_FREQUENCY_HZ,
+    microphones: Sequence[Hashable] | None = None,
 ) -> FreeFieldCorrection:
     r"""Free-field corrections, normalised to the calibration check frequency,
     for use with an electrostatic actuator (IEC 62585:2012, Annex F,
@@ -1211,6 +1317,8 @@ def electrostatic_actuator_correction(
     :param free_field_level_difference_db: :math:`L_{p,\mathrm{F1}} -
         L_{p,\mathrm{F2}}` at each frequency, in dB (Default: 0; NOTE 3).
     :param check_frequency_hz: :math:`f_0`, in Hz (Default: 1000).
+    :param microphones: The microphone of each determination, one label per
+        row (Default: None, every determination a microphone of its own).
     :return: The :class:`FreeFieldCorrection`, zero at :math:`f_0`.
     :raises ValueError: as :func:`sound_calibrator_correction`, or for an
         :math:`f_0` that is not among the frequencies.
@@ -1255,6 +1363,11 @@ def electrostatic_actuator_correction(
         reference_correction_db=reference,
         source="electrostatic_actuator",
         check_frequency_hz=float(frequencies[index]),
+        microphones=(
+            None
+            if microphones is None
+            else _microphone_labels(microphones, corrections.shape[0])
+        ),
     )
 
 
@@ -1287,7 +1400,8 @@ class CorrectionUncertaintyBudget:
     :ivar dofs: the degrees of freedom of each component (``inf`` for a
         Type B estimate).
     :ivar uncertainty: the :class:`~phonometry.metrology.UncertaintyResult`
-        of the combination.
+        of the combination, which has to be the combination of the
+        components the other columns state.
     :ivar coverage: the level of confidence, 0,95 by clause 5.
     """
 
@@ -1304,8 +1418,10 @@ class CorrectionUncertaintyBudget:
         """Refuse columns that disagree, and publish them read-only.
 
         :raises ValueError: if the columns do not hold one entry per
-            component, a value or divisor is not positive, or the coverage is
-            not a probability.
+            component, a value or divisor is not positive, degrees of freedom
+            are not positive, the coverage is not a probability, or
+            :attr:`uncertainty` is not the combination of the components the
+            columns state.
         """
         require_positive(self.frequency_hz, "frequency_hz")
         count = len(self.descriptors)
@@ -1327,8 +1443,52 @@ class CorrectionUncertaintyBudget:
         if not np.all(np.isfinite(self.divisors)) or np.any(self.divisors <= 0.0):
             msg = "CorrectionUncertaintyBudget: 'divisors' must be positive."
             raise ValueError(msg)
+        if np.any(np.isnan(self.dofs)) or np.any(self.dofs <= 0.0):
+            msg = "CorrectionUncertaintyBudget: 'dofs' must be positive."
+            raise ValueError(msg)
         if not 0.0 < self.coverage < 1.0:
             msg = f"CorrectionUncertaintyBudget: 'coverage' must be in (0, 1); got {self.coverage}."
+            raise ValueError(msg)
+        self._check_combination()
+
+    def _check_combination(self) -> None:
+        r"""Refuse an :attr:`uncertainty` the columns do not give.
+
+        Every component enters Formula (E.6) with a sensitivity of
+        :math:`\pm 1`, so the combined standard uncertainty is the quadrature
+        sum of :attr:`standard_uncertainties_db` and the effective degrees of
+        freedom those of Welch-Satterthwaite.
+
+        :raises ValueError: if the combined uncertainty, the effective degrees
+            of freedom or the component names differ from what the columns
+            give.
+        """
+        standard = self.values_db / self.divisors
+        combined = math.sqrt(float(np.sum(standard**2)))
+        names = tuple(self.uncertainty.names)
+        consistent = (not names or names == self.descriptors) and math.isclose(
+            float(self.uncertainty.combined_uncertainty),
+            combined,
+            rel_tol=_COMBINATION_REL_TOL,
+            abs_tol=_COMBINATION_ABS_TOL_DB,
+        )
+        finite = np.isfinite(self.dofs) & (standard > 0.0)
+        if consistent and combined > 0.0:
+            effective = (
+                combined**4 / float(np.sum(standard[finite] ** 4 / self.dofs[finite]))
+                if np.any(finite)
+                else math.inf
+            )
+            stated = float(self.uncertainty.effective_dof)
+            consistent = (math.isinf(effective) and math.isinf(stated)) or (
+                math.isclose(stated, effective, rel_tol=_COMBINATION_REL_TOL)
+            )
+        if not consistent:
+            msg = (
+                "CorrectionUncertaintyBudget: 'uncertainty' must be the combination "
+                "of the components 'values_db', 'divisors' and 'dofs' state; build "
+                "the budget with correction_uncertainty_budget()."
+            )
             raise ValueError(msg)
 
     @property
@@ -1595,6 +1755,19 @@ def _clause(clause: object) -> int:
     return number
 
 
+def _at_most_each(
+    values: NDArray[np.float64], bounds: NDArray[np.float64]
+) -> NDArray[np.bool_]:
+    """Whether each value is at or below its bound, by the rule of the IEC TC
+    29 conformance verdict: a last-bit excess from floating-point arithmetic
+    is forgiven.
+    """
+    return np.array(
+        [_at_most(float(v), float(b)) for v, b in zip(values, bounds, strict=True)],
+        dtype=np.bool_,
+    )
+
+
 def _maximum_at(frequency: float, clause: int) -> float:
     """The maximum of one clause at one frequency, in dB.
 
@@ -1662,27 +1835,30 @@ class CorrectionUncertaintyVerification:
     corrections measured with three microphones exceeds the maximum permitted
     expanded uncertainty at a frequency, the microphone is unsuitable for the
     source unless more samples show otherwise. Both are "shall not exceed", so
-    a value equal to its maximum passes.
+    a value equal to its maximum passes, and so does one that lands on it
+    through floating-point arithmetic: the comparison is the one
+    :func:`~phonometry.metrology.verify_conformance` makes for the IEC TC 29
+    instrument standards, which forgives an excess of one part in
+    :math:`10^9`. The maximum is derived from the clause and the frequencies,
+    :attr:`maximum_uncertainty_db`, so a verdict cannot be judged against a
+    maximum its clause does not give.
 
     :ivar clause: the clause, 9 to 14.
     :ivar frequencies_hz: the frequencies, in Hz.
     :ivar expanded_uncertainty_db: the actual expanded uncertainty at each
         frequency, in dB.
-    :ivar maximum_uncertainty_db: the maximum permitted at each frequency, in
-        dB.
     :ivar correction_db: the corrections, in dB, which the documentation of
         clause 15 states with their uncertainty; ``None`` if not given.
     :ivar coverage_factor: the coverage factor of each expanded uncertainty,
         which clause 15 asks to be stated; ``None`` if not given.
     :ivar correction_range_db: the range of the corrections over the
-        microphones at each frequency, in dB (clauses 12 to 14); ``None`` if
-        not given.
+        microphones at each frequency, in dB (clauses 12 to 14), such as
+        :attr:`FreeFieldCorrection.range_db`; ``None`` if not given.
     """
 
     clause: int
     frequencies_hz: NDArray[np.float64]
     expanded_uncertainty_db: NDArray[np.float64]
-    maximum_uncertainty_db: NDArray[np.float64]
     correction_db: NDArray[np.float64] | None = None
     coverage_factor: NDArray[np.float64] | None = None
     correction_range_db: NDArray[np.float64] | None = None
@@ -1692,11 +1868,13 @@ class CorrectionUncertaintyVerification:
 
         :raises ValueError: for an unknown clause, a column that does not hold
             one value per frequency, a value that is not finite, a negative
-            uncertainty or range, or a range for a clause other than 12 to 14.
+            uncertainty or range, a range for a clause other than 12 to 14, or
+            a frequency below 63 Hz for clause 10.
         """
         _clause(self.clause)
         frequencies = _frequency_axis(self.frequencies_hz)
         object.__setattr__(self, "frequencies_hz", read_only(frequencies.copy()))
+        maximum_expanded_uncertainty(frequencies, clause=self.clause)
         if self.correction_range_db is not None and self.clause not in _RANGE_CLAUSES:
             msg = (
                 "CorrectionUncertaintyVerification: the range of the corrections is "
@@ -1705,7 +1883,6 @@ class CorrectionUncertaintyVerification:
             raise ValueError(msg)
         for name in (
             "expanded_uncertainty_db",
-            "maximum_uncertainty_db",
             "correction_db",
             "coverage_factor",
             "correction_range_db",
@@ -1728,11 +1905,18 @@ class CorrectionUncertaintyVerification:
             object.__setattr__(self, name, read_only(column.copy()))
 
     @property
+    def maximum_uncertainty_db(self) -> NDArray[np.float64]:
+        """The maximum permitted at each frequency by the clause, in dB,
+        :func:`maximum_expanded_uncertainty`.
+        """
+        return maximum_expanded_uncertainty(self.frequencies_hz, clause=self.clause)
+
+    @property
     def uncertainty_passes(self) -> NDArray[np.bool_]:
         """Whether the expanded uncertainty is within the maximum, frequency
         by frequency.
         """
-        return self.expanded_uncertainty_db <= self.maximum_uncertainty_db
+        return _at_most_each(self.expanded_uncertainty_db, self.maximum_uncertainty_db)
 
     @property
     def range_passes(self) -> NDArray[np.bool_] | None:
@@ -1741,7 +1925,7 @@ class CorrectionUncertaintyVerification:
         """
         if self.correction_range_db is None:
             return None
-        return self.correction_range_db <= self.maximum_uncertainty_db
+        return _at_most_each(self.correction_range_db, self.maximum_uncertainty_db)
 
     @property
     def margin_db(self) -> NDArray[np.float64]:
@@ -1873,9 +2057,11 @@ def verify_correction_uncertainty(
     calibrator, a coupler or an actuator (clauses 12 to 14) the range of the
     corrections over three microphones has not to exceed it either. A
     :class:`FreeFieldCorrection` knows its clause, :attr:`~FreeFieldCorrection.clause`,
-    and its range, :attr:`~FreeFieldCorrection.range_db`; a
+    and its range over the microphones, :attr:`~FreeFieldCorrection.range_db`,
+    once it knows which determinations share a microphone; a
     :class:`CorrectionUncertaintyBudget` per frequency gives the expanded
-    uncertainty and the coverage factor.
+    uncertainty and the coverage factor. A value that reaches its maximum
+    through floating-point arithmetic is on it, not above it.
 
     :param frequencies_hz: The frequencies, in Hz, increasing.
     :param expanded_uncertainty_db: The actual expanded uncertainty at each
@@ -1889,7 +2075,8 @@ def verify_correction_uncertainty(
     :param coverage_factor: The coverage factor of each expanded uncertainty,
         for the same documentation (Default: None).
     :param correction_range_db: The range of the corrections over the
-        microphones at each frequency, in dB, clauses 12 to 14 only (Default:
+        microphones at each frequency, in dB, such as
+        :attr:`FreeFieldCorrection.range_db`; clauses 12 to 14 only (Default:
         None, not judged).
     :return: The :class:`CorrectionUncertaintyVerification`.
     :raises ValueError: for an unknown clause, columns that do not hold one
@@ -1905,7 +2092,6 @@ def verify_correction_uncertainty(
         expanded_uncertainty_db=_band_column(
             expanded_uncertainty_db, "expanded_uncertainty_db", count
         ),
-        maximum_uncertainty_db=maximum_expanded_uncertainty(frequencies, clause=number),
         correction_db=_optional_column(correction_db, "correction_db", count),
         coverage_factor=_optional_column(coverage_factor, "coverage_factor", count),
         correction_range_db=_optional_column(

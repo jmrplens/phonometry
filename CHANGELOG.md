@@ -146,29 +146,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `metrology.electrostatic_actuator_correction` apply Formulas (D.7), (E.6)
   and (F.13), the last normalised to the check frequency, to readings given
   one row per determination, and return a `metrology.FreeFieldCorrection`
-  with their mean, their range and the clause they belong to. The
-  free-field correction of the reference microphone, from IEC/TS 61094-7, is
-  an input. `metrology.correction_uncertainty_budget` builds the budget of
-  Table I.1 on `metrology.combine_uncertainty`, its fifteen components keyed
-  as the table prints them with the divisors of their distributions, adds
-  the static-pressure component of clause 6 below 97 kPa and any component a
-  laboratory's method needs, and takes the coverage factor from the
-  Welch-Satterthwaite effective degrees of freedom.
+  with their mean, the clause they belong to and the range clauses 12 to 14
+  judge, taken over the microphones: `microphones=` names the microphone of
+  each row, so nine determinations of three microphones on three calibrators
+  are judged on the three microphones and not on the spread between the
+  calibrators. The free-field correction of the reference microphone, from
+  IEC/TS 61094-7, is an input. `metrology.correction_uncertainty_budget`
+  builds the budget of Table I.1 on `metrology.combine_uncertainty`, its
+  fifteen components keyed as the table prints them with the divisors of
+  their distributions, adds the static-pressure component of clause 6 below
+  97 kPa and any component a laboratory's method needs, and takes the
+  coverage factor from the Welch-Satterthwaite effective degrees of freedom;
+  a budget refuses a combination its own columns do not give.
   `metrology.maximum_expanded_uncertainty` gives the maxima of clauses 9 to
   14, and `metrology.verify_correction_uncertainty` judges the expanded
   uncertainties against them, and for clauses 12 to 14 the range of the
   corrections over the microphones too, returning a verdict whose `passes`
-  is the answer and whose `bool()` raises; its `.report()` renders the
+  is the answer and whose `bool()` raises. The verdict derives its maxima
+  from the clause rather than storing them, and a value that reaches a
+  maximum through floating-point arithmetic is on it, by the same rule as
+  the IEC TC 29 conformance verdict; its `.report()` renders the
   documentation of clause 15 n) and o) as a one-page fiche.
   `metrology.exact_frequencies` evaluates Formula (H.1) for any step-width
-  designator. Every result has `.plot()`. Tables I.2 and I.3 and the 41
-  frequencies of Table H.1 are conformance rows. Three printed defects are in
-  the errata: Table I.2 prints `k = 2,11` beside its own 29,98 effective
-  degrees of freedom, for which the factor at 95 % is 2,04, so the row pins
-  2,04; Table H.1 prints the exponent of index 31 as 31/80; and Formulas
-  (E.4) to (E.6) exchange the two readings in the coupler that Figure E.1
-  defines, which the coupler function avoids by naming its inputs by what
-  each reading is of. A new guide under Calibration and uncertainty runs every
+  designator. Every result has `.plot()`. Tables I.2 and I.3, the 41
+  frequencies of Table H.1, the clause 6 component either side of 3 kHz and
+  the adjustment value of Annex A are conformance rows. Three printed defects
+  are in the errata: Table I.2 prints `k = 2,11` beside its own 29,98
+  effective degrees of freedom, for which the factor at 95 % is 2,04, so the
+  rows pin 2,04 and the expanded uncertainty it gives, 0,121 dB, where the
+  table prints 0,12(4); Table H.1 prints the exponent of index 31 as 31/80;
+  and Formulas (E.4) to (E.6) exchange the two readings in the coupler that
+  Figure E.1 defines, which the coupler function avoids by naming its inputs
+  by what each reading is of. A new guide under Calibration and uncertainty runs every
   method on a synthetic meter and on the two worked budgets, in English and
   Spanish.
 - **What a sound level meter reads when sound arrives from every direction

@@ -68,6 +68,13 @@ if TYPE_CHECKING:
 #: microphones as well.
 _RANGE_CLAUSES = (12, 13, 14)
 
+#: The widths of the two panels, in mm, which fill the 174 mm between the
+#: margins of the page, and of the plot drawn in the second, which leaves the
+#: cell's padding of about 2 mm on its left.
+_TABLE_WIDTH_MM = 86.0
+_PLOT_WIDTH_MM = 88.0
+_DRAWING_WIDTH_MM = 86.0
+
 
 def _basis(
     result: CorrectionUncertaintyVerification,
@@ -281,11 +288,22 @@ def render_iec62585_report(
         ("BOTTOMPADDING", (0, 1), (-1, -1), 1.6),
     ]
     left_cell = band_table(rows, widths, len(rows) - 1, compact, band_centres=None)
+    # The two panels share the 174 mm the page's margins leave: the table
+    # (84 mm and its padding) and the plot, whose legend the drawing's width
+    # includes, so that it ends at the right margin and not past it.
     plot_drawing = render_figure_drawing(
-        result.plot, 92 * mm, y_top=None, figsize=(5.2, 6.4), language=language
+        result.plot,
+        _DRAWING_WIDTH_MM * mm,
+        y_top=None,
+        language=language,
     )
     flow.append(
-        two_panel_body(left_cell, plot_drawing, left_width_mm=86.0, plot_width_mm=92.0)
+        two_panel_body(
+            left_cell,
+            plot_drawing,
+            left_width_mm=_TABLE_WIDTH_MM,
+            plot_width_mm=_PLOT_WIDTH_MM,
+        )
     )
     flow.append(Spacer(1, 8))
 

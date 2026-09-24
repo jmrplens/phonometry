@@ -5,10 +5,12 @@ IEC 62585:2012 prints two worked uncertainty budgets of a correction measured
 with a comparison coupler, at 1 kHz (Table I.2) and at 8 kHz (Table I.3), the
 exact one-twelfth-octave frequencies of one decade (Table H.1), and the maximum
 expanded uncertainty each of clauses 9 to 14 permits. The rows below
-reproduce each from the library, and check the three measurement models
-against the equations they are derived from: readings built by Formulas (D.1)
-to (D.4), (E.1) to (E.3B) and (F.1) to (F.3) from known responses have to give
-back the correction those responses define.
+reproduce each from the library, and check the four measurement models
+against the text they are derived from: readings built by Formulas (D.1) to
+(D.4), (E.1) to (E.3B) and (F.1) to (F.3) from known responses have to give
+back the correction those responses define, and the adjustment value of Annex
+A has to be the Delta L = L1 - L4 of Figure A.1 for a response whose fit is
+known in closed form.
 
 Oracle: BS EN 62585:2012, the English text of EN 62585:2012, which is
 IEC 62585:2012 unchanged: clause 6 on printed folio 10 (PDF page 12), clauses
@@ -18,8 +20,8 @@ page 41).
 
 Three printed defects sit in this oracle and are recorded in
 ``docs/ERRATA.md``. Table I.2 prints k = 2,11 beside its own 29,98 effective
-degrees of freedom, for which the Student factor at 95 % is 2,04; the row pins
-the factor the page's own numbers give. Table H.1 prints the exponent of index
+degrees of freedom, for which the Student factor at 95 % is 2,04; the rows pin
+the factor and the expanded uncertainty the page's own numbers give. Table H.1 prints the exponent of index
 31 as 31/80 beside the value of 10^(31/40). Formulas (E.4) to (E.6) exchange
 the two readings in the coupler that Figure E.1 defines, which the derivation
 row of Annex E checks with the figure's labels.
@@ -159,21 +161,24 @@ def _chk_i2_coverage() -> Outcome:
 
 @register(
     _IEC62585,
-    "IEC 62585:2012 Table I.2",
-    "Expanded uncertainty of the correction at 1 kHz, to two decimals",
+    "IEC 62585:2012 Table I.2, clause 5",
+    "Expanded uncertainty of the correction at 1 kHz, to the printed guard digit",
 )
 def _chk_i2_expanded() -> Outcome:
-    """2,04 times 0,0590 dB, which the table prints as 0,12 dB.
+    """2,042 times 0,05903 dB is 0,1206 dB, that is 0,12(1).
 
-    Its guard digit, 0,12(4), follows from the misprinted k; to the two
-    decimals the correction is quoted to (a14) both give 0,12 dB.
+    The table prints 0,12(4), which follows from its misprinted k = 2,11
+    (docs/ERRATA.md). The row pins the value the page's own numbers give to
+    the guard digit the table prints, so it tells the two apart: 2,11 times
+    0,05903 dB is 0,1246 dB.
     """
     return numeric(
-        ref.IEC62585_TABLE_I2_EXPANDED_2DP_DB,
+        ref.IEC62585_TABLE_I2_EXPANDED_DB,
         _budget_i2().expanded_uncertainty_db,
-        0.005,
+        0.0005,
         unit="dB",
-        places=3,
+        places=4,
+        expected_label="0.121 dB (printed 0,12(4), an erratum)",
     )
 
 
@@ -340,9 +345,10 @@ def _chk_formula_d7() -> Outcome:
 def _chk_formula_e6() -> Outcome:
     """With Figure E.1's labels: L_ind3a is the reference, L_ind3b the meter.
 
-    Formula (E.6) as printed exchanges the two and comes out twice the
-    difference of the two pressure responses away (docs/ERRATA.md); the
-    library names the readings by what each is of.
+    Formula (E.6) as printed exchanges the two and comes out
+    2(dL_P,SLM - dL_P,RM) away (docs/ERRATA.md), the deviations of the two
+    channels' indications from the coupler level; the library names the
+    readings by what each is of.
     """
     result = metrology.comparison_coupler_correction(
         _F,
@@ -382,3 +388,32 @@ def _chk_formula_f13() -> Outcome:
     absolute = _SLM_FREE - slm_actuator
     error = float(np.max(np.abs(result.correction_db - (absolute - absolute[1]))))
     return numeric(0.0, error, 1e-12, unit="dB", places=12)
+
+
+@register(
+    _IEC62585,
+    "IEC 62585:2012 Annex A, Figure A.1",
+    "Adjustment value of a response whose fit is known in closed form",
+)
+def _chk_annex_a() -> Outcome:
+    """Delta L = L1 - L4, added to what the adjusted meter reads.
+
+    With equal weights the fit moves the sensitivity by minus the mean
+    deviation: deviations of +0,2, +0,1 and -0,6 dB give s = +0,1 dB, so a
+    meter reading 93,7 dB on a 94,0 dB calibrator before the adjustment reads
+    L4 = 93,8 dB after it, and Delta L = +0,2 dB.
+    """
+    result = metrology.adjustment_value(
+        [125.0, 1000.0, 8000.0],
+        [94.2, 94.1, 93.4],
+        93.7,
+        calibrator_level_db=94.0,
+    )
+    return numeric(
+        0.2,
+        result.adjustment_db,
+        1e-12,
+        unit="dB",
+        places=3,
+        expected_label="0.2 dB (closed form)",
+    )

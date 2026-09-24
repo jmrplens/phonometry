@@ -425,18 +425,22 @@ def _whole(value: object, where: str) -> object:
     return value
 
 
+#: What a numeric cell has to be, in the words every refusal of one uses.
+_FINITE = "a finite number"
+
+
 def _real(value: object, where: str) -> object:
     # ``float`` and ``int`` are what a data file holds, and checking them by
     # type first spares every packaged cell the slower abstract check.
     exact = type(value) is float or type(value) is int
     if not exact and (isinstance(value, bool) or not isinstance(value, numbers.Real)):
-        _refuse(where, value, "a finite number")
+        _refuse(where, value, _FINITE)
     try:
         finite = math.isfinite(typing.cast("float", value))
     except OverflowError:
         finite = False
     if not finite:
-        _refuse(where, value, "a finite number")
+        _refuse(where, value, _FINITE)
     return value
 
 
@@ -754,7 +758,7 @@ def _figure(value: object, where: str) -> str:
     """
     if isinstance(value, Decimal):
         if not value.is_finite():
-            _refuse(where, value, "a finite number")
+            _refuse(where, value, _FINITE)
         return str(value)
     _real(value, where)
     if isinstance(value, numbers.Integral):
@@ -776,6 +780,34 @@ def _alias_for(
         key=lambda alias: len(alias.suffix),
         default=None,
     )
+
+
+def _check_requires(
+    label: str, written: str, alias: UnitAlias, cells: Mapping[str, Any]
+) -> None:
+    """Refuse an alias figure whose text field, the one saying what it is of, is empty.
+
+    :raises CatalogueError: naming the row, the figure and the field.
+    """
+    missing = next((need for need in alias.requires if not cells.get(need)), None)
+    if missing is not None:
+        msg = (
+            f"{label}: a figure in {alias.unit} ({written}) needs "
+            f"{missing} written beside it, to say what it is of"
+        )
+        raise CatalogueError(msg)
+
+
+def _alias_figure(label: str, value: object, written: str) -> str:
+    """The digits of a figure written under an alias, or a refusal naming the row.
+
+    :raises CatalogueError: for a value that is not a finite number.
+    """
+    try:
+        return _figure(value, written)
+    except CatalogueError as error:
+        msg = f"{label}: {error}"
+        raise CatalogueError(msg) from None
 
 
 def _resolve_units(cls: type[CatalogueRow], cells: dict[str, Any]) -> dict[str, Any]:
@@ -809,23 +841,12 @@ def _resolve_units(cls: type[CatalogueRow], cells: dict[str, Any]) -> dict[str, 
             msg = f"{label}: {written} and {other} are one cell, given twice"
             raise CatalogueError(msg)
         claimed[target] = written
-        for need in alias.requires:
-            if not cells.get(need):
-                msg = (
-                    f"{label}: a figure in {alias.unit} ({written}) needs "
-                    f"{need} written beside it, to say what it is of"
-                )
-                raise CatalogueError(msg)
+        _check_requires(label, written, alias, cells)
         del resolved[written]
-        if value is None:
-            continue
-        try:
-            figure = _figure(value, written)
-        except CatalogueError as error:
-            msg = f"{label}: {error}"
-            raise CatalogueError(msg) from None
-        resolved[target] = convert_figure(figure, alias.factor)
-        converted[target] = (figure, alias.unit)
+        if value is not None:
+            figure = _alias_figure(label, value, written)
+            resolved[target] = convert_figure(figure, alias.factor)
+            converted[target] = (figure, alias.unit)
     if converted:
         resolved["converted"] = converted
     return resolved

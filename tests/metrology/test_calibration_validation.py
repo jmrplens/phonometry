@@ -5,8 +5,9 @@ IEC 60942:2017 (EN IEC 60942:2018) 5.3.3: the short-term level fluctuation is
 measured with time-weighting F over 60 s, sampling at least 30 times; the
 absolute value of the difference between each of the maximum and minimum
 levels and the mean level shall not exceed the Table 2 (p. 16) acceptance
-limits. Class 1: 0.20 dB in 31,5-63 Hz, 0.10 dB in >63-<160 Hz, 0.07 dB from
-160 Hz up (classes LS/2 are only specified in 160-1250 Hz: 0.03/0.15 dB).
+limits, read from :data:`phonometry.metrology.FLUCTUATION_ACCEPTANCE_LIMITS_DB`.
+Class 1: 0.20 dB in 31,5-63 Hz, 0.10 dB in >63-<160 Hz, 0.07 dB from 160 Hz up
+(classes LS/2 are only specified in 160-1250 Hz: 0.03/0.15 dB).
 """
 
 import warnings
@@ -165,16 +166,34 @@ def test_narrowband_requires_fs() -> None:
         metrology.sensitivity(tone, narrowband=True)
 
 
-def test_table2_row_boundaries() -> None:
-    """IEC 60942:2017 Table 2: 160 Hz belongs to the 0.07 dB row and 63 Hz
-    to the 0.20 dB row; the open interval between them gets 0.10 dB.
-    """
-    from phonometry.metrology.calibration import _class1_fluctuation_limit
+def test_the_limit_follows_the_calibrator_class() -> None:
+    """IEC 60942:2017 Table 2 at 1 kHz: 0.03 dB for LS, 0.07 for 1, 0.15 for 2.
 
-    assert _class1_fluctuation_limit(63.0) == pytest.approx(0.20)
-    assert _class1_fluctuation_limit(100.0) == pytest.approx(0.10)
-    assert _class1_fluctuation_limit(160.0) == pytest.approx(0.07)
-    assert _class1_fluctuation_limit(1000.0) == pytest.approx(0.07)
+    A 0.8 % modulation fluctuates by about 0.04 dB, over the class LS limit and
+    inside the class 1 one; a 2.5 % one by about 0.12 dB, well over class 1
+    and well inside class 2. The limit is read from the published table rather
+    than from a class 1 copy of it.
+    """
+    small = _cal_tone(am_depth=0.008)
+    larger = _cal_tone(am_depth=0.025)
+    with pytest.warns(
+        metrology.CalibrationWarning, match=r"Calibration tone level fluctuation is"
+    ):
+        metrology.sensitivity(small, fs=FS, calibrator_class="LS")
+    with _assert_no_calibration_warning():
+        metrology.sensitivity(small, fs=FS, calibrator_class="1")
+    with pytest.warns(
+        metrology.CalibrationWarning, match=r"Calibration tone level fluctuation is"
+    ):
+        metrology.sensitivity(larger, fs=FS, calibrator_class="1")
+    with _assert_no_calibration_warning():
+        metrology.sensitivity(larger, fs=FS, calibrator_class="2")
+
+
+def test_an_unknown_calibrator_class_is_refused() -> None:
+    tone = _cal_tone()
+    with pytest.raises(ValueError, match="calibrator_class"):
+        metrology.sensitivity(tone, fs=FS, calibrator_class="0")
 
 
 def test_sensitivity_rejects_non_finite_samples() -> None:

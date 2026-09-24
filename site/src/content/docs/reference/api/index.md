@@ -57,6 +57,8 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | Module | Summary |
 | :--- | :--- |
 | [`metrology.calibration`](/phonometry/reference/api/metrology/calibration/) | Calibration utilities for mapping digital signals to physical SPL levels. |
+| [`metrology.sound_calibrator`](/phonometry/reference/api/metrology/sound-calibrator/) | Sound calibrators (IEC 60942:2017): the class tables and the verdict on one. |
+| [`metrology.conformance`](/phonometry/reference/api/metrology/conformance/) | The conformance rule of IEC TC 29: a deviation, its limits and its uncertainty. |
 | [`metrology.uncertainty`](/phonometry/reference/api/metrology/uncertainty/) | Measurement uncertainty by the GUM and its Monte Carlo supplement. |
 | [`metrology.data_qualification`](/phonometry/reference/api/metrology/data-qualification/) | Random-data qualification: stationarity tests and Rice crossing statistics. |
 | [`metrology.reference_values`](/phonometry/reference/api/metrology/reference-values/) | Preferred reference values for acoustical and vibratory levels (ISO 1683:2015). |

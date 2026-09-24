@@ -3,13 +3,13 @@
   "library": "4.0.0rc1",
   "generator": "scripts/conformance_report.py",
   "counts": {
-    "checks": 1309,
-    "passing": 1309,
+    "checks": 1337,
+    "passing": 1337,
     "failing": 0,
-    "domains": 91,
-    "standards": 466,
-    "citations": 894,
-    "designations": 184,
+    "domains": 92,
+    "standards": 467,
+    "citations": 905,
+    "designations": 185,
     "sources": 114
   },
   "units": [
@@ -118,6 +118,12 @@
       "title": "Room acoustics",
       "checks": 16,
       "passing": 16
+    },
+    {
+      "id": "sound-calibrators-and-the-conformance-rule-iec-60942-iec-61672-1",
+      "title": "Sound calibrators and the conformance rule (IEC 60942, IEC 61672-1)",
+      "checks": 28,
+      "passing": 28
     },
     {
       "id": "psychoacoustics",
@@ -3093,6 +3099,1102 @@
         "value": 0.021
       },
       "precision": 2,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-calibrators-and-the-conformance-rule-iec-60942-iec-61672-1/iec-60942-2017-table-e-1/example-1-deviation-0-40-db-u-0-12-db-against-0-25-db-and-0-15-db",
+      "domain": "sound-calibrators-and-the-conformance-rule-iec-60942-iec-61672-1",
+      "reference": {
+        "cite": "IEC 60942:2017 Table E.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60942",
+            "edition": "2017",
+            "clause": "Table E.1"
+          }
+        ]
+      },
+      "quantity": "Example 1: |deviation| 0.40 dB, U 0.12 dB against 0.25 dB and 0.15 dB",
+      "kind": "record",
+      "expected": {
+        "label": "No: Deviation exceeds acceptance limits",
+        "record": {
+          "conforms": 0.0,
+          "outcome": 3.0,
+          "reason": 1.0
+        }
+      },
+      "computed": {
+        "label": "No: Deviation exceeds acceptance limits",
+        "record": {
+          "conforms": 0.0,
+          "outcome": 3.0,
+          "reason": 1.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-calibrators-and-the-conformance-rule-iec-60942-iec-61672-1/iec-60942-2017-table-e-1/example-2-deviation-0-35-db-u-0-12-db-against-0-25-db-and-0-15-db",
+      "domain": "sound-calibrators-and-the-conformance-rule-iec-60942-iec-61672-1",
+      "reference": {
+        "cite": "IEC 60942:2017 Table E.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60942",
+            "edition": "2017",
+            "clause": "Table E.1"
+          }
+        ]
+      },
+      "quantity": "Example 2: |deviation| 0.35 dB, U 0.12 dB against 0.25 dB and 0.15 dB",
+      "kind": "record",
+      "expected": {
+        "label": "No: Deviation exceeds acceptance limits",
+        "record": {
+          "conforms": 0.0,
+          "outcome": 3.0,
+          "reason": 1.0
+        }
+      },
+      "computed": {
+        "label": "No: Deviation exceeds acceptance limits",
+        "record": {
+          "conforms": 0.0,
+          "outcome": 3.0,
+          "reason": 1.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-calibrators-and-the-conformance-rule-iec-60942-iec-61672-1/iec-60942-2017-table-e-1/example-3-deviation-0-20-db-u-0-13-db-against-0-25-db-and-0-15-db",
+      "domain": "sound-calibrators-and-the-conformance-rule-iec-60942-iec-61672-1",
+      "reference": {
+        "cite": "IEC 60942:2017 Table E.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60942",
+            "edition": "2017",
+            "clause": "Table E.1"
+          }
+        ]
+      },
+      "quantity": "Example 3: |deviation| 0.20 dB, U 0.13 dB against 0.25 dB and 0.15 dB",
+      "kind": "record",
+      "expected": {
+        "label": "Yes: Deviation within acceptance limits AND uncertainty within maximum-permitted",
+        "record": {
+          "conforms": 1.0,
+          "outcome": 1.0,
+          "reason": 1.0
+        }
+      },
+      "computed": {
+        "label": "Yes: Deviation within acceptance limits AND uncertainty within maximum-permitted",
+        "record": {
+          "conforms": 1.0,
+          "outcome": 1.0,
+          "reason": 1.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-calibrators-and-the-conformance-rule-iec-60942-iec-61672-1/iec-60942-2017-table-e-1/example-4-deviation-0-00-db-u-0-14-db-against-0-25-db-and-0-15-db",
+      "domain": "sound-calibrators-and-the-conformance-rule-iec-60942-iec-61672-1",
+      "reference": {
+        "cite": "IEC 60942:2017 Table E.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60942",
+            "edition": "2017",
+            "clause": "Table E.1"
+          }
+        ]
+      },
+      "quantity": "Example 4: |deviation| 0.00 dB, U 0.14 dB against 0.25 dB and 0.15 dB",
+      "kind": "record",
+      "expected": {
+        "label": "Yes: Deviation within acceptance limits AND uncertainty within maximum-permitted",
+        "record": {
+          "conforms": 1.0,
+          "outcome": 1.0,
+          "reason": 1.0
+        }
+      },
+      "computed": {
+        "label": "Yes: Deviation within acceptance limits AND uncertainty within maximum-permitted",
+        "record": {
+          "conforms": 1.0,
+          "outcome": 1.0,
+          "reason": 1.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-calibrators-and-the-conformance-rule-iec-60942-iec-61672-1/iec-60942-2017-table-e-1/example-5-deviation-0-00-db-u-0-17-db-against-0-25-db-and-0-15-db",
+      "domain": "sound-calibrators-and-the-conformance-rule-iec-60942-iec-61672-1",
+      "reference": {
+        "cite": "IEC 60942:2017 Table E.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60942",
+            "edition": "2017",
+            "clause": "Table E.1"
+          }
+        ]
+      },
+      "quantity": "Example 5: |deviation| 0.00 dB, U 0.17 dB against 0.25 dB and 0.15 dB",
+      "kind": "record",
+      "expected": {
+        "label": "No: Deviation within acceptance limits BUT uncertainty exceeds maximum-permitted",
+        "record": {
+          "conforms": 0.0,
+          "outcome": 2.0,
+          "reason": 1.0
+        }
+      },
+      "computed": {
+        "label": "No: Deviation within acceptance limits BUT uncertainty exceeds maximum-permitted",
+        "record": {
+          "conforms": 0.0,
+          "outcome": 2.0,
+          "reason": 1.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-calibrators-and-the-conformance-rule-iec-60942-iec-61672-1/iec-60942-2017-table-e-1/example-6-deviation-0-25-db-u-0-10-db-against-0-25-db-and-0-15-db",
+      "domain": "sound-calibrators-and-the-conformance-rule-iec-60942-iec-61672-1",
+      "reference": {
+        "cite": "IEC 60942:2017 Table E.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60942",
+            "edition": "2017",
+            "clause": "Table E.1"
+          }
+        ]
+      },
+      "quantity": "Example 6: |deviation| 0.25 dB, U 0.10 dB against 0.25 dB and 0.15 dB",
+      "kind": "record",
+      "expected": {
+        "label": "Yes: Deviation within acceptance limits AND uncertainty within maximum-permitted",
+        "record": {
+          "conforms": 1.0,
+          "outcome": 1.0,
+          "reason": 1.0
+        }
+      },
+      "computed": {
+        "label": "Yes: Deviation within acceptance limits AND uncertainty within maximum-permitted",
+        "record": {
+          "conforms": 1.0,
+          "outcome": 1.0,
+          "reason": 1.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-calibrators-and-the-conformance-rule-iec-60942-iec-61672-1/iec-60942-2017-table-e-1/example-7-deviation-0-25-db-u-0-15-db-against-0-25-db-and-0-15-db",
+      "domain": "sound-calibrators-and-the-conformance-rule-iec-60942-iec-61672-1",
+      "reference": {
+        "cite": "IEC 60942:2017 Table E.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60942",
+            "edition": "2017",
+            "clause": "Table E.1"
+          }
+        ]
+      },
+      "quantity": "Example 7: |deviation| 0.25 dB, U 0.15 dB against 0.25 dB and 0.15 dB",
+      "kind": "record",
+      "expected": {
+        "label": "Yes: Deviation within acceptance limits AND uncertainty within maximum-permitted",
+        "record": {
+          "conforms": 1.0,
+          "outcome": 1.0,
+          "reason": 1.0
+        }
+      },
+      "computed": {
+        "label": "Yes: Deviation within acceptance limits AND uncertainty within maximum-permitted",
+        "record": {
+          "conforms": 1.0,
+          "outcome": 1.0,
+          "reason": 1.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-calibrators-and-the-conformance-rule-iec-60942-iec-61672-1/iec-60942-2017-table-e-1/example-8-deviation-0-40-db-u-0-50-db-against-0-25-db-and-0-20-db",
+      "domain": "sound-calibrators-and-the-conformance-rule-iec-60942-iec-61672-1",
+      "reference": {
+        "cite": "IEC 60942:2017 Table E.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60942",
+            "edition": "2017",
+            "clause": "Table E.1"
+          }
+        ]
+      },
+      "quantity": "Example 8: |deviation| 0.40 dB, U 0.50 dB against 0.25 dB and 0.20 dB",
+      "kind": "record",
+      "expected": {
+        "label": "No: Deviation exceeds acceptance limits AND uncertainty exceeds maximum-permitted",
+        "record": {
+          "conforms": 0.0,
+          "outcome": 4.0,
+          "reason": 1.0
+        }
+      },
+      "computed": {
+        "label": "No: Deviation exceeds acceptance limits AND uncertainty exceeds maximum-permitted",
+        "record": {
+          "conforms": 0.0,
+          "outcome": 4.0,
+          "reason": 1.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-calibrators-and-the-conformance-rule-iec-60942-iec-61672-1/iec-61672-1-2013-table-c-1/example-1-deviation-1-7-db-u-0-3-db-against-1-0-1-2-db-and-0-5-db",
+      "domain": "sound-calibrators-and-the-conformance-rule-iec-60942-iec-61672-1",
+      "reference": {
+        "cite": "IEC 61672-1:2013 Table C.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-1",
+            "edition": "2013",
+            "clause": "Table C.1"
+          }
+        ]
+      },
+      "quantity": "Example 1: deviation +1.7 dB, U 0.3 dB against +1.0; -1.2 dB and 0.5 dB",
+      "kind": "record",
+      "expected": {
+        "label": "No: Deviation exceeds acceptance limits",
+        "record": {
+          "conforms": 0.0,
+          "outcome": 3.0,
+          "reason": 1.0
+        }
+      },
+      "computed": {
+        "label": "No: Deviation exceeds acceptance limits",
+        "record": {
+          "conforms": 0.0,
+          "outcome": 3.0,
+          "reason": 1.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-calibrators-and-the-conformance-rule-iec-60942-iec-61672-1/iec-61672-1-2013-table-c-1/example-2-deviation-1-1-db-u-0-3-db-against-1-0-1-2-db-and-0-5-db",
+      "domain": "sound-calibrators-and-the-conformance-rule-iec-60942-iec-61672-1",
+      "reference": {
+        "cite": "IEC 61672-1:2013 Table C.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-1",
+            "edition": "2013",
+            "clause": "Table C.1"
+          }
+        ]
+      },
+      "quantity": "Example 2: deviation +1.1 dB, U 0.3 dB against +1.0; -1.2 dB and 0.5 dB",
+      "kind": "record",
+      "expected": {
+        "label": "No: Deviation exceeds acceptance limits",
+        "record": {
+          "conforms": 0.0,
+          "outcome": 3.0,
+          "reason": 1.0
+        }
+      },
+      "computed": {
+        "label": "No: Deviation exceeds acceptance limits",
+        "record": {
+          "conforms": 0.0,
+          "outcome": 3.0,
+          "reason": 1.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-calibrators-and-the-conformance-rule-iec-60942-iec-61672-1/iec-61672-1-2013-table-c-1/example-3-deviation-1-0-db-u-0-3-db-against-1-0-1-2-db-and-0-5-db",
+      "domain": "sound-calibrators-and-the-conformance-rule-iec-60942-iec-61672-1",
+      "reference": {
+        "cite": "IEC 61672-1:2013 Table C.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-1",
+            "edition": "2013",
+            "clause": "Table C.1"
+          }
+        ]
+      },
+      "quantity": "Example 3: deviation +1.0 dB, U 0.3 dB against +1.0; -1.2 dB and 0.5 dB",
+      "kind": "record",
+      "expected": {
+        "label": "Yes: Deviation within acceptance limits AND uncertainty within maximum-permitted",
+        "record": {
+          "conforms": 1.0,
+          "outcome": 1.0,
+          "reason": 1.0
+        }
+      },
+      "computed": {
+        "label": "Yes: Deviation within acceptance limits AND uncertainty within maximum-permitted",
+        "record": {
+          "conforms": 1.0,
+          "outcome": 1.0,
+          "reason": 1.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-calibrators-and-the-conformance-rule-iec-60942-iec-61672-1/iec-61672-1-2013-table-c-1/example-4-deviation-0-0-db-u-0-3-db-against-1-0-1-2-db-and-0-5-db",
+      "domain": "sound-calibrators-and-the-conformance-rule-iec-60942-iec-61672-1",
+      "reference": {
+        "cite": "IEC 61672-1:2013 Table C.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-1",
+            "edition": "2013",
+            "clause": "Table C.1"
+          }
+        ]
+      },
+      "quantity": "Example 4: deviation +0.0 dB, U 0.3 dB against +1.0; -1.2 dB and 0.5 dB",
+      "kind": "record",
+      "expected": {
+        "label": "Yes: Deviation within acceptance limits AND uncertainty within maximum-permitted",
+        "record": {
+          "conforms": 1.0,
+          "outcome": 1.0,
+          "reason": 1.0
+        }
+      },
+      "computed": {
+        "label": "Yes: Deviation within acceptance limits AND uncertainty within maximum-permitted",
+        "record": {
+          "conforms": 1.0,
+          "outcome": 1.0,
+          "reason": 1.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-calibrators-and-the-conformance-rule-iec-60942-iec-61672-1/iec-61672-1-2013-table-c-1/example-5-deviation-0-0-db-u-0-9-db-against-1-0-1-2-db-and-0-5-db",
+      "domain": "sound-calibrators-and-the-conformance-rule-iec-60942-iec-61672-1",
+      "reference": {
+        "cite": "IEC 61672-1:2013 Table C.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-1",
+            "edition": "2013",
+            "clause": "Table C.1"
+          }
+        ]
+      },
+      "quantity": "Example 5: deviation +0.0 dB, U 0.9 dB against +1.0; -1.2 dB and 0.5 dB",
+      "kind": "record",
+      "expected": {
+        "label": "No: Deviation within acceptance limits BUT uncertainty exceeds maximum-permitted",
+        "record": {
+          "conforms": 0.0,
+          "outcome": 2.0,
+          "reason": 1.0
+        }
+      },
+      "computed": {
+        "label": "No: Deviation within acceptance limits BUT uncertainty exceeds maximum-permitted",
+        "record": {
+          "conforms": 0.0,
+          "outcome": 2.0,
+          "reason": 1.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-calibrators-and-the-conformance-rule-iec-60942-iec-61672-1/iec-61672-1-2013-table-c-1/example-6-deviation-0-5-db-u-0-3-db-against-1-0-1-2-db-and-0-5-db",
+      "domain": "sound-calibrators-and-the-conformance-rule-iec-60942-iec-61672-1",
+      "reference": {
+        "cite": "IEC 61672-1:2013 Table C.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-1",
+            "edition": "2013",
+            "clause": "Table C.1"
+          }
+        ]
+      },
+      "quantity": "Example 6: deviation -0.5 dB, U 0.3 dB against +1.0; -1.2 dB and 0.5 dB",
+      "kind": "record",
+      "expected": {
+        "label": "Yes: Deviation within acceptance limits AND uncertainty within maximum-permitted",
+        "record": {
+          "conforms": 1.0,
+          "outcome": 1.0,
+          "reason": 1.0
+        }
+      },
+      "computed": {
+        "label": "Yes: Deviation within acceptance limits AND uncertainty within maximum-permitted",
+        "record": {
+          "conforms": 1.0,
+          "outcome": 1.0,
+          "reason": 1.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-calibrators-and-the-conformance-rule-iec-60942-iec-61672-1/iec-61672-1-2013-table-c-1/example-7-deviation-1-2-db-u-0-3-db-against-1-0-1-2-db-and-0-5-db",
+      "domain": "sound-calibrators-and-the-conformance-rule-iec-60942-iec-61672-1",
+      "reference": {
+        "cite": "IEC 61672-1:2013 Table C.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-1",
+            "edition": "2013",
+            "clause": "Table C.1"
+          }
+        ]
+      },
+      "quantity": "Example 7: deviation -1.2 dB, U 0.3 dB against +1.0; -1.2 dB and 0.5 dB",
+      "kind": "record",
+      "expected": {
+        "label": "Yes: Deviation within acceptance limits AND uncertainty within maximum-permitted",
+        "record": {
+          "conforms": 1.0,
+          "outcome": 1.0,
+          "reason": 1.0
+        }
+      },
+      "computed": {
+        "label": "Yes: Deviation within acceptance limits AND uncertainty within maximum-permitted",
+        "record": {
+          "conforms": 1.0,
+          "outcome": 1.0,
+          "reason": 1.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-calibrators-and-the-conformance-rule-iec-60942-iec-61672-1/iec-61672-1-2013-table-c-1/example-8-deviation-1-3-db-u-0-3-db-against-1-0-1-2-db-and-0-5-db",
+      "domain": "sound-calibrators-and-the-conformance-rule-iec-60942-iec-61672-1",
+      "reference": {
+        "cite": "IEC 61672-1:2013 Table C.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-1",
+            "edition": "2013",
+            "clause": "Table C.1"
+          }
+        ]
+      },
+      "quantity": "Example 8: deviation -1.3 dB, U 0.3 dB against +1.0; -1.2 dB and 0.5 dB",
+      "kind": "record",
+      "expected": {
+        "label": "No: Deviation exceeds acceptance limits",
+        "record": {
+          "conforms": 0.0,
+          "outcome": 3.0,
+          "reason": 1.0
+        }
+      },
+      "computed": {
+        "label": "No: Deviation exceeds acceptance limits",
+        "record": {
+          "conforms": 0.0,
+          "outcome": 3.0,
+          "reason": 1.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-calibrators-and-the-conformance-rule-iec-60942-iec-61672-1/iec-61672-1-2013-table-c-1/example-9-deviation-2-0-db-u-0-3-db-against-1-0-1-2-db-and-0-5-db",
+      "domain": "sound-calibrators-and-the-conformance-rule-iec-60942-iec-61672-1",
+      "reference": {
+        "cite": "IEC 61672-1:2013 Table C.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-1",
+            "edition": "2013",
+            "clause": "Table C.1"
+          }
+        ]
+      },
+      "quantity": "Example 9: deviation -2.0 dB, U 0.3 dB against +1.0; -1.2 dB and 0.5 dB",
+      "kind": "record",
+      "expected": {
+        "label": "No: Deviation exceeds acceptance limits",
+        "record": {
+          "conforms": 0.0,
+          "outcome": 3.0,
+          "reason": 1.0
+        }
+      },
+      "computed": {
+        "label": "No: Deviation exceeds acceptance limits",
+        "record": {
+          "conforms": 0.0,
+          "outcome": 3.0,
+          "reason": 1.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-calibrators-and-the-conformance-rule-iec-60942-iec-61672-1/iec-61672-1-2013-table-c-1/example-10-deviation-2-0-db-u-0-7-db-against-1-0-1-2-db-and-0-5-db",
+      "domain": "sound-calibrators-and-the-conformance-rule-iec-60942-iec-61672-1",
+      "reference": {
+        "cite": "IEC 61672-1:2013 Table C.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-1",
+            "edition": "2013",
+            "clause": "Table C.1"
+          }
+        ]
+      },
+      "quantity": "Example 10: deviation -2.0 dB, U 0.7 dB against +1.0; -1.2 dB and 0.5 dB",
+      "kind": "record",
+      "expected": {
+        "label": "No: Deviation exceeds acceptance limits AND uncertainty exceeds maximum-permitted",
+        "record": {
+          "conforms": 0.0,
+          "outcome": 4.0,
+          "reason": 1.0
+        }
+      },
+      "computed": {
+        "label": "No: Deviation exceeds acceptance limits AND uncertainty exceeds maximum-permitted",
+        "record": {
+          "conforms": 0.0,
+          "outcome": 4.0,
+          "reason": 1.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-calibrators-and-the-conformance-rule-iec-60942-iec-61672-1/iec-60942-2017-table-2/level-and-short-term-fluctuation-limits-dashes-and-ranges-by-class",
+      "domain": "sound-calibrators-and-the-conformance-rule-iec-60942-iec-61672-1",
+      "reference": {
+        "cite": "IEC 60942:2017 Table 2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60942",
+            "edition": "2017",
+            "clause": "Table 2"
+          }
+        ]
+      },
+      "quantity": "Level and short-term fluctuation limits, dashes and ranges, by class",
+      "kind": "count",
+      "expected": {
+        "value": 84.0,
+        "label": "84/84 printed cells"
+      },
+      "computed": {
+        "value": 84.0,
+        "label": "84/84 printed cells"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-calibrators-and-the-conformance-rule-iec-60942-iec-61672-1/iec-60942-2017-tables-3-4-and-6/supply-voltage-frequency-and-environmental-frequency-limits-by-class",
+      "domain": "sound-calibrators-and-the-conformance-rule-iec-60942-iec-61672-1",
+      "reference": {
+        "cite": "IEC 60942:2017 Tables 3, 4 and 6",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60942",
+            "edition": "2017",
+            "clause": "Tables 3, 4 and 6"
+          }
+        ]
+      },
+      "quantity": "Supply-voltage, frequency and environmental-frequency limits, by class",
+      "kind": "count",
+      "expected": {
+        "value": 9.0,
+        "label": "9/9 printed cells"
+      },
+      "computed": {
+        "value": 9.0,
+        "label": "9/9 printed cells"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-calibrators-and-the-conformance-rule-iec-60942-iec-61672-1/iec-60942-2017-tables-5-and-7/environmental-level-and-total-distortion-noise-limits-by-class",
+      "domain": "sound-calibrators-and-the-conformance-rule-iec-60942-iec-61672-1",
+      "reference": {
+        "cite": "IEC 60942:2017 Tables 5 and 7",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60942",
+            "edition": "2017",
+            "clause": "Tables 5 and 7"
+          }
+        ]
+      },
+      "quantity": "Environmental level and total distortion + noise limits, by class",
+      "kind": "count",
+      "expected": {
+        "value": 56.0,
+        "label": "56/56 printed cells"
+      },
+      "computed": {
+        "value": 56.0,
+        "label": "56/56 printed cells"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-calibrators-and-the-conformance-rule-iec-60942-iec-61672-1/iec-60942-2017-tables-a-1-a-3-and-a-4/maximum-permitted-uncertainties-keyed-by-frequency-by-class",
+      "domain": "sound-calibrators-and-the-conformance-rule-iec-60942-iec-61672-1",
+      "reference": {
+        "cite": "IEC 60942:2017 Tables A.1, A.3 and A.4",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60942",
+            "edition": "2017",
+            "clause": "Tables A.1, A.3 and A.4"
+          }
+        ]
+      },
+      "quantity": "Maximum-permitted uncertainties keyed by frequency, by class",
+      "kind": "count",
+      "expected": {
+        "value": 140.0,
+        "label": "140/140 printed cells"
+      },
+      "computed": {
+        "value": 140.0,
+        "label": "140/140 printed cells"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-calibrators-and-the-conformance-rule-iec-60942-iec-61672-1/iec-60942-2017-tables-a-2-and-a-5-a-5-5-7/maximum-permitted-uncertainties-of-the-frequency-and-the-supply-voltage-effect",
+      "domain": "sound-calibrators-and-the-conformance-rule-iec-60942-iec-61672-1",
+      "reference": {
+        "cite": "IEC 60942:2017 Tables A.2 and A.5, A.5.5.7",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60942",
+            "edition": "2017",
+            "clause": "Tables A.2 and A.5, A.5.5.7"
+          }
+        ]
+      },
+      "quantity": "Maximum-permitted uncertainties of the frequency and the supply-voltage effect",
+      "kind": "count",
+      "expected": {
+        "value": 9.0,
+        "label": "9/9 printed cells"
+      },
+      "computed": {
+        "value": 9.0,
+        "label": "9/9 printed cells"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-calibrators-and-the-conformance-rule-iec-60942-iec-61672-1/iec-60942-2017-5-9-4-2-and-a-7-4-8/level-change-in-a-power-or-radio-frequency-field-and-its-maximum-uncertainty",
+      "domain": "sound-calibrators-and-the-conformance-rule-iec-60942-iec-61672-1",
+      "reference": {
+        "cite": "IEC 60942:2017 5.9.4.2 and A.7.4.8",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60942",
+            "edition": "2017",
+            "clause": "5.9.4.2 and A.7.4.8"
+          }
+        ]
+      },
+      "quantity": "Level change in a power- or radio-frequency field and its maximum uncertainty",
+      "kind": "count",
+      "expected": {
+        "value": 6.0,
+        "label": "6/6 printed cells"
+      },
+      "computed": {
+        "value": 6.0,
+        "label": "6/6 printed cells"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-calibrators-and-the-conformance-rule-iec-60942-iec-61672-1/iec-60942-2017-a-6-4-7/reduced-limits-of-the-abbreviated-environmental-test",
+      "domain": "sound-calibrators-and-the-conformance-rule-iec-60942-iec-61672-1",
+      "reference": {
+        "cite": "IEC 60942:2017 A.6.4.7",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60942",
+            "edition": "2017",
+            "clause": "A.6.4.7"
+          }
+        ]
+      },
+      "quantity": "Reduced limits of the abbreviated environmental test",
+      "kind": "count",
+      "expected": {
+        "value": 6.0,
+        "label": "6/6 printed cells"
+      },
+      "computed": {
+        "value": 6.0,
+        "label": "6/6 printed cells"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-calibrators-and-the-conformance-rule-iec-60942-iec-61672-1/iec-60942-2017-5-1-15-with-tables-2-and-a-1/table-e-1-examples-1-to-7-as-a-class-1-level-at-1-khz-7-verdicts",
+      "domain": "sound-calibrators-and-the-conformance-rule-iec-60942-iec-61672-1",
+      "reference": {
+        "cite": "IEC 60942:2017 5.1.15 with Tables 2 and A.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60942",
+            "edition": "2017",
+            "clause": "5.1.15 with Tables 2 and A.1"
+          }
+        ]
+      },
+      "quantity": "Table E.1 examples 1 to 7 as a class 1 level at 1 kHz, 7 verdicts",
+      "kind": "count",
+      "expected": {
+        "value": 7.0,
+        "label": "No, No, Yes, Yes, No, Yes, Yes"
+      },
+      "computed": {
+        "value": 7.0,
+        "label": "7/7 verdicts"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-calibrators-and-the-conformance-rule-iec-60942-iec-61672-1/iec-60942-2017-a-6-4-7/0-22-db-conforms-to-table-5-and-not-to-the-abbreviated-test-2-verdicts",
+      "domain": "sound-calibrators-and-the-conformance-rule-iec-60942-iec-61672-1",
+      "reference": {
+        "cite": "IEC 60942:2017 A.6.4.7",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60942",
+            "edition": "2017",
+            "clause": "A.6.4.7"
+          }
+        ]
+      },
+      "quantity": "0,22 dB conforms to Table 5 and not to the abbreviated test, 2 verdicts",
+      "kind": "count",
+      "expected": {
+        "value": 2.0,
+        "label": "conforms to Table 5 (0,25 dB), not to A.6.4.7 (0,20 dB)"
+      },
+      "computed": {
+        "value": 2.0,
+        "label": "2/2 verdicts"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-calibrators-and-the-conformance-rule-iec-60942-iec-61672-1/iec-60942-2017-5-5-and-a-6-2-4-with-tables-2-5-a-4-and-a-5/class-1-at-2-khz-0-33-db-out-of-the-band-and-in-it-0-5-with-u-0-25-3-verdicts",
+      "domain": "sound-calibrators-and-the-conformance-rule-iec-60942-iec-61672-1",
+      "reference": {
+        "cite": "IEC 60942:2017 5.5 and A.6.2.4 with Tables 2, 5, A.4 and A.5",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 60942",
+            "edition": "2017",
+            "clause": "5.5 and A.6.2.4 with Tables 2, 5, A.4 and A.5"
+          }
+        ]
+      },
+      "quantity": "Class 1 at 2 kHz: 0,33 dB out of the band and in it, -0,5 % with U 0,25 %, 3 verdicts",
+      "kind": "count",
+      "expected": {
+        "value": 3.0,
+        "label": "No by Table 5 (0,30 dB); Yes by Table 2 (0,35 dB); No, U over Table A.5 (0,2 %)"
+      },
+      "computed": {
+        "value": 3.0,
+        "label": "3/3 verdicts"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
       "verdict": "pass"
     },
     {

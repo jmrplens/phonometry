@@ -167,6 +167,106 @@ def generate_calibration_narrowband_bias(output_dir: str) -> None:
     plt.close()
 
 
+def generate_calibrator_verification(output_dir: str) -> None:
+    """IEC 60942:2017: a class 1 calibrator's record, read requirement by requirement.
+
+    A pattern-evaluation record at 1 kHz with every graded requirement in it,
+    and one environmental reading 0,03 dB past its Table 5 limit, so the figure
+    shows both what a pass looks like and what the one failure does to the
+    verdict. Drawn by the result's own ``.plot()``.
+    """
+    print("Generating calibrator_verification...")
+    from phonometry import metrology
+
+    record = metrology.SoundCalibratorMeasurements(
+        level_deviation_db=0.12,
+        level_uncertainty_db=0.10,
+        fluctuation_db=0.02,
+        fluctuation_uncertainty_db=0.02,
+        frequency_deviation_percent=-0.05,
+        frequency_uncertainty_percent=0.02,
+        distortion_percent=0.9,
+        distortion_uncertainty_percent=0.3,
+        supply_voltage_deviation_db=[0.01, -0.03],
+        supply_voltage_uncertainty_db=0.03,
+        environmental_level_deviation_db=[0.10, -0.18, 0.28],
+        environmental_level_uncertainty_db=0.12,
+        environmental_frequency_deviation_percent=[0.12, -0.20],
+        environmental_frequency_uncertainty_percent=0.10,
+        field_immunity_deviation_db=0.06,
+        field_immunity_uncertainty_db=0.04,
+    )
+    result = metrology.verify_sound_calibrator("1", record, nominal_frequency_hz=1000.0)
+    _fig, ax = plt.subplots(figsize=(10, 7.4), layout="constrained")
+    result.plot(ax=ax, language=_LANG)
+    save_figure(output_dir, "calibrator_verification.svg")
+    plt.close()
+
+
+def generate_conformance_rule_examples(output_dir: str) -> None:
+    """The printed examples of the TC 29 rule, re-derived by verify_conformance.
+
+    Left, the eight of IEC 60942:2017 Table E.1, whose deviations are absolute,
+    so Figure E.1 draws its lower acceptance limit at 0 dB and its upper one at
+    0,25 dB, and so does this panel; right, the ten of IEC 61672-1:2013 Table
+    C.1 against +1,0 dB and -1,2 dB. Each marker is the verdict the rule
+    returned, and it is the verdict the table prints.
+    """
+    print("Generating conformance_rule_examples...")
+    from phonometry import metrology
+    from phonometry._plot.metrology import _draw_conformance
+
+    table_e1 = [
+        (0.40, 0.12, 0.15),
+        (0.35, 0.12, 0.15),
+        (0.20, 0.13, 0.15),
+        (0.00, 0.14, 0.15),
+        (0.00, 0.17, 0.15),
+        (0.25, 0.10, 0.15),
+        (0.25, 0.15, 0.15),
+        (0.40, 0.50, 0.20),
+    ]
+    table_c1 = [
+        (1.7, 0.3),
+        (1.1, 0.3),
+        (1.0, 0.3),
+        (0.0, 0.3),
+        (0.0, 0.9),
+        (-0.5, 0.3),
+        (-1.2, 0.3),
+        (-1.3, 0.3),
+        (-2.0, 0.3),
+        (-2.0, 0.7),
+    ]
+    e1 = tuple(
+        metrology.verify_conformance(
+            d, uncertainty=u, acceptance_limits=(0.0, 0.25), max_uncertainty=m
+        )
+        for d, u, m in table_e1
+    )
+    c1 = tuple(
+        metrology.verify_conformance(
+            d, uncertainty=u, acceptance_limits=(-1.2, 1.0), max_uncertainty=0.5
+        )
+        for d, u in table_c1
+    )
+    _fig, (ax_e, ax_c) = plt.subplots(
+        1, 2, figsize=(13, 6.4), layout="constrained", width_ratios=(8, 10)
+    )
+    _draw_conformance(ax_e, e1, _LANG, {})
+    _draw_conformance(ax_c, c1, _LANG, {})
+    ax_e.set_title("IEC 60942:2017, Table E.1")
+    ax_c.set_title("IEC 61672-1:2013, Table C.1")
+    for ax in (ax_e, ax_c):
+        ax.set_xlabel("Example number")
+    # One legend is enough for two panels that draw the same six things.
+    legend = ax_e.get_legend()
+    if legend is not None:
+        legend.remove()
+    save_figure(output_dir, "conformance_rule_examples.svg")
+    plt.close()
+
+
 def generate_dbfs_versus_spl(output_dir: str) -> None:
     """The two reference frames of a band spectrum, and the peak overshoot."""
     print("Generating dbfs_versus_spl...")

@@ -41,6 +41,8 @@ export const apiSections = {
     collapsed: true,
     items: [
       'reference/api/metrology/calibration',
+      'reference/api/metrology/sound-calibrator',
+      'reference/api/metrology/conformance',
       'reference/api/metrology/uncertainty',
       'reference/api/metrology/data-qualification',
       'reference/api/metrology/reference-values',

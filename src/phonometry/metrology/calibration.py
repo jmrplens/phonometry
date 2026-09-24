@@ -11,13 +11,8 @@ import numpy as np
 from .._internal.warnings import PhonometryWarning
 from ..io._resolve import SignalInput, resolve_optional_fs, resolve_samples
 from .reference_values import ISO1683_REFERENCE_VALUES
+from .sound_calibrator import _designation, _fluctuation_limit_db
 
-# IEC 60942:2017 Table 2 (p. 16) row edges in Hz for the class 1 short-term
-# level fluctuation limits; outside the specified span the strictest limit
-# is the fallback (see _class1_fluctuation_limit).
-_TABLE2_SPAN_LOW_HZ = 31.5  # bottom of the specified 31.5 Hz to 16 kHz span
-_TABLE2_LOW_ROW_TOP_HZ = 63.0  # top of the 0.20 dB row, floor of the 0.10 dB row
-_TABLE2_STRICT_ROW_MIN_HZ = 160.0  # at and above, the strictest 0.07 dB applies
 # Minimum sample count for the Hann-windowed coherent (Goertzel) tone
 # estimate; a shorter take falls back to broadband RMS.
 _MIN_COHERENT_SAMPLES = 4
@@ -27,24 +22,6 @@ _P0 = ISO1683_REFERENCE_VALUES["gas"]["sound_pressure"].value
 
 class CalibrationWarning(PhonometryWarning):
     """The calibration reference recording looks unreliable."""
-
-
-# IEC 60942:2017 Table 2 (p. 16): short-term level fluctuation acceptance
-# limits in dB by range of nominal frequencies, class 1 column. Classes LS
-# and 2 are only specified for 160 Hz to 1250 Hz (0,03 / 0,15 dB); the other
-# rows carry "-" for them, so this table exposes the class 1 limits only.
-def _class1_fluctuation_limit(frequency: float) -> float:
-    """Class 1 short-term fluctuation limit for a nominal calibrator frequency.
-
-    IEC 60942:2017 Table 2 rows: 31.5-63 Hz -> 0.20 dB; > 63 to < 160 Hz ->
-    0.10 dB; 160 Hz and above -> 0.07 dB. Frequencies outside the specified
-    31.5 Hz to 16 kHz span fall back to the strictest limit (0.07 dB).
-    """
-    if _TABLE2_SPAN_LOW_HZ <= frequency <= _TABLE2_LOW_ROW_TOP_HZ:
-        return 0.20
-    if _TABLE2_LOW_ROW_TOP_HZ < frequency < _TABLE2_STRICT_ROW_MIN_HZ:
-        return 0.10
-    return 0.07
 
 
 @overload
@@ -57,6 +34,7 @@ def sensitivity(
     validate: bool = ...,
     max_fluctuation_db: float | None = ...,
     frequency: float = ...,
+    calibrator_class: str = ...,
     narrowband: Literal[True],
 ) -> float: ...
 
@@ -71,6 +49,7 @@ def sensitivity(
     validate: bool = ...,
     max_fluctuation_db: float | None = ...,
     frequency: float = ...,
+    calibrator_class: str = ...,
     narrowband: Literal[False] = ...,
 ) -> float: ...
 
@@ -84,6 +63,7 @@ def sensitivity(
     validate: bool = True,
     max_fluctuation_db: float | None = None,
     frequency: float = 1000.0,
+    calibrator_class: str = "1",
     narrowband: bool = False,
 ) -> float:
     r"""Calculate the calibration factor (multiplier) to convert digital units
@@ -94,13 +74,17 @@ def sensitivity(
     itself (5.3.3): levels are measured with time-weighting F and the
     *short-term level fluctuation* (the absolute difference between each of
     the maximum and minimum levels and the mean level) must not exceed the
-    Table 2 acceptance limit for the calibrator class (class 1: 0.07 dB at
-    and above 160 Hz, relaxed to 0.10 dB above 63 Hz and below 160 Hz, and to
-    0.20 dB for the 31.5-63 Hz rows where the F time-weighting itself ripples;
-    below Table 2's 31.5 Hz span the strict 0.07 dB applies). A larger
-    fluctuation usually means a badly coupled microphone or handling noise in
-    the recording, which would silently corrupt every calibrated level; a
-    :class:`CalibrationWarning` is emitted.
+    Table 2 acceptance limit for the calibrator's class and nominal frequency,
+    read from :data:`~phonometry.metrology.FLUCTUATION_ACCEPTANCE_LIMITS_DB`.
+    For class 1 that is 0.07 dB at and above 160 Hz, relaxed to 0.10 dB above
+    63 Hz and below 160 Hz, and to 0.20 dB for the 31.5-63 Hz row where the F
+    time-weighting itself ripples; class LS is held to 0.03 dB and class 2 to
+    0.15 dB. Where Table 2 gives the class no limit (outside 31.5 Hz to 16 kHz
+    for class 1, outside 160 Hz to 1.25 kHz for LS and 2) the strictest limit
+    of the class's column applies. A larger fluctuation usually means a badly
+    coupled microphone or handling noise in the recording, which would
+    silently corrupt every calibrated level; a :class:`CalibrationWarning` is
+    emitted.
 
     .. note:: IEC 60942 certifies calibrators over 60 s of operation sampled
        at least 30 times; this check applies the same criterion to whatever
@@ -121,10 +105,13 @@ def sensitivity(
     :param validate: If True (default) and ``fs`` is given, warn when the
         recording's short-term level fluctuation exceeds the limit.
     :param max_fluctuation_db: Explicit fluctuation limit in dB. Default
-        (None) resolves the IEC 60942:2017 Table 2 class 1 limit for
-        ``frequency``.
+        (None) resolves the IEC 60942:2017 Table 2 limit for
+        ``calibrator_class`` at ``frequency``.
     :param frequency: Nominal frequency of the calibration tone in Hz
         (default 1000.0), used to select the Table 2 row.
+    :param calibrator_class: The calibrator's class designation, ``"LS"``,
+        ``"LS/M"``, ``"1"`` (default), ``"1/M"`` or ``"2"``
+        (IEC 60942:2017 Table 1), used to select the Table 2 column.
     :param narrowband: If True (requires ``fs``), estimate the tone level with
         a coherent single-frequency (Goertzel) detector locked to the tone
         near ``frequency`` instead of the full-band RMS. This rejects
@@ -158,11 +145,12 @@ def sensitivity(
         msg = "Reference signal is silent, cannot calibrate."
         raise ValueError(msg)
 
+    designation = _designation(calibrator_class)
     if validate and fs is not None:
         limit = (
             max_fluctuation_db
             if max_fluctuation_db is not None
-            else _class1_fluctuation_limit(frequency)
+            else _fluctuation_limit_db(frequency, designation)
         )
         _validate_reference_stability(signal_arr, fs, limit)
 

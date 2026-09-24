@@ -1709,6 +1709,10 @@ _ES_EXACT = {
     "IEC 60942:2017 class 1 limit (deviation from mean)": "L\u00edmite de clase 1 de IEC 60942:2017 (desviaci\u00f3n de la media)",
     "Calibration Tone Stability Check (IEC 60942:2017, 5.3.3)": "Comprobaci\u00f3n de estabilidad del tono de calibraci\u00f3n (IEC 60942:2017, 5.3.3)",
     "F-weighted level re mean [dB]": "Nivel con ponderaci\u00f3n F re media [dB]",
+    # The conformance rule of IEC TC 29, drawn on the printed examples.
+    "IEC 60942:2017, Table E.1": "IEC 60942:2017, Tabla E.1",
+    "IEC 61672-1:2013, Table C.1": "IEC 61672-1:2013, Tabla C.1",
+    "Example number": "Número de ejemplo",
     "Fast level of the event": "Nivel Fast del evento",
     r"$L_{\mathrm{eq}}$ over the whole event": r"$L_{\mathrm{eq}}$ de todo el evento",
     "SEL: same energy in 1 s": "SEL: la misma energ\u00eda en 1 s",

@@ -1,8 +1,8 @@
 # phonometry
 
-> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1309 numerical conformance checks against 466 standards enforced in CI.
+> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1337 numerical conformance checks against 467 standards enforced in CI.
 
-phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1309 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 91 domains.
+phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1337 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 92 domains.
 
 The project was published as **PyOctaveBand** until version 3.0.0. Third-party references and dependency pins still using that name refer to this library.
 
@@ -559,8 +559,10 @@ The generated API reference, one page per module. Fetch these only when a specif
 - [materials/suspended-ceilings](https://jmrplens.github.io/phonometry/reference/api/materials/suspended-ceilings/)
 - [materials/uncertainty](https://jmrplens.github.io/phonometry/reference/api/materials/uncertainty/)
 - [metrology/calibration](https://jmrplens.github.io/phonometry/reference/api/metrology/calibration/)
+- [metrology/conformance](https://jmrplens.github.io/phonometry/reference/api/metrology/conformance/)
 - [metrology/data-qualification](https://jmrplens.github.io/phonometry/reference/api/metrology/data-qualification/)
 - [metrology/reference-values](https://jmrplens.github.io/phonometry/reference/api/metrology/reference-values/)
+- [metrology/sound-calibrator](https://jmrplens.github.io/phonometry/reference/api/metrology/sound-calibrator/)
 - [metrology/uncertainty](https://jmrplens.github.io/phonometry/reference/api/metrology/uncertainty/)
 - [noise_control/cabin-insulation](https://jmrplens.github.io/phonometry/reference/api/noise_control/cabin-insulation/)
 - [noise_control/duct-modes](https://jmrplens.github.io/phonometry/reference/api/noise_control/duct-modes/)
@@ -41732,7 +41734,7 @@ documents, one page per module.
 | `ParametricEQ` | `class` | **Reusable parametric-EQ cascade (RBJ Audio EQ Cookbook).**<br>• `fs`: Sample rate [Hz]<br>• `sections`: `EQSection` or sequence of them (cascade order)<br>• `stateful`: Block processing (Default: False)<br>• `steady_ic`: Steady-state initial conditions (Default: False)<br>• `.sos`: the designed cascade, `.filter(x)`, `.response()` | `eq = filters.ParametricEQ(fs, sections)`<br>`y = eq.filter(x)`<br>`res = eq.response()` |
 | `EQSection` | `dataclass` | **One cookbook biquad specification.**<br>• `filter_type`: 'peaking', 'lowshelf', 'highshelf', 'lowpass', 'highpass', 'bandpass', 'bandpass_skirt', 'notch', 'allpass'<br>• `f0`: Centre/corner frequency [Hz]<br>• `gain_db`: Gain (peaking/shelves) [dB]<br>• One of `q` (Default: 1/√2), `bw` [octaves] or `slope` (shelves) | `EQSection("peaking", 1000.0, gain_db=-6.0, bw=1.0)` |
 | `EQResponseResult` | `dataclass` | **Parametric-EQ cascade response.**<br>• `frequencies` [Hz], `magnitude_db` [dB], `phase_rad` [rad]<br>• `section_magnitude_db`: per-section magnitudes [dB]<br>• `sos`: the cascade, `fs`, `sections`; `.plot()` magnitude + phase | `res = eq.response()`<br>`res.plot()` |
-| `sensitivity` | `function`| **SPL Calibration.**<br>• `ref_signal`: Calibration signal<br>• `target_spl`: Level of calibrator (Default: 94.0)<br>• `reference_pressure_pa`: Reference pressure (Default: 20e-6)<br>• `narrowband`: coherent Goertzel tone estimate that rejects broadband hum/noise (needs `fs`; Default: False) | `s = sensitivity(ref_signal, target_spl=94.0)`<br><br>• `s`: Float (multiplier for pressure) |
+| `sensitivity` | `function`| **SPL Calibration.**<br>• `ref_signal`: Calibration signal<br>• `target_spl`: Level of calibrator (Default: 94.0)<br>• `reference_pressure_pa`: Reference pressure (Default: 20e-6)<br>• `frequency`, `calibrator_class`: select the IEC 60942 Table 2 fluctuation limit the take is screened with (Default: 1000.0, `'1'`)<br>• `narrowband`: coherent Goertzel tone estimate that rejects broadband hum/noise (needs `fs`; Default: False) | `s = sensitivity(ref_signal, target_spl=94.0)`<br><br>• `s`: Float (multiplier for pressure) |
 | `read` | `function` | **Read a measurement audio file into a `Signal`.**<br>• `path`: WAV/BWF/RF64 in the base install; FLAC, AIFF, Ogg/Opus, MP3 with `[audio]`<br>• `calibration_factor`: digital units → Pa (Default: None; an existing sidecar is applied automatically, an explicit value wins)<br>Native fs kept, no downmix, no normalization; int PCM scaled by 2^(bits−1); lossy sources raise `LossyCompressionWarning` | `sig = io.read("night.wav")`<br><br>• `sig`: `Signal` (float64, (channels, samples), with fs, calibration, `bext`, labels) |
 | `info` | `function` | **Describe a file from its headers alone.**<br>• `path`: any supported container<br>No sample is decoded, so a 12-hour RF64 answers instantly; compressed WAV that `read` refuses still describes itself | `meta = io.info("night.wav")`<br><br>• `meta`: `AudioFileInfo` |
 | `read_blocks` | `function` | **Stream a file block by block.**<br>• `path`, `block_size` [samples]<br>• `overlap`: samples shared between consecutive blocks (Default: 0)<br>• `calibration_factor`: as in `read`; `None` takes the sidecar's (Default: `None`)<br>Yields exactly what `read` returns, in slices: feeds `BlockProcessing(stateful=True)` unchanged | `for block in io.read_blocks(p, 65536): ...`<br><br>• each `block`: a `Signal` with the rate, calibration, labels and provenance `read` gives |
@@ -42939,6 +42941,33 @@ documents, one page per module.
 | `DEFAULT_CO2_MOLE_FRACTION` | `float` | **CO₂ mole fraction assumed when none is supplied.**<br>0.0004, the value Clause F.2 recommends for laboratory conditions | `DEFAULT_CO2_MOLE_FRACTION  # 0.0004` |
 | `ISO1683_REFERENCE_VALUES` | `mapping` | **The ISO 1683:2015 reference values every level is counted from, keyed `[medium][quantity]`.**<br>• `'gas'`, Table 1: `sound_pressure` 20 µPa, `sound_exposure` (20 µPa)² s, `sound_power` 1 pW, `sound_energy` 1 pJ, `sound_intensity` 1 pW/m²<br>• `'liquid'`, Table 2: the same five re 1 µPa and 1 µPa² s, `particle_displacement` 1 pm, `particle_velocity` 1 nm/s, `particle_acceleration` 1 µm/s² and `distance` 1 m<br>• `'solid'`, Table 3: `displacement` 1 pm, `velocity` 1 nm/s, `acceleration` 1 µm/s², `force` 1 µN, and `velocity_alternative` 50 nm/s from note b<br>• every `value` in SI; the private references of the package read it, and `scripts/check_reference_values.py` keeps them doing so | `metrology.ISO1683_REFERENCE_VALUES['gas']['sound_pressure'].value  # 2e-05` |
 | `ReferenceValue` | `dataclass` | **One row of the ISO 1683 table.**<br>• `quantity`, `medium` ('gas' / 'liquid' / 'solid'), `value` [in `unit`], `unit` (SI), `printed` (as the page prints it, prefix and all), `table` ('Table 1' to 'Table 3', or 'Table 3, note b') | `row = metrology.ISO1683_REFERENCE_VALUES['solid']['force']`<br><br>• `row.value, row.unit  # (1e-06, 'N')` |
+| `verify_conformance` | `function` | **The conformance rule of IEC TC 29 (IEC 60942:2017 5.1.15, IEC 61672-1:2013 5.1.21).**<br>• `deviation`: measured deviation from the design goal, signed<br>• `uncertainty`: actual expanded uncertainty, 95 % coverage<br>• `acceptance_limits`: one number for ±, or `(lower, upper)`<br>• `max_uncertainty`: maximum-permitted expanded uncertainty<br>• `unit`: label for the figure (Default: `'dB'`)<br>Conforms when the deviation is within the limits AND the uncertainty within the maximum, both inclusive; the uncertainty is not added to the deviation | `v = metrology.verify_conformance(-1.2, uncertainty=0.3, acceptance_limits=(-1.2, 1.0), max_uncertainty=0.5)`<br><br>• `v.passes  # True` (IEC 61672-1 Table C.1, example 7) |
+| `ConformanceVerification` | `dataclass` | **One deviation judged by the TC 29 rule.**<br>• `deviation`, `uncertainty`, `lower_limit`, `upper_limit`, `max_uncertainty`, `unit`<br>• `passes`, `deviation_within_limits`, `uncertainty_within_maximum`<br>• `outcome` 1 to 4 (E.2.2 / C.2.2) and `reason`, worded as Tables E.1 and C.1 print it<br>• `share_of_acceptance_limit`, `share_of_max_uncertainty`<br>• no truth value: `bool(v)` raises; `.plot()` draws it as Figure E.1 | `v.outcome, v.reason` |
+| `verify_sound_calibrator` | `function` | **A sound calibrator against IEC 60942:2017.**<br>• `calibrator_class`: `'LS'`, `'LS/M'`, `'1'`, `'1/M'` or `'2'` (Table 1)<br>• `measurements`: a `SoundCalibratorMeasurements`<br>• `nominal_frequency_hz`: selects the rows of Tables 2, 5, 7, A.1, A.3 and A.4; refused where the class has no limit (5.1.2)<br>• `environmental_test`: `'full'` (Tables 5 and 6) or `'abbreviated'` (A.6.4.7) (Default: `'full'`)<br>Every requirement given is judged by `verify_conformance` | `res = metrology.verify_sound_calibrator('1', record, nominal_frequency_hz=1000.0)`<br><br>• `SoundCalibratorVerification` |
+| `SoundCalibratorMeasurements` | `dataclass` | **What a laboratory measured on a calibrator.**<br>• one pair per requirement, deviation and expanded uncertainty: `level_deviation_db`, `fluctuation_db`, `frequency_deviation_percent`, `distortion_percent`, `supply_voltage_deviation_db`, `environmental_level_deviation_db`, `environmental_level_in_band_deviation_db`, `environmental_frequency_deviation_percent`, `field_immunity_deviation_db`, each with its `..._uncertainty_...`<br>• `static_pressure_correction_db`: the manufacturer's correction for an LS/M or 1/M pistonphone, added to the level<br>• each field one number or one per condition; `.pairs(requirement)` | `metrology.SoundCalibratorMeasurements(level_deviation_db=0.12, level_uncertainty_db=0.10)` |
+| `SoundCalibratorRequirement` | `dataclass` | **One IEC 60942 requirement, judged on each of its measurements.**<br>• `name`, `clause`, `tables`, `verifications` (one `ConformanceVerification` each)<br>• `passes`, `unit`, `acceptance_limits`, `max_uncertainty`<br>• no truth value; `.plot()` draws its measurements as Figure E.1 | `res.requirement('level').passes` |
+| `SoundCalibratorVerification` | `dataclass` | **The IEC 60942:2017 verdict on one calibrator setting.**<br>• `calibrator_class`, `nominal_frequency_hz`, `environmental_test`, `measurements`<br>• `requirements` in the order of `CALIBRATOR_REQUIREMENTS`; `requirement(name)`, `failed`<br>• `passes`: every requirement measured passes (False when nothing was measured)<br>• no truth value; `.plot()` draws the share of each allowance used | `res.passes, res.failed` |
+| `CalibratorTableRow` | `dataclass` | **One row of an IEC 60942 table keyed by a range of nominal frequencies.**<br>• `lower_hz`, `upper_hz`, `includes_lower`, `includes_upper` (as the printed "> 63 to < 160" says)<br>• `class_ls`, `class_1`, `class_2`, `None` where the table prints a dash<br>• `.contains(nominal_frequency_hz)`, `.for_class(calibrator_class)` | `metrology.LEVEL_ACCEPTANCE_LIMITS_DB[2].class_1  # 0.25` |
+| `CALIBRATOR_CLASSES` | `constant` | **IEC 60942:2017 Table 1 classes and designations**: `('LS', 'LS/M', '1', '1/M', '2')` | `'1/M' in metrology.CALIBRATOR_CLASSES` |
+| `CALIBRATOR_REQUIREMENTS` | `constant` | **The requirements `verify_sound_calibrator` grades**: `'level'`, `'fluctuation'`, `'frequency'`, `'distortion'`, `'supply_voltage'`, `'environmental_level'`, `'environmental_level_in_band'`, `'environmental_frequency'`, `'field_immunity'` | `metrology.CALIBRATOR_REQUIREMENTS[0]  # 'level'` |
+| `LEVEL_ACCEPTANCE_LIMITS_DB` | `tuple` | **IEC 60942:2017 Table 2, sound pressure level** [dB]: 0.10 / 0.25 / 0.40 (LS / 1 / 2) from 160 Hz to 1.25 kHz; class 1 alone elsewhere, 0.30 to 0.50 dB | `metrology.LEVEL_ACCEPTANCE_LIMITS_DB[2].class_2  # 0.4` |
+| `FLUCTUATION_ACCEPTANCE_LIMITS_DB` | `tuple` | **IEC 60942:2017 Table 2, short-term level fluctuation** [dB]: 0.03 / 0.07 / 0.15 from 160 Hz to 1.25 kHz; class 1 0.20 dB to 63 Hz and 0.10 dB below 160 Hz | `metrology.FLUCTUATION_ACCEPTANCE_LIMITS_DB[0].class_1  # 0.2` |
+| `SUPPLY_VOLTAGE_ACCEPTANCE_LIMITS_DB` | `mapping` | **IEC 60942:2017 Table 3, effect of supply voltage** [dB]: LS 0.02, 1 0.06, 2 0.16 | `metrology.SUPPLY_VOLTAGE_ACCEPTANCE_LIMITS_DB['1']  # 0.06` |
+| `FREQUENCY_ACCEPTANCE_LIMITS_PERCENT` | `mapping` | **IEC 60942:2017 Table 4, frequency** [% of the specified frequency]: LS 0.7, 1 0.7, 2 1.7 | `metrology.FREQUENCY_ACCEPTANCE_LIMITS_PERCENT['2']  # 1.7` |
+| `ENVIRONMENTAL_LEVEL_ACCEPTANCE_LIMITS_DB` | `tuple` | **IEC 60942:2017 Table 5, level over the environmental range** [dB]: 0.10 / 0.25 / 0.40 from 160 Hz to 1.25 kHz; class 1 0.25 to 0.60 dB elsewhere | `metrology.ENVIRONMENTAL_LEVEL_ACCEPTANCE_LIMITS_DB[-1].class_1  # 0.6` |
+| `ENVIRONMENTAL_FREQUENCY_ACCEPTANCE_LIMITS_PERCENT` | `mapping` | **IEC 60942:2017 Table 6, frequency over the environmental range** [%]: LS 0.7, 1 0.7, 2 1.7 | `metrology.ENVIRONMENTAL_FREQUENCY_ACCEPTANCE_LIMITS_PERCENT['LS']  # 0.7` |
+| `DISTORTION_ACCEPTANCE_LIMITS_PERCENT` | `tuple` | **IEC 60942:2017 Table 7, maximum total distortion + noise** [%]: 2.0 / 2.5 / 3.0 from 160 Hz to 1.25 kHz; class 1 3.0 elsewhere | `metrology.DISTORTION_ACCEPTANCE_LIMITS_PERCENT[1].class_ls  # 2.0` |
+| `LEVEL_MAX_UNCERTAINTY_DB` | `tuple` | **IEC 60942:2017 Table A.1, generated level** [dB, 95 %]: 0.10 / 0.15 / 0.35 from 160 Hz to 1.25 kHz; class 1 0.20 to 0.50 dB elsewhere | `metrology.LEVEL_MAX_UNCERTAINTY_DB[2].class_1  # 0.15` |
+| `FLUCTUATION_MAX_UNCERTAINTY_DB` | `tuple` | **IEC 60942:2017 Table A.1, short-term fluctuation** [dB, 95 %]: 0.02 / 0.03 / 0.05 from 160 Hz to 1.25 kHz | `metrology.FLUCTUATION_MAX_UNCERTAINTY_DB[2].class_ls  # 0.02` |
+| `FREQUENCY_MAX_UNCERTAINTY_PERCENT` | `mapping` | **IEC 60942:2017 Table A.2, frequency** [%, 95 %]: 0.2 for every class | `metrology.FREQUENCY_MAX_UNCERTAINTY_PERCENT['1']  # 0.2` |
+| `DISTORTION_MAX_UNCERTAINTY_PERCENT` | `tuple` | **IEC 60942:2017 Table A.3, total distortion + noise** [%, 95 %]: 0.5 / 0.5 / 1.0 from 160 Hz to 1.25 kHz; class 1 1.0 elsewhere | `metrology.DISTORTION_MAX_UNCERTAINTY_PERCENT[1].class_2  # 1.0` |
+| `ENVIRONMENTAL_LEVEL_MAX_UNCERTAINTY_DB` | `tuple` | **IEC 60942:2017 Table A.4, level over the environmental range** [dB, 95 %]: 0.10 / 0.15 / 0.20 from 160 Hz to 1.25 kHz; manufacturer's corrections included, Table A.1 excluded | `metrology.ENVIRONMENTAL_LEVEL_MAX_UNCERTAINTY_DB[1].class_2  # 0.2` |
+| `ENVIRONMENTAL_FREQUENCY_MAX_UNCERTAINTY_PERCENT` | `mapping` | **IEC 60942:2017 Table A.5, frequency over the environmental range** [%, 95 %]: 0.2 for every class | `metrology.ENVIRONMENTAL_FREQUENCY_MAX_UNCERTAINTY_PERCENT['2']  # 0.2` |
+| `SUPPLY_VOLTAGE_MAX_UNCERTAINTY_DB` | `mapping` | **IEC 60942:2017 A.5.5.7 and A.5.5.8, supply-voltage difference** [dB, 95 %]: LS 0.02, 1 and 2 0.04 | `metrology.SUPPLY_VOLTAGE_MAX_UNCERTAINTY_DB['2']  # 0.04` |
+| `FIELD_IMMUNITY_ACCEPTANCE_LIMITS_DB` | `mapping` | **IEC 60942:2017 5.9.4.2, level change in a power- or radio-frequency field** [dB]: LS 0.10, 1 0.25, 2 0.45 | `metrology.FIELD_IMMUNITY_ACCEPTANCE_LIMITS_DB['1']  # 0.25` |
+| `FIELD_IMMUNITY_MAX_UNCERTAINTY_DB` | `mapping` | **IEC 60942:2017 A.7.4.8, that level change** [dB, 95 %]: 0.05 for every class, the field measurement excluded | `metrology.FIELD_IMMUNITY_MAX_UNCERTAINTY_DB['LS']  # 0.05` |
+| `ABBREVIATED_LEVEL_REDUCTIONS_DB` | `mapping` | **IEC 60942:2017 A.6.4.7, reduction of the Table 5 limits in the abbreviated test** [dB]: LS 0.05, 1 0.05, 2 0.10 | `metrology.ABBREVIATED_LEVEL_REDUCTIONS_DB['2']  # 0.1` |
+| `ABBREVIATED_FREQUENCY_ACCEPTANCE_LIMITS_PERCENT` | `mapping` | **IEC 60942:2017 A.6.4.7, frequency limits of the abbreviated test** [%]: LS 0.5, 1 0.5, 2 1.3 | `metrology.ABBREVIATED_FREQUENCY_ACCEPTANCE_LIMITS_PERCENT['2']  # 1.3` |
 | `combine_uncertainty` | `function` | **GUM law of propagation of uncertainty (ISO/IEC Guide 98-3 clause 5).**<br>• `model`: measurement function f(x1…xN)<br>• `quantities`: input `Quantity` objects, in argument order<br>• `correlation`: optional N×N matrix r_ij (Default: None → uncorrelated; non-identity with finite input dof → effective dof undefined, `expanded()` needs `coverage_factor_override`) | `u = metrology.combine_uncertainty(lambda a, b: a*b, [metrology.Quantity(10.0, 0.1), metrology.Quantity(5.0, 0.2)])`<br><br>• `UncertaintyResult`; uc = 2.062 |
 | `monte_carlo` | `function` | **Monte Carlo propagation (Guide 98-3-1, Supplement 1).**<br>• `model`: vectorised f(x1…xN)<br>• `quantities`: input `Quantity` objects<br>• `trials`: M ≥ 2 (Default: 1000000; fixed, no adaptive 7.9)<br>• `coverage`: interval probability (Default: 0.95)<br>• `seed`: reproducibility (Default: None)<br>• inputs sampled independently (no 6.4.8 multivariate path) | `mc = metrology.monte_carlo(model, quantities, seed=1)`<br><br>• `MonteCarloResult` (mean, u, coverage interval) |
 | `rectangular` | `function` | **Type B quantity, rectangular PDF (GUM 4.3.7).**<br>• `value`, `half_width` a, `name` | `rectangular(20.0, 0.5)`<br><br>• `Quantity` with u = a/√3 = 0.289 |
@@ -49575,9 +49604,10 @@ so in its own "Not covered" block.
 `verify_weighting_class` check a designed digital response against the
 tolerance tables of IEC 61260-1 and IEC 61672-1; the IEC 61672-2
 pattern-evaluation tests a physical meter needs for type approval, the IEC
-61672-3 periodic tests it receives in service, and the IEC 60942 conformance
-tests of the calibrator itself, are not run, so a class verdict here describes
-the algorithm and not a built device; [Compliance and
+61672-3 periodic tests it receives in service, and the IEC 60942 tests of the
+calibrator itself, are not run (a laboratory's calibrator results are graded by
+`metrology.verify_sound_calibrator`, which performs no physical test), so a class
+verdict from the filter and weighting verifiers describes the algorithm and not a built device; [Compliance and
 verification](https://jmrplens.github.io/phonometry/signals/metrology/compliance-verification/) draws
 that boundary part by part.
 
@@ -51436,18 +51466,21 @@ calibrator as specified by **IEC 60942** (classes LS, 1 and 2):
 - The default `target_spl=94.0` matches the common 94 dB @ 1 kHz calibrator
   output (the standard requires the principal level to be at least 90 dB re
   20 µPa; 94 dB and 114 dB are the usual choices).
-- The resulting sensitivity inherits the calibrator's class tolerance (e.g.
-  ±0.4 dB for a class 1 calibrator between 160 Hz and 1.25 kHz, IEC 60942
-  Table 1) plus the RMS estimation error of your recording.
+- The resulting sensitivity inherits the calibrator's class tolerance plus
+  the RMS estimation error of your recording. IEC 60942:2017 prints no
+  tolerance limit: Table 2 gives the acceptance limit on the generated level
+  (0.25 dB for class 1 between 160 Hz and 1.25 kHz) and Table A.1 the
+  maximum-permitted uncertainty of the measurement that demonstrates it
+  (0.15 dB), and Annex D puts the tolerance limit at their sum, ±0.4 dB.
 - IEC 60942 specifies the generated level as a 20 s average: record a few
   seconds of *stable* tone (excluding handling noise at the start/end) for the
   RMS estimate to converge.
 
-The conformance tests of the calibrator itself (generated level, frequency,
-distortion, and the environmental corrections for static pressure and
-temperature) are not implemented: when the calibrator's manual asks for a
-pressure or temperature correction, apply it yourself and pass the corrected
-value as `target_spl`.
+The calibrator itself gets its own verdict, from what a laboratory measured
+on it: see [Verifying the calibrator itself](#verifying-the-calibrator-itself-iec-609422017)
+below. `sensitivity()` does not apply an environmental correction: when the
+calibrator's manual asks for a static-pressure correction, apply it yourself
+and pass the corrected value as `target_spl`.
 
 ### Automatic stability validation
 
@@ -51455,11 +51488,14 @@ When you pass the sample rate (and `validate=True`, the default),
 `sensitivity(ref, fs=fs)` checks the recording the way
 IEC 60942:2017 checks the calibrator itself (5.3.3): the *short-term level
 fluctuation*, the absolute difference between each of the maximum and minimum
-F-time-weighted levels and the mean level, must not exceed the Table 2 class 1
-limit for the calibrator's nominal frequency (0.07 dB at and above 160 Hz, relaxed
-to 0.10 dB below 160 Hz and 0.20 dB at or below 63 Hz, where the F
-time-weighting itself ripples). Pass `frequency=` to select the right row for non-1 kHz
-calibrators. A `CalibrationWarning` flags badly coupled microphones or handling
+F-time-weighted levels and the mean level, must not exceed the Table 2 limit
+for the calibrator's class and nominal frequency, read from the published
+`metrology.FLUCTUATION_ACCEPTANCE_LIMITS_DB` (class 1: 0.07 dB at and above
+160 Hz, relaxed to 0.10 dB below 160 Hz and 0.20 dB at or below 63 Hz, where
+the F time-weighting itself ripples). Pass `frequency=` to select the right row
+for non-1 kHz calibrators, and `calibrator_class=` for a class LS (0.03 dB) or
+class 2 (0.15 dB) calibrator; where Table 2 gives the class no limit, the
+strictest figure of its own column applies. A `CalibrationWarning` flags badly coupled microphones or handling
 noise before they silently corrupt every calibrated level. The recording must
 be at least 2 s long (1 s for the F-integrator to settle plus 1 s of settled
 envelope); shorter recordings get a warning instead of an unreliable verdict.
@@ -51511,8 +51547,9 @@ plt.show()
 | `reference_pressure_pa` | float | Pa | default `2e-5` | Reference pressure $p_0$; rarely changed |
 | `fs` | int, optional | Hz | > 0; default `None` | Required for the stability validation; omit to skip it |
 | `validate` | bool | — | default `True` | Emit `CalibrationWarning` on unstable/short recordings; needs `fs`, and does nothing without it |
-| `max_fluctuation_db` | float, optional | dB | default `None` → Table 2 class 1 | Explicit override of the stability limit |
+| `max_fluctuation_db` | float, optional | dB | default `None` → Table 2, by class and frequency | Explicit override of the stability limit |
 | `frequency` | float | Hz | default `1000.0` | Calibrator's nominal frequency; selects the IEC 60942 Table 2 row |
+| `calibrator_class` | str | — | `'LS'`, `'LS/M'`, `'1'`, `'1/M'`, `'2'`; default `'1'` | Calibrator's class designation (Table 1); selects the Table 2 column |
 | `narrowband` | bool | — | default `False` | Estimate the tone with a coherent Goertzel detector near `frequency` (needs `fs`) instead of full-band RMS; rejects broadband hum/noise that otherwise inflates the RMS and shrinks every later level (~−0.44 dB at 20 dB SNR). Enable for noisy coupler recordings |
 
 Returns the sensitivity factor (float) to pass as `calibration_factor=` to
@@ -51549,6 +51586,82 @@ class 1 (or LS) calibrator *and* a class 1 meter; calibrating a class 1
 chain with a class 2 calibrator silently downgrades every derived level to
 class 2 accuracy, because the calibrator's wider level tolerance enters
 $S$ directly.
+
+## Verifying the calibrator itself (IEC 60942:2017)
+
+A field check compares the chain with the calibrator and trusts the calibrator.
+What earns that trust is a laboratory's verdict on it, and IEC 60942:2017 says
+how the verdict is reached: every requirement is a measured deviation with an
+acceptance limit, measured with an expanded uncertainty no larger than a maximum
+the standard also prints. `metrology.verify_sound_calibrator` takes what the
+laboratory measured and gives that verdict, one requirement at a time; it
+measures nothing itself.
+
+| Requirement | Clause | Acceptance limit | Maximum uncertainty | Class 1 at 1 kHz |
+| :--- | :--- | :--- | :--- | :--- |
+| `level` | 5.3.2 | Table 2 | Table A.1 | ±0.25 dB; 0.15 dB |
+| `fluctuation` | 5.3.3 | Table 2 | Table A.1 | 0.07 dB; 0.03 dB |
+| `frequency` | 5.4.2 | Table 4 | Table A.2 | ±0.7 %; 0.2 % |
+| `distortion` | 5.6 | Table 7 | Table A.3 | 2.5 %; 0.5 % |
+| `supply_voltage` | 5.3.4 | Table 3 | A.5.5.7 | ±0.06 dB; 0.04 dB |
+| `environmental_level` | 5.5 | Table 5 | Table A.4 | ±0.25 dB; 0.15 dB |
+| `environmental_level_in_band` | A.6.2.4 | Table 2 | Table A.4 | ±0.25 dB; 0.15 dB |
+| `environmental_frequency` | 5.5 | Table 6 | Table A.5 | ±0.7 %; 0.2 % |
+| `field_immunity` | 5.9.4.2 | 5.9.4.2 | A.7.4.8 | ±0.25 dB; 0.05 dB |
+
+The level is the mean of at least three couplings (A.5.5.3), and the level at
+each end of the supply range goes into `level_deviation_db` too, because 5.3.4
+holds it to Table 2 as well as to Table 3. The static-pressure sweep of A.6.2 is
+graded against Table 2 inside the band of 5.3.2 (97 kPa to 105 kPa) and against
+Table 5 outside it (A.6.2.4), so its in-band points go into
+`environmental_level_in_band` and the rest into `environmental_level`.
+
+Each is judged by the conformance rule the IEC TC 29 instrument standards
+written since 2013 share (5.1.15): the deviation within its acceptance limit
+**and** the uncertainty within its maximum, both inclusive
+(`metrology.verify_conformance`, worked through the printed examples in
+[Compliance and verification](https://jmrplens.github.io/phonometry/signals/metrology/compliance-verification/)).
+
+```python
+from phonometry import metrology
+
+record = metrology.SoundCalibratorMeasurements(
+    level_deviation_db=0.12, level_uncertainty_db=0.10,
+    fluctuation_db=0.02, fluctuation_uncertainty_db=0.02,
+    frequency_deviation_percent=-0.05, frequency_uncertainty_percent=0.02,
+    distortion_percent=0.9, distortion_uncertainty_percent=0.3,
+)
+result = metrology.verify_sound_calibrator("1", record, nominal_frequency_hz=1000.0)
+print(result.passes)                                     # True
+
+# The same 0.12 dB, measured elsewhere with 0.17 dB of expanded uncertainty.
+other_lab = metrology.SoundCalibratorMeasurements(
+    level_deviation_db=0.12, level_uncertainty_db=0.17)
+verdict = metrology.verify_sound_calibrator("1", other_lab, nominal_frequency_hz=1000.0)
+print(verdict.passes)                                    # False
+print(verdict.requirement("level").verifications[0].reason)
+# Deviation within acceptance limits BUT uncertainty exceeds maximum-permitted
+```
+
+The second verdict is the rule, not the calibrator: a laboratory whose
+uncertainty exceeds the 0.15 dB of Table A.1 cannot demonstrate anything about a
+class 1 level (5.1.16), and another laboratory may pass the same calibrator.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/calibrator_verification_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/calibrator_verification.svg" alt="Horizontal bars for a class 1 calibrator at 1 kHz, two per measurement: the deviation as a share of its acceptance limit and the expanded uncertainty as a share of its maximum; only the third environmental level reading, 0.28 dB against 0.25 dB, crosses the 100 percent line, and its bar is drawn in red, which the legend names" width="92%"></picture>
+
+Every limit is read from a published, read-only table (`LEVEL_ACCEPTANCE_LIMITS_DB`,
+`FLUCTUATION_ACCEPTANCE_LIMITS_DB`, the other acceptance tables and the Annex A
+maxima beside them). Classes LS and 2 are specified from 160 Hz to 1.25 kHz only,
+and at any other nominal frequency the verifier refuses the class (5.1.2). A
+class LS/M or 1/M pistonphone takes the manufacturer's static-pressure correction
+as `static_pressure_correction_db`, added to the measured level (5.3.2, B.4.3.2),
+and every other calibrator is refused one (5.1.7).
+`environmental_test="abbreviated"` applies the reduced limits of A.6.4.7, where
+a failure calls for the full environmental tests rather than a non-conformance.
+The markings, stabilization time, supply indicator, radio-frequency emissions
+and electrostatic discharges of IEC 60942 are hardware and paperwork checks
+outside the verdict, and full conformance needs both the pattern evaluation of
+Annex A and the periodic tests of Annex B (5.1.18).
 
 ## Digital Analysis (dBFS)
 
@@ -51625,7 +51738,11 @@ Derive the sensitivity before each measurement series and check it again at the 
 
 ### Can I calibrate a class 1 chain with a class 2 calibrator?
 
-You can, but the tolerances chain: a class 1 measurement requires a class 1 (or LS) calibrator per IEC 60942 and a class 1 meter, so a class 2 calibrator silently downgrades every derived level to class 2 accuracy, because its wider level tolerance enters the sensitivity factor $S$ directly. For reference, the class 1 tolerance is ±0.4 dB between 160 Hz and 1.25 kHz (IEC 60942 Table 1).
+You can, but the tolerances chain: a class 1 measurement requires a class 1 (or LS) calibrator per IEC 60942 and a class 1 meter, so a class 2 calibrator silently downgrades every derived level to class 2 accuracy, because its wider level tolerance enters the sensitivity factor $S$ directly. For reference, the class 1 tolerance limit is ±0.4 dB between 160 Hz and 1.25 kHz: the 0.25 dB acceptance limit of IEC 60942:2017 Table 2 plus the 0.15 dB maximum-permitted uncertainty of Table A.1, combined as Annex D describes.
+
+### How do I check that my calibrator conforms to IEC 60942?
+
+Take the laboratory's results (each measured deviation with the expanded uncertainty it was measured with) into a `metrology.SoundCalibratorMeasurements` and call `metrology.verify_sound_calibrator` with the class and the nominal frequency. Each requirement is judged by the conformance rule of 5.1.15: the deviation within the Table 2 to 7 limit and the uncertainty within the Annex A maximum, both inclusive.
 
 ## See also
 
@@ -51633,15 +51750,18 @@ You can, but the tolerances chain: a class 1 measurement requires a class 1 (or 
 - [Levels](https://jmrplens.github.io/phonometry/signals/levels/levels/): every metric that consumes the `calibration_factor` derived here.
 - [Multichannel and Performance](https://jmrplens.github.io/phonometry/signals/filters/multichannel/): one sensitivity per channel when the channels differ.
 - [GUM uncertainty](https://jmrplens.github.io/phonometry/signals/metrology/gum-uncertainty/): propagating the calibrator tolerance and drift bound into a level's uncertainty.
-- API reference: [`metrology.calibration`](https://jmrplens.github.io/phonometry/reference/api/metrology/calibration/) and [`phonometry`](https://jmrplens.github.io/phonometry/reference/api/filters/phonometry/).
+- [Compliance and verification](https://jmrplens.github.io/phonometry/signals/metrology/compliance-verification/): the conformance rule of IEC TC 29 the calibrator verdict is reached by.
+- API reference: [`metrology.calibration`](https://jmrplens.github.io/phonometry/reference/api/metrology/calibration/), [`metrology.sound_calibrator`](https://jmrplens.github.io/phonometry/reference/api/metrology/sound-calibrator/), [`metrology.conformance`](https://jmrplens.github.io/phonometry/reference/api/metrology/conformance/) and [`phonometry`](https://jmrplens.github.io/phonometry/reference/api/filters/phonometry/).
 
 ## References
 
 - International Electrotechnical Commission. (2017). *Electroacoustics —
   Sound calibrators* (IEC 60942:2017).
   [IEC webstore](https://webstore.iec.ch/en/publication/30045).
-  The calibrator classes, level tolerances and the short-term stability
-  criterion `sensitivity()` applies to the reference recording.
+  The calibrator classes, the acceptance limits and maximum-permitted
+  uncertainties `verify_sound_calibrator` grades a calibrator against, and the
+  short-term stability criterion `sensitivity()` applies to the reference
+  recording.
 - International Electrotechnical Commission. (2013). *Electroacoustics —
   Sound level meters — Part 3: Periodic tests* (IEC 61672-3:2013).
   [IEC webstore](https://webstore.iec.ch/en/publication/5710).
@@ -51658,9 +51778,11 @@ You can, but the tolerances chain: a class 1 measurement requires a class 1 (or 
 
 IEC 60942:2017, *Electroacoustics — Sound calibrators*: the
 calibrator level and class assumptions behind `sensitivity()` (the 94 dB
-principal level and the Table 1 class tolerances) and the short-term
-level-fluctuation stability check of the reference recording (5.3.3, Table 2
-class 1 limits per nominal frequency).
+principal level, the Table 1 classes and the Table 2 and Table A.1 limits), the
+short-term level-fluctuation stability check of the reference recording (5.3.3,
+Table 2 limits per class and nominal frequency), and every requirement with an
+acceptance limit that `verify_sound_calibrator` grades (Tables 2 to 7, Tables
+A.1 to A.5, 5.9.4.2, A.6.4.7) by the conformance rule of 5.1.15.
 
 ---
 
@@ -51767,14 +51889,14 @@ result.report(
 )                                            # -> Class 1 - COMPLIES, PASS
 ```
 
-**The verifiers that grade a measurement, not a design.** Five more functions
+**The verifiers that grade a measurement, not a design.** Six more functions
 carry the same `verify_` prefix and answer a different question. The four
 above are handed a filter this library built, and report whether that *design*
 fits an acceptance mask; these are handed numbers somebody measured on a
 bench, and report whether *that instrument, on the day it was measured*, meets
 the standard it is sold against. There are no classes and no decibel margins
 in them: the verdict is a pass or a fail, in the unit its own standard writes
-its tolerances in. All five return a result object whose verdict says so and
+its tolerances in. All six return a result object whose verdict says so and
 whose other fields say where and by how much, down to `verify_running_rms_decay`,
 which grades one printed row and keeps it.
 
@@ -51785,6 +51907,7 @@ which grades one printed row and keeps it.
 | Human-vibration phase response | `verify_phase_response` | ISO 8041-1:2017 Table 5 and Formula (6) |
 | Saw-tooth burst indications | `verify_signal_burst_response` | ISO 8041-1:2017 Tables 7 to 9 (the signal is Table 6) |
 | Running r.m.s. decay time | `verify_running_rms_decay` | ISO 8041-1:2017 Tables 10 and 11 |
+| Sound calibrator | `verify_sound_calibrator` | IEC 60942:2017 Tables 2 to 7 and A.1 to A.5 |
 
 One clause of ISO 8041-1 makes those four different in kind from everything
 else on this page. The deviation a laboratory reports is extended by that
@@ -51794,6 +51917,40 @@ on another, and `verify_weighting` takes that uncertainty as an argument
 rather than assuming it away. The four are covered by [Verifying a
 human-vibration meter](https://jmrplens.github.io/phonometry/vibration/human/meter-verification/), and the
 aircraft one by [Aircraft noise](https://jmrplens.github.io/phonometry/aircraft/aircraft-noise/).
+
+**The conformance rule of IEC TC 29.** The IEC instrument standards written
+since 2013 answer the same question another way, in the same sentence:
+IEC 61672-1:2013 5.1.21, IEC 60942:2017 5.1.15, IEC 61672-3:2013 4.1 and the
+introductions of IEC 61260-2 and -3:2016. Conformance is demonstrated when the
+measured deviation does not exceed the acceptance limits **and** the
+laboratory's actual expanded uncertainty does not exceed the maximum-permitted
+uncertainty the standard prints for the test, both limits inclusive. The
+uncertainty is not added to the deviation: the tolerance the instrument has to
+meet lies beyond the acceptance limit by that maximum (IEC 60942 Annex D,
+IEC 61672-1 Annex A), a guard band stated for a 95 % coverage interval that
+lowers the risk of passing an instrument outside its tolerance without removing
+it. `metrology.verify_conformance` is the rule on its own,
+and its verdict names which of the four outcomes of IEC 60942 E.2.2 it is, in
+the words of the tables' "Reasons" column; `verify_sound_calibrator` applies it
+to every requirement of IEC 60942:2017 (see [Calibration and dBFS](https://jmrplens.github.io/phonometry/signals/metrology/calibration/)).
+
+```python
+from phonometry import metrology
+
+# IEC 61672-1:2013 Table C.1: acceptance limits +1.0 dB and -1.2 dB, and a
+# maximum-permitted uncertainty of 0.5 dB.
+on_the_limit = metrology.verify_conformance(          # example 7
+    -1.2, uncertainty=0.3, acceptance_limits=(-1.2, 1.0), max_uncertainty=0.5)
+print(on_the_limit.passes, on_the_limit.outcome)      # True 1
+both_out = metrology.verify_conformance(              # example 10
+    -2.0, uncertainty=0.7, acceptance_limits=(-1.2, 1.0), max_uncertainty=0.5)
+print(both_out.passes, both_out.outcome)              # False 4
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/conformance_rule_examples_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/conformance_rule_examples.svg" alt="The eight examples of IEC 60942:2017 Table E.1 between 0 dB and 0.25 dB, as Figure E.1 draws their absolute deviations, and the ten of IEC 61672-1:2013 Table C.1 between -1.2 dB and +1.0 dB, each marker the verdict verify_conformance returned, which is the verdict the table prints" width="100%"></picture>
+
+All eighteen examples are rows of the [conformance report](https://jmrplens.github.io/phonometry/reference/conformance/),
+verdict and printed reason each.
 
 ## Reading the conformance report
 
@@ -51850,13 +52007,14 @@ The same honesty applies to this library, in both directions. A verdict from
 one of the four class verifiers is a statement about a *design*: the digital
 transfer function you configured fits the Part 1 acceptance mask, with the
 reported margins, over the checked range; every measurement made wholly in
-software inherits it. A verdict from one of the five that grade a measurement
+software inherits it. A verdict from one of the six that grade a measurement
 is narrower still: it belongs to the numbers somebody put in, on the day they
 were measured, and nothing else inherits it. Neither is a pattern evaluation,
 a periodic test, or a certificate for any physical device: nothing here has a microphone, a temperature or a serial
 number, and a real front end brings its own paper: the meter's periodic
-test per IEC 61672-3 and the calibrator's conformance per IEC 60942, both
-discussed in [Calibration and dBFS](https://jmrplens.github.io/phonometry/signals/metrology/calibration/). A defensible report
+test per IEC 61672-3 and the calibrator's laboratory results per IEC 60942,
+which `verify_sound_calibrator` grades but cannot produce, both discussed in
+[Calibration and dBFS](https://jmrplens.github.io/phonometry/signals/metrology/calibration/). A defensible report
 names both verdicts: the library's design verdict with the version and its
 conformance report, and the instrument's test record with its date.
 
@@ -51874,6 +52032,10 @@ IEC 61260-2:2016 (*Pattern-evaluation tests*) and IEC 61260-3:2016
 (*Periodic tests*): the filter-set test regimes delimited above, not run.
 IEC 61043:1993, *Instruments for the measurement of sound intensity*: the
 class limits behind `verify_intensity_class`.
+IEC 60942:2017, *Sound calibrators*: the conformance rule of 5.1.15 and
+Annex D, the eight examples of Table E.1 that `verify_conformance` reproduces,
+and the requirements `verify_sound_calibrator` grades. IEC 61672-1:2013 5.1.21
+and Table C.1 give the same rule and ten more examples.
 
 **Not covered.** The verification mathematics of each stage belongs to that
 stage's own page; and every test of the Parts 2 and 3 themselves is
@@ -52642,7 +52804,8 @@ SPL**, established from a recorded calibrator tone (the IEC 60942 field
 ritual), and digital **dBFS**, levels relative to full scale, appropriate when
 no physical reference exists or when characterising the digital chain itself.
 The page explains how each mode is set up and, just as important, which
-quantities are meaningful in which frame.
+quantities are meaningful in which frame, and it grades the calibrator itself
+against IEC 60942:2017 from what a laboratory measured on it.
 
 [Measurement uncertainty (GUM and Monte Carlo)](https://jmrplens.github.io/phonometry/signals/metrology/gum-uncertainty/)
 handles the second, implementing the *Guide to the Expression of Uncertainty
@@ -52659,7 +52822,8 @@ diverge and why.
 carries the evidence story: what a performance class actually claims in
 IEC 61672-1 and IEC 61260-1 (same design goals, different acceptance limits),
 which public verifier grades each stage of a measurement chain against its
-tolerance tables, how to read and cite the numerical conformance report the
+tolerance tables, the conformance rule of IEC TC 29 that grades a measured
+instrument, how to read and cite the numerical conformance report the
 site publishes, and the honest boundary against the pattern-evaluation and
 periodic tests of IEC 61672-2/-3 and IEC 61260-2/-3, which need an
 instrument in a laboratory rather than a library.
@@ -52688,11 +52852,13 @@ budgets that are specialisations of the GUM machinery described here.
 
 - [Calibration and dBFS](https://jmrplens.github.io/phonometry/signals/metrology/calibration/): physical SPL
   calibration from a calibrator tone, the stability check it applies to that
-  recording, and the digital full-scale mode.
+  recording, the IEC 60942:2017 verdict on the calibrator itself, and the
+  digital full-scale mode.
 - [Compliance and verification](https://jmrplens.github.io/phonometry/signals/metrology/compliance-verification/):
   what a performance class asserts, the verifiers that grade weightings,
   filter banks and intensity spectra against their tolerance tables, the
-  conformance report, and the scope of IEC 61672-2/-3 and IEC 61260-2/-3.
+  conformance rule of IEC TC 29, the conformance report, and the scope of
+  IEC 61672-2/-3 and IEC 61260-2/-3.
 - [Measurement uncertainty (GUM and Monte Carlo)](https://jmrplens.github.io/phonometry/signals/metrology/gum-uncertainty/):
   the law of propagation of uncertainty and the Monte Carlo method, expanded
   uncertainty and coverage intervals.
@@ -52702,11 +52868,12 @@ budgets that are specialisations of the GUM machinery described here.
 
 ## What this section does not cover
 
-Nothing here checks an instrument or a calibrator. The IEC 60942 conformance
-tests of the calibrator itself (generated level, frequency, distortion, and
-the corrections for static pressure and temperature) are not implemented, so
-pass an already corrected `target_spl` when the manual asks for one, and the
-IEC 61672-3 periodic tests are cited as laboratory practice rather than run;
+Nothing here measures an instrument or a calibrator. No IEC 60942 test is
+performed: `verify_sound_calibrator` grades the numbers a laboratory measured
+on a calibrator, and the static-pressure correction of an LS/M or 1/M
+pistonphone comes from its manual, so pass an already corrected `target_spl`
+when the manual asks for one; the IEC 61672-3 periodic tests are cited as
+laboratory practice rather than run;
 [Compliance and
 verification](https://jmrplens.github.io/phonometry/signals/metrology/compliance-verification/) draws
 that boundary precisely, part by part. The dBFS half of the calibration page
@@ -52924,7 +53091,10 @@ detector, $L_\mathrm{Aeq}$, the percentile levels, the sound exposure level and 
 C-weighted peak, the IEC 61260-1:2014 octave filters of `octave_filter`, and
 the Table 3 (weighting) and Table 1 (filter) class acceptance limits checked by
 `verify_weighting_class` and `verify_filter_class`. Each stage's own guide
-states its coverage in detail.
+states its coverage in detail. The calibrator the pipeline starts from has a
+verdict of its own: `metrology.verify_sound_calibrator` grades what a
+laboratory measured on it against every IEC 60942:2017 requirement that has an
+acceptance limit, by the conformance rule of IEC TC 29.
 
 **Not covered.** `verify_weighting_class` and `verify_filter_class` check the
 frequency-response *design* of the digital filters against the standards'
@@ -52933,10 +53103,12 @@ physical instrument needs for type approval (self-generated noise, linearity
 range, overload indication, directional response) nor the IEC 61672-3:2013
 periodic tests a working instrument receives. A class verdict from this page
 describes an algorithm, not a built device, and the screening checks of the
-last section screen the *recording*, not the instrument. The IEC 60942:2017
-calibrator conformance tests are not run here either; see
-[Calibration and dBFS](https://jmrplens.github.io/phonometry/signals/metrology/calibration/) for exactly what
-`sensitivity()` does and does not check.
+last section screen the *recording*, not the instrument. The same holds for
+the calibrator: nothing here performs an IEC 60942:2017 test on one.
+`verify_sound_calibrator` grades the numbers a laboratory measured, and
+`sensitivity()` screens the short-term stability of the take against Table 2;
+[Calibration and dBFS](https://jmrplens.github.io/phonometry/signals/metrology/calibration/) says exactly what each checks
+and what it does not.
 
 ## See also
 
@@ -58182,7 +58354,7 @@ the normative PDF fiche.
 - [Filter Architecture Gallery](https://jmrplens.github.io/phonometry/signals/filters/filter-gallery/): choose an architecture and inspect responses
 - [Calibration and dBFS](https://jmrplens.github.io/phonometry/signals/metrology/calibration/): get real-world SPL values
 - [Why phonometry](https://jmrplens.github.io/phonometry/start/why-phonometry/): the conformance-first design philosophy
-- [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): the expected and computed value of all 1309 checks
+- [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): the expected and computed value of all 1337 checks
 - [API Reference](https://jmrplens.github.io/phonometry/reference/api/): every parameter of every function
 - [Bibliography](https://jmrplens.github.io/phonometry/reference/bibliography/): the books and papers behind every guide, each with a verified link
 
@@ -59150,11 +59322,11 @@ sample from the metrology core:
 | ISO 226:2023 Table 1 and Annex B | Equal-loudness contours and loudness levels against the Annex B tables, hearing threshold against the Table 1 $T_f$ parameters | `tests/psychoacoustics/loudness/test_contours.py` |
 | ECMA-418-1:2024 | TNR/PR tone prominence: critical bandwidths, proximity spacing and prominence criteria against the worked examples in clauses 10–12 | `tests/psychoacoustics/quality/test_tonality.py` |
 | ISO 1996-1:2016 | `lden()`, `ldn()` and `composite_rating_level()` against hand-computed formula values | `tests/environment/assessment/test_rating.py` |
-| IEC 60942:2017 Table 2 | Calibrator short-term stability limits (frequency-dependent, class 1) in `sensitivity()` | `tests/metrology/test_calibration_validation.py` |
+| IEC 60942:2017 Tables 2 to 7, A.1 to A.5 and E.1 | Calibrator short-term stability limits by class and frequency in `sensitivity()`, and each requirement `verify_sound_calibrator()` grades from the laboratory's measurements | `tests/metrology/test_calibration_validation.py`, `tests/metrology/test_sound_calibrator.py` |
 | IEC 61252:1993 | The personal sound exposure quantities, `sound_exposure()` and the normalized 8 h level `lex_8h()`; IEC 61252:2025 has since superseded this print, and the transcription still targets the 1993+A2 text | `tests/signals/test_levels.py` |
 
 The same discipline applies far beyond the metrology core: today the suite runs
-1309 numerical conformance checks across 91 domains and 466 standards, covering
+1337 numerical conformance checks across 92 domains and 467 standards, covering
 psychoacoustics and speech intelligibility, room, building and materials
 acoustics, human and machine vibration, environmental, aircraft, rotorcraft
 and underwater noise, electroacoustics, broadcast loudness, industrial noise

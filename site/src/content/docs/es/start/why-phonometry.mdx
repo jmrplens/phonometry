@@ -201,7 +201,7 @@ metrología:
 | ISO 226:2023 Tabla 1 y Anexo B | Líneas isofónicas y niveles de sonoridad frente a las tablas del Anexo B, umbral de audición frente a los parámetros $T_f$ de la Tabla 1 | `tests/psychoacoustics/loudness/test_contours.py` |
 | ECMA-418-1:2024 | Prominencia tonal TNR/PR: anchos de banda críticos, separación de proximidad y criterios de prominencia frente a los ejemplos resueltos de los apartados 10–12 | `tests/psychoacoustics/quality/test_tonality.py` |
 | ISO 1996-1:2016 | `lden()`, `ldn()` y `composite_rating_level()` frente a valores calculados a mano con las fórmulas | `tests/environment/assessment/test_rating.py` |
-| IEC 60942:2017 Tabla 2 | Límites de estabilidad a corto plazo del calibrador (dependientes de la frecuencia, clase 1) en `sensitivity()` | `tests/metrology/test_calibration_validation.py` |
+| IEC 60942:2017 Tablas 2 a 7, A.1 a A.5 y E.1 | Límites de estabilidad a corto plazo del calibrador por clase y frecuencia en `sensitivity()`, y cada requisito que `verify_sound_calibrator()` califica a partir de las medidas del laboratorio | `tests/metrology/test_calibration_validation.py`, `tests/metrology/test_sound_calibrator.py` |
 | IEC 61252:1993 | Las magnitudes de exposición sonora personal, `sound_exposure()` y el nivel normalizado a 8 h `lex_8h()`; IEC 61252:2025 ha sustituido desde entonces esa impresión, y la transcripción sigue apuntando al texto de 1993+A2 | `tests/signals/test_levels.py` |
 
 La misma disciplina se aplica mucho más allá del núcleo de metrología: hoy la

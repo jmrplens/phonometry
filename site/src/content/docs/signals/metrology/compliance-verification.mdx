@@ -1,6 +1,6 @@
 ---
 title: "Compliance and verification"
-description: "What a performance class claims under IEC 61672-1 and IEC 61260-1, the public verifiers that grade a designed chain against the tolerance tables, how to read the published conformance report, and the honest boundary drawn by the pattern-evaluation and periodic-test parts that only a laboratory can run."
+description: "What a performance class claims under IEC 61672-1 and IEC 61260-1, the public verifiers that grade a designed chain against the tolerance tables, the conformance rule of IEC TC 29 that grades a measured instrument, how to read the published conformance report, and the honest boundary drawn by the pattern-evaluation and periodic-test parts that only a laboratory can run."
 references:
   - type: standard
     organization: "International Electrotechnical Commission"
@@ -8,7 +8,7 @@ references:
     title: "Electroacoustics — Sound level meters — Part 1: Specifications"
     designation: "IEC 61672-1:2013"
     url: "https://webstore.iec.ch/en/publication/5708"
-    note: "The two performance categories of clause 1 (same design goals, different acceptance limits and operational temperature range) and the Table 3 frequency-weighting acceptance limits checked by verify_weighting_class."
+    note: "The two performance categories of clause 1 (same design goals, different acceptance limits and operational temperature range), the Table 3 frequency-weighting acceptance limits checked by verify_weighting_class, and the conformance rule of 5.1.21 with the ten examples of Table C.1 that verify_conformance reproduces."
   - type: standard
     organization: "International Electrotechnical Commission"
     year: 2013
@@ -51,6 +51,13 @@ references:
     designation: "IEC 61043:1993"
     url: "https://webstore.iec.ch/en/publication/4353"
     note: "The class limits on the pressure-residual intensity index behind verify_intensity_class, the third verifier family this page inventories."
+  - type: standard
+    organization: "International Electrotechnical Commission"
+    year: 2017
+    title: "Electroacoustics — Sound calibrators"
+    designation: "IEC 60942:2017"
+    url: "https://webstore.iec.ch/en/publication/30045"
+    note: "The conformance rule of 5.1.15 and Annex D, the eight examples of Table E.1 that verify_conformance reproduces, and the requirements verify_sound_calibrator grades a calibrator against."
 ---
 
 import ReportPreview from '../../../../components/ReportPreview.astro';
@@ -240,13 +247,13 @@ spectrum against the IEC 61043 class limits and hands back a result with
 
 ### The verifiers that grade a measurement, not a design
 
-Five more functions carry the same `verify_` prefix and answer a different
+Six more functions carry the same `verify_` prefix and answer a different
 question. The four above are handed a filter this library built, and report
 whether that **design** fits an acceptance mask; these are handed numbers
 somebody measured on a bench, and report whether **that instrument, on the day
 it was measured**, meets the standard it is sold against. There are no classes
 and no decibel margins in them: the verdict is a pass or a fail, in the unit
-its own standard writes its tolerances in. All five return a result object
+its own standard writes its tolerances in. All six return a result object
 whose verdict says so and whose other fields say where and by how much, down to
 `verify_running_rms_decay`, which grades one printed row and keeps it.
 
@@ -257,6 +264,7 @@ whose verdict says so and whose other fields say where and by how much, down to
 | Human-vibration phase response | `verify_phase_response` | ISO 8041-1:2017 Table 5 and Formula (6) | [Verifying a Human-Vibration Meter](/phonometry/vibration/human/meter-verification/) |
 | Saw-tooth burst indications | `verify_signal_burst_response` | ISO 8041-1:2017 Tables 7 to 9 (the signal is Table 6) | [Verifying a Human-Vibration Meter](/phonometry/vibration/human/meter-verification/) |
 | Running r.m.s. decay time | `verify_running_rms_decay` | ISO 8041-1:2017 Tables 10 and 11 | [Verifying a Human-Vibration Meter](/phonometry/vibration/human/meter-verification/) |
+| Sound calibrator | `verify_sound_calibrator` | IEC 60942:2017 Tables 2 to 7 and A.1 to A.5 | [Calibration and dBFS](/phonometry/signals/metrology/calibration/#verifying-the-calibrator-itself-iec-609422017) |
 
 One clause of ISO 8041-1 makes those four different in kind from everything
 else on this page. The deviation a laboratory reports is extended by that
@@ -264,6 +272,110 @@ laboratory's own expanded uncertainty before it is compared with the limit
 (clauses 13.1 and 14.1), so the same instrument passes on one bench and fails
 on another, and `verify_weighting` takes that uncertainty as an argument
 rather than assuming it away.
+
+### The conformance rule of IEC TC 29
+
+The IEC instrument standards written since 2013 answer the same question
+another way, and all of them in the same sentence. IEC 61672-1:2013 prints it
+in 5.1.21 and IEC 60942:2017 in 5.1.15: conformance to a performance
+specification is demonstrated when the measured deviation from the design goal
+does not exceed the acceptance limits **and** the laboratory's actual expanded
+uncertainty does not exceed the maximum-permitted uncertainty the standard
+prints for that test. The uncertainty is not added to the deviation. It has a
+ceiling of its own, and the tolerance the instrument has to meet lies beyond
+the acceptance limit by that ceiling (IEC 60942 Annex D, IEC 61672-1 Annex A),
+so a laboratory within its maximum is unlikely to pass an instrument outside
+its tolerance. Unlikely, not unable: the ceiling is stated for a 95 % coverage
+interval, and the guard band lowers the risk of a false acceptance without
+removing it. Both limits are inclusive: a deviation equal to its acceptance limit
+conforms, and so does an uncertainty equal to its maximum.
+
+`metrology.verify_conformance` is that rule on its own, for any standard that
+uses it: IEC 61672-3:2013 (4.1) and IEC 61260-2 and -3:2016 write the same one,
+for the pattern evaluation and the periodic tests of meters and filters. Its
+verdict says which of the four outcomes of IEC 60942 E.2.2 (IEC 61672-1 C.2.2)
+it is, in the words of the "Reasons" column the tables print, and it has no
+truth value, so an `if verify_conformance(...):` raises instead of passing
+everything.
+
+```python
+from phonometry import metrology
+
+# IEC 61672-1:2013 Table C.1: acceptance limits +1.0 dB and -1.2 dB, and a
+# maximum-permitted uncertainty of 0.5 dB.
+on_the_limit = metrology.verify_conformance(          # example 7
+    -1.2, uncertainty=0.3, acceptance_limits=(-1.2, 1.0), max_uncertainty=0.5)
+print(on_the_limit.passes, on_the_limit.outcome)      # True 1
+both_out = metrology.verify_conformance(              # example 10
+    -2.0, uncertainty=0.7, acceptance_limits=(-1.2, 1.0), max_uncertainty=0.5)
+print(both_out.passes, both_out.outcome)              # False 4
+print(both_out.reason)
+# Deviation exceeds acceptance limits AND uncertainty exceeds maximum-permitted
+```
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/conformance_rule_examples.svg" alt="Two panels drawn the way the standards draw their own examples. Left, the eight examples of IEC 60942:2017 Table E.1, whose deviations are absolute, between a lower acceptance limit of 0 dB and an upper one of 0.25 dB, as Figure E.1 draws them: examples 3, 4, 6 and 7 are diamonds that conform, 6 and 7 sitting on the upper limit, and 1, 2, 5 and 8 are crosses, 5 because its 0.17 dB uncertainty bar is longer than its 0.15 dB shaded maximum. Right, the ten examples of IEC 61672-1:2013 Table C.1 against +1.0 dB and -1.2 dB: examples 3, 4, 6 and 7 conform, 3 on the upper limit and 7 on the lower one, and the other six do not" width="100%" />
+
+*The eighteen printed examples, each marker the verdict `verify_conformance`
+returned, which is the verdict the table prints. The shaded band is the
+maximum-permitted uncertainty and the error bar the actual one; a diamond on a
+limit line conforms, and a cross inside the limits (example 5 of both tables)
+is a measurement whose uncertainty was too large to demonstrate anything.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+from phonometry import metrology
+
+table_e1 = [(0.40, 0.12, 0.15), (0.35, 0.12, 0.15), (0.20, 0.13, 0.15),
+            (0.00, 0.14, 0.15), (0.00, 0.17, 0.15), (0.25, 0.10, 0.15),
+            (0.25, 0.15, 0.15), (0.40, 0.50, 0.20)]
+table_c1 = [(1.7, 0.3), (1.1, 0.3), (1.0, 0.3), (0.0, 0.3), (0.0, 0.9),
+            (-0.5, 0.3), (-1.2, 0.3), (-1.3, 0.3), (-2.0, 0.3), (-2.0, 0.7)]
+# Table E.1 prints the absolute deviation, so Figure E.1 draws its limits at
+# 0 dB and 0.25 dB.
+e1 = [metrology.verify_conformance(d, uncertainty=u, acceptance_limits=(0.0, 0.25),
+                                   max_uncertainty=m) for d, u, m in table_e1]
+c1 = [metrology.verify_conformance(d, uncertainty=u, acceptance_limits=(-1.2, 1.0),
+                                   max_uncertainty=0.5) for d, u in table_c1]
+
+
+def draw(ax, results, title):
+    ax.axhline(results[0].upper_limit, color="tab:orange", lw=2)
+    ax.axhline(results[0].lower_limit, color="tab:orange", lw=2, ls="--")
+    for x, v in enumerate(results, start=1):
+        ax.bar(x, 2 * v.max_uncertainty, bottom=v.deviation - v.max_uncertainty,
+               width=0.28, color="0.8")
+        ax.errorbar(x, v.deviation, yerr=v.uncertainty, fmt="none",
+                    ecolor="tab:blue", capsize=5)
+        ax.plot(x, v.deviation, "D" if v.passes else "X", ms=9,
+                color="tab:green" if v.passes else "tab:red")
+    ax.set_title(title)
+    ax.set_xlabel("Example number")
+    ax.set_ylabel("Deviation from design goal [dB]")
+
+
+fig, (ax_e, ax_c) = plt.subplots(1, 2, figsize=(13, 6))
+draw(ax_e, e1, "IEC 60942:2017, Table E.1")
+draw(ax_c, c1, "IEC 61672-1:2013, Table C.1")
+plt.show()
+```
+
+</details>
+
+All eighteen examples, the eight of IEC 60942 Table E.1 and the ten of
+IEC 61672-1 Table C.1, are rows of the
+[conformance report](/phonometry/reference/conformance/), verdict and reason
+each. IEC 60942 writes its limits on the absolute deviation, so a signed
+deviation takes one number (`acceptance_limits=0.25` is ±0.25 dB). Table E.1
+prints the absolute deviation already, and Figure E.1 draws its limits at 0 dB
+and 0.25 dB, so the figure above passes `acceptance_limits=(0.0, 0.25)`: the
+eight verdicts are the same either way. IEC 61672-1 writes most of its own
+limits as an asymmetric pair. `verify_sound_calibrator` applies the rule to
+every requirement of IEC 60942:2017 with the limits the class and the nominal
+frequency select, as [Calibration and dBFS](/phonometry/signals/metrology/calibration/#verifying-the-calibrator-itself-iec-609422017)
+shows.
 
 ## 3. Reading the conformance report
 
@@ -361,7 +473,7 @@ The same honesty applies to this library, in both directions:
   wholly in software inherits it, which is why the
   [sound level meter walkthrough](/phonometry/signals/sound-level-meter/) ends by
   running the verifiers on the chain it just built.
-- **What a measurement verdict is.** Narrower still. The five verifiers of the
+- **What a measurement verdict is.** Narrower still. The six verifiers of the
   second table are handed numbers somebody read off a bench, so their verdict
   belongs to that instrument on the day it was measured and nothing inherits
   it, not even a second run of the same test.
@@ -371,7 +483,8 @@ The same honesty applies to this library, in both directions:
   are not implemented, and no green verdict from section 2 says anything
   about the hardware that recorded your samples. A real front end brings its
   own paper: the meter's periodic test per IEC 61672-3 and the calibrator's
-  conformance per IEC 60942, both discussed with the field ritual in
+  laboratory results per IEC 60942, which `verify_sound_calibrator` grades but
+  cannot produce, both discussed with the field ritual in
   [Calibration and dBFS](/phonometry/signals/metrology/calibration/).
 - **Name both verdicts in a report.** "Band levels computed with filters
   verified class 1 per IEC 61260-1:2014 Table 1 (library version X, see its
@@ -388,8 +501,10 @@ how the claim chains through a measurement; the public verifiers
 (`verify_weighting_class`, `verify_filter_class`, `verify_intensity_class`,
 with `weighting_class_limits` and `class_limits` publishing the masks, and the
 last two returning a result that carries `.plot()` and the accredited fiche);
-the five verifiers that grade a measured instrument
-rather than a design, and where each one's page is; how to read and cite the
+the six verifiers that grade a measured instrument
+rather than a design, and where each one's page is; the conformance rule of
+IEC TC 29 (`verify_conformance`, reproducing every example of IEC 60942:2017
+Table E.1 and IEC 61672-1:2013 Table C.1); how to read and cite the
 published conformance report; and the verified scope of the
 pattern-evaluation and periodic-test parts.
 </ScopeClaim>
@@ -423,8 +538,10 @@ physical instrument is assigned a class.
 - [Conformance report](/phonometry/reference/conformance/): the published table
   this page teaches how to read.
 - API reference: [`filters.compliance`](/phonometry/reference/api/filters/compliance/),
-  [`filters.weighting_compliance`](/phonometry/reference/api/filters/weighting-compliance/)
-  and [`emission.intensity_compliance`](/phonometry/reference/api/power/intensity-compliance/).
+  [`filters.weighting_compliance`](/phonometry/reference/api/filters/weighting-compliance/),
+  [`emission.intensity_compliance`](/phonometry/reference/api/power/intensity-compliance/),
+  [`metrology.conformance`](/phonometry/reference/api/metrology/conformance/)
+  and [`metrology.sound_calibrator`](/phonometry/reference/api/metrology/sound-calibrator/).
 
 </SeeAlso>
 
@@ -460,8 +577,10 @@ against IEC 61260-1:2014 Table 1 (the 1995 class 0 mask via
 `edition="1995"`), and `verify_intensity_class` checks an intensity
 instrument's residual-index spectrum against IEC 61043:1993. All three report
 a per-band class with margins in dB, and the last two hand back a result
-that carries `.plot()` and an accredited `.report()` fiche. Five more verifiers grade a measurement rather
+that carries `.plot()` and an accredited `.report()` fiche. Six more verifiers grade a measurement rather
 than a design and return a plain pass or fail:
-`verify_aircraft_noise_system` against IEC 61265:1995, and `verify_weighting`,
+`verify_aircraft_noise_system` against IEC 61265:1995, `verify_weighting`,
 `verify_phase_response`, `verify_signal_burst_response` and
-`verify_running_rms_decay` against the tolerance tables of ISO 8041-1:2017.
+`verify_running_rms_decay` against the tolerance tables of ISO 8041-1:2017, and
+`verify_sound_calibrator` against IEC 60942:2017, by the conformance rule of
+IEC TC 29 that `verify_conformance` publishes on its own.

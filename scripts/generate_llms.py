@@ -327,9 +327,13 @@ def _area_members() -> dict[str, list[str]]:
 #: hand (``docs/buildings/insulation/index.md``: "Laboratory.", "Field.",
 #: "Ratings and the envelope.").
 #:
-#: ``devices/emission`` has seven, and the family sorts its determination
+#: ``devices/emission`` has ten, and the family sorts its determination
 #: routes by the quantity actually measured: sound pressure, sound intensity,
-#: and the surface velocity of the casing. The intensity pair carves out.
+#: and the surface velocity of the casing. The intensity pair carves out, and
+#: so do the three pressure routes that read a reverberant field instead of an
+#: enveloping surface: the reverberation room of ISO 3741, the in situ
+#: comparison of ISO 3747 and the 16 kHz octave of ISO 9295, which extends the
+#: first above 10 kHz.
 #:
 #: ``buildings/rooms`` has eleven, and four of them are the auditorium
 #: measures of the ISO 3382-1 annexes and the tables that report them, which
@@ -363,6 +367,15 @@ MANUAL_SPLITS: dict[str, tuple[tuple[str, str, tuple[str, ...]], ...]] = {
             "devices-emission-intensity",
             "Sound intensity and sound power from it",
             ("intensity", "sound-power-intensity"),
+        ),
+        (
+            "devices-emission-reverberant",
+            "Sound power in a reverberant field",
+            (
+                "sound-power-reverberation",
+                "sound-power-in-situ",
+                "sound-power-high-frequency",
+            ),
         ),
     ),
     "devices/noise-control": (

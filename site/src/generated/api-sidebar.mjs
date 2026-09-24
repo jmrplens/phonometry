@@ -311,6 +311,7 @@ export const apiSections = {
       'reference/api/power/sound-power-reverberation',
       'reference/api/power/sound-power-in-situ',
       'reference/api/power/sound-power-in-duct',
+      'reference/api/power/sound-power-high-frequency',
       'reference/api/power/intensity',
       'reference/api/power/intensity-compliance',
       'reference/api/power/vibration-sound-power',

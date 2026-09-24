@@ -9,6 +9,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- **Sound power in the 16 kHz octave band (ISO 9295).** The general sound
+  power methods stop at the 10 kHz one-third-octave band, and a printer's
+  paper noise or a power supply's whine sits above it. The new
+  `emission.sound_power_high_frequency` module carries the four methods of
+  ISO 9295:2015 into the octave from 11.2 kHz to 22.4 kHz.
+  `room_constant_from_reverberation_time` gives the room constant from the
+  measured reverberation time through the Eyring relation of Formulae (4) and
+  (5), `room_constant_from_air_absorption` gives it from the air absorption
+  alone (Formula (7)), and `high_frequency_sound_power` turns the mean room
+  level into $L_W = L_p - 10 \lg(4/R)$ (Formula (6)), averaging four
+  orientations by Formula (1) and carrying the result to the reference
+  meteorological conditions with the $C_1$ and $C_2$ of ISO 3741, as
+  clause 10.1 asks. `high_frequency_sound_power_comparison` is the comparison
+  with a reference sound source, for broadband noise (Formula (8)) and for
+  tones read against a source calibrated per hertz (Formula (9)), and the
+  result marks the tones within 10 dB of the highest that the report has to
+  carry. `minimum_analyzer_bandwidth_hz` and `tone_level_from_sidebands` are
+  the bandwidth a moving microphone needs and the sideband sum when the FFT is
+  narrower (Formulae (2) and (3)), and `free_field_absorption_correction` the
+  $K = r\alpha$ of the free-field method beyond 2 m (Formula (10)).
+  `air_absorption_np_per_m` is Annex A, the ISO 9613-1 attenuation in nepers
+  per metre, evaluated up to 22.4 kHz without the advisory ISO 9613-1 raises
+  above 10 kHz. Every result has `.plot()`, and a new guide in both languages
+  walks a printer and a power supply through the methods. Tables 1 and 2 of
+  the standard are pinned cell by cell: 581 of the 624 are Annex A to the
+  fourth decimal, computed with the temperature converted as
+  $\theta + 273.16$ K, and the other 43 are cells whose fourth decimal is 0
+  printed as another digit, registered in the errata with the full list.
 - **What an active noise reduction earmuff adds, its uncertainty and where it
   stops being linear (ISO 4869-6:2019).** `hearing.active_insertion_loss` takes
   the levels at both ears with the circuit off and on (or the insertion loss

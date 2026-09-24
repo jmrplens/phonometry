@@ -126,6 +126,8 @@ from .devices import (
     generate_field_indicators,
     generate_frequency_response,
     generate_helmholtz_branch_geometry,
+    generate_high_frequency_air_absorption,
+    generate_high_frequency_sound_power,
     generate_hvac_elbow_flow_noise,
     generate_hvac_end_reflection,
     generate_in_duct_flow_correction,
@@ -898,6 +900,10 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     # ISO 3747 in situ comparison: the per-position levels of both sources
     # after K1, and the LW they yield with the RSS calibration beside it.
     generate_in_situ_sound_power,
+    # ISO 9295 16 kHz octave: Annex A against the 624 printed cells of
+    # Tables 1 and 2, and a direct and a tonal determination.
+    generate_high_frequency_air_absorption,
+    generate_high_frequency_sound_power,
     # Human vibration (ISO 8041-1, ISO 2631-1/-2/-4, ISO 5349-1/-2,
     # Directive 2002/44/EC): frequency weighting, weighted a_w, daily A(8)
     generate_vibration_weighting,

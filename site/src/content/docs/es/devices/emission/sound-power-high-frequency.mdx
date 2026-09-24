@@ -1,0 +1,436 @@
+---
+title: "Potencia acústica en la octava de 16 kHz (ISO 9295)"
+description: "Los métodos de ISO 9295 para la banda de octava de 16 kHz: la constante de sala a partir del tiempo de reverberación medido o de la absorción del aire del anexo A, el nivel directo LW = Lp - 10 lg(4/R), la comparación con una fuente sonora de referencia para ruido de banda ancha y para tonos discretos, el ancho de banda que pide un micrófono en movimiento, la corrección de campo libre más allá de 2 m y las 43 celdas que las tablas 1 y 2 imprimen mal."
+references:
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2015
+    title: "Acoustics — Determination of high-frequency sound power levels emitted by machinery and equipment"
+    designation: "ISO 9295:2015"
+    note: "Leída en su adopción española, UNE-EN ISO 9295:2015. Las fórmulas (1) a (10), las tablas 1 y 2, la tabla 3 y el anexo A normativo que implementa esta guía."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 1993
+    title: "Acoustics — Attenuation of sound during propagation outdoors — Part 1: Calculation of the absorption of sound by the atmosphere"
+    designation: "ISO 9613-1:1993"
+    url: "https://www.iso.org/standard/17426.html"
+    note: "El coeficiente de atenuación de tono puro que el anexo A de ISO 9295 escribe en neperios por metro y extiende hasta 22,4 kHz."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2010
+    title: "Acoustics — Determination of sound power levels and sound energy levels of noise sources using sound pressure — Precision methods for reverberation test rooms"
+    designation: "ISO 3741:2010"
+    url: "https://www.iso.org/standard/52053.html"
+    note: "La técnica de cámara reverberante sobre la que se construye ISO 9295, y las correcciones C1 y C2 del apartado 9.1.4 que su apartado 10.1 aplica para las condiciones meteorológicas de referencia."
+---
+
+import Scope from '../../../../../components/Scope.astro';
+import ScopeClaim from '../../../../../components/ScopeClaim.astro';
+import SeeAlso from '../../../../../components/SeeAlso.astro';
+import ThemeImage from '../../../../../components/ThemeImage.astro';
+
+Algunas máquinas suenan más fuerte justo donde los métodos generales dejan
+de escuchar. El ruido del papel en una impresora rápida, el pitido de una
+fuente de alimentación conmutada y el tono de línea de una pantalla están por
+encima de 10 kHz, y tanto ISO 3741 como ISO 3744 terminan en la banda de
+tercio de octava de 10 kHz. ISO 9295 añade la banda de octava centrada en
+16 kHz, de 11,2 kHz a 22,4 kHz, y determina el nivel de potencia acústica sin
+ponderar en sus tres bandas de tercio de octava (12,5, 16 y 20 kHz) o en las
+bandas estrechas de sus tonos discretos. A esas frecuencias el propio aire es
+el principal absorbente de una cámara reverberante, y eso es lo que da forma
+al método: esta guía cubre la constante de sala a partir del tiempo de
+reverberación medido o de la absorción del aire calculada, el nivel directo,
+la comparación con una fuente sonora de referencia para ruido de banda ancha y
+para tonos, la alternativa de campo libre y las erratas de las tablas que la
+norma imprime para la absorción del aire. Qué vía encaja con qué trabajo por
+debajo de 10 kHz se sopesa en
+[Potencia acústica](/phonometry/es/devices/emission/sound-power/).
+
+## 1. La banda de octava de 16 kHz (ISO 9295)
+
+La norma especifica cuatro métodos (apartado 1). Tres usan la cámara
+reverberante de ISO 3741: el **tiempo de reverberación medido** (apartado 6),
+la **absorción del aire calculada** (apartado 7) y una **fuente sonora de
+referencia** (apartado 8). El cuarto es el **campo libre sobre un plano
+reflectante** de ISO 3744 (apartado 9). En la cámara el micrófono va en un
+brazo giratorio que describe un círculo de al menos 2 m de diámetro, montado
+apuntando hacia arriba para que su membrana quede de espaldas al equipo
+(apartado 5.4): esa orientación es la que deja fuera el campo directo de una
+lectura que el método trata como puramente reverberante. El equipo se coloca
+en el suelo a al menos 1 m de cualquier pared y a 1,8 m de la posición de
+micrófono más cercana, y se mide en cuatro orientaciones, girado 90° cada vez,
+o sobre una mesa giratoria (apartado 5.5).
+
+El nivel de cada banda es la media energética de las cuatro orientaciones
+($N = 4$) o de tres vueltas del brazo ($N = 3$), fórmula (1):
+
+$$
+\overline{L_p} = 10 \lg\left[\frac{1}{N}\sum_{i=1}^{N} 10^{0{,}1 L_i}\right]\ \mathrm{dB}.
+$$
+
+Todas las funciones de determinación de más abajo aceptan los niveles ya
+promediados, un valor por banda, o como una matriz `(N, bands)` que promedian
+con la fórmula (1). La cadena tiene que ser plana a ±1,0 dB de 11,2 kHz a
+22,4 kHz después de corregirla, lo que en la práctica pide un micrófono de
+13,2 mm de diámetro o menos (apartado 5.3), y las condiciones de la sala forman
+parte del resultado: el apartado 5.2 recomienda de 15 °C a 30 °C y del 40 % al
+70 % de humedad relativa y pide que el producto
+$h_\mathrm{r}(\theta + 5\ ^\circ\mathrm{C})$ no varíe más de ±10 % durante la
+medición, porque la absorción del aire cambia la constante de sala banda a
+banda.
+
+### Cómo se hace la medida
+
+Cualifique la cámara según ISO 3741 y monte el brazo: un círculo de 2 m o más,
+el micrófono en el extremo apuntando hacia arriba, un periodo de giro al menos
+tan largo como pide ISO 3741, y más largo si el mecanismo es ruidoso o se está
+leyendo un tono. Coloque el equipo en el suelo, a 1 m de cada pared y a 1,8 m
+de la trayectoria, en su primera orientación, y calibre toda la cadena,
+comprobando su respuesta en la octava de 16 kHz al menos cada dos años.
+Registre la temperatura, la humedad relativa y la presión estática. En cada una
+de las cuatro orientaciones lea el nivel promediado en el tiempo durante
+vueltas completas, en bandas de tercio de octava para el ruido de banda ancha y
+en bandas estrechas donde haya un tono, y lea el fondo con el equipo parado.
+El apartado 5.7 deja la corrección de fondo a ISO 3741, así que los niveles se
+corrigen antes de llegar a las funciones de más abajo:
+`reverberation_background_correction` da la $K_1$ de ISO 3741 para cualquier
+banda, y por encima de 6,3 kHz aplica el criterio de 6 dB, que cubre toda la
+octava de 16 kHz. Después, o mida el tiempo de reverberación en tres o cuatro
+puntos de la trayectoria (apartado 6), o tome la constante de sala de la
+absorción del aire (apartado 7), o mida una fuente de referencia calibrada en
+el mismo sitio y con el mismo ancho de banda (apartado 8). El informe indica el
+método, el tipo de ruido de la tabla 3, los niveles por banda en las
+condiciones meteorológicas de referencia y la frecuencia de cada tono que
+quede a menos de 10 dB del más alto (apartado 13).
+
+## 2. La constante de sala
+
+Una cámara reverberante convierte la presión cuadrática media en potencia
+acústica a través de su absorción. Por encima de 10 kHz esa absorción es lo
+bastante grande para que la aproximación de Sabine deje de valer, así que la
+norma escribe la constante de sala $R$ en sus dos métodos con el coeficiente de
+absorción de la sala, $\alpha_\mathrm{sala}$, y no con el área de Sabine. El
+método del apartado 6 obtiene $\alpha_\mathrm{sala}$ del tiempo de
+reverberación medido $T$ mediante la relación de Eyring, fórmulas (4) y (5),
+con $S$ la superficie total de la sala y $V$ su volumen:
+
+$$
+R = \frac{S\,\alpha_\mathrm{sala}}{1 - \alpha_\mathrm{sala}}, \qquad
+\alpha_\mathrm{sala} = 1 - \mathrm{e}^{-0{,}16\,V/(S T)}.
+$$
+
+El método del apartado 7 se ahorra la medida. A 10 kHz y por encima,
+prácticamente toda la absorción de la sala está en el aire, cuyo coeficiente
+de atenuación de amplitud $\alpha$ en neperios por metro da un área de
+absorción de $8\alpha V$, y de ahí la fórmula (7):
+
+$$
+R = \frac{8\,\alpha V}{1 - \dfrac{8\,\alpha V}{S}}.
+$$
+
+$\alpha$ sale del anexo A, normativo, que es ISO 9613-1 escrita en neperios
+por metro y evaluada hasta 22,4 kHz, donde ISO 9613-1 se detiene en 10 kHz; el
+paso a decibelios por metro es el factor 8,686. `air_absorption_np_per_m` la
+evalúa con la propia implementación de ISO 9613-1 de la biblioteca, sin el
+aviso que esa implementación emite por encima de 10 kHz.
+
+```python
+import numpy as np
+from phonometry import emission
+
+thirds = np.array([12500.0, 16000.0, 20000.0])
+# Una cámara reverberante de 200 m3 con 210 m2 de superficie, a 23 °C y 50 %.
+alpha = emission.air_absorption_np_per_m(
+    thirds, temperature_c=23.0, relative_humidity_percent=50.0)
+print(alpha.round(4))            # [0.0245 0.0383 0.0564] Np/m
+room_air = emission.room_constant_from_air_absorption(
+    thirds, volume_m3=200.0, surface_area_m2=210.0,
+    temperature_c=23.0, relative_humidity_percent=50.0)
+print(room_air.round(1))         # [ 48.3  86.6 158.4] m2
+
+# La misma sala, a partir de los tiempos de reverberación medidos en el brazo.
+times = [0.70, 0.42, 0.26]       # s, a 12,5, 16 y 20 kHz
+print(emission.room_absorption_coefficient(
+    times, volume_m3=200.0, surface_area_m2=210.0).round(3))   # [0.196 0.304 0.443]
+room_t = emission.room_constant_from_reverberation_time(
+    times, volume_m3=200.0, surface_area_m2=210.0)
+print(room_t.round(1))           # [ 51.1  91.8 167.4] m2
+```
+
+Las dos constantes difieren en lo que absorben las paredes además del aire,
+0,25 dB en el nivel que dan. El término del aire se mueve mucho más con el
+tiempo atmosférico: la misma sala a 20 °C y 40 % tiene una constante de sala
+1,5 dB mayor a 12,5 kHz y 16 kHz, y por eso el apartado 5.2 pide que el
+producto de humedad y temperatura se mantenga durante la medida.
+`room_constant_from_air_absorption` avisa por debajo de 10 kHz, donde su
+premisa deja de valer, y rechaza una sala en la que $8\alpha V/S$ llegue a 1,
+donde el aire solo absorbería más de lo que puede la superficie de la sala.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/high_frequency_air_absorption.svg" alt="Dos paneles. A la izquierda, el coeficiente de absorción del aire del anexo A de ISO 9295 en neperios por metro de 10 kHz a 22,4 kHz, tres curvas que crecen con la frecuencia: 18 grados y 40 % de 0,024 a 0,076, 23 grados y 50 % de 0,016 a 0,068, y 27 grados y 60 % de 0,012 a 0,054, cada una con las celdas impresas de su columna de las tablas 1 y 2 como marcadores huecos sobre la curva, salvo un marcador verde a 21,5 kHz que queda claramente por encima de la curva de 27 grados. A la derecha, cada una de las 624 celdas impresas como su diferencia con el anexo A en unidades del cuarto decimal, frente a la frecuencia: 581 puntos grises sobre la línea de cero y 43 cruces rojas por encima, la mayoría entre 1 y 8 unidades, y tres que destacan en 30, 40 y 50 unidades a 14,5, 17 y 21,5 kHz" width="100%" />
+
+*El anexo A frente a la página. Las tablas imprimen $\alpha$ de 18 °C a
+27 °C, del 40 % al 60 % y de 10 000 Hz a 22 400 Hz, 624 celdas con cuatro
+decimales, y 581 son el anexo A hasta la última cifra. Las otras 43 son las
+erratas del párrafo siguiente: todas son celdas cuyo cuarto decimal es 0,
+impreso como otra cifra.*
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import emission
+
+grid = np.linspace(10_000.0, 22_400.0, 250)
+fig, ax = plt.subplots(figsize=(7, 5))
+for t, rh in ((18.0, 40.0), (23.0, 50.0), (27.0, 60.0)):
+    alpha = emission.air_absorption_np_per_m(
+        grid, temperature_c=t, relative_humidity_percent=rh)
+    ax.plot(grid / 1000.0, alpha, label=f"Anexo A, {t:g} °C y {rh:g} %")
+ax.set_xlabel("Frecuencia [kHz]")
+ax.set_ylabel("Absorción del aire alfa [Np/m]")
+ax.legend()
+plt.show()
+```
+
+</details>
+
+No lea $\alpha$ en las tablas 1 y 2. Cuarenta y tres de sus celdas están mal
+impresas, y de la misma manera: el anexo A da 0 como cuarto decimal y la página
+imprime otra cifra, casi siempre el tercer decimal repetido («0,027 7» donde
+el anexo A da 0,027 0). La mayor es «0,033 0» por 0,030 0 a 14 500 Hz, 25 °C y
+50 %, que llevada a la fórmula (7) sube el nivel al menos 0,41 dB. La lista
+completa, celda a celda, está en el
+[registro de erratas](/phonometry/es/reference/errata/). Las 581 celdas
+correctas guardan una sorpresa menor: solo se reproducen cifra a cifra con la
+temperatura convertida como $\theta + 273{,}16$ K, el punto triple del agua,
+donde la escala Celsius pone 273,15 K. La biblioteca convierte con 273,15 K,
+lo que mueve 61 de ellas una unidad del cuarto decimal y ninguna más de
+0,000 063 Np/m.
+
+### Las funciones de la constante de sala
+
+| Función | Fórmula | Devuelve | Notas |
+| :--- | :--- | :--- | :--- |
+| `air_absorption_np_per_m(frequencies_hz, *, temperature_c, relative_humidity_percent, static_pressure_kpa=101.325)` | Anexo A | $\alpha$ [Np/m] | ISO 9613-1 sin el 8,686; aviso fuera de 50 Hz a 22,4 kHz y fuera de −20 °C a +50 °C |
+| `room_absorption_coefficient(reverberation_time_s, *, volume_m3, surface_area_m2)` | (5) | $\alpha_\mathrm{sala}$ | El 0,16 que imprime la fórmula |
+| `room_constant_from_reverberation_time(reverberation_time_s, *, volume_m3, surface_area_m2)` | (4), (5) | $R$ [m²] | Apartado 6 |
+| `room_constant_from_air_absorption(frequencies_hz, *, volume_m3, surface_area_m2, temperature_c, relative_humidity_percent, static_pressure_kpa=101.325)` | (7) | $R$ [m²] | Apartado 7; avisa por debajo de 10 kHz, rechaza $8\alpha V/S \ge 1$ |
+
+## 3. Una impresora en una cámara reverberante
+
+Con la constante de sala en la mano, el nivel de cada banda es la fórmula (6):
+
+$$
+L_W = \overline{L_{p(\mathrm{ST})}} - 10 \lg\frac{4}{R}\ \mathrm{dB}.
+$$
+
+El apartado 10.1 lo lleva después a las condiciones meteorológicas de
+referencia, 101,325 kPa y 23,0 °C, «de acuerdo con la Norma ISO 3741»: la
+corrección de las magnitudes de referencia $C_1$ y la corrección de impedancia
+de radiación $C_2$ del apartado 9.1.4 de ISO 3741, tal como ISO 3741 las suma a
+su propio método directo. `high_frequency_sound_power` hace las dos cosas, con
+la constante de sala de cualquiera de los dos métodos. El ejemplo es una
+impresora medida en las cuatro orientaciones en la sala de antes.
+
+```python
+orientations = np.array([        # dB re 20 uPa, una fila por orientación
+    [58.3, 56.1, 51.2],
+    [59.0, 56.8, 52.0],
+    [57.6, 55.7, 50.9],
+    [58.8, 56.5, 51.6],
+])
+printer = emission.high_frequency_sound_power(
+    orientations, frequencies_hz=thirds, room_constant_m2=room_air,
+    temperature_c=23.0, static_pressure_kpa=101.325)
+print(printer.mean_pressure_level.round(2))   # [58.46 56.29 51.44] dB, fórmula (1)
+print(printer.sound_power_level.round(1))     # [69.1 69.5 67.3] dB re 1 pW
+print(round(printer.c1, 3), round(printer.c2, 4))   # -0.127 0.0033
+
+printer.plot(language="es")   # LW por banda con el nivel medio de la sala (necesita matplotlib)
+```
+
+A 23 °C y 101,325 kPa, $C_2$ es casi nada, pero $C_1$ no: es el
+$5 \lg(296{,}15/314)$ que refiere la impedancia característica del aire a la
+que supone el $-6$ dB de la relación de campo difuso, y resta 0,13 dB a cada
+banda. Medidas a través del tiempo de reverberación, las mismas lecturas dan
+69,4, 69,8 y 67,5 dB.
+
+### Parámetros de `high_frequency_sound_power()`
+
+| Parámetro | Tipo | Unidades | Rango / valor por defecto | Notas |
+| :--- | :--- | :--- | :--- | :--- |
+| `pressure_levels_db` | matriz 1D o 2D | dB | `(bands,)` o `(N, bands)` | $\overline{L_{p(\mathrm{ST})}}$, o las orientaciones o vueltas promediadas con la fórmula (1) |
+| `frequencies_hz` | matriz 1D | Hz | una por banda | Una frecuencia fuera de 11,2 kHz a 22,4 kHz emite un `SoundPowerWarning` |
+| `room_constant_m2` | float o matriz 1D | m² | positiva | De cualquiera de las dos funciones de constante de sala |
+| `temperature_c` | float | °C | por defecto `23.0` | Para $C_1$ y $C_2$ (apartado 10.1) |
+| `static_pressure_kpa` | float | kPa | por defecto `101.325` | Para $C_1$ y $C_2$ |
+| `tonal` | bool | | por defecto `False` | Las bandas son las bandas estrechas de tonos |
+
+El resultado, un `HighFrequencySoundPowerResult`, lleva los niveles por banda
+(`sound_power_level`), el nivel medio de la sala (`mean_pressure_level`), la
+constante de sala, las dos correcciones (`c1`, `c2`) y el método, y
+`within_10_db_of_maximum` marca las bandas que quedan a menos de 10 dB de la
+más alta.
+
+## 4. Tonos frente a una fuente de referencia
+
+El método del apartado 8 no necesita constante de sala. Una fuente sonora de
+referencia calibrada según ISO 6926 se mide en el sitio del equipo con el mismo
+ancho de banda, y la sala se cancela entre las dos, fórmula (8):
+
+$$
+L_W = L_{W(\mathrm{FAR})} - \overline{L_{p(\mathrm{FAR})}} + \overline{L_{p(\mathrm{ST})}}.
+$$
+
+Para tonos discretos el análisis es de banda estrecha, y un micrófono en
+movimiento lo complica: su desplazamiento reparte el tono en bandas laterales
+por efecto Doppler, sobre un ancho que da la fórmula (2) a partir de la
+velocidad $v$ del micrófono y de la velocidad del sonido $c$,
+
+$$
+\Delta f = 2 f \frac{v}{c}.
+$$
+
+Un analizador al menos así de ancho recoge todo el tono en una banda; una FFT
+más estrecha no, y las bandas laterales que llevan el tono se suman en base
+energética, fórmula (3). La fuente de referencia para tonos se calibra como
+densidad espectral de potencia, por hercio, así que la fórmula (9) suma el
+ancho de banda de ruido $\Delta F$ del analizador, como mucho 112 Hz para una
+FFT y tomado como 1 Hz para un analizador de porcentaje constante:
+
+$$
+L_W = L_{W(\mathrm{FAR})} - \overline{L_{p(\mathrm{FAR})}} + \overline{L_{p(\mathrm{ST})}}
++ 10 \lg(\Delta F / 1\ \mathrm{Hz})\ \mathrm{dB}.
+$$
+
+El ejemplo es una fuente de alimentación con un tono a 15 625 Hz y otros dos a
+17 000 Hz y 20 500 Hz, leída con una FFT de 12,5 Hz en un brazo de 1 m de radio
+que da una vuelta cada 32 s.
+
+```python
+speed = 2.0 * np.pi * 1.0 / 32.0                     # m/s a lo largo de la trayectoria
+print(emission.minimum_analyzer_bandwidth_hz(
+    15625.0, microphone_speed_m_s=speed, speed_of_sound_m_s=345.5).round(1))   # [17.8] Hz
+# La FFT es más estrecha, así que el tono es la suma de sus bandas laterales.
+tone = emission.tone_level_from_sidebands([42.9, 41.3, 38.0])
+print(round(tone, 1))                                # 45.9 dB
+
+tones = emission.high_frequency_sound_power_comparison(
+    [tone, 38.5, 31.0], frequencies_hz=[15625.0, 17000.0, 20500.0],
+    reference_pressure_levels_db=[41.8, 41.2, 40.1],
+    reference_sound_power_levels_db=[44.3, 43.9, 43.0],   # dB re 1 pW por hercio
+    noise_bandwidth_hz=12.5)
+print(tones.sound_power_level.round(1))              # [59.4 52.2 44.9] dB re 1 pW
+print(tones.within_10_db_of_maximum)                 # [ True  True False]
+```
+
+El apartado 13 c) pide el nivel y la frecuencia de cada tono que quede a menos
+de 10 dB del más alto, y `within_10_db_of_maximum` los marca: aquí los dos
+primeros. Un ancho de banda mayor de 112 Hz emite un `SoundPowerWarning`, y sin
+`noise_bandwidth_hz` la misma función aplica la fórmula (8) a bandas de banda
+ancha. La comparación aplica solo $C_2$, como hace ISO 3741 en su propio método
+de comparación.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/high_frequency_sound_power.svg" alt="Dos paneles. A la izquierda, la impresora del ejemplo: una barra de nivel de potencia acústica por banda de tercio de octava de la octava de 16 kHz, 69,1 dB a 12,5 kHz, 69,5 dB a 16 kHz y 67,3 dB a 20 kHz, con un punto naranja en cada barra para el nivel medio de la sala de 58,5, 56,3 y 51,4 dB. A la derecha, la fuente de alimentación del ejemplo tonal: tres líneas verticales sobre un eje de frecuencia en kilohercios, 59,4 dB a 15,625 kHz y 52,2 dB a 17 kHz en azul, y 44,9 dB a 20,5 kHz en gris, cada una con una marca naranja corta para su nivel medio de sala, y una línea roja discontinua en 49,4 dB, 10 dB por debajo del tono más alto, que solo cruzan las dos primeras" width="100%" />
+
+*A la izquierda, la impresora de la sección 3: el término de sala de la
+fórmula (6) es la distancia entre cada barra y su punto: crece de 10,7 dB a 12,5 kHz a 15,9 dB a 20 kHz, porque
+el aire absorbe más en lo alto de la octava y la constante de sala crece con
+él. A la derecha, los tonos de arriba: el de 20,5 kHz queda más
+de 10 dB por debajo del más alto y fuera de lo que el apartado 13 c) pide
+informar.*
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+# printer y tones son los resultados calculados en esta guía.
+fig, (left, right) = plt.subplots(1, 2, figsize=(12.5, 5.6))
+printer.plot(ax=left, language="es")
+tones.plot(ax=right, language="es")
+plt.show()
+```
+
+</details>
+
+## 5. El campo libre sobre un plano reflectante
+
+El cuarto método es ISO 3744 en una sala semianecoica, con las tres bandas de
+tercio de octava de la octava de 16 kHz, y
+[`sound_power_pressure`](/phonometry/es/devices/emission/sound-power-pressure/)
+lo admite tal cual (sin `frequencies`, porque la tabla de ponderación A de
+ISO 3744 se detiene en 10 kHz). Lo que añade ISO 9295 es la fórmula (10): más
+allá de un radio de medida de 2 m el aire absorbe lo bastante en el camino
+para que el nivel de superficie lleve la corrección $K = r\,\alpha$, con
+$\alpha$ en decibelios por metro (apartado 9.8). El nivel de superficie y el
+nivel de potencia acústica difieren en una constante, así que sumar $K$ a los
+niveles por banda es lo mismo.
+
+```python
+levels = np.array([[50.0, 48.0, 44.0]] * 10) + np.linspace(-1.0, 1.0, 10)[:, None]
+hemisphere = emission.sound_power_pressure(levels, "hemisphere", radius=2.5)
+k = emission.free_field_absorption_correction(
+    thirds, radius_m=2.5, temperature_c=23.0, relative_humidity_percent=50.0)
+print(k.round(2))                                        # [0.53 0.83 1.23] dB
+print((hemisphere.sound_power_level + k).round(1))       # [66.5 64.8 61.2] dB
+```
+
+A 2 m o menos el apartado no pide corrección y la función devuelve cero.
+
+## Qué cubre esta guía
+
+<Scope>
+<ScopeClaim status="covered" label="Cubierto">
+La determinación de ISO 9295:2015 del nivel de potencia acústica en la banda
+de octava de 16 kHz: la media energética sobre orientaciones o vueltas
+(fórmula (1)), el ancho de banda del analizador con un micrófono en movimiento
+y la suma de bandas laterales (fórmulas (2) y (3)), la constante de sala a
+partir del tiempo de reverberación medido mediante la relación de Eyring
+(fórmulas (4) y (5)) o de la absorción del aire del anexo A (fórmula (7),
+`air_absorption_np_per_m`, fijada a las 581 celdas bien impresas de las
+tablas 1 y 2), el nivel directo de la fórmula (6), la comparación con una
+fuente sonora de referencia para ruido de banda ancha y para tonos
+(fórmulas (8) y (9)), la corrección de campo libre de la fórmula (10), las
+condiciones meteorológicas de referencia del apartado 10.1 mediante las $C_1$
+y $C_2$ de ISO 3741, y el intervalo de 10 dB que informar del apartado 13 c).
+</ScopeClaim>
+
+<ScopeClaim status="not-covered" label="No cubierto">
+La sala, el brazo y los instrumentos se suponen cualificados: la cualificación
+de la sala según ISO 3741, la planitud de la cadena y la calibración de la
+fuente de referencia según ISO 6926 son comprobaciones que hace el
+laboratorio, y la estabilidad de ±10 % de
+$h_\mathrm{r}(\theta + 5\ ^\circ\mathrm{C})$ no se vigila. La corrección de
+fondo es la de ISO 3741, aplicada a los niveles antes de pasarlos
+(`reverberation_background_correction`). El método de campo libre es ISO 3744
+tal como lo implementa la biblioteca, más la fórmula (10). La tabla 3, que dice
+qué determinar para cada tipo de ruido, es una guía para el informe y no se
+calcula, y la incertidumbre del apartado 11 es una declaración,
+$u(L_W) \approx \sigma_\mathrm{tot}$, con desviaciones típicas de
+reproducibilidad de 3 dB o menos en la octava de 16 kHz.
+</ScopeClaim>
+</Scope>
+
+<SeeAlso>
+
+## Véase también
+
+- [Potencia acústica](/phonometry/es/devices/emission/sound-power/): cómo elegir
+  entre las vías de determinación por debajo de 10 kHz y la declaración de
+  ISO 4871.
+- [Potencia acústica en cámara reverberante (ISO 3741)](/phonometry/es/devices/emission/sound-power-reverberation/):
+  la técnica de sala que esta norma extiende, y las $C_1$ y $C_2$ que toma de
+  ella.
+- [Potencia acústica por métodos de presión (ISO 3744 / ISO 3746 / ISO 3745)](/phonometry/es/devices/emission/sound-power-pressure/):
+  la superficie envolvente del método de campo libre.
+- [Propagación en exteriores (ISO 9613-1 / ISO 9613-2)](/phonometry/es/environment/propagation/outdoor-propagation/):
+  el coeficiente de atenuación a partir del que se escribe el anexo A.
+- [Erratas](/phonometry/es/reference/errata/): las 43 celdas mal impresas de las
+  tablas 1 y 2.
+- Referencia de la API: [`emission.sound_power_high_frequency`](/phonometry/es/reference/api/power/sound-power-high-frequency/).
+
+</SeeAlso>

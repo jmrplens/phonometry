@@ -63,8 +63,8 @@ From FRF vocabulary to the predicted level in a receiving room.
   and Kij, and the experimental route that measures the same coupling loss
   factors by power injection.
 - [Transfer stiffness of resilient elements (ISO 10846)](structural/transfer-stiffness.md):
-  the dynamic transfer stiffness of vibration isolators by the direct and
-  indirect methods.
+  the dynamic transfer stiffness of vibration isolators by the direct,
+  indirect and driving-point methods, in one-third-octave bands.
 - [Sound power from surface vibration (ISO/TS 7849)](../devices/emission/vibration-sound-power.md):
   radiated airborne power from surface velocity and a radiation factor.
 - [Structure-borne sound power of equipment (EN 15657)](../buildings/design/structure-borne-power.md):
@@ -164,10 +164,10 @@ simply supported junction (the *measured* vibration reduction index of ISO
 transmission](../buildings/insulation/flanking-lab.md)) and the FRF
 page returns element-wise free reciprocals, correct for a driving-point or
 single-path use but not a full FRF matrix, with no impact-hammer processing
-(ISO 7626-5) and no blocked matrix quantities. On the isolator page, parts 4
-and 5 of ISO 10846 are not implemented, and two of the standard's validity
-checks (the blocking-mass inequality and the clause 7.6 linearity criterion)
-are described but not computed for you.
+(ISO 7626-5) and no blocked matrix quantities. On the isolator page, the
+linearity test of ISO 10846 (clause 7.7 of Parts 2, 4 and 5, clause 7.6 of
+Part 3) is described but not computed for you, and the Figure 11 nomograms of ISO 10846-4 for steel blocking masses are
+not tabulated.
 
 ## Before and after these pages
 

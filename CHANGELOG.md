@@ -41,6 +41,50 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   printed as another digit, registered in the errata with the full list,
   next to the digit zero that Formula (A.5) writes for the oxygen relaxation
   frequency.
+- **The one-third-octave band average every part of ISO 10846 asks for, the
+  driving-point method of Part 5 and the adequacy checks of Parts 4 and 5
+  (ISO 10846-4:2003, ISO 10846-5:2008).** `vibration.band_averaged_stiffness`
+  averages the squared magnitude of a narrow-band stiffness over the lines of
+  each base-ten third-octave band (Part 2 Formula (6), Part 3 Formula (7),
+  Part 4 Formula (11), Part 5 Formula (6)); a band of fewer than five lines
+  gets no value and a `vibration.TransferStiffnessWarning`, and lines that
+  fail an adequacy condition stay out. `TransferStiffnessResult.band_average()`
+  wires it into the direct and indirect methods, and the indirect result now
+  marks the lines with |T| > 0.1 as not valid. `vibration.driving_point_stiffness`
+  turns input force and acceleration into k1,1 (Formula (3)), finds the upper
+  limiting frequency of 6.2, 2 dB below the 1 Hz to 20 Hz value, and averages
+  only the lines at or below it, where 8.3 states that k1,1 stands for k2,1
+  within 2 dB (Formula (7)); given the output or the unwanted accelerations it
+  checks Inequalities (1) and (2) line by line and excludes the lines that
+  fail. `vibration.check_blocked_output`, `vibration.check_unwanted_input` and
+  `vibration.check_output_mass` judge the 20 dB, the 15 dB and the output-mass
+  limit of Part 4 Inequality (3), warning where they fail;
+  `vibration.effective_blocking_mass` is Part 4 Formula (6) with the f3 of its
+  Inequality (5); `vibration.driving_point_uncertainty` builds the Annex B
+  budget of Part 5 on `metrology.combine_uncertainty`, with U = 2u, from the
+  expressions B.3.4 to B.3.6 print (Table B.1 rounds them up to one decimal,
+  and any term can be passed in to reproduce it). Each result has `.plot()`.
+  Neither part prints a worked example, so the conformance rows are closed
+  forms: a band of identical lines averages to itself, a massless spring gives
+  a flat stiffness and no f_UL, a spring under a force distribution plate
+  gives the f_UL of its closed form, and the output mass on its bound biases
+  the force by 0,51 to 0,54 dB, the 0,5 dB of Part 4 NOTE 1. Two defects in the
+  prints are registered in the errata: that 0,5 dB printed as "05 dB" in
+  Part 4, and the Part 2 clause 7.6.1 that sends the unidirectionality pre-run
+  to the blocked-output inequality of 6.1 instead of the unwanted-input one of
+  6.4. The transfer-stiffness guide covers both parts in both languages.
+- **The indirect method warns with its own class (ISO 10846-3).** The
+  |T| > 0.1 advisory of `vibration.transfer_stiffness_indirect` is now a
+  `vibration.TransferStiffnessWarning`, a subclass of `PhonometryWarning`, so
+  the whole ISO 10846 family can be filtered with one rule.
+- **The ISO 10846 test-report fiche prints the band levels and skips the lines
+  the part excludes.** `TransferStiffnessResult.report()` now adds the
+  one-third-octave band levels the test report of ISO 10846-2 (9 m)) and
+  ISO 10846-3 (10 j)) presents, with the line count in place of a level for a
+  band of fewer than five valid lines, and reads its low-frequency headline at
+  the lowest valid line: an indirect result used to box the inflated stiffness
+  of the resonance region that Inequality (2) rules out. `.plot()` draws the
+  excluded lines apart, and `report()` refuses a result with no valid line.
 - **What an active noise reduction earmuff adds, its uncertainty and where it
   stops being linear (ISO 4869-6:2019).** `hearing.active_insertion_loss` takes
   the levels at both ears with the circuit off and on (or the insertion loss
@@ -373,6 +417,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **A nominal band frequency below the preferred table is the number the
+  standard prints.** The IEC 61260-1 nominal frequency of a band a decade or
+  more below the base table was scaled by 0.1, which binary cannot hold, so
+  the 3.15 Hz one-third-octave band came back as 3.1500000000000004 and the
+  6.3 Hz band as 6.300000000000001. The table now divides by the power of ten,
+  so every nominal value is the double nearest the printed one; labels, which
+  were already rounded for display, do not change.
 - **An estimate in the solids catalogue reads as an estimate on the page.**
   The published catalogues page showed the 33 cells of Hopkins Table A2 that
   the book marks as estimates, the Poisson's ratio of all 21 of its solids

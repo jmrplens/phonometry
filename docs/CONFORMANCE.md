@@ -19,7 +19,7 @@
 
 ## Numerical conformance report
 
-**1360/1360 conformance checks pass** across 93 domains and 469 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+**1373/1373 conformance checks pass** across 93 domains and 471 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub><b>&#916;</b> is the difference between the computed value and the one the standard publishes. <b>Used</b> is how much of that clause's published tolerance the difference consumes: 100 % means it sits exactly on the limit, 5 % means it uses a twentieth of the allowance, and a dash means the clause states no two-sided tolerance for the quantity, so there is no budget to spend. It is reported and never used to decide a verdict, which is settled at full precision before any rounding.</sub>
 
@@ -150,7 +150,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary><b>Room &amp; building acoustics</b>: 100% (106/106)</summary>
+<summary><b>Room &amp; building acoustics</b>: 100% (119/119)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
 |:---|:---|:---|:---|:---|:---:|:---:|
@@ -242,7 +242,20 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO 10846-3:2002 6.1 Inequality (2) | Indirect-method validity limit mag(T) = 0,1 ↔ ΔL1,2 = 20 dB | 20 dB (+/-0 dB) | 20 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 | ISO 10846-3:2002 6.1 | Model bias at the validity limit: k_ind/k = 1,1 (0,83 dB ≤ 1 dB, 10 % ≤ 12 %) | 1.1 (+/-1e-07%) | 1.1 | 0 | 0 % | ![Pass][cv-pass] Pass |
 | ISO 10846-1:2008 Equation (6) | Delivered/blocking force F2/F2,b = 1/1,1 at mag(k2,2/kt) = 0,1 (within 10 %) | 0.9091 (+/-0) | 0.9091 | 0 | 0 % | ![Pass][cv-pass] Pass |
-| ISO 10846-2:2008 / -3:2002 7.6 | Linearity: ΔLk ≤ 1,5 dB for input spectra 10 dB apart (linear element: 0) | ΔLk ≤ 1,5 dB (7.6 c) | 0 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| ISO 10846-2:2008 7.7 / -3:2002 7.6 | Linearity: ΔLk ≤ 1,5 dB for input spectra 10 dB apart (linear element: 0) | ΔLk ≤ 1,5 dB (-2 7.7 c), -3 7.6 c)) | 0 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| ISO 10846-4:2003 Formula (11) / ISO 10846-5:2008 Formula (6) | A band of five identical lines averages to that line (closed form, 1 MN/m) | 1000000 N/m (+/-1e-07%) | 1000000 N/m | 0 N/m | 0 % | ![Pass][cv-pass] Pass |
+| ISO 10846-4:2003 Formula (11) | Squared-magnitude average of \|k\| = 1 to 5 MN/m is √11 MN/m (closed form) | 3316624.8 N/m (+/-1e-10%) | 3316624.8 N/m | 0 N/m | 0 % | ![Pass][cv-pass] Pass |
+| ISO 10846-4:2003 8.3 / ISO 10846-5:2008 8.2 | A band of four lines has no band value: n ≥ 5 frequencies | 1/1 band of four lines left undetermined | 1/1 band of four lines left undetermined | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 10846-5:2008 Formula (3) | A massless spring gives a flat k1,1 = k from 1 Hz to 400 Hz, f_UL never reached | 0 N/m (flat \|k\|, no f_UL) | 0 N/m | 0 N/m | 0 % | ![Pass][cv-pass] Pass |
+| ISO 10846-5:2008 6.2 | f_UL of a 1 MN/m spring under a 2 kg plate: 2 dB below the 1 Hz to 20 Hz value (closed form) | 52.119 Hz (+/-0.01 Hz) | 52.119 Hz | 0 Hz | 2 % | ![Pass][cv-pass] Pass |
+| ISO 10846-5:2008 Formula (7) | Every band of k1,1 at or below f_UL is within 2 dB of k2,1 (2 kg plate on 1 MN/m) | within 2 dB (8.3) | 1.779 dB | 1.779 dB | 89 % | ![Pass][cv-pass] Pass |
+| ISO 10846-4:2003 Inequality (3) | Output mass limit 0,06·\|F2\|/\|a2\|: LF2 = 120 dB, La2 = 100 dB gives 0,6 kg | 0.6 kg (+/-1e-10%) | 0.6 kg | 0 kg | 0 % | ![Pass][cv-pass] Pass |
+| ISO 10846-4:2003 6.2 NOTE 1 | m0 on the Inequality (3) bound: worst-case force-level bias -20 lg 0,94 = 0,537 dB, the 0,5 dB NOTE 1 prints to one decimal (1 dp print) | 0,5 dB (1 dp print, +/-0,05 dB) | 0.537 dB | 0.037 dB | 74 % | ![Pass][cv-pass] Pass |
+| ISO 10846-4:2003 Formula (6) | A rigid 25 kg block: m2,eff = \|2F2/(a'1 + a''1)\| = m2 at every frequency | 0 kg (+/-0 kg) | 0 kg | 0 kg | 0 % | ![Pass][cv-pass] Pass |
+| ISO 10846-4:2003 Inequality (5) / ISO 10846-3:2002 Inequality (3) | f3 of m2,eff = m2(1 + (f/3 kHz)²): the 1 dB crossing, 3000·√(10^(1/20) - 1) Hz | 1047.93 Hz (+/-0.05 Hz) | 1047.93 Hz | 0 Hz | 0 % | ![Pass][cv-pass] Pass |
+| ISO 10846-5:2008 Inequalities (1) and (2) | 20 dB and 15 dB hold at equality and fail 0,1 dB below | 4/4 verdicts at and below the limits | 4/4 verdicts at and below the limits | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 10846-5:2008 Formulas (B.2) and (B.3) | Budget from the B.3 expressions: u = 1,394 dB, U = 2u = 2,789 dB (no repeatability spread) | 2.7887 dB (+/-0 dB) | 2.7887 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| ISO 10846-5:2008 Table B.1 | The Table B.1 inputs (B.3 expressions rounded up to one decimal) give u = √2,12 = 1,456 dB | 1.456 dB (+/-0 dB) | 1.456 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 | ISO/TS 7849-1:2009 Formula (8) | Calibration L_v from â = 9,81 m/s² at 100 Hz  (standard's EXAMPLE) | 106.9 dB (+/-0.1 dB) | 106.9 dB | -0.02 dB | 40 % | ![Pass][cv-pass] Pass |
 | ISO/TS 7849-2:2009 Formula (15) | L_W from L_v via measured radiation factor = 10 lg(P/P0)  (round-trip) | 84.771 dB (+/-0 dB) | 84.771 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 | ISO/TS 7849-1:2009 Formula (12) | Impedance term: L_W − L_v = 10 lg(411/400) at ε = 1, S = S0 | 0.1178 dB (+/-0 dB) | 0.1178 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |

@@ -873,6 +873,66 @@ in the same order.
   retained because the library cites the 2006 edition, whose print carries the
   defect; the 2017 edition stands as the confirmation.
 
+## ISO 10846-2:2008, 7.6.1 (the unidirectionality pre-run cross-referenced to 6.1, Inequality (1))
+
+- **Location:** clause 7.6.1, "General", the paragraph on the pre-run that
+  checks the direction of the input motion.
+- **The print:** "A further pre-run shall be performed to check that the
+  acceleration in the excitation direction exceeds the acceleration in other
+  directions. Measurement results, which do not meet the condition of **6.1,
+  Inequality (1)**, shall be excluded from the evaluation of the dynamic
+  stiffness function."
+- **The problem:** 6.1, Inequality (1), is the blocked-output condition
+  $\Delta L_{1,2} = L_{a1} - L_{a2} \geqslant 20$ dB, a level difference
+  between the input and the output sides, which a check of the directions at
+  the input cannot test. The condition the pre-run tests is 6.4, "Unwanted
+  input vibrations", Inequality (3),
+  $L_{a(\mathrm{excitation})} - L_{a(\mathrm{unwanted})} \geqslant 15$ dB.
+  The same sentence in the companion parts points to their own
+  unwanted-input clause: ISO 10846-3:2002 7.5.1 to 6.4, ISO 10846-4:2003
+  7.6.1 to 6.5 and ISO 10846-5:2008 7.6.1 to its Inequality (2). Followed as
+  printed, the sentence excludes the lines where the output is not blocked
+  and keeps those where the input moves in the wrong direction.
+- **Evidence:** the reference read against the clauses it can mean. Verified
+  on PDF page 24 (printed p. 16, 7.6.1), PDF page 20 (printed p. 12, 6.1) and
+  PDF page 21 (printed p. 13, 6.4) of BS EN ISO 10846-2:2008, the UK
+  implementation of ISO 10846-2:2008 (second edition); the companion
+  sentences on PDF page 33 (printed p. 23) of BS EN ISO 10846-3:2002, PDF
+  page 36 (printed p. 26) of BS EN ISO 10846-4:2003 and PDF page 23 (printed
+  p. 15) of BS EN ISO 10846-5:2009.
+- **Library behaviour:** follows the intended target. `check_unwanted_input`
+  judges the unidirectionality of Part 2 against the 15 dB of its
+  Inequality (3), and `check_blocked_output` keeps the 20 dB of
+  Inequality (1) for the output side. The reference changes no number the
+  library reports.
+- **Status:** unreported (cross-reference defect, no numerical consequence).
+
+## ISO 10846-4:2003, 6.2 NOTE 1 (the bound of Inequality (3) printed as 05 dB)
+
+- **Location:** clause 6.2, "Measurement of blocking force in the direct
+  method", NOTE 1 to Inequality (3).
+- **The print:** "Inequality (3) is equivalent to the requirement that
+  $|L_{F_\mathrm{b}} - L_{F_2}| \leqslant 05$ dB."
+- **The problem:** the decimal comma is missing: the bound is 0,5 dB, not
+  5 dB. Inequality (3) itself, $m_0 \leqslant 0{,}06 \times 10^{L_{F2}/20} /
+  10^{L_{a2}/20}$ kg, limits the inertia force $m_0 a_2$ to 6 % of the
+  measured force, so the two force levels differ by at most
+  $20\lg 1{,}06 = 0{,}51$ dB with the inertia force in phase and
+  $-20\lg 0{,}94 = 0{,}54$ dB against it: 0,5 dB, a tenth of what the note
+  reads. ISO 10846-2:2008, which states the same inequality for resilient
+  supports (its Inequality (2)), prints the same note with the comma in
+  place, "$L_{F_2'} - L_{F_2} \leqslant 0{,}5$ dB".
+- **Evidence:** the note beside the inequality it restates, and the same note
+  in the companion part. Verified on PDF page 30 (printed p. 20) of BS EN ISO
+  10846-4:2003, the UK implementation of ISO 10846-4:2003 (first edition), and
+  on PDF page 21 (printed p. 13) of BS EN ISO 10846-2:2008.
+- **Library behaviour:** no change required, since the library computes the
+  inequality, not the note. `check_output_mass` reports the bias the mass can
+  cause, `bias_bound_db`, which is 0,54 dB on the bound, and the conformance
+  check "ISO 10846-4:2003 6.2 NOTE 1" holds it against the 0,5 dB the note
+  means.
+- **Status:** unreported.
+
 ## UNE-EN 15657:2018, Clause 7.1, Formula (14) (reference mass dimensionally inconsistent with the quantity it normalises)
 
 - **Location:** Clause 7.1, the sentence introducing Formula (14) (printed

@@ -38,7 +38,8 @@ measured subsystem energies.
 [Transfer stiffness of resilient elements (ISO 10846)](/phonometry/vibration/structural/transfer-stiffness/)
 measures the dynamic transfer stiffness of the isolators, mounts and hoses
 inserted precisely to break the transmission path, by the direct and indirect
-(transmissibility) methods.
+(transmissibility) methods, and their low-frequency stiffness by the
+driving-point method, one value per one-third-octave band.
 [Sound power from surface vibration (ISO/TS 7849)](/phonometry/devices/emission/vibration-sound-power/)
 handles the direct radiation: the airborne power estimated from surface
 velocity and a radiation factor, without any acoustic measurement.
@@ -78,7 +79,8 @@ range the annex reports without offering a way to predict it.
   plus experimental SEA: coupling loss factors inverted from measured energies
   by power injection, with the modal densities they need.
 - [Transfer stiffness of resilient elements (ISO 10846)](/phonometry/vibration/structural/transfer-stiffness/):
-  dynamic transfer stiffness of isolators by the direct and indirect methods.
+  dynamic transfer stiffness of isolators by the direct, indirect and
+  driving-point methods, in one-third-octave bands, with the checks of the rig.
 - [Vibration damage to structures (DIN 4150-3)](/phonometry/vibration/structural/structural-damage/):
   the guideline peak velocities of Tables 1, 2 and 3, the reading of Bild 1
   between them, and the bending stress a measured velocity implies.
@@ -124,10 +126,10 @@ matrix quantities are not built.
 </ScopeClaim>
 
 <ScopeClaim status="not-covered">
-On the isolator page, parts 4 and 5 of ISO 10846 are not implemented, and two
-of the standard's own validity checks are described rather than computed: the
-rigid blocking-mass inequality, and the clause 7.6 linearity criterion (two
-input spectra 10 dB apart agreeing within 1.5 dB). Finally, nothing here
+On the isolator page, one of the standard's own validity checks is described
+rather than computed: the linearity test (two input spectra 10 dB apart
+must give transfer-stiffness levels within 1.5 dB, clause 7.7 of ISO 10846-2, -4 and -5 and clause 7.6 of
+ISO 10846-3). Finally, nothing here
 designs an isolator or a floating base: the pages characterise elements and
 predict transmission, and the sizing decision stays yours.
 </ScopeClaim>

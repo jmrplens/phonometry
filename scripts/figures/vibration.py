@@ -235,10 +235,20 @@ def generate_transfer_stiffness(output_dir: str) -> None:
     )  # ISO 10846-3 Eq. (1)
 
     # Where the standard's own criterion starts holding: |T| <= 0.1
-    # (Inequality 2), not the 3 f0 rule of thumb.
+    # (Inequality 2), not the 3 f0 rule of thumb. The crossing is interpolated
+    # in log |T| against log f between the two lines around it, so the number
+    # printed belongs to the element (187.5 Hz) and not to the grid, whose
+    # first line past it sits a step higher.
     magnitude_t = np.abs(np.asarray(t, dtype=np.complex128))
     valid = np.flatnonzero(magnitude_t <= 0.1)
-    f_valid = float(freq[valid[0]]) if valid.size else float(freq[-1])
+    if valid.size and valid[0] > 0:
+        above, below = int(valid[0]) - 1, int(valid[0])
+        log_t = np.log10(magnitude_t[[above, below]])
+        log_f = np.log10(freq[[above, below]])
+        fraction = (-1.0 - log_t[0]) / (log_t[1] - log_t[0])
+        f_valid = float(10.0 ** (log_f[0] + fraction * (log_f[1] - log_f[0])))
+    else:
+        f_valid = float(freq[valid[0]]) if valid.size else float(freq[-1])
     level_error = vibration.transfer_stiffness_level(
         k_indirect
     ) - vibration.transfer_stiffness_level(k_true)
@@ -284,7 +294,7 @@ def generate_transfer_stiffness(output_dir: str) -> None:
     info = [
         "Kelvin-Voigt: $k$ = 1 MN/m, $c$ = 120 N·s/m",
         rf"blocking mass $m_2$ = 8 kg,  $f_0$ = {f0:.1f} Hz",
-        rf"$|T|$ falls to 0.1 at {f_valid:.0f} Hz",
+        rf"$|T|$ falls to 0.1 at {f_valid:.1f} Hz",
         "shaded: Inequality (2) not met → no result",
     ]
     ax.text(
@@ -386,6 +396,138 @@ def generate_transfer_stiffness(output_dir: str) -> None:
     fig.align_ylabels()
     plt.tight_layout()
     save_figure(output_dir, "transfer_stiffness.svg")
+    plt.close()
+
+
+def generate_driving_point_stiffness(output_dir: str) -> None:
+    """ISO 10846-5 driving-point method: f_UL (6.2) and the band averages of Formula (7)."""
+    print("Generating driving_point_stiffness...")
+    from phonometry import vibration
+
+    # A 1 MN/m element with a 5 % loss factor, driven through a 2 kg force
+    # distribution plate between the input force transducers and the element:
+    # the plate's inertia is measured with the element, so the input force
+    # reads k1,1 = k2,1 - w^2 m_p and falls away from the transfer stiffness as
+    # the frequency rises. Lines every 0.2 Hz, as clause 7.5 asks below 20 Hz.
+    k, eta, plate = 1.0e6, 0.05, 2.0
+    freq = np.arange(1.0, 200.0, 0.2)
+    w = 2.0 * np.pi * freq
+    k21 = k * (1.0 + 1j * eta)
+    u1 = 1.0e-6
+    res = vibration.driving_point_stiffness(
+        freq, (k21 - w**2 * plate) * u1, -(w**2) * u1 * np.ones(freq.size)
+    )
+    bands = res.band_average()
+    f_ul = res.upper_limiting_frequency_hz
+    assert f_ul is not None
+    l21 = 20.0 * np.log10(abs(k21))
+    # Below 4 Hz the 0.2 Hz lines leave a band short of five; those bands
+    # have no value and are simply not drawn. The band that holds f_UL is
+    # averaged over its lines below it.
+    centres = bands.center_frequencies[bands.determined]
+    band_levels = bands.levels[bands.determined]
+
+    fig, (top, bottom) = plt.subplots(
+        2,
+        1,
+        figsize=(10, 8.8),
+        sharex=True,
+        gridspec_kw={"height_ratios": [1.4, 1.0]},
+    )
+    for panel in (top, bottom):
+        panel.axvspan(
+            f_ul, freq[-1], color=theme_fill(COLOR_SECONDARY, panel), zorder=0
+        )
+        panel.axvline(f_ul, color=COLOR_SECONDARY, linestyle="-", linewidth=1.4)
+        panel.grid(which="both", color=COLOR_GRID, linestyle="--", alpha=0.5)
+        panel.set_axisbelow(True)
+
+    top.semilogx(
+        freq,
+        res.levels,
+        color=COLOR_PRIMARY,
+        linewidth=2.0,
+        label=r"driving-point stiffness $L_{k_{1,1}}$",
+    )
+    top.axhline(
+        l21,
+        color=COLOR_TERTIARY,
+        linestyle="--",
+        linewidth=1.6,
+        label=r"transfer stiffness $L_{k_{2,1}}$",
+    )
+    top.axhline(
+        res.threshold_level_db,
+        color=COLOR_FG,
+        linestyle=":",
+        linewidth=1.4,
+        label="2 dB below the 1 Hz to 20 Hz value",
+    )
+    top.plot(
+        centres,
+        band_levels,
+        "o",
+        color=COLOR_SECONDARY,
+        markersize=6,
+        label=r"band average $L_{k,\mathrm{av}}$, Formula (6)",
+    )
+    top.set_ylabel(r"$L_k$ [dB re 1 N/m]")
+    top.set_title("ISO 10846-5 Driving-Point Method", pad=12)
+    top.set_xlim(freq[0], freq[-1])
+    top.set_ylim(l21 - 7.0, l21 + 2.5)
+    top.legend(loc="lower left", fontsize=9)
+    top.text(
+        0.985,
+        0.95,
+        "\n".join(
+            [
+                "$k_{2,1}$ = 1 MN/m, $\\eta$ = 0.05, force distribution plate 2 kg",
+                rf"$f_\mathrm{{UL}}$ = {f_ul:.1f} Hz (clause 6.2)",
+                "shaded: above $f_\\mathrm{UL}$, not evaluated",
+            ]
+        ),
+        transform=top.transAxes,
+        va="top",
+        ha="right",
+        fontsize=10,
+        color=COLOR_FG,
+        bbox={
+            "boxstyle": "round,pad=0.5",
+            "facecolor": COLOR_PANEL,
+            "edgecolor": COLOR_GRID,
+        },
+    )
+
+    bottom.axhspan(
+        -2.0,
+        2.0,
+        color=theme_fill(COLOR_TERTIARY, bottom),
+        zorder=0,
+        label=r"$\pm$2 dB of Formula (7)",
+    )
+    bottom.semilogx(
+        freq,
+        res.levels - l21,
+        color=COLOR_PRIMARY,
+        linewidth=1.6,
+        label=r"$L_{k_{1,1}} - L_{k_{2,1}}$, narrow band",
+    )
+    bottom.plot(
+        centres,
+        band_levels - l21,
+        "o",
+        color=COLOR_SECONDARY,
+        markersize=6,
+        label="band averages below $f_\\mathrm{UL}$",
+    )
+    bottom.set_ylim(-7.0, 3.0)
+    bottom.set_ylabel("Difference [dB]")
+    bottom.set_xlabel(LABEL_FREQ_HZ)
+    format_frequency_axis(bottom, float(freq[0]), float(freq[-1]), language=_LANG)
+    bottom.legend(loc="lower left", fontsize=9)
+    fig.align_ylabels()
+    plt.tight_layout()
+    save_figure(output_dir, "driving_point_stiffness.svg")
     plt.close()
 
 

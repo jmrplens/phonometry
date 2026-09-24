@@ -3,13 +3,13 @@
   "library": "4.0.0rc1",
   "generator": "scripts/conformance_report.py",
   "counts": {
-    "checks": 1360,
-    "passing": 1360,
+    "checks": 1373,
+    "passing": 1373,
     "failing": 0,
     "domains": 93,
-    "standards": 469,
-    "citations": 926,
-    "designations": 188,
+    "standards": 471,
+    "citations": 939,
+    "designations": 190,
     "sources": 114
   },
   "units": [
@@ -111,8 +111,8 @@
     {
       "id": "room-building-acoustics",
       "title": "Room & building acoustics",
-      "checks": 106,
-      "passing": 106
+      "checks": 119,
+      "passing": 119
     },
     {
       "id": "room-acoustics",
@@ -10133,15 +10133,16 @@
       "verdict": "pass"
     },
     {
-      "id": "room-building-acoustics/iso-10846-2-2008-3-2002-7-6/linearity-lk-1-5-db-for-input-spectra-10-db-apart-linear-element-0",
+      "id": "room-building-acoustics/iso-10846-2-2008-7-7-3-2002-7-6/linearity-lk-1-5-db-for-input-spectra-10-db-apart-linear-element-0",
       "domain": "room-building-acoustics",
       "reference": {
-        "cite": "ISO 10846-2:2008 / -3:2002 7.6",
+        "cite": "ISO 10846-2:2008 7.7 / -3:2002 7.6",
         "documents": [
           {
             "kind": "standard",
             "designation": "ISO 10846-2",
-            "edition": "2008"
+            "edition": "2008",
+            "clause": "7.7"
           },
           {
             "kind": "standard",
@@ -10158,7 +10159,7 @@
       "kind": "scalar",
       "expected": {
         "value": 0.0,
-        "label": "ΔLk ≤ 1,5 dB (7.6 c)"
+        "label": "ΔLk ≤ 1,5 dB (-2 7.7 c), -3 7.6 c))"
       },
       "computed": {
         "value": 0.0
@@ -10172,6 +10173,464 @@
         "value": 0.0
       },
       "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "room-building-acoustics/iso-10846-4-2003-formula-11-iso-10846-5-2008-formula-6/a-band-of-five-identical-lines-averages-to-that-line-closed-form-1-mn-m",
+      "domain": "room-building-acoustics",
+      "reference": {
+        "cite": "ISO 10846-4:2003 Formula (11) / ISO 10846-5:2008 Formula (6)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 10846-4",
+            "edition": "2003",
+            "clause": "Formula (11)"
+          },
+          {
+            "kind": "standard",
+            "designation": "ISO 10846-5",
+            "edition": "2008",
+            "clause": "Formula (6)",
+            "lead": " / ",
+            "relation": "corroborates"
+          }
+        ]
+      },
+      "quantity": "A band of five identical lines averages to that line (closed form, 1 MN/m)",
+      "kind": "scalar",
+      "expected": {
+        "value": 1000000.0
+      },
+      "computed": {
+        "value": 1000000.0
+      },
+      "unit": "N/m",
+      "tolerance": {
+        "mode": "relative",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 1,
+      "verdict": "pass"
+    },
+    {
+      "id": "room-building-acoustics/iso-10846-4-2003-formula-11/squared-magnitude-average-of-k-1-to-5-mn-m-is-11-mn-m-closed-form",
+      "domain": "room-building-acoustics",
+      "reference": {
+        "cite": "ISO 10846-4:2003 Formula (11)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 10846-4",
+            "edition": "2003",
+            "clause": "Formula (11)"
+          }
+        ]
+      },
+      "quantity": "Squared-magnitude average of |k| = 1 to 5 MN/m is √11 MN/m (closed form)",
+      "kind": "scalar",
+      "expected": {
+        "value": 3316624.7903553997
+      },
+      "computed": {
+        "value": 3316624.8
+      },
+      "unit": "N/m",
+      "tolerance": {
+        "mode": "relative",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 1,
+      "verdict": "pass"
+    },
+    {
+      "id": "room-building-acoustics/iso-10846-4-2003-8-3-iso-10846-5-2008-8-2/a-band-of-four-lines-has-no-band-value-n-5-frequencies",
+      "domain": "room-building-acoustics",
+      "reference": {
+        "cite": "ISO 10846-4:2003 8.3 / ISO 10846-5:2008 8.2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 10846-4",
+            "edition": "2003",
+            "clause": "8.3"
+          },
+          {
+            "kind": "standard",
+            "designation": "ISO 10846-5",
+            "edition": "2008",
+            "clause": "8.2",
+            "lead": " / ",
+            "relation": "corroborates"
+          }
+        ]
+      },
+      "quantity": "A band of four lines has no band value: n ≥ 5 frequencies",
+      "kind": "count",
+      "expected": {
+        "value": 1.0,
+        "label": "1/1 band of four lines left undetermined"
+      },
+      "computed": {
+        "value": 1.0,
+        "label": "1/1 band of four lines left undetermined"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "room-building-acoustics/iso-10846-5-2008-formula-3/a-massless-spring-gives-a-flat-k1-1-k-from-1-hz-to-400-hz-f-ul-never-reached",
+      "domain": "room-building-acoustics",
+      "reference": {
+        "cite": "ISO 10846-5:2008 Formula (3)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 10846-5",
+            "edition": "2008",
+            "clause": "Formula (3)"
+          }
+        ]
+      },
+      "quantity": "A massless spring gives a flat k1,1 = k from 1 Hz to 400 Hz, f_UL never reached",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0,
+        "label": "0 N/m (flat |k|, no f_UL)"
+      },
+      "computed": {
+        "value": 2.33e-10
+      },
+      "unit": "N/m",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-06
+      },
+      "deviation": {
+        "value": 2.33e-10
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "room-building-acoustics/iso-10846-5-2008-6-2/f-ul-of-a-1-mn-m-spring-under-a-2-kg-plate-2-db-below-the-1-hz-to-20-hz-value-closed-form",
+      "domain": "room-building-acoustics",
+      "reference": {
+        "cite": "ISO 10846-5:2008 6.2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 10846-5",
+            "edition": "2008",
+            "clause": "6.2"
+          }
+        ]
+      },
+      "quantity": "f_UL of a 1 MN/m spring under a 2 kg plate: 2 dB below the 1 Hz to 20 Hz value (closed form)",
+      "kind": "scalar",
+      "expected": {
+        "value": 52.118937568459664
+      },
+      "computed": {
+        "value": 52.119
+      },
+      "unit": "Hz",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.01
+      },
+      "deviation": {
+        "value": -0.000236
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "room-building-acoustics/iso-10846-5-2008-formula-7/every-band-of-k1-1-at-or-below-f-ul-is-within-2-db-of-k2-1-2-kg-plate-on-1-mn-m",
+      "domain": "room-building-acoustics",
+      "reference": {
+        "cite": "ISO 10846-5:2008 Formula (7)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 10846-5",
+            "edition": "2008",
+            "clause": "Formula (7)"
+          }
+        ]
+      },
+      "quantity": "Every band of k1,1 at or below f_UL is within 2 dB of k2,1 (2 kg plate on 1 MN/m)",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0,
+        "label": "within 2 dB (8.3)"
+      },
+      "computed": {
+        "value": 1.779
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 2.0
+      },
+      "deviation": {
+        "value": 1.779
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "room-building-acoustics/iso-10846-4-2003-inequality-3/output-mass-limit-0-06-f2-a2-lf2-120-db-la2-100-db-gives-0-6-kg",
+      "domain": "room-building-acoustics",
+      "reference": {
+        "cite": "ISO 10846-4:2003 Inequality (3)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 10846-4",
+            "edition": "2003",
+            "clause": "Inequality (3)"
+          }
+        ]
+      },
+      "quantity": "Output mass limit 0,06·|F2|/|a2|: LF2 = 120 dB, La2 = 100 dB gives 0,6 kg",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.6
+      },
+      "computed": {
+        "value": 0.6
+      },
+      "unit": "kg",
+      "tolerance": {
+        "mode": "relative",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "room-building-acoustics/iso-10846-4-2003-6-2-note-1/m0-on-the-inequality-3-bound-worst-case-force-level-bias-20-lg-0-94-0-537-db-the-0-5-db-note-1-prints-to-one-decimal-1-dp-print",
+      "domain": "room-building-acoustics",
+      "reference": {
+        "cite": "ISO 10846-4:2003 6.2 NOTE 1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 10846-4",
+            "edition": "2003",
+            "clause": "6.2 NOTE 1"
+          }
+        ]
+      },
+      "quantity": "m0 on the Inequality (3) bound: worst-case force-level bias -20 lg 0,94 = 0,537 dB, the 0,5 dB NOTE 1 prints to one decimal (1 dp print)",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.5,
+        "label": "0,5 dB (1 dp print, +/-0,05 dB)"
+      },
+      "computed": {
+        "value": 0.537
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.05
+      },
+      "deviation": {
+        "value": 0.037
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "room-building-acoustics/iso-10846-4-2003-formula-6/a-rigid-25-kg-block-m2-eff-2f2-a-1-a-1-m2-at-every-frequency",
+      "domain": "room-building-acoustics",
+      "reference": {
+        "cite": "ISO 10846-4:2003 Formula (6)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 10846-4",
+            "edition": "2003",
+            "clause": "Formula (6)"
+          }
+        ]
+      },
+      "quantity": "A rigid 25 kg block: m2,eff = |2F2/(a'1 + a''1)| = m2 at every frequency",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0
+      },
+      "computed": {
+        "value": 0.0
+      },
+      "unit": "kg",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "room-building-acoustics/iso-10846-4-2003-inequality-5-iso-10846-3-2002-inequality-3/f3-of-m2-eff-m2-1-f-3-khz-the-1-db-crossing-3000-10-1-20-1-hz",
+      "domain": "room-building-acoustics",
+      "reference": {
+        "cite": "ISO 10846-4:2003 Inequality (5) / ISO 10846-3:2002 Inequality (3)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 10846-4",
+            "edition": "2003",
+            "clause": "Inequality (5)"
+          },
+          {
+            "kind": "standard",
+            "designation": "ISO 10846-3",
+            "edition": "2002",
+            "clause": "Inequality (3)",
+            "lead": " / ",
+            "relation": "corroborates"
+          }
+        ]
+      },
+      "quantity": "f3 of m2,eff = m2(1 + (f/3 kHz)²): the 1 dB crossing, 3000·√(10^(1/20) - 1) Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 1047.9342005668439
+      },
+      "computed": {
+        "value": 1047.93
+      },
+      "unit": "Hz",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.05
+      },
+      "deviation": {
+        "value": -0.000235
+      },
+      "precision": 2,
+      "verdict": "pass"
+    },
+    {
+      "id": "room-building-acoustics/iso-10846-5-2008-inequalities-1-and-2/20-db-and-15-db-hold-at-equality-and-fail-0-1-db-below",
+      "domain": "room-building-acoustics",
+      "reference": {
+        "cite": "ISO 10846-5:2008 Inequalities (1) and (2)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 10846-5",
+            "edition": "2008",
+            "clause": "Inequalities (1) and (2)"
+          }
+        ]
+      },
+      "quantity": "20 dB and 15 dB hold at equality and fail 0,1 dB below",
+      "kind": "count",
+      "expected": {
+        "value": 4.0,
+        "label": "4/4 verdicts at and below the limits"
+      },
+      "computed": {
+        "value": 4.0,
+        "label": "4/4 verdicts at and below the limits"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "room-building-acoustics/iso-10846-5-2008-formulas-b-2-and-b-3/budget-from-the-b-3-expressions-u-1-394-db-u-2u-2-789-db-no-repeatability-spread",
+      "domain": "room-building-acoustics",
+      "reference": {
+        "cite": "ISO 10846-5:2008 Formulas (B.2) and (B.3)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 10846-5",
+            "edition": "2008",
+            "clause": "Formulas (B.2) and (B.3)"
+          }
+        ]
+      },
+      "quantity": "Budget from the B.3 expressions: u = 1,394 dB, U = 2u = 2,789 dB (no repeatability spread)",
+      "kind": "scalar",
+      "expected": {
+        "value": 2.7886675432303987
+      },
+      "computed": {
+        "value": 2.7887
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": -9.77e-15
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "room-building-acoustics/iso-10846-5-2008-table-b-1/the-table-b-1-inputs-b-3-expressions-rounded-up-to-one-decimal-give-u-2-12-1-456-db",
+      "domain": "room-building-acoustics",
+      "reference": {
+        "cite": "ISO 10846-5:2008 Table B.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 10846-5",
+            "edition": "2008",
+            "clause": "Table B.1"
+          }
+        ]
+      },
+      "quantity": "The Table B.1 inputs (B.3 expressions rounded up to one decimal) give u = √2,12 = 1,456 dB",
+      "kind": "scalar",
+      "expected": {
+        "value": 1.4560219778561037
+      },
+      "computed": {
+        "value": 1.456
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 1.33e-15
+      },
+      "precision": 4,
       "verdict": "pass"
     },
     {

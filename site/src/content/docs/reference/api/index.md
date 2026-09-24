@@ -219,7 +219,7 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | [`vibration.structural.experimental_sea`](/phonometry/reference/api/vibration/experimental-sea/) | Experimental statistical energy analysis: coupling loss factors from measured energies (Norton & Karczub Ch. |
 | [`vibration.machinery.diagnostics`](/phonometry/reference/api/vibration/diagnostics/) | Kinematic fault frequencies of rotating machinery (Norton & Karczub Ch. |
 | [`vibration.machinery.evaluation`](/phonometry/reference/api/vibration/evaluation/) | Evaluation of machine vibration by measurement (ISO 20816-1:2016). |
-| [`vibration.structural.transfer_stiffness`](/phonometry/reference/api/vibration/transfer-stiffness/) | Dynamic transfer stiffness of resilient elements (ISO 10846-1/-2/-3). |
+| [`vibration.structural.transfer_stiffness`](/phonometry/reference/api/vibration/transfer-stiffness/) | Dynamic transfer stiffness of resilient elements (ISO 10846, Parts 1 to 5). |
 | [`vibration.structural.building_damage`](/phonometry/reference/api/vibration/building-damage/) | Effects of vibration on structures (DIN 4150-3:1999-02). |
 | [`vibration.structural.building_response`](/phonometry/reference/api/vibration/building-response/) | Predicting the fundamental frequency of a building (ISO 4866 Annex D). |
 | [`vibration.human.exposure`](/phonometry/reference/api/vibration/exposure/) | Human exposure to whole-body and hand-transmitted vibration. |

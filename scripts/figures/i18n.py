@@ -1397,11 +1397,27 @@ _ES_EXACT = {
     "reales son mucho más planos: esto es un modelo, no un material",
     "Kelvin-Voigt: $k$ = 1 MN/m, $c$ = 120 N·s/m\n"
     "blocking mass $m_2$ = 8 kg,  $f_0$ = 56.3 Hz\n"
-    "$|T|$ falls to 0.1 at 189 Hz\n"
+    "$|T|$ falls to 0.1 at 187.5 Hz\n"
     "shaded: Inequality (2) not met → no result": "Kelvin-Voigt: $k$ = 1 MN/m, $c$ = 120 N·s/m\n"
     "masa de bloqueo $m_2$ = 8 kg,  $f_0$ = 56,3 Hz\n"
-    "$|T|$ cae a 0,1 a 189 Hz\n"
+    "$|T|$ cae a 0,1 a 187,5 Hz\n"
     "sombreado: Desigualdad (2) sin cumplir → sin resultado",
+    # driving_point_stiffness figure (ISO 10846-5, 6.2 and Formula (7))
+    "ISO 10846-5 Driving-Point Method": "Método del punto de excitación ISO 10846-5",
+    r"driving-point stiffness $L_{k_{1,1}}$": r"rigidez en el punto de excitación $L_{k_{1,1}}$",
+    r"transfer stiffness $L_{k_{2,1}}$": r"rigidez de transferencia $L_{k_{2,1}}$",
+    "2 dB below the 1 Hz to 20 Hz value": "2 dB por debajo del valor de 1 Hz a 20 Hz",
+    r"band average $L_{k,\mathrm{av}}$, Formula (6)": r"media en banda $L_{k,\mathrm{av}}$, Fórmula (6)",
+    r"$L_k$ [dB re 1 N/m]": r"$L_k$ [dB re 1 N/m]",
+    "$k_{2,1}$ = 1 MN/m, $\\eta$ = 0.05, force distribution plate 2 kg\n"
+    "$f_\\mathrm{UL}$ = 52.2 Hz (clause 6.2)\n"
+    "shaded: above $f_\\mathrm{UL}$, not evaluated": "$k_{2,1}$ = 1 MN/m, $\\eta$ = 0,05, placa de reparto de fuerza de 2 kg\n"
+    "$f_\\mathrm{UL}$ = 52,2 Hz (apartado 6.2)\n"
+    "sombreado: por encima de $f_\\mathrm{UL}$, sin evaluar",
+    r"$\pm$2 dB of Formula (7)": r"$\pm$2 dB de la Fórmula (7)",
+    r"$L_{k_{1,1}} - L_{k_{2,1}}$, narrow band": r"$L_{k_{1,1}} - L_{k_{2,1}}$, banda estrecha",
+    "band averages below $f_\\mathrm{UL}$": "medias en banda por debajo de $f_\\mathrm{UL}$",
+    "Difference [dB]": "Diferencia [dB]",
     # rigid_mass_calibration figure (ISO 7626-2, 7.5.2)
     "ISO 7626-2 Rigid-Mass Calibration Check": "Verificación de calibración con masa rígida ISO 7626-2",
     "Accelerance $|A|$ [1/kg]": "Acelerancia $|A|$ [1/kg]",

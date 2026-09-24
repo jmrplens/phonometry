@@ -71,7 +71,8 @@ Del vocabulario de FRF al nivel predicho en el recinto receptor.
   esos mismos factores de pérdidas por acoplamiento por inyección de potencia.
 - [Rigidez dinámica de transferencia (ISO 10846)](/phonometry/es/vibration/structural/transfer-stiffness/):
   la rigidez de transferencia dinámica de aisladores de vibración por los
-  métodos directo e indirecto.
+  métodos directo, indirecto y del punto de excitación, en bandas de tercio de
+  octava.
 - [Potencia acústica a partir de la vibración (ISO/TS 7849)](/phonometry/es/devices/emission/vibration-sound-power/):
   potencia aérea radiada a partir de la velocidad superficial y un factor de
   radiación.
@@ -195,10 +196,10 @@ laboratorio](/phonometry/es/buildings/insulation/flanking-lab/)) y la página
 de FRF devuelve recíprocas libres elemento a elemento, correctas para el punto
 de excitación o para una sola vía pero no para una matriz de FRF completa, sin
 procesado de excitación por martillo de impacto (ISO 7626-5) y sin magnitudes
-matriciales bloqueadas. En la página de aisladores, las Partes 4 y 5 de la ISO
-10846 no están implementadas, y dos de las comprobaciones de validez de la
-norma (la desigualdad de masa de bloqueo y el criterio de linealidad del
-apartado 7.6) se describen, pero la biblioteca no las calcula por ti.
+matriciales bloqueadas. En la página de aisladores, el ensayo de linealidad de
+la ISO 10846 (apartado 7.7 de las Partes 2, 4 y 5, apartado 7.6 de la Parte 3)
+se describe, pero la biblioteca no lo calcula por ti, y los nomogramas de la Figura 11 de la ISO 10846-4 para masas de
+bloqueo de acero no están tabulados.
 </ScopeClaim>
 </Scope>
 

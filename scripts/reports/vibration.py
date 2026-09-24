@@ -157,36 +157,16 @@ def _transfer_stiffness_example() -> tuple[object, ReportMetadata, str]:
     measures it as k2,1 = F2,b/u1; synthesising the blocked output force
     F2,b = k2,1 * u1 from a 1 um input displacement u1 and feeding it back
     through ``transfer_stiffness_direct`` recovers the closed form exactly, so
-    the printed values match the module's tested oracle. At the 20 Hz plateau
-    |k2,1| = 1.00 MN/m, L_k = 20 lg(|k2,1|/k0) = 120.0 dB re 1 N/m and the loss
-    factor eta = Im/Re = 0.010 (ISO 10846-1:2008, 3.8).
+    the printed values match the module's tested oracle. The sweep puts ten
+    lines in every one-third-octave band from 20 Hz to 2 kHz, twice the five
+    a band average needs, so the fiche prints all 21 band levels. At the
+    lowest line, 18.0 Hz, |k2,1| = 1.00 MN/m, L_k = 20 lg(|k2,1|/k0) =
+    120.0 dB re 1 N/m and the loss factor eta = Im/Re = 0.009 (ISO 10846-1:2008,
+    3.8).
     """
-    freqs = np.array(
-        [
-            20,
-            25,
-            31.5,
-            40,
-            50,
-            63,
-            80,
-            100,
-            125,
-            160,
-            200,
-            250,
-            315,
-            400,
-            500,
-            630,
-            800,
-            1000,
-            1250,
-            1600,
-            2000,
-        ],
-        dtype=float,
-    )
+    # Ten lines per band, centred in it: band x runs from 10**((x - 0.5)/10)
+    # to 10**((x + 0.5)/10) kHz, and the lines sit at hundredths of a decade.
+    freqs = 1000.0 * 10.0 ** ((np.arange(-175, 35) + 0.5) / 100.0)
     stiffness, damping = 1.0e6, 80.0
     omega = 2.0 * np.pi * freqs
     k21 = stiffness + 1j * omega * damping

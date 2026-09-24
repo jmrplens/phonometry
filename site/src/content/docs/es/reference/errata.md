@@ -976,6 +976,71 @@ dos ediciones con las mismas entradas y en el mismo orden.
   la edición de 2006, cuyo impreso lleva el defecto; la edición de 2017 queda
   como confirmación.
 
+## ISO 10846-2:2008, 7.6.1 (el ensayo previo de unidireccionalidad remite al 6.1, Desigualdad (1))
+
+- **Ubicación:** apartado 7.6.1, «General», el párrafo del ensayo previo que
+  comprueba la dirección del movimiento de entrada.
+- **El impreso:** «A further pre-run shall be performed to check that the
+  acceleration in the excitation direction exceeds the acceleration in other
+  directions. Measurement results, which do not meet the condition of **6.1,
+  Inequality (1)**, shall be excluded from the evaluation of the dynamic
+  stiffness function.»
+- **El problema:** la Desigualdad (1) del 6.1 es la condición de salida
+  bloqueada, $\Delta L_{1,2} = L_{a1} - L_{a2} \geqslant 20$ dB, una
+  diferencia de niveles entre el lado de entrada y el de salida, que una
+  comprobación de las direcciones en la entrada no puede ensayar. La condición
+  que ensaya el ensayo previo es la del 6.4, «Unwanted input vibrations»,
+  Desigualdad (3),
+  $L_{a(\mathrm{excitation})} - L_{a(\mathrm{unwanted})} \geqslant 15$ dB.
+  La misma frase en las partes hermanas remite a su propio apartado de
+  entradas no deseadas: la ISO 10846-3:2002 7.5.1 al 6.4, la ISO
+  10846-4:2003 7.6.1 al 6.5 y la ISO 10846-5:2008 7.6.1 a su Desigualdad (2).
+  Seguida tal como está impresa, la frase excluye las líneas en las que la
+  salida no está bloqueada y conserva aquellas en las que la entrada se mueve
+  en la dirección equivocada.
+- **Evidencia:** la referencia leída frente a los apartados a los que puede
+  remitir. Verificado en la página 24 del PDF (p. 16 impresa, 7.6.1), la
+  página 20 del PDF (p. 12 impresa, 6.1) y la página 21 del PDF (p. 13
+  impresa, 6.4) de BS EN ISO 10846-2:2008, la implementación británica de
+  ISO 10846-2:2008 (segunda edición); las frases hermanas en la página 33
+  del PDF (p. 23 impresa) de BS EN ISO 10846-3:2002, la página 36 del PDF
+  (p. 26 impresa) de BS EN ISO 10846-4:2003 y la página 23 del PDF (p. 15
+  impresa) de BS EN ISO 10846-5:2009.
+- **Comportamiento de la biblioteca:** sigue el destino pretendido.
+  `check_unwanted_input` juzga la unidireccionalidad de la Parte 2 con los
+  15 dB de su Desigualdad (3), y `check_blocked_output` conserva los 20 dB de
+  la Desigualdad (1) para el lado de salida. La referencia no cambia ningún
+  número que informe la biblioteca.
+- **Estado:** sin notificar (defecto de referencia cruzada, sin consecuencia
+  numérica).
+
+## ISO 10846-4:2003, 6.2 NOTA 1 (la cota de la Desigualdad (3) impresa como 05 dB)
+
+- **Ubicación:** apartado 6.2, «Measurement of blocking force in the direct
+  method», NOTA 1 a la Desigualdad (3).
+- **El impreso:** «Inequality (3) is equivalent to the requirement that
+  $|L_{F_\mathrm{b}} - L_{F_2}| \leqslant 05$ dB.»
+- **El problema:** falta la coma decimal: la cota es 0,5 dB, no 5 dB. La
+  propia Desigualdad (3), $m_0 \leqslant 0{,}06 \times 10^{L_{F2}/20} /
+  10^{L_{a2}/20}$ kg, limita la fuerza de inercia $m_0 a_2$ al 6 % de la
+  fuerza medida, así que los dos niveles de fuerza difieren como mucho en
+  $20\lg 1{,}06 = 0{,}51$ dB con la fuerza de inercia en fase y
+  $-20\lg 0{,}94 = 0{,}54$ dB en oposición: 0,5 dB, la décima parte de lo que
+  dice la nota. ISO 10846-2:2008, que enuncia la misma desigualdad para
+  soportes resilientes (su Desigualdad (2)), imprime la misma nota con la coma
+  en su sitio, «$L_{F_2'} - L_{F_2} \leqslant 0{,}5$ dB».
+- **Evidencia:** la nota junto a la desigualdad que reformula, y la misma
+  nota en la parte hermana. Verificado en la página 30 del PDF (p. 20
+  impresa) de BS EN ISO 10846-4:2003, la implementación británica de ISO
+  10846-4:2003 (primera edición), y en la página 21 del PDF (p. 13 impresa)
+  de BS EN ISO 10846-2:2008.
+- **Comportamiento de la biblioteca:** no hizo falta ningún cambio, porque la
+  biblioteca calcula la desigualdad, no la nota. `check_output_mass` informa
+  del sesgo que puede causar la masa, `bias_bound_db`, que es 0,54 dB sobre
+  la cota, y la comprobación de conformidad «ISO 10846-4:2003 6.2 NOTE 1» lo
+  contrasta con los 0,5 dB que la nota quiere decir.
+- **Estado:** sin notificar.
+
 ## UNE-EN 15657:2018, apartado 7.1, Fórmula (14) (masa de referencia dimensionalmente inconsistente con la magnitud que normaliza)
 
 - **Ubicación:** apartado 7.1, la frase que introduce la Fórmula (14) (p. 14

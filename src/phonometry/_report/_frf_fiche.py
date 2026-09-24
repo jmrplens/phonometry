@@ -7,11 +7,13 @@ mobility (:mod:`.iso7626`) and the ISO 10846 dynamic transfer stiffness
 an optional metadata header grid, a two-panel body with a compact table of the
 FRF's characteristic points beside the result's own spectrum plot, a boxed
 representative single value and a footer identity/disclaimer block. Both are
-continuous frequency-response functions over a fine frequency axis rather than
-octave bands, so neither carries a per-band table (that would misrepresent the
-quantity); the honest presentation is the spectrum plot plus a small table of
-characteristic points. Both are characterisations, so neither carries a
-pass/fail verdict.
+continuous frequency-response functions over a fine frequency axis, so the
+body is the spectrum plot plus a small table of characteristic points. A fiche
+whose standard also asks for band values in its test report adds them below
+the body through ``after_body``: the ISO 10846 test report presents the
+one-third-octave band averages of ISO 10846-2 9 m) and ISO 10846-3 10 j), while
+the ISO 7626 mobility has no band form. Both are characterisations, so neither
+carries a pass/fail verdict.
 
 This module holds those shared pieces so each renderer only writes the parts
 that are genuinely specific (the title, the basis line, the characteristic-point
@@ -42,6 +44,8 @@ from ._layout import (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     import numpy as np
 
     from ..vibration.structural.mechanical_mobility import MobilityResult
@@ -103,6 +107,7 @@ def render_frf_fiche(
     extended: list[str],
     metadata: ReportMetadata | None,
     language: str = "en",
+    after_body: Callable[[], list[Any]] | None = None,
 ) -> str:
     """Assemble a structural-vibration FRF fiche into a one-page PDF at ``path``.
 
@@ -117,6 +122,9 @@ def render_frf_fiche(
     :param extended: The extended terms shown beside the boxed value.
     :param metadata: Optional :class:`ReportMetadata` for the footer identity.
     :param language: ``"en"`` (default) or ``"es"``.
+    :param after_body: Optional builder of the flowables placed between the
+        body and the boxed value (a band table); called once reportlab is
+        imported, so it may build reportlab objects.
     :return: The written ``path`` as a :class:`str`.
     :raises ImportError: If reportlab (or, for the figure, matplotlib) is not
         installed.
@@ -154,6 +162,9 @@ def render_frf_fiche(
     )
     flow.append(two_panel_body(left_cell, plot_drawing))
     flow.append(Spacer(1, 8))
+    if after_body is not None:
+        flow.extend(after_body())
+        flow.append(Spacer(1, 5))
 
     flow.append(result_box(statement, styles, accent, extended=extended))
     flow.extend(footer_flow(metadata, language))

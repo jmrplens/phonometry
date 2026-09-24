@@ -841,9 +841,10 @@ def _resolve_units(cls: type[CatalogueRow], cells: dict[str, Any]) -> dict[str, 
             msg = f"{label}: {written} and {other} are one cell, given twice"
             raise CatalogueError(msg)
         claimed[target] = written
-        _check_requires(label, written, alias, cells)
         del resolved[written]
         if value is not None:
+            # An empty figure says nothing a text field would have to explain.
+            _check_requires(label, written, alias, cells)
             figure = _alias_figure(label, value, written)
             resolved[target] = convert_figure(figure, alias.factor)
             converted[target] = (figure, alias.unit)

@@ -615,6 +615,18 @@ def test_sabins_per_thousand_cubic_feet_need_what_they_are_per() -> None:
         )
 
 
+def test_an_empty_figure_per_thousand_cubic_feet_needs_nothing_beside_it() -> None:
+    """The page leaves the cell empty, so there is no figure for per to explain."""
+    row = AbsorptionAreaSpectrum.from_printed(
+        name="Air",
+        source=_SOURCE,
+        absorption_area_2000_ft2_per_1000_ft3=None,
+        absorption_area_4000_ft2_per_1000_ft3=None,
+    )
+    assert row.absorption_area_2000_m2 is None
+    assert row.converted == {}
+
+
 def test_a_cell_given_under_two_names_is_refused() -> None:
     cells = {
         "name": "Musician",

@@ -48,6 +48,9 @@ _PVEM = "Personal vibration exposure meters (ISO 8041-2)"
 
 _TOLERANCE = 5e-4
 
+#: Fields Table 6 prints per application.
+_TABLE6_FIELDS = 6
+
 #: Each printed table of Part 2: its number, the application it grades, its
 #: printed columns and its transcribed lines.
 _TABLES: tuple[
@@ -188,8 +191,14 @@ def _chk_table_6() -> Outcome:
     """
     same = 0
     total = 0
-    for application, printed in ref.ISO8041_2_TABLE6.items():
-        test = ph.vibration.SAWTOOTH_BURST_TESTS[application]
+    # Walk the library's applications, not the transcription's: an application
+    # the transcription lost then counts as six fields that differ instead of
+    # leaving the tally to pass on the ones that remain.
+    for application, test in ph.vibration.SAWTOOTH_BURST_TESTS.items():
+        printed = ref.ISO8041_2_TABLE6.get(application)
+        if printed is None:
+            total += _TABLE6_FIELDS
+            continue
         library = (
             test.weightings,
             test.angular_frequency_rad_s,
@@ -202,6 +211,9 @@ def _chk_table_6() -> Outcome:
             total += 1
             if part_2 == part_1:
                 same += 1
+    # And an application the page prints that the library lacks counts too.
+    unmatched = set(ref.ISO8041_2_TABLE6) - set(ph.vibration.SAWTOOTH_BURST_TESTS)
+    total += _TABLE6_FIELDS * len(unmatched)
     return count(same, total, subject="fields")
 
 
@@ -276,11 +288,15 @@ def _chk_all_uncertainties() -> Outcome:
     "Coverage factor of the expanded uncertainty",
 )
 def _chk_coverage_factor() -> Outcome:
-    """12.1 prints "no less than 2" (folio 23) and 13.1 ``k = 2`` (folio 37)."""
+    """12.1 prints "no less than 2" (folio 23) and 13.1 ``k = 2`` (folio 37).
+
+    The factor is a stated integer, not a measured value, so it is compared
+    with no tolerance at all.
+    """
     return numeric(
         ref.ISO8041_2_COVERAGE_FACTOR,
         ph.vibration.ISO8041_COVERAGE_FACTOR,
-        _TOLERANCE,
-        places=4,
+        0.0,
+        places=0,
         unit="",
     )

@@ -77,6 +77,12 @@ _YLABEL_LJ = "Sound energy level $L_J$ [dB]"
 #: text. ``_t`` returns the English key unchanged for any language other
 #: than ``"es"``, so the English output is byte-for-byte identical to the
 #: pre-i18n renderers.
+#: Labels the high-frequency sound power plots share, named once so the
+#: translation table and the axes cannot drift apart.
+_LEVEL_LABEL = "Level [dB]"
+_SOUND_POWER_LABEL = "Sound power $L_W$"
+_MEAN_ROOM_LEVEL_LABEL = r"Mean room level $\overline{L_p}$"
+
 _STRINGS: dict[str, str] = {
     "Band": "Banda",
     _YLABEL_LW: "Nivel de potencia acústica $L_W$ [dB]",
@@ -89,7 +95,7 @@ _STRINGS: dict[str, str] = {
     "Non-positive band": "Banda no positiva",
     "Pressure level $L_p$": "Nivel de presión $L_p$",
     "Intensity level $L_I$": "Nivel de intensidad $L_I$",
-    "Level [dB]": "Nivel [dB]",
+    _LEVEL_LABEL: "Nivel [dB]",
     r"Pressure-intensity index $\delta_{pI}$ [dB]": r"Índice presión-intensidad $\delta_{pI}$ [dB]",
     _YLABEL_LW_ABSOLUTE: "Nivel de potencia acústica $L_W$ [dB re 1 pW]",
     "ISO/TS 7849 sound power from surface vibration": "Potencia acústica por vibración superficial ISO/TS 7849",
@@ -123,8 +129,8 @@ _STRINGS: dict[str, str] = {
     "upper bound: the background is too close": "cota superior: el fondo está demasiado cerca",
     "grade 2 (engineering)": "grado 2 (ingeniería)",
     "grade 3 (survey)": "grado 3 (control)",
-    "Sound power $L_W$": "Potencia acústica $L_W$",
-    r"Mean room level $\overline{L_p}$": r"Nivel medio en la sala $\overline{L_p}$",
+    _SOUND_POWER_LABEL: "Potencia acústica $L_W$",
+    _MEAN_ROOM_LEVEL_LABEL: r"Nivel medio en la sala $\overline{L_p}$",
     "Frequency [kHz]": "Frecuencia [kHz]",
     "Tone below the reporting range": "Tono fuera del intervalo a informar",
     "10 dB below the highest tone": "10 dB bajo el tono más alto",
@@ -532,7 +538,7 @@ def plot_high_frequency_sound_power(
         ax.vlines(khz, floor, levels, colors=colours, linewidth=2.0)
         style_default(kwargs, "color", colours)
         kwargs.setdefault("zorder", 3)
-        kwargs.setdefault("label", _t("Sound power $L_W$", language))
+        kwargs.setdefault("label", _t(_SOUND_POWER_LABEL, language))
         ax.scatter(khz, levels, **kwargs)
         ax.scatter(
             khz,
@@ -541,7 +547,7 @@ def plot_high_frequency_sound_power(
             s=160,
             color=_C_SECONDARY,
             zorder=3,
-            label=_t(r"Mean room level $\overline{L_p}$", language),
+            label=_t(_MEAN_ROOM_LEVEL_LABEL, language),
         )
         threshold = float(np.max(levels)) - 10.0
         ax.axhline(
@@ -568,7 +574,7 @@ def plot_high_frequency_sound_power(
     else:
         positions = _band_axis(ax, freqs, language=language)
         style_default(kwargs, "color", _C_PRIMARY)
-        kwargs.setdefault("label", _t("Sound power $L_W$", language))
+        kwargs.setdefault("label", _t(_SOUND_POWER_LABEL, language))
         kwargs.setdefault("width", 0.6)
         ax.bar(positions, levels, **kwargs)
         ax.plot(
@@ -577,7 +583,7 @@ def plot_high_frequency_sound_power(
             marker="o",
             linestyle="",
             color=_C_SECONDARY,
-            label=_t(r"Mean room level $\overline{L_p}$", language),
+            label=_t(_MEAN_ROOM_LEVEL_LABEL, language),
         )
         low = float(np.min(np.concatenate([levels, mean])))
         ax.set_ylim(bottom=low - 10.0)
@@ -588,7 +594,7 @@ def plot_high_frequency_sound_power(
                 method=method,
             )
         )
-    ax.set_ylabel(_t("Level [dB]", language))
+    ax.set_ylabel(_t(_LEVEL_LABEL, language))
     ax.grid(visible=True, axis="y", alpha=0.3)
     place_legend_clear(ax.legend(fontsize="small"))
     localize_axes(ax, language)
@@ -637,7 +643,7 @@ def plot_intensity(
         label=_t("Intensity level $L_I$", language),
     )
     _freq_axis(ax, freqs, language=language)
-    ax.set_ylabel(_t("Level [dB]", language))
+    ax.set_ylabel(_t(_LEVEL_LABEL, language))
     ax.grid(visible=True, which="both", alpha=0.3)
 
     twin = ax.twinx()

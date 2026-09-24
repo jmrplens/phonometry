@@ -7924,6 +7924,8 @@ in the same order.
   evaluates Annex A through the library's ISO 9613-1 implementation, which
   names the oxygen relaxation frequency `fro`, and the 581 correctly printed
   cells of Tables 1 and 2 confirm the reading.
+- **Status:** unreported.
+
 ## IEC 61260-2:2016 / IEC 61260-3:2016, Annex A, Formula (A.2) (the coefficient of the frequency terms left unsquared)
 
 - **Location:** Annex A (informative), A.1.3, Formula (A.2), printed p. 19 of

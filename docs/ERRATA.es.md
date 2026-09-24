@@ -8399,6 +8399,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   que llama `fro` a la frecuencia de relajación del oxígeno, y las 581 celdas
   bien impresas de las tablas 1 y 2 confirman esa lectura.
 - **Estado:** sin comunicar.
+
 ## IEC 61260-2:2016 / IEC 61260-3:2016, anexo A, Fórmula (A.2) (el coeficiente de los términos de frecuencia sin elevar al cuadrado)
 
 - **Ubicación:** anexo A (informativo), A.1.3, Fórmula (A.2), página impresa

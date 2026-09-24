@@ -21,6 +21,7 @@ from .common import (
     _new_axes,
     _new_axes_column,
     format_frequency_axis,
+    place_legend_clear,
     style_default,
     style_pop,
 )
@@ -159,6 +160,10 @@ _RISK_LABEL = r"$R$ = {r},  $\Pi$ = {p} %"
 #: label a curve carries and the key its translation is filed under agree.
 _BAND_AVERAGE_LABEL = r"band average $L_{k,\mathrm{av}}$"
 _FEWER_LINES_LABEL = "fewer than five lines"
+_BAND_FREQUENCY_LABEL = "One-third-octave frequency [Hz]"
+_NO_BAND_LABEL = "no band holds five valid lines"
+_EXCLUDED_LINES_LABEL = "excluded: adequacy condition not met"
+_LEVEL_DIFFERENCE_LABEL = "level difference"
 
 #: Spanish translations of the fixed strings rendered by the vibration
 #: ``.plot()`` renderers, keyed by their verbatim English text. ``_t``
@@ -342,19 +347,21 @@ _STRINGS: dict[str, str] = {
     # effective blocking mass, driving-point method and its uncertainty.
     _BAND_AVERAGE_LABEL: r"media en banda $L_{k,\mathrm{av}}$",
     _FEWER_LINES_LABEL: "menos de cinco líneas",
-    "One-third-octave frequency [Hz]": "Frecuencia de tercio de octava [Hz]",
+    _BAND_FREQUENCY_LABEL: "Frecuencia de tercio de octava [Hz]",
+    _NO_BAND_LABEL: "ninguna banda reúne cinco líneas válidas",
+    _EXCLUDED_LINES_LABEL: "excluida: condición de adecuación no cumplida",
+    _LEVEL_DIFFERENCE_LABEL: "diferencia de niveles",
     "Band stiffness level $L_{k,\\mathrm{av}}$ [dB re 1 N/m]": "Nivel de rigidez en banda $L_{k,\\mathrm{av}}$ [dB re 1 N/m]",
     "ISO 10846 one-third-octave-band stiffness": "ISO 10846 rigidez en bandas de tercio de octava",
     "Level difference [dB]": "Diferencia de niveles [dB]",
     "limit {limit} dB": "límite {limit} dB",
-    "condition met": "condición cumplida",
     "condition not met": "condición no cumplida",
     r"ISO 10846 blocked output: $\Delta L_{1,2} = L_{a1} - L_{a2}$": r"ISO 10846 salida bloqueada: $\Delta L_{1,2} = L_{a1} - L_{a2}$",
     "ISO 10846 unwanted input: excitation minus unwanted direction": "ISO 10846 entrada no deseada: excitación menos dirección no deseada",
     "Mass [kg]": "Masa [kg]",
     r"limit $0.06\,|F_2|/|a_2|$": r"límite $0{,}06\,|F_2|/|a_2|$",
     "$m_0$ = {mass} kg": "$m_0$ = {mass} kg",
-    "ISO 10846-4 Inequality (3): mass in front of the output force transducers": "ISO 10846-4 Desigualdad (3): masa delante de los transductores de fuerza de salida",
+    "ISO 10846-4 Inequality (3): output mass $m_0$": "ISO 10846-4 Desigualdad (3): masa de salida $m_0$",
     r"$\Delta L = 20\,\lg(m_{2,\mathrm{eff}}/m_2)$": r"$\Delta L = 20\,\lg(m_{2,\mathrm{eff}}/m_2)$",
     r"$\pm$1 dB (Inequality (5))": r"$\pm$1 dB (Desigualdad (5))",
     "below 40 Hz: ignored": "por debajo de 40 Hz: se ignora",
@@ -814,6 +821,19 @@ def plot_rigid_mass_calibration(
     return axes
 
 
+def _lay_out_own_figure(ax: Axes) -> None:
+    """Fit a figure the renderer made itself, so no label falls off its canvas.
+
+    Only for a figure the renderer created: axes a caller hands in belong to
+    the caller's layout, which a renderer has no business rearranging.
+    """
+    from matplotlib.figure import Figure
+
+    figure = ax.get_figure(root=True)
+    if isinstance(figure, Figure):
+        figure.tight_layout()
+
+
 def plot_transfer_stiffness(
     result: TransferStiffnessResult,
     ax: Axes | None = None,
@@ -823,10 +843,15 @@ def plot_transfer_stiffness(
 ) -> Axes:
     """Dynamic transfer stiffness level ``L_k(f)`` on a log-frequency axis.
 
+    Lines the result marks not :attr:`valid` (an adequacy condition of the
+    part fails there, so the part excludes them from the evaluation) are
+    drawn apart, as a thin dashed muted curve, so the plot never presents
+    them as part of the result.
+
     :param result: A :class:`~phonometry.vibration.structural.transfer_stiffness.TransferStiffnessResult`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
-    :param kwargs: Forwarded to the level ``plot``.
+    :param kwargs: Forwarded to the level ``plot`` of the valid lines.
     :return: The axes.
     """
     from .._i18n import localize_axes
@@ -834,9 +859,28 @@ def plot_transfer_stiffness(
     ax = ax if ax is not None else _new_axes()
     freq = np.asarray(result.frequencies, dtype=np.float64)
     level = np.asarray(result.levels, dtype=np.float64)
+    valid = (
+        np.ones(freq.shape, dtype=bool)
+        if result.valid is None
+        else np.asarray(result.valid, dtype=bool)
+    )
     style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("label", r"$L_k = 20\,\log_{10}(|k_{2,1}|/k_0)$")
-    ax.semilogx(freq, level, **kwargs)
+    ax.semilogx(freq, np.where(valid, level, np.nan), **kwargs)
+    if not np.all(valid):
+        # Widened by one line either side, so the excluded stretch meets the
+        # valid curve instead of leaving a gap one line wide at each end.
+        excluded = ~valid
+        excluded[1:] |= ~valid[:-1]
+        excluded[:-1] |= ~valid[1:]
+        ax.semilogx(
+            freq,
+            np.where(excluded, level, np.nan),
+            color=_C_MUTED,
+            ls="--",
+            lw=1.0,
+            label=_t(_EXCLUDED_LINES_LABEL, language),
+        )
     format_frequency_axis(ax, float(freq.min()), float(freq.max()), language=language)
     ax.set_xlabel(_t(_FREQ_LABEL, language))
     ax.set_ylabel(_t("Transfer stiffness level $L_k$ [dB re 1 N/m]", language))
@@ -860,6 +904,9 @@ def plot_band_averaged_stiffness(
     ask the graphs to be drawn (8.3 or 8.4 of each: a fixed length per
     one-third-octave band). A band without a value, fewer than five lines,
     breaks the curve and is marked with a cross along the foot of the axes.
+    With no band determined at all there is no level to put on the y axis:
+    its tick labels are hidden and a note says why, rather than leaving an
+    empty curve on an autoscaled axis around 0 dB.
 
     :param result: A
         :class:`~phonometry.vibration.structural.transfer_stiffness.BandAveragedStiffness`.
@@ -870,13 +917,16 @@ def plot_band_averaged_stiffness(
     """
     from .._i18n import localize_axes
 
+    created = ax is None
     ax = ax if ax is not None else _new_axes()
     levels = np.asarray(result.levels, dtype=np.float64)
     determined = np.asarray(result.determined, dtype=bool)
+    # The label goes in translated: _band_axis looks it up in the shared
+    # table only, which does not carry this domain's strings.
     positions = _band_axis(
         ax,
         np.asarray(result.nominal_frequencies, dtype=np.float64),
-        xlabel="One-third-octave frequency [Hz]",
+        xlabel=_t(_BAND_FREQUENCY_LABEL, language),
         language=language,
     )
     style_default(kwargs, "color", _C_PRIMARY)
@@ -892,13 +942,29 @@ def plot_band_averaged_stiffness(
             transform=ax.get_xaxis_transform(),
             label=_t(_FEWER_LINES_LABEL, language),
         )
+    if not np.any(determined):
+        ax.tick_params(axis="y", labelleft=False)
+        ax.text(
+            0.5,
+            0.5,
+            _t(_NO_BAND_LABEL, language),
+            transform=ax.transAxes,
+            ha="center",
+            va="center",
+            color=_C_MUTED,
+        )
     ax.set_ylabel(
         _t("Band stiffness level $L_{k,\\mathrm{av}}$ [dB re 1 N/m]", language)
     )
     ax.set_title(_t("ISO 10846 one-third-octave-band stiffness", language))
-    ax.legend(loc="best", fontsize="small")
+    legend = ax.legend(fontsize="small")
     ax.grid(visible=True, alpha=0.3)
     localize_axes(ax, language)
+    if created:
+        _lay_out_own_figure(ax)
+    # Placed last, against the markers' own size and the final axes box:
+    # "best" lets a longer translated label reach the edge of a marker.
+    place_legend_clear(legend)
     return ax
 
 
@@ -920,6 +986,7 @@ def plot_level_difference_check(
     """
     from .._i18n import format_number, localize_axes
 
+    created = ax is None
     ax = ax if ax is not None else _new_axes()
     freq = np.asarray(result.frequencies, dtype=np.float64)
     difference = np.asarray(result.difference_db, dtype=np.float64)
@@ -934,7 +1001,9 @@ def plot_level_difference_check(
         label=_t("limit {limit} dB", language).format(limit=limit),
     )
     style_default(kwargs, "color", _C_PRIMARY)
-    kwargs.setdefault("label", _t("condition met", language))
+    # The curve is the difference itself, wherever it lies; the verdict is
+    # the markers', so the curve's label does not claim one.
+    kwargs.setdefault("label", _t(_LEVEL_DIFFERENCE_LABEL, language))
     style_default(kwargs, "linewidth", 1.4)
     ax.semilogx(freq, shown, "-", **kwargs)
     if not np.all(holds):
@@ -958,6 +1027,8 @@ def plot_level_difference_check(
     ax.legend(loc="best", fontsize="small")
     ax.grid(visible=True, which="both", alpha=0.3)
     localize_axes(ax, language)
+    if created:
+        _lay_out_own_figure(ax)
     return ax
 
 
@@ -979,6 +1050,7 @@ def plot_output_mass_check(
     """
     from .._i18n import decimal_comma, localize_axes
 
+    created = ax is None
     ax = ax if ax is not None else _new_axes()
     freq = np.asarray(result.frequencies, dtype=np.float64)
     limit = np.asarray(result.mass_limit_kg, dtype=np.float64)
@@ -1007,15 +1079,12 @@ def plot_output_mass_check(
     format_frequency_axis(ax, float(freq.min()), float(freq.max()), language=language)
     ax.set_xlabel(_t(_FREQ_LABEL, language))
     ax.set_ylabel(_t("Mass [kg]", language))
-    ax.set_title(
-        _t(
-            "ISO 10846-4 Inequality (3): mass in front of the output force transducers",
-            language,
-        )
-    )
+    ax.set_title(_t("ISO 10846-4 Inequality (3): output mass $m_0$", language))
     ax.legend(loc="best", fontsize="small")
     ax.grid(visible=True, which="both", alpha=0.3)
     localize_axes(ax, language)
+    if created:
+        _lay_out_own_figure(ax)
     return ax
 
 
@@ -1037,6 +1106,7 @@ def plot_effective_blocking_mass(
     """
     from .._i18n import format_number, localize_axes
 
+    created = ax is None
     ax = ax if ax is not None else _new_axes()
     freq = np.asarray(result.frequencies, dtype=np.float64)
     deviation = np.asarray(result.deviation_db, dtype=np.float64)
@@ -1081,6 +1151,8 @@ def plot_effective_blocking_mass(
     ax.legend(loc="best", fontsize="small")
     ax.grid(visible=True, which="both", alpha=0.3)
     localize_axes(ax, language)
+    if created:
+        _lay_out_own_figure(ax)
     return ax
 
 
@@ -1102,6 +1174,7 @@ def plot_driving_point_stiffness(
     """
     from .._i18n import format_number, localize_axes
 
+    created = ax is None
     ax = ax if ax is not None else _new_axes()
     freq = np.asarray(result.frequencies, dtype=np.float64)
     levels = np.asarray(result.levels, dtype=np.float64)
@@ -1159,6 +1232,8 @@ def plot_driving_point_stiffness(
     ax.legend(loc="best", fontsize="small")
     ax.grid(visible=True, which="both", alpha=0.3)
     localize_axes(ax, language)
+    if created:
+        _lay_out_own_figure(ax)
     return ax
 
 

@@ -470,7 +470,7 @@ def _band_averaged_stiffness() -> ph.vibration.BandAveragedStiffness:
 
 
 def _effective_blocking_mass() -> ph.vibration.EffectiveBlockingMass:
-    """A 20 kg block that stops being rigid near 2 kHz (f3 about 1047 Hz)."""
+    """A 20 kg block whose effective mass leaves 1 dB at f3, about 1048 Hz."""
     f = np.geomspace(20.0, 5000.0, 200)
     m_eff = 20.0 * (1.0 + (f / 3000.0) ** 2)
     ones = np.ones(f.size, dtype=complex)
@@ -480,7 +480,7 @@ def _effective_blocking_mass() -> ph.vibration.EffectiveBlockingMass:
 
 
 def _driving_point_stiffness() -> ph.vibration.DrivingPointStiffnessResult:
-    """A 1 MN/m spring under a 2 kg force plate: f_UL near 52 Hz."""
+    """A 1 MN/m spring under a 2 kg force distribution plate: f_UL near 52 Hz."""
     f = np.arange(1.0, 200.0, 0.2)
     w = 2.0 * np.pi * f
     k11 = 1.0e6 - w**2 * 2.0

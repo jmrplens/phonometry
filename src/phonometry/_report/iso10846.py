@@ -16,18 +16,23 @@ the direct method (ISO 10846-2:2008) or the indirect blocking-mass method
   the left (the method, the blocking mass for the indirect method, the frequency
   range, the low-frequency stiffness plateau ``|k2,1|``, its level ``L_k`` and
   the low-frequency loss factor ``eta``) beside the transfer-stiffness level
-  spectrum ``L_k(f)`` drawn by the result's own ``plot(ax=...)``;
+  spectrum ``L_k(f)`` drawn by the result's own ``plot(ax=...)``, with the
+  lines that fail an adequacy condition drawn apart;
+* the one-third-octave band levels ``L_k,av`` the test report of ISO 10846-2
+  (9 m), which clause 10 requires) and ISO 10846-3 (10 j)) asks for, the
+  squared-magnitude averages of the valid lines, or a note when no band holds
+  the five lines an average needs;
 * a boxed representative value, the low-frequency dynamic-transfer-stiffness
   level ``L_k`` (the plateau that characterises the element below its internal
   resonances), with the stiffness magnitude and the method alongside; and
 * a footer identity/disclaimer block.
 
-Dynamic transfer stiffness is a continuous frequency-response function over a
-fine frequency axis, not an octave-band quantity, so the fiche presents it
-honestly as a spectrum plot plus a small table of characteristic points; it
-carries no per-band table and no pass/fail verdict (a transfer-stiffness
-determination is a characterisation). The shared FRF skeleton lives in
-:mod:`._frf_fiche`; this module only holds the transfer-stiffness specifics.
+The characteristic points are read at the lowest *valid* line: a line the
+result marks as failing an adequacy condition is excluded from the evaluation
+by the part itself, so it cannot be the headline either. The fiche carries no
+pass/fail verdict (a transfer-stiffness determination is a characterisation).
+The shared FRF skeleton lives in :mod:`._frf_fiche`; this module only holds
+the transfer-stiffness specifics.
 reportlab, matplotlib and svglib are soft dependencies imported lazily (reportlab
 and svglib ship in the ``phonometry[report]`` extra, matplotlib in
 ``phonometry[plot]``); each is guarded with an actionable :class:`ImportError`.
@@ -35,7 +40,8 @@ and svglib ship in the ``phonometry[report]`` extra, matplotlib in
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+import warnings
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -43,8 +49,17 @@ from ._frf_fiche import frequency_range, frf_metadata_pairs, render_frf_fiche
 from ._i18n import format_number, t
 
 if TYPE_CHECKING:
-    from ..vibration.structural.transfer_stiffness import TransferStiffnessResult
+    from ..vibration.structural.transfer_stiffness import (
+        BandAveragedStiffness,
+        TransferStiffnessResult,
+    )
     from .metadata import ReportMetadata
+
+#: Bands per row of the band-level table: twelve columns of about 12 mm
+#: beside a 26 mm label column fill the 174 mm content width.
+_BANDS_PER_ROW = 12
+_LABEL_COLUMN_MM = 26.0
+_CONTENT_WIDTH_MM = 174.0
 
 
 def _is_indirect(result: TransferStiffnessResult) -> bool:
@@ -68,18 +83,44 @@ def _basis(result: TransferStiffnessResult, language: str = "en") -> str:
     ).format(method=_method(result, language))
 
 
+def _reference_index(result: TransferStiffnessResult) -> int:
+    """Index of the lowest line that enters the evaluation.
+
+    With no validity flags every line does. An indirect determination marks
+    the lines with ``|T| > 0.1`` as not valid, and those sit at the bottom of
+    the sweep, below and around the mass-spring resonance: reading the plateau
+    there printed the inflated stiffness of the resonance region as the
+    element's headline value.
+
+    :raises ValueError: when the result marks every line as not valid.
+    """
+    freq = np.asarray(result.frequencies, dtype=np.float64)
+    if result.valid is None:
+        return int(np.argmin(freq))
+    valid = np.asarray(result.valid, dtype=bool)
+    if not np.any(valid):
+        msg = (
+            "TransferStiffnessResult.report: no line meets the adequacy "
+            "conditions of its part, so the fiche has no value to report."
+        )
+        raise ValueError(msg)
+    candidates = np.flatnonzero(valid)
+    return int(candidates[np.argmin(freq[candidates])])
+
+
 def _low_frequency_values(
     result: TransferStiffnessResult,
 ) -> tuple[float, float, float, float]:
-    """Return the lowest frequency and the ``|k2,1|``, ``L_k`` and ``eta`` there.
+    """Return the lowest valid frequency and the ``|k2,1|``, ``L_k`` and ``eta`` there.
 
     The low-frequency point characterises the element below its internal
     resonances: the transfer stiffness there is the plateau reported as the
     headline value, and ISO 10846-1 (3.8) defines the loss factor only in the
     low-frequency range where inertial forces in the element are negligible.
+    See :func:`_reference_index` for why the point is the lowest *valid* line.
     """
     freq = np.asarray(result.frequencies, dtype=np.float64)
-    index = int(np.argmin(freq))
+    index = _reference_index(result)
     magnitude = float(np.asarray(result.magnitude, dtype=np.float64)[index])
     level = float(np.asarray(result.levels, dtype=np.float64)[index])
     # Reuse the result's own loss-factor property (eta = Im/Re, ISO 10846-1 3.8)
@@ -169,6 +210,106 @@ def _extended_terms(result: TransferStiffnessResult, language: str = "en") -> li
     ]
 
 
+def _band_levels(result: TransferStiffnessResult) -> BandAveragedStiffness:
+    """The band averages of the valid lines, their short-band warning muted.
+
+    The fiche marks a band of fewer than five lines itself, in its own cell,
+    so the warning would only repeat on the console what the page prints.
+    """
+    from ..vibration.structural.transfer_stiffness import TransferStiffnessWarning
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", TransferStiffnessWarning)
+        return result.band_average()
+
+
+def _band_level_flow(
+    result: TransferStiffnessResult, language: str = "en"
+) -> list[Any]:
+    """The clause 10 band-level table, twelve bands a row, or a note.
+
+    A band holding one to four valid lines has no level; its cell prints
+    ``n = 3`` (the count), so the page says why the value is missing. When
+    no band holds five lines the table would be all such cells, and a single
+    sentence says so instead.
+    """
+    from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+    from reportlab.lib.units import mm
+    from reportlab.platypus import Spacer
+
+    from ..filters.frequencies import _format_nominal_freq
+    from ._i18n import decimal_comma
+    from ._layout import band_table_header_style, fiche_paragraph, stacked_table
+
+    styles = getSampleStyleSheet()
+    caption = ParagraphStyle(
+        "fiche_band_caption", parent=styles["Normal"], fontSize=8.5, leading=11
+    )
+    header_style = band_table_header_style()
+    cell_style = ParagraphStyle(
+        "fiche_band_cell",
+        parent=styles["Normal"],
+        fontSize=7.4,
+        leading=8.8,
+        alignment=1,
+    )
+    bands = _band_levels(result)
+    if not np.any(bands.determined):
+        return [
+            fiche_paragraph(
+                t(
+                    "One-third-octave band levels: none determined, since no band "
+                    "holds the five valid lines a band average needs "
+                    "(ISO 10846, n &#8805; 5).",
+                    language,
+                ),
+                caption,
+            )
+        ]
+    flow: list[Any] = [
+        fiche_paragraph(
+            t(
+                "One-third-octave band levels L<sub>k,av</sub> [dB re 1 N/m], "
+                "squared-magnitude averages of the valid lines (n &#8805; 5)",
+                language,
+            ),
+            caption,
+        ),
+        Spacer(1, 2),
+    ]
+    nominal = np.asarray(bands.nominal_frequencies, dtype=np.float64)
+    levels = np.asarray(bands.levels, dtype=np.float64)
+    counts = np.asarray(bands.line_counts)
+    determined = np.asarray(bands.determined, dtype=bool)
+    band_mm = (_CONTENT_WIDTH_MM - _LABEL_COLUMN_MM) / _BANDS_PER_ROW
+    for start in range(0, nominal.size, _BANDS_PER_ROW):
+        chunk = slice(start, start + _BANDS_PER_ROW)
+        header = [t("f [Hz]", language)] + [
+            decimal_comma(_format_nominal_freq(float(f)), language)
+            for f in nominal[chunk]
+        ]
+        values = [t("L<sub>k,av</sub> [dB]", language)] + [
+            format_number(float(level), language, decimals=1) if ok else f"n = {int(n)}"
+            for level, n, ok in zip(
+                levels[chunk], counts[chunk], determined[chunk], strict=True
+            )
+        ]
+        widths = [_LABEL_COLUMN_MM * mm] + [band_mm * mm] * (len(header) - 1)
+        table = stacked_table(
+            [
+                [fiche_paragraph(cell, header_style) for cell in header],
+                [fiche_paragraph(cell, cell_style) for cell in values],
+            ],
+            widths,
+        )
+        # A last, shorter row of bands lines up under the first, column for
+        # column, instead of centring itself on the page.
+        table.hAlign = "LEFT"
+        flow.append(table)
+        flow.append(Spacer(1, 3))
+    return flow
+
+
 def render_transfer_stiffness_report(
     result: TransferStiffnessResult,
     path: str,
@@ -214,4 +355,5 @@ def render_transfer_stiffness_report(
         extended=_extended_terms(result, language),
         metadata=metadata,
         language=language,
+        after_body=lambda: _band_level_flow(result, language),
     )

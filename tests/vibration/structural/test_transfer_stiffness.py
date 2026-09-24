@@ -463,6 +463,28 @@ def test_bands_beyond_the_outermost_valid_line_are_not_listed() -> None:
     assert bands.nominal_frequencies.tolist() == [1000.0]
 
 
+def test_a_band_whose_lines_were_all_excluded_is_undetermined_without_a_warning() -> (
+    None
+):
+    """Lines refused by an adequacy condition were measured, not missing.
+
+    Five lines in each of three bands, every line of the middle one marked
+    not valid: the middle band has no value, and no warning, because the
+    five-line rule is about how finely the sweep was resolved.
+    """
+    f = np.concatenate([_TWO_BANDS_HZ, _TWO_BANDS_HZ[:5] * 1.6])
+    valid = np.ones(f.size, dtype=bool)
+    valid[5:10] = False
+    k = np.full(f.size, 1.0e6)
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", vibration.TransferStiffnessWarning)
+        bands = vibration.band_averaged_stiffness(f, k, valid=valid)
+    assert bands.nominal_frequencies.tolist() == [1000.0, 1250.0, 1600.0]
+    assert bands.line_counts.tolist() == [5, 0, 5]
+    assert math.isnan(float(bands.stiffness[1]))
+    assert bands.determined.tolist() == [True, False, True]
+
+
 def test_the_band_average_refuses_a_repeated_line() -> None:
     f = np.array([900.0, 950.0, 950.0, 1000.0, 1050.0])
     k = np.full(f.size, 1.0e6)
@@ -576,6 +598,45 @@ def test_the_loudest_unwanted_direction_decides() -> None:
     assert check.holds.tolist() == [True, False]
 
 
+def test_an_unwanted_direction_15_db_down_is_acceptable() -> None:
+    """The inequality is inclusive: 15 dB exactly holds, 14,9 dB does not."""
+    f = np.array([100.0, 200.0])
+    with pytest.warns(
+        vibration.TransferStiffnessWarning, match="down to 14.9 dB at 200 Hz"
+    ):
+        check = vibration.check_unwanted_input(f, [100.0, 100.0], [85.0, 85.1])
+    assert check.holds.tolist() == [True, False]
+    assert check.limit_db == pytest.approx(15.0)
+
+
+def test_the_level_difference_curve_does_not_claim_the_verdict() -> None:
+    """A difference that fails everywhere is labelled as what it is.
+
+    The curve is the difference wherever it lies; only the markers carry the
+    verdict, so a curve lying under its limit is never called "met".
+    """
+    pytest.importorskip("matplotlib")
+    import matplotlib as mpl
+
+    mpl.use("Agg")
+    import matplotlib.pyplot as plt
+
+    f = [63.0, 125.0, 250.0]
+    with pytest.warns(vibration.TransferStiffnessWarning, match="unwanted directions"):
+        check = vibration.check_unwanted_input(f, [100.0] * 3, [88.0] * 3)
+    for language, curve, failed in (
+        ("en", "level difference", "condition not met"),
+        ("es", "diferencia de niveles", "condición no cumplida"),
+    ):
+        labels = check.plot(language=language).get_legend_handles_labels()[1]
+        assert curve in labels
+        assert failed in labels
+        assert not any(
+            label in {"condition met", "condición cumplida"} for label in labels
+        )
+    plt.close("all")
+
+
 def test_a_level_difference_check_is_not_a_truth_value() -> None:
     check = vibration.check_blocked_output([100.0], [100.0], [50.0])
     with pytest.raises(TypeError, match="no truth value"):
@@ -660,6 +721,34 @@ def test_f3_is_where_the_effective_mass_leaves_1_db() -> None:
     expected = fc * math.sqrt(10.0**0.05 - 1.0)
     assert em.upper_frequency_limit_hz == pytest.approx(expected, rel=1e-5)
     assert bool(np.all(f[em.valid] < expected * 1.001))
+
+
+def test_f3_is_interpolated_in_log_frequency_and_the_mask_ends_before_it() -> None:
+    """On a coarse grid the crossing lies well inside a step of the sweep.
+
+    The mask keeps exactly the lines before the first one outside 1 dB, and
+    f3 is the crossing of the 1 dB margin interpolated linearly against the
+    logarithm of frequency between that line and the one before it; on this
+    grid a linear-in-f interpolation lands 0,3 Hz away.
+    """
+    fc, m2 = 3000.0, 20.0
+    f = np.geomspace(40.0, 5000.0, 60)
+    m_eff = m2 * (1.0 + (f / fc) ** 2)
+    ones = np.ones(f.size, dtype=complex)
+    em = vibration.effective_blocking_mass(
+        f, m_eff * ones, ones, ones, blocking_mass_kg=m2
+    )
+    deviation = 20.0 * np.log10(m_eff / m2)
+    first = int(np.flatnonzero(np.abs(deviation) > 1.0)[0])
+    last = first - 1
+    assert em.valid.tolist() == (f < f[first]).tolist()
+    margin = 1.0 - np.abs(deviation)
+    fraction = margin[last] / (margin[last] - margin[first])
+    in_log_f = f[last] * (f[first] / f[last]) ** fraction
+    in_f = f[last] + (f[first] - f[last]) * fraction
+    f3 = em.upper_frequency_limit_hz
+    assert f3 == pytest.approx(in_log_f, rel=1e-12)
+    assert abs(float(in_f) - float(in_log_f)) > 0.1
 
 
 def test_a_deviation_below_40_hz_does_not_set_f3() -> None:
@@ -784,6 +873,97 @@ def test_lines_with_unwanted_input_motion_are_excluded() -> None:
     assert not bool(np.any(res.valid[_SWEEP_HZ < 5.0]))
 
 
+def test_a_line_exactly_on_the_threshold_is_f_ul_and_is_kept() -> None:
+    """8.3: "If f <= fUL", so the line at f_UL itself is evaluated.
+
+    Levels of 120 dB up to 20 Hz, then exactly 118 dB at 30 Hz: the 30 Hz
+    line sits on the 2 dB threshold, is f_UL, and stays valid; 40 Hz does not.
+    """
+    f = np.array([1.0, 5.0, 10.0, 20.0, 30.0, 40.0])
+    k = 10.0 ** (np.array([120.0, 120.0, 120.0, 120.0, 118.0, 117.0]) / 20.0)
+    w = 2.0 * np.pi * f
+    res = vibration.driving_point_stiffness(f, k * 1.0e-6, -(w**2) * 1.0e-6)
+    assert res.threshold_level_db == pytest.approx(118.0, abs=1e-12)
+    assert res.upper_limiting_frequency_hz == pytest.approx(30.0, abs=1e-12)
+    assert res.valid.tolist() == [True, True, True, True, True, False]
+
+
+def test_a_line_must_pass_both_inequalities_and_counts_nowhere_if_it_fails() -> None:
+    """Inequalities (1) and (2) are both required, for f_UL and the 1-20 Hz value.
+
+    A flat 1 MN/m element with a 3 dB dip at 9,9 Hz to 10,5 Hz, where the
+    output is only 10,5 dB down (Inequality (1) fails, (2) holds), and an
+    unwanted direction 6 dB down at 30 Hz to 31 Hz only. With both given the
+    dip is excluded: no f_UL, and the low-frequency value is the flat 120 dB.
+    """
+    k = np.full(_SWEEP_HZ.size, 1.0e6 + 0j)
+    dip = (_SWEEP_HZ > 9.85) & (_SWEEP_HZ < 10.55)
+    k[dip] *= 10.0 ** (-3.0 / 20.0)
+    force, accel = _driven(k)
+    output = accel * 1.0e-3
+    output[dip] = accel[dip] * 0.3
+    unwanted = accel * 0.01
+    loud = (_SWEEP_HZ > 29.95) & (_SWEEP_HZ < 31.05)
+    unwanted[loud] = accel[loud] * 0.5
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", vibration.TransferStiffnessWarning)
+        res = vibration.driving_point_stiffness(
+            _SWEEP_HZ,
+            force,
+            accel,
+            output_acceleration_m_s2=output,
+            unwanted_acceleration_m_s2=unwanted,
+        )
+    assert res.adequate is not None
+    assert res.adequate.tolist() == (~dip & ~loud).tolist()
+    assert res.upper_limiting_frequency_hz is None
+    assert res.low_frequency_level_db == pytest.approx(120.0, abs=1e-9)
+
+
+def test_lines_below_1_hz_neither_set_f_ul_nor_enter_the_result() -> None:
+    """The method starts at 1 Hz (clause 1): a dip below it is not judged."""
+    f = np.arange(0.2, 400.0, 0.2)
+    w = 2.0 * np.pi * f
+    k = np.full(f.size, 1.0e6 + 0j)
+    below = f < 0.95
+    k[below] *= 10.0 ** (-3.0 / 20.0)
+    res = vibration.driving_point_stiffness(f, k * 1.0e-6, -(w**2) * 1.0e-6)
+    assert res.upper_limiting_frequency_hz is None
+    assert res.low_frequency_level_db == pytest.approx(120.0, abs=1e-9)
+    assert not bool(np.any(res.valid[below]))
+    assert bool(np.all(res.valid[~below]))
+
+
+def test_short_bands_are_quiet_up_to_20_hz_and_no_further() -> None:
+    """7.5 asks for five lines a band only above 20 Hz.
+
+    Lines every hertz from 1 Hz leave the 6,3 Hz to 16 Hz bands with two or
+    three lines and the 20 Hz band with five: nothing warns. The same short
+    bands above 20 Hz do warn.
+    """
+    f = np.arange(1.0, 400.0, 1.0)
+    w = 2.0 * np.pi * f
+    res = vibration.driving_point_stiffness(
+        f, np.full(f.size, 1.0) + 0j, -(w**2) * 1.0e-6
+    )
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", vibration.TransferStiffnessWarning)
+        bands = res.band_average()
+    counts = dict(
+        zip(bands.nominal_frequencies.tolist(), bands.line_counts.tolist(), strict=True)
+    )
+    assert counts[6.3] == 2
+    assert counts[16.0] == 3
+    assert counts[20.0] == 5
+    sparse = np.concatenate([np.arange(1.0, 20.1, 0.2), [25.0, 26.0, 27.0]])
+    w = 2.0 * np.pi * sparse
+    short = vibration.driving_point_stiffness(
+        sparse, np.full(sparse.size, 1.0) + 0j, -(w**2) * 1.0e-6
+    )
+    with pytest.warns(vibration.TransferStiffnessWarning, match=r"25 Hz \(3\)"):
+        short.band_average()
+
+
 def test_the_driving_point_method_needs_lines_from_1_to_20_hz() -> None:
     f = np.arange(25.0, 400.0, 1.0)
     w = 2.0 * np.pi * f
@@ -824,12 +1004,17 @@ def test_the_annex_b_defaults_are_the_expressions_b3_prints() -> None:
     assert u.band_level_db == pytest.approx(120.0)
 
 
-def test_the_table_b1_roundings_of_the_three_rectangular_terms() -> None:
-    """0,289 and 1,155 round to the printed 0,3 and 1,2; 0,433 rounds to 0,4, not 0,5."""
+def test_the_table_b1_values_are_the_three_rectangular_terms_rounded_up() -> None:
+    """Table B.1 prints 0,3, 1,2 and 0,5: each expression rounded up to a tenth.
+
+    Rounding up is the conservative rounding an uncertainty may take (GUM
+    7.2.6); to the nearest tenth the linearity term 0,433 would read 0,4.
+    """
     u = vibration.driving_point_uncertainty(120.0, repeatability_range_db=0.0)
     rig, dps, lin = (float(c) for c in u.budget.contributions[3:])
-    assert round(rig, 1) == pytest.approx(0.3)
-    assert round(dps, 1) == pytest.approx(1.2)
+    assert [math.ceil(10.0 * c) / 10.0 for c in (rig, dps, lin)] == pytest.approx(
+        [0.3, 1.2, 0.5]
+    )
     assert round(lin, 1) == pytest.approx(0.4)
 
 
@@ -906,8 +1091,114 @@ def test_the_band_figure_marks_the_undetermined_bands() -> None:
     import matplotlib.pyplot as plt
 
     f = np.concatenate([_TWO_BANDS_HZ[:5], _TWO_BANDS_HZ[5:8]])
-    with pytest.warns(vibration.TransferStiffnessWarning):
+    with pytest.warns(vibration.TransferStiffnessWarning, match=r"1250 Hz \(3\)"):
         bands = vibration.band_averaged_stiffness(f, np.full(f.size, 1.0e6))
     ax = bands.plot()
     assert "fewer than five lines" in ax.get_legend_handles_labels()[1]
+    plt.close("all")
+
+
+def test_a_band_figure_with_no_band_determined_says_so() -> None:
+    """No level to draw: the y ticks go, and a note says why."""
+    pytest.importorskip("matplotlib")
+    import matplotlib as mpl
+
+    mpl.use("Agg")
+    import matplotlib.pyplot as plt
+
+    f = np.geomspace(20.0, 2000.0, 60)
+    with pytest.warns(vibration.TransferStiffnessWarning, match="left undetermined"):
+        bands = vibration.band_averaged_stiffness(f, np.full(f.size, 1.0e6))
+    assert not bool(np.any(bands.determined))
+    ax = bands.plot(language="es")
+    texts = [text.get_text() for text in ax.texts]
+    assert "ninguna banda reúne cinco líneas válidas" in texts
+    assert ax.yaxis.get_tick_params()["labelleft"] is False
+    plt.close("all")
+
+
+@pytest.mark.parametrize("language", ["en", "es"])
+def test_the_band_figure_legend_leaves_every_marker_clear(language: str) -> None:
+    """The Spanish legend is wider; it must still clear the 4 Hz marker's edge.
+
+    Drawn on the caller's default axes, where no layout pass moves anything
+    afterwards: there ``loc="best"`` put the Spanish box over the edge of the
+    4 Hz marker.
+    """
+    pytest.importorskip("matplotlib")
+    import matplotlib as mpl
+
+    mpl.use("Agg")
+    import matplotlib.pyplot as plt
+
+    k, m0 = 1.0e6 * (1.0 + 0.05j), 2.0
+    f = np.arange(1.0, 200.0, 0.2)
+    w = 2.0 * np.pi * f
+    res = vibration.driving_point_stiffness(
+        f, (k - w**2 * m0) * 1.0e-6, -(w**2) * 1.0e-6
+    )
+    fig, ax = plt.subplots()
+    res.band_average().plot(ax=ax, language=language)
+    fig.canvas.draw()
+    legend = ax.get_legend().get_window_extent()
+    curve = ax.lines[0]
+    radius = curve.get_markersize() * fig.dpi / 72.0 / 2.0
+    points = ax.transData.transform(np.column_stack(curve.get_data()))
+    points = points[np.all(np.isfinite(points), axis=1)]
+    x, y = points[:, 0], points[:, 1]
+    covered = (
+        (x >= legend.x0 - radius)
+        & (x <= legend.x1 + radius)
+        & (y >= legend.y0 - radius)
+        & (y <= legend.y1 + radius)
+    )
+    assert not bool(np.any(covered))
+    plt.close("all")
+
+
+def test_a_spanish_title_fits_the_default_figure() -> None:
+    """The output-mass title stays inside a default 6,4 in figure in Spanish."""
+    pytest.importorskip("matplotlib")
+    import matplotlib as mpl
+
+    mpl.use("Agg")
+    import matplotlib.pyplot as plt
+
+    check = vibration.check_output_mass(
+        [20.0, 63.0, 125.0], 0.1, [120.0] * 3, [100.0, 104.0, 106.0]
+    )
+    ax = check.plot(language="es")
+    fig = ax.figure
+    fig.canvas.draw()
+    renderer = fig.canvas.get_renderer()
+    width, height = fig.bbox.width, fig.bbox.height
+    for artist in (ax.title, ax.xaxis.label, ax.yaxis.label):
+        box = artist.get_window_extent(renderer)
+        assert box.x0 >= 0.0, artist.get_text()
+        assert box.x1 <= width, artist.get_text()
+        assert box.y0 >= 0.0, artist.get_text()
+        assert box.y1 <= height, artist.get_text()
+    plt.close("all")
+
+
+def test_the_transfer_stiffness_figure_draws_the_excluded_lines_apart() -> None:
+    """Lines with |T| > 0,1 are not drawn as part of the result."""
+    pytest.importorskip("matplotlib")
+    import matplotlib as mpl
+
+    mpl.use("Agg")
+    import matplotlib.pyplot as plt
+
+    f = np.arange(90.0, 1120.0, 2.0)
+    t = vibration.base_transmissibility(f, mass=8.0, stiffness=1.0e6, damping=120.0)
+    with pytest.warns(vibration.TransferStiffnessWarning, match="Inequality \\(2\\)"):
+        res = vibration.indirect_transfer_stiffness_result(f, t, blocking_mass=8.0)
+    assert res.valid is not None
+    ax = res.plot()
+    valid_curve, excluded_curve = ax.lines[0], ax.lines[1]
+    assert excluded_curve.get_label() == "excluded: adequacy condition not met"
+    drawn = np.isfinite(np.asarray(valid_curve.get_ydata(), dtype=float))
+    assert drawn.tolist() == res.valid.tolist()
+    muted = np.isfinite(np.asarray(excluded_curve.get_ydata(), dtype=float))
+    assert bool(np.all(muted[~res.valid]))
     plt.close("all")

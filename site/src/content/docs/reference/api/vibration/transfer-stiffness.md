@@ -417,7 +417,11 @@ $$
 Inequality (7), -5:2008 Inequality (2)), the unwanted accelerations read
 at the edge of the excitation mass or force distribution plate in the
 plane of the input flange. With several unwanted directions, the loudest
-one at each frequency decides.
+one at each frequency decides. (ISO 10846-2:2008 7.6.1, which excludes
+the lines that fail this pre-run, prints the reference as "6.1,
+Inequality (1)", the blocked-output condition; the condition meant is
+6.4, Inequality (3), as the same sentence in Parts 3 to 5 shows. See the
+errata register.)
 
 **Parameters**
 
@@ -526,12 +530,13 @@ Table B.1, built on [`phonometry.metrology.combine_uncertainty`](/phonometry/ref
   $1{,}5/(2\sqrt{3})$ dB (B.3.6).
 
 The last three are the expressions B.3.4 to B.3.6 print, 0,289, 1,155
-and 0,433 dB, not the 0,3, 1,2 and 0,5 dB Table B.1 rounds them to; the
-0,5 dB of the linearity row is not the nearest tenth of 0,433 dB. With
-the defaults and no repeatability spread, $u = 1{,}394$ dB and
-$U = 2{,}789$ dB. Every default can be replaced by a reasoned
-estimate, as the annex encourages, and the note to (B.3) allows doing so
-band by band.
+and 0,433 dB. Table B.1 carries them rounded up to one decimal, 0,3, 1,2
+and 0,5 dB, the conservative rounding an uncertainty may take
+(ISO/IEC Guide 98-3:2008, 7.2.6); the defaults keep the expressions.
+With the defaults and no repeatability spread, $u = 1{,}394$ dB and
+$U = 2{,}789$ dB, against 1,456 dB and 2,91 dB with the rounded
+table. Every default can be replaced by a reasoned estimate, as the annex
+encourages, and the note to (B.3) allows doing so band by band.
 
 **Parameters**
 
@@ -586,7 +591,9 @@ from 1 Hz to 20 Hz, the one average the part defines for a stiffness; for
 the flat stiffness the clause presumes, it and the mean of the levels
 agree. The crossing of the 2 dB threshold is interpolated in the logarithm
 of frequency between the last line above it and the first line on or
-below it, and every line from that first one up is excluded. Lines that
+below it, and every line above $f_\mathrm{UL}$ is excluded; a line
+exactly on the threshold is $f_\mathrm{UL}$ itself and stays in,
+since 8.3 states the 2 dB for $f \le f_\mathrm{UL}$. Lines that
 fail Inequality (1) or (2) (`adequate`) are excluded from the
 evaluation altogether, as 7.6.1 requires, and so are lines below the
 1 Hz at which the method starts.
@@ -607,11 +614,13 @@ DrivingPointStiffnessResult.band_average() -> BandAveragedStiffness
 
 One-third-octave-band averages of $k_{1,1}$ over the valid lines (Formulas (6), (7)).
 
-Every line averaged lies below $f_\mathrm{UL}$ and within 2 dB
-of $k_{2,1}$, so each band average is within 2 dB of
-$k_{\mathrm{av}(2,1)}$ too: the ratio of the two squared
-magnitudes is bounded line by line, and a mean of bounded ratios is
-bounded by the same numbers.
+Only the lines at or below $f_\mathrm{UL}$ are averaged. For
+those bands 8.3 states that the band averages of $k_{1,1}$
+stand for those of $k_{2,1}$ within 2 dB, and Annex B (B.3.5)
+assumes the same $\pm 2$ dB for its uncertainty budget; the
+criterion of 6.2 itself only watches $k_{1,1}$ fall below its
+own low-frequency value, so the 2 dB is the standard's statement,
+not something the average can prove line by line.
 
 Up to 20 Hz the 0,2 Hz line spacing of 7.5 leaves the lowest bands
 with fewer than five lines; the NOTE to clause 9 m) accepts
@@ -700,7 +709,10 @@ $f_\mathrm{UL}$ of 6.2, in hertz, or `None` when the sweep never reaches it.
 Per frequency, whether the line is evaluated.
 
 A line is evaluated when it is adequate, lies at or above 1 Hz and
-lies below the first line 2 dB down, i.e. below $f_\mathrm{UL}$.
+lies at or below $f_\mathrm{UL}$: 8.3 states the accuracy of
+Formula (7) "if $f \le f_\mathrm{UL}$", so a line that sits
+exactly on the 2 dB threshold, and is $f_\mathrm{UL}$ itself,
+is kept.
 
 **Returns:** One boolean per frequency.
 
@@ -1399,14 +1411,18 @@ characteristic points (the method, the blocking mass for the indirect
 method, the frequency range, and the low-frequency stiffness plateau
 $|k_{2,1}|$, its level `L_k` and the loss factor `eta`
 there) beside
-the transfer-stiffness level spectrum `L_k(f)`, a boxed low-frequency
-`L_k` with the stiffness magnitude and method alongside, and a footer
-identity/disclaimer block.
+the transfer-stiffness level spectrum `L_k(f)`, the one-third-octave
+band levels of `band_average` that the test report of
+ISO 10846-2 (9 m)) and ISO 10846-3 (10 j)) presents, a boxed
+low-frequency `L_k` with the stiffness magnitude and method
+alongside, and a footer identity/disclaimer block.
 
-Dynamic transfer stiffness is a continuous frequency-response function,
-so the fiche presents it as a spectrum plus a table of characteristic
-points; a transfer-stiffness determination is a characterisation, so
-there is no pass/fail verdict.
+The characteristic points are read at the lowest line `valid`
+keeps, since the part excludes the others from the evaluation, and the
+spectrum draws the excluded lines apart. A band holding fewer than
+five valid lines prints its line count instead of a level. A
+transfer-stiffness determination is a characterisation, so there is
+no pass/fail verdict.
 
 **Parameters**
 
@@ -1424,7 +1440,7 @@ there is no pass/fail verdict.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If `engine` is not `"reportlab"` or `language` is unknown. |
+| ValueError | If `engine` is not `"reportlab"` or `language` is unknown, or `valid` marks every line as failing its adequacy conditions (there is then no value to report). |
 | ImportError | If reportlab or matplotlib is not installed. The fiche always embeds the `L_k(f)` spectrum, so both are required (`pip install "phonometry[report,plot]"`). |
 
 ### TransferStiffnessResult.to()

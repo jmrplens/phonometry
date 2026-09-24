@@ -16,6 +16,7 @@ contract.
 
 from __future__ import annotations
 
+import dataclasses
 import warnings
 from typing import TYPE_CHECKING
 
@@ -211,3 +212,89 @@ def test_unknown_language_rejected(tmp_path: Path) -> None:
     out = str(tmp_path / "bad.pdf")
     with pytest.raises(ValueError, match=r"Unknown language"):
         res.report(out, language="xx")
+
+
+def _dense_direct_result() -> vibration.TransferStiffnessResult:
+    """Ten lines in every one-third-octave band from 20 Hz to 2 kHz."""
+    freqs = 1000.0 * 10.0 ** ((np.arange(-175, 35) + 0.5) / 100.0)
+    k21 = _K + 1j * 2.0 * np.pi * freqs * _C
+    return vibration.TransferStiffnessResult(frequencies=freqs, transfer_stiffness=k21)
+
+
+def test_the_fiche_prints_the_band_levels_of_the_test_report(tmp_path: Path) -> None:
+    """ISO 10846-2 9 m) / -3 10 j): one-third-octave band levels, n >= 5 lines.
+
+    The 2 kHz band averages its ten lines of |k + j omega c|^2; the closed
+    form of that mean is the oracle for the printed level.
+    """
+    pytest.importorskip("reportlab")
+    pytest.importorskip("matplotlib")
+    res = _dense_direct_result()
+    lines = res.frequencies[-10:]
+    power = np.mean(_K**2 + (2.0 * np.pi * lines * _C) ** 2)
+    expected = 10.0 * np.log10(power)
+    out = tmp_path / "bands.pdf"
+    res.report(str(out))
+    assert_one_page(str(out))
+    text = _extract_text(str(out))
+    assert "One-third-octave band levels" in text
+    assert "1.25k" in text
+    assert f"{expected:.1f}" in text
+
+
+def test_a_band_short_of_five_valid_lines_prints_its_count(tmp_path: Path) -> None:
+    pytest.importorskip("reportlab")
+    pytest.importorskip("matplotlib")
+    dense = _dense_direct_result()
+    keep = np.ones(dense.frequencies.size, dtype=bool)
+    keep[-7:] = False  # the 2 kHz band keeps three of its ten lines
+    res = vibration.TransferStiffnessResult(
+        frequencies=dense.frequencies[keep],
+        transfer_stiffness=dense.transfer_stiffness[keep],
+    )
+    out = tmp_path / "short.pdf"
+    res.report(str(out))
+    assert "n = 3" in _extract_text(str(out))
+
+
+def test_a_sweep_without_five_lines_a_band_says_so(tmp_path: Path) -> None:
+    """One line per band, as the band-centre sweep of the fiche above."""
+    pytest.importorskip("reportlab")
+    pytest.importorskip("matplotlib")
+    out = tmp_path / "coarse.pdf"
+    _direct_result().report(str(out), language="es")
+    assert "ninguno determinado" in _extract_text(str(out))
+
+
+def test_the_headline_is_read_at_the_lowest_valid_line(tmp_path: Path) -> None:
+    """An indirect result excludes |T| > 0,1: the fiche must not box that region.
+
+    8 kg on 1 MN/m (c = 120 N.s/m), lines every 2 Hz from 90 Hz: |T| falls to
+    0,1 at 187,5 Hz, so the headline is the 188 Hz line, not the inflated
+    90 Hz one the resonance region gives.
+    """
+    pytest.importorskip("reportlab")
+    pytest.importorskip("matplotlib")
+    f = np.arange(90.0, 1120.0, 2.0)
+    t = vibration.base_transmissibility(f, mass=8.0, stiffness=_K, damping=120.0)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", vibration.TransferStiffnessWarning)
+        res = vibration.indirect_transfer_stiffness_result(f, t, blocking_mass=8.0)
+    assert res.valid is not None
+    first = int(np.flatnonzero(res.valid)[0])
+    assert float(f[first]) == pytest.approx(188.0)
+    out = tmp_path / "indirect_valid.pdf"
+    res.report(str(out))
+    text = _extract_text(str(out))
+    assert f"{float(res.levels[first]):.1f} dB re 1 N/m" in text
+    assert f"{float(res.levels[0]):.1f} dB re 1 N/m" not in text
+    assert "at 188 Hz" in text
+
+
+def test_a_result_with_no_valid_line_has_no_fiche(tmp_path: Path) -> None:
+    pytest.importorskip("reportlab")
+    pytest.importorskip("matplotlib")
+    res = dataclasses.replace(_direct_result(), valid=np.zeros(_FREQS.size, dtype=bool))
+    out = str(tmp_path / "none.pdf")
+    with pytest.raises(ValueError, match="no line meets the adequacy conditions"):
+        res.report(out)

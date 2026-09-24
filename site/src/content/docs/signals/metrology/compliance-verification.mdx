@@ -284,8 +284,10 @@ uncertainty does not exceed the maximum-permitted uncertainty the standard
 prints for that test. The uncertainty is not added to the deviation. It has a
 ceiling of its own, and the tolerance the instrument has to meet lies beyond
 the acceptance limit by that ceiling (IEC 60942 Annex D, IEC 61672-1 Annex A),
-so a laboratory within its maximum cannot pass an instrument outside its
-tolerance. Both limits are inclusive: a deviation equal to its acceptance limit
+so a laboratory within its maximum is unlikely to pass an instrument outside
+its tolerance. Unlikely, not unable: the ceiling is stated for a 95 % coverage
+interval, and the guard band lowers the risk of a false acceptance without
+removing it. Both limits are inclusive: a deviation equal to its acceptance limit
 conforms, and so does an uncertainty equal to its maximum.
 
 `metrology.verify_conformance` is that rule on its own, for any standard that
@@ -311,7 +313,7 @@ print(both_out.reason)
 # Deviation exceeds acceptance limits AND uncertainty exceeds maximum-permitted
 ```
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/conformance_rule_examples.svg" alt="Two panels drawn the way the standards draw their own examples. Left, the eight examples of IEC 60942:2017 Table E.1 against an acceptance limit of 0.25 dB either way: examples 3, 4, 6 and 7 are diamonds that conform, 6 and 7 sitting on the upper limit, and 1, 2, 5 and 8 are crosses, 5 because its 0.17 dB uncertainty bar is longer than its 0.15 dB shaded maximum. Right, the ten examples of IEC 61672-1:2013 Table C.1 against +1.0 dB and -1.2 dB: examples 3, 4, 6 and 7 conform, 3 on the upper limit and 7 on the lower one, and the other six do not" width="100%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/conformance_rule_examples.svg" alt="Two panels drawn the way the standards draw their own examples. Left, the eight examples of IEC 60942:2017 Table E.1, whose deviations are absolute, between a lower acceptance limit of 0 dB and an upper one of 0.25 dB, as Figure E.1 draws them: examples 3, 4, 6 and 7 are diamonds that conform, 6 and 7 sitting on the upper limit, and 1, 2, 5 and 8 are crosses, 5 because its 0.17 dB uncertainty bar is longer than its 0.15 dB shaded maximum. Right, the ten examples of IEC 61672-1:2013 Table C.1 against +1.0 dB and -1.2 dB: examples 3, 4, 6 and 7 conform, 3 on the upper limit and 7 on the lower one, and the other six do not" width="100%" />
 
 *The eighteen printed examples, each marker the verdict `verify_conformance`
 returned, which is the verdict the table prints. The shaded band is the
@@ -331,7 +333,9 @@ table_e1 = [(0.40, 0.12, 0.15), (0.35, 0.12, 0.15), (0.20, 0.13, 0.15),
             (0.25, 0.15, 0.15), (0.40, 0.50, 0.20)]
 table_c1 = [(1.7, 0.3), (1.1, 0.3), (1.0, 0.3), (0.0, 0.3), (0.0, 0.9),
             (-0.5, 0.3), (-1.2, 0.3), (-1.3, 0.3), (-2.0, 0.3), (-2.0, 0.7)]
-e1 = [metrology.verify_conformance(d, uncertainty=u, acceptance_limits=0.25,
+# Table E.1 prints the absolute deviation, so Figure E.1 draws its limits at
+# 0 dB and 0.25 dB.
+e1 = [metrology.verify_conformance(d, uncertainty=u, acceptance_limits=(0.0, 0.25),
                                    max_uncertainty=m) for d, u, m in table_e1]
 c1 = [metrology.verify_conformance(d, uncertainty=u, acceptance_limits=(-1.2, 1.0),
                                    max_uncertainty=0.5) for d, u in table_c1]
@@ -363,9 +367,12 @@ plt.show()
 All eighteen examples, the eight of IEC 60942 Table E.1 and the ten of
 IEC 61672-1 Table C.1, are rows of the
 [conformance report](/phonometry/reference/conformance/), verdict and reason
-each. IEC 60942 writes its limits on the absolute deviation, so its examples
-take one number (`acceptance_limits=0.25` is ±0.25 dB); IEC 61672-1 writes most
-of its own as an asymmetric pair. `verify_sound_calibrator` applies the rule to
+each. IEC 60942 writes its limits on the absolute deviation, so a signed
+deviation takes one number (`acceptance_limits=0.25` is ±0.25 dB). Table E.1
+prints the absolute deviation already, and Figure E.1 draws its limits at 0 dB
+and 0.25 dB, so the figure above passes `acceptance_limits=(0.0, 0.25)`: the
+eight verdicts are the same either way. IEC 61672-1 writes most of its own
+limits as an asymmetric pair. `verify_sound_calibrator` applies the rule to
 every requirement of IEC 60942:2017 with the limits the class and the nominal
 frequency select, as [Calibration and dBFS](/phonometry/signals/metrology/calibration/#verifying-the-calibrator-itself-iec-609422017)
 shows.
@@ -531,7 +538,7 @@ physical instrument is assigned a class.
 - [Conformance report](/phonometry/reference/conformance/): the published table
   this page teaches how to read.
 - API reference: [`filters.compliance`](/phonometry/reference/api/filters/compliance/),
-  [`filters.weighting_compliance`](/phonometry/reference/api/filters/weighting-compliance/)
+  [`filters.weighting_compliance`](/phonometry/reference/api/filters/weighting-compliance/),
   [`emission.intensity_compliance`](/phonometry/reference/api/power/intensity-compliance/),
   [`metrology.conformance`](/phonometry/reference/api/metrology/conformance/)
   and [`metrology.sound_calibrator`](/phonometry/reference/api/metrology/sound-calibrator/).

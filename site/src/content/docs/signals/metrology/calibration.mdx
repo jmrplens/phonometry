@@ -550,18 +550,29 @@ as they are.
 
 | Requirement | Clause | What is measured | Acceptance limit | Maximum uncertainty | Class 1 at 1 kHz |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| `level` | 5.3.2 | generated minus specified level, the mean of three couplings | Table 2 | Table A.1 | ±0.25 dB; 0.15 dB |
+| `level` | 5.3.2 | generated minus specified level, the mean of at least three couplings, and the level at each end of the supply range (5.3.4) | Table 2 | Table A.1 | ±0.25 dB; 0.15 dB |
 | `fluctuation` | 5.3.3 | the larger of the maximum and minimum F-weighted level against their mean, over 60 s | Table 2 | Table A.1 | 0.07 dB; 0.03 dB |
 | `frequency` | 5.4.2 | generated minus specified frequency | Table 4 | Table A.2 | ±0.7 %; 0.2 % |
 | `distortion` | 5.6 | total distortion + noise, 22.4 Hz to 22.4 kHz | Table 7 | Table A.3 | 2.5 %; 0.5 % |
 | `supply_voltage` | 5.3.4 | level at an end of the supply range minus level at the nominal voltage | Table 3 | A.5.5.7 | ±0.06 dB; 0.04 dB |
 | `environmental_level` | 5.5 | level at a condition outside the band of 5.3.2 minus level at reference conditions | Table 5 | Table A.4 | ±0.25 dB; 0.15 dB |
+| `environmental_level_in_band` | A.6.2.4 | level at a static pressure of the A.6.2 sweep inside the band of 5.3.2 minus level at reference conditions | Table 2 | Table A.4 | ±0.25 dB; 0.15 dB |
 | `environmental_frequency` | 5.5 | frequency at that condition minus frequency at reference conditions | Table 6 | Table A.5 | ±0.7 %; 0.2 % |
 | `field_immunity` | 5.9.4.2 | level in a power- or radio-frequency field minus level without it | 5.9.4.2 | A.7.4.8 | ±0.25 dB; 0.05 dB |
 
-Each is judged by the conformance rule every IEC TC 29 standard now shares
-(5.1.15): the deviation within its acceptance limit **and** the uncertainty
-within its maximum, both inclusive. The rule on its own is
+Two measurements need a word on where they go. The level at each end of the
+supply range is a level like any other: 5.3.4 holds it to Table 2 as well as to
+Table 3, so it goes into `level_deviation_db` beside the one at the nominal
+voltage, and its difference from that one into `supply_voltage_deviation_db`.
+The static-pressure sweep of A.6.2 is graded point by point against Table 2
+inside the band of 5.3.2 (97 kPa to 105 kPa) and against Table 5 outside it
+(A.6.2.4), so its points inside the band go into `environmental_level_in_band`
+and the rest into `environmental_level`. At 1 kHz the two tables agree; at
+2 kHz a class 1 calibrator has 0.35 dB inside the band and 0.30 dB outside it.
+
+Each is judged by the conformance rule the IEC TC 29 instrument standards
+written since 2013 share (5.1.15): the deviation within its acceptance limit
+**and** the uncertainty within its maximum, both inclusive. The rule on its own is
 `metrology.verify_conformance`, and
 [Compliance and verification](/phonometry/signals/metrology/compliance-verification/#the-conformance-rule-of-iec-tc-29)
 works it through the examples the standards print.
@@ -604,7 +615,8 @@ the "Reasons" column of Table E.1 words it, and the object has no truth value:
 *`result.plot()` on a pattern-evaluation record with every requirement in it.
 One pair of bars per measurement: the deviation as a share of the acceptance
 limit on its side, and the uncertainty as a share of the maximum permitted. A
-measurement conforms when both bars stop at or before the dashed line. Here one
+measurement conforms when both bars stop at or before the dashed line, and a
+bar whose criterion fails is drawn in red, as the legend says. Here one
 environmental reading, 0.28 dB against 0.25 dB, is the whole verdict.*
 
 <details>

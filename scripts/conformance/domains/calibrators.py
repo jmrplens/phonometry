@@ -7,15 +7,18 @@ requirement is met when the measured deviation is within the acceptance
 limits AND the actual expanded uncertainty is within the maximum permitted,
 both limits inclusive. Each standard prints worked examples with the verdict
 and the reason, eight in IEC 60942 Table E.1 and ten in IEC 61672-1 Table C.1,
-and each is a row: the verdict and the printed reason have to come back, the
-boundary cases included (a deviation equal to its limit, an uncertainty equal
-to its maximum, and the deviation of -1,2 dB on the lower limit of C.1).
+and each is a row: the verdict, the outcome number and the printed reason
+have to come back, the boundary cases included (a deviation equal to its
+limit, an uncertainty equal to its maximum, and the deviation of -1,2 dB on
+the lower limit of C.1).
 
-The second is IEC 60942 itself: Tables 2 to 7 and A.1 to A.5 and the three
-limits the clauses print in their text, each cell against an independent
-transcription of the rasterised page, dashes and range ends included, and the
-verdict of :func:`phonometry.metrology.verify_sound_calibrator` where the
-tables meet the rule.
+The second is IEC 60942 itself: Tables 2 to 7 and A.1 to A.5 and the limits
+four clauses print in their text (5.9.4.2, A.5.5.7, A.6.4.7 and A.7.4.8), each
+cell against an independent transcription of the rasterised page, dashes and
+range ends included, the two frequencies of every range as well as which of
+them it includes, and the verdict of
+:func:`phonometry.metrology.verify_sound_calibrator` where the tables meet the
+rule, at 1 kHz and at 2 kHz, where Table 2 and Table 5 differ.
 
 Oracle: IEC 60942:2017 read in UNE-EN IEC 60942:2018 (PDF page = folio + 8):
 Tables 2 and 3 (folio 16), 4 (17), 5 and 6 (18), 7 (19), A.1 (28), A.2 (29),
@@ -26,6 +29,7 @@ A.3 (30), A.4 (32), A.5 (35), the text of 5.9.4.2 (21), A.5.5.7 (27), A.6.4.7
 
 from __future__ import annotations
 
+import re
 from typing import TYPE_CHECKING
 
 import reference_data as ref
@@ -50,8 +54,12 @@ def _verdict_record(
     result: ph.metrology.ConformanceVerification, *, conforms: bool, outcome: int
 ) -> Outcome:
     """The printed verdict and reason against the ones the rule gives."""
-    expected = {"conforms": float(conforms), "outcome": float(outcome)}
-    computed = {"conforms": float(result.passes), "outcome": float(result.outcome)}
+    expected = {"conforms": float(conforms), "outcome": float(outcome), "reason": 1.0}
+    computed = {
+        "conforms": float(result.passes),
+        "outcome": float(result.outcome),
+        "reason": float(result.reason == ref.TC29_REASONS[outcome]),
+    }
     return record(
         expected,
         computed,
@@ -132,24 +140,54 @@ _register_table_e1()
 _register_table_c1()
 
 
-def _ends(printed: str) -> tuple[bool, bool]:
-    """Which ends a printed range includes: ``"> 63 to < 160"`` includes neither."""
-    low, high = printed.split(" to ")
-    return not low.startswith(">"), not high.startswith("<")
+#: A printed range of nominal frequencies, ``"31,5 to 63"`` or ``"> 63 to < 160"``:
+#: an optional sign, a number with a decimal comma and a space between the
+#: thousands, ``to``, and the same again. The last row of Table A.1 prints no
+#: space after its sign, which the pattern allows.
+_RANGE = re.compile(r"(>?)\s*([\d ,]+?)\s+to\s+(<?)\s*([\d ,]+)")
+
+
+def _bounds(printed: str) -> tuple[float, float, bool, bool]:
+    """The two frequencies of a printed range and whether each is included.
+
+    ``"> 63 to < 160"`` is ``(63.0, 160.0, False, False)``.
+    """
+    match = _RANGE.fullmatch(printed)
+    if match is None:
+        msg = f"not a printed range of nominal frequencies: {printed!r}"
+        raise ValueError(msg)
+    low_sign, low, high_sign, high = match.groups()
+
+    def number(text: str) -> float:
+        return float(text.replace(" ", "").replace(",", "."))
+
+    return number(low), number(high), low_sign != ">", high_sign != "<"
 
 
 def _banded_matches(
     table: Sequence[CalibratorTableRow],
     printed: Sequence[tuple[str, tuple[float | None, float | None, float | None]]],
 ) -> tuple[int, int]:
-    """Agreeing cells and range ends between a published table and the page."""
+    """Agreeing cells, range frequencies and range ends against the page.
+
+    Seven per row: the three class cells, the two frequencies of the range and
+    whether each of them belongs to it.
+    """
     matching = total = 0
     for row, (label, cells) in zip(table, printed, strict=True):
-        published = (row.class_ls, row.class_1, row.class_2)
-        ends = (row.includes_lower, row.includes_upper)
-        matching += sum(a == b for a, b in zip(published, cells, strict=True))
-        matching += sum(a == b for a, b in zip(ends, _ends(label), strict=True))
-        total += 5
+        published = (
+            row.class_ls,
+            row.class_1,
+            row.class_2,
+            row.lower_hz,
+            row.upper_hz,
+            row.includes_lower,
+            row.includes_upper,
+        )
+        lower, upper, with_lower, with_upper = _bounds(label)
+        page = (*cells, lower, upper, with_lower, with_upper)
+        matching += sum(a == b for a, b in zip(published, page, strict=True))
+        total += len(page)
     return matching, total
 
 
@@ -164,7 +202,7 @@ def _per_class_matches(
 @register(
     _CALIBRATORS,
     "IEC 60942:2017 Table 2",
-    "Level and short-term fluctuation limits, dashes and range ends, by class",
+    "Level and short-term fluctuation limits, dashes and ranges, by class",
 )
 def _chk_table_2() -> Outcome:
     level = _banded_matches(
@@ -356,4 +394,51 @@ def _chk_abbreviated_verdict() -> Outcome:
         2,
         subject="verdicts",
         expected_label="conforms to Table 5 (0,25 dB), not to A.6.4.7 (0,20 dB)",
+    )
+
+
+@register(
+    _CALIBRATORS,
+    "IEC 60942:2017 5.5 and A.6.2.4 with Tables 2, 5, A.4 and A.5",
+    "Class 1 at 2 kHz: 0,33 dB out of the band and in it, -0,5 % with U 0,25 %, "
+    "3 verdicts",
+)
+def _chk_environmental_at_2_khz() -> Outcome:
+    """Where Table 2 and Table 5 part: class 1 at 2 kHz, 0,35 dB against 0,30 dB.
+
+    A level 0,33 dB off at an environmental condition outside the band of
+    5.3.2 exceeds Table 5 (0,30 dB); the same 0,33 dB at a static pressure of
+    the A.6.2 sweep inside the band meets Table 2 (0,35 dB), which A.6.2.4
+    applies there, both with the 0,30 dB maximum of Table A.4. A frequency
+    0,5 % off, inside the 0,7 % of Table 6, measured with 0,25 % against the
+    0,2 % of Table A.5, cannot demonstrate conformance.
+    """
+    measured = ph.metrology.SoundCalibratorMeasurements(
+        environmental_level_deviation_db=0.33,
+        environmental_level_uncertainty_db=0.10,
+        environmental_level_in_band_deviation_db=0.33,
+        environmental_level_in_band_uncertainty_db=0.10,
+        environmental_frequency_deviation_percent=-0.5,
+        environmental_frequency_uncertainty_percent=0.25,
+    )
+    verdict = ph.metrology.verify_sound_calibrator(
+        "1", measured, nominal_frequency_hz=2000.0
+    )
+    outcomes = tuple(
+        verdict.requirement(name).verifications[0].outcome
+        for name in (
+            "environmental_level",
+            "environmental_level_in_band",
+            "environmental_frequency",
+        )
+    )
+    agree = sum(a == b for a, b in zip(outcomes, (3, 1, 2), strict=True))
+    return count(
+        agree,
+        3,
+        subject="verdicts",
+        expected_label=(
+            "No by Table 5 (0,30 dB); Yes by Table 2 (0,35 dB); "
+            "No, U over Table A.5 (0,2 %)"
+        ),
     )

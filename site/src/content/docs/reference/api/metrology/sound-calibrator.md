@@ -19,7 +19,9 @@ the manufacturer is applied (5.1.5, Table 1).
 **What is graded.** Every requirement of the standard that is a measured
 number with an acceptance limit and a maximum-permitted uncertainty:
 
-* `level` (5.3.2): Table 2, with the maximum uncertainty of Table A.1;
+* `level` (5.3.2): Table 2, with the maximum uncertainty of Table A.1,
+  for the level at the nominal supply voltage and at each end of the supply
+  range alike (5.3.4, A.5.5.7, A.5.5.8);
 * `fluctuation` (5.3.3): Table 2, with Table A.1;
 * `frequency` (5.4.2): Table 4, with Table A.2;
 * `distortion` (5.6): Table 7, with Table A.3;
@@ -27,6 +29,8 @@ number with an acceptance limit and a maximum-permitted uncertainty:
   print in their text;
 * `environmental_level` (5.5): Table 5, or the reduced limits of A.6.4.7,
   with Table A.4;
+* `environmental_level_in_band` (A.6.2.4): Table 2, with Table A.4, for the
+  static pressures of the A.6.2 sweep that fall inside the band of 5.3.2;
 * `environmental_frequency` (5.5): Table 6, or A.6.4.7, with Table A.5;
 * `field_immunity` (5.9.4.2): the limits 5.9.4.2 prints, with the maximum of
   A.7.4.8.
@@ -67,7 +71,9 @@ classes LS and 1 and by 0,10 dB for class 2, and 0,5 %, 0,5 % and 1,3 % for the
 frequency (A.6.4.7). A calibrator that meets those is deemed to conform; one
 that does not is **not** thereby non-conforming, it has to be given the full
 tests (A.6.1.2). `environmental_test="abbreviated"` applies the reduced limits
-and the verdict means exactly that.
+and the verdict means exactly that. The static-pressure sweep of A.6.2 is not
+part of the abbreviated test, so `environmental_level_in_band` keeps Table 2
+whichever test is chosen.
 
 **What a verdict here is and is not.** It grades the numbers a laboratory
 measured; it measures nothing. The requirements that are not numbers with a
@@ -110,7 +116,7 @@ CALIBRATOR_CLASSES = ('LS', 'LS/M', '1', '1/M', '2')
 *Constant* (`tuple`).
 
 ```python
-CALIBRATOR_REQUIREMENTS = ('level', 'fluctuation', 'frequency', 'distortion', 'supply_voltage', 'environmental_level', 'environmental_frequency', 'field_immunity')
+CALIBRATOR_REQUIREMENTS = ('level', 'fluctuation', 'frequency', 'distortion', 'supply_voltage', 'environmental_level', 'environmental_level_in_band', 'environmental_frequency', 'field_immunity')
 ```
 
 ## CalibratorTableRow
@@ -313,6 +319,8 @@ SoundCalibratorMeasurements(
     supply_voltage_uncertainty_db: float | Sequence[float] | None = None,
     environmental_level_deviation_db: float | Sequence[float] | None = None,
     environmental_level_uncertainty_db: float | Sequence[float] | None = None,
+    environmental_level_in_band_deviation_db: float | Sequence[float] | None = None,
+    environmental_level_in_band_uncertainty_db: float | Sequence[float] | None = None,
     environmental_frequency_deviation_percent: float | Sequence[float] | None = None,
     environmental_frequency_uncertainty_percent: float | Sequence[float] | None = None,
     field_immunity_deviation_db: float | Sequence[float] | None = None,
@@ -334,7 +342,7 @@ frequency); an uncertainty given as one number applies to all of them.
 
 | Name | Description |
 | :--- | :--- |
-| `level_deviation_db` | Measured minus specified sound pressure level (5.3.2), each the mean of at least three couplings (A.5.5.3, B.4.6.3.1), in decibels. For an /M pistonphone, as measured: the correction below is added to it. |
+| `level_deviation_db` | Measured minus specified sound pressure level (5.3.2), in decibels: the mean of at least three couplings at the nominal supply voltage (A.5.5.3, B.4.6.3.1), and also the level measured, without replications, at each end of the supply-voltage range, which has to meet Table 2 too (5.3.4, A.5.5.6 to A.5.5.8). For an /M pistonphone, as measured: the correction below is added to it. |
 | `level_uncertainty_db` | Its expanded uncertainty, in decibels. |
 | `static_pressure_correction_db` | The manufacturer's correction to the reference static pressure for a class LS/M or 1/M pistonphone (5.1.5, B.4.3.2), in decibels, added to `level_deviation_db`. Required for those designations whenever the level is given (`0.0` at the reference pressure) and refused for every other (5.1.7). |
 | `fluctuation_db` | The short-term level fluctuation (5.3.3): the larger of the absolute differences between the maximum and the minimum F-weighted level and their mean over 60 s, in decibels. |
@@ -343,10 +351,12 @@ frequency); an uncertainty given as one number applies to all of them.
 | `frequency_uncertainty_percent` | Its expanded uncertainty, in per cent of the specified frequency. |
 | `distortion_percent` | The total distortion + noise over 22,4 Hz to 22,4 kHz (5.6), in per cent. |
 | `distortion_uncertainty_percent` | Its expanded uncertainty, in per cent distortion. |
-| `supply_voltage_deviation_db` | The level at a supply voltage at an end of the permitted range minus the level at the nominal voltage (5.3.4), in decibels. |
+| `supply_voltage_deviation_db` | The level at a supply voltage at an end of the permitted range minus the level at the nominal voltage (5.3.4), in decibels, judged against Table 3. The same level minus the specified level has to meet Table 2 as well (5.3.4, A.5.5.7, A.5.5.8), and goes into `level_deviation_db` with the others. |
 | `supply_voltage_uncertainty_db` | Its expanded uncertainty, in decibels. |
 | `environmental_level_deviation_db` | The level at an environmental condition outside the band of 5.3.2 minus the level at reference conditions (5.5), in decibels; for an /M pistonphone already corrected for static pressure, one correction per condition (A.6.2.3). |
 | `environmental_level_uncertainty_db` | Its expanded uncertainty, in decibels. |
+| `environmental_level_in_band_deviation_db` | The level at a static pressure of the A.6.2 sweep inside the band of 5.3.2 (97 kPa to 105 kPa) minus the level at reference conditions, in decibels, corrected as above for an /M pistonphone. A.6.2.4 judges the points of the sweep against Table 2 or Table 5 "as appropriate for the static pressure", so the points inside the band are given here and graded against Table 2, and the points outside it go into `environmental_level_deviation_db`. The maximum uncertainty is that of Table A.4 for both. |
+| `environmental_level_in_band_uncertainty_db` | Its expanded uncertainty, in decibels. |
 | `environmental_frequency_deviation_percent` | The frequency at such a condition minus the frequency at reference conditions, in per cent of the specified frequency (5.5). |
 | `environmental_frequency_uncertainty_percent` | Its expanded uncertainty, in per cent of the specified frequency. |
 | `field_immunity_deviation_db` | The level in a power- or radio-frequency field minus the level without it (5.9.4.2), in decibels. |

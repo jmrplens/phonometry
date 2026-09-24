@@ -13,7 +13,9 @@ the manufacturer is applied (5.1.5, Table 1).
 **What is graded.** Every requirement of the standard that is a measured
 number with an acceptance limit and a maximum-permitted uncertainty:
 
-* ``level`` (5.3.2): Table 2, with the maximum uncertainty of Table A.1;
+* ``level`` (5.3.2): Table 2, with the maximum uncertainty of Table A.1,
+  for the level at the nominal supply voltage and at each end of the supply
+  range alike (5.3.4, A.5.5.7, A.5.5.8);
 * ``fluctuation`` (5.3.3): Table 2, with Table A.1;
 * ``frequency`` (5.4.2): Table 4, with Table A.2;
 * ``distortion`` (5.6): Table 7, with Table A.3;
@@ -21,6 +23,8 @@ number with an acceptance limit and a maximum-permitted uncertainty:
   print in their text;
 * ``environmental_level`` (5.5): Table 5, or the reduced limits of A.6.4.7,
   with Table A.4;
+* ``environmental_level_in_band`` (A.6.2.4): Table 2, with Table A.4, for the
+  static pressures of the A.6.2 sweep that fall inside the band of 5.3.2;
 * ``environmental_frequency`` (5.5): Table 6, or A.6.4.7, with Table A.5;
 * ``field_immunity`` (5.9.4.2): the limits 5.9.4.2 prints, with the maximum of
   A.7.4.8.
@@ -61,7 +65,9 @@ classes LS and 1 and by 0,10 dB for class 2, and 0,5 %, 0,5 % and 1,3 % for the
 frequency (A.6.4.7). A calibrator that meets those is deemed to conform; one
 that does not is **not** thereby non-conforming, it has to be given the full
 tests (A.6.1.2). ``environmental_test="abbreviated"`` applies the reduced limits
-and the verdict means exactly that.
+and the verdict means exactly that. The static-pressure sweep of A.6.2 is not
+part of the abbreviated test, so ``environmental_level_in_band`` keeps Table 2
+whichever test is chosen.
 
 **What a verdict here is and is not.** It grades the numbers a laboratory
 measured; it measures nothing. The requirements that are not numbers with a
@@ -198,6 +204,7 @@ CALIBRATOR_REQUIREMENTS: tuple[str, ...] = (
     "distortion",
     "supply_voltage",
     "environmental_level",
+    "environmental_level_in_band",
     "environmental_frequency",
     "field_immunity",
 )
@@ -442,6 +449,10 @@ _FIELDS: dict[str, tuple[str, str]] = {
         "environmental_level_deviation_db",
         "environmental_level_uncertainty_db",
     ),
+    "environmental_level_in_band": (
+        "environmental_level_in_band_deviation_db",
+        "environmental_level_in_band_uncertainty_db",
+    ),
     "environmental_frequency": (
         "environmental_frequency_deviation_percent",
         "environmental_frequency_uncertainty_percent",
@@ -494,9 +505,12 @@ class SoundCalibratorMeasurements:
     frequency); an uncertainty given as one number applies to all of them.
 
     :ivar level_deviation_db: Measured minus specified sound pressure level
-        (5.3.2), each the mean of at least three couplings (A.5.5.3,
-        B.4.6.3.1), in decibels. For an /M pistonphone, as measured: the
-        correction below is added to it.
+        (5.3.2), in decibels: the mean of at least three couplings at the
+        nominal supply voltage (A.5.5.3, B.4.6.3.1), and also the level
+        measured, without replications, at each end of the supply-voltage
+        range, which has to meet Table 2 too (5.3.4, A.5.5.6 to A.5.5.8).
+        For an /M pistonphone, as measured: the correction below is added to
+        it.
     :ivar level_uncertainty_db: Its expanded uncertainty, in decibels.
     :ivar static_pressure_correction_db: The manufacturer's correction to the
         reference static pressure for a class LS/M or 1/M pistonphone
@@ -517,7 +531,9 @@ class SoundCalibratorMeasurements:
         cent distortion.
     :ivar supply_voltage_deviation_db: The level at a supply voltage at an end
         of the permitted range minus the level at the nominal voltage (5.3.4),
-        in decibels.
+        in decibels, judged against Table 3. The same level minus the
+        specified level has to meet Table 2 as well (5.3.4, A.5.5.7, A.5.5.8),
+        and goes into ``level_deviation_db`` with the others.
     :ivar supply_voltage_uncertainty_db: Its expanded uncertainty, in decibels.
     :ivar environmental_level_deviation_db: The level at an environmental
         condition outside the band of 5.3.2 minus the level at reference
@@ -525,6 +541,17 @@ class SoundCalibratorMeasurements:
         corrected for static pressure, one correction per condition (A.6.2.3).
     :ivar environmental_level_uncertainty_db: Its expanded uncertainty, in
         decibels.
+    :ivar environmental_level_in_band_deviation_db: The level at a static
+        pressure of the A.6.2 sweep inside the band of 5.3.2 (97 kPa to
+        105 kPa) minus the level at reference conditions, in decibels, corrected
+        as above for an /M pistonphone. A.6.2.4 judges the points of the sweep
+        against Table 2 or Table 5 "as appropriate for the static pressure",
+        so the points inside the band are given here and graded against
+        Table 2, and the points outside it go into
+        ``environmental_level_deviation_db``. The maximum uncertainty is that
+        of Table A.4 for both.
+    :ivar environmental_level_in_band_uncertainty_db: Its expanded
+        uncertainty, in decibels.
     :ivar environmental_frequency_deviation_percent: The frequency at such a
         condition minus the frequency at reference conditions, in per cent of
         the specified frequency (5.5).
@@ -550,6 +577,8 @@ class SoundCalibratorMeasurements:
     supply_voltage_uncertainty_db: float | Sequence[float] | None = None
     environmental_level_deviation_db: float | Sequence[float] | None = None
     environmental_level_uncertainty_db: float | Sequence[float] | None = None
+    environmental_level_in_band_deviation_db: float | Sequence[float] | None = None
+    environmental_level_in_band_uncertainty_db: float | Sequence[float] | None = None
     environmental_frequency_deviation_percent: float | Sequence[float] | None = None
     environmental_frequency_uncertainty_percent: float | Sequence[float] | None = None
     field_immunity_deviation_db: float | Sequence[float] | None = None
@@ -814,6 +843,9 @@ _RULES: dict[str, _Rule] = {
     "distortion": _Rule("5.6", "Table 7, Table A.3", "%", magnitude=True),
     "supply_voltage": _Rule("5.3.4", "Table 3, A.5.5.7", "dB", magnitude=False),
     "environmental_level": _Rule("5.5", "Table 5, Table A.4", "dB", magnitude=False),
+    "environmental_level_in_band": _Rule(
+        "A.6.2.4", "Table 2, Table A.4", "dB", magnitude=False
+    ),
     "environmental_frequency": _Rule("5.5", "Table 6, Table A.5", "%", magnitude=False),
     "field_immunity": _Rule("5.9.4.2", "5.9.4.2, A.7.4.8", "dB", magnitude=False),
 }
@@ -829,6 +861,10 @@ def _limits(
         str, tuple[tuple[CalibratorTableRow, ...], tuple[CalibratorTableRow, ...]]
     ] = {
         "level": (LEVEL_ACCEPTANCE_LIMITS_DB, LEVEL_MAX_UNCERTAINTY_DB),
+        "environmental_level_in_band": (
+            LEVEL_ACCEPTANCE_LIMITS_DB,
+            ENVIRONMENTAL_LEVEL_MAX_UNCERTAINTY_DB,
+        ),
         "fluctuation": (
             FLUCTUATION_ACCEPTANCE_LIMITS_DB,
             FLUCTUATION_MAX_UNCERTAINTY_DB,

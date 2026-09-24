@@ -206,9 +206,10 @@ def generate_calibrator_verification(output_dir: str) -> None:
 def generate_conformance_rule_examples(output_dir: str) -> None:
     """The printed examples of the TC 29 rule, re-derived by verify_conformance.
 
-    Left, the eight of IEC 60942:2017 Table E.1, whose deviations are absolute
-    and whose limit is 0,25 dB either way; right, the ten of IEC 61672-1:2013
-    Table C.1 against +1,0 dB and -1,2 dB. Each marker is the verdict the rule
+    Left, the eight of IEC 60942:2017 Table E.1, whose deviations are absolute,
+    so Figure E.1 draws its lower acceptance limit at 0 dB and its upper one at
+    0,25 dB, and so does this panel; right, the ten of IEC 61672-1:2013 Table
+    C.1 against +1,0 dB and -1,2 dB. Each marker is the verdict the rule
     returned, and it is the verdict the table prints.
     """
     print("Generating conformance_rule_examples...")
@@ -239,7 +240,7 @@ def generate_conformance_rule_examples(output_dir: str) -> None:
     ]
     e1 = tuple(
         metrology.verify_conformance(
-            d, uncertainty=u, acceptance_limits=0.25, max_uncertainty=m
+            d, uncertainty=u, acceptance_limits=(0.0, 0.25), max_uncertainty=m
         )
         for d, u, m in table_e1
     )

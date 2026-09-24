@@ -170,12 +170,12 @@ def test_the_limit_follows_the_calibrator_class() -> None:
     """IEC 60942:2017 Table 2 at 1 kHz: 0.03 dB for LS, 0.07 for 1, 0.15 for 2.
 
     A 0.8 % modulation fluctuates by about 0.04 dB, over the class LS limit and
-    inside the class 1 one; a 1.5 % one by about 0.13 dB, over class 1 and
-    inside class 2. The limit is read from the published table rather than
-    from a class 1 copy of it.
+    inside the class 1 one; a 2.5 % one by about 0.12 dB, well over class 1
+    and well inside class 2. The limit is read from the published table rather
+    than from a class 1 copy of it.
     """
     small = _cal_tone(am_depth=0.008)
-    larger = _cal_tone(am_depth=0.015)
+    larger = _cal_tone(am_depth=0.025)
     with pytest.warns(
         metrology.CalibrationWarning, match=r"Calibration tone level fluctuation is"
     ):

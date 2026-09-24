@@ -3,9 +3,10 @@
 
 Narrowed in 4.0 to the transverse metrology: calibration, GUM uncertainty,
 data qualification, the ISO 1683 reference values every level is counted
-from, the conformance rule IEC TC 29 grades every instrument by, and the
-IEC 60942 verdict on the sound calibrator every calibration starts from. The filter banks and weightings moved to
-:mod:`phonometry.filters`, the general signal analysis to
+from, the conformance rule the IEC TC 29 instrument standards written since
+2013 grade an instrument by, and the IEC 60942 verdict on the sound
+calibrator every calibration starts from. The filter banks and weightings
+moved to :mod:`phonometry.filters`, the general signal analysis to
 :mod:`phonometry.signals` and the IEC 61043 intensity-instrument class check
 to :mod:`phonometry.emission.intensity_compliance`, which is what it verifies.
 """

@@ -663,7 +663,8 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     generate_calibration_stability,
     generate_calibration_narrowband_bias,
     generate_dbfs_versus_spl,
-    # IEC 60942:2017 and the conformance rule every TC 29 standard shares.
+    # IEC 60942:2017 and the conformance rule of the IEC TC 29 instrument
+    # standards.
     generate_calibrator_verification,
     generate_conformance_rule_examples,
     # The audio-files guide: the calibrated waveform a measurement WAV comes

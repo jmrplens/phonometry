@@ -19,7 +19,7 @@
 
 ## Numerical conformance report
 
-**1309/1309 conformance checks pass** across 91 domains and 466 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+**1337/1337 conformance checks pass** across 92 domains and 467 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub><b>&#916;</b> is the difference between the computed value and the one the standard publishes. <b>Used</b> is how much of that clause's published tolerance the difference consumes: 100 % means it sits exactly on the limit, 5 % means it uses a twentieth of the allowance, and a dash means the clause states no two-sided tolerance for the quantity, so there is no budget to spend. It is reported and never used to decide a verdict, which is settled at full precision before any rounding.</sub>
 
@@ -284,6 +284,42 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | Bies 5e Eq. (6.43) | Critical distance rc: direct field = reverberant field (R = 25, Q = 1) | 0.160000 (= reverberant term) | 0.16 | 0 | 0 % | ![Pass][cv-pass] Pass |
 | Kuttruff Room Acoustics 6e, Eq. (3.44) | Schroeder frequency f_s = 2000√(T/V)  (V = 200 m³, T = 1 s) | 141.421 Hz (+/-0 Hz) | 141.421 Hz | 0 Hz | 0 % | ![Pass][cv-pass] Pass |
 | Bies 5e Eq. (6.43) | Steady-state SPL Lp = Lw + 10lg(Q/4πr² + 4/R)  (Lw=90, r=1, R=25, Q=1) | 83.7945 dB (+/-0 dB) | 83.7945 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+
+</details>
+
+<details>
+<summary><b>Sound calibrators and the conformance rule (IEC 60942, IEC 61672-1)</b>: 100% (28/28)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
+|:---|:---|:---|:---|:---|:---:|:---:|
+| IEC 60942:2017 Table E.1 | Example 1: \|deviation\| 0.40 dB, U 0.12 dB against 0.25 dB and 0.15 dB | No: Deviation exceeds acceptance limits | No: Deviation exceeds acceptance limits | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 60942:2017 Table E.1 | Example 2: \|deviation\| 0.35 dB, U 0.12 dB against 0.25 dB and 0.15 dB | No: Deviation exceeds acceptance limits | No: Deviation exceeds acceptance limits | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 60942:2017 Table E.1 | Example 3: \|deviation\| 0.20 dB, U 0.13 dB against 0.25 dB and 0.15 dB | Yes: Deviation within acceptance limits AND uncertainty within maximum-permitted | Yes: Deviation within acceptance limits AND uncertainty within maximum-permitted | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 60942:2017 Table E.1 | Example 4: \|deviation\| 0.00 dB, U 0.14 dB against 0.25 dB and 0.15 dB | Yes: Deviation within acceptance limits AND uncertainty within maximum-permitted | Yes: Deviation within acceptance limits AND uncertainty within maximum-permitted | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 60942:2017 Table E.1 | Example 5: \|deviation\| 0.00 dB, U 0.17 dB against 0.25 dB and 0.15 dB | No: Deviation within acceptance limits BUT uncertainty exceeds maximum-permitted | No: Deviation within acceptance limits BUT uncertainty exceeds maximum-permitted | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 60942:2017 Table E.1 | Example 6: \|deviation\| 0.25 dB, U 0.10 dB against 0.25 dB and 0.15 dB | Yes: Deviation within acceptance limits AND uncertainty within maximum-permitted | Yes: Deviation within acceptance limits AND uncertainty within maximum-permitted | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 60942:2017 Table E.1 | Example 7: \|deviation\| 0.25 dB, U 0.15 dB against 0.25 dB and 0.15 dB | Yes: Deviation within acceptance limits AND uncertainty within maximum-permitted | Yes: Deviation within acceptance limits AND uncertainty within maximum-permitted | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 60942:2017 Table E.1 | Example 8: \|deviation\| 0.40 dB, U 0.50 dB against 0.25 dB and 0.20 dB | No: Deviation exceeds acceptance limits AND uncertainty exceeds maximum-permitted | No: Deviation exceeds acceptance limits AND uncertainty exceeds maximum-permitted | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61672-1:2013 Table C.1 | Example 1: deviation +1.7 dB, U 0.3 dB against +1.0; -1.2 dB and 0.5 dB | No: Deviation exceeds acceptance limits | No: Deviation exceeds acceptance limits | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61672-1:2013 Table C.1 | Example 2: deviation +1.1 dB, U 0.3 dB against +1.0; -1.2 dB and 0.5 dB | No: Deviation exceeds acceptance limits | No: Deviation exceeds acceptance limits | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61672-1:2013 Table C.1 | Example 3: deviation +1.0 dB, U 0.3 dB against +1.0; -1.2 dB and 0.5 dB | Yes: Deviation within acceptance limits AND uncertainty within maximum-permitted | Yes: Deviation within acceptance limits AND uncertainty within maximum-permitted | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61672-1:2013 Table C.1 | Example 4: deviation +0.0 dB, U 0.3 dB against +1.0; -1.2 dB and 0.5 dB | Yes: Deviation within acceptance limits AND uncertainty within maximum-permitted | Yes: Deviation within acceptance limits AND uncertainty within maximum-permitted | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61672-1:2013 Table C.1 | Example 5: deviation +0.0 dB, U 0.9 dB against +1.0; -1.2 dB and 0.5 dB | No: Deviation within acceptance limits BUT uncertainty exceeds maximum-permitted | No: Deviation within acceptance limits BUT uncertainty exceeds maximum-permitted | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61672-1:2013 Table C.1 | Example 6: deviation -0.5 dB, U 0.3 dB against +1.0; -1.2 dB and 0.5 dB | Yes: Deviation within acceptance limits AND uncertainty within maximum-permitted | Yes: Deviation within acceptance limits AND uncertainty within maximum-permitted | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61672-1:2013 Table C.1 | Example 7: deviation -1.2 dB, U 0.3 dB against +1.0; -1.2 dB and 0.5 dB | Yes: Deviation within acceptance limits AND uncertainty within maximum-permitted | Yes: Deviation within acceptance limits AND uncertainty within maximum-permitted | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61672-1:2013 Table C.1 | Example 8: deviation -1.3 dB, U 0.3 dB against +1.0; -1.2 dB and 0.5 dB | No: Deviation exceeds acceptance limits | No: Deviation exceeds acceptance limits | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61672-1:2013 Table C.1 | Example 9: deviation -2.0 dB, U 0.3 dB against +1.0; -1.2 dB and 0.5 dB | No: Deviation exceeds acceptance limits | No: Deviation exceeds acceptance limits | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61672-1:2013 Table C.1 | Example 10: deviation -2.0 dB, U 0.7 dB against +1.0; -1.2 dB and 0.5 dB | No: Deviation exceeds acceptance limits AND uncertainty exceeds maximum-permitted | No: Deviation exceeds acceptance limits AND uncertainty exceeds maximum-permitted | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 60942:2017 Table 2 | Level and short-term fluctuation limits, dashes and ranges, by class | 84/84 printed cells | 84/84 printed cells | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 60942:2017 Tables 3, 4 and 6 | Supply-voltage, frequency and environmental-frequency limits, by class | 9/9 printed cells | 9/9 printed cells | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 60942:2017 Tables 5 and 7 | Environmental level and total distortion + noise limits, by class | 56/56 printed cells | 56/56 printed cells | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 60942:2017 Tables A.1, A.3 and A.4 | Maximum-permitted uncertainties keyed by frequency, by class | 140/140 printed cells | 140/140 printed cells | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 60942:2017 Tables A.2 and A.5, A.5.5.7 | Maximum-permitted uncertainties of the frequency and the supply-voltage effect | 9/9 printed cells | 9/9 printed cells | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 60942:2017 5.9.4.2 and A.7.4.8 | Level change in a power- or radio-frequency field and its maximum uncertainty | 6/6 printed cells | 6/6 printed cells | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 60942:2017 A.6.4.7 | Reduced limits of the abbreviated environmental test | 6/6 printed cells | 6/6 printed cells | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 60942:2017 5.1.15 with Tables 2 and A.1 | Table E.1 examples 1 to 7 as a class 1 level at 1 kHz, 7 verdicts | No, No, Yes, Yes, No, Yes, Yes | 7/7 verdicts | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 60942:2017 A.6.4.7 | 0,22 dB conforms to Table 5 and not to the abbreviated test, 2 verdicts | conforms to Table 5 (0,25 dB), not to A.6.4.7 (0,20 dB) | 2/2 verdicts | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 60942:2017 5.5 and A.6.2.4 with Tables 2, 5, A.4 and A.5 | Class 1 at 2 kHz: 0,33 dB out of the band and in it, -0,5 % with U 0,25 %, 3 verdicts | No by Table 5 (0,30 dB); Yes by Table 2 (0,35 dB); No, U over Table A.5 (0,2 %) | 3/3 verdicts | exact | 0 % | ![Pass][cv-pass] Pass |
 
 </details>
 

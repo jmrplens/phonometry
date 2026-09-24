@@ -86,11 +86,14 @@ _STRINGS: dict[str, str] = {
     "Upper acceptance limit": "Límite de aceptación superior",
     "Lower acceptance limit": "Límite de aceptación inferior",
     "Acceptance limits": "Límites de aceptación",
+    "Acceptance limit": "Límite de aceptación",
     "Conforms": "Conforme",
     "Does not conform": "No conforme",
     "Actual uncertainty": "Incertidumbre real",
     "Maximum-permitted uncertainty": "Incertidumbre máxima permitida",
     "Deviation from design goal [{unit}]": "Desviación respecto al objetivo de diseño [{unit}]",
+    "Short-term level fluctuation [{unit}]": "Fluctuación del nivel a corto plazo [{unit}]",
+    "Total distortion + noise [{unit}]": "Distorsión total + ruido [{unit}]",
     "Measurement": "Medida",
     "conforms": "conforme",
     "does not conform": "no conforme",
@@ -99,12 +102,15 @@ _STRINGS: dict[str, str] = {
     "Deviation / acceptance limit": "Desviación / límite de aceptación",
     "Uncertainty / maximum permitted": "Incertidumbre / máxima permitida",
     "Share of the allowance used [%]": "Parte del margen consumida [%]",
+    "Past its allowance": "Supera su margen",
+    "Whole allowance (100 %)": "Margen completo (100 %)",
     "Generated level": "Nivel generado",
     "Short-term fluctuation": "Fluctuación a corto plazo",
     "Frequency": "Frecuencia",
     "Total distortion + noise": "Distorsión total + ruido",
     "Supply voltage": "Tensión de alimentación",
     "Environmental level": "Nivel en condiciones ambientales",
+    "Level in the reference band": "Nivel en la banda de referencia",
     "Environmental frequency": "Frecuencia en condiciones ambientales",
     "Field immunity": "Inmunidad a campos",
 }
@@ -502,8 +508,18 @@ _REQUIREMENT_LABELS: dict[str, str] = {
     "distortion": "Total distortion + noise",
     "supply_voltage": "Supply voltage",
     "environmental_level": "Environmental level",
+    "environmental_level_in_band": "Level in the reference band",
     "environmental_frequency": "Environmental frequency",
     "field_immunity": "Field immunity",
+}
+
+#: The requirements whose measured value is a magnitude with a maximum, not a
+#: deviation from a design goal, and the quantity their vertical axis names:
+#: IEC 60942:2017 bounds |max or min - mean| of the level (5.3.3) and prints a
+#: maximum total distortion + noise (Table 7), so neither has a lower limit.
+_MAGNITUDE_AXIS_LABELS: dict[str, str] = {
+    "fluctuation": "Short-term level fluctuation [{unit}]",
+    "distortion": "Total distortion + noise [{unit}]",
 }
 
 #: Half the width of the band a maximum-permitted uncertainty is drawn as, in
@@ -524,10 +540,35 @@ def _draw_limits(
     verifications: tuple[ConformanceVerification, ...],
     positions: np.ndarray,
     language: str,
+    *,
+    one_sided: bool,
 ) -> None:
-    """The acceptance limits: two lines when shared, short bars when not."""
+    """The acceptance limits: two lines when shared, short bars when not.
+
+    A one-sided requirement, a magnitude with a maximum, has only the upper
+    one: its lower bound of zero is not a limit the standard prints.
+    """
     lowers = {v.lower_limit for v in verifications}
     uppers = {v.upper_limit for v in verifications}
+    if one_sided and len(uppers) == 1:
+        ax.axhline(
+            next(iter(uppers)),
+            color=_C_SECONDARY,
+            lw=2.2,
+            label=_t("Acceptance limit", language),
+        )
+        return
+    if one_sided:
+        for k, (x, v) in enumerate(zip(positions, verifications, strict=True)):
+            ax.hlines(
+                v.upper_limit,
+                x - 0.4,
+                x + 0.4,
+                color=_C_SECONDARY,
+                lw=2.2,
+                label=_t("Acceptance limit", language) if k == 0 else "_nolegend_",
+            )
+        return
     if len(lowers) == 1 and len(uppers) == 1:
         ax.axhline(
             next(iter(uppers)),
@@ -628,13 +669,24 @@ def _draw_conformance(
     verifications: tuple[ConformanceVerification, ...],
     language: str,
     kwargs: dict[str, Any],
+    *,
+    magnitude_axis_label: str | None = None,
 ) -> None:
     """The picture of Figure E.1: limits, band, error bar and verdict marker.
 
-    One measurement per unit of the horizontal axis, starting at 1.
+    One measurement per unit of the horizontal axis, starting at 1. A
+    ``magnitude_axis_label`` marks a one-sided requirement, a magnitude with a
+    maximum, and names its vertical axis in place of the deviation from a
+    design goal.
     """
     positions = np.arange(1, len(verifications) + 1, dtype=float)
-    _draw_limits(ax, verifications, positions, language)
+    _draw_limits(
+        ax,
+        verifications,
+        positions,
+        language,
+        one_sided=magnitude_axis_label is not None,
+    )
     _draw_uncertainties(ax, verifications, positions, language)
     _draw_verdicts(ax, verifications, positions, language, kwargs)
     reach = [max(v.uncertainty, v.max_uncertainty) for v in verifications]
@@ -652,7 +704,8 @@ def _draw_conformance(
     ax.set_xticks(positions)
     ax.set_xticklabels([str(k) for k in range(1, len(verifications) + 1)])
     unit = verifications[0].unit
-    ax.set_ylabel(_t("Deviation from design goal [{unit}]", language, unit=unit))
+    axis_label = magnitude_axis_label or "Deviation from design goal [{unit}]"
+    ax.set_ylabel(_t(axis_label, language, unit=unit))
     ax.grid(visible=True, axis="y", alpha=0.3)
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small", ncols=2)
 
@@ -725,7 +778,13 @@ def plot_sound_calibrator_requirement(
     from .._i18n import localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    _draw_conformance(ax, result.verifications, language, kwargs)
+    _draw_conformance(
+        ax,
+        result.verifications,
+        language,
+        kwargs,
+        magnitude_axis_label=_MAGNITUDE_AXIS_LABELS.get(result.name),
+    )
     ax.set_xlabel(_t("Measurement", language))
     verdict = _verdict_word(passes=result.passes, language=language)
     ax.set_title(
@@ -737,11 +796,12 @@ def plot_sound_calibrator_requirement(
 
 def _allowance_shares(
     result: SoundCalibratorVerification, language: str
-) -> tuple[list[str], list[float], list[float]]:
-    """One label and the two shares, in per cent, per measurement."""
+) -> tuple[list[str], list[float], list[float], list[ConformanceVerification]]:
+    """One label, the two shares in per cent and the verdict, per measurement."""
     labels: list[str] = []
     deviation_share: list[float] = []
     uncertainty_share: list[float] = []
+    verdicts: list[ConformanceVerification] = []
     for requirement in result.requirements:
         base = _requirement_label(requirement.name, requirement.clause, language)
         count = len(requirement.verifications)
@@ -749,7 +809,40 @@ def _allowance_shares(
             labels.append(f"{base} #{k}" if count > 1 else base)
             deviation_share.append(_FULL_SHARE * abs(v.share_of_acceptance_limit))
             uncertainty_share.append(_FULL_SHARE * v.share_of_max_uncertainty)
-    return labels, deviation_share, uncertainty_share
+            verdicts.append(v)
+    return labels, deviation_share, uncertainty_share, verdicts
+
+
+#: The gap between the x label and a legend set below it, in points.
+_LEGEND_GAP_PT = 4.0
+
+#: The height of one line of text as a multiple of its font size, generous
+#: enough for descenders and for the mathtext of a unit.
+_LINE_HEIGHT = 1.3
+
+
+def _depth_below_axes_pt(ax: Axes) -> float:
+    """How far below the axes the tick labels and the x label reach, in points.
+
+    Read from the font sizes and paddings the axis was built with, not from a
+    draw, so a legend placed this far down clears the x label whatever the
+    height of the figure.
+    """
+    import matplotlib as mpl
+
+    tick = ax.xaxis.get_major_ticks()[0]
+    # The pad a caller set with tick_params, or the one the style gives.
+    pad = ax.xaxis.get_tick_params(which="major").get(
+        "pad", mpl.rcParams["xtick.major.pad"]
+    )
+    return (
+        tick.get_tick_padding()
+        + float(pad)
+        + _LINE_HEIGHT * tick.label1.get_fontproperties().get_size_in_points()
+        + ax.xaxis.labelpad
+        + _LINE_HEIGHT * ax.xaxis.label.get_fontproperties().get_size_in_points()
+        + _LEGEND_GAP_PT
+    )
 
 
 def plot_sound_calibrator_verification(
@@ -764,8 +857,8 @@ def plot_sound_calibrator_verification(
     One pair of horizontal bars per measurement: the deviation as a share of
     the acceptance limit on its side, and the actual uncertainty as a share
     of the maximum permitted. A measurement demonstrates conformance when
-    both bars stop at or before the 100 % line; a bar past it is drawn in
-    red.
+    both bars stop at or before the dashed 100 % line; a bar whose criterion
+    fails is drawn in red, and the legend names both the line and the red.
 
     :param result: A
         :class:`~phonometry.metrology.sound_calibrator.SoundCalibratorVerification`.
@@ -775,9 +868,14 @@ def plot_sound_calibrator_verification(
     :return: The axes.
     :raises ValueError: when no requirement was measured.
     """
+    from matplotlib.patches import Patch
+    from matplotlib.transforms import ScaledTranslation
+
     from .._i18n import format_number, localize_axes
 
-    labels, deviation_share, uncertainty_share = _allowance_shares(result, language)
+    labels, deviation_share, uncertainty_share, verdicts = _allowance_shares(
+        result, language
+    )
     if not labels:
         msg = "plot() needs at least one measured requirement to draw."
         raise ValueError(msg)
@@ -804,14 +902,30 @@ def plot_sound_calibrator_verification(
         color=_C_SECONDARY,
         label=_t("Uncertainty / maximum permitted", language),
     )
-    over = [(bar, share) for bar, share in zip(bars, deviation_share, strict=True)]
-    if caller_colour:
-        over = []
-    over += list(zip(spread, uncertainty_share, strict=True))
-    for bar, share in over:
-        if share > _FULL_SHARE:
+    # The colour follows the verdict, not the share: a deviation that lands on
+    # its limit through floating-point arithmetic reads a share a few parts in
+    # 10**16 above 100 % and still conforms, and must not be drawn as a failure.
+    past = [
+        *(
+            (bar, v.deviation_within_limits)
+            for bar, v in zip(bars, verdicts, strict=True)
+            if not caller_colour
+        ),
+        *(
+            (bar, v.uncertainty_within_maximum)
+            for bar, v in zip(spread, verdicts, strict=True)
+        ),
+    ]
+    for bar, within in past:
+        if not within:
             bar.set_facecolor(_C_REFERENCE)
-    ax.axvline(_FULL_SHARE, color=_C_MUTED, lw=1.4, ls="--")
+    full = ax.axvline(
+        _FULL_SHARE,
+        color=_C_MUTED,
+        lw=1.4,
+        ls="--",
+        label=_t("Whole allowance (100 %)", language),
+    )
     ax.set_yticks(y)
     ax.set_yticklabels(labels)
     ax.invert_yaxis()
@@ -828,11 +942,24 @@ def plot_sound_calibrator_verification(
         )
     )
     ax.grid(visible=True, axis="x", alpha=0.3)
-    # Below the axes, where no bar can be: inside them the legend would sit on
-    # whichever requirement happened to be drawn last.
+    handles: list[Any] = [bars, spread]
+    if any(not within for _bar, within in past):
+        handles.append(
+            Patch(facecolor=_C_REFERENCE, label=_t("Past its allowance", language))
+        )
+    handles.append(full)
+    # Below the x label, where no bar can be: inside the axes the legend would
+    # sit on whichever requirement happened to be drawn last. The offset is in
+    # points, so it clears the label on a figure of one row as on one of
+    # twenty.
+    below = ScaledTranslation(
+        0.0, -_depth_below_axes_pt(ax) / 72.0, ax.figure.dpi_scale_trans
+    )
     ax.legend(
+        handles=handles,
         loc="upper center",
-        bbox_to_anchor=(0.5, -0.12),
+        bbox_to_anchor=(0.5, 0.0),
+        bbox_transform=ax.transAxes + below,
         ncols=2,
         fontsize="small",
         frameon=False,

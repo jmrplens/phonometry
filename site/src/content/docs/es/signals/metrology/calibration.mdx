@@ -580,18 +580,31 @@ que valgan ellos.
 
 | Requisito | Apartado | Qué se mide | Límite de aceptación | Incertidumbre máxima | Clase 1 a 1 kHz |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| `level` | 5.3.2 | nivel generado menos nivel especificado, media de tres acoplamientos | Tabla 2 | Tabla A.1 | ±0,25 dB; 0,15 dB |
+| `level` | 5.3.2 | nivel generado menos nivel especificado, media de al menos tres acoplamientos, y el nivel en cada extremo del rango de alimentación (5.3.4) | Tabla 2 | Tabla A.1 | ±0,25 dB; 0,15 dB |
 | `fluctuation` | 5.3.3 | la mayor de las diferencias entre los niveles F máximo y mínimo y su media, en 60 s | Tabla 2 | Tabla A.1 | 0,07 dB; 0,03 dB |
 | `frequency` | 5.4.2 | frecuencia generada menos frecuencia especificada | Tabla 4 | Tabla A.2 | ±0,7 %; 0,2 % |
 | `distortion` | 5.6 | distorsión total + ruido, de 22,4 Hz a 22,4 kHz | Tabla 7 | Tabla A.3 | 2,5 %; 0,5 % |
 | `supply_voltage` | 5.3.4 | nivel en un extremo del rango de alimentación menos nivel a la tensión nominal | Tabla 3 | A.5.5.7 | ±0,06 dB; 0,04 dB |
 | `environmental_level` | 5.5 | nivel en una condición fuera de la banda de 5.3.2 menos nivel en condiciones de referencia | Tabla 5 | Tabla A.4 | ±0,25 dB; 0,15 dB |
+| `environmental_level_in_band` | A.6.2.4 | nivel a una presión estática del barrido de A.6.2 dentro de la banda de 5.3.2 menos nivel en condiciones de referencia | Tabla 2 | Tabla A.4 | ±0,25 dB; 0,15 dB |
 | `environmental_frequency` | 5.5 | frecuencia en esa condición menos frecuencia en condiciones de referencia | Tabla 6 | Tabla A.5 | ±0,7 %; 0,2 % |
 | `field_immunity` | 5.9.4.2 | nivel dentro de un campo de frecuencia industrial o de radiofrecuencia menos nivel sin él | 5.9.4.2 | A.7.4.8 | ±0,25 dB; 0,05 dB |
 
-Cada uno se juzga con la regla de conformidad que ya comparten todas las normas
-del IEC TC 29 (5.1.15): la desviación dentro de su límite de aceptación **y** la
-incertidumbre dentro de su máximo, ambos inclusive. La regla por sí sola es
+Dos medidas merecen una aclaración sobre dónde van. El nivel en cada extremo del rango
+de alimentación es un nivel como cualquier otro: el apartado 5.3.4 lo somete a
+la Tabla 2 además de a la Tabla 3, así que va a `level_deviation_db` junto al de
+la tensión nominal, y su diferencia con ese a `supply_voltage_deviation_db`. El
+barrido de presión estática de A.6.2 se juzga punto a punto con la Tabla 2
+dentro de la banda de 5.3.2 (de 97 kPa a 105 kPa) y con la Tabla 5 fuera de ella
+(A.6.2.4), así que sus puntos dentro de la banda van a
+`environmental_level_in_band` y el resto a `environmental_level`. A 1 kHz las
+dos tablas coinciden; a 2 kHz un calibrador de clase 1 tiene 0,35 dB dentro de
+la banda y 0,30 dB fuera de ella.
+
+Cada uno se juzga con la regla de conformidad que comparten las normas de
+instrumentos del IEC TC 29 escritas desde 2013 (5.1.15): la desviación dentro de
+su límite de aceptación **y** la incertidumbre dentro de su máximo, ambos
+inclusive. La regla por sí sola es
 `metrology.verify_conformance`, y
 [Conformidad y verificación](/phonometry/es/signals/metrology/compliance-verification/#la-regla-de-conformidad-del-iec-tc-29)
 la recorre sobre los ejemplos que imprimen las normas.
@@ -636,7 +649,8 @@ excepción en lugar de aprobar todos los calibradores.
 Un par de barras por medida: la desviación como fracción del límite de
 aceptación de su lado, y la incertidumbre como fracción de la máxima
 permitida. Una medida es conforme cuando las dos barras se quedan en la línea
-discontinua o antes. Aquí una lectura ambiental, 0,28 dB frente a 0,25 dB, es
+discontinua o antes, y una barra cuyo criterio no se cumple se dibuja en rojo,
+como dice la leyenda. Aquí una lectura ambiental, 0,28 dB frente a 0,25 dB, es
 todo el veredicto.*
 
 <details>

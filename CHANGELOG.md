@@ -150,40 +150,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   row does not print is refused with what the page had there, never read as
   zero.
 - **A sound calibrator gets its IEC 60942:2017 verdict, by the conformance
-  rule every IEC TC 29 standard shares.** `metrology.verify_conformance` is the
-  rule IEC 60942:2017 (5.1.15), IEC 61672-1:2013 (5.1.21), IEC 61672-3:2013 and
-  IEC 61260-2 and -3:2016 write in one sentence: a measured deviation within its
-  acceptance limits and the laboratory's actual expanded uncertainty within the
-  maximum permitted, both inclusive. The uncertainty is not added to the
-  deviation, which is how ISO 8041-1 decides and how `vibration.verify_weighting`
-  still does. The `ConformanceVerification` it returns says which of the four
-  outcomes of E.2.2 it is, in the words of the "Reasons" column of the tables,
-  draws itself as Figure E.1 does, and has no truth value, so an
+  rule the IEC TC 29 instrument standards written since 2013 share.**
+  `metrology.verify_conformance` is the rule IEC 60942:2017 (5.1.15), IEC
+  61672-1:2013 (5.1.21), IEC 61672-3:2013 and IEC 61260-2 and -3:2016 write in
+  one sentence: a measured deviation within its acceptance limits and the
+  laboratory's actual expanded uncertainty within the maximum permitted, both
+  inclusive. The uncertainty is not added to the deviation, unlike ISO 8041-1
+  (13.1, 14.1) and `vibration.verify_weighting`, which extend the deviation by
+  it. The `ConformanceVerification` it returns says which of the four outcomes
+  of E.2.2 it is, in the words of the "Reasons" column of the tables, draws
+  itself as Figure E.1 does, and has no truth value, so an
   `if verify_conformance(...):` raises instead of passing everything.
   `metrology.verify_sound_calibrator` grades a laboratory's record of a class
   LS, 1 or 2 calibrator, or of an LS/M or 1/M pistonphone, given as a
-  `SoundCalibratorMeasurements`: the generated level, the short-term
-  fluctuation, the frequency, the total distortion + noise, the supply-voltage
-  effect, the level and the frequency over the environmental range (against
-  the reduced limits of the abbreviated test of A.6.4.7 on request) and the
-  level in a power- or radio-frequency field. It returns one
-  `SoundCalibratorRequirement` per requirement and one verdict overall, each
-  with `.plot()`. Tables 2 to 7 and A.1 to A.5, and the three limits the
-  clauses print in their text, are published read-only, and each range of
-  nominal frequencies keeps which of its printed ends it includes; classes LS
-  and 2 are refused outside 160 Hz to 1.25 kHz, where the standard gives them no
-  limit. A pistonphone's static-pressure correction is an input from its
-  manual, added to the measured level, and any other calibrator is refused one.
-  `metrology.sensitivity` takes `calibrator_class=` and screens a calibrator
-  take against that class's Table 2 fluctuation limit, read from the published
-  table instead of a private copy of the class 1 column. Twenty-seven
-  conformance rows pin it all: the eight examples of IEC 60942 Table E.1 and
-  the ten of IEC 61672-1 Table C.1, which had no row before, verdict and printed
-  reason each, every cell of the IEC 60942 tables with its dashes and range
-  ends, and the verdicts where the tables meet the rule. The sound level
-  meter, calibration and compliance guides no longer say the calibrator goes
-  ungraded, and the plain-Markdown calibration guide no longer attributes the
-  class 1 tolerance to Table 1, which lists the classes.
+  `SoundCalibratorMeasurements`: the generated level, at the nominal supply
+  voltage and at each end of the supply range, the short-term fluctuation, the
+  frequency, the total distortion + noise, the supply-voltage effect, the level
+  and the frequency over the environmental range (against the reduced limits of
+  the abbreviated test of A.6.4.7 on request), the level at the static
+  pressures of the A.6.2 sweep that fall inside the reference band, which
+  A.6.2.4 holds to Table 2 rather than Table 5, and the level in a power- or
+  radio-frequency field. It returns one `SoundCalibratorRequirement` per
+  requirement and one verdict overall, each with `.plot()`: a fluctuation or a
+  distortion is drawn against its maximum alone, and a bar of the overall
+  figure turns red when its verdict fails, not when its share rounds past
+  100 %. Tables 2 to 7 and A.1 to A.5, and the limits four clauses print in
+  their text (5.9.4.2, A.5.5.7, A.6.4.7 and A.7.4.8), are published read-only,
+  and each range of nominal frequencies keeps which of its printed ends it
+  includes; classes LS and 2 are refused outside 160 Hz to 1.25 kHz, where the
+  standard gives them no limit. A pistonphone's static-pressure correction is
+  an input from its manual, added to the measured level, and any other
+  calibrator is refused one. `metrology.sensitivity` takes `calibrator_class=`
+  and screens a calibrator take against that class's Table 2 fluctuation limit,
+  read from the published table instead of a private copy of the class 1
+  column. Twenty-eight conformance rows pin it all: the eight examples of IEC
+  60942 Table E.1 and the ten of IEC 61672-1 Table C.1, which had no row
+  before, verdict, outcome and printed reason each, every cell of the IEC 60942
+  tables with its dashes, the two frequencies of its range and which of them it
+  includes, and the verdicts where the tables meet the rule, at 1 kHz and at
+  2 kHz, where Table 2 and Table 5 part. The sound level meter, calibration and
+  compliance guides no longer say the calibrator goes ungraded, and the
+  plain-Markdown calibration guide no longer attributes the class 1 tolerance
+  to Table 1, which lists the classes.
 - **The ISO 1683 reference values, published once and read by every level.**
   `metrology.ISO1683_REFERENCE_VALUES` holds ISO 1683:2015 Tables 1 to 3,
   the reference values for sound in gases, sound in liquids and vibration,

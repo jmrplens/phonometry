@@ -17,11 +17,14 @@ performance specification is demonstrated when **both** of the following hold,
 Two things set this rule apart from the older one, which ISO 8041-1:2017 still
 uses (13.1 and 14.1) and :func:`phonometry.vibration.verify_weighting`
 implements: the uncertainty is not added to the deviation, and the limits are
-inclusive. Annex D of IEC 60942 (Figure D.1) says why the first is safe: the
-acceptance interval already sits inside the tolerance interval by a guard band
-equal to the maximum-permitted uncertainty, so a laboratory whose uncertainty
-is no larger than that maximum cannot pass an instrument that is outside its
-tolerance. The same annex settles the second in so many words: "a measured
+inclusive. Annex D of IEC 60942 (Figure D.1) shows where the first comes
+from: the tolerance limits are not stated, but lie outside the acceptance
+limits by a guard band equal to the maximum-permitted uncertainty "for a 95 %
+coverage interval". The guard band is what keeps a laboratory whose
+uncertainty is no larger than that maximum from passing an instrument outside
+its tolerance, and it does so at that coverage, not with certainty: it lowers
+the risk of a false acceptance without removing it. The same annex settles
+the second in so many words: "a measured
 deviation equal to a limit of an acceptance interval demonstrates conformance
 to a specification, providing also that the uncertainty of the measurement
 from the laboratory performing a test does not exceed the specified

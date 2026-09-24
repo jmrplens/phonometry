@@ -137,7 +137,9 @@ laboratory's actual expanded uncertainty does not exceed the maximum-permitted
 uncertainty the standard prints for the test, both limits inclusive. The
 uncertainty is not added to the deviation: the tolerance the instrument has to
 meet lies beyond the acceptance limit by that maximum (IEC 60942 Annex D,
-IEC 61672-1 Annex A). `metrology.verify_conformance` is the rule on its own,
+IEC 61672-1 Annex A), a guard band stated for a 95 % coverage interval that
+lowers the risk of passing an instrument outside its tolerance without removing
+it. `metrology.verify_conformance` is the rule on its own,
 and its verdict names which of the four outcomes of IEC 60942 E.2.2 it is, in
 the words of the tables' "Reasons" column; `verify_sound_calibrator` applies it
 to every requirement of IEC 60942:2017 (see [Calibration and dBFS](calibration.md)).
@@ -155,7 +157,7 @@ both_out = metrology.verify_conformance(              # example 10
 print(both_out.passes, both_out.outcome)              # False 4
 ```
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/conformance_rule_examples_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/conformance_rule_examples.svg" alt="The eight examples of IEC 60942:2017 Table E.1 and the ten of IEC 61672-1:2013 Table C.1 drawn as the standards draw them, each marker the verdict verify_conformance returned, which is the verdict the table prints" width="100%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/conformance_rule_examples_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/conformance_rule_examples.svg" alt="The eight examples of IEC 60942:2017 Table E.1 between 0 dB and 0.25 dB, as Figure E.1 draws their absolute deviations, and the ten of IEC 61672-1:2013 Table C.1 between -1.2 dB and +1.0 dB, each marker the verdict verify_conformance returned, which is the verdict the table prints" width="100%"></picture>
 
 All eighteen examples are rows of the [conformance report](../../CONFORMANCE.md),
 verdict and printed reason each.

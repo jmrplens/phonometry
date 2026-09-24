@@ -229,13 +229,22 @@ measures nothing itself.
 | `distortion` | 5.6 | Table 7 | Table A.3 | 2.5 %; 0.5 % |
 | `supply_voltage` | 5.3.4 | Table 3 | A.5.5.7 | ±0.06 dB; 0.04 dB |
 | `environmental_level` | 5.5 | Table 5 | Table A.4 | ±0.25 dB; 0.15 dB |
+| `environmental_level_in_band` | A.6.2.4 | Table 2 | Table A.4 | ±0.25 dB; 0.15 dB |
 | `environmental_frequency` | 5.5 | Table 6 | Table A.5 | ±0.7 %; 0.2 % |
 | `field_immunity` | 5.9.4.2 | 5.9.4.2 | A.7.4.8 | ±0.25 dB; 0.05 dB |
 
-Each is judged by the conformance rule every IEC TC 29 standard now shares
-(5.1.15): the deviation within its acceptance limit **and** the uncertainty
-within its maximum, both inclusive (`metrology.verify_conformance`, worked
-through the printed examples in [Compliance and verification](compliance-verification.md)).
+The level is the mean of at least three couplings (A.5.5.3), and the level at
+each end of the supply range goes into `level_deviation_db` too, because 5.3.4
+holds it to Table 2 as well as to Table 3. The static-pressure sweep of A.6.2 is
+graded against Table 2 inside the band of 5.3.2 (97 kPa to 105 kPa) and against
+Table 5 outside it (A.6.2.4), so its in-band points go into
+`environmental_level_in_band` and the rest into `environmental_level`.
+
+Each is judged by the conformance rule the IEC TC 29 instrument standards
+written since 2013 share (5.1.15): the deviation within its acceptance limit
+**and** the uncertainty within its maximum, both inclusive
+(`metrology.verify_conformance`, worked through the printed examples in
+[Compliance and verification](compliance-verification.md)).
 
 ```python
 from phonometry import metrology
@@ -262,7 +271,7 @@ The second verdict is the rule, not the calibrator: a laboratory whose
 uncertainty exceeds the 0.15 dB of Table A.1 cannot demonstrate anything about a
 class 1 level (5.1.16), and another laboratory may pass the same calibrator.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/calibrator_verification_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/calibrator_verification.svg" alt="Horizontal bars for a class 1 calibrator at 1 kHz, two per measurement: the deviation as a share of its acceptance limit and the expanded uncertainty as a share of its maximum; only the third environmental level reading, 0.28 dB against 0.25 dB, crosses the 100 percent line" width="92%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/calibrator_verification_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/calibrator_verification.svg" alt="Horizontal bars for a class 1 calibrator at 1 kHz, two per measurement: the deviation as a share of its acceptance limit and the expanded uncertainty as a share of its maximum; only the third environmental level reading, 0.28 dB against 0.25 dB, crosses the 100 percent line, and its bar is drawn in red, which the legend names" width="92%"></picture>
 
 Every limit is read from a published, read-only table (`LEVEL_ACCEPTANCE_LIMITS_DB`,
 `FLUCTUATION_ACCEPTANCE_LIMITS_DB`, the other acceptance tables and the Annex A

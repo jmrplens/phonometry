@@ -361,12 +361,45 @@ def test_frame_constants_refuses_a_specimen_published_without_them() -> None:
 def test_a_row_whose_page_prints_no_loss_factor_is_not_given_one() -> None:
     """Table 11.3's foam prints ``eta_s``; Table 12.4's limp foam does not.
 
-    ``frame_constants`` reads a missing loss factor as zero, which is the
-    lossless frame, not a guess at a typical value. The field stays ``None``
-    so a caller can tell the two apart.
+    The field stays ``None`` rather than holding a typical value nobody
+    printed.
     """
     row = PUBLISHED_POROUS["allard-2009-table-12-4/limp_foam"]
     assert row.structural_loss_factor is None
+
+
+def test_frame_constants_refuses_a_missing_loss_factor_rather_than_a_zero() -> None:
+    """A lossless frame is a claim about a material; an empty cell is not.
+
+    ``frame_constants`` once read a missing loss factor as zero and handed
+    back a real shear modulus, which every poroelastic model downstream took
+    for a frame that dissipates nothing. It now asks for the loss factor the
+    way it asks for the other two, and the refusal says what the page had.
+    """
+    row = PorousMaterial(
+        name="Frame without a loss factor",
+        source="Example Acoustics Ltd, Panel 40 technical data sheet, Rev. 4",
+        shear_modulus_pa=80.0e3,
+        poisson_ratio=0.44,
+    )
+    with pytest.raises(ValueError, match=r"has no structural_loss_factor"):
+        row.frame_constants()
+
+
+def test_every_published_row_with_both_moduli_prints_its_loss_factor() -> None:
+    """So the refusal above moves no published result."""
+    with_moduli = [
+        row
+        for row in PUBLISHED_POROUS.values()
+        if row.shear_modulus_pa is not None and row.poisson_ratio is not None
+    ]
+    assert len(with_moduli) >= 20
+    for row in with_moduli:
+        assert row.structural_loss_factor is not None, (row.table, row.name)
+        shear, _ = row.frame_constants()
+        assert shear.imag == pytest.approx(
+            row.shear_modulus_pa * row.structural_loss_factor, rel=1e-15
+        )
 
 
 # ---------------------------------------------------------------------------

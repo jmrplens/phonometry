@@ -552,9 +552,6 @@ class ResilientLayer(CatalogueRow):
         )
 
 
-#: The row fields the data files write as a list and the row holds as a set.
-_SETS = ("approximate", "bounded_above", "bounded_below")
-
 #: The published tables this catalogue reads.
 _TABLES = ("hopkins-2007-table-a3",)
 
@@ -566,7 +563,7 @@ def _load() -> dict[str, ResilientLayer]:
         citation, rows = read_table("phonometry.materials.resilient", f"{table}.json")
         for row in rows:
             out[f"{table}/{row['key']}"] = ResilientLayer(
-                source=citation, table=table, **take(row, frozen=_SETS)
+                source=citation, table=table, **take(row)
             )
     return out
 

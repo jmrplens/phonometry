@@ -186,9 +186,6 @@ class AbsorptionAreaSpectrum(BandedRow):
     _table_kind: ClassVar[str] = "absorption"
 
 
-#: The hedges these tables spell as a set rather than a mapping.
-_SETS = ("approximate", "bounded_above", "bounded_below")
-
 #: The published tables this catalogue reads, in the order the books print
 #: them, one data file per table.
 _TABLES = (
@@ -271,7 +268,7 @@ def _load() -> tuple[dict[str, AbsorptionSpectrum], dict[str, AbsorptionAreaSpec
         source, records = read_table("phonometry.materials.absorbers", f"{table}.json")
         for record in records:
             key = f"{table}/{record['key']}"
-            fields = take(record, frozen=_SETS)
+            fields = take(record)
             if _is_area(record):
                 areas[key] = AbsorptionAreaSpectrum(
                     table=table, source=source, **_metric(fields)

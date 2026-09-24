@@ -46066,7 +46066,7 @@ export const catalogues = {
         "weave": "",
         "bonding": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
-        "note": "Flow resistivity printed \"(540 ± 92) × 10^3\". Name wrapped over two printed lines. Porosity decay cell prints a dash. The Porosity column prints this value as a number far above 1 while every other row of the column prints a fraction; on the page it is plainly a percentage, but it is transcribed exactly as printed.",
+        "note": "Flow resistivity printed \"(540 ± 92) × 10^3\". Name wrapped over two printed lines. Porosity decay cell prints a dash. The Porosity column prints this value as a number far above 1 while every other row of the column prints a fraction; on the page it is plainly a percentage, but the page does not say so, and the cell is held as misprinted (docs/ERRATA.md).",
         "attributedTo": {
           "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
         },
@@ -46077,9 +46077,9 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "36,5",
-            "kind": "printed",
-            "note": ""
+            "text": "",
+            "kind": "absent",
+            "note": "the page prints “36.5” in its Porosity column, which states no unit and prints a fraction on every other row, and a porosity is the open fraction of a volume, so it cannot pass 1. The figure reads as a per cent, but the page does not say so, and this library does not convert a unit the page does not print. The defect is registered in docs/ERRATA.md under “Cox & D'Antonio, Acoustic Absorbers and Diffusers 3e (2017), Table 6.7”."
           },
           {
             "text": "15",
@@ -46118,7 +46118,7 @@ export const catalogues = {
         "weave": "",
         "bonding": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
-        "note": "Flow resistivity printed \"(230 ± 220) × 10^3\"; the stated uncertainty is almost as large as the value. Porosity decay cell prints a dash. The Porosity column prints this value as a number far above 1 while every other row of the column prints a fraction; on the page it is plainly a percentage, but it is transcribed exactly as printed.",
+        "note": "Flow resistivity printed \"(230 ± 220) × 10^3\"; the stated uncertainty is almost as large as the value. Porosity decay cell prints a dash. The Porosity column prints this value as a number far above 1 while every other row of the column prints a fraction; on the page it is plainly a percentage, but the page does not say so, and the cell is held as misprinted (docs/ERRATA.md).",
         "attributedTo": {
           "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
         },
@@ -46129,9 +46129,9 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "58,1",
-            "kind": "printed",
-            "note": ""
+            "text": "",
+            "kind": "absent",
+            "note": "the page prints “58.1” in its Porosity column, which states no unit and prints a fraction on every other row, and a porosity is the open fraction of a volume, so it cannot pass 1. The figure reads as a per cent, but the page does not say so, and this library does not convert a unit the page does not print. The defect is registered in docs/ERRATA.md under “Cox & D'Antonio, Acoustic Absorbers and Diffusers 3e (2017), Table 6.7”."
           },
           {
             "text": "16,1",
@@ -46222,7 +46222,7 @@ export const catalogues = {
         "weave": "",
         "bonding": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
-        "note": "Flow resistivity printed \"(9 ± 5) × 10^3\"; the en dash of \"6–7 cm\" as printed. Porosity decay cell prints a dash. The Porosity column prints this value as a number far above 1 while every other row of the column prints a fraction; on the page it is plainly a percentage, but it is transcribed exactly as printed.",
+        "note": "Flow resistivity printed \"(9 ± 5) × 10^3\"; the en dash of \"6–7 cm\" as printed. Porosity decay cell prints a dash. The Porosity column prints this value as a number far above 1 while every other row of the column prints a fraction; on the page it is plainly a percentage, but the page does not say so, and the cell is held as misprinted (docs/ERRATA.md).",
         "attributedTo": {
           "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
         },
@@ -46233,9 +46233,9 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "38,9",
-            "kind": "printed",
-            "note": ""
+            "text": "",
+            "kind": "absent",
+            "note": "the page prints “38.9” in its Porosity column, which states no unit and prints a fraction on every other row, and a porosity is the open fraction of a volume, so it cannot pass 1. The figure reads as a per cent, but the page does not say so, and this library does not convert a unit the page does not print. The defect is registered in docs/ERRATA.md under “Cox & D'Antonio, Acoustic Absorbers and Diffusers 3e (2017), Table 6.7”."
           },
           {
             "text": "28,6",
@@ -47054,7 +47054,7 @@ export const catalogues = {
         "weave": "",
         "bonding": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
-        "note": "Flow resistivity printed \"(150 ± 90) × 10^3\" and porosity printed \"48 ± 4\", the only porosity cell in the table with a stated uncertainty. Water content and porosity decay cells print a dash. The Porosity column prints this value as a number far above 1 while every other row of the column prints a fraction; on the page it is plainly a percentage, but it is transcribed exactly as printed.",
+        "note": "Flow resistivity printed \"(150 ± 90) × 10^3\" and porosity printed \"48 ± 4\", the only porosity cell in the table with a stated uncertainty. Water content and porosity decay cells print a dash. The Porosity column prints this value as a number far above 1 while every other row of the column prints a fraction; on the page it is plainly a percentage, but the page does not say so, and the cell is held as misprinted (docs/ERRATA.md).",
         "attributedTo": {
           "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
         },
@@ -47065,9 +47065,9 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "48 ± 4",
-            "kind": "printed",
-            "note": ""
+            "text": "",
+            "kind": "absent",
+            "note": "the page prints “48 ± 4” in its Porosity column, which states no unit and prints a fraction on every other row, and a porosity is the open fraction of a volume, so it cannot pass 1. The figure reads as a per cent, but the page does not say so, and this library does not convert a unit the page does not print. The defect is registered in docs/ERRATA.md under “Cox & D'Antonio, Acoustic Absorbers and Diffusers 3e (2017), Table 6.7”."
           },
           {
             "text": "",
@@ -48822,7 +48822,7 @@ export const catalogues = {
         "weave": "",
         "bonding": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
-        "note": "Flow resistivity printed \"(420 ± 17) × 10^3\". Porosity decay cell prints a dash. The Porosity column prints this value as a number far above 1 while every other row of the column prints a fraction; on the page it is plainly a percentage, but it is transcribed exactly as printed.",
+        "note": "Flow resistivity printed \"(420 ± 17) × 10^3\". Porosity decay cell prints a dash. The Porosity column prints this value as a number far above 1 while every other row of the column prints a fraction; on the page it is plainly a percentage, but the page does not say so, and the cell is held as misprinted (docs/ERRATA.md).",
         "attributedTo": {
           "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
         },
@@ -48833,9 +48833,9 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "37,5",
-            "kind": "printed",
-            "note": ""
+            "text": "",
+            "kind": "absent",
+            "note": "the page prints “37.5” in its Porosity column, which states no unit and prints a fraction on every other row, and a porosity is the open fraction of a volume, so it cannot pass 1. The figure reads as a per cent, but the page does not say so, and this library does not convert a unit the page does not print. The defect is registered in docs/ERRATA.md under “Cox & D'Antonio, Acoustic Absorbers and Diffusers 3e (2017), Table 6.7”."
           },
           {
             "text": "11,2",
@@ -48874,7 +48874,7 @@ export const catalogues = {
         "weave": "",
         "bonding": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
-        "note": "Flow resistivity printed \"(370 ± 110) × 10^3\". Last row of the table. Porosity decay cell prints a dash. The Porosity column prints this value as a number far above 1 while every other row of the column prints a fraction; on the page it is plainly a percentage, but it is transcribed exactly as printed.",
+        "note": "Flow resistivity printed \"(370 ± 110) × 10^3\". Last row of the table. Porosity decay cell prints a dash. The Porosity column prints this value as a number far above 1 while every other row of the column prints a fraction; on the page it is plainly a percentage, but the page does not say so, and the cell is held as misprinted (docs/ERRATA.md).",
         "attributedTo": {
           "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
         },
@@ -48885,9 +48885,9 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "26,9",
-            "kind": "printed",
-            "note": ""
+            "text": "",
+            "kind": "absent",
+            "note": "the page prints “26.9” in its Porosity column, which states no unit and prints a fraction on every other row, and a porosity is the open fraction of a volume, so it cannot pass 1. The figure reads as a per cent, but the page does not say so, and this library does not convert a unit the page does not print. The defect is registered in docs/ERRATA.md under “Cox & D'Antonio, Acoustic Absorbers and Diffusers 3e (2017), Table 6.7”."
           },
           {
             "text": "9,3",

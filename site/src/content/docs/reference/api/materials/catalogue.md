@@ -236,13 +236,19 @@ page printed a Young's modulus instead has had its shear modulus
 derived through the Poisson ratio, and
 [`derived`](/phonometry/reference/api/io/io/#cataloguerow) says so.
 
+The loss factor is asked for like the other two. A row whose page
+prints the moduli and no loss factor is refused rather than handed
+a frame with `eta_s = 0`: a lossless frame is a claim about the
+material, and a cell the page left empty is not a zero. Every
+published row that prints both moduli prints the loss factor too.
+
 **Returns:** `(shear_modulus_pa, poisson_ratio)`, the first complex.
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | when the source prints no elastic constants. |
+| ValueError | when the source prints no elastic constants, or prints them without a structural loss factor, in which case the message says what the page had in that cell instead. |
 
 ### PorousMaterial.is_approximate()
 

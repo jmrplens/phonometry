@@ -92,9 +92,6 @@ class ScatteringCoefficientSpectrum(ScatteringBands):
     """
 
 
-#: The hedges these tables spell as a set rather than a mapping.
-_SETS = ("approximate", "bounded_above", "bounded_below")
-
 #: The published tables this catalogue reads, one data file per table.
 _TABLES = ("cox-2017-appendix-d",)
 
@@ -107,7 +104,7 @@ def _load() -> dict[str, ScatteringCoefficientSpectrum]:
         for record in records:
             key = f"{table}/{record['key']}"
             rows[key] = ScatteringCoefficientSpectrum(
-                table=table, source=source, **take(record, frozen=_SETS)
+                table=table, source=source, **take(record)
             )
     return rows
 

@@ -196,8 +196,16 @@ class PorousMaterial(CatalogueRow):
         derived through the Poisson ratio, and
         :attr:`~phonometry.io.CatalogueRow.derived` says so.
 
+        The loss factor is asked for like the other two. A row whose page
+        prints the moduli and no loss factor is refused rather than handed
+        a frame with ``eta_s = 0``: a lossless frame is a claim about the
+        material, and a cell the page left empty is not a zero. Every
+        published row that prints both moduli prints the loss factor too.
+
         :return: ``(shear_modulus_pa, poisson_ratio)``, the first complex.
-        :raises ValueError: when the source prints no elastic constants.
+        :raises ValueError: when the source prints no elastic constants, or
+            prints them without a structural loss factor, in which case the
+            message says what the page had in that cell instead.
         """
         if self.shear_modulus_pa is None or self.poisson_ratio is None:
             msg = (
@@ -206,9 +214,7 @@ class PorousMaterial(CatalogueRow):
                 "and a Poisson ratio, so pass them explicitly."
             )
             raise ValueError(msg)
-        loss = (
-            0.0 if self.structural_loss_factor is None else self.structural_loss_factor
-        )
+        loss = self.printed("structural_loss_factor", wanted_by="frame_constants")
         return complex(
             self.shear_modulus_pa, self.shear_modulus_pa * loss
         ), self.poisson_ratio
@@ -366,9 +372,6 @@ def _complete(fields: dict[str, Any]) -> dict[str, Any]:
 #    as if it had been read.
 # ---------------------------------------------------------------------------
 
-#: The row fields the data files write as a list and the row holds as a set.
-_SETS = ("approximate", "bounded_above", "bounded_below")
-
 #: The published tables this catalogue reads, in the order the book prints
 #: them.
 _TABLES = (
@@ -414,7 +417,7 @@ def _load() -> dict[str, PorousMaterial]:
     for table in _TABLES:
         source, records = read_table("phonometry.materials.absorbers", f"{table}.json")
         for record in records:
-            fields = _complete(take(record, frozen=_SETS))
+            fields = _complete(take(record))
             rows[f"{table}/{record['key']}"] = PorousMaterial(
                 table=table, source=source, **fields
             )

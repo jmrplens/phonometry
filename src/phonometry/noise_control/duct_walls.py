@@ -214,9 +214,6 @@ class DuctWallSpectrum(BandedRow):
         return self._in_band(band_hz)
 
 
-#: The hedges these tables spell as a set rather than a mapping.
-_SETS = ("approximate", "bounded_above", "bounded_below")
-
 #: The published tables this catalogue reads. One file holds the six printed
 #: tables, because they are one reading of one stretch of one chapter and each
 #: row says which table it is printed in.
@@ -230,9 +227,7 @@ def _load() -> dict[str, DuctWallSpectrum]:
         source, records = read_table("phonometry.noise_control", f"{table}.json")
         for record in records:
             key = f"{table}/{record['key']}"
-            rows[key] = DuctWallSpectrum(
-                table=table, source=source, **take(record, frozen=_SETS)
-            )
+            rows[key] = DuctWallSpectrum(table=table, source=source, **take(record))
     return rows
 
 

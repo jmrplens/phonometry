@@ -115,7 +115,7 @@ saying what the cell held instead.
 | Name | Description |
 | :--- | :--- |
 | `flow_resistivity_pa_s_m2` | Effective flow resistivity `R_1` or `sigma_e`, in Pa s/m2. Bies prints it in kPa s/m2 and Cox in rayl/m, which is this unit under another name; the conversion is pinned in the data file's `about`. |
-| `porosity` | Open porosity, where the fit that produced the resistivity also produced one. |
+| `porosity` | Open porosity, where the fit that produced the resistivity also produced one, as the fraction of the volume that is open, from 0 to 1. Cox's Table 6.7 prints six of its porosities as 26.9 to 58.1 in a column that prints a fraction on every other row and states no unit; a porosity of 36.5 is not a porosity, so those six cells are empty, and [`why_missing`](/phonometry/reference/api/io/io/#cataloguerowwhy_missing) quotes the figure the page prints. |
 | `water_content_percent` | Water content of the specimen, per cent, for the sands Cox tabulates wet and dry. The resistivity of a sand is not monotonic in it, which is the point of printing it. |
 | `porosity_decay_rate_per_m` | The rate `zeta` at which porosity falls with depth in the variable-porosity model, in 1/m. It is negative for several surfaces, which is what the page prints. |
 | `iso_9613_ground_factor` | The ground factor `G` of ISO 9613-2 for a ground class: 0 for hard ground, 1 for porous ground. |

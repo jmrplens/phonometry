@@ -108,9 +108,6 @@ class OrthotropicWood(CatalogueRow):
 #: The published tables this catalogue reads, in the order it reads them.
 _TABLES = ("rossing-2014-table-15-5",)
 
-#: The row fields that arrive as a list and are held as a set.
-_SETS = ("approximate", "bounded_above", "bounded_below")
-
 
 def _load() -> dict[str, OrthotropicWood]:
     """Every row of every packaged table, keyed by table and row."""
@@ -119,7 +116,7 @@ def _load() -> dict[str, OrthotropicWood]:
         citation, rows = read_table("phonometry.solids", f"{table}.json")
         for row in rows:
             out[f"{table}/{row['key']}"] = OrthotropicWood(
-                source=citation, table=table, **take(row, frozen=_SETS)
+                source=citation, table=table, **take(row)
             )
     return out
 

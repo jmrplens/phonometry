@@ -169,3 +169,47 @@ def test_resilient_layer_row_moves_the_fifteen_layers_and_no_others() -> None:
         "rebond_foam_64_15",
         "rebond_foam_64_25",
     ]
+
+
+def test_row_contract_moves_the_six_percent_porosities_and_no_others() -> None:
+    """The step that made rows check themselves moved six cells, and no digit.
+
+    Cox Table 6.7 prints six porosities in per cent in a column of fractions;
+    each ``porosity`` was emptied, the one ``± 4`` with it, and
+    ``misprinted`` now quotes the figure the page prints. Every other mapping
+    and every other row comes out of the step as it went in.
+    """
+    before = fp.resilient_layer_row(fp.one_row_shape(fp.baseline()))
+    after = fp.row_contract(before)
+    assert {name for name in before if before[name] != after[name]} == {
+        "PUBLISHED_GROUND"
+    }
+    old, new = before["PUBLISHED_GROUND"], after["PUBLISHED_GROUND"]
+    assert list(new) == list(old)
+    changed = sorted(key for key in old if old[key] != new[key])
+    assert changed == sorted(fp.GROUND_POROSITY_IN_PER_CENT)
+    assert sorted(old[key]["porosity"] for key in changed) == [
+        26.9,
+        36.5,
+        37.5,
+        38.9,
+        48.0,
+        58.1,
+    ]
+    for key in changed:
+        assert "porosity" not in new[key]
+        assert "porosity" not in new[key].get("uncertainty", {})
+        figure = fp.GROUND_POROSITY_IN_PER_CENT[key]
+        assert new[key]["misprinted"] == {
+            "porosity": fp.ground_porosity_misprint(figure)
+        }
+        kept = {"porosity", "uncertainty", "misprinted", "note"}
+        assert _text({f: v for f, v in new[key].items() if f not in kept}) == _text(
+            {f: v for f, v in old[key].items() if f not in kept}
+        )
+    root = "cox-2017-table-6-7/grass_root_layer_in_loamy_sand"
+    assert old[root]["uncertainty"] == {
+        "flow_resistivity_pa_s_m2": 90000.0,
+        "porosity": 4.0,
+    }
+    assert new[root]["uncertainty"] == {"flow_resistivity_pa_s_m2": 90000.0}

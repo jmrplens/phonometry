@@ -12,6 +12,11 @@ answering to the same name.
 The reader is also what keeps the citation single. It is read from the file
 that holds the rows, so the provenance gate and the published record cannot
 disagree: there is only one copy to be right or wrong.
+
+And it reads JSON as a browser does, because the published tables are read
+from JavaScript too: a ``NaN`` or an infinity is refused, so is a name written
+twice in one object (JSON keeps the last and says nothing), and so is a ``/``
+in a row key, which separates the table from the row in every catalogue key.
 """
 
 from __future__ import annotations
@@ -28,22 +33,32 @@ if TYPE_CHECKING:
 from phonometry._internal.catalogue import (
     CatalogueError,
     CatalogueRow,
+    parse_packaged,
     read_table,
     take,
 )
 
 
-def _packaged(monkeypatch: pytest.MonkeyPatch, document: dict[str, object]) -> None:
-    """Make ``read_table`` see *document* instead of a file on disk."""
+def _packaged_text(monkeypatch: pytest.MonkeyPatch, text: str) -> None:
+    """Make ``read_table`` see *text* instead of a file on disk."""
 
     class _Entry:
         def __truediv__(self, other: str) -> _Entry:
             return self
 
         def read_text(self, encoding: str = "utf-8") -> str:
-            return json.dumps(document)
+            return text
 
     monkeypatch.setattr("importlib.resources.files", lambda _: _Entry())
+
+
+def _packaged(monkeypatch: pytest.MonkeyPatch, document: dict[str, object]) -> None:
+    """Make ``read_table`` see *document* instead of a file on disk.
+
+    ``json.dumps`` writes a float NaN or infinity as the bare token CPython's
+    reader accepts, which is what the refusals below need to see.
+    """
+    _packaged_text(monkeypatch, json.dumps(document))
 
 
 def _document(**overrides: object) -> dict[str, object]:
@@ -116,23 +131,149 @@ def test_take_drops_the_key_and_keeps_everything_else() -> None:
     assert fields == {"name": "Steel", "density_kg_m3": 7800.0}
 
 
-def test_take_freezes_the_named_sets() -> None:
-    """A list in JSON implies an order a set does not have."""
-    fields = take(
-        {"key": "x", "approximate": ["poisson_ratio"]}, frozen=("approximate",)
+def test_take_converts_nothing_and_leaves_the_freezing_to_the_row() -> None:
+    """A list stays a list here; the row freezes it from its annotation.
+
+    The loaders once listed which of their fields were sets, fifteen times,
+    and the solids' list had fallen behind the dataclass it fed; a loader
+    with no list, and a row built by hand, never froze its sets at all.
+    """
+    record = {
+        "key": "x",
+        "approximate": ["poisson_ratio"],
+        "ranges": {"density_kg_m3": [400.0, 800.0]},
+    }
+    fields = take(record)
+    assert fields == {
+        "approximate": ["poisson_ratio"],
+        "ranges": {"density_kg_m3": [400.0, 800.0]},
+    }
+    assert take({"key": "x"}) == {}
+
+
+@pytest.mark.parametrize("token", ["NaN", "Infinity", "-Infinity"])
+def test_a_number_json_does_not_have_is_refused_naming_the_row(
+    monkeypatch: pytest.MonkeyPatch, token: str
+) -> None:
+    """CPython reads these three; ``JSON.parse`` rejects them on sight."""
+    text = (
+        '{"source": "s", "about": "a", "rows": '
+        f'[{{"key": "steel", "name": "Steel", "density_kg_m3": {token}}}]}}'
     )
-    assert fields["approximate"] == frozenset({"poisson_ratio"})
+    _packaged_text(monkeypatch, text)
+    with pytest.raises(CatalogueError, match=r"^t\.json: row 'steel': density_kg_m3"):
+        read_table("phonometry.solids", "t.json")
 
 
-def test_take_leaves_a_set_absent_rather_than_inventing_an_empty_one() -> None:
-    """The dataclass default says what a missing field means, not this."""
-    assert take({"key": "x"}, frozen=("approximate",)) == {}
+def test_a_nan_nested_in_a_hedge_names_its_row_and_its_path(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    document = _document(
+        rows=[
+            {"key": "brick", "name": "Brick"},
+            {"key": "steel", "name": "Steel", "ranges": {"x": [1.0, float("nan")]}},
+        ]
+    )
+    _packaged(monkeypatch, document)
+    with pytest.raises(CatalogueError, match=r"row 'steel': ranges\.x\[1\] is NaN"):
+        read_table("phonometry.solids", "t.json")
 
 
-def test_take_turns_each_range_into_a_pair() -> None:
-    """JSON has no tuple, and the field is typed as one."""
-    fields = take({"key": "x", "ranges": {"density_kg_m3": [400.0, 800.0]}})
-    assert fields["ranges"] == {"density_kg_m3": (400.0, 800.0)}
+def test_a_name_written_twice_in_a_row_is_refused_naming_the_row(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """JSON keeps the second of two members with one name, and says nothing."""
+    text = (
+        '{"source": "s", "about": "a", "rows": '
+        '[{"key": "steel", "density_kg_m3": 7800, "density_kg_m3": 7850}]}'
+    )
+    _packaged_text(monkeypatch, text)
+    with pytest.raises(CatalogueError, match=r"row 'steel': .*'density_kg_m3' twice"):
+        read_table("phonometry.solids", "t.json")
+
+
+def test_a_name_written_twice_inside_a_hedge_names_the_row(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    text = (
+        '{"source": "s", "about": "a", "rows": [{"key": "steel", '
+        '"ranges": {"x": [1, 2], "x": [3, 4]}}]}'
+    )
+    _packaged_text(monkeypatch, text)
+    with pytest.raises(CatalogueError, match=r"row 'steel': ranges names 'x' twice"):
+        read_table("phonometry.solids", "t.json")
+
+
+def test_a_top_level_name_written_twice_is_refused(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    text = '{"source": "s", "source": "t", "about": "a", "rows": [{"key": "k"}]}'
+    _packaged_text(monkeypatch, text)
+    with pytest.raises(CatalogueError, match=r"the document names 'source' twice"):
+        read_table("phonometry.solids", "t.json")
+
+
+def test_a_slash_in_a_row_key_is_refused(monkeypatch: pytest.MonkeyPatch) -> None:
+    """The slash is what separates the table from the row in a catalogue key."""
+    _packaged(monkeypatch, _document(rows=[{"key": "steel/mild", "name": "Steel"}]))
+    with pytest.raises(CatalogueError, match=r"row 'steel/mild': a row key holds no"):
+        read_table("phonometry.solids", "t.json")
+
+
+def test_a_key_that_is_not_text_is_refused(monkeypatch: pytest.MonkeyPatch) -> None:
+    _packaged(monkeypatch, _document(rows=[{"key": 7, "name": "Steel"}]))
+    with pytest.raises(CatalogueError, match=r"the key 7 is not text"):
+        read_table("phonometry.solids", "t.json")
+
+
+def test_a_row_that_is_not_an_object_is_refused(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _packaged(monkeypatch, _document(rows=["steel"]))
+    with pytest.raises(CatalogueError, match=r"every row is a JSON object"):
+        read_table("phonometry.solids", "t.json")
+
+
+@pytest.mark.parametrize("extra", ["provenance", "schema", "rows_extra"])
+def test_a_top_level_key_a_packaged_table_does_not_hold_is_refused(
+    monkeypatch: pytest.MonkeyPatch, extra: str
+) -> None:
+    """A packaged table cites its page in ``source``; nothing else goes on top."""
+    _packaged(monkeypatch, _document(**{extra: "x"}))
+    with pytest.raises(CatalogueError, match=rf"no top-level '{extra}'"):
+        read_table("phonometry.solids", "t.json")
+
+
+@pytest.mark.parametrize("extra", ["conventions", "validity"])
+def test_the_two_optional_top_level_keys_are_read(
+    monkeypatch: pytest.MonkeyPatch, extra: str
+) -> None:
+    _packaged(monkeypatch, _document(**{extra: ["a legend"]}))
+    source, rows = read_table("phonometry.solids", "t.json")
+    assert source.startswith("Hopkins")
+    assert [row["key"] for row in rows] == ["steel"]
+
+
+@pytest.mark.parametrize(
+    ("text", "fragment"),
+    [
+        ('{"source": "s", "about": ', "this is not JSON"),
+        ('["source", "about", "rows"]', "one JSON object"),
+    ],
+)
+def test_a_file_that_is_not_one_json_object_is_refused(
+    monkeypatch: pytest.MonkeyPatch, text: str, fragment: str
+) -> None:
+    _packaged_text(monkeypatch, text)
+    with pytest.raises(CatalogueError, match=fragment):
+        read_table("phonometry.solids", "t.json")
+
+
+def test_every_packaged_file_reads_through_the_strict_reader() -> None:
+    """The 83 data files pass what a user file will have to pass."""
+    for path in _DATA_FILES:
+        document = parse_packaged(path.read_text(encoding="utf-8"), path.name)
+        assert document["rows"], path.name
 
 
 def test_the_packaged_solids_table_reads_back_from_its_own_file() -> None:
@@ -178,18 +319,23 @@ def test_a_field_name_the_dataclass_does_not_have_fails_at_construction() -> Non
 # ---------------------------------------------------------------------------
 # The shared row: the hedges every catalogue needs, and reading them back
 # ---------------------------------------------------------------------------
-def test_take_turns_each_reported_list_into_a_tuple_of_values_and_pairs() -> None:
+def test_a_row_holds_each_reported_list_as_a_tuple_of_values_and_pairs() -> None:
     """A page that lists several readings lists numbers and intervals mixed.
 
     Cox prints "96, 200-450" in one cell of his characteristic-length table:
     one study measured 96 um and another a band. Both have to survive into one
     field, so an entry is a float or a pair and the pair is a tuple like every
-    other interval in this reader.
+    other interval a row holds, whatever the data file wrote it as.
     """
-    fields = take(
-        {"key": "x", "reported": {"viscous_length_um": [96.0, [200.0, 450.0]]}}
+    from phonometry.materials.absorbers import PorousMaterial
+
+    row = PorousMaterial(
+        name="PU foam, fully reticulated",
+        source="Cox & D'Antonio 3e Table 6.8, PDF page 261 (printed p. 204)",
+        reported={"viscous_length_um": [96.0, [200.0, 450.0]]},
     )
-    assert fields["reported"] == {"viscous_length_um": (96.0, (200.0, 450.0))}
+    assert row.reported == {"viscous_length_um": (96.0, (200.0, 450.0))}
+    assert isinstance(row.reported["viscous_length_um"][1], tuple)
 
 
 def test_a_row_says_a_listed_cell_is_listed_and_not_empty() -> None:
@@ -225,17 +371,21 @@ def test_a_listed_cell_that_holds_an_interval_reads_it_out_as_one() -> None:
 
 def test_the_hedges_of_a_shared_row_cannot_be_edited_in_place() -> None:
     """Every mapping a row holds is frozen, including the new one."""
-    row = CatalogueRow(
+    from phonometry.materials.absorbers import PorousMaterial
+
+    row = PorousMaterial(
         name="x",
         source="y",
+        youngs_modulus_pa=4.4e6,
+        thickness_mm=40.0,
         reported={"viscous_length_um": (1.0,)},
         unquantified={"tortuosity": "model"},
         derived={"youngs_modulus_pa": "from the shear modulus"},
-        ranges={"porosity": (0.9, 0.99)},
+        ranges={"porosity": (0.9, 0.99), "flow_resistivity_pa_s_m2": (5e3, 9e3)},
         attributed_to={"row": "Someone, 1990"},
         basis={"row": "measured"},
-        converted={"porosity": ("99", "%")},
-        carried={"tortuosity": "from the row above"},
+        converted={"flow_resistivity_pa_s_m2": ("5", "kPa s/m2")},
+        carried={"thickness_mm": "from the row above"},
     )
     for mapping in (
         row.reported,
@@ -285,13 +435,16 @@ def test_a_bound_may_leave_open_the_end_the_quantity_has_no_limit_on() -> None:
     )
 
 
+_TL = "transmission_loss_63_db"
+
+
 @pytest.mark.parametrize(
     ("ranges", "bounded_above", "bounded_below"),
     [
-        ({"x": (45.0, None)}, frozenset(), frozenset()),
-        ({"x": (None, 5.0)}, frozenset(), frozenset()),
-        ({"x": (None, 5.0)}, frozenset(), frozenset({"x"})),
-        ({"x": (45.0, None)}, frozenset({"x"}), frozenset()),
+        ({_TL: (45.0, None)}, frozenset(), frozenset()),
+        ({_TL: (None, 5.0)}, frozenset(), frozenset()),
+        ({_TL: (None, 5.0)}, frozenset(), frozenset({_TL})),
+        ({_TL: (45.0, None)}, frozenset({_TL}), frozenset()),
     ],
 )
 def test_a_range_missing_the_end_the_page_printed_is_refused(
@@ -305,8 +458,10 @@ def test_a_range_missing_the_end_the_page_printed_is_refused(
     book left blank, which is the one thing these hedges exist to tell apart,
     and it would reach a published table as half a range.
     """
+    from phonometry.noise_control import DuctWallSpectrum
+
     with pytest.raises(CatalogueError, match="missing an end"):
-        CatalogueRow(
+        DuctWallSpectrum(
             name="x",
             source="y",
             ranges=ranges,

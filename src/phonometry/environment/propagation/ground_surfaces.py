@@ -77,7 +77,12 @@ class GroundSurface(CatalogueRow):
         rayl/m, which is this unit under another name; the conversion is
         pinned in the data file's ``about``.
     :ivar porosity: Open porosity, where the fit that produced the resistivity
-        also produced one.
+        also produced one, as the fraction of the volume that is open, from 0
+        to 1. Cox's Table 6.7 prints six of its porosities as 26.9 to 58.1 in
+        a column that prints a fraction on every other row and states no
+        unit; a porosity of 36.5 is not a porosity, so those six cells are
+        empty, and :meth:`~phonometry.io.CatalogueRow.why_missing` quotes the
+        figure the page prints.
     :ivar water_content_percent: Water content of the specimen, per cent, for
         the sands Cox tabulates wet and dry. The resistivity of a sand is not
         monotonic in it, which is the point of printing it.
@@ -116,9 +121,6 @@ class GroundSurface(CatalogueRow):
 #    including the cell Cox prints with two decimal points in it.
 # ---------------------------------------------------------------------------
 
-#: The row fields the data files write as a list and the row holds as a set.
-_SETS = ("approximate", "bounded_above", "bounded_below")
-
 #: The published tables this catalogue reads.
 _TABLES = (
     "bies-2017-table-5-1",
@@ -136,7 +138,7 @@ def _transcribed() -> dict[str, GroundSurface]:
         )
         for row in published:
             rows[f"{table}/{row['key']}"] = GroundSurface(
-                source=source, table=table, **take(row, frozen=_SETS)
+                source=source, table=table, **take(row)
             )
     return rows
 

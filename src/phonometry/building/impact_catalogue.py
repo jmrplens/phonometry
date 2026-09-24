@@ -189,9 +189,6 @@ class ImpactInsulation(CatalogueRow):
     layer_density_kg_m3: float | None = None
 
 
-#: The hedges these tables spell as a set rather than a mapping.
-_SETS = ("approximate", "bounded_above", "bounded_below")
-
 #: The data files this catalogue reads. The first holds eight printed tables
 #: that number their constructions straight through, so they are one file; the
 #: other three number nothing and are one file per printed table.
@@ -210,9 +207,7 @@ def _load() -> dict[str, ImpactInsulation]:
         source, records = read_table("phonometry.building", f"{table}.json")
         for record in records:
             key = f"{table}/{record['key']}"
-            rows[key] = ImpactInsulation(
-                table=table, source=source, **take(record, frozen=_SETS)
-            )
+            rows[key] = ImpactInsulation(table=table, source=source, **take(record))
     return rows
 
 

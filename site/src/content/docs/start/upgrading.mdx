@@ -518,6 +518,48 @@ print(rebond.attributed_to["row"], round(rebond.natural_frequency(mass_per_area_
 # Hopkins and Hall (2006) 43.6
 ```
 
+## A catalogue row checks itself when it is built
+
+Every catalogue row is checked in its constructor, whether the library builds
+it from a packaged table or a caller builds it by hand, and a cell nothing
+downstream could read raises `io.CatalogueError`, naming the row and the
+field. Code written against the main branch in between that relied on any of
+these being accepted has to change:
+
+| Accepted before | 4.0 |
+| --- | --- |
+| `NaN`, an infinity, `True` or a text such as `"0,97"` in a numeric field | `CatalogueError`; a cell the page leaves empty is `None` |
+| a fraction in a whole-number field (`year`), `1` in a flag field (`has_section_drawing`), a number in a text field | `CatalogueError` |
+| an empty `name` or `source`, or a hedge whose text is empty, as in `misprinted={"porosity": ""}` | `CatalogueError`; `why_missing` answered `""` for that cell, which hid the hedge |
+| a hedge keyed by a field the class does not have, as in `ranges={"no_such_field": ...}`, or a hedge on a number (`ranges`, `approximate`, `unquantified`, ...) keyed by a text field | `CatalogueError`, naming the hedge and the key |
+| `bounded_above` or `bounded_below` on a field with no range; a range, or an interval among the `reported` readings, with an end that is not finite or with its low end above its high one; a `reported` list with nothing in it; an `uncertainty` below zero | `CatalogueError` |
+| a value beside `misprinted`, `unquantified`, `not_derivable` or `reported` on the same field; a `converted` or `carried` entry on a field that holds nothing | `CatalogueError`: the first four say there is no value to serve, the last two have nothing to describe |
+| a value below zero in a field whose name ends in `_kg_m3`, `_kg_m2`, `_kg`, `_kg_mol`, `_m_s`, `_pa`, `_pa_s_m2`, `_pa_s_m`, `_n_m3`, `_mm`, `_um`, `_m`, `_m2`, `_m_hz` or `_per_cm` (a density, a mass per area, a mass, a molar mass, a speed, a pressure or modulus, a flow resistivity, a specific flow resistance, a stiffness per area, a length, an area, a thickness-frequency product, a count per centimetre); a porosity outside 0 to 1; `shot_content_percent`, `binder_content_percent` or `adhered_area_percent` outside 0 to 100 | `CatalogueError`; a Celsius temperature, a decay rate per metre and a level in decibels stay signed |
+| `approximate=[...]` kept as the list it was given, a mapping kept as the dict | a `frozenset`, and every mapping frozen all the way down, its pairs into tuples |
+| a subclass field annotated with a type the contract has no check for, a bare `float` or `int` included | `TypeError` the first time the class is built; a field is `float \| None` (`Optional[float]` is the same), `int \| None`, `bool`, `str`, `frozenset[str]` or a `Mapping[str, ...]` of those, because every cell of a row may be missing |
+| `PorousMaterial.frame_constants()` on a row without `structural_loss_factor`, read as a frame that dissipates nothing | `ValueError`, saying what the page had in that cell |
+| `GroundSurface.porosity` holding 26.9 to 58.1 on six rows of Cox & D'Antonio Table 6.7, which the page prints in per cent in a column of fractions that states no unit | `None`, with `misprinted["porosity"]` quoting the figure the page prints; `why_missing("porosity")` and `printed("porosity")` say so |
+
+Every other packaged row already met the contract, so those six porosities are
+the only published cells that change, and every published porous row with
+both moduli prints its loss factor.
+
+```python
+from phonometry import io, materials
+
+try:
+    materials.PorousMaterial(name="Panel core", source="a datasheet", porosity=97.0)
+except io.CatalogueError as error:
+    print(error)
+# 'Panel core': porosity is 97.0, and a porosity is a fraction from 0 to 1
+
+carpet = materials.Carpet(
+    name="Loop pile", source="a datasheet", pile_height_mm=6.0, approximate=["pile_height_mm"]
+)
+print(carpet.approximate)
+# frozenset({'pile_height_mm'})
+```
+
 ## The ten names that are gone
 
 Everything else moved. These ten exist in no public module:

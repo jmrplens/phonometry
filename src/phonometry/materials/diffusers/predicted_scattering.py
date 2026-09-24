@@ -94,9 +94,6 @@ class PredictedScatteringSpectrum(ScatteringBands):
     model: str = ""
 
 
-#: The hedges these tables spell as a set rather than a mapping.
-_SETS = ("approximate", "bounded_above", "bounded_below")
-
 #: The published tables this catalogue reads, one data file per table.
 _TABLES = ("cox-2017-table-c1", "cox-2017-table-c2", "cox-2017-table-c3")
 
@@ -109,7 +106,7 @@ def _load() -> dict[str, PredictedScatteringSpectrum]:
         for record in records:
             key = f"{table}/{record['key']}"
             rows[key] = PredictedScatteringSpectrum(
-                table=table, source=source, **take(record, frozen=_SETS)
+                table=table, source=source, **take(record)
             )
     return rows
 

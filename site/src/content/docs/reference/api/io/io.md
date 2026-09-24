@@ -46,8 +46,12 @@ file too, and the type they share lives here: [`CatalogueRow`](/phonometry/refer
 row keeps the same hedges (a range, a bound, a word, a value converted from
 the unit the page prints, a cell carried from another row) and says what
 its source claims for each cell through [`CatalogueRow.basis_of`](/phonometry/reference/api/io/io/#cataloguerowbasis_of), one of
-[`CATALOGUE_BASES`](/phonometry/reference/api/io/io/#catalogue_bases). [`CatalogueError`](/phonometry/reference/api/io/io/#catalogueerror) is what a catalogue raises
-when its cells contradict each other.
+[`CATALOGUE_BASES`](/phonometry/reference/api/io/io/#catalogue_bases). A row checks itself when it is built, whether a
+packaged table or a caller builds it, and [`CatalogueError`](/phonometry/reference/api/io/io/#catalogueerror) is what it
+raises for a cell nothing downstream can read: a number that is not finite
+or is text, a hedge on a field the row does not have, a value beside a hedge
+that says there is none, a density below zero. A packaged table raises it
+too for text that is not strict JSON or a table missing its citation.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
@@ -393,9 +397,13 @@ CATALOGUE_BASES = ('measured', 'declared', 'calculated', 'estimated', 'extended'
 A catalogue that does not say what a reader needs to trust it.
 
 Raised for a table document that is missing what every table needs (a
-citation, an `about`, rows, a key per row) and for a row whose cells
-contradict each other, such as a bound with no printed end. A
-`ValueError`, because the data is wrong and not the call.
+citation, an `about`, rows, a key per row) or that holds what JSON
+does not (a `NaN`, a name written twice in one object), and for a row
+that breaks the contract every row is held to when it is built: a
+numeric cell holding text or a `NaN`, a hedge naming a field the row
+does not have, a bound with no printed end, a density below zero. A
+`ValueError`, because the data is wrong and not the call, whether
+it came from a file or from a caller building a row by hand.
 
 ## CatalogueRow
 
@@ -442,6 +450,60 @@ catalogue of the library publishes is the same, and it leaves out
 `slots=True`: on the Python 3.13 releases that predate the fix, a
 slotted dataclass that calls `super()` without arguments, as a
 `__post_init__` does, raises `TypeError` when it is built.
+
+**A row checks itself when it is built**, whoever builds it, and refuses
+with [`CatalogueError`](/phonometry/reference/api/io/io/#catalogueerror) rather than holding a cell nothing
+downstream can read. The check is the same for a packaged row, a row a
+reader builds from a file and a row written by hand:
+
+1. `name` and `source` are text that is not empty, and so is
+   every text a hedge holds: `why_missing` hands a
+   `misprinted` or `not_derivable` text back as it is, and
+   an empty one would answer as a cell that is not missing at all.
+2. A numeric field holds `None` or a finite number, never a `bool`, a
+   text or a `NaN`; an `int` field a whole number; a `bool` field
+   `True` or `False`; a text field text.
+3. A set of field names (`approximate` and the bounds) is frozen
+   into a `frozenset`, whatever it was written as.
+4. Every mapping is frozen, all the way down: its pairs into tuples.
+5. Every key of a hedge names a numeric field of the row. `basis`
+   and `attributed_to` also take the `"row"`, and a credit the
+   `"table"`; `derived`, `carried` and `misprinted`
+   may name a text field too (but not `source` or `table`,
+   which are not cells of the page), because a page misprints a name or
+   gives a description by reference to another row.
+6. `bounded_above` and `bounded_below` name only fields that
+   have a range.
+7. A range's ends are finite, the low one no higher than the high one,
+   and the end the page printed is there; an interval among the
+   readings of `reported` runs from low to high as well.
+8. A list in `reported` holds at least one reading, and its
+   readings are finite; an `uncertainty` is finite and not below
+   zero.
+9. A field in `unquantified`, `not_derivable` or
+   `reported`, or a numeric field in `misprinted`, holds no
+   value; a field in `converted` or `carried` holds
+   something: a value, a range or a list.
+10. `basis` holds only the words of [`CATALOGUE_BASES`](/phonometry/reference/api/io/io/#catalogue_bases).
+11. A quantity whose unit cannot be negative is not: a field ending in
+    `_kg_m3`, `_kg_m2`, `_kg`, `_kg_mol`, `_m_s`, `_pa`,
+    `_pa_s_m2`, `_pa_s_m`, `_n_m3`, `_mm`, `_um`, `_m`,
+    `_m2`, `_m_hz` or `_per_cm`, in its value, its range and its
+    readings. A `porosity` runs from 0 to 1, and the per-cent fields
+    that are a share of a whole (`shot_content_percent`,
+    `binder_content_percent` and `adhered_area_percent`) from 0 to
+    100.
+    Nothing else is bounded: a Celsius temperature, a decay rate per
+    metre and a level in decibels can be negative, and a size is never
+    a reason to refuse a number.
+
+The fields are told apart by their resolved annotations, once per
+class, so a subclass annotates each of its own fields as one of
+`float | None` (`Optional[float]` is the same annotation),
+`int | None`, `bool`, `str`, `frozenset[str]` or
+`Mapping[str, ...]` of those; any other annotation, a bare `float`
+or `int` included, raises `TypeError` the first time the class
+is built, rather than letting a field through unchecked.
 
 **Attributes**
 

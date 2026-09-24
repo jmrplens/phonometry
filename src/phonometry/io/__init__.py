@@ -40,8 +40,12 @@ file too, and the type they share lives here: :class:`CatalogueRow`, with
 row keeps the same hedges (a range, a bound, a word, a value converted from
 the unit the page prints, a cell carried from another row) and says what
 its source claims for each cell through :meth:`CatalogueRow.basis_of`, one of
-:data:`CATALOGUE_BASES`. :class:`CatalogueError` is what a catalogue raises
-when its cells contradict each other.
+:data:`CATALOGUE_BASES`. A row checks itself when it is built, whether a
+packaged table or a caller builds it, and :class:`CatalogueError` is what it
+raises for a cell nothing downstream can read: a number that is not finite
+or is text, a hedge on a field the row does not have, a value beside a hedge
+that says there is none, a density below zero. A packaged table raises it
+too for text that is not strict JSON or a table missing its citation.
 """
 
 from __future__ import annotations

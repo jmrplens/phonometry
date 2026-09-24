@@ -534,6 +534,49 @@ print(rebond.attributed_to["row"], round(rebond.natural_frequency(mass_per_area_
 # Hopkins and Hall (2006) 43.6
 ```
 
+## Una fila de catálogo se comprueba al construirse
+
+Toda fila de catálogo se comprueba en su constructor, la construya la
+biblioteca a partir de una tabla empaquetada o quien llama a mano, y una celda
+que nada de lo que viene después podría leer lanza `io.CatalogueError`,
+nombrando la fila y el campo. El código escrito entretanto contra la rama
+principal que contara con que se aceptara algo de lo siguiente tiene que
+cambiar:
+
+| Antes se aceptaba | 4.0 |
+| --- | --- |
+| `NaN`, un infinito, `True` o un texto como `"0,97"` en un campo numérico | `CatalogueError`; una celda que la página deja vacía es `None` |
+| una fracción en un campo entero (`year`), `1` en un campo booleano (`has_section_drawing`), un número en un campo de texto | `CatalogueError` |
+| un `name` o un `source` vacíos, o un matiz cuyo texto está vacío, como `misprinted={"porosity": ""}` | `CatalogueError`; `why_missing` respondía `""` para esa celda, lo que escondía el matiz |
+| un matiz con la clave de un campo que la clase no tiene, como en `ranges={"no_such_field": ...}`, o un matiz sobre un número (`ranges`, `approximate`, `unquantified`, ...) con la clave de un campo de texto | `CatalogueError`, que nombra el matiz y la clave |
+| `bounded_above` o `bounded_below` sobre un campo sin intervalo; un intervalo, o uno de los intervalos de las lecturas de `reported`, con un extremo que no es finito o con el extremo bajo por encima del alto; una lista de `reported` sin nada dentro; una `uncertainty` negativa | `CatalogueError` |
+| un valor junto a `misprinted`, `unquantified`, `not_derivable` o `reported` en el mismo campo; una entrada de `converted` o `carried` en un campo que no guarda nada | `CatalogueError`: los cuatro primeros dicen que no hay valor que servir, y los dos últimos no tienen nada que describir |
+| un valor negativo en un campo cuyo nombre acaba en `_kg_m3`, `_kg_m2`, `_kg`, `_kg_mol`, `_m_s`, `_pa`, `_pa_s_m2`, `_pa_s_m`, `_n_m3`, `_mm`, `_um`, `_m`, `_m2`, `_m_hz` o `_per_cm` (una densidad, una masa por unidad de superficie, una masa, una masa molar, una velocidad, una presión o un módulo, una resistividad al flujo, una resistencia al flujo específica, una rigidez por unidad de superficie, una longitud, un área, un producto espesor por frecuencia, una cuenta por centímetro); una porosidad fuera de 0 a 1; `shot_content_percent`, `binder_content_percent` o `adhered_area_percent` fuera de 0 a 100 | `CatalogueError`; una temperatura en grados Celsius, una tasa de decaimiento por metro y un nivel en decibelios siguen pudiendo ser negativos |
+| `approximate=[...]` guardado como la lista que se le dio, un mapeo guardado como el diccionario | un `frozenset`, y todo mapeo congelado hasta el fondo, con sus pares en tuplas |
+| un campo de una subclase anotado con un tipo para el que el contrato no tiene comprobación, un `float` o un `int` a secas incluidos | `TypeError` la primera vez que se construye la clase; un campo es `float \| None` (`Optional[float]` es lo mismo), `int \| None`, `bool`, `str`, `frozenset[str]` o un `Mapping[str, ...]` de ellos, porque cualquier celda de una fila puede faltar |
+| `PorousMaterial.frame_constants()` sobre una fila sin `structural_loss_factor`, leída como un esqueleto que no disipa nada | `ValueError`, que dice qué tenía la página en esa celda |
+| `GroundSurface.porosity` con valores de 26,9 a 58,1 en seis filas de la Tabla 6.7 de Cox y D'Antonio, que la página imprime en tanto por ciento en una columna de fracciones que no dice su unidad | `None`, con `misprinted["porosity"]` citando la cifra que imprime la página; `why_missing("porosity")` y `printed("porosity")` lo dicen |
+
+Todas las demás filas empaquetadas cumplían ya el contrato, así que esas seis
+porosidades son las únicas celdas publicadas que cambian, y todas las filas
+porosas publicadas con los dos módulos imprimen su factor de pérdidas.
+
+```python
+from phonometry import io, materials
+
+try:
+    materials.PorousMaterial(name="Panel core", source="a datasheet", porosity=97.0)
+except io.CatalogueError as error:
+    print(error)
+# 'Panel core': porosity is 97.0, and a porosity is a fraction from 0 to 1
+
+carpet = materials.Carpet(
+    name="Loop pile", source="a datasheet", pile_height_mm=6.0, approximate=["pile_height_mm"]
+)
+print(carpet.approximate)
+# frozenset({'pile_height_mm'})
+```
+
 ## Los diez nombres que ya no están
 
 Todo lo demás se movió. Estos diez no existen en ningún módulo público:

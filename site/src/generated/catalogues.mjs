@@ -416,14 +416,14 @@ export const catalogues = {
           {
             "text": "10,8",
             "kind": "derived",
-            "note": "from the plate speed, the density and the Poisson ratio",
-            "noteEs": "a partir de la velocidad de placa, la densidad y el coeficiente de Poisson"
+            "note": "from the plate speed, the density and the Poisson ratio; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir de la velocidad de placa, la densidad y el coeficiente de Poisson; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "4,5",
             "kind": "derived",
-            "note": "from the modulus and the Poisson ratio",
-            "noteEs": "a partir del módulo y el coeficiente de Poisson"
+            "note": "from the modulus and the Poisson ratio; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo y el coeficiente de Poisson; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "0,2",
@@ -438,8 +438,8 @@ export const catalogues = {
           {
             "text": "2 449",
             "kind": "derived",
-            "note": "from the modulus and the density",
-            "noteEs": "a partir del módulo y la densidad"
+            "note": "from the modulus and the density; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo y la densidad; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "2 500",
@@ -449,14 +449,14 @@ export const catalogues = {
           {
             "text": "2 582",
             "kind": "derived",
-            "note": "from the modulus, the density and the Poisson ratio",
-            "noteEs": "a partir del módulo, la densidad y el coeficiente de Poisson"
+            "note": "from the modulus, the density and the Poisson ratio; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo, la densidad y el coeficiente de Poisson; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "1 581",
             "kind": "derived",
-            "note": "from the shear modulus and the density",
-            "noteEs": "a partir del módulo de cizalla y la densidad"
+            "note": "from the shear modulus and the density; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo de cizalla y la densidad; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "",
@@ -517,14 +517,14 @@ export const catalogues = {
           {
             "text": "3,347",
             "kind": "derived",
-            "note": "from the plate speed, the density and the Poisson ratio",
-            "noteEs": "a partir de la velocidad de placa, la densidad y el coeficiente de Poisson"
+            "note": "from the plate speed, the density and the Poisson ratio; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir de la velocidad de placa, la densidad y el coeficiente de Poisson; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "1,287",
             "kind": "derived",
-            "note": "from the modulus and the Poisson ratio",
-            "noteEs": "a partir del módulo y el coeficiente de Poisson"
+            "note": "from the modulus and the Poisson ratio; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo y el coeficiente de Poisson; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "0,3",
@@ -539,8 +539,8 @@ export const catalogues = {
           {
             "text": "2 099",
             "kind": "derived",
-            "note": "from the modulus and the density",
-            "noteEs": "a partir del módulo y la densidad"
+            "note": "from the modulus and the density; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo y la densidad; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "2 200",
@@ -550,14 +550,14 @@ export const catalogues = {
           {
             "text": "2 435",
             "kind": "derived",
-            "note": "from the modulus, the density and the Poisson ratio",
-            "noteEs": "a partir del módulo, la densidad y el coeficiente de Poisson"
+            "note": "from the modulus, the density and the Poisson ratio; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo, la densidad y el coeficiente de Poisson; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "1 302",
             "kind": "derived",
-            "note": "from the shear modulus and the density",
-            "noteEs": "a partir del módulo de cizalla y la densidad"
+            "note": "from the shear modulus and the density; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo de cizalla y la densidad; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "",
@@ -618,14 +618,14 @@ export const catalogues = {
           {
             "text": "3,384",
             "kind": "derived",
-            "note": "from the plate speed, the density and the Poisson ratio",
-            "noteEs": "a partir de la velocidad de placa, la densidad y el coeficiente de Poisson"
+            "note": "from the plate speed, the density and the Poisson ratio; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir de la velocidad de placa, la densidad y el coeficiente de Poisson; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "1,41",
             "kind": "derived",
-            "note": "from the modulus and the Poisson ratio",
-            "noteEs": "a partir del módulo y el coeficiente de Poisson"
+            "note": "from the modulus and the Poisson ratio; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo y el coeficiente de Poisson; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "0,2",
@@ -640,8 +640,8 @@ export const catalogues = {
           {
             "text": "1 813",
             "kind": "derived",
-            "note": "from the modulus and the density",
-            "noteEs": "a partir del módulo y la densidad"
+            "note": "from the modulus and the density; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo y la densidad; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "1 850",
@@ -651,14 +651,14 @@ export const catalogues = {
           {
             "text": "1 911",
             "kind": "derived",
-            "note": "from the modulus, the density and the Poisson ratio",
-            "noteEs": "a partir del módulo, la densidad y el coeficiente de Poisson"
+            "note": "from the modulus, the density and the Poisson ratio; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo, la densidad y el coeficiente de Poisson; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "1 170",
             "kind": "derived",
-            "note": "from the shear modulus and the density",
-            "noteEs": "a partir del módulo de cizalla y la densidad"
+            "note": "from the shear modulus and the density; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo de cizalla y la densidad; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "",
@@ -719,14 +719,14 @@ export const catalogues = {
           {
             "text": "7,992",
             "kind": "derived",
-            "note": "from the plate speed, the density and the Poisson ratio",
-            "noteEs": "a partir de la velocidad de placa, la densidad y el coeficiente de Poisson"
+            "note": "from the plate speed, the density and the Poisson ratio; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir de la velocidad de placa, la densidad y el coeficiente de Poisson; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "3,33",
             "kind": "derived",
-            "note": "from the modulus and the Poisson ratio",
-            "noteEs": "a partir del módulo y el coeficiente de Poisson"
+            "note": "from the modulus and the Poisson ratio; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo y el coeficiente de Poisson; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "0,2",
@@ -741,8 +741,8 @@ export const catalogues = {
           {
             "text": "2 156",
             "kind": "derived",
-            "note": "from the modulus and the density",
-            "noteEs": "a partir del módulo y la densidad"
+            "note": "from the modulus and the density; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo y la densidad; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "2 200",
@@ -752,14 +752,14 @@ export const catalogues = {
           {
             "text": "2 272",
             "kind": "derived",
-            "note": "from the modulus, the density and the Poisson ratio",
-            "noteEs": "a partir del módulo, la densidad y el coeficiente de Poisson"
+            "note": "from the modulus, the density and the Poisson ratio; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo, la densidad y el coeficiente de Poisson; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "1 391",
             "kind": "derived",
-            "note": "from the shear modulus and the density",
-            "noteEs": "a partir del módulo de cizalla y la densidad"
+            "note": "from the shear modulus and the density; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo de cizalla y la densidad; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "",
@@ -820,14 +820,14 @@ export const catalogues = {
           {
             "text": "6,041",
             "kind": "derived",
-            "note": "from the plate speed, the density and the Poisson ratio",
-            "noteEs": "a partir de la velocidad de placa, la densidad y el coeficiente de Poisson"
+            "note": "from the plate speed, the density and the Poisson ratio; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir de la velocidad de placa, la densidad y el coeficiente de Poisson; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "2,517",
             "kind": "derived",
-            "note": "from the modulus and the Poisson ratio",
-            "noteEs": "a partir del módulo y el coeficiente de Poisson"
+            "note": "from the modulus and the Poisson ratio; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo y el coeficiente de Poisson; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "0,2",
@@ -842,8 +842,8 @@ export const catalogues = {
           {
             "text": "1 871",
             "kind": "derived",
-            "note": "from the modulus and the density",
-            "noteEs": "a partir del módulo y la densidad"
+            "note": "from the modulus and the density; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo y la densidad; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "1 910",
@@ -853,14 +853,14 @@ export const catalogues = {
           {
             "text": "1 973",
             "kind": "derived",
-            "note": "from the modulus, the density and the Poisson ratio",
-            "noteEs": "a partir del módulo, la densidad y el coeficiente de Poisson"
+            "note": "from the modulus, the density and the Poisson ratio; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo, la densidad y el coeficiente de Poisson; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "1 208",
             "kind": "derived",
-            "note": "from the shear modulus and the density",
-            "noteEs": "a partir del módulo de cizalla y la densidad"
+            "note": "from the shear modulus and the density; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo de cizalla y la densidad; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "",
@@ -921,14 +921,14 @@ export const catalogues = {
           {
             "text": "30,5",
             "kind": "derived",
-            "note": "from the plate speed, the density and the Poisson ratio",
-            "noteEs": "a partir de la velocidad de placa, la densidad y el coeficiente de Poisson"
+            "note": "from the plate speed, the density and the Poisson ratio; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir de la velocidad de placa, la densidad y el coeficiente de Poisson; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "12,71",
             "kind": "derived",
-            "note": "from the modulus and the Poisson ratio",
-            "noteEs": "a partir del módulo y el coeficiente de Poisson"
+            "note": "from the modulus and the Poisson ratio; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo y el coeficiente de Poisson; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "0,2",
@@ -943,8 +943,8 @@ export const catalogues = {
           {
             "text": "3 723",
             "kind": "derived",
-            "note": "from the modulus and the density",
-            "noteEs": "a partir del módulo y la densidad"
+            "note": "from the modulus and the density; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo y la densidad; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "3 800",
@@ -954,14 +954,14 @@ export const catalogues = {
           {
             "text": "3 925",
             "kind": "derived",
-            "note": "from the modulus, the density and the Poisson ratio",
-            "noteEs": "a partir del módulo, la densidad y el coeficiente de Poisson"
+            "note": "from the modulus, the density and the Poisson ratio; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo, la densidad y el coeficiente de Poisson; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "2 403",
             "kind": "derived",
-            "note": "from the shear modulus and the density",
-            "noteEs": "a partir del módulo de cizalla y la densidad"
+            "note": "from the shear modulus and the density; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo de cizalla y la densidad; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "",
@@ -1022,14 +1022,14 @@ export const catalogues = {
           {
             "text": "19,66",
             "kind": "derived",
-            "note": "from the plate speed, the density and the Poisson ratio",
-            "noteEs": "a partir de la velocidad de placa, la densidad y el coeficiente de Poisson"
+            "note": "from the plate speed, the density and the Poisson ratio; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir de la velocidad de placa, la densidad y el coeficiente de Poisson; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "8,192",
             "kind": "derived",
-            "note": "from the modulus and the Poisson ratio",
-            "noteEs": "a partir del módulo y el coeficiente de Poisson"
+            "note": "from the modulus and the Poisson ratio; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo y el coeficiente de Poisson; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "0,2",
@@ -1044,8 +1044,8 @@ export const catalogues = {
           {
             "text": "3 135",
             "kind": "derived",
-            "note": "from the modulus and the density",
-            "noteEs": "a partir del módulo y la densidad"
+            "note": "from the modulus and the density; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo y la densidad; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "3 200",
@@ -1055,14 +1055,14 @@ export const catalogues = {
           {
             "text": "3 305",
             "kind": "derived",
-            "note": "from the modulus, the density and the Poisson ratio",
-            "noteEs": "a partir del módulo, la densidad y el coeficiente de Poisson"
+            "note": "from the modulus, the density and the Poisson ratio; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo, la densidad y el coeficiente de Poisson; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "2 024",
             "kind": "derived",
-            "note": "from the shear modulus and the density",
-            "noteEs": "a partir del módulo de cizalla y la densidad"
+            "note": "from the shear modulus and the density; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo de cizalla y la densidad; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "",
@@ -1123,14 +1123,14 @@ export const catalogues = {
           {
             "text": "4,063",
             "kind": "derived",
-            "note": "from the plate speed, the density and the Poisson ratio",
-            "noteEs": "a partir de la velocidad de placa, la densidad y el coeficiente de Poisson"
+            "note": "from the plate speed, the density and the Poisson ratio; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir de la velocidad de placa, la densidad y el coeficiente de Poisson; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "1,693",
             "kind": "derived",
-            "note": "from the modulus and the Poisson ratio",
-            "noteEs": "a partir del módulo y el coeficiente de Poisson"
+            "note": "from the modulus and the Poisson ratio; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo y el coeficiente de Poisson; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "0,2",
@@ -1145,8 +1145,8 @@ export const catalogues = {
           {
             "text": "2 254",
             "kind": "derived",
-            "note": "from the modulus and the density",
-            "noteEs": "a partir del módulo y la densidad"
+            "note": "from the modulus and the density; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo y la densidad; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "2 300",
@@ -1156,14 +1156,14 @@ export const catalogues = {
           {
             "text": "2 375",
             "kind": "derived",
-            "note": "from the modulus, the density and the Poisson ratio",
-            "noteEs": "a partir del módulo, la densidad y el coeficiente de Poisson"
+            "note": "from the modulus, the density and the Poisson ratio; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo, la densidad y el coeficiente de Poisson; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "1 455",
             "kind": "derived",
-            "note": "from the shear modulus and the density",
-            "noteEs": "a partir del módulo de cizalla y la densidad"
+            "note": "from the shear modulus and the density; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo de cizalla y la densidad; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "",
@@ -1327,14 +1327,14 @@ export const catalogues = {
           {
             "text": "6,505",
             "kind": "derived",
-            "note": "from the plate speed, the density and the Poisson ratio",
-            "noteEs": "a partir de la velocidad de placa, la densidad y el coeficiente de Poisson"
+            "note": "from the plate speed, the density and the Poisson ratio; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir de la velocidad de placa, la densidad y el coeficiente de Poisson; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "2,71",
             "kind": "derived",
-            "note": "from the modulus and the Poisson ratio",
-            "noteEs": "a partir del módulo y el coeficiente de Poisson"
+            "note": "from the modulus and the Poisson ratio; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo y el coeficiente de Poisson; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "0,2",
@@ -1349,8 +1349,8 @@ export const catalogues = {
           {
             "text": "2 156",
             "kind": "derived",
-            "note": "from the modulus and the density",
-            "noteEs": "a partir del módulo y la densidad"
+            "note": "from the modulus and the density; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo y la densidad; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "2 200",
@@ -1360,14 +1360,14 @@ export const catalogues = {
           {
             "text": "2 272",
             "kind": "derived",
-            "note": "from the modulus, the density and the Poisson ratio",
-            "noteEs": "a partir del módulo, la densidad y el coeficiente de Poisson"
+            "note": "from the modulus, the density and the Poisson ratio; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo, la densidad y el coeficiente de Poisson; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "1 391",
             "kind": "derived",
-            "note": "from the shear modulus and the density",
-            "noteEs": "a partir del módulo de cizalla y la densidad"
+            "note": "from the shear modulus and the density; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo de cizalla y la densidad; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "",
@@ -1428,14 +1428,14 @@ export const catalogues = {
           {
             "text": "4,532",
             "kind": "derived",
-            "note": "from the plate speed, the density and the Poisson ratio",
-            "noteEs": "a partir de la velocidad de placa, la densidad y el coeficiente de Poisson"
+            "note": "from the plate speed, the density and the Poisson ratio; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir de la velocidad de placa, la densidad y el coeficiente de Poisson; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "1,743",
             "kind": "derived",
-            "note": "from the modulus and the Poisson ratio",
-            "noteEs": "a partir del módulo y el coeficiente de Poisson"
+            "note": "from the modulus and the Poisson ratio; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo y el coeficiente de Poisson; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "0,3",
@@ -1450,8 +1450,8 @@ export const catalogues = {
           {
             "text": "2 442",
             "kind": "derived",
-            "note": "from the modulus and the density",
-            "noteEs": "a partir del módulo y la densidad"
+            "note": "from the modulus and the density; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo y la densidad; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "2 560",
@@ -1461,14 +1461,14 @@ export const catalogues = {
           {
             "text": "2 833",
             "kind": "derived",
-            "note": "from the modulus, the density and the Poisson ratio",
-            "noteEs": "a partir del módulo, la densidad y el coeficiente de Poisson"
+            "note": "from the modulus, the density and the Poisson ratio; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo, la densidad y el coeficiente de Poisson; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "1 515",
             "kind": "derived",
-            "note": "from the shear modulus and the density",
-            "noteEs": "a partir del módulo de cizalla y la densidad"
+            "note": "from the shear modulus and the density; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo de cizalla y la densidad; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "",
@@ -1630,14 +1630,14 @@ export const catalogues = {
           {
             "text": "3,546",
             "kind": "derived",
-            "note": "from the plate speed, the density and the Poisson ratio",
-            "noteEs": "a partir de la velocidad de placa, la densidad y el coeficiente de Poisson"
+            "note": "from the plate speed, the density and the Poisson ratio; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir de la velocidad de placa, la densidad y el coeficiente de Poisson; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "1,364",
             "kind": "derived",
-            "note": "from the modulus and the Poisson ratio",
-            "noteEs": "a partir del módulo y el coeficiente de Poisson"
+            "note": "from the modulus and the Poisson ratio; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo y el coeficiente de Poisson; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "0,3",
@@ -1652,8 +1652,8 @@ export const catalogues = {
           {
             "text": "2 452",
             "kind": "derived",
-            "note": "from the modulus and the density",
-            "noteEs": "a partir del módulo y la densidad"
+            "note": "from the modulus and the density; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo y la densidad; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "2 570",
@@ -1663,14 +1663,14 @@ export const catalogues = {
           {
             "text": "2 844",
             "kind": "derived",
-            "note": "from the modulus, the density and the Poisson ratio",
-            "noteEs": "a partir del módulo, la densidad y el coeficiente de Poisson"
+            "note": "from the modulus, the density and the Poisson ratio; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo, la densidad y el coeficiente de Poisson; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "1 520",
             "kind": "derived",
-            "note": "from the shear modulus and the density",
-            "noteEs": "a partir del módulo de cizalla y la densidad"
+            "note": "from the shear modulus and the density; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo de cizalla y la densidad; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "",
@@ -1732,14 +1732,14 @@ export const catalogues = {
           {
             "text": "6,282",
             "kind": "derived",
-            "note": "from the plate speed, the density and the Poisson ratio",
-            "noteEs": "a partir de la velocidad de placa, la densidad y el coeficiente de Poisson"
+            "note": "from the plate speed, the density and the Poisson ratio; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir de la velocidad de placa, la densidad y el coeficiente de Poisson; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "2,416",
             "kind": "derived",
-            "note": "from the modulus and the Poisson ratio",
-            "noteEs": "a partir del módulo y el coeficiente de Poisson"
+            "note": "from the modulus and the Poisson ratio; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo y el coeficiente de Poisson; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "0,3",
@@ -1754,8 +1754,8 @@ export const catalogues = {
           {
             "text": "2 242",
             "kind": "derived",
-            "note": "from the modulus and the density",
-            "noteEs": "a partir del módulo y la densidad"
+            "note": "from the modulus and the density; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo y la densidad; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "2 350",
@@ -1765,14 +1765,14 @@ export const catalogues = {
           {
             "text": "2 601",
             "kind": "derived",
-            "note": "from the modulus, the density and the Poisson ratio",
-            "noteEs": "a partir del módulo, la densidad y el coeficiente de Poisson"
+            "note": "from the modulus, the density and the Poisson ratio; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo, la densidad y el coeficiente de Poisson; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "1 390",
             "kind": "derived",
-            "note": "from the shear modulus and the density",
-            "noteEs": "a partir del módulo de cizalla y la densidad"
+            "note": "from the shear modulus and the density; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo de cizalla y la densidad; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "",
@@ -1832,14 +1832,14 @@ export const catalogues = {
           {
             "text": "1,617",
             "kind": "derived",
-            "note": "from the plate speed, the density and the Poisson ratio",
-            "noteEs": "a partir de la velocidad de placa, la densidad y el coeficiente de Poisson"
+            "note": "from the plate speed, the density and the Poisson ratio; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir de la velocidad de placa, la densidad y el coeficiente de Poisson; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "0,6739",
             "kind": "derived",
-            "note": "from the modulus and the Poisson ratio",
-            "noteEs": "a partir del módulo y el coeficiente de Poisson"
+            "note": "from the modulus and the Poisson ratio; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo y el coeficiente de Poisson; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "0,2",
@@ -1854,8 +1854,8 @@ export const catalogues = {
           {
             "text": "1 577",
             "kind": "derived",
-            "note": "from the modulus and the density",
-            "noteEs": "a partir del módulo y la densidad"
+            "note": "from the modulus and the density; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo y la densidad; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "1 610",
@@ -1865,14 +1865,14 @@ export const catalogues = {
           {
             "text": "1 663",
             "kind": "derived",
-            "note": "from the modulus, the density and the Poisson ratio",
-            "noteEs": "a partir del módulo, la densidad y el coeficiente de Poisson"
+            "note": "from the modulus, the density and the Poisson ratio; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo, la densidad y el coeficiente de Poisson; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "1 018",
             "kind": "derived",
-            "note": "from the shear modulus and the density",
-            "noteEs": "a partir del módulo de cizalla y la densidad"
+            "note": "from the shear modulus and the density; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo de cizalla y la densidad; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "",
@@ -1933,14 +1933,14 @@ export const catalogues = {
           {
             "text": "1,737",
             "kind": "derived",
-            "note": "from the plate speed, the density and the Poisson ratio",
-            "noteEs": "a partir de la velocidad de placa, la densidad y el coeficiente de Poisson"
+            "note": "from the plate speed, the density and the Poisson ratio; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir de la velocidad de placa, la densidad y el coeficiente de Poisson; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "0,6683",
             "kind": "derived",
-            "note": "from the modulus and the Poisson ratio",
-            "noteEs": "a partir del módulo y el coeficiente de Poisson"
+            "note": "from the modulus and the Poisson ratio; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo y el coeficiente de Poisson; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "0,3",
@@ -1955,8 +1955,8 @@ export const catalogues = {
           {
             "text": "1 421",
             "kind": "derived",
-            "note": "from the modulus and the density",
-            "noteEs": "a partir del módulo y la densidad"
+            "note": "from the modulus and the density; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo y la densidad; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "1 490",
@@ -1966,14 +1966,14 @@ export const catalogues = {
           {
             "text": "1 649",
             "kind": "derived",
-            "note": "from the modulus, the density and the Poisson ratio",
-            "noteEs": "a partir del módulo, la densidad y el coeficiente de Poisson"
+            "note": "from the modulus, the density and the Poisson ratio; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo, la densidad y el coeficiente de Poisson; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "881,5",
             "kind": "derived",
-            "note": "from the shear modulus and the density",
-            "noteEs": "a partir del módulo de cizalla y la densidad"
+            "note": "from the shear modulus and the density; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo de cizalla y la densidad; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "",
@@ -2034,14 +2034,14 @@ export const catalogues = {
           {
             "text": "2,027",
             "kind": "derived",
-            "note": "from the plate speed, the density and the Poisson ratio",
-            "noteEs": "a partir de la velocidad de placa, la densidad y el coeficiente de Poisson"
+            "note": "from the plate speed, the density and the Poisson ratio; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir de la velocidad de placa, la densidad y el coeficiente de Poisson; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "0,7797",
             "kind": "derived",
-            "note": "from the modulus and the Poisson ratio",
-            "noteEs": "a partir del módulo y el coeficiente de Poisson"
+            "note": "from the modulus and the Poisson ratio; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo y el coeficiente de Poisson; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "0,3",
@@ -2056,8 +2056,8 @@ export const catalogues = {
           {
             "text": "1 727",
             "kind": "derived",
-            "note": "from the modulus and the density",
-            "noteEs": "a partir del módulo y la densidad"
+            "note": "from the modulus and the density; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo y la densidad; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "1 810",
@@ -2067,14 +2067,14 @@ export const catalogues = {
           {
             "text": "2 003",
             "kind": "derived",
-            "note": "from the modulus, the density and the Poisson ratio",
-            "noteEs": "a partir del módulo, la densidad y el coeficiente de Poisson"
+            "note": "from the modulus, the density and the Poisson ratio; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo, la densidad y el coeficiente de Poisson; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "1 071",
             "kind": "derived",
-            "note": "from the shear modulus and the density",
-            "noteEs": "a partir del módulo de cizalla y la densidad"
+            "note": "from the shear modulus and the density; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo de cizalla y la densidad; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "",
@@ -2135,14 +2135,14 @@ export const catalogues = {
           {
             "text": "2,941",
             "kind": "derived",
-            "note": "from the plate speed, the density and the Poisson ratio",
-            "noteEs": "a partir de la velocidad de placa, la densidad y el coeficiente de Poisson"
+            "note": "from the plate speed, the density and the Poisson ratio; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir de la velocidad de placa, la densidad y el coeficiente de Poisson; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "1,131",
             "kind": "derived",
-            "note": "from the modulus and the Poisson ratio",
-            "noteEs": "a partir del módulo y el coeficiente de Poisson"
+            "note": "from the modulus and the Poisson ratio; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo y el coeficiente de Poisson; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "0,3",
@@ -2157,8 +2157,8 @@ export const catalogues = {
           {
             "text": "1 917",
             "kind": "derived",
-            "note": "from the modulus and the density",
-            "noteEs": "a partir del módulo y la densidad"
+            "note": "from the modulus and the density; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo y la densidad; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "2 010",
@@ -2168,14 +2168,14 @@ export const catalogues = {
           {
             "text": "2 225",
             "kind": "derived",
-            "note": "from the modulus, the density and the Poisson ratio",
-            "noteEs": "a partir del módulo, la densidad y el coeficiente de Poisson"
+            "note": "from the modulus, the density and the Poisson ratio; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo, la densidad y el coeficiente de Poisson; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "1 189",
             "kind": "derived",
-            "note": "from the shear modulus and the density",
-            "noteEs": "a partir del módulo de cizalla y la densidad"
+            "note": "from the shear modulus and the density; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo de cizalla y la densidad; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "",
@@ -2236,14 +2236,14 @@ export const catalogues = {
           {
             "text": "9,577",
             "kind": "derived",
-            "note": "from the plate speed, the density and the Poisson ratio",
-            "noteEs": "a partir de la velocidad de placa, la densidad y el coeficiente de Poisson"
+            "note": "from the plate speed, the density and the Poisson ratio; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir de la velocidad de placa, la densidad y el coeficiente de Poisson; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "3,683",
             "kind": "derived",
-            "note": "from the modulus and the Poisson ratio",
-            "noteEs": "a partir del módulo y el coeficiente de Poisson"
+            "note": "from the modulus and the Poisson ratio; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo y el coeficiente de Poisson; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "0,3",
@@ -2258,8 +2258,8 @@ export const catalogues = {
           {
             "text": "3 673",
             "kind": "derived",
-            "note": "from the modulus and the density",
-            "noteEs": "a partir del módulo y la densidad"
+            "note": "from the modulus and the density; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo y la densidad; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "3 850",
@@ -2269,14 +2269,14 @@ export const catalogues = {
           {
             "text": "4 261",
             "kind": "derived",
-            "note": "from the modulus, the density and the Poisson ratio",
-            "noteEs": "a partir del módulo, la densidad y el coeficiente de Poisson"
+            "note": "from the modulus, the density and the Poisson ratio; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo, la densidad y el coeficiente de Poisson; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "2 278",
             "kind": "derived",
-            "note": "from the shear modulus and the density",
-            "noteEs": "a partir del módulo de cizalla y la densidad"
+            "note": "from the shear modulus and the density; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo de cizalla y la densidad; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "",
@@ -2337,14 +2337,14 @@ export const catalogues = {
           {
             "text": "20,28",
             "kind": "derived",
-            "note": "from the plate speed, the density and the Poisson ratio",
-            "noteEs": "a partir de la velocidad de placa, la densidad y el coeficiente de Poisson"
+            "note": "from the plate speed, the density and the Poisson ratio; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir de la velocidad de placa, la densidad y el coeficiente de Poisson; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "8,45",
             "kind": "derived",
-            "note": "from the modulus and the Poisson ratio",
-            "noteEs": "a partir del módulo y el coeficiente de Poisson"
+            "note": "from the modulus and the Poisson ratio; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo y el coeficiente de Poisson; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "0,2",
@@ -2359,8 +2359,8 @@ export const catalogues = {
           {
             "text": "3 184",
             "kind": "derived",
-            "note": "from the modulus and the density",
-            "noteEs": "a partir del módulo y la densidad"
+            "note": "from the modulus and the density; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo y la densidad; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "3 250",
@@ -2370,14 +2370,14 @@ export const catalogues = {
           {
             "text": "3 357",
             "kind": "derived",
-            "note": "from the modulus, the density and the Poisson ratio",
-            "noteEs": "a partir del módulo, la densidad y el coeficiente de Poisson"
+            "note": "from the modulus, the density and the Poisson ratio; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo, la densidad y el coeficiente de Poisson; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "2 055",
             "kind": "derived",
-            "note": "from the shear modulus and the density",
-            "noteEs": "a partir del módulo de cizalla y la densidad"
+            "note": "from the shear modulus and the density; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo de cizalla y la densidad; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "",
@@ -2542,14 +2542,14 @@ export const catalogues = {
           {
             "text": "10,01",
             "kind": "derived",
-            "note": "from the plate speed, the density and the Poisson ratio",
-            "noteEs": "a partir de la velocidad de placa, la densidad y el coeficiente de Poisson"
+            "note": "from the plate speed, the density and the Poisson ratio; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir de la velocidad de placa, la densidad y el coeficiente de Poisson; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "3,85",
             "kind": "derived",
-            "note": "from the modulus and the Poisson ratio",
-            "noteEs": "a partir del módulo y el coeficiente de Poisson"
+            "note": "from the modulus and the Poisson ratio; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo y el coeficiente de Poisson; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "0,3",
@@ -2564,8 +2564,8 @@ export const catalogues = {
           {
             "text": "4 770",
             "kind": "derived",
-            "note": "from the modulus and the density",
-            "noteEs": "a partir del módulo y la densidad"
+            "note": "from the modulus and the density; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo y la densidad; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "5 000",
@@ -2575,14 +2575,14 @@ export const catalogues = {
           {
             "text": "5 534",
             "kind": "derived",
-            "note": "from the modulus, the density and the Poisson ratio",
-            "noteEs": "a partir del módulo, la densidad y el coeficiente de Poisson"
+            "note": "from the modulus, the density and the Poisson ratio; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo, la densidad y el coeficiente de Poisson; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "2 958",
             "kind": "derived",
-            "note": "from the shear modulus and the density",
-            "noteEs": "a partir del módulo de cizalla y la densidad"
+            "note": "from the shear modulus and the density; it rests on poisson_ratio (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source does not state",
+            "noteEs": "a partir del módulo de cizalla y la densidad; se apoya en poisson_ratio (una estimación) y en plate_longitudinal_speed_m_s y density_kg_m3, cuya base no indica la fuente"
           },
           {
             "text": "",

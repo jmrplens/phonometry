@@ -264,6 +264,7 @@ def test_the_published_tables_carry_every_accent() -> None:
         ("Decimación multitasa", [("Decimación", "Diezmado")]),
         ("sin decimación", [("decimación", "diezmado")]),
         ("a frecuencia decimada", [("decimada", "diezmada")]),
+        ("dos decimaciones", [("decimaciones", "diezmados")]),
     ],
 )
 def test_a_glossary_calque_is_found(text: str, found: list[tuple[str, str]]) -> None:

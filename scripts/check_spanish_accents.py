@@ -265,6 +265,7 @@ NEEDS_MARK: dict[str, str] = {
 GLOSSARY_TERMS: dict[str, str] = {
     "decimación": "diezmado",
     "decimacion": "diezmado",
+    "decimaciones": "diezmados",
     "decimado": "diezmado",
     "decimados": "diezmados",
     "decimada": "diezmada",

@@ -26,6 +26,14 @@ catalogues because the pages are: a range in a table of solids is a range in
 a table of porous materials. A row checks itself when it is built, whoever
 builds it: a data file, a loader or a caller writing one by hand.
 
+There are two ways to build one. The constructor is literal: the row holds
+what it is given, checked and frozen, and nothing more.
+:meth:`CatalogueRow.from_printed` is the one path that also works out what
+follows from the cells a page prints (a modulus from a speed and a density,
+an area in square metres from the page's square feet) and says so in the
+row. Every packaged loader builds its rows through it, so a row read from a
+data file and a row a caller builds from the same cells are the same row.
+
 The reader stays private. :class:`CatalogueRow`, :class:`BandedRow`,
 :class:`CatalogueError` and :data:`CATALOGUE_BASES` are public, from
 :mod:`phonometry.io`, because every catalogue of the library hands out rows
@@ -37,6 +45,7 @@ because the domain packages that publish the rows import them, and
 
 from __future__ import annotations
 
+import dataclasses
 import json
 import math
 import numbers
@@ -46,11 +55,18 @@ import weakref
 from collections.abc import Mapping
 from collections.abc import Set as AbstractSet
 from dataclasses import dataclass, field, fields
+from decimal import Decimal
+from fractions import Fraction
+from itertools import chain
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, ClassVar, NamedTuple, NoReturn
+from typing import TYPE_CHECKING, Any, ClassVar, NamedTuple, NoReturn, Self
+
+import numpy as np
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Iterator
+    from collections.abc import Callable, Iterator, Sequence
+
+    from numpy.typing import ArrayLike, NDArray
 
 _REQUIRED = ("source", "about", "rows")
 
@@ -300,7 +316,8 @@ def take(row: Mapping[str, Any]) -> dict[str, Any]:
     names when it is built.
 
     :param row: One row as :func:`read_table` returned it.
-    :return: The remaining fields, ready to splat into the dataclass.
+    :return: The remaining fields, ready to pass to
+        :meth:`CatalogueRow.from_printed`.
     """
     return {name: value for name, value in row.items() if name != "key"}
 
@@ -673,6 +690,276 @@ def _classify(cls: type) -> _Shape:
     return _Shape(tuple(checks), numeric, values, cells, texts, limits)
 
 
+# ---------------------------------------------------------------------------
+# Building a row from the cells a page prints: a figure in another unit
+# converted exactly, and what follows from the cells worked out and marked
+# ---------------------------------------------------------------------------
+class UnitAlias(NamedTuple):
+    """A unit a page prints a field in that is not the one the row holds.
+
+    A table set in feet prints an absorption area in square feet, and the row
+    holds square metres, because a field named ``_m2`` holds square metres or
+    it lies. The cells name the page's figure after the field, with this
+    suffix in place of the row's own (``absorption_area_125_ft2`` for
+    ``absorption_area_125_m2``), and :meth:`CatalogueRow.from_printed`
+    converts it and records the figure and its unit in
+    :attr:`CatalogueRow.converted`. A row class lists the aliases it takes in
+    its ``_unit_aliases``.
+    """
+
+    #: The suffix the figure is written under, as ``"_ft2"``.
+    suffix: str
+    #: The suffix of the field that holds the value, as ``"_m2"``.
+    target: str
+    #: One of the page's unit in the row's, exactly.
+    factor: Fraction
+    #: The unit as :attr:`CatalogueRow.converted` records it beside the
+    #: figure, as ``"sabins"``.
+    unit: str
+    #: Text fields the row has to fill for the figure to mean anything: an
+    #: area per unit of volume says what it is per in ``per``, whose default
+    #: is a person.
+    requires: tuple[str, ...] = ()
+
+
+def convert_figure(figure: str, factor: Fraction) -> float:
+    """The page's *figure* in the row's unit, rounded to a float once.
+
+    The figure is read as the decimal it is and multiplied by the exact
+    factor, and only the product is rounded. Multiplying two floats rounds
+    the figure, the factor and the product: 11.5 sabins times the
+    0.09290304 m2 of a square foot comes out as 1.0683849600000002 that way,
+    where the product of the two decimals is 1.06838496 exactly, and so is
+    the float it rounds to here.
+
+    :param figure: The number as the page prints it, in digits: ``"11.5"``,
+        ``"3e5"``.
+    :param factor: One of the page's unit in the row's, exactly.
+    :return: The float nearest the exact product.
+    """
+    return float(Fraction(figure) * factor)
+
+
+def _figure(value: object, where: str) -> str:
+    """The digits of a figure a cell holds, for :func:`convert_figure`.
+
+    A float is written by its shortest ``repr``, which for a number read
+    from text is the digits the text had; a decimal keeps its own.
+
+    :raises CatalogueError: for a value that is not a finite number.
+    """
+    if isinstance(value, Decimal):
+        if not value.is_finite():
+            _refuse(where, value, "a finite number")
+        return str(value)
+    _real(value, where)
+    if isinstance(value, numbers.Integral):
+        return str(int(value))
+    return repr(float(typing.cast("float", value)))
+
+
+def _alias_for(
+    written: str, aliases: tuple[UnitAlias, ...], names: AbstractSet[str]
+) -> UnitAlias | None:
+    """The alias *written* is a field name under, the longest suffix first."""
+    return max(
+        (
+            alias
+            for alias in aliases
+            if written.endswith(alias.suffix)
+            and f"{written.removesuffix(alias.suffix)}{alias.target}" in names
+        ),
+        key=lambda alias: len(alias.suffix),
+        default=None,
+    )
+
+
+def _resolve_units(cls: type[CatalogueRow], cells: dict[str, Any]) -> dict[str, Any]:
+    """*cells* with every figure written under a unit alias converted.
+
+    A name that is neither a field nor an alias of one is left for the
+    constructor, which refuses it as the unknown keyword it is.
+
+    :raises CatalogueError: naming the row and the cell, for a figure that
+        is not a finite number, for a cell given both under its own name and
+        under an alias, and for an alias whose figure needs a text field the
+        row leaves empty.
+    """
+    aliases = cls._unit_aliases
+    if not aliases:
+        return cells
+    names = frozenset(item.name for item in fields(cls))
+    resolved = dict(cells)
+    converted = dict(cells.get("converted") or {})
+    label = repr(cells.get("name"))
+    for written, value in cells.items():
+        alias = None if written in names else _alias_for(written, aliases, names)
+        if alias is None:
+            continue
+        target = f"{written.removesuffix(alias.suffix)}{alias.target}"
+        if target in resolved or target in converted:
+            msg = f"{label}: {written} and {target} are one cell, given twice"
+            raise CatalogueError(msg)
+        for need in alias.requires:
+            if not cells.get(need):
+                msg = (
+                    f"{label}: a figure in {alias.unit} ({written}) needs "
+                    f"{need} written beside it, to say what it is of"
+                )
+                raise CatalogueError(msg)
+        del resolved[written]
+        if value is None:
+            continue
+        try:
+            figure = _figure(value, written)
+        except CatalogueError as error:
+            msg = f"{label}: {error}"
+            raise CatalogueError(msg) from None
+        resolved[target] = convert_figure(figure, alias.factor)
+        converted[target] = (figure, alias.unit)
+    if converted:
+        resolved["converted"] = converted
+    return resolved
+
+
+def _joined(items: Sequence[str]) -> str:
+    """``a``, ``a and b`` or ``a, b and c``, for a list that is not empty."""
+    *head, last = items
+    return f"{', '.join(head)} and {last}" if head else last
+
+
+def _bases_named(cells: Sequence[str], bases: Sequence[str]) -> str:
+    """Which basis each printed cell a derived value rests on has.
+
+    Written only when they are not all one, so that a modulus worked out
+    from a speed and a density the source gives as they are and a Poisson
+    ratio it marks as an estimate does not read as a figure of one kind.
+    """
+    pairs = list(zip(cells, bases, strict=True))
+    stated = [f"{cell} ({basis})" for cell, basis in pairs if basis]
+    unstated = [cell for cell, basis in pairs if not basis]
+    text = f"it rests on {_joined(stated)}"
+    if unstated:
+        text += f" and on {_joined(unstated)}, whose basis the source does not state"
+    return text
+
+
+class Completion:
+    """One row's cells as the completion of its class fills them in.
+
+    :meth:`CatalogueRow.from_printed` builds the row from the printed cells
+    first, so that every cell is checked before any arithmetic reads it,
+    and then hands one of these to the class's ``_complete`` hook. The hook
+    reads a cell with :meth:`get`, which sees what it has filled so far, and
+    fills one with :meth:`fill`, naming the cells the value is worked out
+    from. What it filled becomes the row's values, and how, its
+    :attr:`~CatalogueRow.derived`.
+    """
+
+    __slots__ = ("_filled", "_how", "_inputs", "_row", "_said")
+
+    def __init__(self, row: CatalogueRow) -> None:
+        self._row = row
+        self._said = frozenset(
+            chain(
+                row.ranges,
+                row.reported,
+                row.unquantified,
+                row.not_derivable,
+                row.misprinted,
+            )
+        )
+        self._filled: dict[str, float] = {}
+        self._how: dict[str, str] = {}
+        self._inputs: dict[str, tuple[str, ...]] = {}
+
+    def get(self, field_name: str) -> float | None:
+        """A field's value, as the row holds it or as filled so far."""
+        if field_name in self._filled:
+            return self._filled[field_name]
+        return typing.cast("float | None", getattr(self._row, field_name))
+
+    def is_hedged(self, field_name: str) -> bool:
+        """Whether the row says something about a field other than a value.
+
+        A range, several readings, a word, a reason it is left empty, or a
+        misprint: each is the page's answer for that cell, and none of them
+        is a number arithmetic can take.
+        """
+        return field_name in self._said
+
+    def fill(
+        self, field_name: str, value: float, how: str, *, inputs: tuple[str, ...]
+    ) -> None:
+        """Hold *value* in a cell the page leaves empty, and say how.
+
+        Nothing is filled over a cell that holds a value, and nothing over a
+        cell the row says something else about. Bies prints a modulus of 18
+        to 30 GPa for normal concrete and a speed beside it, and a single
+        modulus worked back out of that speed would sit next to the interval
+        contradicting it. Bies leaves the speed of his aluminium honeycomb
+        panels blank on purpose, and ``not_derivable`` says why; a word or a
+        list the page printed has answered the cell already; and a value
+        worked out around a misprint would put the book's mistake back into
+        the arithmetic through the side door.
+
+        :param field_name: The field to fill.
+        :param value: What follows for it from the cells of the row.
+        :param how: The cells it comes from, in words, for
+            :attr:`~CatalogueRow.derived`: ``"from the modulus and the
+            density"``.
+        :param inputs: The fields *value* is worked out from, printed or
+            filled, which is how :meth:`derived` finds the basis of every
+            printed cell the value rests on.
+        """
+        if self.get(field_name) is not None or field_name in self._said:
+            return
+        self._filled[field_name] = value
+        self._how[field_name] = how
+        self._inputs[field_name] = inputs
+
+    def filled(self) -> dict[str, float]:
+        """Every value filled, by field."""
+        return dict(self._filled)
+
+    def derived(self) -> dict[str, str]:
+        """How each filled value was reached, naming the bases when they mix.
+
+        The printed cells a value rests on are followed back through the
+        filled ones, so a bar speed worked out from a modulus that was
+        itself worked out from a Poisson ratio rests on that ratio. When
+        their :meth:`~CatalogueRow.basis_of` is not one for all of them, a
+        source not saying counting as an answer of its own, the text names
+        the basis of each.
+        """
+        texts: dict[str, str] = {}
+        for field_name, how in self._how.items():
+            cells = self._rests_on(field_name)
+            bases = [self._row.basis_of(cell) for cell in cells]
+            if len(set(bases)) > 1:
+                how = f"{how}; {_bases_named(cells, bases)}"
+            texts[field_name] = how
+        return texts
+
+    def _rests_on(self, field_name: str) -> tuple[str, ...]:
+        """The printed cells a field rests on, following filled ones back."""
+        inputs = self._inputs.get(field_name)
+        if inputs is None:
+            return (field_name,)
+        return tuple(
+            dict.fromkeys(cell for name in inputs for cell in self._rests_on(name))
+        )
+
+
+def _holds_nothing(value: object) -> bool:
+    """Whether a field holds nothing: ``None``, no text, an empty hedge."""
+    if value is None:
+        return True
+    if isinstance(value, (str, Mapping, AbstractSet, tuple)):
+        return len(value) == 0
+    return False
+
+
 def _spell(entry: float | tuple[float, float]) -> str:
     """One listed value or interval, the way the page would read it aloud."""
     if isinstance(entry, tuple):
@@ -747,6 +1034,18 @@ class CatalogueRow:
         metre and a level in decibels can be negative, and a size is never
         a reason to refuse a number.
 
+    **Two ways to build a row.** ``Cls(...)`` is literal: the row holds what
+    it is given, checked and frozen, and nothing is worked out.
+    :meth:`from_printed` takes the cells the page prints, converts a figure
+    written in a unit the class takes as an alias of its own, builds the
+    row, fills what its class knows how to work out from those cells, and
+    marks each filled value in :attr:`derived`. It is the one path that
+    derives anything, and every packaged catalogue is built through it. To
+    change a cell and have what follows from it follow again, change it in
+    :meth:`printed_fields` and build again with :meth:`from_printed`:
+    ``dataclasses.replace`` copies the derived values as they were, which
+    then no longer follow from the cell that changed.
+
     The fields are told apart by their resolved annotations, once per
     class, so a subclass annotates each of its own fields as one of
     ``float | None`` (``Optional[float]`` is the same annotation),
@@ -777,9 +1076,14 @@ class CatalogueRow:
     :ivar derived: Field to how it was computed, for the ones this library
         worked out from the cells the page did print. A derived value is never
         stored as if it had been read, and it always follows again from the
-        row's own cells. A value converted from the unit the page prints is
-        not derived (:attr:`converted` holds it), and neither is one the page
-        gives by reference to another of its rows (:attr:`carried` does).
+        row's own cells: :meth:`from_printed` writes it, and nothing else in
+        the library does. When the printed cells a value rests on do not all
+        have one :attr:`basis`, the text names the basis of each, so a
+        modulus worked out from a plate speed and a Poisson ratio Hopkins
+        marks as an estimate says it rests on that estimate. A value
+        converted from the unit the page prints is not derived
+        (:attr:`converted` holds it), and neither is one the page gives by
+        reference to another of its rows (:attr:`carried` does).
     :ivar converted: Field to ``(figure, unit)``, the page's figure and the
         unit it is in, for a value this row holds in a unit the page does
         not use. Ver and Beranek print their damping materials in degrees
@@ -885,6 +1189,12 @@ class CatalogueRow:
     #: name, and three of his descriptions give their row by reference to the
     #: one above.
     _value_hedges: ClassVar[tuple[str, ...]] = ("derived", "carried", "misprinted")
+    #: The units :meth:`from_printed` takes a figure in besides the one a
+    #: field is named for, converted exactly and recorded in
+    #: :attr:`converted`. A class whose pages print another unit lists it, as
+    #: :class:`~phonometry.materials.AbsorptionAreaSpectrum` lists the
+    #: sabins of a table set in feet.
+    _unit_aliases: ClassVar[tuple[UnitAlias, ...]] = ()
 
     name: str
     source: str
@@ -1200,6 +1510,99 @@ class CatalogueRow:
                 )
                 raise CatalogueError(msg)
 
+    @classmethod
+    def from_printed(cls, **cells: Any) -> Self:
+        """A row built from the cells its page prints, completed and marked.
+
+        The one path that works anything out. The cells are what the page
+        prints, under the field names of the class and with the hedges each
+        cell carries, as a data file writes them. A figure written under a
+        unit the class takes as an alias of its own (an
+        :class:`~phonometry.materials.AbsorptionAreaSpectrum` takes
+        ``absorption_area_125_ft2`` for ``absorption_area_125_m2``) is
+        converted on its digits with an exact factor and rounded once, and
+        :attr:`converted` records the figure and its unit. The row is then
+        built and held to the contract the class docstring lists, so every
+        cell is checked before any arithmetic reads it. Last, the class
+        fills what follows from those cells (a modulus from a plate speed, a
+        density and a Poisson ratio), never over a cell that holds a value
+        or one the row says something else about, and :attr:`derived` says
+        how each filled value was reached and, when the cells it rests on
+        do not share one :attr:`basis`, the basis of each.
+
+        ``Cls(...)`` stays literal: it holds what it is given and works
+        nothing out. To change a cell of a row and have what follows from
+        it follow again, change it in :meth:`printed_fields` and build again
+        here; ``dataclasses.replace`` would copy the derived values as they
+        were::
+
+            cells = row.printed_fields()
+            cells["density_kg_m3"] = 2400.0
+            row = type(row).from_printed(**cells)
+
+        :param cells: The printed cells, as keywords of the class.
+        :return: The row, with what follows from its cells filled in.
+        :raises CatalogueError: for a cell the contract refuses; for a
+            ``derived`` among the cells, which is this method's to write; for
+            a figure under a unit alias that is not a finite number, or that
+            names a cell given under its own name as well.
+        :raises TypeError: for a name that is neither a field of the class
+            nor a unit alias of one.
+        """
+        if "derived" in cells:
+            msg = (
+                f"{cells.get('name')!r}: derived is what from_printed works out "
+                "from the printed cells, and is not one of them; pass the cells "
+                "the page prints, as printed_fields() gives them"
+            )
+            raise CatalogueError(msg)
+        row = cls(**_resolve_units(cls, cells))
+        if cls._complete is CatalogueRow._complete:
+            return row
+        completion = Completion(row)
+        row._complete(completion)
+        filled: dict[str, Any] = completion.filled()
+        if not filled:
+            return row
+        filled["derived"] = completion.derived()
+        return dataclasses.replace(row, **filled)
+
+    def _complete(self, cells: Completion) -> None:
+        """Fill what follows from this row's printed cells; the base fills nothing.
+
+        The hook :meth:`from_printed` calls on the row it has built from the
+        printed cells. A class whose cells over-determine one another reads
+        them with :meth:`Completion.get` and fills with
+        :meth:`Completion.fill`, naming the fields each value is worked out
+        from.
+
+        :param cells: The row's cells as the completion fills them in.
+        """
+
+    def printed_fields(self) -> dict[str, Any]:
+        """The cells the page prints, as :meth:`from_printed` takes them.
+
+        Every field that holds something, the name, the citation, the table
+        and every hedge included, except the values this library derived
+        and :attr:`derived` itself. A value converted from the page's unit
+        and one the page gives by reference to another of its rows are the
+        page's, so they stay, with :attr:`converted` and :attr:`carried`
+        beside them. ``type(row).from_printed(**row.printed_fields())`` is
+        the row again, and changing a cell before building it again is how a
+        row is edited without carrying a derived value that no longer
+        follows from it.
+
+        :return: A new dictionary of constructor keywords. The values are
+            the ones the row holds, frozen as the row holds them.
+        """
+        return {
+            item.name: value
+            for item in fields(self)
+            if item.name != "derived"
+            and item.name not in self.derived
+            and not _holds_nothing(value := getattr(self, item.name))
+        }
+
     def is_approximate(self, field_name: str) -> bool:
         """Whether the page prints this field with a ``~``.
 
@@ -1312,12 +1715,18 @@ class BandedRow(CatalogueRow):
     A subclass declares the bands its tables can print and how its band fields
     are spelled, and defines the reading method under the name its own domain
     uses, because ``row.transmission_loss_db(500)`` reads better than a generic
-    verb and says what comes back.
+    verb and says what comes back. :meth:`values_at` reads the row at a whole
+    array of frequencies, for a function that takes one value per band by
+    position.
     """
 
     #: The band centre frequencies a table of this quantity can print, in
     #: hertz. A table prints a subset.
     _bands_hz: ClassVar[tuple[int, ...]] = ()
+    #: How many of these bands make an octave: 1 for octave bands, 3 for
+    #: one-third octave bands. :meth:`values_at` reads a frequency as a band
+    #: within a sixth of the spacing between bands.
+    _bands_per_octave: ClassVar[int] = 1
     #: The band field for a centre frequency is this, the frequency, and
     #: :attr:`_band_suffix`: ``"absorption_coefficient_"`` and ``""`` give
     #: ``absorption_coefficient_500``.
@@ -1353,6 +1762,13 @@ class BandedRow(CatalogueRow):
             band: float(getattr(self, self._band_field(band))) for band in self.bands()
         }
 
+    def _not_a_band(self, frequency: float) -> str:
+        """The start of a refusal for a frequency that is none of the bands."""
+        return (
+            f"{frequency:g} Hz is not {self._band_kind} band that "
+            f"{self._table_kind} tables print"
+        )
+
     def _in_band(self, band_hz: int) -> float:
         """One band of this row, or a refusal that says what the page had.
 
@@ -1363,11 +1779,64 @@ class BandedRow(CatalogueRow):
             *band_hz* is not a band these tables print.
         """
         if band_hz not in self._bands_hz:
-            msg = (
-                f"{band_hz} Hz is not {self._band_kind} band a "
-                f"{self._table_kind} table prints; the bands are {self._bands_hz}"
-            )
+            msg = f"{self._not_a_band(band_hz)}; the bands are {self._bands_hz}"
             raise ValueError(msg)
         return self.printed(
             self._band_field(band_hz), wanted_by=f"the {band_hz} Hz band"
+        )
+
+    def values_at(self, frequencies_hz: ArrayLike) -> NDArray[np.float64]:
+        """The row's value at each of *frequencies_hz*, or a refusal.
+
+        The adapter for a function that takes one value per band by position
+        (the absorption of a surface in a reverberation formula, the
+        transmission loss of a panel at the frequencies an enclosure model
+        asks for), because an array handed over by position cannot say
+        which band is missing and a row can. Each frequency is read as the
+        band of these tables whose centre is nearest on a logarithmic scale,
+        and matches it when it lies within a sixth of the spacing between
+        bands: a sixth of an octave for octave bands, an eighteenth for
+        one-third octave bands. That takes the nominal centre, the exact
+        base-ten one and the exact base-two one alike (160 Hz, 158.49 Hz and
+        157.49 Hz are one band) and never reaches the next band. A band the
+        row does not print is refused, as :meth:`~CatalogueRow.printed`
+        refuses it, with what the page had there; it is never read as zero
+        and never filled from its neighbours.
+
+        :param frequencies_hz: Band centre frequencies, in hertz, of any
+            shape.
+        :return: A new array of the same shape, one value per frequency.
+        :raises ValueError: for a frequency that is not finite and positive,
+            for one that matches none of the bands, naming the nearest, and
+            for a band this row does not print, naming the row, the band and
+            what the page had in that cell.
+        """
+        wanted = np.asarray(frequencies_hz, dtype=np.float64)
+        flat = wanted.reshape(-1)
+        if not (np.all(np.isfinite(flat)) and np.all(flat > 0.0)):
+            msg = (
+                f"frequencies_hz holds {_quote(flat.tolist())}, and a band "
+                "centre is a finite frequency above zero"
+            )
+            raise ValueError(msg)
+        if flat.size == 0:
+            return np.empty(wanted.shape, dtype=np.float64)
+        centres = np.asarray(self._bands_hz, dtype=np.float64)
+        octaves = np.abs(np.log2(flat[:, np.newaxis] / centres))
+        nearest = np.argmin(octaves, axis=1)
+        reach = 1.0 / (6.0 * self._bands_per_octave)
+        off = octaves[np.arange(flat.size), nearest] > reach
+        if np.any(off):
+            first = int(np.argmax(off))
+            band = self._bands_hz[int(nearest[first])]
+            msg = (
+                f"{self._not_a_band(float(flat[first]))}: the nearest is {band} "
+                "Hz, and a frequency reads as a band within a sixth of the "
+                "spacing between bands"
+            )
+            raise ValueError(msg)
+        bands = [self._bands_hz[int(index)] for index in nearest]
+        values = {band: self._in_band(band) for band in dict.fromkeys(bands)}
+        return np.array([values[band] for band in bands], dtype=np.float64).reshape(
+            wanted.shape
         )

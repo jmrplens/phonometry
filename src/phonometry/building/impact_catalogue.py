@@ -207,7 +207,9 @@ def _load() -> dict[str, ImpactInsulation]:
         source, records = read_table("phonometry.building", f"{table}.json")
         for record in records:
             key = f"{table}/{record['key']}"
-            rows[key] = ImpactInsulation(table=table, source=source, **take(record))
+            rows[key] = ImpactInsulation.from_printed(
+                table=table, source=source, **take(record)
+            )
     return rows
 
 

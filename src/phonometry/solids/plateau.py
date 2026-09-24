@@ -101,7 +101,7 @@ def _load() -> dict[str, PlateauMaterial]:
     for table in _TABLES:
         citation, rows = read_table("phonometry.solids", f"{table}.json")
         for row in rows:
-            out[f"{table}/{row['key']}"] = PlateauMaterial(
+            out[f"{table}/{row['key']}"] = PlateauMaterial.from_printed(
                 source=citation, table=table, **take(row)
             )
     return out

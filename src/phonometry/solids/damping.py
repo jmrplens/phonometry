@@ -134,7 +134,9 @@ def _rows() -> dict[str, DampingMaterial]:
         citation, rows = read_table("phonometry.solids", f"{filename}.json")
         for row in rows:
             key = f"{filename}/{row['key']}"
-            out[key] = DampingMaterial(source=citation, table=filename, **take(row))
+            out[key] = DampingMaterial.from_printed(
+                source=citation, table=filename, **take(row)
+            )
     return out
 
 

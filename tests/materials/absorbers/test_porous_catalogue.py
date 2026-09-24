@@ -578,20 +578,18 @@ def test_arithmetic_never_fills_a_cell_the_row_can_speak_for(
     Deriving a scalar from the other two constants would put it beside the
     interval contradicting it: the field would say one number and the row
     would say the book gave none. No table in this catalogue prints a modulus
-    that way yet, so this is asserted on a row built for it.
+    that way yet, so this is asserted on a row built for it, through the one
+    path that completes a row.
     """
-    from phonometry.materials.absorbers.catalogue import _complete
-
-    filled = _complete(
-        {
-            "name": "Hedged",
-            "shear_modulus_pa": 1.0e5,
-            "poisson_ratio": 0.3,
-            hedge: cell,
-        }
+    filled = PorousMaterial.from_printed(
+        name="Hedged",
+        source="Example Acoustics Ltd, Panel 40 technical data sheet, Rev. 4, p. 2",
+        shear_modulus_pa=1.0e5,
+        poisson_ratio=0.3,
+        **{hedge: cell},
     )
-    assert "youngs_modulus_pa" not in filled
-    assert not filled.get("derived")
+    assert filled.youngs_modulus_pa is None
+    assert not filled.derived
 
 
 # ---------------------------------------------------------------------------

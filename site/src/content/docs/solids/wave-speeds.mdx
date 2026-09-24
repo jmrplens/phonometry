@@ -150,8 +150,11 @@ print(round(board.youngs_modulus_pa / 1e9, 2))
 That modulus is not in the table. It is the inverse of the section above, run
 on the row's own speed, density and Poisson ratio, and the row says so:
 `board.is_derived("youngs_modulus_pa")` is `True` and
-`board.derived["youngs_modulus_pa"]` names the three cells it came from. A
-number this library computed is never stored as though a page had printed it.
+`board.derived["youngs_modulus_pa"]` names the three cells it came from.
+Hopkins marks this board's Poisson ratio as an estimate, so the text also says
+that the modulus rests on that estimate, beside a speed and a density whose
+basis the page does not state. A number this library computed is never stored
+as though a page had printed it.
 
 ### The key names the book on purpose
 

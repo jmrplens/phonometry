@@ -52,7 +52,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass, field
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, ClassVar
+from typing import TYPE_CHECKING, ClassVar
 
 from .._internal.catalogue import CatalogueRow, read_table, take
 from .elastic import (
@@ -66,6 +66,8 @@ from .elastic import (
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
+
+    from .._internal.catalogue import Completion
 
 __all__ = [
     "PUBLISHED_SOLIDS",
@@ -171,10 +173,45 @@ class SolidMaterial(CatalogueRow):
     thickness_critical_frequency_product_m_hz: float | None = None
     borrowed: Mapping[str, str] = field(default_factory=dict)
 
+    def _complete(self, cells: Completion) -> None:
+        """Fill what follows from the cells the page printed.
+
+        A materials table prints the columns its author needed, and the next
+        reader needs others. Hopkins gives a plate speed and no modulus,
+        Cremer a modulus and a bar speed and no plate speed, and comparing the
+        two means converting one into the other. Doing it here, once, beats
+        every caller doing it in their head, which is the conversion
+        :mod:`phonometry.solids` was added for.
+
+        Nothing is filled over a cell the page printed, or over one the row
+        says something else about: a modulus beside the 18 to 30 GPa Bies
+        prints for normal concrete would contradict the interval, and the
+        speed Bies leaves blank for his aluminium honeycomb panels stays
+        blank, because a one-dimensional speed means nothing in a honeycomb
+        and :attr:`~phonometry.io.CatalogueRow.not_derivable` says so. Every
+        value filled here is named in
+        :attr:`~phonometry.io.CatalogueRow.derived`, with the cells it comes
+        from.
+
+        :param cells: The row's cells as the completion fills them in.
+        """
+        _elastic_constants(cells)
+        _wave_speeds(cells)
+        plate = cells.get(_PLATE)
+        if plate is not None and cells.get(_HFC) is None:
+            cells.fill(
+                _HFC,
+                thickness_critical_frequency_product(plate),
+                _PLATE_HFC,
+                inputs=(_PLATE,),
+            )
+
 
 #: How a field this library computed is described in
 #: :attr:`SolidMaterial.derived`. The wording names the cells it came from, so
-#: a reader of a derived number can go back to the ones that were read.
+#: a reader of a derived number can go back to the ones that were read, and
+#: :meth:`~phonometry.io.CatalogueRow.from_printed` adds the basis of each
+#: printed cell it rests on when they are not all one.
 _FROM_PLATE = "from the plate speed, the density and the Poisson ratio"
 _FROM_BAR = "from the bar speed and the density"
 _FROM_MODULUS = "from the modulus and the density"
@@ -184,145 +221,92 @@ _FROM_E_G = "from the modulus and the shear modulus"
 _FROM_E_NU = "from the modulus and the Poisson ratio"
 _PLATE_HFC = "from the plate speed, for the 343 m/s the heading assumes"
 
-#: The one field name long enough to be worth a shorthand.
+#: The field names the completion reads, as shorthands.
 _HFC = "thickness_critical_frequency_product_m_hz"
+_RHO = "density_kg_m3"
+_NU = "poisson_ratio"
+_E = "youngs_modulus_pa"
+_G = "shear_modulus_pa"
+_PLATE = "plate_longitudinal_speed_m_s"
+_BAR = "bar_longitudinal_speed_m_s"
+_BULK = "bulk_longitudinal_speed_m_s"
+_TRANSVERSE = "transverse_speed_m_s"
 
 
-def _fill(fields: dict[str, Any], name: str, value: float, how: str) -> None:
-    """Record *value* under *name*, and that it was computed and not read.
-
-    A field the page printed as an interval is left alone. Bies prints a
-    modulus of 18 to 30 GPa for normal concrete and a speed beside it, and a
-    single modulus worked back out of that speed would sit next to the
-    interval contradicting it: the field would say one number and
-    :attr:`SolidMaterial.ranges` would say the book gave none.
-
-    So is a field the row says is not derivable. Bies leaves the speed of his
-    aluminium honeycomb panels blank because a one-dimensional speed does not
-    mean anything in a honeycomb, and the modulus and density beside it are
-    effective ones; deriving 4 265 m/s from them would be arithmetic standing
-    in for a quantity that does not exist. So is a field whose cell held
-    something that is not a number, because the page has already answered
-    there, and so is a field whose printed value is registered as a defect,
-    because deriving around it would put the book's mistake back into the
-    arithmetic through the side door. Wherever
-    :attr:`SolidMaterial.not_derivable`, :attr:`SolidMaterial.misprinted` or
-    :attr:`SolidMaterial.unquantified` speaks, it wins.
-    """
-    if any(
-        name in fields.get(where, {})
-        for where in ("ranges", "unquantified", "not_derivable", "misprinted")
-    ):
-        return
-    fields[name] = value
-    fields.setdefault("derived", {})
-    fields["derived"] = {**fields["derived"], name: how}
-
-
-def _elastic_constants(fields: dict[str, Any]) -> None:
+def _elastic_constants(cells: Completion) -> None:
     """Fill the modulus, the shear modulus and the Poisson ratio.
 
     Any two of them give the third, and a speed with a density gives the
     modulus, so a page that prints a speed and a density has printed a modulus
     without writing it down.
     """
-    rho = fields.get("density_kg_m3")
-    nu = fields.get("poisson_ratio")
-    modulus = fields.get("youngs_modulus_pa")
-    shear = fields.get("shear_modulus_pa")
-    plate = fields.get("plate_longitudinal_speed_m_s")
-    bar = fields.get("bar_longitudinal_speed_m_s")
+    rho = cells.get(_RHO)
+    nu = cells.get(_NU)
+    modulus = cells.get(_E)
+    shear = cells.get(_G)
+    plate = cells.get(_PLATE)
+    bar = cells.get(_BAR)
 
     if modulus is None and rho is not None:
         if plate is not None and nu is not None:
-            _fill(
-                fields,
-                "youngs_modulus_pa",
+            cells.fill(
+                _E,
                 youngs_modulus_from_plate_speed(
                     plate, density_kg_m3=rho, poisson_ratio=nu
                 ),
                 _FROM_PLATE,
+                inputs=(_PLATE, _RHO, _NU),
             )
         elif bar is not None:
-            _fill(
-                fields,
-                "youngs_modulus_pa",
+            cells.fill(
+                _E,
                 youngs_modulus_from_beam_speed(bar, density_kg_m3=rho),
                 _FROM_BAR,
+                inputs=(_BAR, _RHO),
             )
-        modulus = fields.get("youngs_modulus_pa")
+        modulus = cells.get(_E)
     if nu is None and modulus is not None and shear is not None:
-        _fill(fields, "poisson_ratio", modulus / (2.0 * shear) - 1.0, _FROM_E_G)
+        cells.fill(_NU, modulus / (2.0 * shear) - 1.0, _FROM_E_G, inputs=(_E, _G))
     elif shear is None and modulus is not None and nu is not None:
-        _fill(fields, "shear_modulus_pa", modulus / (2.0 * (1.0 + nu)), _FROM_E_NU)
+        cells.fill(_G, modulus / (2.0 * (1.0 + nu)), _FROM_E_NU, inputs=(_E, _NU))
 
 
-def _wave_speeds(fields: dict[str, Any]) -> None:
+def _wave_speeds(cells: Completion) -> None:
     """Fill the three longitudinal speeds and the transverse one.
 
     A page prints the wave its author needed and the reader needs another, so
     every row ends up carrying all four: the one that was read, and the ones
     that follow from the row's own cells.
     """
-    rho = fields.get("density_kg_m3")
-    nu = fields.get("poisson_ratio")
-    modulus = fields.get("youngs_modulus_pa")
-    shear = fields.get("shear_modulus_pa")
+    rho = cells.get(_RHO)
+    nu = cells.get(_NU)
+    modulus = cells.get(_E)
+    shear = cells.get(_G)
 
     if rho is not None and modulus is not None:
-        if fields.get("bar_longitudinal_speed_m_s") is None:
-            _fill(
-                fields,
-                "bar_longitudinal_speed_m_s",
+        if cells.get(_BAR) is None:
+            cells.fill(
+                _BAR,
                 beam_longitudinal_speed(modulus, density_kg_m3=rho),
                 _FROM_MODULUS,
+                inputs=(_E, _RHO),
             )
-        if nu is not None and fields.get("plate_longitudinal_speed_m_s") is None:
-            _fill(
-                fields,
-                "plate_longitudinal_speed_m_s",
+        if nu is not None and cells.get(_PLATE) is None:
+            cells.fill(
+                _PLATE,
                 plate_longitudinal_speed(modulus, density_kg_m3=rho, poisson_ratio=nu),
                 _FROM_MODULUS_NU,
+                inputs=(_E, _RHO, _NU),
             )
-        if nu is not None and fields.get("bulk_longitudinal_speed_m_s") is None:
-            _fill(
-                fields,
-                "bulk_longitudinal_speed_m_s",
+        if nu is not None and cells.get(_BULK) is None:
+            cells.fill(
+                _BULK,
                 bulk_longitudinal_speed(modulus, density_kg_m3=rho, poisson_ratio=nu),
                 _FROM_MODULUS_NU,
+                inputs=(_E, _RHO, _NU),
             )
-    if (
-        rho is not None
-        and shear is not None
-        and fields.get("transverse_speed_m_s") is None
-    ):
-        _fill(fields, "transverse_speed_m_s", math.sqrt(shear / rho), _FROM_SHEAR)
-
-
-def _complete(fields: dict[str, Any]) -> dict[str, Any]:
-    """Fill what follows from the cells the page printed.
-
-    A materials table prints the columns its author needed, and the next
-    reader needs others. Hopkins gives a plate speed and no modulus, Cremer a
-    modulus and a bar speed and no plate speed, and comparing the two means
-    converting one into the other. Doing it here, once, beats every caller
-    doing it in their head, which is the conversion :mod:`phonometry.solids`
-    was added for.
-
-    Nothing is filled over a cell the page printed, and nothing is filled from
-    a cell the page printed as a range: a modulus from the midpoint of a
-    density the book declined to collapse would be a number nobody published.
-    Every value filled here is named in :attr:`SolidMaterial.derived`.
-
-    :param fields: One row as the data file wrote it.
-    :return: The same row with the derivable quantities added.
-    """
-    _elastic_constants(fields)
-    _wave_speeds(fields)
-    plate = fields.get("plate_longitudinal_speed_m_s")
-    if plate is not None and fields.get(_HFC) is None:
-        _fill(fields, _HFC, thickness_critical_frequency_product(plate), _PLATE_HFC)
-    return fields
+    if rho is not None and shear is not None and cells.get(_TRANSVERSE) is None:
+        cells.fill(_TRANSVERSE, math.sqrt(shear / rho), _FROM_SHEAR, inputs=(_G, _RHO))
 
 
 #: The published tables this catalogue reads, in the order a reader should
@@ -355,9 +339,8 @@ def _load() -> dict[str, SolidMaterial]:
     for table in _TABLES:
         source, records = read_table("phonometry.solids", f"{table}.json")
         for record in records:
-            fields = _complete(take(record))
-            rows[f"{table}/{record['key']}"] = SolidMaterial(
-                table=table, source=source, **fields
+            rows[f"{table}/{record['key']}"] = SolidMaterial.from_printed(
+                table=table, source=source, **take(record)
             )
     return rows
 

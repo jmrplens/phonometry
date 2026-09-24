@@ -137,7 +137,7 @@ def _transcribed() -> dict[str, GroundSurface]:
             "phonometry.environment.propagation", f"{table}.json"
         )
         for row in published:
-            rows[f"{table}/{row['key']}"] = GroundSurface(
+            rows[f"{table}/{row['key']}"] = GroundSurface.from_printed(
                 source=source, table=table, **take(row)
             )
     return rows

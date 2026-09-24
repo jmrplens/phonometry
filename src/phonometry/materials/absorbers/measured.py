@@ -64,10 +64,11 @@ keeps the page's figure and its unit.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from fractions import Fraction
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, ClassVar
+from typing import TYPE_CHECKING, ClassVar
 
-from ..._internal.catalogue import BandedRow, read_table, take
+from ..._internal.catalogue import BandedRow, UnitAlias, read_table, take
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -85,6 +86,15 @@ __all__ = [
 #: hertz. A table prints a subset, six or seven of them; the field for a band
 #: it does not print stays ``None`` on every row.
 ABSORPTION_BANDS_HZ: tuple[int, ...] = (63, 125, 250, 500, 1000, 2000, 4000, 8000)
+
+#: A square foot in square metres, exact since the 1959 definition of the
+#: yard. Long's two absorption areas are in sabins, which in a table set in
+#: inches and pounds are square feet of perfect absorption.
+_SQUARE_FOOT_M2 = Fraction("0.09290304")
+
+#: A thousand cubic feet in cubic metres, exact for the same reason. Long
+#: prints the absorption of air "per 1000 cubic feet".
+_THOUSAND_CUBIC_FEET_M3 = Fraction("28.316846592")
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -167,6 +177,17 @@ class AbsorptionAreaSpectrum(BandedRow):
         ``"person"`` for an audience row, ``"seat"`` for a chair, and a
         cubic metre of air for the one row Long prints as an absorption per
         volume, which is the air term of a Sabine sum by another name.
+
+    A table set in feet prints its areas in sabins, and
+    :meth:`~phonometry.io.CatalogueRow.from_printed` takes them under the
+    band's field name with ``_ft2`` in place of ``_m2``, or
+    ``_ft2_per_1000_ft3`` for sabins per thousand cubic feet, which then
+    needs :attr:`per` written beside it, because its default is a person.
+    The page's figure is converted on its digits with the exact factor of
+    the 1959 foot and rounded once, and
+    :attr:`~phonometry.io.CatalogueRow.converted` keeps the figure and its
+    unit, so the page's own number is never more than a lookup away. It is
+    not a derivation: the value is the page's, in another unit.
     """
 
     absorption_area_63_m2: float | None = None
@@ -184,6 +205,16 @@ class AbsorptionAreaSpectrum(BandedRow):
     _band_suffix: ClassVar[str] = "_m2"
     _band_kind: ClassVar[str] = "an octave"
     _table_kind: ClassVar[str] = "absorption"
+    _unit_aliases: ClassVar[tuple[UnitAlias, ...]] = (
+        UnitAlias(
+            "_ft2_per_1000_ft3",
+            "_m2",
+            _SQUARE_FOOT_M2 / _THOUSAND_CUBIC_FEET_M3,
+            "sabins per 1000 ft3",
+            requires=("per",),
+        ),
+        UnitAlias("_ft2", "_m2", _SQUARE_FOOT_M2, "sabins"),
+    )
 
 
 #: The published tables this catalogue reads, in the order the books print
@@ -194,28 +225,6 @@ _TABLES = (
     "cox-2017-appendix-a",
     "arau-1999-table-6-1",
     "everest-2001-appendix",
-)
-
-#: A square foot in square metres, exact since the 1959 definition of the
-#: yard. Long's two absorption areas are in sabins, which in a table set in
-#: inches and pounds are square feet of perfect absorption.
-_SQUARE_FOOT_M2 = 0.09290304
-
-#: A thousand cubic feet in cubic metres, exact for the same reason. Long
-#: prints the absorption of air "per 1000 cubic feet".
-_THOUSAND_CUBIC_FEET_M3 = 28.316846592
-
-#: The imperial suffixes a data file may write an area field with, each with
-#: the factor that takes the page's figure to the metric field and the unit
-#: the figure is in, which :attr:`~phonometry.io.CatalogueRow.converted` keeps
-#: beside it.
-_IMPERIAL_AREAS = (
-    (
-        "_ft2_per_1000_ft3",
-        _SQUARE_FOOT_M2 / _THOUSAND_CUBIC_FEET_M3,
-        "sabins per 1000 ft3",
-    ),
-    ("_ft2", _SQUARE_FOOT_M2, "sabins"),
 )
 
 
@@ -230,38 +239,15 @@ def _is_area(record: Mapping[str, object]) -> bool:
     return any(key.startswith("absorption_area_") for key in record)
 
 
-def _metric(fields: dict[str, Any]) -> dict[str, Any]:
-    """The area fields of a row in square metres, converted where printed otherwise.
-
-    A data file writes what the page prints, so a table set in feet writes
-    ``absorption_area_125_ft2`` and the number beside it is the page's
-    figure, in sabins. The row holds square metres, because every other row
-    does and because a caller adding an audience to a room in metres cannot
-    be handed square feet under a field that says ``m2``. The conversion is
-    done here, once, and :attr:`~phonometry.io.CatalogueRow.converted` keeps
-    the page's figure and its unit, so the page's own number is never more
-    than a lookup away. It is not a derivation: the value is the page's, in
-    another unit. The unit is the suffix the data file writes, and a page
-    that prints its figures bare, as Long does for his musician, says in the
-    row's note why they are sabins.
-    """
-    metric_fields = dict(fields)
-    converted = dict(fields.get("converted", {}))
-    for name, value in fields.items():
-        for suffix, factor, unit in _IMPERIAL_AREAS:
-            if name.startswith("absorption_area_") and name.endswith(suffix):
-                metric = f"{name.removesuffix(suffix)}_m2"
-                del metric_fields[name]
-                metric_fields[metric] = value * factor
-                converted[metric] = (repr(value), unit)
-                break
-    if converted:
-        metric_fields["converted"] = converted
-    return metric_fields
-
-
 def _load() -> tuple[dict[str, AbsorptionSpectrum], dict[str, AbsorptionAreaSpectrum]]:
-    """Every row of every packaged table, split by the quantity it holds."""
+    """Every row of every packaged table, split by the quantity it holds.
+
+    Which of the two a row is, the file tells by the fields it writes
+    (:func:`_is_area`), and that choice is the loader's to make; both are
+    then built through
+    :meth:`~phonometry.io.CatalogueRow.from_printed`, which takes an area
+    written in sabins to square metres.
+    """
     coefficients: dict[str, AbsorptionSpectrum] = {}
     areas: dict[str, AbsorptionAreaSpectrum] = {}
     for table in _TABLES:
@@ -270,11 +256,11 @@ def _load() -> tuple[dict[str, AbsorptionSpectrum], dict[str, AbsorptionAreaSpec
             key = f"{table}/{record['key']}"
             fields = take(record)
             if _is_area(record):
-                areas[key] = AbsorptionAreaSpectrum(
-                    table=table, source=source, **_metric(fields)
+                areas[key] = AbsorptionAreaSpectrum.from_printed(
+                    table=table, source=source, **fields
                 )
             else:
-                coefficients[key] = AbsorptionSpectrum(
+                coefficients[key] = AbsorptionSpectrum.from_printed(
                     table=table, source=source, **fields
                 )
     return coefficients, areas

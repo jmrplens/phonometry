@@ -101,6 +101,7 @@ class ScatteringBands(BandedRow):
     _bands_hz: ClassVar[tuple[int, ...]] = SCATTERING_BANDS_HZ
     _band_prefix: ClassVar[str] = "scattering_coefficient_"
     _band_kind: ClassVar[str] = "a one-third octave"
+    _bands_per_octave: ClassVar[int] = 3
     _table_kind: ClassVar[str] = "scattering"
 
     def scattering_coefficient(self, band_hz: int) -> float:

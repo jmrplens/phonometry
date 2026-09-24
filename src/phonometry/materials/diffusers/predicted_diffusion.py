@@ -136,6 +136,7 @@ class NormalizedDiffusionSpectrum(BandedRow):
     _bands_hz: ClassVar[tuple[int, ...]] = DIFFUSION_BANDS_HZ
     _band_prefix: ClassVar[str] = "diffusion_coefficient_"
     _band_kind: ClassVar[str] = "a one-third octave"
+    _bands_per_octave: ClassVar[int] = 3
     _table_kind: ClassVar[str] = "diffusion coefficient"
 
     def diffusion_coefficient(self, band_hz: int) -> float:
@@ -162,7 +163,7 @@ def _load() -> dict[str, NormalizedDiffusionSpectrum]:
         source, records = read_table("phonometry.materials.diffusers", f"{table}.json")
         for record in records:
             key = f"{table}/{record['key']}"
-            rows[key] = NormalizedDiffusionSpectrum(
+            rows[key] = NormalizedDiffusionSpectrum.from_printed(
                 table=table, source=source, **take(record)
             )
     return rows

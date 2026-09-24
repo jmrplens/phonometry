@@ -10,8 +10,11 @@ claims a move the library did not make.
 from __future__ import annotations
 
 import json
+from decimal import Decimal
+from fractions import Fraction
 
 import catalogue_fingerprint as fp
+import numpy as np
 
 
 def _text(value: object) -> str:
@@ -213,3 +216,77 @@ def test_row_contract_moves_the_six_percent_porosities_and_no_others() -> None:
         "porosity": 4.0,
     }
     assert new[root]["uncertainty"] == {"flow_resistivity_pa_s_m2": 90000.0}
+
+
+def _before_completion_path() -> dict[str, dict[str, fp.Row]]:
+    """The dump as the steps before the one completion path left it."""
+    return fp.row_contract(fp.resilient_layer_row(fp.one_row_shape(fp.baseline())))
+
+
+def test_exact_unit_conversion_moves_four_last_digits_and_no_others() -> None:
+    """The step that converts a figure exactly moved four cells, by one ulp.
+
+    Each of the four is the float nearest the exact product of the page's
+    figure and the factor of the foot, and was the float product of two
+    rounded operands before; every other cell of every mapping comes out of
+    the step as it went in, the five converted cells of the two rows that
+    came out the same either way included.
+    """
+    before = _before_completion_path()
+    after = fp.exact_unit_conversion(before)
+    assert {name for name in before if before[name] != after[name]} == {
+        "PUBLISHED_ABSORPTION_AREAS"
+    }
+    old = before["PUBLISHED_ABSORPTION_AREAS"]
+    new = after["PUBLISHED_ABSORPTION_AREAS"]
+    moved = {
+        (key, field)
+        for key in old
+        for field in set(old[key]) | set(new[key])
+        if _text(old[key].get(field)) != _text(new[key].get(field))
+    }
+    assert moved == set(fp.EXACT_CONVERSION)
+    foot = Fraction("0.09290304")
+    per_volume = foot / Fraction("28.316846592")
+    for (key, field), (was, now) in fp.EXACT_CONVERSION.items():
+        figure, unit = new[key]["converted"][field]
+        factor = per_volume if unit == "sabins per 1000 ft3" else foot
+        assert now == float(Fraction(Decimal(figure)) * factor)
+        assert was == float(figure) * float(factor)
+        assert np.nextafter(was, now) == now
+
+
+def test_derived_names_bases_rewrites_the_nineteen_hopkins_rows_only() -> None:
+    """The step that names mixed bases touched the texts it lists and no value.
+
+    The nineteen rows are exactly the published rows whose derived values
+    rest on cells of more than one basis: Hopkins' estimated Poisson ratios
+    beside a plate speed and a density whose basis the page does not state.
+    Each of their five derived texts gained the one clause, and nothing
+    else of any row moved.
+    """
+    before = fp.exact_unit_conversion(_before_completion_path())
+    after = fp.derived_names_bases(before)
+    assert {name for name in before if before[name] != after[name]} == {
+        "PUBLISHED_SOLIDS"
+    }
+    old, new = before["PUBLISHED_SOLIDS"], after["PUBLISHED_SOLIDS"]
+    changed = [key for key in old if old[key] != new[key]]
+    assert changed == list(fp.MIXED_BASIS_ROWS)
+    mixed = [
+        key
+        for key, row in old.items()
+        if row.get("derived") and row.get("basis", {}).get("poisson_ratio")
+    ]
+    assert mixed == list(fp.MIXED_BASIS_ROWS)
+    texts = 0
+    for key in changed:
+        kept = {f: v for f, v in new[key].items() if f != "derived"}
+        assert _text(kept) == _text(
+            {f: v for f, v in old[key].items() if f != "derived"}
+        )
+        assert list(new[key]["derived"]) == list(old[key]["derived"])
+        for field, text in new[key]["derived"].items():
+            assert text == old[key]["derived"][field] + fp.MIXED_BASIS_CLAUSE
+            texts += 1
+    assert texts == 95

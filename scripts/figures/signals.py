@@ -1399,9 +1399,9 @@ def generate_filter_summation(output_dir: str) -> None:
     """IEC 61260-1:2014 5.16 on the library's two default banks.
 
     Formula (3) of IEC 61260-2:2016 across every inner band: the decimated
-    octave bank sums its neighbours up to +0.94 dB and down to -1.16 dB about
-    the input, past the +0.8 dB of class 1, where the one-third-octave bank
-    stays well inside. Drawn by ``FilterComplianceResult.plot``.
+    octave and one-third-octave banks both sum their neighbours between
+    0 dB and about +0.16 dB about the input, well inside class 1. Drawn by
+    ``FilterComplianceResult.plot``.
     """
     print("Generating filter_summation...")
     octave = filters.verify_filter_class(
@@ -1415,7 +1415,7 @@ def generate_filter_summation(output_dir: str) -> None:
     )
     octave.plot(ax=ax_oct, requirement="summation", language=_LANG)
     third.plot(ax=ax_third, requirement="summation", language=_LANG)
-    ax_oct.set_title("Octave bank, decimated: class 2 on §5.16")
+    ax_oct.set_title("Octave bank, decimated: class 1 on §5.16")
     ax_third.set_title("One-third-octave bank: class 1 on §5.16")
     ax_third.set_ylabel("")
     save_figure(output_dir, "filter_summation.svg")

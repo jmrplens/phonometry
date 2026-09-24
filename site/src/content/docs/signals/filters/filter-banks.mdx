@@ -151,14 +151,15 @@ its own coefficients, so rounding errors stay local instead of compounding
 through one high-order polynomial. The other half, the tiny $B / f_\mathrm{s}$ ratio
 itself, is what decimation fixes.
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/pole_migration.svg" alt="Three panels for the 25 Hz one-third-octave band of a bank at 48 kHz. Left, the z-plane constellation of the band designed at the full rate: every pole is collapsed onto z = 1, with a zoom inset showing the six poles spread over less than a thousandth of the radius and the annotation 1 minus r equals 8.7e-05. Middle, the same band as the bank actually realizes it, at 96 Hz after decimating by 500: the poles are clearly separated around the unit circle, at 1 minus r equals 4.6e-02. Right, the largest pole radius of every band of the bank on log-log axes, the one-rate design rising steadily from 4e-05 at 12.5 Hz to 5e-02 at 20 kHz while the multirate bank stays pinned near 5e-02 across the whole range" width="94%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/pole_migration.svg" alt="Three panels for the 25 Hz one-third-octave band of a bank at 48 kHz. Left, the z-plane constellation of the band designed at the full rate: every pole is collapsed onto z = 1, with a zoom inset showing the six poles spread over less than a thousandth of the radius and the annotation 1 minus r equals 8.7e-05. Middle, the same band as the bank actually realizes it, at 906 Hz after decimating by 53: the poles have left z = 1 and sit just inside the unit circle in two tight groups about 10 degrees above and below the real axis, at 1 minus r equals 4.6e-03. Right, the largest pole radius of every band of the bank on log-log axes, the one-rate design rising steadily from 4e-05 at 12.5 Hz to 5e-02 at 16 kHz, while the multirate bank stays between 3.5e-03 and 4.6e-03 from 12.5 Hz to 630 Hz and, from 800 Hz up, where its bands run at the full rate, follows the one-rate curve" width="94%" />
 
 *Selectivity is proximity, and the price is conditioning. At the full rate the
 25 Hz band's poles sit less than $10^{-4}$ from the unit circle and on top of
-each other; the same band realized at its decimated rate has them spread out
-and 500 times further away. The right panel is the design decision as one
-curve: the multirate bank keeps every band in the same well-conditioned
-region, whatever its centre frequency.*
+each other; the same band realized at its decimated rate has them spread apart
+and 53 times further away. The right panel is the design decision as one
+curve: the multirate bank holds every decimated band at the same distance from
+the unit circle, whatever its centre frequency, and the bands that run at the
+full rate, from 800 Hz up, sit about as far from it or further.*
 
 <details>
 <summary>How this figure was measured</summary>
@@ -169,10 +170,12 @@ are read straight off the bank: `bank.sos[idx]` is the SOS cascade of band
 `idx` and `scipy.signal.sos2zpk` turns it into zeros, poles and gain, so the
 distance from the unit circle is `1 - abs(poles).max()`. For the 25.1 Hz band
 of a 48 kHz one-third-octave bank that distance is **8.73e-05** at the full
-rate and **4.62e-02** at the decimated rate the bank actually uses
-(`bank.factor[idx]` is 500, so the band runs at 96 Hz). SciPy raises
-`BadCoefficients` while reading the full-rate design: that warning is the
-argument of this section, printed by the library that hit it.
+rate and **4.62e-03** at the decimated rate the bank actually uses
+(`bank.factor[idx]` is 53, the largest factor that keeps the band's processing
+Nyquist frequency at least sixteen times its upper band edge, so the band runs
+at 906 Hz). SciPy raises `BadCoefficients` while reading the full-rate design,
+and not the decimated one: that warning is the argument of this section,
+printed by the library that hit it.
 
 </details>
 
@@ -352,8 +355,9 @@ arithmetic mean of decibels.
 `verify_filter_class(bank)` checks the designed bank against the IEC 61260-1
 Table 1 acceptance limits, the effective bandwidth and the summation of
 adjacent outputs, and reports the class (`1`, `2` or `None` if outside both)
-with per-band margins. The decimated octave bank is class 2 on the summation;
-Filter Class Verification says why.
+with per-band margins. The default octave and one-third-octave banks are
+class 1 on all three, decimated or filtered at the full rate; Filter Class
+Verification says why the decimation barely moves the summation.
 
 ### What `order` buys, and where it stops buying
 
@@ -601,7 +605,9 @@ forward-backward (`scipy.signal.sosfiltfilt`), keeping band signals
 time-aligned with the input. It is a per-call option on the bank, not an
 argument of the one-shot `octave_filter()`. The effective attenuation doubles and the
 effective passband narrows, lowering the measured broadband band level by
-~0.2 to 0.3 dB per band (a pure in-band tone is unaffected); prefer forward
+about 0.4 dB per band (filtering twice squares the magnitude, and an order-6
+Butterworth band then passes 11/12 of its noise bandwidth, −0.38 dB; a pure
+in-band tone is unaffected); prefer forward
 filtering when the absolute band SPL must match single-pass conventions, and
 reserve zero-phase for when the temporal envelope matters (e.g. reverberation
 decay). The option is incompatible with stateful (block) processing.

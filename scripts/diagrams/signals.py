@@ -275,8 +275,8 @@ def _d_multirate(s: SVG, th: Theme) -> None:
 
     rows = [
         (120.0, "16 kHz band", "$f_s$", "no decimation", th.secondary),
-        (230.0, "1 kHz band", "$f_s / 8$", "6 kHz", th.primary),
-        (340.0, "63 Hz band", "$f_s / 64$", "750 Hz", th.accent),
+        (230.0, "250 Hz band", "$f_s / 4$", "12 kHz", th.primary),
+        (340.0, "63 Hz band", "$f_s / 16$", "3 kHz", th.accent),
     ]
     for y, band, rate, eff, color in rows:
         bx = 455.0
@@ -2750,7 +2750,7 @@ def _d_bank_dataflow(s: SVG, th: Theme) -> None:
     s.arrow(450, 118, 450, 132, th.fg, 2.0)
     s.path("M 450 132 L 610 184 L 450 236 L 290 184 Z", th.panel, th.primary, sw=2)
     s.text(450, 180, "Room to decimate?", 17, th.fg, bold=True)
-    s.text(450, 204, "$f_s / 2 ≥ 1.25 · f_{upper}$", 12, th.muted)
+    s.text(450, 204, "$f_s / 2 ≥ 32 · f_{upper}$", 12, th.muted)
 
     s.line(290, 184, 190, 184, th.fg, 2.0)
     s.arrow(190, 184, 190, 244, th.fg, 2.0)
@@ -2762,7 +2762,7 @@ def _d_bank_dataflow(s: SVG, th: Theme) -> None:
     # --- The decimated branch ----------------------------------------------
     s.rect(50, 244, 280, 80, th.panel, th.primary, rx=12, sw=2)
     s.text(190, 274, "resample_poly(1, M)", 13, th.fg, bold=True, mono=True)
-    s.text(190, 298, "$M = floor[(f_s / 2) / (1.25 · f_{upper})]$", 11, th.muted)
+    s.text(190, 298, "$M = floor[(f_s / 2) / (16 · f_{upper})]$", 11, th.muted)
     s.text(190, 318, "poles stay clear of $z = 1$", 12, th.muted)
     s.arrow(190, 324, 190, 360, th.fg, 2.0)
 
@@ -3152,8 +3152,9 @@ def _d_filter_class_check(s: SVG, th: Theme) -> None:
     verdict. The two panels draw that mask on an axis stretched breakpoint by
     breakpoint, so every limit is a straight line between breakpoints, which
     is what Formula (11) says. The band is an order-6 Butterworth one-third
-    octave at 1 kHz; the Nyquist line is where the decimated default bank
-    stops walking it (48 kHz over 17, halved). The solid box at the top right
+    octave at 1 kHz, which the default bank at 48 kHz walks to the end of the
+    mask: its Nyquist frequency is 24 f_m, and a decimated band keeps its own
+    at least sixteen times its upper edge. The solid box at the top right
     is what the verifier also computes on the design, the IEC 61260-2 tests
     that need no specimen (the Formula (1) grid, 5.12, 5.16 and the swept
     test of 5.14); the dashed column below it is IEC 61260-2 and IEC 61260-3
@@ -3281,12 +3282,6 @@ def _d_filter_class_check(s: SVG, th: Theme) -> None:
     s.text(88, 258, "$ΔA$ of the band", 11, th.fg, anchor="start")
     s.circle(75, 270, 4.2, th.fg)
     s.text(88, 274, "$ΔA$ at a breakpoint", 11, th.fg, anchor="start")
-
-    # Where the decimated default bank stops walking this band: its Nyquist.
-    x_nyq = x_of(48000 / 17 / 2 / 1000, stop_om, stop_x)
-    s.line(x_nyq, top + 4, x_nyq, bottom, th.secondary, 1.4, dash="4,4")
-    s.text(x_nyq + 5, 226, "decimated bank:", 11, th.secondary, anchor="start")
-    s.text(x_nyq + 5, 242, "walked to $Ω$ = 1.41", 11, th.secondary, anchor="start")
 
     # Column labels: the octave breakpoint, then its one-third-octave value.
     for xs, names, values in (

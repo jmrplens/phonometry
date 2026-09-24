@@ -27,10 +27,9 @@ governing standard and numerically checked against it: the auto-generated
 runs 1447 conformance checks across 97 domains and 477 standards, each pinning
 an expected normative value to the value the library computes, and CI
 regenerates it on every pull request. Filters meet the class 1 mask of
-**IEC 61260-1:2014 / ANSI S1.11-2004**, and one-third-octave banks are class 1
-on every requirement the 2014 edition grades on a design; the default
-decimated octave bank is class 2 on the summation of its outputs and class 1
-filtered at the full rate. Weightings and levels are class 1 per
+**IEC 61260-1:2014 / ANSI S1.11-2004**, and the octave and one-third-octave
+banks are class 1 on every requirement the 2014 edition grades on a design.
+Weightings and levels are class 1 per
 **IEC 61672-1:2013**.
 
 <a href="https://github.com/jmrplens/phonometry/blob/main/docs/CONFORMANCE.md"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/badges/conformance-summary_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/badges/conformance-summary.svg" alt="All 1447 conformance checks pass, across 97 domains and 477 standards"></picture></a>

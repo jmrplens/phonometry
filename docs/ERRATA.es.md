@@ -8625,9 +8625,9 @@ dos ediciones con las mismas entradas y en el mismo orden.
   [`verify_filter_class`](../src/phonometry/filters/compliance.py) aplica los
   límites del 5.16 a la Fórmula (3) tal como está impresa, como indica el
   7.2.4.5. Los veredictos que da a los bancos de la propia biblioteca no
-  dependen de la lectura: el banco de octavas diezmado suma de −1,16 dB a
-  +0,94 dB y es clase 2 de las dos maneras, y el banco de tercios de octava
-  suma de −0,55 dB a +0,76 dB y es clase 1 de las dos maneras.
+  dependen de la lectura: a 48 kHz el banco de octavas suma de −0,06 dB a
+  +0,69 dB y el de tercios de octava de −0,25 dB a +0,76 dB, los dos clase 1
+  de las dos maneras.
   `test_the_summation_is_what_tones_through_the_bank_read` en
   [`tests/filters/test_pattern_evaluation.py`](../tests/filters/test_pattern_evaluation.py)
   mantiene la Fórmula (3) en lo que lee el banco en marcha.

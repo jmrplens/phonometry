@@ -65,15 +65,18 @@ bank = filters.OctaveFilterBank(fs=48000, fraction=3, order=6,
                                 limits=[100, 10000])
 bands = filters.verify_filter_class(bank)
 print(bands.overall_class)           # 1
-print(bands.range_limited)           # True for a decimated bank
+print(bands.range_limited)           # True: its top bands reach Nyquist
 ```
 
-Read the flags, not just the class: `range_limited` is `True` on the
-decimated bank because a band cannot be evaluated beyond its own processing
-Nyquist, so the far stopband rests on the anti-alias argument rather than on
-the band filter itself. The class is the strictest met on every requirement
-graded (`bands.requirements`), and the decimated octave bank is the one that
-parts company with its Table 1 verdict, class 2 on the summation of 5.16. The
+Read the flags, not just the class: `range_limited` is `True` on this bank
+because its bands from 5 kHz up, filtered at the full rate, cannot be
+evaluated beyond the 24 kHz Nyquist frequency, which falls short of the end of
+their Table 1 mask, so their far stopband rests on the anti-alias filter of
+the capture chain rather than on the band filter itself. The class is the
+strictest met on every requirement graded (`bands.requirements`), and a bank
+can still part company with its Table 1 verdict: at 48 kHz an order-4
+one-third-octave bank is class 1 on Table 1 and misses class 1 on the
+summation of 5.16 by 0.002 dB, at its 16 kHz band. The
 details, including why a +0.400 dB margin is the ceiling for a passing
 Butterworth bank, are in
 [Filter class verification](../filters/filter-compliance.md); the weighting
@@ -90,8 +93,7 @@ verdict:
 ```python
 from phonometry import ReportMetadata, filters
 
-bank_11 = filters.OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[125, 4000],
-                                   design=filters.FilterDesign(resample=False))
+bank_11 = filters.OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[125, 4000])
 result = filters.verify_filter_class(bank_11)   # result.overall_class == 1
 result.report(
     "iec61260.pdf",

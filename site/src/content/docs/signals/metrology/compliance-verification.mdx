@@ -149,14 +149,15 @@ bank = filters.OctaveFilterBank(fs=48000, fraction=3, order=6,
                                 limits=[100, 10000])
 bands = filters.verify_filter_class(bank)
 print(bands.overall_class)           # 1
-print(bands.range_limited)           # True for a decimated bank
+print(bands.range_limited)           # True: its top bands reach Nyquist
 ```
 
 Read the flags, not just the class. `range_limited` on the bank is `True`
-because a decimated band cannot be evaluated beyond its own processing
-Nyquist, so the far stopband rests on the anti-alias argument rather than on
-the band filter itself; the weighting at 48 kHz checks all 34 nominal
-frequencies and reports `False`. The margins say how close the verdict came:
+because its bands from 5 kHz up, filtered at the full rate, cannot be
+evaluated beyond the 24 kHz Nyquist frequency, which falls short of the end of
+their Table 1 mask, so their far stopband rests on the anti-alias filter of
+the capture chain rather than on the band filter itself; the weighting at
+48 kHz checks all 34 nominal frequencies and reports `False`. The margins say how close the verdict came:
 
 ```python
 worst = min(bands.bands, key=lambda b: b["margin_class1_db"])
@@ -167,11 +168,12 @@ print(weighting.bands[20])
 
 The class of a bank is the strictest class it meets on every requirement
 graded, and `bands.requirements` lists them: here the Table 1 mask, the
-effective bandwidth and the summation of adjacent outputs, all class 1. The
-decimated octave bank is the one that parts company with its Table 1 verdict,
-class 2 on the summation, and
+effective bandwidth and the summation of adjacent outputs, all class 1. A bank
+can still part company with its Table 1 verdict: at 48 kHz an order-4
+one-third-octave bank is class 1 on Table 1 and misses class 1 on the
+summation by 0.002 dB, at its 16 kHz band, and
 [Filter Class Verification](/phonometry/signals/filters/filter-compliance/#1b-effective-bandwidth-and-the-summation-of-outputs-iec-61260-2)
-shows why. A margin of +0.400 dB on a passing Butterworth bank is the passband
+shows how the summation is graded. A margin of +0.400 dB on a passing Butterworth bank is the passband
 half-corridor itself, the best a compliant design can report, not a result to
 improve; [Filter Class Verification](/phonometry/signals/filters/filter-compliance/#1-verifying-the-class-against-iec-61260-12014)
 explains which constraint binds and why raising the order stops helping the
@@ -226,8 +228,7 @@ optional PASS/FAIL row against a required class:
 ```python
 from phonometry import ReportMetadata, filters
 
-bank = filters.OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[125, 4000],
-                                design=filters.FilterDesign(resample=False))
+bank = filters.OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[125, 4000])
 result = filters.verify_filter_class(bank)   # result.overall_class == 1
 result.report(
     "iec61260.pdf",

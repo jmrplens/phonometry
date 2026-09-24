@@ -187,8 +187,9 @@ impulsive signals it is dominated by the filter's own ringing. There is no
 `verify_filter_class(bank)` checks the designed bank against the IEC 61260-1
 Table 1 acceptance limits, the effective bandwidth and the summation of
 adjacent outputs, and reports the class (`1`, `2` or `None` if outside both)
-with per-band margins. The decimated octave bank is class 2 on the summation;
-Filter Class Verification says why.
+with per-band margins. The default octave and one-third-octave banks are
+class 1 on all three, decimated or filtered at the full rate; Filter Class
+Verification says why the decimation barely moves the summation.
 
 ## 4. Parametric EQ (`ParametricEQ`)
 
@@ -385,7 +386,9 @@ time-aligned with the input. It is a per-call option on the bank, not an
 argument of the one-shot `octave_filter()`, which rejects it with a
 `TypeError`. The effective attenuation doubles and the
 effective passband narrows, lowering the measured broadband band level by
-~0.2 to 0.3 dB per band (a pure in-band tone is unaffected); prefer forward
+about 0.4 dB per band (filtering twice squares the magnitude, and an order-6
+Butterworth band then passes 11/12 of its noise bandwidth, −0.38 dB; a pure
+in-band tone is unaffected); prefer forward
 filtering when the absolute band SPL must match single-pass conventions, and
 reserve zero-phase for when the temporal envelope matters (e.g. reverberation
 decay). The option is incompatible with stateful (block) processing.

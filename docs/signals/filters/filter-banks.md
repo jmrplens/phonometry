@@ -185,8 +185,10 @@ impulsive signals it is dominated by the filter's own ringing. There is no
 `10*np.log10(np.sum(10**(spl/10)))`, never an arithmetic mean of decibels.
 
 `verify_filter_class(bank)` checks the designed bank against the IEC 61260-1
-Table 1 acceptance limits and reports the class (`1`, `2` or `None` if outside both) with per-band
-margins.
+Table 1 acceptance limits, the effective bandwidth and the summation of
+adjacent outputs, and reports the class (`1`, `2` or `None` if outside both)
+with per-band margins. The decimated octave bank is class 2 on the summation;
+Filter Class Verification says why.
 
 ## 4. Parametric EQ (`ParametricEQ`)
 

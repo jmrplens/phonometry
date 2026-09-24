@@ -577,6 +577,32 @@ print(carpet.approximate)
 # frozenset({'pile_height_mm'})
 ```
 
+## La clase de un banco de filtros lee todos los requisitos de IEC 61260-1
+
+`verify_filter_class` calificaba solo la máscara de la Tabla 1. Para la edición
+de 2014 califica ahora también la desviación del ancho de banda efectivo del
+5.12 y la suma de las señales de salida del 5.16, calculadas como las calcula
+IEC 61260-2:2016, y la `class` de una banda y la `overall_class` del banco son
+la clase más estricta que se cumple en los tres. Un veredicto con
+`edition="1995"` no cambia.
+
+| Antes | 4.0 |
+| --- | --- |
+| `overall_class` 1 para el banco de octavas diezmado (Butterworth, orden 6, 48 kHz) | 2: sus salidas adyacentes suman hasta +0,94 dB respecto a la entrada, más allá de los +0,8 dB de la clase 1 en el 5.16; el mismo banco diseñado con `FilterDesign(resample=False)` es clase 1 |
+| la `class` de una banda leída de `margin_class{c}_db` | `class` sobre todos los requisitos; `margin_class{c}_db` sigue siendo el margen de la Tabla 1, junto a `bandwidth_margin_class{c}_db` y `summation_margin_class{c}_db`, que vale `None` en las dos bandas de los extremos |
+| un solo requisito por el que preguntar | `requirements`, `requirement_class(name)` y `binding_margin_db(name, cls)` leen cada uno por separado, y `plot(requirement="summation")` lo dibuja |
+
+El banco de tercios de octava sigue siendo clase 1.
+
+```python
+from phonometry import filters
+
+octave = filters.verify_filter_class(
+    filters.OctaveFilterBank(48000, fraction=1, limits=[125, 4000]))
+print(octave.overall_class, octave.requirement_class("relative_attenuation"))
+# 2 1
+```
+
 ## Los diez nombres que ya no están
 
 Todo lo demás se movió. Estos diez no existen en ningún módulo público:

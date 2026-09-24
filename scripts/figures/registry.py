@@ -503,7 +503,10 @@ from .signals import (
     generate_dose_exchange,
     generate_energy_vs_arithmetic_mean,
     generate_filter_class0_mask,
+    generate_filter_periodic_verdict,
     generate_filter_responses,
+    generate_filter_summation,
+    generate_filter_time_invariance,
     generate_filter_type_comparison,
     generate_g_weighting_response,
     generate_group_delay_comparison,
@@ -667,6 +670,11 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     generate_block_processing_continuity,
     generate_class_mask_overlay,
     generate_filter_class0_mask,
+    # IEC 61260-2:2016 and IEC 61260-3:2016: the summation of outputs, the
+    # swept test of time-invariant operation and a periodic-test verdict.
+    generate_filter_summation,
+    generate_filter_time_invariance,
+    generate_filter_periodic_verdict,
     generate_weighting_class_mask,
     generate_calibration_stability,
     generate_calibration_narrowband_bias,

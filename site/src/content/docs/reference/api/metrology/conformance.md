@@ -56,7 +56,11 @@ tables are reproduced to the letter as well as to the verdict.
 The limits may be symmetric, as IEC 60942 writes them (an acceptance limit on
 the *absolute* deviation), or asymmetric, as IEC 61672-1 writes most of its own
 (+1,0 dB; -1,2 dB in Table C.1). A symmetric limit is given as one number and
-an asymmetric pair as `(lower, upper)`.
+an asymmetric pair as `(lower, upper)`. One end of the pair may be open: the
+stop band of IEC 61260-1:2014 Table 1 prints a minimum relative attenuation
+and a maximum of $+\infty$ ("+70; +∞"), and that is an acceptance
+interval with no upper limit, given as `(70.0, math.inf)`. An interval open
+at both ends bounds nothing and is refused.
 
 A deviation that reaches a limit through floating-point arithmetic, such as a
 measured 0,2 dB plus a correction of 0,1 dB against a limit of 0,3 dB, sums
@@ -93,8 +97,8 @@ numbers are in the one unit the specification is written in, which
 | :--- | :--- |
 | `deviation` | The measured deviation from the design goal, signed. |
 | `uncertainty` | The actual expanded uncertainty of that measurement, for a coverage probability of 95 %, as the testing laboratory calculated it. |
-| `lower_limit` | The lower acceptance limit, inclusive. |
-| `upper_limit` | The upper acceptance limit, inclusive. |
+| `lower_limit` | The lower acceptance limit, inclusive, or `-inf` for an interval with no lower limit. |
+| `upper_limit` | The upper acceptance limit, inclusive, or `+inf` for an interval with no upper limit (the stop band of IEC 61260-1:2014 Table 1). |
 | `max_uncertainty` | The maximum-permitted expanded uncertainty the standard prints for the test, inclusive. |
 | `unit` | The unit of the five numbers, a label for the figure (`"dB"` by default, `"%"` for a frequency or a distortion). |
 
@@ -171,7 +175,10 @@ Read on the side the deviation lies: a deviation of -0,6 dB against
 limits of +1,0 dB and -1,2 dB uses 0,5 of the lower one. Above 1 the
 deviation is outside the limits. A deviation on the far side of a
 limit of zero (a negative distortion against `(0, 3)`) has no finite
-share and reads as infinity.
+share and reads as infinity. An open side is never used up: on it the
+share is zero while the deviation is inside the interval and infinity
+once it is not (a stop-band attenuation of 40 dB against
+`(70, +inf)`).
 
 ### ConformanceVerification.share_of_max_uncertainty
 
@@ -218,7 +225,7 @@ what the standard prints for the test at hand, read off its own tables.
 | :--- | :--- |
 | `deviation` | The measured deviation from the design goal, signed, in the unit of the specification. A standard that grades the absolute deviation, as IEC 60942 does, is served by passing the deviation as measured and a symmetric limit. |
 | `uncertainty` | The actual expanded uncertainty of the measurement for a coverage probability of 95 %, in the same unit. |
-| `acceptance_limits` | One non-negative number for symmetric limits (`0.25` is +/-0,25), or a `(lower, upper)` pair such as `(-1.2, 1.0)`. Both limits belong to the acceptance interval. |
+| `acceptance_limits` | One non-negative number for symmetric limits (`0.25` is +/-0,25), or a `(lower, upper)` pair such as `(-1.2, 1.0)`. Both limits belong to the acceptance interval. One end of a pair may be open, `(70.0, math.inf)` for a minimum with no maximum, as IEC 61260-1:2014 Table 1 writes its stop band. |
 | `max_uncertainty` | The maximum-permitted expanded uncertainty for a coverage probability of 95 %, in the same unit. |
 | `unit` | The unit of the numbers, used to label the figure (default `"dB"`). |
 
@@ -228,4 +235,4 @@ what the standard prints for the test at hand, read off its own tables.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | for a non-finite number, a negative symmetric limit, a lower limit above the upper one, a negative uncertainty or a maximum-permitted uncertainty that is not positive. |
+| ValueError | for a non-finite number (bar a limit open on its own side), a negative symmetric limit, a lower limit above the upper one, a pair open at both ends, a negative uncertainty or a maximum-permitted uncertainty that is not positive. |

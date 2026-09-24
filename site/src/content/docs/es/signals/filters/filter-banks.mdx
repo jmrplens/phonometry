@@ -371,8 +371,10 @@ una suma energética que hace quien llama,
 `10*np.log10(np.sum(10**(spl/10)))`, nunca una media aritmética de decibelios.
 
 `verify_filter_class(bank)` comprueba el banco diseñado contra los límites de
-aceptación de la Tabla 1 de IEC 61260-1 e informa de la clase (`1`, `2` o `None` si queda fuera de ambas) con los
-márgenes por banda.
+aceptación de la Tabla 1 de IEC 61260-1, el ancho de banda efectivo y la suma de
+las salidas adyacentes, e informa de la clase (`1`, `2` o `None` si queda fuera
+de ambas) con los márgenes por banda. El banco de octavas diezmado es clase 2 en
+la suma; Verificación de clase de filtros explica por qué.
 
 ### Qué compra `order`, y dónde deja de comprar
 

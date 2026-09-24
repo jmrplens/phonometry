@@ -1760,6 +1760,9 @@ _ES_EXACT = {
     "IEC 60942:2017, Table E.1": "IEC 60942:2017, Tabla E.1",
     "IEC 61672-1:2013, Table C.1": "IEC 61672-1:2013, Tabla C.1",
     "Example number": "Número de ejemplo",
+    # IEC 61260-2 and IEC 61260-3: the band-filter tests.
+    "Octave bank, decimated: class 2 on §5.16": "Banco de octava, diezmado: clase 2 en §5.16",
+    "One-third-octave bank: class 1 on §5.16": "Banco de tercio de octava: clase 1 en §5.16",
     "Fast level of the event": "Nivel Fast del evento",
     r"$L_{\mathrm{eq}}$ over the whole event": r"$L_{\mathrm{eq}}$ de todo el evento",
     "SEL: same energy in 1 s": "SEL: la misma energ\u00eda en 1 s",

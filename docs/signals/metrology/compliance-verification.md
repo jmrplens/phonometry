@@ -44,7 +44,7 @@ standard's frequency range could not be demonstrated at your sample rate.
 | :--- | :--- | :--- |
 | Frequency weighting (A, C, Z) | `verify_weighting_class` | IEC 61672-1:2013 Table 3 |
 | Weightings B and AU | `verify_weighting_class` | ANSI S1.4-1983 Tables IV/V; IEC 61012:1990 Table 1 |
-| Fractional-octave filter bank | `verify_filter_class` | IEC 61260-1:2014 Table 1 (1995 mask via `edition="1995"`) |
+| Fractional-octave filter bank | `verify_filter_class`; `verify_time_invariance` | IEC 61260-1:2014 Table 1, 5.12 and 5.16 as IEC 61260-2 computes them (1995 mask via `edition="1995"`); 5.14 by an exponential sweep |
 | Intensity instrument spectrum | `verify_intensity_class` | IEC 61043:1993 Table 2 |
 
 The masks are public too: `weighting_class_limits(1)` returns the Table 3
@@ -71,8 +71,11 @@ print(bands.range_limited)           # True for a decimated bank
 Read the flags, not just the class: `range_limited` is `True` on the
 decimated bank because a band cannot be evaluated beyond its own processing
 Nyquist, so the far stopband rests on the anti-alias argument rather than on
-the band filter itself. The details, including why a +0.400 dB margin is the
-ceiling for a passing Butterworth bank, are in
+the band filter itself. The class is the strictest met on every requirement
+graded (`bands.requirements`), and the decimated octave bank is the one that
+parts company with its Table 1 verdict, class 2 on the summation of 5.16. The
+details, including why a +0.400 dB margin is the ceiling for a passing
+Butterworth bank, are in
 [Filter class verification](../filters/filter-compliance.md); the weighting
 side is section 6 of [Frequency weighting](../levels/weighting.md).
 
@@ -87,7 +90,8 @@ verdict:
 ```python
 from phonometry import ReportMetadata, filters
 
-bank_11 = filters.OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[125, 4000])
+bank_11 = filters.OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[125, 4000],
+                                   design=filters.FilterDesign(resample=False))
 result = filters.verify_filter_class(bank_11)   # result.overall_class == 1
 result.report(
     "iec61260.pdf",
@@ -99,14 +103,14 @@ result.report(
 )                                            # -> Class 1 - COMPLIES, PASS
 ```
 
-**The verifiers that grade a measurement, not a design.** Six more functions
+**The verifiers that grade a measurement, not a design.** Seven more functions
 carry the same `verify_` prefix and answer a different question. The four
 above are handed a filter this library built, and report whether that *design*
 fits an acceptance mask; these are handed numbers somebody measured on a
 bench, and report whether *that instrument, on the day it was measured*, meets
 the standard it is sold against. There are no classes and no decibel margins
 in them: the verdict is a pass or a fail, in the unit its own standard writes
-its tolerances in. All six return a result object whose verdict says so and
+its tolerances in. All seven return a result object whose verdict says so and
 whose other fields say where and by how much, down to `verify_running_rms_decay`,
 which grades one printed row and keeps it.
 
@@ -118,6 +122,7 @@ which grades one printed row and keeps it.
 | Saw-tooth burst indications | `verify_signal_burst_response` | ISO 8041-1:2017 Tables 7 to 9 (the signal is Table 6) |
 | Running r.m.s. decay time | `verify_running_rms_decay` | ISO 8041-1:2017 Tables 10 and 11 |
 | Sound calibrator | `verify_sound_calibrator` | IEC 60942:2017 Tables 2 to 7 and A.1 to A.5 |
+| Band-filter periodic test | `verify_filter_periodic` | IEC 61260-3:2016 clauses 10, 11 and 13 and Table 1, with the maxima of IEC 61260-1:2014 Annex B |
 
 One clause of ISO 8041-1 makes those four different in kind from everything
 else on this page. The deviation a laboratory reports is extended by that
@@ -141,8 +146,12 @@ IEC 61672-1 Annex A), a guard band stated for a 95 % coverage interval that
 lowers the risk of passing an instrument outside its tolerance without removing
 it. `metrology.verify_conformance` is the rule on its own,
 and its verdict names which of the four outcomes of IEC 60942 E.2.2 it is, in
-the words of the tables' "Reasons" column; `verify_sound_calibrator` applies it
-to every requirement of IEC 60942:2017 (see [Calibration and dBFS](calibration.md)).
+the words of the tables' "Reasons" column. One end of the acceptance interval
+may be open, `acceptance_limits=(70.0, math.inf)`, for a stop-band requirement
+that has a minimum and no maximum. `verify_sound_calibrator` applies the rule
+to every requirement of IEC 60942:2017 (see [Calibration and dBFS](calibration.md)),
+and `verify_filter_periodic` to every result of an IEC 61260-3:2016 periodic
+test (see [Filter class verification](../filters/filter-compliance.md)).
 
 ```python
 from phonometry import metrology
@@ -160,7 +169,8 @@ print(both_out.passes, both_out.outcome)              # False 4
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/conformance_rule_examples_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/conformance_rule_examples.svg" alt="The eight examples of IEC 60942:2017 Table E.1 between 0 dB and 0.25 dB, as Figure E.1 draws their absolute deviations, and the ten of IEC 61672-1:2013 Table C.1 between -1.2 dB and +1.0 dB, each marker the verdict verify_conformance returned, which is the verdict the table prints" width="100%"></picture>
 
 All eighteen examples are rows of the [conformance report](../../CONFORMANCE.md),
-verdict and printed reason each.
+verdict and printed reason each, and so are the same ten as IEC 61260-1:2014
+Table C.1 prints them.
 
 ## Reading the conformance report
 
@@ -182,15 +192,20 @@ published standards themselves are in the [errata registry](../../ERRATA.md).
 ## What only a laboratory can attest
 
 Both instrument series continue past their Part 1 with two test regimes, and
-neither is something a software library can run on itself.
+neither is something a software library can run on itself. What the library
+can do with them is arithmetic: the requirements of a filter set that Part 2
+computes from a response are computed on the design, and the results a Part 3
+test of a filter set returns are graded by `verify_filter_periodic`, which
+runs none of the tests.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_verification_regimes_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_verification_regimes.svg" alt="Three stacked bands, one for each part of the two instrument series, with sound level meters to IEC 61672 on the left and band filters to IEC 61260 on the right. A box at the top stands for the transfer function configured in phonometry, and two arrows, verify_weighting_class and verify_filter_class, reach down into the first band only. Part 1 holds the specifications: Table 3 of IEC 61672-1, the A, C and Z weightings at 34 frequencies from 10 Hz to 20 kHz with ±0.7 dB at 1 kHz for class 1, and Table 1 of IEC 61260-1, a relative attenuation corridor with ±0.4 dB at the mid-band, each with the largest uncertainty a laboratory may claim it with. A dashed line separates a design checked in software from a physical instrument in a laboratory. Part 2, pattern evaluation, shows at least three specimens submitted, at least two selected and at least one tested in full, with the environmental, electrostatic, radio-frequency, free-field, linearity and climate tests, and a report that states whether the pattern is approved. An arrow carries that approval down to Part 3, periodic tests on one working instrument at 20 °C to 26 °C with a limited set of checks, which support no general conclusion without it. A box at the foot gives the conformance criterion: the deviation within the acceptance limits and the uncertainty no larger than its maximum." width="100%"></picture>
 
-*The two series side by side, their three parts stacked. The verifiers reach
-only the Part 1 tables and only the first half of the conformance criterion;
-Parts 2 and 3, under the dashed line, need a physical instrument, and a
-periodic test says nothing general until the pattern approval it leans on is
-public.*
+*The two series side by side, their three parts stacked. The design verifiers
+reach only the Part 1 requirements and only the first half of the conformance
+criterion; Parts 2 and 3, under the dashed line, need a physical instrument,
+whose periodic-test results `verify_filter_periodic` grades on both halves,
+and a periodic test says nothing general until the pattern approval it leans
+on is public.*
 
 **Pattern evaluation** (IEC 61672-2:2013 for meters, IEC 61260-2:2016 for
 filters) is the type-approval regime a *model* passes once: the tests
@@ -217,13 +232,15 @@ The same honesty applies to this library, in both directions. A verdict from
 one of the four class verifiers is a statement about a *design*: the digital
 transfer function you configured fits the Part 1 acceptance mask, with the
 reported margins, over the checked range; every measurement made wholly in
-software inherits it. A verdict from one of the six that grade a measurement
+software inherits it. A verdict from one of the seven that grade a measurement
 is narrower still: it belongs to the numbers somebody put in, on the day they
 were measured, and nothing else inherits it. Neither is a pattern evaluation,
 a periodic test, or a certificate for any physical device: nothing here has a microphone, a temperature or a serial
 number, and a real front end brings its own paper: the meter's periodic
 test per IEC 61672-3 and the calibrator's laboratory results per IEC 60942,
-which `verify_sound_calibrator` grades but cannot produce, both discussed in
+which `verify_sound_calibrator` grades but cannot produce (as
+`verify_filter_periodic` grades a filter set's IEC 61260-3 results), both
+discussed in
 [Calibration and dBFS](calibration.md). A defensible report
 names both verdicts: the library's design verdict with the version and its
 conformance report, and the instrument's test record with its date.
@@ -236,10 +253,15 @@ performance categories and the Table 3 acceptance limits checked by
 IEC 61672-2:2013 (*Pattern evaluation tests*) and IEC 61672-3:2013
 (*Periodic tests*): the instrument test regimes delimited above, not run.
 IEC 61260-1:2014, *Octave-band and fractional-octave-band filters — Part 1:
-Specifications*: the Table 1 acceptance limits checked by
-`verify_filter_class`.
-IEC 61260-2:2016 (*Pattern-evaluation tests*) and IEC 61260-3:2016
-(*Periodic tests*): the filter-set test regimes delimited above, not run.
+Specifications*: the Table 1 acceptance limits, the effective bandwidth of 5.12
+and the summation of 5.16 checked by `verify_filter_class`, the time-invariant
+operation of 5.14 by `verify_time_invariance`, and the Annex B maxima of the
+periodic tests.
+IEC 61260-2:2016 (*Pattern-evaluation tests*): Formulas (1) to (3) and the
+swept test of 7.4, computed on a design; the tests on a specimen are delimited
+above, not run.
+IEC 61260-3:2016 (*Periodic tests*): the tests are delimited above, not run;
+`verify_filter_periodic` grades the results a laboratory returns.
 IEC 61043:1993, *Instruments for the measurement of sound intensity*: the
 class limits behind `verify_intensity_class`.
 IEC 60942:2017, *Sound calibrators*: the conformance rule of 5.1.15 and
@@ -251,3 +273,5 @@ and Table C.1 give the same rule and ten more examples.
 stage's own page; and every test of the Parts 2 and 3 themselves is
 delimited here but not performed: no environmental, immunity, acoustical or
 linearity test is run, and no physical instrument is assigned a class.
+`verify_filter_periodic` grades the results of a filter-set periodic test; it
+does not produce them.

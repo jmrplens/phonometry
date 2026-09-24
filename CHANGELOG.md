@@ -164,6 +164,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   gives 77,8° and 282,2°, which is registered in the errata. A new guide under
   Calibration and uncertainty runs both methods on a synthetic meter, with a
   drawing of the two measurement set-ups, in English and Spanish.
+- **A filter bank's effective bandwidth, summation of outputs and swept
+  time-invariance, and the grading of an IEC 61260-3 periodic test.** For the
+  2014 edition `filters.verify_filter_class` grades, besides the Table 1 mask,
+  the effective bandwidth deviation of IEC 61260-1:2014 5.12 and the summation
+  of output signals of 5.16, computed as IEC 61260-2:2016 computes them: the
+  test frequencies of its Formula (1) with `points_per_bandwidth` (S, at least
+  24), the trapezoidal effective bandwidth of Formula (2) and the energy sum of
+  each band and its two neighbours of Formula (3); `requirements`,
+  `requirement_class`, `binding_margin_db` and `plot(requirement=...)` read
+  each one, and the fiche tabulates them. `filters.verify_time_invariance` runs
+  the exponential sweep of IEC 61260-2 7.4 through the bank itself, decimation
+  included, at 2 s and 5 s per decade against Formula (17), which is
+  `filters.swept_band_level` (107.97 dB for the example of Annex B), with the
+  Annex A uncertainty in `filters.swept_level_uncertainty`.
+  `filters.verify_filter_periodic` grades a laboratory's IEC 61260-3:2016
+  results, `filters.FilterPeriodicMeasurements`, clause by clause (10.2 or
+  10.3, 11.7, 11.9 and 13) by the conformance rule of IEC TC 29 with the
+  maxima of IEC 61260-1:2014 Annex B, names the results 5.3 makes unusable,
+  and gives the statement of Clause 14 with the caveat of 1.5;
+  `filters.periodic_test_frequencies` is Formulas (1) and (2) for any
+  bandwidth and `filters.PERIODIC_TEST_ATTENUATION_LIMITS_DB` its Table 1.
+  `metrology.verify_conformance` accepts an interval open at one end, for a
+  stop-band minimum. The fifteen frequencies of Table C.1, the derivation of
+  C.2, every cell of Table 1, the ten examples of IEC 61260-1:2014 Table C.1
+  and the worked examples of Annexes A and B are conformance rows; Formulas (2)
+  and (3) print no example and are held to closed forms. The printed
+  Formula (A.2) of both parts leaves a square off the coefficient of its
+  frequency terms, 61260-3 B.2.6 ends its averaging 6 s to 7 s after 6.3 Hz
+  where its own settings give 18 s to 19 s, and Formula (3) and the words of
+  7.2.4.3 and 5.16 take the difference in opposite directions; all three are
+  registered in the errata. The filter-verification guide gains sections on
+  each, with figures, in both languages.
+
 - **What an active noise reduction earmuff adds, its uncertainty and where it
   stops being linear (ISO 4869-6:2019).** `hearing.active_insertion_loss` takes
   the levels at both ears with the circuit off and on (or the insertion loss
@@ -735,6 +768,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   suggestion now finds rows of its own catalogue, which a test checks in both
   languages: the wood, plateau, porous, area, predicted scattering and fluid
   catalogues suggested materials none of their rows hold.
+- **A filter bank's class reads every requirement IEC 61260-1:2014 sets on its
+  response.** `filters.verify_filter_class` graded the Table 1 mask alone; for
+  the 2014 edition a band's `class` and the bank's `overall_class` are now the
+  strictest class met on Table 1, the effective bandwidth (5.12) and the
+  summation of outputs (5.16). The decimated octave bank (Butterworth, order 6,
+  48 kHz) sums its adjacent outputs from −1.16 dB to +0.94 dB about the input,
+  past the +0.8 dB of class 1, and reads class 2 where it read class 1; tones
+  run through the bank itself read the same sums. Designed with
+  `FilterDesign(resample=False)` it is class 1, and so is the one-third-octave
+  bank as designed. `margin_class{c}_db` is still the Table 1 margin, and a
+  1995-edition verdict is unchanged. The example fiche is the octave bank
+  designed at the full rate.
 - **Every catalogue row has one shape, and says what its source claims for
   each cell.** The rows of every published catalogue share one base,
   `io.CatalogueRow` (with `io.BandedRow` for a row printed band by band),

@@ -3154,7 +3154,7 @@ def _d_filter_class_check(s: SVG, th: Theme) -> None:
     is what Formula (11) says. The band is an order-6 Butterworth one-third
     octave at 1 kHz; the Nyquist line is where the decimated default bank
     stops walking it (48 kHz over 17, halved). The dashed column is
-    IEC 61260-2 and IEC 61260-3, which test a device and are not run here.
+    IEC 61260-2 and IEC 61260-3 as a laboratory runs them on a device.
     """
     pass_om = [_third_octave_breakpoint(row[0]) for row in _TABLE1_PASS_MAX]
     stop_om = [_third_octave_breakpoint(row[0]) for row in _TABLE1_STOP_MIN]
@@ -3434,7 +3434,7 @@ def _d_verification_regimes(s: SVG, th: Theme) -> None:
 
     Both series split the same way. Part 1 fixes the design goals and the
     acceptance limits, Table 3 of IEC 61672-1 and Table 1 of IEC 61260-1, and
-    it is the only part the two verifiers read. Part 2 is pattern evaluation,
+    it is the only part the two design verifiers are held to. Part 2 is pattern evaluation,
     and 4.1 of both parts sets minimums rather than counts: at least three
     specimens submitted, at least two selected and at least one of those
     tested in full against every mandatory specification, ending in a report

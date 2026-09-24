@@ -11,11 +11,14 @@ A bank "is class 1" when every band of it stays inside the class 1 corridor
 at every normalized frequency, and the margin in decibels says by how much.
 
 This page is the verification half of the octave-filtering topic: the 2014
-mask and the per-band verdict, the stricter **class 0** kept alive by the
-withdrawn IEC 61260:1995 and ANSI S1.11-2004 masks, a reading of what a
-class actually buys in a measurement (passband error, stopband leakage,
-uncertainty budget), and the one-page accredited fiche that turns the
-verdict into a document. The design half, the band mathematics and the
+mask and the per-band verdict, the two requirements Part 2 of the series
+computes from the same response (the effective bandwidth and the summation of
+adjacent outputs) and the swept test of time-invariant operation, the stricter
+**class 0** kept alive by the withdrawn IEC 61260:1995 and ANSI S1.11-2004
+masks, a reading of what a class actually buys in a measurement (passband
+error, stopband leakage, uncertainty budget), how the results of a periodic
+test are graded, and the one-page accredited fiche that turns the verdict into
+a document. The design half, the band mathematics and the
 parameter reference, is [Filter Banks](filter-banks.md), and the five
 architectures with their compared responses are
 [Filter Architecture Gallery](filter-gallery.md); the same machinery
@@ -26,8 +29,10 @@ applied to the frequency weightings is section 6 of
 
 `verify_filter_class` checks every band of a bank against the acceptance
 limits of **IEC 61260-1:2014** (Table 1, with the fractional-octave breakpoint
-mapping and log-frequency interpolation from the standard) and reports the
-performance class per band with its margin in dB:
+mapping and log-frequency interpolation from the standard), and, for the 2014
+edition, against the effective bandwidth and the summation of outputs the way
+IEC 61260-2:2016 computes them (section 1b). It reports the performance class
+per band with its margins in dB:
 
 ```python
 from phonometry import filters
@@ -35,8 +40,13 @@ from phonometry import filters
 bank = filters.OctaveFilterBank(fs=48000, fraction=3, order=6)
 result = filters.verify_filter_class(bank)
 print(result.overall_class)          # 1
-print(result.bands[0])
-# {'freq': 12.589254117941678, 'class': 1, 'checked_to_omega': 3.8127755266765493, 'margin_class1_db': 0.3999999999999595, 'margin_class2_db': 0.5999999999999595}
+print(result.requirements)
+# ('relative_attenuation', 'effective_bandwidth', 'summation')
+band = result.bands[0]
+print(band["freq"], band["class"], band["checked_to_omega"])
+# 12.589254117941678 1 3.8127755266765493
+print(band["margin_class1_db"], band["bandwidth_margin_class1_db"])
+# 0.3999999999999595 0.35183457985825545
 ```
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_filter_class_check_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_filter_class_check.svg" alt="Calculation chain for grading a band filter against IEC 61260-1 Table 1: a one-third-octave band at 1 kHz, its relative attenuation at every breakpoint against the class 1 and class 2 limits, the class 1 margin at each breakpoint and the class it gives, with the hardware tests of IEC 61260-2 and IEC 61260-3 set apart as outside the check" width="88%"></picture>
@@ -45,8 +55,9 @@ print(result.bands[0])
 relative attenuation at every Table 1 breakpoint, carried to one-third octave,
 against the class 1 and class 2 limits, with the smallest margin deciding the
 class. The red dashed line is where the decimated bank stops walking it. The
-dashed column on the right is what a laboratory does to an instrument instead,
-and none of it runs here.*
+dashed column on the right is what a laboratory does to an instrument instead:
+of it, section 1b computes on the design the two tests that need no specimen,
+and section 3b grades the periodic-test results a laboratory returns.*
 
 The Table 1 acceptance mask itself is public too: `class_limits(fraction,
 filter_class, omega)` returns the minimum/maximum relative-attenuation
@@ -95,14 +106,188 @@ plt.show()
 
 </details>
 
-With default parameters (order 6), **Butterworth meets class 1**, and so does
+With default parameters (order 6), **Butterworth meets the class 1 mask of
+Table 1**, and so does
 **Chebyshev II**: its `attenuation` default is now `72` dB, clearing the 70 dB
 far-stopband class 1 limit (scipy pins the cheby2 equiripple floor at exactly
 `attenuation`, so any value $\ge 70\ \text{dB}$ qualifies; the 72 dB default
 keeps the same +0.400 dB passband margin as Butterworth). Chebyshev I,
 Elliptic and Bessel do
 not meet class limits at order 6: passband ripple (cheby1/ellip) and slow
-roll-off (bessel) violate the mask.
+roll-off (bessel) violate the mask. Whether a whole bank is class 1 also
+depends on the two requirements of section 1b, and there the decimated octave
+bank falls to class 2.
+
+## 1b. Effective bandwidth and the summation of outputs (IEC 61260-2)
+
+Table 1 judges a band one frequency at a time. IEC 61260-1:2014 adds two
+requirements that judge a band, and a set of bands, as a whole, and
+IEC 61260-2:2016 says how a pattern-evaluation laboratory computes them from
+the same relative attenuation. Neither needs anything but the designed
+response, so for the 2014 edition `verify_filter_class` grades both, and a
+band's `class` is the strictest class it meets on all three.
+
+**Effective bandwidth (5.12).** For broadband sound a band analyser reports
+the power its band lets through, so its width in power is what matters. The
+normalized effective bandwidth is Formula (13) of IEC 61260-1,
+
+$$
+B_\mathrm{e} = \int_0^\infty \frac{1}{\Omega}\,10^{-0.1\,\Delta A(\Omega)}\,\mathrm{d}\Omega ,
+$$
+
+and its deviation from the bandwidth of an ideal band,
+$B_\mathrm{r} = (1/b)\ln G$, is $\Delta B = 10\lg(B_\mathrm{e}/B_\mathrm{r})$,
+within ±0.4 dB for class 1 and ±0.6 dB for class 2 (5.12.2). A band with
+$\Delta B = +0.05$ dB reads pink noise 0.05 dB high. The verifier evaluates the
+integral as IEC 61260-2 7.2.3.2 recommends: the trapezoidal rule of its
+Formula (2) over the test frequencies of its Formula (1),
+
+$$
+\Omega_i = G^{i/(bS)} ,
+$$
+
+with $S$ at least 24 frequencies per bandwidth (`points_per_bandwidth`, 24 by
+default), carried out to the outermost breakpoint of Table 1, where a class 1
+band is at least 70 dB down.
+
+**Summation of output signals (5.16).** A tone between two mid-band
+frequencies has to come out of the set with its power, shared between the
+bands that see it, neither lost nor added. Formula (3) of IEC 61260-2 sums on
+an energy basis the relative attenuation of band $j$ and of its two
+neighbours, at the test frequencies inside band $j$
+($|i| \le \lfloor S/2 \rfloor$):
+
+$$
+\Delta P_j = 10\lg\left[10^{-0.1\,\Delta A_{j-1}} + 10^{-0.1\,\Delta A_j} + 10^{-0.1\,\Delta A_{j+1}}\right]
+$$
+
+and the result has to stay between −1.8 dB and +0.8 dB for class 1, and between
+−3.8 dB and +1.8 dB for class 2. The two end bands, with a neighbour on one side
+only, are left out (7.2.4.4), so the requirement is graded only on a bank of
+three bands or more, and `result.requirements` says whether it was. The printed
+Formula (3) and the words of 7.2.4.3 and of 5.16 take the difference in
+opposite directions, which with limits this lopsided is not the same test; the
+verifier applies the limits to the formula as printed, as 7.2.4.5 instructs,
+and the [errata registry](../../ERRATA.md) records the conflict.
+
+```python
+from phonometry import filters
+
+third = filters.verify_filter_class(
+    filters.OctaveFilterBank(48000, fraction=3, order=6, limits=[125, 4000]))
+print(third.overall_class)                                  # 1
+
+octave = filters.verify_filter_class(
+    filters.OctaveFilterBank(48000, fraction=1, order=6, limits=[125, 4000]))
+print(octave.requirement_class("relative_attenuation"))     # 1
+print(octave.requirement_class("effective_bandwidth"))      # 1
+print(octave.requirement_class("summation"))                # 2
+print(round(octave.binding_margin_db("summation", 1), 2))   # -0.14
+print(octave.overall_class)                                 # 2
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_summation_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_summation.svg" alt="Two panels of the summed output of adjacent bands against normalized frequency, from the lower to the upper band edge, with the class 1 limits dashed at +0.8 dB and −1.8 dB and the class 2 limits dotted at +1.8 dB and −3.8 dB. On the left, the decimated octave bank from 125 Hz to 4 kHz: every inner band dips to about −1.1 dB just above its lower edge and climbs to about +0.9 dB just below its upper edge, the 251 Hz band reaching +0.94 dB, past the class 1 limit, so the bank is class 2. On the right, the one-third-octave bank over the same range traces the same shape from about −0.55 dB to +0.62 dB, inside class 1" width="100%"></picture>
+
+*Formula (3) of IEC 61260-2 on every inner band of the two default banks, drawn
+by `result.plot(requirement="summation")`. The octave bank loses power just
+above each lower band edge and adds it just below each upper edge, and its peak
+crosses the class 1 limit.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+from phonometry import filters
+
+octave = filters.verify_filter_class(
+    filters.OctaveFilterBank(48000, fraction=1, order=6, limits=[125, 4000]))
+third = filters.verify_filter_class(
+    filters.OctaveFilterBank(48000, fraction=3, order=6, limits=[125, 4000]))
+fig, (ax_oct, ax_third) = plt.subplots(1, 2, figsize=(13, 6.2), sharey=True)
+octave.plot(ax=ax_oct, requirement="summation")
+third.plot(ax=ax_third, requirement="summation")
+plt.show()
+```
+
+</details>
+
+**Why the default octave bank is class 2 on 5.16.** The library's default
+octave bank (Butterworth, order 6, 48 kHz, decimated) meets class 1 on Table 1
+and on the effective bandwidth, and its adjacent outputs sum from −1.16 dB to
++0.94 dB about the input: past the +0.8 dB of class 1, inside class 2. It is
+not an artefact of grading transfer functions: tones at those frequencies, run
+through the bank itself with its decimation filters, read the same sums to
+within 0.01 dB. The cause is the multirate design. Each octave is filtered at
+the lowest rate that keeps its upper band edge at 0.8 of the processing Nyquist
+frequency, and that close to Nyquist the bilinear transform squeezes the
+frequency axis: a band's upper skirt falls away sooner than an analogue band's
+would, and its lower skirt later. Just above a lower band edge the neighbour
+below has already gone and power is lost; just below an upper band edge the
+neighbour above is still there and power is added. Designed at the full rate,
+`design=filters.FilterDesign(resample=False)`, the same octave bank sums within
+0 dB to +0.16 dB and is class 1 on every requirement, and so is the Chebyshev II
+octave bank (−0.56 dB to +0.54 dB). The one-third-octave bank passes with the
+decimated design, from −0.55 dB to +0.76 dB over its full default range: a
+margin of 0.04 dB. When an octave analysis has to be class 1 against
+IEC 61260-1:2014 as a whole, design it at the full rate and let
+`verify_filter_class` say so.
+
+## 1c. Time-invariant operation (5.14)
+
+A multirate bank does not filter a tone the same way wherever it falls against
+the decimation, and a transfer function cannot show that. IEC 61260-1:2014
+5.14 tests it on the running filter instead: a sinusoid of constant amplitude
+whose frequency rises one decade in 2 s to 5 s, and each band's time-averaged
+output has to stay within ±0.4 dB (class 1) or ±0.6 dB (class 2) of the level
+of Formula (17),
+
+$$
+L_\mathrm{c} = L_\mathrm{in} - A_\mathrm{ref} + 10\lg\left[\frac{T_\mathrm{sweep}}{T_\mathrm{avg}}\,\frac{\lg(f_2/f_1)}{\lg(f_\mathrm{end}/f_\mathrm{start})}\right]
+$$
+
+the output of an ideal band of the same bandwidth. `swept_band_level` is that
+formula (107.97 dB for the example Annex B of IEC 61260-2 and -3 works
+through), and `swept_level_uncertainty` its standard uncertainty from the
+uncertainties of the sweep (Annex A). `verify_time_invariance` runs the test of
+IEC 61260-2 7.4 on a bank: the sweep of Formulas (A.3) and (A.4) goes through
+every band exactly as `OctaveFilterBank.filter` processes a signal, polyphase
+decimation included, at 2 s and at 5 s per decade.
+
+```python
+from phonometry import filters
+
+bank = filters.OctaveFilterBank(48000, fraction=3, order=6, limits=[25, 10000])
+swept = filters.verify_time_invariance(bank)
+print(swept.overall_class)                       # 1
+print(round(swept.worst_deviation_db, 3))        # 0.054
+print(swept.seconds_per_decade)                  # (2.0, 5.0)
+print(round(filters.swept_band_level(
+    127.0, fraction=3, sweep_duration_s=30, averaging_time_s=30,
+    start_frequency_hz=0.01, end_frequency_hz=1e6), 2))   # 107.97
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_time_invariance_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_time_invariance.svg" alt="The deviation of each band's swept output from the level of Formula (17), for the one-third-octave bank from 25 Hz to 10 kHz, at 2 s and at 5 s per decade, between the class 1 limits dashed at ±0.4 dB and the class 2 limits dotted at ±0.6 dB. Every band at both rates sits at about +0.05 dB, the two rates on top of each other, so the bank is class 1" width="90%"></picture>
+
+*Every band of the decimated one-third-octave bank reads about +0.05 dB at both
+sweep rates. That is its effective bandwidth deviation of section 1b, which is
+what Annex G of IEC 61260-1 says a band that behaves as its transfer function
+must read (G.2.8); decimation that folded energy back into a band would read
+more, and the two rates would part.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+from phonometry import filters
+
+bank = filters.OctaveFilterBank(48000, fraction=3, order=6, limits=[25, 10000])
+filters.verify_time_invariance(bank).plot()
+plt.show()
+```
+
+</details>
 
 ## 2. Class 0 (IEC 61260:1995 / ANSI S1.11-2004)
 
@@ -215,23 +400,112 @@ the class mask. Away from these settings (very high `fraction` or near-Nyquist
 bands), always re-run `verify_filter_class` to confirm the class you need, and
 raise the order if a band needs more margin.
 
+## 3b. Periodic tests: grading a laboratory's results (IEC 61260-3)
+
+`verify_filter_class` answers a question about a *design*. A working
+instrument receives the **periodic tests** of IEC 61260-3:2016 in a
+laboratory, on a date, and they are the laboratory's to run; the
+verdict on what it measured is arithmetic, and `verify_filter_periodic` does
+it. Each result goes in with the laboratory's expanded uncertainty, and each is
+judged by the conformance rule of IEC TC 29 (`metrology.verify_conformance`):
+the deviation within its acceptance limits and the uncertainty within the
+maximum IEC 61260-1:2014 Annex B permits for that test. Clause by clause:
+
+| Clause | What the laboratory measured | Acceptance limits | Maximum $U$ (Annex B) |
+| :--- | :--- | :--- | :--- |
+| 10.2 | relative attenuation of every filter at its exact mid-band | ±0.4 dB class 1, ±0.6 dB class 2 | 0.20 dB |
+| 10.3 | or, time-invariant filters, $\Delta B$ from one sweep | ±0.4 dB class 1, ±0.6 dB class 2 | 0.20 dB |
+| 11.7 | level linearity on the reference range | ±0.5 dB class 1, ±0.6 dB class 2 within 40 dB of the upper boundary; ±0.7 dB and ±0.9 dB beyond | 0.20 dB within 40 dB, 0.35 dB beyond |
+| 11.9 | level linearity on each other range, 30 dB below its upper boundary | as 11.7 | as 11.7 |
+| 13 | relative attenuation of three filters at up to 15 $\Omega_k$ | IEC 61260-3 Table 1 | 0.20, 0.30 or 0.50 dB as $\Delta A$ is up to 2 dB, up to 40 dB, or more |
+
+The fifteen frequencies of clause 13 come from Formulas (1) and (2) of
+IEC 61260-3 for any bandwidth designator, `periodic_test_frequencies(b)`, and
+its Table 1 is `PERIODIC_TEST_ATTENUATION_LIMITS_DB`, the stop-band rows with
+no maximum. A laboratory drops the frequencies that fall outside the range of
+the set (13.4) by writing NaN in their place.
+
+```python
+from phonometry import filters
+
+omega = filters.periodic_test_frequencies(3)
+print(round(float(omega[8]), 5))                          # 1.02667, Table C.1
+print(filters.PERIODIC_TEST_ATTENUATION_LIMITS_DB[1][7])  # (70.0, inf)
+
+row = [76.0, 63.0, 45.0, 20.0, 0.8, 0.3, 0.1, 0.0, 0.1, 0.2, 0.7, 19.0, 44.0, 63.0, 77.0]
+row_u = [0.4, 0.4, 0.4, 0.25, 0.15, 0.15, 0.15, 0.15, 0.15, 0.15, 0.15, 0.25, 0.4, 0.4, 0.4]
+record = filters.FilterPeriodicMeasurements(
+    midband_attenuations_db=[0.12, -0.05, 0.08, 0.02, -0.1, 0.15],
+    midband_uncertainties_db=[0.15] * 6,
+    linearity_deviations_db=[0.0, 0.1, 0.2, -0.3, 0.4],
+    linearity_levels_below_upper_db=[0.0, 10.0, 20.0, 45.0, 55.0],
+    linearity_uncertainties_db=[0.12, 0.12, 0.25, 0.2, 0.3],
+    relative_attenuations_db=[row, row, row],
+    relative_attenuation_uncertainties_db=[row_u, row_u, row_u],
+)
+verdict = filters.verify_filter_periodic(1, record, fraction=3)
+print(verdict.passes)       # False
+print(verdict.unusable)     # (('11.7', '20 dB below the upper boundary'),)
+print(verdict.failed)       # ()
+```
+
+Every deviation of that record is inside its limits, and the verdict is still
+not a pass: one linearity reading was taken with 0.25 dB of expanded
+uncertainty where Annex B allows 0.20 dB, and 5.3 of IEC 61260-3 forbids using
+it. `verdict.statement` says so in the words of the standard, and once every
+result is usable it becomes the statement Clause 14 prescribes: 14 k) when the
+model's pattern approval is public (`pattern_approval_public=True`), 14 l)
+otherwise, with the caveat of 1.5 that no general conclusion about
+IEC 61260-1 follows from the periodic tests alone.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_periodic_verdict_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_periodic_verdict.svg" alt="The margin of every result of a class 1 periodic test to its nearer acceptance limit, grouped by clause: six mid-band results of 10.2 between 0.25 dB and 0.38 dB, five level-linearity results of 11.7 and forty-five relative attenuations of clause 13, on a scale linear up to 1 dB and logarithmic above. Every result lies above the red acceptance line at zero with its expanded uncertainty drawn as a bar, and all are green diamonds except one 11.7 result drawn as a hollow orange circle, unusable under 5.3 because its uncertainty exceeds the Annex B maximum. The title reads not passed" width="100%"></picture>
+
+*`verdict.plot()`: every result's margin to its nearer limit with its expanded
+uncertainty, clause by clause. The hollow circle is the one result 5.3 makes
+unusable, and it alone holds the verdict back.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+# `verdict` is the result of the snippet above.
+verdict.plot()
+plt.show()
+```
+
+</details>
+
+What the periodic grader leaves to the laboratory report: the self-generated
+noise of Clause 12, for which Annex B sets no maximum uncertainty, the overload
+indication of 11.5 and 11.8, and the observations of Clauses 4 and 6 to 8
+(preliminary inspection, environmental conditions, the manual) are not graded;
+record them beside the verdict.
+
 ## 4. The compliance fiche (`.report()`)
 
 `verify_filter_class(bank)` returns a result object that exposes `.plot()`
 and `.report()`, so a type-test verdict can be rendered as a one-page
-accredited fiche: a per-band classification table, the
-worst-margin band's measured relative attenuation overlaid on the class
-corridor, and the boxed overall class-compliance result. Pass a `required_class`
+accredited fiche: a per-band classification table with each band's binding
+margin over every requirement graded, a table of the requirements of sections
+1 and 1b with each one's class, binding margin and range, the worst-margin
+band's measured relative attenuation overlaid on the class corridor, and the
+boxed overall class-compliance result. Pass a `required_class`
 on the `ReportMetadata` to add a PASS/FAIL verdict row (a bank "meets class N"
 when its achieved class is at least as strict, i.e. a class index of N or
 lower). The fiche renders in English by default; pass `language="es"` for a
 Spanish fiche (translated fixed strings and a comma decimal separator), e.g.
 `result.report("iec61260_es.pdf", language="es")`.
 
+The example is the octave bank designed at the full rate, the configuration
+section 1b shows to be class 1 on every requirement:
+
 ```python
 from phonometry import ReportMetadata, filters
 
-bank = filters.OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[125, 4000])
+bank = filters.OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[125, 4000],
+                                design=filters.FilterDesign(resample=False))
 result = filters.verify_filter_class(bank)   # overall_class == 1
 result.plot()   # the worst-margin band on its class corridor
 
@@ -248,11 +522,12 @@ result.report(
 The example fiche, regenerated with `make reports`, is kept rendered in the
 repository. Click the preview to open the PDF:
 
-[![One-page filter-class-compliance fiche: a metadata header, a per-band classification table listing each octave band's achieved class and binding margin, the worst-margin band's measured relative attenuation overlaid on the green class-1 acceptance corridor, the boxed Class 1 - COMPLIES (margin +0.40 dB) result and a PASS verdict against the required class 1](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iec61260_filter_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iec61260_filter_example.pdf)
+[![One-page filter-class-compliance fiche: a metadata header, a per-band classification table listing each octave band's achieved class and binding margin, the worst-margin band's measured relative attenuation overlaid on the green class-1 acceptance corridor with the three requirements graded beneath it, the boxed Class 1 - COMPLIES result and a PASS verdict against the required class 1](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iec61260_filter_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iec61260_filter_example.pdf)
 
 *Filter class compliance fiche (`FilterComplianceResult.report`), the achieved
-class with its binding margin in dB and the measured relative attenuation over
-the IEC 61260-1:2014 Table 1 corridor.*
+class with its binding margin in dB, the measured relative attenuation over
+the IEC 61260-1:2014 Table 1 corridor, and the class of each requirement
+graded.*
 
 Passing `edition="1995"` verifies against the older IEC 61260:1995 /
 ANSI S1.11-2004 mask, which keeps the stricter **class 0** that the 2014 edition
@@ -285,7 +560,17 @@ Table 1 acceptance limits, and so does Chebyshev II: its default
 `attenuation` of 72 dB clears the 70 dB far-stopband class 1 limit.
 Chebyshev I, Elliptic and Bessel do not: passband ripple (cheby1, ellip)
 and slow roll-off (bessel) violate the mask. `verify_filter_class` reports
-the achieved class per band.
+the achieved class per band, on Table 1 and on the effective bandwidth and
+summation requirements too.
+
+### Is the default octave bank class 1 under IEC 61260-1:2014?
+
+On the Table 1 mask and on the effective bandwidth, yes; on the summation of
+output signals (5.16), no. The decimated Butterworth octave bank sums adjacent
+outputs up to +0.94 dB about the input, past the +0.8 dB of class 1, so its
+overall class is 2. Designed at the full rate with
+`FilterDesign(resample=False)` it sums within +0.16 dB and is class 1 on
+every requirement; the one-third-octave bank is class 1 as designed.
 
 ### What is class 0 and which standard defines it?
 
@@ -307,7 +592,9 @@ configurations.
   spectrum stage this class applies to.
 - [Conformance report](../../CONFORMANCE.md): the verified configurations behind
   the class claims of this page.
-- API reference: [`filters.compliance`](https://jmrplens.github.io/phonometry/reference/api/filters/compliance/).
+- API reference: [`filters.compliance`](https://jmrplens.github.io/phonometry/reference/api/filters/compliance/),
+  [`filters.time_invariance`](https://jmrplens.github.io/phonometry/reference/api/filters/time-invariance/)
+  and [`filters.periodic_tests`](https://jmrplens.github.io/phonometry/reference/api/filters/periodic-tests/).
 
 ## References
 
@@ -329,24 +616,44 @@ configurations.
   [ANSI webstore](https://webstore.ansi.org/standards/asa/ansis1112004).
   Its Table 1 class limits are identical to those of IEC 61260:1995 and back
   the same class 0 mask.
+- International Electrotechnical Commission. (2016). *Electroacoustics —
+  Octave-band and fractional-octave-band filters — Part 2: Pattern-evaluation
+  tests* (IEC 61260-2:2016).
+  [IEC webstore](https://webstore.iec.ch/en/publication/24560).
+  Its Formulas (1) to (3) are how `verify_filter_class` grades 5.12 and 5.16
+  of Part 1, and its swept test of 7.4, with Annexes A and B, is
+  `verify_time_invariance`, `swept_band_level` and `swept_level_uncertainty`.
+- International Electrotechnical Commission. (2016). *Electroacoustics —
+  Octave-band and fractional-octave-band filters — Part 3: Periodic tests*
+  (IEC 61260-3:2016). [IEC webstore](https://webstore.iec.ch/en/publication/24561).
+  The periodic tests whose results `verify_filter_periodic` grades, with the
+  Formulas (1) and (2) of `periodic_test_frequencies` and the Table 1 of
+  `PERIODIC_TEST_ATTENUATION_LIMITS_DB`.
 
 ## Standards
 
 IEC 61260-1:2014, *Electroacoustics — Octave-band and
 fractional-octave-band filters — Part 1: Specifications*: the Table 1
 class 1 / class 2 acceptance limits (with the fractional-octave breakpoint
-mapping and log-frequency interpolation) verified in §1.
+mapping and log-frequency interpolation) verified in §1, and the effective
+bandwidth (5.12), time-invariant operation (5.14), summation of output signals
+(5.16) and conformance rule of Annex B graded in §1b, §1c and §3b.
+IEC 61260-2:2016, *Pattern-evaluation tests*: Formulas (1) to (3) and the swept
+test of 7.4 with Annexes A and B, in §1b and §1c.
+IEC 61260-3:2016, *Periodic tests*: the clauses graded in §3b, Formulas (1) and
+(2), Table 1 and the statements of Clause 14.
 IEC 61260:1995 and ANSI S1.11-2004, *Octave-Band and Fractional-Octave-Band …
 Filters*: the withdrawn edition's Table 1 (identical between the two)
 supplies the stricter class 0 mask offered by ``edition="1995"`` and
 verified in §2.
 
-**Not covered.** `verify_filter_class` checks a *designed digital response*
-against Table 1, not an instrument. IEC 61260-1's conformance tests for the
-physical filter (overload recovery, filter linearity, environmental influences)
-apply to hardware and are not run here; they belong to **IEC 61260-2:2016**
-(pattern evaluation) and **IEC 61260-3:2016** (periodic tests), which this page
-only summarises. Near Nyquist the bilinear transform warps the frequency axis
+**Not covered.** The tests themselves on a physical filter: the specimens,
+climate, immunity, overload and linearity tests of **IEC 61260-2:2016** and the
+measurements of **IEC 61260-3:2016** are a laboratory's to run, and
+`verify_filter_periodic` grades the numbers it returns without producing them.
+Of those, the self-generated noise of IEC 61260-3 Clause 12 and the overload
+indications of 11.5 and 11.8 are not graded. An `edition="1995"` verdict is its
+Table 1 mask alone. Near Nyquist the bilinear transform warps the frequency axis
 and the bank carries no correction for it, so the stopband mask beyond the
 processing Nyquist is reported as `range_limited` rather than verified.
 

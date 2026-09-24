@@ -66,7 +66,7 @@ unchanged:
 rather than decibels and evaluated up to 22,4 kHz, where ISO 9613-1 stops at
 10 kHz; :func:`air_absorption_np_per_m` evaluates it with the library's
 ISO 9613-1 implementation. Tables 1 and 2 print it for 18 °C to 27 °C, 40 %
-to 60 % relative humidity and 10 000 Hz to 22 400 Hz.
+to 60 % relative humidity and 10 000 Hz to 22 400 Hz.
 
 **Method with a reference sound source** (clause 8). The source under test
 and a calibrated reference source are measured in turn with the same

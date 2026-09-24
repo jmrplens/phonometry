@@ -9,11 +9,18 @@
  * about how the rows are sourced and no sign that a table existed at all.
  *
  * So the three choices a reader actually makes, which catalogue, which
- * material and which published table, are made here, once, at the top of the
- * page, and only the chosen catalogue is shown. The per-catalogue filters
- * that used to sit above each table are gone: two of the three choices were
- * repeated eleven times and the third, the one that matters most, could not
- * be made at all.
+ * material and which published table, are made here, once, and only the
+ * chosen catalogue is shown. The per-catalogue filters that used to sit above
+ * each table are gone: two of the three choices were repeated eleven times
+ * and the third, the one that matters most, could not be made at all.
+ *
+ * The panel sits where the table starts, not at the top of the page. At the
+ * top, a reader who had scrolled down a table to compare two rows had to
+ * scroll all the way back up to change catalogue or filter, and on a phone
+ * the panel itself was a screen tall, so the button that was meant to carry
+ * them past the prose was below the fold. What stays at the top is that one
+ * button, and it lands on the panel; the script moves the panel above the
+ * first table of whichever catalogue is shown.
  *
  * Nothing here is rendered from a list of catalogues kept in this file. The
  * options are read out of the document: every `<section data-catalogue>` the
@@ -52,6 +59,10 @@ const copy = {
 }[lang];
 ---
 
+<div class="jump not-content" data-finder-jump hidden>
+	<button type="button" data-jump>{copy.jump}</button>
+</div>
+
 <div
 	class="finder not-content"
 	data-finder
@@ -75,7 +86,6 @@ const copy = {
 				<option value="">{copy.everyTable}</option>
 			</select>
 		</label>
-		<button type="button" data-jump>{copy.jump}</button>
 		<span class="count" data-count></span>
 	</div>
 </div>
@@ -104,8 +114,9 @@ const copy = {
 		const searchLabel = finder.querySelector<HTMLElement>('[data-search-label]');
 		const tableSelect = finder.querySelector<HTMLSelectElement>('[data-table]');
 		const count = finder.querySelector<HTMLElement>('[data-count]');
-		const jump = finder.querySelector<HTMLButtonElement>('[data-jump]');
-		if (!category || !search || !searchLabel || !tableSelect || !count || !jump) return;
+		const jumpBar = document.querySelector<HTMLElement>('[data-finder-jump]');
+		const jump = jumpBar?.querySelector<HTMLButtonElement>('[data-jump]');
+		if (!category || !search || !searchLabel || !tableSelect || !count || !jumpBar || !jump) return;
 		/* The two words the control prints for itself. They travel on the panel
 		   rather than through `define:vars`, which would force this script inline
 		   and therefore to run where it is written, above every table it is
@@ -175,7 +186,13 @@ const copy = {
 			group.tables.flatMap((table) => [...table.querySelectorAll<HTMLElement>('[data-row]')]);
 
 		const applyFilter = () => {
-			const needle = search.value.trim().toLowerCase();
+			/* Folded the way Catalogues.astro folds each row's words, so a reader
+			   who types "hormigon" or "argon" finds "hormigón" and "argón". */
+			const needle = search.value
+				.trim()
+				.normalize('NFD')
+				.replace(/\p{M}/gu, '')
+				.toLowerCase();
 			const wanted = tableSelect.value;
 			let shown = 0;
 			for (const row of rowsOf(active)) {
@@ -197,8 +214,19 @@ const copy = {
 			}
 		};
 
-		const show = (group: CatalogueGroup, { scroll = false }: { scroll?: boolean } = {}) => {
+		/** Bring the panel, and with it the top of the table, into view. */
+		const toPanel = () => finder.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+		const show = (
+			group: CatalogueGroup,
+			{ scroll }: { scroll?: 'heading' | 'panel' } = {},
+		) => {
 			active = group;
+			/* The panel goes where this catalogue's table starts: after its
+			   heading and the prose that introduces it, so the controls are
+			   the first thing above the rows they filter. It is outside every
+			   group's nodes, so hiding the other catalogues never hides it. */
+			group.tables[0].before(finder);
 			for (const other of catalogues) {
 				const hide = other !== group;
 				for (const node of other.nodes) node.classList.toggle('catalogue-hidden', hide);
@@ -219,7 +247,8 @@ const copy = {
 				tableSelect.append(option);
 			}
 			applyFilter();
-			if (scroll) group.heading.scrollIntoView({ behavior: 'smooth', block: 'start' });
+			if (scroll === 'heading') group.heading.scrollIntoView({ behavior: 'smooth', block: 'start' });
+			if (scroll === 'panel') toPanel();
 		};
 
 		/* A link can name a catalogue two ways: by the heading's own id, which is
@@ -251,19 +280,20 @@ const copy = {
 
 		category.addEventListener('change', () => {
 			const group = catalogues.find((candidate) => candidate.key === category.value);
-			if (group) show(group, { scroll: true });
+			if (group) show(group, { scroll: 'panel' });
 		});
 		search.addEventListener('input', applyFilter);
 		tableSelect.addEventListener('change', applyFilter);
-		jump.addEventListener('click', () => {
-			active.heading.scrollIntoView({ behavior: 'smooth', block: 'start' });
-		});
+		jump.addEventListener('click', toPanel);
+		/* A link from a guide names the catalogue's heading, so it lands on
+		   the heading and the prose that says what the table is. */
 		window.addEventListener('hashchange', () => {
 			const group = fromHash();
-			if (group) show(group, { scroll: true });
+			if (group) show(group, { scroll: 'heading' });
 		});
 
 		finder.removeAttribute('hidden');
+		jumpBar.removeAttribute('hidden');
 		show(fromHash() ?? catalogues[0]);
 	})();
 </script>
@@ -280,8 +310,31 @@ const copy = {
 </style>
 
 <style>
+	/* The button that stays at the top of the page. It is the only thing
+	   there, so a phone shows it without scrolling. */
+	.jump {
+		margin-block: 0 1.5rem;
+	}
+
+	.jump button {
+		font: inherit;
+		padding: 0.45rem 1rem;
+		border: 1px solid var(--sl-color-text-accent);
+		border-radius: 0.25rem;
+		background: var(--sl-color-text-accent);
+		color: var(--sl-color-black);
+		cursor: pointer;
+	}
+
+	.jump button:hover {
+		background: color-mix(in srgb, var(--sl-color-text-accent) 82%, var(--sl-color-black));
+	}
+
 	.finder {
-		margin-block: 0 2rem;
+		margin-block: 1rem;
+		/* Clear of the sticky header when the button or the category
+		   control scrolls the panel to the top of the screen. */
+		scroll-margin-top: calc(var(--sl-nav-height, 3.5rem) + 1rem);
 		padding: 1rem 1.15rem 1.15rem;
 		border: 1px solid var(--sl-color-gray-5);
 		border-radius: 0.6rem;
@@ -329,36 +382,21 @@ const copy = {
 		color: var(--sl-color-white);
 	}
 
-	.controls button {
-		font: inherit;
-		padding: 0.4rem 0.9rem;
-		border: 1px solid var(--sl-color-text-accent);
-		border-radius: 0.25rem;
-		background: var(--sl-color-text-accent);
-		color: var(--sl-color-black);
-		cursor: pointer;
-	}
-
-	.controls button:hover {
-		background: color-mix(in srgb, var(--sl-color-text-accent) 82%, var(--sl-color-black));
-	}
-
 	.count {
 		font-size: var(--sl-text-sm);
 		color: var(--sl-color-gray-3);
 		padding-block-end: 0.45rem;
 	}
 
-	/* On a phone the four controls are one per line, and the button that
-	   carries the reader past the prose to the table is worth the full width:
-	   it is the whole reason this panel is at the top of the page. */
+	/* On a phone the controls are one per line, and the button at the top
+	   takes the full width, where a thumb finds it. */
 	@media (max-width: 30rem) {
 		.controls {
 			gap: 0.7rem;
 		}
 
 		.controls label,
-		.controls button {
+		.jump button {
 			flex: 1 1 100%;
 			width: 100%;
 		}

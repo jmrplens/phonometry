@@ -457,6 +457,7 @@ _STRINGS: dict[str, str] = {
     "Low-frequency stiffness |k<sub>2,1</sub>| = {value} MN/m at {freq} Hz": "Rigidez a baja frecuencia |k<sub>2,1</sub>| = {value} MN/m a {freq} Hz",
     "Loss factor &#951; = {value} (low frequency)": "Factor de pérdidas &#951; = {value} (baja frecuencia)",
     "One-third-octave band levels: none determined, since no band holds the five valid lines a band average needs (ISO 10846, n &#8805; 5).": "Niveles en bandas de tercio de octava: ninguno determinado, porque ninguna banda reúne las cinco líneas válidas que necesita una media en banda (ISO 10846, n &#8805; 5).",
+    "{count} more bands, up to {top} Hz, are in the result's band_average().": "{count} bandas más, hasta {top} Hz, están en el band_average() del resultado.",
     "One-third-octave band levels L<sub>k,av</sub> [dB re 1 N/m], squared-magnitude averages of the valid lines (n &#8805; 5)": "Niveles en bandas de tercio de octava L<sub>k,av</sub> [dB re 1 N/m], medias del módulo al cuadrado de las líneas válidas (n &#8805; 5)",
     "L<sub>k,av</sub> [dB]": "L<sub>k,av</sub> [dB]",
     # --- sound power determination (ISO 3744 / ISO 3745) -------------------

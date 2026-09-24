@@ -298,3 +298,23 @@ def test_a_result_with_no_valid_line_has_no_fiche(tmp_path: Path) -> None:
     out = str(tmp_path / "none.pdf")
     with pytest.raises(ValueError, match="no line meets the adequacy conditions"):
         res.report(out)
+
+
+def test_a_wide_sweep_keeps_the_fiche_on_one_page(tmp_path: Path) -> None:
+    """Ten lines a band from a thousandth of a hertz to 20 kHz is 84 bands.
+
+    The fiche is one A4 page and refuses anything longer, so the band table
+    stops at the rows the page has room for and says how many bands the
+    result holds beyond them, instead of making ``.report()`` fail.
+    """
+    pytest.importorskip("reportlab")
+    pytest.importorskip("matplotlib")
+    freqs = 1000.0 * 10.0 ** ((np.arange(-700, 131) + 0.5) / 100.0)
+    k21 = _K + 1j * 2.0 * np.pi * freqs * _C
+    res = vibration.TransferStiffnessResult(frequencies=freqs, transfer_stiffness=k21)
+    out = tmp_path / "wide.pdf"
+    res.report(str(out))
+    assert_one_page(str(out))
+    text = _extract_text(str(out))
+    assert "24 more bands, up to 20k Hz" in text
+    assert "band_average()" in text

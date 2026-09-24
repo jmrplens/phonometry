@@ -274,10 +274,10 @@ frecuencia utilizable por ambos lados:
   $\Delta L_{1,2} = L_{a1} - L_{a2} \ge 20\ \text{dB}$, es decir,
   $|T| \le 0{,}1$ (la constante `TRANSMISSIBILITY_LIMIT`).
   `transfer_stiffness_indirect` calcula el $|T|$
-  por banda y emite un `TransferStiffnessWarning` cuando alguna banda lo
-  supera (habitual cerca o por debajo de la resonancia masa/resorte, como en
-  la figura anterior); el resultado que construye marca esas bandas como no
-  válidas.
+  de cada línea de frecuencia y emite un `TransferStiffnessWarning` cuando
+  alguna línea lo supera (habitual cerca o por debajo de la resonancia masa/resorte, como en
+  la figura anterior); el resultado que construye marca esas líneas como no
+  válidas, y su promedio por bandas las deja fuera.
 * **Masa de bloqueo rígida (Desigualdad 3).** Por encima de una frecuencia
   superior $f_3$ la masa de bloqueo deja de moverse como cuerpo rígido; los
   resultados solo son válidos mientras su masa efectiva medida

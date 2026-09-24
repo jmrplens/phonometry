@@ -166,10 +166,11 @@ frequency range on both sides:
 
 * **Impedance mismatch (Inequality 2).** Valid only where
   $\Delta L_{1,2} = L_{a1} - L_{a2} \ge 20\ \text{dB}$, i.e. $|T| \le 0.1$, the
-  constant `TRANSMISSIBILITY_LIMIT`. `transfer_stiffness_indirect` computes the
-  per-band $|T|$ and emits a `TransferStiffnessWarning` when any band exceeds
-  it (routine near or below the mass/spring resonance, as in the figure
-  above); the result it builds marks those bands as not valid.
+  constant `TRANSMISSIBILITY_LIMIT`. `transfer_stiffness_indirect` computes
+  $|T|$ at every frequency line and emits a `TransferStiffnessWarning` when any
+  line exceeds it (routine near or below the mass/spring resonance, as in the figure
+  above); the result it builds marks those lines as not valid, and
+  its band average leaves them out.
 * **Rigid blocking mass (Inequality 3).** Above an upper frequency $f_3$ the
   blocking mass no longer moves as a rigid body; results are valid only while
   its measured effective mass $m_{2,\text{eff}} = 2F_2/(a'_1 + a''_1)$ (Eq. 4)

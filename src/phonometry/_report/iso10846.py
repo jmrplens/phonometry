@@ -58,6 +58,12 @@ if TYPE_CHECKING:
 #: Bands per row of the band-level table: twelve columns of about 12 mm
 #: beside a 26 mm label column fill the 174 mm content width.
 _BANDS_PER_ROW = 12
+
+#: Rows of bands the one-page fiche has room for below its body. Seven rows
+#: (a sweep from a thousandth of a hertz to 20 kHz) pushed the fiche onto a
+#: second page, which it refuses; a wider sweep lists its first bands and
+#: says how many more the result holds.
+_MAX_BAND_ROWS = 5
 _LABEL_COLUMN_MM = 26.0
 _CONTENT_WIDTH_MM = 174.0
 
@@ -282,8 +288,9 @@ def _band_level_flow(
     counts = np.asarray(bands.line_counts)
     determined = np.asarray(bands.determined, dtype=bool)
     band_mm = (_CONTENT_WIDTH_MM - _LABEL_COLUMN_MM) / _BANDS_PER_ROW
-    for start in range(0, nominal.size, _BANDS_PER_ROW):
-        chunk = slice(start, start + _BANDS_PER_ROW)
+    shown = min(nominal.size, _MAX_BAND_ROWS * _BANDS_PER_ROW)
+    for start in range(0, shown, _BANDS_PER_ROW):
+        chunk = slice(start, min(start + _BANDS_PER_ROW, shown))
         header = [t("f [Hz]", language)] + [
             decimal_comma(_format_nominal_freq(float(f)), language)
             for f in nominal[chunk]
@@ -307,6 +314,22 @@ def _band_level_flow(
         table.hAlign = "LEFT"
         flow.append(table)
         flow.append(Spacer(1, 3))
+    if shown < nominal.size:
+        flow.append(
+            fiche_paragraph(
+                t(
+                    "{count} more bands, up to {top} Hz, are in the result's "
+                    "band_average().",
+                    language,
+                ).format(
+                    count=nominal.size - shown,
+                    top=decimal_comma(
+                        _format_nominal_freq(float(nominal[-1])), language
+                    ),
+                ),
+                caption,
+            )
+        )
     return flow
 
 

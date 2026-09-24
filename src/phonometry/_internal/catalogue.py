@@ -34,21 +34,37 @@ an area in square metres from the page's square feet) and says so in the
 row. Every packaged loader builds its rows through it, so a row read from a
 data file and a row a caller builds from the same cells are the same row.
 
-The reader stays private. :class:`CatalogueRow`, :class:`BandedRow`,
-:class:`CatalogueError` and :data:`CATALOGUE_BASES` are public, from
-:mod:`phonometry.io`, because every catalogue of the library hands out rows
-built on them, and a caller has to be able to name the type of what it holds
-and catch what the constructor raises. They are defined here and not there
-because the domain packages that publish the rows import them, and
-:mod:`phonometry.io` importing a domain would close a cycle.
+A row a caller reads from a catalogue file of their own carries a
+:class:`Provenance`: what kind of document the cells were read from, which
+version of it, when it was consulted and, for a test report, the laboratory
+and the report number. The file names every cell by the field it fills,
+either in the unit the field is named for or in another unit of the same
+kind (``thickness_m`` for ``thickness_mm``, ``flow_resistivity_kpa_s_m2``
+for ``flow_resistivity_pa_s_m2``), and :meth:`CatalogueRow.from_printed`
+converts such a figure on its digits and records it in
+:attr:`CatalogueRow.converted`, whether the figure is a value, an end of a
+range or one of several readings.
+
+The reader of the packaged tables stays private, and so does the reader of a
+caller's file, which lives in :mod:`phonometry.io`. :class:`CatalogueRow`,
+:class:`BandedRow`, :class:`Provenance`, :class:`CatalogueIssue`,
+:class:`CatalogueError`, :data:`CATALOGUE_BASES` and
+:data:`PROVENANCE_KINDS` are public, from :mod:`phonometry.io`, because every
+catalogue of the library hands out rows built on them, and a caller has to be
+able to name the type of what it holds and catch what the constructor
+raises. They are defined here and not there because the domain packages that
+publish the rows import them, and :mod:`phonometry.io` importing a domain
+would close a cycle.
 """
 
 from __future__ import annotations
 
 import dataclasses
+import datetime
 import json
 import math
 import numbers
+import re
 import types
 import typing
 import weakref
@@ -59,7 +75,7 @@ from decimal import Decimal
 from fractions import Fraction
 from itertools import chain
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, ClassVar, NamedTuple, NoReturn, Self
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, NamedTuple, NoReturn, Self
 
 import numpy as np
 
@@ -91,6 +107,75 @@ CATALOGUE_BASES: tuple[str, ...] = (
 )
 
 
+#: What kind of document a catalogue's cells were read from: a
+#: manufacturer's data sheet, a declaration of performance under a product
+#: standard, a laboratory's test report, a measurement of one's own, a
+#: calculation note, a book or a paper, or something else. The kind decides
+#: how a refusal names the document ("the datasheet prints an upper bound
+#: of ...") and how the citation of every row is composed from it.
+PROVENANCE_KINDS: tuple[str, ...] = (
+    "datasheet",
+    "declaration_of_performance",
+    "test_report",
+    "measurement",
+    "calculation",
+    "publication",
+    "other",
+)
+
+#: How a sentence names each kind of document as its subject.
+_NOUNS: Mapping[str, str] = MappingProxyType(
+    {
+        "datasheet": "the datasheet",
+        "declaration_of_performance": "the declaration of performance",
+        "test_report": "the test report",
+        "measurement": "the measurement record",
+        "calculation": "the calculation note",
+        "publication": "the source",
+        "other": "the source",
+    }
+)
+
+#: The subject of a sentence about a row that carries no provenance, which is
+#: every packaged row: each cites a page of a book or a standard.
+_PAGE = "the page"
+
+
+@dataclass(frozen=True, kw_only=True)
+class CatalogueIssue:
+    """One thing wrong with a catalogue, or worth a second look, and where.
+
+    A reader of a catalogue file collects every one of these before it
+    builds a single row, so one pass over a file shows everything that has
+    to change in it. A :class:`CatalogueError` carries the errors; a note
+    rides on the catalogue that was read, in ``Catalogue.notes``.
+
+    :ivar file: The file, as the caller named it; empty for a row built in
+        Python.
+    :ivar location: Where in the file: a JSON pointer (RFC 6901) such as
+        ``"/rows/1/porosity"``; ``"<Python>"`` for a row built in Python.
+    :ivar row_key: The key of the row, when the issue sits in one.
+    :ivar field: The field of the row, when the issue is about one cell.
+    :ivar message: What is wrong and, where it helps, what to write instead.
+    :ivar severity: ``"error"``, which stops the read, or ``"note"``, which
+        is kept and read past.
+    """
+
+    file: str
+    location: str
+    row_key: str = ""
+    field: str = ""
+    message: str
+    severity: Literal["error", "note"] = "error"
+
+    def __str__(self) -> str:
+        """The issue as one line: file, place, row and message."""
+        head = ": ".join(part for part in (self.file, self.location) if part)
+        if self.row_key:
+            head = f"{head} (row {self.row_key!r})" if head else f"row {self.row_key!r}"
+        return f"{head}: {self.message}" if head else self.message
+
+
 class CatalogueError(ValueError):
     """A catalogue that does not say what a reader needs to trust it.
 
@@ -102,13 +187,237 @@ class CatalogueError(ValueError):
     does not have, a bound with no printed end, a density below zero. A
     :class:`ValueError`, because the data is wrong and not the call, whether
     it came from a file or from a caller building a row by hand.
+
+    :attr:`issues` holds every problem found, each a :class:`CatalogueIssue`
+    naming where it is. A reader of a catalogue file raises one error for
+    the whole file, with every issue in it; a row built in Python raises one
+    with a single issue, located at ``"<Python>"``.
     """
+
+    #: Every problem found, in the order the reader met them.
+    issues: tuple[CatalogueIssue, ...]
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        issues: tuple[CatalogueIssue, ...] = (),
+        field: str = "",
+    ) -> None:
+        super().__init__(message)
+        self.issues = issues or (
+            CatalogueIssue(file="", location="<Python>", field=field, message=message),
+        )
 
 
 def _reject(filename: str, what: str) -> NoReturn:
     """Name the file and the defect, because the caller cannot see either."""
     msg = f"{filename}: {what}"
-    raise CatalogueError(msg)
+    issue = CatalogueIssue(file=filename, location="", message=what)
+    raise CatalogueError(msg, issues=(issue,))
+
+
+#: A date as ISO 8601 writes it at the precision it is printed with: a year,
+#: a month or a day.
+_PRINTED_DATE = re.compile(r"\d{4}(-\d{2}(-\d{2})?)?")
+
+#: A calendar day as ISO 8601 writes it.
+_DAY = re.compile(r"\d{4}-\d{2}-\d{2}")
+
+#: A SHA-256 digest in hexadecimal.
+_DIGEST = re.compile(r"[0-9a-fA-F]{64}")
+
+
+def _date_is_valid(text: str) -> bool:
+    """Whether *text* is a year, a year and month, or a calendar day."""
+    if not _PRINTED_DATE.fullmatch(text):
+        return False
+    padded = text + "-01" * (2 - text.count("-"))
+    try:
+        datetime.date.fromisoformat(padded)
+    except ValueError:
+        return False
+    return True
+
+
+@dataclass(frozen=True, kw_only=True)
+class Provenance:
+    """Which document a catalogue's cells were read from, and how.
+
+    A book's table is cited by its page, and the citation of every packaged
+    row says all there is to say. A manufacturer's data sheet is not a book:
+    it is revised without notice, the same product has several of them, and
+    what it prints may be a laboratory's result, a value declared under a
+    product standard or a figure from a calculation. So a row read from a
+    caller's catalogue file carries this, and its :attr:`CatalogueRow.source`
+    is composed from it: for a ``"publication"`` the document as it is cited,
+    and for every other kind the document, its publisher, its version, the
+    page and the table, the report and the laboratory, and the day it was
+    consulted.
+
+    :ivar kind: One of :data:`PROVENANCE_KINDS`.
+    :ivar document: The document's title as it prints it.
+    :ivar version: The revision the document prints (``"Rev. 4"``), or
+        ``None`` when it prints none, which is a different answer from a
+        version nobody wrote down.
+    :ivar consulted: The day the document was read, as ``YYYY-MM-DD``: a
+        data sheet changes under the same title.
+    :ivar publisher: Who issues the document.
+    :ivar issued: When the document says it was issued, as ``YYYY``,
+        ``YYYY-MM`` or ``YYYY-MM-DD``, at the precision it prints.
+    :ivar url: Where the document was found. Never opened by this library.
+    :ivar sha256: The digest of the file that was read, in hexadecimal, so
+        that the copy can be told apart from a later revision. Never checked
+        against anything by this library.
+    :ivar page: The page the cells are on.
+    :ivar printed_table: The label of the table on the page, as it prints it
+        (``"Table 2"``).
+    :ivar laboratory: The laboratory that made the measurement.
+    :ivar accreditation: The laboratory's accreditation, as printed.
+    :ivar report: The number of the test report.
+    :ivar test_date: When the test was made, as printed.
+    :ivar test_standard: The standard the test followed, as printed
+        (``"ISO 9053-1:2018"``).
+    :ivar field_test_standards: Field to the standard a document cites for
+        that property alone, when it names a different one for each; it
+        takes precedence over :attr:`test_standard` for that field.
+    """
+
+    kind: str
+    document: str
+    version: str | None
+    consulted: str
+    publisher: str = ""
+    issued: str = ""
+    url: str = ""
+    sha256: str = ""
+    page: str = ""
+    printed_table: str = ""
+    laboratory: str = ""
+    accreditation: str = ""
+    report: str = ""
+    test_date: str = ""
+    test_standard: str = ""
+    field_test_standards: Mapping[str, str] = field(default_factory=dict)
+
+    # A mapping field makes the record unhashable; saying so here gives the
+    # refusal the class's name instead of the mapping's.
+    __hash__ = None  # type: ignore[assignment]
+
+    def __post_init__(self) -> None:
+        """Check each field and freeze the per-field standards.
+
+        :raises CatalogueError: naming the field, for a kind outside
+            :data:`PROVENANCE_KINDS`, an empty document, a version that is
+            empty text rather than ``None``, a date that is not one, a digest
+            that is not SHA-256 in hexadecimal, or a field that is not text.
+        """
+        for item in fields(self):
+            value = getattr(self, item.name)
+            if item.name == "field_test_standards":
+                self._freeze_standards(value)
+            elif item.name == "version":
+                if value is not None and not (isinstance(value, str) and value.strip()):
+                    self._refuse(
+                        "version",
+                        f"holds {_quote(value)}; write the version the document "
+                        "prints, or None when it prints none",
+                    )
+            elif not isinstance(value, str):
+                self._refuse(item.name, f"holds {_quote(value)}, which is not text")
+        self._check_values()
+
+    def _check_values(self) -> None:
+        """The checks that read what the text fields say."""
+        if self.kind not in PROVENANCE_KINDS:
+            self._refuse(
+                "kind",
+                f"is {self.kind!r}, which is not one of {', '.join(PROVENANCE_KINDS)}",
+            )
+        if not self.document.strip():
+            self._refuse("document", "is empty; a provenance names its document")
+        if not (_DAY.fullmatch(self.consulted) and _date_is_valid(self.consulted)):
+            self._refuse(
+                "consulted",
+                f"is {self.consulted!r}; write the day the document was read "
+                "as YYYY-MM-DD",
+            )
+        if self.issued and not _date_is_valid(self.issued):
+            self._refuse(
+                "issued",
+                f"is {self.issued!r}; write it as YYYY, YYYY-MM or YYYY-MM-DD, "
+                "at the precision the document prints",
+            )
+        if self.sha256 and not _DIGEST.fullmatch(self.sha256):
+            self._refuse(
+                "sha256", f"is {_quote(self.sha256)}, which is not a SHA-256 digest"
+            )
+
+    def _freeze_standards(self, value: object) -> None:
+        """Hold the per-field standards as a read-only mapping of text."""
+        if not isinstance(value, Mapping):
+            self._refuse(
+                "field_test_standards", f"holds {_quote(value)}, not a mapping"
+            )
+        for key, standard in value.items():
+            if not (
+                isinstance(key, str) and isinstance(standard, str) and standard.strip()
+            ):
+                self._refuse(
+                    "field_test_standards",
+                    f"maps {_quote(key)} to {_quote(standard)}; each field names "
+                    "the standard as text",
+                )
+        object.__setattr__(self, "field_test_standards", MappingProxyType(dict(value)))
+
+    @staticmethod
+    def _refuse(field_name: str, what: str) -> NoReturn:
+        msg = f"the provenance's {field_name} {what}"
+        raise CatalogueError(msg, field=field_name)
+
+    @property
+    def noun(self) -> str:
+        """The document as the subject of a sentence: ``"the datasheet"``."""
+        return _NOUNS[self.kind]
+
+    def test_standard_of(self, field_name: str) -> str:
+        """The standard the test of one field followed, as printed.
+
+        :param field_name: A field of the row.
+        :return: The field's own entry in :attr:`field_test_standards`, else
+            :attr:`test_standard`, else the empty string.
+        """
+        return self.field_test_standards.get(field_name, self.test_standard)
+
+    def cited(self) -> str:
+        """The citation every row read with this provenance carries as its source.
+
+        A publication is cited as its document is, because a book's citation
+        already names its edition and its page. Every other document is
+        cited by its title, its publisher, the version it prints (or that it
+        prints none), the page and the table, the report and the laboratory,
+        and the day it was consulted, because each of those can change under
+        the same title.
+        """
+        if self.kind == "publication":
+            return self.document
+        text = self.document
+        if self.publisher:
+            text += f" ({self.publisher})"
+        text += (
+            f", {self.version}" if self.version is not None else ", no version printed"
+        )
+        if self.page:
+            text += f", p. {self.page}"
+        if self.printed_table:
+            text += f", {self.printed_table}"
+        if self.report:
+            text += f"; report {self.report}"
+            if self.laboratory:
+                text += f" ({self.laboratory})"
+        elif self.laboratory:
+            text += f"; laboratory {self.laboratory}"
+        return f"{text}; consulted {self.consulted}"
 
 
 # ---------------------------------------------------------------------------
@@ -172,14 +481,24 @@ def _refuse_flaws(document: object, label: str) -> NoReturn:
     _reject(label, "the text holds something JSON does not")  # pragma: no cover
 
 
-def _strict_json(text: str, label: str) -> object:
-    """The document *text* holds, refusing what only CPython's reader accepts.
+def decode_marked(text: str, *, figures: bool) -> tuple[object, bool]:
+    """The document *text* holds, with what JSON does not have marked.
+
+    CPython's reader accepts a ``NaN`` and an infinity, which JSON does not
+    have, and keeps the last of two members that share a name. Here each
+    becomes a marker the caller finds by walking the document: a
+    :class:`_Constant` in place of the token, and a :class:`_Repeated` for
+    the object that repeats a name. A reader of a packaged table refuses on
+    the first; a reader of a caller's file reports every one of them with
+    where it is.
 
     :param text: The file's text.
-    :param label: What names the file in a refusal.
-    :return: The decoded document.
-    :raises CatalogueError: for text that is not JSON, for a ``NaN`` or an
-        infinity, and for a name written twice in one object.
+    :param figures: Decode every number as a :class:`PrintedNumber`, which
+        keeps the digits it was written with, instead of as a float or an
+        integer.
+    :return: The decoded document, and whether any marker was placed.
+    :raises json.JSONDecodeError: for text that is not JSON.
+    :raises RecursionError: for text nested past what the decoder follows.
     """
     flagged: list[object] = []
 
@@ -203,11 +522,36 @@ def _strict_json(text: str, label: str) -> object:
         flagged.append(marked)
         return marked
 
+    number = PrintedNumber if figures else None
+    document = json.loads(
+        text,
+        parse_constant=constant,
+        object_pairs_hook=members,
+        parse_float=number,
+        parse_int=number,
+    )
+    return document, bool(flagged)
+
+
+def _strict_json(text: str, label: str) -> object:
+    """The document *text* holds, refusing what only CPython's reader accepts.
+
+    :param text: The file's text.
+    :param label: What names the file in a refusal.
+    :return: The decoded document.
+    :raises CatalogueError: for text that is not JSON, for a ``NaN`` or an
+        infinity, and for a name written twice in one object.
+    """
     try:
-        document = json.loads(text, parse_constant=constant, object_pairs_hook=members)
+        document, flagged = decode_marked(text, figures=False)
     except json.JSONDecodeError as error:
         msg = f"{label}: this is not JSON ({error})"
-        raise CatalogueError(msg) from error
+        issue = CatalogueIssue(
+            file=label,
+            location=f"line {error.lineno}, column {error.colno}",
+            message=f"this is not JSON ({error.msg})",
+        )
+        raise CatalogueError(msg, issues=(issue,)) from error
     if flagged:
         _refuse_flaws(document, label)
     return document
@@ -444,6 +788,12 @@ def _real(value: object, where: str) -> object:
     return value
 
 
+def _provenance(value: object, where: str) -> object:
+    if not isinstance(value, Provenance):
+        _refuse(where, value, "a Provenance")
+    return value
+
+
 def _names(value: object, where: str) -> frozenset[str]:
     if isinstance(value, frozenset) and all(type(item) is str for item in value):
         return value
@@ -571,18 +921,21 @@ def _field_check(hint: object) -> tuple[str, _Check] | None:
 
     The kinds are ``"number"`` (``float | None``), ``"whole"``
     (``int | None``), ``"flag"`` (``bool``), ``"text"`` (``str``), ``"set"``
-    (``frozenset[str]``) and ``"mapping"`` (``Mapping[str, ...]`` of plain
-    values and tuples of them). ``Optional[float]`` is ``float | None``, and
-    on Python 3.14 the same object. Anything else answers ``None``, a bare
-    ``float`` or ``int`` included: every quantity of a row may be missing,
-    because the pages print different columns, and a row that could not say
-    so would have no answer for :meth:`CatalogueRow.why_missing` to give.
+    (``frozenset[str]``), ``"mapping"`` (``Mapping[str, ...]`` of plain
+    values and tuples of them) and ``"provenance"`` (``Provenance | None``).
+    ``Optional[float]`` is ``float | None``, and on Python 3.14 the same
+    object. Anything else answers ``None``, a bare ``float`` or ``int``
+    included: every quantity of a row may be missing, because the pages
+    print different columns, and a row that could not say so would have no
+    answer for :meth:`CatalogueRow.why_missing` to give.
     """
     if hint is bool:
         return "flag", _flag
     if hint is str:
         return "text", _text
     origin, args = typing.get_origin(hint), typing.get_args(hint)
+    if origin in _UNIONS and set(args) == {Provenance, type(None)}:
+        return "provenance", _optional(_provenance)
     if origin is frozenset and args == (str,):
         return "set", _names
     if origin is Mapping and args[:1] == (str,):
@@ -630,6 +983,14 @@ class _Shape(NamedTuple):
     texts: frozenset[str]
     #: ``(field, low, high, why)`` for each numeric field with a physical limit.
     limits: tuple[tuple[str, float, float | None, str], ...]
+    #: Every other name a numeric field is taken under, in another unit.
+    spellings: _Spellings
+    #: The hedges of the class, whose keys may name a field in another unit.
+    hedges: frozenset[str]
+    #: Every field by the kind the contract gives it: ``"number"``,
+    #: ``"whole"``, ``"flag"``, ``"text"``, ``"set"``, ``"mapping"`` or
+    #: ``"provenance"``.
+    kinds: Mapping[str, str]
 
 
 #: The shape of every row class built so far. Weakly keyed, so a caller's
@@ -691,7 +1052,17 @@ def _classify(cls: type) -> _Shape:
     )
     values = numeric | texts | flags
     cells = (numeric | texts) - {"source", "table"}
-    return _Shape(tuple(checks), numeric, values, cells, texts, limits)
+    return _Shape(
+        tuple(checks),
+        numeric,
+        values,
+        cells,
+        texts,
+        limits,
+        _spellings(cls, numeric),
+        frozenset((*cls._number_hedges, *cls._value_hedges)),  # type: ignore[attr-defined]
+        MappingProxyType(kinds),
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -707,8 +1078,10 @@ class UnitAlias(NamedTuple):
     suffix in place of the row's own (``absorption_area_125_ft2`` for
     ``absorption_area_125_m2``), and :meth:`CatalogueRow.from_printed`
     converts it and records the figure and its unit in
-    :attr:`CatalogueRow.converted`. A row class lists the aliases it takes in
-    its ``_unit_aliases``.
+    :attr:`CatalogueRow.converted`. A row class lists the aliases only it
+    takes in its ``_unit_aliases``; the ones every row takes, another unit
+    of the same kind as the one a field is named for, come from the unit
+    families of this module.
     """
 
     #: The suffix the figure is written under, as ``"_ft2"``.
@@ -724,24 +1097,230 @@ class UnitAlias(NamedTuple):
     #: area per unit of volume says what it is per in ``per``, whose default
     #: is a person.
     requires: tuple[str, ...] = ()
+    #: What the page's zero is in the row's unit, added after the factor: a
+    #: temperature in kelvin is one in degrees Celsius less 273.15. Zero for
+    #: every unit that shares its zero with the row's. A difference, such as
+    #: a plus-or-minus, takes the factor alone.
+    offset: Fraction = Fraction(0)
 
 
-def convert_figure(figure: str, factor: Fraction) -> float:
+class _Unit(NamedTuple):
+    """One unit of a family, as a figure written in it is converted."""
+
+    #: The kind of quantity: a figure converts only within its family.
+    family: str
+    #: One of this unit in the family's first unit, exactly.
+    factor: Fraction
+    #: How :attr:`CatalogueRow.converted` records the unit beside a figure.
+    spelling: str
+    #: The family's first unit at this unit's zero.
+    offset: Fraction = Fraction(0)
+
+
+def _power(exponent: int) -> Fraction:
+    """Ten to *exponent*, exactly."""
+    return Fraction(10) ** exponent
+
+
+#: The units a catalogue file may write a field in besides the one the field
+#: is named for, by the suffix a field name ends in. A figure converts only
+#: to a field of the same family with the same root: ``thickness_m`` fills
+#: ``thickness_mm``, ``viscous_length_mm`` fills ``viscous_length_um``, and
+#: ``surface_density_kg_m2`` fills a resistive sheet's
+#: ``surface_density_g_m2``. ``_mpa`` is megapascal, as the library already
+#: spells it, and ``_n_mm2`` the spelling elastomer data sheets print for the
+#: same unit.
+_UNITS: Mapping[str, _Unit] = MappingProxyType(
+    {
+        "_um": _Unit("length", _power(-6), "µm"),
+        "_mm": _Unit("length", _power(-3), "mm"),
+        "_cm": _Unit("length", _power(-2), "cm"),
+        "_m": _Unit("length", Fraction(1), "m"),
+        "_g_m2": _Unit("mass per area", _power(-3), "g/m2"),
+        "_kg_m2": _Unit("mass per area", Fraction(1), "kg/m2"),
+        "_g_cm3": _Unit("density", _power(3), "g/cm3"),
+        "_kg_m3": _Unit("density", Fraction(1), "kg/m3"),
+        "_pa": _Unit("pressure", Fraction(1), "Pa"),
+        "_kpa": _Unit("pressure", _power(3), "kPa"),
+        "_mpa": _Unit("pressure", _power(6), "MPa"),
+        "_n_mm2": _Unit("pressure", _power(6), "N/mm2"),
+        "_gpa": _Unit("pressure", _power(9), "GPa"),
+        "_n_m3": _Unit("stiffness per area", Fraction(1), "N/m3"),
+        "_mn_m3": _Unit("stiffness per area", _power(6), "MN/m3"),
+        "_pa_s_m2": _Unit("flow resistivity", Fraction(1), "Pa s/m2"),
+        "_kpa_s_m2": _Unit("flow resistivity", _power(3), "kPa s/m2"),
+        "_c": _Unit("temperature", Fraction(1), "°C"),
+        "_k": _Unit("temperature", Fraction(1), "K", Fraction(-27315, 100)),
+    }
+)
+
+#: The units the library's fields are named in that belong to no family and
+#: end in the suffix of one. The suffix of a name is its longest match
+#: against every unit, so these are found before the shorter one inside them:
+#: a specific flow resistance in Pa s/m does not end in metres, a decay rate
+#: per metre is not a length, and a count per centimetre is not one either.
+#: Without them ``specific_flow_resistance_pa_s_mm`` would read as a root
+#: ``specific_flow_resistance_pa_s`` in millimetres and be divided by a
+#: thousand, and a rate per millimetre would be scaled the wrong way.
+_COMPOUND_UNITS = ("_pa_s_m", "_per_m", "_per_cm", "_m_s", "_m_hz")
+
+
+def unit_suffix(name: str, extra: tuple[str, ...] = ()) -> str:
+    """The unit a field name ends in, by the longest match, or ``""``.
+
+    :param name: A field name, or a name a catalogue file writes.
+    :param extra: Suffixes a row class adds to the families, from its own
+        ``_unit_aliases``.
+    :return: The suffix, with its leading underscore, or the empty string
+        for a name that ends in none of them.
+    """
+    return max(
+        (
+            suffix
+            for suffix in chain(_UNITS, _COMPOUND_UNITS, extra)
+            if name.endswith(suffix) and len(name) > len(suffix)
+        ),
+        key=len,
+        default="",
+    )
+
+
+def unit_spelling(field_name: str) -> str:
+    """How a field's own unit is spelled beside a figure, or ``""``."""
+    unit = _UNITS.get(unit_suffix(field_name))
+    return "" if unit is None else unit.spelling
+
+
+class _Spellings(NamedTuple):
+    """Every other name a row class takes a numeric field under."""
+
+    #: Written name to the field it fills and the alias that converts it.
+    aliases: Mapping[str, tuple[str, UnitAlias]]
+    #: Written names two fields of one family and root could both take, to
+    #: the fields: refused, because the name does not say which.
+    ambiguous: Mapping[str, tuple[str, ...]]
+    #: Every name in either, for the one look a row without them takes.
+    written: frozenset[str]
+
+
+def _family_aliases(
+    numeric: frozenset[str], extra: tuple[str, ...]
+) -> dict[str, list[tuple[str, UnitAlias]]]:
+    """Every written name the unit families give the numeric fields."""
+    members: dict[tuple[str, str], list[tuple[str, str]]] = {}
+    for name in sorted(numeric):
+        suffix = unit_suffix(name, extra)
+        unit = _UNITS.get(suffix)
+        if unit is not None:
+            root = name.removesuffix(suffix)
+            members.setdefault((root, unit.family), []).append((name, suffix))
+    found: dict[str, list[tuple[str, UnitAlias]]] = {}
+    for (root, family), group in members.items():
+        for written_suffix, written in _UNITS.items():
+            if written.family != family:
+                continue
+            for name, suffix in group:
+                own = _UNITS[suffix]
+                alias = UnitAlias(
+                    written_suffix,
+                    suffix,
+                    written.factor / own.factor,
+                    written.spelling,
+                    offset=(written.offset - own.offset) / own.factor,
+                )
+                found.setdefault(f"{root}{written_suffix}", []).append((name, alias))
+    return found
+
+
+def _spellings(cls: type, numeric: frozenset[str]) -> _Spellings:
+    """The written names a row class takes besides its field names.
+
+    A name that is a field of the class is never converted, a name two
+    fields could take is ambiguous, and a class's own ``_unit_aliases``
+    (the sabins of a table set in feet) join the families.
+    """
+    own: tuple[UnitAlias, ...] = getattr(cls, "_unit_aliases", ())
+    extra = tuple(chain.from_iterable((alias.suffix, alias.target) for alias in own))
+    found = _family_aliases(numeric, extra)
+    for alias in own:
+        for name in numeric:
+            if unit_suffix(name, extra) == alias.target:
+                written = f"{name.removesuffix(alias.target)}{alias.suffix}"
+                found.setdefault(written, []).append((name, alias))
+    names = frozenset(item.name for item in fields(cls))
+    aliases = {
+        written: targets[0]
+        for written, targets in found.items()
+        if written not in names and len(targets) == 1
+    }
+    ambiguous = {
+        written: tuple(name for name, _ in targets)
+        for written, targets in found.items()
+        if written not in names and len(targets) > 1
+    }
+    return _Spellings(
+        MappingProxyType(aliases),
+        MappingProxyType(ambiguous),
+        frozenset(aliases) | frozenset(ambiguous),
+    )
+
+
+def spellings(cls: type[CatalogueRow]) -> _Spellings:
+    """Every other name *cls* takes a numeric field under, worked out once."""
+    return _shape(cls).spellings
+
+
+def field_kinds(cls: type[CatalogueRow]) -> Mapping[str, str]:
+    """Every field of *cls* by the kind the row contract gives it.
+
+    :raises TypeError: for a field whose annotation the contract cannot
+        classify, the first time the class is looked at.
+    """
+    return _shape(cls).kinds
+
+
+def convert_figure(
+    figure: str, factor: Fraction, offset: Fraction = Fraction(0)
+) -> float:
     """The page's *figure* in the row's unit, rounded to a float once.
 
-    The figure is read as the decimal it is and multiplied by the exact
-    factor, and only the product is rounded. Multiplying two floats rounds
-    the figure, the factor and the product: 11.5 sabins times the
-    0.09290304 m2 of a square foot comes out as 1.0683849600000002 that way,
-    where the product of the two decimals is 1.06838496 exactly, and the
-    float it rounds to here is the one ``repr`` writes as 1.06838496.
+    The figure is read as the decimal it is, multiplied by the exact factor
+    and moved by the exact offset, and only the result is rounded.
+    Multiplying two floats rounds the figure, the factor and the product:
+    11.5 sabins times the 0.09290304 m2 of a square foot comes out as
+    1.0683849600000002 that way, where the product of the two decimals is
+    1.06838496 exactly, and the float it rounds to here is the one ``repr``
+    writes as 1.06838496.
 
     :param figure: The number as the page prints it, in digits: ``"11.5"``,
         ``"3e5"``.
     :param factor: One of the page's unit in the row's, exactly.
-    :return: The float nearest the exact product.
+    :param offset: The page's zero in the row's unit, exactly; zero for a
+        unit that shares its zero with the row's.
+    :return: The float nearest the exact result.
+    :raises OverflowError: for a result too large for a float.
     """
-    return float(Fraction(figure) * factor)
+    return float(Fraction(figure) * factor + offset)
+
+
+class PrintedNumber(Decimal):
+    """A number as a catalogue file's text writes it, digits and all.
+
+    A reader decodes every number of a file into one of these, so that a
+    figure written in another unit is converted from the digits it was
+    written with, trailing zeros and exponent included, and
+    :attr:`CatalogueRow.converted` records them as they were written.
+    """
+
+    __slots__ = ("text",)
+
+    text: str
+
+    def __new__(cls, text: str) -> Self:
+        """The number *text* writes, keeping *text*."""
+        number = super().__new__(cls, text)
+        number.text = text
+        return number
 
 
 def _figure(value: object, where: str) -> str:
@@ -751,7 +1330,8 @@ def _figure(value: object, where: str) -> str:
     read back as the same number. Those are the page's digits unless the
     text wrote trailing zeros or an exponent (``"11.50"`` comes back as
     ``11.5``, ``"3e5"`` as ``300000.0``). A :class:`~decimal.Decimal` keeps
-    the digits it was read with, trailing zeros included, so a reader that
+    the digits it was read with, trailing zeros included, and a
+    :class:`PrintedNumber` the very text it was read from, so a reader that
     must record the figure as printed passes one.
 
     :raises CatalogueError: for a value that is not a finite number.
@@ -759,98 +1339,324 @@ def _figure(value: object, where: str) -> str:
     if isinstance(value, Decimal):
         if not value.is_finite():
             _refuse(where, value, _FINITE)
-        return str(value)
+        return value.text if isinstance(value, PrintedNumber) else str(value)
     _real(value, where)
     if isinstance(value, numbers.Integral):
         return str(int(value))
     return repr(float(typing.cast("float", value)))
 
 
-def _alias_for(
-    written: str, aliases: tuple[UnitAlias, ...], names: AbstractSet[str]
-) -> UnitAlias | None:
-    """The alias *written* is a field name under, the longest suffix first."""
-    return max(
-        (
-            alias
-            for alias in aliases
-            if written.endswith(alias.suffix)
-            and f"{written.removesuffix(alias.suffix)}{alias.target}" in names
-        ),
-        key=lambda alias: len(alias.suffix),
-        default=None,
-    )
+#: The two ends of an interval.
+_PAIR = 2
+
+#: The hedges whose entries are numbers of the cell they are keyed by, and
+#: so are converted with it: the ends of a range, the readings of a list and
+#: a plus-or-minus, which is a difference and takes the factor alone.
+_NUMBER_HEDGES = ("ranges", "reported", "uncertainty")
 
 
-def _check_requires(
-    label: str, written: str, alias: UnitAlias, cells: Mapping[str, Any]
-) -> None:
-    """Refuse an alias figure whose text field, the one saying what it is of, is empty.
+def _names_an_alias(
+    cells: Mapping[str, Any], hedges: frozenset[str], names: _Spellings
+) -> bool:
+    """Whether any cell or any hedge key is written under another name.
 
-    :raises CatalogueError: naming the row, the figure and the field.
+    Every packaged row is built through here and almost none writes another
+    unit, so the answer is sought with set operations before any loop.
     """
-    missing = next((need for need in alias.requires if not cells.get(need)), None)
-    if missing is not None:
-        msg = (
-            f"{label}: a figure in {alias.unit} ({written}) needs "
-            f"{missing} written beside it, to say what it is of"
+    wanted = names.written
+    if not wanted:
+        return False
+    if not wanted.isdisjoint(cells):
+        return True
+    for hedge in hedges.intersection(cells):
+        held = cells[hedge]
+        if (
+            held
+            and isinstance(held, (Mapping, list, tuple, AbstractSet))
+            and any(isinstance(key, str) and key in wanted for key in held)
+        ):
+            return True
+    return False
+
+
+class _Resolution:
+    """One row's cells with every name written in another unit resolved.
+
+    A figure is a value, an end of a range, one of several readings or a
+    plus-or-minus, and a unit is allowed wherever the field is named: as a
+    cell and as the key of a hedge. Every number of one cell is written in
+    one unit, so that :attr:`CatalogueRow.converted` can say which figure
+    the page printed; the words of a hedge (a bound, a basis, a credit) may
+    name the cell either way.
+    """
+
+    def __init__(
+        self, cls: type[CatalogueRow], cells: Mapping[str, Any], names: _Spellings
+    ) -> None:
+        self._cls = cls
+        self._cells = cells
+        self._names = names
+        self._label = repr(cells.get("name"))
+        self._fields = frozenset(item.name for item in fields(cls))
+        self._numeric = _shape(cls).numeric
+        self._resolved = dict(cells)
+        self._given = self._renamed_mapping("converted", cells.get("converted") or {})
+        self._converted: dict[str, tuple[str, str]] = dict(self._given)
+        #: Field to the name its numbers are written under, and the alias.
+        self._spoken: dict[str, tuple[str, UnitAlias | None]] = {}
+        #: Field to the alias figure of its value, of its range, of its list.
+        self._figures: dict[str, dict[str, str]] = {}
+        #: Field to the name its value was given under, for "given twice".
+        self._claimed: dict[str, str] = {}
+
+    def run(self) -> dict[str, Any]:
+        """The resolved cells, ready for the constructor."""
+        hedges = (*self._cls._number_hedges, *self._cls._value_hedges)
+        for hedge in hedges:
+            if hedge in self._cells and hedge != "converted":
+                self._resolved[hedge] = self._rename(hedge, self._cells[hedge])
+        self._resolve_values()
+        self._record()
+        if self._converted:
+            self._resolved["converted"] = self._converted
+        return self._resolved
+
+    # -- names ---------------------------------------------------------------
+    def _fail(self, what: str, field_name: str = "") -> NoReturn:
+        msg = f"{self._label}: {what}"
+        raise CatalogueError(msg, field=field_name)
+
+    def _target(self, written: str) -> tuple[str, UnitAlias | None]:
+        """The field *written* names, and the alias it is written under."""
+        if written in self._fields:
+            return written, None
+        choices = self._names.ambiguous.get(written)
+        if choices is not None:
+            self._fail(
+                f"{written} could be {_joined(list(choices))}, which share a root "
+                "and a kind of unit; write the field's own name"
+            )
+        found = self._names.aliases.get(written)
+        if found is None:
+            return written, None
+        return found
+
+    def _rename(self, hedge: str, held: object) -> object:
+        """A hedge with its keys named by field, its numbers converted."""
+        if isinstance(held, Mapping):
+            return self._renamed_mapping(hedge, held)
+        if isinstance(held, (list, tuple, AbstractSet)) and not isinstance(held, str):
+            renamed: list[object] = []
+            for written in held:
+                target = (
+                    self._target(written)[0] if isinstance(written, str) else written
+                )
+                if target in renamed:
+                    self._fail(f"{hedge} names {target} twice, under two units", target)
+                renamed.append(target)
+            return renamed
+        return held
+
+    def _renamed_mapping(self, hedge: str, held: Mapping[Any, Any]) -> dict[Any, Any]:
+        renamed: dict[Any, Any] = {}
+        where: dict[Any, str] = {}
+        for written, entry in held.items():
+            target, alias = (
+                self._target(written) if isinstance(written, str) else (written, None)
+            )
+            if target in renamed:
+                self._fail(
+                    f"{hedge} gives {target} twice, as {where[target]} and as {written}",
+                    target,
+                )
+            where[target] = written
+            if hedge in _NUMBER_HEDGES:
+                entry = self._numbers(hedge, written, target, alias, entry)
+            renamed[target] = entry
+        return renamed
+
+    # -- numbers -------------------------------------------------------------
+    def _speak(self, target: str, written: str, alias: UnitAlias | None) -> None:
+        """Hold every number of *target* to one unit."""
+        before = self._spoken.setdefault(target, (written, alias))
+        if before[1] != alias:
+            self._fail(
+                f"the numbers of {target} are written as {before[0]} and as "
+                f"{written}; write every number of one cell in one unit",
+                target,
+            )
+
+    def _convert(
+        self, value: object, alias: UnitAlias, where: str, *, difference: bool = False
+    ) -> tuple[float, str]:
+        """One figure in the row's unit, and its digits."""
+        try:
+            figure = _figure(value, where)
+        except CatalogueError as error:
+            self._fail(str(error))
+        offset = Fraction(0) if difference else alias.offset
+        try:
+            return convert_figure(figure, alias.factor, offset), figure
+        except OverflowError:
+            self._fail(f"{where} holds {figure}, which is too large to convert")
+
+    def _numbers(
+        self,
+        hedge: str,
+        written: str,
+        target: str,
+        alias: UnitAlias | None,
+        entry: object,
+    ) -> object:
+        """The numbers of a range, a list or a plus-or-minus, converted."""
+        if alias is None:
+            if entry is not None:
+                self._speak(target, written, None)
+            return entry
+        self._speak(target, written, alias)
+        where = f"{hedge}[{written!r}]"
+        if hedge == "uncertainty":
+            return self._convert(entry, alias, where, difference=True)[0]
+        if hedge == "ranges":
+            return self._range(entry, alias, where, target)
+        return self._readings(entry, alias, where, target)
+
+    def _range(
+        self, entry: object, alias: UnitAlias, where: str, target: str
+    ) -> tuple[float | None, float | None]:
+        if not isinstance(entry, (list, tuple)) or len(entry) != _PAIR:
+            self._fail(f"{where} holds {_quote(entry)}, which is not a list of 2")
+        ends: list[float | None] = []
+        digits: list[str | None] = []
+        for index, end in enumerate(entry):
+            if end is None:
+                ends.append(None)
+                digits.append(None)
+            else:
+                value, figure = self._convert(end, alias, f"{where}[{index}]")
+                ends.append(value)
+                digits.append(figure)
+        self._figures.setdefault(target, {})["range"] = "|".join(
+            figure or "" for figure in digits
         )
-        raise CatalogueError(msg)
+        return ends[0], ends[1]
 
+    def _readings(
+        self, entry: object, alias: UnitAlias, where: str, target: str
+    ) -> tuple[float | tuple[float, float], ...]:
+        if not isinstance(entry, (list, tuple)):
+            self._fail(f"{where} holds {_quote(entry)}, which is not a list")
+        readings: list[float | tuple[float, float]] = []
+        spoken: list[str] = []
+        for index, reading in enumerate(entry):
+            at = f"{where}[{index}]"
+            if isinstance(reading, (list, tuple)):
+                if len(reading) != _PAIR:
+                    self._fail(
+                        f"{at} holds {_quote(reading)}, which is not a list of 2"
+                    )
+                low, low_figure = self._convert(reading[0], alias, f"{at}[0]")
+                high, high_figure = self._convert(reading[1], alias, f"{at}[1]")
+                readings.append((low, high))
+                spoken.append(f"{low_figure} to {high_figure}")
+            else:
+                value, figure = self._convert(reading, alias, at)
+                readings.append(value)
+                spoken.append(figure)
+        self._figures.setdefault(target, {})["list"] = ", ".join(spoken)
+        return tuple(readings)
 
-def _alias_figure(label: str, value: object, written: str) -> str:
-    """The digits of a figure written under an alias, or a refusal naming the row.
+    def _resolve_values(self) -> None:
+        """Every value written under another name, converted into its field."""
+        for written, value in self._cells.items():
+            if written in self._fields:
+                if value is not None and written in self._numeric:
+                    self._speak(written, written, None)
+                continue
+            target, alias = self._target(written)
+            if alias is None:
+                continue
+            if (
+                target in self._cells
+                or target in self._given
+                or target in self._claimed
+            ):
+                other = self._claimed.get(target, target)
+                self._fail(f"{written} and {other} are one cell, given twice", target)
+            self._claimed[target] = written
+            del self._resolved[written]
+            if value is None:
+                continue
+            self._speak(target, written, alias)
+            number, figure = self._convert(value, alias, written)
+            self._resolved[target] = number
+            self._figures.setdefault(target, {})["value"] = figure
 
-    :raises CatalogueError: for a value that is not a finite number.
-    """
-    try:
-        return _figure(value, written)
-    except CatalogueError as error:
-        msg = f"{label}: {error}"
-        raise CatalogueError(msg) from None
+    def _record(self) -> None:
+        """Record the page's figure and unit of every cell written in another."""
+        for target, (written, alias) in self._spoken.items():
+            if alias is None:
+                continue
+            if target in self._given:
+                self._fail(
+                    f"converted is given for {target}, whose figure is also written "
+                    f"as {written}; write the figure under {written}, or the value "
+                    "in the field's own unit with converted beside it, not both",
+                    target,
+                )
+            missing = next(
+                (need for need in alias.requires if not self._cells.get(need)), None
+            )
+            if missing is not None:
+                self._fail(
+                    f"a figure in {alias.unit} ({written}) needs {missing} written "
+                    "beside it, to say what it is of",
+                    target,
+                )
+            figure = self._spoken_figure(target)
+            if not figure:
+                self._fail(
+                    f"{written} gives a plus-or-minus in {alias.unit} and no value, "
+                    "range or list for it to go with",
+                    target,
+                )
+            self._converted[target] = (figure, alias.unit)
+
+    def _spoken_figure(self, target: str) -> str:
+        """The figure the page prints for a cell: its value, its range or its list."""
+        figures = self._figures.get(target, {})
+        if "value" in figures:
+            return figures["value"]
+        if "range" in figures:
+            low, high = figures["range"].split("|")
+            bounds = self._resolved.get("bounded_above") or ()
+            if target in bounds and high:
+                return high
+            if target in (self._resolved.get("bounded_below") or ()) and low:
+                return low
+            return f"{low} to {high}" if low and high else low or high
+        return figures.get("list", "")
 
 
 def _resolve_units(cls: type[CatalogueRow], cells: dict[str, Any]) -> dict[str, Any]:
     """*cells* with every figure written under a unit alias converted.
 
-    A name that is neither a field nor an alias of one is left for the
-    constructor, which refuses it as the unknown keyword it is.
+    A figure is converted wherever the field is named: as a value, and as
+    the key of a hedge, whose numbers (the ends of a range, the readings of
+    a list, a plus-or-minus) are converted with it. A name that is neither a
+    field nor an alias of one is left for the constructor, which refuses it
+    as the unknown keyword it is.
 
     :raises CatalogueError: naming the row and the cell, for a figure that
         is not a finite number, for a cell given both under its own name and
-        under an alias, and for an alias whose figure needs a text field the
-        row leaves empty.
+        under an alias, for the numbers of one cell written in two units,
+        for a name two fields could take, and for an alias whose figure
+        needs a text field the row leaves empty.
     """
-    aliases = cls._unit_aliases
-    if not aliases:
+    shape = _shape(cls)
+    if not _names_an_alias(cells, shape.hedges, shape.spellings):
         return cells
-    names = frozenset(item.name for item in fields(cls))
-    resolved = dict(cells)
-    converted = dict(cells.get("converted") or {})
-    # A figure the page leaves empty adds no value, but its cell is spoken
-    # for all the same, so a second alias for it is still a second answer.
-    claimed: dict[str, str] = {}
-    label = repr(cells.get("name"))
-    for written, value in cells.items():
-        alias = None if written in names else _alias_for(written, aliases, names)
-        if alias is None:
-            continue
-        target = f"{written.removesuffix(alias.suffix)}{alias.target}"
-        if target in resolved or target in converted or target in claimed:
-            other = claimed.get(target, target)
-            msg = f"{label}: {written} and {other} are one cell, given twice"
-            raise CatalogueError(msg)
-        claimed[target] = written
-        del resolved[written]
-        if value is not None:
-            # An empty figure says nothing a text field would have to explain.
-            _check_requires(label, written, alias, cells)
-            figure = _alias_figure(label, value, written)
-            resolved[target] = convert_figure(figure, alias.factor)
-            converted[target] = (figure, alias.unit)
-    if converted:
-        resolved["converted"] = converted
-    return resolved
+    return _Resolution(cls, cells, shape.spellings).run()
 
 
 def _joined(items: Sequence[str]) -> str:
@@ -1059,12 +1865,12 @@ def _left_empty(item: dataclasses.Field[Any], value: object) -> bool:
     return False
 
 
-def _spell(entry: float | tuple[float, float]) -> str:
+def _spell(entry: float | tuple[float, float], digits: str = "g") -> str:
     """One listed value or interval, the way the page would read it aloud."""
     if isinstance(entry, tuple):
         low, high = entry
-        return f"{low:g} to {high:g}"
-    return f"{entry:g}"
+        return f"{format(low, digits)} to {format(high, digits)}"
+    return format(entry, digits)
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -1196,10 +2002,16 @@ class CatalogueRow:
         page prints with the figure or over its column. Long prints the
         figures of his musician bare, and the sabins recorded for them are a
         reading of the table, which is set in inches and pounds and names
-        sabins on the next row; that row's note says so. A figure a
-        packaged table prints with another SI prefix, such as the megapascals
-        of Rossing Table 15.5, is held in the base unit with no entry here,
-        and the table's ``about`` says so.
+        sabins on the next row; that row's note says so. A figure written in
+        another unit of the same kind as the field's (``thickness_m`` for
+        ``thickness_mm``, ``flow_resistivity_kpa_s_m2`` for
+        ``flow_resistivity_pa_s_m2``) is converted by :meth:`from_printed`
+        and recorded here, whether it is a value, the end of a range or one
+        of several readings; for a range the figure is the printed end of a
+        bound, or both ends as ``"5 to 10"``, and for readings the list as
+        the page gives it. A packaged table transcribed in the base unit
+        with only its SI prefix changed, such as the megapascals of Rossing
+        Table 15.5, holds no entry here, and the table's ``about`` says so.
     :ivar carried: Field to where the page gives it from, for a value the
         page gives by reference to another of its rows rather than on this
         one: a cell left blank under a block whose first row prints the
@@ -1266,6 +2078,13 @@ class CatalogueRow:
         ``"Granular materials"`` or ``"Other"``. Empty for a table that prints
         one list.
     :ivar note: What the page says about this row beyond its numbers.
+    :ivar provenance: The document the row was read from, for a row read
+        from a caller's catalogue file: its kind, version, the day it was
+        consulted, the laboratory and the report. ``None`` on every packaged
+        row, whose :attr:`source` cites a page. A refusal names the document
+        by its kind (``"the datasheet prints an upper bound of ..."``), where
+        a row without one says ``"the page"``; and the fields of its
+        ``field_test_standards`` are fields of the row.
     """
 
     #: The hedges whose keys name a numeric field: what the page printed in
@@ -1328,6 +2147,7 @@ class CatalogueRow:
     attributed_to: Mapping[str, str] = field(default_factory=dict)
     group: str = ""
     note: str = ""
+    provenance: Provenance | None = None
 
     def __post_init__(self) -> None:
         """Hold the row to the contract every row is held to, and freeze it.
@@ -1354,9 +2174,10 @@ class CatalogueRow:
                     object.__setattr__(self, field_name, kept)
         except CatalogueError as error:
             msg = f"{self.name!r}: {error}"
-            raise CatalogueError(msg) from None
+            raise CatalogueError(msg, field=field_name) from None
         self._check_name_and_source()
         self._check_hedge_keys(shape)
+        self._check_test_standards(shape)
         self._check_hedge_texts()
         self._check_bounds_have_ranges()
         self._check_range_ends()
@@ -1381,7 +2202,7 @@ class CatalogueRow:
                     f"a catalogue row needs a name and a source, and the row "
                     f"{self.name!r} from {self.source!r} has no {field_name}"
                 )
-                raise CatalogueError(msg)
+                raise CatalogueError(msg, field=field_name)
 
     def _check_hedge_keys(self, shape: _Shape) -> None:
         """Refuse a hedge keyed by a name that is not a field of this row.
@@ -1406,7 +2227,26 @@ class CatalogueRow:
                             f"{self.name!r}: {hedge} names {key!r}, which is not "
                             f"{what} of {type(self).__name__}"
                         )
-                        raise CatalogueError(msg)
+                        raise CatalogueError(msg, field=hedge)
+
+    def _check_test_standards(self, shape: _Shape) -> None:
+        """Refuse a per-field test standard keyed by a name that is no field.
+
+        A standard cited for a misspelt field is cited for nothing, and the
+        field it meant falls back to the document's own.
+
+        :raises CatalogueError: naming the key and the class.
+        """
+        if self.provenance is None:
+            return
+        for key in self.provenance.field_test_standards:
+            if key not in shape.numeric:
+                msg = (
+                    f"{self.name!r}: the provenance's field_test_standards names "
+                    f"{key!r}, which is not a numeric field of "
+                    f"{type(self).__name__}"
+                )
+                raise CatalogueError(msg, field="provenance")
 
     def _check_hedge_texts(self) -> None:
         """Refuse a hedge whose text says nothing.
@@ -1433,7 +2273,7 @@ class CatalogueRow:
                         "hedge that says nothing reads as a cell with nothing "
                         "to explain"
                     )
-                    raise CatalogueError(msg)
+                    raise CatalogueError(msg, field=hedge)
 
     def _check_bounds_have_ranges(self) -> None:
         """Refuse a bound on a field that has no range to bound.
@@ -1450,7 +2290,7 @@ class CatalogueRow:
                         f"{self.name!r}: {hedge} names {key!r}, which has no "
                         "range; a bound is a range the page prints one end of"
                     )
-                    raise CatalogueError(msg)
+                    raise CatalogueError(msg, field=hedge)
 
     def _check_reported(self) -> None:
         """Refuse an empty list of readings, or a reading interval backwards.
@@ -1469,7 +2309,7 @@ class CatalogueRow:
                     f"{self.name!r}: reported lists nothing for {field_name!r}; "
                     "a list of readings holds at least one"
                 )
-                raise CatalogueError(msg)
+                raise CatalogueError(msg, field=field_name)
             for entry in entries:
                 if isinstance(entry, tuple) and entry[0] > entry[1]:
                     msg = (
@@ -1477,7 +2317,7 @@ class CatalogueRow:
                         f"{entry[0]!r} down to {entry[1]!r}; the low end comes "
                         "first"
                     )
-                    raise CatalogueError(msg)
+                    raise CatalogueError(msg, field=field_name)
 
     def _check_uncertainty(self) -> None:
         """Refuse a plus-or-minus below zero.
@@ -1490,7 +2330,7 @@ class CatalogueRow:
                     f"{self.name!r}: the uncertainty of {key!r} is {spread!r}, "
                     "and a plus-or-minus is never below zero"
                 )
-                raise CatalogueError(msg)
+                raise CatalogueError(msg, field=key)
 
     def _check_cells_that_hold_nothing(self, shape: _Shape) -> None:
         """Refuse a value beside a hedge that says there is none to serve.
@@ -1515,7 +2355,7 @@ class CatalogueRow:
                     f"{self.name!r}: {key} holds {_quote(value)}, and {hedge} "
                     "says the page has no value to serve there"
                 )
-                raise CatalogueError(msg)
+                raise CatalogueError(msg, field=key)
 
     def _check_cells_that_hold_something(self, shape: _Shape) -> None:
         """Refuse a conversion or a carried cell with nothing behind it.
@@ -1540,7 +2380,7 @@ class CatalogueRow:
                         f"{self.name!r}: {hedge} names {key!r}, which holds "
                         "nothing: no value, no range and no list"
                     )
-                    raise CatalogueError(msg)
+                    raise CatalogueError(msg, field=key)
 
     def _readings(self, field_name: str) -> Iterator[tuple[str, float]]:
         """Every number the row holds for one field, with what it is."""
@@ -1563,7 +2403,7 @@ class CatalogueRow:
             for what, number in self._readings(field_name):
                 if number < low or (high is not None and number > high):
                     msg = f"{self.name!r}: {what} is {number!r}, and {why}"
-                    raise CatalogueError(msg)
+                    raise CatalogueError(msg, field=field_name)
 
     def _check_basis(self) -> None:
         """Refuse a basis outside :data:`CATALOGUE_BASES`.
@@ -1581,7 +2421,7 @@ class CatalogueRow:
                     f"{self.name!r}: the basis of {field_name!r} is {basis!r}, "
                     f"which is not one of {', '.join(CATALOGUE_BASES)}"
                 )
-                raise CatalogueError(msg)
+                raise CatalogueError(msg, field="basis")
 
     def _check_range_ends(self) -> None:
         """Refuse a range missing the end the page printed.
@@ -1610,13 +2450,13 @@ class CatalogueRow:
                     f"{self.name!r}: the range of {field_name!r} is missing an end "
                     "the page prints; only the open side of a bound may be empty"
                 )
-                raise CatalogueError(msg)
+                raise CatalogueError(msg, field=field_name)
             if low is not None and high is not None and low > high:
                 msg = (
                     f"{self.name!r}: the range of {field_name!r} runs from "
                     f"{low!r} down to {high!r}; the low end comes first"
                 )
-                raise CatalogueError(msg)
+                raise CatalogueError(msg, field=field_name)
 
     @classmethod
     def from_printed(cls, **cells: Any) -> Self:
@@ -1624,12 +2464,18 @@ class CatalogueRow:
 
         The one path that works anything out. The cells are what the page
         prints, under the field names of the class and with the hedges each
-        cell carries, as a data file writes them. A figure written under a
-        unit the class takes as an alias of its own (an
+        cell carries, as a data file writes them. A figure written in another
+        unit of the same kind as its field (``thickness_m`` for
+        ``thickness_mm``, ``flow_resistivity_kpa_s_m2`` for
+        ``flow_resistivity_pa_s_m2``), or in a unit the class takes as an
+        alias of its own (an
         :class:`~phonometry.materials.AbsorptionAreaSpectrum` takes
-        ``absorption_area_125_ft2`` for ``absorption_area_125_m2``) is
-        converted on its digits with an exact factor and rounded once, and
-        :attr:`converted` records the figure and its unit. The row is then
+        ``absorption_area_125_ft2`` for ``absorption_area_125_m2``), is
+        converted on its digits with an exact factor and rounded once,
+        whether it is a value or stands as the key of a hedge (the ends of a
+        range, the readings of a list and a plus-or-minus convert with it),
+        and :attr:`converted` records the figure and its unit. Every number
+        of one cell is written in one unit. The row is then
         built and held to the contract the class docstring lists, so every
         cell is checked before any arithmetic reads it. Last, the class
         fills what follows from those cells (a modulus from a plate speed, a
@@ -1659,8 +2505,11 @@ class CatalogueRow:
             ``derived`` among the cells, which is this method's to write; for
             a figure under a unit alias that is not a finite number, or that
             names a cell given under its own name or under another alias as
-            well; and for printed cells a value that follows from them cannot
-            be worked out of, naming the value and the cells.
+            well; for the numbers of one cell written in two units, a name
+            two fields of one kind could both take, or a figure whose text
+            field saying what it is of is empty; and for printed cells a
+            value that follows from them cannot be worked out of, naming the
+            value and the cells.
         :raises TypeError: for a name that is neither a field of the class
             nor a unit alias of one.
         """
@@ -1791,6 +2640,14 @@ class CatalogueRow:
         measured it and printed a dash, or whether the cell holds something
         that is not a number. Each of those is a different answer.
 
+        The sentence names the document by its kind: ``"the datasheet"``,
+        ``"the test report"``, and ``"the page"`` for a row with no
+        :attr:`provenance`, which is every packaged one. For a cell the row
+        holds in another unit than the page's, a bound, a range or a list
+        quotes the page's figure and unit first and the row's value after
+        it: ``"the datasheet prints a lower bound of 5 kPa s/m2 (5000 Pa
+        s/m2) and no value"``, never a figure the page does not print.
+
         :param field_name: One of the numeric field names of this class.
         :return: What the page had in that cell, or the empty string when the
             field is not missing at all. A field the page has no column for
@@ -1801,27 +2658,69 @@ class CatalogueRow:
         """
         if getattr(self, field_name) is not None:
             return ""
+        subject = _PAGE if self.provenance is None else self.provenance.noun
         if field_name in self.misprinted:
             return self.misprinted[field_name]
         if field_name in self.unquantified:
             return (
-                f"the page prints “{self.unquantified[field_name]}” "
+                f"{subject} prints “{self.unquantified[field_name]}” "
                 f"where the number would be"
             )
         if field_name in self.not_derivable:
             return self.not_derivable[field_name]
+        # A value converted from the page's figure is quoted in full after
+        # it, where six digits would round what the conversion kept.
+        digits = ".15g" if field_name in self.converted else "g"
         if field_name in self.ranges:
             low, high = self.ranges[field_name]
             if high is not None and field_name in self.bounded_above:
-                return f"the page prints an upper bound of {high:g} and no value"
+                shown = self._as_printed(field_name, format(high, digits))
+                return f"{subject} prints an upper bound of {shown} and no value"
             if low is not None and field_name in self.bounded_below:
-                return f"the page prints a lower bound of {low:g} and no value"
+                shown = self._as_printed(field_name, format(low, digits))
+                return f"{subject} prints a lower bound of {shown} and no value"
             if low is not None and high is not None:
-                return f"the page prints {low:g} to {high:g} and no value"
+                spelled = f"{format(low, digits)} to {format(high, digits)}"
+                shown = self._as_printed(field_name, spelled)
+                return f"{subject} prints {shown} and no value"
         if field_name in self.reported:
-            listed = ", ".join(_spell(entry) for entry in self.reported[field_name])
-            return f"the page lists {listed} and no single value"
-        return "the page does not give it, and it does not follow from the cells that it does"
+            listed = ", ".join(
+                _spell(entry, digits) for entry in self.reported[field_name]
+            )
+            shown = self._as_printed(field_name, listed)
+            return f"{subject} lists {shown} and no single value"
+        return (
+            f"{subject} does not give it, and it does not follow from the cells "
+            "that it does"
+        )
+
+    def _as_printed(self, field_name: str, held: str) -> str:
+        """*held*, or the page's figure and unit with *held* after it.
+
+        A cell the row holds in another unit than the page's is quoted in
+        the page's terms first, because a refusal that put the converted
+        number after "prints" would say the page prints a figure it does
+        not.
+        """
+        if field_name not in self.converted:
+            return held
+        figure, unit = self.converted[field_name]
+        own = unit_spelling(field_name)
+        return f"{figure} {unit} ({held} {own})" if own else f"{figure} {unit} ({held})"
+
+    def _catalogue_notes(self) -> tuple[str, ...]:
+        """What a reader of a catalogue file should note about this row.
+
+        The hook a catalogue reader calls on every row it builds, for what
+        only the row's own class can judge: a rating a data sheet prints
+        beside the bands it is worked out from, and which does not follow
+        from them, or a value off the grid its standard rounds to. A note is
+        kept beside the catalogue and never changes the row. The base class
+        notes nothing.
+
+        :return: One sentence per note, each naming the cells it is about.
+        """
+        return ()
 
 
 @dataclass(frozen=True, kw_only=True)

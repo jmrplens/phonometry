@@ -1,5 +1,5 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
-"""Measurement audio files: read, write, stream and convert without touching a level.
+"""Files: measurement audio, its calibration sidecar and catalogues of materials.
 
 Every function here treats an audio file as a measurement record rather than
 as material to be played back, which fixes the defaults: the native sample
@@ -50,18 +50,46 @@ too for text that is not strict JSON or a table missing its citation.
 and fills what follows from them, which is how every packaged catalogue is
 built; :meth:`CatalogueRow.printed_fields` gives those cells back, and
 :meth:`BandedRow.values_at` reads a banded row at an array of frequencies.
+
+The library publishes no manufacturer's data, so a caller's own data sheets,
+declarations of performance and test reports live in a catalogue file of
+their own, which :func:`read_catalogue` reads into rows of the same classes:
+a versioned JSON document with its :class:`Provenance` (the kind of document,
+its version, the day it was consulted, the laboratory and the report), each
+cell named as the field it fills or in another unit of the same kind, and
+every hedge the packaged tables use. What comes back is a :class:`Catalogue`,
+a read-only mapping keyed like the packaged ones that joins a ``PUBLISHED_*``
+catalogue with ``|`` and never lets one row replace another. Every problem in
+a file is raised at once in one :class:`CatalogueError`, each
+:class:`CatalogueIssue` with the JSON pointer to it, and what is only worth a
+second look rides on the catalogue as a note with one
+:class:`CatalogueWarning`. :func:`parse_catalogue` reads the same from text or
+a mapping in memory, and :func:`write_catalogue` writes rows, a packaged
+table among them, as a file that reads back into the same rows. Nothing the
+file names is ever imported, and nothing it holds is kept anywhere but in the
+objects handed back.
 """
 
 from __future__ import annotations
 
 from .._internal.catalogue import (
     CATALOGUE_BASES,
+    PROVENANCE_KINDS,
     BandedRow,
     CatalogueError,
+    CatalogueIssue,
     CatalogueRow,
+    Provenance,
 )
 from ._backends import LossyCompressionWarning, info, read
 from ._blocks import read_blocks
+from ._catalogue import (
+    Catalogue,
+    CatalogueWarning,
+    parse_catalogue,
+    read_catalogue,
+    write_catalogue,
+)
 from ._chunks import BroadcastMetadata, CuePoint
 from ._convert import convert
 from ._sidecar import (
@@ -76,23 +104,31 @@ from ._write import ClippingWarning, write
 
 __all__ = [
     "CATALOGUE_BASES",
+    "PROVENANCE_KINDS",
     "AudioFileInfo",
     "BandedRow",
     "BroadcastMetadata",
     "CalibrationSidecar",
+    "Catalogue",
     "CatalogueError",
+    "CatalogueIssue",
     "CatalogueRow",
+    "CatalogueWarning",
     "ClippingWarning",
     "CuePoint",
     "LossyCompressionWarning",
+    "Provenance",
     "Signal",
     "SignalOrigin",
     "convert",
     "info",
+    "parse_catalogue",
     "read",
     "read_blocks",
+    "read_catalogue",
     "read_sidecar",
     "sidecar_path",
     "write",
+    "write_catalogue",
     "write_sidecar",
 ]

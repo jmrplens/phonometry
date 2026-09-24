@@ -43,6 +43,17 @@ class FilterBankWarning(PhonometryWarning):
 #: Filter families the bank knows how to design (see ``OctaveFilterBank``).
 _VALID_FILTERS = ["butter", "cheby1", "cheby2", "ellip", "bessel"]
 
+#: The ratio of a band's decimated Nyquist frequency to its upper band edge.
+#: A band designed close to its own Nyquist frequency is bent by the bilinear
+#: transform: just inside its upper band edge it attenuates less than the same
+#: band designed far from it, and above that edge it falls more steeply. At
+#: 1.25 the octave bank's adjacent outputs summed to +0.94 dB near a band's
+#: upper edge, past the +0.8 dB of class 1 in IEC 61260-1:2014 5.16, and to
+#: -1.16 dB near its lower edge. The bend shrinks as the square of this
+#: ratio: at 16 it moves the summation of an octave band by at most 0.005 dB
+#: and of a one-third-octave band by 0.002 dB, under a hundredth of a decibel.
+_DECIMATION_HEADROOM = 16.0
+
 
 @dataclass(frozen=True)
 class OctaveFilterResult:
@@ -155,11 +166,11 @@ class FilterDesign:
         72 dB default clears class 1 with the same +0.400 dB passband margin
         as ``butter``.
     :ivar resample: If True, resampling is performed: each band is filtered on
-        a decimated sample rate (default True). A decimated ``butter`` octave
-        bank sums its adjacent outputs to about +0.94 dB, past the +0.8 dB of
-        class 1 in IEC 61260-1:2014 5.16, and is class 2; filtered at the full
-        rate (``False``) it is class 1 on every requirement, and a
-        one-third-octave bank is class 1 either way.
+        a decimated sample rate whose Nyquist frequency is at least sixteen
+        times its upper band edge (default True). The order 6 ``butter``
+        octave and one-third-octave banks are class 1 on every requirement
+        either way, decimated or at the full rate (``False``); the decimation
+        moves the summation of adjacent outputs by at most 0.005 dB.
     """
 
     filter_type: str = "butter"
@@ -213,10 +224,10 @@ class ResponsePlot:
     file: str | None = None
 
 
-#: The defaults of the bank and of :func:`octave_filter`: the design that
-#: meets the class 1 mask of IEC 61260-1:2014 Table 1 (an octave bank so
-#: designed is class 2 on the summation of 5.16), no calibration, no carried
-#: state and no response plot.
+#: The defaults of the bank and of :func:`octave_filter`: the design that is
+#: class 1 on every requirement of IEC 61260-1:2014 it is graded on (the
+#: Table 1 mask, the effective bandwidth of 5.12 and the summation of 5.16),
+#: no calibration, no carried state and no response plot.
 #: One shared instance each: the bundles are frozen, so a call cannot
 #: mutate them.
 _DEFAULT_DESIGN = FilterDesign()
@@ -364,10 +375,10 @@ class OctaveFilterBank:
             of IEC 61260-1:2014 Table 1 with the default parameters
             (``cheby2`` also does once ``attenuation`` >= 70 dB);
             ``cheby1``/``ellip``/``bessel`` fail on passband ripple or
-            roll-off regardless of parameters. The decimated octave bank is
-            class 2 on the summation of outputs (5.16) and class 1 filtered
-            at the full rate (``FilterDesign(resample=False)``); the
-            one-third-octave bank is class 1 on every requirement.
+            roll-off regardless of parameters. The octave and
+            one-third-octave banks are class 1 on every requirement,
+            decimated or filtered at the full rate
+            (``FilterDesign(resample=False)``).
         :param calibration: How band energy becomes a level: calibration
             factor and dBFS switch (:class:`LevelCalibration`).
         :param block_processing: Whether the bank carries its filter state
@@ -405,7 +416,7 @@ class OctaveFilterBank:
 
         # Calculate factors and design SOS
         if design.resample:
-            headroom = 1.25
+            headroom = _DECIMATION_HEADROOM
             if design.filter_type == "cheby2":
                 # The cheby2 stopband extends above the band's upper edge;
                 # 5% safety margin so it clears the decimated Nyquist.
@@ -860,8 +871,8 @@ def octave_filter(
         IEC 61260-1 Table 1 with the default parameters; for ``cheby2`` scipy
         pins the deep-stopband floor at exactly ``attenuation``, so it must be
         >= 70 dB to clear the class 1 limit (matches
-        :class:`OctaveFilterBank`, which also says how the decimated octave
-        bank grades on the summation of outputs).
+        :class:`OctaveFilterBank`, which also says how the decimated banks
+        grade on the summation of outputs).
     :param calibration: How band energy becomes a level: calibration factor
         and dBFS switch (:class:`LevelCalibration`). This is the explicit
         knob: when its ``factor`` is left at 1.0, a calibrated

@@ -286,15 +286,20 @@ def test_fiche_prints_the_three_requirements(tmp_path: Path) -> None:
     assert "graded as IEC 61260-2:2016 tests them" in text
 
 
-def test_octave_bank_fiche_names_summation(tmp_path: Path) -> None:
-    """The default octave bank is boxed class 2 and fails a required class 1.
+def test_fiche_names_summation_when_it_binds(tmp_path: Path) -> None:
+    """An order 4 one-third-octave bank is boxed class 2 and fails class 1.
 
-    Its Table 1 margin is the class 1 +0.40 dB, but its adjacent outputs sum
-    up to +0.94 dB about the input, past the +0.8 dB of 5.16; the fiche says
-    which requirement binds.
+    Its Table 1 margin is the class 1 +0.40 dB, but the bands next to its
+    20 kHz band, whose upper edge sits close to the Nyquist frequency of
+    48 kHz, sum to +0.802 dB about the input, past the +0.8 dB of 5.16; the
+    fiche says which requirement binds.
     """
-    bank = filters.OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[125, 4000])
+    bank = filters.OctaveFilterBank(
+        fs=48000, fraction=3, order=4, limits=[10000, 20000]
+    )
     result = filters.verify_filter_class(bank)
+    assert result.requirement_class("relative_attenuation") == 1
+    assert result.requirement_class("summation") == 2
     assert result.overall_class == 2
     out = tmp_path / "octave.pdf"
     result.report(str(out), metadata=ReportMetadata(required_class=1))

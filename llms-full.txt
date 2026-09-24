@@ -47977,21 +47977,27 @@ To ensure **100% stability** across the entire audible spectrum (even at low
 frequencies like 16 Hz with high sample rates), phonometry employs two
 critical strategies:
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_bank_dataflow_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_bank_dataflow.svg" alt="Data flow inside one band of the filter bank: a band with room to decimate, meaning half the sample rate still clears 1.25 times its upper edge, takes the resample_poly branch down to fs over M so its poles stay clear of the unit circle, every band is then a cascade of second-order sections designed on the IEC 61260-1 band edges rather than one high-order transfer function, both branches end in the band level in dB, and sigbands=True additionally returns the band signal brought back to the input rate" width="92%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_bank_dataflow_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_bank_dataflow.svg" alt="Data flow inside one band of the filter bank: a band with room to decimate, meaning half the sample rate is at least 32 times its upper edge, so that it can be decimated by two or more and still keep its processing Nyquist frequency sixteen times that edge, takes the resample_poly branch down to fs over M so its poles stay clear of the unit circle, every band is then a cascade of second-order sections designed on the IEC 61260-1 band edges rather than one high-order transfer function, both branches end in the band level in dB, and sigbands=True additionally returns the band signal brought back to the input rate" width="92%"></picture>
 
 1. **Second-Order Sections (SOS):** All filters are implemented as a series of
    cascaded biquads. This avoids the catastrophic numerical precision loss
    associated with high-order transfer functions (coefficients a, b).
-2. **Multi-rate Decimation:** Whenever half the sample rate still clears the
-   band's upper edge by a factor of 1.25, the signal is automatically
-   downsampled (decimated) by
-   $M = \lfloor (f_\mathrm{s}/2) / (1.25\,f_\text{upper}) \rfloor$ before filtering,
-   which is most bands rather than only the low ones (29 of the 33
-   one-third-octave bands at 48 kHz). This keeps the digital pole locations far
-   from the unit circle boundary, preventing oscillation and noise. The band
-   level is computed on the decimated signal; only `sigbands=True` brings the
-   band signal back to the input rate, with `resample_poly(M, 1)`. Chebyshev II banks reserve extra
-   decimation headroom so their stopband edges stay below the decimated Nyquist.
+2. **Multi-rate Decimation:** Whenever half the sample rate is at least 32
+   times the band's upper edge, the signal is automatically downsampled
+   (decimated) by
+   $M = \lfloor (f_\mathrm{s}/2) / (16\,f_\text{upper}) \rfloor$ before filtering
+   (the 18 lowest of the 33 one-third-octave bands at 48 kHz). This keeps the
+   digital pole locations far from the unit circle boundary, preventing
+   oscillation and noise, and it stops at sixteen times the upper edge because
+   closer to its Nyquist frequency the bilinear transform bends the band: at
+   1.25 times the edge the octave bank summed its adjacent outputs to
+   +0.94 dB, past the +0.8 dB of class 1 in IEC 61260-1:2014 5.16, and at 16
+   the bend moves that sum by at most 0.005 dB. The band level is computed on
+   the decimated signal; only `sigbands=True` brings the band signal back to
+   the input rate, with `resample_poly(M, 1)`. A Chebyshev II band of low order
+   and deep stopband, whose stopband edge would sit above sixteen times its
+   upper edge, reserves more so its stopband edge stays below the decimated
+   Nyquist.
 
 ## Weighting Curves (IEC 61672-1)
 
@@ -48834,8 +48840,9 @@ impulsive signals it is dominated by the filter's own ringing. There is no
 `verify_filter_class(bank)` checks the designed bank against the IEC 61260-1
 Table 1 acceptance limits, the effective bandwidth and the summation of
 adjacent outputs, and reports the class (`1`, `2` or `None` if outside both)
-with per-band margins. The decimated octave bank is class 2 on the summation;
-Filter Class Verification says why.
+with per-band margins. The default octave and one-third-octave banks are
+class 1 on all three, decimated or filtered at the full rate; Filter Class
+Verification says why the decimation barely moves the summation.
 
 ## 4. Parametric EQ (`ParametricEQ`)
 
@@ -49032,7 +49039,9 @@ time-aligned with the input. It is a per-call option on the bank, not an
 argument of the one-shot `octave_filter()`, which rejects it with a
 `TypeError`. The effective attenuation doubles and the
 effective passband narrows, lowering the measured broadband band level by
-~0.2 to 0.3 dB per band (a pure in-band tone is unaffected); prefer forward
+about 0.4 dB per band (filtering twice squares the magnitude, and an order-6
+Butterworth band then passes 11/12 of its noise bandwidth, −0.38 dB; a pure
+in-band tone is unaffected); prefer forward
 filtering when the absolute band SPL must match single-pass conventions, and
 reserve zero-phase for when the temporal envelope matters (e.g. reverberation
 decay). The option is incompatible with stateful (block) processing.
@@ -49192,9 +49201,9 @@ print(result.requirements)
 # ('relative_attenuation', 'effective_bandwidth', 'summation')
 band = result.bands[0]
 print(band["freq"], band["class"], band["checked_to_omega"])
-# 12.589254117941678 1 3.8127755266765493
+# 12.589254117941678 1 17.984790220172403
 print(band["margin_class1_db"], band["bandwidth_margin_class1_db"])
-# 0.3999999999999595 0.35183457985825545
+# 0.39999999999978114 0.3512657809681092
 ```
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_filter_class_check_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_filter_class_check.svg" alt="Calculation chain for grading a band filter against IEC 61260-1 Table 1: a one-third-octave band at 1 kHz, its relative attenuation at every breakpoint against the class 1 and class 2 limits, the class 1 margin at each breakpoint and the class it gives, with the IEC 61260-2 tests that need no specimen (the 24-point grid, the effective bandwidth, the summation and the sweep) computed on the design as well, and the tests a laboratory runs on a device, IEC 61260-2 on a specimen and IEC 61260-3 periodic tests graded by verify_filter_periodic, set apart as outside the check" width="88%"></picture>
@@ -49202,7 +49211,9 @@ print(band["margin_class1_db"], band["bandwidth_margin_class1_db"])
 *The 1 kHz band of a bank like the one above, walked through the check: its
 relative attenuation at every Table 1 breakpoint, carried to one-third octave,
 against the class 1 and class 2 limits, with the smallest margin deciding the
-class. The red dashed line is where the decimated bank stops walking it. The
+class. The default bank walks it to the end of the mask: its Nyquist frequency
+at 48 kHz is 24 times its mid-band frequency, and a decimated band keeps its
+own at least sixteen times its upper edge. The
 box on the right is what section 1b computes on the design as well, the
 IEC 61260-2 tests that need no specimen; the dashed column under it is what a
 laboratory does to an instrument, and section 3b grades the periodic-test
@@ -49264,8 +49275,8 @@ keeps the same +0.400 dB passband margin as Butterworth). Chebyshev I,
 Elliptic and Bessel do
 not meet class limits at order 6: passband ripple (cheby1/ellip) and slow
 roll-off (bessel) violate the mask. Whether a whole bank is class 1 also
-depends on the two requirements of section 1b, and there the decimated octave
-bank falls to class 2.
+depends on the two requirements of section 1b, and the default octave and
+one-third-octave banks meet class 1 there too.
 
 ## 1b. Effective bandwidth and the summation of outputs (IEC 61260-2)
 
@@ -49330,17 +49341,18 @@ octave = filters.verify_filter_class(
     filters.OctaveFilterBank(48000, fraction=1, order=6, limits=[125, 4000]))
 print(octave.requirement_class("relative_attenuation"))     # 1
 print(octave.requirement_class("effective_bandwidth"))      # 1
-print(octave.requirement_class("summation"))                # 2
-print(round(octave.binding_margin_db("summation", 1), 2))   # -0.14
-print(octave.overall_class)                                 # 2
+print(octave.requirement_class("summation"))                # 1
+print(round(octave.binding_margin_db("summation", 1), 2))   # 0.64
+print(octave.overall_class)                                 # 1
 ```
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_summation_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_summation.svg" alt="Two panels of the summed output of adjacent bands against normalized frequency, from the lower to the upper band edge, with the class 1 limits dashed at +0.8 dB and −1.8 dB and the class 2 limits dotted at +1.8 dB and −3.8 dB. On the left, the decimated octave bank from 125 Hz to 4 kHz: the inner bands dip to between −0.94 dB and −1.16 dB just above their lower edges and climb to between +0.71 dB and +0.94 dB just below their upper edges, the 251 Hz band reaching +0.94 dB, past the class 1 limit, so the bank is class 2. On the right, the one-third-octave bank over the same range traces the same shape from about −0.55 dB to +0.63 dB, inside class 1" width="100%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_summation_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_summation.svg" alt="Two panels of the summed output of adjacent bands against normalized frequency, from the lower to the upper band edge, with the class 1 limits dashed at +0.8 dB and −1.8 dB and the class 2 limits dotted at +1.8 dB and −3.8 dB. On the left, the decimated octave bank from 125 Hz to 4 kHz: every inner band sums to about 0 dB across the middle of the band and rises in a narrow bump just inside each band edge, to about +0.13 dB near the lower edge and to between +0.14 dB and +0.16 dB near the upper edge, before returning to 0 dB at the edges themselves; the 1995 Hz band, drawn heavier as the binding band, reaches +0.16 dB, far inside class 1. On the right, the one-third-octave bank over the same range traces the same shape from 0.00 dB to +0.16 dB, its 3162 Hz band the binding one, inside class 1" width="100%"></picture>
 
 *Formula (3) of IEC 61260-2 on every inner band of the two default banks, drawn
-by `result.plot(requirement="summation")`. The octave bank loses power just
-above each lower band edge and adds it just below each upper edge, and its peak
-crosses the class 1 limit.*
+by `result.plot(requirement="summation")`. Both banks return a tone's power to
+within 0.16 dB: the sum stays within a few hundredths of a decibel of 0 dB
+across the middle of each band and rises by a little more than a tenth of a
+decibel just inside its edges, where two neighbouring bands share the tone.*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -49356,7 +49368,7 @@ third = filters.verify_filter_class(
 fig, (ax_oct, ax_third) = plt.subplots(1, 2, figsize=(13, 6.2), sharey=True)
 octave.plot(ax=ax_oct, requirement="summation")
 third.plot(ax=ax_third, requirement="summation")
-ax_oct.set_title("Octave bank, decimated: class 2 on §5.16")
+ax_oct.set_title("Octave bank, decimated: class 1 on §5.16")
 ax_third.set_title("One-third-octave bank: class 1 on §5.16")
 ax_third.set_ylabel("")
 plt.show()
@@ -49364,28 +49376,32 @@ plt.show()
 
 </details>
 
-**Why the default octave bank is class 2 on 5.16.** The library's default
-octave bank (Butterworth, order 6, 48 kHz, decimated) meets class 1 on Table 1
-and on the effective bandwidth, and its adjacent outputs sum from −1.16 dB to
-+0.94 dB about the input: past the +0.8 dB of class 1, inside class 2. It is
-not an artefact of grading transfer functions: tones at those frequencies, run
-through the bank itself with its decimation filters, read the same sums to
-within 0.01 dB. The cause is the multirate design. Each octave is filtered at
-the lowest rate that keeps its upper band edge at 0.8 of the processing Nyquist
-frequency, and that close to Nyquist the bilinear transform squeezes the
-frequency axis: a band's upper skirt falls away sooner than an analogue band's
-would, and its lower skirt later. Just above a lower band edge the neighbour
-below has already gone and power is lost; just below an upper band edge the
-neighbour above is still there and power is added. Designed at the full rate,
-`design=filters.FilterDesign(resample=False)`, the same octave bank sums from
-−0.06 dB to +0.69 dB over its full default range, the top set by the 8 kHz
-band nearest the Nyquist frequency, and is class 1 on every requirement with
-0.11 dB to spare; the decimated Chebyshev II octave bank is class 1 too, from
-−0.57 dB to +0.64 dB. The one-third-octave bank passes with the decimated
-design, from −0.55 dB to +0.76 dB over its full default range: a margin of
-0.04 dB. When an octave analysis has to be class 1 against
-IEC 61260-1:2014 as a whole, design it at the full rate and let
-`verify_filter_class` say so.
+**Why the bank decimates a band only to sixteen times its upper edge.** The
+summation is the requirement a multirate design puts at risk. Close to its own
+Nyquist frequency the bilinear transform bends a band: just inside its upper
+band edge it attenuates less than the same band designed far from Nyquist, and
+above that edge it falls more steeply. Just below an upper band edge the band
+and its neighbour above then pass more than the tone's power; just above a
+lower band edge the band below has already fallen away and power is lost. An
+octave bank (Butterworth, order 6, 48 kHz) decimated until each band's
+processing Nyquist frequency was only 1.25 times its upper band edge sums its
+adjacent outputs from −1.16 dB to +0.94 dB about the input: past the +0.8 dB of
+class 1, a class 2 bank. The bend shrinks as the square of that ratio: it moves
+the summation of an octave band by 0.074 dB at a ratio of four, 0.018 dB at
+eight and 0.005 dB at sixteen, and that of a one-third-octave band by 0.002 dB
+at sixteen. So the bank stops decimating a band while its processing Nyquist
+frequency is still at least sixteen times its upper band edge, and its
+decimated banks sum as the same banks designed at the full rate
+(`design=filters.FilterDesign(resample=False)`): class 1 on every requirement
+at 44.1, 48 and 96 kHz. Over its full default range at 48 kHz the octave bank
+sums from −0.06 dB to +0.69 dB, decimated or not, the top set by the 8 kHz
+band next to the 16 kHz band, which runs at the full rate close to the 24 kHz
+Nyquist frequency: class 1 with 0.11 dB to spare. The one-third-octave bank
+sums from −0.25 dB to +0.76 dB, both at its 16 kHz band, a margin of 0.04 dB,
+and the decimated Chebyshev II octave bank from −0.08 dB to +0.64 dB. None of
+this is an artefact of grading transfer functions: tones run through the bank
+itself, its decimation filters included, read the Formula (3) sums to within
+0.01 dB.
 
 ## 1c. Time-invariant operation (5.14)
 
@@ -49414,7 +49430,7 @@ from phonometry import filters
 bank = filters.OctaveFilterBank(48000, fraction=3, order=6, limits=[25, 10000])
 swept = filters.verify_time_invariance(bank)
 print(swept.overall_class)                       # 1
-print(round(swept.worst_deviation_db, 3))        # 0.054
+print(round(swept.worst_deviation_db, 3))        # 0.056
 print(swept.seconds_per_decade)                  # (2.0, 5.0)
 print(round(filters.swept_band_level(
     127.0, fraction=3, sweep_duration_s=30, averaging_time_s=30,
@@ -49667,14 +49683,13 @@ lower). The fiche renders in English by default; pass `language="es"` for a
 Spanish fiche (translated fixed strings and a comma decimal separator), e.g.
 `result.report("iec61260_es.pdf", language="es")`.
 
-The example is the octave bank designed at the full rate, the configuration
-section 1b shows to be class 1 on every requirement:
+The example is the decimated octave bank from 125 Hz to 4 kHz, the
+configuration section 1b shows to be class 1 on every requirement:
 
 ```python
 from phonometry import ReportMetadata, filters
 
-bank = filters.OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[125, 4000],
-                                design=filters.FilterDesign(resample=False))
+bank = filters.OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[125, 4000])
 result = filters.verify_filter_class(bank)   # overall_class == 1
 result.plot()   # the worst-margin band on its class corridor
 
@@ -49734,13 +49749,16 @@ summation requirements too.
 
 ### Is the default octave bank class 1 under IEC 61260-1:2014?
 
-On the Table 1 mask and on the effective bandwidth, yes; on the summation of
-output signals (5.16), no. The decimated Butterworth octave bank sums adjacent
-outputs up to +0.94 dB about the input, past the +0.8 dB of class 1, so its
-overall class is 2. Designed at the full rate with
-`FilterDesign(resample=False)` it sums within −0.06 dB and +0.69 dB over its
-default range and is class 1 on every requirement; the one-third-octave bank
-is class 1 as designed.
+Yes, on every requirement it is graded on: the Table 1 mask, the effective
+bandwidth (5.12) and the summation of output signals (5.16). The decimated
+Butterworth octave bank sums adjacent outputs within −0.06 dB and +0.69 dB of
+the input over its default range at 48 kHz, inside the −1.8 dB and +0.8 dB of
+class 1 with 0.11 dB to spare, exactly as the same bank designed at the full
+rate with `FilterDesign(resample=False)`: the bank decimates a band only as
+far as its processing Nyquist frequency stays at least sixteen times its upper
+band edge, where the decimation moves the summation by at most 0.005 dB. The
+one-third-octave bank is class 1 on every requirement too, with 0.04 dB to
+spare on the summation.
 
 ### What is class 0 and which standard defines it?
 
@@ -53008,15 +53026,18 @@ bank = filters.OctaveFilterBank(fs=48000, fraction=3, order=6,
                                 limits=[100, 10000])
 bands = filters.verify_filter_class(bank)
 print(bands.overall_class)           # 1
-print(bands.range_limited)           # True for a decimated bank
+print(bands.range_limited)           # True: its top bands reach Nyquist
 ```
 
-Read the flags, not just the class: `range_limited` is `True` on the
-decimated bank because a band cannot be evaluated beyond its own processing
-Nyquist, so the far stopband rests on the anti-alias argument rather than on
-the band filter itself. The class is the strictest met on every requirement
-graded (`bands.requirements`), and the decimated octave bank is the one that
-parts company with its Table 1 verdict, class 2 on the summation of 5.16. The
+Read the flags, not just the class: `range_limited` is `True` on this bank
+because its bands from 5 kHz up, filtered at the full rate, cannot be
+evaluated beyond the 24 kHz Nyquist frequency, which falls short of the end of
+their Table 1 mask, so their far stopband rests on the anti-alias filter of
+the capture chain rather than on the band filter itself. The class is the
+strictest met on every requirement graded (`bands.requirements`), and a bank
+can still part company with its Table 1 verdict: at 48 kHz an order-4
+one-third-octave bank is class 1 on Table 1 and misses class 1 on the
+summation of 5.16 by 0.002 dB, at its 16 kHz band. The
 details, including why a +0.400 dB margin is the ceiling for a passing
 Butterworth bank, are in
 [Filter class verification](https://jmrplens.github.io/phonometry/signals/filters/filter-compliance/); the weighting
@@ -53033,8 +53054,7 @@ verdict:
 ```python
 from phonometry import ReportMetadata, filters
 
-bank_11 = filters.OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[125, 4000],
-                                   design=filters.FilterDesign(resample=False))
+bank_11 = filters.OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[125, 4000])
 result = filters.verify_filter_class(bank_11)   # result.overall_class == 1
 result.report(
     "iec61260.pdf",
@@ -60755,11 +60775,11 @@ all three. A verdict for `edition="1995"` is unchanged.
 
 | Before | 4.0 |
 | --- | --- |
-| `overall_class` 1 for the decimated octave bank (Butterworth, order 6, 48 kHz) | 2: its adjacent outputs sum up to +0.94 dB about the input, past the +0.8 dB of class 1 on 5.16; the same bank designed with `FilterDesign(resample=False)` is class 1 |
+| each band of a decimated bank decimated until its processing Nyquist frequency is 1.25 times its upper band edge | decimated only as far as leaves it sixteen times that edge, so the bilinear transform no longer bends the band: a band level moves by up to 0.07 dB on white noise, most in the lowest bands, and the octave bank, which would sum its outputs up to +0.94 dB and read class 2 on 5.16, is class 1 on every requirement |
 | a band's `class` read off `margin_class{c}_db` | `class` over every requirement; `margin_class{c}_db` is still the Table 1 margin, beside `bandwidth_margin_class{c}_db` and `summation_margin_class{c}_db`, which is `None` on the two end bands |
 | one requirement to ask about | `requirements`, `requirement_class(name)` and `binding_margin_db(name, cls)` read each one on its own, and `plot(requirement="summation")` draws it |
 
-The one-third-octave bank keeps class 1.
+The octave and one-third-octave banks keep class 1.
 
 ```python
 from phonometry import filters
@@ -60798,12 +60818,16 @@ of 5.12 and the summation of 5.16 as well as the Table 1 mask, so a bank's
 class is the strictest it meets on all three. Its Table 1 margins and a
 verdict for `edition="1995"` are the numbers they were.
 
+The decimated filter banks are the other: each band now keeps its processing
+Nyquist frequency sixteen times its upper edge, so a band level moves by up to
+0.07 dB on white noise, as the same section says.
+
 What each `.plot()` draws is untouched, and so is what each `.report()`
 prints but one label: the microphone fiche writes dB(468) where it wrote
 dB(CCIR). The `Signal` contract is the one it was, now kept in two more
 places, the blocks of `read_blocks` and the waveforms inside five results.
 Every formula is untouched too. 4.0 rearranged the furniture and put the unit
-on the label; apart from that verdict, it did not recompute anything.
+on the label; apart from those two, it did not recompute anything.
 
 ---
 

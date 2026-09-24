@@ -828,14 +828,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   response.** `filters.verify_filter_class` graded the Table 1 mask alone; for
   the 2014 edition a band's `class` and the bank's `overall_class` are now the
   strictest class met on Table 1, the effective bandwidth (5.12) and the
-  summation of outputs (5.16). The decimated octave bank (Butterworth, order 6,
-  48 kHz) sums its adjacent outputs from −1.16 dB to +0.94 dB about the input,
-  past the +0.8 dB of class 1, and reads class 2 where it read class 1; tones
-  run through the bank itself read the same sums. Designed with
-  `FilterDesign(resample=False)` it is class 1, and so is the one-third-octave
-  bank as designed. `margin_class{c}_db` is still the Table 1 margin, and a
-  1995-edition verdict is unchanged. The example fiche is the octave bank
-  designed at the full rate.
+  summation of outputs (5.16). The library's octave and one-third-octave banks
+  (Butterworth, order 6) are class 1 on all three, decimated or designed at
+  the full rate; tones run through the bank itself read the same sums the
+  verdict computes. `margin_class{c}_db` is still the Table 1 margin, and a
+  1995-edition verdict is unchanged.
+- **A decimated filter band keeps its shape.** `OctaveFilterBank` decimated
+  each band until its processing Nyquist frequency was 1.25 times its upper
+  band edge, where the bilinear transform bends the band: just inside its
+  upper edge it attenuated less than the band designed far from Nyquist, and
+  above it fell more steeply. The decimated octave bank then summed its
+  adjacent outputs from −1.16 dB to +0.94 dB about the input, past the
+  +0.8 dB of class 1 in IEC 61260-1:2014 5.16. Each band now keeps its
+  processing Nyquist frequency at least sixteen times its upper edge, where
+  the bend moves the summation of an octave band by at most 0.005 dB, and the
+  decimated banks read the same verdict as the same banks at the full rate.
+  A band level of a decimated bank moves by up to 0.07 dB on white noise, most
+  in the lowest bands; the bank is no slower at 48 kHz. A decimated band also
+  reaches the end of its Table 1 stop-band mask now, so `range_limited` is set
+  only by the bands filtered at the full rate near the top of the bank.
 - **Every catalogue row has one shape, and says what its source claims for
   each cell.** The rows of every published catalogue share one base,
   `io.CatalogueRow` (with `io.BandedRow` for a row printed band by band),

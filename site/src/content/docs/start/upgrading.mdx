@@ -570,11 +570,11 @@ all three. A verdict for `edition="1995"` is unchanged.
 
 | Before | 4.0 |
 | --- | --- |
-| `overall_class` 1 for the decimated octave bank (Butterworth, order 6, 48 kHz) | 2: its adjacent outputs sum up to +0.94 dB about the input, past the +0.8 dB of class 1 on 5.16; the same bank designed with `FilterDesign(resample=False)` is class 1 |
+| each band of a decimated bank decimated until its processing Nyquist frequency is 1.25 times its upper band edge | decimated only as far as leaves it sixteen times that edge, so the bilinear transform no longer bends the band: a band level moves by up to 0.07 dB on white noise, most in the lowest bands, and the octave bank, which would sum its outputs up to +0.94 dB and read class 2 on 5.16, is class 1 on every requirement |
 | a band's `class` read off `margin_class{c}_db` | `class` over every requirement; `margin_class{c}_db` is still the Table 1 margin, beside `bandwidth_margin_class{c}_db` and `summation_margin_class{c}_db`, which is `None` on the two end bands |
 | one requirement to ask about | `requirements`, `requirement_class(name)` and `binding_margin_db(name, cls)` read each one on its own, and `plot(requirement="summation")` draws it |
 
-The one-third-octave bank keeps class 1.
+The octave and one-third-octave banks keep class 1.
 
 ```python
 from phonometry import filters
@@ -613,9 +613,13 @@ of 5.12 and the summation of 5.16 as well as the Table 1 mask, so a bank's
 class is the strictest it meets on all three. Its Table 1 margins and a
 verdict for `edition="1995"` are the numbers they were.
 
+The decimated filter banks are the other: each band now keeps its processing
+Nyquist frequency sixteen times its upper edge, so a band level moves by up to
+0.07 dB on white noise, as the same section says.
+
 What each `.plot()` draws is untouched, and so is what each `.report()`
 prints but one label: the microphone fiche writes dB(468) where it wrote
 dB(CCIR). The `Signal` contract is the one it was, now kept in two more
 places, the blocks of `read_blocks` and the waveforms inside five results.
 Every formula is untouched too. 4.0 rearranged the furniture and put the unit
-on the label; apart from that verdict, it did not recompute anything.
+on the label; apart from those two, it did not recompute anything.

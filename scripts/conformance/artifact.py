@@ -22,7 +22,9 @@ a three-decimal floor, because the precision suits the value and a deviation is
 a much smaller number than the value it is a deviation from. The old report
 capped every deviation at three decimals for the cross-build reason alone,
 coarsening the evidence of every check to suit the noisiest; the cap is gone and
-the floor remains.
+the floor remains. Below ``NOISE_FLOOR`` (1e-12) a computed value is the
+residue of an identity that holds exactly on paper, and it is stored as the
+zero it is a residue of: its leading digits, not only its last, are the CPU's.
 
 **The verdict is stored, never re-derived.** It is decided at full precision
 inside the check, before anything is rounded. A deviation one quantum below its
@@ -40,7 +42,16 @@ from typing import TYPE_CHECKING, Any
 
 from .compare import document_problems
 from .references import Cited, Reference, ReferenceKind, documents, parse
-from .registry import _ROOT, CHECKS, Kind, Outcome, Verdict, _snap, deviation_places
+from .registry import (
+    _ROOT,
+    CHECKS,
+    NOISE_FLOOR,
+    Kind,
+    Outcome,
+    Verdict,
+    _snap,
+    deviation_places,
+)
 from .shared import _FILTER_ARCHS, _filter_class, _weighting_deviation
 from .units import UNITS
 
@@ -135,6 +146,11 @@ def _rounded(value: float, precision: int) -> float:
     if not math.isfinite(value):
         msg = f"non-finite value {value!r} cannot be stored in the artefact."
         raise ValueError(msg)
+    if abs(value) < NOISE_FLOOR:
+        # The residue of an identity: its digits are the CPU's, not the
+        # library's (see NOISE_FLOOR), and the fallback below would keep
+        # three of them.
+        return 0.0
     coarse = round(value, precision) + 0.0
     if coarse == 0.0 and value != 0.0:
         return float(f"{value:.{_FALLBACK_SIGNIFICANT}g}") + 0.0

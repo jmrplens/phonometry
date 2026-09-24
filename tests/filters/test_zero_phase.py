@@ -69,8 +69,14 @@ def test_zero_phase_passband_level_matches() -> None:
 
 def test_zero_phase_broadband_band_narrowing() -> None:
     """Forward-backward filtering narrows the effective passband, lowering the
-    measured broadband band level ~0.2-0.3 dB per band (a pure center tone,
-    tested above, does not exercise this). Characterizes the documented bias.
+    measured broadband band level (a pure center tone, tested above, does not
+    exercise this). Characterizes the documented bias.
+
+    Filtering twice squares the magnitude, so white noise passes the noise
+    bandwidth of ``1/(1+x^12)^2`` instead of ``1/(1+x^12)``, for the
+    sixth-order Butterworth prototype: 11/12 of it, or -0.38 dB. The top
+    band, filtered at the full rate close to its Nyquist frequency, narrows a
+    little less.
     """
     bank = filters.OctaveFilterBank(fs=FS, fraction=1, limits=[100, 8000])
     x = np.random.default_rng(7).standard_normal(FS * 4)
@@ -80,7 +86,7 @@ def test_zero_phase_broadband_band_narrowing() -> None:
     # Every band shifts down by a small, bounded amount (never up).
     assert np.all(delta < 0.0)
     assert np.all(delta > -0.5)
-    assert -0.35 < float(np.mean(delta)) < -0.15
+    assert -0.40 < float(np.mean(delta)) < -0.33
 
 
 def test_zero_phase_short_signal_does_not_crash() -> None:

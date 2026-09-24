@@ -678,7 +678,7 @@
           "verdict": "pass",
           "class": 1,
           "binding": {
-            "frequency_hz": 100.0,
+            "frequency_hz": 501.0,
             "measured": 0.0,
             "limit": -0.4,
             "side": "floor"
@@ -691,12 +691,12 @@
           "verdict": "by-design",
           "reason": "passband ripple",
           "binding": {
-            "frequency_hz": 6310.0,
-            "measured": 0.19,
-            "limit": 1.4365420521124361,
+            "frequency_hz": 10000.0,
+            "measured": 0.16,
+            "limit": 1.4087354151903386,
             "side": "stop"
           },
-          "margin_class1": -1.246,
+          "margin_class1": -1.245,
           "margin_class2": -0.837
         },
         {
@@ -704,7 +704,7 @@
           "verdict": "pass",
           "class": 1,
           "binding": {
-            "frequency_hz": 100.0,
+            "frequency_hz": 794.0,
             "measured": 0.0,
             "limit": -0.4,
             "side": "floor"
@@ -730,13 +730,13 @@
           "verdict": "by-design",
           "reason": "soft rolloff",
           "binding": {
-            "frequency_hz": 100.0,
-            "measured": 12.46,
-            "limit": 16.59667632639719,
+            "frequency_hz": 10000.0,
+            "measured": 9.82,
+            "limit": 10.620635856869447,
             "side": "stop"
           },
-          "margin_class1": -4.133,
-          "margin_class2": -3.133
+          "margin_class1": -0.799,
+          "margin_class2": -0.045
         }
       ]
     },
@@ -2324,7 +2324,7 @@
         "value": 1e-12
       },
       "deviation": {
-        "value": 4.82e-16
+        "value": 0.0
       },
       "precision": 6,
       "verdict": "pass"
@@ -2349,8 +2349,8 @@
         "value": 0.0
       },
       "computed": {
-        "value": 4.82e-16,
-        "label": "max |Delta P| 4.8e-16 dB"
+        "value": 0.0,
+        "label": "max |Delta P| below 1e-12 dB"
       },
       "unit": "dB",
       "tolerance": {
@@ -2358,7 +2358,7 @@
         "value": 1e-12
       },
       "deviation": {
-        "value": 4.82e-16
+        "value": 0.0
       },
       "precision": 6,
       "verdict": "pass"
@@ -2391,11 +2391,11 @@
         "label": "class 1 (|Delta B| <= 0.4 dB)"
       },
       "computed": {
-        "label": "class 1 (|Delta B| <= 0.047 dB)"
+        "label": "class 1 (|Delta B| <= 0.049 dB)"
       },
       "deviation": {
-        "value": 0.353,
-        "label": "+0.353 dB"
+        "value": 0.351,
+        "label": "+0.351 dB"
       },
       "precision": 4,
       "verdict": "pass"
@@ -2428,11 +2428,11 @@
         "label": "class 1 (-1.8 dB <= Delta P <= +0.8 dB)"
       },
       "computed": {
-        "label": "class 1 (-0.552 dB to +0.625 dB)"
+        "label": "class 1 (+0.000 dB to +0.248 dB)"
       },
       "deviation": {
-        "value": 0.175,
-        "label": "+0.175 dB"
+        "value": 0.552,
+        "label": "+0.552 dB"
       },
       "precision": 4,
       "verdict": "pass"
@@ -2465,11 +2465,11 @@
         "label": "class 1 (|L_out - L_c| <= 0.4 dB)"
       },
       "computed": {
-        "label": "class 1 (|L_out - L_c| <= 0.054 dB)"
+        "label": "class 1 (|L_out - L_c| <= 0.056 dB)"
       },
       "deviation": {
-        "value": 0.346,
-        "label": "+0.346 dB"
+        "value": 0.344,
+        "label": "+0.344 dB"
       },
       "precision": 4,
       "verdict": "pass"
@@ -2494,8 +2494,8 @@
         "value": 0.0
       },
       "computed": {
-        "value": 0.0068,
-        "label": "max |(L_out - L_c) - Delta B| 0.0068 dB"
+        "value": 0.007,
+        "label": "max |(L_out - L_c) - Delta B| 0.0070 dB"
       },
       "unit": "dB",
       "tolerance": {
@@ -2503,7 +2503,7 @@
         "value": 0.01
       },
       "deviation": {
-        "value": 0.0068
+        "value": 0.007
       },
       "precision": 4,
       "verdict": "pass"
@@ -2699,7 +2699,7 @@
         "value": 1e-12
       },
       "deviation": {
-        "value": 8.55e-14
+        "value": 0.0
       },
       "precision": 7,
       "verdict": "pass"
@@ -3601,7 +3601,7 @@
         "value": 1e-09
       },
       "deviation": {
-        "value": 2.78e-17
+        "value": 0.0
       },
       "precision": 6,
       "verdict": "pass"
@@ -6359,7 +6359,7 @@
         "value": 0.005
       },
       "deviation": {
-        "value": 2.66e-05
+        "value": -9.92e-06
       },
       "precision": 4,
       "verdict": "pass"
@@ -6384,14 +6384,14 @@
         "label": "m >= 0.5 (C.4.2 pass criterion)"
       },
       "computed": {
-        "label": "0.9812"
+        "label": "0.8831"
       },
       "tolerance": {
         "mode": "mask",
         "value": 0.0
       },
       "deviation": {
-        "value": 0.981
+        "value": 0.883
       },
       "binding": {
         "lower": 0.5
@@ -6451,14 +6451,14 @@
         "value": 0.9
       },
       "computed": {
-        "value": 0.8975
+        "value": 0.8981
       },
       "tolerance": {
         "mode": "absolute",
         "value": 0.01
       },
       "deviation": {
-        "value": -0.0025
+        "value": -0.0019
       },
       "precision": 4,
       "verdict": "pass"
@@ -6484,14 +6484,14 @@
         "label": "0 (algebraic identity, +/-1e-10)"
       },
       "computed": {
-        "value": 4.55e-13
+        "value": 0.0
       },
       "tolerance": {
         "mode": "absolute",
         "value": 1e-10
       },
       "deviation": {
-        "value": 4.55e-13
+        "value": 0.0
       },
       "precision": 6,
       "verdict": "pass"
@@ -6517,14 +6517,14 @@
         "label": "0 (machine precision, +/-1e-13)"
       },
       "computed": {
-        "value": 1.11e-16
+        "value": 0.0
       },
       "tolerance": {
         "mode": "absolute",
         "value": 1e-13
       },
       "deviation": {
-        "value": 1.11e-16
+        "value": 0.0
       },
       "precision": 6,
       "verdict": "pass"
@@ -6558,14 +6558,14 @@
         "label": "0 (closed form, +/-1e-12)"
       },
       "computed": {
-        "value": 4.36e-16
+        "value": 0.0
       },
       "tolerance": {
         "mode": "absolute",
         "value": 1e-12
       },
       "deviation": {
-        "value": 4.36e-16
+        "value": 0.0
       },
       "precision": 6,
       "verdict": "pass"
@@ -6795,7 +6795,7 @@
         "value": 1e-12
       },
       "deviation": {
-        "value": 4.44e-16
+        "value": 0.0
       },
       "precision": 6,
       "verdict": "pass"
@@ -6981,7 +6981,7 @@
         "label": "LJ - LW = 10 dB, 0 dB error"
       },
       "computed": {
-        "value": 1.42e-14
+        "value": 0.0
       },
       "unit": "dB",
       "tolerance": {
@@ -6989,7 +6989,7 @@
         "value": 1e-09
       },
       "deviation": {
-        "value": 1.42e-14
+        "value": 0.0
       },
       "precision": 9,
       "verdict": "pass"
@@ -7022,7 +7022,7 @@
         "value": 1e-12
       },
       "deviation": {
-        "value": -8.88e-16
+        "value": 0.0
       },
       "precision": 6,
       "verdict": "pass"
@@ -7089,7 +7089,7 @@
         "value": 1e-12
       },
       "deviation": {
-        "value": 1.78e-15
+        "value": 0.0
       },
       "precision": 6,
       "verdict": "pass"
@@ -7473,7 +7473,7 @@
         "label": "0 dB difference"
       },
       "computed": {
-        "value": 1.42e-14
+        "value": 0.0
       },
       "unit": "dB",
       "tolerance": {
@@ -7481,7 +7481,7 @@
         "value": 1e-09
       },
       "deviation": {
-        "value": 1.42e-14
+        "value": 0.0
       },
       "precision": 9,
       "verdict": "pass"
@@ -7648,7 +7648,7 @@
         "value": 1e-09
       },
       "deviation": {
-        "value": -1.42e-14
+        "value": 0.0
       },
       "precision": 4,
       "verdict": "pass"
@@ -7681,7 +7681,7 @@
         "value": 1e-12
       },
       "deviation": {
-        "value": -1.78e-15
+        "value": 0.0
       },
       "precision": 6,
       "verdict": "pass"
@@ -8220,7 +8220,7 @@
       },
       "computed": {
         "value": 0.0,
-        "label": "max absolute deviation 0.0e+00 dB"
+        "label": "max absolute deviation below 1e-12 dB"
       },
       "unit": "dB",
       "tolerance": {
@@ -8261,7 +8261,7 @@
         "value": 1e-09
       },
       "deviation": {
-        "value": -2.22e-16
+        "value": 0.0
       },
       "precision": 5,
       "verdict": "pass"
@@ -8294,7 +8294,7 @@
         "value": 1e-06
       },
       "deviation": {
-        "value": -1.07e-14
+        "value": 0.0
       },
       "precision": 4,
       "verdict": "pass"
@@ -8355,8 +8355,8 @@
         "label": "27 tabulated values of C_j reproduced"
       },
       "computed": {
-        "value": 5.77e-15,
-        "label": "max absolute deviation 5.8e-15 dB"
+        "value": 0.0,
+        "label": "max absolute deviation below 1e-12 dB"
       },
       "unit": "dB",
       "tolerance": {
@@ -8364,7 +8364,7 @@
         "value": 1e-09
       },
       "deviation": {
-        "value": 5.77e-15
+        "value": 0.0
       },
       "precision": 9,
       "verdict": "pass"
@@ -8561,7 +8561,7 @@
         "value": 1e-12
       },
       "deviation": {
-        "value": -1.11e-16
+        "value": 0.0
       },
       "precision": 9,
       "verdict": "pass"
@@ -8627,7 +8627,7 @@
         "value": 1e-09
       },
       "deviation": {
-        "value": 8.88e-16
+        "value": 0.0
       },
       "precision": 6,
       "verdict": "pass"
@@ -8686,8 +8686,8 @@
         "label": "0 dB shift (+/-1e-09 dB)"
       },
       "computed": {
-        "value": 1.42e-14,
-        "label": "max shift over 6 bands 1.42e-14 dB"
+        "value": 0.0,
+        "label": "max shift over 6 bands below 1e-12 dB"
       },
       "unit": "dB",
       "tolerance": {
@@ -8695,7 +8695,7 @@
         "value": 1e-09
       },
       "deviation": {
-        "value": 1.42e-14
+        "value": 0.0
       },
       "precision": 6,
       "verdict": "pass"
@@ -8794,7 +8794,7 @@
         "value": 1e-12
       },
       "deviation": {
-        "value": 8.88e-16
+        "value": 0.0
       },
       "precision": 6,
       "verdict": "pass"
@@ -8827,7 +8827,7 @@
         "value": 1e-12
       },
       "deviation": {
-        "value": -4.44e-16
+        "value": 0.0
       },
       "precision": 6,
       "verdict": "pass"
@@ -8891,7 +8891,7 @@
         "value": 1e-12
       },
       "deviation": {
-        "value": -5.55e-17
+        "value": 0.0
       },
       "precision": 6,
       "verdict": "pass"
@@ -8924,7 +8924,7 @@
         "value": 1e-09
       },
       "deviation": {
-        "value": 5.33e-15
+        "value": 0.0
       },
       "precision": 6,
       "verdict": "pass"
@@ -9137,7 +9137,7 @@
         "value": 1e-12
       },
       "deviation": {
-        "value": -2.22e-16
+        "value": 0.0
       },
       "precision": 8,
       "verdict": "pass"
@@ -9319,7 +9319,7 @@
         "value": 1e-09
       },
       "deviation": {
-        "value": -4.44e-16
+        "value": 0.0
       },
       "precision": 9,
       "verdict": "pass"
@@ -9621,7 +9621,7 @@
         "value": 1e-09
       },
       "deviation": {
-        "value": -7.11e-15
+        "value": 0.0
       },
       "precision": 6,
       "verdict": "pass"
@@ -9802,7 +9802,7 @@
         "label": "Formula (12) over q = 2 positions (closed form)"
       },
       "computed": {
-        "value": 1.42e-14,
+        "value": 0.0,
         "label": "max deviation 0.000000000 dB"
       },
       "unit": "dB",
@@ -9811,7 +9811,7 @@
         "value": 1e-09
       },
       "deviation": {
-        "value": 1.42e-14
+        "value": 0.0
       },
       "precision": 9,
       "verdict": "pass"
@@ -10346,7 +10346,7 @@
         ]
       },
       "quantity": "Low-frequency DI,n,e; the series' own +10 lg N sign",
-      "kind": "scalar",
+      "kind": "record",
       "expected": {
         "label": "DI,n,e = 21 dB; N = 4 adds 6.021 dB"
       },
@@ -10354,8 +10354,7 @@
         "label": "21 dB; N = 4 adds 6.021 dB"
       },
       "deviation": {
-        "value": 8.88e-16,
-        "label": "+8.882e-16 dB"
+        "label": "below 1e-12 dB"
       },
       "precision": 4,
       "verdict": "pass"
@@ -10809,7 +10808,7 @@
         "value": 1e-06
       },
       "deviation": {
-        "value": 2.78e-17
+        "value": 0.0
       },
       "precision": 6,
       "verdict": "pass"
@@ -10842,7 +10841,7 @@
         "value": 1e-06
       },
       "deviation": {
-        "value": 1.25e-18
+        "value": 0.0
       },
       "precision": 8,
       "verdict": "pass"
@@ -10875,7 +10874,7 @@
         "value": 1e-09
       },
       "deviation": {
-        "value": 2.22e-16
+        "value": 0.0
       },
       "precision": 4,
       "verdict": "pass"
@@ -11933,7 +11932,7 @@
         "value": 1e-09
       },
       "deviation": {
-        "value": -9.77e-15
+        "value": 0.0
       },
       "precision": 4,
       "verdict": "pass"
@@ -11966,7 +11965,7 @@
         "value": 1e-09
       },
       "deviation": {
-        "value": 1.33e-15
+        "value": 0.0
       },
       "precision": 4,
       "verdict": "pass"
@@ -12065,7 +12064,7 @@
         "value": 1e-09
       },
       "deviation": {
-        "value": -2.5e-15
+        "value": 0.0
       },
       "precision": 4,
       "verdict": "pass"
@@ -12098,7 +12097,7 @@
         "value": 1e-06
       },
       "deviation": {
-        "value": -7.11e-15
+        "value": 0.0
       },
       "precision": 3,
       "verdict": "pass"
@@ -13452,14 +13451,14 @@
         "label": "abs(r - (0.3-0.4j)) = 0 (identity, +/-1e-9)"
       },
       "computed": {
-        "value": 2.83e-16
+        "value": 0.0
       },
       "tolerance": {
         "mode": "absolute",
         "value": 1e-09
       },
       "deviation": {
-        "value": 2.83e-16
+        "value": 0.0
       },
       "precision": 9,
       "verdict": "pass"
@@ -14018,7 +14017,7 @@
         "value": 0.1
       },
       "deviation": {
-        "value": -2.27e-13
+        "value": 0.0
       },
       "precision": 1,
       "verdict": "pass"
@@ -17715,7 +17714,7 @@
         "label": "0 deg for any constant delay"
       },
       "computed": {
-        "value": 2.83e-13
+        "value": 0.0
       },
       "unit": "deg",
       "tolerance": {
@@ -17723,7 +17722,7 @@
         "value": 1e-09
       },
       "deviation": {
-        "value": 2.83e-13
+        "value": 0.0
       },
       "precision": 9,
       "verdict": "pass"
@@ -19909,7 +19908,7 @@
         "value": 0.0005
       },
       "deviation": {
-        "value": 5.55e-17
+        "value": 0.0
       },
       "precision": 4,
       "verdict": "pass"
@@ -22106,7 +22105,7 @@
         "value": 0.0005
       },
       "deviation": {
-        "value": -2.22e-16
+        "value": 0.0
       },
       "precision": 4,
       "verdict": "pass"
@@ -22172,7 +22171,7 @@
         "value": 0.0005
       },
       "deviation": {
-        "value": 1.11e-16
+        "value": 0.0
       },
       "precision": 4,
       "verdict": "pass"
@@ -25083,7 +25082,7 @@
         "value": 0.100000001
       },
       "deviation": {
-        "value": 7.11e-15
+        "value": 0.0
       },
       "precision": 2,
       "verdict": "pass"
@@ -25115,7 +25114,7 @@
         "value": 0.100000001
       },
       "deviation": {
-        "value": -3.55e-15
+        "value": 0.0
       },
       "precision": 2,
       "verdict": "pass"
@@ -26310,7 +26309,7 @@
         "value": 1e-06
       },
       "deviation": {
-        "value": -3.33e-15
+        "value": 0.0
       },
       "precision": 8,
       "verdict": "pass"
@@ -26686,7 +26685,7 @@
         "value": 1e-09
       },
       "deviation": {
-        "value": -1.11e-16
+        "value": 0.0
       },
       "precision": 6,
       "verdict": "pass"
@@ -26879,7 +26878,7 @@
         "value": 1e-06
       },
       "deviation": {
-        "value": -3.33e-15
+        "value": 0.0
       },
       "precision": 6,
       "verdict": "pass"
@@ -26911,7 +26910,7 @@
         "value": 1e-06
       },
       "deviation": {
-        "value": -4.44e-16
+        "value": 0.0
       },
       "precision": 6,
       "verdict": "pass"
@@ -27038,7 +27037,7 @@
         "value": 1e-06
       },
       "deviation": {
-        "value": -7.11e-14
+        "value": 0.0
       },
       "precision": 4,
       "verdict": "pass"
@@ -27071,7 +27070,7 @@
         "value": 1e-06
       },
       "deviation": {
-        "value": -2.66e-15
+        "value": 0.0
       },
       "precision": 4,
       "verdict": "pass"
@@ -27767,7 +27766,7 @@
         "value": 0.05
       },
       "deviation": {
-        "value": -3.55e-15
+        "value": 0.0
       },
       "precision": 1,
       "verdict": "pass"
@@ -28840,7 +28839,7 @@
         "value": 1e-09
       },
       "deviation": {
-        "value": -1.33e-15
+        "value": 0.0
       },
       "precision": 9,
       "verdict": "pass"
@@ -28933,7 +28932,7 @@
       },
       "computed": {
         "value": 0.0,
-        "label": "max |P|, |E| = 0.0e+00"
+        "label": "max |P|, |E| below 1e-12"
       },
       "tolerance": {
         "mode": "absolute",
@@ -29072,7 +29071,7 @@
         "value": 1e-12
       },
       "deviation": {
-        "value": -1.11e-16
+        "value": 0.0
       },
       "precision": 10,
       "verdict": "pass"
@@ -29168,7 +29167,7 @@
         "value": 1e-12
       },
       "deviation": {
-        "value": 1.11e-16
+        "value": 0.0
       },
       "precision": 10,
       "verdict": "pass"
@@ -29847,7 +29846,7 @@
         "value": 0.05
       },
       "deviation": {
-        "value": -1.15e-14
+        "value": 0.0
       },
       "precision": 3,
       "verdict": "pass"
@@ -29879,7 +29878,7 @@
         "value": 0.0001
       },
       "deviation": {
-        "value": 5.55e-17
+        "value": 0.0
       },
       "precision": 6,
       "verdict": "pass"
@@ -29909,7 +29908,7 @@
         "value": 0.0001
       },
       "deviation": {
-        "value": 8.33e-17
+        "value": 0.0
       },
       "precision": 6,
       "verdict": "pass"
@@ -30002,7 +30001,7 @@
         "value": 0.0001
       },
       "deviation": {
-        "value": -1.39e-17
+        "value": 0.0
       },
       "precision": 6,
       "verdict": "pass"
@@ -30161,7 +30160,7 @@
         "value": 0.0001
       },
       "deviation": {
-        "value": -3.16e-15
+        "value": 0.0
       },
       "precision": 6,
       "verdict": "pass"
@@ -30193,7 +30192,7 @@
         "value": 0.0001
       },
       "deviation": {
-        "value": -8.05e-16
+        "value": 0.0
       },
       "precision": 6,
       "verdict": "pass"
@@ -30225,7 +30224,7 @@
         "value": 0.0001
       },
       "deviation": {
-        "value": 1.64e-14
+        "value": 0.0
       },
       "precision": 6,
       "verdict": "pass"
@@ -30257,7 +30256,7 @@
         "value": 0.0001
       },
       "deviation": {
-        "value": 7.22e-15
+        "value": 0.0
       },
       "precision": 6,
       "verdict": "pass"
@@ -30289,7 +30288,7 @@
         "value": 0.0001
       },
       "deviation": {
-        "value": -2.16e-15
+        "value": 0.0
       },
       "precision": 8,
       "verdict": "pass"
@@ -30353,7 +30352,7 @@
         "value": 0.0001
       },
       "deviation": {
-        "value": -1.56e-14
+        "value": 0.0
       },
       "precision": 6,
       "verdict": "pass"
@@ -30448,7 +30447,7 @@
         "value": 0.01
       },
       "deviation": {
-        "value": 3.55e-15
+        "value": 0.0
       },
       "precision": 2,
       "verdict": "pass"
@@ -30672,7 +30671,7 @@
         "value": 1e-12
       },
       "deviation": {
-        "value": -1.11e-16
+        "value": 0.0
       },
       "precision": 6,
       "verdict": "pass"
@@ -30734,7 +30733,7 @@
         "value": 1e-09
       },
       "deviation": {
-        "value": -1.39e-17
+        "value": 0.0
       },
       "precision": 6,
       "verdict": "pass"
@@ -30766,7 +30765,7 @@
         "value": 1e-12
       },
       "deviation": {
-        "value": -4.44e-16
+        "value": 0.0
       },
       "precision": 12,
       "verdict": "pass"
@@ -30894,7 +30893,7 @@
         "value": 1e-12
       },
       "deviation": {
-        "value": 2.22e-16
+        "value": 0.0
       },
       "precision": 9,
       "verdict": "pass"
@@ -31015,14 +31014,14 @@
         "value": 0.0
       },
       "computed": {
-        "value": 4.34e-19
+        "value": 0.0
       },
       "tolerance": {
         "mode": "absolute",
         "value": 1e-12
       },
       "deviation": {
-        "value": 4.34e-19
+        "value": 0.0
       },
       "precision": 12,
       "verdict": "pass"
@@ -31054,7 +31053,7 @@
         "value": 1e-09
       },
       "deviation": {
-        "value": 8.35e-14
+        "value": 0.0
       },
       "precision": 6,
       "verdict": "pass"
@@ -31084,7 +31083,7 @@
         "value": 1e-12
       },
       "deviation": {
-        "value": 2.78e-17
+        "value": 0.0
       },
       "precision": 6,
       "verdict": "pass"
@@ -31116,7 +31115,7 @@
         "value": 1e-12
       },
       "deviation": {
-        "value": 4.22e-15
+        "value": 0.0
       },
       "precision": 6,
       "verdict": "pass"
@@ -31372,7 +31371,7 @@
         "value": 1e-10
       },
       "deviation": {
-        "value": 5.55e-17
+        "value": 0.0
       },
       "precision": 6,
       "verdict": "pass"
@@ -31404,7 +31403,7 @@
         "value": 1e-10
       },
       "deviation": {
-        "value": -1.39e-17
+        "value": 0.0
       },
       "precision": 6,
       "verdict": "pass"
@@ -31436,7 +31435,7 @@
         "value": 0.002
       },
       "deviation": {
-        "value": -1.89e-15
+        "value": 0.0
       },
       "precision": 4,
       "verdict": "pass"
@@ -31500,7 +31499,7 @@
         "value": 1e-10
       },
       "deviation": {
-        "value": 1.11e-16
+        "value": 0.0
       },
       "precision": 8,
       "verdict": "pass"
@@ -31525,14 +31524,14 @@
         "value": 0.0
       },
       "computed": {
-        "value": 6.48e-14
+        "value": 0.0
       },
       "tolerance": {
         "mode": "absolute",
         "value": 1e-10
       },
       "deviation": {
-        "value": 6.48e-14
+        "value": 0.0
       },
       "precision": 10,
       "verdict": "pass"
@@ -31557,14 +31556,14 @@
         "value": 0.0
       },
       "computed": {
-        "value": 8.88e-16
+        "value": 0.0
       },
       "tolerance": {
         "mode": "absolute",
         "value": 1e-10
       },
       "deviation": {
-        "value": 8.88e-16
+        "value": 0.0
       },
       "precision": 12,
       "verdict": "pass"
@@ -32820,7 +32819,7 @@
         "value": 1e-06
       },
       "deviation": {
-        "value": -7.11e-15
+        "value": 0.0
       },
       "precision": 3,
       "verdict": "pass"
@@ -32944,7 +32943,7 @@
         "value": 1e-06
       },
       "deviation": {
-        "value": 3.55e-15
+        "value": 0.0
       },
       "precision": 6,
       "verdict": "pass"
@@ -33820,7 +33819,7 @@
         "value": 1e-06
       },
       "deviation": {
-        "value": 3.55e-15
+        "value": 0.0
       },
       "precision": 4,
       "verdict": "pass"
@@ -34017,7 +34016,7 @@
         "value": 1e-06
       },
       "deviation": {
-        "value": -4.66e-15
+        "value": 0.0
       },
       "precision": 4,
       "verdict": "pass"
@@ -34791,7 +34790,7 @@
         "value": 1e-09
       },
       "deviation": {
-        "value": -5.55e-17
+        "value": 0.0
       },
       "precision": 4,
       "verdict": "pass"
@@ -34888,14 +34887,14 @@
         "value": 0.0
       },
       "computed": {
-        "value": 6.99e-16
+        "value": 0.0
       },
       "tolerance": {
         "mode": "absolute",
         "value": 1e-10
       },
       "deviation": {
-        "value": 6.99e-16
+        "value": 0.0
       },
       "precision": 4,
       "verdict": "pass"
@@ -35390,14 +35389,14 @@
         "value": 0.0
       },
       "computed": {
-        "value": 8.93e-16
+        "value": 0.0
       },
       "tolerance": {
         "mode": "absolute",
         "value": 1e-10
       },
       "deviation": {
-        "value": 8.93e-16
+        "value": 0.0
       },
       "precision": 12,
       "verdict": "pass"
@@ -36094,7 +36093,7 @@
         "value": 0.0
       },
       "computed": {
-        "value": -5.88e-14
+        "value": 0.0
       },
       "unit": "dBqps",
       "tolerance": {
@@ -36102,7 +36101,7 @@
         "value": 1e-06
       },
       "deviation": {
-        "value": -5.88e-14
+        "value": 0.0
       },
       "precision": 6,
       "verdict": "pass"
@@ -36790,7 +36789,7 @@
         "value": 0.0
       },
       "computed": {
-        "value": 1.3e-15
+        "value": 0.0
       },
       "unit": "rad",
       "tolerance": {
@@ -36798,7 +36797,7 @@
         "value": 1e-09
       },
       "deviation": {
-        "value": 1.3e-15
+        "value": 0.0
       },
       "precision": 6,
       "verdict": "pass"
@@ -36858,7 +36857,7 @@
         "value": 1e-06
       },
       "deviation": {
-        "value": 1.84e-13
+        "value": 0.0
       },
       "precision": 5,
       "verdict": "pass"
@@ -37196,7 +37195,7 @@
         "value": 1e-09
       },
       "deviation": {
-        "value": -3.55e-15
+        "value": 0.0
       },
       "precision": 4,
       "verdict": "pass"
@@ -37654,7 +37653,7 @@
         "value": 1e-09
       },
       "deviation": {
-        "value": 2.22e-16
+        "value": 0.0
       },
       "precision": 4,
       "verdict": "pass"
@@ -38159,7 +38158,7 @@
         "value": 1e-06
       },
       "deviation": {
-        "value": 6.66e-16
+        "value": 0.0
       },
       "precision": 4,
       "verdict": "pass"
@@ -38441,14 +38440,14 @@
         "value": 0.0
       },
       "computed": {
-        "value": -4.87e-17
+        "value": 0.0
       },
       "tolerance": {
         "mode": "absolute",
         "value": 1e-06
       },
       "deviation": {
-        "value": -4.87e-17
+        "value": 0.0
       },
       "precision": 8,
       "verdict": "pass"
@@ -38713,7 +38712,7 @@
         "value": 1e-12
       },
       "deviation": {
-        "value": -1.11e-16
+        "value": 0.0
       },
       "precision": 6,
       "verdict": "pass"
@@ -39272,7 +39271,7 @@
         "value": 0.0
       },
       "computed": {
-        "value": 2e-14
+        "value": 0.0
       },
       "unit": "dB",
       "tolerance": {
@@ -39280,7 +39279,7 @@
         "value": 1e-12
       },
       "deviation": {
-        "value": 2e-14
+        "value": 0.0
       },
       "precision": 12,
       "verdict": "pass"
@@ -39305,7 +39304,7 @@
         "value": 0.0
       },
       "computed": {
-        "value": 2e-14
+        "value": 0.0
       },
       "unit": "dB",
       "tolerance": {
@@ -39313,7 +39312,7 @@
         "value": 1e-12
       },
       "deviation": {
-        "value": 2e-14
+        "value": 0.0
       },
       "precision": 12,
       "verdict": "pass"
@@ -39338,7 +39337,7 @@
         "value": 0.0
       },
       "computed": {
-        "value": 1.73e-14
+        "value": 0.0
       },
       "unit": "dB",
       "tolerance": {
@@ -39346,7 +39345,7 @@
         "value": 1e-12
       },
       "deviation": {
-        "value": 1.73e-14
+        "value": 0.0
       },
       "precision": 12,
       "verdict": "pass"
@@ -39380,7 +39379,7 @@
         "value": 1e-12
       },
       "deviation": {
-        "value": 2.83e-15
+        "value": 0.0
       },
       "precision": 3,
       "verdict": "pass"
@@ -39545,7 +39544,7 @@
         "value": 1e-09
       },
       "deviation": {
-        "value": 8.33e-17
+        "value": 0.0
       },
       "precision": 4,
       "verdict": "pass"
@@ -39719,7 +39718,7 @@
         "value": 1e-09
       },
       "deviation": {
-        "value": 3.55e-15
+        "value": 0.0
       },
       "precision": 4,
       "verdict": "pass"
@@ -40162,7 +40161,7 @@
         "value": 1e-09
       },
       "deviation": {
-        "value": 8.88e-16
+        "value": 0.0
       },
       "precision": 4,
       "verdict": "pass"
@@ -40195,7 +40194,7 @@
         "value": 0.0
       },
       "computed": {
-        "value": 7.11e-15,
+        "value": 0.0,
         "label": "max absolute difference 0.000 dB over 18 bands"
       },
       "unit": "dB",
@@ -40204,7 +40203,7 @@
         "value": 1e-12
       },
       "deviation": {
-        "value": 7.11e-15
+        "value": 0.0
       },
       "precision": 4,
       "verdict": "pass"
@@ -40311,8 +40310,8 @@
         "value": 0.0
       },
       "computed": {
-        "value": 4.44e-16,
-        "label": "max deviation 4.44e-16 dB over the 7 rows of Table C.2"
+        "value": 0.0,
+        "label": "max deviation below 1e-12 dB over the 7 rows of Table C.2"
       },
       "unit": "dB",
       "tolerance": {
@@ -40320,7 +40319,7 @@
         "value": 1e-09
       },
       "deviation": {
-        "value": 4.44e-16
+        "value": 0.0
       },
       "precision": 4,
       "verdict": "pass"
@@ -43052,7 +43051,7 @@
         "label": "7.6 dB at 63 Hz and 24.2 dB at 8000 Hz"
       },
       "computed": {
-        "value": 5.33e-15,
+        "value": 0.0,
         "label": "7.6 dB and 24.2 dB"
       },
       "unit": "dB",
@@ -43061,7 +43060,7 @@
         "value": 1e-12
       },
       "deviation": {
-        "value": 5.33e-15
+        "value": 0.0
       },
       "precision": 4,
       "verdict": "pass"
@@ -43102,7 +43101,7 @@
         "value": 1e-12
       },
       "deviation": {
-        "value": -3.55e-15
+        "value": 0.0
       },
       "precision": 1,
       "verdict": "pass"
@@ -43143,7 +43142,7 @@
         "value": 1e-12
       },
       "deviation": {
-        "value": -3.55e-15
+        "value": 0.0
       },
       "precision": 1,
       "verdict": "pass"
@@ -44020,7 +44019,7 @@
         "label": "8,8 dB from the 56,2 dB typed, 8,7 dB from the 56,3 dB listed"
       },
       "computed": {
-        "value": 3.55e-15,
+        "value": 0.0,
         "label": "largest departure 0.000 dB"
       },
       "unit": "dB",
@@ -44029,7 +44028,7 @@
         "value": 0.05
       },
       "deviation": {
-        "value": 3.55e-15
+        "value": 0.0
       },
       "precision": 4,
       "verdict": "pass"
@@ -44265,8 +44264,8 @@
         "label": "10 degrees over the angle to the top, at four geometries"
       },
       "computed": {
-        "value": 3.55e-15,
-        "label": "largest departure 3.55e-15 deg"
+        "value": 0.0,
+        "label": "largest departure below 1e-12 deg"
       },
       "unit": "deg",
       "tolerance": {
@@ -44274,7 +44273,7 @@
         "value": 1e-09
       },
       "deviation": {
-        "value": 3.55e-15
+        "value": 0.0
       },
       "precision": 4,
       "verdict": "pass"
@@ -47343,7 +47342,7 @@
         "value": 1e-12
       },
       "deviation": {
-        "value": 4.44e-16
+        "value": 0.0
       },
       "precision": 6,
       "verdict": "pass"
@@ -47711,8 +47710,8 @@
         "label": "D_td = -10 lg(1 - r^2) at all 30 pairs"
       },
       "computed": {
-        "value": 1.24e-14,
-        "label": "largest disagreement 1.243e-14 dB"
+        "value": 0.0,
+        "label": "largest disagreement below 1e-12 dB"
       },
       "unit": "dB",
       "tolerance": {
@@ -47720,7 +47719,7 @@
         "value": 1e-12
       },
       "deviation": {
-        "value": 1.24e-14
+        "value": 0.0
       },
       "precision": 12,
       "verdict": "pass"
@@ -47799,7 +47798,7 @@
         "value": 1e-09
       },
       "deviation": {
-        "value": -5.68e-14
+        "value": 0.0
       },
       "precision": 6,
       "verdict": "pass"
@@ -48078,8 +48077,8 @@
         "label": "ISO 5135 (2) = ISO 7235 (B.3) at all 30 pairs"
       },
       "computed": {
-        "value": 3.55e-15,
-        "label": "largest disagreement 3.553e-15 dB"
+        "value": 0.0,
+        "label": "largest disagreement below 1e-12 dB"
       },
       "unit": "dB",
       "tolerance": {
@@ -48087,7 +48086,7 @@
         "value": 1e-12
       },
       "deviation": {
-        "value": 3.55e-15
+        "value": 0.0
       },
       "precision": 12,
       "verdict": "pass"
@@ -50282,7 +50281,7 @@
         "label": "50 lg 2 = 15.051 dB on every band"
       },
       "computed": {
-        "value": 1.07e-14
+        "value": 0.0
       },
       "unit": "dB",
       "tolerance": {
@@ -50290,7 +50289,7 @@
         "value": 1e-12
       },
       "deviation": {
-        "value": 1.07e-14
+        "value": 0.0
       },
       "precision": 6,
       "verdict": "pass"

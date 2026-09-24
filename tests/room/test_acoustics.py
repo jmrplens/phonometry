@@ -128,10 +128,11 @@ def test_zero_phase_reduces_short_decay_group_delay_bias() -> None:
     """ISO 3382-2:2008 Clause 7.3 NOTE: time-reversed (zero-phase) octave
     filtering removes the filter group delay, which otherwise inflates the
     apparent decay time of a short low-frequency decay. On a deterministic
-    125 Hz damped sinusoid (T = 0.2 s) the zero-phase T20/T30 sit closer to
-    the true value than the causal fit.
+    125 Hz damped sinusoid (T = 0.1 s, short enough that the causal fit reads
+    it 7 % to 12 % long) the zero-phase T20/T30 sit closer to the true value
+    than the causal fit. At T = 0.2 s both read it within 0.3 %.
     """
-    t60, fc = 0.2, 125.89254118
+    t60, fc = 0.1, 125.89254118
     n = int(1.2 * FS)
     t = np.arange(n) / FS
     # Amplitude decays A60/2 (energy decays A60, i.e. 60 dB) over t60.

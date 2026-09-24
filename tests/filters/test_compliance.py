@@ -57,25 +57,37 @@ def test_butter_order6_third_octave_meets_class1() -> None:
     assert result.overall_class == 1, result
 
 
-def test_butter_order6_octave_meets_table1_class1_and_summation_class2() -> None:
-    """The multirate octave bank keeps the Table 1 and 5.12 class 1, and 5.16
-    grades it class 2.
+def test_butter_order6_decimated_octave_bank_is_class1_on_every_requirement() -> None:
+    """The multirate octave bank is class 1 on Table 1, 5.12 and 5.16.
 
-    Each band is decimated until its upper edge sits at 0.8 of its processing
-    Nyquist frequency, where the bilinear transform steepens the upper skirt:
-    adjacent octave bands then sum to +0.94 dB and -1.16 dB about the input,
-    past the +0.8 dB class 1 limit of IEC 61260-1:2014 5.16.
+    Each band is decimated only as far as leaves its processing Nyquist
+    frequency sixteen times its upper band edge, where the bilinear transform
+    no longer bends the skirts: every band sums its neighbours within 0.005 dB
+    of the same band filtered at the full rate. Decimated to 1.25 times the
+    edge, the bank summed to +0.94 dB, past the +0.8 dB of class 1.
     """
-    bank = filters.OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[125, 4000])
+    limits = [125, 4000]
+    bank = filters.OctaveFilterBank(fs=48000, fraction=1, order=6, limits=limits)
     result = filters.verify_filter_class(bank)
+    assert any(f > 1 for f in bank.factor)
     assert result.requirement_class("relative_attenuation") == 1
     assert result.requirement_class("effective_bandwidth") == 1
-    assert result.requirement_class("summation") == 2
-    assert result.overall_class == 2, result
-    top = max(b["summation_max_db"] for b in result.bands[1:-1])
-    bottom = min(b["summation_min_db"] for b in result.bands[1:-1])
-    assert top == pytest.approx(0.94, abs=0.01)
-    assert bottom == pytest.approx(-1.16, abs=0.01)
+    assert result.requirement_class("summation") == 1
+    assert result.overall_class == 1, result
+    full_rate = filters.verify_filter_class(
+        filters.OctaveFilterBank(
+            fs=48000,
+            fraction=1,
+            order=6,
+            limits=limits,
+            design=filters.FilterDesign(resample=False),
+        )
+    )
+    for decimated, reference in zip(
+        result.bands[1:-1], full_rate.bands[1:-1], strict=True
+    ):
+        for key in ("summation_max_db", "summation_min_db"):
+            assert decimated[key] == pytest.approx(reference[key], abs=0.005)
 
 
 def test_undecimated_octave_bank_meets_class1_on_every_requirement() -> None:
@@ -257,17 +269,23 @@ def test_2014_default_unaffected_by_edition_support() -> None:
 def test_range_limited_flag_reports_unverifiable_stopband() -> None:
     """The verdict flags that the mask beyond the processing Nyquist is unchecked.
 
-    Each band's multirate processing Nyquist sits around 1.8-2.0 f_m while
-    the octave-band stop-band mask runs to G^4 = 15.85 f_m, so the G^2..G^4
-    rows cannot be demonstrated and the verdict must say so instead of
-    claiming full Table 1 conformance.
+    The octave-band stop-band mask runs to G^4 = 15.85 f_m. A decimated band
+    keeps its processing Nyquist frequency at least sixteen times its upper
+    edge, about 23 f_m, so its whole mask is demonstrated; the 2 kHz and
+    4 kHz bands run at the full 48 kHz, whose Nyquist frequency is 12 f_m and
+    6 f_m for them, so their G^2..G^4 rows cannot be, and the verdict must
+    say so instead of claiming full Table 1 conformance.
     """
     bank = filters.OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[125, 4000])
     result = filters.verify_filter_class(bank)
     assert result.range_limited is True
-    for band in result.bands:
-        # The checked range covers the band edge but not the G^4 mask end.
-        assert 10**0.15 < band["checked_to_omega"] < 15.0
+    mask_end = 10 ** (0.3 * 4)
+    for band, factor in zip(result.bands, bank.factor, strict=True):
+        if factor > 1:
+            assert band["checked_to_omega"] > mask_end
+    top = result.bands[-1]["checked_to_omega"]
+    # The checked range covers the band edge but not the G^4 mask end.
+    assert 10**0.15 < top < mask_end
 
 
 def test_1995_rejects_out_of_range_class_and_bad_edition() -> None:

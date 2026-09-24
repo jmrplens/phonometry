@@ -28,7 +28,7 @@ from scipy import stats
 
 from phonometry import environment, psychoacoustics, signals
 
-from ..registry import Outcome, count, numeric, register
+from ..registry import Outcome, count, numeric, register, residue_text
 
 #: The domain title carries the edition, because the report shows the title and
 #: not this docstring: the rows check the 2019 edition, and the 2025 edition
@@ -96,7 +96,11 @@ def _chk_origin() -> Outcome:
             abs(float(result.eventfulness[0])),
         )
     return numeric(
-        0.0, largest, 1e-12, places=12, computed_label=f"max |P|, |E| = {largest:.1e}"
+        0.0,
+        largest,
+        1e-12,
+        places=12,
+        computed_label=f"max |P|, |E| {residue_text(largest, spec='.1e')}",
     )
 
 

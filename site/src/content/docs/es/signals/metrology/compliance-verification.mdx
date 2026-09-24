@@ -158,14 +158,16 @@ bank = filters.OctaveFilterBank(fs=48000, fraction=3, order=6,
                                 limits=[100, 10000])
 bands = filters.verify_filter_class(bank)
 print(bands.overall_class)           # 1
-print(bands.range_limited)           # True en un banco diezmado
+print(bands.range_limited)           # True: sus bandas altas llegan a Nyquist
 ```
 
 Lee las banderas, no solo la clase. `range_limited` en el banco es `True`
-porque una banda diezmada no puede evaluarse más allá de su propio Nyquist
-de proceso, así que la banda atenuada lejana descansa en el argumento del
-antialias y no en el propio filtro de banda; la ponderación a 48 kHz
-comprueba las 34 frecuencias nominales e informa `False`. Los márgenes dicen
+porque sus bandas desde 5 kHz, filtradas a la frecuencia completa, no pueden
+evaluarse más allá de la frecuencia de Nyquist de 24 kHz, que se queda corta
+del final de su máscara de la Tabla 1, así que su banda atenuada lejana
+descansa en el filtro antialiasing de la cadena de captura y no en el propio
+filtro de banda; la ponderación a 48 kHz comprueba las 34 frecuencias
+nominales e informa `False`. Los márgenes dicen
 cuánto le faltó al veredicto:
 
 ```python
@@ -178,10 +180,12 @@ print(weighting.bands[20])
 La clase de un banco es la clase más estricta que cumple en todos los
 requisitos calificados, y `bands.requirements` los enumera: aquí la máscara de
 la Tabla 1, el ancho de banda efectivo y la suma de las salidas adyacentes,
-todos de clase 1. El banco de octavas diezmado es el que se separa de su
-veredicto de la Tabla 1, clase 2 en la suma, y
+todos de clase 1. Un banco todavía puede separarse de su veredicto de la
+Tabla 1: a 48 kHz, un banco de tercios de octava de orden 4 es clase 1 en la
+Tabla 1 y se queda a 0,002 dB de la clase 1 en la suma, en su banda de
+16 kHz, y
 [Verificación de clase de filtros](/phonometry/es/signals/filters/filter-compliance/#1b-ancho-de-banda-efectivo-y-suma-de-las-salidas-iec-61260-2)
-explica por qué. Un margen de +0,400 dB en un banco Butterworth que cumple es la propia
+explica cómo se califica la suma. Un margen de +0,400 dB en un banco Butterworth que cumple es la propia
 semianchura del corredor de banda de paso, lo mejor que puede informar un
 diseño conforme, no un resultado que mejorar;
 [Verificación de clase de filtros](/phonometry/es/signals/filters/filter-compliance/#1-verificar-la-clase-frente-a-iec-61260-12014)
@@ -243,8 +247,7 @@ una clase exigida:
 ```python
 from phonometry import ReportMetadata, filters
 
-bank = filters.OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[125, 4000],
-                                design=filters.FilterDesign(resample=False))
+bank = filters.OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[125, 4000])
 result = filters.verify_filter_class(bank)   # result.overall_class == 1
 result.report(
     "iec61260_es.pdf",

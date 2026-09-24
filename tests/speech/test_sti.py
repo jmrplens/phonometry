@@ -71,6 +71,7 @@ from phonometry.speech.sti import (
     _masking_amdb,
     _rating,
     _sti_from_mtf,
+    _stipa_modulation_depths,
     _truncated_mtf,
 )
 
@@ -369,6 +370,21 @@ def test_rating_letters_from_band_edges() -> None:
 # ---------------------------------------------------------------------------
 
 
+def test_a_dead_band_reads_zero_modulation_with_a_warning() -> None:
+    """A band whose intensity envelope integrates to nothing has no defined
+    modulation depth: STIPA pins it to m = 0 (TI = 0) and warns rather than
+    raising, so the IEC 60268-16 C.4.2 verification signals, which carry
+    energy in two bands only, remain measurable.
+    """
+    envelopes = np.ones((7, 4 * FS))
+    envelopes[2] = 0.0
+    with pytest.warns(STIWarning, match=r"No energy in octave band\(s\) \[2\]"):
+        depths = _stipa_modulation_depths(envelopes, FS)
+    assert np.all(depths[2] == 0.0)
+    # A steady envelope carries no modulation either, but it has energy.
+    assert np.all(np.abs(np.delete(depths, 2, axis=0)) < 1e-9)
+
+
 def test_invalid_inputs_raise() -> None:
     ir = np.zeros(FS // 4)
     ir[10] = 1.0
@@ -418,21 +434,15 @@ def test_invalid_inputs_raise() -> None:
         ):
             speech.stipa(half_second_clip, FS)
     with pytest.warns(STIWarning) as tone_warnings:  # noqa: PT031 - the warns block records the whole STIWarning family while running
-        # A pure tone leaves other octave bands empty: those bands read
-        # m = 0 (TI = 0) with a warning rather than a hard error, so the
-        # IEC 60268-16 C.4.2 verification signals (energy in only two
-        # bands) remain measurable. The 4 s clip also (correctly) raises
-        # the sub-15 s STIPA and the m > 1.3 advisories; recording the
-        # whole STIWarning family keeps them out of the run summary (a
-        # leaked warning is re-materialised on the pytest-xdist controller
-        # by importing its module, which races the phonometry import).
+        # A pure tone: the 4 s clip (correctly) raises the sub-15 s STIPA
+        # and the m > 1.3 advisories; recording the whole STIWarning family
+        # keeps them out of the run summary (a leaked warning is
+        # re-materialised on the pytest-xdist controller by importing its
+        # module, which races the phonometry import).
         t = np.arange(4 * FS) / FS
         res_tone = speech.stipa(np.sin(2 * np.pi * 1000.0 * t), FS)
-    assert any("No energy in octave band" in str(w.message) for w in tone_warnings)
-    # The 1 kHz band carries the tone (unmodulated: m ~ 0); at least one
-    # dead band integrates to non-positive envelope energy and is pinned
-    # to exactly m = 0 instead of raising.
-    assert np.any(res_tone.mtf == 0.0)
+    assert tone_warnings
+    # The 1 kHz band carries the tone, unmodulated: m ~ 0.
     assert np.all(res_tone.mtf[3] < 0.01)
 
     with pytest.raises(ValueError, match=r"'seconds' must be positive"):

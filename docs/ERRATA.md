@@ -8135,10 +8135,9 @@ in the same order.
 - **Library behaviour:**
   [`verify_filter_class`](../src/phonometry/filters/compliance.py) applies the
   limits of 5.16 to Formula (3) as printed, as 7.2.4.5 instructs. The verdicts
-  it gives the library's own banks do not depend on the reading: the decimated
-  octave bank sums from −1,16 dB to +0,94 dB and is class 2 either way, and the
-  one-third-octave bank sums from −0,55 dB to +0,76 dB and is class 1 either
-  way. `test_the_summation_is_what_tones_through_the_bank_read` in
+  it gives the library's own banks do not depend on the reading: at 48 kHz the
+  octave bank sums from −0,06 dB to +0,69 dB and the one-third-octave bank
+  from −0,25 dB to +0,76 dB, both class 1 either way. `test_the_summation_is_what_tones_through_the_bank_read` in
   [`tests/filters/test_pattern_evaluation.py`](../tests/filters/test_pattern_evaluation.py)
   holds Formula (3) to what the running bank reads.
 - **Status:** unreported.

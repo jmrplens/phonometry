@@ -123,7 +123,7 @@ from phonometry.noise_control.silencer_in_situ import (
     SABINE_AREA_COEFFICIENT,
 )
 
-from ..registry import Outcome, count, numeric, record, register
+from ..registry import Outcome, count, numeric, record, register, residue_text
 
 _IN_SITU = "In-situ measurement of silencers, screens and barriers"
 
@@ -1825,5 +1825,5 @@ def _chk_iso10847_ten_degree_increment() -> Outcome:
         1e-9,
         unit="deg",
         expected_label="10 degrees over the angle to the top, at four geometries",
-        computed_label=f"largest departure {worst:.2e} deg",
+        computed_label=f"largest departure {residue_text(worst, 'deg', '.2e')}",
     )

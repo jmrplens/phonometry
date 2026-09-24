@@ -262,19 +262,21 @@ def test_third_octave_default_meets_class1_on_every_requirement() -> None:
     assert max(deviations) < 0.06
 
 
-@pytest.mark.parametrize("i", [-11, 11])
+@pytest.mark.parametrize("i", [-5, 5])
 def test_the_summation_is_what_tones_through_the_bank_read(i: int) -> None:
     """Formula (3) on the designed sections is what the running bank delivers.
 
-    A tone at the extreme test frequencies of the 500 Hz band of the
-    decimated octave bank, filtered by the bank itself (anti-alias decimation
-    included), and the three band levels summed on an energy basis re the
-    level a mid-band tone reads: the same Delta P the verifier computes, to
-    a hundredth of a decibel. The octave bank's class 2 on 5.16 is a
-    property of the instrument, not of the way it is graded.
+    A tone at the test frequencies where the 500 Hz band of a decimated
+    octave bank of order 2 sums its neighbours highest, filtered by the bank
+    itself (anti-alias decimation included), and the three band levels summed
+    on an energy basis re the level a mid-band tone reads: the same Delta P
+    the verifier computes, to a hundredth of a decibel. The shallow order 2
+    skirts overlap enough for the sum to pass +0.45 dB there, so the
+    agreement is not two zeros agreeing.
     """
     fs = 48000
-    bank = filters.OctaveFilterBank(fs=fs, fraction=1, order=6, limits=[125, 4000])
+    bank = filters.OctaveFilterBank(fs=fs, fraction=1, order=2, limits=[125, 4000])
+    assert bank.factor[1] > 1
     j = 2
     time_s = np.arange(4 * fs) / fs
     mid = float(bank.freq[j])
@@ -289,8 +291,8 @@ def test_the_summation_is_what_tones_through_the_bank_read(i: int) -> None:
         bank.sos, np.asarray(bank.freq, dtype=float), rates, 1, 24, j
     )
     computed = float(curve[np.argmin(np.abs(omega - _G ** (i / 24)))])
-    assert abs(computed) > 0.9
-    assert measured == pytest.approx(computed, abs=0.02)
+    assert computed > 0.45
+    assert measured == pytest.approx(computed, abs=0.01)
 
 
 def test_end_bands_carry_no_summation() -> None:
@@ -402,8 +404,8 @@ def test_each_requirement_plots(requirement: str, language: str) -> None:
         ("5.12" in title) if requirement == "effective_bandwidth" else ("5.16" in title)
     )
     if requirement == "summation":
-        # The default octave bank is class 2 on 5.16.
-        assert title.endswith(("class 2", "clase 2"))
+        # The default octave bank is class 1 on 5.16.
+        assert title.endswith(("class 1", "clase 1"))
     plt.close("all")
 
 

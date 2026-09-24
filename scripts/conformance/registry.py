@@ -335,6 +335,27 @@ def _fmt(value: float, unit: str = "", places: int = 4) -> str:
     return f"{text} {unit}".strip()
 
 
+#: Below this magnitude a computed value is not the library's answer but the
+#: arithmetic's own noise: the residue of an identity that holds exactly on
+#: paper, whose leading digits, not only its last, change from one CPU to the
+#: next when a vectorised path runs on one runner and not on another. The
+#: artefact stores it as the zero it is a residue of, and a label says it is
+#: below this rather than printing digits no second machine would reproduce.
+NOISE_FLOOR = 1e-12
+
+
+def residue_text(value: float, unit: str = "", spec: str = ".3g") -> str:
+    """*value* for a label, or "below 1e-12" when it is arithmetic noise.
+
+    :param value: A computed deviation or residue.
+    :param unit: Appended after a space when given.
+    :param spec: The format of a value at or above :data:`NOISE_FLOOR`.
+    :return: The text a computed label prints for it.
+    """
+    text = f"below {NOISE_FLOOR:g}" if abs(value) < NOISE_FLOOR else f"{value:{spec}}"
+    return f"{text} {unit}".rstrip()
+
+
 def numeric(
     expected: float,
     computed: float,

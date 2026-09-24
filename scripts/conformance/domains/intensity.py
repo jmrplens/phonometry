@@ -24,7 +24,7 @@ import reference_data as ref
 import phonometry as ph
 from phonometry.environment.propagation.air_absorption import _pure_tone_terms
 
-from ..registry import Outcome, count, numeric, record, register
+from ..registry import Outcome, count, numeric, record, register, residue_text
 from .levels import _FS
 
 if TYPE_CHECKING:
@@ -1291,7 +1291,7 @@ def _chk_iso5136_annex_d_example() -> Outcome:
         unit="dB",
         places=9,
         expected_label="2,42 dB at +15 m/s and 1,28 dB at -15 m/s reproduced",
-        computed_label=f"max absolute deviation {worst:.1e} dB",
+        computed_label=f"max absolute deviation {residue_text(worst, 'dB', '.1e')}",
     )
 
 
@@ -1400,7 +1400,7 @@ def _chk_iso5136_table_c1() -> Outcome:
         unit="dB",
         places=9,
         expected_label=f"{len(ref.ISO5136_TABLE_C1)} tabulated values of C_j reproduced",
-        computed_label=f"max absolute deviation {worst:.1e} dB",
+        computed_label=f"max absolute deviation {residue_text(worst, 'dB', '.1e')}",
     )
 
 

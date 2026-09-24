@@ -337,24 +337,27 @@ $10^{-4}$ del círculo unidad, donde los coeficientes en float64 ya no los
 resuelven y la ecuación en diferencias degenera. Dos medidas mantienen a todas
 las bandas del banco lejos de ese régimen:
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_bank_dataflow.svg" alt="Flujo de datos dentro de una banda del banco de filtros: una banda en la que cabe diezmar, es decir en la que la mitad de la frecuencia de muestreo sigue por encima de 1,25 veces su borde superior, toma la rama de diezmado con resample_poly hasta fs entre M para que sus polos se alejen del círculo unidad, después toda banda es una cascada de secciones de segundo orden diseñada sobre los bordes de banda de IEC 61260-1 en lugar de una función de transferencia de orden alto, ambas ramas terminan en el nivel de banda en dB y sigbands=True devuelve además la señal de banda devuelta a la frecuencia de entrada" width="92%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_bank_dataflow.svg" alt="Flujo de datos dentro de una banda del banco de filtros: una banda en la que cabe diezmar, es decir en la que la mitad de la frecuencia de muestreo es al menos 32 veces su borde superior, de modo que se puede diezmar por dos o más y conservar su frecuencia de Nyquist de proceso en dieciséis veces ese borde, toma la rama de diezmado con resample_poly hasta fs entre M para que sus polos se alejen del círculo unidad, después toda banda es una cascada de secciones de segundo orden diseñada sobre los bordes de banda de IEC 61260-1 en lugar de una función de transferencia de orden alto, ambas ramas terminan en el nivel de banda en dB y sigbands=True devuelve además la señal de banda devuelta a la frecuencia de entrada" width="92%" />
 
 1. **Secciones de segundo orden (SOS):** cada banda es una cascada de biquads en
    lugar de una única función de transferencia de orden alto, así que un error
    de redondeo en un coeficiente perturba un par de polos y no todos a la vez.
 2. **Diezmado multitasa:** siempre que la mitad de la frecuencia de muestreo
-   siga por encima de 1,25 veces el borde superior de la banda, la señal se
-   diezma por
-   $M = \lfloor (f_\mathrm{s}/2) / (1{,}25\,f_\text{sup}) \rfloor$ antes de filtrar, lo
-   que se aplica a la mayoría de las bandas y no solo a las graves
-   (29 de las 33 bandas de tercio de octava a 48 kHz), de modo que cada banda se
-   filtra cerca de su propia frecuencia de muestreo natural y sus polos quedan
-   bien dentro
-   del círculo unidad. El nivel de banda se calcula sobre la señal diezmada;
-   solo con `sigbands=True` la señal de banda vuelve a la frecuencia de entrada,
-   con `resample_poly(M, 1)`. Los bancos
-   Chebyshev II reservan margen de diezmado adicional para que sus bordes de
-   banda atenuada queden por debajo del Nyquist diezmado.
+   sea al menos 32 veces el borde superior de la banda, la señal se diezma por
+   $M = \lfloor (f_\mathrm{s}/2) / (16\,f_\text{sup}) \rfloor$ antes de filtrar
+   (las 18 más graves de las 33 bandas de tercio de octava a 48 kHz), de modo
+   que cada banda grave se filtra cerca de su propia frecuencia de muestreo
+   natural y sus polos quedan bien dentro del círculo unidad. Se detiene en
+   dieciséis veces el borde superior porque, más cerca de su frecuencia de
+   Nyquist, la transformación bilineal deforma la banda: a 1,25 veces el borde
+   el banco de octavas sumaba sus salidas adyacentes hasta +0,94 dB, más allá
+   de los +0,8 dB de la clase 1 en el 5.16 de IEC 61260-1:2014, y a 16 la
+   deformación mueve esa suma como mucho 0,005 dB. El nivel de banda se calcula
+   sobre la señal diezmada; solo con `sigbands=True` la señal de banda vuelve a
+   la frecuencia de entrada, con `resample_poly(M, 1)`. Una banda Chebyshev II
+   de orden bajo y banda atenuada profunda, cuyo borde de banda atenuada
+   quedaría por encima de dieciséis veces su borde superior, reserva más margen
+   para que ese borde quede por debajo del Nyquist diezmado.
 3. **El establecimiento, y dos efectos que sesgan un nivel de banda.** Un filtro
    de banda necesita del orden de $5/f_\text{inf}$ segundos para establecerse,
    así que un registro de 1 s ya trunca la respuesta de la banda de 16 Hz y la

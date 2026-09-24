@@ -51,11 +51,11 @@
 
 | Architecture | Class verdict | Binding band | Measured rel. atten. | Class-1 limit | Margin cl.1 | Margin cl.2 |
 |:---|:---:|:---:|:---:|:---:|:---:|:---:|
-| butter | ![Pass][cv-pass] Class 1 (default) | 100 Hz | +0.00 dB | &ge; -0.40 dB | +0.400 dB | +0.600 dB |
-| cheby1 | ![By design][cv-by-design] By design (passband ripple) | 6310 Hz | +0.19 dB | &ge; +1.44 dB | -1.246 dB | -0.837 dB |
-| cheby2 | ![Pass][cv-pass] Class 1 | 100 Hz | +0.00 dB | &ge; -0.40 dB | +0.400 dB | +0.600 dB |
+| butter | ![Pass][cv-pass] Class 1 (default) | 501 Hz | +0.00 dB | &ge; -0.40 dB | +0.400 dB | +0.600 dB |
+| cheby1 | ![By design][cv-by-design] By design (passband ripple) | 10000 Hz | +0.16 dB | &ge; +1.41 dB | -1.245 dB | -0.837 dB |
+| cheby2 | ![Pass][cv-pass] Class 1 | 794 Hz | +0.00 dB | &ge; -0.40 dB | +0.400 dB | +0.600 dB |
 | ellip | ![By design][cv-by-design] By design (passband ripple) | 10000 Hz | +0.10 dB | &ge; +1.32 dB | -1.218 dB | -0.813 dB |
-| bessel | ![By design][cv-by-design] By design (soft rolloff) | 100 Hz | +12.46 dB | &ge; +16.60 dB | -4.133 dB | -3.133 dB |
+| bessel | ![By design][cv-by-design] By design (soft rolloff) | 10000 Hz | +9.82 dB | &ge; +10.62 dB | -0.799 dB | -0.045 dB |
 
 Only **Butterworth** (the library default) and **Chebyshev-II** are class-compliant architectures. Chebyshev-I and elliptic trade the mask for passband ripple, and Bessel for a maximally-flat group delay (soft rolloff); they cannot satisfy the IEC 61260-1 Class 1/2 attenuation mask by construction, so they are labelled *By design* - this is expected, not a failure or regression.
 
@@ -126,11 +126,11 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | IEC 61260-2:2016 / IEC 61260-3:2016 A.3.5 | Expanded uncertainty of the test signal (k = 2) | 0.115 dB (+/-0.001 dB) | 0.115 dB | 0 dB | 46 % | ![Pass][cv-pass] Pass |
 | IEC 61260-2:2016 / IEC 61260-3:2016 A.3.5 | Expanded uncertainty read on a 0.1 dB display (k = 2) | 0.128 dB (+/-0.001 dB) | 0.128 dB | 0 dB | 95 % | ![Pass][cv-pass] Pass |
 | IEC 61260-2:2016 Formula (2) / IEC 61260-1:2014 Formulas (15), (16) | Ideal octave band: Delta B = 10 lg(tanh(x/2)/(x/2)), x = ln G / (bS), S = 24 (closed form) | -0.0003 dB (+/-0 dB) | -0.0003 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
-| IEC 61260-2:2016 Formula (3) | Ideal bank: summed outputs restore the input inside a band and on its edges (closed form) | 0 dB (+/-0 dB) | max \|Delta P\| 4.8e-16 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
-| IEC 61260-1:2014 5.12.2 / IEC 61260-2:2016 7.2.3 | One-third-octave Butterworth bank (fs=48 kHz): largest \|Delta B\| within the class 1 +/-0.4 dB | class 1 (\|Delta B\| <= 0.4 dB) | class 1 (\|Delta B\| <= 0.047 dB) | +0.353 dB | - | ![Pass][cv-pass] Pass |
-| IEC 61260-1:2014 5.16 / IEC 61260-2:2016 7.2.4 | One-third-octave Butterworth bank (fs=48 kHz): summed outputs within the class 1 +0.8/-1.8 dB | class 1 (-1.8 dB <= Delta P <= +0.8 dB) | class 1 (-0.552 dB to +0.625 dB) | +0.175 dB | - | ![Pass][cv-pass] Pass |
-| IEC 61260-1:2014 5.14.3 / IEC 61260-2:2016 7.4 | One-third-octave multirate bank swept at 2 and 5 s per decade: \|L_out - L_c\| within class 1 +/-0.4 dB | class 1 (\|L_out - L_c\| <= 0.4 dB) | class 1 (\|L_out - L_c\| <= 0.054 dB) | +0.346 dB | - | ![Pass][cv-pass] Pass |
-| IEC 61260-1:2014 Annex G, G.2.8 | Swept deviation of a time-invariant band equals its effective bandwidth deviation | 0 dB (+/-0.01 dB) | max \|(L_out - L_c) - Delta B\| 0.0068 dB | 0.0068 dB | 68 % | ![Pass][cv-pass] Pass |
+| IEC 61260-2:2016 Formula (3) | Ideal bank: summed outputs restore the input inside a band and on its edges (closed form) | 0 dB (+/-0 dB) | max \|Delta P\| below 1e-12 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61260-1:2014 5.12.2 / IEC 61260-2:2016 7.2.3 | One-third-octave Butterworth bank (fs=48 kHz): largest \|Delta B\| within the class 1 +/-0.4 dB | class 1 (\|Delta B\| <= 0.4 dB) | class 1 (\|Delta B\| <= 0.049 dB) | +0.351 dB | - | ![Pass][cv-pass] Pass |
+| IEC 61260-1:2014 5.16 / IEC 61260-2:2016 7.2.4 | One-third-octave Butterworth bank (fs=48 kHz): summed outputs within the class 1 +0.8/-1.8 dB | class 1 (-1.8 dB <= Delta P <= +0.8 dB) | class 1 (+0.000 dB to +0.248 dB) | +0.552 dB | - | ![Pass][cv-pass] Pass |
+| IEC 61260-1:2014 5.14.3 / IEC 61260-2:2016 7.4 | One-third-octave multirate bank swept at 2 and 5 s per decade: \|L_out - L_c\| within class 1 +/-0.4 dB | class 1 (\|L_out - L_c\| <= 0.4 dB) | class 1 (\|L_out - L_c\| <= 0.056 dB) | +0.344 dB | - | ![Pass][cv-pass] Pass |
+| IEC 61260-1:2014 Annex G, G.2.8 | Swept deviation of a time-invariant band equals its effective bandwidth deviation | 0 dB (+/-0.01 dB) | max \|(L_out - L_c) - Delta B\| 0.0070 dB | 0.007 dB | 70 % | ![Pass][cv-pass] Pass |
 
 </details>
 
@@ -152,7 +152,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 |:---|:---|:---|:---|:---|:---:|:---:|
 | Ainslie (2010) Eq. (4.6), printed folio 127 | Density of the standard ocean: 10 C, salinity 35, at the surface | 1027 kg/m³ (+/-0.5 kg/m³) | 1027.0439 kg/m³ | 0.0439 kg/m³ | 9 % | ![Pass][cv-pass] Pass |
 | Ainslie (2010) Eq. (4.11), printed folio 128 | Absolute static pressure at the surface is one atmosphere, not zero | 101989.16 Pa (+/-0 Pa) | 101989.16 Pa | 0 Pa | 0 % | ![Pass][cv-pass] Pass |
-| Ainslie (2010) Eq. (4.6) vs printed folio 177 | The pressure term the book's own folio 177 drops: 4,3e-7 per pascal times one atmosphere | 0.0438549 kg/m³ (+/-0 kg/m³) | 0.0438549 kg/m³ | 0 kg/m³ | 9 % | ![Pass][cv-pass] Pass |
+| Ainslie (2010) Eq. (4.6) vs printed folio 177 | The pressure term the book's own folio 177 drops: 4,3e-7 per pascal times one atmosphere | 0.0438549 kg/m³ (+/-0 kg/m³) | 0.0438549 kg/m³ | 0 kg/m³ | 0 % | ![Pass][cv-pass] Pass |
 
 </details>
 
@@ -206,7 +206,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO 3382-2:2008 5.3.3 | T30 from a synthetic exponential decay (T=1.0 s) | 1 s (+/-1%) | 1 s | 0 s | 0 % | ![Pass][cv-pass] Pass |
 | ISO 3382-1:2009 Annex A (informative) Eq. (A.1) | Sound strength of a response scaled against its free-field reference | 6.0206 dB (+/-0 dB) | 6.0206 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 | ISO 3382-1:2009 Annex A (informative) Eq. (A.2) | Sound pressure exposure level of a 1 Pa burst held for 0,5 s | 90.9691 dB (+/-0 dB) | 90.9691 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
-| ISO 3382-1:2009 Annex A (informative) A.2.1 | A calibration shared by both responses cancels out of G | 0 dB shift (+/-1e-09 dB) | max shift over 6 bands 1.42e-14 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| ISO 3382-1:2009 Annex A (informative) A.2.1 | A calibration shared by both responses cancels out of G | 0 dB shift (+/-1e-09 dB) | max shift over 6 bands below 1e-12 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 | ISO 3382-1:2009 Annex A (informative) Eqs. (A.4)/(A.8) | Free-field reference referred from 5 m to 10 m | -6.0206 dB (+/-0 dB) | -6.0206 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 | ISO 3382-1:2009 Annex A (informative) Eq. (A.5) | Reverberation-room reference level, A = 0,16 V/T = 10 m2 | 53 dB (+/-0 dB) | 53 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 | ISO 3382-1:2009 Annex A (informative) Eqs. (A.5)/(A.9) | The two printed routes to G span the 0,0206 dB their integers force | 0.0206 dB (+/-0 dB) | 0.0206 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
@@ -251,7 +251,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO 15186-1:2000 Annex B, Table B.1 | Adaptation term Kc: all 21 printed rows; (B.1) reduces to (B.2) | max abs(Kc - Table B.1) <= 0,05 dB (1 dp print) | 0.047 dB (B.1 vs B.2: 4.33e-04 dB) | 0.047 dB | - | ![Pass][cv-pass] Pass |
 | ISO 15186-3:2002 Annex A, Table A.1 | Limp-panel qualification: the printed plaster-board column | max abs(R - Table A.1) <= 0,05 dB (1 dp print) | 0.050 dB over 50 Hz to 160 Hz | 0.050 dB | - | ![Pass][cv-pass] Pass |
 | ISO 15186-3:2002 Formula (7) | Low-frequency RI subtracts 9 dB, three more than part 1 | RI = 15 dB, 3 dB below part 1; FpI = 8 dB qualifies at 10 not 6 | RI = 15 dB, part 1 - part 3 = 3 dB | +0.000 dB | - | ![Pass][cv-pass] Pass |
-| ISO 15186-3:2002 Clause 3.9, Formula (8) | Low-frequency DI,n,e; the series' own +10 lg N sign | DI,n,e = 21 dB; N = 4 adds 6.021 dB | 21 dB; N = 4 adds 6.021 dB | +8.882e-16 dB | - | ![Pass][cv-pass] Pass |
+| ISO 15186-3:2002 Clause 3.9, Formula (8) | Low-frequency DI,n,e; the series' own +10 lg N sign | DI,n,e = 21 dB; N = 4 adds 6.021 dB | 21 dB; N = 4 adds 6.021 dB | below 1e-12 dB | - | ![Pass][cv-pass] Pass |
 | ISO 10052:2021 Clause 3.6 | Survey R' applies the V/7,5 minimum-area rule | 26.197888 dB (+/-0 dB) | 26.197888 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 | ISO 10052:2021 Clause 3.16 | Service-equipment LXY is the 3-position energy average | 32.823329 dB (+/-0 dB) | 32.823329 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 | ISO 10052:2021 Table 4 | Reverberation-index estimate (35 <= V < 60, type g) | k = [4.5, 5.0, 5.5, 5.5, 5.5] dB | k = [4.5, 5.0, 5.5, 5.5, 5.5] dB | exact | - | ![Pass][cv-pass] Pass |
@@ -417,10 +417,10 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | IEC 60268-16:2020 C.3.2 | STIPA direct method, Formula (C.1) signal at m=0.2 | 0.3 (+/-0.01) | 0.2992 | -0.0008 | 8 % | ![Pass][cv-pass] Pass |
 | IEC 60268-16:2020 C.3.2 | STIPA direct method, Formula (C.1) signal at m=0.5 | 0.5 (+/-0.01) | 0.4998 | -0.0002 | 2 % | ![Pass][cv-pass] Pass |
 | IEC 60268-16:2020 C.3.2 | STIPA direct method, Formula (C.1) signal at m=0.8 | 0.7 (+/-0.01) | 0.7002 | 0.0002 | 2 % | ![Pass][cv-pass] Pass |
-| IEC 60268-16:2020 C.3.3 | Indirect method: exponential decay RT60=1 s vs Schroeder MTF | 0.5885 (+/-0.005) | 0.5885 | 0 | 1 % | ![Pass][cv-pass] Pass |
-| IEC 60268-16:2020 C.4.2 | Filter-bank slope: +41 dB unmodulated tone one octave below 125 Hz | m >= 0.5 (C.4.2 pass criterion) | 0.9812 | headroom 0.481 | - | ![Pass][cv-pass] Pass |
+| IEC 60268-16:2020 C.3.3 | Indirect method: exponential decay RT60=1 s vs Schroeder MTF | 0.5885 (+/-0.005) | 0.5885 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| IEC 60268-16:2020 C.4.2 | Filter-bank slope: +41 dB unmodulated tone one octave below 125 Hz | m >= 0.5 (C.4.2 pass criterion) | 0.8831 | headroom 0.383 | - | ![Pass][cv-pass] Pass |
 | IEC 60268-16:2020 A.2.2 (audio path) | Weighting factors: modulated 500 Hz + 1 kHz pair through stipa() | 0.398 (+/-0.005) | 0.398 | 0 | 0 % | ![Pass][cv-pass] Pass |
-| IEC 60268-16:2020 A.3.1.2 (audio path) | Filter-bank phase: half-octave edge carriers at TI=0.9 | 0.9 (+/-0.01) | 0.8975 | -0.0025 | 25 % | ![Pass][cv-pass] Pass |
+| IEC 60268-16:2020 A.3.1.2 (audio path) | Filter-bank phase: half-octave edge carriers at TI=0.9 | 0.9 (+/-0.01) | 0.8981 | -0.0019 | 19 % | ![Pass][cv-pass] Pass |
 
 </details>
 
@@ -486,11 +486,11 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO 9295:2015 Formula (10) | Free-field absorption correction K_alpha = r alpha at r = 4 m, alpha in dB/m (8,686 times Annex A), and none at r = 2 m | 0 dB difference | 0 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 | ISO 9295:2015 Table 3 (UNE-EN ISO 9295:2015, PDF page 24, printed folio 24) | The sound power levels to determine for each type of noise: the six rows, from the A-weighted level alone to the tones within 10 dB of the highest | 6/6 rows of Table 3 | 6/6 rows of Table 3 | exact | 0 % | ![Pass][cv-pass] Pass |
 | ISO 5136:2003 Table D.1 | C3,4 of the sampling tube for d = 0,5 m at U = +/-5, +/-15, +/-30 m/s, 27 bands | 162 tabulated values reproduced to the printed 0,1 dB | max absolute deviation 0.049 dB | 0.049 dB | 98 % | ![Pass][cv-pass] Pass |
-| ISO 5136:2003 Eqs (D.2)/(D.3) | Worked example: C3,4 = (1,85 + 0,038 U) dB at 1 kHz, U = +15 and -15 m/s | 2,42 dB at +15 m/s and 1,28 dB at -15 m/s reproduced | max absolute deviation 0.0e+00 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| ISO 5136:2003 Eqs (D.2)/(D.3) | Worked example: C3,4 = (1,85 + 0,038 U) dB at 1 kHz, U = +15 and -15 m/s | 2,42 dB at +15 m/s and 1,28 dB at -15 m/s reproduced | max absolute deviation below 1e-12 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 | ISO 5136:2003 Eq. (8) | Nose-cone / foam-ball correction 10 lg[1/(1 - U/c)^2] at U = 20 m/s, c = 340 m/s | 0.52658 dB (+/-0 dB) | 0.52658 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 | ISO 5136:2003 Eq. (12) | Plane-wave relation LW - Lp = 10 lg(S/S0) - 10 lg(rho c/400), d = 0,5 m | -7.2113 dB (+/-0 dB) | -7.2113 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 | ISO 5136:2003 Table 2 / Table 3 | Reproducibility sigma_R per band, 50 Hz to 10 kHz, and the extrapolated 12,5 to 20 kHz | 27 tabulated values of sigma_R reproduced | max absolute deviation 0.000 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
-| ISO 5136:2003 Annex C Table C.1 | A-weighting C_j of the 27 bands, read back as LWA - LW of one band at a time | 27 tabulated values of C_j reproduced | max absolute deviation 5.8e-15 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| ISO 5136:2003 Annex C Table C.1 | A-weighting C_j of the 27 bands, read back as LWA - LW of one band at a time | 27 tabulated values of C_j reproduced | max absolute deviation below 1e-12 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 
 </details>
 
@@ -1294,7 +1294,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
 |:---|:---|:---|:---|:---|:---:|:---:|
 | ISO/TS 12913-3:2019 A.2, Table A.1 | Scale value of each of the five boxes of the four parts of Method A | 20/20 scale values of Table A.1 | 20/20 scale values of Table A.1 | exact | 0 % | ![Pass][cv-pass] Pass |
-| ISO/TS 12913-3:2019 Formulas (A.1) and (A.2) | Every attribute at one score puts the respondent at the origin | 0 (+/-0.000000000001) | max \|P\|, \|E\| = 0.0e+00 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| ISO/TS 12913-3:2019 Formulas (A.1) and (A.2) | Every attribute at one score puts the respondent at the origin | 0 (+/-0.000000000001) | max \|P\|, \|E\| below 1e-12 | 0 | 0 % | ![Pass][cv-pass] Pass |
 | ISO/TS 12913-3:2019 A.3 | Range of the coordinates, 4 + sqrt(32), printed as 9,66 | 9.66 (+/-0.005) | 9.6569 | -0.0031 | 62 % | ![Pass][cv-pass] Pass |
 | ISO/TS 12913-3:2019 A.3 | The four extremes of P and E divided by 4 + sqrt(32) are plus and minus 1 | 4/4 normalised extremes at plus or minus 1 | 4/4 normalised extremes at plus or minus 1 | exact | 0 % | ![Pass][cv-pass] Pass |
 | ISO/TS 12913-3:2019 Figure A.1, Formulas (A.1) and (A.2) | Each attribute raised alone moves the point along its own arrow of the figure | 8/8 attribute axes of Figure A.1 | 8/8 attribute axes of Figure A.1 | exact | 0 % | ![Pass][cv-pass] Pass |
@@ -1418,7 +1418,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 |:---|:---|:---|:---|:---|:---:|:---:|
 | Bendat & Piersol, Random Data 4e Eq. (12.173) | Spectrogram of an on-bin tone reads its mean square A^2/2 in every column | 2 (+/-1e-07%) | 2 | 0 | 0 % | ![Pass][cv-pass] Pass |
 | Parseval + COLA identity (Hann taper, 75% overlap) | Time-integrated STFT power = time-domain energy of an interior burst | 0.236151 (+/-1e-10%) | 0.236151 | 0 | 0 % | ![Pass][cv-pass] Pass |
-| Bendat & Piersol, Random Data 4e Eqs. (11.128)-(11.130) | Zoom FFT tone amplitude = demodulate-decimate-DFT chain, machine precision | 0.7 (+/-1e-10%) | 0.7 | 0 | 1 % | ![Pass][cv-pass] Pass |
+| Bendat & Piersol, Random Data 4e Eqs. (11.128)-(11.130) | Zoom FFT tone amplitude = demodulate-decimate-DFT chain, machine precision | 0.7 (+/-1e-10%) | 0.7 | 0 | 0 % | ![Pass][cv-pass] Pass |
 
 </details>
 
@@ -1916,9 +1916,9 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | IEC 62585:2012 Formula (H.1), Table H.1 | Exact one-twelfth-octave frequencies from 1 kHz to 10 kHz | 41/41 frequencies of Table H.1 | 41/41 frequencies of Table H.1 | exact | 0 % | ![Pass][cv-pass] Pass |
 | IEC 62585:2012 clauses 9 to 14 | Maximum permitted expanded uncertainty either side of each boundary | 18/18 printed maxima of clauses 9 to 14 | 18/18 printed maxima of clauses 9 to 14 | exact | 0 % | ![Pass][cv-pass] Pass |
 | IEC 62585:2012 clause 6 | Static-pressure component below 97 kPa, up to and above 3 kHz | 5/5 clause 6 components | 5/5 clause 6 components | exact | 0 % | ![Pass][cv-pass] Pass |
-| IEC 62585:2012 Formulas (D.1) to (D.7) | A calibrator's correction from readings built by (D.1) to (D.4) | 0 dB (+/-0.000000000001 dB) | 0 dB | 0 dB | 2 % | ![Pass][cv-pass] Pass |
-| IEC 62585:2012 Formulas (E.1) to (E.6), Figure E.1 | A coupler's correction from readings built by (E.1) to (E.3B) | 0 dB (+/-0.000000000001 dB) | 0 dB | 0 dB | 2 % | ![Pass][cv-pass] Pass |
-| IEC 62585:2012 Formulas (F.1) to (F.13) | An actuator's normalised correction from readings built by (F.1) to (F.3) | 0 dB (+/-0.000000000001 dB) | 0 dB | 0 dB | 2 % | ![Pass][cv-pass] Pass |
+| IEC 62585:2012 Formulas (D.1) to (D.7) | A calibrator's correction from readings built by (D.1) to (D.4) | 0 dB (+/-0.000000000001 dB) | 0 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| IEC 62585:2012 Formulas (E.1) to (E.6), Figure E.1 | A coupler's correction from readings built by (E.1) to (E.3B) | 0 dB (+/-0.000000000001 dB) | 0 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| IEC 62585:2012 Formulas (F.1) to (F.13) | An actuator's normalised correction from readings built by (F.1) to (F.3) | 0 dB (+/-0.000000000001 dB) | 0 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 | IEC 62585:2012 Annex A, Figure A.1 | Adjustment value of a response whose fit is known in closed form | 0.2 dB (closed form) | 0.2 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 
 </details>
@@ -1959,10 +1959,10 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
 |:---|:---|:---|:---|:---|:---:|:---:|
-| ISO 11546-1:1995 Eq. (1) / ISO 11546-2:1995 Eq. (1) | D_W is the difference of the two sound power determinations, and a level shift common to both leaves it alone | 0 dB (+/-0 dB) | max absolute difference 0.000 dB over 18 bands | 0 dB | 1 % | ![Pass][cv-pass] Pass |
+| ISO 11546-1:1995 Eq. (1) / ISO 11546-2:1995 Eq. (1) | D_W is the difference of the two sound power determinations, and a level shift common to both leaves it alone | 0 dB (+/-0 dB) | max absolute difference 0.000 dB over 18 bands | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 | ISO 11546-1:1995 Annex C / ISO 11546-2:1995 Annex D | D_WA,e of the annex equals the difference of the two A-weighted totals computed from the same assumed spectrum | 16.3145 dB (+/-0 dB) | 16.3145 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 | ISO 11546-1:1995 Annex C / ISO 11546-2:1995 Annex D | An enclosure of no insulation at all estimates exactly 0 dB, which is the sign test of the A-weighting term A_i | 0 dB (+/-0 dB) | 0 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
-| ISO 11546-2:1995 Figure C.1 | The area ratio S_V/S the closed form returns puts K_2 back on the Table C.1 limit, at every absorption coefficient of Table C.2 | 0 dB (+/-0 dB) | max deviation 4.44e-16 dB over the 7 rows of Table C.2 | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| ISO 11546-2:1995 Figure C.1 | The area ratio S_V/S the closed form returns puts K_2 back on the Table C.1 limit, at every absorption coefficient of Table C.2 | 0 dB (+/-0 dB) | max deviation below 1e-12 dB over the 7 rows of Table C.2 | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 | ISO 11546-2:1995 Table C.1 | Environmental correction ceiling K_2 and background margin dL of the nine columns | ISO 3743-1 dL = 6 dB; ISO 3744 K2 = 2 dB; ISO 3744 dL = 6 dB; ISO 3746 K2 = 7 dB; ISO 3746 dL = 3 dB; ISO 3747 dL = 3 dB; ISO 11201 K2 = 2 dB; ISO 11201 dL = 6 dB; ISO 11202 K2 = 7 dB; ISO 11202 dL = 3 dB; ISO 11204 K2 = 7 dB; ISO 11204 dL = 6 dB | ISO 3743-1 dL = 6 dB; ISO 3744 K2 = 2 dB; ISO 3744 dL = 6 dB; ISO 3746 K2 = 7 dB; ISO 3746 dL = 3 dB; ISO 3747 dL = 3 dB; ISO 11201 K2 = 2 dB; ISO 11201 dL = 6 dB; ISO 11202 K2 = 7 dB; ISO 11202 dL = 3 dB; ISO 11204 K2 = 7 dB; ISO 11204 dL = 6 dB | exact | 0 % | ![Pass][cv-pass] Pass |
 | ISO 11546-2:1995 Table C.2 | The seven room descriptions, word for word, under the mean absorption coefficient each of them is printed against | 7/7 rows of Table C.2 | 7/7 rows of Table C.2 | exact | 0 % | ![Pass][cv-pass] Pass |
 | ISO 11546-2:1995 Table 1 | The survey methods give an A-weighted value only, so no band quantity may be declared from them | ISO 3744 bands, ISO 3746 none, ISO 11202 none, ISO 11204 bands | ISO 3744 bands, ISO 3746 none, ISO 11202 none, ISO 11204 bands | exact | 0 % | ![Pass][cv-pass] Pass |
@@ -2039,7 +2039,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO 11821:1997 5.5.2 | The four microphone distances are a quarter, a half, once and twice the screen height, with a floor of 1 m | h/4 = 2 m; h/2 = 4 m; h = 8 m; 2h = 16 m | h/4 = 2 m; h/2 = 4 m; h = 8 m; 2h = 16 m | exact | 0 % | ![Pass][cv-pass] Pass |
 | ISO 11821:1997 3.10 and 5.2.2 | The directivity index is the logarithmic mean of twelve positions less the position, so a position under the mean reads positive | 9.6614 dB (+/-0 dB) | 9.6614 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 | ISO 11821:1997 5.6.2.1 and clause 6 | The impulse repeat rules and the one uncertainty number the document prints | repeats = 3; repeat again = 3; invalid = 5; deviation = 2 | repeats = 3; repeat again = 3; invalid = 5; deviation = 2 | exact | 0 % | ![Pass][cv-pass] Pass |
-| ISO 11821:1997 5.8 / Barron (2003) Table 7-6, PDF page 328, folio 316 | D_p from a printed level pair, at the two octave bands the worked example prints a reduction for | 7.6 dB at 63 Hz and 24.2 dB at 8000 Hz | 7.6 dB and 24.2 dB | 0 dB | 1 % | ![Pass][cv-pass] Pass |
+| ISO 11821:1997 5.8 / Barron (2003) Table 7-6, PDF page 328, folio 316 | D_p from a printed level pair, at the two octave bands the worked example prints a reduction for | 7.6 dB at 63 Hz and 24.2 dB at 8000 Hz | 7.6 dB and 24.2 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 | ISO 11821:1997 5.9 / Barron (2003) Example 7-9, PDF pages 327 and 329, folios 315 and 317 | D_pA from the printed A-weighted pair, 69.6 dBA without the barrier and 55.3 dBA with it | 14.3 dBA (+/-0 dBA) | 14.3 dBA | 0 dBA | 0 % | ![Pass][cv-pass] Pass |
 | ISO 11821:1997 5.8 / Barron (2003) Example 7-10, PDF pages 331 to 333, folios 319 to 321 | D_p for a screen standing indoors: 92.3 dB falls to 84.0 dB in the 1000 Hz octave at the operator position | 8.3 dB (+/-0 dB) | 8.3 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 | ISO 11821:1997 5.8 / Hansen (2005) Example 6.23, PDF pages 325 and 326, folios 317 and 318 | D_p over three octave bands, rounded to the whole decibel 7.4 c) reports it in | 500 Hz = 10 dB; 1000 Hz = 15 dB; 2000 Hz = 20 dB | 500 Hz = 10 dB; 1000 Hz = 15 dB; 2000 Hz = 20 dB | exact | 0 % | ![Pass][cv-pass] Pass |
@@ -2070,7 +2070,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | Jagniatinskis et al. (2017) Table 1, printed folios 293 and 294 (PDF pages 5 and 6) | Three insertion losses from a highway campaign that prints its before difference as one number, read at three unrelated splits of it | 9/9 (worst departure 0.000 dBA) | 9/9 readings, three printed results at three splits each | exact | 0 % | ![Pass][cv-pass] Pass |
 | Rodiño & Masson (2015) Tabla 2, printed folio 7 (PDF page 7) | Six printed insertion losses of a screen measured with no reference microphone, where 8.2.1 degenerates to the plain level difference | 6/6 (worst departure 0.000 dB) | 6/6 printed insertion losses, unweighted and A-weighted | exact | 0 % | ![Pass][cv-pass] Pass |
 | Bies 5e §4.9.2 (printed folio 201, PDF page 230) | The 6 dB of C'_r read off a page outside the standard: the pressure doubling at a receiver held against a reflecting surface | 6 dB in every band, the 20 lg 2 of a pressure doubling as the page prints it | max absolute departure 0.000 dB over the three bands | 0 dB | 0 % | ![Pass][cv-pass] Pass |
-| ISO 10847:1997 7.2.2, NOTE | The close-source height puts the reference microphone 10 degrees above the angle to the barrier top, and not 10 degrees above the ground | 10 degrees over the angle to the top, at four geometries | largest departure 3.55e-15 deg | 0 deg | 0 % | ![Pass][cv-pass] Pass |
+| ISO 10847:1997 7.2.2, NOTE | The close-source height puts the reference microphone 10 degrees above the angle to the barrier top, and not 10 degrees above the ground | 10 degrees over the angle to the top, at four geometries | largest departure below 1e-12 deg | 0 deg | 0 % | ![Pass][cv-pass] Pass |
 
 </details>
 
@@ -2196,7 +2196,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO 7235:2003 | Reproducibility of the three quantities (Table 7) | insertion_loss 50 Hz = 1.5 dB; insertion_loss 250 Hz = 1 dB; insertion_loss 1000 Hz = 2 dB; insertion_loss 4000 Hz = 3 dB; transmission_loss 50 Hz = 3 dB; transmission_loss 250 Hz = 3 dB; transmission_loss 1000 Hz = 3 dB; transmission_loss 4000 Hz = 3 dB; intensity 50 Hz = 3 dB; intensity 250 Hz = 1.5 dB; intensity 1000 Hz = 1 dB; intensity 4000 Hz = 1 dB | insertion_loss 50 Hz = 1.5 dB; insertion_loss 250 Hz = 1 dB; insertion_loss 1000 Hz = 2 dB; insertion_loss 4000 Hz = 3 dB; transmission_loss 50 Hz = 3 dB; transmission_loss 250 Hz = 3 dB; transmission_loss 1000 Hz = 3 dB; transmission_loss 4000 Hz = 3 dB; intensity 50 Hz = 3 dB; intensity 250 Hz = 1.5 dB; intensity 1000 Hz = 1 dB; intensity 4000 Hz = 1 dB | exact | 0 % | ![Pass][cv-pass] Pass |
 | ISO 7235:2003 | Expanded measurement uncertainty (7.9) | 250 Hz = 2 dB; 4000 Hz = 6 dB | 250 Hz = 2 dB; 4000 Hz = 6 dB | exact | 0 % | ![Pass][cv-pass] Pass |
 | ISO 11691:1995 | Test duct against the silencer (4.5) | lower = 0.6; upper = 1.7 | lower = 0.6; upper = 1.7 | exact | 0 % | ![Pass][cv-pass] Pass |
-| ISO 7235:2003 | Open-end transmission loss and reflection (B.3), (B.4) | D_td = -10 lg(1 - r^2) at all 30 pairs | largest disagreement 1.243e-14 dB | 0 dB | 1 % | ![Pass][cv-pass] Pass |
+| ISO 7235:2003 | Open-end transmission loss and reflection (B.3), (B.4) | D_td = -10 lg(1 - r^2) at all 30 pairs | largest disagreement below 1e-12 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 | ISO 7235:2003 | Solid angle of radiation at the duct end (Table B.1) | A (flush in a wall) = 6.2832 sr; B (wall and floor) = 3.1416 sr; C (free in the room) = 12.5664 sr; D (on the floor) = 6.2832 sr; E (mid-room duct) = 12.5664 sr | A (flush in a wall) = 6.2832 sr; B (wall and floor) = 3.1416 sr; C (free in the room) = 12.5664 sr; D (on the floor) = 6.2832 sr; E (mid-room duct) = 12.5664 sr | exact | 0 % | ![Pass][cv-pass] Pass |
 | ISO 7235:2003 | Rectangular cut-on frequency (Eq. (5)) | 343,000000 Hz from the (1, 0) eigenvalue | 343 Hz | 0 Hz | 0 % | ![Pass][cv-pass] Pass |
 | ISO 7235:2003 | Circular cut-on frequency (Eq. (4)) | 0,59 / (1,8412 / pi) = 1,006701 | 1.006702 | 0 | 0 % | ![Pass][cv-pass] Pass |
@@ -2206,7 +2206,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO 7235:2003 | Pressure loss coefficient is flow invariant (Eq. (14)) | zeta = 0.750000 at 1 m³/s | 0.750000 at 2 m³/s | 0 | 0 % | ![Pass][cv-pass] Pass |
 | ISO 7235:2003 | Averaged pressure loss coefficient (Eq. (18)) | 2,5 - 0,4 = 2,100000 | 2.1 | 0 | 0 % | ![Pass][cv-pass] Pass |
 | ISO 7235:2003 | Upstream straight length (6.5.2.2.1) | S = 0,0962 m² (350 mm) = 2 m; S = 0,1257 m² (400 mm) = 2 m; S = 0,5 m² = 3.9894 m | S = 0,0962 m² (350 mm) = 2 m; S = 0,1257 m² (400 mm) = 2 m; S = 0,5 m² = 3.9894 m | exact | 0 % | ![Pass][cv-pass] Pass |
-| ISO 5135:1999 | End reflection loss is ISO 7235 (B.3) written out (Eq. (2)) | ISO 5135 (2) = ISO 7235 (B.3) at all 30 pairs | largest disagreement 3.553e-15 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| ISO 5135:1999 | End reflection loss is ISO 7235 (B.3) written out (Eq. (2)) | ISO 5135 (2) = ISO 7235 (B.3) at all 30 pairs | largest disagreement below 1e-12 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 | ISO 5135:1999 | Sound power level in the duct (Eq. (1)) | 63 Hz = 71.2255 dB; 125 Hz = 66.1429 dB; 250 Hz = 62.5007 dB; 500 Hz = 60.7724 dB; 1000 Hz = 60.2063 dB; 2000 Hz = 60.0525 dB | 63 Hz = 71.2255 dB; 125 Hz = 66.1429 dB; 250 Hz = 62.5007 dB; 500 Hz = 60.7724 dB; 1000 Hz = 60.2063 dB; 2000 Hz = 60.0525 dB | exact | 0 % | ![Pass][cv-pass] Pass |
 | ISO 5135:1999 | Least-squares operating line (5.5.2) | slope [dB/decade] = 20; level at 0,2 m³/s [dB] = 50; worst deviation [dB] = 0; lowest readable duty [m³/s] = 0.025; highest readable duty [m³/s] = 1.6 | slope [dB/decade] = 20; level at 0,2 m³/s [dB] = 50; worst deviation [dB] = 0; lowest readable duty [m³/s] = 0.025; highest readable duty [m³/s] = 1.6 | exact | 0 % | ![Pass][cv-pass] Pass |
 
@@ -2288,7 +2288,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | Appendix G Table G-3 (transfer functions) | Track transfer (8 x 24), wheel transfer (4 x 24) and superstructure transfer (24), dB per axle | 312 coefficients identical | 312/312 coefficients | exact | 0 % | ![Pass][cv-pass] Pass |
 | Appendix G Tables G-4 to G-7 | Impact roughness (35), traction (5 x 2 x 24), aerodynamic (2 x 24) and bridge (2 x 24), dB | 371 coefficients identical | 371/371 coefficients | exact | 0 % | ![Pass][cv-pass] Pass |
 | Annex II 2.3.2, formula (2.3.15) | Horizontal dipole directivity along the track: 10 lg(0,01) at phi = 0 | -20 dB (+/-0 dB) | -20 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
-| Annex II 2.3.2, formulae (2.3.13) and (2.3.14) | Aerodynamic speed law at v0 = 300 km/h reduces to Table G-6 verbatim | 50 lg 2 = 15.051 dB on every band | 0 dB | 0 dB | 1 % | ![Pass][cv-pass] Pass |
+| Annex II 2.3.2, formulae (2.3.13) and (2.3.14) | Aerodynamic speed law at v0 = 300 km/h reduces to Table G-6 verbatim | 50 lg 2 = 15.051 dB on every band | 0 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 | Annex II 2.3.2, formula (2.3.12) | Impact roughness at the tabulated joint density n_l = 0,01 per m | Table G-4 verbatim | 0 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 
 </details>

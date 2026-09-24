@@ -191,21 +191,27 @@ To ensure **100% stability** across the entire audible spectrum (even at low
 frequencies like 16 Hz with high sample rates), phonometry employs two
 critical strategies:
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_bank_dataflow_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_bank_dataflow.svg" alt="Data flow inside one band of the filter bank: a band with room to decimate, meaning half the sample rate still clears 1.25 times its upper edge, takes the resample_poly branch down to fs over M so its poles stay clear of the unit circle, every band is then a cascade of second-order sections designed on the IEC 61260-1 band edges rather than one high-order transfer function, both branches end in the band level in dB, and sigbands=True additionally returns the band signal brought back to the input rate" width="92%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_bank_dataflow_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_bank_dataflow.svg" alt="Data flow inside one band of the filter bank: a band with room to decimate, meaning half the sample rate is at least 32 times its upper edge, so that it can be decimated by two or more and still keep its processing Nyquist frequency sixteen times that edge, takes the resample_poly branch down to fs over M so its poles stay clear of the unit circle, every band is then a cascade of second-order sections designed on the IEC 61260-1 band edges rather than one high-order transfer function, both branches end in the band level in dB, and sigbands=True additionally returns the band signal brought back to the input rate" width="92%"></picture>
 
 1. **Second-Order Sections (SOS):** All filters are implemented as a series of
    cascaded biquads. This avoids the catastrophic numerical precision loss
    associated with high-order transfer functions (coefficients a, b).
-2. **Multi-rate Decimation:** Whenever half the sample rate still clears the
-   band's upper edge by a factor of 1.25, the signal is automatically
-   downsampled (decimated) by
-   $M = \lfloor (f_\mathrm{s}/2) / (1.25\,f_\text{upper}) \rfloor$ before filtering,
-   which is most bands rather than only the low ones (29 of the 33
-   one-third-octave bands at 48 kHz). This keeps the digital pole locations far
-   from the unit circle boundary, preventing oscillation and noise. The band
-   level is computed on the decimated signal; only `sigbands=True` brings the
-   band signal back to the input rate, with `resample_poly(M, 1)`. Chebyshev II banks reserve extra
-   decimation headroom so their stopband edges stay below the decimated Nyquist.
+2. **Multi-rate Decimation:** Whenever half the sample rate is at least 32
+   times the band's upper edge, the signal is automatically downsampled
+   (decimated) by
+   $M = \lfloor (f_\mathrm{s}/2) / (16\,f_\text{upper}) \rfloor$ before filtering
+   (the 18 lowest of the 33 one-third-octave bands at 48 kHz). This keeps the
+   digital pole locations far from the unit circle boundary, preventing
+   oscillation and noise, and it stops at sixteen times the upper edge because
+   closer to its Nyquist frequency the bilinear transform bends the band: at
+   1.25 times the edge the octave bank summed its adjacent outputs to
+   +0.94 dB, past the +0.8 dB of class 1 in IEC 61260-1:2014 5.16, and at 16
+   the bend moves that sum by at most 0.005 dB. The band level is computed on
+   the decimated signal; only `sigbands=True` brings the band signal back to
+   the input rate, with `resample_poly(M, 1)`. A Chebyshev II band of low order
+   and deep stopband, whose stopband edge would sit above sixteen times its
+   upper edge, reserves more so its stopband edge stays below the decimated
+   Nyquist.
 
 ## Weighting Curves (IEC 61672-1)
 

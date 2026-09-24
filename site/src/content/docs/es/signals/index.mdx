@@ -79,8 +79,11 @@ escalarla: bloques en streaming y arrays multicanal.
   las cinco arquitecturas de filtro comparadas, la galería completa de
   respuestas y el uso de cada arquitectura, con el crossover Linkwitz-Riley.
 - [Verificación de clase de filtros (IEC 61260-1)](/phonometry/es/signals/filters/filter-compliance/):
-  la máscara de aceptación de la Tabla 1 banda a banda, la clase 0 de la
-  edición retirada de 1995 y la ficha de conformidad.
+  la máscara de aceptación de la Tabla 1 banda a banda, el ancho de banda
+  efectivo y la suma de salidas de IEC 61260-2, el ensayo de invariancia en el
+  tiempo con barrido, la calificación de los ensayos periódicos de
+  IEC 61260-3, la clase 0 de la edición retirada de 1995 y la ficha de
+  conformidad.
 - [Procesado por bloques](/phonometry/es/signals/filters/block-processing/): análisis
   en streaming con estado, que arrastra el estado de los filtros entre
   búferes, para señales que no caben en memoria.
@@ -196,10 +199,13 @@ guía lo dice en su propio bloque «No cubierto».
 `verify_weighting_class` comprueban una respuesta digital diseñada frente a
 las tablas de tolerancias de IEC 61260-1 y de IEC 61672-1; los ensayos de tipo
 de IEC 61672-2 que un sonómetro físico necesita para su aprobación de tipo,
-los ensayos periódicos de IEC 61672-3 que recibe en servicio, y los ensayos
-del propio calibrador de IEC 60942, no se ejecutan (los resultados de
-laboratorio de un calibrador los califica `metrology.verify_sound_calibrator`,
-que no hace ningún ensayo físico), así que un veredicto de clase de los verificadores de filtros y ponderaciones describe el algoritmo
+los ensayos periódicos de IEC 61672-3 que recibe en servicio, los ensayos de
+IEC 61260-2 e IEC 61260-3 sobre un filtro de bandas físico y los ensayos del
+propio calibrador de IEC 60942, no se ejecutan (los resultados de laboratorio
+de un calibrador los califica `metrology.verify_sound_calibrator` y los de los
+ensayos periódicos de un filtro `filters.verify_filter_periodic`, y ninguno de
+los dos hace un ensayo físico; los ensayos de IEC 61260-2 que no necesitan una
+muestra se calculan sobre el diseño), así que un veredicto de clase de los verificadores de filtros y ponderaciones describe el algoritmo
 y no un aparato construido;
 [Conformidad y
 verificación](/phonometry/es/signals/metrology/compliance-verification/) traza

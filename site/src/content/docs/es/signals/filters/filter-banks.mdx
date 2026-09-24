@@ -384,14 +384,18 @@ nivel de una banda. El orden 6 es el valor por defecto porque supera la máscara
 de IEC 61260-1 con holgura para Butterworth, y la aritmética merece verse: a
 48 kHz sobre un banco Butterworth de tercios de octava, el orden 2 se queda a
 27,03 dB de la clase 1 en la banda atenuada lejana, mientras que los órdenes 4,
-6, 8 y 10 pasan todos con un margen de clase 1 de exactamente +0,40 dB.
+6, 8 y 10 pasan todos la máscara de la Tabla 1 con un margen de clase 1 de
+exactamente +0,40 dB.
 
 Que el margen sea idéntico no es casualidad, y es la mitad útil de la regla. A
 partir del orden 4 la restricción que manda se ha desplazado de la banda
 atenuada a la banda de paso, donde un diseño máximamente plano se queda en 0 dB
 de desviación y el corredor de clase 1 es de ±0,4 dB: subir más el orden compra
-profundidad en la banda atenuada, pero ni un decibelio de margen de clase. Y
-cuesta: cada par de polos de más alarga la resonancia (los picos de retardo de
+profundidad en la banda atenuada, pero ni un decibelio de margen en la máscara.
+Lo que manda a partir de ahí es la suma de las salidas adyacentes, que
+IEC 61260-1:2014 también califica (5.16): el orden 4 se queda a 0,002 dB de la
+clase 1 en ella y es clase 2 en conjunto, mientras que los órdenes 6, 8 y 10 la
+cumplen con 0,04 dB, 0,08 dB y 0,07 dB. Y un orden mayor cuesta: cada par de polos de más alarga la resonancia (los picos de retardo de
 grupo del apartado 5 crecen con el orden), que es la razón por la que el trabajo
 con transitorios y los espectrogramas de ventana corta prefieren órdenes bajos.
 La aritmética del margen en sí es

@@ -49,15 +49,16 @@ print(band["margin_class1_db"], band["bandwidth_margin_class1_db"])
 # 0.3999999999999595 0.35183457985825545
 ```
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_filter_class_check_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_filter_class_check.svg" alt="Calculation chain for grading a band filter against IEC 61260-1 Table 1: a one-third-octave band at 1 kHz, its relative attenuation at every breakpoint against the class 1 and class 2 limits, the class 1 margin at each breakpoint and the class it gives, with the hardware tests of IEC 61260-2 and IEC 61260-3 set apart as outside the check" width="88%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_filter_class_check_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_filter_class_check.svg" alt="Calculation chain for grading a band filter against IEC 61260-1 Table 1: a one-third-octave band at 1 kHz, its relative attenuation at every breakpoint against the class 1 and class 2 limits, the class 1 margin at each breakpoint and the class it gives, with the IEC 61260-2 tests that need no specimen (the 24-point grid, the effective bandwidth, the summation and the sweep) computed on the design as well, and the tests a laboratory runs on a device, IEC 61260-2 on a specimen and IEC 61260-3 periodic tests graded by verify_filter_periodic, set apart as outside the check" width="88%"></picture>
 
 *The 1 kHz band of a bank like the one above, walked through the check: its
 relative attenuation at every Table 1 breakpoint, carried to one-third octave,
 against the class 1 and class 2 limits, with the smallest margin deciding the
 class. The red dashed line is where the decimated bank stops walking it. The
-dashed column on the right is what a laboratory does to an instrument instead:
-of it, section 1b computes on the design the two tests that need no specimen,
-and section 3b grades the periodic-test results a laboratory returns.*
+box on the right is what section 1b computes on the design as well, the
+IEC 61260-2 tests that need no specimen; the dashed column under it is what a
+laboratory does to an instrument, and section 3b grades the periodic-test
+results it returns.*
 
 The Table 1 acceptance mask itself is public too: `class_limits(fraction,
 filter_class, omega)` returns the minimum/maximum relative-attenuation
@@ -186,7 +187,7 @@ print(round(octave.binding_margin_db("summation", 1), 2))   # -0.14
 print(octave.overall_class)                                 # 2
 ```
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_summation_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_summation.svg" alt="Two panels of the summed output of adjacent bands against normalized frequency, from the lower to the upper band edge, with the class 1 limits dashed at +0.8 dB and −1.8 dB and the class 2 limits dotted at +1.8 dB and −3.8 dB. On the left, the decimated octave bank from 125 Hz to 4 kHz: every inner band dips to about −1.1 dB just above its lower edge and climbs to about +0.9 dB just below its upper edge, the 251 Hz band reaching +0.94 dB, past the class 1 limit, so the bank is class 2. On the right, the one-third-octave bank over the same range traces the same shape from about −0.55 dB to +0.62 dB, inside class 1" width="100%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_summation_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_summation.svg" alt="Two panels of the summed output of adjacent bands against normalized frequency, from the lower to the upper band edge, with the class 1 limits dashed at +0.8 dB and −1.8 dB and the class 2 limits dotted at +1.8 dB and −3.8 dB. On the left, the decimated octave bank from 125 Hz to 4 kHz: the inner bands dip to between −0.94 dB and −1.16 dB just above their lower edges and climb to between +0.71 dB and +0.94 dB just below their upper edges, the 251 Hz band reaching +0.94 dB, past the class 1 limit, so the bank is class 2. On the right, the one-third-octave bank over the same range traces the same shape from about −0.55 dB to +0.63 dB, inside class 1" width="100%"></picture>
 
 *Formula (3) of IEC 61260-2 on every inner band of the two default banks, drawn
 by `result.plot(requirement="summation")`. The octave bank loses power just
@@ -207,6 +208,9 @@ third = filters.verify_filter_class(
 fig, (ax_oct, ax_third) = plt.subplots(1, 2, figsize=(13, 6.2), sharey=True)
 octave.plot(ax=ax_oct, requirement="summation")
 third.plot(ax=ax_third, requirement="summation")
+ax_oct.set_title("Octave bank, decimated: class 2 on §5.16")
+ax_third.set_title("One-third-octave bank: class 1 on §5.16")
+ax_third.set_ylabel("")
 plt.show()
 ```
 
@@ -225,11 +229,13 @@ frequency axis: a band's upper skirt falls away sooner than an analogue band's
 would, and its lower skirt later. Just above a lower band edge the neighbour
 below has already gone and power is lost; just below an upper band edge the
 neighbour above is still there and power is added. Designed at the full rate,
-`design=filters.FilterDesign(resample=False)`, the same octave bank sums within
-0 dB to +0.16 dB and is class 1 on every requirement, and so is the Chebyshev II
-octave bank (−0.56 dB to +0.54 dB). The one-third-octave bank passes with the
-decimated design, from −0.55 dB to +0.76 dB over its full default range: a
-margin of 0.04 dB. When an octave analysis has to be class 1 against
+`design=filters.FilterDesign(resample=False)`, the same octave bank sums from
+−0.06 dB to +0.69 dB over its full default range, the top set by the 8 kHz
+band nearest the Nyquist frequency, and is class 1 on every requirement with
+0.11 dB to spare; the decimated Chebyshev II octave bank is class 1 too, from
+−0.57 dB to +0.64 dB. The one-third-octave bank passes with the decimated
+design, from −0.55 dB to +0.76 dB over its full default range: a margin of
+0.04 dB. When an octave analysis has to be class 1 against
 IEC 61260-1:2014 as a whole, design it at the full rate and let
 `verify_filter_class` say so.
 
@@ -413,7 +419,7 @@ maximum IEC 61260-1:2014 Annex B permits for that test. Clause by clause:
 
 | Clause | What the laboratory measured | Acceptance limits | Maximum $U$ (Annex B) |
 | :--- | :--- | :--- | :--- |
-| 10.2 | relative attenuation of every filter at its exact mid-band | ±0.4 dB class 1, ±0.6 dB class 2 | 0.20 dB |
+| 10.2 | relative attenuation of every filter at its exact mid-band | ±0.4 dB class 1, ±0.6 dB class 2 | 0.20 dB, or 0.30 dB past a $\Delta A$ of 2 dB |
 | 10.3 | or, time-invariant filters, $\Delta B$ from one sweep | ±0.4 dB class 1, ±0.6 dB class 2 | 0.20 dB |
 | 11.7 | level linearity on the reference range | ±0.5 dB class 1, ±0.6 dB class 2 within 40 dB of the upper boundary; ±0.7 dB and ±0.9 dB beyond | 0.20 dB within 40 dB, 0.35 dB beyond |
 | 11.9 | level linearity on each other range, 30 dB below its upper boundary | as 11.7 | as 11.7 |
@@ -440,7 +446,7 @@ record = filters.FilterPeriodicMeasurements(
     linearity_deviations_db=[0.0, 0.1, 0.2, -0.3, 0.4],
     linearity_levels_below_upper_db=[0.0, 10.0, 20.0, 45.0, 55.0],
     linearity_uncertainties_db=[0.12, 0.12, 0.25, 0.2, 0.3],
-    relative_attenuations_db=[row, row, row],
+    relative_attenuations_db=[row, [x + 0.2 for x in row], row],
     relative_attenuation_uncertainties_db=[row_u, row_u, row_u],
 )
 verdict = filters.verify_filter_periodic(1, record, fraction=3)
@@ -457,6 +463,21 @@ result is usable it becomes the statement Clause 14 prescribes: 14 k) when the
 model's pattern approval is public (`pattern_approval_public=True`), 14 l)
 otherwise, with the caveat of 1.5 that no general conclusion about
 IEC 61260-1 follows from the periodic tests alone.
+
+A pass also needs the tests to cover what the standard asks of them: 11.3 and
+13.1 measure three filters, and 13.4 measures each of them at every test
+frequency above 0.5 times the lowest mid-band frequency of the set and below
+1.5 times the highest. Given the mid-band frequencies of the set
+(`set_midband_frequencies_hz`), of the three tested filters
+(`tested_midband_frequencies_hz`) and of the filter behind each linearity
+result (`linearity_midband_frequencies_hz`), the verdict counts them, and
+`verdict.incomplete` lists each shortfall, a NaN where 13.4 asks for a
+measurement included; it holds the pass back as a missing clause does. A
+record without them cannot be checked for coverage: `verdict.coverage_checked`
+is `False`, and a passing statement ends by saying the coverage was not
+checked. A mid-band attenuation of 10.2 takes its Annex B maximum from what
+was measured, as clause 13 does: a filter that has drifted past 2 dB at its
+mid-band is allowed 0.30 dB, and so fails rather than being unusable.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_periodic_verdict_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_periodic_verdict.svg" alt="The margin of every result of a class 1 periodic test to its nearer acceptance limit, grouped by clause: six mid-band results of 10.2 between 0.25 dB and 0.38 dB, five level-linearity results of 11.7 and forty-five relative attenuations of clause 13, on a scale linear up to 1 dB and logarithmic above. Every result lies above the red acceptance line at zero with its expanded uncertainty drawn as a bar, and all are green diamonds except one 11.7 result drawn as a hollow orange circle, unusable under 5.3 because its uncertainty exceeds the Annex B maximum. The title reads not passed" width="100%"></picture>
 
@@ -569,8 +590,9 @@ On the Table 1 mask and on the effective bandwidth, yes; on the summation of
 output signals (5.16), no. The decimated Butterworth octave bank sums adjacent
 outputs up to +0.94 dB about the input, past the +0.8 dB of class 1, so its
 overall class is 2. Designed at the full rate with
-`FilterDesign(resample=False)` it sums within +0.16 dB and is class 1 on
-every requirement; the one-third-octave bank is class 1 as designed.
+`FilterDesign(resample=False)` it sums within −0.06 dB and +0.69 dB over its
+default range and is class 1 on every requirement; the one-third-octave bank
+is class 1 as designed.
 
 ### What is class 0 and which standard defines it?
 

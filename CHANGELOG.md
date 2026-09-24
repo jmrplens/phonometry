@@ -181,12 +181,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `filters.verify_filter_periodic` grades a laboratory's IEC 61260-3:2016
   results, `filters.FilterPeriodicMeasurements`, clause by clause (10.2 or
   10.3, 11.7, 11.9 and 13) by the conformance rule of IEC TC 29 with the
-  maxima of IEC 61260-1:2014 Annex B, names the results 5.3 makes unusable,
-  and gives the statement of Clause 14 with the caveat of 1.5;
+  maxima of IEC 61260-1:2014 Annex B read off the attenuation measured,
+  names the results 5.3 makes unusable, lists in `incomplete` the three
+  filters of 11.3 and 13.1 or the test frequencies of 13.4 a record lacks (and
+  says in `coverage_checked` and in the statement when the record does not
+  name its filters, `linearity_midband_frequencies_hz` among them), and gives
+  the statement of Clause 14 with the caveat of 1.5;
   `filters.periodic_test_frequencies` is Formulas (1) and (2) for any
   bandwidth and `filters.PERIODIC_TEST_ATTENUATION_LIMITS_DB` its Table 1.
   `metrology.verify_conformance` accepts an interval open at one end, for a
-  stop-band minimum. The fifteen frequencies of Table C.1, the derivation of
+  stop-band minimum, and a deviation outside its interval always reads a
+  `share_of_acceptance_limit` above 1. The fifteen frequencies of Table C.1, the derivation of
   C.2, every cell of Table 1, the ten examples of IEC 61260-1:2014 Table C.1
   and the worked examples of Annexes A and B are conformance rows; Formulas (2)
   and (3) print no example and are held to closed forms. The printed
@@ -194,8 +199,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   frequency terms, 61260-3 B.2.6 ends its averaging 6 s to 7 s after 6.3 Hz
   where its own settings give 18 s to 19 s, and Formula (3) and the words of
   7.2.4.3 and 5.16 take the difference in opposite directions; all three are
-  registered in the errata. The filter-verification guide gains sections on
-  each, with figures, in both languages.
+  registered in the errata, as standing in the consolidated edition of
+  IEC 61260-2 with its 2017 amendment. The filter-verification guide gains
+  sections on each, with figures, in both languages, and the figure of a
+  band's class mask stops at the G² breakpoint of Table 1, so a bank filtered
+  at the full rate keeps its pass-band corridor readable.
 
 - **What an active noise reduction earmuff adds, its uncertainty and where it
   stops being linear (ISO 4869-6:2019).** `hearing.active_insertion_loss` takes

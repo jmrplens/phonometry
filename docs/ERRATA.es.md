@@ -8430,7 +8430,12 @@ dos ediciones con las mismas entradas y en el mismo orden.
 - **Evidencia:** un recálculo del ejemplo impreso de las dos maneras.
   Verificado en la página 21 del PDF (p. 19 impresa) y en la página 23 del PDF
   (p. 21 impresa) de la IEC 61260-2:2016, y en la página 18 del PDF (p. 16
-  impresa) y la página 20 del PDF (p. 18 impresa) de la IEC 61260-3:2016.
+  impresa) y la página 20 del PDF (p. 18 impresa) de la IEC 61260-3:2016. La
+  versión consolidada IEC 61260-2:2016+AMD1:2017 (edición 1.1) imprime la misma
+  Fórmula (A.2) en la página 23 del PDF (p. 19 impresa) y los mismos 0,057 dB,
+  0,115 dB y 0,128 dB en la página 25 del PDF (p. 21 impresa): la modificación
+  solo añade la opción de guía de ondas TEM de la IEC 61000-4-20 al ensayo de
+  inmunidad a campos, y el defecto sigue en la edición vigente.
 - **Comportamiento de la biblioteca:**
   [`swept_level_uncertainty`](../src/phonometry/filters/time_invariance.py)
   eleva el coeficiente al cuadrado, como hace la (A.1), y reproduce 0,057 dB,
@@ -8493,7 +8498,12 @@ dos ediciones con las mismas entradas y en el mismo orden.
 - **Evidencia:** una comparación de la frase con la fórmula que introduce.
   Verificado en la página 13 del PDF (p. 11 impresa) y en la página 14 del PDF
   (p. 12 impresa) de la IEC 61260-2:2016, y en la página 23 del PDF (p. 21
-  impresa) de la BS EN 61260-1:2014.
+  impresa) de la BS EN 61260-1:2014. La versión consolidada
+  IEC 61260-2:2016+AMD1:2017 (edición 1.1) imprime las mismas palabras y la
+  misma Fórmula (3): el 7.2.4.3 va de la página 15 del PDF (p. 11 impresa) a la
+  página 16 del PDF (p. 12 impresa), con la Fórmula (3) y el 7.2.4.5 en esta
+  última; la modificación no toca el 7.2.4, y el conflicto sigue en la edición
+  vigente.
 - **Comportamiento de la biblioteca:**
   [`verify_filter_class`](../src/phonometry/filters/compliance.py) aplica los
   límites del 5.16 a la Fórmula (3) tal como está impresa, como indica el

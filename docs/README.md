@@ -31,7 +31,7 @@ Every other section consumes it.
 
 - [Filter Banks](signals/filters/filter-banks.md): band mathematics, bank parameters, parametric EQ, band decomposition and zero-phase filtering
 - [Filter architecture gallery](signals/filters/filter-gallery.md): the five filter architectures compared at the band edges, the full response gallery for 1/1 and 1/3 octave, per-architecture usage and the Linkwitz-Riley crossover
-- [Filter class verification](signals/filters/filter-compliance.md): the IEC 61260-1:2014 Table 1 acceptance mask band by band, the class 0 of the withdrawn IEC 61260:1995 / ANSI S1.11-2004 edition, what a performance class buys in a measurement, and the one-page compliance fiche
+- [Filter class verification](signals/filters/filter-compliance.md): the IEC 61260-1:2014 Table 1 acceptance mask band by band, the effective bandwidth and summation of outputs of IEC 61260-2:2016, the swept time-invariance test, the grading of IEC 61260-3:2016 periodic tests, the class 0 of the withdrawn IEC 61260:1995 / ANSI S1.11-2004 edition, what a performance class buys in a measurement, and the one-page compliance fiche
 - [Block Processing](signals/filters/block-processing.md): stateful real-time workflows
 - [Multichannel](signals/filters/multichannel.md): vectorized multichannel analysis
 

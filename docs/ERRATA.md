@@ -7952,7 +7952,12 @@ in the same order.
 - **Evidence:** a recomputation of the printed example both ways. Verified on
   PDF page 21 (printed p. 19) and PDF page 23 (printed p. 21) of
   IEC 61260-2:2016, and on PDF page 18 (printed p. 16) and PDF page 20
-  (printed p. 18) of IEC 61260-3:2016.
+  (printed p. 18) of IEC 61260-3:2016. The consolidated
+  IEC 61260-2:2016+AMD1:2017 (Edition 1.1) prints the same Formula (A.2) on
+  PDF page 23 (printed p. 19) and the same 0,057 dB, 0,115 dB and 0,128 dB on
+  PDF page 25 (printed p. 21): the amendment adds only the TEM-waveguide
+  option of IEC 61000-4-20 to the field-immunity test, and the defect stands
+  in the current edition.
 - **Library behaviour:**
   [`swept_level_uncertainty`](../src/phonometry/filters/time_invariance.py)
   squares the coefficient, as (A.1) does, and reproduces 0,057 dB, 0,115 dB
@@ -8011,6 +8016,11 @@ in the same order.
 - **Evidence:** a comparison of the sentence with the formula it introduces.
   Verified on PDF page 13 (printed p. 11) and PDF page 14 (printed p. 12) of
   IEC 61260-2:2016, and on PDF page 23 (printed p. 21) of BS EN 61260-1:2014.
+  The consolidated IEC 61260-2:2016+AMD1:2017 (Edition 1.1) prints the same
+  words and Formula (3), 7.2.4.3 running from PDF page 15 (printed p. 11) to
+  PDF page 16 (printed p. 12) with Formula (3) and 7.2.4.5 on the latter; the
+  amendment does not touch 7.2.4, and the conflict stands in the current
+  edition.
 - **Library behaviour:**
   [`verify_filter_class`](../src/phonometry/filters/compliance.py) applies the
   limits of 5.16 to Formula (3) as printed, as 7.2.4.5 instructs. The verdicts

@@ -1144,7 +1144,7 @@ DIAGRAMS = {
     "diagram_verification_regimes": (
         _d_verification_regimes,
         "Specification, pattern evaluation, periodic test (IEC 61672, IEC 61260)",
-        974,
+        1030,
     ),
     "diagram_humid_air_chain": (
         _d_humid_air_chain,

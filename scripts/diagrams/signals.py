@@ -3153,8 +3153,12 @@ def _d_filter_class_check(s: SVG, th: Theme) -> None:
     breakpoint, so every limit is a straight line between breakpoints, which
     is what Formula (11) says. The band is an order-6 Butterworth one-third
     octave at 1 kHz; the Nyquist line is where the decimated default bank
-    stops walking it (48 kHz over 17, halved). The dashed column is
-    IEC 61260-2 and IEC 61260-3 as a laboratory runs them on a device.
+    stops walking it (48 kHz over 17, halved). The solid box at the top right
+    is what the verifier also computes on the design, the IEC 61260-2 tests
+    that need no specimen (the Formula (1) grid, 5.12, 5.16 and the swept
+    test of 5.14); the dashed column below it is IEC 61260-2 and IEC 61260-3
+    as a laboratory runs them on a device, whose periodic results
+    ``verify_filter_periodic`` grades.
     """
     pass_om = [_third_octave_breakpoint(row[0]) for row in _TABLE1_PASS_MAX]
     stop_om = [_third_octave_breakpoint(row[0]) for row in _TABLE1_STOP_MIN]
@@ -3364,46 +3368,51 @@ def _d_filter_class_check(s: SVG, th: Theme) -> None:
         th.muted,
     )
 
+    # -- Computed on the design too: the IEC 61260-2 tests with no specimen -
+    s.line(339.5, by + bh, 339.5, 176, th.primary, 1.4)
+    s.line(339.5, 176, 758, 176, th.primary, 1.4)
+    s.arrow(758, 176, 758, 190, th.primary, 1.4)
+    s.rect(636, 192, 244, 180, th.panel, th.primary, rx=8, sw=1.6)
+    s.text(758, 214, "Also computed on the design", 13, th.primary, bold=True)
+    s.text(758, 231, "the IEC 61260-2 tests with no specimen", 11, th.muted)
+    for y, line in (
+        (252, "$S ≥ 24$ sines per bandwidth,"),
+        (268, "at $Ω_i = G^{i/(bS)}$ (Formula 1)"),
+        (288, "5.12: $ΔB$ by Formula (2),"),
+        (304, "±0.4 dB class 1, ±0.6 dB class 2"),
+        (324, "5.16: $ΔP_j$ by Formula (3),"),
+        (340, "+0.8 dB to −1.8 dB class 1"),
+        (360, "5.14: one sweep through the bank"),
+    ):
+        s.text(758, y, line, 11, th.fg)
+
     # -- Outside the check: what a laboratory does to an instrument ---------
-    s.line(339.5, by + bh, 339.5, 176, th.muted, 1.4, dash="5,4")
-    s.line(339.5, 176, 758, 176, th.muted, 1.4, dash="5,4")
-    s.arrow(758, 176, 758, 190, th.muted, 1.4)
-    s.rect(636, 192, 244, 514, "none", th.muted, rx=8, sw=1.4, dash="7,5")
-    s.text(758, 214, "Outside the check", 14, th.muted, bold=True)
-    s.text(758, 236, "on a device, $A = L_{in} − L_{out}$", 12, th.fg)
-    s.text(758, 254, "is measured, not computed", 12, th.fg)
+    s.rect(636, 384, 244, 322, "none", th.muted, rx=8, sw=1.4, dash="7,5")
+    s.text(758, 405, "Outside the check", 14, th.muted, bold=True)
+    s.text(758, 424, "on a device, $A = L_{in} − L_{out}$ is measured", 11, th.fg)
 
-    s.rect(644, 268, 228, 196, th.panel, th.muted, rx=6, sw=1.2)
-    s.text(758, 290, "IEC 61260-2, pattern evaluation", 12, th.fg, bold=True)
-    s.text(758, 307, "once per model", 11, th.muted)
+    s.rect(644, 436, 228, 104, th.panel, th.muted, rx=6, sw=1.2)
+    s.text(758, 456, "IEC 61260-2, on a specimen", 12, th.fg, bold=True)
+    s.text(758, 472, "once per model", 11, th.muted)
     for y, line in (
-        (328, "≥ 3 specimens in, ≥ 1 tested in full"),
-        (346, "$S ≥ 24$ sines per bandwidth,"),
-        (362, "at $Ω_i = G^{i/(bS)}$"),
-        (382, "from 0.5 $f_m$ of the lowest band"),
-        (398, "to 1.5 $f_m$ of the highest"),
-        (418, "1 dB under the top of the linear range"),
-        (438, "20 °C to 26 °C, 35 % to 65 % RH"),
-        (454, "after at least 6 h to acclimatize"),
+        (490, "≥ 3 specimens in, ≥ 1 tested in full"),
+        (506, "1 dB under the top of the linear range"),
+        (522, "20 °C to 26 °C, 35 % to 65 % RH"),
     ):
         s.text(758, y, line, 11, th.fg)
 
-    s.rect(644, 476, 228, 188, th.panel, th.muted, rx=6, sw=1.2)
-    s.text(758, 498, "IEC 61260-3, periodic test", 12, th.fg, bold=True)
-    s.text(758, 515, "each instrument, on a date", 11, th.muted)
-    for y, line in (
-        (534, "every filter at its mid-band:"),
-        (550, "±0.4 dB class 1, ±0.6 dB class 2,"),
-        (566, "or, if time invariant, one sweep"),
-        (584, "three filters, low, middle and high,"),
-        (600, "such as 31.5 Hz, 1 kHz and 16 kHz,"),
-        (618, "up to 15 sines each, $k$ = −7 … 7,"),
-        (634, "with no band-edge row"),
-        (652, "20 °C to 26 °C, 25 % to 70 % RH"),
+    s.rect(644, 550, 228, 132, th.panel, th.muted, rx=6, sw=1.2)
+    s.text(758, 570, "IEC 61260-3, periodic test", 12, th.fg, bold=True)
+    s.text(758, 586, "each instrument, on a date", 11, th.muted)
+    for y, line, colour in (
+        (604, "every filter at mid-band, or one sweep", th.fg),
+        (620, "three filters, low, middle and high,", th.fg),
+        (636, "up to 15 sines each, $k$ = −7 … 7", th.fg),
+        (656, "the results graded by", th.primary),
+        (672, "verify_filter_periodic", th.primary),
     ):
-        s.text(758, y, line, 11, th.fg)
-    s.text(758, 684, "both also need the lab's uncertainty", 11, th.muted)
-    s.text(758, 700, "within Annex B: 0.20, 0.30 or 0.50 dB", 11, th.muted)
+        s.text(758, y, line, 11, colour)
+    s.text(758, 698, "$U$ within Annex B: 0.20 to 0.50 dB", 11, th.muted)
 
     # -- The two formulas that carry Table 1 to any bandwidth --------------
     s.rect(20, 718, 860, 64, th.panel, th.fg, rx=6, sw=1.6)
@@ -3434,7 +3443,11 @@ def _d_verification_regimes(s: SVG, th: Theme) -> None:
 
     Both series split the same way. Part 1 fixes the design goals and the
     acceptance limits, Table 3 of IEC 61672-1 and Table 1 of IEC 61260-1, and
-    it is the only part the two design verifiers are held to. Part 2 is pattern evaluation,
+    it is the only part the design verifiers are held to; for the filters
+    that is Table 1 with the effective bandwidth, the swept test and the
+    summation of outputs (5.12, 5.14, 5.16), which ``verify_filter_class``
+    and ``verify_time_invariance`` compute on the design the way Part 2
+    tests them. Part 2 is pattern evaluation,
     and 4.1 of both parts sets minimums rather than counts: at least three
     specimens submitted, at least two selected and at least one of those
     tested in full against every mandatory specification, ending in a report
@@ -3451,7 +3464,9 @@ def _d_verification_regimes(s: SVG, th: Theme) -> None:
     set and below 1,5 times the highest, so fifteen is a ceiling. The box at
     the foot is the conformance criterion both series apply (5.1.21 of
     IEC 61672-1, 5.1.9 of IEC 61260-1), of which a computed response can show
-    only the first half.
+    only the first half. The arrow down the right margin is
+    ``verify_filter_periodic``, which grades a laboratory's Part 3 results
+    for a band filter on both halves without running a test.
     """
     left, right, mid = 36.0, 864.0, 450.0
     xl, xr = 52.0, 466.0  # text start of the meter cell and of the filter cell
@@ -3497,18 +3512,19 @@ def _d_verification_regimes(s: SVG, th: Theme) -> None:
         12,
         th.muted,
     )
-    for x, name, anchor, dx in (
-        (239.0, "verify_weighting_class", "end", -8),
-        (661.0, "verify_filter_class", "start", 8),
+    for x, names, anchor, dx in (
+        (239.0, ("verify_weighting_class",), "end", -8),
+        (661.0, ("verify_filter_class", "verify_time_invariance"), "start", 8),
     ):
-        s.arrow(x, 110, x, 148, th.primary, 1.8)
-        s.text(x + dx, 134, name, 12, th.primary, anchor, mono=True)
+        s.arrow(x, 110, x, 168, th.primary, 1.8)
+        for k, name in enumerate(names):
+            s.text(x + dx, 134 + 18 * k, name, 12, th.primary, anchor, mono=True)
 
     # -- Part 1: the tables both verifiers read, and what a laboratory is held to
-    y1 = 150.0
+    y1 = 170.0
     row(
         y1,
-        160,
+        180,
         th.primary,
         "Part 1 · Specifications: design goals and acceptance limits",
     )
@@ -3525,7 +3541,7 @@ def _d_verification_regimes(s: SVG, th: Theme) -> None:
     )
     s.text(
         xl,
-        y1 + 110,
+        y1 + 130,
         "the laboratory's $U$: at most 0.60 dB up to 4 kHz",
         12,
         th.muted,
@@ -3537,12 +3553,13 @@ def _d_verification_regimes(s: SVG, th: Theme) -> None:
         y1 + 70,
         (
             "Table 1: a relative attenuation corridor",
-            "round each mid-band; ±0.4 dB at $Ω = 1$ for class 1",
+            "round each mid-band; ±0.4 dB at $Ω = 1$ for class 1;",
+            "5.12, 5.14, 5.16: bandwidth, sweep, summation",
         ),
     )
     s.text(
         xr,
-        y1 + 110,
+        y1 + 130,
         "the laboratory's $U$: at most 0.20 dB while $ΔA ≤ 2$ dB",
         12,
         th.muted,
@@ -3550,7 +3567,7 @@ def _d_verification_regimes(s: SVG, th: Theme) -> None:
     )
     s.text(
         mid,
-        y1 + 146,
+        y1 + 166,
         "class 2 shares the design goals, with limits as wide or wider, "
         "and 0 °C to +40 °C against −10 °C to +50 °C for class 1",
         12,
@@ -3558,7 +3575,7 @@ def _d_verification_regimes(s: SVG, th: Theme) -> None:
     )
 
     # -- The line the verifiers stop at --------------------------------------
-    yb = 330.0
+    yb = 370.0
     s.line(16, yb, 884, yb, th.fg, 1.6, dash="8,5")
     chip = (
         "above: a design checked in software · below: a physical instrument "
@@ -3569,7 +3586,7 @@ def _d_verification_regimes(s: SVG, th: Theme) -> None:
     s.text(mid, yb + 4, chip, 12, th.fg, bold=True)
 
     # -- Part 2: a model, once, on specimens, and every count a minimum ------
-    y2 = 354.0
+    y2 = 394.0
     row(
         y2,
         222,
@@ -3624,7 +3641,7 @@ def _d_verification_regimes(s: SVG, th: Theme) -> None:
     )
 
     # -- Part 3: one working instrument, a deliberately limited set ----------
-    y3 = 596.0
+    y3 = 636.0
     row(
         y3,
         234,
@@ -3691,9 +3708,22 @@ def _d_verification_regimes(s: SVG, th: Theme) -> None:
     )
     s.arrow(left - 10, y3 + 220, left - 1, y3 + 220, th.accent, 1.6)
 
+    # The periodic grader: a laboratory's Part 3 results, read on both halves.
+    s.path(f"M 750 80 H 882 V {y3 + 44}", stroke=th.primary, sw=1.6)
+    s.arrow(882, y3 + 44, right + 1, y3 + 44, th.primary, 1.6)
+    s.text(
+        right - 12,
+        y3 + 48,
+        "verify_filter_periodic",
+        12,
+        th.primary,
+        "end",
+        mono=True,
+    )
+
     # -- The criterion both series apply, and the half software can see ------
-    yf = 850.0
-    s.rect(70, yf, 760, 84, th.panel, th.fg, rx=6, sw=1.6)
+    yf = 890.0
+    s.rect(70, yf, 760, 102, th.panel, th.fg, rx=6, sw=1.6)
     s.text(
         mid,
         yf + 30,
@@ -3712,14 +3742,21 @@ def _d_verification_regimes(s: SVG, th: Theme) -> None:
     s.text(
         mid,
         yf + 74,
-        "a verifier reads the first half off a computed response; "
-        "a laboratory has to meet both",
+        "a design verifier reads the first half off a computed response; "
+        "a laboratory has to meet both,",
         12,
         th.muted,
     )
     s.text(
         mid,
-        yf + 114,
+        yf + 92,
+        "and verify_filter_periodic grades both on a band filter's periodic results",
+        12,
+        th.muted,
+    )
+    s.text(
+        mid,
+        yf + 130,
         "IEC 61043 keeps all three in one document: requirements in clauses "
         "6 to 10, type tests in 11 to 13, periodic verification in Annex A",
         12,

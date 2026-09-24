@@ -176,9 +176,11 @@ limits of +1,0 dB and -1,2 dB uses 0,5 of the lower one. Above 1 the
 deviation is outside the limits. A deviation on the far side of a
 limit of zero (a negative distortion against `(0, 3)`) has no finite
 share and reads as infinity. An open side is never used up: on it the
-share is zero while the deviation is inside the interval and infinity
-once it is not (a stop-band attenuation of 40 dB against
-`(70, +inf)`).
+share is zero while the deviation is inside the interval. A deviation
+outside the interval always reads above 1, on whichever side it
+leaves: its share of the limit it crosses when that is above 1, and
+infinity otherwise (a stop-band attenuation of 40 dB, or of -5 dB,
+against `(70, +inf)`).
 
 ### ConformanceVerification.share_of_max_uncertainty
 

@@ -362,14 +362,18 @@ skirts fall away and therefore how much of a neighbouring band leaks into a
 band level. Order 6 is the default because it clears the IEC 61260-1 mask with
 room to spare for Butterworth, and the arithmetic is worth seeing: at 48 kHz on
 a one-third-octave Butterworth bank, order 2 misses class 1 by 27.03 dB on the
-far stopband, while orders 4, 6, 8 and 10 all pass with a class 1 margin of
-exactly +0.40 dB.
+far stopband, while orders 4, 6, 8 and 10 all pass the Table 1 mask with a
+class 1 margin of exactly +0.40 dB.
 
 That identical margin is not a coincidence and it is the useful half of the
 rule. From order 4 upward the binding constraint has moved out of the stopband
 and into the passband, where a maximally flat design sits at 0 dB deviation and
 the class 1 corridor is ±0.4 dB; so raising the order further buys stopband
-depth but no class margin at all. It does cost: every extra pole pair lengthens
+depth but no margin on the mask. What binds from there is the summation of
+adjacent outputs, which IEC 61260-1:2014 grades too (5.16): order 4 misses
+class 1 on it by 0.002 dB and is class 2 overall, while orders 6, 8 and 10
+meet it by 0.04 dB, 0.08 dB and 0.07 dB. A higher order does cost: every
+extra pole pair lengthens
 the ringing (the group-delay peaks of section 5 grow with order), which is why
 transient work and short-window spectrograms prefer low orders. The margin
 arithmetic itself is

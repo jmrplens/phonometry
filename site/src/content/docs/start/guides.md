@@ -168,7 +168,9 @@ IEC 61252, ISO 1996-1, IEC 60942, IEC 61183 and the GUM.
   filter architectures compared at the band edges, the full response gallery
   and per-architecture usage, with the Linkwitz-Riley crossover.
 - [Filter Class Verification (IEC 61260-1)](/phonometry/signals/filters/filter-compliance/):
-  the Table 1 acceptance mask band by band, the class 0 of the withdrawn 1995
+  the Table 1 acceptance mask band by band, the effective bandwidth and the
+  summation of outputs of IEC 61260-2, the swept time-invariance test, the
+  grading of IEC 61260-3 periodic tests, the class 0 of the withdrawn 1995
   edition and the compliance fiche.
 - [Block Processing](/phonometry/signals/filters/block-processing/): stateful streaming
   analysis that carries filter state across buffers, for signals that never fit

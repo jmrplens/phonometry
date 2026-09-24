@@ -44,11 +44,14 @@ from result_factories import (
     _airborne_prediction,
     _airborne_rating,
     _assessment_velocity,
+    _band_averaged_stiffness,
     _band_uncertainty,
     _cnossos_road,
     _conformance_verification,
     _diffuse_absorption,
     _double_wall,
+    _driving_point_stiffness,
+    _effective_blocking_mass,
     _exp_ir,
     _exposure,
     _extended_impact_rating,
@@ -324,6 +327,30 @@ _KWARG_PLOT_CASES = [
         "bar",
     ),
     ("band_uncertainty", _band_uncertainty, "line"),
+    ("band_averaged_stiffness", _band_averaged_stiffness, "line"),
+    (
+        "blocked_output_check",
+        lambda: ph.vibration.check_blocked_output(
+            [50.0, 100.0, 200.0], [100.0, 100.0, 100.0], [70.0, 75.0, 60.0]
+        ),
+        "line",
+    ),
+    (
+        "output_mass_check",
+        lambda: ph.vibration.check_output_mass(
+            [50.0, 100.0, 200.0], 0.1, [120.0, 120.0, 120.0], [100.0, 105.0, 110.0]
+        ),
+        "line",
+    ),
+    ("effective_blocking_mass", _effective_blocking_mass, "line"),
+    ("driving_point_stiffness", _driving_point_stiffness, "line"),
+    (
+        "driving_point_uncertainty",
+        lambda: ph.vibration.driving_point_uncertainty(
+            120.0, repeatability_range_db=0.6
+        ),
+        "bar",
+    ),
     ("radiation_efficiency", _radiation_efficiency, "line"),
     ("single_panel", _single_panel, "line"),
     ("double_wall", _double_wall, "line"),

@@ -87,7 +87,15 @@ if TYPE_CHECKING:
         RigidMassCalibrationResult,
     )
     from ..vibration.structural.radiation_efficiency import RadiationEfficiencyResult
-    from ..vibration.structural.transfer_stiffness import TransferStiffnessResult
+    from ..vibration.structural.transfer_stiffness import (
+        BandAveragedStiffness,
+        DrivingPointStiffnessResult,
+        DrivingPointUncertainty,
+        EffectiveBlockingMass,
+        LevelDifferenceCheck,
+        OutputMassCheck,
+        TransferStiffnessResult,
+    )
 
     class _SpectrumLike(Protocol):
         """A measured spectrum: anything exposing the two plotted vectors.
@@ -147,6 +155,10 @@ _GUIDE_LABELS = {"a_u": "$A_u$", "a_o": "$A_o$", "a_r": "$A_r$"}
 #: Legend entry of the assessed ISO 2631-5 point (stress variable and
 #: injury probability), formatted with ``r`` and ``p``.
 _RISK_LABEL = r"$R$ = {r},  $\Pi$ = {p} %"
+#: Legend entries of the ISO 10846 band-average figure, named once so the
+#: label a curve carries and the key its translation is filed under agree.
+_BAND_AVERAGE_LABEL = r"band average $L_{k,\mathrm{av}}$"
+_FEWER_LINES_LABEL = "fewer than five lines"
 
 #: Spanish translations of the fixed strings rendered by the vibration
 #: ``.plot()`` renderers, keyed by their verbatim English text. ``_t``
@@ -326,6 +338,38 @@ _STRINGS: dict[str, str] = {
     _FLOOR_LABEL: r"forjado $L_v$",
     _WEIGHTED_LABEL: r"ponderado KB $L_{v,KB}$",
     "Predicted spectrum on the floor (E DIN 45672-3): $KB_{{FTm}}$ = {kb}": "Espectro previsto en el forjado (E DIN 45672-3): $KB_{{FTm}}$ = {kb}",
+    # Resilient elements (ISO 10846-2 to -5): band average, adequacy checks,
+    # effective blocking mass, driving-point method and its uncertainty.
+    _BAND_AVERAGE_LABEL: r"media en banda $L_{k,\mathrm{av}}$",
+    _FEWER_LINES_LABEL: "menos de cinco líneas",
+    "One-third-octave frequency [Hz]": "Frecuencia de tercio de octava [Hz]",
+    "Band stiffness level $L_{k,\\mathrm{av}}$ [dB re 1 N/m]": "Nivel de rigidez en banda $L_{k,\\mathrm{av}}$ [dB re 1 N/m]",
+    "ISO 10846 one-third-octave-band stiffness": "ISO 10846 rigidez en bandas de tercio de octava",
+    "Level difference [dB]": "Diferencia de niveles [dB]",
+    "limit {limit} dB": "límite {limit} dB",
+    "condition met": "condición cumplida",
+    "condition not met": "condición no cumplida",
+    r"ISO 10846 blocked output: $\Delta L_{1,2} = L_{a1} - L_{a2}$": r"ISO 10846 salida bloqueada: $\Delta L_{1,2} = L_{a1} - L_{a2}$",
+    "ISO 10846 unwanted input: excitation minus unwanted direction": "ISO 10846 entrada no deseada: excitación menos dirección no deseada",
+    "Mass [kg]": "Masa [kg]",
+    r"limit $0.06\,|F_2|/|a_2|$": r"límite $0{,}06\,|F_2|/|a_2|$",
+    "$m_0$ = {mass} kg": "$m_0$ = {mass} kg",
+    "ISO 10846-4 Inequality (3): mass in front of the output force transducers": "ISO 10846-4 Desigualdad (3): masa delante de los transductores de fuerza de salida",
+    r"$\Delta L = 20\,\lg(m_{2,\mathrm{eff}}/m_2)$": r"$\Delta L = 20\,\lg(m_{2,\mathrm{eff}}/m_2)$",
+    r"$\pm$1 dB (Inequality (5))": r"$\pm$1 dB (Desigualdad (5))",
+    "below 40 Hz: ignored": "por debajo de 40 Hz: se ignora",
+    "$f_3$ = {f3} Hz": "$f_3$ = {f3} Hz",
+    "Deviation from $m_2$ [dB]": "Desviación respecto de $m_2$ [dB]",
+    "ISO 10846-4 effective blocking mass": "ISO 10846-4 masa de bloqueo efectiva",
+    r"driving-point stiffness $L_{k_{1,1}}$": r"rigidez en el punto de excitación $L_{k_{1,1}}$",
+    "low-frequency value (1 Hz to 20 Hz)": "valor de baja frecuencia (1 Hz a 20 Hz)",
+    "2 dB below it": "2 dB por debajo",
+    r"$f_\mathrm{{UL}}$ = {ful} Hz": r"$f_\mathrm{{UL}}$ = {ful} Hz",
+    "excluded (Inequality (1) or (2))": "excluida (Desigualdad (1) o (2))",
+    "Driving-point stiffness level [dB re 1 N/m]": "Nivel de rigidez en el punto de excitación [dB re 1 N/m]",
+    "ISO 10846-5 driving-point stiffness": "ISO 10846-5 rigidez en el punto de excitación",
+    "$U = 2u$ = {u} dB": "$U = 2u$ = {u} dB",
+    r"ISO 10846-5 Annex B: $L_{{k,\mathrm{{av}}}}$ = {level} dB, $U$ = {u} dB": r"ISO 10846-5 Anexo B: $L_{{k,\mathrm{{av}}}}$ = {level} dB, $U$ = {u} dB",
 }
 
 
@@ -800,6 +844,362 @@ def plot_transfer_stiffness(
     ax.legend(loc="best", fontsize="small")
     ax.grid(visible=True, which="both", alpha=0.3)
     localize_axes(ax, language)
+    return ax
+
+
+def plot_band_averaged_stiffness(
+    result: BandAveragedStiffness,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """One-third-octave band levels ``L_k,av`` on a band axis (ISO 10846).
+
+    The bands run along a categorical axis, one step per band, as the parts
+    ask the graphs to be drawn (8.3 or 8.4 of each: a fixed length per
+    one-third-octave band). A band without a value, fewer than five lines,
+    breaks the curve and is marked with a cross along the foot of the axes.
+
+    :param result: A
+        :class:`~phonometry.vibration.structural.transfer_stiffness.BandAveragedStiffness`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the band-level curve.
+    :return: The axes.
+    """
+    from .._i18n import localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    levels = np.asarray(result.levels, dtype=np.float64)
+    determined = np.asarray(result.determined, dtype=bool)
+    positions = _band_axis(
+        ax,
+        np.asarray(result.nominal_frequencies, dtype=np.float64),
+        xlabel="One-third-octave frequency [Hz]",
+        language=language,
+    )
+    style_default(kwargs, "color", _C_PRIMARY)
+    style_default(kwargs, "marker", "o")
+    kwargs.setdefault("label", _t(_BAND_AVERAGE_LABEL, language))
+    ax.plot(positions, levels, **kwargs)
+    if not np.all(determined):
+        ax.plot(
+            positions[~determined],
+            np.full(int(np.count_nonzero(~determined)), 0.04),
+            "x",
+            color=_C_MUTED,
+            transform=ax.get_xaxis_transform(),
+            label=_t(_FEWER_LINES_LABEL, language),
+        )
+    ax.set_ylabel(
+        _t("Band stiffness level $L_{k,\\mathrm{av}}$ [dB re 1 N/m]", language)
+    )
+    ax.set_title(_t("ISO 10846 one-third-octave-band stiffness", language))
+    ax.legend(loc="best", fontsize="small")
+    ax.grid(visible=True, alpha=0.3)
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_level_difference_check(
+    result: LevelDifferenceCheck,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """A level difference against its ISO 10846 limit, failures marked.
+
+    :param result: A
+        :class:`~phonometry.vibration.structural.transfer_stiffness.LevelDifferenceCheck`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the level-difference curve.
+    :return: The axes.
+    """
+    from .._i18n import format_number, localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    freq = np.asarray(result.frequencies, dtype=np.float64)
+    difference = np.asarray(result.difference_db, dtype=np.float64)
+    shown = np.where(np.isfinite(difference), difference, np.nan)
+    holds = np.asarray(result.holds, dtype=bool)
+    limit = format_number(result.limit_db, language, decimals=0)
+    ax.axhline(
+        result.limit_db,
+        color=_C_REFERENCE,
+        ls="--",
+        lw=1.2,
+        label=_t("limit {limit} dB", language).format(limit=limit),
+    )
+    style_default(kwargs, "color", _C_PRIMARY)
+    kwargs.setdefault("label", _t("condition met", language))
+    style_default(kwargs, "linewidth", 1.4)
+    ax.semilogx(freq, shown, "-", **kwargs)
+    if not np.all(holds):
+        ax.plot(
+            freq[~holds],
+            shown[~holds],
+            "o",
+            color=_C_SECONDARY,
+            zorder=3,
+            label=_t("condition not met", language),
+        )
+    title = (
+        r"ISO 10846 blocked output: $\Delta L_{1,2} = L_{a1} - L_{a2}$"
+        if result.condition == "blocked_output"
+        else "ISO 10846 unwanted input: excitation minus unwanted direction"
+    )
+    format_frequency_axis(ax, float(freq.min()), float(freq.max()), language=language)
+    ax.set_xlabel(_t(_FREQ_LABEL, language))
+    ax.set_ylabel(_t("Level difference [dB]", language))
+    ax.set_title(_t(title, language))
+    ax.legend(loc="best", fontsize="small")
+    ax.grid(visible=True, which="both", alpha=0.3)
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_output_mass_check(
+    result: OutputMassCheck,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """The ISO 10846-4 Inequality (3) mass limit against the mass in place.
+
+    :param result: An
+        :class:`~phonometry.vibration.structural.transfer_stiffness.OutputMassCheck`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the mass-limit curve.
+    :return: The axes.
+    """
+    from .._i18n import decimal_comma, localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    freq = np.asarray(result.frequencies, dtype=np.float64)
+    limit = np.asarray(result.mass_limit_kg, dtype=np.float64)
+    holds = np.asarray(result.holds, dtype=bool)
+    style_default(kwargs, "color", _C_PRIMARY)
+    kwargs.setdefault("label", _t(r"limit $0.06\,|F_2|/|a_2|$", language))
+    style_default(kwargs, "linewidth", 1.4)
+    ax.loglog(freq, limit, "-", **kwargs)
+    mass = decimal_comma(f"{result.output_mass_kg:g}", language)
+    ax.axhline(
+        result.output_mass_kg,
+        color=_C_REFERENCE,
+        ls="--",
+        lw=1.2,
+        label=_t("$m_0$ = {mass} kg", language).format(mass=mass),
+    )
+    if not np.all(holds):
+        ax.plot(
+            freq[~holds],
+            limit[~holds],
+            "o",
+            color=_C_SECONDARY,
+            zorder=3,
+            label=_t("condition not met", language),
+        )
+    format_frequency_axis(ax, float(freq.min()), float(freq.max()), language=language)
+    ax.set_xlabel(_t(_FREQ_LABEL, language))
+    ax.set_ylabel(_t("Mass [kg]", language))
+    ax.set_title(
+        _t(
+            "ISO 10846-4 Inequality (3): mass in front of the output force transducers",
+            language,
+        )
+    )
+    ax.legend(loc="best", fontsize="small")
+    ax.grid(visible=True, which="both", alpha=0.3)
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_effective_blocking_mass(
+    result: EffectiveBlockingMass,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """Deviation of the effective blocking mass from ``m2``, with ``f3`` marked.
+
+    :param result: An
+        :class:`~phonometry.vibration.structural.transfer_stiffness.EffectiveBlockingMass`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the deviation curve.
+    :return: The axes.
+    """
+    from .._i18n import format_number, localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    freq = np.asarray(result.frequencies, dtype=np.float64)
+    deviation = np.asarray(result.deviation_db, dtype=np.float64)
+    fmin, fmax = float(freq.min()), float(freq.max())
+    ax.axhspan(
+        -1.0,
+        1.0,
+        color=_C_REFERENCE,
+        alpha=0.12,
+        label=_t(r"$\pm$1 dB (Inequality (5))", language),
+    )
+    ignored = result.ignored_below_hz
+    if fmin < ignored:
+        ax.axvspan(
+            fmin,
+            min(ignored, fmax),
+            color=_C_MUTED,
+            alpha=0.15,
+            label=_t("below 40 Hz: ignored", language),
+        )
+    style_default(kwargs, "color", _C_PRIMARY)
+    kwargs.setdefault(
+        "label", _t(r"$\Delta L = 20\,\lg(m_{2,\mathrm{eff}}/m_2)$", language)
+    )
+    style_default(kwargs, "linewidth", 1.4)
+    ax.semilogx(freq, deviation, "-", **kwargs)
+    f3 = result.upper_frequency_limit_hz
+    if f3 is not None:
+        ax.axvline(
+            f3,
+            color=_C_SECONDARY,
+            ls=":",
+            lw=1.4,
+            label=_t("$f_3$ = {f3} Hz", language).format(
+                f3=format_number(f3, language, decimals=0)
+            ),
+        )
+    format_frequency_axis(ax, fmin, fmax, language=language)
+    ax.set_xlabel(_t(_FREQ_LABEL, language))
+    ax.set_ylabel(_t("Deviation from $m_2$ [dB]", language))
+    ax.set_title(_t("ISO 10846-4 effective blocking mass", language))
+    ax.legend(loc="best", fontsize="small")
+    ax.grid(visible=True, which="both", alpha=0.3)
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_driving_point_stiffness(
+    result: DrivingPointStiffnessResult,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """Driving-point stiffness level with the 6.2 threshold and ``f_UL`` (ISO 10846-5).
+
+    :param result: A
+        :class:`~phonometry.vibration.structural.transfer_stiffness.DrivingPointStiffnessResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the level curve.
+    :return: The axes.
+    """
+    from .._i18n import format_number, localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    freq = np.asarray(result.frequencies, dtype=np.float64)
+    levels = np.asarray(result.levels, dtype=np.float64)
+    fmin, fmax = float(freq.min()), float(freq.max())
+    low = result.low_frequency_level_db
+    style_default(kwargs, "color", _C_PRIMARY)
+    kwargs.setdefault("label", _t(r"driving-point stiffness $L_{k_{1,1}}$", language))
+    style_default(kwargs, "linewidth", 1.4)
+    ax.semilogx(freq, levels, "-", **kwargs)
+    ax.axhline(
+        low,
+        color=_C_MUTED,
+        ls="--",
+        lw=1.1,
+        label=_t("low-frequency value (1 Hz to 20 Hz)", language),
+    )
+    ax.axhline(
+        result.threshold_level_db,
+        color=_C_REFERENCE,
+        ls=":",
+        lw=1.2,
+        label=_t("2 dB below it", language),
+    )
+    f_ul = result.upper_limiting_frequency_hz
+    if f_ul is not None:
+        ax.axvline(
+            f_ul,
+            color=_C_SECONDARY,
+            ls="-",
+            lw=1.2,
+            label=_t(r"$f_\mathrm{{UL}}$ = {ful} Hz", language).format(
+                ful=format_number(f_ul, language, decimals=1, trim=True)
+            ),
+        )
+        if f_ul < fmax:
+            ax.axvspan(f_ul, fmax, color=_C_MUTED, alpha=0.12)
+    adequate = (
+        np.ones(freq.shape, dtype=bool)
+        if result.adequate is None
+        else np.asarray(result.adequate, dtype=bool)
+    )
+    if not np.all(adequate):
+        ax.plot(
+            freq[~adequate],
+            levels[~adequate],
+            "x",
+            color=_C_SECONDARY,
+            zorder=3,
+            label=_t("excluded (Inequality (1) or (2))", language),
+        )
+    format_frequency_axis(ax, fmin, fmax, language=language)
+    ax.set_xlabel(_t(_FREQ_LABEL, language))
+    ax.set_ylabel(_t("Driving-point stiffness level [dB re 1 N/m]", language))
+    ax.set_title(_t("ISO 10846-5 driving-point stiffness", language))
+    ax.legend(loc="best", fontsize="small")
+    ax.grid(visible=True, which="both", alpha=0.3)
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_driving_point_uncertainty(
+    result: DrivingPointUncertainty,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """The ISO 10846-5 Annex B budget, one bar per input quantity, with ``U = 2u``.
+
+    :param result: A
+        :class:`~phonometry.vibration.structural.transfer_stiffness.DrivingPointUncertainty`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the contribution bars.
+    :return: The axes.
+    """
+    from .._i18n import format_number
+    from .metrology import plot_uncertainty_budget
+
+    ax = plot_uncertainty_budget(result.budget, ax=ax, language=language, **kwargs)
+    expanded = format_number(result.expanded_uncertainty_db, language, decimals=2)
+    ax.axvline(
+        result.expanded_uncertainty_db,
+        color=_C_SECONDARY,
+        ls=":",
+        lw=1.4,
+        label=_t("$U = 2u$ = {u} dB", language).format(u=expanded),
+    )
+    ax.set_title(
+        _t(
+            r"ISO 10846-5 Annex B: $L_{{k,\mathrm{{av}}}}$ = {level} dB, $U$ = {u} dB",
+            language,
+        ).format(
+            level=format_number(result.band_level_db, language, decimals=1),
+            u=expanded,
+        )
+    )
+    ax.legend(loc="lower right", fontsize="small")
     return ax
 
 

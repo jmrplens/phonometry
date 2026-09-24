@@ -463,6 +463,30 @@ _PANEL_BANDS = np.array(
 )
 
 
+def _band_averaged_stiffness() -> ph.vibration.BandAveragedStiffness:
+    """Twenty lines in each third-octave band from 100 Hz to 2 kHz, of a Kelvin-Voigt element."""
+    f = np.geomspace(89.2, 2238.0, 280)
+    return ph.vibration.band_averaged_stiffness(f, 1.0e6 + 1j * 2.0 * np.pi * f * 80.0)
+
+
+def _effective_blocking_mass() -> ph.vibration.EffectiveBlockingMass:
+    """A 20 kg block that stops being rigid near 2 kHz (f3 about 1047 Hz)."""
+    f = np.geomspace(20.0, 5000.0, 200)
+    m_eff = 20.0 * (1.0 + (f / 3000.0) ** 2)
+    ones = np.ones(f.size, dtype=complex)
+    return ph.vibration.effective_blocking_mass(
+        f, m_eff * ones, ones, ones, blocking_mass_kg=20.0
+    )
+
+
+def _driving_point_stiffness() -> ph.vibration.DrivingPointStiffnessResult:
+    """A 1 MN/m spring under a 2 kg force plate: f_UL near 52 Hz."""
+    f = np.arange(1.0, 200.0, 0.2)
+    w = 2.0 * np.pi * f
+    k11 = 1.0e6 - w**2 * 2.0
+    return ph.vibration.driving_point_stiffness(f, k11 * 1.0e-6, -(w**2) * 1.0e-6)
+
+
 def _radiation_efficiency() -> ph.vibration.RadiationEfficiencyResult:
     bp = ph.vibration.plate_bending_stiffness(6.2e10, 0.006, 0.24)
     fc = ph.vibration.coincidence_frequency(2500.0 * 0.006, bp)

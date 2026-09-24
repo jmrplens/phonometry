@@ -44,6 +44,10 @@ if TYPE_CHECKING:
         RadiationEfficiencyResult,
     )
     from phonometry.vibration.structural.transfer_stiffness import (
+        DrivingPointStiffnessResult,
+        EffectiveBlockingMass,
+        LevelDifferenceCheck,
+        OutputMassCheck,
         TransferStiffnessResult,
     )
 
@@ -74,6 +78,35 @@ def _transfer_stiffness() -> TransferStiffnessResult:
     f = np.array([25.0, 50.0, 100.0, 200.0, 400.0])
     t = np.array([0.08, 0.05, 0.02, 0.008, 0.004]) * np.exp(1j * 0.1)
     return vibration.indirect_transfer_stiffness_result(f, t, blocking_mass=8.0)
+
+
+def _blocked_output() -> LevelDifferenceCheck:
+    return vibration.check_blocked_output(
+        [20.0, 31.5, 63.0, 125.0], [100.0] * 4, [70.0, 72.0, 75.0, 78.0]
+    )
+
+
+def _output_mass() -> OutputMassCheck:
+    return vibration.check_output_mass(
+        [20.0, 31.5, 63.0, 125.0], 0.1, [120.0] * 4, [100.0, 102.0, 104.0, 106.0]
+    )
+
+
+def _effective_blocking_mass() -> EffectiveBlockingMass:
+    f = np.geomspace(20.0, 5000.0, 100)
+    ones = np.ones(f.size, dtype=complex)
+    m_eff = 20.0 * (1.0 + (f / 3000.0) ** 2)
+    return vibration.effective_blocking_mass(
+        f, m_eff * ones, ones, ones, blocking_mass_kg=20.0
+    )
+
+
+def _driving_point() -> DrivingPointStiffnessResult:
+    f = np.arange(1.0, 200.0, 0.2)
+    w = 2.0 * np.pi * f
+    return vibration.driving_point_stiffness(
+        f, (1.0e6 - 2.0 * w**2) * 1.0e-6, -(w**2) * 1.0e-6
+    )
 
 
 def _radiation_efficiency() -> RadiationEfficiencyResult:
@@ -115,6 +148,10 @@ _CASES = [
         _on_axes(_rigid_mass_calibration), id="rigid_mass_calibration-on-axes"
     ),
     pytest.param(_own_figure(_transfer_stiffness), id="transfer_stiffness"),
+    pytest.param(_own_figure(_blocked_output), id="blocked_output"),
+    pytest.param(_own_figure(_output_mass), id="output_mass"),
+    pytest.param(_own_figure(_effective_blocking_mass), id="effective_blocking_mass"),
+    pytest.param(_own_figure(_driving_point), id="driving_point_stiffness"),
     pytest.param(_own_figure(_radiation_efficiency), id="radiation_efficiency"),
     pytest.param(_own_figure(_power_injection), id="power_injection"),
 ]

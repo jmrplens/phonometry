@@ -68,26 +68,18 @@ if TYPE_CHECKING:
 #: microphones as well.
 _RANGE_CLAUSES = (12, 13, 14)
 
-#: What each clause corrects for, as fiche prose.
-_SUBJECTS = {
-    9: "reflections from the case and diffraction around the microphone",
-    10: "deviation of the microphone from a uniform frequency response",
-    11: "windscreens and similar accessories",
-    12: "a sound calibrator",
-    13: "a comparison coupler",
-    14: "an electrostatic actuator",
-}
-
 
 def _basis(
     result: CorrectionUncertaintyVerification,
     metadata: ReportMetadata | None,
     language: str,
 ) -> str:
-    """The standard-basis line for the fiche."""
+    """The standard-basis line for the fiche, naming what the clause corrects
+    for in the words the verdict carries.
+    """
     clause = t(
         "IEC 62585:2012, clause {n}: corrections for {subject}", language
-    ).format(n=result.clause, subject=t(_SUBJECTS[result.clause], language))
+    ).format(n=result.clause, subject=t(result.subject, language))
     measurement_standard = (
         metadata.measurement_standard if metadata is not None else None
     )

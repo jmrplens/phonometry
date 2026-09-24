@@ -98,6 +98,7 @@ _SECTION_LIST: tuple[Section, ...] = (
             "phonometry.metrology.data_qualification",
             "phonometry.metrology.reference_values",
             "phonometry.metrology.random_incidence",
+            "phonometry.metrology.free_field_corrections",
         ),
     ),
     Section(
@@ -656,6 +657,9 @@ OBJECT_MODULE_OVERRIDES: dict[str, str] = {
     # The IEC 61260-3:2016 Table 1 limits are a read-only mapping, so a scan
     # by module finds no owner; they belong to the periodic tests they grade.
     "PERIODIC_TEST_ATTENUATION_LIMITS_DB": "phonometry.filters.periodic_tests",
+    # IEC 62585 Table I.1 likewise, owned by the module whose budget builder
+    # reads its divisors.
+    "IEC62585_TABLE_I1": "phonometry.metrology.free_field_corrections",
     # Defined in phonometry._internal.warnings, exported at the top level.
     "PhonometryWarning": "phonometry",
     # The io subpackage keeps its implementation modules private and

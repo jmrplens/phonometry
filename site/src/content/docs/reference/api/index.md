@@ -65,6 +65,7 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | [`metrology.data_qualification`](/phonometry/reference/api/metrology/data-qualification/) | Random-data qualification: stationarity tests and Rice crossing statistics. |
 | [`metrology.reference_values`](/phonometry/reference/api/metrology/reference-values/) | Preferred reference values for acoustical and vibratory levels (ISO 1683:2015). |
 | [`metrology.random_incidence`](/phonometry/reference/api/metrology/random-incidence/) | Random-incidence and diffuse-field sensitivity of a sound level meter (IEC 61183:1994). |
+| [`metrology.free_field_corrections`](/phonometry/reference/api/metrology/free-field-corrections/) | Corrections that bring a sound level meter to its free-field response (IEC 62585:2012). |
 
 ## Fluids
 

@@ -20,6 +20,12 @@ if TYPE_CHECKING:
         StationarityTestResult,
         TrendTestResult,
     )
+    from ..metrology.free_field_corrections import (
+        AdjustmentValue,
+        CorrectionUncertaintyBudget,
+        CorrectionUncertaintyVerification,
+        FreeFieldCorrection,
+    )
     from ..metrology.random_incidence import (
         DiffuseFieldSensitivity,
         DirectivityFactor,
@@ -43,6 +49,7 @@ from .common import (
     _import_pyplot,
     _new_axes,
     format_frequency_axis,
+    place_legend_clear,
     style_default,
     theme_fill,
 )
@@ -63,11 +70,14 @@ _ACCEPTANCE_LABEL = "Acceptance limit"
 #: Legend entry of the acceptance limits of several requirements at once.
 _ACCEPTANCE_LIMITS_LABEL = "Acceptance limits"
 
-#: Labels the IEC 61183 plots share with the translation table, written once.
+#: Labels the IEC 61183 and IEC 62585 plots share with the translation table,
+#: written once.
 _RI_CORRECTION_LABEL = r"$G_\mathrm{RI} - G_\mathrm{F} = -10\,\lg\gamma$"
 _SENSITIVITY_LEVEL_LABEL = "Sensitivity level [dB]"
 _FREQUENCY_LABEL = "Frequency [Hz]"
 _DIFFUSE_DEVIATION_LABEL = r"$\Delta G_\mathrm{D} = L_\mathrm{D} - L_\mathrm{D,ref}$"
+_CORRECTION_AXIS_LABEL = "Correction [dB]"
+_REFERENCE_MIC_LABEL = r"$C_\mathrm{FF,RM}$, reference microphone"
 
 _STRINGS: dict[str, str] = {
     r"Contribution to combined uncertainty $|c_i|\,u(x_i)$": r"Contribución a la incertidumbre combinada $|c_i|\,u(x_i)$",
@@ -152,7 +162,7 @@ _STRINGS: dict[str, str] = {
     r"$G_\mathrm{RI}$, random incidence": r"$G_\mathrm{RI}$, incidencia aleatoria",
     _RI_CORRECTION_LABEL: _RI_CORRECTION_LABEL,
     _SENSITIVITY_LEVEL_LABEL: "Nivel de sensibilidad [dB]",
-    "Correction [dB]": "Corrección [dB]",
+    _CORRECTION_AXIS_LABEL: "Corrección [dB]",
     "Random-incidence sensitivity level (IEC 61183)": "Nivel de sensibilidad en incidencia aleatoria (IEC 61183)",
     "Random-incidence correction (IEC 61183)": "Corrección de incidencia aleatoria (IEC 61183)",
     _FREQUENCY_LABEL: "Frecuencia [Hz]",
@@ -162,6 +172,45 @@ _STRINGS: dict[str, str] = {
     r"$G_\mathrm{D,ref}$, reference, Formula (11)": r"$G_\mathrm{D,ref}$, referencia, Fórmula (11)",
     _DIFFUSE_DEVIATION_LABEL: _DIFFUSE_DEVIATION_LABEL,
     "Diffuse-field sensitivity level (IEC 61183)": "Nivel de sensibilidad en campo difuso (IEC 61183)",
+    # IEC 62585: corrections for the free-field response of a sound level meter.
+    r"$C_\mathrm{FF,SLM}$, Formula (D.7)": r"$C_\mathrm{FF,SLM}$, Fórmula (D.7)",
+    r"$C_\mathrm{FF,SLM}$, Formula (E.6)": r"$C_\mathrm{FF,SLM}$, Fórmula (E.6)",
+    r"$C_\mathrm{N,FF,SLM}$, Formula (F.13)": r"$C_\mathrm{N,FF,SLM}$, Fórmula (F.13)",
+    _REFERENCE_MIC_LABEL: r"$C_\mathrm{FF,RM}$, micrófono de referencia",
+    r"$S_\mathrm{N,RM} + G_\mathrm{N,RC}$, reference channel": r"$S_\mathrm{N,RM} + G_\mathrm{N,RC}$, canal de referencia",
+    "Free-field correction on a sound calibrator (IEC 62585)": "Corrección de campo libre con calibrador acústico (IEC 62585)",
+    "Free-field correction in a comparison coupler (IEC 62585)": "Corrección de campo libre en acoplador de comparación (IEC 62585)",
+    "Free-field correction on an electrostatic actuator (IEC 62585)": "Corrección de campo libre con actuador electrostático (IEC 62585)",
+    "Gain of the meter": "Ganancia del sonómetro",
+    "Gain of the reference channel": "Ganancia del canal de referencia",
+    "Source to microphone distance": "Distancia de la fuente al micrófono",
+    "Free progressive wave": "Onda progresiva libre",
+    "Mountings": "Soportes",
+    "Microphone diameters": "Diámetros de los micrófonos",
+    "Rounding": "Redondeo",
+    "Repeatability": "Repetibilidad",
+    "Static pressure": "Presión estática",
+    r"Tolerance $\pm t$ the fit weighs": r"Tolerancia $\pm t$ con que pondera el ajuste",
+    "Free-field response, before the adjustment": "Respuesta en campo libre, antes del ajuste",
+    "Free-field response, adjusted ($s$ = {s} dB)": "Respuesta en campo libre, ajustada ($s$ = {s} dB)",
+    "Pressure response, adjusted": "Respuesta en campo de presión, ajustada",
+    "Deviation from the incident level [dB]": "Desviación respecto del nivel incidente [dB]",
+    r"Adjustment value $\Delta L = L_1 - L_4$ = {dl} dB (IEC 62585)": r"Valor de ajuste $\Delta L = L_1 - L_4$ = {dl} dB (IEC 62585)",
+    "Range of the {n} determinations": "Intervalo de las {n} determinaciones",
+    "{label}, mean": "{label}, media",
+    r"$f_0$ = {f} Hz, where it is zero": r"$f_0$ = {f} Hz, donde es nula",
+    r"Standard uncertainty $u_i$ [dB]": r"Incertidumbre típica $u_i$ [dB]",
+    "Uncertainty budget at {f} Hz (IEC 62585 Annex I)": "Presupuesto de incertidumbre a {f} Hz (IEC 62585, anexo I)",
+    "Type B": "Tipo B",
+    "Type A, from repeat measurements": "Tipo A, de medidas repetidas",
+    "Maximum, clause {n}": "Máximo, apartado {n}",
+    r"Expanded uncertainty $U$": r"Incertidumbre expandida $U$",
+    "Range over the microphones": "Intervalo entre micrófonos",
+    "Exceeds the maximum": "Supera el máximo",
+    "Expanded uncertainty [dB]": "Incertidumbre expandida [dB]",
+    "Expanded uncertainty, range [dB]": "Incertidumbre expandida, intervalo [dB]",
+    "Clause {n}: exceeds the maximum at {k} of {m} frequencies (IEC 62585)": "Apartado {n}: supera el máximo en {k} de {m} frecuencias (IEC 62585)",
+    "Clause {n}: within the maximum at every frequency (IEC 62585)": "Apartado {n}: dentro del máximo en todas las frecuencias (IEC 62585)",
 }
 
 
@@ -1356,7 +1405,7 @@ def plot_random_incidence_sensitivity(
         kwargs.setdefault("label", _t(_RI_CORRECTION_LABEL, language))
         ax.plot(frequencies, result.correction_db, **kwargs)
         ax.axhline(0.0, color=_C_MUTED, lw=0.8, ls="--")
-        ax.set_ylabel(_t("Correction [dB]", language))
+        ax.set_ylabel(_t(_CORRECTION_AXIS_LABEL, language))
         ax.set_title(_t("Random-incidence correction (IEC 61183)", language))
     else:
         kwargs.setdefault(
@@ -1449,5 +1498,444 @@ def plot_diffuse_field_sensitivity(
     ax.set_title(_t("Diffuse-field sensitivity level (IEC 61183)", language))
     ax.grid(visible=True, which="both", alpha=0.3)
     ax.legend(loc="lower left", fontsize="small")
+    localize_axes(ax, language)
+    return ax
+
+
+# ---------------------------------------------------------------------------
+# IEC 62585: corrections for the free-field response of a sound level meter
+# ---------------------------------------------------------------------------
+
+#: The curve label of a correction, by the source it was measured on.
+_CORRECTION_LABELS = {
+    "sound_calibrator": r"$C_\mathrm{FF,SLM}$, Formula (D.7)",
+    "comparison_coupler": r"$C_\mathrm{FF,SLM}$, Formula (E.6)",
+    "electrostatic_actuator": r"$C_\mathrm{N,FF,SLM}$, Formula (F.13)",
+}
+
+#: The label of what the reference contributes, by source.
+_REFERENCE_TERM_LABELS = {
+    "sound_calibrator": _REFERENCE_MIC_LABEL,
+    "comparison_coupler": _REFERENCE_MIC_LABEL,
+    "electrostatic_actuator": r"$S_\mathrm{N,RM} + G_\mathrm{N,RC}$, reference channel",
+}
+
+#: The title of a correction plot, by source.
+_CORRECTION_TITLES = {
+    "sound_calibrator": "Free-field correction on a sound calibrator (IEC 62585)",
+    "comparison_coupler": "Free-field correction in a comparison coupler (IEC 62585)",
+    "electrostatic_actuator": (
+        "Free-field correction on an electrostatic actuator (IEC 62585)"
+    ),
+}
+
+#: The tick label of each component of a budget, by descriptor: the symbol of
+#: Table I.1 where it has one, its name where it does not.
+_COMPONENT_LABELS = {
+    "a1": r"$L_\mathrm{ind1}$",
+    "a2": r"$L_\mathrm{ind2}$",
+    "a3": r"$L_\mathrm{ind3a}$",
+    "a4": r"$L_\mathrm{ind3b}$",
+    "a5": r"$L_{p,\mathrm{F1}} - L_{p,\mathrm{F2}}$",
+    "a6": r"$L_{p,\mathrm{P1}} - L_{p,\mathrm{P2}}$",
+    "a7": r"$C_\mathrm{FF,RM}$",
+    "a8": "Gain of the meter",
+    "a9": "Gain of the reference channel",
+    "a10": "Source to microphone distance",
+    "a11": "Free progressive wave",
+    "a12": "Mountings",
+    "a13": "Microphone diameters",
+    "a14": "Rounding",
+    "a15": "Repeatability",
+    "static pressure": "Static pressure",
+}
+
+#: How many points draw the stepped maximum of a clause across the axis.
+_MAXIMUM_CURVE_POINTS = 400
+
+#: Headroom over the largest value of the verification view.
+_VERIFICATION_HEADROOM = 1.3
+
+
+def plot_adjustment_value(
+    result: AdjustmentValue,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    r"""The free-field deviation of a meter before and after its adjustment.
+
+    Draws the deviation of the indication from the incident level as
+    measured, the same after the sensitivity adjustment of the fit, the
+    tolerance band the fit weighed it against where one was given, and the
+    pressure response after the adjustment when it was measured: curves (2)
+    and (3) of IEC 62585 Figure A.1 less the incident level (1).
+
+    :param result: An
+        :class:`~phonometry.metrology.free_field_corrections.AdjustmentValue`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the adjusted-response curve.
+    :return: The axes.
+    """
+    from .._i18n import format_number, localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    frequencies = np.asarray(result.frequencies_hz, dtype=np.float64)
+    if result.tolerance_db is not None:
+        tolerance = np.asarray(result.tolerance_db, dtype=np.float64)
+        bound = np.where(np.isfinite(tolerance), tolerance, np.nan)
+        ax.fill_between(
+            frequencies,
+            -bound,
+            bound,
+            color=theme_fill(_C_PRIMARY, ax),
+            lw=0.0,
+            label=_t(r"Tolerance $\pm t$ the fit weighs", language),
+        )
+    ax.axhline(0.0, color=_C_MUTED, lw=0.8)
+    ax.plot(
+        frequencies,
+        result.free_field_deviation_db,
+        color=_C_MUTED,
+        lw=1.0,
+        ls="--",
+        marker="o",
+        ms=3.5,
+        mfc="none",
+        label=_t("Free-field response, before the adjustment", language),
+    )
+    adjustment = format_number(result.sensitivity_adjustment_db, language, decimals=2)
+    style_default(kwargs, "color", _C_PRIMARY)
+    style_default(kwargs, "lw", 1.6)
+    style_default(kwargs, "marker", "o")
+    style_default(kwargs, "ms", 3.5)
+    kwargs.setdefault(
+        "label",
+        _t(
+            "Free-field response, adjusted ($s$ = {s} dB)",
+            language,
+            s=adjustment,
+        ),
+    )
+    ax.plot(frequencies, result.adjusted_deviation_db, **kwargs)
+    correction = result.pressure_to_free_field_correction_db
+    if correction is not None:
+        ax.plot(
+            frequencies,
+            -np.asarray(correction, dtype=np.float64),
+            color=_C_SECONDARY,
+            lw=1.2,
+            ls="-.",
+            marker="s",
+            ms=3.5,
+            mfc="none",
+            label=_t("Pressure response, adjusted", language),
+        )
+    check = format_number(result.check_frequency_hz, language, decimals=0)
+    ax.axvline(
+        result.check_frequency_hz,
+        color=_C_REFERENCE,
+        lw=1.0,
+        ls=":",
+        label=_t(r"$f_\mathrm{{R}}$ = {f} Hz", language, f=check),
+    )
+    ax.set_xscale("log")
+    format_frequency_axis(ax, language=language)
+    ax.set_xlabel(_t(_FREQUENCY_LABEL, language))
+    ax.set_ylabel(_t("Deviation from the incident level [dB]", language))
+    delta = format_number(result.adjustment_db, language, decimals=2)
+    ax.set_title(
+        _t(
+            r"Adjustment value $\Delta L = L_1 - L_4$ = {dl} dB (IEC 62585)",
+            language,
+            dl=delta,
+        )
+    )
+    ax.grid(visible=True, which="both", alpha=0.3)
+    place_legend_clear(ax.legend(fontsize="small"))
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_free_field_correction(
+    result: FreeFieldCorrection,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    r"""The IEC 62585 free-field correction of a meter against frequency.
+
+    Draws the mean correction over the determinations, the band between the
+    smallest and the largest when there are several, and what the reference
+    microphone contributes to it.
+
+    :param result: A
+        :class:`~phonometry.metrology.free_field_corrections.FreeFieldCorrection`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the mean-correction curve.
+    :return: The axes.
+    """
+    from .._i18n import format_number, localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    frequencies = np.asarray(result.frequencies_hz, dtype=np.float64)
+    corrections = np.asarray(result.corrections_db, dtype=np.float64)
+    count = result.determinations
+    if count > 1:
+        ax.fill_between(
+            frequencies,
+            corrections.min(axis=0),
+            corrections.max(axis=0),
+            color=theme_fill(_C_PRIMARY, ax),
+            lw=0.0,
+            label=_t("Range of the {n} determinations", language, n=count),
+        )
+    ax.axhline(0.0, color=_C_MUTED, lw=0.8)
+    style_default(kwargs, "color", _C_PRIMARY)
+    style_default(kwargs, "lw", 1.6)
+    style_default(kwargs, "marker", "o")
+    style_default(kwargs, "ms", 3.5)
+    label = _t(_CORRECTION_LABELS[result.source], language)
+    if count > 1:
+        label = _t("{label}, mean", language, label=label)
+    kwargs.setdefault("label", label)
+    ax.plot(frequencies, result.correction_db, **kwargs)
+    ax.plot(
+        frequencies,
+        result.reference_correction_db,
+        color=_C_SECONDARY,
+        lw=1.2,
+        ls="--",
+        marker="s",
+        ms=3.5,
+        mfc="none",
+        label=_t(_REFERENCE_TERM_LABELS[result.source], language),
+    )
+    if result.check_frequency_hz is not None:
+        f0 = format_number(result.check_frequency_hz, language, decimals=0)
+        ax.axvline(
+            result.check_frequency_hz,
+            color=_C_REFERENCE,
+            lw=1.0,
+            ls=":",
+            label=_t(r"$f_0$ = {f} Hz, where it is zero", language, f=f0),
+        )
+    ax.set_xscale("log")
+    format_frequency_axis(ax, language=language)
+    ax.set_xlabel(_t(_FREQUENCY_LABEL, language))
+    ax.set_ylabel(_t(_CORRECTION_AXIS_LABEL, language))
+    ax.set_title(_t(_CORRECTION_TITLES[result.source], language))
+    ax.grid(visible=True, which="both", alpha=0.3)
+    place_legend_clear(ax.legend(fontsize="small"))
+    localize_axes(ax, language)
+    return ax
+
+
+def _component_label(descriptor: str, language: str) -> str:
+    """The tick label of one component: ``a7: C_FF,RM``, or its own name."""
+    label = _COMPONENT_LABELS.get(descriptor)
+    if label is None:
+        return descriptor
+    text = _t(label, language)
+    return f"{descriptor}: {text}" if descriptor.startswith("a") else text
+
+
+def plot_correction_budget(
+    result: CorrectionUncertaintyBudget,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    r"""The standard uncertainty of each component of an IEC 62585 budget.
+
+    One bar per component in the order of Table I.1, the statistical
+    (Type A) ones apart in colour, with the combined standard uncertainty
+    marked and the coverage factor and expanded uncertainty in the title.
+
+    :param result: A
+        :class:`~phonometry.metrology.free_field_corrections.CorrectionUncertaintyBudget`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to :meth:`~matplotlib.axes.Axes.barh`.
+    :return: The axes.
+    """
+    from matplotlib.patches import Patch
+
+    from .._i18n import format_number, localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    values = np.asarray(result.standard_uncertainties_db, dtype=np.float64)
+    statistical = np.isfinite(np.asarray(result.dofs, dtype=np.float64))
+    positions = np.arange(values.size)
+    colours = [_C_SECONDARY if flag else _C_PRIMARY for flag in statistical]
+    style_default(kwargs, "color", colours)
+    ax.barh(positions, values, **kwargs)
+    uc = format_number(result.combined_uncertainty_db, language, decimals=4)
+    combined = ax.axvline(
+        result.combined_uncertainty_db,
+        color=_C_REFERENCE,
+        ls="--",
+        lw=1.2,
+        label=_t(r"$u_\mathrm{{c}}$ = {uc} dB", language, uc=uc),
+    )
+    ax.set_yticks(positions)
+    ax.set_yticklabels(
+        [_component_label(name, language) for name in result.descriptors]
+    )
+    ax.invert_yaxis()
+    ax.set_xlim(0.0, 1.15 * max(float(values.max()), result.combined_uncertainty_db))
+    ax.set_xlabel(_t(r"Standard uncertainty $u_i$ [dB]", language))
+    frequency = format_number(result.frequency_hz, language, decimals=0)
+    dof = result.effective_dof
+    nu = "∞" if math.isinf(dof) else format_number(dof, language, decimals=2)
+    k = format_number(result.coverage_factor, language, decimals=2)
+    expanded = format_number(result.expanded_uncertainty_db, language, decimals=3)
+    ax.set_title(
+        _t("Uncertainty budget at {f} Hz (IEC 62585 Annex I)", language, f=frequency)
+        + "\n"
+        + _t(
+            r"$\nu_\mathrm{{eff}}$ = {nu}, $k$ = {k}, $U$ = {u} dB",
+            language,
+            nu=nu,
+            k=k,
+            u=expanded,
+        )
+    )
+    handles: list[Any] = [Patch(color=_C_PRIMARY, label=_t("Type B", language))]
+    if np.any(statistical):
+        handles.append(
+            Patch(
+                color=_C_SECONDARY,
+                label=_t("Type A, from repeat measurements", language),
+            )
+        )
+    handles.append(combined)
+    place_legend_clear(ax.legend(handles=handles, fontsize="small"))
+    ax.grid(visible=True, axis="x", alpha=0.3)
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_correction_uncertainty_verification(
+    result: CorrectionUncertaintyVerification,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    r"""The expanded uncertainties of a set of corrections against the
+    maximum of their IEC 62585 clause.
+
+    Draws the maximum permitted by the clause as a stepped line across the
+    frequencies, the actual expanded uncertainty at each, the range of the
+    corrections over the microphones when it was given, and a cross on every
+    value that exceeds the maximum.
+
+    :param result: A
+        :class:`~phonometry.metrology.free_field_corrections.CorrectionUncertaintyVerification`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the expanded-uncertainty curve.
+    :return: The axes.
+    """
+    from .._i18n import localize_axes
+    from ..metrology.free_field_corrections import maximum_expanded_uncertainty
+
+    ax = ax if ax is not None else _new_axes()
+    frequencies = np.asarray(result.frequencies_hz, dtype=np.float64)
+    low, high = float(frequencies[0]), float(frequencies[-1])
+    grid = (
+        np.array([low])
+        if math.isclose(low, high)
+        else np.logspace(math.log10(low), math.log10(high), _MAXIMUM_CURVE_POINTS)
+    )
+    ax.plot(
+        grid,
+        maximum_expanded_uncertainty(grid, clause=result.clause),
+        color=_C_REFERENCE,
+        lw=1.5,
+        label=_t("Maximum, clause {n}", language, n=result.clause),
+    )
+    style_default(kwargs, "color", _C_PRIMARY)
+    style_default(kwargs, "lw", 1.4)
+    style_default(kwargs, "marker", "o")
+    style_default(kwargs, "ms", 4.0)
+    kwargs.setdefault("label", _t(r"Expanded uncertainty $U$", language))
+    ax.plot(frequencies, result.expanded_uncertainty_db, **kwargs)
+    tops = [
+        float(np.max(result.maximum_uncertainty_db)),
+        float(np.max(result.expanded_uncertainty_db)),
+    ]
+    failing = ~np.asarray(result.uncertainty_passes)
+    if result.correction_range_db is not None:
+        ranges = np.asarray(result.correction_range_db, dtype=np.float64)
+        ax.plot(
+            frequencies,
+            ranges,
+            color=_C_SECONDARY,
+            lw=1.0,
+            ls="--",
+            marker="^",
+            ms=4.5,
+            mfc="none",
+            label=_t("Range over the microphones", language),
+        )
+        tops.append(float(ranges.max()))
+        range_failing = ~np.asarray(result.range_passes)
+        if np.any(range_failing):
+            ax.plot(
+                frequencies[range_failing],
+                ranges[range_failing],
+                ls="none",
+                marker="x",
+                ms=8.0,
+                mew=2.0,
+                color=_C_REFERENCE,
+            )
+    if np.any(failing):
+        ax.plot(
+            frequencies[failing],
+            np.asarray(result.expanded_uncertainty_db)[failing],
+            ls="none",
+            marker="x",
+            ms=8.0,
+            mew=2.0,
+            color=_C_REFERENCE,
+            label=_t("Exceeds the maximum", language),
+        )
+    ax.set_ylim(0.0, _VERIFICATION_HEADROOM * max(tops))
+    ax.set_xscale("log")
+    format_frequency_axis(ax, language=language)
+    ax.set_xlabel(_t(_FREQUENCY_LABEL, language))
+    # The range shares the axis: a spread of corrections, not an uncertainty.
+    ylabel = (
+        "Expanded uncertainty [dB]"
+        if result.correction_range_db is None
+        else "Expanded uncertainty, range [dB]"
+    )
+    ax.set_ylabel(_t(ylabel, language))
+    failures = int(result.failing_frequencies_hz.size)
+    if failures:
+        title = _t(
+            "Clause {n}: exceeds the maximum at {k} of {m} frequencies (IEC 62585)",
+            language,
+            n=result.clause,
+            k=failures,
+            m=frequencies.size,
+        )
+    else:
+        title = _t(
+            "Clause {n}: within the maximum at every frequency (IEC 62585)",
+            language,
+            n=result.clause,
+        )
+    ax.set_title(title)
+    ax.grid(visible=True, which="both", alpha=0.3)
+    place_legend_clear(ax.legend(fontsize="small"))
     localize_axes(ax, language)
     return ax

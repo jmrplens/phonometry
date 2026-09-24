@@ -363,6 +363,10 @@ from .metrology import (
     generate_conformance_rule_examples,
     generate_dbfs_versus_spl,
     generate_diffuse_field_sensitivity,
+    generate_free_field_adjustment,
+    generate_free_field_correction,
+    generate_free_field_uncertainty,
+    generate_free_field_verification,
     generate_random_incidence_correction,
     generate_random_incidence_directivity,
     generate_rice_level_crossings,
@@ -994,6 +998,12 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     generate_random_incidence_directivity,
     generate_random_incidence_correction,
     generate_diffuse_field_sensitivity,
+    # IEC 62585: the corrections that bring a meter on a calibrator, a
+    # coupler or an actuator to its free-field response.
+    generate_free_field_adjustment,
+    generate_free_field_correction,
+    generate_free_field_uncertainty,
+    generate_free_field_verification,
     generate_stationarity_glide_blind_spot,
     generate_rice_nongaussian_screen,
     # Psychoacoustics / open-plan plots (sharpness weighting, spatial decay)

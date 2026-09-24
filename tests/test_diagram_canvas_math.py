@@ -361,6 +361,23 @@ def test_descriptive_subscripts_stay_upright() -> None:
     ]
 
 
+def test_a_curated_script_through_a_digit_stays_upright_to_its_end() -> None:
+    # IEC 62585:2012 prints the two readings in the comparison coupler,
+    # L_ind3a and L_ind3b, upright from end to end (Figure E.1, Table I.1);
+    # the letter scan stops at the digit and would set the a apart, italic.
+    assert _math_runs("$L_{ind3a}$") == [
+        ("L", True, 0.0, 1.0),
+        ("ind3a", False, 0.22, 0.70),
+    ]
+    assert _math_runs("$L_{ind3b}$")[1] == ("ind3b", False, 0.22, 0.70)
+    # A script that is not curated keeps the index rule for its last letter.
+    assert _math_runs("$L_{ind3x}$") == [
+        ("L", True, 0.0, 1.0),
+        ("ind3", False, 0.22, 0.70),
+        ("x", True, 0.22, 0.70),
+    ]
+
+
 def test_a_greek_and_latin_script_splits_by_letter() -> None:
     # Δl is the end correction of a slit mouth (Jiménez et al. 2017,
     # Sci. Rep. 7:5389, Eq. (5)): the Δ is an operator and upright, the l

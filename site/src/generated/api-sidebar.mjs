@@ -49,6 +49,7 @@ export const apiSections = {
       'reference/api/metrology/data-qualification',
       'reference/api/metrology/reference-values',
       'reference/api/metrology/random-incidence',
+      'reference/api/metrology/free-field-corrections',
     ],
   },
   'fluids': {

@@ -1977,6 +1977,119 @@ dos ediciones con las mismas entradas y en el mismo orden.
   coloca la fuente.
 - **Estado:** sin notificar.
 
+## IEC 62585:2012, Tabla I.2 (un factor de cobertura que sus propios grados de libertad no dan)
+
+- **Ubicación:** Anexo I, Tabla I.2 «Uncertainty example for a frequency of
+  1 kHz» (folio impreso 38), la última fila, «Expanded uncertainty of
+  $C_\mathrm{FF,SLM}$».
+- **El impreso:** «(normal) **k = 2,11**» junto a «Effective degree of freedom
+  = 29,98», con la incertidumbre expandida impresa «0,12» y un dígito de guarda
+  en subíndice «(4)», es decir 0,124 dB, sobre una incertidumbre típica
+  combinada de «0,059 0» dB.
+- **El problema:** el apartado 5 pide el factor de cobertura que da un nivel
+  de confianza del 95 %, y el Anexo I calcula los grados de libertad efectivos
+  por Welch-Satterthwaite «thereby enabling the coverage factor k to be
+  selected to provide a level of confidence of 95 %». Las componentes de la
+  propia tabla dan $u_\mathrm{c} = 0{,}0590$ dB y $\nu_\mathrm{eff} =
+  u_\mathrm{c}^4 / (0{,}03^4/2) = 29{,}98$, ambos como se imprimen, y el factor
+  de Student para el 95 % con 29,98 grados de libertad es $t_{0{,}975}(29{,}98)
+  = $ **2,04**, no 2,11; 2,11 es el factor para unos 17 grados de libertad. La
+  incertidumbre expandida que resulta es $t_{0{,}975}(29{,}98) \times
+  u_\mathrm{c} = 2{,}042\,3 \times 0{,}059\,031 = 0{,}120\,56$ dB, que con su
+  dígito de guarda se imprimiría **0,12(1)**; el 0,12(4) impreso es
+  $2{,}11 \times 0{,}0590 = 0{,}124\,49$ dB. Con los dos decimales con que se
+  da la corrección (componente a14), ambos se leen 0,12 dB.
+- **Evidencia:** el presupuesto recalculado a partir de los quince valores y
+  divisores impresos, y el cuantil de Student evaluado en los grados de
+  libertad impresos. Verificado en la página 40 del PDF (p. 38 impresa) de
+  BS EN 62585:2012, el texto inglés de EN 62585:2012, que es IEC 62585:2012
+  sin cambios.
+- **Comportamiento de la biblioteca:** `metrology.correction_uncertainty_budget`
+  toma el factor de cobertura de los grados de libertad efectivos, aquí 2,042,
+  y las filas de conformidad de la Tabla I.2 fijan ese factor y la
+  incertidumbre expandida que da, 0,121 dB, con los impresos señalados como
+  errata
+  ([`tests/metrology/test_free_field_corrections.py`](https://github.com/jmrplens/phonometry/blob/main/tests/metrology/test_free_field_corrections.py)).
+- **Estado:** sin notificar.
+
+## IEC 62585:2012, Tabla H.1 (el exponente del índice 31)
+
+- **Ubicación:** Anexo H, Tabla H.1 «Exact frequencies for one-twelfth-octave
+  steps over one decade» (folio impreso 35), la fila del índice 31.
+- **El impreso:** «Exact $f_x$» **$10^{31/80}$**, junto a «Exact $f_x$
+  calculated» 5,956 621 kHz.
+- **El problema:** todas las demás filas imprimen el exponente $x/40$, que es
+  la Fórmula (H.1), $f_x = f_\mathrm{r} \cdot 10^{3x/10b}$ con $b = 12$, y el
+  valor calculado a su lado es $10^{31/40} = 5{,}956\,621$. $10^{31/80}$ daría
+  2,441 kHz, fuera de la década que cubre la tabla. El exponente se lee
+  **$10^{31/40}$**.
+- **Evidencia:** la Fórmula (H.1) evaluada para los 41 índices; los 41
+  valores calculados se reproducen con las siete cifras significativas
+  impresas. Verificado en la página 37 del PDF (p. 35 impresa) de
+  BS EN 62585:2012, el texto inglés de EN 62585:2012, que es IEC 62585:2012
+  sin cambios.
+- **Comportamiento de la biblioteca:** `metrology.exact_frequencies` evalúa la
+  Fórmula (H.1) y nunca lee la columna de exponentes, así que no hizo falta
+  ningún cambio; la fila de conformidad de la Tabla H.1 comprueba los 41
+  valores calculados.
+- **Estado:** sin notificar.
+
+## IEC 62585:2012, Fórmulas (E.4) a (E.6) (las dos lecturas en el acoplador intercambiadas)
+
+- **Ubicación:** Anexo E, Fórmulas (E.4), (E.5) y (E.6) (folio impreso 26),
+  frente a la Figura E.1 y sus Fórmulas (E.3A) y (E.3B) (folio impreso 25), la
+  lista de símbolos bajo (E.6) y los descriptores a3 y a4 de la Tabla I.1
+  (folio impreso 37).
+- **El impreso:** Figura E.1: «$L_\mathrm{ind3a} = L_{p,\mathrm{P1}} +
+  \Delta L_\mathrm{P,RM}$ (E.3A)» y «$L_\mathrm{ind3b} = L_{p,\mathrm{P2}} +
+  \Delta L_\mathrm{P,SLM}$ (E.3B)», con $L_{p,\mathrm{P1}}$ dibujado en el
+  micrófono de referencia y $L_{p,\mathrm{P2}}$ en el sonómetro; la lista de
+  símbolos: «$L_{p,\mathrm{P1}}$ is the sound pressure level at reference
+  microphone in the comparison coupler», «$L_{p,\mathrm{P2}}$ is the sound
+  pressure level at sound level meter»; la Tabla I.1: «$L_\mathrm{ind3a}$ Level
+  measurement – reference microphone in comparison coupler», «$L_\mathrm{ind3b}$
+  Level measurement – sound level meter in comparison coupler». Y después
+  «$C_\mathrm{FF,SLM} = (L_\mathrm{ind1} - L_\mathrm{ind3a}) -
+  (L_\mathrm{ind2} - L_\mathrm{ind3b}) - (L_{p,\mathrm{F1}} -
+  L_{p,\mathrm{F2}}) + (L_{p,\mathrm{P1}} - L_{p,\mathrm{P2}}) +
+  C_\mathrm{FF,RM}$ (E.6)».
+- **El problema:** la corrección es la respuesta del sonómetro en campo libre
+  menos su respuesta en el acoplador, $\Delta L_\mathrm{F,SLM} -
+  \Delta L_\mathrm{P,SLM}$, como dice (E.5), y con las definiciones de la
+  Figura E.1 eso es $(L_\mathrm{ind1} - L_\mathrm{ind3b}) - (L_\mathrm{ind2} -
+  L_\mathrm{ind3a}) - (L_{p,\mathrm{F1}} - L_{p,\mathrm{F2}}) +
+  (L_{p,\mathrm{P2}} - L_{p,\mathrm{P1}}) + C_\mathrm{FF,RM}$. Las Fórmulas
+  (E.4) a (E.6) son las (D.5) a (D.7) del calibrador con $L_\mathrm{ind3}$ y
+  $L_\mathrm{ind4}$ renombrados, así que toman $L_\mathrm{ind3a}$ como el
+  sonómetro y $L_\mathrm{ind3b}$ como la referencia, y $L_{p,\mathrm{P1}}$ en
+  el sonómetro. Leída con las etiquetas de la propia figura, (E.6) queda a
+  $2(\Delta L_\mathrm{P,SLM} - \Delta L_\mathrm{P,RM})$ de la corrección.
+  Son las desviaciones de la indicación de cada canal respecto del nivel en el
+  acoplador, y el método «requires neither absolute measurements nor an
+  absolutely calibrated sound level meter» (E.1, folio impreso 25) mientras el
+  canal de referencia lee «the level of the output voltage from the
+  microphone» (E.2, paso 2, folio impreso 26), así que el error arrastra la
+  diferencia entre las sensibilidades absolutas de los dos canales y está en
+  todas las frecuencias: decenas de decibelios cuando un canal lee en
+  decibelios re 1 V y el otro en nivel de presión sonora. Solo cuando los dos
+  canales leen nivel de presión sonora se reduce al doble de la diferencia
+  entre las dos respuestas de presión. O bien la figura, la lista de símbolos
+  y la Tabla I.1 intercambian las dos etiquetas, o lo hacen las fórmulas; la
+  página no puede sostener ambas cosas.
+- **Evidencia:** (E.1) a (E.3B) sustituidas en (E.4), que no se reduce a
+  $\Delta L_\mathrm{F,SLM} - \Delta L_\mathrm{P,SLM}$ con las etiquetas de la
+  figura y sí con las de las fórmulas. Verificado en las páginas 27 y 28 del
+  PDF (pp. 25 y 26 impresas) y en la página 39 del PDF (p. 37 impresa) de
+  BS EN 62585:2012, el texto inglés de EN 62585:2012, que es IEC 62585:2012
+  sin cambios.
+- **Comportamiento de la biblioteca:** `metrology.comparison_coupler_correction`
+  nombra sus entradas por lo que mide cada lectura, `slm_coupler_level_db` y
+  `reference_coupler_level_db`, así que ninguna de las dos rotulaciones le
+  afecta; la fila de conformidad del Anexo E construye las lecturas con las
+  etiquetas de la Figura E.1 y los tests fijan el tamaño de la discrepancia
+  ([`tests/metrology/test_free_field_corrections.py`](https://github.com/jmrplens/phonometry/blob/main/tests/metrology/test_free_field_corrections.py)).
+- **Estado:** sin notificar.
+
 ## UNE-EN ISO 9614-1:2010, apartado 9.1 (el signo perdido de «signed magnitude» en la traducción)
 
 - **Ubicación:** apartado 9.1, la lista de símbolos bajo la Fórmula (11)

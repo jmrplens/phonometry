@@ -5,9 +5,11 @@ Narrowed in 4.0 to the transverse metrology: calibration, GUM uncertainty,
 data qualification, the ISO 1683 reference values every level is counted
 from, the conformance rule the IEC TC 29 instrument standards written since
 2013 grade an instrument by, the IEC 60942 verdict on the sound calibrator
-every calibration starts from, and the IEC 61183 random-incidence and
-diffuse-field sensitivity of a sound level meter. The filter banks and
-weightings moved to :mod:`phonometry.filters`, the general signal analysis to
+every calibration starts from, the IEC 61183 random-incidence and
+diffuse-field sensitivity of a sound level meter, and the IEC 62585
+corrections that bring a sound level meter on a calibrator, coupler or
+actuator to its free-field response. The filter banks and weightings moved to
+:mod:`phonometry.filters`, the general signal analysis to
 :mod:`phonometry.signals` and the IEC 61043 intensity-instrument class check
 to :mod:`phonometry.emission.intensity_compliance`, which is what it verifies.
 """
@@ -25,6 +27,22 @@ from .data_qualification import (
     peak_statistics,
     stationarity_test,
     trend_test,
+)
+from .free_field_corrections import (
+    IEC62585_TABLE_I1,
+    AdjustmentValue,
+    CorrectionUncertaintyBudget,
+    CorrectionUncertaintyVerification,
+    FreeFieldCorrection,
+    UncertaintyComponentRow,
+    adjustment_value,
+    comparison_coupler_correction,
+    correction_uncertainty_budget,
+    electrostatic_actuator_correction,
+    exact_frequencies,
+    maximum_expanded_uncertainty,
+    sound_calibrator_correction,
+    verify_correction_uncertainty,
 )
 from .random_incidence import (
     IEC61183_TABLE_B1,
@@ -102,16 +120,21 @@ __all__ = [
     "FREQUENCY_ACCEPTANCE_LIMITS_PERCENT",
     "FREQUENCY_MAX_UNCERTAINTY_PERCENT",
     "IEC61183_TABLE_B1",
+    "IEC62585_TABLE_I1",
     "ISO1683_REFERENCE_VALUES",
     "LEVEL_ACCEPTANCE_LIMITS_DB",
     "LEVEL_MAX_UNCERTAINTY_DB",
     "SUPPLY_VOLTAGE_ACCEPTANCE_LIMITS_DB",
     "SUPPLY_VOLTAGE_MAX_UNCERTAINTY_DB",
+    "AdjustmentValue",
     "CalibrationWarning",
     "CalibratorTableRow",
     "ConformanceVerification",
+    "CorrectionUncertaintyBudget",
+    "CorrectionUncertaintyVerification",
     "DiffuseFieldSensitivity",
     "DirectivityFactor",
+    "FreeFieldCorrection",
     "LevelCrossingResult",
     "MonteCarloResult",
     "PeakStatisticsResult",
@@ -125,28 +148,37 @@ __all__ = [
     "SphereDivisionWarning",
     "StationarityTestResult",
     "TrendTestResult",
+    "UncertaintyComponentRow",
     "UncertaintyResult",
     "UncertaintyWarning",
     "adjustment_factors",
+    "adjustment_value",
     "axisymmetric_directivity_factor",
     "combine_uncertainty",
+    "comparison_coupler_correction",
+    "correction_uncertainty_budget",
     "coverage_factor",
     "diffuse_field_sensitivity",
     "directivity_factor",
+    "electrostatic_actuator_correction",
     "equal_area_directivity_factor",
     "equal_area_incidence_angles",
+    "exact_frequencies",
     "expanded_uncertainty",
     "largest_element_fraction",
     "level_crossing_rate",
+    "maximum_expanded_uncertainty",
     "monte_carlo",
     "peak_statistics",
     "random_incidence_sensitivity",
     "rectangular",
     "sensitivity",
+    "sound_calibrator_correction",
     "stationarity_test",
     "trend_test",
     "triangular",
     "u_shaped",
     "verify_conformance",
+    "verify_correction_uncertainty",
     "verify_sound_calibrator",
 ]

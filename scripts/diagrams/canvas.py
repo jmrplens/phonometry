@@ -184,6 +184,10 @@ _ROMAN_SCRIPTS = frozenset(
         # IEC 61183:1994, printed upright in L_rd, G_RI and G_RI,ref.
         "rd",
         "RI",
+        # FF/RM: the free field and the reference microphone of IEC 62585:2012,
+        # printed upright in C_FF,RM.
+        "FF",
+        "RM",
         "rms",
         "tot",
         "TOT",
@@ -333,6 +337,15 @@ _MIXED_SCRIPTS: dict[str, str] = {
     "Δl": "uv",
 }
 
+#: Whole subscripts that run through a digit and are printed upright from end
+#: to end. The letter scan of :func:`_math_tokens` stops at a digit, so in
+#: ``ind3a`` it would read ``ind`` against :data:`_ROMAN_SCRIPTS` and leave the
+#: trailing ``a`` alone, a single letter it sets italic as an index. IEC
+#: 62585:2012 prints the readings of the comparison coupler, ``L_ind3a`` and
+#: ``L_ind3b``, upright throughout (Figure E.1, Table I.1), and so do the
+#: guide and the budget plot.
+_ROMAN_SCRIPT_RUNS = frozenset({"ind3a", "ind3b"})
+
 #: Script metrics of the ``$...$`` composer, as fractions of the font size:
 #: how far a subscript drops, how far a superscript rises, and the glyph
 #: scale of both.
@@ -426,7 +439,9 @@ def _math_tokens(run: str, s: str, *, script: bool = False) -> list[tuple[str, s
     the upright ``\Delta`` mathtext sets in the matplotlib figures), and
     at the baseline runs of two or more Latin letters, which are operator
     names and acronyms (log, grad, CN), never products; a product of two
-    symbols is written with an explicit space or middle dot between them. ``sub`` and ``sup``
+    symbols is written with an explicit space or middle dot between them. A
+    whole script of :data:`_ROMAN_SCRIPT_RUNS` (``ind3a``) is one upright
+    run, though it runs through a digit. ``sub`` and ``sup``
     carry the payload of ``_``/``^``, braced or single character, to be
     tokenized again at script size.
 
@@ -440,6 +455,8 @@ def _math_tokens(run: str, s: str, *, script: bool = False) -> list[tuple[str, s
     unclosed script brace, and a script inside a script (``L_{p_1}``),
     which the composer cannot set.
     """
+    if script and run in _ROMAN_SCRIPT_RUNS:
+        return [("up", run)]
     out: list[tuple[str, str]] = []
     i = 0
     while i < len(run):

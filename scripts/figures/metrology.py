@@ -31,7 +31,11 @@ from .theme import (
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-    from phonometry.metrology import DirectivityFactor, RandomIncidenceSensitivity
+    from phonometry.metrology import (
+        DirectivityFactor,
+        FreeFieldCorrection,
+        RandomIncidenceSensitivity,
+    )
 
 
 def generate_calibration_stability(output_dir: str) -> None:
@@ -1411,4 +1415,186 @@ def generate_diffuse_field_sensitivity(output_dir: str) -> None:
     result.plot(ax, language=_LANG)
     fig.tight_layout()
     save_figure(output_dir, "diffuse_field_sensitivity.svg")
+    plt.close()
+
+
+# ---------------------------------------------------------------------------
+# IEC 62585: the corrections that bring a meter to its free-field response
+# ---------------------------------------------------------------------------
+#
+# The four figures of the guide signals/metrology/free-field-corrections, built
+# with the code the guide prints, step for step, so that its "Show the code for
+# these figures" block draws them exactly: the adjustment value of Annex A for
+# a synthetic class 1 meter, its corrections on a multi-frequency calibrator
+# (Annex D) and on an electrostatic actuator (Annex F), the budgets of Tables
+# I.2 and I.3, and the verdict of clause 12 on the calibrator's corrections.
+
+#: Annex I, Table I.2 (printed folio 38): the value of each component at
+#: 1 kHz, which the guide writes out as ``table_i2``.
+_TABLE_I2_DB = {
+    "a1": 0.005,
+    "a2": 0.005,
+    "a3": 0.005,
+    "a4": 0.005,
+    "a5": 0.05,
+    "a6": 0.0,
+    "a7": 0.06,
+    "a8": 0.025,
+    "a9": 0.025,
+    "a10": 0.029,
+    "a11": 0.013,
+    "a12": 0.013,
+    "a13": 0.0,
+    "a14": 0.005,
+    "a15": 0.03,
+}
+
+#: Table I.3 (printed folio 39): the four components that change at 8 kHz.
+_TABLE_I3_CHANGES_DB = {"a7": 0.17, "a11": 0.104, "a12": 0.104, "a15": 0.06}
+
+#: The guide's per-octave budget, 63 Hz to 16 kHz: the expanded uncertainty
+#: of C_FF,RM (a7), the field and mountings (a11 and a12) and the
+#: repeatability (a15), the rest as Table I.2.
+_OCTAVE_A7_DB = (0.06, 0.06, 0.06, 0.06, 0.06, 0.08, 0.10, 0.17, 0.30)
+_OCTAVE_A11_DB = (0.013, 0.013, 0.013, 0.013, 0.013, 0.03, 0.06, 0.104, 0.18)
+_OCTAVE_A15_DB = (0.03, 0.03, 0.03, 0.03, 0.03, 0.04, 0.05, 0.06, 0.09)
+
+
+def _meter_octaves() -> dict[str, Any]:
+    """The guide's synthetic meter at the nine exact octaves.
+
+    ``c_ff_rm`` is an illustrative free-field correction of the LS2P
+    reference, ``free`` and ``pressure`` the meter's response in a free field
+    and on the calibrator, and ``spread`` what three microphones of the model
+    add to them.
+    """
+    from phonometry import metrology
+
+    f = metrology.exact_frequencies(63, 16000, fraction=1)
+    x = f / 1000
+    return {
+        "f": f,
+        "x": x,
+        "c_ff_rm": 0.05 * x**1.3,
+        "free": 0.1 * np.sin(np.log(x)) - 0.05 * x**1.2,
+        "pressure": -0.1 * x**1.5,
+        "spread": np.array([[0.0], [0.02], [-0.03]]) * x**0.8,
+    }
+
+
+def _calibrator_correction() -> "FreeFieldCorrection":
+    """The guide's ``c``: Formula (D.7) on the three microphones."""
+    from phonometry import metrology
+
+    m = _meter_octaves()
+    return metrology.sound_calibrator_correction(
+        m["f"],
+        94.0 + m["free"] + m["spread"],
+        94.0 + m["c_ff_rm"],
+        94.0 + m["pressure"] + m["spread"] / 2,
+        94.0,
+        reference_free_field_correction_db=m["c_ff_rm"],
+    )
+
+
+def generate_free_field_adjustment(output_dir: str) -> None:
+    """IEC 62585 Annex A: the adjustment value at the calibration check frequency."""
+    print("Generating free_field_adjustment...")
+    from phonometry import filters, metrology
+
+    f3 = metrology.exact_frequencies(63, 16000, fraction=3)
+    nominal, lower, upper = filters.weighting_class_limits(1)
+    band = (nominal >= 63) & (nominal <= 16000)
+    tolerance = np.minimum(upper, -lower)[band]
+    x = f3 / 1000
+    response = 0.4 + 0.12 * np.cos(3 * np.log(x)) - 0.3 * (x / 8) ** 2
+    result = metrology.adjustment_value(
+        f3,
+        94.0 + response,
+        94.35,
+        calibrator_level_db=94.0,
+        tolerance_db=tolerance,
+    )
+    fig, ax = plt.subplots(figsize=(10, 6))
+    result.plot(ax, language=_LANG)
+    fig.tight_layout()
+    save_figure(output_dir, "free_field_adjustment.svg")
+    plt.close()
+
+
+def generate_free_field_correction(output_dir: str) -> None:
+    """IEC 62585 Formulas (D.7) and (F.13): a calibrator and an actuator."""
+    print("Generating free_field_correction...")
+    from phonometry import metrology
+
+    m = _meter_octaves()
+    calibrator = _calibrator_correction()
+    actuator = metrology.electrostatic_actuator_correction(
+        m["f"],
+        94.0 + m["free"] + m["spread"],
+        94.0 - 26.0 + m["c_ff_rm"],
+        94.0 - 0.08 * m["x"] ** 1.7 + m["spread"] / 2,
+        reference_sensitivity_level_db=-26.0 + m["c_ff_rm"],
+    )
+    fig, (ax_calibrator, ax_actuator) = plt.subplots(1, 2, figsize=(13.5, 5.6))
+    calibrator.plot(ax_calibrator, language=_LANG)
+    actuator.plot(ax_actuator, language=_LANG)
+    fig.tight_layout()
+    save_figure(output_dir, "free_field_correction.svg")
+    plt.close()
+
+
+def generate_free_field_uncertainty(output_dir: str) -> None:
+    """IEC 62585 Tables I.2 and I.3: the budgets at 1 kHz and 8 kHz."""
+    print("Generating free_field_uncertainty...")
+    from phonometry import metrology
+
+    at_1k = metrology.correction_uncertainty_budget(
+        _TABLE_I2_DB, repeatability_dof=2, frequency_hz=1000
+    )
+    at_8k = metrology.correction_uncertainty_budget(
+        {**_TABLE_I2_DB, **_TABLE_I3_CHANGES_DB}, repeatability_dof=2, frequency_hz=8000
+    )
+    fig, (ax_1k, ax_8k) = plt.subplots(1, 2, figsize=(13.5, 6.4))
+    at_1k.plot(ax_1k, language=_LANG)
+    at_8k.plot(ax_8k, language=_LANG)
+    fig.tight_layout()
+    save_figure(output_dir, "free_field_uncertainty.svg")
+    plt.close()
+
+
+def generate_free_field_verification(output_dir: str) -> None:
+    """IEC 62585 clause 12: the calibrator's corrections against the maxima."""
+    print("Generating free_field_verification...")
+    from phonometry import metrology
+
+    correction = _calibrator_correction()
+    budgets = [
+        metrology.correction_uncertainty_budget(
+            {**_TABLE_I2_DB, "a7": a7, "a11": a11, "a12": a11, "a15": a15},
+            repeatability_dof=2,
+            frequency_hz=frequency,
+            correction_db=value,
+        )
+        for frequency, a7, a11, a15, value in zip(
+            correction.frequencies_hz,
+            _OCTAVE_A7_DB,
+            _OCTAVE_A11_DB,
+            _OCTAVE_A15_DB,
+            correction.correction_db,
+            strict=True,
+        )
+    ]
+    verdict = metrology.verify_correction_uncertainty(
+        correction.frequencies_hz,
+        [b.expanded_uncertainty_db for b in budgets],
+        clause=correction.clause,
+        correction_db=correction.correction_db,
+        coverage_factor=[b.coverage_factor for b in budgets],
+        correction_range_db=correction.range_db,
+    )
+    fig, ax = plt.subplots(figsize=(10, 6))
+    verdict.plot(ax, language=_LANG)
+    fig.tight_layout()
+    save_figure(output_dir, "free_field_verification.svg")
     plt.close()

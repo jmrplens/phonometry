@@ -169,6 +169,9 @@ What the numbers mean and how much to trust them.
 - [Random-Incidence and Diffuse-Field Response (IEC 61183)](metrology/random-incidence.md):
   the directivity factor of a sound level meter and its random-incidence and
   diffuse-field sensitivity levels.
+- [Free-Field Corrections of a Sound Level Meter (IEC 62585)](metrology/free-field-corrections.md):
+  the corrections that bring a meter on a calibrator, a coupler or an
+  actuator to its free-field response, and their uncertainty.
 
 ## What this section does not cover
 

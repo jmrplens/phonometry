@@ -77,6 +77,7 @@ from reports.building_design import (
 from reports.devices import (
     _filter_class_1995_example,
     _filter_class_example,
+    _free_field_correction_example,
     _intensity_class_example,
     _loudspeaker_example,
     _microphone_example,
@@ -196,6 +197,7 @@ _FICHES: dict[str, Callable[[], _Fiche]] = {
     "iec61260_filter_example.pdf": _filter_class_example,
     "iec61260_filter_1995_example.pdf": _filter_class_1995_example,
     "iec61043_intensity_example.pdf": _intensity_class_example,
+    "iec62585_free_field_correction_example.pdf": _free_field_correction_example,
     "iso4871_declaration_example.pdf": _iso4871_declaration_example,
     "iec60268_5_loudspeaker_example.pdf": _loudspeaker_example,
     "iec60268_4_microphone_example.pdf": _microphone_example,

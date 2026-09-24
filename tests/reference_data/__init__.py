@@ -624,6 +624,54 @@ from .filters import INF as INF
 from .filters import ISO7196_G_TOLERANCE_DB as ISO7196_G_TOLERANCE_DB
 from .filters import ISO7196_TABLE2 as ISO7196_TABLE2
 from .filters import LIBROSA_D_WEIGHTING_CONSTS as LIBROSA_D_WEIGHTING_CONSTS
+from .free_field_corrections import IEC62585_MAXIMA as IEC62585_MAXIMA
+from .free_field_corrections import (
+    IEC62585_REPEATABILITY_DOF as IEC62585_REPEATABILITY_DOF,
+)
+from .free_field_corrections import (
+    IEC62585_STATIC_PRESSURE_EXPANDED_DB as IEC62585_STATIC_PRESSURE_EXPANDED_DB,
+)
+from .free_field_corrections import (
+    IEC62585_STATIC_PRESSURE_LIMIT_KPA as IEC62585_STATIC_PRESSURE_LIMIT_KPA,
+)
+from .free_field_corrections import IEC62585_TABLE_H1_KHZ as IEC62585_TABLE_H1_KHZ
+from .free_field_corrections import (
+    IEC62585_TABLE_I2_COMBINED_DB as IEC62585_TABLE_I2_COMBINED_DB,
+)
+from .free_field_corrections import (
+    IEC62585_TABLE_I2_EFFECTIVE_DOF as IEC62585_TABLE_I2_EFFECTIVE_DOF,
+)
+from .free_field_corrections import (
+    IEC62585_TABLE_I2_EXPANDED_DB as IEC62585_TABLE_I2_EXPANDED_DB,
+)
+from .free_field_corrections import (
+    IEC62585_TABLE_I2_PRINTED_EXPANDED_DB as IEC62585_TABLE_I2_PRINTED_EXPANDED_DB,
+)
+from .free_field_corrections import (
+    IEC62585_TABLE_I2_PRINTED_K as IEC62585_TABLE_I2_PRINTED_K,
+)
+from .free_field_corrections import (
+    IEC62585_TABLE_I2_STANDARD_DB as IEC62585_TABLE_I2_STANDARD_DB,
+)
+from .free_field_corrections import (
+    IEC62585_TABLE_I2_VALUES_DB as IEC62585_TABLE_I2_VALUES_DB,
+)
+from .free_field_corrections import (
+    IEC62585_TABLE_I3_COMBINED_DB as IEC62585_TABLE_I3_COMBINED_DB,
+)
+from .free_field_corrections import (
+    IEC62585_TABLE_I3_DOF_ABOVE as IEC62585_TABLE_I3_DOF_ABOVE,
+)
+from .free_field_corrections import (
+    IEC62585_TABLE_I3_EXPANDED_DB as IEC62585_TABLE_I3_EXPANDED_DB,
+)
+from .free_field_corrections import IEC62585_TABLE_I3_K as IEC62585_TABLE_I3_K
+from .free_field_corrections import (
+    IEC62585_TABLE_I3_STANDARD_DB as IEC62585_TABLE_I3_STANDARD_DB,
+)
+from .free_field_corrections import (
+    IEC62585_TABLE_I3_VALUES_DB as IEC62585_TABLE_I3_VALUES_DB,
+)
 from .gases import BIES_C2_GASES as BIES_C2_GASES
 from .gases import BIES_C2_MISPRINTED as BIES_C2_MISPRINTED
 from .gases import FORMULA_MASS_TOLERANCE as FORMULA_MASS_TOLERANCE

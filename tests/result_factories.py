@@ -354,6 +354,51 @@ def _diffuse_field() -> ph.metrology.DiffuseFieldSensitivity:
     )
 
 
+def _adjustment_value() -> ph.metrology.AdjustmentValue:
+    """A meter's free-field response fitted to its tolerances (IEC 62585 A)."""
+    return ph.metrology.adjustment_value(
+        [125.0, 1000.0, 8000.0],
+        [94.2, 94.1, 93.4],
+        94.3,
+        calibrator_level_db=94.0,
+        tolerance_db=[1.0, 0.7, 1.5],
+    )
+
+
+def _free_field_correction() -> ph.metrology.FreeFieldCorrection:
+    """Three microphones on a calibrator (IEC 62585 Formula (D.7))."""
+    return ph.metrology.sound_calibrator_correction(
+        [1000.0, 4000.0, 8000.0],
+        [[94.0, 93.6, 92.9], [94.0, 93.65, 93.0], [94.0, 93.55, 92.85]],
+        [94.08, 94.95, 96.6],
+        [94.0, 93.1, 91.6],
+        [94.0, 94.1, 94.2],
+        reference_free_field_correction_db=[0.08, 0.85, 2.4],
+    )
+
+
+def _correction_budget() -> ph.metrology.CorrectionUncertaintyBudget:
+    """The budget of IEC 62585 Table I.2, at 1 kHz."""
+    values = dict.fromkeys(("a1", "a2", "a3", "a4", "a14"), 0.005)
+    values.update(
+        a5=0.05, a6=0.0, a7=0.06, a8=0.025, a9=0.025, a10=0.029,
+        a11=0.013, a12=0.013, a13=0.0, a15=0.03,
+    )  # fmt: skip
+    return ph.metrology.correction_uncertainty_budget(
+        values, repeatability_dof=2, frequency_hz=1000.0
+    )
+
+
+def _correction_verification() -> ph.metrology.CorrectionUncertaintyVerification:
+    """Expanded uncertainties against the maxima of IEC 62585 clause 12."""
+    return ph.metrology.verify_correction_uncertainty(
+        [1000.0, 4000.0, 8000.0, 16000.0],
+        [0.12, 0.2, 0.3, 0.55],
+        clause=12,
+        correction_range_db=[0.02, 0.05, 0.1, 0.2],
+    )
+
+
 def _static_airflow() -> ph.materials.StaticAirflowResult:
     u = np.array([0.2e-3, 0.4e-3, 0.6e-3, 0.8e-3, 1.0e-3])
     dp = 30000.0 * u + 4.0e6 * u**2

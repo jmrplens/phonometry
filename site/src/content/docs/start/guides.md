@@ -344,9 +344,10 @@ ISO 9612.
 - [Occupational Noise Exposure (ISO 9612)](/phonometry/perception/hearing/occupational-exposure/):
   the task-based, job-based and full-day strategies for $L_\mathrm{EX,8h}$, with the
   uncertainty budget and the upper limit.
-- [Hearing Protectors (ISO 4869-2)](/phonometry/perception/hearing/hearing-protectors/):
-  the octave-band, HML and SNR methods that say what a protector leaves at the
-  ear, and the one protection performance all three are set to.
+- [Hearing Protectors (ISO 4869-1, -2 and -6)](/phonometry/perception/hearing/hearing-protectors/):
+  the attenuation measured on sixteen subjects with its uncertainty and its
+  significance test, the octave-band, HML and SNR methods that say what a
+  protector leaves at the ear, and what an active noise reduction earmuff adds.
 
 ## [Rooms and buildings](/phonometry/buildings/)
 

@@ -173,7 +173,9 @@ _SECTION_LIST: tuple[Section, ...] = (
             "phonometry.hearing.threshold",
             "phonometry.hearing.noise_induced_hearing_loss",
             "phonometry.hearing.occupational_exposure",
+            "phonometry.hearing.real_ear_attenuation",
             "phonometry.hearing.hearing_protectors",
+            "phonometry.hearing.active_noise_reduction",
         ),
     ),
     Section(
@@ -478,6 +480,10 @@ OBJECT_MODULE_OVERRIDES: dict[str, str] = {
     "ANNEX_A_AIR": "phonometry.materials.absorbers.airflow_resistance",
     "EN_12354_AIR": "phonometry.building.prediction.detailed_model",
     "SIMULATION_AIR": "phonometry.simulation.ntff",
+    # The same holds for an uncertainty budget: the ISO 4869-6 one is an
+    # instance of the ISO 4869-1 budget type and belongs to the standard that
+    # prints it.
+    "ANR_WITHIN_LABORATORY_UNCERTAINTY": "phonometry.hearing.active_noise_reduction",
     # The three assumed conditions are owned by the air model and re-exported
     # by the package, so a plain scan sees them in both.
     "DEFAULT_CO2_MOLE_FRACTION": "phonometry.fluids.air",

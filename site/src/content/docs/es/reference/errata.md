@@ -4638,6 +4638,51 @@ dos ediciones con las mismas entradas y en el mismo orden.
   las dos lecturas no pueden intercambiarse en silencio.
 - **Estado:** sin notificar.
 
+## ISO 4869-6:2019, Tabla A.3 (las filas de incertidumbre salen de la fila redondeada de encima)
+
+- **Ubicación:** anexo A (normativo), Tabla A.3 «An example of ANR earmuff
+  active insertion loss test data in dB for a given laboratory», las filas
+  «Combined standard uncertainty, $u$, ($\sigma/\sqrt{N}$)» y «Expanded
+  uncertainty, $U_{95}$», página 16 del PDF (p. 10 impresa), frente a las
+  definiciones de A.1 y A.2 de la página 14 del PDF (p. 8 impresa).
+- **El impreso:** la tabla da la pérdida por inserción activa de dieciséis
+  sujetos en las frecuencias de octava de 63 Hz a 8 kHz, y después su media, su
+  desviación típica $\sigma$, $u$ y $U_{95}$. La fila de $u$ dice 0,5 / 0,2 /
+  **0,4** / 0,5 / 0,4 / 0,4 / 0,4 / 0,2 dB y la de $U_{95}$ **1,0** / 0,4 /
+  **0,8** / **1,0** / **0,8** / 0,8 / **0,8** / **0,4** dB. El apartado A.2
+  define $u$ como «the standard deviation of the individual active insertion
+  loss data divided by the square root of the number of test subjects, i.e.
+  $\sqrt{16} = 4$», y A.1 define $U_{95}$ como $u$ multiplicada por el factor
+  de cobertura $k = 2$. La tabla no lleva ninguna nota sobre cómo redondea.
+- **El problema:** con las dieciséis filas impresas, la media y $\sigma$ se
+  reproducen en las dieciséis celdas, pero $u$ en 250 Hz vale 0,348 dB, que se
+  redondea a 0,3 y no a 0,4, y $U_{95} = 2\sigma/4$ vale 0,935 / 0,355 / 0,697 /
+  0,940 / 0,711 / 0,839 / 0,720 / 0,325 dB, que se redondea a 0,9 / 0,4 / 0,7 /
+  0,9 / 0,7 / 0,8 / 0,7 / 0,3: seis de las ocho celdas impresas quedan 0,1 dB
+  por encima. Cada celda impresa es, en cambio, la fórmula aplicada a la fila
+  **redondeada** de encima: $1{,}4 / 4 = 0{,}35$ se imprime 0,4, y cada
+  $U_{95}$ es el doble de la $u$ impresa sobre ella. La misma tabla de la
+  ISO 4869-1:2018 (su Tabla A.3, con la misma disposición) calcula con
+  precisión completa y lo dice en su NOTA 2, «All calculations are made with
+  full precision before rounding to one decimal», y sus 28 celdas derivadas se
+  reproducen así. Quien aplique A.1 y A.2 a los datos impresos de la
+  ISO 4869-6 obtiene una incertidumbre expandida una décima de decibelio por
+  debajo de la impresa en seis bandas de ocho, y la página no le dice por qué.
+- **Evidencia:** las dieciséis filas y las cuatro filas derivadas de la
+  Tabla A.3, página 16 del PDF (p. 10 impresa), recalculadas con
+  $u = \sigma/4$ y $U_{95} = 2u$ una vez con precisión completa y otra desde la
+  $\sigma$ y la $u$ impresas; A.1 y A.2, página 14 del PDF (p. 8 impresa); todo
+  ello de la ISO 4869-6:2019. Para el contraste, la Tabla A.3 de la
+  ISO 4869-1:2018 y su NOTA 2, página 19 del PDF (p. 13 impresa).
+- **Comportamiento de la biblioteca:** `hearing.active_insertion_loss`
+  devuelve $u$ y $U_{95}$ con precisión completa a partir de los datos, como
+  las definen A.1 y A.2. La fila de conformidad y
+  `tests/hearing/test_active_noise_reduction.py` fijan las filas de la media y
+  de $\sigma$ tal como están impresas, reproducen las de $u$ y $U_{95}$ del modo
+  en que las forma la tabla y comprueban que la precisión completa difiere
+  exactamente en las siete celdas citadas aquí, cada una en 0,1 dB.
+- **Estado:** sin notificar.
+
 ## VDI 2081 Blatt 1:2001-07, apartado 6.4 (la columna inglesa dice lo contrario que la alemana)
 
 - **Ubicación:** folio impreso 40 (página 40 del PDF), apartado 6.4

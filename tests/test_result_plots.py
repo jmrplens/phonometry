@@ -230,6 +230,50 @@ _KWARG_PLOT_CASES = [
         ),
         "bar",
     ),
+    (
+        "real_ear_attenuation",
+        lambda: ph.hearing.real_ear_attenuation(_PROTECTOR_ATTENUATION),
+        "line",
+    ),
+    (
+        "attenuation_difference",
+        lambda: ph.hearing.assess_attenuation_difference(
+            ph.hearing.real_ear_attenuation(_PROTECTOR_ATTENUATION),
+            [6.0, 9.0, 14.0, 19.0, 22.0, 29.0, 30.0, 33.0],
+            second_expanded_uncertainty_db=2.0,
+        ),
+        "bar",
+    ),
+    (
+        "reat_sound_field",
+        lambda: ph.hearing.check_reat_sound_field(
+            dict.fromkeys(("front", "back", "left", "right", "up", "down"), [0.5] * 7),
+            [0.0] * 7,
+        ),
+        "line",
+    ),
+    (
+        "active_insertion_loss",
+        lambda: ph.hearing.active_insertion_loss(
+            [[20.0, 24.0, -3.0], [22.0, 23.0, -1.0], [21.0, 25.0, -2.0]],
+            frequencies=[100.0, 125.0, 1000.0],
+        ),
+        "line",
+    ),
+    (
+        "anr_total_attenuation",
+        lambda: ph.hearing.anr_total_attenuation(
+            _PROTECTOR_ATTENUATION, [[20.0] * 24] * len(_PROTECTOR_ATTENUATION)
+        ),
+        "line",
+    ),
+    (
+        "anr_linearity",
+        lambda: ph.hearing.assess_anr_linearity(
+            [90.0, 95.0, 100.0], [[60.0, 65.0, 70.0], [60.0, 65.0, 69.0]]
+        ),
+        "line",
+    ),
     ("static_airflow", _static_airflow, "line"),
     ("airborne_prediction", _airborne_prediction, "bar"),
     ("impact_prediction", _impact_prediction, "bar"),

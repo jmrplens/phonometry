@@ -16,6 +16,7 @@ here in the order the report reads them.
 
 from __future__ import annotations
 
+import decimal
 import math
 import warnings
 from typing import TYPE_CHECKING
@@ -26,9 +27,11 @@ from scipy import signal as sg
 
 import phonometry as ph
 
-from ..registry import Outcome, numeric, record, register
+from ..registry import Outcome, count, numeric, record, register
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from phonometry.environment import ImpulseOnset
     from phonometry.metrology import UncertaintyResult
 
@@ -375,6 +378,209 @@ def _chk_nihl_annex_c_htlan() -> Outcome:
     return numeric(ref.ISO1999_ANNEX_C_HTLAN, value, 0.05, unit="dB", places=1)
 
 
+_REAT = "Hearing protector attenuation (ISO 4869-1)"
+
+
+def _reat_budget_mismatches(
+    library: Mapping[str, Mapping[str, ph.hearing.ProtectorUncertaintyBudget]],
+    printed: dict[str, list[tuple[float, float, float, float, float]]],
+) -> tuple[int, int]:
+    """Cells of Table A.2 or B.2 the library's budgets do not reproduce.
+
+    The components are compared as transcribed, and the combined and expanded
+    rows as the table prints them: computed at full precision from the three
+    components and rounded to one decimal last (the NOTE under each table).
+
+    :return: ``(mismatches, cells)``.
+    """
+    mismatches = cells = 0
+    for protector, columns in printed.items():
+        for name, (meth, eq, env, u, u95) in zip(
+            ph.hearing.REAT_FREQUENCY_RANGES, columns, strict=True
+        ):
+            budget = library[protector][name]
+            pairs = (
+                (budget.method_db, meth),
+                (budget.equipment_db, eq),
+                (budget.environment_db, env),
+                (round(budget.combined_db, 1), u),
+                (round(budget.expanded_db, 1), u95),
+            )
+            cells += len(pairs)
+            mismatches += sum(abs(got - want) > 1e-9 for got, want in pairs)
+    return mismatches, cells
+
+
+@register(
+    _REAT,
+    "ISO 4869-1:2018 Annex A, Table A.2",
+    "Within-laboratory budget: u and U95 from the three components",
+)
+def _chk_reat_table_a2() -> Outcome:
+    """Table A.2 from its components, earplug and earmuff, three ranges each."""
+    mismatches, cells = _reat_budget_mismatches(
+        ph.hearing.REAT_WITHIN_LABORATORY_UNCERTAINTY, ref.ISO4869_1_TABLE_A2
+    )
+    return count(cells - mismatches, cells, subject="cells of Table A.2")
+
+
+@register(
+    _REAT,
+    "ISO 4869-1:2018 Annex B, Table B.2",
+    "Between-laboratory budget: u and U95 from the three components",
+)
+def _chk_reat_table_b2() -> Outcome:
+    """Table B.2 the same way: every combined and expanded cell, rounded last."""
+    mismatches, cells = _reat_budget_mismatches(
+        ph.hearing.REAT_BETWEEN_LABORATORY_UNCERTAINTY, ref.ISO4869_1_TABLE_B2
+    )
+    return count(cells - mismatches, cells, subject="cells of Table B.2")
+
+
+@register(
+    _REAT,
+    "ISO 4869-1:2018 Annex A, Table A.3",
+    "Earmuff on 16 subjects: mean, sigma, u = sigma/4 and U95, 7 bands",
+)
+def _chk_reat_table_a3() -> Outcome:
+    """All 28 derived cells, at full precision and rounded last (NOTE 2)."""
+    result = ph.hearing.real_ear_attenuation(ref.ISO4869_1_TABLE_A3)
+    rows = (
+        (result.mean_db, ref.ISO4869_1_TABLE_A3_MEAN),
+        (result.standard_deviation_db, ref.ISO4869_1_TABLE_A3_SIGMA),
+        (result.standard_uncertainty_db, ref.ISO4869_1_TABLE_A3_U),
+        (result.expanded_uncertainty_db, ref.ISO4869_1_TABLE_A3_U95),
+    )
+    worst = max(
+        float(np.max(np.abs(np.round(values, 1) - np.asarray(printed))))
+        for values, printed in rows
+    )
+    return Outcome(
+        expected="Table A.3 derived rows at 1 dp, 28 cells",
+        computed=f"max deviation {worst:.3f} dB",
+        delta=f"{worst:.3f} dB",
+        passed=worst <= 1e-9,
+    )
+
+
+#: Table B.1's difference row against the full-precision m1 and the printed
+#: m2: the m2 behind the printed difference lies within 0,05 dB of the printed
+#: one, and the printed difference rounds that again, so a consistent cell is
+#: at most 0,1 dB away.
+_REAT_B1_DIFFERENCE_TOLERANCE_DB = 0.1
+
+
+@register(
+    _REAT,
+    "ISO 4869-1:2018 Annex B, Table B.1",
+    "Two tests of one earmuff: criterion row, difference row and verdict",
+)
+def _chk_reat_table_b1() -> Outcome:
+    """The criterion row to 1 dp, the difference row and 'significant at 8 kHz only'.
+
+    Test 2 is printed rounded, so its mean and U95 enter as printed; test 1 is
+    Table A.3 at full precision. The criterion row reproduces all seven cells
+    to the printed decimal. The difference row can only agree within 0,1 dB:
+    six cells round to the print, and at 8 kHz the full-precision m1 of
+    34,956 dB against the printed m2 of 38,9 dB gives 3,944 dB where the table
+    prints 4,0, 0,056 dB off because m2 is printed rounded.
+    """
+    result = ph.hearing.assess_attenuation_difference(
+        ph.hearing.real_ear_attenuation(ref.ISO4869_1_TABLE_A3),
+        ref.ISO4869_1_TABLE_B1_MEAN_2,
+        second_expanded_uncertainty_db=ref.ISO4869_1_TABLE_B1_U95_2,
+    )
+    worst = float(
+        np.max(
+            np.abs(
+                np.round(result.criterion_db, 1)
+                - np.asarray(ref.ISO4869_1_TABLE_B1_CRITERION)
+            )
+        )
+    )
+    difference = float(
+        np.max(
+            np.abs(result.difference_db - np.asarray(ref.ISO4869_1_TABLE_B1_DIFFERENCE))
+        )
+    )
+    significant = result.significant_frequencies.tolist()
+    passed = (
+        worst <= 1e-9
+        and difference <= _REAT_B1_DIFFERENCE_TOLERANCE_DB
+        and significant == ref.ISO4869_1_TABLE_B1_SIGNIFICANT
+    )
+    return Outcome(
+        expected=(
+            "criterion row at 1 dp; difference row within 0.1 dB of the "
+            "rounded m2; significant at 8000 Hz only"
+        ),
+        computed=(
+            f"criterion max deviation {worst:.3f} dB; difference max deviation "
+            f"{difference:.3f} dB; significant at "
+            f"{', '.join(f'{f:g}' for f in significant) or 'none'} Hz"
+        ),
+        delta=f"{max(worst, difference):.3f} dB",
+        passed=passed,
+    )
+
+
+@register(
+    _REAT,
+    "ISO 4869-1:2018 B.1.1 and B.2",
+    "Minimum significant difference sqrt(2) x U95, 250 Hz to 4 kHz",
+)
+def _chk_reat_minimum_differences() -> Outcome:
+    """3,3 and 2,3 dB within, 9,3 and 6,9 dB between laboratories.
+
+    The text evaluates the rule on the U95 its tables print rounded, and writes
+    that input out ("sqrt(2) x 2,3 dB = 3,3 dB"), so the rounded U95 is what
+    goes in here. From the unrounded budgets the earplug values would be
+    3,21 dB and 9,37 dB; the earmuff ones round the same either way.
+    """
+    computed = {
+        f"{table} {protector}": round(
+            float(ph.hearing.minimum_significant_difference(u95)), 1
+        )
+        for (table, protector), (
+            u95,
+            _printed,
+        ) in ref.ISO4869_1_MINIMUM_DIFFERENCES.items()
+    }
+    expected = {
+        f"{table} {protector}": printed
+        for (table, protector), (
+            _u95,
+            printed,
+        ) in ref.ISO4869_1_MINIMUM_DIFFERENCES.items()
+    }
+    return record(expected, computed, unit="dB")
+
+
+@register(
+    _REAT,
+    "ISO 4869-1:2018 Table 1",
+    "Allowable sound-field variation by microphone free-field rejection",
+)
+def _chk_reat_table_1() -> Outcome:
+    """Each row read at its lower edge, and the 10 dB floor below which none fits."""
+    matching = sum(
+        abs(ph.hearing.allowable_field_variation(lowest) - allowed) <= 1e-9
+        for lowest, allowed in ref.ISO4869_1_TABLE_1
+    )
+    floor = min(lowest for lowest, _allowed in ref.ISO4869_1_TABLE_1)
+    try:
+        ph.hearing.allowable_field_variation(floor - 0.1)
+    except ValueError:
+        matching += 1
+    rows = len(ref.ISO4869_1_TABLE_1) + 1
+    return count(
+        matching,
+        rows,
+        subject="rows of Table 1",
+        expected_label=f"{rows}/{rows} rows of Table 1, the last one 'not suitable'",
+    )
+
+
 _HPD = "Hearing protectors (ISO 4869-2)"
 
 
@@ -504,6 +710,226 @@ def _chk_hpd_applications() -> Outcome:
         ),
         delta=f"{hml.noise_reduction - ref.ISO4869_2_ANNEX_C_PNR84:+.3f} dB",
         passed=passed,
+    )
+
+
+_ANR = "Active noise reduction earmuffs (ISO 4869-6)"
+
+
+def _half_up(values: np.ndarray) -> np.ndarray:
+    """Round to one decimal with halves away from zero, as a spreadsheet ROUND does.
+
+    Through the shortest decimal that represents each double, so a value such
+    as 12,85 rounds the way it is written and not the way it is stored.
+    """
+
+    def one(value: float) -> float:
+        exact = decimal.Decimal(repr(round(float(value), 9)))
+        return float(
+            exact.quantize(decimal.Decimal("0.1"), rounding=decimal.ROUND_HALF_UP)
+        )
+
+    flat = [one(value) for value in np.asarray(values, dtype=float).ravel()]
+    return np.asarray(flat, dtype=float).reshape(np.shape(values))
+
+
+def _anr_workbook_insertion_loss() -> ph.hearing.ActiveInsertionLossResult:
+    return ph.hearing.active_insertion_loss(
+        passive_levels_db=ref.ISO4869_6_WORKBOOK_PASSIVE_LEVELS,
+        active_levels_db=ref.ISO4869_6_WORKBOOK_ACTIVE_LEVELS,
+    )
+
+
+def _anr_workbook_total() -> ph.hearing.AnrTotalAttenuationResult:
+    return ph.hearing.anr_total_attenuation(
+        ref.ISO4869_6_WORKBOOK_REAT, _anr_workbook_insertion_loss()
+    )
+
+
+@register(
+    _ANR,
+    "ISO 4869-6:2019 Annex A, Table A.2",
+    "Within-laboratory budget of the mean active insertion loss",
+)
+def _chk_anr_table_a2() -> Outcome:
+    """u = 0,78 dB and U95 = 1,6 dB, derived from the three components."""
+    budget = ph.hearing.ANR_WITHIN_LABORATORY_UNCERTAINTY
+    meth, eq, env, u, u95 = ref.ISO4869_6_TABLE_A2
+    matching = sum(
+        abs(got - want) <= 1e-9
+        for got, want in (
+            (budget.method_db, meth),
+            (budget.equipment_db, eq),
+            (budget.environment_db, env),
+            (round(budget.combined_db, 2), u),
+            (round(budget.expanded_db, 1), u95),
+        )
+    )
+    return count(matching, 5, subject="cells of Table A.2")
+
+
+@register(
+    _ANR,
+    "ISO 4869-6:2019 Annex A, Table A.3",
+    "Active insertion loss of 16 subjects: mean and sigma, 8 bands",
+)
+def _chk_anr_table_a3_spread() -> Outcome:
+    """The mean and sigma rows, at full precision and rounded once."""
+    result = ph.hearing.active_insertion_loss(ref.ISO4869_6_TABLE_A3)
+    matching = int(
+        np.sum(_half_up(result.mean_db) == np.asarray(ref.ISO4869_6_TABLE_A3_MEAN))
+        + np.sum(
+            _half_up(result.standard_deviation_db)
+            == np.asarray(ref.ISO4869_6_TABLE_A3_SIGMA)
+        )
+    )
+    return count(matching, 16, subject="cells of the mean and sigma rows")
+
+
+@register(
+    _ANR,
+    "ISO 4869-6:2019 Annex A, Table A.3",
+    "u = sigma/4 and U95 = 2u, as the table forms them from its rounded rows",
+)
+def _chk_anr_table_a3_uncertainty() -> Outcome:
+    """The u and U95 rows, and the seven cells full precision moves.
+
+    The table forms u from the sigma it prints and U95 from the u it prints,
+    which no note says; at full precision, as A.1 and A.2 define them, one u
+    cell and six U95 cells are a tenth lower (see docs/ERRATA.md). The library
+    returns full precision; this row pins both readings.
+    """
+    result = ph.hearing.active_insertion_loss(ref.ISO4869_6_TABLE_A3)
+    printed_u = np.asarray(ref.ISO4869_6_TABLE_A3_U)
+    printed_u95 = np.asarray(ref.ISO4869_6_TABLE_A3_U95)
+    chained_u = _half_up(_half_up(result.standard_deviation_db) / 4.0)
+    chained_u95 = _half_up(2.0 * chained_u)
+    matching = int(np.sum(chained_u == printed_u) + np.sum(chained_u95 == printed_u95))
+    moved_u = tuple(
+        np.flatnonzero(_half_up(result.standard_uncertainty_db) != printed_u)
+    )
+    moved_u95 = tuple(
+        np.flatnonzero(_half_up(result.expanded_uncertainty_db) != printed_u95)
+    )
+    registered = (
+        moved_u == ref.ISO4869_6_TABLE_A3_U_ROUNDED_FROM_SIGMA
+        and moved_u95 == ref.ISO4869_6_TABLE_A3_U95_ROUNDED_FROM_U
+    )
+    return count(
+        matching if registered else 0,
+        16,
+        subject="cells of the u and U95 rows",
+        expected_label="16/16 cells from the rounded rows; 7 moved at full precision",
+    )
+
+
+@register(
+    _ANR,
+    "ISO 4869-6:2019 5.5 b), calculation example",
+    "Lower-ear active insertion loss from the MIRE levels, 16 x 24 cells",
+)
+def _chk_anr_workbook_lower_ear() -> Outcome:
+    """Passive minus active per ear, and the lower ear per band (rows 134-149)."""
+    result = _anr_workbook_insertion_loss()
+    workbook = np.asarray(ref.ISO4869_6_WORKBOOK_LOWER_EAR)
+    matching = int(np.sum(np.abs(result.insertion_loss_db - workbook) <= 1e-9))
+    return count(matching, workbook.size, subject="cells of rows 134-149")
+
+
+@register(
+    _ANR,
+    "ISO 4869-6:2019 5.5 a), calculation example",
+    "REAT interpolated linearly in hertz into 24 one-third octaves",
+)
+def _chk_anr_workbook_interpolation() -> Outcome:
+    """Rows 182-197, once rounded to 0,1 dB the way the workbook rounds them."""
+    result = _anr_workbook_total()
+    workbook = np.asarray(ref.ISO4869_6_WORKBOOK_REAT_THIRDS)
+    matching = int(np.sum(_half_up(result.reat_third_octave_db) == workbook))
+    return count(matching, workbook.size, subject="cells of rows 182-197")
+
+
+#: 5.5 c): the workbook adds its rounded interpolation (rows 182-197) to the
+#: lower ear, so its sums sit within the 0,05 dB of that rounding.
+_ANR_THIRDS_TOLERANCE_DB = 0.05
+#: Formula (1) and 5.5 e): two roundings of up to 0,05 dB each.
+_ANR_OCTAVE_TOLERANCE_DB = 0.1
+
+
+@register(
+    _ANR,
+    "ISO 4869-6:2019 5.5 c), calculation example",
+    "Total attenuation per one-third octave, 16 x 24 cells",
+)
+def _chk_anr_workbook_thirds() -> Outcome:
+    """Rows 206-221 within the 0,05 dB the workbook's rounding of a) leaves.
+
+    The workbook sums its rounded interpolation (rows 182-197) and the lower
+    ear (rows 134-149) and does not round the sum; the library interpolates
+    at full precision.
+    """
+    result = _anr_workbook_total()
+    workbook = np.asarray(ref.ISO4869_6_WORKBOOK_TOTAL_THIRDS)
+    worst = float(np.max(np.abs(result.total_third_octave_db - workbook)))
+    return Outcome(
+        expected="384 cells of rows 206-221, within 0.05 dB",
+        computed=f"max deviation {worst:.3f} dB",
+        delta=f"{worst:.3f} dB",
+        passed=worst <= _ANR_THIRDS_TOLERANCE_DB + 1e-9,
+    )
+
+
+@register(
+    _ANR,
+    "ISO 4869-6:2019 Formula (1), calculation example",
+    "Octave-band total attenuation of 16 subjects, 8 bands",
+)
+def _chk_anr_workbook_octaves() -> Outcome:
+    """Rows 230-245 within the 0,1 dB the workbook's two roundings leave.
+
+    The workbook rounds the interpolated passive value and the octave result,
+    each by up to 0,05 dB; the library rounds neither.
+    """
+    result = _anr_workbook_total()
+    workbook = np.asarray(ref.ISO4869_6_WORKBOOK_TOTAL_OCTAVES)
+    worst = float(np.max(np.abs(result.total_octave_db - workbook)))
+    return Outcome(
+        expected="128 cells of rows 230-245, within 0.1 dB",
+        computed=f"max deviation {worst:.3f} dB",
+        delta=f"{worst:.3f} dB",
+        passed=worst <= _ANR_OCTAVE_TOLERANCE_DB,
+    )
+
+
+@register(
+    _ANR,
+    "ISO 4869-6:2019 5.5 e), calculation example",
+    "Mean, SD and APV84 of the octave totals",
+)
+def _chk_anr_workbook_statistics() -> Outcome:
+    """Rows 247-248 to 0,1 dB, and the library's own APV84 against row 249.
+
+    The mean and SD rows round the library's values the way the workbook's
+    ROUND does and match cell for cell. Row 249 is the rounded mean less the
+    rounded SD (=D247-D248), which carries both roundings; the library's
+    APV84 is Formula (1) of ISO 4869-2 at full precision and is held to
+    0,1 dB of it (63 Hz: 31,62 dB against the row's 31,7).
+    """
+    apv = _anr_workbook_total().assumed_protection
+    matching = int(
+        np.sum(
+            _half_up(apv.mean_attenuation) == np.asarray(ref.ISO4869_6_WORKBOOK_MEAN)
+        )
+        + np.sum(
+            _half_up(apv.standard_deviation) == np.asarray(ref.ISO4869_6_WORKBOOK_SD)
+        )
+    )
+    worst = float(np.max(np.abs(apv.apv - np.asarray(ref.ISO4869_6_WORKBOOK_APV84))))
+    return Outcome(
+        expected="16/16 cells of rows 247-248; APV84 within 0.1 dB of row 249",
+        computed=f"{matching}/16 cells; APV84 max deviation {worst:.3f} dB",
+        delta=f"{worst:.3f} dB",
+        passed=matching == 16 and worst <= _ANR_OCTAVE_TOLERANCE_DB,
     )
 
 

@@ -1,8 +1,8 @@
 # phonometry
 
-> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1281 numerical conformance checks against 462 standards enforced in CI.
+> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1295 numerical conformance checks against 464 standards enforced in CI.
 
-phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1281 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 87 domains.
+phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1295 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 89 domains.
 
 The project was published as **PyOctaveBand** until version 3.0.0. Third-party references and dependency pins still using that name refer to this library.
 
@@ -130,7 +130,7 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 - [Hearing threshold (age and reference zero)](https://jmrplens.github.io/phonometry/perception/hearing/hearing-threshold/)
 - [Occupational Noise Exposure (ISO 9612)](https://jmrplens.github.io/phonometry/perception/hearing/occupational-exposure/)
 - [Noise-induced hearing loss (ISO 1999)](https://jmrplens.github.io/phonometry/perception/hearing/noise-induced-hearing-loss/)
-- [Hearing Protectors (ISO 4869-2)](https://jmrplens.github.io/phonometry/perception/hearing/hearing-protectors/)
+- [Hearing Protectors (ISO 4869-1, -2 and -6)](https://jmrplens.github.io/phonometry/perception/hearing/hearing-protectors/)
 
 ## Rooms and buildings
 
@@ -521,9 +521,11 @@ The generated API reference, one page per module. Fetch these only when a specif
 - [fluids/gas](https://jmrplens.github.io/phonometry/reference/api/fluids/gas/)
 - [fluids/nonlinearity](https://jmrplens.github.io/phonometry/reference/api/fluids/nonlinearity/)
 - [fluids/water](https://jmrplens.github.io/phonometry/reference/api/fluids/water/)
+- [hearing/active-noise-reduction](https://jmrplens.github.io/phonometry/reference/api/hearing/active-noise-reduction/)
 - [hearing/hearing-protectors](https://jmrplens.github.io/phonometry/reference/api/hearing/hearing-protectors/)
 - [hearing/noise-induced-hearing-loss](https://jmrplens.github.io/phonometry/reference/api/hearing/noise-induced-hearing-loss/)
 - [hearing/occupational-exposure](https://jmrplens.github.io/phonometry/reference/api/hearing/occupational-exposure/)
+- [hearing/real-ear-attenuation](https://jmrplens.github.io/phonometry/reference/api/hearing/real-ear-attenuation/)
 - [hearing/threshold](https://jmrplens.github.io/phonometry/reference/api/hearing/threshold/)
 - [io/io](https://jmrplens.github.io/phonometry/reference/api/io/io/)
 - [materials/airflow-resistance](https://jmrplens.github.io/phonometry/reference/api/materials/airflow-resistance/)
@@ -36056,7 +36058,7 @@ tracked in [CONFORMANCE.md](https://jmrplens.github.io/phonometry/reference/conf
 <!-- source: docs/perception/hearing/hearing-protectors.md | canonical: https://jmrplens.github.io/phonometry/perception/hearing/hearing-protectors/ -->
 Source: https://jmrplens.github.io/phonometry/perception/hearing/hearing-protectors/
 
-# Hearing Protectors (ISO 4869-2)
+# Hearing Protectors (ISO 4869-1, -2 and -6)
 
 A hearing protector is not measured on a coupler. ISO 4869-1 seats it on
 sixteen people and records the threshold shift each of them gets, so what
@@ -36064,6 +36066,64 @@ comes back from the laboratory is a **distribution**: one attenuation per
 subject per octave band, with a spread that is often a third of the mean.
 ISO 4869-2 is the standard that turns that distribution into a number someone
 can act on, and the first thing it does is refuse to use the mean.
+
+## Where the distribution comes from (ISO 4869-1)
+
+Each of sixteen subjects finds a threshold for one-third-octave bands of pink
+noise at the octave frequencies from 125 Hz to 8 kHz (63 Hz optional), with open
+ears and with the protector in place, and the attenuation is the difference
+(4.6.2):
+
+$$
+A_{j,f} = L_{\mathrm{occluded},j,f} - L_{\mathrm{open},j,f}
+$$
+
+Annex A models the attenuation as the measured value plus three zero-mean
+inputs (method, equipment, environment); within one laboratory the combined
+standard uncertainty is the standard deviation of the mean, $u = s/\sqrt{N}$,
+and $U_{95} = 2u$.
+
+```python
+import numpy as np
+from phonometry import hearing
+
+# ISO 4869-1 Table A.3: one earmuff on sixteen subjects, 125 Hz to 8 kHz.
+table_a3 = np.array([
+    [9.6, 13.5, 27.5, 32.4, 35.2, 29.1, 28.5],  [14.1, 20.2, 25.8, 32.0, 28.9, 35.3, 35.7],
+    [21.8, 27.8, 28.3, 46.6, 37.4, 40.1, 38.7], [18.5, 22.2, 36.5, 44.8, 39.1, 30.6, 33.5],
+    [15.6, 21.9, 31.8, 42.5, 38.9, 38.3, 37.1], [18.7, 28.6, 31.3, 39.0, 35.6, 35.3, 29.4],
+    [23.0, 26.5, 34.0, 41.3, 40.8, 38.7, 35.9], [17.3, 21.7, 25.0, 30.7, 38.6, 37.9, 40.8],
+    [19.4, 19.6, 28.0, 36.6, 40.7, 34.9, 39.4], [11.6, 20.4, 22.6, 38.0, 39.2, 33.9, 30.3],
+    [20.5, 21.8, 29.2, 40.7, 36.2, 35.7, 38.4], [18.3, 19.6, 26.2, 34.6, 32.7, 34.9, 26.6],
+    [15.1, 17.5, 30.1, 39.0, 39.4, 38.2, 39.5], [21.7, 20.8, 28.3, 39.5, 38.1, 40.0, 38.4],
+    [15.9, 17.8, 26.0, 40.6, 38.0, 40.2, 37.2], [11.8, 18.4, 29.6, 37.2, 40.8, 36.0, 29.9],
+])
+reat = hearing.real_ear_attenuation(table_a3)
+print(np.round(reat.mean_db, 1))                  # [17.1 21.1 28.8 38.5 37.5 36.2 35. ]
+print(np.round(reat.expanded_uncertainty_db, 1))  # [2.  1.9 1.7 2.2 1.6 1.6 2.3]
+
+# Annex B, Table B.1: a second test of the same earmuff, printed as means and U95.
+test_2_mean = [16.8, 21.0, 28.3, 38.2, 35.5, 34.6, 38.9]
+test_2_u95 = [1.6, 1.2, 1.4, 1.5, 1.5, 1.7, 2.5]
+difference = hearing.assess_attenuation_difference(
+    reat, test_2_mean, second_expanded_uncertainty_db=test_2_u95
+)
+print(np.round(difference.criterion_db, 1))  # [2.5 2.3 2.2 2.7 2.2 2.3 3.4]
+print(difference.significant_frequencies)    # [8000.]
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/hearing_protector_reat_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/hearing_protector_reat.svg" alt="Left: the sound attenuation of one earmuff on sixteen subjects at the seven test signals from 125 Hz to 8 kHz, one faint line per subject, with the mean drawn over them and the expanded uncertainty of the mean as error bars, attenuation increasing downwards. Right: the difference between the means of two tests of the same earmuff as one bar per test signal, with the root sum of squares of the two expanded uncertainties marked over each bar; only the 8 kHz bar clears its mark and is hatched" width="92%"></picture>
+
+Two means differ significantly at the 5 % level when
+$|m_1 - m_2| > \sqrt{U_{95,1}^2 + U_{95,2}^2}$ (B.1.2), which for two equal
+uncertainties is $\sqrt{2}\,U_{95}$. Tables A.2 and B.2 give typical budgets
+(`hearing.REAT_WITHIN_LABORATORY_UNCERTAINTY`,
+`hearing.REAT_BETWEEN_LABORATORY_UNCERTAINTY`), and B.1.1 evaluates the minimum
+difference on the rounded 2,3 dB its table prints, writing that input out:
+"$\sqrt{2}$ × 2,3 dB = 3,3 dB". From the unrounded 2.27 dB it is 3.21 dB. The
+sound field of the test room (4.2.2, with Table 1 for the rotated directional
+microphone) is judged by `hearing.check_reat_sound_field`, whose verdict passes
+only when the rotation of b) was measured as well as the positions of a).
 
 ## The distribution first (Clause 5)
 
@@ -36167,6 +36227,47 @@ Table C.1 and the reprint disagrees with the original in two cells. Table 2 is
 the one that reproduces the annex's own worked results, and it is the one this
 library carries; the discrepancy is registered in [ERRATA](https://jmrplens.github.io/phonometry/reference/errata/).
 
+## Active noise reduction earmuffs (ISO 4869-6)
+
+An active noise reduction earmuff adds a cancellation circuit to a passive
+shell, and a threshold test cannot see it. ISO 4869-6 measures the two halves
+on the same sixteen subjects: the ISO 4869-1 attenuation with the circuit off,
+in octave bands, and the active insertion loss, the level at each ear with the
+circuit off minus the level with it on, measured with a microphone in the ear
+canal in one-third-octave bands. Clause 5.5 interpolates the passive side into
+one-third octaves (linearly in hertz, as ISO's calculation workbook does it),
+keeps the ear with the lower insertion loss in each band, adds the two, folds
+each octave back with Formula (1) and rates the sixteen results with ISO 4869-2
+at 84 %. The methods are meant for steady noise exposures and do not apply to
+noise with impulsive components (Clause 1).
+
+```python
+# ISO 4869-6 Table A.3: the lower-ear active insertion loss, 63 Hz to 8 kHz.
+table_a3_anr = np.array([
+    [18.4, 23.9, 21.6, 5.2, -4.5, -0.2, -1.3, -1.0], [19.4, 23.0, 21.7, 5.7, -6.4, -0.4, 0.8, -1.9],
+    [19.7, 23.1, 20.8, 3.6, -4.2, -2.9, 0.2, -0.6], [19.8, 23.1, 18.7, 2.2, -4.9, -0.5, -0.2, 0.2],
+    [20.5, 24.5, 20.2, 3.1, -4.4, -2.9, -1.4, 0.3], [18.8, 24.4, 20.8, 3.9, -4.3, -2.6, -0.4, -0.2],
+    [21.7, 24.4, 22.2, 4.7, -5.2, -5.1, -1.5, -0.3], [20.5, 22.7, 24.3, 8.8, -8.8, -3.1, -4.8, -0.7],
+    [22.9, 23.2, 20.7, 5.4, -6.5, -2.8, -0.5, -1.0], [21.9, 22.9, 23.1, 8.8, -8.4, -4.9, -2.6, -0.7],
+    [23.7, 24.6, 20.8, 3.4, -6.4, -0.1, -0.3, -0.6], [22.0, 23.9, 20.3, 3.0, -4.2, -0.8, -1.0, 0.3],
+    [23.2, 24.3, 20.9, 4.6, -5.6, -0.1, -0.5, -1.0], [21.5, 23.5, 23.3, 5.9, -5.2, -3.1, -3.6, -1.6],
+    [24.3, 24.2, 22.5, 4.2, -6.3, -2.5, -0.9, -0.5], [23.8, 24.9, 20.7, 3.8, -4.8, -0.5, -0.3, 0.2],
+])
+insertion = hearing.active_insertion_loss(table_a3_anr)
+print(np.round(insertion.mean_db, 1))                  # [21.4 23.8 21.4  4.8 -5.6 -2.  -1.1 -0.6]
+print(np.round(insertion.expanded_uncertainty_db, 1))  # [0.9 0.4 0.7 0.9 0.7 0.8 0.7 0.3]
+```
+
+Table A.3 prints its $u$ and $U_{95}$ rows from the rounded row above each, so
+six of its eight $U_{95}$ cells are a tenth above the value Annex A defines;
+see [ERRATA](https://jmrplens.github.io/phonometry/reference/errata/). On ISO's calculation example the circuit raises
+$L$ from 12 dB to 19 dB and lowers $H$ from 24 dB to 21 dB, because it adds
+sound from 1 kHz up (`hearing.anr_total_attenuation`), and
+`hearing.assess_anr_linearity` finds the highest external level at which every
+ear still follows the 5 dB steps of 5.4.4 within ±1 dB.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/hearing_protector_anr_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/hearing_protector_anr.svg" alt="Left: averaged over sixteen subjects, the passive attenuation of an active noise reduction earmuff interpolated into one-third-octave bands, the active insertion loss of the ear with the lower value, their sum, and the assumed protection value at 84 % in each octave band. Right: the active insertion loss of each subject in one-third-octave bands, with the mean and the expanded uncertainty of the mean as error bars and a line at zero" width="92%"></picture>
+
 ## References
 
 - International Organization for Standardization (2018). *Acoustics — Hearing
@@ -36179,14 +36280,24 @@ library carries; the discrepancy is registered in [ERRATA](https://jmrplens.gith
   protectors — Part 1: Subjective method for the measurement of sound
   attenuation* (ISO 4869-1:2018).
   [iso.org catalogue](https://www.iso.org/standard/65581.html).
-  Where the per-subject attenuation values come from.
+  Where the per-subject attenuation values come from: 4.6, Annex A, Annex B
+  and 4.2.2 with Table 1, validated against Tables A.2, A.3, B.1 and B.2.
+- International Organization for Standardization (2019). *Acoustics — Hearing
+  protectors — Part 6: Determination of sound attenuation of active noise
+  reduction earmuffs* (ISO 4869-6:2019). The active insertion loss, its
+  uncertainty, the total attenuation of 5.5 and the linear-operation check of
+  5.4.4, validated against Tables A.2 and A.3 and ISO's calculation workbook.
 
 ## Standards
 
-ISO 4869-2:2018, which defines the assumed protection value $APV_{fx}$
-(Clause 5), the octave-band method (Clause 6), the $H$, $M$ and $L$ values
-(Clause 7) and the single number rating $SNR$ (Clause 8). The attenuation they
-all start from is measured to ISO 4869-1:2018.
+ISO 4869-1:2018, which measures the attenuation (4.6), gives the uncertainty of
+its mean (Annex A, Tables A.2 and A.3), the test of whether two measurements
+differ (Annex B, Tables B.1 and B.2) and the sound-field conditions of the test
+room (4.2.2, Table 1). ISO 4869-2:2018, which defines the assumed protection
+value $APV_{fx}$ (Clause 5), the octave-band method (Clause 6), the $H$, $M$ and
+$L$ values (Clause 7) and the single number rating $SNR$ (Clause 8).
+ISO 4869-6:2019, which adds the active insertion loss of an active noise
+reduction earmuff to that attenuation (5.4, 5.5, Annex A).
 
 ## See also
 
@@ -36196,7 +36307,9 @@ all start from is measured to ISO 4869-1:2018.
   the exposure the protector did not stop does over a working life.
 - [Hearing threshold (age and reference zero)](https://jmrplens.github.io/phonometry/perception/hearing/hearing-threshold/): the
   baseline any protected exposure is judged against.
-- API reference: [`hearing.hearing_protectors`](https://jmrplens.github.io/phonometry/reference/api/hearing/hearing-protectors/).
+- API reference: [`hearing.real_ear_attenuation`](https://jmrplens.github.io/phonometry/reference/api/hearing/real-ear-attenuation/),
+  [`hearing.hearing_protectors`](https://jmrplens.github.io/phonometry/reference/api/hearing/hearing-protectors/)
+  and [`hearing.active_noise_reduction`](https://jmrplens.github.io/phonometry/reference/api/hearing/active-noise-reduction/).
 
 ---
 
@@ -36540,9 +36653,11 @@ In the order the chain runs.
 - **Damage**: [Noise-induced hearing loss (ISO 1999)](https://jmrplens.github.io/phonometry/perception/hearing/noise-induced-hearing-loss/):
   NIPTS and its population distribution, and the combination with age into
   HTLAN.
-- **Protection**: [Hearing Protectors (ISO 4869-2)](https://jmrplens.github.io/phonometry/perception/hearing/hearing-protectors/):
-  the octave-band, HML and SNR methods that say what a protector actually
-  leaves at the ear, and the one protection performance all three are set to.
+- **Protection**: [Hearing Protectors (ISO 4869-1, -2 and -6)](https://jmrplens.github.io/phonometry/perception/hearing/hearing-protectors/):
+  the attenuation measured on sixteen subjects with its uncertainty and its
+  significance test, the octave-band, HML and SNR methods that say what a
+  protector actually leaves at the ear, and what an active noise reduction
+  earmuff adds.
 
 ## What this section does not cover
 
@@ -41824,6 +41939,19 @@ documents, one page per module.
 | `table_c4_contribution` | `function` | **Sampling contribution c₁u₁ [dB] from Table C.4 (ISO 9612 job/full-day).**<br>• `n_samples`: N (clamped to [3, 30])<br>• `u1`: sampling standard uncertainty [dB]<br>• bilinear interpolation, anchored at u₁ = 0 | `table_c4_contribution(6, 2.0)  # 1.4` |
 | `minimum_cumulative_duration_hours` | `function` | **Minimum cumulative measurement duration [h] (ISO 9612 Table 1).**<br>• `n_workers`: group size n_G (> 40 → 17 h; the standard advises splitting the group) | `minimum_cumulative_duration_hours(18)  # 10.75` |
 | `COVERAGE_FACTOR` | `float` | **ISO 9612 coverage factor k = 1.65 (Clause 14).**<br>One-sided 95 % confidence: U = 1.65 u, upper limit LEX,8h + U | `COVERAGE_FACTOR  # 1.65` |
+| `real_ear_attenuation` | `function` | **The attenuation of a protector on a panel of subjects, its spread and its uncertainty (ISO 4869-1 4.6 and Annex A).**<br>• `attenuation_db`: `(subjects, bands)` individual attenuations [dB], or `open_threshold_db` with `occluded_threshold_db` (4.6.2: occluded minus open)<br>• `frequencies` [Hz] (Default: 125 Hz to 8 kHz for seven bands, from 63 Hz for eight)<br>• u = s/√N, U95 = 2u, at full precision | `r = hearing.real_ear_attenuation(grid)`<br><br>• `RealEarAttenuationResult`; `r.attenuation_db` feeds `assumed_protection_value`, `hml_rating` and `snr_rating` unchanged |
+| `RealEarAttenuationResult` | `dataclass` | **ISO 4869-1 measurement.**<br>• `attenuation_db`, `mean_db`, `standard_deviation_db`, `standard_uncertainty_db`, `expanded_uncertainty_db` [dB]<br>• `frequencies` [Hz], `subjects`<br>• `.plot()`: mean attenuation downwards on the IEC 60263 grid, Clause 6 l) | `r.expanded_uncertainty_db` |
+| `assess_attenuation_difference` | `function` | **Do two attenuation measurements differ significantly? (ISO 4869-1 Annex B).**<br>• `first`, `second`: a `RealEarAttenuationResult` or its means [dB]<br>• `first_expanded_uncertainty_db`, `second_expanded_uncertainty_db`: U95 for bare means [dB]<br>• significant when \|m1 − m2\| > √(U95,1² + U95,2²) | `d = hearing.assess_attenuation_difference(r1, r2)`<br><br>• `AttenuationDifferenceResult` (`difference_db`, `criterion_db`, `significant`, `significant_frequencies`, `.plot()`) |
+| `AttenuationDifferenceResult` | `dataclass` | **Annex B verdict per band.**<br>• `difference_db`, `criterion_db` [dB], `significant` per band, `any_significant`<br>• no truth value: read `significant`<br>• `.plot()` | `d.significant_frequencies` |
+| `minimum_significant_difference` | `function` | **√2·U95, the minimum difference for two equal uncertainties (ISO 4869-1 B.1.1, B.2).**<br>• `expanded_uncertainty_db` [dB], a number or an array<br>• B.1.1 feeds it the rounded 2,3 dB of Table A.2 and prints 3,3 dB | `hearing.minimum_significant_difference(2.3)  # 3.25` |
+| `reat_expanded_uncertainty` | `function` | **Typical U95 per band from Table A.2 (within a laboratory) or B.2 (between laboratories).**<br>• `frequencies` [Hz]<br>• `protector`: 'earplug' or 'earmuff'<br>• `between_laboratories` (Default: False) | `hearing.reat_expanded_uncertainty([250, 8000], protector='earplug')` |
+| `ProtectorUncertaintyBudget` | `dataclass` | **The three standard uncertainties of Table A.1: `method_db`, `equipment_db`, `environment_db` [dB].**<br>• `combined_db` = root sum of squares, `expanded_db` = 2u, both derived | `hearing.REAT_WITHIN_LABORATORY_UNCERTAINTY['earmuff']['250 Hz up to 4 kHz'].expanded_db` |
+| `REAT_WITHIN_LABORATORY_UNCERTAINTY` / `REAT_BETWEEN_LABORATORY_UNCERTAINTY` | `mapping` | **Tables A.2 and B.2 of ISO 4869-1: the typical budget by protector ('earplug', 'earmuff') and frequency range.** | `hearing.REAT_BETWEEN_LABORATORY_UNCERTAINTY['earplug']` |
+| `REAT_FREQUENCY_RANGES` | `constant` | **The three columns of Tables A.2 and B.2: 'below 250 Hz', '250 Hz up to 4 kHz', 'above 4 kHz'.** | `hearing.REAT_FREQUENCY_RANGES` |
+| `REAT_FIELD_VARIATION_LIMITS` | `constant` | **Table 1 of ISO 4869-1: (lowest free-field rejection, allowable field variation) [dB].**<br>25 → 20, 20 → 15, 15 → 10, 10 → 5; below 10 dB the microphone is not suitable | `hearing.REAT_FIELD_VARIATION_LIMITS[0]  # (25.0, 20.0)` |
+| `allowable_field_variation` | `function` | **Table 1 lookup.**<br>• `free_field_rejection_db` [dB]; below 10 dB raises | `hearing.allowable_field_variation(18.0)  # 10.0` |
+| `check_reat_sound_field` | `function` | **Is the test site's sound field diffuse enough? (ISO 4869-1 4.2.2).**<br>• `position_levels_db`: levels at 'front', 'back', 'left', 'right', 'up', 'down' [dB]<br>• `reference_levels_db` [dB]<br>• `rotation_levels_db` with `free_field_rejection_db` for b), from 500 Hz | `c = hearing.check_reat_sound_field(levels, reference)`<br><br>• `ReatSoundFieldCheck` |
+| `ReatSoundFieldCheck` | `dataclass` | **4.2.2 verdict.**<br>• `uniform` (±2,5 dB), `balanced` (right-left 3 dB), `diffuse` (Table 1) per band<br>• `directionality_judged`: whether b) was measured<br>• `passes` needs a) and b); no truth value<br>• `.plot()` | `c.passes` |
 | `assumed_protection_value` | `function` | **Assumed protection value APVfx = mf − α·sf (ISO 4869-2 Clause 5, Formula (1)).**<br>• `attenuation`: `(subjects, bands)` ISO 4869-1 grid [dB]<br>• `performance`: 50/75/80/84/90/95/98 % from Table 1 (Default: 84)<br>• `frequencies`: mid-band [Hz] (Default: the eight octaves from 63 Hz) | `apv = hearing.assumed_protection_value(grid)`<br><br>• `AssumedProtectionResult` (`apv`, `mean_attenuation`, `standard_deviation`, `alpha`, `subjects`) |
 | `octave_band_protected_level` | `function` | **Effective A-weighted level, octave-band method (ISO 4869-2 Formula (2)).**<br>• `noise_levels`: unweighted octave-band levels [dB]<br>• `apv`: assumed protection values or the result carrying them<br>• `a_weighting`: [dB] (Default: IEC 61672-1 Table 3) | `res = hearing.octave_band_protected_level(noise, apv)`<br><br>• `ProtectedLevelResult` (`effective_level`, `reported_level`, `noise_reduction`, `band_levels`) |
 | `hml_rating` / `hml_protected_level` | `function` | **H, M and L values and their application (ISO 4869-2 Clause 7).**<br>• `hml_rating(attenuation, performance=84)`: Formulae (3)-(15) over the eight reference noises of Table 2<br>• `hml_protected_level(l_p_a, l_p_c, rating)`: Formulae (16)-(18), consuming the rounded triple | `res = hearing.hml_protected_level(104.0, 103.0, hearing.hml_rating(grid))`<br><br>• `HMLRatingResult` (`high`, `medium`, `low`, `reported`, `subject_h/m/l`, `predicted_reduction`) |
@@ -41832,6 +41960,13 @@ documents, one page per module.
 | `PROTECTION_PERFORMANCES` | `dict` | **Table 1: the constant α for each protection performance x (ISO 4869-2).**<br>50 → 0.00, 75 → 0.67, 80 → 0.84, 84 → 1.00, 90 → 1.28, 95 → 1.64, 98 → 2.00 | `hearing.PROTECTION_PERFORMANCES[84]` |
 | `PROTECTOR_OCTAVE_BANDS` / `PROTECTOR_A_WEIGHTING` | `tuple` | **The eight octave bands of Formula (2) and frequency weighting A at them.**<br>63 Hz to 8 kHz; the weighting is IEC 61672-1:2013 Table 3, which ISO 4869-2 reprints as its Table B.1 | `hearing.PROTECTOR_OCTAVE_BANDS` |
 | `HML_REFERENCE_NOISES` / `HML_REFERENCE_C_MINUS_A` / `HML_REFERENCE_D` | `tuple` | **Table 2: the eight reference noises the HML method is fitted on.**<br>A-weighted octave-band levels 125 Hz to 8 kHz, their (LpC − LpA) and the empirical weights d | `hearing.HML_REFERENCE_NOISES` |
+| `active_insertion_loss` | `function` | **The active insertion loss of an ANR earmuff, its lower ear and its uncertainty (ISO 4869-6 5.4, 5.5 b) and Annex A).**<br>• `passive_levels_db`, `active_levels_db`: MIRE levels, `(subjects, 2, bands)` [dB], left ear first<br>• or `insertion_loss_db` per ear, or already the lower ear<br>• `frequencies` [Hz] (Default: the one-third octaves 50 Hz or 100 Hz to 10 kHz, or the octaves 63 Hz or 125 Hz to 8 kHz, by count) | `ail = hearing.active_insertion_loss(passive_levels_db=off, active_levels_db=on)`<br><br>• `ActiveInsertionLossResult` |
+| `ActiveInsertionLossResult` | `dataclass` | **ISO 4869-6 active insertion loss.**<br>• `insertion_loss_db` (lower ear), `per_ear_db`<br>• `mean_db`, `standard_deviation_db`, `standard_uncertainty_db`, `expanded_uncertainty_db` [dB]<br>• `.plot()` | `ail.expanded_uncertainty_db` |
+| `anr_total_attenuation` | `function` | **Total attenuation of an ANR earmuff and its ISO 4869-2 ratings at 84 % (ISO 4869-6 5.5).**<br>• `reat`: ISO 4869-1 result or `(subjects, octaves)` grid, 63 Hz or 125 Hz to 8 kHz<br>• `insertion_loss`: `ActiveInsertionLossResult` or a grid on the one-third octaves<br>• passive side interpolated linearly in hertz, as ISO's calculation example does | `anr = hearing.anr_total_attenuation(reat, ail)`<br><br>• `AnrTotalAttenuationResult` (`total_octave_db`, `assumed_protection`, `hml`, `snr`) |
+| `AnrTotalAttenuationResult` | `dataclass` | **ISO 4869-6 total attenuation.**<br>• `total_octave_db` (Formula (1)), `total_third_octave_db`, `reat_third_octave_db`, `insertion_loss_db` [dB]<br>• `assumed_protection`, `hml`, `snr` at 84 %<br>• `.plot()` | `anr.hml.reported` |
+| `assess_anr_linearity` | `function` | **Up to what external level does an ANR earmuff stay linear? (ISO 4869-6 5.4.4).**<br>• `external_levels_db`: 5 dB steps up to 110 dB<br>• `ear_levels_db`: 125 Hz octave level at the ear, external levels on the last axis<br>• or `ear_third_octave_levels_db` (100, 125, 160 Hz on the last axis) | `hearing.assess_anr_linearity([90, 95, 100], ears).maximum_linear_level_db`<br><br>• `AnrLinearityResult` |
+| `AnrLinearityResult` | `dataclass` | **5.4.4 verdict.**<br>• `maximum_linear_level_db`, `increments_db`, `linear` per ear and step<br>• `passes`, `linear_to_110_db`; no truth value<br>• `.plot()` | `lin.maximum_linear_level_db` |
+| `ANR_WITHIN_LABORATORY_UNCERTAINTY` | `constant` | **Table A.2 of ISO 4869-6: the typical budget of the mean active insertion loss (0.6, 0.3, 0.4 dB) as a `ProtectorUncertaintyBudget`.** | `hearing.ANR_WITHIN_LABORATORY_UNCERTAINTY.expanded_db  # 1.56` |
 | `PINK_NOISE_A_WEIGHTED` | `tuple` | **Table 3: the pink noise the SNR method is defined against.**<br>A-weighted octave-band levels 125 Hz to 8 kHz of a pink noise whose C-weighted level is 100 dB | `hearing.PINK_NOISE_A_WEIGHTED` |
 | `INSTRUMENT_U2` | `mapping` | **Instrument standard uncertainty u2 [dB] (ISO 9612 Table C.5).**<br>Keyed by `'class1'` (0.7), `'class2'` (1.5), `'personal_exposimeter'` (1.5) | `INSTRUMENT_U2['class1']  # 0.7` |
 | `OccupationalExposureWarning` | `warning class` | **ISO 9612 sampling advisory.**<br>Emitted for the 3 dB task spread (Clause 9.3), c₁u₁ > 3.5 dB (Clause 10.4) or a short Table 1 cumulative duration | `warnings.simplefilter('error', OccupationalExposureWarning)` |
@@ -57675,7 +57810,7 @@ the normative PDF fiche.
 - [Filter Architecture Gallery](https://jmrplens.github.io/phonometry/signals/filters/filter-gallery/): choose an architecture and inspect responses
 - [Calibration and dBFS](https://jmrplens.github.io/phonometry/signals/metrology/calibration/): get real-world SPL values
 - [Why phonometry](https://jmrplens.github.io/phonometry/start/why-phonometry/): the conformance-first design philosophy
-- [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): the expected and computed value of all 1281 checks
+- [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): the expected and computed value of all 1295 checks
 - [API Reference](https://jmrplens.github.io/phonometry/reference/api/): every parameter of every function
 - [Bibliography](https://jmrplens.github.io/phonometry/reference/bibliography/): the books and papers behind every guide, each with a verified link
 
@@ -58605,7 +58740,7 @@ sample from the metrology core:
 | IEC 61252:1993 | The personal sound exposure quantities, `sound_exposure()` and the normalized 8 h level `lex_8h()`; IEC 61252:2025 has since superseded this print, and the transcription still targets the 1993+A2 text | `tests/signals/test_levels.py` |
 
 The same discipline applies far beyond the metrology core: today the suite runs
-1281 numerical conformance checks across 87 domains and 462 standards, covering
+1295 numerical conformance checks across 89 domains and 464 standards, covering
 psychoacoustics and speech intelligibility, room, building and materials
 acoustics, human and machine vibration, environmental, aircraft, rotorcraft
 and underwater noise, electroacoustics, broadcast loudness, industrial noise

@@ -1,6 +1,6 @@
 ---
-title: "Protectores auditivos (ISO 4869-2)"
-description: "Los tres métodos de la ISO 4869-2 que convierten la atenuación medida de un protector auditivo en el nivel efectivo ponderado A: el método por bandas de octava, los valores HML y el índice de número único, los tres con un mismo rendimiento de protección."
+title: "Protectores auditivos (ISO 4869-1, -2 y -6)"
+description: "Cómo se mide la atenuación de un protector auditivo sobre dieciséis sujetos, con su incertidumbre y su prueba de significación (ISO 4869-1), y los tres métodos de la ISO 4869-2 que la convierten en el nivel efectivo ponderado A, y la atenuación total de una orejera de reducción activa del ruido (ISO 4869-6)."
 references:
   - type: standard
     organization: "International Organization for Standardization"
@@ -15,7 +15,13 @@ references:
     title: "Acoustics — Hearing protectors — Part 1: Subjective method for the measurement of sound attenuation"
     designation: "ISO 4869-1:2018"
     url: "https://www.iso.org/standard/65581.html"
-    note: "De dónde salen las atenuaciones por sujeto: la atenuación en oído real en el umbral, medida sobre 16 sujetos, que es la entrada de la que parte todo método de esta página."
+    note: "De dónde salen las atenuaciones por sujeto: la atenuación en oído real en el umbral del apartado 4.6, la incertidumbre de su media del anexo A, la prueba de significación del anexo B y la cualificación del campo sonoro del apartado 4.2.2 con su Tabla 1, validadas contra las Tablas A.2, A.3, B.1 y B.2 y las diferencias mínimas de B.1.1 y B.2."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2019
+    title: "Acoustics — Hearing protectors — Part 6: Determination of sound attenuation of active noise reduction earmuffs"
+    designation: "ISO 4869-6:2019"
+    note: "La pérdida por inserción activa del apartado 5.4, el oído con el valor menor y su incertidumbre (anexo A), la atenuación total del apartado 5.5 y la comprobación de funcionamiento lineal del apartado 5.4.4, validadas contra las Tablas A.2 y A.3 y contra cada paso del apartado 5.5 que guarda el libro de cálculo que ISO publica con ella."
 ---
 
 import Scope from '../../../../../components/Scope.astro';
@@ -30,6 +36,169 @@ consigue cada una, así que lo que vuelve del laboratorio es una
 dispersión que a menudo es un tercio de la media. La ISO 4869-2 es la norma que
 convierte esa distribución en un número con el que se puede actuar, y lo
 primero que hace es negarse a usar la media.
+
+## De dónde sale la distribución (ISO 4869-1)
+
+La ISO 4869-1 mide la atenuación en el umbral de audición. Las señales de ensayo
+son bandas de tercio de octava de ruido rosa centradas en las frecuencias de
+octava de 125 Hz a 8 kHz, con 63 Hz opcional (4.1). Cada uno de los dieciséis
+sujetos busca su umbral para cada una de ellas dos veces, con los oídos libres y
+con el protector puesto, la mitad del panel en cada orden, y la atenuación de
+ese sujeto en esa banda es la diferencia (4.6.2) entre el umbral con el oído
+ocluido, $L_{\mathrm{occluded}}$, y con el oído libre, $L_{\mathrm{open}}$:
+
+$$
+A_{j,f} = L_{\mathrm{occluded},j,f} - L_{\mathrm{open},j,f}
+$$
+
+Un informe da esos valores individuales y, por cada señal de ensayo, su media,
+su desviación típica y la incertidumbre expandida de la media (apartado 6). El
+anexo A modela la atenuación como el valor medido más tres entradas de media
+nula, la del método (el grupo de sujetos, la colocación, el juicio del umbral,
+el operador, la muestra), la del equipo de ensayo y la del entorno. Dentro de un
+mismo laboratorio, la incertidumbre típica combinada de una medición concreta es
+la desviación típica de su media, y el factor de cobertura es 2:
+
+$$
+u = \frac{s}{\sqrt{N}}, \qquad U_{95} = 2u
+$$
+
+```python
+import numpy as np
+from phonometry import hearing
+
+# Tabla A.3 de la ISO 4869-1: una orejera sobre dieciséis sujetos, de 125 Hz a 8 kHz.
+tabla_a3 = np.array([
+    [9.6, 13.5, 27.5, 32.4, 35.2, 29.1, 28.5],  [14.1, 20.2, 25.8, 32.0, 28.9, 35.3, 35.7],
+    [21.8, 27.8, 28.3, 46.6, 37.4, 40.1, 38.7], [18.5, 22.2, 36.5, 44.8, 39.1, 30.6, 33.5],
+    [15.6, 21.9, 31.8, 42.5, 38.9, 38.3, 37.1], [18.7, 28.6, 31.3, 39.0, 35.6, 35.3, 29.4],
+    [23.0, 26.5, 34.0, 41.3, 40.8, 38.7, 35.9], [17.3, 21.7, 25.0, 30.7, 38.6, 37.9, 40.8],
+    [19.4, 19.6, 28.0, 36.6, 40.7, 34.9, 39.4], [11.6, 20.4, 22.6, 38.0, 39.2, 33.9, 30.3],
+    [20.5, 21.8, 29.2, 40.7, 36.2, 35.7, 38.4], [18.3, 19.6, 26.2, 34.6, 32.7, 34.9, 26.6],
+    [15.1, 17.5, 30.1, 39.0, 39.4, 38.2, 39.5], [21.7, 20.8, 28.3, 39.5, 38.1, 40.0, 38.4],
+    [15.9, 17.8, 26.0, 40.6, 38.0, 40.2, 37.2], [11.8, 18.4, 29.6, 37.2, 40.8, 36.0, 29.9],
+])
+reat = hearing.real_ear_attenuation(tabla_a3)
+print(np.round(reat.mean_db, 1))                  # [17.1 21.1 28.8 38.5 37.5 36.2 35. ]
+print(np.round(reat.standard_deviation_db, 1))    # [3.9 3.9 3.5 4.5 3.2 3.2 4.6]
+print(np.round(reat.expanded_uncertainty_db, 1))  # [2.  1.9 1.7 2.2 1.6 1.6 2.3]
+
+# La rejilla es la entrada de todos los métodos de la ISO 4869-2 de abajo, sin cambios.
+print(np.round(hearing.assumed_protection_value(reat.attenuation_db).apv, 1))
+# [13.1 17.2 25.3 34.  34.3 33.  30.4]
+```
+
+También pueden entrar los propios umbrales, como `open_threshold_db` y
+`occluded_threshold_db`; solo tienen que compartir referencia, porque un nivel
+de presión sonora y uno de nivel de audición dan la misma diferencia. Todo se
+calcula con precisión completa y lo redondea quien lo imprime, que es lo que
+dicen hacer las Tablas A.3 y B.1.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/hearing_protector_reat.svg" alt="Izquierda: la atenuación acústica de una orejera sobre dieciséis sujetos en las siete señales de ensayo de 125 Hz a 8 kHz, una línea tenue por sujeto, con la media dibujada encima y la incertidumbre expandida de la media como barras de error, con la atenuación creciendo hacia abajo; la media sube de unos 17 dB en 125 Hz a unos 38 dB en 1 kHz y se queda cerca de 35 dB por encima. Derecha: la diferencia entre las medias de dos ensayos de la misma orejera, una barra por señal de ensayo, con la raíz de la suma de cuadrados de las dos incertidumbres expandidas marcada sobre cada barra; solo la barra de 8 kHz, de unos 3,9 dB frente a un criterio de 3,4 dB, supera su marca y va rayada" width="92%" />
+
+*A la izquierda, la Tabla A.3: la dispersión entre sujetos es de varios
+decibelios, y la incertidumbre expandida de la media que se dibuja sobre ella es
+la mitad de esa dispersión, porque dieciséis sujetos la dividen por cuatro y el
+factor de cobertura la vuelve a duplicar. A la derecha, la Tabla B.1: dos
+ensayos de la orejera en dos condiciones de ensayo (por ejemplo, dos posiciones
+de la diadema), que solo en 8 kHz difieren más de lo que permiten las dos
+incertidumbres.*
+
+<details>
+<summary>Ver el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+# Una línea cada una, con los resultados calculados en esta página.
+reat.plot(language="es")   # media hacia abajo, sujetos tenues, U95 como barras (6 l))
+plt.show()
+
+media_2 = [16.8, 21.0, 28.3, 38.2, 35.5, 34.6, 38.9]
+u95_2 = [1.6, 1.2, 1.4, 1.5, 1.5, 1.7, 2.5]
+hearing.assess_attenuation_difference(
+    reat, media_2, second_expanded_uncertainty_db=u95_2
+).plot(language="es")
+plt.show()
+```
+
+</details>
+
+### ¿Son distintas dos mediciones? (anexo B)
+
+Dos atenuaciones medias difieren significativamente al nivel del 5 % cuando su
+diferencia supera la raíz de la suma de los cuadrados de sus incertidumbres
+expandidas (B.1.2):
+
+$$
+|m_1 - m_2| > \sqrt{U_{95,1}^2 + U_{95,2}^2}
+$$
+
+La Tabla B.1 lo aplica a la orejera de arriba y a un segundo ensayo de ella en
+otra condición de ensayo (la posición de la diadema es el ejemplo que da
+B.1.2), del que la norma solo imprime medias e incertidumbres:
+
+```python
+media_2 = [16.8, 21.0, 28.3, 38.2, 35.5, 34.6, 38.9]
+u95_2 = [1.6, 1.2, 1.4, 1.5, 1.5, 1.7, 2.5]
+diferencia = hearing.assess_attenuation_difference(
+    reat, media_2, second_expanded_uncertainty_db=u95_2
+)
+print(np.round(diferencia.criterion_db, 1))  # [2.5 2.3 2.2 2.7 2.2 2.3 3.4]
+print(diferencia.significant_frequencies)    # [8000.]
+```
+
+Cuando no hay datos de la medición concreta, B.1.1 y B.2 toman las
+incertidumbres típicas de la Tabla A.2 (dentro de un laboratorio) y de la
+Tabla B.2 (entre laboratorios), para tapones y orejeras en tres intervalos de
+frecuencia. La biblioteca guarda las tres componentes de cada una y deriva de
+ellas los valores combinado y expandido, lo que reproduce todas las celdas
+impresas. Con dos incertidumbres iguales el criterio pasa a ser
+$\sqrt{2}\,U_{95}$, y B.1.1 lo evalúa sobre el valor redondeado que imprime su
+tabla, y escribe esa entrada: «$\sqrt{2}$ × 2,3 dB = 3,3 dB». El balance sin
+redondear da 3,21 dB:
+
+```python
+tapon = hearing.REAT_WITHIN_LABORATORY_UNCERTAINTY["earplug"]["250 Hz up to 4 kHz"]
+print(round(tapon.expanded_db, 2))                                          # 2.27
+print(round(hearing.minimum_significant_difference(2.3), 1))                # 3.3
+print(round(hearing.minimum_significant_difference(tapon.expanded_db), 2))  # 3.21
+
+# La U95 típica banda a banda, lista para assess_attenuation_difference.
+print(np.round(hearing.reat_expanded_uncertainty(reat.frequencies, protector="earplug"), 1))
+# [3.2 2.3 2.3 2.3 2.3 2.3 3.2]
+```
+
+Entre laboratorios, el mismo tapón necesita 9,3 dB según la cuenta de B.2
+($\sqrt{2}$ × 6,6 dB), o 9,37 dB a partir de los 6,62 dB sin redondear: en lo
+que más discrepan dos laboratorios es en cómo se colocan el protector sus
+sujetos.
+
+### La sala de ensayo (4.2.2)
+
+El campo sonoro se cualifica sin el sujeto ni la silla. El nivel a 15 cm del
+punto de referencia sobre los tres ejes se queda dentro de ±2,5 dB del nivel en
+él, las posiciones derecha e izquierda a menos de 3 dB entre sí, y desde 500 Hz
+un micrófono direccional girado 360° ve una variación no mayor de la que la
+Tabla 1 le permite según su rechazo en campo libre (20 dB desde un rechazo de
+25 dB, hasta 5 dB para uno de 10 dB, y ningún micrófono por debajo):
+
+```python
+campo = hearing.check_reat_sound_field(
+    {"front": [0.8] * 7, "back": [-0.6] * 7, "left": [1.1] * 7,
+     "right": [-1.2] * 7, "up": [1.9] * 7, "down": [-2.0] * 7},
+    [0.0] * 7,
+    rotation_levels_db=[[0.0] * 7, [4.0] * 7],
+    free_field_rejection_db=17.0,
+)
+print(hearing.allowable_field_variation(17.0))  # 10.0
+print(campo.passes)                             # True
+```
+
+El apartado 4.2.2 b) es un requisito del apartado, no un añadido: si falta la
+rotación, `campo.directionality_judged` es falso y `campo.passes` también,
+mientras `campo.uniform` y `campo.balanced` siguen dando el veredicto de a)
+banda a banda.
 
 ## Primero la distribución (apartado 5)
 
@@ -235,9 +404,217 @@ celdas. La Tabla 2 es la que reproduce los propios resultados del anexo, y es
 la que lleva esta biblioteca; la discrepancia está registrada en
 [ERRATA](/phonometry/es/reference/errata/).
 
+## Orejeras de reducción activa del ruido (ISO 4869-6)
+
+Una orejera de reducción activa del ruido añade un circuito de cancelación a
+una carcasa pasiva, y el circuito trabaja sobre todo a baja frecuencia, donde la
+carcasa es más débil. Un ensayo de umbral no lo ve: la ISO 4869-1 trabaja a
+niveles muy por debajo de aquellos en los que el circuito tiene algo que
+cancelar. Por eso la ISO 4869-6 mide las dos mitades por separado, sobre los
+mismos dieciséis sujetos, y las suma sujeto a sujeto. Sus métodos están
+pensados para exposiciones a ruido estable y no se aplican a ruidos con
+componentes impulsivos (cláusula 1):
+
+- la atenuación **pasiva** es el resultado de la ISO 4869-1 con el circuito
+  apagado, en bandas de octava;
+- la **pérdida por inserción activa** (5.4.3) es el nivel en cada oído con el
+  circuito apagado menos el nivel con él encendido, medido con un micrófono en
+  el conducto auditivo cerrado (ISO 11904-1) en bandas de tercio de octava de un
+  ruido de banda ancha a entre 85 dB y 95 dB:
+
+$$
+\alpha_{j,e,f} = L_{\mathrm{passive},j,e,f} - L_{\mathrm{active},j,e,f}
+$$
+
+con $L_{\mathrm{passive}}$ el nivel en el oído con el circuito apagado y
+$L_{\mathrm{active}}$ el nivel con él encendido.
+
+El anexo A trata su incertidumbre como la ISO 4869-1 trata la de la
+atenuación, sobre los dieciséis valores del oído con la menor pérdida por
+inserción, e imprime un ejemplo, la Tabla A.3:
+
+```python
+# Tabla A.3 de la ISO 4869-6: la pérdida por inserción activa del oído de menor
+# pérdida de dieciséis sujetos en las frecuencias de octava de 63 Hz a 8 kHz.
+tabla_a3_anr = np.array([
+    [18.4, 23.9, 21.6, 5.2, -4.5, -0.2, -1.3, -1.0], [19.4, 23.0, 21.7, 5.7, -6.4, -0.4, 0.8, -1.9],
+    [19.7, 23.1, 20.8, 3.6, -4.2, -2.9, 0.2, -0.6], [19.8, 23.1, 18.7, 2.2, -4.9, -0.5, -0.2, 0.2],
+    [20.5, 24.5, 20.2, 3.1, -4.4, -2.9, -1.4, 0.3], [18.8, 24.4, 20.8, 3.9, -4.3, -2.6, -0.4, -0.2],
+    [21.7, 24.4, 22.2, 4.7, -5.2, -5.1, -1.5, -0.3], [20.5, 22.7, 24.3, 8.8, -8.8, -3.1, -4.8, -0.7],
+    [22.9, 23.2, 20.7, 5.4, -6.5, -2.8, -0.5, -1.0], [21.9, 22.9, 23.1, 8.8, -8.4, -4.9, -2.6, -0.7],
+    [23.7, 24.6, 20.8, 3.4, -6.4, -0.1, -0.3, -0.6], [22.0, 23.9, 20.3, 3.0, -4.2, -0.8, -1.0, 0.3],
+    [23.2, 24.3, 20.9, 4.6, -5.6, -0.1, -0.5, -1.0], [21.5, 23.5, 23.3, 5.9, -5.2, -3.1, -3.6, -1.6],
+    [24.3, 24.2, 22.5, 4.2, -6.3, -2.5, -0.9, -0.5], [23.8, 24.9, 20.7, 3.8, -4.8, -0.5, -0.3, 0.2],
+])
+insercion = hearing.active_insertion_loss(tabla_a3_anr)
+print(np.round(insercion.mean_db, 1))                  # [21.4 23.8 21.4  4.8 -5.6 -2.  -1.1 -0.6]
+print(np.round(insercion.expanded_uncertainty_db, 1))  # [0.9 0.4 0.7 0.9 0.7 0.8 0.7 0.3]
+```
+
+Desde 1 kHz el circuito añade sonido en lugar de quitarlo, hasta 6 dB en
+1 kHz, y los valores negativos se conservan tal cual. Las filas de la media y de
+la desviación típica de la Tabla A.3 se reproducen exactas, pero sus filas de
+$u$ y $U_{95}$ son la fórmula aplicada a la fila **redondeada** de encima
+($1{,}4 / 4 = 0{,}35$ se imprime 0,4), lo que deja seis de sus ocho celdas de
+$U_{95}$ una décima por encima del valor que definen A.1 y A.2. La biblioteca
+devuelve el valor definido; la discrepancia está registrada en
+[ERRATA](/phonometry/es/reference/errata/). El balance típico de la Tabla A.2
+es `hearing.ANR_WITHIN_LABORATORY_UNCERTAINTY`, con $U_{95}$ = 1,56 dB.
+
+### La atenuación total (5.5)
+
+El apartado 5.5 suma las dos mitades por sujeto. La atenuación pasiva se
+interpola en bandas de tercio de octava y se prolonga hasta 50 Hz y 10 kHz (a),
+en cada banda solo se conserva el oído con la menor pérdida por inserción activa
+(b), se suman las dos (c), cada octava es el promedio energético de sus tres
+tercios de octava (d) y los dieciséis resultados por octava entran en los
+métodos de la ISO 4869-2 al 84 % (e):
+
+$$
+A_{\mathrm{total,oct},j} = -10 \lg \left[\left(
+\sum_{i=1}^{3} 10^{-0,1 A_{\mathrm{total},f_i,j}}\right) / 3\right] \mathrm{dB}
+$$
+
+La norma remite para los detalles a un libro de cálculo que publica ISO, y ese
+libro interpola **linealmente en hercios** entre las frecuencias centrales
+nominales, no sobre un eje logarítmico: 80 Hz queda al 27 % del camino de 63 Hz
+a 125 Hz, no a un tercio. La biblioteca sigue el libro y reproduce cada paso
+del apartado 5.5 que guarda: el oído con el valor menor, la interpolación, las
+sumas, la Fórmula (1) y la media, la desviación típica y el $APV_{f84}$. El
+libro redondea a 0,1 dB la interpolación, la Fórmula (1), la media y la
+desviación típica, y deja el resto como sale; la biblioteca no redondea nada,
+lo que mueve un total por octava o un $APV_{f84}$ menos de 0,1 dB.
+
+<details>
+<summary>Ver los datos del ejemplo de cálculo de ISO</summary>
+
+```python
+# La REAT de los dieciséis sujetos, bandas de octava de 63 Hz a 8 kHz.
+reat_anr = np.array([
+    [11.7, 15.7, 8.6, 10.7, 25.6, 22.7, 43.0, 38.0], [12.7, 20.3, 15.7, 13.4, 23.0, 24.3, 36.7, 42.0],
+    [21.0, 22.7, 17.7, 18.0, 27.4, 31.0, 36.3, 45.0], [21.6, 22.0, 21.0, 13.4, 24.7, 30.3, 36.3, 42.3],
+    [10.6, 10.0, 11.7, 16.0, 24.6, 23.4, 38.0, 42.4], [12.3, 13.3, 12.3, 17.6, 30.0, 22.6, 39.3, 43.3],
+    [11.0, 10.0, 10.0, 13.6, 24.3, 25.4, 36.3, 37.4], [16.0, 12.0, 11.3, 13.0, 28.7, 25.7, 38.0, 35.0],
+    [11.4, 11.6, 11.0, 13.7, 29.3, 24.3, 42.7, 37.6], [12.7, 12.0, 8.0, 9.0, 32.7, 25.6, 37.0, 41.0],
+    [14.0, 10.3, 7.7, 15.0, 21.0, 22.7, 33.3, 33.0], [19.3, 18.3, 15.6, 16.3, 21.0, 26.4, 32.7, 31.0],
+    [13.7, 15.4, 12.6, 13.4, 22.0, 19.0, 40.0, 33.3], [13.0, 15.3, 6.7, 12.0, 23.0, 28.7, 40.4, 38.0],
+    [16.7, 21.6, 18.4, 18.0, 33.7, 37.7, 57.0, 50.6], [10.7, 15.0, 10.0, 11.7, 25.0, 22.0, 32.0, 38.7],
+])
+# Su pérdida por inserción activa del oído de menor pérdida, 24 tercios de octava de 50 Hz a 10 kHz.
+ail_anr = np.array([
+    [17.3, 18.4, 20.6, 23.3, 23.9, 24.8, 23.6, 21.6, 17.0, 12.1, 5.2, -0.7, -5.7, -4.5, -2.0, 0.1, -0.2, -6.5, -4.4, -1.3, -0.2, 0.2, -1.0, -0.1],
+    [17.5, 19.4, 19.9, 21.7, 23.0, 23.9, 23.9, 21.7, 17.6, 12.8, 5.7, 0.8, -6.8, -6.4, -2.6, -1.2, -0.4, -1.6, -0.8, 0.8, -0.4, -1.3, -1.9, 0.7],
+    [17.0, 19.7, 21.2, 22.0, 23.1, 24.6, 23.7, 20.8, 17.0, 11.6, 3.6, -2.0, -7.0, -4.2, -1.9, -0.6, -2.9, -6.2, -2.8, 0.2, 0.3, -1.0, -0.6, 0.6],
+    [17.4, 19.8, 21.3, 22.4, 23.1, 22.3, 20.6, 18.7, 14.6, 9.7, 2.2, -2.6, -6.3, -4.9, -2.5, -1.4, -0.5, -2.9, -1.1, -0.2, 0.2, 0.1, 0.2, 1.1],
+    [19.0, 20.5, 21.8, 23.1, 24.5, 24.5, 22.3, 20.2, 16.2, 10.6, 3.1, -1.5, -5.9, -4.4, -1.6, -0.8, -2.9, -7.7, -5.8, -1.4, 0.0, -0.6, 0.3, -0.7],
+    [17.7, 18.8, 20.4, 23.0, 24.4, 25.3, 24.3, 20.8, 16.4, 10.6, 3.9, -1.7, -6.2, -4.3, -2.0, -1.2, -2.6, -5.1, -3.9, -0.4, 0.3, -0.1, -0.2, 0.3],
+    [20.0, 21.7, 22.8, 23.2, 24.4, 24.1, 24.2, 22.2, 17.3, 12.5, 4.7, 0.2, -5.5, -5.2, -2.4, -1.5, -5.1, -8.7, -6.6, -1.5, -1.1, -1.7, -0.3, -0.4],
+    [20.1, 20.5, 21.2, 21.4, 22.7, 24.7, 25.1, 24.3, 19.7, 15.5, 8.8, 5.4, -3.3, -8.8, -7.6, -4.1, -3.1, -6.2, -8.3, -4.8, -2.1, -0.6, -0.7, -1.9],
+    [22.9, 22.9, 22.9, 22.9, 23.2, 24.0, 23.6, 20.7, 17.2, 11.7, 5.4, 0.1, -7.7, -6.5, -3.0, -1.9, -2.8, -3.9, -4.5, -0.5, 0.0, -0.7, -1.0, 1.1],
+    [21.9, 21.9, 21.9, 21.9, 22.9, 24.3, 24.4, 23.1, 17.8, 14.3, 8.8, 5.3, -3.4, -8.4, -4.8, -2.7, -4.9, -5.0, -4.2, -2.6, -0.3, -0.4, -0.7, -0.4],
+    [23.7, 23.7, 23.7, 23.7, 24.6, 24.3, 23.0, 20.8, 16.7, 11.1, 3.4, -2.2, -8.0, -6.4, -3.0, -1.7, -0.1, 0.0, -0.5, -0.3, -0.2, -1.8, -0.6, 0.0],
+    [22.0, 22.0, 22.0, 22.0, 23.9, 24.1, 22.8, 20.3, 16.1, 11.1, 3.0, -1.8, -6.2, -4.2, -1.9, -0.1, -0.8, -6.0, -5.2, -1.0, -0.2, 0.1, 0.3, 0.7],
+    [23.2, 23.2, 23.2, 23.2, 24.3, 23.9, 23.5, 20.9, 16.8, 11.8, 4.6, -1.2, -6.8, -5.6, -2.3, -1.2, -0.1, -1.5, -3.2, -0.5, 0.8, 0.1, -1.0, -0.3],
+    [21.5, 21.5, 21.5, 21.5, 23.5, 24.6, 25.1, 23.3, 17.6, 13.4, 5.9, 1.6, -4.3, -5.2, -2.3, -1.2, -3.1, -7.3, -4.0, -3.6, 0.0, -1.3, -1.6, 0.6],
+    [24.3, 24.3, 24.3, 24.3, 24.2, 24.6, 23.9, 22.5, 17.7, 12.4, 4.2, -0.2, -7.2, -6.3, -2.2, -1.0, -2.5, -6.9, -3.1, -0.9, 0.0, -0.1, -0.5, 0.6],
+    [23.8, 23.8, 23.8, 23.8, 24.9, 24.2, 22.3, 20.7, 15.9, 10.9, 3.8, -0.4, -6.7, -4.8, -2.1, -0.7, -0.5, -6.3, -3.4, -0.3, 0.2, 0.1, 0.2, 1.3],
+])
+```
+
+</details>
+
+```python
+anr = hearing.anr_total_attenuation(reat_anr, ail_anr)
+print(np.round(anr.assumed_protection.apv, 1))  # [31.6 34.5 29.1 16.9 15.2 19.9 27.8 33.5]
+print(anr.hml.reported, anr.snr.reported)       # (21, 17, 19) 21
+
+# La misma orejera con el circuito apagado, directa a la ISO 4869-2:
+print(hearing.hml_rating(reat_anr).reported, hearing.snr_rating(reat_anr).reported)
+# (24, 17, 12) 20
+```
+
+El circuito gana siete decibelios de $L$, el valor de baja frecuencia, y cuesta
+tres de $H$: añade sonido desde 1 kHz. El número único se mueve un decibelio,
+por eso un protector para un ruido de baja frecuencia se elige mejor por su $L$,
+o por el método por bandas de octava, que por su SNR.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/hearing_protector_anr.svg" alt="Izquierda: promediadas sobre dieciséis sujetos, la atenuación pasiva de una orejera de reducción activa del ruido interpolada en bandas de tercio de octava de 50 Hz a 10 kHz, que sube de unos 14 dB a baja frecuencia a unos 39 dB en 8 kHz; la pérdida por inserción activa del oído con el valor menor, de unos 20 a 24 dB por debajo de 250 Hz, que cruza el cero hacia 630 Hz, baja a unos menos 6 dB en 1 kHz y se queda algo por debajo de cero más arriba; su suma, de unos 39 dB en 125 Hz y otra vez en lo alto del intervalo, con un mínimo de unos 15 dB hacia 800 Hz; y el valor de protección supuesta al 84 % en cada banda de octava, dibujado como cuadrados unos decibelios por debajo del total. Derecha: la pérdida por inserción activa de cada uno de los dieciséis sujetos en bandas de tercio de octava, con la media y la incertidumbre expandida de la media como barras de error, y una línea en cero" width="92%" />
+
+*A la izquierda, el ejemplo de cálculo de ISO para 5.5: el circuito añade más de 20 dB donde la carcasa pasiva es más débil, por debajo de 250 Hz, y quita unos decibelios desde 1 kHz. A la derecha, la propia pérdida por inserción activa, los mismos datos que el anexo A: la dispersión entre sujetos es pequeña, y por eso también lo es su incertidumbre expandida.*
+
+<details>
+<summary>Ver el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+anr.plot(language="es")  # pasiva, activa y total, con las octavas y el APV
+plt.show()
+# La pérdida por inserción del oído de menor pérdida del libro en sus 24 tercios
+# de octava, de la que la Tabla A.3 es el subconjunto de las frecuencias de octava,
+# con su incertidumbre expandida.
+hearing.active_insertion_loss(ail_anr).plot(language="es")
+plt.show()
+```
+
+</details>
+
+### Funcionamiento lineal (5.4.4)
+
+Un circuito de cancelación se satura, así que su pérdida por inserción solo
+vale hasta cierto nivel exterior. Con ruido rojo y el circuito encendido, el
+nivel exterior ponderado A sube en pasos de 5 dB desde el de la medida de la
+pérdida por inserción hasta 110 dB como mucho, y el nivel en cada oído en la
+octava de 125 Hz tiene que subir los mismos 5 dB, con ±1 dB de tolerancia. Lo
+que se informa es el nivel exterior más alto hasta el que eso se cumple en
+todas las muestras, sujetos y oídos:
+
+```python
+exterior = [90.0, 95.0, 100.0, 105.0, 110.0]
+en_los_oidos = [[60.0, 65.0, 70.0, 75.0, 80.0],   # una fila por oído
+                [61.0, 66.0, 71.0, 75.5, 78.0]]   # el último paso sube 2,5 dB
+linealidad = hearing.assess_anr_linearity(exterior, en_los_oidos)
+print(linealidad.maximum_linear_level_db)  # 105.0
+print(linealidad.linear_to_110_db)         # False
+```
+
+También pueden entrar los tres niveles de tercio de octava en el oído, como
+`ear_third_octave_levels_db`, que se suman en energía para formar la octava.
+
 ## Qué cubre esta guía
 
 <Scope>
+<ScopeClaim status="covered" label="Cubierto">
+La atenuación del apartado 4.6.2 de la ISO 4869-1:2018 y su estadística
+(4.6.3), la incertidumbre de la media del anexo A con los balances típicos de
+las Tablas A.2 y B.2, la prueba de significación del anexo B (B.1.2, y la
+diferencia mínima de B.1.1 y B.2) y las condiciones del campo sonoro del
+apartado 4.2.2 con la Tabla 1, mediante `hearing.real_ear_attenuation`,
+`hearing.assess_attenuation_difference`,
+`hearing.minimum_significant_difference`, `hearing.reat_expanded_uncertainty`
+y `hearing.check_reat_sound_field`. Todas las celdas derivadas de las Tablas
+A.2, A.3 y B.2, la fila del criterio y el veredicto de la Tabla B.1 y las cuatro
+diferencias mínimas se reproducen hasta el decimal impreso en la suite de tests
+y en el informe de conformidad. La fila de diferencias de la Tabla B.1 coincide
+a 0,1 dB, porque la norma imprime redondeadas las medias de su segundo ensayo:
+en 8 kHz sale 3,94 dB frente a los 4,0 impresos.
+</ScopeClaim>
+
+<ScopeClaim status="covered" label="Cubierto">
+La pérdida por inserción activa de la ISO 4869-6:2019 (5.4.1 y 5.4.3, a partir
+de los niveles MIRE de los dos oídos o dada directamente), la elección del oído
+con el valor menor de 5.5 b), la incertidumbre de su media del anexo A con el
+balance típico de la Tabla A.2, la atenuación total de 5.5 a) a e) con la
+Fórmula (1) y la comprobación de funcionamiento lineal de 5.4.4, mediante
+`hearing.active_insertion_loss`, `hearing.anr_total_attenuation` y
+`hearing.assess_anr_linearity`. La media y la desviación típica de la
+Tabla A.3 y sus filas de $u$ y $U_{95}$ tal como las forma la tabla se
+reproducen en la suite de tests y en el informe de conformidad, y también cada
+paso del apartado 5.5 que guarda el libro de cálculo de ISO (filas 134-149,
+182-197, 206-221, 230-245 y 247-249): las del oído de menor pérdida exactas, y
+las demás dentro del redondeo que el libro aplica a lo largo de la cadena.
+</ScopeClaim>
+
 <ScopeClaim status="covered" label="Cubierto">
 El valor de protección supuesta de la ISO 4869-2:2018 (apartado 5, Fórmula (1),
 con los siete rendimientos de protección de la Tabla 1), el método por bandas
@@ -253,10 +630,15 @@ conformidad.
 </ScopeClaim>
 
 <ScopeClaim status="not-covered" label="No cubierto">
-La medición que produce las atenuaciones es de la ISO 4869-1 y no está
-implementada: la atenuación en oído real en el umbral, su panel de sujetos, su
-procedimiento de colocación y su propia incertidumbre se dan por hechos, y esta
-biblioteca parte de la rejilla resultante. Tampoco está implementado el
+La medición del umbral en sí no se simula: la selección y el entrenamiento de
+los sujetos de la ISO 4869-1 (4.4), su procedimiento de colocación (4.5), el
+equipo de ensayo (4.3), el tiempo de reverberación (4.2.3) y el ruido de fondo
+(4.2.4, Tabla 2) de la sala y la fuerza de aplicación del apartado 5 son
+requisitos de laboratorio que esta biblioteca no juzga, y parte de los umbrales
+o de las atenuaciones que produjeron. También se dan por hechos la medida MIRE
+de la ISO 11904-1 que hay detrás de la pérdida por inserción activa, las
+señales de ensayo del apartado 5.3 y la comprobación de oscilaciones del
+apartado 5.4.2. Tampoco está implementado el
 tratamiento de incertidumbre del anexo E de la ISO 4869-2 sobre atenuaciones e
 índices. Nada de aquí modela la diferencia entre la atenuación de laboratorio y
 lo que un protector consigue en campo, que es el objeto del ISO/TR 4869-5 y es
@@ -275,6 +657,8 @@ política que esta biblioteca no toma por ti.
   lo que hace a lo largo de una vida laboral la exposición que el protector no detuvo.
 - [Umbral de audición (edad y cero de referencia)](/phonometry/es/perception/hearing/hearing-threshold/):
   la línea base contra la que se juzga cualquier exposición protegida.
-- Referencia de API: [`hearing.hearing_protectors`](/phonometry/es/reference/api/hearing/hearing-protectors/).
+- Referencia de API: [`hearing.real_ear_attenuation`](/phonometry/es/reference/api/hearing/real-ear-attenuation/),
+  [`hearing.hearing_protectors`](/phonometry/es/reference/api/hearing/hearing-protectors/)
+  y [`hearing.active_noise_reduction`](/phonometry/es/reference/api/hearing/active-noise-reduction/).
 
 </SeeAlso>

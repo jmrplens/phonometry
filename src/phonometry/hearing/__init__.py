@@ -9,6 +9,15 @@ rather than an ear.
 
 from __future__ import annotations
 
+from .active_noise_reduction import (
+    ANR_WITHIN_LABORATORY_UNCERTAINTY,
+    ActiveInsertionLossResult,
+    AnrLinearityResult,
+    AnrTotalAttenuationResult,
+    active_insertion_loss,
+    anr_total_attenuation,
+    assess_anr_linearity,
+)
 from .hearing_protectors import (
     HML_REFERENCE_C_MINUS_A,
     HML_REFERENCE_D,
@@ -49,6 +58,22 @@ from .occupational_exposure import (
     table_c4_contribution,
     task_based_exposure,
 )
+from .real_ear_attenuation import (
+    REAT_BETWEEN_LABORATORY_UNCERTAINTY,
+    REAT_FIELD_VARIATION_LIMITS,
+    REAT_FREQUENCY_RANGES,
+    REAT_WITHIN_LABORATORY_UNCERTAINTY,
+    AttenuationDifferenceResult,
+    ProtectorUncertaintyBudget,
+    RealEarAttenuationResult,
+    ReatSoundFieldCheck,
+    allowable_field_variation,
+    assess_attenuation_difference,
+    check_reat_sound_field,
+    minimum_significant_difference,
+    real_ear_attenuation,
+    reat_expanded_uncertainty,
+)
 from .threshold import (
     AUDIOMETRIC_FREQUENCIES,
     EARPHONE_COUPLERS,
@@ -64,11 +89,22 @@ from .threshold import (
 )
 
 __all__ = [
+    "active_insertion_loss",
+    "ActiveInsertionLossResult",
     "age_threshold",
     "AgeThresholdResult",
+    "allowable_field_variation",
+    "anr_total_attenuation",
+    "ANR_WITHIN_LABORATORY_UNCERTAINTY",
+    "AnrLinearityResult",
+    "AnrTotalAttenuationResult",
+    "assess_anr_linearity",
+    "assess_attenuation_difference",
     "assumed_protection_value",
     "AssumedProtectionResult",
+    "AttenuationDifferenceResult",
     "AUDIOMETRIC_FREQUENCIES",
+    "check_reat_sound_field",
     "combine_age_and_noise",
     "COVERAGE_FACTOR",
     "EARPHONE_COUPLERS",
@@ -89,6 +125,7 @@ __all__ = [
     "INSTRUMENT_U2",
     "job_based_exposure",
     "minimum_cumulative_duration_hours",
+    "minimum_significant_difference",
     "nipts",
     "NiptsResult",
     "NoiseInducedHearingLossWarning",
@@ -99,6 +136,15 @@ __all__ = [
     "PROTECTION_PERFORMANCES",
     "PROTECTOR_A_WEIGHTING",
     "PROTECTOR_OCTAVE_BANDS",
+    "ProtectorUncertaintyBudget",
+    "real_ear_attenuation",
+    "RealEarAttenuationResult",
+    "REAT_BETWEEN_LABORATORY_UNCERTAINTY",
+    "reat_expanded_uncertainty",
+    "REAT_FIELD_VARIATION_LIMITS",
+    "REAT_FREQUENCY_RANGES",
+    "REAT_WITHIN_LABORATORY_UNCERTAINTY",
+    "ReatSoundFieldCheck",
     "reference_threshold",
     "RETSPL_FREQUENCIES_HZ",
     "SEXES",

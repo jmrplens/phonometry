@@ -426,12 +426,12 @@ def _real(value: object, where: str) -> object:
 def _names(value: object, where: str) -> frozenset[str]:
     if type(value) is frozenset and all(type(item) is str for item in value):
         return value
-    if isinstance(value, str) or not isinstance(value, (list, tuple, AbstractSet)):
-        _refuse(where, value, "a set of field names")
-    return frozenset(
-        typing.cast("str", _text(item, f"{where}[{index}]"))
-        for index, item in enumerate(value)
-    )
+    if isinstance(value, (list, tuple, AbstractSet)) and not isinstance(value, str):
+        return frozenset(
+            typing.cast("str", _text(item, f"{where}[{index}]"))
+            for index, item in enumerate(value)
+        )
+    _refuse(where, value, "a set of field names")
 
 
 def _optional(check: _Check) -> _Check:

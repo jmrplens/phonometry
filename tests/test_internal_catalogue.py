@@ -134,8 +134,9 @@ def test_take_drops_the_key_and_keeps_everything_else() -> None:
 def test_take_converts_nothing_and_leaves_the_freezing_to_the_row() -> None:
     """A list stays a list here; the row freezes it from its annotation.
 
-    The loaders once listed which of their fields were sets, fourteen times,
-    and two of those lists had fallen behind the dataclass they fed.
+    The loaders once listed which of their fields were sets, fifteen times,
+    and the solids' list had fallen behind the dataclass it fed; a loader
+    with no list, and a row built by hand, never froze its sets at all.
     """
     record = {
         "key": "x",

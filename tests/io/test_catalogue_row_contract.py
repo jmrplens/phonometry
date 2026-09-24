@@ -30,7 +30,12 @@ from phonometry import io
 from phonometry.building import ImpactInsulation, TransmissionLossSpectrum
 from phonometry.environment.propagation import GroundSurface
 from phonometry.fluids import Gas, NonlinearityParameter
-from phonometry.materials import AbsorptionSpectrum, Carpet, PorousMaterial
+from phonometry.materials import (
+    AbsorptionSpectrum,
+    Carpet,
+    PorousMaterial,
+    ResistiveSheet,
+)
 from phonometry.noise_control import DuctWallSpectrum
 from phonometry.solids import DampingTreatment, SolidMaterial
 
@@ -69,6 +74,42 @@ def test_a_row_without_a_name_or_a_source_is_refused(
 def test_a_name_that_is_not_text_is_refused() -> None:
     with pytest.raises(io.CatalogueError, match="name holds 7, which is not text"):
         SolidMaterial(name=7, source=_SOURCE)  # type: ignore[arg-type]
+
+
+@pytest.mark.parametrize(
+    "cells",
+    [
+        {"misprinted": {"porosity": ""}},
+        {"not_derivable": {"porosity": "   "}},
+        {"unquantified": {"porosity": ""}},
+        {"derived": {"porosity": ""}},
+        {"porosity": 0.9, "carried": {"porosity": " "}},
+        {"attributed_to": {"row": ""}},
+        {"thickness_mm": 40.0, "converted": {"thickness_mm": ("", "cm")}},
+        {"thickness_mm": 40.0, "converted": {"thickness_mm": ("4", "")}},
+    ],
+    ids=[
+        "misprinted",
+        "not_derivable",
+        "unquantified",
+        "derived",
+        "carried",
+        "attributed_to",
+        "converted-figure",
+        "converted-unit",
+    ],
+)
+def test_a_hedge_whose_text_is_empty_is_refused(cells: dict[str, object]) -> None:
+    """An empty ``misprinted`` answered ``why_missing`` with ``""`` and hid it."""
+    ((hedge, entry),) = ((k, v) for k, v in cells.items() if isinstance(v, dict))
+    ((key, _),) = entry.items()
+    with pytest.raises(io.CatalogueError, match=f"{hedge} holds no text for {key!r}"):
+        _row(PorousMaterial, **cells)
+
+
+def test_a_hedge_a_subclass_adds_holds_text_too() -> None:
+    with pytest.raises(io.CatalogueError, match="borrowed holds no text"):
+        _row(SolidMaterial, loss_factor=0.01, borrowed={"loss_factor": ""})
 
 
 # ---------------------------------------------------------------------------
@@ -133,7 +174,7 @@ def test_a_text_field_takes_text(value: object) -> None:
 
 def test_a_refused_value_is_quoted_short() -> None:
     """A message quotes a cell, not a page of it."""
-    with pytest.raises(io.CatalogueError) as caught:
+    with pytest.raises(io.CatalogueError, match="poisson_ratio holds") as caught:
         _row(SolidMaterial, poisson_ratio="x" * 500)
     assert len(str(caught.value)) < 200
 
@@ -336,6 +377,12 @@ def test_a_range_that_is_not_one_is_refused(
         _row(PorousMaterial, ranges={"tortuosity": pair})
 
 
+def test_a_reading_interval_that_runs_backwards_is_refused() -> None:
+    """A ``(low, high)`` among the readings is an interval like any other."""
+    with pytest.raises(io.CatalogueError, match="viscous_length_um' runs from 5.0 d"):
+        _row(PorousMaterial, reported={"viscous_length_um": (96.0, (5.0, 2.0))})
+
+
 def test_a_range_of_one_point_is_a_range() -> None:
     row = _row(PorousMaterial, ranges={"tortuosity": (1.5, 1.5)})
     assert row.ranges["tortuosity"] == (1.5, 1.5)
@@ -357,6 +404,25 @@ def test_a_reading_that_is_not_a_finite_number_is_refused(
 ) -> None:
     with pytest.raises(io.CatalogueError, match=fragment):
         _row(PorousMaterial, reported={"viscous_length_um": entries})
+
+
+@pytest.mark.parametrize(
+    "cells",
+    [
+        {"reported": {"viscous_length_um": ()}},
+        {
+            "reported": {"viscous_length_um": ()},
+            "carried": {"viscous_length_um": "the row above"},
+        },
+    ],
+    ids=["alone", "behind-carried"],
+)
+def test_a_list_of_readings_with_nothing_in_it_is_refused(
+    cells: dict[str, object],
+) -> None:
+    """``why_missing`` read "the page lists  and no single value" for it."""
+    with pytest.raises(io.CatalogueError, match="reported lists nothing for 'visc"):
+        _row(PorousMaterial, **cells)
 
 
 @pytest.mark.parametrize(
@@ -563,10 +629,14 @@ def test_the_first_probe_is_refused_for_its_density() -> None:
         (PorousMaterial, {"shot_content_percent": 101.0}, "share of a whole"),
         (PorousMaterial, {"binder_content_percent": -1.0}, "share of a whole"),
         (DampingTreatment, {"adhered_area_percent": 120.0}, "share of a whole"),
-        (GroundSurface, {"porosity_percent": 101.0}, "share of a whole"),
-        (Gas, {"molar_mass_kg_mol": -0.029}, "kg/mol is never negative"),
-        (TransmissionLossSpectrum, {"block_mass_kg": -1.0}, "kg is never negative"),
-        (DuctWallSpectrum, {"duct_length_m": -3.0}, "in m is never negative"),
+        (Gas, {"molar_mass_kg_mol": -0.029}, "ends in _kg_mol is never negative"),
+        (TransmissionLossSpectrum, {"block_mass_kg": -1.0}, "ends in _kg is never"),
+        (DuctWallSpectrum, {"duct_length_m": -3.0}, "ends in _m is never negative"),
+        (
+            ResistiveSheet,
+            {"surface_density_g_m2": -1.0},
+            "whose name ends in _m2 is never negative",
+        ),
     ],
 )
 def test_a_packaged_row_class_is_held_to_its_limits(
@@ -630,7 +700,10 @@ def _subclass(annotation: object, name: str = "reading") -> type[io.CatalogueRow
         frozenset[int],
         typing.Any,
         bytes,
+        float,
+        int,
         "Undeclared | None",
+        "float |",
     ],
     ids=str,
 )
@@ -641,6 +714,13 @@ def test_an_annotation_the_contract_cannot_check_raises_type_error(
     cls = _subclass(annotation)
     with pytest.raises(TypeError, match=r"UserRow"):
         cls(name="x", source="y")
+
+
+def test_a_bare_number_is_refused_because_every_cell_may_be_missing() -> None:
+    """A ``float`` field could not say the page left its cell empty."""
+    cls = _subclass(float)
+    with pytest.raises(TypeError, match="never a bare float or int"):
+        cls(name="x", source="y", reading=1.5)
 
 
 def test_optional_float_is_checked_as_the_number_it_is() -> None:
@@ -691,26 +771,60 @@ def test_every_published_row_rebuilds_to_itself_through_the_contract() -> None:
         assert type(row)(**cells) == row, f"{row.table}: {row.name}"
 
 
-def test_the_six_percent_porosities_of_cox_are_held_as_printed() -> None:
+#: The six porosities Cox Table 6.7 prints in per cent, with what each prints.
+_COX_PER_CENT = {
+    "mineral_layer_beneath_mixed_deciduous_forest": "36.5",
+    "humus_on_pine_forest_floor": "58.1",
+    "pine_forest_litter": "38.9",
+    "grass_root_layer_in_loamy_sand": "48 ± 4",
+    "loamy_sand": "37.5",
+    "bare_sandy_plain": "26.9",
+}
+
+
+def test_the_six_percent_porosities_of_cox_are_held_as_misprinted() -> None:
     """Cox Table 6.7 prints six porosities in per cent in a column of fractions.
 
-    A porosity of 36.5 is not one, so the six are held in
-    ``porosity_percent`` with the digits the page prints, and ``porosity``
-    is left empty on them. Every other porosity the catalogue holds is a
-    fraction.
+    A porosity of 36.5 is not one, and the page does not say it is a per
+    cent, so the six cells are empty and ``misprinted`` quotes what the page
+    prints. Every other porosity the catalogue holds is a fraction.
     """
     from phonometry.environment.propagation import PUBLISHED_GROUND
 
-    percent = {
-        key: row.porosity_percent
+    held = {
+        key: row
         for key, row in PUBLISHED_GROUND.items()
-        if row.porosity_percent is not None
+        if "porosity" in row.misprinted
     }
-    assert sorted(percent.values()) == [26.9, 36.5, 37.5, 38.9, 48.0, 58.1]
-    for key in percent:
-        assert PUBLISHED_GROUND[key].porosity is None
-    root = PUBLISHED_GROUND["cox-2017-table-6-7/grass_root_layer_in_loamy_sand"]
-    assert root.uncertainty["porosity_percent"] == 4.0
+    assert sorted(held) == sorted(f"cox-2017-table-6-7/{key}" for key in _COX_PER_CENT)
+    for row in held.values():
+        assert row.porosity is None
+        assert "porosity" not in row.uncertainty
     fractions = [row.porosity for row in PUBLISHED_GROUND.values() if row.porosity]
     assert fractions
     assert all(0.0 < value <= 1.0 for value in fractions)
+
+
+@pytest.mark.parametrize(("key", "figure"), _COX_PER_CENT.items())
+def test_why_a_per_cent_porosity_is_missing_quotes_the_page(
+    key: str, figure: str
+) -> None:
+    """The answer is what the page prints, not that it printed nothing."""
+    from phonometry.environment.propagation import PUBLISHED_GROUND
+
+    row = PUBLISHED_GROUND[f"cox-2017-table-6-7/{key}"]
+    why = row.why_missing("porosity")
+    assert why.startswith(f"the page prints “{figure}” in its Porosity column")
+    assert "docs/ERRATA.md" in why
+    with pytest.raises(ValueError, match=f"prints “{figure}”"):
+        row.printed("porosity")
+
+
+def test_a_porosity_the_page_leaves_empty_still_says_so() -> None:
+    """Tall crops prints a dash, which is a different answer from the six."""
+    from phonometry.environment.propagation import PUBLISHED_GROUND
+
+    row = PUBLISHED_GROUND["cox-2017-table-6-7/tall_crops"]
+    assert row.why_missing("porosity") == (
+        "the page does not give it, and it does not follow from the cells that it does"
+    )

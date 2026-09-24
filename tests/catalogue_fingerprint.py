@@ -386,39 +386,62 @@ def resilient_layer_row(
 
 
 #: The six ground surfaces whose porosity Cox Table 6.7 prints in per cent,
-#: in a column that prints a fraction on every other row and states no unit.
-GROUND_POROSITY_IN_PER_CENT = (
-    "cox-2017-table-6-7/mineral_layer_beneath_mixed_deciduous_forest",
-    "cox-2017-table-6-7/humus_on_pine_forest_floor",
-    "cox-2017-table-6-7/pine_forest_litter",
-    "cox-2017-table-6-7/grass_root_layer_in_loamy_sand",
-    "cox-2017-table-6-7/loamy_sand",
-    "cox-2017-table-6-7/bare_sandy_plain",
-)
+#: in a column that prints a fraction on every other row and states no unit,
+#: with the figure each prints there.
+GROUND_POROSITY_IN_PER_CENT: Mapping[str, str] = {
+    "cox-2017-table-6-7/mineral_layer_beneath_mixed_deciduous_forest": "36.5",
+    "cox-2017-table-6-7/humus_on_pine_forest_floor": "58.1",
+    "cox-2017-table-6-7/pine_forest_litter": "38.9",
+    "cox-2017-table-6-7/grass_root_layer_in_loamy_sand": "48 ± 4",
+    "cox-2017-table-6-7/loamy_sand": "37.5",
+    "cox-2017-table-6-7/bare_sandy_plain": "26.9",
+}
 
 #: The sentence each of those six notes had, and the one it has now.
 GROUND_POROSITY_NOTE = (
     "on the page it is plainly a percentage, but it is transcribed exactly as printed.",
-    "on the page it is plainly a percentage, so it is held as printed in "
-    "porosity_percent and not in porosity, which is a fraction (docs/ERRATA.md).",
+    "on the page it is plainly a percentage, but the page does not say so, and "
+    "the cell is held as misprinted (docs/ERRATA.md).",
 )
 
 
-def _porosity_in_per_cent(name: str, key: str, row: Row) -> Row:
-    """One of the six ground surfaces with its porosity moved to per cent.
+def ground_porosity_misprint(figure: str) -> str:
+    """What ``misprinted['porosity']`` says on one of the six rows."""
+    return (
+        f"the page prints “{figure}” in its Porosity column, which states no unit "
+        "and prints a fraction on every other row, and a porosity is the open "
+        "fraction of a volume, so it cannot pass 1. The figure reads as a per "
+        "cent, but the page does not say so, and this library does not convert "
+        "a unit the page does not print. The defect is registered in "
+        "docs/ERRATA.md under “Cox & D'Antonio, Acoustic Absorbers and Diffusers "
+        "3e (2017), Table 6.7”."
+    )
 
-    :raises ValueError: when the row holds no porosity to move, or its note
+
+def _porosity_misprinted(name: str, key: str, row: Row) -> Row:
+    """One of the six ground surfaces with its porosity held as misprinted.
+
+    :raises ValueError: when the row holds no porosity to empty, or its note
         does not say the sentence the step rewrites.
     """
     row = dict(row)
     if "porosity" not in row:
-        msg = f"{name}[{key!r}] holds no porosity to move"
+        msg = f"{name}[{key!r}] holds no porosity to empty"
         raise ValueError(msg)
-    row["porosity_percent"] = row.pop("porosity")
-    uncertainty = dict(row.get("uncertainty", {}))
-    if "porosity" in uncertainty:
-        uncertainty["porosity_percent"] = uncertainty.pop("porosity")
+    del row["porosity"]
+    uncertainty = {
+        field: spread
+        for field, spread in row.get("uncertainty", {}).items()
+        if field != "porosity"
+    }
+    if uncertainty:
         row["uncertainty"] = uncertainty
+    else:
+        row.pop("uncertainty", None)
+    row["misprinted"] = {
+        **row.get("misprinted", {}),
+        "porosity": ground_porosity_misprint(GROUND_POROSITY_IN_PER_CENT[key]),
+    }
     before, after = GROUND_POROSITY_NOTE
     if before not in row.get("note", ""):
         msg = f"{name}[{key!r}]: the note does not say {before!r}"
@@ -436,18 +459,19 @@ def row_contract(
     ``CatalogueRow.__post_init__`` describes, and every packaged row but six
     already met it. Those six are ground surfaces of Cox Table 6.7 whose
     porosity the page prints in per cent (26.9 to 58.1) in a column of
-    fractions, and a porosity above 1 is refused. One thing moved for them,
-    and nothing else may:
+    fractions that states no unit, and a porosity above 1 is refused. One
+    thing moved for them, and nothing else may:
 
-    * ``porosity`` became ``porosity_percent``, the same number, and the
-      ``48 ± 4`` of the grass root layer took its uncertainty with it; the
-      six notes say where the value is now held.
+    * ``porosity`` was emptied, the ``48 ± 4`` of the grass root layer took
+      its uncertainty with it, and ``misprinted['porosity']`` quotes the
+      figure the page prints; the six notes say the cell is held as
+      misprinted.
     """
     out = {name: dict(rows) for name, rows in catalogues.items()}
     name = "PUBLISHED_GROUND"
     ground = dict(out[name])
     for key in GROUND_POROSITY_IN_PER_CENT:
-        ground[key] = _porosity_in_per_cent(name, key, ground[key])
+        ground[key] = _porosity_misprinted(name, key, ground[key])
     out[name] = ground
     return out
 

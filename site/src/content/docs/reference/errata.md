@@ -6667,12 +6667,17 @@ in the same order.
   print the values quoted, the fourth as "48 ± 4".
 - **Library behaviour:** in
   [`PUBLISHED_GROUND`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/environment/propagation/ground_surfaces.py)
-  the six rows hold their values as printed in `GroundSurface.porosity_percent`,
-  the ± 4 in its uncertainty, and leave `porosity`, which is a fraction from 0
-  to 1, empty; every catalogue row checks when it is built that a porosity is
-  a fraction. `test_the_six_percent_porosities_of_cox_are_held_as_printed` in
+  the six rows leave `GroundSurface.porosity`, which is a fraction from 0 to 1,
+  empty, and hold the cell as `misprinted`: `why_missing("porosity")` and the
+  refusal of `printed("porosity")` quote the figure the page prints, the
+  ± 4 included, and say why it is not served. The library does not convert it
+  to 0.365 and so on, because the page does not print the unit that
+  conversion would assume. Every catalogue row checks when it is built that a
+  porosity is a fraction.
+  `test_the_six_percent_porosities_of_cox_are_held_as_misprinted` and
+  `test_why_a_per_cent_porosity_is_missing_quotes_the_page` in
   [`tests/io/test_catalogue_row_contract.py`](https://github.com/jmrplens/phonometry/blob/main/tests/io/test_catalogue_row_contract.py)
-  pins the six.
+  pin the six.
 - **Status:** unreported.
 
 ## Ver & Beranek 2e (2006), TABLE 14.1 (three moduli whose e-notation is corrupted in the printing)

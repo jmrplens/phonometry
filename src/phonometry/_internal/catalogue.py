@@ -255,6 +255,25 @@ def parse_packaged(text: str, label: str) -> dict[str, Any]:
     return document
 
 
+def read_packaged(package: str, filename: str) -> dict[str, Any]:
+    """The whole of one published table from a package's ``data`` directory.
+
+    For a loader that needs more of the document than its rows, as the fluid
+    tables need the ``validity`` they put on the whole table; the text goes
+    through :func:`parse_packaged` like every other packaged table.
+
+    :param package: The package that owns the data, as ``phonometry.solids``.
+        The file is read from its ``data`` subpackage.
+    :param filename: The file name inside ``data``, including the extension.
+    :return: The decoded document.
+    :raises CatalogueError: for anything :func:`parse_packaged` refuses.
+    """
+    from importlib.resources import files
+
+    text = (files(f"{package}.data") / filename).read_text(encoding="utf-8")
+    return parse_packaged(text, filename)
+
+
 def read_table(package: str, filename: str) -> tuple[str, tuple[dict[str, Any], ...]]:
     """Read one published table from a package's ``data`` directory.
 
@@ -268,10 +287,7 @@ def read_table(package: str, filename: str) -> tuple[str, tuple[dict[str, Any], 
         missing or unknown top-level key, no rows, two rows sharing a key, a
         ``/`` in a key, a ``NaN`` or a name written twice.
     """
-    from importlib.resources import files
-
-    text = (files(f"{package}.data") / filename).read_text(encoding="utf-8")
-    document = parse_packaged(text, filename)
+    document = read_packaged(package, filename)
     return document["source"], tuple(document["rows"])
 
 
@@ -323,28 +339,30 @@ _ROW_WORDS: Mapping[str, frozenset[str]] = MappingProxyType(
 _HOLDS_NOTHING = ("unquantified", "not_derivable", "reported")
 
 #: The unit suffixes of the quantities that cannot be negative: a density, a
-#: mass, a speed, a pressure or modulus, a flow resistivity or resistance, a
-#: stiffness per area, a length, an area, and the lengths per unit that are
-#: counts. Named by the unit the field carries, which is a physical limit and
-#: not a guard on how large a value may be.
-_NOT_NEGATIVE: Mapping[str, str] = MappingProxyType(
-    {
-        "_kg_m3": "kg/m3",
-        "_kg_m2": "kg/m2",
-        "_kg": "kg",
-        "_kg_mol": "kg/mol",
-        "_m_s": "m/s",
-        "_pa": "Pa",
-        "_pa_s_m2": "Pa s/m2",
-        "_pa_s_m": "Pa s/m",
-        "_n_m3": "N/m3",
-        "_mm": "mm",
-        "_um": "um",
-        "_m": "m",
-        "_m2": "m2",
-        "_m_hz": "m Hz",
-        "_per_cm": "1/cm",
-    }
+#: mass per area, a mass, a molar mass, a speed, a pressure or modulus, a flow
+#: resistivity, a specific flow resistance, a stiffness per area, a length in
+#: millimetres, micrometres or metres, an area, a thickness-frequency product
+#: and a count per centimetre. Named by the unit the field carries, which is a
+#: physical limit and not a guard on how large a value may be. A refusal names
+#: the suffix rather than a unit, because a field named for a compound unit
+#: (``surface_density_g_m2``) ends in a shorter one (``_m2``) that is not its
+#: own.
+_NOT_NEGATIVE = (
+    "_kg_m3",
+    "_kg_m2",
+    "_kg",
+    "_kg_mol",
+    "_m_s",
+    "_pa",
+    "_pa_s_m2",
+    "_pa_s_m",
+    "_n_m3",
+    "_mm",
+    "_um",
+    "_m",
+    "_m2",
+    "_m_hz",
+    "_per_cm",
 )
 
 #: The unit suffixes of quantities that can be negative, and which a shorter
@@ -356,12 +374,7 @@ _SIGNED = ("_c", "_per_m", "_db")
 #: The per-cent fields that are a share of a whole, and so run from 0 to 100.
 #: Not every ``_percent``: a water content on a dry basis passes 100.
 _SHARES = frozenset(
-    {
-        "shot_content_percent",
-        "binder_content_percent",
-        "adhered_area_percent",
-        "porosity_percent",
-    }
+    {"shot_content_percent", "binder_content_percent", "adhered_area_percent"}
 )
 
 
@@ -538,7 +551,11 @@ def _field_check(hint: object) -> tuple[str, _Check] | None:
     The kinds are ``"number"`` (``float | None``), ``"whole"``
     (``int | None``), ``"flag"`` (``bool``), ``"text"`` (``str``), ``"set"``
     (``frozenset[str]``) and ``"mapping"`` (``Mapping[str, ...]`` of plain
-    values and tuples of them). Anything else answers ``None``.
+    values and tuples of them). ``Optional[float]`` is ``float | None``, and
+    on Python 3.14 the same object. Anything else answers ``None``, a bare
+    ``float`` or ``int`` included: every quantity of a row may be missing,
+    because the pages print different columns, and a row that could not say
+    so would have no answer for :meth:`CatalogueRow.why_missing` to give.
     """
     if hint is bool:
         return "flag", _flag
@@ -550,12 +567,12 @@ def _field_check(hint: object) -> tuple[str, _Check] | None:
     if origin is Mapping and args[:1] == (str,):
         check = _value_check(args[-1])
         return None if check is None else ("mapping", _mapping_of(check))
-    union = origin in _UNIONS
-    members = {arg for arg in args if arg is not type(None)} if union else {hint}
-    optional = union and type(None) in args
+    if origin not in _UNIONS or type(None) not in args:
+        return None
+    members = {arg for arg in args if arg is not type(None)}
     for kind, plain, leaf in (("number", float, _real), ("whole", int, _whole)):
         if members == {plain}:
-            return kind, _optional(leaf) if optional else leaf
+            return kind, _optional(leaf)
     return None
 
 
@@ -571,7 +588,7 @@ def _limit(field_name: str) -> tuple[float, float | None, str] | None:
         default="",
     )
     if suffix in _NOT_NEGATIVE:
-        return 0.0, None, f"a quantity in {_NOT_NEGATIVE[suffix]} is never negative"
+        return 0.0, None, f"a quantity whose name ends in {suffix} is never negative"
     return None
 
 
@@ -624,7 +641,7 @@ def _classify(cls: type) -> _Shape:
     """
     try:
         hints = typing.get_type_hints(cls, localns={"Mapping": Mapping})
-    except NameError as error:
+    except (NameError, SyntaxError, TypeError) as error:
         msg = (
             f"{cls.__qualname__}: an annotation does not resolve ({error}); a "
             "catalogue row's annotations have to resolve at run time"
@@ -639,7 +656,8 @@ def _classify(cls: type) -> _Shape:
                 f"{cls.__qualname__}.{item.name} is annotated "
                 f"{hints[item.name]!r}, which a catalogue row cannot check: a "
                 "field is float | None, int | None, bool, str, frozenset[str] "
-                "or a Mapping[str, ...] of those"
+                "or a Mapping[str, ...] of those, and a quantity is never a "
+                "bare float or int, because every cell of a row may be missing"
             )
             raise TypeError(msg)
         kinds[item.name], check = classified
@@ -688,7 +706,10 @@ class CatalogueRow:
     downstream can read. The check is the same for a packaged row, a row a
     reader builds from a file and a row written by hand:
 
-    1. :attr:`name` and :attr:`source` are text that is not empty.
+    1. :attr:`name` and :attr:`source` are text that is not empty, and so is
+       every text a hedge holds: :meth:`why_missing` hands a
+       :attr:`misprinted` or :attr:`not_derivable` text back as it is, and
+       an empty one would answer as a cell that is not missing at all.
     2. A numeric field holds ``None`` or a finite number, never a ``bool``, a
        text or a ``NaN``; an ``int`` field a whole number; a ``bool`` field
        ``True`` or ``False``; a text field text.
@@ -704,9 +725,11 @@ class CatalogueRow:
     6. :attr:`bounded_above` and :attr:`bounded_below` name only fields that
        have a range.
     7. A range's ends are finite, the low one no higher than the high one,
-       and the end the page printed is there.
-    8. The readings in :attr:`reported` are finite, and an
-       :attr:`uncertainty` is finite and not below zero.
+       and the end the page printed is there; an interval among the
+       readings of :attr:`reported` runs from low to high as well.
+    8. A list in :attr:`reported` holds at least one reading, and its
+       readings are finite; an :attr:`uncertainty` is finite and not below
+       zero.
     9. A field in :attr:`unquantified`, :attr:`not_derivable` or
        :attr:`reported`, or a numeric field in :attr:`misprinted`, holds no
        value; a field in :attr:`converted` or :attr:`carried` holds
@@ -718,18 +741,19 @@ class CatalogueRow:
         ``_m2``, ``_m_hz`` or ``_per_cm``, in its value, its range and its
         readings. A ``porosity`` runs from 0 to 1, and the per-cent fields
         that are a share of a whole (``shot_content_percent``,
-        ``binder_content_percent``, ``adhered_area_percent``,
-        ``porosity_percent``) from 0 to 100.
+        ``binder_content_percent`` and ``adhered_area_percent``) from 0 to
+        100.
         Nothing else is bounded: a Celsius temperature, a decay rate per
         metre and a level in decibels can be negative, and a size is never
         a reason to refuse a number.
 
     The fields are told apart by their resolved annotations, once per
     class, so a subclass annotates each of its own fields as one of
-    ``float | None``, ``int | None``, ``bool``, ``str``, ``frozenset[str]``
-    or ``Mapping[str, ...]`` of those; any other annotation raises
-    :class:`TypeError` the first time the class is built, rather than letting
-    a field through unchecked.
+    ``float | None`` (``Optional[float]`` is the same annotation),
+    ``int | None``, ``bool``, ``str``, ``frozenset[str]`` or
+    ``Mapping[str, ...]`` of those; any other annotation, a bare ``float``
+    or ``int`` included, raises :class:`TypeError` the first time the class
+    is built, rather than letting a field through unchecked.
 
     :ivar name: The material as the table names it, attribution stripped.
     :ivar variant: Which specimen or condition this row is, when the page
@@ -915,8 +939,10 @@ class CatalogueRow:
             raise CatalogueError(msg) from None
         self._check_name_and_source()
         self._check_hedge_keys(shape)
+        self._check_hedge_texts()
         self._check_bounds_have_ranges()
         self._check_range_ends()
+        self._check_reported()
         self._check_uncertainty()
         self._check_cells_that_hold_nothing(shape)
         self._check_cells_that_hold_something(shape)
@@ -964,6 +990,33 @@ class CatalogueRow:
                         )
                         raise CatalogueError(msg)
 
+    def _check_hedge_texts(self) -> None:
+        """Refuse a hedge whose text says nothing.
+
+        :meth:`why_missing` hands a :attr:`misprinted` or
+        :attr:`not_derivable` text back as it is, so an empty one answers
+        ``""``, which is the answer of a cell that holds its value, and hides
+        the defect the hedge was written to record. An empty word, credit,
+        source row or printed figure says as little. :attr:`basis` is left
+        to :meth:`_check_basis`, whose five words already leave out the
+        empty one.
+
+        :raises CatalogueError: naming the hedge and the field.
+        """
+        for hedge in (*self._number_hedges, *self._value_hedges):
+            held = getattr(self, hedge)
+            if hedge == "basis" or not held or not isinstance(held, Mapping):
+                continue
+            for key, value in held.items():
+                texts = value if isinstance(value, tuple) else (value,)
+                if any(isinstance(text, str) and not text.strip() for text in texts):
+                    msg = (
+                        f"{self.name!r}: {hedge} holds no text for {key!r}; a "
+                        "hedge that says nothing reads as a cell with nothing "
+                        "to explain"
+                    )
+                    raise CatalogueError(msg)
+
     def _check_bounds_have_ranges(self) -> None:
         """Refuse a bound on a field that has no range to bound.
 
@@ -978,6 +1031,33 @@ class CatalogueRow:
                     msg = (
                         f"{self.name!r}: {hedge} names {key!r}, which has no "
                         "range; a bound is a range the page prints one end of"
+                    )
+                    raise CatalogueError(msg)
+
+    def _check_reported(self) -> None:
+        """Refuse an empty list of readings, or a reading interval backwards.
+
+        A list with nothing in it is not several values: :meth:`why_missing`
+        would say the page lists nothing, and a ``converted`` or ``carried``
+        cell would count it as something to describe. An interval among the
+        readings is an interval like any other, and one stored high to low
+        reads back as a reading nobody printed.
+
+        :raises CatalogueError: naming the field, and the interval.
+        """
+        for field_name, entries in self.reported.items():
+            if not entries:
+                msg = (
+                    f"{self.name!r}: reported lists nothing for {field_name!r}; "
+                    "a list of readings holds at least one"
+                )
+                raise CatalogueError(msg)
+            for entry in entries:
+                if isinstance(entry, tuple) and entry[0] > entry[1]:
+                    msg = (
+                        f"{self.name!r}: a reading of {field_name!r} runs from "
+                        f"{entry[0]!r} down to {entry[1]!r}; the low end comes "
+                        "first"
                     )
                     raise CatalogueError(msg)
 

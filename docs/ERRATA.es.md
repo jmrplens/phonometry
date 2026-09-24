@@ -7065,13 +7065,17 @@ dos ediciones con las mismas entradas y en el mismo orden.
   y las seis celdas imprimen los valores citados, la cuarta como «48 ± 4».
 - **Comportamiento de la biblioteca:** en
   [`PUBLISHED_GROUND`](../src/phonometry/environment/propagation/ground_surfaces.py)
-  las seis filas guardan sus valores tal como se imprimen en
-  `GroundSurface.porosity_percent`, con el ± 4 en su incertidumbre, y dejan
-  vacío `porosity`, que es una fracción de 0 a 1; toda fila de catálogo
-  comprueba al construirse que una porosidad es una fracción.
-  `test_the_six_percent_porosities_of_cox_are_held_as_printed` de
+  las seis filas dejan vacío `GroundSurface.porosity`, que es una fracción de 0
+  a 1, y guardan la celda como `misprinted`: `why_missing("porosity")` y el
+  rechazo de `printed("porosity")` citan la cifra que imprime la página, con el
+  ± 4, y dicen por qué no se sirve. La biblioteca no la convierte en 0,365 ni en
+  las demás, porque la página no imprime la unidad que esa conversión daría
+  por supuesta. Toda fila de catálogo comprueba al construirse que una
+  porosidad es una fracción.
+  `test_the_six_percent_porosities_of_cox_are_held_as_misprinted` y
+  `test_why_a_per_cent_porosity_is_missing_quotes_the_page` de
   [`tests/io/test_catalogue_row_contract.py`](../tests/io/test_catalogue_row_contract.py)
-  fija las seis.
+  fijan las seis.
 - **Estado:** sin notificar.
 
 ## Ver & Beranek 2e (2006), TABLA 14.1 (tres módulos con la notación e corrompida en la impresión)

@@ -65,7 +65,13 @@ from dataclasses import dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING
 
-from .._internal.catalogue import CatalogueRow, read_table, take
+from .._internal.catalogue import (
+    CatalogueError,
+    CatalogueRow,
+    read_packaged,
+    read_table,
+    take,
+)
 from ._state import Fluid
 from .gas import ideal_gas
 
@@ -110,8 +116,9 @@ def _transcribed() -> dict[str, Fluid]:
     """
     states: dict[str, Fluid] = {}
     for table in _FLUID_TABLES:
-        source, rows = read_table(_PACKAGE, f"{table}.json")
-        about = _table_validity(_PACKAGE, f"{table}.json")
+        document = read_packaged(_PACKAGE, f"{table}.json")
+        source, rows = document["source"], document["rows"]
+        about = _table_validity(document, f"{table}.json")
         for row in rows:
             # Only what the row prints. A table that gives the ratio of
             # specific heats fixes it; one that does not leaves the state
@@ -140,7 +147,7 @@ def _transcribed() -> dict[str, Fluid]:
 _ONE_ATMOSPHERE_PA = 101325.0
 
 
-def _table_validity(package: str, filename: str) -> str:
+def _table_validity(document: Mapping[str, object], filename: str) -> str:
     """The hedge a book puts on a whole table, read from the table's own file.
 
     What a book says about a table belongs with any number a reader takes off
@@ -150,17 +157,15 @@ def _table_validity(package: str, filename: str) -> str:
     used to be a constant in this module, which meant the second table to
     arrive would have carried the first book's hedge, so it now lives in the
     data file beside the rows it qualifies.
-    """
-    import json
-    from importlib.resources import files
 
-    document = json.loads(
-        (files(package) / "data" / filename).read_text(encoding="utf-8")
-    )
-    validity = document["validity"]
+    :param document: The table as :func:`read_packaged` decoded it.
+    :param filename: The file it came from, named in a refusal.
+    :raises CatalogueError: for a fluid table with no ``validity`` text.
+    """
+    validity = document.get("validity")
     if not isinstance(validity, str):  # pragma: no cover - a malformed file
-        msg = f"{filename}: 'validity' must be a string"
-        raise TypeError(msg)
+        msg = f"{filename}: a fluid table needs a top-level 'validity' that is text"
+        raise CatalogueError(msg)
     return validity
 
 

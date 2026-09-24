@@ -1923,7 +1923,7 @@ def _chk_iso10846_1_blocking_force() -> Outcome:
 
 @register(
     "Room & building acoustics",
-    "ISO 10846-2:2008 / -3:2002 7.6",
+    "ISO 10846-2:2008 7.7 / -3:2002 7.6",
     "Linearity: ΔLk ≤ 1,5 dB for input spectra 10 dB apart (linear element: 0)",
 )
 def _chk_iso10846_linearity() -> Outcome:
@@ -1945,7 +1945,7 @@ def _chk_iso10846_linearity() -> Outcome:
         ref.ISO10846_LINEARITY_TOL_DB,
         unit="dB",
         places=3,
-        expected_label="ΔLk ≤ 1,5 dB (7.6 c)",
+        expected_label="ΔLk ≤ 1,5 dB (-2 7.7 c), -3 7.6 c))",
     )
 
 
@@ -1968,7 +1968,7 @@ def _iso10846_5_driven(
 
 
 def _iso10846_5_mass_loaded() -> ph.vibration.DrivingPointStiffnessResult:
-    """A massless spring under a 2 kg force plate: k1,1 = k - w^2 m."""
+    """A massless spring under a 2 kg force distribution plate: k1,1 = k - w^2 m_p."""
     return _iso10846_5_driven(_ISO10846_K - _ISO10846_5_OMEGA**2 * _ISO10846_5_PLATE_KG)
 
 
@@ -2065,7 +2065,7 @@ def _chk_iso10846_5_upper_limiting_frequency() -> Outcome:
 @register(
     "Room & building acoustics",
     "ISO 10846-5:2008 Formula (7)",
-    "Every band of k1,1 below f_UL is within 2 dB of k2,1 (2 kg plate on 1 MN/m)",
+    "Every band of k1,1 at or below f_UL is within 2 dB of k2,1 (2 kg plate on 1 MN/m)",
 )
 def _chk_iso10846_5_formula_7() -> Outcome:
     res = _iso10846_5_mass_loaded()
@@ -2098,13 +2098,24 @@ def _chk_iso10846_4_output_mass_limit() -> Outcome:
 @register(
     "Room & building acoustics",
     "ISO 10846-4:2003 6.2 NOTE 1",
-    "m0 on the Inequality (3) bound biases the force level by 0,5 dB at most",
+    "m0 on the Inequality (3) bound: worst-case force-level bias -20 lg 0,94 = 0,537 dB, "
+    "the 0,5 dB NOTE 1 prints to one decimal (1 dp print)",
 )
 def _chk_iso10846_4_output_mass_bias() -> Outcome:
+    # NOTE 1 states the bias to one decimal, so the printed 0,5 dB is held
+    # with the half unit of that decimal: the exact worst case, with the
+    # inertia force opposing the measured one, is -20 lg(1 - 0,06) = 0,537 dB.
     limit = ref.ISO10846_4_OUTPUT_MASS_FACTOR * 10.0
     check = ph.vibration.check_output_mass([100.0], limit, [120.0], [100.0])
     bias = float(check.bias_bound_db[0])
-    return numeric(ref.ISO10846_4_NOTE1_BIAS_DB, bias, 0.05, unit="dB", places=3)
+    return numeric(
+        ref.ISO10846_4_NOTE1_BIAS_DB,
+        bias,
+        0.05,
+        unit="dB",
+        places=3,
+        expected_label="0,5 dB (1 dp print, +/-0,05 dB)",
+    )
 
 
 @register(
@@ -2184,7 +2195,7 @@ def _chk_iso10846_5_budget() -> Outcome:
 @register(
     "Room & building acoustics",
     "ISO 10846-5:2008 Table B.1",
-    "The rounded Table B.1 inputs give u = √2,12 = 1,456 dB when passed in",
+    "The Table B.1 inputs (B.3 expressions rounded up to one decimal) give u = √2,12 = 1,456 dB",
 )
 def _chk_iso10846_5_table_b1() -> Outcome:
     signal, ins, rig, dps, lin = ref.ISO10846_5_TABLE_B1_U_DB

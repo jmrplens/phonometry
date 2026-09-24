@@ -1204,8 +1204,10 @@ ISO2631_5_ANNEX_D_A: tuple[float, ...] = (
 # undamped mass-spring model gives k_indirect/k = 1,1 (0,83 dB, 10 %).
 # ISO 10846-1:2008, Eq. (6): at mag(k2,2/kt) = 0,1 the delivered force is
 # F2/F2,b = 1/1,1 = 0,9091 - the Eq. (7) "within 10 %" claim.
-# ISO 10846-2/-3, 7.6: two input spectra 10 dB apart must give transfer-
-# stiffness levels within 1,5 dB for the data to count as linear.
+# ISO 10846-2 7.7 and ISO 10846-3 7.6 (the test for linearity is 7.7 in
+# Parts 2, 4 and 5 and 7.6 in Part 3): two input spectra 10 dB apart must
+# give transfer-stiffness levels within 1,5 dB for the data to count as
+# linear.
 # ---------------------------------------------------------------------------
 ISO7626_2_CAL_MASS_KG = 10.0  # rigid calibration block mass (7.5.2)
 ISO7626_2_CAL_ACCELERANCE = 0.100  # mag(A) = 1/m, 1/kg
@@ -1219,8 +1221,8 @@ ISO10846_3_LIMIT_BIAS_RATIO = 1.1  # k_indirect/k of the model at mag(T) = 0,1
 ISO10846_3_ACCURACY_DB = 1.0  # 6.1: Formula (1) accurate within 1 dB
 ISO10846_3_ACCURACY_FRACTION = 0.12  # i.e. within 12 %
 ISO10846_1_EQ6_FORCE_RATIO = 1.0 / 1.1  # F2/F2,b at mag(k2,2/kt) = 0,1
-ISO10846_LINEARITY_STEP_DB = 10.0  # 7.6: input spectra A/B, 10 dB apart
-ISO10846_LINEARITY_TOL_DB = 1.5  # 7.6 c): levels equal within 1,5 dB
+ISO10846_LINEARITY_STEP_DB = 10.0  # -2 7.7 b), -3 7.6 b): A/B 10 dB apart
+ISO10846_LINEARITY_TOL_DB = 1.5  # -2 7.7 c), -3 7.6 c): within 1,5 dB
 
 # ---------------------------------------------------------------------------
 # ISO 10846-4:2003 (BS EN ISO 10846-4:2003) and ISO 10846-5:2008 (BS EN
@@ -1242,7 +1244,7 @@ ISO10846_LINEARITY_TOL_DB = 1.5  # 7.6 c): levels equal within 1,5 dB
 # ---------------------------------------------------------------------------
 ISO10846_MIN_FREQUENCIES_PER_BAND = 5  # -4 F(11), -5 F(6)
 ISO10846_4_OUTPUT_MASS_FACTOR = 0.06  # -4 Inequality (3)
-ISO10846_4_NOTE1_BIAS_DB = 0.5  # -4 6.2 NOTE 1
+ISO10846_4_NOTE1_BIAS_DB = 0.5  # -4 6.2 NOTE 1, printed to one decimal
 ISO10846_4_EFFECTIVE_MASS_TOL_DB = 1.0  # -4 Inequality (5)
 ISO10846_5_DRIVING_POINT_TOL_DB = 2.0  # -5 6.2 and Formula (7)
 ISO10846_5_BLOCKED_OUTPUT_DB = 20.0  # -5 Inequality (1)

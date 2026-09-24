@@ -1085,6 +1085,12 @@ from .solids import (
 from .soundscape import ISD_LOCATION_MEDIANS as ISD_LOCATION_MEDIANS
 from .soundscape import ISD_REGENTS_PARK_JAPAN_ANSWERS as ISD_REGENTS_PARK_JAPAN_ANSWERS
 from .soundscape import (
+    ISO12913_2_FIGURE_C4_ATTRIBUTES as ISO12913_2_FIGURE_C4_ATTRIBUTES,
+)
+from .soundscape import (
+    ISO12913_2_METHOD_A_CATEGORIES as ISO12913_2_METHOD_A_CATEGORIES,
+)
+from .soundscape import (
     ISO12913_3_COORDINATE_RANGE_PRINTED as ISO12913_3_COORDINATE_RANGE_PRINTED,
 )
 from .soundscape import (

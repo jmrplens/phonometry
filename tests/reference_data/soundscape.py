@@ -44,6 +44,37 @@ ISO12913_3_TABLE_A1_SCALE_VALUES = {
 #: the source ranking of Method B, part 2.
 ISO12913_3_TABLE_B1_RANKS = (1, 2, 3, 4, 5, 6, 7, 8)
 
+#: ISO/TS 12913-2:2018 Annex C, the response categories of the four parts of
+#: Method A from the left-hand box to the right-hand one, keyed by the figure
+#: that prints them: Figures C.2 and C.3 on PDF page 21 (printed p. 15),
+#: Figures C.4, C.5 and C.6 on PDF page 22 (printed p. 16).
+ISO12913_2_METHOD_A_CATEGORIES = {
+    "C.2": ("Not at all", "A little", "Moderately", "A lot", "Dominates completely"),
+    "C.3": ("Not at all", "A little", "Moderately", "A lot", "Dominates completely"),
+    "C.4": (
+        "Strongly agree",
+        "Agree",
+        "Neither agree, nor disagree",
+        "Disagree",
+        "Strongly disagree",
+    ),
+    "C.5": ("Very good", "Good", "Neither good, nor bad", "Bad", "Very bad"),
+    "C.6": ("Not at all", "Slightly", "Moderately", "Very", "Perfectly"),
+}
+
+#: ISO/TS 12913-2:2018 Figure C.4 (PDF page 22, printed p. 16): the eight
+#: scales of the perceived affective quality, in the order printed.
+ISO12913_2_FIGURE_C4_ATTRIBUTES = (
+    "pleasant",
+    "chaotic",
+    "vibrant",
+    "uneventful",
+    "calm",
+    "annoying",
+    "eventful",
+    "monotonous",
+)
+
 #: ISO/TS 12913-3:2019 Table D.1 (PDF page 19, folio 13): parameter, the
 #: metrics determined for each channel, whether the representative value may
 #: be the average of the ears as well as the higher one, and the reference.

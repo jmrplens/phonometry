@@ -2378,6 +2378,121 @@ dos ediciones con las mismas entradas y en el mismo orden.
   impresos no tienen comprobación de conformidad.
 - **Estado:** sin notificar.
 
+## ISO/TS 12913-3:2019, Anexo A.3 (la calidad afectiva percibida llamada parte 3)
+
+- **Ubicación:** Anexo A (informativo), A.3, el párrafo que presenta las
+  Fórmulas (A.1) y (A.2).
+- **El impreso:** «The results from part 3 (see A.1) are further processed to
+  derive the values on two dimensions (pleasantness and eventfulness) for each
+  site.»
+- **El problema:** los ocho atributos que leen las dos fórmulas (annoying,
+  calm, chaotic, eventful, monotonous, pleasant, uneventful, vibrant) son la
+  calidad afectiva percibida, que es la parte 2 del cuestionario del Método A
+  en todos los demás sitios donde los documentos la nombran: en la Tabla A.1
+  de la página anterior («2 (perceived affective quality)»), en el párrafo de
+  A.2 que asigna sus valores de escala de 5 a 1 («questionnaire part 2 (see
+  Figure C.4 ...)»), en el propio título de A.3 («based on perceived
+  affective quality responses») y en ISO/TS 12913-2:2018, C.3.1.3 y Figura
+  C.4, «Questionnaire part 2: Perceived affective quality». La parte 3 es la
+  valoración global única de la Figura C.5, «Overall, how would you describe
+  the present surrounding sound environment?», que no tiene atributos y no
+  puede alimentar ninguna de las dos fórmulas. La referencia «(see A.1)» no
+  ayuda: A.1 es el apartado general y no nombra ninguna parte. La frase
+  debería decir «part 2 (see A.2 and Table A.1)».
+- **Evidencia:** la frase en la página 11 del PDF (p. 5 impresa), la Tabla
+  A.1 y los párrafos de A.2 en la página 10 del PDF (p. 4 impresa), ambas de
+  ISO/TS 12913-3:2019 (primera edición, 2019-12); C.3.1.3 y las Figuras C.4 y
+  C.5 en la página 22 del PDF (p. 16 impresa) de ISO/TS 12913-2:2018 (primera
+  edición).
+- **Comportamiento de la biblioteca:** `pleasantness_eventfulness` aplica las
+  Fórmulas (A.1) y (A.2) a los ocho atributos de la parte 2, la única lectura
+  con la que pueden evaluarse
+  ([`soundscape.py`](../src/phonometry/environment/assessment/soundscape.py)).
+  No hizo falta ningún cambio. La edición de 2025 de ISO/TS 12913-3 revisa el
+  Anexo A y no se ha comprobado para esta entrada.
+- **Estado:** sin notificar.
+
+## ISO/TS 12913-3:2019, Fórmula (A.3) (un factor 1 suelto)
+
+- **Ubicación:** Anexo A (informativo), A.4, Fórmula (A.3), el coeficiente de
+  correlación por rangos de Spearman para rangos sin empates.
+- **El impreso:**
+  $r_\mathrm{spearman} = 1 - 1\,\dfrac{6\cdot\sum_{i=1}^{n} d_i^2}{n\cdot(n^2 - 1)}$,
+  con un «1» entre el signo menos y la fracción.
+- **El problema:** el coeficiente para rangos sin empates es
+  $1 - 6\sum d_i^2 / \left[n(n^2 - 1)\right]$, que es lo que da la página si
+  el «1» suelto se lee como un factor uno. Leído como se escribe un número
+  mixto, $1\,\tfrac{a}{b} = 1 + \tfrac{a}{b}$, daría
+  $r = -6\sum d_i^2 / \left[n(n^2 - 1)\right]$, que vale cero para dos
+  ordenaciones idénticas en lugar de uno. La Fórmula (A.4), en la misma
+  página, se reduce al coeficiente habitual cuando no hay empates, así que la
+  forma buscada no ofrece dudas; el «1» es un resto de composición.
+- **Evidencia:** la Fórmula (A.3) en la página 12 del PDF (p. 6 impresa) de
+  ISO/TS 12913-3:2019 (primera edición, 2019-12).
+- **Comportamiento de la biblioteca:** `spearman_rank_correlation` evalúa
+  $1 - 6\sum d_i^2 / \left[n(n^2 - 1)\right]$ sin empates y la Fórmula (A.4)
+  con ellos; las filas de conformidad ligan la primera al coeficiente de
+  Pearson de los rangos y la segunda a `scipy.stats.spearmanr`
+  ([`soundscape.py`](../src/phonometry/environment/assessment/soundscape.py)).
+  No hizo falta ningún cambio.
+- **Estado:** sin notificar.
+
+## ISO/TS 12913-2:2018, C.3.2.3 frente a la Figura C.7 (tres escalas en el texto, cuatro en la figura)
+
+- **Ubicación:** Anexo C (informativo), C.3.2.3, «Soundwalk data collection
+  part 1: Assessment of the sound environment», y la Figura C.7 que le sigue.
+- **El impreso:** el texto dice «The participants should assess a site on
+  three different five-point unipolar continuous-category scales with
+  additional verbal labelling ranging from "not at all" to "extremely".» La
+  figura imprime cuatro escalas: «How loud is it here?», «How unpleasant is
+  it here?» y «How appropriate is the sound to the surrounding?», rotuladas de
+  «not at all» a «extremely», y «How often would you like to visit this place
+  again?», rotulada «never», «rarely», «sometimes», «often», «very often».
+- **El problema:** el texto y la figura que presenta no coinciden ni en el
+  número de escalas ni en sus rótulos. O la cuarta escala forma parte del
+  Método B, y el texto debería decir cuatro y nombrar su segundo juego de
+  rótulos, o no forma parte, y la figura no debería imprimirla.
+  ISO/TS 12913-3:2019, B.2 y la Tabla B.1 hablan de «the five-point unipolar
+  continuous-category scales» sin número y no lo resuelven.
+- **Evidencia:** C.3.2.3 y la Figura C.7 en la página 24 del PDF (p. 18
+  impresa) de ISO/TS 12913-2:2018 (primera edición); B.2 y la Tabla B.1 en
+  la página 14 del PDF (p. 8 impresa) de ISO/TS 12913-3:2019.
+- **Comportamiento de la biblioteca:** `METHOD_B_SCALES` guarda las cuatro
+  escalas de la figura tal como se imprimen, y `method_b_summary` acepta una
+  tabla con tres o con cuatro, de modo que un estudio que siguiera cualquiera
+  de las dos lecturas se resume con sus propias preguntas
+  ([`soundscape.py`](../src/phonometry/environment/assessment/soundscape.py)).
+- **Estado:** sin notificar.
+
+## ISO/TS 12913-2:2018, Figuras C.2 a C.4 («extend» por «extent», «reponse» por «response»)
+
+- **Ubicación:** Anexo C (informativo), el cuestionario del Método A: las
+  preguntas de las Figuras C.2, C.3 y C.4 y la línea de instrucciones de
+  cada una.
+- **El impreso:** «To what extend do you presently hear the following four
+  types of sounds?» (Figura C.2), «To what extend do you presently hear the
+  following three types of sounds?» (Figura C.3), «For each of the 8 scales
+  below, to what extend do you agree or disagree that the present surrounding
+  sound environment is...» (Figura C.4); y «Please tick off one reponse
+  alternative per type of sound» (Figuras C.2 y C.3), «Please tick off one
+  reponse alternative per scale» (Figura C.4).
+- **El problema:** «extend» es un verbo; la pregunta es «to what extent», que
+  la Figura C.6 del mismo anexo escribe bien («Overall, to what extent is the
+  present surrounding sound environment appropriate to the present place?»).
+  «reponse» es una errata de «response». Las figuras son un cuestionario
+  pensado para ponerse delante de los participantes tal como se imprime, así
+  que los deslices llegan al trabajo de campo si el estudio no los corrige.
+- **Evidencia:** las Figuras C.2 y C.3 en la página 21 del PDF (p. 15
+  impresa), las Figuras C.4 y C.6 en la página 22 del PDF (p. 16 impresa),
+  todo de ISO/TS 12913-2:2018 (primera edición).
+- **Comportamiento de la biblioteca:** `METHOD_A_SCALES` y
+  `METHOD_A_ALTERNATIVE_PART_1` transcriben las preguntas y las instrucciones
+  tal como se imprimen, erratas incluidas, para que la tabla pueda cotejarse
+  con la página; el docstring de `QuestionnaireScale` advierte que un estudio
+  que imprima su cuestionario a partir de ella debe corregirlas
+  ([`soundscape.py`](../src/phonometry/environment/assessment/soundscape.py)).
+- **Estado:** sin notificar.
+
 ## ISO 3744:2010, H.4.2.7 (la corrección por altitud y el divisor que lleva debajo)
 
 - **Ubicación:** Anexo H (informativo), H.4.2.7 «Meteorological and radiation

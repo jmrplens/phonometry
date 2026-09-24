@@ -857,6 +857,90 @@ def generate_sel_distribution_exceedance(output_dir: str) -> None:
     plt.close()
 
 
+#: Eleven London sites of the International Soundscape Database v1.0 (Mitchell,
+#: Oberman, Aletta et al., Zenodo, DOI 10.5281/zenodo.10672568, CC BY 4.0),
+#: surveyed with the English questionnaire of ISO/TS 12913-2 Method A: the
+#: median of the eight perceived affective quality answers per site (pleasant,
+#: chaotic, vibrant, uneventful, calm, annoying, eventful, monotonous) and the
+#: median LAeq of the site's recordings, in dB. Derived for the guide; the same
+#: values are in ``tests/reference_data/soundscape.py``.
+_LONDON_SITES: tuple[tuple[str, tuple[float, ...], float], ...] = (
+    ("Camden Town", (3, 4, 4, 2, 2, 3, 4, 3), 69.96),
+    ("Euston Tap", (2, 4, 3, 3, 2, 3, 3, 3), 69.45),
+    ("Marchmont Garden", (4, 2, 3, 3, 4, 2, 3, 2), 55.14),
+    ("Pancras Lock", (4, 3, 3, 2, 4, 2, 3, 2), 59.02),
+    ("Regent's Park Fields", (5, 2, 3, 3, 4, 1, 3, 2), 53.12),
+    ("Regent's Park Japan", (5, 1, 4, 3, 5, 1, 3, 2), 59.74),
+    ("Russell Square", (4, 2, 4, 2, 4, 1, 3, 2), 66.12),
+    ("St Paul's Cross", (4, 2.5, 4, 2, 4, 2, 3, 2), 61.83),
+    ("St Paul's Row", (4, 3, 4, 2, 3, 2, 3, 3), 63.34),
+    ("Tate Modern", (4, 3, 4, 2, 4, 2, 4, 2), 63.00),
+    ("Torrington Square", (3, 4, 4, 3, 2, 3, 3, 2), 63.51),
+)
+
+
+def generate_soundscape_pleasantness_eventfulness(output_dir: str) -> None:
+    """ISO/TS 12913-3: eleven London sites on Figure A.1, and P against LAeq."""
+    print("Generating soundscape_pleasantness_eventfulness...")
+    from phonometry import environment
+
+    medians = np.array([row[1] for row in _LONDON_SITES], dtype=float)
+    laeq = np.array([row[2] for row in _LONDON_SITES])
+    sites = [row[0] for row in _LONDON_SITES]
+    result = environment.pleasantness_eventfulness(medians, sites=sites)
+    correlation = environment.spearman_rank_correlation(result.pleasantness, laeq)
+    _fig, (ax_model, ax_rank) = plt.subplots(1, 2, figsize=(14.0, 6.6))
+    result.plot(ax_model, language=_LANG)
+    correlation.plot(ax_rank, language=_LANG)
+    # The renderer names its axes x and y; here they are the two things the
+    # sites were ranked by, and the save-time pass writes them in Spanish.
+    ax_rank.set_xlabel(r"Rank of the site pleasantness $P$")
+    ax_rank.set_ylabel(r"Rank of the site $L_\mathrm{Aeq}$")
+    plt.tight_layout()
+    save_figure(output_dir, "soundscape_pleasantness_eventfulness.svg")
+    plt.close()
+
+
+def _binaural_street() -> NDArray[np.float64]:
+    """Eight seconds at a kerb: steady noise, one vehicle passing left to right.
+
+    The pass-by rises by about 12 dB in the middle of the record and reaches
+    the left ear first and louder; the right ear hears the same event a little
+    later and 3 dB down. Calibrated in pascals, 48 kHz.
+    """
+    fs = 48_000
+    rng = np.random.default_rng(12913)
+    n = 8 * fs
+    t = np.arange(n) / fs
+    background = 0.02 * rng.standard_normal(n)
+    swell = np.exp(-0.5 * ((t - 4.0) / 0.9) ** 2)
+    vehicle = 0.08 * rng.standard_normal(n)
+    left = background + swell * vehicle
+    lag = int(0.3 * fs)
+    right = 0.9 * background + 10.0 ** (-3.0 / 20.0) * np.roll(swell, lag) * vehicle
+    return np.vstack([left, right])
+
+
+def generate_soundscape_binaural_indicators(output_dir: str) -> None:
+    """ISO/TS 12913-3 Table D.1: the levels and the loudness at both ears."""
+    import warnings
+
+    print("Generating soundscape_binaural_indicators...")
+    from phonometry import environment
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", environment.SoundscapeWarning)
+        result = environment.binaural_indicators(
+            _binaural_street(), 48_000, parameters=("sound_pressure_level", "loudness")
+        )
+    _fig, (ax_levels, ax_loudness) = plt.subplots(1, 2, figsize=(14.0, 5.8))
+    result.plot(ax_levels, parameter="sound_pressure_level", language=_LANG)
+    result.plot(ax_loudness, parameter="loudness", language=_LANG)
+    plt.tight_layout()
+    save_figure(output_dir, "soundscape_binaural_indicators.svg")
+    plt.close()
+
+
 def generate_tonal_audibility(output_dir: str) -> None:
     """ISO 1996-2: tonal adjustment Kt(ΔLta) with the Annex C.5 examples."""
     print("Generating tonal_audibility...")

@@ -263,7 +263,7 @@ def test_roughness_r10_is_the_ecma_single_value() -> None:
     assert result.metrics["R10"].left == pytest.approx(reference.roughness, rel=1e-12)
     assert result.metrics["R10"].right == pytest.approx(reference.roughness, rel=1e-12)
     assert result.metrics["R50"].left <= result.metrics["R10"].left
-    assert result.metrics["R10"].unit == "asper_HMS"
+    assert result.metrics["R10"].unit == "asper"
 
 
 def test_fluctuation_percentiles_leave_out_the_settling_frames(

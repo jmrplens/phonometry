@@ -1545,6 +1545,10 @@ _PAQ_AXES: tuple[tuple[str, float, bool], ...] = (
     ("CALM", 315.0, False),
 )
 
+#: Marker shapes, one per round of the site colours, so that a study with
+#: more sites than colours still tells every site apart.
+_SITE_MARKERS = ("o", "s", "^", "D")
+
 #: How many item labels fit side by side under a column plot before they are
 #: tilted to keep clear of each other.
 _FLAT_ITEM_LABELS = 2
@@ -1570,10 +1574,10 @@ _METHOD_A_SUBJECTS: dict[int, str] = {
 
 #: The symbols of Table D.1 as mathematics, for the tick labels.
 _TABLE_D1_SYMBOLS: dict[str, str] = {
-    "LAeq,T": r"$L_\mathrm{Aeq,T}$",
-    "LCeq,T": r"$L_\mathrm{Ceq,T}$",
-    "LAF5,T": r"$L_\mathrm{AF5,T}$",
-    "LAF95,T": r"$L_\mathrm{AF95,T}$",
+    "LAeq,T": r"$L_{\mathrm{Aeq},T}$",
+    "LCeq,T": r"$L_{\mathrm{Ceq},T}$",
+    "LAF5,T": r"$L_{\mathrm{AF5},T}$",
+    "LAF95,T": r"$L_{\mathrm{AF95},T}$",
     "N5": "$N_5$",
     "Naverage": r"$N_\mathrm{average}$",
     "Nrmc": r"$N_\mathrm{rmc}$",
@@ -1651,9 +1655,9 @@ _SOUNDSCAPE_STRINGS_ES: dict[str, str] = {
     "rank of $y$": "rango de $y$",
     "left ear": "oído izquierdo",
     "right ear": "oído derecho",
-    "representative (higher ear)": "representativo (oído más alto)",
+    "representative (higher of the two ears)": "representativo (el mayor de los dos oídos)",
     "ISO/TS 12913-3 Table D.1": "ISO/TS 12913-3 Tabla D.1",
-    "Sound pressure level": "Nivel de presión sonora",
+    "Sound pressure level": "Nivel de presión acústica",
     "Loudness (time-variant loudness)": "Sonoridad (variable en el tiempo)",
     "Psychoacoustic tonality": "Tonalidad psicoacústica",
     "Roughness": "Aspereza",
@@ -1851,17 +1855,32 @@ def plot_pleasantness_eventfulness(
             color=theme_line(_C_MUTED, ax, quiet=0.6),
             ms=3,
         )
+    # Each site a marker of its own, named in a legend under the axes: sites
+    # of one study sit close together, and names written beside the points
+    # would run into each other and across the attribute arrows.
     x = result.pleasantness * scale
     y = result.eventfulness * scale
-    ax.plot(x, y, **styled(kwargs, color=_C_PRIMARY, marker="o", ls="none", ms=8))
-    for site, xs, ys in zip(result.sites, x, y, strict=True):
-        ax.annotate(
-            _site_label(site, language),
-            (float(xs), float(ys)),
-            xytext=(6, 6),
-            textcoords="offset points",
-            fontsize="small",
+    for k, (site, xs, ys) in enumerate(zip(result.sites, x, y, strict=True)):
+        ax.plot(
+            [float(xs)],
+            [float(ys)],
+            **styled(
+                kwargs,
+                color=_SITE_COLORS[k % len(_SITE_COLORS)],
+                marker=_SITE_MARKERS[(k // len(_SITE_COLORS)) % len(_SITE_MARKERS)],
+                ls="none",
+                ms=8,
+                label=_site_label(site, language),
+            ),
         )
+    legend = ax.legend(
+        loc="upper center",
+        bbox_to_anchor=(0.5, -0.13),
+        ncol=min(3, max(1, len(result.sites))),
+        fontsize="small",
+        frameon=False,
+    )
+    legend.set_in_layout(True)
     limit = 1.55 * reach
     ax.set_xlim(-limit, limit)
     ax.set_ylim(-limit, limit)
@@ -2089,7 +2108,7 @@ def plot_binaural_indicators(
         x + width,
         colors=[ink],
         lw=2.0,
-        label=_t("representative (higher ear)", language),
+        label=_t("representative (higher of the two ears)", language),
     )
     ax.set_xticks(x)
     ax.set_xticklabels([_TABLE_D1_SYMBOLS.get(m.symbol, m.symbol) for m in metrics])
@@ -2108,7 +2127,11 @@ def plot_binaural_indicators(
             f"({_t('right ear', language)})"
         )
     ax.set_title(title)
+    # Horizontal rules only: a vertical one would run through the middle of
+    # every pair of bars, where the tick of each metric sits.
+    ax.grid(visible=False, axis="x")
     ax.grid(visible=True, axis="y", alpha=0.3)
+    ax.set_axisbelow(True)
     legend = ax.legend(fontsize="small")
     place_legend_clear(legend)
     localize_axes(ax, language)

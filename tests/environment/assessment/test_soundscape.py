@@ -758,7 +758,8 @@ def test_the_figure_a1_plot_draws_the_eight_attributes() -> None:
     labels = {t.get_text() for t in ax.texts}
     assert {"PLEASANT", "VIBRANT", "EVENTFUL", "CHAOTIC"} <= labels
     assert {"ANNOYING", "MONOTONOUS", "UNEVENTFUL", "CALM"} <= labels
-    assert set(sites) <= labels
+    # Each site is a marker of its own, named in the legend.
+    assert ax.get_legend_handles_labels()[1] == sites
     assert ax.get_xlim() == pytest.approx((-1.55, 1.55))
     plt.close("all")
     ax = result.plot(normalized=False, respondents=True, language="es")

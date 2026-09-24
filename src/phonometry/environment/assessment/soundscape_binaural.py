@@ -249,8 +249,8 @@ _UNITS: Mapping[str, str] = MappingProxyType(
         "N95": "sone",
         "N5/N95": "1",
         "T": "tu_HMS",
-        "R10": "asper_HMS",
-        "R50": "asper_HMS",
+        "R10": "asper",
+        "R50": "asper",
         "F10": "vacil_HMS",
         "F50": "vacil_HMS",
     }

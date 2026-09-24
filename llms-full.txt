@@ -60818,12 +60818,16 @@ of 5.12 and the summation of 5.16 as well as the Table 1 mask, so a bank's
 class is the strictest it meets on all three. Its Table 1 margins and a
 verdict for `edition="1995"` are the numbers they were.
 
+The decimated filter banks are the other: each band now keeps its processing
+Nyquist frequency sixteen times its upper edge, so a band level moves by up to
+0.07 dB on white noise, as the same section says.
+
 What each `.plot()` draws is untouched, and so is what each `.report()`
 prints but one label: the microphone fiche writes dB(468) where it wrote
 dB(CCIR). The `Signal` contract is the one it was, now kept in two more
 places, the blocks of `read_blocks` and the waveforms inside five results.
 Every formula is untouched too. 4.0 rearranged the furniture and put the unit
-on the label; apart from that verdict, it did not recompute anything.
+on the label; apart from those two, it did not recompute anything.
 
 ---
 

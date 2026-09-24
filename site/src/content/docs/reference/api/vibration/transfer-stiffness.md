@@ -1241,11 +1241,11 @@ mass/spring resonance).
 of Formula (1) is required accurate within 1 dB, i.e. within 12 % of the
 calculated stiffness magnitude. This holds only where Inequality (2) is
 met: $\Delta L_{1,2} = L_{a1} - L_{a2} \ge 20$ dB, i.e.
-$|T| \le 0.1$ ([`TRANSMISSIBILITY_LIMIT`](/phonometry/reference/api/vibration/transfer-stiffness/#transmissibility_limit)). Bands with
+$|T| \le 0.1$ ([`TRANSMISSIBILITY_LIMIT`](/phonometry/reference/api/vibration/transfer-stiffness/#transmissibility_limit)). Lines with
 `|T|` above that limit
 (routine near or below the mass/spring resonance) trigger a
-[`TransferStiffnessWarning`](/phonometry/reference/api/vibration/transfer-stiffness/#transferstiffnesswarning); treat those bands as outside the
-valid frequency range of the test arrangement. The upper frequency limit
+[`TransferStiffnessWarning`](/phonometry/reference/api/vibration/transfer-stiffness/#transferstiffnesswarning); the result marks each of them as not
+valid, and its band average leaves them out. The upper frequency limit
 `f3` additionally requires the blocking mass to vibrate as a rigid
 body: results are valid only while its effective mass `m2,eff`,
 measured per Formula (4) as

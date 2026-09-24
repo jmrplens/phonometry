@@ -5206,6 +5206,84 @@ in the same order.
   reference-conditions row of Table 1 is about.
 - **Status:** unreported.
 
+## ISO 8041-2:2021, clause 12.7 ("the appropriate weighting factor (see Table 1)" for `Wf`, carried over from Part 1)
+
+- **Location:** clause 12.7, printed folio 26 (PDF page 34), the second
+  paragraph on that folio. The clause opens on printed folio 25.
+- **The print:** the sentence of ISO 8041-1:2017 12.7 recorded in the entry
+  above, word for word: "With an input signal adjusted to indicate the
+  reference vibration value on the reference measurement range with
+  band-limiting frequency weighting, the indicated frequency-weighted
+  vibration values shall equal the indicated band-limited weighted vibration
+  value multiplied by the appropriate weighting factor (see Table 1) within
+  the tolerance limits of Table 2." Table 1 of this document prints the same
+  weighting factor for `Wf` at 2,5 rad/s, 0,388 8, and Table 3 the same `Wf`
+  parameters, with its band-limiting corners at 0,08 Hz and 0,63 Hz.
+- **The problem:** the ISO 8041-1:2017 defect, carried into the personal
+  vibration exposure meter. Part 2 keeps `Wf` among the weightings a PVEM may
+  provide, with the same reference frequency inside the same band-limiting
+  skirt, so the arithmetic of the entry above holds unchanged: read as the
+  0,388 8 of Table 1, the paragraph asks a conforming `Wf` meter for a value
+  7,75 % away from the one it displays, outside the ±3 % that the second row of
+  Table 2 allows the difference and outside the ±5 % its first row allows a
+  low-frequency whole-body indication. Read as the ratio of the overall
+  weighting to the band-limiting one at the reference frequency, 0,418 982,
+  the paragraph is true by construction.
+- **Evidence:** the printed clause against Table 1 (printed folio 5) and
+  Tables 2 and 3 (printed folio 8), whose `Wf` row carries the parameters
+  ISO 8041-1:2017 prints. Verified on PDF pages 13, 16 and 34 (printed pp. 5,
+  8 and 26) of ISO 8041-2:2021(E).
+- **Consequence for the standard's own tables:** none, as in Part 1.
+- **Library behaviour:** unchanged by this entry.
+  [`band_limited_weighting_factor`](../src/phonometry/vibration/human/instrumentation.py)
+  returns the ratio, and it serves both parts because Part 2 prints the same
+  weightings. The conformance row "ISO 8041-2:2021 Table 2" records the
+  tolerances this paragraph is judged against.
+- **Status:** unreported.
+
+## ISO 8041-2:2021, clause 12.7 (time weightings graded against a row Table 2 no longer prints)
+
+- **Location:** clause 12.7, printed folio 26 (PDF page 34), the third
+  paragraph on that folio; read against Table 2 on printed folio 8 and
+  clause 5.13 on printed folio 15.
+- **The print:** "For an instrument where time weightings are provided, a
+  steady sinusoidal electrical signal shall be applied to the electrical input
+  facility at the reference frequency. [...] With the same input signal, the
+  indicated vibration values on each time weighting shall equal the indicated
+  reference vibration value within the tolerance limits of Table 2." Table 2
+  prints two rows: the tolerance of indication at the reference frequency
+  (±4 %, and ±5 % for low-frequency whole-body vibration) and the difference
+  between a frequency-weighted indication and the band-limited one times the
+  weighting factor (±3 %). Clause 5.13, "Running RMS acceleration", reads in
+  full: "Not applicable for PVEM."
+- **The problem:** the paragraph is the one ISO 8041-1:2017 prints in its own
+  12.7 (printed folio 30 of that document), with "the vibration meter" turned
+  into "the PVEM", and there the limit it points at is the third row of the
+  Part 1 Table 2: the running r.m.s. indication against the linear
+  time-averaged one, ±2 %. The time weighting in this family of standards is
+  that running r.m.s.; Part 1 titles its Tables 10 and 11 "Time-weighting
+  decay rates". Part 2 dropped the row, since its 5.13 declares the running
+  r.m.s. not applicable, and kept the paragraph that grades it, so the
+  paragraph now sends the reader to a table in which no row states a limit for
+  a time-weighted indication. For a PVEM that provides no time weighting the
+  paragraph is empty; for one that provides them anyway, the document does not
+  say what they are held to.
+- **Evidence:** the three printed passages against each other, and against
+  ISO 8041-1:2017 12.7 and its Table 2, which print the running r.m.s. row
+  this paragraph was written for. Verified on PDF pages 16, 23 and 34
+  (printed pp. 8, 15 and 26) of ISO 8041-2:2021(E), and on PDF pages 20, 28
+  and 38 (printed pp. 12, 20 and 30) of ISO 8041-1:2017(E) for the Part 1
+  Table 2, the title of its Table 10 and its 12.7.
+- **Consequence for the standard's own tables:** none. The defect is a
+  cross-reference that outlived its row.
+- **Library behaviour:**
+  [`PVEM_INDICATION_TOLERANCES_PERCENT`](../src/phonometry/vibration/human/instrumentation.py)
+  publishes the two rows Part 2 prints and no running r.m.s. row, so nothing
+  in the library grades a PVEM on this paragraph; the Part 1 row remains
+  `RUNNING_RMS_CONSISTENCY_TOLERANCE_PERCENT`, documented as Part 1 only. The
+  conformance row "ISO 8041-2:2021 Table 2" records the two rows.
+- **Status:** unreported.
+
 ## DIN 45669-1:2010-09, Table 9 (a peak-velocity row that contradicts Formula (5), and the KB_F row beside it)
 
 - **Location:** Table 9, printed folio 35 (PDF page 35 of the copy read here,

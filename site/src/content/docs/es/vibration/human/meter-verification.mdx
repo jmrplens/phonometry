@@ -1,6 +1,6 @@
 ---
 title: "Verificación del vibrómetro de vibración en humanos"
-description: "Los apartados de la ISO 8041-1 que son aritmética: la banda de tolerancia de la Tabla 5 alrededor de cada ponderación frecuencial con la incertidumbre expandida del propio laboratorio, la desviación característica de fase de la Fórmula (6), los tiempos de decaimiento del valor eficaz móvil de las Tablas 10 y 11, y las 228 indicaciones de la ráfaga en diente de sierra de las Tablas 7 a 9."
+description: "Los apartados de la ISO 8041-1 que son aritmética: la banda de tolerancia de la Tabla 5 alrededor de cada ponderación frecuencial con la incertidumbre expandida del propio laboratorio, la desviación característica de fase de la Fórmula (6), los tiempos de decaimiento del valor eficaz móvil de las Tablas 10 y 11, y las 228 indicaciones de la ráfaga en diente de sierra de las Tablas 7 a 9, que el medidor personal de exposición de la ISO 8041-2 vuelve a imprimir."
 references:
   - type: standard
     organization: "International Organization for Standardization"
@@ -9,6 +9,12 @@ references:
     designation: "ISO 8041-1:2017"
     primary: true
     note: "Los tres niveles de ensayo de prestaciones (apartado 1), las condiciones ambientales de referencia (apartado 4), los valores y frecuencias de vibración de referencia de la Tabla 1, las tres filas de la Tabla 2, los parámetros de ponderación de la Tabla 3 y las funciones de transferencia de 5.6, las frecuencias de transición de la Tabla 4 y las tolerancias de la Tabla 5 con su nota a, la desviación característica de fase de la Fórmula (6), la ráfaga de señal en diente de sierra de 5.9 con su Tabla 6 y las respuestas impresas de las Tablas 7 a 9, el promediado temporal del valor eficaz móvil de 5.13 con las Tablas 10 y 11, las incertidumbres expandidas máximas de 12.1 y la malla de ensayo de 12.11.1, la demostración de conformidad de 13.1 y 14.1, las ponderaciones y fases del objetivo de diseño tabuladas del anexo B, y el argumento de fase del anexo H con sus fórmulas (H.1), (H.3) y (H.4). Los apartados de diseño y de ensayo de tipo que necesitan un banco no están implementados: cumplir en cualquier apartado de aquí es una afirmación sobre ese apartado y nunca un certificado de conformidad de un instrumento."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2021
+    title: "Human response to vibration — Measuring instrumentation — Part 2: Personal vibration exposure meters"
+    designation: "ISO 8041-2:2021"
+    note: "El medidor personal de exposición a vibraciones: las 12 h de 5.1 y 5.12, la Tabla 2 con sus dos filas y el «Not applicable for PVEM» de 5.13, la ráfaga de señal en diente de sierra de 5.9 con su Tabla 6 y las respuestas impresas de las Tablas 7 a 9, las incertidumbres expandidas máximas de los apartados 12 y 13, y la regla de decisión de 12.1 y 13.1. La aritmética de respuesta en frecuencia de 12.11 y el ensayo de registro de 12 h de 12.22 no están implementados."
   - type: book
     authors: ["Griffin, M. J."]
     year: 1996
@@ -39,7 +45,8 @@ humana a la vibración» (apartado 1), para vibración transmitida a las manos
 (ISO 5349-1), vibración de cuerpo entero (ISO 2631-1, ISO 2631-2 e ISO 2631-4)
 y vibración de cuerpo entero de baja frecuencia de 0,1 Hz a 0,5 Hz. Lo de **uso
 general** la separa de la ISO 8041-2, que especifica medidores personales de
-exposición, y no de algún otro tipo de vibrómetro: un instrumento de
+exposición con la mayoría de las mismas tablas (la sección 11 dice cuáles), y
+no de algún otro tipo de vibrómetro: un instrumento de
 mantenimiento predictivo de máquina o de daño en edificios se juzga contra
 otros documentos, y nada de esta página le aplica.
 
@@ -1397,7 +1404,125 @@ impresas, es un 2,3 % en el peor caso frente a tolerancias impresas del 10 % y
 del 12 %. Y lo que significa un cumple sigue siendo estrecho: la respuesta
 temporal de una cadena de ponderación coincide con la tabla impresa el día en
 que se midió.
-## 11. La misma comprobación al otro lado de la frontera
+
+## 11. El medidor personal de la ISO 8041-2
+
+Todo lo anterior es la ISO 8041-1, el vibrómetro de uso general que un técnico
+lleva a una máquina o a un asiento. La ISO 8041-2:2021 especifica el otro
+instrumento de una campaña de vibración en humanos, el **medidor personal de
+exposición a vibraciones** (PVEM): el que un trabajador lleva puesto durante
+la jornada y que tiene que registrar la exposición al menos 12 h sin que nadie
+lo toque (5.1 y 5.12). Mide las mismas magnitudes a través de las mismas
+ponderaciones, y la parte 2 no le escribe un segundo juego de tablas: vuelve a
+imprimir las de la parte 1 y cambia solo lo que necesita cambiar un medidor
+que se lleva sobre el cuerpo. La pregunta de esta sección es, por tanto, a
+cuáles de los números anteriores está sujeto un PVEM y cuáles son suyos.
+
+**La misma ráfaga, dígito a dígito.** El apartado 5.9 de la parte 2 repite la
+ráfaga en diente de sierra de la sección 10. Su Tabla 6 define la misma señal
+de ensayo, y sus Tablas 7, 8 y 9 imprimen 228 indicaciones con una tolerancia
+al lado de cada una. Leídas en las páginas de la parte 2 y puestas junto a
+`SIGNAL_BURST_RESPONSE`, cada una de las 228 indicaciones y cada una de las 228
+tolerancias es el número de la parte 1, y el 12.13 de la parte 2 las juzga con
+la misma frase y la misma incertidumbre máxima del 3 %. Así que una sola
+implementación sirve a las dos partes: los fragmentos de la sección 10 son el
+ensayo de la parte 2 tal como están escritos, y el informe de conformidad
+califica la biblioteca frente a la página de la parte 2 en una sección propia,
+que además contrasta cada celda de la parte 2 con su gemela de la parte 1.
+
+```python
+from phonometry import vibration
+
+# La tabla que reproduce la sección 10 es también la de la parte 2: 72 líneas
+# impresas y 228 celdas, entre ellas la fila Wk de la Tabla 8.
+cells = vibration.SIGNAL_BURST_RESPONSE
+print(len(cells), sum(len(row) for row in cells.values()))   # 72 228
+print(dict(cells["whole-body", "Wk", 4]))
+# {'rms': 0.0577, 'vdv': 0.455, 'mtvv_linear': 0.182, 'mtvv_exponential': 0.171}
+```
+
+**La Tabla 2 pierde una fila.** Las tolerancias de indicación de la parte 2
+son las dos primeras filas de la tabla de la parte 1, número por número: un
+4 % para la indicación a la frecuencia de referencia, un 5 % para la vibración
+de cuerpo entero de baja frecuencia, y un 3 % entre una indicación ponderada en
+frecuencia y la limitada en banda multiplicada por el factor de ponderación.
+La tercera fila, el 2 % entre el valor eficaz móvil y el promedio lineal, ha
+desaparecido, porque el apartado 5.13 de la parte 2 dice entero «Not
+applicable for PVEM». La parte 2 no le pide a un medidor personal ningún valor
+eficaz móvil, así que los tiempos de decaimiento de la sección 9 tampoco
+tienen equivalente en ella. `PVEM_INDICATION_TOLERANCES_PERCENT` es esa tabla,
+de modo que una comprobación que la recorra califica un PVEM con lo que
+imprime la parte 2 y con nada más:
+
+```python
+from phonometry import vibration
+
+print(dict(vibration.PVEM_INDICATION_TOLERANCES_PERCENT))
+# {'indication': 4.0, 'low-frequency indication': 5.0, 'weighting consistency': 3.0}
+
+# La fila que la parte 2 no imprime se queda donde la puso la parte 1.
+print(vibration.RUNNING_RMS_CONSISTENCY_TOLERANCE_PERCENT)   # 2.0
+```
+
+Dos párrafos del 12.7 de la parte 2 llegaron sin cambios desde la parte 1, y
+ninguno encaja con el medidor que ahora describen. El ensayo de coherencia de
+la ponderación sigue apuntando a «the appropriate weighting factor (see
+Table 1)», y la Tabla 1 de la parte 2 sigue imprimiendo 0,388 8 para `Wf`, así
+que la advertencia de la sección 6 vale para un PVEM palabra por palabra:
+`band_limited_weighting_factor` es el factor con el que la fila se puede
+cumplir. Y el párrafo siguiente sigue juzgando «each time weighting» frente a
+«the tolerance limits of Table 2», cuya fila de ponderación temporal la parte 2
+ya no imprime. Los dos están en el
+[registro de erratas](/phonometry/es/reference/errata/).
+
+**Sus propias incertidumbres.** La parte 2 imprime la incertidumbre expandida
+máxima que cada uno de sus apartados de ensayo le permite a un laboratorio, y
+en el apartado 12, el ensayo de tipo, cada cifra es la que imprime la parte 1
+con el mismo número: un 4,5 % para la respuesta en frecuencia mecánica del
+12.11.2, un 3 % para la eléctrica del 12.11.3, un 5 % para la respuesta global
+del 12.11.4 y un 3 % para la ráfaga del 12.13. Es en el apartado 13 donde los
+dos documentos se separan. La parte 2 no tiene validación de un instrumento de
+ejemplar único, que es el apartado 13 de la parte 1, y su verificación
+periódica es el apartado 13 y no el 14: el 13.9 de la parte 2 es el 5 % de una
+verificación periódica, el equivalente del 14.9 de la parte 1, mientras que el
+13.9 de la parte 1 es el 2 % de otro ensayo. Un mismo número de apartado nombra
+un ensayo distinto en cada documento, y por eso las dos tablas van por
+separado:
+
+```python
+from phonometry import vibration
+
+pvem = vibration.PVEM_MAX_EXPANDED_UNCERTAINTY_PERCENT
+general = vibration.MAX_EXPANDED_UNCERTAINTY_PERCENT
+for clause in ("12.11.2", "12.11.3", "12.11.4", "12.13"):
+    print(clause, pvem[clause], general[clause])
+# 12.11.2 4.5 4.5
+# 12.11.3 3.0 3.0
+# 12.11.4 5.0 5.0
+# 12.13 3.0 3.0
+print(pvem["13.9"], general["13.9"], general["14.9"])   # 5.0 2.0 5.0
+print(sorted(set(general) - set(pvem)))
+# ['13.11', '13.14', '13.15', '14.9']
+print(vibration.ISO8041_COVERAGE_FACTOR)                # 2.0
+```
+
+La regla de decisión de la sección 4 no cambia: los apartados 12.1 y 13.1 de
+la parte 2 imprimen la frase y el factor de cobertura que imprime la parte 1,
+así que `verify_weighting` con el `expanded_uncertainty_percent` del propio
+laboratorio es también el veredicto de un PVEM, con la cifra de la parte 2
+como techo de lo que el laboratorio puede declarar.
+
+Lo que la parte 2 añade más allá de estas tablas no está aquí. La aritmética
+de su 12.11, las Fórmulas (9) a (13), reparte un error de respuesta en
+frecuencia entre el transductor y la parte eléctrica del instrumento y combina
+el error aparente con la incertidumbre del laboratorio; el ensayo de registro
+del 12.22 hace funcionar el medidor 12 h, con una pasada en el excitador al
+principio y otra al final, y lee su fichero de registro muestra a muestra; y
+el registro, la detección del operario, la detección de artefactos
+transitorios (anexo A) y la fuerza de contacto (anexo B) son propiedades del
+hardware.
+
+## 12. La misma comprobación al otro lado de la frontera
 
 Un sonómetro recibe exactamente este trato, de otro comité y en otra unidad.
 La IEC 61672-1 imprime objetivos de diseño para las ponderaciones A, C y Z y
@@ -1479,6 +1604,14 @@ una indicación. Se publican, no se comprueban: leer una pantalla es una medici�
 de banco.
 </ScopeClaim>
 
+<ScopeClaim status="covered">
+El **medidor personal de exposición a vibraciones** de la ISO 8041-2:2021: sus
+228 celdas de ráfaga de las Tablas 7 a 9, las de la parte 1 dígito a dígito,
+calificadas en el informe de conformidad frente a la página de la parte 2; su
+Tabla 2 de dos filas; y las incertidumbres expandidas máximas que imprimen sus
+apartados 12 y 13.
+</ScopeClaim>
+
 <ScopeClaim status="not-covered" label="No cubierto">
 **Ningún banco, en ninguna parte.** Todo criterio de aquí es un lado de una
 comparación cuyo otro lado alguien tiene que medir sobre hardware. La
@@ -1493,6 +1626,13 @@ aquí.
 apartado de esta página es una afirmación sobre ese apartado. El ensayo de tipo,
 la verificación periódica y la comprobación in situ son procedimientos sobre un
 vibrómetro físico, y aquí nada lleva un número de serie.
+</ScopeClaim>
+
+<ScopeClaim status="not-covered">
+**El resto de la ISO 8041-2.** La aritmética de respuesta en frecuencia de su
+12.11 (Fórmulas (9) a (13)), el ensayo de registro de 12 h del 12.22, y los
+apartados de registro, detección del operario, detección de artefactos
+(anexo A) y fuerza de contacto (anexo B) no están implementados.
 </ScopeClaim>
 
 </Scope>

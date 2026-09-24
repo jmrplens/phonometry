@@ -59,7 +59,7 @@ from phonometry.noise_control.enclosure_insulation import (
     TEST_ENVIRONMENT_REQUIREMENTS,
 )
 
-from ..registry import Outcome, count, mask, numeric, record, register
+from ..registry import Outcome, count, mask, numeric, record, register, residue_text
 
 _ENCLOSURES = "Enclosure and cabin insulation"
 
@@ -178,7 +178,9 @@ def _chk_figure_c1_closed_form() -> Outcome:
         worst,
         1e-9,
         unit="dB",
-        computed_label=f"max deviation {worst:.2e} dB over the 7 rows of Table C.2",
+        computed_label=(
+            f"max deviation {residue_text(worst, 'dB', '.2e')} over the 7 rows of Table C.2"
+        ),
     )
 
 

@@ -1464,3 +1464,35 @@ def test_a_spanish_title_keeps_the_id_it_had_without_its_accents() -> None:
 def test_a_decomposed_accent_reduces_to_the_same_id() -> None:
     """ "á" and "a" with a combining acute are one letter, so one slug."""
     assert artifact.slug("Catálogo") == artifact.slug("Catálogo") == "catalogo"
+
+
+# --------------------------------------------------------------------------
+# Machine noise is not published
+# --------------------------------------------------------------------------
+#: A number printed with an exponent below the noise floor.
+_NOISE_DIGITS = re.compile(r"\d(?:\.\d+)?e-(?:1[3-9]|[2-9]\d)\b")
+
+
+def test_a_residue_below_the_noise_floor_is_stored_as_zero() -> None:
+    """The residue of an identity differs between CPUs in its leading digits."""
+    assert artifact._rounded(5.68e-14, 6) == 0.0
+    assert artifact._rounded(-6.39e-14, 6) == 0.0
+    assert artifact._rounded(4.2e-7, 5) == pytest.approx(4.2e-7)
+    assert registry.residue_text(5.68e-14, "dB") == "below 1e-12 dB"
+    assert registry.residue_text(0.0) == "below 1e-12"
+    assert registry.residue_text(0.0438, "dB", ".3g") == "0.0438 dB"
+
+
+def test_the_report_publishes_no_machine_noise(committed: dict) -> None:
+    """No stored value and no label carries digits a second CPU would not."""
+    noisy = []
+    for check in committed["checks"]:
+        for side in ("computed", "deviation"):
+            part = check.get(side) or {}
+            value = part.get("value")
+            if isinstance(value, float) and 0.0 < abs(value) < registry.NOISE_FLOOR:
+                noisy.append(f"{check['id']} {side}.value {value!r}")
+            label = part.get("label") or ""
+            if _NOISE_DIGITS.search(label):
+                noisy.append(f"{check['id']} {side}.label {label!r}")
+    assert noisy == []

@@ -53,7 +53,7 @@ from phonometry.filters.compliance import (
     _test_frequencies,
 )
 
-from ..registry import Outcome, count, numeric, record, register
+from ..registry import Outcome, count, numeric, record, register, residue_text
 
 _FILTER_TESTS = (
     "Band-filter pattern evaluation and periodic tests (IEC 61260-2, IEC 61260-3)"
@@ -292,7 +292,9 @@ def _chk_ideal_summation() -> Outcome:
         1e-12,
         unit="dB",
         places=6,
-        computed_label=f"max |Delta P| {max(abs(inside), abs(edge)):.1e} dB",
+        computed_label=(
+            f"max |Delta P| {residue_text(max(abs(inside), abs(edge)), 'dB', '.1e')}"
+        ),
     )
 
 

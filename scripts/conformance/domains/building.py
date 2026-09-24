@@ -30,7 +30,7 @@ from scipy import signal as sg
 
 import phonometry as ph
 
-from ..registry import Outcome, count, numeric, record, register
+from ..registry import Outcome, count, numeric, record, register, residue_text
 from .levels import _FS
 
 if TYPE_CHECKING:
@@ -115,7 +115,7 @@ def _chk_iso3382_1_shared_calibration() -> Outcome:
         unit="dB",
         places=6,
         expected_label="0 dB shift (+/-1e-09 dB)",
-        computed_label=f"max shift over 6 bands {worst:.3g} dB",
+        computed_label=f"max shift over 6 bands {residue_text(worst, 'dB')}",
     )
 
 
@@ -1276,7 +1276,7 @@ def _chk_low_frequency_element() -> Outcome:
     return Outcome(
         expected=f"DI,n,e = 21 dB; N = 4 adds {expected_lift:.3f} dB",
         computed=f"{base:g} dB; N = 4 adds {lift:.3f} dB",
-        delta=f"{lift - expected_lift:+.3e} dB",
+        delta=residue_text(lift - expected_lift, "dB", "+.3e"),
         passed=passed,
     )
 

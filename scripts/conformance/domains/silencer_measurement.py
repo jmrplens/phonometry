@@ -27,7 +27,7 @@ import numpy as np
 
 import phonometry as ph
 
-from ..registry import Outcome, mask, numeric, record, register
+from ..registry import Outcome, mask, numeric, record, register, residue_text
 
 _ISO7235 = "Ducted silencer measurement (ISO 7235, ISO 11691)"
 
@@ -312,7 +312,7 @@ def _chk_open_end_identity() -> Outcome:
         unit="dB",
         places=12,
         expected_label="D_td = -10 lg(1 - r^2) at all 30 pairs",
-        computed_label=f"largest disagreement {worst:.3e} dB",
+        computed_label=f"largest disagreement {residue_text(worst, 'dB', '.3e')}",
     )
 
 
@@ -594,7 +594,7 @@ def _chk_iso5135_end_reflection() -> Outcome:
         unit="dB",
         places=12,
         expected_label="ISO 5135 (2) = ISO 7235 (B.3) at all 30 pairs",
-        computed_label=f"largest disagreement {worst:.3e} dB",
+        computed_label=f"largest disagreement {residue_text(worst, 'dB', '.3e')}",
     )
 
 

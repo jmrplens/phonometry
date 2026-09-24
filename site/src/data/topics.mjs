@@ -149,7 +149,7 @@ export const topics = [
   },
   {
     id: 'io',
-    label: { en: 'Audio files', es: 'Archivos de audio' },
+    label: { en: 'Files', es: 'Archivos' },
     link: '/io/',
     items: [
       { slug: 'io', label: 'Overview', translations: { es: 'Resumen' } },

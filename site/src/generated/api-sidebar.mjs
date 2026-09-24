@@ -80,8 +80,8 @@ export const apiSections = {
     ],
   },
   'io': {
-    label: 'Audio files',
-    translations: { es: 'Archivos de audio' },
+    label: 'Files',
+    translations: { es: 'Archivos' },
     collapsed: true,
     items: [
       'reference/api/io/io',

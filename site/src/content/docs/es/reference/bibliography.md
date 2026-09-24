@@ -257,7 +257,7 @@ síncrono, Golay por los pares complementarios.
   y
   [Cepstrum, ecos y espectro de la envolvente](/phonometry/es/signals/spectra/cepstrum-echoes/).
 
-## Archivos de audio
+## Archivos
 
 Normas más que libros: la capa de archivos implementa especificaciones
 publicadas de contenedores y metadatos, y cada entrada fija la pieza del

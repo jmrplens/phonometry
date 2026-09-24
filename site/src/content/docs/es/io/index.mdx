@@ -1,6 +1,6 @@
 ---
-title: "Archivos de audio"
-description: "La capa de archivos de la medición: leer en un Signal calibrado todo WAV lineal que escribe un sonómetro, inspección solo de cabeceras, flujo por bloques hacia filtros con estado, escritura BWF con procedencia bext y sonoridad medida, el sidecar de calibración y la conversión sin pérdidas; qué queda fuera, y por qué."
+title: "Archivos"
+description: "La capa de archivos de la medición: leer en un Signal calibrado todo WAV lineal que escribe un sonómetro, inspección solo de cabeceras, flujo por bloques hacia filtros con estado, escritura BWF con procedencia bext y sonoridad medida, el sidecar de calibración, la conversión sin pérdidas y los catálogos de materiales propios; qué queda fuera, y por qué."
 ---
 
 import Scope from '../../../../components/Scope.astro';
@@ -45,6 +45,21 @@ propia de la BS.1770, y deja la calibración en un pequeño sidecar JSON
 versionado junto al audio: el número para el que ningún contenedor de
 audio tiene campo, hecho para viajar.
 
+Los otros archivos que la biblioteca lee y escribe son catálogos de
+materiales. La biblioteca publica las tablas de sus libros y normas y
+ninguna de un fabricante, así que una ficha técnica, una declaración de
+prestaciones o un informe de ensayo propios van en un archivo JSON suyo, con
+la procedencia del documento: su tipo, su versión, el día en que se
+consultó, el laboratorio y el informe. `read_catalogue` lee ese archivo en
+filas de las mismas clases que entregan todos los catálogos publicados, de
+modo que el núcleo poroso de su ficha entra en `medium()` igual que uno de
+un libro, y una cifra que la ficha imprime en kPa·s/m² o en centímetros se
+convierte a partir de sus dígitos y queda anotada tal como la imprimió. Todos
+los problemas de un archivo se informan a la vez, cada uno en su lugar del
+archivo, y nada de lo que el archivo nombra se importa nunca.
+`write_catalogue` escribe un catálogo de vuelta, y escribe una tabla
+publicada con la misma forma, como plantilla de partida.
+
 ## Páginas de esta sección
 
 - [Leer y escribir audio de medición](/phonometry/es/io/audio-files/): todo
@@ -84,6 +99,16 @@ etiquetados, pero no se aplica ninguna matriz de conversión FuMa a AmbiX:
 el canal 0 de un archivo FuMa lleva W a −3 dB, y convertirlo en una presión
 sin decirlo sería un cambio de nivel silencioso. Es exactamente la clase de
 valor por defecto que este módulo existe para rechazar.
+</ScopeClaim>
+
+<ScopeClaim status="not-covered">
+**La biblioteca no trae datos de fabricantes.** Una ficha técnica se revisa
+sin cambiar de título, sus condiciones rara vez permiten copiarla, y el valor
+que necesita un proyecto es el de la ficha con la que se especificó, así que
+sus catálogos se quedan en sus archivos y en los objetos que devuelve
+`read_catalogue`: la biblioteca no guarda ninguna copia ni abre ningún
+enlace que nombre un archivo. Por lo mismo, una tabla de un fabricante pegada
+en una issue o en una pull request nunca se incorpora.
 </ScopeClaim>
 </Scope>
 

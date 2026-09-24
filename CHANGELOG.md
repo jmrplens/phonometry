@@ -9,6 +9,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- **Read a catalogue of your own from a JSON file, and write one back.** The
+  library publishes the tables of its books and standards and nothing a
+  manufacturer prints, so a data sheet, a declaration of performance, a test
+  report or a measurement of your own lives in a catalogue file of yours.
+  `io.read_catalogue(path, row_type=...)` reads one table from a versioned
+  JSON document into rows of the class you pass, the same classes the
+  `PUBLISHED_*` catalogues hand out, each built through
+  `io.CatalogueRow.from_printed` as the packaged rows are, so `medium()`,
+  `printed()`, `why_missing()` and every other method behave alike on both;
+  `io.parse_catalogue` reads the same from text or from a mapping in memory.
+  The document carries an `io.Provenance`: the kind of document (one of
+  `io.PROVENANCE_KINDS`), its version, the day it was consulted and, where a
+  row narrows it, the page, the table, the laboratory, the report and the
+  standard of each test. Every row keeps it in its new `provenance` field, its
+  `source` is composed from it, and a refusal names the document by its kind:
+  "the datasheet prints a lower bound of 5 kPa s/m2 (5000 Pa s/m2) and no
+  value", quoting the sheet's own figure before the converted one. A cell may
+  be written in another unit of the same kind as its field (`thickness_m` for
+  `thickness_mm`, `flow_resistivity_kpa_s_m2`, `youngs_modulus_gpa`,
+  `temperature_k`), as a value or as the key of a hedge, and
+  `CatalogueRow.from_printed` now converts it wherever it stands, on its
+  digits with the exact factor, rounded once and recorded in `converted`; a
+  unit no family holds, or a name such as `specific_flow_resistance_pa_s_mm`
+  whose unit is compound, is refused rather than scaled. What comes back is an
+  `io.Catalogue`, a read-only mapping keyed `"<catalogue>/<key>"` that joins a
+  published catalogue with `|` and refuses a key both hold; a catalogue of
+  yours can never take a name of the packaged form (a four-digit year
+  followed by a word), so the keys of the two never meet. Every problem in a
+  file (a text where a number goes, an unknown field with the name most like
+  it, a `NaN`, a name written twice, a reserved name, a newer schema) is found
+  before any row is built and raised together in one `io.CatalogueError`,
+  whose new `issues` holds an `io.CatalogueIssue` for each, with its JSON
+  pointer, its row and its field; what is only worth a second look is kept in
+  `Catalogue.notes` with one `io.CatalogueWarning`. The file never runs
+  anything: only `json` reads it, and the class it names is compared with
+  yours and never imported. `io.write_catalogue` writes rows as a file that
+  reads back into the same rows, a published table among them as a template
+  to start from; every table of every published catalogue is written, read
+  back and compared field for field in the test suite. The `io` section of
+  the documentation is now "Files", since it holds more than audio.
+
 - **Sound power in the 16 kHz octave band (ISO 9295).** The general sound
   power methods stop at the 10 kHz one-third-octave band, and a printer's
   paper noise or a power supply's whine sits above it. The new

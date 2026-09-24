@@ -40,8 +40,8 @@ head:
           {
             "@type": "ListItem",
             "position": 4,
-            "name": "Archivos de audio",
-            "description": "Audio de medición de entrada y salida: lectura calibrada, procedencia, flujo por bloques, escritura BWF y conversión sin pérdidas.",
+            "name": "Archivos",
+            "description": "Audio de medición de entrada y salida: lectura calibrada, procedencia, flujo por bloques, escritura BWF y conversión sin pérdidas; catálogos de materiales propios.",
             "url": "https://jmrplens.github.io/phonometry/es/io/"
           },
           {
@@ -302,7 +302,7 @@ de cada llamante.
   el módulo de Young desde cada una, y el producto de espesor por frecuencia
   crítica que permite comprobar dos libros uno contra otro sin coste.
 
-## [Archivos de audio](/phonometry/es/io/)
+## [Archivos](/phonometry/es/io/)
 
 Audio de medición de entrada y salida. La capa de archivos de la cadena de
 señal: todo WAV lineal que escribe un sonómetro o un grabador de campo
@@ -310,7 +310,9 @@ vuelve como un `Signal` calibrado con su procedencia `bext`, las
 grabaciones largas fluyen por bloques a través de los filtros con estado, y
 lo que sale de la biblioteca es un BWF con su procedencia y un sidecar que
 transporta la calibración. Implementa EBU Tech 3285 e ITU-R BS.2088; los archivos FLAC siguen la
-RFC 9639.
+RFC 9639. Un catálogo de materiales propio, sacado de una ficha técnica o de
+un informe de ensayo, se lee de un archivo JSON en las mismas filas que
+entregan todos los catálogos publicados.
 
 - [Leer y escribir audio de medición](/phonometry/es/io/audio-files/): todo
   el flujo en una página ejecutable, del WAV del sonómetro al nivel

@@ -1,4 +1,4 @@
-# phonometry: Audio files
+# phonometry: Files
 
 Part of https://jmrplens.github.io/phonometry/llms.txt. Full text of the pages in this area.
 
@@ -7,7 +7,7 @@ Part of https://jmrplens.github.io/phonometry/llms.txt. Full text of the pages i
 <!-- source: docs/io/index.md | canonical: https://jmrplens.github.io/phonometry/io/ -->
 Source: https://jmrplens.github.io/phonometry/io/
 
-# Audio files
+# Files
 
 Every other area of this library starts from an array that is already in
 memory; this one is about the files the array comes from and returns to. Its
@@ -47,6 +47,20 @@ library's own BS.1770 implementation, and puts the calibration in a small
 versioned JSON sidecar beside the audio: the one number no audio container
 has a field for, made to travel.
 
+The other files the library reads and writes are catalogues of materials.
+The library publishes the tables of its books and standards and none of a
+manufacturer's, so a data sheet, a declaration of performance or a test
+report of your own goes in a JSON file of yours, with the provenance of the
+document: its kind, its version, the day you consulted it, the laboratory
+and the report. `read_catalogue` reads that file into rows of the same
+classes every published catalogue hands out, so a porous core from your data
+sheet goes into `medium()` as one from a book does, and a figure the sheet
+prints in kPa·s/m² or in centimetres is converted on its digits and recorded
+as the sheet printed it. Every problem in a file is reported at once, each
+at its place in the file, and nothing the file names is ever imported.
+`write_catalogue` writes a catalogue back, and writes a published table in
+the same form, as a template to start from.
+
 ## Pages in this section
 
 - [Reading and writing measurement audio](https://jmrplens.github.io/phonometry/io/audio-files/): the
@@ -78,6 +92,14 @@ FuMa-to-AmbiX conversion matrix is applied: channel 0 of a FuMa file
 carries W at −3 dB, and turning that into a pressure without saying so
 would be a silent level change. This is exactly the class of default this
 module exists to refuse.
+
+**No manufacturer's data ships with the library.** A data sheet is revised
+under the same title, its terms rarely allow copying it, and the value a
+project needs is the one on the sheet it was specified against, so your
+catalogues stay in your files and in the objects `read_catalogue` hands
+back: the library keeps no copy and opens no link a file names. For the same
+reason a table of a manufacturer pasted into an issue or a pull request is
+never merged.
 
 ## Before and after these pages
 

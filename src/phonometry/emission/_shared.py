@@ -69,6 +69,9 @@ _S0 = 1.0  #: Reference area, in square metres (ISO 3744, 8.2.5).
 #: Reference static pressure of the ISO 3740 family, in kilopascals
 #: (ISO 3741:2010 clause 4; ISO 3747:2010 Annex C prints 1,013 25 x 10^5 Pa).
 _PS0 = 101.325
+#: Reference temperature of the C1 reference-quantity correction, in kelvin
+#: (ISO 3741:2010 clause 9.1.4).
+_THETA0 = 314.0
 #: Reference temperature of the C2 radiation-impedance correction, in kelvin
 #: (ISO 3741:2010 clause 9.1.4, ISO 3747:2010 Annex C).
 _THETA1 = 296.0
@@ -201,6 +204,19 @@ def _validate_meteorology(temperature_c: float, static_pressure_kpa: float) -> N
     if not np.isfinite(static_pressure_kpa) or static_pressure_kpa <= 0.0:
         msg = "'static_pressure_kpa' must be finite and positive."
         raise ValueError(msg)
+
+
+def _c1_correction(temperature_c: float, static_pressure_kpa: float) -> float:
+    """Reference-quantity correction ``C1`` (ISO 3741:2010 clause 9.1.4).
+
+    Read by the ISO 3741 direct method and by the two ISO 9295:2015 direct
+    methods, whose clause 10.1 carries their result to the reference
+    meteorological conditions "de acuerdo con la Norma ISO 3741".
+    """
+    return float(
+        -10.0 * np.log10(static_pressure_kpa / _PS0)
+        + 5.0 * np.log10((273.15 + temperature_c) / _THETA0)
+    )
 
 
 def _c2_correction(temperature_c: float, static_pressure_kpa: float) -> float:

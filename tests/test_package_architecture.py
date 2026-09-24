@@ -53,6 +53,10 @@ ALLOWED_EDGES: set[tuple[str, str]] = {
     # so it reuses the A-weighting corrections and the background
     # correction of the sound power measurement methods it cites
     ("noise_control", "emission"),
+    # ISO 9295:2015 Annex A is the ISO 9613-1 air absorption written in
+    # nepers per metre and evaluated up to 22,4 kHz, so the high-frequency
+    # sound power methods read the one implementation of it
+    ("emission", "environment"),
     # the level functions detect io.Signal so a read measurement carries
     # its own fs and calibration; io imports no toolbox code back at
     # module level, so import stays acyclic

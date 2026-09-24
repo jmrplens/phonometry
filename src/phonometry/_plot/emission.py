@@ -36,6 +36,7 @@ if TYPE_CHECKING:
     )
     from ..emission.sound_power import SoundEnergyResult, SoundPowerResult
     from ..emission.sound_power_anechoic import PrecisionSoundPowerResult
+    from ..emission.sound_power_high_frequency import HighFrequencySoundPowerResult
     from ..emission.sound_power_in_duct import InDuctSoundPowerResult
     from ..emission.sound_power_in_situ import InSituSoundPowerResult
     from ..emission.sound_power_intensity import (
@@ -122,6 +123,15 @@ _STRINGS: dict[str, str] = {
     "upper bound: the background is too close": "cota superior: el fondo está demasiado cerca",
     "grade 2 (engineering)": "grado 2 (ingeniería)",
     "grade 3 (survey)": "grado 3 (control)",
+    "Sound power $L_W$": "Potencia acústica $L_W$",
+    r"Mean room level $\overline{L_p}$": r"Nivel medio en la sala $\overline{L_p}$",
+    "Frequency [kHz]": "Frecuencia [kHz]",
+    "Tone below the reporting range": "Tono fuera del intervalo a informar",
+    "10 dB below the highest tone": "10 dB bajo el tono más alto",
+    "ISO 9295 sound power in the 16 kHz octave, {method}": "Potencia acústica ISO 9295 en la octava de 16 kHz, {method}",
+    "ISO 9295 tonal sound power, {method}": "Potencia acústica tonal ISO 9295, {method}",
+    "direct method": "método directo",
+    "reference source": "fuente de referencia",
 }
 
 
@@ -476,6 +486,110 @@ def plot_in_situ_sound_power(
     if handles or "label" in kwargs:
         ax.legend(handles=handles or None, loc="best", fontsize="small")
     ax.grid(visible=True, axis="y", alpha=0.3)
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_high_frequency_sound_power(
+    result: HighFrequencySoundPowerResult,
+    ax: Axes | None = None,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    r"""ISO 9295 band levels, with the mean room level they came from.
+
+    Broadband noise is one bar of :math:`L_W` per one-third octave band, with
+    :math:`\overline{L_p}` beside it so the room term of Formula (6) (or the
+    reference-source term of Formula (8)) reads as the gap between the two.
+    A tonal determination is one stem per tone on a frequency axis in
+    kilohertz, with the line 10 dB below the highest tone: clause 13 c)
+    reports every tone above it, and the tones below it are drawn muted.
+
+    :param result: A
+        :class:`~phonometry.emission.sound_power_high_frequency.HighFrequencySoundPowerResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the :math:`L_W` bars (broadband) or stem
+        markers (tonal).
+    :return: The axes.
+    """
+    from .._i18n import localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    levels = np.asarray(result.sound_power_level, dtype=np.float64)
+    mean = np.asarray(result.mean_pressure_level, dtype=np.float64)
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
+    method = _t(
+        "direct method" if result.method == "direct" else "reference source",
+        language,
+    )
+    if result.tonal:
+        khz = freqs / 1000.0
+        reported = np.asarray(result.within_10_db_of_maximum, dtype=bool)
+        floor = float(np.min(np.concatenate([levels, mean]))) - 10.0
+        colours = [_C_PRIMARY if keep else _C_MUTED for keep in reported]
+        ax.vlines(khz, floor, levels, colors=colours, linewidth=2.0)
+        style_default(kwargs, "color", colours)
+        kwargs.setdefault("zorder", 3)
+        kwargs.setdefault("label", _t("Sound power $L_W$", language))
+        ax.scatter(khz, levels, **kwargs)
+        ax.scatter(
+            khz,
+            mean,
+            marker="_",
+            s=160,
+            color=_C_SECONDARY,
+            zorder=3,
+            label=_t(r"Mean room level $\overline{L_p}$", language),
+        )
+        threshold = float(np.max(levels)) - 10.0
+        ax.axhline(
+            threshold,
+            color=_C_REFERENCE,
+            linestyle="--",
+            linewidth=1.0,
+            label=_t("10 dB below the highest tone", language),
+        )
+        if not np.all(reported):
+            ax.scatter(
+                [],
+                [],
+                color=_C_MUTED,
+                label=_t("Tone below the reporting range", language),
+            )
+        ax.set_ylim(bottom=floor)
+        span = max(float(np.ptp(khz)), 1.0)
+        ax.set_xlim(float(np.min(khz)) - 0.1 * span, float(np.max(khz)) + 0.1 * span)
+        ax.set_xlabel(_t("Frequency [kHz]", language))
+        ax.set_title(
+            _t("ISO 9295 tonal sound power, {method}", language, method=method)
+        )
+    else:
+        positions = _band_axis(ax, freqs, language=language)
+        style_default(kwargs, "color", _C_PRIMARY)
+        kwargs.setdefault("label", _t("Sound power $L_W$", language))
+        kwargs.setdefault("width", 0.6)
+        ax.bar(positions, levels, **kwargs)
+        ax.plot(
+            positions,
+            mean,
+            marker="o",
+            linestyle="",
+            color=_C_SECONDARY,
+            label=_t(r"Mean room level $\overline{L_p}$", language),
+        )
+        low = float(np.min(np.concatenate([levels, mean])))
+        ax.set_ylim(bottom=low - 10.0)
+        ax.set_title(
+            _t(
+                "ISO 9295 sound power in the 16 kHz octave, {method}",
+                language,
+                method=method,
+            )
+        )
+    ax.set_ylabel(_t("Level [dB]", language))
+    ax.grid(visible=True, axis="y", alpha=0.3)
+    place_legend_clear(ax.legend(fontsize="small"))
     localize_axes(ax, language)
     return ax
 

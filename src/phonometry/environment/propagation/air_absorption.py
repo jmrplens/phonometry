@@ -144,8 +144,16 @@ def _validate(
     temperature_c: float,
     relative_humidity_percent: float,
     atmospheric_pressure_kpa: float,
+    *,
+    frequency_scope: tuple[float, float, str] | None = None,
 ) -> None:
-    """Raise on non-physical inputs; warn on out-of-tabulated-range inputs."""
+    """Raise on non-physical inputs; warn on out-of-tabulated-range inputs.
+
+    ``frequency_scope`` is ``(low, high, description)`` of the frequency range
+    the caller answers for, when it is wider than the ISO 9613-1 table: ISO
+    9295:2015 Annex A evaluates the same Eq. (5) up to 22,4 kHz, the top of the
+    16 kHz octave band, so its caller passes that range and its own name.
+    """
     if np.any(freqs <= 0.0):
         msg = "'frequencies' must be positive."
         raise ValueError(msg)
@@ -174,11 +182,15 @@ def _validate(
             AtmosphericAbsorptionWarning,
             stacklevel=3,
         )
-    lo_f, hi_f = _FREQ_RANGE
+    lo_f, hi_f, scope = (
+        (*_FREQ_RANGE, "tabulated range of ISO 9613-1:1993")
+        if frequency_scope is None
+        else frequency_scope
+    )
     if np.any(freqs < lo_f) or np.any(freqs > hi_f):
         warnings.warn(
             f"One or more frequencies are outside the {lo_f:g}..{hi_f:g} Hz "
-            "tabulated range of ISO 9613-1:1993; the result is advisory.",
+            f"{scope}; the result is advisory.",
             AtmosphericAbsorptionWarning,
             stacklevel=3,
         )
@@ -242,7 +254,32 @@ def air_attenuation(
     if exact_midband:
         freqs = _exact_midband(freqs)
 
-    temperature_k = temperature_c + _KELVIN
+    f2, bracket = _pure_tone_terms(
+        freqs,
+        temperature_c + _KELVIN,
+        relative_humidity_percent,
+        atmospheric_pressure_kpa,
+    )
+    alpha = _EIGHT_686 * f2 * bracket
+    return np.asarray(alpha, dtype=np.float64)
+
+
+def _pure_tone_terms(
+    freqs: NDArray[np.float64],
+    temperature_k: float,
+    relative_humidity_percent: float,
+    atmospheric_pressure_kpa: float,
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
+    r"""The two factors of Eq. (5) that do not carry the decibel.
+
+    Returns :math:`f^2` and the braced sum of the classical, rotational and
+    vibrational terms, so that :math:`\alpha = 8{,}686\, f^2\, \{\ldots\}` in
+    decibels per metre (ISO 9613-1:1993, Eq. (5)) and :math:`f^2\, \{\ldots\}`
+    is the same coefficient in nepers per metre, which is how ISO 9295:2015
+    Annex A prints it (Formula (A.5)). The temperature is taken in kelvins,
+    already converted, so the conversion from Celsius is written once, by the
+    caller that owns it. Nothing is validated here.
+    """
     pa_over_pr = atmospheric_pressure_kpa / _PR
     t_ratio = temperature_k / _T0
 
@@ -262,8 +299,7 @@ def air_attenuation(
         0.01275 * np.exp(-2239.1 / temperature_k) / (fro + f2 / fro)
         + 0.1068 * np.exp(-3352.0 / temperature_k) / (frn + f2 / frn)
     )
-    alpha = _EIGHT_686 * f2 * (classical + vibrational)
-    return np.asarray(alpha, dtype=np.float64)
+    return f2, np.asarray(classical + vibrational, dtype=np.float64)
 
 
 def air_attenuation_m(

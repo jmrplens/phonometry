@@ -100,10 +100,10 @@ from .._internal.validation import (
     require_same_length,
 )
 from ._shared import (
-    _PS0,
     SoundPowerWarning,
     _a_weighting_corrections,
     _background_exposure,
+    _c1_correction,
     _c2_correction,
     _single_event_mean,
     _validate_event_count,
@@ -111,7 +111,6 @@ from ._shared import (
 )
 
 _A0 = 1.0  #: Reference absorption area, in square metres (ISO 3741, Eq. 20).
-_THETA0 = 314.0  #: Reference temperature for C1, in K (ISO 3741 clause 9.1.4).
 #: K1 qualification edges: bands at or below the low edge or at or above the
 #: high edge carry the relaxed 6 dB lower criterion (ISO 3741:2010, 9.1.2).
 _K1_EDGE_LOW_HZ = 200.0
@@ -300,14 +299,6 @@ def _speed_of_sound(temperature_c: float) -> float:
     clause 9.1.4).
     """
     return float(20.05 * np.sqrt(273.0 + temperature_c))
-
-
-def _c1_correction(temperature_c: float, static_pressure_kpa: float) -> float:
-    """Reference-quantity correction ``C1`` (ISO 3741:2010 clause 9.1.4)."""
-    return float(
-        -10.0 * np.log10(static_pressure_kpa / _PS0)
-        + 5.0 * np.log10((273.15 + temperature_c) / _THETA0)
-    )
 
 
 def _mean_level(levels: np.ndarray) -> np.ndarray:

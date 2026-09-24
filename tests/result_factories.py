@@ -535,6 +535,29 @@ def _transfer_matrix() -> tuple[ph.materials.TransferMatrix, np.ndarray, float]:
     return tm, f, rho_c
 
 
+def _high_frequency_power() -> ph.emission.HighFrequencySoundPowerResult:
+    """ISO 9295 direct method over the three thirds of the 16 kHz octave."""
+    freqs = np.array([12500.0, 16000.0, 20000.0])
+    room = ph.emission.room_constant_from_air_absorption(
+        freqs,
+        volume_m3=200.0,
+        surface_area_m2=210.0,
+        temperature_c=23.0,
+        relative_humidity_percent=50.0,
+    )
+    orientations = np.array(
+        [
+            [62.0, 60.0, 55.0],
+            [63.0, 61.0, 56.0],
+            [61.5, 60.5, 54.0],
+            [62.5, 59.5, 55.5],
+        ]
+    )
+    return ph.emission.high_frequency_sound_power(
+        orientations, frequencies_hz=freqs, room_constant_m2=room
+    )
+
+
 def _in_situ_power() -> ph.emission.InSituSoundPowerResult:
     """ISO 3747 in situ comparison at four positions, one band an upper bound."""
     freqs = np.array([250.0, 500.0, 1000.0, 2000.0])

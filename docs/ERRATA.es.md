@@ -1955,10 +1955,11 @@ dos ediciones con las mismas entradas y en el mismo orden.
   u_\mathrm{c}^4 / (0{,}03^4/2) = 29{,}98$, ambos como se imprimen, y el factor
   de Student para el 95 % con 29,98 grados de libertad es $t_{0{,}975}(29{,}98)
   = $ **2,04**, no 2,11; 2,11 es el factor para unos 17 grados de libertad. La
-  incertidumbre expandida que resulta es $2{,}04 \times 0{,}0590 = 0{,}120$ dB,
-  que con su dígito de guarda se imprimiría **0,12(1)**; el 0,12(4) impreso es
-  $2{,}11 \times 0{,}0590$. Con los dos decimales con que se da la corrección
-  (componente a14), ambos se leen 0,12 dB.
+  incertidumbre expandida que resulta es $t_{0{,}975}(29{,}98) \times
+  u_\mathrm{c} = 2{,}042\,3 \times 0{,}059\,031 = 0{,}120\,56$ dB, que con su
+  dígito de guarda se imprimiría **0,12(1)**; el 0,12(4) impreso es
+  $2{,}11 \times 0{,}0590 = 0{,}124\,49$ dB. Con los dos decimales con que se
+  da la corrección (componente a14), ambos se leen 0,12 dB.
 - **Evidencia:** el presupuesto recalculado a partir de los quince valores y
   divisores impresos, y el cuantil de Student evaluado en los grados de
   libertad impresos. Verificado en la página 40 del PDF (p. 38 impresa) de
@@ -1966,8 +1967,9 @@ dos ediciones con las mismas entradas y en el mismo orden.
   sin cambios.
 - **Comportamiento de la biblioteca:** `metrology.correction_uncertainty_budget`
   toma el factor de cobertura de los grados de libertad efectivos, aquí 2,042,
-  y la fila de conformidad de la Tabla I.2 fija ese valor, con el impreso
-  señalado como errata
+  y las filas de conformidad de la Tabla I.2 fijan ese factor y la
+  incertidumbre expandida que da, 0,121 dB, con los impresos señalados como
+  errata
   ([`tests/metrology/test_free_field_corrections.py`](../tests/metrology/test_free_field_corrections.py)).
 - **Estado:** sin notificar.
 
@@ -2022,11 +2024,19 @@ dos ediciones con las mismas entradas y en el mismo orden.
   $L_\mathrm{ind4}$ renombrados, así que toman $L_\mathrm{ind3a}$ como el
   sonómetro y $L_\mathrm{ind3b}$ como la referencia, y $L_{p,\mathrm{P1}}$ en
   el sonómetro. Leída con las etiquetas de la propia figura, (E.6) queda a
-  $2(\Delta L_\mathrm{P,SLM} - \Delta L_\mathrm{P,RM})$ de la corrección, el
-  doble de la diferencia entre las dos respuestas de presión, que llega a
-  decibelios por encima de unos pocos kilohercios. O bien la figura, la lista
-  de símbolos y la Tabla I.1 intercambian las dos etiquetas, o lo hacen las
-  fórmulas; la página no puede sostener ambas cosas.
+  $2(\Delta L_\mathrm{P,SLM} - \Delta L_\mathrm{P,RM})$ de la corrección.
+  Son las desviaciones de la indicación de cada canal respecto del nivel en el
+  acoplador, y el método «requires neither absolute measurements nor an
+  absolutely calibrated sound level meter» (E.1, folio impreso 25) mientras el
+  canal de referencia lee «the level of the output voltage from the
+  microphone» (E.2, paso 2, folio impreso 26), así que el error arrastra la
+  diferencia entre las sensibilidades absolutas de los dos canales y está en
+  todas las frecuencias: decenas de decibelios cuando un canal lee en
+  decibelios re 1 V y el otro en nivel de presión sonora. Solo cuando los dos
+  canales leen nivel de presión sonora se reduce al doble de la diferencia
+  entre las dos respuestas de presión. O bien la figura, la lista de símbolos
+  y la Tabla I.1 intercambian las dos etiquetas, o lo hacen las fórmulas; la
+  página no puede sostener ambas cosas.
 - **Evidencia:** (E.1) a (E.3B) sustituidas en (E.4), que no se reduce a
   $\Delta L_\mathrm{F,SLM} - \Delta L_\mathrm{P,SLM}$ con las etiquetas de la
   figura y sí con las de las fórmulas. Verificado en las páginas 27 y 28 del

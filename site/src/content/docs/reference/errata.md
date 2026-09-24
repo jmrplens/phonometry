@@ -1845,8 +1845,9 @@ in the same order.
   (0{,}03^4/2) = 29{,}98$, both as printed, and the Student factor for 95 % at
   29,98 degrees of freedom is $t_{0{,}975}(29{,}98) = $ **2,04**, not 2,11;
   2,11 is the factor for about 17 degrees of freedom. The expanded uncertainty
-  that follows is $2{,}04 \times 0{,}0590 = 0{,}120$ dB, printed with its guard
-  digit **0,12(1)**; the printed 0,12(4) is $2{,}11 \times 0{,}0590$. To the two
+  that follows is $t_{0{,}975}(29{,}98) \times u_\mathrm{c} = 2{,}042\,3 \times
+  0{,}059\,031 = 0{,}120\,56$ dB, printed with its guard digit **0,12(1)**;
+  the printed 0,12(4) is $2{,}11 \times 0{,}0590 = 0{,}124\,49$ dB. To the two
   decimals the correction is quoted to (component a14), both read 0,12 dB.
 - **Evidence:** the budget recomputed from the fifteen printed values and
   divisors, and the Student quantile evaluated at the printed degrees of
@@ -1854,8 +1855,8 @@ in the same order.
   English text of EN 62585:2012, which is IEC 62585:2012 unchanged.
 - **Library behaviour:** `metrology.correction_uncertainty_budget` takes the
   coverage factor from the effective degrees of freedom, 2,042 here, and the
-  conformance row on Table I.2 pins that value with the printed one named as
-  the erratum
+  conformance rows on Table I.2 pin that factor and the expanded uncertainty
+  it gives, 0,121 dB, with the printed ones named as the erratum
   ([`tests/metrology/test_free_field_corrections.py`](https://github.com/jmrplens/phonometry/blob/main/tests/metrology/test_free_field_corrections.py)).
 - **Status:** unreported.
 
@@ -1908,10 +1909,18 @@ in the same order.
   renamed, so they take $L_\mathrm{ind3a}$ as the meter and $L_\mathrm{ind3b}$
   as the reference, and $L_{p,\mathrm{P1}}$ at the meter. Read with the
   figure's own labels, (E.6) comes out $2(\Delta L_\mathrm{P,SLM} -
-  \Delta L_\mathrm{P,RM})$ away from the correction, twice the difference of
-  the two pressure responses, which reaches decibels above a few kilohertz.
-  Either the figure, the symbol list and Table I.1 exchange the two labels, or
-  the formulas do; the page cannot hold both.
+  \Delta L_\mathrm{P,RM})$ away from the correction. Those are the deviations
+  of each channel's indication from the level in the coupler, and the method
+  "requires neither absolute measurements nor an absolutely calibrated sound
+  level meter" (E.1, printed folio 25) while the reference channel reads "the
+  level of the output voltage from the microphone" (E.2 step 2, printed
+  folio 26), so the error carries the difference of the two channels'
+  absolute sensitivities and is there at every frequency, tens of decibels
+  when one channel reads in decibels re 1 V and the other in sound pressure
+  level. Only when both channels read sound pressure level does it reduce to
+  twice the difference of the two pressure responses. Either the figure, the
+  symbol list and Table I.1 exchange the two labels, or the formulas do; the
+  page cannot hold both.
 - **Evidence:** (E.1) to (E.3B) substituted into (E.4), which does not
   reduce to $\Delta L_\mathrm{F,SLM} - \Delta L_\mathrm{P,SLM}$ with the
   figure's labels and does with the formulas'. Verified on PDF pages 27 and 28

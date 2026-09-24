@@ -53,29 +53,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   marks the lines with |T| > 0.1 as not valid. `vibration.driving_point_stiffness`
   turns input force and acceleration into k1,1 (Formula (3)), finds the upper
   limiting frequency of 6.2, 2 dB below the 1 Hz to 20 Hz value, and averages
-  only the lines below it, where Formula (7) makes k1,1 stand for k2,1 within
-  2 dB; given the output or the unwanted accelerations it checks Inequalities
-  (1) and (2) line by line and excludes the lines that fail.
-  `vibration.check_blocked_output`, `vibration.check_unwanted_input` and
+  only the lines at or below it, where 8.3 states that k1,1 stands for k2,1
+  within 2 dB (Formula (7)); given the output or the unwanted accelerations it
+  checks Inequalities (1) and (2) line by line and excludes the lines that
+  fail. `vibration.check_blocked_output`, `vibration.check_unwanted_input` and
   `vibration.check_output_mass` judge the 20 dB, the 15 dB and the output-mass
   limit of Part 4 Inequality (3), warning where they fail;
   `vibration.effective_blocking_mass` is Part 4 Formula (6) with the f3 of its
   Inequality (5); `vibration.driving_point_uncertainty` builds the Annex B
-  budget of Part 5 on `metrology.combine_uncertainty`, with U = 2u. Each result
-  has `.plot()`. Neither part prints a worked example, so the conformance rows
-  are closed forms: a band of identical lines averages to itself, a massless
-  spring gives a flat stiffness and no f_UL, a spring under a force plate gives
-  the f_UL of its closed form, and the output mass on its bound biases the
-  force by 0.5 dB. Two defects in the prints are registered in the errata: the
-  0,5 dB of Part 4 NOTE 1 printed as "05 dB", and the linearity term of
-  Part 5 Annex B (and the test-rig and linearity terms of Part 2) rounded to
-  0,5 dB from 0,433 dB. The transfer-stiffness guide covers both parts in both
-  languages.
+  budget of Part 5 on `metrology.combine_uncertainty`, with U = 2u, from the
+  expressions B.3.4 to B.3.6 print (Table B.1 rounds them up to one decimal,
+  and any term can be passed in to reproduce it). Each result has `.plot()`.
+  Neither part prints a worked example, so the conformance rows are closed
+  forms: a band of identical lines averages to itself, a massless spring gives
+  a flat stiffness and no f_UL, a spring under a force distribution plate
+  gives the f_UL of its closed form, and the output mass on its bound biases
+  the force by 0,51 to 0,54 dB, the 0,5 dB of Part 4 NOTE 1. Two defects in the
+  prints are registered in the errata: that 0,5 dB printed as "05 dB" in
+  Part 4, and the Part 2 clause 7.6.1 that sends the unidirectionality pre-run
+  to the blocked-output inequality of 6.1 instead of the unwanted-input one of
+  6.4. The transfer-stiffness guide covers both parts in both languages.
 - **The indirect method warns with its own class (ISO 10846-3).** The
   |T| > 0.1 advisory of `vibration.transfer_stiffness_indirect` is now a
   `vibration.TransferStiffnessWarning`, a subclass of `PhonometryWarning`, so
   the whole ISO 10846 family can be filtered with one rule.
-
+- **The ISO 10846 test-report fiche prints the band levels and skips the lines
+  the part excludes.** `TransferStiffnessResult.report()` now adds the
+  one-third-octave band levels the test report of ISO 10846-2 (9 m)) and
+  ISO 10846-3 (10 j)) presents, with the line count in place of a level for a
+  band of fewer than five valid lines, and reads its low-frequency headline at
+  the lowest valid line: an indirect result used to box the inflated stiffness
+  of the resonance region that Inequality (2) rules out. `.plot()` draws the
+  excluded lines apart, and `report()` refuses a result with no valid line.
 - **What an active noise reduction earmuff adds, its uncertainty and where it
   stops being linear (ISO 4869-6:2019).** `hearing.active_insertion_loss` takes
   the levels at both ears with the circuit off and on (or the insertion loss

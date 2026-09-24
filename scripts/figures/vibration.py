@@ -235,10 +235,20 @@ def generate_transfer_stiffness(output_dir: str) -> None:
     )  # ISO 10846-3 Eq. (1)
 
     # Where the standard's own criterion starts holding: |T| <= 0.1
-    # (Inequality 2), not the 3 f0 rule of thumb.
+    # (Inequality 2), not the 3 f0 rule of thumb. The crossing is interpolated
+    # in log |T| against log f between the two lines around it, so the number
+    # printed belongs to the element (187.5 Hz) and not to the grid, whose
+    # first line past it sits a step higher.
     magnitude_t = np.abs(np.asarray(t, dtype=np.complex128))
     valid = np.flatnonzero(magnitude_t <= 0.1)
-    f_valid = float(freq[valid[0]]) if valid.size else float(freq[-1])
+    if valid.size and valid[0] > 0:
+        above, below = int(valid[0]) - 1, int(valid[0])
+        log_t = np.log10(magnitude_t[[above, below]])
+        log_f = np.log10(freq[[above, below]])
+        fraction = (-1.0 - log_t[0]) / (log_t[1] - log_t[0])
+        f_valid = float(10.0 ** (log_f[0] + fraction * (log_f[1] - log_f[0])))
+    else:
+        f_valid = float(freq[valid[0]]) if valid.size else float(freq[-1])
     level_error = vibration.transfer_stiffness_level(
         k_indirect
     ) - vibration.transfer_stiffness_level(k_true)
@@ -284,7 +294,7 @@ def generate_transfer_stiffness(output_dir: str) -> None:
     info = [
         "Kelvin-Voigt: $k$ = 1 MN/m, $c$ = 120 N·s/m",
         rf"blocking mass $m_2$ = 8 kg,  $f_0$ = {f0:.1f} Hz",
-        rf"$|T|$ falls to 0.1 at {f_valid:.0f} Hz",
+        rf"$|T|$ falls to 0.1 at {f_valid:.1f} Hz",
         "shaded: Inequality (2) not met → no result",
     ]
     ax.text(
@@ -395,10 +405,10 @@ def generate_driving_point_stiffness(output_dir: str) -> None:
     from phonometry import vibration
 
     # A 1 MN/m element with a 5 % loss factor, driven through a 2 kg force
-    # plate: the plate's inertia is measured with the element, so the input
-    # force reads k1,1 = k2,1 - w^2 m0 and falls away from the transfer
-    # stiffness as the frequency rises. Lines every 0.2 Hz, as clause 7.5
-    # asks below 20 Hz.
+    # distribution plate between the input force transducers and the element:
+    # the plate's inertia is measured with the element, so the input force
+    # reads k1,1 = k2,1 - w^2 m_p and falls away from the transfer stiffness as
+    # the frequency rises. Lines every 0.2 Hz, as clause 7.5 asks below 20 Hz.
     k, eta, plate = 1.0e6, 0.05, 2.0
     freq = np.arange(1.0, 200.0, 0.2)
     w = 2.0 * np.pi * freq
@@ -471,7 +481,7 @@ def generate_driving_point_stiffness(output_dir: str) -> None:
         0.95,
         "\n".join(
             [
-                "$k_{2,1}$ = 1 MN/m, $\\eta$ = 0.05, force plate 2 kg",
+                "$k_{2,1}$ = 1 MN/m, $\\eta$ = 0.05, force distribution plate 2 kg",
                 rf"$f_\mathrm{{UL}}$ = {f_ul:.1f} Hz (clause 6.2)",
                 "shaded: above $f_\\mathrm{UL}$, not evaluated",
             ]

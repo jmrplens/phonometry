@@ -899,6 +899,40 @@ in the same order.
   retained because the library cites the 2006 edition, whose print carries the
   defect; the 2017 edition stands as the confirmation.
 
+## ISO 10846-2:2008, 7.6.1 (the unidirectionality pre-run cross-referenced to 6.1, Inequality (1))
+
+- **Location:** clause 7.6.1, "General", the paragraph on the pre-run that
+  checks the direction of the input motion.
+- **The print:** "A further pre-run shall be performed to check that the
+  acceleration in the excitation direction exceeds the acceleration in other
+  directions. Measurement results, which do not meet the condition of **6.1,
+  Inequality (1)**, shall be excluded from the evaluation of the dynamic
+  stiffness function."
+- **The problem:** 6.1, Inequality (1), is the blocked-output condition
+  $\Delta L_{1,2} = L_{a1} - L_{a2} \geqslant 20$ dB, a level difference
+  between the input and the output sides, which a check of the directions at
+  the input cannot test. The condition the pre-run tests is 6.4, "Unwanted
+  input vibrations", Inequality (3),
+  $L_{a(\mathrm{excitation})} - L_{a(\mathrm{unwanted})} \geqslant 15$ dB.
+  The same sentence in the companion parts points to their own
+  unwanted-input clause: ISO 10846-3:2002 7.5.1 to 6.4, ISO 10846-4:2003
+  7.6.1 to 6.5 and ISO 10846-5:2008 7.6.1 to its Inequality (2). Followed as
+  printed, the sentence excludes the lines where the output is not blocked
+  and keeps those where the input moves in the wrong direction.
+- **Evidence:** the reference read against the clauses it can mean. Verified
+  on PDF page 24 (printed p. 16, 7.6.1), PDF page 20 (printed p. 12, 6.1) and
+  PDF page 21 (printed p. 13, 6.4) of BS EN ISO 10846-2:2008, the UK
+  implementation of ISO 10846-2:2008 (second edition); the companion
+  sentences on PDF page 33 (printed p. 23) of BS EN ISO 10846-3:2002, PDF
+  page 36 (printed p. 26) of BS EN ISO 10846-4:2003 and PDF page 23 (printed
+  p. 15) of BS EN ISO 10846-5:2009.
+- **Library behaviour:** follows the intended target. `check_unwanted_input`
+  judges the unidirectionality of Part 2 against the 15 dB of its
+  Inequality (3), and `check_blocked_output` keeps the 20 dB of
+  Inequality (1) for the output side. The reference changes no number the
+  library reports.
+- **Status:** unreported (cross-reference defect, no numerical consequence).
+
 ## ISO 10846-4:2003, 6.2 NOTE 1 (the bound of Inequality (3) printed as 05 dB)
 
 - **Location:** clause 6.2, "Measurement of blocking force in the direct
@@ -915,46 +949,14 @@ in the same order.
   supports (its Inequality (2)), prints the same note with the comma in
   place, "$L_{F_2'} - L_{F_2} \leqslant 0{,}5$ dB".
 - **Evidence:** the note beside the inequality it restates, and the same note
-  in the companion part; the note was read as an image, not from extracted
-  text. Verified on PDF page 30 (printed p. 20) of BS EN ISO 10846-4:2003, the
-  UK implementation of ISO 10846-4:2003 (first edition), and on PDF page 21
-  (printed p. 13) of BS EN ISO 10846-2:2008.
+  in the companion part. Verified on PDF page 30 (printed p. 20) of BS EN ISO
+  10846-4:2003, the UK implementation of ISO 10846-4:2003 (first edition), and
+  on PDF page 21 (printed p. 13) of BS EN ISO 10846-2:2008.
 - **Library behaviour:** no change required, since the library computes the
   inequality, not the note. `check_output_mass` reports the bias the mass can
   cause, `bias_bound_db`, which is 0,54 dB on the bound, and the conformance
   check "ISO 10846-4:2003 6.2 NOTE 1" holds it against the 0,5 dB the note
   means.
-- **Status:** unreported.
-
-## ISO 10846-5:2008, B.3.6 and Table B.1 (1,5/(2√3) dB rounded to 0,5 dB)
-
-- **Location:** Annex B (informative), B.3.6 "Test for linearity" and the
-  $\delta_\mathrm{lin}$ row of Table B.1.
-- **The print:** "a standard uncertainty
-  $u_\mathrm{lin} = 1{,}5 / (2\sqrt{3}) \approx 0{,}5$ dB", and 0,5 in the
-  standard-uncertainty and uncertainty-contribution columns of the
-  $\delta_\mathrm{lin}$ row.
-- **The problem:** $1{,}5/(2\sqrt{3}) = 0{,}433$ dB, which is 0,4 dB to the
-  tenth, not 0,5 dB. The two other expressions of the same annex agree with
-  their approximations to the nearest tenth, $u_\mathrm{rig} = 1/(2\sqrt{3})
-  = 0{,}289 \approx 0{,}3$ dB (B.3.4) and $u_\mathrm{dps} = 2/\sqrt{3} =
-  1{,}155 \approx 1{,}2$ dB (B.3.5); the annex does not say that it rounds up.
-  With the Table B.1 values and no repeatability spread the combined standard
-  uncertainty is $\sqrt{2{,}12} = 1{,}456$ dB and $U = 2{,}91$ dB; with the
-  expressions it is 1,394 dB and $U = 2{,}79$ dB. ISO 10846-2:2008 carries
-  the same rounding twice, $u_\mathrm{rig} = u_\mathrm{lin} = 1{,}5/(2\sqrt{3})
-  \approx 0{,}5$ dB in B.3.4 and B.3.5 and 0,5 in both rows of its Table B.1.
-- **Evidence:** the expression beside the number it is said to approximate,
-  on the page as printed. Verified on PDF page 33 (printed p. 25) and PDF page
-  32 (printed p. 24, Table B.1) of BS EN ISO 10846-5:2009, the UK
-  implementation of ISO 10846-5:2008 (first edition), and on PDF page 34
-  (printed p. 26) and PDF page 33 (printed p. 25, Table B.1) of BS EN ISO
-  10846-2:2008.
-- **Library behaviour:** `driving_point_uncertainty` defaults to the
-  expressions B.3.4 to B.3.6 print, 0,289, 1,155 and 0,433 dB, and takes any
-  of them as an argument, so the Table B.1 values can be passed in. The
-  conformance checks "ISO 10846-5:2008 Formulas (B.2) and (B.3)" and
-  "ISO 10846-5:2008 Table B.1" hold the two budgets.
 - **Status:** unreported.
 
 ## UNE-EN 15657:2018, Clause 7.1, Formula (14) (reference mass dimensionally inconsistent with the quantity it normalises)

@@ -42,7 +42,7 @@ references:
     year: 2008
     title: "Acoustics and vibration — Laboratory measurement of vibro-acoustic transfer properties of resilient elements — Part 5: Driving point method for determination of the low-frequency transfer stiffness of resilient supports for translatory motion"
     designation: "ISO 10846-5:2008"
-    note: "The driving-point stiffness k₁,₁ of Formula (3), the upper limiting frequency of 6.2, the band averages of Formulas (6) and (7), Inequalities (1) and (2), and the Annex B budget. No worked example either; the linearity term of Table B.1 is 0,5 dB where its expression gives 0,433 dB (see the errata)."
+    note: "The driving-point stiffness k₁,₁ of Formula (3), the upper limiting frequency of 6.2, the band averages of Formulas (6) and (7), Inequalities (1) and (2), and the Annex B budget. No worked example either; Table B.1 rounds its three rectangular terms up to one decimal (the linearity term 1,5/(2√3) = 0,433 dB becomes 0,5 dB), and the library keeps the expressions."
 ---
 
 import ReportPreview from '../../../../components/ReportPreview.astro';
@@ -294,9 +294,10 @@ frequency range on both sides:
 
 Every criterion above is a property of the element and the model. ISO 10846-2
 clauses 6 and 7 add a set of pre-runs and hardware requirements that decide
-whether a result exists at all. The two that are level differences can be
-judged from the measured spectra (section 5); the rest are left to the
-operator.
+whether a result exists at all. One of the two level differences, the
+unidirectionality pre-run, can be judged from the measured spectra
+(`check_unwanted_input`, section 5); the background pre-run and the rest are
+left to the operator.
 
 * **A background pre-run** (7.6.1). With the source switched off, measure
   $L_{F_2}$ and $L_{a_1}$; the source output shall be adjusted so that they
@@ -305,7 +306,10 @@ operator.
   excitation direction shall exceed the unwanted perpendicular components by at
   least **15 dB**, measured at the edge of the excitation mass in the plane of
   the input flange: the accelerometer drawn on the rig figure. Bands that fail
-  are excluded from the result; `check_unwanted_input` judges them.
+  are excluded from the result; `check_unwanted_input` judges them. (Clause
+  7.6.1 sends this exclusion to "6.1, Inequality (1)", the 20 dB of the
+  blocked output; the condition it means is 6.4, Inequality (3), as the
+  companion parts show. See the [errata](/phonometry/reference/errata/).)
 * **Transducers** (6.5, 6.6). Accelerometers and force transducers shall have a
   sensitivity level that is frequency-independent within **0,5 dB**, be
   calibrated at the laboratory temperature, and have a cross-axis sensitivity
@@ -324,11 +328,12 @@ Annex B of Part 2 says what each of these is worth. Its uncertainty budget
 assigns 0,3 dB to signal processing and background noise, **0,5 dB** to
 instrumentation when only the minimum requirements above are met, **0,5 dB** to
 the test rig (from the residual output motion the two inequalities bound), and
-**0,5 dB** to linearity. The three are comparable, which is the argument for
-not skipping any of them: no one of them dominates, so no one of them is
-optional.
+**0,5 dB** to linearity. The last two are rectangular terms over a 1,5 dB
+range, $1{,}5/(2\sqrt{3}) = 0{,}433$ dB each, which the annex rounds up to
+0,5 dB. The three are comparable, which is the argument for not skipping any
+of them: no one of them dominates, so no one of them is optional.
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/transfer_stiffness.svg" alt="Three stacked panels sharing a logarithmic frequency axis for a Kelvin-Voigt isolator on an 8 kilogram blocking mass. The upper panel gives the true transfer-stiffness level and the indirect-method estimate: the estimate runs far above the truth below and around the mass-spring resonance and lies on it above. The middle panel gives the transmissibility magnitude, which peaks above ten at the resonance and crosses the 0.1 limit at 189 hertz, with the level error of the estimate on a second axis staying inside a shaded plus-or-minus one decibel band from that crossing onwards. The lower panel gives the loss factor, rising in proportion to frequency as the Kelvin-Voigt model demands. Every panel is shaded up to the 0.1 crossing, the frequencies at which no result exists." width="82%" loading="eager" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/transfer_stiffness.svg" alt="Three stacked panels sharing a logarithmic frequency axis for a Kelvin-Voigt isolator on an 8 kilogram blocking mass. The upper panel gives the true transfer-stiffness level and the indirect-method estimate: the estimate runs far above the truth below and around the mass-spring resonance and lies on it above. The middle panel gives the transmissibility magnitude, which peaks above ten at the resonance and crosses the 0.1 limit at 187.5 hertz, with the level error of the estimate on a second axis staying inside a shaded plus-or-minus one decibel band from that crossing onwards. The lower panel gives the loss factor, rising in proportion to frequency as the Kelvin-Voigt model demands. Every panel is shaded up to the 0.1 crossing, the frequencies at which no result exists." width="82%" loading="eager" />
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -369,7 +374,7 @@ plt.show()
 </details>
 
 *The criterion, and the error it buys. The indirect method is valid from where
-$|T|$ falls below 0.1 (189 Hz for this element, not the mass/spring resonance
+$|T|$ falls below 0.1 (187.5 Hz for this element, not the mass/spring resonance
 at 56 Hz and not the $3f_0$ rule of thumb) and that limit is chosen because it
 is what holds the stiffness error inside the 1 dB the clause requires, as the
 middle panel's second axis shows. The lower panel is the loss factor: for a
@@ -438,8 +443,9 @@ bands = direct.band_average()
 print(bands.nominal_frequencies[[0, -1]], bands.line_counts[[0, -1]])  # [ 100. 1000.] [ 12 114]
 print(round(float(bands.levels[-1]), 2))                               # 120.99  dB re 1 N/m
 
-# Indirect method on an 8 kg blocking mass: below 189 Hz |T| > 0.1, and those
-# lines never reach the average.
+# Indirect method on an 8 kg blocking mass: |T| falls to 0.1 at 187.5 Hz, so the
+# lines up to 186 Hz fail Inequality (2) and never reach the average; the 200 Hz
+# band averages its 18 lines from 188 Hz up.
 t = vibration.base_transmissibility(f, mass=8.0, stiffness=1.0e6, damping=120.0)
 with warnings.catch_warnings():
     warnings.simplefilter("ignore", vibration.TransferStiffnessWarning)
@@ -501,8 +507,9 @@ f = [63.0, 125.0, 250.0]
 check = vibration.check_blocked_output(f, [110.0, 110.0, 110.0], [85.0, 88.0, 86.0])
 print(check.holds, check.passes)                        # [ True  True  True] True
 
-# A 0.4 kg force plate under an output force of 1 N (120 dB re 1 µN) and an
-# output acceleration of 0.1 m/s² (100 dB re 1 µm/s²):
+# m0 = 0.4 kg (output flange, force distribution plate and half the transducers)
+# under an output force of 1 N (120 dB re 1 µN) and an output acceleration of
+# 0.1 m/s² (100 dB re 1 µm/s²):
 mass = vibration.check_output_mass([125.0], 0.4, [120.0], [100.0])
 print(mass.mass_limit_kg, mass.passes, mass.bias_bound_db.round(3))   # [0.6] True [0.355]
 
@@ -542,13 +549,17 @@ the clause presumes, the same as the mean of the levels), and interpolates the
 crossing of the 2 dB threshold. Given the output acceleration or the unwanted
 input accelerations, it checks Inequalities (1) and (2) line by line and leaves
 the lines that fail out of everything, as 7.6.1 requires. Its `.band_average()`
-averages only the valid lines, all below $f_\mathrm{UL}$; since each of them is
-within 2 dB of $k_{2,1}$, so is each band. Below 20 Hz, 7.5 asks for a 0,2 Hz
+averages only the valid lines, those at or below $f_\mathrm{UL}$ (8.3 states
+the 2 dB "if $f \le f_\mathrm{UL}$"). For those bands the 2 dB of Formula (7)
+is the standard's own statement, which Annex B assumes again for its budget
+(B.3.5): the criterion of 6.2 only watches $k_{1,1}$ fall below its own
+low-frequency value, so nothing in the average proves the bound line by line.
+Below 20 Hz, 7.5 asks for a 0,2 Hz
 line spacing rather than five lines per band, which leaves the lowest bands
 short of five; those bands have no value, without a warning, and the note to
 clause 9 m) accepts narrow-band data there instead.
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/driving_point_stiffness.svg" alt="Two stacked panels sharing a logarithmic frequency axis from 1 to 200 hertz for a 1 meganewton per metre element with a 5 per cent loss factor driven through a 2 kilogram force plate. The upper panel gives the driving-point stiffness level, flat at 120 decibels at low frequency and falling away as the plate's inertia grows, the transfer stiffness as a dashed horizontal line at 120 decibels, a dotted threshold 2 decibels below the 1 to 20 hertz value, a vertical line at the upper limiting frequency of 52.2 hertz, and red dots for the band averages from 4 to 50 hertz; everything above 52.2 hertz is shaded as not evaluated. The lower panel gives the difference between the driving-point and transfer stiffness levels, narrow band and band by band, inside a shaded band of plus or minus 2 decibels that every band average respects." width="82%" loading="eager" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/driving_point_stiffness.svg" alt="Two stacked panels sharing a logarithmic frequency axis from 1 to 200 hertz for a 1 meganewton per metre element with a 5 per cent loss factor driven through a 2 kilogram force distribution plate. The upper panel gives the driving-point stiffness level, flat at 120 decibels at low frequency and falling away as the plate's inertia grows, the transfer stiffness as a dashed horizontal line at 120 decibels, a dotted threshold 2 decibels below the 1 to 20 hertz value, a vertical line at the upper limiting frequency of 52.2 hertz, and red dots for the band averages from 4 to 50 hertz; everything above 52.2 hertz is shaded as not evaluated. The lower panel gives the difference between the driving-point and transfer stiffness levels, narrow band and band by band, inside a shaded band of plus or minus 2 decibels that every band average respects." width="82%" loading="eager" />
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -558,24 +569,55 @@ import matplotlib.pyplot as plt
 import numpy as np
 from phonometry import vibration
 
-# A 1 MN/m element with a 5 % loss factor, driven through a 2 kg force plate:
-# the transducers read the plate's inertia with the element.
+# A 1 MN/m element with a 5 % loss factor, driven through a 2 kg force
+# distribution plate: the input force transducers read the plate's inertia with
+# the element.
 f = np.arange(1.0, 200.0, 0.2)          # the 0.2 Hz lines of 7.5
 w = 2.0 * np.pi * f
 k21 = 1.0e6 * (1.0 + 0.05j)
 res = vibration.driving_point_stiffness(f, (k21 - w**2 * 2.0) * 1e-6, -(w**2) * 1e-6)
 print(round(res.upper_limiting_frequency_hz, 1))    # 52.2  Hz
 
-res.plot()             # the level, the 2 dB threshold and f_UL
+# One line each: the level with the 2 dB threshold and f_UL, and the bands.
+res.plot()
 res.band_average().plot()
+plt.show()
+
+# By hand, the two panels above: k1,1 against k2,1, and their difference.
+bands = res.band_average()
+centres = bands.center_frequencies[bands.determined]
+band_levels = bands.levels[bands.determined]
+l21 = 20.0 * np.log10(abs(k21))
+f_ul = res.upper_limiting_frequency_hz
+fig, (top, bottom) = plt.subplots(2, 1, sharex=True, figsize=(10, 8.8))
+for panel in (top, bottom):
+    panel.axvspan(f_ul, f[-1], color="0.9")            # above f_UL: not evaluated
+    panel.axvline(f_ul, color="C1")
+    panel.grid(True, which="both", alpha=0.3)
+top.semilogx(f, res.levels, label="driving-point stiffness $L_{k_{1,1}}$")
+top.axhline(l21, color="C2", linestyle="--", label="transfer stiffness $L_{k_{2,1}}$")
+top.axhline(res.threshold_level_db, color="k", linestyle=":",
+            label="2 dB below the 1 Hz to 20 Hz value")
+top.plot(centres, band_levels, "o", color="C1",
+         label="band average $L_{k,\\mathrm{av}}$, Formula (6)")
+top.set(ylabel="$L_k$ [dB re 1 N/m]", ylim=(l21 - 7.0, l21 + 2.5))
+top.legend(loc="lower left")
+bottom.axhspan(-2.0, 2.0, color="C2", alpha=0.15, label="$\\pm$2 dB of Formula (7)")
+bottom.semilogx(f, res.levels - l21, label="$L_{k_{1,1}} - L_{k_{2,1}}$, narrow band")
+bottom.plot(centres, band_levels - l21, "o", color="C1",
+            label="band averages below $f_\\mathrm{UL}$")
+bottom.set(xlabel="Frequency [Hz]", ylabel="Difference [dB]",
+           xlim=(f[0], f[-1]), ylim=(-7.0, 3.0))
+bottom.legend(loc="lower left")
 plt.show()
 ```
 
 </details>
 
-*Where the method stops. The force plate is 2 kg, so the measured stiffness is
-$k_{2,1} - \omega^2 m_0$ and falls away from the transfer stiffness as the
-frequency rises; at 52.2 Hz it is 2 dB below its 1 Hz to 20 Hz value, and
+*Where the method stops. The force distribution plate between the input force
+transducers and the element is 2 kg, $m_\mathrm{p}$, so the measured stiffness
+is $k_{2,1} - \omega^2 m_\mathrm{p}$ and falls away from the transfer
+stiffness as the frequency rises; at 52.2 Hz it is 2 dB below its 1 Hz to 20 Hz value, and
 nothing above that is evaluated. Every band average below it lies inside the
 ±2 dB of Formula (7); the last one, at 50 Hz, averages only the 37 lines below
 $f_\mathrm{UL}$ and sits 1.8 dB down.*
@@ -590,10 +632,11 @@ repeated installations, and three rectangular terms, the test rig
 $1/(2\sqrt{3}) = 0{,}289$ dB, the driving-point discrepancy
 $2/\sqrt{3} = 1{,}155$ dB for its $\pm 2$ dB, and linearity
 $1{,}5/(2\sqrt{3}) = 0{,}433$ dB. Those three are the expressions the annex
-prints, not the 0,3, 1,2 and 0,5 dB Table B.1 rounds them to: the 0,5 dB is
-not the nearest tenth of 0,433 dB, which the
-[errata](/phonometry/reference/errata/) record, and every term can be passed in
-to reproduce the table or to state a reasoned estimate. The discrepancy term
+prints. Table B.1 carries them rounded up to one decimal, 0,3, 1,2 and 0,5 dB,
+the conservative rounding an uncertainty may take (ISO/IEC Guide 98-3, 7.2.6),
+which puts $u$ at 1,456 dB instead of 1,394 dB with no repeatability spread.
+The library keeps the expressions, and every term can be passed in to
+reproduce the table or to state a reasoned estimate. The discrepancy term
 dominates: it is the price of measuring $k_{1,1}$ for $k_{2,1}$.
 
 ```python
@@ -673,23 +716,28 @@ print(round(abs(complex(vibration.convert_frf(
 `TransferStiffnessResult.report(path)` renders a one-page
 dynamic-transfer-stiffness characterisation report for a resilient element
 (ISO 10846-1:2008 definition; determined by the direct method, ISO 10846-2:2008,
-or the indirect blocking-mass method, ISO 10846-3:2002). The transfer stiffness
-is a continuous frequency-response function, not an octave-band quantity, so the
-sheet presents it honestly as the $L_k(f)$ level spectrum plus a compact table
-of characteristic points (the determination method, the blocking mass for the
-indirect method, the frequency range, and the low-frequency stiffness plateau
-$|k_{2,1}|$, its level $L_k$ and the loss factor there), and a boxed
-low-frequency $L_k$ (the plateau that characterises the element below its
-internal resonances). It is a characterisation, so there is no pass/fail
-verdict; `language="es"` renders the Spanish fiche. The fiche always embeds the
-$L_k(f)$ spectrum, so it needs both the report and plot extras
-(`pip install "phonometry[report,plot]"`).
+or the indirect blocking-mass method, ISO 10846-3:2002). The sheet shows the
+$L_k(f)$ level spectrum beside a compact table of characteristic points (the
+determination method, the blocking mass for the indirect method, the frequency
+range, and the low-frequency stiffness plateau $|k_{2,1}|$, its level $L_k$
+and the loss factor there), then the one-third-octave band levels
+$L_{k,\mathrm{av}}$ of section 4, which the test report of both parts presents
+(ISO 10846-2 9 m), ISO 10846-3 10 j)), and a boxed low-frequency $L_k$ (the
+plateau that characterises the element below its internal resonances). The
+characteristic points are read at the lowest *valid* line and the spectrum
+draws the excluded lines apart, so an indirect result never reports the
+resonance region that Inequality (2) rules out; a band of fewer than five valid
+lines prints its line count instead of a level. It is a characterisation, so
+there is no pass/fail verdict; `language="es"` renders the Spanish fiche. The
+fiche always embeds the $L_k(f)$ spectrum, so it needs both the report and plot
+extras (`pip install "phonometry[report,plot]"`).
 
 ```python
 import numpy as np
 from phonometry import ReportMetadata, vibration
 
-freqs = np.array([20, 31.5, 50, 80, 125, 200, 315, 500, 800, 1250, 2000], dtype=float)
+# Ten lines in every one-third-octave band from 20 Hz to 2 kHz:
+freqs = 1000.0 * 10.0 ** ((np.arange(-175, 35) + 0.5) / 100.0)
 k21 = 1e6 + 1j * (2 * np.pi * freqs) * 80.0     # Kelvin-Voigt element k + jwc
 u1 = 1e-6 + 0j
 k = vibration.transfer_stiffness_direct(k21 * u1, u1)     # direct method: k2,1 = F2,b/u1
@@ -706,8 +754,8 @@ res.report(
 <ReportPreview
 	name="iso10846_transfer_stiffness_example"
 	title="ISO 10846 dynamic-transfer-stiffness example report (PDF)"
-	description="One-page dynamic-transfer-stiffness fiche: a metadata header, a table of the FRF characteristic points (the determination method, the frequency range and the low-frequency stiffness, level and loss factor) beside the transfer-stiffness level spectrum, and the boxed low-frequency level."
-	caption="Dynamic-transfer-stiffness fiche (TransferStiffnessResult.report): the FRF characteristic points and the transfer-stiffness level spectrum."
+	description="One-page dynamic-transfer-stiffness fiche: a metadata header, a table of the FRF characteristic points (the determination method, the frequency range and the low-frequency stiffness, level and loss factor) beside the transfer-stiffness level spectrum, the 21 one-third-octave band levels from 20 Hz to 2 kHz, and the boxed low-frequency level."
+	caption="Dynamic-transfer-stiffness fiche (TransferStiffnessResult.report): the FRF characteristic points, the transfer-stiffness level spectrum and its one-third-octave band levels."
 />
 
 ## What this guide covers
@@ -722,7 +770,7 @@ Formula 1 (`transfer_stiffness_indirect`, including its `flange_mass=` term).
 The blocking-force approximation of Equations 6-7 (`blocking_force_ratio`) and
 the Annex A / Table A.2 FRF relations (`convert_frf`) are implemented too.
 `TransferStiffnessResult` bundles a swept determination, and `.report()`
-renders the characterisation fiche.
+renders the characterisation fiche with its one-third-octave band levels.
 </ScopeClaim>
 
 <ScopeClaim status="covered" label="Covered">
@@ -746,11 +794,13 @@ The test arrangements of ISO 10846-4 for couplings, bellows, hoses, pipe
 hangers and cables are described by the standard, not modelled: the same
 functions serve them once the forces and accelerations are measured. The
 Figure 11 nomograms of $f_3$ for steel cubes and cylinders are not tabulated;
-$f_3$ is found from a measured effective mass. The clause 7.6 linearity
-criterion (two input spectra 10 dB apart within 1.5 dB) is not checked in
-code, and neither are the background pre-run, the 0,5 dB transducer flatness
-and inter-channel matching or the 0,2 Hz line spacing ISO 10846-5 asks for
-below 20 Hz. Hydraulic mounts are outside the single-spectrum description
+$f_3$ is found from a measured effective mass. The linearity test (two input
+spectra 10 dB apart within 1.5 dB, clause 7.7 of ISO 10846-2, -4 and -5 and
+clause 7.6 of ISO 10846-3) is not checked in code, and neither are the preload,
+creep and temperature conditioning, the background pre-run, the 0,5 dB
+transducer flatness and inter-channel matching or the 0,2 Hz line spacing
+ISO 10846-5 asks for below 20 Hz: the page describes them and leaves them to
+the operator. Hydraulic mounts are outside the single-spectrum description
 altogether: their stiffness is amplitude-dependent by design, so one $L_k(f)$
 does not characterise them.
 </ScopeClaim>

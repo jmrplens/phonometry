@@ -119,8 +119,9 @@ driving-point or single-path use, not for a full FRF matrix, whose blocked
 matrix quantities are not built.
 
 On the isolator page, one of the standard's own validity checks is described
-rather than computed: the clause 7.6 linearity criterion (two input spectra
-10 dB apart agreeing within 1.5 dB). Finally, nothing here
+rather than computed: the linearity test (two input spectra 10 dB apart
+agreeing within 1.5 dB, clause 7.7 of ISO 10846-2, -4 and -5 and clause 7.6 of
+ISO 10846-3). Finally, nothing here
 designs an isolator or a floating base: the pages characterise elements and
 predict transmission, and the sizing decision stays yours.
 
@@ -1108,19 +1109,21 @@ The `TransferStiffnessResult` carries the complex $k_{2,1}$ and exposes `.levels
 **Test-report fiche.** `TransferStiffnessResult.report(path)` renders a one-page
 dynamic-transfer-stiffness characterisation report for a resilient element
 (ISO 10846-1:2008 definition; determined by the direct method, ISO 10846-2:2008,
-or the indirect blocking-mass method, ISO 10846-3:2002). The transfer stiffness
-is a continuous frequency-response function, not an octave-band quantity, so the
-sheet presents it honestly as the $L_k(f)$ level spectrum plus a compact table
-of characteristic points (the determination method, the blocking mass for the
-indirect method, the frequency range, and the low-frequency stiffness plateau
-$|k_{2,1}|$, its level $L_k$ and the loss factor there), and a boxed
-low-frequency $L_k$ (the plateau that characterises the element below its
-internal resonances). It is a characterisation, so there is no pass/fail
-verdict; `language="es"` renders the Spanish fiche. The fiche always embeds the
-$L_k(f)$ spectrum, so it needs both the report and plot extras
+or the indirect blocking-mass method, ISO 10846-3:2002). The sheet shows the
+$L_k(f)$ level spectrum beside a compact table of characteristic points (the
+determination method, the blocking mass for the indirect method, the frequency
+range, and the low-frequency stiffness plateau $|k_{2,1}|$, its level $L_k$
+and the loss factor there), then the one-third-octave band levels
+$L_{k,\mathrm{av}}$ of section 4 that the test report of both parts presents
+(ISO 10846-2 9 m), ISO 10846-3 10 j)), and a boxed low-frequency $L_k$. The
+characteristic points are read at the lowest *valid* line and the spectrum
+draws the excluded lines apart; a band of fewer than five valid lines prints
+its line count instead of a level. It is a characterisation, so there is no
+pass/fail verdict; `language="es"` renders the Spanish fiche. The fiche always
+embeds the $L_k(f)$ spectrum, so it needs both the report and plot extras
 (`pip install "phonometry[report,plot]"`).
 
-[![ISO 10846 dynamic-transfer-stiffness example report: a metadata header, a table of the FRF characteristic points (method, frequency range and low-frequency stiffness, level and loss factor) beside the transfer-stiffness level spectrum, and the boxed low-frequency level](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso10846_transfer_stiffness_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso10846_transfer_stiffness_example.pdf)
+[![ISO 10846 dynamic-transfer-stiffness example report: a metadata header, a table of the FRF characteristic points (method, frequency range and low-frequency stiffness, level and loss factor) beside the transfer-stiffness level spectrum, the 21 one-third-octave band levels from 20 Hz to 2 kHz, and the boxed low-frequency level](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso10846_transfer_stiffness_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso10846_transfer_stiffness_example.pdf)
 
 The two methods split the frequency axis between them. The direct method
 works from 1 Hz, the lower bound of the ISO 10846-2 scope (in practice the
@@ -1155,8 +1158,9 @@ frequency range on both sides:
   transfer-stiffness levels within 1.5 dB.
 
 Inequality 2 is computed with the indirect method itself and Inequality 3
-through the effective mass of section 5; the clause 7.6 linearity criterion is
-described here and left to the operator.
+through the effective mass of section 5; the linearity criterion (ISO 10846-3
+clause 7.6, and clause 7.7 of Parts 2, 4 and 5) is described here and left to
+the operator, as are the preload, creep and temperature conditioning.
 
 The blocking-force idealisation itself is quantified by ISO 10846-1, Eq. (6):
 for an isolator of output driving-point stiffness $k_{2,2}$ on a termination of
@@ -1215,8 +1219,9 @@ bands = direct.band_average()
 print(bands.nominal_frequencies[[0, -1]], bands.line_counts[[0, -1]])  # [ 100. 1000.] [ 12 114]
 print(round(float(bands.levels[-1]), 2))                               # 120.99  dB re 1 N/m
 
-# Indirect method on an 8 kg blocking mass: below 189 Hz |T| > 0.1, and those
-# lines never reach the average.
+# Indirect method on an 8 kg blocking mass: |T| falls to 0.1 at 187.5 Hz, so the
+# lines up to 186 Hz fail Inequality (2) and never reach the average; the 200 Hz
+# band averages its 18 lines from 188 Hz up.
 t = vibration.base_transmissibility(f, mass=8.0, stiffness=1.0e6, damping=120.0)
 with warnings.catch_warnings():
     warnings.simplefilter("ignore", vibration.TransferStiffnessWarning)
@@ -1239,7 +1244,9 @@ condition frequency by frequency with an overall `.passes`, draws itself with
 * **The input moves in one direction**, the excitation direction at least
   15 dB above each perpendicular one (Part 5 Inequality (2); (3) of Part 2,
   (5) of Part 3, (7) of Part 4): `check_unwanted_input`, the loudest unwanted
-  direction deciding.
+  direction deciding. ISO 10846-2 7.6.1 sends the exclusion of the lines that
+  fail it to "6.1, Inequality (1)", the blocked-output condition, where 6.4,
+  Inequality (3), is meant (see the [errata](https://jmrplens.github.io/phonometry/reference/errata/)).
 * **The mass in front of the output force transducers is light enough** for
   the direct method (ISO 10846-4 Inequality (3), ISO 10846-2 Inequality (2)),
   $m_0 \le 0{,}06 \times 10^{L_{F2}/20} / 10^{L_{a2}/20}$ kg with $L_{F2}$ re
@@ -1264,6 +1271,7 @@ f = [63.0, 125.0, 250.0]
 check = vibration.check_blocked_output(f, [110.0, 110.0, 110.0], [85.0, 88.0, 86.0])
 print(check.holds, check.passes)                        # [ True  True  True] True
 
+# m0 = 0.4 kg (output flange, force distribution plate, half the transducers):
 mass = vibration.check_output_mass([125.0], 0.4, [120.0], [100.0])
 print(mass.mass_limit_kg, mass.passes, mass.bias_bound_db.round(3))   # [0.6] True [0.355]
 
@@ -1286,9 +1294,12 @@ to it the band averages of $k_{1,1}$ stand for those of $k_{2,1}$ within 2 dB
 (Formula (7)). `driving_point_stiffness` computes $k_{1,1}$, finds
 $f_\mathrm{UL}$, checks Inequalities (1) and (2) when given the output or the
 unwanted accelerations, and its `.band_average()` averages only the valid
-lines below $f_\mathrm{UL}$.
+lines at or below $f_\mathrm{UL}$ (8.3: "if $f \le f_\mathrm{UL}$"). The 2 dB
+for those bands is the standard's statement, which Annex B assumes again
+(B.3.5); the 6.2 criterion only watches $k_{1,1}$ fall below its own
+low-frequency value.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/driving_point_stiffness_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/driving_point_stiffness.svg" alt="Driving-point stiffness level of a 1 MN/m element driven through a 2 kg force plate: flat at 120 dB at low frequency and falling away as the plate's inertia grows, with the threshold 2 dB below the 1 to 20 Hz value, the upper limiting frequency at 52.2 Hz and the band averages below it, all within the plus or minus 2 dB of Formula (7)" width="82%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/driving_point_stiffness_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/driving_point_stiffness.svg" alt="Driving-point stiffness level of a 1 MN/m element driven through a 2 kg force distribution plate: flat at 120 dB at low frequency and falling away as the plate's inertia grows, with the threshold 2 dB below the 1 to 20 Hz value, the upper limiting frequency at 52.2 Hz and the band averages below it, all within the plus or minus 2 dB of Formula (7)" width="82%"></picture>
 
 ```python
 import numpy as np
@@ -1309,9 +1320,10 @@ print(round(budget.expanded_uncertainty_db, 2))    # 2.81  dB
 ```
 
 The three rectangular terms of the budget are the expressions Annex B prints,
-0,289, 1,155 and 0,433 dB, not the 0,3, 1,2 and 0,5 dB of Table B.1: 0,5 dB
-is not the nearest tenth of 0,433 dB (see the [errata](https://jmrplens.github.io/phonometry/reference/errata/)), and
-every term can be passed in to reproduce the table.
+0,289, 1,155 and 0,433 dB. Table B.1 carries them rounded up to one decimal,
+0,3, 1,2 and 0,5 dB, the conservative rounding an uncertainty may take
+(ISO/IEC Guide 98-3, 7.2.6); the library keeps the expressions, and every term
+can be passed in to reproduce the table.
 
 ## 7. Relation to the FRF family
 
@@ -1334,23 +1346,26 @@ print(abs(complex(vibration.convert_frf(Z, 250.0, "impedance", "dynamic_stiffnes
 `TransferStiffnessResult.report(path)` renders a one-page
 dynamic-transfer-stiffness characterisation report for a resilient element
 (ISO 10846-1:2008 definition; determined by the direct method, ISO 10846-2:2008,
-or the indirect blocking-mass method, ISO 10846-3:2002). The transfer stiffness
-is a continuous frequency-response function, not an octave-band quantity, so the
-sheet presents it honestly as the $L_k(f)$ level spectrum plus a compact table
-of characteristic points (the determination method, the blocking mass for the
-indirect method, the frequency range, and the low-frequency stiffness plateau
-$|k_{2,1}|$, its level $L_k$ and the loss factor there), and a boxed
-low-frequency $L_k$ (the plateau that characterises the element below its
-internal resonances). It is a characterisation, so there is no pass/fail
-verdict; `language="es"` renders the Spanish fiche. The fiche always embeds the
-$L_k(f)$ spectrum, so it needs both the report and plot extras
+or the indirect blocking-mass method, ISO 10846-3:2002). The sheet shows the
+$L_k(f)$ level spectrum beside a compact table of characteristic points (the
+determination method, the blocking mass for the indirect method, the frequency
+range, and the low-frequency stiffness plateau $|k_{2,1}|$, its level $L_k$
+and the loss factor there), then the one-third-octave band levels
+$L_{k,\mathrm{av}}$ of section 4 that the test report of both parts presents
+(ISO 10846-2 9 m), ISO 10846-3 10 j)), and a boxed low-frequency $L_k$. The
+characteristic points are read at the lowest *valid* line and the spectrum
+draws the excluded lines apart; a band of fewer than five valid lines prints
+its line count instead of a level. It is a characterisation, so there is no
+pass/fail verdict; `language="es"` renders the Spanish fiche. The fiche always
+embeds the $L_k(f)$ spectrum, so it needs both the report and plot extras
 (`pip install "phonometry[report,plot]"`).
 
 ```python
 import numpy as np
 from phonometry import ReportMetadata, vibration
 
-freqs = np.array([20, 31.5, 50, 80, 125, 200, 315, 500, 800, 1250, 2000], dtype=float)
+# Ten lines in every one-third-octave band from 20 Hz to 2 kHz:
+freqs = 1000.0 * 10.0 ** ((np.arange(-175, 35) + 0.5) / 100.0)
 k21 = 1e6 + 1j * (2 * np.pi * freqs) * 80.0     # Kelvin-Voigt element k + jwc
 u1 = 1e-6 + 0j
 k = vibration.transfer_stiffness_direct(k21 * u1, u1)     # direct method: k2,1 = F2,b/u1
@@ -1367,10 +1382,11 @@ res.report(
 The example fiche is regenerated with `make reports` and kept in the
 repository. Click the preview to open the PDF:
 
-[![ISO 10846 dynamic-transfer-stiffness example report: a metadata header, a table of the FRF characteristic points (the determination method, the frequency range and the low-frequency stiffness, level and loss factor) beside the transfer-stiffness level spectrum, and the boxed low-frequency level](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso10846_transfer_stiffness_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso10846_transfer_stiffness_example.pdf)
+[![ISO 10846 dynamic-transfer-stiffness example report: a metadata header, a table of the FRF characteristic points (the determination method, the frequency range and the low-frequency stiffness, level and loss factor) beside the transfer-stiffness level spectrum, the 21 one-third-octave band levels from 20 Hz to 2 kHz, and the boxed low-frequency level](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso10846_transfer_stiffness_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso10846_transfer_stiffness_example.pdf)
 
 *Dynamic-transfer-stiffness fiche (`TransferStiffnessResult.report`): the FRF
-characteristic points and the transfer-stiffness level spectrum.*
+characteristic points, the transfer-stiffness level spectrum and its
+one-third-octave band levels.*
 
 ## See also
 
@@ -1421,10 +1437,10 @@ closed-form definitions: the level of a decade of stiffness, the indirect
 inertia relation, the Table-A.2 identity $k = j\omega Z$, the
 $|T| = 0.1 \leftrightarrow \Delta L_{1,2} = 20\ \text{dB}$ validity
 limit and its 1 dB (12 %) accuracy bound, the Eq. (6) force ratio $1/1.1$, and
-the 7.6 linearity criterion; Parts 4 and 5 print no worked example, and their
-rows are closed forms too (a band of identical lines averages to itself, a
-massless spring gives a flat stiffness, the output mass on its bound biases
-the force by 0,5 dB).
+the linearity criterion (7.7 of Part 2, 7.6 of Part 3); Parts 4 and 5 print no
+worked example, and their rows are closed forms too (a band of identical lines
+averages to itself, a massless spring gives a flat stiffness, the output mass
+on its bound biases the force by 0,51 to 0,54 dB, the 0,5 dB of NOTE 1).
 
 ---
 

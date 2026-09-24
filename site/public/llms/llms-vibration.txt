@@ -172,8 +172,8 @@ transmission](https://jmrplens.github.io/phonometry/buildings/insulation/flankin
 page returns element-wise free reciprocals, correct for a driving-point or
 single-path use but not a full FRF matrix, with no impact-hammer processing
 (ISO 7626-5) and no blocked matrix quantities. On the isolator page, the
-clause 7.6 linearity criterion of ISO 10846 is described but not computed for
-you, and the Figure 11 nomograms of ISO 10846-4 for steel blocking masses are
+linearity test of ISO 10846 (clause 7.7 of Parts 2, 4 and 5, clause 7.6 of
+Part 3) is described but not computed for you, and the Figure 11 nomograms of ISO 10846-4 for steel blocking masses are
 not tabulated.
 
 ## Before and after these pages

@@ -976,6 +976,44 @@ dos ediciones con las mismas entradas y en el mismo orden.
   la edición de 2006, cuyo impreso lleva el defecto; la edición de 2017 queda
   como confirmación.
 
+## ISO 10846-2:2008, 7.6.1 (el ensayo previo de unidireccionalidad remite al 6.1, Desigualdad (1))
+
+- **Ubicación:** apartado 7.6.1, «General», el párrafo del ensayo previo que
+  comprueba la dirección del movimiento de entrada.
+- **El impreso:** «A further pre-run shall be performed to check that the
+  acceleration in the excitation direction exceeds the acceleration in other
+  directions. Measurement results, which do not meet the condition of **6.1,
+  Inequality (1)**, shall be excluded from the evaluation of the dynamic
+  stiffness function.»
+- **El problema:** la Desigualdad (1) del 6.1 es la condición de salida
+  bloqueada, $\Delta L_{1,2} = L_{a1} - L_{a2} \geqslant 20$ dB, una
+  diferencia de niveles entre el lado de entrada y el de salida, que una
+  comprobación de las direcciones en la entrada no puede ensayar. La condición
+  que ensaya el ensayo previo es la del 6.4, «Unwanted input vibrations»,
+  Desigualdad (3),
+  $L_{a(\mathrm{excitation})} - L_{a(\mathrm{unwanted})} \geqslant 15$ dB.
+  La misma frase en las partes hermanas remite a su propio apartado de
+  entradas no deseadas: la ISO 10846-3:2002 7.5.1 al 6.4, la ISO
+  10846-4:2003 7.6.1 al 6.5 y la ISO 10846-5:2008 7.6.1 a su Desigualdad (2).
+  Seguida tal como está impresa, la frase excluye las líneas en las que la
+  salida no está bloqueada y conserva aquellas en las que la entrada se mueve
+  en la dirección equivocada.
+- **Evidencia:** la referencia leída frente a los apartados a los que puede
+  remitir. Verificado en la página 24 del PDF (p. 16 impresa, 7.6.1), la
+  página 20 del PDF (p. 12 impresa, 6.1) y la página 21 del PDF (p. 13
+  impresa, 6.4) de BS EN ISO 10846-2:2008, la implementación británica de
+  ISO 10846-2:2008 (segunda edición); las frases hermanas en la página 33
+  del PDF (p. 23 impresa) de BS EN ISO 10846-3:2002, la página 36 del PDF
+  (p. 26 impresa) de BS EN ISO 10846-4:2003 y la página 23 del PDF (p. 15
+  impresa) de BS EN ISO 10846-5:2009.
+- **Comportamiento de la biblioteca:** sigue el destino pretendido.
+  `check_unwanted_input` juzga la unidireccionalidad de la Parte 2 con los
+  15 dB de su Desigualdad (3), y `check_blocked_output` conserva los 20 dB de
+  la Desigualdad (1) para el lado de salida. La referencia no cambia ningún
+  número que informe la biblioteca.
+- **Estado:** sin notificar (defecto de referencia cruzada, sin consecuencia
+  numérica).
+
 ## ISO 10846-4:2003, 6.2 NOTA 1 (la cota de la Desigualdad (3) impresa como 05 dB)
 
 - **Ubicación:** apartado 6.2, «Measurement of blocking force in the direct
@@ -992,49 +1030,15 @@ dos ediciones con las mismas entradas y en el mismo orden.
   soportes resilientes (su Desigualdad (2)), imprime la misma nota con la coma
   en su sitio, «$L_{F_2'} - L_{F_2} \leqslant 0{,}5$ dB».
 - **Evidencia:** la nota junto a la desigualdad que reformula, y la misma
-  nota en la parte hermana; la nota se leyó como imagen, no desde el texto
-  extraído. Verificado en la página 30 del PDF (p. 20 impresa) de BS EN ISO
-  10846-4:2003, la implementación británica de ISO 10846-4:2003 (primera
-  edición), y en la página 21 del PDF (p. 13 impresa) de BS EN ISO
-  10846-2:2008.
+  nota en la parte hermana. Verificado en la página 30 del PDF (p. 20
+  impresa) de BS EN ISO 10846-4:2003, la implementación británica de ISO
+  10846-4:2003 (primera edición), y en la página 21 del PDF (p. 13 impresa)
+  de BS EN ISO 10846-2:2008.
 - **Comportamiento de la biblioteca:** no hizo falta ningún cambio, porque la
   biblioteca calcula la desigualdad, no la nota. `check_output_mass` informa
   del sesgo que puede causar la masa, `bias_bound_db`, que es 0,54 dB sobre
   la cota, y la comprobación de conformidad «ISO 10846-4:2003 6.2 NOTE 1» lo
   contrasta con los 0,5 dB que la nota quiere decir.
-- **Estado:** sin notificar.
-
-## ISO 10846-5:2008, B.3.6 y Tabla B.1 (1,5/(2√3) dB redondeado a 0,5 dB)
-
-- **Ubicación:** Anexo B (informativo), B.3.6 «Test for linearity» y la fila
-  $\delta_\mathrm{lin}$ de la Tabla B.1.
-- **El impreso:** «a standard uncertainty
-  $u_\mathrm{lin} = 1{,}5 / (2\sqrt{3}) \approx 0{,}5$ dB», y 0,5 en las
-  columnas de incertidumbre típica y de contribución de la fila
-  $\delta_\mathrm{lin}$.
-- **El problema:** $1{,}5/(2\sqrt{3}) = 0{,}433$ dB, que redondeado a la
-  décima es 0,4 dB, no 0,5 dB. Las otras dos expresiones del mismo anexo
-  coinciden con su aproximación a la décima más cercana,
-  $u_\mathrm{rig} = 1/(2\sqrt{3}) = 0{,}289 \approx 0{,}3$ dB (B.3.4) y
-  $u_\mathrm{dps} = 2/\sqrt{3} = 1{,}155 \approx 1{,}2$ dB (B.3.5); el anexo
-  no dice que redondee hacia arriba. Con los valores de la Tabla B.1 y sin
-  dispersión de repetibilidad, la incertidumbre típica combinada es
-  $\sqrt{2{,}12} = 1{,}456$ dB y $U = 2{,}91$ dB; con las expresiones es
-  1,394 dB y $U = 2{,}79$ dB. ISO 10846-2:2008 lleva el mismo redondeo dos
-  veces, $u_\mathrm{rig} = u_\mathrm{lin} = 1{,}5/(2\sqrt{3}) \approx 0{,}5$ dB
-  en B.3.4 y B.3.5 y 0,5 en las dos filas de su Tabla B.1.
-- **Evidencia:** la expresión junto al número que se dice que aproxima, en la
-  página tal como está impresa. Verificado en la página 33 del PDF (p. 25
-  impresa) y la página 32 del PDF (p. 24 impresa, Tabla B.1) de BS EN ISO
-  10846-5:2009, la implementación británica de ISO 10846-5:2008 (primera
-  edición), y en la página 34 del PDF (p. 26 impresa) y la página 33 del PDF
-  (p. 25 impresa, Tabla B.1) de BS EN ISO 10846-2:2008.
-- **Comportamiento de la biblioteca:** `driving_point_uncertainty` toma por
-  defecto las expresiones que imprimen B.3.4 a B.3.6, 0,289, 1,155 y
-  0,433 dB, y admite cualquiera de ellas como argumento, de modo que se
-  pueden pasar los valores de la Tabla B.1. Las comprobaciones de conformidad
-  «ISO 10846-5:2008 Formulas (B.2) and (B.3)» e «ISO 10846-5:2008 Table B.1»
-  contrastan los dos presupuestos.
 - **Estado:** sin notificar.
 
 ## UNE-EN 15657:2018, apartado 7.1, Fórmula (14) (masa de referencia dimensionalmente inconsistente con la magnitud que normaliza)

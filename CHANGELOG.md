@@ -132,6 +132,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   ISO/TS 12913-3 is the one implemented; a 2025 edition revises Annex A. A new
   guide, in both languages, walks through a study from the questionnaire to
   the report.
+- **What a sound level meter reads when sound arrives from every direction
+  (IEC 61183:1994).** `metrology.directivity_factor` takes the levels a meter
+  indicates at equal angular steps in two planes (or four, as NOTE 2 of A.6
+  asks for when the reference direction is not normal to the diaphragm) and
+  returns its directivity factor by Formula (A.3);
+  `metrology.axisymmetric_directivity_factor` does the same from one plane for
+  a rotationally symmetric meter (Formula (A.4)), and
+  `metrology.equal_area_directivity_factor` from the 38 equal-area directions
+  of the note to A.1.8 (Formula (A.5)), whose angles
+  `metrology.equal_area_incidence_angles` computes.
+  `metrology.adjustment_factors` gives the weights of Formulas (6), (7), (A.1)
+  and (A.2) for any angular step that divides 180° and any number of planes,
+  `metrology.largest_element_fraction` the largest element of that division,
+  and a `metrology.SphereDivisionWarning` is raised above the 3 % of A.1.6.
+  `metrology.random_incidence_sensitivity` applies Formula (1), and
+  `metrology.diffuse_field_sensitivity` the three diffuse-field routes of
+  Formulas (8) to (11), taking the directivity factor and the diffuse-to-pressure
+  difference of the reference microphone from `metrology.IEC61183_TABLE_B1`,
+  Table B.1, unless it is given others. Each result has `.plot()`: the polar
+  response per plane, the weight of each reading, and the sensitivity levels
+  and the correction against frequency. The readings at 0° and 180° enter both
+  plane sums of Formula (A.3), which is what makes the 72 factors of Table A.1
+  sum to one; counted once, as the paragraph under the formula could be read,
+  they sum to 0,998 097 and every directivity index would come out 0,008 dB
+  high. The ten values of Table A.1 are a conformance row to their five
+  decimals, and so are the 2,2 % of A.1.7, the halving of NOTE 2 and the
+  equal-area directions. Two of those directions are printed as 77,9° and
+  282,1° where the symmetry of the list gives 77,8° and 282,2°, which is
+  registered in the errata. A new guide under Calibration and uncertainty runs
+  both methods on a synthetic meter, in English and Spanish.
 - **What an active noise reduction earmuff adds, its uncertainty and where it
   stops being linear (ISO 4869-6:2019).** `hearing.active_insertion_loss` takes
   the levels at both ears with the circuit off and on (or the insertion loss

@@ -153,7 +153,7 @@ the chain that turns a digital signal into a standards-compliant number, and
 every other area consumes it: a loudness model needs calibrated band levels, a
 room parameter needs a filtered impulse response, an environmental rating is an
 adjusted $L_\mathrm{eq}$. Implements IEC 61260-1, ANSI S1.11, IEC 61672-1, ISO 7196,
-IEC 61252, ISO 1996-1, IEC 60942 and the GUM.
+IEC 61252, ISO 1996-1, IEC 60942, IEC 61183 and the GUM.
 
 - [Build a sound level meter](/phonometry/signals/sound-level-meter/):
   the whole area assembled end to end on one runnable page, from the
@@ -249,6 +249,10 @@ IEC 61252, ISO 1996-1, IEC 60942 and the GUM.
 - [Data qualification](/phonometry/signals/metrology/data-qualification/): the reverse
   arrangement and runs tests for stationarity, and the Rice level-crossing and
   peak statistics with the irregularity factor.
+- [Random-Incidence and Diffuse-Field Response (IEC 61183)](/phonometry/signals/metrology/random-incidence/):
+  the directivity factor of a sound level meter from readings in two planes,
+  one plane or 38 equal-area elements, and its random-incidence and
+  diffuse-field sensitivity levels.
 
 ## [The medium](/phonometry/fluids/)
 

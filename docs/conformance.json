@@ -3,13 +3,13 @@
   "library": "4.0.0rc1",
   "generator": "scripts/conformance_report.py",
   "counts": {
-    "checks": 1373,
-    "passing": 1373,
+    "checks": 1387,
+    "passing": 1387,
     "failing": 0,
-    "domains": 93,
-    "standards": 471,
-    "citations": 939,
-    "designations": 190,
+    "domains": 94,
+    "standards": 473,
+    "citations": 952,
+    "designations": 192,
     "sources": 114
   },
   "units": [
@@ -365,6 +365,12 @@
       "title": "Impulsive sound exposure distribution (ISO 13474)",
       "checks": 7,
       "passing": 7
+    },
+    {
+      "id": "soundscape-analysis-iso-ts-12913-3-2019-the-2025-edition-revises-annex-a",
+      "title": "Soundscape analysis (ISO/TS 12913-3:2019; the 2025 edition revises Annex A)",
+      "checks": 14,
+      "passing": 14
     },
     {
       "id": "prominent-discrete-tones-ecma-418-1",
@@ -27538,6 +27544,473 @@
         "value": -0.044
       },
       "precision": 2,
+      "verdict": "pass"
+    },
+    {
+      "id": "soundscape-analysis-iso-ts-12913-3-2019-the-2025-edition-revises-annex-a/iso-ts-12913-3-2019-a-2-table-a-1/scale-value-of-each-of-the-five-boxes-of-the-four-parts-of-method-a",
+      "domain": "soundscape-analysis-iso-ts-12913-3-2019-the-2025-edition-revises-annex-a",
+      "reference": {
+        "cite": "ISO/TS 12913-3:2019 A.2, Table A.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO/TS 12913-3",
+            "edition": "2019",
+            "clause": "A.2, Table A.1"
+          }
+        ]
+      },
+      "quantity": "Scale value of each of the five boxes of the four parts of Method A",
+      "kind": "count",
+      "expected": {
+        "value": 20.0,
+        "label": "20/20 scale values of Table A.1"
+      },
+      "computed": {
+        "value": 20.0,
+        "label": "20/20 scale values of Table A.1"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "soundscape-analysis-iso-ts-12913-3-2019-the-2025-edition-revises-annex-a/iso-ts-12913-3-2019-formulas-a-1-and-a-2/every-attribute-at-one-score-puts-the-respondent-at-the-origin",
+      "domain": "soundscape-analysis-iso-ts-12913-3-2019-the-2025-edition-revises-annex-a",
+      "reference": {
+        "cite": "ISO/TS 12913-3:2019 Formulas (A.1) and (A.2)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO/TS 12913-3",
+            "edition": "2019",
+            "clause": "Formulas (A.1) and (A.2)"
+          }
+        ]
+      },
+      "quantity": "Every attribute at one score puts the respondent at the origin",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0
+      },
+      "computed": {
+        "value": 0.0,
+        "label": "max |P|, |E| = 0.0e+00"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 12,
+      "verdict": "pass"
+    },
+    {
+      "id": "soundscape-analysis-iso-ts-12913-3-2019-the-2025-edition-revises-annex-a/iso-ts-12913-3-2019-a-3/range-of-the-coordinates-4-sqrt-32-printed-as-9-66",
+      "domain": "soundscape-analysis-iso-ts-12913-3-2019-the-2025-edition-revises-annex-a",
+      "reference": {
+        "cite": "ISO/TS 12913-3:2019 A.3",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO/TS 12913-3",
+            "edition": "2019",
+            "clause": "A.3"
+          }
+        ]
+      },
+      "quantity": "Range of the coordinates, 4 + sqrt(32), printed as 9,66",
+      "kind": "scalar",
+      "expected": {
+        "value": 9.66
+      },
+      "computed": {
+        "value": 9.6569
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": -0.0031
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "soundscape-analysis-iso-ts-12913-3-2019-the-2025-edition-revises-annex-a/iso-ts-12913-3-2019-a-3/the-four-extremes-of-p-and-e-divided-by-4-sqrt-32-are-plus-and-minus-1",
+      "domain": "soundscape-analysis-iso-ts-12913-3-2019-the-2025-edition-revises-annex-a",
+      "reference": {
+        "cite": "ISO/TS 12913-3:2019 A.3",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO/TS 12913-3",
+            "edition": "2019",
+            "clause": "A.3"
+          }
+        ]
+      },
+      "quantity": "The four extremes of P and E divided by 4 + sqrt(32) are plus and minus 1",
+      "kind": "count",
+      "expected": {
+        "value": 4.0,
+        "label": "4/4 normalised extremes at plus or minus 1"
+      },
+      "computed": {
+        "value": 4.0,
+        "label": "4/4 normalised extremes at plus or minus 1"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "soundscape-analysis-iso-ts-12913-3-2019-the-2025-edition-revises-annex-a/iso-ts-12913-3-2019-figure-a-1-formulas-a-1-and-a-2/each-attribute-raised-alone-moves-the-point-along-its-own-arrow-of-the-figure",
+      "domain": "soundscape-analysis-iso-ts-12913-3-2019-the-2025-edition-revises-annex-a",
+      "reference": {
+        "cite": "ISO/TS 12913-3:2019 Figure A.1, Formulas (A.1) and (A.2)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO/TS 12913-3",
+            "edition": "2019",
+            "clause": "Figure A.1, Formulas (A.1) and (A.2)"
+          }
+        ]
+      },
+      "quantity": "Each attribute raised alone moves the point along its own arrow of the figure",
+      "kind": "count",
+      "expected": {
+        "value": 8.0,
+        "label": "8/8 attribute axes of Figure A.1"
+      },
+      "computed": {
+        "value": 8.0,
+        "label": "8/8 attribute axes of Figure A.1"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "soundscape-analysis-iso-ts-12913-3-2019-the-2025-edition-revises-annex-a/iso-ts-12913-3-2019-formula-a-3/spearman-s-coefficient-without-ties-is-pearson-s-coefficient-of-the-ranks",
+      "domain": "soundscape-analysis-iso-ts-12913-3-2019-the-2025-edition-revises-annex-a",
+      "reference": {
+        "cite": "ISO/TS 12913-3:2019 Formula (A.3)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO/TS 12913-3",
+            "edition": "2019",
+            "clause": "Formula (A.3)"
+          }
+        ]
+      },
+      "quantity": "Spearman's coefficient without ties is Pearson's coefficient of the ranks",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.9300699300699302
+      },
+      "computed": {
+        "value": 0.9300699301
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": -1.11e-16
+      },
+      "precision": 10,
+      "verdict": "pass"
+    },
+    {
+      "id": "soundscape-analysis-iso-ts-12913-3-2019-the-2025-edition-revises-annex-a/iso-ts-12913-3-2019-formula-a-4-against-scipy-stats-spearmanr/spearman-s-coefficient-with-ties-on-93-real-ordinal-answers",
+      "domain": "soundscape-analysis-iso-ts-12913-3-2019-the-2025-edition-revises-annex-a",
+      "reference": {
+        "cite": "ISO/TS 12913-3:2019 Formula (A.4) against scipy.stats.spearmanr",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO/TS 12913-3",
+            "edition": "2019",
+            "clause": "Formula (A.4) against scipy.stats.spearmanr"
+          }
+        ]
+      },
+      "quantity": "Spearman's coefficient with ties, on 93 real ordinal answers",
+      "kind": "scalar",
+      "expected": {
+        "value": -0.38989175080149246
+      },
+      "computed": {
+        "value": -0.3898917508
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 10,
+      "verdict": "pass"
+    },
+    {
+      "id": "soundscape-analysis-iso-ts-12913-3-2019-the-2025-edition-revises-annex-a/iso-ts-12913-3-2019-a-4-against-scipy-stats-spearmanr/probability-value-of-spearman-s-coefficient-student-t-with-n-2-degrees-of-freedom",
+      "domain": "soundscape-analysis-iso-ts-12913-3-2019-the-2025-edition-revises-annex-a",
+      "reference": {
+        "cite": "ISO/TS 12913-3:2019 A.4 against scipy.stats.spearmanr",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO/TS 12913-3",
+            "edition": "2019",
+            "clause": "A.4 against scipy.stats.spearmanr"
+          }
+        ]
+      },
+      "quantity": "Probability value of Spearman's coefficient, Student t with n - 2 degrees of freedom",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0001221443974997434
+      },
+      "computed": {
+        "value": 0.00012214
+      },
+      "tolerance": {
+        "mode": "relative",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 8,
+      "verdict": "pass"
+    },
+    {
+      "id": "soundscape-analysis-iso-ts-12913-3-2019-the-2025-edition-revises-annex-a/iso-ts-12913-3-2019-formulas-b-1-and-b-2-against-scipy-stats-pearsonr/pearson-s-coefficient-with-the-covariance-over-n",
+      "domain": "soundscape-analysis-iso-ts-12913-3-2019-the-2025-edition-revises-annex-a",
+      "reference": {
+        "cite": "ISO/TS 12913-3:2019 Formulas (B.1) and (B.2) against scipy.stats.pearsonr",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO/TS 12913-3",
+            "edition": "2019",
+            "clause": "Formulas (B.1) and (B.2) against scipy.stats.pearsonr"
+          }
+        ]
+      },
+      "quantity": "Pearson's coefficient with the covariance over n",
+      "kind": "scalar",
+      "expected": {
+        "value": -0.3898445719434216
+      },
+      "computed": {
+        "value": -0.3898445719
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 1.11e-16
+      },
+      "precision": 10,
+      "verdict": "pass"
+    },
+    {
+      "id": "soundscape-analysis-iso-ts-12913-3-2019-the-2025-edition-revises-annex-a/iso-ts-12913-3-2019-b-2-against-scipy-stats-t-interval/upper-end-of-the-95-confidence-interval-of-a-method-b-mean",
+      "domain": "soundscape-analysis-iso-ts-12913-3-2019-the-2025-edition-revises-annex-a",
+      "reference": {
+        "cite": "ISO/TS 12913-3:2019 B.2 against scipy.stats.t.interval",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO/TS 12913-3",
+            "edition": "2019",
+            "clause": "B.2 against scipy.stats.t.interval"
+          }
+        ]
+      },
+      "quantity": "Upper end of the 95 % confidence interval of a Method B mean",
+      "kind": "scalar",
+      "expected": {
+        "value": 3.58920882754177
+      },
+      "computed": {
+        "value": 3.5892088275
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 10,
+      "verdict": "pass"
+    },
+    {
+      "id": "soundscape-analysis-iso-ts-12913-3-2019-the-2025-edition-revises-annex-a/iso-ts-12913-3-2019-table-d-1/metrics-of-each-parameter-and-the-representative-value-rule-as-printed",
+      "domain": "soundscape-analysis-iso-ts-12913-3-2019-the-2025-edition-revises-annex-a",
+      "reference": {
+        "cite": "ISO/TS 12913-3:2019 Table D.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO/TS 12913-3",
+            "edition": "2019",
+            "clause": "Table D.1"
+          }
+        ]
+      },
+      "quantity": "Metrics of each parameter and the representative-value rule, as printed",
+      "kind": "count",
+      "expected": {
+        "value": 24.0,
+        "label": "24/24 cells of Table D.1"
+      },
+      "computed": {
+        "value": 24.0,
+        "label": "24/24 cells of Table D.1"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "soundscape-analysis-iso-ts-12913-3-2019-the-2025-edition-revises-annex-a/iso-ts-12913-3-2019-d-2/representative-laeq-t-of-two-ears-6-db-apart-is-the-louder-ear-s",
+      "domain": "soundscape-analysis-iso-ts-12913-3-2019-the-2025-edition-revises-annex-a",
+      "reference": {
+        "cite": "ISO/TS 12913-3:2019 D.2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO/TS 12913-3",
+            "edition": "2019",
+            "clause": "D.2"
+          }
+        ]
+      },
+      "quantity": "Representative LAeq,T of two ears 6 dB apart is the louder ear's",
+      "kind": "scalar",
+      "expected": {
+        "value": 77.3003886927467
+      },
+      "computed": {
+        "value": 77.3004
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "soundscape-analysis-iso-ts-12913-3-2019-the-2025-edition-revises-annex-a/iso-ts-12913-2-2018-figures-c-2-to-c-6/response-categories-of-the-four-parts-of-method-a-and-the-eight-attributes",
+      "domain": "soundscape-analysis-iso-ts-12913-3-2019-the-2025-edition-revises-annex-a",
+      "reference": {
+        "cite": "ISO/TS 12913-2:2018 Figures C.2 to C.6",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO/TS 12913-2",
+            "edition": "2018",
+            "clause": "Figures C.2 to C.6"
+          }
+        ]
+      },
+      "quantity": "Response categories of the four parts of Method A, and the eight attributes",
+      "kind": "count",
+      "expected": {
+        "value": 33.0,
+        "label": "33/33 printed strings of Annex C"
+      },
+      "computed": {
+        "value": 33.0,
+        "label": "33/33 printed strings of Annex C"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "soundscape-analysis-iso-ts-12913-3-2019-the-2025-edition-revises-annex-a/iso-ts-12913-2-2018-a-3-f-with-iso-532-1-2017/root-mean-cubed-loudness-nrmc-of-an-ear-by-the-formula-of-the-note",
+      "domain": "soundscape-analysis-iso-ts-12913-3-2019-the-2025-edition-revises-annex-a",
+      "reference": {
+        "cite": "ISO/TS 12913-2:2018 A.3 f) with ISO 532-1:2017",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO/TS 12913-2",
+            "edition": "2018",
+            "clause": "A.3 f)"
+          },
+          {
+            "kind": "standard",
+            "designation": "ISO 532-1",
+            "edition": "2017",
+            "lead": " with ",
+            "relation": "supplies"
+          }
+        ]
+      },
+      "quantity": "Root mean cubed loudness Nrmc of an ear, by the formula of the NOTE",
+      "kind": "scalar",
+      "expected": {
+        "value": 18.245392454505843
+      },
+      "computed": {
+        "value": 18.245392
+      },
+      "tolerance": {
+        "mode": "relative",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 6,
       "verdict": "pass"
     },
     {

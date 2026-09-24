@@ -1,8 +1,8 @@
 # phonometry
 
-> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1373 numerical conformance checks against 471 standards enforced in CI.
+> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1387 numerical conformance checks against 473 standards enforced in CI.
 
-phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1373 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 93 domains.
+phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1387 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 94 domains.
 
 The project was published as **PyOctaveBand** until version 3.0.0. Third-party references and dependency pins still using that name refer to this library.
 
@@ -263,6 +263,7 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 - [Impulsive-sound prominence (NT ACOU 112)](https://jmrplens.github.io/phonometry/environment/assessment/impulsive-sound/)
 - [Spanish Noise Regulation (RD 1367/2007)](https://jmrplens.github.io/phonometry/environment/assessment/spanish-noise-regulation/)
 - [Impulsive sound exposure statistics (ISO 13474)](https://jmrplens.github.io/phonometry/environment/assessment/sel-distribution/)
+- [Soundscape analysis (ISO/TS 12913)](https://jmrplens.github.io/phonometry/environment/assessment/soundscape/)
 
 ### Outdoor sound
 
@@ -515,6 +516,8 @@ The generated API reference, one page per module. Fetch these only when a specif
 - [environment/outdoor-propagation](https://jmrplens.github.io/phonometry/reference/api/environment/outdoor-propagation/)
 - [environment/rating](https://jmrplens.github.io/phonometry/reference/api/environment/rating/)
 - [environment/refraction](https://jmrplens.github.io/phonometry/reference/api/environment/refraction/)
+- [environment/soundscape](https://jmrplens.github.io/phonometry/reference/api/environment/soundscape/)
+- [environment/soundscape-binaural](https://jmrplens.github.io/phonometry/reference/api/environment/soundscape-binaural/)
 - [environment/spain](https://jmrplens.github.io/phonometry/reference/api/environment/spain/)
 - [environment/statistical-pass-by](https://jmrplens.github.io/phonometry/reference/api/environment/statistical-pass-by/)
 - [environment/wind-turbine](https://jmrplens.github.io/phonometry/reference/api/environment/wind-turbine/)
@@ -26869,10 +26872,19 @@ exposure level, spreads it for turbulence, and reads off the long-term level,
 the rating level with the impulsive adjustment K, and the level exceeded by
 any percentage of the events.
 
+[Soundscape Analysis (ISO/TS 12913)](https://jmrplens.github.io/phonometry/environment/assessment/soundscape/)
+turns the question round: not how much sound arrives, but how the people
+there hear it. Its input is a questionnaire rather than a signal: the scale
+values and site medians of the ISO/TS 12913-2 questionnaire, the pleasantness
+and eventfulness of each site on the two-dimensional model of ISO/TS 12913-3,
+the correlations that link the answers to the measured levels, and the
+binaural analysis of the same place at both ears.
+
 Read Environmental Levels first, then the impulsive-sound page as the
 adjustment that feeds it, then the Spanish regulation as the national assembly
 of both. The exposure statistics page stands beside them for firing ranges,
-quarries and demolition, where the weather decides the level.
+quarries and demolition, where the weather decides the level, and the
+soundscape page for a study that asks the people who live with the sound.
 
 ## Pages in this section
 
@@ -26890,6 +26902,10 @@ quarries and demolition, where the weather decides the level.
 - [Spanish Noise Regulation (RD 1367/2007)](https://jmrplens.github.io/phonometry/environment/assessment/spanish-noise-regulation/):
   the corrected level LKeq, the Kt/Kf/Ki corrections, the evaluation periods
   and noise phases, and the immission limit tables.
+- [Soundscape Analysis (ISO/TS 12913)](https://jmrplens.github.io/phonometry/environment/assessment/soundscape/):
+  the questionnaire and its scale values, the pleasantness and eventfulness
+  of Figure A.1, the Spearman and Pearson correlations, the Method B
+  statistics, the binaural metrics of Table D.1 and the reporting record.
 
 ## See also
 
@@ -27063,6 +27079,203 @@ and the uncertainty budget of Annex B.
 - [Errata in published sources](https://jmrplens.github.io/phonometry/reference/errata/): the shift printed as 1,04 dB
   and the exceedance levels of Figure A.3.
 - API reference: [`environment.assessment.exposure_distribution`](https://jmrplens.github.io/phonometry/reference/api/environment/exposure-distribution/).
+
+---
+
+
+<!-- source: docs/environment/assessment/soundscape.md | canonical: https://jmrplens.github.io/phonometry/environment/assessment/soundscape/ -->
+Source: https://jmrplens.github.io/phonometry/environment/assessment/soundscape/
+
+# Soundscape analysis (ISO/TS 12913)
+
+A sound level tells how much sound arrives at a place, not whether the people
+there find it pleasant, busy, calming or annoying. A **soundscape** is the
+acoustic environment as a person perceives it, in context (ISO 12913-1), and
+this is the first page of the library whose input is a **questionnaire**
+rather than a signal. ISO/TS 12913-2:2018 prints the questionnaires and the
+minimum a study reports; ISO/TS 12913-3 turns the answers into numbers, places
+each site on a two-dimensional model of how pleasant and how eventful it
+sounds, correlates the answers with the acoustic data, and analyses a binaural
+recording of the same place.
+
+This page implements the **2019 edition of ISO/TS 12913-3**. A 2025 edition
+exists that revises Annex A, where the pleasantness and eventfulness formulas
+are; it has not been read for this implementation, so a study citing it should
+check those formulas against it.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/soundscape_pleasantness_eventfulness_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/soundscape_pleasantness_eventfulness.svg" alt="Eleven London sites on the two-dimensional model of ISO/TS 12913-3 Figure A.1, pleasantness against eventfulness with the eight attribute axes, and the rank of each site's pleasantness against the rank of its LAeq, r spearman = minus 0.638, p = 0.035" width="100%"></picture>
+
+## The questionnaire and its scale values
+
+Method A of ISO/TS 12913-2 (C.3.1) has four parts on five boxes each: the
+sources heard (Figure C.2, or the three-source Figure C.3), eight attributes of
+the perceived affective quality (Figure C.4), the overall quality (Figure C.5)
+and the appropriateness (Figure C.6). They are published as read-only tables,
+text as printed, with the scale values of ISO/TS 12913-3 Table A.1: parts 1
+and 4 run 1 to 5 from the left-hand box, parts 2 and 3 run **5 to 1**.
+
+```python
+from phonometry import environment
+
+part2 = environment.METHOD_A_SCALES[2]
+print(part2.figure, part2.categories[0], part2.scale_values)  # C.4 Strongly agree (5, 4, 3, 2, 1)
+print(environment.method_a_scale_values([1, 2, 5], part=2))  # [5. 4. 1.]
+
+answers = {"pleasant": [5, 4, 4, 2, 5], "annoying": [1, 2, 1, 4, 1]}
+summary = environment.method_a_summary(
+    answers, part=2, sites=["park", "park", "park", "road", "road"]
+)
+print(summary.medians.tolist())   # [[4.0, 1.0], [3.5, 2.5]]
+print(summary.ranges.tolist())    # [[1.0, 1.0], [3.0, 3.0]]
+```
+
+Every Method A scale is ordinal, so A.2 reports the median per site and item
+and the range. The questions of Figures C.2 to C.4 print "to what extend" and
+"reponse alternative"; the tables keep them, and the
+[errata register](https://jmrplens.github.io/phonometry/reference/errata/) has the entry.
+
+## Pleasantness and eventfulness
+
+Formulas (A.1) and (A.2) project the eight attributes onto two axes, with
+`cos 45°` weighting the two rotated ones:
+`P = (p - a) + cos 45° (ca - ch) + cos 45° (v - m)` and
+`E = (e - u) + cos 45° (ch - ca) + cos 45° (v - m)`. Equal answers sit at the
+origin and the extremes are `±(4 + √32) = ±9.66`; dividing by `4 + √32` maps
+the coordinates to ±1. The site point is the formulas applied to the site
+median of each attribute (A.2), or to its mean with `central_tendency="mean"`,
+which is the mean of the respondents' coordinates only when nobody left an
+attribute blank. The eleven London sites below were surveyed almost entirely
+with the English questionnaire; ten answers at four sites came from the
+database's Spanish version and are counted too.
+
+```python
+sites = ["Camden Town", "Euston Tap", "Marchmont Garden", "Pancras Lock",
+         "Regent's Park Fields", "Regent's Park Japan", "Russell Square",
+         "St Paul's Cross", "St Paul's Row", "Tate Modern", "Torrington Square"]
+# Site medians of the eight attributes (International Soundscape Database v1.0,
+# CC BY 4.0), in the order of Figure C.4: pleasant, chaotic, vibrant,
+# uneventful, calm, annoying, eventful, monotonous.
+medians = [
+    [3, 4, 4, 2, 2, 3, 4, 3], [2, 4, 3, 3, 2, 3, 3, 3], [4, 2, 3, 3, 4, 2, 3, 2],
+    [4, 3, 3, 2, 4, 2, 3, 2], [5, 2, 3, 3, 4, 1, 3, 2], [5, 1, 4, 3, 5, 1, 3, 2],
+    [4, 2, 4, 2, 4, 1, 3, 2], [4, 2.5, 4, 2, 4, 2, 3, 2], [4, 3, 4, 2, 3, 2, 3, 3],
+    [4, 3, 4, 2, 4, 2, 4, 2], [3, 4, 4, 3, 2, 3, 3, 2],
+]
+laeq_db = [69.96, 69.45, 55.14, 59.02, 53.12, 59.74, 66.12, 61.83, 63.34, 63.00, 63.51]
+
+pe = environment.pleasantness_eventfulness(medians, sites=sites)
+print(round(pe.normalized_pleasantness[5], 2), round(pe.normalized_eventfulness[5], 2))  # 0.85 -0.15
+pe.plot()  # the model of Figure A.1
+```
+
+A.3 says the formulas process "the results from part 3"; the attributes they
+read are part 2, which is what the library uses (see the
+[errata register](https://jmrplens.github.io/phonometry/reference/errata/)).
+
+## Linking the ratings to the acoustic data
+
+For ordinal data A.4 prescribes Spearman's coefficient, Formula (A.3) without
+ties and (A.4) with them; for interval data B.3 prescribes Pearson's, Formulas
+(B.1) and (B.2), whose covariance divides by `n`. Both come with the
+probability value of the Student statistic with `n - 2` degrees of freedom.
+
+```python
+rho = environment.spearman_rank_correlation(pe.pleasantness, laeq_db)
+print(rho.formula, round(rho.coefficient, 3), round(rho.p_value, 3))  # (A.4) -0.638 0.035
+r = environment.pearson_correlation(pe.pleasantness, laeq_db)
+print(r.formula, round(r.coefficient, 3), round(r.p_value, 3))  # (B.1) -0.66 0.027
+```
+
+Formula (A.3) is printed with a stray factor 1 before its fraction, read as the
+typesetting remnant it is; the where-list of (A.4) garbles the definitions of
+the tie counts `t_j` and `k(x)`, read as the size and the number of the groups
+of tied values; and the where-list of (B.2) prints `x_I` for `x_i`.
+
+## Method B
+
+The continuous-category scales of Figure C.7 take a value from 1 to 5 with one
+decimal; B.2 reports their mean, standard deviation and 95 % confidence
+interval per site, and the median and range of the rank of each recognised
+source. The text of C.3.2.3 speaks of three scales where the figure prints
+four; `METHOD_B_SCALES` holds all four.
+
+```python
+print(environment.method_b_scale_values([0.0, 0.37, 1.0]))  # [1.  2.5 5. ]
+ratings = {"How loud is it here?": [3.9, 4.2, 3.1, 4.4, 3.6, 4.0]}
+b = environment.method_b_summary(ratings)
+print(round(b.confidence_lower[0, 0], 2), round(b.confidence_upper[0, 0], 2))  # 3.38 4.35
+```
+
+## The binaural analysis
+
+Every metric of ISO/TS 12913-3 Table D.1 is determined at each ear of an
+equalized, calibrated two-channel recording, and the higher of the two is the
+representative value (D.2): the levels `LAeq,T`, `LCeq,T`, `LAF5,T`,
+`LAF95,T`; the ISO 532-1 loudness `N5`, `Naverage`, `Nrmc`, `N95` and the ratio
+`N5/N95` (`Nrmc` by the formula of the NOTE under ISO/TS 12913-2 A.3 f), whose
+text says "the exponent 3" where the formula applies 1/3); and the ECMA-418-2
+tonality, roughness `R10`, `R50` and fluctuation
+strength `F10`, `F50`. The time-varying sharpness `S5`, `Saverage`, `S95` is
+reported as not implemented, because the library's DIN 45692 sharpness is
+stationary. A recording under 3 min or sampled below 44.1 kHz raises a
+`SoundscapeWarning` (ISO/TS 12913-2 D.3, D.6).
+
+```python
+import warnings
+
+import numpy as np
+
+fs = 48_000
+rng = np.random.default_rng(12913)
+t = np.arange(8 * fs) / fs
+background = 0.02 * rng.standard_normal(t.size)
+swell = np.exp(-0.5 * ((t - 4.0) / 0.9) ** 2)
+vehicle = 0.08 * rng.standard_normal(t.size)
+left = background + swell * vehicle
+right = 0.9 * background + 10 ** (-3 / 20) * np.roll(swell, int(0.3 * fs)) * vehicle
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore", environment.SoundscapeWarning)
+    bi = environment.binaural_indicators(
+        np.vstack([left, right]), fs, parameters=("sound_pressure_level", "loudness", "sharpness")
+    )
+print(round(bi.representative("LAeq,T"), 1), round(bi.representative("N5"), 1))  # 63.5 22.2
+print(sorted(bi.not_implemented))  # ['S5', 'S95', 'Saverage']
+bi.plot(parameter="loudness")
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/soundscape_binaural_indicators_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/soundscape_binaural_indicators.svg" alt="The sound pressure levels and the loudness of Table D.1 at the left and right ears of a synthetic street recording, with the higher ear marked as the representative value and N5/N95 of 2.27 and 2.01" width="100%"></picture>
+
+## The report
+
+`SoundscapeReport` holds the minimum reporting requirements of ISO/TS 12913-2
+Annex A (normative): the participants (A.2), the acoustic environment with the
+seven results of A.3 f), which `bi.reporting_results()` provides, and the data
+collection (A.4). A record with a required item missing is refused, and the
+error names its clause.
+
+## What this guide covers
+
+Implemented: the scale values and ordinal statistics of ISO/TS 12913-3 Annex
+A, Formulas (A.1) to (A.4) with probability values, the Method B statistics and
+Formulas (B.1) and (B.2) of Annex B, the binaural metrics of Table D.1 the
+library implements with the representative values of D.2, the questionnaires
+of ISO/TS 12913-2 Annex C, its Annex D recording checks and its Annex A
+reporting record. Not implemented: the 2025 edition of ISO/TS 12913-3, the
+time-varying sharpness of Table D.1, the qualitative analyses, triangulation,
+laboratory studies, clustering and psychoacoustic maps, and the binaural
+measurement protocol of ISO/TS 12913-2 D.7.
+
+## See also
+
+- [Environmental levels](https://jmrplens.github.io/phonometry/environment/assessment/environmental-levels/): the ISO 1996-1 framework
+  the levels of Table D.1 are defined in.
+- [Integrated and statistical levels](https://jmrplens.github.io/phonometry/signals/levels/levels/): the
+  level and percentile functions the binaural analysis reads at each ear.
+- [Errata in published sources](https://jmrplens.github.io/phonometry/reference/errata/): part 3 for part 2, the stray
+  factor of Formula (A.3), the where-lists of (A.4) and (B.2), the exponent of
+  the Nrmc NOTE, three scales for four, and the questionnaire misspellings.
+- API reference: [`environment.assessment.soundscape`](https://jmrplens.github.io/phonometry/reference/api/environment/soundscape/)
+  and [`environment.assessment.soundscape_binaural`](https://jmrplens.github.io/phonometry/reference/api/environment/soundscape-binaural/).
 
 ---
 
@@ -27433,8 +27646,10 @@ The **assessment** pages handle what happens once the sound has arrived: the
 ISO 1996 rating level and the day-evening-night indicators, their Spanish
 application in RD 1367/2007, the NT ACOU 112 adjustment that quantifies when
 impulsive character makes a received sound more annoying than its LAeq suggests,
-and the ISO 13474 distribution that says how often a distant blast is heard at
-each sound exposure level as the weather between source and receiver changes.
+the ISO 13474 distribution that says how often a distant blast is heard at
+each sound exposure level as the weather between source and receiver changes,
+and the ISO/TS 12913 soundscape analysis that asks the people there how they
+hear it.
 
 The **source** pages handle the other end: what emits, described the way an
 environmental model wants it. CNOSSOS-EU gives road traffic and railways a
@@ -27481,6 +27696,10 @@ What the received sound is rated against, once it has arrived.
   how often a distant blast is how loud: the long-term and rating levels of
   its sound exposure level over the replica atmospheres, the distribution
   spread for turbulence and the level exceeded by any share of the events.
+- [Soundscape Analysis (ISO/TS 12913)](https://jmrplens.github.io/phonometry/environment/assessment/soundscape/):
+  how the people there hear it: the questionnaire and its scale values, the
+  pleasantness and eventfulness of each site, their correlation with the
+  measured levels and the binaural metrics at both ears.
 
 ## [Outdoor sound](https://jmrplens.github.io/phonometry/environment/propagation/)
 
@@ -43245,6 +43464,36 @@ documents, one page per module.
 | `turbulence_level_shift` | `function` | **Shift Δμ of each Gaussian subclass, σ² ln 10 / 20 (ISO 13474 Equation (22) in closed form).**<br>• `sigma_db`: standard deviation of the turbulent spread [dB] | `environment.turbulence_level_shift(5.0)  # 2.878`<br><br>• [dB] |
 | `sel_distribution` | `function` | **Statistical distribution of the single-event sound exposure level (ISO 13474:2009 clause 5, Equations (10) to (25)).**<br>• `levels_db`: L_E,w of each replica atmosphere [dB], any shape<br>• `probabilities`: same shape, summing to one<br>• `sigma_db`: turbulent spread [dB] (Default: 5.0, the value clause 5 says is typical)<br>• `subclasses`: N_sub per class (Default: 10, as Annex A) | `d = environment.sel_distribution(levels_db, p)`<br><br>• `SelDistribution` |
 | `SelDistribution` | `dataclass` | **The ISO 13474 distribution: sorted classes, their boundaries and densities, and the spread density.**<br>• `levels_db`, `probabilities`, `lower_bounds_db` / `upper_bounds_db` [dB], `class_densities_per_db` [1/dB] (Equations (10) to (15))<br>• `subclass_centres_db` [dB], `sigma_db`, `level_shift_db` [dB], `subclasses` (Equations (17) to (22))<br>• `long_term_level_db` (Equation (7), LT1) and `distribution_long_term_level_db` (Equation (A.4), LT2) [dB]<br>• `replicas`: the input replicas of each class<br>• `.class_density(x_db)`, `.density(x_db)`, `.exceedance(x_db)` (Equation (24)), `.exceedance_level(percent)` (Equation (25))<br>• `.plot(view='classes' / 'density' / 'exceedance')` | `d.exceedance_level(50.0)  # 31.5 dB`<br>`d.plot(view='exceedance')` |
+| `PERCEIVED_AFFECTIVE_QUALITY_ATTRIBUTES` | `constant` | **The eight attributes of the perceived affective quality, part 2 of Method A (ISO/TS 12913-2 Figure C.4), in printed order.**<br>pleasant, chaotic, vibrant, uneventful, calm, annoying, eventful, monotonous: the variables p, ch, v, u, ca, a, e, m of ISO/TS 12913-3 Formulas (A.1) and (A.2) | `environment.PERCEIVED_AFFECTIVE_QUALITY_ATTRIBUTES[0]  # 'pleasant'` |
+| `QuestionnaireScale` | `dataclass` | **One scale of the soundscape questionnaire as ISO/TS 12913-2 Annex C prints it (misprints included).**<br>• `method` (`"A"`/`"B"`), `part`, `figure`, `subject`<br>• `question`, `instruction`, `items`<br>• `categories`: left to right, `scale_values`: Table A.1 or B.1<br>• `continuous`: a mark anywhere on the scale (Method B) | `environment.METHOD_A_SCALES[2].categories[0]  # 'Strongly agree'` |
+| `METHOD_A_SCALES` | `mapping` | **Method A of ISO/TS 12913-2 (C.3.1), part number to `QuestionnaireScale`.**<br>1: sound source identification (Figure C.2), 2: perceived affective quality (C.4), 3: assessment of the surrounding sound environment (C.5), 4: appropriateness (C.6); scale values of ISO/TS 12913-3 Table A.1 (parts 1 and 4 run 1 to 5 from the left, parts 2 and 3 run 5 to 1) | `environment.METHOD_A_SCALES[3].scale_values  # (5, 4, 3, 2, 1)` |
+| `METHOD_A_ALTERNATIVE_PART_1` | `constant` | **Figure C.3 of ISO/TS 12913-2, the three-source alternative to Figure C.2 for part 1.**<br>A `QuestionnaireScale` with the categories and scale values of Figure C.2 | `environment.METHOD_A_ALTERNATIVE_PART_1.items[0]` |
+| `METHOD_B_SCALES` | `constant` | **The four continuous-category scales of Figure C.7, part 1 of Method B (ISO/TS 12913-2 C.3.2.3).**<br>A tuple of `QuestionnaireScale`: loud, unpleasant, appropriate, visit again; scale value 1 at the left-hand tick to 5 at the right-hand one (Table B.1) | `environment.METHOD_B_SCALES[0].question  # 'How loud is it here?'` |
+| `METHOD_B_MAXIMUM_SOURCES` | `constant` | **The most sound sources a participant may rank in part 2 of Method B (ISO/TS 12913-2 C.3.2.4).** | `environment.METHOD_B_MAXIMUM_SOURCES  # 8` |
+| `PLEASANTNESS_EVENTFULNESS_RANGE` | `constant` | **Half-range of the coordinates of Formulas (A.1) and (A.2), 4 + √32 ≈ 9.66 (ISO/TS 12913-3 A.3).**<br>Dividing by it maps P and E to ±1 | `environment.PLEASANTNESS_EVENTFULNESS_RANGE  # 9.657` |
+| `method_a_scale_values` | `function` | **Scale value of a ticked Method A box (ISO/TS 12913-3 Table A.1).**<br>• `positions`: box counted from the left, 1 to 5 (NaN for a blank)<br>• `part`: 1 to 4 (parts 2 and 3 run 5 to 1) | `environment.method_a_scale_values([1, 5], part=2)  # [5., 1.]` |
+| `method_a_summary` | `function` | **Median and range of Method A scale values per site and item (ISO/TS 12913-3 A.2, Table A.1).**<br>• `scale_values`: mapping item to values, 1-D array (parts 3, 4) or `(responses, items)` array<br>• `part`: 1 to 4<br>• `sites`: site of each response (Default: one site `"all"`) | `s = environment.method_a_summary(values, part=2, sites=sites)`<br><br>• `MethodASummary` |
+| `MethodASummary` | `dataclass` | **Ordinal statistics of Method A per site and item.**<br>• `part`, `items`, `sites`<br>• `medians`, `minima`, `maxima`, `ranges`, `counts`: shape `(sites, items)`<br>• `.plot()` | `s.medians[0], s.ranges[0]` |
+| `pleasantness_eventfulness` | `function` | **Pleasantness P and eventfulness E per respondent and per site (ISO/TS 12913-3 A.3, Formulas (A.1) and (A.2)).**<br>• `scale_values`: the eight attributes of part 2, mapping or `(respondents, 8)` array, 5 = strongly agree<br>• `sites`: site of each respondent (Default: one site `"all"`)<br>• `central_tendency`: `"median"` (A.2) or `"mean"` of each attribute per site | `pe = environment.pleasantness_eventfulness(values, sites=sites)`<br><br>• `PleasantnessEventfulness` |
+| `PleasantnessEventfulness` | `dataclass` | **The two soundscape dimensions of Figure A.1.**<br>• `sites`, `attribute_values`: per-site statistic of each attribute<br>• `pleasantness`, `eventfulness`: per site, in ±9.66<br>• `respondent_pleasantness`, `respondent_eventfulness`, `respondent_sites`, `respondent_counts`<br>• `.normalized_pleasantness`, `.normalized_eventfulness`: in ±1<br>• `.plot(normalized=True, respondents=False)`: the model of Figure A.1 | `pe.normalized_pleasantness`<br>`pe.plot(respondents=True)` |
+| `spearman_rank_correlation` | `function` | **Spearman's rank correlation for ordinal data (ISO/TS 12913-3 A.4, Formula (A.3) untied, (A.4) tied).**<br>• `x`, `y`: paired values, at least three pairs<br>• `alternative`: `"two-sided"` (Default), `"greater"`, `"less"` | `c = environment.spearman_rank_correlation(site_p, laeq)`<br><br>• `SoundscapeCorrelation` with r and its p-value (Student t, n − 2 degrees of freedom) |
+| `pearson_correlation` | `function` | **Pearson's correlation for interval data (ISO/TS 12913-3 B.3, Formulas (B.1) and (B.2), covariance over n).**<br>• `x`, `y`: paired values, at least three pairs<br>• `alternative`: `"two-sided"` (Default), `"greater"`, `"less"` | `c = environment.pearson_correlation(mean_rating, laeq)`<br><br>• `SoundscapeCorrelation` |
+| `SoundscapeCorrelation` | `dataclass` | **A correlation coefficient with its probability value.**<br>• `method`: `"spearman"` / `"pearson"`, `formula`: `"(A.3)"`, `"(A.4)"` or `"(B.1)"`<br>• `coefficient`, `p_value`, `t_statistic`, `degrees_of_freedom`, `alternative`<br>• `x`, `y`, `x_ranks`, `y_ranks` (Spearman), `.n`<br>• `.plot()` | `c.coefficient, c.p_value` |
+| `method_b_scale_values` | `function` | **Scale value of a mark on a Method B continuous-category scale, 1 + 4f to one decimal (ISO/TS 12913-3 B.2).**<br>• `marked_fraction`: position from the left-hand tick (0) to the right-hand one (1) | `environment.method_b_scale_values(0.62)  # 3.5` |
+| `method_b_summary` | `function` | **Mean, standard deviation and confidence interval of Method B ratings per site (ISO/TS 12913-3 B.2, Table B.1).**<br>• `scale_values`: mapping scale to values, 1-D array or `(responses, scales)` array of the Figure C.7 scales<br>• `sites`: site of each response<br>• `confidence_level` (Default: 0.95) | `b = environment.method_b_summary(values, sites=sites)`<br><br>• `MethodBSummary` |
+| `MethodBSummary` | `dataclass` | **Interval statistics of Method B per site and scale.**<br>• `items`, `sites`<br>• `means`, `standard_deviations` (n − 1), `confidence_lower` / `confidence_upper` (Student t), `medians`, `counts`<br>• `confidence_level`<br>• `.plot()` | `b.means[0], b.confidence_upper[0]` |
+| `method_b_source_ranking` | `function` | **Median and range of the rank of each recognised sound source (ISO/TS 12913-3 B.2, ISO/TS 12913-2 C.3.2.4).**<br>• `rankings`: per participant, the sources listed, most noticeable first, at most eight<br>• `sites`: site of each participant | `r = environment.method_b_source_ranking([["traffic", "birds"], ["birds"]])`<br><br>• `SourceRanking` |
+| `SourceRanking` | `dataclass` | **Ordinal statistics of the source ranking per site.**<br>• `sources`, `sites`, `participants`<br>• `median_ranks`, `lowest_ranks`, `highest_ranks`, `rank_ranges`, `mentions`: shape `(sites, sources)`<br>• `.plot()` | `r.sources, r.median_ranks[0]` |
+| `SoundscapeParticipants` | `dataclass` | **ISO/TS 12913-2 A.2 a) to e): how the participants were selected, residents or visitors, lay or expert, age and gender distribution, other relevant information.**<br>Every item required; an empty one raises naming its clause | `environment.SoundscapeParticipants(selection="...", ...)` |
+| `SoundscapeAcousticEnvironment` | `dataclass` | **ISO/TS 12913-2 A.3 a) to h): the studied acoustic environment.**<br>• `environment_type`: `"real"`, `"recorded"`, `"virtual"`<br>• `sound_sources`, `weather_and_wind`, `time_of_year_and_day`, `measurement_points`<br>• `measurement_results`: the seven results of A.3 f) by symbol (LAeq,T, LCeq,T, LAF5,T, LAF95,T, N5, N95, Nrmc)<br>• `site_description` (field or recorded), `recording_and_reproduction` (recorded or virtual) | `environment.SoundscapeAcousticEnvironment(..., measurement_results=bi.reporting_results())` |
+| `SoundscapeDataCollection` | `dataclass` | **ISO/TS 12913-2 A.4 a) to e): how the perception data were collected.**<br>• `methods`, `questions`, `language`, `instrument_copy` (required)<br>• `rating_scale_construction`, `behaviour_observation` (when the study used them) | `environment.SoundscapeDataCollection(methods="...", ...)` |
+| `SoundscapeReport` | `dataclass` | **The minimum reporting requirements of ISO/TS 12913-2 Annex A (normative), checked when built.**<br>• `participants` (A.2), `acoustic_environment` (A.3), `data_collection` (A.4) | `environment.SoundscapeReport(participants, environment_record, collection)` |
+| `BINAURAL_PARAMETERS` | `mapping` | **ISO/TS 12913-3 Table D.1, row name to `BinauralParameter`.**<br>`"sound_pressure_level"`, `"loudness"`, `"sharpness"`, `"tonality"`, `"roughness"`, `"fluctuation_strength"` | `environment.BINAURAL_PARAMETERS["loudness"].metrics` |
+| `BinauralParameter` | `dataclass` | **One row of Table D.1.**<br>• `parameter`, `metrics` (the printed symbols), `average_allowed`, `reference` | `environment.BINAURAL_PARAMETERS["roughness"].reference  # '[32]'` |
+| `binaural_indicators` | `function` | **Every metric of ISO/TS 12913-3 Table D.1 at each ear, with the representative value of D.2.**<br>• `x`: equalized binaural recording `(2, samples)`, left first, or a two-channel `Signal`<br>• `fs` [Hz], `calibration_factor` (to Pa)<br>• `field`: `"free"` (Default) or `"diffuse"`<br>• `parameters`: rows of Table D.1 (Default: all)<br>• sharpness S5/Saverage/S95 reported as not implemented; recordings under 3 min or 44.1 kHz emit `SoundscapeWarning` | `bi = environment.binaural_indicators(x, 48000, parameters=("sound_pressure_level", "loudness"))`<br><br>• `BinauralIndicators` |
+| `BinauralIndicators` | `dataclass` | **The binaural analysis of a recording.**<br>• `metrics`: symbol to `BinauralMetric`, in Table D.1 order<br>• `not_implemented`: symbol to the reason<br>• `parameters`, `fs` [Hz], `duration_s` [s], `field`<br>• `.representative(symbol)`, `.reporting_results()` (ISO/TS 12913-2 A.3 f))<br>• `.plot(parameter=None)` | `bi.representative("LAeq,T")`<br>`bi.plot(parameter="loudness")` |
+| `BinauralMetric` | `dataclass` | **One metric at both ears.**<br>• `symbol`, `parameter`, `left`, `right`, `unit`, `method`<br>• `.representative`: the higher ear (D.2), `.mean`: their average | `bi.metrics["N5"].representative` |
+| `SoundscapeWarning` | `warning class` | **ISO/TS 12913-2 Annex D advisory.**<br>Emitted for a recording shorter than the 3 min of D.3 or sampled below the 44.1 kHz of D.6 | `warnings.simplefilter('error', SoundscapeWarning)` |
 | `multiple_shock_assessment` | `function` | **Full multiple-shock assessment from seat acceleration (ISO 2631-5:2018).**<br>• `acceleration`: vertical seat az(t) [m/s²], `fs` [Hz]<br>• `start_age`: years, `years`: exposure years, `days_per_year`<br>• `exposure_time` / `measurement_time`: scale Dz to a daily dose (Default: None)<br>• `sex`: 'male'/'female' (Default: 'male')<br>• `mz`: MPa per m/s² (Default: sex-specific) | `res = vibration.multiple_shock_assessment(az, fs, start_age=25, years=30, days_per_year=220)`<br><br>• `MultipleShockResult` |
 | `seat_to_spine_transfer` | `function` | **Seat-to-spine transfer function H(ω) (clause 5.2 Formula 1).**<br>• `frequencies` [Hz] | `H = vibration.seat_to_spine_transfer(freqs)`<br><br>• Complex response; unity at 0 Hz |
 | `spinal_response` | `function` | **Vertical spinal response Az(t) (Formula 2).**<br>• `acceleration`: seat az(t) [m/s²]<br>• `fs` [Hz] | `Az = vibration.spinal_response(az, fs)`<br><br>• Same length as the input [m/s²] |
@@ -58864,7 +59113,7 @@ the normative PDF fiche.
 - [Filter Architecture Gallery](https://jmrplens.github.io/phonometry/signals/filters/filter-gallery/): choose an architecture and inspect responses
 - [Calibration and dBFS](https://jmrplens.github.io/phonometry/signals/metrology/calibration/): get real-world SPL values
 - [Why phonometry](https://jmrplens.github.io/phonometry/start/why-phonometry/): the conformance-first design philosophy
-- [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): the expected and computed value of all 1373 checks
+- [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): the expected and computed value of all 1387 checks
 - [API Reference](https://jmrplens.github.io/phonometry/reference/api/): every parameter of every function
 - [Bibliography](https://jmrplens.github.io/phonometry/reference/bibliography/): the books and papers behind every guide, each with a verified link
 
@@ -59836,7 +60085,7 @@ sample from the metrology core:
 | IEC 61252:1993 | The personal sound exposure quantities, `sound_exposure()` and the normalized 8 h level `lex_8h()`; IEC 61252:2025 has since superseded this print, and the transcription still targets the 1993+A2 text | `tests/signals/test_levels.py` |
 
 The same discipline applies far beyond the metrology core: today the suite runs
-1373 numerical conformance checks across 93 domains and 471 standards, covering
+1387 numerical conformance checks across 94 domains and 473 standards, covering
 psychoacoustics and speech intelligibility, room, building and materials
 acoustics, human and machine vibration, environmental, aircraft, rotorcraft
 and underwater noise, electroacoustics, broadcast loudness, industrial noise

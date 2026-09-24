@@ -52,10 +52,19 @@ exposure level, spreads it for turbulence, and reads off the long-term level,
 the rating level with the impulsive adjustment K, and the level exceeded by
 any percentage of the events.
 
+[Soundscape Analysis (ISO/TS 12913)](soundscape.md)
+turns the question round: not how much sound arrives, but how the people
+there hear it. Its input is a questionnaire rather than a signal: the scale
+values and site medians of the ISO/TS 12913-2 questionnaire, the pleasantness
+and eventfulness of each site on the two-dimensional model of ISO/TS 12913-3,
+the correlations that link the answers to the measured levels, and the
+binaural analysis of the same place at both ears.
+
 Read Environmental Levels first, then the impulsive-sound page as the
 adjustment that feeds it, then the Spanish regulation as the national assembly
 of both. The exposure statistics page stands beside them for firing ranges,
-quarries and demolition, where the weather decides the level.
+quarries and demolition, where the weather decides the level, and the
+soundscape page for a study that asks the people who live with the sound.
 
 ## Pages in this section
 
@@ -73,6 +82,10 @@ quarries and demolition, where the weather decides the level.
 - [Spanish Noise Regulation (RD 1367/2007)](spanish-noise-regulation.md):
   the corrected level LKeq, the Kt/Kf/Ki corrections, the evaluation periods
   and noise phases, and the immission limit tables.
+- [Soundscape Analysis (ISO/TS 12913)](soundscape.md):
+  the questionnaire and its scale values, the pleasantness and eventfulness
+  of Figure A.1, the Spearman and Pearson correlations, the Method B
+  statistics, the binaural metrics of Table D.1 and the reporting record.
 
 ## See also
 

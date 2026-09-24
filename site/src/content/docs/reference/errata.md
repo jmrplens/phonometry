@@ -2231,6 +2231,192 @@ in the same order.
   printed 31,5 dB; the other four printed levels have no conformance check.
 - **Status:** unreported.
 
+## ISO/TS 12913-3:2019, Annex A.3 (the perceived affective quality called part 3)
+
+- **Location:** Annex A (informative), A.3, the paragraph that introduces
+  Formulas (A.1) and (A.2).
+- **The print:** "The results from part 3 (see A.1) are further processed to
+  derive the values on two dimensions (pleasantness and eventfulness) for each
+  site."
+- **The problem:** the eight attributes the two formulas read (annoying, calm,
+  chaotic, eventful, monotonous, pleasant, uneventful, vibrant) are the
+  perceived affective quality, which is part 2 of the Method A questionnaire
+  everywhere else the documents name it: in Table A.1 on the page before
+  ("2 (perceived affective quality)"), in the A.2 paragraph that assigns its
+  scale values 5 to 1 ("questionnaire part 2 (see Figure C.4 ...)"), in the
+  title of A.3 itself ("based on perceived affective quality responses"), and
+  in ISO/TS 12913-2:2018, C.3.1.3 and Figure C.4, "Questionnaire part 2:
+  Perceived affective quality". Part 3 is the single overall rating of
+  Figure C.5, "Overall, how would you describe the present surrounding sound
+  environment?", which has no attributes and cannot feed either formula. The
+  cross-reference "(see A.1)" does not help: A.1 is the general clause and
+  names no part. The sentence should read "part 2 (see A.2 and Table A.1)".
+- **Evidence:** the sentence on PDF page 11 (printed p. 5), Table A.1 and the
+  A.2 paragraphs on PDF page 10 (printed p. 4), both of ISO/TS 12913-3:2019
+  (first edition, 2019-12); C.3.1.3 on PDF page 21 (printed p. 15) and
+  Figures C.4 and C.5 on PDF page 22 (printed p. 16) of ISO/TS 12913-2:2018
+  (first edition).
+- **Library behaviour:** `pleasantness_eventfulness` applies Formulas (A.1)
+  and (A.2) to the eight attributes of part 2, the only reading under which
+  they can be evaluated
+  ([`soundscape.py`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/environment/assessment/soundscape.py)).
+  No change was required. The 2025 edition of ISO/TS 12913-3 revises Annex A
+  and has not been checked for this entry.
+- **Status:** unreported.
+
+## ISO/TS 12913-3:2019, Formula (A.3) (a stray factor 1)
+
+- **Location:** Annex A (informative), A.4, Formula (A.3), Spearman's rank
+  correlation coefficient for untied ranks.
+- **The print:**
+  $r_\mathrm{spearman} = 1 - 1\,\dfrac{6\cdot\sum_{i=1}^{n} d_i^2}{n\cdot(n^2 - 1)}$,
+  with a "1" standing between the minus sign and the fraction.
+- **The problem:** the coefficient for untied ranks is
+  $1 - 6\sum d_i^2 / \left[n(n^2 - 1)\right]$, which is what the page gives if
+  the stray "1" is read as a factor of one. Read the way a mixed number is
+  written, $1\,\tfrac{a}{b} = 1 + \tfrac{a}{b}$, it would give
+  $r = -6\sum d_i^2 / \left[n(n^2 - 1)\right]$, which is zero for identical
+  rankings instead of one. Formula (A.4) on the same page reduces to the
+  usual coefficient when there are no ties, so the intended form is not in
+  doubt; the "1" is a typesetting remnant.
+- **Evidence:** Formula (A.3) on PDF page 12 (printed p. 6) of
+  ISO/TS 12913-3:2019 (first edition, 2019-12).
+- **Library behaviour:** `spearman_rank_correlation` evaluates
+  $1 - 6\sum d_i^2 / \left[n(n^2 - 1)\right]$ without ties and Formula (A.4)
+  with them; the conformance rows hold the first to Pearson's coefficient of
+  the ranks and the second to `scipy.stats.spearmanr`
+  ([`soundscape.py`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/environment/assessment/soundscape.py)).
+  No change was required.
+- **Status:** unreported.
+
+## ISO/TS 12913-3:2019, Formula (A.4) (the where-list of the tie counts)
+
+- **Location:** Annex A (informative), A.4, the where-list under Formula
+  (A.4), Spearman's rank correlation coefficient for tied ranks.
+- **The print:** "$t_j$ is the number of in $t_j$ tied ranks of the variable
+  $x$; $u_j$ is the number of in $u_j$ tied ranks of the variable $y$;
+  $k(x)$ and $k(y)$ are the numbers of tied ranks of the variables $x$ and
+  $y$", under
+  $T = \sum_{j=1}^{k(x)} (t_j^3 - t_j)/12$ and
+  $U = \sum_{j=1}^{k(y)} (u_j^3 - u_j)/12$.
+- **The problem:** the first two definitions are not sentences ("the number
+  of in $t_j$ tied ranks") and define $t_j$ by itself. The sums need $t_j$
+  to be the number of values sharing the $j$-th tied rank of $x$ ($u_j$ the
+  same for $y$), and $k(x)$, $k(y)$ to be the number of such groups of ties
+  in each variable, which "the numbers of tied ranks" does not say. The
+  intended reading is the usual tie correction of Spearman's coefficient,
+  which is what makes (A.4) Pearson's coefficient of the average ranks.
+- **Evidence:** the where-list on PDF page 13 (printed p. 7), under Formula
+  (A.4) on PDF page 12 (printed p. 6), of ISO/TS 12913-3:2019 (first
+  edition, 2019-12).
+- **Library behaviour:** `spearman_rank_correlation` sums
+  $(t_j^3 - t_j)/12$ over the groups of equal values of each variable, and a
+  conformance row holds Formula (A.4) so read to `scipy.stats.spearmanr` on
+  93 real answers with heavy ties
+  ([`soundscape.py`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/environment/assessment/soundscape.py)).
+  No change was required.
+- **Status:** unreported.
+
+## ISO/TS 12913-3:2019, Formula (B.2) ($x_I$ for $x_i$)
+
+- **Location:** Annex B (informative), B.3, the where-list under Formula
+  (B.2), the covariance of Pearson's correlation coefficient.
+- **The print:** "$\bar{x}$ is the arithmetic mean value of the array $x_I$;"
+  with a capital $I$, followed by "$\bar{y}$ is the arithmetic mean value of
+  the array $y_i$;".
+- **The problem:** the index is the lower-case $i$ of the sum in (B.2),
+  $\sum_{i=1}^{n} (x_i - \bar{x})(y_i - \bar{y})/n$, and of the line for
+  $\bar{y}$ just under it; $x_I$ names no array of the annex.
+- **Evidence:** the where-list on PDF page 15 (printed p. 9) of
+  ISO/TS 12913-3:2019 (first edition, 2019-12).
+- **Library behaviour:** `pearson_correlation` takes $\bar{x}$ as the mean of
+  the $x_i$ ([`soundscape.py`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/environment/assessment/soundscape.py)).
+  No change was required.
+- **Status:** unreported.
+
+## ISO/TS 12913-2:2018, A.3 f), NOTE (exponent 3 for a cube root)
+
+- **Location:** Annex A (normative), A.3 f), the NOTE on the root mean cubed
+  loudness $N_\mathrm{rmc}$.
+- **The print:** "The root mean cubed loudness (cubic mean), Nrmc, is
+  computed by determining the mean of all loudness values raised to the power
+  of 3 with a subsequent application of the exponent 3 as shown in the
+  following formula:
+  $N_\mathrm{rmc} = \sqrt[3]{\frac{1}{n}\sum_{i=1}^{n} N_i^3}$".
+- **The problem:** the text and the formula under it disagree. The formula
+  takes the cube root of the mean of the cubes, a subsequent exponent of
+  $1/3$, which is what a cubic mean is and what returns a loudness in sone;
+  the text says the subsequent exponent is 3, which would give the mean cube
+  raised to the third power, $\left(\frac{1}{n}\sum N_i^3\right)^3$, in
+  sone to the ninth. The sentence should read "a subsequent application of
+  the exponent 1/3". ISO 532-1:2017, 6.4, NOTE, describes the energy mean of
+  the loudness level in the same shape and gets it right: a power of about
+  3,322 and then a power law "with the exponent lg(2)", its inverse.
+- **Evidence:** the NOTE and its formula on PDF page 14 (printed p. 8) of
+  ISO/TS 12913-2:2018 (first edition, 2018-08); ISO 532-1:2017, 6.4, on PDF
+  page 22 (printed p. 16).
+- **Library behaviour:** `binaural_indicators` computes $N_\mathrm{rmc}$ of
+  each ear by the formula, the cube root of the mean of the cubes of the
+  loudness over time, and a conformance row holds it to that formula
+  ([`soundscape_binaural.py`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/environment/assessment/soundscape_binaural.py)).
+  No change was required.
+- **Status:** unreported.
+
+## ISO/TS 12913-2:2018, C.3.2.3 against Figure C.7 (three scales in the text, four in the figure)
+
+- **Location:** Annex C (informative), C.3.2.3, "Soundwalk data collection
+  part 1: Assessment of the sound environment", and Figure C.7 below it.
+- **The print:** the text reads "The participants should assess a site on
+  three different five-point unipolar continuous-category scales with
+  additional verbal labelling ranging from "not at all" to "extremely"." The
+  figure prints four scales: "How loud is it here?", "How unpleasant is it
+  here?" and "How appropriate is the sound to the surrounding?", labelled from
+  "not at all" to "extremely", and "How often would you like to visit this
+  place again?", labelled "never", "rarely", "sometimes", "often",
+  "very often".
+- **The problem:** the text and the figure it introduces disagree on the
+  number of scales and on their labels. Either the fourth scale belongs to
+  Method B, and the text should say four and name its second set of labels,
+  or it does not, and the figure should not print it. ISO/TS 12913-3:2019 B.2
+  and Table B.1 speak of "the five-point unipolar continuous-category scales"
+  without a number and do not settle it.
+- **Evidence:** C.3.2.3 and Figure C.7 on PDF page 24 (printed p. 18) of
+  ISO/TS 12913-2:2018 (first edition); B.2 and Table B.1 on PDF page 14
+  (printed p. 8) of ISO/TS 12913-3:2019.
+- **Library behaviour:** `METHOD_B_SCALES` holds the four scales of the
+  figure, as printed, and `method_b_summary` takes a table of three or four
+  of them, so a study that used either reading is summarised under its own
+  questions ([`soundscape.py`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/environment/assessment/soundscape.py)).
+- **Status:** unreported.
+
+## ISO/TS 12913-2:2018, Figures C.2 to C.4 ("extend" for "extent", "reponse" for "response")
+
+- **Location:** Annex C (informative), the questionnaire of Method A: the
+  questions of Figures C.2, C.3 and C.4 and the instruction line under each.
+- **The print:** "To what extend do you presently hear the following four
+  types of sounds?" (Figure C.2), "To what extend do you presently hear the
+  following three types of sounds?" (Figure C.3), "For each of the 8 scales
+  below, to what extend do you agree or disagree that the present surrounding
+  sound environment is..." (Figure C.4); and "Please tick off one reponse
+  alternative per type of sound" (Figures C.2 and C.3), "Please tick off one
+  reponse alternative per scale" (Figure C.4).
+- **The problem:** "extend" is a verb; the question asks "to what extent",
+  which Figure C.6 of the same annex spells correctly ("Overall, to what
+  extent is the present surrounding sound environment appropriate to the
+  present place?"). "reponse" is a misspelling of "response". The figures are
+  a questionnaire meant to be put in front of participants as printed, so the
+  slips reach the field unless the study corrects them.
+- **Evidence:** Figures C.2 and C.3 on PDF page 21 (printed p. 15), Figures
+  C.4 and C.6 on PDF page 22 (printed p. 16), all of ISO/TS 12913-2:2018
+  (first edition).
+- **Library behaviour:** `METHOD_A_SCALES` and `METHOD_A_ALTERNATIVE_PART_1`
+  transcribe the questions and instructions as printed, misspellings
+  included, so the table can be compared with the page; the docstring of
+  `QuestionnaireScale` says a study printing its own questionnaire from it
+  should correct them
+  ([`soundscape.py`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/environment/assessment/soundscape.py)).
+- **Status:** unreported.
+
 ## ISO 3744:2010, H.4.2.7 (the altitude correction and the divisor under it)
 
 - **Location:** Annex H (informative), H.4.2.7 "Meteorological and radiation

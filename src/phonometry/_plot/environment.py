@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import math
 from typing import TYPE_CHECKING, Any, cast
 
 import numpy as np
@@ -20,6 +21,7 @@ from .common import (
     _band_axis,
     _field_cmap,
     _freq_axis,
+    _import_pyplot,
     _new_axes,
     _plot_two_runs,
     format_frequency_axis,
@@ -32,10 +34,19 @@ from .common import (
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
+    from matplotlib.figure import Figure
 
     from ..environment.assessment.exposure_distribution import SelDistribution
     from ..environment.assessment.impulsive_sound import ImpulseProminenceResult
     from ..environment.assessment.measurement import TonalAssessmentResult
+    from ..environment.assessment.soundscape import (
+        MethodASummary,
+        MethodBSummary,
+        PleasantnessEventfulness,
+        SoundscapeCorrelation,
+        SourceRanking,
+    )
+    from ..environment.assessment.soundscape_binaural import BinauralIndicators
     from ..environment.assessment.spain import (
         ActivityAssessment,
         TonalCorrectionResult,
@@ -1514,5 +1525,723 @@ def plot_sel_distribution(
         place_legend_clear(legend)
     ax.set_xlabel(_t(_SEL_X_LABEL, language))
     ax.grid(visible=True, alpha=0.3)
+    localize_axes(ax, language)
+    return ax
+
+
+# ---------------------------------------------------------------------------
+# ISO/TS 12913: soundscape questionnaires and binaural analysis
+# ---------------------------------------------------------------------------
+
+#: The eight attributes of Figure A.1 of ISO/TS 12913-3, as (label, angle in
+#: degrees from the pleasantness axis, drawn solid): the two main dimensions
+#: solid, the two rotated by 45 degrees dashed, as the figure draws them.
+_PAQ_AXES: tuple[tuple[str, float, bool], ...] = (
+    ("PLEASANT", 0.0, True),
+    ("VIBRANT", 45.0, False),
+    ("EVENTFUL", 90.0, True),
+    ("CHAOTIC", 135.0, False),
+    ("ANNOYING", 180.0, True),
+    ("MONOTONOUS", 225.0, False),
+    ("UNEVENTFUL", 270.0, True),
+    ("CALM", 315.0, False),
+)
+
+#: Marker shapes, one per round of the site colours, so that a study with
+#: more sites than colours still tells every site apart.
+_SITE_MARKERS = ("o", "s", "^", "D")
+
+#: How many item labels fit side by side under a column plot before they are
+#: tilted to keep clear of each other.
+_FLAT_ITEM_LABELS = 2
+
+#: Site colours, cycled.
+_SITE_COLORS = (
+    _C_PRIMARY,
+    _C_SECONDARY,
+    _C_TERTIARY,
+    _C_QUATERNARY,
+    _C_REFERENCE,
+    _C_MUTED,
+)
+
+#: The subject of each part of Method A, as Table A.1 of ISO/TS 12913-3 names
+#: them, for the titles.
+_METHOD_A_SUBJECTS: dict[int, str] = {
+    1: "sound source identification",
+    2: "perceived affective quality",
+    3: "assessment of the surrounding sound environment",
+    4: "appropriateness of the surrounding sound environment",
+}
+
+#: The symbols of Table D.1 as mathematics, for the tick labels.
+_TABLE_D1_SYMBOLS: dict[str, str] = {
+    "LAeq,T": r"$L_{\mathrm{Aeq},T}$",
+    "LCeq,T": r"$L_{\mathrm{Ceq},T}$",
+    "LAF5,T": r"$L_{\mathrm{AF5},T}$",
+    "LAF95,T": r"$L_{\mathrm{AF95},T}$",
+    "N5": "$N_5$",
+    "Naverage": r"$N_\mathrm{average}$",
+    "Nrmc": r"$N_\mathrm{rmc}$",
+    "N95": "$N_{95}$",
+    "T": "$T$",
+    "R10": "$R_{10}$",
+    "R50": "$R_{50}$",
+    "F10": "$F_{10}$",
+    "F50": "$F_{50}$",
+}
+
+#: The axis label of each row of Table D.1, shorter than its parameter name.
+_TABLE_D1_AXES: dict[str, str] = {
+    "sound_pressure_level": "Level",
+    "loudness": "Loudness",
+    "sharpness": "Sharpness",
+    "tonality": "Tonality",
+    "roughness": "Roughness",
+    "fluctuation_strength": "Fluctuation strength",
+}
+
+#: The Spanish of the soundscape renderers. The attributes are the words of
+#: the English questionnaire of ISO/TS 12913-2 Figure C.4; the Spanish figure
+#: renders them descriptively, not as a validated translation of the
+#: questionnaire.
+_SOUNDSCAPE_STRINGS_ES: dict[str, str] = {
+    "PLEASANT": "AGRADABLE",
+    "VIBRANT": "VIBRANTE",
+    "EVENTFUL": "CON ACTIVIDAD",
+    "CHAOTIC": "CAÓTICO",
+    "ANNOYING": "MOLESTO",
+    "MONOTONOUS": "MONÓTONO",
+    "UNEVENTFUL": "SIN ACTIVIDAD",
+    "CALM": "TRANQUILO",
+    "pleasant": "agradable",
+    "chaotic": "caótico",
+    "vibrant": "vibrante",
+    "uneventful": "sin actividad",
+    "calm": "tranquilo",
+    "annoying": "molesto",
+    "eventful": "con actividad",
+    "monotonous": "monótono",
+    _METHOD_A_SUBJECTS[1]: "identificación de fuentes sonoras",
+    _METHOD_A_SUBJECTS[2]: "calidad afectiva percibida",
+    _METHOD_A_SUBJECTS[3]: "valoración del entorno sonoro circundante",
+    _METHOD_A_SUBJECTS[4]: "adecuación del entorno sonoro circundante",
+    "Traffic noise": "Ruido de tráfico",
+    "Other noise": "Otros ruidos",
+    "Sounds from human beings": "Sonidos de personas",
+    "Natural sounds": "Sonidos naturales",
+    "Noise": "Ruido",
+    "loud": "ruidoso",
+    "unpleasant": "desagradable",
+    "appropriate": "adecuado",
+    "visit again": "volver",
+    "all": "todas",
+    "Pleasantness $P$": "Agradabilidad $P$",
+    "Eventfulness $E$": "Actividad $E$",
+    r"Pleasantness $P/(4+\sqrt{32})$": r"Agradabilidad $P/(4+\sqrt{32})$",
+    r"Eventfulness $E/(4+\sqrt{32})$": r"Actividad $E/(4+\sqrt{32})$",
+    "ISO/TS 12913-3 Figure A.1: pleasantness and eventfulness": (
+        "ISO/TS 12913-3 Figura A.1: agradabilidad y actividad"
+    ),
+    "Scale value (Table A.1)": "Valor de escala (Tabla A.1)",
+    "Scale value (Table B.1)": "Valor de escala (Tabla B.1)",
+    "median, range": "mediana, recorrido",
+    "Method A, part": "Método A, parte",
+    "Method B, part 1": "Método B, parte 1",
+    "mean": "media",
+    "{level} % confidence interval": "intervalo de confianza del {level} %",
+    "Rank (1 = most noticeable)": "Rango (1 = la más perceptible)",
+    "Method B, part 2: source ranking": "Método B, parte 2: orden de las fuentes",
+    "Formula": "Fórmula",
+    "rank of $x$": "rango de $x$",
+    "rank of $y$": "rango de $y$",
+    "left ear": "oído izquierdo",
+    "right ear": "oído derecho",
+    "representative (higher of the two ears)": "representativo (el mayor de los dos oídos)",
+    "ISO/TS 12913-3 Table D.1": "ISO/TS 12913-3 Tabla D.1",
+    "Sound pressure level": "Nivel de presión acústica",
+    "Loudness (time-variant loudness)": "Sonoridad (variable en el tiempo)",
+    "Psychoacoustic tonality": "Tonalidad psicoacústica",
+    "Roughness": "Aspereza",
+    "Level": "Nivel",
+    "Loudness": "Sonoridad",
+    "Sharpness": "Agudeza",
+    "Tonality": "Tonalidad",
+    "Fluctuation strength": "Intensidad de fluctuación",
+}
+_STRINGS.update(_SOUNDSCAPE_STRINGS_ES)
+
+
+#: Where an attribute label stops sitting on its axis and goes beside it: the
+#: cosine (or sine) of 60 degrees, so the diagonal labels sit off both axes.
+_LABEL_SLANT = 0.5
+
+#: The half-width and half-height of the Figure A.1 axes, in arrow lengths:
+#: room past the tips for a label written across (a word, "AGRADABLE") and for
+#: one written above or below (a line).
+_FIGURE_A1_WIDTH = 2.0
+_FIGURE_A1_HEIGHT = 1.55
+
+#: The size, in inches, of a figure the Figure A.1 renderer creates itself.
+_FIGURE_A1_SIZE_IN = (7.0, 7.0)
+
+#: Line height of a label, as a multiple of its font size.
+_LINE_HEIGHT = 1.25
+
+#: Space kept between the axis label and a legend under it, in points.
+_LEGEND_GAP_PT = 4.0
+
+
+def _under_x_axis_pt() -> float:
+    """Depth of the tick marks, tick labels and axis label under the axes,
+    in points, from the current style.
+    """
+    import matplotlib as mpl
+    from matplotlib.font_manager import FontProperties
+
+    rc = mpl.rcParams
+
+    def size(value: float | str) -> float:
+        return float(FontProperties(size=value).get_size_in_points())
+
+    tick = max(float(rc["xtick.major.size"]), 0.0) + float(rc["xtick.major.pad"])
+    return (
+        tick
+        + _LINE_HEIGHT * size(rc["xtick.labelsize"])
+        + float(rc["axes.labelpad"])
+        + _LINE_HEIGHT * size(rc["axes.labelsize"])
+        + _LEGEND_GAP_PT
+    )
+
+
+def _sign_of(value: float) -> float:
+    """-1, 0 or 1 by the side of the label axis a value falls on."""
+    if value > _LABEL_SLANT:
+        return 1.0
+    if value < -_LABEL_SLANT:
+        return -1.0
+    return 0.0
+
+
+#: The four questions of Figure C.7, as an axis can hold them.
+_METHOD_B_SHORT: dict[str, str] = {
+    "How loud is it here?": "loud",
+    "How unpleasant is it here?": "unpleasant",
+    "How appropriate is the sound to the surrounding?": "appropriate",
+    "How often would you like to visit this place again?": "visit again",
+}
+
+
+def _item_label(item: str, language: str) -> str:
+    """An item as drawn: without the examples in brackets, translated."""
+    short = _METHOD_B_SHORT.get(item, item.split(" (e.g.", 1)[0].strip())
+    return _t(short, language)
+
+
+def _site_label(site: str, language: str) -> str:
+    """A site as drawn: the one unnamed site of a study is translated."""
+    return _t(site, language) if site == "all" else site
+
+
+def _first_or_fixed(
+    kwargs: dict[str, Any], *, first: bool, **base: Any
+) -> dict[str, Any]:
+    """The caller's style for the first series, the renderer's for the rest."""
+    return styled(kwargs, **base) if first else dict(base)
+
+
+def plot_method_a_summary(
+    result: MethodASummary,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """Median and range of each Method A item per site (ISO/TS 12913-3 A.2).
+
+    Each item is a column; each site a marker at the median with a vertical
+    bar over the range, offset beside the other sites.
+
+    :param result: A
+        :class:`~phonometry.environment.assessment.soundscape.MethodASummary`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the median markers of the first site.
+    :return: The axes.
+    """
+    from .._i18n import localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    items = np.arange(len(result.items), dtype=np.float64)
+    n_sites = len(result.sites)
+    width = 0.6 / max(n_sites, 1)
+    for k, site in enumerate(result.sites):
+        offset = (k - 0.5 * (n_sites - 1)) * width
+        color = _SITE_COLORS[k % len(_SITE_COLORS)]
+        x = items + offset
+        ax.vlines(
+            x,
+            result.minima[k],
+            result.maxima[k],
+            color=theme_line(color, ax, quiet=0.55),
+            lw=2.0,
+        )
+        style = _first_or_fixed(
+            kwargs,
+            first=k == 0,
+            color=color,
+            marker="o",
+            ls="none",
+            ms=7,
+            label=_site_label(site, language),
+        )
+        ax.plot(x, result.medians[k], **style)
+    tilted = len(result.items) > _FLAT_ITEM_LABELS
+    ax.set_xticks(items)
+    ax.set_xticklabels(
+        [_item_label(item, language) for item in result.items],
+        rotation=30 if tilted else 0,
+        ha="right" if tilted else "center",
+    )
+    ax.set_xlim(-0.6, len(result.items) - 0.4)
+    ax.set_ylim(0.5, 5.5)
+    ax.set_yticks([1, 2, 3, 4, 5])
+    ax.set_ylabel(_t("Scale value (Table A.1)", language))
+    # Two lines: the longest subject, part 4, runs past a default figure on
+    # one line with the method and the statistics in front of it.
+    subject = _t(_METHOD_A_SUBJECTS[result.part], language)
+    ax.set_title(
+        f"ISO/TS 12913-3, {_t('Method A, part', language)} {result.part} "
+        f"({_t('median, range', language)})\n{subject[:1].upper()}{subject[1:]}"
+    )
+    ax.grid(visible=True, axis="y", alpha=0.3)
+    legend = ax.legend(fontsize="small")
+    place_legend_clear(legend)
+    localize_axes(ax, language)
+    return ax
+
+
+#: The loudness variability ratio of ISO/TS 12913-3 D.2, as the binaural
+#: result keys it.
+_N5_N95 = "N5/N95"
+
+
+def _toward(value: float, positive: str, negative: str) -> str:
+    """Where a label past an arrow tip anchors, away from the centre.
+
+    :param value: The cosine (for the horizontal anchor) or sine (for the
+        vertical one) of the arrow's angle.
+    :param positive: The anchor when the arrow points that way clearly.
+    :param negative: The anchor when it points the other way clearly.
+    :return: ``positive``, ``negative`` or ``"center"`` for an arrow closer to
+        the other axis.
+    """
+    if value > _LABEL_SLANT:
+        return positive
+    if value < -_LABEL_SLANT:
+        return negative
+    return "center"
+
+
+def _draw_attribute_axes(ax: Axes, reach: float, language: str) -> None:
+    """The eight attribute arrows of Figure A.1, named past their tips."""
+    ink = theme_line(ax.xaxis.label.get_color(), ax, quiet=0.7)
+    for label, angle, solid in _PAQ_AXES:
+        rad = math.radians(angle)
+        end = (reach * math.cos(rad), reach * math.sin(rad))
+        ax.annotate(
+            "",
+            xy=end,
+            xytext=(0.0, 0.0),
+            arrowprops={
+                "arrowstyle": "-|>",
+                "color": ink,
+                "lw": 1.0,
+                "ls": "-" if solid else "--",
+                "shrinkA": 0.0,
+                "shrinkB": 0.0,
+            },
+        )
+        cos, sin = math.cos(rad), math.sin(rad)
+        ax.annotate(
+            _t(label, language),
+            end,
+            xytext=(4.0 * _sign_of(cos), 4.0 * _sign_of(sin)),
+            textcoords="offset points",
+            ha=_toward(cos, "left", "right"),
+            va=_toward(sin, "bottom", "top"),
+            fontsize="small",
+            color=ink,
+        )
+
+
+def _draw_respondents(ax: Axes, result: PleasantnessEventfulness, scale: float) -> None:
+    """Every respondent, faintly, in the colour of their site."""
+    respondent_sites = np.asarray(result.respondent_sites, dtype=object)
+    for k, site in enumerate(result.sites):
+        own = respondent_sites == site
+        ax.plot(
+            result.respondent_pleasantness[own] * scale,
+            result.respondent_eventfulness[own] * scale,
+            ".",
+            color=theme_line(_SITE_COLORS[k % len(_SITE_COLORS)], ax, quiet=0.6),
+            ms=3,
+        )
+
+
+def plot_pleasantness_eventfulness(
+    result: PleasantnessEventfulness,
+    ax: Axes | None = None,
+    *,
+    normalized: bool = True,
+    respondents: bool = False,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    r"""The sites on the two-dimensional model of ISO/TS 12913-3 Figure A.1.
+
+    Pleasantness on the horizontal axis, eventfulness on the vertical one,
+    the four main attribute axes solid and the four rotated ones dashed, as
+    the figure draws them, and each site a point of its own, named in a
+    legend under the axes. The attribute names sit past the arrow tips, where
+    no site can fall, since the coordinates end at the tips. A figure the
+    renderer creates itself is square, with room for the legend, and laid out
+    by the constrained layout so the legend stays on the canvas; on axes the
+    caller passes, the caller lays the figure out (``plt.tight_layout()``).
+
+    :param result: A
+        :class:`~phonometry.environment.assessment.soundscape.PleasantnessEventfulness`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param normalized: Coordinates divided by :math:`4 + \sqrt{32}` (default)
+        or raw.
+    :param respondents: Also draw every respondent, faintly.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the site markers.
+    :return: The axes.
+    """
+    from matplotlib.transforms import offset_copy
+
+    from .._i18n import localize_axes
+    from ..environment.assessment.soundscape import PLEASANTNESS_EVENTFULNESS_RANGE
+
+    own_figure = None
+    if ax is None:
+        # Square, for the square model, and tall enough for a legend of a few
+        # dozen sites under it; the layout engine keeps that legend on the
+        # canvas for a plain savefig() or plt.show().
+        own_figure = _import_pyplot().figure(
+            figsize=_FIGURE_A1_SIZE_IN, layout="constrained"
+        )
+        ax = own_figure.add_subplot()
+    scale = 1.0 / PLEASANTNESS_EVENTFULNESS_RANGE if normalized else 1.0
+    reach = PLEASANTNESS_EVENTFULNESS_RANGE * scale
+    _draw_attribute_axes(ax, reach, language)
+    if respondents:
+        _draw_respondents(ax, result, scale)
+    # Each site a marker of its own, named in a legend under the axes: sites
+    # of one study sit close together, and names written beside the points
+    # would run into each other and across the attribute arrows.
+    x = result.pleasantness * scale
+    y = result.eventfulness * scale
+    for k, (site, xs, ys) in enumerate(zip(result.sites, x, y, strict=True)):
+        ax.plot(
+            [float(xs)],
+            [float(ys)],
+            **styled(
+                kwargs,
+                color=_SITE_COLORS[k % len(_SITE_COLORS)],
+                marker=_SITE_MARKERS[(k // len(_SITE_COLORS)) % len(_SITE_MARKERS)],
+                ls="none",
+                ms=8,
+                label=_site_label(site, language),
+            ),
+        )
+    # The legend hangs a fixed distance under the axes, the depth of the tick
+    # labels and the axis label, in points: an offset in axes fractions would
+    # move with the axes height, which the layout engine is still choosing,
+    # and a tall legend of many sites would then be laid out off the canvas.
+    placement: dict[str, Any] = {
+        "loc": "upper center",
+        "bbox_to_anchor": (0.5, 0.0),
+        "bbox_transform": offset_copy(
+            ax.transAxes,
+            fig=cast("Figure", ax.get_figure(root=True)),
+            y=-_under_x_axis_pt(),
+            units="points",
+        ),
+    }
+    legend = ax.legend(
+        ncol=min(3, max(1, len(result.sites))),
+        fontsize="small",
+        frameon=False,
+        **placement,
+    )
+    legend.set_in_layout(True)
+    # The labels sit past the arrow tips, as in Figure A.1. Across the page
+    # they need the room of a word ("AGRADABLE", "MONOTONOUS"), up and down
+    # only that of a line, so the horizontal limits reach further.
+    ax.set_xlim(-_FIGURE_A1_WIDTH * reach, _FIGURE_A1_WIDTH * reach)
+    ax.set_ylim(-_FIGURE_A1_HEIGHT * reach, _FIGURE_A1_HEIGHT * reach)
+    ax.set_aspect("equal")
+    if normalized:
+        ax.set_xlabel(_t(r"Pleasantness $P/(4+\sqrt{32})$", language))
+        ax.set_ylabel(_t(r"Eventfulness $E/(4+\sqrt{32})$", language))
+    else:
+        ax.set_xlabel(_t("Pleasantness $P$", language))
+        ax.set_ylabel(_t("Eventfulness $E$", language))
+    ax.set_title(
+        _t("ISO/TS 12913-3 Figure A.1: pleasantness and eventfulness", language)
+    )
+    ax.grid(visible=True, alpha=0.3)
+    localize_axes(ax, language)
+    if own_figure is not None:
+        # The constrained layout of an equal-aspect axes with a tall legend
+        # under it settles on its second pass; the first, taken here, keeps
+        # the caller's first savefig() or show() from drawing the unsettled
+        # one, with the legend and the title past the canvas.
+        own_figure.draw_without_rendering()
+    return ax
+
+
+def plot_soundscape_correlation(
+    result: SoundscapeCorrelation,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """The pairs of a correlation, as ranks for Spearman, with the coefficient.
+
+    :param result: A
+        :class:`~phonometry.environment.assessment.soundscape.SoundscapeCorrelation`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the markers.
+    :return: The axes.
+    """
+    from .._i18n import format_number, localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    spearman = result.method == "spearman"
+    if spearman and result.x_ranks is not None and result.y_ranks is not None:
+        x, y = result.x_ranks, result.y_ranks
+        ax.set_xlabel(_t("rank of $x$", language))
+        ax.set_ylabel(_t("rank of $y$", language))
+    else:
+        x, y = result.x, result.y
+        ax.set_xlabel("$x$")
+        ax.set_ylabel("$y$")
+    ax.plot(x, y, **styled(kwargs, color=_C_PRIMARY, marker="o", ls="none", ms=6))
+    # The symbols of the page: r_spearman in Formulas (A.3) and (A.4), plain r
+    # for Pearson's coefficient in B.3.
+    symbol = r"$r_\mathrm{spearman}$" if spearman else "Pearson $r$"
+    ax.set_title(
+        f"{symbol} = {format_number(result.coefficient, language, decimals=3)}, "
+        f"$p$ = {format_number(result.p_value, language, decimals=3)} "
+        f"({_t('Formula', language)} {result.formula}, $n$ = {result.n})"
+    )
+    ax.grid(visible=True, alpha=0.3)
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_method_b_summary(
+    result: MethodBSummary,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """Mean and confidence interval of each Method B scale per site.
+
+    :param result: A
+        :class:`~phonometry.environment.assessment.soundscape.MethodBSummary`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the mean markers of the first site.
+    :return: The axes.
+    """
+    from .._i18n import format_number, localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    items = np.arange(len(result.items), dtype=np.float64)
+    n_sites = len(result.sites)
+    width = 0.6 / max(n_sites, 1)
+    for k, site in enumerate(result.sites):
+        offset = (k - 0.5 * (n_sites - 1)) * width
+        color = _SITE_COLORS[k % len(_SITE_COLORS)]
+        x = items + offset
+        ax.vlines(
+            x,
+            result.confidence_lower[k],
+            result.confidence_upper[k],
+            color=theme_line(color, ax, quiet=0.55),
+            lw=2.0,
+        )
+        style = _first_or_fixed(
+            kwargs,
+            first=k == 0,
+            color=color,
+            marker="s",
+            ls="none",
+            ms=7,
+            label=_site_label(site, language),
+        )
+        ax.plot(x, result.means[k], **style)
+    ax.set_xticks(items)
+    ax.set_xticklabels([_item_label(item, language) for item in result.items])
+    ax.set_xlim(-0.6, len(result.items) - 0.4)
+    ax.set_ylim(0.5, 5.5)
+    ax.set_yticks([1, 2, 3, 4, 5])
+    ax.set_ylabel(_t("Scale value (Table B.1)", language))
+    level = format_number(100.0 * result.confidence_level, language, decimals=0)
+    # The level goes where each language puts it: "95 % confidence interval",
+    # "intervalo de confianza del 95 %".
+    interval = _t("{level} % confidence interval", language).format(level=level)
+    ax.set_title(
+        f"ISO/TS 12913-3, {_t('Method B, part 1', language)}: {_t('mean', language)}, "
+        f"{interval}"
+    )
+    ax.grid(visible=True, axis="y", alpha=0.3)
+    legend = ax.legend(fontsize="small")
+    place_legend_clear(legend)
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_source_ranking(
+    result: SourceRanking,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """Median rank of each recognised sound source per site, with its range.
+
+    :param result: A
+        :class:`~phonometry.environment.assessment.soundscape.SourceRanking`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the bars of the first site.
+    :return: The axes.
+    """
+    from .._i18n import localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    rows = np.arange(len(result.sources), dtype=np.float64)
+    n_sites = len(result.sites)
+    height = 0.8 / max(n_sites, 1)
+    ink = theme_line(ax.xaxis.label.get_color(), ax, quiet=0.7)
+    for k, site in enumerate(result.sites):
+        offset = (k - 0.5 * (n_sites - 1)) * height
+        medians = np.nan_to_num(result.median_ranks[k], nan=0.0)
+        style = _first_or_fixed(
+            kwargs,
+            first=k == 0,
+            color=_SITE_COLORS[k % len(_SITE_COLORS)],
+            height=height,
+            label=_site_label(site, language),
+        )
+        ax.barh(rows + offset, medians, **style)
+        ax.hlines(
+            rows + offset,
+            np.nan_to_num(result.lowest_ranks[k], nan=0.0),
+            np.nan_to_num(result.highest_ranks[k], nan=0.0),
+            colors=[ink],
+            lw=1.2,
+        )
+    ax.set_yticks(rows)
+    ax.set_yticklabels(list(result.sources))
+    ax.invert_yaxis()
+    ax.set_xlim(0.0, 8.5)
+    ax.set_xlabel(_t("Rank (1 = most noticeable)", language))
+    ax.set_title(f"ISO/TS 12913-3, {_t('Method B, part 2: source ranking', language)}")
+    ax.grid(visible=True, axis="x", alpha=0.3)
+    legend = ax.legend(fontsize="small")
+    place_legend_clear(legend)
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_binaural_indicators(
+    result: BinauralIndicators,
+    ax: Axes | None = None,
+    *,
+    parameter: str,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """One row of ISO/TS 12913-3 Table D.1 at both ears.
+
+    Each metric of the row is a pair of bars, left and right ear, with the
+    representative value of D.2, the higher of the two, marked across them.
+
+    :param result: A
+        :class:`~phonometry.environment.assessment.soundscape_binaural.BinauralIndicators`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param parameter: The row of Table D.1 to draw.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the left-ear bars.
+    :return: The axes.
+    """
+    from .._i18n import format_number, localize_axes
+    from ..environment.assessment.soundscape_binaural import BINAURAL_PARAMETERS
+
+    ax = ax if ax is not None else _new_axes()
+    row = BINAURAL_PARAMETERS[parameter]
+    # The ratio N5/N95 has no unit and a scale of its own, so it is named in
+    # the title rather than drawn beside four loudnesses in sone.
+    metrics = [
+        result.metrics[s] for s in row.metrics if s in result.metrics and s != _N5_N95
+    ]
+    x = np.arange(len(metrics), dtype=np.float64)
+    left = np.asarray([m.left for m in metrics])
+    right = np.asarray([m.right for m in metrics])
+    width = 0.38
+    ax.bar(
+        x - 0.5 * width,
+        left,
+        **styled(kwargs, color=_C_PRIMARY, width=width, label=_t("left ear", language)),
+    )
+    ax.bar(
+        x + 0.5 * width,
+        right,
+        color=_C_SECONDARY,
+        width=width,
+        label=_t("right ear", language),
+    )
+    ink = theme_line(ax.xaxis.label.get_color(), ax, quiet=0.85)
+    ax.hlines(
+        [m.representative for m in metrics],
+        x - width,
+        x + width,
+        colors=[ink],
+        lw=2.0,
+        label=_t("representative (higher of the two ears)", language),
+    )
+    ax.set_xticks(x)
+    ax.set_xticklabels([_TABLE_D1_SYMBOLS.get(m.symbol, m.symbol) for m in metrics])
+    unit = metrics[0].unit if metrics else ""
+    ax.set_ylabel(f"{_t(_TABLE_D1_AXES[parameter], language)} [{unit}]")
+    if parameter == "sound_pressure_level" and metrics:
+        low = float(min(left.min(), right.min()))
+        ax.set_ylim(max(0.0, 10.0 * math.floor(low / 10.0) - 10.0), None)
+    title = f"{_t('ISO/TS 12913-3 Table D.1', language)}: {_t(row.parameter, language)}"
+    if _N5_N95 in result.metrics and parameter == "loudness":
+        ratio = result.metrics[_N5_N95]
+        title += (
+            f"\n$N_5/N_{{95}}$ = {format_number(ratio.left, language, decimals=2)} "
+            f"({_t('left ear', language)}), "
+            f"{format_number(ratio.right, language, decimals=2)} "
+            f"({_t('right ear', language)})"
+        )
+    ax.set_title(title)
+    # Horizontal rules only: a vertical one would run through the middle of
+    # every pair of bars, where the tick of each metric sits.
+    ax.grid(visible=False, axis="x")
+    ax.grid(visible=True, axis="y", alpha=0.3)
+    ax.set_axisbelow(True)
+    legend = ax.legend(fontsize="small")
+    place_legend_clear(legend)
     localize_axes(ax, language)
     return ax

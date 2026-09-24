@@ -1,6 +1,6 @@
 ---
 title: "Guías"
-description: "Las 141 guías de phonometry, agrupadas en los trece temas que cubre la biblioteca: para qué sirve cada área, las normas que implementa y un resumen de una línea de cada guía que contiene."
+description: "Las 142 guías de phonometry, agrupadas en los trece temas que cubre la biblioteca: para qué sirve cada área, las normas que implementa y un resumen de una línea de cada guía que contiene."
 head:
   - tag: script
     attrs:
@@ -118,7 +118,7 @@ hay ninguna panorámica del campo: cada página es la documentación de trabajo 
 un módulo, escrita para que un resultado se pueda defender apartado por
 apartado en lugar de darlo por bueno.
 
-Esta página es el mapa. Ciento cuarenta y una guías repartidas en trece temas, y cada
+Esta página es el mapa. Ciento cuarenta y dos guías repartidas en trece temas, y cada
 área tiene su propio índice con el relato largo de cómo encajan sus piezas. Si
 llegas sin una pregunta concreta, lee primero la
 [introducción](/phonometry/es/start/getting-started/): recorre una señal por toda la
@@ -654,8 +654,8 @@ ferroviarias y de aerogenerador, y la valoración construida sobre ellas. Todo
 lo de aquí trata de sonido que tiene que recorrer una distancia larga antes de
 valorarse, así que la atmósfera, el suelo y el propio movimiento de la fuente
 entran en la respuesta. Implementa ISO 9613-1/-2, ISO 1996-1/-2,
-ISO/PAS 1996-3, NT ACOU 112, ISO 13474, CNOSSOS-EU (Directiva 2002/49/CE,
-anexo II), ISO 11819-1 e IEC 61400-11.
+ISO/PAS 1996-3, NT ACOU 112, ISO 13474, ISO/TS 12913-2/-3, CNOSSOS-EU
+(Directiva 2002/49/CE, anexo II), ISO 11819-1 e IEC 61400-11.
 
 Hay un límite de alcance que vale la pena decir aquí y no a un clic de
 distancia. De CNOSSOS-EU, lo implementado es el lado de la **fuente** del anexo
@@ -706,6 +706,11 @@ para la cartografía reglamentaria.
   con qué frecuencia una voladura lejana suena con qué nivel: los niveles a
   largo plazo y de evaluación, las clases ordenadas, la dispersión por
   turbulencia y los niveles superados.
+- [Análisis del paisaje sonoro (ISO/TS 12913)](/phonometry/es/environment/assessment/soundscape/):
+  cómo oye la gente un lugar: el cuestionario y sus valores de escala, la
+  agradabilidad y la actividad de la Figura A.1, las correlaciones con
+  los datos acústicos y las métricas binaurales de la Tabla D.1 en los dos
+  oídos.
 
 - [Niveles ambientales (ISO 1996-1/-2)](/phonometry/es/environment/assessment/environmental-levels/):
   $L_\mathrm{den}$, $L_\mathrm{dn}$ y los niveles de evaluación compuestos, el ajuste tonal, la

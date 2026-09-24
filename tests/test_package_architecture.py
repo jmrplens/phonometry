@@ -31,6 +31,11 @@ TOOLBOX: frozenset[str] = frozenset({"filters", "fluids", "signals", "metrology"
 #: level of the package (shrinks to the facade set as the migration proceeds).
 ALLOWED_EDGES: set[tuple[str, str]] = {
     ("environment", "materials"),  # air_absorption -> ISO 354 helpers
+    # the binaural analysis of a soundscape (ISO/TS 12913-3 Table D.1) reports
+    # the ISO 532-1 loudness and the ECMA-418-2 tonality, roughness and
+    # fluctuation strength of each ear, which the psychoacoustics domain
+    # implements; psychoacoustics imports nothing from environment
+    ("environment", "psychoacoustics"),
     ("aircraft", "environment"),  # atmospheric absorption reuse
     ("vibration", "hearing"),  # multiple-shock SEXES tables
     # swept-sine distortion reuses the ISO 18233 sweep / Farina

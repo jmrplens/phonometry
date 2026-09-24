@@ -19,7 +19,7 @@
 
 ## Numerical conformance report
 
-**1373/1373 conformance checks pass** across 93 domains and 471 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+**1387/1387 conformance checks pass** across 94 domains and 473 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub><b>&#916;</b> is the difference between the computed value and the one the standard publishes. <b>Used</b> is how much of that clause's published tolerance the difference consumes: 100 % means it sits exactly on the limit, 5 % means it uses a twentieth of the allowance, and a dash means the clause states no two-sided tolerance for the quantity, so there is no budget to spend. It is reported and never used to decide a verdict, which is settled at full precision before any rounding.</sub>
 
@@ -1241,6 +1241,28 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO 13474:2009 Equation (A.4), Figure A.3 | Long-term level LT2 from the distribution spread with sigma = 5 dB | 37 dB (+/-0.05 dB) | 36.96 dB | -0.042 dB | 84 % | ![Pass][cv-pass] Pass |
 | ISO 13474:2009 Equation (22) | Shift of the Gaussian subclasses at sigma = 5 dB, against the printed integral | 2.878231366 dB (+/-0.000000001 dB) | 2.878231366 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 | ISO 13474:2009 Equation (25), Figure A.3 | Level exceeded by 50 % of the events, L50 | 31.5 dB (+/-0.05 dB) | 31.46 dB | -0.044 dB | 88 % | ![Pass][cv-pass] Pass |
+
+</details>
+
+<details>
+<summary><b>Soundscape analysis (ISO/TS 12913-3:2019; the 2025 edition revises Annex A)</b>: 100% (14/14)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
+|:---|:---|:---|:---|:---|:---:|:---:|
+| ISO/TS 12913-3:2019 A.2, Table A.1 | Scale value of each of the five boxes of the four parts of Method A | 20/20 scale values of Table A.1 | 20/20 scale values of Table A.1 | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO/TS 12913-3:2019 Formulas (A.1) and (A.2) | Every attribute at one score puts the respondent at the origin | 0 (+/-0.000000000001) | max \|P\|, \|E\| = 0.0e+00 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| ISO/TS 12913-3:2019 A.3 | Range of the coordinates, 4 + sqrt(32), printed as 9,66 | 9.66 (+/-0.005) | 9.6569 | -0.0031 | 62 % | ![Pass][cv-pass] Pass |
+| ISO/TS 12913-3:2019 A.3 | The four extremes of P and E divided by 4 + sqrt(32) are plus and minus 1 | 4/4 normalised extremes at plus or minus 1 | 4/4 normalised extremes at plus or minus 1 | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO/TS 12913-3:2019 Figure A.1, Formulas (A.1) and (A.2) | Each attribute raised alone moves the point along its own arrow of the figure | 8/8 attribute axes of Figure A.1 | 8/8 attribute axes of Figure A.1 | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO/TS 12913-3:2019 Formula (A.3) | Spearman's coefficient without ties is Pearson's coefficient of the ranks | 0.9300699301 (+/-0) | 0.9300699301 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| ISO/TS 12913-3:2019 Formula (A.4) against scipy.stats.spearmanr | Spearman's coefficient with ties, on 93 real ordinal answers | -0.3898917508 (+/-0) | -0.3898917508 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| ISO/TS 12913-3:2019 A.4 against scipy.stats.spearmanr | Probability value of Spearman's coefficient, Student t with n - 2 degrees of freedom | 0.00012214 (+/-1e-07%) | 0.00012214 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| ISO/TS 12913-3:2019 Formulas (B.1) and (B.2) against scipy.stats.pearsonr | Pearson's coefficient with the covariance over n | -0.3898445719 (+/-0) | -0.3898445719 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| ISO/TS 12913-3:2019 B.2 against scipy.stats.t.interval | Upper end of the 95 % confidence interval of a Method B mean | 3.5892088275 (+/-0) | 3.5892088275 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| ISO/TS 12913-3:2019 Table D.1 | Metrics of each parameter and the representative-value rule, as printed | 24/24 cells of Table D.1 | 24/24 cells of Table D.1 | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO/TS 12913-3:2019 D.2 | Representative LAeq,T of two ears 6 dB apart is the louder ear's | 77.3004 dB (+/-0 dB) | 77.3004 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| ISO/TS 12913-2:2018 Figures C.2 to C.6 | Response categories of the four parts of Method A, and the eight attributes | 33/33 printed strings of Annex C | 33/33 printed strings of Annex C | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO/TS 12913-2:2018 A.3 f) with ISO 532-1:2017 | Root mean cubed loudness Nrmc of an ear, by the formula of the NOTE | 18.245392 (+/-1e-10%) | 18.245392 | 0 | 0 % | ![Pass][cv-pass] Pass |
 
 </details>
 

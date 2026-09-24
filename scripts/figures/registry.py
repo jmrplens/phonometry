@@ -237,6 +237,8 @@ from .environment import (
     generate_sel_distribution_density,
     generate_sel_distribution_exceedance,
     generate_shadow_zone_map,
+    generate_soundscape_binaural_indicators,
+    generate_soundscape_pleasantness_eventfulness,
     generate_statistical_pass_by,
     generate_tonal_audibility,
     generate_wind_turbine_apparent_power,
@@ -1239,6 +1241,11 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     # level, the TOW launcher of Annex A drawn by the result's own .plot().
     generate_sel_distribution_density,
     generate_sel_distribution_exceedance,
+    # ISO/TS 12913-3: how people hear a place. Eleven London sites of the
+    # International Soundscape Database on Figure A.1, and the level and
+    # loudness rows of Table D.1 at both ears of a synthetic street recording.
+    generate_soundscape_pleasantness_eventfulness,
+    generate_soundscape_binaural_indicators,
     generate_moore_glasberg_specific_loudness,
     generate_sottek_specific_tonality,
     generate_fluctuation_strength_specific,

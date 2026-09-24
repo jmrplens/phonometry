@@ -1,6 +1,6 @@
 ---
 title: "Rigidez dinámica de transferencia (ISO 10846)"
-description: "La rigidez dinámica de transferencia k₂₁ = F₂,b/u₁ de elementos resilientes según ISO 10846: el nivel Lₖ re 1 N/m y el factor de pérdidas (Partes 1-3), el método directo (Parte 2), el método indirecto k₂₁ = −(2πf)²(m₂+m_f)T a partir de la transmisibilidad de vibración (Parte 3, Fórmula 1) y la relación del Anexo A con la impedancia mecánica y la masa efectiva."
+description: "La rigidez dinámica de transferencia k₂₁ = F₂,b/u₁ de elementos resilientes según ISO 10846: el nivel Lₖ re 1 N/m y el factor de pérdidas, los métodos directo e indirecto (Partes 2 a 4), la media en bandas de tercio de octava que pide cada parte, las comprobaciones de adecuación del banco, la masa de bloqueo efectiva, el método de punto de excitación con su frecuencia límite superior y el presupuesto del Anexo B (Parte 5), y la relación del Anexo A con la impedancia mecánica y la masa efectiva."
 references:
   - type: book
     authors: ["Cremer, L.", "Heckl, M.", "Petersson, B. A. T."]
@@ -31,6 +31,18 @@ references:
     designation: "ISO 10846-3:2002"
     url: "https://www.iso.org/standard/34560.html"
     note: "El método indirecto k₂₁ = −(2πf)²(m₂+m_f)T (Fórmula 1) con sus condiciones de validez (apartado 6: Desigualdades 2 y 3; linealidad del 7.6). La conformidad se ancla en la relación de inercia del método indirecto, el límite de validez |T| = 0,1 ↔ ΔL₁,₂ = 20 dB con su cota de exactitud de 1 dB (12 %) y el criterio de linealidad del 7.6."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2003
+    title: "Acoustics and vibration — Laboratory measurement of vibro-acoustic transfer properties of resilient elements — Part 4: Dynamic stiffness of elements other than resilient supports for translatory motion"
+    designation: "ISO 10846-4:2003"
+    note: "Acoplamientos, fuelles, mangueras, soportes de tuberías y cables por los métodos directo e indirecto: el límite de la masa de salida de la Desigualdad (3), la masa de bloqueo efectiva de la Fórmula (6) con su f₃ (Desigualdad 5) y la media en banda de la Fórmula (11). No imprime ningún ejemplo resuelto, así que la conformidad se ancla en formas cerradas; los 0,5 dB de la NOTA 1 de su 6.2 están impresos como 05 dB (véanse las erratas)."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2008
+    title: "Acoustics and vibration — Laboratory measurement of vibro-acoustic transfer properties of resilient elements — Part 5: Driving point method for determination of the low-frequency transfer stiffness of resilient supports for translatory motion"
+    designation: "ISO 10846-5:2008"
+    note: "La rigidez en el punto de excitación k₁,₁ de la Fórmula (3), la frecuencia límite superior del 6.2, las medias en banda de las Fórmulas (6) y (7), las Desigualdades (1) y (2) y el presupuesto del Anexo B. Tampoco trae ejemplo resuelto; el término de linealidad de la Tabla B.1 es 0,5 dB donde su expresión da 0,433 dB (véanse las erratas)."
 ---
 
 import ReportPreview from '../../../../../components/ReportPreview.astro';
@@ -135,7 +147,7 @@ de servicio.
   cara, y las bridas grandes pueden necesitar un aplanado), y todo dispositivo
   que no forme parte del elemento en servicio se retira o se desactiva.
 
-Esas condiciones van en la ficha de la sección 6 junto con el resultado:
+Esas condiciones van en la ficha de la sección 9 junto con el resultado:
 `ReportMetadata` las transporta en sus campos `test_room` y `notes`.
 
 ### Tres métodos, no dos
@@ -180,7 +192,8 @@ res.plot()   # el espectro de nivel Lk(f), como en la figura de arriba (requiere
 ```
 
 El `TransferStiffnessResult` transporta el $k_{2,1}$ complejo y expone `.levels`,
-`.loss_factor`, `.magnitude`, `.to("impedance"/"apparent_mass")` y `.plot()`.
+`.loss_factor`, `.magnitude`, `.to("impedance"/"apparent_mass")`,
+`.band_average()` (sección 4) y `.plot()`.
 
 El apartado 6.1 de la ISO 10846-1 cuenta **tres** métodos, no dos, «porque son
 complementarios en cuanto a sus puntos fuertes y débiles». El tercero es el
@@ -192,10 +205,11 @@ la de transferencia son **iguales**, puede usarse para determinar la rigidez de
 transferencia, que es la razón de que la serie lo recoja siquiera: quien tenga
 un banco caro de punto de excitación puede aprovecharlo para la rigidez de
 transferencia en baja frecuencia. Esa misma identidad es la razón de que la
-ficha de la sección 6 enmarque la *meseta* de baja frecuencia y no un valor a
+ficha de la sección 9 enmarque la *meseta* de baja frecuencia y no un valor a
 una frecuencia: por debajo de las resonancias internas solo hay una rigidez que
-declarar. La Parte 5 de la serie, que especifica ese método, no está
-implementada aquí.
+declarar. La Parte 5 de la serie especifica ese método, y la sección 6 lo
+calcula, con la frecuencia hasta la que puede sustituir a la rigidez de
+transferencia.
 
 Los métodos se reparten el eje de frecuencia, y los dos límites del método
 indirecto tienen nombre. Es válido entre $f_2$ y $f_3$, «típicamente
@@ -260,14 +274,16 @@ frecuencia utilizable por ambos lados:
   $\Delta L_{1,2} = L_{a1} - L_{a2} \ge 20\ \text{dB}$, es decir,
   $|T| \le 0{,}1$ (la constante `TRANSMISSIBILITY_LIMIT`).
   `transfer_stiffness_indirect` calcula el $|T|$
-  por banda y emite un `PhonometryWarning` cuando alguna banda lo supera
-  (habitual cerca o por debajo de la resonancia masa/resorte, como en la
-  figura anterior).
+  por banda y emite un `TransferStiffnessWarning` cuando alguna banda lo
+  supera (habitual cerca o por debajo de la resonancia masa/resorte, como en
+  la figura anterior); el resultado que construye marca esas bandas como no
+  válidas.
 * **Masa de bloqueo rígida (Desigualdad 3).** Por encima de una frecuencia
   superior $f_3$ la masa de bloqueo deja de moverse como cuerpo rígido; los
   resultados solo son válidos mientras su masa efectiva medida
   $m_{2,\text{eff}} = 2F_2/(a'_1 + a''_1)$ (Ec. 4) se mantenga dentro de 1 dB de
-  la masa rígida: $10\log_{10}(m_{2,\text{eff}}^2/m_2^2) \le 1\ \text{dB}$.
+  la masa rígida: $|10\log_{10}(m_{2,\text{eff}}^2/m_2^2)| \le 1\ \text{dB}$.
+  `effective_blocking_mass` halla $f_3$ a partir de esa medida (sección 5).
 * **Linealidad (apartado 7.6).** Dos espectros de entrada separados 10 dB
   deben dar niveles de rigidez de transferencia dentro de 1,5 dB. El número no
   es arbitrario, y es el único criterio de aquí que va de verdad sobre el
@@ -292,8 +308,9 @@ frecuencia utilizable por ambos lados:
 
 Todos los criterios anteriores son propiedades del elemento y del modelo. Los
 apartados 6 y 7 de la ISO 10846-2 añaden un conjunto de ensayos previos y de
-requisitos de equipo que deciden si hay resultado siquiera, ninguno de los
-cuales se calcula aquí.
+requisitos de equipo que deciden si hay resultado siquiera. Los dos que son
+diferencias de nivel pueden juzgarse a partir de los espectros medidos
+(sección 5); el resto se deja al operador.
 
 * **Un ensayo previo de fondo** (7.6.1). Con la fuente apagada, mide
   $L_{F_2}$ y $L_{a_1}$; la salida de la fuente debe ajustarse para que superen
@@ -302,7 +319,8 @@ cuales se calcula aquí.
   aceleración en la dirección de excitación debe superar a las componentes
   perpendiculares no deseadas en al menos **15 dB**, medida en el borde de la masa
   de excitación en el plano de la brida de entrada: el acelerómetro que dibuja
-  la figura del banco. Las bandas que no lo cumplen se excluyen del resultado.
+  la figura del banco. Las bandas que no lo cumplen se excluyen del resultado;
+  `check_unwanted_input` las juzga.
 * **Transductores** (6.5, 6.6). Los acelerómetros y los transductores de fuerza
   deben tener un nivel de sensibilidad independiente de la frecuencia dentro de
   **0,5 dB**, estar calibrados a la temperatura del laboratorio y tener una
@@ -392,13 +410,231 @@ from phonometry import vibration
 with warnings.catch_warnings(record=True) as caught:
     warnings.simplefilter("always")
     vibration.transfer_stiffness_indirect(50.0, 0.5, blocking_mass=10.0)
-print(caught[0].category.__name__)                     # PhonometryWarning
+print(caught[0].category.__name__)                     # TransferStiffnessWarning
 
 # Aproximación de la fuerza de bloqueo en el límite del 10 % (ISO 10846-1, Ec. 6):
 print(round(abs(complex(vibration.blocking_force_ratio(1e5, 1e6))), 4))   # 0.9091
 ```
 
-## 4. Leer $L_k$, y para qué sirve
+## 4. Un valor por banda de tercio de octava
+
+Una medida en barrido o por pasos da $k_{2,1}$ en cientos de líneas, y todas
+las partes de la serie lo declaran como un valor por banda de tercio de octava:
+la media del módulo al cuadrado sobre las $n$ líneas que contiene la banda
+(ISO 10846-2 Fórmula (6), -3 Fórmula (7), -4 Fórmula (11), -5 Fórmula (6)),
+
+$$
+k_\mathrm{av} = \left\{ \frac{1}{n} \sum_{i=1}^{n} \lvert k_{2,1}(f_i) \rvert^2 \right\}^{1/2},
+\qquad L_{k,\mathrm{av}} = 10 \lg \frac{k_\mathrm{av}^2}{k_0^2},
+$$
+
+«donde la suma se extiende a un mínimo de $n = 5$ frecuencias». Promediar el
+cuadrado y no el nivel da peso a los máximos, que las partes llaman
+«normalmente los más importantes», y la fase se pierde. Las cinco líneas son
+además un requisito de la medida: el analizador debe resolver al menos cinco
+frecuencias distintas por banda, y un seno por pasos o en barrido debe poner
+cinco en cada banda de la que se declare un valor. Por eso
+`band_averaged_stiffness` deja sin valor (NaN) una banda de una a cuatro líneas
+y emite un `TransferStiffnessWarning`, en lugar de promediar demasiado pocas.
+Asigna cada línea a la banda de base diez que la contiene, nombra las bandas
+por sus centros de la ISO 266 y deja fuera antes las líneas que no cumplieron
+una condición de adecuación, porque todas las partes las excluyen de la
+evaluación: el resultado indirecto marca las líneas con $|T| > 0{,}1$, de modo
+que su `.band_average()` promedia solo la parte válida del barrido.
+
+```python
+import warnings
+import numpy as np
+from phonometry import vibration
+
+# Método directo, un soporte Kelvin-Voigt k + jwc, líneas cada 2 Hz:
+f = np.arange(90.0, 1120.0, 2.0)
+k21 = 1.0e6 + 1j * 2.0 * np.pi * f * 80.0
+direct = vibration.TransferStiffnessResult(
+    frequencies=f, transfer_stiffness=vibration.transfer_stiffness_direct(k21 * 1e-6, 1e-6)
+)
+bands = direct.band_average()
+print(bands.nominal_frequencies[[0, -1]], bands.line_counts[[0, -1]])  # [ 100. 1000.] [ 12 114]
+print(round(float(bands.levels[-1]), 2))                               # 120.99  dB re 1 N/m
+
+# Método indirecto con una masa de bloqueo de 8 kg: por debajo de 189 Hz
+# |T| > 0,1, y esas líneas nunca llegan a la media.
+t = vibration.base_transmissibility(f, mass=8.0, stiffness=1.0e6, damping=120.0)
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore", vibration.TransferStiffnessWarning)
+    indirect = vibration.indirect_transfer_stiffness_result(f, t, blocking_mass=8.0)
+bands = indirect.band_average()
+print(bands.nominal_frequencies[0], bands.line_counts[0])  # 200.0 18
+bands.plot(language="es")   # los niveles por banda, con las bandas sin valor marcadas
+```
+
+## 5. Comprobar el banco a partir de los espectros medidos
+
+Tres de las condiciones de adecuación de la serie son diferencias de nivel o
+una masa, y pueden juzgarse con lo que el banco midió. Cada comprobación
+devuelve la condición frecuencia a frecuencia con un `.passes` global, se
+dibuja con `.plot()` y avisa (`TransferStiffnessWarning`) donde la condición
+no se cumple.
+
+* **La salida está bloqueada**, $\Delta L_{1,2} = L_{a1} - L_{a2} \ge 20$ dB
+  (ISO 10846-5 Desigualdad (1); Desigualdad (1) de la Parte 2, (2) de las
+  Partes 3 y 4): `check_blocked_output`. Una diferencia menor indica una
+  desadaptación de rigidez insuficiente entre el elemento y la base, o
+  transmisión por flancos.
+* **La entrada se mueve en una sola dirección**, la de excitación al menos
+  15 dB por encima de cada una de las perpendiculares (Parte 5 Desigualdad (2);
+  (3) de la Parte 2, (5) de la Parte 3, (7) de la Parte 4):
+  `check_unwanted_input`, que toma una fila de niveles por dirección no
+  deseada y deja decidir a la más fuerte.
+* **La masa delante de los transductores de fuerza de salida es lo bastante
+  ligera** para el método directo (ISO 10846-4 Desigualdad (3), ISO 10846-2
+  Desigualdad (2)): la brida de salida, la placa de reparto de fuerza y la
+  mitad de los transductores, $m_0$, llevan una fuerza de inercia $m_0 a_2$ que
+  los transductores leen como parte de la fuerza de bloqueo, y no debe superar
+  el 6 % de la fuerza,
+
+  $$
+  m_0 \le 0{,}06 \times \frac{10^{L_{F2}/20}}{10^{L_{a2}/20}}\ \text{kg},
+  $$
+
+  con $L_{F2}$ re 1 µN y $L_{a2}$ re 1 µm/s², de modo que la cota es
+  $0{,}06\,|F_2|/|a_2|$. En la cota los niveles de fuerza difieren en
+  $20 \lg 1{,}06 = 0{,}51$ dB cuando la fuerza de inercia está en fase con la
+  medida y en $-20 \lg 0{,}94 = 0{,}54$ dB cuando se le opone: los 0,5 dB de la
+  NOTA 1 (que la ISO 10846-4 imprime como «05 dB»; véanse las
+  [erratas](/phonometry/es/reference/errata/)). `check_output_mass` devuelve el
+  límite y ese sesgo en el peor caso, `bias_bound_db`.
+
+En el método indirecto la pregunta es hasta dónde sigue siendo rígida la masa
+de bloqueo. La Fórmula (6) de la ISO 10846-4 (Fórmula (4) de la ISO 10846-3)
+mide su masa efectiva con el bloque sobre resortes blandos, excitado por una
+fuerza $F_2$ a través de su centro de masas y leído por dos acelerómetros a
+$\sqrt{S}$ de distancia dentro del área de contacto,
+$m_{2,\mathrm{eff}} = |2F_2/(a'_1 + a''_1)|$; el límite superior $f_3$ es la
+frecuencia más baja a la que se aparta de $m_2$ en más de 1 dB (12 %),
+Desigualdad (5), ignorando por debajo de 40 Hz el apartamiento debido al
+comportamiento masa-resorte del bloque sobre sus apoyos.
+`effective_blocking_mass` interpola el cruce entre la última línea dentro de
+1 dB y la primera fuera.
+
+```python
+import numpy as np
+from phonometry import vibration
+
+f = [63.0, 125.0, 250.0]
+check = vibration.check_blocked_output(f, [110.0, 110.0, 110.0], [85.0, 88.0, 86.0])
+print(check.holds, check.passes)                        # [ True  True  True] True
+
+# Una placa de fuerza de 0,4 kg bajo una fuerza de salida de 1 N (120 dB re 1 µN)
+# y una aceleración de salida de 0,1 m/s² (100 dB re 1 µm/s²):
+mass = vibration.check_output_mass([125.0], 0.4, [120.0], [100.0])
+print(mass.mass_limit_kg, mass.passes, mass.bias_bound_db.round(3))   # [0.6] True [0.355]
+
+# Un bloque de 20 kg cuya masa efectiva crece como (f/3 kHz)^2 sobre la rígida:
+fe = np.geomspace(20.0, 5000.0, 400)
+m_eff = 20.0 * (1.0 + (fe / 3000.0) ** 2)
+ones = np.ones(fe.size, dtype=complex)
+block = vibration.effective_blocking_mass(fe, m_eff * ones, ones, ones, blocking_mass_kg=20.0)
+print(round(block.upper_frequency_limit_hz, 1))         # 1047.9  Hz
+```
+
+## 6. El método de punto de excitación (ISO 10846-5)
+
+Con la salida del elemento bloqueada, la fuerza y la aceleración de entrada dan
+la **rigidez en el punto de excitación** (Fórmula (3)),
+
+$$
+k_{1,1}(f) = \frac{F_1}{u_1} = -(2\pi f)^2 \frac{F_1}{a_1},
+$$
+
+que solo coincide con la rigidez de transferencia a baja frecuencia. Dos cosas
+la separan: la masa entre el elemento y los transductores de fuerza de entrada,
+cuya inercia leen los transductores junto con el elemento, y las resonancias
+internas del propio elemento. El apartado 6.2 fija dónde acaba la
+aproximación. El valor de baja frecuencia es «la media de 1 Hz a 20 Hz», y la
+**frecuencia límite superior** $f_\mathrm{UL}$ es «la frecuencia más baja a la
+que el nivel de rigidez en el punto de excitación se hace 2 dB menor que la
+rigidez de baja frecuencia». Hasta ella las medias por banda de $k_{1,1}$
+sustituyen a las de $k_{2,1}$ dentro de 2 dB (Fórmula (7),
+$k_\mathrm{av} = k_{\mathrm{av}(2,1)} \approx k_{\mathrm{av}(1,1)}$), y por
+encima el método no dice nada. $f_\mathrm{UL}$ suele estar entre 50 Hz y
+200 Hz, así que es un método de baja frecuencia, pensado para quien tiene un
+banco de punto de excitación.
+
+`driving_point_stiffness` calcula $k_{1,1}$, toma el valor de baja frecuencia
+como la media de la Fórmula (6) de las líneas de 1 Hz a 20 Hz (para la rigidez
+plana que el apartado presupone, lo mismo que la media de los niveles) e
+interpola el cruce del umbral de 2 dB. Si recibe la aceleración de salida o las
+aceleraciones de entrada no deseadas, comprueba las Desigualdades (1) y (2)
+línea a línea y deja fuera de todo las líneas que no las cumplen, como pide el
+7.6.1. Su `.band_average()` promedia solo las líneas válidas, todas por debajo
+de $f_\mathrm{UL}$; como cada una está dentro de 2 dB de $k_{2,1}$, también lo
+está cada banda. Por debajo de 20 Hz el 7.5 pide un paso de 0,2 Hz entre
+líneas en lugar de cinco líneas por banda, lo que deja las bandas más bajas por
+debajo de cinco; esas bandas quedan sin valor, sin aviso, y la nota del
+apartado 9 m) acepta ahí datos en banda estrecha.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/driving_point_stiffness.svg" alt="Dos paneles apilados que comparten un eje de frecuencia logarítmico de 1 a 200 hercios para un elemento de 1 meganewton por metro con un factor de pérdidas del 5 por ciento excitado a través de una placa de fuerza de 2 kilogramos. El panel superior da el nivel de rigidez en el punto de excitación, plano en 120 decibelios a baja frecuencia y cayendo a medida que crece la inercia de la placa, la rigidez de transferencia como una línea horizontal discontinua en 120 decibelios, un umbral punteado 2 decibelios por debajo del valor de 1 a 20 hercios, una línea vertical en la frecuencia límite superior de 52,2 hercios y puntos rojos para las medias por banda de 4 a 50 hercios; todo lo que está por encima de 52,2 hercios aparece sombreado como no evaluado. El panel inferior da la diferencia entre los niveles de rigidez en el punto de excitación y de transferencia, en banda estrecha y banda a banda, dentro de una franja sombreada de más o menos 2 decibelios que todas las medias por banda respetan." width="82%" loading="eager" />
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import vibration
+
+# Un elemento de 1 MN/m con un factor de pérdidas del 5 %, excitado a través de
+# una placa de fuerza de 2 kg: los transductores leen la inercia de la placa con
+# el elemento.
+f = np.arange(1.0, 200.0, 0.2)          # las líneas de 0,2 Hz del 7.5
+w = 2.0 * np.pi * f
+k21 = 1.0e6 * (1.0 + 0.05j)
+res = vibration.driving_point_stiffness(f, (k21 - w**2 * 2.0) * 1e-6, -(w**2) * 1e-6)
+print(round(res.upper_limiting_frequency_hz, 1))    # 52.2  Hz
+
+res.plot(language="es")             # el nivel, el umbral de 2 dB y f_UL
+res.band_average().plot(language="es")
+plt.show()
+```
+
+</details>
+
+*Dónde se detiene el método. La placa de fuerza es de 2 kg, así que la rigidez
+medida es $k_{2,1} - \omega^2 m_0$ y se aparta de la rigidez de transferencia
+según sube la frecuencia; a 52,2 Hz está 2 dB por debajo de su valor de 1 Hz a
+20 Hz, y nada por encima se evalúa. Todas las medias por banda por debajo
+quedan dentro de los ±2 dB de la Fórmula (7); la última, a 50 Hz, promedia solo
+las 37 líneas por debajo de $f_\mathrm{UL}$ y queda 1,8 dB por debajo.*
+
+**El presupuesto de incertidumbre** (Anexo B) escribe el nivel por banda como
+el medido más cinco correcciones de estimación nula, todas con coeficiente de
+sensibilidad 1 (Fórmula (B.1)), las combina por raíz de la suma de cuadrados
+(B.2) y toma $U = 2u$ para una cobertura del 95 % (B.3).
+`driving_point_uncertainty` lo construye sobre
+`metrology.combine_uncertainty`: el procesado de señal 0,3 dB y la
+instrumentación 0,5 dB (normales), la repetibilidad de instalación
+$p/\sqrt{3}$ para una dispersión $2p$ entre instalaciones repetidas, y tres
+términos rectangulares, el banco de ensayo $1/(2\sqrt{3}) = 0{,}289$ dB, la
+discrepancia del punto de excitación $2/\sqrt{3} = 1{,}155$ dB por sus
+$\pm 2$ dB, y la linealidad $1{,}5/(2\sqrt{3}) = 0{,}433$ dB. Esos tres son las
+expresiones que imprime el anexo, no los 0,3, 1,2 y 0,5 dB a los que los
+redondea la Tabla B.1: 0,5 dB no es la décima más cercana a 0,433 dB, como
+registran las [erratas](/phonometry/es/reference/errata/), y cualquier término
+puede pasarse como argumento para reproducir la tabla o para declarar una
+estimación razonada. Domina el término de discrepancia: es el precio de medir
+$k_{1,1}$ en lugar de $k_{2,1}$.
+
+```python
+from phonometry import vibration
+
+budget = vibration.driving_point_uncertainty(119.3, repeatability_range_db=0.6)
+print(round(budget.combined_uncertainty_db, 3))    # 1.405  dB
+print(round(budget.expanded_uncertainty_db, 2))    # 2.81  dB (U = 2u)
+budget.plot(language="es")   # una barra por magnitud de entrada, con u y U
+```
+
+## 7. Leer $L_k$, y para qué sirve
 
 Un nivel en dB re 1 N/m necesita una escala antes de significar nada. Cada
 década de rigidez son 20 dB, así que el rango de trabajo abarca más o menos
@@ -446,7 +682,7 @@ alimentada por una fuente caracterizada según
 hay detrás de las dos es la regla de las movilidades de fuente y receptor de la
 [guía de movilidad](/phonometry/es/vibration/structural/mechanical-mobility/#por-que-la-potencia-la-deciden-dos-movilidades).
 
-## 5. Relación con la familia de FRF
+## 8. Relación con la familia de FRF
 
 La rigidez dinámica es un miembro de la familia de funciones de respuesta en
 frecuencia (ISO 10846-1, Anexo A / Tabla A.2): es la recíproca de la receptancia
@@ -464,7 +700,7 @@ print(round(abs(complex(vibration.convert_frf(
     Z, 250.0, "impedance", "dynamic_stiffness"))), 1))    # 1001249.2
 ```
 
-## 6. Ficha de informe
+## 9. Ficha de informe
 
 `TransferStiffnessResult.report(path)` genera un informe de una página con la
 caracterización de la rigidez dinámica de transferencia de un elemento resiliente
@@ -524,19 +760,35 @@ relaciones FRF del Anexo A / Tabla A.2 (`convert_frf`).
 genera la ficha de caracterización.
 </ScopeClaim>
 
+<ScopeClaim status="covered" label="Cubierto">
+La media en bandas de tercio de octava de todas las partes, ISO 10846-2
+Fórmula (6), -3 Fórmula (7), -4:2003 Fórmula (11) y -5:2008 Fórmula (6), sin
+valor para una banda de menos de cinco líneas (`band_averaged_stiffness`,
+`TransferStiffnessResult.band_average`). Las condiciones de adecuación que las
+ISO 10846-4:2003 y -5:2008 enuncian como desigualdades: los 20 dB de la salida
+bloqueada y los 15 dB de las direcciones de entrada no deseadas
+(`check_blocked_output`, `check_unwanted_input`) y el límite de la masa de
+salida de la Desigualdad (3) de la ISO 10846-4 (`check_output_mass`), y la masa
+de bloqueo efectiva de la Fórmula (6) de la ISO 10846-4 con su $f_3$
+(`effective_blocking_mass`). La rigidez en el punto de excitación de la
+Fórmula (3) de la ISO 10846-5:2008, su frecuencia límite superior (6.2) y las
+medias por banda de la Fórmula (7) (`driving_point_stiffness`), y el
+presupuesto de incertidumbre del Anexo B (`driving_point_uncertainty`).
+Ninguna de las dos partes trae un ejemplo resuelto, así que la conformidad se
+ancla en formas cerradas.
+</ScopeClaim>
+
 <ScopeClaim status="not-covered" label="No cubierto">
-Las Partes 4 y 5 de la serie ISO 10846, que cubren elementos distintos de los
-soportes resilientes y el método de punto de excitación en baja frecuencia, no
-están implementadas. `transfer_stiffness_indirect` solo comprueba la
-Desigualdad 2 (el límite de transmisibilidad $|T| \le 0{,}1$): la Desigualdad
-3, la comprobación de masa de bloqueo rígida de la Fórmula 4, se describe pero
-no se calcula automáticamente. El criterio de linealidad del apartado 7.6 (dos
-espectros de entrada separados 10 dB dentro de 1,5 dB) tampoco se comprueba en
-el código, ni tampoco los requisitos de acondicionamiento e instrumentación de
-la sección 3: el acondicionamiento de precarga, fluencia y temperatura, los
-dos ensayos previos de 15 dB, la planitud de 0,5 dB de los transductores y el
-emparejamiento entre canales, y la resolución de cinco líneas por banda se
-describen aquí y se dejan al operador. Los soportes hidráulicos quedan del
+Los montajes de ensayo de la ISO 10846-4 para acoplamientos, fuelles,
+mangueras, soportes de tuberías y cables los describe la norma, no se modelan:
+las mismas funciones les sirven una vez medidas las fuerzas y las
+aceleraciones. Los nomogramas de $f_3$ de la Figura 11 para cubos y cilindros
+de acero no están tabulados; $f_3$ se halla a partir de una masa efectiva
+medida. El criterio de linealidad del apartado 7.6 (dos espectros de entrada
+separados 10 dB dentro de 1,5 dB) no se comprueba en el código, ni tampoco el
+ensayo previo de fondo, la planitud de 0,5 dB de los transductores y el
+emparejamiento entre canales, ni el paso de 0,2 Hz entre líneas que la
+ISO 10846-5 pide por debajo de 20 Hz. Los soportes hidráulicos quedan del
 todo fuera de la descripción con un solo espectro: su rigidez depende de la
 amplitud por diseño, así que un único $L_k(f)$ no los caracteriza.
 </ScopeClaim>

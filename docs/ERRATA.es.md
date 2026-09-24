@@ -937,6 +937,67 @@ dos ediciones con las mismas entradas y en el mismo orden.
   la edición de 2006, cuyo impreso lleva el defecto; la edición de 2017 queda
   como confirmación.
 
+## ISO 10846-4:2003, 6.2 NOTA 1 (la cota de la Desigualdad (3) impresa como 05 dB)
+
+- **Ubicación:** apartado 6.2, «Measurement of blocking force in the direct
+  method», NOTA 1 a la Desigualdad (3).
+- **El impreso:** «Inequality (3) is equivalent to the requirement that
+  $|L_{F_\mathrm{b}} - L_{F_2}| \leqslant 05$ dB.»
+- **El problema:** falta la coma decimal: la cota es 0,5 dB, no 5 dB. La
+  propia Desigualdad (3), $m_0 \leqslant 0{,}06 \times 10^{L_{F2}/20} /
+  10^{L_{a2}/20}$ kg, limita la fuerza de inercia $m_0 a_2$ al 6 % de la
+  fuerza medida, así que los dos niveles de fuerza difieren como mucho en
+  $20\lg 1{,}06 = 0{,}51$ dB con la fuerza de inercia en fase y
+  $-20\lg 0{,}94 = 0{,}54$ dB en oposición: 0,5 dB, la décima parte de lo que
+  dice la nota. ISO 10846-2:2008, que enuncia la misma desigualdad para
+  soportes resilientes (su Desigualdad (2)), imprime la misma nota con la coma
+  en su sitio, «$L_{F_2'} - L_{F_2} \leqslant 0{,}5$ dB».
+- **Evidencia:** la nota junto a la desigualdad que reformula, y la misma
+  nota en la parte hermana; la nota se leyó como imagen, no desde el texto
+  extraído. Verificado en la página 30 del PDF (p. 20 impresa) de BS EN ISO
+  10846-4:2003, la implementación británica de ISO 10846-4:2003 (primera
+  edición), y en la página 21 del PDF (p. 13 impresa) de BS EN ISO
+  10846-2:2008.
+- **Comportamiento de la biblioteca:** no hizo falta ningún cambio, porque la
+  biblioteca calcula la desigualdad, no la nota. `check_output_mass` informa
+  del sesgo que puede causar la masa, `bias_bound_db`, que es 0,54 dB sobre
+  la cota, y la comprobación de conformidad «ISO 10846-4:2003 6.2 NOTE 1» lo
+  contrasta con los 0,5 dB que la nota quiere decir.
+- **Estado:** sin notificar.
+
+## ISO 10846-5:2008, B.3.6 y Tabla B.1 (1,5/(2√3) dB redondeado a 0,5 dB)
+
+- **Ubicación:** Anexo B (informativo), B.3.6 «Test for linearity» y la fila
+  $\delta_\mathrm{lin}$ de la Tabla B.1.
+- **El impreso:** «a standard uncertainty
+  $u_\mathrm{lin} = 1{,}5 / (2\sqrt{3}) \approx 0{,}5$ dB», y 0,5 en las
+  columnas de incertidumbre típica y de contribución de la fila
+  $\delta_\mathrm{lin}$.
+- **El problema:** $1{,}5/(2\sqrt{3}) = 0{,}433$ dB, que redondeado a la
+  décima es 0,4 dB, no 0,5 dB. Las otras dos expresiones del mismo anexo
+  coinciden con su aproximación a la décima más cercana,
+  $u_\mathrm{rig} = 1/(2\sqrt{3}) = 0{,}289 \approx 0{,}3$ dB (B.3.4) y
+  $u_\mathrm{dps} = 2/\sqrt{3} = 1{,}155 \approx 1{,}2$ dB (B.3.5); el anexo
+  no dice que redondee hacia arriba. Con los valores de la Tabla B.1 y sin
+  dispersión de repetibilidad, la incertidumbre típica combinada es
+  $\sqrt{2{,}12} = 1{,}456$ dB y $U = 2{,}91$ dB; con las expresiones es
+  1,394 dB y $U = 2{,}79$ dB. ISO 10846-2:2008 lleva el mismo redondeo dos
+  veces, $u_\mathrm{rig} = u_\mathrm{lin} = 1{,}5/(2\sqrt{3}) \approx 0{,}5$ dB
+  en B.3.4 y B.3.5 y 0,5 en las dos filas de su Tabla B.1.
+- **Evidencia:** la expresión junto al número que se dice que aproxima, en la
+  página tal como está impresa. Verificado en la página 33 del PDF (p. 25
+  impresa) y la página 32 del PDF (p. 24 impresa, Tabla B.1) de BS EN ISO
+  10846-5:2009, la implementación británica de ISO 10846-5:2008 (primera
+  edición), y en la página 34 del PDF (p. 26 impresa) y la página 33 del PDF
+  (p. 25 impresa, Tabla B.1) de BS EN ISO 10846-2:2008.
+- **Comportamiento de la biblioteca:** `driving_point_uncertainty` toma por
+  defecto las expresiones que imprimen B.3.4 a B.3.6, 0,289, 1,155 y
+  0,433 dB, y admite cualquiera de ellas como argumento, de modo que se
+  pueden pasar los valores de la Tabla B.1. Las comprobaciones de conformidad
+  «ISO 10846-5:2008 Formulas (B.2) and (B.3)» e «ISO 10846-5:2008 Table B.1»
+  contrastan los dos presupuestos.
+- **Estado:** sin notificar.
+
 ## UNE-EN 15657:2018, apartado 7.1, Fórmula (14) (masa de referencia dimensionalmente inconsistente con la magnitud que normaliza)
 
 - **Ubicación:** apartado 7.1, la frase que introduce la Fórmula (14) (p. 14

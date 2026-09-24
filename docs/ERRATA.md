@@ -873,6 +873,64 @@ in the same order.
   retained because the library cites the 2006 edition, whose print carries the
   defect; the 2017 edition stands as the confirmation.
 
+## ISO 10846-4:2003, 6.2 NOTE 1 (the bound of Inequality (3) printed as 05 dB)
+
+- **Location:** clause 6.2, "Measurement of blocking force in the direct
+  method", NOTE 1 to Inequality (3).
+- **The print:** "Inequality (3) is equivalent to the requirement that
+  $|L_{F_\mathrm{b}} - L_{F_2}| \leqslant 05$ dB."
+- **The problem:** the decimal comma is missing: the bound is 0,5 dB, not
+  5 dB. Inequality (3) itself, $m_0 \leqslant 0{,}06 \times 10^{L_{F2}/20} /
+  10^{L_{a2}/20}$ kg, limits the inertia force $m_0 a_2$ to 6 % of the
+  measured force, so the two force levels differ by at most
+  $20\lg 1{,}06 = 0{,}51$ dB with the inertia force in phase and
+  $-20\lg 0{,}94 = 0{,}54$ dB against it: 0,5 dB, a tenth of what the note
+  reads. ISO 10846-2:2008, which states the same inequality for resilient
+  supports (its Inequality (2)), prints the same note with the comma in
+  place, "$L_{F_2'} - L_{F_2} \leqslant 0{,}5$ dB".
+- **Evidence:** the note beside the inequality it restates, and the same note
+  in the companion part; the note was read as an image, not from extracted
+  text. Verified on PDF page 30 (printed p. 20) of BS EN ISO 10846-4:2003, the
+  UK implementation of ISO 10846-4:2003 (first edition), and on PDF page 21
+  (printed p. 13) of BS EN ISO 10846-2:2008.
+- **Library behaviour:** no change required, since the library computes the
+  inequality, not the note. `check_output_mass` reports the bias the mass can
+  cause, `bias_bound_db`, which is 0,54 dB on the bound, and the conformance
+  check "ISO 10846-4:2003 6.2 NOTE 1" holds it against the 0,5 dB the note
+  means.
+- **Status:** unreported.
+
+## ISO 10846-5:2008, B.3.6 and Table B.1 (1,5/(2√3) dB rounded to 0,5 dB)
+
+- **Location:** Annex B (informative), B.3.6 "Test for linearity" and the
+  $\delta_\mathrm{lin}$ row of Table B.1.
+- **The print:** "a standard uncertainty
+  $u_\mathrm{lin} = 1{,}5 / (2\sqrt{3}) \approx 0{,}5$ dB", and 0,5 in the
+  standard-uncertainty and uncertainty-contribution columns of the
+  $\delta_\mathrm{lin}$ row.
+- **The problem:** $1{,}5/(2\sqrt{3}) = 0{,}433$ dB, which is 0,4 dB to the
+  tenth, not 0,5 dB. The two other expressions of the same annex agree with
+  their approximations to the nearest tenth, $u_\mathrm{rig} = 1/(2\sqrt{3})
+  = 0{,}289 \approx 0{,}3$ dB (B.3.4) and $u_\mathrm{dps} = 2/\sqrt{3} =
+  1{,}155 \approx 1{,}2$ dB (B.3.5); the annex does not say that it rounds up.
+  With the Table B.1 values and no repeatability spread the combined standard
+  uncertainty is $\sqrt{2{,}12} = 1{,}456$ dB and $U = 2{,}91$ dB; with the
+  expressions it is 1,394 dB and $U = 2{,}79$ dB. ISO 10846-2:2008 carries
+  the same rounding twice, $u_\mathrm{rig} = u_\mathrm{lin} = 1{,}5/(2\sqrt{3})
+  \approx 0{,}5$ dB in B.3.4 and B.3.5 and 0,5 in both rows of its Table B.1.
+- **Evidence:** the expression beside the number it is said to approximate,
+  on the page as printed. Verified on PDF page 33 (printed p. 25) and PDF page
+  32 (printed p. 24, Table B.1) of BS EN ISO 10846-5:2009, the UK
+  implementation of ISO 10846-5:2008 (first edition), and on PDF page 34
+  (printed p. 26) and PDF page 33 (printed p. 25, Table B.1) of BS EN ISO
+  10846-2:2008.
+- **Library behaviour:** `driving_point_uncertainty` defaults to the
+  expressions B.3.4 to B.3.6 print, 0,289, 1,155 and 0,433 dB, and takes any
+  of them as an argument, so the Table B.1 values can be passed in. The
+  conformance checks "ISO 10846-5:2008 Formulas (B.2) and (B.3)" and
+  "ISO 10846-5:2008 Table B.1" hold the two budgets.
+- **Status:** unreported.
+
 ## UNE-EN 15657:2018, Clause 7.1, Formula (14) (reference mass dimensionally inconsistent with the quantity it normalises)
 
 - **Location:** Clause 7.1, the sentence introducing Formula (14) (printed

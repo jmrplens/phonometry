@@ -518,7 +518,7 @@ Mobility and frequency-response functions, isolators, radiated power,
 junctions and human vibration. The area covers the path a machine takes into a
 structure and out again as airborne sound, and the separate question of what
 vibration does to the person exposed to it. Implements ISO 7626-1/-2,
-ISO 10846-1/-2/-3, ISO 9611, ISO/TS 7849-1/-2, EN 15657, EN 12354-5,
+ISO 10846-1/-2/-3/-4/-5, ISO 9611, ISO/TS 7849-1/-2, EN 15657, EN 12354-5,
 ISO 2631-1/-2/-4/-5, ISO 5349-1/-2, ISO 8041-1/-2 and DIN 4150-3.
 
 **[Structure-borne sources](/phonometry/vibration/structural/)**
@@ -531,8 +531,9 @@ ISO 2631-1/-2/-4/-5, ISO 5349-1/-2, ISO 8041-1/-2 and DIN 4150-3.
   junctions, their diffuse-field average, and the coupling loss factor and
   vibration reduction index.
 - [Transfer stiffness of resilient elements (ISO 10846)](/phonometry/vibration/structural/transfer-stiffness/):
-  the dynamic transfer stiffness and loss factor of an isolator by the direct
-  and indirect methods.
+  the dynamic transfer stiffness and loss factor of an isolator by the direct,
+  indirect and driving-point methods, averaged into one-third-octave bands,
+  with the adequacy checks of the rig and the Annex B uncertainty budget.
 - [Vibration damage to structures (DIN 4150-3)](/phonometry/vibration/structural/structural-damage/):
   the guideline peak particle velocities a foundation, a topmost floor plane and
   a buried pipe are judged by, and the bending stress a velocity implies.

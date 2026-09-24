@@ -543,7 +543,7 @@ Movilidad y funciones de respuesta en frecuencia, aisladores, potencia radiada,
 uniones y vibración en humanos. El área cubre el camino que sigue una máquina
 al entrar en una estructura y volver a salir como sonido aéreo, y la cuestión
 aparte de qué le hace la vibración a la persona expuesta. Implementa
-ISO 7626-1/-2, ISO 10846-1/-2/-3, ISO 9611, ISO/TS 7849-1/-2, EN 15657,
+ISO 7626-1/-2, ISO 10846-1/-2/-3/-4/-5, ISO 9611, ISO/TS 7849-1/-2, EN 15657,
 EN 12354-5, ISO 2631-1/-2/-4/-5, ISO 5349-1/-2, ISO 8041-1/-2 y DIN 4150-3.
 
 **[Fuentes de ruido estructural](/phonometry/es/vibration/structural/)**
@@ -557,7 +557,9 @@ EN 12354-5, ISO 2631-1/-2/-4/-5, ISO 5349-1/-2, ISO 8041-1/-2 y DIN 4150-3.
   acoplamiento y el índice de reducción vibratoria.
 - [Rigidez dinámica de transferencia (ISO 10846)](/phonometry/es/vibration/structural/transfer-stiffness/):
   la rigidez dinámica de transferencia y el factor de pérdidas de un aislador por
-  los métodos directo e indirecto.
+  los métodos directo, indirecto y de punto de excitación, promediada en bandas
+  de tercio de octava, con las comprobaciones de adecuación del banco y el
+  presupuesto de incertidumbre del Anexo B.
 - [Daños en estructuras por vibración (DIN 4150-3)](/phonometry/es/vibration/structural/structural-damage/):
   las velocidades de pico de referencia con las que se juzgan un cimiento, el
   plano de la última planta y una tubería enterrada, y la tensión de flexión que

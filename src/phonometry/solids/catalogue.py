@@ -173,6 +173,19 @@ class SolidMaterial(CatalogueRow):
     thickness_critical_frequency_product_m_hz: float | None = None
     borrowed: Mapping[str, str] = field(default_factory=dict)
 
+    _cell_words: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {
+            "density_kg_m3": "the density",
+            "poisson_ratio": "the Poisson ratio",
+            "youngs_modulus_pa": "the modulus",
+            "shear_modulus_pa": "the shear modulus",
+            "plate_longitudinal_speed_m_s": "the plate speed",
+            "bar_longitudinal_speed_m_s": "the bar speed",
+            "bulk_longitudinal_speed_m_s": "the bulk speed",
+            "transverse_speed_m_s": "the transverse speed",
+        }
+    )
+
     def _complete(self, cells: Completion) -> None:
         """Fill what follows from the cells the page printed.
 

@@ -859,14 +859,15 @@ def _joined(items: Sequence[str]) -> str:
     return f"{', '.join(head)} and {last}" if head else last
 
 
-def _bases_named(cells: Sequence[str], bases: Sequence[str]) -> str:
+def _bases_named(words: Sequence[str], bases: Sequence[str]) -> str:
     """Which basis each printed cell a derived value rests on has.
 
     Written only when they are not all one, so that a modulus worked out
     from a speed and a density the source gives as they are and a Poisson
     ratio it marks as an estimate does not read as a figure of one kind.
+    Each cell is named in *words*, as the rest of the text names it.
     """
-    pairs = list(zip(cells, bases, strict=True))
+    pairs = list(zip(words, bases, strict=True))
     stated = [f"{cell} ({basis})" for cell, basis in pairs if basis]
     unstated = [cell for cell, basis in pairs if not basis]
     text = f"it rests on {_joined(stated)}"
@@ -998,9 +999,25 @@ class Completion:
             cells = self._rests_on(field_name)
             bases = [self._row.basis_of(cell) for cell in cells]
             if len(set(bases)) > 1:
-                how = f"{how}; {_bases_named(cells, bases)}"
+                how = f"{how}; {_bases_named(self._words(cells), bases)}"
             texts[field_name] = how
         return texts
+
+    def _words(self, cells: Sequence[str]) -> list[str]:
+        """How the row's class names each of *cells* in a derived text.
+
+        :raises CatalogueError: for a cell the class gives no words for, so
+            that a field name never reaches a text written for a reader.
+        """
+        words = type(self._row)._cell_words
+        missing = [cell for cell in cells if cell not in words]
+        if missing:
+            msg = (
+                f"{type(self._row).__name__} names no words for {_joined(missing)} "
+                "in _cell_words, and a derived text rests on them"
+            )
+            raise CatalogueError(msg)
+        return [words[cell] for cell in cells]
 
     def _rests_on(self, field_name: str) -> tuple[str, ...]:
         """The printed cells a field rests on, following filled ones back."""
@@ -1280,6 +1297,12 @@ class CatalogueRow:
     #: :class:`~phonometry.materials.AbsorptionAreaSpectrum` lists the
     #: sabins of a table set in feet.
     _unit_aliases: ClassVar[tuple[UnitAlias, ...]] = ()
+    #: How a derived text names each printed cell a value can rest on, in
+    #: the words the rest of the text uses ("the plate speed", not the field
+    #: name). A class whose :meth:`_complete` fills a value lists every cell
+    #: it passes as an input; a derived text resting on a cell with no words
+    #: refuses to be written.
+    _cell_words: ClassVar[Mapping[str, str]] = MappingProxyType({})
 
     name: str
     source: str

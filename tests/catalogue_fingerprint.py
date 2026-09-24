@@ -607,6 +607,86 @@ def derived_names_bases(
     return out
 
 
+#: The same clause with the cells it rests on named in words, as the rest of
+#: each text names them, rather than by their field names.
+WORDED_BASIS_CLAUSE = (
+    "; it rests on the Poisson ratio (estimated) and on the plate speed and "
+    "the density, whose basis the source does not state"
+)
+
+
+def bases_in_words(
+    catalogues: Mapping[str, Mapping[str, Row]],
+) -> dict[str, dict[str, Row]]:
+    """The dump taken through the change that names those cells in words.
+
+    The clause :func:`derived_names_bases` added named the printed cells by
+    their field names, ``poisson_ratio``, ``plate_longitudinal_speed_m_s``
+    and ``density_kg_m3``, in a text whose first half already said "the
+    Poisson ratio", "the plate speed" and "the density", and the published
+    catalogues page showed them to readers as they were. One thing moved,
+    and nothing else may:
+
+    * every ``derived`` text of the rows of :data:`MIXED_BASIS_ROWS` ends in
+      :data:`WORDED_BASIS_CLAUSE` where it ended in
+      :data:`MIXED_BASIS_CLAUSE`. No value moved.
+
+    :raises ValueError: when one of those texts does not end in the old
+        clause, so that the step can never claim a rewrite it did not make.
+    """
+    out = {name: dict(rows) for name, rows in catalogues.items()}
+    name = "PUBLISHED_SOLIDS"
+    solids = dict(out[name])
+    for key in MIXED_BASIS_ROWS:
+        row = dict(solids[key])
+        worded = {}
+        for field, text in row["derived"].items():
+            if not text.endswith(MIXED_BASIS_CLAUSE):
+                msg = f"{name}[{key!r}].derived[{field!r}] does not name the bases"
+                raise ValueError(msg)
+            worded[field] = text.removesuffix(MIXED_BASIS_CLAUSE) + WORDED_BASIS_CLAUSE
+        row["derived"] = worded
+        solids[key] = row
+    out[name] = solids
+    return out
+
+
+#: The note of Cox Table 6.5's aerogel row, which told the reader how the row
+#: is written down in the library's field names, and the one it has now.
+AEROGEL_NOTE = (
+    'Page superscript: 19. Cell printed ">0.75". The schema has bounded_above for "< x" cells only; by analogy this row uses ranges with the printed value as the low end and the physical ceiling of porosity (1.0, NOT a printed number) as the high end, flagged with bounded_below.',
+    'Page superscript: 19. The page prints the porosity as ">0.75", so it is held as the interval from 0.75 to 1, the most a porosity can be, with 0.75 the bound the page gives; the 1 is not a printed figure.',
+)
+
+
+def aerogel_note_in_words(
+    catalogues: Mapping[str, Mapping[str, Row]],
+) -> dict[str, dict[str, Row]]:
+    """The dump taken through the rewrite of the aerogel row's note.
+
+    Its note explained the porosity it holds in terms of the schema,
+    ``bounded_above``, ``ranges`` and ``bounded_below``, and the published
+    catalogues page showed that to readers. One thing moved, and nothing
+    else may:
+
+    * the ``note`` of ``PUBLISHED_POROUS["cox-2017-table-6-5/aerogel"]`` is
+      the second text of :data:`AEROGEL_NOTE` where it was the first.
+
+    :raises ValueError: when the note is not the first text, so that the step
+        can never claim a rewrite it did not make.
+    """
+    out = {name: dict(rows) for name, rows in catalogues.items()}
+    name, key = "PUBLISHED_POROUS", "cox-2017-table-6-5/aerogel"
+    row = dict(out[name][key])
+    before, after = AEROGEL_NOTE
+    if row.get("note") != before:
+        msg = f"{name}[{key!r}]: the note is not the one the step rewrites"
+        raise ValueError(msg)
+    row["note"] = after
+    out[name][key] = row
+    return out
+
+
 #: Every change since the baseline, oldest first.
 CHANGES: tuple[Change, ...] = (
     one_row_shape,
@@ -614,6 +694,8 @@ CHANGES: tuple[Change, ...] = (
     row_contract,
     exact_unit_conversion,
     derived_names_bases,
+    bases_in_words,
+    aerogel_note_in_words,
 )
 
 

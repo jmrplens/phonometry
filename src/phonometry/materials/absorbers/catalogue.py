@@ -68,7 +68,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar
 
 from ..._internal.catalogue import CatalogueRow, read_table, take
 from .porous import (
@@ -187,6 +187,14 @@ class PorousMaterial(CatalogueRow):
     shear_modulus_pa: float | None = None
     poisson_ratio: float | None = None
     structural_loss_factor: float | None = None
+
+    _cell_words: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {
+            "youngs_modulus_pa": "the Young's modulus",
+            "shear_modulus_pa": "the shear modulus",
+            "poisson_ratio": "the Poisson ratio",
+        }
+    )
 
     def _complete(self, cells: Completion) -> None:
         """Fill the one elastic constant that follows from the other two.

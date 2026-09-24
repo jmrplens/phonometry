@@ -585,6 +585,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **A derived value names the cells it rests on in words.** When the cells a
+  catalogue value is worked out from have mixed bases, `derived` says the basis
+  of each, and it named them by their field names: "it rests on poisson_ratio
+  (estimated) and on plate_longitudinal_speed_m_s and density_kg_m3", on the
+  nineteen rows of Hopkins Table A2 whose Poisson ratio is an estimate, and the
+  published catalogues page showed it so in both languages. It now reads "it
+  rests on the Poisson ratio (estimated) and on the plate speed and the
+  density", in the words the rest of the text uses, and a row whose class gives
+  no words for such a cell is refused rather than built. The note of the aerogel
+  row of Cox Table 6.5, which explained its porosity in the schema's field
+  names, says it in a reader's words too, and the catalogues page refuses to
+  publish a text that names a field by its identifier.
+
 - **A nominal band frequency below the preferred table is the number the
   standard prints.** The IEC 61260-1 nominal frequency of a band a decade or
   more below the base table was scaled by 0.1, which binary cannot hold, so

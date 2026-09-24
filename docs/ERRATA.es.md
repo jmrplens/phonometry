@@ -5512,7 +5512,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
 
 ## ISO 8041-1:2017, apartado 12.7 («the appropriate weighting factor (see Table 1)» para `Wf`)
 
-- **Localización:** apartado 12.7, folio impreso 30 (página 30 del PDF en la
+- **Ubicación:** apartado 12.7, folio impreso 30 (página 30 del PDF en la
   edición de ISO, página 38 del PDF de la copia leída aquí), párrafo cuarto. El
   apartado empieza en el folio impreso 29.
 - **Lo impreso:** «For each frequency weighting provided, a steady sinusoidal
@@ -5538,10 +5538,11 @@ dos ediciones con las mismas entradas y en el mismo orden.
   Tabla 3 en 0,08 Hz y 0,63 Hz. Ahí la ponderación de limitación de banda vale
   0,928 078 y la global 0,388 848, valores que la Tabla B.5 imprime como
   0,927 9 y 0,388 4 en el centro de banda vecino de 0,398 1 Hz. Leído como el
-  0,388 8 de la Tabla 1, el ensayo le pide a un vibrómetro `Wf` conforme un
-  valor que dista un 7,75 % del que muestra, frente al ±5 % que la Tabla 2
-  permite a la vibración de cuerpo entero de baja frecuencia: la mitad otra vez
-  por encima del límite, en un instrumento sin defecto. Leído como el cociente
+  0,388 8 de la Tabla 1, el ensayo exige un valor que la indicación de un
+  vibrómetro `Wf` conforme supera en un 7,76 % de ese valor exigido
+  ($0{,}418\,982 / 0{,}388\,8 - 1$), frente al ±5 % que la Tabla 2 permite a
+  la vibración de cuerpo entero de baja frecuencia: la mitad otra vez por
+  encima del límite, en un instrumento sin defecto. Leído como el cociente
   0,418 982, el ensayo es cierto por construcción.
 - **Consecuencia:** ninguna para las tablas de la propia norma. El anexo B
   tabula la ponderación de limitación de banda y la global en columnas
@@ -5561,11 +5562,11 @@ dos ediciones con las mismas entradas y en el mismo orden.
   para las nueve ponderaciones, de modo que un informe pueda decir cuál usó.
   `reference_indication` devuelve el producto de la Tabla 1, que es la otra
   magnitud y la que trata la fila de condiciones de referencia de esa tabla.
-- **Estado:** sin comunicar.
+- **Estado:** sin notificar.
 
 ## ISO 8041-2:2021, apartado 12.7 («the appropriate weighting factor (see Table 1)» para `Wf`, heredado de la parte 1)
 
-- **Localización:** apartado 12.7, folio impreso 26 (página 34 del PDF), el
+- **Ubicación:** apartado 12.7, folio impreso 26 (página 34 del PDF), el
   segundo párrafo de ese folio. El apartado empieza en el folio impreso 25.
 - **Lo impreso:** la frase del apartado 12.7 de la ISO 8041-1:2017 que recoge
   la entrada anterior, palabra por palabra: «With an input signal adjusted to
@@ -5582,8 +5583,9 @@ dos ediciones con las mismas entradas y en el mismo orden.
   ponderaciones que puede ofrecer un PVEM, con la misma frecuencia de
   referencia dentro de la misma falda de limitación de banda, así que la
   aritmética de la entrada anterior vale sin cambios: leído como el 0,388 8 de
-  la Tabla 1, el párrafo le pide a un vibrómetro `Wf` conforme un valor que
-  dista un 7,75 % del que muestra, fuera del ±3 % que la segunda fila de la
+  la Tabla 1, el párrafo exige un valor que la indicación de un vibrómetro
+  `Wf` conforme supera en un 7,76 % de ese valor exigido
+  ($0{,}418\,982 / 0{,}388\,8 - 1$), fuera del ±3 % que la segunda fila de la
   Tabla 2 permite a la diferencia y fuera del ±5 % que su primera fila permite
   a una indicación de cuerpo entero de baja frecuencia. Leído como el cociente
   entre la ponderación global y la de limitación de banda en la frecuencia de
@@ -5599,11 +5601,11 @@ dos ediciones con las mismas entradas y en el mismo orden.
   devuelve el cociente, y sirve a las dos partes porque la parte 2 imprime las
   mismas ponderaciones. La fila de conformidad «ISO 8041-2:2021 Table 2»
   recoge las tolerancias frente a las que se juzga este párrafo.
-- **Estado:** sin comunicar.
+- **Estado:** sin notificar.
 
 ## ISO 8041-2:2021, apartado 12.7 (ponderaciones temporales juzgadas frente a una fila que la Tabla 2 ya no imprime)
 
-- **Localización:** apartado 12.7, folio impreso 26 (página 34 del PDF), el
+- **Ubicación:** apartado 12.7, folio impreso 26 (página 34 del PDF), el
   tercer párrafo de ese folio; leído frente a la Tabla 2 del folio impreso 8,
   al apartado 5.13 del folio impreso 15, al apartado 5.1.2 del folio impreso 6
   y a la Tabla 8 de los folios impresos 13 y 14.
@@ -5654,11 +5656,11 @@ dos ediciones con las mismas entradas y en el mismo orden.
   de la parte 1 sigue siendo `RUNNING_RMS_CONSISTENCY_TOLERANCE_PERCENT`,
   documentada como solo de la parte 1. La fila de conformidad «ISO 8041-2:2021
   Table 2» recoge las dos filas.
-- **Estado:** sin comunicar.
+- **Estado:** sin notificar.
 
 ## ISO 8041-2:2021, apartado 12.22 («exited» por «excited»)
 
-- **Localización:** apartado 12.22, «Logging capabilities», folio impreso 36
+- **Ubicación:** apartado 12.22, «Logging capabilities», folio impreso 36
   (página 44 del PDF), el primer párrafo del apartado.
 - **Lo impreso:** «Part A of the PVEM shall be placed on a shaker and be
   exited 2 times for at least 300 s each.»

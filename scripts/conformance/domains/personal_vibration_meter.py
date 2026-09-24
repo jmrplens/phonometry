@@ -2,8 +2,9 @@
 """Personal vibration exposure meters (ISO 8041-2).
 
 ISO 8041-2:2021 specifies the personal vibration exposure meter (PVEM), the
-instrument a worker wears through a shift, and it grades that instrument with
-the tables of ISO 8041-1 wherever it can. Its 5.9 (folio 11) repeats the
+instrument left unattended to log a worker's exposure through a full working
+day (5.1.1, folio 4), and it grades that instrument with the tables of
+ISO 8041-1 wherever it can. Its 5.9 (folio 11) repeats the
 saw-tooth signal burst: Table 6 (folio 12) defines the same test signal, and
 Tables 7, 8 and 9 (folios 12, 13 and 14) print 228 indications a conforming
 PVEM has to show, each with its tolerance beside it.
@@ -253,7 +254,7 @@ def _chk_frequency_response_uncertainties() -> Outcome:
 @register(
     _PVEM,
     "ISO 8041-2:2021 Clauses 12 and 13",
-    "Maximum expanded uncertainties of measurement, 11 clauses, %",
+    "Maximum expanded uncertainties of measurement, 11 figures over 10 clauses, %",
 )
 def _chk_all_uncertainties() -> Outcome:
     """Every clause of Part 2 that prints a figure, and no other.

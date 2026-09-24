@@ -5183,10 +5183,11 @@ in the same order.
   puts at 0,08 Hz and 0,63 Hz. There the band-limiting weighting is 0,928 078
   and the overall weighting 0,388 848, which Table B.5 prints as 0,927 9 and
   0,388 4 at the neighbouring 0,398 1 Hz band centre. Read as the 0,388 8 of
-  Table 1, the row asks a conforming `Wf` meter for a value 7,75 % away from
-  the one it displays, against the ±5 % Table 2 allows low-frequency
-  whole-body vibration: half again over the limit, on an instrument with no
-  defect. Read as the ratio 0,418 982, the row is true by construction.
+  Table 1, the row demands a value that a conforming `Wf` meter's indication
+  exceeds by 7,76 % of that demanded value ($0{,}418\,982 / 0{,}388\,8 - 1$),
+  against the ±5 % Table 2 allows low-frequency whole-body vibration: half
+  again over the limit, on an instrument with no defect. Read as the ratio
+  0,418 982, the row is true by construction.
 - **Evidence:** the printed clause against Table 1 (printed folio 9), Table 2
   (printed folio 12), Table 3 (printed folios 12 to 13) and Table B.5. The two
   responses at 2,5 rad/s are evaluated from the Formula (1) to (5) cascade the
@@ -5223,8 +5224,9 @@ in the same order.
   vibration exposure meter. Part 2 keeps `Wf` among the weightings a PVEM may
   provide, with the same reference frequency inside the same band-limiting
   skirt, so the arithmetic of the entry above holds unchanged: read as the
-  0,388 8 of Table 1, the paragraph asks a conforming `Wf` meter for a value
-  7,75 % away from the one it displays, outside the ±3 % that the second row of
+  0,388 8 of Table 1, the paragraph demands a value that a conforming `Wf`
+  meter's indication exceeds by 7,76 % of that demanded value
+  ($0{,}418\,982 / 0{,}388\,8 - 1$), outside the ±3 % that the second row of
   Table 2 allows the difference and outside the ±5 % its first row allows a
   low-frequency whole-body indication. Read as the ratio of the overall
   weighting to the band-limiting one at the reference frequency, 0,418 982,

@@ -2331,13 +2331,13 @@ matches the printed table on the day it was measured.
 Everything above is ISO 8041-1, the general-purpose meter an engineer carries
 to a machine or a seat. ISO 8041-2:2021 specifies the other instrument a
 human-vibration survey uses, the **personal vibration exposure meter**
-(PVEM): the one a worker wears through the shift, which has to log the
-exposure for at least 12 h without anyone touching it (5.1 and 5.12). It
-measures the same quantities through the same weightings, and Part 2 does not
-write a second set of tables for it. It prints the Part 1 tables again and
-changes only what a meter worn on the body needs changed, so the question for
-this section is which of the numbers above a PVEM is held to, and which are
-its own.
+(PVEM): the one left unattended to log a worker's exposure through a full
+working day, at least 12 h without anyone touching it (5.1 and 5.12), with its
+transducer fitted to the worker, to the seat, or to the machine or power tool
+(5.1.2 and 5.1.3). It measures the same quantities through the same
+weightings, and Part 2 does not write a second set of tables for it. It prints
+the Part 1 tables again wherever it can, so the question for this section is
+which of the numbers above a PVEM is held to, and which are its own.
 
 **The same burst, to the digit.** Part 2 5.9 repeats the saw-tooth signal
 burst of section 10. Its Table 6 defines the same test signal, and its
@@ -2521,6 +2521,11 @@ is a statement about that clause. Pattern evaluation, periodic verification
 and the in situ check are procedures on a physical meter, and nothing here
 carries a serial number.
 
+**The rest of ISO 8041-2.** The frequency-response arithmetic of its 12.11
+(Formulae (9) to (13)), the 12 h logging test of 12.22, and the logging,
+operator detection, artefact detection (Annex A) and contact force (Annex B)
+clauses are not implemented.
+
 ## See also
 
 - [Human vibration exposure (ISO 2631, ISO 5349)](https://jmrplens.github.io/phonometry/vibration/human/human-vibration/): the
@@ -2530,7 +2535,7 @@ carries a serial number.
   the other verifiers, and what only a laboratory can attest.
 - [Frequency Weighting (A, C, Z)](https://jmrplens.github.io/phonometry/signals/levels/weighting/): the
   sound level meter's weightings and the IEC 61672-1 acceptance limits of
-  section 11.
+  section 12.
 - [Calibration and dBFS](https://jmrplens.github.io/phonometry/signals/metrology/calibration/): the
   before-and-after check that an in situ verification is built on, and the
   traceability a type test is reported with.

@@ -225,8 +225,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   plain-Markdown calibration guide no longer attributes the class 1 tolerance
   to Table 1, which lists the classes.
 - **The personal vibration exposure meter of ISO 8041-2:2021.** A PVEM, the
-  meter a worker wears through a shift, is graded with the tables of
-  ISO 8041-1 wherever Part 2 prints them again, and the library now shows
+  meter left unattended to log a worker's exposure through a full working
+  day, is graded with the tables of ISO 8041-1 wherever Part 2 prints them
+  again, and the library now shows
   that it does, cell for cell: the 228 saw-tooth burst indications of Part 2
   Tables 7 to 9 and the 228 tolerances beside them, read off the Part 2 pages,
   are the Part 1 cells `vibration.SIGNAL_BURST_RESPONSE` already holds, and so

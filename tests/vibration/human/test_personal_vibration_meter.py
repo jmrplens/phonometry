@@ -22,7 +22,6 @@ from reference_data import (
     ISO8041_2_MAX_EXPANDED_UNCERTAINTY_PERCENT,
     ISO8041_2_TABLE2_INDICATION_PERCENT,
     ISO8041_2_TABLE2_LOW_FREQUENCY_INDICATION_PERCENT,
-    ISO8041_2_TABLE2_ROWS,
     ISO8041_2_TABLE2_WEIGHTING_CONSISTENCY_PERCENT,
     ISO8041_2_TABLE6,
     ISO8041_2_TABLE7,
@@ -148,13 +147,11 @@ def test_the_pvem_table_2_has_no_running_rms_row() -> None:
     rows publish three keys; none of them is the 2 % running r.m.s. row of
     Part 1.
     """
-    rows = {
-        "indication": 1,
-        "low-frequency indication": 1,
-        "weighting consistency": 2,
+    assert set(vibration.PVEM_INDICATION_TOLERANCES_PERCENT) == {
+        "indication",
+        "low-frequency indication",
+        "weighting consistency",
     }
-    assert set(vibration.PVEM_INDICATION_TOLERANCES_PERCENT) == set(rows)
-    assert max(rows.values()) == ISO8041_2_TABLE2_ROWS
     assert vibration.RUNNING_RMS_CONSISTENCY_TOLERANCE_PERCENT not in (
         vibration.PVEM_INDICATION_TOLERANCES_PERCENT.values()
     )

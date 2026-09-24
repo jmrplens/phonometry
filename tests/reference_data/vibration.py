@@ -1100,7 +1100,6 @@ ISO8041_2_TABLE9: dict[tuple[str, int | None], tuple[tuple[float, float], ...]] 
 ISO8041_2_TABLE2_INDICATION_PERCENT = 4.0  # hand-transmitted and whole-body
 ISO8041_2_TABLE2_LOW_FREQUENCY_INDICATION_PERCENT = 5.0  # low-frequency
 ISO8041_2_TABLE2_WEIGHTING_CONSISTENCY_PERCENT = 3.0
-ISO8041_2_TABLE2_ROWS = 2
 
 # The maximum expanded uncertainties of measurement clauses 12 and 13 print,
 # in per cent, keyed by clause: 12.7 (folio 26, the same 2 % three times),

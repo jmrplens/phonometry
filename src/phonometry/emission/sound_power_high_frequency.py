@@ -356,7 +356,7 @@ def minimum_analyzer_bandwidth_hz(
     tone_frequency_hz: ArrayLike,
     *,
     microphone_speed_m_s: float,
-    speed_of_sound_m_s: float,
+    speed_of_sound: float,
 ) -> NDArray[np.float64]:
     r"""Narrowest analyser bandwidth that holds a tone seen by a moving microphone.
 
@@ -369,13 +369,13 @@ def minimum_analyzer_bandwidth_hz(
     :param tone_frequency_hz: Centre frequency ``f`` of the tone, in hertz.
     :param microphone_speed_m_s: Speed ``v`` of the microphone along its
         path, in metres per second.
-    :param speed_of_sound_m_s: Speed of sound ``c``, in metres per second.
+    :param speed_of_sound: Speed of sound ``c``, in metres per second.
     :return: The minimum bandwidth :math:`\Delta f`, in hertz.
     :raises ValueError: for a non-positive or non-finite input.
     """
     f = require_positive_array(tone_frequency_hz, "tone_frequency_hz")
     v = require_positive(microphone_speed_m_s, "microphone_speed_m_s")
-    c = require_positive(speed_of_sound_m_s, "speed_of_sound_m_s")
+    c = require_positive(speed_of_sound, "speed_of_sound")
     return np.asarray(2.0 * f * v / c, dtype=np.float64)
 
 

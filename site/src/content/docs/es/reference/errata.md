@@ -7900,7 +7900,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   `fluorite`, y su nota dice qué quiere decir.
 - **Estado:** sin comunicar.
 
-## UNE-EN ISO 9295:2015, tablas 1 y 2 (cuarenta y tres celdas cuyo 0 del cuarto decimal se imprime como otra cifra)
+## UNE-EN ISO 9295:2015, tablas 1 y 2 (cuarenta y tres celdas donde un 0 del anexo A se imprime como otra cifra)
 
 - **Ubicación:** tablas 1 y 2, «Valores del coeficiente de absorción por el
   aire», en los folios impresos 15 y 16 de la UNE-EN ISO 9295:2015 (octubre
@@ -7915,13 +7915,14 @@ dos ediciones con las mismas entradas y en el mismo orden.
 - **Lo impreso:** cada celda lleva cuatro decimales, con coma decimal y la
   última cifra separada, «0,027 7».
 - **El problema:** cuarenta y tres celdas contradicen el anexo A, y las
-  cuarenta y tres de la misma manera: el anexo A da 0 como cuarto decimal y la
-  página imprime ahí otra cifra. En cuarenta la cifra impresa es el tercer
-  decimal repetido («0,027 7» donde el anexo A da 0,027 0); las otras tres son
-  «0,033 0» donde el anexo A da 0,030 0, con el 3 repetido en el tercer decimal
-  en su lugar, y «0,04 4» y «0,05 50», donde el anexo A da 0,040 0 y 0,050 0,
-  con los grupos de cifras fuera de sitio. El defecto se limita a los ceros y
-  no es cuestión de redondeo: las otras 581 celdas son el anexo A hasta la
+  cuarenta y tres de la misma manera: el valor que da el anexo A acaba en 0, y
+  un 0 se imprime como otra cifra. En cuarenta es el cuarto decimal, impreso
+  como el tercero repetido («0,027 7» donde el anexo A da 0,027 0). Las otras
+  tres son las celdas cuyo valor del anexo A acaba en dos ceros, y ahí es el
+  tercer decimal el que toma la cifra anterior: «0,033 0» donde el anexo A da
+  0,030 0, y «0,04 4» y «0,05 50», además con los grupos de cifras fuera de
+  sitio, donde el anexo A da 0,040 0 y 0,050 0. El defecto se limita a
+  los ceros y no es cuestión de redondeo: las otras 581 celdas son el anexo A hasta la
   última cifra (véase la evidencia más abajo), y de las 60 celdas cuyo valor
   del anexo A acaba en 0, estas 43 están mal impresas y 17 se imprimen con su
   0. Los errores van de una unidad del cuarto decimal, cuando la cifra

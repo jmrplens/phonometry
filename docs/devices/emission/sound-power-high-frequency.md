@@ -280,7 +280,7 @@ turning once every 32 s.
 ```python
 speed = 2.0 * np.pi * 1.0 / 32.0                     # m/s along the path
 print(emission.minimum_analyzer_bandwidth_hz(
-    15625.0, microphone_speed_m_s=speed, speed_of_sound_m_s=345.5).round(1))   # [17.8] Hz
+    15625.0, microphone_speed_m_s=speed, speed_of_sound=345.5).round(1))   # [17.8] Hz
 # The FFT is narrower than that, so the tone is the sum of its sidebands.
 tone = emission.tone_level_from_sidebands([42.9, 41.3, 38.0])
 print(round(tone, 1))                                # 45.9 dB

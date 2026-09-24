@@ -456,7 +456,7 @@ def test_comparison_refuses_reference_levels_of_another_length() -> None:
 
 def test_formula_2_minimum_bandwidth() -> None:
     bandwidth = emission.minimum_analyzer_bandwidth_hz(
-        16_000.0, microphone_speed_m_s=0.4, speed_of_sound_m_s=345.0
+        16_000.0, microphone_speed_m_s=0.4, speed_of_sound=345.0
     )
     assert float(bandwidth[0]) == pytest.approx(2.0 * 16_000.0 * 0.4 / 345.0)
 

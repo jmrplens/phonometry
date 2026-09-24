@@ -7439,7 +7439,7 @@ in the same order.
   note says what the word stands for.
 - **Status:** unreported.
 
-## UNE-EN ISO 9295:2015, Tables 1 and 2 (forty-three cells whose fourth decimal 0 is printed as another digit)
+## UNE-EN ISO 9295:2015, Tables 1 and 2 (forty-three cells where a 0 of Annex A is printed as another digit)
 
 - **Location:** Tables 1 and 2, "Valores del coeficiente de absorción por el
   aire", on printed folios 15 and 16 of UNE-EN ISO 9295:2015 (October 2015),
@@ -7453,12 +7453,13 @@ in the same order.
 - **The print:** every cell carries four decimals, with the decimal comma and
   the last digit set apart, "0,027 7".
 - **The problem:** forty-three cells contradict Annex A, and all forty-three
-  in the same way: Annex A gives 0 as the fourth decimal, and the page prints
-  another digit there. In forty of them the digit printed is the third decimal
-  repeated ("0,027 7" where Annex A gives 0,027 0); the other three are
-  "0,033 0" where Annex A gives 0,030 0, the 3 repeated into the third decimal
-  instead, and "0,04 4" and "0,05 50", where Annex A gives 0,040 0 and
-  0,050 0, whose digit groups are set out of place. The defect is confined to
+  in the same way: the value Annex A gives ends in 0, and a 0 is printed as
+  another digit. In forty of them it is the fourth decimal, printed as the
+  third repeated ("0,027 7" where Annex A gives 0,027 0). The other three are
+  the cells whose Annex A value ends in two zeros, and there it is the third
+  decimal that takes the digit before it: "0,033 0" where Annex A gives
+  0,030 0, and "0,04 4" and "0,05 50", with their digit groups set out of place
+  as well, where Annex A gives 0,040 0 and 0,050 0. The defect is confined to
   zeros and is not a matter of rounding: the other 581 cells are Annex A to
   the last digit (see the evidence below), and of the 60 cells whose Annex A
   value ends in 0, these 43 are misprinted while 17 are printed with their 0.
@@ -7502,9 +7503,10 @@ in the same order.
   $\theta + 273{,}16$ K, and of the conversions from $\theta + 273{,}15$ K to
   $\theta + 273{,}18$ K in steps of 0,002 K that is the only one that
   reproduces all of them, so the tables were computed with the 273,16 K of
-  the triple point where the Celsius scale puts 273,15 K. That offset is a property of the tables rather
-  than a misprint, and a small one: at $\theta + 273{,}15$ K, 61 of the 581
-  move by one unit of the fourth decimal and none by more than 0,000 063 Np/m.
+  the triple point where the Celsius scale puts 273,15 K. That offset is a
+  property of the tables rather than a misprint, and a small one: at
+  $\theta + 273{,}15$ K, 61 of the 581 move by one unit of the fourth
+  decimal and none by more than 0,000 063 Np/m.
   For one listed cell the two conversions round apart, 19 500 Hz at 23 °C and
   50 %, which is 0,054 0 at 273,16 K and 0,054 1 at 273,15 K against the
   0,054 4 printed; the entry gives the table's own conversion throughout. The

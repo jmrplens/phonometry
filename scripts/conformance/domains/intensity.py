@@ -1091,7 +1091,7 @@ def _chk_iso9295_comparison() -> Outcome:
 )
 def _chk_iso9295_tone_under_moving_microphone() -> Outcome:
     bandwidth = ph.emission.minimum_analyzer_bandwidth_hz(
-        16000.0, microphone_speed_m_s=0.4, speed_of_sound_m_s=345.0
+        16000.0, microphone_speed_m_s=0.4, speed_of_sound=345.0
     )
     total = ph.emission.tone_level_from_sidebands([50.0, 50.0, 50.0])
     return record(

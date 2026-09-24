@@ -374,7 +374,7 @@ minimum_analyzer_bandwidth_hz(
     tone_frequency_hz: ArrayLike,
     *,
     microphone_speed_m_s: float,
-    speed_of_sound_m_s: float,
+    speed_of_sound: float,
 ) -> NDArray[np.float64]
 ```
 
@@ -392,7 +392,7 @@ summed with [`tone_level_from_sidebands`](/phonometry/reference/api/power/sound-
 | :--- | :--- |
 | `tone_frequency_hz` | Centre frequency `f` of the tone, in hertz. |
 | `microphone_speed_m_s` | Speed `v` of the microphone along its path, in metres per second. |
-| `speed_of_sound_m_s` | Speed of sound `c`, in metres per second. |
+| `speed_of_sound` | Speed of sound `c`, in metres per second. |
 
 **Returns:** The minimum bandwidth $\Delta f$, in hertz.
 

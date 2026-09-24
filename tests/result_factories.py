@@ -247,6 +247,86 @@ def _sel_distribution() -> ph.environment.SelDistribution:
     )
 
 
+def _soundscape_answers() -> tuple[np.ndarray, list[str]]:
+    """Twelve Method A part 2 answers at three sites (ISO/TS 12913-3 A.3)."""
+    answers = np.array(
+        [
+            [5, 1, 4, 3, 5, 1, 3, 2],
+            [4, 2, 4, 3, 4, 1, 3, 2],
+            [5, 1, 3, 4, 5, 1, 2, 2],
+            [4, 2, 3, 3, 4, 2, 3, 2],
+            [2, 4, 4, 1, 2, 4, 5, 2],
+            [3, 4, 5, 2, 2, 3, 5, 1],
+            [2, 5, 4, 1, 1, 4, 5, 2],
+            [3, 4, 4, 2, 2, 3, 4, 2],
+            [2, 3, 1, 4, 2, 3, 1, 5],
+            [2, 2, 2, 4, 3, 3, 2, 4],
+            [3, 2, 1, 5, 3, 2, 1, 4],
+            [2, 3, 2, 4, 2, 3, 2, 5],
+        ],
+        dtype=float,
+    )
+    sites = ["garden"] * 4 + ["market"] * 4 + ["car park"] * 4
+    return answers, sites
+
+
+def _pleasantness_eventfulness() -> ph.environment.PleasantnessEventfulness:
+    answers, sites = _soundscape_answers()
+    return ph.environment.pleasantness_eventfulness(answers, sites=sites)
+
+
+def _method_a_summary() -> ph.environment.MethodASummary:
+    answers, sites = _soundscape_answers()
+    return ph.environment.method_a_summary(answers, part=2, sites=sites)
+
+
+def _soundscape_correlation() -> ph.environment.SoundscapeCorrelation:
+    """Site pleasantness against site LAeq, five sites (ISO/TS 12913-3 A.4)."""
+    return ph.environment.spearman_rank_correlation(
+        [6.1, 4.8, 1.2, -2.5, -4.0], [52.0, 55.5, 61.0, 66.5, 70.0]
+    )
+
+
+def _method_b_summary() -> ph.environment.MethodBSummary:
+    ratings = np.array(
+        [
+            [2.1, 1.4, 4.2, 4.0],
+            [2.6, 1.9, 3.8, 3.5],
+            [3.9, 3.6, 2.4, 2.2],
+            [4.3, 3.1, 2.0, 1.6],
+        ]
+    )
+    return ph.environment.method_b_summary(
+        ratings, sites=["park", "park", "road", "road"]
+    )
+
+
+def _source_ranking() -> ph.environment.SourceRanking:
+    return ph.environment.method_b_source_ranking(
+        [
+            ["birds", "water", "voices"],
+            ["water", "birds"],
+            ["traffic", "voices"],
+            ["traffic"],
+        ],
+        sites=["park", "park", "road", "road"],
+    )
+
+
+def _binaural_indicators() -> ph.environment.BinauralIndicators:
+    """One second of noise at two ears, the right 4 dB down (ISO/TS 12913-3 D.2)."""
+    import warnings
+
+    left = 0.1 * np.random.default_rng(12913).standard_normal(FS)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", ph.environment.SoundscapeWarning)
+        return ph.environment.binaural_indicators(
+            np.vstack([left, 10.0 ** (-4.0 / 20.0) * left]),
+            FS,
+            parameters="sound_pressure_level",
+        )
+
+
 def _static_airflow() -> ph.materials.StaticAirflowResult:
     u = np.array([0.2e-3, 0.4e-3, 0.6e-3, 0.8e-3, 1.0e-3])
     dp = 30000.0 * u + 4.0e6 * u**2

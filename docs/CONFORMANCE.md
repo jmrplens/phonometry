@@ -19,7 +19,7 @@
 
 ## Numerical conformance report
 
-**1431/1431 conformance checks pass** across 96 domains and 476 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+**1447/1447 conformance checks pass** across 97 domains and 477 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub><b>&#916;</b> is the difference between the computed value and the one the standard publishes. <b>Used</b> is how much of that clause's published tolerance the difference consumes: 100 % means it sits exactly on the limit, 5 % means it uses a twentieth of the allowance, and a dash means the clause states no two-sided tolerance for the quantity, so there is no budget to spend. It is reported and never used to decide a verdict, which is settled at full precision before any rounding.</sub>
 
@@ -1896,6 +1896,30 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | IEC 61183:1994 note to A.1.8 | Directions of the 38 equal-area elements, to the 0,1° printed | 18/18 printed angles other than 77,9° and 282,1° | 18/18 printed angles other than 77,9° and 282,1° | exact | 0 % | ![Pass][cv-pass] Pass |
 | IEC 61183:1994 note to A.1.8, Formula (A.5) | Each of the 38 equal-area elements is 2,6 % of the sphere | 2.6 % (+/-0.05 %) | 2.632 % | 0.032 % | 64 % | ![Pass][cv-pass] Pass |
 | IEC 61183:1994 Formulas (10), (11), Table B.1 | Reference corrections of an LS2aP/LS2F microphone, 25 Hz to 20 kHz | 30/30 printed cells of Table B.1 | 30/30 printed cells of Table B.1 | exact | 0 % | ![Pass][cv-pass] Pass |
+
+</details>
+
+<details>
+<summary><b>Free-field corrections of a sound level meter (IEC 62585)</b>: 100% (16/16)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
+|:---|:---|:---|:---|:---|:---:|:---:|
+| IEC 62585:2012 Table I.2 | Standard uncertainty of each of the 15 components at 1 kHz | 15/15 components of Table I.2 | 15/15 components of Table I.2 | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 62585:2012 Table I.2 | Combined standard uncertainty of the correction at 1 kHz | 0.059 dB (+/-0.0001 dB) | 0.059 dB | 0 dB | 62 % | ![Pass][cv-pass] Pass |
+| IEC 62585:2012 Table I.2 | Welch-Satterthwaite effective degrees of freedom at 1 kHz | 29.98 (+/-0.01) | 29.98 | 0.002 | 40 % | ![Pass][cv-pass] Pass |
+| IEC 62585:2012 Table I.2, clause 5 | Coverage factor for 95 % at the 29,98 degrees of freedom the table prints | 2.04 (printed 2,11, an erratum) | 2.042 | 0.002 | 40 % | ![Pass][cv-pass] Pass |
+| IEC 62585:2012 Table I.2, clause 5 | Expanded uncertainty of the correction at 1 kHz, to the printed guard digit | 0.121 dB (printed 0,12(4), an erratum) | 0.1206 dB | -0.0004 dB | 80 % | ![Pass][cv-pass] Pass |
+| IEC 62585:2012 Table I.3 | Standard uncertainty of the four components that change at 8 kHz | 4/4 changed components of Table I.3 | 4/4 changed components of Table I.3 | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 62585:2012 Table I.3 | Combined standard uncertainty of the correction at 8 kHz | 0.14 dB (+/-0.0005 dB) | 0.14 dB | 0 dB | 5 % | ![Pass][cv-pass] Pass |
+| IEC 62585:2012 Table I.3 | Coverage factor at 8 kHz, more than 30 effective degrees of freedom | 2 (+/-0.005) | 2.001 | 0.001 | 20 % | ![Pass][cv-pass] Pass |
+| IEC 62585:2012 Table I.3 | Expanded uncertainty of the correction at 8 kHz | 0.28 dB (+/-0.005 dB) | 0.28 dB | 0 dB | 3 % | ![Pass][cv-pass] Pass |
+| IEC 62585:2012 Formula (H.1), Table H.1 | Exact one-twelfth-octave frequencies from 1 kHz to 10 kHz | 41/41 frequencies of Table H.1 | 41/41 frequencies of Table H.1 | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 62585:2012 clauses 9 to 14 | Maximum permitted expanded uncertainty either side of each boundary | 18/18 printed maxima of clauses 9 to 14 | 18/18 printed maxima of clauses 9 to 14 | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 62585:2012 clause 6 | Static-pressure component below 97 kPa, up to and above 3 kHz | 5/5 clause 6 components | 5/5 clause 6 components | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 62585:2012 Formulas (D.1) to (D.7) | A calibrator's correction from readings built by (D.1) to (D.4) | 0 dB (+/-0.000000000001 dB) | 0 dB | 0 dB | 2 % | ![Pass][cv-pass] Pass |
+| IEC 62585:2012 Formulas (E.1) to (E.6), Figure E.1 | A coupler's correction from readings built by (E.1) to (E.3B) | 0 dB (+/-0.000000000001 dB) | 0 dB | 0 dB | 2 % | ![Pass][cv-pass] Pass |
+| IEC 62585:2012 Formulas (F.1) to (F.13) | An actuator's normalised correction from readings built by (F.1) to (F.3) | 0 dB (+/-0.000000000001 dB) | 0 dB | 0 dB | 2 % | ![Pass][cv-pass] Pass |
+| IEC 62585:2012 Annex A, Figure A.1 | Adjustment value of a response whose fit is known in closed form | 0.2 dB (closed form) | 0.2 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 
 </details>
 

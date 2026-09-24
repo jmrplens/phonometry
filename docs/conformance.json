@@ -3,13 +3,13 @@
   "library": "4.0.0rc1",
   "generator": "scripts/conformance_report.py",
   "counts": {
-    "checks": 1431,
-    "passing": 1431,
+    "checks": 1447,
+    "passing": 1447,
     "failing": 0,
-    "domains": 96,
-    "standards": 476,
-    "citations": 973,
-    "designations": 195,
+    "domains": 97,
+    "standards": 477,
+    "citations": 983,
+    "designations": 196,
     "sources": 114
   },
   "units": [
@@ -599,6 +599,12 @@
       "title": "Random-incidence and diffuse-field sensitivity (IEC 61183)",
       "checks": 8,
       "passing": 8
+    },
+    {
+      "id": "free-field-corrections-of-a-sound-level-meter-iec-62585",
+      "title": "Free-field corrections of a sound level meter (IEC 62585)",
+      "checks": 16,
+      "passing": 16
     },
     {
       "id": "industrial-noise-control",
@@ -38844,6 +38850,539 @@
         "value": 0.0
       },
       "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "free-field-corrections-of-a-sound-level-meter-iec-62585/iec-62585-2012-table-i-2/standard-uncertainty-of-each-of-the-15-components-at-1-khz",
+      "domain": "free-field-corrections-of-a-sound-level-meter-iec-62585",
+      "reference": {
+        "cite": "IEC 62585:2012 Table I.2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 62585",
+            "edition": "2012",
+            "clause": "Table I.2"
+          }
+        ]
+      },
+      "quantity": "Standard uncertainty of each of the 15 components at 1 kHz",
+      "kind": "count",
+      "expected": {
+        "value": 15.0,
+        "label": "15/15 components of Table I.2"
+      },
+      "computed": {
+        "value": 15.0,
+        "label": "15/15 components of Table I.2"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "free-field-corrections-of-a-sound-level-meter-iec-62585/iec-62585-2012-table-i-2/combined-standard-uncertainty-of-the-correction-at-1-khz",
+      "domain": "free-field-corrections-of-a-sound-level-meter-iec-62585",
+      "reference": {
+        "cite": "IEC 62585:2012 Table I.2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 62585",
+            "edition": "2012",
+            "clause": "Table I.2"
+          }
+        ]
+      },
+      "quantity": "Combined standard uncertainty of the correction at 1 kHz",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.059
+      },
+      "computed": {
+        "value": 0.059
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 5e-05
+      },
+      "deviation": {
+        "value": 3.11e-05
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "free-field-corrections-of-a-sound-level-meter-iec-62585/iec-62585-2012-table-i-2/welch-satterthwaite-effective-degrees-of-freedom-at-1-khz",
+      "domain": "free-field-corrections-of-a-sound-level-meter-iec-62585",
+      "reference": {
+        "cite": "IEC 62585:2012 Table I.2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 62585",
+            "edition": "2012",
+            "clause": "Table I.2"
+          }
+        ]
+      },
+      "quantity": "Welch-Satterthwaite effective degrees of freedom at 1 kHz",
+      "kind": "scalar",
+      "expected": {
+        "value": 29.98
+      },
+      "computed": {
+        "value": 29.98
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": 0.002
+      },
+      "precision": 2,
+      "verdict": "pass"
+    },
+    {
+      "id": "free-field-corrections-of-a-sound-level-meter-iec-62585/iec-62585-2012-table-i-2-clause-5/coverage-factor-for-95-at-the-29-98-degrees-of-freedom-the-table-prints",
+      "domain": "free-field-corrections-of-a-sound-level-meter-iec-62585",
+      "reference": {
+        "cite": "IEC 62585:2012 Table I.2, clause 5",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 62585",
+            "edition": "2012",
+            "clause": "Table I.2, clause 5"
+          }
+        ]
+      },
+      "quantity": "Coverage factor for 95 % at the 29,98 degrees of freedom the table prints",
+      "kind": "scalar",
+      "expected": {
+        "value": 2.04,
+        "label": "2.04 (printed 2,11, an erratum)"
+      },
+      "computed": {
+        "value": 2.042
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": 0.002
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "free-field-corrections-of-a-sound-level-meter-iec-62585/iec-62585-2012-table-i-2-clause-5/expanded-uncertainty-of-the-correction-at-1-khz-to-the-printed-guard-digit",
+      "domain": "free-field-corrections-of-a-sound-level-meter-iec-62585",
+      "reference": {
+        "cite": "IEC 62585:2012 Table I.2, clause 5",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 62585",
+            "edition": "2012",
+            "clause": "Table I.2, clause 5"
+          }
+        ]
+      },
+      "quantity": "Expanded uncertainty of the correction at 1 kHz, to the printed guard digit",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.121,
+        "label": "0.121 dB (printed 0,12(4), an erratum)"
+      },
+      "computed": {
+        "value": 0.1206
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": -0.0004
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "free-field-corrections-of-a-sound-level-meter-iec-62585/iec-62585-2012-table-i-3/standard-uncertainty-of-the-four-components-that-change-at-8-khz",
+      "domain": "free-field-corrections-of-a-sound-level-meter-iec-62585",
+      "reference": {
+        "cite": "IEC 62585:2012 Table I.3",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 62585",
+            "edition": "2012",
+            "clause": "Table I.3"
+          }
+        ]
+      },
+      "quantity": "Standard uncertainty of the four components that change at 8 kHz",
+      "kind": "count",
+      "expected": {
+        "value": 4.0,
+        "label": "4/4 changed components of Table I.3"
+      },
+      "computed": {
+        "value": 4.0,
+        "label": "4/4 changed components of Table I.3"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "free-field-corrections-of-a-sound-level-meter-iec-62585/iec-62585-2012-table-i-3/combined-standard-uncertainty-of-the-correction-at-8-khz",
+      "domain": "free-field-corrections-of-a-sound-level-meter-iec-62585",
+      "reference": {
+        "cite": "IEC 62585:2012 Table I.3",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 62585",
+            "edition": "2012",
+            "clause": "Table I.3"
+          }
+        ]
+      },
+      "quantity": "Combined standard uncertainty of the correction at 8 kHz",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.14
+      },
+      "computed": {
+        "value": 0.14
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": 2.74e-05
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "free-field-corrections-of-a-sound-level-meter-iec-62585/iec-62585-2012-table-i-3/coverage-factor-at-8-khz-more-than-30-effective-degrees-of-freedom",
+      "domain": "free-field-corrections-of-a-sound-level-meter-iec-62585",
+      "reference": {
+        "cite": "IEC 62585:2012 Table I.3",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 62585",
+            "edition": "2012",
+            "clause": "Table I.3"
+          }
+        ]
+      },
+      "quantity": "Coverage factor at 8 kHz, more than 30 effective degrees of freedom",
+      "kind": "scalar",
+      "expected": {
+        "value": 2.0
+      },
+      "computed": {
+        "value": 2.001
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": 0.001
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "free-field-corrections-of-a-sound-level-meter-iec-62585/iec-62585-2012-table-i-3/expanded-uncertainty-of-the-correction-at-8-khz",
+      "domain": "free-field-corrections-of-a-sound-level-meter-iec-62585",
+      "reference": {
+        "cite": "IEC 62585:2012 Table I.3",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 62585",
+            "edition": "2012",
+            "clause": "Table I.3"
+          }
+        ]
+      },
+      "quantity": "Expanded uncertainty of the correction at 8 kHz",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.28
+      },
+      "computed": {
+        "value": 0.28
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": 0.000161
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "free-field-corrections-of-a-sound-level-meter-iec-62585/iec-62585-2012-formula-h-1-table-h-1/exact-one-twelfth-octave-frequencies-from-1-khz-to-10-khz",
+      "domain": "free-field-corrections-of-a-sound-level-meter-iec-62585",
+      "reference": {
+        "cite": "IEC 62585:2012 Formula (H.1), Table H.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 62585",
+            "edition": "2012",
+            "clause": "Formula (H.1), Table H.1"
+          }
+        ]
+      },
+      "quantity": "Exact one-twelfth-octave frequencies from 1 kHz to 10 kHz",
+      "kind": "count",
+      "expected": {
+        "value": 41.0,
+        "label": "41/41 frequencies of Table H.1"
+      },
+      "computed": {
+        "value": 41.0,
+        "label": "41/41 frequencies of Table H.1"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "free-field-corrections-of-a-sound-level-meter-iec-62585/iec-62585-2012-clauses-9-to-14/maximum-permitted-expanded-uncertainty-either-side-of-each-boundary",
+      "domain": "free-field-corrections-of-a-sound-level-meter-iec-62585",
+      "reference": {
+        "cite": "IEC 62585:2012 clauses 9 to 14",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 62585",
+            "edition": "2012",
+            "clause": "clauses 9 to 14"
+          }
+        ]
+      },
+      "quantity": "Maximum permitted expanded uncertainty either side of each boundary",
+      "kind": "count",
+      "expected": {
+        "value": 18.0,
+        "label": "18/18 printed maxima of clauses 9 to 14"
+      },
+      "computed": {
+        "value": 18.0,
+        "label": "18/18 printed maxima of clauses 9 to 14"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "free-field-corrections-of-a-sound-level-meter-iec-62585/iec-62585-2012-clause-6/static-pressure-component-below-97-kpa-up-to-and-above-3-khz",
+      "domain": "free-field-corrections-of-a-sound-level-meter-iec-62585",
+      "reference": {
+        "cite": "IEC 62585:2012 clause 6",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 62585",
+            "edition": "2012",
+            "clause": "clause 6"
+          }
+        ]
+      },
+      "quantity": "Static-pressure component below 97 kPa, up to and above 3 kHz",
+      "kind": "count",
+      "expected": {
+        "value": 5.0,
+        "label": "5/5 clause 6 components"
+      },
+      "computed": {
+        "value": 5.0,
+        "label": "5/5 clause 6 components"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "free-field-corrections-of-a-sound-level-meter-iec-62585/iec-62585-2012-formulas-d-1-to-d-7/a-calibrator-s-correction-from-readings-built-by-d-1-to-d-4",
+      "domain": "free-field-corrections-of-a-sound-level-meter-iec-62585",
+      "reference": {
+        "cite": "IEC 62585:2012 Formulas (D.1) to (D.7)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 62585",
+            "edition": "2012",
+            "clause": "Formulas (D.1) to (D.7)"
+          }
+        ]
+      },
+      "quantity": "A calibrator's correction from readings built by (D.1) to (D.4)",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0
+      },
+      "computed": {
+        "value": 2e-14
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 2e-14
+      },
+      "precision": 12,
+      "verdict": "pass"
+    },
+    {
+      "id": "free-field-corrections-of-a-sound-level-meter-iec-62585/iec-62585-2012-formulas-e-1-to-e-6-figure-e-1/a-coupler-s-correction-from-readings-built-by-e-1-to-e-3b",
+      "domain": "free-field-corrections-of-a-sound-level-meter-iec-62585",
+      "reference": {
+        "cite": "IEC 62585:2012 Formulas (E.1) to (E.6), Figure E.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 62585",
+            "edition": "2012",
+            "clause": "Formulas (E.1) to (E.6), Figure E.1"
+          }
+        ]
+      },
+      "quantity": "A coupler's correction from readings built by (E.1) to (E.3B)",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0
+      },
+      "computed": {
+        "value": 2e-14
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 2e-14
+      },
+      "precision": 12,
+      "verdict": "pass"
+    },
+    {
+      "id": "free-field-corrections-of-a-sound-level-meter-iec-62585/iec-62585-2012-formulas-f-1-to-f-13/an-actuator-s-normalised-correction-from-readings-built-by-f-1-to-f-3",
+      "domain": "free-field-corrections-of-a-sound-level-meter-iec-62585",
+      "reference": {
+        "cite": "IEC 62585:2012 Formulas (F.1) to (F.13)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 62585",
+            "edition": "2012",
+            "clause": "Formulas (F.1) to (F.13)"
+          }
+        ]
+      },
+      "quantity": "An actuator's normalised correction from readings built by (F.1) to (F.3)",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0
+      },
+      "computed": {
+        "value": 1.73e-14
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 1.73e-14
+      },
+      "precision": 12,
+      "verdict": "pass"
+    },
+    {
+      "id": "free-field-corrections-of-a-sound-level-meter-iec-62585/iec-62585-2012-annex-a-figure-a-1/adjustment-value-of-a-response-whose-fit-is-known-in-closed-form",
+      "domain": "free-field-corrections-of-a-sound-level-meter-iec-62585",
+      "reference": {
+        "cite": "IEC 62585:2012 Annex A, Figure A.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 62585",
+            "edition": "2012",
+            "clause": "Annex A, Figure A.1"
+          }
+        ]
+      },
+      "quantity": "Adjustment value of a response whose fit is known in closed form",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.2,
+        "label": "0.2 dB (closed form)"
+      },
+      "computed": {
+        "value": 0.2
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 2.83e-15
+      },
+      "precision": 3,
       "verdict": "pass"
     },
     {

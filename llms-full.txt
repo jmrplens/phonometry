@@ -1,8 +1,8 @@
 # phonometry
 
-> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1431 numerical conformance checks against 476 standards enforced in CI.
+> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1447 numerical conformance checks against 477 standards enforced in CI.
 
-phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1431 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 96 domains.
+phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1447 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 97 domains.
 
 The project was published as **PyOctaveBand** until version 3.0.0. Third-party references and dependency pins still using that name refer to this library.
 
@@ -88,6 +88,7 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 - [Compliance and verification](https://jmrplens.github.io/phonometry/signals/metrology/compliance-verification/)
 - [Data qualification: stationarity, level crossings and peaks (Bendat & Piersol)](https://jmrplens.github.io/phonometry/signals/metrology/data-qualification/)
 - [Random-incidence and diffuse-field response (IEC 61183)](https://jmrplens.github.io/phonometry/signals/metrology/random-incidence/)
+- [Free-field corrections of a sound level meter (IEC 62585)](https://jmrplens.github.io/phonometry/signals/metrology/free-field-corrections/)
 
 ## The medium
 
@@ -573,6 +574,7 @@ The generated API reference, one page per module. Fetch these only when a specif
 - [metrology/calibration](https://jmrplens.github.io/phonometry/reference/api/metrology/calibration/)
 - [metrology/conformance](https://jmrplens.github.io/phonometry/reference/api/metrology/conformance/)
 - [metrology/data-qualification](https://jmrplens.github.io/phonometry/reference/api/metrology/data-qualification/)
+- [metrology/free-field-corrections](https://jmrplens.github.io/phonometry/reference/api/metrology/free-field-corrections/)
 - [metrology/random-incidence](https://jmrplens.github.io/phonometry/reference/api/metrology/random-incidence/)
 - [metrology/reference-values](https://jmrplens.github.io/phonometry/reference/api/metrology/reference-values/)
 - [metrology/sound-calibrator](https://jmrplens.github.io/phonometry/reference/api/metrology/sound-calibrator/)
@@ -43753,6 +43755,20 @@ documents, one page per module.
 | `DiffuseFieldSensitivity` | `dataclass` | **The comparison of IEC 61183 clause 5, route by route.**<br>• `frequencies_hz` [Hz], `indicated_level_db`, `reference_indicated_level_db`, `reference_sensitivity_level_db`, `reference_correction_db` [dB], `route` ('random_incidence' / 'free_field' / 'pressure')<br>• `.level_difference_db` ΔG_D, `.reference_diffuse_field_level_db` G_D,ref, `.diffuse_field_level_db` G_D [dB]<br>• `.plot()`: the three against frequency | `dd.diffuse_field_level_db` |
 | `IEC61183_TABLE_B1` | `mapping` | **IEC 61183:1994 Table B.1, the type LS2aP/LS2F microphone, keyed by preferred frequency [Hz].**<br>• 25 Hz to 20 kHz; the row printed "25 to 800" at each preferred frequency it covers<br>• each value a `ReferenceMicrophoneRow`; rounded to 0,05 dB by the table | `metrology.IEC61183_TABLE_B1[8000.0].directivity_index_db  # 2.45` |
 | `ReferenceMicrophoneRow` | `dataclass` | **One row of Table B.1.**<br>• `directivity_index_db`: 10 lg γ_ref [dB]<br>• `diffuse_pressure_difference_db`: Δ_DP, diffuse-field less pressure sensitivity level [dB] | `metrology.IEC61183_TABLE_B1[16000.0].diffuse_pressure_difference_db  # 3.05` |
+| `exact_frequencies` | `function` | **Exact base-ten frequencies between two limits (IEC 62585 Annex H, Formula (H.1)).**<br>• `lowest_hz`, `highest_hz` [Hz], inclusive<br>• `fraction`: the step-width designator b (Default: 12, the one-twelfth octaves of Table H.1; 1 the exact octaves, 3 the thirds)<br>• f_x = 1000 · 10^(3x/10b) [Hz], read-only | `metrology.exact_frequencies(1000, 10000)[31] / 1000  # 5.956621` |
+| `adjustment_value` | `function` | **The adjustment value at the calibration check frequency (IEC 62585 Annex A).**<br>• `frequencies_hz` [Hz], the check frequency among them; `free_field_indicated_level_db` [dB] before the adjustment; `calibrator_reading_db`: L4′ on the calibrator at the same sensitivity [dB]<br>• keyword-only: `calibrator_level_db` L1 [dB]; `incident_level_db` [dB] (Default: None → L1); `tolerance_db` [dB], infinite where a band does not pull the fit (Default: None → equal weights); `pressure_indicated_level_db` [dB] (Default: None); `check_frequency_hz` (Default: 1000)<br>• least-squares fit s = −Σ w d / Σ w, w = 1/t² (the module's reading of a text with no formula); ΔL = L1 − (L4′ + s) | `a = metrology.adjustment_value(f, l_ff, 94.35, calibrator_level_db=94.0)`<br><br>• `AdjustmentValue`; `a.adjustment_db` |
+| `AdjustmentValue` | `dataclass` | **The free-field response before the adjustment and what the fit makes of it.**<br>• `frequencies_hz` [Hz], `free_field_deviation_db` [dB], `calibrator_level_db`, `calibrator_reading_db` [dB], `check_frequency_hz` [Hz], `tolerance_db`, `pressure_deviation_db` [dB] or None, read-only<br>• derived, never stored: `.weights`, `.sensitivity_adjustment_db` s, `.calibrator_indicated_level_db` L4, `.adjustment_db` ΔL, `.check_frequency_offset_db` L2 − L1, `.free_field_indicated_level_db` L2, `.pressure_indicated_level_db` L3, `.pressure_to_free_field_correction_db` [dB]<br>• `.plot()`: the deviation before and after, with the tolerances | `a.sensitivity_adjustment_db, a.check_frequency_offset_db` |
+| `sound_calibrator_correction` | `function` | **Free-field corrections for a multi-frequency sound calibrator (IEC 62585 Annex D, Formula (D.7)).**<br>• `frequencies_hz` [Hz]; `slm_free_field_level_db`, `reference_free_field_level_db`, `slm_calibrator_level_db`, `reference_calibrator_level_db` [dB]: L_ind1 to L_ind4, one value per frequency or one row per determination<br>• keyword-only: `reference_free_field_correction_db` C_FF,RM from IEC/TS 61094-7 [dB]; `free_field_level_difference_db`, `calibrator_level_difference_db` [dB] (Default: 0); `microphones`: the microphone of each row, so the range is taken over the microphones (Default: None, each row its own) | `c = metrology.sound_calibrator_correction(f, l1, l2, l3, l4, reference_free_field_correction_db=c_rm)`<br><br>• `FreeFieldCorrection`, clause 12 |
+| `comparison_coupler_correction` | `function` | **Free-field corrections for a comparison coupler (IEC 62585 Annex E, Formula (E.6)).**<br>• as `sound_calibrator_correction`, with `slm_coupler_level_db` and `reference_coupler_level_db` [dB], named by what each reading is of (Formula (E.6) exchanges the two labels of Figure E.1, an erratum)<br>• keyword-only: `coupler_level_difference_db`: the level at the meter less that at the reference [dB] (Default: 0); `microphones` (Default: None) | `metrology.comparison_coupler_correction(f, l1, l2, l_slm, l_rm, reference_free_field_correction_db=c_rm)`<br><br>• `FreeFieldCorrection`, clause 13 |
+| `electrostatic_actuator_correction` | `function` | **Free-field corrections normalised at the check frequency, for an electrostatic actuator (IEC 62585 Annex F, Formula (F.13)).**<br>• `frequencies_hz` [Hz]; `slm_free_field_level_db`, `reference_free_field_level_db`, `slm_actuator_level_db` [dB]<br>• keyword-only: `reference_sensitivity_level_db` S_RM [dB re 1 V/Pa]; `reference_channel_gain_db` G_RC [dB] (Default: 0); `actuator_level_db` L_EA [dB] (Default: 0); `free_field_level_difference_db` [dB] (Default: 0); `check_frequency_hz` f0 (Default: 1000); `microphones` (Default: None)<br>• zero at f0 | `metrology.electrostatic_actuator_correction(f, l1, l2, l3, reference_sensitivity_level_db=s_rm)`<br><br>• `FreeFieldCorrection`, clause 14 |
+| `FreeFieldCorrection` | `dataclass` | **The corrections of every determination, their mean and their range.**<br>• `frequencies_hz` [Hz], `corrections_db` (determinations × frequencies) [dB], `reference_correction_db` [dB], `source` ('sound_calibrator' / 'comparison_coupler' / 'electrostatic_actuator'), `check_frequency_hz` (actuator only), `microphones` (one label per row, or None), read-only<br>• `.correction_db` mean, `.microphone_corrections_db` the mean of each microphone, `.range_db` over the microphones, largest less smallest [dB], `.determinations`, `.microphone_count`, `.formula` ('D.7' / 'E.6' / 'F.13'), `.clause` (12 / 13 / 14)<br>• `.plot()`: the mean, the range band and the reference's part | `c.correction_db, c.range_db, c.clause` |
+| `correction_uncertainty_budget` | `function` | **The uncertainty budget of a correction, 15 components of Table I.1 (IEC 62585 Annex I).**<br>• `values_db`: the value of each component as Table I.2 states it, keyed 'a1' to 'a15' [dB]<br>• keyword-only: `repeatability_dof` of a15; `frequency_hz` [Hz]; `correction_db` [dB] (Default: 0); `static_pressure_kpa` [kPa]: below 97 adds the clause 6 component, outside 80 to 105 refused (Default: None); `additional_components`: further `Quantity` objects (Default: none); `coverage` (Default: 0.95)<br>• on `combine_uncertainty`, sensitivities ±1, Welch-Satterthwaite dof, Student k | `b = metrology.correction_uncertainty_budget(table_i2, repeatability_dof=2, frequency_hz=1000)`<br><br>• `b.coverage_factor  # 2.042 (Table I.2 prints 2,11, an erratum)` |
+| `CorrectionUncertaintyBudget` | `dataclass` | **One budget at one frequency.**<br>• `frequency_hz` [Hz], `descriptors`, `symbols`, `values_db` [dB], `divisors`, `dofs`, `uncertainty` (the `UncertaintyResult`, refused unless it is the combination of the columns), `coverage`, read-only<br>• `.standard_uncertainties_db`, `.combined_uncertainty_db`, `.expanded_uncertainty_db` [dB], `.effective_dof`, `.coverage_factor`, `.correction_db`<br>• `.plot()`: one bar per component, Type A apart, with u_c, k and U | `b.combined_uncertainty_db, b.effective_dof  # 0.0590 29.98` |
+| `IEC62585_TABLE_I1` | `mapping` | **IEC 62585:2012 Table I.1, the likely components of the uncertainty of a correction, keyed 'a1' to 'a15'.**<br>• each value an `UncertaintyComponentRow`: the symbol, the description, the distribution and the divisor (√3 rectangular, 2 for C_FF,RM, 1 for the repeatability) | `metrology.IEC62585_TABLE_I1["a7"].divisor  # 2.0` |
+| `UncertaintyComponentRow` | `dataclass` | **One row of Table I.1.**<br>• `symbol`, `description`, `distribution` ('rectangular' / 'normal'), `divisor` | `metrology.IEC62585_TABLE_I1["a15"].symbol  # 'Repeatability'` |
+| `maximum_expanded_uncertainty` | `function` | **The maximum permitted expanded uncertainty of a correction (IEC 62585 clauses 9 to 14).**<br>• `frequencies_hz` [Hz]<br>• keyword-only: `clause`, 9 to 14 (10 from 63 Hz only)<br>• 0,25 dB to 4 kHz and 0,35 dB above (9); 0,25, 0,35 to 8 kHz, 0,45 (10); 0,20, 0,30 (11); 0,25, 0,35 below 10 kHz, 0,50 from 10 kHz (12 to 14) [dB], read-only; a frequency within 2 % of a boundary reads as it | `metrology.maximum_expanded_uncertainty([3981.07, 10000.0], clause=12)  # [0.25 0.5]` |
+| `verify_correction_uncertainty` | `function` | **Verify the expanded uncertainties of a set of corrections against the maxima of their clause (IEC 62585 clauses 5, 9 to 14).**<br>• `frequencies_hz` [Hz]; `expanded_uncertainty_db` [dB]<br>• keyword-only: `clause`; `correction_db` [dB] and `coverage_factor`, for the clause 15 documentation (Default: None); `correction_range_db` [dB], clauses 12 to 14 only (Default: None)<br>• a value equal to its maximum passes, and one that reaches it through floating-point arithmetic | `v = metrology.verify_correction_uncertainty(f, u, clause=c.clause, correction_range_db=c.range_db)`<br><br>• `CorrectionUncertaintyVerification` |
+| `CorrectionUncertaintyVerification` | `dataclass` | **The verdict of one clause on a set of corrections.**<br>• `clause`, `frequencies_hz` [Hz], `expanded_uncertainty_db`, `correction_db`, `coverage_factor`, `correction_range_db` [dB], read-only<br>• `.maximum_uncertainty_db` [dB], derived from the clause<br>• `.passes`; `bool()` raises; `.uncertainty_passes`, `.range_passes`, `.margin_db`, `.failing_frequencies_hz`, `.subject`<br>• `.plot()`: U and the range against the stepped maximum<br>• `.report(path, *, metadata=None)`: one-page PDF fiche of clause 15 n) and o) | `v.passes`<br>`v.report("iec62585.pdf")` |
 | `combine_uncertainty` | `function` | **GUM law of propagation of uncertainty (ISO/IEC Guide 98-3 clause 5).**<br>• `model`: measurement function f(x1…xN)<br>• `quantities`: input `Quantity` objects, in argument order<br>• `correlation`: optional N×N matrix r_ij (Default: None → uncorrelated; non-identity with finite input dof → effective dof undefined, `expanded()` needs `coverage_factor_override`) | `u = metrology.combine_uncertainty(lambda a, b: a*b, [metrology.Quantity(10.0, 0.1), metrology.Quantity(5.0, 0.2)])`<br><br>• `UncertaintyResult`; uc = 2.062 |
 | `monte_carlo` | `function` | **Monte Carlo propagation (Guide 98-3-1, Supplement 1).**<br>• `model`: vectorised f(x1…xN)<br>• `quantities`: input `Quantity` objects<br>• `trials`: M ≥ 2 (Default: 1000000; fixed, no adaptive 7.9)<br>• `coverage`: interval probability (Default: 0.95)<br>• `seed`: reproducibility (Default: None)<br>• inputs sampled independently (no 6.4.8 multivariate path) | `mc = metrology.monte_carlo(model, quantities, seed=1)`<br><br>• `MonteCarloResult` (mean, u, coverage interval) |
 | `rectangular` | `function` | **Type B quantity, rectangular PDF (GUM 4.3.7).**<br>• `value`, `half_width` a, `name` | `rectangular(20.0, 0.5)`<br><br>• `Quantity` with u = a/√3 = 0.289 |
@@ -44170,7 +44186,7 @@ documents, one page per module.
 | `TonalityWarning` | `warning class` | **Tonality advisory.**<br>Emitted for biased tonality estimates (e.g. coarse FFT resolution) | `warnings.simplefilter('error', TonalityWarning)` |
 | `STIWarning` | `warning class` | **STI/STIPA advisory.**<br>Emitted for suspect speech-intelligibility measurements or inputs | `warnings.simplefilter('error', STIWarning)` |
 | `__version__` | `str` | **Package version string.**<br>(no parameters) | `phonometry.__version__  # '4.0.0rc1'` |
-| `.plot()` | `method` | **One-line canonical figure on every result object (soft matplotlib dependency).**<br>Available on `ZwickerLoudness`, `MooreGlasbergLoudness`, `MooreGlasbergTimeVaryingLoudness`, `EcmaLoudness`, `EcmaTonality`, `EcmaRoughness`, `PsychoacousticAnnoyanceResult`, `FluctuationStrengthResult`, `ProgramLoudnessResult`, `KWeightingResponse`, `STIResult`, `SIIResult`, `SIIProcedure`, `StandardSpeechSpectrum`, `NCResult`, `RCResult`, `AgeThresholdResult`, `NiptsResult`, `HtlanResult`, `ImpulseProminenceResult`, `ImpulsiveSoundResult`, `SelDistribution`, `DirectivityFactor`, `RandomIncidenceSensitivity`, `DiffuseFieldSensitivity`, `MultipleShockResult`, `ImpulseResponseResult`, `DecayCurve`, `RoomAcousticsResult`, `ReverberationResult`, `ReverberationModelResult`, `DynamicStiffnessResult`, `MobilityResult`, `TransferStiffnessResult`, `BandAveragedStiffness`, `LevelDifferenceCheck`, `OutputMassCheck`, `EffectiveBlockingMass`, `DrivingPointStiffnessResult`, `DrivingPointUncertainty`, `VibrationSoundPowerResult`, `StructureBornePowerResult`, `InstalledSourceResult`, `WeightedRatingResult`, `ImpactRatingResult`, `FacadeInsulationResult`, `LabAirborneInsulationResult`, `LabImpactInsulationResult`, `SoundPowerResult`, `SoundEnergyResult`, `ReverberationSoundPowerResult`, `ReverberationSoundEnergyResult`, `InSituSoundPowerResult`, `InDuctSoundPowerResult`, `HighFrequencySoundPowerResult`, `SoundPowerIntensityResult`, `DiscretePointIntensityResult`, `PrecisionSoundPowerResult`, `PrecisionIntensityResult`, `IntensityResult`, `UncertaintyResult`, `AbsorptionRatingResult`, `ScatteringResult`, `DiffusionResult`, `DiffusionSpectrum`, `InsituAbsorptionResult`, `WeightingResponse`, `WeightedSpectrum`, `Signal` and `DailyVibrationExposure`.<br>• `ax`: existing Axes, or None to build a fresh figure (Default: None)<br>• returns the Matplotlib `Axes` (an array of Axes for multi-panel figures); never calls `plt.show()`<br>• needs matplotlib (`pip install phonometry[plot]`) | `res.plot()`<br>`decay_curve(ir, fs).plot()` |
+| `.plot()` | `method` | **One-line canonical figure on every result object (soft matplotlib dependency).**<br>Available on `ZwickerLoudness`, `MooreGlasbergLoudness`, `MooreGlasbergTimeVaryingLoudness`, `EcmaLoudness`, `EcmaTonality`, `EcmaRoughness`, `PsychoacousticAnnoyanceResult`, `FluctuationStrengthResult`, `ProgramLoudnessResult`, `KWeightingResponse`, `STIResult`, `SIIResult`, `SIIProcedure`, `StandardSpeechSpectrum`, `NCResult`, `RCResult`, `AgeThresholdResult`, `NiptsResult`, `HtlanResult`, `ImpulseProminenceResult`, `ImpulsiveSoundResult`, `SelDistribution`, `DirectivityFactor`, `RandomIncidenceSensitivity`, `DiffuseFieldSensitivity`, `AdjustmentValue`, `FreeFieldCorrection`, `CorrectionUncertaintyBudget`, `CorrectionUncertaintyVerification`, `MultipleShockResult`, `ImpulseResponseResult`, `DecayCurve`, `RoomAcousticsResult`, `ReverberationResult`, `ReverberationModelResult`, `DynamicStiffnessResult`, `MobilityResult`, `TransferStiffnessResult`, `BandAveragedStiffness`, `LevelDifferenceCheck`, `OutputMassCheck`, `EffectiveBlockingMass`, `DrivingPointStiffnessResult`, `DrivingPointUncertainty`, `VibrationSoundPowerResult`, `StructureBornePowerResult`, `InstalledSourceResult`, `WeightedRatingResult`, `ImpactRatingResult`, `FacadeInsulationResult`, `LabAirborneInsulationResult`, `LabImpactInsulationResult`, `SoundPowerResult`, `SoundEnergyResult`, `ReverberationSoundPowerResult`, `ReverberationSoundEnergyResult`, `InSituSoundPowerResult`, `InDuctSoundPowerResult`, `HighFrequencySoundPowerResult`, `SoundPowerIntensityResult`, `DiscretePointIntensityResult`, `PrecisionSoundPowerResult`, `PrecisionIntensityResult`, `IntensityResult`, `UncertaintyResult`, `AbsorptionRatingResult`, `ScatteringResult`, `DiffusionResult`, `DiffusionSpectrum`, `InsituAbsorptionResult`, `WeightingResponse`, `WeightedSpectrum`, `Signal` and `DailyVibrationExposure`.<br>• `ax`: existing Axes, or None to build a fresh figure (Default: None)<br>• returns the Matplotlib `Axes` (an array of Axes for multi-panel figures); never calls `plt.show()`<br>• needs matplotlib (`pip install phonometry[plot]`) | `res.plot()`<br>`decay_curve(ir, fs).plot()` |
 
 ## Notes
 
@@ -50725,6 +50741,9 @@ What the numbers mean and how much to trust them.
 - [Random-Incidence and Diffuse-Field Response (IEC 61183)](https://jmrplens.github.io/phonometry/signals/metrology/random-incidence/):
   the directivity factor of a sound level meter and its random-incidence and
   diffuse-field sensitivity levels.
+- [Free-Field Corrections of a Sound Level Meter (IEC 62585)](https://jmrplens.github.io/phonometry/signals/metrology/free-field-corrections/):
+  the corrections that bring a meter on a calibrator, a coupler or an
+  actuator to its free-field response, and their uncertainty.
 
 ## What this section does not cover
 
@@ -53666,6 +53685,208 @@ out glitches stay manual steps, the way the book describes them.
 ---
 
 
+<!-- source: docs/signals/metrology/free-field-corrections.md | canonical: https://jmrplens.github.io/phonometry/signals/metrology/free-field-corrections/ -->
+Source: https://jmrplens.github.io/phonometry/signals/metrology/free-field-corrections/
+
+# Free-field corrections of a sound level meter (IEC 62585)
+
+A periodic test of a sound level meter by IEC 61672-3 drives the microphone
+with a sound calibrator, a comparison coupler or an electrostatic actuator,
+and none of those is the plane progressive wave the meter is specified for.
+The test needs, at each frequency, the **correction** that turns what the
+meter indicates on that source into what it would indicate in a free field of
+the same level, and the manufacturer states it in the manual. IEC 62585:2012
+gives the methods for finding those corrections, the uncertainty they may
+carry, and the adjustment value the manual quotes at the calibration check
+frequency. This page runs every step on a synthetic class 1 meter and on the
+two worked budgets the standard prints.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/free_field_correction_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/free_field_correction.svg" alt="The free-field correction of a synthetic meter at the nine exact octaves from 63 Hz to 16 kHz: on a multi-frequency calibrator by Formula (D.7), rising from about 0 dB up to 1 kHz to 5 dB at 16 kHz with the range of three microphones around it, and on an electrostatic actuator by Formula (F.13), zero at 1 kHz and 7.4 dB at 16 kHz" width="100%"></picture>
+
+## The adjustment value at the calibration check frequency
+
+The manufacturer sets the sensitivity so that the free-field response deviates
+as little as it can from the incident level over the whole frequency range,
+then applies the calibrator and reads `L4`; the manual states
+`Delta L = L1 - L4` as a fixed number (Annex A, clause 8). The text prints no
+formula for the fit, and `metrology.adjustment_value` takes the least-squares
+reading, the adjustment `s = -sum(w d) / sum(w)` with weights `w = 1/t²` for
+the tolerance `t` at each frequency:
+
+```python
+import numpy as np
+from phonometry import filters, metrology
+
+f3 = metrology.exact_frequencies(63, 16000, fraction=3)   # 25 exact one-third octaves
+nominal, lower, upper = filters.weighting_class_limits(1)  # IEC 61672-1 Table 3, class 1
+band = (nominal >= 63) & (nominal <= 16000)
+tolerance = np.minimum(upper, -lower)[band]                # the narrower side at each band
+
+x3 = f3 / 1000
+response = 0.4 + 0.12 * np.cos(3 * np.log(x3)) - 0.3 * (x3 / 8) ** 2   # indication less field, dB
+a = metrology.adjustment_value(
+    f3, 94.0 + response, 94.35, calibrator_level_db=94.0, tolerance_db=tolerance
+)
+print(round(a.sensitivity_adjustment_db, 2), round(a.adjustment_db, 2))  # -0.37 0.02
+print(round(a.check_frequency_offset_db, 2))                           # 0.15
+```
+
+The adjusted meter reads a free field 0,15 dB high at 1 kHz: the offset the
+fit chose so the response sits inside the tolerances everywhere else.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/free_field_adjustment_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/free_field_adjustment.svg" alt="The free-field deviation of the synthetic meter before and after the adjustment of Annex A, 63 Hz to 16 kHz, inside the class 1 tolerance band; Delta L = 0.02 dB" width="88%"></picture>
+
+## How the measurement goes
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_free_field_corrections_setup_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_free_field_corrections_setup.svg" alt="The readings of IEC 62585: a meter and a type LS2P reference microphone read the same free field in turn, then the same source, a sound calibrator (Formula (D.7)), a comparison coupler with both face to face, read together or in turn (Formula (E.6)), or an electrostatic actuator on the meter (Formula (F.13)); (D.7) and (E.6) are shown with stable sources" width="92%"></picture>
+
+| Requirement | Value | Clause |
+| :--- | :--- | :--- |
+| Environment | 80 kPa to 105 kPa, 20 °C to 26 °C, 25 % to 70 % relative humidity; below 97 kPa an extra component enters the budget | 6 |
+| Free-field mounting | On a rod of the microphone's diameter; source more than 1 m away and at least six times the largest dimension of the meter | 6 |
+| Samples | Three calibrators, three microphones and one meter; five microphones for a typical response, five windscreens | 7 |
+| Source level | 70 dB to 125 dB in a calibrator or coupler; 80 dB to 105 dB on the display at 1 kHz with an actuator | 12, 13, 14 |
+| Frequencies | Exact base-ten frequencies of Annex H | 10, B.2, C.2 |
+
+## The corrections for a calibrator, a coupler and an actuator
+
+Every method compares the meter with a type LS2P reference microphone, whose
+free-field correction `C_FF,RM` comes from IEC/TS 61094-7 and is an input. On
+a calibrator (Formula (D.7)),
+`C_FF,SLM = (L_ind1 - L_ind3) - (L_ind2 - L_ind4) - (L_p,F1 - L_p,F2) + (L_p,P1 - L_p,P2) + C_FF,RM`:
+
+```python
+f = metrology.exact_frequencies(63, 16000, fraction=1)   # the nine exact octaves
+x = f / 1000
+c_ff_rm = 0.05 * x**1.3                        # C_FF,RM of the reference: illustrative
+free = 0.1 * np.sin(np.log(x)) - 0.05 * x**1.2  # the meter in a free field, re the field
+pressure = -0.1 * x**1.5                        # the meter on the calibrator, re its level
+spread = np.array([[0.0], [0.02], [-0.03]]) * x**0.8   # three microphones of the model
+
+c = metrology.sound_calibrator_correction(
+    f,
+    94.0 + free + spread,          # L_ind1: the meter in the free field
+    94.0 + c_ff_rm,                # L_ind2: the reference in its place
+    94.0 + pressure + spread / 2,  # L_ind3: the calibrator on the meter
+    94.0,                          # L_ind4: the calibrator on the reference
+    reference_free_field_correction_db=c_ff_rm,
+)
+print(c.correction_db.round(2))  # [-0.04 -0.09 -0.1  -0.05  0.05  0.23  0.63  1.72  4.95]
+print(c.clause, c.formula)       # 12 D.7
+```
+
+The three rows are three microphones on one calibrator. The nine
+determinations of D.2 step 6, three microphones on three calibrators, go in as
+nine rows with `microphones=[1, 1, 1, 2, 2, 2, 3, 3, 3]`, so that `range_db`,
+the range clause 12 judges, is taken over the three microphones' mean
+corrections and not over the calibrators as well.
+
+`metrology.comparison_coupler_correction` names its two readings in the
+coupler by what each is of, `slm_coupler_level_db` and
+`reference_coupler_level_db`, because Formulas (E.4) to (E.6) exchange the two
+labels Figure E.1 defines (an [erratum](https://jmrplens.github.io/phonometry/reference/errata/)).
+`metrology.electrostatic_actuator_correction` returns the correction of
+Formula (F.13), normalised to the calibration check frequency, where it is
+zero.
+
+## The uncertainty budget of Annex I
+
+`metrology.correction_uncertainty_budget` takes the fifteen components of
+Table I.1 as Table I.2 states them, divides each by its divisor (`√3`, 2 for
+`C_FF,RM`, 1 for the repeatability), combines them on
+`metrology.combine_uncertainty` and takes the coverage factor from the
+Welch-Satterthwaite effective degrees of freedom at 95 %:
+
+```python
+table_i2 = {
+    "a1": 0.005, "a2": 0.005, "a3": 0.005, "a4": 0.005, "a5": 0.05, "a6": 0.0,
+    "a7": 0.06, "a8": 0.025, "a9": 0.025, "a10": 0.029, "a11": 0.013,
+    "a12": 0.013, "a13": 0.0, "a14": 0.005, "a15": 0.03,
+}
+b1 = metrology.correction_uncertainty_budget(table_i2, repeatability_dof=2, frequency_hz=1000)
+print(round(b1.combined_uncertainty_db, 4), round(b1.effective_dof, 2))   # 0.059 29.98
+print(round(b1.coverage_factor, 2), round(b1.expanded_uncertainty_db, 2))  # 2.04 0.12
+```
+
+Tables I.2 and I.3 both reproduce. Table I.2 prints `k = 2,11`, which is not
+the factor its own 29,98 degrees of freedom give: at 95 % that is 2,04, and
+2,11 is the one for about 17 (an [erratum](https://jmrplens.github.io/phonometry/reference/errata/)).
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/free_field_uncertainty_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/free_field_uncertainty.svg" alt="The standard uncertainty of each of the fifteen components of Table I.1 at 1 kHz (u_c = 0.0590 dB, k = 2.04, U = 0.121 dB) and at 8 kHz (u_c = 0.1400 dB, k = 2.00, U = 0.280 dB)" width="100%"></picture>
+
+## The maximum permitted uncertainty, and the verdict
+
+| Clause | Correction for | Maximum expanded uncertainty |
+| :--- | :--- | :--- |
+| 9 | Reflections from the case, diffraction round the microphone | 0,25 dB up to and including 4 kHz; 0,35 dB above |
+| 10 | The microphone's deviation from a uniform response | 0,25 dB from 63 Hz to 4 kHz; 0,35 dB to 8 kHz; 0,45 dB above |
+| 11 | Windscreens and similar accessories | 0,20 dB up to and including 4 kHz; 0,30 dB above |
+| 12, 13, 14 | A calibrator, a coupler, an actuator | 0,25 dB up to and including 4 kHz; 0,35 dB below 10 kHz; 0,50 dB from 10 kHz |
+
+`metrology.verify_correction_uncertainty` judges the expanded uncertainty at
+each frequency against the maximum of the clause, and for clauses 12 to 14 the
+range of the corrections over the microphones too; the verdict carries
+`passes`, and `bool()` of it raises. `.report()` renders the documentation of
+clause 15 n) and o) as a one-page fiche:
+
+```python
+v = metrology.verify_correction_uncertainty(
+    f, 0.12 + 0.02 * x**0.8, clause=c.clause, correction_db=c.correction_db,
+    correction_range_db=c.range_db,
+)
+print(v.passes)   # True
+```
+
+[![One-page fiche of the corrections of a class 1 meter on its calibrator with their expanded uncertainty, coverage factor, maximum, range over three microphones and verdict at the nine exact octaves, and a PASS verdict against clause 12](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iec62585_free_field_correction_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iec62585_free_field_correction_example.pdf)
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/free_field_verification_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/free_field_verification.svg" alt="The expanded uncertainty of the calibrator's corrections and their range over three microphones, under the stepped maximum of clause 12" width="88%"></picture>
+
+## Exact frequencies
+
+Annex H gives the exact base-ten frequencies by Formula (H.1),
+`f_x = 1000 · 10^(3x/10b)` Hz, with `b = 12` for one-twelfth octaves:
+
+```python
+h = metrology.exact_frequencies(1000, 10000)   # the 41 rows of Table H.1
+print(h.size, (h[[1, 31, 40]] / 1000).round(6))   # 41 [ 1.059254  5.956621 10.      ]
+```
+
+All 41 values of Table H.1 reproduce; its exponent column prints `10^(31/80)`
+for index 31, where the value is `10^(31/40)` (an [erratum](https://jmrplens.github.io/phonometry/reference/errata/)).
+
+## What this guide covers
+
+Implemented: the adjustment value of Annex A (the least-squares fit is this
+library's reading of a text that prints no formula); the free-field
+corrections for a multi-frequency calibrator, a comparison coupler and an
+electrostatic actuator (Formulas (D.7), (E.6) and (F.13)), averaged over the
+determinations with their range over the microphones kept; the uncertainty
+budget of Annex I with the fifteen components of Table I.1, the
+static-pressure component of clause 6 and the Welch-Satterthwaite coverage
+factor; the maxima of clauses 9 to 14 as a verdict and a fiche; and the exact
+frequencies of Annex H. Not implemented: the measurements themselves, the
+techniques of Annex G, the free-field correction of the reference microphone
+(an input from IEC/TS 61094-7), the corrections of clauses 9 to 11 (the
+set-up differences of Annexes B and C, the typical microphone response over
+five microphones and the rotational means of clauses 10 and 11, whose maxima
+are judged but which are not computed), and the comparison of the corrections
+with the IEC 61672-1 acceptance limits that clause 15 p) asks for separately.
+
+## See also
+
+- [Random-incidence and diffuse-field response (IEC 61183)](https://jmrplens.github.io/phonometry/signals/metrology/random-incidence/):
+  the response of the meter to sound from every direction.
+- [Measurement uncertainty](https://jmrplens.github.io/phonometry/signals/metrology/gum-uncertainty/): the GUM law of propagation
+  and the Welch-Satterthwaite degrees of freedom the budget is built on.
+- [Compliance and verification](https://jmrplens.github.io/phonometry/signals/metrology/compliance-verification/): what the
+  IEC 61672-1 class of a meter asserts.
+- [Errata in published sources](https://jmrplens.github.io/phonometry/reference/errata/): Table I.2, Table H.1 and
+  Formulas (E.4) to (E.6).
+- API reference: [`metrology.free_field_corrections`](https://jmrplens.github.io/phonometry/reference/api/metrology/free-field-corrections/).
+
+---
+
+
 <!-- source: docs/signals/metrology/gum-uncertainty.md | canonical: https://jmrplens.github.io/phonometry/signals/metrology/gum-uncertainty/ -->
 Source: https://jmrplens.github.io/phonometry/signals/metrology/gum-uncertainty/
 
@@ -54005,6 +54226,13 @@ random-incidence sensitivity level that follows from it, and the
 diffuse-field level by comparison with a reference meter in a reverberation
 room.
 
+[Free-field corrections](https://jmrplens.github.io/phonometry/signals/metrology/free-field-corrections/)
+bring a meter tested on a sound calibrator, a comparison coupler or an
+electrostatic actuator back to the free field it is specified for: the IEC
+62585 adjustment value at the calibration check frequency, the correction at
+each frequency, the uncertainty budget that goes with it, and the maximum each
+clause permits.
+
 The same discipline extends into the frequency domain: the
 [Signals and spectra](https://jmrplens.github.io/phonometry/signals/spectra/) pages
 apply the Bendat & Piersol error analysis to Welch spectral estimates, so
@@ -54037,6 +54265,9 @@ budgets that are specialisations of the GUM machinery described here.
   the directivity factor of a sound level meter from readings in two planes,
   one plane or 38 equal-area elements, its random-incidence and diffuse-field
   sensitivity levels, and Table B.1 of the reference microphone.
+- [Free-Field Corrections of a Sound Level Meter (IEC 62585)](https://jmrplens.github.io/phonometry/signals/metrology/free-field-corrections/):
+  the adjustment value, the corrections for a calibrator, a coupler and an
+  actuator, the budget of Annex I and the verdict of clauses 9 to 14.
 
 ## What this section does not cover
 
@@ -54276,13 +54507,17 @@ plane under rotational symmetry and from 38 equal-area elements (Formulas
 to (11); and Table B.1. Not implemented: the measurements themselves (the
 ISO 3745 anechoic and ISO 3741 reverberation rooms, the source, the turntable,
 the signal-to-noise ratio of A.2.3 and the integration times of B.1.4), the
-averaging of at least eight tones per band (4.11), and the corrections of
-IEC 62585 for the case, the microphone and the windscreen, which bring a
-measurement made with a sound calibrator, a comparison coupler or an
-electrostatic actuator to the meter's free-field response.
+averaging of at least eight tones per band (4.11). The corrections of
+IEC 62585 that bring a measurement made with a sound calibrator, a comparison
+coupler or an electrostatic actuator to the meter's free-field response are
+on [their own page](https://jmrplens.github.io/phonometry/signals/metrology/free-field-corrections/); its corrections for the case,
+the microphone and the windscreen (clauses 9 to 11) are not implemented.
 
 ## See also
 
+- [Free-field corrections](https://jmrplens.github.io/phonometry/signals/metrology/free-field-corrections/): IEC 62585, the
+  corrections that bring a meter on a calibrator, a coupler or an actuator to
+  its free-field response, for a meter with a free-field microphone.
 - [Calibration and dBFS](https://jmrplens.github.io/phonometry/signals/metrology/calibration/): the calibrator tone that sets the
   pressure sensitivity every level of a meter starts from.
 - [Compliance and verification](https://jmrplens.github.io/phonometry/signals/metrology/compliance-verification/): what the
@@ -59759,7 +59994,7 @@ the normative PDF fiche.
 - [Filter Architecture Gallery](https://jmrplens.github.io/phonometry/signals/filters/filter-gallery/): choose an architecture and inspect responses
 - [Calibration and dBFS](https://jmrplens.github.io/phonometry/signals/metrology/calibration/): get real-world SPL values
 - [Why phonometry](https://jmrplens.github.io/phonometry/start/why-phonometry/): the conformance-first design philosophy
-- [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): the expected and computed value of all 1431 checks
+- [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): the expected and computed value of all 1447 checks
 - [API Reference](https://jmrplens.github.io/phonometry/reference/api/): every parameter of every function
 - [Bibliography](https://jmrplens.github.io/phonometry/reference/bibliography/): the books and papers behind every guide, each with a verified link
 
@@ -60762,7 +60997,7 @@ sample from the metrology core:
 | IEC 61252:1993 | The personal sound exposure quantities, `sound_exposure()` and the normalized 8 h level `lex_8h()`; IEC 61252:2025 has since superseded this print, and the transcription still targets the 1993+A2 text | `tests/signals/test_levels.py` |
 
 The same discipline applies far beyond the metrology core: today the suite runs
-1431 numerical conformance checks across 96 domains and 476 standards, covering
+1447 numerical conformance checks across 97 domains and 477 standards, covering
 psychoacoustics and speech intelligibility, room, building and materials
 acoustics, human and machine vibration, environmental, aircraft, rotorcraft
 and underwater noise, electroacoustics, broadcast loudness, industrial noise

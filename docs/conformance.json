@@ -3,13 +3,13 @@
   "library": "4.0.0rc1",
   "generator": "scripts/conformance_report.py",
   "counts": {
-    "checks": 1395,
-    "passing": 1395,
+    "checks": 1431,
+    "passing": 1431,
     "failing": 0,
-    "domains": 95,
-    "standards": 474,
-    "citations": 960,
-    "designations": 193,
+    "domains": 96,
+    "standards": 476,
+    "citations": 973,
+    "designations": 195,
     "sources": 114
   },
   "units": [
@@ -89,6 +89,12 @@
       "title": "Filters & weightings",
       "checks": 12,
       "passing": 12
+    },
+    {
+      "id": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3",
+      "title": "Band-filter pattern evaluation and periodic tests (IEC 61260-2, IEC 61260-3)",
+      "checks": 36,
+      "passing": 36
     },
     {
       "id": "humid-air-iec-61094-2-2009-annex-f",
@@ -1178,6 +1184,1320 @@
       "deviation": {
         "value": 0.169,
         "label": "headroom +0.169 dB"
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3/iec-61260-3-2016-table-c-1/one-third-octave-test-frequency-omega-k-k-7-below-the-mid-band-formulas-1-2",
+      "domain": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3",
+      "reference": {
+        "cite": "IEC 61260-3:2016 Table C.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61260-3",
+            "edition": "2016",
+            "clause": "Table C.1"
+          }
+        ]
+      },
+      "quantity": "One-third-octave test frequency Omega_k, k = -7 (below the mid-band, Formulas (1), (2))",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.18546
+      },
+      "computed": {
+        "value": 0.18546
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 5e-06
+      },
+      "deviation": {
+        "value": 1.71e-06
+      },
+      "precision": 5,
+      "verdict": "pass"
+    },
+    {
+      "id": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3/iec-61260-3-2016-table-c-1/one-third-octave-test-frequency-omega-k-k-6-below-the-mid-band-formulas-1-2",
+      "domain": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3",
+      "reference": {
+        "cite": "IEC 61260-3:2016 Table C.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61260-3",
+            "edition": "2016",
+            "clause": "Table C.1"
+          }
+        ]
+      },
+      "quantity": "One-third-octave test frequency Omega_k, k = -6 (below the mid-band, Formulas (1), (2))",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.32748
+      },
+      "computed": {
+        "value": 0.32748
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 5e-06
+      },
+      "deviation": {
+        "value": -3.27e-06
+      },
+      "precision": 5,
+      "verdict": "pass"
+    },
+    {
+      "id": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3/iec-61260-3-2016-table-c-1/one-third-octave-test-frequency-omega-k-k-5-below-the-mid-band-formulas-1-2",
+      "domain": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3",
+      "reference": {
+        "cite": "IEC 61260-3:2016 Table C.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61260-3",
+            "edition": "2016",
+            "clause": "Table C.1"
+          }
+        ]
+      },
+      "quantity": "One-third-octave test frequency Omega_k, k = -5 (below the mid-band, Formulas (1), (2))",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.53143
+      },
+      "computed": {
+        "value": 0.53143
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 5e-06
+      },
+      "deviation": {
+        "value": -3.47e-06
+      },
+      "precision": 5,
+      "verdict": "pass"
+    },
+    {
+      "id": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3/iec-61260-3-2016-table-c-1/one-third-octave-test-frequency-omega-k-k-4-below-the-mid-band-formulas-1-2",
+      "domain": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3",
+      "reference": {
+        "cite": "IEC 61260-3:2016 Table C.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61260-3",
+            "edition": "2016",
+            "clause": "Table C.1"
+          }
+        ]
+      },
+      "quantity": "One-third-octave test frequency Omega_k, k = -4 (below the mid-band, Formulas (1), (2))",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.77257
+      },
+      "computed": {
+        "value": 0.77257
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 5e-06
+      },
+      "deviation": {
+        "value": 4.17e-06
+      },
+      "precision": 5,
+      "verdict": "pass"
+    },
+    {
+      "id": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3/iec-61260-3-2016-table-c-1/one-third-octave-test-frequency-omega-k-k-3-below-the-mid-band-formulas-1-2",
+      "domain": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3",
+      "reference": {
+        "cite": "IEC 61260-3:2016 Table C.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61260-3",
+            "edition": "2016",
+            "clause": "Table C.1"
+          }
+        ]
+      },
+      "quantity": "One-third-octave test frequency Omega_k, k = -3 (below the mid-band, Formulas (1), (2))",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.91958
+      },
+      "computed": {
+        "value": 0.91958
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 5e-06
+      },
+      "deviation": {
+        "value": -3.28e-06
+      },
+      "precision": 5,
+      "verdict": "pass"
+    },
+    {
+      "id": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3/iec-61260-3-2016-table-c-1/one-third-octave-test-frequency-omega-k-k-2-below-the-mid-band-formulas-1-2",
+      "domain": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3",
+      "reference": {
+        "cite": "IEC 61260-3:2016 Table C.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61260-3",
+            "edition": "2016",
+            "clause": "Table C.1"
+          }
+        ]
+      },
+      "quantity": "One-third-octave test frequency Omega_k, k = -2 (below the mid-band, Formulas (1), (2))",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.94719
+      },
+      "computed": {
+        "value": 0.94719
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 5e-06
+      },
+      "deviation": {
+        "value": 6.18e-08
+      },
+      "precision": 5,
+      "verdict": "pass"
+    },
+    {
+      "id": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3/iec-61260-3-2016-table-c-1-c-2/one-third-octave-test-frequency-omega-k-k-1-below-the-mid-band-formulas-1-2",
+      "domain": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3",
+      "reference": {
+        "cite": "IEC 61260-3:2016 Table C.1, C.2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61260-3",
+            "edition": "2016",
+            "clause": "Table C.1, C.2"
+          }
+        ]
+      },
+      "quantity": "One-third-octave test frequency Omega_k, k = -1 (below the mid-band, Formulas (1), (2))",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.97402
+      },
+      "computed": {
+        "value": 0.97402
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 5e-06
+      },
+      "deviation": {
+        "value": -1.32e-06
+      },
+      "precision": 5,
+      "verdict": "pass"
+    },
+    {
+      "id": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3/iec-61260-3-2016-table-c-1/one-third-octave-test-frequency-omega-k-k-0-at-the-mid-band-formulas-1-2",
+      "domain": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3",
+      "reference": {
+        "cite": "IEC 61260-3:2016 Table C.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61260-3",
+            "edition": "2016",
+            "clause": "Table C.1"
+          }
+        ]
+      },
+      "quantity": "One-third-octave test frequency Omega_k, k = 0 (at the mid-band, Formulas (1), (2))",
+      "kind": "scalar",
+      "expected": {
+        "value": 1.0
+      },
+      "computed": {
+        "value": 1.0
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 5e-06
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 5,
+      "verdict": "pass"
+    },
+    {
+      "id": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3/iec-61260-3-2016-table-c-1-c-2/one-third-octave-test-frequency-omega-k-k-1-above-the-mid-band-formulas-1-2",
+      "domain": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3",
+      "reference": {
+        "cite": "IEC 61260-3:2016 Table C.1, C.2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61260-3",
+            "edition": "2016",
+            "clause": "Table C.1, C.2"
+          }
+        ]
+      },
+      "quantity": "One-third-octave test frequency Omega_k, k = +1 (above the mid-band, Formulas (1), (2))",
+      "kind": "scalar",
+      "expected": {
+        "value": 1.02667
+      },
+      "computed": {
+        "value": 1.02667
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 5e-06
+      },
+      "deviation": {
+        "value": 4.35e-06
+      },
+      "precision": 5,
+      "verdict": "pass"
+    },
+    {
+      "id": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3/iec-61260-3-2016-table-c-1/one-third-octave-test-frequency-omega-k-k-2-above-the-mid-band-formulas-1-2",
+      "domain": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3",
+      "reference": {
+        "cite": "IEC 61260-3:2016 Table C.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61260-3",
+            "edition": "2016",
+            "clause": "Table C.1"
+          }
+        ]
+      },
+      "quantity": "One-third-octave test frequency Omega_k, k = +2 (above the mid-band, Formulas (1), (2))",
+      "kind": "scalar",
+      "expected": {
+        "value": 1.05575
+      },
+      "computed": {
+        "value": 1.05575
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 5e-06
+      },
+      "deviation": {
+        "value": 4.32e-06
+      },
+      "precision": 5,
+      "verdict": "pass"
+    },
+    {
+      "id": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3/iec-61260-3-2016-table-c-1/one-third-octave-test-frequency-omega-k-k-3-above-the-mid-band-formulas-1-2",
+      "domain": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3",
+      "reference": {
+        "cite": "IEC 61260-3:2016 Table C.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61260-3",
+            "edition": "2016",
+            "clause": "Table C.1"
+          }
+        ]
+      },
+      "quantity": "One-third-octave test frequency Omega_k, k = +3 (above the mid-band, Formulas (1), (2))",
+      "kind": "scalar",
+      "expected": {
+        "value": 1.08746
+      },
+      "computed": {
+        "value": 1.08746
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 5e-06
+      },
+      "deviation": {
+        "value": -3.15e-06
+      },
+      "precision": 5,
+      "verdict": "pass"
+    },
+    {
+      "id": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3/iec-61260-3-2016-table-c-1/one-third-octave-test-frequency-omega-k-k-4-above-the-mid-band-formulas-1-2",
+      "domain": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3",
+      "reference": {
+        "cite": "IEC 61260-3:2016 Table C.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61260-3",
+            "edition": "2016",
+            "clause": "Table C.1"
+          }
+        ]
+      },
+      "quantity": "One-third-octave test frequency Omega_k, k = +4 (above the mid-band, Formulas (1), (2))",
+      "kind": "scalar",
+      "expected": {
+        "value": 1.29437
+      },
+      "computed": {
+        "value": 1.29437
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 5e-06
+      },
+      "deviation": {
+        "value": 4.1e-06
+      },
+      "precision": 5,
+      "verdict": "pass"
+    },
+    {
+      "id": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3/iec-61260-3-2016-table-c-1/one-third-octave-test-frequency-omega-k-k-5-above-the-mid-band-formulas-1-2",
+      "domain": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3",
+      "reference": {
+        "cite": "IEC 61260-3:2016 Table C.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61260-3",
+            "edition": "2016",
+            "clause": "Table C.1"
+          }
+        ]
+      },
+      "quantity": "One-third-octave test frequency Omega_k, k = +5 (above the mid-band, Formulas (1), (2))",
+      "kind": "scalar",
+      "expected": {
+        "value": 1.88173
+      },
+      "computed": {
+        "value": 1.88173
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 5e-06
+      },
+      "deviation": {
+        "value": -2.35e-06
+      },
+      "precision": 5,
+      "verdict": "pass"
+    },
+    {
+      "id": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3/iec-61260-3-2016-table-c-1/one-third-octave-test-frequency-omega-k-k-6-above-the-mid-band-formulas-1-2",
+      "domain": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3",
+      "reference": {
+        "cite": "IEC 61260-3:2016 Table C.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61260-3",
+            "edition": "2016",
+            "clause": "Table C.1"
+          }
+        ]
+      },
+      "quantity": "One-third-octave test frequency Omega_k, k = +6 (above the mid-band, Formulas (1), (2))",
+      "kind": "scalar",
+      "expected": {
+        "value": 3.05365
+      },
+      "computed": {
+        "value": 3.05365
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 5e-06
+      },
+      "deviation": {
+        "value": 2.06e-06
+      },
+      "precision": 5,
+      "verdict": "pass"
+    },
+    {
+      "id": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3/iec-61260-3-2016-table-c-1/one-third-octave-test-frequency-omega-k-k-7-above-the-mid-band-formulas-1-2",
+      "domain": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3",
+      "reference": {
+        "cite": "IEC 61260-3:2016 Table C.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61260-3",
+            "edition": "2016",
+            "clause": "Table C.1"
+          }
+        ]
+      },
+      "quantity": "One-third-octave test frequency Omega_k, k = +7 (above the mid-band, Formulas (1), (2))",
+      "kind": "scalar",
+      "expected": {
+        "value": 5.39195
+      },
+      "computed": {
+        "value": 5.39195
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 5e-06
+      },
+      "deviation": {
+        "value": -1.33e-06
+      },
+      "precision": 5,
+      "verdict": "pass"
+    },
+    {
+      "id": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3/iec-61260-3-2016-table-1/acceptance-limits-on-relative-attenuation-8-frequency-parameters-x-2-classes",
+      "domain": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3",
+      "reference": {
+        "cite": "IEC 61260-3:2016 Table 1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61260-3",
+            "edition": "2016",
+            "clause": "Table 1"
+          }
+        ]
+      },
+      "quantity": "Acceptance limits on relative attenuation, 8 frequency parameters x 2 classes",
+      "kind": "count",
+      "expected": {
+        "value": 32.0,
+        "label": "32/32 cells"
+      },
+      "computed": {
+        "value": 32.0,
+        "label": "32/32 cells"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3/iec-61260-1-2014-table-c-1/example-1-deviation-1-7-db-u-0-3-db-against-1-0-1-2-db-and-0-5-db",
+      "domain": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3",
+      "reference": {
+        "cite": "IEC 61260-1:2014 Table C.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61260-1",
+            "edition": "2014",
+            "clause": "Table C.1"
+          }
+        ]
+      },
+      "quantity": "Example 1: deviation +1.7 dB, U 0.3 dB against +1.0; -1.2 dB and 0.5 dB",
+      "kind": "record",
+      "expected": {
+        "label": "No: Deviation exceeds acceptance limits",
+        "record": {
+          "conforms": 0.0,
+          "outcome": 3.0,
+          "reason": 1.0
+        }
+      },
+      "computed": {
+        "label": "No: Deviation exceeds acceptance limits",
+        "record": {
+          "conforms": 0.0,
+          "outcome": 3.0,
+          "reason": 1.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3/iec-61260-1-2014-table-c-1/example-2-deviation-1-1-db-u-0-3-db-against-1-0-1-2-db-and-0-5-db",
+      "domain": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3",
+      "reference": {
+        "cite": "IEC 61260-1:2014 Table C.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61260-1",
+            "edition": "2014",
+            "clause": "Table C.1"
+          }
+        ]
+      },
+      "quantity": "Example 2: deviation +1.1 dB, U 0.3 dB against +1.0; -1.2 dB and 0.5 dB",
+      "kind": "record",
+      "expected": {
+        "label": "No: Deviation exceeds acceptance limits",
+        "record": {
+          "conforms": 0.0,
+          "outcome": 3.0,
+          "reason": 1.0
+        }
+      },
+      "computed": {
+        "label": "No: Deviation exceeds acceptance limits",
+        "record": {
+          "conforms": 0.0,
+          "outcome": 3.0,
+          "reason": 1.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3/iec-61260-1-2014-table-c-1/example-3-deviation-1-0-db-u-0-3-db-against-1-0-1-2-db-and-0-5-db",
+      "domain": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3",
+      "reference": {
+        "cite": "IEC 61260-1:2014 Table C.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61260-1",
+            "edition": "2014",
+            "clause": "Table C.1"
+          }
+        ]
+      },
+      "quantity": "Example 3: deviation +1.0 dB, U 0.3 dB against +1.0; -1.2 dB and 0.5 dB",
+      "kind": "record",
+      "expected": {
+        "label": "Yes: Deviation within acceptance limits AND uncertainty within maximum-permitted",
+        "record": {
+          "conforms": 1.0,
+          "outcome": 1.0,
+          "reason": 1.0
+        }
+      },
+      "computed": {
+        "label": "Yes: Deviation within acceptance limits AND uncertainty within maximum-permitted",
+        "record": {
+          "conforms": 1.0,
+          "outcome": 1.0,
+          "reason": 1.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3/iec-61260-1-2014-table-c-1/example-4-deviation-0-0-db-u-0-3-db-against-1-0-1-2-db-and-0-5-db",
+      "domain": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3",
+      "reference": {
+        "cite": "IEC 61260-1:2014 Table C.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61260-1",
+            "edition": "2014",
+            "clause": "Table C.1"
+          }
+        ]
+      },
+      "quantity": "Example 4: deviation +0.0 dB, U 0.3 dB against +1.0; -1.2 dB and 0.5 dB",
+      "kind": "record",
+      "expected": {
+        "label": "Yes: Deviation within acceptance limits AND uncertainty within maximum-permitted",
+        "record": {
+          "conforms": 1.0,
+          "outcome": 1.0,
+          "reason": 1.0
+        }
+      },
+      "computed": {
+        "label": "Yes: Deviation within acceptance limits AND uncertainty within maximum-permitted",
+        "record": {
+          "conforms": 1.0,
+          "outcome": 1.0,
+          "reason": 1.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3/iec-61260-1-2014-table-c-1/example-5-deviation-0-0-db-u-0-9-db-against-1-0-1-2-db-and-0-5-db",
+      "domain": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3",
+      "reference": {
+        "cite": "IEC 61260-1:2014 Table C.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61260-1",
+            "edition": "2014",
+            "clause": "Table C.1"
+          }
+        ]
+      },
+      "quantity": "Example 5: deviation +0.0 dB, U 0.9 dB against +1.0; -1.2 dB and 0.5 dB",
+      "kind": "record",
+      "expected": {
+        "label": "No: Deviation within acceptance limits BUT uncertainty exceeds maximum-permitted",
+        "record": {
+          "conforms": 0.0,
+          "outcome": 2.0,
+          "reason": 1.0
+        }
+      },
+      "computed": {
+        "label": "No: Deviation within acceptance limits BUT uncertainty exceeds maximum-permitted",
+        "record": {
+          "conforms": 0.0,
+          "outcome": 2.0,
+          "reason": 1.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3/iec-61260-1-2014-table-c-1/example-6-deviation-0-5-db-u-0-3-db-against-1-0-1-2-db-and-0-5-db",
+      "domain": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3",
+      "reference": {
+        "cite": "IEC 61260-1:2014 Table C.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61260-1",
+            "edition": "2014",
+            "clause": "Table C.1"
+          }
+        ]
+      },
+      "quantity": "Example 6: deviation -0.5 dB, U 0.3 dB against +1.0; -1.2 dB and 0.5 dB",
+      "kind": "record",
+      "expected": {
+        "label": "Yes: Deviation within acceptance limits AND uncertainty within maximum-permitted",
+        "record": {
+          "conforms": 1.0,
+          "outcome": 1.0,
+          "reason": 1.0
+        }
+      },
+      "computed": {
+        "label": "Yes: Deviation within acceptance limits AND uncertainty within maximum-permitted",
+        "record": {
+          "conforms": 1.0,
+          "outcome": 1.0,
+          "reason": 1.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3/iec-61260-1-2014-table-c-1/example-7-deviation-1-2-db-u-0-3-db-against-1-0-1-2-db-and-0-5-db",
+      "domain": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3",
+      "reference": {
+        "cite": "IEC 61260-1:2014 Table C.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61260-1",
+            "edition": "2014",
+            "clause": "Table C.1"
+          }
+        ]
+      },
+      "quantity": "Example 7: deviation -1.2 dB, U 0.3 dB against +1.0; -1.2 dB and 0.5 dB",
+      "kind": "record",
+      "expected": {
+        "label": "Yes: Deviation within acceptance limits AND uncertainty within maximum-permitted",
+        "record": {
+          "conforms": 1.0,
+          "outcome": 1.0,
+          "reason": 1.0
+        }
+      },
+      "computed": {
+        "label": "Yes: Deviation within acceptance limits AND uncertainty within maximum-permitted",
+        "record": {
+          "conforms": 1.0,
+          "outcome": 1.0,
+          "reason": 1.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3/iec-61260-1-2014-table-c-1/example-8-deviation-1-3-db-u-0-3-db-against-1-0-1-2-db-and-0-5-db",
+      "domain": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3",
+      "reference": {
+        "cite": "IEC 61260-1:2014 Table C.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61260-1",
+            "edition": "2014",
+            "clause": "Table C.1"
+          }
+        ]
+      },
+      "quantity": "Example 8: deviation -1.3 dB, U 0.3 dB against +1.0; -1.2 dB and 0.5 dB",
+      "kind": "record",
+      "expected": {
+        "label": "No: Deviation exceeds acceptance limits",
+        "record": {
+          "conforms": 0.0,
+          "outcome": 3.0,
+          "reason": 1.0
+        }
+      },
+      "computed": {
+        "label": "No: Deviation exceeds acceptance limits",
+        "record": {
+          "conforms": 0.0,
+          "outcome": 3.0,
+          "reason": 1.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3/iec-61260-1-2014-table-c-1/example-9-deviation-2-0-db-u-0-3-db-against-1-0-1-2-db-and-0-5-db",
+      "domain": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3",
+      "reference": {
+        "cite": "IEC 61260-1:2014 Table C.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61260-1",
+            "edition": "2014",
+            "clause": "Table C.1"
+          }
+        ]
+      },
+      "quantity": "Example 9: deviation -2.0 dB, U 0.3 dB against +1.0; -1.2 dB and 0.5 dB",
+      "kind": "record",
+      "expected": {
+        "label": "No: Deviation exceeds acceptance limits",
+        "record": {
+          "conforms": 0.0,
+          "outcome": 3.0,
+          "reason": 1.0
+        }
+      },
+      "computed": {
+        "label": "No: Deviation exceeds acceptance limits",
+        "record": {
+          "conforms": 0.0,
+          "outcome": 3.0,
+          "reason": 1.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3/iec-61260-1-2014-table-c-1/example-10-deviation-2-0-db-u-0-7-db-against-1-0-1-2-db-and-0-5-db",
+      "domain": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3",
+      "reference": {
+        "cite": "IEC 61260-1:2014 Table C.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61260-1",
+            "edition": "2014",
+            "clause": "Table C.1"
+          }
+        ]
+      },
+      "quantity": "Example 10: deviation -2.0 dB, U 0.7 dB against +1.0; -1.2 dB and 0.5 dB",
+      "kind": "record",
+      "expected": {
+        "label": "No: Deviation exceeds acceptance limits AND uncertainty exceeds maximum-permitted",
+        "record": {
+          "conforms": 0.0,
+          "outcome": 4.0,
+          "reason": 1.0
+        }
+      },
+      "computed": {
+        "label": "No: Deviation exceeds acceptance limits AND uncertainty exceeds maximum-permitted",
+        "record": {
+          "conforms": 0.0,
+          "outcome": 4.0,
+          "reason": 1.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3/iec-61260-2-2016-iec-61260-3-2016-annex-b-formula-b-5/swept-output-level-l-c-of-a-one-third-octave-filter-formula-17-of-iec-61260-1",
+      "domain": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3",
+      "reference": {
+        "cite": "IEC 61260-2:2016 / IEC 61260-3:2016 Annex B, Formula (B.5)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61260-2",
+            "edition": "2016"
+          },
+          {
+            "kind": "standard",
+            "designation": "IEC 61260-3",
+            "edition": "2016",
+            "clause": "Annex B, Formula (B.5)",
+            "lead": " / ",
+            "relation": "corroborates"
+          }
+        ]
+      },
+      "quantity": "Swept output level L_c of a one-third-octave filter (Formula (17) of IEC 61260-1)",
+      "kind": "scalar",
+      "expected": {
+        "value": 107.97
+      },
+      "computed": {
+        "value": 107.97
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": -0.001
+      },
+      "precision": 2,
+      "verdict": "pass"
+    },
+    {
+      "id": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3/iec-61260-2-2016-iec-61260-3-2016-a-3-5-formula-a-2/standard-uncertainty-u-lc-of-the-swept-output-level",
+      "domain": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3",
+      "reference": {
+        "cite": "IEC 61260-2:2016 / IEC 61260-3:2016 A.3.5, Formula (A.2)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61260-2",
+            "edition": "2016"
+          },
+          {
+            "kind": "standard",
+            "designation": "IEC 61260-3",
+            "edition": "2016",
+            "clause": "A.3.5, Formula (A.2)",
+            "lead": " / ",
+            "relation": "corroborates"
+          }
+        ]
+      },
+      "quantity": "Standard uncertainty u_Lc of the swept output level",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.057
+      },
+      "computed": {
+        "value": 0.057
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": 0.000385
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3/iec-61260-2-2016-iec-61260-3-2016-a-3-5/expanded-uncertainty-of-the-test-signal-k-2",
+      "domain": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3",
+      "reference": {
+        "cite": "IEC 61260-2:2016 / IEC 61260-3:2016 A.3.5",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61260-2",
+            "edition": "2016"
+          },
+          {
+            "kind": "standard",
+            "designation": "IEC 61260-3",
+            "edition": "2016",
+            "clause": "A.3.5",
+            "lead": " / ",
+            "relation": "corroborates"
+          }
+        ]
+      },
+      "quantity": "Expanded uncertainty of the test signal (k = 2)",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.115
+      },
+      "computed": {
+        "value": 0.115
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": -0.00023
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3/iec-61260-2-2016-iec-61260-3-2016-a-3-5/expanded-uncertainty-read-on-a-0-1-db-display-k-2",
+      "domain": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3",
+      "reference": {
+        "cite": "IEC 61260-2:2016 / IEC 61260-3:2016 A.3.5",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61260-2",
+            "edition": "2016"
+          },
+          {
+            "kind": "standard",
+            "designation": "IEC 61260-3",
+            "edition": "2016",
+            "clause": "A.3.5",
+            "lead": " / ",
+            "relation": "corroborates"
+          }
+        ]
+      },
+      "quantity": "Expanded uncertainty read on a 0.1 dB display (k = 2)",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.128
+      },
+      "computed": {
+        "value": 0.128
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": 0.000474
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3/iec-61260-2-2016-formula-2-iec-61260-1-2014-formulas-15-16/ideal-octave-band-delta-b-10-lg-tanh-x-2-x-2-x-ln-g-bs-s-24-closed-form",
+      "domain": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3",
+      "reference": {
+        "cite": "IEC 61260-2:2016 Formula (2) / IEC 61260-1:2014 Formulas (15), (16)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61260-2",
+            "edition": "2016",
+            "clause": "Formula (2)"
+          },
+          {
+            "kind": "standard",
+            "designation": "IEC 61260-1",
+            "edition": "2014",
+            "clause": "Formulas (15), (16)",
+            "lead": " / ",
+            "relation": "corroborates"
+          }
+        ]
+      },
+      "quantity": "Ideal octave band: Delta B = 10 lg(tanh(x/2)/(x/2)), x = ln G / (bS), S = 24 (closed form)",
+      "kind": "scalar",
+      "expected": {
+        "value": -0.0002998012796858665
+      },
+      "computed": {
+        "value": -0.0003
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 4.82e-16
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3/iec-61260-2-2016-formula-3/ideal-bank-summed-outputs-restore-the-input-inside-a-band-and-on-its-edges-closed-form",
+      "domain": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3",
+      "reference": {
+        "cite": "IEC 61260-2:2016 Formula (3)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61260-2",
+            "edition": "2016",
+            "clause": "Formula (3)"
+          }
+        ]
+      },
+      "quantity": "Ideal bank: summed outputs restore the input inside a band and on its edges (closed form)",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0
+      },
+      "computed": {
+        "value": 4.82e-16,
+        "label": "max |Delta P| 4.8e-16 dB"
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 4.82e-16
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3/iec-61260-1-2014-5-12-2-iec-61260-2-2016-7-2-3/one-third-octave-butterworth-bank-fs-48-khz-largest-delta-b-within-the-class-1-0-4-db",
+      "domain": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3",
+      "reference": {
+        "cite": "IEC 61260-1:2014 5.12.2 / IEC 61260-2:2016 7.2.3",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61260-1",
+            "edition": "2014",
+            "clause": "5.12.2"
+          },
+          {
+            "kind": "standard",
+            "designation": "IEC 61260-2",
+            "edition": "2016",
+            "clause": "7.2.3",
+            "lead": " / ",
+            "relation": "corroborates"
+          }
+        ]
+      },
+      "quantity": "One-third-octave Butterworth bank (fs=48 kHz): largest |Delta B| within the class 1 +/-0.4 dB",
+      "kind": "mask",
+      "expected": {
+        "label": "class 1 (|Delta B| <= 0.4 dB)"
+      },
+      "computed": {
+        "label": "class 1 (|Delta B| <= 0.047 dB)"
+      },
+      "deviation": {
+        "value": 0.353,
+        "label": "+0.353 dB"
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3/iec-61260-1-2014-5-16-iec-61260-2-2016-7-2-4/one-third-octave-butterworth-bank-fs-48-khz-summed-outputs-within-the-class-1-0-8-1-8-db",
+      "domain": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3",
+      "reference": {
+        "cite": "IEC 61260-1:2014 5.16 / IEC 61260-2:2016 7.2.4",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61260-1",
+            "edition": "2014",
+            "clause": "5.16"
+          },
+          {
+            "kind": "standard",
+            "designation": "IEC 61260-2",
+            "edition": "2016",
+            "clause": "7.2.4",
+            "lead": " / ",
+            "relation": "corroborates"
+          }
+        ]
+      },
+      "quantity": "One-third-octave Butterworth bank (fs=48 kHz): summed outputs within the class 1 +0.8/-1.8 dB",
+      "kind": "mask",
+      "expected": {
+        "label": "class 1 (-1.8 dB <= Delta P <= +0.8 dB)"
+      },
+      "computed": {
+        "label": "class 1 (-0.552 dB to +0.625 dB)"
+      },
+      "deviation": {
+        "value": 0.175,
+        "label": "+0.175 dB"
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3/iec-61260-1-2014-5-14-3-iec-61260-2-2016-7-4/one-third-octave-multirate-bank-swept-at-2-and-5-s-per-decade-l-out-l-c-within-class-1-0-4-db",
+      "domain": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3",
+      "reference": {
+        "cite": "IEC 61260-1:2014 5.14.3 / IEC 61260-2:2016 7.4",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61260-1",
+            "edition": "2014",
+            "clause": "5.14.3"
+          },
+          {
+            "kind": "standard",
+            "designation": "IEC 61260-2",
+            "edition": "2016",
+            "clause": "7.4",
+            "lead": " / ",
+            "relation": "corroborates"
+          }
+        ]
+      },
+      "quantity": "One-third-octave multirate bank swept at 2 and 5 s per decade: |L_out - L_c| within class 1 +/-0.4 dB",
+      "kind": "mask",
+      "expected": {
+        "label": "class 1 (|L_out - L_c| <= 0.4 dB)"
+      },
+      "computed": {
+        "label": "class 1 (|L_out - L_c| <= 0.054 dB)"
+      },
+      "deviation": {
+        "value": 0.346,
+        "label": "+0.346 dB"
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3/iec-61260-1-2014-annex-g-g-2-8/swept-deviation-of-a-time-invariant-band-equals-its-effective-bandwidth-deviation",
+      "domain": "band-filter-pattern-evaluation-and-periodic-tests-iec-61260-2-iec-61260-3",
+      "reference": {
+        "cite": "IEC 61260-1:2014 Annex G, G.2.8",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61260-1",
+            "edition": "2014",
+            "clause": "Annex G, G.2.8"
+          }
+        ]
+      },
+      "quantity": "Swept deviation of a time-invariant band equals its effective bandwidth deviation",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0
+      },
+      "computed": {
+        "value": 0.0068,
+        "label": "max |(L_out - L_c) - Delta B| 0.0068 dB"
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.01
+      },
+      "deviation": {
+        "value": 0.0068
       },
       "precision": 4,
       "verdict": "pass"

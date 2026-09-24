@@ -86,9 +86,10 @@ def test_the_loaders_build_what_they_built_before_but_the_listed_cells() -> None
     Before is the dump the literal constructors and the private completions
     of the solids and the porous materials built, which the fingerprint
     carries through its earlier steps. The cells that differ now are exactly
-    the ones its two newest steps list: four last digits of Long Table 7.1,
-    and the derived texts of the nineteen Hopkins rows whose estimated
-    Poisson ratio they rest on. Nothing else of any row moved.
+    the ones its newer steps list: four last digits of Long Table 7.1, the
+    derived texts of the nineteen Hopkins rows whose estimated Poisson ratio
+    they rest on, and the note of Cox Table 6.5's aerogel row. Nothing else
+    of any row moved.
     """
     fp = catalogue_fingerprint
     before = fp.row_contract(fp.resilient_layer_row(fp.one_row_shape(fp.baseline())))
@@ -104,6 +105,7 @@ def test_the_loaders_build_what_they_built_before_but_the_listed_cells() -> None
     listed = {
         ("PUBLISHED_ABSORPTION_AREAS", key, field) for key, field in fp.EXACT_CONVERSION
     } | {("PUBLISHED_SOLIDS", key, "derived") for key in fp.MIXED_BASIS_ROWS}
+    listed.add(("PUBLISHED_POROUS", "cox-2017-table-6-5/aerogel", "note"))
     assert moved == listed
     assert all(set(before[name]) == set(live[name]) for name in before)
 
@@ -410,8 +412,38 @@ def test_the_derived_text_names_the_bases_of_the_cells_it_rests_on() -> None:
     assert row.shear_modulus_pa == 70000.0
     assert row.derived["shear_modulus_pa"] == (
         "from the Young's modulus and the Poisson ratio; it rests on "
-        "youngs_modulus_pa (calculated) and poisson_ratio (estimated)"
+        "the Young's modulus (calculated) and the Poisson ratio (estimated)"
     )
+
+
+@dataclasses.dataclass(frozen=True, kw_only=True)
+class _Unworded(io.CatalogueRow):
+    """A row that fills a value from two cells it gives no words for."""
+
+    mass_kg: float | None = None
+    volume_m3: float | None = None
+    density_kg_m3: float | None = None
+
+    def _complete(self, cells: private.Completion) -> None:
+        mass, volume = cells.get("mass_kg"), cells.get("volume_m3")
+        if mass is not None and volume is not None:
+            cells.fill(
+                "density_kg_m3",
+                lambda: mass / volume,
+                "from the mass and the volume",
+                inputs=("mass_kg", "volume_m3"),
+            )
+
+
+def test_a_cell_without_words_refuses_a_text_that_would_name_it() -> None:
+    """The field name would reach the reader, so the row is not built."""
+    cells = {"name": "Block", "source": _SOURCE, "mass_kg": 2.0, "volume_m3": 0.001}
+    same = _Unworded.from_printed(**cells)
+    assert same.derived["density_kg_m3"] == "from the mass and the volume"
+    with pytest.raises(
+        io.CatalogueError, match=r"_Unworded names no words for mass_kg and volume_m3"
+    ):
+        _Unworded.from_printed(**cells, basis={"mass_kg": "estimated"})
 
 
 def test_one_basis_for_every_cell_names_none() -> None:
@@ -435,8 +467,8 @@ def test_a_value_rests_on_the_cells_of_the_values_it_was_worked_out_from() -> No
         **_PLATE_CELLS, basis={"poisson_ratio": "estimated"}
     )
     clause = (
-        "; it rests on poisson_ratio (estimated) and on "
-        "plate_longitudinal_speed_m_s and density_kg_m3, whose basis the source "
+        "; it rests on the Poisson ratio (estimated) and on "
+        "the plate speed and the density, whose basis the source "
         "does not state"
     )
     assert row.derived["bar_longitudinal_speed_m_s"] == (
@@ -451,7 +483,7 @@ def test_the_hopkins_estimates_are_named_in_every_value_they_feed() -> None:
     board = solids.PUBLISHED_SOLIDS["hopkins-2007-table-a2/plasterboard_natural_gypsum"]
     assert board.basis_of("poisson_ratio") == "estimated"
     for text in board.derived.values():
-        assert text.endswith(catalogue_fingerprint.MIXED_BASIS_CLAUSE[2:])
+        assert text.endswith(catalogue_fingerprint.WORDED_BASIS_CLAUSE[2:])
 
 
 _E = "youngs_modulus_pa"
@@ -544,11 +576,14 @@ def test_every_fill_names_each_printed_cell_it_rests_on(
         basis={estimated: "estimated"},
         **printed,
     )
-    others = " and ".join(cell for cell in rests_on if cell != estimated)
+    words = cls._cell_words
+    others = " and ".join(words[cell] for cell in rests_on if cell != estimated)
     assert row.derived[filled].endswith(
-        f"; it rests on {estimated} (estimated) and on {others}, whose basis "
-        "the source does not state"
+        f"; it rests on {words[estimated]} (estimated) and on {others}, whose "
+        "basis the source does not state"
     )
+    # The text is written for a reader: no field name reaches it.
+    assert not any(cell in row.derived[filled] for cell in rests_on)
 
 
 # ---------------------------------------------------------------------------

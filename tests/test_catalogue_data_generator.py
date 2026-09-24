@@ -811,3 +811,25 @@ def test_every_search_suggestion_finds_a_row(language: str) -> None:
             if not any(_folded(word) in haystack for haystack in haystacks)
         ]
     assert lost == []
+
+
+def test_a_field_name_in_a_note_stops_the_generator() -> None:
+    """A reader sees "the plate speed", never ``plate_longitudinal_speed_m_s``."""
+    document = {
+        "solids": {
+            "columns": [{"field": "plate_longitudinal_speed_m_s"}],
+            "rows": [
+                {
+                    "name": "Chipboard",
+                    "cells": [
+                        {"note": "it rests on plate_longitudinal_speed_m_s"},
+                        {"note": "it rests on the plate speed"},
+                    ],
+                }
+            ],
+        }
+    }
+    with pytest.raises(gcd.FieldNameInProseError, match="plate_longitudinal_speed_m_s"):
+        gcd.refuse_field_names(document)
+    document["solids"]["rows"][0]["cells"].pop(0)
+    gcd.refuse_field_names(document)

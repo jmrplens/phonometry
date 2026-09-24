@@ -678,7 +678,7 @@
           "verdict": "pass",
           "class": 1,
           "binding": {
-            "frequency_hz": 100.0,
+            "frequency_hz": 501.0,
             "measured": 0.0,
             "limit": -0.4,
             "side": "floor"
@@ -691,12 +691,12 @@
           "verdict": "by-design",
           "reason": "passband ripple",
           "binding": {
-            "frequency_hz": 6310.0,
-            "measured": 0.19,
-            "limit": 1.4365420521124361,
+            "frequency_hz": 10000.0,
+            "measured": 0.16,
+            "limit": 1.4087354151903386,
             "side": "stop"
           },
-          "margin_class1": -1.246,
+          "margin_class1": -1.245,
           "margin_class2": -0.837
         },
         {
@@ -704,7 +704,7 @@
           "verdict": "pass",
           "class": 1,
           "binding": {
-            "frequency_hz": 100.0,
+            "frequency_hz": 794.0,
             "measured": 0.0,
             "limit": -0.4,
             "side": "floor"
@@ -730,13 +730,13 @@
           "verdict": "by-design",
           "reason": "soft rolloff",
           "binding": {
-            "frequency_hz": 100.0,
-            "measured": 12.46,
-            "limit": 16.59667632639719,
+            "frequency_hz": 10000.0,
+            "measured": 9.82,
+            "limit": 10.620635856869447,
             "side": "stop"
           },
-          "margin_class1": -4.133,
-          "margin_class2": -3.133
+          "margin_class1": -0.799,
+          "margin_class2": -0.045
         }
       ]
     },
@@ -2391,11 +2391,11 @@
         "label": "class 1 (|Delta B| <= 0.4 dB)"
       },
       "computed": {
-        "label": "class 1 (|Delta B| <= 0.047 dB)"
+        "label": "class 1 (|Delta B| <= 0.049 dB)"
       },
       "deviation": {
-        "value": 0.353,
-        "label": "+0.353 dB"
+        "value": 0.351,
+        "label": "+0.351 dB"
       },
       "precision": 4,
       "verdict": "pass"
@@ -2428,11 +2428,11 @@
         "label": "class 1 (-1.8 dB <= Delta P <= +0.8 dB)"
       },
       "computed": {
-        "label": "class 1 (-0.552 dB to +0.625 dB)"
+        "label": "class 1 (+0.000 dB to +0.248 dB)"
       },
       "deviation": {
-        "value": 0.175,
-        "label": "+0.175 dB"
+        "value": 0.552,
+        "label": "+0.552 dB"
       },
       "precision": 4,
       "verdict": "pass"
@@ -2465,11 +2465,11 @@
         "label": "class 1 (|L_out - L_c| <= 0.4 dB)"
       },
       "computed": {
-        "label": "class 1 (|L_out - L_c| <= 0.054 dB)"
+        "label": "class 1 (|L_out - L_c| <= 0.056 dB)"
       },
       "deviation": {
-        "value": 0.346,
-        "label": "+0.346 dB"
+        "value": 0.344,
+        "label": "+0.344 dB"
       },
       "precision": 4,
       "verdict": "pass"
@@ -2494,8 +2494,8 @@
         "value": 0.0
       },
       "computed": {
-        "value": 0.0068,
-        "label": "max |(L_out - L_c) - Delta B| 0.0068 dB"
+        "value": 0.007,
+        "label": "max |(L_out - L_c) - Delta B| 0.0070 dB"
       },
       "unit": "dB",
       "tolerance": {
@@ -2503,7 +2503,7 @@
         "value": 0.01
       },
       "deviation": {
-        "value": 0.0068
+        "value": 0.007
       },
       "precision": 4,
       "verdict": "pass"
@@ -6359,7 +6359,7 @@
         "value": 0.005
       },
       "deviation": {
-        "value": 2.66e-05
+        "value": -9.92e-06
       },
       "precision": 4,
       "verdict": "pass"
@@ -6384,14 +6384,14 @@
         "label": "m >= 0.5 (C.4.2 pass criterion)"
       },
       "computed": {
-        "label": "0.9812"
+        "label": "0.8831"
       },
       "tolerance": {
         "mode": "mask",
         "value": 0.0
       },
       "deviation": {
-        "value": 0.981
+        "value": 0.883
       },
       "binding": {
         "lower": 0.5
@@ -6451,14 +6451,14 @@
         "value": 0.9
       },
       "computed": {
-        "value": 0.8975
+        "value": 0.8981
       },
       "tolerance": {
         "mode": "absolute",
         "value": 0.01
       },
       "deviation": {
-        "value": -0.0025
+        "value": -0.0019
       },
       "precision": 4,
       "verdict": "pass"
@@ -8686,8 +8686,8 @@
         "label": "0 dB shift (+/-1e-09 dB)"
       },
       "computed": {
-        "value": 1.42e-14,
-        "label": "max shift over 6 bands 1.42e-14 dB"
+        "value": 5.68e-14,
+        "label": "max shift over 6 bands 5.68e-14 dB"
       },
       "unit": "dB",
       "tolerance": {
@@ -8695,7 +8695,7 @@
         "value": 1e-09
       },
       "deviation": {
-        "value": 1.42e-14
+        "value": 5.68e-14
       },
       "precision": 6,
       "verdict": "pass"

@@ -1637,11 +1637,11 @@ _SOUNDSCAPE_STRINGS_ES: dict[str, str] = {
     "visit again": "volver",
     "all": "todas",
     "Pleasantness $P$": "Agradabilidad $P$",
-    "Eventfulness $E$": "Eventualidad $E$",
+    "Eventfulness $E$": "Actividad $E$",
     r"Pleasantness $P/(4+\sqrt{32})$": r"Agradabilidad $P/(4+\sqrt{32})$",
-    r"Eventfulness $E/(4+\sqrt{32})$": r"Eventualidad $E/(4+\sqrt{32})$",
+    r"Eventfulness $E/(4+\sqrt{32})$": r"Actividad $E/(4+\sqrt{32})$",
     "ISO/TS 12913-3 Figure A.1: pleasantness and eventfulness": (
-        "ISO/TS 12913-3 Figura A.1: agradabilidad y eventualidad"
+        "ISO/TS 12913-3 Figura A.1: agradabilidad y actividad"
     ),
     "Scale value (Table A.1)": "Valor de escala (Tabla A.1)",
     "Scale value (Table B.1)": "Valor de escala (Tabla B.1)",

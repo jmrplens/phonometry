@@ -708,7 +708,7 @@ para la cartografía reglamentaria.
   turbulencia y los niveles superados.
 - [Análisis del paisaje sonoro (ISO/TS 12913)](/phonometry/es/environment/assessment/soundscape/):
   cómo oye la gente un lugar: el cuestionario y sus valores de escala, la
-  agradabilidad y la eventualidad de la Figura A.1, las correlaciones con
+  agradabilidad y la actividad de la Figura A.1, las correlaciones con
   los datos acústicos y las métricas binaurales de la Tabla D.1 en los dos
   oídos.
 

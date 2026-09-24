@@ -1,6 +1,6 @@
 ---
 title: "Análisis del paisaje sonoro (ISO/TS 12913)"
-description: "Cómo oye la gente un lugar, según ISO/TS 12913-2 e ISO/TS 12913-3: el cuestionario de paisaje sonoro y sus valores de escala, la mediana y el recorrido por lugar, las coordenadas de agradabilidad y eventualidad de la Figura A.1, las correlaciones de Spearman y de Pearson con su probabilidad, los estadísticos del Método B, las métricas binaurales de la Tabla D.1 en los dos oídos y el registro mínimo del informe."
+description: "Cómo oye la gente un lugar, según ISO/TS 12913-2 e ISO/TS 12913-3: el cuestionario de paisaje sonoro y sus valores de escala, la mediana y el recorrido por lugar, las coordenadas de agradabilidad y actividad de la Figura A.1, las correlaciones de Spearman y de Pearson con su probabilidad, los estadísticos del Método B, las métricas binaurales de la Tabla D.1 en los dos oídos y el registro mínimo del informe."
 references:
   - type: standard
     organization: "International Organization for Standardization"
@@ -8,7 +8,7 @@ references:
     title: "Acoustics — Soundscape — Part 3: Data analysis"
     designation: "ISO/TS 12913-3:2019"
     primary: true
-    note: "El análisis implementado: los valores de escala y los estadísticos ordinales del Anexo A (Tabla A.1), la agradabilidad y la eventualidad de las Fórmulas (A.1) y (A.2) con el modelo de la Figura A.1, el coeficiente de Spearman de las Fórmulas (A.3) y (A.4), los estadísticos del Método B y el coeficiente de Pearson del Anexo B, y las métricas binaurales y sus valores representativos del Anexo D (Tabla D.1). Es la primera edición. ISO ha publicado después ISO/TS 12913-3:2025, que revisa el Anexo A; no se ha leído para esta implementación."
+    note: "El análisis implementado: los valores de escala y los estadísticos ordinales del Anexo A (Tabla A.1), la agradabilidad y la actividad de las Fórmulas (A.1) y (A.2) con el modelo de la Figura A.1, el coeficiente de Spearman de las Fórmulas (A.3) y (A.4), los estadísticos del Método B y el coeficiente de Pearson del Anexo B, y las métricas binaurales y sus valores representativos del Anexo D (Tabla D.1). Es la primera edición. ISO ha publicado después ISO/TS 12913-3:2025, que revisa el Anexo A; no se ha leído para esta implementación."
   - type: standard
     organization: "International Organization for Standardization"
     year: 2018
@@ -54,10 +54,10 @@ analiza una grabación binaural hecha en el mismo sitio.
 
 Esta página implementa la **edición de 2019 de ISO/TS 12913-3**. ISO ha
 publicado una edición de 2025 que revisa el Anexo A, donde están las fórmulas
-de agradabilidad y eventualidad; no se ha leído para esta implementación, así
+de agradabilidad y actividad; no se ha leído para esta implementación, así
 que un estudio que cite la edición de 2025 debe cotejar esas fórmulas con ella.
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/soundscape_pleasantness_eventfulness.svg" alt="Dos paneles. Izquierda: el modelo de dos dimensiones de la Figura A.1 de ISO/TS 12913-3, con la agradabilidad en el eje horizontal y la eventualidad en el vertical, ambas de menos 1 a más 1, los cuatro atributos principales sobre flechas continuas y caótico, vibrante, tranquilo y monótono sobre diagonales discontinuas; se dibujan once lugares de Londres, la mayoría en la mitad agradable, el jardín japonés de Regent's Park el más agradable y algo sin actividad, Camden Town y Euston Tap del lado molesto y con actividad. Derecha: el rango de la agradabilidad de cada lugar frente al rango de su LAeq, que baja de arriba a la izquierda a abajo a la derecha, con el título r spearman = menos 0,638, p = 0,035, Fórmula (A.4), n = 11" width="100%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/soundscape_pleasantness_eventfulness.svg" alt="Dos paneles. Izquierda: el modelo de dos dimensiones de la Figura A.1 de ISO/TS 12913-3, con la agradabilidad en el eje horizontal y la actividad en el vertical, ambas de menos 1 a más 1, los cuatro atributos principales sobre flechas continuas y caótico, vibrante, tranquilo y monótono sobre diagonales discontinuas; se dibujan once lugares de Londres, la mayoría en la mitad agradable, el jardín japonés de Regent's Park el más agradable y algo sin actividad, Camden Town y Euston Tap del lado molesto y con actividad. Derecha: el rango de la agradabilidad de cada lugar frente al rango de su LAeq, que baja de arriba a la izquierda a abajo a la derecha, con el título r spearman = menos 0,638, p = 0,035, Fórmula (A.4), n = 11" width="100%" />
 
 *Once lugares de Londres de la International Soundscape Database sobre el
 modelo de la Figura A.1 (izquierda) y la correlación por rangos de su
@@ -120,7 +120,7 @@ Un array 2-D `(respuestas, elementos)` se lee en el orden de la figura de la
 parte, y `summary.plot()` dibuja la mediana de cada elemento con su recorrido
 como una barra, un lugar junto a otro.
 
-## 3. Agradabilidad y eventualidad
+## 3. Agradabilidad y actividad
 
 Los ocho atributos de la parte 2 no son ocho juicios independientes. Cuando la
 gente describe cómo se siente un entorno, sus respuestas caen sobre dos
@@ -445,7 +445,7 @@ plt.show()
 <ScopeClaim status="covered" label="Cubierto">
 **ISO/TS 12913-3:2019, el análisis cuantitativo:** los valores de escala de la
 Tabla A.1 con la orientación de cada parte, la mediana y el recorrido por lugar
-y elemento (A.2), la agradabilidad y la eventualidad de las Fórmulas (A.1) y
+y elemento (A.2), la agradabilidad y la actividad de las Fórmulas (A.1) y
 (A.2) por encuestado y por lugar, en bruto y normalizadas, con el modelo de la
 Figura A.1 como gráfico; el coeficiente de Spearman con las Fórmulas (A.3) y
 (A.4) y el de Pearson con (B.1) y (B.2), cada uno con su probabilidad; los

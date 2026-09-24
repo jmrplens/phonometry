@@ -1221,3 +1221,31 @@ ISO10846_3_ACCURACY_FRACTION = 0.12  # i.e. within 12 %
 ISO10846_1_EQ6_FORCE_RATIO = 1.0 / 1.1  # F2/F2,b at mag(k2,2/kt) = 0,1
 ISO10846_LINEARITY_STEP_DB = 10.0  # 7.6: input spectra A/B, 10 dB apart
 ISO10846_LINEARITY_TOL_DB = 1.5  # 7.6 c): levels equal within 1,5 dB
+
+# ---------------------------------------------------------------------------
+# ISO 10846-4:2003 (BS EN ISO 10846-4:2003) and ISO 10846-5:2008 (BS EN
+# ISO 10846-5:2009). Neither part prints a worked example, so the rows are
+# closed forms held against the numbers the pages do print, read on the
+# rasterized pages:
+# - -4 Formula (11), PDF p. 38 (folio 28), and -5 Formula (6), PDF p. 25
+#   (folio 17): "a minimum of n = 5 frequencies" per one-third-octave band.
+# - -4 Inequality (3), PDF p. 30 (folio 20): m0 <= 0,06 x 10^(LF2/20) /
+#   10^(La2/20) kg, and its NOTE 1: |LFb - LF2| <= 0,5 dB (printed "05 dB").
+# - -4 Inequality (5), PDF p. 31 (folio 21): |20 lg(m2,eff/m2)| <= 1 dB,
+#   deviations below 40 Hz ignored (folio 23).
+# - -5 Inequalities (1) and (2) and 6.2, PDF p. 20 (folio 12): 20 dB, 15 dB,
+#   and f_UL 2 dB below the 1 Hz to 20 Hz value; Formula (7), folio 17:
+#   within 2 dB for f <= f_UL.
+# - -5 Table B.1 and B.3.4 to B.3.6, PDF pp. 32-33 (folios 24-25): 0,3, 0,5,
+#   p/sqrt(3), 0,3, 1,2, 0,5 dB, the last three printed as 1/(2 sqrt 3),
+#   2/sqrt 3 and 1,5/(2 sqrt 3); (B.3) U = 2u.
+# ---------------------------------------------------------------------------
+ISO10846_MIN_FREQUENCIES_PER_BAND = 5  # -4 F(11), -5 F(6)
+ISO10846_4_OUTPUT_MASS_FACTOR = 0.06  # -4 Inequality (3)
+ISO10846_4_NOTE1_BIAS_DB = 0.5  # -4 6.2 NOTE 1
+ISO10846_4_EFFECTIVE_MASS_TOL_DB = 1.0  # -4 Inequality (5)
+ISO10846_5_DRIVING_POINT_TOL_DB = 2.0  # -5 6.2 and Formula (7)
+ISO10846_5_BLOCKED_OUTPUT_DB = 20.0  # -5 Inequality (1)
+ISO10846_5_UNWANTED_INPUT_DB = 15.0  # -5 Inequality (2)
+ISO10846_5_TABLE_B1_U_DB = (0.3, 0.5, 0.3, 1.2, 0.5)  # without delta_rep
+ISO10846_5_COVERAGE_FACTOR = 2.0  # -5 Formula (B.3)

@@ -21,6 +21,7 @@ published ASTM E1414 laboratory reports.
 from __future__ import annotations
 
 import math
+import warnings
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -1946,6 +1947,258 @@ def _chk_iso10846_linearity() -> Outcome:
         places=3,
         expected_label="ΔLk ≤ 1,5 dB (7.6 c)",
     )
+
+
+# --- ISO 10846-4 and -5: no worked example, closed forms (see reference_data) ---
+#: A 1 MN/m element seen by the 0,2 Hz lines of ISO 10846-5 7.5, from 1 Hz up.
+_ISO10846_5_SWEEP_HZ = np.arange(1.0, 400.0, 0.2)
+_ISO10846_5_OMEGA = 2.0 * math.pi * _ISO10846_5_SWEEP_HZ
+_ISO10846_K = 1.0e6
+_ISO10846_5_PLATE_KG = 2.0
+
+
+def _iso10846_5_driven(
+    stiffness: ArrayLike,
+) -> ph.vibration.DrivingPointStiffnessResult:
+    """k1,1 of a 1 µm input displacement into ``stiffness`` (Formula (3))."""
+    u1 = 1.0e-6
+    force = np.asarray(stiffness, dtype=np.complex128) * u1
+    accel = -(_ISO10846_5_OMEGA**2) * u1 * np.ones(_ISO10846_5_SWEEP_HZ.size)
+    return ph.vibration.driving_point_stiffness(_ISO10846_5_SWEEP_HZ, force, accel)
+
+
+def _iso10846_5_mass_loaded() -> ph.vibration.DrivingPointStiffnessResult:
+    """A massless spring under a 2 kg force plate: k1,1 = k - w^2 m."""
+    return _iso10846_5_driven(_ISO10846_K - _ISO10846_5_OMEGA**2 * _ISO10846_5_PLATE_KG)
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 10846-4:2003 Formula (11) / ISO 10846-5:2008 Formula (6)",
+    "A band of five identical lines averages to that line (closed form, 1 MN/m)",
+)
+def _chk_iso10846_band_average_identity() -> Outcome:
+    f = np.array([900.0, 950.0, 1000.0, 1050.0, 1100.0])
+    bands = ph.vibration.band_averaged_stiffness(f, np.full(f.size, _ISO10846_K + 0j))
+    return numeric(
+        _ISO10846_K, float(bands.stiffness[0]), 1e-9, rel=True, unit="N/m", places=1
+    )
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 10846-4:2003 Formula (11)",
+    "Squared-magnitude average of |k| = 1 to 5 MN/m is √11 MN/m (closed form)",
+)
+def _chk_iso10846_band_average_rms() -> Outcome:
+    f = np.array([900.0, 950.0, 1000.0, 1050.0, 1100.0])
+    k = 1.0e6 * np.array([1.0, 2.0j, -3.0, 4.0, 5.0]) * np.exp(0.3j)
+    bands = ph.vibration.band_averaged_stiffness(f, k)
+    return numeric(
+        math.sqrt(11.0) * 1.0e6,
+        float(bands.stiffness[0]),
+        1e-12,
+        rel=True,
+        unit="N/m",
+        places=1,
+    )
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 10846-4:2003 8.3 / ISO 10846-5:2008 8.2",
+    "A band of four lines has no band value: n ≥ 5 frequencies",
+)
+def _chk_iso10846_band_minimum_lines() -> Outcome:
+    f = np.array([900.0, 950.0, 1000.0, 1050.0])
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", ph.vibration.TransferStiffnessWarning)
+        bands = ph.vibration.band_averaged_stiffness(f, np.full(f.size, _ISO10846_K))
+    undetermined = int(not bool(bands.determined[0]))
+    ok = ph.vibration.MIN_FREQUENCIES_PER_BAND == ref.ISO10846_MIN_FREQUENCIES_PER_BAND
+    return count(
+        undetermined if ok else 0,
+        1,
+        subject="band of four lines left undetermined",
+    )
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 10846-5:2008 Formula (3)",
+    "A massless spring gives a flat k1,1 = k from 1 Hz to 400 Hz, f_UL never reached",
+)
+def _chk_iso10846_5_massless_spring() -> Outcome:
+    res = _iso10846_5_driven(np.full(_ISO10846_5_SWEEP_HZ.size, _ISO10846_K + 0j))
+    deviation = float(np.max(np.abs(res.magnitude - _ISO10846_K)))
+    reached = res.upper_limiting_frequency_hz is not None
+    return numeric(
+        0.0,
+        math.inf if reached else deviation,
+        1e-6,
+        unit="N/m",
+        places=6,
+        expected_label="0 N/m (flat |k|, no f_UL)",
+    )
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 10846-5:2008 6.2",
+    "f_UL of a 1 MN/m spring under a 2 kg plate: 2 dB below the 1 Hz to 20 Hz value (closed form)",
+)
+def _chk_iso10846_5_upper_limiting_frequency() -> Outcome:
+    res = _iso10846_5_mass_loaded()
+    lines = (_ISO10846_5_SWEEP_HZ >= 1.0) & (_ISO10846_5_SWEEP_HZ <= 20.0)
+    k11 = _ISO10846_K - _ISO10846_5_OMEGA[lines] ** 2 * _ISO10846_5_PLATE_KG
+    low = 10.0 * math.log10(float(np.mean(k11**2)))
+    target = 10.0 ** ((low - ref.ISO10846_5_DRIVING_POINT_TOL_DB) / 20.0)
+    expected = math.sqrt((_ISO10846_K - target) / _ISO10846_5_PLATE_KG) / (
+        2.0 * math.pi
+    )
+    f_ul = res.upper_limiting_frequency_hz
+    return numeric(
+        expected, math.nan if f_ul is None else f_ul, 0.01, unit="Hz", places=3
+    )
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 10846-5:2008 Formula (7)",
+    "Every band of k1,1 below f_UL is within 2 dB of k2,1 (2 kg plate on 1 MN/m)",
+)
+def _chk_iso10846_5_formula_7() -> Outcome:
+    res = _iso10846_5_mass_loaded()
+    bands = res.band_average()
+    levels = bands.levels[bands.determined]
+    worst = float(np.max(np.abs(levels - 20.0 * math.log10(_ISO10846_K))))
+    return numeric(
+        0.0,
+        worst,
+        ref.ISO10846_5_DRIVING_POINT_TOL_DB,
+        unit="dB",
+        places=3,
+        expected_label="within 2 dB (8.3)",
+    )
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 10846-4:2003 Inequality (3)",
+    "Output mass limit 0,06·|F2|/|a2|: LF2 = 120 dB, La2 = 100 dB gives 0,6 kg",
+)
+def _chk_iso10846_4_output_mass_limit() -> Outcome:
+    check = ph.vibration.check_output_mass([100.0], 0.0, [120.0], [100.0])
+    expected = ref.ISO10846_4_OUTPUT_MASS_FACTOR * 10.0 ** ((120.0 - 100.0) / 20.0)
+    return numeric(
+        expected, float(check.mass_limit_kg[0]), 1e-12, rel=True, unit="kg", places=3
+    )
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 10846-4:2003 6.2 NOTE 1",
+    "m0 on the Inequality (3) bound biases the force level by 0,5 dB at most",
+)
+def _chk_iso10846_4_output_mass_bias() -> Outcome:
+    limit = ref.ISO10846_4_OUTPUT_MASS_FACTOR * 10.0
+    check = ph.vibration.check_output_mass([100.0], limit, [120.0], [100.0])
+    bias = float(check.bias_bound_db[0])
+    return numeric(ref.ISO10846_4_NOTE1_BIAS_DB, bias, 0.05, unit="dB", places=3)
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 10846-4:2003 Formula (6)",
+    "A rigid 25 kg block: m2,eff = |2F2/(a'1 + a''1)| = m2 at every frequency",
+)
+def _chk_iso10846_4_rigid_block() -> Outcome:
+    f = np.geomspace(10.0, 5000.0, 50)
+    force = np.full(f.size, 10.0 + 0j)
+    a = force / 25.0
+    em = ph.vibration.effective_blocking_mass(f, force, a, a, blocking_mass_kg=25.0)
+    worst = float(np.max(np.abs(em.effective_mass_kg - 25.0)))
+    return numeric(0.0, worst, 1e-12, unit="kg", places=6)
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 10846-4:2003 Inequality (5) / ISO 10846-3:2002 Inequality (3)",
+    "f3 of m2,eff = m2(1 + (f/3 kHz)²): the 1 dB crossing, 3000·√(10^(1/20) - 1) Hz",
+)
+def _chk_iso10846_4_f3() -> Outcome:
+    fc, m2 = 3000.0, 20.0
+    f = np.geomspace(40.0, 5000.0, 4000)
+    ones = np.ones(f.size, dtype=complex)
+    m_eff = m2 * (1.0 + (f / fc) ** 2)
+    em = ph.vibration.effective_blocking_mass(
+        f, m_eff * ones, ones, ones, blocking_mass_kg=m2
+    )
+    expected = fc * math.sqrt(
+        10.0 ** (ref.ISO10846_4_EFFECTIVE_MASS_TOL_DB / 20.0) - 1.0
+    )
+    f3 = em.upper_frequency_limit_hz
+    return numeric(expected, math.nan if f3 is None else f3, 0.05, unit="Hz", places=2)
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 10846-5:2008 Inequalities (1) and (2)",
+    "20 dB and 15 dB hold at equality and fail 0,1 dB below",
+)
+def _chk_iso10846_5_inequalities() -> Outcome:
+    f = [100.0, 200.0]
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", ph.vibration.TransferStiffnessWarning)
+        blocked = ph.vibration.check_blocked_output(
+            f, [100.0, 100.0], [100.0 - ref.ISO10846_5_BLOCKED_OUTPUT_DB, 80.1]
+        )
+        unwanted = ph.vibration.check_unwanted_input(
+            f, [100.0, 100.0], [100.0 - ref.ISO10846_5_UNWANTED_INPUT_DB, 85.1]
+        )
+    verdicts = [*blocked.holds.tolist(), *unwanted.holds.tolist()]
+    right = sum(
+        v == e for v, e in zip(verdicts, [True, False, True, False], strict=True)
+    )
+    return count(right, 4, subject="verdicts at and below the limits")
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 10846-5:2008 Formulas (B.2) and (B.3)",
+    "Budget from the B.3 expressions: u = 1,394 dB, U = 2u = 2,789 dB (no repeatability spread)",
+)
+def _chk_iso10846_5_budget() -> Outcome:
+    budget = ph.vibration.driving_point_uncertainty(120.0, repeatability_range_db=0.0)
+    terms = [
+        0.3,
+        0.5,
+        1.0 / (2.0 * math.sqrt(3.0)),
+        2.0 / math.sqrt(3.0),
+        1.5 / (2.0 * math.sqrt(3.0)),
+    ]
+    expected = ref.ISO10846_5_COVERAGE_FACTOR * math.sqrt(sum(t * t for t in terms))
+    return numeric(expected, budget.expanded_uncertainty_db, 1e-9, unit="dB", places=4)
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 10846-5:2008 Table B.1",
+    "The rounded Table B.1 inputs give u = √2,12 = 1,456 dB when passed in",
+)
+def _chk_iso10846_5_table_b1() -> Outcome:
+    signal, ins, rig, dps, lin = ref.ISO10846_5_TABLE_B1_U_DB
+    budget = ph.vibration.driving_point_uncertainty(
+        120.0,
+        repeatability_range_db=0.0,
+        signal_uncertainty_db=signal,
+        instrumentation_uncertainty_db=ins,
+        test_rig_uncertainty_db=rig,
+        discrepancy_uncertainty_db=dps,
+        linearity_uncertainty_db=lin,
+    )
+    expected = math.sqrt(sum(u * u for u in ref.ISO10846_5_TABLE_B1_U_DB))
+    return numeric(expected, budget.combined_uncertainty_db, 1e-9, unit="dB", places=4)
 
 
 # --- Sound power from surface vibration (ISO/TS 7849-1/-2) ---

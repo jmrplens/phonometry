@@ -82,7 +82,7 @@ The ear analyzes sound in **critical bands**: frequency regions within which ene
    N = \int_0^{24} N'(z)\ dz \ \ \text{sone}
    $$
 
-For time-varying sounds a nonlinear temporal decay (time constants 5/15/75 ms, clause 6.3) and the duration-dependent weighting of the total loudness (3.5 ms and 70 ms low-passes weighted 0.47/0.53, clause 6.4) precede the 500 Hz loudness-vs-time output and the percentile values N5/N10 (clause 6.5).
+For time-varying sounds a nonlinear temporal decay (time constants 5/15/75 ms, clause 6.3) and the duration-dependent weighting of the total loudness (3.5 ms and 70 ms low-passes weighted 0.47/0.53, also clause 6.3) precede the 500 Hz loudness-vs-time output (clause 6.3) and the percentile values N5/N10 (clause 6.4).
 
 **Sone and phon** are tied together by the 1 kHz anchor (1 sone = 40 phon; clause 5.6):
 

@@ -184,7 +184,7 @@ def test_time_varying_fiche_reports_nmax_percentiles_and_nt(tmp_path: Path) -> N
     assert "Maximum loudness Nmax [sone]" in text
     assert "N5 [sone]" in text
     assert "N10 [sone]" in text
-    assert "Loudness versus time N(t) (clause 6.5)" in text
+    assert "Loudness versus time N(t) (clause 6.4)" in text
     assert "Total loudness N [sone]" not in text
 
 

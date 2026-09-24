@@ -127,8 +127,9 @@ sone-to-phon mapping of the reference implementation.  `specific` holds the
 specific loudness N' in sone/Bark at 0.1-Bark steps (240 values; for
 the time-varying method it is the pattern at the instant of maximum
 loudness).  `n5`/`n10` are the percentile loudness values N5/N10
-and `times`/`loudness_vs_time` the 500 Hz loudness-vs-time trace
-(clause 6.5); these four are `None` for stationary results.
+(clause 6.4) and `times`/`loudness_vs_time` the 500 Hz
+loudness-vs-time trace (clause 6.3); these four are `None` for
+stationary results.
 `field` records the sound field the calculation assumed (`"free"`
 or `"diffuse"`), one of the items clause 7 requires a loudness report
 to state; it defaults to `None` only for backward-compatible manual

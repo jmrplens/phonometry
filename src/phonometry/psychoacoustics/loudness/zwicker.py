@@ -72,7 +72,7 @@ _FS_REF = 48000
 # every 0.5 ms (SR_LEVEL = 2000 Hz; clause 6.2). The 2 ms / 500 Hz spacing
 # applies only to the final loudness-vs-time output (_SR_LOUDNESS).
 _SR_LEVEL = 2000
-# Output sampling rate of the total loudness vs. time (clause 6.5).
+# Output sampling rate of the total loudness vs. time (clause 6.3).
 _SR_LOUDNESS = 500
 # Cap on the reduced polyphase resampling factors (up and down) accepted
 # when converting the caller's sampling rate to _FS_REF; above it the
@@ -120,8 +120,9 @@ class ZwickerLoudness:
     specific loudness N' in sone/Bark at 0.1-Bark steps (240 values; for
     the time-varying method it is the pattern at the instant of maximum
     loudness).  ``n5``/``n10`` are the percentile loudness values N5/N10
-    and ``times``/``loudness_vs_time`` the 500 Hz loudness-vs-time trace
-    (clause 6.5); these four are ``None`` for stationary results.
+    (clause 6.4) and ``times``/``loudness_vs_time`` the 500 Hz
+    loudness-vs-time trace (clause 6.3); these four are ``None`` for
+    stationary results.
     ``field`` records the sound field the calculation assumed (``"free"``
     or ``"diffuse"``), one of the items clause 7 requires a loudness report
     to state; it defaults to ``None`` only for backward-compatible manual
@@ -142,7 +143,7 @@ class ZwickerLoudness:
 
         ``times`` and ``loudness_vs_time`` are one axis written down twice: the
         constructor decimates the 2000 Hz weighted series to 500 Hz and builds
-        both from the same ``num_out`` (clause 6.5). Everything that reads them
+        both from the same ``num_out`` (clause 6.3). Everything that reads them
         reads them as a pair, and only as a pair, so a disagreement is never
         arithmetic that comes out wrong -- it is a plot that stops or a panel
         that lies.
@@ -692,12 +693,12 @@ def _slopes_over_time(core: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
 
 
 # ---------------------------------------------------------------------------
-# Temporal weighting of the total loudness (clause 6.4)
+# Temporal weighting of the total loudness (clause 6.3)
 # ---------------------------------------------------------------------------
 
 
 def _lowpass_interpolated(x: np.ndarray, tau: float, sample_rate: float) -> np.ndarray:
-    """First-order low-pass with linear input interpolation (clause 6.4).
+    """First-order low-pass with linear input interpolation (clause 6.3).
 
     The filter runs at ``_LP_ITER`` times the sampling rate on a linearly
     interpolated input for increased precision; one output value is kept
@@ -722,7 +723,7 @@ def _lowpass_interpolated(x: np.ndarray, tau: float, sample_rate: float) -> np.n
 
 
 def _temporal_weighting(loudness: np.ndarray, sample_rate: float) -> np.ndarray:
-    """Duration-dependent weighting of the total loudness (clause 6.4).
+    """Duration-dependent weighting of the total loudness (clause 6.3).
 
     Weighted sum of two first-order low-passes (3.5 ms and 70 ms) with
     the factors 0.47 and 0.53.
@@ -762,7 +763,7 @@ def _percentile(values: np.ndarray, percentile: int) -> float:
 
     NX is the loudness exceeded X % of the time: with the values sorted
     ascending and :math:`k = \lfloor (1 - X/100)\, n \rfloor`, the mean of
-    the samples at positions k-1 and k (clause 6.5, Annex A main program).
+    the samples at positions k-1 and k (clause 6.4, Annex A main program).
 
     Provenance: this (k-1, k) mean comes from the electronic attachment's
     main program, not from a printed formula, and is supported by the
@@ -990,7 +991,7 @@ def loudness_zwicker(
     loudness, specific = _slopes_over_time(core)
     loudness = _temporal_weighting(loudness, _SR_LEVEL)
 
-    # Loudness-vs-time output at 500 Hz (clause 6.5): plain decimation of
+    # Loudness-vs-time output at 500 Hz (clause 6.3): plain decimation of
     # the 0.5 ms (2000 Hz) series, as in the reference main program. This decimated
     # trace remains the public ``times``/``loudness_vs_time`` contract.
     dec_factor = _SR_LEVEL // _SR_LOUDNESS

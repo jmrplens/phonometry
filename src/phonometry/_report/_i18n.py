@@ -577,7 +577,7 @@ _STRINGS: dict[str, str] = {
     "free (F)": "libre (F)",
     "diffuse (D)": "difuso (D)",
     "Maximum loudness N<sub>max</sub> [sone]": "Sonoridad máxima N<sub>max</sub> [sone]",
-    "Loudness versus time N(t) (clause 6.5)": "Sonoridad en función del tiempo N(t) (apartado 6.5)",
+    "Loudness versus time N(t) (clause 6.4)": "Sonoridad en función del tiempo N(t) (apartado 6.4)",
     "{sym} = {value} sone, required &#8804; {req} sone": "{sym} = {value} sone, exigido &#8804; {req} sone",
     # --- epnl reference conditions (Annex 16 Vol I Part II, 3.6.1.5) -------
     "Reference conditions: 25 &#176;C (ISA + 10 &#176;C), 70% relative humidity, 1013.25 hPa sea-level pressure, zero wind (ICAO Annex 16 Vol I Part II, 3.6.1.5).": "Condiciones de referencia: 25 &#176;C (ISA + 10 &#176;C), 70% de humedad relativa, presión a nivel del mar de 1013,25 hPa, viento nulo (OACI Anexo 16 Vol I Parte II, 3.6.1.5).",

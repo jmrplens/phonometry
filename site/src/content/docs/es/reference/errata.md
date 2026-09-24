@@ -6879,9 +6879,13 @@ dos ediciones con las mismas entradas y en el mismo orden.
   recta en la velocidad media da el nivel medio impreso a su lado
   ($16{,}6 + 32{,}55 \lg 88{,}5 = 79{,}97$, impreso 80,0; 81,76 y 84,44,
   impresos 81,8 y 84,4), lo que muestra además que la velocidad media es
-  $10^{\overline{\lg v}}$; y $s_L\sqrt{1 - r^2}$ da 1,35, 2,15 y 2,00 dB, las
-  desviaciones típicas de los residuos impresas como 1,3, 2,1 y 2,0 dB. Solo
-  la fila de dispersiones de velocidad desentona. Verificado en la página 34
+  $10^{\overline{\lg v}}$; y $s_L\sqrt{1 - r^2}$ da 1,35, 2,15 y 2,00 dB, que
+  concuerdan con las desviaciones típicas de los residuos impresas como 1,3,
+  2,1 y 2,0 dB dentro del redondeo de los $r$ y $s_L$ impresos (de 1,30 a
+  1,39, de 2,10 a 2,20 y de 1,96 a 2,06 dB en ese margen, y de 1,31 a 1,40,
+  de 2,13 a 2,24 y de 1,97 a 2,08 dB con el denominador $n - 2$ de un
+  residuo). Solo la fila de dispersiones de velocidad desentona, y sigue
+  desentonando en ese mismo margen de redondeo. Verificado en la página 34
   del PDF (p. 26 impresa) de la BS EN ISO 11819-1:2001.
 - **Consecuencia para el propio ejemplo de la norma:** ninguna para los
   niveles sonoros de vehículo, que solo necesitan las ordenadas en el origen y

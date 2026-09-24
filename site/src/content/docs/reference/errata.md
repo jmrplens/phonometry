@@ -6454,8 +6454,12 @@ in the same order.
   ($16{,}6 + 32{,}55 \lg 88{,}5 = 79{,}97$, printed 80,0; 81,76 and 84,44,
   printed 81,8 and 84,4), which also shows the average speed to be
   $10^{\overline{\lg v}}$; and $s_L\sqrt{1 - r^2}$ gives 1,35, 2,15 and
-  2,00 dB, the residual standard deviations printed as 1,3, 2,1 and 2,0 dB.
-  Only the row of speed spreads is out of step. Verified on PDF page 34
+  2,00 dB, which agree with the residual standard deviations printed as 1,3,
+  2,1 and 2,0 dB within the rounding of the printed $r$ and $s_L$ (1,30 to
+  1,39, 2,10 to 2,20 and 1,96 to 2,06 dB across it, and 1,31 to 1,40, 2,13 to
+  2,24 and 1,97 to 2,08 dB with the $n - 2$ denominator of a residual). Only
+  the row of speed spreads is out of step, and it stays out of step across the
+  same rounding. Verified on PDF page 34
   (printed p. 26) of BS EN ISO 11819-1:2001.
 - **Consequence for the standard's own example:** none for the vehicle sound
   levels, which need only the intercepts and the slopes. The 9.3 check the

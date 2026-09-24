@@ -183,8 +183,8 @@ tolerance tables of IEC 61260-1 and IEC 61672-1; the IEC 61672-2
 pattern-evaluation tests a physical meter needs for type approval, the IEC
 61672-3 periodic tests it receives in service, and the IEC 60942 tests of the
 calibrator itself, are not run (a laboratory's calibrator results are graded by
-`metrology.verify_sound_calibrator`, which measures nothing), so a class
-verdict here describes the algorithm and not a built device; [Compliance and
+`metrology.verify_sound_calibrator`, which performs no physical test), so a class
+verdict from the filter and weighting verifiers describes the algorithm and not a built device; [Compliance and
 verification](https://jmrplens.github.io/phonometry/signals/metrology/compliance-verification/) draws
 that boundary part by part.
 

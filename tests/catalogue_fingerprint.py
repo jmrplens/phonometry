@@ -577,9 +577,11 @@ def derived_names_bases(
     out from, followed back through the ones it derived first, and when the
     source does not give all of them one basis, ``derived`` now says which
     it gives each. In the published catalogues that happens in one place:
-    Hopkins marks the Poisson ratio of nineteen rows of Table A2 as an
-    estimate, and every modulus and speed derived on those rows rests on it,
-    beside a plate speed and a density whose basis the page does not state.
+    Hopkins marks the Poisson ratio of twenty-one rows of Table A2 as an
+    estimate, and on the nineteen of them that print a single density every
+    modulus and speed derived rests on it, beside a plate speed and a density
+    whose basis the page does not state. Aircrete and brick print their
+    density as a range, so nothing is derived on them.
     One thing moved, and nothing else may:
 
     * every ``derived`` text of the rows of :data:`MIXED_BASIS_ROWS` gained

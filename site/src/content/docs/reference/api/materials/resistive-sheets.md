@@ -196,7 +196,7 @@ is optional.
 | `table` | The data file this row was read from, without the extension, which is also the first half of its key in the catalogue that holds it. |
 | `basis` | What the source says a value is: a field name, or `"row"` for the whole row, to one of [`CATALOGUE_BASES`](/phonometry/reference/api/io/io/#catalogue_bases). Hopkins marks most of his Poisson ratios "Estimate", and those cells hold `"estimated"`; a datasheet that declares a class under a product standard would hold `"declared"`. A field with no entry takes the row's, and a row with neither is one whose source does not say, which is a different answer from any of the five. `basis_of` reads it. Independent of `derived`: this is what the source claims for a cell, that is what this library computed. |
 | `approximate` | Fields the page prints with a `~`. Not an estimate and not an interval: a number the author rounded on purpose. |
-| `derived` | Field to how it was computed, for the ones this library worked out from the cells the page did print. A derived value is never stored as if it had been read, and it always follows again from the row's own cells: `from_printed` writes it, and nothing else in the library does. When the printed cells a value rests on do not all have one `basis`, the text names the basis of each, so a modulus worked out from a plate speed and a Poisson ratio Hopkins marks as an estimate says it rests on that estimate. A value converted from the unit the page prints is not derived (`converted` holds it), and neither is one the page gives by reference to another of its rows (`carried` does). |
+| `derived` | Field to how it was computed, for the ones this library worked out from the cells the page did print. A derived value is never stored as if it had been read, and on every row the library builds it follows again from the row's own cells: `from_printed` writes it, and nothing else in the library does. One a caller passes to the literal constructor is the caller's word, which the row keeps and `printed_fields` leaves out with its value, as it leaves out every derived one. When the printed cells a value rests on do not all have one `basis`, the text names the basis of each, so a modulus worked out from a plate speed and a Poisson ratio Hopkins marks as an estimate says it rests on that estimate. A value converted from the unit the page prints is not derived (`converted` holds it), and neither is one the page gives by reference to another of its rows (`carried` does). |
 | `converted` | Field to `(figure, unit)`, the page's figure and the unit it is in, for a value this row holds in a unit the page does not use. Ver and Beranek print their damping materials in degrees Fahrenheit and pounds per square inch, and the row holds degrees Celsius and pascals, so `("3e5", "psi")` sits beside a modulus in pascals. The figure is kept as the page writes it, so the cell can always be read back in the page's own terms. The unit is the one the page prints with the figure or over its column. Long prints the figures of his musician bare, and the sabins recorded for them are a reading of the table, which is set in inches and pounds and names sabins on the next row; that row's note says so. A figure a packaged table prints with another SI prefix, such as the megapascals of Rossing Table 15.5, is held in the base unit with no entry here, and the table's `about` says so. |
 | `carried` | Field to where the page gives it from, for a value the page gives by reference to another of its rows rather than on this one: a cell left blank under a block whose first row prints the figure, as in Ver and Beranek Table 8.7, or a description that reads "Parecido al anterior" and prints no row number, as three rows of Harris Chapter 32 do, which refers to the row above it. The value is the page's, and this says which of its rows gives it. |
 | `ranges` | `(low, high)` for each field the page prints as an interval rather than a value. One end is `None` only for a bound whose open side the quantity has no limit on; the end the page prints is always a number, and a two-sided interval has two. |
@@ -254,7 +254,12 @@ fills what follows from those cells (a modulus from a plate speed, a
 density and a Poisson ratio), never over a cell that holds a value
 or one the row says something else about, and `derived` says
 how each filled value was reached and, when the cells it rests on
-do not share one `basis`, the basis of each.
+do not share one `basis`, the basis of each. Cells the
+arithmetic cannot take are refused rather than turned into a value
+that would be wrong: a modulus of 1 GPa and a shear modulus of
+0.1 GPa give a Poisson ratio of 4, which no isotropic solid has, and
+a row whose cells are not meant to give a value says so in
+`not_derivable`, which keeps the arithmetic from running.
 
 `Cls(...)` stays literal: it holds what it is given and works
 nothing out. To change a cell of a row and have what follows from
@@ -280,7 +285,7 @@ row = type(row).from_printed(**cells)
 
 | Exception | When |
 | :--- | :--- |
-| CatalogueError | for a cell the contract refuses; for a `derived` among the cells, which is this method's to write; for a figure under a unit alias that is not a finite number, or that names a cell given under its own name as well. |
+| CatalogueError | for a cell the contract refuses; for a `derived` among the cells, which is this method's to write; for a figure under a unit alias that is not a finite number, or that names a cell given under its own name or under another alias as well; and for printed cells a value that follows from them cannot be worked out of, naming the value and the cells. |
 | TypeError | for a name that is neither a field of the class nor a unit alias of one. |
 
 ### ResistiveSheet.is_approximate()
@@ -357,15 +362,24 @@ ResistiveSheet.printed_fields() -> dict[str, Any]
 
 The cells the page prints, as `from_printed` takes them.
 
-Every field that holds something, the name, the citation, the table
-and every hedge included, except the values this library derived
-and `derived` itself. A value converted from the page's unit
-and one the page gives by reference to another of its rows are the
-page's, so they stay, with `converted` and `carried`
-beside them. `type(row).from_printed(**row.printed_fields())` is
-the row again, and changing a cell before building it again is how a
-row is edited without carrying a derived value that no longer
-follows from it.
+Every field, the name, the citation, the table and every hedge
+included, except the values this library derived, `derived`
+itself, and a field left at a default that holds nothing (a quantity
+the page leaves out, an empty text or hedge). A text field whose
+default says something is kept even when it holds no text: the
+`per` of an area per unit is a person unless the row says
+otherwise, and a row that leaves it empty has said otherwise. A
+value converted from the page's unit and one the page gives by
+reference to another of its rows are the page's, so they stay, with
+`converted` and `carried` beside them.
+
+For every row `from_printed` builds, and so for every packaged
+one, `type(row).from_printed(**row.printed_fields())` is the row
+again, and changing a cell before building it again is how a row is
+edited without carrying a derived value that no longer follows from
+it. A `derived` passed to the literal constructor is the caller's
+own; it is left out here with its value, like every derived one, so
+building again gives back only what the class works out.
 
 **Returns:** A new dictionary of constructor keywords. The values are the ones the row holds, frozen as the row holds them.
 

@@ -201,7 +201,7 @@ class SolidMaterial(CatalogueRow):
         if plate is not None and cells.get(_HFC) is None:
             cells.fill(
                 _HFC,
-                thickness_critical_frequency_product(plate),
+                lambda: thickness_critical_frequency_product(plate),
                 _PLATE_HFC,
                 inputs=(_PLATE,),
             )
@@ -251,7 +251,7 @@ def _elastic_constants(cells: Completion) -> None:
         if plate is not None and nu is not None:
             cells.fill(
                 _E,
-                youngs_modulus_from_plate_speed(
+                lambda: youngs_modulus_from_plate_speed(
                     plate, density_kg_m3=rho, poisson_ratio=nu
                 ),
                 _FROM_PLATE,
@@ -260,15 +260,49 @@ def _elastic_constants(cells: Completion) -> None:
         elif bar is not None:
             cells.fill(
                 _E,
-                youngs_modulus_from_beam_speed(bar, density_kg_m3=rho),
+                lambda: youngs_modulus_from_beam_speed(bar, density_kg_m3=rho),
                 _FROM_BAR,
                 inputs=(_BAR, _RHO),
             )
         modulus = cells.get(_E)
     if nu is None and modulus is not None and shear is not None:
-        cells.fill(_NU, modulus / (2.0 * shear) - 1.0, _FROM_E_G, inputs=(_E, _G))
+        cells.fill(
+            _NU,
+            lambda: _poisson_ratio_from_moduli(modulus, shear),
+            _FROM_E_G,
+            inputs=(_E, _G),
+        )
     elif shear is None and modulus is not None and nu is not None:
-        cells.fill(_G, modulus / (2.0 * (1.0 + nu)), _FROM_E_NU, inputs=(_E, _NU))
+        cells.fill(
+            _G, lambda: modulus / (2.0 * (1.0 + nu)), _FROM_E_NU, inputs=(_E, _NU)
+        )
+
+
+#: The Poisson ratio of an isotropic solid lies between these: at -1 its bulk
+#: modulus is zero, and at 0.5 it is incompressible.
+_ISOTROPIC_POISSON_LOW = -1.0
+_ISOTROPIC_POISSON_HIGH = 0.5
+
+
+def _poisson_ratio_from_moduli(modulus: float, shear: float) -> float:
+    """``nu = E / (2 G) - 1``, refused where no isotropic solid has it.
+
+    A modulus and a shear modulus that give a Poisson ratio outside -1 to 0.5
+    are not the two moduli of one isotropic solid: the page printed them for
+    different directions of an orthotropic material, or one of them is wrong.
+    Either way the ratio they give is not the material's.
+
+    :raises ValueError: for a ratio outside -1 to 0.5.
+    """
+    nu = modulus / (2.0 * shear) - 1.0
+    if not _ISOTROPIC_POISSON_LOW < nu <= _ISOTROPIC_POISSON_HIGH:
+        msg = (
+            f"they give {nu:g}, and the Poisson ratio of an isotropic solid "
+            f"lies between {_ISOTROPIC_POISSON_LOW:g} and "
+            f"{_ISOTROPIC_POISSON_HIGH:g}"
+        )
+        raise ValueError(msg)
+    return nu
 
 
 def _wave_speeds(cells: Completion) -> None:
@@ -287,26 +321,35 @@ def _wave_speeds(cells: Completion) -> None:
         if cells.get(_BAR) is None:
             cells.fill(
                 _BAR,
-                beam_longitudinal_speed(modulus, density_kg_m3=rho),
+                lambda: beam_longitudinal_speed(modulus, density_kg_m3=rho),
                 _FROM_MODULUS,
                 inputs=(_E, _RHO),
             )
         if nu is not None and cells.get(_PLATE) is None:
             cells.fill(
                 _PLATE,
-                plate_longitudinal_speed(modulus, density_kg_m3=rho, poisson_ratio=nu),
+                lambda: plate_longitudinal_speed(
+                    modulus, density_kg_m3=rho, poisson_ratio=nu
+                ),
                 _FROM_MODULUS_NU,
                 inputs=(_E, _RHO, _NU),
             )
         if nu is not None and cells.get(_BULK) is None:
             cells.fill(
                 _BULK,
-                bulk_longitudinal_speed(modulus, density_kg_m3=rho, poisson_ratio=nu),
+                lambda: bulk_longitudinal_speed(
+                    modulus, density_kg_m3=rho, poisson_ratio=nu
+                ),
                 _FROM_MODULUS_NU,
                 inputs=(_E, _RHO, _NU),
             )
     if rho is not None and shear is not None and cells.get(_TRANSVERSE) is None:
-        cells.fill(_TRANSVERSE, math.sqrt(shear / rho), _FROM_SHEAR, inputs=(_G, _RHO))
+        cells.fill(
+            _TRANSVERSE,
+            lambda: math.sqrt(shear / rho),
+            _FROM_SHEAR,
+            inputs=(_G, _RHO),
+        )
 
 
 #: The published tables this catalogue reads, in the order a reader should

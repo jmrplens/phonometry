@@ -729,8 +729,8 @@ def convert_figure(figure: str, factor: Fraction) -> float:
     factor, and only the product is rounded. Multiplying two floats rounds
     the figure, the factor and the product: 11.5 sabins times the
     0.09290304 m2 of a square foot comes out as 1.0683849600000002 that way,
-    where the product of the two decimals is 1.06838496 exactly, and so is
-    the float it rounds to here.
+    where the product of the two decimals is 1.06838496 exactly, and the
+    float it rounds to here is the one ``repr`` writes as 1.06838496.
 
     :param figure: The number as the page prints it, in digits: ``"11.5"``,
         ``"3e5"``.
@@ -743,8 +743,12 @@ def convert_figure(figure: str, factor: Fraction) -> float:
 def _figure(value: object, where: str) -> str:
     """The digits of a figure a cell holds, for :func:`convert_figure`.
 
-    A float is written by its shortest ``repr``, which for a number read
-    from text is the digits the text had; a decimal keeps its own.
+    A float is written by its shortest ``repr``, the fewest digits that
+    read back as the same number. Those are the page's digits unless the
+    text wrote trailing zeros or an exponent (``"11.50"`` comes back as
+    ``11.5``, ``"3e5"`` as ``300000.0``). A :class:`~decimal.Decimal` keeps
+    the digits it was read with, trailing zeros included, so a reader that
+    must record the figure as printed passes one.
 
     :raises CatalogueError: for a value that is not a finite number.
     """
@@ -791,15 +795,20 @@ def _resolve_units(cls: type[CatalogueRow], cells: dict[str, Any]) -> dict[str, 
     names = frozenset(item.name for item in fields(cls))
     resolved = dict(cells)
     converted = dict(cells.get("converted") or {})
+    # A figure the page leaves empty adds no value, but its cell is spoken
+    # for all the same, so a second alias for it is still a second answer.
+    claimed: dict[str, str] = {}
     label = repr(cells.get("name"))
     for written, value in cells.items():
         alias = None if written in names else _alias_for(written, aliases, names)
         if alias is None:
             continue
         target = f"{written.removesuffix(alias.suffix)}{alias.target}"
-        if target in resolved or target in converted:
-            msg = f"{label}: {written} and {target} are one cell, given twice"
+        if target in resolved or target in converted or target in claimed:
+            other = claimed.get(target, target)
+            msg = f"{label}: {written} and {other} are one cell, given twice"
             raise CatalogueError(msg)
+        claimed[target] = written
         for need in alias.requires:
             if not cells.get(need):
                 msg = (
@@ -889,9 +898,14 @@ class Completion:
         return field_name in self._said
 
     def fill(
-        self, field_name: str, value: float, how: str, *, inputs: tuple[str, ...]
+        self,
+        field_name: str,
+        work: Callable[[], float],
+        how: str,
+        *,
+        inputs: tuple[str, ...],
     ) -> None:
-        """Hold *value* in a cell the page leaves empty, and say how.
+        """Hold what *work* gives in a cell the page leaves empty, and say how.
 
         Nothing is filled over a cell that holds a value, and nothing over a
         cell the row says something else about. Bies prints a modulus of 18
@@ -903,17 +917,42 @@ class Completion:
         worked out around a misprint would put the book's mistake back into
         the arithmetic through the side door.
 
+        *work* runs only for a cell that is filled. When the cells it reads
+        are outside what its arithmetic takes (a Poisson ratio of 0.7 for
+        the speed in an unbounded solid, or a modulus and a shear modulus
+        that no isotropic solid has together), the row is refused rather
+        than handed a value that would be wrong, and the refusal names the
+        printed cells the value would have rested on. A row whose cells are
+        not meant to give that value says so in ``not_derivable``, and then
+        nothing is worked out.
+
         :param field_name: The field to fill.
-        :param value: What follows for it from the cells of the row.
+        :param work: Works the value out from the cells of the row.
         :param how: The cells it comes from, in words, for
             :attr:`~CatalogueRow.derived`: ``"from the modulus and the
             density"``.
-        :param inputs: The fields *value* is worked out from, printed or
+        :param inputs: The fields the value is worked out from, printed or
             filled, which is how :meth:`derived` finds the basis of every
             printed cell the value rests on.
+        :raises CatalogueError: naming the row, the field and the printed
+            cells with their values, when *work* refuses them with a
+            ``ValueError`` or cannot divide by them.
         """
         if self.get(field_name) is not None or field_name in self._said:
             return
+        try:
+            value = work()
+        except CatalogueError:
+            raise
+        except (ValueError, ArithmeticError) as error:
+            printed = self._printed_under(inputs)
+            cells = _joined([f"{cell} = {self.get(cell)!r}" for cell in printed])
+            msg = (
+                f"{self._row.name!r}: {field_name} cannot be worked out {how} "
+                f"({cells}): {error}; a row whose cells are not meant to give "
+                "it says why in not_derivable"
+            )
+            raise CatalogueError(msg) from error
         self._filled[field_name] = value
         self._how[field_name] = how
         self._inputs[field_name] = inputs
@@ -946,6 +985,10 @@ class Completion:
         inputs = self._inputs.get(field_name)
         if inputs is None:
             return (field_name,)
+        return self._printed_under(inputs)
+
+    def _printed_under(self, inputs: tuple[str, ...]) -> tuple[str, ...]:
+        """The printed cells under *inputs*, following filled ones back."""
         return tuple(
             dict.fromkeys(cell for name in inputs for cell in self._rests_on(name))
         )
@@ -957,6 +1000,23 @@ def _holds_nothing(value: object) -> bool:
         return True
     if isinstance(value, (str, Mapping, AbstractSet, tuple)):
         return len(value) == 0
+    return False
+
+
+def _left_empty(item: dataclasses.Field[Any], value: object) -> bool:
+    """Whether a field holds nothing, and nothing is also its default.
+
+    Only such a field can be left out of the keywords that build the row
+    again. A text field whose default says something, as the ``per`` of an
+    area per unit says a person, holds an answer of its own when it holds no
+    text, and building the row without it would put the default back.
+    """
+    if not _holds_nothing(value):
+        return False
+    if item.default is not dataclasses.MISSING:
+        return bool(value == item.default)
+    if item.default_factory is not dataclasses.MISSING:
+        return bool(value == item.default_factory())
     return False
 
 
@@ -1075,9 +1135,12 @@ class CatalogueRow:
         and not an interval: a number the author rounded on purpose.
     :ivar derived: Field to how it was computed, for the ones this library
         worked out from the cells the page did print. A derived value is never
-        stored as if it had been read, and it always follows again from the
-        row's own cells: :meth:`from_printed` writes it, and nothing else in
-        the library does. When the printed cells a value rests on do not all
+        stored as if it had been read, and on every row the library builds it
+        follows again from the row's own cells: :meth:`from_printed` writes
+        it, and nothing else in the library does. One a caller passes to the
+        literal constructor is the caller's word, which the row keeps and
+        :meth:`printed_fields` leaves out with its value, as it leaves out
+        every derived one. When the printed cells a value rests on do not all
         have one :attr:`basis`, the text names the basis of each, so a
         modulus worked out from a plate speed and a Poisson ratio Hopkins
         marks as an estimate says it rests on that estimate. A value
@@ -1528,7 +1591,12 @@ class CatalogueRow:
         density and a Poisson ratio), never over a cell that holds a value
         or one the row says something else about, and :attr:`derived` says
         how each filled value was reached and, when the cells it rests on
-        do not share one :attr:`basis`, the basis of each.
+        do not share one :attr:`basis`, the basis of each. Cells the
+        arithmetic cannot take are refused rather than turned into a value
+        that would be wrong: a modulus of 1 GPa and a shear modulus of
+        0.1 GPa give a Poisson ratio of 4, which no isotropic solid has, and
+        a row whose cells are not meant to give a value says so in
+        :attr:`not_derivable`, which keeps the arithmetic from running.
 
         ``Cls(...)`` stays literal: it holds what it is given and works
         nothing out. To change a cell of a row and have what follows from
@@ -1545,7 +1613,9 @@ class CatalogueRow:
         :raises CatalogueError: for a cell the contract refuses; for a
             ``derived`` among the cells, which is this method's to write; for
             a figure under a unit alias that is not a finite number, or that
-            names a cell given under its own name as well.
+            names a cell given under its own name or under another alias as
+            well; and for printed cells a value that follows from them cannot
+            be worked out of, naming the value and the cells.
         :raises TypeError: for a name that is neither a field of the class
             nor a unit alias of one.
         """
@@ -1582,15 +1652,24 @@ class CatalogueRow:
     def printed_fields(self) -> dict[str, Any]:
         """The cells the page prints, as :meth:`from_printed` takes them.
 
-        Every field that holds something, the name, the citation, the table
-        and every hedge included, except the values this library derived
-        and :attr:`derived` itself. A value converted from the page's unit
-        and one the page gives by reference to another of its rows are the
-        page's, so they stay, with :attr:`converted` and :attr:`carried`
-        beside them. ``type(row).from_printed(**row.printed_fields())`` is
-        the row again, and changing a cell before building it again is how a
-        row is edited without carrying a derived value that no longer
-        follows from it.
+        Every field, the name, the citation, the table and every hedge
+        included, except the values this library derived, :attr:`derived`
+        itself, and a field left at a default that holds nothing (a quantity
+        the page leaves out, an empty text or hedge). A text field whose
+        default says something is kept even when it holds no text: the
+        ``per`` of an area per unit is a person unless the row says
+        otherwise, and a row that leaves it empty has said otherwise. A
+        value converted from the page's unit and one the page gives by
+        reference to another of its rows are the page's, so they stay, with
+        :attr:`converted` and :attr:`carried` beside them.
+
+        For every row :meth:`from_printed` builds, and so for every packaged
+        one, ``type(row).from_printed(**row.printed_fields())`` is the row
+        again, and changing a cell before building it again is how a row is
+        edited without carrying a derived value that no longer follows from
+        it. A ``derived`` passed to the literal constructor is the caller's
+        own; it is left out here with its value, like every derived one, so
+        building again gives back only what the class works out.
 
         :return: A new dictionary of constructor keywords. The values are
             the ones the row holds, frozen as the row holds them.
@@ -1600,7 +1679,7 @@ class CatalogueRow:
             for item in fields(self)
             if item.name != "derived"
             and item.name not in self.derived
-            and not _holds_nothing(value := getattr(self, item.name))
+            and not _left_empty(item, value := getattr(self, item.name))
         }
 
     def is_approximate(self, field_name: str) -> bool:

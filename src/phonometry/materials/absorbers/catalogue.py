@@ -217,14 +217,14 @@ class PorousMaterial(CatalogueRow):
         if shear is None and modulus is not None:
             cells.fill(
                 "shear_modulus_pa",
-                modulus / (2.0 * (1.0 + nu)),
+                lambda: modulus / (2.0 * (1.0 + nu)),
                 _FROM_E_NU,
                 inputs=("youngs_modulus_pa", "poisson_ratio"),
             )
         elif modulus is None and shear is not None:
             cells.fill(
                 "youngs_modulus_pa",
-                2.0 * shear * (1.0 + nu),
+                lambda: 2.0 * shear * (1.0 + nu),
                 _FROM_N_NU,
                 inputs=("shear_modulus_pa", "poisson_ratio"),
             )

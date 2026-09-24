@@ -155,6 +155,41 @@ def test_printed_fields_keeps_a_flag_that_is_false() -> None:
     assert floor.printed_fields()["has_section_drawing"] is False
 
 
+def test_printed_fields_keeps_a_text_left_empty_whose_default_says_something() -> None:
+    """An area per nothing stated is not an area per person.
+
+    ``per`` defaults to a person, so a row that leaves it empty has said
+    something other than the default, and building it again without the
+    empty text would make it an area per person without anyone noticing.
+    """
+    row = AbsorptionAreaSpectrum.from_printed(
+        name="Chair", source=_SOURCE, per="", absorption_area_500_m2=0.4
+    )
+    cells = row.printed_fields()
+    assert cells["per"] == ""
+    again = AbsorptionAreaSpectrum.from_printed(**cells)
+    assert again.per == ""
+    assert again == row
+
+
+def test_printed_fields_leaves_out_a_derived_the_caller_passed_literally() -> None:
+    """A ``derived`` given to ``Cls(...)`` is the caller's, and is not printed.
+
+    It goes with its value, like every derived one, so building again gives
+    back what the class works out from the printed cells, which here is
+    nothing.
+    """
+    row = SolidMaterial(
+        name="Panel 40 core",
+        source=_SOURCE,
+        youngs_modulus_pa=1.0e9,
+        derived={"youngs_modulus_pa": "the caller's own estimate"},
+    )
+    assert row.is_derived("youngs_modulus_pa")
+    assert row.printed_fields() == {"name": "Panel 40 core", "source": _SOURCE}
+    assert SolidMaterial.from_printed(**row.printed_fields()).youngs_modulus_pa is None
+
+
 def test_printed_fields_is_a_new_dictionary_of_frozen_values() -> None:
     row = solids.PUBLISHED_SOLIDS["hopkins-2007-table-a2/aircrete"]
     first = row.printed_fields()
@@ -285,6 +320,76 @@ def test_a_hedged_poisson_ratio_completes_no_porous_modulus() -> None:
     assert row.shear_modulus_pa is None
 
 
+def test_the_poisson_ratio_follows_from_the_modulus_and_the_shear_modulus() -> None:
+    """``nu = E / (2 G) - 1``: 200 GPa and 79 GPa give 200/158 - 1 = 21/79."""
+    row = SolidMaterial.from_printed(
+        name="Panel 40 core",
+        source=_SOURCE,
+        youngs_modulus_pa=2.0e11,
+        shear_modulus_pa=7.9e10,
+    )
+    assert row.poisson_ratio == pytest.approx(21 / 79, rel=1e-14)
+    assert row.is_derived("poisson_ratio")
+    assert row.derived["poisson_ratio"] == "from the modulus and the shear modulus"
+
+
+_NO_ISOTROPIC_SOLID = {
+    "name": "Panel 40 core",
+    "source": _SOURCE,
+    "youngs_modulus_pa": 1.0e9,
+    "shear_modulus_pa": 1.0e8,
+}
+
+
+@pytest.mark.parametrize("density", [None, 1000.0], ids=["alone", "with a density"])
+def test_two_moduli_no_isotropic_solid_has_are_refused(density: float | None) -> None:
+    """1 GPa and 0.1 GPa give a Poisson ratio of 4, which is no material's.
+
+    Without a density nothing downstream would read it, and it would be
+    stored as derived; with one, the plate speed would refuse it with a
+    ``ValueError`` about a cell the caller never gave. Both are the row's
+    refusal now, naming the two printed cells.
+    """
+    cells = {**_NO_ISOTROPIC_SOLID, "density_kg_m3": density}
+    with pytest.raises(io.CatalogueError, match="poisson_ratio cannot be worked out"):
+        SolidMaterial.from_printed(**cells)
+
+
+def test_the_refusal_names_the_printed_cells_and_their_values() -> None:
+    with pytest.raises(io.CatalogueError) as refusal:
+        SolidMaterial.from_printed(**_NO_ISOTROPIC_SOLID)
+    text = str(refusal.value)
+    assert "youngs_modulus_pa = 1000000000.0" in text
+    assert "shear_modulus_pa = 100000000.0" in text
+    assert "not_derivable" in text
+
+
+def test_not_derivable_keeps_the_arithmetic_from_running() -> None:
+    """A row that says the two moduli do not give a ratio loads, without one."""
+    row = SolidMaterial.from_printed(
+        **_NO_ISOTROPIC_SOLID,
+        density_kg_m3=1000.0,
+        not_derivable={"poisson_ratio": "the two moduli are for different axes"},
+    )
+    assert row.poisson_ratio is None
+    assert set(row.derived) == {"bar_longitudinal_speed_m_s", "transverse_speed_m_s"}
+
+
+def test_a_printed_poisson_ratio_the_arithmetic_refuses_is_the_rows_refusal() -> None:
+    """0.7 gives a plate speed and no bulk speed, and the row says which."""
+    cells = {
+        "name": "Panel 40 core",
+        "source": _SOURCE,
+        "youngs_modulus_pa": 2.0e10,
+        "density_kg_m3": 2000.0,
+        "poisson_ratio": 0.7,
+    }
+    with pytest.raises(
+        io.CatalogueError, match="bulk_longitudinal_speed_m_s cannot be worked out"
+    ):
+        SolidMaterial.from_printed(**cells)
+
+
 # ---------------------------------------------------------------------------
 # The derived text names the bases when they mix
 # ---------------------------------------------------------------------------
@@ -347,6 +452,103 @@ def test_the_hopkins_estimates_are_named_in_every_value_they_feed() -> None:
     assert board.basis_of("poisson_ratio") == "estimated"
     for text in board.derived.values():
         assert text.endswith(catalogue_fingerprint.MIXED_BASIS_CLAUSE[2:])
+
+
+_E = "youngs_modulus_pa"
+_G = "shear_modulus_pa"
+_NU = "poisson_ratio"
+_RHO = "density_kg_m3"
+_PLATE = "plate_longitudinal_speed_m_s"
+_BAR = "bar_longitudinal_speed_m_s"
+_ELASTIC = {_E: 2.0e10, _RHO: 2000.0, _NU: 0.2}
+
+#: Every place a completion fills a value: the class, the cells printed, the
+#: field filled and the printed cells it rests on, in the order the text
+#: names them. Worked out by hand from the formulas each site applies.
+_FILL_SITES = {
+    "modulus from the plate speed": (
+        SolidMaterial,
+        {_PLATE: 3000.0, _RHO: 2000.0, _NU: 0.2},
+        _E,
+        (_PLATE, _RHO, _NU),
+    ),
+    "modulus from the bar speed": (
+        SolidMaterial,
+        {_BAR: 3000.0, _RHO: 2000.0},
+        _E,
+        (_BAR, _RHO),
+    ),
+    "Poisson ratio from the two moduli": (
+        SolidMaterial,
+        {_E: 2.0e11, _G: 7.9e10},
+        _NU,
+        (_E, _G),
+    ),
+    "shear modulus from the modulus": (
+        SolidMaterial,
+        {_E: 2.0e10, _NU: 0.2},
+        _G,
+        (_E, _NU),
+    ),
+    "bar speed": (SolidMaterial, {_E: 2.0e10, _RHO: 2000.0}, _BAR, (_E, _RHO)),
+    "plate speed": (SolidMaterial, _ELASTIC, _PLATE, (_E, _RHO, _NU)),
+    "bulk speed": (
+        SolidMaterial,
+        _ELASTIC,
+        "bulk_longitudinal_speed_m_s",
+        (_E, _RHO, _NU),
+    ),
+    "transverse speed": (
+        SolidMaterial,
+        {_G: 8.0e9, _RHO: 2000.0},
+        "transverse_speed_m_s",
+        (_G, _RHO),
+    ),
+    "h f_c from a derived plate speed": (
+        SolidMaterial,
+        _ELASTIC,
+        "thickness_critical_frequency_product_m_hz",
+        (_E, _RHO, _NU),
+    ),
+    "porous shear modulus": (
+        PorousMaterial,
+        {_E: 140000.0, _NU: 0.3},
+        _G,
+        (_E, _NU),
+    ),
+    "porous modulus": (PorousMaterial, {_G: 50000.0, _NU: 0.3}, _E, (_G, _NU)),
+}
+
+
+@pytest.mark.parametrize(
+    ("site", "estimated"),
+    [
+        (site, cell)
+        for site, (_, _, _, rests_on) in _FILL_SITES.items()
+        for cell in rests_on
+    ],
+)
+def test_every_fill_names_each_printed_cell_it_rests_on(
+    site: str, estimated: str
+) -> None:
+    """One estimated input at a time, at every fill: the text names it.
+
+    A fill that left one of its inputs out would leave that input's basis out
+    of the text, and a value resting on an estimate would read as a figure
+    of one kind.
+    """
+    cls, printed, filled, rests_on = _FILL_SITES[site]
+    row = cls.from_printed(
+        name="Panel 40 core",
+        source=_SOURCE,
+        basis={estimated: "estimated"},
+        **printed,
+    )
+    others = " and ".join(cell for cell in rests_on if cell != estimated)
+    assert row.derived[filled].endswith(
+        f"; it rests on {estimated} (estimated) and on {others}, whose basis "
+        "the source does not state"
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -419,6 +621,19 @@ def test_a_cell_given_under_two_names_is_refused() -> None:
         "source": _SOURCE,
         "absorption_area_500_ft2": 11.5,
         "absorption_area_500_m2": 1.07,
+    }
+    with pytest.raises(io.CatalogueError, match="are one cell, given twice"):
+        AbsorptionAreaSpectrum.from_printed(**cells)
+
+
+def test_a_figure_left_empty_still_speaks_for_its_cell() -> None:
+    """An empty figure under one alias and a figure under another are two answers."""
+    cells = {
+        "name": "Musician",
+        "source": _SOURCE,
+        "per": "seat",
+        "absorption_area_500_ft2": None,
+        "absorption_area_500_ft2_per_1000_ft3": 2.0,
     }
     with pytest.raises(io.CatalogueError, match="are one cell, given twice"):
         AbsorptionAreaSpectrum.from_printed(**cells)

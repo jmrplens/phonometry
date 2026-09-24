@@ -129,12 +129,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   modulus from a plate speed, a density and a Poisson ratio) and names each
   filled value in `derived`. Every packaged catalogue is now built through
   it, and `Cls(...)` stays literal: it holds what it is given and works
-  nothing out. `row.printed_fields()` gives back the cells the page prints,
-  the converted and the carried ones included and the derived ones left out,
-  so `type(row).from_printed(**row.printed_fields())` is the row again, and
-  changing a cell there before building it again is how a row is edited:
-  `dataclasses.replace` copies the derived values as they were, beside a
-  cell they no longer follow from. `io.BandedRow.values_at(frequencies_hz)`
+  nothing out. Cells the arithmetic cannot take, such as a modulus and a
+  shear modulus that no isotropic solid has together, are refused with
+  `io.CatalogueError` naming them, rather than stored as a Poisson ratio of
+  4; a row whose cells are not meant to give a value says so in
+  `not_derivable`. `row.printed_fields()` gives back the cells the page
+  prints, the converted and the carried ones included and the derived ones
+  left out, so `type(row).from_printed(**row.printed_fields())` is the row
+  again for every row `from_printed` builds, and changing a cell there
+  before building it again is how a row is edited: `dataclasses.replace`
+  copies the derived values as they were, beside a cell they no longer
+  follow from. `io.BandedRow.values_at(frequencies_hz)`
   reads a banded row at an array of frequencies, for the functions that take
   one value per band by position, such as the surfaces of
   `room.sabine_reverberation_time` or the transmission loss
@@ -572,11 +577,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   becomes `1.06838496`), and no printed digit moves. When the printed cells a
   derived value rests on, followed back through the values derived first, do
   not all have one basis, its `derived` text now names the basis of each: the
-  moduli and speeds of the nineteen rows of Hopkins Table A2 whose Poisson
-  ratio the page marks as an estimate say they rest on that estimate and on a
-  plate speed and a density whose basis the page does not state. A band no
-  table prints is refused as "not an octave band that absorption tables
-  print".
+  moduli and speeds of the nineteen rows of Hopkins Table A2 that derive them
+  from a Poisson ratio the page marks as an estimate say they rest on that
+  estimate and on a plate speed and a density whose basis the page does not
+  state. The page marks twenty-one; aircrete and brick print their density
+  as a range and derive nothing. A band no table prints is refused as "not an
+  octave band that absorption tables print".
 
 - **A catalogue row checks itself when it is built.** Every `io.CatalogueRow`,
   packaged or built by hand, is checked in its constructor and refuses with

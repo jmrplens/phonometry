@@ -31,8 +31,10 @@ from __future__ import annotations
 import argparse
 import decimal
 import functools
+import json
 import math
 import pathlib
+import re
 import statistics
 import sys
 from typing import TYPE_CHECKING, Any, NamedTuple
@@ -107,6 +109,36 @@ OUTPUT = (
 #: so a page that imports the module reads these types and not the giant
 #: structural inference a JSON literal of this size would otherwise produce.
 TYPES_OUTPUT = OUTPUT.with_suffix(".d.mts")
+
+#: The Spanish of every word the catalogues page prints about a row, keyed by
+#: the English the row carries: its name, variant and group, the notes on the
+#: row and on its cells, its word columns and its citation. The books print
+#: English, so the Spanish page printed English too until a reader asked why a
+#: page in Spanish called lead "Lead". The row keeps the book's words, which
+#: are what the library's lookups take and what the search still matches;
+#: this file is only what the Spanish page shows in their place.
+SPANISH = OUTPUT.parents[1] / "data/catalogue-es.json"
+
+#: The row fields the page prints as words, and therefore translates.
+_SPANISH_FIELDS = (
+    "name",
+    "variant",
+    "group",
+    "note",
+    "mounting",
+    "per",
+    "model",
+    "direction",
+    "shape",
+    "bonding",
+    "weave",
+    "source",
+    "validity",
+)
+
+#: A cell or a column that holds only figures, signs and units of that kind
+#: ("26*", "60 × 58", "101 325") reads the same in both languages.
+_LANGUAGE_FREE = re.compile(r"[\d\s×*.,/()%-]+")
 
 #: Every table :func:`render` writes, in the order it writes them, so
 #: :func:`render_types` can declare one field per table without a second
@@ -1385,13 +1417,91 @@ def section(
     }
 
 
+class MissingSpanishError(Exception):
+    """The Spanish page would print a row's words in English, or keep dead ones.
+
+    :ivar missing: The English strings with no entry in :data:`SPANISH`.
+    :ivar unused: The entries of :data:`SPANISH` no row prints any more.
+    """
+
+    def __init__(self, missing: set[str], unused: set[str]) -> None:
+        self.missing = missing
+        self.unused = unused
+        lines = [
+            f"{len(missing)} strings on the catalogues page have no Spanish in "
+            f"{SPANISH.name}, and {len(unused)} of its entries are no longer "
+            "printed. Run `python scripts/generate_catalogue_data.py "
+            "--untranslated` for the missing ones as a stub to fill in."
+        ]
+        lines += [f"  missing: {text!r}" for text in sorted(missing)[:20]]
+        lines += [f"  unused: {text!r}" for text in sorted(unused)[:20]]
+        super().__init__("\n".join(lines))
+
+
+def in_spanish(document: dict[str, Any], spanish: Mapping[str, str]) -> None:
+    """Give every row and every cell of *document* the words of the Spanish page.
+
+    A row gains ``es``, holding the Spanish of each word field that differs
+    from what the row carries (a row whose book already prints Spanish gains
+    nothing), and a cell gains ``noteEs`` beside its note and ``textEs`` where
+    its text joins the two ends of a range with "to", which Spanish writes "a".
+    The English stays where it is: it is what the library's lookups take and
+    what the search on the Spanish page matches as well.
+
+    :param document: What :func:`render` is about to write, changed in place.
+    :param spanish: English to Spanish, as :data:`SPANISH` holds it.
+    :raises MissingSpanishError: When a word the page prints has no Spanish,
+        or an entry translates something no row prints any more, so the
+        Spanish page can neither fall back to English in silence nor carry
+        translations of rows that were renamed.
+    """
+    missing: set[str] = set()
+    used: set[str] = set()
+
+    def translated(text: str) -> str | None:
+        if not text or _LANGUAGE_FREE.fullmatch(text):
+            return None
+        if text not in spanish:
+            missing.add(text)
+            return None
+        used.add(text)
+        return spanish[text] if spanish[text] != text else None
+
+    for table in document.values():
+        for row in table["rows"]:
+            words = {
+                field: text
+                for field in _SPANISH_FIELDS
+                if isinstance(row.get(field), str)
+                and (text := translated(row[field])) is not None
+            }
+            if words:
+                row["es"] = words
+            for cell in row["cells"]:
+                note = translated(cell["note"])
+                if note is not None:
+                    cell["noteEs"] = note
+                if cell["kind"] in {"range", "reported"} and " to " in cell["text"]:
+                    cell["textEs"] = cell["text"].replace(" to ", " a ")
+    unused = set(spanish) - used
+    if missing or unused:
+        raise MissingSpanishError(missing, unused)
+
+
+def _spanish() -> dict[str, str]:
+    """What :data:`SPANISH` holds, or nothing when it is not there yet."""
+    if not SPANISH.is_file():
+        return {}
+    loaded: dict[str, str] = json.loads(SPANISH.read_text(encoding="utf-8"))
+    return loaded
+
+
 def render() -> str:
     """The module the site imports.
 
     :return: Its whole text, ending in a newline.
+    :raises MissingSpanishError: When the Spanish page would print English.
     """
-    import json
-
     solid_styles = styles(PUBLISHED_SOLIDS, SOLID_COLUMNS)
     porous_styles = styles(PUBLISHED_POROUS, POROUS_COLUMNS)
     ground_styles = styles(PUBLISHED_GROUND, GROUND_COLUMNS)
@@ -1481,6 +1591,7 @@ def render() -> str:
         "fluids": {"columns": fluid_columns, "rows": fluid_rows},
         "airAttenuation": transcribed(air_conditions(), AIR_ATTENUATION_COLUMNS),
     }
+    in_spanish(document, _spanish())
     body = json.dumps(document, ensure_ascii=False, indent=2, sort_keys=False)
     return (
         "// Auto-generated by scripts/generate_catalogue_data.py "
@@ -1543,7 +1654,16 @@ def render_types() -> str:
         "\tnote: string;\n"
         "\t/** The figure and the unit the page prints, on a converted cell. */\n"
         "\tprinted?: string;\n"
+        '\t/** The text on the Spanish page, where it differs: a range\'s "a". */\n'
+        "\ttextEs?: string;\n"
+        "\t/** The note on the Spanish page, where it differs. */\n"
+        "\tnoteEs?: string;\n"
         "}\n"
+        "\n"
+        "/** The fields of a row the page prints as words. */\n"
+        "export type CatalogueTextField =\n"
+        + "".join(f"\t| '{field}'\n" for field in _SPANISH_FIELDS[:-1])
+        + f"\t| '{_SPANISH_FIELDS[-1]}';\n"
         "\n"
         "export interface CatalogueColumn {\n"
         "\tfield: string;\n"
@@ -1580,6 +1700,8 @@ def render_types() -> str:
         "\ttemperature?: string;\n"
         "\tpressure?: string;\n"
         "\tvalidity?: string;\n"
+        "\t/** The Spanish page's words, for each word field that differs. */\n"
+        "\tes?: Partial<Record<CatalogueTextField, string>>;\n"
         "}\n"
         "\n"
         "export interface CatalogueTable {\n"
@@ -1607,8 +1729,27 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="exit non-zero when the committed file differs from a fresh run",
     )
+    parser.add_argument(
+        "--untranslated",
+        action="store_true",
+        help=(
+            "print, as a JSON object to fill in, every word the Spanish page "
+            f"would print in English because {SPANISH.name} has no entry for it"
+        ),
+    )
     args = parser.parse_args(argv)
-    fresh = render()
+    try:
+        fresh = render()
+    except MissingSpanishError as error:
+        if args.untranslated:
+            stub = dict.fromkeys(sorted(error.missing), "")
+            print(json.dumps(stub, ensure_ascii=False, indent=1))
+            return 0
+        print(error, file=sys.stderr)
+        return 1
+    if args.untranslated:
+        print("{}")
+        return 0
     fresh_types = render_types()
     if args.check:
         stale = [

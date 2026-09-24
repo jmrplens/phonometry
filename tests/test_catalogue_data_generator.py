@@ -17,6 +17,7 @@ import dataclasses
 import pathlib
 import sys
 from collections.abc import Mapping
+from typing import Any
 
 import pytest
 
@@ -620,3 +621,193 @@ def test_a_state_a_model_fixes_is_not_a_state_a_page_printed() -> None:
         "fixed"
     }
     assert [column["field"] for column in columns][0] == "speed_of_sound"
+
+
+# --- The Spanish page -------------------------------------------------------
+
+
+def _one_row(**row: object) -> dict[str, Any]:
+    """A document of one table holding one row, as :func:`gcd.render` builds it."""
+    base: dict[str, object] = {"name": "Lead", "cells": []}
+    return {"solids": {"rows": [{**base, **row}]}}
+
+
+def test_a_range_reads_a_in_spanish() -> None:
+    """A reader of the Spanish page was shown "0,4 to 0,8"."""
+    document = _one_row(
+        cells=[
+            {"text": "0,4 to 0,8", "kind": "range", "note": ""},
+            {"text": "1 to 2, 5", "kind": "reported", "note": ""},
+            {"text": "7 850", "kind": "printed", "note": ""},
+        ]
+    )
+
+    gcd.in_spanish(document, {"Lead": "Plomo"})
+
+    cells = document["solids"]["rows"][0]["cells"]
+    assert [cell.get("textEs") for cell in cells] == ["0,4 a 0,8", "1 a 2, 5", None]
+    assert cells[0]["text"] == "0,4 to 0,8"
+
+
+def test_a_row_carries_its_spanish_beside_its_english() -> None:
+    """The English stays: the lookups take it and the search still matches it."""
+    document = _one_row(
+        variant="chemically pure",
+        source="Bies 5e Table C.1",
+        cells=[{"text": "", "kind": "absent", "note": "the page prints no value"}],
+    )
+    spanish = {
+        "Lead": "Plomo",
+        "chemically pure": "químicamente puro",
+        "Bies 5e Table C.1": "Bies 5e Tabla C.1",
+        "the page prints no value": "la página no imprime ningún valor",
+    }
+
+    gcd.in_spanish(document, spanish)
+
+    row = document["solids"]["rows"][0]
+    assert row["name"] == "Lead"
+    assert row["es"] == {
+        "name": "Plomo",
+        "variant": "químicamente puro",
+        "source": "Bies 5e Tabla C.1",
+    }
+    assert row["cells"][0]["noteEs"] == "la página no imprime ningún valor"
+
+
+def test_a_row_its_book_prints_in_spanish_gains_nothing() -> None:
+    """Arau prints "Moqueta"; its entry is itself and the row stays as it is."""
+    document = _one_row(name="Moqueta")
+
+    gcd.in_spanish(document, {"Moqueta": "Moqueta"})
+
+    assert "es" not in document["solids"]["rows"][0]
+
+
+def test_figures_need_no_spanish() -> None:
+    """A gauge of "26*" or a weave of "60 × 58" reads the same in both."""
+    document = _one_row(weave="60 × 58", mounting="101 325")
+
+    gcd.in_spanish(document, {"Lead": "Plomo"})
+
+    assert document["solids"]["rows"][0]["es"] == {"name": "Plomo"}
+
+
+def test_a_word_with_no_spanish_stops_the_generator() -> None:
+    """Otherwise the Spanish page falls back to English and nobody notices."""
+    document = _one_row(variant="annealed")
+
+    with pytest.raises(gcd.MissingSpanishError, match="have no Spanish") as caught:
+        gcd.in_spanish(document, {"Lead": "Plomo"})
+
+    assert caught.value.missing == {"annealed"}
+
+
+def test_a_translation_no_row_prints_stops_the_generator() -> None:
+    """A renamed row leaves its old translation behind; it has to go."""
+    document = _one_row()
+
+    with pytest.raises(gcd.MissingSpanishError, match="no longer") as caught:
+        gcd.in_spanish(document, {"Lead": "Plomo", "Tin": "Estaño"})
+
+    assert caught.value.unused == {"Tin"}
+
+
+def test_the_committed_spanish_has_no_em_dash() -> None:
+    """The same rule as every other published sentence."""
+    import json
+
+    spanish = json.loads(gcd.SPANISH.read_text(encoding="utf-8"))
+
+    assert [text for text in spanish.values() if "—" in text] == []
+
+
+_COMPONENT = (
+    pathlib.Path(__file__).resolve().parents[1] / "site/src/components/Catalogues.astro"
+)
+_PAGE = (
+    pathlib.Path(__file__).resolve().parents[1]
+    / "site/src/content/docs/reference/catalogues.mdx"
+)
+
+#: The word columns the component prints and searches, as ``textColumns``
+#: and ``haystack`` in Catalogues.astro list them.
+_SEARCHED = (
+    "name",
+    "variant",
+    "group",
+    "table",
+    "source",
+    "model",
+    "mounting",
+    "per",
+    "direction",
+    "shape",
+    "gauge",
+    "weave",
+    "bonding",
+)
+
+
+def _folded(text: str) -> str:
+    """Lower case without accents, the way the component and the finder fold."""
+    import unicodedata
+
+    decomposed = unicodedata.normalize("NFD", text)
+    return "".join(c for c in decomposed if not unicodedata.combining(c)).lower()
+
+
+def _placeholders(language: str) -> dict[str, str]:
+    """What the filter of each catalogue on the page suggests, in *language*."""
+    import re
+
+    source = _COMPONENT.read_text(encoding="utf-8")
+    english, spanish = source.split("\n\ten: {", 1)[1].split("\n\tes: {", 1)
+    spanish = spanish.split("}[lang];", 1)[0]
+    copy = dict(
+        re.findall(
+            r"^\t\t(\w+Placeholder): '([^']*)',$",
+            english if language == "en" else spanish,
+            re.MULTILINE,
+        )
+    )
+    mapping = source.split("const placeholders:", 1)[1].split("};", 1)[0]
+    chosen = dict(re.findall(r"^\t(\w+): copy\.(\w+),$", mapping, re.MULTILINE))
+    shown = re.findall(
+        r'<Catalogues catalogue="(\w+)"', _PAGE.read_text(encoding="utf-8")
+    )
+    return {
+        catalogue: copy[chosen.get(catalogue, "searchPlaceholder")]
+        for catalogue in shown
+    }
+
+
+@pytest.mark.parametrize("language", ["en", "es"])
+def test_every_search_suggestion_finds_a_row(language: str) -> None:
+    """A suggestion that finds nothing tells the reader the filter is broken.
+
+    The Spanish suggestions were English for as long as the Spanish page
+    matched only the book's words; now that it matches Spanish too they are
+    Spanish, and each word has to find at least one row of its own catalogue.
+    """
+    import json
+
+    text = gcd.render()
+    document = json.loads(text.split("export const catalogues = ", 1)[1].rstrip(";\n"))
+    lost = []
+    for catalogue, suggestion in _placeholders(language).items():
+        haystacks = [
+            _folded(
+                " ".join(
+                    [str(row.get(field, "")) for field in _SEARCHED]
+                    + (list(row.get("es", {}).values()) if language == "es" else [])
+                )
+            )
+            for row in document[catalogue]["rows"]
+        ]
+        lost += [
+            (catalogue, word)
+            for word in suggestion.split(", ")
+            if not any(_folded(word) in haystack for haystack in haystacks)
+        ]
+    assert lost == []

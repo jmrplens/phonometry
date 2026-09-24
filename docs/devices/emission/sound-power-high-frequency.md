@@ -140,8 +140,8 @@ surface can.
 *Annex A against the page. The tables print $\alpha$ for 18 °C to 27 °C,
 40 % to 60 % and 10 000 Hz to 22 400 Hz, 624 cells to four decimals, and 581
 of them are Annex A to the last digit. The other 43 are the misprints of the
-next paragraph: every one of them is a cell whose fourth decimal is 0, printed
-as another digit.*
+next paragraph: in every one of them a 0 of Annex A is printed as another
+digit.*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -166,9 +166,9 @@ plt.show()
 </details>
 
 Do not read $\alpha$ from Tables 1 and 2. Forty-three of their cells are
-misprinted, and in the same way: Annex A gives 0 as the fourth decimal and
-the page prints another digit, most often the third decimal repeated
-("0,027 7" where Annex A gives 0,027 0). The largest is "0,033 0" for 0,030 0
+misprinted, and in the same way: a 0 that Annex A gives is printed as
+another digit, most often the fourth decimal as the third repeated ("0,027 7"
+where Annex A gives 0,027 0). The largest is "0,033 0" for 0,030 0
 at 14 500 Hz, 25 °C and 50 %, which read into Formula (7) raises the level
 by at least 0.41 dB. The whole list, cell by cell, is in the
 [errata registry](../../ERRATA.md). The 581 correct cells hold a

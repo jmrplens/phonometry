@@ -31,7 +31,10 @@ clause 9.1.4 and ISO 3747:2010 Annex C print the same expression,
    \quad \theta_1 = 296\ \mathrm{K}
 
 digit for digit, so the guard on the two meteorological inputs and the
-correction itself live here once.
+correction itself live here once. The reference-quantity correction
+:math:`C_1` of ISO 3741:2010 clause 9.1.4 sits beside it for the same reason:
+the ISO 3741 direct method and the two ISO 9295:2015 direct methods, whose
+clause 10.1 refers to ISO 3741 for the reference conditions, both apply it.
 
 The single event time-integrated levels of the sound energy determinations
 meet here too: ISO 3744:2010 Eq. (19)/(20), ISO 3746:2010 Eq. (16)/(17) and

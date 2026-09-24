@@ -35,7 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   walks a printer and a power supply through the methods. Tables 1 and 2 of
   the standard are pinned cell by cell: 581 of the 624 are Annex A to the
   fourth decimal, computed with the temperature converted as
-  $\theta + 273.16$ K, and the other 43 are cells whose fourth decimal is 0
+  $\theta + 273.16$ K, and in the other 43 a 0 that Annex A gives is
   printed as another digit, registered in the errata with the full list.
 - **What an active noise reduction earmuff adds, its uncertainty and where it
   stops being linear (ISO 4869-6:2019).** `hearing.active_insertion_loss` takes

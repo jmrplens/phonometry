@@ -861,7 +861,7 @@ def _chk_iso3747_excess_level() -> Outcome:
 # are Annex A rounded to four decimals with the temperature converted as
 # theta + 273,16 K; the library converts with 273,15 K, which moves 61 of the
 # correctly printed cells by one unit of the fourth decimal and none by more.
-# 43 cells are misprinted, each a 0 in the fourth decimal set as another digit
+# 43 cells are misprinted, each a 0 of Annex A set as another digit
 # (docs/ERRATA.md); the rows below pin the others and name those.
 # Formulae (4) to (10) print no worked example and are pinned in closed form.
 # ---------------------------------------------------------------------------
@@ -968,8 +968,8 @@ def _chk_iso9295_table2() -> Outcome:
 @register(
     "Intensity & sound power",
     "ISO 9295:2015 Table 1 (UNE-EN ISO 9295:2015, PDF page 15, printed folio 15)",
-    "The 9 cells Table 1 misprints (docs/ERRATA.md): Annex A gives 0 in the "
-    "fourth decimal where the page prints another digit",
+    "The 9 cells Table 1 misprints (docs/ERRATA.md): each prints a 0 of Annex A "
+    "as another digit",
 )
 def _chk_iso9295_table1_misprints() -> Outcome:
     return _iso9295_misprints(1)
@@ -978,8 +978,8 @@ def _chk_iso9295_table1_misprints() -> Outcome:
 @register(
     "Intensity & sound power",
     "ISO 9295:2015 Table 2 (UNE-EN ISO 9295:2015, PDF page 16, printed folio 16)",
-    "The 34 cells Table 2 misprints (docs/ERRATA.md): Annex A gives 0 in the "
-    "fourth decimal where the page prints another digit",
+    "The 34 cells Table 2 misprints (docs/ERRATA.md): each prints a 0 of Annex A "
+    "as another digit",
 )
 def _chk_iso9295_table2_misprints() -> Outcome:
     return _iso9295_misprints(2)

@@ -5747,12 +5747,13 @@ def generate_high_frequency_air_absorption(output_dir: str) -> None:
 
     # Right: every cell's departure from Annex A as the tables computed it,
     # in units of the fourth decimal. 581 sit on zero; the 43 do not, and
-    # every one of them is a cell whose fourth decimal Annex A gives as 0.
-    right, wrong = [], []
-    for _, f, t, rh, printed in cells:
+    # every one of them is a cell whose Annex A value ends in 0.
+    right: list[tuple[float, int]] = []
+    wrong: list[tuple[float, int]] = []
+    for _, f, t, rh, cell_value in cells:
         f2, bracket = _pure_tone_terms(np.asarray([f]), t + 273.16, rh, 101.325)
         table_value = round(float((f2 * bracket)[0]), 4)
-        units = round((printed - table_value) * 1e4)
+        units = round((cell_value - table_value) * 1e4)
         (wrong if units else right).append((f / 1000.0, units))
     axd.axhline(0.0, color=COLOR_MUTED, linewidth=0.8, zorder=1)
     axd.plot(

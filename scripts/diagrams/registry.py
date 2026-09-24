@@ -110,6 +110,7 @@ from .environment import (
     _d_impulse_prominence,
     _d_outdoor,
     _d_rd1367_chain,
+    _d_statistical_pass_by_site,
     _d_wind_turbine,
     _d_wind_turbine_board,
 )
@@ -1023,6 +1024,11 @@ DIAGRAMS = {
         _d_cnossos_rail,
         "CNOSSOS-EU railway source lines and directivity angles",
         700,
+    ),
+    "diagram_statistical_pass_by_site": (
+        _d_statistical_pass_by_site,
+        "ISO 11819-1 pass-by site: the microphone and the test section",
+        596,
     ),
     "diagram_wind_turbine_board": (
         _d_wind_turbine_board,

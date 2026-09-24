@@ -1,8 +1,8 @@
 # phonometry
 
-> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1295 numerical conformance checks against 464 standards enforced in CI.
+> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1302 numerical conformance checks against 465 standards enforced in CI.
 
-phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1295 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 89 domains.
+phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1302 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 90 domains.
 
 The project was published as **PyOctaveBand** until version 3.0.0. Third-party references and dependency pins still using that name refer to this library.
 
@@ -275,6 +275,7 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 - [Overview](https://jmrplens.github.io/phonometry/environment/sources/) · [full text](https://jmrplens.github.io/phonometry/llms/llms-environment-sources.txt)
 - [CNOSSOS-EU road traffic source emission](https://jmrplens.github.io/phonometry/environment/sources/cnossos-road-emission/)
 - [CNOSSOS-EU railway source emission](https://jmrplens.github.io/phonometry/environment/sources/cnossos-rail-emission/)
+- [Road-surface noise: the statistical pass-by method (ISO 11819-1)](https://jmrplens.github.io/phonometry/environment/sources/road-surface-pass-by/)
 - [Wind-turbine noise: apparent sound power and tonal audibility (IEC 61400-11)](https://jmrplens.github.io/phonometry/environment/sources/wind-turbine-noise/)
 
 ## Aircraft noise
@@ -507,6 +508,7 @@ The generated API reference, one page per module. Fetch these only when a specif
 - [environment/rating](https://jmrplens.github.io/phonometry/reference/api/environment/rating/)
 - [environment/refraction](https://jmrplens.github.io/phonometry/reference/api/environment/refraction/)
 - [environment/spain](https://jmrplens.github.io/phonometry/reference/api/environment/spain/)
+- [environment/statistical-pass-by](https://jmrplens.github.io/phonometry/reference/api/environment/statistical-pass-by/)
 - [environment/wind-turbine](https://jmrplens.github.io/phonometry/reference/api/environment/wind-turbine/)
 - [filters/compliance](https://jmrplens.github.io/phonometry/reference/api/filters/compliance/)
 - [filters/core](https://jmrplens.github.io/phonometry/reference/api/filters/core/)
@@ -26794,7 +26796,8 @@ environmental model wants it. CNOSSOS-EU gives road traffic and railways a
 source power per band and per category, and IEC 61400-11 rates a wind turbine
 by its apparent sound power and its tonal audibility. What unites them is the
 pattern: a carefully standardised source descriptor that the path model above
-then attenuates.
+then attenuates. ISO 11819-1 sits beside them and measures something else, how
+much a road surface adds to the noise of the traffic on it.
 
 This section leans on the core toolkit, but only up to the period level.
 [Integrated and Statistical Levels](https://jmrplens.github.io/phonometry/signals/levels/levels/) supplies
@@ -26849,11 +26852,15 @@ arrives.
 ## [Environmental sources](https://jmrplens.github.io/phonometry/environment/sources/)
 
 What emits, described the way an environmental model wants it: a source
-strength per band, ready for the path above to attenuate.
+strength per band, ready for the path above to attenuate, and what a road
+surface adds to the traffic on it.
 
 - [CNOSSOS-EU road traffic source emission](https://jmrplens.github.io/phonometry/environment/sources/cnossos-road-emission/):
   the rolling and propulsion power of a traffic stream, per vehicle category
   and per band.
+- [Road-surface noise: the statistical pass-by method](https://jmrplens.github.io/phonometry/environment/sources/road-surface-pass-by/):
+  the ISO 11819-1 vehicle sound levels and Statistical Pass-By Index measured
+  on real traffic, which rank a road surface against a reference.
 - [CNOSSOS-EU railway source emission](https://jmrplens.github.io/phonometry/environment/sources/cnossos-rail-emission/):
   the equivalent for rail, with its source heights and its rolling, traction
   and aerodynamic contributions.
@@ -29452,8 +29459,8 @@ line carrying a sound power per metre at a standardised height; for a turbine it
 means an apparent sound power referred to an equivalent point source at the
 rotor centre. The height, the band range and the directivity are part of the
 definition, not details of the measurement, which is why an emission method is
-a standard in its own right and not a preliminary step. What every page here
-produces is that descriptor, in the form
+a standard in its own right and not a preliminary step. What every emission
+page here produces is that descriptor, in the form
 [Outdoor Sound Propagation](https://jmrplens.github.io/phonometry/environment/propagation/outdoor-propagation/)
 consumes.
 
@@ -29481,6 +29488,14 @@ arithmetic. Impact noise at joints and switches, curve squeal, traction,
 aerodynamic noise above 200 km/h and a bridge term are each allocated to the
 height they radiate from.
 
+[Road-surface noise: the statistical pass-by method](https://jmrplens.github.io/phonometry/environment/sources/road-surface-pass-by/)
+is the one page here that measures what a **road surface** contributes rather
+than what a source emits. ISO 11819-1 records the maximum level and the speed of
+isolated cars and heavy vehicles, fits each category with a line in the
+logarithm of speed, reads it at the reference speeds of its Table 1 and adds the
+three vehicle sound levels into the Statistical Pass-By Index, in many cases
+quoted as a difference from a reference surface.
+
 [Wind-turbine noise: sound power and tonal audibility](https://jmrplens.github.io/phonometry/environment/sources/wind-turbine-noise/)
 is IEC 61400-11, where the descriptor is **measured** rather than tabulated.
 With the microphone on a ground board at the horizontal distance R0 = H + D/2,
@@ -29493,7 +29508,8 @@ ends in a `.report()` assessment fiche.
 
 Read the road page first even for a railway job: it introduces the source-line
 bookkeeping and the Annex II layering that the rail page reuses. The turbine
-page is independent of both.
+page is independent of both, and so is the pass-by page, which feeds no
+propagation model: its index ranks surfaces.
 
 ## Pages in this section
 
@@ -29501,6 +29517,10 @@ page is independent of both.
   the rolling and propulsion sound power per vehicle category, its pavement,
   temperature, studded-tyre, gradient and junction corrections, and the
   directional power per metre of source line.
+- [Road-surface noise: the statistical pass-by method](https://jmrplens.github.io/phonometry/environment/sources/road-surface-pass-by/):
+  the ISO 11819-1 regression of each vehicle category on speed, the vehicle
+  sound levels at the Table 1 reference speeds, the index and its difference
+  from a reference surface.
 - [CNOSSOS-EU railway source emission](https://jmrplens.github.io/phonometry/environment/sources/cnossos-rail-emission/):
   roughness and transfer functions to the two equivalent source lines at 0,5 m
   and 4,0 m, with the impact, squeal, traction, aerodynamic and bridge terms.
@@ -29535,6 +29555,171 @@ carry no spectrum in Appendix G and must be supplied by the Member State, and
 how a source line is split into point sources is declared out of scope by the
 method. Depots, stations and loudspeakers are railway sources under 2.3.3 but
 are treated by the industrial method, so they are not here either.
+
+---
+
+
+<!-- source: docs/environment/sources/road-surface-pass-by.md | canonical: https://jmrplens.github.io/phonometry/environment/sources/road-surface-pass-by/ -->
+Source: https://jmrplens.github.io/phonometry/environment/sources/road-surface-pass-by/
+
+# Road-surface noise: the statistical pass-by method (ISO 11819-1)
+
+A road surface makes no noise of its own, yet the same traffic can be up to
+15 dB louder on one surface than on another (the Introduction of ISO 11819-1).
+The Statistical Pass-By method measures that influence without choosing any
+vehicles: it records the traffic that uses the road, one isolated vehicle at a
+time, and lets a regression take the vehicles out. The implemented text is ISO
+11819-1:1997, read from BS EN ISO 11819-1:2001, which is identical to it.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/statistical_pass_by_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/statistical_pass_by.svg" alt="Maximum A-weighted level against vehicle speed on a logarithmic axis for a medium-speed site: a cloud of 120 cars, 40 dual-axle and 50 multi-axle heavy vehicles, each cloud with its least-squares line, and a diamond on each line at the reference speed, 80 km/h for the cars and 70 km/h for both heavy categories; the legend gives the vehicle sound levels 78.9, 81.0 and 83.7 dB and the title the Statistical Pass-By Index of 80.1 dB" width="92%"></picture>
+
+## 1. What is measured, and on which vehicles
+
+Each vehicle is put in one of three categories (3.4): **cars (1)**,
+**dual-axle heavy vehicles (2a)** and **multi-axle heavy vehicles (2b)**. Vans,
+cars with trailers and motorcycles are not used (clause 4). The road is put in
+one of three speed categories by the average speed of its traffic (3.3): low
+(45 km/h to 64 km/h), medium (65 km/h to 99 km/h) and high (cars at 100 km/h or
+more). Table 1 gives, for each, the reference speed every level is brought to
+and the weighting factor $W_x$ each category gets in the index:
+
+| Vehicle category | Low: speed | Low: $W_x$ | Medium: speed | Medium: $W_x$ | High: speed | High: $W_x$ |
+| :--- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Cars (1) | 50 km/h | 0,900 | 80 km/h | 0,800 | 110 km/h | 0,700 |
+| Dual-axle heavy (2a) | 50 km/h | 0,075 | 70 km/h | 0,100 | 85 km/h | 0,075 |
+| Multi-axle heavy (2b) | 50 km/h | 0,025 | 70 km/h | 0,100 | 85 km/h | 0,225 |
+
+## How the measurement goes
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_statistical_pass_by_site_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_statistical_pass_by_site.svg" alt="Plan and section of a statistical pass-by site: a two-lane road with right-hand traffic, microphone position 1 on the roadside 7.5 m from the centre of the measuring lane, position 2 on the far side at the same 7.5 m, at least 30 m of level, straight road on each side of the microphone (50 m on a high-speed road), and in section the microphone 1.2 m ± 0.1 m above the road with its axis horizontal and towards the vehicles" width="92%"></picture>
+
+| Requirement | Value | Clause |
+| :--- | :--- | :--- |
+| Microphone | 7,5 m ± 0,1 m from the centre of the test lane, 1,2 m ± 0,1 m above it | 8.1 |
+| Level | Maximum A-weighted level, time weighting F; type 1 meter; calibration drift over 0,5 dB invalidates the series | 5.1, 5.3, 8.2 |
+| Speed | As the vehicle midpoint passes the microphone, standard uncertainty under 3 % | 5.4, 8.4 |
+| Which pass-bys | The level at least 6 dB lower just before and after; no overtaking or opposing traffic at the peak; constant speed | 7.2 |
+| How many | 100 cars, 30 dual-axle, 30 multi-axle and 80 heavy vehicles together, for classification | 7.3 |
+| Site and weather | Level and straight over 30 m each side (50 m on a high-speed road); wind at most 5 m/s; air 5 °C to 30 °C; road 5 °C to 50 °C; dry | 6, 11 |
+| Background | At least 10 dB under the quietest pass-by | 12 |
+
+## 2. The vehicle sound level
+
+For each category the pass-bys are fitted by least squares with
+$L_{\mathrm{AFmax}} = a + b \lg(v / 1\ \mathrm{km/h})$ (9.1), and the line read
+at the reference speed is the **vehicle sound level** $L_\mathrm{veh}$ (9.2).
+
+```python
+import numpy as np
+from phonometry import environment
+
+rng = np.random.default_rng(11819)
+site = {  # pass-bys, mean speed (km/h), spread of lg v, line and scatter (dB)
+    "1": (120, 88.0, 0.055, 16.6, 32.6, 1.4),
+    "2a": (40, 76.0, 0.050, 46.5, 18.8, 2.0),
+    "2b": (50, 74.0, 0.045, 34.5, 26.7, 2.0),
+}
+categories, speeds, levels = [], [], []
+for category, (n, mean_kmh, spread, a, b, scatter) in site.items():
+    lg_v = np.log10(mean_kmh) + spread * rng.standard_normal(n)
+    categories += [category] * n
+    speeds += (10.0**lg_v).tolist()
+    levels += (a + b * lg_v + scatter * rng.standard_normal(n)).tolist()
+
+result = environment.statistical_pass_by(
+    categories,
+    speeds,
+    levels,
+    road_speed_category="medium",
+    reference_db=environment.SPB_NORMALIZED_REFERENCE_DB,
+)
+print(dict(result.reported_vehicle_sound_levels_db))  # {'1': 78.9, '2a': 81.0, '2b': 83.7}
+print(result.reported_index_db)                       # 80.1 dB
+print(round(result.difference_db, 2))                 # 1.22 dB above Annex D
+```
+
+Each regression reports what clause 13 item 29 asks for (the slope, the
+intercept, the mean speed $10^{\overline{\lg v}}$ and the spread of the speeds,
+the spread of the residuals) and the correlation Annex E prints beside them.
+Clause 9.3 asks the reference speed to lie within one standard deviation of the
+mean speed for heavy vehicles and one and a half for cars; the window is judged in $\lg v$, the variable of the fit. The 9.3 window
+and the 7.3 counts are kept on the result and, when they fail, emitted as
+`StatisticalPassByWarning` rather than raised.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/pass_by_regression_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/pass_by_regression.svg" alt="The 120 cars of the site alone, maximum level against speed on a logarithmic axis, with their regression line, a shaded band from about 72 to 105 km/h marking the window of clause 9.3, and a diamond on the line at the 80 km/h reference speed giving a vehicle sound level of 78.9 dB" width="88%"></picture>
+
+## 3. The index and the reference surface
+
+The **Statistical Pass-By Index** adds the three levels on an energy basis
+(9.5):
+
+$$
+\mathrm{SPBI} = 10 \lg \left[ W_1 \, 10^{L_1/10}
+  + W_{2a} \frac{v_1}{v_{2a}} 10^{L_{2a}/10}
+  + W_{2b} \frac{v_1}{v_{2b}} 10^{L_{2b}/10} \right] \ \mathrm{dB}.
+$$
+
+It adds the vehicle sound levels as 9.2 reports them, to one decimal: 9.5
+defines its $L_1$, $L_{2a}$ and $L_{2b}$ as the vehicle sound levels "according
+to 9.2", which has every level "calculated to two decimal places and rounded to
+one decimal place". The index of the unrounded levels stays on the result as
+`full_precision_index_db` (80,153 dB for the site above). The index compares
+surfaces under a standard mix and is not an equivalent level of any traffic
+(9.5 NOTE). In many cases it is used as a difference from a reference surface
+(clause 10): a real dense asphalt concrete (10.1), a normalized case set by
+convention (10.2, with the Annex D example of seven dense bituminous surfaces as
+`SPB_ANNEX_D_SURFACES_DB` and its average `SPB_NORMALIZED_REFERENCE_DB`), the
+same surface at the same age (10.3) or any surface chosen (10.4). The standard
+gives no temperature correction (9.4): corrected levels are an input,
+`corrected_vehicle_sound_levels_db`, and the index is computed for them too,
+from the levels rounded to one decimal. Clause 13 lists the corrected levels and
+index as optional report items (26 and 28).
+
+## 4. How precise it is
+
+Table 2 expects individual vehicles to scatter by 1,5 dB (cars) and 2,0 dB
+(heavy) about $L_\mathrm{veh}$, which leaves 0,3 dB and 0,7 dB of 95 %
+confidence interval for 100 cars and 40 heavy vehicles of each type. Each
+regression also gives its own interval at the reference speed
+(`confidence_interval_db`, Student $t$ with $n - 2$ degrees of freedom), and
+the result combines the three into an interval on the index through the
+sensitivity of the index to each level, taking the categories as independent.
+
+## 5. The example of Annex E, and its rounding
+
+Annex E prints $L_\mathrm{veh}$ = 78,5, 81,1 and 83,8 dB and an index of 79,9 dB,
+which is the index of those three levels, 79,946 dB, rounded once. That is the
+chain 9.2 and 9.5 require, and the one the library runs: from pass-bys placed on
+the printed regression lines, `index_db` is 79,946 dB and `reported_index_db`
+79,9 dB, and the conformance row pins that value. Carried unrounded from the
+printed lines, the levels would be 78,546, 81,114 and 83,838 dB and their index
+79,985 dB (`full_precision_index_db`), which would print 80,0. The printed
+coefficients are themselves rounded, so the lines alone do not decide between
+the two: over every line consistent with the printed intercept, slope, mean
+level, mean speed and vehicle sound level, the unrounded index spans 79,948 dB
+to 79,996 dB. The corrected index (80,1 dB) and the temperature-corrected
+2,8 dB difference from the 77,3 dB reference are pinned the same way.
+
+The 77,3 dB reference is described as seven surfaces of the same composition as
+Annex D, whose levels index to 78,92 dB with the same weights; the standard does
+not say they are one database. The speed spreads of Annex E do not fit its own
+regression; see the [errata registry](https://jmrplens.github.io/phonometry/reference/errata/).
+
+## What this page does not cover
+
+The measurement itself (classifying vehicles, screening pass-bys for the 6 dB
+dips of 7.2, the site and weather checks), a temperature correction the
+standard does not give, and the Close-Proximity method of ISO 11819-2. Later
+editions of ISO 11819-1 were not consulted.
+
+## See also
+
+- [CNOSSOS-EU road traffic source emission](https://jmrplens.github.io/phonometry/environment/sources/cnossos-road-emission/): the
+  prediction side, where a surface is a correction per vehicle category.
+- [In-situ road-surface absorption](https://jmrplens.github.io/phonometry/materials/surfaces/road-absorption/):
+  the ISO 13472 absorption of the surface itself.
+- [Errata in published sources](https://jmrplens.github.io/phonometry/reference/errata/): the two ISO 11819-1 entries.
+- API reference: [`environment.sources.statistical_pass_by`](https://jmrplens.github.io/phonometry/reference/api/environment/statistical-pass-by/).
 
 ---
 
@@ -41905,6 +42090,19 @@ documents, one page per module.
 | `CNOSSOS_A_WEIGHTING` | `tuple` | **Octave-band A-weighting AWCf,i printed by Annex II 2.5.5 as amended by (EU) 2021/1226.**<br>(no parameters) | `CNOSSOS_A_WEIGHTING  # (-26.2, …, -1.1)` |
 | `ROAD_OCTAVE_BANDS` | `tuple` | **CNOSSOS-EU road source octave bands (63 Hz…8 kHz, per the 2018 corrigendum to 2.2.1).**<br>(no parameters) | `ROAD_OCTAVE_BANDS` |
 | `ROAD_REFERENCE_SPEED` / `ROAD_REFERENCE_TEMPERATURE` / `ROAD_SOURCE_HEIGHT` | `float` | **Reference conditions of Annex II 2.2.**<br>vref = 70 km/h, tauref = 20 °C, source height 0,05 m | `ROAD_REFERENCE_SPEED  # 70.0` |
+| `statistical_pass_by` | `function` | **Statistical Pass-By method of a road surface (ISO 11819-1:1997, 9.1 to 9.5).**<br>• `vehicle_categories` (`"1"` cars, `"2a"` dual-axle, `"2b"` multi-axle heavy) / `speeds_kmh` / `max_levels_db` (LAFmax): one row per pass-by<br>• `road_speed_category`: `"low"`\|`"medium"`\|`"high"` (Table 1 reference speeds and weights)<br>• `corrected_vehicle_sound_levels_db`: temperature-corrected L_veh (9.4 gives no method)<br>• `reference_db`: reference surface SPBI or its three L_veh (clause 10)<br>• `weighting_factors`: other proportions, summing to 1<br>• 7.3 counts and 9.3 speed windows emit `StatisticalPassByWarning` | `res = environment.statistical_pass_by(cats, v, L, road_speed_category="medium")`<br><br>• `StatisticalPassByResult` |
+| `StatisticalPassByResult` | `dataclass` | **Vehicle sound levels and index of one surface.**<br>• `regressions` (per category) / `vehicle_sound_levels_db` / `index_db` (unrounded)<br>• `reported_vehicle_sound_levels_db` / `reported_index_db` (one decimal, half up)<br>• `corrected_index_db` / `reference_index_db` / `.difference_db` / `.corrected_difference_db`<br>• `.index_confidence_interval_db` / `.meets_minimum_counts` / `.reference_speeds_in_window`<br>• `.plot()`: the three clouds, their lines and L_veh | `res.reported_index_db` |
+| `pass_by_regression` | `function` | **Least-squares line of LAFmax on lg v for one category, read at the reference speed (9.1, 9.2).**<br>• `speeds_kmh` / `max_levels_db`<br>• `vehicle_category` / `road_speed_category` | `reg = environment.pass_by_regression(v, L, vehicle_category="1", road_speed_category="medium")`<br><br>• `PassByRegression` |
+| `PassByRegression` | `dataclass` | **One category's line and the clause 13 item 29 statistics.**<br>• `intercept_db` / `slope_db_per_decade` / `correlation`<br>• `level_standard_deviation_db` / `residual_standard_deviation_db` (n − 2) / `lg_speed_standard_deviation`<br>• `.vehicle_sound_level_db` / `.reported_vehicle_sound_level_db` / `.mean_speed_kmh` (10^mean lg v)<br>• `.speed_window_kmh` / `.reference_speed_in_window` (9.3) / `.meets_minimum_count` (7.3)<br>• `.confidence_interval_db` (95 %, Student t) / `.plot()` | `reg.vehicle_sound_level_db` |
+| `statistical_pass_by_index` | `function` | **SPBI of three vehicle sound levels (9.5).**<br>• `vehicle_sound_levels_db`: keyed `"1"`, `"2a"`, `"2b"`<br>• `road_speed_category` / `weighting_factors` | `environment.statistical_pass_by_index({"1": 78.5, "2a": 81.1, "2b": 83.8}, road_speed_category="medium")  # 79.946…` |
+| `normalized_reference_levels` | `function` | **L_veh of a normalized reference surface: the average of several surfaces (10.2, Annex D).**<br>• `surface_levels_db`: surface label → the three L_veh | `normalized_reference_levels(SPB_ANNEX_D_SURFACES_DB)` |
+| `StatisticalPassByWarning` | `warning class` | **ISO 11819-1 advisory.**<br>Emitted when a category falls short of the 7.3 minimum count or its reference speed leaves the 9.3 window | `warnings.simplefilter('error', StatisticalPassByWarning)` |
+| `SPB_REFERENCE_SPEEDS_KMH` / `SPB_WEIGHTING_FACTORS` | `mapping` | **Table 1: reference speeds [km/h] and weighting factors Wx, by road speed then vehicle category.** | `SPB_REFERENCE_SPEEDS_KMH["medium"]["1"]  # 80.0` |
+| `SPB_VEHICLE_STANDARD_DEVIATIONS_DB` / `SPB_CONFIDENCE_INTERVALS_DB` | `mapping` | **Table 2: expected spread of individual vehicles about L_veh and the 95 % interval it leaves [dB].** | `SPB_CONFIDENCE_INTERVALS_DB["1"]  # 0.3` |
+| `SPB_MINIMUM_VEHICLE_COUNTS` / `SPB_SPEED_WINDOW_STANDARD_DEVIATIONS` | `mapping` | **7.3 minimum vehicles for classification (`"2"` is 2a and 2b together) and the 9.3 window in standard deviations of speed.** | `SPB_MINIMUM_VEHICLE_COUNTS["2"]  # 80` |
+| `SPB_ANNEX_D_SURFACES_DB` / `SPB_NORMALIZED_REFERENCE_DB` | `mapping` | **Annex D: the seven surfaces of the example reference case and their average row [dB], medium speed range.** | `SPB_NORMALIZED_REFERENCE_DB["2b"]  # 84.0` |
+| `SPB_VEHICLE_CATEGORIES` / `SPB_ROAD_SPEED_CATEGORIES` | `constant` | **The category labels the method uses: `("1", "2a", "2b")` and `("low", "medium", "high")`.** | `SPB_VEHICLE_CATEGORIES` |
+| `SPB_REFERENCE_AIR_TEMPERATURE_C` | `float` | **9.4: the air temperature L_veh should be corrected to [°C].** | `SPB_REFERENCE_AIR_TEMPERATURE_C  # 20.0` |
 | `ground_effect` | `function` | **Spherical-wave ground effect ΔL (Weyl-Van der Pol; Attenborough 2e Eq. 2.40, Salomons Eq. 3.4).**<br>• `frequencies` [Hz], `source_height` hs, `receiver_height` hr, `distance` [m]<br>• `impedance` (normalized) or `flow_resistivity` σ [Pa·s/m²]<br>• `model` 'delany_bazley'/'miki' | `r = environment.ground_effect(bands, 1, 1.5, 50, flow_resistivity=2e5)`<br><br>• `SphericalGroundResult` (ΔL, Q, Rp, F) |
 | `GroundSurface` | `dataclass` | **One ground surface as one published table prints it.**<br>• `flow_resistivity_pa_s_m2` is an **effective** resistivity: the number that makes a rigid-framed ground model reproduce a measured attenuation, so it carries the fit it came from<br>• `porosity` (a fraction), `water_content_percent`, `porosity_decay_rate_per_m`: what Cox tabulates beside it; the six porosities Cox prints in per cent in a column of fractions are `None`, and `.why_missing('porosity')` quotes them<br>• `iso_9613_ground_factor`, `nmpb_ground_factor`, `harmonoise_class`: the class rows, where the two models disagree on two of the eight classes<br>• The hedges every catalogue row has: `ranges`, `reported`, `unquantified`, `uncertainty`, `approximate`, `variant` | `g = environment.PUBLISHED_GROUND['bies-2017-table-5-1/sugar_snow']`<br>`g.printed('flow_resistivity_pa_s_m2')`<br><br>• `g.source` prints the page |
 | `PUBLISHED_GROUND` | `mapping` | **A hundred and five ground surfaces from three published tables, keyed `'<table>/<row>'`.**<br>• Bies 5e Table 5.1, thirty-four measured surfaces, and Table 5.2, the eight classes A to H with the ISO 9613-2 and NMPB-2008 ground factors<br>• Cox & D'Antonio 3e Table 6.7, sixty-three rows: the same surface fitted with three different models is three rows, because the fit is part of the quantity<br>• Seven surfaces both books take from Embleton (1983) come out to the same digits through two different printed units<br>• One cell of Cox prints `1.7.3 × 10⁵`, with two decimal points; it is kept as the page printed it and answers `None` | `environment.PUBLISHED_GROUND['bies-2017-table-5-2/normal_uncompacted_ground']`<br><br>• `GroundSurface`, `ground_surfaces_named` |
@@ -57810,7 +58008,7 @@ the normative PDF fiche.
 - [Filter Architecture Gallery](https://jmrplens.github.io/phonometry/signals/filters/filter-gallery/): choose an architecture and inspect responses
 - [Calibration and dBFS](https://jmrplens.github.io/phonometry/signals/metrology/calibration/): get real-world SPL values
 - [Why phonometry](https://jmrplens.github.io/phonometry/start/why-phonometry/): the conformance-first design philosophy
-- [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): the expected and computed value of all 1295 checks
+- [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): the expected and computed value of all 1302 checks
 - [API Reference](https://jmrplens.github.io/phonometry/reference/api/): every parameter of every function
 - [Bibliography](https://jmrplens.github.io/phonometry/reference/bibliography/): the books and papers behind every guide, each with a verified link
 
@@ -58782,7 +58980,7 @@ sample from the metrology core:
 | IEC 61252:1993 | The personal sound exposure quantities, `sound_exposure()` and the normalized 8 h level `lex_8h()`; IEC 61252:2025 has since superseded this print, and the transcription still targets the 1993+A2 text | `tests/signals/test_levels.py` |
 
 The same discipline applies far beyond the metrology core: today the suite runs
-1295 numerical conformance checks across 89 domains and 464 standards, covering
+1302 numerical conformance checks across 90 domains and 465 standards, covering
 psychoacoustics and speech intelligibility, room, building and materials
 acoustics, human and machine vibration, environmental, aircraft, rotorcraft
 and underwater noise, electroacoustics, broadcast loudness, industrial noise

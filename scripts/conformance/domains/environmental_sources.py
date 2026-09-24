@@ -1,10 +1,18 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
-"""Environmental noise sources: road traffic and wind turbines.
+"""Environmental noise sources: road traffic, road surfaces and wind turbines.
 
 The CNOSSOS-EU road source of Directive 2002/49/EC Annex II 2.2 - rolling and
 propulsion emission per vehicle category, the road-surface corrections and the
 traffic-flow assembly - checked against the CIRCABC emission test set the
 Commission publishes with the method.
+
+The Statistical Pass-By method of ISO 11819-1 follows: the reference speeds and
+weighting factors of Table 1, the expected random errors of Table 2, and the
+example report of Annex E run from pass-bys to the difference from the
+reference surface, with the reference surface of Annex D averaged from its
+seven rows. Annex E prints its regression lines but not the pass-bys, so the
+chain starts from pass-bys placed so that their least-squares line is exactly
+the printed one.
 
 The IEC 61400-11 wind-turbine quantities close the module: the apparent sound
 power level referred to the rotor centre and the tonal-audibility chain, both
@@ -18,10 +26,11 @@ from typing import Any
 
 import numpy as np
 import reference_data as ref
+from reference_data import statistical_pass_by as spb
 
 import phonometry as ph
 
-from ..registry import Outcome, count, numeric, register
+from ..registry import Outcome, count, numeric, record, register
 
 _CNOSSOS_ROAD = "CNOSSOS-EU road source (Directive 2002/49/EC Annex II)"
 
@@ -287,3 +296,158 @@ def _chk_wt_tonal_audibility() -> Outcome:
     levels[int(np.argmin(np.abs(freqs - 500.0)))] = 60.0
     res = ph.environment.wind_turbine_tonality(levels, freqs)
     return numeric(16.38, res.tonal_audibility, 6e-2, unit="dB", places=2)
+
+
+# ===========================================================================
+# Road surfaces: the Statistical Pass-By method (ISO 11819-1)
+# ===========================================================================
+_ROAD_SURFACE = "Road-surface influence on traffic noise (ISO 11819-1)"
+
+#: The Annex E site: a medium-speed road, cars at 80 km/h and heavy vehicles
+#: at 70 km/h.
+_SPB_ROAD = spb.ANNEX_E_ROAD_SPEED_CATEGORY
+
+
+def _given(value: float | None) -> float:
+    """A value the call was given the inputs for, which cannot be missing."""
+    if value is None:
+        msg = "the corrected levels were passed, so the corrected value exists."
+        raise ValueError(msg)
+    return value
+
+
+def _spb_annex_e(**options: Any) -> ph.environment.StatisticalPassByResult:
+    """The method run on pass-bys whose lines are the Annex E ones."""
+    categories: list[str] = []
+    speeds: list[float] = []
+    levels: list[float] = []
+    for category in ph.environment.SPB_VEHICLE_CATEGORIES:
+        v, level = spb.annex_e_pass_bys(category)
+        categories += [category] * len(v)
+        speeds += v
+        levels += level
+    return ph.environment.statistical_pass_by(
+        categories, speeds, levels, road_speed_category=_SPB_ROAD, **options
+    )
+
+
+@register(
+    _ROAD_SURFACE,
+    "ISO 11819-1:1997 Table 1",
+    "Reference speeds and weighting factors, 3 road speed categories x 3 "
+    "vehicle categories x 2",
+)
+def _chk_spb_table_1() -> Outcome:
+    printed = [
+        (spb.TABLE_1_REFERENCE_SPEEDS_KMH, ph.environment.SPB_REFERENCE_SPEEDS_KMH),
+        (spb.TABLE_1_WEIGHTING_FACTORS, ph.environment.SPB_WEIGHTING_FACTORS),
+    ]
+    cells = [
+        (float(table[road][category]), float(published[road][category]))
+        for table, published in printed
+        for road in table
+        for category in table[road]
+    ]
+    matching = sum(1 for want, got in cells if math.isclose(want, got, abs_tol=0.0))
+    return count(matching, len(cells), subject="printed cells")
+
+
+@register(
+    _ROAD_SURFACE,
+    "ISO 11819-1:1997 Table 2",
+    "Expected random errors: standard deviation of individual vehicles and "
+    "95 % confidence interval around L_veh, 3 vehicle categories, dB",
+)
+def _chk_spb_table_2() -> Outcome:
+    printed = {
+        **{f"s {k}": v for k, v in spb.TABLE_2_STANDARD_DEVIATIONS_DB.items()},
+        **{f"CI {k}": v for k, v in spb.TABLE_2_CONFIDENCE_INTERVALS_DB.items()},
+    }
+    published = {
+        **{
+            f"s {k}": v
+            for k, v in ph.environment.SPB_VEHICLE_STANDARD_DEVIATIONS_DB.items()
+        },
+        **{f"CI {k}": v for k, v in ph.environment.SPB_CONFIDENCE_INTERVALS_DB.items()},
+    }
+    return record(printed, published, unit="dB")
+
+
+@register(
+    _ROAD_SURFACE,
+    "ISO 11819-1:1997 Annex E, regression data",
+    "L_veh of cars, dual-axle and multi-axle heavy vehicles at 80 and 70 km/h, "
+    "from pass-bys on the printed regression lines, reported to one decimal, dB",
+)
+def _chk_spb_annex_e_vehicle_levels() -> Outcome:
+    result = _spb_annex_e()
+    return record(
+        spb.ANNEX_E_VEHICLE_SOUND_LEVELS_DB,
+        dict(result.reported_vehicle_sound_levels_db),
+        unit="dB",
+    )
+
+
+@register(
+    _ROAD_SURFACE,
+    "ISO 11819-1:1997 9.2, 9.5 and Annex E",
+    "SPBI not corrected for temperature, from pass-bys on the printed "
+    "regression lines through the L_veh of 9.2 to one decimal, dB",
+)
+def _chk_spb_annex_e_index() -> Outcome:
+    return numeric(
+        spb.ANNEX_E_INDEX_DB, _spb_annex_e().index_db, 0.05, unit="dB", places=3
+    )
+
+
+@register(
+    _ROAD_SURFACE,
+    "ISO 11819-1:1997 9.5 and Annex E",
+    "SPBI corrected for temperature, from the corrected L_veh Annex E prints, dB",
+)
+def _chk_spb_annex_e_corrected_index() -> Outcome:
+    result = _spb_annex_e(
+        corrected_vehicle_sound_levels_db=spb.ANNEX_E_CORRECTED_VEHICLE_SOUND_LEVELS_DB
+    )
+    return numeric(
+        spb.ANNEX_E_CORRECTED_INDEX_DB,
+        _given(result.corrected_index_db),
+        0.05,
+        unit="dB",
+        places=3,
+    )
+
+
+@register(
+    _ROAD_SURFACE,
+    "ISO 11819-1:1997 clause 10 and Annex E",
+    "Difference of the temperature-corrected SPBI from the 77,3 dB of the "
+    "reference surface, dB",
+)
+def _chk_spb_annex_e_difference() -> Outcome:
+    result = _spb_annex_e(
+        corrected_vehicle_sound_levels_db=spb.ANNEX_E_CORRECTED_VEHICLE_SOUND_LEVELS_DB,
+        reference_db=spb.ANNEX_E_REFERENCE_INDEX_DB,
+    )
+    return numeric(
+        spb.ANNEX_E_DIFFERENCE_DB,
+        _given(result.corrected_difference_db),
+        0.05,
+        unit="dB",
+        places=3,
+    )
+
+
+@register(
+    _ROAD_SURFACE,
+    "ISO 11819-1:1997 10.2 and Annex D",
+    "L_veh of the normalized reference surface for the medium speed range, "
+    "the average of the seven surfaces printed, to one decimal, dB",
+)
+def _chk_spb_annex_d_reference() -> Outcome:
+    averaged = ph.environment.normalized_reference_levels(spb.ANNEX_D_SURFACES_DB)
+    return record(
+        spb.ANNEX_D_AVERAGE_DB,
+        {key: round(value, 1) for key, value in averaged.items()},
+        unit="dB",
+    )

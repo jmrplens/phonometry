@@ -240,6 +240,7 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | :--- | :--- |
 | [`environment.propagation.outdoor_propagation`](/phonometry/reference/api/environment/outdoor-propagation/) | Outdoor sound propagation: ISO 9613-2:1996 general method of calculation. |
 | [`environment.sources.cnossos_road`](/phonometry/reference/api/environment/cnossos-road/) | CNOSSOS-EU road traffic source emission (Directive 2002/49/EC Annex II, 2.2). |
+| [`environment.sources.statistical_pass_by`](/phonometry/reference/api/environment/statistical-pass-by/) | What a road surface adds to the noise of the traffic on it (ISO 11819-1:1997). |
 | [`environment.propagation.ground_barriers`](/phonometry/reference/api/environment/ground-barriers/) | Spherical-wave ground effect and advanced barrier diffraction. |
 | [`environment.propagation.ground_surfaces`](/phonometry/reference/api/environment/ground-surfaces/) | Ground surfaces as the pages that print them print them. |
 | [`environment.propagation.noise_reducing_devices`](/phonometry/reference/api/environment/noise-reducing-devices/) | Single-number ratings of noise reducing devices (EN 1793, EN 16272). |

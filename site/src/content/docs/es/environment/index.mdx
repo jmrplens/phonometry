@@ -1,6 +1,6 @@
 ---
 title: "Medio ambiente y transporte"
-description: "El sonido en exteriores y las fuentes que lo dominan: el modelo de propagación ISO 9613, el nivel de evaluación de ISO 1996 y su aplicación española, el ajuste por sonidos impulsivos NT ACOU 112, y los modelos de fuente CNOSSOS-EU de carretera y ferrocarril y de aerogeneradores de IEC 61400-11."
+description: "El sonido en exteriores y las fuentes que lo dominan: el modelo de propagación ISO 9613, el nivel de evaluación de ISO 1996 y su aplicación española, el ajuste por sonidos impulsivos NT ACOU 112, los modelos de fuente CNOSSOS-EU de carretera y ferrocarril y de aerogeneradores de IEC 61400-11, y el método estadístico de paso de la ISO 11819-1, que califica un pavimento."
 ---
 
 import Scope from '../../../../components/Scope.astro';
@@ -24,7 +24,9 @@ como lo quiere un modelo ambiental. CNOSSOS-EU da al tráfico viario y al
 ferrocarril una potencia de fuente por banda y por categoría, e IEC 61400-11
 valora un aerogenerador por su potencia acústica aparente y su audibilidad
 tonal. Lo que los une es el patrón: un descriptor de fuente cuidadosamente
-normalizado que el modelo de camino de arriba atenúa después.
+normalizado que el modelo de camino de arriba atenúa después. La ISO 11819-1
+está junto a ellos y mide otra cosa: cuánto añade un pavimento al ruido del
+tráfico que circula por él.
 
 Esta sección se apoya en el núcleo de la biblioteca, pero solo hasta el nivel
 de periodo.
@@ -85,11 +87,16 @@ llega.
 ## [Fuentes ambientales](/phonometry/es/environment/sources/)
 
 Lo que emite, descrito como lo quiere un modelo ambiental: una potencia de
-fuente por banda, lista para que el camino de arriba la atenúe.
+fuente por banda, lista para que el camino de arriba la atenúe, y lo que un
+pavimento añade al tráfico que circula por él.
 
 - [Emisión de la fuente de tráfico viario CNOSSOS-EU](/phonometry/es/environment/sources/cnossos-road-emission/):
   la potencia de rodadura y propulsión de un flujo de tráfico, por categoría
   de vehículo y por banda.
+- [Ruido y pavimento: el método estadístico de paso](/phonometry/es/environment/sources/road-surface-pass-by/):
+  los niveles sonoros de vehículo y el índice estadístico de paso de la
+  ISO 11819-1, medidos sobre tráfico real, que ordenan un pavimento frente a
+  una referencia.
 - [Emisión de la fuente ferroviaria CNOSSOS-EU](/phonometry/es/environment/sources/cnossos-rail-emission/):
   el equivalente para ferrocarril, con sus alturas de fuente y sus aportes de
   rodadura, tracción y aerodinámico.

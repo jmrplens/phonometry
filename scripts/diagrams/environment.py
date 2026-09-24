@@ -1488,3 +1488,121 @@ def _d_rd1367_chain(s: SVG, th: Theme) -> None:
         th.muted,
         anchor="start",
     )
+
+
+# ---------------------------------------------------------------------------
+# ISO 11819-1 statistical pass-by: the site and the microphone (6.1, 8.1)
+# ---------------------------------------------------------------------------
+
+
+def _d_statistical_pass_by_site(s: SVG, th: Theme) -> None:
+    # --- plan, 12 px per metre -------------------------------------------
+    # Figure 3's two-lane road: the measuring lane on the roadside of
+    # right-hand traffic, the microphone 7,5 m from its centre (8.1), and
+    # 30 m of level, straight road on each side of it (6.1).
+    rx0, rx1 = 50.0, 850.0
+    mx = 450.0
+    per_m = 12.0
+    s.text(rx0, 64.0, "Plan, right-hand traffic", 17, th.fg, anchor="start", bold=True)
+    shoulder, lane = 1.5 * per_m, 3.5 * per_m
+    top = 118.0
+    y_opp = top + shoulder
+    y_mid = y_opp + lane
+    y_near = y_mid + lane
+    y_edge = y_near + shoulder
+    centre = y_mid + lane / 2
+    s.rect(rx0, top, rx1 - rx0, shoulder, th.bg, th.muted, sw=1.0)
+    s.rect(rx0, y_edge - shoulder, rx1 - rx0, shoulder, th.bg, th.muted, sw=1.0)
+    s.rect(rx0, y_opp, rx1 - rx0, 2 * lane, th.panel, th.muted, sw=1.2)
+    s.line(rx0, y_mid, rx1, y_mid, th.muted, 1.6, dash="14,10")
+    s.text(rx0 + 10, top + 14, "shoulder", 13, th.muted, anchor="start")
+    s.text(rx0 + 10, y_edge - 4, "shoulder", 13, th.muted, anchor="start")
+    s.text(rx0 + 10, y_opp + 27, "opposing lane", 15, th.fg, anchor="start")
+    s.text(rx0 + 10, y_mid + 27, "measuring lane", 15, th.fg, anchor="start", bold=True)
+    s.text(mx + 16, y_edge + 20, "roadside area", 13, th.muted, anchor="start")
+
+    # One vehicle on its own, driving towards the microphone.
+    cx0, cx1 = 300.0, 354.0
+    s.rect(cx0, centre - 11, cx1 - cx0, 22, th.secondary, rx=6)
+    s.arrow(cx1 + 8, centre, cx1 + 48, centre, th.secondary, 2.0)
+
+    # The two microphone positions, both 7,5 m from the measuring lane.
+    mic1 = centre + 7.5 * per_m
+    mic2 = centre - 7.5 * per_m
+    for my in (mic1, mic2):
+        s.circle(mx, my, 7, th.primary)
+    s.line(mx, mic2 + 7, mx, mic1 - 7, th.muted, 0.9, dash="3,3")
+    s.dim(mx - 22, centre, mx - 22, mic1, "7.5 m", 0, 15)
+    s.dim(mx - 22, centre, mx - 22, mic2, "7.5 m", 0, 15)
+    s.line(mx - 30, centre, mx + 30, centre, th.muted, 0.9, dash="3,3")
+    s.text(
+        mx + 16,
+        mic1 + 6,
+        "microphone position 1",
+        15,
+        th.primary,
+        anchor="start",
+        bold=True,
+    )
+    s.text(
+        mx + 16,
+        mic2 + 5,
+        "position 2, when the near shoulder is unsuitable",
+        15,
+        th.primary,
+        anchor="start",
+    )
+
+    # The test section, 30 m each way (50 m on a high-speed road).
+    half = 30.0 * per_m
+    s.dim(mx - half, y_edge, mx, y_edge, "≥ 30 m (50 m on a high-speed road)", 92, 15)
+    s.dim(mx, y_edge, mx + half, y_edge, "≥ 30 m", 92, 15)
+    s.text(
+        rx0,
+        y_edge + 124,
+        "test section: level and straight, the surface homogeneous over it (6.1)",
+        15,
+        th.fg,
+        anchor="start",
+    )
+
+    # --- section at the microphone, 40 px per metre ------------------------
+    gy = 540.0
+    sec_m = 40.0
+    s.text(
+        rx0, 424.0, "Section at the microphone", 17, th.fg, anchor="start", bold=True
+    )
+    s.text(
+        rx0,
+        450.0,
+        "per isolated pass-by: category, speed $v$ and $L_{AFmax}$",
+        15,
+        th.fg,
+        anchor="start",
+    )
+    s.ground(gy, rx0, rx1)
+    lane_x = 380.0
+    road_x0 = lane_x - 1.5 * 3.5 * sec_m
+    road_x1 = lane_x + (3.5 / 2 + 1.5) * sec_m
+    s.rect(road_x0, gy - 8, road_x1 - road_x0, 8, th.muted)
+    # A car on the measuring lane (its size is not to scale).
+    s.rect(lane_x - 55, gy - 34, 110, 16, th.secondary, rx=5)
+    s.path(
+        f"M {lane_x - 40} {gy - 34} L {lane_x - 26} {gy - 52} "
+        f"L {lane_x + 22} {gy - 52} L {lane_x + 38} {gy - 34} Z",
+        fill=th.secondary,
+    )
+    s.circle(lane_x - 32, gy - 16, 9, th.fg)
+    s.circle(lane_x + 32, gy - 16, 9, th.fg)
+    s.line(lane_x, gy - 62, lane_x, gy, th.muted, 0.9, dash="3,3")
+    s.text(lane_x, gy - 70, "lane centre", 13, th.muted)
+
+    mic_x = lane_x + 7.5 * sec_m
+    cap = gy - 1.2 * sec_m
+    s.mic(mic_x, cap, gy, 0.8)
+    s.arrow(mic_x - 10, cap + 5, mic_x - 70, cap + 5, th.primary, 1.8)
+    s.text(
+        mic_x - 40, cap - 24, "axis horizontal, towards the vehicles", 15, th.primary
+    )
+    s.dim(mic_x, gy, mic_x, cap, "1.2 m ± 0.1 m", 56, 15, label_side="right")
+    s.dim(lane_x, gy, mic_x, gy, "7.5 m ± 0.1 m", 30, 15)

@@ -1,5 +1,5 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
-"""environment.sources subdomain of phonometry: environmental source emission (CNOSSOS, wind turbines)."""
+"""environment.sources subdomain of phonometry: environmental source emission (CNOSSOS, road surfaces, wind turbines)."""
 
 from __future__ import annotations
 
@@ -76,6 +76,26 @@ from .cnossos_road import (
     road_surface_coefficients,
     road_vehicle_sound_power,
 )
+from .statistical_pass_by import (
+    SPB_ANNEX_D_SURFACES_DB,
+    SPB_CONFIDENCE_INTERVALS_DB,
+    SPB_MINIMUM_VEHICLE_COUNTS,
+    SPB_NORMALIZED_REFERENCE_DB,
+    SPB_REFERENCE_AIR_TEMPERATURE_C,
+    SPB_REFERENCE_SPEEDS_KMH,
+    SPB_ROAD_SPEED_CATEGORIES,
+    SPB_SPEED_WINDOW_STANDARD_DEVIATIONS,
+    SPB_VEHICLE_CATEGORIES,
+    SPB_VEHICLE_STANDARD_DEVIATIONS_DB,
+    SPB_WEIGHTING_FACTORS,
+    PassByRegression,
+    StatisticalPassByResult,
+    StatisticalPassByWarning,
+    normalized_reference_levels,
+    pass_by_regression,
+    statistical_pass_by,
+    statistical_pass_by_index,
+)
 from .wind_turbine import (
     WindTurbineNoiseWarning,
     WindTurbineTonalityResult,
@@ -85,6 +105,24 @@ from .wind_turbine import (
 )
 
 __all__ = [
+    "SPB_ANNEX_D_SURFACES_DB",
+    "SPB_CONFIDENCE_INTERVALS_DB",
+    "SPB_MINIMUM_VEHICLE_COUNTS",
+    "SPB_NORMALIZED_REFERENCE_DB",
+    "SPB_REFERENCE_AIR_TEMPERATURE_C",
+    "SPB_REFERENCE_SPEEDS_KMH",
+    "SPB_ROAD_SPEED_CATEGORIES",
+    "SPB_SPEED_WINDOW_STANDARD_DEVIATIONS",
+    "SPB_VEHICLE_CATEGORIES",
+    "SPB_VEHICLE_STANDARD_DEVIATIONS_DB",
+    "SPB_WEIGHTING_FACTORS",
+    "PassByRegression",
+    "StatisticalPassByResult",
+    "StatisticalPassByWarning",
+    "normalized_reference_levels",
+    "pass_by_regression",
+    "statistical_pass_by",
+    "statistical_pass_by_index",
     "AERODYNAMIC_REFERENCE_SPEED",
     "AERODYNAMIC_THRESHOLD_SPEED",
     "CNOSSOS_A_WEIGHTING",

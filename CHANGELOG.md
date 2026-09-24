@@ -63,6 +63,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   values would be 3.21 dB and 9.37 dB rather than the printed 3,3 dB and
   9,3 dB. The
   hearing-protector guide gains a section on the measurement in both languages.
+- **What a road surface adds to traffic noise, by the ISO 11819-1 statistical
+  pass-by.** `environment.statistical_pass_by` takes one row per isolated
+  vehicle (its category, cars `"1"`, dual-axle `"2a"` or multi-axle heavy
+  `"2b"`, its speed and its maximum A-weighted level), fits each category
+  with a least-squares line in the logarithm of speed, reads it at the
+  reference speed of Table 1 for the road's speed category, rounds the three
+  vehicle sound levels to one decimal as 9.2 has them reported, and adds them
+  into the Statistical Pass-By Index of 9.5, whose levels are those of 9.2.
+  It takes temperature-corrected levels as an input, since 9.4 gives no
+  correction, and a reference surface as an index or as its three levels,
+  and returns the difference from it; the index of the unrounded levels
+  stays on the result as `full_precision_index_db`. `pass_by_regression`
+  fits one category and keeps what clause 13 item 29 asks to be reported
+  (slope, intercept, the mean and the spread of the speeds, the spread of
+  the residuals), the correlation and level spread Annex E prints beside
+  them, the 95 % interval of the line at the reference speed and the 9.3
+  window the reference speed must fall in; the 9.3 window and the 7.3
+  minimum counts are judged, kept on the result and emitted as
+  `StatisticalPassByWarning` when they fail. `statistical_pass_by_index`
+  computes the index of levels already reported, and
+  `normalized_reference_levels` averages surfaces into a reference as Annex D
+  does. Tables 1 and 2, the 7.3 and 9.3 numbers and the Annex D surfaces are
+  read-only tables, and both results draw themselves with `.plot()`. Run from
+  pass-bys placed on the regression lines Annex E prints, the method gives
+  its 78,5, 81,1 and 83,8 dB and its index of 79,9 dB; the unrounded levels
+  would give 79,985 dB, and the guide explains why the printed lines alone
+  cannot tell the two apart and why the clauses can. Seven conformance rows
+  run Annex E from pass-bys to its 2,8 dB difference and Annex D to its
+  average, and two defects of the printed page are in the errata registry. A
+  new guide covers the method in English and Spanish, with a diagram of the
+  measurement site.
 - **The ISO 1683 reference values, published once and read by every level.**
   `metrology.ISO1683_REFERENCE_VALUES` holds ISO 1683:2015 Tables 1 to 3,
   the reference values for sound in gases, sound in liquids and vibration,

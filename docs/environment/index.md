@@ -19,7 +19,8 @@ environmental model wants it. CNOSSOS-EU gives road traffic and railways a
 source power per band and per category, and IEC 61400-11 rates a wind turbine
 by its apparent sound power and its tonal audibility. What unites them is the
 pattern: a carefully standardised source descriptor that the path model above
-then attenuates.
+then attenuates. ISO 11819-1 sits beside them and measures something else, how
+much a road surface adds to the noise of the traffic on it.
 
 This section leans on the core toolkit, but only up to the period level.
 [Integrated and Statistical Levels](../signals/levels/levels.md) supplies
@@ -74,11 +75,15 @@ arrives.
 ## [Environmental sources](sources/index.md)
 
 What emits, described the way an environmental model wants it: a source
-strength per band, ready for the path above to attenuate.
+strength per band, ready for the path above to attenuate, and what a road
+surface adds to the traffic on it.
 
 - [CNOSSOS-EU road traffic source emission](sources/cnossos-road-emission.md):
   the rolling and propulsion power of a traffic stream, per vehicle category
   and per band.
+- [Road-surface noise: the statistical pass-by method](sources/road-surface-pass-by.md):
+  the ISO 11819-1 vehicle sound levels and Statistical Pass-By Index measured
+  on real traffic, which rank a road surface against a reference.
 - [CNOSSOS-EU railway source emission](sources/cnossos-rail-emission.md):
   the equivalent for rail, with its source heights and its rolling, traction
   and aerodynamic contributions.

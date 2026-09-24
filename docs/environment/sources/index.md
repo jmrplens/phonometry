@@ -8,8 +8,8 @@ line carrying a sound power per metre at a standardised height; for a turbine it
 means an apparent sound power referred to an equivalent point source at the
 rotor centre. The height, the band range and the directivity are part of the
 definition, not details of the measurement, which is why an emission method is
-a standard in its own right and not a preliminary step. What every page here
-produces is that descriptor, in the form
+a standard in its own right and not a preliminary step. What every emission
+page here produces is that descriptor, in the form
 [Outdoor Sound Propagation](../propagation/outdoor-propagation.md)
 consumes.
 
@@ -37,6 +37,14 @@ arithmetic. Impact noise at joints and switches, curve squeal, traction,
 aerodynamic noise above 200 km/h and a bridge term are each allocated to the
 height they radiate from.
 
+[Road-surface noise: the statistical pass-by method](road-surface-pass-by.md)
+is the one page here that measures what a **road surface** contributes rather
+than what a source emits. ISO 11819-1 records the maximum level and the speed of
+isolated cars and heavy vehicles, fits each category with a line in the
+logarithm of speed, reads it at the reference speeds of its Table 1 and adds the
+three vehicle sound levels into the Statistical Pass-By Index, in many cases
+quoted as a difference from a reference surface.
+
 [Wind-turbine noise: sound power and tonal audibility](wind-turbine-noise.md)
 is IEC 61400-11, where the descriptor is **measured** rather than tabulated.
 With the microphone on a ground board at the horizontal distance R0 = H + D/2,
@@ -49,7 +57,8 @@ ends in a `.report()` assessment fiche.
 
 Read the road page first even for a railway job: it introduces the source-line
 bookkeeping and the Annex II layering that the rail page reuses. The turbine
-page is independent of both.
+page is independent of both, and so is the pass-by page, which feeds no
+propagation model: its index ranks surfaces.
 
 ## Pages in this section
 
@@ -57,6 +66,10 @@ page is independent of both.
   the rolling and propulsion sound power per vehicle category, its pavement,
   temperature, studded-tyre, gradient and junction corrections, and the
   directional power per metre of source line.
+- [Road-surface noise: the statistical pass-by method](road-surface-pass-by.md):
+  the ISO 11819-1 regression of each vehicle category on speed, the vehicle
+  sound levels at the Table 1 reference speeds, the index and its difference
+  from a reference surface.
 - [CNOSSOS-EU railway source emission](cnossos-rail-emission.md):
   roughness and transfer functions to the two equivalent source lines at 0,5 m
   and 4,0 m, with the impact, squeal, traction, aerodynamic and bridge terms.

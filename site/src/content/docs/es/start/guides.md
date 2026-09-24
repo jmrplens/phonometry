@@ -1,6 +1,6 @@
 ---
 title: "Guías"
-description: "Las 138 guías de phonometry, agrupadas en los trece temas que cubre la biblioteca: para qué sirve cada área, las normas que implementa y un resumen de una línea de cada guía que contiene."
+description: "Las 139 guías de phonometry, agrupadas en los trece temas que cubre la biblioteca: para qué sirve cada área, las normas que implementa y un resumen de una línea de cada guía que contiene."
 head:
   - tag: script
     attrs:
@@ -118,7 +118,7 @@ hay ninguna panorámica del campo: cada página es la documentación de trabajo 
 un módulo, escrita para que un resultado se pueda defender apartado por
 apartado en lugar de darlo por bueno.
 
-Esta página es el mapa. Ciento treinta y ocho guías repartidas en trece temas, y cada
+Esta página es el mapa. Ciento treinta y nueve guías repartidas en trece temas, y cada
 área tiene su propio índice con el relato largo de cómo encajan sus piezas. Si
 llegas sin una pregunta concreta, lee primero la
 [introducción](/phonometry/es/start/getting-started/): recorre una señal por toda la
@@ -651,8 +651,8 @@ ferroviarias y de aerogenerador, y la valoración construida sobre ellas. Todo
 lo de aquí trata de sonido que tiene que recorrer una distancia larga antes de
 valorarse, así que la atmósfera, el suelo y el propio movimiento de la fuente
 entran en la respuesta. Implementa ISO 9613-1/-2, ISO 1996-1/-2,
-ISO/PAS 1996-3, NT ACOU 112, CNOSSOS-EU (Directiva 2002/49/CE, anexo II) e
-IEC 61400-11.
+ISO/PAS 1996-3, NT ACOU 112, CNOSSOS-EU (Directiva 2002/49/CE, anexo II),
+ISO 11819-1 e IEC 61400-11.
 
 Hay un límite de alcance que vale la pena decir aquí y no a un clic de
 distancia. De CNOSSOS-EU, lo implementado es el lado de la **fuente** del anexo
@@ -682,6 +682,10 @@ para la cartografía reglamentaria.
   la fuente viaria común europea del Anexo II 2.2: potencia acústica de rodadura
   y propulsión por categoría de vehículo y potencia direccional por metro de
   línea fuente.
+- [Ruido y pavimento: el método estadístico de paso](/phonometry/es/environment/sources/road-surface-pass-by/):
+  lo que un pavimento añade al tráfico que circula por él, desde el nivel máximo
+  de cada vehículo que pasa frente a su velocidad hasta el índice estadístico de
+  paso de la ISO 11819-1 y su diferencia con un pavimento de referencia.
 - [Emisión de la fuente ferroviaria CNOSSOS-EU](/phonometry/es/environment/sources/cnossos-rail-emission/):
   la fuente ferroviaria del anexo II 2.3: rugosidad y filtro de contacto, ruido
   de impacto, chirrido en curva, tracción y ruido aerodinámico, y las dos líneas

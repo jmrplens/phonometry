@@ -26,6 +26,7 @@ from .common import (
     place_legend_clear,
     style_default,
     styled,
+    theme_fill,
 )
 
 if TYPE_CHECKING:
@@ -54,6 +55,10 @@ if TYPE_CHECKING:
     )
     from ..environment.sources.cnossos_rail import RailwayEmissionResult
     from ..environment.sources.cnossos_road import RoadEmissionResult
+    from ..environment.sources.statistical_pass_by import (
+        PassByRegression,
+        StatisticalPassByResult,
+    )
     from ..environment.sources.wind_turbine import WindTurbineTonalityResult
 
 #: Spanish translations of the fixed strings rendered by the environmental
@@ -72,6 +77,15 @@ _FREE_FIELD_LABEL = "Level re free field [dB]"
 #: table and the axes cannot drift apart.
 _INSERTION_LOSS_LABEL = "Insertion loss [dB]"
 _LT_LABEL = "$L_\\mathrm{t}$ [dB]"
+#: Axis labels and legend names of the two ISO 11819-1 renderers, the names
+#: keyed by vehicle category, written once so the table and the axes agree.
+_SPB_SPEED_LABEL = "Vehicle speed [km/h]"
+_SPB_LEVEL_LABEL = "Maximum level $L_\\mathrm{AFmax}$ [dB]"
+_SPB_CATEGORY_LABELS: dict[str, str] = {
+    "1": "Cars (1)",
+    "2a": "Dual-axle heavy (2a)",
+    "2b": "Multi-axle heavy (2b)",
+}
 
 _STRINGS: dict[str, str] = {
     "Narrowband spectrum": "Espectro de banda estrecha",
@@ -158,6 +172,19 @@ _STRINGS: dict[str, str] = {
     "Mopeds (4a)": "Ciclomotores (4a)",
     "Motorcycles (4b)": "Motocicletas (4b)",
     "CNOSSOS-EU road source line power": "Potencia de la línea fuente viaria CNOSSOS-EU",
+    # ISO 11819-1, the statistical pass-by of a road surface.
+    _SPB_CATEGORY_LABELS["1"]: "Turismos (1)",
+    _SPB_CATEGORY_LABELS["2a"]: "Pesados de dos ejes (2a)",
+    _SPB_CATEGORY_LABELS["2b"]: "Pesados de más de dos ejes (2b)",
+    _SPB_SPEED_LABEL: "Velocidad del vehículo [km/h]",
+    _SPB_LEVEL_LABEL: "Nivel máximo $L_\\mathrm{AFmax}$ [dB]",
+    "Pass-bys": "Pasos",
+    "Regression line": "Recta de regresión",
+    "Window of clause 9.3 for the reference speed": (
+        "Ventana del apartado 9.3 para la velocidad de referencia"
+    ),
+    "ISO 11819-1 regression": "Regresión ISO 11819-1",
+    "ISO 11819-1 statistical pass-by": "Paso estadístico ISO 11819-1",
 }
 
 
@@ -1141,3 +1168,218 @@ def plot_barrier_in_situ(
         language=language,
         kwargs=kwargs,
     )
+
+
+#: Colour and marker of each ISO 11819-1 vehicle category: the CNOSSOS-EU
+#: pairs of the nearest categories, so a car looks the same on both pages.
+_SPB_CATEGORY_STYLE: dict[str, tuple[str, str]] = {
+    "1": (_C_PRIMARY, "o"),
+    "2a": (_C_TERTIARY, "s"),
+    "2b": (_C_REFERENCE, "D"),
+}
+
+#: Round speeds the speed axis is labelled at, in km/h.
+_SPB_SPEED_TICKS_KMH: tuple[float, ...] = (
+    30.0,
+    40.0,
+    50.0,
+    60.0,
+    70.0,
+    80.0,
+    90.0,
+    100.0,
+    110.0,
+    120.0,
+    140.0,
+    160.0,
+)
+
+#: How far past the drawn speeds the speed axis reaches, as a ratio.
+_SPB_AXIS_MARGIN = 1.08
+
+
+def _spb_speed_axis(ax: Axes, speeds_kmh: list[float], language: str) -> None:
+    """A logarithmic speed axis, the one the regression of 9.1 is a line on."""
+    import matplotlib.ticker as mticker
+
+    from .._i18n import format_number
+
+    low = min(speeds_kmh) / _SPB_AXIS_MARGIN
+    high = max(speeds_kmh) * _SPB_AXIS_MARGIN
+    ax.set_xscale("log")
+    ax.set_xlim(low, high)
+    ticks = [tick for tick in _SPB_SPEED_TICKS_KMH if low <= tick <= high]
+    ax.xaxis.set_major_locator(mticker.FixedLocator(ticks))
+    ax.xaxis.set_major_formatter(
+        mticker.FuncFormatter(
+            lambda value, _pos: format_number(value, language, decimals=0)
+        )
+    )
+    ax.xaxis.set_minor_formatter(mticker.NullFormatter())
+    ax.set_xlabel(_t(_SPB_SPEED_LABEL, language))
+    ax.set_ylabel(_t(_SPB_LEVEL_LABEL, language))
+
+
+def _spb_line(
+    regression: PassByRegression, low: float, high: float
+) -> tuple[np.ndarray, np.ndarray]:
+    """The fitted line between two speeds, as the arrays to draw."""
+    speeds = np.geomspace(low, high, 32)
+    levels = regression.intercept_db + regression.slope_db_per_decade * np.log10(speeds)
+    return speeds, levels
+
+
+def plot_pass_by_regression(
+    result: PassByRegression,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """One category of pass-bys against speed, the line through them and ``L_veh``.
+
+    The pass-bys are drawn against the logarithm of speed, the axis on which
+    ISO 11819-1 9.1 fits its line, so the regression is straight. The band is
+    the 9.3 window the reference speed has to fall in, and the diamond is the
+    vehicle sound level read off the line at the Table 1 reference speed.
+
+    :param result: A
+        :class:`~phonometry.environment.sources.statistical_pass_by.PassByRegression`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the fitted line.
+    :return: The axes.
+    """
+    from .._i18n import format_number, localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    color, marker = _SPB_CATEGORY_STYLE[result.vehicle_category]
+    speeds = np.asarray(result.speeds_kmh, dtype=np.float64)
+    levels = np.asarray(result.max_levels_db, dtype=np.float64)
+    low, high = result.speed_window_kmh
+    ax.axvspan(
+        low,
+        high,
+        color=theme_fill(_C_PRIMARY, ax),
+        label=_t("Window of clause 9.3 for the reference speed", language),
+    )
+    ax.plot(
+        speeds,
+        levels,
+        linestyle="none",
+        marker=marker,
+        ms=4,
+        color=color,
+        alpha=0.55,
+        label=f"{_t('Pass-bys', language)} ($n$ = {result.vehicle_count})",
+    )
+    span = [float(speeds.min()), float(speeds.max()), result.reference_speed_kmh]
+    line_x, line_y = _spb_line(result, min(span), max(span))
+    ax.plot(
+        line_x,
+        line_y,
+        **styled(
+            kwargs,
+            color=color,
+            lw=1.8,
+            label=_t("Regression line", language),
+        ),
+    )
+    ax.plot(
+        [result.reference_speed_kmh],
+        [result.vehicle_sound_level_db],
+        linestyle="none",
+        marker="D",
+        ms=8,
+        color=_C_SECONDARY,
+        zorder=5,
+        label=(
+            r"$L_\mathrm{veh}$ = "
+            f"{format_number(result.reported_vehicle_sound_level_db, language)} dB, "
+            f"{format_number(result.reference_speed_kmh, language, decimals=0)} km/h"
+        ),
+    )
+    _spb_speed_axis(ax, [*span, low, high], language)
+    ax.set_title(
+        f"{_t('ISO 11819-1 regression', language)}: "
+        f"{_t(_SPB_CATEGORY_LABELS[result.vehicle_category], language)}"
+    )
+    ax.grid(visible=True, which="major", alpha=0.3)
+    place_legend_clear(ax.legend(fontsize="small"))
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_statistical_pass_by(
+    result: StatisticalPassByResult,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """The three clouds of pass-bys of a surface, their lines and the index.
+
+    Cars, dual-axle and multi-axle heavy vehicles are drawn against the
+    logarithm of speed, each with the line ISO 11819-1 9.1 fits through it and
+    a diamond where the line crosses the category's reference speed, which is
+    the vehicle sound level 9.2 reads. The title carries the index those three
+    levels make.
+
+    :param result: A
+        :class:`~phonometry.environment.sources.statistical_pass_by.StatisticalPassByResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the three fitted lines.
+    :return: The axes.
+    """
+    from .._i18n import format_number, localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    extent: list[float] = []
+    for category, regression in result.regressions.items():
+        color, marker = _SPB_CATEGORY_STYLE[category]
+        speeds = np.asarray(regression.speeds_kmh, dtype=np.float64)
+        levels = np.asarray(regression.max_levels_db, dtype=np.float64)
+        ax.plot(
+            speeds,
+            levels,
+            linestyle="none",
+            marker=marker,
+            ms=3.5,
+            color=color,
+            alpha=0.35,
+        )
+        span = [
+            float(speeds.min()),
+            float(speeds.max()),
+            regression.reference_speed_kmh,
+        ]
+        extent.extend(span)
+        line_x, line_y = _spb_line(regression, min(span), max(span))
+        line_kwargs = styled(kwargs, color=color, lw=1.8)
+        line_kwargs.setdefault(
+            "label",
+            f"{_t(_SPB_CATEGORY_LABELS[category], language)}: "
+            r"$L_\mathrm{veh}$ = "
+            f"{format_number(regression.reported_vehicle_sound_level_db, language)} dB",
+        )
+        ax.plot(line_x, line_y, **line_kwargs)
+        ax.plot(
+            [regression.reference_speed_kmh],
+            [regression.vehicle_sound_level_db],
+            linestyle="none",
+            marker="D",
+            ms=8,
+            markeredgecolor=_C_SECONDARY,
+            markerfacecolor=color,
+            zorder=5,
+        )
+    _spb_speed_axis(ax, extent, language)
+    ax.set_title(
+        f"{_t('ISO 11819-1 statistical pass-by', language)}: SPBI = "
+        f"{format_number(result.reported_index_db, language)} dB"
+    )
+    ax.grid(visible=True, which="major", alpha=0.3)
+    place_legend_clear(ax.legend(fontsize="small"))
+    localize_axes(ax, language)
+    return ax

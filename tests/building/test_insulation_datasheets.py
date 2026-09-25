@@ -188,10 +188,37 @@ def test_the_improvement_rating_plots_its_spectrum_and_numbers(language: str) ->
     (line,) = ax.get_lines()
     assert line.get_ydata().tolist() == ref.ISO717_2_ANNEX_C2_DELTA_L
     title = ax.get_title()
-    assert "= 15 dB" in title
-    assert "= -9 dB" in title or "= −9 dB" in title
-    word = "Reducción" if language == "es" else "Weighted Reduction"
-    assert word in title
+    assert title.startswith(r"ISO 717-2 $\Delta L_\mathrm{w}$")
+    assert title.endswith(") = 15 dB")
+    # The signs are the typographic minus of the other ISO 717 renderers.
+    assert "$=−9;" in title
+    assert "$=−2)" in title
+    assert "-" not in title.removeprefix("ISO 717-2")
+    fig = ax.figure
+    fig.canvas.draw()
+    extent = ax.title.get_window_extent()
+    assert 0.0 <= extent.x0
+    assert extent.x1 <= fig.bbox.width
+    plt.close(fig)
+
+
+def test_the_improvement_plot_keeps_a_negative_band_in_view() -> None:
+    """A floating floor's resonance makes Delta L negative in its low bands."""
+    import matplotlib.pyplot as plt
+
+    values = [-4.0, -6.0, -2.0, 3.0, 8.0, 12.0, 16.0, 20.0, 24.0, 27.0, 30.0]
+    values += [33.0, 35.0, 36.0, 37.0, 38.0]
+    cells = {
+        f"impact_improvement_{band}_db": value
+        for band, value in zip(_RATED, values, strict=True)
+    }
+    row = building.ImpactImprovementSpectrum(name="Floating floor", source="s", **cells)
+    rating = row.rating()
+    assert (rating.delta_lw, rating.ci_delta, rating.ci_r) == (18, -13, 2)
+    ax = rating.plot()
+    bottom, top = ax.get_ylim()
+    assert bottom < min(values)
+    assert top > max(values)
     plt.close(ax.figure)
 
 
@@ -255,5 +282,6 @@ def test_the_rows_refuse_a_frequency_that_is_no_band() -> None:
     ]
     with pytest.raises(ValueError, match="one-third octave band"):
         row.sound_reduction_index_db(6300)
+    improvement = _improvement()
     with pytest.raises(ValueError, match="impact_improvement_50_db"):
-        _improvement().impact_improvement_db(50)
+        improvement.impact_improvement_db(50)

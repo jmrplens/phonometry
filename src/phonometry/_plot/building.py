@@ -218,7 +218,6 @@ _STRINGS: dict[str, str] = {
     "Shifted reference (core bands)": "Referencia desplazada (bandas 100-3150 Hz)",
     _IMPROVEMENT_LABEL: r"Mejora del aislamiento a ruido de impacto $\Delta L$ [dB]",
     "ISO 16251-1 Floor-Covering Impact Sound Improvement": "Mejora del aislamiento a ruido de impacto de revestimiento de suelo ISO 16251-1",
-    "ISO 717-2 Weighted Reduction of Impact Sound": "Reducción ponderada del nivel de ruido de impacto ISO 717-2",
     "band insulation": "aislamiento por banda",
     "transmitted level $L_{x,i} - X_i$": "nivel transmitido $L_{x,i} - X_i$",
     "Band insulation $X_i$ [dB]": "Aislamiento por banda $X_i$ [dB]",
@@ -548,13 +547,16 @@ def _plot_extended_rating(
     core_measured = np.asarray(result.core.measured, dtype=np.float64)
     core_ref = np.asarray(result.core.shifted_reference, dtype=np.float64)
 
-    # Mark the bands outside the 100-3150 Hz core as the enlarged range.
+    # Mark the bands outside the 100-3150 Hz core as the enlarged range, with
+    # an opaque wash that stays visible on a dark page as on a light one.
+    enlarged = theme_fill(_C_MUTED, ax)
     if float(freqs.min()) < float(core_freqs.min()):
         ax.axvspan(
             float(freqs.min()),
             float(core_freqs.min()),
-            color=_C_MUTED,
-            alpha=0.12,
+            color=enlarged,
+            lw=0,
+            zorder=0,
             label=_t(span_label, language),
         )
     if float(freqs.max()) > float(core_freqs.max()):
@@ -566,8 +568,9 @@ def _plot_extended_rating(
         ax.axvspan(
             float(core_freqs.max()),
             float(freqs.max()),
-            color=_C_MUTED,
-            alpha=0.12,
+            color=enlarged,
+            lw=0,
+            zorder=0,
             label=label,
         )
 
@@ -1509,7 +1512,12 @@ def _plot_improvement(
         )
     _freq_axis(ax, freqs, language=language)
     ax.set_ylabel(_t(_IMPROVEMENT_LABEL, language))
-    ax.set_ylim(bottom=0.0)
+    # The axis starts at 0 dB only when no band is below it: a floating
+    # floor's mass-spring resonance makes the covering worsen the floor in
+    # its low bands, and those negative bands are the ones CI,Δ answers to.
+    finite = dl[np.isfinite(dl)]
+    if not finite.size or bool(np.all(finite >= 0.0)):
+        ax.set_ylim(bottom=0.0)
     ax.set_title(title)
     ax.grid(visible=True, which="both", alpha=0.3)
     if ax.get_legend_handles_labels()[0]:
@@ -1558,7 +1566,11 @@ def plot_impact_improvement_rating(
     language: str = "en",
     **kwargs: Any,
 ) -> Axes:
-    """The improvement spectrum ΔL a covering is rated from (ISO 717-2).
+    r"""The improvement spectrum ΔL a covering is rated from (ISO 717-2).
+
+    The title gives the rating in the form of the other ISO 717 renderers,
+    the symbols carrying the names: :math:`\Delta L_\mathrm{w}` with
+    :math:`C_{\mathrm{I},\Delta}` and :math:`C_\mathrm{I,r}` in parentheses.
 
     :param result: A
         :class:`~phonometry.building.measurement.ratings.ImpactImprovementRatingResult`.
@@ -1567,14 +1579,14 @@ def plot_impact_improvement_rating(
     :param kwargs: Forwarded to the improvement-curve ``plot`` call.
     :return: The axes.
     """
-    from .._i18n import decimal_comma
+    from .._i18n import format_number
 
     title = (
-        _t("ISO 717-2 Weighted Reduction of Impact Sound", language)
-        + r"  ($\Delta L_\mathrm{w}$ = "
-        + f"{decimal_comma(str(result.delta_lw), language)} dB; "
-        + r"$C_{\mathrm{I},\Delta}$ = "
-        + f"{decimal_comma(str(result.ci_delta), language)} dB)"
+        # Sign only when negative, the style of ISO 717-2's own examples.
+        r"ISO 717-2 $\Delta L_\mathrm{w}$ "
+        rf"($C_{{\mathrm{{I}},\Delta}}$={format_number(result.ci_delta, language, decimals=0)}; "
+        rf"$C_\mathrm{{I,r}}$={format_number(result.ci_r, language, decimals=0)}) = "
+        rf"{format_number(result.delta_lw, language, decimals=0)} dB"
     )
     return _plot_improvement(
         ax if ax is not None else _new_axes(),

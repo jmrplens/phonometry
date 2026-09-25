@@ -244,7 +244,7 @@ def impact_insulation_named(
         tuple and not one row, because a description is not a name and several
         constructions share most of their words.
     :raises TypeError: for a *catalogue* that is not a mapping, or that holds a
-        row that is not a :class:`ImpactInsulation`, naming its key.
+        row that is not an :class:`ImpactInsulation`, naming its key.
     """
     wanted = name.casefold()
     return tuple(

@@ -230,8 +230,8 @@ def test_a_row_of_another_class_is_refused_by_its_key(name: str) -> None:
     stranger = _stranger(row_type)
     catalogue = {"mine/one": _first(published), "mine/stranger": stranger}
     expected = (
-        f"catalogue= holds a {type(stranger).__name__} under 'mine/stranger', "
-        f"and {name} reads {row_type.__name__} rows"
+        f"catalogue= holds a row of class {type(stranger).__name__} under "
+        f"'mine/stranger', and {name} reads {row_type.__name__} rows"
     )
     with pytest.raises(TypeError, match=expected):
         lookup("anything", catalogue=catalogue)
@@ -241,7 +241,8 @@ def test_a_row_of_another_class_is_refused_by_its_key(name: str) -> None:
 def test_a_catalogue_that_is_not_a_mapping_is_refused(name: str) -> None:
     lookup, published = LOOKUPS[name]
     rows = [_first(published)]
-    with pytest.raises(TypeError, match=f"{name} takes catalogue= as a mapping"):
+    expected = f"{name} takes catalogue= as a mapping of key to row, .*; got list$"
+    with pytest.raises(TypeError, match=expected):
         lookup("anything", catalogue=rows)
 
 
@@ -304,8 +305,8 @@ def test_the_published_catalogue_and_yours_are_searched_as_one() -> None:
 def test_a_catalogue_of_another_row_class_is_refused_by_its_first_key() -> None:
     mine = _mine()
     expected = (
-        "catalogue= holds a PorousMaterial under 'example-foams/grey', and "
-        "solids_named reads SolidMaterial rows"
+        "catalogue= holds a row of class PorousMaterial under "
+        "'example-foams/grey', and solids_named reads SolidMaterial rows"
     )
     with pytest.raises(TypeError, match=expected):
         solids.solids_named("Foam", catalogue=mine)  # type: ignore[arg-type]

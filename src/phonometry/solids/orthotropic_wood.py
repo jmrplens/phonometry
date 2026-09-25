@@ -141,7 +141,7 @@ def orthotropic_wood_named(
     :return: The matching rows, in the order the tables list them. Empty when
         nothing matches, which is not an error.
     :raises TypeError: for a *catalogue* that is not a mapping, or that holds a
-        row that is not a :class:`OrthotropicWood`, naming its key.
+        row that is not an :class:`OrthotropicWood`, naming its key.
     """
     wanted = name.casefold()
     return tuple(

@@ -313,7 +313,7 @@ def absorption_named(
     :return: The rows whose :attr:`AbsorptionSpectrum.name` contains it, in
         the order the tables are read, which is empty when no page has one.
     :raises TypeError: for a *catalogue* that is not a mapping, or that holds a
-        row that is not a :class:`AbsorptionSpectrum`, naming its key.
+        row that is not an :class:`AbsorptionSpectrum`, naming its key.
     """
     wanted = name.casefold()
     return tuple(

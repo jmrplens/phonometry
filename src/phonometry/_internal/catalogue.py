@@ -2984,14 +2984,14 @@ def rows_to_search[R: CatalogueRow](
     if not isinstance(catalogue, Mapping):
         msg = (
             f"{lookup} takes catalogue= as a mapping of key to row, such as "
-            f"what io.read_catalogue returns, and got a {type(catalogue).__name__}"
+            f"what io.read_catalogue returns; got {type(catalogue).__name__}"
         )
         raise TypeError(msg)
     for key, row in catalogue.items():
         if not isinstance(row, row_type):
             msg = (
-                f"catalogue= holds a {type(row).__name__} under {key!r}, and "
-                f"{lookup} reads {row_type.__name__} rows"
+                f"catalogue= holds a row of class {type(row).__name__} under "
+                f"{key!r}, and {lookup} reads {row_type.__name__} rows"
             )
             raise TypeError(msg)
     return tuple(catalogue.values())

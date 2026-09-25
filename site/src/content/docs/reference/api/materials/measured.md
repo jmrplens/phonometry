@@ -109,7 +109,7 @@ behalf.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | for a *catalogue* that is not a mapping, or that holds a row that is not a [`AbsorptionSpectrum`](/phonometry/reference/api/materials/measured/#absorptionspectrum), naming its key. |
+| TypeError | for a *catalogue* that is not a mapping, or that holds a row that is not an [`AbsorptionSpectrum`](/phonometry/reference/api/materials/measured/#absorptionspectrum), naming its key. |
 
 ## AbsorptionAreaSpectrum
 

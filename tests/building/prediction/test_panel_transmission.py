@@ -724,7 +724,7 @@ def test_plateau_refuses_a_row_of_another_catalogue() -> None:
     steel = solids.solids_named("Steel")[0]
     expected = (
         r"'material' is a name in PLATEAU_MATERIALS or a solids\.PlateauMaterial "
-        r"row; got a SolidMaterial\."
+        r"row; got SolidMaterial\."
     )
     with pytest.raises(TypeError, match=expected):
         building.plateau_transmission_loss(

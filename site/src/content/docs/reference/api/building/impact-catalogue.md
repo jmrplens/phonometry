@@ -132,7 +132,7 @@ Every published row whose printed description contains *name*.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | for a *catalogue* that is not a mapping, or that holds a row that is not a [`ImpactInsulation`](/phonometry/reference/api/building/impact-catalogue/#impactinsulation), naming its key. |
+| TypeError | for a *catalogue* that is not a mapping, or that holds a row that is not an [`ImpactInsulation`](/phonometry/reference/api/building/impact-catalogue/#impactinsulation), naming its key. |
 
 ## ImpactInsulation
 

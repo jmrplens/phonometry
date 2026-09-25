@@ -117,7 +117,7 @@ impact_insulation_named(
 ) -> tuple[ImpactInsulation, ...]
 ```
 
-Every published row whose printed description contains *name*.
+Every row whose printed description contains *name*.
 
 **Parameters**
 

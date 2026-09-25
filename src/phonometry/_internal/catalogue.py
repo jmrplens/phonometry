@@ -67,6 +67,7 @@ import numbers
 import re
 import types
 import typing
+import unicodedata
 import weakref
 from collections.abc import Mapping
 from collections.abc import Set as AbstractSet
@@ -2995,3 +2996,23 @@ def rows_to_search[R: CatalogueRow](
             )
             raise TypeError(msg)
     return tuple(catalogue.values())
+
+
+def search_text(text: str) -> str:
+    """*text* as every ``*_named`` lookup compares it: one form, no case.
+
+    One word can reach a lookup in two Unicode forms: ``"linóleo"`` typed
+    with the accented letter as one character, or pasted from a document that
+    stores it as the plain letter followed by a combining accent. The two
+    print the same and :meth:`str.casefold` keeps them apart, so a lookup that
+    only folded case would answer the second with nothing. Every lookup
+    passes both the name asked for and the text of each row through here:
+    canonical decomposition, case folding and canonical composition, which is
+    Unicode's canonical caseless match, so a name matches whichever form
+    either side arrives in.
+
+    :param text: A name asked for, or the text of a row.
+    :return: *text* in the one form the lookups compare.
+    """
+    decomposed = unicodedata.normalize("NFD", text)
+    return unicodedata.normalize("NFC", decomposed.casefold())

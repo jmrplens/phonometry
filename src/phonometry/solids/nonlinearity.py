@@ -42,7 +42,13 @@ from dataclasses import dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING
 
-from .._internal.catalogue import CatalogueRow, read_table, rows_to_search, take
+from .._internal.catalogue import (
+    CatalogueRow,
+    read_table,
+    rows_to_search,
+    search_text,
+    take,
+)
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from collections.abc import Mapping
@@ -96,7 +102,7 @@ PUBLISHED_SOLID_NONLINEARITY: Mapping[str, SolidNonlinearity] = MappingProxyType
 def solid_nonlinearity_named(
     name: str, *, catalogue: Mapping[str, SolidNonlinearity] | None = None
 ) -> tuple[SolidNonlinearity, ...]:
-    """Every published solid whose printed name contains *name*.
+    """Every solid whose printed name contains *name*.
 
     :param name: Part of the name as the page prints it, matched without
         regard to case: ``"fcc"`` answers with both face-centred cubic rows.
@@ -106,12 +112,12 @@ def solid_nonlinearity_named(
         ``PUBLISHED_SOLID_NONLINEARITY | mine`` to search both at once, or any
         mapping of key to row (Default: ``None``, which searches
         :data:`PUBLISHED_SOLID_NONLINEARITY`).
-    :return: The matching rows, in the order the table lists them. Empty when
-        nothing matches, which is not an error.
+    :return: The matching rows, in catalogue order. Empty when nothing
+        matches, which is not an error.
     :raises TypeError: for a *catalogue* that is not a mapping, or that holds a
         row that is not a :class:`SolidNonlinearity`, naming its key.
     """
-    wanted = name.casefold()
+    wanted = search_text(name)
     return tuple(
         row
         for row in rows_to_search(
@@ -120,5 +126,5 @@ def solid_nonlinearity_named(
             SolidNonlinearity,
             "solid_nonlinearity_named",
         )
-        if wanted in row.name.casefold()
+        if wanted in search_text(row.name)
     )

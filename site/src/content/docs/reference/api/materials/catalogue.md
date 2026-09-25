@@ -81,7 +81,7 @@ porous_materials_named(
 ) -> tuple[PorousMaterial, ...]
 ```
 
-Every published row for a specimen name, across the tables.
+Every row for a specimen name, across the tables.
 
 Comparing two printings of one specimen is the point of holding both, and
 it has to be a deliberate act: a lookup that returned one row for "Foam"
@@ -98,7 +98,7 @@ two ranges Cox compiles for it.
 | `name` | The specimen name as a table prints it, matched without regard to case: `"Foam"`, `"foam"`. |
 | `catalogue` | The rows to search in place of [`PUBLISHED_POROUS`](/phonometry/reference/api/materials/catalogue/#published_porous): a catalogue of your own that [`phonometry.io.read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) returns, `PUBLISHED_POROUS \| mine` to search both at once, or any mapping of key to row (Default: `None`, which searches [`PUBLISHED_POROUS`](/phonometry/reference/api/materials/catalogue/#published_porous)). |
 
-**Returns:** The rows whose [`PorousMaterial.name`](/phonometry/reference/api/materials/catalogue/#porousmaterial) matches, in the order the tables are read, which is empty when no page names it.
+**Returns:** The rows whose [`PorousMaterial.name`](/phonometry/reference/api/materials/catalogue/#porousmaterial) matches, in catalogue order, which is empty when no row names it.
 
 **Raises**
 

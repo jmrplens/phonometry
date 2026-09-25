@@ -67,7 +67,7 @@ nonlinearity_named(
 ) -> tuple[NonlinearityParameter, ...]
 ```
 
-Every published value whose substance name contains *name*.
+Every value whose substance name contains *name*.
 
 **Parameters**
 
@@ -76,7 +76,7 @@ Every published value whose substance name contains *name*.
 | `name` | Part of a substance's name as the page prints it, matched without regard to case: `"water"` answers with every row of Tables 8.1 and 8.2 and with the sea water of Table 8.4. |
 | `catalogue` | The rows to search in place of [`PUBLISHED_NONLINEARITY`](/phonometry/reference/api/fluids/nonlinearity/#published_nonlinearity): a catalogue of your own that [`phonometry.io.read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) returns, `PUBLISHED_NONLINEARITY \| mine` to search both at once, or any mapping of key to row (Default: `None`, which searches [`PUBLISHED_NONLINEARITY`](/phonometry/reference/api/fluids/nonlinearity/#published_nonlinearity)). |
 
-**Returns:** The matching rows, in the order the tables list them. Empty when nothing matches, which is not an error.
+**Returns:** The matching rows, in catalogue order. Empty when nothing matches, which is not an error.
 
 **Raises**
 

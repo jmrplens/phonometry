@@ -406,7 +406,7 @@ solids_named(
 ) -> tuple[SolidMaterial, ...]
 ```
 
-Every published row for a material, across the books.
+Every row for a material, across the tables.
 
 Comparing two books is the point of holding both, and it has to be a
 deliberate act: a lookup that returned one row for "steel" would be
@@ -419,7 +419,7 @@ choosing between published values on the caller's behalf.
 | `name` | The material name as a table prints it, matched without regard to case: `"Steel"`, `"steel"`. |
 | `catalogue` | The rows to search in place of [`PUBLISHED_SOLIDS`](/phonometry/reference/api/solids/catalogue/#published_solids): a catalogue of your own that [`phonometry.io.read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) returns, `PUBLISHED_SOLIDS \| mine` to search both at once, or any mapping of key to row (Default: `None`, which searches [`PUBLISHED_SOLIDS`](/phonometry/reference/api/solids/catalogue/#published_solids)). |
 
-**Returns:** The rows whose [`SolidMaterial.name`](/phonometry/reference/api/solids/catalogue/#solidmaterial) matches, in the order the tables are read, which is empty when no page names it.
+**Returns:** The rows whose [`SolidMaterial.name`](/phonometry/reference/api/solids/catalogue/#solidmaterial) matches, in catalogue order, which is empty when no row names it.
 
 **Raises**
 

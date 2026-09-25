@@ -388,7 +388,7 @@ gases_named(
 ) -> tuple[Gas, ...]
 ```
 
-Every published row for a gas name, across the tables.
+Every row for a gas name, across the tables.
 
 Two books printing one gas is worth having, because the pair they print is
 not always the same pair: for carbon dioxide one of them gives 1,30 and
@@ -404,7 +404,7 @@ to load first.
 | `name` | The gas as a table names it, matched without regard to case and ignoring a parenthesis the page adds: `"air"` answers with the row Hopkins prints as `"Air (dry)"`. |
 | `catalogue` | The rows to search in place of [`PUBLISHED_GASES`](/phonometry/reference/api/fluids/catalogue/#published_gases): a catalogue of your own that [`phonometry.io.read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) returns, `PUBLISHED_GASES \| mine` to search both at once, or any mapping of key to row (Default: `None`, which searches [`PUBLISHED_GASES`](/phonometry/reference/api/fluids/catalogue/#published_gases)). |
 
-**Returns:** The rows whose [`Gas.name`](/phonometry/reference/api/fluids/catalogue/#gas) matches, in the order the tables are read, which is empty when no page names it.
+**Returns:** The rows whose [`Gas.name`](/phonometry/reference/api/fluids/catalogue/#gas) matches, in catalogue order, which is empty when no row names it.
 
 **Raises**
 

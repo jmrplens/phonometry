@@ -87,9 +87,12 @@ jobs:
     # installs, so nothing here ever imported or type checked it, and two
     # defects reached its published page that way. Ruff walks the tree from
     # `.` and has always reached the shim; mypy takes the paths it is given,
-    # and this one was never among them.
+    # and this one was never among them. `tests/static_typing` holds what
+    # only a type checker can see, such as a published catalogue joined with
+    # a caller's being accepted by a lookup's `catalogue=`: the suite runs
+    # those files, but a wrong annotation passes at run time.
     - name: Type check with Mypy
-      run: mypy src scripts stub/src
+      run: mypy src scripts stub/src tests/static_typing
     - name: Security check with Bandit
       run: bandit -r src
 

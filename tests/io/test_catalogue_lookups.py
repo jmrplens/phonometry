@@ -123,21 +123,23 @@ def _row_type(lookup: Lookup) -> type[io.CatalogueRow] | None:
     return None
 
 
-def _published_lookups() -> dict[str, Lookup]:
-    """Every public function named ``*_named`` that answers a tuple of rows."""
-    found: dict[str, Lookup] = {}
-    for module in pkgutil.iter_modules(phonometry.__path__):
-        if module.name.startswith("_") or not module.ispkg:
+def _published_lookups() -> dict[str, Any]:
+    """Every public name ending in ``_named`` that a public package exports.
+
+    Collected by name alone, whatever the object is and whatever it is
+    annotated to answer, so that a lookup of another shape reaches the guard
+    below and fails it instead of being left out of it.
+    """
+    found: dict[str, Any] = {}
+    for module in pkgutil.walk_packages(phonometry.__path__, "phonometry."):
+        if not module.ispkg or any(
+            part.startswith("_") for part in module.name.split(".")
+        ):
             continue
-        package = importlib.import_module(f"phonometry.{module.name}")
+        package = importlib.import_module(module.name)
         for name in getattr(package, "__all__", ()):
-            value = getattr(package, name)
-            if (
-                name.endswith("_named")
-                and inspect.isfunction(value)
-                and _row_type(value) is not None
-            ):
-                found[name] = value
+            if name.endswith("_named"):
+                found.setdefault(name, getattr(package, name))
     return found
 
 
@@ -160,10 +162,19 @@ def _stranger(row_type: type[io.CatalogueRow]) -> io.CatalogueRow:
 # Guard (b): every lookup takes catalogue=, and the table lists every lookup
 # ---------------------------------------------------------------------------
 def test_every_lookup_the_packages_publish_takes_a_catalogue() -> None:
-    """Guard (b): ``catalogue`` is keyword-only and ``None`` by default."""
+    """Guard (b): ``catalogue`` is keyword-only and ``None`` by default.
+
+    Every public ``*_named`` is held to the shape of a lookup first: a
+    function annotated to answer ``tuple[<row class>, ...]``. One annotated
+    otherwise fails here rather than escaping the rest of the guard.
+    """
     published = _published_lookups()
     assert len(published) >= 20
     for name, lookup in published.items():
+        assert inspect.isfunction(lookup), name
+        assert _row_type(lookup) is not None, (
+            f"{name} is not annotated to answer tuple[<CatalogueRow subclass>, ...]"
+        )
         parameter = inspect.signature(lookup).parameters.get("catalogue")
         assert parameter is not None, name
         assert parameter.kind is inspect.Parameter.KEYWORD_ONLY, name
@@ -220,6 +231,33 @@ def test_a_lookup_answers_every_match_in_the_order_the_catalogue_holds_them(
     found = lookup(row.name, catalogue={"mine/b": twin, "mine/a": row})
     assert found == (twin, row)
     assert found[0] is twin
+
+
+#: One name in its two Unicode forms: the accented letter as one character,
+#: and the plain letter followed by a combining acute accent.
+_COMPOSED = "Caf\u00e9 board"
+_DECOMPOSED = "Cafe\u0301 board"
+
+
+@pytest.mark.parametrize("name", NAMES)
+@pytest.mark.parametrize(
+    ("printed", "asked"),
+    [
+        (_COMPOSED, _DECOMPOSED),
+        (_DECOMPOSED, _COMPOSED),
+        (_COMPOSED, _DECOMPOSED.upper()),
+    ],
+    ids=["decomposed-query", "decomposed-row", "decomposed-upper-case-query"],
+)
+def test_a_name_matches_whichever_unicode_form_either_side_arrives_in(
+    name: str, printed: str, asked: str
+) -> None:
+    # A name pasted from a document can store an accented letter decomposed,
+    # and it prints the same as the one typed; the lookup finds it either way.
+    assert printed != asked
+    lookup, published = LOOKUPS[name]
+    row = dataclasses.replace(_first(published), name=printed)
+    assert lookup(asked, catalogue={"mine/one": row}) == (row,)
 
 
 @pytest.mark.parametrize("name", NAMES)

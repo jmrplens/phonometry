@@ -61,7 +61,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `materials.PUBLISHED_POROUS | mine` to search both at once. Each keeps its
   own way of matching a name (whole or in part, in the name, in the heading
   above it or in a carpet's fibre), answers every match in the order the
-  mapping holds them and never picks one for you. A row of another class in
+  mapping holds them and never picks one for you. A name matches without
+  regard to case or to how an accented letter is stored, so a name pasted
+  from a document that writes "é" as a plain "e" and a combining accent
+  finds the row typed with "é". A row of another class in
   the mapping is refused with `TypeError` naming its key, rather than left
   out of an answer that would then be missing it without saying so. The
   join of a published catalogue and yours is typed as a mapping of their

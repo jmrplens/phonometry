@@ -72,7 +72,7 @@ install:
 lint:
 	$(RUFF) check .
 	$(RUFF) format --check .
-	$(MYPY) src scripts
+	$(MYPY) src scripts tests/static_typing
 
 format:
 	$(RUFF) check --fix .

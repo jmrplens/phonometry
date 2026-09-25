@@ -207,8 +207,8 @@ breaks the contract every row keeps (a negative density, a porosity above 1,
 a value beside a word that says there is none) is reported with the first
 rule it breaks. The reader refuses a `NaN` or an `Infinity`, a name written
 twice in one object, a control character or a mark that reorders text, a
-file over 16 MiB (checked before a byte of it is read), more than
-50 000 rows and nesting past six levels.
+file over 16 MiB (checked before a byte of it is read), the header of a
+CSV file over 64 KiB, more than 50 000 rows and nesting past six levels.
 
 What is only worth a second look is not an error. A value whose basis is
 `measured` with neither a report nor a laboratory named for it, or a word in
@@ -636,8 +636,11 @@ except io.CatalogueError as error:
 
 `0.^G` is what a PDF's broken text layer can leave behind: if the page
 prints a word there, it goes between brackets; if it prints a number, type
-the number. When every number that fails is written with the other decimal
-mark, or the first line splits into columns at another delimiter, the
+the number. A range typed with a dash, a plus-or-minus typed as `+-`, a
+unit typed after the number and a number grouped in thousands are each told
+how to write them. When every number that fails is written with the other
+decimal mark (a number grouped in thousands, which could be either, is not
+counted), or the first line splits into columns at another delimiter, the
 refusal also says which one to declare.
 
 What one cell cannot say is written in a JSON document instead: several
@@ -648,7 +651,7 @@ a range with a plus-or-minus, an approximate bound, and an empty text where
 the field's default says something. `write_catalogue` refuses to write such
 a table as CSV, names every cell it cannot hold by the pointer the JSON
 document would write it at, and writes nothing. Table 6.2 of Bies credits
-its rows to the papers they come from, so it goes to JSON only:
+its first row to Beranek and Hidaka (1998), so it goes to JSON only:
 
 ```python
 bies = {

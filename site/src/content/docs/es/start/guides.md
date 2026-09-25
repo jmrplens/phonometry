@@ -311,8 +311,9 @@ grabaciones largas fluyen por bloques a través de los filtros con estado, y
 lo que sale de la biblioteca es un BWF con su procedencia y un sidecar que
 transporta la calibración. Implementa EBU Tech 3285 e ITU-R BS.2088; los archivos FLAC siguen la
 RFC 9639. Un catálogo de materiales propio, sacado de una hoja de
-características o de un informe de ensayo, se lee de un archivo JSON en las
-mismas filas que entregan todos los catálogos publicados.
+características o de un informe de ensayo, se lee de un archivo JSON, o de
+una hoja de cálculo guardada como CSV, en las mismas filas que entregan todos
+los catálogos publicados.
 
 - [Leer y escribir audio de medición](/phonometry/es/io/audio-files/): todo
   el flujo en una página ejecutable, del WAV del sonómetro al nivel

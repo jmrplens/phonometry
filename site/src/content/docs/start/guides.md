@@ -297,7 +297,8 @@ through the stateful filters block by block, and what leaves the library is
 a BWF with its provenance and a sidecar carrying the calibration.
 Implements EBU Tech 3285 and ITU-R BS.2088; FLAC archives follow RFC 9639.
 A catalogue of materials of your own, from a data sheet or a test report,
-is read from a JSON file into the rows every published catalogue hands out.
+is read from a JSON file, or from a spreadsheet saved as CSV, into the rows
+every published catalogue hands out.
 
 - [Reading and writing measurement audio](/phonometry/io/audio-files/): the
   whole workflow on one runnable page, from the meter's WAV to the

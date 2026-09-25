@@ -46,8 +46,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   name, a newer schema) and the first rule of the row contract each row
   breaks; what is only worth a second look is kept in
   `Catalogue.notes` with one `io.CatalogueWarning`. The file never runs
-  anything: only `json` reads it, and the class it names is compared with
-  yours and never imported. `io.write_catalogue` writes rows as a file that
+  anything: only the standard library's `json` and `csv` read it, and the
+  class it names is compared with yours and never imported. `io.write_catalogue` writes rows as a file that
   reads back into the same rows, a published table among them as a template
   to start from; every table of every published catalogue is written, read
   back and compared field for field in the test suite. The `io` section of
@@ -108,8 +108,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   rows go through the same checks as a JSON document's, so every problem is
   raised at once, each at its line and its column as a spreadsheet letters
   them; a text where a number goes is never read as a word, a `NaN` or a
-  zero, a thousands separator is never read, and when every failing number
-  is written with the other decimal mark, or the first line splits at
+  zero, a thousands separator is never read, and a range typed with a dash,
+  a plus-or-minus typed as `+-`, a unit typed after the number and a number
+  grouped in thousands are each told how to write them; when every failing
+  number is written with the other decimal mark, or the first line splits at
   another delimiter, the refusal says which one to declare. The file is
   UTF-8 with or without a byte order mark, and any other encoding is refused
   with the advice to save it as "CSV UTF-8". `io.write_catalogue` writes the

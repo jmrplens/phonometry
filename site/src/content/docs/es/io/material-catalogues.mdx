@@ -261,8 +261,8 @@ porosidad mayor que 1, un valor junto a una palabra que dice que no lo hay) se
 comunica con la primera regla que incumple. El lector rechaza un `NaN` o un
 `Infinity`, un nombre escrito dos veces en un mismo objeto, un carácter de
 control o una marca que reordena el texto, un archivo de más de 16 MiB
-(comprobado antes de leer un solo byte), más de 50 000 filas y un anidamiento
-de más de seis niveles.
+(comprobado antes de leer un solo byte), una cabecera de archivo CSV de más de
+64 KiB, más de 50 000 filas y un anidamiento de más de seis niveles.
 
 Lo que solo merece una segunda mirada no es un error. Un valor cuya base es
 `measured` sin informe ni laboratorio que lo respalden, o una palabra en lugar
@@ -699,9 +699,13 @@ except io.CatalogueError as error:
 
 `0.^G` es lo que puede dejar la capa de texto rota de un PDF: si la página
 imprime ahí una palabra, va entre corchetes; si imprime un número, teclea el
-número. Cuando todos los números que fallan están escritos con la otra marca
-decimal, o la primera línea se parte en columnas con otro delimitador, el
-rechazo dice además cuál hay que declarar.
+número. Un intervalo tecleado con un guion, un más-menos tecleado como `+-`,
+una unidad tecleada detrás del número y un número agrupado en miles reciben
+cada uno la forma de escribirlos. Cuando todos los números que fallan están
+escritos con la otra marca decimal (un número agrupado en miles, que podría
+ser cualquiera de las dos, no cuenta), o la primera línea se parte en
+columnas con otro delimitador, el rechazo dice además cuál hay que
+declarar.
 
 Lo que no cabe en una celda se escribe en un documento JSON: varias lecturas
 sin un valor único, una errata, un valor al que llega la aritmética pero que
@@ -711,8 +715,8 @@ celda, una cota o un intervalo con más-menos, una cota aproximada y un texto
 vacío donde el valor por defecto del campo dice algo. `write_catalogue` se
 niega a escribir una tabla así como CSV, nombra cada celda que no puede
 guardar con el puntero con que la escribiría el documento JSON y no escribe
-nada. La Tabla 6.2 de Bies atribuye sus filas a los artículos de los que
-salen, así que solo va a JSON:
+nada. La Tabla 6.2 de Bies atribuye su primera fila a Beranek e Hidaka
+(1998), así que solo va a JSON:
 
 ```python
 bies = {

@@ -439,6 +439,7 @@ _FAMILY_FIELDS: dict[str, frozenset[str]] = {
     "flow resistivity": frozenset({"flow_resistivity_pa_s_m2"}),
     "length": frozenset(
         {
+            "construction_depth_mm",
             "diameter_mm",
             "duct_length_m",
             "fibre_diameter_um",

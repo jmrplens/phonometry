@@ -193,6 +193,21 @@ _KWARG_PLOT_CASES = [
     ("sti", _sti, "bar"),
     ("airborne", _airborne_rating, "line"),
     ("impact", _impact_rating, "line"),
+    (
+        "impact_improvement_rating",
+        lambda: ph.building.ImpactImprovementSpectrum(
+            name="Covering",
+            source="A test",
+            **{
+                f"impact_improvement_{band}_db": 2.0 * index
+                for index, band in enumerate(
+                    (100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000)
+                    + (1250, 1600, 2000, 2500, 3150)
+                )
+            },
+        ).rating(),
+        "line",
+    ),
     ("room", lambda: _room([250, 2000]), "bar"),
     ("sound_power", _sound_power, "bar"),
     ("reverb_power", _reverb_power, "bar"),

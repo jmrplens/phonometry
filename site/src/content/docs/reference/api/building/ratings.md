@@ -184,7 +184,7 @@ adaptation term the input covered. Requires matplotlib
 
 ```python
 impact_improvement_adaptation_term(
-    delta_l: Sequence[float] | np.ndarray,
+    delta_l: Mapping[float, float] | Sequence[float] | np.ndarray,
 ) -> int
 ```
 
@@ -204,7 +204,7 @@ Clause 8 e) requires this term in the statement of results.
 
 | Name | Description |
 | :--- | :--- |
-| `delta_l` | The reduction of impact sound pressure level `ΔL` per band, in dB; 16 one-third-octave values from 100 Hz to 3150 Hz. |
+| `delta_l` | The reduction of impact sound pressure level `ΔL` per band, in dB; 16 one-third-octave values from 100 Hz to 3150 Hz, or a mapping of band centre frequency in hertz to `ΔL` that holds those 16 bands, other keys not read. |
 
 **Returns:** The spectrum adaptation term `CI,Δ`, in dB (integer).
 
@@ -212,7 +212,56 @@ Clause 8 e) requires this term in the statement of results.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If `delta_l` is not 16 one-third-octave values, or is non-finite. |
+| ValueError | If `delta_l` is not 16 one-third-octave values, a mapping lacks one of them, or it is non-finite. |
+
+## ImpactImprovementRatingResult
+
+```python
+ImpactImprovementRatingResult(
+    delta_lw: int,
+    ci_delta: int,
+    ci_r: int,
+    band_centers: np.ndarray,
+    improvement: np.ndarray,
+)
+```
+
+The weighted reduction of impact level of a covering, with its terms.
+
+ISO 717-2:2020 rates the reduction of impact sound pressure level
+$\Delta L$ of a floor covering against the heavyweight reference
+floor of its Table 4: $\Delta L_\mathrm{w}$ from Formulae (1) and
+(2), and the adaptation terms of Clause A.2.2, where
+$C_{\mathrm{I},\Delta} = C_\mathrm{I,r,0} - C_\mathrm{I,r}$
+(Formula (A.4)) with $C_\mathrm{I,r,0} = -11$ dB. A data sheet of a
+covering or a resilient layer prints $\Delta L_\mathrm{w}$ and
+one of the two terms, so both are here.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `delta_lw` | The weighted reduction of impact sound pressure level $\Delta L_\mathrm{w}$, in dB, from [`weighted_impact_improvement`](/phonometry/reference/api/building/ratings/#weighted_impact_improvement). Integer. |
+| `ci_delta` | The spectrum adaptation term $C_{\mathrm{I},\Delta}$, in dB, from [`impact_improvement_adaptation_term`](/phonometry/reference/api/building/ratings/#impact_improvement_adaptation_term). Integer. |
+| `ci_r` | The spectrum adaptation term $C_\mathrm{I,r}$ of the reference floor with the covering, in dB, which is $C_\mathrm{I,r,0} - C_{\mathrm{I},\Delta}$. Integer. |
+| `band_centers` | The 16 one-third-octave centre frequencies rated, 100 Hz to 3150 Hz. |
+| `improvement` | $\Delta L$ in those bands, in dB, as given. |
+
+### ImpactImprovementRatingResult.plot()
+
+```python
+ImpactImprovementRatingResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
+```
+
+Plot the improvement spectrum with its rating (ISO 717-2).
+
+Requires matplotlib (`pip install phonometry[plot]`); returns the
+`Axes`.
 
 ## ImpactRatingResult
 
@@ -305,7 +354,9 @@ optional verdict row and a footer with the fixed disclaimer.
 ## weighted_impact_improvement
 
 ```python
-weighted_impact_improvement(delta_l: Sequence[float] | np.ndarray) -> int
+weighted_impact_improvement(
+    delta_l: Mapping[float, float] | Sequence[float] | np.ndarray,
+) -> int
 ```
 
 Weighted reduction of impact level `ΔLw` (ISO 717-2:2020 §5).
@@ -324,7 +375,7 @@ the ISO 717-2 weighted rating of `Ln,r` from
 
 | Name | Description |
 | :--- | :--- |
-| `delta_l` | The reduction of impact sound pressure level `ΔL` per band, in dB; 16 one-third-octave values from 100 Hz to 3150 Hz (e.g. from a floor-covering measurement to ISO 10140-3 or ISO 16251-1). |
+| `delta_l` | The reduction of impact sound pressure level `ΔL` per band, in dB; 16 one-third-octave values from 100 Hz to 3150 Hz (e.g. from a floor-covering measurement to ISO 10140-3 or ISO 16251-1), or a mapping of band centre frequency in hertz to `ΔL` that holds those 16 bands, other keys not read. |
 
 **Returns:** The weighted reduction `ΔLw`, in dB (rounded, per ISO 717-2).
 
@@ -332,13 +383,13 @@ the ISO 717-2 weighted rating of `Ln,r` from
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If `delta_l` is not 16 one-third-octave values, or is non-finite. |
+| ValueError | If `delta_l` is not 16 one-third-octave values, a mapping lacks one of them, or it is non-finite. |
 
 ## weighted_impact_rating
 
 ```python
 weighted_impact_rating(
-    values_by_band: Sequence[float] | np.ndarray,
+    values_by_band: Mapping[float, float] | Sequence[float] | np.ndarray,
     bands: str | None = None,
 ) -> ImpactRatingResult
 ```
@@ -368,8 +419,8 @@ airborne problem, so no separate search is duplicated.
 
 | Name | Description |
 | :--- | :--- |
-| `values_by_band` | Measured impact levels (`Ln`, `L'n`, `L'nT`) in dB. 16 values are read as one-third-octave bands, 5 values as octave bands. |
-| `bands` | `"third-octave"`, `"octave"` or `None` to infer the band set from the number of values. |
+| `values_by_band` | Measured impact levels (`Ln`, `L'n`, `L'nT`) in dB. 16 values are read as one-third-octave bands, 5 values as octave bands. A mapping of band centre frequency in hertz to level is read band by band, as [`weighted_rating`](/phonometry/reference/api/building/ratings/#weighted_rating) reads one, and a rating band it lacks is refused rather than filled. |
+| `bands` | `"third-octave"`, `"octave"` or `None` to infer the band set from the number of values or the keys of the mapping. |
 
 **Returns:** [`ImpactRatingResult`](/phonometry/reference/api/building/ratings/#impactratingresult) with `rating`, `ci` and `unfavourable_sum`.
 
@@ -377,7 +428,7 @@ airborne problem, so no separate search is duplicated.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If the number of values does not match the band set, or if any value is non-finite. |
+| ValueError | If the number of values does not match the band set, if a mapping lacks a band of it, or if any value is non-finite. |
 
 ## weighted_impact_rating_extended
 
@@ -424,7 +475,7 @@ as printed in A.2.2).
 
 ```python
 weighted_rating(
-    values_by_band: Sequence[float] | np.ndarray,
+    values_by_band: Mapping[float, float] | Sequence[float] | np.ndarray,
     bands: str | None = None,
 ) -> WeightedRatingResult
 ```
@@ -445,8 +496,8 @@ No. 2. Input values are first reduced to one decimal place
 
 | Name | Description |
 | :--- | :--- |
-| `values_by_band` | Measured band quantities (`R`, `R'`, `Dn`, `DnT` ...) in dB. 16 values are read as one-third-octave bands, 5 values as octave bands. |
-| `bands` | `"third-octave"`, `"octave"` or `None` to infer the band set from the number of values. |
+| `values_by_band` | Measured band quantities (`R`, `R'`, `Dn`, `DnT` ...) in dB. 16 values are read as one-third-octave bands, 5 values as octave bands. A mapping of band centre frequency in hertz to value, such as a catalogue row's [`spectrum`](/phonometry/reference/api/io/io/#bandedrowspectrum), is read band by band: one that holds any one-third-octave band that is not an octave centre as the 16 one-third octaves, any other as the 5 octaves, and a rating band it lacks is refused rather than filled. |
+| `bands` | `"third-octave"`, `"octave"` or `None` to infer the band set from the number of values or the keys of the mapping. |
 
 **Returns:** [`WeightedRatingResult`](/phonometry/reference/api/building/ratings/#weightedratingresult) with `rating`, `c`, `ctr` and `unfavourable_sum`.
 
@@ -454,7 +505,7 @@ No. 2. Input values are first reduced to one decimal place
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If the number of values does not match the band set, or if any value is non-finite. |
+| ValueError | If the number of values does not match the band set, if a mapping lacks a band of it, or if any value is non-finite. |
 
 ## weighted_rating_extended
 

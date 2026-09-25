@@ -85,6 +85,14 @@ def _annex_c(**extra: Any) -> materials.ThirdOctaveAbsorptionSpectrum:
     return _THIRDS(name="Annex C", source="ISO 11654 Annex C", **cells, **extra)
 
 
+def _annex_c_with(band: int, value: float) -> materials.ThirdOctaveAbsorptionSpectrum:
+    """Annex C with one band's coefficient replaced."""
+    cells = {
+        f"absorption_coefficient_{b}": v for b, v in {**_ANNEX_C, band: value}.items()
+    }
+    return _THIRDS(name="Annex C", source="ISO 11654 Annex C", **cells)
+
+
 @pytest.mark.parametrize(
     ("values", "label"),
     [(_FIGURE_A1, "0.60"), (_FIGURE_A2, "0.60(M)")],
@@ -289,3 +297,78 @@ def test_a_printed_shape_indicator_that_disagrees_is_noted() -> None:
     row = _practical(_FIGURE_A1, shape_indicator="L")
     (note,) = row._catalogue_notes()
     assert "shape indicator is printed as 'L' and the bands give none" in note
+
+
+@pytest.mark.parametrize(
+    "rate",
+    [
+        lambda row: row.rating(),
+        lambda row: row.practical().rating(),
+    ],
+    ids=["from-thirds", "through-practical"],
+)
+def test_a_negative_rating_band_is_refused_both_ways(
+    rate: Callable[
+        [materials.ThirdOctaveAbsorptionSpectrum], materials.AbsorptionRatingResult
+    ],
+) -> None:
+    """A negative alpha_s is neither read as 0 nor left out of the mean."""
+    row = _annex_c_with(200, -0.02)
+    with pytest.raises(ValueError, match="absorption_coefficient_200"):
+        rate(row)
+
+
+def test_a_negative_band_leaves_its_octave_empty_and_says_why() -> None:
+    practical = _annex_c_with(200, -0.02).practical()
+    assert practical.practical_absorption_coefficient_250 is None
+    assert "practical_absorption_coefficient_250" not in practical.derived
+    why = practical.why_missing("practical_absorption_coefficient_250")
+    assert "at 200 Hz" in why
+    assert "-0.02" in why
+    assert "neither read as 0 nor left out of the mean" in why
+    assert practical.practical_absorption_coefficient_500 == pytest.approx(0.75)
+
+
+def test_a_negative_band_below_the_rating_empties_only_the_125_hz_octave() -> None:
+    """ISO 11654 Clause 1: the 125 Hz octave is not rated, so the rating stands."""
+    row = _annex_c_with(100, -0.30)
+    practical = row.practical()
+    assert practical.practical_absorption_coefficient_125 is None
+    assert "at 100 Hz" in practical.why_missing("practical_absorption_coefficient_125")
+    assert row.rating().rating_label == practical.rating().rating_label == "0.65(MH)"
+
+
+@pytest.mark.parametrize(
+    ("values", "printed"),
+    [
+        (_FIGURE_A1, "C"),
+        (_FIGURE_A1, "c"),
+        (_FIGURE_A1, "Class C"),
+        (_FIGURE_A1, "class c"),
+        ((0.10,) * 6, "Not classified"),
+        ((0.10,) * 6, "not classified"),
+        ((0.10,) * 6, "Not Classified"),
+    ],
+)
+def test_a_printed_class_the_bands_give_in_any_case_leaves_no_note(
+    values: tuple[float, ...], printed: str
+) -> None:
+    """ISO 11654 Annex B: the same class, however the sheet writes it."""
+    assert _practical(values, absorption_class=printed)._catalogue_notes() == ()
+
+
+@pytest.mark.parametrize("printed", ["MH", "(MH)", "mh", "(mh)"])
+def test_a_printed_shape_indicator_the_bands_give_in_any_case_leaves_no_note(
+    printed: str,
+) -> None:
+    assert _annex_c(shape_indicator=printed)._catalogue_notes() == ()
+
+
+def test_practical_keeps_a_derived_text_the_row_carried_on_a_shared_field() -> None:
+    how = "from the mass per unit area and the density the report prints"
+    practical = _annex_c(thickness_mm=40.0, derived={"thickness_mm": how}).practical()
+    assert practical.derived["thickness_mm"] == how
+    assert set(practical.derived) == {
+        "thickness_mm",
+        *(f"practical_absorption_coefficient_{band}" for band in _ANNEX_C_PRACTICAL),
+    }

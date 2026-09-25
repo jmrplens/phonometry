@@ -15,7 +15,8 @@ in two shapes that are not the same quantity:
 
 * the **sound absorption coefficient** $\alpha_\mathrm{s}$ of ISO 354,
   one value per one-third octave band as the reverberation room measured it,
-  which can exceed 1 and carries every digit the laboratory reported; and
+  which can exceed 1 (ISO 354 3.9, NOTE 2, gives diffraction effects as the
+  reason) and carries every digit the laboratory reported; and
 * the **practical sound absorption coefficient** $\alpha_\mathrm{p}$ of
   ISO 11654 Clause 4.1, one value per octave band from 125 Hz to 4 kHz, the
   mean of the three one-third octaves in it rounded in steps of 0,05 and
@@ -534,12 +535,17 @@ The sound absorption coefficient $\alpha_\mathrm{s}$ of ISO 354,
 as the reverberation room measured it: one value per one-third octave
 band, 100 Hz to 5 kHz in the standard's range and from 50 Hz to 10 kHz
 where a laboratory reports more. A value above 1 is common and not an
-error, because $\alpha_\mathrm{s}$ is referred to the specimen's
-area and its edges absorb too; nothing here caps it.
+error: ISO 354 (3.9, NOTE 2) says a coefficient evaluated from
+reverberation times can exceed 1,0, for example because of diffraction
+effects. Nothing here caps it.
 
 `practical` turns the row into its practical coefficients, and
 `rating` rates it; both leave out an octave the row cannot give
-all three of its one-third octaves for.
+all three of its one-third octaves for. A negative coefficient, which a
+measurement can give in a band where the specimen adds almost nothing to
+the room's absorption, is never read as 0 nor left out of a mean: the
+octave it falls in gets no practical coefficient, and `rating`
+refuses it.
 
 **Attributes**
 
@@ -761,7 +767,12 @@ of each. An octave with a one-third octave the row does not print
 as a number stays empty, and its
 [`why_missing`](/phonometry/reference/api/io/io/#cataloguerowwhy_missing) says it does not
 follow from the cells the row has: nothing is borrowed from a
-neighbouring band.
+neighbouring band. An octave with a negative one-third-octave
+coefficient stays empty too, with the band and the value in its
+[`not_derivable`](/phonometry/reference/api/io/io/#cataloguerow): a negative value
+is neither read as 0 nor left out of the mean, so
+[`PracticalAbsorptionSpectrum.rating`](/phonometry/reference/api/materials/datasheets/#practicalabsorptionspectrumrating) of the result refuses a
+rating band this empties, as `rating` refuses the band itself.
 
 The name, the source, the provenance and what the report prints
 about the specimen (the mounting, the thickness, the depth of
@@ -855,7 +866,7 @@ differs from this one.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | for a band from 200 Hz to 5 kHz the row does not print, naming the row, the band and what the report had there, or for a negative coefficient among them. |
+| ValueError | for a band from 200 Hz to 5 kHz the row does not print, naming the row, the band and what the report had there, or for a negative coefficient among them, naming the row, the band and the value. |
 
 ### ThirdOctaveAbsorptionSpectrum.spectrum()
 

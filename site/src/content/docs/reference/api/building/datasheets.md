@@ -20,7 +20,9 @@ to a standard and rated to another, and that are held here in a class each:
   frequency ranges of its Annex B when the report prints the bands they
   need: [`SoundReductionSpectrum`](/phonometry/reference/api/building/datasheets/#soundreductionspectrum);
 * the **reduction of impact sound pressure level** $\Delta L$ of a
-  floor covering or a floating floor measured to ISO 10140-3, one value per
+  floor covering or a floating floor, defined by ISO 10140-1 Annex H
+  (Equation (H.1), $\Delta L = L_\mathrm{n0} - L_\mathrm{n}$ on a
+  reference floor) with the levels measured by ISO 10140-3, one value per
   one-third octave band, rated to $\Delta L_\mathrm{w}$ against the
   heavyweight reference floor of ISO 717-2, with the adaptation terms
   $C_{\mathrm{I},\Delta}$ and $C_\mathrm{I,r}$ of its Clause A.2.2:
@@ -102,11 +104,14 @@ ImpactImprovementSpectrum(
 One covering or floating floor of a report, with its $\Delta L$.
 
 The reduction of impact sound pressure level $\Delta L$ of
-ISO 10140-3, the difference a floor covering or a floating floor makes
-to the impact level of a heavyweight floor, one value per one-third
-octave band from 50 Hz to 5 kHz as the report prints them, and the
-single numbers of ISO 717-2 printed beside them. `rating` rates
-the bands again; the printed numbers stay as printed.
+ISO 10140-1 Annex H, Equation (H.1): the normalized impact sound
+pressure level of a reference floor without the covering less the one
+with it, both measured by ISO 10140-3. It is the difference a floor
+covering or a floating floor makes to the impact level of the floor, one
+value per one-third octave band from 50 Hz to 5 kHz as the report prints
+them, and the single numbers of ISO 717-2 printed beside them.
+`rating` rates the bands again; the printed numbers stay as
+printed.
 
 $\Delta L_\mathrm{w}$ has a field of its own because it is a
 rating against the reference floor of ISO 717-2 Table 4, not a mean over

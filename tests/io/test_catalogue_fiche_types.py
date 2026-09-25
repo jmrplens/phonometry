@@ -11,6 +11,7 @@ and notes nothing.
 from __future__ import annotations
 
 import json
+import warnings
 from typing import TYPE_CHECKING, Any
 
 import pytest
@@ -100,7 +101,11 @@ def test_a_sheet_whose_ratings_follow_notes_nothing(tmp_path: pathlib.Path) -> N
     sheet = _SHEET.replace("1,05;1,00;0,95;0,60;MH;C", "1,00;1,00;0,95;0,55;MH;D")
     path = _write_sheet(tmp_path)
     path.write_text(sheet, encoding="utf-8")
-    catalogue = io.read_catalogue(path, row_type=materials.PracticalAbsorptionSpectrum)
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        catalogue = io.read_catalogue(
+            path, row_type=materials.PracticalAbsorptionSpectrum
+        )
     assert catalogue.notes == ()
 
 
@@ -120,9 +125,11 @@ def test_an_alias_and_an_x_column_note_nothing() -> None:
             "x-code": "P40",
         },
     )
-    catalogue = io.parse_catalogue(
-        document, row_type=materials.PracticalAbsorptionSpectrum
-    )
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        catalogue = io.parse_catalogue(
+            document, row_type=materials.PracticalAbsorptionSpectrum
+        )
     assert catalogue.notes == ()
     assert catalogue["lab-report/p"].thickness_mm == 40.0
 

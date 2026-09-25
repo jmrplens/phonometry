@@ -23,7 +23,7 @@ into the library.
 
 The quickest way to see the shape of a file is to write one. `write_catalogue`
 writes any published table in the form `read_catalogue` reads, as a template
-to copy and edit: here the porous specimens of Allard & Atalla's Table 13.1.
+to copy and edit: here the foam of Allard & Atalla's Table 13.1.
 
 ```python
 import json
@@ -66,9 +66,10 @@ top:
 | `catalogue` | The catalogue's name, the first half of every key: up to 64 of `a-z`, `0-9`, `.`, `_` and `-`. |
 | `row_type` | The name of the row class. It is compared with the class you pass and never imported. |
 | `about` | What the document is, how you read it and what units it prints. |
-| `provenance` | The document: its `kind`, its title in `document`, its `version` (or `null` when it prints none) and the day you `consulted` it are required. |
+| `provenance` | The document: its `kind`, its title in `document`, its `version` (or `null` when it prints none) and the day you `consulted` it, as `YYYY-MM-DD`, are required. The `kind` is one of `io.PROVENANCE_KINDS`: `datasheet`, `declaration_of_performance`, `test_report`, `measurement`, `calculation`, `publication` or `other`. |
 | `basis` | Optional: what the document says every value is, unless a row says otherwise. |
 | `conventions` | Optional: the notes and legends the document prints for the whole table. |
+| `phonometry_version` | Optional: the version of the library that wrote the file, which `write_catalogue` fills in. It is never read. |
 | `rows` | The rows, each with a `key` of its own and a `name`. |
 
 Here is a fictitious data sheet with two rows. The first is the airflow
@@ -162,10 +163,14 @@ A row may narrow the document's provenance to its own page, table,
 laboratory, accreditation, report, test date and standard, as `core-lab`
 does, and a standard given for one field (`field_test_standards`) is added to
 the document's. A different document is a different file: a row cannot
-change the document, its kind or its version. The row's `source` is composed
-from all of it, and a refusal names the document by its kind: "the
-datasheet", "the declaration of performance", "the test report", "the
-measurement record", "the calculation note", "the source".
+change the document, its kind or its version. For every kind but a
+`publication`, which is cited as its document is, the row's `source` names
+the document, its publisher and its version, the page and the table, the
+report and the laboratory, and the day it was consulted; the accreditation,
+the test date and the standards stay in `row.provenance`. A refusal names the
+document by its kind: "the datasheet", "the declaration of performance", "the
+test report", "the measurement record" for a `measurement`, "the calculation
+note" for a `calculation`, and "the source" for a `publication` or `other`.
 
 Columns of your own go under a name that starts with `x-`: they are kept, as
 text, in `Catalogue.extras` and take part in no calculation. A row never
@@ -388,7 +393,7 @@ layers = io.parse_catalogue(
                 "key": "tested",
                 "name": "Underlay 20",
                 "thickness_mm": 20,
-                "apparent_dynamic_stiffness_mn_m3": 7.4,
+                "apparent_dynamic_stiffness_mn_m3": 7,
                 "basis": {"row": "measured"},
                 "provenance": {"laboratory": "Example Lab", "report": "26-044"},
             },
@@ -407,7 +412,7 @@ except ValueError as error:
 
 tested = layers["underlays/tested"]
 f0 = tested.natural_frequency(mass_per_area_kg_m2=100.0, airflow_resistivity_pa_s_m2=150_000.0)
-print(round(float(f0), 1))   # 43.3
+print(round(float(f0), 1))   # 42.1
 ```
 
 The tested layer gives only $s'_\mathrm{t}$, so its natural frequency needs
@@ -433,8 +438,11 @@ print(len(materials.porous_materials_named("Foam", catalogue=both)))   # 5
 ```
 
 Each lookup keeps its own way of matching a name, answers every match in the
-order the catalogue holds them and never picks one. A row of another class in
-the catalogue is refused with `TypeError`, naming its key.
+order the catalogue holds them and never picks one. It matches without regard
+to case or to how an accented letter is stored: a name pasted from a document
+that stores "é" as "e" followed by a combining accent finds the row typed with
+"é", and the other way round. A row of another class in the catalogue is
+refused with `TypeError`, naming its key.
 
 ## Writing what the document prints
 
@@ -506,10 +514,15 @@ one into another's field, so read this before choosing a `row_type`.
   European data sheet's octave row is usually that. No row class of this
   library holds $\alpha_\mathrm{p}$, nor a one-third-octave
   $\alpha_\mathrm{s}$; do not write either into `AbsorptionSpectrum`.
-- `TransmissionLossSpectrum` holds the field-incidence transmission loss of
-  a construction as a book compiles it. The sound reduction index $R$ a
-  laboratory measures under ISO 10140-2 is a different quantity, with its
-  own flanking and its own specimen, and no row class holds it.
+- `TransmissionLossSpectrum` holds the transmission loss of a construction
+  as a book compiles it, in octave bands, from tests the book seldom names:
+  Bies qualifies his values as field incidence, ASHRAE's rows come from
+  laboratory tests, and Rossing names no source. The sound reduction index
+  $R$ of a test report under ISO 10140-2 is measured in one-third-octave
+  bands on one product's specimen, in a laboratory where the sound
+  transmitted by flanking paths has been shown to be negligible, and it is
+  rated with ISO 717-1. It is a different record, and no row class holds it;
+  do not write it into `TransmissionLossSpectrum`.
 - `ResilientLayer` holds $s'$ in `dynamic_stiffness_n_m3` and
   $s'_\mathrm{t}$ in `apparent_dynamic_stiffness_n_m3`. A test report under
   EN 29052-1 prints $s'_\mathrm{t}$ and, when it can, $s'$; a data sheet
@@ -565,7 +578,8 @@ file, in a row class of your own: a frozen, keyword-only dataclass built on
 `io.CatalogueRow`, with every field annotated `float | None`, `int | None`,
 `bool`, `str`, `frozenset[str]` or a `Mapping` of those. The reader reads it
 like any other, and the other units of a kind apply to your fields too when
-the name leaves no doubt:
+the name leaves no doubt, except a temperature, which has to be written in
+the unit its field is named for:
 
 ```python
 import dataclasses
@@ -669,7 +683,7 @@ or a pull request is never merged.
   The practical sound absorption coefficient a European data sheet prints, rounded to steps of 0.05 and capped at 1.00: a rating of a reverberation-room measurement and not a Sabine coefficient, which is why it has no place in AbsorptionSpectrum.
 - International Organization for Standardization. (2010). *Acoustics — Laboratory measurement of sound insulation of building elements — Part 2: Measurement of airborne sound insulation* (ISO 10140-2:2010).
   [iso.org catalogue](https://www.iso.org/standard/42088.html).
-  The laboratory sound reduction index R a data sheet of a wall or a door prints, which is not the field-incidence transmission loss of a book that TransmissionLossSpectrum holds.
+  The laboratory sound reduction index R a data sheet of a wall or a door prints: one product's specimen, measured in one-third-octave bands in a facility where flanking transmission is negligible and rated with ISO 717-1. It is not the transmission loss a book compiles, which TransmissionLossSpectrum holds.
 - International Organization for Standardization. (1989). *Acoustics — Determination of dynamic stiffness — Part 1: Materials used under floating floors in dwellings* (EN 29052-1:1992 (ISO 9052-1:1989)).
   [iso.org catalogue](https://www.iso.org/standard/16620.html).
   The dynamic stiffness s' of an installed layer and the apparent dynamic stiffness s't of a test specimen, two fields of ResilientLayer, and clause 8.2, which turns the second into the first with the lateral airflow resistivity.

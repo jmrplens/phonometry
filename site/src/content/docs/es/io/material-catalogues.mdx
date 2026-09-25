@@ -30,7 +30,7 @@ references:
     title: "Acoustics — Laboratory measurement of sound insulation of building elements — Part 2: Measurement of airborne sound insulation"
     designation: "ISO 10140-2:2010"
     url: "https://www.iso.org/standard/42088.html"
-    note: "El índice de reducción sonora R de laboratorio que imprime la hoja de características de un muro o de una puerta, que no es la pérdida por transmisión en incidencia de campo de un libro que guarda TransmissionLossSpectrum."
+    note: "El índice de reducción acústica R de laboratorio que imprime la hoja de características de un muro o de una puerta: una probeta de un producto, medida por tercios de octava en una instalación donde la transmisión por flancos es despreciable y valorada con la ISO 717-1. No es la pérdida por transmisión que recopila un libro, que es la que guarda TransmissionLossSpectrum."
   - type: standard
     organization: "International Organization for Standardization"
     year: 1989
@@ -66,8 +66,8 @@ issue o en una pull request nunca se incorpora a la biblioteca.
 
 La forma más rápida de ver cómo es un archivo es escribir uno.
 `write_catalogue` escribe cualquier tabla publicada en la forma que lee
-`read_catalogue`, como plantilla para copiar y editar: aquí las probetas
-porosas de la Tabla 13.1 de Allard & Atalla.
+`read_catalogue`, como plantilla para copiar y editar: aquí la espuma de la
+Tabla 13.1 de Allard & Atalla.
 
 ```python
 import json
@@ -95,7 +95,7 @@ print(template["rows"][0]["key"], template["rows"][0]["flow_resistivity_pa_s_m2"
 Una tabla de filas de una misma clase sale entera, con el libro como
 procedencia y el día de la exportación como día de consulta. Lo que la
 biblioteca calcula a partir de las celdas impresas (aquí el módulo de
-cortadura, a partir del módulo de Young y del coeficiente de Poisson) no se
+cizalla, a partir del módulo de Young y del coeficiente de Poisson) no se
 escribe nunca: se vuelve a calcular al leer el archivo. Si ya hay un archivo
 en esa ruta, se rechaza con `FileExistsError` salvo que pases
 `overwrite=True`.
@@ -111,9 +111,10 @@ cerrado de claves en el primer nivel:
 | `catalogue` | El nombre del catálogo, la primera mitad de cada clave: hasta 64 caracteres entre `a-z`, `0-9`, `.`, `_` y `-`. |
 | `row_type` | El nombre de la clase de fila. Se compara con la clase que pasas y nunca se importa. |
 | `about` | Qué es el documento, cómo lo leíste y en qué unidades imprime. |
-| `provenance` | El documento: son obligatorios su tipo en `kind`, su título en `document`, su versión en `version` (o `null` si no imprime ninguna) y el día en que lo consultaste en `consulted`. |
+| `provenance` | El documento: son obligatorios su tipo en `kind`, su título en `document`, su versión en `version` (o `null` si no imprime ninguna) y el día en que lo consultaste en `consulted`, como `AAAA-MM-DD`. El tipo es uno de `io.PROVENANCE_KINDS`: `datasheet`, `declaration_of_performance`, `test_report`, `measurement`, `calculation`, `publication` u `other`. |
 | `basis` | Opcional: qué dice el documento que es cada valor, salvo que una fila diga otra cosa. |
 | `conventions` | Opcional: las notas y leyendas que el documento imprime para toda la tabla. |
+| `phonometry_version` | Opcional: la versión de la biblioteca que escribió el archivo, que rellena `write_catalogue`. No se lee nunca. |
 | `rows` | Las filas, cada una con una clave propia en `key` y un nombre en `name`. |
 
 Aquí va una hoja de características ficticia con dos filas. La primera es la
@@ -208,10 +209,15 @@ Una fila puede acotar la procedencia del documento a su propia página, tabla,
 laboratorio, acreditación, informe, fecha de ensayo y norma, como hace
 `core-lab`, y una norma dada para un solo campo (`field_test_standards`) se
 suma a las del documento. Un documento distinto es otro archivo: una fila no
-puede cambiar el documento, su tipo ni su versión. El `source` de la fila se
-compone con todo ello, y un rechazo nombra el documento por su tipo: «the
-datasheet», «the declaration of performance», «the test report», «the
-measurement record», «the calculation note», «the source».
+puede cambiar el documento, su tipo ni su versión. Para todo tipo salvo
+`publication`, que se cita como se cita su documento, el `source` de la fila
+nombra el documento, su editor y su versión, la página y la tabla, el informe
+y el laboratorio, y el día de la consulta; la acreditación, la fecha de
+ensayo y las normas se quedan en `row.provenance`. Un rechazo nombra el
+documento por su tipo: «the datasheet», «the declaration of performance»,
+«the test report», «the measurement record» para `measurement`, «the
+calculation note» para `calculation`, y «the source» para `publication` u
+`other`.
 
 Las columnas propias van bajo un nombre que empieza por `x-`: se guardan, como
 texto, en `Catalogue.extras` y no intervienen en ningún cálculo. Una fila
@@ -436,7 +442,7 @@ layers = io.parse_catalogue(
                 "key": "tested",
                 "name": "Underlay 20",
                 "thickness_mm": 20,
-                "apparent_dynamic_stiffness_mn_m3": 7.4,
+                "apparent_dynamic_stiffness_mn_m3": 7,
                 "basis": {"row": "measured"},
                 "provenance": {"laboratory": "Example Lab", "report": "26-044"},
             },
@@ -455,7 +461,7 @@ except ValueError as error:
 
 tested = layers["underlays/tested"]
 f0 = tested.natural_frequency(mass_per_area_kg_m2=100.0, airflow_resistivity_pa_s_m2=150_000.0)
-print(round(float(f0), 1))   # 43.3
+print(round(float(f0), 1))   # 42.1
 ```
 
 La capa ensayada solo da $s'_\mathrm{t}$, así que su frecuencia natural
@@ -483,8 +489,11 @@ print(len(materials.porous_materials_named("Foam", catalogue=both)))   # 5
 
 Cada búsqueda conserva su propia forma de casar un nombre, contesta con todas
 las coincidencias en el orden en que las guarda el catálogo y nunca elige una.
-Una fila de otra clase dentro del catálogo se rechaza con `TypeError`, que
-nombra su clave.
+Casa sin distinguir mayúsculas ni la forma en que se guarda una letra
+acentuada: un nombre pegado de un documento que guarda «é» como «e» seguida
+de un acento combinante encuentra la fila escrita con «é», y al revés. Una
+fila de otra clase dentro del catálogo se rechaza con `TypeError`, que nombra
+su clave.
 
 ## Escribir lo que imprime el documento
 
@@ -561,11 +570,16 @@ elegir un `row_type`.
   hoja de características europea suele ser eso. Ninguna clase de fila de la
   biblioteca guarda $\alpha_\mathrm{p}$, ni un $\alpha_\mathrm{s}$ por
   tercios de octava; no escribas ninguno de los dos en `AbsorptionSpectrum`.
-- `TransmissionLossSpectrum` guarda la pérdida por transmisión en incidencia
-  de campo de una construcción tal como la recopila un libro. El índice de
-  reducción sonora $R$ que mide un laboratorio según la ISO 10140-2 es otra
-  magnitud, con sus propias transmisiones indirectas y su propia probeta, y
-  ninguna clase de fila lo guarda.
+- `TransmissionLossSpectrum` guarda la pérdida por transmisión de una
+  construcción tal como la recopila un libro, por bandas de octava, a partir
+  de ensayos que el libro rara vez nombra: Bies califica sus valores de
+  incidencia de campo, las filas de ASHRAE salen de ensayos de laboratorio y
+  Rossing no nombra ninguna fuente. El índice de reducción acústica $R$ de un
+  informe de ensayo según la ISO 10140-2 se mide por tercios de octava sobre
+  una probeta de un producto, en un laboratorio donde se ha comprobado que el
+  sonido transmitido por flancos es despreciable, y se valora con la
+  ISO 717-1. Es otro registro, y ninguna clase de fila lo guarda; no lo
+  escribas en `TransmissionLossSpectrum`.
 - `ResilientLayer` guarda $s'$ en `dynamic_stiffness_n_m3` y
   $s'_\mathrm{t}$ en `apparent_dynamic_stiffness_n_m3`. Un informe de ensayo
   según la EN 29052-1 imprime $s'_\mathrm{t}$ y, cuando puede, $s'$; una hoja
@@ -595,7 +609,7 @@ todas sus celdas, y la entrada propia de una celda manda sobre las dos.
 
 `basis` es lo que dice el documento; `derived` es lo que calculó esta
 biblioteca, a partir de las celdas impresas, al construir la fila. Son
-independientes: el módulo de cortadura de `core-lab` es derivado, y su texto
+independientes: el módulo de cizalla de `core-lab` es derivado, y su texto
 en `derived` nombra las bases en las que se apoya, un módulo de Young medido y
 un coeficiente de Poisson estimado. `converted` guarda la cifra y la unidad de
 un valor convertido desde otra unidad, y `carried` dice de dónde da el
@@ -625,7 +639,8 @@ keyword-only construida sobre `io.CatalogueRow`, con cada campo anotado como
 `float | None`, `int | None`, `bool`, `str`, `frozenset[str]` o un `Mapping`
 de ellos. El lector la lee como cualquier otra, y las demás unidades de una
 magnitud se aplican también a tus campos cuando el nombre no deja lugar a
-dudas:
+dudas, salvo una temperatura, que se escribe en la unidad que nombra su
+campo:
 
 ```python
 import dataclasses
@@ -710,7 +725,7 @@ El lector solo admite JSON: una hoja de cálculo se convierte antes en el
 documento, por ejemplo en un diccionario que se pasa a `parse_catalogue`.
 Ninguna clase de fila guarda el coeficiente práctico de absorción
 $\alpha_\mathrm{p}$ de una hoja de características, su $\alpha_\mathrm{s}$
-por tercios de octava ni un índice de reducción sonora $R$ de laboratorio, y
+por tercios de octava ni un índice de reducción acústica $R$ de laboratorio, y
 ninguna valoración se recalcula a partir de un espectro que guarde un archivo.
 La biblioteca no trae datos de ningún fabricante, y una tabla pegada en una
 issue o en una pull request nunca se incorpora.

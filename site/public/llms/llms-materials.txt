@@ -207,8 +207,9 @@ or a pull request is never merged.
 
 A reverberation-room test (ISO 354) measures the **sound absorption
 coefficient** $\alpha_\mathrm{s}$ in one-third octave bands. It is referred
-to the area of the specimen, whose edges absorb too, so a value above 1 is
-common and is not an error. A test report prints it to two decimals, one
+to the area of the specimen, and ISO 354 notes that it can exceed 1.0, for
+example because of diffraction effects, so a value above 1 is common and is
+not an error. A test report prints it to two decimals, one
 value per band, and `ThirdOctaveAbsorptionSpectrum` holds it as printed,
 from 50 Hz to 10 kHz.
 
@@ -273,7 +274,43 @@ print(rating.rating_label, rating.absorption_class)   # 0.65(MH) C
 The 1 kHz octave is 1.10 before the cap and 1.00 after it; the report's
 1.19 stays 1.19. An octave whose three one-third octaves the report does
 not all print is left empty, and `why_missing` says it does not follow from
-the cells the row has: nothing is borrowed from a neighbouring band.
+the cells the row has: nothing is borrowed from a neighbouring band. A
+negative coefficient, which a measurement can give in a band where the
+specimen adds almost nothing to the room's absorption, is not read as 0
+either: its octave is left empty with the band and the value in
+`why_missing`, and `rating()` refuses it, naming the band.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/datasheet_absorption_rating_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/datasheet_absorption_rating.svg" alt="ISO 11654 rating of a test report's one-third-octave absorption: the practical coefficients of the five rating octaves above the reference curve shifted to 0.65, with one unfavourable deviation of 0.10 at 250 Hz" width="80%"></picture>
+
+*`AbsorptionRatingResult.plot()` of the report's row: the practical
+coefficients of the five rating octaves, and the reference curve of
+ISO 11654 shifted down until the unfavourable deviations add up to no more
+than 0.10. Here they are 0.10, all of it at 250 Hz, so the curve stops at
+$\alpha_\mathrm{w}$ = 0.65. The coefficients stand 0.35 above it at 1, 2 and
+4 kHz, past the 0.25 of Clause 4.3, which is what the indicators M and H
+say.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+from phonometry import materials
+
+bands = (100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000, 1250,
+         1600, 2000, 2500, 3150, 4000, 5000)
+alpha_s = (0.12, 0.15, 0.17, 0.21, 0.31, 0.51, 0.54, 0.80, 0.93, 1.05, 1.10,
+           1.19, 1.20, 1.13, 1.02, 0.99, 0.94, 0.81)
+panel = materials.ThirdOctaveAbsorptionSpectrum(
+    name="Panel 40",
+    source="Sound absorption test report 26-015",
+    **{f"absorption_coefficient_{b}": a for b, a in zip(bands, alpha_s, strict=True)},
+)
+panel.rating().plot()
+plt.show()
+```
+
+</details>
 
 ### The grid, the cap and the 125 Hz band
 
@@ -446,13 +483,6 @@ bands and the numbers as printed, and `rating()` works them out again. It
 is not the transmission loss a book compiles, which
 `TransmissionLossSpectrum` holds.
 
-A floating floor's or a covering's sheet prints the weighted reduction of
-impact sound pressure level $\Delta L_\mathrm{w}$ of ISO 717-2, often with
-$C_\mathrm{I,r}$ beside it, and a report prints the $\Delta L$ of
-ISO 10140-3 per band. `ImpactImprovementSpectrum` holds them, and
-`rating()` works out $\Delta L_\mathrm{w}$, $C_{\mathrm{I},\Delta}$ and
-$C_\mathrm{I,r} = -11 - C_{\mathrm{I},\Delta}$ dB (Clause A.2.2).
-
 ```python
 from phonometry import building, io
 
@@ -463,7 +493,7 @@ r_db = (18.7, 19.2, 20.0, 20.4, 16.3, 17.7, 22.6, 22.4, 22.7, 24.8, 26.6,
 wall = {
     "key": "partition",
     "name": "Glazed partition",
-    "construction": "single 6 mm glass pane",
+    "construction": "single 4 mm glass pane",
     "weighted_sound_reduction_index_db": 30,
     "spectrum_adaptation_term_db": -2,
     "traffic_spectrum_adaptation_term_db": -3,
@@ -497,6 +527,131 @@ rated = tested["lab-walls/partition"].rating()
 print(rated.rating, rated.c, rated.ctr, rated.c_50_5000, rated.ctr_50_5000)
 # 30 -2 -3 -2 -4
 print(tested.notes)   # () : the printed numbers are the ones the bands give
+```
+
+The partition's printed numbers are the ones its bands give, so there is no
+note.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/datasheet_sound_reduction_rating_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/datasheet_sound_reduction_rating.svg" alt="ISO 717-1 rating of a laboratory sound reduction index from 50 Hz to 5 kHz: the reference curve shifted to Rw = 30 dB over 100 Hz to 3.15 kHz, the unfavourable deviations shaded, and the enlarged range of Annex B greyed with its six adaptation terms in the title" width="80%"></picture>
+
+*`ExtendedWeightedRatingResult.plot()` of the partition's row: the
+reference curve of ISO 717-1 shifted over the sixteen bands from 100 Hz to
+3.15 kHz until it rates the partition at $R_\mathrm{w}$ = 30 dB, the
+unfavourable deviations shaded, and the bands of the enlarged range of
+Annex B greyed, with their six terms in the title. The deepest deviation is
+the dip at 3.15 kHz, where the pane's coincidence is.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+from phonometry import building
+
+bands = (50, 63, 80, 100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000,
+         1250, 1600, 2000, 2500, 3150, 4000, 5000)
+r_db = (18.7, 19.2, 20.0, 20.4, 16.3, 17.7, 22.6, 22.4, 22.7, 24.8, 26.6,
+        28.0, 30.5, 31.8, 32.5, 33.4, 33.0, 31.0, 25.5, 26.8, 29.2)
+partition = building.SoundReductionSpectrum(
+    name="Glazed partition",
+    source="Airborne sound insulation test report 26-021",
+    **{f"sound_reduction_index_{b}_db": r for b, r in zip(bands, r_db, strict=True)},
+)
+partition.rating().plot()
+plt.show()
+```
+
+</details>
+
+A floating floor's or a covering's sheet prints the weighted reduction of
+impact sound pressure level $\Delta L_\mathrm{w}$ of ISO 717-2, often with
+$C_\mathrm{I,r}$ beside it. A laboratory report prints per band the
+reduction of impact sound pressure level $\Delta L$ of ISO 10140-1 Annex H:
+the normalized impact level of a reference floor without the covering less
+the one with it (Equation (H.1)), both measured by ISO 10140-3.
+`ImpactImprovementSpectrum` holds them, and `rating()` works out
+$\Delta L_\mathrm{w}$, $C_{\mathrm{I},\Delta}$ and
+$C_\mathrm{I,r} = -11 - C_{\mathrm{I},\Delta}$ dB (Clause A.2.2).
+
+```python
+from phonometry import building, io
+
+bands = (100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000, 1250, 1600,
+         2000, 2500, 3150)
+delta_l_db = (3.0, 3.7, 1.9, 3.0, 3.2, 3.5, 4.0, 6.1, 6.7, 7.0, 7.7, 10.8,
+              15.2, 20.3, 25.4, 23.2)
+covering = {
+    "key": "covering",
+    "name": "Floor covering",
+    "weighted_impact_improvement_db": 15,
+    "reference_floor_adaptation_term_db": -2,
+}
+covering |= {f"impact_improvement_{b}_db": d for b, d in zip(bands, delta_l_db, strict=True)}
+coverings = io.parse_catalogue(
+    {
+        "schema": "phonometry-catalogue",
+        "schema_version": 1,
+        "catalogue": "lab-coverings",
+        "row_type": "ImpactImprovementSpectrum",
+        "about": "Floor coverings rated in the laboratory, from their test reports.",
+        "provenance": {
+            "kind": "test_report",
+            "document": "Impact sound insulation test report 26-022",
+            "version": None,
+            "consulted": "2026-09-25",
+            "laboratory": "Example Lab",
+            "report": "26-022",
+            "test_standard": "ISO 10140-1:2010 Annex H",
+        },
+        "basis": "measured",
+        "rows": [covering],
+    },
+    row_type=building.ImpactImprovementSpectrum,
+)
+rated = coverings["lab-coverings/covering"].rating()
+print(rated.delta_lw, rated.ci_delta, rated.ci_r)   # 15 -9 -2
+print(coverings.notes)   # ()
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/datasheet_impact_improvement_rating_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/datasheet_impact_improvement_rating.svg" alt="ISO 717-2 rating of a floor covering's reduction of impact sound pressure level per one-third octave from 100 Hz to 3.15 kHz, with ΔLw = 15 dB, CI,Δ = −9 dB and CI,r = −2 dB in the title" width="80%"></picture>
+
+*`ImpactImprovementRatingResult.plot()` of the covering's row: the
+$\Delta L$ the report prints per band, rated in the title. The covering
+takes 20 dB and more off the impact level from 2 kHz up and only 2 to 4 dB
+up to 400 Hz, and $C_{\mathrm{I},\Delta}$ = −9 dB says so: the single
+number on the unweighted linear level,
+$\Delta L_\mathrm{lin} = \Delta L_\mathrm{w} + C_{\mathrm{I},\Delta}$
+(ISO 717-2 Formula (A.5)), is 6 dB, not 15. A floating floor whose
+mass-spring resonance makes $\Delta L$ negative in its lowest bands keeps
+those bands in view.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+from phonometry import building
+
+bands = (100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000, 1250, 1600,
+         2000, 2500, 3150)
+delta_l_db = (3.0, 3.7, 1.9, 3.0, 3.2, 3.5, 4.0, 6.1, 6.7, 7.0, 7.7, 10.8,
+              15.2, 20.3, 25.4, 23.2)
+covering = building.ImpactImprovementSpectrum(
+    name="Floor covering",
+    source="Impact sound insulation test report 26-022",
+    **{f"impact_improvement_{b}_db": d for b, d in zip(bands, delta_l_db, strict=True)},
+)
+covering.rating().plot()
+plt.show()
+```
+
+</details>
+
+A sheet that declares $\Delta L_\mathrm{w}$ rather than printing the bands
+is written as the bound it is:
+
+```python
+from phonometry import building, io
 
 sheet = io.parse_catalogue(
     {
@@ -539,19 +694,21 @@ except ValueError as error:
 # 26 and no value (...)
 ```
 
-The partition's printed numbers are the ones its bands give, so there is no
-note. The mat's sheet declares its improvement as at least 26 dB, which is
-not a value the prediction can take, and the refusal says so. A rating a
+The mat's sheet declares its improvement as at least 26 dB, which is not a
+value the prediction can take, and the refusal says so. A rating a
 sheet prints and no function of this library works out (an STC, an IIC, a
 flanking level difference) has no field of its own; write it in the row's
 `note`.
 
 ## What never happens
 
-- No coefficient is rounded, clipped or moved to the grid, and no rating
-  printed on the sheet is replaced by the one its bands give.
-- No octave is formed from one-third octaves the row does not print, and no
-  band is filled from its neighbours.
+- No printed coefficient is rounded, clipped or moved to the grid, and no
+  rating printed on the sheet is replaced by the one its bands give; the
+  practical coefficients `practical()` works out are rounded as Clause 4.1
+  says, and marked as derived.
+- No octave is formed from one-third octaves the row does not print or from
+  a negative one, no negative coefficient is read as 0, and no band is
+  filled from its neighbours.
 - No bound becomes a value, and no declared level is read as a
   measurement.
 - No note changes a cell: a note is read once, beside the catalogue.
@@ -564,7 +721,7 @@ coefficients (`materials.ThirdOctaveAbsorptionSpectrum`) with the practical
 coefficients they give, a laboratory sound reduction index
 (`building.SoundReductionSpectrum`) and a reduction of impact sound pressure
 level (`building.ImpactImprovementSpectrum`), each rated again from its bands
-with `rating()`; the notes a reader keeps for a value off the ISO 11654 grid
+with `rating()`, whose result draws itself with `plot()`; the notes a reader keeps for a value off the ISO 11654 grid
 or above its cap and for a printed rating the bands do not give; and how to
 write a declared level, a mounting, a revision and a word printed where a
 number would be.
@@ -589,15 +746,17 @@ library, and a sheet pasted into an issue or a pull request is never merged.
   The practical coefficient of Clause 4.1, the mean of three one-third octaves rounded in steps of 0.05 and set to 1.00 above it; the weighted coefficient and its shape indicators of Clauses 4.2 and 4.3; Clause 1, which starts the rating at 250 Hz; Clause 5, which gives every coefficient to two decimals and asks for the depth of construction. Read from BS EN ISO 11654:1997.
 - International Organization for Standardization. (2003). *Acoustics — Measurement of sound absorption in a reverberation room* (ISO 354:2003).
   [iso.org catalogue](https://www.iso.org/standard/34545.html).
-  The one-third-octave sound absorption coefficient a test report prints, and the mountings of Annex B: type A against a room surface, type E over an air space whose number is the distance in millimetres from the specimen's face to the surface behind it.
+  The one-third-octave sound absorption coefficient a test report prints, which 3.9 NOTE 2 says can exceed 1.0 because of diffraction effects, and the mountings of Annex B: type A against a room surface, type E over an air space whose number is the distance in millimetres from the specimen's face to the surface behind it.
 - European Committee for Standardization. (2015). *Thermal insulation products for buildings — Factory made mineral wool (MW) products — Specification* (EN 13162:2012+A1:2015).
   A product standard under CE marking and what its declarations mean: clause 4.3.9 declares the dynamic stiffness in levels no test result exceeds, 4.3.11 the practical and weighted coefficients in levels no result falls below, 4.3.12 the airflow resistivity likewise, and clause 6 codes them as SDi, APi, AWi and AFri. Read from BS EN 13162:2012+A1:2015.
 - International Organization for Standardization. (2010). *Acoustics — Laboratory measurement of sound insulation of building elements — Part 2: Measurement of airborne sound insulation* (ISO 10140-2:2010).
   [iso.org catalogue](https://www.iso.org/standard/42088.html).
   The laboratory sound reduction index R of a wall or a door, one-third octave by one-third octave, which a test report prints and SoundReductionSpectrum holds.
+- International Organization for Standardization. (2010). *Acoustics — Laboratory measurement of sound insulation of building elements — Part 1: Application rules for specific products* (ISO 10140-1:2010).
+  Annex H, Equation (H.1): the reduction of impact sound pressure level ΔL = Ln0 − Ln of a floor covering on a reference floor, the difference between the normalized impact levels without and with it, which ImpactImprovementSpectrum holds. Read from BS EN ISO 10140-1:2010+A2:2014.
 - International Organization for Standardization. (2010). *Acoustics — Laboratory measurement of sound insulation of building elements — Part 3: Measurement of impact sound insulation* (ISO 10140-3:2010).
   [iso.org catalogue](https://www.iso.org/standard/42089.html).
-  The reduction of impact sound pressure level of a floor covering or a floating floor that ImpactImprovementSpectrum holds.
+  The measurement of the normalized impact sound pressure levels, with the covering and without it, from which Annex H of ISO 10140-1 forms ΔL.
 - International Organization for Standardization. (2020). *Acoustics — Rating of sound insulation in buildings and of building elements — Part 1: Airborne sound insulation* (ISO 717-1:2020).
   [iso.org catalogue](https://www.iso.org/standard/77435.html).
   Rw with C and Ctr, and the adaptation terms of the enlarged frequency ranges of Annex B, which a report prints beside R.

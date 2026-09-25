@@ -188,13 +188,14 @@ class CatalogueError(ValueError):
     :class:`ValueError`, because the data is wrong and not the call, whether
     it came from a file or from a caller building a row by hand.
 
-    :attr:`issues` holds every problem found, each a :class:`CatalogueIssue`
+    :attr:`issues` holds the problems found, each a :class:`CatalogueIssue`
     naming where it is. A reader of a catalogue file raises one error for
-    the whole file, with every issue in it; a row built in Python raises one
-    with a single issue, located at ``"<Python>"``.
+    the whole file, with every problem of form in it and the first rule of
+    the row contract each row breaks; a row built in Python raises one with
+    a single issue, located at ``"<Python>"``.
     """
 
-    #: Every problem found, in the order the reader met them.
+    #: The problems found, in the order they stand in the document.
     issues: tuple[CatalogueIssue, ...]
 
     def __init__(
@@ -1164,6 +1165,35 @@ _UNITS: Mapping[str, _Unit] = MappingProxyType(
 #: thousand, and a rate per millimetre would be scaled the wrong way.
 _COMPOUND_UNITS = ("_pa_s_m", "_per_m", "_per_cm", "_m_s", "_m_hz")
 
+#: The words a unit is spelled with in a name, and the word of a rate. A
+#: field of a caller's own class whose root holds one is in a compound unit:
+#: ``dynamic_stiffness_n_m`` is in N/m and ``thermal_conductivity_w_m_k`` in
+#: W/(m K), and the family of their last word is not their unit. A written
+#: name that ends in them is a name in some unit, which a refusal says.
+_UNIT_WORDS = frozenset(
+    {
+        # length, area and volume
+        *("um", "mm", "cm", "dm", "m", "km", "in", "inch", "inches", "ft"),
+        *("feet", "yd", "mil", "m2", "m3", "mm2", "mm3", "cm2", "cm3"),
+        *("ft2", "ft3", "in2", "in3"),
+        # mass and amount
+        *("mg", "g", "kg", "t", "lb", "lbs", "oz", "mol"),
+        # time and frequency
+        *("s", "ms", "min", "h", "hz", "khz"),
+        # force, pressure, energy and power
+        *("n", "kn", "mn", "kgf", "lbf", "pa", "kpa", "mpa", "gpa", "hpa"),
+        *("bar", "mbar", "psi", "psf", "atm", "j", "kj", "w", "kw"),
+        # temperature, angle, level and ratio
+        *("k", "c", "f", "degc", "degf", "deg", "rad", "db", "percent", "pct"),
+        # the units of airflow and absorption, and the word of a rate
+        *("rayl", "rayls", "sabin", "sabins", "per"),
+    }
+)
+
+#: How the unit of a field that a class's own aliases fill is spelled beside
+#: a figure, for a unit no family holds.
+_TARGET_SPELLINGS: Mapping[str, str] = MappingProxyType({"_m2": "m2"})
+
 
 def unit_suffix(name: str, extra: tuple[str, ...] = ()) -> str:
     """The unit a field name ends in, by the longest match, or ``""``.
@@ -1185,10 +1215,49 @@ def unit_suffix(name: str, extra: tuple[str, ...] = ()) -> str:
     )
 
 
-def unit_spelling(field_name: str) -> str:
-    """How a field's own unit is spelled beside a figure, or ``""``."""
-    unit = _UNITS.get(unit_suffix(field_name))
-    return "" if unit is None else unit.spelling
+def unit_stem(name: str) -> str:
+    """*name* without the words of the unit it ends in, or ``""``.
+
+    ``thickness_mm`` gives ``thickness`` and ``dynamic_stiffness_n_m3``
+    gives ``dynamic_stiffness``; a name that ends in no unit word, or is
+    nothing else, gives the empty string.
+    """
+    words = name.split("_")
+    end = len(words)
+    while end > 1 and words[end - 1] in _UNIT_WORDS:
+        end -= 1
+    return "_".join(words[:end]) if end < len(words) else ""
+
+
+def is_unit_spelling(text: str) -> bool:
+    """Whether every word of *text* is one a unit is spelled with."""
+    return bool(text) and all(word in _UNIT_WORDS for word in text.split("_"))
+
+
+def _introduced_by(cls: type, name: str) -> type | None:
+    """The class of *cls*'s hierarchy that first declares the field *name*."""
+    for klass in reversed(cls.__mro__):
+        if name in vars(klass).get("__dataclass_fields__", {}):
+            return klass
+    return None
+
+
+def _takes_family_units(cls: type, name: str, root: str, unit: _Unit) -> bool:
+    """Whether the field *name* of *cls* takes the other units of its family.
+
+    Every field a class of this library declares was read for the unit its
+    name carries, and a test lists them family by family. A field of a
+    caller's own class takes them only when its name leaves no doubt: a
+    root with no unit and no rate in it, and never a temperature, whose name
+    cannot say whether it is a temperature or a difference of two, which
+    moves by the factor alone.
+    """
+    introduced = _introduced_by(cls, name)
+    if introduced is not None and introduced.__module__.startswith("phonometry."):
+        return True
+    return unit.family != "temperature" and not any(
+        word in _UNIT_WORDS for word in root.split("_")
+    )
 
 
 class _Spellings(NamedTuple):
@@ -1201,19 +1270,28 @@ class _Spellings(NamedTuple):
     ambiguous: Mapping[str, tuple[str, ...]]
     #: Every name in either, for the one look a row without them takes.
     written: frozenset[str]
+    #: Field to how its own unit is spelled beside a figure, for every field
+    #: that takes another unit.
+    units: Mapping[str, str]
 
 
 def _family_aliases(
-    numeric: frozenset[str], extra: tuple[str, ...]
+    cls: type, numeric: frozenset[str], extra: tuple[str, ...], units: dict[str, str]
 ) -> dict[str, list[tuple[str, UnitAlias]]]:
-    """Every written name the unit families give the numeric fields."""
+    """Every written name the unit families give the numeric fields.
+
+    Records in *units* how the unit of each field they apply to is spelled.
+    """
     members: dict[tuple[str, str], list[tuple[str, str]]] = {}
     for name in sorted(numeric):
         suffix = unit_suffix(name, extra)
         unit = _UNITS.get(suffix)
-        if unit is not None:
-            root = name.removesuffix(suffix)
+        if unit is None:
+            continue
+        root = name.removesuffix(suffix)
+        if _takes_family_units(cls, name, root, unit):
             members.setdefault((root, unit.family), []).append((name, suffix))
+            units[name] = unit.spelling
     found: dict[str, list[tuple[str, UnitAlias]]] = {}
     for (root, family), group in members.items():
         for written_suffix, written in _UNITS.items():
@@ -1237,16 +1315,25 @@ def _spellings(cls: type, numeric: frozenset[str]) -> _Spellings:
 
     A name that is a field of the class is never converted, a name two
     fields could take is ambiguous, and a class's own ``_unit_aliases``
-    (the sabins of a table set in feet) join the families.
+    (the sabins of a table set in feet) join the families for the fields
+    that class and its bases declare, not for a field a subclass adds.
     """
     own: tuple[UnitAlias, ...] = getattr(cls, "_unit_aliases", ())
     extra = tuple(chain.from_iterable((alias.suffix, alias.target) for alias in own))
-    found = _family_aliases(numeric, extra)
+    units: dict[str, str] = {}
+    found = _family_aliases(cls, numeric, extra, units)
+    owner = next(
+        (klass for klass in cls.__mro__ if "_unit_aliases" in vars(klass)), cls
+    )
     for alias in own:
         for name in numeric:
-            if unit_suffix(name, extra) == alias.target:
+            introduced = _introduced_by(cls, name)
+            if unit_suffix(name, extra) == alias.target and (
+                introduced is not None and issubclass(owner, introduced)
+            ):
                 written = f"{name.removesuffix(alias.target)}{alias.suffix}"
                 found.setdefault(written, []).append((name, alias))
+                units.setdefault(name, _TARGET_SPELLINGS.get(alias.target, ""))
     names = frozenset(item.name for item in fields(cls))
     aliases = {
         written: targets[0]
@@ -1262,6 +1349,7 @@ def _spellings(cls: type, numeric: frozenset[str]) -> _Spellings:
         MappingProxyType(aliases),
         MappingProxyType(ambiguous),
         frozenset(aliases) | frozenset(ambiguous),
+        MappingProxyType(units),
     )
 
 
@@ -2705,7 +2793,7 @@ class CatalogueRow:
         if field_name not in self.converted:
             return held
         figure, unit = self.converted[field_name]
-        own = unit_spelling(field_name)
+        own = _shape(type(self)).spellings.units.get(field_name, "")
         return f"{figure} {unit} ({held} {own})" if own else f"{figure} {unit} ({held})"
 
     def _catalogue_notes(self) -> tuple[str, ...]:

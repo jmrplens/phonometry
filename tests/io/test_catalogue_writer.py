@@ -12,6 +12,7 @@ every hedge the packaged data uses goes through the reader.
 
 from __future__ import annotations
 
+import copy
 import dataclasses
 import datetime
 import importlib
@@ -117,8 +118,8 @@ def test_a_table_is_exported_as_a_publication_consulted_today(
     tmp_path: pathlib.Path,
 ) -> None:
     rows = _hopkins_a2()
-    path = tmp_path / "plantilla.json"
-    written = io.write_catalogue(rows, path, catalogue="plantilla-a2")
+    path = tmp_path / "template.json"
+    written = io.write_catalogue(rows, path, catalogue="template-a2")
     assert written == (path,)
     document = json.loads(path.read_text(encoding="utf-8"))
     assert document["schema"] == "phonometry-catalogue"
@@ -144,8 +145,8 @@ def test_a_provenance_passed_in_makes_the_file_the_same_every_day(
         kind="publication", document=source, version=None, consulted="2026-09-23"
     )
     first, second = tmp_path / "one.json", tmp_path / "two.json"
-    io.write_catalogue(rows, first, catalogue="plantilla-a2", provenance=fixed)
-    io.write_catalogue(rows, second, catalogue="plantilla-a2", provenance=fixed)
+    io.write_catalogue(rows, first, catalogue="template-a2", provenance=fixed)
+    io.write_catalogue(rows, second, catalogue="template-a2", provenance=fixed)
     assert first.read_bytes() == second.read_bytes()
 
 
@@ -261,6 +262,72 @@ def test_a_converted_cell_is_written_in_the_unit_it_was_read_in(
     assert rows[1]["x-edge"] == "24"
 
 
+def test_a_figure_that_does_not_read_back_is_written_in_the_field_unit(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A record that does not convert to the value held never replaces it."""
+    row = PorousMaterial(
+        name="Panel 40 core",
+        source="Panel 40 technical data sheet",
+        flow_resistivity_pa_s_m2=12480.0,
+        converted={"flow_resistivity_pa_s_m2": ("12.5", "kPa s/m2")},
+    )
+    path = tmp_path / "mine.json"
+    io.write_catalogue(
+        {"mine/core": row}, path, catalogue="mine", about="A row built in Python."
+    )
+    written = json.loads(path.read_text(encoding="utf-8"))["rows"][0]
+    assert written["flow_resistivity_pa_s_m2"] == 12480.0
+    assert "flow_resistivity_kpa_s_m2" not in written
+    assert written["converted"] == {"flow_resistivity_pa_s_m2": ["12.5", "kPa s/m2"]}
+    back = io.read_catalogue(path, row_type=PorousMaterial)["mine/core"]
+    assert back.flow_resistivity_pa_s_m2 == 12480.0
+    assert back.converted == row.converted
+
+
+def test_a_plus_or_minus_is_written_in_the_unit_it_reads_back_in(
+    tmp_path: pathlib.Path,
+) -> None:
+    """4.2 Pa s/m2 is 0.0042 kPa s/m2, whose float reads back as 4.200000000000001."""
+    document = copy.deepcopy(_MINE)
+    document["rows"][1]["uncertainty"] = {"flow_resistivity_kpa_s_m2": 0.0042}
+    mine = io.parse_catalogue(json.dumps(document), row_type=PorousMaterial)
+    lab = mine["panel-40/core-lab"]
+    assert lab.uncertainty == {"flow_resistivity_pa_s_m2": 4.2}
+    path = tmp_path / "mine.json"
+    io.write_catalogue(mine, path)
+    written = json.loads(path.read_text(encoding="utf-8"))["rows"][1]
+    assert written["flow_resistivity_pa_s_m2"] == 12500.0
+    assert written["uncertainty"] == {"flow_resistivity_pa_s_m2": 4.2}
+    assert written["converted"] == {"flow_resistivity_pa_s_m2": ["12.5", "kPa s/m2"]}
+    back = io.read_catalogue(path, row_type=PorousMaterial)
+    assert back == mine
+    assert back["panel-40/core-lab"].uncertainty == {"flow_resistivity_pa_s_m2": 4.2}
+
+
+def test_the_standard_of_one_field_is_written_where_the_rows_differ(
+    tmp_path: pathlib.Path,
+) -> None:
+    document = copy.deepcopy(_MINE)
+    document["rows"][1]["provenance"]["field_test_standards"] = {
+        "tortuosity": "ISO 9053-1:2018"
+    }
+    mine = io.parse_catalogue(json.dumps(document), row_type=PorousMaterial)
+    path = tmp_path / "mine.json"
+    io.write_catalogue(mine, path)
+    written = json.loads(path.read_text(encoding="utf-8"))
+    assert written["provenance"]["field_test_standards"] == {
+        "flow_resistivity_pa_s_m2": "EN 29053"
+    }
+    assert written["rows"][1]["provenance"]["field_test_standards"] == {
+        "tortuosity": "ISO 9053-1:2018"
+    }
+    assert "provenance" not in written["rows"][0]
+    back = io.read_catalogue(path, row_type=PorousMaterial)
+    for key in mine:
+        assert back[key].provenance == mine[key].provenance
+
+
 def test_a_row_of_your_own_filtered_out_of_a_catalogue_writes_alone(
     tmp_path: pathlib.Path,
 ) -> None:
@@ -322,7 +389,9 @@ def test_rows_of_two_classes_are_refused(tmp_path: pathlib.Path) -> None:
 
 
 def test_no_rows_is_nothing_to_write(tmp_path: pathlib.Path) -> None:
-    with pytest.raises(io.CatalogueError, match="nothing to write"):
+    with pytest.raises(
+        io.CatalogueError, match="a catalogue with no rows says nothing"
+    ):
         io.write_catalogue({}, tmp_path / "empty.json", catalogue="empty")
 
 
@@ -362,7 +431,7 @@ def test_a_failed_write_leaves_nothing_behind(
 
     monkeypatch.setattr(pathlib.Path, "replace", refuse)
     mine = _mine()
-    with pytest.raises(OSError, match="tmp"):
+    with pytest.raises(OSError, match=r"\.mine\.json\.[0-9a-f]{16}\.tmp"):
         io.write_catalogue(mine, tmp_path / "mine.json")
     assert list(tmp_path.iterdir()) == []
 
@@ -388,7 +457,7 @@ def test_rows_of_two_documents_are_refused(tmp_path: pathlib.Path) -> None:
         ),
     )
     rows = {"panel-40/a": mine["panel-40/core-declared"], "panel-40/b": other}
-    with pytest.raises(io.CatalogueError, match="one document"):
+    with pytest.raises(io.CatalogueError, match="not all read from one document"):
         io.write_catalogue(rows, tmp_path / "two.json", about="Two sheets.")
 
 

@@ -12,6 +12,7 @@ from __future__ import annotations
 import dataclasses
 import importlib
 import inspect
+import json
 import pathlib
 import pkgutil
 import re
@@ -61,9 +62,13 @@ def _one_row(cls: type[io.CatalogueRow]) -> dict[str, object]:
 
 @pytest.mark.parametrize("cls", ROW_CLASSES, ids=lambda cls: cls.__name__)
 def test_every_published_row_class_is_read_from_a_one_row_document(
-    cls: type[io.CatalogueRow],
+    cls: type[io.CatalogueRow], tmp_path: pathlib.Path
 ) -> None:
-    """Guard (a): no row class the package publishes escapes the reader."""
+    """Guard (a): no row class the package publishes escapes the reader.
+
+    Read from a file, so the text, its printed digits and the row class go
+    through the whole path a caller's file takes.
+    """
     row = _one_row(cls)
     document = {
         "schema": "phonometry-catalogue",
@@ -79,7 +84,9 @@ def test_every_published_row_class_is_read_from_a_one_row_document(
         },
         "rows": [row],
     }
-    catalogue = io.parse_catalogue(document, row_type=cls)
+    path = tmp_path / "guard.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    catalogue = io.read_catalogue(path, row_type=cls)
     read = catalogue["guard/a"]
     assert type(read) is cls
     for name, value in row.items():

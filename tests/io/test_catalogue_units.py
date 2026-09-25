@@ -24,7 +24,12 @@ from phonometry import io
 from phonometry._internal import catalogue as private
 from phonometry.environment.propagation import GroundSurface
 from phonometry.fluids import NonlinearityParameter
-from phonometry.materials import PorousMaterial, ResilientLayer, ResistiveSheet
+from phonometry.materials import (
+    AbsorptionAreaSpectrum,
+    PorousMaterial,
+    ResilientLayer,
+    ResistiveSheet,
+)
 from phonometry.solids import DampingMaterial, SolidMaterial
 
 _SOURCE = "Panel 40 technical data sheet (Example Acoustics Ltd), Rev. 4"
@@ -236,7 +241,9 @@ def test_the_numbers_of_one_cell_are_written_in_one_unit() -> None:
         "flow_resistivity_kpa_s_m2": 12.5,
         "uncertainty": {"flow_resistivity_pa_s_m2": 900},
     }
-    with pytest.raises(io.CatalogueError, match="in one unit"):
+    with pytest.raises(
+        io.CatalogueError, match="numbers of flow_resistivity_pa_s_m2 are written"
+    ):
         _built(PorousMaterial, **cells)
 
 
@@ -248,7 +255,7 @@ def test_a_cell_given_under_its_own_name_and_an_alias_is_refused() -> None:
 
 def test_a_hedge_that_names_one_cell_twice_is_refused() -> None:
     cells = {"approximate": ["thickness_mm", "thickness_cm"]}
-    with pytest.raises(io.CatalogueError, match="twice"):
+    with pytest.raises(io.CatalogueError, match="approximate names thickness_mm twice"):
         _built(PorousMaterial, **cells)
 
 
@@ -265,7 +272,9 @@ def test_converted_written_beside_an_alias_figure_is_refused() -> None:
         "bounded_below": ["flow_resistivity_kpa_s_m2"],
         "converted": {"flow_resistivity_pa_s_m2": ["5", "kPa s/m2"]},
     }
-    with pytest.raises(io.CatalogueError, match="not both"):
+    with pytest.raises(
+        io.CatalogueError, match="converted is given for flow_resistivity_pa_s_m2"
+    ):
         _built(PorousMaterial, **cells)
 
 
@@ -316,6 +325,83 @@ def test_a_field_name_is_never_converted() -> None:
     assert row.thickness_m == 0.04
     assert row.thickness_mm is None
     assert row.converted == {}
+
+
+# ---------------------------------------------------------------------------
+# A field of a class of your own
+# ---------------------------------------------------------------------------
+@dataclasses.dataclass(frozen=True, kw_only=True)
+class _Mount(io.CatalogueRow):
+    """A row class of a caller's own, with fields in compound units."""
+
+    dynamic_stiffness_n_m: float | None = None
+    mass_per_length_kg_m: float | None = None
+    thermal_conductivity_w_m_k: float | None = None
+    specific_heat_j_kg_k: float | None = None
+    temperature_rise_c: float | None = None
+    wall_thickness_mm: float | None = None
+
+
+@pytest.mark.parametrize(
+    "field",
+    [
+        # N/m: its metre divides, and a figure in N/mm is a thousand times more
+        "dynamic_stiffness_n_m",
+        # kg/m
+        "mass_per_length_kg_m",
+        # W/(m K): its kelvin divides and takes no offset
+        "thermal_conductivity_w_m_k",
+        # J/(kg K)
+        "specific_heat_j_kg_k",
+        # a difference of two temperatures moves by the factor alone
+        "temperature_rise_c",
+    ],
+)
+def test_a_field_of_your_own_in_a_compound_unit_takes_no_other_unit(
+    field: str,
+) -> None:
+    names = private.spellings(_Mount)
+    assert [
+        written for written, (target, _) in names.aliases.items() if target == field
+    ] == []
+    assert field not in names.units
+
+
+def test_a_field_of_your_own_in_a_plain_unit_takes_its_family() -> None:
+    row = _Mount.from_printed(name="Mount", source=_SOURCE, wall_thickness_cm=4)
+    assert row.wall_thickness_mm == 40.0
+    assert row.converted == {"wall_thickness_mm": ("4", "cm")}
+
+
+def test_a_figure_in_a_unit_your_field_does_not_take_is_refused() -> None:
+    """150 N/mm is 150 000 N/m, and read as millimetres it would be 0.15."""
+    cells = {"dynamic_stiffness_n_mm": 150}
+    with pytest.raises(TypeError, match="dynamic_stiffness_n_mm"):
+        _Mount.from_printed(name="Mount", source=_SOURCE, **cells)
+
+
+def test_a_field_a_subclass_adds_takes_none_of_its_base_class_units() -> None:
+    """The sabins of a table set in feet are for the bands that table prints."""
+
+    @dataclasses.dataclass(frozen=True, kw_only=True)
+    class Loud(AbsorptionAreaSpectrum):
+        intensity_w_m2: float | None = None
+
+    names = private.spellings(Loud)
+    assert "intensity_w_ft2" not in names.aliases
+    assert names.aliases["absorption_area_500_ft2"][0] == "absorption_area_500_m2"
+
+
+def test_a_unit_no_family_holds_is_spelled_beside_its_converted_figure() -> None:
+    row = AbsorptionAreaSpectrum.from_printed(
+        name="Seat",
+        source=_SOURCE,
+        per="seat",
+        ranges={"absorption_area_500_ft2": [5, 10]},
+    )
+    assert row.why_missing("absorption_area_500_m2") == (
+        "the page prints 5 to 10 sabins (0.4645152 to 0.9290304 m2) and no value"
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -409,13 +495,25 @@ _FAMILY_FIELDS: dict[str, frozenset[str]] = {
 def test_every_published_field_in_a_family_is_one_the_families_were_read_for() -> None:
     found: dict[str, set[str]] = {}
     for cls in _row_classes():
+        units = private.spellings(cls).units
         for name in private._shape(cls).numeric:
             unit = private._UNITS.get(private.unit_suffix(name))
             if unit is not None:
+                assert units.get(name) == unit.spelling, (cls.__name__, name)
                 found.setdefault(unit.family, set()).add(name)
     assert {family: frozenset(names) for family, names in found.items()} == (
         _FAMILY_FIELDS
     )
+
+
+def test_every_field_that_takes_another_unit_spells_its_own() -> None:
+    """A refusal quotes the page's figure and then the row's, in its unit."""
+    for cls in _row_classes():
+        names = private.spellings(cls)
+        filled = {target for target, _ in names.aliases.values()}
+        assert sorted(name for name in filled if not names.units.get(name)) == [], (
+            cls.__name__
+        )
 
 
 def test_the_compound_units_are_found_before_the_family_inside_them() -> None:

@@ -51,9 +51,12 @@ its own named ``x-...``, which :attr:`Catalogue.extras` keeps as text. A row
 never writes ``derived``, ``table``, ``source`` or ``estimated``: the first
 three are the library's to write, and an estimate is a ``basis``.
 
-Every problem in a document is found before any row is built, and all of
-them are raised together in one :class:`CatalogueError`, each with its place
-in the file as a JSON pointer. A cell worth a second look is kept and noted
+The problems in a document are raised together in one
+:class:`CatalogueError`, each with its place in the file as a JSON pointer:
+every problem of form the pass over the document finds (a text where a
+number goes, a field the row class does not have, a unit no family holds),
+and, for each row the pass finds nothing wrong with, the first rule of the
+row contract it breaks. A cell worth a second look is kept and noted
 in :attr:`Catalogue.notes` instead, and one :class:`CatalogueWarning` says
 how many there are.
 
@@ -97,10 +100,10 @@ from .._internal.catalogue import (
     convert_figure,
     decode_marked,
     field_kinds,
+    is_unit_spelling,
     read_packaged,
     spellings,
-    unit_spelling,
-    unit_suffix,
+    unit_stem,
 )
 from .._internal.warnings import PhonometryWarning
 
@@ -120,9 +123,9 @@ _MAX_ROWS = 50_000
 #: How deep the containers of a document nest: the document, its rows, a
 #: row, a hedge, an entry, an interval inside a list of readings.
 _MAX_DEPTH = 6
-#: The longest ``about``, ``note`` or convention.
+#: The longest ``about`` or ``note``.
 _MAX_PROSE = 20_000
-#: The longest of every other text.
+#: The longest of every other text, a convention among them.
 _MAX_TEXT = 2_000
 #: How many issues a refusal lists before it counts the rest.
 _SHOWN = 20
@@ -606,36 +609,45 @@ class _Names:
         cls = self.row_type.__name__
         if written in self.kinds:
             return f"{written!r} is a field of {cls} that cannot be named here"
-        candidates = sorted(
-            allowed
-            | {
-                name
-                for name, (target, _) in self.spellings.aliases.items()
-                if target in allowed
-            }
-        )
-        close = difflib.get_close_matches(written, candidates, n=1, cutoff=0.8)
+        close = _closest(written, self.names_for(allowed))
         head = f"no field {written!r} on {cls}"
-        return f"{head}; did you mean {close[0]!r}?" if close else head
+        return f"{head}; did you mean {close!r}?" if close else head
+
+    def names_for(self, fields: frozenset[str]) -> frozenset[str]:
+        """*fields*, and every other name they are taken under."""
+        return fields | {
+            name
+            for name, (target, _) in self.spellings.aliases.items()
+            if target in fields
+        }
 
     def unit_hint(self, written: str, allowed: frozenset[str]) -> str:
-        """A refusal naming every unit a field is taken in, for a wrong suffix."""
+        """A refusal naming every unit a field is taken in, for a wrong unit.
+
+        Only when the difference is the unit alone: the written name is a
+        field's root followed by words a unit is spelled with, and no other
+        field is a close match. ``fibre_diameter_distribution_paramter`` is a
+        misspelt field, not a fibre diameter in a unit called
+        ``distribution_paramter``.
+        """
         root, target = "", ""
         for name in allowed & self.numeric:
-            suffix = unit_suffix(name)
-            stem = name.removesuffix(suffix) if suffix else ""
+            stem = unit_stem(name)
             if stem and written.startswith(f"{stem}_") and len(stem) > len(root):
                 root, target = stem, name
-        if not root:
+        written_unit = written.removeprefix(f"{root}_")
+        if not root or not is_unit_spelling(written_unit):
             return ""
-        own = unit_spelling(target)
+        others = self.names_for(allowed) - self.names_for(frozenset({target}))
+        if _closest(written, others):
+            return ""
+        own = self.spellings.units.get(target, "")
         options = [f"{target} ({own})" if own else target]
         options += sorted(
             f"{other} ({alias.unit})"
             for other, (field_name, alias) in self.spellings.aliases.items()
             if field_name == target
         )
-        written_unit = written.removeprefix(f"{root}_")
         choices = (
             f"{', '.join(options[:-1])} or {options[-1]}"
             if len(options) > 1
@@ -644,14 +656,20 @@ class _Names:
         return f"{written_unit!r} is not a unit this reader converts; write {choices}"
 
 
+def _closest(written: str, names: frozenset[str]) -> str:
+    """The name most like *written*, if one is close enough to be meant."""
+    close = difflib.get_close_matches(written, sorted(names), n=1, cutoff=0.8)
+    return close[0] if close else ""
+
+
 class _Reader:
-    """The pass over one document that finds every problem before building.
+    """The pass over one document that finds every problem of form.
 
     It checks the document's own keys, the name, the provenance, and every
     row: its key, every cell against the field it fills, every hedge against
     the fields it names, the unit a figure is written in. Each problem is
-    kept with the pointer to it, and only a document with none goes on to
-    have its rows built.
+    kept with the pointer to it, and only the rows it finds nothing wrong
+    with go on to be built, for the row contract to check.
     """
 
     def __init__(self, row_type: type[CatalogueRow], issues: _Issues) -> None:
@@ -824,7 +842,7 @@ class _Reader:
             self.error("/conventions", f"holds {_quote(held)}, not a list of texts")
             return ()
         found = [
-            self.text(text, _pointer("conventions", index), prose=True)
+            self.text(text, _pointer("conventions", index))
             for index, text in enumerate(held)
         ]
         return tuple(text for text in found if text is not None)
@@ -899,8 +917,8 @@ class _Reader:
     def unknown_key(
         self, where: str, key: str, allowed: Sequence[str] | frozenset[str], what: str
     ) -> None:
-        close = difflib.get_close_matches(key, sorted(allowed), n=1, cutoff=0.8)
-        hint = f"; did you mean {close[0]!r}?" if close else ""
+        close = _closest(key, frozenset(allowed))
+        hint = f"; did you mean {close!r}?" if close else ""
         self.error(where, f"{what} has no {key!r}{hint}")
 
     # -- a row ---------------------------------------------------------------
@@ -1265,8 +1283,14 @@ def _build_row(
 ) -> CatalogueRow | None:
     at = _pointer("rows", read.index)
     if read.narrowed:
+        narrowed = dict(read.narrowed)
+        if "field_test_standards" in narrowed:
+            narrowed["field_test_standards"] = {
+                **provenance.field_test_standards,
+                **narrowed["field_test_standards"],
+            }
         try:
-            provenance = dataclasses.replace(provenance, **read.narrowed)
+            provenance = dataclasses.replace(provenance, **narrowed)
         except CatalogueError as error:
             issue = error.issues[0]
             where = f"{at}/provenance{_pointer(issue.field) if issue.field else ''}"
@@ -1339,14 +1363,21 @@ def _notes(rows: Mapping[str, CatalogueRow], label: str) -> tuple[CatalogueIssue
 def _read(
     document: object, row_type: type[CatalogueRow], label: str, digest: str
 ) -> Catalogue[Any]:
-    """The catalogue *document* holds, every problem in it refused at once."""
+    """The catalogue *document* holds, the problems in it refused at once.
+
+    The rows the document pass found nothing wrong with are built even when
+    other rows or other keys hold problems, so that the one refusal also
+    names what the row contract finds in them. A row that breaks the
+    contract is named once, for the first rule it breaks.
+    """
     issues = _Issues(label)
     reader = _Reader(row_type, issues)
     header = reader.document(document)
-    if header is None or header.provenance is None or issues.found:
+    if header is None or header.provenance is None:
         issues.refuse()
     rows, extras = _build(reader, header, header.provenance)
     if issues.found:
+        issues.found.sort(key=_row_order)
         issues.refuse()
     return Catalogue(
         name=header.name,
@@ -1360,6 +1391,16 @@ def _read(
         schema_version=CATALOGUE_SCHEMA_VERSION,
         file_sha256=digest,
     )
+
+
+def _row_order(issue: CatalogueIssue) -> int:
+    """Where an issue stands: the document's own keys first, then each row.
+
+    Issues of one place keep the order they were found in.
+    """
+    head, _, rest = issue.location.removeprefix("/").partition("/")
+    index = rest.partition("/")[0]
+    return int(index) + 1 if head == "rows" and index.isdigit() else 0
 
 
 def _refusal(label: str, location: str, message: str) -> CatalogueError:
@@ -1440,17 +1481,20 @@ def read_catalogue[R: CatalogueRow](
     document's :class:`Provenance`, narrowed by the row where it narrows it,
     and a :attr:`~CatalogueRow.source` composed from it.
 
-    Every problem in the file is found before a row is built and raised in
-    one :class:`CatalogueError`, each issue with the JSON pointer to it. The
-    class named in the file is only compared with *row_type*, and nothing the
-    file names is ever imported.
+    The problems in the file are raised together in one
+    :class:`CatalogueError`, each issue with the JSON pointer to it: every
+    problem of form, and the first rule of the row contract each row breaks.
+    The class named in the file is only compared with *row_type*, and nothing
+    the file names is ever imported.
 
     :param path: The file, whose name ends in ``.json`` (in any case).
     :param row_type: The class of every row, a subclass of
         :class:`CatalogueRow` such as ``materials.PorousMaterial``.
     :return: The catalogue, keyed ``"<catalogue>/<key>"``.
     :raises CatalogueError: for a file larger than 16 MiB, text that is not
-        UTF-8 or not JSON, and every problem the document holds, all at once.
+        UTF-8 or not JSON, and the problems the document holds, all at once:
+        every problem of form, and the first rule of the row contract each
+        row breaks.
     :raises TypeError: for a *row_type* that is not a catalogue row class.
     :raises ValueError: for a name that does not end in ``.json``.
     :raises OSError: as the file system raises it, untouched.
@@ -1695,13 +1739,25 @@ class _Writer:
             raise CatalogueError(msg)
         common: dict[str, Any] = {}
         for name in _ROW_PROVENANCE:
+            if name == "field_test_standards":
+                continue
             shared = all(
                 provenance is not None
                 and getattr(provenance, name) == getattr(first, name)
                 for provenance in held
             )
-            empty: object = {} if name == "field_test_standards" else ""
-            common[name] = getattr(first, name) if shared else empty
+            common[name] = getattr(first, name) if shared else ""
+        # A row narrows the standards of a document field by field, so the
+        # document keeps every one all its rows cite alike.
+        common["field_test_standards"] = {
+            field_name: standard
+            for field_name, standard in first.field_test_standards.items()
+            if all(
+                provenance is not None
+                and provenance.field_test_standards.get(field_name) == standard
+                for provenance in held
+            )
+        }
         return dataclasses.replace(first, **common)
 
     # -- a row ---------------------------------------------------------------
@@ -1796,14 +1852,26 @@ def _plain_value(value: object) -> object:
 
 
 def _narrowed(provenance: Provenance | None, document: Provenance) -> dict[str, Any]:
-    """What a row's provenance says that its document's does not."""
+    """What a row's provenance says that its document's does not.
+
+    The standards of single fields are narrowed one by one, as the reader
+    reads them: a row writes the ones its document does not cite alike.
+    """
     if provenance is None:
         return {}
     found: dict[str, Any] = {}
     for name in _ROW_PROVENANCE:
         value = getattr(provenance, name)
-        if value != getattr(document, name):
-            found[name] = dict(value) if isinstance(value, Mapping) else value
+        if name == "field_test_standards":
+            own = {
+                field_name: standard
+                for field_name, standard in value.items()
+                if document.field_test_standards.get(field_name) != standard
+            }
+            if own:
+                found[name] = own
+        elif value != getattr(document, name):
+            found[name] = value
     return found
 
 

@@ -202,10 +202,6 @@ class _RatedAbsorption(BandedRow):
     thickness_mm: float | None = None
     construction_depth_mm: float | None = None
 
-    def rating(self) -> AbsorptionRatingResult:
-        """The rating of ISO 11654 worked out from the bands; the class's own."""
-        raise NotImplementedError  # pragma: no cover - every subclass rates
-
     def _rating_notes(self) -> Iterator[str]:
         """Where the rating the sheet prints is not the one its bands give."""
         printed = self.weighted_absorption_coefficient
@@ -491,7 +487,7 @@ class ThirdOctaveAbsorptionSpectrum(_RatedAbsorption):
             field_name = PracticalAbsorptionSpectrum._band_field(octave)
             cells[field_name] = _practical_round(sum(values) / 3.0)
             derived[field_name] = self._how(thirds)
-        cells["derived"] = derived
+        cells["derived"] = {**cells.get("derived", {}), **derived}
         return PracticalAbsorptionSpectrum(**cells)
 
     def _how(self, thirds: tuple[int, int, int]) -> str:

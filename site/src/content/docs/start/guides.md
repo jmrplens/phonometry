@@ -307,7 +307,8 @@ every published catalogue hands out.
 - [Your own catalogues](/phonometry/io/material-catalogues/): a data sheet,
   a test report or a measurement of yours as a catalogue file, read into
   the rows every published catalogue hands out, searched with the same
-  lookups and handed to the same models.
+  lookups, handed to the same models and completed in your editor with its
+  JSON Schema.
 
 ## [Hearing and perception](/phonometry/perception/)
 

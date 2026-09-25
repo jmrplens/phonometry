@@ -60,7 +60,11 @@ de sus dígitos y queda anotada tal como la imprimió. Los problemas de un
 archivo se informan juntos, cada uno en su lugar del archivo, y nada de lo
 que el archivo nombra se importa nunca.
 `write_catalogue` escribe un catálogo de vuelta, y escribe una tabla
-publicada con la misma forma, como plantilla de partida.
+publicada con la misma forma, como plantilla de partida. `catalogue_schema`
+escribe el esquema JSON de un archivo así, para que un editor lo complete
+mientras lo escribes y marque lo que el lector rechazaría por su forma; el
+sitio publica el esquema de todas las clases de fila que publica la
+biblioteca.
 
 ## Páginas de esta sección
 
@@ -76,7 +80,8 @@ publicada con la misma forma, como plantilla de partida.
   ensayo o una medida tuya como archivo de catálogo: una tabla publicada
   como plantilla, el documento y su procedencia, una hoja de cálculo
   guardada como CSV, los rechazos que señalan una celda, las filas en los modelos y en todas las búsquedas por nombre,
-  y qué clase de fila guarda cada magnitud. Qué es cada número de una hoja
+  qué clase de fila guarda cada magnitud y el esquema JSON con el que un
+  editor completa un archivo. Qué es cada número de una hoja
   de características, antes de teclearlo, está en
   [Cómo leer la hoja de características de un material](/phonometry/es/materials/reading-a-datasheet/),
   entre las guías de materiales.

@@ -323,6 +323,40 @@ print(np.round(el.absorption_length[[0, 10]], 1))     # [10.8 11.9]      tabla L
 Cada columna impresa de las tablas L.2, L.3, L.4, G.3 y G.4 se reproduce con un
 margen de 0,06 dB, y el mismo conjunto de datos alimenta los dos totales.
 
+Los $m'$ y $f_\mathrm{c}$ del elemento salen de su material y de su
+espesor, $m' = \rho t$ y $f_\mathrm{c} = c_\mathrm{o}^2 / (1{,}8\, c_\mathrm{L} t)$
+con la densidad y la velocidad de fase cuasilongitudinal de la tabla B.3, y
+`HomogeneousElement.from_solid` calcula los dos a partir de la fila de
+catálogo de un sólido, publicada o de [tus propios catálogos](/phonometry/es/io/material-catalogues/).
+El factor de pérdidas interno nunca se lee de la fila, que puede guardar
+cuatro, así que aquí se da como lo da la especificación del elemento. La
+$f_\mathrm{c}$ sin redondear es la que, según la nota de la norma, usó su
+cálculo:
+
+```python
+from phonometry import solids
+
+concrete = solids.SolidMaterial.from_printed(
+    name="Concrete",
+    source="ISO 12354-1:2017 Table B.3",
+    density_kg_m3=2200.0,
+    plate_longitudinal_speed_m_s=3800.0,
+)
+same_floor = building.HomogeneousElement.from_solid(
+    concrete,
+    thickness_m=0.22,
+    internal_loss_factor=0.005,
+    area_m2=20.0,
+    length1_m=5.0,
+    length2_m=4.0,
+    perimeter_absorption_m=floor_perimeter,
+    label="floor",
+)
+print(round(same_floor.mass_per_area, 1), round(same_floor.critical_frequency, 2))   # 484.0 76.82
+from_row = building.in_situ_element(same_floor, bands)
+print(np.round(from_row.sound_reduction_index[[0, 10]], 1))   # [31.8 54.9]  tabla L.3
+```
+
 ```python
 # Suelo flotante: losa de 35 mm, m' = 73,5 kg/m2 sobre s' = 8 MN/m3.
 f0 = 160.0 * np.sqrt(8.0 / 73.5)                      # 52,8 Hz (fórmula C.2)

@@ -1,6 +1,6 @@
 ---
 title: "Your own catalogues"
-description: "A data sheet, a declaration of performance, a test report or a measurement of your own as a catalogue file: a published table as the template, the JSON document and its provenance, a spreadsheet saved as CSV, refusals that point at a cell, the rows in the porous models, a room model, the plateau method, a floating floor and every lookup by name, how to write a bound, a word or another unit, which row class holds which quantity, and what the library never does with your data."
+description: "A data sheet, a declaration of performance, a test report or a measurement of your own as a catalogue file: a published table as the template, the JSON document and its provenance, a spreadsheet saved as CSV, refusals that point at a cell, the rows in the porous models, a room model, the plateau method, a floating floor, the elastic simulation, the outdoor ground models, the ISO 12354 detailed model and every lookup by name, how to write a bound, a word or another unit, which row class holds which quantity, the JSON Schema an editor completes a file with, and what the library never does with your data."
 references:
   - type: standard
     organization: "Internet Engineering Task Force"
@@ -119,6 +119,7 @@ top:
 | `basis` | Optional: what the document says every value is, unless a row says otherwise. |
 | `conventions` | Optional: the notes and legends the document prints for the whole table. |
 | `phonometry_version` | Optional: the version of the library that wrote the file, which `write_catalogue` fills in. It is never read. |
+| `$schema` | Optional: where an editor finds the document's JSON Schema (see [Completion in your editor](#completion-in-your-editor-the-json-schema)). It is never read. |
 | `rows` | The rows, each with a `key` of its own and a `name`. |
 
 Here is a fictitious data sheet with two rows. The first is the airflow
@@ -470,6 +471,176 @@ the lateral airflow resistivity $r$ of clause 8.2: at or above
 enclosed-gas stiffness $s'_\mathrm{a}$ of Formula 7 as well, which
 `gas_stiffness_n_m3` passes. Without $r$ the call is refused with that
 explanation rather than taking one quantity for the other.
+
+### A solid in the elastic simulation
+
+The elastic simulation takes a solid's row wherever it takes a `Material`:
+`simulation.scholte_speed` and `ElasticFDTD2D.from_regions` read the three
+numbers the solver integrates, the bulk longitudinal speed, the transverse
+speed and the density. A sheet that prints a modulus, a Poisson ratio and a
+density has printed those speeds too, and the row holds them marked as
+derived. The plate and bar speeds a page prints beside them are never read:
+the solver integrates neither, and a plate speed taken for the bulk one is
+some ten per cent wrong.
+
+```python
+from phonometry import simulation, solids
+
+alloys = io.parse_catalogue(
+    {
+        "schema": "phonometry-catalogue",
+        "schema_version": 1,
+        "catalogue": "alloys",
+        "row_type": "SolidMaterial",
+        "about": "Elastic constants of two fictitious alloys, as their data sheet prints them.",
+        "provenance": {
+            "kind": "datasheet",
+            "document": "Example alloy data sheet",
+            "version": "Rev. 1",
+            "consulted": "2026-09-25",
+        },
+        "rows": [
+            {
+                "key": "plate",
+                "name": "Example alloy",
+                "youngs_modulus_gpa": 70,
+                "poisson_ratio": 0.33,
+                "density_kg_m3": 2700,
+            },
+            {
+                "key": "sheet",
+                "name": "Example sheet",
+                "plate_longitudinal_speed_m_s": 5400,
+                "density_kg_m3": 2700,
+            },
+        ],
+    },
+    row_type=solids.SolidMaterial,
+)
+alloy = alloys["alloys/plate"]
+print(round(alloy.bulk_longitudinal_speed_m_s), round(alloy.transverse_speed_m_s))
+# 6198 3122
+print(round(simulation.scholte_speed(simulation.WATER, alloy), 1))   # 1476.6
+
+try:
+    simulation.scholte_speed(simulation.WATER, alloys["alloys/sheet"])
+except ValueError as error:
+    print(error)
+# 'Example sheet' has no bulk_longitudinal_speed_m_s, which 'the elastic FDTD'
+# needs: the datasheet does not give it, and it does not follow from the cells
+# that it does (Example alloy data sheet, Rev. 1; consulted 2026-09-25).
+```
+
+### A ground in the outdoor models
+
+A `GroundSurface` row, one of the published grounds or one of yours, goes
+into the outdoor models through `medium()`: the porous half-space, by the
+Delany and Bazley or the Miki model, that `environment.ground_effect` takes
+as `impedance`, `barrier_insertion_loss` as `ground_impedance` and
+`atmospheric_parabolic_equation` as `impedance`. The resistivity is read
+through `printed()`, so a range of grassland is refused rather than
+averaged. An effective flow resistivity is the parameter of the model it
+was fitted with, so a row the page marks as fitted with one model goes into
+that model only:
+
+```python
+from phonometry import environment
+
+site = io.parse_catalogue(
+    {
+        "schema": "phonometry-catalogue",
+        "schema_version": 1,
+        "catalogue": "site-survey",
+        "row_type": "GroundSurface",
+        "about": "An effective flow resistivity fitted to a site's own level differences.",
+        "provenance": {
+            "kind": "measurement",
+            "document": "Site survey 12",
+            "version": None,
+            "consulted": "2026-09-25",
+            "laboratory": "Example Lab",
+            "report": "26-051",
+        },
+        "basis": "measured",
+        "rows": [{"key": "pasture", "name": "Pasture", "flow_resistivity_kpa_s_m2": 180}],
+    },
+    row_type=environment.GroundSurface,
+)
+pasture = site["site-survey/pasture"]
+octaves = np.array([125.0, 250.0, 500.0, 1000.0])
+ground = pasture.medium(octaves, model="miki")
+over_pasture = environment.ground_effect(octaves, 1.0, 1.5, 50.0, impedance=ground)
+print(over_pasture.excess_attenuation.round(1))   # [  3.6  -4.2 -12.8  -2.8]
+
+fitted = environment.PUBLISHED_GROUND["cox-2017-table-6-7/sports_field_semi_phenomenological"]
+try:
+    fitted.medium(octaves)
+except ValueError as error:
+    print(error)
+# 'Sports field' is the row the page marks “Fitted using semi-phenomenological
+# model” (Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp.
+# 200-201)): its effective flow resistivity is a parameter of that model and
+# not of 'delany_bazley'; neither 'delany_bazley' nor 'miki' is that model, or
+# take row.printed('flow_resistivity_pa_s_m2') into another model yourself.
+```
+
+### A wall in the detailed building model
+
+`building.HomogeneousElement.from_solid` builds the element of ISO 12354-1
+a layer of a solid makes, from the row's density and plate speed, which is
+the quasi-longitudinal phase velocity $c_\mathrm{L}$ of the standard's
+Table B.3, and the thickness you give: $m' = \rho t$ and
+$f_\mathrm{c} = c_\mathrm{o}^2 / (1.8\, c_\mathrm{L} t)$. The internal loss
+factor is yours to give and never read from the row, which may hold four
+(flexural, longitudinal, in situ and one the page does not qualify), because
+only you know which of them, if any, is the $\eta_\mathrm{int}$ of the
+standard:
+
+```python
+from phonometry import building
+
+blocks = io.parse_catalogue(
+    {
+        "schema": "phonometry-catalogue",
+        "schema_version": 1,
+        "catalogue": "blocks",
+        "row_type": "SolidMaterial",
+        "about": "A fictitious calcium-silicate block, as its data sheet prints it.",
+        "provenance": {
+            "kind": "datasheet",
+            "document": "Example block data sheet",
+            "version": "Rev. 3",
+            "consulted": "2026-09-25",
+        },
+        "basis": "declared",
+        "rows": [
+            {
+                "key": "block",
+                "name": "Example block",
+                "density_kg_m3": 1800,
+                "plate_longitudinal_speed_m_s": 2500,
+                "flexural_loss_factor": 0.012,
+            }
+        ],
+    },
+    row_type=solids.SolidMaterial,
+)
+wall = building.HomogeneousElement.from_solid(
+    blocks["blocks/block"],
+    thickness_m=0.2,
+    internal_loss_factor=0.01,
+    area_m2=13.75,
+    length1_m=5.0,
+    length2_m=2.75,
+)
+print(round(wall.mass_per_area, 1), round(wall.critical_frequency, 1))   # 360.0 128.4
+print(wall.internal_loss_factor)   # 0.01, not the row's flexural 0.012
+```
+
+These are the numbers of the internal walls of the worked building of
+ISO 12354-1 Annex L, 200 mm of calcium-silicate blocks at 360 kg/m² and
+128.4 Hz, and the element goes into `building.in_situ_element` as one built
+by hand does.
 
 ### Searching your catalogue and the published ones
 
@@ -848,6 +1019,60 @@ annotation is refused with `TypeError` the first time the class is built,
 because every cell of a row may be missing. A class built on `BandedRow` is
 not supported: its bands are declared in private class variables.
 
+## Completion in your editor: the JSON Schema
+
+A catalogue file is typed by hand, and an editor that knows its shape
+completes the name of a field as you type it, offers the words `basis` and
+`kind` take, and marks a text where a number goes before the reader ever
+sees the file. JSON Schema is how an editor learns a shape, and
+`io.catalogue_schema` writes one, in the 2020-12 dialect, from the row
+classes you give it: every field under its own name and under each other
+unit the reader converts, the fields each hedge may name, the provenance and
+its kinds, the limits a field's unit sets (a density is never negative, a
+porosity runs from 0 to 1), and a CSV file's header with its dialect. A row
+class of your own is described with its fields:
+
+```python
+schema = io.catalogue_schema(materials.PorousMaterial, Plasterboard)
+print(schema["$id"])                               # urn:phonometry:schema:catalogue:1
+print(schema["properties"]["row_type"]["enum"])    # ['Plasterboard', 'PorousMaterial']
+board = schema["$defs"]["Plasterboard"]["properties"]
+print(sorted(name for name in board if name.startswith("surface_density")))
+# ['surface_density_g_m2', 'surface_density_kg_m2']
+pathlib.Path("catalogue.schema.json").write_text(json.dumps(schema, indent=2), encoding="utf-8")
+
+pointed = json.loads(panel_40)
+pointed["$schema"] = "./catalogue.schema.json"
+print(io.parse_catalogue(pointed, row_type=materials.PorousMaterial) == mine)   # True
+```
+
+A document names its schema in a top-level `$schema`, which the reader takes
+and never reads: a file beside it, as above, or the schema of every row
+class the library publishes, which the documentation site serves at
+`https://jmrplens.github.io/phonometry/schemas/phonometry-catalogue-1.json`.
+An editor can also be told which files are catalogues, and keep them free of
+the key; in Visual Studio Code that is one setting:
+
+```json
+{
+  "json.schemas": [
+    {
+      "fileMatch": ["*.catalogue.json", "*.csv.phonometry.json"],
+      "url": "https://jmrplens.github.io/phonometry/schemas/phonometry-catalogue-1.json"
+    }
+  ]
+}
+```
+
+The schema holds a file to its form: which keys a document, a provenance and
+a row may have, what kind of value each takes, the pattern of a name and a
+key. What depends on two cells at once, a value beside a word that says
+there is none or a bound on a field with no range, is the reader's to
+refuse, so a file the editor accepts may still be refused, and the refusal
+says where. A file the reader reads is never marked by the editor. The
+schema's name, `urn:phonometry:schema:catalogue:1`, follows the layout
+version, so a later layout is a new schema beside this one.
+
 ## What never happens
 
 The reader and the rows hold what the document prints and nothing else.
@@ -876,9 +1101,11 @@ JSON header (`io.read_catalogue`), or from text or a mapping
 with its `io.Provenance`, its notes and every problem of form reported at
 once with a JSON pointer or a line and a column; writing rows, a published
 table among them, back to a JSON or CSV file (`io.write_catalogue`);
-searching yours and the published ones with every `*_named` lookup; and
-handing the rows to the porous models, a room model, the plateau method and
-a floating floor.
+searching yours and the published ones with every `*_named` lookup;
+handing the rows to the porous models, a room model, the plateau method, a
+floating floor, the elastic simulation, the outdoor ground models and the
+ISO 12354 detailed model; and the JSON Schema of a catalogue file, for an
+editor to complete it (`io.catalogue_schema`).
 </ScopeClaim>
 
 <ScopeClaim status="not-covered" label="Not covered">
@@ -901,6 +1128,9 @@ or a pull request is never merged.
 - [Porous and Multilayer Absorbers](/phonometry/materials/absorbers/porous-absorbers/): the models a `PorousMaterial` row goes into.
 - [Dynamic stiffness of resilient materials](/phonometry/materials/resilient/dynamic-stiffness/): $s'$, $s'_\mathrm{t}$ and clause 8.2 in full.
 - [Predicting Panel Sound Insulation](/phonometry/buildings/design/panel-sound-insulation/): the plateau method a `PlateauMaterial` row draws.
+- [Elastic waves and fluid-solid coupling](/phonometry/simulation/elastic-waves/): the solver a solid's row is a medium of.
+- [Spherical ground effect and advanced barriers](/phonometry/environment/propagation/ground-barriers/): the models a ground row's `medium()` goes into.
+- [Detailed Per-Band Prediction (ISO 12354)](/phonometry/buildings/design/detailed-prediction/): the ISO 12354 chain an element from `from_solid` enters.
 - API reference: [`phonometry.io`](/phonometry/reference/api/io/io/).
 
 </SeeAlso>

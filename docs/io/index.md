@@ -53,7 +53,10 @@ prints in kPa·s/m² or in centimetres is converted on its digits and recorded
 as the sheet printed it. The problems in a file are reported together, each
 at its place in the file, and nothing the file names is ever imported.
 `write_catalogue` writes a catalogue back, and writes a published table in
-the same form, as a template to start from.
+the same form, as a template to start from. `catalogue_schema` writes the
+JSON Schema of such a file, so an editor completes one as you type it and
+marks what the reader would refuse for its form; the site publishes the
+schema of every row class the library publishes.
 
 ## Pages in this section
 
@@ -69,8 +72,9 @@ the same form, as a template to start from.
   yours as a catalogue file: a published table as the template, the
   document and its provenance, a spreadsheet saved as CSV, the refusals
   that point at a cell, the
-  rows in the models and in every lookup by name, and which row class
-  holds which quantity. What each number on a data sheet is, before you
+  rows in the models and in every lookup by name, which row class
+  holds which quantity, and the JSON Schema an editor completes a file
+  with. What each number on a data sheet is, before you
   type it, is in
   [Reading a material datasheet](../materials/reading-a-datasheet.md),
   among the materials guides.

@@ -277,6 +277,39 @@ niveles a corta distancia entre dos alturas de micrófono sobre la superficie
 impedancia con el que se ajustó, y no es la resistividad al flujo de aire de
 EN 29053 del mismo material.
 
+### Un suelo de un catálogo
+
+Una fila de `environment.PUBLISHED_GROUND`, o de [un catálogo propio](/phonometry/es/io/material-catalogues/),
+da la impedancia por sí misma: `GroundSurface.medium` es el semiespacio
+poroso de su resistividad al flujo efectiva, por el modelo de Delany y
+Bazley o por el de Miki, que `ground_effect` recibe como `impedance`,
+`barrier_insertion_loss` como `ground_impedance` y
+`atmospheric_parabolic_equation` como `impedance`. La resistividad se lee a
+través de `printed()`, así que una fila que imprime un intervalo se rechaza
+en lugar de promediarse y, como el valor ajustado depende del modelo, una
+fila que la página marca como ajustada con un modelo solo entra en ese
+modelo. La clase D de Harmonoise, $\sigma$ = 200 kPa·s/m², da la curva de
+Miki del caso anterior:
+
+```python
+octaves = [125.0, 250.0, 500.0, 1000.0]
+pasture = environment.PUBLISHED_GROUND["bies-2017-table-5-2/normal_uncompacted_ground"]
+ground = pasture.medium(octaves, model="miki")
+over_pasture = environment.ground_effect(octaves, 1.0, 1.5, 50.0, impedance=ground)
+print(over_pasture.excess_attenuation.round(2))   # [  3.84  -3.18 -13.19  -2.96]
+
+field = environment.PUBLISHED_GROUND["cox-2017-table-6-7/sports_field_delany_bazley"]
+try:
+    field.medium(octaves, model="miki")
+except ValueError as error:
+    print(error)
+# 'Sports field' is the row the page marks “Fitted using Delany and Bazley
+# model” (Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp.
+# 200-201)): its effective flow resistivity is a parameter of that model and
+# not of 'miki'; ask for model='delany_bazley', or take
+# row.printed('flow_resistivity_pa_s_m2') into another model yourself.
+```
+
 ## 2. Difracción de barreras avanzada
 
 `barrier_insertion_loss` y sus piezas dan tres niveles de apantallamiento más

@@ -248,10 +248,11 @@ class PracticalAbsorptionSpectrum(_RatedAbsorption):
     ISO 11654 Clause 4.1 is the mean of the three one-third-octave
     coefficients of ISO 354 inside an octave, worked out to the second
     decimal, rounded in steps of 0,05 and set to 1,00 when it rounds above.
-    A sheet that prints six values from 125 Hz to 4 kHz all ending in 0 or 5
-    is printing these, and a row of this class holds them as printed, a
-    value above 1,00 or off the steps included: the reader of a catalogue
-    file notes such a value, and nothing here corrects it.
+    Six values from 125 Hz to 4 kHz all ending in 0 or 5 look like these,
+    though only a sheet that names them says so. A row of this class holds
+    them as printed, a value above 1,00 or off the steps included: the
+    reader of a catalogue file notes such a value, and nothing here corrects
+    it.
 
     A declaration under a product standard declares the coefficients as a
     level no result falls below (EN 13162 Clause 4.3.11 does, for mineral

@@ -83,8 +83,10 @@ A European data sheet usually prints something else: the **practical sound
 absorption coefficient** $\alpha_\mathrm{p}$ of ISO 11654. Clause 4.1 forms
 it for each octave band from the three one-third octaves inside it: their
 mean to the second decimal, rounded in steps of 0.05, and set to 1.00 when
-it rounds above. Six values from 125 Hz to 4 kHz that all end in 0 or 5 are
-practical coefficients, and `PracticalAbsorptionSpectrum` holds them. The
+it rounds above. Six values from 125 Hz to 4 kHz that all end in 0 or 5
+look like practical coefficients, but only a sheet that names them says so;
+when it does not, the row's `note` is the place to write what you concluded.
+`PracticalAbsorptionSpectrum` holds them. The
 Sabine coefficients of a book's table are neither; `AbsorptionSpectrum` holds
 those.
 

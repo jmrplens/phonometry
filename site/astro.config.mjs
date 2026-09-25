@@ -721,8 +721,14 @@ export default defineConfig({
           tag: 'link',
           attrs: { rel: 'apple-touch-icon', href: `${basePath}/apple-touch-icon.png` },
         },
-        // Bing Webmaster Tools site verification (Google Search Console is
-        // already verified for this property; no meta needed).
+        // Ownership proofs for Google Search Console and Bing Webmaster Tools,
+        // for the https://jmrplens.github.io/phonometry/ property. Both read
+        // them from the property's home page and re-check them later, so they
+        // stay. Public by design: neither is a credential.
+        {
+          tag: 'meta',
+          attrs: { name: 'google-site-verification', content: '4Hx_PJ1seU_BgKfWpo_FA7_Hkh7GeYVNrvnvzqCjF0Q' },
+        },
         { tag: 'meta', attrs: { name: 'msvalidate.01', content: '7574EB3B44624C239F14920DBC34EE25' } },
         // JSON-LD structured data
         { tag: 'script', attrs: { type: 'application/ld+json' }, content: jsonLd },

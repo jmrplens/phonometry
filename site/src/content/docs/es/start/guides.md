@@ -1,6 +1,6 @@
 ---
 title: "Guías"
-description: "Las 145 guías de phonometry, agrupadas en los trece temas que cubre la biblioteca: para qué sirve cada área, las normas que implementa y un resumen de una línea de cada guía que contiene."
+description: "Las 146 guías de phonometry, agrupadas en los trece temas que cubre la biblioteca: para qué sirve cada área, las normas que implementa y un resumen de una línea de cada guía que contiene."
 head:
   - tag: script
     attrs:
@@ -118,7 +118,7 @@ hay ninguna panorámica del campo: cada página es la documentación de trabajo 
 un módulo, escrita para que un resultado se pueda defender apartado por
 apartado en lugar de darlo por bueno.
 
-Esta página es el mapa. Ciento cuarenta y cinco guías repartidas en trece temas, y cada
+Esta página es el mapa. Ciento cuarenta y seis guías repartidas en trece temas, y cada
 área tiene su propio índice con el relato largo de cómo encajan sus piezas. Si
 llegas sin una pregunta concreta, lee primero la
 [introducción](/phonometry/es/start/getting-started/): recorre una señal por toda la
@@ -511,6 +511,13 @@ sonido que le llega, medido en laboratorio o predicho a partir de los
 parámetros del material. Implementa ISO 354, ISO 11654, EN 16487,
 ISO 10534-1/-2, ISO 9053-1/-2, ISO 17497-1/-2, ISO 13472-1/-2, EN 29052-1
 e ISO 12999-2.
+
+- [Cómo leer la hoja de características de un material](/phonometry/es/materials/reading-a-datasheet/):
+  qué son los números de una hoja de características o de un informe de ensayo
+  antes de teclearlos: el coeficiente práctico frente al de tercios de octava,
+  un nivel declarado, el montaje y la revisión, y el índice de reducción
+  acústica y la mejora a impactos de un informe de laboratorio, cada uno
+  valorado de nuevo a partir de sus bandas.
 
 **[Absorbentes](/phonometry/es/materials/absorbers/)**
 

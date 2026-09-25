@@ -191,6 +191,7 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 ## Materials and surfaces
 
 - [Overview](https://jmrplens.github.io/phonometry/materials/)
+- [Reading a material datasheet](https://jmrplens.github.io/phonometry/materials/reading-a-datasheet/)
 
 ### Absorbers
 
@@ -476,6 +477,7 @@ The generated API reference, one page per module. Fetch these only when a specif
 - [building/aperture-transmission](https://jmrplens.github.io/phonometry/reference/api/building/aperture-transmission/)
 - [building/catalogue](https://jmrplens.github.io/phonometry/reference/api/building/catalogue/)
 - [building/ceiling-plenum](https://jmrplens.github.io/phonometry/reference/api/building/ceiling-plenum/)
+- [building/datasheets](https://jmrplens.github.io/phonometry/reference/api/building/datasheets/)
 - [building/detailed-model](https://jmrplens.github.io/phonometry/reference/api/building/detailed-model/)
 - [building/facade](https://jmrplens.github.io/phonometry/reference/api/building/facade/)
 - [building/flanking-transmission](https://jmrplens.github.io/phonometry/reference/api/building/flanking-transmission/)
@@ -550,6 +552,7 @@ The generated API reference, one page per module. Fetch these only when a specif
 - [materials/biot](https://jmrplens.github.io/phonometry/reference/api/materials/biot/)
 - [materials/carpets](https://jmrplens.github.io/phonometry/reference/api/materials/carpets/)
 - [materials/catalogue](https://jmrplens.github.io/phonometry/reference/api/materials/catalogue/)
+- [materials/datasheets](https://jmrplens.github.io/phonometry/reference/api/materials/datasheets/)
 - [materials/design](https://jmrplens.github.io/phonometry/reference/api/materials/design/)
 - [materials/dynamic-stiffness](https://jmrplens.github.io/phonometry/reference/api/materials/dynamic-stiffness/)
 - [materials/four-microphone](https://jmrplens.github.io/phonometry/reference/api/materials/four-microphone/)

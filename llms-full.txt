@@ -191,6 +191,7 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 ## Materials and surfaces
 
 - [Overview](https://jmrplens.github.io/phonometry/materials/)
+- [Reading a material datasheet](https://jmrplens.github.io/phonometry/materials/reading-a-datasheet/)
 
 ### Absorbers
 
@@ -476,6 +477,7 @@ The generated API reference, one page per module. Fetch these only when a specif
 - [building/aperture-transmission](https://jmrplens.github.io/phonometry/reference/api/building/aperture-transmission/)
 - [building/catalogue](https://jmrplens.github.io/phonometry/reference/api/building/catalogue/)
 - [building/ceiling-plenum](https://jmrplens.github.io/phonometry/reference/api/building/ceiling-plenum/)
+- [building/datasheets](https://jmrplens.github.io/phonometry/reference/api/building/datasheets/)
 - [building/detailed-model](https://jmrplens.github.io/phonometry/reference/api/building/detailed-model/)
 - [building/facade](https://jmrplens.github.io/phonometry/reference/api/building/facade/)
 - [building/flanking-transmission](https://jmrplens.github.io/phonometry/reference/api/building/flanking-transmission/)
@@ -550,6 +552,7 @@ The generated API reference, one page per module. Fetch these only when a specif
 - [materials/biot](https://jmrplens.github.io/phonometry/reference/api/materials/biot/)
 - [materials/carpets](https://jmrplens.github.io/phonometry/reference/api/materials/carpets/)
 - [materials/catalogue](https://jmrplens.github.io/phonometry/reference/api/materials/catalogue/)
+- [materials/datasheets](https://jmrplens.github.io/phonometry/reference/api/materials/datasheets/)
 - [materials/design](https://jmrplens.github.io/phonometry/reference/api/materials/design/)
 - [materials/dynamic-stiffness](https://jmrplens.github.io/phonometry/reference/api/materials/dynamic-stiffness/)
 - [materials/four-microphone](https://jmrplens.github.io/phonometry/reference/api/materials/four-microphone/)
@@ -31875,7 +31878,10 @@ the same form, as a template to start from.
   document and its provenance, a spreadsheet saved as CSV, the refusals
   that point at a cell, the
   rows in the models and in every lookup by name, and which row class
-  holds which quantity.
+  holds which quantity. What each number on a data sheet is, before you
+  type it, is in
+  [Reading a material datasheet](https://jmrplens.github.io/phonometry/materials/reading-a-datasheet/),
+  among the materials guides.
 
 ## What this section does not cover
 
@@ -32607,9 +32613,13 @@ one into another's field, so read this before choosing a `row_type`.
   prints the result of a reverberation-room test in octaves. The practical
   sound absorption coefficient $\alpha_\mathrm{p}$ of ISO 11654 is not one of
   them: it is a rating, rounded to steps of 0.05 and capped at 1.00, and a
-  European data sheet's octave row is usually that. No row class of this
-  library holds $\alpha_\mathrm{p}$, nor a one-third-octave
-  $\alpha_\mathrm{s}$; do not write either into `AbsorptionSpectrum`.
+  European data sheet's octave row is usually that.
+  `PracticalAbsorptionSpectrum` holds $\alpha_\mathrm{p}$ and
+  `ThirdOctaveAbsorptionSpectrum` a test report's one-third-octave
+  $\alpha_\mathrm{s}$, each with the rating the sheet prints; do not write
+  either into `AbsorptionSpectrum`.
+  [Reading a material datasheet](https://jmrplens.github.io/phonometry/materials/reading-a-datasheet/)
+  tells the three apart on the page.
 - `TransmissionLossSpectrum` holds the transmission loss of a construction
   as a book compiles it, in octave bands, from tests the book seldom names:
   Bies qualifies his values as field incidence, ASHRAE's rows come from
@@ -32617,8 +32627,10 @@ one into another's field, so read this before choosing a `row_type`.
   $R$ of a test report under ISO 10140-2 is measured in one-third-octave
   bands on one product's specimen, in a laboratory where the sound
   transmitted by flanking paths has been shown to be negligible, and it is
-  rated with ISO 717-1. It is a different record, and no row class holds it;
-  do not write it into `TransmissionLossSpectrum`.
+  rated with ISO 717-1. It is a different record: `SoundReductionSpectrum`
+  holds it, with the single numbers the report prints, and
+  `ImpactImprovementSpectrum` the reduction of impact level of a covering;
+  do not write either into `TransmissionLossSpectrum`.
 - `ResilientLayer` holds $s'$ in `dynamic_stiffness_n_m3` and
   $s'_\mathrm{t}$ in `apparent_dynamic_stiffness_n_m3`. A test report under
   EN 29052-1 prints $s'_\mathrm{t}$ and, when it can, $s'$; a data sheet
@@ -32754,10 +32766,9 @@ handing the rows to the porous models, a room model, the plateau method and
 a floating floor.
 
 **Not covered.** A spreadsheet's own format (XLSX, ODS) is not read: save the sheet as
-"CSV UTF-8", and write in JSON what one cell cannot say. No row class holds
-a data sheet's practical absorption coefficient $\alpha_\mathrm{p}$, its
-one-third-octave $\alpha_\mathrm{s}$ or a laboratory sound reduction index
-$R$, and no rating is recomputed from a spectrum a file holds. No
+"CSV UTF-8", and write in JSON what one cell cannot say. A rating no
+function of this library works out (an NRC, an STC, an IIC) is held as
+printed and never checked. No
 manufacturer's data ships with the library, and a table pasted into an issue
 or a pull request is never merged.
 
@@ -32765,6 +32776,7 @@ or a pull request is never merged.
 
 - [Files](https://jmrplens.github.io/phonometry/io/): what the file layer of the library reads and writes, and why.
 - [Published catalogues](https://jmrplens.github.io/phonometry/reference/catalogues/): every table the library has read from a page, the same row classes with the book's cells.
+- [Reading a material datasheet](https://jmrplens.github.io/phonometry/materials/reading-a-datasheet/): what each number on a data sheet is, and which row class holds it.
 - [Porous and Multilayer Absorbers](https://jmrplens.github.io/phonometry/materials/absorbers/porous-absorbers/): the models a `PorousMaterial` row goes into.
 - [Dynamic stiffness of resilient materials](https://jmrplens.github.io/phonometry/materials/resilient/dynamic-stiffness/): $s'$, $s'_\mathrm{t}$ and clause 8.2 in full.
 - [Predicting Panel Sound Insulation](https://jmrplens.github.io/phonometry/buildings/design/panel-sound-insulation/): the plateau method a `PlateauMaterial` row draws.
@@ -37023,6 +37035,15 @@ that measure them, the single-number ratings that summarise them, the
 prediction models that anticipate them, and the in-situ methods that recover
 them outside the laboratory.
 
+Before any of them,
+[Reading a material datasheet](https://jmrplens.github.io/phonometry/materials/reading-a-datasheet/)
+says what the numbers on a data sheet or a test report are: the practical
+coefficient against the one-third-octave one, a level declared under CE
+marking against a measurement, the mounting and the revision; and it shows
+how to keep them, with a laboratory's sound reduction index and a covering's
+impact improvement, in a catalogue of your own that rates them again from
+their bands.
+
 The **Absorbers** subsection covers how much energy a material takes out of
 the field, one instrument or model family per guide.
 [Sound Absorption Measurement and Rating](https://jmrplens.github.io/phonometry/materials/absorbers/absorption-measurement/)
@@ -37179,6 +37200,427 @@ If you arrived here from a search and want the shape of the whole library,
 [What do you need to measure?](https://jmrplens.github.io/phonometry/start/tasks/) indexes it by the job
 and [All guides](https://jmrplens.github.io/phonometry/) lists every page with a line on
 each.
+
+---
+
+
+<!-- source: docs/materials/reading-a-datasheet.md | canonical: https://jmrplens.github.io/phonometry/materials/reading-a-datasheet/ -->
+Source: https://jmrplens.github.io/phonometry/materials/reading-a-datasheet/
+
+# Reading a material datasheet
+
+A data sheet prints fewer numbers than a book and means more by each of
+them. The same "0,90 at 1 kHz" can be a laboratory's one-third-octave
+measurement, a rounded practical coefficient or a level the manufacturer
+declares no product falls below, and the sheet does not always say which.
+This page is about reading those numbers before you type them: what each
+kind is, which row class of the library holds it, and how a
+[catalogue of your own](https://jmrplens.github.io/phonometry/io/material-catalogues/) keeps what the
+sheet prints without turning it into something it is not.
+
+Nothing here ships with data. The sheets are yours, you type them into a
+file of yours, and the library reads the file; a sheet pasted into an issue
+or a pull request is never merged.
+
+## Two absorption coefficients that are not the same number
+
+A reverberation-room test (ISO 354) measures the **sound absorption
+coefficient** $\alpha_\mathrm{s}$ in one-third octave bands. It is referred
+to the area of the specimen, whose edges absorb too, so a value above 1 is
+common and is not an error. A test report prints it to two decimals, one
+value per band, and `ThirdOctaveAbsorptionSpectrum` holds it as printed,
+from 50 Hz to 10 kHz.
+
+A European data sheet usually prints something else: the **practical sound
+absorption coefficient** $\alpha_\mathrm{p}$ of ISO 11654. Clause 4.1 forms
+it for each octave band from the three one-third octaves inside it: their
+mean to the second decimal, rounded in steps of 0.05, and set to 1.00 when
+it rounds above. Six values from 125 Hz to 4 kHz that all end in 0 or 5 are
+practical coefficients, and `PracticalAbsorptionSpectrum` holds them. The
+Sabine coefficients of a book's table are neither; `AbsorptionSpectrum` holds
+those.
+
+A test report's table goes straight into the first class, and
+`practical()` turns it into the second, marking every octave as derived:
+
+```python
+from phonometry import io, materials
+
+bands = (100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000, 1250,
+         1600, 2000, 2500, 3150, 4000, 5000)
+alpha_s = (0.12, 0.15, 0.17, 0.21, 0.31, 0.51, 0.54, 0.80, 0.93, 1.05, 1.10,
+           1.19, 1.20, 1.13, 1.02, 0.99, 0.94, 0.81)
+row = {"key": "e200", "name": "Panel 40", "mounting": "E-200",
+       "construction_depth_mm": 200}
+row |= {f"absorption_coefficient_{b}": a for b, a in zip(bands, alpha_s, strict=True)}
+report = {
+    "schema": "phonometry-catalogue",
+    "schema_version": 1,
+    "catalogue": "panel-40-report",
+    "row_type": "ThirdOctaveAbsorptionSpectrum",
+    "about": "The one-third-octave table of the laboratory report on Panel 40.",
+    "provenance": {
+        "kind": "test_report",
+        "document": "Sound absorption test report 26-015",
+        "publisher": "Example Lab",
+        "version": None,
+        "consulted": "2026-09-25",
+        "laboratory": "Example Lab",
+        "report": "26-015",
+        "test_standard": "ISO 354:2003",
+    },
+    "basis": "measured",
+    "rows": [row],
+}
+panel = io.parse_catalogue(
+    report, row_type=materials.ThirdOctaveAbsorptionSpectrum
+)["panel-40-report/e200"]
+
+print(panel.absorption_coefficient(1250))   # 1.19, above 1 and kept
+practical = panel.practical()
+print(practical.spectrum())
+# {125: 0.15, 250: 0.35, 500: 0.75, 1000: 1.0, 2000: 1.0, 4000: 0.9}
+print(practical.derived["practical_absorption_coefficient_1000"])
+# from the one-third-octave coefficients at 800, 1000 and 1250 Hz, averaged,
+# rounded in steps of 0.05 and capped at 1.00 (ISO 11654 Clause 4.1)
+rating = panel.rating()
+print(rating.rating_label, rating.absorption_class)   # 0.65(MH) C
+```
+
+The 1 kHz octave is 1.10 before the cap and 1.00 after it; the report's
+1.19 stays 1.19. An octave whose three one-third octaves the report does
+not all print is left empty, and `why_missing` says it does not follow from
+the cells the row has: nothing is borrowed from a neighbouring band.
+
+### The grid, the cap and the 125 Hz band
+
+Because $\alpha_\mathrm{p}$ is rounded in steps of 0.05 and capped at 1.00, a
+practical coefficient printed as 0.83 or as 1.05 is not one ISO 11654 can
+give. Such a value is kept as the sheet prints it, and reading the file adds
+a note. The weighted coefficient $\alpha_\mathrm{w}$ is on the same grid, and
+Clause 5 asks for every coefficient to two decimals, with the shape
+indicators in parentheses after $\alpha_\mathrm{w}$: "0,70(MH)". Write the
+letters alone in `shape_indicator`.
+
+The 125 Hz octave is defined like the others (Clause 4.1 forms
+$\alpha_\mathrm{p}$ for each octave band, and Clause 5.2 plots it from
+125 Hz) and is not rated: the reference curve starts at 250 Hz, and Clause 1
+says the rating is not appropriate below it. `PracticalAbsorptionSpectrum`
+holds it, and `rating()` never reads it.
+
+### From a spreadsheet
+
+A data sheet's octave table is a spreadsheet's job. Its header declares the
+dialect and the provenance, and the CSV beside it holds the rows as the
+sheet prints them: a mounting, a depth, a word where a number would be, and
+an `x-` column for the sheet's own edge code.
+
+```python
+import json
+import pathlib
+import warnings
+
+from phonometry import io, materials
+
+header = {
+    "schema": "phonometry-catalogue",
+    "schema_version": 1,
+    "catalogue": "panel-40-alpha",
+    "row_type": "PracticalAbsorptionSpectrum",
+    "about": "The practical coefficients Panel 40's data sheet prints on its page 2.",
+    "provenance": {
+        "kind": "datasheet",
+        "document": "Panel 40 technical data sheet",
+        "publisher": "Example Acoustics Ltd",
+        "version": "Rev. 4",
+        "consulted": "2026-09-25",
+        "laboratory": "Example Lab",
+        "report": "26-015",
+    },
+    "basis": "measured",
+    "csv": {"delimiter": ";", "decimal": ","},
+}
+pathlib.Path("panel-40-alpha.csv.phonometry.json").write_text(
+    json.dumps(header, indent=2), encoding="utf-8"
+)
+pathlib.Path("panel-40-alpha.csv").write_text(
+    "key;name;mounting;construction_depth_mm;"
+    "practical_absorption_coefficient_125;practical_absorption_coefficient_250;"
+    "practical_absorption_coefficient_500;practical_absorption_coefficient_1000;"
+    "practical_absorption_coefficient_2000;practical_absorption_coefficient_4000;"
+    "weighted_absorption_coefficient;shape_indicator;absorption_class;x-edge\n"
+    "e200;Panel 40;E-200;200;0,40;0,70;0,95;1,00;0,95;0,90;0,95;;A;A24\n"
+    "a;Panel 40;A;;[n.m.];0,25;0,70;1,05;1,00;0,95;0,60;MH;C;A24\n",
+    encoding="utf-8",
+)
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore", io.CatalogueWarning)
+    sheet = io.read_catalogue(
+        "panel-40-alpha.csv", row_type=materials.PracticalAbsorptionSpectrum
+    )
+for note in sheet.notes:
+    print(note)
+# panel-40-alpha.csv, line 3, row 'a': the practical coefficient at 1000 Hz
+#   is printed as 1.05, above the 1.00 it is capped at (ISO 11654 Clause 4.1)
+# panel-40-alpha.csv, line 3, row 'a': the weighted coefficient is printed as
+#   0.60 and the bands give 0.55 (ISO 11654 Clause 4.2); the printed value is
+#   kept as printed
+# panel-40-alpha.csv, line 3, row 'a': the absorption class is printed as 'C'
+#   and the bands give 'D' (ISO 11654 Annex B); the printed one is kept as
+#   printed
+mounted = sheet["panel-40-alpha/a"]
+print(mounted.practical_absorption_coefficient_1000)   # 1.05
+print(mounted.rating().rating_label)                   # 0.55(MH)
+print(sheet["panel-40-alpha/e200"].rating().rating_label)   # 0.95
+print(mounted.why_missing("practical_absorption_coefficient_125"))
+# the datasheet prints “n.m.” where the number would be
+```
+
+The first row prints a rating its bands give, so it has no note. The second
+has three: a coefficient above the cap, and a weighted coefficient and a
+class its own bands do not give. The notes are made once, when the file is
+read, and change nothing: the row keeps 1.05, 0.60 and C as printed, and
+`rating()` answers with what the bands give, without warning again. Whether
+the sheet or its table is the one in error is for you to find out.
+
+## A declared level is not a measurement
+
+A product under CE marking declares its performance under a product
+standard, and a declaration is a level, not a result. EN 13162, for mineral
+wool, declares the practical and the weighted coefficients in levels of
+0.05 that no test result falls below (clause 4.3.11), the airflow
+resistivity in levels of 1 kPa·s/m² that no result falls below (4.3.12), and
+the dynamic stiffness in levels of 1 MN/m³ that no result exceeds (4.3.9),
+and its clause 6 codes them as APi, AWi, AFri and SDi. So "AFr5" is a lower
+bound of 5 kPa·s/m², "SD9" an upper bound of 9 MN/m³, and a sheet that
+prints "s′ ≤ 9 MN/m³" is printing the second.
+
+Write a bound as a bound: `ranges` with `bounded_below` or `bounded_above`
+in JSON, or `>=5` and `<=9` in a CSV cell, and the value stays empty. Give
+the row, or the cell, `basis` `"declared"`. A model that needs the number is
+then refused, and the refusal says what the sheet printed; nothing turns a
+bound into a value. The
+[catalogues guide](https://jmrplens.github.io/phonometry/io/material-catalogues/) walks through a
+declared airflow resistivity and a declared dynamic stiffness.
+
+## Measured, declared, calculated, estimated
+
+`basis` says what the document claims a value is: `measured`, `declared`,
+`calculated` (by the document, with a standard's model or a program),
+`estimated` or `extended` (a laboratory's extended application of a
+result). Some catalogues mark their values with a legend of this kind, by
+colour or by symbol; others say nothing, and then a row with no `basis` is
+the honest answer. A value the document marks as calculated is not a
+measurement even when it sits in the same column as one, and the library
+never promotes it.
+
+## Mounting and depth of construction
+
+An absorber over an air space absorbs differently from the same absorber
+against the wall, and the sheet's mounting says which. ISO 354 Annex B names
+them: type A is the specimen laid against a room surface; type E is the
+specimen over an air space, and its number is the distance in millimetres
+from the specimen's exposed face to the surface behind it, so E-200 is
+200 mm. Write it in `mounting` as the sheet prints it; an empty mounting
+means the sheet prints none, which is not type A.
+
+ISO 11654 Clause 5.4 asks for the depth of construction of a product
+mounted over an air space: from the room surface to the absorber's exposed
+face, the absorber included. `construction_depth_mm` holds it, and some
+sheets call it the total construction height. It is not the cavity behind
+the absorber, which is shorter by the absorber's thickness.
+
+## The revision and the day you read it
+
+A data sheet is revised under the same title, and not always with a note of
+what changed: one elastomer's static modulus is printed as 0.19 N/mm² on one
+revision and 0.13 N/mm² on the next, with the test standard changed beside
+it. A project needs the revision it was specified against. Write the
+revision the sheet prints in `version`, or `None` when it prints none, and
+the day you read it in `consulted`; the row's source cites both.
+
+## Decimal commas and a corrupt text layer
+
+A sheet printed in Spanish, German or French writes 0,85, and a JSON number
+never does: in JSON write 0.85, and a text "0,85" is refused rather than
+guessed. A CSV file declares its decimal mark in the header; with a comma,
+its delimiter is a semicolon or a tab.
+
+Type the numbers from the page as you see it. A PDF's text layer can carry
+substituted glyphs, so text copied out of it reads as nonsense or, worse,
+as a different figure. A cell that is not a number in a CSV file is refused
+at its line and column, and a text the page prints where the number would
+be (n.m., a class code) goes between brackets, `[n.m.]`, never as a bare
+word.
+
+## Sound insulation: R and ΔLw
+
+A laboratory report of a wall or a door prints the sound reduction index
+$R$ of ISO 10140-2 in one-third octaves and rates it with ISO 717-1:
+$R_\mathrm{w}(C; C_\mathrm{tr})$, and with the enlarged ranges of Annex B
+when the report measured from 50 Hz. `SoundReductionSpectrum` holds the
+bands and the numbers as printed, and `rating()` works them out again. It
+is not the transmission loss a book compiles, which
+`TransmissionLossSpectrum` holds.
+
+A floating floor's or a covering's sheet prints the weighted reduction of
+impact sound pressure level $\Delta L_\mathrm{w}$ of ISO 717-2, often with
+$C_\mathrm{I,r}$ beside it, and a report prints the $\Delta L$ of
+ISO 10140-3 per band. `ImpactImprovementSpectrum` holds them, and
+`rating()` works out $\Delta L_\mathrm{w}$, $C_{\mathrm{I},\Delta}$ and
+$C_\mathrm{I,r} = -11 - C_{\mathrm{I},\Delta}$ dB (Clause A.2.2).
+
+```python
+from phonometry import building, io
+
+bands = (50, 63, 80, 100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000,
+         1250, 1600, 2000, 2500, 3150, 4000, 5000)
+r_db = (18.7, 19.2, 20.0, 20.4, 16.3, 17.7, 22.6, 22.4, 22.7, 24.8, 26.6,
+        28.0, 30.5, 31.8, 32.5, 33.4, 33.0, 31.0, 25.5, 26.8, 29.2)
+wall = {
+    "key": "partition",
+    "name": "Glazed partition",
+    "construction": "single 6 mm glass pane",
+    "weighted_sound_reduction_index_db": 30,
+    "spectrum_adaptation_term_db": -2,
+    "traffic_spectrum_adaptation_term_db": -3,
+    "spectrum_adaptation_term_50_5000_db": -2,
+    "traffic_spectrum_adaptation_term_50_5000_db": -4,
+}
+wall |= {f"sound_reduction_index_{b}_db": r for b, r in zip(bands, r_db, strict=True)}
+provenance = {
+    "kind": "test_report",
+    "document": "Airborne sound insulation test report 26-021",
+    "version": None,
+    "consulted": "2026-09-25",
+    "laboratory": "Example Lab",
+    "report": "26-021",
+    "test_standard": "ISO 10140-2:2010",
+}
+tested = io.parse_catalogue(
+    {
+        "schema": "phonometry-catalogue",
+        "schema_version": 1,
+        "catalogue": "lab-walls",
+        "row_type": "SoundReductionSpectrum",
+        "about": "Walls rated in the laboratory, from their test reports.",
+        "provenance": provenance,
+        "basis": "measured",
+        "rows": [wall],
+    },
+    row_type=building.SoundReductionSpectrum,
+)
+rated = tested["lab-walls/partition"].rating()
+print(rated.rating, rated.c, rated.ctr, rated.c_50_5000, rated.ctr_50_5000)
+# 30 -2 -3 -2 -4
+print(tested.notes)   # () : the printed numbers are the ones the bands give
+
+sheet = io.parse_catalogue(
+    {
+        "schema": "phonometry-catalogue",
+        "schema_version": 1,
+        "catalogue": "floor-mats",
+        "row_type": "ImpactImprovementSpectrum",
+        "about": "Floating-floor mats as their data sheets declare them.",
+        "provenance": {
+            "kind": "datasheet",
+            "document": "Floor mat 33 data sheet",
+            "publisher": "Example Acoustics Ltd",
+            "version": "04-2026",
+            "consulted": "2026-09-25",
+        },
+        "basis": "declared",
+        "rows": [
+            {
+                "key": "mat-33",
+                "name": "Floor mat 33 under a 50 mm screed",
+                "ranges": {"weighted_impact_improvement_db": [26, None]},
+                "bounded_below": ["weighted_impact_improvement_db"],
+            }
+        ],
+    },
+    row_type=building.ImpactImprovementSpectrum,
+)
+mat = sheet["floor-mats/mat-33"]
+try:
+    building.predicted_impact_insulation(
+        ln_w_eq=78.0,
+        delta_l_w=mat.printed(
+            "weighted_impact_improvement_db", wanted_by="EN 12354-2 Formula 21"
+        ),
+    )
+except ValueError as error:
+    print(error)
+# 'Floor mat 33 under a 50 mm screed' has no weighted_impact_improvement_db,
+# which 'EN 12354-2 Formula 21' needs: the datasheet prints a lower bound of
+# 26 and no value (...)
+```
+
+The partition's printed numbers are the ones its bands give, so there is no
+note. The mat's sheet declares its improvement as at least 26 dB, which is
+not a value the prediction can take, and the refusal says so. A rating a
+sheet prints and no function of this library works out (an STC, an IIC, a
+flanking level difference) has no field of its own; write it in the row's
+`note`.
+
+## What never happens
+
+- No coefficient is rounded, clipped or moved to the grid, and no rating
+  printed on the sheet is replaced by the one its bands give.
+- No octave is formed from one-third octaves the row does not print, and no
+  band is filled from its neighbours.
+- No bound becomes a value, and no declared level is read as a
+  measurement.
+- No note changes a cell: a note is read once, beside the catalogue.
+
+## What this guide covers
+
+**Covered.** Reading a data sheet's practical absorption coefficients
+(`materials.PracticalAbsorptionSpectrum`), a test report's one-third-octave
+coefficients (`materials.ThirdOctaveAbsorptionSpectrum`) with the practical
+coefficients they give, a laboratory sound reduction index
+(`building.SoundReductionSpectrum`) and a reduction of impact sound pressure
+level (`building.ImpactImprovementSpectrum`), each rated again from its bands
+with `rating()`; the notes a reader keeps for a value off the ISO 11654 grid
+or above its cap and for a printed rating the bands do not give; and how to
+write a declared level, a mounting, a revision and a word printed where a
+number would be.
+
+**Not covered.** The noise reduction coefficient, the sound absorption average, the STC, the
+IIC and any other rating no function of this library works out are held as
+printed or in a note and never checked. No sheet is read from a PDF: the
+numbers are typed from the page. No manufacturer's data ships with the
+library, and a sheet pasted into an issue or a pull request is never merged.
+
+## See also
+
+- [Your own catalogues](https://jmrplens.github.io/phonometry/io/material-catalogues/): the file, its provenance, the CSV front end and every refusal.
+- [Sound Absorption Measurement and Rating](https://jmrplens.github.io/phonometry/materials/absorbers/absorption-measurement/): ISO 354 and the rating of ISO 11654 in full.
+- [Dynamic stiffness of resilient materials](https://jmrplens.github.io/phonometry/materials/resilient/dynamic-stiffness/): $s'$ and $s'_\mathrm{t}$, which a floating floor's sheet declares.
+- API reference: [`materials.absorbers.datasheets`](https://jmrplens.github.io/phonometry/reference/api/materials/datasheets/), [`building.datasheets`](https://jmrplens.github.io/phonometry/reference/api/building/datasheets/).
+
+## References
+
+- International Organization for Standardization. (1997). *Acoustics — Sound absorbers for use in buildings — Rating of sound absorption* (ISO 11654:1997).
+  [iso.org catalogue](https://www.iso.org/standard/19583.html).
+  The practical coefficient of Clause 4.1, the mean of three one-third octaves rounded in steps of 0.05 and set to 1.00 above it; the weighted coefficient and its shape indicators of Clauses 4.2 and 4.3; Clause 1, which starts the rating at 250 Hz; Clause 5, which gives every coefficient to two decimals and asks for the depth of construction. Read from BS EN ISO 11654:1997.
+- International Organization for Standardization. (2003). *Acoustics — Measurement of sound absorption in a reverberation room* (ISO 354:2003).
+  [iso.org catalogue](https://www.iso.org/standard/34545.html).
+  The one-third-octave sound absorption coefficient a test report prints, and the mountings of Annex B: type A against a room surface, type E over an air space whose number is the distance in millimetres from the specimen's face to the surface behind it.
+- European Committee for Standardization. (2015). *Thermal insulation products for buildings — Factory made mineral wool (MW) products — Specification* (EN 13162:2012+A1:2015).
+  A product standard under CE marking and what its declarations mean: clause 4.3.9 declares the dynamic stiffness in levels no test result exceeds, 4.3.11 the practical and weighted coefficients in levels no result falls below, 4.3.12 the airflow resistivity likewise, and clause 6 codes them as SDi, APi, AWi and AFri. Read from BS EN 13162:2012+A1:2015.
+- International Organization for Standardization. (2010). *Acoustics — Laboratory measurement of sound insulation of building elements — Part 2: Measurement of airborne sound insulation* (ISO 10140-2:2010).
+  [iso.org catalogue](https://www.iso.org/standard/42088.html).
+  The laboratory sound reduction index R of a wall or a door, one-third octave by one-third octave, which a test report prints and SoundReductionSpectrum holds.
+- International Organization for Standardization. (2010). *Acoustics — Laboratory measurement of sound insulation of building elements — Part 3: Measurement of impact sound insulation* (ISO 10140-3:2010).
+  [iso.org catalogue](https://www.iso.org/standard/42089.html).
+  The reduction of impact sound pressure level of a floor covering or a floating floor that ImpactImprovementSpectrum holds.
+- International Organization for Standardization. (2020). *Acoustics — Rating of sound insulation in buildings and of building elements — Part 1: Airborne sound insulation* (ISO 717-1:2020).
+  [iso.org catalogue](https://www.iso.org/standard/77435.html).
+  Rw with C and Ctr, and the adaptation terms of the enlarged frequency ranges of Annex B, which a report prints beside R.
+- International Organization for Standardization. (2020). *Acoustics — Rating of sound insulation in buildings and of building elements — Part 2: Impact sound insulation* (ISO 717-2:2020).
+  [iso.org catalogue](https://www.iso.org/standard/69867.html).
+  The weighted reduction of impact sound pressure level against the reference floor of Table 4, and Clause A.2.2 with CI,Δ = CI,r,0 − CI,r, CI,r,0 = −11 dB (Formula (A.4)).
 
 ---
 
@@ -43525,7 +43967,7 @@ documents, one page per module.
 | `workstation_level_increase` / `workstation_level` / `total_workstation_level` | `function` | **What the room adds at the machine's own workstation, Annex C.**<br>• `workstation_level_increase(sound_power_level_db=…, emission_level_db=…, absorption_area_m2=…)`: 10 lg(1 + 4S/A) with S = 10^((L_WA − L_pA)/10), the room reflecting back what the machine emits<br>• `workstation_level`: the emission level with that increase on it<br>• `total_workstation_level(contributions, existing_level_db=…)`: the energy sum of every machine, and of what was already there | `room.workstation_level(sound_power_level_db=95.0, emission_level_db=85.0, absorption_area_m2=200.0)` |
 | `typical_decay_range` / `typical_excess_range` / `TYPICAL_DECAY_RANGE_DB` / `TYPICAL_EXCESS_RANGE_DB` | `function` / `mapping` | **What 4.3 says the two descriptors usually are, region by region.**<br>• DL2: 5 dB to 6 dB near, 2 dB to 5 dB in the middle, over 6 dB far away<br>• DLf: 2 dB to 10 dB in the middle region, which is the one the clause prints a range for<br>• an open bound comes back as `None`, so a range is a pair to read rather than a limit to enforce | `room.typical_decay_range("middle")  # (2.0, 5.0)` |
 | `airborne_insulation` | `function` | **Field airborne insulation (ISO 16283-1).**<br>• `l1`/`l2`: Source/receiving levels [dB], 1D or (positions, bands)<br>• `t2`: Receiving-room T per band [s]<br>• `area`: Partition S [m²] (for R')<br>• `volume`: Receiving V [m³] (for R')<br>• `t0`: Reference T0 [s] (Default: 0.5)<br>• `frequencies` [Hz] (required with either low-frequency argument)<br>• `source_low_frequency` / `receiver_low_frequency`: `LowFrequencyProcedure` per room (ISO 16283-1 Clause 8)<br>• Warns (`LowFrequencyWarning`) when `volume` rounds below 25 m³, `frequencies` names 50/63/80 Hz and no `receiver_low_frequency` is given | `ins = building.airborne_insulation(l1, l2, t2, area=10, volume=50)`<br><br>• `AirborneInsulationResult` |
-| `weighted_rating` | `function` | **Single-number rating + C/Ctr (ISO 717-1).**<br>• `values_by_band`: 16 thirds or 5 octaves [dB]<br>• `bands`: 'third-octave', 'octave' or None | `w = building.weighted_rating(R)`<br><br>• `WeightedRatingResult` (Rw, C, Ctr) |
+| `weighted_rating` | `function` | **Single-number rating + C/Ctr (ISO 717-1).**<br>• `values_by_band`: 16 thirds or 5 octaves [dB], or a mapping of band centre in Hz to dB such as a catalogue row's `.spectrum()`: read band by band, a missing rating band refused, never filled<br>• `bands`: 'third-octave', 'octave' or None (a mapping holding a one-third-octave band that is not an octave centre is read as thirds) | `w = building.weighted_rating(R)`<br><br>• `WeightedRatingResult` (Rw, C, Ctr) |
 | `weighted_rating_extended` | `function` | **Rating + enlarged-range terms (ISO 717-1 Annex B).**<br>• `values_by_band` [dB] with `frequencies` [Hz] (None = the 16 core bands)<br>• `one_decimal`: 0.1 dB shift + one-decimal reductions for uncertainty statements (Default: False) | `ext = building.weighted_rating_extended(r, freqs)`<br><br>• `ExtendedWeightedRatingResult` (rating, c, ctr, c_50_3150 … ctr_100_5000) |
 | `ExtendedWeightedRatingResult` | `dataclass` | **Weighted rating with the enlarged-range adaptation terms (ISO 717-1 Annex B).**<br>• `rating` + `c`, `ctr`<br>• `c_50_3150`, `c_50_5000`, `c_100_5000` and the `ctr_` twins<br>• `core`: the base `WeightedRatingResult` | `res = building.weighted_rating_extended(freqs, r)` |
 | `db_hr_global_index` | `function` | **A-weighted global index Ix = −10 lg Σ 10^((Lx,i−Xi)/10) (CTE DB-HR Annex A, A.5-A.7).**<br>• `band_values` Xi [dB] over the 18 bands 100 Hz-5 kHz<br>• `spectrum`: 'pink','traffic','railway','aircraft'<br>• `frequencies` [Hz], `name` | `idx = building.db_hr_global_index(r, "pink")`<br><br>• `DbHrGlobalIndexResult` |
@@ -43552,16 +43994,17 @@ documents, one page per module.
 | `AirborneInsulationResult` | `dataclass` | **Field insulation per band.**<br>• `d`: Level difference D [dB]<br>• `dnt`: Standardized DnT [dB]<br>• `r_prime`: Apparent R' [dB] or None<br>• `l1`, `l2`, `t2`, `t0`: retained measurement chain (or None)<br>• `source_low_frequency`, `receiver_low_frequency`: `LowFrequencyResult` or None<br>• `.report(path, quantity='dnt'/'r_prime', ...)`: ISO 16283-1 field test report (Annex B form) with the ISO 717-1 rating → PDF | `res.report("DnTw.pdf", metadata=ReportMetadata(requirement=50.0))` |
 | `WeightedRatingResult` | `dataclass` | **Weighted rating result.**<br>• `rating`: Rw/DnT,w … [dB], int<br>• `c`: Spectrum term C, int<br>• `ctr`: Spectrum term Ctr, int<br>• `unfavourable_sum`: [dB]<br>• `band_centers`: Measured-curve centres [Hz] or None<br>• `measured`: Measured band values [dB] or None<br>• `shifted_reference`: Shifted Table 3 reference [dB] or None | `w.rating, w.c, w.ctr` |
 | `impact_insulation` | `function` | **Field impact insulation (ISO 16283-2).**<br>• `li`: Impact SPL [dB], 1D or (positions, bands)<br>• `t2`: Receiving-room T per band [s]<br>• `volume`: Receiving V [m³] (for L'n)<br>• `t0`: Reference T0 [s] (Default: 0.5)<br>• `frequencies` [Hz] (required with `low_frequency`)<br>• `low_frequency`: receiving-room `LowFrequencyProcedure` (ISO 16283-2 Clause 8)<br>• Warns (`LowFrequencyWarning`) when `volume` rounds below 25 m³, `frequencies` names 50/63/80 Hz and no `low_frequency` is given | `imp = building.impact_insulation(li, t2, volume=50)`<br><br>• `ImpactInsulationResult` (`l_n_t`, `l_n`) |
-| `weighted_impact_rating` | `function` | **Single-number impact rating + CI (ISO 717-2).**<br>• `values_by_band`: 16 thirds (100-3150 Hz) or 5 octaves (125-2000 Hz) [dB]<br>• `bands`: 'third-octave', 'octave' or None | `r = building.weighted_impact_rating(imp.l_n_t)`<br><br>• `ImpactRatingResult` (Ln,w, CI); octave rating carries the -5 dB rule |
+| `weighted_impact_rating` | `function` | **Single-number impact rating + CI (ISO 717-2).**<br>• `values_by_band`: 16 thirds (100-3150 Hz) or 5 octaves (125-2000 Hz) [dB], or a mapping of band centre in Hz to dB, read as `weighted_rating` reads one<br>• `bands`: 'third-octave', 'octave' or None | `r = building.weighted_impact_rating(imp.l_n_t)`<br><br>• `ImpactRatingResult` (Ln,w, CI); octave rating carries the -5 dB rule |
 | `weighted_impact_rating_extended` | `function` | **Impact rating + CI,50-2500 (ISO 717-2:2020 A.2.1 NOTE).**<br>• `values_by_band` [dB] with `frequencies` [Hz] (None = the 16 core bands)<br>• `one_decimal`: 0.1 dB shift (reproduces Ln,r,0,w = 77.6, CI,r,0 = -10.3 of A.2.2) (Default: False) | `ext = building.weighted_impact_rating_extended(ln, freqs)`<br><br>• `ExtendedImpactRatingResult` (rating, ci, ci_50_2500) |
 | `ExtendedImpactRatingResult` | `dataclass` | **Weighted impact rating with CI,50-2500 (ISO 717-2:2020 A.2.1).**<br>• `rating`, `ci`, `ci_50_2500`<br>• `core`: the base `ImpactRatingResult` | `res = building.weighted_impact_rating_extended(freqs, ln)` |
-| `weighted_impact_improvement` | `function` | **Weighted improvement ΔLw (ISO 717-2 §5).**<br>• `delta_l`: 16 one-third-octave ΔL (100-3150 Hz) [dB]<br>Applies the Table 4 reference floor: ΔLw = 78 − Ln,r,w | `weighted_impact_improvement(delta_l)`<br><br>• ΔLw [dB] (e.g. 19) |
-| `impact_improvement_adaptation_term` | `function` | **Spectrum adaptation term CI,Δ (ISO 717-2:2020 Formula (A.4)).**<br>• `delta_l`: 16 one-third-octave ΔL (100-3150 Hz) [dB]<br>CI,Δ = CI,r,0 − CI,r (CI,r,0 = −11 dB); ISO 16251-1 clause 8 e) | `impact_improvement_adaptation_term(delta_l)`<br><br>• CI,Δ [dB], int |
+| `weighted_impact_improvement` | `function` | **Weighted improvement ΔLw (ISO 717-2 §5).**<br>• `delta_l`: 16 one-third-octave ΔL (100-3150 Hz) [dB], or a mapping of band centre in Hz to ΔL holding those 16 bands<br>Applies the Table 4 reference floor: ΔLw = 78 − Ln,r,w | `weighted_impact_improvement(delta_l)`<br><br>• ΔLw [dB] (e.g. 19) |
+| `impact_improvement_adaptation_term` | `function` | **Spectrum adaptation term CI,Δ (ISO 717-2:2020 Formula (A.4)).**<br>• `delta_l`: 16 one-third-octave ΔL (100-3150 Hz) [dB], or a mapping of band centre in Hz to ΔL holding those 16 bands<br>CI,Δ = CI,r,0 − CI,r (CI,r,0 = −11 dB); ISO 16251-1 clause 8 e) | `impact_improvement_adaptation_term(delta_l)`<br><br>• CI,Δ [dB], int |
 | `impact_improvement` | `function` | **Floor-covering improvement ΔL (ISO 16251-1).**<br>• `bare`, `with_covering`: acceleration levels L0/L1 per band [dB]<br>• `frequencies` [Hz] (a clause 6.3 spectrum is rated on its 100-3150 Hz sub-range)<br>• `background`: optional Lb per band [dB] (Formula 2) | `res = building.impact_improvement(l0, l1, f)`<br><br>• `FloorCoveringImprovementResult` |
 | `acceleration_level` | `function` | **Vibratory acceleration level La (ISO 16251-1 Formula 1).**<br>• `acceleration`: RMS a per band [m/s²]<br>• `reference`: a0 (Default: 1e-6) | `acceleration_level(1e-3)  # 60 dB` |
 | `background_corrected_level` | `function` | **Background correction (ISO 16251-1 Formula 2).**<br>• `signal_and_background`, `background` [dB] | `L, limited = building.background_corrected_level(lp, lb)`<br><br>• (corrected [dB], limit-of-measurement mask) |
 | `improvement_octave_bands` | `function` | **Thirds → octaves for ΔL (ISO 16251-1 Formula 5).**<br>• `improvement`, `frequencies` (whole octave triplets) | `f_oct, dl_oct = building.improvement_octave_bands(dl, f)` |
 | `FloorCoveringImprovementResult` | `dataclass` | **Floor-covering improvement (ISO 16251-1).**<br>• `improvement` ΔL [dB], `delta_lw`, `ci_delta` (or None)<br>• `limited`: > ΔL mask; `.octave_bands()`, `.plot()` | `res.delta_lw, res.ci_delta` |
+| `ImpactImprovementRatingResult` | `dataclass` | **A covering's ΔLw with both adaptation terms (ISO 717-2:2020 Formula (2), Clause A.2.2).**<br>• `delta_lw`, `ci_delta` (CI,Δ, Formula (A.4)) and `ci_r` (CI,r = CI,r,0 − CI,Δ, CI,r,0 = −11 dB), whole decibels<br>• `band_centers` (the 16 thirds 100-3150 Hz), `improvement` (ΔL as given)<br>• refuses a `ci_r` that is not −11 − `ci_delta`; `.plot()` draws ΔL with the two numbers in the title | `r = row.rating()  # an ImpactImprovementSpectrum`<br>`r.delta_lw, r.ci_delta, r.ci_r`<br><br>• `ImpactImprovementSpectrum` |
 | `ImpactInsulationResult` | `dataclass` | **Impact insulation per band.**<br>• `l_n_t`: Standardized L'nT [dB]<br>• `l_n`: Normalized L'n [dB] or None<br>• `li`, `t2`, `t0`: retained measurement chain (or None)<br>• `low_frequency`: `LowFrequencyResult` or None<br>• `.report(path, quantity='l_n_t'/'l_n', ...)`: ISO 16283-2 field test report (Annex C form) with the ISO 717-2 rating → PDF | `imp.report("LnTw.pdf", metadata=ReportMetadata(requirement=58.0))` |
 | `ImpactRatingResult` | `dataclass` | **Weighted impact rating.**<br>• `rating`: Ln,w/L'n,w/L'nT,w [dB], int<br>• `ci`: Spectrum term CI, int<br>• `unfavourable_sum`: [dB]<br>• `band_centers`: Measured-curve centres [Hz] or None<br>• `measured`: Measured impact levels [dB] or None<br>• `shifted_reference`: Shifted impact reference [dB] or None | `r.rating, r.ci` |
 | `ReportMetadata` | `dataclass` | **Metadata for the accredited ISO 717 `.report()` PDF fiche.**<br>• All fields optional; only the supplied ones render<br>• `specimen`, `client`, `manufacturer`, `test_room`, `instrumentation`, `calibration`, `mounting`, `measurement_standard`, `test_date`<br>• numeric (finite, positive): `area`, `mass_per_area`, `source_volume`, `receiving_volume`, `temperature_c`, `relative_humidity_percent`, `static_pressure_kpa`, `requirement`<br>• `laboratory`, `operator`, `report_id`, `notes` | `w.report("f.pdf", metadata=ReportMetadata(area=10.0, requirement=52.0))` |
@@ -43690,6 +44133,8 @@ documents, one page per module.
 | `FlankingImpactLevelResult` | `dataclass` | **Normalized flanking impact level Ln,f (ISO 10848).**<br>• `l_n_f` [dB], `rating`: Ln,f,w (or None)<br>• `.plot()` | `res.l_n_f, res.rating` |
 | `PUBLISHED_TRANSMISSION_LOSS` | `mapping` | **Two hundred and fifty-five measured constructions from ten published tables, keyed `'<table>/<row>'`.**<br>• Bies 5e **Table 7.6**, nine groups from sheet panels and sandwich panels through masonry, stud partitions, glazing and doors to floors<br>• ASHRAE Chapter 49 **Table 40**, nine machine equipment room walls, floors and ceilings with the Sound Transmission Class the page prints beside each one<br>• Rossing (2014) **Table 11.4**, twenty-three common partitions in six bands with an STC<br>• Harris 3e **Tables 31.2, 31.3 and 31.5 to 31.9**, a hundred and twenty-nine STC ratings with no band: stud walls, block walls, doors, sealed windows and floor-ceiling systems, one row per condition the page rates, the condition in `variant`<br>• each row carries the `thickness_mm` and the `surface_density_kg_m2` the page prints beside the description, which is what tells apart six windows all called "Single glass in heavy frame"<br>• the book calls the values representative, says they come from tests published by manufacturers and laboratories, and names no standard, no mounting and no source per row; the qualifier it does give is field incidence<br>• what a formula does not give you: the same 280 mm brick wall is 40 dB at 500 Hz on strip ties and 55 dB on expanded metal ties<br>• the transcription was made twice, from the rendered pages, by readers who never saw each other's work | `row = building.PUBLISHED_TRANSMISSION_LOSS['bies-2017-table-7-6/6_mm_steel_plate_6mm']`<br>`row.spectrum()[500]  # 41 dB`<br><br>• `TransmissionLossSpectrum`, `transmission_loss_named` |
 | `TransmissionLossSpectrum` | `dataclass` | **One construction of a published table, with its transmission loss in each octave band.**<br>• `transmission_loss_63_db` … `transmission_loss_8000_db`, in decibels, `None` where the page prints a dash<br>• `thickness_mm`, `surface_density_kg_m2`: the two columns Bies prints beside the description; two rows carry no weight and say so<br>• `sound_transmission_class`: the single-number rating a page prints where it prints one, kept because an STC is computed from third octaves and these seven or eight bands do not give it back; seven tables print nothing else<br>• `block_mass_kg`: the mass of one masonry block where a page prints it, which is not a surface density<br>• `refers_to_row`: the row a printed "Igual que 8" inherits from; resolve with `PUBLISHED_TRANSMISSION_LOSS[f'{row.table}/{row.refers_to_row}']`<br>• `.bands()`, `.spectrum()` → `{band_hz: db}`, `.transmission_loss_db(band_hz)` narrows or refuses, naming the row and the band<br>• a measurement of one construction in one laboratory, not a property of a material | `row.transmission_loss_db(63)  # ValueError: the page prints a dash there`<br><br>• `PUBLISHED_TRANSMISSION_LOSS` |
+| `SoundReductionSpectrum` | `dataclass` | **One element of a laboratory report, with its sound reduction index R per one-third octave (ISO 10140-2) and the ISO 717-1 single numbers it prints.**<br>• `sound_reduction_index_50_db` … `sound_reduction_index_5000_db`, 21 bands, `None` where the report prints none<br>• `weighted_sound_reduction_index_db` (Rw), `spectrum_adaptation_term_db` (C), `traffic_spectrum_adaptation_term_db` (Ctr) and the six Annex B terms `spectrum_adaptation_term_50_3150_db` … `traffic_spectrum_adaptation_term_100_5000_db`, as printed<br>• `surface_density_kg_m2`, `thickness_mm`, `construction`<br>• `.rating()` → `ExtendedWeightedRatingResult` from every band printed: Rw, C and Ctr from 100-3150 Hz (refused, naming the band, when one is missing) and each Annex B term whose bands are all printed, `None` otherwise<br>• read from a file, a printed number the bands do not give is noted beside the catalogue, never changed<br>• a laboratory's R, not a book's field-incidence loss (`TransmissionLossSpectrum`) | `row.rating().rating  # Rw worked out again`<br>`row.sound_reduction_index_db(500)`<br><br>• `ImpactImprovementSpectrum`, `weighted_rating_extended` |
+| `ImpactImprovementSpectrum` | `dataclass` | **One floor covering or floating floor of a report, with its reduction of impact level ΔL per one-third octave (ISO 10140-3) and the ISO 717-2 single numbers it prints.**<br>• `impact_improvement_50_db` … `impact_improvement_5000_db`, 21 bands<br>• `weighted_impact_improvement_db` (ΔLw), `reference_floor_adaptation_term_db` (CI,r), `impact_improvement_adaptation_term_db` (CI,Δ), as printed<br>• `.rating()` → `ImpactImprovementRatingResult` from the 16 bands 100-3150 Hz, refused, naming the band, when one is missing<br>• ΔLw has a field of its own: it is never read from `ImpactInsulation.impact_sound_improvement_db`, an average over frequency<br>• `predicted_impact_insulation(ln_w_eq=..., delta_l_w=row.printed('weighted_impact_improvement_db'))` takes it, or refuses with what the sheet printed | `row.rating().delta_lw`<br>`row.printed('weighted_impact_improvement_db')`<br><br>• `ImpactImprovementRatingResult`, `SoundReductionSpectrum` |
 | `TRANSMISSION_LOSS_BANDS_HZ` | `constant` | **The octave bands a published transmission loss table can print: 63 Hz to 8 kHz.**<br>• `(63, 125, 250, 500, 1000, 2000, 4000, 8000)`; Bies fills the six middle bands on every row and leaves the ends empty on about forty | `building.TRANSMISSION_LOSS_BANDS_HZ` |
 | `transmission_loss_named` | `function` | **Every construction whose printed description contains a fragment.**<br>• `name`: matched without case against the description the page prints, and nothing else<br>• `'door'` answers with the rows that carry the word, not with Bies's hollow flush panel described without it, nor with the Spanish `'puerta'` of Harris<br>• `catalogue=`: the rows to search instead of `PUBLISHED_TRANSMISSION_LOSS`, such as a catalogue of your own from `io.read_catalogue` or `PUBLISHED_TRANSMISSION_LOSS \| mine`; a row of another class is refused by its key (`TypeError`) | `[r.thickness_mm for r in building.transmission_loss_named('Concrete, reinforced')]  # [100, 200, 300]`<br><br>• `PUBLISHED_TRANSMISSION_LOSS` |
 | `PUBLISHED_IMPACT_INSULATION` | `mapping` | **Seventy-one rows of measured impact insulation, keyed `'<table>/<row>'`.**<br>• Harris 3e **Tables 32.1 to 32.8**: forty-two floor-ceiling constructions with their IIC, and six elastic surface treatments with the improvement each adds over a hard massive floor<br>• Harris (1977) **Tables 19.2 to 19.4**: twenty-three floor finishes, floating screeds and timber floors on bare concrete, with the average improvement in impact sound insulation in decibels, keyed by a slug of the description<br>• Tables 32.1 to 32.7 are keyed by the row number the page prints in its own column, `'1'` to `'38'`, with a lettered pair such as `'34A'`/`'34B'` where a construction is printed as two rows, each with its own description and rating; the six treatments of Table 32.8 and every 1977 row are keyed by a slug of the description<br>• single numbers and nothing per band: these pages print no impact sound pressure level, no octave, no third octave and no reference curve<br>• Chapter 32 is collected measurements from a 1967 report for the Federal Housing Administration, except Table 32.8, which credits a 1963 paper by Zeller; the 1977 tables credit nothing; no laboratory, no test standard and no uncertainty is named for any row<br>• what a formula does not give you: the same reinforced concrete slab is IIC 25 bare and 80 under a wool carpet on a rubber underlay | `row = building.PUBLISHED_IMPACT_INSULATION['harris-1995-tables-32-1-to-32-8/4']`<br>`row.impact_insulation_class  # 80`<br><br>• `ImpactInsulation`, `impact_insulation_named` |
@@ -44845,6 +45290,8 @@ documents, one page per module.
 | `PUBLISHED_FLOW_RESISTANCE` | `mapping` | **Twenty-nine thin resistive facings from three published tables, keyed `'<table>/<row>'`.**<br>• Vér & Beranek 2e **TABLE 8.5** (PDF page 266), five woven wire mesh cloths; **TABLE 8.6** (PDF page 267), thirteen glass fibre cloths; **TABLE 8.7** (PDF page 267), eleven sintered porous metal sheets, one data file and one citation each<br>• A resistance per unit area [Pa·s/m], for the facing over an absorber, and not the flow resistivity [Pa·s/m²] of `PUBLISHED_POROUS`<br>• TABLE 8.7 prints its two resistance columns once per block and blank beneath; the value is carried down and each row that received it names the row it came from<br>• The surface density of TABLE 8.6 is held as the page prints it, in g/m², and its `note` carries the oz/yd² beside it: the two printings disagree by about eleven per cent on all thirteen rows, one wrong factor, and the page does not say which column has it<br>• Not a specification: the pages give no measurement method, no laboratory and no standard, and the values are the linear part of the resistance, for low particle velocity only | `materials.PUBLISHED_FLOW_RESISTANCE['ver-beranek-2006-table-8-7/sintered_fm_122']`<br><br>• `ResistiveSheet`, `resistive_sheet_named` |
 | `resistive_sheet_named` | `function` | **Every facing a page labels with this name, matched whole.**<br>• Matches `ResistiveSheet.name` without regard to case, and whole rather than in part, because these pages name their rows by mesh count and product code: a partial match would answer `'12'` with a mesh, two cloths and four sintered sheets<br>• A tuple and not one row, because a name can be printed by more than one table<br>• `catalogue=`: the rows to search instead of `PUBLISHED_FLOW_RESISTANCE`, such as a catalogue of your own from `io.read_catalogue` or `PUBLISHED_FLOW_RESISTANCE \| mine`; a row of another class is refused by its key (`TypeError`) | `materials.resistive_sheet_named('FM 122')`<br><br>• `PUBLISHED_FLOW_RESISTANCE` |
 | `AbsorptionSpectrum` | `dataclass` | **One finish of a published absorption table, with its Sabine coefficient in each octave band.**<br>• `absorption_coefficient_63` … `absorption_coefficient_8000`: one field per band, the band's centre frequency in hertz as the suffix, `None` where the page prints no value<br>• `.bands()` the bands the row prints; `.spectrum()` → `{band_hz: coefficient}`; `.absorption_coefficient(band_hz)` narrows or refuses, naming the row and the band<br>• `mounting`: the ASTM C423 mounting the page prints beside the row, `'A'`, `'E400'`, `'F'` or empty; the same board on two mounts is two rows, because the airspace behind it changes what it does<br>• thickness and density stay in `name` and `variant` as the page prints them; the hedges of every catalogue row apply band by band<br>• a measurement of a specimen in a room, not a property of a material: representative, never a specification | `row = materials.PUBLISHED_ABSORPTION['bies-2017-table-6-2/carpet_heavy_on_concrete']`<br>`row.spectrum()  # {125: 0.02, 250: 0.06, ...}`<br><br>• `PUBLISHED_ABSORPTION`, `AbsorptionAreaSpectrum` |
+| `PracticalAbsorptionSpectrum` | `dataclass` | **One specimen of a data sheet, with its practical absorption coefficient αp per octave (ISO 11654 Clause 4.1) and the rating it prints.**<br>• `practical_absorption_coefficient_125` … `practical_absorption_coefficient_4000`, six octaves; 125 Hz is held and never rated (Clause 1)<br>• `weighted_absorption_coefficient` (αw), `shape_indicator` (the letters, `'MH'`), `absorption_class`, `noise_reduction_coefficient`, as printed<br>• `mounting` (`'A'`, `'E-200'`, ISO 354 Annex B), `thickness_mm`, `construction_depth_mm` (ISO 11654 Clause 5.4: room surface to the exposed face, the absorber included)<br>• `.rating()` → `AbsorptionRatingResult` from 250-4000 Hz, a missing band refused<br>• read from a file, a value above 1.00 or off the steps of 0.05 and a printed rating the bands do not give are noted beside the catalogue; the cells stay as printed<br>• αp, not the Sabine α of a book (`AbsorptionSpectrum`) nor the one-third-octave αs of a report | `row.rating().rating_label  # '0.60(M)'`<br>`row.practical_absorption_coefficient(500)`<br><br>• `ThirdOctaveAbsorptionSpectrum`, `weighted_absorption` |
+| `ThirdOctaveAbsorptionSpectrum` | `dataclass` | **One specimen of a test report, with its sound absorption coefficient αs per one-third octave (ISO 354), 50 Hz to 10 kHz.**<br>• `absorption_coefficient_50` … `absorption_coefficient_10000`, 24 bands, above 1 as measured, never capped<br>• the rating and specimen fields of `PracticalAbsorptionSpectrum`<br>• `.practical()` → `PracticalAbsorptionSpectrum`, each octave whose three thirds are printed worked out by Clause 4.1 and marked in `derived` (naming the bases when they mix); an octave missing a third stays empty and says why<br>• `.rating()` → `AbsorptionRatingResult` from the 15 thirds 200-5000 Hz, which it keeps<br>• `.absorption_coefficient(band_hz)`, `.values_at(frequencies_hz)` | `row.practical().spectrum()`<br>`row.rating().rating_label`<br><br>• `PracticalAbsorptionSpectrum`, `weighted_absorption_from_third_octave` |
 | `AbsorptionAreaSpectrum` | `dataclass` | **A row a table prints as an equivalent absorption area per person, per seat or per cubic metre of air rather than as a coefficient.**<br>• `absorption_area_63_m2` … `absorption_area_8000_m2`, in square metres per unit of `per`, which is `'person'` for an audience row<br>• kept apart from the coefficients because it is added to a room's absorption, not multiplied by a surface, and the unit is in the field name so it cannot be mistaken for one<br>• a row in sabins has been converted, and `converted[field]` keeps the page's figure and its unit, `('4.0', 'sabins')` | `materials.PUBLISHED_ABSORPTION_AREAS['bies-2017-table-6-2/audience_per_person_seated'].spectrum()[500]  # 0.44 m² per person`<br><br>• `PUBLISHED_ABSORPTION_AREAS` |
 | `ABSORPTION_BANDS_HZ` | `constant` | **The octave bands an absorption table can print: 63 Hz to 8 kHz.**<br>• `(63, 125, 250, 500, 1000, 2000, 4000, 8000)`; a table prints six or seven of them and the others stay empty on every row | `materials.ABSORPTION_BANDS_HZ` |
 | `PUBLISHED_ABSORPTION` | `mapping` | **Four hundred and fifty-five absorption coefficient rows from five published tables, keyed `'<table>/<row>'`.**<br>• Bies 5e **Table 6.2**, fifty-nine rows in eight groups, two of which are areas per person and live in `PUBLISHED_ABSORPTION_AREAS`<br>• Long 2e **Table 7.1**, a hundred and two rows in eleven groups, with an ASTM C423 mounting on sixty-two of them and fifteen finishes printed on two mounts<br>• Cox & D'Antonio 3e **Appendix A**, a hundred and sixty-one rows in twenty-two groups, compiled from twenty-nine sources and credited row by row in `attributed_to`; every cell of it is a number<br>• Arau-Puchades (1999) **Tabla 6.1**, ninety-six of its ninety-nine numbered rows, names in Spanish as printed, two of them intervals in `ranges`; the three that are the air attenuation coefficient m in reciprocal metres are not served<br>• Everest 4e **Appendix**, forty-one rows in three groups, each with the source the page prints beside it in a column of its own; two rows the page marks with a dash carry no credit<br>• the book says the values are selected from the literature, that reverberation times from them are approximate only, and that manufacturer's data or a measurement is better<br>• the transcription was made twice, from the rendered pages, by readers who never saw each other's work, and compared cell by cell before either was kept<br>• of the ten finishes both books describe, five agree in every band and five differ in exactly one cell, which is why `absorption_named` returns every match rather than choosing one | `materials.PUBLISHED_ABSORPTION['bies-2017-table-6-2/glass_heavy_plate'].absorption_coefficient(125)  # 0.18`<br><br>• `AbsorptionSpectrum`, `absorption_named` |
@@ -45114,7 +45561,7 @@ documents, one page per module.
 | `TonalityWarning` | `warning class` | **Tonality advisory.**<br>Emitted for biased tonality estimates (e.g. coarse FFT resolution) | `warnings.simplefilter('error', TonalityWarning)` |
 | `STIWarning` | `warning class` | **STI/STIPA advisory.**<br>Emitted for suspect speech-intelligibility measurements or inputs | `warnings.simplefilter('error', STIWarning)` |
 | `__version__` | `str` | **Package version string.**<br>(no parameters) | `phonometry.__version__  # '4.0.0rc1'` |
-| `.plot()` | `method` | **One-line canonical figure on every result object (soft matplotlib dependency).**<br>Available on `ZwickerLoudness`, `MooreGlasbergLoudness`, `MooreGlasbergTimeVaryingLoudness`, `EcmaLoudness`, `EcmaTonality`, `EcmaRoughness`, `PsychoacousticAnnoyanceResult`, `FluctuationStrengthResult`, `ProgramLoudnessResult`, `KWeightingResponse`, `STIResult`, `SIIResult`, `SIIProcedure`, `StandardSpeechSpectrum`, `NCResult`, `RCResult`, `AgeThresholdResult`, `NiptsResult`, `HtlanResult`, `ImpulseProminenceResult`, `ImpulsiveSoundResult`, `SelDistribution`, `DirectivityFactor`, `RandomIncidenceSensitivity`, `DiffuseFieldSensitivity`, `AdjustmentValue`, `FreeFieldCorrection`, `CorrectionUncertaintyBudget`, `CorrectionUncertaintyVerification`, `MultipleShockResult`, `ImpulseResponseResult`, `DecayCurve`, `RoomAcousticsResult`, `ReverberationResult`, `ReverberationModelResult`, `DynamicStiffnessResult`, `MobilityResult`, `TransferStiffnessResult`, `BandAveragedStiffness`, `LevelDifferenceCheck`, `OutputMassCheck`, `EffectiveBlockingMass`, `DrivingPointStiffnessResult`, `DrivingPointUncertainty`, `VibrationSoundPowerResult`, `StructureBornePowerResult`, `InstalledSourceResult`, `WeightedRatingResult`, `ImpactRatingResult`, `FacadeInsulationResult`, `LabAirborneInsulationResult`, `LabImpactInsulationResult`, `SoundPowerResult`, `SoundEnergyResult`, `ReverberationSoundPowerResult`, `ReverberationSoundEnergyResult`, `InSituSoundPowerResult`, `InDuctSoundPowerResult`, `HighFrequencySoundPowerResult`, `SoundPowerIntensityResult`, `DiscretePointIntensityResult`, `PrecisionSoundPowerResult`, `PrecisionIntensityResult`, `IntensityResult`, `UncertaintyResult`, `AbsorptionRatingResult`, `ScatteringResult`, `DiffusionResult`, `DiffusionSpectrum`, `InsituAbsorptionResult`, `WeightingResponse`, `WeightedSpectrum`, `Signal` and `DailyVibrationExposure`.<br>• `ax`: existing Axes, or None to build a fresh figure (Default: None)<br>• returns the Matplotlib `Axes` (an array of Axes for multi-panel figures); never calls `plt.show()`<br>• needs matplotlib (`pip install phonometry[plot]`) | `res.plot()`<br>`decay_curve(ir, fs).plot()` |
+| `.plot()` | `method` | **One-line canonical figure on every result object (soft matplotlib dependency).**<br>Available on `ZwickerLoudness`, `MooreGlasbergLoudness`, `MooreGlasbergTimeVaryingLoudness`, `EcmaLoudness`, `EcmaTonality`, `EcmaRoughness`, `PsychoacousticAnnoyanceResult`, `FluctuationStrengthResult`, `ProgramLoudnessResult`, `KWeightingResponse`, `STIResult`, `SIIResult`, `SIIProcedure`, `StandardSpeechSpectrum`, `NCResult`, `RCResult`, `AgeThresholdResult`, `NiptsResult`, `HtlanResult`, `ImpulseProminenceResult`, `ImpulsiveSoundResult`, `SelDistribution`, `DirectivityFactor`, `RandomIncidenceSensitivity`, `DiffuseFieldSensitivity`, `AdjustmentValue`, `FreeFieldCorrection`, `CorrectionUncertaintyBudget`, `CorrectionUncertaintyVerification`, `MultipleShockResult`, `ImpulseResponseResult`, `DecayCurve`, `RoomAcousticsResult`, `ReverberationResult`, `ReverberationModelResult`, `DynamicStiffnessResult`, `MobilityResult`, `TransferStiffnessResult`, `BandAveragedStiffness`, `LevelDifferenceCheck`, `OutputMassCheck`, `EffectiveBlockingMass`, `DrivingPointStiffnessResult`, `DrivingPointUncertainty`, `VibrationSoundPowerResult`, `StructureBornePowerResult`, `InstalledSourceResult`, `WeightedRatingResult`, `ImpactRatingResult`, `ImpactImprovementRatingResult`, `FacadeInsulationResult`, `LabAirborneInsulationResult`, `LabImpactInsulationResult`, `SoundPowerResult`, `SoundEnergyResult`, `ReverberationSoundPowerResult`, `ReverberationSoundEnergyResult`, `InSituSoundPowerResult`, `InDuctSoundPowerResult`, `HighFrequencySoundPowerResult`, `SoundPowerIntensityResult`, `DiscretePointIntensityResult`, `PrecisionSoundPowerResult`, `PrecisionIntensityResult`, `IntensityResult`, `UncertaintyResult`, `AbsorptionRatingResult`, `ScatteringResult`, `DiffusionResult`, `DiffusionSpectrum`, `InsituAbsorptionResult`, `WeightingResponse`, `WeightedSpectrum`, `Signal` and `DailyVibrationExposure`.<br>• `ax`: existing Axes, or None to build a fresh figure (Default: None)<br>• returns the Matplotlib `Axes` (an array of Axes for multi-panel figures); never calls `plt.show()`<br>• needs matplotlib (`pip install phonometry[plot]`) | `res.plot()`<br>`decay_curve(ir, fs).plot()` |
 
 ## Notes
 

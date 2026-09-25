@@ -170,6 +170,8 @@ Where the coefficients every room and insulation model consumes come from: the
 laboratory instruments that measure them, the single-number ratings that
 summarise them, and the models that predict them.
 
+- [Reading a material datasheet](materials/reading-a-datasheet.md): what the numbers on a data sheet or a test report are before you type them into a catalogue of your own: the practical coefficient of ISO 11654 against the one-third-octave coefficient of ISO 354, a level declared under CE marking, the mounting, the revision, and the sound reduction index and impact improvement of a laboratory report, each rated again from its bands
+
 **[Absorbers](materials/absorbers/index.md)**
 
 - [Sound Absorption Measurement and Rating](materials/absorbers/absorption-measurement.md): reverberation-room absorption measurement (ISO 354), the weighted rating $\alpha_\mathrm{w}$ with its classes (ISO 11654), and the measurement uncertainty (ISO 12999-2)

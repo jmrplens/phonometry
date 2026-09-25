@@ -272,6 +272,9 @@ export const topics = [
     link: '/materials/',
     items: [
       { slug: 'materials', label: 'Overview', translations: { es: 'Resumen' } },
+      // Before the instruments: what the numbers on a data sheet are, which
+      // every guide below takes as its input and none of them explains.
+      'materials/reading-a-datasheet',
       {
         label: 'Absorbers',
         translations: { es: 'Absorbentes' },

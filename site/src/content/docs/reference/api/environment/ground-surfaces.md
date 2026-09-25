@@ -33,6 +33,19 @@ in flow resistivity measured data from different sources". Grass runs from
 kPa s/m2 across the fits Cox tabulates. A row is a place to start, not a
 measurement of your site.
 
+Into the outdoor models
+-----------------------
+[`GroundSurface.medium`](/phonometry/reference/api/environment/ground-surfaces/#groundsurfacemedium) turns a row's resistivity into the porous
+half-space [`ground_effect`](/phonometry/reference/api/environment/ground-barriers/#ground_effect),
+[`barrier_insertion_loss`](/phonometry/reference/api/environment/ground-barriers/#barrier_insertion_loss) and
+[`atmospheric_parabolic_equation`](/phonometry/reference/api/environment/refraction/#atmospheric_parabolic_equation) take as their
+ground impedance, through the Delany and Bazley or the
+Miki model those functions offer themselves. It reads the resistivity through
+[`printed`](/phonometry/reference/api/io/io/#cataloguerowprinted), so a range, a bound or an empty
+cell is refused in the page's terms rather than collapsed to one number, and
+a row whose page names the model it was fitted with is taken into that model
+only.
+
 The classes are a different thing
 ---------------------------------
 Bies's second table is not measured ground at all: it is the eight classes
@@ -269,6 +282,57 @@ Whether this library computed this field instead of reading it.
 | `field_name` | One of the numeric field names of this class. |
 
 **Returns:** `True` when the page did not print it and the value follows from cells that it did. `derived` says how. A value the page prints in another unit, or gives by reference to another of its rows, answers `False`: the number is the page's, and `converted` or `carried` says so.
+
+### GroundSurface.medium()
+
+```python
+GroundSurface.medium(
+    frequency: ArrayLike,
+    *,
+    model: Literal['delany_bazley', 'miki'] = 'delany_bazley',
+    fluid: Fluid = ...,
+) -> PorousMediumResult
+```
+
+The ground as a semi-infinite porous half-space.
+
+The outdoor models take a ground as the normalized surface impedance
+of a locally reacting half-space, which is the characteristic
+impedance of its porous medium; this is that medium, worked out from
+the row's effective flow resistivity with the Delany and Bazley or
+the Miki model, and it goes into
+[`ground_effect`](/phonometry/reference/api/environment/ground-barriers/#ground_effect) as `impedance`,
+[`barrier_insertion_loss`](/phonometry/reference/api/environment/ground-barriers/#barrier_insertion_loss) as
+`ground_impedance` and
+[`atmospheric_parabolic_equation`](/phonometry/reference/api/environment/refraction/#atmospheric_parabolic_equation) as
+`impedance`, unchanged. Those functions work out the same medium from a bare
+`flow_resistivity`; this is the path for a row, which keeps the
+refusal of a cell the page did not print as a number.
+
+An effective flow resistivity is the parameter of the model it was
+fitted with, and Cox and D'Antonio name that model for each fit
+they print, in the row's [`variant`](/phonometry/reference/api/io/io/#cataloguerow).
+A row fitted with the Delany and Bazley model is taken into that
+model only, and a row fitted with the semi-phenomenological or the
+variable-porosity model into neither of the two here, because its
+resistivity is not a parameter of either. A row that names no fit,
+Bies's and a caller's own, is taken into both.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `frequency` | Frequency vector `f`, in hertz. |
+| `model` | `"delany_bazley"` (Default) or `"miki"`, the two ground models the outdoor functions take. |
+| `fluid` | The air above the ground, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`PUBLISHED_AIR`](/phonometry/reference/api/materials/porous/#published_air), the air the two models were published with, as the outdoor functions default to). |
+
+**Returns:** A [`PorousMediumResult`](/phonometry/reference/api/materials/porous/#porousmediumresult), in the materials domain's time convention, which the outdoor functions convert themselves.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | for a model other than the two, for a row whose page names another fit than *model*, or when the row holds no number for the resistivity, in which case the message says what the page has there instead. |
 
 ### GroundSurface.printed()
 

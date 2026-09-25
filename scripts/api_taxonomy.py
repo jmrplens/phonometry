@@ -707,6 +707,7 @@ OBJECT_MODULE_OVERRIDES: dict[str, str] = {
     "parse_catalogue": "phonometry.io",
     "read_catalogue": "phonometry.io",
     "write_catalogue": "phonometry.io",
+    "catalogue_schema": "phonometry.io",
     # Defined in phonometry.emission._shared, where the three sound power
     # standards share it; documented with the free-field method that raises it
     # most often.

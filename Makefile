@@ -518,6 +518,13 @@ site-reports:
 catalogue-data:
 	$(PYTHON) scripts/generate_catalogue_data.py
 
+# Write the JSON Schema of a catalogue file (every published row class) into
+# site/public/schemas/, where the site serves it for an editor to complete a
+# catalogue file with. CI runs the --check form and fails if the committed
+# file drifts from a fresh run (see the `published-sources` job).
+catalogue-schema:
+	$(PYTHON) scripts/generate_catalogue_schema.py
+
 # Lighthouse over a fixed sample of built pages, against a local preview
 # server (BASE_URL overrides for the live site; `-- --desktop` for desktop
 # throttling). Needs `pnpm build` in site/ first; summary on stdout, JSON
@@ -632,4 +639,4 @@ check: lint security test
 	fence-names decimal-comma spanish-accents figure-decimal-point figure-legends figure-tick-clearance \
 	figure-text-clearance figure-minus-sign control-characters hazards dead-constants reference-values \
 	conformance-rows conformance-vocabulary parameter-units frozen-constants published-sources \
-	solid-agreement shared-sources catalogue-data published-catalogues
+	solid-agreement shared-sources catalogue-data catalogue-schema published-catalogues

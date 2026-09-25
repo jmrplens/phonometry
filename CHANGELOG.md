@@ -9,6 +9,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- **Take a solid's row into the elastic simulation and the detailed building
+  model, and a ground's into the outdoor models.** A solid's catalogue row,
+  one of `solids.PUBLISHED_SOLIDS` or one read from a catalogue file of your
+  own, goes wherever the elastic FDTD takes a `Material`:
+  `simulation.scholte_speed` and `ElasticFDTD2D.from_regions` read its bulk
+  longitudinal speed, its transverse speed and its density through
+  `printed()`, and never the plate or bar speed a table prints beside them.
+  `environment.GroundSurface.medium()` turns a ground row into the porous
+  half-space, by the Delany and Bazley or the Miki model, that
+  `ground_effect`, `barrier_insertion_loss` and
+  `atmospheric_parabolic_equation` take as the ground; a row Cox and
+  D'Antonio mark as fitted with one model goes into that model only.
+  `building.HomogeneousElement.from_solid()` builds the ISO 12354 element a
+  layer of a solid makes, with m' = ρt and fc = c0²/(1.8 cL t) from the
+  row's density and plate speed, and takes the internal loss factor from you,
+  never from the row. A cell the page does not print as one number is
+  refused in each case with what the page has there.
+
+- **Complete a catalogue file in your editor with its JSON Schema.**
+  `io.catalogue_schema()` writes the JSON Schema (2020-12) of a catalogue
+  document for the row classes you give it, your own among them: every field
+  under its own name and under each other unit the reader converts, the
+  fields each hedge may name, the provenance, the limits a field's unit sets
+  and a CSV file's header. The documentation site publishes the schema of
+  every published row class as `schemas/phonometry-catalogue-1.json`, and a
+  document may name it in a top-level `$schema`, which the reader takes and
+  never reads. A document the reader reads is never refused by the schema;
+  what depends on two cells at once stays the reader's to refuse.
+
 - **Keep a data sheet's absorption and a laboratory's insulation as rows of
   their own, rated again from their bands.** Four row classes hold what a
   data sheet or a test report prints, each read by `io.read_catalogue` and

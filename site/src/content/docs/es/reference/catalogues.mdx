@@ -82,8 +82,9 @@ for row in materials.porous_materials_named("Mineral wool"):
     print(row.table, row.porosity if interval is None else interval)
 ```
 
-El catálogo de suelos funciona igual, y alimenta a los modelos que piden una
-resistividad al flujo:
+El catálogo de suelos funciona igual, y el `medium()` de una fila es el
+semiespacio poroso que los modelos de exteriores toman como suelo, calculado a
+partir de la resistividad que imprime la página:
 
 ```python
 from phonometry import environment
@@ -91,12 +92,9 @@ from phonometry import environment
 pasture = environment.PUBLISHED_GROUND["bies-2017-table-5-2/normal_uncompacted_ground"]
 print(pasture.harmonoise_class, pasture.printed("flow_resistivity_pa_s_m2"))
 
+octaves = [125.0, 250.0, 500.0, 1000.0]
 over_pasture = environment.ground_effect(
-    [125.0, 250.0, 500.0, 1000.0],
-    1.0,
-    1.5,
-    50.0,
-    flow_resistivity=pasture.printed("flow_resistivity_pa_s_m2"),
+    octaves, 1.0, 1.5, 50.0, impedance=pasture.medium(octaves)
 )
 print(over_pasture.excess_attenuation.round(2), "dB")
 ```
@@ -132,9 +130,12 @@ de ensayo, el índice de reducción acústica de un laboratorio y la mejora a
 impactos de un revestimiento tienen clases de fila propias que ninguna tabla
 de abajo usa, y
 [Cómo leer la hoja de características de un material](/phonometry/es/materials/reading-a-datasheet/)
-dice qué número de una hoja es cuál. Una tabla de un fabricante pegada en una
-issue o en una pull request nunca se incorpora, y nada de esta página sale de
-una.
+dice qué número de una hoja es cuál. El esquema JSON de un archivo de
+catálogo, para todas las clases de fila de esta página, se sirve en
+[`schemas/phonometry-catalogue-1.json`](https://jmrplens.github.io/phonometry/schemas/phonometry-catalogue-1.json),
+para que un editor complete un archivo tuyo mientras lo escribes. Una tabla de
+un fabricante pegada en una issue o en una pull request nunca se incorpora, y
+nada de esta página sale de una.
 
 ## Sólidos
 

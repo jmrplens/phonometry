@@ -433,6 +433,37 @@ plt.show()
 
 </details>
 
+### A solid from a catalogue
+
+A solid's catalogue row goes wherever a `Material` does, one of
+`solids.PUBLISHED_SOLIDS` or one of [your own catalogues](/phonometry/io/material-catalogues/): the solver
+reads the row's bulk longitudinal speed, its transverse speed and its
+density, and never the plate or bar speed a table prints beside them. The
+mild steel of Bies Table C.1 is the row `STEEL` was taken from, and Long's
+steel, a speed printed without saying which of the three it is, is refused
+rather than guessed at:
+
+```python
+from phonometry.simulation import STEEL, WATER, scholte_speed
+from phonometry.solids import PUBLISHED_SOLIDS
+
+mild_steel = PUBLISHED_SOLIDS["bies-2017-table-c1/steel_mild"]
+bulk, shear = mild_steel.bulk_longitudinal_speed_m_s, mild_steel.transverse_speed_m_s
+print(round(bulk, 1), round(shear, 1))   # 5958.0 3184.7
+print(round(mild_steel.plate_longitudinal_speed_m_s, 1))   # 5383.1, never read here
+print(round(scholte_speed(WATER, mild_steel), 1), round(scholte_speed(WATER, STEEL), 1))
+# 1479.6 1479.6
+
+long_steel = PUBLISHED_SOLIDS["long-2014-table-12-1/steel"]
+try:
+    scholte_speed(WATER, long_steel)
+except ValueError as error:
+    print(error)
+# 'Steel' has no bulk_longitudinal_speed_m_s, which 'the elastic FDTD' needs:
+# the page does not give it, and it does not follow from the cells that it does
+# (Long 2e Table 12.1, PDF page 487 (printed p. 485)).
+```
+
 ## 5. Oblique incidence: mode conversion
 
 Away from normal incidence the solid stops being a liquid. The incident

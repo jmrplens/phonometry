@@ -74,6 +74,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   instead of being drawn, and a number you pass replaces the row's without
   the row's being read.
 
+- **A guide to keeping catalogues of your own.** "Your own catalogues" ("Tus
+  propios catálogos"), in the Files section in both languages, walks a data
+  sheet from a published table written out as a template to the rows in the
+  models: the document and its provenance, the refusals that point at a
+  cell, a porous core in the transfer-matrix model, a spectrum in a
+  reverberation time, a board in the plateau method, a floating floor's
+  $s'$ and $s'_\mathrm{t}$, and every lookup searching yours and the
+  published ones at once. It shows how to write a bound, a word, a range, a
+  plus-or-minus and a figure in another unit, lists the units a cell may be
+  written in, and says which row class holds which quantity: a data sheet's
+  practical absorption coefficient is not a Sabine coefficient, and a
+  laboratory's sound reduction index is not a book's transmission loss. The
+  published catalogues page gains a section that says why it will never show
+  a manufacturer's table and where your own go instead.
+
 - **Sound power in the 16 kHz octave band (ISO 9295).** The general sound
   power methods stop at the 10 kHz one-third-octave band, and a printer's
   paper noise or a power supply's whine sits above it. The new

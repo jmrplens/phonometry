@@ -229,7 +229,8 @@ print(res.transmission_loss.round(1))
 The material does not have to be a name. `material=` also takes a
 `PlateauMaterial` row: one of `solids.PUBLISHED_PLATEAU_DATA`, which draws
 the same curve as its name, or a row of your own that `io.read_catalogue`
-read from a data sheet. A row gives its three numbers only through
+read from a data sheet ([Your own catalogues](../../io/material-catalogues.md)).
+A row gives its three numbers only through
 `printed()`, so a sheet that declares its plateau height as a bound ("no
 more than 30 dB") is refused with what it prints rather than drawn at
 30 dB, and a `plateau_height` you give replaces the row's without reading

@@ -401,8 +401,9 @@ print(res.transmission_loss.round(1))
 El material no tiene por qué ser un nombre. `material=` también admite una
 fila `PlateauMaterial`: una de `solids.PUBLISHED_PLATEAU_DATA`, que dibuja la
 misma curva que su nombre, o una fila tuya que `io.read_catalogue` haya leído
-de una hoja de características. Una fila entrega sus tres números sólo a
-través de `printed()`, así que una hoja que declara la altura de la meseta
+de una hoja de características
+([Tus propios catálogos](/phonometry/es/io/material-catalogues/)). Una fila
+entrega sus tres números solo a través de `printed()`, así que una hoja que declara la altura de la meseta
 como una cota («no más de 30 dB») se rechaza con lo que imprime en lugar de
 dibujarse a 30 dB, y un `plateau_height` que pases sustituye al de la fila
 sin llegar a leerlo.

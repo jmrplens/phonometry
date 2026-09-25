@@ -1,0 +1,731 @@
+---
+title: "Tus propios catálogos"
+description: "Una hoja de características, una declaración de prestaciones, un informe de ensayo o una medida tuya como archivo de catálogo: una tabla publicada como plantilla, el documento JSON y su procedencia, rechazos que señalan una celda, las filas en los modelos de porosos, un modelo de sala, el método de la meseta, un suelo flotante y todas las búsquedas por nombre, cómo escribir una cota, una palabra u otra unidad, qué clase de fila guarda cada magnitud y lo que la biblioteca nunca hace con tus datos."
+references:
+  - type: standard
+    organization: "Internet Engineering Task Force"
+    year: 2017
+    title: "The JavaScript Object Notation (JSON) Data Interchange Format"
+    designation: "RFC 8259"
+    url: "https://www.rfc-editor.org/rfc/rfc8259"
+    primary: true
+    note: "El texto que es un archivo de catálogo. El lector lo exige al pie de la letra: rechaza un NaN o un Infinity, que solo aceptan algunos lectores, y un nombre escrito dos veces en un mismo objeto, cuyo significado la RFC 8259 deja al lector."
+  - type: standard
+    organization: "Internet Engineering Task Force"
+    year: 2013
+    title: "JavaScript Object Notation (JSON) Pointer"
+    designation: "RFC 6901"
+    url: "https://www.rfc-editor.org/rfc/rfc6901"
+    note: "Cómo se sitúa cada problema de un archivo: /rows/1/porosity es la porosidad de la segunda fila."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 1997
+    title: "Acoustics — Sound absorbers for use in buildings — Rating of sound absorption"
+    designation: "ISO 11654:1997"
+    url: "https://www.iso.org/standard/19583.html"
+    note: "El coeficiente práctico de absorción sonora que imprime una hoja de características europea, redondeado a pasos de 0,05 y limitado a 1,00: una valoración de una medida en cámara reverberante y no un coeficiente de Sabine, y por eso no tiene sitio en AbsorptionSpectrum."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2010
+    title: "Acoustics — Laboratory measurement of sound insulation of building elements — Part 2: Measurement of airborne sound insulation"
+    designation: "ISO 10140-2:2010"
+    url: "https://www.iso.org/standard/42088.html"
+    note: "El índice de reducción sonora R de laboratorio que imprime la hoja de características de un muro o de una puerta, que no es la pérdida por transmisión en incidencia de campo de un libro que guarda TransmissionLossSpectrum."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 1989
+    title: "Acoustics — Determination of dynamic stiffness — Part 1: Materials used under floating floors in dwellings"
+    designation: "EN 29052-1:1992 (ISO 9052-1:1989)"
+    url: "https://www.iso.org/standard/16620.html"
+    note: "La rigidez dinámica s' de una capa instalada y la rigidez dinámica aparente s't de una probeta, dos campos de ResilientLayer, y el apartado 8.2, que convierte la segunda en la primera con la resistividad al flujo lateral."
+---
+
+import Scope from '../../../../components/Scope.astro';
+import ScopeClaim from '../../../../components/ScopeClaim.astro';
+import SeeAlso from '../../../../components/SeeAlso.astro';
+
+La biblioteca publica las tablas de sus libros y de sus normas, y nada de lo
+que imprime un fabricante. Una hoja de características se revisa sin aviso
+bajo el mismo título, sus condiciones de uso rara vez permiten copiarla, y el
+valor que necesita un proyecto es el de la hoja con la que se especificó, no
+el de la revisión de hoy. Así que las hojas de características, las
+declaraciones de prestaciones, los informes de ensayo y las medidas tuyas
+viven en un archivo de catálogo tuyo, y `phonometry.io` lee ese archivo en
+filas de las mismas clases que entregan todos los catálogos `PUBLISHED_*`. El
+núcleo poroso de tu hoja entra en los modelos de porosos como entra un
+material poroso de un libro, un espectro de tu informe de ensayo entra en un
+modelo de sala, y todas las búsquedas por nombre buscan en tu catálogo, en el
+publicado o en los dos a la vez.
+
+Las filas son tuyas y se quedan en tus objetos: la biblioteca no guarda
+ninguna copia, no abre ningún enlace que nombre un archivo y no envía nada a
+ninguna parte. Por la misma razón, una tabla de un fabricante pegada en una
+issue o en una pull request nunca se incorpora a la biblioteca.
+
+## Empezar por una tabla publicada
+
+La forma más rápida de ver cómo es un archivo es escribir uno.
+`write_catalogue` escribe cualquier tabla publicada en la forma que lee
+`read_catalogue`, como plantilla para copiar y editar: aquí las probetas
+porosas de la Tabla 13.1 de Allard & Atalla.
+
+```python
+import json
+import pathlib
+
+from phonometry import io, materials
+
+allard = {
+    key: row
+    for key, row in materials.PUBLISHED_POROUS.items()
+    if row.table == "allard-2009-table-13-1"
+}
+written = io.write_catalogue(allard, "template.json", catalogue="template-allard")
+print([path.name for path in written])   # ['template.json']
+
+template = json.loads(pathlib.Path("template.json").read_text(encoding="utf-8"))
+print(list(template))
+# ['schema', 'schema_version', 'catalogue', 'row_type', 'about', 'provenance',
+#  'phonometry_version', 'rows']
+print(template["provenance"]["kind"])    # publication
+print(template["rows"][0]["key"], template["rows"][0]["flow_resistivity_pa_s_m2"])
+# foam 12569.0
+```
+
+Una tabla de filas de una misma clase sale entera, con el libro como
+procedencia y el día de la exportación como día de consulta. Lo que la
+biblioteca calcula a partir de las celdas impresas (aquí el módulo de
+cortadura, a partir del módulo de Young y del coeficiente de Poisson) no se
+escribe nunca: se vuelve a calcular al leer el archivo. Si ya hay un archivo
+en esa ruta, se rechaza con `FileExistsError` salvo que pases
+`overwrite=True`.
+
+## El documento
+
+Un archivo de catálogo es un único objeto JSON, en UTF-8, con un conjunto
+cerrado de claves en el primer nivel:
+
+| Clave | Qué guarda |
+|---|---|
+| `schema`, `schema_version` | `"phonometry-catalogue"` y `1`. Una versión posterior se rechaza con «upgrade phonometry». |
+| `catalogue` | El nombre del catálogo, la primera mitad de cada clave: hasta 64 caracteres entre `a-z`, `0-9`, `.`, `_` y `-`. |
+| `row_type` | El nombre de la clase de fila. Se compara con la clase que pasas y nunca se importa. |
+| `about` | Qué es el documento, cómo lo leíste y en qué unidades imprime. |
+| `provenance` | El documento: son obligatorios su tipo en `kind`, su título en `document`, su versión en `version` (o `null` si no imprime ninguna) y el día en que lo consultaste en `consulted`. |
+| `basis` | Opcional: qué dice el documento que es cada valor, salvo que una fila diga otra cosa. |
+| `conventions` | Opcional: las notas y leyendas que el documento imprime para toda la tabla. |
+| `rows` | Las filas, cada una con una clave propia en `key` y un nombre en `name`. |
+
+Aquí va una hoja de características ficticia con dos filas. La primera es la
+resistividad al flujo que la hoja declara bajo su marcado CE, como cota
+inferior; la segunda es la caracterización de laboratorio que cita la
+página 3, con su propio informe.
+
+```python
+panel_40 = """{
+  "schema": "phonometry-catalogue",
+  "schema_version": 1,
+  "catalogue": "panel-40",
+  "row_type": "PorousMaterial",
+  "about": "Core of the Panel 40 absorber as its data sheet gives it. Page 2 declares the airflow resistivity class under CE marking; page 3 quotes the laboratory characterisation of a 40 mm specimen.",
+  "provenance": {
+    "kind": "datasheet",
+    "document": "Panel 40 technical data sheet",
+    "publisher": "Example Acoustics Ltd",
+    "version": "Rev. 4",
+    "issued": "2026-03",
+    "consulted": "2026-09-23",
+    "page": "2"
+  },
+  "basis": "declared",
+  "rows": [
+    {
+      "key": "core-declared",
+      "name": "Panel 40 core",
+      "variant": "as declared",
+      "thickness_mm": 40,
+      "frame_density_kg_m3": 40,
+      "ranges": {"flow_resistivity_kpa_s_m2": [5, null]},
+      "bounded_below": ["flow_resistivity_kpa_s_m2"],
+      "note": "the sheet prints the designation code AFr5"
+    },
+    {
+      "key": "core-lab",
+      "name": "Panel 40 core",
+      "variant": "40 mm specimen",
+      "provenance": {
+        "page": "3",
+        "printed_table": "Table 2",
+        "laboratory": "Example Lab",
+        "report": "26-014",
+        "test_date": "2025-11-04",
+        "test_standard": "ISO 9053-1:2018"
+      },
+      "basis": {"row": "measured", "poisson_ratio": "estimated"},
+      "flow_resistivity_pa_s_m2": 12500,
+      "uncertainty": {"flow_resistivity_pa_s_m2": 900},
+      "porosity": 0.97,
+      "tortuosity": 1.02,
+      "approximate": ["tortuosity"],
+      "viscous_length_um": 95,
+      "thermal_length_um": 190,
+      "frame_density_kg_m3": 40,
+      "thickness_mm": 40,
+      "youngs_modulus_pa": 140000,
+      "poisson_ratio": 0.0,
+      "unquantified": {"structural_loss_factor": "n.m."},
+      "x-product-code": "P40-C"
+    }
+  ]
+}"""
+pathlib.Path("panel-40.json").write_text(panel_40, encoding="utf-8")
+
+mine = io.read_catalogue("panel-40.json", row_type=materials.PorousMaterial)
+print(list(mine))   # ['panel-40/core-declared', 'panel-40/core-lab']
+
+declared = mine["panel-40/core-declared"]
+lab = mine["panel-40/core-lab"]
+print(lab.source)
+# Panel 40 technical data sheet (Example Acoustics Ltd), Rev. 4, p. 3, Table 2;
+# report 26-014 (Example Lab); consulted 2026-09-23
+print(lab.basis_of("porosity"), lab.basis_of("poisson_ratio"))   # measured estimated
+print(declared.basis_of("frame_density_kg_m3"))                  # declared
+print(declared.ranges, declared.converted)
+# {'flow_resistivity_pa_s_m2': (5000.0, None)}
+# {'flow_resistivity_pa_s_m2': ('5', 'kPa s/m2')}
+print(mine.extras["panel-40/core-lab"]["x-product-code"])       # P40-C
+```
+
+Cada clave es `"<catalogue>/<key>"`, la forma que usan todos los catálogos
+publicados, y el `table` de cada fila es el nombre del catálogo. El nombre de
+un catálogo no puede tener nunca la forma del de una tabla empaquetada, un año
+de cuatro cifras seguido de una palabra (`allard-2009-table-13-1`), así que una
+clave tuya y una clave de la biblioteca no coinciden nunca, ni hoy ni después
+de que una actualización añada una tabla: `acme-2026-rev4` se rechaza y
+`acme-rev4-2026` no.
+
+Una fila puede acotar la procedencia del documento a su propia página, tabla,
+laboratorio, acreditación, informe, fecha de ensayo y norma, como hace
+`core-lab`, y una norma dada para un solo campo (`field_test_standards`) se
+suma a las del documento. Un documento distinto es otro archivo: una fila no
+puede cambiar el documento, su tipo ni su versión. El `source` de la fila se
+compone con todo ello, y un rechazo nombra el documento por su tipo: «the
+datasheet», «the declaration of performance», «the test report», «the
+measurement record», «the calculation note», «the source».
+
+Las columnas propias van bajo un nombre que empieza por `x-`: se guardan, como
+texto, en `Catalogue.extras` y no intervienen en ningún cálculo. Una fila
+nunca escribe `derived`, `table`, `source` ni `estimated`: las tres primeras
+las escribe la biblioteca, y una estimación es una `basis`.
+
+## Cuando el archivo está mal
+
+Todos los problemas de forma de un archivo se comunican a la vez, en un solo
+`io.CatalogueError`, cada uno un `io.CatalogueIssue` con el archivo, su lugar
+como puntero JSON, la fila y el campo. Aquí la porosidad está escrita con coma
+decimal y el espesor en pulgadas, una unidad que el lector no convierte:
+
+```python
+broken = panel_40.replace('"porosity": 0.97', '"porosity": "0,97"')
+broken = broken.replace('"thickness_mm": 40,\n      "youngs', '"thickness_inch": 1.6,\n      "youngs')
+try:
+    io.parse_catalogue(broken, row_type=materials.PorousMaterial, label="panel-40.json")
+except io.CatalogueError as error:
+    for issue in error.issues:
+        print(issue)
+# panel-40.json: /rows/1/porosity (row 'core-lab'): expected a number, got the
+#   text '0,97'; JSON numbers use a decimal point
+# panel-40.json: /rows/1/thickness_inch (row 'core-lab'): 'inch' is not a unit
+#   this reader converts; write thickness_mm (mm), thickness_cm (cm),
+#   thickness_m (m) or thickness_um (µm)
+```
+
+`parse_catalogue` lee lo mismo de un texto o de un diccionario que ya está en
+memoria, y `label` nombra el documento en cada problema. Un campo mal escrito
+se contesta con el campo al que más se parece; una fila bien escrita que
+incumple el contrato que cumple toda fila (una densidad negativa, una
+porosidad mayor que 1, un valor junto a una palabra que dice que no lo hay) se
+comunica con la primera regla que incumple. El lector rechaza un `NaN` o un
+`Infinity`, un nombre escrito dos veces en un mismo objeto, un carácter de
+control o una marca que reordena el texto, un archivo de más de 16 MiB
+(comprobado antes de leer un solo byte), más de 50 000 filas y un anidamiento
+de más de seis niveles.
+
+Lo que solo merece una segunda mirada no es un error. Un valor cuya base es
+`measured` sin informe ni laboratorio que lo respalden, o una palabra en lugar
+de un número tan larga que es una frase, se guarda tal como lo escribe el
+archivo, se anota en `Catalogue.notes` y se anuncia una sola vez con un
+`io.CatalogueWarning`. Una nota nunca cambia una fila.
+
+## Usar las filas
+
+Una fila leída de un archivo es de la misma clase, y se construye de la misma
+manera, que una publicada: la aceptan los mismos métodos, y lo que devuelven
+lo aceptan las mismas funciones.
+
+### En los modelos
+
+`printed()` da un número que imprime el documento, o lo rechaza con lo que el
+documento tiene en su lugar. Es la manera de pasar una celda a cualquier
+función que reciba un `float`. `PorousMaterial.medium()` lee sus cinco
+parámetros del mismo modo, así que la fila de laboratorio entra en el modelo
+de matriz de transferencia y la fila declarada se rechaza en los términos de
+la propia hoja:
+
+```python
+import numpy as np
+
+print(lab.printed("flow_resistivity_pa_s_m2"))   # 12500.0
+
+frequencies = np.array([250.0, 500.0, 1000.0, 2000.0])
+core = materials.PorousLayer(thickness=0.040, medium=lab.medium(frequencies))
+print(materials.layered_absorber(frequencies, [core]).absorption.round(2))
+# [0.15 0.4  0.73 0.98]
+
+try:
+    declared.medium(frequencies)
+except ValueError as error:
+    print(error)
+# 'Panel 40 core' has no flow_resistivity_pa_s_m2, which 'johnson_champoux_allard'
+# needs: the datasheet prints a lower bound of 5 kPa s/m2 (5000 Pa s/m2) and no
+# value (Panel 40 technical data sheet (Example Acoustics Ltd), Rev. 4, p. 2;
+# consulted 2026-09-23).
+```
+
+El rechazo cita primero la cifra y la unidad que imprime la hoja, y después el
+valor que guarda la fila: una cota inferior AFr5 no es una resistividad al
+flujo de 5000 Pa·s/m², y aquí nada finge que lo sea.
+
+### Banda a banda, hacia un modelo de sala
+
+Una fila que imprime un valor por banda se lee en las frecuencias que pide un
+modelo con `values_at()`, que rechaza una banda que el documento no imprime en
+lugar de leerla como cero. Las funciones que reciben sus coeficientes por
+posición, como `room.sabine_reverberation_time`, reciben un array en el que
+cada valor está impreso:
+
+```python
+from phonometry import room
+
+tiles = io.parse_catalogue(
+    {
+        "schema": "phonometry-catalogue",
+        "schema_version": 1,
+        "catalogue": "ceiling-tiles",
+        "row_type": "AbsorptionSpectrum",
+        "about": "Octave-band Sabine coefficients a fictitious data sheet prints.",
+        "provenance": {
+            "kind": "datasheet",
+            "document": "Example tile data sheet",
+            "publisher": "Example Acoustics Ltd",
+            "version": "Rev. 1",
+            "consulted": "2026-09-25",
+            "laboratory": "Example Lab",
+            "report": "26-031",
+            "test_standard": "ASTM C423-17",
+        },
+        "basis": "measured",
+        "rows": [
+            {
+                "key": "tile-e400",
+                "name": "Example ceiling tile",
+                "mounting": "E400",
+                "absorption_coefficient_125": 0.45,
+                "absorption_coefficient_250": 0.62,
+                "absorption_coefficient_500": 0.78,
+                "absorption_coefficient_1000": 0.90,
+                "absorption_coefficient_2000": 0.94,
+                "absorption_coefficient_4000": 0.91,
+            }
+        ],
+    },
+    row_type=materials.AbsorptionSpectrum,
+)
+tile = tiles["ceiling-tiles/tile-e400"]
+bands = np.array([125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0])
+t60 = room.sabine_reverberation_time(180.0, [(60.0, tile.values_at(bands)), (190.0, 0.04)])
+print(t60.round(2))   # [0.84 0.65 0.53 0.47 0.45 0.47]
+
+try:
+    tile.values_at([63.0, 125.0])
+except ValueError as error:
+    print(error)
+# 'Example ceiling tile' has no absorption_coefficient_63, which 'the 63 Hz band'
+# needs: the datasheet does not give it, and it does not follow from the cells
+# that it does (Example tile data sheet (Example Acoustics Ltd), Rev. 1;
+# report 26-031 (Example Lab); consulted 2026-09-25).
+```
+
+### El método de la meseta
+
+`building.plateau_transmission_loss` admite una fila `PlateauMaterial` como
+`material`, una del libro o una tuya, y lee sus tres números a través de
+`printed()`. Un número que pases explícitamente sustituye al de la fila, que
+entonces ni siquiera se lee.
+
+```python
+from phonometry import building, solids
+
+boards = io.parse_catalogue(
+    {
+        "schema": "phonometry-catalogue",
+        "schema_version": 1,
+        "catalogue": "boards",
+        "row_type": "PlateauMaterial",
+        "about": "Plateau-method constants of a fictitious board, as its data sheet prints them.",
+        "provenance": {
+            "kind": "datasheet",
+            "document": "Example board data sheet",
+            "version": "Rev. 2",
+            "consulted": "2026-09-25",
+        },
+        "rows": [
+            {
+                "key": "board",
+                "name": "Example board",
+                "surface_density_per_mm_kg_m2": 0.9,
+                "coincidence_height_db": 28,
+                "plateau_frequency_ratio": 7,
+            }
+        ],
+    },
+    row_type=solids.PlateauMaterial,
+)
+board = boards["boards/board"]
+tl = building.plateau_transmission_loss(bands, material=board, thickness_mm=12.5)
+print(round(tl.plateau_start), round(tl.plateau_end))   # 522 3656
+print(tl.transmission_loss.round(1))   # [15.6 21.6 27.6 28.  28.  29.3]
+```
+
+### Un suelo flotante: s' y s't
+
+La hoja de características de una capa resiliente imprime una de dos magnitudes
+distintas. La rigidez dinámica $s'$ de la capa instalada es la que usa la
+frecuencia natural de un suelo flotante; la rigidez dinámica aparente
+$s'_\mathrm{t}$ es la que mide la EN 29052-1 sobre una probeta, y solo se
+convierte en $s'$ a través de la resistividad al flujo lateral del
+apartado 8.2. `ResilientLayer` las guarda en dos campos,
+`dynamic_stiffness_n_m3` y `apparent_dynamic_stiffness_n_m3`, y un «s' ≤ 9 MN/m³»
+declarado es una cota, no una rigidez:
+
+```python
+layers = io.parse_catalogue(
+    {
+        "schema": "phonometry-catalogue",
+        "schema_version": 1,
+        "catalogue": "underlays",
+        "row_type": "ResilientLayer",
+        "about": "Two underlays of a fictitious data sheet, as it prints them.",
+        "provenance": {
+            "kind": "datasheet",
+            "document": "Example underlay data sheet",
+            "publisher": "Example Acoustics Ltd",
+            "version": None,
+            "consulted": "2026-09-25",
+        },
+        "basis": "declared",
+        "rows": [
+            {
+                "key": "declared",
+                "name": "Underlay 8",
+                "thickness_mm": 8,
+                "ranges": {"dynamic_stiffness_mn_m3": [None, 9]},
+                "bounded_above": ["dynamic_stiffness_mn_m3"],
+            },
+            {
+                "key": "tested",
+                "name": "Underlay 20",
+                "thickness_mm": 20,
+                "apparent_dynamic_stiffness_mn_m3": 7.4,
+                "basis": {"row": "measured"},
+                "provenance": {"laboratory": "Example Lab", "report": "26-044"},
+            },
+        ],
+    },
+    row_type=materials.ResilientLayer,
+)
+try:
+    layers["underlays/declared"].natural_frequency(mass_per_area_kg_m2=100.0)
+except ValueError as error:
+    print(error)
+# 'Underlay 8' has no dynamic_stiffness_n_m3, which 'the natural frequency of
+# EN 29052-1 Formula 2' needs: the datasheet prints an upper bound of 9 MN/m3
+# (9000000 N/m3) and no value (Example underlay data sheet (Example Acoustics
+# Ltd), no version printed; consulted 2026-09-25).
+
+tested = layers["underlays/tested"]
+f0 = tested.natural_frequency(mass_per_area_kg_m2=100.0, airflow_resistivity_pa_s_m2=150_000.0)
+print(round(float(f0), 1))   # 43.3
+```
+
+La capa ensayada solo da $s'_\mathrm{t}$, así que su frecuencia natural
+necesita la resistividad al flujo lateral $r$ del apartado 8.2: a partir de
+100 kPa·s/m², $s'$ es $s'_\mathrm{t}$, y por debajo la llamada necesita además
+la rigidez del gas encerrado $s'_\mathrm{a}$ de la Fórmula 7, que se pasa con
+`gas_stiffness_n_m3`. Sin $r$ la llamada se rechaza con esa explicación en
+lugar de tomar una magnitud por la otra.
+
+### Buscar en tu catálogo y en los publicados
+
+Todas las búsquedas `*_named` admiten `catalogue=`, las filas en las que
+buscar en lugar de su propio `PUBLISHED_*`. `PUBLISHED_POROUS | mine` une los
+dos en un único mapping de solo lectura que rechaza una clave que tengan los
+dos, así que una sola búsqueda contesta desde ambos:
+
+```python
+both = materials.PUBLISHED_POROUS | mine
+for row in materials.porous_materials_named("panel 40 core", catalogue=both):
+    print(row.table, row.variant)
+# panel-40 as declared
+# panel-40 40 mm specimen
+print(len(materials.porous_materials_named("Foam", catalogue=both)))   # 5
+```
+
+Cada búsqueda conserva su propia forma de casar un nombre, contesta con todas
+las coincidencias en el orden en que las guarda el catálogo y nunca elige una.
+Una fila de otra clase dentro del catálogo se rechaza con `TypeError`, que
+nombra su clave.
+
+## Escribir lo que imprime el documento
+
+Un documento imprime más que números, y un archivo escribe cada cosa como lo
+que es, con los mismos matices que usan las tablas publicadas. El sujeto de
+cada frase de abajo es el tipo de documento: «the datasheet», «the test
+report».
+
+| El documento imprime | Se escribe en el archivo como | `why_missing` contesta |
+|---|---|---|
+| un número | el campo, en su unidad o en otra de la misma magnitud | nada: el valor está |
+| nada | el campo omitido, o `null` | «the datasheet does not give it, and it does not follow from the cells that it does» |
+| `~0,85` | el valor, y el campo en `"approximate"` | nada |
+| `≤ 30` o `< 30` | `"ranges": {"f": [null, 30]}` y `"bounded_above": ["f"]` | «the datasheet prints an upper bound of 30 and no value» |
+| `≥ 5` o `> 5` | `"ranges": {"f": [5, null]}` y `"bounded_below": ["f"]` | «... a lower bound of 5 and no value» |
+| `0,30 a 0,50` | `"ranges": {"f": [0.30, 0.50]}` | «the datasheet prints 0.3 to 0.5 and no value» |
+| varias lecturas y ningún valor único | `"reported": {"f": [0.30, 0.35, [0.30, 0.40]]}` | «the datasheet lists 0.3, 0.35, 0.3 to 0.4 and no single value» |
+| `0,85 ± 0,05` | el valor, y `"uncertainty": {"f": 0.05}` | nada |
+| una palabra o un código donde iría el número | `"unquantified": {"f": "AFr5"}` | «the datasheet prints “AFr5” where the number would be» |
+| un valor que sabes que está mal | `"misprinted": {"f": "por qué"}`, sin valor | tu motivo, tal como lo escribiste |
+| un valor al que llega la aritmética pero que no debe calcularse | `"not_derivable": {"f": "por qué"}` | tu motivo |
+| una celda en blanco que el documento da por referencia a otra fila | el valor, y `"carried": {"f": "de la fila de arriba"}` | nada |
+| una cifra en una unidad que no está en ninguna familia | el valor en la unidad del propio campo, y `"converted": {"f": ["3e5", "psi"]}` | nada, y una cota cita primero la cifra |
+| el crédito a un laboratorio o a un autor | `"attributed_to": {"f": "..."}`, o `"row"`, o `"table"` | no se pregunta |
+| un sí o un no | `true` o `false`, en un campo que guarde uno | no se pregunta |
+
+Una cota declarada bajo un marcado CE, `AFr5` para una resistividad al flujo
+de al menos 5 kPa·s/m², se escribe como la cota, con el código en `note`, como
+hace `core-declared`. Escrita como el número 5, afirmaría una medida que la
+hoja no hace.
+
+## Unidades
+
+Una celda puede escribirse en la unidad que lleva el nombre de su campo, o en
+otra unidad de la misma magnitud, con el mismo nombre y el sufijo de la otra
+unidad: `thickness_cm` en lugar de `thickness_mm`. La cifra se convierte sobre
+los dígitos que escribe el archivo, con el factor exacto, y se redondea una
+sola vez, así que 0,067 GPa son 67 000 000 Pa, cosa que no da el producto de
+dos flotantes. `converted` guarda la cifra y la unidad exactamente como las
+escribe el archivo.
+
+| Magnitud | Sufijos |
+|---|---|
+| Longitud | `_um`, `_mm`, `_cm`, `_m` |
+| Masa por unidad de superficie | `_g_m2`, `_kg_m2` |
+| Densidad | `_g_cm3`, `_kg_m3` |
+| Presión y módulo | `_pa`, `_kpa`, `_mpa` (megapascales), `_n_mm2`, `_gpa` |
+| Rigidez por unidad de superficie | `_n_m3`, `_mn_m3` |
+| Resistividad al flujo | `_pa_s_m2`, `_kpa_s_m2` |
+| Temperatura | `_c`, `_k`, desplazada por su origen en un valor, un intervalo y una lectura, y solo por el factor en un más-menos |
+| Área de absorción | `_m2`, `_ft2`, `_ft2_per_1000_ft3`, solo en `AbsorptionAreaSpectrum`, y la última solo con `per` al lado |
+
+La unidad se reconoce por la coincidencia más larga con todas las unidades que
+usan los campos de la biblioteca, así que una unidad compuesta nunca se toma
+por una longitud: una resistencia específica al flujo en Pa·s/m o una tasa por
+metro no admiten otra unidad, y un nombre que podrían tomar dos campos de la
+misma magnitud se rechaza por ambiguo. Una unidad que no está en la tabla se
+rechaza con las grafías que admite el campo. Todos los números de una misma
+celda se escriben en una sola unidad.
+
+## Qué clase de fila guarda cada magnitud
+
+Una hoja de características y un libro pueden imprimir magnitudes que se
+parecen y no son la misma. Las clases de fila las separan, y el archivo no
+puede impedir que escribas una en el campo de otra, así que lee esto antes de
+elegir un `row_type`.
+
+- `AbsorptionSpectrum` guarda coeficientes de absorción de Sabine por octavas
+  de 63 Hz a 8 kHz, tal como los imprime la tabla de un libro o tal como una
+  hoja de características imprime por octavas el resultado de un ensayo en
+  cámara reverberante. El coeficiente práctico de absorción sonora
+  $\alpha_\mathrm{p}$ de la ISO 11654 no es uno de ellos: es una valoración,
+  redondeada a pasos de 0,05 y limitada a 1,00, y la fila por octavas de una
+  hoja de características europea suele ser eso. Ninguna clase de fila de la
+  biblioteca guarda $\alpha_\mathrm{p}$, ni un $\alpha_\mathrm{s}$ por
+  tercios de octava; no escribas ninguno de los dos en `AbsorptionSpectrum`.
+- `TransmissionLossSpectrum` guarda la pérdida por transmisión en incidencia
+  de campo de una construcción tal como la recopila un libro. El índice de
+  reducción sonora $R$ que mide un laboratorio según la ISO 10140-2 es otra
+  magnitud, con sus propias transmisiones indirectas y su propia probeta, y
+  ninguna clase de fila lo guarda.
+- `ResilientLayer` guarda $s'$ en `dynamic_stiffness_n_m3` y
+  $s'_\mathrm{t}$ en `apparent_dynamic_stiffness_n_m3`. Un informe de ensayo
+  según la EN 29052-1 imprime $s'_\mathrm{t}$ y, cuando puede, $s'$; una hoja
+  de características a menudo solo imprime «s'». Escribe cada una en su campo.
+- `PorousMaterial` guarda los parámetros de un esqueleto poroso,
+  `PlateauMaterial` los tres números del método de la meseta y
+  `SolidMaterial` las constantes elásticas de un sólido. La página de
+  catálogos publicados muestra cada clase con sus columnas.
+
+## Qué es un valor: basis, converted y carried
+
+`basis` dice qué afirma el documento que es un valor, uno de
+`io.CATALOGUE_BASES`, y `basis_of(field)` lo contesta para cualquier celda:
+
+| Palabra | Significado |
+|---|---|
+| `measured` | un resultado de ensayo que da el documento |
+| `declared` | un valor, una cota o una clase declarados bajo una norma de producto o un marcado CE |
+| `calculated` | una cifra que calculó el propio documento, con el modelo de una norma, un programa o una fórmula |
+| `estimated` | una estimación del propio documento |
+| `extended` | el resultado de una aplicación extendida de un ensayo |
+
+Una celda sin palabra es una que el documento no califica, que es la respuesta
+honesta en la mayoría de las hojas de características. La `basis` del
+documento es la de todas sus filas, la entrada `"row"` de una fila es la de
+todas sus celdas, y la entrada propia de una celda manda sobre las dos.
+
+`basis` es lo que dice el documento; `derived` es lo que calculó esta
+biblioteca, a partir de las celdas impresas, al construir la fila. Son
+independientes: el módulo de cortadura de `core-lab` es derivado, y su texto
+en `derived` nombra las bases en las que se apoya, un módulo de Young medido y
+un coeficiente de Poisson estimado. `converted` guarda la cifra y la unidad de
+un valor convertido desde otra unidad, y `carried` dice de dónde da el
+documento una celda en blanco. Un archivo puede escribir `converted` y
+`carried` junto a un valor; `derived`, nunca.
+
+## Editar una fila
+
+Una fila es inmutable. Para cambiar una celda, toma las celdas que imprime el
+documento con `printed_fields()`, cambia una y vuelve a construir la fila con
+`from_printed`, que vuelve a calcular lo que se sigue de ellas.
+`dataclasses.replace` copia los valores derivados tal como estaban, junto a
+una celda de la que ya no se siguen:
+
+```python
+cells = lab.printed_fields()
+cells["youngs_modulus_pa"] = 200_000.0
+edited = materials.PorousMaterial.from_printed(**cells)
+print(lab.shear_modulus_pa, edited.shear_modulus_pa)   # 70000.0 100000.0
+```
+
+## Una clase de fila propia
+
+Una magnitud que no guarda ninguna clase de la biblioteca puede vivir igual en
+un archivo de catálogo, en una clase de fila propia: una dataclass inmutable y
+keyword-only construida sobre `io.CatalogueRow`, con cada campo anotado como
+`float | None`, `int | None`, `bool`, `str`, `frozenset[str]` o un `Mapping`
+de ellos. El lector la lee como cualquier otra, y las demás unidades de una
+magnitud se aplican también a tus campos cuando el nombre no deja lugar a
+dudas:
+
+```python
+import dataclasses
+
+
+@dataclasses.dataclass(frozen=True, kw_only=True)
+class Plasterboard(io.CatalogueRow):
+    surface_density_kg_m2: float | None = None
+    reaction_to_fire: str = ""
+
+
+boards_of_mine = io.parse_catalogue(
+    {
+        "schema": "phonometry-catalogue",
+        "schema_version": 1,
+        "catalogue": "plasterboards",
+        "row_type": "Plasterboard",
+        "about": "One board of a fictitious data sheet.",
+        "provenance": {
+            "kind": "datasheet",
+            "document": "Example board range",
+            "version": None,
+            "consulted": "2026-09-25",
+        },
+        "rows": [
+            {
+                "key": "board-12",
+                "name": "Board 12.5",
+                "surface_density_g_m2": 8600,
+                "reaction_to_fire": "A2-s1,d0",
+            }
+        ],
+    },
+    row_type=Plasterboard,
+)
+row = boards_of_mine["plasterboards/board-12"]
+print(row.surface_density_kg_m2, row.converted)
+# 8.6 {'surface_density_kg_m2': ('8600', 'g/m2')}
+```
+
+No pongas `slots=True` en una clase así: en Python 3.13 falla un método suyo
+que llame a `super()` sin argumentos, que es como un `__post_init__` tuyo
+llega al contrato de fila. Una anotación `float` o `int` a secas se rechaza
+con `TypeError` la primera vez que se construye la clase, porque cualquier
+celda de una fila puede faltar. Una clase construida sobre `BandedRow` no está
+soportada: sus bandas se declaran en variables de clase privadas.
+
+## Lo que no pasa nunca
+
+El lector y las filas guardan lo que imprime el documento y nada más.
+
+- Ninguna banda que no imprima el documento se extrapola, se interpola o se
+  rellena con sus vecinas, y ninguna se lee como cero.
+- Nada se recorta ni se redondea: un coeficiente de 1,05 sigue siendo 1,05, y
+  una valoración nunca se lleva a una rejilla.
+- Ninguna cifra se adivina por su tamaño, y ninguna unidad se lee de dentro
+  de una celda.
+- Nada se sube, se guarda en caché ni se copia, y no se abre ningún enlace que
+  nombre un archivo.
+- Dos filas con el mismo nombre se guardan las dos y se contestan las dos, y
+  ninguna búsqueda elige entre ellas por ti.
+- Nada de lo que nombra el archivo se importa: solo lo lee el lector de JSON
+  de la biblioteca estándar, y el nombre de clase que escribe solo se compara
+  con la clase que pasas.
+
+## Qué cubre esta guía
+
+<Scope>
+<ScopeClaim status="covered" label="Cubierto">
+Leer un catálogo propio de un archivo JSON (`io.read_catalogue`) o de un texto
+o un mapping (`io.parse_catalogue`) en las filas que entregan todos los
+catálogos publicados, con su `io.Provenance`, sus notas y todos los problemas
+de forma comunicados a la vez con un puntero JSON; escribir filas, entre ellas
+una tabla publicada, de vuelta a un archivo (`io.write_catalogue`); buscar en
+el tuyo y en los publicados con todas las búsquedas `*_named`; y pasar las
+filas a los modelos de porosos, a un modelo de sala, al método de la meseta y
+a un suelo flotante.
+</ScopeClaim>
+
+<ScopeClaim status="not-covered" label="No cubierto">
+El lector solo admite JSON: una hoja de cálculo se convierte antes en el
+documento, por ejemplo en un diccionario que se pasa a `parse_catalogue`.
+Ninguna clase de fila guarda el coeficiente práctico de absorción
+$\alpha_\mathrm{p}$ de una hoja de características, su $\alpha_\mathrm{s}$
+por tercios de octava ni un índice de reducción sonora $R$ de laboratorio, y
+ninguna valoración se recalcula a partir de un espectro que guarde un archivo.
+La biblioteca no trae datos de ningún fabricante, y una tabla pegada en una
+issue o en una pull request nunca se incorpora.
+</ScopeClaim>
+</Scope>
+
+<SeeAlso>
+
+## Véase también
+
+- [Archivos](/phonometry/es/io/): qué lee y escribe la capa de archivos de la biblioteca, y por qué.
+- [Catálogos publicados](/phonometry/es/reference/catalogues/): todas las tablas que la biblioteca ha leído de una página, las mismas clases de fila con las celdas del libro.
+- [Absorbentes porosos y multicapa](/phonometry/es/materials/absorbers/porous-absorbers/): los modelos en los que entra una fila `PorousMaterial`.
+- [Rigidez dinámica de materiales resilientes](/phonometry/es/materials/resilient/dynamic-stiffness/): $s'$, $s'_\mathrm{t}$ y el apartado 8.2 al completo.
+- [Predicción del aislamiento de paneles](/phonometry/es/buildings/design/panel-sound-insulation/): el método de la meseta que dibuja una fila `PlateauMaterial`.
+- Referencia de la API: [`phonometry.io`](/phonometry/es/reference/api/io/io/).
+
+</SeeAlso>

@@ -92,6 +92,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   published catalogues page gains a section that says why it will never show
   a manufacturer's table and where your own go instead.
 
+- **Keep a catalogue of your own in a spreadsheet, saved as CSV.** A name
+  ending in `.csv` makes `io.read_catalogue` read the rows from a CSV file,
+  one per line under a first line that names the columns, and the rest of
+  the document from a JSON header beside it, named as the file with
+  `.phonometry.json` after it (or wherever `header_path=` says). The header
+  declares the delimiter (a comma, a semicolon or a tab) and the decimal
+  mark, and nothing about the dialect is guessed. Each cell holds one value,
+  bound, range or word in a closed grammar that writes the same hedges as a
+  JSON document: `0,85`, `~0,85`, `<=30`, `>=5`, `0,30..0,50`, `0,85±0,05`,
+  `[AFr5]`, and `true` or `false` in a column of flags. The columns are the
+  row class's fields, in any unit of the same kind, plus `key`, `basis` for
+  the row, `provenance.page`, `provenance.report` and the other columns that
+  narrow the provenance of one row, and columns of your own named `x-`. The
+  rows go through the same checks as a JSON document's, so every problem is
+  raised at once, each at its line and its column as a spreadsheet letters
+  them; a text where a number goes is never read as a word, a `NaN` or a
+  zero, a thousands separator is never read, and when every failing number
+  is written with the other decimal mark, or the first line splits at
+  another delimiter, the refusal says which one to declare. The file is
+  UTF-8 with or without a byte order mark, and any other encoding is refused
+  with the advice to save it as "CSV UTF-8". `io.write_catalogue` writes the
+  pair in the dialect you ask for, with a byte order mark and an apostrophe
+  before any text a spreadsheet would run as a formula, which the reader
+  takes off again; what one cell cannot hold (several readings, a misprint,
+  a carried cell, a credit, a basis or a standard for a single cell) is
+  refused with the pointer the JSON document would write it at, and nothing
+  is written. `io.Catalogue.header_sha256` records the header a CSV file was
+  read with, beside `file_sha256` for the file itself. The guide "Your own
+  catalogues" gains a section on it, in both languages.
+
 - **Sound power in the 16 kHz octave band (ISO 9295).** The general sound
   power methods stop at the 10 kHz one-third-octave band, and a printer's
   paper noise or a power supply's whine sits above it. The new

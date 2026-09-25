@@ -63,16 +63,21 @@ their own, which [`read_catalogue`](/phonometry/reference/api/io/io/#read_catalo
 a versioned JSON document with its [`Provenance`](/phonometry/reference/api/io/io/#provenance) (the kind of document,
 its version, the day it was consulted, the laboratory and the report), each
 cell named as the field it fills or in another unit of the same kind, and
-every hedge the packaged tables use. What comes back is a [`Catalogue`](/phonometry/reference/api/io/io/#catalogue),
-a read-only mapping keyed like the packaged ones that joins a `PUBLISHED_*`
-catalogue with `|` and never lets one row replace another. The problems in
-a file are raised at once in one [`CatalogueError`](/phonometry/reference/api/io/io/#catalogueerror), each
-[`CatalogueIssue`](/phonometry/reference/api/io/io/#catalogueissue) with the JSON pointer to it (every problem of form,
-and the first rule of the row contract each row breaks), and what is only
-worth a second look rides on the catalogue as a note with one
+every hedge the packaged tables use; or the CSV file a spreadsheet saves, one
+row per line in a closed grammar of cells (`~0.85`, `<=30`,
+`0.30..0.50`, `0.85±0.05`, `[AFr5]`), with that document's header
+beside it declaring the delimiter and the decimal mark. What comes back is a
+[`Catalogue`](/phonometry/reference/api/io/io/#catalogue), a read-only mapping keyed like the packaged ones that
+joins a `PUBLISHED_*` catalogue with `|` and never lets one row replace
+another. The problems in a file are raised at once in one
+[`CatalogueError`](/phonometry/reference/api/io/io/#catalogueerror), each [`CatalogueIssue`](/phonometry/reference/api/io/io/#catalogueissue) with its place, a JSON
+pointer or a line and a column of the CSV file (every problem of form, and
+the first rule of the row contract each row breaks), and what is only worth
+a second look rides on the catalogue as a note with one
 [`CatalogueWarning`](/phonometry/reference/api/io/io/#cataloguewarning). [`parse_catalogue`](/phonometry/reference/api/io/io/#parse_catalogue) reads the same from text or
 a mapping in memory, and [`write_catalogue`](/phonometry/reference/api/io/io/#write_catalogue) writes rows, a packaged
-table among them, as a file that reads back into the same rows. Nothing the
+table among them, as a file that reads back into the same rows, and a CSV
+file as a spreadsheet opens it with no text read as a formula. Nothing the
 file names is ever imported, and nothing it holds is kept anywhere but in the
 objects handed back.
 
@@ -564,6 +569,7 @@ Catalogue(
     notes: tuple[CatalogueIssue, ...] = (),
     schema_version: int = 1,
     file_sha256: str = '',
+    header_sha256: str = '',
 )
 ```
 
@@ -593,7 +599,8 @@ keys, as any two mappings are.
 | `conventions` | The notes and legends the document prints for the whole table. |
 | `notes` | What is worth a second look, each a [`CatalogueIssue`](/phonometry/reference/api/io/io/#catalogueissue) of severity `"note"`. |
 | `schema_version` | The version of the layout the document was written in. |
-| `file_sha256` | The SHA-256 of the bytes read, in hexadecimal, so that a report can cite exactly which file its values came from; empty for a document handed over as a mapping, which has no bytes. |
+| `file_sha256` | The SHA-256 of the bytes read, in hexadecimal, so that a report can cite exactly which file its values came from: the JSON document, or the CSV file for a catalogue read from one; empty for a document handed over as a mapping, which has no bytes. |
+| `header_sha256` | The SHA-256 of the JSON header beside a CSV file, which holds the provenance the rows cite; empty for a catalogue read from a JSON document, whose provenance is in its own bytes. |
 
 ## CATALOGUE_BASES
 
@@ -648,7 +655,7 @@ rides on the catalogue that was read, in `Catalogue.notes`.
 | Name | Description |
 | :--- | :--- |
 | `file` | The file, as the caller named it; empty for a row built in Python. |
-| `location` | Where in the file: a JSON pointer (RFC 6901) such as `"/rows/1/porosity"`; `"<Python>"` for a row built in Python. |
+| `location` | Where in the file: a JSON pointer (RFC 6901) such as `"/rows/1/porosity"`; a line and a column as a spreadsheet letters them, such as `"line 3, column E (porosity)"`, in a CSV file; `"<Python>"` for a row built in Python. |
 | `row_key` | The key of the row, when the issue sits in one. |
 | `field` | The field of the row, when the issue is about one cell. |
 | `message` | What is wrong and, where it helps, what to write instead. |
@@ -1363,33 +1370,42 @@ read_catalogue(
     path: str | os.PathLike[str],
     *,
     row_type: type[R],
+    header_path: str | os.PathLike[str] | None = None,
 ) -> Catalogue[R]
 ```
 
-Read a catalogue of your own from a JSON file into rows of *row_type*.
+Read a catalogue of your own from a file into rows of *row_type*.
 
 The file holds one table: a header with the document's provenance, and
 rows whose cells are named as the fields of *row_type* or in another unit
-of the same kind (the module docstring lays it out). Every row is built
-through [`CatalogueRow.from_printed`](/phonometry/reference/api/io/io/#cataloguerowfrom_printed), so a row read from a file and
-a packaged row with the same cells are the same row, and
-[`printed`](/phonometry/reference/api/io/io/#cataloguerowprinted), [`why_missing`](/phonometry/reference/api/io/io/#cataloguerowwhy_missing) and every
-method of the class behave alike on both. Every row carries the
-document's [`Provenance`](/phonometry/reference/api/io/io/#provenance), narrowed by the row where it narrows it,
-and a [`source`](/phonometry/reference/api/io/io/#cataloguerow) composed from it.
+of the same kind (the module docstring lays it out). A JSON file holds
+both. A CSV file holds the rows, one per line under a first line that
+names the columns, and its header is a JSON document beside it, named
+as the CSV file with `.phonometry.json` after it (the calibration
+sidecar of an audio file takes the same tail and is told apart by its
+`schema`), which declares the file's delimiter and decimal mark.
+
+Every row is built through [`CatalogueRow.from_printed`](/phonometry/reference/api/io/io/#cataloguerowfrom_printed), so a row
+read from a file and a packaged row with the same cells are the same
+row, and [`printed`](/phonometry/reference/api/io/io/#cataloguerowprinted), [`why_missing`](/phonometry/reference/api/io/io/#cataloguerowwhy_missing)
+and every method of the class behave alike on both. Every row carries
+the document's [`Provenance`](/phonometry/reference/api/io/io/#provenance), narrowed by the row where it narrows
+it, and a [`source`](/phonometry/reference/api/io/io/#cataloguerow) composed from it.
 
 The problems in the file are raised together in one
-[`CatalogueError`](/phonometry/reference/api/io/io/#catalogueerror), each issue with the JSON pointer to it: every
-problem of form, and the first rule of the row contract each row breaks.
-The class named in the file is only compared with *row_type*, and nothing
-the file names is ever imported.
+[`CatalogueError`](/phonometry/reference/api/io/io/#catalogueerror), each issue with its place: a JSON pointer, or a
+line and a column of a CSV file. That is every problem of form, and the
+first rule of the row contract each row breaks. The class named in the
+file is only compared with *row_type*, and nothing the file names is
+ever imported.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
-| `path` | The file, whose name ends in `.json` (in any case). |
+| `path` | The file, whose name ends in `.json` or `.csv` (in any case). |
 | `row_type` | The class of every row, a subclass of [`CatalogueRow`](/phonometry/reference/api/io/io/#cataloguerow) such as `materials.PorousMaterial`. |
+| `header_path` | The JSON header of a CSV file, where it is not the one beside it; `None` for the one beside it. |
 
 **Returns:** The catalogue, keyed `"<catalogue>/<key>"`.
 
@@ -1397,9 +1413,10 @@ the file names is ever imported.
 
 | Exception | When |
 | :--- | :--- |
-| CatalogueError | for a file larger than 16 MiB, text that is not UTF-8 or not JSON, and the problems the document holds, all at once: every problem of form, and the first rule of the row contract each row breaks. |
+| CatalogueError | for a file larger than 16 MiB, a CSV header larger than 64 KiB, text that is not UTF-8 or not JSON, and the problems the document holds, all at once: every problem of form, and the first rule of the row contract each row breaks. |
 | TypeError | for a *row_type* that is not a catalogue row class. |
-| ValueError | for a name that does not end in `.json`. |
+| ValueError | for a name that ends in neither `.json` nor `.csv`, and for a *header_path* beside a JSON file. |
+| FileNotFoundError | for a CSV file with no header, naming the header it looked for. |
 | OSError | as the file system raises it, untouched. |
 
 **Warns**
@@ -1710,6 +1727,8 @@ write_catalogue(
     catalogue: str | None = None,
     about: str | None = None,
     provenance: Provenance | None = None,
+    delimiter: str = ',',
+    decimal: str = '.',
     overwrite: bool = False,
 ) -> tuple[Path, ...]
 ```
@@ -1735,30 +1754,46 @@ edition is in the citation already, and the copy consulted is the
 library's on that day. Pass *provenance* for a file that has to come out
 the same every day.
 
-The file is written beside its final name and renamed into place, so a
-reader never finds half of it.
+A name ending in `.csv` writes a CSV file, UTF-8 with a byte order
+mark as a spreadsheet saves "CSV UTF-8", one row per line, and its JSON
+header beside it (the name with `.phonometry.json` after it), which
+holds the provenance and declares *delimiter* and *decimal*. Each cell
+holds one value, bound, interval or word in the closed grammar the
+module docstring lays out; a text that a spreadsheet would read as a
+formula (one starting with `=`, `+`, `-`, `@`, a tab or a
+carriage return) is written after an apostrophe, which the reader takes
+off again. What a cell cannot hold (several readings, a misprint, a
+cell carried from another row, a figure converted from a unit no family
+holds, a basis or a standard for a single cell) is refused, with the
+pointer the JSON document would write it at, and nothing is written.
+
+Each file is written beside its final name and renamed into place, so a
+reader never finds half of one; a CSV file and its header are two files,
+written one after the other, and the pair is not written as one.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
 | `rows` | A [`Catalogue`](/phonometry/reference/api/io/io/#catalogue), or a mapping of rows of one class. |
-| `path` | Where to write, a name ending in `.json` (in any case). |
+| `path` | Where to write, a name ending in `.json` or `.csv` (in any case). |
 | `catalogue` | The catalogue's name. Required for a table of the library's own, and for rows of yours that do not share one. |
 | `about` | What the document is; required when the rows bring none. |
 | `provenance` | The document the rows were read from, in place of the one they bring. |
-| `overwrite` | Replace a file already at *path*. |
+| `delimiter` | What separates the cells of a CSV file: `","`, `";"` or a tab. |
+| `decimal` | The decimal mark of a CSV file's numbers: `"."` or `","`, the second only with another delimiter than `","`. |
+| `overwrite` | Replace a file already at *path*, or at its header. |
 
-**Returns:** The paths written.
+**Returns:** The paths written: the JSON document, or the CSV file and its header.
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| CatalogueError | for no rows, rows from more than one table or document, a key a file cannot hold, or a name that is reserved or malformed. |
+| CatalogueError | for no rows, rows from more than one table or document, a key a file cannot hold, a name that is reserved or malformed, and the cells a CSV file cannot hold. |
 | TypeError | for rows that are not catalogue rows of one class (fluid states among them), or a *catalogue* or *about* the rows need and do not bring. |
-| ValueError | for a name that does not end in `.json`. |
-| FileExistsError | for a file at *path* without *overwrite*, and for a symbolic link at *path*. |
+| ValueError | for a name that ends in neither `.json` nor `.csv`, a dialect a CSV file cannot take, and a dialect beside a JSON file. |
+| FileExistsError | for a file at *path* or at its header without *overwrite*, and for a symbolic link at either. |
 
 ## write_sidecar
 

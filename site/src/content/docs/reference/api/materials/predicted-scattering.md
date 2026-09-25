@@ -54,6 +54,8 @@ book explains them nowhere. They are kept as rows, because they are rows.
 ```python
 predicted_scattering_named(
     name: str,
+    *,
+    catalogue: Mapping[str, PredictedScatteringSpectrum] | None = None,
 ) -> tuple[PredictedScatteringSpectrum, ...]
 ```
 
@@ -64,8 +66,15 @@ Every predicted row whose description or heading contains *name*.
 | Name | Description |
 | :--- | :--- |
 | `name` | A fragment of the printed description or of the heading above it, matched without case. The headings are where the topology is: `"sinusoidal"`, `"batten"`, `"triangle"`, since a row of its own reads `"h = 4 cm, L = 20 cm"`. |
+| `catalogue` | The rows to search in place of [`PUBLISHED_PREDICTED_SCATTERING`](/phonometry/reference/api/materials/predicted-scattering/#published_predicted_scattering): a catalogue of your own that [`phonometry.io.read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) returns, `PUBLISHED_PREDICTED_SCATTERING \| mine` to search both at once, or any mapping of key to row (Default: `None`, which searches [`PUBLISHED_PREDICTED_SCATTERING`](/phonometry/reference/api/materials/predicted-scattering/#published_predicted_scattering)). |
 
 **Returns:** The rows that match, in the order the tables are read, which is empty when no table has one.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | for a *catalogue* that is not a mapping, or that holds a row that is not a [`PredictedScatteringSpectrum`](/phonometry/reference/api/materials/predicted-scattering/#predictedscatteringspectrum), naming its key. |
 
 ## PredictedScatteringSpectrum
 

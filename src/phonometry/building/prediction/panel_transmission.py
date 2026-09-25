@@ -102,7 +102,7 @@ from ..._internal.validation import (
     require_same_length,
 )
 from ...materials.absorbers.porous import PUBLISHED_AIR
-from ...solids import PUBLISHED_PLATEAU_DATA
+from ...solids import PUBLISHED_PLATEAU_DATA, PlateauMaterial
 from ...vibration.structural.point_mobility import plate_bending_stiffness
 from ...vibration.structural.radiation_efficiency import coincidence_frequency
 
@@ -155,6 +155,13 @@ def _plateau_constants() -> dict[str, tuple[float, float, float]]:
 #: :data:`phonometry.solids.PUBLISHED_PLATEAU_DATA`, which holds the table.
 PLATEAU_MATERIALS: Mapping[str, tuple[float, float, float]] = MappingProxyType(
     _plateau_constants()
+)
+#: The fields of a :class:`~phonometry.solids.PlateauMaterial` row that hold
+#: the three numbers of a :data:`PLATEAU_MATERIALS` entry, in its order.
+_PLATEAU_FIELDS = (
+    "surface_density_per_mm_kg_m2",
+    "coincidence_height_db",
+    "plateau_frequency_ratio",
 )
 #: Field-incidence correction of Norton Eq. (3.106): a flat 5 dB below the
 #: normal-incidence mass law (a diffuse field limited to 78 degrees).
@@ -528,23 +535,48 @@ def single_panel_transmission_loss(
     )
 
 
+def _plateau_constant(material: str | PlateauMaterial, index: int) -> float:
+    """One of a material's three plateau constants, by its place in the row.
+
+    A name reads the :data:`PLATEAU_MATERIALS` entry. A row reads its cell
+    through :meth:`~phonometry.io.CatalogueRow.printed`, so a cell that holds
+    no number (a range, a bound, a word, an empty cell) is refused with what
+    the row has there rather than read as one.
+    """
+    if isinstance(material, PlateauMaterial):
+        return material.printed(
+            _PLATEAU_FIELDS[index], wanted_by="plateau_transmission_loss"
+        )
+    return PLATEAU_MATERIALS[material][index]
+
+
 def _resolve_plateau_panel(
-    material: str | None,
+    material: str | PlateauMaterial | None,
     thickness_mm: float | None,
     mass_per_area: float | None,
     plateau_height: float | None,
     frequency_ratio: float | None,
 ) -> tuple[float, float, float]:
-    """The plateau construction's three numbers, from the table or explicit.
+    """The plateau construction's three numbers, from a material or explicit.
 
     Returns ``(mass_per_area, plateau_height, frequency_ratio)``; an explicit
-    value always wins over the :data:`PLATEAU_MATERIALS` entry.
+    value always wins over the material's, and a constant an explicit value
+    replaces is never read, so a row need not print it.
 
-    :raises ValueError: for an unknown material or an under-specified panel.
+    :raises ValueError: for an unknown material name, a row without a
+        constant the construction reads, or an under-specified panel.
+    :raises TypeError: for a material that is neither a name nor a
+        :class:`~phonometry.solids.PlateauMaterial`.
     """
     if material is not None:
-        key = require_choice(material, "material", tuple(PLATEAU_MATERIALS))
-        density_per_mm, table_height, table_ratio = PLATEAU_MATERIALS[key]
+        if isinstance(material, str):
+            material = require_choice(material, "material", tuple(PLATEAU_MATERIALS))
+        elif not isinstance(material, PlateauMaterial):
+            msg = (
+                "'material' is a name in PLATEAU_MATERIALS or a "
+                f"solids.PlateauMaterial row; got a {type(material).__name__}."
+            )
+            raise TypeError(msg)
         if mass_per_area is None:
             if thickness_mm is None:
                 msg = (
@@ -552,11 +584,13 @@ def _resolve_plateau_panel(
                     "'mass_per_area' directly."
                 )
                 raise ValueError(msg)
-            mass_per_area = density_per_mm * require_positive(
+            mass_per_area = _plateau_constant(material, 0) * require_positive(
                 thickness_mm, "thickness_mm"
             )
-        plateau_height = table_height if plateau_height is None else plateau_height
-        frequency_ratio = table_ratio if frequency_ratio is None else frequency_ratio
+        if plateau_height is None:
+            plateau_height = _plateau_constant(material, 1)
+        if frequency_ratio is None:
+            frequency_ratio = _plateau_constant(material, 2)
     if mass_per_area is None or plateau_height is None or frequency_ratio is None:
         msg = (
             "the plateau construction needs 'mass_per_area', 'plateau_height' "
@@ -579,7 +613,7 @@ def _resolve_plateau_panel(
 def plateau_transmission_loss(
     frequency: ArrayLike,
     *,
-    material: str,
+    material: str | PlateauMaterial,
     thickness_mm: float,
     plateau_height: float | None = ...,
     frequency_ratio: float | None = ...,
@@ -592,7 +626,7 @@ def plateau_transmission_loss(
 def plateau_transmission_loss(
     frequency: ArrayLike,
     *,
-    material: str,
+    material: str | PlateauMaterial,
     mass_per_area: float,
     thickness_mm: float | None = ...,
     plateau_height: float | None = ...,
@@ -617,7 +651,7 @@ def plateau_transmission_loss(
 def plateau_transmission_loss(
     frequency: ArrayLike,
     *,
-    material: str | None = None,
+    material: str | PlateauMaterial | None = None,
     thickness_mm: float | None = None,
     mass_per_area: float | None = None,
     plateau_height: float | None = None,
@@ -646,13 +680,21 @@ def plateau_transmission_loss(
     and it assumes a diffuse field on both sides of a panel whose length and
     width are at least twenty times its thickness.
 
-    Give a tabulated *material* with its *thickness_mm* (the surface density
-    then follows from the table), or give *mass_per_area* together with
-    *plateau_height* and *frequency_ratio*. An explicit *mass_per_area*,
-    *plateau_height* or *frequency_ratio* always overrides the table.
+    Give a *material* with its *thickness_mm* (the surface density then
+    follows from the material's), or give *mass_per_area* together with
+    *plateau_height* and *frequency_ratio*. The material is a name the table
+    tabulates, or a :class:`~phonometry.solids.PlateauMaterial` row: one of
+    :data:`~phonometry.solids.PUBLISHED_PLATEAU_DATA`, or one of your own
+    that :func:`phonometry.io.read_catalogue` read from a file. A row gives
+    its three numbers through :meth:`~phonometry.io.CatalogueRow.printed`, so
+    a cell it holds as a range, a bound or a word is refused with what it
+    holds, never read as a number. An explicit *mass_per_area*,
+    *plateau_height* or *frequency_ratio* always overrides the material's,
+    and the material's own is then not read at all.
 
     :param frequency: Band centre frequencies ``f``, in hertz (array, > 0).
-    :param material: Key into :data:`PLATEAU_MATERIALS` (Default: ``None``).
+    :param material: A key into :data:`PLATEAU_MATERIALS`, or a
+        :class:`~phonometry.solids.PlateauMaterial` row (Default: ``None``).
     :param thickness_mm: Panel thickness, in **millimetres** (> 0), used with
         *material* to get the surface density.
     :param mass_per_area: Mass per unit area ``m''``, in kg/m^2 (> 0).
@@ -667,8 +709,11 @@ def plateau_transmission_loss(
         :attr:`~SoundReductionResult.plateau_height`,
         :attr:`~SoundReductionResult.plateau_start` (point A) and
         :attr:`~SoundReductionResult.plateau_end` (point B).
-    :raises ValueError: for a non-positive input, an unknown material, or an
+    :raises ValueError: for a non-positive input, an unknown material name, a
+        row that does not print a number the construction reads, or an
         under-specified panel.
+    :raises TypeError: for a *material* that is neither a name nor a
+        :class:`~phonometry.solids.PlateauMaterial`.
     """
     m2, height, ratio = _resolve_plateau_panel(
         material, thickness_mm, mass_per_area, plateau_height, frequency_ratio

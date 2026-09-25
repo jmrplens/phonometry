@@ -60,7 +60,11 @@ printed table, read at import through the package-data reader in
 ## nonlinearity_named
 
 ```python
-nonlinearity_named(name: str) -> tuple[NonlinearityParameter, ...]
+nonlinearity_named(
+    name: str,
+    *,
+    catalogue: Mapping[str, NonlinearityParameter] | None = None,
+) -> tuple[NonlinearityParameter, ...]
 ```
 
 Every published value whose substance name contains *name*.
@@ -70,8 +74,15 @@ Every published value whose substance name contains *name*.
 | Name | Description |
 | :--- | :--- |
 | `name` | Part of a substance's name as the page prints it, matched without regard to case: `"water"` answers with every row of Tables 8.1 and 8.2 and with the sea water of Table 8.4. |
+| `catalogue` | The rows to search in place of [`PUBLISHED_NONLINEARITY`](/phonometry/reference/api/fluids/nonlinearity/#published_nonlinearity): a catalogue of your own that [`phonometry.io.read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) returns, `PUBLISHED_NONLINEARITY \| mine` to search both at once, or any mapping of key to row (Default: `None`, which searches [`PUBLISHED_NONLINEARITY`](/phonometry/reference/api/fluids/nonlinearity/#published_nonlinearity)). |
 
 **Returns:** The matching rows, in the order the tables list them. Empty when nothing matches, which is not an error.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | for a *catalogue* that is not a mapping, or that holds a row that is not a [`NonlinearityParameter`](/phonometry/reference/api/fluids/nonlinearity/#nonlinearityparameter), naming its key. |
 
 ## NonlinearityParameter
 

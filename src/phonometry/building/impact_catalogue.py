@@ -106,7 +106,7 @@ from dataclasses import dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING
 
-from .._internal.catalogue import CatalogueRow, read_table, take
+from .._internal.catalogue import CatalogueRow, read_table, rows_to_search, take
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -225,20 +225,35 @@ def _load() -> dict[str, ImpactInsulation]:
 PUBLISHED_IMPACT_INSULATION: Mapping[str, ImpactInsulation] = MappingProxyType(_load())
 
 
-def impact_insulation_named(name: str) -> tuple[ImpactInsulation, ...]:
+def impact_insulation_named(
+    name: str, *, catalogue: Mapping[str, ImpactInsulation] | None = None
+) -> tuple[ImpactInsulation, ...]:
     """Every published row whose printed description contains *name*.
 
     :param name: A fragment of the printed description, matched without case.
         The descriptions are in the language the page is set in, and they are
         the only thing matched: there is no short name for a construction the
         page describes in a paragraph.
+    :param catalogue: The rows to search in place of
+        :data:`PUBLISHED_IMPACT_INSULATION`: a catalogue of your own that
+        :func:`phonometry.io.read_catalogue` returns,
+        ``PUBLISHED_IMPACT_INSULATION | mine`` to search both at once, or any
+        mapping of key to row (Default: ``None``, which searches
+        :data:`PUBLISHED_IMPACT_INSULATION`).
     :return: The matching rows, in catalogue order. Empty when none match. A
         tuple and not one row, because a description is not a name and several
         constructions share most of their words.
+    :raises TypeError: for a *catalogue* that is not a mapping, or that holds a
+        row that is not a :class:`ImpactInsulation`, naming its key.
     """
     wanted = name.casefold()
     return tuple(
         row
-        for row in PUBLISHED_IMPACT_INSULATION.values()
+        for row in rows_to_search(
+            catalogue,
+            PUBLISHED_IMPACT_INSULATION,
+            ImpactInsulation,
+            "impact_insulation_named",
+        )
         if wanted in row.name.casefold()
     )

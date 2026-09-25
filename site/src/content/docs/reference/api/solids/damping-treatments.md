@@ -40,7 +40,11 @@ catalogue here.
 ## damping_treatments_named
 
 ```python
-damping_treatments_named(name: str) -> tuple[DampingTreatment, ...]
+damping_treatments_named(
+    name: str,
+    *,
+    catalogue: Mapping[str, DampingTreatment] | None = None,
+) -> tuple[DampingTreatment, ...]
 ```
 
 Every published treatment whose printed description contains *name*.
@@ -50,8 +54,15 @@ Every published treatment whose printed description contains *name*.
 | Name | Description |
 | :--- | :--- |
 | `name` | Part of the description as the page prints it, in Spanish, matched without regard to case: `"muescado"` answers with every notched felt. |
+| `catalogue` | The rows to search in place of [`PUBLISHED_DAMPING_TREATMENTS`](/phonometry/reference/api/solids/damping-treatments/#published_damping_treatments): a catalogue of your own that [`phonometry.io.read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) returns, `PUBLISHED_DAMPING_TREATMENTS \| mine` to search both at once, or any mapping of key to row (Default: `None`, which searches [`PUBLISHED_DAMPING_TREATMENTS`](/phonometry/reference/api/solids/damping-treatments/#published_damping_treatments)). |
 
 **Returns:** The matching rows, in the order the table lists them. Empty when nothing matches, which is not an error.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | for a *catalogue* that is not a mapping, or that holds a row that is not a [`DampingTreatment`](/phonometry/reference/api/solids/damping-treatments/#dampingtreatment), naming its key. |
 
 ## DampingTreatment
 

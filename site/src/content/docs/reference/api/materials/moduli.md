@@ -52,7 +52,11 @@ other catalogue in this library.
 ## resilient_moduli_named
 
 ```python
-resilient_moduli_named(name: str) -> tuple[ResilientMaterial, ...]
+resilient_moduli_named(
+    name: str,
+    *,
+    catalogue: Mapping[str, ResilientMaterial] | None = None,
+) -> tuple[ResilientMaterial, ...]
 ```
 
 Every published resilient material whose name contains *name*.
@@ -62,8 +66,15 @@ Every published resilient material whose name contains *name*.
 | Name | Description |
 | :--- | :--- |
 | `name` | Part of a material name as the page prints it, matched without regard to case: `"rock wool"` answers with both of Vigran's rock wools, which only their densities tell apart. |
+| `catalogue` | The rows to search in place of [`PUBLISHED_RESILIENT_MODULI`](/phonometry/reference/api/materials/moduli/#published_resilient_moduli): a catalogue of your own that [`phonometry.io.read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) returns, `PUBLISHED_RESILIENT_MODULI \| mine` to search both at once, or any mapping of key to row (Default: `None`, which searches [`PUBLISHED_RESILIENT_MODULI`](/phonometry/reference/api/materials/moduli/#published_resilient_moduli)). |
 
 **Returns:** The matching rows, in the order the table lists them. Empty when nothing matches, which is not an error.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | for a *catalogue* that is not a mapping, or that holds a row that is not a [`ResilientMaterial`](/phonometry/reference/api/materials/moduli/#resilientmaterial), naming its key. |
 
 ## ResilientMaterial
 

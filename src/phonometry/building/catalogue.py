@@ -87,7 +87,7 @@ from dataclasses import dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING, ClassVar
 
-from .._internal.catalogue import BandedRow, read_table, take
+from .._internal.catalogue import BandedRow, read_table, rows_to_search, take
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -233,10 +233,18 @@ PUBLISHED_TRANSMISSION_LOSS: Mapping[str, TransmissionLossSpectrum] = MappingPro
 )
 
 
-def transmission_loss_named(name: str) -> tuple[TransmissionLossSpectrum, ...]:
+def transmission_loss_named(
+    name: str, *, catalogue: Mapping[str, TransmissionLossSpectrum] | None = None
+) -> tuple[TransmissionLossSpectrum, ...]:
     """Every published row whose printed description contains *name*.
 
     :param name: A fragment of the printed description, matched without case.
+    :param catalogue: The rows to search in place of
+        :data:`PUBLISHED_TRANSMISSION_LOSS`: a catalogue of your own that
+        :func:`phonometry.io.read_catalogue` returns,
+        ``PUBLISHED_TRANSMISSION_LOSS | mine`` to search both at once, or any
+        mapping of key to row (Default: ``None``, which searches
+        :data:`PUBLISHED_TRANSMISSION_LOSS`).
     :return: The rows whose description contains it, in the order the tables
         are read, which is empty when no page has one. It matches the printed
         description and nothing else, in the language the page is set in:
@@ -245,10 +253,17 @@ def transmission_loss_named(name: str) -> tuple[TransmissionLossSpectrum, ...]:
         without it, nor with the doors of the Spanish edition of Harris, which
         are ``"puerta"``. The caller reads the thickness, the surface density
         and the variant to pick the row they mean.
+    :raises TypeError: for a *catalogue* that is not a mapping, or that holds a
+        row that is not a :class:`TransmissionLossSpectrum`, naming its key.
     """
     wanted = name.casefold()
     return tuple(
         row
-        for row in PUBLISHED_TRANSMISSION_LOSS.values()
+        for row in rows_to_search(
+            catalogue,
+            PUBLISHED_TRANSMISSION_LOSS,
+            TransmissionLossSpectrum,
+            "transmission_loss_named",
+        )
         if wanted in row.name.casefold()
     )

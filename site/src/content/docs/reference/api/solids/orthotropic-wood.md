@@ -64,7 +64,11 @@ catalogue here.
 ## orthotropic_wood_named
 
 ```python
-orthotropic_wood_named(name: str) -> tuple[OrthotropicWood, ...]
+orthotropic_wood_named(
+    name: str,
+    *,
+    catalogue: Mapping[str, OrthotropicWood] | None = None,
+) -> tuple[OrthotropicWood, ...]
 ```
 
 Every row whose printed name contains *name*, case insensitively.
@@ -74,8 +78,15 @@ Every row whose printed name contains *name*, case insensitively.
 | Name | Description |
 | :--- | :--- |
 | `name` | Part of a wood's name, as the page prints it. |
+| `catalogue` | The rows to search in place of [`PUBLISHED_ORTHOTROPIC_WOOD`](/phonometry/reference/api/solids/orthotropic-wood/#published_orthotropic_wood): a catalogue of your own that [`phonometry.io.read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) returns, `PUBLISHED_ORTHOTROPIC_WOOD \| mine` to search both at once, or any mapping of key to row (Default: `None`, which searches [`PUBLISHED_ORTHOTROPIC_WOOD`](/phonometry/reference/api/solids/orthotropic-wood/#published_orthotropic_wood)). |
 
 **Returns:** The matching rows, in the order the tables list them. Empty when nothing matches, which is not an error.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | for a *catalogue* that is not a mapping, or that holds a row that is not a [`OrthotropicWood`](/phonometry/reference/api/solids/orthotropic-wood/#orthotropicwood), naming its key. |
 
 ## OrthotropicWood
 

@@ -381,7 +381,11 @@ s/m2) and no value"`, never a figure the page does not print.
 ## gases_named
 
 ```python
-gases_named(name: str) -> tuple[Gas, ...]
+gases_named(
+    name: str,
+    *,
+    catalogue: Mapping[str, Gas] | None = None,
+) -> tuple[Gas, ...]
 ```
 
 Every published row for a gas name, across the tables.
@@ -398,8 +402,15 @@ to load first.
 | Name | Description |
 | :--- | :--- |
 | `name` | The gas as a table names it, matched without regard to case and ignoring a parenthesis the page adds: `"air"` answers with the row Hopkins prints as `"Air (dry)"`. |
+| `catalogue` | The rows to search in place of [`PUBLISHED_GASES`](/phonometry/reference/api/fluids/catalogue/#published_gases): a catalogue of your own that [`phonometry.io.read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) returns, `PUBLISHED_GASES \| mine` to search both at once, or any mapping of key to row (Default: `None`, which searches [`PUBLISHED_GASES`](/phonometry/reference/api/fluids/catalogue/#published_gases)). |
 
 **Returns:** The rows whose [`Gas.name`](/phonometry/reference/api/fluids/catalogue/#gas) matches, in the order the tables are read, which is empty when no page names it.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | for a *catalogue* that is not a mapping, or that holds a row that is not a [`Gas`](/phonometry/reference/api/fluids/catalogue/#gas), naming its key. |
 
 ## PUBLISHED_FLUIDS
 

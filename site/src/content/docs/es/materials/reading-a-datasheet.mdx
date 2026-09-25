@@ -16,7 +16,7 @@ references:
     title: "Acoustics — Measurement of sound absorption in a reverberation room"
     designation: "ISO 354:2003"
     url: "https://www.iso.org/standard/34545.html"
-    note: "El coeficiente de absorción sonora por tercios de octava que imprime un informe de ensayo, y los montajes del Anexo B: el tipo A contra una superficie de la sala, el tipo E sobre una cámara de aire cuyo número es la distancia en milímetros desde la cara de la probeta hasta la superficie que tiene detrás."
+    note: "El coeficiente de absorción sonora por tercios de octava que imprime un informe de ensayo, que según la NOTA 2 de 3.9 puede superar 1,0 por efectos de difracción, y los montajes del Anexo B: el tipo A contra una superficie de la sala, el tipo E sobre una cámara de aire cuyo número es la distancia en milímetros desde la cara de la probeta hasta la superficie que tiene detrás."
   - type: standard
     organization: "European Committee for Standardization"
     year: 2015
@@ -33,10 +33,16 @@ references:
   - type: standard
     organization: "International Organization for Standardization"
     year: 2010
+    title: "Acoustics — Laboratory measurement of sound insulation of building elements — Part 1: Application rules for specific products"
+    designation: "ISO 10140-1:2010"
+    note: "Anexo H, Ecuación (H.1): la reducción del nivel de presión acústica de impactos ΔL = Ln0 − Ln de un revestimiento de suelo sobre un suelo de referencia, la diferencia entre los niveles de impactos normalizados sin él y con él, que guarda ImpactImprovementSpectrum. Leída de la BS EN ISO 10140-1:2010+A2:2014."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2010
     title: "Acoustics — Laboratory measurement of sound insulation of building elements — Part 3: Measurement of impact sound insulation"
     designation: "ISO 10140-3:2010"
     url: "https://www.iso.org/standard/42089.html"
-    note: "La reducción del nivel de presión acústica de impactos de un revestimiento de suelo o de un suelo flotante que guarda ImpactImprovementSpectrum."
+    note: "La medida de los niveles de presión acústica de impactos normalizados, con el revestimiento y sin él, a partir de los que el Anexo H de la ISO 10140-1 forma ΔL."
   - type: standard
     organization: "International Organization for Standardization"
     year: 2020
@@ -56,12 +62,13 @@ references:
 import Scope from '../../../../components/Scope.astro';
 import ScopeClaim from '../../../../components/ScopeClaim.astro';
 import SeeAlso from '../../../../components/SeeAlso.astro';
+import ThemeImage from '../../../../components/ThemeImage.astro';
 
 Una hoja de características imprime menos números que un libro y quiere
 decir más con cada uno. El mismo «0,90 a 1 kHz» puede ser una medida de
 laboratorio por tercios de octava, un coeficiente práctico redondeado o un
-nivel que el fabricante declara que ningún producto queda por debajo, y la
-hoja no siempre dice cuál. Esta página trata de leer esos números antes de
+nivel por debajo del cual, según declara el fabricante, no queda ningún
+producto, y la hoja no siempre dice cuál. Esta página trata de leer esos números antes de
 teclearlos: qué es cada tipo, qué clase de fila de la biblioteca lo guarda y
 cómo un [catálogo propio](/phonometry/es/io/material-catalogues/) conserva lo
 que imprime la hoja sin convertirlo en lo que no es.
@@ -74,8 +81,9 @@ pull request no se incorpora nunca.
 
 Un ensayo en cámara reverberante (ISO 354) mide el **coeficiente de
 absorción sonora** $\alpha_\mathrm{s}$ por bandas de tercio de octava. Está
-referido al área de la probeta, cuyos bordes también absorben, así que un
-valor por encima de 1 es corriente y no es un error. Un informe de ensayo lo
+referido al área de la probeta, y la ISO 354 advierte que puede superar 1,0,
+por ejemplo por efectos de difracción, así que un valor por encima de 1 es
+corriente y no es un error. Un informe de ensayo lo
 imprime con dos decimales, un valor por banda, y
 `ThirdOctaveAbsorptionSpectrum` lo guarda tal como se imprime, de 50 Hz a
 10 kHz.
@@ -141,9 +149,45 @@ print(rating.rating_label, rating.absorption_class)   # 0.65(MH) C
 ```
 
 La octava de 1 kHz vale 1,10 antes del tope y 1,00 después; el 1,19 del
-informe se queda en 1,19. Una octava cuyos tres tercios de octava no imprime
-el informe se queda vacía, y `why_missing` dice que no se sigue de las
-celdas que tiene la fila: no se toma prestado nada de una banda vecina.
+informe se queda en 1,19. Una octava a la que le falta en el informe alguno
+de sus tres tercios de octava se queda vacía, y `why_missing` dice que no se
+sigue de las celdas que tiene la fila: no se toma prestado nada de una banda
+vecina. Un coeficiente negativo, que una medida puede dar en una banda donde
+la probeta apenas añade absorción a la de la sala, tampoco se lee como 0: su
+octava se queda vacía con la banda y el valor en `why_missing`, y `rating()`
+lo rechaza nombrando la banda.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/datasheet_absorption_rating.svg" alt="Valoración ISO 11654 de la absorción por tercios de octava de un informe de ensayo: los coeficientes prácticos de las cinco octavas de valoración por encima de la curva de referencia desplazada a 0,65, con una sola desviación desfavorable de 0,10 en 250 Hz" width="80%" />
+
+*`AbsorptionRatingResult.plot()` de la fila del informe: los coeficientes
+prácticos de las cinco octavas de valoración y la curva de referencia de la
+ISO 11654 desplazada hacia abajo hasta que las desviaciones desfavorables
+suman como mucho 0,10. Aquí suman 0,10, todo en 250 Hz, así que la curva se
+detiene en $\alpha_\mathrm{w}$ = 0,65. Los coeficientes quedan 0,35 por encima
+de ella en 1, 2 y 4 kHz, más de los 0,25 del apartado 4.3, y eso es lo que
+dicen los indicadores M y H.*
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+from phonometry import materials
+
+bands = (100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000, 1250,
+         1600, 2000, 2500, 3150, 4000, 5000)
+alpha_s = (0.12, 0.15, 0.17, 0.21, 0.31, 0.51, 0.54, 0.80, 0.93, 1.05, 1.10,
+           1.19, 1.20, 1.13, 1.02, 0.99, 0.94, 0.81)
+panel = materials.ThirdOctaveAbsorptionSpectrum(
+    name="Panel 40",
+    source="Sound absorption test report 26-015",
+    **{f"absorption_coefficient_{b}": a for b, a in zip(bands, alpha_s, strict=True)},
+)
+panel.rating().plot(language="es")
+plt.show()
+```
+
+</details>
 
 ### La rejilla, el tope y la banda de 125 Hz
 
@@ -324,13 +368,6 @@ imprimen, y `rating()` los vuelve a calcular. No es la pérdida por
 transmisión que recopila un libro, que es la que guarda
 `TransmissionLossSpectrum`.
 
-La hoja de un suelo flotante o de un revestimiento imprime la reducción
-ponderada del nivel de presión acústica de impactos $\Delta L_\mathrm{w}$ de
-la ISO 717-2, a menudo con $C_\mathrm{I,r}$ al lado, y un informe imprime el
-$\Delta L$ de la ISO 10140-3 por banda. `ImpactImprovementSpectrum` los
-guarda, y `rating()` calcula $\Delta L_\mathrm{w}$, $C_{\mathrm{I},\Delta}$
-y $C_\mathrm{I,r} = -11 - C_{\mathrm{I},\Delta}$ dB (apartado A.2.2).
-
 ```python
 from phonometry import building, io
 
@@ -341,7 +378,7 @@ r_db = (18.7, 19.2, 20.0, 20.4, 16.3, 17.7, 22.6, 22.4, 22.7, 24.8, 26.6,
 wall = {
     "key": "partition",
     "name": "Glazed partition",
-    "construction": "single 6 mm glass pane",
+    "construction": "single 4 mm glass pane",
     "weighted_sound_reduction_index_db": 30,
     "spectrum_adaptation_term_db": -2,
     "traffic_spectrum_adaptation_term_db": -3,
@@ -375,6 +412,132 @@ rated = tested["lab-walls/partition"].rating()
 print(rated.rating, rated.c, rated.ctr, rated.c_50_5000, rated.ctr_50_5000)
 # 30 -2 -3 -2 -4
 print(tested.notes)   # () : los números impresos son los que dan las bandas
+```
+
+Los números impresos del tabique son los que dan sus bandas, así que no hay
+nota.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/datasheet_sound_reduction_rating.svg" alt="Valoración ISO 717-1 del índice de reducción acústica de laboratorio de 50 Hz a 5 kHz: la curva de referencia desplazada a Rw = 30 dB entre 100 Hz y 3,15 kHz, las desviaciones desfavorables sombreadas y el rango ampliado del Anexo B en gris con sus seis términos de adaptación en el título" width="80%" />
+
+*`ExtendedWeightedRatingResult.plot()` de la fila del tabique: la curva de
+referencia de la ISO 717-1 desplazada sobre las dieciséis bandas de 100 Hz a
+3,15 kHz hasta valorar el tabique en $R_\mathrm{w}$ = 30 dB, las desviaciones
+desfavorables sombreadas y las bandas del rango ampliado del Anexo B en
+gris, con sus seis términos en el título. La desviación más honda es la
+caída de 3,15 kHz, donde está la coincidencia del vidrio.*
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+from phonometry import building
+
+bands = (50, 63, 80, 100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000,
+         1250, 1600, 2000, 2500, 3150, 4000, 5000)
+r_db = (18.7, 19.2, 20.0, 20.4, 16.3, 17.7, 22.6, 22.4, 22.7, 24.8, 26.6,
+        28.0, 30.5, 31.8, 32.5, 33.4, 33.0, 31.0, 25.5, 26.8, 29.2)
+partition = building.SoundReductionSpectrum(
+    name="Glazed partition",
+    source="Airborne sound insulation test report 26-021",
+    **{f"sound_reduction_index_{b}_db": r for b, r in zip(bands, r_db, strict=True)},
+)
+partition.rating().plot(language="es")
+plt.show()
+```
+
+</details>
+
+La hoja de un suelo flotante o de un revestimiento imprime la reducción
+ponderada del nivel de presión acústica de impactos $\Delta L_\mathrm{w}$ de
+la ISO 717-2, a menudo con $C_\mathrm{I,r}$ al lado. Un informe de
+laboratorio imprime por banda la reducción del nivel de presión acústica de
+impactos $\Delta L$ del Anexo H de la ISO 10140-1: el nivel de impactos
+normalizado de un suelo de referencia sin el revestimiento menos el que tiene
+con él (Ecuación (H.1)), los dos medidos según la ISO 10140-3.
+`ImpactImprovementSpectrum` los guarda, y `rating()` calcula
+$\Delta L_\mathrm{w}$, $C_{\mathrm{I},\Delta}$ y
+$C_\mathrm{I,r} = -11 - C_{\mathrm{I},\Delta}$ dB (apartado A.2.2).
+
+```python
+from phonometry import building, io
+
+bands = (100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000, 1250, 1600,
+         2000, 2500, 3150)
+delta_l_db = (3.0, 3.7, 1.9, 3.0, 3.2, 3.5, 4.0, 6.1, 6.7, 7.0, 7.7, 10.8,
+              15.2, 20.3, 25.4, 23.2)
+covering = {
+    "key": "covering",
+    "name": "Floor covering",
+    "weighted_impact_improvement_db": 15,
+    "reference_floor_adaptation_term_db": -2,
+}
+covering |= {f"impact_improvement_{b}_db": d for b, d in zip(bands, delta_l_db, strict=True)}
+coverings = io.parse_catalogue(
+    {
+        "schema": "phonometry-catalogue",
+        "schema_version": 1,
+        "catalogue": "lab-coverings",
+        "row_type": "ImpactImprovementSpectrum",
+        "about": "Floor coverings rated in the laboratory, from their test reports.",
+        "provenance": {
+            "kind": "test_report",
+            "document": "Impact sound insulation test report 26-022",
+            "version": None,
+            "consulted": "2026-09-25",
+            "laboratory": "Example Lab",
+            "report": "26-022",
+            "test_standard": "ISO 10140-1:2010 Annex H",
+        },
+        "basis": "measured",
+        "rows": [covering],
+    },
+    row_type=building.ImpactImprovementSpectrum,
+)
+rated = coverings["lab-coverings/covering"].rating()
+print(rated.delta_lw, rated.ci_delta, rated.ci_r)   # 15 -9 -2
+print(coverings.notes)   # ()
+```
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/datasheet_impact_improvement_rating.svg" alt="Valoración ISO 717-2 de la reducción del nivel de presión acústica de impactos de un revestimiento de suelo por tercios de octava de 100 Hz a 3,15 kHz, con ΔLw = 15 dB, CI,Δ = −9 dB y CI,r = −2 dB en el título" width="80%" />
+
+*`ImpactImprovementRatingResult.plot()` de la fila del revestimiento: el
+$\Delta L$ que imprime el informe por banda, valorado en el título. El
+revestimiento quita 20 dB o más al nivel de impactos desde 2 kHz y solo de 2
+a 4 dB hasta 400 Hz, y $C_{\mathrm{I},\Delta}$ = −9 dB lo dice: el número
+único sobre el nivel lineal sin ponderar,
+$\Delta L_\mathrm{lin} = \Delta L_\mathrm{w} + C_{\mathrm{I},\Delta}$
+(Fórmula (A.5) de la ISO 717-2), es de 6 dB, no de 15. Un suelo flotante
+cuya resonancia masa-muelle vuelve negativo $\Delta L$ en sus bandas más
+graves conserva esas bandas a la vista.*
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+from phonometry import building
+
+bands = (100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000, 1250, 1600,
+         2000, 2500, 3150)
+delta_l_db = (3.0, 3.7, 1.9, 3.0, 3.2, 3.5, 4.0, 6.1, 6.7, 7.0, 7.7, 10.8,
+              15.2, 20.3, 25.4, 23.2)
+covering = building.ImpactImprovementSpectrum(
+    name="Floor covering",
+    source="Impact sound insulation test report 26-022",
+    **{f"impact_improvement_{b}_db": d for b, d in zip(bands, delta_l_db, strict=True)},
+)
+covering.rating().plot(language="es")
+plt.show()
+```
+
+</details>
+
+Una hoja que declara $\Delta L_\mathrm{w}$ en vez de imprimir las bandas se
+escribe como la cota que es:
+
+```python
+from phonometry import building, io
 
 sheet = io.parse_catalogue(
     {
@@ -417,20 +580,21 @@ except ValueError as error:
 # 26 and no value (...)
 ```
 
-Los números impresos del tabique son los que dan sus bandas, así que no hay
-nota. La hoja de la lámina declara su mejora como al menos 26 dB, que no es
-un valor que la predicción pueda tomar, y el rechazo lo dice. Una valoración
+La hoja de la lámina declara su mejora como al menos 26 dB, que no es un
+valor que la predicción pueda tomar, y el rechazo lo dice. Una valoración
 que imprime una hoja y que ninguna función de esta biblioteca calcula (un
 STC, un IIC, una diferencia de niveles por flancos) no tiene campo propio;
 escríbela en la `note` de la fila.
 
 ## Lo que no pasa nunca
 
-- Ningún coeficiente se redondea, se recorta ni se mueve a la rejilla, y
-  ninguna valoración impresa en la hoja se sustituye por la que dan sus
-  bandas.
-- Ninguna octava se forma con tercios de octava que la fila no imprime, y
-  ninguna banda se rellena con sus vecinas.
+- Ningún coeficiente impreso se redondea, se recorta ni se mueve a la
+  rejilla, y ninguna valoración impresa en la hoja se sustituye por la que
+  dan sus bandas; los coeficientes prácticos que calcula `practical()` se
+  redondean como dice el apartado 4.1, y se marcan como derivados.
+- Ninguna octava se forma con tercios de octava que la fila no imprime ni
+  con uno negativo, ningún coeficiente negativo se lee como 0, y ninguna
+  banda se rellena con sus vecinas.
 - Ninguna cota se convierte en un valor, y ningún nivel declarado se lee
   como una medida.
 - Ninguna nota cambia una celda: una nota se lee una vez, junto al
@@ -446,7 +610,8 @@ octava de un informe de ensayo (`materials.ThirdOctaveAbsorptionSpectrum`)
 con los coeficientes prácticos que dan, un índice de reducción acústica de
 laboratorio (`building.SoundReductionSpectrum`) y una reducción del nivel de
 presión acústica de impactos (`building.ImpactImprovementSpectrum`), cada uno
-valorado de nuevo a partir de sus bandas con `rating()`; las notas que
+valorado de nuevo a partir de sus bandas con `rating()`, cuyo resultado se
+dibuja con `plot()`; las notas que
 guarda un lector para un valor fuera de la rejilla de la ISO 11654 o por
 encima de su tope y para una valoración impresa que las bandas no dan; y
 cómo escribir un nivel declarado, un montaje, una revisión y una palabra

@@ -106,6 +106,11 @@ from .correlation_analysis import (
     generate_synchronous_average,
     generate_tsa_noise_reduction,
 )
+from .datasheets import (
+    generate_datasheet_absorption_rating,
+    generate_datasheet_impact_improvement_rating,
+    generate_datasheet_sound_reduction_rating,
+)
 from .devices import (
     generate_channel_weight_map,
     generate_control_valve_noise,
@@ -864,6 +869,11 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     generate_absorption_rating,
     generate_airflow_resistance,
     generate_impedance_tube,
+    # A data sheet's and a test report's rows rated again from their bands
+    # (ISO 11654, ISO 717-1, ISO 717-2), for the guide on reading them.
+    generate_datasheet_absorption_rating,
+    generate_datasheet_sound_reduction_rating,
+    generate_datasheet_impact_improvement_rating,
     # Porous materials & multilayer absorbers (Mechel / Bies / Cox & D'Antonio)
     generate_porous_absorber_designs,
     generate_limp_frame_effective_density,

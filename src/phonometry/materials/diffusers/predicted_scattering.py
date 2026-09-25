@@ -48,7 +48,7 @@ from dataclasses import dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING
 
-from ..._internal.catalogue import read_table, rows_to_search, take
+from ..._internal.catalogue import read_table, rows_to_search, search_text, take
 from ._scattering import ScatteringBands
 
 if TYPE_CHECKING:
@@ -137,12 +137,12 @@ def predicted_scattering_named(
         ``PUBLISHED_PREDICTED_SCATTERING | mine`` to search both at once, or
         any mapping of key to row (Default: ``None``, which searches
         :data:`PUBLISHED_PREDICTED_SCATTERING`).
-    :return: The rows that match, in the order the tables are read, which is
-        empty when no table has one.
+    :return: The rows that match, in catalogue order, which is empty when no
+        row has one.
     :raises TypeError: for a *catalogue* that is not a mapping, or that holds a
         row that is not a :class:`PredictedScatteringSpectrum`, naming its key.
     """
-    wanted = name.casefold()
+    wanted = search_text(name)
     return tuple(
         row
         for row in rows_to_search(
@@ -151,5 +151,5 @@ def predicted_scattering_named(
             PredictedScatteringSpectrum,
             "predicted_scattering_named",
         )
-        if wanted in row.name.casefold() or wanted in row.group.casefold()
+        if wanted in search_text(row.name) or wanted in search_text(row.group)
     )

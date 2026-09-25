@@ -82,7 +82,7 @@ scattering_named(
 ) -> tuple[ScatteringCoefficientSpectrum, ...]
 ```
 
-Every published row whose description or group contains *name*.
+Every row whose description or group contains *name*.
 
 **Parameters**
 
@@ -91,7 +91,7 @@ Every published row whose description or group contains *name*.
 | `name` | A fragment of the printed description or of the group heading above it, matched without case. The headings are where the useful words are: `"pyramid"`, `"vegetation"`, `"batten"`, since a row of its own reads `"h = w = 10 cm, L = 2h"`. |
 | `catalogue` | The rows to search in place of [`PUBLISHED_SCATTERING`](/phonometry/reference/api/materials/measured-scattering/#published_scattering): a catalogue of your own that [`phonometry.io.read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) returns, `PUBLISHED_SCATTERING \| mine` to search both at once, or any mapping of key to row (Default: `None`, which searches [`PUBLISHED_SCATTERING`](/phonometry/reference/api/materials/measured-scattering/#published_scattering)). |
 
-**Returns:** The rows that match, in the order the tables are read, which is empty when no page has one.
+**Returns:** The rows that match, in catalogue order, which is empty when no row has one.
 
 **Raises**
 

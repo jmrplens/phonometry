@@ -110,7 +110,7 @@ transmission_loss_named(
 ) -> tuple[TransmissionLossSpectrum, ...]
 ```
 
-Every published row whose printed description contains *name*.
+Every row whose printed description contains *name*.
 
 **Parameters**
 
@@ -119,7 +119,7 @@ Every published row whose printed description contains *name*.
 | `name` | A fragment of the printed description, matched without case. |
 | `catalogue` | The rows to search in place of [`PUBLISHED_TRANSMISSION_LOSS`](/phonometry/reference/api/building/catalogue/#published_transmission_loss): a catalogue of your own that [`phonometry.io.read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) returns, `PUBLISHED_TRANSMISSION_LOSS \| mine` to search both at once, or any mapping of key to row (Default: `None`, which searches [`PUBLISHED_TRANSMISSION_LOSS`](/phonometry/reference/api/building/catalogue/#published_transmission_loss)). |
 
-**Returns:** The rows whose description contains it, in the order the tables are read, which is empty when no page has one. It matches the printed description and nothing else, in the language the page is set in: `"door"` answers with the rows that carry the word, and not with Bies's hollow flush panel or solid hardwood, which the page describes without it, nor with the doors of the Spanish edition of Harris, which are `"puerta"`. The caller reads the thickness, the surface density and the variant to pick the row they mean.
+**Returns:** The rows whose description contains it, in catalogue order, which is empty when no row has one. It matches the printed description and nothing else, in the language the page is set in: `"door"` answers with the rows that carry the word, and not with Bies's hollow flush panel or solid hardwood, which the page describes without it, nor with the doors of the Spanish edition of Harris, which are `"puerta"`. The caller reads the thickness, the surface density and the variant to pick the row they mean.
 
 **Raises**
 

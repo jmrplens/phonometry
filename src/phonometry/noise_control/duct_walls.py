@@ -87,7 +87,13 @@ from dataclasses import dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING, ClassVar
 
-from .._internal.catalogue import BandedRow, read_table, rows_to_search, take
+from .._internal.catalogue import (
+    BandedRow,
+    read_table,
+    rows_to_search,
+    search_text,
+    take,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -270,7 +276,7 @@ def duct_wall_named(
     :raises TypeError: for a *catalogue* that is not a mapping, or that holds a
         row that is not a :class:`DuctWallSpectrum`, naming its key.
     """
-    needle = name.casefold()
+    needle = search_text(name)
     return tuple(
         row
         for row in rows_to_search(
@@ -279,5 +285,5 @@ def duct_wall_named(
             DuctWallSpectrum,
             "duct_wall_named",
         )
-        if needle in row.name.casefold()
+        if needle in search_text(row.name)
     )

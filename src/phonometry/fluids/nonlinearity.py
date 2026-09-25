@@ -56,7 +56,13 @@ from dataclasses import dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING
 
-from .._internal.catalogue import CatalogueRow, read_table, rows_to_search, take
+from .._internal.catalogue import (
+    CatalogueRow,
+    read_table,
+    rows_to_search,
+    search_text,
+    take,
+)
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from collections.abc import Mapping
@@ -123,7 +129,7 @@ PUBLISHED_NONLINEARITY: Mapping[str, NonlinearityParameter] = MappingProxyType(_
 def nonlinearity_named(
     name: str, *, catalogue: Mapping[str, NonlinearityParameter] | None = None
 ) -> tuple[NonlinearityParameter, ...]:
-    """Every published value whose substance name contains *name*.
+    """Every value whose substance name contains *name*.
 
     :param name: Part of a substance's name as the page prints it, matched
         without regard to case: ``"water"`` answers with every row of Tables 8.1
@@ -133,12 +139,12 @@ def nonlinearity_named(
         :func:`phonometry.io.read_catalogue` returns, ``PUBLISHED_NONLINEARITY
         | mine`` to search both at once, or any mapping of key to row (Default:
         ``None``, which searches :data:`PUBLISHED_NONLINEARITY`).
-    :return: The matching rows, in the order the tables list them. Empty when
-        nothing matches, which is not an error.
+    :return: The matching rows, in catalogue order. Empty when nothing
+        matches, which is not an error.
     :raises TypeError: for a *catalogue* that is not a mapping, or that holds a
         row that is not a :class:`NonlinearityParameter`, naming its key.
     """
-    wanted = name.casefold()
+    wanted = search_text(name)
     return tuple(
         row
         for row in rows_to_search(
@@ -147,5 +153,5 @@ def nonlinearity_named(
             NonlinearityParameter,
             "nonlinearity_named",
         )
-        if wanted in row.name.casefold()
+        if wanted in search_text(row.name)
     )

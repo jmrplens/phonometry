@@ -71,6 +71,7 @@ from .._internal.catalogue import (
     read_packaged,
     read_table,
     rows_to_search,
+    search_text,
     take,
 )
 from ._state import Fluid
@@ -276,7 +277,7 @@ PUBLISHED_GASES: Mapping[str, Gas] = MappingProxyType(_gases())
 def gases_named(
     name: str, *, catalogue: Mapping[str, Gas] | None = None
 ) -> tuple[Gas, ...]:
-    """Every published row for a gas name, across the tables.
+    """Every row for a gas name, across the tables.
 
     Two books printing one gas is worth having, because the pair they print is
     not always the same pair: for carbon dioxide one of them gives 1,30 and
@@ -293,8 +294,8 @@ def gases_named(
         returns, ``PUBLISHED_GASES | mine`` to search both at once, or any
         mapping of key to row (Default: ``None``, which searches
         :data:`PUBLISHED_GASES`).
-    :return: The rows whose :attr:`Gas.name` matches, in the order the tables
-        are read, which is empty when no page names it.
+    :return: The rows whose :attr:`Gas.name` matches, in catalogue order,
+        which is empty when no row names it.
     :raises TypeError: for a *catalogue* that is not a mapping, or that holds a
         row that is not a :class:`Gas`, naming its key.
     """
@@ -308,4 +309,4 @@ def gases_named(
 
 def _plain(name: str) -> str:
     """A gas name with its case and its parenthetical qualifier dropped."""
-    return name.split("(")[0].strip().casefold()
+    return search_text(name.split("(")[0].strip())

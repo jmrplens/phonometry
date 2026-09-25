@@ -101,7 +101,13 @@ from dataclasses import dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING
 
-from ..._internal.catalogue import CatalogueRow, read_table, rows_to_search, take
+from ..._internal.catalogue import (
+    CatalogueRow,
+    read_table,
+    rows_to_search,
+    search_text,
+    take,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -270,7 +276,7 @@ def resistive_sheet_named(
     :raises TypeError: for a *catalogue* that is not a mapping, or that holds a
         row that is not a :class:`ResistiveSheet`, naming its key.
     """
-    wanted = name.casefold()
+    wanted = search_text(name)
     return tuple(
         row
         for row in rows_to_search(
@@ -279,5 +285,5 @@ def resistive_sheet_named(
             ResistiveSheet,
             "resistive_sheet_named",
         )
-        if row.name.casefold() == wanted
+        if search_text(row.name) == wanted
     )

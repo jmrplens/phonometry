@@ -59,7 +59,7 @@ from dataclasses import dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING
 
-from ..._internal.catalogue import read_table, rows_to_search, take
+from ..._internal.catalogue import read_table, rows_to_search, search_text, take
 from ._scattering import SCATTERING_BANDS_HZ, ScatteringBands
 
 if TYPE_CHECKING:
@@ -124,7 +124,7 @@ PUBLISHED_SCATTERING: Mapping[str, ScatteringCoefficientSpectrum] = MappingProxy
 def scattering_named(
     name: str, *, catalogue: Mapping[str, ScatteringCoefficientSpectrum] | None = None
 ) -> tuple[ScatteringCoefficientSpectrum, ...]:
-    """Every published row whose description or group contains *name*.
+    """Every row whose description or group contains *name*.
 
     :param name: A fragment of the printed description or of the group
         heading above it, matched without case. The headings are where the
@@ -135,13 +135,13 @@ def scattering_named(
         :func:`phonometry.io.read_catalogue` returns, ``PUBLISHED_SCATTERING |
         mine`` to search both at once, or any mapping of key to row (Default:
         ``None``, which searches :data:`PUBLISHED_SCATTERING`).
-    :return: The rows that match, in the order the tables are read, which is
-        empty when no page has one.
+    :return: The rows that match, in catalogue order, which is empty when no
+        row has one.
     :raises TypeError: for a *catalogue* that is not a mapping, or that holds a
         row that is not a :class:`ScatteringCoefficientSpectrum`, naming its
         key.
     """
-    wanted = name.casefold()
+    wanted = search_text(name)
     return tuple(
         row
         for row in rows_to_search(
@@ -150,5 +150,5 @@ def scattering_named(
             ScatteringCoefficientSpectrum,
             "scattering_named",
         )
-        if wanted in row.name.casefold() or wanted in row.group.casefold()
+        if wanted in search_text(row.name) or wanted in search_text(row.group)
     )

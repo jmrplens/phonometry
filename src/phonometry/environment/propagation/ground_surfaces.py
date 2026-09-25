@@ -51,7 +51,13 @@ from dataclasses import dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING
 
-from ..._internal.catalogue import CatalogueRow, read_table, rows_to_search, take
+from ..._internal.catalogue import (
+    CatalogueRow,
+    read_table,
+    rows_to_search,
+    search_text,
+    take,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -159,7 +165,7 @@ PUBLISHED_GROUND: Mapping[str, GroundSurface] = MappingProxyType(_transcribed())
 def ground_surfaces_named(
     name: str, *, catalogue: Mapping[str, GroundSurface] | None = None
 ) -> tuple[GroundSurface, ...]:
-    """Every published row for a surface name, across the tables.
+    """Every row for a surface name, across the tables.
 
     :param name: The surface as a table prints it, matched without regard to
         case.
@@ -168,16 +174,16 @@ def ground_surfaces_named(
         returns, ``PUBLISHED_GROUND | mine`` to search both at once, or any
         mapping of key to row (Default: ``None``, which searches
         :data:`PUBLISHED_GROUND`).
-    :return: The rows whose :attr:`GroundSurface.name` matches, in the order
-        the tables are read, which is empty when no page names it.
+    :return: The rows whose :attr:`GroundSurface.name` matches, in catalogue
+        order, which is empty when no row names it.
     :raises TypeError: for a *catalogue* that is not a mapping, or that holds a
         row that is not a :class:`GroundSurface`, naming its key.
     """
-    wanted = name.casefold()
+    wanted = search_text(name)
     return tuple(
         row
         for row in rows_to_search(
             catalogue, PUBLISHED_GROUND, GroundSurface, "ground_surfaces_named"
         )
-        if row.name.casefold() == wanted
+        if search_text(row.name) == wanted
     )

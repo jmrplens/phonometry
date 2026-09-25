@@ -80,7 +80,7 @@ Every row whose printed name contains *name*, case insensitively.
 | `name` | Part of a wood's name, as the page prints it. |
 | `catalogue` | The rows to search in place of [`PUBLISHED_ORTHOTROPIC_WOOD`](/phonometry/reference/api/solids/orthotropic-wood/#published_orthotropic_wood): a catalogue of your own that [`phonometry.io.read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) returns, `PUBLISHED_ORTHOTROPIC_WOOD \| mine` to search both at once, or any mapping of key to row (Default: `None`, which searches [`PUBLISHED_ORTHOTROPIC_WOOD`](/phonometry/reference/api/solids/orthotropic-wood/#published_orthotropic_wood)). |
 
-**Returns:** The matching rows, in the order the tables list them. Empty when nothing matches, which is not an error.
+**Returns:** The matching rows, in catalogue order. Empty when nothing matches, which is not an error.
 
 **Raises**
 

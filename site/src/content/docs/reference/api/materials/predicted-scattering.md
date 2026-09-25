@@ -68,7 +68,7 @@ Every predicted row whose description or heading contains *name*.
 | `name` | A fragment of the printed description or of the heading above it, matched without case. The headings are where the topology is: `"sinusoidal"`, `"batten"`, `"triangle"`, since a row of its own reads `"h = 4 cm, L = 20 cm"`. |
 | `catalogue` | The rows to search in place of [`PUBLISHED_PREDICTED_SCATTERING`](/phonometry/reference/api/materials/predicted-scattering/#published_predicted_scattering): a catalogue of your own that [`phonometry.io.read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) returns, `PUBLISHED_PREDICTED_SCATTERING \| mine` to search both at once, or any mapping of key to row (Default: `None`, which searches [`PUBLISHED_PREDICTED_SCATTERING`](/phonometry/reference/api/materials/predicted-scattering/#published_predicted_scattering)). |
 
-**Returns:** The rows that match, in the order the tables are read, which is empty when no table has one.
+**Returns:** The rows that match, in catalogue order, which is empty when no row has one.
 
 **Raises**
 

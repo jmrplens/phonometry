@@ -59,7 +59,7 @@ resilient_moduli_named(
 ) -> tuple[ResilientMaterial, ...]
 ```
 
-Every published resilient material whose name contains *name*.
+Every resilient material whose name contains *name*.
 
 **Parameters**
 
@@ -68,7 +68,7 @@ Every published resilient material whose name contains *name*.
 | `name` | Part of a material name as the page prints it, matched without regard to case: `"rock wool"` answers with both of Vigran's rock wools, which only their densities tell apart. |
 | `catalogue` | The rows to search in place of [`PUBLISHED_RESILIENT_MODULI`](/phonometry/reference/api/materials/moduli/#published_resilient_moduli): a catalogue of your own that [`phonometry.io.read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) returns, `PUBLISHED_RESILIENT_MODULI \| mine` to search both at once, or any mapping of key to row (Default: `None`, which searches [`PUBLISHED_RESILIENT_MODULI`](/phonometry/reference/api/materials/moduli/#published_resilient_moduli)). |
 
-**Returns:** The matching rows, in the order the table lists them. Empty when nothing matches, which is not an error.
+**Returns:** The matching rows, in catalogue order. Empty when nothing matches, which is not an error.
 
 **Raises**
 

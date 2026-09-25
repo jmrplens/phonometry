@@ -65,7 +65,7 @@ diffusion_named(
 ) -> tuple[NormalizedDiffusionSpectrum, ...]
 ```
 
-Every published row whose description or section heading contains *name*.
+Every row whose description or section heading contains *name*.
 
 **Parameters**
 
@@ -74,7 +74,7 @@ Every published row whose description or section heading contains *name*.
 | `name` | A fragment of the printed description or of the numbered heading above it, matched without case. The heading is where the geometry is, so `"semiellipse"` and `"Schroeder"` find their sections and `"6 periods"` finds the rows that say so. |
 | `catalogue` | The rows to search in place of [`PUBLISHED_DIFFUSION`](/phonometry/reference/api/materials/predicted-diffusion/#published_diffusion): a catalogue of your own that [`phonometry.io.read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) returns, `PUBLISHED_DIFFUSION \| mine` to search both at once, or any mapping of key to row (Default: `None`, which searches [`PUBLISHED_DIFFUSION`](/phonometry/reference/api/materials/predicted-diffusion/#published_diffusion)). |
 
-**Returns:** The rows that match, in the order the tables are read, which is empty when no page has one. A surface answers with its three angles.
+**Returns:** The rows that match, in catalogue order, which is empty when no row has one. A surface answers with its three angles.
 
 **Raises**
 

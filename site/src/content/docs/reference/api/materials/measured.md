@@ -86,7 +86,7 @@ absorption_named(
 ) -> tuple[AbsorptionSpectrum, ...]
 ```
 
-Every published coefficient row whose name contains *name*.
+Every coefficient row whose name contains *name*.
 
 A finish is described rather than named, and no two books describe one
 the same way, so this matches a fragment inside the printed name, without
@@ -103,7 +103,7 @@ behalf.
 | `name` | A fragment of the printed name, matched without case. |
 | `catalogue` | The rows to search in place of [`PUBLISHED_ABSORPTION`](/phonometry/reference/api/materials/measured/#published_absorption): a catalogue of your own that [`phonometry.io.read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) returns, `PUBLISHED_ABSORPTION \| mine` to search both at once, or any mapping of key to row (Default: `None`, which searches [`PUBLISHED_ABSORPTION`](/phonometry/reference/api/materials/measured/#published_absorption)). |
 
-**Returns:** The rows whose [`AbsorptionSpectrum.name`](/phonometry/reference/api/materials/measured/#absorptionspectrum) contains it, in the order the tables are read, which is empty when no page has one.
+**Returns:** The rows whose [`AbsorptionSpectrum.name`](/phonometry/reference/api/materials/measured/#absorptionspectrum) contains it, in catalogue order, which is empty when no row has one.
 
 **Raises**
 

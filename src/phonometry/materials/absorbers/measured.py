@@ -73,6 +73,7 @@ from ..._internal.catalogue import (
     UnitAlias,
     read_table,
     rows_to_search,
+    search_text,
     take,
 )
 
@@ -294,7 +295,7 @@ PUBLISHED_ABSORPTION_AREAS: Mapping[str, AbsorptionAreaSpectrum] = MappingProxyT
 def absorption_named(
     name: str, *, catalogue: Mapping[str, AbsorptionSpectrum] | None = None
 ) -> tuple[AbsorptionSpectrum, ...]:
-    """Every published coefficient row whose name contains *name*.
+    """Every coefficient row whose name contains *name*.
 
     A finish is described rather than named, and no two books describe one
     the same way, so this matches a fragment inside the printed name, without
@@ -311,15 +312,15 @@ def absorption_named(
         mine`` to search both at once, or any mapping of key to row (Default:
         ``None``, which searches :data:`PUBLISHED_ABSORPTION`).
     :return: The rows whose :attr:`AbsorptionSpectrum.name` contains it, in
-        the order the tables are read, which is empty when no page has one.
+        catalogue order, which is empty when no row has one.
     :raises TypeError: for a *catalogue* that is not a mapping, or that holds a
         row that is not an :class:`AbsorptionSpectrum`, naming its key.
     """
-    wanted = name.casefold()
+    wanted = search_text(name)
     return tuple(
         row
         for row in rows_to_search(
             catalogue, PUBLISHED_ABSORPTION, AbsorptionSpectrum, "absorption_named"
         )
-        if wanted in row.name.casefold()
+        if wanted in search_text(row.name)
     )

@@ -36,7 +36,13 @@ from dataclasses import dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING
 
-from .._internal.catalogue import CatalogueRow, read_table, rows_to_search, take
+from .._internal.catalogue import (
+    CatalogueRow,
+    read_table,
+    rows_to_search,
+    search_text,
+    take,
+)
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from collections.abc import Mapping
@@ -98,7 +104,7 @@ PUBLISHED_DAMPING_TREATMENTS: Mapping[str, DampingTreatment] = MappingProxyType(
 def damping_treatments_named(
     name: str, *, catalogue: Mapping[str, DampingTreatment] | None = None
 ) -> tuple[DampingTreatment, ...]:
-    """Every published treatment whose printed description contains *name*.
+    """Every treatment whose printed description contains *name*.
 
     :param name: Part of the description as the page prints it, in Spanish,
         matched without regard to case: ``"muescado"`` answers with every
@@ -109,12 +115,12 @@ def damping_treatments_named(
         ``PUBLISHED_DAMPING_TREATMENTS | mine`` to search both at once, or any
         mapping of key to row (Default: ``None``, which searches
         :data:`PUBLISHED_DAMPING_TREATMENTS`).
-    :return: The matching rows, in the order the table lists them. Empty when
-        nothing matches, which is not an error.
+    :return: The matching rows, in catalogue order. Empty when nothing
+        matches, which is not an error.
     :raises TypeError: for a *catalogue* that is not a mapping, or that holds a
         row that is not a :class:`DampingTreatment`, naming its key.
     """
-    wanted = name.casefold()
+    wanted = search_text(name)
     return tuple(
         row
         for row in rows_to_search(
@@ -123,5 +129,5 @@ def damping_treatments_named(
             DampingTreatment,
             "damping_treatments_named",
         )
-        if wanted in row.name.casefold()
+        if wanted in search_text(row.name)
     )

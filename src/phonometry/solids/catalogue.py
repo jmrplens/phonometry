@@ -54,7 +54,13 @@ from dataclasses import dataclass, field
 from types import MappingProxyType
 from typing import TYPE_CHECKING, ClassVar
 
-from .._internal.catalogue import CatalogueRow, read_table, rows_to_search, take
+from .._internal.catalogue import (
+    CatalogueRow,
+    read_table,
+    rows_to_search,
+    search_text,
+    take,
+)
 from .elastic import (
     beam_longitudinal_speed,
     bulk_longitudinal_speed,
@@ -420,7 +426,7 @@ PUBLISHED_SOLIDS: Mapping[str, SolidMaterial] = MappingProxyType(_load())
 def solids_named(
     name: str, *, catalogue: Mapping[str, SolidMaterial] | None = None
 ) -> tuple[SolidMaterial, ...]:
-    """Every published row for a material, across the books.
+    """Every row for a material, across the tables.
 
     Comparing two books is the point of holding both, and it has to be a
     deliberate act: a lookup that returned one row for "steel" would be
@@ -433,16 +439,16 @@ def solids_named(
         returns, ``PUBLISHED_SOLIDS | mine`` to search both at once, or any
         mapping of key to row (Default: ``None``, which searches
         :data:`PUBLISHED_SOLIDS`).
-    :return: The rows whose :attr:`SolidMaterial.name` matches, in the order
-        the tables are read, which is empty when no page names it.
+    :return: The rows whose :attr:`SolidMaterial.name` matches, in catalogue
+        order, which is empty when no row names it.
     :raises TypeError: for a *catalogue* that is not a mapping, or that holds a
         row that is not a :class:`SolidMaterial`, naming its key.
     """
-    wanted = name.casefold()
+    wanted = search_text(name)
     return tuple(
         row
         for row in rows_to_search(
             catalogue, PUBLISHED_SOLIDS, SolidMaterial, "solids_named"
         )
-        if row.name.casefold() == wanted
+        if search_text(row.name) == wanted
     )

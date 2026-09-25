@@ -195,6 +195,10 @@ SOURCED: dict[tuple[str, str], str] = {
         "resistivities over three model fits"
     ),
     (
+        "environment/propagation/ground_surfaces.py",
+        "_FITS",
+    ): "Cox & D'Antonio 3e Table 6.7, the three model fits its footnotes name",
+    (
         "fluids/catalogue.py",
         "PUBLISHED_FLUIDS",
     ): (

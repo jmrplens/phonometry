@@ -454,6 +454,11 @@ jobs:
     # is committed and CI checks it against a fresh run.
     - name: Check the catalogue data the site renders
       run: python scripts/generate_catalogue_data.py --check
+    # The JSON Schema of a catalogue file is written from the row classes, so
+    # a field added to one would be missing from every editor that completes
+    # a catalogue file until the published schema is written again.
+    - name: Check the catalogue schema the site publishes
+      run: python scripts/generate_catalogue_schema.py --check
 
   # The solids catalogue's point is that a published value is worth more beside
   # another published value than alone, and four books print the same material.

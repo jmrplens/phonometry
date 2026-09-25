@@ -278,8 +278,8 @@ ElasticFDTD2D.from_regions(
     shape: tuple[int, int],
     dx: float,
     *,
-    background: Material | tuple[float, float, float],
-    regions: Iterable[tuple[Any, Material | tuple[float, float, float]]] = (),
+    background: Material | CatalogueRow | tuple[float, float, float],
+    regions: Iterable[tuple[Any, Material | CatalogueRow | tuple[float, float, float]]] = (),
     **kwargs: Any,
 ) -> ElasticFDTD2D
 ```
@@ -308,8 +308,8 @@ or `numpy.s_[120:, :]` for the same thing spelled as a slice.
 | :--- | :--- |
 | `shape` | Grid shape `(ny, nx)`. |
 | `dx` | Grid spacing [m] (square cells). |
-| `background` | The material filling the whole grid first: a [`Material`](/phonometry/reference/api/simulation/elastic-fdtd/#material) or a `(c_p, c_s, rho)` triple, e.g. [`WATER`](/phonometry/reference/api/simulation/elastic-fdtd/#water). |
-| `regions` | `(where, material)` pairs painted in order. |
+| `background` | The material filling the whole grid first: a [`Material`](/phonometry/reference/api/simulation/elastic-fdtd/#material), a `(c_p, c_s, rho)` triple, e.g. [`WATER`](/phonometry/reference/api/simulation/elastic-fdtd/#water), or a solid's catalogue row ([`SolidMaterial`](/phonometry/reference/api/solids/catalogue/#solidmaterial)), whose bulk longitudinal speed, transverse speed and density are read through [`printed`](/phonometry/reference/api/io/io/#cataloguerowprinted). |
+| `regions` | `(where, material)` pairs painted in order, each material taken in any of the forms `background` takes. |
 | `kwargs` | Forwarded to [`ElasticFDTD2D`](/phonometry/reference/api/simulation/elastic-fdtd/#elasticfdtd2d) (`cfl`, `sponge_width`, `sponge_sides`, `sponge_reflection`, `damping`, `free_sides`, `obstacle_mask`). |
 
 **Returns:** The configured stepping engine.
@@ -318,7 +318,8 @@ or `numpy.s_[120:, :]` for the same thing spelled as a slice.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If a mask does not match `shape` or a material spec is invalid. |
+| ValueError | If a mask does not match `shape` or a material spec is invalid, a catalogue row's refusal among them. |
+| TypeError | For a catalogue row of a class that has no bulk longitudinal speed, transverse speed and density. |
 
 ### ElasticFDTD2D.p
 
@@ -564,6 +565,15 @@ The module constants [`AIR`](/phonometry/reference/api/simulation/elastic-fdtd/#
 properties used throughout the documentation and the validation suite,
 mirroring the documented default media of the acoustic solver.
 
+Wherever a [`Material`](/phonometry/reference/api/simulation/elastic-fdtd/#material) is taken, a solid's catalogue row is taken
+too, one of [`PUBLISHED_SOLIDS`](/phonometry/reference/api/solids/catalogue/#published_solids) or one read from
+a catalogue file of your own: its bulk longitudinal speed, its transverse
+speed and its density are read through
+[`printed`](/phonometry/reference/api/io/io/#cataloguerowprinted), which refuses a cell the
+page does not print, in the page's own terms. The plate and bar speeds a
+table prints beside them are never read, because they are not the bulk
+speed this solver integrates.
+
 **Attributes**
 
 | Name | Description |
@@ -582,8 +592,8 @@ mirroring the documented default media of the acoustic solver.
 
 ```python
 scholte_speed(
-    fluid: Material | tuple[float, float, float],
-    solid: Material | tuple[float, float, float],
+    fluid: Material | CatalogueRow | tuple[float, float, float],
+    solid: Material | CatalogueRow | tuple[float, float, float],
 ) -> float
 ```
 
@@ -617,7 +627,7 @@ measured seabed interface waves probe the sediment shear speed
 | Name | Description |
 | :--- | :--- |
 | `fluid` | Fluid half-space: a [`Material`](/phonometry/reference/api/simulation/elastic-fdtd/#material) with `c_s = 0` (or a `(c_p, 0.0, rho)` triple). |
-| `solid` | Elastic half-space: a [`Material`](/phonometry/reference/api/simulation/elastic-fdtd/#material) with `c_s > 0`. |
+| `solid` | Elastic half-space: a [`Material`](/phonometry/reference/api/simulation/elastic-fdtd/#material) with `c_s > 0`, a `(c_p, c_s, rho)` triple or a solid's catalogue row ([`SolidMaterial`](/phonometry/reference/api/solids/catalogue/#solidmaterial)), whose bulk longitudinal speed, transverse speed and density are read through [`printed`](/phonometry/reference/api/io/io/#cataloguerowprinted). |
 
 **Returns:** The Scholte-wave phase speed [m/s].
 
@@ -625,7 +635,8 @@ measured seabed interface waves probe the sediment shear speed
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If `fluid` carries shear or `solid` does not. |
+| ValueError | If `fluid` carries shear or `solid` does not, or a row does not print one of the three numbers, in the row's terms. |
+| TypeError | For a catalogue row of a class that has no bulk longitudinal speed, transverse speed and density. |
 
 ## STEEL
 

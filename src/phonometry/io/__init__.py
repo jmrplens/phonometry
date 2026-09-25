@@ -73,7 +73,9 @@ a mapping in memory, and :func:`write_catalogue` writes rows, a packaged
 table among them, as a file that reads back into the same rows, and a CSV
 file as a spreadsheet opens it with no text read as a formula. Nothing the
 file names is ever imported, and nothing it holds is kept anywhere but in the
-objects handed back.
+objects handed back. :func:`catalogue_schema` writes the JSON Schema of such
+a document for the row classes it is given, so an editor completes a file
+while it is typed and marks what the reader would refuse for its form.
 """
 
 from __future__ import annotations
@@ -96,6 +98,7 @@ from ._catalogue import (
     read_catalogue,
     write_catalogue,
 )
+from ._catalogue_schema import catalogue_schema
 from ._chunks import BroadcastMetadata, CuePoint
 from ._convert import convert
 from ._sidecar import (
@@ -126,6 +129,7 @@ __all__ = [
     "Provenance",
     "Signal",
     "SignalOrigin",
+    "catalogue_schema",
     "convert",
     "info",
     "parse_catalogue",

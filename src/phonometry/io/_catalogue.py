@@ -42,6 +42,8 @@ Key                     Meaning
 ``rows``                A list of rows, at least one.
 ``phonometry_version``  Optional: the version that wrote the file. Never
                         read.
+``$schema``             Optional: where an editor finds the document's JSON
+                        Schema (:func:`catalogue_schema`). Never read.
 ======================  ======================================================
 
 A row is an object with a ``key`` of its own, a ``name``, and its cells named
@@ -203,7 +205,14 @@ _TOP_REQUIRED = (
     "rows",
 )
 _TOP_KEYS = frozenset(
-    {*_TOP_REQUIRED, "basis", "attributed_to", "conventions", "phonometry_version"}
+    {
+        *_TOP_REQUIRED,
+        "basis",
+        "attributed_to",
+        "conventions",
+        "phonometry_version",
+        "$schema",
+    }
 )
 _PROVENANCE_FIELDS = tuple(item.name for item in dataclasses.fields(Provenance))
 _PROVENANCE_REQUIRED = ("kind", "document", "version", "consulted")
@@ -1005,9 +1014,10 @@ class _Reader:
 
     def unread(self, document: Mapping[str, Any]) -> None:
         """The keys the reader never reads, held to what they are."""
-        version = document.get("phonometry_version")
-        if version is not None and not isinstance(version, str):
-            self.error("/phonometry_version", f"is {_quote(version)}, not text")
+        for key in ("phonometry_version", "$schema"):
+            held = document.get(key)
+            if held is not None and not isinstance(held, str):
+                self.error(_pointer(key), f"is {_quote(held)}, not text")
 
     def table_credit(self, held: object) -> str:
         """The credit of the whole table, as the document gives it once."""

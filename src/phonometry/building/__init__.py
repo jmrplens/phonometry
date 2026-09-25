@@ -25,6 +25,7 @@ from .catalogue import (
     TransmissionLossSpectrum,
     transmission_loss_named,
 )
+from .datasheets import ImpactImprovementSpectrum, SoundReductionSpectrum
 from .impact_catalogue import (
     PUBLISHED_IMPACT_INSULATION,
     ImpactInsulation,
@@ -48,6 +49,7 @@ from .measurement import (
     FloorCoveringImprovementResult,
     HeavyImpactSourceCheck,
     HeavyImpactSourceSpec,
+    ImpactImprovementRatingResult,
     ImpactInsulationResult,
     ImpactRatingResult,
     IntensityElementNormalizedResult,
@@ -312,6 +314,8 @@ __all__ = [
     "PUBLISHED_TRANSMISSION_LOSS",
     "TRANSMISSION_LOSS_BANDS_HZ",
     "TransmissionLossSpectrum",
+    "SoundReductionSpectrum",
+    "ImpactImprovementSpectrum",
     "transmission_loss_named",
     "PUBLISHED_IMPACT_INSULATION",
     "ImpactInsulation",
@@ -366,6 +370,7 @@ __all__ = [
     "HomogeneousElement",
     "ImpactInsulationResult",
     "ImpactPredictionResult",
+    "ImpactImprovementRatingResult",
     "ImpactRatingResult",
     "InSituElementResult",
     "InstalledSourceResult",

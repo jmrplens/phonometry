@@ -70,6 +70,7 @@ from .._internal.catalogue import (
     CatalogueRow,
     read_packaged,
     read_table,
+    rows_to_search,
     take,
 )
 from ._state import Fluid
@@ -272,7 +273,9 @@ def _gases() -> dict[str, Gas]:
 PUBLISHED_GASES: Mapping[str, Gas] = MappingProxyType(_gases())
 
 
-def gases_named(name: str) -> tuple[Gas, ...]:
+def gases_named(
+    name: str, *, catalogue: Mapping[str, Gas] | None = None
+) -> tuple[Gas, ...]:
     """Every published row for a gas name, across the tables.
 
     Two books printing one gas is worth having, because the pair they print is
@@ -285,11 +288,22 @@ def gases_named(name: str) -> tuple[Gas, ...]:
     :param name: The gas as a table names it, matched without regard to case
         and ignoring a parenthesis the page adds: ``"air"`` answers with the
         row Hopkins prints as ``"Air (dry)"``.
+    :param catalogue: The rows to search in place of :data:`PUBLISHED_GASES`: a
+        catalogue of your own that :func:`phonometry.io.read_catalogue`
+        returns, ``PUBLISHED_GASES | mine`` to search both at once, or any
+        mapping of key to row (Default: ``None``, which searches
+        :data:`PUBLISHED_GASES`).
     :return: The rows whose :attr:`Gas.name` matches, in the order the tables
         are read, which is empty when no page names it.
+    :raises TypeError: for a *catalogue* that is not a mapping, or that holds a
+        row that is not a :class:`Gas`, naming its key.
     """
     wanted = _plain(name)
-    return tuple(row for row in PUBLISHED_GASES.values() if _plain(row.name) == wanted)
+    return tuple(
+        row
+        for row in rows_to_search(catalogue, PUBLISHED_GASES, Gas, "gases_named")
+        if _plain(row.name) == wanted
+    )
 
 
 def _plain(name: str) -> str:

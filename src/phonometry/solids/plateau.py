@@ -56,7 +56,7 @@ from dataclasses import dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING
 
-from .._internal.catalogue import CatalogueRow, read_table, take
+from .._internal.catalogue import CatalogueRow, read_table, rows_to_search, take
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from collections.abc import Mapping
@@ -112,15 +112,28 @@ def _load() -> dict[str, PlateauMaterial]:
 PUBLISHED_PLATEAU_DATA: Mapping[str, PlateauMaterial] = MappingProxyType(_load())
 
 
-def plateau_material_named(name: str) -> tuple[PlateauMaterial, ...]:
+def plateau_material_named(
+    name: str, *, catalogue: Mapping[str, PlateauMaterial] | None = None
+) -> tuple[PlateauMaterial, ...]:
     """Every row whose printed name contains *name*, case insensitively.
 
     :param name: Part of a material name, as the page prints it.
+    :param catalogue: The rows to search in place of
+        :data:`PUBLISHED_PLATEAU_DATA`: a catalogue of your own that
+        :func:`phonometry.io.read_catalogue` returns, ``PUBLISHED_PLATEAU_DATA
+        | mine`` to search both at once, or any mapping of key to row (Default:
+        ``None``, which searches :data:`PUBLISHED_PLATEAU_DATA`).
     :return: The matching rows, in the order the tables list them. Empty when
         nothing matches, which is not an error: a caller asking whether a
         material is tabulated gets an empty answer rather than an exception.
+    :raises TypeError: for a *catalogue* that is not a mapping, or that holds a
+        row that is not a :class:`PlateauMaterial`, naming its key.
     """
     wanted = name.casefold()
     return tuple(
-        row for row in PUBLISHED_PLATEAU_DATA.values() if wanted in row.name.casefold()
+        row
+        for row in rows_to_search(
+            catalogue, PUBLISHED_PLATEAU_DATA, PlateauMaterial, "plateau_material_named"
+        )
+        if wanted in row.name.casefold()
     )

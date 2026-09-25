@@ -245,21 +245,20 @@ def _listed(names: Sequence[str]) -> str:
 # ---------------------------------------------------------------------------
 # The catalogue
 # ---------------------------------------------------------------------------
-class _Joined(Mapping[str, CatalogueRow]):
+class _Joined[R: CatalogueRow](Mapping[str, R]):
     """Two catalogues read as one, which never lets one row replace another.
 
     What ``|`` gives between a :class:`Catalogue` and any other mapping of
     rows. It is read-only and joins again with ``|`` under the same rule, so
     ``(PUBLISHED_POROUS | mine) | theirs`` refuses a shared key at every
     step, where a plain ``dict`` would keep the last row under it and say
-    nothing.
+    nothing. Joining two mappings of one row class gives a mapping of that
+    class, so the join goes to a ``*_named`` lookup as either side would.
     """
 
     __slots__ = ("_rows",)
 
-    def __init__(
-        self, left: Mapping[str, CatalogueRow], right: Mapping[str, CatalogueRow]
-    ) -> None:
+    def __init__(self, left: Mapping[str, R], right: Mapping[str, R]) -> None:
         shared = [key for key in right if key in left]
         if shared:
             verb = "is" if len(shared) == 1 else "are"
@@ -269,9 +268,9 @@ class _Joined(Mapping[str, CatalogueRow]):
                 "the row out of one of them first"
             )
             raise CatalogueError(msg)
-        self._rows: Mapping[str, CatalogueRow] = MappingProxyType({**left, **right})
+        self._rows: Mapping[str, R] = MappingProxyType({**left, **right})
 
-    def __getitem__(self, key: str) -> CatalogueRow:
+    def __getitem__(self, key: str) -> R:
         """The row under *key*, from whichever side holds it."""
         return self._rows[key]
 
@@ -283,17 +282,13 @@ class _Joined(Mapping[str, CatalogueRow]):
         """How many rows the two sides hold together."""
         return len(self._rows)
 
-    def __or__(self, other: object) -> Mapping[str, CatalogueRow]:
+    def __or__[S: CatalogueRow](self, other: Mapping[str, S]) -> Mapping[str, R | S]:
         """This and *other* as one, refusing a key both hold."""
-        if not isinstance(other, Mapping):
-            return NotImplemented
-        return _Joined(self, other)
+        return _join(self, other)
 
-    def __ror__(self, other: object) -> Mapping[str, CatalogueRow]:
+    def __ror__[S: CatalogueRow](self, other: Mapping[str, S]) -> Mapping[str, R | S]:
         """*other* and this as one, refusing a key both hold."""
-        if not isinstance(other, Mapping):
-            return NotImplemented
-        return _Joined(other, self)
+        return _join(other, self)
 
     def __repr__(self) -> str:
         """How many rows, not the rows themselves."""
@@ -377,21 +372,17 @@ class Catalogue[R: CatalogueRow](Mapping[str, R]):
         """How many rows the catalogue holds."""
         return len(self.rows)
 
-    def __or__(self, other: object) -> Mapping[str, CatalogueRow]:
+    def __or__[S: CatalogueRow](self, other: Mapping[str, S]) -> Mapping[str, R | S]:
         """This and *other* as one read-only mapping, refusing a shared key."""
-        if not isinstance(other, Mapping):
-            return NotImplemented
-        return _Joined(self, other)
+        return _join(self, other)
 
-    def __ror__(self, other: object) -> Mapping[str, CatalogueRow]:
+    def __ror__[S: CatalogueRow](self, other: Mapping[str, S]) -> Mapping[str, R | S]:
         """*other* and this as one read-only mapping, refusing a shared key.
 
         What ``PUBLISHED_POROUS | mine`` reaches, since a published mapping
         does not know how to join a catalogue.
         """
-        if not isinstance(other, Mapping):
-            return NotImplemented
-        return _Joined(other, self)
+        return _join(other, self)
 
     def __repr__(self) -> str:
         """The name, the row class and the counts, not the rows themselves."""
@@ -399,6 +390,22 @@ class Catalogue[R: CatalogueRow](Mapping[str, R]):
             f"Catalogue(name={self.name!r}, row_type={self.row_type.__name__}, "
             f"rows={len(self.rows)}, notes={len(self.notes)})"
         )
+
+
+def _join[R: CatalogueRow, S: CatalogueRow](
+    left: Mapping[str, R], right: Mapping[str, S]
+) -> Mapping[str, R | S]:
+    """*left* and *right* as one read-only mapping that refuses a shared key.
+
+    Typed as the union of the two sides' row classes, so the join of two
+    mappings of one class is a mapping of that class. An operand that is not
+    a mapping gives ``NotImplemented``, which is what ``|`` expects of an
+    operand it cannot join, so Python raises its own :class:`TypeError`.
+    """
+    if not (isinstance(left, Mapping) and isinstance(right, Mapping)):
+        return NotImplemented
+    joined: _Joined[R | S] = _Joined(left, right)
+    return joined
 
 
 # ---------------------------------------------------------------------------

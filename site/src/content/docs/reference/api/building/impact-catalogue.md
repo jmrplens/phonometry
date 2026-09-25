@@ -110,7 +110,11 @@ than the one printed.
 ## impact_insulation_named
 
 ```python
-impact_insulation_named(name: str) -> tuple[ImpactInsulation, ...]
+impact_insulation_named(
+    name: str,
+    *,
+    catalogue: Mapping[str, ImpactInsulation] | None = None,
+) -> tuple[ImpactInsulation, ...]
 ```
 
 Every published row whose printed description contains *name*.
@@ -120,8 +124,15 @@ Every published row whose printed description contains *name*.
 | Name | Description |
 | :--- | :--- |
 | `name` | A fragment of the printed description, matched without case. The descriptions are in the language the page is set in, and they are the only thing matched: there is no short name for a construction the page describes in a paragraph. |
+| `catalogue` | The rows to search in place of [`PUBLISHED_IMPACT_INSULATION`](/phonometry/reference/api/building/impact-catalogue/#published_impact_insulation): a catalogue of your own that [`phonometry.io.read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) returns, `PUBLISHED_IMPACT_INSULATION \| mine` to search both at once, or any mapping of key to row (Default: `None`, which searches [`PUBLISHED_IMPACT_INSULATION`](/phonometry/reference/api/building/impact-catalogue/#published_impact_insulation)). |
 
 **Returns:** The matching rows, in catalogue order. Empty when none match. A tuple and not one row, because a description is not a name and several constructions share most of their words.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | for a *catalogue* that is not a mapping, or that holds a row that is not a [`ImpactInsulation`](/phonometry/reference/api/building/impact-catalogue/#impactinsulation), naming its key. |
 
 ## ImpactInsulation
 

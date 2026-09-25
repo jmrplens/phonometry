@@ -103,7 +103,11 @@ TRANSMISSION_LOSS_BANDS_HZ = (63, 125, 250, 500, 1000, 2000, 4000, 8000)
 ## transmission_loss_named
 
 ```python
-transmission_loss_named(name: str) -> tuple[TransmissionLossSpectrum, ...]
+transmission_loss_named(
+    name: str,
+    *,
+    catalogue: Mapping[str, TransmissionLossSpectrum] | None = None,
+) -> tuple[TransmissionLossSpectrum, ...]
 ```
 
 Every published row whose printed description contains *name*.
@@ -113,8 +117,15 @@ Every published row whose printed description contains *name*.
 | Name | Description |
 | :--- | :--- |
 | `name` | A fragment of the printed description, matched without case. |
+| `catalogue` | The rows to search in place of [`PUBLISHED_TRANSMISSION_LOSS`](/phonometry/reference/api/building/catalogue/#published_transmission_loss): a catalogue of your own that [`phonometry.io.read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) returns, `PUBLISHED_TRANSMISSION_LOSS \| mine` to search both at once, or any mapping of key to row (Default: `None`, which searches [`PUBLISHED_TRANSMISSION_LOSS`](/phonometry/reference/api/building/catalogue/#published_transmission_loss)). |
 
 **Returns:** The rows whose description contains it, in the order the tables are read, which is empty when no page has one. It matches the printed description and nothing else, in the language the page is set in: `"door"` answers with the rows that carry the word, and not with Bies's hollow flush panel or solid hardwood, which the page describes without it, nor with the doors of the Spanish edition of Harris, which are `"puerta"`. The caller reads the thickness, the surface density and the variant to pick the row they mean.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | for a *catalogue* that is not a mapping, or that holds a row that is not a [`TransmissionLossSpectrum`](/phonometry/reference/api/building/catalogue/#transmissionlossspectrum), naming its key. |
 
 ## TransmissionLossSpectrum
 

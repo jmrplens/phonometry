@@ -58,7 +58,11 @@ DIFFUSION_BANDS_HZ = (100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000, 12
 ## diffusion_named
 
 ```python
-diffusion_named(name: str) -> tuple[NormalizedDiffusionSpectrum, ...]
+diffusion_named(
+    name: str,
+    *,
+    catalogue: Mapping[str, NormalizedDiffusionSpectrum] | None = None,
+) -> tuple[NormalizedDiffusionSpectrum, ...]
 ```
 
 Every published row whose description or section heading contains *name*.
@@ -68,8 +72,15 @@ Every published row whose description or section heading contains *name*.
 | Name | Description |
 | :--- | :--- |
 | `name` | A fragment of the printed description or of the numbered heading above it, matched without case. The heading is where the geometry is, so `"semiellipse"` and `"Schroeder"` find their sections and `"6 periods"` finds the rows that say so. |
+| `catalogue` | The rows to search in place of [`PUBLISHED_DIFFUSION`](/phonometry/reference/api/materials/predicted-diffusion/#published_diffusion): a catalogue of your own that [`phonometry.io.read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) returns, `PUBLISHED_DIFFUSION \| mine` to search both at once, or any mapping of key to row (Default: `None`, which searches [`PUBLISHED_DIFFUSION`](/phonometry/reference/api/materials/predicted-diffusion/#published_diffusion)). |
 
 **Returns:** The rows that match, in the order the tables are read, which is empty when no page has one. A surface answers with its three angles.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | for a *catalogue* that is not a mapping, or that holds a row that is not a [`NormalizedDiffusionSpectrum`](/phonometry/reference/api/materials/predicted-diffusion/#normalizeddiffusionspectrum), naming its key. |
 
 ## NormalizedDiffusionSpectrum
 

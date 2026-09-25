@@ -60,7 +60,7 @@ from dataclasses import dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING
 
-from .._internal.catalogue import CatalogueRow, read_table, take
+from .._internal.catalogue import CatalogueRow, read_table, rows_to_search, take
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from collections.abc import Mapping
@@ -126,16 +126,31 @@ def _load() -> dict[str, OrthotropicWood]:
 PUBLISHED_ORTHOTROPIC_WOOD: Mapping[str, OrthotropicWood] = MappingProxyType(_load())
 
 
-def orthotropic_wood_named(name: str) -> tuple[OrthotropicWood, ...]:
+def orthotropic_wood_named(
+    name: str, *, catalogue: Mapping[str, OrthotropicWood] | None = None
+) -> tuple[OrthotropicWood, ...]:
     """Every row whose printed name contains *name*, case insensitively.
 
     :param name: Part of a wood's name, as the page prints it.
+    :param catalogue: The rows to search in place of
+        :data:`PUBLISHED_ORTHOTROPIC_WOOD`: a catalogue of your own that
+        :func:`phonometry.io.read_catalogue` returns,
+        ``PUBLISHED_ORTHOTROPIC_WOOD | mine`` to search both at once, or any
+        mapping of key to row (Default: ``None``, which searches
+        :data:`PUBLISHED_ORTHOTROPIC_WOOD`).
     :return: The matching rows, in the order the tables list them. Empty when
         nothing matches, which is not an error.
+    :raises TypeError: for a *catalogue* that is not a mapping, or that holds a
+        row that is not a :class:`OrthotropicWood`, naming its key.
     """
     wanted = name.casefold()
     return tuple(
         row
-        for row in PUBLISHED_ORTHOTROPIC_WOOD.values()
+        for row in rows_to_search(
+            catalogue,
+            PUBLISHED_ORTHOTROPIC_WOOD,
+            OrthotropicWood,
+            "orthotropic_wood_named",
+        )
         if wanted in row.name.casefold()
     )

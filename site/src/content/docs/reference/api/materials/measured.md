@@ -79,7 +79,11 @@ ABSORPTION_BANDS_HZ = (63, 125, 250, 500, 1000, 2000, 4000, 8000)
 ## absorption_named
 
 ```python
-absorption_named(name: str) -> tuple[AbsorptionSpectrum, ...]
+absorption_named(
+    name: str,
+    *,
+    catalogue: Mapping[str, AbsorptionSpectrum] | None = None,
+) -> tuple[AbsorptionSpectrum, ...]
 ```
 
 Every published coefficient row whose name contains *name*.
@@ -97,8 +101,15 @@ behalf.
 | Name | Description |
 | :--- | :--- |
 | `name` | A fragment of the printed name, matched without case. |
+| `catalogue` | The rows to search in place of [`PUBLISHED_ABSORPTION`](/phonometry/reference/api/materials/measured/#published_absorption): a catalogue of your own that [`phonometry.io.read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) returns, `PUBLISHED_ABSORPTION \| mine` to search both at once, or any mapping of key to row (Default: `None`, which searches [`PUBLISHED_ABSORPTION`](/phonometry/reference/api/materials/measured/#published_absorption)). |
 
 **Returns:** The rows whose [`AbsorptionSpectrum.name`](/phonometry/reference/api/materials/measured/#absorptionspectrum) contains it, in the order the tables are read, which is empty when no page has one.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | for a *catalogue* that is not a mapping, or that holds a row that is not a [`AbsorptionSpectrum`](/phonometry/reference/api/materials/measured/#absorptionspectrum), naming its key. |
 
 ## AbsorptionAreaSpectrum
 

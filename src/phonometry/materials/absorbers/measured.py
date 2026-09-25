@@ -68,7 +68,13 @@ from fractions import Fraction
 from types import MappingProxyType
 from typing import TYPE_CHECKING, ClassVar
 
-from ..._internal.catalogue import BandedRow, UnitAlias, read_table, take
+from ..._internal.catalogue import (
+    BandedRow,
+    UnitAlias,
+    read_table,
+    rows_to_search,
+    take,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -285,7 +291,9 @@ PUBLISHED_ABSORPTION_AREAS: Mapping[str, AbsorptionAreaSpectrum] = MappingProxyT
 )
 
 
-def absorption_named(name: str) -> tuple[AbsorptionSpectrum, ...]:
+def absorption_named(
+    name: str, *, catalogue: Mapping[str, AbsorptionSpectrum] | None = None
+) -> tuple[AbsorptionSpectrum, ...]:
     """Every published coefficient row whose name contains *name*.
 
     A finish is described rather than named, and no two books describe one
@@ -297,10 +305,21 @@ def absorption_named(name: str) -> tuple[AbsorptionSpectrum, ...]:
     behalf.
 
     :param name: A fragment of the printed name, matched without case.
+    :param catalogue: The rows to search in place of
+        :data:`PUBLISHED_ABSORPTION`: a catalogue of your own that
+        :func:`phonometry.io.read_catalogue` returns, ``PUBLISHED_ABSORPTION |
+        mine`` to search both at once, or any mapping of key to row (Default:
+        ``None``, which searches :data:`PUBLISHED_ABSORPTION`).
     :return: The rows whose :attr:`AbsorptionSpectrum.name` contains it, in
         the order the tables are read, which is empty when no page has one.
+    :raises TypeError: for a *catalogue* that is not a mapping, or that holds a
+        row that is not a :class:`AbsorptionSpectrum`, naming its key.
     """
     wanted = name.casefold()
     return tuple(
-        row for row in PUBLISHED_ABSORPTION.values() if wanted in row.name.casefold()
+        row
+        for row in rows_to_search(
+            catalogue, PUBLISHED_ABSORPTION, AbsorptionSpectrum, "absorption_named"
+        )
+        if wanted in row.name.casefold()
     )

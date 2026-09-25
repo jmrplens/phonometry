@@ -53,6 +53,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   back and compared field for field in the test suite. The `io` section of
   the documentation is now "Files", since it holds more than audio.
 
+- **Search a catalogue of your own with the same lookups, and draw a panel's
+  plateau from its row.** Every `*_named` lookup of a published catalogue,
+  the twenty of `solids`, `fluids`, `materials`, `building`, `noise_control`
+  and `environment`, takes `catalogue=`: the rows to search in place of its
+  own `PUBLISHED_*`, such as a catalogue `io.read_catalogue` read, or
+  `materials.PUBLISHED_POROUS | mine` to search both at once. Each keeps its
+  own way of matching a name (whole or in part, in the name, in the heading
+  above it or in a carpet's fibre), answers every match in the order the
+  mapping holds them and never picks one for you. A row of another class in
+  the mapping is refused with `TypeError` naming its key, rather than left
+  out of an answer that would then be missing it without saying so. The
+  join of a published catalogue and yours is typed as a mapping of their
+  row class, so a type checker takes it where a lookup asks for one.
+  `building.plateau_transmission_loss` takes a `solids.PlateauMaterial` row
+  as its `material` as well as a name: one of `solids.PUBLISHED_PLATEAU_DATA`,
+  which draws the curve its name draws, or a board from a data sheet of your
+  own. The row gives its three numbers through `printed()`, so a plateau
+  height the sheet declares as a bound is refused in the sheet's own words
+  instead of being drawn, and a number you pass replaces the row's without
+  the row's being read.
+
 - **Sound power in the 16 kHz octave band (ISO 9295).** The general sound
   power methods stop at the 10 kHz one-third-octave band, and a printer's
   paper noise or a power supply's whine sits above it. The new

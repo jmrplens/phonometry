@@ -74,7 +74,11 @@ right.
 ## porous_materials_named
 
 ```python
-porous_materials_named(name: str) -> tuple[PorousMaterial, ...]
+porous_materials_named(
+    name: str,
+    *,
+    catalogue: Mapping[str, PorousMaterial] | None = None,
+) -> tuple[PorousMaterial, ...]
 ```
 
 Every published row for a specimen name, across the tables.
@@ -92,8 +96,15 @@ two ranges Cox compiles for it.
 | Name | Description |
 | :--- | :--- |
 | `name` | The specimen name as a table prints it, matched without regard to case: `"Foam"`, `"foam"`. |
+| `catalogue` | The rows to search in place of [`PUBLISHED_POROUS`](/phonometry/reference/api/materials/catalogue/#published_porous): a catalogue of your own that [`phonometry.io.read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) returns, `PUBLISHED_POROUS \| mine` to search both at once, or any mapping of key to row (Default: `None`, which searches [`PUBLISHED_POROUS`](/phonometry/reference/api/materials/catalogue/#published_porous)). |
 
 **Returns:** The rows whose [`PorousMaterial.name`](/phonometry/reference/api/materials/catalogue/#porousmaterial) matches, in the order the tables are read, which is empty when no page names it.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | for a *catalogue* that is not a mapping, or that holds a row that is not a [`PorousMaterial`](/phonometry/reference/api/materials/catalogue/#porousmaterial), naming its key. |
 
 ## PorousMaterial
 

@@ -50,7 +50,11 @@ catalogue here.
 ## solid_nonlinearity_named
 
 ```python
-solid_nonlinearity_named(name: str) -> tuple[SolidNonlinearity, ...]
+solid_nonlinearity_named(
+    name: str,
+    *,
+    catalogue: Mapping[str, SolidNonlinearity] | None = None,
+) -> tuple[SolidNonlinearity, ...]
 ```
 
 Every published solid whose printed name contains *name*.
@@ -60,8 +64,15 @@ Every published solid whose printed name contains *name*.
 | Name | Description |
 | :--- | :--- |
 | `name` | Part of the name as the page prints it, matched without regard to case: `"fcc"` answers with both face-centred cubic rows. |
+| `catalogue` | The rows to search in place of [`PUBLISHED_SOLID_NONLINEARITY`](/phonometry/reference/api/solids/nonlinearity/#published_solid_nonlinearity): a catalogue of your own that [`phonometry.io.read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) returns, `PUBLISHED_SOLID_NONLINEARITY \| mine` to search both at once, or any mapping of key to row (Default: `None`, which searches [`PUBLISHED_SOLID_NONLINEARITY`](/phonometry/reference/api/solids/nonlinearity/#published_solid_nonlinearity)). |
 
 **Returns:** The matching rows, in the order the table lists them. Empty when nothing matches, which is not an error.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | for a *catalogue* that is not a mapping, or that holds a row that is not a [`SolidNonlinearity`](/phonometry/reference/api/solids/nonlinearity/#solidnonlinearity), naming its key. |
 
 ## SolidNonlinearity
 

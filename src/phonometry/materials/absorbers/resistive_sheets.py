@@ -99,8 +99,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from types import MappingProxyType
+from typing import TYPE_CHECKING
 
-from ..._internal.catalogue import CatalogueRow, read_table, take
+from ..._internal.catalogue import CatalogueRow, read_table, rows_to_search, take
+
+if TYPE_CHECKING:
+    from collections.abc import Mapping
 
 __all__ = [
     "PUBLISHED_FLOW_RESISTANCE",
@@ -241,7 +245,9 @@ PUBLISHED_FLOW_RESISTANCE: MappingProxyType[str, ResistiveSheet] = MappingProxyT
 )
 
 
-def resistive_sheet_named(name: str) -> tuple[ResistiveSheet, ...]:
+def resistive_sheet_named(
+    name: str, *, catalogue: Mapping[str, ResistiveSheet] | None = None
+) -> tuple[ResistiveSheet, ...]:
     """Every facing a page labels *name*, matched whole and without case.
 
     Whole and not in part, unlike the other catalogues of this library, and
@@ -254,11 +260,24 @@ def resistive_sheet_named(name: str) -> tuple[ResistiveSheet, ...]:
 
     :param name: The label as its page prints it: ``"80"``, ``"1584"``,
         ``"FM 122"``.
+    :param catalogue: The rows to search in place of
+        :data:`PUBLISHED_FLOW_RESISTANCE`: a catalogue of your own that
+        :func:`phonometry.io.read_catalogue` returns,
+        ``PUBLISHED_FLOW_RESISTANCE | mine`` to search both at once, or any
+        mapping of key to row (Default: ``None``, which searches
+        :data:`PUBLISHED_FLOW_RESISTANCE`).
     :return: The matching rows, in catalogue order. Empty when none match.
+    :raises TypeError: for a *catalogue* that is not a mapping, or that holds a
+        row that is not a :class:`ResistiveSheet`, naming its key.
     """
     wanted = name.casefold()
     return tuple(
         row
-        for row in PUBLISHED_FLOW_RESISTANCE.values()
+        for row in rows_to_search(
+            catalogue,
+            PUBLISHED_FLOW_RESISTANCE,
+            ResistiveSheet,
+            "resistive_sheet_named",
+        )
         if row.name.casefold() == wanted
     )

@@ -55,7 +55,11 @@ written once, in the file that holds the rows it belongs to.
 ## ground_surfaces_named
 
 ```python
-ground_surfaces_named(name: str) -> tuple[GroundSurface, ...]
+ground_surfaces_named(
+    name: str,
+    *,
+    catalogue: Mapping[str, GroundSurface] | None = None,
+) -> tuple[GroundSurface, ...]
 ```
 
 Every published row for a surface name, across the tables.
@@ -65,8 +69,15 @@ Every published row for a surface name, across the tables.
 | Name | Description |
 | :--- | :--- |
 | `name` | The surface as a table prints it, matched without regard to case. |
+| `catalogue` | The rows to search in place of [`PUBLISHED_GROUND`](/phonometry/reference/api/environment/ground-surfaces/#published_ground): a catalogue of your own that [`phonometry.io.read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) returns, `PUBLISHED_GROUND \| mine` to search both at once, or any mapping of key to row (Default: `None`, which searches [`PUBLISHED_GROUND`](/phonometry/reference/api/environment/ground-surfaces/#published_ground)). |
 
 **Returns:** The rows whose [`GroundSurface.name`](/phonometry/reference/api/environment/ground-surfaces/#groundsurface) matches, in the order the tables are read, which is empty when no page names it.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | for a *catalogue* that is not a mapping, or that holds a row that is not a [`GroundSurface`](/phonometry/reference/api/environment/ground-surfaces/#groundsurface), naming its key. |
 
 ## GroundSurface
 

@@ -566,3 +566,15 @@ def test_the_limits_the_schema_states_are_the_readers() -> None:
     assert set(SCHEMA["$defs"]["provenance"]["properties"]) == {
         item.name for item in dataclasses.fields(io.Provenance)
     }
+
+
+@dataclasses.dataclass(frozen=True, kw_only=True)
+class _Undocumented(io.CatalogueRow):
+    mass_kg: float | None = None
+
+
+def test_a_class_is_described_by_its_docstring_or_its_name() -> None:
+    schema = io.catalogue_schema(Plasterboard, _Undocumented)
+    documented = schema["$defs"]["Plasterboard"]["description"]
+    assert documented == "A board a catalogue of the library does not hold."
+    assert schema["$defs"]["_Undocumented"]["description"] == "_Undocumented"

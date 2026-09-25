@@ -24,6 +24,7 @@ never refused by the schema.
 from __future__ import annotations
 
 import dataclasses
+from types import MappingProxyType
 from typing import TYPE_CHECKING, Any
 
 from .._internal.catalogue import (
@@ -54,7 +55,7 @@ from ._catalogue import (
 from ._catalogue_csv import _DECIMALS, _DELIMITERS
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable
+    from collections.abc import Iterable, Mapping
 
 #: The dialect of JSON Schema the document is written in.
 _DIALECT = "https://json-schema.org/draft/2020-12/schema"
@@ -296,11 +297,10 @@ class _RowSchema:
                     "figure on its digits and keeps it in converted."
                 ),
             }
-        summary = (cls.__doc__ or "").strip().splitlines()[:1]
         return {
             "type": "object",
             "title": self.name,
-            "description": summary[0] if summary else self.name,
+            "description": self.summary(),
             "required": ["key", *self.names_required()],
             "properties": properties,
             "patternProperties": {
@@ -314,6 +314,17 @@ class _RowSchema:
             },
             "additionalProperties": False,
         }
+
+    def summary(self) -> str:
+        """The first line of the class's docstring, or its name without one.
+
+        A dataclass with no docstring of its own is given its signature as
+        one, which describes nothing an editor should show.
+        """
+        lines = (self.row_type.__doc__ or "").strip().splitlines()
+        if not lines or lines[0].startswith(f"{self.name}("):
+            return self.name
+        return lines[0]
 
     def names_required(self) -> list[str]:
         return [
@@ -421,37 +432,39 @@ def _entry(hedge: str) -> dict[str, Any]:
 
 
 #: What each hedge says, for the editor to show beside it.
-_HEDGES = {
-    "basis": (
-        "What the source says a value is: field (or row) to measured, "
-        "declared, calculated, estimated or extended."
-    ),
-    "approximate": "The fields the page prints with a ~.",
-    "converted": (
-        "Field to [figure, unit] the page prints, for a value you converted "
-        "from a unit the reader has no alias for."
-    ),
-    "carried": (
-        "Field to where the page gives it from, for a cell it prints blank and "
-        "carries from another row."
-    ),
-    "ranges": (
-        "Field to [low, high] for a cell the page prints as an interval; null "
-        "for an open end."
-    ),
-    "bounded_above": "The fields of ranges the page prints as <= x or < x.",
-    "bounded_below": "The fields of ranges the page prints as >= x or > x.",
-    "reported": (
-        "Field to the readings the page lists, with no single value: numbers "
-        "or intervals [low, high]."
-    ),
-    "unquantified": "Field to what the page prints where the number would be.",
-    "uncertainty": "Field to the plus-or-minus the page prints beside the value.",
-    "not_derivable": "Field to why it is left empty although it could be worked out.",
-    "misprinted": "Field to what the page prints there and why it cannot be served.",
-    "attributed_to": "Field (or row, or table) to whom the page credits it.",
-    "borrowed": "Field to the material the page takes the value from.",
-}
+_HEDGES: Mapping[str, str] = MappingProxyType(
+    {
+        "basis": (
+            "What the source says a value is: field (or row) to measured, "
+            "declared, calculated, estimated or extended."
+        ),
+        "approximate": "The fields the page prints with a ~.",
+        "converted": (
+            "Field to [figure, unit] the page prints, for a value you converted "
+            "from a unit the reader has no alias for."
+        ),
+        "carried": (
+            "Field to where the page gives it from, for a cell it prints blank and "
+            "carries from another row."
+        ),
+        "ranges": (
+            "Field to [low, high] for a cell the page prints as an interval; null "
+            "for an open end."
+        ),
+        "bounded_above": "The fields of ranges the page prints as <= x or < x.",
+        "bounded_below": "The fields of ranges the page prints as >= x or > x.",
+        "reported": (
+            "Field to the readings the page lists, with no single value: numbers "
+            "or intervals [low, high]."
+        ),
+        "unquantified": "Field to what the page prints where the number would be.",
+        "uncertainty": "Field to the plus-or-minus the page prints beside the value.",
+        "not_derivable": "Field to why it is left empty although it could be worked out.",
+        "misprinted": "Field to what the page prints there and why it cannot be served.",
+        "attributed_to": "Field (or row, or table) to whom the page credits it.",
+        "borrowed": "Field to the material the page takes the value from.",
+    }
+)
 
 
 def _document(schemas: list[_RowSchema]) -> dict[str, Any]:

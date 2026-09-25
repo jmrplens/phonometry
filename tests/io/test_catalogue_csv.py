@@ -692,6 +692,20 @@ def test_the_header_problems_come_before_the_cells(tmp_path: pathlib.Path) -> No
     ]
 
 
+def test_a_header_that_stops_the_read_is_still_named_first(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A provenance that fails stops the read before any row is built."""
+    header = _header()
+    header["provenance"] = {**_HEADER["provenance"], "consulted": "yesterday"}
+    text = f"{_COLUMNS}\ne400;Tile;E400;x;0,62;0,78;0,90;0,94;0,91\n"
+    issues = _issues(_sheet(tmp_path, text, header))
+    assert [(issue.file, issue.location.split(" (")[0]) for issue in issues] == [
+        ("tiles.csv.phonometry.json", "/provenance/consulted"),
+        ("tiles.csv", "line 2, column D"),
+    ]
+
+
 def test_every_number_with_the_other_decimal_mark_proposes_it(
     tmp_path: pathlib.Path,
 ) -> None:

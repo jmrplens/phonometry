@@ -1454,6 +1454,7 @@ def _finish(
     """
     issues = reader.issues
     if header is None or header.provenance is None:
+        issues.sort()
         issues.refuse()
     rows, extras = _build(reader, header, header.provenance)
     if issues.found:

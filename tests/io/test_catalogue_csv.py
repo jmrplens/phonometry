@@ -22,6 +22,7 @@ import importlib
 import json
 import pathlib
 import pkgutil
+import re
 import sys
 import warnings
 from collections.abc import Mapping
@@ -32,7 +33,7 @@ import pytest
 import phonometry
 from phonometry import io, materials
 from phonometry.building import ImpactInsulation
-from phonometry.io import _catalogue_csv
+from phonometry.io import _catalogue, _catalogue_csv
 from phonometry.materials import (
     AbsorptionAreaSpectrum,
     AbsorptionSpectrum,
@@ -253,6 +254,20 @@ def test_a_quoted_cell_holds_the_delimiter_and_a_line_break(
     assert row.note == "Two\nlines"
 
 
+def test_a_line_after_a_quoted_line_break_is_counted_as_the_file_counts_it(
+    tmp_path: pathlib.Path,
+) -> None:
+    """Row b is the third record and stands on line 4 of the file."""
+    text = (
+        "key;name;note;absorption_coefficient_500\n"
+        'a;Tile;"Two\r\nlines";0,55\n'
+        "b;Tile;;x\n"
+    )
+    (issue,) = _issues(_sheet(tmp_path, text))
+    assert issue.location == "line 4, column D (absorption_coefficient_500)"
+    assert issue.row_key == "b"
+
+
 # ---------------------------------------------------------------------------
 # The grammar of a cell
 # ---------------------------------------------------------------------------
@@ -343,7 +358,63 @@ def test_the_design_example_of_a_corrupt_glyph(tmp_path: pathlib.Path) -> None:
         ),
         ("0.30, 0.35", ".", "holds several numbers"),
         ("n.m.", ",", "write it as [n.m.]"),
-        ("12 dB", ",", "'12 dB' is not a number"),
+        ("n\u200bm", ",", "'n\\u200bm' is not a number; if the datasheet prints this"),
+        ("n\u200bm", ",", "write it between brackets"),
+        (
+            "12 dB",
+            ",",
+            "'12 dB' writes 'dB' after the number; a cell holds the number alone, "
+            "and a unit goes in the column's name",
+        ),
+        (">=5 kPa", ",", "writes 'kPa' after the number"),
+        (
+            "1.000,5",
+            ",",
+            "'1.000,5' separates thousands with a point, which a catalogue never "
+            "reads; write 1000,5",
+        ),
+        ("1.234.567,89", ",", "write 1234567,89"),
+        (
+            "1,000.5",
+            ".",
+            "separates thousands with a comma, which a catalogue never reads; write 1000.5",
+        ),
+        (
+            "1,000,000",
+            ".",
+            "separates thousands with a comma, which a catalogue never reads; write 1000000",
+        ),
+        (
+            "1.000.000",
+            ",",
+            "separates thousands with a point, which a catalogue never reads; write 1000000",
+        ),
+        (
+            "1,000.5",
+            ",",
+            "separates thousands with a comma and writes a decimal point, where the "
+            'header declares "decimal": ","',
+        ),
+        ("0,500", ".", "'0,500' writes a decimal comma"),
+        (
+            "0,30-0,50",
+            ",",
+            "'0,30-0,50' is a range written with a dash, which reads as the minus "
+            "sign of a negative number; a CSV cell writes a range with two points, "
+            "as 0,30..0,50",
+        ),
+        ("0,30 \u2013 0,50", ",", "as 0,30..0,50"),
+        ("~0,30-0,50", ",", "as ~0,30..0,50"),
+        (
+            "0.30-0.50",
+            ",",
+            'as 0.30..0.50, each number with the decimal mark the header declares, "decimal": ","',
+        ),
+        (
+            "0,85 +- 0,05",
+            ",",
+            "writes a plus-or-minus as '+-'; write 0,85\u00b10,05, or 0,85+/-0,05",
+        ),
     ],
 )
 def test_a_cell_the_grammar_does_not_read_is_refused_where_it_is(
@@ -354,6 +425,35 @@ def test_a_cell_the_grammar_does_not_read_is_refused_where_it_is(
     (issue,) = cells
     assert issue.location == "line 2, column C (absorption_coefficient_500)"
     assert said in issue.message
+
+
+@pytest.mark.parametrize("cell", ["0\u202e5", "1\u2066x", "a\x07b", "\x1b[31mred"])
+def test_a_control_character_in_a_numeric_cell_is_named_and_never_shown(
+    tmp_path: pathlib.Path, cell: str
+) -> None:
+    """The refusal names the character and shows the cell only escaped."""
+    path = _one_cell(tmp_path, cell)
+    with pytest.raises(io.CatalogueError, match=r"tiles\.csv") as caught:
+        _read(path)
+    (issue,) = caught.value.issues
+    assert issue.location == "line 2, column C (absorption_coefficient_500)"
+    unsafe = _catalogue._UNSAFE.search(cell)
+    assert unsafe is not None
+    assert f"holds the character U+{ord(unsafe.group()):04X}" in issue.message
+    assert _catalogue._UNSAFE.search(str(caught.value)) is None
+
+
+@pytest.mark.parametrize(("cell", "decimal"), [("12,500", "."), ("12.500", ",")])
+def test_a_figure_grouped_in_thousands_proposes_no_decimal_mark(
+    tmp_path: pathlib.Path, cell: str, decimal: str
+) -> None:
+    """12,500 could be twelve and a half or twelve thousand: it tells no dialect."""
+    header = _header(csv={"delimiter": ";", "decimal": decimal})
+    columns = "key;name;absorption_coefficient_500;absorption_coefficient_1000"
+    path = _sheet(tmp_path, f"{columns}\na;Tile;{cell};{cell}\n", header)
+    issues = _issues(path)
+    assert [issue.file for issue in issues] == ["tiles.csv", "tiles.csv"]
+    assert all("is ambiguous" in issue.message for issue in issues)
 
 
 def test_every_problem_of_every_cell_is_raised_at_once(tmp_path: pathlib.Path) -> None:
@@ -371,8 +471,9 @@ def test_a_refused_sheet_builds_no_row(tmp_path: pathlib.Path) -> None:
     text = (
         f"{_COLUMNS}\ne400;Tile;E400;0,45;0,62;0,78;0,90;0,94;0,91\na;Tile;A;x;;;;;\n"
     )
+    path = _sheet(tmp_path, text)
     with pytest.raises(io.CatalogueError, match="1 problem, and no row was read"):
-        _read(_sheet(tmp_path, text))
+        _read(path)
 
 
 @pytest.mark.parametrize("word", ["true", "false", "TRUE", "False"])
@@ -437,6 +538,16 @@ def test_the_row_contract_is_placed_at_the_cell_it_breaks(
         ("line 2, column D (frame_density_kg_m3)", "frame_density_kg_m3"),
         ("line 3, column C (porosity)", "porosity"),
     ]
+
+
+def test_a_row_with_a_refused_cell_is_not_held_to_the_row_contract(
+    tmp_path: pathlib.Path,
+) -> None:
+    """The row is never built, so its other cells raise nothing more."""
+    header = _header(row_type="PorousMaterial")
+    text = "key;name;porosity;frame_density_kg_m3\na;Core;x;-5\n"
+    (issue,) = _issues(_sheet(tmp_path, text, header), PorousMaterial)
+    assert issue.location == "line 2, column C (porosity)"
 
 
 def test_a_missing_name_is_placed_at_its_column(tmp_path: pathlib.Path) -> None:
@@ -533,6 +644,10 @@ def test_a_measured_row_without_a_report_is_noted_on_its_line(
         ("x-a b", "'x-a b' is not a column name"),
         ("", "has no name"),
         ("na\u202eme", "a mark that reorders text"),
+        ("Mounting", "no column 'Mounting'; did you mean 'mounting'?"),
+        ("Basis", "did you mean 'basis'?"),
+        ("Provenance.Report", "did you mean 'provenance.report'?"),
+        ("ABSORPTION_COEFFICIENT_500", "did you mean 'absorption_coefficient_500'?"),
     ],
 )
 def test_a_column_the_reader_does_not_take_is_refused_on_the_first_line(
@@ -738,6 +853,27 @@ def test_a_first_line_that_splits_at_another_delimiter_proposes_it(
     assert 'splits into 9 at ";"; declare "delimiter": ";"' in issue.message
 
 
+def test_a_first_line_of_one_column_proposes_no_delimiter(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A single 'key' splits into itself at every delimiter, which proposes none."""
+    (issue,) = _issues(_sheet(tmp_path, "key\na\n"))
+    assert (issue.file, issue.location) == ("tiles.csv", "line 1")
+    assert "names no column that holds 'name'" in issue.message
+
+
+def test_a_capitalised_column_is_answered_with_its_name(tmp_path: pathlib.Path) -> None:
+    """A spreadsheet's 'Key' and 'Name' are told the name they mean."""
+    issues = _issues(
+        _sheet(tmp_path, "key;Name;Key;absorption_coefficient_500\na;T;a;1\n")
+    )
+    said = [(issue.location, issue.message) for issue in issues[:2]]
+    assert said == [
+        ("line 1, column B", "no column 'Name'; did you mean 'name'?"),
+        ("line 1, column C", "no column 'Key'; did you mean 'key'?"),
+    ]
+
+
 def test_a_tab_is_a_delimiter(tmp_path: pathlib.Path) -> None:
     header = _header(csv={"delimiter": "\t", "decimal": ","})
     path = _sheet(tmp_path, _TILES.replace(";", "\t"), header)
@@ -889,6 +1025,31 @@ def test_the_columns_follow_the_row_class_then_the_basis_and_the_provenance(
     assert lines[1] == "e400;Example tile;0,45;0,62;0,78;0,9;0,94;0,91;E400;measured"
 
 
+def test_a_unit_column_stands_beside_its_field_and_the_provenance_after_the_basis(
+    tmp_path: pathlib.Path,
+) -> None:
+    folder = tmp_path / "in"
+    folder.mkdir()
+    header = _header(row_type="PorousMaterial")
+    text = (
+        "x-code;provenance.report;basis;flow_resistivity_pa_s_m2;thickness_cm;"
+        "provenance.page;name;key\n"
+        "C-1;26-031;declared;12500;4;3;Core;a\n"
+    )
+    mine = _read(_sheet(folder, text, header), PorousMaterial)
+    path = tmp_path / "out.csv"
+    io.write_catalogue(mine, path, delimiter=";", decimal=",")
+    lines = path.read_text(encoding="utf-8-sig").splitlines()
+    fields = [item.name for item in dataclasses.fields(PorousMaterial)]
+    assert fields.index("flow_resistivity_pa_s_m2") < fields.index("thickness_mm")
+    assert lines[0] == (
+        "key;name;flow_resistivity_pa_s_m2;thickness_cm;basis;provenance.page;"
+        "provenance.report;x-code"
+    )
+    assert lines[1] == "a;Core;12500;4;declared;3;26-031;C-1"
+    assert dict(_read(path, PorousMaterial)) == dict(mine)
+
+
 def test_a_published_table_is_a_template_in_the_default_dialect(
     tmp_path: pathlib.Path,
 ) -> None:
@@ -952,6 +1113,61 @@ def test_a_text_a_spreadsheet_would_run_is_written_after_an_apostrophe(
     assert [row.name for row in back.values()] == list(_FORMULAS)
     assert [row.note for row in back.values()] == list(_FORMULAS)
     assert back.extras == mine.extras
+
+
+@pytest.mark.parametrize(
+    ("delimiter", "decimal"), [(",", "."), (";", ","), ("\t", ",")]
+)
+@pytest.mark.parametrize(
+    ("row", "cell"),
+    [
+        ({"ranges": {_B: [None, 0.5]}, "bounded_above": [_B]}, "<=0D5"),
+        ({"ranges": {_B: [0.25, None]}, "bounded_below": [_B]}, ">=0D25"),
+        ({_B: 0.85, "uncertainty": {_B: 0.05}}, "0D85\u00b10D05"),
+        ({_B: 0.85, "uncertainty": {_B: 0.05}, "approximate": [_B]}, "~0D85\u00b10D05"),
+        ({"ranges": {_B: [0.3, 0.5]}, "approximate": [_B]}, "~0D3..0D5"),
+        ({"ranges": {_B: [0.3, 0.5]}}, "0D3..0D5"),
+        ({_B: 0.85, "approximate": [_B]}, "~0D85"),
+        ({"unquantified": {_B: "n.m."}}, "[n.m.]"),
+        ({_B: -0.5}, "-0D5"),
+        ({_B: 1e-05}, "1e-05"),
+    ],
+)
+def test_every_mark_a_cell_holds_is_written_as_the_grammar_reads_it(
+    tmp_path: pathlib.Path,
+    row: dict[str, object],
+    cell: str,
+    delimiter: str,
+    decimal: str,
+) -> None:
+    mine = io.parse_catalogue(_document(**row), row_type=AbsorptionSpectrum)
+    path = tmp_path / "out.csv"
+    io.write_catalogue(mine, path, delimiter=delimiter, decimal=decimal)
+    first, line = path.read_text(encoding="utf-8-sig").splitlines()
+    written = dict(zip(first.split(delimiter), line.split(delimiter), strict=True))
+    assert written[_B] == cell.replace("D", decimal)
+    assert dict(_read(path)) == dict(mine)
+
+
+def test_a_provenance_text_a_spreadsheet_would_run_is_guarded_too(
+    tmp_path: pathlib.Path,
+) -> None:
+    document = _header(
+        rows=[
+            {"key": "a", "name": "Tile", _B: 0.5, "provenance": {"report": "=x"}},
+            {"key": "b", "name": "Tile", _B: 0.5, "provenance": {"report": "-12"}},
+        ]
+    )
+    del document["csv"]
+    mine = io.parse_catalogue(document, row_type=AbsorptionSpectrum)
+    path = tmp_path / "reports.csv"
+    io.write_catalogue(mine, path)
+    first, *lines = path.read_text(encoding="utf-8-sig").splitlines()
+    column = first.split(",").index("provenance.report")
+    assert [line.split(",")[column] for line in lines] == ["'=x", "'-12"]
+    back = _read(path)
+    reports = [row.provenance.report for row in back.values() if row.provenance]
+    assert reports == ["=x", "-12"]
 
 
 def test_a_number_is_not_guarded_as_a_formula(tmp_path: pathlib.Path) -> None:
@@ -1067,7 +1283,7 @@ def test_a_dialect_a_csv_file_does_not_take_is_refused_before_writing(
 ) -> None:
     mine = _mine(tmp_path)
     target = tmp_path / "out.csv"
-    with pytest.raises(ValueError, match=said):
+    with pytest.raises(ValueError, match=re.escape(said)):
         io.write_catalogue(mine, target, delimiter=delimiter, decimal=decimal)
     assert not target.exists()
 
@@ -1149,6 +1365,43 @@ def _write_sheet(
     return None
 
 
+#: What a CSV writer refuses only by writing it in JSON: each at a pointer
+#: into these members of a row.
+_JSON_ONLY = frozenset(
+    {
+        "reported",
+        "misprinted",
+        "not_derivable",
+        "carried",
+        "converted",
+        "borrowed",
+        "attributed_to",
+        "basis",
+        "provenance",
+    }
+)
+#: The marks a cell holds alone, and refuses only in these combinations.
+_COMBINATIONS = (
+    "a bound with its other end printed too",
+    "a value beside a range",
+    "a range with an open end and no bound",
+    "a plus-or-minus on a range or a bound",
+    "a mark on a cell with no value",
+    "an approximate bound",
+    "a word beside a value",
+)
+
+
+def _refused_as_written(issue: io.CatalogueIssue) -> bool:
+    """Whether a refusal is one the guide lists: JSON only, or a combination."""
+    parts = issue.location.split("/")
+    if parts[:2] != ["", "rows"] or len(parts) < 4:
+        return False
+    if parts[3] in _JSON_ONLY:
+        return "only in a JSON catalogue" in issue.message
+    return issue.message.startswith(_COMBINATIONS)
+
+
 @pytest.mark.parametrize(
     ("mapping", "table", "rows"),
     TABLES,
@@ -1168,13 +1421,18 @@ def test_every_published_table_reads_back_or_is_refused_at_its_pointers(
     refusal = _write_sheet(rows, path, delimiter=delimiter, decimal=decimal)
     if refusal is not None:
         assert refusal.issues
-        assert all(issue.location.startswith("/rows/") for issue in refusal.issues)
-        assert all("JSON" in issue.message for issue in refusal.issues)
+        assert all(_refused_as_written(issue) for issue in refusal.issues)
         assert list(tmp_path.iterdir()) == []
         return
+    row_type = type(next(iter(rows.values())))
+    twin = tmp_path / f"{table}.json"
+    io.write_catalogue(rows, twin, catalogue="copy")
     with warnings.catch_warnings():
         warnings.simplefilter("error")
-        back = io.read_catalogue(path, row_type=type(next(iter(rows.values()))))
+        back = io.read_catalogue(path, row_type=row_type)
+        document = io.read_catalogue(twin, row_type=row_type)
+    assert back.conventions == document.conventions
+    assert back.about == document.about
     assert [key.partition("/")[2] for key in back] == [
         key.rpartition("/")[2] for key in rows
     ]
@@ -1200,7 +1458,7 @@ def test_most_published_tables_go_into_a_sheet(tmp_path: pathlib.Path) -> None:
         for index, (_, table, rows) in enumerate(TABLES)
         if _write_sheet(rows, tmp_path / f"{index}.csv") is None
     ]
-    assert len(whole) >= 40
+    assert len(whole) >= 44
 
 
 def test_a_published_table_is_the_same_rows_from_either_file(

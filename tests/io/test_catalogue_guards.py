@@ -51,14 +51,13 @@ def test_the_walk_finds_the_row_classes() -> None:
 
 
 def _one_row(cls: type[io.CatalogueRow]) -> dict[str, object]:
-    """A row of *cls* that fills its first numeric field, if it has one."""
+    """A row of *cls* that fills its first field of numbers and of whole numbers."""
     row: dict[str, object] = {"key": "a", "name": "Specimen A"}
     kinds = private.field_kinds(cls)
-    numeric = sorted(
-        name for name, kind in kinds.items() if kind in ("number", "whole")
-    )
-    if numeric:
-        row[numeric[0]] = 1 if kinds[numeric[0]] == "whole" else 0.5
+    for kind, value in (("number", 0.5), ("whole", 1)):
+        named = sorted(name for name, held in kinds.items() if held == kind)
+        if named:
+            row[named[0]] = value
     return row
 
 
@@ -135,17 +134,41 @@ def test_every_field_is_a_csv_column_or_is_sent_where_it_is_written(
 ) -> None:
     """Every field of every row class is a column, or its refusal says where it goes.
 
-    A field is a column of the sheet, a mark written in the cell itself, a
-    form only a JSON document writes, or one the library writes; never a
-    name the sheet refuses as unknown, which is what a new kind of field
-    the CSV front end does not know would come out as.
+    Each kind of field is held to what it is: a number, a whole number, a
+    flag or a text is a column of its own kind, but the two texts the
+    library composes; a set or a mapping is the basis column, a mark the
+    cell writes, or a form only a JSON document writes; the provenance is
+    narrowed in its own columns. A kind the CSV front end does not know
+    fails here, instead of coming out as some refusal that reads right.
     """
     reader = _catalogue._Reader(cls, _catalogue._Issues("guard"))
+    kinds = private.field_kinds(cls)
     for item in dataclasses.fields(cls):
-        role, _, problem = _catalogue_csv._Sheet.role(item.name, reader)
-        assert role or problem, item.name
-        assert not problem.startswith("no field"), (item.name, problem)
-        assert "did you mean" not in problem, (item.name, problem)
+        name, kind = item.name, kinds[item.name]
+        role, target, problem = _catalogue_csv._Sheet.role(name, reader)
+        where = (name, kind, role, problem)
+        if kind in ("number", "whole") or (
+            kind in ("flag", "text") and name not in ("source", "table")
+        ):
+            expected = "number" if kind == "whole" else kind
+            assert (role, target, problem) == (expected, name, ""), where
+        elif kind in ("flag", "text"):
+            assert not role, where
+            assert "composed from the provenance" in problem or (
+                "the catalogue's name" in problem
+            ), where
+        elif name == "basis":
+            assert (role, target, problem) == ("basis", "basis", ""), where
+        elif kind in ("set", "mapping"):
+            assert not role, where
+            assert (
+                "only in a JSON catalogue" in problem
+                or "in its own cell" in problem
+                or "what the library works out" in problem
+            ), where
+        else:
+            assert kind == "provenance", where
+            assert problem.startswith("a row narrows its provenance"), where
 
 
 def _data_files() -> list[pathlib.Path]:

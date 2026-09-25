@@ -125,6 +125,10 @@ _NEEDS_APOSTROPHE = re.compile(r"'*[=+\-@\t\r]")
 _ESCAPED = re.compile(r"'+[=+\-@\t\r]")
 #: The spaces a thousands separator is written with.
 _SPACES = " \u00a0\u2009\u202f"
+#: What a refusal calls each decimal mark.
+_MARKS: Mapping[str, str] = MappingProxyType({".": "point", ",": "comma"})
+#: A number with either decimal mark, as a refused cell may write it.
+_FIGURE = r"[-+\u2212]?[0-9]+(?:[.,][0-9]+)?"
 #: The hedges a row writes as lists of fields, and so points at by index.
 _LISTED = ("approximate", "bounded_above", "bounded_below")
 #: What a bound's sign says of it.
@@ -388,6 +392,13 @@ def _cell(cell: str, dialect: _Dialect, noun: str) -> _Cell | _Bad | None:
     text = cell.strip()
     if not text:
         return None
+    unsafe = _UNSAFE.search(text)
+    if unsafe is not None:
+        return _Bad(
+            f"{_quote(text)} holds the character U+{ord(unsafe.group()):04X}; a "
+            "catalogue's cell holds no control character but the tab and the line "
+            "feed, and no mark that reorders text"
+        )
     if text.startswith("["):
         if len(text) > 1 and text.endswith("]"):
             word = text[1:-1]
@@ -412,28 +423,67 @@ def _cell(cell: str, dialect: _Dialect, noun: str) -> _Cell | _Bad | None:
     return _grammar(text, dialect.decimal) or _diagnose(text, dialect, noun)
 
 
+def _thousands(text: str, declared: str) -> _Bad | None:
+    """Why *text*, a number with a thousands separator, is refused, if it is one.
+
+    A separator that stands more than once, or before a fraction written
+    with the other mark, can only separate thousands. One that stands once
+    in a whole number could be the other decimal mark as well, and is only
+    called ambiguous.
+    """
+    found = re.fullmatch(
+        r"(?P<lead>~?\s*[-+\u2212]?)(?P<whole>[1-9][0-9]{0,2}(?P<sep>[.,])[0-9]{3}"
+        r"(?:(?P=sep)[0-9]{3})*)(?:(?P<dec>[.,])(?P<fraction>[0-9]+))?",
+        text,
+    )
+    if found is None or found["dec"] == found["sep"]:
+        return None
+    sep, dec = found["sep"], found["dec"]
+    lead = re.sub(r"\s+", "", found["lead"])
+    digits = found["whole"].replace(sep, "")
+    if dec is not None:
+        if dec != declared:
+            return _Bad(
+                f"{_quote(text)} separates thousands with a {_MARKS[sep]} and "
+                f"writes a decimal {_MARKS[dec]}, where the header declares "
+                f'"decimal": {json.dumps(declared)}; a catalogue never reads a '
+                "thousands separator: write the number without it, and declare "
+                f'"decimal": {json.dumps(dec)} if the file writes decimal '
+                f"{_MARKS[dec]}s",
+                foreign=True,
+            )
+        plain = f"{lead}{digits}{dec}{found['fraction']}"
+    elif sep != declared and found["whole"].count(sep) == 1:
+        return _Bad(
+            f"{_quote(text)} is ambiguous: the header declares "
+            f'"decimal": {json.dumps(declared)}, so the {_MARKS[sep]} can only '
+            "separate thousands, and a catalogue never reads a thousands "
+            f"separator; write {lead}{digits}, or declare "
+            f'"decimal": {json.dumps(sep)} if the file writes decimal '
+            f"{_MARKS[sep]}s"
+        )
+    elif found["whole"].count(sep) == 1:
+        return None
+    else:
+        plain = f"{lead}{digits}"
+    return _Bad(
+        f"{_quote(text)} separates thousands with a {_MARKS[sep]}, which a "
+        f"catalogue never reads; write {plain}"
+    )
+
+
 def _diagnose(text: str, dialect: _Dialect, noun: str) -> _Bad:
     """Why *text* is not a cell, in the terms most likely to mend it."""
     declared = dialect.decimal
     other = "," if declared == "." else "."
     said = f'"decimal": {json.dumps(declared)}'
+    grouped = _thousands(text, declared)
+    if grouped is not None:
+        return grouped
     if isinstance(_grammar(text, other), _Cell):
-        mark = "comma" if other == "," else "point"
-        grouped = re.fullmatch(
-            rf"~?\s*[-+\u2212]?[0-9]{{1,3}}(?:{re.escape(other)}[0-9]{{3}})+", text
-        )
-        if grouped is not None:
-            plain = text.replace(other, "")
-            return _Bad(
-                f"{_quote(text)} is ambiguous: the header declares {said}, so the "
-                f"{mark} can only separate thousands, and a catalogue never reads "
-                f"a thousands separator; write {plain}, or declare "
-                f'"decimal": {json.dumps(other)} if the file writes decimal '
-                f"{mark}s",
-                foreign=True,
-            )
         return _Bad(
-            f"{_quote(text)} writes a decimal {mark}, and the header declares {said}",
+            f"{_quote(text)} writes a decimal {_MARKS[other]}, and the header "
+            f"declares {said}",
             foreign=True,
         )
     if re.fullmatch(
@@ -442,6 +492,37 @@ def _diagnose(text: str, dialect: _Dialect, noun: str) -> _Bad:
         return _Bad(
             f"{_quote(text)} separates thousands with a space, which a catalogue "
             "never reads; write the number without it"
+        )
+    marks = f", each number with the decimal mark the header declares, {said}"
+    found = re.fullmatch(rf"(~?)\s*({_FIGURE})\s*\+-\s*({_FIGURE})", text)
+    if found is not None:
+        approximate, value, spread = found.groups()
+        return _Bad(
+            f"{_quote(text)} writes a plus-or-minus as '+-'; write "
+            f"{approximate}{value}\u00b1{spread}, or {approximate}{value}+/-{spread}"
+            + (marks if other in value + spread else "")
+        )
+    found = re.fullmatch(
+        rf"(~?)\s*({_FIGURE})\s*[-\u2010-\u2013\u2212]\s*({_FIGURE})", text
+    )
+    if found is not None:
+        approximate, low, high = found.groups()
+        return _Bad(
+            f"{_quote(text)} is a range written with a dash, which reads as the "
+            "minus sign of a negative number; a CSV cell writes a range with two "
+            f"points, as {approximate}{low}..{high}"
+            + (marks if other in low + high else "")
+        )
+    found = re.fullmatch(
+        rf"(?:~|<=|>=|<|>|\u2264|\u2265)?\s*{_FIGURE}\s*"
+        r"([A-Za-z\u00b5\u03bc\u00b0%][^\[\]]*)",
+        text,
+    )
+    if found is not None:
+        return _Bad(
+            f"{_quote(text)} writes {_quote(found[1])} after the number; a cell "
+            "holds the number alone, and a unit goes in the column's name, as "
+            "thickness_cm"
         )
     separators = r"\s*[;/|]\s*|\s+" + (r"|\s*,\s*" if declared == "." else "")
     parts = [part for part in re.split(separators, text) if part]
@@ -452,10 +533,11 @@ def _diagnose(text: str, dialect: _Dialect, noun: str) -> _Bad:
             f"{_quote(text)} holds several numbers; "
             + _in_json("reported", "a list of readings with no single value")
         )
-    shown = f"[{text}]" if len(text) <= _WORD else "between brackets"
+    printable = len(text) <= _WORD and text.isprintable()
+    shown = f"as [{text}]" if printable else "between brackets"
     return _Bad(
         f"{_quote(text)} is not a number; if {noun} prints this text where the "
-        f"number would be, write it as {shown}"
+        f"number would be, write it {shown}"
     )
 
 
@@ -656,7 +738,7 @@ class _Sheet:
         if len(names) == 1:
             for other in _DELIMITERS:
                 parts = names[0].split(other)
-                if other != dialect.delimiter and "key" in parts:
+                if other != dialect.delimiter and len(parts) > 1 and "key" in parts:
                     self.issues.error(
                         "/csv/delimiter",
                         f"is {json.dumps(dialect.delimiter)}, and the first line "
@@ -772,15 +854,28 @@ class _Sheet:
             )
         if name in names.spellings.aliases:
             return "number", names.spellings.aliases[name][0], ""
-        close = _closest(name, _OWN_COLUMNS)
-        if close:
-            return "", "", f"no column {name!r}; did you mean {close!r}?"
+        return "", "", _Sheet.unknown(name, names)
+
+    @staticmethod
+    def unknown(name: str, names: _Names) -> str:
+        """Why a column no row class knows is refused, with the name it means.
+
+        A spreadsheet's ``Name`` or ``Key`` is told the name it spells in
+        other letters; any other is told the name most like it.
+        """
         values = frozenset(
             field_name
             for field_name, field_kind in names.kinds.items()
             if field_kind in ("number", "whole", "text", "flag")
         ) - {"source", "table"}
-        return "", "", names.resolve(name, values, frozenset())[1]
+        folded = {
+            known.casefold(): known
+            for known in (*_OWN_COLUMNS, *values, *names.spellings.aliases)
+        }
+        close = folded.get(name.casefold(), "") or _closest(name, _OWN_COLUMNS)
+        if close:
+            return f"no column {name!r}; did you mean {close!r}?"
+        return names.resolve(name, values, frozenset())[1]
 
     # -- a row -----------------------------------------------------------------
     def row(

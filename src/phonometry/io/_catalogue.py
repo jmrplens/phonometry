@@ -113,6 +113,7 @@ from .._internal.catalogue import (
     unit_stem,
 )
 from .._internal.warnings import PhonometryWarning
+from ._sidecar import _SIDECAR_TAIL
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator, Sequence
@@ -124,7 +125,7 @@ CATALOGUE_SCHEMA = "phonometry-catalogue"
 CATALOGUE_SCHEMA_VERSION = 1
 #: What names a CSV file's JSON header: the CSV file's own name with this
 #: after it, the tail the calibration sidecar of an audio file takes too.
-CSV_HEADER_TAIL = ".phonometry.json"
+CSV_HEADER_TAIL = _SIDECAR_TAIL
 
 #: The largest file read, checked on disk before a byte is read.
 _MAX_BYTES = 16 * 1024 * 1024

@@ -66,8 +66,9 @@ van Vossen, Robertsson & Chapman, *Geophysics* 67(2), 618-624 (2002).
 
 from __future__ import annotations
 
+import dataclasses
 from collections.abc import Callable, Iterable, Mapping, Sequence
-from dataclasses import dataclass, fields
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -320,7 +321,7 @@ def _material_of_row(name: str, row: CatalogueRow) -> Material:
     :raises ValueError: for a cell the row does not hold a number in, or for
         speeds no isotropic solid has.
     """
-    held = {item.name for item in fields(row)}
+    held = {item.name for item in dataclasses.fields(row)}
     missing = [cell for cell in _ROW_CELLS if cell not in held]
     if missing:
         msg = (

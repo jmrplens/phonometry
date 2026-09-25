@@ -901,9 +901,10 @@ performance or test report. A sheet is revised under the same title, its terms
 rarely allow copying it, and the value a project needs is the one on the
 sheet the project was specified against. So such data is never merged, from an
 issue or from a pull request, however it is offered. Keep it in a catalogue
-file of your own and read it with `phonometry.io.read_catalogue`: that is what
-the reader is for, and a problem with how it reads your file is a bug report
-that needs the shape of the file, not its numbers.
+file of your own and read it with `phonometry.io.read_catalogue`, as
+[Your own catalogues](docs/io/material-catalogues.md) shows: that is what the
+reader is for, and a problem with how it reads your file is a bug report that
+needs the shape of the file, not its numbers.
 
 ### Security
 

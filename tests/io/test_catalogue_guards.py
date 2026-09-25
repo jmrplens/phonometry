@@ -1,10 +1,12 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
 """Guards that keep the catalogue reader closed over what the package adds.
 
-Two classes of mistake would slip past the reader's own tests the day they
-are made: a new row class the reader cannot read, and a new packaged table
-whose name a caller's catalogue could already hold. Each guard below walks
-what the package publishes rather than a list, so the class is closed.
+Three classes of mistake would slip past the reader's own tests the day they
+are made: a new row class the reader cannot read, from a JSON document or
+from a CSV file; a new kind of field the CSV front end would refuse as an
+unknown column; and a new packaged table whose name a caller's catalogue
+could already hold. Each guard below walks what the package publishes rather
+than a list, so the class is closed.
 """
 
 from __future__ import annotations
@@ -22,7 +24,7 @@ import pytest
 import phonometry
 from phonometry import io
 from phonometry._internal import catalogue as private
-from phonometry.io import _catalogue
+from phonometry.io import _catalogue, _catalogue_csv
 
 
 def _published_row_classes() -> list[type[io.CatalogueRow]]:
@@ -92,6 +94,58 @@ def test_every_published_row_class_is_read_from_a_one_row_document(
     for name, value in row.items():
         if name != "key":
             assert getattr(read, name) == value
+
+
+@pytest.mark.parametrize("cls", ROW_CLASSES, ids=lambda cls: cls.__name__)
+def test_every_published_row_class_is_read_from_a_one_row_sheet(
+    cls: type[io.CatalogueRow], tmp_path: pathlib.Path
+) -> None:
+    """Guard (a), for a CSV file: no row class escapes the CSV front end."""
+    row = _one_row(cls)
+    header = {
+        "schema": "phonometry-catalogue",
+        "schema_version": 1,
+        "catalogue": "guard",
+        "row_type": cls.__name__,
+        "about": "One row, to show the CSV reader reads the class.",
+        "provenance": {
+            "kind": "other",
+            "document": "A test of the reader",
+            "version": None,
+            "consulted": "2026-09-25",
+        },
+        "csv": {"delimiter": ";", "decimal": ","},
+    }
+    path = tmp_path / "guard.csv"
+    cells = [str(value).replace(".", ",") for value in row.values()]
+    path.write_text(f"{';'.join(row)}\n{';'.join(cells)}\n", encoding="utf-8")
+    (tmp_path / "guard.csv.phonometry.json").write_text(
+        json.dumps(header), encoding="utf-8"
+    )
+    read = io.read_catalogue(path, row_type=cls)["guard/a"]
+    assert type(read) is cls
+    for name, value in row.items():
+        if name != "key":
+            assert getattr(read, name) == value
+
+
+@pytest.mark.parametrize("cls", ROW_CLASSES, ids=lambda cls: cls.__name__)
+def test_every_field_is_a_csv_column_or_is_sent_where_it_is_written(
+    cls: type[io.CatalogueRow],
+) -> None:
+    """Every field of every row class is a column, or its refusal says where it goes.
+
+    A field is a column of the sheet, a mark written in the cell itself, a
+    form only a JSON document writes, or one the library writes; never a
+    name the sheet refuses as unknown, which is what a new kind of field
+    the CSV front end does not know would come out as.
+    """
+    reader = _catalogue._Reader(cls, _catalogue._Issues("guard"))
+    for item in dataclasses.fields(cls):
+        role, _, problem = _catalogue_csv._Sheet.role(item.name, reader)
+        assert role or problem, item.name
+        assert not problem.startswith("no field"), (item.name, problem)
+        assert "did you mean" not in problem, (item.name, problem)
 
 
 def _data_files() -> list[pathlib.Path]:

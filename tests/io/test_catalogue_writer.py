@@ -436,10 +436,17 @@ def test_a_failed_write_leaves_nothing_behind(
     assert list(tmp_path.iterdir()) == []
 
 
-def test_a_file_is_named_json(tmp_path: pathlib.Path) -> None:
+def test_a_file_is_named_json_or_csv(tmp_path: pathlib.Path) -> None:
     mine = _mine()
-    with pytest.raises(ValueError, match="ends in .json"):
-        io.write_catalogue(mine, tmp_path / "mine.csv")
+    with pytest.raises(ValueError, match=r"'mine\.xlsx' ends in neither"):
+        io.write_catalogue(mine, tmp_path / "mine.xlsx")
+
+
+def test_a_json_document_takes_no_dialect(tmp_path: pathlib.Path) -> None:
+    mine = _mine()
+    with pytest.raises(ValueError, match="delimiter= and decimal= declare"):
+        io.write_catalogue(mine, tmp_path / "mine.json", delimiter=";")
+    assert list(tmp_path.iterdir()) == []
 
 
 def test_a_key_a_file_cannot_hold_is_refused(tmp_path: pathlib.Path) -> None:

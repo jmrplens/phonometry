@@ -563,7 +563,7 @@ _REMOVE = object()
         ("/about", "", "/about", "is empty"),
         ("/basis", "estimate", "/basis", "not one of measured"),
         ("/conventions", "a legend", "/conventions", "not a list of texts"),
-        ("/csv", {"delimiter": ";"}, "/csv", "has no 'csv'"),
+        ("/csv", {"delimiter": ";"}, "/csv", "only the header beside a CSV file"),
         ("/rows", [], "/rows", "at least one"),
         ("/about", _REMOVE, "", "needs a top-level 'about'"),
         # the name
@@ -917,10 +917,16 @@ def test_a_document_must_be_text_or_a_mapping() -> None:
         io.parse_catalogue(b"{}", row_type=PorousMaterial)  # type: ignore[arg-type]
 
 
-def test_a_file_must_be_named_json(tmp_path: pathlib.Path) -> None:
-    path = tmp_path / "panel-40.csv"
-    with pytest.raises(ValueError, match="ends in .json"):
+def test_a_file_must_be_named_json_or_csv(tmp_path: pathlib.Path) -> None:
+    path = tmp_path / "panel-40.txt"
+    with pytest.raises(ValueError, match=r"'panel-40\.txt' ends in neither"):
         io.read_catalogue(path, row_type=PorousMaterial)
+
+
+def test_a_json_document_takes_no_header_path(tmp_path: pathlib.Path) -> None:
+    path = tmp_path / "panel-40.json"
+    with pytest.raises(ValueError, match="header_path is the header of a CSV file"):
+        io.read_catalogue(path, row_type=PorousMaterial, header_path="h.json")
 
 
 def test_an_os_error_passes_untouched(tmp_path: pathlib.Path) -> None:

@@ -154,7 +154,9 @@ class CatalogueIssue:
     :ivar file: The file, as the caller named it; empty for a row built in
         Python.
     :ivar location: Where in the file: a JSON pointer (RFC 6901) such as
-        ``"/rows/1/porosity"``; ``"<Python>"`` for a row built in Python.
+        ``"/rows/1/porosity"``; a line and a column as a spreadsheet letters
+        them, such as ``"line 3, column E (porosity)"``, in a CSV file;
+        ``"<Python>"`` for a row built in Python.
     :ivar row_key: The key of the row, when the issue sits in one.
     :ivar field: The field of the row, when the issue is about one cell.
     :ivar message: What is wrong and, where it helps, what to write instead.
@@ -170,7 +172,17 @@ class CatalogueIssue:
     severity: Literal["error", "note"] = "error"
 
     def __str__(self) -> str:
-        """The issue as one line: file, place, row and message."""
+        """The issue as one line: file, place, row and message.
+
+        A place given as a line and a column reads on as a phrase,
+        ``"sheet.csv, line 3, column E (porosity), row 'a': ..."``; a JSON
+        pointer stands apart, ``"sheet.json: /rows/1/porosity (row 'a'): ..."``.
+        """
+        if self.location.startswith("line "):
+            head = ", ".join(part for part in (self.file, self.location) if part)
+            if self.row_key:
+                head = f"{head}, row {self.row_key!r}"
+            return f"{head}: {self.message}"
         head = ": ".join(part for part in (self.file, self.location) if part)
         if self.row_key:
             head = f"{head} (row {self.row_key!r})" if head else f"row {self.row_key!r}"

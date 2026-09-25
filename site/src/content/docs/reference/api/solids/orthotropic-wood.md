@@ -86,7 +86,7 @@ Every row whose printed name contains *name*, case insensitively.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | for a *catalogue* that is not a mapping, or that holds a row that is not a [`OrthotropicWood`](/phonometry/reference/api/solids/orthotropic-wood/#orthotropicwood), naming its key. |
+| TypeError | for a *catalogue* that is not a mapping, or that holds a row that is not an [`OrthotropicWood`](/phonometry/reference/api/solids/orthotropic-wood/#orthotropicwood), naming its key. |
 
 ## OrthotropicWood
 

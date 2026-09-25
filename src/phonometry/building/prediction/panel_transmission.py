@@ -574,7 +574,7 @@ def _resolve_plateau_panel(
         elif not isinstance(material, PlateauMaterial):
             msg = (
                 "'material' is a name in PLATEAU_MATERIALS or a "
-                f"solids.PlateauMaterial row; got a {type(material).__name__}."
+                f"solids.PlateauMaterial row; got {type(material).__name__}."
             )
             raise TypeError(msg)
         if mass_per_area is None:

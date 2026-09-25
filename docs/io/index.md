@@ -49,7 +49,7 @@ and the report. `read_catalogue` reads that file into rows of the same
 classes every published catalogue hands out, so a porous core from your data
 sheet goes into `medium()` as one from a book does, and a figure the sheet
 prints in kPa·s/m² or in centimetres is converted on its digits and recorded
-as the sheet printed it. Every problem in a file is reported at once, each
+as the sheet printed it. The problems in a file are reported together, each
 at its place in the file, and nothing the file names is ever imported.
 `write_catalogue` writes a catalogue back, and writes a published table in
 the same form, as a template to start from.

@@ -7,7 +7,7 @@ sidebar:
 
 Files: measurement audio, its calibration sidecar and catalogues of materials.
 
-Every function here treats an audio file as a measurement record rather than
+Every audio function here treats a file as a measurement record rather than
 as material to be played back, which fixes the defaults: the native sample
 rate is kept (no resampling on load), channels are never mixed down, samples
 are never normalized, and integer PCM is scaled by exactly $2^{B-1}$
@@ -65,10 +65,11 @@ its version, the day it was consulted, the laboratory and the report), each
 cell named as the field it fills or in another unit of the same kind, and
 every hedge the packaged tables use. What comes back is a [`Catalogue`](/phonometry/reference/api/io/io/#catalogue),
 a read-only mapping keyed like the packaged ones that joins a `PUBLISHED_*`
-catalogue with `|` and never lets one row replace another. Every problem in
-a file is raised at once in one [`CatalogueError`](/phonometry/reference/api/io/io/#catalogueerror), each
-[`CatalogueIssue`](/phonometry/reference/api/io/io/#catalogueissue) with the JSON pointer to it, and what is only worth a
-second look rides on the catalogue as a note with one
+catalogue with `|` and never lets one row replace another. The problems in
+a file are raised at once in one [`CatalogueError`](/phonometry/reference/api/io/io/#catalogueerror), each
+[`CatalogueIssue`](/phonometry/reference/api/io/io/#catalogueissue) with the JSON pointer to it (every problem of form,
+and the first rule of the row contract each row breaks), and what is only
+worth a second look rides on the catalogue as a note with one
 [`CatalogueWarning`](/phonometry/reference/api/io/io/#cataloguewarning). [`parse_catalogue`](/phonometry/reference/api/io/io/#parse_catalogue) reads the same from text or
 a mapping in memory, and [`write_catalogue`](/phonometry/reference/api/io/io/#write_catalogue) writes rows, a packaged
 table among them, as a file that reads back into the same rows. Nothing the
@@ -615,10 +616,11 @@ does not have, a bound with no printed end, a density below zero. A
 `ValueError`, because the data is wrong and not the call, whether
 it came from a file or from a caller building a row by hand.
 
-`issues` holds every problem found, each a [`CatalogueIssue`](/phonometry/reference/api/io/io/#catalogueissue)
+`issues` holds the problems found, each a [`CatalogueIssue`](/phonometry/reference/api/io/io/#catalogueissue)
 naming where it is. A reader of a catalogue file raises one error for
-the whole file, with every issue in it; a row built in Python raises one
-with a single issue, located at `"<Python>"`.
+the whole file, with every problem of form in it and the first rule of
+the row contract each row breaks; a row built in Python raises one with
+a single issue, located at `"<Python>"`.
 
 ## CatalogueIssue
 
@@ -1376,10 +1378,11 @@ method of the class behave alike on both. Every row carries the
 document's [`Provenance`](/phonometry/reference/api/io/io/#provenance), narrowed by the row where it narrows it,
 and a [`source`](/phonometry/reference/api/io/io/#cataloguerow) composed from it.
 
-Every problem in the file is found before a row is built and raised in
-one [`CatalogueError`](/phonometry/reference/api/io/io/#catalogueerror), each issue with the JSON pointer to it. The
-class named in the file is only compared with *row_type*, and nothing the
-file names is ever imported.
+The problems in the file are raised together in one
+[`CatalogueError`](/phonometry/reference/api/io/io/#catalogueerror), each issue with the JSON pointer to it: every
+problem of form, and the first rule of the row contract each row breaks.
+The class named in the file is only compared with *row_type*, and nothing
+the file names is ever imported.
 
 **Parameters**
 
@@ -1394,7 +1397,7 @@ file names is ever imported.
 
 | Exception | When |
 | :--- | :--- |
-| CatalogueError | for a file larger than 16 MiB, text that is not UTF-8 or not JSON, and every problem the document holds, all at once. |
+| CatalogueError | for a file larger than 16 MiB, text that is not UTF-8 or not JSON, and the problems the document holds, all at once: every problem of form, and the first rule of the row contract each row breaks. |
 | TypeError | for a *row_type* that is not a catalogue row class. |
 | ValueError | for a name that does not end in `.json`. |
 | OSError | as the file system raises it, untouched. |

@@ -30,18 +30,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `thickness_mm`, `flow_resistivity_kpa_s_m2`, `youngs_modulus_gpa`,
   `temperature_k`), as a value or as the key of a hedge, and
   `CatalogueRow.from_printed` now converts it wherever it stands, on its
-  digits with the exact factor, rounded once and recorded in `converted`; a
-  unit no family holds, or a name such as `specific_flow_resistance_pa_s_mm`
-  whose unit is compound, is refused rather than scaled. What comes back is an
+  digits with the exact factor, rounded once and recorded in `converted`. A
+  unit no family holds is refused rather than scaled, and so is any other
+  unit for a field whose unit is compound, such as a specific flow resistance
+  in Pa s/m or a stiffness in N/m on a row class of your own, whose last word
+  is not its unit. What comes back is an
   `io.Catalogue`, a read-only mapping keyed `"<catalogue>/<key>"` that joins a
   published catalogue with `|` and refuses a key both hold; a catalogue of
   yours can never take a name of the packaged form (a four-digit year
-  followed by a word), so the keys of the two never meet. Every problem in a
-  file (a text where a number goes, an unknown field with the name most like
-  it, a `NaN`, a name written twice, a reserved name, a newer schema) is found
-  before any row is built and raised together in one `io.CatalogueError`,
-  whose new `issues` holds an `io.CatalogueIssue` for each, with its JSON
-  pointer, its row and its field; what is only worth a second look is kept in
+  followed by a word), so the keys of the two never meet. The problems in a
+  file are raised together in one `io.CatalogueError`, whose new `issues`
+  holds an `io.CatalogueIssue` for each, with its JSON pointer, its row and
+  its field: every problem of form (a text where a number goes, an unknown
+  field with the name most like it, a `NaN`, a name written twice, a reserved
+  name, a newer schema) and the first rule of the row contract each row
+  breaks; what is only worth a second look is kept in
   `Catalogue.notes` with one `io.CatalogueWarning`. The file never runs
   anything: only `json` reads it, and the class it names is compared with
   yours and never imported. `io.write_catalogue` writes rows as a file that

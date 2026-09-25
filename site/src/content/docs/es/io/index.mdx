@@ -47,16 +47,17 @@ audio tiene campo, hecho para viajar.
 
 Los otros archivos que la biblioteca lee y escribe son catálogos de
 materiales. La biblioteca publica las tablas de sus libros y normas y
-ninguna de un fabricante, así que una ficha técnica, una declaración de
-prestaciones o un informe de ensayo propios van en un archivo JSON suyo, con
-la procedencia del documento: su tipo, su versión, el día en que se
-consultó, el laboratorio y el informe. `read_catalogue` lee ese archivo en
-filas de las mismas clases que entregan todos los catálogos publicados, de
-modo que el núcleo poroso de su ficha entra en `medium()` igual que uno de
-un libro, y una cifra que la ficha imprime en kPa·s/m² o en centímetros se
-convierte a partir de sus dígitos y queda anotada tal como la imprimió. Todos
-los problemas de un archivo se informan a la vez, cada uno en su lugar del
-archivo, y nada de lo que el archivo nombra se importa nunca.
+ninguna de un fabricante, así que una hoja de características, una
+declaración de prestaciones o un informe de ensayo propios van en un archivo
+JSON tuyo, con la procedencia del documento: su tipo, su versión, el día en
+que lo consultaste, el laboratorio y el informe. `read_catalogue` lee ese
+archivo en filas de las mismas clases que entregan todos los catálogos
+publicados, de modo que el núcleo poroso de tu hoja de características entra
+en `medium()` igual que uno de un libro, y una cifra que la hoja de
+características imprime en kPa·s/m² o en centímetros se convierte a partir
+de sus dígitos y queda anotada tal como la imprimió. Los problemas de un
+archivo se informan juntos, cada uno en su lugar del archivo, y nada de lo
+que el archivo nombra se importa nunca.
 `write_catalogue` escribe un catálogo de vuelta, y escribe una tabla
 publicada con la misma forma, como plantilla de partida.
 
@@ -102,11 +103,11 @@ valor por defecto que este módulo existe para rechazar.
 </ScopeClaim>
 
 <ScopeClaim status="not-covered">
-**La biblioteca no trae datos de fabricantes.** Una ficha técnica se revisa
-sin cambiar de título, sus condiciones rara vez permiten copiarla, y el valor
-que necesita un proyecto es el de la ficha con la que se especificó, así que
-sus catálogos se quedan en sus archivos y en los objetos que devuelve
-`read_catalogue`: la biblioteca no guarda ninguna copia ni abre ningún
+**La biblioteca no trae datos de fabricantes.** Una hoja de características
+se revisa sin cambiar de título, sus condiciones rara vez permiten copiarla, y
+el valor que necesita un proyecto es el de la hoja de características con la
+que se especificó, así que tus catálogos se quedan en tus archivos y en los
+objetos que devuelve `read_catalogue`: la biblioteca no guarda ninguna copia ni abre ningún
 enlace que nombre un archivo. Por lo mismo, una tabla de un fabricante pegada
 en una issue o en una pull request nunca se incorpora.
 </ScopeClaim>

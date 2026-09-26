@@ -99,9 +99,16 @@ _ANCHOR = re.compile(r"\]\(#([^)]+)\)")
 _MATH_META = re.compile(r"^\$\$\s*\S")
 
 
+#: An inline code span: a run of backticks, its text, and the same run again.
+#: A ``$`` inside one is code (the ``$schema`` key of a JSON document), and
+#: CommonMark reads the span before any maths could open in it.
+_CODE_SPAN = re.compile(r"(`+)(.+?)\1")
+
+
 def _unescaped_dollars(line: str) -> int:
-    r"""Inline ``$`` delimiters on a line, ignoring ``\$`` and ``$$``."""
-    return len(re.findall(r"(?<!\\)\$", re.sub(r"\$\$", "", line)))
+    r"""Inline ``$`` delimiters on a line, ignoring ``\$``, ``$$`` and code spans."""
+    prose = _CODE_SPAN.sub("", line)
+    return len(re.findall(r"(?<!\\)\$", re.sub(r"\$\$", "", prose)))
 
 
 def _check(path: pathlib.Path) -> list[str]:

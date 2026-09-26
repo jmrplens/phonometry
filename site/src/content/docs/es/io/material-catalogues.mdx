@@ -1,6 +1,6 @@
 ---
 title: "Tus propios catálogos"
-description: "Una hoja de características, una declaración de prestaciones, un informe de ensayo o una medida tuya como archivo de catálogo: una tabla publicada como plantilla, el documento JSON y su procedencia, una hoja de cálculo guardada como CSV, rechazos que señalan una celda, las filas en los modelos de porosos, un modelo de sala, el método de la meseta, un suelo flotante y todas las búsquedas por nombre, cómo escribir una cota, una palabra u otra unidad, qué clase de fila guarda cada magnitud y lo que la biblioteca nunca hace con tus datos."
+description: "Una hoja de características, una declaración de prestaciones, un informe de ensayo o una medida tuya como archivo de catálogo: una tabla publicada como plantilla, el documento JSON y su procedencia, una hoja de cálculo guardada como CSV, rechazos que señalan una celda, las filas en los modelos de porosos, un modelo de sala, el método de la meseta, un suelo flotante, la simulación elástica, los modelos de suelo de exteriores, el modelo detallado de la ISO 12354 y todas las búsquedas por nombre, cómo escribir una cota, una palabra u otra unidad, qué clase de fila guarda cada magnitud, el esquema JSON con el que un editor completa un archivo y lo que la biblioteca nunca hace con tus datos."
 references:
   - type: standard
     organization: "Internet Engineering Task Force"
@@ -45,6 +45,29 @@ references:
     designation: "EN 29052-1:1992 (ISO 9052-1:1989)"
     url: "https://www.iso.org/standard/16620.html"
     note: "La rigidez dinámica s' de una capa instalada y la rigidez dinámica aparente s't de una probeta, dos campos de ResilientLayer, y el apartado 8.2, que convierte la segunda en la primera con la resistividad al flujo lateral."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2017
+    title: "Building acoustics — Estimation of acoustic performance of buildings from the performance of elements — Part 1: Airborne sound insulation between rooms"
+    designation: "ISO 12354-1:2017"
+    url: "https://www.iso.org/standard/70242.html"
+    note: "El elemento homogéneo que HomogeneousElement.from_solid construye con la fila de un sólido: m' = ρt, y la frecuencia crítica de la Fórmula (B.2) con la velocidad de fase cuasilongitudinal de la Tabla B.3, que es la velocidad de placa de una fila. El ejemplo son las paredes interiores del edificio resuelto del Anexo L."
+  - type: report
+    authors: ["Wright, A.", "Andrews, H.", "Hutton, B.", "Dennis, G."]
+    organization: "Internet Engineering Task Force"
+    year: 2022
+    title: "JSON Schema: A Media Type for Describing JSON Documents"
+    number: "Internet-Draft draft-bhutton-json-schema-01"
+    url: "https://json-schema.org/draft/2020-12/json-schema-core"
+    note: "El dialecto 2020-12 en el que io.catalogue_schema escribe el esquema de un archivo de catálogo, y en el que está escrito el esquema publicado."
+  - type: report
+    authors: ["Wright, A.", "Andrews, H.", "Hutton, B."]
+    organization: "Internet Engineering Task Force"
+    year: 2022
+    title: "JSON Schema Validation: A Vocabulary for Structural Validation of JSON"
+    number: "Internet-Draft draft-bhutton-json-schema-validation-01"
+    url: "https://json-schema.org/draft/2020-12/json-schema-validation"
+    note: "Las palabras clave con las que el esquema declara la forma de un archivo de catálogo: los tipos, las palabras que admite una clave, los patrones de un nombre, las longitudes de un texto y los límites que fija la unidad de un campo."
 ---
 
 import Scope from '../../../../components/Scope.astro';
@@ -122,6 +145,7 @@ cerrado de claves en el primer nivel:
 | `basis` | Opcional: qué dice el documento que es cada valor, salvo que una fila diga otra cosa. |
 | `conventions` | Opcional: las notas y leyendas que el documento imprime para toda la tabla. |
 | `phonometry_version` | Opcional: la versión de la biblioteca que escribió el archivo, que rellena `write_catalogue`. No se lee nunca. |
+| `$schema` | Opcional: dónde encuentra un editor el esquema JSON del documento (véase [Autocompletado en tu editor](#autocompletado-en-tu-editor-el-esquema-json)). No se lee nunca. |
 | `rows` | Las filas, cada una con una clave propia en `key` y un nombre en `name`. |
 
 Aquí va una hoja de características ficticia con dos filas. La primera es la
@@ -477,6 +501,187 @@ necesita la resistividad al flujo lateral $r$ del apartado 8.2: a partir de
 la rigidez del gas encerrado $s'_\mathrm{a}$ de la Fórmula 7, que se pasa con
 `gas_stiffness_n_m3`. Sin $r$ la llamada se rechaza con esa explicación en
 lugar de tomar una magnitud por la otra.
+
+### Un sólido en la simulación elástica
+
+La simulación elástica acepta la fila de un sólido allí donde acepta un
+`Material`: `simulation.scholte_speed` y `ElasticFDTD2D.from_regions` leen
+los tres números que integra el FDTD elástico: la velocidad longitudinal de
+un sólido extenso, la velocidad transversal y la densidad. Una hoja que
+imprime un módulo, un coeficiente de Poisson y una densidad ha impreso
+también esas velocidades, y la fila las guarda marcadas como derivadas. Las
+velocidades de placa y de barra que una página imprime a su lado no se leen
+nunca: el FDTD elástico no integra ninguna de las dos, y una velocidad de
+placa tomada por la de un sólido extenso se equivoca en torno a un diez por
+ciento.
+
+```python
+from phonometry import simulation, solids
+
+alloys = io.parse_catalogue(
+    {
+        "schema": "phonometry-catalogue",
+        "schema_version": 1,
+        "catalogue": "alloys",
+        "row_type": "SolidMaterial",
+        "about": "Elastic constants of two fictitious alloys, as their data sheet prints them.",
+        "provenance": {
+            "kind": "datasheet",
+            "document": "Example alloy data sheet",
+            "version": "Rev. 1",
+            "consulted": "2026-09-25",
+        },
+        "rows": [
+            {
+                "key": "plate",
+                "name": "Example alloy",
+                "youngs_modulus_gpa": 70,
+                "poisson_ratio": 0.33,
+                "density_kg_m3": 2700,
+            },
+            {
+                "key": "sheet",
+                "name": "Example sheet",
+                "plate_longitudinal_speed_m_s": 5400,
+                "density_kg_m3": 2700,
+            },
+        ],
+    },
+    row_type=solids.SolidMaterial,
+)
+alloy = alloys["alloys/plate"]
+print(round(alloy.bulk_longitudinal_speed_m_s), round(alloy.transverse_speed_m_s))
+# 6198 3122
+print(round(simulation.scholte_speed(simulation.WATER, alloy), 1))   # 1476.6
+
+try:
+    simulation.scholte_speed(simulation.WATER, alloys["alloys/sheet"])
+except ValueError as error:
+    print(error)
+# 'Example sheet' has no bulk_longitudinal_speed_m_s, which 'the elastic FDTD'
+# needs: the datasheet does not give it, and it does not follow from the cells
+# that it does (Example alloy data sheet, Rev. 1; consulted 2026-09-25).
+```
+
+### Un suelo en los modelos de exteriores
+
+Una fila `GroundSurface`, de los suelos publicados o de los tuyos, entra en
+los modelos de exteriores a través de `medium()`: el semiespacio poroso, por
+el modelo de Delany y Bazley o por el de Miki, que
+`environment.ground_effect` recibe como `impedance`,
+`barrier_insertion_loss` como `ground_impedance` y
+`atmospheric_parabolic_equation` como `impedance`. La resistividad se lee a
+través de `printed()`, así que el intervalo de un pastizal se rechaza en
+lugar de promediarse. Una resistividad al flujo efectiva es un parámetro del
+modelo con el que se ajustó, así que una fila que la página marca como
+ajustada con un modelo solo entra en ese modelo:
+
+```python
+from phonometry import environment
+
+site = io.parse_catalogue(
+    {
+        "schema": "phonometry-catalogue",
+        "schema_version": 1,
+        "catalogue": "site-survey",
+        "row_type": "GroundSurface",
+        "about": "An effective flow resistivity fitted to a site's own level differences.",
+        "provenance": {
+            "kind": "measurement",
+            "document": "Site survey 12",
+            "version": None,
+            "consulted": "2026-09-25",
+            "laboratory": "Example Lab",
+            "report": "26-051",
+        },
+        "basis": "measured",
+        "rows": [{"key": "pasture", "name": "Pasture", "flow_resistivity_kpa_s_m2": 180}],
+    },
+    row_type=environment.GroundSurface,
+)
+pasture = site["site-survey/pasture"]
+octaves = np.array([125.0, 250.0, 500.0, 1000.0])
+ground = pasture.medium(octaves, model="miki")
+over_pasture = environment.ground_effect(octaves, 1.0, 1.5, 50.0, impedance=ground)
+print(over_pasture.excess_attenuation.round(1))   # [  3.6  -4.2 -12.8  -2.8]
+
+fitted = environment.PUBLISHED_GROUND["cox-2017-table-6-7/sports_field_semi_phenomenological"]
+try:
+    fitted.medium(octaves)
+except ValueError as error:
+    print(error)
+# 'Sports field' is the row the page marks “Fitted using semi-phenomenological
+# model” (Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp.
+# 200-201)): its effective flow resistivity is a parameter of that model and
+# not of 'delany_bazley'; neither 'delany_bazley' nor 'miki' is that model, or
+# take row.printed('flow_resistivity_pa_s_m2') into another model yourself.
+```
+
+Un suelo exterior es mucho más resistivo que los materiales fibrosos con los
+que se ajustaron los dos modelos, así que todas las octavas de aquí quedan por
+debajo de su rango de ajuste publicado, y la llamada emite un
+`PorousAbsorberWarning` que dice que la regresión es ahí una extrapolación;
+[Elección de la impedancia del suelo](/phonometry/es/environment/propagation/ground-barriers/#elección-de-la-impedancia-del-suelo)
+explica lo que eso cuesta y por qué Miki es el modelo que conviene preferir por
+debajo del rango.
+
+### Una pared en el modelo detallado de edificación
+
+`building.HomogeneousElement.from_solid` construye el elemento de la
+ISO 12354-1 que forma una capa de un sólido, a partir de la densidad y la
+velocidad de placa de la fila, que es la velocidad de fase cuasilongitudinal
+$c_\mathrm{L}$ de la Tabla B.3 de la norma, y del espesor que le das:
+$m' = \rho t$ y $f_\mathrm{c} = c_\mathrm{o}^2 / (1{,}8\, c_\mathrm{L} t)$.
+El factor de pérdidas interno lo das tú y nunca se lee de la fila, que puede
+guardar cuatro (a flexión, longitudinal, in situ y uno que la página no
+precisa), porque solo tú sabes cuál de ellos, si alguno, es el
+$\eta_\mathrm{int}$ de la norma:
+
+```python
+from phonometry import building
+
+blocks = io.parse_catalogue(
+    {
+        "schema": "phonometry-catalogue",
+        "schema_version": 1,
+        "catalogue": "blocks",
+        "row_type": "SolidMaterial",
+        "about": "A fictitious calcium-silicate block, as its data sheet prints it.",
+        "provenance": {
+            "kind": "datasheet",
+            "document": "Example block data sheet",
+            "version": "Rev. 3",
+            "consulted": "2026-09-25",
+        },
+        "basis": "declared",
+        "rows": [
+            {
+                "key": "block",
+                "name": "Example block",
+                "density_kg_m3": 1800,
+                "plate_longitudinal_speed_m_s": 2500,
+                "flexural_loss_factor": 0.012,
+            }
+        ],
+    },
+    row_type=solids.SolidMaterial,
+)
+wall = building.HomogeneousElement.from_solid(
+    blocks["blocks/block"],
+    thickness_m=0.2,
+    internal_loss_factor=0.01,
+    area_m2=13.75,
+    length1_m=5.0,
+    length2_m=2.75,
+)
+print(round(wall.mass_per_area, 1), round(wall.critical_frequency, 1))   # 360.0 128.4
+print(wall.internal_loss_factor)   # 0.01, no el 0.012 a flexión de la fila
+```
+
+Son los números de las paredes interiores del edificio resuelto del
+Anexo L de la ISO 12354-1, 200 mm de bloques de silicato cálcico con
+360 kg/m² y 128,4 Hz, y el elemento entra en `building.in_situ_element` como
+uno construido a mano.
 
 ### Buscar en tu catálogo y en los publicados
 
@@ -871,6 +1076,63 @@ con `TypeError` la primera vez que se construye la clase, porque cualquier
 celda de una fila puede faltar. Una clase construida sobre `BandedRow` no está
 soportada: sus bandas se declaran en variables de clase privadas.
 
+## Autocompletado en tu editor: el esquema JSON
+
+Un archivo de catálogo se escribe a mano, y un editor que conoce su forma
+completa el nombre de un campo mientras lo escribes, ofrece las palabras que
+admiten `basis` y `kind` y marca un texto donde va un número antes de que el
+lector vea el archivo. JSON Schema es la manera en que un editor aprende una
+forma, y `io.catalogue_schema` escribe una, en el dialecto 2020-12, a partir
+de las clases de fila que le das: cada campo con su propio nombre y con cada
+otra unidad que convierte el lector, los campos que puede nombrar cada
+matiz, la procedencia y sus tipos, los límites que impone la unidad de un
+campo (una densidad nunca es negativa, una porosidad va de 0 a 1) y la
+cabecera de un archivo CSV con su dialecto. Una clase de fila propia se
+describe con sus campos:
+
+```python
+schema = io.catalogue_schema(materials.PorousMaterial, Plasterboard)
+print(schema["$id"])                               # urn:phonometry:schema:catalogue:1
+print(schema["properties"]["row_type"]["enum"])    # ['Plasterboard', 'PorousMaterial']
+board = schema["$defs"]["Plasterboard"]["properties"]
+print(sorted(name for name in board if name.startswith("surface_density")))
+# ['surface_density_g_m2', 'surface_density_kg_m2']
+pathlib.Path("catalogue.schema.json").write_text(json.dumps(schema, indent=2), encoding="utf-8")
+
+pointed = json.loads(panel_40)
+pointed["$schema"] = "./catalogue.schema.json"
+print(io.parse_catalogue(pointed, row_type=materials.PorousMaterial) == mine)   # True
+```
+
+Un documento nombra su esquema en una clave `$schema` de primer nivel, que
+el lector admite y no lee nunca: un archivo a su lado, como arriba, o el
+esquema de todas las clases de fila que publica la biblioteca, que sirve el
+sitio de la documentación en
+`https://jmrplens.github.io/phonometry/schemas/phonometry-catalogue-1.json`.
+También se le puede decir a un editor qué archivos son catálogos, y dejarlos
+sin esa clave; en Visual Studio Code basta un ajuste:
+
+```json
+{
+  "json.schemas": [
+    {
+      "fileMatch": ["*.catalogue.json", "*.csv.phonometry.json"],
+      "url": "https://jmrplens.github.io/phonometry/schemas/phonometry-catalogue-1.json"
+    }
+  ]
+}
+```
+
+El esquema exige a un archivo su forma: qué claves pueden tener un
+documento, una procedencia y una fila, qué clase de valor admite cada una,
+el patrón de un nombre y de una clave. Lo que depende de dos celdas a la
+vez, un valor junto a una palabra que dice que no lo hay o una cota en un
+campo sin intervalo, lo rechaza el lector, así que un archivo que el editor
+acepta aún puede rechazarse, y el rechazo dice dónde. Un archivo que el
+lector lee nunca aparece marcado en el editor. El nombre del esquema,
+`urn:phonometry:schema:catalogue:1`, sigue a la versión del formato, así que
+un formato posterior será un esquema nuevo al lado de este.
+
 ## Lo que no pasa nunca
 
 El lector y las filas guardan lo que imprime el documento y nada más.
@@ -901,9 +1163,11 @@ en las filas que entregan todos los catálogos publicados, con su
 `io.Provenance`, sus notas y todos los problemas de forma comunicados a la vez
 con un puntero JSON o con una línea y una columna; escribir filas, entre ellas
 una tabla publicada, de vuelta a un archivo JSON o CSV (`io.write_catalogue`);
-buscar en el tuyo y en los publicados con todas las búsquedas `*_named`; y
+buscar en el tuyo y en los publicados con todas las búsquedas `*_named`;
 pasar las filas a los modelos de porosos, a un modelo de sala, al método de la
-meseta y a un suelo flotante.
+meseta, a un suelo flotante, a la simulación elástica, a los modelos de suelo
+de exteriores y al modelo detallado de la ISO 12354; y el esquema JSON de un
+archivo de catálogo, para que un editor lo complete (`io.catalogue_schema`).
 </ScopeClaim>
 
 <ScopeClaim status="not-covered" label="No cubierto">
@@ -926,6 +1190,9 @@ issue o en una pull request nunca se incorpora.
 - [Absorbentes porosos y multicapa](/phonometry/es/materials/absorbers/porous-absorbers/): los modelos en los que entra una fila `PorousMaterial`.
 - [Rigidez dinámica de materiales resilientes](/phonometry/es/materials/resilient/dynamic-stiffness/): $s'$, $s'_\mathrm{t}$ y el apartado 8.2 al completo.
 - [Predicción del aislamiento de paneles](/phonometry/es/buildings/design/panel-sound-insulation/): el método de la meseta que dibuja una fila `PlateauMaterial`.
+- [Ondas elásticas y acoplamiento fluido-sólido](/phonometry/es/simulation/elastic-waves/): el FDTD elástico en el que la fila de un sólido es un medio.
+- [Efecto suelo esférico y barreras avanzadas](/phonometry/es/environment/propagation/ground-barriers/): los modelos en los que entra el `medium()` de una fila de suelo.
+- [Predicción detallada por bandas (ISO 12354)](/phonometry/es/buildings/design/detailed-prediction/): la cadena de la ISO 12354 en la que entra un elemento de `from_solid`.
 - Referencia de la API: [`phonometry.io`](/phonometry/es/reference/api/io/io/).
 
 </SeeAlso>

@@ -26,6 +26,7 @@ pypdfium2==5.13.0  # rasterizes the .report() PDFs to committed WebP previews (s
 
 pystoi==0.4.1  # test-only external cross-check for STOI/ESTOI (reproduces the authors' MATLAB); the library reimplements from the papers and never imports it at runtime
 pyyaml==6.0.3  # the repository-config tests parse .coderabbit.yaml and the workflow triggers; bandit already pulls it in, this makes the direct import declared
+jsonschema==4.26.0  # test-only reference validator for the catalogue JSON Schema (2020-12): every document the reader reads must validate; the library never imports it
 soundfile==0.14.0  # the [audio] extra: exercises the io backend dispatch and lossy-warning lane of the tests
 
 # numba is deliberately absent. The main test matrix installs this file, and

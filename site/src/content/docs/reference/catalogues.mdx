@@ -77,8 +77,9 @@ for row in materials.porous_materials_named("Mineral wool"):
     print(row.table, row.porosity if interval is None else interval)
 ```
 
-The ground catalogue works the same way, and feeds the models that ask for a
-flow resistivity:
+The ground catalogue works the same way, and a row's `medium()` is the porous
+half-space the outdoor models take as the ground, worked out from the
+resistivity the page prints:
 
 ```python
 from phonometry import environment
@@ -86,12 +87,9 @@ from phonometry import environment
 pasture = environment.PUBLISHED_GROUND["bies-2017-table-5-2/normal_uncompacted_ground"]
 print(pasture.harmonoise_class, pasture.printed("flow_resistivity_pa_s_m2"))
 
+octaves = [125.0, 250.0, 500.0, 1000.0]
 over_pasture = environment.ground_effect(
-    [125.0, 250.0, 500.0, 1000.0],
-    1.0,
-    1.5,
-    50.0,
-    flow_resistivity=pasture.printed("flow_resistivity_pa_s_m2"),
+    octaves, 1.0, 1.5, 50.0, impedance=pasture.medium(octaves)
 )
 print(over_pasture.excess_attenuation.round(2), "dB")
 ```
@@ -125,9 +123,12 @@ one-third-octave coefficients, a laboratory's sound reduction index and a
 covering's impact improvement have row classes of their own that no table
 below uses, and
 [Reading a material datasheet](/phonometry/materials/reading-a-datasheet/)
-says which number on a sheet is which. A manufacturer's table pasted into an
-issue or a pull request is never merged, and nothing on this page comes from
-one.
+says which number on a sheet is which. The JSON Schema of a catalogue file,
+for every row class the library publishes, is served at
+[`schemas/phonometry-catalogue-1.json`](https://jmrplens.github.io/phonometry/schemas/phonometry-catalogue-1.json),
+so an editor completes a file of yours as you type it. A manufacturer's table
+pasted into an issue or a pull request is never merged, and nothing on this
+page comes from one.
 
 ## Solids
 

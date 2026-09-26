@@ -272,6 +272,38 @@ ANSI/ASA S1.18). The fitted value is an *effective, model-bound* parameter: it
 must be quoted with the impedance model it was fitted with, and it is not the
 EN 29053 airflow resistivity of the same material.
 
+### A ground from a catalogue
+
+A row of `environment.PUBLISHED_GROUND`, or of [a catalogue of your own](/phonometry/io/material-catalogues/),
+gives the impedance itself: `GroundSurface.medium` is the porous half-space
+of its effective flow resistivity, by the Delany and Bazley or the Miki
+model, which `ground_effect` takes as `impedance`, `barrier_insertion_loss`
+as `ground_impedance` and `atmospheric_parabolic_equation` as `impedance`.
+The resistivity is read through `printed()`, so a row that prints a range
+is refused rather than averaged, and, because the fitted value is
+model-bound, a row the page marks as fitted with one model goes into that
+model only. Harmonoise class D, $\sigma$ = 200 kPa·s/m², gives the Miki
+curve of the case above:
+
+```python
+octaves = [125.0, 250.0, 500.0, 1000.0]
+pasture = environment.PUBLISHED_GROUND["bies-2017-table-5-2/normal_uncompacted_ground"]
+ground = pasture.medium(octaves, model="miki")
+over_pasture = environment.ground_effect(octaves, 1.0, 1.5, 50.0, impedance=ground)
+print(over_pasture.excess_attenuation.round(2))   # [  3.84  -3.18 -13.19  -2.96]
+
+field = environment.PUBLISHED_GROUND["cox-2017-table-6-7/sports_field_delany_bazley"]
+try:
+    field.medium(octaves, model="miki")
+except ValueError as error:
+    print(error)
+# 'Sports field' is the row the page marks “Fitted using Delany and Bazley
+# model” (Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp.
+# 200-201)): its effective flow resistivity is a parameter of that model and
+# not of 'miki'; ask for model='delany_bazley', or take
+# row.printed('flow_resistivity_pa_s_m2') into another model yourself.
+```
+
 ## 2. Advanced barrier diffraction
 
 Three levels of screening beyond the ISO 9613-2 $D_z$ term are provided by

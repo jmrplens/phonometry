@@ -135,6 +135,39 @@ print(np.round(el.absorption_length[[0, 10]], 1))     # [10.8 11.9]      Table L
 Every printed column of Tables L.2, L.3, L.4, G.3 and G.4 comes back within
 0,06 dB, and the same fixture drives both totals.
 
+The element's $m'$ and $f_\mathrm{c}$ follow from its material and its
+thickness, $m' = \rho t$ and $f_\mathrm{c} = c_\mathrm{o}^2 / (1.8\, c_\mathrm{L} t)$
+with the density and the quasi-longitudinal phase velocity of Table B.3, and
+`HomogeneousElement.from_solid` works both out from a solid's catalogue row,
+a published one or one of [your own catalogues](../../io/material-catalogues.md). The internal loss factor
+is never read from the row, which may hold four, so it is given here as the
+element specification gives it. The unrounded $f_\mathrm{c}$ is the one the
+standard's footnote says its calculation used:
+
+```python
+from phonometry import solids
+
+concrete = solids.SolidMaterial.from_printed(
+    name="Concrete",
+    source="ISO 12354-1:2017 Table B.3",
+    density_kg_m3=2200.0,
+    plate_longitudinal_speed_m_s=3800.0,
+)
+same_floor = building.HomogeneousElement.from_solid(
+    concrete,
+    thickness_m=0.22,
+    internal_loss_factor=0.005,
+    area_m2=20.0,
+    length1_m=5.0,
+    length2_m=4.0,
+    perimeter_absorption_m=floor_perimeter,
+    label="floor",
+)
+print(round(same_floor.mass_per_area, 1), round(same_floor.critical_frequency, 2))   # 484.0 76.82
+from_row = building.in_situ_element(same_floor, bands)
+print(np.round(from_row.sound_reduction_index[[0, 10]], 1))   # [31.8 54.9]  Table L.3
+```
+
 ```python
 # The floating floor: 35 mm screed, m' = 73,5 kg/m2 on s' = 8 MN/m3.
 f0 = 160.0 * np.sqrt(8.0 / 73.5)                      # 52.8 Hz (Formula C.2)

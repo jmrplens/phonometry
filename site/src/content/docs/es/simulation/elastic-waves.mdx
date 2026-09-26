@@ -466,6 +466,37 @@ plt.show()
 
 </details>
 
+### Un sólido de un catálogo
+
+La fila de catálogo de un sólido entra allí donde entra un `Material`, sea de
+`solids.PUBLISHED_SOLIDS` o de [tus propios catálogos](/phonometry/es/io/material-catalogues/):
+el FDTD elástico lee de la fila la velocidad longitudinal de un sólido
+extenso, la velocidad transversal y la densidad, y nunca la velocidad de placa o de barra
+que una tabla imprime a su lado. El acero dulce de la Tabla C.1 de Bies es la
+fila de la que sale `STEEL`, y el acero de Long, una velocidad impresa sin
+decir cuál de las tres es, se rechaza en lugar de adivinarse:
+
+```python
+from phonometry.simulation import STEEL, WATER, scholte_speed
+from phonometry.solids import PUBLISHED_SOLIDS
+
+mild_steel = PUBLISHED_SOLIDS["bies-2017-table-c1/steel_mild"]
+bulk, shear = mild_steel.bulk_longitudinal_speed_m_s, mild_steel.transverse_speed_m_s
+print(round(bulk, 1), round(shear, 1))   # 5958.0 3184.7
+print(round(mild_steel.plate_longitudinal_speed_m_s, 1))   # 5383.1, aquí nunca se lee
+print(round(scholte_speed(WATER, mild_steel), 1), round(scholte_speed(WATER, STEEL), 1))
+# 1479.6 1479.6
+
+long_steel = PUBLISHED_SOLIDS["long-2014-table-12-1/steel"]
+try:
+    scholte_speed(WATER, long_steel)
+except ValueError as error:
+    print(error)
+# 'Steel' has no bulk_longitudinal_speed_m_s, which 'the elastic FDTD' needs:
+# the page does not give it, and it does not follow from the cells that it does
+# (Long 2e Table 12.1, PDF page 487 (printed p. 485)).
+```
+
 ## 5. Incidencia oblicua: conversión de modo
 
 Fuera de la incidencia normal el sólido deja de ser un líquido. El sonido

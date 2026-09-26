@@ -79,7 +79,9 @@ a mapping in memory, and [`write_catalogue`](/phonometry/reference/api/io/io/#wr
 table among them, as a file that reads back into the same rows, and a CSV
 file as a spreadsheet opens it with no text read as a formula. Nothing the
 file names is ever imported, and nothing it holds is kept anywhere but in the
-objects handed back.
+objects handed back. [`catalogue_schema`](/phonometry/reference/api/io/io/#catalogue_schema) writes the JSON Schema of such
+a document for the row classes it is given, so an editor completes a file
+while it is typed and marks what the reader would refuse for its form.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
@@ -609,6 +611,45 @@ keys, as any two mappings are.
 ```python
 CATALOGUE_BASES = ('measured', 'declared', 'calculated', 'estimated', 'extended')
 ```
+
+## catalogue_schema
+
+```python
+catalogue_schema(*row_types: type[CatalogueRow]) -> dict[str, Any]
+```
+
+The JSON Schema of a catalogue document whose rows are one of *row_types*.
+
+An editor that is given it completes a document as it is typed: the
+top-level keys, the provenance and its kinds, every field of the row
+class under its own name and under each other unit the reader converts
+from (`thickness_m` beside `thickness_mm`), the fields each hedge may
+name, the words of `basis`, and a CSV file's header with its dialect.
+It marks what the reader would refuse for its form: a text where a number
+goes, a key the class does not have, a name of the reserved form, a
+density below zero. What depends on two cells at once, such as a value
+beside a hedge that says there is none, is the reader's to refuse, so a
+document the schema accepts may still be refused, and one the reader
+reads is never refused by the schema.
+
+The schema is written in the 2020-12 dialect and named
+`urn:phonometry:schema:catalogue:1`. The one the documentation site
+publishes covers every row class the library publishes; a schema of a
+row class of your own covers its fields too.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `row_types` | One or more subclasses of [`CatalogueRow`](/phonometry/reference/api/io/io/#cataloguerow), a caller's own among them. |
+
+**Returns:** A new mapping, ready for `json.dump`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | when no class is given, for anything that is not a row class (a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) among them), or for two classes that share a name, which a document's `row_type` could not tell apart. |
 
 ## CatalogueError
 

@@ -39,6 +39,8 @@ Key                     Meaning
 ``rows``                A list of rows, at least one.
 ``phonometry_version``  Optional: the version that wrote the file. Never
                         read.
+``$schema``             Optional: where an editor finds the document's JSON
+                        Schema (:func:`catalogue_schema`). Never read.
 ======================  ======================================================
 
 A row is an object with a ``key`` of its own, a ``name``, and its cells named
@@ -181,7 +183,9 @@ _TOP_REQUIRED = (
     "provenance",
     "rows",
 )
-_TOP_KEYS = frozenset({*_TOP_REQUIRED, "basis", "conventions", "phonometry_version"})
+_TOP_KEYS = frozenset(
+    {*_TOP_REQUIRED, "basis", "conventions", "phonometry_version", "$schema"}
+)
 _PROVENANCE_FIELDS = tuple(item.name for item in dataclasses.fields(Provenance))
 _PROVENANCE_REQUIRED = ("kind", "document", "version", "consulted")
 #: What a row may narrow of its document's provenance: where on the document
@@ -887,18 +891,23 @@ class _Reader:
                     "/about", "is empty; say what the document is and how it was read"
                 )
             header.about = about or ""
-        basis = document.get("basis")
-        if basis is not None and basis not in CATALOGUE_BASES:
-            self.error(
-                "/basis",
-                f"is {_quote(basis)}, which is not one of {', '.join(CATALOGUE_BASES)}",
-            )
-        elif basis is not None:
-            header.basis = basis
+        # An optional key is either absent or holds what it says: a null is
+        # refused here as it is under every other key, so the schema, which
+        # has no null for any of them, never refuses what this reads.
+        if "basis" in document:
+            basis = document["basis"]
+            if basis not in CATALOGUE_BASES:
+                held = "null" if basis is None else _quote(basis)
+                self.error(
+                    "/basis",
+                    f"is {held}, which is not one of {', '.join(CATALOGUE_BASES)}",
+                )
+            else:
+                header.basis = basis
         header.conventions = self.conventions(document.get("conventions", []))
-        version = document.get("phonometry_version")
-        if version is not None and not isinstance(version, str):
-            self.error("/phonometry_version", f"is {_quote(version)}, not text")
+        for key in ("phonometry_version", "$schema"):
+            if key in document:
+                self.text(document[key], _pointer(key))
         if "provenance" in document:
             header.provenance = self.provenance(document["provenance"])
         if "rows" in document:

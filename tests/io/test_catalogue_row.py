@@ -82,6 +82,15 @@ def test_the_catalogue_file_names_are_published_from_io() -> None:
     assert "CATALOGUE_SCHEMA_VERSION" not in io.__all__
 
 
+def test_the_json_schema_is_published_from_io() -> None:
+    """The schema writer is public; the schema's name stays private."""
+    from phonometry.io import _catalogue_schema
+
+    assert "catalogue_schema" in io.__all__
+    assert io.catalogue_schema is _catalogue_schema.catalogue_schema
+    assert "SCHEMA_ID" not in io.__all__
+
+
 def test_the_bases_are_the_five_a_source_can_claim() -> None:
     assert io.CATALOGUE_BASES == (
         "measured",

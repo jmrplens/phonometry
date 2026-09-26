@@ -66,6 +66,7 @@ van Vossen, Robertsson & Chapman, *Geophysics* 67(2), 618-624 (2002).
 
 from __future__ import annotations
 
+import dataclasses
 from collections.abc import Callable, Iterable, Mapping, Sequence
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
@@ -73,6 +74,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 from scipy.optimize import brentq
 
+from .._internal.catalogue import CatalogueRow
 from .._internal.validation import require_ranks, require_same_length
 from .fdtd import (
     _SIDES,
@@ -208,6 +210,15 @@ class Material:
     properties used throughout the documentation and the validation suite,
     mirroring the documented default media of the acoustic solver.
 
+    Wherever a :class:`Material` is taken, a solid's catalogue row is taken
+    too, one of :data:`~phonometry.solids.PUBLISHED_SOLIDS` or one read from
+    a catalogue file of your own: its bulk longitudinal speed, its transverse
+    speed and its density are read through
+    :meth:`~phonometry.io.CatalogueRow.printed`, which refuses a cell the
+    page does not print, in the page's own terms. The plate and bar speeds a
+    table prints beside them are never read, because they are not the bulk
+    speed this solver integrates.
+
     :ivar c_p: Compressional (P) wave speed [m/s], strictly positive.
     :ivar c_s: Shear (S) wave speed [m/s], non-negative; 0 marks a fluid.
     :ivar rho: Density [kg/m3], strictly positive.
@@ -283,20 +294,73 @@ ALUMINIUM = Material(c_p=6450.5, c_s=3098.7, rho=2700.0)
 CONCRETE = Material(c_p=3726.8, c_s=2282.2, rho=2400.0)
 
 
+#: The three cells of a solid's catalogue row the solver reads: the bulk
+#: longitudinal speed, the transverse speed and the density, in the order of
+#: :class:`Material`'s fields. A row's plate speed, bar speed and the
+#: longitudinal speed a page prints without saying which it is are not among
+#: them, for the reason the comment above the three solids gives.
+_ROW_CELLS = ("bulk_longitudinal_speed_m_s", "transverse_speed_m_s", "density_kg_m3")
+
+#: Who wants the three cells, as a refusal names it.
+_WANTED_BY = "the elastic FDTD"
+
+
+def _material_of_row(name: str, row: CatalogueRow) -> Material:
+    """The medium a solid's catalogue row describes.
+
+    Any row class that has the three cells of :data:`_ROW_CELLS` is taken,
+    :class:`~phonometry.solids.SolidMaterial` and a caller's subclass of it
+    among them; the cells are read through
+    :meth:`~phonometry.io.CatalogueRow.printed`, so a cell the page leaves
+    empty, prints as a range or declares as a bound is refused with what the
+    page has there. A row whose completion could work the bulk speed out of
+    the cells its page prints (a modulus, a Poisson ratio and a density, or
+    a plate speed with them) already holds it, marked as derived.
+
+    :raises TypeError: for a row of a class that lacks any of those cells.
+    :raises ValueError: for a cell the row does not hold a number in, or for
+        speeds no isotropic solid has.
+    """
+    held = {item.name for item in dataclasses.fields(row)}
+    missing = [cell for cell in _ROW_CELLS if cell not in held]
+    if missing:
+        msg = (
+            f"{name} is a {type(row).__name__} row, which has no "
+            f"{' or '.join(missing)}; the elastic FDTD reads the bulk "
+            "longitudinal speed, the transverse speed and the density of a "
+            "solid's row, such as a solids.SolidMaterial"
+        )
+        raise TypeError(msg)
+    c_p, c_s, rho = (row.printed(cell, wanted_by=_WANTED_BY) for cell in _ROW_CELLS)
+    try:
+        return Material(c_p=c_p, c_s=c_s, rho=rho)
+    except ValueError as error:
+        msg = (
+            f"{name}: {row.name!r} ({row.source}) is not a medium this solver "
+            f"takes: {error}"
+        )
+        raise ValueError(msg) from error
+
+
 def _as_material(name: str, value: object) -> Material:
-    """Coerce a :class:`Material` or a ``(c_p, c_s, rho)`` triple."""
+    """Coerce a :class:`Material`, a solid's row or a ``(c_p, c_s, rho)`` triple."""
     if isinstance(value, Material):
         return value
+    if isinstance(value, CatalogueRow):
+        return _material_of_row(name, value)
     if isinstance(value, Sequence) and not isinstance(value, str) and len(value) == 3:  # noqa: PLR2004
         c_p, c_s, rho = (float(np.real(v)) for v in value)
         return Material(c_p=c_p, c_s=c_s, rho=rho)
-    msg = f"{name} must be a Material or a (c_p, c_s, rho) triple"
+    msg = (
+        f"{name} must be a Material, a solid's catalogue row or a "
+        "(c_p, c_s, rho) triple"
+    )
     raise ValueError(msg)
 
 
 def scholte_speed(
-    fluid: Material | tuple[float, float, float],
-    solid: Material | tuple[float, float, float],
+    fluid: Material | CatalogueRow | tuple[float, float, float],
+    solid: Material | CatalogueRow | tuple[float, float, float],
 ) -> float:
     r"""Exact Scholte-wave speed of a fluid over an elastic half-space [m/s].
 
@@ -326,9 +390,16 @@ def scholte_speed(
 
     :param fluid: Fluid half-space: a :class:`Material` with ``c_s = 0``
         (or a ``(c_p, 0.0, rho)`` triple).
-    :param solid: Elastic half-space: a :class:`Material` with ``c_s > 0``.
+    :param solid: Elastic half-space: a :class:`Material` with ``c_s > 0``,
+        a ``(c_p, c_s, rho)`` triple or a solid's catalogue row
+        (:class:`~phonometry.solids.SolidMaterial`), whose bulk
+        longitudinal speed, transverse speed and density are read through
+        :meth:`~phonometry.io.CatalogueRow.printed`.
     :return: The Scholte-wave phase speed [m/s].
-    :raises ValueError: If ``fluid`` carries shear or ``solid`` does not.
+    :raises ValueError: If ``fluid`` carries shear or ``solid`` does not, or
+        a row does not print one of the three numbers, in the row's terms.
+    :raises TypeError: For a catalogue row of a class that lacks any of the
+        bulk longitudinal speed, the transverse speed and the density.
     """
     flu = _as_material("fluid", fluid)
     sol = _as_material("solid", solid)
@@ -579,8 +650,10 @@ class ElasticFDTD2D:
         shape: tuple[int, int],
         dx: float,
         *,
-        background: Material | tuple[float, float, float],
-        regions: Iterable[tuple[Any, Material | tuple[float, float, float]]] = (),
+        background: Material | CatalogueRow | tuple[float, float, float],
+        regions: Iterable[
+            tuple[Any, Material | CatalogueRow | tuple[float, float, float]]
+        ] = (),
         **kwargs: Any,
     ) -> ElasticFDTD2D:
         """Build the engine from named materials painted over a background.
@@ -604,15 +677,21 @@ class ElasticFDTD2D:
         :param shape: Grid shape ``(ny, nx)``.
         :param dx: Grid spacing [m] (square cells).
         :param background: The material filling the whole grid first: a
-            :class:`Material` or a ``(c_p, c_s, rho)`` triple, e.g.
-            :data:`WATER`.
-        :param regions: ``(where, material)`` pairs painted in order.
+            :class:`Material`, a ``(c_p, c_s, rho)`` triple, e.g.
+            :data:`WATER`, or a solid's catalogue row
+            (:class:`~phonometry.solids.SolidMaterial`), whose bulk
+            longitudinal speed, transverse speed and density are read
+            through :meth:`~phonometry.io.CatalogueRow.printed`.
+        :param regions: ``(where, material)`` pairs painted in order, each
+            material taken in any of the forms ``background`` takes.
         :param kwargs: Forwarded to :class:`ElasticFDTD2D` (``cfl``,
             ``sponge_width``, ``sponge_sides``, ``sponge_reflection``,
             ``damping``, ``free_sides``, ``obstacle_mask``).
         :return: The configured stepping engine.
         :raises ValueError: If a mask does not match ``shape`` or a
-            material spec is invalid.
+            material spec is invalid, a catalogue row's refusal among them.
+        :raises TypeError: For a catalogue row of a class that lacks any of
+            the bulk longitudinal speed, the transverse speed and the density.
         """
         ny = _integer("shape[0]", shape[0])
         nx = _integer("shape[1]", shape[1])

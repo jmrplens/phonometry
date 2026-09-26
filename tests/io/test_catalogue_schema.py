@@ -22,6 +22,7 @@ import importlib
 import json
 import pathlib
 import pkgutil
+import re
 import sys
 from collections.abc import Mapping
 from typing import Any
@@ -365,6 +366,26 @@ def test_a_csv_files_header_is_valid(tmp_path: pathlib.Path) -> None:
     assert _problems(header) == []
 
 
+def test_a_csv_files_header_may_name_the_schema(tmp_path: pathlib.Path) -> None:
+    """The header beside a CSV file takes a ``$schema`` and never reads it."""
+    arau = {
+        key: row
+        for key, row in materials.PUBLISHED_ABSORPTION.items()
+        if row.table == "arau-1999-table-6-1"
+    }
+    table, header_path = io.write_catalogue(
+        arau, tmp_path / "arau.csv", catalogue="arau", delimiter=";", decimal=","
+    )
+    before = io.read_catalogue(table, row_type=materials.AbsorptionSpectrum)
+    header = json.loads(header_path.read_text(encoding="utf-8"))
+    header["$schema"] = "./phonometry-catalogue-1.json"
+    header_path.write_text(json.dumps(header), encoding="utf-8")
+    assert _problems(header) == []
+    after = io.read_catalogue(table, row_type=materials.AbsorptionSpectrum)
+    assert after == before
+    assert len(after) == len(arau)
+
+
 @pytest.mark.parametrize("cls", ROW_CLASSES, ids=lambda cls: cls.__name__)
 def test_every_other_unit_of_every_class_is_valid_as_a_value_and_as_a_key(
     cls: type[io.CatalogueRow],
@@ -415,85 +436,298 @@ def _with(path: tuple[Any, ...], value: object) -> dict[str, Any]:
     return document
 
 
-REFUSED = {
-    "an-unknown-top-level-key": _with(("tables",), []),
-    "no-about": _without("about"),
-    "a-blank-about": _with(("about",), "   "),
-    "another-schema": _with(("schema",), "phonometry-sidecar"),
-    "a-newer-version": _with(("schema_version",), 2),
-    "a-version-in-text": _with(("schema_version",), "1"),
-    "a-reserved-name": _with(("catalogue",), "acme-2026-rev4"),
-    "a-name-in-capitals": _with(("catalogue",), "Panel 40"),
-    "a-basis-outside-the-vocabulary": _with(("basis",), "guessed"),
-    "a-convention-that-is-not-text": _with(("conventions",), [3]),
-    "a-dialect-in-a-json-document": _with(("csv",), {"delimiter": ";", "decimal": ","}),
-    "no-rows": _without("rows"),
-    "an-empty-list-of-rows": _with(("rows",), []),
-    "a-schema-key-that-is-not-text": _with(("$schema",), 1),
-    "a-provenance-without-its-day": _with(
-        ("provenance",), {k: v for k, v in _PROVENANCE.items() if k != "consulted"}
+def _moved(row: int, old: str, new: str, value: object) -> dict[str, Any]:
+    """The example with one cell of a row written under another unit."""
+    document = _panel()
+    del document["rows"][row][old]
+    document["rows"][row][new] = value
+    return document
+
+
+#: Each problem of form, and the start of what the reader says about it: its
+#: place in the file and the first words of the refusal, so a case the reader
+#: refuses for another reason than the one it is named for fails.
+REFUSED: dict[str, tuple[dict[str, Any], str]] = {
+    "an-unknown-top-level-key": (
+        _with(("tables",), []),
+        "/tables: a catalogue document has no 'tables'",
     ),
-    "a-day-written-the-other-way": _with(("provenance", "consulted"), "23/09/2026"),
-    "an-unknown-kind": _with(("provenance", "kind"), "brochure"),
-    "an-empty-version": _with(("provenance", "version"), ""),
-    "an-issue-date-in-words": _with(("provenance", "issued"), "March 2026"),
-    "a-digest-that-is-not-one": _with(("provenance", "sha256"), "abc"),
-    "an-unknown-provenance-member": _with(("provenance", "edition"), "3"),
-    "a-standard-for-no-field": _with(
-        ("provenance", "field_test_standards"), {"porosty": "ISO 4638"}
+    "no-about": (
+        _without("about"),
+        "a catalogue document needs a top-level 'about'",
     ),
-    "a-key-with-a-slash": _with(("rows", 0, "key"), "core/declared"),
-    "a-key-with-a-space": _with(("rows", 0, "key"), "core declared"),
-    "a-row-without-a-key": _with(("rows", 0), {"name": "Panel 40 core"}),
-    "a-row-without-a-name": _with(("rows", 0), {"key": "a"}),
-    "a-blank-name": _with(("rows", 0, "name"), " "),
-    "a-control-character": _with(("rows", 0, "name"), "Panel\x0740"),
-    "a-mark-that-reorders-text": _with(("rows", 0, "note"), "core ‮04"),
-    "derived-written-by-hand": _with(("rows", 1, "derived"), {"porosity": "x"}),
-    "a-table-written-by-hand": _with(("rows", 1, "table"), "panel-40"),
-    "a-source-written-by-hand": _with(("rows", 1, "source"), "Panel 40 sheet"),
-    "an-estimate-outside-basis": _with(("rows", 1, "estimated"), ["porosity"]),
-    "an-unknown-field": _with(("rows", 1, "porosty"), 0.97),
-    "an-unknown-unit": _with(("rows", 1, "thickness_inch"), 1.6),
-    "text-where-a-number-goes": _with(("rows", 1, "porosity"), "0,97"),
-    "a-flag-where-a-number-goes": _with(("rows", 1, "porosity"), value=True),
-    "a-negative-density": _with(("rows", 1, "frame_density_kg_m3"), -40),
-    "a-porosity-above-one": _with(("rows", 1, "porosity"), 1.5),
-    "a-negative-thickness-in-another-unit": _with(("rows", 1, "thickness_cm"), -4),
-    "a-hedge-on-no-field": _with(("rows", 1, "approximate"), ["tortuosty"]),
-    "a-basis-word-for-a-field": _with(("rows", 1, "basis"), {"porosity": "typical"}),
-    "a-basis-for-the-table": _with(("rows", 1, "basis"), {"table": "measured"}),
-    "a-range-with-three-ends": _with(
-        ("rows", 1, "ranges"), {"tortuosity": [1.0, 1.1, 1.2]}
+    "a-blank-about": (_with(("about",), "   "), "/about: is empty"),
+    "another-schema": (
+        _with(("schema",), "phonometry-sidecar"),
+        "/schema: is 'phonometry-sidecar', not 'phonometry-catalogue'",
     ),
-    "a-range-end-in-text": _with(("rows", 1, "ranges"), {"tortuosity": ["1", 2]}),
-    "no-readings": _with(("rows", 1, "reported"), {"tortuosity": []}),
-    "a-negative-uncertainty": _with(
-        ("rows", 1, "uncertainty"), {"flow_resistivity_pa_s_m2": -900}
+    "a-newer-version": (
+        _with(("schema_version",), 2),
+        "/schema_version: 2 is newer than the version 1",
     ),
-    "a-converted-figure-without-its-unit": _with(
-        ("rows", 1, "converted"), {"flow_resistivity_pa_s_m2": ["12.5"]}
+    "a-version-in-text": (
+        _with(("schema_version",), "1"),
+        "/schema_version: is '1', not a whole number",
     ),
-    "a-blank-word": _with(("rows", 1, "unquantified"), {"structural_loss_factor": ""}),
-    "a-column-of-your-own-holding-an-object": _with(("rows", 1, "x-product"), {}),
-    "a-column-of-your-own-holding-a-flag": _with(("rows", 1, "x-product"), value=True),
-    "a-column-name-that-is-not-one": _with(("rows", 1, "x-"), "P40"),
-    "a-row-narrowing-its-document": _with(
-        ("rows", 1, "provenance"), {"document": "Another sheet"}
+    "a-reserved-name": (
+        _with(("catalogue",), "acme-2026-rev4"),
+        "/catalogue: 'acme-2026-rev4' has the form of a packaged table's name",
     ),
-    "a-row-narrowing-an-unknown-member": _with(
-        ("rows", 1, "provenance"), {"pages": "3"}
+    "a-name-in-capitals": (
+        _with(("catalogue",), "Panel 40"),
+        "/catalogue: 'Panel 40' is not a catalogue name",
+    ),
+    "a-basis-outside-the-vocabulary": (
+        _with(("basis",), "guessed"),
+        "/basis: is 'guessed', which is not one of",
+    ),
+    "a-basis-of-null": (
+        _with(("basis",), None),
+        "/basis: is null, which is not one of",
+    ),
+    "a-convention-that-is-not-text": (
+        _with(("conventions",), [3]),
+        "/conventions/0: expected text, got the number 3",
+    ),
+    "conventions-of-null": (
+        _with(("conventions",), None),
+        "/conventions: holds None, not a list of texts",
+    ),
+    "a-dialect-in-a-json-document": (
+        _with(("csv",), {"delimiter": ";", "decimal": ","}),
+        "/csv: declares a CSV dialect",
+    ),
+    "no-rows": (_without("rows"), "a catalogue document needs a top-level 'rows'"),
+    "an-empty-list-of-rows": (
+        _with(("rows",), []),
+        "/rows: a catalogue holds a list of rows, at least one",
+    ),
+    "a-schema-key-that-is-not-text": (
+        _with(("$schema",), 1),
+        "/$schema: expected text, got the number 1",
+    ),
+    "a-schema-key-of-null": (
+        _with(("$schema",), None),
+        "/$schema: expected text, got null",
+    ),
+    "a-writing-version-of-null": (
+        _with(("phonometry_version",), None),
+        "/phonometry_version: expected text, got null",
+    ),
+    "a-writing-version-too-long": (
+        _with(("phonometry_version",), "4" * (_catalogue._MAX_TEXT + 1)),
+        f"/phonometry_version: holds {_catalogue._MAX_TEXT + 1} characters",
+    ),
+    "a-provenance-without-its-day": (
+        _with(
+            ("provenance",),
+            {k: v for k, v in _PROVENANCE.items() if k != "consulted"},
+        ),
+        "/provenance: needs 'consulted'",
+    ),
+    "a-day-written-the-other-way": (
+        _with(("provenance", "consulted"), "23/09/2026"),
+        "/provenance/consulted: the provenance's consulted is '23/09/2026'",
+    ),
+    "an-unknown-kind": (
+        _with(("provenance", "kind"), "brochure"),
+        "/provenance/kind: the provenance's kind is 'brochure'",
+    ),
+    "an-empty-version": (
+        _with(("provenance", "version"), ""),
+        "/provenance/version: the provenance's version holds ''",
+    ),
+    "an-issue-date-in-words": (
+        _with(("provenance", "issued"), "March 2026"),
+        "/provenance/issued: the provenance's issued is 'March 2026'",
+    ),
+    "a-digest-that-is-not-one": (
+        _with(("provenance", "sha256"), "abc"),
+        "/provenance/sha256: the provenance's sha256 is 'abc'",
+    ),
+    "an-unknown-provenance-member": (
+        _with(("provenance", "edition"), "3"),
+        "/provenance/edition: a provenance has no 'edition'",
+    ),
+    "a-standard-for-no-field": (
+        _with(("provenance", "field_test_standards"), {"porosty": "ISO 4638"}),
+        "/provenance/field_test_standards/porosty: no field 'porosty'",
+    ),
+    "a-rows-standard-for-no-field": (
+        _with(
+            ("rows", 1, "provenance", "field_test_standards"),
+            {"porosty": "ISO 4638"},
+        ),
+        "/rows/1/provenance/field_test_standards/porosty: no field 'porosty'",
+    ),
+    "a-key-with-a-slash": (
+        _with(("rows", 0, "key"), "core/declared"),
+        "/rows/0/key: is 'core/declared'; a key is",
+    ),
+    "a-key-with-a-space": (
+        _with(("rows", 0, "key"), "core declared"),
+        "/rows/0/key: is 'core declared'; a key is",
+    ),
+    "a-row-without-a-key": (
+        _with(("rows", 0), {"name": "Panel 40 core"}),
+        "/rows/0: every row needs a key of its own",
+    ),
+    "a-row-without-a-name": (
+        _with(("rows", 0), {"key": "a"}),
+        "/rows/0 (row 'a'): every PorousMaterial row needs 'name'",
+    ),
+    "a-blank-name": (
+        _with(("rows", 0, "name"), " "),
+        "/rows/0/name (row 'core-declared'): a catalogue row needs a name",
+    ),
+    "a-control-character": (
+        _with(("rows", 0, "name"), "Panel\x0740"),
+        "/rows/0/name: holds the character U+0007",
+    ),
+    "a-mark-that-reorders-text": (
+        _with(("rows", 0, "note"), "core \u202e04"),
+        "/rows/0/note: holds the character U+202E",
+    ),
+    "derived-written-by-hand": (
+        _with(("rows", 1, "derived"), {"porosity": "x"}),
+        "/rows/1/derived (row 'core-lab'): derived is what the library works out",
+    ),
+    "a-table-written-by-hand": (
+        _with(("rows", 1, "table"), "panel-40"),
+        "/rows/1/table (row 'core-lab'): the catalogue's name is the table",
+    ),
+    "a-source-written-by-hand": (
+        _with(("rows", 1, "source"), "Panel 40 sheet"),
+        "/rows/1/source (row 'core-lab'): the source of every row is composed",
+    ),
+    "an-estimate-outside-basis": (
+        _with(("rows", 1, "estimated"), ["porosity"]),
+        "/rows/1/estimated (row 'core-lab'): an estimate is a basis",
+    ),
+    "an-unknown-field": (
+        _with(("rows", 1, "porosty"), 0.97),
+        "/rows/1/porosty (row 'core-lab'): no field 'porosty'",
+    ),
+    "an-unknown-unit": (
+        _with(("rows", 1, "thickness_inch"), 1.6),
+        "/rows/1/thickness_inch (row 'core-lab'): 'inch' is not a unit",
+    ),
+    "text-where-a-number-goes": (
+        _with(("rows", 1, "porosity"), "0,97"),
+        "/rows/1/porosity (row 'core-lab'): expected a number, got the text '0,97'",
+    ),
+    "a-flag-where-a-number-goes": (
+        _with(("rows", 1, "porosity"), value=True),
+        "/rows/1/porosity (row 'core-lab'): expected a number, got true",
+    ),
+    "a-negative-density": (
+        _with(("rows", 1, "frame_density_kg_m3"), -40),
+        "/rows/1/frame_density_kg_m3 (row 'core-lab'): 'Panel 40 core': "
+        "frame_density_kg_m3 is -40, and a quantity whose name ends in _kg_m3 "
+        "is never negative",
+    ),
+    "a-porosity-above-one": (
+        _with(("rows", 1, "porosity"), 1.5),
+        "/rows/1/porosity (row 'core-lab'): 'Panel 40 core': porosity is 1.5",
+    ),
+    "a-negative-thickness-in-another-unit": (
+        _moved(1, "thickness_mm", "thickness_cm", -4),
+        "/rows/1/thickness_cm (row 'core-lab'): 'Panel 40 core': thickness_mm is "
+        "-40.0, and a quantity whose name ends in _mm is never negative",
+    ),
+    "a-hedge-on-no-field": (
+        _with(("rows", 1, "approximate"), ["tortuosty"]),
+        "/rows/1/approximate/0 (row 'core-lab'): no field 'tortuosty'",
+    ),
+    "a-basis-word-for-a-field": (
+        _with(("rows", 1, "basis"), {"porosity": "typical"}),
+        "/rows/1/basis/porosity (row 'core-lab'): is 'typical', which is not one of",
+    ),
+    "a-basis-for-the-table": (
+        _with(("rows", 1, "basis"), {"table": "measured"}),
+        "/rows/1/basis/table (row 'core-lab'): 'table' is a field of PorousMaterial "
+        "that cannot be named here",
+    ),
+    "a-range-with-three-ends": (
+        _with(("rows", 1, "ranges"), {"tortuosity": [1.0, 1.1, 1.2]}),
+        "/rows/1/ranges/tortuosity (row 'core-lab'): holds [1.0, 1.1, 1.2]",
+    ),
+    "a-range-end-in-text": (
+        _with(("rows", 1, "ranges"), {"tortuosity": ["1", 2]}),
+        "/rows/1/ranges/tortuosity/0 (row 'core-lab'): expected a number",
+    ),
+    "no-readings": (
+        _with(("rows", 1, "reported"), {"tortuosity": []}),
+        "/rows/1/reported/tortuosity (row 'core-lab'): holds []",
+    ),
+    "a-negative-uncertainty": (
+        _with(("rows", 1, "uncertainty"), {"flow_resistivity_pa_s_m2": -900}),
+        "/rows/1/flow_resistivity_pa_s_m2 (row 'core-lab'): 'Panel 40 core': the "
+        "uncertainty of 'flow_resistivity_pa_s_m2' is -900",
+    ),
+    "a-converted-figure-without-its-unit": (
+        _with(("rows", 1, "converted"), {"flow_resistivity_pa_s_m2": ["12.5"]}),
+        "/rows/1/converted/flow_resistivity_pa_s_m2 (row 'core-lab'): holds ['12.5']",
+    ),
+    "a-blank-word": (
+        _with(("rows", 1, "unquantified"), {"structural_loss_factor": ""}),
+        "/rows/1/unquantified (row 'core-lab'): 'Panel 40 core': unquantified holds "
+        "no text for 'structural_loss_factor'",
+    ),
+    "a-column-of-your-own-holding-an-object": (
+        _with(("rows", 1, "x-product"), {}),
+        "/rows/1/x-product (row 'core-lab'): holds an object",
+    ),
+    "a-column-of-your-own-holding-a-flag": (
+        _with(("rows", 1, "x-product"), value=True),
+        "/rows/1/x-product (row 'core-lab'): holds true, which is a flag",
+    ),
+    "a-column-name-that-is-not-one": (
+        _with(("rows", 1, "x-"), "P40"),
+        "/rows/1/x- (row 'core-lab'): 'x-' is not a column name",
+    ),
+    "a-row-narrowing-its-document": (
+        _with(("rows", 1, "provenance"), {"document": "Another sheet"}),
+        "/rows/1/provenance/document (row 'core-lab'): a row cannot change the "
+        "document's document",
+    ),
+    "a-row-narrowing-an-unknown-member": (
+        _with(("rows", 1, "provenance"), {"pages": "3"}),
+        "/rows/1/provenance/pages: a row's provenance has no 'pages'",
     ),
 }
 
 
-@pytest.mark.parametrize("document", REFUSED.values(), ids=list(REFUSED))
+@pytest.mark.parametrize(("document", "said"), REFUSED.values(), ids=list(REFUSED))
 def test_a_problem_of_form_is_refused_by_the_schema_and_by_the_reader(
-    document: dict[str, Any],
+    document: dict[str, Any], said: str
 ) -> None:
     assert _problems(document)
-    with pytest.raises(io.CatalogueError, match="<document>"):
+    with pytest.raises(io.CatalogueError, match=re.escape(f"<document>: {said}")):
         io.parse_catalogue(document, row_type=materials.PorousMaterial)
+
+
+#: The keys a document may leave out, where a null or an over-long text is
+#: the easiest thing to write by hand.
+_OPTIONAL = sorted(_catalogue._TOP_KEYS - set(_catalogue._TOP_REQUIRED))
+
+
+@pytest.mark.parametrize("key", _OPTIONAL)
+@pytest.mark.parametrize(
+    "value", [None, "x" * (_catalogue._MAX_TEXT + 1)], ids=["null", "too-long"]
+)
+def test_an_optional_key_is_read_exactly_when_the_schema_accepts_it(
+    key: str, value: object
+) -> None:
+    """A document the reader reads is never one the schema marks, and back."""
+    document = _with((key,), value)
+    try:
+        io.parse_catalogue(document, row_type=materials.PorousMaterial)
+    except io.CatalogueError:
+        read = False
+    else:
+        read = True
+    assert read == (not _problems(document))
 
 
 def test_a_header_without_its_dialect_is_refused_by_both(

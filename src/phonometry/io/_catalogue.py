@@ -891,19 +891,23 @@ class _Reader:
                     "/about", "is empty; say what the document is and how it was read"
                 )
             header.about = about or ""
-        basis = document.get("basis")
-        if basis is not None and basis not in CATALOGUE_BASES:
-            self.error(
-                "/basis",
-                f"is {_quote(basis)}, which is not one of {', '.join(CATALOGUE_BASES)}",
-            )
-        elif basis is not None:
-            header.basis = basis
+        # An optional key is either absent or holds what it says: a null is
+        # refused here as it is under every other key, so the schema, which
+        # has no null for any of them, never refuses what this reads.
+        if "basis" in document:
+            basis = document["basis"]
+            if basis not in CATALOGUE_BASES:
+                held = "null" if basis is None else _quote(basis)
+                self.error(
+                    "/basis",
+                    f"is {held}, which is not one of {', '.join(CATALOGUE_BASES)}",
+                )
+            else:
+                header.basis = basis
         header.conventions = self.conventions(document.get("conventions", []))
         for key in ("phonometry_version", "$schema"):
-            held = document.get(key)
-            if held is not None and not isinstance(held, str):
-                self.error(_pointer(key), f"is {_quote(held)}, not text")
+            if key in document:
+                self.text(document[key], _pointer(key))
         if "provenance" in document:
             header.provenance = self.provenance(document["provenance"])
         if "rows" in document:

@@ -1002,22 +1002,29 @@ class _Reader:
         header.about = about or ""
 
     def basis(self, document: Mapping[str, Any], header: _Header) -> None:
-        """The basis of every row that does not give its own."""
-        basis = document.get("basis")
-        if basis is not None and basis not in CATALOGUE_BASES:
+        """The basis of every row that does not give its own.
+
+        An optional key is either absent or holds what it says: a null is
+        refused here as it is under every other key, so the schema, which
+        has no null for any of them, never refuses what this reads.
+        """
+        if "basis" not in document:
+            return
+        basis = document["basis"]
+        if basis not in CATALOGUE_BASES:
+            held = "null" if basis is None else _quote(basis)
             self.error(
                 "/basis",
-                f"is {_quote(basis)}, which is not one of {', '.join(CATALOGUE_BASES)}",
+                f"is {held}, which is not one of {', '.join(CATALOGUE_BASES)}",
             )
-        elif basis is not None:
+        else:
             header.basis = basis
 
     def unread(self, document: Mapping[str, Any]) -> None:
         """The keys the reader never reads, held to what they are."""
         for key in ("phonometry_version", "$schema"):
-            held = document.get(key)
-            if held is not None and not isinstance(held, str):
-                self.error(_pointer(key), f"is {_quote(held)}, not text")
+            if key in document:
+                self.text(document[key], _pointer(key))
 
     def table_credit(self, held: object) -> str:
         """The credit of the whole table, as the document gives it once."""

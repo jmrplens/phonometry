@@ -349,7 +349,20 @@ class _RowSchema:
         """The schema of one field of the class, as a document writes it."""
         kind = self.names.kinds[name]
         if name == "provenance":
-            return _ref("row_provenance")
+            # A row narrows the standard of a field of its own class, as the
+            # document does, so the names are held to the class here too.
+            return {
+                "allOf": [
+                    _ref("row_provenance"),
+                    {
+                        "properties": {
+                            "field_test_standards": {
+                                "propertyNames": _ref(f"{self.name}.fields")
+                            }
+                        }
+                    },
+                ]
+            }
         if name in self.names.hedges:
             return self.hedge(name)
         if kind in _NUMERIC:

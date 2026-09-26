@@ -1095,7 +1095,20 @@
           "$ref": "#/$defs/prose"
         },
         "provenance": {
-          "$ref": "#/$defs/row_provenance"
+          "allOf": [
+            {
+              "$ref": "#/$defs/row_provenance"
+            },
+            {
+              "properties": {
+                "field_test_standards": {
+                  "propertyNames": {
+                    "$ref": "#/$defs/AbsorptionAreaSpectrum.fields"
+                  }
+                }
+              }
+            }
+          ]
         },
         "absorption_area_63_m2": {
           "$ref": "#/$defs/number_from_0"
@@ -1391,7 +1404,20 @@
           "$ref": "#/$defs/prose"
         },
         "provenance": {
-          "$ref": "#/$defs/row_provenance"
+          "allOf": [
+            {
+              "$ref": "#/$defs/row_provenance"
+            },
+            {
+              "properties": {
+                "field_test_standards": {
+                  "propertyNames": {
+                    "$ref": "#/$defs/AbsorptionSpectrum.fields"
+                  }
+                }
+              }
+            }
+          ]
         },
         "absorption_coefficient_63": {
           "$ref": "#/$defs/number"
@@ -1591,7 +1617,20 @@
           "$ref": "#/$defs/prose"
         },
         "provenance": {
-          "$ref": "#/$defs/row_provenance"
+          "allOf": [
+            {
+              "$ref": "#/$defs/row_provenance"
+            },
+            {
+              "properties": {
+                "field_test_standards": {
+                  "propertyNames": {
+                    "$ref": "#/$defs/BandedRow.fields"
+                  }
+                }
+              }
+            }
+          ]
         }
       },
       "patternProperties": {
@@ -1746,7 +1785,20 @@
           "$ref": "#/$defs/prose"
         },
         "provenance": {
-          "$ref": "#/$defs/row_provenance"
+          "allOf": [
+            {
+              "$ref": "#/$defs/row_provenance"
+            },
+            {
+              "properties": {
+                "field_test_standards": {
+                  "propertyNames": {
+                    "$ref": "#/$defs/Carpet.fields"
+                  }
+                }
+              }
+            }
+          ]
         },
         "pile_weight_kg_m2": {
           "$ref": "#/$defs/number_from_0"
@@ -1953,7 +2005,20 @@
           "$ref": "#/$defs/prose"
         },
         "provenance": {
-          "$ref": "#/$defs/row_provenance"
+          "allOf": [
+            {
+              "$ref": "#/$defs/row_provenance"
+            },
+            {
+              "properties": {
+                "field_test_standards": {
+                  "propertyNames": {
+                    "$ref": "#/$defs/CatalogueRow.fields"
+                  }
+                }
+              }
+            }
+          ]
         }
       },
       "patternProperties": {
@@ -2108,7 +2173,20 @@
           "$ref": "#/$defs/prose"
         },
         "provenance": {
-          "$ref": "#/$defs/row_provenance"
+          "allOf": [
+            {
+              "$ref": "#/$defs/row_provenance"
+            },
+            {
+              "properties": {
+                "field_test_standards": {
+                  "propertyNames": {
+                    "$ref": "#/$defs/DampingMaterial.fields"
+                  }
+                }
+              }
+            }
+          ]
         },
         "max_loss_factor": {
           "$ref": "#/$defs/number"
@@ -2418,7 +2496,20 @@
           "$ref": "#/$defs/prose"
         },
         "provenance": {
-          "$ref": "#/$defs/row_provenance"
+          "allOf": [
+            {
+              "$ref": "#/$defs/row_provenance"
+            },
+            {
+              "properties": {
+                "field_test_standards": {
+                  "propertyNames": {
+                    "$ref": "#/$defs/DampingTreatment.fields"
+                  }
+                }
+              }
+            }
+          ]
         },
         "decay_rate_db_s": {
           "$ref": "#/$defs/number"
@@ -2606,7 +2697,20 @@
           "$ref": "#/$defs/prose"
         },
         "provenance": {
-          "$ref": "#/$defs/row_provenance"
+          "allOf": [
+            {
+              "$ref": "#/$defs/row_provenance"
+            },
+            {
+              "properties": {
+                "field_test_standards": {
+                  "propertyNames": {
+                    "$ref": "#/$defs/DuctWallSpectrum.fields"
+                  }
+                }
+              }
+            }
+          ]
         },
         "transmission_loss_63_db": {
           "$ref": "#/$defs/number"
@@ -2910,7 +3014,20 @@
           "$ref": "#/$defs/prose"
         },
         "provenance": {
-          "$ref": "#/$defs/row_provenance"
+          "allOf": [
+            {
+              "$ref": "#/$defs/row_provenance"
+            },
+            {
+              "properties": {
+                "field_test_standards": {
+                  "propertyNames": {
+                    "$ref": "#/$defs/Gas.fields"
+                  }
+                }
+              }
+            }
+          ]
         },
         "molar_mass_kg_mol": {
           "$ref": "#/$defs/number_from_0"
@@ -3076,7 +3193,20 @@
           "$ref": "#/$defs/prose"
         },
         "provenance": {
-          "$ref": "#/$defs/row_provenance"
+          "allOf": [
+            {
+              "$ref": "#/$defs/row_provenance"
+            },
+            {
+              "properties": {
+                "field_test_standards": {
+                  "propertyNames": {
+                    "$ref": "#/$defs/GroundSurface.fields"
+                  }
+                }
+              }
+            }
+          ]
         },
         "flow_resistivity_pa_s_m2": {
           "$ref": "#/$defs/number_from_0"
@@ -3272,7 +3402,20 @@
           "$ref": "#/$defs/prose"
         },
         "provenance": {
-          "$ref": "#/$defs/row_provenance"
+          "allOf": [
+            {
+              "$ref": "#/$defs/row_provenance"
+            },
+            {
+              "properties": {
+                "field_test_standards": {
+                  "propertyNames": {
+                    "$ref": "#/$defs/ImpactImprovementSpectrum.fields"
+                  }
+                }
+              }
+            }
+          ]
         },
         "impact_improvement_50_db": {
           "$ref": "#/$defs/number"
@@ -3548,7 +3691,20 @@
           "$ref": "#/$defs/prose"
         },
         "provenance": {
-          "$ref": "#/$defs/row_provenance"
+          "allOf": [
+            {
+              "$ref": "#/$defs/row_provenance"
+            },
+            {
+              "properties": {
+                "field_test_standards": {
+                  "propertyNames": {
+                    "$ref": "#/$defs/ImpactInsulation.fields"
+                  }
+                }
+              }
+            }
+          ]
         },
         "impact_insulation_class": {
           "$ref": "#/$defs/number"
@@ -3766,7 +3922,20 @@
           "$ref": "#/$defs/prose"
         },
         "provenance": {
-          "$ref": "#/$defs/row_provenance"
+          "allOf": [
+            {
+              "$ref": "#/$defs/row_provenance"
+            },
+            {
+              "properties": {
+                "field_test_standards": {
+                  "propertyNames": {
+                    "$ref": "#/$defs/NonlinearityParameter.fields"
+                  }
+                }
+              }
+            }
+          ]
         },
         "b_over_a": {
           "$ref": "#/$defs/number"
@@ -3972,7 +4141,20 @@
           "$ref": "#/$defs/prose"
         },
         "provenance": {
-          "$ref": "#/$defs/row_provenance"
+          "allOf": [
+            {
+              "$ref": "#/$defs/row_provenance"
+            },
+            {
+              "properties": {
+                "field_test_standards": {
+                  "propertyNames": {
+                    "$ref": "#/$defs/NormalizedDiffusionSpectrum.fields"
+                  }
+                }
+              }
+            }
+          ]
         },
         "diffusion_coefficient_100": {
           "$ref": "#/$defs/number"
@@ -4223,7 +4405,20 @@
           "$ref": "#/$defs/prose"
         },
         "provenance": {
-          "$ref": "#/$defs/row_provenance"
+          "allOf": [
+            {
+              "$ref": "#/$defs/row_provenance"
+            },
+            {
+              "properties": {
+                "field_test_standards": {
+                  "propertyNames": {
+                    "$ref": "#/$defs/OrthotropicWood.fields"
+                  }
+                }
+              }
+            }
+          ]
         },
         "density_kg_m3": {
           "$ref": "#/$defs/number_from_0"
@@ -4511,7 +4706,20 @@
           "$ref": "#/$defs/prose"
         },
         "provenance": {
-          "$ref": "#/$defs/row_provenance"
+          "allOf": [
+            {
+              "$ref": "#/$defs/row_provenance"
+            },
+            {
+              "properties": {
+                "field_test_standards": {
+                  "propertyNames": {
+                    "$ref": "#/$defs/PlateauMaterial.fields"
+                  }
+                }
+              }
+            }
+          ]
         },
         "surface_density_per_mm_kg_m2": {
           "$ref": "#/$defs/number_from_0"
@@ -4688,7 +4896,20 @@
           "$ref": "#/$defs/prose"
         },
         "provenance": {
-          "$ref": "#/$defs/row_provenance"
+          "allOf": [
+            {
+              "$ref": "#/$defs/row_provenance"
+            },
+            {
+              "properties": {
+                "field_test_standards": {
+                  "propertyNames": {
+                    "$ref": "#/$defs/PorousMaterial.fields"
+                  }
+                }
+              }
+            }
+          ]
         },
         "flow_resistivity_pa_s_m2": {
           "$ref": "#/$defs/number_from_0"
@@ -5056,7 +5277,20 @@
           "$ref": "#/$defs/prose"
         },
         "provenance": {
-          "$ref": "#/$defs/row_provenance"
+          "allOf": [
+            {
+              "$ref": "#/$defs/row_provenance"
+            },
+            {
+              "properties": {
+                "field_test_standards": {
+                  "propertyNames": {
+                    "$ref": "#/$defs/PracticalAbsorptionSpectrum.fields"
+                  }
+                }
+              }
+            }
+          ]
         },
         "weighted_absorption_coefficient": {
           "$ref": "#/$defs/number"
@@ -5310,7 +5544,20 @@
           "$ref": "#/$defs/prose"
         },
         "provenance": {
-          "$ref": "#/$defs/row_provenance"
+          "allOf": [
+            {
+              "$ref": "#/$defs/row_provenance"
+            },
+            {
+              "properties": {
+                "field_test_standards": {
+                  "propertyNames": {
+                    "$ref": "#/$defs/PredictedScatteringSpectrum.fields"
+                  }
+                }
+              }
+            }
+          ]
         },
         "scattering_coefficient_100": {
           "$ref": "#/$defs/number"
@@ -5565,7 +5812,20 @@
           "$ref": "#/$defs/prose"
         },
         "provenance": {
-          "$ref": "#/$defs/row_provenance"
+          "allOf": [
+            {
+              "$ref": "#/$defs/row_provenance"
+            },
+            {
+              "properties": {
+                "field_test_standards": {
+                  "propertyNames": {
+                    "$ref": "#/$defs/ResilientLayer.fields"
+                  }
+                }
+              }
+            }
+          ]
         },
         "dynamic_stiffness_n_m3": {
           "$ref": "#/$defs/number_from_0"
@@ -5777,7 +6037,20 @@
           "$ref": "#/$defs/prose"
         },
         "provenance": {
-          "$ref": "#/$defs/row_provenance"
+          "allOf": [
+            {
+              "$ref": "#/$defs/row_provenance"
+            },
+            {
+              "properties": {
+                "field_test_standards": {
+                  "propertyNames": {
+                    "$ref": "#/$defs/ResilientMaterial.fields"
+                  }
+                }
+              }
+            }
+          ]
         },
         "density_kg_m3": {
           "$ref": "#/$defs/number_from_0"
@@ -6002,7 +6275,20 @@
           "$ref": "#/$defs/prose"
         },
         "provenance": {
-          "$ref": "#/$defs/row_provenance"
+          "allOf": [
+            {
+              "$ref": "#/$defs/row_provenance"
+            },
+            {
+              "properties": {
+                "field_test_standards": {
+                  "propertyNames": {
+                    "$ref": "#/$defs/ResistiveSheet.fields"
+                  }
+                }
+              }
+            }
+          ]
         },
         "specific_flow_resistance_pa_s_m": {
           "$ref": "#/$defs/number_from_0"
@@ -6250,7 +6536,20 @@
           "$ref": "#/$defs/prose"
         },
         "provenance": {
-          "$ref": "#/$defs/row_provenance"
+          "allOf": [
+            {
+              "$ref": "#/$defs/row_provenance"
+            },
+            {
+              "properties": {
+                "field_test_standards": {
+                  "propertyNames": {
+                    "$ref": "#/$defs/ScatteringCoefficientSpectrum.fields"
+                  }
+                }
+              }
+            }
+          ]
         },
         "scattering_coefficient_100": {
           "$ref": "#/$defs/number"
@@ -6496,7 +6795,20 @@
           "$ref": "#/$defs/prose"
         },
         "provenance": {
-          "$ref": "#/$defs/row_provenance"
+          "allOf": [
+            {
+              "$ref": "#/$defs/row_provenance"
+            },
+            {
+              "properties": {
+                "field_test_standards": {
+                  "propertyNames": {
+                    "$ref": "#/$defs/SolidMaterial.fields"
+                  }
+                }
+              }
+            }
+          ]
         },
         "density_kg_m3": {
           "$ref": "#/$defs/number_from_0"
@@ -6782,7 +7094,20 @@
           "$ref": "#/$defs/prose"
         },
         "provenance": {
-          "$ref": "#/$defs/row_provenance"
+          "allOf": [
+            {
+              "$ref": "#/$defs/row_provenance"
+            },
+            {
+              "properties": {
+                "field_test_standards": {
+                  "propertyNames": {
+                    "$ref": "#/$defs/SolidNonlinearity.fields"
+                  }
+                }
+              }
+            }
+          ]
         },
         "nonlinearity_parameter": {
           "$ref": "#/$defs/number"
@@ -6947,7 +7272,20 @@
           "$ref": "#/$defs/prose"
         },
         "provenance": {
-          "$ref": "#/$defs/row_provenance"
+          "allOf": [
+            {
+              "$ref": "#/$defs/row_provenance"
+            },
+            {
+              "properties": {
+                "field_test_standards": {
+                  "propertyNames": {
+                    "$ref": "#/$defs/SoundReductionSpectrum.fields"
+                  }
+                }
+              }
+            }
+          ]
         },
         "sound_reduction_index_50_db": {
           "$ref": "#/$defs/number"
@@ -7291,7 +7629,20 @@
           "$ref": "#/$defs/prose"
         },
         "provenance": {
-          "$ref": "#/$defs/row_provenance"
+          "allOf": [
+            {
+              "$ref": "#/$defs/row_provenance"
+            },
+            {
+              "properties": {
+                "field_test_standards": {
+                  "propertyNames": {
+                    "$ref": "#/$defs/ThirdOctaveAbsorptionSpectrum.fields"
+                  }
+                }
+              }
+            }
+          ]
         },
         "weighted_absorption_coefficient": {
           "$ref": "#/$defs/number"
@@ -7635,7 +7986,20 @@
           "$ref": "#/$defs/prose"
         },
         "provenance": {
-          "$ref": "#/$defs/row_provenance"
+          "allOf": [
+            {
+              "$ref": "#/$defs/row_provenance"
+            },
+            {
+              "properties": {
+                "field_test_standards": {
+                  "propertyNames": {
+                    "$ref": "#/$defs/TransmissionLossSpectrum.fields"
+                  }
+                }
+              }
+            }
+          ]
         },
         "transmission_loss_63_db": {
           "$ref": "#/$defs/number"

@@ -687,6 +687,50 @@ def aerogel_note_in_words(
     return out
 
 
+#: The scope each of Rossing's four tables of B/A credits its paper at: the
+#: row for the three that print a Reference column beside every value, the
+#: whole table for Table 8.2, whose caption names one paper for every cell.
+NONLINEARITY_CREDIT_SCOPE: Mapping[str, str] = {
+    "rossing-2014-table-8-1": "row",
+    "rossing-2014-table-8-2": "table",
+    "rossing-2014-table-8-3": "row",
+    "rossing-2014-table-8-4": "row",
+}
+
+
+def nonlinearity_credits_by_scope(
+    catalogues: Mapping[str, Mapping[str, Row]],
+) -> dict[str, dict[str, Row]]:
+    """The dump taken through the change that credits B/A at the page's scope.
+
+    Every row of the four tables held its paper as the credit of its one
+    value, ``attributed_to['b_over_a']``. The pages print it as the credit of
+    a measurement: Tables 8.1, 8.3 and 8.4 in a Reference column, one paper
+    per row, which covers the temperature and the year the row prints with
+    the value, and Table 8.2 once in its caption, for the whole table. One
+    thing moved, and nothing else may:
+
+    * the ``attributed_to`` of every row of ``PUBLISHED_NONLINEARITY`` is
+      keyed by the scope :data:`NONLINEARITY_CREDIT_SCOPE` gives its table
+      where it was keyed by ``b_over_a``, with the same text. No value moved.
+
+    :raises ValueError: when a row credits anything but its value, so that
+        the step can never claim a move it did not make.
+    """
+    out = {name: dict(rows) for name, rows in catalogues.items()}
+    name = "PUBLISHED_NONLINEARITY"
+    rows = dict(out[name])
+    for key, row in rows.items():
+        credit = row.get("attributed_to", {})
+        if list(credit) != ["b_over_a"]:
+            msg = f"{name}[{key!r}] credits {sorted(credit)}, not b_over_a alone"
+            raise ValueError(msg)
+        scope = NONLINEARITY_CREDIT_SCOPE[row["table"]]
+        rows[key] = {**row, "attributed_to": {scope: credit["b_over_a"]}}
+    out[name] = rows
+    return out
+
+
 #: Every change since the baseline, oldest first.
 CHANGES: tuple[Change, ...] = (
     one_row_shape,
@@ -696,6 +740,7 @@ CHANGES: tuple[Change, ...] = (
     derived_names_bases,
     bases_in_words,
     aerogel_note_in_words,
+    nonlinearity_credits_by_scope,
 )
 
 

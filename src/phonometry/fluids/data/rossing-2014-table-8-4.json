@@ -8,7 +8,7 @@
       "temperature_c": 318,
       "b_over_a": 7.1,
       "attributed_to": {
-        "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+        "row": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
       },
       "group": "Liquid metals"
     },
@@ -18,7 +18,7 @@
       "temperature_c": 160,
       "b_over_a": 4.6,
       "attributed_to": {
-        "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+        "row": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
       },
       "group": "Liquid metals"
     },
@@ -28,7 +28,7 @@
       "temperature_c": 30,
       "b_over_a": 7.8,
       "attributed_to": {
-        "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+        "row": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
       },
       "group": "Liquid metals"
     },
@@ -38,7 +38,7 @@
       "temperature_c": 100,
       "b_over_a": 2.9,
       "attributed_to": {
-        "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+        "row": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
       },
       "group": "Liquid metals"
     },
@@ -48,7 +48,7 @@
       "temperature_c": 110,
       "b_over_a": 2.7,
       "attributed_to": {
-        "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+        "row": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
       },
       "group": "Liquid metals"
     },
@@ -58,7 +58,7 @@
       "temperature_c": 240,
       "b_over_a": 4.4,
       "attributed_to": {
-        "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+        "row": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
       },
       "group": "Liquid metals"
     },
@@ -68,7 +68,7 @@
       "temperature_c": -187.15,
       "b_over_a": 5.01,
       "attributed_to": {
-        "b_over_a": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
+        "row": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
       },
       "group": "Liquid gases"
     },
@@ -78,7 +78,7 @@
       "temperature_c": -183.15,
       "b_over_a": 5.67,
       "attributed_to": {
-        "b_over_a": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
+        "row": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
       },
       "group": "Liquid gases",
       "note": "The caption says atmospheric pressure, and argon boils at -185.85 °C at one atmosphere, so at -183.15 °C it is liquid only under a higher pressure the page does not print; the reference, [8.74], measured B/A in liquefied gases as a function of temperature and pressure. The value is served as printed and the caption's condition is registered in docs/ERRATA.md."
@@ -89,7 +89,7 @@
       "temperature_c": -271.38,
       "b_over_a": 4.5,
       "attributed_to": {
-        "b_over_a": "H.A. Kashkooli, P.J. Dolan Jr., C.W. Smith: Measurement of the acoustic nonlinearity parameter in water, methanol, liquid nitrogen, and liquid helium-II by two different methods: A comparison, J. Acoust. Soc. Am. 82, 2086–2089 (1987) [8.75]"
+        "row": "H.A. Kashkooli, P.J. Dolan Jr., C.W. Smith: Measurement of the acoustic nonlinearity parameter in water, methanol, liquid nitrogen, and liquid helium-II by two different methods: A comparison, J. Acoust. Soc. Am. 82, 2086–2089 (1987) [8.75]"
       },
       "group": "Liquid gases"
     },
@@ -99,7 +99,7 @@
       "temperature_c": -259.15,
       "b_over_a": 5.59,
       "attributed_to": {
-        "b_over_a": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
+        "row": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
       },
       "group": "Liquid gases"
     },
@@ -109,7 +109,7 @@
       "temperature_c": -257.15,
       "b_over_a": 6.87,
       "attributed_to": {
-        "b_over_a": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
+        "row": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
       },
       "group": "Liquid gases"
     },
@@ -119,7 +119,7 @@
       "temperature_c": -255.15,
       "b_over_a": 7.64,
       "attributed_to": {
-        "b_over_a": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
+        "row": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
       },
       "group": "Liquid gases"
     },
@@ -129,7 +129,7 @@
       "temperature_c": -253.15,
       "b_over_a": 7.79,
       "attributed_to": {
-        "b_over_a": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
+        "row": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
       },
       "group": "Liquid gases"
     },
@@ -139,7 +139,7 @@
       "temperature_c": -163.15,
       "b_over_a": 17.95,
       "attributed_to": {
-        "b_over_a": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
+        "row": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
       },
       "group": "Liquid gases"
     },
@@ -149,7 +149,7 @@
       "temperature_c": -153.15,
       "b_over_a": 10.31,
       "attributed_to": {
-        "b_over_a": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
+        "row": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
       },
       "group": "Liquid gases",
       "note": "The caption says atmospheric pressure, and methane boils at -161.49 °C at one atmosphere, so at -153.15 °C it is liquid only under a higher pressure the page does not print; the reference, [8.74], measured B/A in liquefied gases as a function of temperature and pressure. The value is served as printed and the caption's condition is registered in docs/ERRATA.md."
@@ -160,7 +160,7 @@
       "temperature_c": -143.15,
       "b_over_a": 6.54,
       "attributed_to": {
-        "b_over_a": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
+        "row": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
       },
       "group": "Liquid gases",
       "note": "The caption says atmospheric pressure, and methane boils at -161.49 °C at one atmosphere, so at -143.15 °C it is liquid only under a higher pressure the page does not print; the reference, [8.74], measured B/A in liquefied gases as a function of temperature and pressure. The value is served as printed and the caption's condition is registered in docs/ERRATA.md."
@@ -171,7 +171,7 @@
       "temperature_c": -138.15,
       "b_over_a": 5.41,
       "attributed_to": {
-        "b_over_a": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
+        "row": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
       },
       "group": "Liquid gases",
       "note": "The caption says atmospheric pressure, and methane boils at -161.49 °C at one atmosphere, so at -138.15 °C it is liquid only under a higher pressure the page does not print; the reference, [8.74], measured B/A in liquefied gases as a function of temperature and pressure. The value is served as printed and the caption's condition is registered in docs/ERRATA.md."
@@ -182,7 +182,7 @@
       "temperature_c": -203.15,
       "b_over_a": 7.7,
       "attributed_to": {
-        "b_over_a": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
+        "row": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
       },
       "group": "Liquid gases"
     },
@@ -192,7 +192,7 @@
       "temperature_c": -195.76,
       "b_over_a": 6.6,
       "attributed_to": {
-        "b_over_a": "H.A. Kashkooli, P.J. Dolan Jr., C.W. Smith: Measurement of the acoustic nonlinearity parameter in water, methanol, liquid nitrogen, and liquid helium-II by two different methods: A comparison, J. Acoust. Soc. Am. 82, 2086–2089 (1987) [8.75]"
+        "row": "H.A. Kashkooli, P.J. Dolan Jr., C.W. Smith: Measurement of the acoustic nonlinearity parameter in water, methanol, liquid nitrogen, and liquid helium-II by two different methods: A comparison, J. Acoust. Soc. Am. 82, 2086–2089 (1987) [8.75]"
       },
       "group": "Liquid gases"
     },
@@ -202,7 +202,7 @@
       "temperature_c": -193.15,
       "b_over_a": 8.03,
       "attributed_to": {
-        "b_over_a": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
+        "row": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
       },
       "group": "Liquid gases",
       "note": "The caption says atmospheric pressure, and nitrogen boils at -195.79 °C at one atmosphere, so at -193.15 °C it is liquid only under a higher pressure the page does not print; the reference, [8.74], measured B/A in liquefied gases as a function of temperature and pressure. The value is served as printed and the caption's condition is registered in docs/ERRATA.md."
@@ -213,7 +213,7 @@
       "temperature_c": -183.15,
       "b_over_a": 9,
       "attributed_to": {
-        "b_over_a": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
+        "row": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
       },
       "group": "Liquid gases",
       "note": "The caption says atmospheric pressure, and nitrogen boils at -195.79 °C at one atmosphere, so at -183.15 °C it is liquid only under a higher pressure the page does not print; the reference, [8.74], measured B/A in liquefied gases as a function of temperature and pressure. The value is served as printed and the caption's condition is registered in docs/ERRATA.md."
@@ -224,7 +224,7 @@
       "temperature_c": 20,
       "b_over_a": 5.25,
       "attributed_to": {
-        "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+        "row": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
       },
       "group": "Other substances"
     },
@@ -234,7 +234,7 @@
       "temperature_c": 121,
       "b_over_a": 9.5,
       "attributed_to": {
-        "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+        "row": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
       },
       "group": "Other substances"
     }

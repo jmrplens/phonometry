@@ -290,3 +290,35 @@ def test_derived_names_bases_rewrites_the_nineteen_hopkins_rows_only() -> None:
             assert text == old[key]["derived"][field] + fp.MIXED_BASIS_CLAUSE
             texts += 1
     assert texts == 95
+
+
+def test_nonlinearity_credits_by_scope_moves_the_key_of_each_credit_only() -> None:
+    """The step that credits B/A at the page's scope moved no text and no value.
+
+    Each of the 164 rows of Rossing's four tables keeps the paper it names,
+    word for word, under the row for Tables 8.1, 8.3 and 8.4 and under the
+    table for Table 8.2; every other field of those rows, and every other
+    mapping, comes out of the step as it went in.
+    """
+    before = fp.aerogel_note_in_words(
+        fp.bases_in_words(
+            fp.derived_names_bases(fp.exact_unit_conversion(_before_completion_path()))
+        )
+    )
+    after = fp.nonlinearity_credits_by_scope(before)
+    assert {name for name in before if before[name] != after[name]} == {
+        "PUBLISHED_NONLINEARITY"
+    }
+    old, new = before["PUBLISHED_NONLINEARITY"], after["PUBLISHED_NONLINEARITY"]
+    assert list(new) == list(old)
+    scopes: dict[str, int] = {}
+    for key, row in old.items():
+        built = new[key]
+        (scope,) = built["attributed_to"]
+        assert scope == fp.NONLINEARITY_CREDIT_SCOPE[row["table"]]
+        assert built["attributed_to"][scope] == row["attributed_to"]["b_over_a"]
+        scopes[scope] = scopes.get(scope, 0) + 1
+        assert _text({f: v for f, v in built.items() if f != "attributed_to"}) == (
+            _text({f: v for f, v in row.items() if f != "attributed_to"})
+        )
+    assert scopes == {"row": 102, "table": 62}

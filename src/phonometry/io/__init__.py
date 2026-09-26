@@ -57,16 +57,21 @@ their own, which :func:`read_catalogue` reads into rows of the same classes:
 a versioned JSON document with its :class:`Provenance` (the kind of document,
 its version, the day it was consulted, the laboratory and the report), each
 cell named as the field it fills or in another unit of the same kind, and
-every hedge the packaged tables use. What comes back is a :class:`Catalogue`,
-a read-only mapping keyed like the packaged ones that joins a ``PUBLISHED_*``
-catalogue with ``|`` and never lets one row replace another. The problems in
-a file are raised at once in one :class:`CatalogueError`, each
-:class:`CatalogueIssue` with the JSON pointer to it (every problem of form,
-and the first rule of the row contract each row breaks), and what is only
-worth a second look rides on the catalogue as a note with one
+every hedge the packaged tables use; or the CSV file a spreadsheet saves, one
+row per line in a closed grammar of cells (``~0.85``, ``<=30``,
+``0.30..0.50``, ``0.85±0.05``, ``[AFr5]``), with that document's header
+beside it declaring the delimiter and the decimal mark. What comes back is a
+:class:`Catalogue`, a read-only mapping keyed like the packaged ones that
+joins a ``PUBLISHED_*`` catalogue with ``|`` and never lets one row replace
+another. The problems in a file are raised at once in one
+:class:`CatalogueError`, each :class:`CatalogueIssue` with its place, a JSON
+pointer or a line and a column of the CSV file (every problem of form, and
+the first rule of the row contract each row breaks), and what is only worth
+a second look rides on the catalogue as a note with one
 :class:`CatalogueWarning`. :func:`parse_catalogue` reads the same from text or
 a mapping in memory, and :func:`write_catalogue` writes rows, a packaged
-table among them, as a file that reads back into the same rows. Nothing the
+table among them, as a file that reads back into the same rows, and a CSV
+file as a spreadsheet opens it with no text read as a formula. Nothing the
 file names is ever imported, and nothing it holds is kept anywhere but in the
 objects handed back.
 """

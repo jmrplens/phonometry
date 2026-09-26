@@ -190,6 +190,32 @@ def test_the_document_basis_is_the_row_entry_of_a_row_without_one() -> None:
     assert lab.basis_of("poisson_ratio") == "estimated"
 
 
+def test_the_document_credit_is_the_table_entry_of_every_row() -> None:
+    document = _panel()
+    document["attributed_to"] = "Example Survey, 2024"
+    document["rows"][1]["attributed_to"] = {"row": "Example Lab"}
+    mine = _read(document)
+    assert mine["panel-40/core-declared"].attributed_to == {
+        "table": "Example Survey, 2024"
+    }
+    assert mine["panel-40/core-lab"].attributed_to == {
+        "row": "Example Lab",
+        "table": "Example Survey, 2024",
+    }
+
+
+def test_a_row_does_not_credit_the_table_the_document_credits() -> None:
+    document = _panel()
+    document["attributed_to"] = "Example Survey, 2024"
+    document["rows"][0]["attributed_to"] = {"table": "Example Survey, 2024"}
+    (issue,) = _issues(document)
+    assert (issue.location, issue.row_key) == (
+        "/rows/0/attributed_to/table",
+        "core-declared",
+    )
+    assert "which the document credits once in its own attributed_to" in issue.message
+
+
 def test_a_row_narrows_the_provenance_and_its_source_says_so() -> None:
     mine = _read(_panel())
     lab = mine["panel-40/core-lab"]
@@ -574,8 +600,20 @@ _REMOVE = object()
         ("/row_type", "SolidMaterial", "/row_type", "row_type=PorousMaterial"),
         ("/about", "", "/about", "is empty"),
         ("/basis", "estimate", "/basis", "not one of measured"),
+        (
+            "/attributed_to",
+            {"table": "a"},
+            "/attributed_to",
+            "credits the whole table as",
+        ),
+        (
+            "/attributed_to",
+            " ",
+            "/attributed_to",
+            "name who the whole table is credited",
+        ),
         ("/conventions", "a legend", "/conventions", "not a list of texts"),
-        ("/csv", {"delimiter": ";"}, "/csv", "has no 'csv'"),
+        ("/csv", {"delimiter": ";"}, "/csv", "only the header beside a CSV file"),
         ("/rows", [], "/rows", "at least one"),
         ("/about", _REMOVE, "", "needs a top-level 'about'"),
         # the name
@@ -1329,7 +1367,7 @@ def test_a_file_name_that_is_not_utf8_is_named_by_its_escape(
     with pytest.raises(io.CatalogueError) as caught:
         io.read_catalogue(path, row_type=PorousMaterial)
     refusal = str(caught.value)
-    assert refusal.startswith("\\udcff-panel.json: ")
+    assert refusal.startswith(("\\udcff-panel.json: ", "\\udcff-panel.json, line"))
     refusal.encode("utf-8")
     assert {issue.file for issue in caught.value.issues} == {"\\udcff-panel.json"}
     for issue in caught.value.issues:
@@ -1339,7 +1377,7 @@ def test_a_file_name_that_is_not_utf8_is_named_by_its_escape(
 def test_a_label_is_written_with_the_escapes_a_pointer_takes() -> None:
     with pytest.raises(io.CatalogueError) as caught:
         io.parse_catalogue("{", row_type=PorousMaterial, label="mine\udcff\x1b.json")
-    assert str(caught.value).startswith("mine\\udcff\\x1b.json: line 1")
+    assert str(caught.value).startswith("mine\\udcff\\x1b.json, line 1, column 2")
     (issue,) = caught.value.issues
     assert issue.file == "mine\\udcff\\x1b.json"
 
@@ -1378,10 +1416,16 @@ def test_a_document_must_be_text_or_a_mapping() -> None:
         io.parse_catalogue(b"{}", row_type=PorousMaterial)  # type: ignore[arg-type]
 
 
-def test_a_file_must_be_named_json(tmp_path: pathlib.Path) -> None:
-    path = tmp_path / "panel-40.csv"
-    with pytest.raises(ValueError, match="ends in .json"):
+def test_a_file_must_be_named_json_or_csv(tmp_path: pathlib.Path) -> None:
+    path = tmp_path / "panel-40.txt"
+    with pytest.raises(ValueError, match=r"'panel-40\.txt' ends in neither"):
         io.read_catalogue(path, row_type=PorousMaterial)
+
+
+def test_a_json_document_takes_no_header_path(tmp_path: pathlib.Path) -> None:
+    path = tmp_path / "panel-40.json"
+    with pytest.raises(ValueError, match="header_path is the header of a CSV file"):
+        io.read_catalogue(path, row_type=PorousMaterial, header_path="h.json")
 
 
 def test_an_os_error_passes_untouched(tmp_path: pathlib.Path) -> None:

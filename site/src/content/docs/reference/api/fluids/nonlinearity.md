@@ -31,8 +31,10 @@ prints four values between 5.18 and 5.38 from four papers, and toluene prints
 wants "the" B/A of a liquid has to choose, and the row carries in
 [`attributed_to`](/phonometry/reference/api/io/io/#cataloguerow) the full
 reference the chapter's list gives for that number, so that the choice can be
-made on the paper and not on the digits. Where the page prints a
-plus-or-minus beside the value it is in
+made on the paper and not on the digits. The paper credits the measurement,
+temperature and year with the value, so it is the row's credit, under
+`"row"`; on the rows of Table 8.2 it is the caption's, under `"table"`.
+Where the page prints a plus-or-minus beside the value it is in
 [`uncertainty`](/phonometry/reference/api/io/io/#cataloguerow).
 
 Table 8.2 is the only one that prints a pressure, from 0.1 to 50 MPa, and its

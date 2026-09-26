@@ -207,7 +207,9 @@ answered with the field it is most like; a row that is written correctly but
 breaks the contract every row keeps (a negative density, a porosity above 1,
 a value beside a word that says there is none) is reported with the first
 rule it breaks. The reader refuses a `NaN` or an `Infinity`, a name written
-twice in one object, a control character or a mark that reorders text, a
+twice in one object, a control character or a mark that reorders text,
+anything but a regular file at the name of a catalogue or of its header (a
+pipe, a device, a socket or a directory, refused before it is opened), a
 file over 16 MiB (checked before a byte of it is read), the header of a
 CSV file over 64 KiB, more than 50 000 rows and nesting past six levels.
 

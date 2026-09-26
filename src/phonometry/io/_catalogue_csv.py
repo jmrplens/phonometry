@@ -95,7 +95,6 @@ from ._catalogue import (
     _EXTRA,
     _FORBIDDEN,
     _KEY,
-    _MAX_BYTES,
     _MAX_ROWS,
     _ROW_PROVENANCE,
     _SHOWN,
@@ -105,6 +104,8 @@ from ._catalogue import (
     CSV_HEADER_TAIL,
     _closest,
     _decode,
+    _escaped,
+    _file_bytes,
     _finish,
     _Issues,
     _pointer,
@@ -112,7 +113,6 @@ from ._catalogue import (
     _Reader,
     _refusal,
     _scalar,
-    _size_refusal,
     _text_of,
 )
 from ._sidecar import SIDECAR_SCHEMA
@@ -126,7 +126,8 @@ if TYPE_CHECKING:
 #: The delimiters and the decimal marks a header may declare.
 _DELIMITERS = (",", ";", "\t")
 _DECIMALS = (".", ",")
-#: The largest header read, checked on disk before a byte is read.
+#: The largest header read, checked before more than the limit is read, as
+#: the largest file is.
 _MAX_HEADER = 64 * 1024
 #: A text the writer writes after an apostrophe: one a spreadsheet would run
 #: as a formula, or one that already reads as such an escape.
@@ -1047,23 +1048,28 @@ def read_sheet(
 ) -> Catalogue[Any]:
     """The catalogue a CSV file and its JSON header hold, or one refusal of it.
 
-    :raises CatalogueError: for a file past 16 MiB or a header past 64 KiB,
+    :raises CatalogueError: for a pipe, a device, a socket or a directory at
+        the name of either file, a file past 16 MiB or a header past 64 KiB,
         text that is not UTF-8, a header that is not JSON or is a calibration
         sidecar, and every problem the two hold.
     :raises FileNotFoundError: for a header that is not there.
     """
-    label = path.name
+    label = _escaped(path.name)
     header = (
         Path(header_path)
         if header_path is not None
         else path.with_name(path.name + CSV_HEADER_TAIL)
     )
-    header_label = header.name
-    size = path.stat().st_size
-    if size > _MAX_BYTES:
-        raise _size_refusal(label, size)
+    header_label = _escaped(header.name)
+    raw = _file_bytes(path, label)
     try:
-        header_size = header.stat().st_size
+        head = _file_bytes(
+            header,
+            header_label,
+            limit=_MAX_HEADER,
+            read_as="the header of a catalogue CSV",
+            held_as="the header of a catalogue CSV",
+        )
     except FileNotFoundError as error:
         msg = (
             f"{label} is read with its JSON header, {header_label}, beside it, "
@@ -1071,14 +1077,6 @@ def read_sheet(
             "header_path="
         )
         raise FileNotFoundError(errno.ENOENT, msg, str(header)) from error
-    if header_size > _MAX_HEADER:
-        message = (
-            f"is {header_size} bytes, and the header of a catalogue CSV is at "
-            f"most {_MAX_HEADER} bytes (64 KiB)"
-        )
-        raise _refusal(header_label, "", message)
-    head = header.read_bytes()
-    raw = path.read_bytes()
     document = _decode(_text_of(head, header_label, "UTF-8"), header_label)
     if isinstance(document, Mapping) and document.get("schema") == SIDECAR_SCHEMA:
         message = (

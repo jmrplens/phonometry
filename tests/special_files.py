@@ -25,6 +25,7 @@ from phonometry._internal import json_input
 if TYPE_CHECKING:
     from collections.abc import Callable
     from pathlib import Path
+    from typing import IO
 
 _POSIX = pytest.mark.skipif(sys.platform == "win32", reason="POSIX pipes and devices")
 
@@ -100,3 +101,39 @@ class _SizeSaysNothing:
 def size_says_nothing(monkeypatch: pytest.MonkeyPatch) -> None:
     """Make every file the bounded read opens say it holds no byte."""
     monkeypatch.setattr(json_input, "os", _SizeSaysNothing())
+
+
+class _Unread:
+    """An open file whose size may be asked and whose bytes may not be read."""
+
+    def __init__(self, handle: IO[bytes]) -> None:
+        self.handle = handle
+
+    def __enter__(self) -> _Unread:
+        return self
+
+    def __exit__(self, *_: object) -> None:
+        self.handle.close()
+
+    def fileno(self) -> int:
+        return self.handle.fileno()
+
+    def read(self, *_: object) -> bytes:
+        raise AssertionError(self.handle.name)
+
+
+def reads_refused(monkeypatch: pytest.MonkeyPatch, *refused: Path) -> list[Path]:
+    """Let the bounded read open the files *refused* and never read a byte of them.
+
+    Every other file is read as it is. The list returned fills with each file
+    the bounded read opens, in order, so that a test can say which it opened.
+    """
+    opened: list[Path] = []
+
+    def unread(file: Path, mode: str, **_: object) -> object:
+        opened.append(file)
+        handle = file.open(mode)
+        return _Unread(handle) if file in refused else handle
+
+    monkeypatch.setattr(json_input, "open", unread, raising=False)
+    return opened

@@ -20,15 +20,22 @@ import dataclasses
 import hashlib
 import importlib
 import json
-import pathlib
+import os
 import pkgutil
 import re
 import sys
 import warnings
 from collections.abc import Mapping
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import pytest
+from special_files import (
+    SPECIAL_KINDS,
+    make_special,
+    raised_within,
+    reads_refused,
+    size_says_nothing,
+)
 
 import phonometry
 from phonometry import environment, io, materials
@@ -39,6 +46,9 @@ from phonometry.materials import (
     AbsorptionSpectrum,
     PorousMaterial,
 )
+
+if TYPE_CHECKING:
+    import pathlib
 
 _HEADER: dict[str, Any] = {
     "schema": "phonometry-catalogue",
@@ -1113,26 +1123,101 @@ def test_a_sheet_past_sixteen_mebibytes_is_refused_before_it_is_read(
     path = _sheet(tmp_path)
     with path.open("wb") as handle:
         handle.truncate(16 * 1024 * 1024 + 1)
-
-    def never(self: pathlib.Path) -> bytes:
-        raise AssertionError(self)
-
-    monkeypatch.setattr(pathlib.Path, "read_bytes", never)
-    with pytest.raises(io.CatalogueError, match="tiles.csv: is 16777217 bytes"):
+    opened = reads_refused(monkeypatch, path)
+    with pytest.raises(io.CatalogueError) as caught:
         _read(path)
+    assert str(caught.value) == (
+        "tiles.csv: is 16777217 bytes, and a catalogue file is at most 16777216 "
+        "bytes (16 MiB)"
+    )
+    assert opened == [path]
 
 
 def test_a_header_past_sixty_four_kibibytes_is_refused_before_it_is_read(
     tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     path = _sheet(tmp_path, header=_header(about="x" * 70_000))
-
-    def never(self: pathlib.Path) -> bytes:
-        raise AssertionError(self)
-
-    monkeypatch.setattr(pathlib.Path, "read_bytes", never)
-    with pytest.raises(io.CatalogueError, match="at most 65536 bytes"):
+    header = tmp_path / "tiles.csv.phonometry.json"
+    size = header.stat().st_size
+    opened = reads_refused(monkeypatch, header)
+    with pytest.raises(io.CatalogueError) as caught:
         _read(path)
+    assert str(caught.value) == (
+        f"tiles.csv.phonometry.json: is {size} bytes, and the header of a "
+        "catalogue CSV is at most 65536 bytes (64 KiB)"
+    )
+    assert opened == [path, header]
+
+
+@pytest.mark.parametrize(
+    ("grown", "message"),
+    [
+        (
+            "tiles.csv",
+            "tiles.csv: runs past 16777216 bytes, and a catalogue file is at most "
+            "16777216 bytes (16 MiB)",
+        ),
+        (
+            "tiles.csv.phonometry.json",
+            "tiles.csv.phonometry.json: runs past 65536 bytes, and the header of "
+            "a catalogue CSV is at most 65536 bytes (64 KiB)",
+        ),
+    ],
+    ids=["sheet", "header"],
+)
+def test_a_file_that_holds_more_than_its_size_says_is_refused_one_byte_past(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, grown: str, message: str
+) -> None:
+    """A file of /proc says it holds nothing, and a file may grow as it is read."""
+    path = _sheet(tmp_path)
+    limit = 16 * 1024 * 1024 if grown == "tiles.csv" else 64 * 1024
+    with (tmp_path / grown).open("wb") as handle:
+        handle.truncate(limit + 1)
+    size_says_nothing(monkeypatch)
+    with pytest.raises(io.CatalogueError) as caught:
+        _read(path)
+    assert str(caught.value) == message
+
+
+@pytest.mark.parametrize("kind", SPECIAL_KINDS)
+@pytest.mark.parametrize(
+    ("name", "read_as"),
+    [
+        ("tiles.csv", "a catalogue"),
+        ("tiles.csv.phonometry.json", "the header of a catalogue CSV"),
+    ],
+    ids=["sheet", "header"],
+)
+def test_a_name_that_holds_no_regular_file_is_refused_without_waiting(
+    tmp_path: pathlib.Path, kind: str, name: str, read_as: str
+) -> None:
+    """A pipe no one writes to would keep the open waiting, /dev/zero the read."""
+    path = _sheet(tmp_path)
+    special = tmp_path / name
+    special.unlink()
+    what = make_special(kind, special)
+    error = raised_within(lambda: _read(path), pipe=special if kind == "pipe" else None)
+    assert isinstance(error, io.CatalogueError)
+    assert str(error) == (
+        f"{name}: is {what}, and {read_as} is read only from a regular file"
+    )
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="POSIX names are bytes")
+def test_a_sheet_whose_name_is_not_utf8_is_named_by_its_escape(
+    tmp_path: pathlib.Path,
+) -> None:
+    name = os.fsdecode(b"\xff-tiles.csv")
+    try:
+        path = _sheet(tmp_path, _TILES.replace("0,45", "high"), name=name)
+    except (OSError, UnicodeEncodeError):
+        pytest.skip("this file system takes only names that are text")
+    with pytest.raises(io.CatalogueError) as caught:
+        _read(path)
+    refusal = str(caught.value)
+    refusal.encode("utf-8")
+    assert refusal.startswith("\\udcff-tiles.csv")
+    assert {issue.file for issue in caught.value.issues} == {"\\udcff-tiles.csv"}
 
 
 # ---------------------------------------------------------------------------

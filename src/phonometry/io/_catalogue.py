@@ -1693,15 +1693,49 @@ def _decode(text: str, label: str) -> object:
     return document
 
 
-def _size_refusal(label: str, size: int | None) -> CatalogueError:
-    """The refusal of a text past :data:`_MAX_BYTES`, of *size* bytes if known.
+def _size_refusal(
+    label: str,
+    size: int | None,
+    *,
+    limit: int = _MAX_BYTES,
+    held_as: str = "a catalogue file",
+) -> CatalogueError:
+    """The refusal of a text past *limit* bytes, of *size* bytes if known.
 
     A regular file that grows while it is read says less than it holds, and
     is read one byte past the limit before it is refused.
     """
-    held = f"is {size} bytes" if size is not None else f"runs past {_MAX_BYTES} bytes"
-    message = f"{held}, and a catalogue file is at most {_MAX_BYTES} bytes (16 MiB)"
+    held = f"is {size} bytes" if size is not None else f"runs past {limit} bytes"
+    shown = f"{limit >> 20} MiB" if limit % (1 << 20) == 0 else f"{limit >> 10} KiB"
+    message = f"{held}, and {held_as} is at most {limit} bytes ({shown})"
     return _refusal(label, "", message)
+
+
+def _file_bytes(
+    target: Path,
+    label: str,
+    *,
+    limit: int = _MAX_BYTES,
+    read_as: str = "a catalogue",
+    held_as: str = "a catalogue file",
+) -> bytes:
+    """The bytes of the regular file *target*, or its refusal as *label*.
+
+    Read by :func:`~phonometry._internal.json_input.read_at_most`: a pipe, a
+    device, a socket or a directory at the name is refused before it is
+    opened, and a file past *limit* bytes before more than one byte past it
+    is read.
+
+    :raises CatalogueError: for either, naming the file as *label*.
+    :raises OSError: as the file system raises it, untouched.
+    """
+    try:
+        return read_at_most(target, limit)
+    except NotRegularError as error:
+        message = f"is {error.kind}, and {read_as} is read only from a regular file"
+        raise _refusal(label, "", message) from None
+    except TooLargeError as error:
+        raise _size_refusal(label, error.size, limit=limit, held_as=held_as) from None
 
 
 def _warn(catalogue: Catalogue[Any], label: str) -> None:
@@ -1826,13 +1860,7 @@ def read_catalogue[R: CatalogueRow](
             "JSON document, which holds its own"
         )
         raise ValueError(msg)
-    try:
-        raw = read_at_most(target, _MAX_BYTES)
-    except NotRegularError as error:
-        message = f"is {error.kind}, and a catalogue is read only from a regular file"
-        raise _refusal(label, "", message) from None
-    except TooLargeError as error:
-        raise _size_refusal(label, error.size) from None
+    raw = _file_bytes(target, label)
     document = _decode(_text_of(raw, label, "UTF-8"), label)
     catalogue = _read(document, cls, label, hashlib.sha256(raw).hexdigest())
     _warn(catalogue, label)

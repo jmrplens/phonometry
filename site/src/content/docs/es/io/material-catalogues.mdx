@@ -261,9 +261,12 @@ incumple el contrato que cumple toda fila (una densidad negativa, una
 porosidad mayor que 1, un valor junto a una palabra que dice que no lo hay) se
 comunica con la primera regla que incumple. El lector rechaza un `NaN` o un
 `Infinity`, un nombre escrito dos veces en un mismo objeto, un carácter de
-control o una marca que reordena el texto, un archivo de más de 16 MiB
-(comprobado antes de leer un solo byte), una cabecera de archivo CSV de más de
-64 KiB, más de 50 000 filas y un anidamiento de más de seis niveles.
+control o una marca que reordena el texto, cualquier cosa que no sea un
+archivo regular con el nombre de un catálogo o de su cabecera (una tubería, un
+dispositivo, un socket o un directorio, rechazados antes de abrirlos), un
+archivo de más de 16 MiB (comprobado antes de leer un solo byte), una cabecera
+de archivo CSV de más de 64 KiB, más de 50 000 filas y un anidamiento de más de
+seis niveles.
 
 Lo que solo merece una segunda mirada no es un error. Un valor cuya base es
 `measured` sin informe ni laboratorio que lo respalden, o una palabra en lugar

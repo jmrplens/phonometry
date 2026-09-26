@@ -9,6 +9,8 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
+
     from matplotlib.axes import Axes
     from matplotlib.ticker import FuncFormatter
     from numpy.typing import NDArray
@@ -34,6 +36,10 @@ if TYPE_CHECKING:
     from ..metrology.sound_calibrator import (
         SoundCalibratorRequirement,
         SoundCalibratorVerification,
+    )
+    from ..metrology.sound_level_meter import (
+        SoundLevelMeterPeriodicRequirement,
+        SoundLevelMeterPeriodicVerification,
     )
     from ..metrology.uncertainty import MonteCarloResult, UncertaintyResult
 
@@ -78,6 +84,28 @@ _FREQUENCY_LABEL = "Frequency [Hz]"
 _DIFFUSE_DEVIATION_LABEL = r"$\Delta G_\mathrm{D} = L_\mathrm{D} - L_\mathrm{D,ref}$"
 _CORRECTION_AXIS_LABEL = "Correction [dB]"
 _REFERENCE_MIC_LABEL = r"$C_\mathrm{FF,RM}$, reference microphone"
+
+#: The legend entry of a periodic-test result IEC 61672-3:2013 4.3 forbids
+#: using, and the title of one requirement's figure: the clause and its
+#: verdict, then the clause's heading as it reads, on a line of its own so
+#: that the longest heading fits the default figure in either language.
+_SLM_UNUSABLE_LABEL = "Unusable (§4.3)"
+_SLM_PERIODIC_TITLE = "IEC 61672-3 §{clause}: {verdict}\n{title}"
+
+#: The verdict words a requirement's figure and the conformance figures read.
+_CONFORMS = "conforms"
+_DOES_NOT_CONFORM = "does not conform"
+
+#: How the verdict figure names a graded clause the record does not hold: one
+#: a complete test needs, one the declared features take out (8.1), and one
+#: whose feature is neither declared nor shown.
+_SLM_NOT_MEASURED = "not measured"
+_SLM_NOT_APPLICABLE = "not applicable"
+_SLM_NOT_DECLARED = "not declared"
+
+#: The legend entry of the dashes the verdict figure draws for every result
+#: of a clause, behind the one that decides it.
+_SLM_EVERY_RESULT = "Every result of the clause"
 
 _STRINGS: dict[str, str] = {
     r"Contribution to combined uncertainty $|c_i|\,u(x_i)$": r"Contribución a la incertidumbre combinada $|c_i|\,u(x_i)$",
@@ -127,8 +155,8 @@ _STRINGS: dict[str, str] = {
     "Short-term level fluctuation [{unit}]": "Fluctuación del nivel a corto plazo [{unit}]",
     "Total distortion + noise [{unit}]": "Distorsión total + ruido [{unit}]",
     "Measurement": "Medida",
-    "conforms": "conforme",
-    "does not conform": "no conforme",
+    _CONFORMS: "conforme",
+    _DOES_NOT_CONFORM: "no conforme",
     "Conformance rule of IEC TC 29: {verdict}": "Regla de conformidad del IEC TC 29: {verdict}",
     "Sound calibrator (IEC 60942:2017): {verdict}\nclass {cls} at {freq} Hz": "Calibrador acústico (IEC 60942:2017): {verdict}\nclase {cls} a {freq} Hz",
     "Deviation / acceptance limit": "Desviación / límite de aceptación",
@@ -211,6 +239,38 @@ _STRINGS: dict[str, str] = {
     "Expanded uncertainty, range [dB]": "Incertidumbre expandida, intervalo [dB]",
     "Clause {n}: exceeds the maximum at {k} of {m} frequencies (IEC 62585)": "Apartado {n}: supera el máximo en {k} de {m} frecuencias (IEC 62585)",
     "Clause {n}: within the maximum at every frequency (IEC 62585)": "Apartado {n}: dentro del máximo en todas las frecuencias (IEC 62585)",
+    # IEC 61672-3: the periodic tests of a sound level meter.
+    _SLM_UNUSABLE_LABEL: "No utilizable (§4.3)",
+    _SLM_PERIODIC_TITLE: "IEC 61672-3 §{clause}: {verdict}\n{title}",
+    "IEC 61672-3 periodic tests, class {cls}: {verdict}": "Ensayos periódicos IEC 61672-3, clase {cls}: {verdict}",
+    "passed": "superados",
+    "not passed": "no superados",
+    "not usable (§4.3)": "no utilizable (§4.3)",
+    "Result": "Resultado",
+    "Acoustical signal tests of a frequency weighting": "Ponderación frecuencial con señales acústicas",
+    "Electrical signal tests of frequency weightings": "Ponderaciones frecuenciales con señales eléctricas",
+    "Frequency weightings at 1 kHz": "Ponderaciones frecuenciales a 1 kHz",
+    "Time weightings at 1 kHz": "Ponderaciones temporales a 1 kHz",
+    "Long-term stability": "Estabilidad a largo plazo",
+    "Level linearity on the reference level range": "Linealidad de nivel en el rango de niveles de referencia",
+    "Level linearity including the level range control": "Linealidad de nivel con el control de rango de niveles",
+    "Toneburst response": "Respuesta a una ráfaga tonal",
+    "C-weighted peak sound level": "Nivel de sonido con ponderación C de pico",
+    "Overload indication": "Indicación de sobrecarga",
+    "High-level stability": "Estabilidad a niveles elevados",
+    "one cycle": "un ciclo",
+    "positive half cycle": "semiciclo positivo",
+    "negative half cycle": "semiciclo negativo",
+    "final \u2212 initial": "final \u2212 inicial",
+    "positive \u2212 negative": "positivo \u2212 negativo",
+    "step {n}": "paso {n}",
+    "{reading}, range {n}": "{reading}, rango {n}",
+    _SLM_NOT_MEASURED: "no medido",
+    _SLM_NOT_APPLICABLE: "no aplicable",
+    _SLM_NOT_DECLARED: "no declarado",
+    _SLM_EVERY_RESULT: "Cada resultado del apartado",
+    "Clause": "Apartado",
+    "{reading}, reference range": "{reading}, rango de referencia",
 }
 
 
@@ -630,7 +690,7 @@ _FULL_SHARE = 100.0
 
 def _verdict_word(*, passes: bool, language: str) -> str:
     """``conforms`` or ``does not conform``, localised."""
-    return _t("conforms" if passes else "does not conform", language)
+    return _t(_CONFORMS if passes else _DOES_NOT_CONFORM, language)
 
 
 def _draw_limits(
@@ -771,18 +831,26 @@ def _draw_verdicts(
     kwargs: dict[str, Any],
     *,
     unusable_label: str | None = None,
+    unusable: Sequence[bool] | None = None,
 ) -> None:
     """A diamond where a measurement conforms and a cross where it does not.
 
     With an ``unusable_label`` a measurement whose uncertainty exceeds its
     maximum is a hollow circle under that label instead: a standard that
     forbids using such a result (IEC 61260-3:2016 5.3) reads it as neither.
+    ``unusable``, one flag per measurement, says which are when not every
+    result over its maximum is (IEC 61672-3:2013 4.4).
     """
     shown: set[str] = set()
     user_label = "label" in kwargs
+    flags = (
+        [not v.uncertainty_within_maximum for v in verifications]
+        if unusable is None
+        else list(unusable)
+    )
     for k, (x, v) in enumerate(zip(positions, verifications, strict=True)):
         style = dict(kwargs)
-        if unusable_label is not None and not v.uncertainty_within_maximum:
+        if unusable_label is not None and flags[k]:
             key = unusable_label
             style_default(style, "color", _C_SECONDARY)
             style.setdefault("marker", "o")
@@ -823,6 +891,7 @@ def _draw_conformance(
     *,
     magnitude_axis_label: str | None = None,
     unusable_label: str | None = None,
+    unusable: Sequence[bool] | None = None,
 ) -> None:
     """The picture of Figure E.1: limits, band, error bar and verdict marker.
 
@@ -830,7 +899,8 @@ def _draw_conformance(
     ``magnitude_axis_label`` marks a one-sided requirement, a magnitude with a
     maximum, and names its vertical axis in place of the deviation from a
     design goal; an ``unusable_label`` draws a measurement whose uncertainty
-    exceeds its maximum as unusable rather than as not conforming.
+    exceeds its maximum as unusable rather than as not conforming, or those
+    of the ``unusable`` flags when they are given.
     """
     positions = np.arange(1, len(verifications) + 1, dtype=float)
     _draw_limits(
@@ -842,7 +912,13 @@ def _draw_conformance(
     )
     _draw_uncertainties(ax, verifications, positions, language)
     _draw_verdicts(
-        ax, verifications, positions, language, kwargs, unusable_label=unusable_label
+        ax,
+        verifications,
+        positions,
+        language,
+        kwargs,
+        unusable_label=unusable_label,
+        unusable=unusable,
     )
     reach = [max(v.uncertainty, v.max_uncertainty) for v in verifications]
     # An open end of an interval is no extent of the axis: only the finite
@@ -1122,6 +1198,367 @@ def plot_sound_calibrator_verification(
         frameon=False,
     )
     localize_axes(ax, language)
+    return ax
+
+
+# ---------------------------------------------------------------------------
+# IEC 61672-3: the periodic tests of a sound level meter
+# ---------------------------------------------------------------------------
+
+#: The differences of Clause 14 as the figures write them, in mathtext.
+_SLM_DIFFERENCE_LABELS: dict[str, str] = {
+    "LC - LA": r"$L_\mathrm{C} - L_\mathrm{A}$",
+    "LZ - LA": r"$L_\mathrm{Z} - L_\mathrm{A}$",
+    "LAS - LAF": r"$L_\mathrm{AS} - L_\mathrm{AF}$",
+    "LAeq - LAF": r"$L_\mathrm{Aeq} - L_\mathrm{AF}$",
+}
+
+#: The one-result labels of Clauses 15, 20 and 21, whose hyphen the figure
+#: draws as a minus sign.
+_SLM_CHANGE_LABELS: dict[str, str] = {
+    "final - initial": "final − initial",
+    "positive - negative": "positive − negative",
+}
+
+#: The signals of the C-weighted peak test, which a tick label puts on a
+#: line of their own above the frequency.
+_SLM_PEAK_SIGNALS = ("one cycle", "positive half cycle", "negative half cycle")
+
+#: More results than this and a requirement's tick labels stand on end.
+_SLM_UPRIGHT_TICKS = 9
+
+
+def _slm_label(label: str, language: str) -> str:
+    """One result of a periodic test as its tick label reads.
+
+    The differences of Clause 14 in mathtext, the signal of a C-weighted peak
+    result on a line of its own, the words translated and the decimals
+    localised.
+    """
+    from .._i18n import decimal_comma
+
+    if label in _SLM_DIFFERENCE_LABELS:
+        return _SLM_DIFFERENCE_LABELS[label]
+    if label in _SLM_CHANGE_LABELS:
+        return _t(_SLM_CHANGE_LABELS[label], language)
+    word, _, number = label.partition(" ")
+    if word == "step" and number.isdigit():
+        return _t("step {n}", language, n=number)
+    reading, _, where = label.partition(", ")
+    if where == "reference range":
+        # The reading of 17.4 on the reference level range.
+        return _t("{reading}, reference range", language, reading=reading)
+    reading, _, where = label.partition(", range ")
+    if where.isdigit():
+        # A subclause of Clause 17, whose point is not a decimal separator.
+        return _t("{reading}, range {n}", language, reading=reading, n=where)
+    signal, _, rest = label.partition(", ")
+    if signal in _SLM_PEAK_SIGNALS:
+        return f"{_t(signal, language)}\n{decimal_comma(rest, language)}"
+    return decimal_comma(label, language)
+
+
+def _slm_verdict(result: SoundLevelMeterPeriodicRequirement, language: str) -> str:
+    """``conforms``, ``does not conform`` or ``not usable``, localised."""
+    if result.failed:
+        return _t(_DOES_NOT_CONFORM, language)
+    if result.unusable:
+        return _t("not usable (§4.3)", language)
+    return _t(_CONFORMS, language)
+
+
+def _slm_unusable_flags(result: SoundLevelMeterPeriodicRequirement) -> list[bool]:
+    """One flag per result: whether 4.3 forbids using it (4.4 results are not)."""
+    unusable = set(result.unusable)
+    return [label in unusable for label in result.labels]
+
+
+def plot_slm_periodic_requirement(
+    result: SoundLevelMeterPeriodicRequirement,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """One requirement of IEC 61672-3:2013 against its acceptance limits.
+
+    As IEC 61672-1:2013 Figure C.1: the limits, the deviation from the
+    design goal, its uncertainty and the maximum-permitted band, one result
+    per position and named under it. The electrical test of the frequency
+    weightings, whose limits run from 0,7 dB to 16 dB, is drawn as each
+    result's margin to its nearer limit instead. A result whose uncertainty
+    exceeds its maximum is drawn hollow, as 4.3 forbids using it, unless 4.4
+    makes it a result that did not conform. The title names the clause and
+    its verdict, and under them the clause's heading.
+
+    :param result: A
+        :class:`~phonometry.metrology.sound_level_meter.SoundLevelMeterPeriodicRequirement`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the verdict markers.
+    :return: The axes.
+    """
+    from .._i18n import localize_axes
+    from .filters import _draw_margins, _margin_axis
+
+    count = len(result.verifications)
+    if ax is None:
+        _fig, ax = _import_pyplot().subplots(
+            figsize=(max(6.4, 1.0 + 0.42 * count), 4.8), layout="constrained"
+        )
+    unusable = _t(_SLM_UNUSABLE_LABEL, language)
+    flags = _slm_unusable_flags(result)
+    positions = np.arange(1, count + 1, dtype=float)
+    if result.name == "electrical_weighting":
+        _draw_margins(
+            ax,
+            positions,
+            result.verifications,
+            language,
+            kwargs,
+            set(),
+            unusable_label=unusable,
+            unusable=flags,
+        )
+        _margin_axis(ax, list(result.verifications), language)
+        ax.set_xlim(0.4, count + 0.6)
+        place_legend_clear(ax.legend(fontsize="small"))
+    else:
+        _draw_conformance(
+            ax,
+            result.verifications,
+            language,
+            kwargs,
+            unusable_label=unusable,
+            unusable=flags,
+        )
+    ax.set_xticks(positions)
+    ax.set_xticklabels(
+        [_slm_label(label, language) for label in result.labels],
+        rotation=0 if count <= _SLM_UPRIGHT_TICKS else 90,
+    )
+    ax.set_xlabel(_t("Result", language))
+    ax.set_title(
+        _t(
+            _SLM_PERIODIC_TITLE,
+            language,
+            clause=result.clause,
+            title=_t(result.title, language),
+            verdict=_slm_verdict(result, language),
+        )
+    )
+    localize_axes(ax, language)
+    return ax
+
+
+#: The clauses of IEC 61672-3:2013 that grade a result, in the order of the
+#: standard: the slots of the verdict figure.
+_SLM_GRADED_CLAUSES = (
+    "12",
+    "13",
+    "14.2",
+    "14.3",
+    "15",
+    "16",
+    "17",
+    "18",
+    "19",
+    "20",
+    "21",
+)
+
+#: The colour each kind of clause without results names itself in.
+_SLM_ABSENT_COLORS = {
+    _SLM_NOT_MEASURED: _C_REFERENCE,
+    _SLM_NOT_DECLARED: _C_SECONDARY,
+    _SLM_NOT_APPLICABLE: _C_MUTED,
+}
+
+
+def _slm_clause_slots(
+    result: SoundLevelMeterPeriodicVerification,
+) -> list[tuple[str, SoundLevelMeterPeriodicRequirement | None, str | None]]:
+    """``(clause, requirement, status)`` for each graded clause the figure shows.
+
+    Every clause the record holds with its requirement and no status, and
+    every clause it does not hold with none and why: not measured when a
+    complete test needs it, not applicable when the declared features take
+    it out, and not declared when its feature is an open question (8.1). A
+    clause the record does not hold and that is none of these is left out.
+    """
+    by_clause = {r.clause: r for r in result.requirements}
+    missing = set(result.missing)
+    not_applicable = {clause for clause, _ in result.not_applicable}
+    slots: list[tuple[str, SoundLevelMeterPeriodicRequirement | None, str | None]] = []
+    for clause in _SLM_GRADED_CLAUSES:
+        if clause in by_clause:
+            slots.append((clause, by_clause[clause], None))
+        elif clause in missing:
+            slots.append((clause, None, _SLM_NOT_MEASURED))
+        elif clause in not_applicable:
+            slots.append((clause, None, _SLM_NOT_APPLICABLE))
+        elif result.undeclared:
+            slots.append((clause, None, _SLM_NOT_DECLARED))
+    return slots
+
+
+def _slm_worst(result: SoundLevelMeterPeriodicRequirement) -> int:
+    """The index of the result that stands for its clause in the verdict figure.
+
+    The result that decides the clause: one that did not conform first (a
+    result of 4.4 among them), then one 4.3 forbids using, then any other;
+    of those, the one with the smallest margin to its nearer acceptance
+    limit, which is the furthest past it when the margin is negative.
+    """
+    from .filters import _margin_db
+
+    failed = set(result.failed)
+    unusable = set(result.unusable)
+
+    def rank(k: int) -> tuple[int, float]:
+        label = result.labels[k]
+        if label in failed:
+            severity = 0
+        elif label in unusable:
+            severity = 1
+        else:
+            severity = 2
+        return severity, _margin_db(result.verifications[k])
+
+    return min(range(len(result.verifications)), key=rank)
+
+
+def _draw_slm_slot(
+    ax: Axes,
+    x: float,
+    result: SoundLevelMeterPeriodicRequirement,
+    language: str,
+    kwargs: dict[str, Any],
+    shown: set[str],
+) -> None:
+    """One graded clause in one slot: every result as a dash, its worst on top.
+
+    Every result's margin is a short blue dash at the slot, so a clause of
+    dozens of steps takes no more room than a clause of one; the result
+    that decides the clause (:func:`_slm_worst`) is drawn over them as the
+    clause's verdict marker, with its uncertainty as error bar.
+    """
+    from .filters import _draw_margins, _margin_db
+
+    margins = [_margin_db(v) for v in result.verifications]
+    every = _t(_SLM_EVERY_RESULT, language)
+    ax.plot(
+        np.full(len(margins), x),
+        margins,
+        linestyle="none",
+        marker="_",
+        markersize=16,
+        markeredgewidth=1.5,
+        color=_C_PRIMARY,
+        label="_nolegend_" if every in shown else every,
+    )
+    shown.add(every)
+    k = _slm_worst(result)
+    _draw_margins(
+        ax,
+        np.array([x]),
+        (result.verifications[k],),
+        language,
+        kwargs,
+        shown,
+        unusable_label=_t(_SLM_UNUSABLE_LABEL, language),
+        unusable=[_slm_unusable_flags(result)[k]],
+    )
+
+
+def _slm_tick_labels(
+    ax: Axes,
+    slots: list[tuple[str, SoundLevelMeterPeriodicRequirement | None, str | None]],
+    language: str,
+) -> None:
+    """Each slot's clause under it, a failed check in red, a status on end.
+
+    A clause the record does not hold names its status under the clause,
+    stood on end and in its colour; a clause whose yes/no check failed (no
+    overload during the C-weighted peak test, the latching of the overload
+    indicator) has its name in red, as a check has no margin to draw.
+    """
+    ax.set_xticklabels(
+        [
+            f"§{clause}\n{_t(status, language)}" if status else f"§{clause}"
+            for clause, _, status in slots
+        ]
+    )
+    for tick, (_, requirement, status) in zip(ax.get_xticklabels(), slots, strict=True):
+        if status:
+            # Stood on end: a status is wider than a slot, and would run into
+            # the next clause's name lying down.
+            tick.set_color(_SLM_ABSENT_COLORS[status])
+            tick.set_rotation(90)
+        elif requirement is not None and any(
+            not held for _, held in requirement.checks
+        ):
+            tick.set_color(_C_REFERENCE)
+
+
+def plot_slm_periodic_verification(
+    result: SoundLevelMeterPeriodicVerification,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """Every graded clause of the periodic tests at its margin, one slot each.
+
+    One slot per clause, however many results it holds: each result's
+    distance from its deviation to the nearer acceptance limit is a blue
+    dash, and the result that decides the clause, the worst one, is drawn
+    over them with its actual uncertainty as error bar, as a diamond when it
+    conforms, a cross when it does not and hollow when 4.3 forbids using it;
+    a result 4.4 lets the test proceed with is a cross wherever it lies. At
+    or above the dashed zero line a result lies within its limits. A record
+    with dozens of steps in Clause 16, as 16.3 takes over a linear operating
+    range of 60 dB to 80 dB, keeps every clause's name legible; each
+    requirement's own ``.plot()`` draws its results one by one. A clause
+    whose yes/no check failed has its name in red, and a graded clause the
+    record does not hold keeps an empty slot, named under it as not measured
+    (in red: a complete test needs it), not declared (its feature is an open
+    question, 8.1) or not applicable (the declared features take it out, in
+    grey).
+
+    :param result: A
+        :class:`~phonometry.metrology.sound_level_meter.SoundLevelMeterPeriodicVerification`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the verdict markers.
+    :return: The axes.
+    """
+    from .filters import _margin_axis
+
+    if ax is None:
+        _fig, ax = _import_pyplot().subplots(figsize=(10.0, 5.2), layout="constrained")
+    slots = _slm_clause_slots(result)
+    shown: set[str] = set()
+    for x, (_, requirement, _) in enumerate(slots, 1):
+        if requirement is not None:
+            _draw_slm_slot(ax, float(x), requirement, language, kwargs, shown)
+    _margin_axis(
+        ax, [v for _, r, _ in slots if r is not None for v in r.verifications], language
+    )
+    ax.set_xlim(0.5, len(slots) + 0.5)
+    ax.set_xticks(np.arange(1, len(slots) + 1, dtype=np.float64))
+    _slm_tick_labels(ax, slots, language)
+    ax.set_xlabel(_t("Clause", language))
+    verdict = _t("passed" if result.passes else "not passed", language)
+    ax.set_title(
+        _t(
+            "IEC 61672-3 periodic tests, class {cls}: {verdict}",
+            language,
+            cls=result.meter_class,
+            verdict=verdict,
+        )
+    )
+    place_legend_clear(ax.legend(fontsize="small", ncols=2))
     return ax
 
 

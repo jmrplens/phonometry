@@ -1,6 +1,6 @@
 ---
 title: "Guías"
-description: "Las 147 guías de phonometry, agrupadas en los trece temas que cubre la biblioteca: para qué sirve cada área, las normas que implementa y un resumen de una línea de cada guía que contiene."
+description: "Las 148 guías de phonometry, agrupadas en los trece temas que cubre la biblioteca: para qué sirve cada área, las normas que implementa y un resumen de una línea de cada guía que contiene."
 head:
   - tag: script
     attrs:
@@ -118,7 +118,7 @@ hay ninguna panorámica del campo: cada página es la documentación de trabajo 
 un módulo, escrita para que un resultado se pueda defender apartado por
 apartado en lugar de darlo por bueno.
 
-Esta página es el mapa. Ciento cuarenta y siete guías repartidas en trece temas, y cada
+Esta página es el mapa. Ciento cuarenta y ocho guías repartidas en trece temas, y cada
 área tiene su propio índice con el relato largo de cómo encajan sus piezas. Si
 llegas sin una pregunta concreta, lee primero la
 [introducción](/phonometry/es/start/getting-started/): recorre una señal por toda la
@@ -156,8 +156,8 @@ conforme con las normas, y todas las demás áreas la consumen: un modelo de
 sonoridad necesita niveles de banda calibrados, un parámetro de sala necesita
 una respuesta al impulso filtrada, una valoración ambiental es un $L_\mathrm{eq}$
 ajustado.
-Implementa IEC 61260-1, ANSI S1.11, IEC 61672-1, ISO 7196, IEC 61252,
-ISO 1996-1, IEC 60942, IEC 61183, IEC 62585 y la GUM.
+Implementa IEC 61260-1, IEC 61260-3, ANSI S1.11, IEC 61672-1, IEC 61672-3,
+ISO 7196, IEC 61252, ISO 1996-1, IEC 60942, IEC 61183, IEC 62585 y la GUM.
 
 - [Construye un sonómetro](/phonometry/es/signals/sound-level-meter/): el área
   entera montada de principio a fin en una sola página ejecutable, del tono del
@@ -272,6 +272,10 @@ ISO 1996-1, IEC 60942, IEC 61183, IEC 62585 y la GUM.
   correcciones para un calibrador, un acoplador y un actuador, su presupuesto
   de incertidumbre y los máximos de los apartados 9 a 14 como dictamen y como
   ficha.
+- [Ensayos periódicos de un sonómetro (IEC 61672-3)](/phonometry/es/signals/metrology/sound-level-meter-periodic-tests/):
+  el dictamen sobre los resultados de los ensayos periódicos de un
+  laboratorio, apartado por apartado frente a los límites de la IEC 61672-1 y
+  los máximos de su Tabla B.1, y la declaración del apartado 22.
 
 ## [El medio](/phonometry/es/fluids/)
 

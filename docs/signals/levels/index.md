@@ -76,9 +76,16 @@ Pages elsewhere on the site that this section leans on:
 
 These pages implement the signal processing of a sound level meter, not the
 meter. The rest of IEC 61672-1 (level ranges, overload indication, the
-self-generated noise floor, the directional response and the IEC 61672-3
-periodic tests) is not implemented anywhere in the library, so nothing here
-assigns a class to a physical instrument; [Build a sound level
+self-generated noise floor, the directional response) is measured nowhere in
+the library. Of those requirements, the level range control (Clause 17) and
+the overload indication (Clause 20) are graded from the results a
+laboratory returns from the IEC 61672-3 periodic tests of a physical meter
+([Periodic tests of a sound level
+meter](../metrology/sound-level-meter-periodic-tests.md)); the
+self-generated noise is recorded there for information only (IEC 61672-3
+11.1.2, NOTE 2), and the directional response belongs to pattern evaluation
+(IEC 61672-2). So
+nothing here assigns a class to a physical instrument; [Build a sound level
 meter](../sound-level-meter.md) states exactly what a class
 verdict from the library does and does not mean. Two curves come without a
 verdict of any kind: ISO 7196 defines a single ±1 dB tolerance for G with no

@@ -85,6 +85,7 @@ const ANCHORED = [
       '/signals/sound-level-meter/',
       '/signals/metrology/compliance-verification/',
       '/signals/metrology/free-field-corrections/',
+      '/signals/metrology/sound-level-meter-periodic-tests/',
       '/signals/filters/block-processing/',
       '/signals/filters/multichannel/',
       '/reference/theory/signal-analysis/',

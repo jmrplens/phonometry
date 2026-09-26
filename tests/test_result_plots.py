@@ -92,6 +92,7 @@ from result_factories import (
     _sel_distribution,
     _single_panel,
     _slit_aperture,
+    _slm_periodic,
     _sound_calibrator,
     _sound_energy,
     _sound_power,
@@ -277,6 +278,17 @@ _KWARG_PLOT_CASES = [
     ("filter_periodic", _filter_periodic, "line"),
     ("filter_periodic_clause", lambda: _filter_periodic().clause("13"), "line"),
     ("filter_periodic_figure_c1", lambda: _filter_periodic().clause("10.2"), "line"),
+    ("slm_periodic", _slm_periodic, "line"),
+    (
+        "slm_periodic_requirement",
+        lambda: _slm_periodic().requirement("toneburst"),
+        "line",
+    ),
+    (
+        "slm_periodic_margins",
+        lambda: _slm_periodic().requirement("electrical_weighting"),
+        "line",
+    ),
     ("time_invariance", _time_invariance, "line"),
     ("assessment_velocity", _assessment_velocity, "line"),
     ("train_passage", _train_passage, "line"),
@@ -644,6 +656,9 @@ def test_single_axes_plots_accept_external_ax() -> None:
         _sound_calibrator().requirement("level"),
         _filter_periodic(),
         _filter_periodic().clause("13"),
+        _slm_periodic(),
+        _slm_periodic().requirement("toneburst"),
+        _slm_periodic().requirement("electrical_weighting"),
         _time_invariance(),
         ph.aircraft.load_anp_database().flight_profile(
             "A320-211", "departure", aerodrome=ph.aircraft.Aerodrome(elevation_ft=0.0)

@@ -1,0 +1,622 @@
+---
+title: "Ensayos periódicos de un sonómetro (IEC 61672-3)"
+description: "El dictamen que la IEC 61672-3:2013 da a un sonómetro en servicio a partir de los resultados de los ensayos periódicos de un laboratorio: cada apartado, de las ponderaciones frecuenciales a la estabilidad a niveles elevados, frente a los límites de aceptación de la IEC 61672-1 y los máximos de su Tabla B.1, las tablas que lee, lo que contiene un ensayo completo y la declaración del apartado 22."
+references:
+  - type: standard
+    organization: "International Electrotechnical Commission"
+    year: 2013
+    title: "Electroacoustics — Sound level meters — Part 3: Periodic tests"
+    designation: "IEC 61672-3:2013"
+    primary: true
+    note: "El dictamen implementado: la regla de conformidad del apartado 4.1, los resultados no utilizables del 4.3 y la excepción del 4.4 para los datos de corrección del fabricante, las condiciones ambientales del 7.1, lo que el 8.1 exige de un ensayo completo, los ensayos de los apartados 10 a 21 y las declaraciones de los puntos r), s) y t) del apartado 22. Leída en BS EN 61672-3:2013, el texto inglés de EN 61672-3:2013, que es IEC 61672-3:2013 sin cambios."
+  - type: standard
+    organization: "International Electrotechnical Commission"
+    year: 2013
+    title: "Electroacoustics — Sound level meters — Part 1: Specifications"
+    designation: "IEC 61672-1:2013"
+    note: "Los límites de aceptación a los que remite cada apartado de la Parte 3: Tabla 3 (ponderaciones frecuenciales), 5.5.9, 5.6.5, 5.8.3, Tabla 4 (ráfagas tonales), 5.11.3, Tabla 5 (pico con ponderación C), 5.14.2 y 5.15.2, y las incertidumbres máximas permitidas de la Tabla B.1. El módulo publica las Tablas 4, 5 y B.1. Leída en BS EN 61672-1:2013; los términos en español son los de UNE-EN 61672-1:2014, salvo tone burst, que esta documentación traduce siempre como ráfaga tonal (la norma UNE dice tren de ondas)."
+  - type: standard
+    organization: "International Electrotechnical Commission"
+    year: 2013
+    title: "Electroacoustics — Sound level meters — Part 2: Pattern evaluation tests"
+    designation: "IEC 61672-2:2013"
+    note: "La evaluación de modelo cuya aprobación pública convierte un ensayo periódico superado en una declaración de conformidad (punto r) del apartado 22), y cuyo procedimiento de cálculo siguen las desviaciones de linealidad de nivel del apartado 16.2."
+  - type: standard
+    organization: "International Electrotechnical Commission"
+    year: 2012
+    title: "Electroacoustics — Methods to determine corrections to obtain the free-field response of a sound level meter"
+    designation: "IEC 62585:2012"
+    note: "De dónde salen los datos de corrección del ensayo acústico del apartado 12, y sus incertidumbres máximas cuando el fabricante no declara ninguna (apartado 12.5)."
+  - type: standard
+    organization: "International Electrotechnical Commission"
+    year: 2017
+    title: "Electroacoustics — Sound calibrators"
+    designation: "IEC 60942:2017"
+    note: "El calibrador del apartado 9, cuyo propio ensayo periódico necesita el laboratorio antes del del sonómetro."
+---
+
+import Scope from '../../../../../components/Scope.astro';
+import ScopeClaim from '../../../../../components/ScopeClaim.astro';
+import SeeAlso from '../../../../../components/SeeAlso.astro';
+import ThemeImage from '../../../../../components/ThemeImage.astro';
+
+Un sonómetro en servicio vuelve al laboratorio cada uno o dos años para sus
+**ensayos periódicos**, la lista corta de comprobaciones clave que la
+IEC 61672-3:2013 restringe «al mínimo considerado necesario» (apartado 1): un
+calibrador sobre el micrófono, las ponderaciones frecuenciales con señales
+acústicas en tres frecuencias y con señales eléctricas en las octavas, las
+ponderaciones frecuenciales y temporales a 1 kHz, la estabilidad durante media
+hora y en lo alto del rango, la linealidad de nivel, las ráfagas tonales, el
+pico con ponderación C y el indicador de sobrecarga. El laboratorio mide;
+`metrology.verify_sound_level_meter_periodic` juzga lo que midió, apartado por
+apartado, y escribe la declaración que el apartado 22 prescribe para el
+resultado. No ejecuta ninguno de los ensayos.
+
+Esta página juzga el registro de un sonómetro sintético de clase 1 cuyo único
+fallo es una ráfaga tonal de 0,25 ms, y después muestra qué necesita el
+dictamen de un registro para darlo por completo.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/slm_periodic_verdict.svg" alt="Los ensayos periódicos de un sonómetro sintético de clase 1, un hueco por apartado del 12 al 21 en un eje simétrico-logarítmico con una línea en trazos en cero: la distancia de la desviación de cada resultado a su límite de aceptación más próximo es un trazo azul corto, y sobre los trazos de cada apartado se marca el resultado que lo decide, con su incertidumbre expandida real como barra de error. El apartado 13 reparte sus 27 trazos entre 0,7 dB y 3,7 dB y el apartado 16 sus 25 entre 0,2 dB y 0,8 dB. Cada apartado lleva un rombo verde por encima de la línea, los de 14.2, 14.3, 15 y 21 a 0,1 dB o menos de ella, salvo el apartado 18, cuya cruz roja a −0,4 dB es la respuesta máxima con ponderación F a la ráfaga tonal de 0,25 ms; el título dice Ensayos periódicos IEC 61672-3, clase 1: no superados" width="100%" />
+
+*Cada apartado juzgado del registro en un hueco, con el propio `.plot()` del
+resultado: el margen de cada resultado hasta su límite de aceptación más
+próximo es un trazo, y el resultado que decide el apartado se marca encima.
+Una ráfaga tonal por debajo de su límite retiene el dictamen.*
+
+## 1. La regla con que se juzga cada apartado
+
+La IEC 61672-3 juzga un resultado como lo hacen todas las normas de
+instrumentos del IEC TC 29 escritas desde 2013 (apartado 4.1): la desviación
+medida respecto al objetivo de diseño dentro de los límites de aceptación de
+la IEC 61672-1 **y** la incertidumbre expandida real del laboratorio, para una
+probabilidad de cobertura del 95 %, dentro de la incertidumbre máxima
+permitida por la Tabla B.1 de la IEC 61672-1, con los dos límites incluidos. La
+incertidumbre no se suma a la desviación; la tolerancia que tiene que cumplir
+el sonómetro queda más allá del límite de aceptación en ese máximo. Cada
+resultado es un `metrology.verify_conformance`, y
+[Conformidad y verificación](/phonometry/es/signals/metrology/compliance-verification/)
+muestra la regla sobre los ejemplos impresos de la Tabla C.1 de la
+IEC 61672-1.
+
+Un resultado medido con más incertidumbre que su máximo «no debe utilizarse
+para evaluar la conformidad» (apartado 4.3). No es un fallo del sonómetro, y el
+dictamen no se supera mientras esté ahí: el dictamen lo lista en `unusable`,
+aparte de los resultados de `failed`.
+
+La única excepción es el apartado 4.4. El ensayo acústico de la ponderación
+frecuencial (apartado 12) y el eléctrico (apartado 13) corrigen las
+indicaciones con los datos de corrección de campo libre o de incidencia
+aleatoria del fabricante, y la incertidumbre de esos datos forma parte del
+balance de incertidumbre del laboratorio. Sin ella, la incertidumbre del laboratorio no
+debe superar el máximo; cuando el total lo supera solo por ella, los ensayos
+pueden continuar, y el resultado es uno que no fue conforme, con ese motivo
+en la declaración. El registro recibe la incertidumbre sin los datos
+de corrección al lado del total (el apartado 6 de esta página muestra un
+caso); sin ella, el dictamen solo conoce el total y se aplica el 4.3.
+
+## 2. Frente a qué se juzga cada apartado
+
+| Apartado | Ensayo | Límites de aceptación (IEC 61672-1) | Incertidumbre máxima (Tabla B.1) |
+| :--- | :--- | :--- | :--- |
+| 12 | Ponderación frecuencial con señales acústicas, a 125 Hz y 8 kHz respecto a 1 kHz | Tabla 3 | 0,60 dB hasta 4 kHz, 0,70 dB por encima |
+| 13 | Cada ponderación frecuencial con señales eléctricas, de 63 Hz a 16 kHz (clase 1) o a 8 kHz (clase 2) | Tabla 3 | 0,60 dB, 0,70 dB por encima de 4 kHz, 1,00 dB por encima de 10 kHz |
+| 14.2 | C y Z frente a A a 1 kHz | ±0,2 dB (5.5.9) | 0,20 dB |
+| 14.3 | S y promediado temporal frente a F a 1 kHz | ±0,1 dB (5.8.3) | 0,20 dB |
+| 15 | Estabilidad a largo plazo, de 25 min a 35 min | ±0,1 dB, clase 2 ±0,3 dB (5.14.2) | 0,10 dB |
+| 16 | Linealidad de nivel a 8 kHz en el rango de niveles de referencia | ±0,8 dB, clase 2 ±1,1 dB (5.6.5) | 0,30 dB |
+| 17 | Linealidad de nivel con el control de rango de niveles, a 1 kHz | ±0,8 dB, clase 2 ±1,1 dB (5.6.5) | 0,30 dB |
+| 18 | Ráfagas tonales de 4 kHz de 200 ms, 2 ms y 0,25 ms | Tabla 4 | 0,30 dB |
+| 19 | Pico con ponderación C: un ciclo a 8 kHz, semiciclos a 500 Hz | Tabla 5 | 0,35 dB |
+| 20 | Indicación de sobrecarga, semiciclo positivo frente a negativo | 1,5 dB (5.11.3) | 0,25 dB |
+| 21 | Estabilidad a niveles elevados, 5 min cerca del máximo del rango menos sensible | ±0,1 dB, clase 2 ±0,3 dB (5.15.2) | 0,10 dB |
+
+Dos cosas de la tabla son como las imprimen las páginas y no como cabría
+esperar. La incertidumbre máxima del apartado 14.3, 0,20 dB, es el doble de su
+límite de aceptación, 0,1 dB. Y la Parte 3 juzga la linealidad de nivel de los
+apartados 16 y 17 solo frente al 5.6.5: el límite del 5.6.6 para un cambio de
+nivel de 1 dB a 10 dB es un requisito de la evaluación de modelo
+(IEC 61672-2, 9.8.1.7) que la Parte 3 no menciona nunca.
+
+Los apartados 10 y 11 son registros, no ensayos: las indicaciones a la
+frecuencia de comprobación de la calibración antes y después del ajuste, y el
+ruido intrínseco, que «se indica solo a título informativo y no se utiliza para
+evaluar la conformidad con un requisito», y sin incertidumbre (11.1.2,
+NOTA 2). Los apartados 16, 19 y 20 contienen, además de los números, un
+requisito de sí o no: ninguna indicación de sobrecarga ni de «por debajo del
+rango» dentro del rango de funcionamiento lineal que declara el manual (16.4),
+las señales del pico con ponderación C no deben provocar una indicación de
+sobrecarga (19.3, 19.5), y el indicador de sobrecarga debe quedar enclavado
+(20.5).
+
+## 3. Juzgar un registro
+
+`metrology.SoundLevelMeterPeriodicMeasurements` contiene lo que midió el
+laboratorio, cada resultado juzgado al lado de su incertidumbre expandida y
+cada campo nombrado con su unidad. Las respuestas a las ráfagas tonales y las
+diferencias del pico con ponderación C entran tal como se midieron, respecto al
+nivel continuo; el dictamen toma él mismo la desviación de las Tablas 4 y 5.
+Todo lo demás entra como la desviación que define el apartado. El apartado 16
+lleva además lo que muestra que sus escalones cubren el procedimiento del
+16.3: sobre un rango de funcionamiento lineal de 80 dB, los 25 escalones que
+da un laboratorio, que la figura del dictamen dibuja en un solo hueco. Los
+dos rangos de niveles del sonómetro, que ningún registro puede contar, se
+declaran a su lado; la sección 5 explica por qué.
+
+```python
+from phonometry import metrology
+
+record = metrology.SoundLevelMeterPeriodicMeasurements(
+    # Apartado 7: las condiciones al principio y al final de los ensayos.
+    static_pressures_kpa=[100.9, 100.7],
+    air_temperatures_c=[22.8, 23.3],
+    relative_humidities_percent=[48.0, 46.0],
+    # Apartados 10 y 11: se registran, no se juzgan.
+    calibration_check_initial_db=93.8,
+    calibration_check_adjusted_db=94.0,
+    self_noise_microphone_db=16.9,
+    self_noise_electrical_db={"A": 11.8, "C": 13.9, "Z": 19.2},
+    # Apartado 12: 125 Hz y 8 kHz, respecto a 1 kHz, tras las correcciones.
+    acoustic_weighting_deviations_db=[0.3, -0.9],
+    acoustic_weighting_uncertainties_db=[0.28, 0.45],
+    # Apartado 13: cada ponderación, en las nueve octavas de 63 Hz a 16 kHz.
+    electrical_weighting_deviations_db={
+        "A": [0.1, 0.1, 0.0, 0.0, 0.0, 0.0, -0.1, -0.3, -0.9],
+        "C": [0.2, 0.1, 0.0, 0.0, 0.0, 0.0, -0.1, -0.4, -1.2],
+        "Z": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -0.2, -0.8],
+    },
+    electrical_weighting_uncertainties_db={
+        w: [0.14] * 7 + [0.18, 0.25] for w in ("A", "C", "Z")
+    },
+    # Apartado 14: C y Z frente a A, S y promediado frente a F, a 1 kHz.
+    weighting_at_1khz_deviations_db={"C": 0.0, "Z": 0.1},
+    weighting_at_1khz_uncertainties_db={"C": 0.12, "Z": 0.12},
+    time_weighting_at_1khz_deviations_db={"S": 0.0, "eq": 0.05},
+    time_weighting_at_1khz_uncertainties_db={"S": 0.12, "eq": 0.12},
+    # Apartado 15: la estabilidad a largo plazo.
+    long_term_stability_db=0.04,
+    long_term_stability_uncertainty_db=0.07,
+    # Apartado 16 a 8 kHz: el rango de funcionamiento lineal y el punto de
+    # partida que declara el manual, cada escalón por su nivel previsto,
+    # hacia arriba desde el punto de partida en escalones de 5 dB y de 1 dB
+    # desde 5 dB antes del límite superior, luego hacia abajo del mismo
+    # modo, y los niveles que indicaron por primera vez sobrecarga y «por
+    # debajo del rango».
+    linear_operating_range_db=[40.0, 120.0],
+    linearity_starting_point_db=94.0,
+    linearity_levels_db=[
+        94.0, 99.0, 104.0, 109.0, 114.0, 119.0, 120.0, 121.0, 122.0,
+        89.0, 84.0, 79.0, 74.0, 69.0, 64.0, 59.0, 54.0, 49.0, 44.0,
+        43.0, 42.0, 41.0, 40.0, 39.0, 38.0,
+    ],
+    linearity_deviations_db=[
+        0.0, 0.0, 0.1, 0.1, 0.1, 0.1, 0.0, -0.1, -0.2,
+        0.0, 0.0, 0.0, -0.1, 0.0, 0.0, 0.1, 0.1, 0.1, 0.2,
+        0.2, 0.3, 0.3, 0.4, 0.5, 0.6,
+    ],
+    linearity_uncertainties_db=[0.18] * 25,
+    linearity_overload_level_db=123.0,
+    linearity_under_range_level_db=37.0,
+    # Apartado 17 a 1 kHz: 5 dB por encima de la primera indicación de «por
+    # debajo del rango» en los dos rangos de niveles, primero el de
+    # referencia (17.4), y el nivel de referencia mantenido en el otro
+    # (17.3).
+    range_linearity_deviations_db={"17.3": [0.1], "17.4": [0.1, -0.2]},
+    range_linearity_uncertainties_db={"17.3": [0.18], "17.4": [0.18, 0.18]},
+    # Apartado 18: las respuestas a 200 ms, 2 ms y 0,25 ms (S: 200 ms y 2 ms).
+    toneburst_responses_db={
+        "F": [-1.1, -18.2, -30.4],
+        "S": [-7.5, -27.4],
+        "E": [-7.0, -27.1, -36.6],
+    },
+    toneburst_uncertainties_db={
+        "F": [0.2, 0.2, 0.25],
+        "S": [0.2, 0.2],
+        "E": [0.2, 0.2, 0.25],
+    },
+    # Apartado 19: un ciclo a 8 kHz y después los dos semiciclos a 500 Hz.
+    c_peak_differences_db=[3.9, 2.5, 2.2],
+    c_peak_uncertainties_db=[0.3, 0.3, 0.3],
+    c_peak_overload_indicated=False,
+    # Apartados 20 y 21.
+    overload_difference_db=0.4,
+    overload_uncertainty_db=0.2,
+    overload_latched=True,
+    high_level_stability_db=0.03,
+    high_level_stability_uncertainty_db=0.07,
+)
+meter = metrology.SoundLevelMeterFeatures(level_ranges=2)
+result = metrology.verify_sound_level_meter_periodic(1, record, features=meter)
+print(result.passes)  # False
+print(result.failed)  # (('18', 'F, 0.25 ms'),)
+result.plot(language="es")
+```
+
+El dictamen es un objeto, no un booleano: `result.passes` es la respuesta, y
+`bool(result)` lanza una excepción en lugar de dejar que
+`if verify_sound_level_meter_periodic(...):` dé por bueno cualquier sonómetro.
+Cada requisito es un `result.requirement(name)`, con sus resultados en
+`labels` y un `ConformanceVerification` por cada uno en `verifications`, y
+`result.requirements` los guarda en el orden de la norma.
+
+## 4. Ráfagas tonales y pico con ponderación C
+
+Las respuestas de referencia con que se juzga el ensayo de ráfagas tonales son
+las de la Tabla 4 de la IEC 61672-1, que sus NOTAS obtienen de la Ecuación (7)
+para un nivel máximo con ponderación temporal,
+
+$$
+\delta_\mathrm{ref} = 10\,\lg\!\left(1 - \mathrm{e}^{-T_\mathrm{b}/\tau}\right)\ \mathrm{dB},
+$$
+
+con $\tau$ = 0,125 s para F y 1 s para S, y de la Ecuación (8) para un nivel de
+exposición sonora, $\delta_\mathrm{ref} = 10\,\lg(T_\mathrm{b}/T_0)$ dB con
+$T_0$ = 1 s, ambas redondeadas a la décima de decibelio. Sus límites se
+ensanchan a medida que la ráfaga tonal se acorta, y las filas de S tienen
+límites propios. El módulo publica la tabla como `IEC61672_TABLE_4`, con las
+claves `"F"`, `"S"` y `"E"`:
+
+```python
+row = metrology.IEC61672_TABLE_4["F"][-1]
+print(row.duration_ms, row.reference_response_db, row.limits_db(1))
+# 0.25 -27.0 (-3.0, 1.0)
+worst = result.requirement("toneburst").verifications[2]
+print(round(worst.deviation, 2), worst.lower_limit)  # -3.4 -3.0
+```
+
+El sonómetro indicó −30,4 dB para la ráfaga tonal de 0,25 ms, 3,4 dB por
+debajo de la referencia, donde la clase 1 admite 3,0 dB. Su incertidumbre,
+0,25 dB, está dentro de los 0,30 dB de la Tabla B.1, así que el resultado es
+utilizable y el sonómetro no supera el apartado.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/slm_periodic_toneburst.svg" alt="Los ocho resultados de ráfagas tonales del apartado 18 del sonómetro sintético de clase 1, como la Figura C.1 de la IEC 61672-1 dibuja sus ejemplos: para F a 200 ms, 2 ms y 0,25 ms, S a 200 ms y 2 ms y E a 200 ms, 2 ms y 0,25 ms, la desviación respecto a la respuesta de referencia de la Tabla 4 como marcador, su incertidumbre real como barra de error, la incertidumbre máxima permitida de 0,30 dB como banda gris detrás y los límites de aceptación de la Tabla 4 como barras cortas naranjas, más y menos 0,5 dB a 200 ms, +1,0 y −1,5 dB a 2 ms para F y E y −3,0 dB para S, y +1,0 y −3,0 dB a 0,25 ms. Todos los marcadores son rombos verdes cerca de cero salvo F a 0,25 ms, una cruz roja en −3,4 dB por debajo de su límite de −3,0 dB; el título dice IEC 61672-3 §18: no conforme, sobre Respuesta a una ráfaga tonal" width="92%" />
+
+*El requisito de ráfagas tonales, con su propio `.plot()`.*
+
+El ensayo del pico con ponderación C funciona igual a partir de la Tabla 5: la
+diferencia $L_\mathrm{Cpeak} - L_\mathrm{C}$ medida para un ciclo a 8 kHz y
+para los semiciclos positivo y negativo a 500 Hz, menos la diferencia de
+referencia de 3,4 dB, 2,4 dB y 2,4 dB. El registro las da en ese orden, y el
+otro requisito del ensayo, que ninguna de las tres señales provoque una
+indicación de sobrecarga, como `c_peak_overload_indicated`.
+
+```python
+print(metrology.IEC61672_TABLE_5[2])
+# PeakReference(signal='one cycle', nominal_frequency_hz=8000.0,
+#   reference_difference_db=3.4, class_1_limits_db=(-2.0, 2.0),
+#   class_2_limits_db=(-3.0, 3.0))
+```
+
+La Tabla B.1, la incertidumbre máxima permitida de cada requisito de la
+IEC 61672-1 y no solo de los periódicos, es `IEC61672_TABLE_B1`, con sus bandas
+de frecuencia y los extremos que imprime; las ponderaciones frecuenciales se
+leen mediante `filters.weighting_class_limits`, que publica la Tabla 3.
+
+## 5. Qué contiene un ensayo completo
+
+Superar el dictamen exige un registro completo. El apartado 8.1 pide todos los
+ensayos de las características que la IEC 61672-1 exige y que el sonómetro
+tiene. Un registro muestra las características cuyos resultados contiene, y el
+dictamen se atiene a ellas:
+
+- los apartados 7, 10, 11, 12, 13, 15, 16, 18 y 21 para cualquier sonómetro;
+- la ponderación frecuencial A en el apartado 13 siempre, y también la C para
+  la clase 1, que tiene que tenerla (5.1.9 y 5.1.10 de la IEC 61672-1), y
+  para un sonómetro con pico con ponderación C, al que el 5.1.10 exige medir
+  también el nivel de sonido promediado en el tiempo con ponderación C;
+- cada ponderación que nombre cualquier apartado, sea el 13, el ruido
+  intrínseco del 11.2 o el 14.2, ensayada en los tres (la C y la Z comparadas
+  con la A en el 14.2);
+- el apartado 16 sobre los escalones del 16.3: hacia arriba desde el punto de
+  partida en escalones de 5 dB hasta quedar a menos de 5 dB del límite
+  superior del rango de funcionamiento lineal, en escalones de 1 dB desde ahí
+  hasta la primera indicación de sobrecarga, sin incluirla, y hacia abajo del
+  mismo modo hasta la primera indicación de «por debajo del rango». Un
+  escalón más ancho, o un registro sin los niveles que permitan saberlo, deja
+  el apartado incompleto; los escalones más finos cubren más y se aceptan.
+  Una indicación de sobrecarga o de «por debajo del rango» dentro del rango
+  de funcionamiento lineal, donde el manual dice que el sonómetro no muestra
+  ninguna de las dos (5.6.10 de la IEC 61672-1), hace fallar el apartado
+  (16.4);
+- el apartado 17 a 5 dB por encima de la primera indicación de «por debajo
+  del rango» en cada rango de niveles, incluido el de referencia y el
+  primero (el 17.4 ensaya «cada rango de niveles»), y con el nivel de
+  referencia mantenido en cada uno de los demás (17.3), NaN donde un rango
+  no lo muestra. En el rango de niveles de referencia el 17.3 no tiene nada
+  que leer: el nivel de referencia que fijó el 17.2 es allí el nivel
+  previsto, una desviación nula por construcción (5.6.3 de la IEC 61672-1);
+- las indicaciones F, S y de promediado temporal en los ensayos de ráfagas
+  tonales del apartado 18, con el nivel de exposición sonora calculado a
+  partir de la indicación promediada cuando el sonómetro no lo mide (18.2), y
+  al revés: el 14.3, con la S, para un sonómetro cuya ráfaga tonal con
+  ponderación temporal S está en el apartado 18, y con la indicación
+  promediada para un sonómetro cuya indicación de sobrecarga está en el
+  apartado 20;
+- el apartado 20 para un sonómetro que indica el nivel de sonido promediado en
+  el tiempo (20.1);
+- las condiciones ambientales entre 80 kPa y 105 kPa, 20 °C y 26 °C y 25 % y
+  70 % (7.1), registradas al principio y al final como mínimo (7.2).
+
+Lo que un registro no puede mostrar es una característica que al sonómetro le
+falta: un sonómetro con un solo rango de niveles y un registro que dejó fuera
+el apartado 17 se leen igual, y lo mismo un sonómetro sin pico con ponderación
+C y un registro sin el apartado 19. El manual de instrucciones dice qué
+características opcionales tiene el sonómetro, y
+`metrology.SoundLevelMeterFeatures` lleva esa respuesta al dictamen, mediante
+`features=`: `True` para una característica que el sonómetro tiene, `False`
+para una que le falta y `None` (el valor por defecto) para una no declarada.
+Una característica declarada presente exige sus ensayos igual que una que el
+registro muestra, y una declarada ausente saca sus apartados del ensayo. Una
+característica que ni se declara ni se muestra impide superar el dictamen,
+porque el registro podría ocultar un ensayo omitido.
+
+Los rangos de niveles son un número, `level_ranges`, porque un registro
+tampoco puede contarlos: un apartado 17 con una lectura se lee igual para un
+sonómetro con dos rangos de niveles que para un registro que dejó fuera los
+demás. `level_ranges=1` saca del ensayo el apartado 17; un número mayor es
+cuántos rangos cubre el 17.4, incluido el de referencia, y cuántos cubre el
+17.3 además de él, y mientras no se declara, un sonómetro cuyo apartado 17
+muestra varios deja la pregunta abierta. Una característica declarada ausente se lleva además la que la
+IEC 61672-1 hace depender de ella: un sonómetro sin ponderación frecuencial C
+no mide el nivel de sonido de pico con ponderación C (5.1.10), así que el
+apartado 19 no es aplicable en lugar de no declarado, y uno sin F no tiene S
+(5.1.9). Una declaración sin F, sin indicación promediada en el tiempo y sin
+nivel de exposición sonora se rechaza, porque el 5.1.9 exige una de ellas a
+todo sonómetro.
+
+`missing` nombra los apartados sin medir, `incomplete` lo que le falta a un
+apartado medido, `undeclared` las características que el dictamen no puede
+situar, `not_applicable` los apartados que las características declaradas
+sacan del ensayo y `conditions_outside` las lecturas fuera del 7.1. El
+registro de la sección 3 muestra todas las características, y `meter` da el
+número de rangos de niveles, así que no queda nada abierto. Sin los apartados 17 y 19 queda abierto en los dos, hasta que el
+sonómetro se declara con un solo rango de niveles y sin pico con ponderación
+C:
+
+```python
+import dataclasses
+
+basic = dataclasses.replace(
+    record,
+    range_linearity_deviations_db=None,
+    range_linearity_uncertainties_db=None,
+    c_peak_differences_db=None,
+    c_peak_uncertainties_db=None,
+    c_peak_overload_indicated=None,
+)
+unsaid = metrology.verify_sound_level_meter_periodic(1, basic)
+print([name for name, _ in unsaid.undeclared])
+# ['level_ranges', 'c_weighted_peak']
+declared = metrology.verify_sound_level_meter_periodic(
+    1,
+    basic,
+    features=metrology.SoundLevelMeterFeatures(
+        level_ranges=1, c_weighted_peak=False
+    ),
+)
+print(declared.undeclared, [clause for clause, _ in declared.not_applicable])
+# () ['17', '19']
+```
+
+La figura del dictamen da un solo hueco a cada apartado juzgado, tenga los
+resultados que tenga, y reserva uno para cada apartado juzgado que el
+registro no contiene, nombrado debajo: no medido, no declarado o no
+aplicable.
+
+El mismo registro sin las ráfagas tonales con S, de un sonómetro que el 14.3
+muestra que tiene S, queda incompleto:
+
+```python
+no_s = dataclasses.replace(
+    record,
+    toneburst_responses_db={"F": [-1.1, -18.2, -30.4], "E": [-7.0, -27.1, -36.6]},
+    toneburst_uncertainties_db={"F": [0.2, 0.2, 0.25], "E": [0.2, 0.2, 0.25]},
+)
+short = metrology.verify_sound_level_meter_periodic(1, no_s, features=meter)
+print(short.passes, short.incomplete[0][0])  # False 18
+```
+
+También lo queda un apartado 16 de un solo escalón en el punto de partida, por
+bien que sea conforme: no cubre ni el camino hacia arriba hasta la sobrecarga
+ni el camino hacia abajo hasta «por debajo del rango».
+
+```python
+one_step = dataclasses.replace(
+    record,
+    linearity_levels_db=[94.0],
+    linearity_deviations_db=[0.0],
+    linearity_uncertainties_db=[0.18],
+)
+thin = metrology.verify_sound_level_meter_periodic(1, one_step, features=meter)
+print(thin.passes, [clause for clause, _ in thin.incomplete])  # False ['16', '16']
+print(thin.incomplete[0][1][:60])
+# the steps go from 94 dB to the first indication of overload
+```
+
+Y lo queda un apartado 17 cuyo 17.4 deja fuera el rango de niveles de
+referencia, con NaN en su primer lugar: el 17.4 lee «cada rango de niveles»,
+y un nivel 5 dB por encima de la primera indicación de «por debajo del
+rango» no es el nivel de referencia que fijó allí el 17.2.
+
+```python
+nan = float("nan")
+no_reference = dataclasses.replace(
+    record,
+    range_linearity_deviations_db={"17.3": [0.1], "17.4": [nan, -0.2]},
+    range_linearity_uncertainties_db={"17.3": [0.18], "17.4": [nan, 0.18]},
+)
+open_17 = metrology.verify_sound_level_meter_periodic(1, no_reference, features=meter)
+print(open_17.incomplete)
+# (('17', '17.4 was not measured on the reference level range, and it tests
+#   every level range, the reference one included'),)
+```
+
+Las condiciones pesan también en la incertidumbre: por debajo de 97 kPa, y
+salvo que los datos del modelo digan otra cosa, el apartado 7.3 pide al
+laboratorio que sume una incertidumbre típica de 0,09 dB hasta 3 kHz y de
+0,14 dB por encima a sus ensayos de las ponderaciones frecuenciales. Esa
+componente pertenece al balance de incertidumbre del laboratorio, y el
+dictamen lee la incertidumbre expandida que recibe.
+
+## 6. La declaración del apartado 22
+
+`result.statement` es el texto que lleva la documentación del ensayo, elegido
+como lo elige el apartado 22 y con la clase y el año ya puestos. La norma
+imprime las declaraciones en inglés, y el dictamen las devuelve en inglés, tal
+como la documentación las transcribe. Decide el primero de estos casos que
+se cumpla:
+
+- **un aviso** cuando los ensayos no se hicieron dentro de las condiciones
+  del 7.1: fuera de ellas no son ensayos periódicos según la IEC 61672-3,
+  sean cuales sean sus resultados, y no les corresponde ninguno de los
+  puntos r), s) y t);
+- **punto t)** cuando un resultado queda fuera de sus límites, falla una
+  comprobación o un resultado supera su máximo solo por los datos de
+  corrección del fabricante (4.4): el sonómetro «did not successfully complete the class 1 tests
+  of IEC 61672-3:2013» y «did not conform to the class 1 specifications of
+  IEC 61672-1:2013», seguido de los ensayos no superados y el motivo, con las
+  palabras que sugiere su NOTA;
+- **un aviso** cuando un resultado no es utilizable (4.3) o el registro está
+  incompleto, porque los puntos r) y s) necesitan los resultados de todos los
+  ensayos periódicos;
+- **punto r)** cuando todos los resultados son conformes, hay pruebas públicas
+  de la aprobación de modelo según la IEC 61672-2
+  (`pattern_approval_public=True`) y los datos de corrección del ensayo
+  acústico salieron del Manual de Instrucciones
+  (`corrections_in_manual=True`): el sonómetro «conforms to the class 1
+  specifications of IEC 61672-1:2013»;
+- **punto s)** cuando todos los resultados son conformes pero falta alguna de
+  las dos cosas: no puede sacarse ninguna conclusión general sobre la
+  IEC 61672-1, porque los ensayos periódicos «cover only a limited subset of
+  the specifications».
+
+Las dos declaraciones valen `False` por defecto: el punto c) del apartado 22
+y el 12.5 piden al laboratorio que las haga constar, y el dictamen no da
+ninguna por supuesta. Con la ráfaga tonal de 0,25 ms dentro de su límite, una
+aprobación de modelo pública y los datos de corrección del apartado 12
+tomados del Manual de Instrucciones, como pide en primer lugar el 12.3, el
+mismo sonómetro obtiene la declaración del punto r). Es
+`corrections_in_manual=True` lo que dice de dónde salieron los datos: los del
+fabricante del micrófono o del calibrador (12.4), o un origen sin declarar,
+darían en su lugar la del punto s).
+
+```python
+fixed = dataclasses.replace(
+    record,
+    toneburst_responses_db={
+        "F": [-1.1, -18.2, -29.6],
+        "S": [-7.5, -27.4],
+        "E": [-7.0, -27.1, -36.6],
+    },
+)
+again = metrology.verify_sound_level_meter_periodic(
+    1,
+    fixed,
+    pattern_approval_public=True,
+    corrections_in_manual=True,
+    features=meter,
+)
+print(again.passes)                                  # True
+print(again.statement.endswith("of IEC 61672-1:2013."))  # True
+```
+
+Un laboratorio cuya incertidumbre a 8 kHz en el apartado 12 es de 0,85 dB,
+por encima de los 0,70 dB de la Tabla B.1 solo por los datos de corrección
+del fabricante, da los 0,66 dB que tiene sin ellos al lado del total. El
+resultado es entonces uno que no fue conforme, por el 4.4, y la declaración
+es la del punto t) con el motivo que da su NOTA:
+
+```python
+over = dataclasses.replace(
+    fixed,
+    acoustic_weighting_uncertainties_db=[0.28, 0.85],
+    acoustic_weighting_uncertainties_without_correction_data_db=[0.28, 0.66],
+)
+check = metrology.verify_sound_level_meter_periodic(
+    1,
+    over,
+    pattern_approval_public=True,
+    corrections_in_manual=True,
+    features=meter,
+)
+print(check.unusable, check.over_maximum_by_correction_data)
+# () (('12', '8 kHz'),)
+reason = check.requirement("acoustic_weighting").failure_reason("8 kHz")
+print(reason.endswith("uncertainty budget (4.4)"))  # True
+```
+
+<details>
+<summary>Mostrar el código de estas figuras</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+fig, ax = plt.subplots(figsize=(11, 6.2), layout="constrained")
+result.plot(ax=ax, language="es")
+
+fig, ax = plt.subplots(figsize=(10, 5.6), layout="constrained")
+result.requirement("toneburst").plot(ax=ax, language="es")
+plt.show()
+```
+
+</details>
+
+## Qué cubre esta guía
+
+<Scope>
+<ScopeClaim status="covered" label="Cubierto">
+**IEC 61672-3:2013, el dictamen sobre los resultados de un laboratorio:** la
+regla de conformidad del apartado 4.1 sobre cada resultado juzgado de los
+apartados 12 a 21, con los límites de aceptación de la IEC 61672-1:2013
+(Tabla 3, 5.5.9, 5.6.5, 5.8.3, Tabla 4, 5.11.3, Tabla 5, 5.14.2 y 5.15.2) y
+los máximos de su Tabla B.1; los resultados no utilizables del 4.3 y la
+excepción del 4.4 para la incertidumbre de los datos de corrección del
+fabricante; los requisitos de sí o no de los apartados 16.4, 19.3, 19.5 y
+20.5; las condiciones
+ambientales del 7.1 y el 7.2; lo que el 8.1 exige de un ensayo completo, a
+partir de las características que el registro muestra y de las que
+`SoundLevelMeterFeatures` declara presentes o ausentes, con lo que los
+apartados 5.1.9 y 5.1.10 de la IEC 61672-1 deducen de una característica
+declarada ausente; la extensión del apartado 16 sobre los escalones del 16.3
+y la del apartado 17 sobre cada rango de niveles (17.3, 17.4); y las
+declaraciones de los puntos r), s) y t) del apartado 22. Las Tablas 4, 5 y B.1
+de la IEC 61672-1 se publican como tablas de solo lectura.
+</ScopeClaim>
+
+<ScopeClaim status="not-covered" label="No cubierto">
+Los ensayos en sí: la biblioteca no acciona ningún calibrador, acoplador,
+actuador ni entrada eléctrica. Las desviaciones de linealidad de nivel del
+apartado 16.2 (por el procedimiento de la IEC 61672-2), las ponderaciones
+frecuenciales relativas de los apartados 12.15 y 13.9 con sus correcciones y el
+balance de incertidumbre del laboratorio son entradas. Las comprobaciones
+que no son una desviación medida son registro del laboratorio: el Manual de
+Instrucciones y las marcas del apartado 3, la inspección preliminar del
+apartado 5, la alimentación del apartado 6, la conformidad del propio
+calibrador del apartado 9 (que `metrology.verify_sound_calibrator` juzga
+según la IEC 60942), los requisitos generales de ensayo de los apartados 8.2
+a 8.5, entre ellos la confirmación del 8.4 de que una salida eléctrica usada
+en los ensayos indica lo mismo que la pantalla (dentro de los ±0,1 dB del
+apartado 5.19.4 de la IEC 61672-1), y el origen de los datos de corrección de
+los apartados 12.2 a 12.6. La declaración del punto l), que la documentación
+lleva cuando los datos de corrección de campo libre no tienen incertidumbre,
+no se escribe.
+</ScopeClaim>
+</Scope>
+
+<SeeAlso>
+
+## Véase también
+
+- [Conformidad y verificación](/phonometry/es/signals/metrology/compliance-verification/):
+  la regla de conformidad del IEC TC 29, y lo que atestiguan la evaluación de
+  modelo y los ensayos periódicos.
+- [Correcciones de campo libre de un sonómetro](/phonometry/es/signals/metrology/free-field-corrections/):
+  la IEC 62585, las correcciones que aplica el ensayo acústico del apartado 12
+  y su incertidumbre.
+- [Calibración y dBFS](/phonometry/es/signals/metrology/calibration/): el
+  calibrador acústico del apartado 9 y su propio dictamen según la IEC 60942.
+- [Sonómetro](/phonometry/es/signals/sound-level-meter/): las ponderaciones
+  frecuenciales y temporales, y el dictamen de diseño que la biblioteca da a su
+  propia cadena.
+- Referencia de la API: [`metrology.sound_level_meter`](/phonometry/es/reference/api/metrology/sound-level-meter/).
+
+</SeeAlso>

@@ -571,6 +571,25 @@ def test_the_verdict_and_its_clauses_plot(language: str) -> None:
     plt.close("all")
 
 
+def test_a_verdict_that_holds_no_clause_still_draws_its_axis() -> None:
+    verdict = filters.FilterPeriodicVerification(
+        filter_class=1,
+        fraction=3,
+        pattern_approval_public=False,
+        measurements=filters.FilterPeriodicMeasurements(),
+        clauses=(),
+    )
+    ax = verdict.plot()
+    assert ax.get_xticklabels() == []
+    assert ax.get_xlim() == (0.0, 1.0)
+    assert ax.get_yscale() == "symlog"
+    assert ax.get_ylim() == pytest.approx((-0.5, 1.0))
+    legend = [t.get_text() for t in ax.get_legend().get_texts()]
+    assert legend == ["Acceptance limit"]
+    assert ax.get_title() == "IEC 61260-3 periodic tests, class 1: not passed"
+    plt.close("all")
+
+
 def test_a_clause_draws_an_unusable_result_as_the_verdict_does() -> None:
     """5.3: neither figure calls a result it forbids using a failure."""
     record = _record(**_one_linearity([0.0, 0.1], [0.0, 20.0], [0.1, 0.25]))

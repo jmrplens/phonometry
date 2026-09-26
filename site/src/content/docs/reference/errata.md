@@ -8272,6 +8272,26 @@ in the same order.
   holds Formula (3) to what the running bank reads.
 - **Status:** unreported.
 
+## IEC 61672-1:2013, Table 3 (the class 1 lower limit at 6 300 Hz printed with a decimal point)
+
+- **Location:** Table 3, "Frequency weightings and acceptance limits", row
+  6 300 Hz, column "Performance class 1", printed p. 22.
+- **The print:** "+1,5; -2.0".
+- **The problem:** every other number of the table writes its decimals
+  with a comma, as the IEC does: the class 2 cell of the
+  same row reads "±4,5" and the class 1 cell of the next row "+1,5; -2,5".
+  The lower limit at 6 300 Hz is the one cell written with a decimal point.
+  The value is not in doubt, -2,0 dB, between the -1,5 dB above it and the
+  -2,5 dB below it.
+- **Evidence:** Verified on PDF page 24 (printed p. 22) of BS EN
+  61672-1:2013, the UK implementation of IEC 61672-1:2013 (second edition);
+  the cell is legible and reads "-2.0" beside "+1,5;".
+- **Library behaviour:** none needed. The library holds the number,
+  -2.0 dB, in [`filters.weighting_class_limits`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/filters/weighting_compliance.py),
+  which [`verify_sound_level_meter_periodic`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/metrology/sound_level_meter.py)
+  reads for the frequency weightings.
+- **Status:** unreported.
+
 ## Related source properties that are not errata
 
 Recorded here to prevent future "fixes" that would break agreement with the

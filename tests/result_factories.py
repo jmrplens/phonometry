@@ -856,6 +856,27 @@ def _conformance_verification() -> ph.metrology.ConformanceVerification:
     )
 
 
+def _slm_periodic() -> ph.metrology.SoundLevelMeterPeriodicVerification:
+    """IEC 61672-3:2013: a class 2 meter with A, F and S, one toneburst out."""
+    record = ph.metrology.SoundLevelMeterPeriodicMeasurements(
+        acoustic_weighting_deviations_db=[0.3, -1.2],
+        acoustic_weighting_uncertainties_db=[0.3, 0.5],
+        electrical_weighting_deviations_db={
+            "A": [0.1, 0.0, 0.0, 0.0, 0.0, 0.0, -0.2, -0.6]
+        },
+        electrical_weighting_uncertainties_db={"A": [0.2] * 8},
+        time_weighting_at_1khz_deviations_db={"S": 0.05},
+        time_weighting_at_1khz_uncertainties_db={"S": 0.12},
+        linearity_deviations_db=[0.0, 0.2, -0.3],
+        linearity_uncertainties_db=[0.2, 0.2, 0.2],
+        toneburst_responses_db={"F": [-1.1, -18.3, -32.4], "S": [-7.5, -27.8]},
+        toneburst_uncertainties_db={"F": [0.2] * 3, "S": [0.2] * 2},
+        high_level_stability_db=0.05,
+        high_level_stability_uncertainty_db=0.12,
+    )
+    return ph.metrology.verify_sound_level_meter_periodic(2, record)
+
+
 def _filter_periodic() -> ph.filters.FilterPeriodicVerification:
     """IEC 61260-3:2016: a class 1 one-third-octave filter, every clause graded."""
     row = [75.0, 62.0, 45.0, 20.0, 0.8, 0.3, 0.1, 0.0, 0.1, 0.2, 0.7, 19.0, 44.0, 63.0]

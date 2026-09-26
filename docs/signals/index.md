@@ -172,6 +172,9 @@ What the numbers mean and how much to trust them.
 - [Free-Field Corrections of a Sound Level Meter (IEC 62585)](metrology/free-field-corrections.md):
   the corrections that bring a meter on a calibrator, a coupler or an
   actuator to its free-field response, and their uncertainty.
+- [Periodic Tests of a Sound Level Meter (IEC 61672-3)](metrology/sound-level-meter-periodic-tests.md):
+  the verdict on a laboratory's periodic-test results for a working meter,
+  clause by clause, and the statement of Clause 22.
 
 ## What this section does not cover
 
@@ -185,8 +188,10 @@ pattern-evaluation tests a physical meter needs for type approval, the IEC
 61672-3 periodic tests it receives in service, the IEC 61260-2 and IEC 61260-3
 tests of a physical band filter and the IEC 60942 tests of the calibrator
 itself, are not run (a laboratory's calibrator results are graded by
-`metrology.verify_sound_calibrator` and its filter periodic test results by
-`filters.verify_filter_periodic`, neither of which performs a physical test;
+`metrology.verify_sound_calibrator`, its meter periodic test results by
+`metrology.verify_sound_level_meter_periodic` and its filter periodic test
+results by `filters.verify_filter_periodic`, none of which performs a
+physical test;
 the IEC 61260-2 tests that need no specimen are computed on the design), so a class
 verdict from the filter and weighting verifiers describes the algorithm and not a built device; [Compliance and
 verification](metrology/compliance-verification.md) draws

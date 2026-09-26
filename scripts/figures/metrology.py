@@ -35,6 +35,7 @@ if TYPE_CHECKING:
         DirectivityFactor,
         FreeFieldCorrection,
         RandomIncidenceSensitivity,
+        SoundLevelMeterPeriodicVerification,
     )
 
 
@@ -206,6 +207,117 @@ def generate_calibrator_verification(output_dir: str) -> None:
     _fig, ax = plt.subplots(figsize=(10, 7.4), layout="constrained")
     result.plot(ax=ax, language=_LANG)
     save_figure(output_dir, "calibrator_verification.svg")
+    plt.close()
+
+
+def _slm_periodic_verification() -> "SoundLevelMeterPeriodicVerification":
+    """IEC 61672-3:2013: a class 1 meter's periodic-test record, one result out.
+
+    A meter with the A, C and Z weightings, the F and S time weightings, a
+    time-averaged display and two level ranges, every result inside its
+    limits but the maximum F-weighted response to the 0,25 ms toneburst:
+    -30,4 dB against the -27,0 dB of IEC 61672-1 Table 4, a deviation of
+    -3,4 dB where class 1 allows -3,0 dB. Clause 16 takes the 25 steps 16.3
+    asks over a linear operating range of 80 dB, from 40 dB to 120 dB, and
+    17.4 reads both level ranges, the reference one first. The numbers are
+    illustrative, not a real meter's; they are the guide's record.
+    """
+    from phonometry import metrology
+
+    record = metrology.SoundLevelMeterPeriodicMeasurements(
+        static_pressures_kpa=[100.9, 100.7],
+        air_temperatures_c=[22.8, 23.3],
+        relative_humidities_percent=[48.0, 46.0],
+        calibration_check_initial_db=93.8,
+        calibration_check_adjusted_db=94.0,
+        self_noise_microphone_db=16.9,
+        self_noise_electrical_db={"A": 11.8, "C": 13.9, "Z": 19.2},
+        acoustic_weighting_deviations_db=[0.3, -0.9],
+        acoustic_weighting_uncertainties_db=[0.28, 0.45],
+        electrical_weighting_deviations_db={
+            "A": [0.1, 0.1, 0.0, 0.0, 0.0, 0.0, -0.1, -0.3, -0.9],
+            "C": [0.2, 0.1, 0.0, 0.0, 0.0, 0.0, -0.1, -0.4, -1.2],
+            "Z": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -0.2, -0.8],
+        },
+        electrical_weighting_uncertainties_db={
+            k: [0.14] * 7 + [0.18, 0.25] for k in ("A", "C", "Z")
+        },
+        weighting_at_1khz_deviations_db={"C": 0.0, "Z": 0.1},
+        weighting_at_1khz_uncertainties_db={"C": 0.12, "Z": 0.12},
+        time_weighting_at_1khz_deviations_db={"S": 0.0, "eq": 0.05},
+        time_weighting_at_1khz_uncertainties_db={"S": 0.12, "eq": 0.12},
+        long_term_stability_db=0.04,
+        long_term_stability_uncertainty_db=0.07,
+        linear_operating_range_db=[40.0, 120.0],
+        linearity_starting_point_db=94.0,
+        linearity_levels_db=[
+            *(94.0, 99.0, 104.0, 109.0, 114.0, 119.0, 120.0, 121.0, 122.0),
+            *(89.0, 84.0, 79.0, 74.0, 69.0, 64.0, 59.0, 54.0, 49.0, 44.0),
+            *(43.0, 42.0, 41.0, 40.0, 39.0, 38.0),
+        ],
+        linearity_deviations_db=[
+            *(0.0, 0.0, 0.1, 0.1, 0.1, 0.1, 0.0, -0.1, -0.2),
+            *(0.0, 0.0, 0.0, -0.1, 0.0, 0.0, 0.1, 0.1, 0.1, 0.2),
+            *(0.2, 0.3, 0.3, 0.4, 0.5, 0.6),
+        ],
+        linearity_uncertainties_db=[0.18] * 25,
+        linearity_overload_level_db=123.0,
+        linearity_under_range_level_db=37.0,
+        range_linearity_deviations_db={"17.3": [0.1], "17.4": [0.1, -0.2]},
+        range_linearity_uncertainties_db={"17.3": [0.18], "17.4": [0.18, 0.18]},
+        toneburst_responses_db={
+            "F": [-1.1, -18.2, -30.4],
+            "S": [-7.5, -27.4],
+            "E": [-7.0, -27.1, -36.6],
+        },
+        toneburst_uncertainties_db={
+            "F": [0.2, 0.2, 0.25],
+            "S": [0.2, 0.2],
+            "E": [0.2, 0.2, 0.25],
+        },
+        c_peak_differences_db=[3.9, 2.5, 2.2],
+        c_peak_uncertainties_db=[0.3, 0.3, 0.3],
+        c_peak_overload_indicated=False,
+        overload_difference_db=0.4,
+        overload_uncertainty_db=0.2,
+        overload_latched=True,
+        high_level_stability_db=0.03,
+        high_level_stability_uncertainty_db=0.07,
+    )
+    return metrology.verify_sound_level_meter_periodic(
+        1, record, features=metrology.SoundLevelMeterFeatures(level_ranges=2)
+    )
+
+
+def generate_slm_periodic_verdict(output_dir: str) -> None:
+    """IEC 61672-3:2013: every graded clause of a periodic test at its margin.
+
+    Drawn by ``SoundLevelMeterPeriodicVerification.plot`` on the record of
+    :func:`_slm_periodic_verification`: one slot per clause, every result a
+    dash and the one that decides the clause marked over them, so the 25
+    steps of Clause 16 take no more room than the one result of Clause 15.
+    Its one toneburst result below its limit holds the verdict back.
+    """
+    print("Generating slm_periodic_verdict...")
+    result = _slm_periodic_verification()
+    _fig, ax = plt.subplots(figsize=(11, 6.2), layout="constrained")
+    result.plot(ax=ax, language=_LANG)
+    save_figure(output_dir, "slm_periodic_verdict.svg")
+    plt.close()
+
+
+def generate_slm_periodic_toneburst(output_dir: str) -> None:
+    """IEC 61672-3:2013 Clause 18: the toneburst deviations against Table 4.
+
+    The requirement the verdict of :func:`generate_slm_periodic_verdict`
+    fails on, drawn by its own ``.plot()`` as IEC 61672-1 Figure C.1 draws
+    its examples.
+    """
+    print("Generating slm_periodic_toneburst...")
+    result = _slm_periodic_verification().requirement("toneburst")
+    _fig, ax = plt.subplots(figsize=(10, 5.6), layout="constrained")
+    result.plot(ax=ax, language=_LANG)
+    save_figure(output_dir, "slm_periodic_toneburst.svg")
     plt.close()
 
 

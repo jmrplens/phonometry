@@ -887,9 +887,11 @@ juzga números medidos sobre hardware, y la corrección por presión estática d
 pistófono /M se toma de su manual, no se calcula, así que pasa a `sensitivity()`
 un `target_spl` ya corregido cuando el manual lo pida. Las marcas, el tiempo de
 estabilización, el indicador de alimentación, las emisiones de radiofrecuencia y
-las descargas electrostáticas de la IEC 60942 no se juzgan. Los ensayos periódicos de la IEC 61672-3 se
-citan como práctica de laboratorio, no se ejecutan: aquí nada verifica un
-sonómetro ni le asigna una clase. La parte de dBFS de esta página queda fuera
+las descargas electrostáticas de la IEC 60942 no se juzgan. Tampoco se ejecutan los
+ensayos periódicos de la IEC 61672-3: `metrology.verify_sound_level_meter_periodic`
+juzga los resultados que devuelve un laboratorio ([Ensayos periódicos de un
+sonómetro](/phonometry/es/signals/metrology/sound-level-meter-periodic-tests/)),
+y aquí nada verifica un sonómetro ni le asigna una clase. La parte de dBFS de esta página queda fuera
 de cualquier norma y no hace ninguna afirmación física.
 </ScopeClaim>
 </Scope>

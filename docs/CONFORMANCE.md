@@ -19,7 +19,7 @@
 
 ## Numerical conformance report
 
-**1457/1457 conformance checks pass** across 97 domains and 486 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+**1497/1497 conformance checks pass** across 98 domains and 487 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub><b>&#916;</b> is the difference between the computed value and the one the standard publishes. <b>Used</b> is how much of that clause's published tolerance the difference consumes: 100 % means it sits exactly on the limit, 5 % means it uses a twentieth of the allowance, and a dash means the clause states no two-sided tolerance for the quantity, so there is no budget to spend. It is reported and never used to decide a verdict, which is settled at full precision before any rounding.</sub>
 
@@ -377,6 +377,54 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | IEC 60942:2017 5.1.15 with Tables 2 and A.1 | Table E.1 examples 1 to 7 as a class 1 level at 1 kHz, 7 verdicts | No, No, Yes, Yes, No, Yes, Yes | 7/7 verdicts | exact | 0 % | ![Pass][cv-pass] Pass |
 | IEC 60942:2017 A.6.4.7 | 0,22 dB conforms to Table 5 and not to the abbreviated test, 2 verdicts | conforms to Table 5 (0,25 dB), not to A.6.4.7 (0,20 dB) | 2/2 verdicts | exact | 0 % | ![Pass][cv-pass] Pass |
 | IEC 60942:2017 5.5 and A.6.2.4 with Tables 2, 5, A.4 and A.5 | Class 1 at 2 kHz: 0,33 dB out of the band and in it, -0,5 % with U 0,25 %, 3 verdicts | No by Table 5 (0,30 dB); Yes by Table 2 (0,35 dB); No, U over Table A.5 (0,2 %) | 3/3 verdicts | exact | 0 % | ![Pass][cv-pass] Pass |
+
+</details>
+
+<details>
+<summary><b>Sound level meter periodic tests (IEC 61672-3, IEC 61672-1)</b>: 100% (40/40)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
+|:---|:---|:---|:---|:---|:---:|:---:|
+| IEC 61672-1:2013 Table 4 | Reference responses and limits of LAFmax - LA and LAE - LA, 12 durations | 96/96 cells | 96/96 cells | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61672-1:2013 Table 4 | Reference responses and limits of LASmax - LA, 9 durations | 36/36 cells | 36/36 cells | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61672-1:2013 Table 4, Equations (7) and (8) | Reference toneburst responses against 10 lg(1 - exp(-Tb/tau)) and 10 lg(Tb/T0) | 33/33 reference responses | 33/33 reference responses | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61672-1:2013 Table 5 | Reference differences LCpeak - LC and limits, 5 test signals | 25/25 cells | 25/25 cells | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61672-1:2013 Table B.1 | Maximum-permitted uncertainties, 31 printed rows (the F and S decay rates in two) | 32/32 rows | 32/32 rows | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61672-3:2013 12.16 with IEC 61672-1:2013 Table 3 | Acoustical weighting at 8 kHz, class 1, upper limit | conforms 0.01 dB inside and at the limit, not 0.01 dB past it | conforms inside, conforms at the limit, does not conform past it | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61672-3:2013 12.16 with IEC 61672-1:2013 Table 3 | Acoustical weighting at 8 kHz, class 1, lower limit | conforms 0.01 dB inside and at the limit, not 0.01 dB past it | conforms inside, conforms at the limit, does not conform past it | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61672-3:2013 12.16 with IEC 61672-1:2013 Table 3 | Acoustical weighting at 125 Hz, class 2, lower limit | conforms 0.01 dB inside and at the limit, not 0.01 dB past it | conforms inside, conforms at the limit, does not conform past it | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61672-3:2013 12.16 with IEC 61672-1:2013 Table 3 | Acoustical weighting at 8 kHz, class 2, upper limit | conforms 0.01 dB inside and at the limit, not 0.01 dB past it | conforms inside, conforms at the limit, does not conform past it | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61672-3:2013 13.10 with IEC 61672-1:2013 Table 3 | Electrical weighting A at 16 kHz, class 1, lower limit | conforms 0.01 dB inside and at the limit, not 0.01 dB past it | conforms inside, conforms at the limit, does not conform past it | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61672-3:2013 13.10 with IEC 61672-1:2013 Table 3 | Electrical weighting C at 1 kHz, class 1, upper limit | conforms 0.01 dB inside and at the limit, not 0.01 dB past it | conforms inside, conforms at the limit, does not conform past it | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61672-3:2013 13.10 with IEC 61672-1:2013 Table 3 | Electrical weighting Z at 8 kHz, class 2, lower limit | conforms 0.01 dB inside and at the limit, not 0.01 dB past it | conforms inside, conforms at the limit, does not conform past it | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61672-3:2013 14.2 with IEC 61672-1:2013 5.5.9 | C against A at 1 kHz | conforms 0.01 dB inside and at the limit, not 0.01 dB past it | conforms inside, conforms at the limit, does not conform past it | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61672-3:2013 14.3 with IEC 61672-1:2013 5.8.3 | Time-averaged against F at 1 kHz | conforms 0.01 dB inside and at the limit, not 0.01 dB past it | conforms inside, conforms at the limit, does not conform past it | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61672-3:2013 15.3 with IEC 61672-1:2013 5.14.2 | Long-term stability, class 1 | conforms 0.01 dB inside and at the limit, not 0.01 dB past it | conforms inside, conforms at the limit, does not conform past it | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61672-3:2013 15.3 with IEC 61672-1:2013 5.14.2 | Long-term stability, class 2 | conforms 0.01 dB inside and at the limit, not 0.01 dB past it | conforms inside, conforms at the limit, does not conform past it | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61672-3:2013 16.4 with IEC 61672-1:2013 5.6.5 | Level linearity on the reference level range, class 1 | conforms 0.01 dB inside and at the limit, not 0.01 dB past it | conforms inside, conforms at the limit, does not conform past it | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61672-3:2013 16.4 with IEC 61672-1:2013 5.6.5 | Level linearity on the reference level range, class 2 | conforms 0.01 dB inside and at the limit, not 0.01 dB past it | conforms inside, conforms at the limit, does not conform past it | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61672-3:2013 17.5 with IEC 61672-1:2013 5.6.5 | Level linearity including the range control, class 1 | conforms 0.01 dB inside and at the limit, not 0.01 dB past it | conforms inside, conforms at the limit, does not conform past it | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61672-3:2013 17.5 with IEC 61672-1:2013 5.6.5 | Level linearity including the range control, class 2 | conforms 0.01 dB inside and at the limit, not 0.01 dB past it | conforms inside, conforms at the limit, does not conform past it | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61672-3:2013 18.8 with IEC 61672-1:2013 Table 4 | Toneburst LAFmax - LA at 0.25 ms, class 1, lower limit | conforms 0.01 dB inside and at the limit, not 0.01 dB past it | conforms inside, conforms at the limit, does not conform past it | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61672-3:2013 18.8 with IEC 61672-1:2013 Table 4 | Toneburst LAFmax - LA at 0.25 ms, class 2, lower limit | conforms 0.01 dB inside and at the limit, not 0.01 dB past it | conforms inside, conforms at the limit, does not conform past it | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61672-3:2013 18.8 with IEC 61672-1:2013 Table 4 | Toneburst LAFmax - LA at 0.25 ms, class 2, upper limit | conforms 0.01 dB inside and at the limit, not 0.01 dB past it | conforms inside, conforms at the limit, does not conform past it | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61672-3:2013 18.8 with IEC 61672-1:2013 Table 4 | Toneburst LASmax - LA at 2 ms, class 1, lower limit | conforms 0.01 dB inside and at the limit, not 0.01 dB past it | conforms inside, conforms at the limit, does not conform past it | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61672-3:2013 18.8 with IEC 61672-1:2013 Table 4 | Toneburst LASmax - LA at 2 ms, class 2, lower limit | conforms 0.01 dB inside and at the limit, not 0.01 dB past it | conforms inside, conforms at the limit, does not conform past it | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61672-3:2013 19.6 with IEC 61672-1:2013 Table 5 | C-weighted peak, one cycle at 8 kHz, class 1, upper limit | conforms 0.01 dB inside and at the limit, not 0.01 dB past it | conforms inside, conforms at the limit, does not conform past it | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61672-3:2013 19.6 with IEC 61672-1:2013 Table 5 | C-weighted peak, one cycle at 8 kHz, class 2, upper limit | conforms 0.01 dB inside and at the limit, not 0.01 dB past it | conforms inside, conforms at the limit, does not conform past it | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61672-3:2013 19.6 with IEC 61672-1:2013 Table 5 | C-weighted peak, negative half cycle at 500 Hz, class 1, lower limit | conforms 0.01 dB inside and at the limit, not 0.01 dB past it | conforms inside, conforms at the limit, does not conform past it | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61672-3:2013 19.6 with IEC 61672-1:2013 Table 5 | C-weighted peak, negative half cycle at 500 Hz, class 2, lower limit | conforms 0.01 dB inside and at the limit, not 0.01 dB past it | conforms inside, conforms at the limit, does not conform past it | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61672-3:2013 20.4 with IEC 61672-1:2013 5.11.3 | Overload indication, positive less negative half cycle | conforms 0.01 dB inside and at the limit, not 0.01 dB past it | conforms inside, conforms at the limit, does not conform past it | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61672-3:2013 21.3 with IEC 61672-1:2013 5.15.2 | High-level stability, class 1 | conforms 0.01 dB inside and at the limit, not 0.01 dB past it | conforms inside, conforms at the limit, does not conform past it | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61672-3:2013 21.3 with IEC 61672-1:2013 5.15.2 | High-level stability, class 2 | conforms 0.01 dB inside and at the limit, not 0.01 dB past it | conforms inside, conforms at the limit, does not conform past it | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61672-3:2013 4.3 with IEC 61672-1:2013 Table B.1 | The maximum of every requirement: conforms at its value, unusable 0.01 dB above | 11/11 maxima | 11/11 maxima | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61672-3:2013 4.4 with IEC 61672-1:2013 Table B.1 | Over the maximum only by the correction data: did not conform, and unusable past it | 4.4 inside and at the maximum, unusable (4.3) past it | 4.4 just inside, 4.4 at the maximum, not 4.4 past it | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61672-3:2013 8.1 with IEC 61672-1:2013 5.1.10 | A class 2 meter with C-weighted peak owes C in 11.2, 13 and 14.2 | 4/4 completeness findings | 4/4 completeness findings | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61672-3:2013 8.1, 14.1 and 20.1 | S tonebursts and an overload test show the displays 14.3 compares with F | 4/4 completeness findings | 4/4 completeness findings | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61672-3:2013 16.3, 17.3 and 17.4 | Steps short of 16.3, or a level range left out of 17.4, the reference one included, leave the test open | 7/7 completeness findings | 7/7 completeness findings | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61672-3:2013 22 r) | Statement of a pass with public pattern approval, class 1 | 1/1 statement word for word | 1/1 statement word for word | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61672-3:2013 22 s) | Statement of a pass without public pattern approval, class 2 | 1/1 statement word for word | 1/1 statement word for word | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61672-3:2013 22 t) | Statement of a failure, class 1 | 1/1 statement word for word | 1/1 statement word for word | exact | 0 % | ![Pass][cv-pass] Pass |
 
 </details>
 

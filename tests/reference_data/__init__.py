@@ -1168,6 +1168,17 @@ from .solids import SOLID_TABLE_SIZES as SOLID_TABLE_SIZES
 from .solids import (
     STRUCTURAL_STEEL_YOUNGS_MODULUS_BAND_PA as STRUCTURAL_STEEL_YOUNGS_MODULUS_BAND_PA,
 )
+from .sound_level_meters import (
+    IEC61672_1_TABLE_3_TEST_LIMITS as IEC61672_1_TABLE_3_TEST_LIMITS,
+)
+from .sound_level_meters import IEC61672_1_TABLE_4_F_AND_E as IEC61672_1_TABLE_4_F_AND_E
+from .sound_level_meters import IEC61672_1_TABLE_4_S as IEC61672_1_TABLE_4_S
+from .sound_level_meters import IEC61672_1_TABLE_5 as IEC61672_1_TABLE_5
+from .sound_level_meters import IEC61672_1_TABLE_B1 as IEC61672_1_TABLE_B1
+from .sound_level_meters import IEC61672_1_TEXT_LIMITS as IEC61672_1_TEXT_LIMITS
+from .sound_level_meters import IEC61672_3_STATEMENT_R as IEC61672_3_STATEMENT_R
+from .sound_level_meters import IEC61672_3_STATEMENT_S as IEC61672_3_STATEMENT_S
+from .sound_level_meters import IEC61672_3_STATEMENT_T as IEC61672_3_STATEMENT_T
 from .soundscape import ISD_LOCATION_MEDIANS as ISD_LOCATION_MEDIANS
 from .soundscape import ISD_REGENTS_PARK_JAPAN_ANSWERS as ISD_REGENTS_PARK_JAPAN_ANSWERS
 from .soundscape import (

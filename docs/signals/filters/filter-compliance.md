@@ -511,6 +511,11 @@ indication of 11.5 and 11.8, and the observations of Clauses 4 and 6 to 8
 (preliminary inspection, environmental conditions, the manual) are not graded;
 record them beside the verdict.
 
+The equivalent regime for sound level *meters* (IEC 61672-3 periodic tests,
+and IEC 60942 for the calibrator) is in
+[Periodic tests of a sound level meter](../metrology/sound-level-meter-periodic-tests.md)
+and [Calibration and dBFS](../metrology/calibration.md).
+
 ## 4. The compliance fiche (`.report()`)
 
 `verify_filter_class(bank)` returns a result object that exposes `.plot()`

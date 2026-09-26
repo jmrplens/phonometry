@@ -123,6 +123,16 @@ _MAX_ROWS = 50_000
 #: How deep the containers of a document nest: the document, its rows, a
 #: row, a hedge, an entry, an interval inside a list of readings.
 _MAX_DEPTH = 6
+#: How deep the brackets of a text may nest for the text to be decoded at all,
+#: counted in the text before any decoder runs; past it the text is refused
+#: whole. More than ten times :data:`_MAX_DEPTH`, so that a document nested a
+#: few levels too deep, by hand or by a program's mistake, is still decoded
+#: and told where. And a small part of how deep a decoder follows before it
+#: gives out, which depends on the interpreter: some 500 levels for CPython's
+#: pure-Python scanner at the default recursion limit, 10 000 for the C
+#: scanner of CPython 3.13 on Linux, and from 3.14 as deep as the stack of the
+#: thread allows. Counting the brackets makes the refusal the same everywhere.
+_MAX_NESTING = 64
 #: The longest ``about`` or ``note``.
 _MAX_PROSE = 20_000
 #: The longest of every other text, a convention among them.
@@ -160,6 +170,14 @@ _JSON_NUMBER = re.compile(r"-?(0|[1-9][0-9]*)(\.[0-9]+)?([eE][+-]?[0-9]+)?")
 #: and the line feed, and the marks that reorder what a reader sees (a
 #: "Trojan source" text shows one thing and holds another).
 _UNSAFE = re.compile(r"[\x00-\x08\x0b-\x1f\u202a-\u202e\u2066-\u2069]")
+#: What the nesting of a JSON text is read from: a string, taken whole with its
+#: escapes and every bracket it quotes (one left open runs to the end of the
+#: text, as the decoder reads it), or a run of brackets that open, or of
+#: brackets that close. Every branch starts with its own character, so the
+#: scan passes over numbers, names and blanks without stopping.
+_NESTING = re.compile(
+    r'"[^"\\]*(?:\\.[^"\\]*)*"?|\[[\[{]*|\{[\[{]*|\][\]}]*|\}[\]}]*', re.DOTALL
+)
 
 _TOP_REQUIRED = (
     "schema",
@@ -1410,19 +1428,50 @@ def _refusal(label: str, location: str, message: str) -> CatalogueError:
     return CatalogueError(f"{head}: {message}", issues=(issue,))
 
 
+def _too_deep(label: str, location: str) -> CatalogueError:
+    message = (
+        "the text nests deeper than a reader follows, and a catalogue nests "
+        f"at most {_MAX_DEPTH} levels"
+    )
+    return _refusal(label, location, message)
+
+
+def _check_nesting(text: str, label: str) -> None:
+    """Refuse a text whose brackets nest past :data:`_MAX_NESTING`.
+
+    The brackets are counted outside the strings of the text, before it is
+    decoded, so the refusal never waits on the decoder running out of stack,
+    which from Python 3.14 depends on how large the stack of the thread is.
+    The count may fall below zero at a bracket that closes with nothing open,
+    and the decoder reads no further than that bracket.
+    """
+    depth = 0
+    for token in _NESTING.finditer(text):
+        start, end = token.span()
+        first = text[start]
+        if first in "[{":
+            if depth + end - start > _MAX_NESTING:
+                at = start + _MAX_NESTING - depth
+                line = text.count("\n", 0, at) + 1
+                column = at - text.rfind("\n", 0, at)
+                raise _too_deep(label, f"line {line}, column {column}")
+            depth += end - start
+        elif first != '"':
+            depth -= end - start
+
+
 def _decode(text: str, label: str) -> object:
     """The document a text holds, or a refusal of text that is not JSON."""
+    _check_nesting(text, label)
     try:
         document, _ = decode_marked(text, figures=True)
     except json.JSONDecodeError as error:
         location = f"line {error.lineno}, column {error.colno}"
         raise _refusal(label, location, f"this is not JSON: {error.msg}") from None
     except RecursionError:
-        message = (
-            "the text nests deeper than a reader follows, and a catalogue nests "
-            f"at most {_MAX_DEPTH} levels"
-        )
-        raise _refusal(label, "", message) from None
+        # The count above keeps every text within the decoder's reach, unless
+        # the caller is already deep in its own stack.
+        raise _too_deep(label, "") from None
     return document
 
 

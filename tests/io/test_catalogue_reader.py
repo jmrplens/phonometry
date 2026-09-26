@@ -856,10 +856,78 @@ def test_a_document_nested_past_six_levels_is_refused() -> None:
     assert any("nests at most 6" in issue.message for issue in issues)
 
 
+#: How deep the brackets of a text nest before the reader refuses it undecoded.
+_NESTING = 64
+#: The document, its rows, a row and the row's hedge, around a hedge's value.
+_AROUND_A_HEDGE = 4
+
+
+def _nested(levels: int) -> object:
+    """A number inside *levels* lists."""
+    value: object = 1.0
+    for _ in range(levels):
+        value = [value]
+    return value
+
+
 def test_a_document_nested_past_what_a_reader_follows_is_refused() -> None:
+    """Refused before it is decoded, whatever stack the interpreter runs on."""
     text = "[" * 100_000 + "]" * 100_000
     (issue,) = _issues(text)
     assert "nests deeper than a reader follows" in issue.message
+    assert issue.location == f"line 1, column {_NESTING + 1}"
+
+
+@pytest.mark.parametrize("depth", [7, _NESTING], ids=["one-too-many", "last-decoded"])
+def test_a_text_nested_to_the_last_level_decoded_is_told_where(depth: int) -> None:
+    levels = depth - _AROUND_A_HEDGE
+    document = _broken("/rows/1/reported", {"tortuosity": _nested(levels)})
+    issues = _issues(json.dumps(document))
+    deep = [issue for issue in issues if "levels" in issue.message]
+    assert [(issue.location, issue.message) for issue in deep] == [
+        (
+            "/rows/1/reported/tortuosity/0/0",
+            "is nested 7 levels deep, and a catalogue nests at most 6",
+        )
+    ]
+
+
+def test_a_text_nested_one_level_past_that_is_refused_at_the_bracket() -> None:
+    levels = _NESTING + 1 - _AROUND_A_HEDGE
+    document = _broken("/rows/1/reported", {"tortuosity": _nested(levels)})
+    lines = json.dumps(document, indent=2).splitlines()
+    first = next(n for n, line in enumerate(lines) if '"tortuosity": [' in line)
+    # One bracket to a line after the first, each indented two spaces a level.
+    culprit = lines[first + levels - 1]
+    assert culprit.strip() == "["
+    assert culprit.index("[") == 2 * _NESTING
+    (issue,) = _issues("\n".join(lines))
+    assert "nests deeper than a reader follows" in issue.message
+    assert issue.location == f"line {first + levels}, column {2 * _NESTING + 1}"
+
+
+@pytest.mark.parametrize(
+    ("variant", "note"),
+    [
+        ("40 mm specimen", "[" * 1000),
+        ("40 mm specimen", "{[" * 1000),
+        ("40 mm specimen", '"' + "[" * 1000),
+        ("40 mm specimen", '\\\\\\"' + "[" * 1000),
+        ("C:\\", "[" * 1000),
+    ],
+    ids=["brackets", "braces", "escaped-quote", "escapes-then-quote", "backslash-end"],
+)
+def test_brackets_a_text_quotes_do_not_nest(variant: str, note: str) -> None:
+    document = _broken("/rows/1/note", note)
+    document["rows"][1]["variant"] = variant
+    row = _read(json.dumps(document))["panel-40/core-lab"]
+    assert (row.variant, row.note) == (variant, note)
+
+
+def test_a_string_left_open_is_not_json_whatever_brackets_follow() -> None:
+    (issue,) = _issues('{"about": "' + "[" * 1000)
+    assert issue.location == "line 1, column 11"
+    assert issue.message.startswith("this is not JSON: Unterminated string")
 
 
 def test_a_file_past_sixteen_mebibytes_is_refused_before_it_is_read(

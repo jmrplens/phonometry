@@ -62,11 +62,12 @@ how many there are.
 
 The file never runs anything: only :mod:`json` reads it, the row class is the
 caller's argument and the class name the file writes is only compared with
-it. A file is at most 16 MiB and 50 000 rows, nested at most six levels,
-and its text holds no control character but the tab and the line feed and no
-mark that reorders what a reader sees. A figure written in another unit is
-converted when it runs to 640 characters at most and lies within 400 powers
-of ten of one, which every number a page prints does.
+it. A file is a regular file, never a pipe, a device, a socket or a
+directory, of at most 16 MiB and 50 000 rows, nested at most six levels, and
+its text holds no control character but the tab and the line feed, no lone
+surrogate and no mark that reorders what a reader sees. A figure written in
+another unit is converted when it runs to 640 characters at most and lies
+within 400 powers of ten of one, which every number a page prints does.
 """
 
 from __future__ import annotations
@@ -108,6 +109,8 @@ from .._internal.catalogue import (
     unit_stem,
 )
 from .._internal.json_input import (
+    LONE_SURROGATE,
+    NotRegularError,
     TooLargeError,
     nesting_past,
     read_at_most,
@@ -126,7 +129,7 @@ CATALOGUE_SCHEMA_VERSION = 1
 
 #: The largest file read, checked before more than the limit is read: a file
 #: whose size says it is larger is refused before a byte of it is read, and
-#: a pipe or a device, whose size says nothing, when one byte past it arrives.
+#: one that grows while it is read when one byte past it arrives.
 _MAX_BYTES = 16 * 1024 * 1024
 #: The most rows one document holds.
 _MAX_ROWS = 50_000
@@ -421,10 +424,26 @@ class Catalogue[R: CatalogueRow](Mapping[str, R]):
 # Reading: numbers and names
 # ---------------------------------------------------------------------------
 def _pointer(*parts: object) -> str:
-    """A JSON pointer (RFC 6901) to the member *parts* name."""
+    r"""A JSON pointer (RFC 6901) to the member *parts* name.
+
+    A character no text of a catalogue may hold is written in the pointer as
+    the escape Python writes for it (``\x1b``, ``\ud800``), so that the
+    refusal of a name that holds one can be printed and logged as it stands.
+    """
     return "".join(
-        "/" + str(part).replace("~", "~0").replace("/", "~1") for part in parts
+        "/" + _escaped(str(part).replace("~", "~0").replace("/", "~1"))
+        for part in parts
     )
+
+
+def _escaped(text: str) -> str:
+    """*text*, with each character no catalogue text may hold as its escape."""
+    if text.isprintable():
+        # Every character the two patterns find is one Python does not print.
+        return text
+    for unsafe in (_UNSAFE, LONE_SURROGATE):
+        text = unsafe.sub(lambda found: ascii(found.group())[1:-1], text)
+    return text
 
 
 def _is_number(value: object) -> bool:
@@ -771,6 +790,13 @@ class _Reader:
                 f"holds the character U+{ord(found.group()):04X} in "
                 f"{_quote(text)}; a catalogue's text holds no control character "
                 "but the tab and the line feed, and no mark that reorders it",
+            )
+        lone = LONE_SURROGATE.search(text)
+        if lone is not None:
+            self.error(
+                where,
+                f"holds a lone surrogate, U+{ord(lone.group()):04X}, in "
+                f"{_quote(text)}, which is not text UTF-8 can write",
             )
 
     def text(
@@ -1500,8 +1526,8 @@ def _decode(text: str, label: str) -> object:
 def _size_refusal(label: str, size: int | None) -> CatalogueError:
     """The refusal of a text past :data:`_MAX_BYTES`, of *size* bytes if known.
 
-    A pipe or a device says nothing true about its size, and is read one
-    byte past the limit before it is refused.
+    A regular file that grows while it is read says less than it holds, and
+    is read one byte past the limit before it is refused.
     """
     held = f"is {size} bytes" if size is not None else f"runs past {_MAX_BYTES} bytes"
     message = f"{held}, and a catalogue file is at most {_MAX_BYTES} bytes (16 MiB)"
@@ -1566,10 +1592,11 @@ def read_catalogue[R: CatalogueRow](
     :param row_type: The class of every row, a subclass of
         :class:`CatalogueRow` such as ``materials.PorousMaterial``.
     :return: The catalogue, keyed ``"<catalogue>/<key>"``.
-    :raises CatalogueError: for a file larger than 16 MiB, text that is not
-        UTF-8 or not JSON, and the problems the document holds, all at once:
-        every problem of form, and the first rule of the row contract each
-        row breaks.
+    :raises CatalogueError: for a name that holds anything but a regular
+        file (a pipe, a device, a socket or a directory, behind a link or
+        not), a file larger than 16 MiB, text that is not UTF-8 or not JSON,
+        and the problems the document holds, all at once: every problem of
+        form, and the first rule of the row contract each row breaks.
     :raises TypeError: for a *row_type* that is not a catalogue row class.
     :raises ValueError: for a name that does not end in ``.json``.
     :raises OSError: as the file system raises it, untouched.
@@ -1580,6 +1607,9 @@ def read_catalogue[R: CatalogueRow](
     label = target.name
     try:
         raw = read_at_most(target, _MAX_BYTES)
+    except NotRegularError as error:
+        message = f"is {error.kind}, and a catalogue is read only from a regular file"
+        raise _refusal(label, "", message) from None
     except TooLargeError as error:
         raise _size_refusal(label, error.size) from None
     try:

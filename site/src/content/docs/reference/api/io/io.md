@@ -546,8 +546,10 @@ The calibration record of one audio file (schema v1, module docstring).
 `calibration_factor` is the digital-to-pascal multiplier and the
 only mandatory field; the rest document how it was obtained
 (`reference_spl`, `calibrator_frequency`, `calibrator_model`)
-and what the channels are (`channel_labels`).
-`phonometry_version` records the writing library version.
+and what the channels are (`channel_labels`). Every number is finite,
+as JSON writes no other, and the model and every label are text UTF-8
+can write, so that the record read from one sidecar can be written to
+another. `phonometry_version` records the writing library version.
 
 ## Catalogue
 
@@ -1397,7 +1399,7 @@ the file names is ever imported.
 
 | Exception | When |
 | :--- | :--- |
-| CatalogueError | for a file larger than 16 MiB, text that is not UTF-8 or not JSON, and the problems the document holds, all at once: every problem of form, and the first rule of the row contract each row breaks. |
+| CatalogueError | for a name that holds anything but a regular file (a pipe, a device, a socket or a directory, behind a link or not), a file larger than 16 MiB, text that is not UTF-8 or not JSON, and the problems the document holds, all at once: every problem of form, and the first rule of the row contract each row breaks. |
 | TypeError | for a *row_type* that is not a catalogue row class. |
 | ValueError | for a name that does not end in `.json`. |
 | OSError | as the file system raises it, untouched. |
@@ -1435,7 +1437,7 @@ dropping it would silently drop the calibration).
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If the sidecar exists but is larger than 1 MiB, is not UTF-8 JSON, nests deeper than 64 levels, does not declare this schema, was written by a newer schema version, or carries malformed fields. |
+| ValueError | If the sidecar exists but is not a regular file (a pipe, a device, a socket or a directory, behind a link or not), is larger than 1 MiB, is not UTF-8 JSON, nests deeper than 64 levels, does not declare this schema, was written by a newer schema version, or carries malformed fields: a number that is not finite, or a text with a lone surrogate, among them. |
 
 ## sidecar_path
 
@@ -1792,3 +1794,9 @@ a recalibration wants. The audio file itself is never touched.
 | `channel_labels` | One label per channel of the audio file. |
 
 **Returns:** The path the sidecar was written to.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | for a factor that is not finite and positive, a reference SPL or a calibrator frequency that is not finite, or a model or a label that holds a lone surrogate, before the file at the sidecar's name is touched. |

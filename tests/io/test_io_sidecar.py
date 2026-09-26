@@ -4,13 +4,20 @@
 from __future__ import annotations
 
 import json
+import math
+import re
 import sys
-import time
 import types
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
 import pytest
+from special_files import (
+    SPECIAL_KINDS,
+    make_special,
+    raised_within,
+    size_says_nothing,
+)
 
 from phonometry.io import (
     CalibrationSidecar,
@@ -166,6 +173,15 @@ def _sidecar_text(audio: Path, text: str | bytes) -> None:
         target.write_text(text, encoding="utf-8")
 
 
+def _valid_with(written: str) -> str:
+    """The text of a valid sidecar, with the member *written* names as written."""
+    key = written.partition(":")[0]
+    held = f"{key}: {json.dumps(_valid()[json.loads(key)])}"
+    text = json.dumps(_valid())
+    assert held in text
+    return text.replace(held, written)
+
+
 def _valid() -> dict[str, Any]:
     return {
         "schema": SIDECAR_SCHEMA,
@@ -242,14 +258,175 @@ def test_a_sidecar_past_one_mebibyte_is_refused(tmp_path: Path) -> None:
         read_sidecar(audio)
 
 
-@pytest.mark.skipif(sys.platform == "win32", reason="a POSIX device")
-def test_a_sidecar_that_never_ends_is_refused(tmp_path: Path) -> None:
+def test_a_sidecar_that_holds_more_than_its_size_says_is_refused(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A file of /proc says it holds nothing, and a file may grow as it is read."""
     audio = tmp_path / "meas.wav"
-    sidecar_path(audio).symlink_to("/dev/zero")
-    start = time.perf_counter()
+    _sidecar_text(audio, " " * (1024 * 1024 + 1))
+    size_says_nothing(monkeypatch)
     with pytest.raises(ValueError, match="sidecar runs past 1048576 bytes"):
         read_sidecar(audio)
-    assert time.perf_counter() - start < 5.0
+
+
+@pytest.mark.parametrize("kind", SPECIAL_KINDS)
+def test_a_sidecar_that_is_no_regular_file_is_refused_without_waiting(
+    kind: str, tmp_path: Path
+) -> None:
+    """A pipe no one writes to would keep the open waiting, /dev/zero the read."""
+    audio = tmp_path / "meas.wav"
+    target = sidecar_path(audio)
+    what = make_special(kind, target)
+    error = raised_within(
+        lambda: read_sidecar(audio), pipe=target if kind == "pipe" else None
+    )
+    assert isinstance(error, ValueError)
+    assert str(error) == (
+        f"{target}: sidecar is {what}, and a calibration sidecar is read only "
+        "from a regular file"
+    )
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="POSIX pipes")
+def test_reading_audio_beside_a_pipe_at_the_sidecars_name_does_not_wait(
+    tmp_path: Path,
+) -> None:
+    """The caller names the audio, never the sidecar the reader looks for."""
+    audio = tmp_path / "meas.wav"
+    write(audio, np.zeros(8), FS)
+    target = sidecar_path(audio)
+    make_special("pipe", target)
+    error = raised_within(lambda: read(audio), pipe=target)
+    assert isinstance(error, ValueError)
+    assert "sidecar is a named pipe (FIFO)" in str(error)
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="symbolic links")
+def test_a_link_to_a_sidecar_is_read(tmp_path: Path) -> None:
+    kept = write_sidecar(tmp_path / "kept.wav", 2.5, reference_spl=94.0)
+    audio = tmp_path / "meas.wav"
+    sidecar_path(audio).symlink_to(kept)
+    got = read_sidecar(audio)
+    assert got is not None
+    assert (got.calibration_factor, got.reference_spl) == (2.5, 94.0)
+
+
+@pytest.mark.parametrize(
+    ("written", "message"),
+    [
+        (
+            '"reference_spl": NaN',
+            "reference_spl must be a finite number or null; got nan",
+        ),
+        (
+            '"reference_spl": Infinity',
+            "reference_spl must be a finite number or null; got inf",
+        ),
+        (
+            '"reference_spl": -Infinity',
+            "reference_spl must be a finite number or null; got -inf",
+        ),
+        (
+            '"calibrator": {"frequency": NaN, "model": null}',
+            "calibrator frequency must be a finite number or null; got nan",
+        ),
+        (
+            '"calibrator": {"frequency": Infinity, "model": null}',
+            "calibrator frequency must be a finite number or null; got inf",
+        ),
+        (
+            '"calibration_factor": NaN',
+            "calibration_factor must be finite and positive; got nan",
+        ),
+        (
+            '"calibration_factor": Infinity',
+            "calibration_factor must be finite and positive; got inf",
+        ),
+        ('"schema_version": NaN', "schema_version must be an integer"),
+    ],
+    ids=[
+        "spl-nan",
+        "spl-infinity",
+        "spl-minus-infinity",
+        "frequency-nan",
+        "frequency-infinity",
+        "factor-nan",
+        "factor-infinity",
+        "version-nan",
+    ],
+)
+def test_a_number_that_is_not_finite_is_refused_by_name(
+    tmp_path: Path, written: str, message: str
+) -> None:
+    """The decoder reads NaN and Infinity, which JSON does not have."""
+    audio = tmp_path / "meas.wav"
+    _sidecar_text(audio, _valid_with(written))
+    with pytest.raises(ValueError, match=re.escape(message)) as caught:
+        read_sidecar(audio)
+    assert str(caught.value) == f"{sidecar_path(audio)}: {message}"
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("reference_spl", math.nan),
+        ("reference_spl", math.inf),
+        ("calibrator_frequency", -math.inf),
+    ],
+)
+def test_a_number_that_is_not_finite_is_never_written(
+    tmp_path: Path, field: str, value: float
+) -> None:
+    """JSON has no such number, and the sidecar already there is kept."""
+    audio = tmp_path / "meas.wav"
+    kept = write_sidecar(audio, 2.5)
+    before = kept.read_bytes()
+    with pytest.raises(ValueError, match=f"{field} must be finite or None"):
+        write_sidecar(audio, 2.5, **{field: value})
+    assert kept.read_bytes() == before
+    with pytest.raises(ValueError, match=f"{field} must be finite or None"):
+        CalibrationSidecar(calibration_factor=1.0, **{field: value})
+
+
+@pytest.mark.parametrize(
+    ("written", "message"),
+    [
+        (
+            '"calibrator": {"frequency": null, "model": "B\\ud800K"}',
+            "calibrator_model holds a lone surrogate, U+D800, in 'B\\ud800K'",
+        ),
+        (
+            '"channel_labels": ["left", "right\\udfff"]',
+            "channel_labels holds a lone surrogate, U+DFFF, in 'right\\udfff'",
+        ),
+    ],
+    ids=["model", "label"],
+)
+def test_a_text_with_a_lone_surrogate_is_refused_by_name(
+    tmp_path: Path, written: str, message: str
+) -> None:
+    """A JSON escape spells half a UTF-16 pair, and no sidecar can write it back."""
+    audio = tmp_path / "meas.wav"
+    _sidecar_text(audio, _valid_with(written))
+    with pytest.raises(ValueError, match=re.escape(message)):
+        read_sidecar(audio)
+
+
+@pytest.mark.parametrize(
+    "fields",
+    [{"calibrator_model": "B\ud800K"}, {"channel_labels": ("left", "right\udfff")}],
+    ids=["model", "label"],
+)
+def test_a_text_with_a_lone_surrogate_is_never_written(
+    tmp_path: Path, fields: dict[str, Any]
+) -> None:
+    """Writing it would fail only after the sidecar already there was emptied."""
+    audio = tmp_path / "meas.wav"
+    kept = write_sidecar(audio, 2.5, channel_labels=("left", "right"))
+    before = kept.read_bytes()
+    with pytest.raises(ValueError, match="holds a lone surrogate"):
+        write_sidecar(audio, 2.5, **fields)
+    assert kept.read_bytes() == before
 
 
 def test_the_dataclass_itself_rejects_a_nonpositive_factor() -> None:

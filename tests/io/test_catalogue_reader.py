@@ -24,8 +24,8 @@ import math
 import os
 import pathlib
 import pkgutil
+import stat
 import sys
-import threading
 import time
 import warnings
 from collections.abc import Mapping
@@ -33,9 +33,16 @@ from typing import IO, Any
 
 import numpy as np
 import pytest
+from special_files import (
+    SPECIAL_KINDS,
+    make_special,
+    raised_within,
+    size_says_nothing,
+)
 
 import phonometry
 from phonometry import fluids, io, materials, solids
+from phonometry._internal import json_input
 from phonometry.building import ImpactInsulation
 from phonometry.io import _catalogue
 from phonometry.materials import AbsorptionAreaSpectrum, PorousMaterial
@@ -940,6 +947,41 @@ def test_a_lone_surrogate_in_the_text_is_refused() -> None:
     )
 
 
+@pytest.mark.parametrize("reader", ["file", "mapping"])
+def test_a_lone_surrogate_a_json_escape_spells_is_refused_at_its_cell(
+    reader: str, tmp_path: pathlib.Path
+) -> None:
+    """The escape is ASCII in the file; what it decodes to UTF-8 cannot write."""
+    document = _broken("/rows/1/note", "Panel \ud800 40")
+    text = json.dumps(document)
+    assert "\\ud800" in text
+    path = tmp_path / "panel-40.json"
+    path.write_text(text, encoding="ascii")
+    source: object = path if reader == "file" else document
+    with pytest.raises(io.CatalogueError, match="panel-40.json") as caught:
+        _read_from(source)
+    (issue,) = caught.value.issues
+    assert issue.location == "/rows/1/note"
+    assert issue.message == (
+        "holds a lone surrogate, U+D800, in 'Panel \\ud800 40', which is not "
+        "text UTF-8 can write"
+    )
+
+
+def test_a_name_that_holds_a_lone_surrogate_is_refused_in_text_that_prints() -> None:
+    """The pointer to the name writes the escape, so the refusal can be logged."""
+    document = _panel()
+    document["rows"][1]["x-code\udfff"] = "P40-C"
+    with pytest.raises(io.CatalogueError, match="panel-40.json") as caught:
+        _read(document)
+    issues = caught.value.issues
+    assert {issue.location for issue in issues} == {"/rows/1/x-code\\udfff"}
+    assert "U+DFFF" in issues[0].message
+    refusal = str(caught.value)
+    assert "x-code\\udfff" in refusal
+    refusal.encode("utf-8")
+
+
 @pytest.mark.parametrize("character", ["\x00", "\x1b", "\r", "\u202e", "\u2066"])
 def test_a_control_character_or_a_reordering_mark_is_refused(character: str) -> None:
     document = _broken("/rows/1/note", f"Panel{character}40")
@@ -1112,14 +1154,16 @@ def test_a_file_past_sixteen_mebibytes_is_refused_before_it_is_read(
     path = tmp_path / "huge.json"
     with path.open("wb") as handle:
         handle.truncate(_LIMIT + 1)
-    opened = pathlib.Path.open
+    opened: list[pathlib.Path] = []
 
-    def unread(self: pathlib.Path, *args: Any, **kwargs: Any) -> _Unread:
-        return _Unread(opened(self, *args, **kwargs))
+    def unread(file: pathlib.Path, mode: str, **_: object) -> _Unread:
+        opened.append(file)
+        return _Unread(file.open(mode))
 
-    monkeypatch.setattr(pathlib.Path, "open", unread)
+    monkeypatch.setattr(json_input, "open", unread, raising=False)
     with pytest.raises(io.CatalogueError, match="huge.json: is 16777217 bytes"):
         io.read_catalogue(path, row_type=PorousMaterial)
+    assert opened == [path]
 
 
 def test_a_file_of_sixteen_mebibytes_is_read(tmp_path: pathlib.Path) -> None:
@@ -1133,47 +1177,79 @@ def test_a_file_of_sixteen_mebibytes_is_read(tmp_path: pathlib.Path) -> None:
     assert set(mine) == {"panel-40/core-declared", "panel-40/core-lab"}
 
 
-def _endless_writer(path: pathlib.Path) -> threading.Thread:
-    """A thread that writes blanks into the pipe at *path* until it is closed."""
-
-    def write() -> None:
-        chunk = b" " * 65536
-        try:
-            with path.open("wb") as pipe:
-                for _ in range(4 * _LIMIT // len(chunk)):
-                    pipe.write(chunk)
-        except BrokenPipeError:
-            pass
-
-    thread = threading.Thread(target=write, daemon=True)
-    thread.start()
-    return thread
-
-
-@pytest.mark.skipif(sys.platform == "win32", reason="POSIX pipes and devices")
-@pytest.mark.parametrize("kind", ["pipe", "device"])
-def test_a_file_that_never_ends_is_refused_one_byte_past_the_limit(
-    kind: str, tmp_path: pathlib.Path
+def test_a_file_that_holds_more_than_its_size_says_is_refused_one_byte_past(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """Its size says nothing: a pipe or /dev/zero behind the name says zero."""
-    path = tmp_path / "endless.json"
-    writer = None
-    if kind == "pipe":
-        os.mkfifo(path)
-        writer = _endless_writer(path)
-    else:
-        path.symlink_to("/dev/zero")
-    start = time.perf_counter()
+    """A file of /proc says it holds nothing, and a file may grow as it is read."""
+    path = tmp_path / "grown.json"
+    with path.open("wb") as handle:
+        handle.truncate(_LIMIT + 1)
+    size_says_nothing(monkeypatch)
     with pytest.raises(io.CatalogueError) as caught:
         io.read_catalogue(path, row_type=PorousMaterial)
-    assert time.perf_counter() - start < 5.0
     assert str(caught.value) == (
-        "endless.json: runs past 16777216 bytes, and a catalogue file is at most "
+        "grown.json: runs past 16777216 bytes, and a catalogue file is at most "
         "16777216 bytes (16 MiB)"
     )
-    if writer is not None:
-        writer.join(timeout=10)
-        assert not writer.is_alive()
+
+
+@pytest.mark.parametrize("kind", SPECIAL_KINDS)
+def test_a_name_that_holds_no_regular_file_is_refused_without_waiting(
+    kind: str, tmp_path: pathlib.Path
+) -> None:
+    """A pipe no one writes to would keep the open waiting, /dev/zero the read."""
+    path = tmp_path / "special.json"
+    what = make_special(kind, path)
+    error = raised_within(
+        lambda: io.read_catalogue(path, row_type=PorousMaterial),
+        pipe=path if kind == "pipe" else None,
+    )
+    assert isinstance(error, io.CatalogueError)
+    assert str(error) == (
+        f"special.json: is {what}, and a catalogue is read only from a regular file"
+    )
+    (issue,) = error.issues
+    assert (issue.file, issue.location) == ("special.json", "")
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="POSIX pipes")
+def test_a_pipe_put_in_the_place_of_a_regular_file_is_refused_at_the_open(
+    tmp_path: pathlib.Path,
+) -> None:
+    """Between the look at the name and the open, a pipe may take its place."""
+    regular = tmp_path / "regular.json"
+    regular.write_text("{}", encoding="utf-8")
+    looked = regular.stat()
+
+    class Swapped(pathlib.Path):
+        """A name whose look before the open finds the regular file."""
+
+        def stat(self, *, follow_symlinks: bool = True) -> os.stat_result:
+            return looked
+
+    pipe = tmp_path / "swapped.json"
+    os.mkfifo(pipe)
+    error = raised_within(
+        lambda: json_input.read_at_most(Swapped(pipe), _LIMIT), pipe=pipe
+    )
+    assert isinstance(error, json_input.NotRegularError)
+    assert error.kind == "a named pipe (FIFO)"
+
+
+@pytest.mark.parametrize(
+    ("mode", "kind"),
+    [
+        (stat.S_IFSOCK, "a socket"),
+        (stat.S_IFBLK, "a block device"),
+        (stat.S_IFREG, None),
+        (0, "a special file"),
+    ],
+    ids=["socket", "block-device", "regular", "no-type"],
+)
+def test_every_file_but_a_regular_one_is_named_for_what_it_is(
+    mode: int, kind: str | None
+) -> None:
+    assert json_input._not_regular(mode) == kind
 
 
 def test_text_past_sixteen_mebibytes_is_refused_before_it_is_decoded() -> None:

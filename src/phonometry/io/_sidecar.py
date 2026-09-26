@@ -65,11 +65,14 @@ from __future__ import annotations
 
 import json
 import math
+import numbers
 from dataclasses import dataclass
 from pathlib import Path
 
 from .._internal.json_input import (
+    LONE_SURROGATE,
     MAX_NESTING,
+    NotRegularError,
     TooLargeError,
     nesting_past,
     read_at_most,
@@ -85,8 +88,8 @@ _SIDECAR_TAIL = ".phonometry.json"
 
 #: The largest sidecar read. One holds a few hundred bytes, and a label for
 #: each of a thousand channels keeps it under a hundred kibibytes; the bound
-#: keeps a file at the sidecar's name that never ends (a pipe, a device, a
-#: link to either) from being read without end on every read of the audio.
+#: keeps a file at the sidecar's name that grows while it is read from being
+#: read without end on every read of the audio.
 _MAX_BYTES = 1024 * 1024
 
 
@@ -97,8 +100,10 @@ class CalibrationSidecar:
     ``calibration_factor`` is the digital-to-pascal multiplier and the
     only mandatory field; the rest document how it was obtained
     (``reference_spl``, ``calibrator_frequency``, ``calibrator_model``)
-    and what the channels are (``channel_labels``).
-    ``phonometry_version`` records the writing library version.
+    and what the channels are (``channel_labels``). Every number is finite,
+    as JSON writes no other, and the model and every label are text UTF-8
+    can write, so that the record read from one sidecar can be written to
+    another. ``phonometry_version`` records the writing library version.
     """
 
     calibration_factor: float
@@ -116,6 +121,25 @@ class CalibrationSidecar:
                 f"{self.calibration_factor!r}"
             )
             raise ValueError(msg)
+        for name in ("reference_spl", "calibrator_frequency"):
+            value = getattr(self, name)
+            # JSON has no NaN and no infinity: a sidecar that wrote one would
+            # be read by no strict reader, this module's among them.
+            if isinstance(value, numbers.Real) and not math.isfinite(value):
+                msg = f"{name} must be finite or None; got {value!r}"
+                raise ValueError(msg)
+        texts = [("calibrator_model", self.calibrator_model)]
+        texts += [("channel_labels", label) for label in self.channel_labels or ()]
+        for name, text in texts:
+            # A JSON escape spells half a UTF-16 pair alone, and a text that
+            # holds it fails the write only once the old sidecar is emptied.
+            lone = LONE_SURROGATE.search(text) if isinstance(text, str) else None
+            if lone is not None:
+                msg = (
+                    f"{name} holds a lone surrogate, U+{ord(lone.group()):04X}, "
+                    f"in {text!r}, which is not text UTF-8 can write"
+                )
+                raise ValueError(msg)
 
 
 def sidecar_path(audio_path: str | Path) -> Path:
@@ -149,6 +173,10 @@ def write_sidecar(
     :param calibrator_model: Free-text calibrator identification.
     :param channel_labels: One label per channel of the audio file.
     :return: The path the sidecar was written to.
+    :raises ValueError: for a factor that is not finite and positive, a
+        reference SPL or a calibrator frequency that is not finite, or a
+        model or a label that holds a lone surrogate, before the file at the
+        sidecar's name is touched.
     """
     from .._version import __version__
 
@@ -176,7 +204,7 @@ def write_sidecar(
         ),
     }
     target.write_text(
-        json.dumps(payload, indent=2, ensure_ascii=False) + "\n",
+        json.dumps(payload, indent=2, ensure_ascii=False, allow_nan=False) + "\n",
         encoding="utf-8",
     )
     return target
@@ -191,21 +219,39 @@ def _as_float(value: float, key: str, path: Path) -> float:
         raise ValueError(msg) from None
 
 
-def _optional_number(payload: dict[str, object], key: str, path: Path) -> float | None:
+def _optional_number(
+    payload: dict[str, object], key: str, path: Path, *, name: str = ""
+) -> float | None:
+    """The number at *key*, or ``None`` for null; *name* says it in a message.
+
+    The decoder reads ``NaN``, ``Infinity`` and ``-Infinity``, which are not
+    JSON, and each is refused here as no number a calibration holds.
+    """
+    name = name or key
     value = payload.get(key)
     if value is None:
         return None
     if isinstance(value, bool) or not isinstance(value, int | float):
-        msg = f"{path}: {key} must be a number or null; got {value!r}"
+        msg = f"{path}: {name} must be a number or null; got {value!r}"
         # ValueError keeps the module validation errors uniform.
         raise ValueError(msg)  # noqa: TRY004
-    return _as_float(value, key, path)
+    number = _as_float(value, name, path)
+    if not math.isfinite(number):
+        msg = f"{path}: {name} must be a finite number or null; got {value!r}"
+        raise ValueError(msg)
+    return number
 
 
 def _sidecar_text(source: Path) -> str:
     """The sidecar's text, read to :data:`_MAX_BYTES` at most."""
     try:
         raw = read_at_most(source, _MAX_BYTES)
+    except NotRegularError as exc:
+        msg = (
+            f"{source}: sidecar is {exc.kind}, and a calibration sidecar is "
+            "read only from a regular file"
+        )
+        raise ValueError(msg) from None
     except TooLargeError as exc:
         held = (
             f"is {exc.size} bytes"
@@ -322,10 +368,12 @@ def read_sidecar(audio_path: str | Path) -> CalibrationSidecar | None:
 
     :param audio_path: The audio file whose sidecar to look for.
     :return: The parsed record, or ``None`` when no sidecar exists.
-    :raises ValueError: If the sidecar exists but is larger than 1 MiB, is
-        not UTF-8 JSON, nests deeper than 64 levels, does not declare this
-        schema, was written by a newer schema version, or carries malformed
-        fields.
+    :raises ValueError: If the sidecar exists but is not a regular file (a
+        pipe, a device, a socket or a directory, behind a link or not), is
+        larger than 1 MiB, is not UTF-8 JSON, nests deeper than 64 levels,
+        does not declare this schema, was written by a newer schema version,
+        or carries malformed fields: a number that is not finite, or a text
+        with a lone surrogate, among them.
     """
     source = sidecar_path(audio_path)
     if not source.exists():
@@ -335,7 +383,9 @@ def read_sidecar(audio_path: str | Path) -> CalibrationSidecar | None:
     calibrator, model = _calibrator_fields(payload, source)
     labels = _channel_labels(payload, source)
     reference_spl = _optional_number(payload, "reference_spl", source)
-    frequency = _optional_number(calibrator, "frequency", source)
+    frequency = _optional_number(
+        calibrator, "frequency", source, name="calibrator frequency"
+    )
     try:
         return CalibrationSidecar(
             calibration_factor=factor,

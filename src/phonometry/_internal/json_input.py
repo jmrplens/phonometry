@@ -2,16 +2,21 @@
 """JSON a caller hands in, held to what a reader can take before it is decoded.
 
 A file or a text a caller gives one of the library's readers (a catalogue
-file, a calibration sidecar) is held to two bounds no decoder gives: at most
-so many bytes, whatever the file system says the file holds, and brackets
-nested at most so deep, counted in the text before any decoder runs. Each
-reader turns what these find into its own error, with the place in the file.
+file, a calibration sidecar) is held to what no decoder checks: a file is a
+regular file, never a pipe, a device, a socket or a directory, which could
+keep the reader waiting at the open or reading without end; it holds at most
+so many bytes, whatever the file system says it holds; the brackets of its
+text nest at most so deep, counted before any decoder runs; and a text it
+decodes to holds no lone surrogate, which a JSON escape can spell and UTF-8
+cannot write. Each reader turns what these find into its own error, with the
+place in the file.
 """
 
 from __future__ import annotations
 
 import os
 import re
+import stat
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -37,6 +42,28 @@ _BRACKETS = re.compile(
     r'"[^"\\]*(?:\\.[^"\\]*)*"?|\[[\[{]*|\{[\[{]*|\][\]}]*|\}[\]}]*', re.DOTALL
 )
 
+#: Half of a pair of UTF-16 code units, alone. A JSON escape such as
+#: ``\ud800`` decodes to one, and a text that holds it has no UTF-8 bytes, so
+#: whatever keeps it can never be written out again.
+LONE_SURROGATE = re.compile(r"[\ud800-\udfff]")
+
+#: The flag that keeps an open from waiting: opening a pipe for reading waits
+#: until a writer comes, which may be never. Windows has no such flag.
+_NO_WAIT = getattr(os, "O_NONBLOCK", 0)
+#: What the open adds to the flags Python opens a file with: not to wait, and
+#: not to take a terminal for the reader's own. A regular file is read the same.
+_OPEN_FLAGS = _NO_WAIT | getattr(os, "O_NOCTTY", 0)
+
+
+class NotRegularError(Exception):
+    """A name that holds something other than a regular file, and what it is."""
+
+    def __init__(self, kind: str) -> None:
+        super().__init__(kind)
+        #: What the name holds, as a message says it: "a named pipe (FIFO)",
+        #: "a character device", "a directory".
+        self.kind = kind
+
 
 class TooLargeError(Exception):
     """A file past the bytes a reader takes, and its size when that is known."""
@@ -44,30 +71,66 @@ class TooLargeError(Exception):
     def __init__(self, size: int | None) -> None:
         super().__init__(size)
         #: The size the file system gives for the file, or ``None`` for a
-        #: file that gives none that is true (a pipe, a device, a link to
-        #: either), which was read one byte past the limit.
+        #: file that held more than its size said (one that grew while it
+        #: was read, or one of the files of ``/proc``, whose size is zero),
+        #: which was read one byte past the limit.
         self.size = size
 
 
-def read_at_most(path: Path, limit: int) -> bytes:
-    """The bytes of *path*, never reading more than one byte past *limit*.
+def _not_regular(mode: int) -> str | None:
+    """What a file of *mode* is when it is not a regular file, or ``None``."""
+    if stat.S_ISREG(mode):
+        return None
+    for test, kind in (
+        (stat.S_ISFIFO, "a named pipe (FIFO)"),
+        (stat.S_ISCHR, "a character device"),
+        (stat.S_ISBLK, "a block device"),
+        (stat.S_ISSOCK, "a socket"),
+        (stat.S_ISDIR, "a directory"),
+    ):
+        if test(mode):
+            return kind
+    return "a special file"
 
-    The file is opened once. A file whose size, read from the open file,
-    is past the limit is refused before a byte of it is read; any other is
-    read to one byte past the limit at most, so a file whose size says
-    nothing true about it, a pipe, a device or a link to either, is refused
-    as soon as that byte arrives rather than read without end.
+
+def _open_without_waiting(name: str, flags: int) -> int:
+    """Open *name* as :func:`open` asks, never waiting for a writer to come."""
+    return os.open(name, flags | _OPEN_FLAGS)
+
+
+def read_at_most(path: Path, limit: int) -> bytes:
+    """The bytes of the regular file *path*, never more than one past *limit*.
+
+    Anything else at the name, a pipe, a device, a socket or a directory
+    (behind a link or not), is refused before it is opened, since opening a
+    pipe waits for a writer and reading a device may never end. The file is
+    then opened without waiting and asked again what it is, so that a pipe
+    put in its place in between is refused, not waited on. A regular file
+    whose size, read from the open file, is past the limit is refused before
+    a byte of it is read; any other is read to one byte past the limit at
+    most, so one that grows while it is read, or whose size says nothing true
+    about it, is refused as soon as that byte arrives.
 
     :param path: The file.
     :param limit: The most bytes the reader takes.
     :return: Every byte of the file, at most *limit* of them.
+    :raises NotRegularError: for a name that holds anything but a regular file.
     :raises TooLargeError: for a file that holds more than *limit* bytes.
     :raises OSError: as the file system raises it, untouched.
     """
-    with path.open("rb") as handle:
-        size = os.fstat(handle.fileno()).st_size
-        if size > limit:
-            raise TooLargeError(size)
+    kind = _not_regular(path.stat().st_mode)
+    if kind is not None:
+        raise NotRegularError(kind)
+    with open(path, "rb", opener=_open_without_waiting) as handle:
+        status = os.fstat(handle.fileno())
+        kind = _not_regular(status.st_mode)
+        if kind is not None:
+            raise NotRegularError(kind)
+        if _NO_WAIT:
+            # A regular file, read as any other is read from here on.
+            os.set_blocking(handle.fileno(), True)
+        if status.st_size > limit:
+            raise TooLargeError(status.st_size)
         raw = handle.read(limit + 1)
     if len(raw) > limit:
         raise TooLargeError(None)

@@ -159,6 +159,56 @@ def _cnossos_road() -> ph.environment.RoadEmissionResult:
     )
 
 
+def _reflection_index() -> ph.environment.ReflectionIndexResult:
+    """EN 1793-5 Table B.1: twelve grid positions in front of a 4 m barrier."""
+    from reference_data import barrier_reflection as br
+
+    return ph.environment.reflection_index_from_positions(
+        np.asarray(br.TABLE_B1_POSITIONS).T
+    )
+
+
+def _reflection_records() -> tuple[np.ndarray, np.ndarray]:
+    """In-front and free-field records of microphone 5 before a half reflector."""
+    samples = 2048
+    t = np.arange(samples) / FS
+
+    def pulse(at_s: float, amplitude: float) -> np.ndarray:
+        dt = t - at_s
+        return (
+            amplitude
+            * np.exp(-0.5 * (dt / 0.05e-3) ** 2)
+            * np.cos(2 * np.pi * 3000.0 * dt)
+        )
+
+    direct, reflected = 1.25 / 343.0, 1.75 / 343.0
+    free = pulse(0.004 + direct, 0.8)
+    front = pulse(0.004 + direct, 0.8) + 0.5 * pulse(0.004 + reflected, 1.0 / 1.75)
+    return front, free
+
+
+def _direct_sound_subtraction() -> ph.environment.DirectSoundSubtraction:
+    """EN 1793-5 5.5.4 on microphone 5 in front of a half reflector."""
+    front, free = _reflection_records()
+    return ph.environment.subtract_direct_sound(front, free, FS)
+
+
+def _reflection_limit() -> ph.environment.ReflectionFrequencyLimit:
+    """EN 1793-5 5.5.7 for a 3,5 m barrier, the case of 5.8."""
+    return ph.environment.reflection_low_frequency_limit(3.5, speed_of_sound=343.0)
+
+
+def _reflection_grid_check() -> ph.environment.ReflectionGridCheck:
+    """EN 1793-5 5.6.2.6 with microphone 7 out by 30 mm."""
+    from reference_data import barrier_reflection as br
+
+    distances = np.array([dk for _, dk in br.TABLE_3])
+    distances[6] += 0.030
+    return ph.environment.check_reflection_grid_position(
+        distances / 343.0, speed_of_sound=343.0
+    )
+
+
 def _statistical_pass_by() -> ph.environment.StatisticalPassByResult:
     """The ISO 11819-1 method on the pass-bys whose lines Annex E prints."""
     from reference_data import statistical_pass_by as spb

@@ -21,6 +21,7 @@ from .common import (
     _band_axis,
     _field_cmap,
     _freq_axis,
+    _hatch_invalid,
     _import_pyplot,
     _new_axes,
     _plot_two_runs,
@@ -54,6 +55,12 @@ if TYPE_CHECKING:
     from ..environment.propagation.air_absorption import AtmosphericAttenuation
     from ..environment.propagation.barrier_in_situ import (
         MeasuredBarrierInsertionLoss,
+    )
+    from ..environment.propagation.barrier_reflection import (
+        DirectSoundSubtraction,
+        ReflectionFrequencyLimit,
+        ReflectionGridCheck,
+        ReflectionIndexResult,
     )
     from ..environment.propagation.ground_barriers import (
         BarrierInsertionLoss,
@@ -102,6 +109,14 @@ _SPB_CATEGORY_LABELS: dict[str, str] = {
     "2a": "Dual-axle heavy (2a)",
     "2b": "Multi-axle heavy (2b)",
 }
+
+#: Labels of the EN 1793-5 renderers, named once so the Spanish table and the
+#: axes cannot drift apart.
+_RI_LABEL = "Sound reflection index $RI$"
+_RI_BARS = "$RI$, sound reflection index"
+_BELOW_LOWEST_BAND = "Below the lowest reliable band"
+_RI_AVERAGE = "Average of all positions"
+_RI_POSITIONS = "Each grid position"
 
 _STRINGS: dict[str, str] = {
     "Narrowband spectrum": "Espectro de banda estrecha",
@@ -213,6 +228,43 @@ _STRINGS: dict[str, str] = {
         "ISO 13474: superación del nivel de exposición sonora"
     ),
     "long-term level": "nivel a largo plazo",
+    # EN 1793-1, -2 and -5: the single-number ratings of a road device.
+    "category": "categoría",
+    "Sound absorption coefficient": "Coeficiente de absorción acústica",
+    "Sound reduction index [dB]": "Índice de reducción acústica [dB]",
+    r"$\alpha_\mathrm{S}$, absorption coefficient": (
+        r"$\alpha_\mathrm{S}$, coeficiente de absorción"
+    ),
+    r"$R$, sound reduction index [dB]": r"$R$, índice de reducción acústica [dB]",
+    r"$L_i$, normalised traffic noise [dB]": r"$L_i$, ruido de tráfico normalizado [dB]",
+    _RI_LABEL: "Índice de reflexión acústica $RI$",
+    _RI_BARS: "$RI$, índice de reflexión acústica",
+    _BELOW_LOWEST_BAND: "Por debajo de la banda fiable más baja",
+    _RI_AVERAGE: "Media de todas las posiciones",
+    _RI_POSITIONS: "Cada posición de la rejilla",
+    "to 5 kHz": "a 5 kHz",
+    "Time after the direct sound [ms]": "Tiempo tras el sonido directo [ms]",
+    "Impulse response [a.u.]": "Respuesta al impulso [u. a.]",
+    "In front of the device": "Delante del dispositivo",
+    "Free field, aligned and scaled": "Campo libre, alineado y escalado",
+    "What is left: the reflection": "Lo que queda: la reflexión",
+    "Interval of $R_{sub}$": "Intervalo de $R_{sub}$",
+    "Signal subtraction": "Sustracción de la señal",
+    "Microphone": "Micrófono",
+    "Low frequency limit $f_{min}$ [Hz]": "Límite de baja frecuencia $f_{min}$ [Hz]",
+    "limited by the ground reflection": "limitado por la reflexión en el suelo",
+    "limited by the top edge": "limitado por el borde superior",
+    "limited by a side edge": "limitado por un borde lateral",
+    "Low frequency limit of a device $h_B$ = {height} m": (
+        "Límite de baja frecuencia de un dispositivo de $h_B$ = {height} m"
+    ),
+    "Measured minus nominal [mm]": "Medido menos nominal [mm]",
+    "Deviation from Table 3": "Desviación respecto a la tabla 3",
+    "Tolerance $\\pm\\varepsilon_k$": "Tolerancia $\\pm\\varepsilon_k$",
+    "Loudspeaker against grid (5.6.2.5)": "Altavoz frente a rejilla (5.6.2.5)",
+    "Grid against reference plane (5.6.2.6)": "Rejilla frente al plano de referencia (5.6.2.6)",
+    "position correct": "posición correcta",
+    "position to adjust": "posición que corregir",
 }
 
 
@@ -1097,7 +1149,8 @@ def plot_road_device_rating(
     once: what the device does in each of them, drawn as bars on the left
     axis, and how much each band counts, drawn as the normalised traffic
     noise spectrum on a right axis. The single number in the title is what
-    the two of them come to.
+    the two of them come to. A reflection rating sums from its lowest reliable
+    band, and the bands below it are hatched.
 
     :param result: A
         :class:`~phonometry.environment.propagation.noise_reducing_devices.RoadDeviceRating`.
@@ -1106,26 +1159,35 @@ def plot_road_device_rating(
     :param kwargs: Forwarded to the per-band ``bar`` call.
     :return: The axes.
     """
-    from .._i18n import localize_axes
+    from .._i18n import format_number, localize_axes
 
     ax = ax if ax is not None else _new_axes()
     freqs = np.asarray(result.bands_hz, dtype=np.float64)
     positions = _band_axis(ax, freqs, language=language)
-    absorbing = result.quantity == "absorption"
+    labels = {
+        "absorption": (
+            r"$\alpha_\mathrm{S}$, absorption coefficient",
+            "Sound absorption coefficient",
+            r"$DL_\alpha$",
+        ),
+        "insulation": (
+            r"$R$, sound reduction index [dB]",
+            "Sound reduction index [dB]",
+            r"$DL_R$",
+        ),
+        "reflection": (_RI_BARS, _RI_LABEL, r"$DL_{RI}$"),
+    }
+    legend_label, axis_label, symbol = labels[result.quantity]
 
     style_default(kwargs, "color", _C_PRIMARY)
-    kwargs.setdefault(
-        "label",
-        _t(r"$\alpha_\mathrm{S}$, absorption coefficient", language)
-        if absorbing
-        else _t(r"$R$, sound reduction index [dB]", language),
+    kwargs.setdefault("label", _t(legend_label, language))
+    bars = ax.bar(
+        positions, np.nan_to_num(np.asarray(result.values, dtype=np.float64)), **kwargs
     )
-    ax.bar(positions, np.asarray(result.values, dtype=np.float64), **kwargs)
-    ax.set_ylabel(
-        _t("Sound absorption coefficient", language)
-        if absorbing
-        else _t("Sound reduction index [dB]", language)
-    )
+    below = freqs < result.lowest_band_hz * _BAND_BELOW
+    if np.any(below):
+        _hatch_invalid(bars, below)
+    ax.set_ylabel(_t(axis_label, language))
 
     spectrum = ax.twinx()
     spectrum.plot(
@@ -1133,24 +1195,337 @@ def plot_road_device_rating(
         np.asarray(result.weights, dtype=np.float64),
         color=_C_SECONDARY,
         marker="o",
-        lw=1.6,
+        linewidth=1.6,
         label=_t(r"$L_i$, normalised traffic noise [dB]", language),
     )
     spectrum.set_ylabel(_t(r"$L_i$ [dB]", language), color=_C_SECONDARY)
     spectrum.tick_params(axis="y", labelcolor=_C_SECONDARY)
 
-    symbol = r"$DL_\alpha$" if absorbing else r"$DL_R$"
-    ax.set_title(
-        _t(f"{symbol} = {result.reported} dB, category {result.category}", language)
-    )
-    handles, labels = ax.get_legend_handles_labels()
+    title = f"{symbol} = {result.reported} dB"
+    if result.category is not None:
+        title += f", {_t('category', language)} {result.category}"
+    if np.any(below):
+        lowest = format_number(result.lowest_band_hz, language, decimals=0)
+        title += f" ({lowest} Hz {_t('to 5 kHz', language)})"
+    ax.set_title(title)
+    handles, names = ax.get_legend_handles_labels()
     extra = spectrum.get_legend_handles_labels()
-    legend = ax.legend(handles + extra[0], labels + extra[1], fontsize="small")
+    legend = ax.legend(handles + extra[0], names + extra[1], fontsize="small")
     place_legend_clear(legend, spectrum)
     ax.grid(visible=True, axis="y", alpha=0.3)
     localize_axes(ax, language)
     localize_axes(spectrum, language)
     return ax
+
+
+#: A band sits below the lowest reliable one when its centre is under it by
+#: more than this ratio allows (the centres are nominal, so not exactly equal).
+_BAND_BELOW = 0.99
+
+
+def plot_reflection_index(
+    result: ReflectionIndexResult,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """The sound reflection index of EN 1793-5, band by band.
+
+    Each grid position is a light point per band and their average is the
+    line; the bands below the lowest reliable one, which 5.5.7 keeps for
+    information only, sit on a hatched background, and the title carries
+    :math:`DL_{RI}` over the bands it sums.
+
+    :param result: A
+        :class:`~phonometry.environment.propagation.barrier_reflection.ReflectionIndexResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the average ``Axes.plot`` call.
+    :return: The axes.
+    """
+    from .._i18n import format_number, localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    freqs = np.asarray(result.bands_hz, dtype=np.float64)
+    positions = _band_axis(ax, freqs, language=language)
+    below = freqs < result.lowest_band_hz * _BAND_BELOW
+    if np.any(below):
+        edge = float(positions[np.flatnonzero(below)[-1]]) + 0.5
+        ax.axvspan(
+            -0.5,
+            edge,
+            facecolor="none",
+            edgecolor=theme_line(_C_MUTED, ax, quiet=0.35),
+            hatch="//",
+            linewidth=0.0,
+            zorder=0,
+            label=_t(_BELOW_LOWEST_BAND, language),
+        )
+    values = np.asarray(result.position_values, dtype=np.float64)
+    if values.shape[0] > 1:
+        spread = np.tile(positions, values.shape[0])
+        ax.plot(
+            spread,
+            values.ravel(),
+            linestyle="none",
+            marker="o",
+            markersize=3.5,
+            color=theme_line(_C_PRIMARY, ax, quiet=0.45),
+            label=_t(_RI_POSITIONS, language),
+            zorder=2,
+        )
+    style_default(kwargs, "color", _C_PRIMARY)
+    style_default(kwargs, "linewidth", 2.0)
+    style_default(kwargs, "marker", "o")
+    kwargs.setdefault("label", _t(_RI_AVERAGE, language))
+    ax.plot(
+        positions,
+        np.asarray(result.reflection_index, dtype=np.float64),
+        zorder=3,
+        **kwargs,
+    )
+    ax.set_xlim(-0.5, positions[-1] + 0.5)
+    ax.set_ylim(bottom=0.0)
+    ax.set_ylabel(_t(_RI_LABEL, language))
+    lowest = format_number(result.lowest_band_hz, language, decimals=0)
+    ax.set_title(
+        f"$DL_{{RI}}$ = {result.rating.reported} dB ({lowest} Hz "
+        f"{_t('to 5 kHz', language)})"
+    )
+    ax.grid(visible=True, axis="y", alpha=0.3)
+    legend = ax.legend(fontsize="small")
+    place_legend_clear(legend)
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_direct_sound_subtraction(
+    result: DirectSoundSubtraction,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """The signal subtraction of EN 1793-5, 5.5.4, around the direct sound.
+
+    The record in front of the device, the free-field record aligned onto it
+    and scaled to its peak, and what is left once one is taken from the other,
+    on a time axis that starts a millisecond before the direct sound. The
+    shaded interval is where Formula (6) measures what is left of the direct
+    sound.
+
+    :param result: A
+        :class:`~phonometry.environment.propagation.barrier_reflection.DirectSoundSubtraction`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the residual ``Axes.plot`` call.
+    :return: The axes.
+    """
+    from .._i18n import format_number, localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    fs = float(result.fs)
+    peak = int(result.peak_index)
+    in_front = np.asarray(result.in_front, dtype=np.float64).ravel()
+    aligned = np.asarray(result.aligned_free_field, dtype=np.float64).ravel()
+    residual = np.asarray(result.residual, dtype=np.float64).ravel()
+    start = max(peak - round(_SUBTRACTION_BEFORE_S * fs), 0)
+    stop = min(peak + round(_SUBTRACTION_AFTER_S * fs), in_front.size)
+    time_ms = (np.arange(start, stop) - peak) / fs * 1e3
+    half_ms = _SUBTRACTION_HALF_WIDTH_S * 1e3
+    ax.axvspan(
+        -half_ms,
+        half_ms,
+        facecolor=theme_fill(_C_TERTIARY, ax),
+        linewidth=0.0,
+        zorder=0,
+        label=_t("Interval of $R_{sub}$", language),
+    )
+    # Drawn wide and underneath: where the subtraction worked, the aligned
+    # free-field record lies on top of it and only its edges show.
+    ax.plot(
+        time_ms,
+        in_front[start:stop],
+        color=theme_line(_C_MUTED, ax, quiet=0.6),
+        linewidth=4.0,
+        label=_t("In front of the device", language),
+        zorder=1,
+    )
+    ax.plot(
+        time_ms,
+        aligned[start:stop],
+        color=_C_SECONDARY,
+        linewidth=1.0,
+        linestyle="--",
+        label=_t("Free field, aligned and scaled", language),
+        zorder=2,
+    )
+    style_default(kwargs, "color", _C_PRIMARY)
+    style_default(kwargs, "linewidth", 1.6)
+    kwargs.setdefault("label", _t("What is left: the reflection", language))
+    ax.plot(time_ms, residual[start:stop], zorder=3, **kwargs)
+    ax.set_xlim(time_ms[0], time_ms[-1])
+    ax.set_xlabel(_t("Time after the direct sound [ms]", language))
+    ax.set_ylabel(_t("Impulse response [a.u.]", language))
+    reduction = (
+        "∞"
+        if not math.isfinite(result.reduction_db)
+        else format_number(result.reduction_db, language, decimals=1)
+    )
+    ax.set_title(f"{_t('Signal subtraction', language)}: $R_{{sub}}$ = {reduction} dB")
+    ax.grid(visible=True, alpha=0.3)
+    legend = ax.legend(fontsize="small")
+    place_legend_clear(legend)
+    localize_axes(ax, language)
+    return ax
+
+
+#: How much of the record the subtraction plot shows around the direct peak.
+_SUBTRACTION_BEFORE_S = 1.0e-3
+_SUBTRACTION_AFTER_S = 3.0e-3
+#: Formula (6) integrates 0,5 ms either side of the peak.
+_SUBTRACTION_HALF_WIDTH_S = 0.5e-3
+
+#: Colour of each component that can limit the reflected window.
+_LIMIT_STYLE: dict[str, tuple[str, str]] = {
+    "ground": (_C_PRIMARY, "limited by the ground reflection"),
+    "top edge": (_C_SECONDARY, "limited by the top edge"),
+    "side edge": (_C_TERTIARY, "limited by a side edge"),
+}
+
+
+def plot_reflection_frequency_limit(
+    result: ReflectionFrequencyLimit,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """The low frequency limit at each microphone of the EN 1793-5 grid.
+
+    One bar per microphone, numbered as Figure 3.b, coloured by what ends
+    its window: the ground reflection or an edge of the device.
+
+    :param result: A
+        :class:`~phonometry.environment.propagation.barrier_reflection.ReflectionFrequencyLimit`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the ``Axes.bar`` call.
+    :return: The axes.
+    """
+    from .._i18n import format_number, localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    limits = np.asarray(result.low_frequency_limit_hz, dtype=np.float64)
+    positions = np.arange(limits.size, dtype=np.float64)
+    colours = [_LIMIT_STYLE[name][0] for name in result.limiting_component]
+    style_default(kwargs, "color", colours)
+    ax.set_axisbelow(True)
+    bars = ax.bar(positions, limits, **kwargs)
+    ax.bar_label(
+        bars,
+        labels=[format_number(value, language, decimals=0) for value in limits],
+        padding=2,
+        fontsize="small",
+    )
+    ax.set_xticks(positions)
+    ax.set_xticklabels([str(k + 1) for k in range(limits.size)])
+    ax.set_xlabel(_t("Microphone", language))
+    ax.set_ylabel(_t("Low frequency limit $f_{min}$ [Hz]", language))
+    ax.set_ylim(0.0, float(np.max(limits)) * 1.2)
+    from matplotlib.patches import Patch
+
+    shown = [name for name in _LIMIT_STYLE if name in result.limiting_component]
+    handles: list[Any] = [
+        Patch(
+            facecolor=_LIMIT_STYLE[name][0], label=_t(_LIMIT_STYLE[name][1], language)
+        )
+        for name in shown
+    ]
+    if "label" in kwargs:
+        handles.insert(0, bars)
+    legend = ax.legend(handles=handles, fontsize="small")
+    place_legend_clear(legend)
+    height = format_number(result.device_height_m, language, decimals=1, trim=True)
+    ax.set_title(
+        _t("Low frequency limit of a device $h_B$ = {height} m", language).format(
+            height=height
+        )
+    )
+    ax.grid(visible=True, axis="y", alpha=0.3)
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_reflection_grid_check(
+    result: ReflectionGridCheck,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """The position check of EN 1793-5 against the 25 mm tolerance of Table 3.
+
+    :param result: A
+        :class:`~phonometry.environment.propagation.barrier_reflection.ReflectionGridCheck`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the deviation ``Axes.plot`` call.
+    :return: The axes.
+    """
+    from .._i18n import localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    deviations_mm = np.asarray(result.deviations_m, dtype=np.float64) * 1e3
+    positions = np.arange(1, deviations_mm.size + 1, dtype=np.float64)
+    tolerance_mm = _GRID_TOLERANCE_MM
+    ax.axhspan(
+        -tolerance_mm,
+        tolerance_mm,
+        facecolor=theme_fill(_C_TERTIARY, ax),
+        linewidth=0.0,
+        zorder=0,
+        label=_t("Tolerance $\\pm\\varepsilon_k$", language),
+    )
+    ax.axhline(0.0, color=theme_line(_C_MUTED, ax, quiet=0.6), linewidth=0.8)
+    style_default(kwargs, "color", _C_PRIMARY)
+    style_default(kwargs, "marker", "o")
+    style_default(kwargs, "linewidth", 1.4)
+    kwargs.setdefault("label", _t("Deviation from Table 3", language))
+    ax.plot(positions, deviations_mm, zorder=3, **kwargs)
+    outside = ~np.asarray(result.within, dtype=bool)
+    if np.any(outside):
+        ax.plot(
+            positions[outside],
+            deviations_mm[outside],
+            linestyle="none",
+            marker="x",
+            markersize=9,
+            color=_C_REFERENCE,
+            zorder=4,
+        )
+    ax.set_xticks(positions)
+    ax.set_xlabel(_t("Microphone", language))
+    ax.set_ylabel(_t("Measured minus nominal [mm]", language))
+    reach = max(float(np.max(np.abs(deviations_mm))), tolerance_mm) * 1.3
+    ax.set_ylim(-reach, reach)
+    which = (
+        "Loudspeaker against grid (5.6.2.5)"
+        if result.check == "relative"
+        else "Grid against reference plane (5.6.2.6)"
+    )
+    verdict = "position correct" if result.passes else "position to adjust"
+    ax.set_title(f"{_t(which, language)}: {_t(verdict, language)}")
+    ax.grid(visible=True, alpha=0.3)
+    legend = ax.legend(fontsize="small")
+    place_legend_clear(legend)
+    localize_axes(ax, language)
+    return ax
+
+
+#: Table 3: the tolerance on every path difference, in millimetres.
+_GRID_TOLERANCE_MM = 25.0
 
 
 def plot_barrier_in_situ(

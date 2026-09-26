@@ -400,6 +400,7 @@ export const topics = [
           'environment/propagation/outdoor-propagation',
           'environment/propagation/ground-barriers',
           'environment/propagation/atmospheric-refraction',
+          'environment/propagation/barrier-reflection',
         ],
       },
       {

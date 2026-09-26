@@ -1,6 +1,6 @@
 ---
 title: "Guías"
-description: "Las 148 guías de phonometry, agrupadas en los trece temas que cubre la biblioteca: para qué sirve cada área, las normas que implementa y un resumen de una línea de cada guía que contiene."
+description: "Las 149 guías de phonometry, agrupadas en los trece temas que cubre la biblioteca: para qué sirve cada área, las normas que implementa y un resumen de una línea de cada guía que contiene."
 head:
   - tag: script
     attrs:
@@ -118,7 +118,7 @@ hay ninguna panorámica del campo: cada página es la documentación de trabajo 
 un módulo, escrita para que un resultado se pueda defender apartado por
 apartado en lugar de darlo por bueno.
 
-Esta página es el mapa. Ciento cuarenta y ocho guías repartidas en trece temas, y cada
+Esta página es el mapa. Ciento cuarenta y nueve guías repartidas en trece temas, y cada
 área tiene su propio índice con el relato largo de cómo encajan sus piezas. Si
 llegas sin una pregunta concreta, lee primero la
 [introducción](/phonometry/es/start/getting-started/): recorre una señal por toda la
@@ -686,7 +686,8 @@ lo de aquí trata de sonido que tiene que recorrer una distancia larga antes de
 valorarse, así que la atmósfera, el suelo y el propio movimiento de la fuente
 entran en la respuesta. Implementa ISO 9613-1/-2, ISO 1996-1/-2,
 ISO/PAS 1996-3, NT ACOU 112, ISO 13474, ISO/TS 12913-2/-3, CNOSSOS-EU
-(Directiva 2002/49/CE, anexo II), ISO 11819-1 e IEC 61400-11.
+(Directiva 2002/49/CE, anexo II), EN 1793-1/-2/-3/-5, EN 16272-3-1,
+ISO 11819-1 e IEC 61400-11.
 
 Hay un límite de alcance que vale la pena decir aquí y no a un clic de
 distancia. De CNOSSOS-EU, lo implementado es el lado de la **fuente** del anexo
@@ -709,6 +710,10 @@ para la cartografía reglamentaria.
 - [Refracción atmosférica: rayos y GFPE](/phonometry/es/environment/propagation/atmospheric-refraction/):
   los perfiles de velocidad efectiva del sonido, los rayos curvos con distancia
   de zona de sombra en forma cerrada y el campo de nivel relativo por GFPE.
+- [Reflexión acústica de una pantalla in situ](/phonometry/es/environment/propagation/barrier-reflection/):
+  el índice de reflexión acústica de la EN 1793-5 a partir de las respuestas al
+  impulso de la rejilla de nueve micrófonos, su índice global DL_RI y el límite
+  de baja frecuencia que fija el tamaño de la muestra.
 
 **[Fuentes](/phonometry/es/environment/sources/)**
 

@@ -19,7 +19,7 @@
 
 ## Numerical conformance report
 
-**1497/1497 conformance checks pass** across 98 domains and 487 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+**1510/1510 conformance checks pass** across 98 domains and 488 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub><b>&#916;</b> is the difference between the computed value and the one the standard publishes. <b>Used</b> is how much of that clause's published tolerance the difference consumes: 100 % means it sits exactly on the limit, 5 % means it uses a twentieth of the allowance, and a dash means the clause states no two-sided tolerance for the quantity, so there is no budget to spend. It is reported and never used to decide a verdict, which is settled at full precision before any rounding.</sub>
 
@@ -1849,7 +1849,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary><b>Road traffic noise reducing devices (EN 1793)</b>: 100% (7/7)</summary>
+<summary><b>Road traffic noise reducing devices (EN 1793)</b>: 100% (20/20)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
 |:---|:---|:---|:---|:---|:---:|:---:|
@@ -1860,6 +1860,19 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | EN 1793-2:2012 Clause 5.2 (DLR, constant sound reduction index) | a wall with R = 32 dB in every band rates 32 dB | 32 dB (+/-0 dB) | 32 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 | EN 1793-2:2012 Clause 5.2 (DLR, spectrum weighting) | one 10 dB band costs more at the 1 kHz peak than at the 100 Hz end | DLR(weak at 1 kHz) < DLR(weak at 100 Hz) | 18.14 dB < 29.73 dB | -11.60 dB | - | ![Pass][cv-pass] Pass |
 | EN 1793-2:2012 Table A.1 (categories of airborne sound insulation) | the three boundaries B2/B3/B4 read off the reported integer | 15 dB -> B2, 25 dB -> B3, 35 dB -> B4 | 15 dB -> B2, 25 dB -> B3, 35 dB -> B4 | 0 | - | ![Pass][cv-pass] Pass |
+| EN 1793-5:2016 Table 2 (paths and Cgeo,k of the nine microphones) | dS = 1,50 m, dM = 0,25 m and s = 0,40 m give the printed two decimals | 27/27 printed cells | 27/27 printed cells | exact | 0 % | ![Pass][cv-pass] Pass |
+| EN 1793-5:2016 Table 3 (nominal path differences of the position checks) | the direct-to-microphone-5 and direct-to-reflected differences, to the millimetre | 18/18 printed cells | 18/18 printed cells | exact | 0 % | ![Pass][cv-pass] Pass |
+| EN 1793-5:2016 5.6.1 NOTE 1 (maximum sampled area, Formula (8)) | a 4 m by 4 m sample, the 7,9 ms window and 340 m/s give 1,96 m | 1.96 m (+/-0.005 m) | 1.9555 m | -0.0045 m | 90 % | ![Pass][cv-pass] Pass |
+| EN 1793-5:2016 5.5.5 and 5.5.1 (the three Adrienne windows) | leading edge, flat part and trailing edge of the 7,9 ms, 6,0 ms and 1,3 ms windows | 7.9 ms lead = 0.5 ms; 7.9 ms flat = 5.18 ms; 7.9 ms trail = 2.22 ms; 6.0 ms lead = 0.5 ms; 6.0 ms flat = 3.85 ms; 6.0 ms trail = 1.65 ms; 1.3 ms lead = 0.5 ms; 1.3 ms flat = 0.56 ms; 1.3 ms trail = 0.24 ms | 7.9 ms lead = 0.5 ms; 7.9 ms flat = 5.18 ms; 7.9 ms trail = 2.22 ms; 6.0 ms lead = 0.5 ms; 6.0 ms flat = 3.85 ms; 6.0 ms trail = 1.65 ms; 1.3 ms lead = 0.5 ms; 1.3 ms flat = 0.56 ms; 1.3 ms trail = 0.24 ms | exact | 0 % | ![Pass][cv-pass] Pass |
+| EN 1793-5:2016 Formula (1) (a perfect flat reflector) | RI = 1 in all eighteen bands once Cgeo,k restores the longer path | max \|RI - 1\| = 0 | 0 | 0 | 32 % | ![Pass][cv-pass] Pass |
+| EN 1793-5:2016 Formulas (1) and (4) (a gain change between configurations) | a reflection of amplitude 0,5 rates RI = 0,25 whatever the gain did | max \|RI - 0,25\| = 0 | 0 | 0 | 1 % | ![Pass][cv-pass] Pass |
+| EN 1793-5:2016 Formula (1) (the one-third octave bands of a comb) | two impulses 0,5 ms apart: 0,25 (2 + 2 cos 2 pi f tau) averaged over each band's base-ten edges | max \|RI - comb\| = 0 | 0 | 0 | 31 % | ![Pass][cv-pass] Pass |
+| EN 1793-5:2016 5.5.5 (which window serves which bands) | an impulse 6 ms after the reflection moves 100 Hz to 160 Hz and no band from 200 Hz | max \|RI - 0,25\| from 200 Hz = 0 | 0 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| EN 1793-5:2016 5.5.4 (subtraction to a fiftieth of a sample) | a free-field record 0,36 samples late is found 0,36 samples late | -0.36 (+/-0) | -0.36 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| EN 1793-5:2016 Table B.1 (average of twelve grid positions) | the printed average of every band, two of them exact ties at the half | 18/18 printed averages | 18/18 printed averages | exact | 0 % | ![Pass][cv-pass] Pass |
+| EN 1793-5:2016 Table B.2 (DLRI before rounding) and Table B.1 (DLRI = 8 dB) | Formula (12) on the printed averages from the 200 Hz band | 7.68 dB (+/-0.005 dB) | 7.6797 dB | -0.0003 dB | 6 % | ![Pass][cv-pass] Pass |
+| EN 1793-5:2016 Table B.2 (expanded uncertainty of DLRI) | 1,96 times the high reproducibility of Table A.1, 0,81 dB | 1.59 dB (+/-0.005 dB) | 1.5876 dB | -0.0024 dB | 48 % | ![Pass][cv-pass] Pass |
+| EN 1793-5:2016 Table B.2 (expanded uncertainty per band) | the eleven cells 1,96 times the printed sR gives; the other seven are a hundredth lower, as unrounded sR would give | 11/11 printed cells | 11/11 printed cells | exact | 0 % | ![Pass][cv-pass] Pass |
 
 </details>
 

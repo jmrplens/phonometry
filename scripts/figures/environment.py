@@ -3164,3 +3164,107 @@ def generate_road_device_ratings(output_dir: str) -> None:
     plt.tight_layout()
     save_figure(output_dir, "road_device_ratings.png")
     plt.close()
+
+
+# --------------------------------------------------------------------------- #
+# EN 1793-5: the sound reflection of a barrier measured where it stands
+# --------------------------------------------------------------------------- #
+#: EN 1793-5:2016 Table B.1, printed folio 53: the index of twelve grid
+#: positions in front of a 4 m absorptive barrier, one row per band from
+#: 100 Hz to 5 kHz. The guide types the same table in.
+_EN1793_5_TABLE_B1: tuple[tuple[float, ...], ...] = (
+    (0.59, 0.62, 0.57, 0.55, 0.58, 0.59, 0.57, 0.57, 0.51, 0.61, 0.61, 0.62),
+    (0.60, 0.62, 0.58, 0.54, 0.57, 0.58, 0.58, 0.58, 0.51, 0.60, 0.59, 0.61),
+    (0.63, 0.65, 0.60, 0.55, 0.57, 0.59, 0.60, 0.60, 0.53, 0.60, 0.57, 0.60),
+    (0.38, 0.42, 0.31, 0.37, 0.37, 0.35, 0.37, 0.39, 0.31, 0.36, 0.31, 0.32),
+    (0.43, 0.47, 0.35, 0.39, 0.39, 0.36, 0.42, 0.43, 0.35, 0.38, 0.34, 0.36),
+    (0.43, 0.45, 0.34, 0.37, 0.37, 0.34, 0.37, 0.37, 0.33, 0.33, 0.33, 0.33),
+    (0.34, 0.33, 0.26, 0.28, 0.30, 0.27, 0.22, 0.24, 0.22, 0.21, 0.25, 0.23),
+    (0.15, 0.15, 0.12, 0.13, 0.15, 0.15, 0.07, 0.08, 0.08, 0.11, 0.12, 0.12),
+    (0.05, 0.04, 0.04, 0.07, 0.05, 0.06, 0.06, 0.04, 0.04, 0.09, 0.05, 0.06),
+    (0.07, 0.07, 0.06, 0.13, 0.08, 0.07, 0.17, 0.11, 0.09, 0.11, 0.09, 0.07),
+    (0.11, 0.10, 0.09, 0.13, 0.11, 0.08, 0.17, 0.16, 0.10, 0.08, 0.07, 0.04),
+    (0.11, 0.13, 0.10, 0.07, 0.11, 0.08, 0.10, 0.13, 0.09, 0.10, 0.09, 0.07),
+    (0.39, 0.53, 0.16, 0.37, 0.28, 0.21, 0.30, 0.23, 0.18, 0.30, 0.35, 0.29),
+    (0.19, 0.28, 0.10, 0.20, 0.15, 0.12, 0.16, 0.15, 0.08, 0.13, 0.17, 0.22),
+    (0.15, 0.23, 0.21, 0.14, 0.13, 0.17, 0.15, 0.15, 0.16, 0.12, 0.15, 0.10),
+    (0.31, 0.33, 0.27, 0.26, 0.23, 0.19, 0.18, 0.25, 0.18, 0.16, 0.23, 0.21),
+    (0.39, 0.27, 0.22, 0.23, 0.26, 0.21, 0.28, 0.22, 0.18, 0.28, 0.21, 0.24),
+    (0.55, 0.43, 0.25, 0.52, 0.53, 0.53, 0.40, 0.43, 0.23, 0.46, 0.36, 0.45),
+)
+
+#: Speed of sound of the guide's synthetic measurement, at 20 degC.
+_BARRIER_SPEED_M_S = 343.2
+
+
+def _barrier_reflection_records() -> tuple[NDArray[np.float64], NDArray[np.float64]]:
+    """The guide's nine in-front and free-field records, 48 kHz, 100 ms.
+
+    A loudspeaker pulse at 2,5 kHz; a reflection of 0,35 of the incident
+    amplitude with its top end smoothed; the free-field records taken with
+    the grid 3 microseconds further away, which the subtraction undoes.
+    """
+    from phonometry import environment
+
+    fs = 48000.0
+    t = np.arange(4800) / fs
+
+    def pulse(delay_s: float) -> NDArray[np.float64]:
+        tau = t - delay_s
+        return np.exp(-0.5 * (tau / 60e-6) ** 2) * np.cos(2 * np.pi * 2500.0 * tau)
+
+    smooth = np.hanning(9) / np.hanning(9).sum()
+    free = np.empty((9, t.size))
+    front = np.empty((9, t.size))
+    c = _BARRIER_SPEED_M_S
+    for k, (direct_m, reflected_m) in enumerate(environment.reflection_grid_paths_m()):
+        free[k] = pulse(0.01 + direct_m / c + 3e-6) / direct_m
+        reflection = np.convolve(pulse(0.01 + reflected_m / c), smooth, mode="same")
+        front[k] = (
+            pulse(0.01 + direct_m / c) / direct_m + 0.35 * reflection / reflected_m
+        )
+    return front, free
+
+
+def generate_barrier_reflection_index(output_dir: str) -> None:
+    """EN 1793-5 Annex B: twelve grid positions, their average and DL_RI."""
+    print("Generating barrier_reflection_index...")
+    from phonometry import environment
+
+    result = environment.reflection_index_from_positions(
+        np.asarray(_EN1793_5_TABLE_B1).T
+    )
+    _fig, ax = plt.subplots(figsize=(10, 6.2))
+    result.plot(ax=ax, language=_LANG)
+    plt.tight_layout()
+    save_figure(output_dir, "barrier_reflection_index.svg")
+    plt.close()
+
+
+def generate_barrier_direct_sound_subtraction(output_dir: str) -> None:
+    """EN 1793-5 5.5.4: the direct sound taken out of microphone 5's record."""
+    print("Generating barrier_direct_sound_subtraction...")
+    from phonometry import environment
+
+    front, free = _barrier_reflection_records()
+    result = environment.subtract_direct_sound(front[4], free[4], 48000.0)
+    _fig, ax = plt.subplots(figsize=(10, 6.2))
+    result.plot(ax=ax, language=_LANG)
+    plt.tight_layout()
+    save_figure(output_dir, "barrier_direct_sound_subtraction.svg")
+    plt.close()
+
+
+def generate_barrier_reflection_limit(output_dir: str) -> None:
+    """EN 1793-5 5.5.7: how far down each microphone reaches on a 3,5 m barrier."""
+    print("Generating barrier_reflection_limit...")
+    from phonometry import environment
+
+    result = environment.reflection_low_frequency_limit(
+        3.5, speed_of_sound=_BARRIER_SPEED_M_S
+    )
+    _fig, ax = plt.subplots(figsize=(10, 6.2))
+    result.plot(ax=ax, language=_LANG)
+    plt.tight_layout()
+    save_figure(output_dir, "barrier_reflection_limit.svg")
+    plt.close()

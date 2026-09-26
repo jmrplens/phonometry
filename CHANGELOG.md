@@ -259,6 +259,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   The slope method behind `aircraft.tone_correction` is checked against the
   smoothed background and the excess $F$ that ISO 3891:1978 Annex C prints in
   each of its 22 bands, not only against the final correction of 2 dB.
+- **What a road noise barrier reflects, measured where it stands
+  (EN 1793-5:2016).** The new `environment.propagation.barrier_reflection`
+  module takes the impulse responses of the nine-microphone grid in front of a
+  barrier, and the free-field ones of the same microphones, to the sound
+  reflection index per one-third octave band. `subtract_direct_sound` removes
+  the direct sound by aligning the free-field record to a fiftieth of a sample
+  and reports the reduction factor $R_{sub}$ of Formula (6);
+  `adrienne_reflection_window` is the window of 5.5.5 sampled from Formula (7);
+  `reflection_index` places the windows as 5.5.6 says, applies the divergence,
+  directivity and gain corrections of Formulas (2) to (4), averages
+  microphones 1 to 6 below 200 Hz and all nine above, and averages every
+  microphone of every grid position. It takes the records as nine-channel
+  Signals, one per grid position, whose rate and calibration come with them,
+  or as arrays with `fs`, and the speed of sound has no default, because 5.5.6
+  and 5.7.3 ask for its value at the temperature of the test. The gain factor
+  divides, because Formula (4) defines it as the gain change itself and a
+  multiplier, as Formula (1) prints, would square it; the errata registry
+  records that and five other defects of the standard. `environment.sound_reflection_rating` is
+  $DL_{RI}$ with the EN 1793-3 spectrum from the lowest reliable band, 200 Hz by
+  default, and `RoadDeviceRating` gains `lowest_band_hz` and hatches the bands
+  it leaves out. `source_directivity_corrections` is Formula (3),
+  `check_reflection_grid_position` the two position checks against Table 3,
+  `reflection_sampled_area_radius_m` Formula (8), and
+  `reflection_low_frequency_limit` the limit each microphone reaches for a
+  device of a given size, by the construction of Garai and Guidorzi, since
+  Figure 14 prints no formula. Every result has `.plot()`, and a new guide in
+  both languages walks through a measurement and the example of Annex B. Of
+  that example the library reproduces the twelve-position average of sixteen
+  bands to the hundredth (the other two fall on an exact half that the printed
+  values cannot decide), $DL_{RI}$ of 8 dB (7,68 dB before rounding on the
+  printed averages), its expanded uncertainty of 1,59 dB and interval
+  [6,09; 9,27] dB, and eleven of the eighteen band uncertainties of Table B.2;
+  the other seven are printed a hundredth lower, which the errata registry
+  records.
 - **Sound power in the 16 kHz octave band (ISO 9295).** The general sound
   power methods stop at the 10 kHz one-third-octave band, and a printer's
   paper noise or a power supply's whine sits above it. The new
@@ -1009,6 +1043,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   cut off mid-parenthesis. A full stop now ends the sentence only outside
   brackets and before a word that is not lower case or a number, and six
   summaries read whole again.
+- **The laboratory ratings of a road or railway device plot in Spanish, and a
+  railway rating's title stops at its number.** `.plot(language="es")` on the
+  $DL_\alpha$ and $DL_R$ ratings of EN 1793-1, EN 1793-2 and EN 16272 kept the
+  axis label and the legend entry of the device in English, and a railway
+  rating, which has no category ladder, was titled "category None". Both now
+  read in the language asked for, and the title of a rating without a category
+  gives the single number alone.
+
 - **A derived value names the cells it rests on in words.** When the cells a
   catalogue value is worked out from have mixed bases, `derived` says the basis
   of each, and it named them by their field names: "it rests on poisson_ratio

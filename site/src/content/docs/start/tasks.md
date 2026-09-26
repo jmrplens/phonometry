@@ -51,6 +51,7 @@ it.
 | $L_\mathrm{den}$, $L_\mathrm{night}$ or a rating level from an environmental survey | [Environmental noise levels](/phonometry/environment/assessment/environmental-levels/): ISO 1996-1/-2, the indicators and the adjustments that go on top of them |
 | Source power for a road or railway noise map | [CNOSSOS-EU road traffic source emission](/phonometry/environment/sources/cnossos-road-emission/) and [railway source emission](/phonometry/environment/sources/cnossos-rail-emission/): Annex II of 2002/49/EC, the source side of it |
 | How much a distance, a barrier or the weather takes off | [Outdoor propagation](/phonometry/environment/propagation/outdoor-propagation/) (ISO 9613-2), [Ground effect and barriers](/phonometry/environment/propagation/ground-barriers/), [Atmospheric refraction](/phonometry/environment/propagation/atmospheric-refraction/) |
+| How much sound a road barrier sends back, measured where it stands | [Sound reflection of a noise barrier in situ](/phonometry/environment/propagation/barrier-reflection/): EN 1793-5, the sound reflection index and $DL_{RI}$ |
 | Whether a wind farm is compliant | [Wind turbine noise](/phonometry/environment/sources/wind-turbine-noise/): IEC 61400-11 and the tonal audibility assessment |
 | The certification level of an aircraft flyover | [Aircraft noise: EPNL](/phonometry/aircraft/aircraft-noise/): ICAO Annex 16, and [Airport noise contours](/phonometry/aircraft/airport-noise/) for the map around the airport |
 

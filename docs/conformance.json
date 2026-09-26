@@ -3,13 +3,13 @@
   "library": "4.0.0rc1",
   "generator": "scripts/conformance_report.py",
   "counts": {
-    "checks": 1497,
-    "passing": 1497,
+    "checks": 1510,
+    "passing": 1510,
     "failing": 0,
     "domains": 98,
-    "standards": 487,
-    "citations": 1016,
-    "designations": 198,
+    "standards": 488,
+    "citations": 1029,
+    "designations": 199,
     "sources": 114
   },
   "units": [
@@ -567,8 +567,8 @@
     {
       "id": "road-traffic-noise-reducing-devices-en-1793",
       "title": "Road traffic noise reducing devices (EN 1793)",
-      "checks": 7,
-      "passing": 7
+      "checks": 20,
+      "passing": 20
     },
     {
       "id": "railway-noise-reducing-devices-en-16272",
@@ -39578,6 +39578,460 @@
         "label": "+0.82 dB"
       },
       "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "road-traffic-noise-reducing-devices-en-1793/en-1793-5-2016-table-2-paths-and-cgeo-k-of-the-nine-microphones/ds-1-50-m-dm-0-25-m-and-s-0-40-m-give-the-printed-two-decimals",
+      "domain": "road-traffic-noise-reducing-devices-en-1793",
+      "reference": {
+        "cite": "EN 1793-5:2016 Table 2 (paths and Cgeo,k of the nine microphones)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "EN 1793-5",
+            "edition": "2016",
+            "clause": "Table 2 (paths and Cgeo,k of the nine microphones)"
+          }
+        ]
+      },
+      "quantity": "dS = 1,50 m, dM = 0,25 m and s = 0,40 m give the printed two decimals",
+      "kind": "count",
+      "expected": {
+        "value": 27.0,
+        "label": "27/27 printed cells"
+      },
+      "computed": {
+        "value": 27.0,
+        "label": "27/27 printed cells"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "road-traffic-noise-reducing-devices-en-1793/en-1793-5-2016-table-3-nominal-path-differences-of-the-position-checks/the-direct-to-microphone-5-and-direct-to-reflected-differences-to-the-millimetre",
+      "domain": "road-traffic-noise-reducing-devices-en-1793",
+      "reference": {
+        "cite": "EN 1793-5:2016 Table 3 (nominal path differences of the position checks)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "EN 1793-5",
+            "edition": "2016",
+            "clause": "Table 3 (nominal path differences of the position checks)"
+          }
+        ]
+      },
+      "quantity": "the direct-to-microphone-5 and direct-to-reflected differences, to the millimetre",
+      "kind": "count",
+      "expected": {
+        "value": 18.0,
+        "label": "18/18 printed cells"
+      },
+      "computed": {
+        "value": 18.0,
+        "label": "18/18 printed cells"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "road-traffic-noise-reducing-devices-en-1793/en-1793-5-2016-5-6-1-note-1-maximum-sampled-area-formula-8/a-4-m-by-4-m-sample-the-7-9-ms-window-and-340-m-s-give-1-96-m",
+      "domain": "road-traffic-noise-reducing-devices-en-1793",
+      "reference": {
+        "cite": "EN 1793-5:2016 5.6.1 NOTE 1 (maximum sampled area, Formula (8))",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "EN 1793-5",
+            "edition": "2016",
+            "clause": "5.6.1 NOTE 1 (maximum sampled area, Formula (8))"
+          }
+        ]
+      },
+      "quantity": "a 4 m by 4 m sample, the 7,9 ms window and 340 m/s give 1,96 m",
+      "kind": "scalar",
+      "expected": {
+        "value": 1.96
+      },
+      "computed": {
+        "value": 1.9555
+      },
+      "unit": "m",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": -0.0045
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "road-traffic-noise-reducing-devices-en-1793/en-1793-5-2016-5-5-5-and-5-5-1-the-three-adrienne-windows/leading-edge-flat-part-and-trailing-edge-of-the-7-9-ms-6-0-ms-and-1-3-ms-windows",
+      "domain": "road-traffic-noise-reducing-devices-en-1793",
+      "reference": {
+        "cite": "EN 1793-5:2016 5.5.5 and 5.5.1 (the three Adrienne windows)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "EN 1793-5",
+            "edition": "2016",
+            "clause": "5.5.5 and 5.5.1 (the three Adrienne windows)"
+          }
+        ]
+      },
+      "quantity": "leading edge, flat part and trailing edge of the 7,9 ms, 6,0 ms and 1,3 ms windows",
+      "kind": "record",
+      "expected": {
+        "label": "7.9 ms lead = 0.5 ms; 7.9 ms flat = 5.18 ms; 7.9 ms trail = 2.22 ms; 6.0 ms lead = 0.5 ms; 6.0 ms flat = 3.85 ms; 6.0 ms trail = 1.65 ms; 1.3 ms lead = 0.5 ms; 1.3 ms flat = 0.56 ms; 1.3 ms trail = 0.24 ms",
+        "record": {
+          "7.9 ms lead": 0.5,
+          "7.9 ms flat": 5.18,
+          "7.9 ms trail": 2.22,
+          "6.0 ms lead": 0.5,
+          "6.0 ms flat": 3.85,
+          "6.0 ms trail": 1.65,
+          "1.3 ms lead": 0.5,
+          "1.3 ms flat": 0.56,
+          "1.3 ms trail": 0.24
+        }
+      },
+      "computed": {
+        "label": "7.9 ms lead = 0.5 ms; 7.9 ms flat = 5.18 ms; 7.9 ms trail = 2.22 ms; 6.0 ms lead = 0.5 ms; 6.0 ms flat = 3.85 ms; 6.0 ms trail = 1.65 ms; 1.3 ms lead = 0.5 ms; 1.3 ms flat = 0.56 ms; 1.3 ms trail = 0.24 ms",
+        "record": {
+          "7.9 ms lead": 0.5,
+          "7.9 ms flat": 5.18,
+          "7.9 ms trail": 2.22,
+          "6.0 ms lead": 0.5,
+          "6.0 ms flat": 3.85,
+          "6.0 ms trail": 1.65,
+          "1.3 ms lead": 0.5,
+          "1.3 ms flat": 0.56,
+          "1.3 ms trail": 0.24
+        }
+      },
+      "unit": "ms",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "road-traffic-noise-reducing-devices-en-1793/en-1793-5-2016-formula-1-a-perfect-flat-reflector/ri-1-in-all-eighteen-bands-once-cgeo-k-restores-the-longer-path",
+      "domain": "road-traffic-noise-reducing-devices-en-1793",
+      "reference": {
+        "cite": "EN 1793-5:2016 Formula (1) (a perfect flat reflector)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "EN 1793-5",
+            "edition": "2016",
+            "clause": "Formula (1) (a perfect flat reflector)"
+          }
+        ]
+      },
+      "quantity": "RI = 1 in all eighteen bands once Cgeo,k restores the longer path",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0,
+        "label": "max |RI - 1| = 0"
+      },
+      "computed": {
+        "value": 3.18e-07
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-06
+      },
+      "deviation": {
+        "value": 3.18e-07
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "road-traffic-noise-reducing-devices-en-1793/en-1793-5-2016-formulas-1-and-4-a-gain-change-between-configurations/a-reflection-of-amplitude-0-5-rates-ri-0-25-whatever-the-gain-did",
+      "domain": "road-traffic-noise-reducing-devices-en-1793",
+      "reference": {
+        "cite": "EN 1793-5:2016 Formulas (1) and (4) (a gain change between configurations)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "EN 1793-5",
+            "edition": "2016",
+            "clause": "Formulas (1) and (4) (a gain change between configurations)"
+          }
+        ]
+      },
+      "quantity": "a reflection of amplitude 0,5 rates RI = 0,25 whatever the gain did",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0,
+        "label": "max |RI - 0,25| = 0"
+      },
+      "computed": {
+        "value": 1e-07
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-05
+      },
+      "deviation": {
+        "value": 1e-07
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "road-traffic-noise-reducing-devices-en-1793/en-1793-5-2016-formula-1-the-one-third-octave-bands-of-a-comb/two-impulses-0-5-ms-apart-0-25-2-2-cos-2-pi-f-tau-averaged-over-each-band-s-base-ten-edges",
+      "domain": "road-traffic-noise-reducing-devices-en-1793",
+      "reference": {
+        "cite": "EN 1793-5:2016 Formula (1) (the one-third octave bands of a comb)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "EN 1793-5",
+            "edition": "2016",
+            "clause": "Formula (1) (the one-third octave bands of a comb)"
+          }
+        ]
+      },
+      "quantity": "two impulses 0,5 ms apart: 0,25 (2 + 2 cos 2 pi f tau) averaged over each band's base-ten edges",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0,
+        "label": "max |RI - comb| = 0"
+      },
+      "computed": {
+        "value": 3.12e-07
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-06
+      },
+      "deviation": {
+        "value": 3.12e-07
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "road-traffic-noise-reducing-devices-en-1793/en-1793-5-2016-5-5-5-which-window-serves-which-bands/an-impulse-6-ms-after-the-reflection-moves-100-hz-to-160-hz-and-no-band-from-200-hz",
+      "domain": "road-traffic-noise-reducing-devices-en-1793",
+      "reference": {
+        "cite": "EN 1793-5:2016 5.5.5 (which window serves which bands)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "EN 1793-5",
+            "edition": "2016",
+            "clause": "5.5.5 (which window serves which bands)"
+          }
+        ]
+      },
+      "quantity": "an impulse 6 ms after the reflection moves 100 Hz to 160 Hz and no band from 200 Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0,
+        "label": "max |RI - 0,25| from 200 Hz = 0"
+      },
+      "computed": {
+        "value": 0.0
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "road-traffic-noise-reducing-devices-en-1793/en-1793-5-2016-5-5-4-subtraction-to-a-fiftieth-of-a-sample/a-free-field-record-0-36-samples-late-is-found-0-36-samples-late",
+      "domain": "road-traffic-noise-reducing-devices-en-1793",
+      "reference": {
+        "cite": "EN 1793-5:2016 5.5.4 (subtraction to a fiftieth of a sample)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "EN 1793-5",
+            "edition": "2016",
+            "clause": "5.5.4 (subtraction to a fiftieth of a sample)"
+          }
+        ]
+      },
+      "quantity": "a free-field record 0,36 samples late is found 0,36 samples late",
+      "kind": "scalar",
+      "expected": {
+        "value": -0.36
+      },
+      "computed": {
+        "value": -0.36
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "road-traffic-noise-reducing-devices-en-1793/en-1793-5-2016-table-b-1-average-of-twelve-grid-positions/the-printed-average-of-every-band-two-of-them-exact-ties-at-the-half",
+      "domain": "road-traffic-noise-reducing-devices-en-1793",
+      "reference": {
+        "cite": "EN 1793-5:2016 Table B.1 (average of twelve grid positions)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "EN 1793-5",
+            "edition": "2016",
+            "clause": "Table B.1 (average of twelve grid positions)"
+          }
+        ]
+      },
+      "quantity": "the printed average of every band, two of them exact ties at the half",
+      "kind": "count",
+      "expected": {
+        "value": 18.0,
+        "label": "18/18 printed averages"
+      },
+      "computed": {
+        "value": 18.0,
+        "label": "18/18 printed averages"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "road-traffic-noise-reducing-devices-en-1793/en-1793-5-2016-table-b-2-dlri-before-rounding-and-table-b-1-dlri-8-db/formula-12-on-the-printed-averages-from-the-200-hz-band",
+      "domain": "road-traffic-noise-reducing-devices-en-1793",
+      "reference": {
+        "cite": "EN 1793-5:2016 Table B.2 (DLRI before rounding) and Table B.1 (DLRI = 8 dB)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "EN 1793-5",
+            "edition": "2016",
+            "clause": "Table B.2 (DLRI before rounding) and Table B.1 (DLRI = 8 dB)"
+          }
+        ]
+      },
+      "quantity": "Formula (12) on the printed averages from the 200 Hz band",
+      "kind": "scalar",
+      "expected": {
+        "value": 7.68
+      },
+      "computed": {
+        "value": 7.6797
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": -0.0003
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "road-traffic-noise-reducing-devices-en-1793/en-1793-5-2016-table-b-2-expanded-uncertainty-of-dlri/1-96-times-the-high-reproducibility-of-table-a-1-0-81-db",
+      "domain": "road-traffic-noise-reducing-devices-en-1793",
+      "reference": {
+        "cite": "EN 1793-5:2016 Table B.2 (expanded uncertainty of DLRI)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "EN 1793-5",
+            "edition": "2016",
+            "clause": "Table B.2 (expanded uncertainty of DLRI)"
+          }
+        ]
+      },
+      "quantity": "1,96 times the high reproducibility of Table A.1, 0,81 dB",
+      "kind": "scalar",
+      "expected": {
+        "value": 1.59
+      },
+      "computed": {
+        "value": 1.5876
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": -0.0024
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "road-traffic-noise-reducing-devices-en-1793/en-1793-5-2016-table-b-2-expanded-uncertainty-per-band/the-eleven-cells-1-96-times-the-printed-sr-gives-the-other-seven-are-a-hundredth-lower-as-unrounded-sr-would-give",
+      "domain": "road-traffic-noise-reducing-devices-en-1793",
+      "reference": {
+        "cite": "EN 1793-5:2016 Table B.2 (expanded uncertainty per band)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "EN 1793-5",
+            "edition": "2016",
+            "clause": "Table B.2 (expanded uncertainty per band)"
+          }
+        ]
+      },
+      "quantity": "the eleven cells 1,96 times the printed sR gives; the other seven are a hundredth lower, as unrounded sR would give",
+      "kind": "count",
+      "expected": {
+        "value": 11.0,
+        "label": "11/11 printed cells"
+      },
+      "computed": {
+        "value": 11.0,
+        "label": "11/11 printed cells"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
       "verdict": "pass"
     },
     {

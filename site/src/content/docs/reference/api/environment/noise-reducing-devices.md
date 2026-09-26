@@ -7,8 +7,8 @@ sidebar:
 
 Single-number ratings of noise reducing devices (EN 1793, EN 16272).
 
-A barrier beside a road is not judged band by band. It is judged by two
-numbers, and both are the same operation on a spectrum nobody measures on
+A barrier beside a road is not judged band by band. It is judged by single
+numbers, and each is the same operation on a spectrum nobody measures on
 site: the normalised traffic noise spectrum of **EN 1793-3:1997**, eighteen
 one-third octave bands from 100 Hz to 5 kHz carrying relative A-weighted
 levels $L_i$ that stand for what a road sounds like at the roadside.
@@ -41,16 +41,33 @@ notes, and a rating there is the number and nothing more.
   DL_R = -10 \lg\left| \frac{\sum_{i=1}^{18} 10^{0.1 L_i}\, 10^{-0.1 R_i}} {\sum_{i=1}^{18} 10^{0.1 L_i}} \right|
   $$
 
-Both are reported rounded to the nearest integer (EN 1793-1 Clause 6.1,
-EN 1793-2 Clause 7.1), and both have a normative category ladder in their
-Annex A: A1 to A5 for absorption, B1 to B4 for insulation, with A0 and B0
-reserved for "not determined". The categories are read off the reported
-integer, which is why the ladders have no gaps between their steps.
+* **EN 1793-5:2016** rates the sound reflection measured in place, the
+  index $RI$ of
+  [`barrier_reflection`](/phonometry/reference/api/environment/barrier-reflection/), on the same
+  spectrum but from the lowest band the size of the sample makes reliable
+  (Clause 5.8, Formula (12)):
 
-The two ratings answer different questions and are not comparable. A device
-can be a perfect reflector and still keep the noise out (high $DL_R$,
-low $DL_\alpha$); a device can be highly absorptive and let sound
-through (the other way round). The declaration carries both.
+  $$
+  DL_{RI} = -10 \lg\left[ \frac{\sum_{i=m}^{18} RI_i\, 10^{0.1 L_i}} {\sum_{i=m}^{18} 10^{0.1 L_i}} \right]
+  $$
+
+  The clause copies the 0,99 limit on the ratio from EN 1793-1, so a device
+  reflecting more than it receives in the weighted sum rates 0,04 dB.
+
+All three are reported rounded to the nearest integer (EN 1793-1 Clause 6.1,
+EN 1793-2 Clause 7.1, EN 1793-5 Clause 5.11). The first two have a normative
+category ladder in their Annex A: A1 to A5 for absorption, B1 to B4 for
+insulation, with A0 and B0 reserved for "not determined". The categories are
+read off the reported integer, which is why the ladders have no gaps between
+their steps. EN 1793-5 prints no ladder.
+
+Absorption and insulation answer different questions and are not
+comparable. A device can be a perfect reflector and still keep the noise out
+(high $DL_R$, low $DL_\alpha$); a device can be highly absorptive
+and let sound through (the other way round). The declaration carries both.
+$DL_{RI}$ answers the first question again, in the direct sound field
+beside the road rather than the diffuse field of a reverberation room, so it
+does not convert into $DL_\alpha$ either.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
@@ -136,6 +153,7 @@ RoadDeviceRating(
     bands_hz: NDArray[np.float64],
     values: NDArray[np.float64],
     weights: NDArray[np.float64],
+    lowest_band_hz: float = 100.0,
 )
 ```
 
@@ -145,14 +163,15 @@ One single-number rating of a road traffic noise reducing device.
 
 | Name | Description |
 | :--- | :--- |
-| `rating` | The rating before rounding, in dB. `DLα` (EN 1793-1) or `DL_R` (EN 1793-2), depending on `quantity`. |
+| `rating` | The rating before rounding, in dB. `DLα` (EN 1793-1), `DL_R` (EN 1793-2) or `DL_RI` (EN 1793-5), depending on `quantity`. |
 | `reported` | The same rating rounded to the nearest integer, which is what a test report carries and what the category is read off. |
-| `category` | The Annex A category of the reported value, `"A1"` to `"A5"` for absorption or `"B1"` to `"B4"` for insulation, or `None` for a railway rating, whose standard prints no ladder. |
-| `quantity` | `"absorption"` or `"insulation"`. |
+| `category` | The Annex A category of the reported value, `"A1"` to `"A5"` for absorption or `"B1"` to `"B4"` for insulation, or `None` for a railway rating and for reflection, whose standards print no ladder. |
+| `quantity` | `"absorption"`, `"insulation"` or `"reflection"`. |
 | `spectrum` | `"road"` (EN 1793-3) or `"railway"` (EN 16272-3-1). |
 | `bands_hz` | The eighteen band centre frequencies, in Hz. |
-| `values` | The per-band input the rating was weighted from: the sound absorption coefficients, or the sound reduction indices in dB. |
+| `values` | The per-band input the rating was weighted from: the sound absorption coefficients, the sound reduction indices in dB, or the sound reflection indices (`nan` allowed below `lowest_band_hz`). |
 | `weights` | The normalised traffic noise spectrum, in dB. |
+| `lowest_band_hz` | The lowest band the rating sums from: 100 Hz for `DLα` and `DL_R`, which sum all eighteen, and the lowest reliable band $m$ for `DL_RI`. |
 
 ### RoadDeviceRating.plot()
 
@@ -211,6 +230,49 @@ print a category ladder, so a railway rating carries none.
 | Warning | When |
 | :--- | :--- |
 | RoadDeviceWarning | If the weighted ratio reaches the 0,99 limit both standards put on it, which means the rating is the limit and not the data. |
+
+## sound_reflection_rating
+
+```python
+sound_reflection_rating(
+    reflection_indices: ArrayLike,
+    *,
+    lowest_band_hz: float = 200.0,
+) -> RoadDeviceRating
+```
+
+`DL_RI`, the single-number rating of sound reflection.
+
+EN 1793-5:2016 Clause 5.8, Formula (12): the sound reflection index
+weighted by the normalised traffic noise spectrum of EN 1793-3, summed
+from the lowest reliable band $m$ to 5 kHz. For the qualification
+sample of 4 m by 4 m that band is 200 Hz (5.5.7), the default; a smaller
+device starts higher and the report names the range, for example
+`DL_RI (400 - 5 000 Hz)` for a 3,5 m barrier. Annex B's example rates
+7,68 dB before rounding on the two-decimal averages of Table B.1
+(7,65 dB on its particular values), reported as 8 dB. EN 1793-5 prints no
+category ladder.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `reflection_indices` | $RI$ in the eighteen one-third octave bands of [`TRAFFIC_NOISE_BANDS_HZ`](/phonometry/reference/api/environment/noise-reducing-devices/#traffic_noise_bands_hz); a band below `lowest_band_hz` may be `nan`. |
+| `lowest_band_hz` | The centre of the lowest reliable band, one of the eighteen. |
+
+**Returns:** The rating and its reported integer, category `None`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If there are not eighteen values, a band from `lowest_band_hz` up is not a finite non-negative number, the band is not positive or not one of the eighteen, or the weighted ratio is zero. |
+
+**Warns**
+
+| Warning | When |
+| :--- | :--- |
+| RoadDeviceWarning | If the weighted ratio exceeds the maximum of 0,99 Clause 5.8 limits it to; a ratio of 0,99 itself is not limited. |
 
 ## SPECTRA
 

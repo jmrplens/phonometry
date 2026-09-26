@@ -1,6 +1,6 @@
 ---
 title: "Sonido en exteriores"
-description: "El sonido en su camino por el aire libre: el modelo de propagación ISO 9613 con su desglose de atenuación término a término, el efecto suelo esférico por acústica ondulatoria y la difracción de barreras avanzada que hay debajo, y la atmósfera refractante que ambos suponen inexistente: rayos curvos, zonas de sombra y la ecuación parabólica."
+description: "El sonido en su camino por el aire libre: el modelo de propagación ISO 9613 con su desglose de atenuación término a término, el efecto suelo esférico por acústica ondulatoria y la difracción de barreras avanzada que hay debajo, y la atmósfera refractante que ambos suponen inexistente: rayos curvos, zonas de sombra y la ecuación parabólica. Y la propia pantalla, su reflexión acústica medida in situ según la EN 1793-5."
 ---
 
 import Scope from '../../../../../components/Scope.astro';
@@ -8,7 +8,7 @@ import ScopeClaim from '../../../../../components/ScopeClaim.astro';
 import SeeAlso from '../../../../../components/SeeAlso.astro';
 
 Esta sección es el **camino**: lo que le pasa a un sonido entre una fuente de
-potencia conocida y un receptor a cientos de metros. Sus tres páginas van del
+potencia conocida y un receptor a cientos de metros. Tres de sus páginas van del
 método de ingeniería a la física que aproxima, y de ahí a lo único que ambos
 dan por supuesto que no ocurre.
 
@@ -54,7 +54,15 @@ escalar. Esta página la calcula, con rayos curvos y distancias de zona de sombr
 en forma cerrada, y con la ecuación parabólica de la función de Green como campo
 de referencia.
 
-Léelas en ese orden. La evaluación en la que termina un nivel predicho no está
+Léelas en ese orden. La cuarta página se da la vuelta y mide la propia
+pantalla: [Reflexión acústica de una pantalla
+in situ](/phonometry/es/environment/propagation/barrier-reflection/) lleva las
+respuestas al impulso de la EN 1793-5, un altavoz y nueve micrófonos delante de
+una pantalla de carretera donde está, hasta el índice de reflexión acústica
+banda a banda y su índice global DL_RI, la versión in situ del índice de
+absorción con el que se declara el producto.
+
+La evaluación en la que termina un nivel predicho no está
 aquí: los niveles por periodo salen de [Niveles integrados y
 estadísticos](/phonometry/es/signals/levels/levels/), y el Lden, el Ldn y el
 nivel de evaluación, de [Niveles ambientales (ISO
@@ -79,6 +87,10 @@ máquina, y en [Ruido de aeronaves](/phonometry/es/aircraft/) para las aeronaves
   la propia atmósfera refractante: perfiles efectivos de velocidad del sonido,
   rayos curvados con sus zonas de sombra, y la ecuación parabólica de función
   de Green.
+- [Reflexión acústica de una pantalla in situ](/phonometry/es/environment/propagation/barrier-reflection/):
+  el índice de reflexión acústica de la EN 1793-5 medido delante de una
+  pantalla de carretera, con la sustracción de la señal, la ventana de Adrienne
+  y el índice global DL_RI.
 
 <SeeAlso>
 
@@ -116,9 +128,11 @@ recíproco pero no es una solución por elementos de contorno, y ningún modelo
 de aquí calcula la dispersión por turbulencia: la ISO 9613-2 la absorbe en los
 topes fijos de su término de apantallamiento, y las páginas de acústica
 ondulatoria y de refracción suponen sin más una atmósfera no turbulenta. Nada
-de estas páginas produce una evaluación: ni Lden, ni valor límite, ni
-veredicto (eso es [Evaluación y
-normativa](/phonometry/es/environment/assessment/)).
+de estas páginas produce una evaluación ambiental: ni Lden, ni valor límite, ni
+veredicto sobre un emplazamiento (eso es [Evaluación y
+normativa](/phonometry/es/environment/assessment/)); el índice global y la
+comprobación de posición de la EN 1793-5 tratan de un producto y de su
+medición.
 </ScopeClaim>
 </Scope>
 

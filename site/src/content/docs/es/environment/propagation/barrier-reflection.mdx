@@ -1,0 +1,482 @@
+---
+title: "Reflexión acústica de una pantalla in situ"
+description: "El índice de reflexión acústica de la EN 1793-5 medido delante de una pantalla acústica de carretera donde está: la sustracción de la señal, la ventana de Adrienne, las correcciones de divergencia, directividad y ganancia, el índice global DL_RI y el límite de baja frecuencia que fija el tamaño de la muestra."
+references:
+  - type: standard
+    organization: "European Committee for Standardization"
+    year: 2016
+    title: "Road traffic noise reducing devices - Test method for determining the acoustic performance - Part 5: Intrinsic characteristics - In situ values of sound reflection under direct sound field conditions"
+    designation: "EN 1793-5:2016"
+    primary: true
+    note: "La edición implementada: la rejilla y su geometría (3.10 a 3.15, tablas 2 y 3), la fórmula (1) con las correcciones de las fórmulas (2) a (4), la sustracción y la fórmula (6) del apartado 5.5.4, la ventana de Adrienne del 5.5.5 y la fórmula (7), su colocación (5.5.6), el límite de baja frecuencia (5.5.7), el área muestreada de la fórmula (8), las comprobaciones de posición de los apartados 5.6.2.5 y 5.6.2.6, DL_RI (5.8), la tabla A.1 y el ejemplo del anexo B. Leída de la BS EN 1793-5:2016."
+  - type: standard
+    organization: "European Committee for Standardization"
+    year: 1997
+    title: "Road traffic noise reducing devices - Test method for determining the acoustic performance - Part 3: Normalized traffic noise spectrum"
+    designation: "EN 1793-3:1997"
+    note: "Tabla 1, los dieciocho niveles relativos ponderados A por tercio de octava con los que se pondera DL_RI. Leída de la edición BS EN 1793-3:1998."
+  - type: article
+    authors: ["Garai, M.", "Guidorzi, P."]
+    year: 2000
+    title: "European methodology for testing the airborne sound insulation characteristics of noise barriers in situ: experimental verification and comparison with laboratory data"
+    journal: "The Journal of the Acoustical Society of America"
+    volume: 108
+    issue: 3
+    pages: "1054-1067"
+    doi: "10.1121/1.1286811"
+    note: "Sección III.D: la ventana que termina donde llega la primera componente no deseada, y la primera muesca de su espectro como límite de baja frecuencia, unos 160 Hz para la ventana de 7,9 ms. Es la construcción que usa aquí el límite de baja frecuencia."
+  - type: article
+    authors: ["Guidorzi, P.", "Garai, M."]
+    year: 2013
+    title: "Advancements in sound reflection and airborne sound insulation measurement on noise barriers"
+    journal: "Open Journal of Acoustics"
+    volume: 3
+    issue: "2A"
+    pages: "25-38"
+    doi: "10.4236/oja.2013.32A004"
+    note: "La revisión de QUIESST que adoptó la norma de 2016: la rejilla de nueve micrófonos, la alineación por debajo de la muestra y la corrección de directividad."
+---
+
+import Scope from '../../../../../components/Scope.astro';
+import ScopeClaim from '../../../../../components/ScopeClaim.astro';
+import SeeAlso from '../../../../../components/SeeAlso.astro';
+import ThemeImage from '../../../../../components/ThemeImage.astro';
+
+Una pantalla acústica de carretera se declara por su absorción, y la EN 1793-1
+la mide en una cámara reverberante: una muestra tumbada en el suelo, sonido que
+llega de todas las direcciones y un producto que no es el que está junto a la
+carretera. La EN 1793-5 mide la misma propiedad donde está la pantalla, en el
+campo directo de un altavoz colocado delante, y la llama **índice de reflexión
+acústica** $RI$: en cada banda de tercio de octava, la energía que el
+dispositivo devuelve como fracción de la que le llega. Esta página cubre
+`phonometry.environment.propagation.barrier_reflection`, que lleva las
+respuestas al impulso de la medición hasta el índice, el índice global
+$DL_{RI}$ y los límites que el tamaño de la muestra pone a ambos.
+
+## 1. El montaje
+
+El altavoz mira al dispositivo a media altura, con su panel frontal a
+$d_S$ = 1,50 m del **plano de referencia**, el plano que toca las partes más
+salientes del dispositivo. Entre ambos hay una rejilla vertical de nueve
+micrófonos, de 3 por 3 y separados 0,40 m, con su centro (el micrófono 5) a
+0,25 m del plano y, por tanto, a 1,25 m del altavoz. Los micrófonos se numeran
+como los ve el altavoz: del 1 al 3 en la fila de arriba, del 7 al 9 en la de
+abajo.
+
+Cada micrófono oye el sonido directo y, algo más de un milisegundo después, la
+reflexión. La reflexión ha recorrido más camino, 1,75 m frente a 1,25 m en el
+micrófono 5, y se ha repartido sobre una esfera mayor; la fórmula (2) lo
+devuelve con $C_{geo,k} = (d_{r,k}/d_{i,k})^2$, que la tabla 2 imprime para cada
+micrófono:
+
+```python
+from phonometry import environment
+
+paths = environment.reflection_grid_paths_m()
+print(paths[4])        # [1.25 1.75]: camino directo y especular del micrófono 5, m
+print(environment.geometric_divergence_corrections().round(2))
+# [1.8  1.87 1.8  1.87 1.96 1.87 1.8  1.87 1.8 ]
+```
+
+Que la rejilla está donde debe se comprueba con una placa reflectante en el
+plano de referencia (apartado 5.6.2.6): el retardo entre el sonido directo y el
+reflejado en cada micrófono, multiplicado por la velocidad del sonido, tiene que
+quedar a menos de 25 mm de la diferencia de caminos de la tabla 3. La misma
+comprobación con una placa a 0,25 m por detrás del micrófono 5
+(`check="relative"`, apartado 5.6.2.5) compara las llegadas directas a los ocho
+micrófonos exteriores con la del centro.
+
+```python
+import numpy as np
+
+c = 343.2                                         # m/s a 20 °C
+# Retardos entre el sonido directo y el reflejado en los nueve micrófonos, en s.
+delays = np.array([0.467, 0.483, 0.470, 0.483, 0.502,
+                   0.483, 0.440, 0.483, 0.467]) / c
+check = environment.check_reflection_grid_position(delays, speed_of_sound=c)
+print(check.passes)                               # False
+print((check.deviations_m * 1e3).round())         # al micrófono 7 le faltan 27 mm
+```
+
+El veredicto es `passes`; el objeto se niega a hacer sus veces dentro de un
+`if`, para que una comprobación nunca se lea como aprobada por descuido.
+
+## 2. Quitar el sonido directo
+
+Delante del dispositivo el sonido directo y la reflexión se solapan: la
+respuesta al impulso de un altavoz dura hasta 3 ms (apartado 5.4.2) y la
+reflexión llega unos 1,4 ms después del directo. El registro en campo libre,
+tomado con el altavoz y la rejilla vueltos hacia donde no hay nada, tampoco el
+suelo, *es* el sonido directo. La **sustracción de la señal** (apartado 5.5.4)
+lo quita: el registro en campo libre se desplaza en pasos de un cincuentavo de
+muestra, hasta dos muestras a cada lado, con una rampa de fase sobre su propia
+transformada; se queda el desplazamiento que mejor ajusta las 50 muestras que
+rodean el pico principal; el registro se escala para que los dos picos sean
+iguales y se resta. Lo que queda es la reflexión, y el **factor de reducción**
+$R_{sub}$ de la fórmula (6) mide cuánto del sonido directo se fue con ella: la
+energía a menos de 0,5 ms del pico antes, dividida por la energía que queda
+ahí después. Por debajo de 10 dB la norma da la sustracción por imperfecta, y
+`subtract_direct_sound` también, con un `BarrierReflectionWarning`.
+
+Los registros de abajo hacen de medición a 48 kHz: un pulso de altavoz a
+2,5 kHz, una reflexión de 0,35 veces la amplitud incidente con la parte alta
+suavizada, y registros en campo libre tomados con la rejilla 3 µs más lejos,
+que es lo que hace mover el equipo.
+
+```python
+fs = 48000.0
+t = np.arange(4800) / fs                          # registros de 100 ms
+
+def pulse(delay_s):
+    """La respuesta al impulso corta de un altavoz, que llega tras delay_s."""
+    tau = t - delay_s
+    return np.exp(-0.5 * (tau / 60e-6) ** 2) * np.cos(2 * np.pi * 2500.0 * tau)
+
+smooth = np.hanning(9) / np.hanning(9).sum()
+free = np.empty((9, t.size))
+front = np.empty((9, t.size))
+for k, (direct_m, reflected_m) in enumerate(environment.reflection_grid_paths_m()):
+    free[k] = pulse(0.01 + direct_m / c + 3e-6) / direct_m
+    reflection = np.convolve(pulse(0.01 + reflected_m / c), smooth, mode="same")
+    front[k] = pulse(0.01 + direct_m / c) / direct_m + 0.35 * reflection / reflected_m
+
+sub = environment.subtract_direct_sound(front[4], free[4], fs)
+print(round(sub.shift_samples, 2), round(sub.reduction_db))   # -0.14 57
+```
+
+<ThemeImage
+  src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/barrier_direct_sound_subtraction.svg"
+  alt="La respuesta al impulso del micrófono 5 desde un milisegundo antes hasta tres milisegundos después del sonido directo: el registro delante del dispositivo como una línea gris ancha con el pico directo en cero y la reflexión hacia 1,45 ms, el registro en campo libre alineado y escalado como una línea naranja discontinua encima del pico directo, y lo que queda tras la sustracción como una línea azul, plana en torno a cero donde estaba el sonido directo y con toda la reflexión. Una franja verde marca el intervalo de menos 0,5 a más 0,5 ms donde se mide el factor de reducción, y el título da un R sub de 56,6 dB."
+  width="92%"
+/>
+
+*El sonido directo se va y la reflexión se queda: la sustracción encontró el
+desplazamiento de 0,14 muestras y dejó 57 dB menos de sonido directo.*
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+sub.plot(language="es")
+plt.show()
+```
+
+</details>
+
+La NOTA 1 del apartado 5.5.4 importa aquí: el registro en campo libre desplazado
+y escalado sirve para la sustracción y para nada más. El índice se calcula con
+el original, que el resultado guarda aparte como `aligned_free_field` solo para
+poder dibujarlo.
+
+## 3. La ventana de Adrienne
+
+Cada componente se recorta con la **ventana temporal de Adrienne** del apartado
+5.5.5: una mitad izquierda de 0,5 ms de una ventana de Blackman-Harris de
+cuatro términos, una parte plana y una mitad derecha cuya longitud es 3/7 de la
+parte plana. La ventana normal dura 7,9 ms (0,5 + 5,18 + 2,22 ms); la que
+procesa los nueve micrófonos desde 200 Hz dura 6,0 ms (0,5 + 3,85 + 1,65 ms);
+la comprobación de ganancia del apartado 5.5.1 usa 1,3 ms (0,5 + 0,56 +
+0,24 ms), lo bastante corta para terminar antes de que la reflexión alcance los
+micrófonos de las esquinas. El **punto marcador** donde empieza la parte plana
+queda 0,2 ms antes del pico de la componente (apartado 5.5.6); para la reflexión
+el pico se coloca por geometría, el pico directo más $(d_{r,k} - d_{i,k})/c$, que
+es lo que hace del plano de referencia el plano de reflexión convencional de un
+dispositivo que no es plano.
+
+```python
+window = environment.adrienne_reflection_window(fs, environment.ADRIENNE_SHORT_LENGTH_S)
+print(window.size)                                        # 288 muestras a 48 kHz
+print(round(environment.adrienne_low_frequency_limit_hz(7.9e-3), 1))   # 162.5 Hz
+```
+
+Los flancos son la fórmula (7) muestreada tal como está impresa, cada uno la
+mitad de una ventana de Blackman-Harris completa del doble de su longitud. La
+tabla 1 llama a $T_{W,BH}$ longitud del flanco de bajada, que metida en la
+fórmula (7) dibujaría una campana entera donde el flanco tendría que caer; el
+[registro de erratas](/phonometry/es/reference/errata/) lo recoge. La segunda
+línea es el límite de baja frecuencia de la ventana, el asunto de la sección 5.
+
+## 4. El índice, banda a banda
+
+La fórmula (1) promedia, sobre los micrófonos, el cociente entre la energía
+reflejada y la incidente de cada banda, con tres correcciones; el factor de
+ganancia divide aquí, como lo calcula la biblioteca (véase más abajo):
+
+$$
+RI_j = \frac{1}{n_j} \sum_{k=1}^{n_j}
+\frac{\int_{\Delta f_j} |F[h_{r,k}(t)\, w_{r,k}(t)]|^2\, df}
+     {\int_{\Delta f_j} |F[h_{i,k}(t)\, w_{i,k}(t)]|^2\, df}
+\; \frac{C_{geo,k}\, C_{dir,k}(\Delta f_j)}{C_{gain,k}(\Delta f_g)}
+$$
+
+- $C_{geo,k}$ es la divergencia de la sección 1.
+- $C_{dir,k}$ devuelve la **directividad del altavoz**: la reflexión salió de él
+  hacia el punto especular, con otro ángulo que el sonido directo. Se mide una
+  vez por altavoz (fórmula (3)), en campo libre, en la posición del micrófono y
+  sobre el camino especular a la misma distancia, y
+  `source_directivity_corrections` convierte los dos juegos de registros en la
+  matriz `(9, 18)` que recibe `reflection_index`. Un informe sin ella declara
+  «ninguna», y no pasarla equivale a eso.
+- $C_{gain,k}$ quita un **cambio de ganancia** entre la configuración en campo
+  libre y la de delante del dispositivo. La fórmula (4) lo mide como la energía
+  incidente delante del dispositivo dividida por la del campo libre, con la
+  ventana de 1,3 ms sobre las bandas de 500 Hz a 2 kHz. La biblioteca **divide**
+  por él. La fórmula (1) lo imprime como multiplicador, y como la fórmula (4)
+  lo hace igual al propio cambio de ganancia, un multiplicador elevaría el
+  cambio al cuadrado en lugar de quitarlo; el [registro de
+  erratas](/phonometry/es/reference/errata/) lo recoge. Por encima del 20 % la
+  norma lee el cambio como señal de que los ajustes se movieron, y la función
+  avisa.
+
+En las bandas de 100 Hz, 125 Hz y 160 Hz el promedio es sobre los micrófonos 1 a
+6 con la ventana de 7,9 ms, porque la fila de abajo es la primera a la que llega
+la reflexión en el suelo; desde 200 Hz es sobre los nueve con la de 6,0 ms.
+
+```python
+result = environment.reflection_index(front, free, fs, speed_of_sound=c)
+print(result.reflection_index.round(2))
+# [0.12 0.12 0.12 0.12 0.12 0.12 0.12 0.12 0.12 0.12 0.12 0.12 0.11 0.11
+#  0.1  0.08 0.07 0.05]
+print(result.rating.reported)                  # 9 dB desde la banda de 200 Hz
+print(result.gain_corrections[0, 4].round(3))  # 1.0: ninguna ganancia cambió
+
+on_axis, specular = free, 0.95 * free          # un altavoz un 5 % más débil fuera del eje
+directivity = environment.source_directivity_corrections(on_axis, specular, fs)
+print(directivity[4, 10].round(3))             # 1.108 en 1 kHz
+```
+
+Una reflexión de 0,35 veces la amplitud vuelve como 0,12, su cuadrado, y baja
+donde el suavizado quitó la parte alta. El resultado guarda el
+índice de cada micrófono (`microphone_values`, `nan` donde el apartado 5.5.5
+deja fuera un micrófono), cada factor de ganancia y cada factor de reducción,
+para que un informe pueda declararlos. Varias posiciones de la rejilla, las A,
+B y C de un dispositivo que no es plano u homogéneo (apartado 5.6.2.3), entran
+como una matriz `(posiciones, 9, N)` y se promedian sobre cada micrófono de cada
+posición. Los registros también pueden llegar como los `Signal` de nueve canales
+que devuelve el lector, uno por posición de la rejilla: la frecuencia de
+muestreo y la calibración vienen con ellos, y `fs` se omite. La velocidad del
+sonido no tiene valor por defecto, porque los apartados 5.5.6 y 5.7.3 piden su
+valor a la temperatura del ensayo.
+
+## 5. Hasta dónde se puede medir una muestra
+
+La ventana reflejada tiene que terminar antes de que lleguen al micrófono dos
+componentes no deseadas: el sonido reflejado en el **suelo** delante del
+dispositivo y el sonido **difractado por sus bordes** (apartado 5.5.7). Un
+dispositivo más bajo adelanta las dos, admite una ventana más corta, y una
+ventana más corta llega menos abajo. La norma da el resultado para un
+dispositivo más largo que alto solo como las tres curvas de la figura 14, sin la
+fórmula que hay detrás. `reflection_low_frequency_limit` lo calcula con la
+construcción de los autores del método (Garai y Guidorzi, 2000): la parte plana
+y el flanco de bajada de la ventana duran justo el retardo entre la reflexión y
+la primera componente no deseada, y su límite es la primera muesca del espectro
+de esa ventana, 162,5 Hz para la de 7,9 ms, que el artículo da como unos 160 Hz.
+
+```python
+limit = environment.reflection_low_frequency_limit(3.5, speed_of_sound=c)
+print(limit.low_frequency_limit_hz.round())
+# [220. 217. 220. 211. 208. 211. 265. 262. 265.]
+print(limit.limiting_component[1], limit.limiting_component[7])   # top edge ground
+```
+
+<ThemeImage
+  src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/barrier_reflection_limit.svg"
+  alt="Barras del límite de baja frecuencia en cada uno de los nueve micrófonos de la rejilla delante de una pantalla de 3,5 m: unos 220 Hz en los micrófonos 1 a 3, coloreados como limitados por el borde superior, unos 210 Hz en los micrófonos 4 a 6 y unos 265 Hz en los micrófonos 7 a 9, ambos coloreados como limitados por la reflexión en el suelo."
+  width="92%"
+/>
+
+*En esta construcción el borde superior corta la fila de arriba y el suelo la
+de abajo, así que la del medio llega más abajo; la figura 14 de la norma da el
+límite más bajo al micrófono 2 (se comparan a continuación).*
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+limit.plot(language="es")
+plt.show()
+```
+
+</details>
+
+Frente a lo que imprime la norma, la construcción coincide en el centro de la
+rejilla y no en sus filas de arriba y de abajo:
+
+| Muestra de 4 m, 340 m/s | Texto del 5.5.7 | Figura 14 | Esta construcción |
+| :--- | ---: | ---: | ---: |
+| Micrófono 2 | unos 160 Hz | 160 Hz | 176 Hz (borde superior) |
+| Micrófono 5 | unos 170 Hz | 170 Hz | 167 Hz (suelo) |
+| Micrófono 8 | unos 220 Hz | 220 Hz | 201 Hz (suelo) |
+
+La columna de la figura 14 está leída sobre las curvas impresas, con un 1 %
+aproximadamente. El micrófono 5 sigue su curva con menos del 5 % de diferencia
+desde 2,75 m, y queda un 5,5 % por debajo a 2,5 m. En el micrófono 2 el borde
+superior, que el apartado 5.5.7 nombra como componente que hay que dejar fuera,
+llega antes que la reflexión en el suelo y pone el límite entre un 3 % y un
+10 % por encima de la curva a todas las alturas; en el micrófono 8 el límite
+queda un tercio por debajo de la curva a 2,5 m, un 6 % por debajo a 4,5 m y un
+3 % o menos desde 6 m, siempre por debajo. Ninguna de las dos curvas exteriores
+sale de la reflexión en el suelo, del borde superior ni de ninguna combinación
+de los dos a las alturas de la rejilla, así que la figura no se pudo
+reconstruir. Para la pantalla de 3,5 m del apartado 5.8
+el límite más alto sale de 265 Hz, donde la norma dice 300 Hz. Por eso el límite
+se informa y no se usa para elegir una banda: **la banda fiable más baja** $m$
+del índice global la decide quien llama, y los dos ejemplos que da la norma para
+elegirla leen un límite contra las bandas en sentidos opuestos (la muestra de
+4 m conserva su banda de 200 Hz con un límite de 220 Hz, la pantalla de 3,5 m
+pierde su banda de 315 Hz con un límite de 300 Hz), lo que el registro de
+erratas también recoge.
+
+Los bordes laterales entran con `device_length_m`, para una muestra más
+estrecha que alta. `reflection_sampled_area_radius_m` da el otro tamaño que
+importa, el radio alrededor del punto de incidencia que tiene que quedar libre
+de objetos reflectantes (fórmula (8)): 1,96 m para la ventana de 7,9 ms a
+340 m/s, el valor de la NOTA 1 del apartado 5.6.1.
+
+## 6. El índice global y el anexo B
+
+El índice se pondera con el espectro normalizado de ruido de tráfico de la
+EN 1793-3, desde la banda fiable más baja $m$ hacia arriba (fórmula (12)):
+
+$$
+DL_{RI} = -10 \lg\left[
+\frac{\sum_{i=m}^{18} RI_i\, 10^{0,1 L_i}}
+     {\sum_{i=m}^{18} 10^{0,1 L_i}} \right]
+$$
+
+Se declara redondeado al entero más próximo y no tiene escala de categorías.
+Para la muestra de cualificación de 4 m por 4 m la banda más baja es 200 Hz, el
+valor por defecto; un dispositivo menor declara su intervalo junto al número,
+`DL_RI (400 - 5 000 Hz)` para la pantalla de 3,5 m del apartado 5.8. El
+apartado copia de la EN 1793-1 el límite de 0,99 en el cociente, que allí evita
+un logaritmo sin argumento; aquí un dispositivo que devolviera más de lo que
+recibe daría sin más un índice por debajo de cero, pero el límite se aplica tal
+como está impreso, con un aviso.
+
+El anexo B informa de una pantalla absorbente de 4 m medida en doce posiciones
+de la rejilla, cada posición una columna de «valores particulares», y del índice
+declarado como su media. `reflection_index_from_positions` lo recalcula:
+
+```python
+table_b1 = [   # EN 1793-5, tabla B.1: doce posiciones de la rejilla por banda
+    [0.59, 0.62, 0.57, 0.55, 0.58, 0.59, 0.57, 0.57, 0.51, 0.61, 0.61, 0.62],
+    [0.60, 0.62, 0.58, 0.54, 0.57, 0.58, 0.58, 0.58, 0.51, 0.60, 0.59, 0.61],
+    [0.63, 0.65, 0.60, 0.55, 0.57, 0.59, 0.60, 0.60, 0.53, 0.60, 0.57, 0.60],
+    [0.38, 0.42, 0.31, 0.37, 0.37, 0.35, 0.37, 0.39, 0.31, 0.36, 0.31, 0.32],
+    [0.43, 0.47, 0.35, 0.39, 0.39, 0.36, 0.42, 0.43, 0.35, 0.38, 0.34, 0.36],
+    [0.43, 0.45, 0.34, 0.37, 0.37, 0.34, 0.37, 0.37, 0.33, 0.33, 0.33, 0.33],
+    [0.34, 0.33, 0.26, 0.28, 0.30, 0.27, 0.22, 0.24, 0.22, 0.21, 0.25, 0.23],
+    [0.15, 0.15, 0.12, 0.13, 0.15, 0.15, 0.07, 0.08, 0.08, 0.11, 0.12, 0.12],
+    [0.05, 0.04, 0.04, 0.07, 0.05, 0.06, 0.06, 0.04, 0.04, 0.09, 0.05, 0.06],
+    [0.07, 0.07, 0.06, 0.13, 0.08, 0.07, 0.17, 0.11, 0.09, 0.11, 0.09, 0.07],
+    [0.11, 0.10, 0.09, 0.13, 0.11, 0.08, 0.17, 0.16, 0.10, 0.08, 0.07, 0.04],
+    [0.11, 0.13, 0.10, 0.07, 0.11, 0.08, 0.10, 0.13, 0.09, 0.10, 0.09, 0.07],
+    [0.39, 0.53, 0.16, 0.37, 0.28, 0.21, 0.30, 0.23, 0.18, 0.30, 0.35, 0.29],
+    [0.19, 0.28, 0.10, 0.20, 0.15, 0.12, 0.16, 0.15, 0.08, 0.13, 0.17, 0.22],
+    [0.15, 0.23, 0.21, 0.14, 0.13, 0.17, 0.15, 0.15, 0.16, 0.12, 0.15, 0.10],
+    [0.31, 0.33, 0.27, 0.26, 0.23, 0.19, 0.18, 0.25, 0.18, 0.16, 0.23, 0.21],
+    [0.39, 0.27, 0.22, 0.23, 0.26, 0.21, 0.28, 0.22, 0.18, 0.28, 0.21, 0.24],
+    [0.55, 0.43, 0.25, 0.52, 0.53, 0.53, 0.40, 0.43, 0.23, 0.46, 0.36, 0.45],
+]
+annex_b = environment.reflection_index_from_positions(np.array(table_b1).T)
+print(annex_b.reflection_index.round(2)[4:10])  # [0.39 0.36 0.26 0.12 0.05 0.09]
+print(annex_b.rating.reported)                 # 8 dB, lo impreso bajo la tabla
+print(round(annex_b.rating.rating, 2))         # 7.65 dB antes de redondear, véase abajo
+
+u_bands, u_rating = annex_b.expanded_uncertainty()   # tabla A.1, columna alta, k = 1,96
+print(round(u_rating, 2))                            # 1.59 dB, tabla B.2
+```
+
+<ThemeImage
+  src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/barrier_reflection_index.svg"
+  alt="El índice de reflexión acústica de la pantalla del anexo B en las dieciocho bandas de tercio de octava de 100 Hz a 5 kHz: doce puntos claros por banda para las doce posiciones de la rejilla y una línea por su media, cerca de 0,58 en las tres bandas rayadas por debajo de 200 Hz, bajando de 0,39 en 250 Hz a 0,05 en 630 Hz, en torno a 0,1 hasta 1,25 kHz, un máximo de 0,30 en 1,6 kHz y una subida hasta 0,43 en 5 kHz. El título da un DL RI de 8 dB de 200 Hz a 5 kHz."
+  width="92%"
+/>
+
+*Doce posiciones a lo largo de una pantalla absorbente: vuelve poco entre
+500 Hz y 1,25 kHz, donde más pesa el espectro de tráfico, y los postes y la cara
+perforada se notan más arriba.*
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+annex_b.plot(language="es")
+plt.show()
+```
+
+</details>
+
+Las dieciocho medias de la tabla B.1 salen de sus doce valores particulares:
+dieciséis a la centésima, y dos, en 200 Hz y 2,5 kHz, caen justo en una mitad
+y se imprimen una hacia abajo y otra hacia arriba, que es lo que darían medias
+de valores particulares sin redondear. La fórmula (12) sobre las medias
+impresas da los 7,68 dB de la tabla B.2 antes de redondear. Sobre los propios
+valores particulares, que es lo que guarda `annex_b.rating.rating`, da
+7,65 dB: los 7,68 dB son la fórmula (12) sobre medias redondeadas a dos
+decimales, la resolución con la que el apartado 5.11 informa del índice. Los
+dos redondean a los 8 dB impresos. La incertidumbre expandida es la
+reproducibilidad del ensayo interlaboratorio de la tabla A.1 por el factor de
+cobertura, 1,59 dB para el índice global; en siete bandas la tabla B.2 imprime
+una centésima menos que 1,96 veces la $s_R$ de la tabla A.1, como darían
+desviaciones típicas sin redondear. La impresión no dice qué valores multiplicó
+el ejemplo, y la biblioteca multiplica los impresos.
+
+## Relación con las otras partes de la EN 1793
+
+La declaración de un dispositivo de carretera ([Efecto suelo esférico y
+barreras
+avanzadas](/phonometry/es/environment/propagation/ground-barriers/#3-lo-que-dice-la-declaración-del-producto-en-1793))
+lleva $DL_\alpha$ de la EN 1793-1 y $DL_R$ de la EN 1793-2, los dos de
+laboratorio. $DL_{RI}$ responde otra vez a la pregunta de $DL_\alpha$, en el
+campo directo junto a la carretera en lugar del campo difuso de una cámara
+reverberante, y sobre el producto tal como está construido; los dos no se
+convierten el uno en el otro, y una declaración que dé los dos está diciendo dos
+cosas. Los tres índices globales comparten una familia de funciones y un
+resultado, `RoadDeviceRating`, cuyo `quantity` dice cuál es.
+
+## Qué cubre esta guía
+
+<Scope>
+<ScopeClaim status="covered" label="Cubierto">
+La EN 1793-5:2016 a partir de las respuestas al impulso: la geometría de la
+rejilla y la fórmula (2) (tabla 2), la sustracción de la señal con su
+alineación por debajo de la muestra y el factor de reducción de la fórmula (6)
+(apartado 5.5.4), la ventana de Adrienne del apartado 5.5.5 con la fórmula (7) y
+su colocación (5.5.6), el índice de reflexión acústica de la fórmula (1) con la
+corrección de directividad de la fórmula (3) y el factor de ganancia de la
+fórmula (4), los promedios de los apartados 5.5.5 y 5.6.2.3 sobre micrófonos y
+posiciones de la rejilla, el índice global $DL_{RI}$ del apartado 5.8 con el
+espectro de la EN 1793-3, el área muestreada de la fórmula (8), las dos
+comprobaciones de posición de los apartados 5.6.2.5 y 5.6.2.6 frente a la
+tabla 3, la incertidumbre expandida a partir de la tabla A.1 y el límite de baja
+frecuencia del apartado 5.5.7 con la construcción de Garai y Guidorzi. Las
+tablas 2 y 3, la NOTA 1 del apartado 5.6.1, las tres ventanas y el ejemplo del
+anexo B (tablas B.1 y B.2) son comprobaciones de conformidad.
+</ScopeClaim>
+
+<ScopeClaim status="not-covered" label="No cubierto">
+Obtener las respuestas al impulso, por MLS o barrido y deconvolución (apartado
+5.4.3), que es la maquinaria de la [respuesta al impulso de
+salas](/phonometry/es/buildings/rooms/room-impulse-response/); el filtro
+antisolapamiento del apartado 5.5.2 y la relación señal/ruido del 5.5.3, que un
+laboratorio declara en lugar de calcular; las condiciones meteorológicas y de
+la superficie del apartado 5.7; y los indicadores de campo lejano del anexo C,
+que la norma deja a los informes de QUIESST. El límite de baja frecuencia sigue
+la figura 14 en el micrófono 5 y no en los micrófonos 2 y 8, así que no elige la
+banda fiable más baja: esa decisión queda en el informe.
+</ScopeClaim>
+</Scope>
+
+<SeeAlso>
+
+## Véase también
+
+- [Efecto suelo esférico y barreras avanzadas](/phonometry/es/environment/propagation/ground-barriers/): la declaración de un dispositivo de carretera, $DL_\alpha$ y $DL_R$ sobre el mismo espectro, y lo que una barrera hace a un receptor que está detrás.
+- [Absorción in situ de pavimentos de carretera](/phonometry/es/materials/surfaces/road-absorption/): la ISO 13472-1, la misma sustracción y la misma ventana de Adrienne apuntadas a un pavimento.
+- [Erratas de las fuentes publicadas](/phonometry/es/reference/errata/): el factor de ganancia de la fórmula (1), la tabla B.2 y los demás defectos de la EN 1793-5.
+- Referencia de la API: [`environment.propagation.barrier_reflection`](/phonometry/es/reference/api/environment/barrier-reflection/).
+
+</SeeAlso>

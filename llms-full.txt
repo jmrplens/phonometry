@@ -1,8 +1,8 @@
 # phonometry
 
-> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1497 numerical conformance checks against 487 standards enforced in CI.
+> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1510 numerical conformance checks against 488 standards enforced in CI.
 
-phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1497 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 98 domains.
+phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1510 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 98 domains.
 
 The project was published as **PyOctaveBand** until version 3.0.0. Third-party references and dependency pins still using that name refer to this library.
 
@@ -276,6 +276,7 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 - [Outdoor Sound Propagation](https://jmrplens.github.io/phonometry/environment/propagation/outdoor-propagation/)
 - [Spherical ground effect and advanced barriers (Attenborough / Salomons / Bies)](https://jmrplens.github.io/phonometry/environment/propagation/ground-barriers/)
 - [Atmospheric refraction: ray tracing and the parabolic equation (Salomons / Attenborough)](https://jmrplens.github.io/phonometry/environment/propagation/atmospheric-refraction/)
+- [Sound reflection of a noise barrier in situ (EN 1793-5)](https://jmrplens.github.io/phonometry/environment/propagation/barrier-reflection/)
 
 ### Environmental sources
 
@@ -514,6 +515,7 @@ The generated API reference, one page per module. Fetch these only when a specif
 - [electroacoustics/swept-sine](https://jmrplens.github.io/phonometry/reference/api/electroacoustics/swept-sine/)
 - [environment/air-absorption](https://jmrplens.github.io/phonometry/reference/api/environment/air-absorption/)
 - [environment/barrier-in-situ](https://jmrplens.github.io/phonometry/reference/api/environment/barrier-in-situ/)
+- [environment/barrier-reflection](https://jmrplens.github.io/phonometry/reference/api/environment/barrier-reflection/)
 - [environment/cnossos-rail](https://jmrplens.github.io/phonometry/reference/api/environment/cnossos-rail/)
 - [environment/cnossos-road](https://jmrplens.github.io/phonometry/reference/api/environment/cnossos-road/)
 - [environment/exposure-distribution](https://jmrplens.github.io/phonometry/reference/api/environment/exposure-distribution/)
@@ -28123,6 +28125,9 @@ arrives.
   wave-theoretic screen diffraction.
 - [Atmospheric refraction](https://jmrplens.github.io/phonometry/environment/propagation/atmospheric-refraction/):
   how wind and temperature gradients bend a ray into or out of a shadow zone.
+- [Sound reflection of a noise barrier in situ](https://jmrplens.github.io/phonometry/environment/propagation/barrier-reflection/):
+  the barrier measured where it stands: the sound reflection index of EN 1793-5
+  and its single number DL_RI.
 
 ## [Environmental sources](https://jmrplens.github.io/phonometry/environment/sources/)
 
@@ -28554,6 +28559,443 @@ assume flat ground at $z = 0$; neither accepts a terrain elevation profile.
 ---
 
 
+<!-- source: docs/environment/propagation/barrier-reflection.md | canonical: https://jmrplens.github.io/phonometry/environment/propagation/barrier-reflection/ -->
+Source: https://jmrplens.github.io/phonometry/environment/propagation/barrier-reflection/
+
+# Sound reflection of a noise barrier in situ (EN 1793-5)
+
+A road noise barrier is declared by its absorption, and EN 1793-1 measures that
+in a reverberation room: a sample lying on the floor, sound arriving from every
+direction, and a product that is not the one standing beside the road. EN
+1793-5 measures the same property where the barrier stands, in the direct
+sound field of a loudspeaker in front of it, and calls it the **sound
+reflection index** $RI$: in each one-third octave band, the energy the device
+sends back as a fraction of what reaches it. This page covers
+`phonometry.environment.propagation.barrier_reflection`, which takes the
+impulse responses of the measurement to the index, the single number
+$DL_{RI}$ and the limits the size of the sample puts on both.
+
+## 1. The set-up
+
+The loudspeaker faces the device at half its height, its front panel
+$d_S$ = 1,50 m from the **reference plane**, the plane that touches the most
+protruding parts of the device. Between them stands a vertical grid of nine
+microphones, 3 by 3 and 0,40 m apart, its centre (microphone 5) 0,25 m from the
+plane and so 1,25 m from the loudspeaker. The microphones are numbered as the
+loudspeaker sees them: 1 to 3 along the top row, 7 to 9 along the bottom.
+
+Each microphone hears the direct sound and, a little over a millisecond later,
+the reflection. The reflection has travelled further, 1,75 m against 1,25 m at
+microphone 5, and has spread over a larger sphere; Formula (2) puts that back
+with $C_{geo,k} = (d_{r,k}/d_{i,k})^2$, which Table 2 prints for every
+microphone:
+
+```python
+from phonometry import environment
+
+paths = environment.reflection_grid_paths_m()
+print(paths[4])        # [1.25 1.75]: direct and specular path at microphone 5, m
+print(environment.geometric_divergence_corrections().round(2))
+# [1.8  1.87 1.8  1.87 1.96 1.87 1.8  1.87 1.8 ]
+```
+
+Whether the grid really stands where it should is checked with a reflecting
+plate on the reference plane (5.6.2.6): the delay between the direct and the
+reflected sound at each microphone, times the speed of sound, has to be within
+25 mm of the path difference of Table 3. The same check against a plate 0,25 m
+behind microphone 5 (`check="relative"`, 5.6.2.5) compares the direct arrivals
+at the eight outer microphones with the one at the centre.
+
+```python
+import numpy as np
+
+c = 343.2                                         # m/s at 20 degC
+# Direct-to-reflected delays read at the nine microphones, in seconds.
+delays = np.array([0.467, 0.483, 0.470, 0.483, 0.502,
+                   0.483, 0.440, 0.483, 0.467]) / c
+check = environment.check_reflection_grid_position(delays, speed_of_sound=c)
+print(check.passes)                               # False
+print((check.deviations_m * 1e3).round())         # microphone 7 is 27 mm short
+```
+
+The verdict is `passes`; the object refuses to stand in for it in an `if`, so a
+check is never read as a pass by accident.
+
+## 2. Taking the direct sound out
+
+In front of the device the direct sound and the reflection overlap: a
+loudspeaker's impulse response lasts up to 3 ms (5.4.2) and the reflection
+arrives about 1,4 ms after the direct sound. The free-field record, taken with
+the loudspeaker and the grid turned away from everything, the ground included,
+*is* the direct sound. **Signal subtraction** (5.5.4) removes it: the
+free-field record is shifted in steps of a fiftieth of a sample, within two
+samples either way, by a phase ramp over its own transform; the shift that
+best fits the 50 samples around the main peak is kept; the record is scaled so
+the two peaks are equal and subtracted. What is left is the reflection, and the
+**reduction factor** $R_{sub}$ of Formula (6) measures how much of the direct
+sound went with it: the energy within 0,5 ms of the peak before, over the
+energy there after. Below 10 dB the standard reads the subtraction as
+imperfect, and so does `subtract_direct_sound`, with a
+`BarrierReflectionWarning`.
+
+The records below stand in for a measurement at 48 kHz: a loudspeaker pulse at
+2,5 kHz, a reflection of 0,35 of the incident amplitude with its top end
+smoothed, and free-field records taken with the grid 3 µs further away, which
+is what moving the equipment does.
+
+```python
+fs = 48000.0
+t = np.arange(4800) / fs                          # 100 ms records
+
+def pulse(delay_s):
+    """A loudspeaker's short impulse response, arriving after delay_s."""
+    tau = t - delay_s
+    return np.exp(-0.5 * (tau / 60e-6) ** 2) * np.cos(2 * np.pi * 2500.0 * tau)
+
+smooth = np.hanning(9) / np.hanning(9).sum()
+free = np.empty((9, t.size))
+front = np.empty((9, t.size))
+for k, (direct_m, reflected_m) in enumerate(environment.reflection_grid_paths_m()):
+    free[k] = pulse(0.01 + direct_m / c + 3e-6) / direct_m
+    reflection = np.convolve(pulse(0.01 + reflected_m / c), smooth, mode="same")
+    front[k] = pulse(0.01 + direct_m / c) / direct_m + 0.35 * reflection / reflected_m
+
+sub = environment.subtract_direct_sound(front[4], free[4], fs)
+print(round(sub.shift_samples, 2), round(sub.reduction_db))   # -0.14 57
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/barrier_direct_sound_subtraction_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/barrier_direct_sound_subtraction.svg" alt="The impulse response at microphone 5 from one millisecond before to three milliseconds after the direct sound: the record in front of the device as a wide grey line with the direct peak at zero and the reflection at about 1.45 ms, the free-field record aligned onto it and scaled as a dashed orange line lying on the direct peak, and what is left after the subtraction as a blue line, flat around zero where the direct sound was and carrying the whole reflection. A green band marks the interval from minus 0.5 to plus 0.5 ms where the reduction factor is measured, and the title gives R sub of 56.6 dB." width="92%"></picture>
+
+*The direct sound goes and the reflection stays: the subtraction found the
+0,14 sample shift and left 57 dB less of the direct sound behind.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+sub.plot()
+plt.show()
+```
+
+</details>
+
+NOTE 1 of 5.5.4 matters here: the shifted and scaled free-field record serves
+the subtraction and nothing else. The index is computed from the original one,
+which the result keeps apart as `aligned_free_field` only so it can be drawn.
+
+## 3. The Adrienne window
+
+Each component is cut out with the **Adrienne temporal window** of 5.5.5: a
+0,5 ms left half of a four-term Blackman-Harris window, a flat part, and a right
+half whose length is 3/7 of the flat part. The standard window is 7,9 ms long
+(0,5 + 5,18 + 2,22 ms); the one that processes all nine microphones from
+200 Hz upward is 6,0 ms (0,5 + 3,85 + 1,65 ms); the gain check of 5.5.1 uses
+1,3 ms (0,5 + 0,56 + 0,24 ms), short enough to end before the reflection
+reaches the corner microphones. The **marker point** where the flat part
+begins sits 0,2 ms before the peak of the component (5.5.6); for the reflection
+the peak is placed by geometry, the direct peak plus $(d_{r,k} - d_{i,k})/c$,
+which is what makes the reference plane the conventional reflection plane of a
+device that is not flat.
+
+```python
+window = environment.adrienne_reflection_window(fs, environment.ADRIENNE_SHORT_LENGTH_S)
+print(window.size)                                        # 288 samples at 48 kHz
+print(round(environment.adrienne_low_frequency_limit_hz(7.9e-3), 1))   # 162.5 Hz
+```
+
+The edges are Formula (7) sampled as printed, each a half of a full
+Blackman-Harris window twice its own length. Table 1 calls $T_{W,BH}$ the length
+of the trailing edge, which read into Formula (7) would draw a whole bell
+where the edge should fall; the [errata
+registry](https://jmrplens.github.io/phonometry/reference/errata/) records it. The second line is the
+window's low frequency limit, the subject of section 5.
+
+## 4. The index, band by band
+
+Formula (1) averages, over the microphones, the ratio of the reflected to the
+incident energy in each band, with three corrections; the gain factor divides
+here, as the library computes it (see below):
+
+$$
+RI_j = \frac{1}{n_j} \sum_{k=1}^{n_j}
+\frac{\int_{\Delta f_j} |F[h_{r,k}(t)\, w_{r,k}(t)]|^2\, df}
+     {\int_{\Delta f_j} |F[h_{i,k}(t)\, w_{i,k}(t)]|^2\, df}
+\; \frac{C_{geo,k}\, C_{dir,k}(\Delta f_j)}{C_{gain,k}(\Delta f_g)}
+$$
+
+- $C_{geo,k}$ is the divergence of section 1.
+- $C_{dir,k}$ puts back the **directivity of the loudspeaker**: the reflection
+  left it towards the specular point, at another angle than the direct sound.
+  It is measured once per loudspeaker (Formula (3)), in free field, at the
+  microphone position and on the specular path at the same distance, and
+  `source_directivity_corrections` turns the two sets of records into the
+  `(9, 18)` array `reflection_index` takes. A report without it states "none",
+  and so does leaving it out.
+- $C_{gain,k}$ takes out a **change of gain** between the free-field and the
+  in-front configurations. Formula (4) measures it as the in-front incident
+  energy over the free-field one, with the 1,3 ms window over the bands of
+  500 Hz to 2 kHz. The library **divides** by it. Formula (1) prints it as a
+  multiplier, and since Formula (4) makes it the gain change itself, a
+  multiplier would square the change instead of removing it; the [errata
+  registry](https://jmrplens.github.io/phonometry/reference/errata/) records the case. Above 20 % the
+  standard reads the change as a sign the settings moved, and the function
+  warns.
+
+In the bands of 100 Hz, 125 Hz and 160 Hz the average is over microphones 1 to
+6 with the 7,9 ms window, because the bottom row meets the ground reflection
+first; from 200 Hz it is over all nine with the 6,0 ms window.
+
+```python
+result = environment.reflection_index(front, free, fs, speed_of_sound=c)
+print(result.reflection_index.round(2))
+# [0.12 0.12 0.12 0.12 0.12 0.12 0.12 0.12 0.12 0.12 0.12 0.12 0.11 0.11
+#  0.1  0.08 0.07 0.05]
+print(result.rating.reported)                  # 9 dB from the 200 Hz band
+print(result.gain_corrections[0, 4].round(3))  # 1.0: no gain changed
+
+on_axis, specular = free, 0.95 * free          # a loudspeaker 5 % weaker off axis
+directivity = environment.source_directivity_corrections(on_axis, specular, fs)
+print(directivity[4, 10].round(3))             # 1.108 at 1 kHz
+```
+
+A reflection of 0,35 of the amplitude comes back as 0,12, its square, and
+falls where the smoothing took the top end off. The result keeps
+every microphone's index (`microphone_values`, `nan` where 5.5.5 leaves a
+microphone out), every gain factor and every reduction factor, so a report can
+state them. Several grid positions, the A, B and C of a device that is not flat
+or not homogeneous (5.6.2.3), go in as a `(positions, 9, N)` array and are
+averaged over every microphone of every position. The records can also
+arrive as the nine-channel `Signal` objects the reader returns, one per grid
+position: the rate and the calibration come with them, and `fs` is left out.
+The speed of sound has no default, because 5.5.6 and 5.7.3 ask for its value at
+the temperature of the test.
+
+## 5. How low a sample can be measured
+
+The reflected window has to end before two unwanted arrivals reach the
+microphone: the sound reflected by the **ground** in front of the device, and
+the sound **diffracted by its edges** (5.5.7). A lower device brings both
+earlier, allows a shorter window, and a shorter window reaches less far down.
+The standard gives the result for a device longer than it is high only as the
+three curves of Figure 14, without the formula behind them.
+`reflection_low_frequency_limit` computes it by the construction of the
+method's authors (Garai and Guidorzi, 2000): the window's flat part and
+trailing edge last exactly the delay between the reflection and the first
+unwanted component, and its limit is the first notch in the spectrum of that
+window, 162,5 Hz for the 7,9 ms one, which the paper gives as about 160 Hz.
+
+```python
+limit = environment.reflection_low_frequency_limit(3.5, speed_of_sound=c)
+print(limit.low_frequency_limit_hz.round())
+# [220. 217. 220. 211. 208. 211. 265. 262. 265.]
+print(limit.limiting_component[1], limit.limiting_component[7])   # top edge ground
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/barrier_reflection_limit_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/barrier_reflection_limit.svg" alt="Bars of the low frequency limit at each of the nine microphones of the grid in front of a 3.5 m barrier: about 220 Hz for microphones 1 to 3, coloured as limited by the top edge, about 210 Hz for microphones 4 to 6 and about 265 Hz for microphones 7 to 9, both coloured as limited by the ground reflection." width="92%"></picture>
+
+*In this construction the top edge cuts the top row short and the ground the
+bottom row, so the middle row reaches lowest; Figure 14 of the standard gives
+microphone 2 the lowest limit (compared below).*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+limit.plot()
+plt.show()
+```
+
+</details>
+
+Against what the standard prints, the construction agrees at the centre of
+the grid and not at its top and bottom rows:
+
+| 4 m sample, 340 m/s | 5.5.7 text | Figure 14 | This construction |
+| :--- | ---: | ---: | ---: |
+| Microphone 2 | about 160 Hz | 160 Hz | 176 Hz (top edge) |
+| Microphone 5 | about 170 Hz | 170 Hz | 167 Hz (ground) |
+| Microphone 8 | about 220 Hz | 220 Hz | 201 Hz (ground) |
+
+The Figure 14 column is read off the printed curves, to about 1 %.
+Microphone 5 follows its curve within 5 % from 2,75 m up, and is 5,5 % below it
+at 2,5 m. At microphone 2 the top edge, which 5.5.7 names as a component to
+keep out, arrives before the ground reflection and puts the limit about 3 % to
+10 % above the curve at every height; at microphone 8 the limit is a third
+below the curve at 2,5 m, 6 % below at 4,5 m and 3 % or less from 6 m up,
+below it throughout. Neither outer curve comes out of the ground reflection, the top
+edge or any mix of them at the heights of the grid, so the figure could not be
+rebuilt. For the 3,5 m barrier of 5.8 the highest limit comes out at 265 Hz
+where the standard states 300 Hz. The limit is therefore reported, not
+used to pick a band: **the lowest reliable band** $m$ of the single number
+is the caller's, and the two examples the standard gives for choosing it read
+a limit against the bands in opposite directions (the 4 m sample keeps its
+200 Hz band with a limit of 220 Hz, the 3,5 m barrier loses its 315 Hz band
+with a limit of 300 Hz), which the errata registry also records.
+
+The side edges come in with `device_length_m`, for a sample narrower than it
+is high. `reflection_sampled_area_radius_m` gives the other size that matters,
+the radius around the point of incidence that must stay free of reflecting
+objects (Formula (8)): 1,96 m for the 7,9 ms window at 340 m/s, the value of
+NOTE 1 of 5.6.1.
+
+## 6. The single number, and Annex B
+
+The index is weighted by the normalised traffic noise spectrum of EN 1793-3,
+from the lowest reliable band $m$ up (Formula (12)):
+
+$$
+DL_{RI} = -10 \lg\left[
+\frac{\sum_{i=m}^{18} RI_i\, 10^{0,1 L_i}}
+     {\sum_{i=m}^{18} 10^{0,1 L_i}} \right]
+$$
+
+It is reported to the nearest integer and carries no category ladder. For the
+qualification sample of 4 m by 4 m the lowest band is 200 Hz, the default; a
+smaller device reports its range with the number, `DL_RI (400 - 5 000 Hz)` for
+the 3,5 m barrier of 5.8. The clause copies the 0,99 limit on the ratio from EN
+1793-1, where it keeps a logarithm defined; here a device reflecting more than
+it receives would simply rate below zero, but the limit is applied as printed,
+with a warning.
+
+Annex B reports a 4 m absorptive barrier measured at twelve grid positions,
+each position one column of "particular values", and the declared index as their
+mean. `reflection_index_from_positions` recomputes it:
+
+```python
+table_b1 = [   # EN 1793-5 Table B.1: twelve grid positions per band
+    [0.59, 0.62, 0.57, 0.55, 0.58, 0.59, 0.57, 0.57, 0.51, 0.61, 0.61, 0.62],
+    [0.60, 0.62, 0.58, 0.54, 0.57, 0.58, 0.58, 0.58, 0.51, 0.60, 0.59, 0.61],
+    [0.63, 0.65, 0.60, 0.55, 0.57, 0.59, 0.60, 0.60, 0.53, 0.60, 0.57, 0.60],
+    [0.38, 0.42, 0.31, 0.37, 0.37, 0.35, 0.37, 0.39, 0.31, 0.36, 0.31, 0.32],
+    [0.43, 0.47, 0.35, 0.39, 0.39, 0.36, 0.42, 0.43, 0.35, 0.38, 0.34, 0.36],
+    [0.43, 0.45, 0.34, 0.37, 0.37, 0.34, 0.37, 0.37, 0.33, 0.33, 0.33, 0.33],
+    [0.34, 0.33, 0.26, 0.28, 0.30, 0.27, 0.22, 0.24, 0.22, 0.21, 0.25, 0.23],
+    [0.15, 0.15, 0.12, 0.13, 0.15, 0.15, 0.07, 0.08, 0.08, 0.11, 0.12, 0.12],
+    [0.05, 0.04, 0.04, 0.07, 0.05, 0.06, 0.06, 0.04, 0.04, 0.09, 0.05, 0.06],
+    [0.07, 0.07, 0.06, 0.13, 0.08, 0.07, 0.17, 0.11, 0.09, 0.11, 0.09, 0.07],
+    [0.11, 0.10, 0.09, 0.13, 0.11, 0.08, 0.17, 0.16, 0.10, 0.08, 0.07, 0.04],
+    [0.11, 0.13, 0.10, 0.07, 0.11, 0.08, 0.10, 0.13, 0.09, 0.10, 0.09, 0.07],
+    [0.39, 0.53, 0.16, 0.37, 0.28, 0.21, 0.30, 0.23, 0.18, 0.30, 0.35, 0.29],
+    [0.19, 0.28, 0.10, 0.20, 0.15, 0.12, 0.16, 0.15, 0.08, 0.13, 0.17, 0.22],
+    [0.15, 0.23, 0.21, 0.14, 0.13, 0.17, 0.15, 0.15, 0.16, 0.12, 0.15, 0.10],
+    [0.31, 0.33, 0.27, 0.26, 0.23, 0.19, 0.18, 0.25, 0.18, 0.16, 0.23, 0.21],
+    [0.39, 0.27, 0.22, 0.23, 0.26, 0.21, 0.28, 0.22, 0.18, 0.28, 0.21, 0.24],
+    [0.55, 0.43, 0.25, 0.52, 0.53, 0.53, 0.40, 0.43, 0.23, 0.46, 0.36, 0.45],
+]
+annex_b = environment.reflection_index_from_positions(np.array(table_b1).T)
+print(annex_b.reflection_index.round(2)[4:10])  # [0.39 0.36 0.26 0.12 0.05 0.09]
+print(annex_b.rating.reported)                 # 8 dB, as printed under the table
+print(round(annex_b.rating.rating, 2))         # 7.65 dB before rounding, see below
+
+u_bands, u_rating = annex_b.expanded_uncertainty()   # Table A.1, high column, k = 1.96
+print(round(u_rating, 2))                            # 1.59 dB, Table B.2
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/barrier_reflection_index_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/barrier_reflection_index.svg" alt="The sound reflection index of the Annex B barrier over the eighteen one-third octave bands from 100 Hz to 5 kHz: twelve light points per band for the twelve grid positions and a line through their average, near 0.58 in the three hatched bands below 200 Hz, falling from 0.39 at 250 Hz to 0.05 at 630 Hz, around 0.1 up to 1.25 kHz, a peak of 0.30 at 1.6 kHz and a rise to 0.43 at 5 kHz. The title gives DL RI of 8 dB from 200 Hz to 5 kHz." width="92%"></picture>
+
+*Twelve positions along an absorptive barrier: little comes back between
+500 Hz and 1,25 kHz, where the traffic spectrum weighs most, and the posts and
+the perforated face show above.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+annex_b.plot()
+plt.show()
+```
+
+</details>
+
+Every one of the eighteen averages of Table B.1 comes out of its twelve
+particular values: sixteen to the hundredth, and two, at 200 Hz and 2,5 kHz,
+fall exactly on a half and are printed one down and one up, which is what
+averages of unrounded particular values would give. Formula (12) on the
+printed averages gives the 7,68 dB of Table B.2 before rounding. On the
+particular values themselves, which is what `annex_b.rating.rating` holds, it
+gives 7,65 dB: the 7,68 dB is Formula (12) on averages rounded to two
+decimals, the resolution 5.11 reports the index to. Both round to the 8 dB
+printed. The expanded uncertainty is the reproducibility of the
+inter-laboratory test in Table A.1 times the coverage factor, 1,59 dB for the
+single number; in seven bands Table B.2 prints a hundredth less than 1,96
+times the $s_R$ of Table A.1, as unrounded standard deviations would give. The
+print does not say which values the example multiplied, and the library
+multiplies the printed ones.
+
+## Relation to the other parts of EN 1793
+
+The declaration of a road device ([Spherical ground effect and advanced
+barriers](https://jmrplens.github.io/phonometry/environment/propagation/ground-barriers/#3-what-the-product-declaration-says-en-1793))
+carries $DL_\alpha$ from EN 1793-1 and $DL_R$ from EN 1793-2, both from a
+laboratory. $DL_{RI}$ answers the question of $DL_\alpha$ again, in the direct
+field beside the road rather than the diffuse field of a reverberation room,
+on the product as built; the two do not convert into each other, and a
+declaration that states both is stating two things. The three single numbers
+share one function family and one result, `RoadDeviceRating`, whose `quantity`
+says which it is.
+
+## What this guide covers
+
+**Covered.** EN 1793-5:2016 from the impulse responses on: the geometry of the grid and
+Formula (2) (Table 2), the signal subtraction with its sub-sample alignment and
+the reduction factor of Formula (6) (5.5.4), the Adrienne window of 5.5.5 with
+Formula (7) and its placement (5.5.6), the sound reflection index of Formula
+(1) with the directivity correction of Formula (3) and the gain factor of
+Formula (4), the averages of 5.5.5 and 5.6.2.3 over microphones and grid
+positions, the single number $DL_{RI}$ of 5.8 with the EN 1793-3 spectrum, the
+sampled area of Formula (8), the two position checks of 5.6.2.5 and 5.6.2.6
+against Table 3, the expanded uncertainty from Table A.1, and the low
+frequency limit of 5.5.7 by the construction of Garai and Guidorzi. Tables 2
+and 3, NOTE 1 of 5.6.1, the three windows and the example of Annex B (Tables
+B.1 and B.2) are conformance checks.
+
+**Not covered.** Obtaining the impulse responses, by MLS or sweep and deconvolution (5.4.3),
+which is the [room impulse response](https://jmrplens.github.io/phonometry/buildings/rooms/room-impulse-response/)
+machinery; the anti-aliasing filter of 5.5.2 and the signal-to-noise ratio of
+5.5.3, which a laboratory states rather than computes; the meteorological and
+surface conditions of 5.7; and the far-field indicators of Annex C, which the
+standard leaves to the QUIESST reports. The low frequency limit follows Figure
+14 at microphone 5 and not at microphones 2 and 8, so it does not choose the
+lowest reliable band: that stays with the report.
+
+## See also
+
+- [Spherical ground effect and advanced barriers](https://jmrplens.github.io/phonometry/environment/propagation/ground-barriers/): the declaration of a road device, $DL_\alpha$ and $DL_R$ over the same spectrum, and what a barrier does to a receiver behind it.
+- [In-situ Road-Surface Absorption](https://jmrplens.github.io/phonometry/materials/surfaces/road-absorption/): ISO 13472-1, the same subtraction and Adrienne window pointed at a road surface.
+- [Errata found in published sources](https://jmrplens.github.io/phonometry/reference/errata/): the gain factor of Formula (1), Table B.2 and the other defects of EN 1793-5.
+- API reference: [`environment.propagation.barrier_reflection`](https://jmrplens.github.io/phonometry/reference/api/environment/barrier-reflection/).
+
+## References
+
+- CEN (2016). *EN 1793-5:2016 Road traffic noise reducing devices - Test
+  method for determining the acoustic performance - Part 5: Intrinsic
+  characteristics - In situ values of sound reflection under direct sound field
+  conditions*. The implemented edition, read from BS EN 1793-5:2016: the grid
+  and its geometry (3.10 to 3.15, Tables 2 and 3), Formula (1) with the
+  corrections of Formulas (2) to (4), the subtraction and Formula (6) of 5.5.4,
+  the Adrienne window of 5.5.5 and Formula (7), its placement (5.5.6), the low
+  frequency limit (5.5.7), the sampled area of Formula (8), the position checks
+  of 5.6.2.5 and 5.6.2.6, DL_RI (5.8), Table A.1 and the example of Annex B.
+- CEN (1997). *EN 1793-3:1997 Road traffic noise reducing devices - Test
+  method for determining the acoustic performance - Part 3: Normalized traffic
+  noise spectrum*. Table 1, read from the BS EN 1793-3:1998 edition.
+- Garai, M., & Guidorzi, P. (2000). European methodology for testing the
+  airborne sound insulation characteristics of noise barriers in situ:
+  experimental verification and comparison with laboratory data. *Journal of
+  the Acoustical Society of America*, 108(3), 1054-1067.
+  [doi:10.1121/1.1286811](https://doi.org/10.1121/1.1286811). Section III.D,
+  the window and its first notch as the low frequency limit.
+- Guidorzi, P., & Garai, M. (2013). Advancements in sound reflection and
+  airborne sound insulation measurement on noise barriers. *Open Journal of
+  Acoustics*, 3(2A), 25-38.
+  [doi:10.4236/oja.2013.32A004](https://doi.org/10.4236/oja.2013.32A004). The
+  QUIESST revision the 2016 standard adopted.
+
+---
+
+
 <!-- source: docs/environment/propagation/ground-barriers.md | canonical: https://jmrplens.github.io/phonometry/environment/propagation/ground-barriers/ -->
 Source: https://jmrplens.github.io/phonometry/environment/propagation/ground-barriers/
 
@@ -28965,6 +29407,17 @@ that standard is the railway spectrum and the symbol list under the formula
 says railway. It is the road wording of EN 1793-2, left in place when the
 clause was copied.
 
+### The reflection, measured where the barrier stands
+
+Both road numbers come from a laboratory, on a sample and in a diffuse field.
+EN 1793-5 measures the reflection of the barrier as built, in the direct field
+of a loudspeaker in front of it, and weights it by the same spectrum into a
+third number, $DL_{RI}$. It has its own page, [Sound reflection of a noise
+barrier in situ](https://jmrplens.github.io/phonometry/environment/propagation/barrier-reflection/), because most of the work is in getting from nine
+impulse responses to the index; the rating itself is
+`environment.sound_reflection_rating`, beside the two above, and returns the
+same `RoadDeviceRating`.
+
 ## Relation to ISO 9613-2
 
 The tabulated $A_\mathrm{gr}$ and $D_z$ of the
@@ -29042,7 +29495,7 @@ Source: https://jmrplens.github.io/phonometry/environment/propagation/
 # Outdoor sound
 
 This section is the **path**: what happens to a sound between a source of known
-power and a receiver hundreds of metres away. Its three pages go from the
+power and a receiver hundreds of metres away. Three of its pages go from the
 engineering method down to the physics it approximates, and then to the one
 thing both of them assume does not happen.
 
@@ -29083,7 +29536,15 @@ compresses into the scalar meteorological correction. This page computes it,
 with curved rays and closed-form shadow-zone distances, and with the Green's
 function parabolic equation as the reference field.
 
-Read them in that order. The rating that a predicted level ends in is not here:
+Read them in that order. The fourth page turns round and measures the
+barrier itself: [Sound reflection of a noise barrier
+in situ](https://jmrplens.github.io/phonometry/environment/propagation/barrier-reflection/) takes the
+impulse responses of EN 1793-5, a loudspeaker and nine microphones in front of
+a road barrier where it stands, to the sound reflection index band by band and
+to its single number DL_RI, the in-place counterpart of the absorption rating
+the product is declared by.
+
+The rating that a predicted level ends in is not here:
 the period levels come from [Integrated and Statistical
 Levels](https://jmrplens.github.io/phonometry/signals/levels/levels/), and Lden, Ldn and the rating level
 from [Environmental Levels (ISO
@@ -29106,6 +29567,9 @@ for a machine, and in [Aircraft noise](https://jmrplens.github.io/phonometry/air
 - [Atmospheric refraction: rays and the GFPE](https://jmrplens.github.io/phonometry/environment/propagation/atmospheric-refraction/):
   the refracting atmosphere itself: effective sound-speed profiles, curved rays
   with their shadow zones, and the Green's function parabolic equation.
+- [Sound reflection of a noise barrier in situ](https://jmrplens.github.io/phonometry/environment/propagation/barrier-reflection/):
+  the sound reflection index of EN 1793-5 measured in front of a road barrier,
+  with the signal subtraction, the Adrienne window and the single number DL_RI.
 
 ## See also
 
@@ -29136,9 +29600,10 @@ computed over the overall geometry, so it is coherent and reciprocal but is
 not a boundary-element solution, and no model here computes turbulent
 scattering: ISO 9613-2 absorbs it into the fixed caps on its screening term,
 and the wave-acoustic and refraction pages assume a non-turbulent atmosphere
-outright. Nothing on these pages produces a rating: no Lden, no limit value
-and no verdict (those are [Assessment and
-regulation](https://jmrplens.github.io/phonometry/environment/assessment/)).
+outright. Nothing on these pages produces an environmental rating: no Lden, no
+limit value and no verdict on a site (those are [Assessment and
+regulation](https://jmrplens.github.io/phonometry/environment/assessment/)); the single number and the
+position check of EN 1793-5 are about a product and its measurement.
 
 ---
 
@@ -45235,9 +45700,22 @@ documents, one page per module.
 | `barrier_insertion_loss` | `function` | **Barrier insertion loss: Kurze-Anderson / exact half-plane / coherent ground four-path (Attenborough Ch. 9, Bies 5.3.5-5.3.7).**<br>• `frequencies`, `source_height`, `barrier_distance`, `barrier_height`, `receiver_distance`, `receiver_height`<br>• `method` 'exact'/'kurze_anderson'<br>• `thickness` e [m] (thick barrier)<br>• `ground_impedance` or `ground_flow_resistivity` | `il = environment.barrier_insertion_loss(bands, 1, 50, 4, 100, 1.5, ground_flow_resistivity=2e5)`<br><br>• `BarrierInsertionLoss` |
 | `TRAFFIC_NOISE_BANDS_HZ` / `NORMALISED_TRAFFIC_NOISE_SPECTRUM_DB` / `NORMALISED_RAILWAY_NOISE_SPECTRUM_DB` / `SPECTRA` | `constant` | **The eighteen one-third octave bands from 100 Hz to 5 kHz, and the two spectra a device is rated against: EN 1793-3 Table 1 for a road and EN 16272-3-1 Table 1 for a railway.** `SPECTRA` maps `'road'` and `'railway'` to them. | `environment.NORMALISED_TRAFFIC_NOISE_SPECTRUM_DB[10]  # -8.0 dB at 1 kHz` |
 | `sound_absorption_rating` / `airborne_insulation_rating` | `function` | **EN 1793-1 Clause 5, EN 1793-2 Clause 5.2 and EN 16272-3-1 Clauses 5 and 6: what a noise reducing device is declared by.**<br>• `sound_absorption_rating(absorption_coefficients, spectrum='road')`: `DLα`, the energy the device does not send back, capped by the 0,99 ratio limit both standards put on it<br>• `airborne_insulation_rating(sound_reduction_index_db, spectrum='road')`: `DL_R`, the energy it does not pass<br>• `spectrum='railway'` swaps in EN 16272-3-1 Clauses 5 and 6, which are the same formulas on the railway table and print no category ladder<br>• both return a `RoadDeviceRating` carrying the unrounded value, the reported integer and, for a road device, its Annex A category | `environment.airborne_insulation_rating([32.0] * 18).category  # 'B3'` |
-| `RoadDeviceRating` | `dataclass` | **One declared rating: `rating`, `reported`, `category` (`None` for a railway device), `quantity`, `spectrum`, `bands_hz`, `values`, `weights`.**<br>• `.plot()` draws the per-band input against the spectrum that weights it | `rating.plot()` |
+| `RoadDeviceRating` | `dataclass` | **One declared rating: `rating`, `reported`, `category` (`None` for a railway device and for reflection), `quantity` (`'absorption'`, `'insulation'` or `'reflection'`), `spectrum`, `bands_hz`, `values`, `weights`, `lowest_band_hz`.**<br>• `.plot()` draws the per-band input against the spectrum that weights it, hatching the bands a reflection rating leaves out | `rating.plot()` |
 | `ABSORPTION_RATIO_LIMIT` / `ABSORPTION_CATEGORIES` / `INSULATION_CATEGORIES` | `constant` | **The 0,99 ceiling of EN 1793-1 Clause 5, and the two Annex A category ladders (A1 to A5, B1 to B4) read off the reported integer.** | `environment.ABSORPTION_RATIO_LIMIT  # 0.99` |
 | `RoadDeviceWarning` | `warning class` | **Emitted when the weighted absorption ratio reaches the 0,99 limit, so the rating is the limit rather than the measurement.** | `warnings.catch_warnings()` |
+| `sound_reflection_rating` | `function` | **EN 1793-5 Clause 5.8, Formula (12): `DL_RI`, the sound reflection index weighted by the EN 1793-3 spectrum from the lowest reliable band.**<br>• `reflection_indices`: the eighteen `RI` values; a band below `lowest_band_hz` may be `nan`<br>• `lowest_band_hz` (Default: 200 Hz, the qualification sample of 4 m by 4 m); a 3,5 m barrier reports `DL_RI (400 - 5 000 Hz)`<br>• the ratio is capped at 0,99 as the clause says, with a `RoadDeviceWarning`; no category ladder | `environment.sound_reflection_rating([0.1] * 18).rating  # 10.0 dB` |
+| `reflection_index` / `ReflectionIndexResult` | `function` / `dataclass` | **EN 1793-5 Formula (1): the sound reflection index `RI` per one-third octave band from the impulse responses of the nine microphones.**<br>• `in_front_irs`, `free_field_irs`: `(9, N)` for one grid position or `(positions, 9, N)`; `fs`<br>• `speed_of_sound` places the reflected window; `window_length_s` (6,0 ms, one or nine) from 200 Hz, `low_band_window_length_s` (7,9 ms) and `low_band_microphones` (1 to 6) below it<br>• `directivity_corrections`: `C_dir,k` as `(9, 18)`, or `None`; `C_geo,k` from the geometry and `C_gain,k` of Formula (4), which divides<br>• result: `reflection_index`, `position_values`, `microphone_values`, `gain_corrections`, `subtraction_reductions_db`, `rating` (`DL_RI`), `expanded_uncertainty()`, `.plot()` | `environment.reflection_index(front, free, 48000.0, speed_of_sound=343.0)` |
+| `reflection_index_from_positions` | `function` | **The declared index from the index of each grid position, their band-by-band mean (5.6.2.3, Annex B Table B.1).**<br>• `position_values`: `(positions, 18)`, `nan` where a band was not measured<br>• `lowest_band_hz` (Default: 200 Hz) | `environment.reflection_index_from_positions(rows).rating.reported  # 8 for Table B.1` |
+| `subtract_direct_sound` / `DirectSoundSubtraction` | `function` / `dataclass` | **EN 1793-5 5.5.4: the free-field record aligned onto the in-front one to a fiftieth of a sample, scaled to its peak and subtracted.**<br>• the shift is a phase ramp over the record's own transform, within two samples either way<br>• result: `residual` (the reflection), `aligned_free_field`, `shift_samples`, `amplitude_factor`, `reduction_db` (`R_sub`, Formula (6)), `.plot()`<br>• an `R_sub` below 10 dB emits a `BarrierReflectionWarning` | `environment.subtract_direct_sound(front[4], free[4], 48000.0).reduction_db` |
+| `adrienne_reflection_window` / `adrienne_low_frequency_limit_hz` | `function` | **The Adrienne window of EN 1793-5 5.5.5 and the low frequency limit it allows.**<br>• the window: a 0,5 ms left half of the Blackman-Harris window of Formula (7), a flat part, and a right half 3/7 of the flat part; the marker point is sample `round(0.5e-3 * fs)`<br>• the limit: the first notch of the continuous window's spectrum, the indicator of Garai and Guidorzi (2000): 162,5 Hz for 7,9 ms, 216,5 Hz for 6,0 ms | `environment.adrienne_low_frequency_limit_hz(7.9e-3)  # 162.55 Hz` |
+| `ADRIENNE_STANDARD_LENGTH_S` / `ADRIENNE_SHORT_LENGTH_S` / `ADRIENNE_CALIBRATION_LENGTH_S` / `REFLECTION_LOW_BAND_MICROPHONES` | `constant` | **The three window lengths EN 1793-5 prints: 7,9 ms below 200 Hz, 6,0 ms from 200 Hz, 1,3 ms for the gain check of 5.5.1; and the microphones 1 to 6 averaged below 200 Hz.** | `environment.ADRIENNE_SHORT_LENGTH_S  # 0.006` |
+| `source_directivity_corrections` | `function` | **EN 1793-5 Formula (3): `C_dir,k` per microphone and band, from free-field records at the microphone positions and on the specular paths, at the same distance from the loudspeaker.**<br>• returns a read-only `(9, 18)` array for `reflection_index(directivity_corrections=...)` | `environment.source_directivity_corrections(on_axis, specular, 48000.0)` |
+| `reflection_grid_paths_m` / `geometric_divergence_corrections` / `reflection_sampled_area_radius_m` | `function` | **The geometry of the grid: the direct and the specular path to each microphone (Table 2), `C_geo,k = (d_r,k/d_i,k)²` (Formula (2)) and the maximum sampled area (Formula (8)).**<br>• `source_distance_m`, `microphone_distance_m`, `grid_spacing_m` default to 1,50 m, 0,25 m and 0,40 m<br>• the sampled area takes the window length and `speed_of_sound`: 1,96 m for 7,9 ms at 340 m/s (5.6.1 NOTE 1) | `environment.geometric_divergence_corrections()[4]  # 1.96` |
+| `REFLECTION_SOURCE_DISTANCE_M` / `REFLECTION_MICROPHONE_DISTANCE_M` / `REFLECTION_GRID_SPACING_M` / `REFLECTION_GRID_DISTANCES` / `REFLECTION_PATH_DIFFERENCES_M` / `REFLECTION_PATH_TOLERANCE_M` | `constant` / `mapping` | **The fixed geometry of EN 1793-5 (1,50 m, 0,25 m, 0,40 m), Table 2 as printed (`d_i,k`, `d_r,k`, `C_geo,k` per microphone) and Table 3 as printed (`Δd_k5`, `Δd_k`) with its 25 mm tolerance.** | `environment.REFLECTION_PATH_DIFFERENCES_M[5]  # (0.0, 0.5)` |
+| `reflection_low_frequency_limit` / `ReflectionFrequencyLimit` | `function` / `dataclass` | **How far down a device of a given size can be measured, EN 1793-5 5.5.7.**<br>• `device_height_m`; `speed_of_sound`; `device_length_m` adds the side edges; `source_height_m` (Default: half the height)<br>• each microphone's longest window ends where the ground reflection or an edge diffraction arrives, and its limit is that window's first notch; Figure 14 prints only curves, and this construction is the one of the method's authors<br>• result: `window_length_s`, `low_frequency_limit_hz`, `limiting_component`, `.plot()` | `environment.reflection_low_frequency_limit(4.0, speed_of_sound=340.0)` |
+| `check_reflection_grid_position` / `ReflectionGridCheck` | `function` / `dataclass` | **The two position checks of EN 1793-5 against Table 3: 5.6.2.5 (`check='relative'`, loudspeaker against grid) and 5.6.2.6 (`check='grid'`, grid against the reference plane).**<br>• `time_delays_s`: nine delays; `speed_of_sound` turns them into path differences (Formulas (10) and (11))<br>• result: `path_differences_m`, `nominal_m`, `deviations_m`, `within`, `passes`, `.plot()`; it has no truth value | `environment.check_reflection_grid_position(delays, speed_of_sound=343.0).passes` |
+| `REFLECTION_INDEX_PRECISION` / `REFLECTION_RATING_PRECISION_DB` | `mapping` | **Table A.1 of EN 1793-5: the standard deviations of repeatability and reproducibility of `RI` per band and of `DL_RI`, each `(median, low, high)`, from the QUIESST inter-laboratory test.** | `environment.REFLECTION_INDEX_PRECISION[100.0]['reproducibility']  # (0.27, 0.23, 0.32)` |
+| `BarrierReflectionWarning` | `warning class` | **A reflection measurement EN 1793-5 flags as suspect: an `R_sub` below 10 dB (5.5.4), a gain factor more than 20 % from 1 (5.5.1), a sample rate below 44 kHz (5.5.2).** | `warnings.catch_warnings()`<br>Emitted by `environment.propagation.barrier_reflection` |
 | `plot_barrier_geometry` | `function` | **Source-barrier-receiver section to scale.**<br>• `source_height`, `barrier_distance`, `barrier_height`, `receiver_distance`, `receiver_height` [m]<br>• `thickness` [m] (Default: None → thin screen)<br>• `language` | `plot_barrier_geometry(source_height=1.5, barrier_distance=5.0, barrier_height=3.0, receiver_distance=20.0, receiver_height=1.5)`<br><br>• Direct + diffracted paths, path difference annotated; also `BarrierInsertionLoss.plot_geometry()` |
 | `BarrierInsertionLoss` | `dataclass` | **Per-band barrier insertion loss.**<br>• `insertion_loss` [dB], `fresnel_number`, `method`, `ground`<br>• `.plot()` (IL vs frequency) | `il.insertion_loss` |
 | `linear_sound_speed_profile` | `function` | **Linear effective sound-speed profile c_eff(z) = c0 + g·z (Salomons Sec. 4.2).**<br>• `gradient_per_s` g [s⁻¹]<br>• `ground_speed` c0 [m/s], `max_height` [m] | `p = environment.linear_sound_speed_profile(0.1)`<br><br>• `EffectiveSoundSpeedProfile` |
@@ -47307,6 +47785,31 @@ it; the list grows as guides gain their References sections.
   The exact wedge-diffraction solution whose flat-wedge (thin-screen) limit
   the barrier insertion loss uses.
   Cited by [Spherical ground effect and advanced barriers](https://jmrplens.github.io/phonometry/environment/propagation/ground-barriers/).
+- Garai, M., & Guidorzi, P. (2000). European methodology for testing the
+  airborne sound insulation characteristics of noise barriers in situ:
+  experimental verification and comparison with laboratory data. *Journal of
+  the Acoustical Society of America*, 108(3), 1054-1067.
+  [doi:10.1121/1.1286811](https://doi.org/10.1121/1.1286811).
+  Section III.D: the window that ends where the first unwanted component
+  arrives, and the first notch of its spectrum as the low frequency limit.
+  Cited by [Sound reflection of a noise barrier in situ](https://jmrplens.github.io/phonometry/environment/propagation/barrier-reflection/).
+- Guidorzi, P., & Garai, M. (2013). Advancements in sound reflection and
+  airborne sound insulation measurement on noise barriers. *Open Journal of
+  Acoustics*, 3(2A), 25-38.
+  [doi:10.4236/oja.2013.32A004](https://doi.org/10.4236/oja.2013.32A004).
+  The QUIESST revision the 2016 edition of EN 1793-5 adopted: the
+  nine-microphone grid, the sub-sample alignment and the directivity
+  correction.
+  Cited by [Sound reflection of a noise barrier in situ](https://jmrplens.github.io/phonometry/environment/propagation/barrier-reflection/).
+- European Committee for Standardization. (2016). *Road traffic noise
+  reducing devices - Test method for determining the acoustic performance -
+  Part 5: Intrinsic characteristics - In situ values of sound reflection
+  under direct sound field conditions* (EN 1793-5:2016).
+  The in situ sound reflection index of a road noise barrier: the signal
+  subtraction and Adrienne window it shares with ISO 13472-1, the
+  nine-microphone grid, the single number $DL_{RI}$ and the example of
+  Annex B.
+  Cited by [Sound reflection of a noise barrier in situ](https://jmrplens.github.io/phonometry/environment/propagation/barrier-reflection/).
 - Kephalopoulos, S., Paviotti, M., & Anfosso-Lédée, F. (2012). *Common noise
   assessment methods in Europe (CNOSSOS-EU)* (EUR 25379 EN). Publications
   Office of the European Union.
@@ -62713,7 +63216,7 @@ the normative PDF fiche.
 - [Filter Architecture Gallery](https://jmrplens.github.io/phonometry/signals/filters/filter-gallery/): choose an architecture and inspect responses
 - [Calibration and dBFS](https://jmrplens.github.io/phonometry/signals/metrology/calibration/): get real-world SPL values
 - [Why phonometry](https://jmrplens.github.io/phonometry/start/why-phonometry/): the conformance-first design philosophy
-- [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): the expected and computed value of all 1497 checks
+- [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): the expected and computed value of all 1510 checks
 - [API Reference](https://jmrplens.github.io/phonometry/reference/api/): every parameter of every function
 - [Bibliography](https://jmrplens.github.io/phonometry/reference/bibliography/): the books and papers behind every guide, each with a verified link
 
@@ -63721,7 +64224,7 @@ sample from the metrology core:
 | IEC 61252:1993 | The personal sound exposure quantities, `sound_exposure()` and the normalized 8 h level `lex_8h()`; IEC 61252:2025 has since superseded this print, and the transcription still targets the 1993+A2 text | `tests/signals/test_levels.py` |
 
 The same discipline applies far beyond the metrology core: today the suite runs
-1497 numerical conformance checks across 98 domains and 487 standards, covering
+1510 numerical conformance checks across 98 domains and 488 standards, covering
 psychoacoustics and speech intelligibility, room, building and materials
 acoustics, human and machine vibration, environmental, aircraft, rotorcraft
 and underwater noise, electroacoustics, broadcast loudness, industrial noise

@@ -71,7 +71,7 @@ import weakref
 from collections.abc import Mapping
 from collections.abc import Set as AbstractSet
 from dataclasses import dataclass, field, fields
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from fractions import Fraction
 from itertools import chain
 from types import MappingProxyType
@@ -742,7 +742,13 @@ _SHARES = frozenset(
 
 def _quote(value: object) -> str:
     """*value* as a message quotes it: its ``repr``, cut at a readable length."""
-    text = repr(value)
+    try:
+        text = repr(value)
+    except (ValueError, RecursionError):
+        # What repr gives up on: an integer longer than Python writes out
+        # (sys.get_int_max_str_digits), or containers nested deeper than it
+        # follows.
+        text = f"<{type(value).__name__} too large to quote>"
     return text if len(text) <= _QUOTED else f"{text[: _QUOTED - 3]}..."
 
 
@@ -1367,6 +1373,45 @@ def field_kinds(cls: type[CatalogueRow]) -> Mapping[str, str]:
     return _shape(cls).kinds
 
 
+#: The longest figure :func:`convert_figure` reads, in characters. A figure
+#: is read exactly as integers, of its digits and of its exponent, and Python
+#: refuses to read more digits than ``sys.get_int_max_str_digits`` as one:
+#: 4 300 by default, and never fewer than 640 wherever it is set. A page
+#: prints a handful of digits, and a program that writes the shortest digits
+#: of a double writes seventeen at most.
+_FIGURE_LENGTH = 640
+#: How far from zero the decimal exponent of a figure may lie, either way,
+#: for :func:`convert_figure` to read it. A float holds magnitudes from some
+#: 5e-324 to 1.8e308, and a unit's factor moves a figure by a few powers of
+#: ten, so a figure past this bound converts to zero or to nothing a float
+#: holds. Reading one exactly builds a power of ten as long as its exponent:
+#: for ``1e-999999999``, minutes of work and hundreds of megabytes.
+_FIGURE_EXPONENT = 400
+#: A figure as :func:`convert_figure` reads it: a sign, the digits before the
+#: point, the digits after it and the exponent, each of them optional.
+_FIGURE_PARTS = re.compile(r"[+-]?([0-9]*)(?:\.([0-9]*))?(?:[eE]([+-]?[0-9]+))?")
+
+
+def _figure_exponent(figure: str) -> int | None:
+    """The power of ten of the first digit of *figure* that is not zero.
+
+    The exponent the figure writes, for a figure that is zero; ``None`` for
+    a ratio or a text that is not a figure, which :class:`~fractions.Fraction`
+    reads without a power of ten or refuses. The blanks and the underscores
+    it passes over are passed over here too.
+    """
+    parts = _FIGURE_PARTS.fullmatch(figure.strip().replace("_", ""))
+    if parts is None:
+        return None
+    whole, fraction, exponent = (part or "" for part in parts.groups())
+    written = int(exponent or "0")
+    digits = whole + fraction
+    significant = digits.lstrip("0")
+    if not significant:
+        return written
+    return written + len(whole) - (len(digits) - len(significant)) - 1
+
+
 def convert_figure(
     figure: str, factor: Fraction, offset: Fraction = Fraction(0)
 ) -> float:
@@ -1380,15 +1425,38 @@ def convert_figure(
     1.06838496 exactly, and the float it rounds to here is the one ``repr``
     writes as 1.06838496.
 
+    A figure longer than 640 characters, or whose decimal exponent lies more
+    than 400 from zero, is refused before it is read: neither is a number a
+    page prints, and reading either exactly would take minutes or fail.
+
     :param figure: The number as the page prints it, in digits: ``"11.5"``,
         ``"3e5"``.
     :param factor: One of the page's unit in the row's, exactly.
     :param offset: The page's zero in the row's unit, exactly; zero for a
         unit that shares its zero with the row's.
     :return: The float nearest the exact result.
-    :raises OverflowError: for a result too large for a float.
+    :raises OverflowError: for a figure too long or too far from one to
+        read, and for a result too large for a float, saying which.
     """
-    return float(Fraction(figure) * factor + offset)
+    if len(figure) > _FIGURE_LENGTH:
+        msg = (
+            f"runs to {len(figure)} characters, and a figure is converted from "
+            f"{_FIGURE_LENGTH} at most"
+        )
+        raise OverflowError(msg)
+    exponent = _figure_exponent(figure)
+    if exponent is not None and abs(exponent) > _FIGURE_EXPONENT:
+        side = "above" if exponent > 0 else "below"
+        msg = (
+            f"is written {abs(exponent)} powers of ten {side} one, and a figure "
+            f"is converted within {_FIGURE_EXPONENT} of it"
+        )
+        raise OverflowError(msg)
+    try:
+        return float(Fraction(figure) * factor + offset)
+    except OverflowError:
+        msg = "is too large to convert"
+        raise OverflowError(msg) from None
 
 
 class PrintedNumber(Decimal):
@@ -1405,8 +1473,17 @@ class PrintedNumber(Decimal):
     text: str
 
     def __new__(cls, text: str) -> Self:
-        """The number *text* writes, keeping *text*."""
-        number = super().__new__(cls, text)
+        """The number *text* writes, keeping *text*.
+
+        An exponent too long for a :class:`~decimal.Decimal` to hold, some
+        eighteen digits on a 64-bit build, is past every float too: the
+        number is then the float the text reads as, zero or an infinity, and
+        the text is kept as written, for every check that reads it to refuse.
+        """
+        try:
+            number = super().__new__(cls, text)
+        except InvalidOperation:
+            number = super().__new__(cls, repr(float(text)))
         number.text = text
         return number
 
@@ -1575,18 +1652,29 @@ class _Resolution:
             )
 
     def _convert(
-        self, value: object, alias: UnitAlias, where: str, *, difference: bool = False
+        self,
+        value: object,
+        alias: UnitAlias,
+        where: str,
+        target: str,
+        *,
+        difference: bool = False,
     ) -> tuple[float, str]:
-        """One figure in the row's unit, and its digits."""
+        """One figure of the field *target* in the row's unit, and its digits.
+
+        A refusal names *target*, so that a reader of a file can say where
+        the figure stands in it.
+        """
         try:
             figure = _figure(value, where)
         except CatalogueError as error:
-            self._fail(str(error))
+            self._fail(str(error), target)
         offset = Fraction(0) if difference else alias.offset
         try:
             return convert_figure(figure, alias.factor, offset), figure
-        except OverflowError:
-            self._fail(f"{where} holds {figure}, which is too large to convert")
+        except OverflowError as error:
+            shown = figure if len(figure) <= _QUOTED else f"{figure[: _QUOTED - 3]}..."
+            self._fail(f"{where} holds {shown}, which {error}", target)
 
     def _numbers(
         self,
@@ -1604,7 +1692,7 @@ class _Resolution:
         self._speak(target, written, alias)
         where = f"{hedge}[{written!r}]"
         if hedge == "uncertainty":
-            return self._convert(entry, alias, where, difference=True)[0]
+            return self._convert(entry, alias, where, target, difference=True)[0]
         if hedge == "ranges":
             return self._range(entry, alias, where, target)
         return self._readings(entry, alias, where, target)
@@ -1621,7 +1709,7 @@ class _Resolution:
                 ends.append(None)
                 digits.append(None)
             else:
-                value, figure = self._convert(end, alias, f"{where}[{index}]")
+                value, figure = self._convert(end, alias, f"{where}[{index}]", target)
                 ends.append(value)
                 digits.append(figure)
         self._figures.setdefault(target, {})["range"] = "|".join(
@@ -1643,12 +1731,12 @@ class _Resolution:
                     self._fail(
                         f"{at} holds {_quote(reading)}, which is not a list of 2"
                     )
-                low, low_figure = self._convert(reading[0], alias, f"{at}[0]")
-                high, high_figure = self._convert(reading[1], alias, f"{at}[1]")
+                low, low_figure = self._convert(reading[0], alias, f"{at}[0]", target)
+                high, high_figure = self._convert(reading[1], alias, f"{at}[1]", target)
                 readings.append((low, high))
                 spoken.append(f"{low_figure} to {high_figure}")
             else:
-                value, figure = self._convert(reading, alias, at)
+                value, figure = self._convert(reading, alias, at, target)
                 readings.append(value)
                 spoken.append(figure)
         self._figures.setdefault(target, {})["list"] = ", ".join(spoken)
@@ -1676,7 +1764,7 @@ class _Resolution:
             if value is None:
                 continue
             self._speak(target, written, alias)
-            number, figure = self._convert(value, alias, written)
+            number, figure = self._convert(value, alias, written, target)
             self._resolved[target] = number
             self._figures.setdefault(target, {})["value"] = figure
 

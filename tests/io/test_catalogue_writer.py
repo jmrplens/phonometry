@@ -285,6 +285,26 @@ def test_a_figure_that_does_not_read_back_is_written_in_the_field_unit(
     assert back.converted == row.converted
 
 
+def test_a_record_too_far_from_one_to_convert_is_kept_as_a_record(
+    tmp_path: pathlib.Path,
+) -> None:
+    """Reading 1e-999999999 exactly would take minutes; it is not tried."""
+    row = PorousMaterial(
+        name="Panel 40 core",
+        source="Panel 40 technical data sheet",
+        thickness_mm=40.0,
+        converted={"thickness_mm": ("1e-999999999", "cm")},
+    )
+    path = tmp_path / "mine.json"
+    io.write_catalogue(
+        {"mine/core": row}, path, catalogue="mine", about="A row built in Python."
+    )
+    written = json.loads(path.read_text(encoding="utf-8"))["rows"][0]
+    assert written["thickness_mm"] == 40.0
+    assert "thickness_cm" not in written
+    assert written["converted"] == {"thickness_mm": ["1e-999999999", "cm"]}
+
+
 def test_a_plus_or_minus_is_written_in_the_unit_it_reads_back_in(
     tmp_path: pathlib.Path,
 ) -> None:

@@ -16,16 +16,20 @@ The manufacturer here is fictitious, as in every example of the repository.
 from __future__ import annotations
 
 import copy
+import dataclasses
 import hashlib
 import importlib
 import json
 import math
+import os
 import pathlib
 import pkgutil
 import sys
+import threading
+import time
 import warnings
 from collections.abc import Mapping
-from typing import Any
+from typing import IO, Any
 
 import numpy as np
 import pytest
@@ -33,6 +37,7 @@ import pytest
 import phonometry
 from phonometry import fluids, io, materials, solids
 from phonometry.building import ImpactInsulation
+from phonometry.io import _catalogue
 from phonometry.materials import AbsorptionAreaSpectrum, PorousMaterial
 
 _SCRIPTS = str(pathlib.Path(__file__).resolve().parents[2] / "scripts")
@@ -810,6 +815,25 @@ def test_a_name_written_twice_in_a_row_is_refused() -> None:
     )
 
 
+@pytest.mark.parametrize("key", [1, None], ids=["int", "none"])
+@pytest.mark.parametrize(
+    "block", ["/provenance", "/rows/1/provenance"], ids=["document", "row"]
+)
+def test_a_key_that_is_not_text_is_refused_in_a_provenance(
+    block: str, key: object
+) -> None:
+    """A mapping handed in can hold one; it is refused, never raised."""
+    document = _panel()
+    held = document
+    for part in block.strip("/").split("/"):
+        held = held[int(part)] if isinstance(held, list) else held[part]
+    held[key] = "Example Lab"
+    issues = _issues(document)
+    assert [(issue.location, issue.message) for issue in issues] == [
+        (block, f"has the key {key!r}, which is not text")
+    ]
+
+
 def test_a_nan_from_a_mapping_is_refused_as_it_is_from_text() -> None:
     document = _broken("/rows/1/porosity", float("nan"))
     issues = _issues(document)
@@ -821,6 +845,99 @@ def test_a_number_too_large_for_a_float_is_refused() -> None:
     text = json.dumps(_panel()).replace('"porosity": 0.97', '"porosity": 1e400')
     issues = _issues(text)
     assert "not a finite number" in issues[0].message
+
+
+#: Figures no page prints, each once a way to make the exact reading of a
+#: figure in another unit cost minutes or raise past the refusal: a power of
+#: ten a billion digits long (read as zero by a float, so the finiteness check
+#: let it through), the same behind a zero, an exponent a Decimal cannot hold,
+#: and more digits than Python reads as one integer.
+_UNREADABLE_FIGURES = {
+    "exponent": ("1e-999999999", "is written 999999999 powers of ten below one"),
+    "zero": ("0e999999999", "is written 999999999 powers of ten above one"),
+    "decimal": (
+        "1e-99999999999999999999",
+        "is written 99999999999999999999 powers of ten below one",
+    ),
+    "digits": ("0." + "0" * 4400 + "1", "runs to 4403 characters"),
+}
+
+
+def _read_from(source: object) -> io.Catalogue[PorousMaterial]:
+    """The example read from a file, given its path, or from its text."""
+    if isinstance(source, pathlib.Path):
+        return io.read_catalogue(source, row_type=PorousMaterial)
+    return _read(source)
+
+
+def _thickness_in_centimetres(figure: str) -> str:
+    """The example's text, the laboratory row's thickness written as *figure* cm."""
+    document = _panel()
+    row = document["rows"][1]
+    del row["thickness_mm"]
+    row["thickness_cm"] = "FIGURE"
+    return json.dumps(document).replace('"FIGURE"', figure)
+
+
+@pytest.mark.parametrize("reader", ["file", "text"])
+@pytest.mark.parametrize("trigger", sorted(_UNREADABLE_FIGURES))
+def test_a_figure_too_far_from_one_or_too_long_is_refused_where_it_stands(
+    trigger: str, reader: str, tmp_path: pathlib.Path
+) -> None:
+    figure, said = _UNREADABLE_FIGURES[trigger]
+    text = _thickness_in_centimetres(figure)
+    path = tmp_path / "panel-40.json"
+    path.write_text(text, encoding="utf-8")
+    source: object = path if reader == "file" else text
+    start = time.perf_counter()
+    with pytest.raises(io.CatalogueError, match="panel-40.json") as caught:
+        _read_from(source)
+    assert time.perf_counter() - start < 1.0
+    (issue,) = caught.value.issues
+    assert (issue.location, issue.row_key, issue.field) == (
+        "/rows/1/thickness_cm",
+        "core-lab",
+        "thickness_mm",
+    )
+    assert said in issue.message
+
+
+def test_a_figure_a_decimal_cannot_hold_is_read_as_the_float_it_is() -> None:
+    """Past every float, it is refused as any infinite number is."""
+    text = json.dumps(_panel()).replace(
+        '"porosity": 0.97', '"porosity": 1e99999999999999999999'
+    )
+    messages = [
+        issue.message for issue in _issues(text) if issue.location == "/rows/1/porosity"
+    ]
+    assert messages == [
+        "expected a number, got 1e99999999999999999999, which is not a finite number"
+    ]
+
+
+def test_a_whole_number_longer_than_python_reads_is_refused_in_a_mapping() -> None:
+    """A field of a class of your own holding a mapping of numbers."""
+
+    @dataclasses.dataclass(frozen=True, kw_only=True)
+    class Sheet(io.CatalogueRow):
+        levels: Mapping[str, float] = dataclasses.field(default_factory=dict)
+
+    document = _document("Sheet", {"key": "a", "name": "Sheet", "levels": {"a": 0}})
+    text = json.dumps(document).replace('{"a": 0}', '{"a": 1' + "0" * 5000 + "}")
+    with pytest.raises(io.CatalogueError, match="levels") as caught:
+        io.parse_catalogue(text, row_type=Sheet, label="mine.json")
+    (issue,) = caught.value.issues
+    assert issue.location == "/rows/0/levels"
+    assert "not a finite number" in issue.message
+
+
+def test_a_lone_surrogate_in_the_text_is_refused() -> None:
+    """Text in memory can hold one, which UTF-8 has no bytes for."""
+    (issue,) = _issues('{"about": "\ud800"}')
+    assert issue.message == (
+        "holds a lone surrogate, U+D800, at character 12, which is not text "
+        "UTF-8 can write"
+    )
 
 
 @pytest.mark.parametrize("character", ["\x00", "\x1b", "\r", "\u202e", "\u2066"])
@@ -930,19 +1047,133 @@ def test_a_string_left_open_is_not_json_whatever_brackets_follow() -> None:
     assert issue.message.startswith("this is not JSON: Unterminated string")
 
 
+def test_the_brackets_are_counted_to_the_end_of_the_value_the_text_opens() -> None:
+    """What follows the value is not JSON, however deep it nests."""
+    (issue,) = _issues("[]" + "[" * (_NESTING + 1))
+    assert issue.location == "line 1, column 3"
+    assert issue.message == "this is not JSON: Extra data"
+
+
+def test_sixteen_mebibytes_of_empty_lists_are_refused_at_once() -> None:
+    """Counted to the end of the text, they held a reader for seconds."""
+    text = "[]" * (8 * 1024 * 1024)
+    start = time.perf_counter()
+    (issue,) = _issues(text)
+    assert time.perf_counter() - start < 1.0
+    assert (issue.location, issue.message) == (
+        "line 1, column 3",
+        "this is not JSON: Extra data",
+    )
+
+
+def test_a_decoder_out_of_stack_is_a_refusal_of_the_text(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A caller already deep in its own stack can still run the decoder out."""
+
+    def out_of_stack(text: str, *, figures: bool) -> tuple[object, bool]:
+        raise RecursionError(text[:10], figures)
+
+    monkeypatch.setattr(_catalogue, "decode_marked", out_of_stack)
+    (issue,) = _issues(json.dumps(_panel()))
+    assert issue.location == ""
+    assert issue.message == (
+        "the text nests deeper than a reader follows, and a catalogue nests at "
+        "most 6 levels"
+    )
+
+
+#: The most bytes a catalogue file holds.
+_LIMIT = 16 * 1024 * 1024
+
+
+class _Unread:
+    """An open file whose size may be asked and whose bytes may not be read."""
+
+    def __init__(self, handle: IO[bytes]) -> None:
+        self.handle = handle
+
+    def __enter__(self) -> _Unread:
+        return self
+
+    def __exit__(self, *_: object) -> None:
+        self.handle.close()
+
+    def fileno(self) -> int:
+        return self.handle.fileno()
+
+    def read(self, *_: object) -> bytes:
+        raise AssertionError(self.handle.name)
+
+
 def test_a_file_past_sixteen_mebibytes_is_refused_before_it_is_read(
     tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     path = tmp_path / "huge.json"
     with path.open("wb") as handle:
-        handle.truncate(16 * 1024 * 1024 + 1)
+        handle.truncate(_LIMIT + 1)
+    opened = pathlib.Path.open
 
-    def never(self: pathlib.Path) -> bytes:
-        raise AssertionError(self)
+    def unread(self: pathlib.Path, *args: Any, **kwargs: Any) -> _Unread:
+        return _Unread(opened(self, *args, **kwargs))
 
-    monkeypatch.setattr(pathlib.Path, "read_bytes", never)
+    monkeypatch.setattr(pathlib.Path, "open", unread)
     with pytest.raises(io.CatalogueError, match="huge.json: is 16777217 bytes"):
         io.read_catalogue(path, row_type=PorousMaterial)
+
+
+def test_a_file_of_sixteen_mebibytes_is_read(tmp_path: pathlib.Path) -> None:
+    text = json.dumps(_panel())
+    path = tmp_path / "panel-40.json"
+    path.write_bytes((text + " " * (_LIMIT - len(text))).encode("ascii"))
+    assert path.stat().st_size == _LIMIT
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", io.CatalogueWarning)
+        mine = io.read_catalogue(path, row_type=PorousMaterial)
+    assert set(mine) == {"panel-40/core-declared", "panel-40/core-lab"}
+
+
+def _endless_writer(path: pathlib.Path) -> threading.Thread:
+    """A thread that writes blanks into the pipe at *path* until it is closed."""
+
+    def write() -> None:
+        chunk = b" " * 65536
+        try:
+            with path.open("wb") as pipe:
+                for _ in range(4 * _LIMIT // len(chunk)):
+                    pipe.write(chunk)
+        except BrokenPipeError:
+            pass
+
+    thread = threading.Thread(target=write, daemon=True)
+    thread.start()
+    return thread
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="POSIX pipes and devices")
+@pytest.mark.parametrize("kind", ["pipe", "device"])
+def test_a_file_that_never_ends_is_refused_one_byte_past_the_limit(
+    kind: str, tmp_path: pathlib.Path
+) -> None:
+    """Its size says nothing: a pipe or /dev/zero behind the name says zero."""
+    path = tmp_path / "endless.json"
+    writer = None
+    if kind == "pipe":
+        os.mkfifo(path)
+        writer = _endless_writer(path)
+    else:
+        path.symlink_to("/dev/zero")
+    start = time.perf_counter()
+    with pytest.raises(io.CatalogueError) as caught:
+        io.read_catalogue(path, row_type=PorousMaterial)
+    assert time.perf_counter() - start < 5.0
+    assert str(caught.value) == (
+        "endless.json: runs past 16777216 bytes, and a catalogue file is at most "
+        "16777216 bytes (16 MiB)"
+    )
+    if writer is not None:
+        writer.join(timeout=10)
+        assert not writer.is_alive()
 
 
 def test_text_past_sixteen_mebibytes_is_refused_before_it_is_decoded() -> None:

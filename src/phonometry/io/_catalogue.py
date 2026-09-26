@@ -64,7 +64,9 @@ The file never runs anything: only :mod:`json` reads it, the row class is the
 caller's argument and the class name the file writes is only compared with
 it. A file is at most 16 MiB and 50 000 rows, nested at most six levels,
 and its text holds no control character but the tab and the line feed and no
-mark that reorders what a reader sees.
+mark that reorders what a reader sees. A figure written in another unit is
+converted when it runs to 640 characters at most and lies within 400 powers
+of ten of one, which every number a page prints does.
 """
 
 from __future__ import annotations
@@ -105,6 +107,12 @@ from .._internal.catalogue import (
     spellings,
     unit_stem,
 )
+from .._internal.json_input import (
+    TooLargeError,
+    nesting_past,
+    read_at_most,
+    text_location,
+)
 from .._internal.warnings import PhonometryWarning
 
 if TYPE_CHECKING:
@@ -116,23 +124,15 @@ if TYPE_CHECKING:
 CATALOGUE_SCHEMA = "phonometry-catalogue"
 CATALOGUE_SCHEMA_VERSION = 1
 
-#: The largest file read, checked on disk before a byte is read.
+#: The largest file read, checked before more than the limit is read: a file
+#: whose size says it is larger is refused before a byte of it is read, and
+#: a pipe or a device, whose size says nothing, when one byte past it arrives.
 _MAX_BYTES = 16 * 1024 * 1024
 #: The most rows one document holds.
 _MAX_ROWS = 50_000
 #: How deep the containers of a document nest: the document, its rows, a
 #: row, a hedge, an entry, an interval inside a list of readings.
 _MAX_DEPTH = 6
-#: How deep the brackets of a text may nest for the text to be decoded at all,
-#: counted in the text before any decoder runs; past it the text is refused
-#: whole. More than ten times :data:`_MAX_DEPTH`, so that a document nested a
-#: few levels too deep, by hand or by a program's mistake, is still decoded
-#: and told where. And a small part of how deep a decoder follows before it
-#: gives out, which depends on the interpreter: some 500 levels for CPython's
-#: pure-Python scanner at the default recursion limit, 10 000 for the C
-#: scanner of CPython 3.13 on Linux, and from 3.14 as deep as the stack of the
-#: thread allows. Counting the brackets makes the refusal the same everywhere.
-_MAX_NESTING = 64
 #: The longest ``about`` or ``note``.
 _MAX_PROSE = 20_000
 #: The longest of every other text, a convention among them.
@@ -170,14 +170,6 @@ _JSON_NUMBER = re.compile(r"-?(0|[1-9][0-9]*)(\.[0-9]+)?([eE][+-]?[0-9]+)?")
 #: and the line feed, and the marks that reorder what a reader sees (a
 #: "Trojan source" text shows one thing and holds another).
 _UNSAFE = re.compile(r"[\x00-\x08\x0b-\x1f\u202a-\u202e\u2066-\u2069]")
-#: What the nesting of a JSON text is read from: a string, taken whole with its
-#: escapes and every bracket it quotes (one left open runs to the end of the
-#: text, as the decoder reads it), or a run of brackets that open, or of
-#: brackets that close. Every branch starts with its own character, so the
-#: scan passes over numbers, names and blanks without stopping.
-_NESTING = re.compile(
-    r'"[^"\\]*(?:\\.[^"\\]*)*"?|\[[\[{]*|\{[\[{]*|\][\]}]*|\}[\]}]*', re.DOTALL
-)
 
 _TOP_REQUIRED = (
     "schema",
@@ -249,7 +241,13 @@ class CatalogueWarning(PhonometryWarning):
 
 
 def _quote(value: object) -> str:
-    text = repr(value)
+    try:
+        text = repr(value)
+    except (ValueError, RecursionError):
+        # Only a mapping handed in holds what repr gives up on: an integer
+        # longer than Python writes out (sys.get_int_max_str_digits), or
+        # containers nested deeper than repr follows.
+        text = f"<{type(value).__name__} too large to quote>"
     return text if len(text) <= _QUOTED else f"{text[: _QUOTED - 3]}..."
 
 
@@ -436,7 +434,11 @@ def _is_number(value: object) -> bool:
     if isinstance(value, PrintedNumber):
         return math.isfinite(float(value.text))
     if isinstance(value, numbers.Real):
-        return math.isfinite(float(value))
+        try:
+            return math.isfinite(float(value))
+        except OverflowError:
+            # An integer or a fraction of a mapping past every float.
+            return False
     return False
 
 
@@ -449,12 +451,23 @@ def _plain(value: object) -> object:
     """
     if isinstance(value, PrintedNumber):
         text = value.text
-        return float(text) if any(mark in text for mark in ".eE") else int(text)
+        number = float(text)
+        # An integer past every float stays the infinity it reads as, which
+        # every check of a number refuses, and is never handed to int(): past
+        # 4 300 digits Python refuses to read one (sys.get_int_max_str_digits).
+        if any(mark in text for mark in ".eE") or not math.isfinite(number):
+            return number
+        return int(text)
     if isinstance(value, bool) or not isinstance(value, numbers.Real):
         return value
     if isinstance(value, numbers.Integral):
         return int(value)
-    return float(value)
+    try:
+        return float(value)
+    except OverflowError:
+        # A fraction of a mapping past every float, left for the check of
+        # the field it fills to refuse.
+        return value
 
 
 def _what_it_is(value: object) -> str:
@@ -484,7 +497,15 @@ def _what_it_is(value: object) -> str:
 
 def _number_text(value: object) -> str:
     """A number as the document writes it."""
-    return value.text if isinstance(value, PrintedNumber) else repr(_plain(value))
+    if isinstance(value, PrintedNumber):
+        return value.text
+    try:
+        return repr(_plain(value))
+    except ValueError:
+        # An integer of a mapping longer than Python writes out
+        # (sys.get_int_max_str_digits): past every float, so never kept, only
+        # named in the refusal of it.
+        return "an integer too long to write out"
 
 
 def _reserved_message(name: str) -> str:
@@ -872,6 +893,10 @@ class _Reader:
         values: dict[str, Any] = {}
         failed = False
         for key, value in held.items():
+            if not isinstance(key, str):
+                # The pass over the whole text has said so, with where.
+                failed = True
+                continue
             where = _pointer("provenance", key)
             if key not in _PROVENANCE_FIELDS:
                 self.unknown_key(where, key, _PROVENANCE_FIELDS, "a provenance")
@@ -1085,6 +1110,9 @@ class _Reader:
             self.error(where, f"holds {_quote(held)}, not an object", row_key=read.key)
             return
         for key, value in held.items():
+            if not isinstance(key, str):
+                # The pass over the whole text has said so, with where.
+                continue
             at = f"{where}{_pointer(key)}"
             if key in _PROVENANCE_FIELDS and key not in _ROW_PROVENANCE:
                 self.error(
@@ -1240,12 +1268,19 @@ class _Reader:
         return found
 
 
-def _plain_tree(value: object) -> object:
-    """A caller's own set or mapping field, its numbers made plain."""
+def _plain_tree(value: object, depth: int = 0) -> object:
+    """A caller's own set or mapping field, its numbers made plain.
+
+    Past :data:`_MAX_DEPTH` levels the value is left as it is: the pass over
+    the whole text has refused the document for its depth, and a mapping
+    handed in may nest without end or hold itself.
+    """
+    if depth > _MAX_DEPTH:
+        return value
     if isinstance(value, Mapping):
-        return {key: _plain_tree(item) for key, item in value.items()}
+        return {key: _plain_tree(item, depth + 1) for key, item in value.items()}
     if isinstance(value, (list, tuple)):
-        return [_plain_tree(item) for item in value]
+        return [_plain_tree(item, depth + 1) for item in value]
     if isinstance(value, str):
         return unicodedata.normalize("NFC", value)
     return _plain(value)
@@ -1437,27 +1472,14 @@ def _too_deep(label: str, location: str) -> CatalogueError:
 
 
 def _check_nesting(text: str, label: str) -> None:
-    """Refuse a text whose brackets nest past :data:`_MAX_NESTING`.
+    """Refuse a text whose brackets nest past what is decoded, at the bracket.
 
-    The brackets are counted outside the strings of the text, before it is
-    decoded, so the refusal never waits on the decoder running out of stack,
-    which from Python 3.14 depends on how large the stack of the thread is.
-    The count may fall below zero at a bracket that closes with nothing open,
-    and the decoder reads no further than that bracket.
+    The count is :func:`~phonometry._internal.json_input.nesting_past`'s,
+    made before the text is decoded and ended where the document closes.
     """
-    depth = 0
-    for token in _NESTING.finditer(text):
-        start, end = token.span()
-        first = text[start]
-        if first in "[{":
-            if depth + end - start > _MAX_NESTING:
-                at = start + _MAX_NESTING - depth
-                line = text.count("\n", 0, at) + 1
-                column = at - text.rfind("\n", 0, at)
-                raise _too_deep(label, f"line {line}, column {column}")
-            depth += end - start
-        elif first != '"':
-            depth -= end - start
+    at = nesting_past(text)
+    if at is not None:
+        raise _too_deep(label, text_location(text, at))
 
 
 def _decode(text: str, label: str) -> object:
@@ -1475,10 +1497,14 @@ def _decode(text: str, label: str) -> object:
     return document
 
 
-def _size_refusal(label: str, size: int) -> CatalogueError:
-    message = (
-        f"is {size} bytes, and a catalogue file is at most {_MAX_BYTES} bytes (16 MiB)"
-    )
+def _size_refusal(label: str, size: int | None) -> CatalogueError:
+    """The refusal of a text past :data:`_MAX_BYTES`, of *size* bytes if known.
+
+    A pipe or a device says nothing true about its size, and is read one
+    byte past the limit before it is refused.
+    """
+    held = f"is {size} bytes" if size is not None else f"runs past {_MAX_BYTES} bytes"
+    message = f"{held}, and a catalogue file is at most {_MAX_BYTES} bytes (16 MiB)"
     return _refusal(label, "", message)
 
 
@@ -1552,10 +1578,10 @@ def read_catalogue[R: CatalogueRow](
     cls = _check_row_type(row_type)
     target = _json_path(path, "read_catalogue reads")
     label = target.name
-    size = target.stat().st_size
-    if size > _MAX_BYTES:
-        raise _size_refusal(label, size)
-    raw = target.read_bytes()
+    try:
+        raw = read_at_most(target, _MAX_BYTES)
+    except TooLargeError as error:
+        raise _size_refusal(label, error.size) from None
     try:
         text = raw.decode("utf-8")
     except UnicodeDecodeError as error:
@@ -1596,7 +1622,14 @@ def parse_catalogue[R: CatalogueRow](
     """
     cls = _check_row_type(row_type)
     if isinstance(document, str):
-        encoded = document.encode("utf-8")
+        try:
+            encoded = document.encode("utf-8")
+        except UnicodeEncodeError as error:
+            message = (
+                f"holds a lone surrogate, U+{ord(document[error.start]):04X}, at "
+                f"character {error.start + 1}, which is not text UTF-8 can write"
+            )
+            raise _refusal(label, "", message) from None
         if len(encoded) > _MAX_BYTES:
             raise _size_refusal(label, len(encoded))
         decoded = _decode(document, label)
@@ -1928,7 +1961,12 @@ def _exact(figure: str, alias: UnitAlias, held: object) -> _Raw | None:
     """*figure* as written, if it converts to exactly the number *held*."""
     if not _JSON_NUMBER.fullmatch(figure):
         return None
-    if not _same_float(convert_figure(figure, alias.factor, alias.offset), held):
+    try:
+        converted = convert_figure(figure, alias.factor, alias.offset)
+    except OverflowError:
+        # Too long or too far from one to read, which the reader refuses.
+        return None
+    if not _same_float(converted, held):
         return None
     return _Raw(figure)
 
@@ -2015,10 +2053,13 @@ def _range_pieces(
 
 def _spread_figure(spread: float, alias: UnitAlias) -> str | None:
     """A plus-or-minus in the alias's unit that converts back exactly."""
-    text = float.__repr__(float(Fraction(spread) / alias.factor))
-    if _same_float(convert_figure(text, alias.factor), spread):
-        return text
-    return None
+    try:
+        text = float.__repr__(float(Fraction(spread) / alias.factor))
+        back = convert_figure(text, alias.factor)
+    except OverflowError:
+        # A spread past every float once it is in the alias's unit.
+        return None
+    return text if _same_float(back, spread) else None
 
 
 def _packaged_table(row: CatalogueRow) -> dict[str, Any] | None:

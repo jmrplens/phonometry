@@ -7,12 +7,14 @@ critical frequency ``fc = co**2 / (1.8 cL t)`` (ISO 12354-1:2017, the symbols
 of Formula (B.2), PDF page 32, printed folio 26), with ``cL`` the
 quasi-longitudinal phase velocity of Table B.3 (PDF page 37, folio 31), which
 is a row's plate speed. The oracle is the worked example of
-Annex L, whose element block (PDF page 84, folio 78) builds its three
-constructions from exactly those properties and prints the results rounded
-to one decimal: 220 mm of concrete at 2 200 kg/m³ and 3 800 m/s is
-484 kg/m² and 76,8 Hz; 365 mm of autoclaved aerated concrete at 600 kg/m³
-and 1 900 m/s is 219 kg/m² and 92,6 Hz; 200 mm of calcium-silicate blocks at
-1 800 kg/m³ and 2 500 m/s is 360 kg/m² and 128,4 Hz, all with
+Annex L, whose element block (PDF page 84, folio 78) prints the density and
+the velocity of each of its three constructions beside the results, rounded
+to one decimal. Table B.3 prints the same two numbers for concrete and for
+calcium-silicate blocks, and 400 to 800 kg/m³ for autoclaved aerated
+concrete, of which Annex L takes 600. 220 mm of concrete at 2 200 kg/m³ and
+3 800 m/s is 484 kg/m² and 76,8 Hz; 365 mm of autoclaved aerated concrete at
+600 kg/m³ and 1 900 m/s is 219 kg/m² and 92,6 Hz; 200 mm of calcium-silicate
+blocks at 1 800 kg/m³ and 2 500 m/s is 360 kg/m² and 128,4 Hz, all with
 ``co`` = 340 m/s. Its footnote says the calculation used the unrounded
 values, which is what this method gives, so the in-situ indices of
 Table L.3 follow from the rows to the tolerance the detailed model is held to.
@@ -30,9 +32,12 @@ from phonometry import building, io, materials, solids
 #: The one-third-octave bands of the Annex L tables.
 BANDS = np.asarray(ref.ISO12354_ANNEX_L_BANDS, dtype=np.float64)
 
-#: Table B.3 of ISO 12354-1:2017 (PDF page 37, folio 31) for the three
-#: materials of Annex L: density and quasi-longitudinal phase velocity.
-TABLE_B3 = {
+#: The density and the quasi-longitudinal phase velocity of the three
+#: materials of ISO 12354-1:2017 Annex L, as its element block prints them
+#: (PDF page 84, folio 78). Table B.3 (PDF page 37, folio 31) prints the same
+#: pairs, except that it gives autoclaved aerated concrete blocks a density
+#: of 400 to 800 kg/m³, of which Annex L takes 600.
+ANNEX_L_MATERIALS = {
     "Concrete": (2200.0, 3800.0),
     "Autoclaved aerated concrete blocks": (600.0, 1900.0),
     "Calcium-silicate blocks": (1800.0, 2500.0),
@@ -49,10 +54,10 @@ ELEMENTS = {
 
 
 def _row(material: str) -> solids.SolidMaterial:
-    density, speed = TABLE_B3[material]
+    density, speed = ANNEX_L_MATERIALS[material]
     return solids.SolidMaterial.from_printed(
         name=material,
-        source="ISO 12354-1:2017 Table B.3, PDF page 37 (printed p. 31)",
+        source="ISO 12354-1:2017 Annex L, PDF page 84 (printed p. 78)",
         density_kg_m3=density,
         plate_longitudinal_speed_m_s=speed,
     )
@@ -77,14 +82,16 @@ def _element(label: str) -> building.HomogeneousElement:
     ("label", "mass", "fc"),
     [("floor", 484.0, 76.8), ("ext1", 219.0, 92.6), ("int1", 360.0, 128.4)],
 )
-def test_the_annex_l_elements_follow_from_their_table_b3_rows(
+def test_the_annex_l_elements_follow_from_their_rows(
     label: str, mass: float, fc: float
 ) -> None:
     element = _element(label)
     assert element.mass_per_area == pytest.approx(mass, rel=1e-12)
     assert round(element.critical_frequency, 1) == fc
     material, _ = ELEMENTS[label]
-    assert (element.density, element.longitudinal_velocity) == TABLE_B3[material]
+    assert (element.density, element.longitudinal_velocity) == ANNEX_L_MATERIALS[
+        material
+    ]
 
 
 @pytest.mark.parametrize("label", sorted(ref.ISO12354_ANNEX_L3_R_SITU))
@@ -141,9 +148,10 @@ def test_no_loss_factor_the_row_holds_is_ever_read() -> None:
 
 
 def test_the_loss_factor_has_no_default() -> None:
+    concrete = _row("Concrete")
     with pytest.raises(TypeError, match="internal_loss_factor"):
         building.HomogeneousElement.from_solid(  # type: ignore[call-arg]
-            _row("Concrete"),
+            concrete,
             thickness_m=0.22,
             area_m2=20.0,
             length1_m=5.0,

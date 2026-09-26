@@ -20,7 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   half-space, by the Delany and Bazley or the Miki model, that
   `ground_effect`, `barrier_insertion_loss` and
   `atmospheric_parabolic_equation` take as the ground; a row Cox and
-  D'Antonio mark as fitted with one model goes into that model only.
+  D'Antonio tie to the model it was fitted with, by a footnote or in their
+  text, goes into that model only.
   `building.HomogeneousElement.from_solid()` builds the ISO 12354 element a
   layer of a solid makes, with m' = ρt and fc = c0²/(1.8 cL t) from the
   row's density and plate speed, and takes the internal loss factor from you,

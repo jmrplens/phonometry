@@ -687,6 +687,58 @@ def aerogel_note_in_words(
     return out
 
 
+#: The rows of Cox Table 6.7 for the two sands printed at four water contents,
+#: which the text beside the table ties to the two-parameter model of
+#: Attenborough (Sect. 6.6.3, PDF page 272, printed p. 215) and no footnote
+#: marks.
+WET_SAND_ROWS = tuple(
+    f"cox-2017-table-6-7/{sand}_water_{water}"
+    for sand, waters in (
+        ("coarse_sand_98um", (0, 11, 51, 95)),
+        ("fine_sand_65um", (0, 15, 48, 95)),
+    )
+    for water in waters
+)
+
+#: The sentence each of their notes gained.
+WET_SAND_SENTENCE = (
+    " The text on folio 215 (PDF page 272) says Horoshenkov and Mohamed found"
+    " the two-parameter model of Attenborough more suitable for these sands"
+    " than one based on the Delany and Bazley formulations, and that these are"
+    " the parameters of that model they deduced."
+)
+
+
+def wet_sands_fit_in_words(
+    catalogues: Mapping[str, Mapping[str, Row]],
+) -> dict[str, dict[str, Row]]:
+    """The dump taken through the notes that name the fit of the wetted sands.
+
+    No footnote marks the fit of the eight rows, and their notes said
+    nothing of it, so a reader of the page could not tell that their
+    resistivities are parameters of another model than the ones the outdoor
+    functions take. One thing moved, and nothing else may:
+
+    * the ``note`` of each row of :data:`WET_SAND_ROWS` in
+      ``PUBLISHED_GROUND`` ends with :data:`WET_SAND_SENTENCE`, which it did
+      not before.
+
+    :raises ValueError: when a note already ends with it, so that the step
+        can never claim a change it did not make.
+    """
+    out = {name: dict(rows) for name, rows in catalogues.items()}
+    name = "PUBLISHED_GROUND"
+    for key in WET_SAND_ROWS:
+        row = dict(out[name][key])
+        note = row.get("note", "")
+        if not note or note.endswith(WET_SAND_SENTENCE):
+            msg = f"{name}[{key!r}]: the note is not the one the step extends"
+            raise ValueError(msg)
+        row["note"] = note + WET_SAND_SENTENCE
+        out[name][key] = row
+    return out
+
+
 #: Every change since the baseline, oldest first.
 CHANGES: tuple[Change, ...] = (
     one_row_shape,
@@ -696,6 +748,7 @@ CHANGES: tuple[Change, ...] = (
     derived_names_bases,
     bases_in_words,
     aerogel_note_in_words,
+    wet_sands_fit_in_words,
 )
 
 

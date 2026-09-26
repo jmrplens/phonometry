@@ -129,11 +129,14 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | Module | Summary |
 | :--- | :--- |
 | [`hearing.threshold`](/phonometry/reference/api/hearing/threshold/) | Age-related hearing threshold (ISO 7029:2017) and audiometric reference zero (ISO 389-7:2005). |
+| [`hearing.audiometry`](/phonometry/reference/api/hearing/audiometry/) | Pure-tone audiometry: the test room, the threshold rules and their uncertainty (ISO 8253-1:2010). |
+| [`hearing.sound_field_audiometry`](/phonometry/reference/api/hearing/sound-field-audiometry/) | The sound field of an audiometric test room (ISO 8253-2:2009). |
 | [`hearing.noise_induced_hearing_loss`](/phonometry/reference/api/hearing/noise-induced-hearing-loss/) | Estimation of noise-induced hearing loss (ISO 1999:2013). |
 | [`hearing.occupational_exposure`](/phonometry/reference/api/hearing/occupational-exposure/) | Occupational noise exposure: measurement strategies and uncertainty (ISO 9612:2009). |
 | [`hearing.real_ear_attenuation`](/phonometry/reference/api/hearing/real-ear-attenuation/) | Real-ear attenuation of a hearing protector and its uncertainty (ISO 4869-1:2018). |
 | [`hearing.hearing_protectors`](/phonometry/reference/api/hearing/hearing-protectors/) | What a hearing protector leaves at the ear (ISO 4869-2:2018). |
 | [`hearing.active_noise_reduction`](/phonometry/reference/api/hearing/active-noise-reduction/) | Total attenuation of an active noise reduction earmuff (ISO 4869-6:2019). |
+| [`hearing.earmuff_insertion_loss`](/phonometry/reference/api/hearing/earmuff-insertion-loss/) | The insertion loss of an earmuff on an acoustic test fixture (ISO 4869-3:2007). |
 
 ## Room acoustics
 

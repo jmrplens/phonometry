@@ -1,6 +1,6 @@
 ---
-title: "Hearing Protectors (ISO 4869-1, -2 and -6)"
-description: "How a hearing protector's attenuation is measured on sixteen subjects with its uncertainty and its significance test (ISO 4869-1), and the three ISO 4869-2 methods that turn it into the effective A-weighted level, and the total attenuation of an active noise reduction earmuff (ISO 4869-6)."
+title: "Hearing Protectors (ISO 4869-1, -2, -3 and -6)"
+description: "How a hearing protector's attenuation is measured on sixteen subjects with its uncertainty and its significance test (ISO 4869-1), the three ISO 4869-2 methods that turn it into the effective A-weighted level, the total attenuation of an active noise reduction earmuff (ISO 4869-6), and the insertion loss of an earmuff screened on an acoustic test fixture (ISO 4869-3)."
 references:
   - type: standard
     organization: "International Organization for Standardization"
@@ -22,6 +22,12 @@ references:
     title: "Acoustics — Hearing protectors — Part 6: Determination of sound attenuation of active noise reduction earmuffs"
     designation: "ISO 4869-6:2019"
     note: "The active insertion loss of 5.4, the ear with the lower value and its uncertainty (Annex A), the total attenuation of 5.5 and the linear-operation check of 5.4.4, validated against Tables A.2 and A.3 and against each step of 5.5 stored in the calculation workbook ISO publishes with it."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2007
+    title: "Acoustics — Hearing protectors — Part 3: Measurement of insertion loss of ear-muff type protectors using an acoustic test fixture"
+    designation: "ISO 4869-3:2007"
+    note: "The insertion loss of 5.4 with the uncertainty of Annex B, the random-incidence field and plane progressive wave of the test site (5.2, Table 1) and the fixture's acoustic isolation (5.1.4), validated against Tables 1, A.1 and B.1."
 ---
 
 import Scope from '../../../../components/Scope.astro';
@@ -565,6 +571,107 @@ print(linearity.linear_to_110_db)         # False
 The three one-third-octave levels at the ear can go in instead, as
 `ear_third_octave_levels_db`, and are summed into the octave on energy.
 
+## Earmuffs on a test fixture (ISO 4869-3)
+
+Sixteen subjects are a laboratory's week. ISO 4869-3 measures an earmuff
+without any: the acoustic test fixture is a metal cylinder 135 mm across with
+its end faces 145 mm apart and a pressure microphone flush with one of them
+(5.1), and the **insertion loss** is the level at that microphone without the
+earmuff less the level with it seated on the fixture, in one-third-octave bands
+from at least 63 Hz to 8 kHz (5.3, 5.4.2):
+
+$$
+IL_f = \overline{L}_{\mathrm{open},f} - \overline{L}_{\mathrm{occl},f}
+$$
+
+It is a screening method. Its scope names what it is for, checking the spread
+of production for type approval or certification, the change of performance
+with age, and whether the samples sent for the subjective test of ISO 4869-1
+are typical of their type, and what it is not: its data "are not intended to be
+quoted as representing the real-ear sound attenuation of an ear-muff, nor the
+protection provided by the ear-muff" (Clause 1). So nothing here feeds an
+insertion loss to the ISO 4869-2 methods above, which take the real-ear
+attenuation of sixteen subjects.
+
+```python
+# An earmuff fitted three times on the fixture (5.4.3), 63 Hz to 8 kHz.
+bands = np.asarray(hearing.EARMUFF_TEST_BANDS_HZ)
+loss = np.array([7.5, 9.0, 11.0, 13.5, 16.5, 20.0, 23.5, 27.0, 30.0, 32.5, 34.5,
+                 36.0, 37.0, 37.5, 37.0, 36.0, 35.5, 36.5, 38.0, 37.0, 35.0, 33.5])
+spread = np.array([[-0.6], [0.1], [0.5]]) * np.linspace(1.0, 2.2, 22)
+open_level = np.full(22, 88.0)
+fittings = open_level - loss + spread
+il = hearing.earmuff_insertion_loss(
+    open_level, fittings, isolation_cup_levels_db=open_level - 70.0
+)
+print(il.reported_db[[3, 9, 12, 18]])                   # [13.5 32.5 37.  38. ]
+print(np.round(il.expanded_uncertainty_db[[3, 12, 21]], 1))  # [1.8 1.9 2.1]
+print(il.repetitions_sufficient, bool(np.all(il.floor_adequate)))  # True True
+```
+
+The result is reported to 0.1 dB and drawn as Clause 6 asks, increasing
+downwards on the IEC 60263 scale of 50 dB per decade of frequency; `.plot()`
+gives the axes that aspect whether it creates them or they are passed in. Annex B's uncertainty is evaluated band by band: the two levels carry the
+standard deviation of the mean of their repetitions (B.3), or Table B.1's
+typical 0.5 dB and 1.0 dB when there is only one of them, and the fixture, the
+field and the equipment add 0.3 dB, 0.5 dB and 0.2 dB. Table B.1 with its
+typical values gives $u$ = 1.3 dB and $U$ = 2.6 dB, which is
+`hearing.EARMUFF_INSERTION_LOSS_UNCERTAINTY`. The isolation cup in place of the
+earmuff has to read at least 10 dB lower (5.3), which `floor_adequate` checks,
+and `level_stable` and `response_smooth` check that the test signal held within
+±1 dB and that no two adjacent bands of it differ by more than 5 dB.
+
+The test site is qualified as a random-incidence field or a plane progressive
+wave (5.2). The random-incidence field is the diffuse field of ISO 8253-2
+([audiometric test methods](/phonometry/perception/hearing/audiometry/)) with
+this standard's own Table 1, and Annex A notes that the fixture itself can be
+the directional microphone where its front-to-random index reaches 4 dB:
+
+```python
+index = [hearing.ATF_FRONT_TO_RANDOM_INDEX_DB.get(f, np.nan) for f in bands]
+positions = dict.fromkeys(("front", "back", "left", "right", "up", "down"),
+                          np.full(22, 1.0))
+ring = np.zeros((2, 22))
+ring[1] = 3.0
+field = hearing.check_random_incidence_field(
+    positions, np.zeros(22), directional_levels_db=ring, front_to_random_index_db=index
+)
+print(bands[field.directional_required & ~field.directional_judged])
+# [ 500.  630.  800. 1000. 4000. 5000.]: another microphone has to read these
+```
+
+`hearing.check_plane_progressive_wave` judges the other site of 5.2.3, the two
+end-face positions within 2 dB and a directional microphone reading at least
+10 dB more facing the source than facing away, and
+`hearing.verify_fixture_isolation` judges the fixture itself: with its isolation
+cup sealed on, at least 50 dB up to 250 Hz, 65 dB from 315 Hz to 4 kHz and
+55 dB above (5.1.4). Table 1 of ISO 4869-3 prints its first row as "> 5" while
+5.2.2 asks for an index "of at least 5 dB"; the library follows the text, and
+the discrepancy is registered in [ERRATA](/phonometry/reference/errata/).
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/hearing_protector_insertion_loss.svg" alt="Left: the insertion loss of an earmuff on the acoustic test fixture from 63 Hz to 8 kHz, drawn increasing downwards, the three fittings as faint lines around the mean, which rises from 7.5 dB at 63 Hz to about 37 dB at 1 kHz and stays between 33 dB and 38 dB above, with the expanded uncertainty of each band as error bars of about 2 dB. Right: the fixture's acoustic isolation, rising from 54 dB at 63 Hz to 74 dB at 1 kHz and falling to 59 dB at 8 kHz, above the stepped requirement of 5.1.4 at 50 dB up to 250 Hz, 65 dB from 315 Hz to 4 kHz and 55 dB above; the fixture qualifies" width="92%" />
+
+*Left, 5.4: three fittings and their mean, with the uncertainty of Annex B.
+Right, 5.1.4: the fixture isolates its microphone by more than the earmuff it
+tests will, which is what makes the insertion loss measurable.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+isolation = hearing.verify_fixture_isolation(
+    np.full(22, 120.0),
+    120.0 - np.array([54, 55, 57, 59, 61, 63, 66, 68, 70, 71, 72, 73, 74, 74,
+                      73, 72, 71, 70, 68, 64, 61, 59]),
+)
+fig, (left, right) = plt.subplots(1, 2, figsize=(13.5, 5.6))
+il.plot(left)          # the fittings, their mean and U, 50 dB per decade downwards
+isolation.plot(right)  # the isolation against the three ranges of 5.1.4
+plt.show()
+```
+
+</details>
+
 ## What this guide covers
 
 <Scope>
@@ -611,6 +718,20 @@ runs through Annexes A to D is reproduced in the test suite and in the
 conformance report.
 </ScopeClaim>
 
+<ScopeClaim status="covered" label="Covered">
+ISO 4869-3:2007's insertion loss of an earmuff on the acoustic test fixture
+(5.4.2 and 5.4.3, reported as Clause 6 asks) with the uncertainty of Annex B and
+the checks of 5.3 on the isolation cup, the test signal's stability and its
+spectrum; the random-incidence field of 5.2.2 with Table 1 and the fixture's own
+front-to-random index of Table A.1; the plane progressive wave of 5.2.3; and the
+acoustic isolation of the fixture (5.1.4), via `hearing.earmuff_insertion_loss`,
+`hearing.check_random_incidence_field`, `hearing.check_plane_progressive_wave`
+and `hearing.verify_fixture_isolation`. Tables 1, A.1 and B.1 ($u$ = 1.3 dB,
+$U$ = 2.6 dB) and the isolation of 5.1.4 are reproduced in the test suite and in
+the conformance report. The insertion loss is a screening quantity and is not
+converted into a real-ear attenuation.
+</ScopeClaim>
+
 <ScopeClaim status="not-covered" label="Not covered">
 The threshold measurement itself is not simulated: ISO 4869-1's subject
 selection and training (4.4), its fitting procedure (4.5), the test equipment
@@ -619,7 +740,9 @@ test room and the application force of Clause 5 are laboratory requirements
 this library does not judge, and it starts from the thresholds or the
 attenuations they produced. The MIRE measurement of ISO 11904-1 behind
 the active insertion loss, the test signals of 5.3 and the oscillation check of
-5.4.2 are likewise taken as given. ISO 4869-2's Annex E uncertainty
+5.4.2 are likewise taken as given, and so are the construction of ISO 4869-3's
+fixture (5.1.2, 5.1.3), the fitting of the earmuff on it (5.4.1) and the
+background noise of its test site (5.2.4). ISO 4869-2's Annex E uncertainty
 treatment of attenuation values and ratings is not implemented either. Nothing
 here models the difference between laboratory attenuation and what a protector
 achieves in the field, which is the subject of ISO/TR 4869-5 and is
@@ -638,8 +761,12 @@ not make for you.
   what the exposure the protector did not stop does over a working life.
 - [Hearing threshold (age and reference zero)](/phonometry/perception/hearing/hearing-threshold/):
   the baseline any protected exposure is judged against.
+- [Audiometric Test Methods (ISO 8253-1 and -2)](/phonometry/perception/hearing/audiometry/):
+  the diffuse-field test the site of ISO 4869-3 shares, and the room and the
+  rules behind every threshold a protector is measured with.
 - API reference: [`hearing.real_ear_attenuation`](/phonometry/reference/api/hearing/real-ear-attenuation/),
-  [`hearing.hearing_protectors`](/phonometry/reference/api/hearing/hearing-protectors/)
-  and [`hearing.active_noise_reduction`](/phonometry/reference/api/hearing/active-noise-reduction/).
+  [`hearing.hearing_protectors`](/phonometry/reference/api/hearing/hearing-protectors/),
+  [`hearing.active_noise_reduction`](/phonometry/reference/api/hearing/active-noise-reduction/)
+  and [`hearing.earmuff_insertion_loss`](/phonometry/reference/api/hearing/earmuff-insertion-loss/).
 
 </SeeAlso>

@@ -8925,6 +8925,121 @@ in the same order.
   reads for the frequency weightings.
 - **Status:** unreported.
 
+## ISO 8253-1:2010, 11.1 (the filter standard cited as IEC 61620)
+
+- **Location:** 11.1, the paragraph on how the ambient noise is measured,
+  printed p. 16.
+- **The print:** "The measurements shall meet the requirements for class 1
+  sound level meters of IEC 61672-1 and IEC 61620 and have a noise floor at
+  least 6 dB below the sound pressure level being measured."
+- **The problem:** the one-third-octave measurement 11.1 asks for needs the
+  filter standard, IEC 61260, "Octave-band and fractional-octave-band
+  filters", which Clause 2 lists among the normative references and 12.4
+  names for the "one-third-octave-band filter set". Clause 2 lists no
+  IEC 61620 and no other clause cites one: the digits are transposed.
+- **Evidence:** the citation read against the list it should come from.
+  Verified on PDF page 24 (printed p. 16), PDF page 9 (printed p. 1) and PDF
+  page 30 (printed p. 22) of BS EN ISO 8253-1:2010, whose endorsement notice
+  adopts ISO 8253-1:2010 without modification.
+- **Library behaviour:** none needed.
+  [`check_audiometric_ambient_noise`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/hearing/audiometry.py)
+  takes the one-third-octave levels as measured, and its noise-floor flag is
+  the 6 dB margin of the same sentence.
+- **Status:** unreported (cross-reference defect, no numerical consequence).
+
+## ISO 8253-1:2010, Table 3, footnote a (the earphone names marked with the diffuse-field footnote)
+
+- **Location:** Table 3, footnote a, printed p. 18.
+- **The print:** "The values given are based on measurements using pure tones
+  in a free sound field and using Telephonics TDH39 with MX 41/AR cushions
+  and Beyer DT48 earphones", with the mark of footnote d after each of the
+  three product names. Footnote d reads "Data are valid for an artificial
+  diffuse field according to ISO 4869-1"; footnote e reads "This is a product
+  available commercially. This information is given for the convenience of
+  users of this International Standard and does not constitute an
+  endorsement by ISO of this product."
+- **The problem:** the three product names carry the marker of footnote d,
+  which describes the ER-3A and HDA 200 data and says the opposite of the
+  sentence it is attached to: a diffuse field where footnote a says a free
+  field with pure tones. The note the product names need is footnote e, the
+  disclaimer the table's own column headings attach to the other two
+  products: the ER-3A heading carries the marks d, e and f, the HDA 200
+  heading d, e and g.
+- **Evidence:** the footnote read against the two footnotes it cites and the
+  column headings. Verified on PDF page 26 (printed p. 18) of BS EN ISO
+  8253-1:2010.
+- **Library behaviour:** none needed. The attenuation values of
+  [`EARPHONE_ATTENUATION_DB`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/hearing/audiometry.py) are the
+  table's cells and do not depend on the footnote marks.
+- **Status:** unreported (editorial, no numerical consequence).
+
+## ISO 8253-1:2010, A.3.6 (a misspelt word in the masking-noise uncertainty)
+
+- **Location:** A.3.6, "Masking noise, $\delta_\mathrm{m}$", printed p. 25.
+- **The print:** "However, a standard uncertainty of 2 dB may provisionably be
+  attributed to $\delta_\mathrm{m}$ with a normal probability distribution if
+  masking noise is applied."
+- **The problem:** "provisionably" for "provisionally". The word is the one
+  that tells the reader the 2 dB is a stopgap until better figures exist, so
+  the misspelling sits on the qualifier of the value.
+- **Evidence:** the sentence as printed. Verified on PDF page 33 (printed
+  p. 25) of BS EN ISO 8253-1:2010, whose endorsement notice adopts
+  ISO 8253-1:2010 without modification.
+- **Library behaviour:** none needed.
+  [`audiometric_uncertainty`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/hearing/audiometry.py) takes
+  the 2 dB of A.3.6 when `masked=True`; no number depends on the word.
+- **Status:** unreported (editorial, no numerical consequence).
+
+## ISO 8253-2:2009, Annex B (Table B.1 announced from 200 Hz, printed from 125 Hz)
+
+- **Location:** Annex B (informative), the paragraph above Table B.1 and the
+  table, printed p. 15.
+- **The print:** "Table B.1 gives figures for the increased sound pressure
+  levels at test frequencies from 200 Hz to 12 500 Hz at angles of incidence
+  45° and 90°". The table's first rows are 125 Hz (0,5 dB and 1 dB) and
+  160 Hz (1 dB and 1,5 dB).
+- **The problem:** the table runs from 125 Hz, two rows below the range the
+  text announces for it. A reader who trusts the sentence discards two
+  printed rows; one who trusts the table has a text that says they are not
+  there. The 125 Hz row is the one sound field audiometry needs, since its
+  primary range starts at 125 Hz (Clause 1).
+- **Evidence:** the sentence read against the rows it introduces. Verified on
+  PDF page 21 (printed p. 15) of ISO 8253-2:2009.
+- **Library behaviour:**
+  [`INCIDENCE_CORRECTIONS_DB`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/hearing/sound_field_audiometry.py)
+  carries every printed row, 125 Hz to 12 500 Hz, and
+  [`incidence_correction`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/hearing/sound_field_audiometry.py)
+  reads them. The conformance check "ISO 8253-2:2009 Table B.1" counts all 48
+  cells, the four below 200 Hz among them.
+- **Status:** unreported.
+
+## ISO 4869-3:2007, 5.2.2 and Table 1 (a microphone index of exactly 5 dB in two rows)
+
+- **Location:** 5.2.2, the paragraph on the directional test, and Table 1,
+  printed p. 4.
+- **The print:** 5.2.2: "the range of sound pressure levels at the reference
+  point shall be within 5 dB for any two directions of measurement of the
+  incident sound energy when measured with a directional microphone with a
+  front-to-random sensitivity index of at least 5 dB. For other directional
+  microphones, the relationship between the front-to-random sensitivity index
+  and the allowable field variations is given in Table 1." Table 1 prints the
+  rows "> 5" (5 dB), "4 to 5" (4 dB) and "< 4" (microphone not suitable).
+- **The problem:** a microphone whose index is exactly 5 dB may read 5 dB by
+  the text, which asks for "at least 5 dB", and 4 dB by the table, whose
+  first row excludes 5 and whose second includes it. The allowable variation
+  of the one microphone the text names is therefore not decided by the page.
+  ISO 8253-2:2009, which prints the same directional test in 5.3 b), writes
+  the first row of its own Table 1 as "≥ 5".
+- **Evidence:** the table read against the sentence that introduces it.
+  Verified on PDF page 8 (printed p. 4) of ISO 4869-3:2007, and on PDF page
+  13 (printed p. 7) of ISO 8253-2:2009.
+- **Library behaviour:** follows the text.
+  [`RANDOM_INCIDENCE_VARIATION_LIMITS`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/hearing/earmuff_insertion_loss.py)
+  allows 5 dB from an index of 5 dB and 4 dB from 4 dB up to below 5 dB, and
+  the conformance check "ISO 4869-3:2007 5.2.2, Table 1" pins the row for
+  5 dB. A field that meets 4 dB passes either reading.
+- **Status:** unreported.
+
 ## Related source properties that are not errata
 
 Recorded here to prevent future "fixes" that would break agreement with the

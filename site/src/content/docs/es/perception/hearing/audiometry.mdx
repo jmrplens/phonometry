@@ -1,0 +1,499 @@
+---
+title: "Métodos de ensayo audiométricos (ISO 8253-1 y -2)"
+description: "Si una sala de ensayo audiométrico es lo bastante silenciosa y su campo sonoro lo bastante bueno (ISO 8253-1 apartado 11, ISO 8253-2 apartados 5 y 6), cómo convierten en un nivel de umbral de audición las respuestas los métodos ascendente, de horquillado, de registro automático y de barrido en frecuencia, y la incertidumbre de ese nivel (ISO 8253-1 anexo A)."
+references:
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2010
+    title: "Acoustics — Audiometric test methods — Part 1: Pure-tone air and bone conduction audiometry"
+    designation: "ISO 8253-1:2010"
+    note: "La norma implementada: los niveles ambientales máximos admisibles del apartado 11 con las Tablas 2 a 4, las reglas del umbral de los apartados 6.2.4, 6.3.5 y 7.5, y el balance de incertidumbre del anexo A, validados contra cada celda de las Tablas 2 a 4 y contra la Tabla A.2. Leída en su adopción europea BS EN ISO 8253-1:2010, que la adopta sin modificaciones."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2009
+    title: "Acoustics — Audiometric test methods — Part 2: Sound field audiometry with pure-tone and narrow-band test signals"
+    designation: "ISO 8253-2:2009"
+    note: "Los campos sonoros libre, difuso y cuasi libre de los apartados 5.2 a 5.4 con la Tabla 1, los límites ambientales del apartado 6 y la Tabla 2, y los incrementos fuera de eje del anexo B, validados contra cada celda de las Tablas 2 y B.1."
+---
+
+import Scope from '../../../../../components/Scope.astro';
+import ScopeClaim from '../../../../../components/ScopeClaim.astro';
+import SeeAlso from '../../../../../components/SeeAlso.astro';
+import ThemeImage from '../../../../../components/ThemeImage.astro';
+
+Un audiograma es un conjunto de niveles de umbral de audición, y cada uno
+descansa en tres cosas que el audiómetro no enseña: una sala lo bastante
+silenciosa para no enmascarar el tono más débil, una regla que convierte una
+serie de «oído» y «no oído» en un número, y una incertidumbre que dice hasta
+dónde fiarse de ese número. La ISO 8253-1 establece las tres para auriculares y
+vibradores óseos, y la ISO 8253-2 añade lo que necesita un altavoz: una sala
+cuyo campo sonoro se conoce.
+
+## ¿Es la sala lo bastante silenciosa? (ISO 8253-1, apartado 11)
+
+El ruido ambiental no debe enmascarar el tono de ensayo más bajo. Las Tablas 2
+y 4 dan el nivel de presión sonora ambiental máximo admisible
+$L_{S,\mathrm{max}}$ en cada banda de tercio de octava de 31,5 Hz a 8 kHz, para
+la vía aérea con auriculares supraaurales típicos y para la vía ósea, y para la
+frecuencia más baja que ensaya la audiometría: 125 Hz, 250 Hz o, con
+auriculares, 500 Hz. Valen para niveles de umbral de audición hasta 0 dB con un
+desplazamiento del umbral de +2 dB como mucho por el ruido. Tres cosas los
+mueven (apartado 11.1 y las notas de las tablas):
+
+$$
+L_{S,\mathrm{max}}' = L_{S,\mathrm{max}}
++ \left(A_\mathrm{earphone} - A_\mathrm{supra\text{-}aural}\right)
++ L_\mathrm{HT,min} + \Delta
+$$
+
+un auricular que excluye más ruido que el supraaural admite la diferencia de las
+dos atenuaciones de la Tabla 3; un nivel de umbral de audición más bajo
+$L_\mathrm{HT,min}$ distinto de 0 dB se suma banda a banda; y aceptar un
+desplazamiento del umbral de +5 dB en lugar de +2 dB suma $\Delta$ = 8 dB.
+
+```python
+import numpy as np
+from phonometry import hearing
+
+# Niveles ambientales por tercios de octava de una cabina de pared simple, 31,5 Hz a 8 kHz.
+booth = [50, 48, 45, 43, 40, 36, 30, 24, 19, 16, 14, 12, 11,
+         10, 10, 10, 9, 9, 9, 8, 8, 8, 8, 8, 8]
+supra_aural = hearing.check_audiometric_ambient_noise(booth)
+print(supra_aural.passes)                               # False
+print(supra_aural.frequencies[~supra_aural.within])     # [ 63.  80. 100. 125. 160.]
+print(supra_aural.lowest_measurable_hearing_level_db)   # 3.0
+
+# La misma cabina con auriculares de inserción (Tabla 3: unos 33 dB en graves).
+insert = hearing.check_audiometric_ambient_noise(booth, earphone="ER-3A")
+print(insert.passes)                                    # True
+print(hearing.ambient_noise_limits("air", earphone="ER-3A")[15])  # 45.0 a 1 kHz
+```
+
+La ventilación de la cabina deja demasiado de 63 Hz a 160 Hz para auriculares
+supraaurales, hasta 3 dB de más a 100 Hz, así que con ellos solo puede medir
+hasta un nivel de audición de 3 dB: el más bajo que la regla del 11.1 le permite
+a esta sala. La ISO 8253-1 no pide declararlo en el informe; la ISO 8253-2 pide
+en su 11.1 f) que un informe de campo sonoro declare esa misma cifra cuando no es
+0 dB. Los auriculares de inserción excluyen ese ruido, y la misma sala
+cumple. Otro auricular entra con su propia atenuación banda a banda,
+`earphone_attenuation_db=`.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/audiometry_test_room.svg" alt="Dos paneles con el espectro ambiental por tercios de octava de la misma cabina de 31,5 Hz a 8 kHz, que baja de 50 dB a 31,5 Hz a unos 8 dB por encima de 2 kHz, frente al nivel máximo admisible para audiometría por vía aérea desde 125 Hz. A la izquierda, con auriculares supraaurales: el límite baja de 56 dB a 18 dB entre 31,5 Hz y 500 Hz y sube a 36 dB a 4 kHz, y el espectro lo cruza a 63, 80, 100, 125 y 160 Hz, cada una marcada con un aspa; la sala no cumple. A la derecha, con auriculares de inserción ER-3A: el límite sube en la diferencia de atenuación, a entre 37 dB y 89 dB, y el espectro queda muy por debajo en todas partes; la sala cumple" width="92%" loading="eager" />
+
+*Una cabina, dos auriculares. Los límites de la Tabla 2 son lo que deja pasar
+un auricular supraaural; uno de inserción excluye unos 30 dB más por debajo de
+500 Hz, y la Tabla 3 lo convierte en margen para la sala.*
+
+<details>
+<summary>Ver el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+fig, (left, right) = plt.subplots(1, 2, figsize=(13.5, 5.6), sharey=True)
+supra_aural.plot(left, language="es")   # límites, espectro medido, aspas donde se supera
+insert.plot(right, language="es")
+plt.show()
+```
+
+</details>
+
+La vía ósea deja los dos oídos abiertos, así que ningún auricular los protege y
+la Tabla 4 es más estricta que la Tabla 2 en 10 dB a 500 Hz y en 34 dB a 4 kHz;
+su nota 2 advierte de que los niveles por debajo de 5 dB son difíciles de medir con la
+mayoría de los sonómetros. La misma cabina, para vía ósea desde 250 Hz, solo
+admite un nivel de audición más bajo de 6 dB, que fija la banda de 4 kHz:
+
+```python
+bone = hearing.check_audiometric_ambient_noise(
+    booth, presentation="bone", lowest_test_frequency_hz=250
+)
+print(bone.passes, bone.lowest_measurable_hearing_level_db)   # False 6.0
+print(bone.frequencies[np.argmax(bone.exceedance_db)])        # 4000.0
+
+# Medir solo hasta 10 dB sube todos los límites 10 dB (apartado 11.1).
+print(hearing.check_audiometric_ambient_noise(
+    booth, presentation="bone", lowest_test_frequency_hz=250,
+    lowest_hearing_level_db=10.0,
+).passes)                                                     # True
+```
+
+Una medición a la que le faltan bandas se juzga en las que tiene y no cumple: la
+sala no demuestra cumplir las bandas que nadie midió. `noise_floor_db=` señala
+las bandas donde la lectura queda a menos de 6 dB del ruido de fondo propio del
+sonómetro, que el 11.1 prohíbe; esa lectura sobrestima la sala, así que una
+banda dentro de su límite sigue estándolo, y una por encima puede serlo por
+culpa del sonómetro.
+
+## De las respuestas al umbral (apartados 6.2 a 7.5)
+
+Cada método acaba en una regla, y cada regla tiene su propia prueba de
+fiabilidad: una dispersión de más de 10 dB entre los niveles que combina.
+
+### El método ascendente (6.2.3.2, 6.2.4.2)
+
+El primer tono va 10 dB por debajo del nivel más bajo al que respondió el sujeto
+durante la familiarización; tras una falta de respuesta el nivel sube 5 dB, y
+tras una respuesta baja 10 dB. Un **ascenso** es una serie de tonos crecientes
+que acaba en una respuesta, y la serie se detiene cuando tres ascensos acaban en
+el mismo nivel, de cinco como mucho. El nivel de umbral de audición es el nivel
+más bajo en el que hay respuesta en más de la mitad de los ascensos:
+
+```python
+series = hearing.ascending_method_threshold(
+    presentation_levels_db=[30, 20, 25, 15, 20, 25, 15, 20, 10, 15, 20, 25],
+    responses=[1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 1],
+    familiarization_level_db=40.0,
+)
+print(series.ascent_levels_db)   # [25. 25. 20. 25.]
+print(series.threshold_db)       # 25.0
+print(series.doubtful)           # False: los ascensos abarcan 5 dB, no más de 10 dB
+
+# Reproducida sobre la marcha, la misma regla dice qué presentar después.
+print(hearing.ascending_method_threshold(
+    presentation_levels_db=[30, 20], responses=[True, False],
+    familiarization_level_db=40.0,
+).next_level_db)                 # 25.0
+```
+
+La secuencia se contrasta con los pasos del 6.2.3.2, y un tono que los rompe se
+rechaza indicando su posición, que es lo que permite a la función dar el nivel
+siguiente a un audiómetro controlado por ordenador (6.4): se la llama con las
+presentaciones hechas y se presenta `next_level_db`. El primer tono, oído a la primera, no es un
+ascenso: ningún tono subió hasta él. Tras cinco ascensos sin tres en el mismo
+nivel la serie se agota, y la siguiente empieza 10 dB por encima de la última
+respuesta. También pueden entrar solos los niveles de respuesta de los ascensos,
+y `shortened=True` aplica la versión abreviada, que se detiene en dos respuestas
+de tres ascensos. El 6.2.3.2 no dice qué sigue a una serie abreviada que agota
+sus tres ascensos sin dos respuestas en el mismo nivel; la biblioteca la continúa
+con el método completo, una nueva llamada sobre las mismas presentaciones con
+`shortened=False`.
+
+### El método de horquillado (6.2.4.3)
+
+Ascensos y descensos se alternan en pasos de 5 dB. Se promedian los niveles de
+respuesta más bajos de los ascensos, se promedian los de los descensos, y la
+media de los dos promedios, redondeada al paso de 5 dB más próximo, es el umbral.
+Una media a mitad de camino entre dos pasos va al superior, que es como la
+biblioteca lee «más próximo» siempre que una norma deja abierto el empate:
+
+```python
+bracket = hearing.bracketing_method_threshold([30, 30, 35], [30, 35, 35])
+print(bracket.mean_db, bracket.threshold_db)   # 32.5 35.0
+print(bracket.complete, bracket.repeat_advised)  # True False
+```
+
+Tres ascensos y tres descensos forman una serie completa; bastan dos de cada si
+sus cuatro niveles quedan a 5 dB unos de otros.
+
+### Registro automático (6.3.5)
+
+El sujeto hace bajar el nivel mientras oye el tono y lo deja subir cuando no, y
+el trazo zigzaguea en torno al umbral. Se descarta la primera inversión tras un
+cambio de frecuencia, y también las dos inversiones de cualquier excursión de
+3 dB o menos; se promedian los picos por un lado y los valles por otro, y la
+media de los dos promedios, **redondeada hacia arriba** al decibelio entero
+siguiente, es el umbral:
+
+```python
+tracing = hearing.automatic_audiometry_threshold(
+    [38, 22, 31, 21, 32, 20, 30, 29, 31, 19, 30, 20, 31, 21]
+)
+print(tracing.peaks_db)                      # [31. 32. 30. 31.]
+print(tracing.valleys_db)                    # [22. 21. 20. 19. 20. 21.]
+print(tracing.mean_db, tracing.threshold_db) # 25.75 26.0
+```
+
+El registro es de fiabilidad dudosa cuando los picos o los valles se dispersan
+más de 10 dB o quedan menos de seis inversiones. La nota 2 del 6.3.5 sitúa los
+umbrales automáticos, de media, 3 dB por debajo de los manuales, una propiedad
+del método que esta función no corrige.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/audiometry_threshold_rules.svg" alt="A la izquierda, doce presentaciones del método ascendente como una escalera de nivel de audición frente al número de presentación, que empieza en 30 dB, con los tonos oídos rellenos y los no oídos huecos, y los finales de los cuatro ascensos rodeados a 25, 25, 20 y 25 dB; una línea discontinua marca el umbral de 25 dB. A la derecha, un registro automático como catorce inversiones que zigzaguean entre unos 20 dB y 32 dB, la primera inversión y tres en torno a una oscilación de 1 dB en gris como descartadas, líneas de puntos en la media de los picos, 31 dB, y de los valles, 20,5 dB, y una línea discontinua en el umbral de 26 dB" width="92%" />
+
+*A la izquierda, el método ascendente: tres de los cuatro ascensos acaban en
+25 dB, que es más de la mitad. A la derecha, el registro automático: los picos
+promedian 31 dB y los valles 20,5 dB, y la media de 25,75 dB se redondea hacia
+arriba.*
+
+<details>
+<summary>Ver el código de esta figura</summary>
+
+```python
+fig, (left, right) = plt.subplots(1, 2, figsize=(13.5, 5.6))
+series.plot(left, language="es")    # la escalera, oídos y no oídos, ascensos rodeados
+tracing.plot(right, language="es")  # el trazo, sus inversiones descartadas y los promedios
+plt.show()
+```
+
+</details>
+
+### Audiometría de barrido en frecuencia (7.5)
+
+La frecuencia barre, normalmente de 0,5 a 2 octavas por minuto, mientras el
+sujeto sigue el umbral. En una frecuencia dada se promedian los tres picos y los
+tres valles más próximos a ella, más próximos en el eje logarítmico por el que
+corre el barrido, y la media se redondea al decibelio más próximo. A lo largo del
+trazo, seis inversiones consecutivas dan el umbral en la media geométrica de sus
+frecuencias:
+
+```python
+reversal_frequencies = np.geomspace(500.0, 4000.0, 18)
+reversal_levels = [34, 24, 33, 23, 35, 25, 36, 24, 38, 27, 40, 29,
+                   43, 31, 46, 34, 48, 37]
+sweep = hearing.sweep_audiometry_threshold(reversal_frequencies, reversal_levels)
+print(sweep.frequencies)     # [ 500.  750. 1000. 1500. 2000. 3000. 4000.]
+print(sweep.threshold_db)    # [29. 29. 30. 32. 36. 40. 40.]
+print(np.round(sweep.running_frequencies[:2]))  # [679. 767.]
+```
+
+### La repetición a 1 kHz y las precauciones (6.2.3.2, 8.4)
+
+Otras tres reglas juzgan los niveles una vez hallados. Cuando están hechas todas
+las frecuencias del primer oído, el paso 3 del 6.2.3.2 repite la medida a 1 kHz:
+una concordancia de 5 dB o menos pasa al otro oído, y una mejora o un
+empeoramiento de 10 dB o más obliga a repetir las demás frecuencias, en el mismo
+orden, hasta recuperar la concordancia. Un nivel de audición de 40 dB o más en
+cualquiera de los dos oídos pide precaución porque el tono puede oírse por el
+otro oído, y entonces puede hacer falta enmascaramiento contralateral (6.2.3.2).
+Y un vibrador óseo sobre la mastoides se siente, de media, a un nivel de audición
+de unos 40 dB a 250 Hz, 60 dB a 500 Hz y 70 dB a 1 kHz (8.4, unos 10 dB menos si
+el audiómetro está calibrado para la frente), así que una respuesta por vía ósea
+a esos niveles puede ser tacto y no audición:
+
+```python
+repeat = hearing.check_retest_agreement(25.0, 35.0)   # primera y repetición a 1 kHz
+print(repeat.passes, repeat.retest_further_frequencies)   # False True
+
+cautions = hearing.audiogram_cautions(
+    [250, 500, 1000, 2000, 4000],
+    air_conduction_db=[20, 25, 30, 45, 55],
+    bone_conduction_db=[40, 20, 25, 40, 50],
+)
+print(cautions.cross_hearing)   # [False False False  True  True]
+print(cautions.vibrotactile)    # [ True False False False False]
+```
+
+El texto está escrito para los pasos de 5 dB de un audiómetro manual, en los que
+una repetición o concuerda a 5 dB o difiere en 10 dB. Un mando más fino puede dar
+7 dB, que no es concordancia y para lo que el paso 3 no indica nada; la
+comprobación entonces ni cumple ni pide repetir. El 8.4 da niveles en solo tres
+frecuencias y advierte de que varían mucho de una persona a otra, así que una
+marca ahí es un motivo para volver a mirar, no un veredicto; la vía ósea no
+recibe marca de audición cruzada, porque el 8.1 ya pide enmascarar el otro oído a
+cualquier nivel. `cautions.plot(language="es")` dibuja el audiograma con los
+niveles marcados con un aspa.
+
+## La incertidumbre de un umbral (anexo A)
+
+El anexo A modela el nivel de umbral de audición como el valor determinado más
+siete magnitudes de entrada de media cero, para el audiómetro, el transductor y
+su colocación, el ruido ambiental, el enmascaramiento, el examinador, el sujeto
+y una medición inusualmente difícil. Ninguna está correlacionada con otra y cada
+una tiene un coeficiente de sensibilidad de 1, así que
+
+$$
+u = \sqrt{\sum_{i=1}^{8} u_i^2}, \qquad U = 2u
+$$
+
+y el apartado A.3 da valores típicos: 2,5 dB para determinaciones repetidas por
+vía aérea hasta 4 kHz, los ±3 dB del audiómetro y sus pasos de 5 dB como dos
+distribuciones rectangulares, $\sqrt{1{,}5^2 + 2{,}5^2}$ = 2,9 dB para el
+transductor, y 2 dB para una sala que cumple el apartado 11. Ese es el ejemplo de
+la Tabla A.2:
+
+```python
+budget = hearing.audiometric_uncertainty(1000.0)
+print(np.round(budget.components_db[:4], 1))           # [2.5 2.3 2.9 2. ]
+print(round(budget.combined_db, 1), round(budget.expanded_db))  # 4.9 10
+
+# Vía ósea por encima de 4 kHz con ruido de enmascaramiento: crecen todos.
+masked_bone = hearing.audiometric_uncertainty(6000.0, conduction="bone", masked=True)
+print(round(masked_bone.expanded_db, 1))               # 15.3
+```
+
+Una incertidumbre expandida de 10 dB son dos pasos del audiómetro a cada lado,
+que es lo que puede afirmar un único audiograma. `environment_db=` sustituye los
+2 dB del A.3.5 para una sala que supera el apartado 11, o los suprime para
+umbrales muy por encima de 0 dB, y `tester_db=`, `subject_db=` y `special_db=`
+llevan las componentes excepcionales de los apartados A.3.7 a A.3.9;
+`budget.plot(language="es")` dibuja las ocho como barras.
+
+## El campo sonoro (ISO 8253-2)
+
+Con altavoces la sala forma parte del instrumento, así que la ISO 8253-2 la
+cualifica, sin el sujeto ni la silla y con las señales de la propia audiometría,
+como uno de tres campos:
+
+- un **campo libre** (5.2): el altavoz a 1 m como mínimo, el nivel a 0,15 m a
+  izquierda, derecha, arriba y abajo del punto de referencia a ±1 dB del nivel en
+  él hasta 4 kHz y a ±2 dB por encima, las posiciones de los oídos a 3 dB una de
+  otra por encima de 4 kHz, y los puntos a 0,15 m delante y detrás de él sobre el
+  eje del altavoz a ±1 dB de la ley de la inversa de la distancia,
+  $20 \lg\left((r + d)/(r - d)\right)$. Solo una cámara anecoica lo cumple, y los
+  tonos puros lo necesitan (4.2);
+- un **campo cuasi libre** (5.4): lo mismo con ±2 dB en las posiciones laterales
+  y los puntos axiales a 0,10 m. Su intervalo de frecuencias utilizable es aquel
+  en el que se cumplen los requisitos;
+- un **campo difuso** (5.3): seis posiciones a 0,15 m dentro de ±2,5 dB y los
+  lados de los oídos a 3 dB, y desde 500 Hz los niveles que lee un micrófono
+  direccional en las direcciones de más y de menos energía incidente dentro de la
+  variación que la Tabla 1 admite para su índice frontal-aleatorio de
+  sensibilidad (*front-to-random sensitivity index*): 5 dB para un índice de
+  5 dB o más, 4,5 dB para 4,5 dB, 4 dB para 4 dB.
+
+```python
+# Una sala tratada, el altavoz a 1,2 m: desviaciones respecto al nivel en el
+# punto de referencia, 125 Hz a 8 kHz, en las cuatro posiciones laterales.
+lateral = {
+    "left": [2.6, -2.2, 0.8, 0.6, -0.4, 0.5, 0.9, -0.7, 1.2, -1.1, 1.4],
+    "right": [-2.4, 1.9, -0.6, 0.3, 0.7, -0.8, 0.4, 1.1, -1.3, 1.5, -0.9],
+    "up": [1.2, 2.3, 0.5, -0.9, 0.2, 0.6, -0.5, 0.8, 0.4, -1.2, 1.6],
+    "down": [-1.5, -1.8, -0.9, 0.4, -0.6, -0.3, 0.7, -0.4, -0.8, 0.9, -1.7],
+}
+law = 20 * np.log10(1.3 / 1.1)   # la diferencia axial a 0,10 m, 1,45 dB
+front = law + np.array([1.8, 1.2, 0.4, -0.3, 0.2, -0.4, 0.3, 0.5, -0.2, 0.6, -0.5])
+quasi = hearing.check_quasi_free_sound_field(
+    lateral, np.zeros(11), front_levels_db=front, back_levels_db=np.zeros(11),
+    loudspeaker_distance_m=1.2,
+)
+print(quasi.passes)              # False: los modos de la sala estropean 125 Hz y 250 Hz
+print(quasi.usable_frequencies)  # [ 500.  750. 1000. 1500. 2000. 3000. 4000. 6000. 8000.]
+
+# Cuatro altavoces con bandas estrechas de ruido no correlacionadas: las seis
+# posiciones, y un micrófono direccional de índice 5 dB leído en dos direcciones.
+six = {
+    "front": [1.4, 0.9, 0.6, -0.8, 0.5, 1.1, -0.4, 0.7, -0.6, 0.9, 1.2],
+    "back": [-1.2, -0.6, 0.8, 0.5, -0.9, -0.7, 0.6, -0.5, 0.8, -1.0, -0.8],
+    "left": [0.8, 1.3, -0.5, 0.9, 0.4, -0.6, 1.0, 0.6, -0.9, 0.5, 1.4],
+    "right": [-0.9, -1.1, 0.7, -0.4, -0.8, 0.9, -0.7, -0.8, 0.7, -0.6, -1.1],
+    "up": [2.1, 1.6, -1.1, 0.6, 1.2, -0.9, 0.8, -1.2, 0.5, 1.3, -0.7],
+    "down": [-1.8, -1.4, 0.9, -1.0, -0.5, 0.8, -1.1, 0.9, -0.4, -0.9, 0.6],
+}
+readings = np.zeros((2, 11))
+readings[1] = [np.nan, np.nan, 3.1, 2.7, 3.4, 2.9, 3.8, 3.2, 3.6, 4.1, 4.3]
+diffuse = hearing.check_diffuse_sound_field(
+    six, np.zeros(11), directional_levels_db=readings, front_to_random_index_db=5.0
+)
+print(diffuse.passes)            # True
+```
+
+El ensayo direccional del 5.3 b) es un requisito, no un añadido: sin las
+lecturas, `diffuse.directionality_judged` es falso y `passes` también, mientras
+que `uniform` y `balanced` siguen dando el veredicto del a) banda a banda. Un
+micrófono de índice 4 dB solo admitiría 4 dB y suspendería las bandas de 6 kHz y
+8 kHz con las mismas lecturas. La sala de campo sonoro tiene además sus propios
+límites ambientales, la Tabla 2 de la ISO 8253-2 hasta 12,5 kHz, derivados de la
+ISO 8253-1 para escucha binaural (nota a); puestos uno junto a otro, son sus
+límites de vía ósea menos 3 dB:
+`check_audiometric_ambient_noise(levels, presentation="sound field")`. Con bandas
+estrechas de ruido como señal de ensayo, como en este campo difuso, la nota b
+pide límites más bajos que los de la tabla y no imprime cifra, así que una sala
+que supera la comprobación aún puede ser demasiado ruidosa para ellas.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/audiometry_sound_field.svg" alt="Dos paneles frente a la frecuencia de 125 Hz a 8 kHz. A la izquierda, un campo cuasi libre: la mayor desviación lateral baja de 2,6 dB a 125 Hz y 2,3 dB a 250 Hz, ambas con aspa por quedar fuera del campo, a menos de más o menos 2 dB desde 500 Hz, entre líneas discontinuas de tolerancia a más y menos 2 dB; la desviación axial respecto a la ley de la inversa de la distancia baja de 1,8 dB a 125 Hz y 1,2 dB a 250 Hz, también con aspa, a dentro de las líneas de puntos de más o menos 1 dB desde 500 Hz; el título dice utilizable de 500 Hz a 8000 Hz. A la derecha, un campo difuso: la mayor desviación de las seis posiciones queda dentro de más o menos 2,5 dB, la diferencia entre derecha e izquierda por debajo de 3 dB, y la variación direccional desde 500 Hz entre 2,7 dB y 4,3 dB, por debajo del límite de la Tabla 1 de 5 dB dibujado con trazos; el título dice cumple" width="92%" />
+
+*A la izquierda, 5.4: el intervalo utilizable de un campo cuasi libre es aquel en
+el que cumple sus requisitos, aquí de 500 Hz a 8 kHz. A la derecha, 5.3: un campo
+difuso hecho con cuatro altavoces, cualificado con un micrófono direccional de
+índice 5 dB.*
+
+<details>
+<summary>Ver el código de esta figura</summary>
+
+```python
+fig, (left, right) = plt.subplots(1, 2, figsize=(13.5, 5.6))
+quasi.plot(left, language="es")     # desviaciones laterales y axiales, bandas fuera con aspa
+diffuse.plot(right, language="es")  # posiciones, lados de los oídos y variación direccional
+plt.show()
+```
+
+</details>
+
+No existe un umbral de referencia normalizado para un altavoz fuera de 0°
+(4.8, nota 1). El anexo B imprime cuánto más alto es el nivel en el oído más
+próximo al altavoz a 45° y a 90°, redondeado a 0,5 dB, que es lo que un informe
+puede declarar junto a un umbral fuera de eje:
+
+```python
+print(hearing.incidence_correction([500, 1000, 4000], incidence_angle_deg=90))
+# [ 4.5  5.5 -0.5]
+```
+
+El párrafo que precede a la Tabla B.1 la anuncia desde 200 Hz; la tabla imprime
+filas desde 125 Hz, y la biblioteca conserva todas las filas impresas. La
+discrepancia está registrada en [ERRATA](/phonometry/es/reference/errata/).
+
+## Qué cubre esta guía
+
+<Scope>
+<ScopeClaim status="covered" label="Cubierto">
+De la ISO 8253-1:2010, los niveles ambientales máximos admisibles del apartado
+11 (Tablas 2 y 4) con la bonificación por auricular de la Tabla 3, el nivel de
+umbral de audición más bajo y la relajación de +5 dB, y el margen de ruido de
+fondo del 11.1; las reglas del umbral del método ascendente (6.2.3.2 y 6.2.4.2,
+con sus series completa y abreviada y la reproducción de una secuencia de
+presentaciones), del método de horquillado (6.2.4.3), del registro automático
+(6.3.5) y de la audiometría de barrido en frecuencia (7.5), cada una con su
+prueba de fiabilidad; la repetición a 1 kHz del paso 3 del 6.2.3.2, la
+precaución por audición cruzada del 6.2.3.2 y los niveles vibrotáctiles del 8.4;
+y el balance de incertidumbre del anexo A (A.3 a A.5), mediante
+`hearing.check_audiometric_ambient_noise`, `hearing.ambient_noise_limits`,
+`hearing.ascending_method_threshold`, `hearing.bracketing_method_threshold`,
+`hearing.automatic_audiometry_threshold`, `hearing.sweep_audiometry_threshold`,
+`hearing.check_retest_agreement`, `hearing.audiogram_cautions` y
+`hearing.audiometric_uncertainty`. Cada celda de las Tablas 2 a 4, los niveles
+del 8.4, las componentes de los apartados A.3.3 y A.3.4 y el balance de la
+Tabla A.2 (sus cuatro componentes, $u$ = 4,9 dB y $U$ = 10 dB) se reproducen en
+el conjunto de pruebas y en el informe de conformidad.
+</ScopeClaim>
+
+<ScopeClaim status="covered" label="Cubierto">
+De la ISO 8253-2:2009, los campos sonoros libre, cuasi libre y difuso (5.2 a
+5.4, con la Tabla 1), los límites ambientales del apartado 6 y la Tabla 2, y los
+incrementos fuera de eje del anexo B (Tabla B.1), mediante
+`hearing.check_free_sound_field`, `hearing.check_quasi_free_sound_field`,
+`hearing.check_diffuse_sound_field`, `hearing.check_audiometric_ambient_noise` y
+`hearing.incidence_correction`. Cada celda de las Tablas 2 y B.1 se reproduce en
+el conjunto de pruebas y en el informe de conformidad, y también la derivación
+de la Tabla 2 a partir de la Tabla 4 de la ISO 8253-1. La comprobación de campo
+difuso es la que la ISO 4869-3 aplica al campo de incidencia aleatoria de su
+lugar de ensayo, en la página de
+[protectores auditivos](/phonometry/es/perception/hearing/hearing-protectors/).
+</ScopeClaim>
+
+<ScopeClaim status="not-covered" label="No cubierto">
+Nada de esto presenta un tono, gobierna el equipo de un audiómetro ni juzga a un
+sujeto. La preparación e instrucción del sujeto (apartado 5), la familiarización
+del 6.2.2, los procedimientos de enmascaramiento de los apartados 6.2.3.3 y 8.5,
+el cribado del apartado 9, los símbolos del audiograma del apartado 10 y la
+comprobación psicoacústica del 11.2 son procedimientos que sigue el examinador,
+y el esquema de calibración del apartado 12 corresponde a la IEC 60645-1 y a la
+serie ISO 389. Las características de la señal de ensayo del apartado 4 de la
+ISO 8253-2, sus ensayos monoaural y binaural (8.2, 8.3) y el ensayo con audífono
+(apartado 9) se dan igualmente por supuestos, y también los límites ambientales
+más bajos que la nota b de su Tabla 2 pide para el ruido de banda estrecha, para
+los que no imprime cifra. La audiometría verbal es la ISO 8253-3, que la
+biblioteca no implementa. El cero de referencia sobre el que
+se miden los umbrales está en la página del
+[umbral de audición](/phonometry/es/perception/hearing/hearing-threshold/).
+</ScopeClaim>
+</Scope>
+
+<SeeAlso>
+
+## Véase también
+
+- [Umbral de audición (edad y cero de referencia)](/phonometry/es/perception/hearing/hearing-threshold/):
+  el cero audiométrico desde el que se miden los niveles de audición, y el umbral
+  que cabe esperar de un oído otológicamente normal de una edad dada.
+- [Protectores auditivos (ISO 4869-1, -2, -3 y -6)](/phonometry/es/perception/hearing/hearing-protectors/):
+  el mismo ensayo de campo difuso, aplicado al lugar donde se criba una orejera
+  sobre su montaje de ensayo.
+- [Pérdida auditiva inducida por ruido (ISO 1999)](/phonometry/es/perception/hearing/noise-induced-hearing-loss/):
+  aquello con lo que se comparan los niveles de umbral que registra un
+  audiograma.
+- Referencia de API: [`hearing.audiometry`](/phonometry/es/reference/api/hearing/audiometry/)
+  y [`hearing.sound_field_audiometry`](/phonometry/es/reference/api/hearing/sound-field-audiometry/).
+
+</SeeAlso>

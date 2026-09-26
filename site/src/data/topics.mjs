@@ -197,6 +197,7 @@ export const topics = [
         items: [
           { slug: 'perception/hearing', label: 'Overview', translations: { es: 'Resumen' } },
           'perception/hearing/hearing-threshold',
+          'perception/hearing/audiometry',
           'perception/hearing/noise-induced-hearing-loss',
           'perception/hearing/occupational-exposure',
           'perception/hearing/hearing-protectors',

@@ -41,6 +41,39 @@ from .absorption import EVEREST_BANDS_HZ as EVEREST_BANDS_HZ
 from .absorption import LONG_7_1_ABSORPTION as LONG_7_1_ABSORPTION
 from .absorption import LONG_7_1_BANDS_HZ as LONG_7_1_BANDS_HZ
 from .absorption import RANGE_ACROSS_COLUMNS as RANGE_ACROSS_COLUMNS
+from .audiometry import ISO4869_3_B4_EXPANDED_DB as ISO4869_3_B4_EXPANDED_DB
+from .audiometry import ISO4869_3_ISOLATION as ISO4869_3_ISOLATION
+from .audiometry import ISO4869_3_TABLE_1 as ISO4869_3_TABLE_1
+from .audiometry import ISO4869_3_TABLE_A1 as ISO4869_3_TABLE_A1
+from .audiometry import (
+    ISO4869_3_TABLE_B1_COMPONENTS_DB as ISO4869_3_TABLE_B1_COMPONENTS_DB,
+)
+from .audiometry import ISO4869_3_TABLE_B1_U_DB as ISO4869_3_TABLE_B1_U_DB
+from .audiometry import ISO8253_1_A33_EQUIPMENT_DB as ISO8253_1_A33_EQUIPMENT_DB
+from .audiometry import ISO8253_1_A34_TRANSDUCER_DB as ISO8253_1_A34_TRANSDUCER_DB
+from .audiometry import ISO8253_1_BANDS_HZ as ISO8253_1_BANDS_HZ
+from .audiometry import ISO8253_1_CROSS_HEARING_DB as ISO8253_1_CROSS_HEARING_DB
+from .audiometry import ISO8253_1_FOREHEAD_OFFSET_DB as ISO8253_1_FOREHEAD_OFFSET_DB
+from .audiometry import ISO8253_1_RELAXED_ALLOWANCE_DB as ISO8253_1_RELAXED_ALLOWANCE_DB
+from .audiometry import ISO8253_1_RETEST_AGREEMENT_DB as ISO8253_1_RETEST_AGREEMENT_DB
+from .audiometry import (
+    ISO8253_1_RETEST_DISAGREEMENT_DB as ISO8253_1_RETEST_DISAGREEMENT_DB,
+)
+from .audiometry import ISO8253_1_TABLE_2 as ISO8253_1_TABLE_2
+from .audiometry import ISO8253_1_TABLE_3 as ISO8253_1_TABLE_3
+from .audiometry import ISO8253_1_TABLE_4 as ISO8253_1_TABLE_4
+from .audiometry import (
+    ISO8253_1_TABLE_A2_COMPONENTS_DB as ISO8253_1_TABLE_A2_COMPONENTS_DB,
+)
+from .audiometry import ISO8253_1_TABLE_A2_EXPANDED_DB as ISO8253_1_TABLE_A2_EXPANDED_DB
+from .audiometry import ISO8253_1_TABLE_A2_U_DB as ISO8253_1_TABLE_A2_U_DB
+from .audiometry import ISO8253_1_VIBROTACTILE_DB as ISO8253_1_VIBROTACTILE_DB
+from .audiometry import ISO8253_2_BANDS_HZ as ISO8253_2_BANDS_HZ
+from .audiometry import ISO8253_2_BINAURAL_OFFSET_DB as ISO8253_2_BINAURAL_OFFSET_DB
+from .audiometry import ISO8253_2_TABLE_1 as ISO8253_2_TABLE_1
+from .audiometry import ISO8253_2_TABLE_2 as ISO8253_2_TABLE_2
+from .audiometry import ISO8253_2_TABLE_B1 as ISO8253_2_TABLE_B1
+from .audiometry import ISO8253_2_TABLE_B1_HZ as ISO8253_2_TABLE_B1_HZ
 from .broadcast import BS468_BURST_HZ as BS468_BURST_HZ
 from .broadcast import BS468_CALIBRATION_V as BS468_CALIBRATION_V
 from .broadcast import BS468_OVERLOAD_BURST_MS as BS468_OVERLOAD_BURST_MS

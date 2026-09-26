@@ -379,6 +379,100 @@ _KWARG_PLOT_CASES = [
         ),
         "line",
     ),
+    (
+        "audiometric_ambient_noise",
+        lambda: ph.hearing.check_audiometric_ambient_noise(np.full(25, 10.0)),
+        "line",
+    ),
+    (
+        "ascending_method",
+        lambda: ph.hearing.ascending_method_threshold(
+            presentation_levels_db=[20, 25, 30, 20, 25, 30],
+            responses=[False, False, True, False, False, True],
+        ),
+        "line",
+    ),
+    (
+        "bracketing_method",
+        lambda: ph.hearing.bracketing_method_threshold([30, 30, 35], [30, 35, 35]),
+        "line",
+    ),
+    (
+        "automatic_audiometry",
+        lambda: ph.hearing.automatic_audiometry_threshold(
+            [30, 20, 31, 21, 32, 20, 30, 19]
+        ),
+        "line",
+    ),
+    (
+        "sweep_audiometry",
+        lambda: ph.hearing.sweep_audiometry_threshold(
+            np.geomspace(500.0, 4000.0, 12), [30.0, 20.0] * 6
+        ),
+        "line",
+    ),
+    (
+        "retest_agreement",
+        lambda: ph.hearing.check_retest_agreement(25.0, 30.0),
+        "line",
+    ),
+    (
+        "audiogram_cautions",
+        lambda: ph.hearing.audiogram_cautions(
+            [250.0, 500.0, 1000.0],
+            air_conduction_db=[20.0, 40.0, 45.0],
+            bone_conduction_db=[40.0, 30.0, 35.0],
+        ),
+        "line",
+    ),
+    (
+        "audiometric_uncertainty",
+        lambda: ph.hearing.audiometric_uncertainty(1000.0),
+        "bar",
+    ),
+    (
+        "diffuse_sound_field",
+        lambda: ph.hearing.check_diffuse_sound_field(
+            dict.fromkeys(("front", "back", "left", "right", "up", "down"), [0.5] * 11),
+            [0.0] * 11,
+        ),
+        "line",
+    ),
+    (
+        "free_sound_field",
+        lambda: ph.hearing.check_free_sound_field(
+            dict.fromkeys(("left", "right", "up", "down"), [0.5] * 11),
+            [0.0] * 11,
+            front_levels_db=[1.0] * 11,
+            back_levels_db=[0.0] * 11,
+            loudspeaker_distance_m=2.0,
+        ),
+        "line",
+    ),
+    (
+        "earmuff_insertion_loss",
+        lambda: ph.hearing.earmuff_insertion_loss(
+            np.full(22, 90.0), np.full((3, 22), 70.0) + np.arange(3)[:, None]
+        ),
+        "line",
+    ),
+    (
+        "insertion_loss_uncertainty",
+        lambda: ph.hearing.EARMUFF_INSERTION_LOSS_UNCERTAINTY,
+        "bar",
+    ),
+    (
+        "plane_progressive_wave",
+        lambda: ph.hearing.check_plane_progressive_wave([[80.0] * 22, [81.0] * 22]),
+        "line",
+    ),
+    (
+        "fixture_isolation",
+        lambda: ph.hearing.verify_fixture_isolation(
+            np.full(22, 120.0), np.full(22, 55.0)
+        ),
+        "line",
+    ),
     ("static_airflow", _static_airflow, "line"),
     ("airborne_prediction", _airborne_prediction, "bar"),
     ("impact_prediction", _impact_prediction, "bar"),
@@ -668,6 +762,13 @@ def test_single_axes_plots_accept_external_ax() -> None:
         _free_field_correction(),
         _correction_budget(),
         _correction_verification(),
+        ph.hearing.check_audiometric_ambient_noise(np.full(25, 10.0)),
+        ph.hearing.bracketing_method_threshold([30, 30, 35], [30, 35, 35]),
+        ph.hearing.check_retest_agreement(25.0, 30.0),
+        ph.hearing.audiogram_cautions([250.0, 500.0], air_conduction_db=[20.0, 45.0]),
+        ph.hearing.audiometric_uncertainty(1000.0),
+        ph.hearing.EARMUFF_INSERTION_LOSS_UNCERTAINTY,
+        ph.hearing.verify_fixture_isolation(np.full(22, 120.0), np.full(22, 55.0)),
         _static_airflow(),
         _airborne_prediction(),
         _impact_prediction(),

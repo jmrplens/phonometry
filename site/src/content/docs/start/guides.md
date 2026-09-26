@@ -1,6 +1,6 @@
 ---
 title: "Guides"
-description: "The 150 guides of phonometry, grouped into the thirteen topics the library covers: what each area is for, the standards implemented in it, and a one-line summary of every guide inside it."
+description: "The 151 guides of phonometry, grouped into the thirteen topics the library covers: what each area is for, the standards implemented in it, and a one-line summary of every guide inside it."
 head:
   - tag: script
     attrs:
@@ -117,7 +117,7 @@ makes, then runnable code and the figure it draws. Nothing here is a survey of
 the field; each page is the working documentation of a module, written so that
 a result can be defended clause by clause rather than trusted.
 
-This page is the map. A hundred and fifty guides sit in thirteen topics, and each topic has its
+This page is the map. A hundred and fifty-one guides sit in thirteen topics, and each topic has its
 own overview page with the longer story of how its pieces fit together. If you
 are arriving without a specific question, read
 [Getting Started](/phonometry/start/getting-started/) first: it runs one signal
@@ -322,8 +322,8 @@ the core area asks how much sound there is, this one asks what a listener makes
 of it: how loud it seems, how sharp or rough or annoying, how much of a talker
 survives the room, and how much hearing a working life in that noise costs.
 Implements ISO 532-1/-2/-3, ECMA-418-1/-2, ISO 226, DIN 45692, IEC 60268-16,
-ANSI S3.5, DIN 45681, ISO/PAS 20065, ISO 7029, ISO 389-7, ISO 1999 and
-ISO 9612.
+ANSI S3.5, DIN 45681, ISO/PAS 20065, ISO 7029, ISO 389-7, ISO 8253-1/-2,
+ISO 1999, ISO 9612 and ISO 4869-1/-2/-3/-6.
 
 **[Psychoacoustics](/phonometry/perception/psychoacoustics/)**
 
@@ -361,16 +361,21 @@ ISO 9612.
 - [Hearing threshold (age and reference zero)](/phonometry/perception/hearing/hearing-threshold/):
   the age-related threshold distribution of ISO 7029 and the ISO 389-7
   reference threshold of hearing.
+- [Audiometric Test Methods (ISO 8253-1 and -2)](/phonometry/perception/hearing/audiometry/):
+  whether the test room is quiet enough and its sound field free, quasi-free or
+  diffuse, the rules that turn responses into a hearing threshold level, and
+  its uncertainty.
 - [Noise-induced hearing loss (ISO 1999)](/phonometry/perception/hearing/noise-induced-hearing-loss/):
   the permanent threshold shift as a function of level, duration and frequency,
   combined with the age component.
 - [Occupational Noise Exposure (ISO 9612)](/phonometry/perception/hearing/occupational-exposure/):
   the task-based, job-based and full-day strategies for $L_\mathrm{EX,8h}$, with the
   uncertainty budget and the upper limit.
-- [Hearing Protectors (ISO 4869-1, -2 and -6)](/phonometry/perception/hearing/hearing-protectors/):
+- [Hearing Protectors (ISO 4869-1, -2, -3 and -6)](/phonometry/perception/hearing/hearing-protectors/):
   the attenuation measured on sixteen subjects with its uncertainty and its
   significance test, the octave-band, HML and SNR methods that say what a
-  protector leaves at the ear, and what an active noise reduction earmuff adds.
+  protector leaves at the ear, what an active noise reduction earmuff adds, and
+  the insertion loss that screens an earmuff on a test fixture.
 
 ## [Rooms and buildings](/phonometry/buildings/)
 

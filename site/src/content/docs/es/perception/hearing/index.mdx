@@ -1,6 +1,6 @@
 ---
 title: "Audición y exposición"
-description: "La estadística de la audición y el ruido que la daña: la distribución del umbral con la edad de ISO 7029 y el cero de referencia de ISO 389-7, el desplazamiento permanente del umbral inducido por ruido de ISO 1999, y el muestreo de exposición laboral de ISO 9612."
+description: "La estadística de la audición y el ruido que la daña: la distribución del umbral con la edad de ISO 7029 y el cero de referencia de ISO 389-7, la sala de ensayo audiométrico y las reglas del umbral de ISO 8253, el desplazamiento permanente del umbral inducido por ruido de ISO 1999, el muestreo de exposición laboral de ISO 9612 y los protectores auditivos de ISO 4869."
 ---
 
 import Scope from '../../../../../components/Scope.astro';
@@ -20,6 +20,12 @@ desglosada por edad, sexo y fractil de población. **ISO 389-7:2005** fija el
 otro extremo de la escala: el umbral de referencia de audición, el nivel de
 presión acústica físico al que corresponde el 0 dB HL audiométrico en escucha
 de campo libre y campo difuso.
+
+[Métodos de ensayo audiométricos (ISO 8253-1 y -2)](/phonometry/es/perception/hearing/audiometry/)
+dice lo que hace falta para medir un umbral respecto a ese cero: una sala de
+ensayo lo bastante silenciosa (apartado 11 de la ISO 8253-1) o con un campo
+sonoro cualificado (ISO 8253-2), las reglas que convierten las respuestas en un
+nivel de umbral de audición, y la incertidumbre de ese nivel.
 
 [Exposición al ruido en el trabajo (ISO 9612)](/phonometry/es/perception/hearing/occupational-exposure/)
 mide la causa. El nivel de exposición diario regulado LEX,8h se ensambla a
@@ -64,17 +70,22 @@ En el orden en que discurre la cadena.
 - **Línea base**: [Umbral de audición (edad y cero de referencia)](/phonometry/es/perception/hearing/hearing-threshold/):
   la distribución del umbral con la edad de ISO 7029:2017 y el umbral de
   referencia de ISO 389-7:2005.
+- **Medición**: [Métodos de ensayo audiométricos (ISO 8253-1 y -2)](/phonometry/es/perception/hearing/audiometry/):
+  el ruido ambiental y el campo sonoro de la sala de ensayo, las reglas del
+  umbral de los métodos ascendente, de horquillado, de registro automático y de
+  barrido en frecuencia, y la incertidumbre del anexo A.
 - **Exposición**: [Exposición al ruido en el trabajo (ISO 9612)](/phonometry/es/perception/hearing/occupational-exposure/):
   las tres estrategias de medición para LEX,8h con el presupuesto de
   incertidumbre del Anexo C.
 - **Daño**: [Pérdida auditiva inducida por ruido (ISO 1999)](/phonometry/es/perception/hearing/noise-induced-hearing-loss/):
   el NIPTS y su distribución poblacional, y la combinación con la edad en el
   HTLAN.
-- **Protección**: [Protectores auditivos (ISO 4869-1, -2 y -6)](/phonometry/es/perception/hearing/hearing-protectors/):
+- **Protección**: [Protectores auditivos (ISO 4869-1, -2, -3 y -6)](/phonometry/es/perception/hearing/hearing-protectors/):
   la atenuación medida sobre dieciséis sujetos con su incertidumbre y su prueba
   de significación, los métodos por bandas de octava, HML y SNR que dicen lo que
-  un protector deja realmente en el oído, y lo que añade una orejera de
-  reducción activa.
+  un protector deja realmente en el oído, lo que añade una orejera de reducción
+  activa, y la pérdida por inserción con la que se criba una orejera sobre un
+  montaje de ensayo.
 
 ## Qué no cubre esta sección
 
@@ -103,9 +114,11 @@ referencia de la Tabla 1, no los procedimientos con los que se establecieron.
 </ScopeClaim>
 
 <ScopeClaim status="not-covered">
-Y aquí no se hace audiometría. Nada genera un tono de prueba, gobierna un
-audiómetro ni corrige por el acoplador de un auricular: las páginas consumen y
-producen niveles de umbral como datos.
+Y aquí no se gobierna el equipo de ningún audiómetro. Nada genera un tono de
+prueba ni se lo presenta a un sujeto: las reglas de la ISO 8253 convierten en un umbral las
+respuestas que registra el examinador, y juzgan la sala en la que se midió, pero
+las respuestas mismas son datos, y también lo son los niveles de umbral que
+consumen y producen las demás páginas.
 </ScopeClaim>
 </Scope>
 

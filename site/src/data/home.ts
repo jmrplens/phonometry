@@ -198,7 +198,7 @@ export const en: HomeContent = {
 				name: 'Hearing and perception',
 				href: '/phonometry/perception/',
 				summary: 'Loudness, sound quality, speech intelligibility, hearing and exposure.',
-				standards: ['ISO 532-1/-2/-3', 'ECMA-418-1/-2', 'ISO 226', 'DIN 45692', 'IEC 60268-16', 'ANSI S3.5', 'DIN 45681', 'ISO/PAS 20065', 'ISO 7029', 'ISO 389-7', 'ISO 1999', 'ISO 9612'],
+				standards: ['ISO 532-1/-2/-3', 'ECMA-418-1/-2', 'ISO 226', 'DIN 45692', 'IEC 60268-16', 'ANSI S3.5', 'DIN 45681', 'ISO/PAS 20065', 'ISO 7029', 'ISO 389-7', 'ISO 8253-1/-2', 'ISO 1999', 'ISO 9612', 'ISO 4869-1/-2/-3/-6'],
 			},
 			{
 				name: 'Rooms and buildings',
@@ -353,7 +353,7 @@ export const es: HomeContent = {
 				name: 'Audición y percepción',
 				href: '/phonometry/es/perception/',
 				summary: 'Sonoridad, calidad sonora, inteligibilidad del habla, audición y exposición.',
-				standards: ['ISO 532-1/-2/-3', 'ECMA-418-1/-2', 'ISO 226', 'DIN 45692', 'IEC 60268-16', 'ANSI S3.5', 'DIN 45681', 'ISO/PAS 20065', 'ISO 7029', 'ISO 389-7', 'ISO 1999', 'ISO 9612'],
+				standards: ['ISO 532-1/-2/-3', 'ECMA-418-1/-2', 'ISO 226', 'DIN 45692', 'IEC 60268-16', 'ANSI S3.5', 'DIN 45681', 'ISO/PAS 20065', 'ISO 7029', 'ISO 389-7', 'ISO 8253-1/-2', 'ISO 1999', 'ISO 9612', 'ISO 4869-1/-2/-3/-6'],
 			},
 			{
 				name: 'Salas y edificación',

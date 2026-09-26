@@ -15,6 +15,12 @@ fractile. **ISO 389-7:2005** fixes the other end of the scale: the reference
 threshold of hearing, the physical sound pressure level that audiometric
 0 dB HL corresponds to under free-field and diffuse-field listening.
 
+[Audiometric Test Methods (ISO 8253-1 and -2)](audiometry.md)
+says what it takes to measure a threshold against that zero: a test room quiet
+enough (ISO 8253-1 Clause 11) or with a qualified sound field (ISO 8253-2), the
+rules that turn responses into a hearing threshold level, and the uncertainty
+of that level.
+
 [Occupational Noise Exposure (ISO 9612)](occupational-exposure.md)
 measures the cause. A regulated daily exposure level LEX,8h is assembled from
 samples of a real working day by one of three strategies (task-based,
@@ -57,17 +63,20 @@ In the order the chain runs.
 - **Baseline**: [Hearing threshold (age and reference zero)](hearing-threshold.md):
   the ISO 7029:2017 age-related threshold distribution and the ISO 389-7:2005
   reference threshold of hearing.
+- **Measurement**: [Audiometric Test Methods (ISO 8253-1 and -2)](audiometry.md):
+  the test room's ambient noise and sound field, the ascending, bracketing,
+  automatic and sweep-frequency threshold rules, and the Annex A uncertainty.
 - **Exposure**: [Occupational Noise Exposure (ISO 9612)](occupational-exposure.md):
   the three measurement strategies for LEX,8h with the Annex C uncertainty
   budget.
 - **Damage**: [Noise-induced hearing loss (ISO 1999)](noise-induced-hearing-loss.md):
   NIPTS and its population distribution, and the combination with age into
   HTLAN.
-- **Protection**: [Hearing Protectors (ISO 4869-1, -2 and -6)](hearing-protectors.md):
+- **Protection**: [Hearing Protectors (ISO 4869-1, -2, -3 and -6)](hearing-protectors.md):
   the attenuation measured on sixteen subjects with its uncertainty and its
   significance test, the octave-band, HML and SNR methods that say what a
-  protector actually leaves at the ear, and what an active noise reduction
-  earmuff adds.
+  protector actually leaves at the ear, what an active noise reduction earmuff
+  adds, and the insertion loss that screens an earmuff on a test fixture.
 
 ## What this section does not cover
 
@@ -89,6 +98,7 @@ implemented for ISO 1999: `htlan` always draws its age component from ISO
 ISO 389-7, only the Table 1 reference values are implemented, not the
 procedures by which they were established.
 
-And no audiometry happens here. Nothing generates a test tone, drives an
-audiometer or corrects for an earphone coupler: the pages consume and produce
-threshold levels as data.
+And no audiometer's hardware is driven here. Nothing generates a test tone or
+presents it to a subject: ISO 8253's rules turn the responses a tester records into a
+threshold, and judge the room it was measured in, but the responses themselves
+are data, and so are the threshold levels the other pages consume and produce.

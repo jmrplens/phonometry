@@ -317,7 +317,7 @@ def _material_of_row(name: str, row: CatalogueRow) -> Material:
     the cells its page prints (a modulus, a Poisson ratio and a density, or
     a plate speed with them) already holds it, marked as derived.
 
-    :raises TypeError: for a row of a class that has none of those cells.
+    :raises TypeError: for a row of a class that lacks any of those cells.
     :raises ValueError: for a cell the row does not hold a number in, or for
         speeds no isotropic solid has.
     """
@@ -398,8 +398,8 @@ def scholte_speed(
     :return: The Scholte-wave phase speed [m/s].
     :raises ValueError: If ``fluid`` carries shear or ``solid`` does not, or
         a row does not print one of the three numbers, in the row's terms.
-    :raises TypeError: For a catalogue row of a class that has no bulk
-        longitudinal speed, transverse speed and density.
+    :raises TypeError: For a catalogue row of a class that lacks any of the
+        bulk longitudinal speed, the transverse speed and the density.
     """
     flu = _as_material("fluid", fluid)
     sol = _as_material("solid", solid)
@@ -690,8 +690,8 @@ class ElasticFDTD2D:
         :return: The configured stepping engine.
         :raises ValueError: If a mask does not match ``shape`` or a
             material spec is invalid, a catalogue row's refusal among them.
-        :raises TypeError: For a catalogue row of a class that has no bulk
-            longitudinal speed, transverse speed and density.
+        :raises TypeError: For a catalogue row of a class that lacks any of
+            the bulk longitudinal speed, the transverse speed and the density.
         """
         ny = _integer("shape[0]", shape[0])
         nx = _integer("shape[1]", shape[1])

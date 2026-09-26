@@ -9,7 +9,8 @@ bar speed taken for the bulk speed it integrates, which would put an eleven
 per cent error behind a citation. The oracle for the speeds is the closed
 forms of an isotropic solid, ``c_P = sqrt(E (1 - nu) / (rho (1 + nu)
 (1 - 2 nu)))`` and ``c_S = sqrt(E / (2 rho (1 + nu)))``, applied to the
-modulus, Poisson ratio and density Bies Table C.1 prints for mild steel.
+modulus, Poisson ratio and density Bies Table C.1 prints for mild steel,
+written here as the page prints them rather than read back from the row.
 """
 
 from __future__ import annotations
@@ -32,6 +33,11 @@ from phonometry.solids import PUBLISHED_SOLIDS
 #: Mild steel as Bies Table C.1 prints it, the row the STEEL constant cites.
 BIES_STEEL = PUBLISHED_SOLIDS["bies-2017-table-c1/steel_mild"]
 
+#: What Bies 5e Table C.1 prints for "Steel (mild)", PDF page 747 (printed
+#: p. 718): a Young's modulus of 207 x 10^9 N/m2, a density of 7850 kg/m3 and
+#: a Poisson's ratio of 0.30.
+PRINTED_E_PA, PRINTED_RHO_KG_M3, PRINTED_NU = 207e9, 7850.0, 0.30
+
 
 def _bulk(e: float, nu: float, rho: float) -> float:
     return math.sqrt(e * (1.0 - nu) / (rho * (1.0 + nu) * (1.0 - 2.0 * nu)))
@@ -49,16 +55,25 @@ def _solid(**cells: float) -> solids.SolidMaterial:
 
 
 def test_a_row_gives_the_bulk_speeds_of_its_printed_constants() -> None:
-    e = BIES_STEEL.printed("youngs_modulus_pa")
-    nu = BIES_STEEL.printed("poisson_ratio")
-    rho = BIES_STEEL.printed("density_kg_m3")
+    e, nu, rho = PRINTED_E_PA, PRINTED_NU, PRINTED_RHO_KG_M3
+    assert (
+        BIES_STEEL.printed("youngs_modulus_pa"),
+        BIES_STEEL.printed("poisson_ratio"),
+        BIES_STEEL.printed("density_kg_m3"),
+    ) == (e, nu, rho)
+    # The two speeds the solver reads, against the closed forms of the page's
+    # three numbers: 5957.96 and 3184.66 m/s.
+    c_p, c_s = _bulk(e, nu, rho), _shear(e, nu, rho)
+    assert BIES_STEEL.printed("bulk_longitudinal_speed_m_s") == pytest.approx(
+        c_p, rel=1e-12
+    )
+    assert BIES_STEEL.printed("transverse_speed_m_s") == pytest.approx(c_s, rel=1e-12)
     fluid = WATER
     by_row = scholte_speed(fluid, BIES_STEEL)
-    by_material = scholte_speed(
-        fluid, Material(c_p=_bulk(e, nu, rho), c_s=_shear(e, nu, rho), rho=rho)
-    )
+    by_material = scholte_speed(fluid, Material(c_p=c_p, c_s=c_s, rho=rho))
     assert by_row == pytest.approx(by_material, rel=1e-12)
     # The STEEL constant is the same row, rounded to 0.1 m/s.
+    assert (STEEL.c_p, STEEL.c_s) == pytest.approx((c_p, c_s), abs=0.05)
     assert by_row == pytest.approx(scholte_speed(fluid, STEEL), rel=1e-5)
 
 

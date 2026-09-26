@@ -629,6 +629,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **A calibration sidecar no reader can take is refused as a `ValueError`.**
+  `io.read_sidecar`, which `io.read` and `io.read_blocks` call for every audio
+  file they open, read the file at the sidecar's name whole and handed it to
+  the JSON decoder as it was: a text of 100 000 nested brackets escaped as a
+  `RecursionError`, an integer too large for a float as an `OverflowError`,
+  and a link to a device that never ends, such as `/dev/zero`, was read until
+  memory ran out. A sidecar is now read to 1 MiB at most, its brackets are
+  counted before it is decoded and refused past 64 levels with the line and
+  column where they go too deep, and a number past every float, or longer
+  than Python reads, is refused by name: each is the `ValueError` the
+  function documents, naming the file once.
+
 - **A derived value names the cells it rests on in words.** When the cells a
   catalogue value is worked out from have mixed bases, `derived` says the basis
   of each, and it named them by their field names: "it rests on poisson_ratio

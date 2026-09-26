@@ -68,12 +68,26 @@ import math
 from dataclasses import dataclass
 from pathlib import Path
 
+from .._internal.json_input import (
+    MAX_NESTING,
+    TooLargeError,
+    nesting_past,
+    read_at_most,
+    text_location,
+)
+
 #: The schema identifier and the layout version this module writes.
 SIDECAR_SCHEMA = "phonometry-calibration"
 SIDECAR_VERSION = 1
 
 #: The tail appended to the full audio filename to name its sidecar.
 _SIDECAR_TAIL = ".phonometry.json"
+
+#: The largest sidecar read. One holds a few hundred bytes, and a label for
+#: each of a thousand channels keeps it under a hundred kibibytes; the bound
+#: keeps a file at the sidecar's name that never ends (a pipe, a device, a
+#: link to either) from being read without end on every read of the audio.
+_MAX_BYTES = 1024 * 1024
 
 
 @dataclass(frozen=True)
@@ -168,6 +182,15 @@ def write_sidecar(
     return target
 
 
+def _as_float(value: float, key: str, path: Path) -> float:
+    """*value* as a float, refusing a JSON integer past every float."""
+    try:
+        return float(value)
+    except OverflowError:
+        msg = f"{path}: {key} is an integer too large for a float"
+        raise ValueError(msg) from None
+
+
 def _optional_number(payload: dict[str, object], key: str, path: Path) -> float | None:
     value = payload.get(key)
     if value is None:
@@ -176,16 +199,55 @@ def _optional_number(payload: dict[str, object], key: str, path: Path) -> float 
         msg = f"{path}: {key} must be a number or null; got {value!r}"
         # ValueError keeps the module validation errors uniform.
         raise ValueError(msg)  # noqa: TRY004
-    return float(value)
+    return _as_float(value, key, path)
+
+
+def _sidecar_text(source: Path) -> str:
+    """The sidecar's text, read to :data:`_MAX_BYTES` at most."""
+    try:
+        raw = read_at_most(source, _MAX_BYTES)
+    except TooLargeError as exc:
+        held = (
+            f"is {exc.size} bytes"
+            if exc.size is not None
+            else f"runs past {_MAX_BYTES} bytes"
+        )
+        msg = (
+            f"{source}: sidecar {held}, and a calibration sidecar is at most "
+            f"{_MAX_BYTES} bytes (1 MiB)"
+        )
+        raise ValueError(msg) from None
+    try:
+        return raw.decode("utf-8")
+    except UnicodeDecodeError as exc:
+        msg = f"{source}: sidecar is not UTF-8 text (byte {exc.start})"
+        raise ValueError(msg) from None
 
 
 def _load_sidecar_payload(source: Path) -> dict[str, object]:
     """Parse the sidecar's JSON and check its schema declaration."""
+    text = _sidecar_text(source)
+    deep = nesting_past(text)
+    if deep is not None:
+        msg = (
+            f"{source}: sidecar is not a calibration record: it nests deeper "
+            f"than {MAX_NESTING} levels at {text_location(text, deep)}"
+        )
+        raise ValueError(msg)
     try:
-        payload = json.loads(source.read_text(encoding="utf-8"))
+        payload = json.loads(text)
     except json.JSONDecodeError as exc:
         msg = f"{source}: sidecar is not valid JSON"
         raise ValueError(msg) from exc
+    except ValueError as exc:
+        # An integer longer than Python reads (sys.get_int_max_str_digits).
+        msg = f"{source}: sidecar holds a number too long to read"
+        raise ValueError(msg) from exc
+    except RecursionError:
+        # The count above keeps every text within the decoder's reach, unless
+        # the caller is already deep in its own stack.
+        msg = f"{source}: sidecar nests deeper than the decoder follows"
+        raise ValueError(msg) from None
     if not isinstance(payload, dict) or payload.get("schema") != SIDECAR_SCHEMA:
         msg = (
             f"{source}: not a {SIDECAR_SCHEMA!r} sidecar; refusing to "
@@ -214,7 +276,7 @@ def _required_factor(payload: dict[str, object], source: Path) -> float:
         msg = f"{source}: calibration_factor must be a number; got {factor!r}"
         # ValueError keeps the module validation errors uniform.
         raise ValueError(msg)  # noqa: TRY004
-    return float(factor)
+    return _as_float(factor, "calibration_factor", source)
 
 
 def _calibrator_fields(
@@ -260,9 +322,10 @@ def read_sidecar(audio_path: str | Path) -> CalibrationSidecar | None:
 
     :param audio_path: The audio file whose sidecar to look for.
     :return: The parsed record, or ``None`` when no sidecar exists.
-    :raises ValueError: If the sidecar exists but is not valid JSON, does
-        not declare this schema, was written by a newer schema version, or
-        carries malformed fields.
+    :raises ValueError: If the sidecar exists but is larger than 1 MiB, is
+        not UTF-8 JSON, nests deeper than 64 levels, does not declare this
+        schema, was written by a newer schema version, or carries malformed
+        fields.
     """
     source = sidecar_path(audio_path)
     if not source.exists():
@@ -271,11 +334,13 @@ def read_sidecar(audio_path: str | Path) -> CalibrationSidecar | None:
     factor = _required_factor(payload, source)
     calibrator, model = _calibrator_fields(payload, source)
     labels = _channel_labels(payload, source)
+    reference_spl = _optional_number(payload, "reference_spl", source)
+    frequency = _optional_number(calibrator, "frequency", source)
     try:
         return CalibrationSidecar(
             calibration_factor=factor,
-            reference_spl=_optional_number(payload, "reference_spl", source),
-            calibrator_frequency=_optional_number(calibrator, "frequency", source),
+            reference_spl=reference_spl,
+            calibrator_frequency=frequency,
             calibrator_model=model,
             channel_labels=labels,
             phonometry_version=(

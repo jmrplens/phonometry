@@ -1435,7 +1435,7 @@ dropping it would silently drop the calibration).
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If the sidecar exists but is not valid JSON, does not declare this schema, was written by a newer schema version, or carries malformed fields. |
+| ValueError | If the sidecar exists but is larger than 1 MiB, is not UTF-8 JSON, nests deeper than 64 levels, does not declare this schema, was written by a newer schema version, or carries malformed fields. |
 
 ## sidecar_path
 

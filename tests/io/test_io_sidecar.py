@@ -4,7 +4,10 @@
 from __future__ import annotations
 
 import json
-from typing import TYPE_CHECKING
+import sys
+import time
+import types
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 import pytest
@@ -12,6 +15,7 @@ import pytest
 from phonometry.io import (
     CalibrationSidecar,
     Signal,
+    _sidecar,
     read,
     read_sidecar,
     sidecar_path,
@@ -151,6 +155,101 @@ def test_malformed_fields_are_refused(tmp_path: Path) -> None:
     target.write_text("{not json")
     with pytest.raises(ValueError, match="not valid JSON"):
         read_sidecar(audio)
+
+
+def _sidecar_text(audio: Path, text: str | bytes) -> None:
+    """Put *text* at the sidecar's name of *audio*."""
+    target = sidecar_path(audio)
+    if isinstance(text, bytes):
+        target.write_bytes(text)
+    else:
+        target.write_text(text, encoding="utf-8")
+
+
+def _valid() -> dict[str, Any]:
+    return {
+        "schema": SIDECAR_SCHEMA,
+        "schema_version": 1,
+        "phonometry_version": None,
+        "calibration_factor": 1.0,
+        "reference_spl": None,
+        "calibrator": None,
+        "channel_labels": None,
+    }
+
+
+@pytest.mark.parametrize(
+    ("text", "message"),
+    [
+        ("[" * 100_000, "nests deeper than 64 levels at line 1, column 65"),
+        (
+            json.dumps(_valid()).replace(
+                '"calibration_factor": 1.0', '"calibration_factor": 1' + "0" * 400
+            ),
+            "calibration_factor is an integer too large for a float",
+        ),
+        (
+            json.dumps(_valid()).replace(
+                '"reference_spl": null', '"reference_spl": 1' + "0" * 400
+            ),
+            "reference_spl is an integer too large for a float",
+        ),
+        (
+            json.dumps(_valid()).replace(
+                '"reference_spl": null', '"reference_spl": 1' + "0" * 5000
+            ),
+            "sidecar holds a number too long to read",
+        ),
+        (b'{"schema": "phonometry-calibration", "model": "Bru\xe9l"}', "not UTF-8"),
+    ],
+    ids=["nested", "factor-past-floats", "spl-past-floats", "digits", "latin-1"],
+)
+def test_a_sidecar_no_decoder_takes_is_refused_as_a_value_error(
+    tmp_path: Path, text: str | bytes, message: str
+) -> None:
+    audio = tmp_path / "meas.wav"
+    _sidecar_text(audio, text)
+    with pytest.raises(ValueError, match=message) as caught:
+        read_sidecar(audio)
+    assert str(caught.value).count(str(sidecar_path(audio))) == 1
+
+
+def test_a_decoder_out_of_stack_is_a_value_error(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A caller already deep in its own stack can still run the decoder out."""
+
+    def out_of_stack(text: str) -> object:
+        raise RecursionError(text[:10])
+
+    decoder = types.SimpleNamespace(
+        loads=out_of_stack, JSONDecodeError=json.JSONDecodeError
+    )
+    monkeypatch.setattr(_sidecar, "json", decoder)
+    audio = tmp_path / "meas.wav"
+    _sidecar_text(audio, "{}")
+    with pytest.raises(ValueError, match="nests deeper than the decoder follows"):
+        read_sidecar(audio)
+
+
+def test_a_sidecar_past_one_mebibyte_is_refused(tmp_path: Path) -> None:
+    audio = tmp_path / "meas.wav"
+    text = json.dumps(_valid())
+    _sidecar_text(audio, text + " " * (1024 * 1024 - len(text)))
+    assert read_sidecar(audio) is not None
+    _sidecar_text(audio, text + " " * (1024 * 1024 + 1 - len(text)))
+    with pytest.raises(ValueError, match="sidecar is 1048577 bytes"):
+        read_sidecar(audio)
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="a POSIX device")
+def test_a_sidecar_that_never_ends_is_refused(tmp_path: Path) -> None:
+    audio = tmp_path / "meas.wav"
+    sidecar_path(audio).symlink_to("/dev/zero")
+    start = time.perf_counter()
+    with pytest.raises(ValueError, match="sidecar runs past 1048576 bytes"):
+        read_sidecar(audio)
+    assert time.perf_counter() - start < 5.0
 
 
 def test_the_dataclass_itself_rejects_a_nonpositive_factor() -> None:

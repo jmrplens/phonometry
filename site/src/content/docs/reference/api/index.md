@@ -90,11 +90,11 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | [`solids.orthotropic_wood`](/phonometry/reference/api/solids/orthotropic-wood/) | Wood, which is not the same material in two directions. |
 | [`solids.plateau`](/phonometry/reference/api/solids/plateau/) | The three numbers a panel needs before its transmission loss can be sketched. |
 
-## Audio files
+## Files
 
 | Module | Summary |
 | :--- | :--- |
-| [`io`](/phonometry/reference/api/io/io/) | Measurement audio files: read, write, stream and convert without touching a level. |
+| [`io`](/phonometry/reference/api/io/io/) | Files: measurement audio, its calibration sidecar and catalogues of materials. |
 
 ## Psychoacoustics
 

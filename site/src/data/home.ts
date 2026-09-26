@@ -189,9 +189,9 @@ export const en: HomeContent = {
 				standards: ['IEC 61260-1', 'ANSI S1.11', 'IEC 61672-1', 'ISO 7196', 'IEC 61252', 'ISO 1996-1', 'IEC 60942', 'GUM'],
 			},
 			{
-				name: 'Audio files',
+				name: 'Files',
 				href: '/phonometry/io/',
-				summary: 'Measurement audio in and out: calibrated reading, provenance, streaming, BWF writing, lossless conversion.',
+				summary: 'Measurement audio in and out: calibrated reading, provenance, streaming, BWF writing, lossless conversion; catalogues of materials of your own.',
 				standards: ['EBU Tech 3285', 'ITU-R BS.2088'],
 			},
 			{
@@ -344,9 +344,9 @@ export const es: HomeContent = {
 				standards: ['IEC 61260-1', 'ANSI S1.11', 'IEC 61672-1', 'ISO 7196', 'IEC 61252', 'ISO 1996-1', 'IEC 60942', 'GUM'],
 			},
 			{
-				name: 'Archivos de audio',
+				name: 'Archivos',
 				href: '/phonometry/es/io/',
-				summary: 'Audio de medición de entrada y salida: lectura calibrada, procedencia, flujo por bloques, escritura BWF, conversión sin pérdidas.',
+				summary: 'Audio de medición de entrada y salida: lectura calibrada, procedencia, flujo por bloques, escritura BWF, conversión sin pérdidas; catálogos de materiales propios.',
 				standards: ['EBU Tech 3285', 'ITU-R BS.2088'],
 			},
 			{

@@ -1,13 +1,13 @@
 ---
 title: "io"
-description: "Measurement audio files: read, write, stream and convert without touching a level."
+description: "Files: measurement audio, its calibration sidecar and catalogues of materials."
 sidebar:
   label: "io"
 ---
 
-Measurement audio files: read, write, stream and convert without touching a level.
+Files: measurement audio, its calibration sidecar and catalogues of materials.
 
-Every function here treats an audio file as a measurement record rather than
+Every audio function here treats a file as a measurement record rather than
 as material to be played back, which fixes the defaults: the native sample
 rate is kept (no resampling on load), channels are never mixed down, samples
 are never normalized, and integer PCM is scaled by exactly $2^{B-1}$
@@ -56,6 +56,25 @@ too for text that is not strict JSON or a table missing its citation.
 and fills what follows from them, which is how every packaged catalogue is
 built; [`CatalogueRow.printed_fields`](/phonometry/reference/api/io/io/#cataloguerowprinted_fields) gives those cells back, and
 [`BandedRow.values_at`](/phonometry/reference/api/io/io/#bandedrowvalues_at) reads a banded row at an array of frequencies.
+
+The library publishes no manufacturer's data, so a caller's own data sheets,
+declarations of performance and test reports live in a catalogue file of
+their own, which [`read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) reads into rows of the same classes:
+a versioned JSON document with its [`Provenance`](/phonometry/reference/api/io/io/#provenance) (the kind of document,
+its version, the day it was consulted, the laboratory and the report), each
+cell named as the field it fills or in another unit of the same kind, and
+every hedge the packaged tables use. What comes back is a [`Catalogue`](/phonometry/reference/api/io/io/#catalogue),
+a read-only mapping keyed like the packaged ones that joins a `PUBLISHED_*`
+catalogue with `|` and never lets one row replace another. The problems in
+a file are raised at once in one [`CatalogueError`](/phonometry/reference/api/io/io/#catalogueerror), each
+[`CatalogueIssue`](/phonometry/reference/api/io/io/#catalogueissue) with the JSON pointer to it (every problem of form,
+and the first rule of the row contract each row breaks), and what is only
+worth a second look rides on the catalogue as a note with one
+[`CatalogueWarning`](/phonometry/reference/api/io/io/#cataloguewarning). [`parse_catalogue`](/phonometry/reference/api/io/io/#parse_catalogue) reads the same from text or
+a mapping in memory, and [`write_catalogue`](/phonometry/reference/api/io/io/#write_catalogue) writes rows, a packaged
+table among them, as a file that reads back into the same rows. Nothing the
+file names is ever imported, and nothing it holds is kept anywhere but in the
+objects handed back.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
@@ -122,6 +141,7 @@ BandedRow(
     attributed_to: Mapping[str, str] = ...,
     group: str = '',
     note: str = '',
+    provenance: Provenance | None = None,
 )
 ```
 
@@ -153,7 +173,7 @@ position.
 | `basis` | What the source says a value is: a field name, or `"row"` for the whole row, to one of [`CATALOGUE_BASES`](/phonometry/reference/api/io/io/#catalogue_bases). Hopkins marks most of his Poisson ratios "Estimate", and those cells hold `"estimated"`; a datasheet that declares a class under a product standard would hold `"declared"`. A field with no entry takes the row's, and a row with neither is one whose source does not say, which is a different answer from any of the five. `basis_of` reads it. Independent of `derived`: this is what the source claims for a cell, that is what this library computed. |
 | `approximate` | Fields the page prints with a `~`. Not an estimate and not an interval: a number the author rounded on purpose. |
 | `derived` | Field to how it was computed, for the ones this library worked out from the cells the page did print. A derived value is never stored as if it had been read, and on every row the library builds it follows again from the row's own cells: `from_printed` writes it, and nothing else in the library does. One a caller passes to the literal constructor is the caller's word, which the row keeps and `printed_fields` leaves out with its value, as it leaves out every derived one. When the printed cells a value rests on do not all have one `basis`, the text names the basis of each, so a modulus worked out from a plate speed and a Poisson ratio Hopkins marks as an estimate says it rests on that estimate. A value converted from the unit the page prints is not derived (`converted` holds it), and neither is one the page gives by reference to another of its rows (`carried` does). |
-| `converted` | Field to `(figure, unit)`, the page's figure and the unit it is in, for a value this row holds in a unit the page does not use. Ver and Beranek print their damping materials in degrees Fahrenheit and pounds per square inch, and the row holds degrees Celsius and pascals, so `("3e5", "psi")` sits beside a modulus in pascals. The figure is kept as the page writes it, so the cell can always be read back in the page's own terms. The unit is the one the page prints with the figure or over its column. Long prints the figures of his musician bare, and the sabins recorded for them are a reading of the table, which is set in inches and pounds and names sabins on the next row; that row's note says so. A figure a packaged table prints with another SI prefix, such as the megapascals of Rossing Table 15.5, is held in the base unit with no entry here, and the table's `about` says so. |
+| `converted` | Field to `(figure, unit)`, the page's figure and the unit it is in, for a value this row holds in a unit the page does not use. Ver and Beranek print their damping materials in degrees Fahrenheit and pounds per square inch, and the row holds degrees Celsius and pascals, so `("3e5", "psi")` sits beside a modulus in pascals. The figure is kept as the page writes it, so the cell can always be read back in the page's own terms. The unit is the one the page prints with the figure or over its column. Long prints the figures of his musician bare, and the sabins recorded for them are a reading of the table, which is set in inches and pounds and names sabins on the next row; that row's note says so. A figure written in another unit of the same kind as the field's (`thickness_m` for `thickness_mm`, `flow_resistivity_kpa_s_m2` for `flow_resistivity_pa_s_m2`) is converted by `from_printed` and recorded here, whether it is a value, the end of a range or one of several readings; for a range the figure is the printed end of a bound, or both ends as `"5 to 10"`, and for readings the list as the page gives it. A packaged table transcribed in the base unit with only its SI prefix changed, such as the megapascals of Rossing Table 15.5, holds no entry here, and the table's `about` says so. |
 | `carried` | Field to where the page gives it from, for a value the page gives by reference to another of its rows rather than on this one: a cell left blank under a block whose first row prints the figure, as in Ver and Beranek Table 8.7, or a description that reads "Parecido al anterior" and prints no row number, as three rows of Harris Chapter 32 do, which refers to the row above it. The value is the page's, and this says which of its rows gives it. |
 | `ranges` | `(low, high)` for each field the page prints as an interval rather than a value. One end is `None` only for a bound whose open side the quantity has no limit on; the end the page prints is always a number, and a two-sided interval has two. |
 | `bounded_above` | The subset of `ranges` the page prints as `< x` or `<= x`, where the low end is a floor and not a measurement. |
@@ -166,6 +186,7 @@ position.
 | `attributed_to` | Credit for a cell the book takes from someone else. Keyed by field name, or by `"row"` or `"table"` when the credit covers all of one. |
 | `group` | The heading of the block this row sits under, when the table prints its rows in named groups: Cox files each material under `"Fibrous materials"`, `"Cellular materials"`, `"Granular materials"` or `"Other"`. Empty for a table that prints one list. |
 | `note` | What the page says about this row beyond its numbers. |
+| `provenance` | The document the row was read from, for a row read from a caller's catalogue file: its kind, version, the day it was consulted, the laboratory and the report. `None` on every packaged row, whose `source` cites a page. A refusal names the document by its kind (`"the datasheet prints an upper bound of ..."`), where a row without one says `"the page"`; and the fields of its `field_test_standards` are fields of the row. |
 
 ### BandedRow.bands()
 
@@ -206,12 +227,18 @@ A row built from the cells its page prints, completed and marked.
 
 The one path that works anything out. The cells are what the page
 prints, under the field names of the class and with the hedges each
-cell carries, as a data file writes them. A figure written under a
-unit the class takes as an alias of its own (an
+cell carries, as a data file writes them. A figure written in another
+unit of the same kind as its field (`thickness_m` for
+`thickness_mm`, `flow_resistivity_kpa_s_m2` for
+`flow_resistivity_pa_s_m2`), or in a unit the class takes as an
+alias of its own (an
 [`AbsorptionAreaSpectrum`](/phonometry/reference/api/materials/measured/#absorptionareaspectrum) takes
-`absorption_area_125_ft2` for `absorption_area_125_m2`) is
-converted on its digits with an exact factor and rounded once, and
-`converted` records the figure and its unit. The row is then
+`absorption_area_125_ft2` for `absorption_area_125_m2`), is
+converted on its digits with an exact factor and rounded once,
+whether it is a value or stands as the key of a hedge (the ends of a
+range, the readings of a list and a plus-or-minus convert with it),
+and `converted` records the figure and its unit. Every number
+of one cell is written in one unit. The row is then
 built and held to the contract the class docstring lists, so every
 cell is checked before any arithmetic reads it. Last, the class
 fills what follows from those cells (a modulus from a plate speed, a
@@ -249,7 +276,7 @@ row = type(row).from_printed(**cells)
 
 | Exception | When |
 | :--- | :--- |
-| CatalogueError | for a cell the contract refuses; for a `derived` among the cells, which is this method's to write; for a figure under a unit alias that is not a finite number, or that names a cell given under its own name or under another alias as well; and for printed cells a value that follows from them cannot be worked out of, naming the value and the cells. |
+| CatalogueError | for a cell the contract refuses; for a `derived` among the cells, which is this method's to write; for a figure under a unit alias that is not a finite number, or that names a cell given under its own name or under another alias as well; for the numbers of one cell written in two units, a name two fields of one kind could both take, or a figure whose text field saying what it is of is empty; and for printed cells a value that follows from them cannot be worked out of, naming the value and the cells. |
 | TypeError | for a name that is neither a field of the class nor a unit alias of one. |
 
 ### BandedRow.is_approximate()
@@ -410,6 +437,14 @@ guess whether the material has no such property, whether the book
 measured it and printed a dash, or whether the cell holds something
 that is not a number. Each of those is a different answer.
 
+The sentence names the document by its kind: `"the datasheet"`,
+`"the test report"`, and `"the page"` for a row with no
+`provenance`, which is every packaged one. For a cell the row
+holds in another unit than the page's, a bound, a range or a list
+quotes the page's figure and unit first and the row's value after
+it: `"the datasheet prints a lower bound of 5 kPa s/m2 (5000 Pa
+s/m2) and no value"`, never a figure the page does not print.
+
 **Parameters**
 
 | Name | Description |
@@ -514,6 +549,52 @@ only mandatory field; the rest document how it was obtained
 and what the channels are (`channel_labels`).
 `phonometry_version` records the writing library version.
 
+## Catalogue
+
+```python
+Catalogue(
+    *,
+    name: str,
+    row_type: type[R],
+    about: str,
+    provenance: Provenance,
+    rows: Mapping[str, R],
+    extras: Mapping[str, Mapping[str, str]] = ...,
+    conventions: tuple[str, ...] = (),
+    notes: tuple[CatalogueIssue, ...] = (),
+    schema_version: int = 1,
+    file_sha256: str = '',
+)
+```
+
+A caller's catalogue: rows of one class, keyed as the packaged ones are.
+
+What [`read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) and [`parse_catalogue`](/phonometry/reference/api/io/io/#parse_catalogue) return. It is a
+read-only mapping from `"<name>/<key>"` to a row, so it goes wherever a
+`PUBLISHED_*` catalogue goes, and a row's [`CatalogueRow.table`](/phonometry/reference/api/io/io/#cataloguerow) is
+the catalogue's name. `PUBLISHED_POROUS | mine` reads both as one and
+refuses a key both hold rather than letting one row replace the other;
+a caller's catalogue can never take a name of the packaged form, so the
+keys of the two never meet.
+
+Two catalogues are equal when they hold the same rows under the same
+keys, as any two mappings are.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `name` | The catalogue's name, the first half of every key. |
+| `row_type` | The class every row is. |
+| `about` | What the document is and how it was read. |
+| `provenance` | The document the rows were read from. A row that narrows it holds its own in [`CatalogueRow.provenance`](/phonometry/reference/api/io/io/#cataloguerow). |
+| `rows` | The rows, by key, read-only, in the order of the document. |
+| `extras` | The caller's own `x-...` columns, by row key and column, as text: a number keeps the digits it was written with. |
+| `conventions` | The notes and legends the document prints for the whole table. |
+| `notes` | What is worth a second look, each a [`CatalogueIssue`](/phonometry/reference/api/io/io/#catalogueissue) of severity `"note"`. |
+| `schema_version` | The version of the layout the document was written in. |
+| `file_sha256` | The SHA-256 of the bytes read, in hexadecimal, so that a report can cite exactly which file its values came from; empty for a document handed over as a mapping, which has no bytes. |
+
 ## CATALOGUE_BASES
 
 *Constant* (`tuple`).
@@ -534,6 +615,44 @@ numeric cell holding text or a `NaN`, a hedge naming a field the row
 does not have, a bound with no printed end, a density below zero. A
 `ValueError`, because the data is wrong and not the call, whether
 it came from a file or from a caller building a row by hand.
+
+`issues` holds the problems found, each a [`CatalogueIssue`](/phonometry/reference/api/io/io/#catalogueissue)
+naming where it is. A reader of a catalogue file raises one error for
+the whole file, with every problem of form in it and the first rule of
+the row contract each row breaks; a row built in Python raises one with
+a single issue, located at `"<Python>"`.
+
+## CatalogueIssue
+
+```python
+CatalogueIssue(
+    *,
+    file: str,
+    location: str,
+    row_key: str = '',
+    field: str = '',
+    message: str,
+    severity: Literal['error', 'note'] = 'error',
+)
+```
+
+One thing wrong with a catalogue, or worth a second look, and where.
+
+A reader of a catalogue file collects every one of these before it
+builds a single row, so one pass over a file shows everything that has
+to change in it. A [`CatalogueError`](/phonometry/reference/api/io/io/#catalogueerror) carries the errors; a note
+rides on the catalogue that was read, in `Catalogue.notes`.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `file` | The file, as the caller named it; empty for a row built in Python. |
+| `location` | Where in the file: a JSON pointer (RFC 6901) such as `"/rows/1/porosity"`; `"<Python>"` for a row built in Python. |
+| `row_key` | The key of the row, when the issue sits in one. |
+| `field` | The field of the row, when the issue is about one cell. |
+| `message` | What is wrong and, where it helps, what to write instead. |
+| `severity` | `"error"`, which stops the read, or `"note"`, which is kept and read past. |
 
 ## CatalogueRow
 
@@ -560,6 +679,7 @@ CatalogueRow(
     attributed_to: Mapping[str, str] = ...,
     group: str = '',
     note: str = '',
+    provenance: Provenance | None = None,
 )
 ```
 
@@ -658,7 +778,7 @@ is built, rather than letting a field through unchecked.
 | `basis` | What the source says a value is: a field name, or `"row"` for the whole row, to one of [`CATALOGUE_BASES`](/phonometry/reference/api/io/io/#catalogue_bases). Hopkins marks most of his Poisson ratios "Estimate", and those cells hold `"estimated"`; a datasheet that declares a class under a product standard would hold `"declared"`. A field with no entry takes the row's, and a row with neither is one whose source does not say, which is a different answer from any of the five. `basis_of` reads it. Independent of `derived`: this is what the source claims for a cell, that is what this library computed. |
 | `approximate` | Fields the page prints with a `~`. Not an estimate and not an interval: a number the author rounded on purpose. |
 | `derived` | Field to how it was computed, for the ones this library worked out from the cells the page did print. A derived value is never stored as if it had been read, and on every row the library builds it follows again from the row's own cells: `from_printed` writes it, and nothing else in the library does. One a caller passes to the literal constructor is the caller's word, which the row keeps and `printed_fields` leaves out with its value, as it leaves out every derived one. When the printed cells a value rests on do not all have one `basis`, the text names the basis of each, so a modulus worked out from a plate speed and a Poisson ratio Hopkins marks as an estimate says it rests on that estimate. A value converted from the unit the page prints is not derived (`converted` holds it), and neither is one the page gives by reference to another of its rows (`carried` does). |
-| `converted` | Field to `(figure, unit)`, the page's figure and the unit it is in, for a value this row holds in a unit the page does not use. Ver and Beranek print their damping materials in degrees Fahrenheit and pounds per square inch, and the row holds degrees Celsius and pascals, so `("3e5", "psi")` sits beside a modulus in pascals. The figure is kept as the page writes it, so the cell can always be read back in the page's own terms. The unit is the one the page prints with the figure or over its column. Long prints the figures of his musician bare, and the sabins recorded for them are a reading of the table, which is set in inches and pounds and names sabins on the next row; that row's note says so. A figure a packaged table prints with another SI prefix, such as the megapascals of Rossing Table 15.5, is held in the base unit with no entry here, and the table's `about` says so. |
+| `converted` | Field to `(figure, unit)`, the page's figure and the unit it is in, for a value this row holds in a unit the page does not use. Ver and Beranek print their damping materials in degrees Fahrenheit and pounds per square inch, and the row holds degrees Celsius and pascals, so `("3e5", "psi")` sits beside a modulus in pascals. The figure is kept as the page writes it, so the cell can always be read back in the page's own terms. The unit is the one the page prints with the figure or over its column. Long prints the figures of his musician bare, and the sabins recorded for them are a reading of the table, which is set in inches and pounds and names sabins on the next row; that row's note says so. A figure written in another unit of the same kind as the field's (`thickness_m` for `thickness_mm`, `flow_resistivity_kpa_s_m2` for `flow_resistivity_pa_s_m2`) is converted by `from_printed` and recorded here, whether it is a value, the end of a range or one of several readings; for a range the figure is the printed end of a bound, or both ends as `"5 to 10"`, and for readings the list as the page gives it. A packaged table transcribed in the base unit with only its SI prefix changed, such as the megapascals of Rossing Table 15.5, holds no entry here, and the table's `about` says so. |
 | `carried` | Field to where the page gives it from, for a value the page gives by reference to another of its rows rather than on this one: a cell left blank under a block whose first row prints the figure, as in Ver and Beranek Table 8.7, or a description that reads "Parecido al anterior" and prints no row number, as three rows of Harris Chapter 32 do, which refers to the row above it. The value is the page's, and this says which of its rows gives it. |
 | `ranges` | `(low, high)` for each field the page prints as an interval rather than a value. One end is `None` only for a bound whose open side the quantity has no limit on; the end the page prints is always a number, and a two-sided interval has two. |
 | `bounded_above` | The subset of `ranges` the page prints as `< x` or `<= x`, where the low end is a floor and not a measurement. |
@@ -671,6 +791,7 @@ is built, rather than letting a field through unchecked.
 | `attributed_to` | Credit for a cell the book takes from someone else. Keyed by field name, or by `"row"` or `"table"` when the credit covers all of one. |
 | `group` | The heading of the block this row sits under, when the table prints its rows in named groups: Cox files each material under `"Fibrous materials"`, `"Cellular materials"`, `"Granular materials"` or `"Other"`. Empty for a table that prints one list. |
 | `note` | What the page says about this row beyond its numbers. |
+| `provenance` | The document the row was read from, for a row read from a caller's catalogue file: its kind, version, the day it was consulted, the laboratory and the report. `None` on every packaged row, whose `source` cites a page. A refusal names the document by its kind (`"the datasheet prints an upper bound of ..."`), where a row without one says `"the page"`; and the fields of its `field_test_standards` are fields of the row. |
 
 ### CatalogueRow.basis_of()
 
@@ -703,12 +824,18 @@ A row built from the cells its page prints, completed and marked.
 
 The one path that works anything out. The cells are what the page
 prints, under the field names of the class and with the hedges each
-cell carries, as a data file writes them. A figure written under a
-unit the class takes as an alias of its own (an
+cell carries, as a data file writes them. A figure written in another
+unit of the same kind as its field (`thickness_m` for
+`thickness_mm`, `flow_resistivity_kpa_s_m2` for
+`flow_resistivity_pa_s_m2`), or in a unit the class takes as an
+alias of its own (an
 [`AbsorptionAreaSpectrum`](/phonometry/reference/api/materials/measured/#absorptionareaspectrum) takes
-`absorption_area_125_ft2` for `absorption_area_125_m2`) is
-converted on its digits with an exact factor and rounded once, and
-`converted` records the figure and its unit. The row is then
+`absorption_area_125_ft2` for `absorption_area_125_m2`), is
+converted on its digits with an exact factor and rounded once,
+whether it is a value or stands as the key of a hedge (the ends of a
+range, the readings of a list and a plus-or-minus convert with it),
+and `converted` records the figure and its unit. Every number
+of one cell is written in one unit. The row is then
 built and held to the contract the class docstring lists, so every
 cell is checked before any arithmetic reads it. Last, the class
 fills what follows from those cells (a modulus from a plate speed, a
@@ -746,7 +873,7 @@ row = type(row).from_printed(**cells)
 
 | Exception | When |
 | :--- | :--- |
-| CatalogueError | for a cell the contract refuses; for a `derived` among the cells, which is this method's to write; for a figure under a unit alias that is not a finite number, or that names a cell given under its own name or under another alias as well; and for printed cells a value that follows from them cannot be worked out of, naming the value and the cells. |
+| CatalogueError | for a cell the contract refuses; for a `derived` among the cells, which is this method's to write; for a figure under a unit alias that is not a finite number, or that names a cell given under its own name or under another alias as well; for the numbers of one cell written in two units, a name two fields of one kind could both take, or a figure whose text field saying what it is of is empty; and for printed cells a value that follows from them cannot be worked out of, naming the value and the cells. |
 | TypeError | for a name that is neither a field of the class nor a unit alias of one. |
 
 ### CatalogueRow.is_approximate()
@@ -857,6 +984,14 @@ guess whether the material has no such property, whether the book
 measured it and printed a dash, or whether the cell holds something
 that is not a number. Each of those is a different answer.
 
+The sentence names the document by its kind: `"the datasheet"`,
+`"the test report"`, and `"the page"` for a row with no
+`provenance`, which is every packaged one. For a cell the row
+holds in another unit than the page's, a bound, a range or a list
+quotes the page's figure and unit first and the row's value after
+it: `"the datasheet prints a lower bound of 5 kPa s/m2 (5000 Pa
+s/m2) and no value"`, never a figure the page does not print.
+
 **Parameters**
 
 | Name | Description |
@@ -870,6 +1005,16 @@ that is not a number. Each of those is a different answer.
 | Exception | When |
 | :--- | :--- |
 | AttributeError | for a name this class does not have, because a misspelt field would otherwise answer as if the cell were empty. |
+
+## CatalogueWarning
+
+A catalogue file was read, and some of its cells are worth a second look.
+
+Emitted once per document by [`read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) and
+[`parse_catalogue`](/phonometry/reference/api/io/io/#parse_catalogue) when [`Catalogue.notes`](/phonometry/reference/api/io/io/#catalogue) is not empty, with
+the count and the first notes. A note never changes a row: a value
+measured with no report or laboratory named for it, or a word in place of
+a number long enough to be a sentence, is kept as the file writes it.
 
 ## ClippingWarning
 
@@ -969,6 +1114,152 @@ the `lossy` field carries the fact instead.
 
 Warns that samples came through a lossy codec: levels are not defensible.
 
+## parse_catalogue
+
+```python
+parse_catalogue(
+    document: str | Mapping[str, Any],
+    *,
+    row_type: type[R],
+    label: str = '<document>',
+) -> Catalogue[R]
+```
+
+Read a catalogue from JSON text, or from a mapping already in memory.
+
+The same reading as [`read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue), for a document that is not a
+file: text built in a notebook, a spreadsheet turned into a dictionary, a
+test. A mapping has no printed digits, so a figure written in another
+unit is converted from the `repr` of its float; a `NaN` is refused as
+it is from text, but two members of one name cannot be told apart once a
+dictionary has merged them.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `document` | JSON text, or a mapping of the same shape. |
+| `row_type` | The class of every row, a subclass of [`CatalogueRow`](/phonometry/reference/api/io/io/#cataloguerow). |
+| `label` | What names the document in every issue. |
+
+**Returns:** The catalogue, keyed `"<catalogue>/<key>"`. Its [`file_sha256`](/phonometry/reference/api/io/io/#catalogue) is the SHA-256 of the text's UTF-8 bytes, or empty for a mapping.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| CatalogueError | for everything [`read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) refuses. |
+| TypeError | for a *row_type* that is not a catalogue row class, and for a *document* that is neither text nor a mapping. |
+
+**Warns**
+
+| Warning | When |
+| :--- | :--- |
+| CatalogueWarning | once, when the catalogue carries notes. |
+
+## Provenance
+
+```python
+Provenance(
+    *,
+    kind: str,
+    document: str,
+    version: str | None,
+    consulted: str,
+    publisher: str = '',
+    issued: str = '',
+    url: str = '',
+    sha256: str = '',
+    page: str = '',
+    printed_table: str = '',
+    laboratory: str = '',
+    accreditation: str = '',
+    report: str = '',
+    test_date: str = '',
+    test_standard: str = '',
+    field_test_standards: Mapping[str, str] = ...,
+)
+```
+
+Which document a catalogue's cells were read from, and how.
+
+A book's table is cited by its page, and the citation of every packaged
+row says all there is to say. A manufacturer's data sheet is not a book:
+it is revised without notice, the same product has several of them, and
+what it prints may be a laboratory's result, a value declared under a
+product standard or a figure from a calculation. So a row read from a
+caller's catalogue file carries this, and its [`CatalogueRow.source`](/phonometry/reference/api/io/io/#cataloguerow)
+is composed from it: for a `"publication"` the document as it is cited,
+and for every other kind the document, its publisher, its version, the
+page and the table, the report and the laboratory, and the day it was
+consulted.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `kind` | One of [`PROVENANCE_KINDS`](/phonometry/reference/api/io/io/#provenance_kinds). |
+| `document` | The document's title as it prints it. |
+| `version` | The revision the document prints (`"Rev. 4"`), or `None` when it prints none, which is a different answer from a version nobody wrote down. |
+| `consulted` | The day the document was read, as `YYYY-MM-DD`: a data sheet changes under the same title. |
+| `publisher` | Who issues the document. |
+| `issued` | When the document says it was issued, as `YYYY`, `YYYY-MM` or `YYYY-MM-DD`, at the precision it prints. |
+| `url` | Where the document was found. Never opened by this library. |
+| `sha256` | The digest of the file that was read, in hexadecimal, so that the copy can be told apart from a later revision. Never checked against anything by this library. |
+| `page` | The page the cells are on. |
+| `printed_table` | The label of the table on the page, as it prints it (`"Table 2"`). |
+| `laboratory` | The laboratory that made the measurement. |
+| `accreditation` | The laboratory's accreditation, as printed. |
+| `report` | The number of the test report. |
+| `test_date` | When the test was made, as printed. |
+| `test_standard` | The standard the test followed, as printed (`"ISO 9053-1:2018"`). |
+| `field_test_standards` | Field to the standard a document cites for that property alone, when it names a different one for each; it takes precedence over `test_standard` for that field. |
+
+### Provenance.cited()
+
+```python
+Provenance.cited() -> str
+```
+
+The citation every row read with this provenance carries as its source.
+
+A publication is cited as its document is, because a book's citation
+already names its edition and its page. Every other document is
+cited by its title, its publisher, the version it prints (or that it
+prints none), the page and the table, the report and the laboratory,
+and the day it was consulted, because each of those can change under
+the same title.
+
+### Provenance.noun
+
+*property*
+
+The document as the subject of a sentence: `"the datasheet"`.
+
+### Provenance.test_standard_of()
+
+```python
+Provenance.test_standard_of(field_name: str) -> str
+```
+
+The standard the test of one field followed, as printed.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `field_name` | A field of the row. |
+
+**Returns:** The field's own entry in `field_test_standards`, else `test_standard`, else the empty string.
+
+## PROVENANCE_KINDS
+
+*Constant* (`tuple`).
+
+```python
+PROVENANCE_KINDS = ('datasheet', 'declaration_of_performance', 'test_report', 'measurement', 'calculation', 'publication', 'other')
+```
+
 ## read
 
 ```python
@@ -1064,6 +1355,58 @@ the per-backend mechanics and the exact overlap rule.
 | :--- | :--- |
 | ValueError | If the geometry is invalid, `calibration_factor` is not a positive finite number, the file matches no known audio format, or a sidecar exists but is invalid (all at the call), or the data chunk is shorter than its header claims (at the block that reaches the end of it). |
 | ImportError | If the format needs the `[audio]` extra and it is not installed. |
+
+## read_catalogue
+
+```python
+read_catalogue(
+    path: str | os.PathLike[str],
+    *,
+    row_type: type[R],
+) -> Catalogue[R]
+```
+
+Read a catalogue of your own from a JSON file into rows of *row_type*.
+
+The file holds one table: a header with the document's provenance, and
+rows whose cells are named as the fields of *row_type* or in another unit
+of the same kind (the module docstring lays it out). Every row is built
+through [`CatalogueRow.from_printed`](/phonometry/reference/api/io/io/#cataloguerowfrom_printed), so a row read from a file and
+a packaged row with the same cells are the same row, and
+[`printed`](/phonometry/reference/api/io/io/#cataloguerowprinted), [`why_missing`](/phonometry/reference/api/io/io/#cataloguerowwhy_missing) and every
+method of the class behave alike on both. Every row carries the
+document's [`Provenance`](/phonometry/reference/api/io/io/#provenance), narrowed by the row where it narrows it,
+and a [`source`](/phonometry/reference/api/io/io/#cataloguerow) composed from it.
+
+The problems in the file are raised together in one
+[`CatalogueError`](/phonometry/reference/api/io/io/#catalogueerror), each issue with the JSON pointer to it: every
+problem of form, and the first rule of the row contract each row breaks.
+The class named in the file is only compared with *row_type*, and nothing
+the file names is ever imported.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `path` | The file, whose name ends in `.json` (in any case). |
+| `row_type` | The class of every row, a subclass of [`CatalogueRow`](/phonometry/reference/api/io/io/#cataloguerow) such as `materials.PorousMaterial`. |
+
+**Returns:** The catalogue, keyed `"<catalogue>/<key>"`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| CatalogueError | for a file larger than 16 MiB, text that is not UTF-8 or not JSON, and the problems the document holds, all at once: every problem of form, and the first rule of the row contract each row breaks. |
+| TypeError | for a *row_type* that is not a catalogue row class. |
+| ValueError | for a name that does not end in `.json`. |
+| OSError | as the file system raises it, untouched. |
+
+**Warns**
+
+| Warning | When |
+| :--- | :--- |
+| CatalogueWarning | once, when the catalogue carries notes. |
 
 ## read_sidecar
 
@@ -1356,6 +1699,66 @@ out of calibrated results.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For an unknown suffix or subtype, a missing or conflicting `fs`, a dither request outside `PCM_16`, an `rng` without a `dither` for it to seed, bext metadata that violates Tech 3285 (oversize field, version too old for a carried UMID or loudness), or a sidecar request without a calibrated [`Signal`](/phonometry/reference/api/io/io/#signal). |
+
+## write_catalogue
+
+```python
+write_catalogue(
+    rows: Mapping[str, CatalogueRow],
+    path: str | os.PathLike[str],
+    *,
+    catalogue: str | None = None,
+    about: str | None = None,
+    provenance: Provenance | None = None,
+    overwrite: bool = False,
+) -> tuple[Path, ...]
+```
+
+Write rows as a catalogue file that reads back into the same rows.
+
+The document [`read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) reads, written so that reading it
+gives rows equal to these, field for field: the cells each row's page
+prints, as [`CatalogueRow.printed_fields`](/phonometry/reference/api/io/io/#cataloguerowprinted_fields) gives them, and never a
+derived value, which the reader works out again. A value converted from
+another unit is written in that unit, under the name that carries it,
+when that reads back to the same float, and otherwise in the field's own
+unit with its `converted` record beside it, as the degrees Fahrenheit
+and the psi of a damping table are.
+
+A [`Catalogue`](/phonometry/reference/api/io/io/#catalogue) brings its name, its `about`, its provenance, its
+legends and its `x-...` columns. A table of the library's own (a
+`PUBLISHED_*` catalogue filtered by `row.table`) needs a *catalogue*
+name that is not of the packaged form, and takes the table's `about`
+and legends, with a provenance that cites the publication as the rows do
+and records the day of the export as the day it was consulted: the
+edition is in the citation already, and the copy consulted is the
+library's on that day. Pass *provenance* for a file that has to come out
+the same every day.
+
+The file is written beside its final name and renamed into place, so a
+reader never finds half of it.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `rows` | A [`Catalogue`](/phonometry/reference/api/io/io/#catalogue), or a mapping of rows of one class. |
+| `path` | Where to write, a name ending in `.json` (in any case). |
+| `catalogue` | The catalogue's name. Required for a table of the library's own, and for rows of yours that do not share one. |
+| `about` | What the document is; required when the rows bring none. |
+| `provenance` | The document the rows were read from, in place of the one they bring. |
+| `overwrite` | Replace a file already at *path*. |
+
+**Returns:** The paths written.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| CatalogueError | for no rows, rows from more than one table or document, a key a file cannot hold, or a name that is reserved or malformed. |
+| TypeError | for rows that are not catalogue rows of one class (fluid states among them), or a *catalogue* or *about* the rows need and do not bring. |
+| ValueError | for a name that does not end in `.json`. |
+| FileExistsError | for a file at *path* without *overwrite*, and for a symbolic link at *path*. |
 
 ## write_sidecar
 

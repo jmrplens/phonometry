@@ -1376,7 +1376,22 @@ implementation is validated against.
   rooms* (ISO 3741:2010).
   [iso.org catalogue](https://www.iso.org/standard/52053.html).
   The precision reverberation-room method.
-  Cited by [Sound Power in the Reverberation Room](/phonometry/devices/emission/sound-power-reverberation/).
+  Cited by [Sound Power in the Reverberation Room](/phonometry/devices/emission/sound-power-reverberation/) and
+  [Sound Power in Small Test Rooms](/phonometry/devices/emission/sound-power-test-rooms/).
+- International Organization for Standardization. (2010). *Acoustics —
+  Determination of sound power levels and sound energy levels of noise
+  sources using sound pressure — Engineering methods for small movable
+  sources in reverberant fields — Part 1: Comparison method for a
+  hard-walled test room* (ISO 3743-1:2010).
+  The comparison with a reference sound source in a hard-walled room.
+  Cited by [Sound Power in Small Test Rooms](/phonometry/devices/emission/sound-power-test-rooms/).
+- International Organization for Standardization. (2018). *Acoustics —
+  Determination of sound power levels of noise sources using sound
+  pressure — Engineering methods for small, movable sources in reverberant
+  fields — Part 2: Methods for special reverberation test rooms*
+  (ISO 3743-2:2018).
+  The direct and comparison methods of a special reverberation room.
+  Cited by [Sound Power in Small Test Rooms](/phonometry/devices/emission/sound-power-test-rooms/).
 - International Organization for Standardization. (2010). *Acoustics —
   Determination of sound power levels and sound energy levels of noise
   sources using sound pressure — Engineering/survey methods for use in situ

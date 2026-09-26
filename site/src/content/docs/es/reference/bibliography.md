@@ -1419,7 +1419,22 @@ implementación.
   rooms* (ISO 3741:2010).
   [Catálogo iso.org](https://www.iso.org/standard/52053.html).
   El método de precisión en cámara reverberante.
-  Citado por [Potencia acústica en cámara reverberante](/phonometry/es/devices/emission/sound-power-reverberation/).
+  Citado por [Potencia acústica en cámara reverberante](/phonometry/es/devices/emission/sound-power-reverberation/) y
+  [Potencia acústica en salas de ensayo pequeñas](/phonometry/es/devices/emission/sound-power-test-rooms/).
+- International Organization for Standardization. (2010). *Acoustics —
+  Determination of sound power levels and sound energy levels of noise
+  sources using sound pressure — Engineering methods for small movable
+  sources in reverberant fields — Part 1: Comparison method for a
+  hard-walled test room* (ISO 3743-1:2010).
+  La comparación con una fuente sonora de referencia en una sala de paredes rígidas.
+  Citado por [Potencia acústica en salas de ensayo pequeñas](/phonometry/es/devices/emission/sound-power-test-rooms/).
+- International Organization for Standardization. (2018). *Acoustics —
+  Determination of sound power levels of noise sources using sound
+  pressure — Engineering methods for small, movable sources in reverberant
+  fields — Part 2: Methods for special reverberation test rooms*
+  (ISO 3743-2:2018).
+  Los métodos directo y de comparación de una sala reverberante especial.
+  Citado por [Potencia acústica en salas de ensayo pequeñas](/phonometry/es/devices/emission/sound-power-test-rooms/).
 - International Organization for Standardization. (2010). *Acoustics —
   Determination of sound power levels and sound energy levels of noise
   sources using sound pressure — Engineering/survey methods for use in situ

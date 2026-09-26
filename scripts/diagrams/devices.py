@@ -852,6 +852,214 @@ def _d_reverberation_power(s: SVG, th: Theme) -> None:
 
 
 # ---------------------------------------------------------------------------
+# ISO 3743-1 and ISO 3743-2: the two small test rooms, in plan
+# ---------------------------------------------------------------------------
+
+#: ISO 3743-1 panel: the guide's 5,0 m x 4,0 m x 3,0 m hard-walled room
+#: (V = 60 m3, d_min = 0,3 V^(1/3) = 1,17 m, lambda/2 = 1,37 m at 125 Hz),
+#: the blender's reference box and the four microphone positions round it, in
+#: metres; the fifth stands above the box (7.3).
+_HW_ROOM_M = (5.0, 4.0)
+_HW_SOURCE = (1.7, 2.0)
+_HW_MICS = ((3.0, 3.4), (4.4, 2.6), (3.4, 0.8), (1.6, 0.6))
+#: ISO 3743-2 panel: a 5,4 m x 4,4 m x 3,03 m special room (V = 72 m3,
+#: d_min = 1,25 m, lambda/4 = 0,69 m and lambda/2 = 1,37 m at 125 Hz), two
+#: source locations 1,2 m apart, and six positions that keep every clearance
+#: from both.
+_SR_ROOM_M = (5.4, 4.4)
+_SR_SOURCES = ((1.5, 1.7), (2.7, 1.7))
+_SR_MICS = ((0.7, 0.7), (3.9, 0.7), (4.7, 2.1), (4.7, 3.7), (3.1, 3.0), (1.5, 3.7))
+
+
+def _d_small_test_rooms(s: SVG, th: Theme) -> None:
+    """ISO 3743-1 and ISO 3743-2 in plan: the two small test rooms.
+
+    Left, the hard-walled room of Part 1: the source's reference box at least
+    1 m from every wall and turned off the walls' axes (6.3), the reference
+    sound source run afterwards in the same place (7.2), and five microphone
+    positions at least 0,3 V^(1/3) from the source, 0,5 m from the walls and
+    the ceiling and half a wavelength of the lowest band apart, four round the
+    box and the fifth above it (7.3). Right, the special
+    reverberation room of Part 2: absorbers in patches over the walls
+    (Annex B), a reflecting floor (6.4), two source locations at least 1 m
+    from the nearest wall (8.2, 9.4), and six positions a quarter wavelength
+    from the surfaces, 0,3 V^(1/3) from every source location and half a
+    wavelength apart (9.3). Both rooms are the guide's own examples; the
+    reference source of the Part 2 comparison method, at least 1,5 m from
+    every wall (10.3), is left to the footer.
+    """
+    base = 344.0  # y of both plans' origin
+
+    def plan(x0: float, room: tuple[float, float], scale: float) -> None:
+        w, h = room[0] * scale, room[1] * scale
+        s.rect(x0, base - h, w, h, th.panel, th.fg, sw=3.0)
+
+    def mic(px: float, py: float, n: str, *, beside: bool = False) -> None:
+        s.circle(px, py, 6.5, th.secondary)
+        s.circle(px, py, 2.2, th.bg)
+        # A dimension line that arrives from above takes the number's place;
+        # the number then goes to the left of the microphone.
+        if beside:
+            s.text(px - 16, py + 5, n, 12, th.fg, bold=True)
+        else:
+            s.text(px, py - 11, n, 12, th.fg, bold=True)
+
+    def box(px: float, py: float, colour: str, *, dash: str = "") -> None:
+        s.path(
+            f"M {px - 16:.1f} {py - 6:.1f} L {px + 6:.1f} {py - 17:.1f} "
+            f"L {px + 16:.1f} {py + 6:.1f} L {px - 6:.1f} {py + 17:.1f} Z",
+            fill=th.bg if dash else colour,
+            stroke=colour,
+            sw=1.6,
+            dash=dash,
+        )
+
+    # ===== Left: ISO 3743-1, the hard-walled room =====
+    lx, lsc = 52.0, 62.0
+
+    def lp(x: float, y: float) -> tuple[float, float]:
+        return lx + x * lsc, base - y * lsc
+
+    s.text(lx + 155, 58, "ISO 3743-1: hard-walled room", 16, th.fg, bold=True)
+    plan(lx, _HW_ROOM_M, lsc)
+    sx, sy = lp(*_HW_SOURCE)
+    box(sx, sy, th.fg)
+    s.text(sx + 22, sy - 6, "source under test,", 12, th.fg, "start", bold=True)
+    s.text(sx + 22, sy + 9, "then the reference", 12, th.accent, "start", bold=True)
+    s.text(sx + 22, sy + 24, "source in its place (7.2)", 12, th.accent, "start")
+    # 6.3: at least 1 m from every wall and the ceiling.
+    s.line(lx, sy, sx - 16, sy, th.muted, 1.0, dash="3,3")
+    s.text((lx + sx - 16) / 2, sy - 8, "≥ 1 m", 11, th.muted)
+    pts = [lp(*m) for m in _HW_MICS]
+    for i, (px, py) in enumerate(pts, start=1):
+        # The d_min line below arrives at position 4 from above.
+        mic(px, py, str(i), beside=i == 4)
+    # 7.3: the fifth position stands directly above the box, so in plan it
+    # sits on it; its number goes beside the box, where it can be read.
+    s.circle(sx, sy, 6.5, th.secondary)
+    s.circle(sx, sy, 2.2, th.bg)
+    s.text(sx - 24, sy - 12, "5", 12, th.fg, bold=True)
+    s.text(sx + 22, sy + 39, "5: above the source (7.3)", 12, th.secondary, "start")
+    # d_min from the source to its nearest microphone.
+    m4x, m4y = pts[3]
+    s.line(sx, sy + 17, m4x, m4y - 6.5, th.primary, 1.4, dash="6,4")
+    s.text(
+        sx - 8, (sy + m4y) / 2 + 8, "$≥ 0,3 V^{1/3}$", 12, th.primary, "end", bold=True
+    )
+    # Half a wavelength between two positions.
+    (m3x, m3y) = pts[2]
+    s.line(m3x, m3y, m4x, m4y, th.secondary, 1.2, dash="5,4")
+    s.text((m3x + m4x) / 2, max(m3y, m4y) + 20, "$≥ λ/2$", 12, th.secondary, bold=True)
+    # 0,5 m from the wall.
+    m2x, m2y = pts[1]
+    rwall = lx + _HW_ROOM_M[0] * lsc
+    s.line(m2x + 6.5, m2y, rwall, m2y, th.muted, 1.0, dash="3,3")
+    s.text(rwall - 4, m2y + 17, "≥ 0,5 m", 11, th.muted, "end")
+
+    # ===== Right: ISO 3743-2, the special reverberation room =====
+    rx, rsc = 488.0, 57.0
+
+    def rp(x: float, y: float) -> tuple[float, float]:
+        return rx + x * rsc, base - y * rsc
+
+    s.text(rx + 154, 58, "ISO 3743-2: special reverberation room", 16, th.fg, bold=True)
+    plan(rx, _SR_ROOM_M, rsc)
+    w, h = _SR_ROOM_M[0] * rsc, _SR_ROOM_M[1] * rsc
+    # Annex B: absorbers in patches of at most 1,5 m2, spread over the walls.
+    for fx in (0.12, 0.47, 0.78):
+        s.rect(rx + fx * w, base - h + 3, 34, 7, th.accent, rx=1.5)
+        s.rect(rx + (fx + 0.06) * w, base - 10, 34, 7, th.accent, rx=1.5)
+    for fy in (0.25, 0.62):
+        s.rect(rx + 3, base - (fy + 0.1) * h, 7, 30, th.accent, rx=1.5)
+        s.rect(rx + w - 10, base - fy * h, 7, 30, th.accent, rx=1.5)
+    s.text(
+        rx + w / 2, base - h - 12, "absorber patches ≤ 1,5 m² (Annex B)", 12, th.accent
+    )
+    (s1x, s1y), (s2x, s2y) = rp(*_SR_SOURCES[0]), rp(*_SR_SOURCES[1])
+    box(s1x, s1y, th.fg)
+    box(s2x, s2y, th.fg, dash="4,3")
+    s.text(s1x, s1y + 34, "source, location 1", 12, th.fg, bold=True)
+    s.text(s2x + 6, s2y - 26, "location 2 (Table 3)", 12, th.fg)
+    s.line(rx, s1y, s1x - 16, s1y, th.muted, 1.0, dash="3,3")
+    s.text((rx + s1x - 16) / 2, s1y - 8, "≥ 1 m", 11, th.muted)
+    pts2 = [rp(*m) for m in _SR_MICS]
+    for i, (px, py) in enumerate(pts2, start=1):
+        mic(px, py, str(i))
+    (a_x, a_y), (b_x, b_y) = pts2[0], pts2[1]
+    s.line(s2x + 6, s2y + 16, b_x - 4, b_y - 6, th.primary, 1.4, dash="6,4")
+    s.text(
+        (s2x + b_x) / 2 + 12,
+        (s2y + b_y) / 2 - 4,
+        "$≥ 0,3 V^{1/3}$",
+        12,
+        th.primary,
+        "start",
+        bold=True,
+    )
+    s.line(a_x + 6.5, a_y, b_x - 6.5, b_y, th.secondary, 1.2, dash="5,4")
+    s.text((a_x + b_x) / 2 - 30, a_y + 18, "$≥ λ/2$", 12, th.secondary, bold=True)
+    s.line(b_x, b_y + 6.5, b_x, base, th.muted, 1.0, dash="3,3")
+    s.text(b_x + 8, b_y + 26, "$≥ λ/4$", 11, th.muted, "start")
+    s.text(rx + w / 2, base + 22, "floor: painted concrete, $α < 0,06$", 12, th.muted)
+
+    # ===== Footer: the rules the plans cannot dimension =====
+    s.line(50, 386, 850, 386, th.muted, 1.0)
+    for k, (txt, col, bold) in enumerate(
+        (
+            (
+                "Part 1: $V ≥$ 40 m³ and ≥ 40 × the reference box · every surface "
+                "$α ≤ 0,20$ · 8 orientations (Table 3)",
+                th.primary,
+                True,
+            ),
+            (
+                "≥ 3 positions, five if the room allows · $V$ = 60 m³: "
+                "$0,3 V^{1/3}$ = 1,17 m, $λ/2$ = 1,37 m at 125 Hz",
+                th.fg,
+                False,
+            ),
+            (
+                "$L_W = L_{W(RSS)} − L'_{p(RSS)} + L'_{p(ST)} + K_{1(RSS)} − K_1$ "
+                "on the means (Eq. 14) · both margins ≥ 6 dB",
+                th.fg,
+                False,
+            ),
+            (
+                "Part 2: $V ≥$ 70 m³ (≤ 300 m³ for 4 and 8 kHz, direct method) · "
+                "floor $α < 0,06$ · walls 0,5 to 1,5 × mean",
+                th.secondary,
+                True,
+            ),
+            (
+                "$T$ from $0,9 R T_{nom}$ to $1,1 R T_{nom}$ with "
+                "$R = 1 + 257/(f V^{1/3})$ · $T_{nom}$ 0,5 s to 1,0 s (6.3)",
+                th.fg,
+                False,
+            ),
+            (
+                "six positions (9.3) · $V$ = 72 m³: $0,3 V^{1/3}$ = 1,25 m, "
+                "$λ/4$ = 0,69 m, $λ/2$ = 1,37 m at 125 Hz",
+                th.fg,
+                False,
+            ),
+            (
+                "direct method: $L_W = L_p − 10 lg(T_{nom}/T_0) + 10 lg(V/V_0) − 13$ dB "
+                "(Formula 9)",
+                th.accent,
+                True,
+            ),
+            (
+                "comparison method: $L_{We} = L_{pe} + L_{Wr} − L_{pr}$ (Formula 10), "
+                "the reference source ≥ 1,5 m from the walls",
+                th.accent,
+                True,
+            ),
+        )
+    ):
+        s.text(58, 412 + k * 23, txt, 13, col, anchor="start", bold=bold)
+
+
+# ---------------------------------------------------------------------------
 # ISO 3747 comparison in situ: one room, two sources, the same microphones
 # ---------------------------------------------------------------------------
 

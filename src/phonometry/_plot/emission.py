@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Final
 
 import numpy as np
 
@@ -11,11 +11,14 @@ from .common import (
     _C_EDGE,
     _C_MUTED,
     _C_PRIMARY,
+    _C_PRIMARY_LIGHT,
+    _C_QUATERNARY,
     _C_REFERENCE,
     _C_SECONDARY,
     _C_TERTIARY,
     _band_axis,
     _bar_width,
+    _format_freq,
     _freq_axis,
     _hatch_invalid,
     _new_axes,
@@ -25,10 +28,13 @@ from .common import (
     place_legend_clear,
     style_default,
     theme_fill,
+    theme_line,
 )
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
+    from matplotlib.container import BarContainer
+    from matplotlib.patches import Rectangle
 
     from ..emission.intensity import FieldIndicators, IntensityResult
     from ..emission.intensity_compliance import (
@@ -36,6 +42,11 @@ if TYPE_CHECKING:
     )
     from ..emission.sound_power import SoundEnergyResult, SoundPowerResult
     from ..emission.sound_power_anechoic import PrecisionSoundPowerResult
+    from ..emission.sound_power_hard_walled import (
+        HardWalledRoomCheck,
+        HardWalledSoundPowerResult,
+        SourceLocationPlan,
+    )
     from ..emission.sound_power_high_frequency import HighFrequencySoundPowerResult
     from ..emission.sound_power_in_duct import InDuctSoundPowerResult
     from ..emission.sound_power_in_situ import InSituSoundPowerResult
@@ -49,6 +60,12 @@ if TYPE_CHECKING:
     from ..emission.sound_power_reverberation import (
         ReverberationSoundEnergyResult,
         ReverberationSoundPowerResult,
+    )
+    from ..emission.sound_power_special_room import (
+        SpecialRoomReverberationCheck,
+        SpecialRoomSoundPowerResult,
+        SpecialRoomSuitabilityCheck,
+        SpecialRoomSurfaceCheck,
     )
     from ..emission.vibration_sound_power import VibrationSoundPowerResult
     from ..emission.workstation import EmissionPressureResult
@@ -83,6 +100,24 @@ _LEVEL_LABEL = "Level [dB]"
 _SOUND_POWER_LABEL = "Sound power $L_W$"
 _MEAN_ROOM_LEVEL_LABEL = r"Mean room level $\overline{L_p}$"
 
+#: Axis labels of the ISO 3743 renderers, named for the same reason.
+_SPREAD_LABEL = "Spread between orientations [dB]"
+_SM_LABEL = r"Standard deviation $s_\mathrm{M}$ [dB]"
+_T_NOMINAL_LABEL = r"$T/T_\mathrm{nom}$"
+_ALPHA_LABEL = r"Absorption coefficient $\alpha$"
+_DIFFERENCE_LABEL = "Power level difference [dB]"
+#: Words and symbols of the ISO 3743 renderers written more than once.
+_DIRECT_METHOD = "direct method"
+_NOT_QUALIFIED = "not qualified"
+_LWA_SYMBOL = "$L_{W\\mathrm{A}}$"
+#: Legend corner of the ISO 3743 renderers whose curves leave it free.
+_LEGEND_LOWER_RIGHT: Final = "lower right"
+#: Legend of a band the standard makes an upper bound: the source under test's
+#: own background margin fell short (ISO 3743-1 8.1.3, ISO 3747 8.1).
+_UPPER_BOUND_LABEL = "Upper bound: source margin below 6 dB"
+#: Axis of a survey plot that adds the A-weighted row as a bar of its own.
+_A_BAND_LABEL = "Frequency [Hz]; A: A-weighted level"
+
 _STRINGS: dict[str, str] = {
     "Band": "Banda",
     _YLABEL_LW: "Nivel de potencia acústica $L_W$ [dB]",
@@ -91,7 +126,10 @@ _STRINGS: dict[str, str] = {
     "sound energy spectrum": "espectro de energía acústica",
     "In situ sound power spectrum (ISO 3747)": "Espectro de potencia acústica in situ (ISO 3747)",
     "In situ sound energy spectrum (ISO 3747)": "Espectro de energía acústica in situ (ISO 3747)",
-    "Upper bound: background margin below 6 dB": "Cota superior: margen de fondo inferior a 6 dB",
+    _UPPER_BOUND_LABEL: "Cota superior: margen de la fuente inferior a 6 dB",
+    "Background requirement (8.1) not shown to be met": "Requisito de ruido de fondo (apartado 8.1) no demostrado",
+    "Background requirement (4.5) not shown to be met": "Requisito de ruido de fondo (apartado 4.5) no demostrado",
+    "Background requirement (9.8) not shown to be met": "Requisito de ruido de fondo (apartado 9.8) no demostrado",
     "Non-positive band": "Banda no positiva",
     "Pressure level $L_p$": "Nivel de presión $L_p$",
     "Intensity level $L_I$": "Nivel de intensidad $L_I$",
@@ -136,8 +174,49 @@ _STRINGS: dict[str, str] = {
     "10 dB below the highest tone": "10 dB bajo el tono más alto",
     "ISO 9295 sound power in the 16 kHz octave, {method}": "Potencia acústica ISO 9295 en la octava de 16 kHz, {method}",
     "ISO 9295 tonal sound power, {method}": "Potencia acústica tonal ISO 9295, {method}",
-    "direct method": "método directo",
+    _DIRECT_METHOD: "método directo",
     "reference source": "fuente de referencia",
+    "comparison method": "método de comparación",
+    "Expanded uncertainty $U$": "Incertidumbre expandida $U$",
+    _SPREAD_LABEL: "Dispersión entre orientaciones [dB]",
+    "Largest spread between orientations": "Mayor dispersión entre orientaciones",
+    r"Table 3 limit $\sigma_{R0}$": r"Límite de la tabla 3 $\sigma_{R0}$",
+    "Spread above the limit": "Dispersión por encima del límite",
+    "ISO 3743-1 room qualification: {verdict}": "Cualificación de la sala ISO 3743-1: {verdict}",
+    "qualified": "cualificada",
+    _NOT_QUALIFIED: "no cualificada",
+    _SM_LABEL: r"Desviación típica $s_\mathrm{M}$ [dB]",
+    "Survey standard deviation": "Desviación típica del sondeo",
+    "{standard} source locations, {mics} microphone positions": "{standard}: ubicaciones de la fuente, {mics} posiciones de micrófono",
+    "Table 2: one location up to 2.5 dB": "Tabla 2: una ubicación hasta 2,5 dB",
+    "N over a bar: source locations (Table 2)": "N sobre una barra: ubicaciones de la fuente (Tabla 2)",
+    "N over a bar: source locations (Table 3)": "N sobre una barra: ubicaciones de la fuente (Tabla 3)",
+    _A_BAND_LABEL: "Frecuencia [Hz]; A: nivel ponderado A",
+    "Table 2: two locations up to 4.0 dB": "Tabla 2: dos ubicaciones hasta 4,0 dB",
+    "N+2: two more locations in another room": "N+2: dos ubicaciones más en otra sala",
+    "Table 3: 2.3 dB, narrow-band components (9.5)": "Tabla 3: 2,3 dB, componentes de banda estrecha (apartado 9.5)",
+    "Table 3: 4 dB, discrete tone (9.5)": "Tabla 3: 4 dB, tono discreto (apartado 9.5)",
+    _T_NOMINAL_LABEL: r"$T/T_\mathrm{nom}$",
+    r"Measured $T/T_\mathrm{nom}$": r"$T/T_\mathrm{nom}$ medido",
+    "Ideal ratio $R$": "Relación ideal $R$",
+    "Limiting curves": "Curvas límite",
+    "Outside the limiting curves": "Fuera de las curvas límite",
+    r"ISO 3743-2 reverberation time, $T_\mathrm{{nom}}$ = {tnom} s: {verdict}": r"Tiempo de reverberación ISO 3743-2, $T_\mathrm{{nom}}$ = {tnom} s: {verdict}",
+    _ALPHA_LABEL: r"Coeficiente de absorción $\alpha$",
+    "Wall or ceiling {n}": "Pared o techo {n}",
+    "0.5 to 1.5 times the mean": "0,5 a 1,5 veces la media",
+    "Floor": "Suelo",
+    "Floor limit 0.06": "Límite del suelo 0,06",
+    "ISO 3743-2 surface treatment (6.4): {verdict}": "Tratamiento de superficies ISO 3743-2 (apartado 6.4): {verdict}",
+    "complies": "cumple",
+    "does not comply": "no cumple",
+    "Outside 6.4": "Fuera del apartado 6.4",
+    _DIFFERENCE_LABEL: "Diferencia de nivel de potencia [dB]",
+    "Table 1 limits": "Límites de la tabla 1",
+    "Beyond Table 1": "Fuera de la tabla 1",
+    "ISO 3743-2 room suitability (6.7): {verdict}": "Idoneidad de la sala ISO 3743-2 (apartado 6.7): {verdict}",
+    "suitable": "idónea",
+    "not suitable": "no idónea",
 }
 
 
@@ -438,9 +517,11 @@ def plot_in_situ_sound_power(
     """In situ sound power (or energy) spectrum with the A-weighted total.
 
     One bar per octave band of ``LW``, or of ``LJ`` when the result is an
-    energy determination; a band whose background margin fell below the
-    6 dB of ISO 3747:2010 clause 8.1 is hatched, because the level drawn
-    there is an upper bound and the report has to say so.
+    energy determination. A band where the source under test's background
+    margin fell below the 6 dB of ISO 3747:2010 clause 8.1 is hatched as the
+    upper bound that clause makes it; a band that fails 8.1 otherwise (the
+    reference source's margin, or no background measured) is cross-hatched,
+    since its level is no bound either way. The report has to say both.
 
     :param result: An
         :class:`~phonometry.emission.sound_power_in_situ.InSituSoundPowerResult`.
@@ -449,8 +530,6 @@ def plot_in_situ_sound_power(
     :param kwargs: Forwarded to the band :meth:`~matplotlib.axes.Axes.bar`.
     :return: The axes.
     """
-    from matplotlib.patches import Patch
-
     from .._i18n import format_number, localize_axes
 
     ax = ax if ax is not None else _new_axes()
@@ -463,10 +542,17 @@ def plot_in_situ_sound_power(
     positions = _band_axis(
         ax, np.asarray(result.frequencies, dtype=np.float64), language=language
     )
-    upper = ~np.asarray(result.background_requirement_met, dtype=bool)
     style_default(kwargs, "color", _C_PRIMARY)
     bars = ax.bar(positions, np.nan_to_num(levels), **kwargs)
-    _hatch_invalid(bars, upper)
+    handles = _mark_background(
+        bars,
+        not_met=~np.asarray(result.background_requirement_met, dtype=bool),
+        upper=np.asarray(result.upper_bound, dtype=bool),
+        labels=(
+            _t(_UPPER_BOUND_LABEL, language),
+            _t("Background requirement (8.1) not shown to be met", language),
+        ),
+    )
 
     if energy:
         ax.set_ylabel(_t(_YLABEL_LJ, language))
@@ -475,20 +561,10 @@ def plot_in_situ_sound_power(
     else:
         ax.set_ylabel(_t(_YLABEL_LW, language))
         title = _t("In situ sound power spectrum (ISO 3747)", language)
-        symbol = "$L_{W\\mathrm{A}}$"
+        symbol = _LWA_SYMBOL
     if np.isfinite(total):
         title += f"  ({symbol} = {format_number(total, language, decimals=1)} dB(A))"
     ax.set_title(title)
-    handles: list[Any] = []
-    if np.any(upper):
-        handles.append(
-            Patch(
-                facecolor=_C_PRIMARY,
-                edgecolor=_C_EDGE,
-                hatch="//",
-                label=_t("Upper bound: background margin below 6 dB", language),
-            )
-        )
     if handles or "label" in kwargs:
         ax.legend(handles=handles or None, loc="best", fontsize="small")
     ax.grid(visible=True, axis="y", alpha=0.3)
@@ -527,7 +603,7 @@ def plot_high_frequency_sound_power(
     mean = np.asarray(result.mean_pressure_level, dtype=np.float64)
     freqs = np.asarray(result.frequencies, dtype=np.float64)
     method = _t(
-        "direct method" if result.method == "direct" else "reference source",
+        _DIRECT_METHOD if result.method == "direct" else "reference source",
         language,
     )
     if result.tonal:
@@ -946,7 +1022,638 @@ def plot_intensity_class(
             spacing=decimal_comma(f"{result.spacing * 1000.0:g}", language),
         )
     )
-    ax.legend(loc="lower right", fontsize="small")
+    ax.legend(loc=_LEGEND_LOWER_RIGHT, fontsize="small")
     ax.grid(visible=True, which="both", alpha=0.3)
+    localize_axes(ax, language)
+    return ax
+
+
+def _mark_background(
+    bars: BarContainer,
+    *,
+    not_met: np.ndarray,
+    upper: np.ndarray,
+    labels: tuple[str, str],
+) -> list[Rectangle]:
+    """Hatch the bands that fail the background requirement, and say why.
+
+    A band the standard makes an upper bound (the source under test's margin
+    fell short, the reference source's did not) is hatched ``//``; any other
+    band that fails the requirement, a short reference margin or no
+    background measured at all, is cross-hatched ``xx``, since its level is
+    no bound either way. The first bar of each group carries the legend
+    label itself rather than a free-standing proxy patch: a caller that
+    rebuilds the legend from the axes (the report fiches do) then still
+    finds both entries.
+
+    :param labels: ``(upper-bound legend, requirement-not-met legend)``,
+        already translated.
+    :return: The labelled bars, in that order, for the legend.
+    """
+    failing = np.asarray(not_met, dtype=bool)
+    bound = np.asarray(upper, dtype=bool) & failing
+    handles: list[Rectangle] = []
+    for mask, hatch, label in (
+        (bound, "//", labels[0]),
+        (failing & ~bound, "xx", labels[1]),
+    ):
+        marked = np.flatnonzero(mask)
+        for index in marked:
+            bars[int(index)].set_hatch(hatch)
+            bars[int(index)].set_edgecolor(_C_EDGE)
+        if marked.size:
+            bars[int(marked[0])].set_label(label)
+            handles.append(bars[int(marked[0])])
+    return handles
+
+
+def _plot_determined_spectrum(
+    ax: Axes,
+    *,
+    levels: np.ndarray,
+    frequencies: np.ndarray,
+    not_met: np.ndarray,
+    upper_bound: np.ndarray,
+    expanded: np.ndarray,
+    total: float,
+    labels: tuple[str, str, str, str, str],
+    language: str,
+    kwargs: dict[str, Any],
+) -> Axes:
+    """The bar spectrum the ISO 3743 determinations share.
+
+    One bar per octave band, hatched where the band is an upper bound and
+    cross-hatched where it fails the background requirement otherwise, the
+    expanded uncertainty as an error bar where it is finite, and the
+    A-weighted total on the second line of the title.
+
+    :param labels: ``(y label, title, total symbol, upper-bound legend,
+        requirement-not-met legend)``, already translated.
+    """
+    from .._i18n import format_number, localize_axes
+
+    ylabel, title, symbol, upper_label, not_met_label = labels
+    positions = _band_axis(ax, frequencies, language=language)
+    style_default(kwargs, "color", _C_PRIMARY)
+    bars = ax.bar(positions, np.nan_to_num(levels), **kwargs)
+    background = _mark_background(
+        bars,
+        not_met=not_met,
+        upper=upper_bound,
+        labels=(upper_label, not_met_label),
+    )
+    handles: list[Any] = []
+    with_u = np.isfinite(expanded) & np.isfinite(levels)
+    if np.any(with_u):
+        handles.append(
+            ax.errorbar(
+                positions[with_u],
+                levels[with_u],
+                yerr=expanded[with_u],
+                fmt="none",
+                ecolor=theme_line(ax.xaxis.label.get_color(), ax, quiet=0.8),
+                elinewidth=1.0,
+                capsize=3.0,
+                label=_t("Expanded uncertainty $U$", language),
+            )
+        )
+    handles.extend(background)
+    ax.set_ylabel(ylabel)
+    if np.isfinite(total):
+        # The total takes a line of its own: with the method named, one line
+        # runs past the edge of a default-size figure.
+        title += f"\n{symbol} = {format_number(total, language, decimals=1)} dB(A)"
+    ax.set_title(title)
+    if "label" in kwargs:
+        handles.insert(0, bars)
+    if handles:
+        ax.legend(handles=handles, loc=_LEGEND_LOWER_RIGHT, fontsize="small")
+    ax.grid(visible=True, axis="y", alpha=0.3)
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_hard_walled_sound_power(
+    result: HardWalledSoundPowerResult,
+    ax: Axes | None = None,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    r"""Sound power (or energy) spectrum in a hard-walled test room.
+
+    One bar per octave band of ``LW``, or of ``LJ`` for an energy
+    determination. A band where the source under test's background margin
+    fell below the 6 dB of ISO 3743-1:2010 4.5 is hatched as the upper bound
+    8.1.3 makes it; a band that fails 4.5 otherwise (the reference source's
+    margin, or no background measured) is cross-hatched, since the capped
+    :math:`K_{1(\mathrm{RSS})}` lowers its level. The expanded uncertainty is
+    drawn where ``sigma_omc`` was supplied.
+
+    :param result: A
+        :class:`~phonometry.emission.sound_power_hard_walled.HardWalledSoundPowerResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the band :meth:`~matplotlib.axes.Axes.bar`.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    energy = result.quantity == "energy"
+    return _plot_determined_spectrum(
+        ax,
+        levels=np.asarray(
+            result.sound_energy_level if energy else result.sound_power_level,
+            dtype=np.float64,
+        ),
+        frequencies=np.asarray(result.frequencies, dtype=np.float64),
+        not_met=~np.asarray(result.background_requirement_met, dtype=bool),
+        upper_bound=np.asarray(result.upper_bound, dtype=bool),
+        expanded=np.asarray(result.expanded_uncertainty, dtype=np.float64),
+        total=float(
+            result.sound_energy_level_a if energy else result.sound_power_level_a
+        ),
+        labels=(
+            _t(_YLABEL_LJ if energy else _YLABEL_LW, language),
+            "ISO 3743-1 "
+            + _t(
+                "sound energy spectrum" if energy else "sound power spectrum", language
+            ),
+            "$L_{J\\mathrm{A}}$" if energy else _LWA_SYMBOL,
+            _t(_UPPER_BOUND_LABEL, language),
+            _t("Background requirement (4.5) not shown to be met", language),
+        ),
+        language=language,
+        kwargs=kwargs,
+    )
+
+
+def plot_special_room_sound_power(
+    result: SpecialRoomSoundPowerResult,
+    ax: Axes | None = None,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """Sound power spectrum in a special reverberation test room.
+
+    One bar per octave band of ``LW`` by the direct or the comparison method
+    of ISO 3743-2:2018, a band whose background requirement is not shown to
+    be met (a margin below the 4 dB of 9.8, or no background measured)
+    cross-hatched and named as such, which is all 9.8 says of it, and the
+    expanded uncertainty drawn where ``sigma_omc`` was supplied. The title
+    carries the Annex F total.
+
+    :param result: A
+        :class:`~phonometry.emission.sound_power_special_room.SpecialRoomSoundPowerResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the band :meth:`~matplotlib.axes.Axes.bar`.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    method = _t(
+        _DIRECT_METHOD if result.method == "direct" else "comparison method",
+        language,
+    )
+    return _plot_determined_spectrum(
+        ax,
+        levels=np.asarray(result.sound_power_level, dtype=np.float64),
+        frequencies=np.asarray(result.frequencies, dtype=np.float64),
+        not_met=~np.asarray(result.background_requirement_met, dtype=bool),
+        upper_bound=np.zeros(result.frequencies.shape, dtype=bool),
+        expanded=np.asarray(result.expanded_uncertainty, dtype=np.float64),
+        total=float(result.sound_power_level_a),
+        labels=(
+            _t(_YLABEL_LW, language),
+            f"ISO 3743-2 {_t('sound power spectrum', language)}, {method}",
+            _LWA_SYMBOL,
+            _t(_UPPER_BOUND_LABEL, language),
+            _t("Background requirement (9.8) not shown to be met", language),
+        ),
+        language=language,
+        kwargs=kwargs,
+    )
+
+
+def plot_hard_walled_room_check(
+    result: HardWalledRoomCheck,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """The spread between the orientations of 4.4 against Table 3.
+
+    One bar per octave band for the largest difference between the mean
+    levels of any two orientations of the directional source, and a short
+    horizontal mark at the Table 3 standard deviation of reproducibility it may
+    not exceed; a bar over its mark is drawn in the failure colour. The legend
+    keys each colour by a bar that carries it, so a failing first band does
+    not lend its colour to the passing ones. The title gives the verdict on
+    every criterion evaluated (4.2, 4.3 and 4.4).
+
+    :param result: A
+        :class:`~phonometry.emission.sound_power_hard_walled.HardWalledRoomCheck`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the spread bars.
+    :return: The axes.
+    """
+    from .._i18n import localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
+    spread = np.asarray(result.level_range_db, dtype=np.float64)
+    limit = np.asarray(result.limit_db, dtype=np.float64)
+    ok = np.asarray(result.band_adequate, dtype=bool)
+    positions = _band_axis(ax, freqs, language=language)
+    style_default(
+        kwargs, "color", [_C_PRIMARY if good else _C_REFERENCE for good in ok]
+    )
+    label = kwargs.pop("label", _t("Largest spread between orientations", language))
+    bars = ax.bar(positions, spread, **kwargs)
+    marks = ax.hlines(
+        limit,
+        positions - 0.4,
+        positions + 0.4,
+        colors=_C_SECONDARY,
+        lw=2.2,
+        label=_t(r"Table 3 limit $\sigma_{R0}$", language),
+    )
+    # A bar container hands the legend the colour of its first bar, which is
+    # the failure colour whenever the lowest band fails; key each colour by a
+    # bar that carries it instead.
+    handles: list[Any] = []
+    passing, failing = np.flatnonzero(ok), np.flatnonzero(~ok)
+    if passing.size:
+        bars[int(passing[0])].set_label(label)
+        handles.append(bars[int(passing[0])])
+    handles.append(marks)
+    if failing.size:
+        bars[int(failing[0])].set_label(_t("Spread above the limit", language))
+        handles.append(bars[int(failing[0])])
+    ax.set_ylim(0.0, 1.3 * float(max(np.max(spread), np.max(limit))))
+    ax.set_ylabel(_t(_SPREAD_LABEL, language))
+    verdict = _t("qualified" if result.passes else _NOT_QUALIFIED, language)
+    ax.set_title(
+        _t("ISO 3743-1 room qualification: {verdict}", language, verdict=verdict)
+    )
+    ax.legend(handles=handles, loc="upper left", fontsize="small")
+    ax.grid(visible=True, axis="y", alpha=0.3)
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_source_location_plan(
+    result: SourceLocationPlan,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    r"""The survey standard deviation per band against the class limits of the
+    table, with the number of source locations over each bar.
+
+    ISO 3743-1:2010 Table 2 draws its lines at 2,5 dB and 4,0 dB, and a band
+    above the second sends two more locations to another room, written
+    ``2+2``; ISO 3743-2:2018 Table 3 draws them at 2,3 dB and 4 dB and adds
+    the A-weighted row as a bar of its own when it was surveyed.
+
+    :param result: A
+        :class:`~phonometry.emission.sound_power_hard_walled.SourceLocationPlan`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the standard-deviation bars.
+    :return: The axes.
+    """
+    from .._i18n import localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    s_m = [float(v) for v in result.standard_deviation_db]
+    counts = [
+        f"{int(n)}+{int(extra)}" if extra else f"{int(n)}"
+        for n, extra in zip(
+            result.source_locations, result.additional_room_locations, strict=True
+        )
+    ]
+    ticks: list[str] = [_format_freq(float(f), language) for f in result.frequencies]
+    with_a = bool(np.isfinite(result.a_weighted_standard_deviation_db))
+    if with_a:
+        ticks.append("A")
+        s_m.append(float(result.a_weighted_standard_deviation_db))
+        counts.append(f"{int(result.a_weighted_source_locations)}")
+    positions = _band_axis(ax, ticks, language=language)
+    if with_a:
+        ax.set_xlabel(_t(_A_BAND_LABEL, language))
+    style_default(kwargs, "color", _C_PRIMARY)
+    kwargs.setdefault("label", _t("Survey standard deviation", language))
+    bars = ax.bar(positions, s_m, **kwargs)
+    part_1 = result.standard == "ISO 3743-1:2010"
+    # Each limit line carries its own legend entry: what the table does at it.
+    limits = (
+        (
+            (2.5, "--", "Table 2: one location up to 2.5 dB"),
+            (4.0, ":", "Table 2: two locations up to 4.0 dB"),
+        )
+        if part_1
+        else (
+            (2.3, "--", "Table 3: 2.3 dB, narrow-band components (9.5)"),
+            (4.0, ":", "Table 3: 4 dB, discrete tone (9.5)"),
+        )
+    )
+    for value, style, label in limits:
+        ax.axhline(
+            value, color=_C_SECONDARY, ls=style, lw=1.2, label=_t(label, language)
+        )
+    # The figures over the bars need their key: the number of source
+    # locations the table gives, and "N+2" for the second room of Table 2.
+    ax.plot(
+        [],
+        [],
+        ls="none",
+        marker="$N$",
+        ms=8.0,
+        color=ax.xaxis.label.get_color(),
+        label=_t(
+            "N over a bar: source locations (Table 2)"
+            if part_1
+            else "N over a bar: source locations (Table 3)",
+            language,
+        ),
+    )
+    if any(int(extra) for extra in result.additional_room_locations):
+        ax.plot(
+            [],
+            [],
+            ls="none",
+            marker="$+2$",
+            ms=11.0,
+            color=ax.xaxis.label.get_color(),
+            label=_t("N+2: two more locations in another room", language),
+        )
+    for bar, text in zip(bars, counts, strict=True):
+        ax.annotate(
+            text,
+            (bar.get_x() + bar.get_width() / 2.0, bar.get_height()),
+            xytext=(0.0, 3.0),
+            textcoords="offset points",
+            ha="center",
+            va="bottom",
+            fontsize="small",
+        )
+    ax.set_ylim(0.0, 1.3 * max(*s_m, 4.0))
+    ax.set_ylabel(_t(_SM_LABEL, language))
+    ax.set_title(
+        _t(
+            "{standard} source locations, {mics} microphone positions",
+            language,
+            standard=result.standard,
+            mics=result.microphone_positions,
+        )
+    )
+    ax.legend(loc="upper left", fontsize="small")
+    ax.grid(visible=True, axis="y", alpha=0.3)
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_special_room_reverberation(
+    result: SpecialRoomReverberationCheck,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    r"""The measured :math:`T/T_\mathrm{nom}` within the limiting curves of
+    ISO 3743-2:2018 6.3, laid out as Figure B.3.
+
+    The shaded band runs from :math:`0{,}9\,R` to :math:`1{,}1\,R` (0,8 and 1,2
+    above the 6,3 kHz band, as the text of 6.3 says; Figure B.3 widens it at
+    6,3 kHz already), the dotted curve is the ideal ratio :math:`R`, and a band
+    outside the limits is ringed. The title gives :math:`T_\mathrm{nom}` and
+    the verdict of 6.2, 6.3 and 6.6 together.
+
+    :param result: A
+        :class:`~phonometry.emission.sound_power_special_room.SpecialRoomReverberationCheck`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the measured curve.
+    :return: The axes.
+    """
+    from .._i18n import format_number, localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
+    r = np.asarray(result.reverberation_parameter, dtype=np.float64)
+    lower = np.asarray(result.lower_limit, dtype=np.float64) * r
+    upper = np.asarray(result.upper_limit, dtype=np.float64) * r
+    measured = np.asarray(result.ratio_to_nominal, dtype=np.float64)
+    ax.fill_between(
+        freqs,
+        lower,
+        upper,
+        facecolor=theme_fill(_C_TERTIARY, ax),
+        edgecolor="none",
+        zorder=0,
+        label=_t("Limiting curves", language),
+    )
+    ax.plot(freqs, lower, color=_C_TERTIARY, lw=1.0)
+    ax.plot(freqs, upper, color=_C_TERTIARY, lw=1.0)
+    ax.plot(
+        freqs,
+        r,
+        color=theme_line(ax.xaxis.label.get_color(), ax, quiet=0.7),
+        ls=":",
+        lw=1.2,
+        label=_t("Ideal ratio $R$", language),
+    )
+    style_default(kwargs, "color", _C_PRIMARY)
+    style_default(kwargs, "lw", 1.6)
+    kwargs.setdefault("marker", "o")
+    style_default(kwargs, "ms", 3.0)
+    kwargs.setdefault("label", _t(r"Measured $T/T_\mathrm{nom}$", language))
+    ax.plot(freqs, measured, **kwargs)
+    outside = ~np.asarray(result.band_within, dtype=bool)
+    if np.any(outside):
+        ax.plot(
+            freqs[outside],
+            measured[outside],
+            ls="",
+            marker="o",
+            ms=7.0,
+            mfc="none",
+            mew=1.6,
+            color=_C_REFERENCE,
+            label=_t("Outside the limiting curves", language),
+        )
+    format_frequency_axis(ax, float(freqs.min()), float(freqs.max()), language=language)
+    ax.set_xlim(float(freqs.min()) / 1.15, float(freqs.max()) * 1.15)
+    ax.set_ylim(0.0, 1.15 * float(max(np.max(upper), np.max(measured))))
+    ax.set_xlabel(_t(_FREQ_LABEL, language))
+    ax.set_ylabel(_t(_T_NOMINAL_LABEL, language))
+    ax.set_title(
+        _t(
+            r"ISO 3743-2 reverberation time, $T_\mathrm{{nom}}$ = {tnom} s: {verdict}",
+            language,
+            tnom=format_number(
+                result.nominal_reverberation_time_s, language, decimals=2
+            ),
+            verdict=_t("qualified" if result.passes else _NOT_QUALIFIED, language),
+        )
+    )
+    ax.legend(loc="upper right", fontsize="small")
+    ax.grid(visible=True, which="both", alpha=0.3)
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_special_room_surfaces(
+    result: SpecialRoomSurfaceCheck,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """The absorption of each wall and of the ceiling within 0,5 to 1,5 times
+    their mean, and the floor against its 0,06 (ISO 3743-2:2018 6.4).
+
+    A coefficient outside either criterion is ringed, the verdict is in the
+    title, and the legend goes where it covers the fewest points, with head
+    room above the curves for it.
+
+    :param result: A
+        :class:`~phonometry.emission.sound_power_special_room.SpecialRoomSurfaceCheck`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to every wall and ceiling curve.
+    :return: The axes.
+    """
+    from .._i18n import localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
+    mean = np.asarray(result.mean_absorption, dtype=np.float64)
+    floor = np.asarray(result.floor_absorption, dtype=np.float64)
+    ax.fill_between(
+        freqs,
+        0.5 * mean,
+        1.5 * mean,
+        facecolor=theme_fill(_C_TERTIARY, ax),
+        edgecolor="none",
+        zorder=0,
+        label=_t("0.5 to 1.5 times the mean", language),
+    )
+    palette = (_C_PRIMARY, _C_QUATERNARY, _C_PRIMARY_LIGHT, _C_TERTIARY, _C_MUTED)
+    surfaces = np.asarray(result.surface_absorption, dtype=np.float64)
+    for index, alpha in enumerate(surfaces):
+        style = dict(kwargs)
+        style_default(style, "color", palette[index % len(palette)])
+        style_default(style, "lw", 1.4)
+        style.setdefault("marker", "o")
+        style_default(style, "ms", 3.0)
+        style.setdefault("label", _t("Wall or ceiling {n}", language, n=index + 1))
+        ax.plot(freqs, alpha, **style)
+    ax.plot(
+        freqs,
+        floor,
+        color=_C_SECONDARY,
+        ls="--",
+        lw=1.4,
+        marker="s",
+        ms=3.0,
+        label=_t("Floor", language),
+    )
+    ax.axhline(
+        0.06, color=_C_REFERENCE, ls=":", lw=1.2, label=_t("Floor limit 0.06", language)
+    )
+    out_x = [
+        *np.broadcast_to(freqs, surfaces.shape)[~result.surface_within],
+        *freqs[~result.floor_reflective],
+    ]
+    out_y = [*surfaces[~result.surface_within], *floor[~result.floor_reflective]]
+    if out_x:
+        ax.plot(
+            out_x,
+            out_y,
+            ls="",
+            marker="o",
+            ms=8.0,
+            mfc="none",
+            mew=1.6,
+            color=_C_REFERENCE,
+            label=_t("Outside 6.4", language),
+        )
+    format_frequency_axis(ax, float(freqs.min()), float(freqs.max()), language=language)
+    ax.set_xlim(float(freqs.min()) / 1.15, float(freqs.max()) * 1.15)
+    # Head room above the curves: the legend has one row per surface.
+    top = float(max(np.max(surfaces), np.max(floor), np.max(1.5 * mean), 0.06))
+    ax.set_ylim(0.0, 2.0 * top)
+    ax.set_xlabel(_t(_FREQ_LABEL, language))
+    ax.set_ylabel(_t(_ALPHA_LABEL, language))
+    ax.set_title(
+        _t(
+            "ISO 3743-2 surface treatment (6.4): {verdict}",
+            language,
+            verdict=_t("complies" if result.passes else "does not comply", language),
+        )
+    )
+    place_legend_clear(ax.legend(fontsize="small", ncol=2))
+    ax.grid(visible=True, which="both", alpha=0.3)
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_special_room_suitability(
+    result: SpecialRoomSuitabilityCheck,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """The difference between a reference source determined in the room and
+    its calibration, within the ± Table 1 limits of ISO 3743-2:2018 6.7.
+
+    :param result: A
+        :class:`~phonometry.emission.sound_power_special_room.SpecialRoomSuitabilityCheck`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the difference bars.
+    :return: The axes.
+    """
+    from matplotlib.patches import Patch
+
+    from .._i18n import localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
+    difference = np.asarray(result.difference_db, dtype=np.float64)
+    limit = np.asarray(result.limit_db, dtype=np.float64)
+    ok = np.asarray(result.band_within, dtype=bool)
+    positions = _band_axis(ax, freqs, language=language)
+    style_default(
+        kwargs, "color", [_C_PRIMARY if good else _C_REFERENCE for good in ok]
+    )
+    ax.bar(positions, difference, **kwargs)
+    ax.hlines(
+        np.concatenate([limit, -limit]),
+        np.concatenate([positions, positions]) - 0.4,
+        np.concatenate([positions, positions]) + 0.4,
+        colors=_C_SECONDARY,
+        lw=2.2,
+        label=_t("Table 1 limits", language),
+    )
+    ax.axhline(0.0, color=_C_EDGE, lw=0.8)
+    handles, _ = ax.get_legend_handles_labels()
+    if not np.all(ok):
+        handles.append(
+            Patch(facecolor=_C_REFERENCE, label=_t("Beyond Table 1", language))
+        )
+    bound = 1.3 * float(max(np.max(np.abs(difference)), np.max(limit)))
+    ax.set_ylim(-bound, bound)
+    ax.set_ylabel(_t(_DIFFERENCE_LABEL, language))
+    verdict = _t("suitable" if result.passes else "not suitable", language)
+    ax.set_title(
+        _t("ISO 3743-2 room suitability (6.7): {verdict}", language, verdict=verdict)
+    )
+    ax.legend(handles=handles, loc=_LEGEND_LOWER_RIGHT, fontsize="small")
+    ax.grid(visible=True, axis="y", alpha=0.3)
     localize_axes(ax, language)
     return ax

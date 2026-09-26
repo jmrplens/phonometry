@@ -1,0 +1,775 @@
+---
+title: "Potencia acústica en salas de ensayo pequeñas (ISO 3743)"
+description: "Los dos métodos de ingeniería de ISO 3743 para fuentes pequeñas y transportables: la comparación con una fuente sonora de referencia en una sala corriente de paredes rígidas (ISO 3743-1), y los métodos directo y de comparación de una sala reverberante especial cuyo tiempo de reverberación sigue una curva prescrita (ISO 3743-2), con la cualificación de la sala de ambas partes, las correcciones por ruido de fondo, los sondeos de ubicaciones de la fuente, las reproducibilidades de las Tablas 3 y 5 y las condiciones meteorológicas de referencia."
+references:
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2010
+    title: "Acoustics — Determination of sound power levels and sound energy levels of noise sources using sound pressure — Engineering methods for small movable sources in reverberant fields — Part 1: Comparison method for a hard-walled test room"
+    designation: "ISO 3743-1:2010"
+    note: "El método de comparación del apartado 1 de esta guía: los criterios de sala de 4.2 a 4.4, el sondeo de 7.4, la corrección por ruido de fondo de 8.1.3, las Ec. 14 y 20, la reproducibilidad de la Tabla 3 y los Anexos A y B."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2018
+    title: "Acoustics — Determination of sound power levels of noise sources using sound pressure — Engineering methods for small, movable sources in reverberant fields — Part 2: Methods for special reverberation test rooms"
+    designation: "ISO 3743-2:2018"
+    note: "La sala especial del apartado 2 de esta guía: la curva del tiempo de reverberación de 6.3, las superficies de 6.4, la evaluación de idoneidad de 6.7, las Tablas 3 y 4, la fórmula directa (9) y la de comparación (10), la reproducibilidad de la Tabla 5 y los Anexos E y F."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2010
+    title: "Acoustics — Determination of sound power levels and sound energy levels of noise sources using sound pressure — Precision methods for reverberation test rooms"
+    designation: "ISO 3741:2010"
+    url: "https://www.iso.org/standard/52053.html"
+    note: "El método de precisión en cámara reverberante por debajo del que se sitúan ambas partes: el término de Waterhouse que la sala especial incorpora a su curva de reverberación, y la suma C1 + C2 cuyas cifras de altitud citan los anexos informativos de ISO 3743."
+---
+
+import ReportPreview from '../../../../../components/ReportPreview.astro';
+import Scope from '../../../../../components/Scope.astro';
+import ScopeClaim from '../../../../../components/ScopeClaim.astro';
+import SeeAlso from '../../../../../components/SeeAlso.astro';
+import ThemeImage from '../../../../../components/ThemeImage.astro';
+
+Un secador de pelo, una batidora, una impresora de sobremesa, un taladro:
+fuentes pequeñas que se pueden llevar a una sala pensada para ellas. ISO 3743
+mide su potencia acústica con grado de ingeniería 2 en dos salas de ese tipo.
+La Parte 1 casi no pide nada a la sala, una sala corriente de paredes
+rígidas, y lo paga con una fuente sonora de referencia calibrada en cada
+determinación: la fuente y la fuente de referencia se escuchan en los mismos
+micrófonos, y la sala desaparece en la diferencia. La Parte 2 construye la
+sala en su lugar, una **sala de ensayo reverberante especial** cuyo tiempo de
+reverberación sigue una curva prescrita, de modo que la potencia acústica se
+lee solo a partir del nivel medio en la sala; conserva además un método de
+comparación. Esta guía cubre la cualificación de la sala de ambas partes, las
+correcciones por ruido de fondo, los sondeos de ubicaciones de la fuente, las
+determinaciones, la reproducibilidad de las Tablas 3 y 5 y las condiciones
+meteorológicas de referencia. Qué vía encaja con qué trabajo se sopesa en
+[Potencia acústica](/phonometry/es/devices/emission/sound-power/).
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_small_test_rooms.svg" alt="Dos planos de sala uno al lado del otro. A la izquierda, la sala de paredes rígidas de ISO 3743-1, de 5,0 m por 4,0 m: el paralelepípedo de referencia de la fuente girado respecto a los ejes de las paredes y a al menos 1 m de la pared, rotulado como la fuente bajo ensayo y luego la fuente de referencia en su lugar, cuatro posiciones de micrófono numeradas a su alrededor y una quinta sobre el paralelepípedo, marcada como situada encima, una unida a la fuente por una línea discontinua marcada al menos 0,3 V elevado a un tercio, dos unidas por una línea marcada al menos media longitud de onda, y una a al menos 0,5 m de la pared. A la derecha, la sala reverberante especial de ISO 3743-2, de 5,4 m por 4,4 m, con parches absorbentes de como mucho 1,5 metros cuadrados a lo largo de las paredes y un suelo de hormigón pintado que absorbe menos de 0,06: una primera ubicación de la fuente a al menos 1 m de la pared, una segunda ubicación discontinua 1,2 m al lado, y seis posiciones de micrófono numeradas, con al menos 0,3 V elevado a un tercio desde la segunda ubicación, media longitud de onda entre dos posiciones y un cuarto de longitud de onda hasta la pared. Un pie recoge los criterios de sala de las dos partes, las distancias resueltas para 60 y 72 metros cúbicos, la Ec. 14 sobre las medias con los dos márgenes de al menos 6 dB, los límites del tiempo de reverberación con R, la fórmula 9 y la fórmula 10 con la fuente de referencia a al menos 1,5 m de las paredes" width="96%" />
+
+*Las dos salas en planta, cada una la del ejemplo resuelto de la guía. La
+Parte 1 pide poco a la sala y lleva una fuente de referencia a donde estuvo
+la fuente; la Parte 2 construye la sala para que su tiempo de reverberación
+siga una curva, y lee la potencia solo a partir del nivel en la sala.*
+
+## 1. La sala de paredes rígidas y la fuente de referencia (ISO 3743-1)
+
+**La sala.** El apartado 4 pide una sala de al menos 40 m³ y de al menos
+cuarenta veces la caja de referencia, la menor caja que encierra la fuente y
+su mesa; en una sala de hasta 100 m³ la mayor dimensión de la caja es como
+mucho 1,0 m, y 2,0 m por encima de ese volumen (4.2). Ninguna porción de las
+paredes, del suelo o del techo puede tener un coeficiente de absorción mayor
+que 0,20 a ninguna frecuencia de interés (4.3): el modelo es una sala casi
+vacía de hormigón, ladrillo, yeso o azulejo lisos. Lo que la cualifica
+acústicamente es 4.4: una fuente de banda ancha muy directiva, con índice de
+directividad de al menos 5 dB por encima de 500 Hz, se gira por cuatro
+orientaciones horizontales y cuatro verticales, y en cada banda de octava de
+125 Hz a 8 kHz la mayor diferencia entre los ocho niveles medios no puede
+superar la desviación típica de reproducibilidad de la Tabla 3.
+
+```python
+import numpy as np
+from phonometry import emission
+
+# Una batidora de encimera sobre una mesa de ensayo pequeña, en una sala de
+# 5,0 m x 4,0 m x 3,0 m con paredes de hormigón pintado y suelo de terrazo. La
+# caja de referencia, mesa incluida, mide 0,5 m x 0,4 m x 0,9 m.
+freqs = np.array([125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0])
+orientations = np.array([  # 4.4: una fuente directiva, nivel medio por orientación
+    [71.2, 74.0, 76.1, 77.3, 76.0, 73.1, 68.2],   # cuatro horizontales ...
+    [72.4, 73.1, 75.4, 76.6, 75.2, 72.6, 67.4],
+    [70.3, 74.6, 76.3, 77.0, 76.4, 73.5, 68.9],
+    [71.9, 73.6, 75.7, 76.2, 75.5, 72.4, 67.8],
+    [72.8, 74.3, 76.8, 77.1, 76.3, 73.6, 69.0],   # ... y cuatro verticales
+    [70.8, 73.3, 75.9, 76.5, 75.6, 72.9, 68.1],
+    [71.5, 74.9, 76.2, 77.5, 75.9, 73.3, 68.6],
+    [72.1, 73.9, 75.5, 76.8, 76.2, 73.0, 67.9],
+])
+room = emission.check_hard_walled_room(
+    orientations, freqs, volume_m3=60.0, reference_box_m=[0.5, 0.4, 0.9],
+    absorption_coefficients=[0.02, 0.03, 0.05, 0.08, 0.12],
+)
+print(np.round(room.level_range_db, 1))           # [2.5 1.8 1.4 1.3 1.2 1.2 1.6]
+print(room.limit_db)                              # [3.  2.  1.5 1.5 1.5 1.5 2.5]
+print(room.passes)                                # True
+print(round(room.minimum_microphone_distance_m, 2))  # 1.17 m desde la fuente (7.3)
+```
+
+La Tabla 3 imprime su fila central de octavas como «400 to 5 000», un
+intervalo de tercios de octava que conservó de la tabla de ISO 3744 de la que
+se convirtió; la biblioteca lee la fila como las octavas que abarca, de
+500 Hz a 4 kHz (véanse las [erratas](/phonometry/es/reference/errata/)). La
+última línea es la $d_\mathrm{min} = 0{,}3\,V^{1/3}$ de 7.3 que mantiene cada
+micrófono en el campo reverberante, declarada para el montaje y no juzgada.
+
+**Cuántas ubicaciones de la fuente.** Una fuente con tonos audibles o bandas
+estrechas de ruido se sondea primero (7.4): al menos seis posiciones fijas
+registran su nivel sin corregir, y la desviación típica por banda respecto a
+su media aritmética (Ec. 7 y 8) fija el número de ubicaciones de la fuente de
+la Tabla 2: una hasta 2,5 dB, dos en la misma sala hasta 4,0 dB y, por
+encima, otras dos en una segunda sala de dimensiones distintas.
+
+```python
+survey = np.array([  # 7.4: seis posiciones, la batidora en marcha, dB
+    [84.1, 86.0, 88.2, 90.1, 87.4, 83.2, 78.1],
+    [82.6, 85.1, 87.5, 89.6, 88.0, 83.9, 77.5],
+    [83.3, 86.8, 88.9, 90.8, 86.9, 82.8, 78.6],
+    [85.0, 85.6, 87.8, 89.2, 87.7, 84.4, 77.9],
+    [82.9, 86.3, 88.4, 90.5, 88.3, 83.5, 78.3],
+    [84.4, 85.4, 87.1, 91.4, 87.2, 83.0, 77.6],
+])
+plan = emission.hard_walled_source_locations(survey, freqs)
+print(np.round(plan.standard_deviation_db, 2))    # [0.93 0.63 0.65 0.8  0.52 0.6  0.42]
+print(plan.required_source_locations)             # 1
+```
+
+**La comparación.** Funciona la fuente, luego la fuente sonora de referencia
+donde estuvo la fuente (7.2), y ambas se leen en las mismas tres o más
+posiciones, con el ruido de fondo justo antes o justo después (7.3, 7.5).
+Cada conjunto se promedia energéticamente sobre las posiciones (Ec. 10 a 12),
+y antes sobre las ubicaciones de la fuente cuando hay varias (Ec. 9). El ruido
+de fondo se corrige una vez por banda, **sobre las medias** y no posición a
+posición (8.1.3):
+
+$$
+K_1 = -10 \log_{10}\left(1 - 10^{-0{,}1\,\Delta L_p}\right),
+\qquad \Delta L_p = \overline{L'_{p(\mathrm{ST})}} - \overline{L_{p(\mathrm{B})}},
+$$
+
+sin nada que corregir por encima de 15 dB y, **por debajo de 6 dB**, un valor
+fijo de **1,3 dB**, el de 6 dB, con la banda declarada como **cota
+superior**: la corrección fija es menor que la que tomaría la Ec. 13, así que
+el nivel sale alto. La misma regla da $K_{1(\mathrm{RSS})}$ a partir de la
+media de la fuente de referencia, y 4.5 exige los dos márgenes de al menos
+6 dB, pero un margen corto de la fuente de referencia no es una cota
+superior. $K_{1(\mathrm{RSS})}$ entra en la Ec. 14 con signo más, así que su
+valor fijo de 1,3 dB rebaja el nivel, y 8.1.3 reserva la lectura de cota
+superior al margen de la fuente bajo ensayo. La biblioteca marca las dos
+bandas con `background_requirement_met` y solo la primera con `upper_bound`.
+El nivel de potencia acústica en cada banda de octava es entonces
+
+$$
+L_W = L_{W(\mathrm{RSS})} - \overline{L'_{p(\mathrm{RSS})}} + \overline{L'_{p(\mathrm{ST})}}
++ K_{1(\mathrm{RSS})} - K_1 \qquad \text{(Ec. 14)}
+$$
+
+y $L_{W\mathrm{A}}$ el total del Anexo B con las correcciones por octava de la
+Tabla B.1.
+
+```python
+st = survey[:5]  # cinco posiciones: una a cada lado de la caja y otra encima (7.3)
+rss = np.array([  # la fuente de referencia donde estuvo la batidora, mismas posiciones
+    [87.8, 83.9, 86.8, 87.9, 87.1, 85.2, 81.8],
+    [87.1, 83.1, 86.1, 87.3, 86.6, 84.7, 81.2],
+    [88.5, 84.4, 87.2, 88.4, 87.6, 85.8, 82.4],
+    [87.7, 83.6, 86.5, 87.8, 87.0, 85.1, 81.6],
+    [88.2, 83.8, 86.9, 88.1, 87.4, 85.4, 82.0],
+])
+lw_rss = np.array([94.0, 89.9, 92.8, 94.1, 93.2, 91.3, 87.9])  # calibrado
+background = np.array([  # un conducto de ventilación en el techo, fuerte en graves
+    [78.5, 71.0, 64.0, 58.0, 52.0, 45.0, 40.0],
+    [79.5, 71.5, 64.5, 58.5, 52.5, 45.5, 40.5],
+    [78.0, 70.5, 63.5, 57.5, 51.5, 44.5, 39.5],
+    [79.0, 71.0, 64.0, 58.0, 52.0, 45.0, 40.0],
+    [79.5, 71.5, 64.5, 58.5, 52.5, 45.5, 40.5],   # encima de la caja, más cerca del conducto
+])
+res = emission.sound_power_hard_walled(
+    st, rss, lw_rss, freqs, background_levels=background, sigma_omc_db=1.0,
+)
+print(np.round(res.sound_power_level, 1))         # [89.1 92.2 94.3 96.3 93.7 89.6 84.2]
+print(round(res.sound_power_level_a, 1))          # 100.1 dB(A)
+print(np.round(res.background_correction, 2))     # [1.3  0.14 0.   0.   0.   0.   0.  ]
+print(np.round(res.background_correction_ref, 2)) # [0.59 0.24 0.   0.   0.   0.   0.  ]
+print(res.background_requirement_met)             # [False  True  True  True  True  True  True]
+print(res.upper_bound)                            # [ True False False False False False False]
+print(round(res.expanded_uncertainty_a, 1))       # 3.6 dB (k = 2)
+```
+
+En 125 Hz el conducto queda a 4,7 dB de la batidora, así que $K_1$ toma su
+valor fijo de 1,3 dB donde la Ec. 13 tomaría 1,8 dB, la llamada avisa, y los
+89,1 dB que da la banda son una **cota superior**, que es lo que dicen el
+`False` y el `True` de `upper_bound`. La fuente de referencia, más ruidosa,
+conserva ahí 8,9 dB sobre el conducto, dentro del intervalo de la Ec. 13, así
+que sus 0,59 dB son exactos. Si hubiera sido la fuente de referencia la que
+se quedara corta, la banda incumpliría 4.5 igual, pero `upper_bound` seguiría
+en `False`: su corrección limitada daría un nivel bajo.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/hard_walled_sound_power.svg" alt="Dos paneles sobre las siete bandas de octava de 125 Hz a 8 kHz. El panel superior representa los niveles de presión acústica en las cinco posiciones de micrófono: la batidora como círculos azules con su media energética como línea azul, la fuente de referencia como cuadrados verdes con su media como línea verde, y el ruido de fondo como aspas grises con su media como línea gris punteada que baja de unos 79 dB en 125 Hz a 40 dB en 8 kHz, unos 5 dB por debajo de la batidora y 9 dB por debajo de la fuente de referencia, más ruidosa, en 125 Hz, y muy por debajo de ambas desde 500 Hz. El panel inferior dibuja el nivel de potencia acústica de la batidora como barras azules, de 89,1 dB en 125 Hz a un máximo de 96,3 dB en 1 kHz y 84,2 dB en 8 kHz, con la barra de 125 Hz rayada y rotulada como cota superior porque el margen de la propia batidora sobre el ruido de fondo bajó de 6 dB, con una incertidumbre expandida como barra de error en cada banda, y da en su título un nivel ponderado A de 100,1 dB(A)" width="96%" />
+
+*La comparación en una sala de paredes rígidas. Arriba, la batidora y la
+fuente de referencia en las cinco posiciones de micrófono, con el ruido de fondo que
+decide $K_1$; abajo, la Ec. 14 banda a banda, con la cota superior de 125 Hz
+rayada y la incertidumbre expandida de la Tabla 3 con
+$\sigma_\mathrm{omc}$ = 1,0 dB en cada barra.*
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+# res es el HardWalledSoundPowerResult calculado arriba. Una línea:
+res.plot(language="es")   # barras de LW, LWA en el título, la cota superior rayada, U como barras de error
+plt.show()
+
+# A mano: las dos fuentes y el ruido de fondo por posición arriba, la Ec. 14 abajo.
+x = np.arange(freqs.size)
+fig, (axt, axb) = plt.subplots(2, 1, figsize=(10, 8.6))
+for i, offset in enumerate(np.linspace(-0.24, 0.24, st.shape[0])):
+    axt.plot(x + offset, st[i], "o", color="#1f77b4")
+    axt.plot(x + offset, rss[i], "s", color="#2ca02c")
+    axt.plot(x + offset, background[i], "x", color="#9e9e9e")
+axt.plot(x, res.mean_source_level, "-", color="#1f77b4", label="media, batidora")
+axt.plot(x, res.mean_reference_level, "-", color="#2ca02c", label="media, fuente de referencia")
+axt.plot(x, res.mean_background_level, ":", color="#9e9e9e", label="ruido de fondo medio")
+axt.set_xticks(x, [f"{f:g}" for f in freqs])
+axt.set_ylabel("Nivel de presión acústica [dB]")
+axt.legend()
+res.plot(ax=axb, language="es")
+plt.show()
+```
+
+</details>
+
+### Parámetros de `sound_power_hard_walled()`
+
+| Parámetro | Tipo | Unidades | Rango / valor por defecto | Notas |
+| :--- | :--- | :--- | :--- | :--- |
+| `levels` | array 1D, 2D o 3D | dB | `(bandas,)`, `(NM, bandas)` o `(NS, NM, bandas)` | $L'_{pi(\mathrm{ST})}$ medidos: un recorrido (NOTA de 8.1.2), una fila por posición fija (al menos tres, 7.3) o una rejilla por ubicación de la fuente (Ec. 9) |
+| `levels_ref` | array 1D o 2D | dB | `(bandas,)` o `(NM, bandas)` | La fuente de referencia en las mismas posiciones, o en el mismo recorrido |
+| `lw_ref` | array 1D | dB | `(bandas,)` | $L_{W(\mathrm{RSS})}$ calibrado |
+| `frequencies` | array 1D | Hz | octavas de 125 Hz a 8 kHz | Centros de octava ascendentes (3.11); se acepta 63 Hz donde la sala y la instrumentación son satisfactorias en esa banda (nota de la Tabla B.1) |
+| `background_levels` | array 1D o 2D | dB | `(bandas,)` o `(NM, bandas)` | $L_{pi(\mathrm{B})}$, promediados con la Ec. 12. `None` avisa y deja `background_requirement_met` en `False` en todas las bandas |
+| `background_levels_ref` | array 1D o 2D | dB | mismas formas | Ruido de fondo de la lectura de la fuente de referencia; `None` reutiliza `background_levels` |
+| `temperature_c` | float | °C | por defecto `23.0` | Para $C_2$ (Anexo A) |
+| `static_pressure_kpa` | float | kPa | por defecto `101.325` | Para $C_2$; `static_pressure_from_altitude` la da a partir de la altitud (Ec. A.2) |
+| `sigma_omc_db` | float | dB | $\ge 0$ | Condiciones de funcionamiento y montaje (9.2); `None` deja la incertidumbre en `NaN` |
+| `coverage_factor` | float | | por defecto `2.0` | $k$ de la Ec. 23, que 9.5 fija en 2; 1,6 para una comparación unilateral con un valor límite |
+
+La función devuelve un `HardWalledSoundPowerResult`: `sound_power_level`
+(Ec. 14), `mean_source_level`, `mean_reference_level` y
+`mean_background_level` (Ec. 10 a 12), `reference_power_level`,
+`background_correction` y `background_correction_ref` por banda,
+`background_requirement_met`, `upper_bound`, `c2`, `sigma_r0` por banda (Tabla 3) y
+`sigma_r0_a`, `sigma_omc`, `coverage_factor`, `sound_power_level_a`,
+`microphone_positions` y `source_positions`; lo completan las propiedades
+`sigma_tot`, `expanded_uncertainty` (y sus formas `_a`) y
+`sound_power_level_ref`.
+
+### Ráfagas: el nivel de energía acústica (Ec. 15 a 20)
+
+Una grapadora, un pestillo o una perforadora de papel no tienen una potencia
+estacionaria. El apartado 7.6 mide su nivel de suceso aislado en cada
+posición, al menos cinco sucesos de uno en uno o una vez sobre una serie de
+$N_\mathrm{e}$ sucesos, y 8.2 los reduce al nivel de un suceso (Ec. 15 o 16),
+los promedia sobre las ubicaciones de la fuente y las posiciones (Ec. 17 y
+18), los corrige con la misma regla (Ec. 19) y devuelve el **nivel de energía
+acústica** $L_J$ en dB re 1 pJ con la Ec. 20, la comparación de la Ec. 14 con
+$\overline{L'_{E(\mathrm{ST})}}$ en lugar de $\overline{L'_{p(\mathrm{ST})}}$.
+La Ec. 19 resta el ruido de fondo *promediado en el tiempo* de un nivel de
+suceso *integrado en el tiempo*, como hace ISO 3744; la biblioteca compara el
+ruido de fondo como su exposición sobre el mismo intervalo $T$,
+$\overline{L_{p(\mathrm{B})}} + 10 \log_{10}(T/T_0)$, y por eso pide
+`integration_time_s` cuando hay ruido de fondo (véanse las
+[erratas](/phonometry/es/reference/errata/)).
+
+```python
+# Una grapadora eléctrica de escritorio en la misma sala: cinco grapados medidos
+# de uno en uno en las mismas cinco posiciones, cada uno sobre T = 2 s.
+strokes = st + 12.0
+events = np.stack([strokes + d for d in (-0.4, 0.1, 0.3, -0.2, 0.2)])
+energy = emission.sound_energy_hard_walled(
+    events, rss, lw_rss, freqs,                  # (5 sucesos, 5 posiciones, 7 bandas)
+    background_levels=background, integration_time_s=2.0, sigma_omc_db=2.0,
+)
+print(np.round(energy.sound_energy_level, 1))     # [102.2 104.4 106.3 108.3 105.7 101.6  96.2]
+print(round(energy.sound_energy_level_a, 1))      # 112.1 dB(A) re 1 pJ
+print(round(energy.expanded_uncertainty_a, 1))    # 5.0 dB: el EJEMPLO de 9.5
+```
+
+Los 5,0 dB son el ejemplo del apartado 9.5, reproducido porque las entradas
+son las mismas: $\sigma_{R0}$ = 1,5 dB de la Tabla 3,
+$\sigma_\mathrm{omc}$ = 2,0 dB y $k$ = 2.
+
+### Cómo se hace la medida
+
+Primero se cualifica la sala: su volumen frente a la caja de referencia, sus
+superficies frente a 0,20 y las ocho orientaciones de una fuente directiva
+frente a la Tabla 3; una fuente del mismo tipo que la que se va a ensayar
+puede sustituir a la directiva, pero la sala queda entonces cualificada solo
+para ese tipo. Se usan instrumentos y filtros de clase 1 y un calibrador de
+clase 1 antes y después de cada serie, y la serie se descarta si las dos
+lecturas difieren en más de 0,5 dB (5.2). La fuente se instala como se usa, a
+1 m como mínimo de cada pared y del techo, con los lados de su caja no
+paralelos a las paredes (6.3), y una fuente directiva se orienta de modo que
+su componente más fuerte llegue a cada micrófono por reflexión. Se sondean
+seis posiciones si tiene tonos, y se usa el número de ubicaciones de la
+fuente que da la Tabla 2. Se colocan al menos tres micrófonos, a
+$0{,}3\,V^{1/3}$ de la fuente, a 0,5 m de las paredes y del techo y separados
+media longitud de onda de la banda más baja; cinco, uno a cada lado de la
+caja y otro encima, donde la sala lo permita (7.3). Se lee la fuente, la
+fuente de referencia donde estuvo durante unos 30 s y el ruido de fondo
+durante el mismo intervalo, y se declaran los niveles por banda y ponderado A
+con 0,1 dB de resolución junto con la incertidumbre expandida.
+
+## 2. La sala reverberante especial (ISO 3743-2)
+
+**La sala.** Al menos 70 m³, y como mucho 300 m³ cuando las octavas de 4 kHz
+y 8 kHz se miden con el método directo (6.2 y su NOTA). Su tiempo de
+reverberación está prescrito banda a banda: entre $0{,}9\,R\,T_\mathrm{nom}$
+y $1{,}1\,R\,T_\mathrm{nom}$ (0,8 y 1,2 por encima de 6,3 kHz), con
+
+$$
+R = 1 + \frac{257}{f\,V^{1/3}} \qquad \text{(fórmula 1)}
+$$
+
+o, para una sala que no sea casi cúbica, $R = 1 + cS/(8Vf)$ (NOTA de 6.3), y
+un tiempo de reverberación nominal $T_\mathrm{nom}$ entre 0,5 s y 1,0 s. La
+forma de la NOTA es el argumento del término de Waterhouse de ISO 3741: donde
+ISO 3741 corrige la energía que se acumula junto a las paredes, esta sala la
+incorpora, con un tiempo de reverberación que sube a bajas frecuencias y los
+13 dB de la fórmula 9 en lugar de 14 dB (NOTA de 10.2). La norma obtiene
+$T_\mathrm{nom}$ centrando los valores medidos entre las curvas límite (6.3,
+B.5) y no imprime ninguna regla para ese centrado; la biblioteca toma el
+$T_\mathrm{nom}$ que deja más margen, el que minimiza la mayor desviación de
+cualquier banda respecto a la curva ideal medida contra la tolerancia de esa
+misma banda. Cuando la curva se sigue exactamente, B.5 da la fórmula (B.2),
+$T_\mathrm{nom} = T_{1\,000}/1{,}06$ para su sala de 70 m³, con 1,06 el valor de $R$
+a 1 000 Hz, y la biblioteca devuelve $T_{1\,000}/R(1\,000\ \mathrm{Hz})$ para una sala
+así con cualquier volumen. El EJEMPLO de B.5 centra la curva medida de su
+Figura B.4 y lee $T/T_\mathrm{nom}$ = 1,09 a 1 kHz, de modo que
+$T_\mathrm{nom}$ = 0,8 s/1,09 = 0,73 s; sobre la misma curva la regla de la
+biblioteca da 1,05 y 0,76 s, que separan en 0,17 dB el $L_W$ de la fórmula 9.
+El 1,09 es el punto medio de las razones extremas tomadas solo frente a 0,9 y
+1,1, y pone la banda de 250 Hz de la Figura B.4 en 1,13 $R$, fuera de los
+límites entre los que el ejemplo dice que la curva queda centrada, así que la
+biblioteca mantiene su regla; un $T_\mathrm{nom}$ dado en
+`nominal_reverberation_time_s`, los 0,73 s impresos entre ellos, se comprueba
+tal cual (véanse las [erratas](/phonometry/es/reference/errata/)). Después, 6.6 pide que el clima se
+mantenga: $H(\theta + 5\ ^\circ\mathrm{C})$ durante el ensayo dentro de ±10 %
+de su valor cuando se midió el tiempo de reverberación. El apartado 5 añade
+una recomendación sobre la fuente: su volumen no debería superar el 1 % del de
+la sala, 0,7 m³ en una sala de 70 m³. Con `source_volume_m3`, la comprobación
+lo lee como `source_size_recommended` y avisa si lo supera, pero deja `passes`
+a 6.2, 6.3 y 6.6, porque el apartado dice «debería».
+
+```python
+# Una sala reverberante especial de 4,8 m x 5,0 m x 3,0 m, 72 m3, medida en
+# bandas de tercio de octava con un 52 % de humedad y 21 °C.
+thirds = np.array([
+    100.0, 125.0, 160.0, 200.0, 250.0, 315.0, 400.0, 500.0, 630.0, 800.0, 1000.0,
+    1250.0, 1600.0, 2000.0, 2500.0, 3150.0, 4000.0, 5000.0, 6300.0, 8000.0, 10000.0,
+])
+t = np.array([
+    1.30, 1.13, 1.14, 1.01, 0.99, 0.90, 0.94, 0.86, 0.87, 0.82, 0.83,
+    0.83, 0.79, 0.83, 0.79, 0.80, 0.77, 0.81, 0.74, 0.71, 0.67,
+])
+room2 = emission.check_special_room_reverberation(
+    t, thirds, volume_m3=72.0,
+    relative_humidity_percent=48.0, temperature_c=22.0,          # durante el ensayo
+    reverberation_relative_humidity_percent=52.0, reverberation_temperature_c=21.0,
+)
+print(round(room2.nominal_reverberation_time_s, 2))  # 0.77 s, centrado
+print(room2.passes)                                  # True
+print(round(room2.climate_product_change, 3))        # -0.041: dentro de +/-10 % (6.6)
+print(np.round(emission.reverberation_parameter([100.0, 1000.0], 72.0), 3))  # [1.618 1.062]
+```
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/special_room_reverberation.svg" alt="El tiempo de reverberación medido de una sala reverberante especial de 72 metros cúbicos, dividido por su tiempo de reverberación nominal centrado de 0,77 s, representado como una línea azul con puntos sobre las bandas de tercio de octava de 100 Hz a 10 kHz. Una franja verde sombreada entre dos curvas verdes marca las curvas límite, de 0,9 a 1,1 veces el parámetro de reverberación R, que se ensanchan a 0,8 y 1,2 por encima de 6,3 kHz, y una curva punteada dentro de ella es la razón ideal R, que baja de unos 1,6 en 100 Hz a 1,0 arriba. La curva medida empieza cerca de 1,7 en 100 Hz, zigzaguea dentro de la franja alrededor de la curva punteada y termina cerca de 0,87 en 10 kHz, dentro de todos los límites" width="96%" />
+
+*6.3 con la disposición de la Figura B.3: el $T/T_\mathrm{nom}$ medido dentro
+de las curvas límite de esta sala de 72 m³, con el $T_\mathrm{nom}$ centrado en
+el título. Las curvas se ensanchan por encima de la banda de 6,3 kHz, como dice
+el texto de 6.3; la Figura B.3 ya las dibuja anchas en 6,3 kHz (véanse las
+[erratas](/phonometry/es/reference/errata/)).*
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+room2.plot(language="es")   # T/Tnom, las curvas límite y la R ideal
+plt.show()
+```
+
+</details>
+
+**Las superficies y la evaluación de idoneidad.** El suelo es reflectante, con
+un coeficiente de absorción menor que 0,06, y cada pared y el techo absorben
+entre 0,5 y 1,5 veces la media de las paredes y el techo (6.4); el apartado no
+dice cómo se forma esa media, y con las áreas dadas la biblioteca pondera por
+ellas. Antes de usar la sala, 6.7 determina en ella, según esta norma, la
+potencia por octavas de una fuente de referencia de banda ancha calibrada
+según ISO 3741, o según ISO 6926 e ISO 3745, y la compara con la
+calibración: dentro de ±5 dB en 125 Hz, ±3 dB de 250 Hz a 4 kHz y ±4 dB en
+8 kHz (Tabla 1).
+
+```python
+walls = np.array([  # 6.4: cada pared y el techo, bandas de octava
+    [0.16, 0.14, 0.12, 0.11, 0.10, 0.10, 0.11],
+    [0.18, 0.15, 0.13, 0.12, 0.11, 0.11, 0.12],
+    [0.13, 0.12, 0.11, 0.10, 0.09, 0.09, 0.10],
+    [0.17, 0.15, 0.12, 0.11, 0.10, 0.10, 0.12],
+    [0.12, 0.11, 0.10, 0.09, 0.09, 0.09, 0.10],   # el techo
+])
+floor = np.array([0.02, 0.02, 0.02, 0.03, 0.03, 0.04, 0.05])
+surfaces = emission.check_special_room_surfaces(
+    walls, floor, freqs, surface_areas_m2=[15.0, 14.4, 15.0, 14.4, 24.0]
+)
+print(surfaces.passes)                               # True
+print(np.round(surfaces.surface_ratio.min(), 2), np.round(surfaces.surface_ratio.max(), 2))  # 0.81 1.21
+
+tnom = round(room2.nominal_reverberation_time_s, 2)
+bg2 = np.array([48.0, 45.0, 42.0, 40.0, 38.0, 36.0, 35.0])
+lw_r = np.array([80.0, 83.5, 86.2, 86.9, 86.4, 84.3, 80.7])  # calibrada según ISO 3741
+rss2 = np.array([  # la fuente de referencia en el suelo, a 1,5 m de las paredes
+    [74.5, 76.8, 79.8, 80.0, 80.2, 77.2, 73.7],
+    [73.6, 77.3, 79.3, 80.3, 79.7, 77.5, 73.3],
+    [74.3, 77.5, 79.7, 79.9, 80.0, 77.7, 73.8],
+    [73.8, 76.9, 79.5, 80.4, 79.6, 77.3, 73.7],
+    [74.2, 77.2, 79.9, 80.2, 80.1, 77.2, 73.4],
+    [74.1, 76.9, 79.4, 79.8, 79.8, 77.5, 73.6],
+])
+in_room = emission.sound_power_special_room(
+    rss2, freqs, volume_m3=72.0, nominal_reverberation_time_s=tnom, background_levels=bg2,
+)
+suitability = emission.check_special_room_suitability(in_room.sound_power_level, lw_r, freqs)
+print(np.round(suitability.difference_db, 1))   # [ 0.8  0.3  0.1 -0.1  0.2 -0.2 -0.4]
+print(suitability.passes)                       # True
+```
+
+**El sondeo.** Seis posiciones en una ubicación de la fuente dan $s_\mathrm{M}$
+por banda y para el nivel ponderado A (fórmula 4), respecto a la media
+aritmética cuando los seis niveles abarcan 5 dB o menos y respecto a su media
+energética (fórmula 5) cuando abarcan más. La Tabla 3 lo convierte en el
+número mínimo de ubicaciones de la fuente para 3, 6 o 12 posiciones de
+micrófono, y 9.5 lee las mismas clases como el carácter del espectro: banda
+ancha por debajo de 2,3 dB, componentes de banda estrecha hasta 4 dB y un
+tono discreto por encima, que el informe debe mencionar.
+
+```python
+# Una impresora de sobremesa cuyo ventilador zumba en la octava de 500 Hz:
+# el sondeo de 9.4, seis posiciones en una ubicación de la fuente, y ponderado A.
+survey2 = np.array([
+    [62.1, 65.4, 63.2, 64.2, 61.5, 58.1, 52.3],
+    [60.4, 66.2, 69.1, 64.9, 61.1, 57.7, 51.8],
+    [63.0, 64.1, 64.0, 63.8, 62.0, 58.6, 52.9],
+    [61.2, 66.8, 68.7, 64.6, 61.7, 57.9, 52.1],
+    [62.6, 64.7, 62.9, 63.5, 61.3, 58.4, 52.6],
+    [60.9, 65.9, 67.8, 64.1, 61.9, 58.0, 52.0],
+])
+survey2_a = np.array([68.4, 70.1, 68.5, 70.0, 68.1, 69.5])
+plan2 = emission.special_room_source_locations(survey2, freqs, a_weighted_levels=survey2_a)
+print(np.round(plan2.standard_deviation_db, 2))  # [1.02 0.99 3.   0.51 0.35 0.33 0.41]
+print(plan2.spectral_character[2])               # narrow-band
+print(plan2.source_locations, plan2.a_weighted_source_locations)  # [1 1 2 1 1 1 1] 1
+```
+
+**Los métodos directo y de comparación.** Cada nivel se corrige por ruido de
+fondo con los escalones de la Tabla 4 en su propia posición (9.8): 2 dB con
+un margen de 4 dB o 5 dB, 1 dB de 6 dB a 8 dB, 0,5 dB con 9 dB y 10 dB, y
+nada por encima; la tabla da decibelios enteros y la biblioteca lee un margen
+en el entero más próximo. Los niveles corregidos de todas las posiciones y
+ubicaciones de la fuente se promedian energéticamente (fórmula 8), y el
+método directo lee la potencia a partir de la sala (10.2):
+
+$$
+L_W = \overline{L_p} - 10 \log_{10}\frac{T_\mathrm{nom}}{T_0}
++ 10 \log_{10}\frac{V}{V_0} - 13\ \mathrm{dB} \qquad \text{(fórmula 9)},
+$$
+
+en cada banda de octava y, a partir de los niveles ponderados A, para el
+nivel ponderado A directamente, que es como describe el método el apartado 4.
+El método de comparación mantiene una fuente de referencia en no menos de
+seis posiciones (10.3) y lee
+$L_{W\mathrm{e}} = L_{p\mathrm{e}} + (L_{W\mathrm{r}} - L_{p\mathrm{r}})$
+(fórmula 10), con el nivel ponderado A a partir de las bandas según el
+Anexo F.
+
+```python
+# Así que dos ubicaciones de la fuente, la segunda 1,2 m más allá sobre el suelo.
+second = survey2 + np.array([
+    [0.3, -0.4, 2.1, 0.2, -0.1, 0.2, 0.1],
+    [-0.2, 0.3, -3.8, -0.1, 0.2, -0.1, 0.0],
+    [0.1, 0.2, 3.3, 0.1, 0.0, 0.1, -0.1],
+    [-0.3, -0.2, -3.1, 0.2, 0.1, 0.0, 0.2],
+    [0.2, 0.1, 2.9, -0.2, -0.2, 0.1, 0.1],
+    [-0.1, 0.0, -2.4, 0.0, 0.1, -0.2, 0.0],
+])
+levels = np.stack([survey2, second])                           # (2, 6, 7)
+levels_a = np.array([survey2_a, [68.8, 69.0, 69.4, 69.2, 68.5, 68.9]])
+direct = emission.sound_power_special_room(
+    levels, freqs, volume_m3=72.0, nominal_reverberation_time_s=tnom,
+    background_levels=bg2, a_weighted_levels=levels_a, a_weighted_background_levels=46.0,
+    sigma_omc_db=0.5,
+)
+print(np.round(direct.sound_power_level, 1))     # [68.5 72.3 73.  70.9 68.3 64.8 59. ]
+print(round(direct.sound_power_level_a_direct, 1), round(direct.sound_power_level_a, 1))  # 75.8 75.8
+print(round(direct.expanded_uncertainty_a, 1))   # 4.1 dB (Tabla 5, k = 2)
+
+comparison = emission.sound_power_special_room_comparison(
+    levels, rss2, lw_r, freqs, background_levels=bg2, sigma_omc_db=0.5,
+)
+print(np.round(comparison.sound_power_level, 1))  # [67.7 72.  72.9 71.  68.1 65.  59.4]
+print(round(comparison.sound_power_level_a, 1))   # 75.7 dB(A)
+print(emission.special_room_background_correction([62.0, 62.0, 62.0], [57.6, 54.5, 50.0]))  # [2. 1. 0.]
+```
+
+Los dos métodos se separan por la desviación de la propia sala respecto a su
+modelo, los mismos 0,8 dB en 125 Hz que encontró la evaluación de idoneidad:
+el método directo lee la sala y el de comparación la cancela.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/special_room_sound_power.svg" alt="Dos paneles. El superior representa la desviación típica del sondeo de la impresora en seis posiciones como barras azules sobre las bandas de octava de 125 Hz a 8 kHz y una barra ponderada A a la derecha, con los límites de clase de la Tabla 3 en 2,3 dB y 4 dB como líneas naranjas discontinua y punteada; la barra de 500 Hz llega a 3 dB, en la clase de banda estrecha, y lleva encima la cifra 2 por dos ubicaciones de la fuente, y todas las demás barras rondan 1 dB o menos con un 1 encima. El panel inferior dibuja el nivel de potencia acústica de la impresora por el método directo como barras azules, de 68,5 dB en 125 Hz a 59 dB en 8 kHz, cada una con su incertidumbre expandida como barra de error, la mayor en 125 Hz, y rombos rojos para el método de comparación sobre cada barra o justo al lado, el más bajo frente a la barra de 125 Hz, 0,8 dB por debajo; el título da el nivel ponderado A de 75,8 dB(A)" width="96%" />
+
+*9.4 y 10 en una sola vista. Arriba, la $s_\mathrm{M}$ del sondeo frente a los
+límites de clase de la Tabla 3, con el zumbido del ventilador en 500 Hz
+pidiendo dos ubicaciones de la fuente; abajo, la fórmula 9 banda a banda con
+la incertidumbre expandida de la Tabla 5, y la fórmula 10 como rombos.*
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+fig, (axt, axb) = plt.subplots(2, 1, figsize=(10, 8.6), height_ratios=(0.85, 1.0))
+plan2.plot(ax=axt, language="es")
+direct.plot(ax=axb, language="es")
+axb.plot(np.arange(freqs.size), comparison.sound_power_level, "D",
+         color="#d62728", label="Método de comparación, fórmula (10)")
+axb.legend(loc="lower right")
+plt.show()
+```
+
+</details>
+
+### Parámetros de `sound_power_special_room()`
+
+| Parámetro | Tipo | Unidades | Rango / valor por defecto | Notas |
+| :--- | :--- | :--- | :--- | :--- |
+| `levels` | array 1D, 2D o 3D | dB | `(bandas,)`, `(NM, bandas)` o `(NS, NM, bandas)` | Niveles por banda medidos: un recorrido, una fila por posición o una rejilla por ubicación de la fuente; todas las entradas entran en la fórmula 8 |
+| `frequencies` | array 1D | Hz | octavas de 125 Hz a 8 kHz | Centros de octava ascendentes de la Tabla F.1; 63 Hz según su nota |
+| `volume_m3` | float | m³ | $> 0$ | Avisa por debajo de 70 m³, y por encima de 300 m³ cuando las bandas llegan a la octava de 8 kHz (6.2) |
+| `nominal_reverberation_time_s` | float | s | $> 0$ | $T_\mathrm{nom}$; avisa fuera de 0,5 s a 1,0 s (6.3) |
+| `background_levels` | array 1D o 2D | dB | `(bandas,)` o `(NM, bandas)` | Tabla 4 en cada posición; `None` avisa y no cumple nada |
+| `a_weighted_levels` | array 0D, 1D o 2D | dB | uno por posición | Los niveles ponderados A para la fórmula 9 directamente; `None` deja `sound_power_level_a_direct` en `NaN` |
+| `a_weighted_background_levels` | float o array 1D | dB | uno, o uno por posición | Su ruido de fondo, Tabla 4 |
+| `temperature_c`, `static_pressure_kpa` | float | °C, kPa | `23.0`, `101.325` | Para $C_2$ (Anexo E) |
+| `sigma_omc_db`, `coverage_factor` | float | dB, | `None`, `2.0` | Fórmulas 12 y 13 |
+
+`sound_power_special_room_comparison()` recibe `levels`, `levels_ref` (al
+menos seis posiciones, 10.3), `lw_ref`, `frequencies`, `background_levels`,
+`background_levels_ref` y los mismos cuatro últimos argumentos. Ambas
+devuelven un `SpecialRoomSoundPowerResult`: `sound_power_level`,
+`mean_pressure_level`, `background_correction`,
+`background_requirement_met`, el `mean_reference_level` y el
+`reference_power_level` de la fuente de referencia (comparación) o el
+`volume_m3` y el `nominal_reverberation_time_s` de la sala (directo), `c2`,
+`sigma_r0` (Tabla 5), `sound_power_level_a` (Anexo F),
+`sound_power_level_a_direct` y `mean_a_weighted_level`, con las mismas
+propiedades de incertidumbre que en la Parte 1.
+
+### Cómo se hace la medida
+
+Se construye o se trata la sala para que siga la curva: absorbentes de
+membrana para los graves y paneles perforados rellenos de lana mineral para
+las frecuencias medias y altas, repartidos al azar por las paredes y el techo
+en parches de no más de 1,5 m², y un suelo de hormigón vertido pintado
+(Anexo B). Se mide el tiempo de reverberación en bandas de tercio de octava
+con cualquier soporte absorbente de la fuente colocado, se centra, y se
+mantienen la humedad y la temperatura de esa medición dentro de 6.6 en cada
+ensayo. Se comprueba la sala una vez con una fuente de referencia calibrada
+(6.7). Se usa un micrófono plano para incidencia aleatoria, dentro de las
+tolerancias de la Tabla 2 de la norma. La fuente se instala como se usa o, si
+no, sobre el suelo a 1 m como mínimo de la pared más cercana (8.2), y sin
+superar el 1 % del volumen de la sala (apartado 5). Se
+sondean seis posiciones, a $\lambda/4$ como mínimo de las superficies de la
+sala para la banda más baja, a $0{,}3\,V^{1/3}$ de la fuente y separadas
+$\lambda/2$ ($\lambda$ = 3,5 m para la ponderación A, 9.3), y se toman las
+posiciones y ubicaciones que da la Tabla 3. Con un micrófono móvil se
+promedian al menos 10 s por banda, y 30 s en 160 Hz y por debajo y para la
+ponderación A (9.2).
+
+## 3. Incertidumbre, ensayos interlaboratorio y condiciones de referencia
+
+**Incertidumbre (apartado 9 de ISO 3743-1, apartado 11 de ISO 3743-2).**
+$\sigma_\mathrm{tot} = \sqrt{\sigma_{R0}^2 + \sigma_\mathrm{omc}^2}$ y
+$U = k\,\sigma_\mathrm{tot}$, con $\sigma_{R0}$ la cota superior típica por
+banda: la Tabla 3 de la Parte 1 da 3,0 / 2,0 / 1,5 / 2,5 dB en 125 Hz /
+250 Hz / de 500 Hz a 4 kHz / 8 kHz y 1,5 dB ponderado A, y la Tabla 5 de la
+Parte 2 da 5,0 / 3,0 / 2,0 / 3,0 dB y 2,0 dB. Los dos EJEMPLOS, con
+$\sigma_\mathrm{omc}$ = 2,0 dB y $k$ = 2, dan 5 dB (Parte 1) y 5,7 dB
+(Parte 2), y las Tablas C.1 y D.1 imprimen los totales para tres
+estabilidades de las condiciones de funcionamiento; el informe de
+conformidad fija todos ellos. Los presupuestos de los Anexos C y D son
+informativos y no se modelan.
+
+**Ensayos interlaboratorio (Ec. 24 de la Parte 1).** Un ensayo
+interlaboratorio da la desviación típica total de una fuente, que aún lleva
+la inestabilidad de esa fuente;
+$\sigma'_{R0} = \sqrt{{\sigma'_\mathrm{tot}}^2 - {\sigma'_\mathrm{omc}}^2}$
+la elimina, y no debe usarse con $\sigma'_\mathrm{omc}$ por encima de
+$\sigma'_\mathrm{tot}/\sqrt{2}$. La Parte 2 imprime la misma relación como su
+fórmula (14) con un signo más, que su propio párrafo siguiente contradice; la
+biblioteca toma la diferencia en ambas (véanse las
+[erratas](/phonometry/es/reference/errata/)).
+
+**Condiciones de referencia (Anexo A de la Parte 1, Anexo E de la Parte 2).**
+Por encima de 500 m los niveles se llevan a 101,325 kPa y 23,0 °C con
+$C_2 = -10 \log_{10}(p_\mathrm{s}/p_{\mathrm{s},0}) + 15 \log_{10}[(273{,}15 + \theta)/296]$,
+la $C_2$ de ISO 3741 e ISO 3747, con la presión estática a partir de la
+altitud según $p_\mathrm{s} = p_{\mathrm{s},0}\,(1 - a H_\mathrm{a})^b$. Ambos
+anexos imprimen $C_2$ sola.
+
+```python
+# Un laboratorio a 1 100 m sobre el nivel del mar, a 19 °C.
+ps = emission.static_pressure_from_altitude(1100.0)
+high = emission.sound_power_hard_walled(
+    st, rss, lw_rss, freqs, background_levels=background,
+    temperature_c=19.0, static_pressure_kpa=ps,
+)
+print(round(ps, 2), round(high.c2, 3))            # 88.79 kPa, 0.488 dB (Ec. A.2, A.1)
+print(round(high.sound_power_level_a_ref, 1))     # 100.6 dB(A) en las condiciones de referencia
+print(round(emission.reproducibility_from_round_robin(1.9, 1.1), 2))  # 1.55 dB (Ec. 24)
+```
+
+**Totales ponderados A (Anexo B de la Parte 1, Anexo F de la Parte 2).**
+$L_{W\mathrm{A}}$ es la suma energética de los niveles por banda más las
+correcciones por octava de la Tabla B.1 (las mismas que la Tabla F.1 y que la
+Tabla E.2 de ISO 3744): −26,2, −16,1, −8,6, −3,2, 0,0, 1,2, 1,0 y −1,1 dB de
+63 Hz a 8 kHz.
+
+## 4. La hoja de ensayo (`.report()`)
+
+Una determinación termina en un documento. Los dos resultados tienen un método
+`.report()` que escribe una ficha PDF de una página con la disposición de las
+demás hojas de potencia acústica: el método y su grado de exactitud, una
+cabecera opcional de `ReportMetadata` (cliente, fuente de ruido, sala de
+ensayo, instrumentación, clima, fecha), una tabla por banda de octava, el
+espectro, el nivel ponderado A en recuadro con la incertidumbre expandida y su
+factor de cobertura, y la cadena de fórmulas en la que se apoya el nivel, que
+es lo que el apartado 10.5 de la Parte 1 y el 12.5 de la Parte 2 piden que
+recoja el registro. La tabla de ISO 3743-1 lleva las dos fuentes: el nivel
+medio de la fuente, el nivel medio y la potencia calibrada de la fuente sonora
+de referencia, y $L_W$ (o $L_J$ para una ráfaga). La tabla de ISO 3743-2 lleva
+el nivel medio y $L_W$, con las columnas de la fuente de referencia en el
+método de comparación, e imprime $L_W$ al medio decibelio más próximo, como
+pide su apartado 12.5 d), donde la Parte 1 pide 0,1 dB (10.5 g). En la tabla
+de ISO 3743-1 una banda que el apartado 8.1.3 convierte en cota superior se
+marca con `*` y se nombra como tal debajo; una banda que incumple 4.5 por el
+margen de la fuente de referencia, o sin ruido de fondo medido, se marca con
+`†` y se nombra así. La tabla de ISO 3743-2 marca con `*` toda banda en la que
+no se demuestra el requisito de ruido de fondo, que es todo lo que dice de
+ella el apartado 9.8. La línea de base dice lo que da el factor de cobertura:
+el 95 % bilateral con $k$ = 2, el 95 % unilateral para una comparación con un
+límite con $k$ = 1,6. El
+método directo pone en el recuadro el nivel ponderado A que describe el
+apartado 4, la fórmula 9 sobre los niveles de presión acústica ponderados A, e
+imprime al lado el total de las bandas del Anexo F. `requirement` añade un
+veredicto CUMPLE o NO CUMPLE frente a un límite ponderado A declarado,
+`verbose=True` añade las columnas de ruido de fondo y `language="es"` escribe
+la hoja en español.
+
+```python
+from phonometry import ReportMetadata
+
+res.report(
+    "batidora_iso3743_1.pdf",
+    metadata=ReportMetadata(
+        client="Fabricante de electrodomésticos de ejemplo",
+        specimen="Batidora de encimera sobre mesa de ensayo, a plena velocidad",
+        test_room="Sala de ensayo de paredes rígidas, V = 60 m3, hormigón pintado",
+        requirement=102.0,
+    ),
+    language="es",
+)   # LWA = 100,1 dB(A) re 1 pW, 125 Hz marcada con *: límite declarado 102 dB(A), CUMPLE
+direct.report("impresora_iso3743_2.pdf", language="es", verbose=True)
+```
+
+Las fichas de ejemplo se regeneran con `make reports` y se mantienen
+renderizadas en el repositorio; pulsa una vista previa para abrir el PDF.
+
+<ReportPreview
+	name="iso3743_1_hard_walled_power_example"
+	title="Informe de ejemplo de potencia acústica en sala de ensayo de paredes rígidas ISO 3743-1 (PDF)"
+	description="Ficha de una página de determinación de la potencia acústica según ISO 3743-1: un encabezado con el cliente, la batidora de encimera como fuente de ruido, la sala de ensayo de paredes rígidas de 60 metros cúbicos, la instrumentación y el clima, la tabla en bandas de octava de 125 Hz a 8 kHz del nivel medio de la fuente, del nivel medio y del nivel de potencia acústica calibrado de la fuente sonora de referencia y del LW determinado, con el valor de 125 Hz de 89,1 dB marcado con un asterisco, el espectro de potencia acústica con su incertidumbre expandida y la cota superior de 125 Hz en la leyenda, el recuadro con el nivel de potencia acústica ponderado A LWA = 100,1 dB(A) re 1 pW con el LW total, el método de comparación y una incertidumbre expandida de 3,6 dB con factor de cobertura 2, un veredicto CUMPLE frente a 102 dB(A) declarados, y unas líneas de base con la cadena de las Ec. 10 a 14 y sus correcciones por ruido de fondo, la frase que declara cota superior la banda marcada, la incertidumbre según la Tabla 3 y la ponderación A del Anexo B."
+	caption="Ficha de sala de ensayo de paredes rígidas (HardWalledSoundPowerResult.report): la comparación ISO 3743-1 de la batidora con la fuente sonora de referencia, con su banda de 125 Hz como cota superior."
+/>
+
+<ReportPreview
+	name="iso3743_2_special_room_power_example"
+	title="Informe de ejemplo de potencia acústica en sala reverberante especial ISO 3743-2 (PDF)"
+	description="Ficha de una página de determinación de la potencia acústica según ISO 3743-2: un encabezado con el cliente, la impresora de sobremesa como fuente de ruido, la sala de ensayo reverberante especial de 72 metros cúbicos con un tiempo de reverberación nominal de 0,77 s, la instrumentación y el clima, la tabla en bandas de octava de 125 Hz a 8 kHz del nivel de presión acústica medio y del LW determinado al medio decibelio más próximo, el espectro de potencia acústica con su incertidumbre expandida, el recuadro con el nivel de potencia acústica ponderado A LWA = 75,8 dB(A) re 1 pW a partir de los niveles ponderados A por la fórmula 9, con el LW total, el total de las bandas del Anexo F de 75,8 dB(A), el método directo con el volumen de la sala y el tiempo de reverberación nominal y una incertidumbre expandida de 4,1 dB con factor de cobertura 2, un veredicto CUMPLE frente a 77 dB(A) declarados, y unas líneas de base con la fórmula 8 y las correcciones por ruido de fondo de la Tabla 4, la fórmula 9, la incertidumbre según la Tabla 5 y la ponderación A del Anexo F."
+	caption="Ficha de sala reverberante especial (SpecialRoomSoundPowerResult.report): el método directo ISO 3743-2 sobre la impresora, con el nivel ponderado A leído como lo describe el apartado 4."
+/>
+
+## Qué cubre esta guía
+
+<Scope>
+<ScopeClaim status="covered" label="Cubierto">
+ISO 3743-1:2010: los criterios de sala de 4.2 a 4.4 (`check_hard_walled_room`),
+el sondeo de 7.4 con la Tabla 2 (`hard_walled_source_locations`), las medias
+de las Ec. 9 a 12, la corrección por ruido de fondo de 8.1.3 sobre las medias
+con sus reglas de 6 dB, 15 dB y 1,3 dB, el nivel de potencia acústica de la
+Ec. 14 (`sound_power_hard_walled`), el nivel de energía acústica de las
+Ec. 15 a 20 (`sound_energy_hard_walled`), la reproducibilidad de la Tabla 3
+con las Ec. 22 y 23, el ensayo interlaboratorio de la Ec. 24
+(`reproducibility_from_round_robin`), el Anexo A y los totales del Anexo B.
+ISO 3743-2:2018: el parámetro de reverberación de la fórmula (1) y su NOTA
+(`reverberation_parameter`), las curvas límite de 6.3 con un $T_\mathrm{nom}$
+centrado o dado, el volumen de 6.2, el clima de 6.6 y el tamaño de la fuente
+del apartado 5 (`check_special_room_reverberation`), las superficies de 6.4
+(`check_special_room_surfaces`), la evaluación de idoneidad de 6.7
+(`check_special_room_suitability`), el sondeo de 9.4 con la Tabla 3 y el
+carácter espectral de 9.5 (`special_room_source_locations`), la Tabla 4
+(`special_room_background_correction`), la fórmula directa 9
+(`sound_power_special_room`) y la de comparación 10
+(`sound_power_special_room_comparison`), la reproducibilidad de la Tabla 5, el
+Anexo E y los totales del Anexo F. Los dos resultados escriben la hoja de
+ensayo de una página con `.report()`, con las cotas superiores de la Parte 1
+y las demás bandas que incumplen el requisito de ruido de fondo marcadas y
+declaradas por separado.
+</ScopeClaim>
+
+<ScopeClaim status="not-covered" label="No cubierto">
+Los presupuestos de incertidumbre del Anexo C (Parte 1) y del Anexo D
+(Parte 2) son informativos y no se modelan: $\sigma_{R0}$ es la cota superior
+típica de la Tabla 3 o de la Tabla 5, no un valor de un ensayo
+interlaboratorio ni de un modelo. Las reglas de colocación (ubicación de la
+fuente, distancias de los micrófonos a la fuente y a las superficies,
+recorridos y su velocidad) son decisiones del operador, tomadas antes de que
+existan los niveles, y las tolerancias de instrumentación de la Tabla 2 de la
+Parte 2 son del instrumento. La guía de diseño del Anexo B de la Parte 2 (las
+proporciones de sala de la Tabla B.1, el absorbente de membrana de la
+fórmula B.1) es un consejo para construir una sala, no un criterio con el que
+se juzgue. La Parte 2 deja las ráfagas aisladas a ISO 3744 e ISO 3745 por su
+objeto; la Parte 1 les da un nivel de energía acústica. La fuente sonora de
+referencia se toma como calibrada: sus características y sus tolerancias de
+calibración, el Anexo A de la Parte 2 (A.1 y la Tabla A.1: ±1 dB de 100 Hz a
+160 Hz, ±0,5 dB de 200 Hz a 4 kHz, ±1 dB de 5 kHz a 10 kHz) y la ISO 6926
+para la Parte 1, son cosa de su certificado de calibración y no se juzgan
+aquí.
+</ScopeClaim>
+</Scope>
+
+<SeeAlso>
+
+## Véase también
+
+- [Potencia acústica](/phonometry/es/devices/emission/sound-power/): elegir
+  entre las vías de determinación, los grados de precisión y la declaración
+  de emisión de ruido de ISO 4871.
+- [Potencia acústica en cámara reverberante](/phonometry/es/devices/emission/sound-power-reverberation/):
+  el grado de precisión de ISO 3741, cuyo término de Waterhouse incorpora la
+  sala especial a su curva de reverberación.
+- [Potencia acústica in situ por comparación](/phonometry/es/devices/emission/sound-power-in-situ/):
+  la misma comparación con una fuente de referencia, llevada a la sala en la
+  que trabaja la máquina.
+- [Potencia acústica por métodos de presión](/phonometry/es/devices/emission/sound-power-pressure/):
+  la superficie envolvente de ISO 3744, ISO 3745 e ISO 3746 para una fuente
+  medida en su campo directo.
+- Referencia de la API: [`emission.sound_power_hard_walled`](/phonometry/es/reference/api/power/sound-power-hard-walled/),
+  [`emission.sound_power_special_room`](/phonometry/es/reference/api/power/sound-power-special-room/).
+
+</SeeAlso>

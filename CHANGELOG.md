@@ -293,6 +293,67 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   [6,09; 9,27] dB, and eleven of the eighteen band uncertainties of Table B.2;
   the other seven are printed a hundredth lower, which the errata registry
   records.
+- **Sound power of small movable sources in a hard-walled or a special
+  reverberation test room (ISO 3743-1, ISO 3743-2).** The two members of the
+  ISO 3740 family the sound power guide listed as missing are implemented in
+  two new modules. `emission.sound_power_hard_walled` is the ISO 3743-1:2010
+  comparison with a reference sound source: the energy means of Eq. 9 to 12,
+  the background correction of 8.1.3 applied once per band on the means, with
+  no correction above a 15 dB margin, Eq. 13 from 6 dB and a fixed 1.3 dB
+  below it with the band flagged in `background_requirement_met`, and the
+  sound power level of Eq. 14. `upper_bound` names the bands 8.1.3 makes
+  upper bounds, those where the source under test's own margin fell short: a
+  short margin of the reference source caps $K_{1(\mathrm{RSS})}$, which
+  enters Eq. 14 with a plus sign and lowers the level, so such a band only
+  fails 4.5. `sound_energy_hard_walled` gives the sound energy level of a burst
+  by Eq. 15 to 20, from events measured one at a time or over a run.
+  `check_hard_walled_room` judges the room by 4.2 to 4.4 (volume, reference
+  box, absorption coefficients and the eight orientations of a directional
+  source against Table 3), `hard_walled_source_locations` reads the number of
+  source locations from the survey of 7.4 and Table 2, and
+  `reproducibility_from_round_robin` is Eq. 24. In the second module,
+  `emission.sound_power_special_room` is the direct method of ISO 3743-2:2018,
+  Formula 9 per octave band and for the A-weighted level measured directly,
+  with the stepped background correction of Table 4 at each position, and
+  `sound_power_special_room_comparison` is Formula 10.
+  `check_special_room_reverberation` judges the reverberation time against
+  the limiting curves of 6.3 with $R$ from Formula 1 or its NOTE
+  (`reverberation_parameter`), centres the nominal reverberation time when it
+  is not given, on the one that leaves every band the most margin against its
+  own limits, and checks the volume of 6.2 and the climate of 6.6; given
+  `source_volume_m3`, it also reads the source size clause 5 recommends, at
+  most 1 % of the room, as `source_size_recommended`, and warns above it
+  without failing the room. On the curve of Figure B.4 the centring gives
+  0.76 s where the EXAMPLE of B.5 prints 0.73 s, 0.17 dB apart in the level:
+  the printed centring puts the bands from 200 Hz to 400 Hz above the limits
+  it says the curve is centred in, and a nominal reverberation time passed in
+  is checked as given. `check_special_room_surfaces` is 6.4, with `surface_within` per wall and
+  band, `check_special_room_suitability` the
+  reference-source evaluation of 6.7 against Table 1, and
+  `special_room_source_locations` the survey of 9.4 with Table 3 and the
+  spectral classes of 9.5. Both parts carry the reproducibility of their
+  Table 3 and Table 5 into an expanded uncertainty, the $C_2$ of Annexes A
+  and E and the A-weighted totals of Annexes B and F. Every result has
+  `.plot()`, the checks with their verdict in the title and the failing
+  surfaces or bands ringed, and both determinations write the one-page sound
+  power test sheet through `.report()`, with the reference sound source's
+  columns, the expanded uncertainty with its coverage factor and what that
+  factor gives (95 % two-sided for 2, one-sided for 1.6), and the failing
+  bands marked in the table and named beneath it: in Part 1 an upper bound
+  `*` and any other failing band `†`, as 8.1.3 asks, in Part 2 every band not
+  shown to meet 9.8, with the band levels to the nearest one-half decibel as
+  12.5 d) asks. A new guide in both languages takes a blender, a stapler and
+  a printer through the two rooms, drawn in plan with their placement rules,
+  and the conformance report pins the 9.5 and 11.5 EXAMPLEs, Tables C.1 and
+  D.1, the suitability verdicts of Table 1 read high and low, and the
+  departure from the B.5 EXAMPLE with its size.
+  Fifteen misprints found on the way are in the errata register, among them
+  the "400 to 5 000" row of ISO 3743-1 Table 3, a one-third-octave range under
+  an octave heading, the plus sign of ISO 3743-2 Formula (14), the Figure 1 of
+  ISO 3743-2 that runs 0.04 above its own Formula (1) at 100 Hz, the
+  Figure B.3 that widens its limits at 6.3 kHz where the text widens them
+  above it, and the F.1 that ties Annex F to the direct method while 10.4
+  sends the comparison method to it.
 - **Sound power in the 16 kHz octave band (ISO 9295).** The general sound
   power methods stop at the 10 kHz one-third-octave band, and a printer's
   paper noise or a power supply's whine sits above it. The new
@@ -1051,6 +1112,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   read in the language asked for, and the title of a rating without a category
   gives the single number alone.
 
+- **A short background margin of the reference source is no longer called an
+  upper bound (ISO 3747, ISO 3741).** `emission.sound_power_in_situ` and
+  `sound_energy_in_situ` flagged a band as an upper bound, in the plot, its
+  docstring and the no-background warning, whenever either source's margin
+  fell below 6 dB or no background was measured. ISO 3747 8.1 reads the upper
+  bound off the machine's own margin, and a short margin of the reference
+  source caps the correction of the level Eq. 11 subtracts, which lowers the
+  result. `InSituSoundPowerResult` now carries `upper_bound`, `True` only
+  where the machine's margin fell short and the reference source's did not;
+  `background_requirement_met` is unchanged. The plot hatches an upper bound
+  `//` and any other failing band `xx`, each with its own legend entry, and
+  the guide's 125 Hz band, where both margins are short, is described as
+  failing 8.1 without being a bound. The ISO 3741 comparison method warned
+  "the levels are upper bounds" when it clamped the reference source's
+  correction; it now says the clamp lowers the result.
+
 - **A derived value names the cells it rests on in words.** When the cells a
   catalogue value is worked out from have mixed bases, `derived` says the basis
   of each, and it named them by their field names: "it rests on poisson_ratio
@@ -1287,6 +1364,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- **The glossary has an llms shard of its own.** The glossary left
+  `llms-reference.txt` for a new `llms-glossary.txt`, which `llms.txt` lists
+  beside the other shards: next to the bibliography it pushed the reference
+  shard over the 200 000-byte budget that keeps every shard under the
+  truncation limit of the fetch tools. A client that fetched
+  `llms-reference.txt` for the glossary finds it at the new address, and the
+  ISO 3743 guide joins the reverberant sound power shard,
+  `llms-devices-emission-reverberant.txt`.
 - **The published catalogues page reads in Spanish, and its controls sit on the table.**
   The Spanish page printed every row's words in English: the 1227 material
   names, their variants and groups, the notes on rows and cells, and the

@@ -321,6 +321,8 @@ export const apiSections = {
       'reference/api/power/sound-power-intensity-points',
       'reference/api/power/sound-power-reverberation',
       'reference/api/power/sound-power-in-situ',
+      'reference/api/power/sound-power-hard-walled',
+      'reference/api/power/sound-power-special-room',
       'reference/api/power/sound-power-in-duct',
       'reference/api/power/sound-power-high-frequency',
       'reference/api/power/intensity',

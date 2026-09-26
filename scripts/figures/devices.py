@@ -20,7 +20,12 @@ from matplotlib.colors import Normalize
 from numpy.typing import NDArray
 from scipy import signal as scipy_signal
 
-from phonometry._plot.common import format_frequency_axis, theme_fill, theme_line
+from phonometry._plot.common import (
+    _format_freq,
+    format_frequency_axis,
+    theme_fill,
+    theme_line,
+)
 
 from .i18n import _LANG, _fmt_minus, localize_panel, lookup
 from .theme import (
@@ -5405,8 +5410,9 @@ def generate_in_situ_sound_power(output_dir: str) -> None:
     # box, one reference sound source location alongside it, octave bands
     # from 125 Hz to 8 kHz. The floor is loud at the low end, so at 125 Hz
     # the compressor keeps a margin below 6 dB at one position and the
-    # quieter reference source at all four, which makes the band an upper
-    # bound; 250 Hz shows the correction at work on both sources.
+    # quieter reference source at all four: the band fails 8.1, and with
+    # both corrections capped it is no upper bound either; 250 Hz shows the
+    # correction at work on both sources.
     freqs = np.array([125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0])
     lw_rss = np.array([84.5, 88.0, 91.0, 92.5, 92.0, 90.5, 87.0])
     st = np.array(
@@ -5446,7 +5452,7 @@ def generate_in_situ_sound_power(output_dir: str) -> None:
     )
     corrected_st = st - result.background_correction
     corrected_rss = rss - result.background_correction_ref[0]
-    upper = ~np.asarray(result.background_requirement_met, dtype=bool)
+    failing = ~np.asarray(result.background_requirement_met, dtype=bool)
 
     fig, (axt, axb) = plt.subplots(
         2, 1, figsize=(10, 8.4), height_ratios=(1.25, 1.0), sharex=True
@@ -5561,8 +5567,9 @@ def generate_in_situ_sound_power(output_dir: str) -> None:
     axt.annotate(
         (
             "125 Hz: margin below 6 dB here, and at every\n"
-            "position for the reference source: $K_1$ capped\n"
-            "at 1.3 dB and the band is an upper bound"
+            "position for the reference source: both $K_1$\n"
+            "capped at 1.3 dB, the band fails 8.1 and is\n"
+            "no upper bound"
         ),
         xy=(x[0] + offsets[1], float(corrected_st[1, 0]) - 0.6),
         xytext=(x[0] + 0.15, 61.0),
@@ -5599,9 +5606,9 @@ def generate_in_situ_sound_power(output_dir: str) -> None:
         zorder=3,
         label="$L_W$ of the source under test (Eq. 11)",
     )
-    for patch, is_upper in zip(bars.patches, upper, strict=True):
-        if is_upper:
-            patch.set_hatch("//")
+    for patch, fails in zip(bars.patches, failing, strict=True):
+        if fails:
+            patch.set_hatch("xx")
     axb.plot(
         x,
         result.reference_power_level,
@@ -5623,8 +5630,8 @@ def generate_in_situ_sound_power(output_dir: str) -> None:
             facecolor=COLOR_PRIMARY,
             edgecolor=COLOR_FG,
             linewidth=0.7,
-            hatch="//",
-            label="Upper bound (background)",
+            hatch="xx",
+            label="Background requirement not met (8.1)",
         ),
         Line2D(
             [],
@@ -7686,4 +7693,256 @@ def generate_in_situ_noise_control(output_dir: str) -> None:
 
     plt.tight_layout()
     save_figure(output_dir, "in_situ_noise_control.svg")
+    plt.close()
+
+
+#: The ISO 3743 guide's worked examples, shared by the three figures that draw
+#: them so the page and the figures show the same numbers.
+_ISO3743_FREQS = np.array([125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0])
+
+
+def _iso3743_1_example() -> tuple[Any, np.ndarray, np.ndarray, np.ndarray]:
+    """The blender of the ISO 3743-1 guide: five microphone positions, one on
+    each side of the reference box and one above it as 7.3 asks where the room
+    allows, the reference source where the blender stood, and a background
+    loud at the low end, so that at 125 Hz the blender's own margin falls below
+    6 dB while the louder reference source keeps 9 dB: the upper bound of 8.1.3.
+    """
+    from phonometry import emission
+
+    st = np.array(
+        [
+            [84.1, 86.0, 88.2, 90.1, 87.4, 83.2, 78.1],
+            [82.6, 85.1, 87.5, 89.6, 88.0, 83.9, 77.5],
+            [83.3, 86.8, 88.9, 90.8, 86.9, 82.8, 78.6],
+            [85.0, 85.6, 87.8, 89.2, 87.7, 84.4, 77.9],
+            [82.9, 86.3, 88.4, 90.5, 88.3, 83.5, 78.3],
+        ]
+    )
+    rss = np.array(
+        [
+            [87.8, 83.9, 86.8, 87.9, 87.1, 85.2, 81.8],
+            [87.1, 83.1, 86.1, 87.3, 86.6, 84.7, 81.2],
+            [88.5, 84.4, 87.2, 88.4, 87.6, 85.8, 82.4],
+            [87.7, 83.6, 86.5, 87.8, 87.0, 85.1, 81.6],
+            [88.2, 83.8, 86.9, 88.1, 87.4, 85.4, 82.0],
+        ]
+    )
+    background = np.array(
+        [
+            [78.5, 71.0, 64.0, 58.0, 52.0, 45.0, 40.0],
+            [79.5, 71.5, 64.5, 58.5, 52.5, 45.5, 40.5],
+            [78.0, 70.5, 63.5, 57.5, 51.5, 44.5, 39.5],
+            [79.0, 71.0, 64.0, 58.0, 52.0, 45.0, 40.0],
+            [79.5, 71.5, 64.5, 58.5, 52.5, 45.5, 40.5],
+        ]
+    )
+    lw_rss = np.array([94.0, 89.9, 92.8, 94.1, 93.2, 91.3, 87.9])
+    with warnings.catch_warnings():
+        # The 125 Hz band is an upper bound on purpose: that is what the
+        # figure shows.
+        warnings.simplefilter("ignore", emission.SoundPowerWarning)
+        result = emission.sound_power_hard_walled(
+            st,
+            rss,
+            lw_rss,
+            _ISO3743_FREQS,
+            background_levels=background,
+            sigma_omc_db=1.0,
+        )
+    return result, st, rss, background
+
+
+def generate_hard_walled_sound_power(output_dir: str) -> None:
+    """ISO 3743-1: the comparison in a hard-walled room, and the LW it yields."""
+    print("Generating hard_walled_sound_power.svg...")
+    from matplotlib.lines import Line2D
+
+    result, st, rss, background = _iso3743_1_example()
+    fig, (axt, axb) = plt.subplots(
+        2, 1, figsize=(10, 8.6), height_ratios=(1.15, 1.0), sharex=False
+    )
+    x = np.arange(_ISO3743_FREQS.size, dtype=float)
+    offsets = np.linspace(-0.24, 0.24, st.shape[0])
+    for i, offset in enumerate(offsets):
+        axt.plot(x + offset, st[i], "o", color=COLOR_PRIMARY, markersize=5.5, zorder=5)
+        axt.plot(x + offset, rss[i], "s", color=COLOR_TERTIARY, markersize=5, zorder=5)
+        axt.plot(
+            x + offset, background[i], "x", color=COLOR_MUTED, markersize=6, zorder=4
+        )
+    (mean_st,) = axt.plot(
+        x,
+        result.mean_source_level,
+        "-",
+        color=COLOR_PRIMARY,
+        linewidth=1.8,
+        zorder=3,
+        label="Mean $\\overline{L'_{p(\\mathrm{ST})}}$ of the blender (Eq. 10)",
+    )
+    (mean_rss,) = axt.plot(
+        x,
+        result.mean_reference_level,
+        "-",
+        color=COLOR_TERTIARY,
+        linewidth=1.8,
+        zorder=3,
+        label="Mean $\\overline{L'_{p(\\mathrm{RSS})}}$ of the reference source (Eq. 11)",
+    )
+    (mean_bg,) = axt.plot(
+        x,
+        result.mean_background_level,
+        ":",
+        color=COLOR_MUTED,
+        linewidth=1.6,
+        zorder=3,
+        label="Mean background $\\overline{L_{p(\\mathrm{B})}}$ (Eq. 12)",
+    )
+    handles = [
+        Line2D(
+            [],
+            [],
+            marker="o",
+            linestyle="",
+            color=COLOR_PRIMARY,
+            markersize=5.5,
+            label="Blender at each microphone position, $L'_{pi(\\mathrm{ST})}$",
+        ),
+        Line2D(
+            [],
+            [],
+            marker="s",
+            linestyle="",
+            color=COLOR_TERTIARY,
+            markersize=5,
+            label="Reference source at each microphone position, $L'_{pi(\\mathrm{RSS})}$",
+        ),
+        Line2D(
+            [],
+            [],
+            marker="x",
+            linestyle="",
+            color=COLOR_MUTED,
+            markersize=6,
+            label="Background $L_{pi(\\mathrm{B})}$",
+        ),
+        mean_st,
+        mean_rss,
+        mean_bg,
+    ]
+    axt.legend(handles=handles, loc="lower right", fontsize=8.5, ncol=2)
+    axt.set_xticks(x)
+    # The band labels the lower panel's own axis prints, so both read alike.
+    axt.set_xticklabels([_format_freq(float(f), _LANG) for f in _ISO3743_FREQS])
+    axt.set_xlabel(LABEL_FREQ_HZ)
+    axt.set_ylabel("Sound pressure level [dB]")
+    axt.set_ylim(22.0, 96.0)
+    axt.set_title(
+        "Hard-walled test room (ISO 3743-1): the blender and the reference "
+        "source at five microphone positions",
+        pad=12,
+    )
+    axt.grid(axis="y", color=COLOR_GRID, linestyle="--", alpha=0.5, zorder=0)
+    axt.set_axisbelow(True)
+    result.plot(ax=axb, language=_LANG)
+    axb.set_xlabel(LABEL_FREQ_HZ)
+    fig.tight_layout()
+    save_figure(output_dir, "hard_walled_sound_power.svg")
+    plt.close()
+
+
+def generate_special_room_reverberation(output_dir: str) -> None:
+    """ISO 3743-2 6.3: a 72 m3 room's reverberation time within its curves."""
+    print("Generating special_room_reverberation.svg...")
+    from phonometry import emission
+
+    thirds = np.array(
+        [100.0, 125.0, 160.0, 200.0, 250.0, 315.0, 400.0, 500.0, 630.0, 800.0,
+         1000.0, 1250.0, 1600.0, 2000.0, 2500.0, 3150.0, 4000.0, 5000.0, 6300.0,
+         8000.0, 10000.0]
+    )  # fmt: skip
+    measured = np.array(
+        [1.30, 1.13, 1.14, 1.01, 0.99, 0.90, 0.94, 0.86, 0.87, 0.82, 0.83,
+         0.83, 0.79, 0.83, 0.79, 0.80, 0.77, 0.81, 0.74, 0.71, 0.67]
+    )  # fmt: skip
+    check = emission.check_special_room_reverberation(measured, thirds, volume_m3=72.0)
+    fig, ax = plt.subplots(figsize=(10, 5.6))
+    check.plot(ax=ax, language=_LANG)
+    fig.tight_layout()
+    save_figure(output_dir, "special_room_reverberation.svg")
+    plt.close()
+
+
+def generate_special_room_sound_power(output_dir: str) -> None:
+    """ISO 3743-2: the survey of 9.4 and the direct and comparison methods."""
+    print("Generating special_room_sound_power.svg...")
+    from phonometry import emission
+
+    ck = np.array([-16.1, -8.6, -3.2, 0.0, 1.2, 1.0, -1.1])
+    survey = np.array(
+        [
+            [62.1, 65.4, 63.2, 64.2, 61.5, 58.1, 52.3],
+            [60.4, 66.2, 69.1, 64.9, 61.1, 57.7, 51.8],
+            [63.0, 64.1, 64.0, 63.8, 62.0, 58.6, 52.9],
+            [61.2, 66.8, 68.7, 64.6, 61.7, 57.9, 52.1],
+            [62.6, 64.7, 62.9, 63.5, 61.3, 58.4, 52.6],
+            [60.9, 65.9, 67.8, 64.1, 61.9, 58.0, 52.0],
+        ]
+    )
+    second = survey + np.array(
+        [
+            [0.3, -0.4, 2.1, 0.2, -0.1, 0.2, 0.1],
+            [-0.2, 0.3, -3.8, -0.1, 0.2, -0.1, 0.0],
+            [0.1, 0.2, 3.3, 0.1, 0.0, 0.1, -0.1],
+            [-0.3, -0.2, -3.1, 0.2, 0.1, 0.0, 0.2],
+            [0.2, 0.1, 2.9, -0.2, -0.2, 0.1, 0.1],
+            [-0.1, 0.0, -2.4, 0.0, 0.1, -0.2, 0.0],
+        ]
+    )
+    levels = np.stack([survey, second])
+    a_levels = np.round(
+        10.0 * np.log10(np.sum(10.0 ** ((levels + ck) / 10.0), axis=2)), 1
+    )
+    background = np.array([48.0, 45.0, 42.0, 40.0, 38.0, 36.0, 35.0])
+    plan = emission.special_room_source_locations(
+        survey, _ISO3743_FREQS, a_weighted_levels=a_levels[0]
+    )
+    direct = emission.sound_power_special_room(
+        levels,
+        _ISO3743_FREQS,
+        volume_m3=72.0,
+        nominal_reverberation_time_s=0.77,
+        background_levels=background,
+        a_weighted_levels=a_levels,
+        a_weighted_background_levels=46.0,
+        sigma_omc_db=0.5,
+    )
+    lw_ref = np.array([80.0, 83.5, 86.2, 86.9, 86.4, 84.3, 80.7])
+    rss = np.array(
+        [
+            [74.5, 76.8, 79.8, 80.0, 80.2, 77.2, 73.7],
+            [73.6, 77.3, 79.3, 80.3, 79.7, 77.5, 73.3],
+            [74.3, 77.5, 79.7, 79.9, 80.0, 77.7, 73.8],
+            [73.8, 76.9, 79.5, 80.4, 79.6, 77.3, 73.7],
+            [74.2, 77.2, 79.9, 80.2, 80.1, 77.2, 73.4],
+            [74.1, 76.9, 79.4, 79.8, 79.8, 77.5, 73.6],
+        ]
+    )
+    comparison = emission.sound_power_special_room_comparison(
+        levels, rss, lw_ref, _ISO3743_FREQS, background_levels=background
+    )
+    fig, (axt, axb) = plt.subplots(2, 1, figsize=(10, 8.6), height_ratios=(0.85, 1.0))
+    plan.plot(ax=axt, language=_LANG)
+    direct.plot(ax=axb, language=_LANG)
+    axb.plot(
+        np.arange(_ISO3743_FREQS.size, dtype=float),
+        comparison.sound_power_level,
+        "D",
+        color=COLOR_SECONDARY,
+        markersize=7,
+        zorder=6,
+        label="Comparison method, Formula (10)",
+    )
+    axb.legend(loc="lower right", fontsize="small")
+    fig.tight_layout()
+    save_figure(output_dir, "special_room_sound_power.svg")
     plt.close()

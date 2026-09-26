@@ -88,6 +88,7 @@ from .devices import (
     _d_screen_in_situ,
     _d_silencer_in_situ,
     _d_silencer_iso7235,
+    _d_small_test_rooms,
     _d_sound_power_in_situ,
     _d_surfaces,
     _d_sweep_bench,
@@ -399,6 +400,11 @@ DIAGRAMS = {
     "diagram_reverberation_power": (
         _d_reverberation_power,
         "ISO 3741 reverberation test room",
+        600,
+    ),
+    "diagram_small_test_rooms": (
+        _d_small_test_rooms,
+        "The two small test rooms of ISO 3743",
         600,
     ),
     "diagram_sound_power_in_situ": (

@@ -1,8 +1,8 @@
 # phonometry
 
-> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1510 numerical conformance checks against 488 standards enforced in CI.
+> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1539 numerical conformance checks against 490 standards enforced in CI.
 
-phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1510 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 98 domains.
+phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1539 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 98 domains.
 
 The project was published as **PyOctaveBand** until version 3.0.0. Third-party references and dependency pins still using that name refer to this library.
 
@@ -320,6 +320,7 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 
 - [Overview](https://jmrplens.github.io/phonometry/devices/emission/) · [full text](https://jmrplens.github.io/phonometry/llms/llms-devices-emission-reverberant.txt)
 - [Sound Power in the Reverberation Room (ISO 3741)](https://jmrplens.github.io/phonometry/devices/emission/sound-power-reverberation/)
+- [Sound Power in Small Test Rooms (ISO 3743)](https://jmrplens.github.io/phonometry/devices/emission/sound-power-test-rooms/)
 - [Sound Power in Situ by Comparison (ISO 3747)](https://jmrplens.github.io/phonometry/devices/emission/sound-power-in-situ/)
 - [Sound Power in the 16 kHz Octave (ISO 9295)](https://jmrplens.github.io/phonometry/devices/emission/sound-power-high-frequency/)
 
@@ -609,12 +610,14 @@ The generated API reference, one page per module. Fetch these only when a specif
 - [power/intensity-compliance](https://jmrplens.github.io/phonometry/reference/api/power/intensity-compliance/)
 - [power/sound-power](https://jmrplens.github.io/phonometry/reference/api/power/sound-power/)
 - [power/sound-power-anechoic](https://jmrplens.github.io/phonometry/reference/api/power/sound-power-anechoic/)
+- [power/sound-power-hard-walled](https://jmrplens.github.io/phonometry/reference/api/power/sound-power-hard-walled/)
 - [power/sound-power-high-frequency](https://jmrplens.github.io/phonometry/reference/api/power/sound-power-high-frequency/)
 - [power/sound-power-in-duct](https://jmrplens.github.io/phonometry/reference/api/power/sound-power-in-duct/)
 - [power/sound-power-in-situ](https://jmrplens.github.io/phonometry/reference/api/power/sound-power-in-situ/)
 - [power/sound-power-intensity](https://jmrplens.github.io/phonometry/reference/api/power/sound-power-intensity/)
 - [power/sound-power-intensity-points](https://jmrplens.github.io/phonometry/reference/api/power/sound-power-intensity-points/)
 - [power/sound-power-reverberation](https://jmrplens.github.io/phonometry/reference/api/power/sound-power-reverberation/)
+- [power/sound-power-special-room](https://jmrplens.github.io/phonometry/reference/api/power/sound-power-special-room/)
 - [power/vibration-sound-power](https://jmrplens.github.io/phonometry/reference/api/power/vibration-sound-power/)
 - [power/workstation](https://jmrplens.github.io/phonometry/reference/api/power/workstation/)
 - [psychoacoustics/annoyance](https://jmrplens.github.io/phonometry/reference/api/psychoacoustics/annoyance/)

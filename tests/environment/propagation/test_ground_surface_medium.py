@@ -168,6 +168,43 @@ def test_a_fit_of_another_model_is_refused_by_both(
         row.medium(BANDS, model=model)  # type: ignore[arg-type]
 
 
+#: The models each footnote under Cox & D'Antonio 3e Table 6.7 (PDF page 258,
+#: printed p. 201) lets a row into: its own, when it is one of the two here.
+FOOTNOTE_MODELS = {
+    "Fitted using Delany and Bazley model": {"delany_bazley"},
+    "Fitted using semi-phenomenological model": set(),
+    "Fitted using variable porosity model": set(),
+}
+
+#: The rows no footnote marks but the text does: Sect. 6.6.3, PDF page 272
+#: (printed p. 215), says the parameters Horoshenkov and Mohamed deduced for
+#: their wetted sands are those of "the two-parameter model of Attenborough",
+#: and the table prints those sands at four water contents each.
+WET_SANDS = tuple(
+    f"cox-2017-table-6-7/{sand}_water_{water}"
+    for sand, waters in (
+        ("coarse_sand_98um", (0, 11, 51, 95)),
+        ("fine_sand_65um", (0, 15, 48, 95)),
+    )
+    for water in waters
+)
+
+
+@pytest.mark.parametrize("key", WET_SANDS)
+@pytest.mark.parametrize("model", ["delany_bazley", "miki"])
+def test_a_sand_the_text_ties_to_another_model_is_refused_by_both(
+    key: str, model: str
+) -> None:
+    sand = PUBLISHED_GROUND[key]
+    with pytest.raises(
+        ValueError,
+        match=r"whose parameters the text beside the table gives as those of "
+        r"“the two-parameter model of Attenborough” \(Cox & D'Antonio 3e "
+        r"Sect\. 6\.6\.3, PDF page 272, printed p\. 215\)",
+    ):
+        sand.medium(BANDS, model=model)  # type: ignore[arg-type]
+
+
 def test_every_fit_a_published_row_names_is_one_the_method_knows() -> None:
     """A new table whose rows name a fit fails here until the fit is mapped."""
     named = {
@@ -175,7 +212,36 @@ def test_every_fit_a_published_row_names_is_one_the_method_knows() -> None:
         for row in PUBLISHED_GROUND.values()
         if row.variant.lower().startswith("fitted")
     }
-    assert named == set(module._FITS)
+    assert named == set(module._FITS) == set(FOOTNOTE_MODELS)
+    tied = {
+        (PUBLISHED_GROUND[key].table, PUBLISHED_GROUND[key].name) for key in WET_SANDS
+    }
+    assert tied == set(module._FITS_IN_TEXT)
+
+
+@pytest.mark.parametrize("model", ["delany_bazley", "miki"])
+def test_every_published_row_goes_only_into_the_models_its_page_allows(
+    model: str,
+) -> None:
+    """Each row with one printed resistivity, whatever marks its fit or none."""
+    for key, row in PUBLISHED_GROUND.items():
+        try:
+            row.printed("flow_resistivity_pa_s_m2")
+        except ValueError:
+            continue
+        if row.variant in FOOTNOTE_MODELS:
+            allowed = FOOTNOTE_MODELS[row.variant]
+        elif key in WET_SANDS:
+            allowed = set()
+        else:
+            allowed = {"delany_bazley", "miki"}
+        try:
+            row.medium(BANDS, model=model)  # type: ignore[arg-type]
+        except ValueError:
+            taken = False
+        else:
+            taken = True
+        assert taken == (model in allowed), key
 
 
 def test_a_row_that_names_no_fit_goes_into_either_model() -> None:

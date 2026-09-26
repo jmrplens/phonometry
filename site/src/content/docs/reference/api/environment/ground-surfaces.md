@@ -18,11 +18,12 @@ An **effective** flow resistivity, which is not the flow resistivity of the
 material under your feet. It is the single number that makes a
 semi-infinite, locally reacting, rigid-framed ground model reproduce a
 measured excess attenuation, so it carries the model it was fitted with. Cox
-and D'Antonio say so explicitly and mark each row with the fit it belongs to,
-which is why a surface there is several rows: the same grass fitted with the
-Delany and Bazley model, with the semi-phenomenological model and with the
-variable-porosity model is three numbers, and averaging them would be an
-average of three different quantities.
+and D'Antonio say so explicitly, and where they print a surface once per fit
+they mark each line with the fit it belongs to, which is why a surface there
+is several rows: the same grass fitted with the Delany and Bazley model, with
+the semi-phenomenological model and with the variable-porosity model is three
+numbers, and averaging them would be an average of three different
+quantities.
 
 Why the numbers spread the way they do
 --------------------------------------
@@ -310,13 +311,18 @@ the Miki model, and it goes into
 refusal of a cell the page did not print as a number.
 
 An effective flow resistivity is the parameter of the model it was
-fitted with, and Cox and D'Antonio name that model for each fit
-they print, in the row's [`variant`](/phonometry/reference/api/io/io/#cataloguerow).
-A row fitted with the Delany and Bazley model is taken into that
-model only, and a row fitted with the semi-phenomenological or the
-variable-porosity model into neither of the two here, because its
-resistivity is not a parameter of either. A row that names no fit,
-Bies's and a caller's own, is taken into both.
+fitted with, and Cox and D'Antonio name that model for some of their
+rows. Where they print a surface once per fit, a footnote marks each
+line, and the row's [`variant`](/phonometry/reference/api/io/io/#cataloguerow)
+quotes it; for the two sands Horoshenkov and Mohamed measured at four
+water contents, the text beside the table says the parameters are
+those of the two-parameter model of Attenborough. A row fitted with
+the Delany and Bazley model is taken into that model only, and a row
+fitted with the semi-phenomenological, the variable-porosity or the
+two-parameter model into neither of the two here, because its
+resistivity is not a parameter of either. A row whose page names no
+fit, most of Cox's, every one of Bies's and a caller's own, is taken
+into both.
 
 **Parameters**
 

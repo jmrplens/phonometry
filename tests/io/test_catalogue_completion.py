@@ -88,9 +88,10 @@ def test_the_loaders_build_what_they_built_before_but_the_listed_cells() -> None
     carries through its earlier steps. The cells that differ now are exactly
     the ones its newer steps list: four last digits of Long Table 7.1, the
     derived texts of the nineteen Hopkins rows whose estimated Poisson ratio
-    they rest on, the note of Cox Table 6.5's aerogel row, and the credit of
-    every row of Rossing's tables of B/A, now keyed by the row or the table.
-    Nothing else of any row moved.
+    they rest on, the note of Cox Table 6.5's aerogel row, the credit of
+    every row of Rossing's tables of B/A, now keyed by the row or the table,
+    and the notes of the eight wetted sands of Cox Table 6.7. Nothing else of
+    any row moved.
     """
     fp = catalogue_fingerprint
     before = fp.row_contract(fp.resilient_layer_row(fp.one_row_shape(fp.baseline())))
@@ -111,6 +112,7 @@ def test_the_loaders_build_what_they_built_before_but_the_listed_cells() -> None
         ("PUBLISHED_NONLINEARITY", key, "attributed_to")
         for key in before["PUBLISHED_NONLINEARITY"]
     }
+    listed |= {("PUBLISHED_GROUND", key, "note") for key in fp.WET_SAND_ROWS}
     assert moved == listed
     assert all(set(before[name]) == set(live[name]) for name in before)
 

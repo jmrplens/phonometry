@@ -12,11 +12,12 @@ An **effective** flow resistivity, which is not the flow resistivity of the
 material under your feet. It is the single number that makes a
 semi-infinite, locally reacting, rigid-framed ground model reproduce a
 measured excess attenuation, so it carries the model it was fitted with. Cox
-and D'Antonio say so explicitly and mark each row with the fit it belongs to,
-which is why a surface there is several rows: the same grass fitted with the
-Delany and Bazley model, with the semi-phenomenological model and with the
-variable-porosity model is three numbers, and averaging them would be an
-average of three different quantities.
+and D'Antonio say so explicitly, and where they print a surface once per fit
+they mark each line with the fit it belongs to, which is why a surface there
+is several rows: the same grass fitted with the Delany and Bazley model, with
+the semi-phenomenological model and with the variable-porosity model is three
+numbers, and averaging them would be an average of three different
+quantities.
 
 Why the numbers spread the way they do
 --------------------------------------
@@ -154,13 +155,18 @@ class GroundSurface(CatalogueRow):
         refusal of a cell the page did not print as a number.
 
         An effective flow resistivity is the parameter of the model it was
-        fitted with, and Cox and D'Antonio name that model for each fit
-        they print, in the row's :attr:`~phonometry.io.CatalogueRow.variant`.
-        A row fitted with the Delany and Bazley model is taken into that
-        model only, and a row fitted with the semi-phenomenological or the
-        variable-porosity model into neither of the two here, because its
-        resistivity is not a parameter of either. A row that names no fit,
-        Bies's and a caller's own, is taken into both.
+        fitted with, and Cox and D'Antonio name that model for some of their
+        rows. Where they print a surface once per fit, a footnote marks each
+        line, and the row's :attr:`~phonometry.io.CatalogueRow.variant`
+        quotes it; for the two sands Horoshenkov and Mohamed measured at four
+        water contents, the text beside the table says the parameters are
+        those of the two-parameter model of Attenborough. A row fitted with
+        the Delany and Bazley model is taken into that model only, and a row
+        fitted with the semi-phenomenological, the variable-porosity or the
+        two-parameter model into neither of the two here, because its
+        resistivity is not a parameter of either. A row whose page names no
+        fit, most of Cox's, every one of Bies's and a caller's own, is taken
+        into both.
 
         :param frequency: Frequency vector ``f``, in hertz.
         :param model: ``"delany_bazley"`` (Default) or ``"miki"``, the two
@@ -194,9 +200,17 @@ class GroundSurface(CatalogueRow):
         :raises ValueError: naming the fit the page prints and the model
             asked for.
         """
-        if self.variant not in _FITS:
+        if self.variant in _FITS:
+            fitted = _FITS[self.variant]
+            named = f"the row the page marks “{self.variant}” ({self.source})"
+        elif (self.table, self.name) in _FITS_IN_TEXT:
+            words, fitted, where = _FITS_IN_TEXT[self.table, self.name]
+            named = (
+                f"the row “{self.variant}”, whose parameters the text beside "
+                f"the table gives as those of “{words}” ({where})"
+            )
+        else:
             return
-        fitted = _FITS[self.variant]
         if fitted == model:
             return
         instead = (
@@ -205,9 +219,8 @@ class GroundSurface(CatalogueRow):
             else "neither 'delany_bazley' nor 'miki' is that model"
         )
         msg = (
-            f"{self.name!r} is the row the page marks “{self.variant}” "
-            f"({self.source}): its effective flow resistivity is a parameter "
-            f"of that model and not of {model!r}; {instead}, or take "
+            f"{self.name!r} is {named}: its effective flow resistivity is a "
+            f"parameter of that model and not of {model!r}; {instead}, or take "
             "row.printed('flow_resistivity_pa_s_m2') into another model "
             "yourself."
         )
@@ -227,6 +240,28 @@ _FITS: Mapping[str, str] = MappingProxyType(
         "Fitted using Delany and Bazley model": "delany_bazley",
         "Fitted using semi-phenomenological model": "",
         "Fitted using variable porosity model": "",
+    }
+)
+
+#: The rows of Cox & D'Antonio 3e Table 6.7 no footnote marks but the text
+#: ties to a fit, keyed ``(table, surface name)``: the model as the text names
+#: it, the model of :meth:`GroundSurface.medium` its resistivity is a
+#: parameter of (none), and where the text says it. Sect. 6.6.3, PDF page 272
+#: (printed p. 215), on the sands Horoshenkov and Mohamed wetted in the
+#: laboratory: "They also found that the two-parameter model of Attenborough
+#: was more suitable than one based on the Delany and Bazley formulations;
+#: the parameters for the model they deduced are shown in Table 6.7." Those
+#: are the two sands printed at four water contents each, with the porosity
+#: decay rate of that model (Eq. 6.46, PDF page 271, printed p. 214) beside
+#: every resistivity.
+_FITS_IN_TEXT: Mapping[tuple[str, str], tuple[str, str, str]] = MappingProxyType(
+    {
+        ("cox-2017-table-6-7", surface): (
+            "the two-parameter model of Attenborough",
+            "",
+            "Cox & D'Antonio 3e Sect. 6.6.3, PDF page 272, printed p. 215",
+        )
+        for surface in ("Coarse sand, pore size 98 μm", "Fine sand, pore size 65 μm")
     }
 )
 

@@ -982,12 +982,60 @@ def test_a_name_that_holds_a_lone_surrogate_is_refused_in_text_that_prints() -> 
     refusal.encode("utf-8")
 
 
-@pytest.mark.parametrize("character", ["\x00", "\x1b", "\r", "\u202e", "\u2066"])
+@pytest.mark.parametrize(
+    "character",
+    ["\x00", "\x1b", "\r", "\x7f", "\x80", "\x85", "\x9b", "\x9f", "\u202e", "\u2066"],
+)
 def test_a_control_character_or_a_reordering_mark_is_refused(character: str) -> None:
+    """DEL and the C1 controls too.
+
+    A next line (U+0085) breaks a line, and U+009B opens a terminal's commands
+    as ESC [ does.
+    """
     document = _broken("/rows/1/note", f"Panel{character}40")
     issues = _issues(document)
     assert issues[0].location == "/rows/1/note"
     assert f"U+{ord(character):04X}" in issues[0].message
+
+
+def test_a_name_that_holds_a_c1_control_is_refused_in_text_that_prints() -> None:
+    document = _panel()
+    document["rows"][1]["x-code\x9b"] = "P40-C"
+    with pytest.raises(io.CatalogueError, match="panel-40.json") as caught:
+        _read(document)
+    locations = {issue.location for issue in caught.value.issues}
+    assert locations == {"/rows/1/x-code\\x9b"}
+    assert "\x9b" not in str(caught.value)
+    assert "x-code\\x9b" in str(caught.value)
+
+
+def test_no_packaged_text_holds_a_character_a_catalogue_file_refuses() -> None:
+    """Every table the package ships could be written to a file and read back."""
+    found = []
+    for path in sorted(pathlib.Path(phonometry.__file__).parent.glob("**/data/*.json")):
+        text = json.loads(path.read_text(encoding="utf-8"))
+        for where, held in _texts(text, ""):
+            if _catalogue._UNSAFE.search(held) is not None:
+                found.append(f"{path.name}{where}")
+    assert found == []
+
+
+def _texts(node: object, where: str) -> list[tuple[str, str]]:
+    """Every text in *node*, its keys among them, with the pointer to it."""
+    if isinstance(node, str):
+        return [(where, node)]
+    if isinstance(node, dict):
+        pairs = [(f"{where}/{key}", key) for key in node]
+        for key, value in node.items():
+            pairs += _texts(value, f"{where}/{key}")
+        return pairs
+    if isinstance(node, list):
+        return [
+            pair
+            for index, value in enumerate(node)
+            for pair in _texts(value, f"{where}/{index}")
+        ]
+    return []
 
 
 def test_a_tab_and_a_line_feed_are_text() -> None:
@@ -1256,6 +1304,44 @@ def test_text_past_sixteen_mebibytes_is_refused_before_it_is_decoded() -> None:
     text = json.dumps(_panel()) + " " * (16 * 1024 * 1024)
     with pytest.raises(io.CatalogueError, match="panel-40.json: is 1677"):
         _read(text)
+
+
+def _not_utf8_name(tmp_path: pathlib.Path) -> pathlib.Path:
+    """A file whose name holds a byte UTF-8 has no character for."""
+    path = tmp_path / os.fsdecode(b"\xff-panel.json")
+    try:
+        path.touch()
+    except (OSError, UnicodeEncodeError):
+        pytest.skip("this file system takes only names that are text")
+    return path
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="POSIX names are bytes")
+@pytest.mark.parametrize("text", ["{", "document"], ids=["not-json", "issues"])
+def test_a_file_name_that_is_not_utf8_is_named_by_its_escape(
+    tmp_path: pathlib.Path, text: str
+) -> None:
+    """The byte is decoded as a lone surrogate, which no refusal can print."""
+    path = _not_utf8_name(tmp_path)
+    if text == "document":
+        text = json.dumps(_broken("/rows/1/porosity", "high"))
+    path.write_text(text, encoding="utf-8")
+    with pytest.raises(io.CatalogueError) as caught:
+        io.read_catalogue(path, row_type=PorousMaterial)
+    refusal = str(caught.value)
+    assert refusal.startswith("\\udcff-panel.json: ")
+    refusal.encode("utf-8")
+    assert {issue.file for issue in caught.value.issues} == {"\\udcff-panel.json"}
+    for issue in caught.value.issues:
+        str(issue).encode("utf-8")
+
+
+def test_a_label_is_written_with_the_escapes_a_pointer_takes() -> None:
+    with pytest.raises(io.CatalogueError) as caught:
+        io.parse_catalogue("{", row_type=PorousMaterial, label="mine\udcff\x1b.json")
+    assert str(caught.value).startswith("mine\\udcff\\x1b.json: line 1")
+    (issue,) = caught.value.issues
+    assert issue.file == "mine\\udcff\\x1b.json"
 
 
 def test_text_that_is_not_utf8_is_refused(tmp_path: pathlib.Path) -> None:

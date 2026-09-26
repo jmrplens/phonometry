@@ -650,7 +650,7 @@ rides on the catalogue that was read, in `Catalogue.notes`.
 
 | Name | Description |
 | :--- | :--- |
-| `file` | The file, as the caller named it; empty for a row built in Python. |
+| `file` | The file, as the caller named it, with a character no catalogue text may hold written as its escape (`\udcff` for a byte of a name that is not UTF-8), so that the issue can be printed; empty for a row built in Python. |
 | `location` | Where in the file: a JSON pointer (RFC 6901) such as `"/rows/1/porosity"`; `"<Python>"` for a row built in Python. |
 | `row_key` | The key of the row, when the issue sits in one. |
 | `field` | The field of the row, when the issue is about one cell. |
@@ -1143,7 +1143,7 @@ dictionary has merged them.
 | :--- | :--- |
 | `document` | JSON text, or a mapping of the same shape. |
 | `row_type` | The class of every row, a subclass of [`CatalogueRow`](/phonometry/reference/api/io/io/#cataloguerow). |
-| `label` | What names the document in every issue. |
+| `label` | What names the document in every issue, with a character no catalogue text may hold written as its escape, as a file's name is. |
 
 **Returns:** The catalogue, keyed `"<catalogue>/<key>"`. Its [`file_sha256`](/phonometry/reference/api/io/io/#catalogue) is the SHA-256 of the text's UTF-8 bytes, or empty for a mapping.
 

@@ -169,10 +169,12 @@ _KEY = re.compile(r"[A-Za-z0-9_][A-Za-z0-9._+-]{0,127}")
 _EXTRA = re.compile(r"x-[A-Za-z0-9_][A-Za-z0-9._+-]{0,125}")
 #: A number as JSON writes one.
 _JSON_NUMBER = re.compile(r"-?(0|[1-9][0-9]*)(\.[0-9]+)?([eE][+-]?[0-9]+)?")
-#: What no text of a catalogue may hold: the control characters but the tab
-#: and the line feed, and the marks that reorder what a reader sees (a
-#: "Trojan source" text shows one thing and holds another).
-_UNSAFE = re.compile(r"[\x00-\x08\x0b-\x1f\u202a-\u202e\u2066-\u2069]")
+#: What no text of a catalogue may hold: every control character but the tab
+#: and the line feed (those of C0, DEL, and those of C1, the next line and the
+#: escape that opens a terminal's commands among them), and the marks that
+#: reorder what a reader sees (a "Trojan source" text shows one thing and
+#: holds another).
+_UNSAFE = re.compile(r"[\x00-\x08\x0b-\x1f\x7f-\x9f\u202a-\u202e\u2066-\u2069]")
 
 _TOP_REQUIRED = (
     "schema",
@@ -1604,7 +1606,7 @@ def read_catalogue[R: CatalogueRow](
     """
     cls = _check_row_type(row_type)
     target = _json_path(path, "read_catalogue reads")
-    label = target.name
+    label = _escaped(target.name)
     try:
         raw = read_at_most(target, _MAX_BYTES)
     except NotRegularError as error:
@@ -1641,7 +1643,8 @@ def parse_catalogue[R: CatalogueRow](
     :param document: JSON text, or a mapping of the same shape.
     :param row_type: The class of every row, a subclass of
         :class:`CatalogueRow`.
-    :param label: What names the document in every issue.
+    :param label: What names the document in every issue, with a character
+        no catalogue text may hold written as its escape, as a file's name is.
     :return: The catalogue, keyed ``"<catalogue>/<key>"``. Its
         :attr:`~Catalogue.file_sha256` is the SHA-256 of the text's UTF-8
         bytes, or empty for a mapping.
@@ -1651,6 +1654,7 @@ def parse_catalogue[R: CatalogueRow](
     :warns CatalogueWarning: once, when the catalogue carries notes.
     """
     cls = _check_row_type(row_type)
+    label = _escaped(label)
     if isinstance(document, str):
         try:
             encoded = document.encode("utf-8")
@@ -2130,10 +2134,13 @@ def _write_atomic(target: Path, text: str, *, overwrite: bool) -> None:
         and for a symbolic link at the name, which is never followed.
     """
     if target.is_symlink():
-        msg = f"{target} is a symbolic link, and write_catalogue does not write through one"
+        msg = (
+            f"{_escaped(str(target))} is a symbolic link, and write_catalogue "
+            "does not write through one"
+        )
         raise FileExistsError(msg)
     if target.exists() and not overwrite:
-        msg = f"{target} exists; pass overwrite=True to replace it"
+        msg = f"{_escaped(str(target))} exists; pass overwrite=True to replace it"
         raise FileExistsError(msg)
     write_beside(target, text.encode("utf-8"))
 

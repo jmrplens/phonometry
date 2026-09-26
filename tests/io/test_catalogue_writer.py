@@ -21,6 +21,7 @@ import os
 import pathlib
 import pkgutil
 import re
+import sys
 from collections.abc import Mapping
 from typing import Any
 
@@ -436,6 +437,21 @@ def test_a_symbolic_link_is_never_written_through(tmp_path: pathlib.Path) -> Non
     with pytest.raises(FileExistsError, match="symbolic link"):
         io.write_catalogue(mine, link, overwrite=True)
     assert target.read_text(encoding="utf-8") == "keep"
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="POSIX names are bytes")
+def test_a_refusal_to_overwrite_prints_a_name_that_is_not_utf8(
+    tmp_path: pathlib.Path,
+) -> None:
+    path = tmp_path / os.fsdecode(b"\xff-mine.json")
+    try:
+        path.write_text("keep", encoding="utf-8")
+    except (OSError, UnicodeEncodeError):
+        pytest.skip("this file system takes only names that are text")
+    with pytest.raises(FileExistsError) as caught:
+        io.write_catalogue(_mine(), path)
+    assert "\\udcff-mine.json exists" in str(caught.value)
+    str(caught.value).encode("utf-8")
 
 
 def test_a_write_leaves_no_file_but_its_own(tmp_path: pathlib.Path) -> None:

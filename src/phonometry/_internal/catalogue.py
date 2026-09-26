@@ -143,15 +143,17 @@ _PAGE = "the page"
 
 @dataclass(frozen=True, kw_only=True)
 class CatalogueIssue:
-    """One thing wrong with a catalogue, or worth a second look, and where.
+    r"""One thing wrong with a catalogue, or worth a second look, and where.
 
     A reader of a catalogue file collects every one of these before it
     builds a single row, so one pass over a file shows everything that has
     to change in it. A :class:`CatalogueError` carries the errors; a note
     rides on the catalogue that was read, in ``Catalogue.notes``.
 
-    :ivar file: The file, as the caller named it; empty for a row built in
-        Python.
+    :ivar file: The file, as the caller named it, with a character no
+        catalogue text may hold written as its escape (``\udcff`` for a
+        byte of a name that is not UTF-8), so that the issue can be printed;
+        empty for a row built in Python.
     :ivar location: Where in the file: a JSON pointer (RFC 6901) such as
         ``"/rows/1/porosity"``; ``"<Python>"`` for a row built in Python.
     :ivar row_key: The key of the row, when the issue sits in one.

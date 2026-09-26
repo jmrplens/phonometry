@@ -1,6 +1,6 @@
 ---
 title: "Guías"
-description: "Las 144 guías de phonometry, agrupadas en los trece temas que cubre la biblioteca: para qué sirve cada área, las normas que implementa y un resumen de una línea de cada guía que contiene."
+description: "Las 145 guías de phonometry, agrupadas en los trece temas que cubre la biblioteca: para qué sirve cada área, las normas que implementa y un resumen de una línea de cada guía que contiene."
 head:
   - tag: script
     attrs:
@@ -118,7 +118,7 @@ hay ninguna panorámica del campo: cada página es la documentación de trabajo 
 un módulo, escrita para que un resultado se pueda defender apartado por
 apartado en lugar de darlo por bueno.
 
-Esta página es el mapa. Ciento cuarenta y cuatro guías repartidas en trece temas, y cada
+Esta página es el mapa. Ciento cuarenta y cinco guías repartidas en trece temas, y cada
 área tiene su propio índice con el relato largo de cómo encajan sus piezas. Si
 llegas sin una pregunta concreta, lee primero la
 [introducción](/phonometry/es/start/getting-started/): recorre una señal por toda la
@@ -318,6 +318,11 @@ mismas filas que entregan todos los catálogos publicados.
   el flujo en una página ejecutable, del WAV del sonómetro al nivel
   calibrado, el aviso de pérdidas, el flujo por bloques, la escritura BWF,
   el sidecar y la conversión sin pérdidas.
+- [Tus propios catálogos](/phonometry/es/io/material-catalogues/): una hoja
+  de características, un informe de ensayo o una medida tuya como archivo
+  de catálogo, leído en las filas que entregan todos los catálogos
+  publicados, buscado con las mismas búsquedas y pasado a los mismos
+  modelos.
 
 ## [Audición y percepción](/phonometry/es/perception/)
 

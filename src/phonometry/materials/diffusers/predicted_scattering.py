@@ -48,7 +48,7 @@ from dataclasses import dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING
 
-from ..._internal.catalogue import read_table, take
+from ..._internal.catalogue import read_table, rows_to_search, search_text, take
 from ._scattering import ScatteringBands
 
 if TYPE_CHECKING:
@@ -122,19 +122,34 @@ PUBLISHED_PREDICTED_SCATTERING: Mapping[str, PredictedScatteringSpectrum] = (
 )
 
 
-def predicted_scattering_named(name: str) -> tuple[PredictedScatteringSpectrum, ...]:
+def predicted_scattering_named(
+    name: str, *, catalogue: Mapping[str, PredictedScatteringSpectrum] | None = None
+) -> tuple[PredictedScatteringSpectrum, ...]:
     """Every predicted row whose description or heading contains *name*.
 
     :param name: A fragment of the printed description or of the heading above
         it, matched without case. The headings are where the topology is:
         ``"sinusoidal"``, ``"batten"``, ``"triangle"``, since a row of its own
         reads ``"h = 4 cm, L = 20 cm"``.
-    :return: The rows that match, in the order the tables are read, which is
-        empty when no table has one.
+    :param catalogue: The rows to search in place of
+        :data:`PUBLISHED_PREDICTED_SCATTERING`: a catalogue of your own that
+        :func:`phonometry.io.read_catalogue` returns,
+        ``PUBLISHED_PREDICTED_SCATTERING | mine`` to search both at once, or
+        any mapping of key to row (Default: ``None``, which searches
+        :data:`PUBLISHED_PREDICTED_SCATTERING`).
+    :return: The rows that match, in catalogue order, which is empty when no
+        row has one.
+    :raises TypeError: for a *catalogue* that is not a mapping, or that holds a
+        row that is not a :class:`PredictedScatteringSpectrum`, naming its key.
     """
-    wanted = name.casefold()
+    wanted = search_text(name)
     return tuple(
         row
-        for row in PUBLISHED_PREDICTED_SCATTERING.values()
-        if wanted in row.name.casefold() or wanted in row.group.casefold()
+        for row in rows_to_search(
+            catalogue,
+            PUBLISHED_PREDICTED_SCATTERING,
+            PredictedScatteringSpectrum,
+            "predicted_scattering_named",
+        )
+        if wanted in search_text(row.name) or wanted in search_text(row.group)
     )

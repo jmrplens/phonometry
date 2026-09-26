@@ -53,7 +53,11 @@ and this catalogue refuses them rather than guessing what the digits were.
 ## damping_named
 
 ```python
-damping_named(name: str) -> tuple[DampingMaterial, ...]
+damping_named(
+    name: str,
+    *,
+    catalogue: Mapping[str, DampingMaterial] | None = None,
+) -> tuple[DampingMaterial, ...]
 ```
 
 Every damping material whose name contains *name*, case-insensitively.
@@ -67,8 +71,15 @@ behalf.
 | Name | Description |
 | :--- | :--- |
 | `name` | Part of a material name, as its page prints it. |
+| `catalogue` | The rows to search in place of [`PUBLISHED_DAMPING`](/phonometry/reference/api/solids/damping/#published_damping): a catalogue of your own that [`phonometry.io.read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) returns, `PUBLISHED_DAMPING \| mine` to search both at once, or any mapping of key to row (Default: `None`, which searches [`PUBLISHED_DAMPING`](/phonometry/reference/api/solids/damping/#published_damping)). |
 
 **Returns:** The matching rows, in catalogue order. Empty when none match.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | for a *catalogue* that is not a mapping, or that holds a row that is not a [`DampingMaterial`](/phonometry/reference/api/solids/damping/#dampingmaterial), naming its key. |
 
 ## DampingMaterial
 

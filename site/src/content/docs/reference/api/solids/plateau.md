@@ -60,7 +60,11 @@ catalogue here.
 ## plateau_material_named
 
 ```python
-plateau_material_named(name: str) -> tuple[PlateauMaterial, ...]
+plateau_material_named(
+    name: str,
+    *,
+    catalogue: Mapping[str, PlateauMaterial] | None = None,
+) -> tuple[PlateauMaterial, ...]
 ```
 
 Every row whose printed name contains *name*, case insensitively.
@@ -70,8 +74,15 @@ Every row whose printed name contains *name*, case insensitively.
 | Name | Description |
 | :--- | :--- |
 | `name` | Part of a material name, as the page prints it. |
+| `catalogue` | The rows to search in place of [`PUBLISHED_PLATEAU_DATA`](/phonometry/reference/api/solids/plateau/#published_plateau_data): a catalogue of your own that [`phonometry.io.read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) returns, `PUBLISHED_PLATEAU_DATA \| mine` to search both at once, or any mapping of key to row (Default: `None`, which searches [`PUBLISHED_PLATEAU_DATA`](/phonometry/reference/api/solids/plateau/#published_plateau_data)). |
 
-**Returns:** The matching rows, in the order the tables list them. Empty when nothing matches, which is not an error: a caller asking whether a material is tabulated gets an empty answer rather than an exception.
+**Returns:** The matching rows, in catalogue order. Empty when nothing matches, which is not an error: a caller asking whether a material is tabulated gets an empty answer rather than an exception.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | for a *catalogue* that is not a mapping, or that holds a row that is not a [`PlateauMaterial`](/phonometry/reference/api/solids/plateau/#plateaumaterial), naming its key. |
 
 ## PlateauMaterial
 

@@ -557,7 +557,7 @@ PLATEAU_MATERIALS = {'aluminium': (2.66, 29.0, 11.0), 'brick': (2.1, 37.0, 4.5),
 plateau_transmission_loss(
     frequency: ArrayLike,
     *,
-    material: str,
+    material: str | PlateauMaterial,
     thickness_mm: float,
     plateau_height: float | None = ...,
     frequency_ratio: float | None = ...,
@@ -568,7 +568,7 @@ plateau_transmission_loss(
 plateau_transmission_loss(
     frequency: ArrayLike,
     *,
-    material: str,
+    material: str | PlateauMaterial,
     mass_per_area: float,
     thickness_mm: float | None = ...,
     plateau_height: float | None = ...,
@@ -609,17 +609,24 @@ tabulated plateau absorbs both. The price is that it is only an estimate,
 and it assumes a diffuse field on both sides of a panel whose length and
 width are at least twenty times its thickness.
 
-Give a tabulated *material* with its *thickness_mm* (the surface density
-then follows from the table), or give *mass_per_area* together with
-*plateau_height* and *frequency_ratio*. An explicit *mass_per_area*,
-*plateau_height* or *frequency_ratio* always overrides the table.
+Give a *material* with its *thickness_mm* (the surface density then
+follows from the material's), or give *mass_per_area* together with
+*plateau_height* and *frequency_ratio*. The material is a name the table
+tabulates, or a [`PlateauMaterial`](/phonometry/reference/api/solids/plateau/#plateaumaterial) row: one of
+[`PUBLISHED_PLATEAU_DATA`](/phonometry/reference/api/solids/plateau/#published_plateau_data), or one of your own
+that [`phonometry.io.read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) read from a file. A row gives
+its three numbers through [`printed`](/phonometry/reference/api/io/io/#cataloguerowprinted), so
+a cell it holds as a range, a bound or a word is refused with what it
+holds, never read as a number. An explicit *mass_per_area*,
+*plateau_height* or *frequency_ratio* always overrides the material's,
+and the material's own is then not read at all.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
 | `frequency` | Band centre frequencies `f`, in hertz (array, > 0). |
-| `material` | Key into [`PLATEAU_MATERIALS`](/phonometry/reference/api/building/panel-transmission/#plateau_materials) (Default: `None`). |
+| `material` | A key into [`PLATEAU_MATERIALS`](/phonometry/reference/api/building/panel-transmission/#plateau_materials), or a [`PlateauMaterial`](/phonometry/reference/api/solids/plateau/#plateaumaterial) row (Default: `None`). |
 | `thickness_mm` | Panel thickness, in **millimetres** (> 0), used with *material* to get the surface density. |
 | `mass_per_area` | Mass per unit area `m''`, in kg/m^2 (> 0). |
 | `plateau_height` | Coincidence plateau height, in dB (> 0). |
@@ -633,7 +640,8 @@ then follows from the table), or give *mass_per_area* together with
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | for a non-positive input, an unknown material, or an under-specified panel. |
+| ValueError | for a non-positive input, an unknown material name, a row that does not print a number the construction reads, or an under-specified panel. |
+| TypeError | for a *material* that is neither a name nor a [`PlateauMaterial`](/phonometry/reference/api/solids/plateau/#plateaumaterial). |
 
 ## plot_double_wall_geometry
 

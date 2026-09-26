@@ -67,6 +67,7 @@ import numbers
 import re
 import types
 import typing
+import unicodedata
 import weakref
 from collections.abc import Mapping
 from collections.abc import Set as AbstractSet
@@ -2951,3 +2952,67 @@ class BandedRow(CatalogueRow):
         return np.array([values[band] for band in bands], dtype=np.float64).reshape(
             wanted.shape
         )
+
+
+def rows_to_search[R: CatalogueRow](
+    catalogue: object,
+    published: Mapping[str, R],
+    row_type: type[R],
+    lookup: str,
+) -> tuple[R, ...]:
+    """The rows a ``*_named`` lookup reads, in the order the mapping holds them.
+
+    Every lookup of a published catalogue takes ``catalogue=``, the rows to
+    search in place of its own ``PUBLISHED_*``, which is *published* when the
+    caller gives none. A caller's catalogue is any mapping of key to row: what
+    :func:`phonometry.io.read_catalogue` returns, a published catalogue joined
+    with one by ``|``, or a plain dictionary. Every row in it has to be a
+    *row_type*, a subclass of the caller's own included. A row of another
+    class is refused rather than skipped, because a lookup that skipped it
+    would leave it out of the answer under the very name asked for, and
+    nothing would say so.
+
+    :param catalogue: What the caller passed as ``catalogue=``, or ``None``.
+    :param published: The lookup's own published catalogue.
+    :param row_type: The class the lookup answers with.
+    :param lookup: The lookup's name, for the refusal.
+    :return: The rows to match, every one a *row_type*.
+    :raises TypeError: for a *catalogue* that is not a mapping, and for one
+        that holds a row of another class, naming its key.
+    """
+    if catalogue is None:
+        return tuple(published.values())
+    if not isinstance(catalogue, Mapping):
+        msg = (
+            f"{lookup} takes catalogue= as a mapping of key to row, such as "
+            f"what io.read_catalogue returns; got {type(catalogue).__name__}"
+        )
+        raise TypeError(msg)
+    for key, row in catalogue.items():
+        if not isinstance(row, row_type):
+            msg = (
+                f"catalogue= holds a row of class {type(row).__name__} under "
+                f"{key!r}, and {lookup} reads {row_type.__name__} rows"
+            )
+            raise TypeError(msg)
+    return tuple(catalogue.values())
+
+
+def search_text(text: str) -> str:
+    """*text* as every ``*_named`` lookup compares it: one form, no case.
+
+    One word can reach a lookup in two Unicode forms: ``"linóleo"`` typed
+    with the accented letter as one character, or pasted from a document that
+    stores it as the plain letter followed by a combining accent. The two
+    print the same and :meth:`str.casefold` keeps them apart, so a lookup that
+    only folded case would answer the second with nothing. Every lookup
+    passes both the name asked for and the text of each row through here:
+    canonical decomposition, case folding and canonical composition, which is
+    Unicode's canonical caseless match, so a name matches whichever form
+    either side arrives in.
+
+    :param text: A name asked for, or the text of a row.
+    :return: *text* in the one form the lookups compare.
+    """
+    decomposed = unicodedata.normalize("NFD", text)
+    return unicodedata.normalize("NFC", decomposed.casefold())

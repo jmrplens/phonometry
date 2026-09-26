@@ -109,7 +109,11 @@ cloth tables print none.
 ## resistive_sheet_named
 
 ```python
-resistive_sheet_named(name: str) -> tuple[ResistiveSheet, ...]
+resistive_sheet_named(
+    name: str,
+    *,
+    catalogue: Mapping[str, ResistiveSheet] | None = None,
+) -> tuple[ResistiveSheet, ...]
 ```
 
 Every facing a page labels *name*, matched whole and without case.
@@ -127,8 +131,15 @@ other.
 | Name | Description |
 | :--- | :--- |
 | `name` | The label as its page prints it: `"80"`, `"1584"`, `"FM 122"`. |
+| `catalogue` | The rows to search in place of [`PUBLISHED_FLOW_RESISTANCE`](/phonometry/reference/api/materials/resistive-sheets/#published_flow_resistance): a catalogue of your own that [`phonometry.io.read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) returns, `PUBLISHED_FLOW_RESISTANCE \| mine` to search both at once, or any mapping of key to row (Default: `None`, which searches [`PUBLISHED_FLOW_RESISTANCE`](/phonometry/reference/api/materials/resistive-sheets/#published_flow_resistance)). |
 
 **Returns:** The matching rows, in catalogue order. Empty when none match.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | for a *catalogue* that is not a mapping, or that holds a row that is not a [`ResistiveSheet`](/phonometry/reference/api/materials/resistive-sheets/#resistivesheet), naming its key. |
 
 ## ResistiveSheet
 

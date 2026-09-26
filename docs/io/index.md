@@ -43,7 +43,8 @@ has a field for, made to travel.
 The other files the library reads and writes are catalogues of materials.
 The library publishes the tables of its books and standards and none of a
 manufacturer's, so a data sheet, a declaration of performance or a test
-report of your own goes in a JSON file of yours, with the provenance of the
+report of your own goes in a file of yours, a JSON document or a spreadsheet
+saved as CSV with a JSON header beside it, with the provenance of the
 document: its kind, its version, the day you consulted it, the laboratory
 and the report. `read_catalogue` reads that file into rows of the same
 classes every published catalogue hands out, so a porous core from your data
@@ -66,7 +67,8 @@ the same form, as a template to start from.
 - [Your own catalogues](material-catalogues.md): a data
   sheet, a declaration of performance, a test report or a measurement of
   yours as a catalogue file: a published table as the template, the
-  document and its provenance, the refusals that point at a cell, the
+  document and its provenance, a spreadsheet saved as CSV, the refusals
+  that point at a cell, the
   rows in the models and in every lookup by name, and which row class
   holds which quantity.
 

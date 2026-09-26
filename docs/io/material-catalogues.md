@@ -207,8 +207,8 @@ breaks the contract every row keeps (a negative density, a porosity above 1,
 a value beside a word that says there is none) is reported with the first
 rule it breaks. The reader refuses a `NaN` or an `Infinity`, a name written
 twice in one object, a control character or a mark that reorders text, a
-file over 16 MiB (checked before a byte of it is read), more than
-50 000 rows and nesting past six levels.
+file over 16 MiB (checked before a byte of it is read), the header of a
+CSV file over 64 KiB, more than 50 000 rows and nesting past six levels.
 
 What is only worth a second look is not an error. A value whose basis is
 `measured` with neither a report nor a laboratory named for it, or a word in
@@ -500,6 +500,172 @@ fields of one kind could take is refused as ambiguous. A unit the table does
 not hold is refused with the spellings the field takes. Every number of one
 cell is written in one unit.
 
+## From a spreadsheet: a CSV file
+
+A data sheet is more often typed into a spreadsheet than into a JSON file,
+and a spreadsheet saves CSV. A catalogue can be one: the rows go in the CSV
+file, one per line under a first line that names the columns, and the
+document without its rows goes in a JSON header beside it, named as the CSV
+file with `.phonometry.json` after it. The header declares how the file
+writes its cells, `"csv": {"delimiter": ";", "decimal": ","}` for a
+spreadsheet set up for a decimal comma, and nothing about the dialect is
+guessed from the file. `write_catalogue` writes the pair when the name ends
+in `.csv`, so a published table is again the quickest template, here the
+absorption coefficients of Tabla 6.1 of Arau-Puchades (1999):
+
+```python
+arau = {
+    key: row
+    for key, row in materials.PUBLISHED_ABSORPTION.items()
+    if row.table == "arau-1999-table-6-1"
+}
+written = io.write_catalogue(
+    arau, "template.csv", catalogue="template-arau", delimiter=";", decimal=","
+)
+print([path.name for path in written])
+# ['template.csv', 'template.csv.phonometry.json']
+
+lines = pathlib.Path("template.csv").read_text(encoding="utf-8-sig").splitlines()
+print(lines[0].split(";")[:5])
+# ['key', 'name', 'variant', 'note', 'absorption_coefficient_125']
+print(lines[1].split(";")[:5])
+# ['01_pared_de_ladrillo', 'Pared de ladrillo', '', '', '0,025']
+header = json.loads(pathlib.Path("template.csv.phonometry.json").read_text("utf-8"))
+print(header["csv"])   # {'delimiter': ';', 'decimal': ','}
+```
+
+Open the file in a spreadsheet, edit it, and save it as "CSV UTF-8". The
+reader takes UTF-8 with or without the byte order mark a spreadsheet writes
+there, and refuses any other encoding with that advice. Keep the header
+beside the file, with the delimiter and the decimal mark the spreadsheet
+saved with. The writer puts an apostrophe before a text a spreadsheet would
+run as a formula (one that starts with `=`, `+`, `-`, `@`, a tab or a
+carriage return), and the reader takes it off again. A CSV file and its
+header are two files: each is written whole, but not the two as one.
+
+Each numeric cell holds one thing, in a closed grammar that writes the same
+hedges as the JSON document:
+
+| The cell | What it says |
+|---|---|
+| empty | the document prints nothing there |
+| `0,85` | a value, with the decimal mark the header declares |
+| `~0,85` | an approximate value |
+| `<=30`, `<30` or `≤30` | an upper bound and no value |
+| `>=5`, `>5` or `≥5` | a lower bound and no value |
+| `0,30..0,50` | a range and no value; `~0,30..0,50` if it is approximate |
+| `0,85±0,05` or `0,85+/-0,05` | a value and its plus-or-minus |
+| `[AFr5]` | what the document prints where the number would be |
+| `true` or `false` | a yes or a no, in a column that holds one |
+
+A number never carries a thousands separator, and its minus sign may be the
+typographic one. The columns are `key`, the fields of the row class (in the
+unit each is named for, or in another of the same kind, as
+`flow_resistivity_kpa_s_m2`), `basis` for the row as a whole (an empty cell
+takes the document's), the page, the table, the laboratory, the
+accreditation, the report, the test date and the standard of the row as
+`provenance.page`, `provenance.printed_table`, `provenance.laboratory`,
+`provenance.accreditation`, `provenance.report`, `provenance.test_date` and
+`provenance.test_standard`, and columns of your own named `x-...`. A
+fictitious tile range typed into a sheet:
+
+```python
+header = {
+    "schema": "phonometry-catalogue",
+    "schema_version": 1,
+    "catalogue": "tile-range",
+    "row_type": "AbsorptionSpectrum",
+    "about": "Octave-band Sabine coefficients of a fictitious tile range, typed from its data sheet.",
+    "provenance": {
+        "kind": "datasheet",
+        "document": "Example tile range data sheet",
+        "publisher": "Example Acoustics Ltd",
+        "version": "Rev. 2",
+        "consulted": "2026-09-25",
+        "laboratory": "Example Lab",
+    },
+    "basis": "measured",
+    "csv": {"delimiter": ";", "decimal": ","},
+}
+pathlib.Path("tiles.csv.phonometry.json").write_text(json.dumps(header), encoding="utf-8")
+pathlib.Path("tiles.csv").write_text(
+    "key;name;mounting;absorption_coefficient_125;absorption_coefficient_250;"
+    "absorption_coefficient_500;absorption_coefficient_1000;"
+    "absorption_coefficient_2000;absorption_coefficient_4000;provenance.report;x-code\n"
+    "e400;Tile 15;E400;0,45;~0,62;0,78±0,03;0,90;0,94;0,91;26-031;T15\n"
+    "a;Tile 15;A;[n.m.];0,25..0,30;0,55;0,80;>=0,85;0,80;26-032;T15\n",
+    encoding="utf-8",
+)
+sheet = io.read_catalogue("tiles.csv", row_type=materials.AbsorptionSpectrum)
+e400, mounted_a = sheet["tile-range/e400"], sheet["tile-range/a"]
+print(e400.absorption_coefficient_1000, e400.approximate, e400.uncertainty)
+# 0.9 frozenset({'absorption_coefficient_250'}) {'absorption_coefficient_500': 0.03}
+print(mounted_a.ranges)
+# {'absorption_coefficient_250': (0.25, 0.3), 'absorption_coefficient_2000': (0.85, None)}
+print(mounted_a.why_missing("absorption_coefficient_2000"))
+# the datasheet prints a lower bound of 0.85 and no value
+print(mounted_a.source)
+# Example tile range data sheet (Example Acoustics Ltd), Rev. 2; report 26-032
+# (Example Lab); consulted 2026-09-25
+print(sheet.extras["tile-range/a"]["x-code"])   # T15
+```
+
+The rows go through the same checks as a JSON document's, and every problem
+is reported at once at its line and its column, lettered as a spreadsheet
+letters them. A column the reader does not know is answered with the name
+most like it, and a text where a number goes is never read as a word, a
+`NaN` or a zero:
+
+```python
+pathlib.Path("tiles.csv").write_text(
+    "key;name;absorption_coefficent_500;absorption_coefficient_1000\n"
+    "e400;Tile 15;0,78;0.^G\n",
+    encoding="utf-8",
+)
+try:
+    io.read_catalogue("tiles.csv", row_type=materials.AbsorptionSpectrum)
+except io.CatalogueError as error:
+    for issue in error.issues:
+        print(issue)
+# tiles.csv, line 1, column C: no field 'absorption_coefficent_500' on
+#   AbsorptionSpectrum; did you mean 'absorption_coefficient_500'?
+# tiles.csv, line 2, column D (absorption_coefficient_1000), row 'e400': '0.^G'
+#   is not a number; if the datasheet prints this text where the number would
+#   be, write it as [0.^G]
+```
+
+`0.^G` is what a PDF's broken text layer can leave behind: if the page
+prints a word there, it goes between brackets; if it prints a number, type
+the number. A range typed with a dash, a plus-or-minus typed as `+-`, a
+unit typed after the number and a number grouped in thousands are each told
+how to write them. When every number that fails is written with the other
+decimal mark (a number grouped in thousands, which could be either, is not
+counted), or the first line splits into columns at another delimiter, the
+refusal also says which one to declare.
+
+What one cell cannot say is written in a JSON document instead: several
+readings with no single value, a misprint, a value the arithmetic reaches
+but should not, a cell carried from another row, a figure in a unit no
+family holds, a credit, a basis or a standard for a single cell, a bound or
+a range with a plus-or-minus, an approximate bound, and an empty text where
+the field's default says something. `write_catalogue` refuses to write such
+a table as CSV, names every cell it cannot hold by the pointer the JSON
+document would write it at, and writes nothing. Table 6.2 of Bies credits
+its first row to Beranek and Hidaka (1998), so it goes to JSON only:
+
+```python
+bies = {
+    key: row
+    for key, row in materials.PUBLISHED_ABSORPTION.items()
+    if row.table == "bies-2017-table-6-2"
+}
+try:
+    io.write_catalogue(bies, "bies.csv", catalogue="bies")
+except io.CatalogueError as error:
+    print(error.issues[0].location)   # /rows/0/attributed_to/row
+print(pathlib.Path("bies.csv").exists())   # False
+```
+
 ## Which row class holds which quantity
 
 A data sheet and a book can print quantities that look alike and are not.
@@ -639,22 +805,26 @@ The reader and the rows hold what the document prints and nothing else.
 - Nothing is uploaded, cached or copied, and no link a file names is opened.
 - Two rows under the same name are both kept and both answered, and no
   lookup chooses between them for you.
-- Nothing the file names is imported: only the JSON reader of the standard
-  library reads it, and the class name it writes is only compared with the
-  class you pass.
+- Nothing the file names is imported: only the JSON and CSV readers of the
+  standard library read it, and the class name it writes is only compared
+  with the class you pass.
+- No dialect is guessed: a CSV file's delimiter and decimal mark are the
+  ones its header declares, and a thousands separator is never read.
 
 ## What this guide covers
 
-**Covered.** Reading a catalogue of your own from a JSON file (`io.read_catalogue`) or
-from text or a mapping (`io.parse_catalogue`) into the rows every published
-catalogue hands out, with its `io.Provenance`, its notes and every problem of
-form reported at once with a JSON pointer; writing rows, a published table
-among them, back to a file (`io.write_catalogue`); searching yours and the
-published ones with every `*_named` lookup; and handing the rows to the
-porous models, a room model, the plateau method and a floating floor.
+**Covered.** Reading a catalogue of your own from a JSON file or from a CSV file with its
+JSON header (`io.read_catalogue`), or from text or a mapping
+(`io.parse_catalogue`), into the rows every published catalogue hands out,
+with its `io.Provenance`, its notes and every problem of form reported at
+once with a JSON pointer or a line and a column; writing rows, a published
+table among them, back to a JSON or CSV file (`io.write_catalogue`);
+searching yours and the published ones with every `*_named` lookup; and
+handing the rows to the porous models, a room model, the plateau method and
+a floating floor.
 
-**Not covered.** The reader takes JSON only: a spreadsheet is turned into the document first,
-for example as a dictionary handed to `parse_catalogue`. No row class holds
+**Not covered.** A spreadsheet's own format (XLSX, ODS) is not read: save the sheet as
+"CSV UTF-8", and write in JSON what one cell cannot say. No row class holds
 a data sheet's practical absorption coefficient $\alpha_\mathrm{p}$, its
 one-third-octave $\alpha_\mathrm{s}$ or a laboratory sound reduction index
 $R$, and no rating is recomputed from a spectrum a file holds. No
@@ -678,6 +848,9 @@ or a pull request is never merged.
 - Internet Engineering Task Force. (2013). *JavaScript Object Notation (JSON) Pointer* (RFC 6901).
   [rfc-editor.org](https://www.rfc-editor.org/rfc/rfc6901).
   How every problem in a file is located: /rows/1/porosity is the porosity of the second row.
+- Internet Engineering Task Force. (2005). *Common Format and MIME Type for Comma-Separated Values (CSV) Files* (RFC 4180).
+  [rfc-editor.org](https://www.rfc-editor.org/rfc/rfc4180).
+  The CSV file a spreadsheet saves: one record per line ending in CRLF, the same number of fields on every line, and a field that holds a line break, a double quote or the delimiter enclosed in double quotes, with a quote inside it doubled. The reader takes a semicolon or a tab as the delimiter too, as the header declares.
 - International Organization for Standardization. (1997). *Acoustics — Sound absorbers for use in buildings — Rating of sound absorption* (ISO 11654:1997).
   [iso.org catalogue](https://www.iso.org/standard/19583.html).
   The practical sound absorption coefficient a European data sheet prints, rounded to steps of 0.05 and capped at 1.00: a rating of a reverberation-room measurement and not a Sabine coefficient, which is why it has no place in AbsorptionSpectrum.

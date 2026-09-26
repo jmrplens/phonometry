@@ -1,10 +1,12 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
 """Guards that keep the catalogue reader closed over what the package adds.
 
-Two classes of mistake would slip past the reader's own tests the day they
-are made: a new row class the reader cannot read, and a new packaged table
-whose name a caller's catalogue could already hold. Each guard below walks
-what the package publishes rather than a list, so the class is closed.
+Three classes of mistake would slip past the reader's own tests the day they
+are made: a new row class the reader cannot read, from a JSON document or
+from a CSV file; a new kind of field the CSV front end would refuse as an
+unknown column; and a new packaged table whose name a caller's catalogue
+could already hold. Each guard below walks what the package publishes rather
+than a list, so the class is closed.
 """
 
 from __future__ import annotations
@@ -22,7 +24,7 @@ import pytest
 import phonometry
 from phonometry import io
 from phonometry._internal import catalogue as private
-from phonometry.io import _catalogue
+from phonometry.io import _catalogue, _catalogue_csv
 
 
 def _published_row_classes() -> list[type[io.CatalogueRow]]:
@@ -49,14 +51,13 @@ def test_the_walk_finds_the_row_classes() -> None:
 
 
 def _one_row(cls: type[io.CatalogueRow]) -> dict[str, object]:
-    """A row of *cls* that fills its first numeric field, if it has one."""
+    """A row of *cls* that fills its first field of numbers and of whole numbers."""
     row: dict[str, object] = {"key": "a", "name": "Specimen A"}
     kinds = private.field_kinds(cls)
-    numeric = sorted(
-        name for name, kind in kinds.items() if kind in ("number", "whole")
-    )
-    if numeric:
-        row[numeric[0]] = 1 if kinds[numeric[0]] == "whole" else 0.5
+    for kind, value in (("number", 0.5), ("whole", 1)):
+        named = sorted(name for name, held in kinds.items() if held == kind)
+        if named:
+            row[named[0]] = value
     return row
 
 
@@ -92,6 +93,82 @@ def test_every_published_row_class_is_read_from_a_one_row_document(
     for name, value in row.items():
         if name != "key":
             assert getattr(read, name) == value
+
+
+@pytest.mark.parametrize("cls", ROW_CLASSES, ids=lambda cls: cls.__name__)
+def test_every_published_row_class_is_read_from_a_one_row_sheet(
+    cls: type[io.CatalogueRow], tmp_path: pathlib.Path
+) -> None:
+    """Guard (a), for a CSV file: no row class escapes the CSV front end."""
+    row = _one_row(cls)
+    header = {
+        "schema": "phonometry-catalogue",
+        "schema_version": 1,
+        "catalogue": "guard",
+        "row_type": cls.__name__,
+        "about": "One row, to show the CSV reader reads the class.",
+        "provenance": {
+            "kind": "other",
+            "document": "A test of the reader",
+            "version": None,
+            "consulted": "2026-09-25",
+        },
+        "csv": {"delimiter": ";", "decimal": ","},
+    }
+    path = tmp_path / "guard.csv"
+    cells = [str(value).replace(".", ",") for value in row.values()]
+    path.write_text(f"{';'.join(row)}\n{';'.join(cells)}\n", encoding="utf-8")
+    (tmp_path / "guard.csv.phonometry.json").write_text(
+        json.dumps(header), encoding="utf-8"
+    )
+    read = io.read_catalogue(path, row_type=cls)["guard/a"]
+    assert type(read) is cls
+    for name, value in row.items():
+        if name != "key":
+            assert getattr(read, name) == value
+
+
+@pytest.mark.parametrize("cls", ROW_CLASSES, ids=lambda cls: cls.__name__)
+def test_every_field_is_a_csv_column_or_is_sent_where_it_is_written(
+    cls: type[io.CatalogueRow],
+) -> None:
+    """Every field of every row class is a column, or its refusal says where it goes.
+
+    Each kind of field is held to what it is: a number, a whole number, a
+    flag or a text is a column of its own kind, but the two texts the
+    library composes; a set or a mapping is the basis column, a mark the
+    cell writes, or a form only a JSON document writes; the provenance is
+    narrowed in its own columns. A kind the CSV front end does not know
+    fails here, instead of coming out as some refusal that reads right.
+    """
+    reader = _catalogue._Reader(cls, _catalogue._Issues("guard"))
+    kinds = private.field_kinds(cls)
+    for item in dataclasses.fields(cls):
+        name, kind = item.name, kinds[item.name]
+        role, target, problem = _catalogue_csv._Sheet.role(name, reader)
+        where = (name, kind, role, problem)
+        if kind in ("number", "whole") or (
+            kind in ("flag", "text") and name not in ("source", "table")
+        ):
+            expected = "number" if kind == "whole" else kind
+            assert (role, target, problem) == (expected, name, ""), where
+        elif kind in ("flag", "text"):
+            assert not role, where
+            assert "composed from the provenance" in problem or (
+                "the catalogue's name" in problem
+            ), where
+        elif name == "basis":
+            assert (role, target, problem) == ("basis", "basis", ""), where
+        elif kind in ("set", "mapping"):
+            assert not role, where
+            assert (
+                "only in a JSON catalogue" in problem
+                or "in its own cell" in problem
+                or "what the library works out" in problem
+            ), where
+        else:
+            assert kind == "provenance", where
+            assert problem.startswith("a row narrows its provenance"), where
 
 
 def _data_files() -> list[pathlib.Path]:

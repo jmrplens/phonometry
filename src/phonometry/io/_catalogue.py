@@ -65,6 +65,13 @@ caller's argument and the class name the file writes is only compared with
 it. A file is at most 16 MiB and 50 000 rows, nested at most six levels,
 and its text holds no control character but the tab and the line feed and no
 mark that reorders what a reader sees.
+
+**A CSV file** holds the rows of the same document, one per line, and the
+document without its rows is a JSON header beside it that declares the
+file's delimiter and decimal mark (``_catalogue_csv`` lays out the columns
+and the grammar of a cell). Its lines are turned into the rows a JSON
+document would write and go through the same pass, and each issue that pass
+finds is placed back at its line and its column.
 """
 
 from __future__ import annotations
@@ -106,15 +113,19 @@ from .._internal.catalogue import (
     unit_stem,
 )
 from .._internal.warnings import PhonometryWarning
+from ._sidecar import _SIDECAR_TAIL
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator, Sequence
+    from collections.abc import Callable, Iterator, Sequence
 
     from .._internal.catalogue import UnitAlias
 
 #: The schema identifier and the layout version this module reads and writes.
 CATALOGUE_SCHEMA = "phonometry-catalogue"
 CATALOGUE_SCHEMA_VERSION = 1
+#: What names a CSV file's JSON header: the CSV file's own name with this
+#: after it, the tail the calibration sidecar of an audio file takes too.
+CSV_HEADER_TAIL = _SIDECAR_TAIL
 
 #: The largest file read, checked on disk before a byte is read.
 _MAX_BYTES = 16 * 1024 * 1024
@@ -325,8 +336,12 @@ class Catalogue[R: CatalogueRow](Mapping[str, R]):
     :ivar schema_version: The version of the layout the document was written
         in.
     :ivar file_sha256: The SHA-256 of the bytes read, in hexadecimal, so
-        that a report can cite exactly which file its values came from;
-        empty for a document handed over as a mapping, which has no bytes.
+        that a report can cite exactly which file its values came from: the
+        JSON document, or the CSV file for a catalogue read from one; empty
+        for a document handed over as a mapping, which has no bytes.
+    :ivar header_sha256: The SHA-256 of the JSON header beside a CSV file,
+        which holds the provenance the rows cite; empty for a catalogue
+        read from a JSON document, whose provenance is in its own bytes.
     """
 
     name: str
@@ -339,6 +354,7 @@ class Catalogue[R: CatalogueRow](Mapping[str, R]):
     notes: tuple[CatalogueIssue, ...] = ()
     schema_version: int = CATALOGUE_SCHEMA_VERSION
     file_sha256: str = ""
+    header_sha256: str = ""
 
     def __post_init__(self) -> None:
         """Freeze what the catalogue holds, and hold its rows to one class.
@@ -545,25 +561,55 @@ class _Header:
     rows: list[_Row] = field(default_factory=list)
 
 
-class _Issues:
-    """Every issue found in one document, with the file it is in."""
+#: Where an issue found at a JSON pointer stands for the reader: the file it
+#: is in, its place there, and its rank among the issues, for their order.
+type _Place = Callable[[str, str], tuple[str, str, int]]
 
-    def __init__(self, label: str) -> None:
+
+class _Issues:
+    """Every issue found in one document, with the file it is in.
+
+    A document's issues are found at JSON pointers into the document the
+    pass reads. For a CSV file, that document is assembled from two files,
+    and *place* turns each pointer into the file and the place a person
+    finds it at: a line and a column of the CSV, or a pointer into its
+    header.
+    """
+
+    def __init__(self, label: str, place: _Place | None = None) -> None:
         self.label = label
+        self.place: _Place = place or self.pointer
         self.found: list[CatalogueIssue] = []
+        self.ranks: list[int] = []
+
+    def pointer(self, location: str, field_name: str) -> tuple[str, str, int]:
+        """A JSON document's issue: in its own file, at its pointer."""
+        del field_name
+        return self.label, location, _row_order(location)
 
     def error(
         self, location: str, message: str, *, row_key: str = "", field_name: str = ""
     ) -> None:
+        file, where, rank = self.place(location, field_name)
         self.found.append(
             CatalogueIssue(
-                file=self.label,
-                location=location,
+                file=file,
+                location=where,
                 row_key=row_key,
                 field=field_name,
                 message=message,
             )
         )
+        self.ranks.append(rank)
+
+    def sort(self) -> None:
+        """The document's own keys first, then each row in turn.
+
+        Issues of one place keep the order they were found in.
+        """
+        ranked = sorted(zip(self.ranks, self.found, strict=True), key=lambda x: x[0])
+        self.ranks = [rank for rank, _ in ranked]
+        self.found = [issue for _, issue in ranked]
 
     def refuse(self) -> NoReturn:
         """One error for the whole document, with every issue in it."""
@@ -679,7 +725,9 @@ class _Reader:
     with go on to be built, for the row contract to check.
     """
 
-    def __init__(self, row_type: type[CatalogueRow], issues: _Issues) -> None:
+    def __init__(
+        self, row_type: type[CatalogueRow], issues: _Issues, *, sheet: bool = False
+    ) -> None:
         self.row_type = row_type
         self.issues = issues
         self.names = _Names(row_type)
@@ -690,6 +738,12 @@ class _Reader:
             and item.default_factory is dataclasses.MISSING
             and item.name != "source"
         )
+        #: Whether the document is a CSV file's header with the file's lines
+        #: as its rows, which it leaves out when the lines cannot be read.
+        self.sheet = sheet
+        #: The rows a problem was already found in before the pass, in the
+        #: cells of a CSV file, which are never built.
+        self.failed: set[int] = set()
 
     def error(
         self, location: str, message: str, *, row_key: str = "", field_name: str = ""
@@ -768,10 +822,16 @@ class _Reader:
             return None
         self.hygiene(document, "", 1)
         for key in document:
-            if isinstance(key, str) and key not in _TOP_KEYS:
+            if key == "csv":
+                self.error(
+                    "/csv",
+                    "declares a CSV dialect, which only the header beside a CSV "
+                    "file does; a JSON document holds its rows itself",
+                )
+            elif isinstance(key, str) and key not in _TOP_KEYS:
                 self.unknown_key(_pointer(key), key, _TOP_KEYS, "a catalogue document")
         for key in _TOP_REQUIRED:
-            if key not in document:
+            if key not in document and not (self.sheet and key == "rows"):
                 self.error("", f"a catalogue document needs a top-level {key!r}")
         if not self.schema(document):
             return None
@@ -948,7 +1008,7 @@ class _Reader:
                     row_key=read.key,
                     field_name=name,
                 )
-        if key is None or len(self.issues.found) > before:
+        if key is None or len(self.issues.found) > before or index in self.failed:
             return None
         return read
 
@@ -1322,8 +1382,14 @@ def _build_row(
     return None
 
 
-def _notes(rows: Mapping[str, CatalogueRow], label: str) -> tuple[CatalogueIssue, ...]:
-    """What is worth a second look in the rows read, without changing any."""
+def _notes(
+    rows: Mapping[str, CatalogueRow], issues: _Issues
+) -> tuple[CatalogueIssue, ...]:
+    """What is worth a second look in the rows read, without changing any.
+
+    Each note is placed as an issue would be: at the row's pointer in a JSON
+    document, on the row's line in a CSV file.
+    """
     notes: list[CatalogueIssue] = []
     for index, (key, row) in enumerate(rows.items()):
         found: list[tuple[str, str]] = []
@@ -1353,59 +1419,66 @@ def _notes(rows: Mapping[str, CatalogueRow], label: str) -> tuple[CatalogueIssue
             if len(word) > _WORD
         ]
         found += [("", message) for message in row._catalogue_notes()]
-        notes += [
-            CatalogueIssue(
-                file=label,
-                location=_pointer("rows", index),
-                row_key=key.partition("/")[2],
-                field=name,
-                message=message,
-                severity="note",
+        for name, message in found:
+            file, where, _ = issues.place(_pointer("rows", index), name)
+            notes.append(
+                CatalogueIssue(
+                    file=file,
+                    location=where,
+                    row_key=key.partition("/")[2],
+                    field=name,
+                    message=message,
+                    severity="note",
+                )
             )
-            for name, message in found
-        ]
     return tuple(notes)
 
 
 def _read(
     document: object, row_type: type[CatalogueRow], label: str, digest: str
 ) -> Catalogue[Any]:
-    """The catalogue *document* holds, the problems in it refused at once.
+    """The catalogue *document* holds, the problems in it refused at once."""
+    issues = _Issues(label)
+    reader = _Reader(row_type, issues)
+    return _finish(reader, reader.document(document), digest)
+
+
+def _finish(
+    reader: _Reader, header: _Header | None, digest: str, header_digest: str = ""
+) -> Catalogue[Any]:
+    """The catalogue the pass over a document found, or one refusal of it.
 
     The rows the document pass found nothing wrong with are built even when
     other rows or other keys hold problems, so that the one refusal also
     names what the row contract finds in them. A row that breaks the
     contract is named once, for the first rule it breaks.
     """
-    issues = _Issues(label)
-    reader = _Reader(row_type, issues)
-    header = reader.document(document)
+    issues = reader.issues
     if header is None or header.provenance is None:
+        issues.sort()
         issues.refuse()
     rows, extras = _build(reader, header, header.provenance)
     if issues.found:
-        issues.found.sort(key=_row_order)
+        issues.sort()
         issues.refuse()
     return Catalogue(
         name=header.name,
-        row_type=row_type,
+        row_type=reader.row_type,
         about=header.about,
         provenance=header.provenance,
         rows=rows,
         extras=extras,
         conventions=header.conventions,
-        notes=_notes(rows, label),
+        notes=_notes(rows, issues),
         schema_version=CATALOGUE_SCHEMA_VERSION,
         file_sha256=digest,
+        header_sha256=header_digest,
     )
 
 
-def _row_order(issue: CatalogueIssue) -> int:
-    """Where an issue stands: the document's own keys first, then each row.
-
-    Issues of one place keep the order they were found in.
-    """
-    head, _, rest = issue.location.removeprefix("/").partition("/")
+def _row_order(location: str) -> int:
+    """Where an issue at a JSON pointer stands: the document's own keys, then rows."""
+    head, _, rest = location.removeprefix("/").partition("/")
     index = rest.partition("/")[0]
     return int(index) + 1 if head == "rows" and index.isdigit() else 0
 
@@ -1413,8 +1486,7 @@ def _row_order(issue: CatalogueIssue) -> int:
 def _refusal(label: str, location: str, message: str) -> CatalogueError:
     """An error about the whole document, before any of it is read."""
     issue = CatalogueIssue(file=label, location=location, message=message)
-    head = ": ".join(part for part in (label, location) if part)
-    return CatalogueError(f"{head}: {message}", issues=(issue,))
+    return CatalogueError(str(issue), issues=(issue,))
 
 
 def _decode(text: str, label: str) -> object:
@@ -1457,69 +1529,110 @@ def _warn(catalogue: Catalogue[Any], label: str) -> None:
     warnings.warn("\n".join([head, *shown]), CatalogueWarning, stacklevel=3)
 
 
-def _json_path(path: str | os.PathLike[str], what: str) -> Path:
-    """*path* as a :class:`~pathlib.Path`, if it names a JSON document.
+def _catalogue_path(path: str | os.PathLike[str], what: str) -> tuple[Path, str]:
+    """*path* as a :class:`~pathlib.Path`, and whether it is JSON or CSV.
 
-    :raises ValueError: for a name that does not end in ``.json``, in any
-        case, since Windows and spreadsheets write ``.JSON`` too.
+    :return: The path, and ``"json"`` or ``"csv"``.
+    :raises ValueError: for a name that ends in neither ``.json`` nor
+        ``.csv``, in any case, since Windows and spreadsheets write
+        ``.JSON`` and ``.CSV`` too.
     """
     target = Path(path)
-    if target.suffix.lower() != ".json":
+    kind = target.suffix.lower().removeprefix(".")
+    if kind not in ("json", "csv"):
         msg = (
             f"{what} a catalogue document in JSON, whose file name ends in "
-            f".json, and {target.name!r} does not"
+            ".json, or a CSV file with its JSON header beside it, whose name "
+            f"ends in .csv, and {target.name!r} ends in neither"
         )
         raise ValueError(msg)
-    return target
+    return target, kind
+
+
+def _text_of(raw: bytes, label: str, save_as: str) -> str:
+    """The UTF-8 text of a file's bytes, a byte order mark left out.
+
+    :raises CatalogueError: for bytes that are not UTF-8, saying how to save
+        the file so that they are.
+    """
+    try:
+        text = raw.decode("utf-8")
+    except UnicodeDecodeError as error:
+        message = f"is not UTF-8 text (byte {error.start}); save it as {save_as}"
+        raise _refusal(label, "", message) from None
+    return text.removeprefix("\ufeff")
 
 
 def read_catalogue[R: CatalogueRow](
-    path: str | os.PathLike[str], *, row_type: type[R]
+    path: str | os.PathLike[str],
+    *,
+    row_type: type[R],
+    header_path: str | os.PathLike[str] | None = None,
 ) -> Catalogue[R]:
-    """Read a catalogue of your own from a JSON file into rows of *row_type*.
+    """Read a catalogue of your own from a file into rows of *row_type*.
 
     The file holds one table: a header with the document's provenance, and
     rows whose cells are named as the fields of *row_type* or in another unit
-    of the same kind (the module docstring lays it out). Every row is built
-    through :meth:`CatalogueRow.from_printed`, so a row read from a file and
-    a packaged row with the same cells are the same row, and
-    :meth:`~CatalogueRow.printed`, :meth:`~CatalogueRow.why_missing` and every
-    method of the class behave alike on both. Every row carries the
-    document's :class:`Provenance`, narrowed by the row where it narrows it,
-    and a :attr:`~CatalogueRow.source` composed from it.
+    of the same kind (the module docstring lays it out). A JSON file holds
+    both. A CSV file holds the rows, one per line under a first line that
+    names the columns, and its header is a JSON document beside it, named
+    as the CSV file with ``.phonometry.json`` after it (the calibration
+    sidecar of an audio file takes the same tail and is told apart by its
+    ``schema``), which declares the file's delimiter and decimal mark.
+
+    Every row is built through :meth:`CatalogueRow.from_printed`, so a row
+    read from a file and a packaged row with the same cells are the same
+    row, and :meth:`~CatalogueRow.printed`, :meth:`~CatalogueRow.why_missing`
+    and every method of the class behave alike on both. Every row carries
+    the document's :class:`Provenance`, narrowed by the row where it narrows
+    it, and a :attr:`~CatalogueRow.source` composed from it.
 
     The problems in the file are raised together in one
-    :class:`CatalogueError`, each issue with the JSON pointer to it: every
-    problem of form, and the first rule of the row contract each row breaks.
-    The class named in the file is only compared with *row_type*, and nothing
-    the file names is ever imported.
+    :class:`CatalogueError`, each issue with its place: a JSON pointer, or a
+    line and a column of a CSV file. That is every problem of form, and the
+    first rule of the row contract each row breaks. The class named in the
+    file is only compared with *row_type*, and nothing the file names is
+    ever imported.
 
-    :param path: The file, whose name ends in ``.json`` (in any case).
+    :param path: The file, whose name ends in ``.json`` or ``.csv`` (in any
+        case).
     :param row_type: The class of every row, a subclass of
         :class:`CatalogueRow` such as ``materials.PorousMaterial``.
+    :param header_path: The JSON header of a CSV file, where it is not the
+        one beside it; ``None`` for the one beside it.
     :return: The catalogue, keyed ``"<catalogue>/<key>"``.
-    :raises CatalogueError: for a file larger than 16 MiB, text that is not
-        UTF-8 or not JSON, and the problems the document holds, all at once:
-        every problem of form, and the first rule of the row contract each
-        row breaks.
+    :raises CatalogueError: for a file larger than 16 MiB, a CSV header
+        larger than 64 KiB, text that is not UTF-8 or not JSON, and the
+        problems the document holds, all at once: every problem of form,
+        and the first rule of the row contract each row breaks.
     :raises TypeError: for a *row_type* that is not a catalogue row class.
-    :raises ValueError: for a name that does not end in ``.json``.
+    :raises ValueError: for a name that ends in neither ``.json`` nor
+        ``.csv``, and for a *header_path* beside a JSON file.
+    :raises FileNotFoundError: for a CSV file with no header, naming the
+        header it looked for.
     :raises OSError: as the file system raises it, untouched.
     :warns CatalogueWarning: once, when the catalogue carries notes.
     """
     cls = _check_row_type(row_type)
-    target = _json_path(path, "read_catalogue reads")
+    target, kind = _catalogue_path(path, "read_catalogue reads")
     label = target.name
+    if kind == "csv":
+        from ._catalogue_csv import read_sheet
+
+        catalogue: Catalogue[R] = read_sheet(target, header_path, cls)
+        _warn(catalogue, label)
+        return catalogue
+    if header_path is not None:
+        msg = (
+            f"header_path is the header of a CSV file, and {label!r} is a JSON "
+            "document, which holds its own"
+        )
+        raise ValueError(msg)
     size = target.stat().st_size
     if size > _MAX_BYTES:
         raise _size_refusal(label, size)
     raw = target.read_bytes()
-    try:
-        text = raw.decode("utf-8")
-    except UnicodeDecodeError as error:
-        message = f"is not UTF-8 text (byte {error.start}); save it as UTF-8"
-        raise _refusal(label, "", message) from None
-    document = _decode(text.removeprefix("\ufeff"), label)
+    document = _decode(_text_of(raw, label, "UTF-8"), label)
     catalogue = _read(document, cls, label, hashlib.sha256(raw).hexdigest())
     _warn(catalogue, label)
     return catalogue
@@ -2010,8 +2123,8 @@ def _packaged_table(row: CatalogueRow) -> dict[str, Any] | None:
 _NAME_CHARS = re.compile(r"[a-z0-9][a-z0-9._-]*")
 
 
-def _write_atomic(target: Path, text: str, *, overwrite: bool) -> None:
-    """Write *text* to *target* through a file beside it, renamed into place.
+def _check_target(target: Path, *, overwrite: bool) -> None:
+    """Refuse to write *target* before anything is written.
 
     :raises FileExistsError: for a file already there without *overwrite*,
         and for a symbolic link at the name, which is never followed.
@@ -2022,6 +2135,17 @@ def _write_atomic(target: Path, text: str, *, overwrite: bool) -> None:
     if target.exists() and not overwrite:
         msg = f"{target} exists; pass overwrite=True to replace it"
         raise FileExistsError(msg)
+
+
+def _write_atomic(target: Path, text: str, *, overwrite: bool) -> None:
+    """Write *text* to *target* through a file beside it, renamed into place.
+
+    The text is written as it is: a CSV file's line ends are its own.
+
+    :raises FileExistsError: for a file already there without *overwrite*,
+        and for a symbolic link at the name, which is never followed.
+    """
+    _check_target(target, overwrite=overwrite)
     temporary = target.with_name(f".{target.name}.{secrets.token_hex(8)}.tmp")
     try:
         with temporary.open("x", encoding="utf-8", newline="\n") as handle:
@@ -2115,6 +2239,8 @@ def write_catalogue(
     catalogue: str | None = None,
     about: str | None = None,
     provenance: Provenance | None = None,
+    delimiter: str = ",",
+    decimal: str = ".",
     overwrite: bool = False,
 ) -> tuple[Path, ...]:
     """Write rows as a catalogue file that reads back into the same rows.
@@ -2138,33 +2264,74 @@ def write_catalogue(
     library's on that day. Pass *provenance* for a file that has to come out
     the same every day.
 
-    The file is written beside its final name and renamed into place, so a
-    reader never finds half of it.
+    A name ending in ``.csv`` writes a CSV file, UTF-8 with a byte order
+    mark as a spreadsheet saves "CSV UTF-8", one row per line, and its JSON
+    header beside it (the name with ``.phonometry.json`` after it), which
+    holds the provenance and declares *delimiter* and *decimal*. Each cell
+    holds one value, bound, interval or word in the closed grammar the
+    module docstring lays out; a text that a spreadsheet would read as a
+    formula (one starting with ``=``, ``+``, ``-``, ``@``, a tab or a
+    carriage return) is written after an apostrophe, which the reader takes
+    off again. What a cell cannot hold (several readings, a misprint, a
+    cell carried from another row, a figure converted from a unit no family
+    holds, a basis or a standard for a single cell) is refused, with the
+    pointer the JSON document would write it at, and nothing is written.
+
+    Each file is written beside its final name and renamed into place, so a
+    reader never finds half of one; a CSV file and its header are two files,
+    written one after the other, and the pair is not written as one.
 
     :param rows: A :class:`Catalogue`, or a mapping of rows of one class.
-    :param path: Where to write, a name ending in ``.json`` (in any case).
+    :param path: Where to write, a name ending in ``.json`` or ``.csv`` (in
+        any case).
     :param catalogue: The catalogue's name. Required for a table of the
         library's own, and for rows of yours that do not share one.
     :param about: What the document is; required when the rows bring none.
     :param provenance: The document the rows were read from, in place of the
         one they bring.
-    :param overwrite: Replace a file already at *path*.
-    :return: The paths written.
+    :param delimiter: What separates the cells of a CSV file: ``","``,
+        ``";"`` or a tab.
+    :param decimal: The decimal mark of a CSV file's numbers: ``"."`` or
+        ``","``, the second only with another delimiter than ``","``.
+    :param overwrite: Replace a file already at *path*, or at its header.
+    :return: The paths written: the JSON document, or the CSV file and its
+        header.
     :raises CatalogueError: for no rows, rows from more than one table or
-        document, a key a file cannot hold, or a name that is reserved or
-        malformed.
+        document, a key a file cannot hold, a name that is reserved or
+        malformed, and the cells a CSV file cannot hold.
     :raises TypeError: for rows that are not catalogue rows of one class
         (fluid states among them), or a *catalogue* or *about* the rows
         need and do not bring.
-    :raises ValueError: for a name that does not end in ``.json``.
-    :raises FileExistsError: for a file at *path* without *overwrite*, and
-        for a symbolic link at *path*.
+    :raises ValueError: for a name that ends in neither ``.json`` nor
+        ``.csv``, a dialect a CSV file cannot take, and a dialect beside a
+        JSON file.
+    :raises FileExistsError: for a file at *path* or at its header without
+        *overwrite*, and for a symbolic link at either.
     """
-    target = _json_path(path, "write_catalogue writes")
+    target, kind = _catalogue_path(path, "write_catalogue writes")
     if not isinstance(rows, Mapping):
         msg = f"rows is a {type(rows).__name__}, and write_catalogue takes a mapping of rows"
         raise TypeError(msg)
+    if kind == "json":
+        if (delimiter, decimal) != (",", "."):
+            msg = (
+                "delimiter= and decimal= declare a CSV file's dialect, and "
+                f"{target.name!r} is a JSON document"
+            )
+            raise ValueError(msg)
+        writer = _Writer(rows)
+        document = _document(writer, rows, catalogue, about, provenance)
+        _write_atomic(target, _dumps(document) + "\n", overwrite=overwrite)
+        return (target,)
+    from ._catalogue_csv import check_dialect, sheet_texts
+
+    dialect = check_dialect(delimiter, decimal)
     writer = _Writer(rows)
     document = _document(writer, rows, catalogue, about, provenance)
-    _write_atomic(target, _dumps(document) + "\n", overwrite=overwrite)
-    return (target,)
+    header = target.with_name(target.name + CSV_HEADER_TAIL)
+    sheet, head = sheet_texts(document, writer.names, dialect, target.name)
+    _check_target(target, overwrite=overwrite)
+    _check_target(header, overwrite=overwrite)
+    _write_atomic(target, sheet, overwrite=overwrite)
+    _write_atomic(header, _dumps(head) + "\n", overwrite=overwrite)
+    return (target, header)

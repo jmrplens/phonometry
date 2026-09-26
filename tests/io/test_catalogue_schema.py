@@ -366,6 +366,35 @@ def test_a_csv_files_header_is_valid(tmp_path: pathlib.Path) -> None:
     assert _problems(header) == []
 
 
+def test_a_credit_of_the_whole_table_is_taken_by_both() -> None:
+    """The document's own attributed_to, which a CSV file's header holds too."""
+    document = _with(("attributed_to",), "Beranek and Hidaka (1998)")
+    assert _problems(document) == []
+    read = io.parse_catalogue(document, row_type=materials.PorousMaterial)
+    assert {row.attributed_to["table"] for row in read.values()} == {
+        "Beranek and Hidaka (1998)"
+    }
+
+
+def test_a_csv_files_header_with_the_tables_credit_is_valid(
+    tmp_path: pathlib.Path,
+) -> None:
+    """Table 8.2 of Rossing credits one paper for every cell, in the header."""
+    table = {
+        key: row
+        for key, row in fluids.PUBLISHED_NONLINEARITY.items()
+        if row.table == "rossing-2014-table-8-2"
+    }
+    sheet, header_path = io.write_catalogue(
+        table, tmp_path / "rossing.csv", catalogue="rossing-8-2"
+    )
+    header = json.loads(header_path.read_text(encoding="utf-8"))
+    assert header["attributed_to"]
+    assert _problems(header) == []
+    read = io.read_catalogue(sheet, row_type=fluids.NonlinearityParameter)
+    assert len(read) == len(table)
+
+
 def test_a_csv_files_header_may_name_the_schema(tmp_path: pathlib.Path) -> None:
     """The header beside a CSV file takes a ``$schema`` and never reads it."""
     arau = {
@@ -484,6 +513,15 @@ REFUSED: dict[str, tuple[dict[str, Any], str]] = {
     "a-basis-of-null": (
         _with(("basis",), None),
         "/basis: is null, which is not one of",
+    ),
+    "a-credit-of-the-table-that-is-an-object": (
+        _with(("attributed_to",), {"table": "Beranek and Hidaka (1998)"}),
+        "/attributed_to: holds {'table': 'Beranek and Hidaka (1998)'}; the "
+        "document credits the whole table as one text",
+    ),
+    "a-blank-credit-of-the-table": (
+        _with(("attributed_to",), "  "),
+        "/attributed_to: is empty; name who the whole table is credited to",
     ),
     "a-convention-that-is-not-text": (
         _with(("conventions",), [3]),

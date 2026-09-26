@@ -557,6 +557,14 @@ def _document(schemas: list[_RowSchema]) -> dict[str, Any]:
                 "enum": list(CATALOGUE_BASES),
                 "description": "The basis of every row that does not give its own.",
             },
+            "attributed_to": {
+                **_ref("filled"),
+                "description": (
+                    "Who the page credits the whole table to, once for every "
+                    "row; a row credits itself or one of its cells in its own "
+                    "attributed_to."
+                ),
+            },
             "conventions": {
                 "type": "array",
                 "items": text,

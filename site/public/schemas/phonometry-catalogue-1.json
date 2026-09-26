@@ -88,6 +88,10 @@
       ],
       "description": "The basis of every row that does not give its own."
     },
+    "attributed_to": {
+      "$ref": "#/$defs/filled",
+      "description": "Who the page credits the whole table to, once for every row; a row credits itself or one of its cells in its own attributed_to."
+    },
     "conventions": {
       "type": "array",
       "items": {
@@ -8340,7 +8344,7 @@
     "prose": {
       "type": "string",
       "maxLength": 20000,
-      "pattern": "^[^\\x00-\\x08\\x0b-\\x1f\\u202a-\\u202e\\u2066-\\u2069]*$",
+      "pattern": "^[^\\x00-\\x08\\x0b-\\x1f\\x7f-\\x9f\\u202a-\\u202e\\u2066-\\u2069]*$",
       "description": "A paragraph or more of text."
     },
     "provenance": {
@@ -8522,7 +8526,7 @@
     "text": {
       "type": "string",
       "maxLength": 2000,
-      "pattern": "^[^\\x00-\\x08\\x0b-\\x1f\\u202a-\\u202e\\u2066-\\u2069]*$",
+      "pattern": "^[^\\x00-\\x08\\x0b-\\x1f\\x7f-\\x9f\\u202a-\\u202e\\u2066-\\u2069]*$",
       "description": "Text, with no control character but the tab and the line feed and no mark that reorders it."
     },
     "whole": {

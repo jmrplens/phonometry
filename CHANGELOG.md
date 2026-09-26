@@ -31,13 +31,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - **Complete a catalogue file in your editor with its JSON Schema.**
   `io.catalogue_schema()` writes the JSON Schema (2020-12) of a catalogue
   document for the row classes you give it, your own among them: every field
-  under its own name and under each other unit the reader converts, the
-  fields each hedge may name, the provenance, the limits a field's unit sets
-  and a CSV file's header. The documentation site publishes the schema of
-  every published row class as `schemas/phonometry-catalogue-1.json`, and a
-  document may name it in a top-level `$schema`, which the reader takes and
-  never reads. A document the reader reads is never refused by the schema;
-  what depends on two cells at once stays the reader's to refuse.
+  under its own name and under each other unit the reader converts, the fields
+  each hedge may name, the provenance, the credit of the whole table, the
+  limits a field's unit sets and a CSV file's header. The documentation site
+  publishes the schema of every published row class as
+  `schemas/phonometry-catalogue-1.json`, and a document may name it in a
+  top-level `$schema`, which the reader takes and never reads. A document the
+  reader reads is never refused by the schema; what depends on two cells at
+  once stays the reader's to refuse.
 
 - **Keep a data sheet's absorption and a laboratory's insulation as rows of
   their own, rated again from their bands.** Four row classes hold what a

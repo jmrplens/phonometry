@@ -45,6 +45,29 @@ references:
     designation: "EN 29052-1:1992 (ISO 9052-1:1989)"
     url: "https://www.iso.org/standard/16620.html"
     note: "La rigidez dinámica s' de una capa instalada y la rigidez dinámica aparente s't de una probeta, dos campos de ResilientLayer, y el apartado 8.2, que convierte la segunda en la primera con la resistividad al flujo lateral."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2017
+    title: "Building acoustics — Estimation of acoustic performance of buildings from the performance of elements — Part 1: Airborne sound insulation between rooms"
+    designation: "ISO 12354-1:2017"
+    url: "https://www.iso.org/standard/70242.html"
+    note: "El elemento homogéneo que HomogeneousElement.from_solid construye con la fila de un sólido: m' = ρt, y la frecuencia crítica de la Fórmula (B.2) con la velocidad de fase cuasilongitudinal de la Tabla B.3, que es la velocidad de placa de una fila. El ejemplo son las paredes interiores del edificio resuelto del Anexo L."
+  - type: report
+    authors: ["Wright, A.", "Andrews, H.", "Hutton, B.", "Dennis, G."]
+    organization: "Internet Engineering Task Force"
+    year: 2022
+    title: "JSON Schema: A Media Type for Describing JSON Documents"
+    number: "Internet-Draft draft-bhutton-json-schema-01"
+    url: "https://json-schema.org/draft/2020-12/json-schema-core"
+    note: "El dialecto 2020-12 en el que io.catalogue_schema escribe el esquema de un archivo de catálogo, y en el que está escrito el esquema publicado."
+  - type: report
+    authors: ["Wright, A.", "Andrews, H.", "Hutton, B."]
+    organization: "Internet Engineering Task Force"
+    year: 2022
+    title: "JSON Schema Validation: A Vocabulary for Structural Validation of JSON"
+    number: "Internet-Draft draft-bhutton-json-schema-validation-01"
+    url: "https://json-schema.org/draft/2020-12/json-schema-validation"
+    note: "Las palabras clave con las que el esquema declara la forma de un archivo de catálogo: los tipos, las palabras que admite una clave, los patrones de un nombre, las longitudes de un texto y los límites que fija la unidad de un campo."
 ---
 
 import Scope from '../../../../components/Scope.astro';
@@ -483,13 +506,14 @@ lugar de tomar una magnitud por la otra.
 
 La simulación elástica acepta la fila de un sólido allí donde acepta un
 `Material`: `simulation.scholte_speed` y `ElasticFDTD2D.from_regions` leen
-los tres números que integra el resolvedor, la velocidad longitudinal en
-medio indefinido, la velocidad transversal y la densidad. Una hoja que
+los tres números que integra el FDTD elástico: la velocidad longitudinal de
+un sólido extenso, la velocidad transversal y la densidad. Una hoja que
 imprime un módulo, un coeficiente de Poisson y una densidad ha impreso
 también esas velocidades, y la fila las guarda marcadas como derivadas. Las
 velocidades de placa y de barra que una página imprime a su lado no se leen
-nunca: el resolvedor no integra ninguna de las dos, y una velocidad de placa
-tomada por la de medio indefinido se equivoca en torno a un diez por ciento.
+nunca: el FDTD elástico no integra ninguna de las dos, y una velocidad de
+placa tomada por la de un sólido extenso se equivoca en torno a un diez por
+ciento.
 
 ```python
 from phonometry import simulation, solids
@@ -592,6 +616,14 @@ except ValueError as error:
 # not of 'delany_bazley'; neither 'delany_bazley' nor 'miki' is that model, or
 # take row.printed('flow_resistivity_pa_s_m2') into another model yourself.
 ```
+
+Un suelo exterior es mucho más resistivo que los materiales fibrosos con los
+que se ajustaron los dos modelos, así que todas las octavas de aquí quedan por
+debajo de su rango de ajuste publicado, y la llamada emite un
+`PorousAbsorberWarning` que dice que la regresión es ahí una extrapolación;
+[Elección de la impedancia del suelo](/phonometry/es/environment/propagation/ground-barriers/#elección-de-la-impedancia-del-suelo)
+explica lo que eso cuesta y por qué Miki es el modelo que conviene preferir por
+debajo del rango.
 
 ### Una pared en el modelo detallado de edificación
 
@@ -1158,7 +1190,7 @@ issue o en una pull request nunca se incorpora.
 - [Absorbentes porosos y multicapa](/phonometry/es/materials/absorbers/porous-absorbers/): los modelos en los que entra una fila `PorousMaterial`.
 - [Rigidez dinámica de materiales resilientes](/phonometry/es/materials/resilient/dynamic-stiffness/): $s'$, $s'_\mathrm{t}$ y el apartado 8.2 al completo.
 - [Predicción del aislamiento de paneles](/phonometry/es/buildings/design/panel-sound-insulation/): el método de la meseta que dibuja una fila `PlateauMaterial`.
-- [Ondas elásticas y acoplamiento fluido-sólido](/phonometry/es/simulation/elastic-waves/): el resolvedor del que la fila de un sólido es un medio.
+- [Ondas elásticas y acoplamiento fluido-sólido](/phonometry/es/simulation/elastic-waves/): el FDTD elástico en el que la fila de un sólido es un medio.
 - [Efecto suelo esférico y barreras avanzadas](/phonometry/es/environment/propagation/ground-barriers/): los modelos en los que entra el `medium()` de una fila de suelo.
 - [Predicción detallada por bandas (ISO 12354)](/phonometry/es/buildings/design/detailed-prediction/): la cadena de la ISO 12354 en la que entra un elemento de `from_solid`.
 - Referencia de la API: [`phonometry.io`](/phonometry/es/reference/api/io/io/).

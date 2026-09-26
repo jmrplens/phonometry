@@ -1218,6 +1218,13 @@ except ValueError as error:
 # take row.printed('flow_resistivity_pa_s_m2') into another model yourself.
 ```
 
+An outdoor ground is far more resistive than the fibrous materials the two
+models were fitted to, so every octave here lies below their published fit
+range, and the call raises a `PorousAbsorberWarning` saying the regression is
+an extrapolation there;
+[Choosing the ground impedance](https://jmrplens.github.io/phonometry/environment/propagation/ground-barriers/#choosing-the-ground-impedance)
+explains what that costs and why Miki is the model to prefer below the range.
+
 ### A wall in the detailed building model
 
 `building.HomogeneousElement.from_solid` builds the element of ISO 12354-1
@@ -1779,5 +1786,14 @@ or a pull request is never merged.
 - International Organization for Standardization. (1989). *Acoustics — Determination of dynamic stiffness — Part 1: Materials used under floating floors in dwellings* (EN 29052-1:1992 (ISO 9052-1:1989)).
   [iso.org catalogue](https://www.iso.org/standard/16620.html).
   The dynamic stiffness s' of an installed layer and the apparent dynamic stiffness s't of a test specimen, two fields of ResilientLayer, and clause 8.2, which turns the second into the first with the lateral airflow resistivity.
+- International Organization for Standardization. (2017). *Building acoustics — Estimation of acoustic performance of buildings from the performance of elements — Part 1: Airborne sound insulation between rooms* (ISO 12354-1:2017).
+  [iso.org catalogue](https://www.iso.org/standard/70242.html).
+  The homogeneous element HomogeneousElement.from_solid builds from a solid's row: m' = ρt, and the critical frequency of Formula (B.2) with the quasi-longitudinal phase velocity of Table B.3, which is a row's plate speed. The internal walls of the worked building of Annex L are the example.
+- Wright, A., Andrews, H., Hutton, B., & Dennis, G. (2022). *JSON Schema: A Media Type for Describing JSON Documents* (Internet-Draft draft-bhutton-json-schema-01). Internet Engineering Task Force.
+  [json-schema.org](https://json-schema.org/draft/2020-12/json-schema-core).
+  The 2020-12 dialect io.catalogue_schema writes the schema of a catalogue file in, and the published schema is written in.
+- Wright, A., Andrews, H., & Hutton, B. (2022). *JSON Schema Validation: A Vocabulary for Structural Validation of JSON* (Internet-Draft draft-bhutton-json-schema-validation-01). Internet Engineering Task Force.
+  [json-schema.org](https://json-schema.org/draft/2020-12/json-schema-validation).
+  The keywords the schema states the form of a catalogue file with: the types, the words a key may hold, the patterns of a name, the lengths of a text and the limits a field's unit sets.
 
 ---

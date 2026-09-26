@@ -45,6 +45,29 @@ references:
     designation: "EN 29052-1:1992 (ISO 9052-1:1989)"
     url: "https://www.iso.org/standard/16620.html"
     note: "The dynamic stiffness s' of an installed layer and the apparent dynamic stiffness s't of a test specimen, two fields of ResilientLayer, and clause 8.2, which turns the second into the first with the lateral airflow resistivity."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2017
+    title: "Building acoustics — Estimation of acoustic performance of buildings from the performance of elements — Part 1: Airborne sound insulation between rooms"
+    designation: "ISO 12354-1:2017"
+    url: "https://www.iso.org/standard/70242.html"
+    note: "The homogeneous element HomogeneousElement.from_solid builds from a solid's row: m' = ρt, and the critical frequency of Formula (B.2) with the quasi-longitudinal phase velocity of Table B.3, which is a row's plate speed. The internal walls of the worked building of Annex L are the example."
+  - type: report
+    authors: ["Wright, A.", "Andrews, H.", "Hutton, B.", "Dennis, G."]
+    organization: "Internet Engineering Task Force"
+    year: 2022
+    title: "JSON Schema: A Media Type for Describing JSON Documents"
+    number: "Internet-Draft draft-bhutton-json-schema-01"
+    url: "https://json-schema.org/draft/2020-12/json-schema-core"
+    note: "The 2020-12 dialect io.catalogue_schema writes the schema of a catalogue file in, and the published schema is written in."
+  - type: report
+    authors: ["Wright, A.", "Andrews, H.", "Hutton, B."]
+    organization: "Internet Engineering Task Force"
+    year: 2022
+    title: "JSON Schema Validation: A Vocabulary for Structural Validation of JSON"
+    number: "Internet-Draft draft-bhutton-json-schema-validation-01"
+    url: "https://json-schema.org/draft/2020-12/json-schema-validation"
+    note: "The keywords the schema states the form of a catalogue file with: the types, the words a key may hold, the patterns of a name, the lengths of a text and the limits a field's unit sets."
 ---
 
 import Scope from '../../../components/Scope.astro';
@@ -583,6 +606,13 @@ except ValueError as error:
 # not of 'delany_bazley'; neither 'delany_bazley' nor 'miki' is that model, or
 # take row.printed('flow_resistivity_pa_s_m2') into another model yourself.
 ```
+
+An outdoor ground is far more resistive than the fibrous materials the two
+models were fitted to, so every octave here lies below their published fit
+range, and the call raises a `PorousAbsorberWarning` saying the regression is
+an extrapolation there;
+[Choosing the ground impedance](/phonometry/environment/propagation/ground-barriers/#choosing-the-ground-impedance)
+explains what that costs and why Miki is the model to prefer below the range.
 
 ### A wall in the detailed building model
 

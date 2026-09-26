@@ -1,6 +1,6 @@
 ---
 title: "Guides"
-description: "The 145 guides of phonometry, grouped into the thirteen topics the library covers: what each area is for, the standards implemented in it, and a one-line summary of every guide inside it."
+description: "The 146 guides of phonometry, grouped into the thirteen topics the library covers: what each area is for, the standards implemented in it, and a one-line summary of every guide inside it."
 head:
   - tag: script
     attrs:
@@ -117,7 +117,7 @@ makes, then runnable code and the figure it draws. Nothing here is a survey of
 the field; each page is the working documentation of a module, written so that
 a result can be defended clause by clause rather than trusted.
 
-This page is the map. A hundred and forty-five guides sit in thirteen topics, and each topic has its
+This page is the map. A hundred and forty-six guides sit in thirteen topics, and each topic has its
 own overview page with the longer story of how its pieces fit together. If you
 are arriving without a specific question, read
 [Getting Started](/phonometry/start/getting-started/) first: it runs one signal
@@ -487,6 +487,12 @@ models, diffusers and scattering. What a surface does to the sound that
 reaches it, measured in a laboratory or predicted from the material
 parameters. Implements ISO 354, ISO 11654, EN 16487, ISO 10534-1/-2,
 ISO 9053-1/-2, ISO 17497-1/-2, ISO 13472-1/-2, EN 29052-1 and ISO 12999-2.
+
+- [Reading a material datasheet](/phonometry/materials/reading-a-datasheet/):
+  what the numbers on a data sheet or a test report are before you type them:
+  the practical against the one-third-octave coefficient, a declared level,
+  the mounting and the revision, and the sound reduction index and impact
+  improvement of a laboratory report, each rated again from its bands.
 
 **[Absorbers](/phonometry/materials/absorbers/)**
 

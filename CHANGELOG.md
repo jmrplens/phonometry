@@ -9,6 +9,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- **Keep a data sheet's absorption and a laboratory's insulation as rows of
+  their own, rated again from their bands.** Four row classes hold what a
+  data sheet or a test report prints, each read by `io.read_catalogue` and
+  each with the function that rates it. `materials.PracticalAbsorptionSpectrum`
+  holds the practical absorption coefficients of ISO 11654 from 125 Hz to
+  4 kHz, and `materials.ThirdOctaveAbsorptionSpectrum` the one-third-octave
+  coefficients of ISO 354 from 50 Hz to 10 kHz; both carry the weighted
+  coefficient, shape indicators, class, NRC, mounting, thickness and depth of
+  construction the sheet prints, `rating()` works the weighted coefficient
+  out again from the bands, and `practical()` turns one-third octaves into
+  practical coefficients, each marked as derived and an octave missing a band
+  or holding a negative one left empty, never read as zero, which `rating()`
+  refuses. `building.SoundReductionSpectrum` holds the sound reduction
+  index of ISO 10140-2 in one-third octaves with Rw, C, Ctr and the Annex B
+  terms of ISO 717-1, rated by `weighted_rating_extended`; and
+  `building.ImpactImprovementSpectrum` the reduction of impact sound pressure
+  level of ISO 10140-1 Annex H, measured by ISO 10140-3, with its weighted
+  value, CI,r and CI,Δ, rated into the new
+  `building.ImpactImprovementRatingResult`, whose `plot()` draws the
+  spectrum with the three numbers in its title. When a catalogue file is read, a practical coefficient above
+  1.00 or off the steps of 0.05, and a printed rating the bands do not give,
+  are noted beside the catalogue without changing a cell.
+  `weighted_rating`, `weighted_impact_rating`, `weighted_impact_improvement`
+  and `impact_improvement_adaptation_term` now take a mapping of band centre
+  to value, such as a row's `spectrum()`, and refuse a band it lacks rather
+  than rating a spectrum with a gap. A new guide, "Reading a material
+  datasheet", says what each number on a sheet is before it is typed.
+
 - **Read a catalogue of your own from a JSON file, and write one back.** The
   library publishes the tables of its books and standards and nothing a
   manufacturer prints, so a data sheet, a declaration of performance, a test

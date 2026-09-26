@@ -90,6 +90,7 @@ from .low_frequency import (
 from .ratings import (
     ExtendedImpactRatingResult,
     ExtendedWeightedRatingResult,
+    ImpactImprovementRatingResult,
     ImpactRatingResult,
     WeightedRatingResult,
     impact_improvement_adaptation_term,
@@ -160,6 +161,7 @@ __all__ = [
     "HeavyImpactSourceCheck",
     "HeavyImpactSourceSpec",
     "ImpactInsulationResult",
+    "ImpactImprovementRatingResult",
     "ImpactRatingResult",
     "IntensityElementNormalizedResult",
     "IntensityReductionResult",

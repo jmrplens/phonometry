@@ -32,6 +32,7 @@ from .catalogue import (
     PorousMaterial,
     porous_materials_named,
 )
+from .datasheets import PracticalAbsorptionSpectrum, ThirdOctaveAbsorptionSpectrum
 from .four_microphone import (
     TransferMatrix,
     air_density_astm,
@@ -197,6 +198,8 @@ __all__ = [
     "AbsorptionAreaSpectrum",
     "AbsorptionRatingResult",
     "AbsorptionSpectrum",
+    "PracticalAbsorptionSpectrum",
+    "ThirdOctaveAbsorptionSpectrum",
     "AbsorptionUncertaintyResult",
     "AbsorptionWarning",
     "AirLayer",

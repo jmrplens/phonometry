@@ -214,6 +214,7 @@ _SECTION_LIST: tuple[Section, ...] = (
             "phonometry.building.measurement.ratings",
             "phonometry.building.catalogue",
             "phonometry.building.impact_catalogue",
+            "phonometry.building.datasheets",
             "phonometry.building.prediction.panel_transmission",
             "phonometry.building.prediction.masonry_cavity_wall",
             "phonometry.building.measurement.heavy_impact",
@@ -253,6 +254,7 @@ _SECTION_LIST: tuple[Section, ...] = (
             "phonometry.materials.absorbers.catalogue",
             "phonometry.materials.absorbers.resistive_sheets",
             "phonometry.materials.absorbers.measured",
+            "phonometry.materials.absorbers.datasheets",
             "phonometry.materials.absorbers.carpets",
             "phonometry.materials.absorbers.layered",
             "phonometry.materials.absorbers.biot",
@@ -537,6 +539,11 @@ OBJECT_MODULE_OVERRIDES: dict[str, str] = {
     "PredictedScatteringSpectrum": "phonometry.materials.diffusers.predicted_scattering",
     "predicted_scattering_named": "phonometry.materials.diffusers.predicted_scattering",
     "PUBLISHED_ABSORPTION_AREAS": "phonometry.materials.absorbers.measured",
+    # The ISO 11654 band sets the data-sheet rows rate over are imported into
+    # phonometry/materials/absorbers/datasheets.py; they are defined, and
+    # documented, beside the rating.
+    "OCTAVE_BANDS": "phonometry.materials.absorbers.rating",
+    "THIRD_OCTAVE_BANDS": "phonometry.materials.absorbers.rating",
     "PUBLISHED_FLUIDS": "phonometry.fluids.catalogue",
     "PUBLISHED_GASES": "phonometry.fluids.catalogue",
     "PUBLISHED_NONLINEARITY": "phonometry.fluids.nonlinearity",

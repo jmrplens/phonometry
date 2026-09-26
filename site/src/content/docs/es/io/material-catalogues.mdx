@@ -744,9 +744,13 @@ elegir un `row_type`.
   cámara reverberante. El coeficiente práctico de absorción sonora
   $\alpha_\mathrm{p}$ de la ISO 11654 no es uno de ellos: es una valoración,
   redondeada a pasos de 0,05 y limitada a 1,00, y la fila por octavas de una
-  hoja de características europea suele ser eso. Ninguna clase de fila de la
-  biblioteca guarda $\alpha_\mathrm{p}$, ni un $\alpha_\mathrm{s}$ por
-  tercios de octava; no escribas ninguno de los dos en `AbsorptionSpectrum`.
+  hoja de características europea suele ser eso.
+  `PracticalAbsorptionSpectrum` guarda $\alpha_\mathrm{p}$ y
+  `ThirdOctaveAbsorptionSpectrum` el $\alpha_\mathrm{s}$ por tercios de
+  octava de un informe de ensayo, cada uno con la valoración que imprime la
+  hoja; no escribas ninguno de los dos en `AbsorptionSpectrum`.
+  [Cómo leer la hoja de características de un material](/phonometry/es/materials/reading-a-datasheet/)
+  distingue los tres en la página.
 - `TransmissionLossSpectrum` guarda la pérdida por transmisión de una
   construcción tal como la recopila un libro, por bandas de octava, a partir
   de ensayos que el libro rara vez nombra: Bies califica sus valores de
@@ -755,8 +759,10 @@ elegir un `row_type`.
   informe de ensayo según la ISO 10140-2 se mide por tercios de octava sobre
   una probeta de un producto, en un laboratorio donde se ha comprobado que el
   sonido transmitido por flancos es despreciable, y se valora con la
-  ISO 717-1. Es otro registro, y ninguna clase de fila lo guarda; no lo
-  escribas en `TransmissionLossSpectrum`.
+  ISO 717-1. Es otro registro: lo guarda `SoundReductionSpectrum`, con los
+  índices globales que imprime el informe, e `ImpactImprovementSpectrum`
+  guarda la reducción del nivel de impactos de un revestimiento; no escribas
+  ninguno de los dos en `TransmissionLossSpectrum`.
 - `ResilientLayer` guarda $s'$ en `dynamic_stiffness_n_m3` y
   $s'_\mathrm{t}$ en `apparent_dynamic_stiffness_n_m3`. Un informe de ensayo
   según la EN 29052-1 imprime $s'_\mathrm{t}$ y, cuando puede, $s'$; una hoja
@@ -902,11 +908,9 @@ meseta y a un suelo flotante.
 
 <ScopeClaim status="not-covered" label="No cubierto">
 El formato propio de una hoja de cálculo (XLSX, ODS) no se lee: guarda la hoja
-como «CSV UTF-8», y escribe en JSON lo que no cabe en una celda. Ninguna clase
-de fila guarda el coeficiente práctico de absorción
-$\alpha_\mathrm{p}$ de una hoja de características, su $\alpha_\mathrm{s}$
-por tercios de octava ni un índice de reducción acústica $R$ de laboratorio, y
-ninguna valoración se recalcula a partir de un espectro que guarde un archivo.
+como «CSV UTF-8», y escribe en JSON lo que no cabe en una celda. Una
+valoración que ninguna función de esta biblioteca calcula (un NRC, un STC, un
+IIC) se guarda tal como se imprime y no se comprueba nunca.
 La biblioteca no trae datos de ningún fabricante, y una tabla pegada en una
 issue o en una pull request nunca se incorpora.
 </ScopeClaim>
@@ -918,6 +922,7 @@ issue o en una pull request nunca se incorpora.
 
 - [Archivos](/phonometry/es/io/): qué lee y escribe la capa de archivos de la biblioteca, y por qué.
 - [Catálogos publicados](/phonometry/es/reference/catalogues/): todas las tablas que la biblioteca ha leído de una página, las mismas clases de fila con las celdas del libro.
+- [Cómo leer la hoja de características de un material](/phonometry/es/materials/reading-a-datasheet/): qué es cada número de una hoja de características y qué clase de fila lo guarda.
 - [Absorbentes porosos y multicapa](/phonometry/es/materials/absorbers/porous-absorbers/): los modelos en los que entra una fila `PorousMaterial`.
 - [Rigidez dinámica de materiales resilientes](/phonometry/es/materials/resilient/dynamic-stiffness/): $s'$, $s'_\mathrm{t}$ y el apartado 8.2 al completo.
 - [Predicción del aislamiento de paneles](/phonometry/es/buildings/design/panel-sound-insulation/): el método de la meseta que dibuja una fila `PlateauMaterial`.

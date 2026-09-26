@@ -677,9 +677,13 @@ one into another's field, so read this before choosing a `row_type`.
   prints the result of a reverberation-room test in octaves. The practical
   sound absorption coefficient $\alpha_\mathrm{p}$ of ISO 11654 is not one of
   them: it is a rating, rounded to steps of 0.05 and capped at 1.00, and a
-  European data sheet's octave row is usually that. No row class of this
-  library holds $\alpha_\mathrm{p}$, nor a one-third-octave
-  $\alpha_\mathrm{s}$; do not write either into `AbsorptionSpectrum`.
+  European data sheet's octave row is usually that.
+  `PracticalAbsorptionSpectrum` holds $\alpha_\mathrm{p}$ and
+  `ThirdOctaveAbsorptionSpectrum` a test report's one-third-octave
+  $\alpha_\mathrm{s}$, each with the rating the sheet prints; do not write
+  either into `AbsorptionSpectrum`.
+  [Reading a material datasheet](../materials/reading-a-datasheet.md)
+  tells the three apart on the page.
 - `TransmissionLossSpectrum` holds the transmission loss of a construction
   as a book compiles it, in octave bands, from tests the book seldom names:
   Bies qualifies his values as field incidence, ASHRAE's rows come from
@@ -687,8 +691,10 @@ one into another's field, so read this before choosing a `row_type`.
   $R$ of a test report under ISO 10140-2 is measured in one-third-octave
   bands on one product's specimen, in a laboratory where the sound
   transmitted by flanking paths has been shown to be negligible, and it is
-  rated with ISO 717-1. It is a different record, and no row class holds it;
-  do not write it into `TransmissionLossSpectrum`.
+  rated with ISO 717-1. It is a different record: `SoundReductionSpectrum`
+  holds it, with the single numbers the report prints, and
+  `ImpactImprovementSpectrum` the reduction of impact level of a covering;
+  do not write either into `TransmissionLossSpectrum`.
 - `ResilientLayer` holds $s'$ in `dynamic_stiffness_n_m3` and
   $s'_\mathrm{t}$ in `apparent_dynamic_stiffness_n_m3`. A test report under
   EN 29052-1 prints $s'_\mathrm{t}$ and, when it can, $s'$; a data sheet
@@ -824,10 +830,9 @@ handing the rows to the porous models, a room model, the plateau method and
 a floating floor.
 
 **Not covered.** A spreadsheet's own format (XLSX, ODS) is not read: save the sheet as
-"CSV UTF-8", and write in JSON what one cell cannot say. No row class holds
-a data sheet's practical absorption coefficient $\alpha_\mathrm{p}$, its
-one-third-octave $\alpha_\mathrm{s}$ or a laboratory sound reduction index
-$R$, and no rating is recomputed from a spectrum a file holds. No
+"CSV UTF-8", and write in JSON what one cell cannot say. A rating no
+function of this library works out (an NRC, an STC, an IIC) is held as
+printed and never checked. No
 manufacturer's data ships with the library, and a table pasted into an issue
 or a pull request is never merged.
 
@@ -835,6 +840,7 @@ or a pull request is never merged.
 
 - [Files](index.md): what the file layer of the library reads and writes, and why.
 - [Published catalogues](https://jmrplens.github.io/phonometry/reference/catalogues/): every table the library has read from a page, the same row classes with the book's cells.
+- [Reading a material datasheet](../materials/reading-a-datasheet.md): what each number on a data sheet is, and which row class holds it.
 - [Porous and Multilayer Absorbers](../materials/absorbers/porous-absorbers.md): the models a `PorousMaterial` row goes into.
 - [Dynamic stiffness of resilient materials](../materials/resilient/dynamic-stiffness.md): $s'$, $s'_\mathrm{t}$ and clause 8.2 in full.
 - [Predicting Panel Sound Insulation](../buildings/design/panel-sound-insulation.md): the plateau method a `PlateauMaterial` row draws.

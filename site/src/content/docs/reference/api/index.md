@@ -161,6 +161,7 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | [`building.measurement.ratings`](/phonometry/reference/api/building/ratings/) | Single-number weighted ratings of sound insulation and their spectrum adaptation terms (ISO 717-1 airborne, ISO 717-2 impact). |
 | [`building.catalogue`](/phonometry/reference/api/building/catalogue/) | Transmission loss as the books print it, one row per construction. |
 | [`building.impact_catalogue`](/phonometry/reference/api/building/impact-catalogue/) | Impact insulation as a handbook prints it, one row per floor-ceiling. |
+| [`building.datasheets`](/phonometry/reference/api/building/datasheets/) | Sound insulation as a data sheet or a test report prints it. |
 | [`building.prediction.panel_transmission`](/phonometry/reference/api/building/panel-transmission/) | Predicted airborne sound reduction index of panels (Bies, Hansen & Howard 2017, Engineering Noise Control 5e, Section 7.2; Sharp 1973). |
 | [`building.prediction.masonry_cavity_wall`](/phonometry/reference/api/building/masonry-cavity-wall/) | Wall ties in masonry cavity walls: the structural bridge across the cavity (Hopkins 2007, Sections 3.11.3.2 and 4.3.5.4.1). |
 | [`building.measurement.heavy_impact`](/phonometry/reference/api/building/heavy-impact/) | Heavy and soft impact sources: rubber ball and bang machine (ISO 16283-2:2020 Annex A, ISO 10140-5:2010 Annex F, JIS A 1418-2:2019, ISO 717-2:2020 Annex D). |
@@ -198,6 +199,7 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | [`materials.absorbers.catalogue`](/phonometry/reference/api/materials/catalogue/) | Porous specimens as the pages that print them have them. |
 | [`materials.absorbers.resistive_sheets`](/phonometry/reference/api/materials/resistive-sheets/) | Thin resistive facings, and the resistance of one square metre of them. |
 | [`materials.absorbers.measured`](/phonometry/reference/api/materials/measured/) | Absorption coefficients as the books print them, one row per finish. |
+| [`materials.absorbers.datasheets`](/phonometry/reference/api/materials/datasheets/) | Sound absorption as a data sheet or a test report prints it. |
 | [`materials.absorbers.carpets`](/phonometry/reference/api/materials/carpets/) | Carpets, rated by their noise reduction coefficient and described by their pile. |
 | [`materials.absorbers.layered`](/phonometry/reference/api/materials/layered/) | Declarative layer stacks and the transfer-matrix absorber solver. |
 | [`materials.absorbers.biot`](/phonometry/reference/api/materials/biot/) | Biot poroelastic layers: the three waves and the 6x6 transfer matrix. |

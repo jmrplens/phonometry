@@ -546,10 +546,11 @@ The calibration record of one audio file (schema v1, module docstring).
 `calibration_factor` is the digital-to-pascal multiplier and the
 only mandatory field; the rest document how it was obtained
 (`reference_spl`, `calibrator_frequency`, `calibrator_model`)
-and what the channels are (`channel_labels`). Every number is finite,
-as JSON writes no other, and the model and every label are text UTF-8
-can write, so that the record read from one sidecar can be written to
-another. `phonometry_version` records the writing library version.
+and what the channels are (`channel_labels`). `phonometry_version`
+records the writing library version. Every number is finite, as JSON
+writes no other, and the model, every label and the version are text
+UTF-8 can write, so that the record read from one sidecar can be written
+to another.
 
 ## Catalogue
 
@@ -1058,7 +1059,7 @@ original) so tools that only read PCM can open it.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | For a lossy or unknown target suffix, source and destination naming the same file, a FLAC target that cannot hold the source without an explicit `subtype`, or an invalid `block_size`. |
+| ValueError | For a lossy or unknown target suffix, source and destination naming the same file, a FLAC target that cannot hold the source without an explicit `subtype`, an invalid `block_size`, a sidecar beside the source that [`read_sidecar`](/phonometry/reference/api/io/io/#read_sidecar) refuses, or a pipe, a device, a socket or a directory at the sidecar's name beside the destination; a sidecar is refused before a sample is written. |
 | ImportError | If source or target needs the `[audio]` extra and it is not installed. |
 
 ## CuePoint
@@ -1437,7 +1438,7 @@ dropping it would silently drop the calibration).
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If the sidecar exists but is not a regular file (a pipe, a device, a socket or a directory, behind a link or not), is larger than 1 MiB, is not UTF-8 JSON, nests deeper than 64 levels, does not declare this schema, was written by a newer schema version, or carries malformed fields: a number that is not finite, or a text with a lone surrogate, among them. |
+| ValueError | If the sidecar exists but is not a regular file (a pipe, a device, a socket or a directory, behind a link or not), is larger than 1 MiB, is not UTF-8 JSON, nests deeper than 64 levels, does not declare this schema, was written by a newer schema version, or carries malformed fields: a number that is not finite, a version that is not text, or a text with a lone surrogate, among them. |
 
 ## sidecar_path
 
@@ -1700,7 +1701,7 @@ out of calibrated results.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | For an unknown suffix or subtype, a missing or conflicting `fs`, a dither request outside `PCM_16`, an `rng` without a `dither` for it to seed, bext metadata that violates Tech 3285 (oversize field, version too old for a carried UMID or loudness), or a sidecar request without a calibrated [`Signal`](/phonometry/reference/api/io/io/#signal). |
+| ValueError | For an unknown suffix or subtype, a missing or conflicting `fs`, a dither request outside `PCM_16`, an `rng` without a `dither` for it to seed, bext metadata that violates Tech 3285 (oversize field, version too old for a carried UMID or loudness), a sidecar request without a calibrated [`Signal`](/phonometry/reference/api/io/io/#signal), or one with a pipe, a device, a socket or a directory at the sidecar's name, refused before the audio is written. |
 
 ## write_catalogue
 
@@ -1780,7 +1781,11 @@ Write the calibration sidecar beside an audio file.
 
 Serialises schema v1 with every key present (the module docstring's
 table); an existing sidecar is replaced, which is the update semantics
-a recalibration wants. The audio file itself is never touched.
+a recalibration wants. The audio file itself is never touched. The
+sidecar is written to a new file beside it and renamed into place, so a
+reader finds the old sidecar or the new one whole and the name itself is
+never opened for writing; a link at the name is followed to the file it
+names.
 
 **Parameters**
 
@@ -1799,4 +1804,4 @@ a recalibration wants. The audio file itself is never touched.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | for a factor that is not finite and positive, a reference SPL or a calibrator frequency that is not finite, or a model or a label that holds a lone surrogate, before the file at the sidecar's name is touched. |
+| ValueError | for a factor that is not finite and positive, a reference SPL or a calibrator frequency that is not finite, a model or a label that holds a lone surrogate, or a pipe, a device, a socket or a directory at the sidecar's name, behind a link or not, before the file at the sidecar's name is touched. |

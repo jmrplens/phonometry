@@ -629,26 +629,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
-- **A calibration sidecar no reader can take is refused as a `ValueError`.**
-  `io.read_sidecar`, which `io.read` and `io.read_blocks` call for every audio
-  file they open, read the file at the sidecar's name whole and handed it to
-  the JSON decoder as it was: a text of 100 000 nested brackets escaped as a
-  `RecursionError`, an integer too large for a float as an `OverflowError`, a
-  link to a device that never ends, such as `/dev/zero`, was read until
-  memory ran out, and a named pipe no program writes to kept the read of the
-  audio waiting for ever. `NaN` and `Infinity`, which are not JSON, were
-  written by `io.write_sidecar` and read back as a reference level or a
-  calibrator frequency, and a text escaped as half a UTF-16 pair (`\ud800`)
-  was read as a calibrator model or a channel label that `io.write_sidecar`
-  then failed to write, after it had emptied the sidecar already there. A
-  sidecar is now read only from a regular file, and a pipe, a device, a
-  socket or a directory at its name is refused before it is opened; it is
-  read to 1 MiB at most, its brackets are counted before it is decoded and
-  refused past 64 levels with the line and column where they go too deep,
-  and a number past every float, longer than Python reads or not finite, and
-  a text with a lone surrogate, are refused by name: each is the `ValueError`
-  the function documents, naming the file once. `io.write_sidecar` refuses
-  the same numbers and texts before it touches the file.
+- **A calibration sidecar no reader can take is refused as a `ValueError`,
+  and none is written into a pipe.** `io.read_sidecar`, which `io.read` and
+  `io.read_blocks` call for every audio file they open, read the file at the
+  sidecar's name whole and handed it to the JSON decoder as it was: a text of
+  100 000 nested brackets escaped as a `RecursionError`, an integer too large
+  for a float as an `OverflowError`, a link to a device that never ends, such
+  as `/dev/zero`, was read until memory ran out, and a named pipe no program
+  writes to kept the read of the audio waiting for ever. `io.write_sidecar`,
+  which `io.write` calls with `sidecar=True`, opened the name for writing, so
+  a named pipe there kept it waiting for a program to read it, once the audio
+  was written. `NaN` and `Infinity`, which are not JSON, were written by
+  `io.write_sidecar` and read back as a reference level or a calibrator
+  frequency, and as the text `'nan'` or `'inf'` for the version that wrote
+  the file, and a text escaped as half a UTF-16 pair (`\ud800`) was read as
+  that version, or as a calibrator model or a channel label that
+  `io.write_sidecar` then failed to write, after it had emptied the sidecar
+  already there. A sidecar is now read only from a regular file, and a pipe,
+  a device, a socket or a directory at its name is refused before it is
+  opened; it is read to 1 MiB at most, its brackets are counted before it is
+  decoded and refused past 64 levels with the line and column where they go
+  too deep, and a number past every float, longer than Python reads or not
+  finite, a version that is not text, and a text with a lone surrogate, are
+  refused by name: each is the `ValueError` the function documents, naming
+  the file once. `io.write_sidecar` refuses the same numbers and texts before
+  it touches the file, and writes the sidecar to a new file beside it,
+  renamed into place, so that the name is never opened for writing and a
+  reader finds the old sidecar or the new one whole; a pipe, a device, a
+  socket or a directory at the name is refused, and `io.write` and
+  `io.convert` ask before they write a sample, so that no audio is left
+  without the sidecar it was written with. `io.convert` reads the source's
+  sidecar once, checks it and carries those bytes.
 
 - **A derived value names the cells it rests on in words.** When the cells a
   catalogue value is worked out from have mixed bases, `derived` says the basis

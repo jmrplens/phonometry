@@ -86,6 +86,7 @@ from ._bext import (
     with_measured_loudness,
 )
 from ._chunks import _RF64_SIZE_SENTINEL, BroadcastMetadata
+from ._sidecar import writable_sidecar, write_sidecar
 from ._signal import Signal
 
 if TYPE_CHECKING:
@@ -786,12 +787,16 @@ def write(
         conflicting ``fs``, a dither request outside ``PCM_16``, an
         ``rng`` without a ``dither`` for it to seed, bext
         metadata that violates Tech 3285 (oversize field, version too old
-        for a carried UMID or loudness), or a sidecar request without a
-        calibrated :class:`Signal`.
+        for a carried UMID or loudness), a sidecar request without a
+        calibrated :class:`Signal`, or one with a pipe, a device, a socket or
+        a directory at the sidecar's name, refused before the audio is
+        written.
     """
     target = Path(path)
     _check_target_suffix(path, target)
     _check_sidecar_request(x=x, sidecar=sidecar)
+    if sidecar:
+        writable_sidecar(target)
     if rng is not None and dither is None:
         msg = (
             "rng seeds the TPDF dither noise and does nothing without it; "
@@ -834,8 +839,6 @@ def _write_signal_sidecar(
     """
     if not sidecar or not isinstance(x, Signal) or x.calibration_factor is None:
         return
-    from ._sidecar import write_sidecar
-
     write_sidecar(
         path,
         x.calibration_factor,

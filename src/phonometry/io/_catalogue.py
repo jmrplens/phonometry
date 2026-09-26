@@ -79,9 +79,7 @@ import hashlib
 import json
 import math
 import numbers
-import os
 import re
-import secrets
 import unicodedata
 import warnings
 from collections.abc import Mapping
@@ -115,10 +113,12 @@ from .._internal.json_input import (
     nesting_past,
     read_at_most,
     text_location,
+    write_beside,
 )
 from .._internal.warnings import PhonometryWarning
 
 if TYPE_CHECKING:
+    import os
     from collections.abc import Iterator, Sequence
 
     from .._internal.catalogue import UnitAlias
@@ -2135,16 +2135,7 @@ def _write_atomic(target: Path, text: str, *, overwrite: bool) -> None:
     if target.exists() and not overwrite:
         msg = f"{target} exists; pass overwrite=True to replace it"
         raise FileExistsError(msg)
-    temporary = target.with_name(f".{target.name}.{secrets.token_hex(8)}.tmp")
-    try:
-        with temporary.open("x", encoding="utf-8", newline="\n") as handle:
-            handle.write(text)
-            handle.flush()
-            os.fsync(handle.fileno())
-        temporary.replace(target)
-    except BaseException:
-        temporary.unlink(missing_ok=True)
-        raise
+    write_beside(target, text.encode("utf-8"))
 
 
 def _document(

@@ -34,8 +34,8 @@ Key                     Meaning
 ``schema_version``      Integer, this layout is ``1``. Readers accept equal
                         or older versions and refuse newer ones loudly (a
                         newer writer may have changed a key's meaning).
-``phonometry_version``  The library version that wrote the file, for
-                        forensics; never used to gate reading.
+``phonometry_version``  The library version that wrote the file, a text or
+                        ``null``, for forensics; never used to gate reading.
 ``calibration_factor``  The digital-to-pascal multiplier (0 dBFS = RMS
                         1.0 convention of ``signals.levels``), as derived
                         by :func:`phonometry.metrology.sensitivity` from a
@@ -66,6 +66,7 @@ from __future__ import annotations
 import json
 import math
 import numbers
+import os
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -75,8 +76,10 @@ from .._internal.json_input import (
     NotRegularError,
     TooLargeError,
     nesting_past,
+    not_regular_at,
     read_at_most,
     text_location,
+    write_beside,
 )
 
 #: The schema identifier and the layout version this module writes.
@@ -100,10 +103,11 @@ class CalibrationSidecar:
     ``calibration_factor`` is the digital-to-pascal multiplier and the
     only mandatory field; the rest document how it was obtained
     (``reference_spl``, ``calibrator_frequency``, ``calibrator_model``)
-    and what the channels are (``channel_labels``). Every number is finite,
-    as JSON writes no other, and the model and every label are text UTF-8
-    can write, so that the record read from one sidecar can be written to
-    another. ``phonometry_version`` records the writing library version.
+    and what the channels are (``channel_labels``). ``phonometry_version``
+    records the writing library version. Every number is finite, as JSON
+    writes no other, and the model, every label and the version are text
+    UTF-8 can write, so that the record read from one sidecar can be written
+    to another.
     """
 
     calibration_factor: float
@@ -128,7 +132,10 @@ class CalibrationSidecar:
             if isinstance(value, numbers.Real) and not math.isfinite(value):
                 msg = f"{name} must be finite or None; got {value!r}"
                 raise ValueError(msg)
-        texts = [("calibrator_model", self.calibrator_model)]
+        texts = [
+            ("calibrator_model", self.calibrator_model),
+            ("phonometry_version", self.phonometry_version),
+        ]
         texts += [("channel_labels", label) for label in self.channel_labels or ()]
         for name, text in texts:
             # A JSON escape spells half a UTF-16 pair alone, and a text that
@@ -148,6 +155,46 @@ def sidecar_path(audio_path: str | Path) -> Path:
     return audio.with_name(audio.name + _SIDECAR_TAIL)
 
 
+def writable_sidecar(audio_path: str | Path) -> Path:
+    """The file a sidecar of *audio_path* is written to, refused if it cannot be.
+
+    A link at the sidecar's name is followed, so that a sidecar kept once and
+    linked beside several recordings is updated where it is kept. The file is
+    a regular file or not there yet: anything else at the name is refused
+    before a byte is written, since a pipe opened for writing waits for a
+    reader, which may never come, and a device or a directory holds no
+    sidecar. The writers of the audio ask first, so that the audio is not
+    written beside a sidecar that cannot be.
+
+    :raises ValueError: for a pipe, a device, a socket or a directory at the
+        sidecar's name, behind a link or not.
+    :raises OSError: as the file system raises it, untouched.
+    """
+    target = sidecar_path(audio_path)
+    kind = not_regular_at(target)
+    if kind is not None:
+        msg = (
+            f"{target}: sidecar is {kind}, and a calibration sidecar is "
+            "written only to a regular file"
+        )
+        raise ValueError(msg)
+    return Path(os.path.realpath(target)) if target.is_symlink() else target
+
+
+def put_sidecar(audio_path: str | Path, data: bytes) -> Path:
+    """Put the bytes of a sidecar at *audio_path*'s, never opening the name.
+
+    The bytes go to a new file beside the sidecar's file, renamed into place,
+    so that a reader finds the old sidecar or the new one whole.
+
+    :return: The sidecar's name, :func:`sidecar_path` of *audio_path*.
+    :raises ValueError: for what :func:`writable_sidecar` refuses.
+    :raises OSError: as the file system raises it, untouched.
+    """
+    write_beside(writable_sidecar(audio_path), data)
+    return sidecar_path(audio_path)
+
+
 def write_sidecar(
     audio_path: str | Path,
     calibration_factor: float,
@@ -161,7 +208,11 @@ def write_sidecar(
 
     Serialises schema v1 with every key present (the module docstring's
     table); an existing sidecar is replaced, which is the update semantics
-    a recalibration wants. The audio file itself is never touched.
+    a recalibration wants. The audio file itself is never touched. The
+    sidecar is written to a new file beside it and renamed into place, so a
+    reader finds the old sidecar or the new one whole and the name itself is
+    never opened for writing; a link at the name is followed to the file it
+    names.
 
     :param audio_path: The audio file the sidecar belongs to (it need not
         exist yet; writing the sidecar first is fine).
@@ -174,9 +225,10 @@ def write_sidecar(
     :param channel_labels: One label per channel of the audio file.
     :return: The path the sidecar was written to.
     :raises ValueError: for a factor that is not finite and positive, a
-        reference SPL or a calibrator frequency that is not finite, or a
-        model or a label that holds a lone surrogate, before the file at the
-        sidecar's name is touched.
+        reference SPL or a calibrator frequency that is not finite, a model
+        or a label that holds a lone surrogate, or a pipe, a device, a socket
+        or a directory at the sidecar's name, behind a link or not, before the
+        file at the sidecar's name is touched.
     """
     from .._version import __version__
 
@@ -188,7 +240,6 @@ def write_sidecar(
         channel_labels=channel_labels,
         phonometry_version=__version__,
     )
-    target = sidecar_path(audio_path)
     payload = {
         "schema": SIDECAR_SCHEMA,
         "schema_version": SIDECAR_VERSION,
@@ -203,11 +254,8 @@ def write_sidecar(
             None if record.channel_labels is None else list(record.channel_labels)
         ),
     }
-    target.write_text(
-        json.dumps(payload, indent=2, ensure_ascii=False, allow_nan=False) + "\n",
-        encoding="utf-8",
-    )
-    return target
+    text = json.dumps(payload, indent=2, ensure_ascii=False, allow_nan=False)
+    return put_sidecar(audio_path, (text + "\n").encode("utf-8"))
 
 
 def _as_float(value: float, key: str, path: Path) -> float:
@@ -242,10 +290,10 @@ def _optional_number(
     return number
 
 
-def _sidecar_text(source: Path) -> str:
-    """The sidecar's text, read to :data:`_MAX_BYTES` at most."""
+def _sidecar_bytes(source: Path) -> bytes:
+    """The sidecar's bytes, read to :data:`_MAX_BYTES` at most."""
     try:
-        raw = read_at_most(source, _MAX_BYTES)
+        return read_at_most(source, _MAX_BYTES)
     except NotRegularError as exc:
         msg = (
             f"{source}: sidecar is {exc.kind}, and a calibration sidecar is "
@@ -263,16 +311,15 @@ def _sidecar_text(source: Path) -> str:
             f"{_MAX_BYTES} bytes (1 MiB)"
         )
         raise ValueError(msg) from None
+
+
+def _load_sidecar_payload(source: Path, raw: bytes) -> dict[str, object]:
+    """Parse the sidecar's JSON and check its schema declaration."""
     try:
-        return raw.decode("utf-8")
+        text = raw.decode("utf-8")
     except UnicodeDecodeError as exc:
         msg = f"{source}: sidecar is not UTF-8 text (byte {exc.start})"
         raise ValueError(msg) from None
-
-
-def _load_sidecar_payload(source: Path) -> dict[str, object]:
-    """Parse the sidecar's JSON and check its schema declaration."""
-    text = _sidecar_text(source)
     deep = nesting_past(text)
     if deep is not None:
         msg = (
@@ -356,6 +403,60 @@ def _channel_labels(payload: dict[str, object], source: Path) -> tuple[str, ...]
     return tuple(labels)
 
 
+def _version(payload: dict[str, object], source: Path) -> str | None:
+    """The version that wrote the sidecar, a text or ``None`` for null.
+
+    A number is refused, a ``NaN`` or an ``Infinity`` among them, so that no
+    version is made up from what the file holds.
+    """
+    version = payload.get("phonometry_version")
+    if version is not None and not isinstance(version, str):
+        msg = f"{source}: phonometry_version must be a string or null; got {version!r}"
+        raise ValueError(msg)
+    return version
+
+
+def _record(source: Path, raw: bytes) -> CalibrationSidecar:
+    """The calibration record the sidecar's bytes *raw* hold, every field checked."""
+    payload = _load_sidecar_payload(source, raw)
+    factor = _required_factor(payload, source)
+    calibrator, model = _calibrator_fields(payload, source)
+    labels = _channel_labels(payload, source)
+    reference_spl = _optional_number(payload, "reference_spl", source)
+    frequency = _optional_number(
+        calibrator, "frequency", source, name="calibrator frequency"
+    )
+    version = _version(payload, source)
+    try:
+        return CalibrationSidecar(
+            calibration_factor=factor,
+            reference_spl=reference_spl,
+            calibrator_frequency=frequency,
+            calibrator_model=model,
+            channel_labels=labels,
+            phonometry_version=version,
+        )
+    except ValueError as exc:
+        msg = f"{source}: {exc}"
+        raise ValueError(msg) from exc
+
+
+def sidecar_bytes(audio_path: str | Path) -> bytes | None:
+    """The bytes of an audio file's sidecar, read and checked, or ``None``.
+
+    Read once and checked as :func:`read_sidecar` checks them, so that a copy
+    of the sidecar carries the bytes that were checked, byte for byte.
+
+    :raises ValueError: for everything :func:`read_sidecar` refuses.
+    """
+    source = sidecar_path(audio_path)
+    if not source.exists():
+        return None
+    raw = _sidecar_bytes(source)
+    _record(source, raw)
+    return raw
+
+
 def read_sidecar(audio_path: str | Path) -> CalibrationSidecar | None:
     """Read an audio file's calibration sidecar, if one exists.
 
@@ -372,33 +473,10 @@ def read_sidecar(audio_path: str | Path) -> CalibrationSidecar | None:
         pipe, a device, a socket or a directory, behind a link or not), is
         larger than 1 MiB, is not UTF-8 JSON, nests deeper than 64 levels,
         does not declare this schema, was written by a newer schema version,
-        or carries malformed fields: a number that is not finite, or a text
-        with a lone surrogate, among them.
+        or carries malformed fields: a number that is not finite, a version
+        that is not text, or a text with a lone surrogate, among them.
     """
     source = sidecar_path(audio_path)
     if not source.exists():
         return None
-    payload = _load_sidecar_payload(source)
-    factor = _required_factor(payload, source)
-    calibrator, model = _calibrator_fields(payload, source)
-    labels = _channel_labels(payload, source)
-    reference_spl = _optional_number(payload, "reference_spl", source)
-    frequency = _optional_number(
-        calibrator, "frequency", source, name="calibrator frequency"
-    )
-    try:
-        return CalibrationSidecar(
-            calibration_factor=factor,
-            reference_spl=reference_spl,
-            calibrator_frequency=frequency,
-            calibrator_model=model,
-            channel_labels=labels,
-            phonometry_version=(
-                str(payload["phonometry_version"])
-                if payload.get("phonometry_version") is not None
-                else None
-            ),
-        )
-    except ValueError as exc:
-        msg = f"{source}: {exc}"
-        raise ValueError(msg) from exc
+    return _record(source, _sidecar_bytes(source))

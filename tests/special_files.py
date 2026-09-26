@@ -56,8 +56,9 @@ def raised_within(
 
     The call runs in a thread of its own. When it is still running at the end
     of *seconds* the test fails; a named pipe at *pipe* is first opened for
-    writing and closed again, which lets an open that waits on it return, so
-    that the thread ends rather than waits for the rest of the session.
+    writing and for reading, which lets an open that waits on it for either
+    return, and closed again, so that the thread ends rather than waits for
+    the rest of the session.
     """
     outcome: list[BaseException | None] = []
 
@@ -74,9 +75,13 @@ def raised_within(
     thread.join(seconds)
     if thread.is_alive():
         if pipe is not None:
-            with contextlib.suppress(OSError):
-                os.close(os.open(pipe, os.O_WRONLY | os.O_NONBLOCK))
+            ends: list[int] = []
+            for flags in (os.O_WRONLY, os.O_RDONLY):
+                with contextlib.suppress(OSError):
+                    ends.append(os.open(pipe, flags | os.O_NONBLOCK))
             thread.join(seconds)
+            for end in ends:
+                os.close(end)
         pytest.fail(f"the call was still waiting after {seconds} s")
     return outcome[0]
 

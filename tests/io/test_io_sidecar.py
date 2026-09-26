@@ -19,10 +19,12 @@ from special_files import (
     size_says_nothing,
 )
 
+from phonometry._internal import json_input
 from phonometry.io import (
     CalibrationSidecar,
     Signal,
     _sidecar,
+    convert,
     read,
     read_sidecar,
     sidecar_path,
@@ -311,6 +313,102 @@ def test_a_link_to_a_sidecar_is_read(tmp_path: Path) -> None:
     assert (got.calibration_factor, got.reference_spl) == (2.5, 94.0)
 
 
+@pytest.mark.parametrize("kind", SPECIAL_KINDS)
+def test_a_sidecar_is_never_written_to_what_is_no_regular_file(
+    kind: str, tmp_path: Path
+) -> None:
+    """A pipe opened for writing waits for a reader, which may never come."""
+    audio = tmp_path / "meas.wav"
+    target = sidecar_path(audio)
+    what = make_special(kind, target)
+    error = raised_within(
+        lambda: write_sidecar(audio, 2.5), pipe=target if kind == "pipe" else None
+    )
+    assert isinstance(error, ValueError)
+    assert str(error) == (
+        f"{target}: sidecar is {what}, and a calibration sidecar is written "
+        "only to a regular file"
+    )
+    assert sorted(path.name for path in tmp_path.iterdir()) == [target.name]
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="POSIX pipes")
+def test_writing_audio_with_a_sidecar_beside_a_pipe_writes_neither(
+    tmp_path: Path,
+) -> None:
+    """The sidecar's name is asked first, so no audio is left without its sidecar."""
+    audio = tmp_path / "cal.wav"
+    target = sidecar_path(audio)
+    make_special("pipe", target)
+    calibrated = Signal(data=np.zeros(8), fs=FS, calibration_factor=3.5)
+    error = raised_within(lambda: write(audio, calibrated, sidecar=True), pipe=target)
+    assert isinstance(error, ValueError)
+    assert "sidecar is a named pipe (FIFO)" in str(error)
+    assert not audio.exists()
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="POSIX pipes")
+def test_converting_beside_a_pipe_at_the_destinations_sidecar_writes_nothing(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "a.wav"
+    write(source, np.zeros(8), FS)
+    write_sidecar(source, 2.5)
+    destination = tmp_path / "b.wav"
+    target = sidecar_path(destination)
+    make_special("pipe", target)
+    error = raised_within(lambda: convert(source, destination), pipe=target)
+    assert isinstance(error, ValueError)
+    assert "sidecar is a named pipe (FIFO)" in str(error)
+    assert not destination.exists()
+
+
+def test_a_source_sidecar_no_reader_takes_stops_a_conversion_before_it_writes(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "a.wav"
+    write(source, np.zeros(8), FS)
+    _sidecar_text(source, _valid_with('"reference_spl": NaN'))
+    destination = tmp_path / "b.wav"
+    with pytest.raises(ValueError, match="reference_spl must be a finite number"):
+        convert(source, destination)
+    assert not destination.exists()
+    assert not sidecar_path(destination).exists()
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="symbolic links")
+def test_a_sidecar_written_through_a_link_updates_the_file_it_names(
+    tmp_path: Path,
+) -> None:
+    """A sidecar kept once and linked beside several recordings stays shared."""
+    kept = write_sidecar(tmp_path / "kept.wav", 2.5)
+    audio = tmp_path / "meas.wav"
+    sidecar_path(audio).symlink_to(kept.name)
+    assert write_sidecar(audio, 4.0) == sidecar_path(audio)
+    assert sidecar_path(audio).is_symlink()
+    got = read_sidecar(tmp_path / "kept.wav")
+    assert got is not None
+    assert got.calibration_factor == 4.0
+
+
+def test_a_sidecar_that_fails_to_be_written_leaves_the_old_one_whole(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The new text goes to a file beside it, removed when the write fails."""
+    audio = tmp_path / "meas.wav"
+    kept = write_sidecar(audio, 2.5)
+    before = kept.read_bytes()
+
+    def full_disk(fd: int) -> None:
+        raise OSError(28, "No space left on device", str(fd))
+
+    monkeypatch.setattr(json_input.os, "fsync", full_disk)
+    with pytest.raises(OSError, match="No space left on device"):
+        write_sidecar(audio, 4.0)
+    assert kept.read_bytes() == before
+    assert sorted(path.name for path in tmp_path.iterdir()) == [kept.name]
+
+
 @pytest.mark.parametrize(
     ("written", "message"),
     [
@@ -427,6 +525,44 @@ def test_a_text_with_a_lone_surrogate_is_never_written(
     with pytest.raises(ValueError, match="holds a lone surrogate"):
         write_sidecar(audio, 2.5, **fields)
     assert kept.read_bytes() == before
+
+
+@pytest.mark.parametrize(
+    ("written", "message"),
+    [
+        ('"phonometry_version": NaN', "got nan"),
+        ('"phonometry_version": Infinity', "got inf"),
+        ('"phonometry_version": -Infinity', "got -inf"),
+        ('"phonometry_version": 1e400', "got inf"),
+        ('"phonometry_version": 4', "got 4"),
+        ('"phonometry_version": ["4.0"]', "got ['4.0']"),
+    ],
+    ids=["nan", "infinity", "minus-infinity", "past-floats", "integer", "list"],
+)
+def test_a_version_that_is_not_text_is_refused_by_name(
+    tmp_path: Path, written: str, message: str
+) -> None:
+    """No version is made up from a number, as the text 'nan' once was."""
+    audio = tmp_path / "meas.wav"
+    _sidecar_text(audio, _valid_with(written))
+    with pytest.raises(ValueError, match=re.escape(message)) as caught:
+        read_sidecar(audio)
+    assert str(caught.value) == (
+        f"{sidecar_path(audio)}: phonometry_version must be a string or null; {message}"
+    )
+
+
+def test_a_version_with_a_lone_surrogate_is_refused_by_name(tmp_path: Path) -> None:
+    audio = tmp_path / "meas.wav"
+    _sidecar_text(audio, _valid_with('"phonometry_version": "4.0\\ud800"'))
+    with pytest.raises(ValueError, match=re.escape("U+D800")) as caught:
+        read_sidecar(audio)
+    assert str(caught.value) == (
+        f"{sidecar_path(audio)}: phonometry_version holds a lone surrogate, "
+        "U+D800, in '4.0\\ud800', which is not text UTF-8 can write"
+    )
+    with pytest.raises(ValueError, match="phonometry_version holds a lone surrogate"):
+        CalibrationSidecar(calibration_factor=1.0, phonometry_version="4.0\ud800")
 
 
 def test_the_dataclass_itself_rejects_a_nonpositive_factor() -> None:

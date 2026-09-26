@@ -10,12 +10,18 @@ text nest at most so deep, counted before any decoder runs; and a text it
 decodes to holds no lone surrogate, which a JSON escape can spell and UTF-8
 cannot write. Each reader turns what these find into its own error, with the
 place in the file.
+
+A file the library writes back at such a name is written beside it and
+renamed into place, so that the name is never opened for writing: opening a
+pipe for writing waits for a reader, which may never come, and a reader of
+the name finds the old file or the new one whole, never half of either.
 """
 
 from __future__ import annotations
 
 import os
 import re
+import secrets
 import stat
 from typing import TYPE_CHECKING
 
@@ -91,6 +97,47 @@ def _not_regular(mode: int) -> str | None:
         if test(mode):
             return kind
     return "a special file"
+
+
+def not_regular_at(path: Path) -> str | None:
+    """What is at *path* when it is not a regular file, or ``None``.
+
+    A link is followed, so a link to a pipe is a pipe. ``None`` when a
+    regular file is at the name, and when nothing is, or the link at it names
+    nothing: a file written there makes one.
+
+    :raises OSError: as the file system raises it, untouched, for anything
+        but a name with nothing at it.
+    """
+    try:
+        mode = path.stat().st_mode
+    except FileNotFoundError:
+        return None
+    return _not_regular(mode)
+
+
+def write_beside(target: Path, data: bytes) -> None:
+    """Put *data* at *target* through a new file beside it, renamed into place.
+
+    *target* itself is never opened. What is at the name is replaced by the
+    rename, so a caller refuses first what it will not replace
+    (:func:`not_regular_at` says what a name holds). The new file is flushed
+    to the disk before the rename, and removed when anything fails before it.
+
+    :param target: Where the file goes.
+    :param data: Its bytes.
+    :raises OSError: as the file system raises it, untouched.
+    """
+    temporary = target.with_name(f".{target.name}.{secrets.token_hex(8)}.tmp")
+    try:
+        with temporary.open("xb") as handle:
+            handle.write(data)
+            handle.flush()
+            os.fsync(handle.fileno())
+        temporary.replace(target)
+    except BaseException:
+        temporary.unlink(missing_ok=True)
+        raise
 
 
 def _open_without_waiting(name: str, flags: int) -> int:

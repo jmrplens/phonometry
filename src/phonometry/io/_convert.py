@@ -51,7 +51,6 @@ not the library, accepts that narrowing.
 
 from __future__ import annotations
 
-import shutil
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -66,7 +65,7 @@ from ._chunks import (
     parse_wav_chunks,
 )
 from ._flac import embed_flac_bext, read_flac_bext
-from ._sidecar import read_sidecar, sidecar_path
+from ._sidecar import put_sidecar, sidecar_bytes, writable_sidecar
 from ._signal import Signal
 from ._write import (
     _SUBTYPE_BITS,
@@ -300,8 +299,11 @@ def convert(
     :return: :func:`phonometry.io.info` of the written file.
     :raises ValueError: For a lossy or unknown target suffix, source and
         destination naming the same file, a FLAC target that cannot hold
-        the source without an explicit ``subtype``, or an invalid
-        ``block_size``.
+        the source without an explicit ``subtype``, an invalid
+        ``block_size``, a sidecar beside the source that
+        :func:`~phonometry.io.read_sidecar` refuses, or a pipe, a device, a
+        socket or a directory at the sidecar's name beside the destination;
+        a sidecar is refused before a sample is written.
     :raises ImportError: If source or target needs the ``[audio]`` extra
         and it is not installed.
     """
@@ -312,6 +314,12 @@ def convert(
     kind, bits, bext, fs, channels, frames = _source_traits(source)
     resolved = _default_subtype(kind, bits, flac=flac) if subtype is None else subtype
     _check_resolved_subtype(resolved, flac=flac)
+    # Read and checked once, and carried byte for byte: the most faithful
+    # copy. A sidecar the destination cannot take is refused before a sample
+    # is written.
+    carried = sidecar_bytes(source)
+    if carried is not None:
+        writable_sidecar(target)
 
     # The conversion's own CodingHistory line, appended under the carried
     # trail. The resolver keys on a Signal's provenance, so the carried
@@ -351,8 +359,6 @@ def convert(
             frames_are_estimate=kind == "decoded",
         )
 
-    source_sidecar = read_sidecar(source)
-    if source_sidecar is not None:
-        # Validated just above; carried byte for byte, the most faithful copy.
-        shutil.copyfile(sidecar_path(source), sidecar_path(target))
+    if carried is not None:
+        put_sidecar(target, carried)
     return info(target)

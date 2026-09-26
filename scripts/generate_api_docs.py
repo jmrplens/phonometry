@@ -1358,11 +1358,34 @@ def render_index(
             # First sentence of the first paragraph (an opening sentence may
             # wrap across several physical source lines).
             paragraph = page.intro.strip().split("\n\n", 1)[0].replace("\n", " ")
-            summary = paragraph.split(". ", 1)[0].rstrip(".") + "." if paragraph else ""
+            summary = _first_sentence(paragraph)
             cell = render_cell(summary, xref, stats)
             out.append(f"| [`{page.title}`]({page.url}) | {cell} |")
         out.append("")
     return "\n".join(out).strip("\n") + "\n"
+
+
+def _first_sentence(paragraph: str) -> str:
+    """The opening sentence of a paragraph, for the module's one-line summary.
+
+    A full stop followed by a space ends the sentence only outside brackets
+    and when the next word does not start with a lower-case letter or a
+    digit, so an abbreviation in a citation ("ECAC Doc 29 Vol. 2",
+    "Norton & Karczub Ch. 11") does not cut the summary off mid-parenthesis.
+    """
+    if not paragraph:
+        return ""
+    depth = 0
+    for i, char in enumerate(paragraph):
+        if char in "([":
+            depth += 1
+        elif char in ")]":
+            depth = max(depth - 1, 0)
+        elif char == "." and depth == 0 and paragraph[i + 1 : i + 2] == " ":
+            following = paragraph[i + 2 : i + 3]
+            if following and not (following.islower() or following.isdigit()):
+                return paragraph[: i + 1]
+    return paragraph.rstrip(".") + "."
 
 
 def render_sidebar(pages: list[ModuleDoc]) -> str:

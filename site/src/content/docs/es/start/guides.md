@@ -1,6 +1,6 @@
 ---
 title: "Guías"
-description: "Las 146 guías de phonometry, agrupadas en los trece temas que cubre la biblioteca: para qué sirve cada área, las normas que implementa y un resumen de una línea de cada guía que contiene."
+description: "Las 147 guías de phonometry, agrupadas en los trece temas que cubre la biblioteca: para qué sirve cada área, las normas que implementa y un resumen de una línea de cada guía que contiene."
 head:
   - tag: script
     attrs:
@@ -118,7 +118,7 @@ hay ninguna panorámica del campo: cada página es la documentación de trabajo 
 un módulo, escrita para que un resultado se pueda defender apartado por
 apartado en lugar de darlo por bueno.
 
-Esta página es el mapa. Ciento cuarenta y seis guías repartidas en trece temas, y cada
+Esta página es el mapa. Ciento cuarenta y siete guías repartidas en trece temas, y cada
 área tiene su propio índice con el relato largo de cómo encajan sus piezas. Si
 llegas sin una pregunta concreta, lee primero la
 [introducción](/phonometry/es/start/getting-started/): recorre una señal por toda la
@@ -755,8 +755,8 @@ para la cartografía reglamentaria.
 Niveles de certificación, contornos de aeropuerto y el método del
 hemisferio para helicópteros: el ruido del vuelo medido como lo prescriben
 los documentos de certificación y de planificación aeroportuaria.
-Implementa el Anexo 16 de la OACI, IEC 61265, SAE ARP 866B/5534 y
-ECAC Doc 29/32.
+Implementa el Anexo 16 de la OACI, IEC 61265, SAE ARP 866A/866B/5534,
+ISO 3891 y ECAC Doc 29/32.
 
 - [Ruido de aeronaves: nivel efectivo de ruido percibido](/phonometry/es/aircraft/aircraft-noise/):
   la ruidosidad percibida y el PNL, la corrección por tonos, la corrección por
@@ -770,6 +770,10 @@ ECAC Doc 29/32.
 - [La base de datos ANP de flota](/phonometry/es/aircraft/anp-fleet/): las tablas
   de EASA con curvas nivel-potencia-distancia y trayectorias por defecto, y la
   cadena de Doc 29 ejecutada desde un identificador de aeronave.
+- [Datos NPD para el aire del aeropuerto](/phonometry/es/aircraft/npd-atmosphere/):
+  las curvas de ANP recalculadas para la temperatura, la humedad y la presión de
+  un estudio según el apéndice D de Doc 29, con la absorción de SAE ARP 5534 o de
+  SAE ARP 866A.
 
 ## [Acústica submarina](/phonometry/es/underwater/)
 

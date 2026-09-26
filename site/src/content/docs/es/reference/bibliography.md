@@ -1147,7 +1147,15 @@ vuelo.
   [sae.org](https://www.sae.org/standards/content/arp5534/).
   La absorción atmosférica en bandas de tercio de octava por el método SAE
   para espectros de sobrevuelo.
-  Citado por [Ruido de aeronaves](/phonometry/es/aircraft/aircraft-noise/).
+  Citado por [Ruido de aeronaves](/phonometry/es/aircraft/aircraft-noise/),
+  [Datos NPD para el aire del aeropuerto](/phonometry/es/aircraft/npd-atmosphere/).
+- International Organization for Standardization. (1978). *Acoustics —
+  Procedure for describing aircraft noise heard on the ground* (ISO 3891:1978,
+  anulada).
+  El anexo A da el coeficiente de atenuación de SAE ARP 866A que ofrece como
+  vía heredada el apéndice D de la ECAC Doc 29; el anexo C es un ejemplo
+  resuelto de corrección tonal.
+  Citado por [Datos NPD para el aire del aeropuerto](/phonometry/es/aircraft/npd-atmosphere/).
 - SAE International. (2012). *Standard values of atmospheric absorption as a
   function of temperature and humidity* (SAE ARP 866B, estabilizada en 2012).
   [sae.org](https://www.sae.org/standards/content/arp866b/).
@@ -1168,6 +1176,14 @@ vuelo.
   El método europeo de contornos de ruido de aeropuerto: interpolación NPD y
   cálculo de evento único por segmentos.
   Citado por [Ruido de aeropuertos](/phonometry/es/aircraft/airport-noise/).
+- European Civil Aviation Conference. (2026). *Report on standard method of
+  computing noise contours around civil airports* (ECAC.CEAC Doc 29, 5.ª ed.),
+  Volumen 2: Guía técnica.
+  [Página de documentos de ECAC](https://www.ecac-ceac.org/documents/ecac-documents-and-international-agreements).
+  El apéndice D: las tasas SAE AIR-1845 que normalizan los datos NPD y su
+  recálculo para una atmósfera distinta de la de referencia, con su ejemplo
+  resuelto.
+  Citado por [Datos NPD para el aire del aeropuerto](/phonometry/es/aircraft/npd-atmosphere/).
 - European Civil Aviation Conference. (2026). *Report on standard method of
   computing noise contours around civil airports* (ECAC.CEAC Doc 29, 5.ª ed.),
   Volumen 3: Casos de referencia y marco de verificación.

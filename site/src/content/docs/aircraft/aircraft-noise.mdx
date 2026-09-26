@@ -29,7 +29,7 @@ references:
     title: "Application of pure-tone atmospheric absorption losses to one-third octave-band data"
     designation: "SAE ARP 5534, reaffirmed 2021"
     url: "https://www.sae.org/standards/content/arp5534/"
-    note: "The SAE-Method band attenuation of the atmospheric-absorption section, with the pure-tone coefficient from ISO 9613-1."
+    note: "The SAE-Method band attenuation of the atmospheric-absorption section, with the pure-tone coefficient of Eqs. 1-6: the ISO 9613-1 terms with the saturation vapour pressure of Eqs. 5-6."
   - type: standard
     organization: "SAE International"
     year: 2012
@@ -381,10 +381,15 @@ approach disagreement above 4 EPNdB, or a result within 1 EPNdB of the Chapter 3
 limit.
 
 The library supplies the ingredients and not the bookkeeping. `air_attenuation`
-and `sae_band_attenuation` below are exactly the $\alpha(i)$ and $\alpha_\mathrm{R}(i)$
-of the first two terms, and the EPNL machinery re-runs an adjusted spectrum as
-readily as a measured one; the flight-path geometry $QK/Q_\mathrm{r}K_\mathrm{r}$ and the four
-$\Delta$ terms themselves are not implemented. Adjust first, then report: the
+and `sae_band_attenuation` below give the $\alpha(i)$ and $\alpha_\mathrm{R}(i)$
+of the first two terms, though not in their unit: §8.3.2.1 takes the
+coefficients in dB/100 m with $QK$ in metres, which is what the 0.01 converts,
+while `air_attenuation` returns dB/m (the $0.01\,\alpha(i)$ of those terms) and
+`sae_band_attenuation` a band attenuation over a given path, in dB (the whole
+$0.01\,\alpha(i)\,QK$ for the path $QK$). The EPNL machinery re-runs an
+adjusted spectrum as readily as a measured one; the flight-path geometry
+$QK/Q_\mathrm{r}K_\mathrm{r}$ and the four $\Delta$ terms themselves are not
+implemented. Adjust first, then report: the
 EPNL this page returns is a test-day value, and a `requirement` verdict is only
 a certification verdict once §8 has been applied.
 
@@ -434,7 +439,9 @@ print(report.passes, report.checks)
 
 Correcting a measured flyover to reference atmospheric conditions needs the
 one-third-octave-band attenuation over the path. The pure-tone coefficient is
-the ISO 9613-1 one (identical, per ARP 5534 §3.1) provided by `air_attenuation`;
+the one of ISO 9613-1, whose terms ARP 5534 §3.1 repeats in its Eqs. 1-3, with
+the saturation vapour pressure that ARP 5534 prints in Eqs. 5-6 (the longer
+form of ANSI S1.26, not the Annex B formula of `air_attenuation`); on top of it
 `sae_band_attenuation` adds the **SAE Method** (ARP 5534 §3.2.2) mapping the
 pure-tone mid-band path attenuation $\delta_\mathrm{t} = \alpha\,s$ to the band
 attenuation $\delta_\mathrm{B}$, consistent with the Exact Method well beyond the 50 dB

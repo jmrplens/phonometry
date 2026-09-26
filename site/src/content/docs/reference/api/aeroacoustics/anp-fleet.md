@@ -56,6 +56,8 @@ AnpAircraft(
     mounting: str,
     npd_id: str,
     power_parameter: str,
+    approach_spectral_class_id: str,
+    departure_spectral_class_id: str,
     _database: AnpDatabase,
 )
 ```
@@ -74,6 +76,8 @@ One ANP aircraft type: metadata plus NPD/profile access and Doc 29 wiring.
 | `mounting` | Doc 29 engine mounting (`"wing"`/`"fuselage"`/`"propeller"`). |
 | `npd_id` | ANP noise identifier. |
 | `power_parameter` | Name/unit of the NPD power parameter. |
+| `approach_spectral_class_id` | Spectral class of the approach NPD. |
+| `departure_spectral_class_id` | Spectral class of the departure NPD. |
 
 ### AnpAircraft.event_level()
 
@@ -87,6 +91,8 @@ AnpAircraft.event_level(
     metric: EventMetric = 'exposure',
     temperature_c: float | None = None,
     atmospheric_pressure_kpa: float | None = None,
+    relative_humidity_percent: float | None = None,
+    absorption: str = 'arp5534',
 ) -> FlyoverResult
 ```
 
@@ -105,6 +111,8 @@ AnpAircraft.noise_contour(
     metric: EventMetric = 'exposure',
     temperature_c: float | None = None,
     atmospheric_pressure_kpa: float | None = None,
+    relative_humidity_percent: float | None = None,
+    absorption: str = 'arp5534',
 ) -> NoiseContourResult
 ```
 
@@ -131,6 +139,44 @@ AnpAircraft.profile(
 
 Fixed-point profile (see [`AnpDatabase.profile`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpdatabaseprofile)).
 
+### AnpAircraft.revised_npd_curves()
+
+```python
+AnpAircraft.revised_npd_curves(
+    operation: str,
+    metric: str = 'SEL',
+    *,
+    temperature_c: float,
+    relative_humidity_percent: float,
+    atmospheric_pressure_kpa: float = 101.325,
+    absorption: str = 'arp5534',
+) -> RevisedNpdCurves
+```
+
+NPD curves for another atmosphere (see [`AnpDatabase.revised_npd_curves`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpdatabaserevised_npd_curves)).
+
+### AnpAircraft.spectral_class()
+
+```python
+AnpAircraft.spectral_class(operation: str) -> SpectralClass
+```
+
+Spectral class of this aircraft's NPD for an operation.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `operation` | `"departure"`/`"D"` or `"arrival"`/`"A"`. |
+
+**Returns:** The [`SpectralClass`](/phonometry/reference/api/aeroacoustics/anp-fleet/#spectralclass) the ANP database assigns.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| KeyError | if the database carries no such class. |
+
 ## AnpDatabase
 
 ```python
@@ -140,6 +186,7 @@ AnpDatabase(
     distances: NDArray[np.float64],
     profiles: Mapping[tuple[str, str, str, int], NDArray[np.float64]],
     performance: _PerformanceTables | None = None,
+    spectral_classes: Mapping[str, SpectralClass] | None = None,
 )
 ```
 
@@ -183,6 +230,8 @@ AnpDatabase.event_level(
     metric: EventMetric = 'exposure',
     temperature_c: float | None = None,
     atmospheric_pressure_kpa: float | None = None,
+    relative_humidity_percent: float | None = None,
+    absorption: str = 'arp5534',
 ) -> FlyoverResult
 ```
 
@@ -203,6 +252,8 @@ Feeds the aircraft's profile and NPD curves into
 | `metric` | `"exposure"` (SEL) or `"maximum"` (LAmax). |
 | `temperature_c` | Air temperature at the field, in °C, for the atmospheric impedance adjustment. Left unset it follows *aerodrome*, or the standard atmosphere when there is none. |
 | `atmospheric_pressure_kpa` | Air pressure at the field, in kPa, likewise. |
+| `relative_humidity_percent` | Relative humidity at the field, in percent. Given, the SEL and LAmax NPD curves are recalculated for that humidity and the temperature and pressure above by ECAC Doc 29 Vol. 2 Appendix D, with the aircraft's spectral class for the operation; left unset they stay in the SAE AIR-1845 atmosphere the database is normalised to. |
+| `absorption` | The Appendix D absorption route, `"arp5534"` (default) or `"arp866a"`; read only with a humidity. |
 
 **Returns:** A [`FlyoverResult`](/phonometry/reference/api/aeroacoustics/airport-noise/#flyoverresult).
 
@@ -259,6 +310,8 @@ AnpDatabase.noise_contour(
     metric: EventMetric = 'exposure',
     temperature_c: float | None = None,
     atmospheric_pressure_kpa: float | None = None,
+    relative_humidity_percent: float | None = None,
+    absorption: str = 'arp5534',
 ) -> NoiseContourResult
 ```
 
@@ -280,6 +333,8 @@ Feeds the aircraft's profile and NPD curves into
 | `metric` | `"exposure"` (SEL) or `"maximum"` (LAmax). |
 | `temperature_c` | Air temperature at the field, in °C, for the atmospheric impedance adjustment. Left unset it follows *aerodrome*, or the standard atmosphere when there is none. |
 | `atmospheric_pressure_kpa` | Air pressure at the field, in kPa, likewise. |
+| `relative_humidity_percent` | Relative humidity at the field, in percent. Given, the SEL and LAmax NPD curves are recalculated for that humidity and the temperature and pressure above by ECAC Doc 29 Vol. 2 Appendix D, with the aircraft's spectral class for the operation; left unset they stay in the SAE AIR-1845 atmosphere the database is normalised to. |
+| `absorption` | The Appendix D absorption route, `"arp5534"` (default) or `"arp866a"`; read only with a humidity. |
 
 **Returns:** A [`NoiseContourResult`](/phonometry/reference/api/aeroacoustics/airport-noise/#noisecontourresult).
 
@@ -445,6 +500,77 @@ none named `"DEFAULT"`) raises listing the identifiers.
 | KeyError | If the aircraft is unknown, has no fixed-point profile for the request, or `profile_id` is not among the available ones. |
 | ValueError | If `profile_id` is `None` and several profiles exist with none of them named `"DEFAULT"`. |
 
+### AnpDatabase.revised_npd_curves()
+
+```python
+AnpDatabase.revised_npd_curves(
+    aircraft_id: str,
+    operation: str,
+    metric: str = 'SEL',
+    *,
+    temperature_c: float,
+    relative_humidity_percent: float,
+    atmospheric_pressure_kpa: float = 101.325,
+    absorption: str = 'arp5534',
+) -> RevisedNpdCurves
+```
+
+NPD curves recalculated for another atmosphere (Doc 29 Vol. 2 Appendix D).
+
+The curves of `npd_curves` revised by the increment of the
+aircraft's own spectral class for the operation, as
+[`revise_npd_curves`](/phonometry/reference/api/aeroacoustics/npd-atmosphere/#revise_npd_curves) computes
+it.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `aircraft_id` | ANP aircraft identifier. |
+| `operation` | `"departure"`/`"D"` or `"arrival"`/`"A"`. |
+| `metric` | `"SEL"` (default) or `"LAmax"`. |
+| `temperature_c` | Air temperature, in degrees Celsius. |
+| `relative_humidity_percent` | Relative humidity, in percent. |
+| `atmospheric_pressure_kpa` | Air pressure, in kPa (default 101.325). |
+| `absorption` | `"arp5534"` (default) or `"arp866a"`. |
+
+**Returns:** A [`RevisedNpdCurves`](/phonometry/reference/api/aeroacoustics/npd-atmosphere/#revisednpdcurves).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| KeyError | if the aircraft, its NPD data or its spectral class is missing. |
+| ValueError | for an unknown metric, operation or absorption route. |
+
+### AnpDatabase.spectral_class()
+
+```python
+AnpDatabase.spectral_class(class_id: int | str) -> SpectralClass
+```
+
+One spectral class of the database (ECAC Doc 29 Vol. 2 G4.3).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `class_id` | Spectral class identifier, as a number or as the table writes it (`103` or `"103"`). |
+
+**Returns:** A [`SpectralClass`](/phonometry/reference/api/aeroacoustics/anp-fleet/#spectralclass).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| KeyError | if the export carries no such class, or no spectral-class table at all. |
+
+### AnpDatabase.spectral_class_ids
+
+*property*
+
+Sorted list of the spectral class identifiers in the database.
+
 ## AnpNpdCurves
 
 ```python
@@ -567,7 +693,7 @@ Load an EASA ANP database (aircraft, NPD curves and default profiles).
 
 | Name | Description |
 | :--- | :--- |
-| `path` | Directory of an ANP CSV export (the `*Aircraft.csv`, `*NPD_data.csv`, `*fixed_point_profiles.csv` tables, plus the optional performance tables the procedural-step model reads: `*engine_coefficients.csv`, `*Aerodynamic_coefficients.csv`, `*weights.csv` and the two `*procedural_steps.csv`). If `None` (default), loads the full EASA ANP database v2.3 shipped with the package (see `aircraft/data/anp/PROVENANCE.md`). |
+| `path` | Directory of an ANP CSV export (the `*Aircraft.csv`, `*NPD_data.csv`, `*fixed_point_profiles.csv` tables, plus the optional performance tables the procedural-step model reads: `*engine_coefficients.csv`, `*Aerodynamic_coefficients.csv`, `*weights.csv` and the two `*procedural_steps.csv`, and the `*Spectral_classes.csv` table ECAC Doc 29 Vol. 2 Appendix D reads to recalculate the NPD curves for another atmosphere). If `None` (default), loads the full EASA ANP database v2.3 shipped with the package (see `aircraft/data/anp/PROVENANCE.md`). |
 
 **Returns:** An [`AnpDatabase`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpdatabase).
 
@@ -576,3 +702,47 @@ Load an EASA ANP database (aircraft, NPD curves and default profiles).
 | Exception | When |
 | :--- | :--- |
 | FileNotFoundError | If a required table is missing. |
+
+## SpectralClass
+
+```python
+SpectralClass(
+    class_id: str,
+    operation: str,
+    description: str,
+    frequencies_hz: NDArray[np.float64],
+    levels_db: NDArray[np.float64],
+)
+```
+
+One ANP spectral class: the reference spectrum of a group of aircraft.
+
+ECAC Doc 29 Vol. 2 G4.3: the average unweighted spectrum at the time of the
+maximum level, at 1 000 ft, normalised to the same SAE AIR-1845 attenuation
+rates as the NPD data and, for historical reasons, to 70 dB in the 1 kHz
+band. Every aircraft is assigned one for approach and one for departure.
+Appendix D recalculates the aircraft's NPD curves for another atmosphere
+from it ([`revise_npd_curves`](/phonometry/reference/api/aeroacoustics/npd-atmosphere/#revise_npd_curves)).
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `class_id` | Spectral class identifier (`"103"`, `"205"`...). |
+| `operation` | `"A"` (approach) or `"D"` (departure). |
+| `description` | The aircraft family the class describes. |
+| `frequencies_hz` | Nominal one-third-octave-band centre frequencies, in Hz, from 50 Hz to 10 kHz. |
+| `levels_db` | Band levels at 1 000 ft, in dB. |
+
+### SpectralClass.plot()
+
+```python
+SpectralClass.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
+```
+
+Plot the band levels versus frequency.

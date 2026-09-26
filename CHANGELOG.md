@@ -217,6 +217,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   beside `file_sha256` for the file itself. The guide "Your own catalogues"
   gains a section on it, in both languages.
 
+- **NPD curves for the air at the airport, not the average air of
+  certification tests (ECAC Doc 29 Vol. 2 Appendix D, SAE ARP 866A through
+  ISO 3891).** The ANP noise-power-distance data are normalised to the SAE
+  AIR-1845 atmosphere, the mean attenuation rates of Table D-1, now published
+  as `aircraft.SAE_AIR1845_ATTENUATION_DB_PER_100M`.
+  `aircraft.npd_atmosphere_increment` takes a spectral class back to the
+  source (Eq. D-1), out to the NPD distances in that atmosphere and in the one
+  specified (Eqs. D-2 and D-3), A-weights both and returns the increment
+  $\Delta L$ of Eq. D-4, by SAE ARP 5534 or by SAE ARP 866A;
+  `aircraft.revise_npd_curves` adds it to an `AnpNpdCurves`, and the result
+  plots the revised curves over the original ones. The ANP database now reads
+  its `Spectral_classes.csv`: `AnpDatabase.spectral_class` and
+  `AnpAircraft.spectral_class` return a `SpectralClass`,
+  `AnpDatabase.revised_npd_curves` recalculates an aircraft's curves with its
+  own class, and `event_level` and `noise_contour` take
+  `relative_humidity_percent` (and `absorption`) to run the whole Doc 29 chain
+  in the air of the field, at the temperature and pressure they already read.
+  `aircraft.arp866a_attenuation` is the legacy SAE ARP 866A coefficient in the
+  form ISO 3891:1978 Annex A gives it, evaluated at the band centre up to
+  4 kHz and at the lower band edge above. Its Table 1 asks for "a form of
+  quadratic interpolation" of $\eta(\delta)$ without saying which, and the two
+  documents that print the attenuation read it differently: the three-point
+  quadratic of the default reproduces all 264 cells of ISO 3891 Table 10, and
+  `eta_interpolation="linear"` reproduces Doc 29 Table D-3b, which is what the
+  Appendix D route uses. The worked example of the appendix is held table by
+  table: Tables D-2, D-3a, D-3c, D-4, D-5 and D-6b to the last printed digit,
+  Table D-3b in 208 of its 240 cells to the printed digit and in the other 32,
+  the longest high-frequency paths, within half a unit plus 7 parts per
+  million, and Table D-6c but for its last row, which the page prints as a
+  copy of the last row of Table D-6b and is now in the errata, with a sentence
+  that pairs Tables D-3b and D-3c with each other's method. ISO 3891 Table 10
+  is a conformance row of its own. Its Table 9 is not: the formula misses 15
+  of its cells by one printed unit, seven that contradict Table 10 where the
+  humidity drops out of the formula, now in the errata too, and eight more
+  where the humidity enters, each within 0.014 dB/100 m of a rounding
+  boundary, which the errata entry lists. A new guide in both languages walks
+  through it, and the airport-noise and ANP fleet guides now point to it
+  instead of saying the recalculation is missing.
+- **Every step of the ISO 3891 tone-correction example is a conformance row.**
+  The slope method behind `aircraft.tone_correction` is checked against the
+  smoothed background and the excess $F$ that ISO 3891:1978 Annex C prints in
+  each of its 22 bands, not only against the final correction of 2 dB.
 - **Sound power in the 16 kHz octave band (ISO 9295).** The general sound
   power methods stop at the 10 kHz one-third-octave band, and a printer's
   paper noise or a power supply's whine sits above it. The new
@@ -875,6 +917,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   left without the sidecar it was written with. `io.convert` reads the
   source's sidecar once, checks it and carries those bytes.
 
+- **SAE ARP 5534 band attenuation uses the ARP's own saturation vapour
+  pressure.** `aircraft.sae_band_attenuation` took its pure-tone coefficient
+  whole from ISO 9613-1, whose Annex B writes the saturation vapour pressure
+  in a short form; ARP 5534 repeats the ISO 9613-1 absorption terms in its
+  Eqs. 1-3 but prints the longer ANSI S1.26 form in Eqs. 5-6, which gives a
+  molar concentration of water vapour 4.5 parts in 100 000 lower at 10 °C.
+  The coefficient now follows Eqs. 5-6, and ECAC Doc 29 Table D-3c, 240 band
+  attenuations over paths up to 7.6 km, is reproduced to the last printed
+  digit, where 57 of its cells were up to 0.036 dB off. In the 25 °C, 70 %
+  reference atmosphere of aircraft certification the band attenuation moves by
+  at most 0.005 dB over 300 m and 0.1 dB over 7.6 km, both in the 10 kHz band.
+- **The API index no longer cuts a module summary at an abbreviation.** The
+  one-line summary of each module in the API reference index is its first
+  sentence, and the index took the first full stop for its end, so a citation
+  such as "ECAC Doc 29 Vol. 2" or "Norton & Karczub Ch. 11" left the summary
+  cut off mid-parenthesis. A full stop now ends the sentence only outside
+  brackets and before a word that is not lower case or a number, and six
+  summaries read whole again.
 - **A derived value names the cells it rests on in words.** When the cells a
   catalogue value is worked out from have mixed bases, `derived` says the basis
   of each, and it named them by their field names: "it rests on poisson_ratio

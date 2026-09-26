@@ -334,6 +334,7 @@ _SECTION_LIST: tuple[Section, ...] = (
             "phonometry.aircraft.atmospheric_absorption",
             "phonometry.aircraft.airport_noise",
             "phonometry.aircraft.anp_fleet",
+            "phonometry.aircraft.npd_atmosphere",
             "phonometry.aircraft.flight_performance",
             "phonometry.aircraft.rotorcraft_noise",
             "phonometry.aircraft.rotorcraft_propagation",
@@ -478,6 +479,10 @@ _SECTION_SUBPACKAGES: dict[str, tuple[str, ...]] = {
 OBJECT_MODULE_OVERRIDES: dict[str, str] = {
     # Defined in phonometry/__init__.py (reported as module "phonometry").
     "__version__": "phonometry",
+    # The 24 noy bands are the certification module's; the SAE ARP 866A, ANP
+    # spectral-class and Doc 29 Appendix D modules import them to name the
+    # same 50 Hz to 10 kHz bands.
+    "NOY_BANDS": "phonometry.aircraft.certification",
     # The fluid state type and its diagnostics are defined in the private
     # phonometry/fluids/_state.py and published by the package, which is where
     # they are documented.

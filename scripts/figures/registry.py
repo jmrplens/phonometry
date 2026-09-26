@@ -32,6 +32,10 @@ from .aircraft import (
     generate_anp_procedural_profile,
     generate_anp_profile,
     generate_epnl,
+    generate_npd_atmosphere_attenuation,
+    generate_npd_atmosphere_increment,
+    generate_npd_atmosphere_revised,
+    generate_npd_atmosphere_spectral_classes,
     generate_rotorcraft_contour,
     generate_rotorcraft_flight_conditions,
     generate_rotorcraft_flyover_event,
@@ -1183,6 +1187,11 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     generate_anp_profile,
     generate_anp_procedural_profile,
     generate_anp_contour,
+    # ECAC Doc 29 Appendix D: the NPD curves for the air at the airport.
+    generate_npd_atmosphere_spectral_classes,
+    generate_npd_atmosphere_attenuation,
+    generate_npd_atmosphere_increment,
+    generate_npd_atmosphere_revised,
     # Rotorcraft: the ECAC Doc 32 hemisphere source and its propagation.
     generate_rotorcraft_hemisphere,
     generate_rotorcraft_hover_ring,

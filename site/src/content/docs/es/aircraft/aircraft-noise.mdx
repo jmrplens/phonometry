@@ -29,7 +29,7 @@ references:
     title: "Application of pure-tone atmospheric absorption losses to one-third octave-band data"
     designation: "SAE ARP 5534, reafirmada en 2021"
     url: "https://www.sae.org/standards/content/arp5534/"
-    note: "La atenuación de banda por el método SAE de la sección de absorción atmosférica, con el coeficiente de tono puro de ISO 9613-1."
+    note: "La atenuación de banda por el método SAE de la sección de absorción atmosférica, con el coeficiente de tono puro de las ecuaciones 1-6: los términos de ISO 9613-1 con la presión de vapor de saturación de las ecuaciones 5-6."
   - type: standard
     organization: "SAE International"
     year: 2012
@@ -404,11 +404,15 @@ aproximación por encima de 4 EPNdB, o un resultado a menos de 1 EPNdB del lími
 del Capítulo 3.
 
 La biblioteca aporta los ingredientes y no la contabilidad. `air_attenuation` y
-`sae_band_attenuation`, más abajo, son exactamente los $\alpha(i)$ y
-$\alpha_\mathrm{R}(i)$ de los dos primeros términos, y la maquinaria del EPNL vuelve a
-pasar un espectro ajustado con la misma facilidad que uno medido; la geometría de
-la trayectoria $QK/Q_\mathrm{r}K_\mathrm{r}$ y los cuatro términos $\Delta$ en sí no están
-implementados. Primero se ajusta y luego se informa: el EPNL que devuelve esta
+`sae_band_attenuation`, más abajo, dan los $\alpha(i)$ y $\alpha_\mathrm{R}(i)$
+de los dos primeros términos, aunque no en su unidad: el §8.3.2.1 toma los
+coeficientes en dB/100 m con $QK$ en metros, y eso es lo que convierte el 0,01,
+mientras que `air_attenuation` devuelve dB/m (el $0{,}01\,\alpha(i)$ de esos
+términos) y `sae_band_attenuation` una atenuación en banda a lo largo de un
+camino dado, en dB (el $0{,}01\,\alpha(i)\,QK$ entero para el camino $QK$). La
+maquinaria del EPNL vuelve a pasar un espectro ajustado con la misma facilidad
+que uno medido; la geometría de la trayectoria $QK/Q_\mathrm{r}K_\mathrm{r}$ y
+los cuatro términos $\Delta$ en sí no están implementados. Primero se ajusta y luego se informa: el EPNL que devuelve esta
 página es un valor del día de ensayo, y un veredicto de `requirement` solo es un
 veredicto de certificación una vez aplicado el §8.
 
@@ -461,8 +465,10 @@ print(report.passes, report.checks)
 
 Corregir un sobrevuelo medido a condiciones atmosféricas de referencia requiere
 la atenuación en bandas de tercio de octava sobre el trayecto. El coeficiente de
-tono puro es el de ISO 9613-1 (idéntico, según ARP 5534 §3.1) que da
-`air_attenuation`; `sae_band_attenuation` añade el **método SAE** (ARP 5534
+tono puro es el de ISO 9613-1, cuyos términos repite ARP 5534 §3.1 en sus
+ecuaciones 1-3, con la presión de vapor de saturación que ARP 5534 imprime en
+las ecuaciones 5-6 (la forma larga de ANSI S1.26, no la fórmula del anexo B de
+`air_attenuation`); sobre él, `sae_band_attenuation` añade el **método SAE** (ARP 5534
 §3.2.2) que mapea la atenuación de trayecto de tono puro medio de banda
 $\delta_\mathrm{t} = \alpha\,s$ a la atenuación de banda $\delta_\mathrm{B}$, coherente con el
 método exacto mucho más allá del límite de 50 dB del método aproximado.

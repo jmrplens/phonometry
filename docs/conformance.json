@@ -3,13 +3,13 @@
   "library": "4.0.0rc1",
   "generator": "scripts/conformance_report.py",
   "counts": {
-    "checks": 1447,
-    "passing": 1447,
+    "checks": 1457,
+    "passing": 1457,
     "failing": 0,
     "domains": 97,
-    "standards": 477,
-    "citations": 983,
-    "designations": 196,
+    "standards": 486,
+    "citations": 993,
+    "designations": 197,
     "sources": 114
   },
   "units": [
@@ -483,8 +483,8 @@
     {
       "id": "aircraft-noise-icao-annex-16-iec-61265",
       "title": "Aircraft noise (ICAO Annex 16 / IEC 61265)",
-      "checks": 18,
-      "passing": 18
+      "checks": 28,
+      "passing": 28
     },
     {
       "id": "rotorcraft-noise-ecac-doc-32-norah2",
@@ -33921,32 +33921,25 @@
       "verdict": "pass"
     },
     {
-      "id": "aircraft-noise-icao-annex-16-iec-61265/sae-arp-5534-pure-tone-coefficient-iso-9613-1/mid-band-at-1-khz-25-c-70-rh-101-325-kpa-db-m",
+      "id": "aircraft-noise-icao-annex-16-iec-61265/sae-arp-5534-pure-tone-coefficient-eqs-1-6/mid-band-at-1-khz-25-c-70-rh-101-325-kpa-db-m",
       "domain": "aircraft-noise-icao-annex-16-iec-61265",
       "reference": {
-        "cite": "SAE ARP 5534 pure-tone coefficient (ISO 9613-1)",
-        "tail": ")",
+        "cite": "SAE ARP 5534 pure-tone coefficient (Eqs. 1-6)",
         "documents": [
           {
             "kind": "standard",
             "designation": "SAE ARP 5534",
-            "clause": "pure-tone coefficient"
-          },
-          {
-            "kind": "standard",
-            "designation": "ISO 9613-1",
-            "lead": " (",
-            "relation": "mentions"
+            "clause": "pure-tone coefficient (Eqs. 1-6)"
           }
         ]
       },
       "quantity": "Mid-band α at 1 kHz, 25 °C, 70 % RH, 101.325 kPa, dB/m",
       "kind": "scalar",
       "expected": {
-        "value": 0.006186474278136009
+        "value": 0.0061867664334147214
       },
       "computed": {
-        "value": 0.006186
+        "value": 0.006187
       },
       "unit": "dB/m",
       "tolerance": {
@@ -34148,6 +34141,338 @@
         "value": 0.035
       },
       "precision": 1,
+      "verdict": "pass"
+    },
+    {
+      "id": "aircraft-noise-icao-annex-16-iec-61265/ecac-doc-29-appendix-d-table-d-2/spectral-classes-103-and-205-corrected-back-to-the-source-eq-d-1-cells",
+      "domain": "aircraft-noise-icao-annex-16-iec-61265",
+      "reference": {
+        "cite": "ECAC Doc 29 Appendix D Table D-2",
+        "documents": [
+          {
+            "kind": "report",
+            "designation": "ECAC Doc 29",
+            "clause": "Appendix D Table D-2"
+          }
+        ]
+      },
+      "quantity": "Spectral classes 103 and 205 corrected back to the source (Eq. D-1), cells",
+      "kind": "count",
+      "expected": {
+        "value": 48.0,
+        "label": "48/48 cells of Table D-2 at source"
+      },
+      "computed": {
+        "value": 48.0,
+        "label": "48/48 cells of Table D-2 at source"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "aircraft-noise-icao-annex-16-iec-61265/ecac-doc-29-appendix-d-table-d-3a/sae-air-1845-attenuation-of-table-d-1-over-the-ten-npd-distances-cells",
+      "domain": "aircraft-noise-icao-annex-16-iec-61265",
+      "reference": {
+        "cite": "ECAC Doc 29 Appendix D Table D-3a",
+        "documents": [
+          {
+            "kind": "report",
+            "designation": "ECAC Doc 29",
+            "clause": "Appendix D Table D-3a"
+          }
+        ]
+      },
+      "quantity": "SAE AIR-1845 attenuation of Table D-1 over the ten NPD distances, cells",
+      "kind": "count",
+      "expected": {
+        "value": 240.0,
+        "label": "240/240 cells of Table D-3a"
+      },
+      "computed": {
+        "value": 240.0,
+        "label": "240/240 cells of Table D-3a"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "aircraft-noise-icao-annex-16-iec-61265/ecac-doc-29-appendix-d-table-d-3b/sae-arp-866a-attenuation-at-10-c-80-over-the-npd-distances-cells",
+      "domain": "aircraft-noise-icao-annex-16-iec-61265",
+      "reference": {
+        "cite": "ECAC Doc 29 Appendix D Table D-3b",
+        "documents": [
+          {
+            "kind": "report",
+            "designation": "ECAC Doc 29",
+            "clause": "Appendix D Table D-3b"
+          }
+        ]
+      },
+      "quantity": "SAE ARP 866A attenuation at 10 °C, 80 % over the NPD distances, cells",
+      "kind": "count",
+      "expected": {
+        "value": 240.0,
+        "label": "240/240 cells of Table D-3b within half a unit of the last digit plus 7 ppm"
+      },
+      "computed": {
+        "value": 240.0,
+        "label": "240/240 cells of Table D-3b"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "aircraft-noise-icao-annex-16-iec-61265/ecac-doc-29-appendix-d-table-d-3c/sae-arp-5534-attenuation-at-10-c-80-101-325-kpa-over-the-npd-distances-cells",
+      "domain": "aircraft-noise-icao-annex-16-iec-61265",
+      "reference": {
+        "cite": "ECAC Doc 29 Appendix D Table D-3c",
+        "documents": [
+          {
+            "kind": "report",
+            "designation": "ECAC Doc 29",
+            "clause": "Appendix D Table D-3c"
+          }
+        ]
+      },
+      "quantity": "SAE ARP 5534 attenuation at 10 °C, 80 %, 101.325 kPa over the NPD distances, cells",
+      "kind": "count",
+      "expected": {
+        "value": 240.0,
+        "label": "240/240 cells of Table D-3c"
+      },
+      "computed": {
+        "value": 240.0,
+        "label": "240/240 cells of Table D-3c"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "aircraft-noise-icao-annex-16-iec-61265/ecac-doc-29-appendix-d-table-d-4/a-weighted-levels-and-increment-l-with-sae-arp-5534-eq-d-4-cells",
+      "domain": "aircraft-noise-icao-annex-16-iec-61265",
+      "reference": {
+        "cite": "ECAC Doc 29 Appendix D Table D-4",
+        "documents": [
+          {
+            "kind": "report",
+            "designation": "ECAC Doc 29",
+            "clause": "Appendix D Table D-4"
+          }
+        ]
+      },
+      "quantity": "A-weighted levels and increment ΔL with SAE ARP 5534 (Eq. D-4), cells",
+      "kind": "count",
+      "expected": {
+        "value": 60.0,
+        "label": "60/60 cells of Table D-4"
+      },
+      "computed": {
+        "value": 60.0,
+        "label": "60/60 cells of Table D-4"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "aircraft-noise-icao-annex-16-iec-61265/ecac-doc-29-appendix-d-table-d-5/a-weighted-levels-and-increment-l-with-sae-arp-866a-eq-d-4-cells",
+      "domain": "aircraft-noise-icao-annex-16-iec-61265",
+      "reference": {
+        "cite": "ECAC Doc 29 Appendix D Table D-5",
+        "documents": [
+          {
+            "kind": "report",
+            "designation": "ECAC Doc 29",
+            "clause": "Appendix D Table D-5"
+          }
+        ]
+      },
+      "quantity": "A-weighted levels and increment ΔL with SAE ARP 866A (Eq. D-4), cells",
+      "kind": "count",
+      "expected": {
+        "value": 60.0,
+        "label": "60/60 cells of Table D-5"
+      },
+      "computed": {
+        "value": 60.0,
+        "label": "60/60 cells of Table D-5"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "aircraft-noise-icao-annex-16-iec-61265/ecac-doc-29-appendix-d-table-d-6b/jetw-sel-npd-data-revised-end-to-end-with-sae-arp-5534-cells",
+      "domain": "aircraft-noise-icao-annex-16-iec-61265",
+      "reference": {
+        "cite": "ECAC Doc 29 Appendix D Table D-6b",
+        "documents": [
+          {
+            "kind": "report",
+            "designation": "ECAC Doc 29",
+            "clause": "Appendix D Table D-6b"
+          }
+        ]
+      },
+      "quantity": "JETW SEL NPD data revised end to end with SAE ARP 5534, cells",
+      "kind": "count",
+      "expected": {
+        "value": 70.0,
+        "label": "70/70 cells of Table D-6b"
+      },
+      "computed": {
+        "value": 70.0,
+        "label": "70/70 cells of Table D-6b"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "aircraft-noise-icao-annex-16-iec-61265/ecac-doc-29-appendix-d-table-d-6c/jetw-sel-npd-data-revised-end-to-end-with-sae-arp-866a-cells",
+      "domain": "aircraft-noise-icao-annex-16-iec-61265",
+      "reference": {
+        "cite": "ECAC Doc 29 Appendix D Table D-6c",
+        "documents": [
+          {
+            "kind": "report",
+            "designation": "ECAC Doc 29",
+            "clause": "Appendix D Table D-6c"
+          }
+        ]
+      },
+      "quantity": "JETW SEL NPD data revised end to end with SAE ARP 866A, cells",
+      "kind": "count",
+      "expected": {
+        "value": 60.0,
+        "label": "60/60 cells of Table D-6c outside its misprinted last row"
+      },
+      "computed": {
+        "value": 60.0,
+        "label": "60/60 cells of Table D-6c"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "aircraft-noise-icao-annex-16-iec-61265/iso-3891-1978-annex-c/tone-correction-worked-example-background-and-excess-f-in-22-bands-fields",
+      "domain": "aircraft-noise-icao-annex-16-iec-61265",
+      "reference": {
+        "cite": "ISO 3891:1978 Annex C",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 3891",
+            "edition": "1978",
+            "clause": "Annex C"
+          }
+        ]
+      },
+      "quantity": "Tone correction worked example: background and excess F in 22 bands, fields",
+      "kind": "count",
+      "expected": {
+        "value": 44.0,
+        "label": "44/44 printed background and excess values"
+      },
+      "computed": {
+        "value": 44.0,
+        "label": "44/44 printed background and excess values"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "aircraft-noise-icao-annex-16-iec-61265/iso-3891-1978-annex-a-table-10/sae-arp-866a-coefficient-at-80-from-10-c-to-40-c-50-hz-to-10-khz-cells",
+      "domain": "aircraft-noise-icao-annex-16-iec-61265",
+      "reference": {
+        "cite": "ISO 3891:1978 Annex A Table 10",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 3891",
+            "edition": "1978",
+            "clause": "Annex A Table 10"
+          }
+        ]
+      },
+      "quantity": "SAE ARP 866A coefficient at 80 % from -10 °C to 40 °C, 50 Hz to 10 kHz, cells",
+      "kind": "count",
+      "expected": {
+        "value": 264.0,
+        "label": "264/264 cells of Table 10"
+      },
+      "computed": {
+        "value": 264.0,
+        "label": "264/264 cells of Table 10"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
       "verdict": "pass"
     },
     {

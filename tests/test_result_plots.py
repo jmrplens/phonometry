@@ -413,6 +413,34 @@ _KWARG_PLOT_CASES = [
         ),
         "line",
     ),
+    (
+        "arp866a_attenuation",
+        lambda: ph.aircraft.arp866a_attenuation(
+            [500.0, 1000.0, 2000.0], temperature_c=10.0, relative_humidity_percent=80.0
+        ),
+        "line",
+    ),
+    (
+        "spectral_class",
+        lambda: ph.aircraft.load_anp_database().spectral_class(103),
+        "line",
+    ),
+    (
+        "npd_atmosphere_increment",
+        lambda: ph.aircraft.npd_atmosphere_increment(
+            ph.aircraft.load_anp_database().spectral_class(103),
+            temperature_c=10.0,
+            relative_humidity_percent=80.0,
+        ),
+        "line",
+    ),
+    (
+        "revised_npd_curves",
+        lambda: ph.aircraft.load_anp_database().revised_npd_curves(
+            "747100", "D", temperature_c=10.0, relative_humidity_percent=80.0
+        ),
+        "line",
+    ),
 ]
 
 

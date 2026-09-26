@@ -122,9 +122,13 @@ The tables may be used as tabulated while the site average stays inside the
 §2.5 envelope: air temperature below 30 °C, the product of temperature in
 degrees Celsius and relative humidity in percent above 500, and wind below
 8 m/s. Outside it the *tables themselves* have to be converted by the Appendix D
-procedure, which this chain does not do: `impedance_adjustment` only rescales
-the levels for the specific acoustic impedance of the air, and there is no
-humidity argument anywhere in the chain.
+procedure before this chain reads them. The functions of this page take the NPD
+arrays as given and have no humidity argument: `impedance_adjustment` only
+rescales the levels for the specific acoustic impedance of the air. The
+conversion is [NPD data for the air at the airport](/phonometry/aircraft/npd-atmosphere/),
+whose `revise_npd_curves` returns revised tables to pass here, and the ANP
+wiring of [The ANP fleet database](/phonometry/aircraft/anp-fleet/) applies it
+by itself when it is given `relative_humidity_percent=`.
 
 Read the curves accordingly. Between the markers the level falls close to
 linearly against the logarithm of distance and steepens at long range as
@@ -514,11 +518,12 @@ library interpolates the tables supplied for an aircraft type, it does not
 synthesise them from engine data. The EASA/EUROCONTROL ANP database of
 measured tables for real types does ship with phonometry and is read by [The
 ANP fleet database](/phonometry/aircraft/anp-fleet/), which wires it straight
-into the functions of this page. Converting NPD data to a site outside the
-§2.5 envelope (the Appendix D recalculation) is not implemented, and neither
-is the acoustically hard ground that SAE AIR 5662 excludes: the lateral
-attenuation, and with it the whole single-event chain, assumes soft grassy
-ground.
+into the functions of this page, and the Appendix D recalculation of NPD data
+for a site outside the §2.5 envelope is in
+[NPD data for the air at the airport](/phonometry/aircraft/npd-atmosphere/).
+The acoustically hard ground that SAE AIR 5662 excludes is not implemented: the
+lateral attenuation, and with it the whole single-event chain, assumes soft
+grassy ground.
 </ScopeClaim>
 </Scope>
 

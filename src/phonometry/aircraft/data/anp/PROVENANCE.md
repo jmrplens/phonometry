@@ -35,7 +35,13 @@ The `anp_fleet` loader consumes `Aircraft.csv`, `NPD_data.csv` and
 engine, aerodynamic, weight and procedural-step tables for the ECAC Doc 29
 Vol. 2 Appendix B performance model in `flight_performance`, which flies a
 published procedure into a profile for aircraft that ship no fixed-point
-trajectory. `Spectral_classes.csv` is shipped for completeness and is not read.
+trajectory. `Spectral_classes.csv` is read as well: the spectral class of
+each aircraft's approach and departure NPD is what ECAC Doc 29 Vol. 2
+Appendix D recalculates the NPD curves from for a non-reference atmosphere, in
+`npd_atmosphere` (`AnpDatabase.spectral_class`,
+`AnpDatabase.revised_npd_curves` and the `relative_humidity_percent` of the
+event and contour wiring). Its classes 103 and 205 are the ones Appendix D
+prints as Table D-2, and they agree with it to the last digit.
 
 The files are the published CSVs with their upstream column layout and values
 unchanged (only the `ANP2.3_` filename prefix is dropped), so their provenance

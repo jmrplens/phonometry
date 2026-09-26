@@ -126,14 +126,24 @@ def _molar_water_vapour(
     temperature_k: float,
     relative_humidity_percent: float,
     atmospheric_pressure_kpa: float,
+    saturation_ratio: float | None = None,
 ) -> float:
     r"""Molar concentration of water vapour ``h`` (%), ISO 9613-1 clause 6.4.
 
     :math:`p_\mathrm{sat}/p_\mathrm{r} = 10^{-6.8346 \, (T_{01}/T)^{1.261} + 4.6151}` and
     :math:`h = h_\mathrm{r} \, (p_\mathrm{sat}/p_\mathrm{r})/(p_\mathrm{a}/p_\mathrm{r})` (Annex B psychrometric
     conversion).
+
+    :param saturation_ratio: :math:`p_\mathrm{sat}/p_\mathrm{r}` from another
+        formula, for a document that keeps ISO 9613-1's Eq. (3)-(5) but writes
+        its own saturation vapour pressure (SAE ARP 5534 Eq. 5-6 prints the
+        longer form of ANSI S1.26). ``None`` takes the Annex B formula above.
     """
-    psat_over_pr = 10.0 ** (-6.8346 * (_T01 / temperature_k) ** 1.261 + 4.6151)
+    psat_over_pr = (
+        10.0 ** (-6.8346 * (_T01 / temperature_k) ** 1.261 + 4.6151)
+        if saturation_ratio is None
+        else saturation_ratio
+    )
     return float(
         relative_humidity_percent * psat_over_pr / (atmospheric_pressure_kpa / _PR)
     )
@@ -269,6 +279,8 @@ def _pure_tone_terms(
     temperature_k: float,
     relative_humidity_percent: float,
     atmospheric_pressure_kpa: float,
+    *,
+    saturation_ratio: float | None = None,
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     r"""The two factors of Eq. (5) that do not carry the decibel.
 
@@ -278,13 +290,17 @@ def _pure_tone_terms(
     is the same coefficient in nepers per metre, which is how ISO 9295:2015
     Annex A prints it (Formula (A.5)). The temperature is taken in kelvins,
     already converted, so the conversion from Celsius is written once, by the
-    caller that owns it. Nothing is validated here.
+    caller that owns it. Nothing is validated here. ``saturation_ratio`` is
+    passed on to :func:`_molar_water_vapour`.
     """
     pa_over_pr = atmospheric_pressure_kpa / _PR
     t_ratio = temperature_k / _T0
 
     h = _molar_water_vapour(
-        temperature_k, relative_humidity_percent, atmospheric_pressure_kpa
+        temperature_k,
+        relative_humidity_percent,
+        atmospheric_pressure_kpa,
+        saturation_ratio,
     )
     fro = pa_over_pr * (24.0 + 4.04e4 * h * (0.02 + h) / (0.391 + h))
     frn = (

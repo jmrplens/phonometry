@@ -933,7 +933,15 @@ it; the list grows as guides gain their References sections.
   [sae.org](https://www.sae.org/standards/content/arp5534/).
   The SAE-Method one-third-octave-band atmospheric absorption for aircraft
   flyover spectra.
-  Cited by [Aircraft noise](../aircraft/aircraft-noise.md).
+  Cited by [Aircraft noise](../aircraft/aircraft-noise.md),
+  [NPD data for the air at the airport](../aircraft/npd-atmosphere.md).
+- International Organization for Standardization. (1978). *Acoustics —
+  Procedure for describing aircraft noise heard on the ground* (ISO 3891:1978,
+  withdrawn).
+  Annex A gives the SAE ARP 866A attenuation coefficient that ECAC Doc 29
+  Appendix D keeps as its legacy route; Annex C is a worked tone-correction
+  example.
+  Cited by [NPD data for the air at the airport](../aircraft/npd-atmosphere.md).
 - SAE International. (2012). *Standard values of atmospheric absorption as a
   function of temperature and humidity* (SAE ARP 866B, stabilized 2012).
   [sae.org](https://www.sae.org/standards/content/arp866b/).
@@ -953,6 +961,13 @@ it; the list grows as guides gain their References sections.
   The European airport noise-contour method: NPD interpolation and the
   single-event segment calculation.
   Cited by [Airport noise](../aircraft/airport-noise.md).
+- European Civil Aviation Conference. (2026). *Report on standard method of
+  computing noise contours around civil airports* (ECAC.CEAC Doc 29, 5th ed.),
+  Volume 2: Technical guide.
+  [ECAC documents page](https://www.ecac-ceac.org/documents/ecac-documents-and-international-agreements).
+  Appendix D: the SAE AIR-1845 rates that normalise the NPD data and their
+  recalculation for a non-reference atmosphere, with its worked example.
+  Cited by [NPD data for the air at the airport](../aircraft/npd-atmosphere.md).
 - European Civil Aviation Conference. (2026). *Report on standard method of
   computing noise contours around civil airports* (ECAC.CEAC Doc 29, 5th ed.),
   Volume 3: Reference cases and verification framework.

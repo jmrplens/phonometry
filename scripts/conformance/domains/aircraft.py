@@ -23,9 +23,11 @@ import numpy as np
 
 import phonometry as ph
 
-from ..registry import _ROOT, Outcome, numeric, register
+from ..registry import _ROOT, Outcome, count, numeric, register
 
 if TYPE_CHECKING:
+    from types import ModuleType
+
     from phonometry.aircraft import RotorcraftHemisphere
 
 _AIRCRAFT = "Aircraft noise (ICAO Annex 16 / IEC 61265)"
@@ -596,18 +598,37 @@ def _chk_doc32_screening_delta() -> Outcome:
     return numeric(float(expected), res.path_difference, 1e-9, unit="m", places=5)
 
 
+def _arp5534_saturation_ratio(temperature_k: float) -> float:
+    """ARP 5534 Eqs. 5-6 as page 8 of the 2021 reaffirmation prints them."""
+    t01 = 273.16
+    v = (
+        10.79586 * (1.0 - t01 / temperature_k)
+        - 5.02808 * math.log10(temperature_k / t01)
+        + 1.50474e-4 * (1.0 - 10.0 ** (-8.29692 * (temperature_k / t01 - 1.0)))
+        + 0.42873e-3 * (-1.0 + 10.0 ** (4.76955 * (1.0 - t01 / temperature_k)))
+        - 2.2195983
+    )
+    return float(10.0**v)
+
+
 @register(
     _AIRCRAFT,
-    "SAE ARP 5534 pure-tone coefficient (ISO 9613-1)",
+    "SAE ARP 5534 pure-tone coefficient (Eqs. 1-6)",
     "Mid-band α at 1 kHz, 25 °C, 70 % RH, 101.325 kPa, dB/m",
 )
 def _chk_arp5534_coefficient() -> Outcome:
-    # ARP 5534 §3.1: the pure-tone coefficient is the ISO 9613-1 one.
+    # ARP 5534 §3.1 repeats the ISO 9613-1 coefficient in Eqs. 1-3 and writes
+    # the saturation vapour pressure in its own form, Eqs. 5-6. ISO 9613-1
+    # evaluated at the humidity that gives the molar concentration of Eq. 4
+    # with that pressure is therefore the ARP 5534 coefficient.
+    t_k = 298.15
+    iso_annex_b = 10.0 ** (-6.8346 * (273.16 / t_k) ** 1.261 + 4.6151)
+    same_h = 70.0 * _arp5534_saturation_ratio(t_k) / iso_annex_b
     expected = float(
         ph.environment.air_attenuation(
             1000.0,
             temperature_c=25.0,
-            relative_humidity_percent=70.0,
+            relative_humidity_percent=same_h,
             atmospheric_pressure_kpa=101.325,
             exact_midband=True,
         )
@@ -901,3 +922,277 @@ def _chk_doc29_approach_thrust() -> Outcome:
     return numeric(
         533.1, profile.points[0].corrected_net_thrust_lb, 0.05, unit="lb", places=1
     )
+
+
+# ECAC Doc 29 5th ed. Vol. 2 Appendix D: the worked example recalculates the SEL
+# NPD data of the JETW reference aeroplane for 10 degC, 80 % and 101.325 kPa
+# with the spectral classes 103 and 205 of the shipped ANP database, by SAE ARP
+# 5534 and by SAE ARP 866A, and prints every intermediate table. The tables are
+# transcribed in tests/aircraft/doc29_appendix_d_data.py (PDF pages 128 to 133,
+# folios D-4 to D-9) and each row below holds one of them, cell by cell, at the
+# precision it is printed to: half a unit of the last digit either way.
+
+#: The atmosphere of the worked example.
+_APPENDIX_D_AIR = {"temperature_c": 10.0, "relative_humidity_percent": 80.0}
+#: Half a unit of the last printed digit of the attenuation and level tables,
+#: with a hair for binary rounding.
+_HALF_MILLI_DB = 0.0005 + 1e-9
+_HALF_DECI_DB = 0.05 + 1e-9
+
+
+def _aircraft_test_data(name: str) -> ModuleType:
+    """A transcription module of printed tables from the aircraft test suite.
+
+    The rows read the tables the tests read, so the report and the suite hold
+    one copy of each printed value.
+    """
+    import importlib
+    import sys as _sys
+
+    tests_dir = str(_ROOT / "tests" / "aircraft")
+    if tests_dir not in _sys.path:
+        _sys.path.insert(0, tests_dir)
+    return importlib.import_module(name)
+
+
+def _appendix_d_tables() -> ModuleType:
+    """The transcription module of the printed Appendix D tables."""
+    return _aircraft_test_data("doc29_appendix_d_data")
+
+
+def _appendix_d_increment(
+    class_id: int, absorption: str
+) -> ph.aircraft.NpdAtmosphereIncrement:
+    database = ph.aircraft.load_anp_database()
+    return ph.aircraft.npd_atmosphere_increment(
+        database.spectral_class(class_id), absorption=absorption, **_APPENDIX_D_AIR
+    )
+
+
+def _cells_within(got: object, printed: object, tolerance: object) -> int:
+    """How many cells of a table sit within their tolerance of the print."""
+    deviation = np.abs(np.asarray(got) - np.asarray(printed))
+    return int(np.count_nonzero(deviation <= np.asarray(tolerance)))
+
+
+@register(
+    _AIRCRAFT,
+    "ECAC Doc 29 Appendix D Table D-2",
+    "Spectral classes 103 and 205 corrected back to the source (Eq. D-1), cells",
+)
+def _chk_doc29_table_d2() -> Outcome:
+    printed = np.asarray(_appendix_d_tables().TABLE_D2)
+    got = np.column_stack(
+        [
+            _appendix_d_increment(103, "arp5534").source_spectrum_db,
+            _appendix_d_increment(205, "arp5534").source_spectrum_db,
+        ]
+    )
+    matching = _cells_within(got, printed[:, 2:], _HALF_DECI_DB)
+    return count(matching, got.size, subject="cells of Table D-2 at source")
+
+
+@register(
+    _AIRCRAFT,
+    "ECAC Doc 29 Appendix D Table D-3a",
+    "SAE AIR-1845 attenuation of Table D-1 over the ten NPD distances, cells",
+)
+def _chk_doc29_table_d3a() -> Outcome:
+    printed = np.asarray(_appendix_d_tables().TABLE_D3A)
+    got = _appendix_d_increment(103, "arp5534").reference_attenuation_db
+    matching = _cells_within(got, printed, _HALF_MILLI_DB)
+    return count(matching, printed.size, subject="cells of Table D-3a")
+
+
+@register(
+    _AIRCRAFT,
+    "ECAC Doc 29 Appendix D Table D-3b",
+    "SAE ARP 866A attenuation at 10 °C, 80 % over the NPD distances, cells",
+)
+def _chk_doc29_table_d3b() -> Outcome:
+    # ISO 3891:1978 Annex A.2 with eta interpolated linearly in its Table 1.
+    # 208 cells agree to the last printed digit; the other 32 are the longest
+    # paths at the highest frequencies, which the page prints about 6 ppm
+    # below the formula (0.0045 dB of 745 dB at most). A common factor between
+    # 0.9999934 and 0.9999942 on the formula reproduces all 240, which points
+    # at a units constant of the program that printed the table rather than at
+    # the absorption model; SAE ARP 866A itself is not available to settle it,
+    # so the tolerance is widened by 7 ppm of the printed value and says so.
+    printed = np.asarray(_appendix_d_tables().TABLE_D3B)
+    got = _appendix_d_increment(103, "arp866a").specified_attenuation_db
+    matching = _cells_within(got, printed, _HALF_MILLI_DB + 7e-6 * printed)
+    return count(
+        matching,
+        printed.size,
+        subject="cells of Table D-3b",
+        expected_label=(
+            f"{printed.size}/{printed.size} cells of Table D-3b within half a "
+            "unit of the last digit plus 7 ppm"
+        ),
+    )
+
+
+@register(
+    _AIRCRAFT,
+    "ECAC Doc 29 Appendix D Table D-3c",
+    "SAE ARP 5534 attenuation at 10 °C, 80 %, 101.325 kPa over the NPD distances, cells",
+)
+def _chk_doc29_table_d3c() -> Outcome:
+    # Every cell to the last digit, which takes the saturation vapour pressure
+    # of ARP 5534 Eqs. 5-6: the ISO 9613-1 Annex B form leaves 57 cells up to
+    # 0.036 dB off.
+    printed = np.asarray(_appendix_d_tables().TABLE_D3C)
+    got = _appendix_d_increment(103, "arp5534").specified_attenuation_db
+    matching = _cells_within(got, printed, _HALF_MILLI_DB)
+    return count(matching, printed.size, subject="cells of Table D-3c")
+
+
+def _appendix_d_levels(absorption: str) -> np.ndarray:
+    """``LA,ref``, ``LA,atm`` and the increment for 103 then 205, as printed."""
+    columns = []
+    for class_id in (103, 205):
+        inc = _appendix_d_increment(class_id, absorption)
+        columns += [
+            inc.reference_levels_dba,
+            inc.specified_levels_dba,
+            inc.increment_db,
+        ]
+    return np.column_stack(columns)
+
+
+@register(
+    _AIRCRAFT,
+    "ECAC Doc 29 Appendix D Table D-4",
+    "A-weighted levels and increment ΔL with SAE ARP 5534 (Eq. D-4), cells",
+)
+def _chk_doc29_table_d4() -> Outcome:
+    printed = np.asarray(_appendix_d_tables().TABLE_D4)
+    matching = _cells_within(_appendix_d_levels("arp5534"), printed, _HALF_DECI_DB)
+    return count(matching, printed.size, subject="cells of Table D-4")
+
+
+@register(
+    _AIRCRAFT,
+    "ECAC Doc 29 Appendix D Table D-5",
+    "A-weighted levels and increment ΔL with SAE ARP 866A (Eq. D-4), cells",
+)
+def _chk_doc29_table_d5() -> Outcome:
+    printed = np.asarray(_appendix_d_tables().TABLE_D5)
+    matching = _cells_within(_appendix_d_levels("arp866a"), printed, _HALF_DECI_DB)
+    return count(matching, printed.size, subject="cells of Table D-5")
+
+
+def _appendix_d_revised(absorption: str) -> tuple[np.ndarray, np.ndarray]:
+    """The JETW NPD data of Table D-6a revised by one route, and Table D-6a's rows."""
+    tables = _appendix_d_tables()
+    database = ph.aircraft.load_anp_database()
+    distances = np.asarray(tables.DISTANCES_FT) * 0.3048
+    revised = []
+    for operation, class_id in (("A", 205), ("D", 103)):
+        rows = [r for r in tables.TABLE_D6A if r[0] == operation]
+        curves = ph.aircraft.AnpNpdCurves(
+            aircraft_id="JETW",
+            npd_id="JETW",
+            metric="SEL",
+            operation=operation,
+            power_parameter="CNT (lb)",
+            powers=np.array([r[1] for r in rows]),
+            distances=distances,
+            levels=np.array([r[2] for r in rows]),
+        )
+        revised.append(
+            ph.aircraft.revise_npd_curves(
+                curves,
+                database.spectral_class(class_id),
+                absorption=absorption,
+                **_APPENDIX_D_AIR,
+            ).revised.levels
+        )
+    return np.vstack(revised), np.asarray([r[2] for r in tables.TABLE_D6A])
+
+
+@register(
+    _AIRCRAFT,
+    "ECAC Doc 29 Appendix D Table D-6b",
+    "JETW SEL NPD data revised end to end with SAE ARP 5534, cells",
+)
+def _chk_doc29_table_d6b() -> Outcome:
+    got, _ = _appendix_d_revised("arp5534")
+    printed = np.asarray([r[2] for r in _appendix_d_tables().TABLE_D6B])
+    matching = _cells_within(got, printed, _HALF_DECI_DB)
+    return count(matching, printed.size, subject="cells of Table D-6b")
+
+
+@register(
+    _AIRCRAFT,
+    "ECAC Doc 29 Appendix D Table D-6c",
+    "JETW SEL NPD data revised end to end with SAE ARP 866A, cells",
+)
+def _chk_doc29_table_d6c() -> Outcome:
+    # The last row (departure, 22 500 lb) is printed as a copy of the last row
+    # of Table D-6b, and eight of its ten cells are not what Table D-6a plus
+    # the Table D-5 increments give; it is in docs/ERRATA.md and left out here.
+    got, _ = _appendix_d_revised("arp866a")
+    printed = np.asarray([r[2] for r in _appendix_d_tables().TABLE_D6C])
+    matching = _cells_within(got[:-1], printed[:-1], _HALF_DECI_DB)
+    total = printed[:-1].size
+    return count(
+        matching,
+        total,
+        subject="cells of Table D-6c",
+        expected_label=(
+            f"{total}/{total} cells of Table D-6c outside its misprinted last row"
+        ),
+    )
+
+
+@register(
+    _AIRCRAFT,
+    "ISO 3891:1978 Annex C",
+    "Tone correction worked example: background and excess F in 22 bands, fields",
+)
+def _chk_iso3891_annex_c() -> Outcome:
+    # The same spectrum as ICAO ETM Table 3-7, whose row checks the correction
+    # C = 2 alone. This one checks every step the example prints: the smoothed
+    # background and the excess in each of the 22 bands. ISO 3891 step 9 has
+    # no 1.5 dB threshold where ICAO Annex 16 has one; the largest correction,
+    # F = 6 dB at 2 500 Hz, is F/3 = 2 under both.
+    # The printed columns (PDF page 26, printed p. 23) are read from the test
+    # suite's transcription, in thirds of a decibel as the page prints them.
+    from phonometry.aircraft.certification import _tone_background
+
+    example = _aircraft_test_data("iso3891_annex_c_data")
+    background, excess = _tone_background([0.0, 0.0, *example.LEVELS_DB])
+    fields = [
+        *zip(background[2:], example.BACKGROUND_THIRDS, strict=True),
+        *zip(np.maximum(excess[2:], 0.0), example.EXCESS_THIRDS, strict=True),
+    ]
+    matching = sum(1 for got, thirds in fields if abs(got - thirds / 3.0) <= 1e-9)
+    return count(matching, len(fields), subject="printed background and excess values")
+
+
+@register(
+    _AIRCRAFT,
+    "ISO 3891:1978 Annex A Table 10",
+    "SAE ARP 866A coefficient at 80 % from -10 °C to 40 °C, 50 Hz to 10 kHz, cells",
+)
+def _chk_iso3891_table_10() -> Outcome:
+    # The formula of A.2 with eta read from Table 1 by the three-point
+    # quadratic of arp866a_attenuation, against the table ISO 3891 prints from
+    # it (PDF page 19, printed p. 16), to its one decimal. Linear interpolation
+    # misses 11 of the 264 cells. The 12 500 Hz row the table also prints has
+    # no evaluation frequency in Table 2 and is not a band of the function.
+    tables = _aircraft_test_data("iso3891_tables_data")
+    printed = np.asarray(tables.TABLE_10)
+    got = np.column_stack(
+        [
+            ph.aircraft.arp866a_attenuation(
+                tables.FREQUENCIES_HZ,
+                temperature_c=t,
+                relative_humidity_percent=80.0,
+            ).coefficient_db_per_100m
+            for t in tables.TEMPERATURES_C
+        ]
+    )
+    matching = _cells_within(got, printed, _HALF_DECI_DB)
+    return count(matching, printed.size, subject="cells of Table 10")

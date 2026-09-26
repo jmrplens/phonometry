@@ -47,8 +47,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   breaks; what is only worth a second look is kept in
   `Catalogue.notes` with one `io.CatalogueWarning`. The file never runs
   anything: only the standard library's `json` and `csv` read it, and the
-  class it names is compared with yours and never imported. `io.write_catalogue` writes rows as a file that
-  reads back into the same rows, a published table among them as a template
+  class it names is compared with yours and never imported.
+  `io.write_catalogue` writes rows as a file that reads back into the same
+  rows, a published table among them as a template
   to start from; every table of every published catalogue is written, read
   back and compared field for field in the test suite. A file already at the
   name is kept unless you pass `overwrite=True`, and so is one another
@@ -98,10 +99,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 - **Keep a catalogue of your own in a spreadsheet, saved as CSV.** A name
   ending in `.csv` makes `io.read_catalogue` read the rows from a CSV file,
-  one per line under a first line that names the columns, and the rest of
-  the document from a JSON header beside it, named as the file with
-  `.phonometry.json` after it (or wherever `header_path=` says). The header
-  declares the delimiter (a comma, a semicolon or a tab) and the decimal
+  each starting on a line of its own under a first line that names the
+  columns, and the rest of the document from a JSON header beside it, named
+  as the file with `.phonometry.json` after it (or wherever `header_path=`
+  says). The header declares the delimiter (a comma, a semicolon or a tab)
+  and the decimal
   mark, and nothing about the dialect is guessed. Each cell holds one value,
   bound, range or word in a closed grammar that writes the same hedges as a
   JSON document: `0,85`, `~0,85`, `<=30`, `>=5`, `0,30..0,50`, `0,85±0,05`,

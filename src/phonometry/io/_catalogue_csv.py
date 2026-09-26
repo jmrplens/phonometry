@@ -2,8 +2,8 @@
 """A catalogue as a spreadsheet saves it: a CSV file and its JSON header.
 
 Data sheets are typed into spreadsheets, and a spreadsheet saves a CSV file.
-A catalogue CSV holds one table, one row per line under a first line that
-names the columns. Its header is the catalogue's JSON document without its
+A catalogue CSV holds one table, each row starting on a line of its own
+under a first line that names the columns. Its header is the catalogue's JSON document without its
 rows, in a file beside it named as the CSV file with ``.phonometry.json``
 after it, and it declares how the cells are written::
 

@@ -554,7 +554,8 @@ cell is written in one unit.
 
 A data sheet is more often typed into a spreadsheet than into a JSON file,
 and a spreadsheet saves CSV. A catalogue can be one: the rows go in the CSV
-file, one per line under a first line that names the columns, and the
+file, each starting on a line of its own under a first line that names the
+columns, and the
 document without its rows goes in a JSON header beside it, named as the CSV
 file with `.phonometry.json` after it. The header declares how the file
 writes its cells, `"csv": {"delimiter": ";", "decimal": ","}` for a

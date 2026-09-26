@@ -63,8 +63,9 @@ their own, which [`read_catalogue`](/phonometry/reference/api/io/io/#read_catalo
 a versioned JSON document with its [`Provenance`](/phonometry/reference/api/io/io/#provenance) (the kind of document,
 its version, the day it was consulted, the laboratory and the report), each
 cell named as the field it fills or in another unit of the same kind, and
-every hedge the packaged tables use; or the CSV file a spreadsheet saves, one
-row per line in a closed grammar of cells (`~0.85`, `<=30`,
+every hedge the packaged tables use; or the CSV file a spreadsheet saves,
+each row starting on a line of its own, in a closed grammar of cells
+(`~0.85`, `<=30`,
 `0.30..0.50`, `0.85±0.05`, `[AFr5]`), with that document's header
 beside it declaring the delimiter and the decimal mark. What comes back is a
 [`Catalogue`](/phonometry/reference/api/io/io/#catalogue), a read-only mapping keyed like the packaged ones that
@@ -1388,8 +1389,9 @@ Read a catalogue of your own from a file into rows of *row_type*.
 The file holds one table: a header with the document's provenance, and
 rows whose cells are named as the fields of *row_type* or in another unit
 of the same kind (the module docstring lays it out). A JSON file holds
-both. A CSV file holds the rows, one per line under a first line that
-names the columns, and its header is a JSON document beside it, named
+both. A CSV file holds the rows, each starting on a line of its own
+under a first line that names the columns, and its header is a JSON
+document beside it, named
 as the CSV file with `.phonometry.json` after it (the calibration
 sidecar of an audio file takes the same tail and is told apart by its
 `schema`), which declares the file's delimiter and decimal mark. A
@@ -1767,8 +1769,9 @@ library's on that day. Pass *provenance* for a file that has to come out
 the same every day.
 
 A name ending in `.csv` writes a CSV file, UTF-8 with a byte order
-mark as a spreadsheet saves "CSV UTF-8", one row per line and CRLF at
-the end of every line, and its JSON header beside it (the name with
+mark as a spreadsheet saves "CSV UTF-8", each row starting on a line
+of its own and CRLF at the end of every line, and its JSON header beside
+it (the name with
 `.phonometry.json` after it), which holds the provenance and the
 credit the rows give the whole table, and declares *delimiter* and
 *decimal*. A row's own credit is its `attributed_to.row` column. A

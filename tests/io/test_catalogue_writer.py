@@ -466,6 +466,19 @@ def test_a_file_written_over_keeps_its_permission_bits(tmp_path: pathlib.Path) -
     assert stat.S_IMODE(path.stat().st_mode) == 0o640
 
 
+def test_a_read_only_file_written_over_stays_read_only(tmp_path: pathlib.Path) -> None:
+    """On POSIX by its bits, and on Windows by the read-only flag it keeps."""
+    path = tmp_path / "mine.json"
+    rows = _mine()
+    io.write_catalogue(rows, path)
+    path.chmod(stat.S_IREAD)
+    io.write_catalogue(rows, path, overwrite=True)
+    assert not path.stat().st_mode & stat.S_IWRITE
+    assert sorted(item.name for item in tmp_path.iterdir()) == ["mine.json"]
+    assert io.read_catalogue(path, row_type=PorousMaterial).keys() == rows.keys()
+    path.chmod(stat.S_IREAD | stat.S_IWRITE)
+
+
 def test_a_write_leaves_no_file_but_its_own(tmp_path: pathlib.Path) -> None:
     io.write_catalogue(_mine(), tmp_path / "mine.json")
     assert [path.name for path in tmp_path.iterdir()] == ["mine.json"]

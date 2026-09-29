@@ -301,7 +301,8 @@ def convert(
         destination naming the same file, a FLAC target that cannot hold
         the source without an explicit ``subtype``, an invalid
         ``block_size``, a sidecar beside the source that
-        :func:`~phonometry.io.read_sidecar` refuses, or a pipe, a device, a
+        :func:`~phonometry.io.read_sidecar` refuses or whose labels do not
+        give one to each channel of the source, or a pipe, a device, a
         socket or a directory at the sidecar's name beside the destination;
         a sidecar is refused before a sample is written.
     :raises ImportError: If source or target needs the ``[audio]`` extra
@@ -317,7 +318,7 @@ def convert(
     # Read and checked once, and carried byte for byte: the most faithful
     # copy. A sidecar the destination cannot take is refused before a sample
     # is written.
-    carried = sidecar_bytes(source)
+    carried = sidecar_bytes(source, channels)
     if carried is not None:
         writable_sidecar(target)
 

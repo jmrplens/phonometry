@@ -654,16 +654,60 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   refused by name: each is the `ValueError` the function documents, naming
   the file once, and by its escapes when the audio's name is not UTF-8.
   `io.CalibrationSidecar` itself refuses a version, a calibrator model or a
-  channel label that is not text, and `io.write_sidecar` refuses the same
-  numbers and texts before it touches the file. It writes the sidecar to a
-  new file beside it, renamed into place, so that the name is never opened
-  for writing and a reader finds the old sidecar or the new one whole: the
-  file is replaced, not written into, so the new one keeps the permission
-  bits of the old and a hard link to the old file keeps the old calibration.
-  A pipe, a device, a socket or a directory at the name is refused, and
-  `io.write` and `io.convert` ask before they write a sample, so that no
-  audio is left without the sidecar it was written with. `io.convert` reads
-  the source's sidecar once, checks it and carries those bytes.
+  channel label that is not text, and labels that are not a tuple or a list,
+  each by the name of its field, and keeps the labels as a tuple. It takes a
+  calibration factor, a reference level and a calibrator frequency where
+  `io.Signal` takes a calibration factor and the number is a real scalar: an
+  `int` or a `float`, a NumPy integer or floating-point number, or a 0-d
+  array of one, each kept as a float. It now refuses by name, as a
+  `ValueError`, a bool, a text, a `Decimal`, a `Fraction`, a complex number,
+  a NumPy timedelta, an array that is not 0-d (one of one element among
+  them), a masked value and an integer past 64 bits. It took each of these
+  as a reference level or a calibrator frequency; as a calibration factor it
+  took a bool, a text, a `Decimal`, a `Fraction`, a NumPy complex number, a
+  NumPy timedelta in years, in months or with no unit, and an integer past
+  64 bits that a float holds, and refused the rest in other terms: a Python
+  complex number, a NumPy timedelta in weeks or a finer unit and an array
+  that is not 0-d as a `TypeError`, an integer past every float as an
+  `OverflowError`, and a masked value as a factor that is not finite and
+  positive.
+  `io.Signal` refuses these too, but for a bool, an array of one element, a
+  NumPy complex number and a NumPy timedelta, which it takes as a
+  calibration factor and `io.write` with `sidecar=True` now refuses before
+  it writes a sample, where it wrote the audio and then either a sidecar of
+  the number `float()` made of it (a bool, a NumPy complex number, a NumPy
+  timedelta in years, in months or with no unit) or no sidecar at all,
+  raising `TypeError` (an array of one element, a NumPy timedelta in weeks
+  or a finer unit).
+  `io.write_sidecar` refuses the same numbers and texts before it touches
+  the file, where it wrote `true` or `"94"` over a good sidecar that every
+  read of the audio then refused, took `"LR"` as two labels, and let an
+  integer past every float escape as an `OverflowError`. It refuses as well,
+  before it touches the file, fields whose sidecar would pass the 1 MiB a
+  reader takes (a calibrator model or a label of two megabytes, which it
+  wrote over the good sidecar), and labels whose count is not the channel
+  count of the audio file, when one is at the name and its channels can be
+  read; each of these left the audio beside it unreadable. `io.read` and
+  `io.read_blocks` refuse a sidecar whose labels do not give one to each
+  channel of the audio with a `ValueError` that names the sidecar, where
+  they failed building the signal in a message that named neither the
+  sidecar nor the file, and `io.convert` refuses it before it writes a
+  sample. It writes the sidecar to a new file beside it, renamed into place,
+  so that the name is never opened for writing and a reader finds the old
+  sidecar or the new one whole: the file is replaced, not written into, so
+  the new one keeps the permission bits of the old (on Windows the read-only
+  flag, which is cleared for the rename and set on the new file, since
+  Windows neither replaces nor removes a read-only file; a flag that cannot
+  be set again once the new file is in place is not raised, since the file
+  is replaced) and a hard link to the old file keeps the old calibration (on
+  Windows without the read-only flag, which belongs to the file and is
+  cleared with it); a new file that cannot be removed after a failure is
+  named in a note on the error rather than raised in its place. A pipe, a
+  device, a socket or a directory at the name is refused, and `io.write` and
+  `io.convert` ask before they write a sample, `io.write` by making the
+  sidecar of the Signal's calibration and labels first, so that no audio is
+  left without the sidecar it was written with. `io.convert` reads the
+  source's sidecar once, checks it and carries those bytes.
 
 - **A derived value names the cells it rests on in words.** When the cells a
   catalogue value is worked out from have mixed bases, `derived` says the basis

@@ -2347,7 +2347,9 @@ def write_catalogue(
 
     The file is written beside its final name and renamed into place, so a
     reader never finds half of it. A file it replaces keeps its permission
-    bits, and a hard link to the old file keeps the old document.
+    bits, and a hard link to the old file keeps the old document (on Windows
+    without a read-only flag the old file had, since the flag belongs to the
+    file and is cleared for the rename).
 
     :param rows: A :class:`Catalogue`, or a mapping of rows of one class.
     :param path: Where to write, a name ending in ``.json`` (in any case).

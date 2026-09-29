@@ -47,7 +47,7 @@ from ._chunks import (
     parse_wav_chunks,
 )
 from ._flac import read_flac_bext
-from ._sidecar import read_sidecar
+from ._sidecar import check_sidecar_labels, read_sidecar
 from ._signal import Signal, SignalOrigin
 from ._wav import AudioFileInfo, read_wav, wav_info
 
@@ -293,7 +293,8 @@ def read(path: str | Path, *, calibration_factor: float | None = None) -> Signal
         signal in digital full-scale units.
     :return: The signal with its metadata.
     :raises ValueError: If the file matches no known audio format, or a
-        sidecar exists but is invalid.
+        sidecar exists but is invalid or gives a count of channel labels
+        that is not the file's count of channels, each naming the sidecar.
     :raises ImportError: If the format needs the ``[audio]`` extra and it
         is not installed.
     """
@@ -317,6 +318,7 @@ def read(path: str | Path, *, calibration_factor: float | None = None) -> Signal
             path, format_name, calibration_factor=calibration_factor
         )
     if sidecar is not None and sidecar.channel_labels is not None:
+        check_sidecar_labels(path, sidecar.channel_labels, signal.n_channels)
         signal = replace(signal, channel_labels=sidecar.channel_labels)
     return signal
 

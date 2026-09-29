@@ -65,10 +65,12 @@ from __future__ import annotations
 
 import json
 import math
-import numbers
 import os
 from dataclasses import dataclass
 from pathlib import Path
+from typing import cast
+
+import numpy as np
 
 from .._internal.json_input import (
     LONE_SURROGATE,
@@ -96,6 +98,10 @@ _SIDECAR_TAIL = ".phonometry.json"
 #: read without end on every read of the audio.
 _MAX_BYTES = 1024 * 1024
 
+#: The kinds of NumPy number a sidecar takes: a signed or an unsigned
+#: integer, and a floating-point number.
+_REAL_KINDS = frozenset("iuf")
+
 
 @dataclass(frozen=True)
 class CalibrationSidecar:
@@ -105,11 +111,16 @@ class CalibrationSidecar:
     only mandatory field; the rest document how it was obtained
     (``reference_spl``, ``calibrator_frequency``, ``calibrator_model``)
     and what the channels are (``channel_labels``). ``phonometry_version``
-    records the writing library version. Every number is finite, as JSON
-    writes no other, and the model, every label and the version are text
-    UTF-8 can write (the model and the version may be ``None``), so that the
-    record read from one sidecar can be written to another. A record that
-    breaks either rule is refused as a :class:`ValueError` when it is built.
+    records the writing library version. Every number is a real number as
+    :class:`~phonometry.io.Signal` takes a calibration factor: an ``int`` or a
+    ``float``, a NumPy integer or floating-point number, or a 0-d array of
+    one, never a bool nor a masked value; it is finite, as JSON writes no
+    other, and it is kept as a float. The labels are a tuple or a list, kept
+    as a tuple; and the model, every label and the version are text UTF-8
+    can write (the model and the version may be ``None``). So every field of
+    a record read from a sidecar is one the writer takes again. A record that
+    breaks any of these rules is refused as a :class:`ValueError` naming the
+    field when it is built.
     """
 
     calibration_factor: float
@@ -120,24 +131,92 @@ class CalibrationSidecar:
     phonometry_version: str | None = None
 
     def __post_init__(self) -> None:
-        factor = float(self.calibration_factor)
+        factor = _real("calibration_factor", self.calibration_factor, "a real number")
         if not (math.isfinite(factor) and factor > 0):
             msg = (
                 f"calibration_factor must be finite and positive; got "
                 f"{self.calibration_factor!r}"
             )
             raise ValueError(msg)
+        object.__setattr__(self, "calibration_factor", factor)
         for name in ("reference_spl", "calibrator_frequency"):
             value = getattr(self, name)
+            if value is None:
+                continue
+            number = _real(name, value, "a real number or None")
             # JSON has no NaN and no infinity: a sidecar that wrote one would
             # be read by no strict reader, this module's among them.
-            if isinstance(value, numbers.Real) and not math.isfinite(value):
+            if not math.isfinite(number):
                 msg = f"{name} must be finite or None; got {value!r}"
                 raise ValueError(msg)
+            object.__setattr__(self, name, number)
         _check_text("calibrator_model", self.calibrator_model, optional=True)
         _check_text("phonometry_version", self.phonometry_version, optional=True)
-        for label in self.channel_labels or ():
-            _check_text("channel_labels", label, optional=False)
+        object.__setattr__(self, "channel_labels", _labels(self.channel_labels))
+
+
+def _real(name: str, value: object, held: str) -> float:
+    """*value* as a float, or refused by name when no sidecar can hold it.
+
+    A number is taken where :class:`~phonometry.io.Signal` takes it as a
+    calibration factor and it is real and scalar: what NumPy reads as a 0-d
+    array of integers or of floating-point numbers. So a Signal calibrated by
+    a 0-d array writes its sidecar. A bool is refused though Python and
+    Signal count it a number, and so is a text ``float`` would read: the
+    reader takes a JSON number and nothing else, and a sidecar written with
+    ``true`` or ``"94"`` would replace a good one and then be refused by every
+    read of the audio beside it. A masked value is refused as Signal refuses
+    it, since NumPy reads it as the number hidden under its mask, which is no
+    value at all.
+
+    :param held: What the field takes, as the message says it.
+    :raises ValueError: for anything else: a bool, a text, a ``Decimal``, a
+        ``Fraction``, a complex number, a NumPy timedelta, an array that is
+        not 0-d, a masked value, and an integer past 64 bits, which NumPy
+        holds only as an object, as Signal refuses it.
+    """
+    if np.ma.is_masked(value):
+        msg = (
+            f"{name} is masked, and a masked value holds no number a sidecar can write"
+        )
+        raise ValueError(msg)
+    try:
+        number = np.asarray(value)
+    except (TypeError, ValueError):
+        # A sequence of sequences of different lengths, which NumPy refuses.
+        number = None
+    if number is not None and number.ndim == 0 and number.dtype.kind in _REAL_KINDS:
+        return float(number)
+    if isinstance(value, int) and not isinstance(value, bool):
+        # The number is not printed: an integer past 4300 digits has no text
+        # Python writes without being asked to.
+        msg = f"{name} is an integer past 64 bits, which no NumPy integer holds"
+        raise ValueError(msg)
+    msg = (
+        f"{name} must be {held}: an int or a float, or a NumPy integer or float, "
+        f"0-d arrays included, and never a bool; got {value!r}"
+    )
+    raise ValueError(msg)
+
+
+def _labels(labels: object) -> tuple[str, ...] | None:
+    """The channel labels as a tuple, or refused by name.
+
+    A tuple or a list of texts, or ``None`` for none. A text is refused
+    rather than read as one label for each of its characters, and anything
+    else that is not a tuple or a list rather than iterated.
+
+    :raises ValueError: for anything else, and for a label that is not text
+        UTF-8 can write.
+    """
+    if labels is None:
+        return None
+    if not isinstance(labels, tuple | list):
+        msg = f"channel_labels must be a tuple or a list of texts, or None; got {labels!r}"
+        raise ValueError(msg)
+    for label in labels:
+        _check_text("channel_labels", label, optional=False)
+    return tuple(labels)
 
 
 def _check_text(name: str, text: object, *, optional: bool) -> None:
@@ -220,52 +299,35 @@ def put_sidecar(audio_path: str | Path, data: bytes) -> Path:
     return sidecar_path(audio_path)
 
 
-def write_sidecar(
-    audio_path: str | Path,
+def sidecar_file(
     calibration_factor: float,
     *,
     reference_spl: float | None = None,
     calibrator_frequency: float | None = None,
     calibrator_model: str | None = None,
-    channel_labels: tuple[str, ...] | None = None,
-) -> Path:
-    """Write the calibration sidecar beside an audio file.
+    channel_labels: tuple[str, ...] | list[str] | None = None,
+) -> bytes:
+    """The bytes of the sidecar these fields make, each field checked.
 
-    Serialises schema v1 with every key present (the module docstring's
-    table); an existing sidecar is replaced, which is the update semantics
-    a recalibration wants. The audio file itself is never touched. The
-    sidecar is written to a new file beside it and renamed into place, so a
-    reader finds the old sidecar or the new one whole and the name itself is
-    never opened for writing; a link at the name is followed to the file it
-    names. The file is replaced, not written into: the new one keeps the
-    permission bits of the old, and a hard link to the old file keeps the
-    old calibration.
+    Schema v1 with every key present (the module docstring's table) and the
+    version of the library that writes it, held to what a reader takes: a
+    sidecar past the :data:`_MAX_BYTES` :func:`read_sidecar` reads is refused
+    here, since written over a good one it would stop every read of the audio
+    beside it. The writers build the bytes before they touch a file, so that
+    what they refuse leaves every file as it was.
 
-    :param audio_path: The audio file the sidecar belongs to (it need not
-        exist yet; writing the sidecar first is fine).
-    :param calibration_factor: Digital-to-pascal multiplier (required,
-        finite, positive).
-    :param reference_spl: The calibrator's known SPL, dB (e.g. 94.0).
-    :param calibrator_frequency: The calibrator tone's nominal frequency,
-        Hz (e.g. 1000.0).
-    :param calibrator_model: Free-text calibrator identification.
-    :param channel_labels: One label per channel of the audio file.
-    :return: The path the sidecar was written to.
-    :raises ValueError: for a factor that is not finite and positive, a
-        reference SPL or a calibrator frequency that is not finite, a model
-        or a label that holds a lone surrogate, or a pipe, a device, a socket
-        or a directory at the sidecar's name, behind a link or not, before the
-        file at the sidecar's name is touched; a name that is not UTF-8 is
-        named by its escapes.
+    :raises ValueError: for a field :class:`CalibrationSidecar` refuses, and
+        for fields whose sidecar would pass 1 MiB.
     """
     from .._version import __version__
 
     record = CalibrationSidecar(
-        calibration_factor=float(calibration_factor),
+        calibration_factor=calibration_factor,
         reference_spl=reference_spl,
         calibrator_frequency=calibrator_frequency,
         calibrator_model=calibrator_model,
-        channel_labels=channel_labels,
+        # The record checks the labels and keeps a list as a tuple.
+        channel_labels=cast("tuple[str, ...] | None", channel_labels),
         phonometry_version=__version__,
     )
     payload = {
@@ -283,7 +345,142 @@ def write_sidecar(
         ),
     }
     text = json.dumps(payload, indent=2, ensure_ascii=False, allow_nan=False)
-    return put_sidecar(audio_path, (text + "\n").encode("utf-8"))
+    data = (text + "\n").encode("utf-8")
+    if len(data) > _MAX_BYTES:
+        msg = (
+            f"the sidecar these fields make is {len(data)} bytes, and a "
+            f"calibration sidecar is at most {_MAX_BYTES} bytes (1 MiB), past "
+            "which read_sidecar refuses it"
+        )
+        raise ValueError(msg)
+    return data
+
+
+def _counted(count: int, word: str) -> str:
+    """*count* and *word*, the word in the plural unless the count is one."""
+    return f"{count} {word}" if count == 1 else f"{count} {word}s"
+
+
+def _audio_channels(audio: Path) -> int | None:
+    """The channels of the audio file at *audio*, or ``None`` when none is read.
+
+    Only a regular file is asked, so a pipe at the name never keeps the
+    writer waiting; a file no reader of the library describes (one that is
+    not audio, or one that needs the ``[audio]`` extra without it) has no
+    count to hold labels to.
+    """
+    if not audio.is_file():
+        return None
+    from ._backends import info
+
+    try:
+        return info(audio).channels
+    except (OSError, ValueError, RuntimeError, ImportError):
+        return None
+
+
+def _refuse_labels_the_audio_lacks(
+    audio: Path, labels: tuple[str, ...] | list[str] | None
+) -> None:
+    """Refuse channel labels whose count is not that of the audio file.
+
+    :raises ValueError: naming the audio file and both counts.
+    """
+    if labels is None:
+        return
+    channels = _audio_channels(audio)
+    if channels is not None and len(labels) != channels:
+        msg = (
+            f"channel_labels gives {_counted(len(labels), 'label')}, and "
+            f"{_named(audio)} has {_counted(channels, 'channel')}: a sidecar "
+            "gives one label to each channel of its audio"
+        )
+        raise ValueError(msg)
+
+
+def check_sidecar_labels(
+    audio_path: str | Path, labels: tuple[str, ...] | None, channels: int
+) -> None:
+    """Refuse a sidecar's channel labels that do not fit its audio, naming it.
+
+    A reader of the audio would otherwise fail building the signal, in a
+    message that names neither the sidecar nor the file.
+
+    :param audio_path: The audio file the sidecar belongs to.
+    :param labels: The labels the sidecar gives, or ``None`` for none.
+    :param channels: The channels of the audio file.
+    :raises ValueError: naming the sidecar, for a count of labels that is
+        not *channels*.
+    """
+    if labels is not None and len(labels) != channels:
+        msg = (
+            f"{_named(sidecar_path(audio_path))}: sidecar gives "
+            f"{_counted(len(labels), 'channel label')}, and its audio has "
+            f"{_counted(channels, 'channel')}"
+        )
+        raise ValueError(msg)
+
+
+def write_sidecar(
+    audio_path: str | Path,
+    calibration_factor: float,
+    *,
+    reference_spl: float | None = None,
+    calibrator_frequency: float | None = None,
+    calibrator_model: str | None = None,
+    channel_labels: tuple[str, ...] | list[str] | None = None,
+) -> Path:
+    """Write the calibration sidecar beside an audio file.
+
+    Serialises schema v1 with every key present (the module docstring's
+    table); an existing sidecar is replaced, which is the update semantics
+    a recalibration wants. The audio file itself is never touched. The
+    sidecar is written to a new file beside it and renamed into place, so a
+    reader finds the old sidecar or the new one whole and the name itself is
+    never opened for writing; a link at the name is followed to the file it
+    names. The file is replaced, not written into: the new one keeps the
+    permission bits of the old, and a hard link to the old file keeps the
+    old calibration (on Windows without a read-only flag the old file had,
+    since the flag belongs to the file and is cleared for the rename). What
+    it writes, :func:`read_sidecar` reads back, and
+    :func:`~phonometry.io.read` reads the audio beside it: fields whose
+    sidecar would pass the 1 MiB a reader takes are refused, and so are
+    labels that do not give one to each channel of the audio file, when one
+    is at *audio_path* and its channels can be read.
+
+    :param audio_path: The audio file the sidecar belongs to (it need not
+        exist yet; writing the sidecar first is fine).
+    :param calibration_factor: Digital-to-pascal multiplier (required, a
+        real number, finite and positive).
+    :param reference_spl: The calibrator's known SPL, dB (e.g. 94.0), a real
+        number.
+    :param calibrator_frequency: The calibrator tone's nominal frequency,
+        Hz (e.g. 1000.0), a real number.
+    :param calibrator_model: Free-text calibrator identification.
+    :param channel_labels: One label per channel of the audio file, a tuple
+        or a list of texts.
+    :return: The path the sidecar was written to.
+    :raises ValueError: for a factor, a reference SPL or a calibrator
+        frequency that is not a real number as :class:`CalibrationSidecar`
+        takes one (a bool, a text or a ``Decimal`` among them) or is not
+        finite, a factor that is not positive, labels that are not a tuple or
+        a list of texts, a model or a label that is not text or holds a lone
+        surrogate, fields whose sidecar would pass 1 MiB, labels whose count
+        is not the channel count of the audio file, or a pipe, a device, a
+        socket or a directory at the sidecar's name, behind a link or not,
+        each before the file at the sidecar's name is touched; a name that is
+        not UTF-8 is named by its escapes.
+    """
+    data = sidecar_file(
+        calibration_factor,
+        reference_spl=reference_spl,
+        calibrator_frequency=calibrator_frequency,
+        calibrator_model=calibrator_model,
+        channel_labels=channel_labels,
+    )
+    # The fields are checked, so the labels are a tuple, a list or None.
+    _refuse_labels_the_audio_lacks(Path(audio_path), channel_labels)
+    return put_sidecar(audio_path, data)
 
 
 def _as_float(value: float, key: str, path: Path) -> float:
@@ -469,19 +666,21 @@ def _record(source: Path, raw: bytes) -> CalibrationSidecar:
         raise ValueError(msg) from exc
 
 
-def sidecar_bytes(audio_path: str | Path) -> bytes | None:
+def sidecar_bytes(audio_path: str | Path, channels: int) -> bytes | None:
     """The bytes of an audio file's sidecar, read and checked, or ``None``.
 
-    Read once and checked as :func:`read_sidecar` checks them, so that a copy
-    of the sidecar carries the bytes that were checked, byte for byte.
+    Read once and checked as :func:`read_sidecar` checks them, and its labels
+    against the audio's *channels*, so that a copy of the sidecar carries the
+    bytes that were checked, byte for byte, and fits the audio it goes with.
 
-    :raises ValueError: for everything :func:`read_sidecar` refuses.
+    :raises ValueError: for everything :func:`read_sidecar` refuses, and for
+        labels that do not give one to each of *channels*.
     """
     source = sidecar_path(audio_path)
     if not source.exists():
         return None
     raw = _sidecar_bytes(source)
-    _record(source, raw)
+    check_sidecar_labels(audio_path, _record(source, raw).channel_labels, channels)
     return raw
 
 

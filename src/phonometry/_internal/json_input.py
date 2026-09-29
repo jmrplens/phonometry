@@ -14,15 +14,21 @@ place in the file.
 A file the library writes back at such a name is written beside it and
 renamed into place, so that the name is never opened for writing: opening a
 pipe for writing waits for a reader, which may never come, and a reader of
-the name finds the old file or the new one whole, never half of either.
+the name finds the old file or the new one whole, never half of either. The
+new file keeps the permission bits of the old on every system, Windows's
+read-only flag among them, and a hard link to the old file keeps the old
+bytes (on Windows without the read-only flag, which belongs to the file and
+is cleared for the rename).
 """
 
 from __future__ import annotations
 
+import contextlib
 import os
 import re
 import secrets
 import stat
+import sys
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -57,6 +63,10 @@ LONE_SURROGATE = re.compile(r"[\ud800-\udfff]")
 #: reorder what a reader sees (a "Trojan source" text shows one thing and
 #: holds another).
 UNSAFE = re.compile(r"[\x00-\x08\x0b-\x1f\x7f-\x9f\u202a-\u202e\u2066-\u2069]")
+
+#: Whether files are Windows's: their permission bits are one read-only flag,
+#: and no file that holds it can be replaced or removed.
+_WINDOWS = sys.platform == "win32"
 
 #: The flag that keeps an open from waiting: opening a pipe for reading waits
 #: until a writer comes, which may be never. Windows has no such flag.
@@ -148,35 +158,94 @@ def write_beside(target: Path, data: bytes) -> None:
     bytes. The new file is flushed to the disk before the rename, and removed
     when anything fails before it.
 
+    On POSIX the new file is given the old one's bits before the rename, so
+    that a file kept private is never seen with any others. On Windows the
+    bits are the read-only flag, and a file that holds it can be neither
+    replaced nor removed: the new file is written without it, the old one's
+    flag is cleared just before the rename (and set again if the rename
+    fails), and the new file is given it once it is in place. A file the
+    caller keeps read-only is so replaced on Windows as on POSIX, stays
+    read-only, and the new file is never left beside it. Two things differ
+    on Windows. The flag belongs to the file, not to its name, so a hard
+    link to the old file, which keeps the old bytes, is left without it once
+    the flag is cleared for the rename. And a flag that cannot be set on the
+    new file once it is in place is not raised: the file is replaced, which
+    is what was asked, and it is left writable.
+
     :param target: Where the file goes.
     :param data: Its bytes.
-    :raises OSError: as the file system raises it, untouched.
+    :raises OSError: as the file system raises it, untouched, for any
+        failure before the file is in place; when the new file cannot be
+        removed after it, a note on the error names the file left behind.
     """
     temporary = target.with_name(f".{target.name}.{secrets.token_hex(8)}.tmp")
+    mode = _mode_of(target)
     try:
         with temporary.open("xb") as handle:
             handle.write(data)
             handle.flush()
-            _keep_mode(target, handle.fileno())
+            if mode is not None and not _WINDOWS:
+                os.fchmod(handle.fileno(), mode)
             os.fsync(handle.fileno())
-        temporary.replace(target)
-    except BaseException:
-        temporary.unlink(missing_ok=True)
+        _rename(temporary, target, mode)
+    except BaseException as error:
+        _discard(temporary, error)
         raise
 
 
-def _keep_mode(target: Path, descriptor: int) -> None:
-    """Give the open file *descriptor* the permission bits of *target*, if any.
+def _mode_of(target: Path) -> int | None:
+    """The permission bits of the file at *target*, or ``None`` with none there.
 
     A file a caller keeps private (``0600``) stays private when it is written
     again; with nothing at *target*, the new file keeps the mode it was made
     with.
     """
     try:
-        mode = stat.S_IMODE(target.stat().st_mode)
+        return stat.S_IMODE(target.stat().st_mode)
     except FileNotFoundError:
+        return None
+
+
+def _rename(temporary: Path, target: Path, mode: int | None) -> None:
+    """Rename *temporary* to *target*, the old file's read-only flag kept.
+
+    Only Windows is kept from replacing a file by its read-only flag: the
+    flag is cleared for the rename, set back on the old file if the rename
+    fails, and set on the new file once it is in place. Cleared, it is
+    cleared on the file, so a hard link to the old file keeps its bytes and
+    loses its flag. A flag that cannot be set on the new file is not raised,
+    since the file is in place: raised, it would tell the caller the write
+    failed, and have it clean up a file that already replaced the old one.
+    """
+    if mode is None or not _WINDOWS or mode & stat.S_IWRITE:
+        temporary.replace(target)
         return
-    os.fchmod(descriptor, mode)
+    target.chmod(mode | stat.S_IWRITE)
+    try:
+        temporary.replace(target)
+    except BaseException:
+        # The old file is still at the name; the error of the rename is the
+        # one to raise, whether or not its flag can be set again.
+        with contextlib.suppress(OSError):
+            target.chmod(mode)
+        raise
+    with contextlib.suppress(OSError):
+        target.chmod(mode)
+
+
+def _discard(temporary: Path, error: BaseException) -> None:
+    """Remove *temporary* after *error*, noting on it a file that stays behind.
+
+    The failure that stopped the write is what the caller is told; one that
+    keeps the new file from being removed is added to it as a note rather
+    than raised in its place.
+    """
+    try:
+        temporary.unlink(missing_ok=True)
+    except OSError as kept:
+        error.add_note(
+            f"{escaped(str(temporary))} could not be removed and is left behind: {kept}"
+        )
 
 
 def _open_without_waiting(name: str, flags: int) -> int:

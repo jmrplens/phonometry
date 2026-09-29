@@ -547,11 +547,16 @@ The calibration record of one audio file (schema v1, module docstring).
 only mandatory field; the rest document how it was obtained
 (`reference_spl`, `calibrator_frequency`, `calibrator_model`)
 and what the channels are (`channel_labels`). `phonometry_version`
-records the writing library version. Every number is finite, as JSON
-writes no other, and the model, every label and the version are text
-UTF-8 can write (the model and the version may be `None`), so that the
-record read from one sidecar can be written to another. A record that
-breaks either rule is refused as a `ValueError` when it is built.
+records the writing library version. Every number is a real number as
+[`Signal`](/phonometry/reference/api/io/io/#signal) takes a calibration factor: an `int` or a
+`float`, a NumPy integer or floating-point number, or a 0-d array of
+one, never a bool nor a masked value; it is finite, as JSON writes no
+other, and it is kept as a float. The labels are a tuple or a list, kept
+as a tuple; and the model, every label and the version are text UTF-8
+can write (the model and the version may be `None`). So every field of
+a record read from a sidecar is one the writer takes again. A record that
+breaks any of these rules is refused as a `ValueError` naming the
+field when it is built.
 
 ## Catalogue
 
@@ -1060,7 +1065,7 @@ original) so tools that only read PCM can open it.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | For a lossy or unknown target suffix, source and destination naming the same file, a FLAC target that cannot hold the source without an explicit `subtype`, an invalid `block_size`, a sidecar beside the source that [`read_sidecar`](/phonometry/reference/api/io/io/#read_sidecar) refuses, or a pipe, a device, a socket or a directory at the sidecar's name beside the destination; a sidecar is refused before a sample is written. |
+| ValueError | For a lossy or unknown target suffix, source and destination naming the same file, a FLAC target that cannot hold the source without an explicit `subtype`, an invalid `block_size`, a sidecar beside the source that [`read_sidecar`](/phonometry/reference/api/io/io/#read_sidecar) refuses or whose labels do not give one to each channel of the source, or a pipe, a device, a socket or a directory at the sidecar's name beside the destination; a sidecar is refused before a sample is written. |
 | ImportError | If source or target needs the `[audio]` extra and it is not installed. |
 
 ## CuePoint
@@ -1312,7 +1317,7 @@ derived from the file's channel mask.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If the file matches no known audio format, or a sidecar exists but is invalid. |
+| ValueError | If the file matches no known audio format, or a sidecar exists but is invalid or gives a count of channel labels that is not the file's count of channels, each naming the sidecar. |
 | ImportError | If the format needs the `[audio]` extra and it is not installed. |
 
 ## read_blocks
@@ -1357,7 +1362,7 @@ the per-backend mechanics and the exact overlap rule.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If the geometry is invalid, `calibration_factor` is not a positive finite number, the file matches no known audio format, or a sidecar exists but is invalid (all at the call), or the data chunk is shorter than its header claims (at the block that reaches the end of it). |
+| ValueError | If the geometry is invalid, `calibration_factor` is not a positive finite number, the file matches no known audio format, or a sidecar exists but is invalid or gives a count of channel labels that is not the file's count of channels (all at the call), or the data chunk is shorter than its header claims (at the block that reaches the end of it). |
 | ImportError | If the format needs the `[audio]` extra and it is not installed. |
 
 ## read_catalogue
@@ -1702,7 +1707,7 @@ out of calibrated results.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | For an unknown suffix or subtype, a missing or conflicting `fs`, a dither request outside `PCM_16`, an `rng` without a `dither` for it to seed, bext metadata that violates Tech 3285 (oversize field, version too old for a carried UMID or loudness), a sidecar request without a calibrated [`Signal`](/phonometry/reference/api/io/io/#signal), or one with a pipe, a device, a socket or a directory at the sidecar's name, refused before the audio is written. |
+| ValueError | For an unknown suffix or subtype, a missing or conflicting `fs`, a dither request outside `PCM_16`, an `rng` without a `dither` for it to seed, bext metadata that violates Tech 3285 (oversize field, version too old for a carried UMID or loudness), a sidecar request without a calibrated [`Signal`](/phonometry/reference/api/io/io/#signal), one whose calibration or channel labels no sidecar holds or whose sidecar would pass the 1 MiB a reader takes, or one with a pipe, a device, a socket or a directory at the sidecar's name, refused before the audio is written. |
 
 ## write_catalogue
 
@@ -1741,7 +1746,9 @@ the same every day.
 
 The file is written beside its final name and renamed into place, so a
 reader never finds half of it. A file it replaces keeps its permission
-bits, and a hard link to the old file keeps the old document.
+bits, and a hard link to the old file keeps the old document (on Windows
+without a read-only flag the old file had, since the flag belongs to the
+file and is cleared for the rename).
 
 **Parameters**
 
@@ -1775,7 +1782,7 @@ write_sidecar(
     reference_spl: float | None = None,
     calibrator_frequency: float | None = None,
     calibrator_model: str | None = None,
-    channel_labels: tuple[str, ...] | None = None,
+    channel_labels: tuple[str, ...] | list[str] | None = None,
 ) -> Path
 ```
 
@@ -1789,18 +1796,24 @@ reader finds the old sidecar or the new one whole and the name itself is
 never opened for writing; a link at the name is followed to the file it
 names. The file is replaced, not written into: the new one keeps the
 permission bits of the old, and a hard link to the old file keeps the
-old calibration.
+old calibration (on Windows without a read-only flag the old file had,
+since the flag belongs to the file and is cleared for the rename). What
+it writes, [`read_sidecar`](/phonometry/reference/api/io/io/#read_sidecar) reads back, and
+[`read`](/phonometry/reference/api/io/io/#read) reads the audio beside it: fields whose
+sidecar would pass the 1 MiB a reader takes are refused, and so are
+labels that do not give one to each channel of the audio file, when one
+is at *audio_path* and its channels can be read.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
 | `audio_path` | The audio file the sidecar belongs to (it need not exist yet; writing the sidecar first is fine). |
-| `calibration_factor` | Digital-to-pascal multiplier (required, finite, positive). |
-| `reference_spl` | The calibrator's known SPL, dB (e.g. 94.0). |
-| `calibrator_frequency` | The calibrator tone's nominal frequency, Hz (e.g. 1000.0). |
+| `calibration_factor` | Digital-to-pascal multiplier (required, a real number, finite and positive). |
+| `reference_spl` | The calibrator's known SPL, dB (e.g. 94.0), a real number. |
+| `calibrator_frequency` | The calibrator tone's nominal frequency, Hz (e.g. 1000.0), a real number. |
 | `calibrator_model` | Free-text calibrator identification. |
-| `channel_labels` | One label per channel of the audio file. |
+| `channel_labels` | One label per channel of the audio file, a tuple or a list of texts. |
 
 **Returns:** The path the sidecar was written to.
 
@@ -1808,4 +1821,4 @@ old calibration.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | for a factor that is not finite and positive, a reference SPL or a calibrator frequency that is not finite, a model or a label that holds a lone surrogate, or a pipe, a device, a socket or a directory at the sidecar's name, behind a link or not, before the file at the sidecar's name is touched; a name that is not UTF-8 is named by its escapes. |
+| ValueError | for a factor, a reference SPL or a calibrator frequency that is not a real number as [`CalibrationSidecar`](/phonometry/reference/api/io/io/#calibrationsidecar) takes one (a bool, a text or a `Decimal` among them) or is not finite, a factor that is not positive, labels that are not a tuple or a list of texts, a model or a label that is not text or holds a lone surrogate, fields whose sidecar would pass 1 MiB, labels whose count is not the channel count of the audio file, or a pipe, a device, a socket or a directory at the sidecar's name, behind a link or not, each before the file at the sidecar's name is touched; a name that is not UTF-8 is named by its escapes. |

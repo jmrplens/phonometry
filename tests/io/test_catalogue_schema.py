@@ -508,6 +508,10 @@ REFUSED: dict[str, tuple[dict[str, Any], str]] = {
         _with(("catalogue",), "Panel 40"),
         "/catalogue: 'Panel 40' is not a catalogue name",
     ),
+    "a-name-ending-in-a-line-feed": (
+        _with(("catalogue",), "panel-40\n"),
+        "/catalogue: 'panel-40\\n' is not a catalogue name",
+    ),
     "a-basis-outside-the-vocabulary": (
         _with(("basis",), "guessed"),
         "/basis: is 'guessed', which is not one of",
@@ -569,6 +573,10 @@ REFUSED: dict[str, tuple[dict[str, Any], str]] = {
         _with(("provenance", "consulted"), "23/09/2026"),
         "/provenance/consulted: the provenance's consulted is '23/09/2026'",
     ),
+    "a-day-ending-in-a-line-feed": (
+        _with(("provenance", "consulted"), "2026-09-23\n"),
+        "/provenance/consulted: the provenance's consulted is '2026-09-23\\n'",
+    ),
     "an-unknown-kind": (
         _with(("provenance", "kind"), "brochure"),
         "/provenance/kind: the provenance's kind is 'brochure'",
@@ -581,9 +589,18 @@ REFUSED: dict[str, tuple[dict[str, Any], str]] = {
         _with(("provenance", "issued"), "March 2026"),
         "/provenance/issued: the provenance's issued is 'March 2026'",
     ),
+    "an-issue-date-ending-in-a-line-feed": (
+        _with(("provenance", "issued"), "2026-03\n"),
+        "/provenance/issued: the provenance's issued is '2026-03\\n'",
+    ),
     "a-digest-that-is-not-one": (
         _with(("provenance", "sha256"), "abc"),
         "/provenance/sha256: the provenance's sha256 is 'abc'",
+    ),
+    "a-digest-ending-in-a-line-feed": (
+        _with(("provenance", "sha256"), "0" * 64 + "\n"),
+        f"/provenance/sha256: the provenance's sha256 is '{'0' * 64}\\n', which "
+        "is not a SHA-256 digest",
     ),
     "an-unknown-provenance-member": (
         _with(("provenance", "edition"), "3"),
@@ -607,6 +624,10 @@ REFUSED: dict[str, tuple[dict[str, Any], str]] = {
     "a-key-with-a-space": (
         _with(("rows", 0, "key"), "core declared"),
         "/rows/0/key: is 'core declared'; a key is",
+    ),
+    "a-key-ending-in-a-line-feed": (
+        _with(("rows", 0, "key"), "core-declared\n"),
+        "/rows/0/key: is 'core-declared\\n'; a key is",
     ),
     "a-row-without-a-key": (
         _with(("rows", 0), {"name": "Panel 40 core"}),
@@ -726,6 +747,10 @@ REFUSED: dict[str, tuple[dict[str, Any], str]] = {
         _with(("rows", 1, "x-"), "P40"),
         "/rows/1/x- (row 'core-lab'): 'x-' is not a column name",
     ),
+    "a-column-name-ending-in-a-line-feed": (
+        _with(("rows", 1, "x-batch\n"), "17"),
+        "/rows/1/x-batch\n (row 'core-lab'): 'x-batch\\n' is not a column name",
+    ),
     "a-row-narrowing-its-document": (
         _with(("rows", 1, "provenance"), {"document": "Another sheet"}),
         "/rows/1/provenance/document (row 'core-lab'): a row cannot change the "
@@ -823,12 +848,13 @@ def test_a_header_holding_rows_is_refused_by_both(tmp_path: pathlib.Path) -> Non
 def test_the_limits_the_schema_states_are_the_readers() -> None:
     """The names, keys, lengths and counts are taken from the reader's own."""
     portable = _catalogue_schema._portable
+    end = r"(?![\s\S])"
     name = SCHEMA["properties"]["catalogue"]["pattern"]
-    assert name == f"^{portable(_catalogue._NAME)}$"
+    assert name == f"^{portable(_catalogue._NAME)}{end}"
     reserved = SCHEMA["properties"]["catalogue"]["not"]["pattern"]
     assert reserved == f"^{portable(_catalogue._RESERVED)}"
     key = SCHEMA["$defs"]["PorousMaterial"]["properties"]["key"]["pattern"]
-    assert key == f"^{portable(_catalogue._KEY)}$"
+    assert key == f"^{portable(_catalogue._KEY)}{end}"
     assert SCHEMA["properties"]["rows"]["maxItems"] == _catalogue._MAX_ROWS
     assert SCHEMA["$defs"]["text"]["maxLength"] == _catalogue._MAX_TEXT
     assert SCHEMA["$defs"]["prose"]["maxLength"] == _catalogue._MAX_PROSE
@@ -870,14 +896,60 @@ def _schema_patterns() -> dict[str, tuple[str, Callable[[str], bool]]]:
 def _pattern_texts() -> list[str]:
     """Every character of the basic plane, alone and where each pattern reads it.
 
-    A text that ends in a line feed is left out: Python's ``$`` matches before
-    one, and neither ECMA-262's ``$`` nor the reader's ``fullmatch`` does.
+    A character follows a whole key, a column's name, a day and a digest, so
+    that a text that ends in a line feed is read where Python's ``$`` would
+    have matched before it, and neither ECMA-262's ``$`` nor the reader's
+    ``fullmatch`` does.
     """
     texts = []
     for point in range(0x10000):
         char = chr(point)
         texts += [char, f"a{char}", f"x-a{char}", f"a-{char}026-b", f" {char}"]
-    return [text for text in texts if not text.endswith("\n")]
+        texts += [f"2026-09-23{char}", f"{'0' * 64}{char}"]
+    return texts
+
+
+def _every_pattern() -> dict[str, str]:
+    """Every pattern the schema holds, a key of patternProperties among them."""
+    found: dict[str, str] = {}
+
+    def walk(node: object, at: str) -> None:
+        if isinstance(node, dict):
+            if isinstance(node.get("pattern"), str):
+                found.setdefault(node["pattern"], at)
+            for pattern in node.get("patternProperties", {}):
+                found.setdefault(pattern, f"{at}/patternProperties")
+            for key, value in node.items():
+                walk(value, f"{at}/{key}")
+        elif isinstance(node, list):
+            for index, value in enumerate(node):
+                walk(value, f"{at}/{index}")
+
+    walk(SCHEMA, "")
+    return {at: pattern for pattern, at in found.items()}
+
+
+def test_no_pattern_of_the_schema_ends_where_python_and_ecma_262_differ() -> None:
+    """Python's ``$`` also matches before a final line feed, ECMA-262's does not.
+
+    Seven of the nine patterns hold a whole text and end at its end; the test
+    of a text that is not blank and the reserved form of a name match a part
+    of it, and end nowhere.
+    """
+    patterns = _every_pattern()
+    assert len(patterns) == 9
+    for at, pattern in patterns.items():
+        assert not pattern.endswith("$"), at
+        assert "$" not in pattern.replace("\\$", ""), at
+    open_ended = {
+        pattern
+        for pattern in patterns.values()
+        if not pattern.endswith(_catalogue_schema._END)
+    }
+    assert open_ended == {
+        SCHEMA["$defs"]["filled"]["allOf"][1]["pattern"],
+        SCHEMA["properties"]["catalogue"]["not"]["pattern"],
+    }
 
 
 def test_every_pattern_the_schema_takes_reads_as_the_reader_does() -> None:
@@ -952,7 +1024,7 @@ def test_an_editors_validator_reads_every_pattern_as_python_does(flags: str) -> 
     ``jsonschema`` would mark a file the reader reads.
     """
     texts = _pattern_texts()
-    patterns = {name: pattern for name, (pattern, _) in _schema_patterns().items()}
+    patterns = _every_pattern()
     script = (
         "const {patterns, texts, flags} = JSON.parse(require('fs')"
         ".readFileSync(0, 'utf8'));"

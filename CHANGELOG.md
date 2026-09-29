@@ -39,9 +39,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   top-level `$schema`, which the reader takes and never reads. A document the
   reader reads is never refused by the schema, by Python's `jsonschema` or by
   an editor's JavaScript validator: its patterns spell every class of
-  characters out, so that both read a key, a column's name and a text that is
-  not blank as the reader does. What depends on two cells at once stays the
-  reader's to refuse.
+  characters out, so that Python's `re` and ECMA-262 both read a key, a
+  column's name and a text that is not blank as the reader does; and each of
+  the seven patterns that hold a whole text is anchored at the very end of it
+  rather than with a `$`, which Python also matches before a final line
+  feed, so that a name, a key, a column's name, a day, a date or a digest
+  that ends in a line feed is refused under both, as the reader refuses it.
+  The other two, the test of a text that is not blank and the reserved form
+  of a name, match a part of the text and are not anchored at its end. The
+  end is a lookahead, which a validator built on RE2 does not compile. What
+  depends on two cells at once stays the reader's to refuse.
 
 - **Keep a data sheet's absorption and a laboratory's insulation as rows of
   their own, rated again from their bands.** Four row classes hold what a

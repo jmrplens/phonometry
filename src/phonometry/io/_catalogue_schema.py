@@ -67,17 +67,27 @@ _DIALECT = "https://json-schema.org/draft/2020-12/schema"
 #: publishes the file moves.
 SCHEMA_ID = f"urn:phonometry:schema:catalogue:{CATALOGUE_SCHEMA_VERSION}"
 
+#: The end of the text, as Python's ``re`` and ECMA-262 both read it, which
+#: ends each pattern that holds a whole text (seven of the nine the schema
+#: holds; the test of a text that is not blank and the reserved form of a
+#: name match a part of it). Python's ``$`` also matches before a line feed
+#: that ends the text, and ECMA-262's does not, so that ``^k$`` takes
+#: ``"k\n"`` under Python's ``jsonschema`` and not in an editor's JavaScript
+#: validator; no character follows the end of the text in either engine, and
+#: ``[\s\S]`` is every character in both, with the ``u`` flag or without it.
+#: A validator built on RE2 compiles no lookahead, and so none of the seven.
+_END = r"(?![\s\S])"
 #: A text no reader should see: the control characters the reader refuses,
 #: taken from its own pattern so the two cannot drift apart.
-_SAFE = f"^[^{_UNSAFE.pattern[1:-1]}]*$"
+_SAFE = f"^[^{_UNSAFE.pattern[1:-1]}]*{_END}"
 #: A text that holds something but white space, as ``str.strip`` tells white
 #: space: the reader's own test of a blank text.
 _NOT_BLANK = re.compile(r"\S")
 #: A day as ``YYYY-MM-DD``, and a date at the precision a document prints.
-_DAY = r"^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
-_PRINTED_DATE = r"^([0-9]{4}(-[0-9]{2}(-[0-9]{2})?)?)?$"
+_DAY = f"^[0-9]{{4}}-[0-9]{{2}}-[0-9]{{2}}{_END}"
+_PRINTED_DATE = f"^([0-9]{{4}}(-[0-9]{{2}}(-[0-9]{{2}})?)?)?{_END}"
 #: A SHA-256 digest in hexadecimal, or nothing.
-_DIGEST = r"^([0-9a-fA-F]{64})?$"
+_DIGEST = f"^([0-9a-fA-F]{{64}})?{_END}"
 #: The fields a row never writes: the library's to write, and the citation
 #: the reader composes from the provenance.
 _NEVER_WRITTEN = frozenset({"derived", "table", "source"})
@@ -88,7 +98,8 @@ def _ref(name: str) -> dict[str, str]:
 
 
 def _anchored(pattern: str) -> str:
-    return f"^{pattern}$"
+    """*pattern* over the whole text, as the reader's ``fullmatch`` reads it."""
+    return f"^{pattern}{_END}"
 
 
 #: The last code point a ``\uXXXX`` escape writes; ECMA-262 writes one past
@@ -105,7 +116,7 @@ def _spelled(points: Iterable[int]) -> str:
     runs: list[list[int]] = []
     for point in sorted(points):
         if point > _LAST_ESCAPED:
-            msg = f"U+{point:X} is past the escapes every validator reads"
+            msg = f"U+{point:X} is past the escapes Python's re and ECMA-262 both read"
             raise ValueError(msg)
         if runs and point == runs[-1][1] + 1:
             runs[-1][1] = point
@@ -153,7 +164,7 @@ def _shorthand(letter: str, *, ascii_only: bool, in_class: bool) -> str:
 
 
 def _portable(pattern: re.Pattern[str]) -> str:
-    r"""*pattern* as a JSON Schema pattern every validator reads as the reader does.
+    r"""*pattern* as a JSON Schema pattern Python and ECMA-262 read as the reader does.
 
     Python's ``re`` and ECMA-262, the dialect JSON Schema names, read the
     class shorthands apart: without the ASCII flag ``\w`` and ``\d`` take
@@ -191,7 +202,7 @@ def _portable(pattern: re.Pattern[str]) -> str:
 
 
 def _filled() -> str:
-    """A text that holds something but white space, for every validator."""
+    """A text that holds something but white space, for Python and ECMA-262 alike."""
     return _portable(_NOT_BLANK)
 
 

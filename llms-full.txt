@@ -33060,9 +33060,11 @@ a row may have, what kind of value each takes, the pattern of a name and a
 key. What depends on two cells at once, a value beside a word that says
 there is none or a bound on a field with no range, is the reader's to
 refuse, so a file the editor accepts may still be refused, and the refusal
-says where. A file the reader reads is never marked by the editor. The
-schema's name, `urn:phonometry:schema:catalogue:1`, follows the layout
-version, so a later layout is a new schema beside this one.
+says where. A file the reader reads is never marked by an editor whose
+validator reads regular expressions as JavaScript or Python does, Visual
+Studio Code's among them. The schema's name,
+`urn:phonometry:schema:catalogue:1`, follows the layout version, so a later
+layout is a new schema beside this one.
 
 ## What never happens
 

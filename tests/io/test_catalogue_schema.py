@@ -23,8 +23,10 @@ import json
 import pathlib
 import pkgutil
 import re
+import shutil
+import subprocess
 import sys
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from typing import Any
 
 import pytest
@@ -33,7 +35,7 @@ from jsonschema import Draft202012Validator
 import phonometry
 from phonometry import fluids, io, materials, solids
 from phonometry._internal import catalogue as private
-from phonometry.io import _catalogue
+from phonometry.io import _catalogue, _catalogue_schema
 
 _SCRIPTS = str(pathlib.Path(__file__).resolve().parents[2] / "scripts")
 if _SCRIPTS not in sys.path:
@@ -820,15 +822,13 @@ def test_a_header_holding_rows_is_refused_by_both(tmp_path: pathlib.Path) -> Non
 
 def test_the_limits_the_schema_states_are_the_readers() -> None:
     """The names, keys, lengths and counts are taken from the reader's own."""
-    assert (
-        SCHEMA["properties"]["catalogue"]["pattern"] == f"^{_catalogue._NAME.pattern}$"
-    )
-    assert (
-        SCHEMA["properties"]["catalogue"]["not"]["pattern"]
-        == f"^{_catalogue._RESERVED.pattern}"
-    )
+    portable = _catalogue_schema._portable
+    name = SCHEMA["properties"]["catalogue"]["pattern"]
+    assert name == f"^{portable(_catalogue._NAME)}$"
+    reserved = SCHEMA["properties"]["catalogue"]["not"]["pattern"]
+    assert reserved == f"^{portable(_catalogue._RESERVED)}"
     key = SCHEMA["$defs"]["PorousMaterial"]["properties"]["key"]["pattern"]
-    assert key == f"^{_catalogue._KEY.pattern}$"
+    assert key == f"^{portable(_catalogue._KEY)}$"
     assert SCHEMA["properties"]["rows"]["maxItems"] == _catalogue._MAX_ROWS
     assert SCHEMA["$defs"]["text"]["maxLength"] == _catalogue._MAX_TEXT
     assert SCHEMA["$defs"]["prose"]["maxLength"] == _catalogue._MAX_PROSE
@@ -838,6 +838,150 @@ def test_the_limits_the_schema_states_are_the_readers() -> None:
     assert set(SCHEMA["$defs"]["provenance"]["properties"]) == {
         item.name for item in dataclasses.fields(io.Provenance)
     }
+
+
+def _schema_patterns() -> dict[str, tuple[str, Callable[[str], bool]]]:
+    """Each pattern the schema takes from the reader, and the reader's own test."""
+    porous = SCHEMA["$defs"]["PorousMaterial"]
+    return {
+        "name": (
+            SCHEMA["properties"]["catalogue"]["pattern"],
+            lambda text: _catalogue._NAME.fullmatch(text) is not None,
+        ),
+        "reserved": (
+            SCHEMA["properties"]["catalogue"]["not"]["pattern"],
+            lambda text: _catalogue._RESERVED.match(text) is not None,
+        ),
+        "key": (
+            porous["properties"]["key"]["pattern"],
+            lambda text: _catalogue._KEY.fullmatch(text) is not None,
+        ),
+        "column": (
+            next(iter(porous["patternProperties"])),
+            lambda text: _catalogue._EXTRA.fullmatch(text) is not None,
+        ),
+        "filled": (
+            SCHEMA["$defs"]["filled"]["allOf"][1]["pattern"],
+            lambda text: bool(text.strip()),
+        ),
+    }
+
+
+def _pattern_texts() -> list[str]:
+    """Every character of the basic plane, alone and where each pattern reads it.
+
+    A text that ends in a line feed is left out: Python's ``$`` matches before
+    one, and neither ECMA-262's ``$`` nor the reader's ``fullmatch`` does.
+    """
+    texts = []
+    for point in range(0x10000):
+        char = chr(point)
+        texts += [char, f"a{char}", f"x-a{char}", f"a-{char}026-b", f" {char}"]
+    return [text for text in texts if not text.endswith("\n")]
+
+
+def test_every_pattern_the_schema_takes_reads_as_the_reader_does() -> None:
+    r"""Python's re reads the schema's patterns as the reader's own tests.
+
+    The reader writes ``\w`` and ``\d`` under ``re.ASCII`` and tells white
+    space by ``str.strip``; the schema spells each out, and a pattern that
+    kept the shorthand would read another script's letters, or U+FEFF, apart.
+    """
+    texts = _pattern_texts()
+    for name, (pattern, reads) in _schema_patterns().items():
+        compiled = re.compile(pattern)
+        differ = [
+            text
+            for text in texts
+            if (compiled.search(text) is not None) != bool(reads(text))
+        ]
+        assert differ == [], name
+
+
+@pytest.mark.parametrize(
+    ("pattern", "said"),
+    [
+        (re.compile(r"\w+"), "every script's characters"),
+        (re.compile(r"[\S]", re.ASCII), "inside a class"),
+    ],
+    ids=["unicode-word", "negated-in-a-class"],
+)
+def test_a_shorthand_no_class_of_characters_spells_is_refused(
+    pattern: re.Pattern[str], said: str
+) -> None:
+    with pytest.raises(ValueError, match=said):
+        _catalogue_schema._portable(pattern)
+
+
+def test_a_character_past_the_basic_plane_is_refused_as_no_escape_writes_it() -> None:
+    with pytest.raises(ValueError, match="U\\+10000 is past the escapes"):
+        _catalogue_schema._spelled([0x10000])
+
+
+@pytest.mark.parametrize(
+    ("text", "filled"),
+    [("\ufeff", True), ("Panel\ufeff", True), (" \u3000\u2028", False)],
+    ids=["byte-order-mark", "word", "blank"],
+)
+def test_a_text_is_filled_for_the_schema_as_it_is_for_the_reader(
+    text: str, *, filled: bool
+) -> None:
+    """U+FEFF is no white space to str.strip, and none to the schema either."""
+    document = _with(("about",), text)
+    document["attributed_to"] = text
+    try:
+        io.parse_catalogue(document, row_type=materials.PorousMaterial)
+    except io.CatalogueError:
+        read = False
+    else:
+        read = True
+    assert read is filled
+    assert (not _problems(document)) is filled
+
+
+_NODE = shutil.which("node")
+
+
+@pytest.mark.skipif(_NODE is None, reason="no ECMA-262 engine to compare with")
+@pytest.mark.parametrize("flags", ["u", ""], ids=["unicode", "plain"])
+def test_an_editors_validator_reads_every_pattern_as_python_does(flags: str) -> None:
+    """ECMA-262, the dialect JSON Schema names, reads the patterns alike.
+
+    An editor validates a catalogue file with the engine of its language,
+    most often JavaScript's; a pattern it read otherwise than Python's
+    ``jsonschema`` would mark a file the reader reads.
+    """
+    texts = _pattern_texts()
+    patterns = {name: pattern for name, (pattern, _) in _schema_patterns().items()}
+    script = (
+        "const {patterns, texts, flags} = JSON.parse(require('fs')"
+        ".readFileSync(0, 'utf8'));"
+        "const out = {};"
+        "for (const [name, p] of Object.entries(patterns)) {"
+        "  const re = new RegExp(p, flags);"
+        "  out[name] = texts.map((t) => re.test(t));"
+        "}"
+        "process.stdout.write(JSON.stringify(out));"
+    )
+    given = json.dumps({"patterns": patterns, "texts": texts, "flags": flags})
+    ran = subprocess.run(
+        [str(_NODE), "-e", script],
+        input=given,
+        capture_output=True,
+        text=True,
+        timeout=120,
+        check=True,
+    )
+    ecma = json.loads(ran.stdout)
+    for name, pattern in patterns.items():
+        compiled = re.compile(pattern)
+        python = [compiled.search(text) is not None for text in texts]
+        differ = [
+            text
+            for text, one, other in zip(texts, python, ecma[name], strict=True)
+            if one != other
+        ]
+        assert differ == [], name
 
 
 @dataclasses.dataclass(frozen=True, kw_only=True)

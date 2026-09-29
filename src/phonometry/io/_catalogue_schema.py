@@ -24,6 +24,9 @@ never refused by the schema.
 from __future__ import annotations
 
 import dataclasses
+import functools
+import re
+import sys
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any
 
@@ -67,8 +70,9 @@ SCHEMA_ID = f"urn:phonometry:schema:catalogue:{CATALOGUE_SCHEMA_VERSION}"
 #: A text no reader should see: the control characters the reader refuses,
 #: taken from its own pattern so the two cannot drift apart.
 _SAFE = f"^[^{_UNSAFE.pattern[1:-1]}]*$"
-#: A text that holds something but white space.
-_FILLED = r"\S"
+#: A text that holds something but white space, as ``str.strip`` tells white
+#: space: the reader's own test of a blank text.
+_NOT_BLANK = re.compile(r"\S")
 #: A day as ``YYYY-MM-DD``, and a date at the precision a document prints.
 _DAY = r"^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
 _PRINTED_DATE = r"^([0-9]{4}(-[0-9]{2}(-[0-9]{2})?)?)?$"
@@ -85,6 +89,110 @@ def _ref(name: str) -> dict[str, str]:
 
 def _anchored(pattern: str) -> str:
     return f"^{pattern}$"
+
+
+#: The last code point a ``\uXXXX`` escape writes; ECMA-262 writes one past
+#: it only with the ``u`` flag, in a form Python's ``re`` does not read.
+_LAST_ESCAPED = 0xFFFF
+
+
+def _spelled(points: Iterable[int]) -> str:
+    r"""Code points as the body of a character class, each run as a range.
+
+    Every character is written as its ``\uXXXX`` escape, which Python's
+    ``re`` and ECMA-262 read alike, with or without the ``u`` flag.
+    """
+    runs: list[list[int]] = []
+    for point in sorted(points):
+        if point > _LAST_ESCAPED:
+            msg = f"U+{point:X} is past the escapes every validator reads"
+            raise ValueError(msg)
+        if runs and point == runs[-1][1] + 1:
+            runs[-1][1] = point
+        else:
+            runs.append([point, point])
+    return "".join(
+        f"\\u{low:04x}" if low == high else f"\\u{low:04x}-\\u{high:04x}"
+        for low, high in runs
+    )
+
+
+@functools.cache
+def _white_space() -> str:
+    r"""What Python's ``\s`` takes in a text, the characters ``str.strip`` strips."""
+    return _spelled(
+        point for point in range(sys.maxunicode + 1) if chr(point).isspace()
+    )
+
+
+#: The class shorthands of an ASCII pattern, as the characters they take.
+_ASCII_SHORTHANDS = MappingProxyType(
+    {"d": "0-9", "w": "A-Za-z0-9_", "s": _spelled((9, 10, 11, 12, 13, 32))}
+)
+
+
+def _shorthand(letter: str, *, ascii_only: bool, in_class: bool) -> str:
+    r"""The characters a class shorthand such as ``\w`` takes, spelled out."""
+    lower = letter.lower()
+    if lower == "s" and not ascii_only:
+        body = _white_space()
+    elif ascii_only:
+        body = _ASCII_SHORTHANDS[lower]
+    else:
+        msg = (
+            f"\\{letter} takes every script's characters in Python, and no validator's"
+        )
+        raise ValueError(msg)
+    negated = letter.isupper()
+    if in_class and negated:
+        msg = f"\\{letter} inside a class has no spelling as characters"
+        raise ValueError(msg)
+    if in_class:
+        return body
+    return f"[^{body}]" if negated else f"[{body}]"
+
+
+def _portable(pattern: re.Pattern[str]) -> str:
+    r"""*pattern* as a JSON Schema pattern every validator reads as the reader does.
+
+    Python's ``re`` and ECMA-262, the dialect JSON Schema names, read the
+    class shorthands apart: without the ASCII flag ``\w`` and ``\d`` take
+    the letters and digits of every script in Python and of ASCII alone in
+    ECMA-262, and ``\s`` takes U+001C to U+001F and U+0085 in Python and
+    U+FEFF in ECMA-262. Each shorthand is spelled out as the characters it
+    takes under the pattern's own flags, so that Python's ``jsonschema`` and
+    an editor's validator accept the texts the reader accepts.
+
+    :raises ValueError: for a shorthand no class of characters can spell.
+    """
+    ascii_only = bool(pattern.flags & re.ASCII)
+    source = pattern.pattern
+    spelled: list[str] = []
+    in_class = False
+    index = 0
+    while index < len(source):
+        char = source[index]
+        if char == "\\" and source[index + 1 : index + 2] in tuple("dswDSW"):
+            letter = source[index + 1]
+            spelled.append(_shorthand(letter, ascii_only=ascii_only, in_class=in_class))
+            index += 2
+            continue
+        if char == "\\":
+            spelled.append(source[index : index + 2])
+            index += 2
+            continue
+        if char == "[" and not in_class:
+            in_class = True
+        elif char == "]" and in_class:
+            in_class = False
+        spelled.append(char)
+        index += 1
+    return "".join(spelled)
+
+
+def _filled() -> str:
+    """A text that holds something but white space, for every validator."""
+    return _portable(_NOT_BLANK)
 
 
 def _pair(item: dict[str, Any]) -> dict[str, Any]:
@@ -110,7 +218,7 @@ def _common() -> dict[str, Any]:
             "pattern": _SAFE,
             "description": "A paragraph or more of text.",
         },
-        "filled": {"allOf": [_ref("text"), {"pattern": _FILLED}]},
+        "filled": {"allOf": [_ref("text"), {"pattern": _filled()}]},
         "number": {"type": ["number", "null"]},
         "whole": {"type": ["integer", "null"]},
         "reading": {
@@ -132,11 +240,11 @@ def _provenance_properties() -> dict[str, Any]:
             "description": "What kind of document the cells were read from.",
         },
         "document": {
-            "allOf": [text, {"pattern": _FILLED}],
+            "allOf": [text, {"pattern": _filled()}],
             "description": "The document's title as it prints it.",
         },
         "version": {
-            "anyOf": [{"allOf": [text, {"pattern": _FILLED}]}, {"type": "null"}],
+            "anyOf": [{"allOf": [text, {"pattern": _filled()}]}, {"type": "null"}],
             "description": (
                 'The revision the document prints ("Rev. 4"), or null when it '
                 "prints none."
@@ -277,7 +385,7 @@ class _RowSchema:
         properties: dict[str, Any] = {
             "key": {
                 "type": "string",
-                "pattern": _anchored(_KEY.pattern),
+                "pattern": _anchored(_portable(_KEY)),
                 "description": (
                     "The row's key in the catalogue, the half of "
                     '"<catalogue>/<key>" after the slash.'
@@ -304,7 +412,7 @@ class _RowSchema:
             "required": ["key", *self.names_required()],
             "properties": properties,
             "patternProperties": {
-                _anchored(_EXTRA.pattern): {
+                _anchored(_portable(_EXTRA)): {
                     "anyOf": [_ref("text"), {"type": "number"}],
                     "description": (
                         "A column of your own, kept as text beside the row and "
@@ -533,8 +641,8 @@ def _document(schemas: list[_RowSchema]) -> dict[str, Any]:
             "schema_version": {"const": CATALOGUE_SCHEMA_VERSION},
             "catalogue": {
                 "type": "string",
-                "pattern": _anchored(_NAME.pattern),
-                "not": {"pattern": f"^{_RESERVED.pattern}"},
+                "pattern": _anchored(_portable(_NAME)),
+                "not": {"pattern": f"^{_portable(_RESERVED)}"},
                 "description": (
                     "The catalogue's name, the first half of every key: never a "
                     "four-digit year followed by a word, which is the form of the "
@@ -546,7 +654,7 @@ def _document(schemas: list[_RowSchema]) -> dict[str, Any]:
                 "description": "The row class every row of the document is read into.",
             },
             "about": {
-                "allOf": [_ref("prose"), {"pattern": _FILLED}],
+                "allOf": [_ref("prose"), {"pattern": _filled()}],
                 "description": (
                     "What the document is, how it was read and in which units it "
                     "prints."

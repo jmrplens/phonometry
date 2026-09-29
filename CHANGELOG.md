@@ -37,8 +37,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   publishes the schema of every published row class as
   `schemas/phonometry-catalogue-1.json`, and a document may name it in a
   top-level `$schema`, which the reader takes and never reads. A document the
-  reader reads is never refused by the schema; what depends on two cells at
-  once stays the reader's to refuse.
+  reader reads is never refused by the schema, by Python's `jsonschema` or by
+  an editor's JavaScript validator: its patterns spell every class of
+  characters out, so that both read a key, a column's name and a text that is
+  not blank as the reader does. What depends on two cells at once stays the
+  reader's to refuse.
 
 - **Keep a data sheet's absorption and a laboratory's insulation as rows of
   their own, rated again from their bands.** Four row classes hold what a

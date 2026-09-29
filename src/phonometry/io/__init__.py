@@ -57,12 +57,11 @@ their own, which :func:`read_catalogue` reads into rows of the same classes:
 a versioned JSON document with its :class:`Provenance` (the kind of document,
 its version, the day it was consulted, the laboratory and the report), each
 cell named as the field it fills or in another unit of the same kind, and
-every hedge the packaged tables use; or the CSV file a spreadsheet saves,
-each row starting on a line of its own, in a closed grammar of cells
-(``~0.85``, ``<=30``,
-``0.30..0.50``, ``0.85±0.05``, ``[AFr5]``), with that document's header
-beside it declaring the delimiter and the decimal mark. What comes back is a
-:class:`Catalogue`, a read-only mapping keyed like the packaged ones that
+every hedge the packaged tables use; or the CSV file a spreadsheet saves, each
+row starting on a line of its own, in a closed grammar of cells (``~0.85``,
+``<=30``, ``0.30..0.50``, ``0.85±0.05``, ``[AFr5]``), with that document's
+header beside it declaring the delimiter and the decimal mark. What comes back
+is a :class:`Catalogue`, a read-only mapping keyed like the packaged ones that
 joins a ``PUBLISHED_*`` catalogue with ``|`` and never lets one row replace
 another. The problems in a file are raised at once in one
 :class:`CatalogueError`, each :class:`CatalogueIssue` with its place, a JSON

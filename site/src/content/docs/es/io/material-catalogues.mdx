@@ -570,14 +570,14 @@ celda se escriben en una sola unidad.
 Una hoja de características se teclea más a menudo en una hoja de cálculo que
 en un archivo JSON, y una hoja de cálculo guarda CSV. Un catálogo puede ser
 uno: las filas van en el archivo CSV, cada una empezando en una línea propia
-bajo una primera línea que nombra las columnas, y el documento sin sus filas va en una cabecera JSON al
-lado, con el nombre del archivo CSV seguido de `.phonometry.json`. La cabecera
-declara cómo escribe el archivo sus celdas, `"csv": {"delimiter": ";",
-"decimal": ","}` para una hoja de cálculo configurada con coma decimal, y nada
-del dialecto se adivina a partir del archivo. `write_catalogue` escribe el par
-cuando el nombre termina en `.csv`, así que una tabla publicada vuelve a ser la
-plantilla más rápida, aquí los coeficientes de absorción de la Tabla 6.1 de
-Arau-Puchades (1999):
+bajo una primera línea que nombra las columnas, y el documento sin sus filas
+va en una cabecera JSON al lado, con el nombre del archivo CSV seguido de
+`.phonometry.json`. La cabecera declara cómo escribe el archivo sus celdas,
+`"csv": {"delimiter": ";", "decimal": ","}` para una hoja de cálculo
+configurada con coma decimal, y nada del dialecto se adivina a partir del
+archivo. `write_catalogue` escribe el par cuando el nombre termina en `.csv`,
+así que una tabla publicada vuelve a ser la plantilla más rápida, aquí los
+coeficientes de absorción de la Tabla 6.1 de Arau-Puchades (1999):
 
 ```python
 arau = {

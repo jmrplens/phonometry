@@ -508,13 +508,13 @@ cell is written in one unit.
 A data sheet is more often typed into a spreadsheet than into a JSON file,
 and a spreadsheet saves CSV. A catalogue can be one: the rows go in the CSV
 file, each starting on a line of its own under a first line that names the
-columns, and the
-document without its rows goes in a JSON header beside it, named as the CSV
-file with `.phonometry.json` after it. The header declares how the file
-writes its cells, `"csv": {"delimiter": ";", "decimal": ","}` for a
-spreadsheet set up for a decimal comma, and nothing about the dialect is
-guessed from the file. `write_catalogue` writes the pair when the name ends
-in `.csv`, so a published table is again the quickest template, here the
+columns, and the document without its rows goes in a JSON header beside it,
+named as the CSV file with `.phonometry.json` after it. The header declares
+how the file writes its cells, `"csv": {"delimiter": ";", "decimal": ","}`
+for a spreadsheet set up for a decimal comma, and nothing about the dialect
+is guessed from the file. `write_catalogue` writes the pair when the name
+ends in `.csv`, so a published table is again the quickest template, here
+the
 absorption coefficients of Tabla 6.1 of Arau-Puchades (1999):
 
 ```python

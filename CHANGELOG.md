@@ -49,14 +49,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   anything: only the standard library's `json` and `csv` read it, and the
   class it names is compared with yours and never imported.
   `io.write_catalogue` writes rows as a file that reads back into the same
-  rows, a published table among them as a template
-  to start from; every table of every published catalogue is written, read
-  back and compared field for field in the test suite. A file already at the
-  name is kept unless you pass `overwrite=True`, and so is one another
-  program makes there while the file is written; on a file system without
-  hard links, such as FAT, the name holds an empty file for the instant
-  before the new one is renamed over it. The `io` section of the
-  documentation is now "Files", since it holds more than audio.
+  rows, a published table among them as a template to start from; every table
+  of every published catalogue is written, read back and compared field for
+  field in the test suite. A file already at the name is kept unless you pass
+  `overwrite=True`, and so is one another program makes there while the file
+  is written; on a file system without hard links, such as FAT, the name
+  holds an empty file for the instant before the new one is renamed over it.
+  The `io` section of the documentation is now "Files", since it holds more
+  than audio.
 
 - **Search a catalogue of your own with the same lookups, and draw a panel's
   plateau from its row.** Every `*_named` lookup of a published catalogue,

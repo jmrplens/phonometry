@@ -1355,9 +1355,16 @@ def _not_utf8_name(tmp_path: pathlib.Path) -> pathlib.Path:
 
 
 @pytest.mark.skipif(sys.platform == "win32", reason="POSIX names are bytes")
-@pytest.mark.parametrize("text", ["{", "document"], ids=["not-json", "issues"])
+@pytest.mark.parametrize(
+    ("text", "head"),
+    [
+        ("{", "\\udcff-panel.json, line 1, column 2: this is not JSON"),
+        ("document", "\\udcff-panel.json: 1 problem, and no row was read\n"),
+    ],
+    ids=["not-json", "issues"],
+)
 def test_a_file_name_that_is_not_utf8_is_named_by_its_escape(
-    tmp_path: pathlib.Path, text: str
+    tmp_path: pathlib.Path, text: str, head: str
 ) -> None:
     """The byte is decoded as a lone surrogate, which no refusal can print."""
     path = _not_utf8_name(tmp_path)
@@ -1367,7 +1374,7 @@ def test_a_file_name_that_is_not_utf8_is_named_by_its_escape(
     with pytest.raises(io.CatalogueError) as caught:
         io.read_catalogue(path, row_type=PorousMaterial)
     refusal = str(caught.value)
-    assert refusal.startswith(("\\udcff-panel.json: ", "\\udcff-panel.json, line"))
+    assert refusal.startswith(head)
     refusal.encode("utf-8")
     assert {issue.file for issue in caught.value.issues} == {"\\udcff-panel.json"}
     for issue in caught.value.issues:

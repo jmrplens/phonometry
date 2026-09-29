@@ -120,10 +120,11 @@ def test_a_field_takes_its_own_standard_over_the_documents() -> None:
 
 
 def test_a_provenance_is_frozen_and_not_hashable() -> None:
+    provenance = dataclasses.replace(_DATASHEET)
     with pytest.raises(dataclasses.FrozenInstanceError, match="page"):
-        _DATASHEET.page = "3"  # type: ignore[misc]
+        provenance.page = "3"  # type: ignore[misc]
     with pytest.raises(TypeError, match="Provenance"):
-        hash(_DATASHEET)
+        hash(provenance)
 
 
 @pytest.mark.parametrize(

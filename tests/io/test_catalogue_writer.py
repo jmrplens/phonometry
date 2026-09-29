@@ -448,8 +448,9 @@ def test_a_refusal_to_overwrite_prints_a_name_that_is_not_utf8(
         path.write_text("keep", encoding="utf-8")
     except (OSError, UnicodeEncodeError):
         pytest.skip("this file system takes only names that are text")
+    rows = _mine()
     with pytest.raises(FileExistsError) as caught:
-        io.write_catalogue(_mine(), path)
+        io.write_catalogue(rows, path)
     assert "\\udcff-mine.json exists" in str(caught.value)
     str(caught.value).encode("utf-8")
 

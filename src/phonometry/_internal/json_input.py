@@ -42,11 +42,9 @@ MAX_NESTING = 64
 #: What the nesting of a JSON text is read from: a string, taken whole with its
 #: escapes and every bracket it quotes (one left open runs to the end of the
 #: text, as the decoder reads it), or a run of brackets that open, or of
-#: brackets that close. Every branch starts with its own character, so the
+#: brackets that close. Every branch starts with its own characters, so the
 #: scan passes over numbers, names and blanks without stopping.
-_BRACKETS = re.compile(
-    r'"[^"\\]*(?:\\.[^"\\]*)*"?|\[[\[{]*|\{[\[{]*|\][\]}]*|\}[\]}]*', re.DOTALL
-)
+_BRACKETS = re.compile(r'"[^"\\]*(?:\\.[^"\\]*)*"?|[\[{]+|[\]}]+', re.DOTALL)
 
 #: Half of a pair of UTF-16 code units, alone. A JSON escape such as
 #: ``\ud800`` decodes to one, and a text that holds it has no UTF-8 bytes, so

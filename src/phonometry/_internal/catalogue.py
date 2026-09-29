@@ -1391,7 +1391,7 @@ _FIGURE_LENGTH = 640
 _FIGURE_EXPONENT = 400
 #: A figure as :func:`convert_figure` reads it: a sign, the digits before the
 #: point, the digits after it and the exponent, each of them optional.
-_FIGURE_PARTS = re.compile(r"[+-]?([0-9]*)(?:\.([0-9]*))?(?:[eE]([+-]?[0-9]+))?")
+_FIGURE_PARTS = re.compile(r"[+-]?(\d*)(?:\.(\d*))?(?:[eE]([+-]?\d+))?", re.ASCII)
 
 
 def _figure_exponent(figure: str) -> int | None:
@@ -2849,18 +2849,9 @@ class CatalogueRow:
         # A value converted from the page's figure is quoted in full after
         # it, where six digits would round what the conversion kept.
         digits = ".15g" if field_name in self.converted else "g"
-        if field_name in self.ranges:
-            low, high = self.ranges[field_name]
-            if high is not None and field_name in self.bounded_above:
-                shown = self._as_printed(field_name, format(high, digits))
-                return f"{subject} prints an upper bound of {shown} and no value"
-            if low is not None and field_name in self.bounded_below:
-                shown = self._as_printed(field_name, format(low, digits))
-                return f"{subject} prints a lower bound of {shown} and no value"
-            if low is not None and high is not None:
-                spelled = f"{format(low, digits)} to {format(high, digits)}"
-                shown = self._as_printed(field_name, spelled)
-                return f"{subject} prints {shown} and no value"
+        ranged = self._missing_range(field_name, subject, digits)
+        if ranged:
+            return ranged
         if field_name in self.reported:
             listed = ", ".join(
                 _spell(entry, digits) for entry in self.reported[field_name]
@@ -2871,6 +2862,26 @@ class CatalogueRow:
             f"{subject} does not give it, and it does not follow from the cells "
             "that it does"
         )
+
+    def _missing_range(self, field_name: str, subject: str, digits: str) -> str:
+        """What the page prints in place of a value: a bound or a range, or ``""``.
+
+        :param digits: The format of each end, as :meth:`why_missing` quotes it.
+        """
+        if field_name not in self.ranges:
+            return ""
+        low, high = self.ranges[field_name]
+        if high is not None and field_name in self.bounded_above:
+            shown = self._as_printed(field_name, format(high, digits))
+            return f"{subject} prints an upper bound of {shown} and no value"
+        if low is not None and field_name in self.bounded_below:
+            shown = self._as_printed(field_name, format(low, digits))
+            return f"{subject} prints a lower bound of {shown} and no value"
+        if low is not None and high is not None:
+            spelled = f"{format(low, digits)} to {format(high, digits)}"
+            shown = self._as_printed(field_name, spelled)
+            return f"{subject} prints {shown} and no value"
+        return ""
 
     def _as_printed(self, field_name: str, held: str) -> str:
         """*held*, or the page's figure and unit with *held* after it.

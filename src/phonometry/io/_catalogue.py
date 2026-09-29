@@ -161,14 +161,14 @@ _NAME = re.compile(r"[a-z0-9][a-z0-9._-]{0,63}")
 #: The names the packaged tables use: a four-digit year and a word after it.
 #: Reserved wide, so that no packaged table added later can take a name a
 #: caller's file already uses, and checked without reading any packaged table.
-_RESERVED = re.compile(r"[a-z0-9][a-z0-9._-]*-[0-9]{4}-[a-z]")
+_RESERVED = re.compile(r"[a-z0-9][a-z0-9._-]*-\d{4}-[a-z]", re.ASCII)
 #: A row's key: no ``/``, which separates the catalogue from the row, and no
 #: space. A leading underscore is allowed, as a packaged key has one.
-_KEY = re.compile(r"[A-Za-z0-9_][A-Za-z0-9._+-]{0,127}")
+_KEY = re.compile(r"\w[\w.+-]{0,127}", re.ASCII)
 #: A column of the caller's own.
-_EXTRA = re.compile(r"x-[A-Za-z0-9_][A-Za-z0-9._+-]{0,125}")
+_EXTRA = re.compile(r"x-\w[\w.+-]{0,125}", re.ASCII)
 #: A number as JSON writes one.
-_JSON_NUMBER = re.compile(r"-?(0|[1-9][0-9]*)(\.[0-9]+)?([eE][+-]?[0-9]+)?")
+_JSON_NUMBER = re.compile(r"-?(0|[1-9]\d*)(\.\d+)?([eE][+-]?\d+)?", re.ASCII)
 #: What no text of a catalogue may hold: every control character but the tab
 #: and the line feed (those of C0, DEL, and those of C1, the next line and the
 #: escape that opens a terminal's commands among them), and the marks that
@@ -496,7 +496,7 @@ def _what_it_is(value: object) -> str:
     if isinstance(value, str):
         hint = (
             "; JSON numbers use a decimal point"
-            if re.fullmatch(r"\s*[-+]?[0-9]+,[0-9]+\s*", value)
+            if re.fullmatch(r"[-+]?\d+,\d+", value.strip(), flags=re.ASCII)
             else ""
         )
         return f"the text {_quote(value)}{hint}"
@@ -536,7 +536,8 @@ def _reserved_message(name: str) -> str:
         (
             index
             for index, part in enumerate(parts[:-1])
-            if re.fullmatch(r"[0-9]{4}", part) and parts[index + 1][:1].isalpha()
+            if re.fullmatch(r"\d{4}", part, flags=re.ASCII)
+            and parts[index + 1][:1].isalpha()
         ),
         None,
     )
@@ -764,25 +765,29 @@ class _Reader:
                 where, f"{node.token} is not JSON and not a number any page prints"
             )
         elif isinstance(node, Mapping):
-            if isinstance(node, _Repeated):
-                named = ", ".join(repr(name) for name in node.repeated)
-                self.error(
-                    where or "/", f"names {named} twice, and JSON keeps only the last"
-                )
-            for key, value in node.items():
-                at = f"{where}{_pointer(key)}"
-                if not isinstance(key, str):
-                    self.error(
-                        where or "/", f"has the key {_quote(key)}, which is not text"
-                    )
-                    continue
-                self.unsafe(key, at)
-                self.hygiene(value, at, depth + 1)
+            self.members(node, where, depth)
         elif isinstance(node, (list, tuple)):
             for index, value in enumerate(node):
                 self.hygiene(value, f"{where}{_pointer(index)}", depth + 1)
         elif isinstance(node, str):
             self.unsafe(node, where)
+
+    def members(self, node: Mapping[object, object], where: str, depth: int) -> None:
+        """The hygiene of an object: each name once and as text, and each value."""
+        if isinstance(node, _Repeated):
+            named = ", ".join(repr(name) for name in node.repeated)
+            self.error(
+                where or "/", f"names {named} twice, and JSON keeps only the last"
+            )
+        for key, value in node.items():
+            at = f"{where}{_pointer(key)}"
+            if not isinstance(key, str):
+                self.error(
+                    where or "/", f"has the key {_quote(key)}, which is not text"
+                )
+                continue
+            self.unsafe(key, at)
+            self.hygiene(value, at, depth + 1)
 
     def unsafe(self, text: str, where: str) -> None:
         found = _UNSAFE.search(text)
@@ -850,43 +855,69 @@ class _Reader:
             return False
         if "schema_version" not in document:
             return False
+        at = "/schema_version"
         version = document["schema_version"]
         whole = _plain(version) if _is_number(version) else None
         if not isinstance(whole, int):
-            self.error("/schema_version", f"is {_quote(version)}, not a whole number")
+            self.error(at, f"is {_quote(version)}, not a whole number")
             return False
         if whole > CATALOGUE_SCHEMA_VERSION:
             self.error(
-                "/schema_version",
+                at,
                 f"{whole} is newer than the version {CATALOGUE_SCHEMA_VERSION} "
                 "this phonometry reads; upgrade phonometry",
             )
             return False
         if whole < 1:
-            self.error("/schema_version", f"is {whole}, and the first version is 1")
+            self.error(at, f"is {whole}, and the first version is 1")
             return False
         return True
 
     def header(self, document: Mapping[str, Any], header: _Header) -> None:
-        if "catalogue" in document:
-            problem = _name_problem(document["catalogue"])
-            if problem:
-                self.error("/catalogue", problem)
-            else:
-                header.name = document["catalogue"]
+        """Every key of the document but its schema, each checked and kept."""
+        self.catalogue_name(document, header)
+        self.declared_type(document)
+        self.about(document, header)
+        self.basis(document, header)
+        header.conventions = self.conventions(document.get("conventions", []))
+        self.unread(document)
+        if "provenance" in document:
+            header.provenance = self.provenance(document["provenance"])
+        if "rows" in document:
+            header.rows = self.rows(document["rows"])
+
+    def catalogue_name(self, document: Mapping[str, Any], header: _Header) -> None:
+        """The catalogue's name, the first half of every key it holds."""
+        if "catalogue" not in document:
+            return
+        problem = _name_problem(document["catalogue"])
+        if problem:
+            self.error("/catalogue", problem)
+        else:
+            header.name = document["catalogue"]
+
+    def declared_type(self, document: Mapping[str, Any]) -> None:
+        """The row class the document names, only compared with the one asked for."""
         if "row_type" in document and document["row_type"] != self.row_type.__name__:
             self.error(
                 "/row_type",
                 f"{_quote(document['row_type'])} in the file, but row_type="
                 f"{self.row_type.__name__} was asked for",
             )
-        if "about" in document:
-            about = self.text(document["about"], "/about", prose=True)
-            if about is not None and not about.strip():
-                self.error(
-                    "/about", "is empty; say what the document is and how it was read"
-                )
-            header.about = about or ""
+
+    def about(self, document: Mapping[str, Any], header: _Header) -> None:
+        """What the document is and how it was read, which is never blank."""
+        if "about" not in document:
+            return
+        about = self.text(document["about"], "/about", prose=True)
+        if about is not None and not about.strip():
+            self.error(
+                "/about", "is empty; say what the document is and how it was read"
+            )
+        header.about = about or ""
+
+    def basis(self, document: Mapping[str, Any], header: _Header) -> None:
+        """The basis of every row that does not give its own."""
         basis = document.get("basis")
         if basis is not None and basis not in CATALOGUE_BASES:
             self.error(
@@ -895,14 +926,12 @@ class _Reader:
             )
         elif basis is not None:
             header.basis = basis
-        header.conventions = self.conventions(document.get("conventions", []))
+
+    def unread(self, document: Mapping[str, Any]) -> None:
+        """The keys the reader never reads, held to what they are."""
         version = document.get("phonometry_version")
         if version is not None and not isinstance(version, str):
             self.error("/phonometry_version", f"is {_quote(version)}, not text")
-        if "provenance" in document:
-            header.provenance = self.provenance(document["provenance"])
-        if "rows" in document:
-            header.rows = self.rows(document["rows"])
 
     def conventions(self, held: object) -> tuple[str, ...]:
         if not isinstance(held, (list, tuple)):
@@ -921,29 +950,8 @@ class _Reader:
         values: dict[str, Any] = {}
         failed = False
         for key, value in held.items():
-            if not isinstance(key, str):
-                # The pass over the whole text has said so, with where.
-                failed = True
-                continue
-            where = _pointer("provenance", key)
-            if key not in _PROVENANCE_FIELDS:
-                self.unknown_key(where, key, _PROVENANCE_FIELDS, "a provenance")
-                failed = True
-            elif key == "field_test_standards":
-                values[key] = self.test_standards(value, where)
-            elif key == "version" and value is None:
-                values[key] = None
-            else:
-                kept = self.text(value, where)
-                failed = failed or kept is None
-                values[key] = kept
-        for key in _PROVENANCE_REQUIRED:
-            if key not in held:
-                extra = (
-                    "; write null for one that prints none" if key == "version" else ""
-                )
-                self.error("/provenance", f"needs {key!r}{extra}")
-                failed = True
+            failed = not self.provenance_member(key, value, values) or failed
+        failed = self.missing_members(held) or failed
         if failed:
             return None
         try:
@@ -952,6 +960,34 @@ class _Reader:
             issue = error.issues[0]
             self.error(_pointer("provenance", issue.field), issue.message)
         return None
+
+    def provenance_member(
+        self, key: object, value: object, values: dict[str, Any]
+    ) -> bool:
+        """One member of the provenance, kept in *values*; whether it reads."""
+        if not isinstance(key, str):
+            # The pass over the whole text has said so, with where.
+            return False
+        where = _pointer("provenance", key)
+        if key not in _PROVENANCE_FIELDS:
+            self.unknown_key(where, key, _PROVENANCE_FIELDS, "a provenance")
+            return False
+        if key == "field_test_standards":
+            values[key] = self.test_standards(value, where)
+        elif key == "version" and value is None:
+            values[key] = None
+        else:
+            values[key] = self.text(value, where)
+            return values[key] is not None
+        return True
+
+    def missing_members(self, held: Mapping[Any, object]) -> bool:
+        """Each member the provenance needs and lacks, named; whether one is."""
+        missing = [key for key in _PROVENANCE_REQUIRED if key not in held]
+        for key in missing:
+            extra = "; write null for one that prints none" if key == "version" else ""
+            self.error("/provenance", f"needs {key!r}{extra}")
+        return bool(missing)
 
     def test_standards(self, held: object, where: str) -> dict[str, str]:
         if not isinstance(held, Mapping):
@@ -1086,29 +1122,16 @@ class _Reader:
         kind = self.names.kinds[name]
         if kind in ("number", "whole") and value is None:
             return None
-        if kind == "number":
-            if _is_number(value):
-                return _plain(value)
+        if kind == "text":
+            text = self.text(value, where, prose=name in _PROSE, row_key=read.key)
+            return _INVALID if text is None else text
+        if kind == "number" and not _is_number(value):
             self.expected_number(read, value, where, name)
             return _INVALID
-        if kind == "whole":
-            whole = _plain(value) if _is_number(value) else None
-            if isinstance(whole, int):
-                return whole
-            what = f"expected a whole number, got {_what_it_is(value)}"
-        elif kind == "flag":
-            if isinstance(value, bool):
-                return value
-            what = f"expected true or false, got {_what_it_is(value)}"
-        elif kind == "text":
-            kept = self.text(value, where, prose=name in _PROSE, row_key=read.key)
-            return _INVALID if kept is None else kept
-        elif kind == "provenance":
-            what = "a file writes a provenance only as the row's own provenance"
-        else:
-            return _plain_tree(value)
-        self.error(where, what, row_key=read.key, field_name=name)
-        return _INVALID
+        kept, refusal = _kept_value(kind, value)
+        if refusal:
+            self.error(where, refusal, row_key=read.key, field_name=name)
+        return kept
 
     def own_column(self, read: _Row, name: str, value: object, where: str) -> None:
         if not _EXTRA.fullmatch(name):
@@ -1294,6 +1317,29 @@ class _Reader:
                 return _INVALID
             found.append(checked)
         return found
+
+
+def _kept_value(kind: str, value: object) -> tuple[object, str]:
+    """What a cell of *kind* keeps of *value*, or why it keeps nothing.
+
+    A text is read by the pass, and a number is known to be one.
+
+    :return: The value kept and ``""``, or ``_INVALID`` and the refusal.
+    """
+    if kind == "number":
+        return _plain(value), ""
+    if kind == "whole":
+        whole = _plain(value) if _is_number(value) else None
+        if isinstance(whole, int):
+            return whole, ""
+        return _INVALID, f"expected a whole number, got {_what_it_is(value)}"
+    if kind == "flag":
+        if isinstance(value, bool):
+            return value, ""
+        return _INVALID, f"expected true or false, got {_what_it_is(value)}"
+    if kind == "provenance":
+        return _INVALID, "a file writes a provenance only as the row's own provenance"
+    return _plain_tree(value), ""
 
 
 def _plain_tree(value: object, depth: int = 0) -> object:
@@ -1874,7 +1920,8 @@ class _Writer:
                 for provenance in held
             )
         }
-        return dataclasses.replace(first, **common)
+        kept = {name: getattr(first, name) for name in _PROVENANCE_FIELDS}
+        return Provenance(**(kept | common))
 
     # -- a row ---------------------------------------------------------------
     def row(
@@ -2017,44 +2064,60 @@ def _alias_pieces(
     value = getattr(row, name)
     ranged, listed = name in row.ranges, name in row.reported
     if value is not None:
-        raw = None if ranged or listed else _exact(figure, alias, value)
-        if raw is None:
+        if ranged or listed:
             return None
-        pieces: dict[str, object] = {"value": raw}
-        spread = row.uncertainty.get(name)
-        if spread is not None:
-            text = _spread_figure(spread, alias)
-            if text is None:
-                return None
-            pieces["uncertainty"] = _Raw(text)
-        return pieces
+        return _value_pieces(row, name, figure, alias, value)
     if name in row.uncertainty or ranged == listed:
         return None
     if ranged:
         ends = _range_pieces(row, name, figure, alias)
         return None if ends is None else {"ranges": ends}
-    entries = row.reported[name]
+    readings = _reported_pieces(row.reported[name], figure, alias)
+    return None if readings is None else {"reported": readings}
+
+
+def _value_pieces(
+    row: CatalogueRow, name: str, figure: str, alias: UnitAlias, value: object
+) -> dict[str, object] | None:
+    """A converted value and its plus-or-minus as the page's figures, or ``None``."""
+    raw = _exact(figure, alias, value)
+    if raw is None:
+        return None
+    pieces: dict[str, object] = {"value": raw}
+    spread = row.uncertainty.get(name)
+    if spread is not None:
+        text = _spread_figure(spread, alias)
+        if text is None:
+            return None
+        pieces["uncertainty"] = _Raw(text)
+    return pieces
+
+
+def _reported_pieces(
+    entries: Sequence[object], figure: str, alias: UnitAlias
+) -> list[object] | None:
+    """The readings of a converted list as the page's figures, or ``None``."""
     spoken = figure.split(", ")
     if len(spoken) != len(entries):
         return None
     readings: list[object] = []
     for text, entry in zip(spoken, entries, strict=True):
-        if isinstance(entry, tuple):
-            parts = text.split(" to ")
-            if len(parts) != _PAIR:
-                return None
-            pair = [
-                _exact(part, alias, end) for part, end in zip(parts, entry, strict=True)
-            ]
-            if None in pair:
-                return None
-            readings.append(pair)
-        else:
-            raw = _exact(text, alias, entry)
-            if raw is None:
-                return None
-            readings.append(raw)
-    return {"reported": readings}
+        reading = _reading_piece(text, entry, alias)
+        if reading is None:
+            return None
+        readings.append(reading)
+    return readings
+
+
+def _reading_piece(text: str, entry: object, alias: UnitAlias) -> object | None:
+    """One reading of a converted list, or its interval, as the page's figure."""
+    if not isinstance(entry, tuple):
+        return _exact(text, alias, entry)
+    parts = text.split(" to ")
+    if len(parts) != _PAIR:
+        return None
+    pair = [_exact(part, alias, end) for part, end in zip(parts, entry, strict=True)]
+    return None if None in pair else pair
 
 
 def _range_pieces(
@@ -2145,6 +2208,69 @@ def _write_atomic(target: Path, text: str, *, overwrite: bool) -> None:
     write_beside(target, text.encode("utf-8"))
 
 
+@dataclass(frozen=True)
+class _Heading:
+    """What a written document says before its rows, and the rows' own columns."""
+
+    name: str
+    about: str | None
+    provenance: Provenance
+    conventions: tuple[str, ...] = ()
+    extras: Mapping[str, Mapping[str, str]] = field(default_factory=dict)
+
+
+def _heading(
+    writer: _Writer,
+    rows: Mapping[str, object],
+    catalogue: str | None,
+    about: str | None,
+    provenance: Provenance | None,
+) -> _Heading:
+    """What the rows bring of their document, with what the caller passes over it."""
+    if isinstance(rows, Catalogue):
+        return _Heading(
+            name=catalogue or rows.name,
+            about=about if about is not None else rows.about,
+            provenance=provenance or rows.provenance,
+            conventions=rows.conventions,
+            extras=rows.extras,
+        )
+    if all(row.provenance is None for row in writer.rows.values()):
+        return _packaged_heading(writer, catalogue, about, provenance)
+    document_provenance = provenance or writer.document_provenance()
+    tables = writer.shared("table")
+    return _Heading(
+        name=catalogue or (tables[0] if len(tables) == 1 else ""),
+        about=about,
+        provenance=document_provenance,
+    )
+
+
+def _packaged_heading(
+    writer: _Writer,
+    catalogue: str | None,
+    about: str | None,
+    provenance: Provenance | None,
+) -> _Heading:
+    """The heading of a table of the library's own, under a name of yours."""
+    default, table = writer.packaged()
+    if catalogue is None:
+        msg = (
+            "catalogue= is required to write a table of the library's own: "
+            "the table's own name has the packaged form, which a file of "
+            "yours cannot take"
+        )
+        raise TypeError(msg)
+    if table is None:
+        return _Heading(name=catalogue, about=about, provenance=provenance or default)
+    return _Heading(
+        name=catalogue,
+        about=table["about"] if about is None else about,
+        provenance=provenance or default,
+        conventions=tuple(table.get("conventions", ())),
+    )
+
+
 def _document(
     writer: _Writer,
     rows: Mapping[str, object],
@@ -2155,57 +2281,31 @@ def _document(
     """The document :func:`write_catalogue` writes."""
     from .._version import __version__
 
-    conventions: tuple[str, ...] = ()
-    extras: Mapping[str, Mapping[str, str]] = {}
-    told = about
-    if isinstance(rows, Catalogue):
-        name = catalogue or rows.name
-        told = about if about is not None else rows.about
-        document_provenance = provenance or rows.provenance
-        conventions = rows.conventions
-        extras = rows.extras
-    elif all(row.provenance is None for row in writer.rows.values()):
-        default, table = writer.packaged()
-        if catalogue is None:
-            msg = (
-                "catalogue= is required to write a table of the library's own: "
-                "the table's own name has the packaged form, which a file of "
-                "yours cannot take"
-            )
-            raise TypeError(msg)
-        name = catalogue
-        document_provenance = provenance or default
-        if told is None and table is not None:
-            told = table["about"]
-        conventions = tuple(table.get("conventions", ())) if table is not None else ()
-    else:
-        document_provenance = provenance or writer.document_provenance()
-        tables = writer.shared("table")
-        name = catalogue or (tables[0] if len(tables) == 1 else "")
-    if not name:
+    heading = _heading(writer, rows, catalogue, about, provenance)
+    if not heading.name:
         msg = "catalogue= is required: the rows do not share a catalogue's name"
         raise TypeError(msg)
-    if told is None:
+    if heading.about is None:
         msg = "about= is required: the rows bring no text saying what the document is"
         raise TypeError(msg)
-    problem = _name_problem(name)
+    problem = _name_problem(heading.name)
     if problem:
-        msg = f"catalogue={name!r}: {problem}"
+        msg = f"catalogue={heading.name!r}: {problem}"
         raise CatalogueError(msg)
     writer.check_keys()
     document: dict[str, Any] = {
         "schema": CATALOGUE_SCHEMA,
         "schema_version": CATALOGUE_SCHEMA_VERSION,
-        "catalogue": name,
+        "catalogue": heading.name,
         "row_type": writer.row_type.__name__,
-        "about": told,
-        "provenance": _provenance_object(document_provenance),
+        "about": heading.about,
+        "provenance": _provenance_object(heading.provenance),
     }
-    if conventions:
-        document["conventions"] = list(conventions)
+    if heading.conventions:
+        document["conventions"] = list(heading.conventions)
     document["phonometry_version"] = __version__
     document["rows"] = [
-        writer.row(key, row, document_provenance, extras.get(key, {}))
+        writer.row(key, row, heading.provenance, heading.extras.get(key, {}))
         for key, row in writer.rows.items()
     ]
     return document

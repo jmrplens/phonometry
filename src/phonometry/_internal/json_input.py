@@ -51,6 +51,13 @@ _BRACKETS = re.compile(r'"[^"\\]*(?:\\.[^"\\]*)*"?|[\[{]+|[\]}]+', re.DOTALL)
 #: whatever keeps it can never be written out again.
 LONE_SURROGATE = re.compile(r"[\ud800-\udfff]")
 
+#: What a message never prints as it is: every control character but the tab
+#: and the line feed (those of C0, DEL, and those of C1, the next line and the
+#: escape that opens a terminal's commands among them), and the marks that
+#: reorder what a reader sees (a "Trojan source" text shows one thing and
+#: holds another).
+UNSAFE = re.compile(r"[\x00-\x08\x0b-\x1f\x7f-\x9f\u202a-\u202e\u2066-\u2069]")
+
 #: The flag that keeps an open from waiting: opening a pipe for reading waits
 #: until a writer comes, which may be never. Windows has no such flag.
 _NO_WAIT = getattr(os, "O_NONBLOCK", 0)
@@ -97,6 +104,22 @@ def _not_regular(mode: int) -> str | None:
     return "a special file"
 
 
+def escaped(text: str) -> str:
+    """*text*, with each :data:`UNSAFE` character and lone surrogate as its escape.
+
+    What a message prints of a name it did not choose: a file whose name is
+    not UTF-8 is named by Python with a lone surrogate for each byte it cannot
+    decode, which no UTF-8 stream can write, and a control character in a name
+    would move a terminal's cursor.
+    """
+    if text.isprintable():
+        # Every character the two patterns find is one Python does not print.
+        return text
+    for unsafe in (UNSAFE, LONE_SURROGATE):
+        text = unsafe.sub(lambda found: ascii(found.group())[1:-1], text)
+    return text
+
+
 def not_regular_at(path: Path) -> str | None:
     """What is at *path* when it is not a regular file, or ``None``.
 
@@ -119,8 +142,11 @@ def write_beside(target: Path, data: bytes) -> None:
 
     *target* itself is never opened. What is at the name is replaced by the
     rename, so a caller refuses first what it will not replace
-    (:func:`not_regular_at` says what a name holds). The new file is flushed
-    to the disk before the rename, and removed when anything fails before it.
+    (:func:`not_regular_at` says what a name holds). The new file takes the
+    permission bits of the file it replaces, and a hard link to the old file
+    keeps the old bytes, since the name is given a new file rather than new
+    bytes. The new file is flushed to the disk before the rename, and removed
+    when anything fails before it.
 
     :param target: Where the file goes.
     :param data: Its bytes.
@@ -131,11 +157,26 @@ def write_beside(target: Path, data: bytes) -> None:
         with temporary.open("xb") as handle:
             handle.write(data)
             handle.flush()
+            _keep_mode(target, handle.fileno())
             os.fsync(handle.fileno())
         temporary.replace(target)
     except BaseException:
         temporary.unlink(missing_ok=True)
         raise
+
+
+def _keep_mode(target: Path, descriptor: int) -> None:
+    """Give the open file *descriptor* the permission bits of *target*, if any.
+
+    A file a caller keeps private (``0600``) stays private when it is written
+    again; with nothing at *target*, the new file keeps the mode it was made
+    with.
+    """
+    try:
+        mode = stat.S_IMODE(target.stat().st_mode)
+    except FileNotFoundError:
+        return
+    os.fchmod(descriptor, mode)
 
 
 def _open_without_waiting(name: str, flags: int) -> int:

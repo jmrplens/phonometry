@@ -652,14 +652,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   too deep, and a number past every float, longer than Python reads or not
   finite, a version that is not text, and a text with a lone surrogate, are
   refused by name: each is the `ValueError` the function documents, naming
-  the file once. `io.write_sidecar` refuses the same numbers and texts before
-  it touches the file, and writes the sidecar to a new file beside it,
-  renamed into place, so that the name is never opened for writing and a
-  reader finds the old sidecar or the new one whole; a pipe, a device, a
-  socket or a directory at the name is refused, and `io.write` and
-  `io.convert` ask before they write a sample, so that no audio is left
-  without the sidecar it was written with. `io.convert` reads the source's
-  sidecar once, checks it and carries those bytes.
+  the file once, and by its escapes when the audio's name is not UTF-8.
+  `io.CalibrationSidecar` itself refuses a version, a calibrator model or a
+  channel label that is not text, and `io.write_sidecar` refuses the same
+  numbers and texts before it touches the file. It writes the sidecar to a
+  new file beside it, renamed into place, so that the name is never opened
+  for writing and a reader finds the old sidecar or the new one whole: the
+  file is replaced, not written into, so the new one keeps the permission
+  bits of the old and a hard link to the old file keeps the old calibration.
+  A pipe, a device, a socket or a directory at the name is refused, and
+  `io.write` and `io.convert` ask before they write a sample, so that no
+  audio is left without the sidecar it was written with. `io.convert` reads
+  the source's sidecar once, checks it and carries those bytes.
 
 - **A derived value names the cells it rests on in words.** When the cells a
   catalogue value is worked out from have mixed bases, `derived` says the basis

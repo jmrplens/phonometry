@@ -108,8 +108,10 @@ from .._internal.catalogue import (
 )
 from .._internal.json_input import (
     LONE_SURROGATE,
+    UNSAFE,
     NotRegularError,
     TooLargeError,
+    escaped,
     nesting_past,
     read_at_most,
     text_location,
@@ -174,7 +176,7 @@ _JSON_NUMBER = re.compile(r"-?(0|[1-9]\d*)(\.\d+)?([eE][+-]?\d+)?", re.ASCII)
 #: escape that opens a terminal's commands among them), and the marks that
 #: reorder what a reader sees (a "Trojan source" text shows one thing and
 #: holds another).
-_UNSAFE = re.compile(r"[\x00-\x08\x0b-\x1f\x7f-\x9f\u202a-\u202e\u2066-\u2069]")
+_UNSAFE = UNSAFE
 
 _TOP_REQUIRED = (
     "schema",
@@ -438,14 +440,8 @@ def _pointer(*parts: object) -> str:
     )
 
 
-def _escaped(text: str) -> str:
-    """*text*, with each character no catalogue text may hold as its escape."""
-    if text.isprintable():
-        # Every character the two patterns find is one Python does not print.
-        return text
-    for unsafe in (_UNSAFE, LONE_SURROGATE):
-        text = unsafe.sub(lambda found: ascii(found.group())[1:-1], text)
-    return text
+#: *text*, with each character no catalogue text may hold as its escape.
+_escaped = escaped
 
 
 def _is_number(value: object) -> bool:
@@ -2350,7 +2346,8 @@ def write_catalogue(
     the same every day.
 
     The file is written beside its final name and renamed into place, so a
-    reader never finds half of it.
+    reader never finds half of it. A file it replaces keeps its permission
+    bits, and a hard link to the old file keeps the old document.
 
     :param rows: A :class:`Catalogue`, or a mapping of rows of one class.
     :param path: Where to write, a name ending in ``.json`` (in any case).

@@ -549,8 +549,9 @@ only mandatory field; the rest document how it was obtained
 and what the channels are (`channel_labels`). `phonometry_version`
 records the writing library version. Every number is finite, as JSON
 writes no other, and the model, every label and the version are text
-UTF-8 can write, so that the record read from one sidecar can be written
-to another.
+UTF-8 can write (the model and the version may be `None`), so that the
+record read from one sidecar can be written to another. A record that
+breaks either rule is refused as a `ValueError` when it is built.
 
 ## Catalogue
 
@@ -1739,7 +1740,8 @@ library's on that day. Pass *provenance* for a file that has to come out
 the same every day.
 
 The file is written beside its final name and renamed into place, so a
-reader never finds half of it.
+reader never finds half of it. A file it replaces keeps its permission
+bits, and a hard link to the old file keeps the old document.
 
 **Parameters**
 
@@ -1785,7 +1787,9 @@ a recalibration wants. The audio file itself is never touched. The
 sidecar is written to a new file beside it and renamed into place, so a
 reader finds the old sidecar or the new one whole and the name itself is
 never opened for writing; a link at the name is followed to the file it
-names.
+names. The file is replaced, not written into: the new one keeps the
+permission bits of the old, and a hard link to the old file keeps the
+old calibration.
 
 **Parameters**
 
@@ -1804,4 +1808,4 @@ names.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | for a factor that is not finite and positive, a reference SPL or a calibrator frequency that is not finite, a model or a label that holds a lone surrogate, or a pipe, a device, a socket or a directory at the sidecar's name, behind a link or not, before the file at the sidecar's name is touched. |
+| ValueError | for a factor that is not finite and positive, a reference SPL or a calibrator frequency that is not finite, a model or a label that holds a lone surrogate, or a pipe, a device, a socket or a directory at the sidecar's name, behind a link or not, before the file at the sidecar's name is touched; a name that is not UTF-8 is named by its escapes. |

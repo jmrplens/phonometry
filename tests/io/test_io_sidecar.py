@@ -5,7 +5,9 @@ from __future__ import annotations
 
 import json
 import math
+import os
 import re
+import stat
 import sys
 import types
 from typing import TYPE_CHECKING, Any
@@ -570,6 +572,118 @@ def test_the_dataclass_itself_rejects_a_nonpositive_factor() -> None:
         ValueError, match=r"calibration_factor must be finite and positive"
     ):
         CalibrationSidecar(calibration_factor=0.0)
+
+
+@pytest.mark.parametrize(
+    ("fields", "message"),
+    [
+        (
+            {"phonometry_version": math.nan},
+            "phonometry_version must be text or None; got nan",
+        ),
+        (
+            {"phonometry_version": float("1e400")},
+            "phonometry_version must be text or None; got inf",
+        ),
+        (
+            {"phonometry_version": 4.0},
+            "phonometry_version must be text or None; got 4.0",
+        ),
+        (
+            {"calibrator_model": 1000},
+            "calibrator_model must be text or None; got 1000",
+        ),
+        ({"channel_labels": ("left", None)}, "channel_labels must be text; got None"),
+    ],
+    ids=[
+        "version-nan",
+        "version-past-floats",
+        "version-number",
+        "model-number",
+        "label-none",
+    ],
+)
+def test_the_dataclass_itself_refuses_a_text_that_is_not_text(
+    fields: dict[str, Any], message: str
+) -> None:
+    """A version, a model and a label are text, as the reader takes them."""
+    with pytest.raises(ValueError, match=re.escape(message)):
+        CalibrationSidecar(calibration_factor=1.0, **fields)
+
+
+def _not_utf8_audio(tmp_path: Path) -> Path:
+    """An audio file whose name holds a byte UTF-8 has no character for."""
+    audio = tmp_path / os.fsdecode(b"\xff-meas.wav")
+    try:
+        sidecar_path(audio).touch()
+    except (OSError, UnicodeEncodeError):
+        pytest.skip("this file system takes only names that are text")
+    sidecar_path(audio).unlink()
+    return audio
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="POSIX names are bytes")
+@pytest.mark.parametrize("reader", ["read_sidecar", "read"])
+def test_a_sidecar_beside_a_name_that_is_not_utf8_is_named_by_its_escape(
+    tmp_path: Path, reader: str
+) -> None:
+    """The byte is decoded as a lone surrogate, which no refusal can print."""
+    audio = _not_utf8_audio(tmp_path)
+    if reader == "read":
+        write(audio, np.zeros(8), FS)
+    _sidecar_text(audio, "not json")
+    call = read if reader == "read" else read_sidecar
+    with pytest.raises(ValueError, match="sidecar is not valid JSON") as caught:
+        call(audio)
+    assert str(caught.value) == (
+        f"{tmp_path}{os.sep}\\udcff-meas.wav.phonometry.json: sidecar is not valid JSON"
+    )
+    str(caught.value).encode("utf-8")
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="POSIX names and pipes")
+def test_a_pipe_beside_a_name_that_is_not_utf8_is_named_by_its_escape(
+    tmp_path: Path,
+) -> None:
+    audio = _not_utf8_audio(tmp_path)
+    target = sidecar_path(audio)
+    make_special("pipe", target)
+    error = raised_within(lambda: write_sidecar(audio, 2.5), pipe=target)
+    assert isinstance(error, ValueError)
+    assert str(error) == (
+        f"{tmp_path}{os.sep}\\udcff-meas.wav.phonometry.json: sidecar is a "
+        "named pipe (FIFO), and a calibration sidecar is written only to a "
+        "regular file"
+    )
+    str(error).encode("utf-8")
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="POSIX permission bits")
+def test_a_sidecar_written_again_keeps_its_permission_bits(tmp_path: Path) -> None:
+    """A sidecar kept from other users stays so when it is recalibrated."""
+    audio = tmp_path / "meas.wav"
+    kept = write_sidecar(audio, 2.5)
+    kept.chmod(0o640)
+    write_sidecar(audio, 4.0)
+    assert stat.S_IMODE(kept.stat().st_mode) == 0o640
+
+
+def test_a_hard_link_to_a_sidecar_keeps_the_calibration_it_had(
+    tmp_path: Path,
+) -> None:
+    """The sidecar is replaced rather than written into, as its docstring says."""
+    audio = tmp_path / "meas.wav"
+    kept = write_sidecar(audio, 2.5)
+    linked = tmp_path / "copy.json"
+    try:
+        os.link(kept, linked)
+    except OSError:
+        pytest.skip("this file system has no hard links")
+    write_sidecar(audio, 4.0)
+    assert json.loads(linked.read_text(encoding="utf-8"))["calibration_factor"] == 2.5
+    got = read_sidecar(audio)
+    assert got is not None
+    assert got.calibration_factor == 4.0
 
 
 def test_write_sidecar_true_requires_a_calibrated_signal(

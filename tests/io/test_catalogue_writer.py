@@ -21,6 +21,7 @@ import os
 import pathlib
 import pkgutil
 import re
+import stat
 import sys
 from collections.abc import Mapping
 from typing import Any
@@ -453,6 +454,16 @@ def test_a_refusal_to_overwrite_prints_a_name_that_is_not_utf8(
         io.write_catalogue(rows, path)
     assert "\\udcff-mine.json exists" in str(caught.value)
     str(caught.value).encode("utf-8")
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="POSIX permission bits")
+def test_a_file_written_over_keeps_its_permission_bits(tmp_path: pathlib.Path) -> None:
+    path = tmp_path / "mine.json"
+    rows = _mine()
+    io.write_catalogue(rows, path)
+    path.chmod(0o640)
+    io.write_catalogue(rows, path, overwrite=True)
+    assert stat.S_IMODE(path.stat().st_mode) == 0o640
 
 
 def test_a_write_leaves_no_file_but_its_own(tmp_path: pathlib.Path) -> None:

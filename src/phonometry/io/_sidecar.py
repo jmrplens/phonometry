@@ -75,6 +75,7 @@ from .._internal.json_input import (
     MAX_NESTING,
     NotRegularError,
     TooLargeError,
+    escaped,
     nesting_past,
     not_regular_at,
     read_at_most,
@@ -106,8 +107,9 @@ class CalibrationSidecar:
     and what the channels are (``channel_labels``). ``phonometry_version``
     records the writing library version. Every number is finite, as JSON
     writes no other, and the model, every label and the version are text
-    UTF-8 can write, so that the record read from one sidecar can be written
-    to another.
+    UTF-8 can write (the model and the version may be ``None``), so that the
+    record read from one sidecar can be written to another. A record that
+    breaks either rule is refused as a :class:`ValueError` when it is built.
     """
 
     calibration_factor: float
@@ -132,21 +134,42 @@ class CalibrationSidecar:
             if isinstance(value, numbers.Real) and not math.isfinite(value):
                 msg = f"{name} must be finite or None; got {value!r}"
                 raise ValueError(msg)
-        texts = [
-            ("calibrator_model", self.calibrator_model),
-            ("phonometry_version", self.phonometry_version),
-        ]
-        texts += [("channel_labels", label) for label in self.channel_labels or ()]
-        for name, text in texts:
-            # A JSON escape spells half a UTF-16 pair alone, and a text that
-            # holds it fails the write only once the old sidecar is emptied.
-            lone = LONE_SURROGATE.search(text) if isinstance(text, str) else None
-            if lone is not None:
-                msg = (
-                    f"{name} holds a lone surrogate, U+{ord(lone.group()):04X}, "
-                    f"in {text!r}, which is not text UTF-8 can write"
-                )
-                raise ValueError(msg)
+        _check_text("calibrator_model", self.calibrator_model, optional=True)
+        _check_text("phonometry_version", self.phonometry_version, optional=True)
+        for label in self.channel_labels or ():
+            _check_text("channel_labels", label, optional=False)
+
+
+def _check_text(name: str, text: object, *, optional: bool) -> None:
+    """Refuse a field of a sidecar that is not text UTF-8 can write, by name.
+
+    :param optional: Whether ``None`` stands for no text, as it does for the
+        model and the version and not for a channel's label.
+    :raises ValueError: for a value that is not text, and for a text with a
+        lone surrogate.
+    """
+    if text is None and optional:
+        return
+    if not isinstance(text, str):
+        # A number would be written as one and read back by no reader, which
+        # takes a version, a model and a label only as text.
+        held = "text or None" if optional else "text"
+        msg = f"{name} must be {held}; got {text!r}"
+        raise ValueError(msg)
+    # A JSON escape spells half a UTF-16 pair alone, and a text that holds it
+    # fails the write only once the old sidecar is emptied.
+    lone = LONE_SURROGATE.search(text)
+    if lone is not None:
+        msg = (
+            f"{name} holds a lone surrogate, U+{ord(lone.group()):04X}, "
+            f"in {text!r}, which is not text UTF-8 can write"
+        )
+        raise ValueError(msg)
+
+
+def _named(path: Path) -> str:
+    """*path* as a message names it: a name that is not UTF-8 by its escapes."""
+    return escaped(str(path))
 
 
 def sidecar_path(audio_path: str | Path) -> Path:
@@ -174,7 +197,7 @@ def writable_sidecar(audio_path: str | Path) -> Path:
     kind = not_regular_at(target)
     if kind is not None:
         msg = (
-            f"{target}: sidecar is {kind}, and a calibration sidecar is "
+            f"{_named(target)}: sidecar is {kind}, and a calibration sidecar is "
             "written only to a regular file"
         )
         raise ValueError(msg)
@@ -185,7 +208,9 @@ def put_sidecar(audio_path: str | Path, data: bytes) -> Path:
     """Put the bytes of a sidecar at *audio_path*'s, never opening the name.
 
     The bytes go to a new file beside the sidecar's file, renamed into place,
-    so that a reader finds the old sidecar or the new one whole.
+    so that a reader finds the old sidecar or the new one whole. The new file
+    keeps the permission bits of the one it replaces, and a hard link to the
+    old file keeps the old bytes.
 
     :return: The sidecar's name, :func:`sidecar_path` of *audio_path*.
     :raises ValueError: for what :func:`writable_sidecar` refuses.
@@ -212,7 +237,9 @@ def write_sidecar(
     sidecar is written to a new file beside it and renamed into place, so a
     reader finds the old sidecar or the new one whole and the name itself is
     never opened for writing; a link at the name is followed to the file it
-    names.
+    names. The file is replaced, not written into: the new one keeps the
+    permission bits of the old, and a hard link to the old file keeps the
+    old calibration.
 
     :param audio_path: The audio file the sidecar belongs to (it need not
         exist yet; writing the sidecar first is fine).
@@ -228,7 +255,8 @@ def write_sidecar(
         reference SPL or a calibrator frequency that is not finite, a model
         or a label that holds a lone surrogate, or a pipe, a device, a socket
         or a directory at the sidecar's name, behind a link or not, before the
-        file at the sidecar's name is touched.
+        file at the sidecar's name is touched; a name that is not UTF-8 is
+        named by its escapes.
     """
     from .._version import __version__
 
@@ -263,7 +291,7 @@ def _as_float(value: float, key: str, path: Path) -> float:
     try:
         return float(value)
     except OverflowError:
-        msg = f"{path}: {key} is an integer too large for a float"
+        msg = f"{_named(path)}: {key} is an integer too large for a float"
         raise ValueError(msg) from None
 
 
@@ -280,12 +308,12 @@ def _optional_number(
     if value is None:
         return None
     if isinstance(value, bool) or not isinstance(value, int | float):
-        msg = f"{path}: {name} must be a number or null; got {value!r}"
+        msg = f"{_named(path)}: {name} must be a number or null; got {value!r}"
         # ValueError keeps the module validation errors uniform.
         raise ValueError(msg)  # noqa: TRY004
     number = _as_float(value, name, path)
     if not math.isfinite(number):
-        msg = f"{path}: {name} must be a finite number or null; got {value!r}"
+        msg = f"{_named(path)}: {name} must be a finite number or null; got {value!r}"
         raise ValueError(msg)
     return number
 
@@ -296,7 +324,7 @@ def _sidecar_bytes(source: Path) -> bytes:
         return read_at_most(source, _MAX_BYTES)
     except NotRegularError as exc:
         msg = (
-            f"{source}: sidecar is {exc.kind}, and a calibration sidecar is "
+            f"{_named(source)}: sidecar is {exc.kind}, and a calibration sidecar is "
             "read only from a regular file"
         )
         raise ValueError(msg) from None
@@ -307,7 +335,7 @@ def _sidecar_bytes(source: Path) -> bytes:
             else f"runs past {_MAX_BYTES} bytes"
         )
         msg = (
-            f"{source}: sidecar {held}, and a calibration sidecar is at most "
+            f"{_named(source)}: sidecar {held}, and a calibration sidecar is at most "
             f"{_MAX_BYTES} bytes (1 MiB)"
         )
         raise ValueError(msg) from None
@@ -318,43 +346,43 @@ def _load_sidecar_payload(source: Path, raw: bytes) -> dict[str, object]:
     try:
         text = raw.decode("utf-8")
     except UnicodeDecodeError as exc:
-        msg = f"{source}: sidecar is not UTF-8 text (byte {exc.start})"
+        msg = f"{_named(source)}: sidecar is not UTF-8 text (byte {exc.start})"
         raise ValueError(msg) from None
     deep = nesting_past(text)
     if deep is not None:
         msg = (
-            f"{source}: sidecar is not a calibration record: it nests deeper "
+            f"{_named(source)}: sidecar is not a calibration record: it nests deeper "
             f"than {MAX_NESTING} levels at {text_location(text, deep)}"
         )
         raise ValueError(msg)
     try:
         payload = json.loads(text)
     except json.JSONDecodeError as exc:
-        msg = f"{source}: sidecar is not valid JSON"
+        msg = f"{_named(source)}: sidecar is not valid JSON"
         raise ValueError(msg) from exc
     except ValueError as exc:
         # An integer longer than Python reads (sys.get_int_max_str_digits).
-        msg = f"{source}: sidecar holds a number too long to read"
+        msg = f"{_named(source)}: sidecar holds a number too long to read"
         raise ValueError(msg) from exc
     except RecursionError:
         # The count above keeps every text within the decoder's reach, unless
         # the caller is already deep in its own stack.
-        msg = f"{source}: sidecar nests deeper than the decoder follows"
+        msg = f"{_named(source)}: sidecar nests deeper than the decoder follows"
         raise ValueError(msg) from None
     if not isinstance(payload, dict) or payload.get("schema") != SIDECAR_SCHEMA:
         msg = (
-            f"{source}: not a {SIDECAR_SCHEMA!r} sidecar; refusing to "
+            f"{_named(source)}: not a {SIDECAR_SCHEMA!r} sidecar; refusing to "
             "guess at its meaning"
         )
         raise ValueError(msg)
     version = payload.get("schema_version")
     if not isinstance(version, int) or isinstance(version, bool):
-        msg = f"{source}: schema_version must be an integer"
+        msg = f"{_named(source)}: schema_version must be an integer"
         # ValueError keeps the module validation errors uniform.
         raise ValueError(msg)  # noqa: TRY004
     if version > SIDECAR_VERSION:
         msg = (
-            f"{source}: sidecar schema version {version} is newer than the "
+            f"{_named(source)}: sidecar schema version {version} is newer than the "
             f"version {SIDECAR_VERSION} this phonometry understands; "
             "upgrade phonometry to read it"
         )
@@ -366,7 +394,7 @@ def _required_factor(payload: dict[str, object], source: Path) -> float:
     """The mandatory calibration factor, validated as a number."""
     factor = payload.get("calibration_factor")
     if isinstance(factor, bool) or not isinstance(factor, int | float):
-        msg = f"{source}: calibration_factor must be a number; got {factor!r}"
+        msg = f"{_named(source)}: calibration_factor must be a number; got {factor!r}"
         # ValueError keeps the module validation errors uniform.
         raise ValueError(msg)  # noqa: TRY004
     return _as_float(factor, "calibration_factor", source)
@@ -380,12 +408,12 @@ def _calibrator_fields(
     if calibrator is None:
         calibrator = {}
     if not isinstance(calibrator, dict):
-        msg = f"{source}: calibrator must be an object or null"
+        msg = f"{_named(source)}: calibrator must be an object or null"
         # ValueError keeps the module validation errors uniform.
         raise ValueError(msg)  # noqa: TRY004
     model = calibrator.get("model")
     if model is not None and not isinstance(model, str):
-        msg = f"{source}: calibrator model must be a string or null"
+        msg = f"{_named(source)}: calibrator model must be a string or null"
         raise ValueError(msg)
     return calibrator, model
 
@@ -398,7 +426,7 @@ def _channel_labels(payload: dict[str, object], source: Path) -> tuple[str, ...]
     if not isinstance(labels, list) or not all(
         isinstance(label, str) for label in labels
     ):
-        msg = f"{source}: channel_labels must be an array of strings or null"
+        msg = f"{_named(source)}: channel_labels must be an array of strings or null"
         raise ValueError(msg)
     return tuple(labels)
 
@@ -411,7 +439,7 @@ def _version(payload: dict[str, object], source: Path) -> str | None:
     """
     version = payload.get("phonometry_version")
     if version is not None and not isinstance(version, str):
-        msg = f"{source}: phonometry_version must be a string or null; got {version!r}"
+        msg = f"{_named(source)}: phonometry_version must be a string or null; got {version!r}"
         raise ValueError(msg)
     return version
 
@@ -437,7 +465,7 @@ def _record(source: Path, raw: bytes) -> CalibrationSidecar:
             phonometry_version=version,
         )
     except ValueError as exc:
-        msg = f"{source}: {exc}"
+        msg = f"{_named(source)}: {exc}"
         raise ValueError(msg) from exc
 
 

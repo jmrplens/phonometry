@@ -359,42 +359,10 @@ def _grammar(text: str, decimal: str) -> _Cell | _Bad | None:
     spread = rf"(?:\s*\+/-\s*({number}))?"
     found = re.fullmatch(rf"(<=|>=|<|>)\s*({number}){spread}", body)
     if found is not None:
-        sign, end, plus = found.groups()
-        if approximate:
-            return _Bad(
-                f"{_quote(text)} is an approximate bound, which a CSV cell does "
-                "not write; write the row in a JSON catalogue, with the field in "
-                '"approximate" beside its "ranges"'
-            )
-        if plus is not None:
-            return _Bad(
-                f"{_quote(text)} is a bound with a plus-or-minus, which a CSV "
-                "cell does not write; write the row in a JSON catalogue, with "
-                '"uncertainty" beside its "ranges"'
-            )
-        figure = _figure(end, decimal)
-        side = _BOUNDS[sign]
-        return _Cell(
-            low=figure if side == "below" else None,
-            high=figure if side == "above" else None,
-            bound=side,
-            marked=decimal in end,
-        )
+        return _bound_cell(found, text, decimal, approximate=approximate)
     found = re.fullmatch(rf"({number})\s*\.\.\s*({number}){spread}", body)
     if found is not None:
-        low, high, plus = found.groups()
-        if plus is not None:
-            return _Bad(
-                f"{_quote(text)} is a range with a plus-or-minus, which a CSV "
-                "cell does not write; write the row in a JSON catalogue, with "
-                '"uncertainty" beside its "ranges"'
-            )
-        return _Cell(
-            low=_figure(low, decimal),
-            high=_figure(high, decimal),
-            approximate=approximate,
-            marked=decimal in low or decimal in high,
-        )
+        return _range_cell(found, text, decimal, approximate=approximate)
     found = re.fullmatch(rf"({number}){spread}", body)
     if found is not None:
         value, plus = found.groups()
@@ -405,6 +373,52 @@ def _grammar(text: str, decimal: str) -> _Cell | _Bad | None:
             marked=decimal in value or (plus is not None and decimal in plus),
         )
     return None
+
+
+def _bound_cell(
+    found: re.Match[str], text: str, decimal: str, *, approximate: bool
+) -> _Cell | _Bad:
+    """A bound and no value, or why a cell does not write it."""
+    sign, end, plus = found.groups()
+    if approximate:
+        return _Bad(
+            f"{_quote(text)} is an approximate bound, which a CSV cell does "
+            "not write; write the row in a JSON catalogue, with the field in "
+            '"approximate" beside its "ranges"'
+        )
+    if plus is not None:
+        return _Bad(
+            f"{_quote(text)} is a bound with a plus-or-minus, which a CSV "
+            "cell does not write; write the row in a JSON catalogue, with "
+            '"uncertainty" beside its "ranges"'
+        )
+    figure = _figure(end, decimal)
+    side = _BOUNDS[sign]
+    return _Cell(
+        low=figure if side == "below" else None,
+        high=figure if side == "above" else None,
+        bound=side,
+        marked=decimal in end,
+    )
+
+
+def _range_cell(
+    found: re.Match[str], text: str, decimal: str, *, approximate: bool
+) -> _Cell | _Bad:
+    """A range and no value, or why a cell does not write it."""
+    low, high, plus = found.groups()
+    if plus is not None:
+        return _Bad(
+            f"{_quote(text)} is a range with a plus-or-minus, which a CSV "
+            "cell does not write; write the row in a JSON catalogue, with "
+            '"uncertainty" beside its "ranges"'
+        )
+    return _Cell(
+        low=_figure(low, decimal),
+        high=_figure(high, decimal),
+        approximate=approximate,
+        marked=decimal in low or decimal in high,
+    )
 
 
 def _cell(cell: str, dialect: _Dialect, noun: str) -> _Cell | _Bad | None:
@@ -513,26 +527,9 @@ def _diagnose(text: str, dialect: _Dialect, noun: str) -> _Bad:
             f"{_quote(text)} separates thousands with a space, which a catalogue "
             "never reads; write the number without it"
         )
-    marks = f", each number with the decimal mark the header declares, {said}"
-    found = re.fullmatch(rf"(~?)\s*({_FIGURE})\s*\+-\s*({_FIGURE})", text)
-    if found is not None:
-        approximate, value, spread = found.groups()
-        return _Bad(
-            f"{_quote(text)} writes a plus-or-minus as '+-'; write "
-            f"{approximate}{value}\u00b1{spread}, or {approximate}{value}+/-{spread}"
-            + (marks if other in value + spread else "")
-        )
-    found = re.fullmatch(
-        rf"(~?)\s*({_FIGURE})\s*[-\u2010-\u2013\u2212]\s*({_FIGURE})", text
-    )
-    if found is not None:
-        approximate, low, high = found.groups()
-        return _Bad(
-            f"{_quote(text)} is a range written with a dash, which reads as the "
-            "minus sign of a negative number; a CSV cell writes a range with two "
-            f"points, as {approximate}{low}..{high}"
-            + (marks if other in low + high else "")
-        )
+    miswritten = _miswritten(text, other, said)
+    if miswritten is not None:
+        return miswritten
     found = re.fullmatch(
         rf"(?:~|<=|>=|<|>|\u2264|\u2265)?\s*{_FIGURE}\s*"
         r"([A-Za-z\u00b5\u03bc\u00b0%][^\[\]]*)",
@@ -559,6 +556,36 @@ def _diagnose(text: str, dialect: _Dialect, noun: str) -> _Bad:
         f"{_quote(text)} is not a number; if {noun} prints this text where the "
         f"number would be, write it {shown}"
     )
+
+
+def _miswritten(text: str, other: str, said: str) -> _Bad | None:
+    """Why *text* is a plus-or-minus or a range written as a cell does not.
+
+    :param other: The decimal mark the header does not declare, which the
+        refusal names when a number of the cell is written with it.
+    :param said: The declaration of the decimal mark, as the header writes it.
+    """
+    marks = f", each number with the decimal mark the header declares, {said}"
+    found = re.fullmatch(rf"(~?)\s*({_FIGURE})\s*\+-\s*({_FIGURE})", text)
+    if found is not None:
+        approximate, value, spread = found.groups()
+        return _Bad(
+            f"{_quote(text)} writes a plus-or-minus as '+-'; write "
+            f"{approximate}{value}\u00b1{spread}, or {approximate}{value}+/-{spread}"
+            + (marks if other in value + spread else "")
+        )
+    found = re.fullmatch(
+        rf"(~?)\s*({_FIGURE})\s*[-\u2010-\u2013\u2212]\s*({_FIGURE})", text
+    )
+    if found is not None:
+        approximate, low, high = found.groups()
+        return _Bad(
+            f"{_quote(text)} is a range written with a dash, which reads as the "
+            "minus sign of a negative number; a CSV cell writes a range with two "
+            f"points, as {approximate}{low}..{high}"
+            + (marks if other in low + high else "")
+        )
+    return None
 
 
 # ---------------------------------------------------------------------------
@@ -823,53 +850,52 @@ class _Sheet:
     @staticmethod
     def role(name: str, reader: _Reader) -> tuple[str, str, str]:
         """What a column named *name* holds: role, target, and why not."""
-        names = reader.names
+        own = _Sheet.own_role(name)
+        if own is not None:
+            return own
+        problem = _Sheet.misplaced(name, reader.names)
+        if problem:
+            return "", "", problem
+        return _Sheet.field_role(name, reader.names)
+
+    @staticmethod
+    def own_role(name: str) -> tuple[str, str, str] | None:
+        """The role of a column only a catalogue CSV has, or ``None``."""
         if name in ("key", "basis"):
             return name, name, ""
         if name in _PROVENANCE_COLUMNS:
             return "provenance", _PROVENANCE_COLUMNS[name], ""
-        if name.startswith("x-"):
-            if _EXTRA.fullmatch(name):
-                return "extra", name, ""
-            return (
-                "",
-                "",
-                (
-                    f"{name!r} is not a column name: after 'x-' come letters, "
-                    "digits and ._+- characters"
-                ),
-            )
-        if name == "provenance.field_test_standards":
-            return "", "", _in_json("field_test_standards")
-        if name.startswith("provenance.") or name == "provenance":
-            close = (
-                _closest(name, frozenset(_PROVENANCE_COLUMNS)) if "." in name else ""
-            )
-            hint = f"; did you mean {close!r}?" if close else ""
-            return (
-                "",
-                "",
-                (
-                    "a row narrows its provenance in the columns "
-                    f"{', '.join(_PROVENANCE_COLUMNS)}{hint}"
-                ),
-            )
         if name == _CREDIT_COLUMN:
             return "credit", "row", ""
-        if name == "attributed_to" or name.startswith("attributed_to."):
-            return "", "", _Sheet.credit_problem(name, names)
-        if name.startswith("basis.") and name.removeprefix("basis.") in names.kinds:
-            return "", "", _in_json("basis", "a basis for one cell")
-        if name in _FORBIDDEN:
-            return "", "", _FORBIDDEN[name]
-        if name in _IN_THE_CELL:
+        if name.startswith("x-") and _EXTRA.fullmatch(name):
+            return "extra", name, ""
+        return None
+
+    @staticmethod
+    def misplaced(name: str, names: _Names) -> str:
+        """Why a column names what a CSV file does not hold in one, or ``""``."""
+        if name.startswith("x-"):
             return (
-                "",
-                "",
-                f"a CSV writes {_IN_THE_CELL[name]}, and has no {name} column",
+                f"{name!r} is not a column name: after 'x-' come letters, "
+                "digits and ._+- characters"
             )
+        if name.startswith("provenance.") or name == "provenance":
+            return _Sheet.provenance_problem(name)
+        if name == "attributed_to" or name.startswith("attributed_to."):
+            return _Sheet.credit_problem(name, names)
+        if name.startswith("basis.") and name.removeprefix("basis.") in names.kinds:
+            return _in_json("basis", "a basis for one cell")
+        if name in _FORBIDDEN:
+            return _FORBIDDEN[name]
+        if name in _IN_THE_CELL:
+            return f"a CSV writes {_IN_THE_CELL[name]}, and has no {name} column"
         if name in _IN_JSON:
-            return "", "", _in_json(name)
+            return _in_json(name)
+        return ""
+
+    @staticmethod
+    def field_role(name: str, names: _Names) -> tuple[str, str, str]:
+        """The role of a column named for a field of the row class, or why not."""
         kind = names.kinds.get(name, "")
         if kind in ("number", "whole"):
             return "number", name, ""
@@ -879,13 +905,23 @@ class _Sheet:
             return (
                 "",
                 "",
-                (
-                    f"{name} holds a set or a mapping, which only a JSON catalogue writes"
-                ),
+                f"{name} holds a set or a mapping, which only a JSON catalogue writes",
             )
         if name in names.spellings.aliases:
             return "number", names.spellings.aliases[name][0], ""
         return "", "", _Sheet.unknown(name, names)
+
+    @staticmethod
+    def provenance_problem(name: str) -> str:
+        """Why a provenance column the reader does not take is refused."""
+        if name == "provenance.field_test_standards":
+            return _in_json("field_test_standards")
+        close = _closest(name, frozenset(_PROVENANCE_COLUMNS)) if "." in name else ""
+        hint = f"; did you mean {close!r}?" if close else ""
+        return (
+            "a row narrows its provenance in the columns "
+            f"{', '.join(_PROVENANCE_COLUMNS)}{hint}"
+        )
 
     @staticmethod
     def credit_problem(name: str, names: _Names) -> str:
@@ -975,35 +1011,16 @@ class _Sheet:
         A cell that says something is recorded as the column's, so that an
         issue the document pass finds in it is placed back in that column.
         """
-        role, name = column.role, column.name
-        if role == "number":
+        if column.role == "number":
             return self.take_number(held, record, number, column, cell, dialect)
-        problem = None
-        if role in ("flag", "basis"):
-            word = cell.strip()
-            if not word:
-                return None
-            if role == "basis":
-                held["basis"] = {"row": word}
-            elif word.lower() in ("true", "false"):
-                held[name] = word.lower() == "true"
-            else:
-                problem = _Bad(
-                    f"{_quote(word)} is not a flag: a flag is true or false, and "
-                    "nothing else"
-                )
+        if column.role in ("flag", "basis"):
+            said, problem = _take_word(held, column, cell)
         else:
-            text = cell if role == "key" else _unescape(cell)
-            if not text:
-                return None
-            if role == "provenance":
-                held.setdefault("provenance", {})[column.target] = text
-            elif role == "credit":
-                held["attributed_to"] = {column.target: text}
-            else:
-                held[name] = text
-        record.members[name] = number
-        if role in ("text", "flag"):
+            said, problem = _take_text(held, column, cell), None
+        if not said:
+            return None
+        record.members[column.name] = number
+        if column.role in ("text", "flag"):
             record.fields[column.target] = number
         return problem
 
@@ -1042,6 +1059,44 @@ class _Sheet:
             record.lists[hedge] = held.setdefault(hedge, [])
             record.lists[hedge].append(name)
         return None
+
+
+def _take_word(
+    held: dict[str, Any], column: _Column, cell: str
+) -> tuple[bool, _Bad | None]:
+    """A flag or the row's basis into the row.
+
+    :return: Whether the cell says anything, and why it cannot go there.
+    """
+    word = cell.strip()
+    if not word:
+        return False, None
+    if column.role == "basis":
+        held["basis"] = {"row": word}
+    elif word.lower() in ("true", "false"):
+        held[column.name] = word.lower() == "true"
+    else:
+        return True, _Bad(
+            f"{_quote(word)} is not a flag: a flag is true or false, and nothing else"
+        )
+    return True, None
+
+
+def _take_text(held: dict[str, Any], column: _Column, cell: str) -> bool:
+    """A key, a text, a provenance entry, a credit or a column of the caller's.
+
+    :return: Whether the cell says anything, and so went into the row.
+    """
+    text = cell if column.role == "key" else _unescape(cell)
+    if not text:
+        return False
+    if column.role == "provenance":
+        held.setdefault("provenance", {})[column.target] = text
+    elif column.role == "credit":
+        held["attributed_to"] = {column.target: text}
+    else:
+        held[column.name] = text
+    return True
 
 
 def read_sheet(
@@ -1125,11 +1180,54 @@ def _number_text(value: object, decimal: str) -> str:
     return text.replace(".", decimal) if decimal != "." else text
 
 
-def _numeric_cell(
-    name: str, pieces: _Pieces, decimal: str
-) -> str | tuple[tuple[object, ...], str]:
+#: The cell of one numeric field, or the pointer and the reason it has none.
+type _CellText = str | tuple[tuple[object, ...], str]
+
+
+def _numeric_cell(name: str, pieces: _Pieces, decimal: str) -> _CellText:
     """The cell of one numeric field, or the pointer and the reason it has none."""
-    approximate = "~" if "approximate" in pieces.listed else ""
+    if pieces.word is not None:
+        return _word_text(name, pieces)
+    if pieces.ends is not None:
+        return _ends_text(name, pieces, pieces.ends, decimal)
+    if pieces.value is None:
+        return (next(iter(pieces.listed), "uncertainty"), name), (
+            "a mark on a cell with no value is written only in a JSON catalogue"
+        )
+    text = f"{_approximate(pieces)}{_number_text(pieces.value, decimal)}"
+    if pieces.spread is not None:
+        text += f"\u00b1{_number_text(pieces.spread, decimal)}"
+    return text
+
+
+def _approximate(pieces: _Pieces) -> str:
+    """The mark of an approximate cell, ``"~"``, or nothing."""
+    return "~" if "approximate" in pieces.listed else ""
+
+
+def _word_text(name: str, pieces: _Pieces) -> _CellText:
+    """A word the page prints where the number would be, between brackets."""
+    if pieces.value is not None or pieces.ends is not None or pieces.listed:
+        return ("unquantified", name), (
+            "a word beside a value, a range or a mark on the cell is "
+            "written only in a JSON catalogue"
+        )
+    return f"[{pieces.word}]"
+
+
+def _ends_text(
+    name: str, pieces: _Pieces, ends: list[object], decimal: str
+) -> _CellText:
+    """A range or a bound and no value, as a cell writes it."""
+    if pieces.value is not None:
+        return ("ranges", name), (
+            "a value beside a range is written only in a JSON catalogue: a "
+            "CSV cell holds one or the other"
+        )
+    if pieces.spread is not None:
+        return ("uncertainty", name), (
+            "a plus-or-minus on a range or a bound is written only in a JSON catalogue"
+        )
     bound = next(
         (
             hedge.removeprefix("bounded_")
@@ -1138,54 +1236,36 @@ def _numeric_cell(
         ),
         "",
     )
-    if pieces.word is not None:
-        if pieces.value is not None or pieces.ends is not None or pieces.listed:
-            return ("unquantified", name), (
-                "a word beside a value, a range or a mark on the cell is "
-                "written only in a JSON catalogue"
-            )
-        return f"[{pieces.word}]"
-    if pieces.ends is not None:
-        if pieces.value is not None:
-            return ("ranges", name), (
-                "a value beside a range is written only in a JSON catalogue: a "
-                "CSV cell holds one or the other"
-            )
-        if pieces.spread is not None:
-            return ("uncertainty", name), (
-                "a plus-or-minus on a range or a bound is written only in a "
-                "JSON catalogue"
-            )
-        low, high = pieces.ends
-        if bound:
-            if approximate:
-                return ("approximate", pieces.listed["approximate"]), (
-                    "an approximate bound is written only in a JSON catalogue"
-                )
-            end, other = (high, low) if bound == "above" else (low, high)
-            if other is not None:
-                return ("ranges", name), (
-                    "a bound with its other end printed too is written only in "
-                    "a JSON catalogue: a CSV cell writes <=30 or >=5 alone"
-                )
-            sign = "<=" if bound == "above" else ">="
-            return f"{sign}{_number_text(end, decimal)}"
-        if low is None or high is None:
-            return ("ranges", name), (
-                "a range with an open end and no bound is written only in a JSON "
-                "catalogue"
-            )
-        return (
-            f"{approximate}{_number_text(low, decimal)}..{_number_text(high, decimal)}"
+    if bound:
+        return _bound_text(name, pieces, ends, bound, decimal)
+    low, high = ends
+    if low is None or high is None:
+        return ("ranges", name), (
+            "a range with an open end and no bound is written only in a JSON catalogue"
         )
-    if pieces.value is None:
-        return (next(iter(pieces.listed), "uncertainty"), name), (
-            "a mark on a cell with no value is written only in a JSON catalogue"
+    return (
+        f"{_approximate(pieces)}{_number_text(low, decimal)}.."
+        f"{_number_text(high, decimal)}"
+    )
+
+
+def _bound_text(
+    name: str, pieces: _Pieces, ends: list[object], bound: str, decimal: str
+) -> _CellText:
+    """A bound and no value, ``<=30`` or ``>=5``, as a cell writes it."""
+    if "approximate" in pieces.listed:
+        return ("approximate", pieces.listed["approximate"]), (
+            "an approximate bound is written only in a JSON catalogue"
         )
-    text = f"{approximate}{_number_text(pieces.value, decimal)}"
-    if pieces.spread is not None:
-        text += f"\u00b1{_number_text(pieces.spread, decimal)}"
-    return text
+    low, high = ends
+    end, other = (high, low) if bound == "above" else (low, high)
+    if other is not None:
+        return ("ranges", name), (
+            "a bound with its other end printed too is written only in "
+            "a JSON catalogue: a CSV cell writes <=30 or >=5 alone"
+        )
+    sign = "<=" if bound == "above" else ">="
+    return f"{sign}{_number_text(end, decimal)}"
 
 
 class _SheetRow:
@@ -1234,16 +1314,7 @@ class _SheetRow:
         if member == "key":
             self.cells["key"] = self.key
         elif member.startswith("x-") or kind == "text":
-            if value == "" and defaults.get(member):
-                self.refuse(
-                    (member,),
-                    f"{member} is empty where its default is {defaults[member]!r}, "
-                    "and an empty CSV cell reads as the default; an empty text "
-                    "is written only in a JSON catalogue",
-                    member,
-                )
-            else:
-                self.cells[member] = _escape(str(value))
+            self.text(member, value, defaults)
         elif kind == "flag":
             self.cells[member] = "true" if value else "false"
         elif kind in ("number", "whole") or member in names.spellings.aliases:
@@ -1260,27 +1331,33 @@ class _SheetRow:
                 member,
             )
 
+    def text(self, member: str, value: object, defaults: Mapping[str, str]) -> None:
+        """A text or a column of the caller's, written after its formula guard.
+
+        An empty text where the field's default is not empty is refused, as
+        an empty cell reads back as the default.
+        """
+        if value == "" and defaults.get(member):
+            self.refuse(
+                (member,),
+                f"{member} is empty where its default is {defaults[member]!r}, "
+                "and an empty CSV cell reads as the default; an empty text "
+                "is written only in a JSON catalogue",
+                member,
+            )
+        else:
+            self.cells[member] = _escape(str(value))
+
     def mapping(self, member: str, value: Mapping[str, Any]) -> None:
         """A member of a JSON row that maps fields to what it says of them."""
-        if member == "ranges":
-            for name, ends in value.items():
-                self.pieces_of(name).ends = list(ends)
-        elif member == "uncertainty":
-            for name, spread in value.items():
-                self.pieces_of(name).spread = spread
-        elif member == "unquantified":
-            for name, word in value.items():
-                self.pieces_of(name).word = word
+        if member in ("ranges", "uncertainty", "unquantified"):
+            self.hedge(member, value)
         elif member == "basis":
             self.basis(value)
         elif member == "attributed_to":
             self.credits(value)
         elif member == "provenance":
-            for entry, text in value.items():
-                if entry == "field_test_standards":
-                    self.refuse(("provenance", entry), _in_json(entry))
-                else:
-                    self.cells[f"provenance.{entry}"] = _escape(str(text))
+            self.provenance(value)
         elif member in _IN_JSON:
             for entry in value:
                 self.refuse((member, entry), _in_json(member), str(entry))
@@ -1290,6 +1367,25 @@ class _SheetRow:
                 f"{member} holds a set or a mapping, which only a JSON catalogue writes",
                 member,
             )
+
+    def hedge(self, member: str, value: Mapping[str, Any]) -> None:
+        """The ends, the plus-or-minus or the word a hedge gives each field."""
+        for name, held in value.items():
+            pieces = self.pieces_of(name)
+            if member == "ranges":
+                pieces.ends = list(held)
+            elif member == "uncertainty":
+                pieces.spread = held
+            else:
+                pieces.word = held
+
+    def provenance(self, value: Mapping[str, Any]) -> None:
+        """The row's narrowing of its provenance, each entry in its column."""
+        for entry, text in value.items():
+            if entry == "field_test_standards":
+                self.refuse(("provenance", entry), _in_json(entry))
+            else:
+                self.cells[f"provenance.{entry}"] = _escape(str(text))
 
     def basis(self, value: Mapping[str, str]) -> None:
         for entry, word in value.items():
@@ -1364,12 +1460,11 @@ def _table_credit(rows: list[_SheetRow]) -> str | None:
     if len(given) == 1:
         return given.pop()
     distinct = len(given - {None})
-    said = (
-        "only some of the rows credit the whole table"
-        if distinct == 1
-        else f"the rows give the whole table {distinct} different credits"
-        + (", and some give it none" if None in given else "")
-    )
+    if distinct == 1:
+        said = "only some of the rows credit the whole table"
+    else:
+        some = ", and some give it none" if None in given else ""
+        said = f"the rows give the whole table {distinct} different credits{some}"
     for row in rows:
         if row.table_credit is not None:
             row.refuse(

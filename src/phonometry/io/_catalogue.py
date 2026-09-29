@@ -135,6 +135,7 @@ if TYPE_CHECKING:
     from collections.abc import Callable, Iterator, Sequence
 
     from .._internal.catalogue import UnitAlias
+    from ._catalogue_csv import _Dialect
 
 #: The schema identifier and the layout version this module reads and writes.
 CATALOGUE_SCHEMA = "phonometry-catalogue"
@@ -1010,18 +1011,19 @@ class _Reader:
 
     def table_credit(self, held: object) -> str:
         """The credit of the whole table, as the document gives it once."""
+        at = "/attributed_to"
         if not isinstance(held, str):
             self.error(
-                "/attributed_to",
+                at,
                 f"holds {_quote(held)}; the document credits the whole table as "
                 'one text, as "attributed_to": "<who>", and a row credits itself '
                 "or its cells in its own attributed_to",
             )
             return ""
-        credit = self.text(held, "/attributed_to")
+        credit = self.text(held, at)
         if credit is not None and not credit.strip():
             self.error(
-                "/attributed_to",
+                at,
                 "is empty; name who the whole table is credited to, or leave "
                 "attributed_to out",
             )
@@ -2646,11 +2648,30 @@ def write_catalogue(
         document = _document(writer, rows, catalogue, about, provenance)
         _write_atomic(target, _dumps(document) + "\n", overwrite=overwrite)
         return (target,)
-    from ._catalogue_csv import check_dialect, sheet_texts
+    from ._catalogue_csv import check_dialect
 
     dialect = check_dialect(delimiter, decimal)
     writer = _Writer(rows)
     document = _document(writer, rows, catalogue, about, provenance)
+    return _write_sheet(document, writer, target, dialect, overwrite=overwrite)
+
+
+def _write_sheet(
+    document: Mapping[str, Any],
+    writer: _Writer,
+    target: Path,
+    dialect: _Dialect,
+    *,
+    overwrite: bool,
+) -> tuple[Path, ...]:
+    """Write *document* as a CSV file at *target* and its JSON header beside it.
+
+    Nothing is written until both texts are made and both names are free.
+
+    :return: The CSV file and its header.
+    """
+    from ._catalogue_csv import sheet_texts
+
     header = target.with_name(target.name + CSV_HEADER_TAIL)
     sheet, head = sheet_texts(document, writer.names, dialect, target.name)
     _check_target(target, overwrite=overwrite)

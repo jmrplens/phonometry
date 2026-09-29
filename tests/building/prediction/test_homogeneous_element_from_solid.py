@@ -89,9 +89,8 @@ def test_the_annex_l_elements_follow_from_their_rows(
     assert element.mass_per_area == pytest.approx(mass, rel=1e-12)
     assert round(element.critical_frequency, 1) == fc
     material, _ = ELEMENTS[label]
-    assert (element.density, element.longitudinal_velocity) == ANNEX_L_MATERIALS[
-        material
-    ]
+    constants = (element.density, element.longitudinal_velocity)
+    assert constants == ANNEX_L_MATERIALS[material]
 
 
 @pytest.mark.parametrize("label", sorted(ref.ISO12354_ANNEX_L3_R_SITU))

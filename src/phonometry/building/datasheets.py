@@ -87,6 +87,8 @@ _BANDS_HZ: tuple[int, ...] = (
 
 #: The 16 one-third octaves 100 Hz to 3150 Hz every ISO 717 rating reads.
 _RATING_BANDS_HZ: tuple[int, ...] = tuple(round(band) for band in _FREQ_THIRD_OCTAVE)
+#: Where ISO 717-1 defines the adaptation terms over the enlarged ranges.
+_ANNEX_B = "Annex B"
 
 
 def _differs(printed: float, worked_out: float) -> bool:
@@ -207,26 +209,26 @@ class SoundReductionSpectrum(BandedRow):
         ("weighted_sound_reduction_index_db", "rating", "Rw", "ISO 717-1 Clause 4.4"),
         ("spectrum_adaptation_term_db", "c", "C", "ISO 717-1 Clause 4.5"),
         ("traffic_spectrum_adaptation_term_db", "ctr", "Ctr", "ISO 717-1 Clause 4.5"),
-        ("spectrum_adaptation_term_50_3150_db", "c_50_3150", "C50-3150", "Annex B"),
-        ("spectrum_adaptation_term_50_5000_db", "c_50_5000", "C50-5000", "Annex B"),
-        ("spectrum_adaptation_term_100_5000_db", "c_100_5000", "C100-5000", "Annex B"),
+        ("spectrum_adaptation_term_50_3150_db", "c_50_3150", "C50-3150", _ANNEX_B),
+        ("spectrum_adaptation_term_50_5000_db", "c_50_5000", "C50-5000", _ANNEX_B),
+        ("spectrum_adaptation_term_100_5000_db", "c_100_5000", "C100-5000", _ANNEX_B),
         (
             "traffic_spectrum_adaptation_term_50_3150_db",
             "ctr_50_3150",
             "Ctr,50-3150",
-            "Annex B",
+            _ANNEX_B,
         ),
         (
             "traffic_spectrum_adaptation_term_50_5000_db",
             "ctr_50_5000",
             "Ctr,50-5000",
-            "Annex B",
+            _ANNEX_B,
         ),
         (
             "traffic_spectrum_adaptation_term_100_5000_db",
             "ctr_100_5000",
             "Ctr,100-5000",
-            "Annex B",
+            _ANNEX_B,
         ),
     )
 

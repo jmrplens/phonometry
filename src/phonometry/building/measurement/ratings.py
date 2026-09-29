@@ -144,6 +144,9 @@ _INDEX_500_OCTAVE = 2
 _MAX_UNFAVOURABLE_THIRD = 32.0
 _MAX_UNFAVOURABLE_OCTAVE = 10.0
 
+#: The refusal of a band set the ratings do not read.
+_BANDS_REFUSAL = "'bands' must be 'third-octave', 'octave' or None."
+
 #: Tolerance absorbing floating-point noise when comparing the
 #: unfavourable-deviation sum (a true multiple of 0,1 dB) to the bound.
 _SHIFT_TOLERANCE = 1e-6
@@ -383,7 +386,7 @@ def _by_band(
     elif bands == "octave":
         centres = _FREQ_OCTAVE
     else:
-        msg = "'bands' must be 'third-octave', 'octave' or None."
+        msg = _BANDS_REFUSAL
         raise ValueError(msg)
     missing = [centre for centre in centres if centre not in values]
     if missing:
@@ -863,7 +866,7 @@ def _resolve_band_set(
             _SPECTRUM2_OCTAVE,
         )
     if bands is not None:
-        msg = "'bands' must be 'third-octave', 'octave' or None."
+        msg = _BANDS_REFUSAL
         raise ValueError(msg)
     msg = (
         "Expected 16 one-third-octave (100-3150 Hz) or 5 octave "
@@ -1015,7 +1018,7 @@ def _resolve_impact_band_set(
             5,
         )
     if bands is not None:
-        msg = "'bands' must be 'third-octave', 'octave' or None."
+        msg = _BANDS_REFUSAL
         raise ValueError(msg)
     msg = (
         "Expected 16 one-third-octave (100-3150 Hz) or 5 octave "

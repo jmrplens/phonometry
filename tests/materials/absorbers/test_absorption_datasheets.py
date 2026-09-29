@@ -161,7 +161,8 @@ def test_the_one_third_octave_row_rates_as_worked_by_hand(
     ],
 ) -> None:
     rating = rate(_annex_c())
-    assert (rating.rating_label, rating.absorption_class) == _ANNEX_C_RATING
+    rated = (rating.rating_label, rating.absorption_class)
+    assert rated == _ANNEX_C_RATING
 
 
 def test_the_rating_keeps_the_fifteen_bands_it_was_formed_from() -> None:

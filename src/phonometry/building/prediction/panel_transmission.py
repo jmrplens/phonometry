@@ -550,6 +550,54 @@ def _plateau_constant(material: str | PlateauMaterial, index: int) -> float:
     return PLATEAU_MATERIALS[material][index]
 
 
+def _plateau_material(material: object) -> str | PlateauMaterial:
+    """A name held to :data:`PLATEAU_MATERIALS`, or a plateau row as it is.
+
+    :raises ValueError: for an unknown material name.
+    :raises TypeError: for anything but a name or a
+        :class:`~phonometry.solids.PlateauMaterial`.
+    """
+    if isinstance(material, str):
+        return require_choice(material, "material", tuple(PLATEAU_MATERIALS))
+    if not isinstance(material, PlateauMaterial):
+        msg = (
+            "'material' is a name in PLATEAU_MATERIALS or a "
+            f"solids.PlateauMaterial row; got {type(material).__name__}."
+        )
+        raise TypeError(msg)
+    return material
+
+
+def _material_constants(
+    material: str | PlateauMaterial,
+    thickness_mm: float | None,
+    mass_per_area: float | None,
+    plateau_height: float | None,
+    frequency_ratio: float | None,
+) -> tuple[float, float, float]:
+    """The three numbers, each the caller's where given and the material's else.
+
+    A constant an explicit value replaces is never read.
+
+    :raises ValueError: for a mass per area with no thickness to work it out
+        from, and for a row without a constant the construction reads.
+    """
+    if mass_per_area is None:
+        if thickness_mm is None:
+            msg = (
+                "give 'thickness_mm' with 'material', or pass 'mass_per_area' directly."
+            )
+            raise ValueError(msg)
+        mass_per_area = _plateau_constant(material, 0) * require_positive(
+            thickness_mm, "thickness_mm"
+        )
+    if plateau_height is None:
+        plateau_height = _plateau_constant(material, 1)
+    if frequency_ratio is None:
+        frequency_ratio = _plateau_constant(material, 2)
+    return mass_per_area, plateau_height, frequency_ratio
+
+
 def _resolve_plateau_panel(
     material: str | PlateauMaterial | None,
     thickness_mm: float | None,
@@ -569,28 +617,13 @@ def _resolve_plateau_panel(
         :class:`~phonometry.solids.PlateauMaterial`.
     """
     if material is not None:
-        if isinstance(material, str):
-            material = require_choice(material, "material", tuple(PLATEAU_MATERIALS))
-        elif not isinstance(material, PlateauMaterial):
-            msg = (
-                "'material' is a name in PLATEAU_MATERIALS or a "
-                f"solids.PlateauMaterial row; got {type(material).__name__}."
-            )
-            raise TypeError(msg)
-        if mass_per_area is None:
-            if thickness_mm is None:
-                msg = (
-                    "give 'thickness_mm' with 'material', or pass "
-                    "'mass_per_area' directly."
-                )
-                raise ValueError(msg)
-            mass_per_area = _plateau_constant(material, 0) * require_positive(
-                thickness_mm, "thickness_mm"
-            )
-        if plateau_height is None:
-            plateau_height = _plateau_constant(material, 1)
-        if frequency_ratio is None:
-            frequency_ratio = _plateau_constant(material, 2)
+        mass_per_area, plateau_height, frequency_ratio = _material_constants(
+            _plateau_material(material),
+            thickness_mm,
+            mass_per_area,
+            plateau_height,
+            frequency_ratio,
+        )
     if mass_per_area is None or plateau_height is None or frequency_ratio is None:
         msg = (
             "the plateau construction needs 'mass_per_area', 'plateau_height' "

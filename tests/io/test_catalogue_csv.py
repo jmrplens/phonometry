@@ -1720,7 +1720,10 @@ def test_a_symbolic_link_at_the_header_is_never_written_through(
     mine = _mine(tmp_path)
     elsewhere = tmp_path / "elsewhere.json"
     elsewhere.write_text("{}", encoding="utf-8")
-    (tmp_path / "out.csv.phonometry.json").symlink_to(elsewhere)
+    try:
+        (tmp_path / "out.csv.phonometry.json").symlink_to(elsewhere)
+    except OSError:
+        pytest.skip("this system does not let the test make a symbolic link")
     target = tmp_path / "out.csv"
     with pytest.raises(FileExistsError, match="symbolic link"):
         io.write_catalogue(mine, target, overwrite=True)

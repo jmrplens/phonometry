@@ -1,5 +1,7 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
 import os
+import sys
+from collections.abc import Iterator
 
 import pytest
 
@@ -19,6 +21,22 @@ def pytest_configure(config: pytest.Config) -> None:
     # setdefault: the CI tests-perf job sets NUMBA_DISABLE_JIT=0 explicitly
     # to exercise the jitted kernel; an externally-set value must win.
     os.environ.setdefault("NUMBA_DISABLE_JIT", "1")
+
+
+@pytest.fixture(autouse=True)
+def _close_figures() -> Iterator[None]:
+    """Close every pyplot figure a test leaves open.
+
+    A figure made through pyplot, as every ``.plot()`` makes it, stays in
+    pyplot's registry until it is closed, so a worker that runs hundreds of
+    plotting tests would hold every one of their figures in memory to the end
+    of the session and warn past the twentieth. pyplot is looked up rather
+    than imported, so a test that never plots does not pay for importing it.
+    """
+    yield
+    pyplot = sys.modules.get("matplotlib.pyplot")
+    if pyplot is not None:
+        pyplot.close("all")
 
 
 # The modules whose tests dominate the wall clock (steady-state FDTD runs,

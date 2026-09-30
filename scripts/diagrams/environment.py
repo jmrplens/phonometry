@@ -1606,3 +1606,171 @@ def _d_statistical_pass_by_site(s: SVG, th: Theme) -> None:
     )
     s.dim(mic_x, gy, mic_x, cap, "1.2 m ± 0.1 m", 56, 15, label_side="right")
     s.dim(lane_x, gy, mic_x, gy, "7.5 m ± 0.1 m", 30, 15)
+
+
+# ---------------------------------------------------------------------------
+# ISO 3095 pass-by site: the microphones and the free area (6.1.1, 6.4.1)
+# ---------------------------------------------------------------------------
+
+
+def _d_rolling_stock_site(s: SVG, th: Theme) -> None:
+    # --- section across the track, 23 px per metre -------------------------
+    # Figure 6: A at 7,5 m and 1,2 m above the top of rail, B at 7,5 m and
+    # 3,5 m (6.4.2), C at 25 m and 3,5 m (6.4.1, 200 km/h and above).
+    per_m = 23.0
+    x0 = 130.0  # track centreline
+    rail = 300.0  # top of rail
+    gy = rail + 1.3 * per_m  # the ground, 1,3 m below the top of rail
+    s.text(
+        50.0,
+        70.0,
+        "Section across the track (6.4.1, Figure 6)",
+        17,
+        th.fg,
+        anchor="start",
+        bold=True,
+    )
+    # The band 6.1.1 allows the ground to lie in, 0 m to -2 m.
+    band = 2.0 * per_m
+    s.rect(x0 + 60, rail, 700, band, th.panel, th.muted, sw=0.8, dash="4,3")
+    s.ground(gy, x0 + 60, x0 + 760)
+    # Ballast, sleeper and the two rails, the gauge out of scale.
+    s.path(
+        f"M {x0 - 70} {gy} L {x0 - 44} {rail + 8} L {x0 + 44} {rail + 8} "
+        f"L {x0 + 70} {gy} Z",
+        fill=th.panel,
+        stroke=th.muted,
+        sw=1.4,
+    )
+    s.rect(x0 - 40, rail + 4, 80, 6, th.muted)
+    for dx in (-17.0, 17.0):
+        s.rect(x0 + dx - 4, rail - 2, 8, 7, th.fg)
+    # The unit under test, a car body on its wheels.
+    s.rect(x0 - 36, rail - 4.2 * per_m, 72, 3.3 * per_m, th.panel, th.fg, rx=10, sw=1.6)
+    s.rect(x0 - 26, rail - 3.6 * per_m, 52, 0.8 * per_m, th.bg, th.muted, rx=3, sw=1.0)
+    for dx in (-17.0, 17.0):
+        s.circle(x0 + dx, rail - 9, 9, th.fg)
+    s.line(x0, rail - 4.6 * per_m, x0, gy + 16, th.muted, 0.9, dash="3,3")
+    s.text(x0, gy + 34, "track centreline", 13, th.muted)
+    # The datum every height is measured from; it and the label under the
+    # band stop at the band's right edge, clear of the canvas edge.
+    s.line(x0 + 40, rail, x0 + 760, rail, th.secondary, 1.6, dash="9,5")
+    # Between A and C, where the line is clear of every stand and dimension.
+    s.text(x0 + 16.25 * per_m, rail - 8, "top of rail", 14, th.secondary)
+    s.text(
+        x0 + 755,
+        rail + band + 18,
+        "ground 0 m to −2 m relative to the top of rail (6.1.1)",
+        13,
+        th.muted,
+        anchor="end",
+    )
+
+    xa = x0 + 7.5 * per_m
+    xc = x0 + 25.0 * per_m
+    ya = rail - 1.2 * per_m
+    yb = rail - 3.5 * per_m
+    s.mic(xa, ya, gy, 0.55)
+    s.circle(xa, yb, 7, th.bg, th.primary, sw=2.0)
+    s.mic(xc, yb, gy, 0.55)
+    s.dim(xa, rail, xa, ya, "1.2 m", 26, 14, label_side="right")
+    s.dim(xa, rail, xa, yb, "3.5 m", -26, 14, label_side="left")
+    s.dim(xc, rail, xc, yb, "3.5 m", 26, 14, label_side="right")
+    s.dim(x0, gy + 62, xa, gy + 62, "7.5 m", 0, 14)
+    s.dim(x0, gy + 90, xc, gy + 90, "25 m", 0, 14)
+    s.text(xa + 16, ya - 16, "A", 16, th.primary, anchor="start", bold=True)
+    s.text(xa + 14, yb - 12, "B", 16, th.primary, anchor="start", bold=True)
+    s.text(xc - 16, yb - 16, "C", 16, th.primary, anchor="end", bold=True)
+    s.text(
+        x0 + 250,
+        120.0,
+        "A: the standard position, both sides of the unit",
+        14,
+        th.fg,
+        anchor="start",
+    )
+    s.text(
+        x0 + 250,
+        140.0,
+        "B: added when sources sit high on the unit (6.4.2)",
+        14,
+        th.fg,
+        anchor="start",
+    )
+    s.text(
+        x0 + 250,
+        160.0,
+        "C: allowed instead of A at 200 km/h and above",
+        14,
+        th.fg,
+        anchor="start",
+    )
+
+    # --- plan, not to scale: d, 2d and 3d as 6.1.1 and 6.2.1 set them ------
+    s.text(
+        50.0,
+        470.0,
+        "Plan: the free area around a microphone at distance $d$",
+        17,
+        th.fg,
+        anchor="start",
+        bold=True,
+    )
+    s.text(50.0, 494.0, "(6.1.1 and 6.2.1)", 14, th.muted, anchor="start")
+    d = 50.0
+    mx, my = 450.0, 680.0
+    ty = my - d
+    s.circle(mx, my, 3 * d, "none", th.muted, sw=1.2)
+    s.path(
+        f"M {mx} {my} L {mx - 2 * d} {ty} L {mx + 2 * d} {ty} Z",
+        fill=th.panel,
+        stroke=th.primary,
+        sw=1.4,
+    )
+    s.line(60.0, ty, 840.0, ty, th.fg, 2.4)
+    s.line(60.0, ty - 8, 840.0, ty - 8, th.fg, 1.2)
+    # A train running along the track towards the microphone section.
+    s.rect(96.0, ty - 16, 150.0, 16.0, th.secondary, rx=4)
+    s.arrow(254.0, ty - 8, 300.0, ty - 8, th.secondary, 2.0)
+    s.circle(mx, my, 7, th.primary)
+    # Left of the triangle, where the label is clear of its edge and of the
+    # circle; on the right the edge ran through the letter.
+    s.dim(mx, ty, mx, my, "$d$", -90, 15, label_side="left")
+    s.dim(mx - 2 * d, ty, mx, ty, "$2d$", -30, 15)
+    s.dim(mx, ty, mx + 2 * d, ty, "$2d$", -30, 15)
+    s.line(mx, my, mx + 3 * d * 0.8, my + 3 * d * 0.6, th.muted, 1.0, dash="4,3")
+    s.text(mx + 96, my + 56, "$3d$", 15, th.muted, anchor="start")
+    s.text(
+        mx + 3 * d + 24,
+        my + 20,
+        "within $3d$: no barriers, hills,",
+        14,
+        th.fg,
+        anchor="start",
+    )
+    s.text(
+        mx + 3 * d + 24,
+        my + 40,
+        "rocks, bridges or buildings",
+        14,
+        th.fg,
+        anchor="start",
+    )
+    s.text(
+        50.0,
+        878.0,
+        "shaded: free propagation, nobody inside, no other track, no snow or tall "
+        "vegetation,",
+        14,
+        th.fg,
+        anchor="start",
+    )
+    s.text(
+        50.0,
+        898.0,
+        "no water, ice, tarmac or concrete; the reference track is the same over "
+        "$2d$ either side",
+        14,
+        th.fg,
+        anchor="start",
+    )

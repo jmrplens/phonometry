@@ -19,7 +19,7 @@
 
 ## Numerical conformance report
 
-**1758/1758 conformance checks pass** across 107 domains and 513 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+**1774/1774 conformance checks pass** across 108 domains and 516 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub><b>&#916;</b> is the difference between the computed value and the one the standard publishes. <b>Used</b> is how much of that clause's published tolerance the difference consumes: 100 % means it sits exactly on the limit, 5 % means it uses a twentieth of the allowance, and a dash means the clause states no two-sided tolerance for the quantity, so there is no budget to spend. It is reported and never used to decide a verdict, which is settled at full precision before any rounding.</sub>
 
@@ -2681,6 +2681,30 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | Annex II 2.3.2, formula (2.3.15) | Horizontal dipole directivity along the track: 10 lg(0,01) at phi = 0 | -20 dB (+/-0 dB) | -20 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 | Annex II 2.3.2, formulae (2.3.13) and (2.3.14) | Aerodynamic speed law at v0 = 300 km/h reduces to Table G-6 verbatim | 50 lg 2 = 15.051 dB on every band | 0 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 | Annex II 2.3.2, formula (2.3.12) | Impact roughness at the tabulated joint density n_l = 0,01 per m | Table G-4 verbatim | 0 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+
+</details>
+
+<details>
+<summary><b>Railway rolling stock noise and its reference track (ISO 3095)</b>: 100% (16/16)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
+|:---|:---|:---|:---|:---|:---:|:---:|
+| ISO 3095:2013 Figure 2 | Default upper limit of the one-third octave band rail roughness, the 22 levels printed beside the points, 40 cm to 0,315 cm, dB re 1 µm | 22/22 printed levels | 22/22 printed levels | exact | 0 % | ![Pass][cv-pass] Pass |
+| EN 15610:2009 Annex B.9.2 | The roughness limit as the listing types it, 22 wavelengths and levels, against the published Figure 2 limit, dB re 1 µm | 22/22 listed levels | 22/22 listed levels | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 3095:2013 Figure 3 | Default lower limits of the vertical and lateral track decay rates, the table beside the curves, 250 Hz to 5 kHz, dB/m | 28/28 printed cells | 28/28 printed cells | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 3095:2013 7.5.1.1, Figure 10 | Microphone positions of the maximum level starting test for the 42, 54, 87 and 108 m units drawn, m behind the front of the unit | 42 m, position 1 = -10 m; 54 m, position 1 = -10 m; 54 m, position 2 = 17 m; 87 m, position 1 = -10 m; 87 m, position 2 = 33.5 m; 108 m, position 1 = -10 m; 108 m, position 2 = 17 m; 108 m, position 3 = 44 m | 42 m, position 1 = -10 m; 54 m, position 1 = -10 m; 54 m, position 2 = 17 m; 87 m, position 1 = -10 m; 87 m, position 2 = 33.5 m; 108 m, position 1 = -10 m; 108 m, position 2 = 17 m; 108 m, position 3 = 44 m | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 3095:2013 Table G.2 | Result of the standstill budget, the reading plus the mean value corrections, dB | 55.68 dB (+/-0.005 dB) | 55.68 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| ISO 3095:2013 Table G.2 | Combined standard uncertainty of the standstill budget, Formula G.5, dB | 0.83 dB (+/-0.005 dB) | 0.828 dB | -0.002 dB | 40 % | ![Pass][cv-pass] Pass |
+| ISO 3095:2013 Table G.2 | Expanded uncertainty of the standstill budget, k = 2, Formula G.6, dB | 1.66 dB (+/-0.005 dB) | 1.656 dB | -0.004 dB | 80 % | ![Pass][cv-pass] Pass |
+| ISO 3095:2013 Figure G.1 | Order of the bars by share of the variance: the nine distinct shares of the thirteen inputs, largest first, each with its inputs (seven inputs tie in three groups, which the figure draws in Table G.2 order) | 9/9 share groups | 9/9 share groups | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 3095:2013 Table G.1 | Standard uncertainty a/√3 (Formula G.2) of the eighteen rectangular rows whose print it gives, to the printed two decimals, dB | 18/18 rows | 18/18 rows | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 3095:2005 3.14, Formulae 9 and 10 | Transit exposure level of a 12 s record at 84 dB over a 5 s pass-by: SEL + 10 lg(T0/Tp) against the library's L_Aeq,T + 10 lg(T/Tp), dB | 87.802112 dB (+/-0 dB) | 87.802112 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| ISO 3095:2013 3.14 and 6.5 | L_pAeq,T of a steady 1 kHz tone of 1 Pa amplitude, where A-weighting is 0 dB: 10 lg(1/2/p0²), dB | 90.969 dB (+/-0.02 dB) | 90.969 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| EN 15610:2009 3.3 and 7.4.2 | Band level of a 3 µm sinusoidal roughness of 1 cm wavelength on a Fourier line, Method A: 10 lg(A²/2), dB re 1 µm | 6.532125 dB (+/-0 dB) | 6.532125 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| EN 15610:2009 7.3 | Curvature processing of an 11 mm pit 50 µm deep: the 0,375 m circle rests on its rims 6 mm from its middle, µm | -48.003072 µm (+/-0 µm) | -48.003072 µm | 0 µm | 0 % | ![Pass][cv-pass] Pass |
+| EN 15461:2008+A1:2010 Formula 1 and Annex A | Decay rate of a response A(0) exp(-βx) sampled every millimetre over 150 m, against 20 lg e^β, dB/m | 1.9978 dB/m (+/-0.02%) | 1.9978 dB/m | 0 dB/m | 6 % | ![Pass][cv-pass] Pass |
+| ISO 3095:2013 Annex C | Effect of a 3 dB exceedance in the 4 cm band at 36 km/h, carried whole onto 250 Hz, on a flat 25-band spectrum: 10 lg 25 - 10 lg(24 + 10^-0,3), dB | 0.087529 dB (+/-0 dB) | 0.087529 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| ISO 3095:2013 Annex D, Formula D.1 | Level increase of 60 dB measured over a 55 dB background, dB | 1.650885 dB (+/-0 dB) | 1.650885 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 
 </details>
 

@@ -1,0 +1,618 @@
+---
+title: "Ruido del material rodante: el ensayo de tipo ISO 3095"
+description: "Cómo se mide el ruido que emite un tren, una locomotora o un vagón para que dos mediciones se puedan comparar, según la ISO 3095:2013: los ensayos a vehículo parado, a velocidad constante, en arranque y en frenado, el nivel de paso sobre el tiempo de paso y el nivel de exposición al tránsito de la edición de 2005, la vía de referencia juzgada por la rugosidad del carril de la EN 15610 y las tasas de decaimiento de la vía de la EN 15461, las pequeñas desviaciones del anexo C y el balance de incertidumbre del anexo G, comprobado con los límites y el balance resuelto que imprime la norma."
+references:
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2013
+    title: "Acoustics — Railway applications — Measurement of noise emitted by railbound vehicles"
+    designation: "ISO 3095:2013"
+    primary: true
+    note: "La edición implementada (tercera edición, 2013-08-01): el ensayo a vehículo parado del apartado 5 y las fórmulas 1 a 3, el ensayo a velocidad constante del apartado 6 con la vía de referencia de 6.2 y los límites que imprimen las figuras 2 y 3, los ensayos de arranque del apartado 7 con las posiciones de la figura 10, el ensayo de frenado del apartado 8, la dispersión de 9.3, la velocidad de subida del anexo A, la fórmula B.1, las pequeñas desviaciones del anexo C, la corrección por ruido de fondo del anexo D, la comparabilidad del anexo E y el balance de incertidumbre del anexo G con su ejemplo, la tabla G.2."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2005
+    title: "Railway applications — Acoustics — Measurement of noise emitted by railbound vehicles"
+    designation: "ISO 3095:2005"
+    note: "La segunda edición, leída de la BS EN ISO 3095:2005, idéntica a ella: el nivel de exposición al tránsito de 3.14 y sus fórmulas 8 a 10, que la edición de 2013 suprimió."
+  - type: standard
+    organization: "European Committee for Standardization"
+    year: 2009
+    title: "Railway applications — Noise emission — Rail roughness measurement related to rolling noise generation"
+    designation: "EN 15610:2009"
+    note: "La rugosidad del carril con la que se juzga la vía de referencia del apartado 6.2.5 de la ISO 3095: la eliminación de picos de 7.2, el procesado por curvatura de 7.3, el método A de 7.4.2 con la síntesis por bandas del anexo C, el promedio de 7.6 y las líneas de medida de 6.4.3. Leída de la BS EN 15610:2009, idéntica a ella."
+  - type: standard
+    organization: "European Committee for Standardization"
+    year: 2010
+    title: "Railway applications — Noise emission — Characterisation of the dynamic properties of track sections for pass by noise measurements"
+    designation: "EN 15461:2008+A1:2010"
+    note: "Las tasas de decaimiento con las que se juzga la vía de referencia del apartado 6.2.6 de la ISO 3095: la malla de la figura 2, la caída de 10 dB de 6.7, la fórmula 1 y el suelo de la fórmula 2, con el anexo A. Leída de la BS EN 15461:2008+A1:2010, idéntica a ella."
+---
+
+import Scope from '../../../../../components/Scope.astro';
+import ScopeClaim from '../../../../../components/ScopeClaim.astro';
+import SeeAlso from '../../../../../components/SeeAlso.astro';
+import ThemeImage from '../../../../../components/ThemeImage.astro';
+
+Un tren que pasa frente a un micrófono son dos fuentes a la vez: el vehículo,
+con sus ruedas, sus equipos de tracción y su caja, y la vía por la que circula,
+cuyos carriles son rugosos y cuya respuesta a una rueda reparte la vibración a
+lo largo de ellos. La ISO 3095 es el ensayo de tipo del material rodante, el
+método con el que se mide un vehículo para que el resultado diga algo del
+vehículo. Fija dónde van los micrófonos, qué registran y cómo se promedian las
+pasadas, y en el ensayo a velocidad constante fija también la vía: un vehículo
+medido sobre una vía rugosa y viva suena más que el mismo vehículo sobre una
+lisa y bien amortiguada, y el resultado solo es comparable entre
+emplazamientos cuyas vías se parecen. Esa segunda mitad son dos normas más, la
+EN 15610 para la rugosidad de los carriles y la EN 15461 para la rapidez con
+que la vibración decae a lo largo de ellos, y esta página cubre las tres.
+
+<ThemeImage
+  src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rolling_stock_pass_by.svg"
+  alt="Nivel ponderado A con ponderación temporal F frente al tiempo en un registro de 14 s del paso de una unidad de 100 m a 80 km/h, a 7,5 m de la vía: el nivel sube de unos 64 dB a una meseta cerca de 82 dB mientras pasa la unidad y vuelve a bajar a unos 62 dB; el intervalo de medición sombreado va de 4 s a 8,5 s, el tiempo de paso de la unidad, con el nivel equivalente sobre él de 81,3 dB trazado como una recta horizontal y el máximo de 81,9 dB marcado"
+  width="92%"
+  loading="eager"
+/>
+
+*Un paso: la historia del nivel, el intervalo que tarda en pasar la unidad y
+los dos números que se leen de él.*
+
+## 1. Cuatro ensayos, y el que necesita una vía
+
+La ISO 3095:2013 tiene cuatro ensayos. Cada uno tiene sus posiciones de
+micrófono y su magnitud medida, y todos piden al menos tres pasadas por
+posición, que valen cuando quedan a no más de 3 dB unas de otras (9.3).
+
+| Ensayo | Magnitud | Micrófonos | Resultado | Apartado |
+| :--- | :--- | :--- | :--- | :--- |
+| A vehículo parado | $L_{p\mathrm{Aeq},T}$, $T \geq 20$ s | A 7,5 m del eje de la vía y 1,2 m sobre la cara superior del carril, en el centro de tramos iguales de 3 m a 5 m a lo largo de los dos lados de cada coche, más dos a 30° sobre una semicircunferencia de 7,5 m frente a cada extremo de la unidad (en un remolque, solo frente a los extremos con cabina) | Las posiciones promediadas en energía, ponderadas por la longitud que representa cada una, por serie; la media de tres series, redondeada al entero | 5 |
+| A velocidad constante | $L_{p\mathrm{Aeq},T_p}$ sobre el tiempo de paso | 7,5 m y 1,2 m a los dos lados; 25 m y 3,5 m admitidos a 200 km/h o más | La media de tres pasadas por lado y velocidad, redondeada; el lado más ruidoso | 6 |
+| Arranque, nivel máximo | $L_{p\mathrm{AFmax}}$ | 7,5 m y 1,2 m, en una sección 10 m por delante de la unidad y a lo largo de una unidad de más de 50 m | La mayor de las medias redondeadas | 7.5 |
+| Arranque, nivel promediado | $L_{p\mathrm{Aeq},T}$ | 25 m y 3,5 m, 10 m por delante de la unidad | La mayor de las medias redondeadas | 7.6 |
+| Frenado | $L_{p\mathrm{AFmax}}$, frenado de servicio completo desde 30 km/h | 7,5 m y 1,2 m, frente al centro del primer coche ya parado, ±10 m | La mayor de las medias redondeadas | 8 |
+
+Solo el ensayo a velocidad constante necesita una vía de referencia. Los
+ensayos de arranque y de frenado piden una vía sin juntas ni defectos visibles
+(7.3, 8.2), pero solo a velocidad constante domina el resultado el ruido de
+rodadura en el que participa la vía, y solo ahí limita la norma la rugosidad
+del carril y las tasas de decaimiento (6.2), las dos impresas como números. Un
+vehículo se puede medir igualmente sobre una vía que no cumpla alguno de los
+dos límites, pero su resultado es entonces de ese emplazamiento.
+
+### Cómo se hace la medida
+
+<ThemeImage
+  src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_rolling_stock_site.svg"
+  alt="Sección transversal y planta de un emplazamiento de paso ISO 3095. En la sección: un coche sobre una vía con balasto, la cara superior del carril como referencia, el micrófono A a 7,5 m del eje de la vía y 1,2 m sobre la cara superior del carril, la posición adicional B a 7,5 m y 3,5 m, y la posición C a 25 m y 3,5 m para 200 km/h o más, con el terreno en cualquier punto entre 0 m y 2 m por debajo de la cara superior del carril. En la planta: un tren sobre la vía, un micrófono a la distancia d, el triángulo sombreado entre el micrófono y la vía que llega a 2d a lo largo de la vía a cada lado y debe permitir la propagación libre, y un círculo de radio 3d alrededor del micrófono sin barreras, colinas, rocas, puentes ni edificios."
+  width="92%"
+/>
+
+*Los micrófonos del ensayo a velocidad constante y la zona que tiene que
+quedar libre a su alrededor.*
+
+| Requisito | Valor | Apartado |
+| :--- | :--- | :--- |
+| Micrófono | A 7,5 m del eje de la vía, 1,2 m sobre la cara superior del carril, a los dos lados de la unidad (basta uno cuando los dos son acústicamente idénticos); 25 m y 3,5 m admitidos desde 200 km/h; se recomienda además 7,5 m y 3,5 m cuando hay fuentes en la parte alta de la unidad | 6.4.1, 6.4.2 |
+| Propagación libre | En el triángulo entre la vía y el micrófono, que llega a lo largo de la vía al doble de la distancia del micrófono a cada lado: el terreno entre 0 m y −2 m respecto a la cara superior del carril, sin otras vías, sin nieve ni vegetación alta, sin agua, hielo, asfalto ni hormigón, sin nadie dentro | 6.1.1 |
+| Objetos reflectantes | Ninguno grande a menos de tres veces la distancia de medida del micrófono | 6.1.1 |
+| Ruido de fondo | $L_{p\mathrm{Aeq},T}$ de 20 s de fondo al menos 10 dB por debajo del nivel de paso, en cada banda de interés cuando se piden espectros | 6.1.3 |
+| Velocidad | Mantenida dentro de ±5 % en el tramo de medida, medida con un error máximo permitido del 3 % | 6.6.2 |
+| Registro | Empieza al menos 10 dB por debajo del nivel con la cabeza del tren frente al micrófono y acaba 10 dB por debajo del nivel con la cola frente a él | 6.6.3 |
+| Vía | Una superestructura uniforme a lo largo del doble de la distancia del micrófono a cada lado; balasto, traviesas de madera o de hormigón, sin apantallamiento; sin juntas ni defectos visibles; los límites de rugosidad y de tasas de decaimiento de 6.2.5 y 6.2.6; un radio de curva de 1 000 m, 3 000 m o 5 000 m según la velocidad, y una pendiente de 5:1 000 como mucho cuando se ensayan unidades motoras | 6.2 |
+
+## 2. El nivel de paso y el nivel de exposición al tránsito
+
+La magnitud del ensayo a velocidad constante es el nivel equivalente ponderado
+A sobre un intervalo de medición $T$ que va de $T_1$ a $T_2$ (3.14),
+
+$$
+L_{p\mathrm{Aeq},T} = 10 \lg \left( \frac{1}{T} \int_{T_1}^{T_2}
+\frac{p_\mathrm{A}^2(t)}{p_0^2}\,\mathrm{d}t \right)\ \mathrm{dB},
+$$
+
+y para una unidad múltiple o una composición fija el intervalo es el tiempo de
+paso de la unidad entera, de su cabeza a su cola, $T_p = l/v$ (6.6.3). Dentro de
+un tren el intervalo va del centro de la primera unidad ensayada al centro de
+la última. `pass_by_measurement` pondera A un registro de presión, guarda la
+historia del nivel $L_{p\mathrm{AF}}(t)$ con ponderación temporal F y lee el
+nivel equivalente y el máximo dentro del intervalo que recibe:
+
+```python
+import numpy as np
+from phonometry import environment
+
+fs = 16000
+length_m, speed_kmh, distance_m = 100.0, 80.0, 7.5
+tp = environment.pass_by_time(length_m, speed_kmh=speed_kmh)
+t = np.arange(int(14.0 * fs)) / fs
+front_s = 4.0                                  # la cabeza pasa frente al micrófono a los 4 s
+x_front = speed_kmh / 3.6 * (t - front_s)      # metros que la cabeza ha rebasado el micrófono
+# La unidad como una fuente lineal incoherente de su misma longitud: el valor
+# cuadrático medio en el micrófono sigue el ángulo que la unidad abarca desde él.
+angle = np.arctan(x_front / distance_m) - np.arctan((x_front - length_m) / distance_m)
+rng = np.random.default_rng(3095)
+p = 0.25 * np.sqrt(angle / np.pi + 1e-4) * rng.standard_normal(t.size)
+
+passby = environment.pass_by_measurement(p, fs, start_s=front_s, end_s=front_s + tp)
+print(round(tp, 2), round(passby.equivalent_level_db, 1), round(passby.max_level_db, 1))
+# 4.5 81.3 81.9   T_p en s, L_pAeq,Tp y L_pAFmax en dB
+```
+
+El apartado 6.6.3 pide además que el propio registro empiece al menos 10 dB por
+debajo del nivel con la cabeza frente al micrófono y acabe 10 dB por debajo del
+nivel con la cola frente a él. Si se le dice cuándo pasan la cabeza y la cola,
+el resultado guarda los dos márgenes y dice si bastan.
+
+La edición de 2005 de la norma definía una magnitud más, el **nivel de
+exposición al tránsito**: la energía del paso entero, medida sobre un
+intervalo lo bastante largo para contenerla toda, repartida solo sobre el
+tiempo de paso (ISO 3095:2005, 3.14, fórmulas 8 a 10),
+
+$$
+\mathrm{TEL} = 10 \lg \left( \frac{1}{T_p} \int_0^T
+\frac{p_\mathrm{A}^2(t)}{p_0^2}\,\mathrm{d}t \right)
+= L_{p\mathrm{Aeq},T} + 10 \lg \frac{T}{T_p}\ \mathrm{dB}.
+$$
+
+La edición de 2013 la suprimió, pero se sigue citando, y su forma sobrevive en
+la fórmula B.1, en la que un único remolque al final de un tren se mide desde
+su centro en adelante y la energía se reparte sobre el tiempo de paso de media
+unidad. Si se le pasa el tiempo de paso a `pass_by_measurement`, el resultado
+lleva la energía de su intervalo repartida sobre él:
+
+```python
+whole = environment.pass_by_measurement(
+    p, fs, start_s=0.0, end_s=14.0, pass_by_time_s=tp,
+    front_passing_s=front_s, rear_passing_s=front_s + tp,
+)
+print(round(whole.start_margin_db, 1), round(whole.end_margin_db, 1), whole.recording_interval_sufficient)
+# 14.0 17.8 True
+print(round(whole.equivalent_level_db, 1), round(whole.normalized_level_db, 1))
+# 77.1 82.0   L_pAeq,T sobre los 14 s del registro, y el TEL
+```
+
+Aquí el nivel de exposición al tránsito queda 0,7 dB por encima del nivel de
+paso porque cuenta también la energía de la aproximación y del alejamiento,
+que el nivel de paso deja fuera. `transit_exposure_level` es la fórmula 10
+sola, para un nivel y dos duraciones que ya se conocen.
+
+## 3. Tres pasadas, una media redondeada y el lado más ruidoso
+
+Todos los ensayos acaban igual: las pasadas de cada posición se promedian
+aritméticamente, la media se redondea al decibelio entero más próximo y el
+resultado es la mayor de esas medias, el lado más ruidoso a velocidad
+constante y la posición más ruidosa en arranque o en frenado (6.7.1, 7.5.4,
+7.6.4, 8.7). `rolling_stock_test` lo hace para cualquiera de los cuatro
+métodos, y dice si las pasadas de cada posición caben en los 3 dB de 9.3:
+
+```python
+test = environment.rolling_stock_test(
+    {"izquierda": [81.3, 82.1, 81.6], "derecha": [80.4, 80.9, 81.2]}
+)
+print(dict(test.reported_levels_db), test.final_level_db, test.valid)
+# {'izquierda': 82.0, 'derecha': 81.0} 82.0 True
+```
+
+La norma redondea al entero más próximo sin una regla para el valor que cae
+justo en la mitad; la biblioteca redondea la mitad hacia arriba, y lo dice en
+la documentación del resultado. Una normalización a una velocidad de
+referencia, cuando se pide, se aplica a las pasadas antes de esto (6.7.1).
+
+Las cláusulas que rodean al ensayo son reglas pequeñas que la biblioteca da
+como funciones: las velocidades del ensayo de tipo de 6.6.2, 80 km/h y la
+velocidad máxima, o la máxima sola hasta 80 km/h; el radio de curva mínimo de
+6.2.2; y las posiciones del ensayo de arranque por nivel máximo, 10 m por
+delante de la unidad, 10 m por delante de su centro cuando mide más de 50 m, y
+repartidas por igual entre ambas cuando esas dos distan más de 50 m (7.5.1.1,
+figura 10):
+
+```python
+print(environment.type_test_speeds(160.0), environment.minimum_curve_radius(160.0))
+# (80.0, 160.0) 5000.0
+print(environment.acceleration_test_positions(108.0))
+# [-10.  17.  44.]   metros por detrás de la cabeza de la unidad, como las dibuja la figura 10
+```
+
+El ensayo a vehículo parado promedia en energía las posiciones de una serie,
+ponderando cada una por la longitud de la unidad que representa,
+$(\pi/2) \times 7{,}5$ m para las posiciones frente a los extremos (5.8.1,
+fórmulas 1 y 2), e informa de la media de tres series redondeada al entero:
+
+```python
+# Una locomotora de 20 m: cuatro tramos de 5 m por lado y dos posiciones frente a cada extremo.
+side = [66.0, 68.5, 70.0, 67.0]
+ends = [64.0, 63.5]
+mesh = np.array(side + side + ends + ends)
+sets = mesh + np.array([[0.0], [0.4], [-0.3]])  # tres series, una fila cada una
+lengths = [5.0] * 8 + [environment.STATIONARY_END_POSITION_LENGTH_M] * 4
+standing = environment.stationary_test(sets, lengths)
+print(standing.set_levels_db.round(2), standing.reported_level_db)
+# [66.31 66.71 66.01] 66.0
+```
+
+## 4. La vía de referencia
+
+### 4.1 La rugosidad de los carriles (EN 15610)
+
+La **rugosidad acústica** de un carril es la altura de su superficie de
+rodadura a lo largo de él, medida con un palpador sobre una línea de la cabeza
+del carril (EN 15610, 3.1). El registro se procesa en tres etapas antes de
+tomar su espectro (7.1). El operador quita las juntas, las soldaduras y los
+defectos. Se eliminan los picos estrechos hacia arriba, que son granos de
+suciedad bajo el palpador: un pico es donde la segunda derivada baja de
+$-10^7\ \mathrm{\mu m/m^2}$ y la primera cambia de signo, sus bordes son donde
+la pendiente baja de $5 \times 10^3\ \mathrm{\mu m/m}$, y se sustituye por una
+recta cuando su altura supera $w^2/a$ con $a = 3$ m, de modo que un pico
+estrecho se va y uno ancho, que la rueda sí nota, se queda (7.2). Después cada
+punto se eleva hasta donde se apoyaría una rueda de 0,375 m de radio, porque
+el palpador entra en hoyos por encima de los que la rueda pasa rodando (7.3).
+
+El método A de 7.4.2 corta luego el registro en segmentos de al menos 1 m que
+se solapan a la mitad, quita la tendencia de cada uno, aplica una ventana de
+Hanning y promedia sus espectros; el valor de la banda de tercio de octava es
+la energía de las líneas que caen dentro de ella, y las dos líneas que
+cabalgan un borde cuentan por la parte de su anchura que queda dentro
+(anexo C). El nivel es $L_r = 10 \lg (r_\mathrm{RMS}^2 / r_0^2)$ dB con
+$r_0 = 1\ \mathrm{\mu m}$ (3.3), y un segmento resuelve longitudes de onda
+hasta la cuarta parte de su longitud (7.5), así que un segmento de 1 m da
+bandas desde la de 0,25 m hacia abajo.
+
+```python
+limit = environment.REFERENCE_TRACK_ROUGHNESS_LIMIT_DB
+x = np.arange(0.0, 20.0, 1.0e-3)               # 20 m de carril, una muestra por milímetro
+
+def rail(offsets_db, seed):
+    """Un registro con sus bandas 3 dB bajo el límite, o donde diga offsets_db."""
+    rng = np.random.default_rng(seed)
+    r = np.zeros_like(x)
+    for wavelength, level in limit.items():
+        target = level + offsets_db.get(wavelength, -3.0)
+        k = 10.0 ** np.linspace(-0.045, 0.045, 10) / wavelength  # diez líneas repartidas por la banda
+        amplitude = np.sqrt(2.0 * 10.0 ** (target / 10.0) / k.size)
+        for kk in k:
+            r += amplitude * np.cos(2.0 * np.pi * kk * x + rng.uniform(0.0, 2.0 * np.pi))
+    return r
+
+# El carril 1 algo ondulado de 5 cm a 2,5 cm, el carril 2 en 4 cm y 3,15 cm.
+left = rail({0.05: -1.0, 0.04: 2.0, 0.0315: 2.5, 0.025: 0.5}, seed=1)
+right = rail({0.04: 1.0, 0.0315: 1.5}, seed=2)
+left[7300] += 25.0                             # un grano de suciedad bajo el palpador
+spectra = [
+    environment.acoustic_roughness_spectrum(r, sample_spacing_m=1.0e-3)
+    for r in (left, right)
+]
+print(spectra[0].segment_count, spectra[0].wavelengths_m[0], spectra[0].wavelengths_m[-1])
+# 39 0.25 0.0025
+print(round(spectra[0].level_at(0.0315), 1), round(spectra[1].level_at(0.0315), 1), limit[0.0315])
+# -2.6 -3.6 -5.0   dB re 1 um: los dos carriles por encima del límite en la banda de 3,15 cm
+```
+
+El límite es la figura 2 de la ISO 3095, que imprime su valor junto a cada
+punto, veintidós de ellos de 0,4 m a 3,15 mm, así que la biblioteca lee los
+números y no una curva (`REFERENCE_TRACK_ROUGHNESS_LIMIT_DB`). El listado del
+anexo B de la EN 15610 escribe los mismos veintidós valores como su «2007 TSI
+limit», una segunda impresión contra la que la batería de conformidad comprueba
+la primera. Hasta 190 km/h la rugosidad se tiene que conocer de 0,003 m a
+0,10 m, y por encima hasta 0,25 m (6.2.5). Los espectros de los registros de
+una línea se promedian en valores cuadráticos medios
+(`average_roughness_spectra`, 7.6), y el apartado 6.4.3 fija en cuántas líneas
+se mide un carril según la anchura de su banda de rodadura
+(`roughness_measurement_lines`).
+
+<ThemeImage
+  src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rolling_stock_track_roughness.svg"
+  alt="Nivel de rugosidad por bandas de tercio de octava en dB re 1 µm frente a la longitud de onda de 40 cm a 0,25 cm, la más larga a la izquierda: el límite de la figura 2 baja de 17,1 dB a 40 cm a −11,0 dB a 0,315 cm, y los espectros de los dos carriles quedan entre unos 2 dB y 4 dB por debajo salvo entre 5 cm y 2,5 cm, donde se acercan y lo superan en las bandas de 4 cm a 2,5 cm hasta en 2,4 dB, y caen bruscamente en la banda de 0,25 cm, pasado el final del límite; el título da el veredicto sobre la vía de referencia, cumple, gracias al anexo C, cuyo efecto sobre el nivel de paso es de 0,57 dB"
+  width="88%"
+/>
+
+*Los dos carriles frente al límite de la figura 2: por debajo en todas partes
+menos en 4 cm y 3,15 cm, donde lo superan los dos, y en 2,5 cm, donde lo supera
+uno. La vía solo cumple gracias al anexo C (apartado 4.4), y el título lo dice.*
+
+### 4.2 Con qué rapidez decae la vibración a lo largo del carril (EN 15461)
+
+La **tasa de decaimiento de la vía** es la atenuación de la vibración a lo
+largo del carril, en decibelios por metro, un valor por banda de tercio de
+octava (EN 15461, 3.6). Un acelerómetro se fija al carril en el centro de un
+vano entre traviesas y un martillo golpea el carril en las posiciones de la
+figura 2, cada cuarto de vano hasta dos vanos y medio y luego más espaciadas,
+hasta 66 vanos (6.7, `track_decay_excitation_positions`). A partir de las
+magnitudes por banda $|A(x_n)|$ de las respuestas, con la directa $A(x_0)$ en
+primer lugar, la fórmula 1 estima la tasa a partir de la integral de la
+respuesta al cuadrado y no de una pendiente ajustada,
+
+$$
+\mathrm{DR} = \frac{4{,}343}{\displaystyle\sum_{n=0}^{n_\mathrm{max}}
+\frac{|A(x_n)|^2}{|A(x_0)|^2}\,\Delta x_n}\ \mathrm{dB/m},
+$$
+
+donde $\Delta x_n$ es la longitud de carril que representa cada posición
+(anexo A). Una malla que se detiene en $x_\mathrm{max}$ no puede medir una tasa
+por debajo de $\mathrm{DR}_\mathrm{min} = 4{,}343 / x_\mathrm{max}$ (fórmula 2), y una banda cuya tasa no
+llega al menos al doble de ese valor no es apta; además la respuesta más
+lejana tiene que quedar 10 dB por debajo de la directa (6.7).
+
+```python
+bands = [100.0, 125.0, 160.0, 200.0, 250.0, 315.0, 400.0, 500.0, 630.0,
+         800.0, 1000.0, 1250.0, 1600.0, 2000.0, 2500.0, 3150.0, 4000.0, 5000.0]
+# Las tasas que podría tener una vía con balasto y traviesas de hormigón, dB/m.
+vertical = [9.0, 8.0, 6.0, 4.0, 3.0, 3.5, 7.0, 8.0, 7.0, 3.0, 1.2, 0.9, 0.9, 1.0, 1.1, 1.3, 1.5, 1.8]
+lateral = [6.0, 5.0, 4.0, 3.0, 3.0, 2.2, 1.2, 0.9, 0.7, 0.6, 0.5, 0.5, 0.6, 0.8, 0.9, 1.0, 1.2, 1.4]
+x_hammer = environment.track_decay_excitation_positions(sleeper_spacing_m=0.6)
+
+def responses(rates_db_per_m):
+    """Magnitudes por banda que decaen exponencialmente en la malla del martillo, una fila por posición."""
+    beta = np.asarray(rates_db_per_m) / (20.0 * np.log10(np.e))
+    return np.exp(-np.outer(x_hammer, beta))
+
+decay = [
+    environment.track_decay_rate(responses(vertical), frequencies_hz=bands, direction="vertical"),
+    environment.track_decay_rate(responses(lateral), frequencies_hz=bands, direction="lateral"),
+]
+print(x_hammer[-1], round(decay[0].minimum_measurable_db_per_m, 3), decay[1].far_field_sufficient)
+# 39.6 0.11 True
+print(round(decay[0].rate_at(1000.0), 2), round(decay[1].rate_at(1000.0), 2))
+# 1.19 0.5
+```
+
+La fórmula 1 da 1,19 dB/m para una respuesta que decae exactamente a
+1,2 dB/m: en la malla de la figura 2 la suma hace las veces de la integral, y
+lee una exponencial alrededor de un 1 % baja. Los límites son la figura 3 de la
+ISO 3095, que los imprime en una tabla junto a sus curvas, catorce bandas de
+250 Hz a 5 kHz para cada dirección (`REFERENCE_TRACK_DECAY_LIMITS_DB_PER_M`);
+por debajo de 250 Hz no fija ninguno.
+
+<ThemeImage
+  src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rolling_stock_track_decay.svg"
+  alt="Tasa de decaimiento de la vía en dB/m en un eje logarítmico de 0,01 a 100 frente a las bandas de tercio de octava de 100 Hz a 5 kHz: la tasa vertical tiene un máximo de unos 8 dB/m entre 400 Hz y 630 Hz y baja a unos 0,9 dB/m en 1,25 kHz, por encima de su límite inferior de la figura 3, de 6 dB/m y 0,8 dB/m ahí; la tasa lateral baja de 6 dB/m en 100 Hz a 0,5 dB/m en 1 kHz, por encima de su propio límite inferior, cuyo mínimo es 0,2 dB/m"
+  width="88%"
+/>
+
+*Las dos tasas de decaimiento por encima de los límites inferiores de la
+figura 3, la vertical por poco en las bandas de 1,25 kHz y 1,6 kHz.*
+
+### 4.3 El veredicto
+
+`check_reference_track` reúne las dos mitades con la geometría de 6.2.2 y
+devuelve un único veredicto, cuyo `passes` es la respuesta y cuyas
+`conditions` son todos los requisitos que ha juzgado, cada uno con el apartado
+del que sale y los números con los que se ha juzgado. Cuando las tasas de
+decaimiento vienen con su malla, se juzgan también el suelo de la fórmula 2 y
+la caída de 10 dB de la EN 15461. El veredicto no tiene valor de verdad propio,
+así que no se puede usar en un `if` por descuido; la respuesta es `.passes`.
+
+```python
+check = environment.check_reference_track(
+    spectra, decay, speed_kmh=160.0, curve_radius_m=6000.0, track_gradient_ratio=0.002
+)
+print(check.passes)
+# False
+for condition in check.failed:
+    print(condition.clause, "|", condition.requirement, "|", condition.detail)
+# 6.2.5 | roughness at or below the limit of Figure 2 | exceeds by 2.4 dB at 0.0315 m
+```
+
+El apartado 8 de la EN 15610 no admite ninguna banda por encima del límite, y
+el 6.2.5 por sí solo tampoco. Añade una salida.
+
+### 4.4 Pequeñas desviaciones: el anexo C
+
+El anexo C acepta una vía cuya rugosidad supera el límite cuando el exceso
+cambia el nivel de paso en no más de 1 dB, juzgado a cada velocidad sobre un
+espectro de paso medido. Los carriles se promedian en valores cuadráticos
+medios; el espectro **justo conforme** es el medido rebajado hasta el límite
+(fórmula C.1); los dos se llevan de longitud de onda a frecuencia a la
+velocidad del tren, $f = v/\lambda$, y sus energías por banda se reparten entre
+las bandas de tercio de octava normalizadas, la síntesis del anexo C de la
+EN 15610 adaptada a bandas de anchura desigual; su diferencia es la corrección
+$\Delta L_{r,\mathrm{rail}}(f)$ (fórmula C.2). El espectro de ruido medido
+menos esa corrección es el espectro **revisado** (fórmula C.3), lo menos que se
+habría podido medir sobre una vía conforme, y el efecto es la suma energética
+del espectro medido menos la del revisado (fórmula C.4):
+
+```python
+noise = [68.0, 69.5, 71.0, 72.5, 74.0, 76.0, 78.0, 80.5, 83.0,
+         85.5, 87.0, 87.5, 86.5, 84.5, 82.0, 79.0, 75.5, 72.0]   # L_pAeq,Tp(f) a 160 km/h, dB
+average = environment.average_roughness_spectra(spectra)
+small = environment.check_small_roughness_deviations(
+    average, noise, frequencies_hz=bands, speed_kmh=160.0
+)
+print(round(small.impact_db, 2), small.passes)
+# 0.57 True
+check = environment.check_reference_track(
+    spectra, decay, speed_kmh=160.0, curve_radius_m=6000.0,
+    track_gradient_ratio=0.002, small_deviations=small,
+)
+print(check.passes)
+# True
+```
+
+A 160 km/h las bandas de 5 cm a 2,5 cm caen entre 890 Hz y 1,8 kHz, que es
+donde está el máximo de este espectro de paso, así que la corrección es de
+0,7 dB a 1,6 dB en las tres bandas de 1 kHz a 1,6 kHz y el efecto sobre el nivel
+es de 0,57 dB: la vía se acepta para este vehículo a esta velocidad. El mismo
+exceso a otra velocidad cae sobre otras frecuencias y hay que juzgarlo de
+nuevo, y `check_reference_track` rechaza un veredicto del anexo C calculado a
+otra velocidad, sobre algo que no sea el promedio cuadrático de los carriles
+que juzga (C.2.1), o frente a un límite que no sea aquel con el que los juzga
+(fórmula C.1).
+
+<ThemeImage
+  src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rolling_stock_small_deviation.svg"
+  alt="Nivel de paso ponderado A por bandas de tercio de octava de 100 Hz a 5 kHz a 160 km/h: el espectro medido sube de 68 dB a un máximo de 87,5 dB en 1,25 kHz y baja a 72 dB en 5 kHz; el espectro revisado coincide con él salvo en 1 kHz, 1,25 kHz y 1,6 kHz, donde queda de 0,7 dB a 1,6 dB por debajo; el título da el efecto sobre el nivel de paso, 0,57 dB, aceptada"
+  width="88%"
+/>
+
+*Lo que la rugosidad por encima del límite podría haber añadido, banda a
+banda, y en total menos del 1 dB que admite el anexo C.*
+
+<details>
+<summary>Mostrar el código de estas figuras</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+passby.plot(language="es")                     # la historia del nivel y el intervalo T_p
+check.plot(panel="roughness", language="es")   # los carriles frente a la figura 2
+check.plot(panel="decay", language="es")       # las tasas de decaimiento frente a la figura 3
+small.plot(language="es")                      # los espectros del anexo C
+plt.show()
+```
+
+</details>
+
+El anexo E responde a una pregunta vecina, si dos emplazamientos de ensayo son
+comparables en rugosidad: `roughness_comparability` forma las envolventes
+mínima y máxima de sus dos espectros de rugosidad (fórmula E.1), lleva cada uno
+por la cadena del anexo C frente al espectro de ruido de cada emplazamiento y
+acota la diferencia que la rugosidad sola podría producir en el nivel de paso
+(fórmulas E.4 y E.5).
+
+## 5. La incertidumbre del anexo G
+
+El anexo G trata el resultado como la lectura más correcciones no
+correlacionadas, así que todos los coeficientes de sensibilidad valen 1
+(fórmulas G.1 y G.4); una entrada de la que solo se conocen sus límites
+$\pm a$ tiene $u = a/\sqrt{3}$ (fórmula G.2), la incertidumbre típica combinada
+es la raíz de la suma de cuadrados (fórmula G.5) y la incertidumbre expandida
+es el doble (fórmula G.6). La tabla G.2 resuelve el balance de una medición a
+vehículo parado, y es el oráculo numérico del módulo:
+
+```python
+from phonometry import metrology
+
+rows = [  # tabla G.2: entrada, corrección del valor medio e incertidumbre típica, dB
+    ("calibrador, referencia", 0.0, 0.14), ("calibrador, largo plazo", 0.0, 0.04),
+    ("calibrador, alimentación", 0.0, 0.06), ("calibrador, distorsión", 0.105, 0.06),
+    ("sonómetro, dirección", 0.0, 0.25), ("sonómetro, frecuencia", 0.0, 0.25),
+    ("sonómetro, linealidad", 0.0, 0.46), ("calibrador, meteorología", 0.0, 0.14),
+    ("sonómetro, pantalla antiviento", 0.06, 0.03), ("trípode", 0.0, 0.35),
+    ("distancia", 0.0, 0.06), ("nivel del terreno", 0.515, 0.30), ("redondeo", 0.0, 0.29),
+]
+budget = environment.pass_by_uncertainty(
+    55.0, [metrology.Quantity(v, u, name=n) for n, v, u in rows]
+)
+print(round(budget.level_db, 2), round(budget.combined_uncertainty_db, 2),
+      round(budget.expanded_uncertainty_db, 2))
+# 55.68 0.83 1.66   la tabla G.2 imprime 55,68, 0,83 y 1,66
+print(round(metrology.rectangular(0.0, 0.8).uncertainty, 2))
+# 0.46   la fila de linealidad de la tabla G.1, +/-0,8 dB entre la raíz de 3
+```
+
+La figura G.1 dibuja la fracción de la varianza de cada entrada, de mayor a
+menor, y el resultado dibuja las mismas barras en el mismo orden; la batería de
+conformidad comprueba el orden con las etiquetas de la figura.
+
+<ThemeImage
+  src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rolling_stock_uncertainty.svg"
+  alt="Gráfico de barras de la fracción de la varianza del resultado que aporta cada entrada, de mayor a menor: la linealidad del sonómetro unos 0,31, el trípode 0,18, el nivel del terreno 0,13, el redondeo 0,12, la dirección y la respuesta en frecuencia del sonómetro 0,09 cada una, los términos de referencia y de meteorología del calibrador 0,03 cada uno, y cinco entradas por debajo de 0,01; el título da la incertidumbre típica combinada de 0,83 dB y la expandida de 1,66 dB"
+  width="88%"
+/>
+
+*El balance de la tabla G.2 como lo dibuja la figura G.1: la linealidad del
+sonómetro, el trípode y el terreno se llevan tres quintas partes de la
+varianza.*
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+budget.plot(language="es")
+plt.show()
+```
+
+</details>
+
+## 6. El resto de la norma
+
+Tres piezas menores completan los ensayos. El anexo A caracteriza el ruido
+impulsivo por la subida más rápida de $L_{p\mathrm{AF}}(t)$ en los tramos que
+suben sin interrupción al menos 10 dB (fórmula A.1). El apartado 6.3.4 acepta
+un vehículo acoplado a la unidad ensayada cuando añade no más de 2,0 dB al
+nivel de paso, con los dos niveles redondeados a un decimal. El anexo D
+corrige un nivel por un ruido de fondo estable al que supera en más de 3 dB
+(fórmula D.1).
+
+```python
+times = np.arange(0.0, 3.0, 0.01)              # una historia L_pAF cada 10 ms
+levels = np.full(times.size, 70.0)
+levels[100:121] = 70.0 + 0.6 * np.arange(21)   # 12 dB en 0,2 s, desde 1 s
+levels[121:] = 82.0
+print(round(environment.impulsiveness_rise_speed(times, levels).rise_speed_db_per_s, 1))
+# 60.0   dB/s
+neutral = environment.check_adjacent_vehicle_neutrality(83.04, 81.06)
+print(neutral.difference_db, neutral.passes)
+# 1.9 True
+print(round(environment.background_level_increase(78.0, 72.0), 2))
+# 1.26   dB que el fondo añade a los 78 dB medidos
+```
+
+## 7. Donde el texto impreso se contradice
+
+Las filas de oráculo de las tablas G.1 y G.2 no concuerdan todas, y el
+[registro de erratas](/phonometry/es/reference/errata/) tiene la aritmética de
+cada una: la incertidumbre típica de la distancia del micrófono de 25 m se
+imprime como 0,004 dB donde su intervalo da 0,04 dB; el nivel del terreno a
+7,5 m es de 0,55 dB en la tabla G.1 y de 0,30 dB en la tabla G.2, que es lo que
+da la fórmula G.2; y el intervalo de la pantalla antiviento se imprime con sus
+extremos al revés. Ninguna cambia un número que calcule la biblioteca: las
+filas de conformidad leen la tabla G.2 tal como está impresa y fijan las filas
+de la tabla G.1 que reproduce la fórmula G.2. En la EN 15610, el bucle de
+eliminación de picos del listado del anexo B se repite mientras alguna segunda
+derivada esté por debajo del umbral, sin el cambio de signo que el apartado
+7.2 c) también pide a un pico, así que nunca acaba en un cambio brusco de
+pendiente del carril que no es ningún pico. Ni él ni el «until no further spike
+is detected» del apartado, leído al pie de la letra, acaban con un pico que se
+detecta y que la prueba de altura conserva; la biblioteca termina la pasada
+cuando una vuelta no elimina nada, que es como lee el apartado.
+
+## Qué cubre esta guía
+
+<Scope>
+<ScopeClaim status="covered" label="Cubierto">
+Los cálculos de la ISO 3095:2013 a partir de registros y niveles medidos:
+`pass_by_measurement` (el nivel equivalente sobre cualquier intervalo, el
+máximo con ponderación temporal F, los márgenes del registro de 6.6.3 y el
+nivel de exposición al tránsito de la ISO 3095:2005 o la fórmula B.1),
+`transit_exposure_level`, `pass_by_time`, `stationary_unit_level` y
+`stationary_test` (fórmulas 1 a 3 y 5.8.1), `rolling_stock_test` para los
+ensayos a velocidad constante, de arranque y de frenado con la dispersión de
+9.3, `type_test_speeds`, `minimum_curve_radius`,
+`acceleration_test_positions`, `impulsiveness_rise_speed` (anexo A),
+`check_adjacent_vehicle_neutrality` (6.3.4), `background_level_increase`
+(anexo D), `check_small_roughness_deviations` (anexo C),
+`roughness_comparability` (anexo E), `check_reference_track` (6.2) y
+`pass_by_uncertainty` (anexo G). De la EN 15610:2009, la eliminación de picos,
+el procesado por curvatura, el método A con la síntesis por bandas del anexo C,
+el promedio de 7.6 y las líneas de 6.4.3; de la EN 15461:2008+A1:2010, la tasa
+de decaimiento de la fórmula 1 en la malla de la figura 2 con el suelo de la
+fórmula 2 y la caída de 10 dB. Los límites de las figuras 2 y 3 son tablas de
+solo lectura, y todos los resultados se dibujan con `.plot()`.
+</ScopeClaim>
+
+<ScopeClaim status="not-covered" label="No cubierto">
+La medición en sí: el trazado de la malla a vehículo parado, la localización de
+$T_1$ y $T_2$ dentro de un tren, las comprobaciones del emplazamiento y de la
+meteorología, que corresponden a quien ensaya, y los casos especiales del
+anexo B más allá de la fórmula B.1. La normalización a una velocidad de
+referencia que menciona 6.7.1, para la que la norma no da fórmula; la
+diferencia tonal, que 6.7.2 remite a la ISO 1996-2 o a la DIN 45681; las
+mediciones en andenes, paradas y puentes del anexo F. En la EN 15610, la
+supresión de juntas, soldaduras y defectos (el anexo A muestra cómo son; lo
+hace el operador) y el método B, los filtros digitales de tercio de octava de
+7.4.3. En la EN 15461, la medición de las funciones de respuesta en frecuencia:
+las tasas se calculan a partir de sus magnitudes por banda. La rugosidad de
+las ruedas, que las normas del carril no cubren.
+</ScopeClaim>
+</Scope>
+
+<SeeAlso>
+
+## Véase también
+
+- [Emisión de la fuente ferroviaria CNOSSOS-EU](/phonometry/es/environment/sources/cnossos-rail-emission/): el lado de la predicción del mismo ruido, donde los espectros de rugosidad del carril y de la rueda y las funciones de transferencia se convierten en una potencia sonora por metro.
+- [Vibración junto a una vía férrea (DIN 45672)](/phonometry/es/vibration/immission/railway-vibration/): lo que los mismos trenes transmiten al terreno y a los edificios junto a la vía.
+- [Ruido y pavimento: el método estadístico de paso](/phonometry/es/environment/sources/road-surface-pass-by/): el equivalente en carretera, donde el pavimento se mide a través del tráfico que circula por él.
+- Referencia de la API: [`environment.sources.rolling_stock_noise`](/phonometry/es/reference/api/environment/rolling-stock-noise/), [`environment.sources.acoustic_roughness`](/phonometry/es/reference/api/environment/acoustic-roughness/), [`environment.sources.track_decay`](/phonometry/es/reference/api/environment/track-decay/).
+
+</SeeAlso>

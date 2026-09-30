@@ -49,6 +49,7 @@ from phonometry.building import impact_force_exposure_level
 from phonometry.emission import sound_intensity
 from phonometry.environment import (
     impulsive_sound_adjustment,
+    pass_by_measurement,
     sound_pressure_level_history,
 )
 from phonometry.io import Signal
@@ -99,6 +100,7 @@ IN_PASCALS = [
     (single_strike_sel, _RECORD, {}),
     (strike_sel_spectrum, _RECORD, {}),
     (sound_pressure_level_history, _RECORD, {}),
+    (pass_by_measurement, _RECORD, {"start_s": 0.2, "end_s": 0.8}),
 ]
 IN_PASCALS_IDS = [f.__name__ for f, _, _ in IN_PASCALS]
 

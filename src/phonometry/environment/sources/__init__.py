@@ -1,8 +1,17 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
-"""environment.sources subdomain of phonometry: environmental source emission (CNOSSOS, road surfaces, wind turbines)."""
+"""environment.sources subdomain of phonometry: environmental source emission (CNOSSOS, road surfaces, rolling stock and its reference track, wind turbines)."""
 
 from __future__ import annotations
 
+from .acoustic_roughness import (
+    AcousticRoughnessSpectrum,
+    acoustic_roughness_spectrum,
+    average_roughness_spectra,
+    curvature_processed_roughness,
+    redistributed_band_energies,
+    remove_roughness_spikes,
+    roughness_measurement_lines,
+)
 from .cnossos_rail import (
     AERODYNAMIC_REFERENCE_SPEED,
     AERODYNAMIC_THRESHOLD_SPEED,
@@ -76,6 +85,39 @@ from .cnossos_road import (
     road_surface_coefficients,
     road_vehicle_sound_power,
 )
+from .rolling_stock_noise import (
+    PREFERRED_PASS_BY_SPEEDS_KMH,
+    REFERENCE_TRACK_DECAY_LIMITS_DB_PER_M,
+    REFERENCE_TRACK_ROUGHNESS_LIMIT_DB,
+    ROLLING_STOCK_TEST_METHODS,
+    STATIONARY_END_POSITION_LENGTH_M,
+    AdjacentVehicleNeutrality,
+    PassByMeasurement,
+    PassByUncertainty,
+    ReferenceTrackCheck,
+    RiseSpeedResult,
+    RollingStockTestResult,
+    RoughnessComparability,
+    SmallRoughnessDeviation,
+    StationaryTestResult,
+    TrackCondition,
+    acceleration_test_positions,
+    background_level_increase,
+    check_adjacent_vehicle_neutrality,
+    check_reference_track,
+    check_small_roughness_deviations,
+    impulsiveness_rise_speed,
+    minimum_curve_radius,
+    pass_by_measurement,
+    pass_by_time,
+    pass_by_uncertainty,
+    rolling_stock_test,
+    roughness_comparability,
+    stationary_test,
+    stationary_unit_level,
+    transit_exposure_level,
+    type_test_speeds,
+)
 from .statistical_pass_by import (
     SPB_ANNEX_D_SURFACES_DB,
     SPB_CONFIDENCE_INTERVALS_DB,
@@ -96,6 +138,13 @@ from .statistical_pass_by import (
     statistical_pass_by,
     statistical_pass_by_index,
 )
+from .track_decay import (
+    TRACK_DECAY_DIRECTIONS,
+    TRACK_DECAY_EXCITATION_INDICES,
+    TrackDecayRate,
+    track_decay_excitation_positions,
+    track_decay_rate,
+)
 from .wind_turbine import (
     WindTurbineNoiseWarning,
     WindTurbineTonalityResult,
@@ -105,6 +154,49 @@ from .wind_turbine import (
 )
 
 __all__ = [
+    "AcousticRoughnessSpectrum",
+    "acoustic_roughness_spectrum",
+    "average_roughness_spectra",
+    "curvature_processed_roughness",
+    "redistributed_band_energies",
+    "remove_roughness_spikes",
+    "roughness_measurement_lines",
+    "PREFERRED_PASS_BY_SPEEDS_KMH",
+    "REFERENCE_TRACK_DECAY_LIMITS_DB_PER_M",
+    "REFERENCE_TRACK_ROUGHNESS_LIMIT_DB",
+    "ROLLING_STOCK_TEST_METHODS",
+    "STATIONARY_END_POSITION_LENGTH_M",
+    "AdjacentVehicleNeutrality",
+    "PassByMeasurement",
+    "PassByUncertainty",
+    "ReferenceTrackCheck",
+    "RiseSpeedResult",
+    "RollingStockTestResult",
+    "RoughnessComparability",
+    "SmallRoughnessDeviation",
+    "StationaryTestResult",
+    "TrackCondition",
+    "acceleration_test_positions",
+    "background_level_increase",
+    "check_adjacent_vehicle_neutrality",
+    "check_reference_track",
+    "check_small_roughness_deviations",
+    "impulsiveness_rise_speed",
+    "minimum_curve_radius",
+    "pass_by_measurement",
+    "pass_by_time",
+    "pass_by_uncertainty",
+    "rolling_stock_test",
+    "roughness_comparability",
+    "stationary_test",
+    "stationary_unit_level",
+    "transit_exposure_level",
+    "type_test_speeds",
+    "TRACK_DECAY_DIRECTIONS",
+    "TRACK_DECAY_EXCITATION_INDICES",
+    "TrackDecayRate",
+    "track_decay_excitation_positions",
+    "track_decay_rate",
     "SPB_ANNEX_D_SURFACES_DB",
     "SPB_CONFIDENCE_INTERVALS_DB",
     "SPB_MINIMUM_VEHICLE_COUNTS",

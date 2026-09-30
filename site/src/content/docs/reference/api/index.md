@@ -266,6 +266,9 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | [`environment.propagation.refraction`](/phonometry/reference/api/environment/refraction/) | Atmospheric refraction: ray tracing and the parabolic equation (PE). |
 | [`environment.propagation.air_absorption`](/phonometry/reference/api/environment/air-absorption/) | Atmospheric absorption of sound: ISO 9613-1:1993. |
 | [`environment.sources.cnossos_rail`](/phonometry/reference/api/environment/cnossos-rail/) | CNOSSOS-EU railway source emission (Directive 2002/49/EC Annex II, 2.3). |
+| [`environment.sources.rolling_stock_noise`](/phonometry/reference/api/environment/rolling-stock-noise/) | The noise a railway vehicle emits, measured by ISO 3095:2013. |
+| [`environment.sources.acoustic_roughness`](/phonometry/reference/api/environment/acoustic-roughness/) | The acoustic roughness of a rail, measured directly on it (EN 15610:2009). |
+| [`environment.sources.track_decay`](/phonometry/reference/api/environment/track-decay/) | How fast vibration dies away along a rail (EN 15461:2008+A1:2010). |
 | [`environment.assessment.impulsive_sound`](/phonometry/reference/api/environment/impulsive-sound/) | Prominence of impulsive sounds and the `LAeq` adjustment (NT ACOU 112:2002, ISO/PAS 1996-3:2022). |
 | [`environment.assessment.exposure_distribution`](/phonometry/reference/api/environment/exposure-distribution/) | How often a blast is how loud: the distribution of its sound exposure level (ISO 13474:2009, clauses 4 and 5). |
 | [`environment.assessment.rating`](/phonometry/reference/api/environment/rating/) | Environmental noise descriptors per ISO 1996-1:2016. |

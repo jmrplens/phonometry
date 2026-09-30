@@ -10530,6 +10530,145 @@ dos ediciones con las mismas entradas y en el mismo orden.
   hizo falta ningún cambio.
 - **Estado:** sin notificar.
 
+## ISO 3095:2013, Tabla G.1 (la incertidumbre típica de la distancia del micrófono de 25 m impresa como 0,004 dB)
+
+- **Ubicación:** anexo G (informativo), Tabla G.1, la fila
+  $\delta_\mathrm{distance}$, página impresa 49.
+- **Lo impreso:** "for a microphone distance of 25 m: ±0,07 dB" en la columna
+  del intervalo de incertidumbre y "for a microphone distance of 25 m:
+  0,004 dB" en la de la incertidumbre típica; la línea de 7,5 m de la misma
+  fila imprime ±0,23 dB y 0,13 dB.
+- **El problema:** el G.3 deduce cada incertidumbre típica de la tabla a
+  partir de su intervalo como $u(x_i) = a/\sqrt{3}$ (Fórmula G.2), y así lo
+  hacen todas las demás filas: ±0,25 dB da 0,14 dB, ±0,44 dB da 0,25 dB, y la
+  línea de 7,5 m de esta fila da $0{,}23/\sqrt{3} = 0{,}13$ dB, como está
+  impreso. Para ±0,07 dB la fórmula da $0{,}07/\sqrt{3} = 0{,}040$ dB. El
+  0,004 dB impreso es diez veces menor, un cero de más tras la coma decimal;
+  la celda debería decir 0,04 dB.
+- **Evidencia:** la Tabla G.1 leída en la página 55 del PDF (p. 49 impresa) y
+  la Fórmula G.2 en la página 54 del PDF (p. 48 impresa) de la ISO 3095:2013
+  (tercera edición, 2013-08-01).
+- **Comportamiento de la biblioteca:** la biblioteca no publica la Tabla G.1;
+  [`pass_by_uncertainty`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/environment/sources/rolling_stock_noise.py)
+  recibe cada entrada como un valor y su incertidumbre típica, y
+  `metrology.rectangular(0.0, 0.07)` da los 0,040 dB de la Fórmula G.2. La
+  comprobación de conformidad "ISO 3095:2013 Table G.1" fija las dieciocho
+  filas rectangulares cuya impresión reproduce la Fórmula G.2 y deja fuera
+  esta celda. No hizo falta ningún cambio.
+- **Estado:** no reportada.
+
+## ISO 3095:2013, Tabla G.1 frente a la Tabla G.2 (la incertidumbre del nivel del terreno a 7,5 m impresa como 0,55 dB en una y 0,30 dB en la otra)
+
+- **Ubicación:** anexo G (informativo), la fila
+  $\delta_\mathrm{ground\ level,7,5}$ de la Tabla G.1, página impresa 49, y la
+  fila $\delta_\mathrm{ground\ level}$ de la Tabla G.2, página impresa 51.
+- **Lo impreso:** la Tabla G.1 da el intervalo "[0 dB; 1,03 dB]" y la
+  incertidumbre típica "0,55 dB" con "$\Delta L_p$ = 0,515 dB" para un
+  micrófono a 7,5 m. La Tabla G.2, el ejemplo del G.6 para una medición en
+  parado cuyo terreno "over a distance of 7,5 m varies between 0 and 2 m
+  below to the top of the rail", usa la misma corrección de 0,515 dB con una
+  incertidumbre típica de 0,30 dB.
+- **El problema:** la nota a de la Tabla G.1 trata un intervalo asimétrico
+  $[a; b]$ como uno simétrico en torno a su media, que es de donde sale la
+  corrección $(0 + 1{,}03)/2 = 0{,}515$ dB, y la Fórmula G.2 da entonces la
+  semianchura entre $\sqrt{3}$: $0{,}515/\sqrt{3} = 0{,}297$ dB, los 0,30 dB de
+  la Tabla G.2. La línea de 25 m de la misma magnitud sigue esa aritmética,
+  $0{,}165/\sqrt{3} = 0{,}10$ dB como está impreso. Los 0,55 dB de la Tabla G.1
+  no son ni la semianchura ni la anchura entera entre $\sqrt{3}$ (0,59 dB); la
+  celda debería decir 0,30 dB. Las dos tablas difieren también en la
+  distancia a 7,5 m, donde la Tabla G.1 imprime 0,13 dB y la Tabla G.2 lleva
+  0,06 dB sin decir de dónde sale ese valor; los 0,83 dB combinados de la
+  Tabla G.2 necesitan sus 0,06 dB (0,13 dB daría 0,84 dB), así que esa
+  diferencia se registra aquí y no se corrige.
+- **Evidencia:** la Tabla G.1 leída en la página 55 del PDF (p. 49 impresa),
+  la Fórmula G.2 y la nota a en la página 54 del PDF (p. 48 impresa), y la
+  Tabla G.2 en las páginas 56 y 57 del PDF (pp. 50 y 51 impresas) de la
+  ISO 3095:2013 (tercera edición, 2013-08-01).
+- **Comportamiento de la biblioteca:** las comprobaciones de conformidad
+  "ISO 3095:2013 Table G.2" pasan a
+  [`pass_by_uncertainty`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/environment/sources/rolling_stock_noise.py)
+  las trece filas de la Tabla G.2 tal como están impresas, con los 0,30 dB y
+  los 0,06 dB, y reproducen sus 55,68 dB, 0,83 dB y 1,66 dB. No hizo falta
+  ningún cambio.
+- **Estado:** no reportada.
+
+## ISO 3095:2013, Tabla G.1 (el intervalo de la pantalla antiviento impreso con los extremos al revés)
+
+- **Ubicación:** anexo G (informativo), Tabla G.1, la fila
+  $\delta_\mathrm{slm,\ wind\ screen}$, página impresa 49.
+- **Lo impreso:** "Damping of the wind screen", intervalo "[0,12 dB; 0 dB]",
+  incertidumbre típica "0,03 dB" y "$\Delta L_p$ = 0,06 dB".
+- **El problema:** la nota a escribe un intervalo asimétrico como $[a; b]$, y
+  las otras cuatro filas que usan uno ponen primero el extremo inferior:
+  "[−0,21 dB; 0 dB]" para el factor de distorsión del calibrador,
+  "[−1,5 dB; 1 dB]" para los impulsos, y "[0 dB; 1,03 dB]" y "[0 dB; 0,33 dB]"
+  para el nivel del terreno a 7,5 m y a 25 m. Tal como está impreso, el
+  intervalo de la pantalla antiviento tiene el extremo inferior por encima
+  del superior, y está vacío. Debería decir o bien [−0,12 dB; 0 dB], un
+  intervalo que rebaja la lectura escrito como escribe el suyo la fila de la
+  distorsión, cuya corrección del valor medio, según la nota a, "increases
+  the average sound level", o bien [0 dB; 0,12 dB], escrito como escriben los
+  suyos las filas del nivel del terreno. Las dos lecturas dan los 0,03 dB y
+  los 0,06 dB impresos, así que la tabla no dice cuál se quiso escribir.
+- **Evidencia:** la Tabla G.1 y su nota a leídas en la página 55 del PDF
+  (p. 49 impresa) y en la página 54 del PDF (p. 48 impresa) de la
+  ISO 3095:2013 (tercera edición, 2013-08-01).
+- **Comportamiento de la biblioteca:** la biblioteca no lee ningún intervalo
+  de la Tabla G.1; la comprobación de conformidad "ISO 3095:2013 Table G.1"
+  usa la semianchura de 0,06 dB y las de la Tabla G.2 la corrección y la
+  incertidumbre tal como están impresas. No hizo falta ningún cambio.
+- **Estado:** no reportada.
+
+## EN 15610:2009, anexo B, B.9.2 (un bucle de eliminación de picos que no pide el cambio de signo y no termina en un cambio brusco de pendiente)
+
+- **Ubicación:** anexo B (informativo), B.9.2, la sección de eliminación de
+  picos del listado de RoughProcess.m, páginas impresas 23 y 24; apartado 7.2,
+  páginas impresas 12 y 13.
+- **Lo impreso:** el listado repite su pasada con
+  `while min(d2rdx2) <-10^7`, y dentro de ella solo trata una muestra como
+  pico `if (y < -10^7) && (d1 ~= d2)`, la segunda derivada y un cambio de
+  signo de la primera, y solo interpola sobre ella `if height > w^2/3`. El
+  apartado 7.2 c) identifica un pico "by the criteria
+  $\mathrm{d}^2r/\mathrm{d}x^2 < -10^7\ \mathrm{\mu m/m^2}$ and a change of
+  sign for $\mathrm{d}r/\mathrm{d}x$", lo elimina cuando $h > w^2/a$ con
+  $a = 3$ m, y termina: "The spike removal procedure shall be repeated until
+  no further spike is detected."
+- **El problema:** la condición del bucle deja fuera el cambio de signo que
+  el 7.2 c) y la propia pasada dentro del bucle piden a un pico. Donde el
+  registro cambia bruscamente de pendiente sin un máximo ni un mínimo, su
+  segunda derivada baja de $-10^7\ \mathrm{\mu m/m^2}$ sin que haya ahí un
+  pico según el 7.2 c), ninguna pasada cambia el registro y el bucle no
+  termina. Un carril que sube 20 µm por milímetro y luego 5 µm por milímetro,
+  muestreado cada milímetro, tiene un cambio así:
+  $\mathrm{d}^2r/\mathrm{d}x^2 = -1{,}5 \times 10^7\ \mathrm{\mu m/m^2}$ en el
+  cambio, y $\mathrm{d}r/\mathrm{d}x$ es positiva a los dos lados. Ahí es
+  donde el listado se aparta del apartado que ilustra. Con un pico que el
+  7.2 c) sí detecta y que la prueba de altura conserva como rugosidad que la
+  rueda nota, el listado no hace nada peor que el apartado leído al pie de la
+  letra: una cresta de 200 µm de alto, muestreada cada milímetro, cuyos bordes
+  sitúa la regla de pendiente del listado a 42 mm uno de otro, tiene
+  $\mathrm{d}^2r/\mathrm{d}x^2 = -2 \times 10^7\ \mathrm{\mu m/m^2}$ en la cima
+  y $h = 2 \times 10^{-4}$ m por debajo de $w^2/3 = 5{,}9 \times 10^{-4}$ m; se
+  detecta en cada pasada y se conserva, así que ni el listado ni "until no
+  further spike is detected" se detienen nunca con ella.
+- **Evidencia:** el listado leído en las páginas 25 y 26 del PDF (pp. 23 y 24
+  impresas), y el apartado 7.2 en las páginas 14 y 15 del PDF (pp. 12 y 13
+  impresas) de la BS EN 15610:2009, la implementación británica de la
+  EN 15610:2009 (aprobada por el CEN el 16 de abril de 2009). La falta de
+  terminación es una ejecución del bucle del listado, transcrito línea a
+  línea, sobre el cambio de pendiente y la cresta de arriba.
+- **Comportamiento de la biblioteca:**
+  [`remove_roughness_spikes`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/environment/sources/acoustic_roughness.py)
+  detecta un pico por los dos criterios del 7.2 c) y repite su pasada hasta
+  que una pasada no elimina nada, que es como lee "until no further spike is
+  detected" para un pico que se detecta y se conserva. Devuelve sin cambios el
+  cambio de pendiente y la cresta de arriba;
+  `test_a_bend_without_an_extremum_is_no_spike` y
+  `test_a_broad_ridge_is_kept_and_the_sweep_ends` en
+  [`tests/environment/sources/test_acoustic_roughness.py`](https://github.com/jmrplens/phonometry/blob/main/tests/environment/sources/test_acoustic_roughness.py)
+  lo fijan en los dos.
+- **Estado:** no reportada.
+
 ## Propiedades de las fuentes, relacionadas, que no son erratas
 
 Registradas aquí para prevenir futuros «arreglos» que romperían la

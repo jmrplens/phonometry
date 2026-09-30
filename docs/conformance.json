@@ -3,13 +3,13 @@
   "library": "4.0.0rc1",
   "generator": "scripts/conformance_report.py",
   "counts": {
-    "checks": 1758,
-    "passing": 1758,
+    "checks": 1774,
+    "passing": 1774,
     "failing": 0,
-    "domains": 107,
-    "standards": 513,
-    "citations": 1218,
-    "designations": 217,
+    "domains": 108,
+    "standards": 516,
+    "citations": 1232,
+    "designations": 220,
     "sources": 123
   },
   "units": [
@@ -733,6 +733,12 @@
       "title": "CNOSSOS-EU railway source (Directive 2002/49/EC Annex II)",
       "checks": 8,
       "passing": 8
+    },
+    {
+      "id": "railway-rolling-stock-noise-and-its-reference-track-iso-3095",
+      "title": "Railway rolling stock noise and its reference track (ISO 3095)",
+      "checks": 16,
+      "passing": 16
     }
   ],
   "panels": [
@@ -62266,6 +62272,559 @@
       },
       "computed": {
         "value": 0.0
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-rolling-stock-noise-and-its-reference-track-iso-3095/iso-3095-2013-figure-2/default-upper-limit-of-the-one-third-octave-band-rail-roughness-the-22-levels-printed-beside-the-points-40-cm-to-0-315-cm-db-re-1-m",
+      "domain": "railway-rolling-stock-noise-and-its-reference-track-iso-3095",
+      "reference": {
+        "cite": "ISO 3095:2013 Figure 2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 3095",
+            "edition": "2013",
+            "clause": "Figure 2"
+          }
+        ]
+      },
+      "quantity": "Default upper limit of the one-third octave band rail roughness, the 22 levels printed beside the points, 40 cm to 0,315 cm, dB re 1 µm",
+      "kind": "count",
+      "expected": {
+        "value": 22.0,
+        "label": "22/22 printed levels"
+      },
+      "computed": {
+        "value": 22.0,
+        "label": "22/22 printed levels"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-rolling-stock-noise-and-its-reference-track-iso-3095/en-15610-2009-annex-b-9-2/the-roughness-limit-as-the-listing-types-it-22-wavelengths-and-levels-against-the-published-figure-2-limit-db-re-1-m",
+      "domain": "railway-rolling-stock-noise-and-its-reference-track-iso-3095",
+      "reference": {
+        "cite": "EN 15610:2009 Annex B.9.2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "EN 15610",
+            "edition": "2009",
+            "clause": "Annex B.9.2"
+          }
+        ]
+      },
+      "quantity": "The roughness limit as the listing types it, 22 wavelengths and levels, against the published Figure 2 limit, dB re 1 µm",
+      "kind": "count",
+      "expected": {
+        "value": 22.0,
+        "label": "22/22 listed levels"
+      },
+      "computed": {
+        "value": 22.0,
+        "label": "22/22 listed levels"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-rolling-stock-noise-and-its-reference-track-iso-3095/iso-3095-2013-figure-3/default-lower-limits-of-the-vertical-and-lateral-track-decay-rates-the-table-beside-the-curves-250-hz-to-5-khz-db-m",
+      "domain": "railway-rolling-stock-noise-and-its-reference-track-iso-3095",
+      "reference": {
+        "cite": "ISO 3095:2013 Figure 3",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 3095",
+            "edition": "2013",
+            "clause": "Figure 3"
+          }
+        ]
+      },
+      "quantity": "Default lower limits of the vertical and lateral track decay rates, the table beside the curves, 250 Hz to 5 kHz, dB/m",
+      "kind": "count",
+      "expected": {
+        "value": 28.0,
+        "label": "28/28 printed cells"
+      },
+      "computed": {
+        "value": 28.0,
+        "label": "28/28 printed cells"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-rolling-stock-noise-and-its-reference-track-iso-3095/iso-3095-2013-7-5-1-1-figure-10/microphone-positions-of-the-maximum-level-starting-test-for-the-42-54-87-and-108-m-units-drawn-m-behind-the-front-of-the-unit",
+      "domain": "railway-rolling-stock-noise-and-its-reference-track-iso-3095",
+      "reference": {
+        "cite": "ISO 3095:2013 7.5.1.1, Figure 10",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 3095",
+            "edition": "2013",
+            "clause": "7.5.1.1, Figure 10"
+          }
+        ]
+      },
+      "quantity": "Microphone positions of the maximum level starting test for the 42, 54, 87 and 108 m units drawn, m behind the front of the unit",
+      "kind": "record",
+      "expected": {
+        "label": "42 m, position 1 = -10 m; 54 m, position 1 = -10 m; 54 m, position 2 = 17 m; 87 m, position 1 = -10 m; 87 m, position 2 = 33.5 m; 108 m, position 1 = -10 m; 108 m, position 2 = 17 m; 108 m, position 3 = 44 m",
+        "record": {
+          "42 m, position 1": -10.0,
+          "54 m, position 1": -10.0,
+          "54 m, position 2": 17.0,
+          "87 m, position 1": -10.0,
+          "87 m, position 2": 33.5,
+          "108 m, position 1": -10.0,
+          "108 m, position 2": 17.0,
+          "108 m, position 3": 44.0
+        }
+      },
+      "computed": {
+        "label": "42 m, position 1 = -10 m; 54 m, position 1 = -10 m; 54 m, position 2 = 17 m; 87 m, position 1 = -10 m; 87 m, position 2 = 33.5 m; 108 m, position 1 = -10 m; 108 m, position 2 = 17 m; 108 m, position 3 = 44 m",
+        "record": {
+          "42 m, position 1": -10.0,
+          "54 m, position 1": -10.0,
+          "54 m, position 2": 17.0,
+          "87 m, position 1": -10.0,
+          "87 m, position 2": 33.5,
+          "108 m, position 1": -10.0,
+          "108 m, position 2": 17.0,
+          "108 m, position 3": 44.0
+        }
+      },
+      "unit": "m",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-rolling-stock-noise-and-its-reference-track-iso-3095/iso-3095-2013-table-g-2/result-of-the-standstill-budget-the-reading-plus-the-mean-value-corrections-db",
+      "domain": "railway-rolling-stock-noise-and-its-reference-track-iso-3095",
+      "reference": {
+        "cite": "ISO 3095:2013 Table G.2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 3095",
+            "edition": "2013",
+            "clause": "Table G.2"
+          }
+        ]
+      },
+      "quantity": "Result of the standstill budget, the reading plus the mean value corrections, dB",
+      "kind": "scalar",
+      "expected": {
+        "value": 55.68
+      },
+      "computed": {
+        "value": 55.68
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-rolling-stock-noise-and-its-reference-track-iso-3095/iso-3095-2013-table-g-2/combined-standard-uncertainty-of-the-standstill-budget-formula-g-5-db",
+      "domain": "railway-rolling-stock-noise-and-its-reference-track-iso-3095",
+      "reference": {
+        "cite": "ISO 3095:2013 Table G.2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 3095",
+            "edition": "2013",
+            "clause": "Table G.2"
+          }
+        ]
+      },
+      "quantity": "Combined standard uncertainty of the standstill budget, Formula G.5, dB",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.83
+      },
+      "computed": {
+        "value": 0.828
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": -0.002
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-rolling-stock-noise-and-its-reference-track-iso-3095/iso-3095-2013-table-g-2/expanded-uncertainty-of-the-standstill-budget-k-2-formula-g-6-db",
+      "domain": "railway-rolling-stock-noise-and-its-reference-track-iso-3095",
+      "reference": {
+        "cite": "ISO 3095:2013 Table G.2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 3095",
+            "edition": "2013",
+            "clause": "Table G.2"
+          }
+        ]
+      },
+      "quantity": "Expanded uncertainty of the standstill budget, k = 2, Formula G.6, dB",
+      "kind": "scalar",
+      "expected": {
+        "value": 1.66
+      },
+      "computed": {
+        "value": 1.656
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": -0.004
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-rolling-stock-noise-and-its-reference-track-iso-3095/iso-3095-2013-figure-g-1/order-of-the-bars-by-share-of-the-variance-the-nine-distinct-shares-of-the-thirteen-inputs-largest-first-each-with-its-inputs-seven-inputs-tie-in-three-groups-which-the-figure-draws-in-table-g-2-order",
+      "domain": "railway-rolling-stock-noise-and-its-reference-track-iso-3095",
+      "reference": {
+        "cite": "ISO 3095:2013 Figure G.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 3095",
+            "edition": "2013",
+            "clause": "Figure G.1"
+          }
+        ]
+      },
+      "quantity": "Order of the bars by share of the variance: the nine distinct shares of the thirteen inputs, largest first, each with its inputs (seven inputs tie in three groups, which the figure draws in Table G.2 order)",
+      "kind": "count",
+      "expected": {
+        "value": 9.0,
+        "label": "9/9 share groups"
+      },
+      "computed": {
+        "value": 9.0,
+        "label": "9/9 share groups"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-rolling-stock-noise-and-its-reference-track-iso-3095/iso-3095-2013-table-g-1/standard-uncertainty-a-3-formula-g-2-of-the-eighteen-rectangular-rows-whose-print-it-gives-to-the-printed-two-decimals-db",
+      "domain": "railway-rolling-stock-noise-and-its-reference-track-iso-3095",
+      "reference": {
+        "cite": "ISO 3095:2013 Table G.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 3095",
+            "edition": "2013",
+            "clause": "Table G.1"
+          }
+        ]
+      },
+      "quantity": "Standard uncertainty a/√3 (Formula G.2) of the eighteen rectangular rows whose print it gives, to the printed two decimals, dB",
+      "kind": "count",
+      "expected": {
+        "value": 18.0,
+        "label": "18/18 rows"
+      },
+      "computed": {
+        "value": 18.0,
+        "label": "18/18 rows"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-rolling-stock-noise-and-its-reference-track-iso-3095/iso-3095-2005-3-14-formulae-9-and-10/transit-exposure-level-of-a-12-s-record-at-84-db-over-a-5-s-pass-by-sel-10-lg-t0-tp-against-the-library-s-l-aeq-t-10-lg-t-tp-db",
+      "domain": "railway-rolling-stock-noise-and-its-reference-track-iso-3095",
+      "reference": {
+        "cite": "ISO 3095:2005 3.14, Formulae 9 and 10",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 3095",
+            "edition": "2005",
+            "clause": "3.14, Formulae 9 and 10"
+          }
+        ]
+      },
+      "quantity": "Transit exposure level of a 12 s record at 84 dB over a 5 s pass-by: SEL + 10 lg(T0/Tp) against the library's L_Aeq,T + 10 lg(T/Tp), dB",
+      "kind": "scalar",
+      "expected": {
+        "value": 87.80211241711606
+      },
+      "computed": {
+        "value": 87.802112
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-rolling-stock-noise-and-its-reference-track-iso-3095/iso-3095-2013-3-14-and-6-5/l-paeq-t-of-a-steady-1-khz-tone-of-1-pa-amplitude-where-a-weighting-is-0-db-10-lg-1-2-p0-db",
+      "domain": "railway-rolling-stock-noise-and-its-reference-track-iso-3095",
+      "reference": {
+        "cite": "ISO 3095:2013 3.14 and 6.5",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 3095",
+            "edition": "2013",
+            "clause": "3.14 and 6.5"
+          }
+        ]
+      },
+      "quantity": "L_pAeq,T of a steady 1 kHz tone of 1 Pa amplitude, where A-weighting is 0 dB: 10 lg(1/2/p0²), dB",
+      "kind": "scalar",
+      "expected": {
+        "value": 90.96910013008056
+      },
+      "computed": {
+        "value": 90.969
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.02
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-rolling-stock-noise-and-its-reference-track-iso-3095/en-15610-2009-3-3-and-7-4-2/band-level-of-a-3-m-sinusoidal-roughness-of-1-cm-wavelength-on-a-fourier-line-method-a-10-lg-a-2-db-re-1-m",
+      "domain": "railway-rolling-stock-noise-and-its-reference-track-iso-3095",
+      "reference": {
+        "cite": "EN 15610:2009 3.3 and 7.4.2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "EN 15610",
+            "edition": "2009",
+            "clause": "3.3 and 7.4.2"
+          }
+        ]
+      },
+      "quantity": "Band level of a 3 µm sinusoidal roughness of 1 cm wavelength on a Fourier line, Method A: 10 lg(A²/2), dB re 1 µm",
+      "kind": "scalar",
+      "expected": {
+        "value": 6.532125137753438
+      },
+      "computed": {
+        "value": 6.532125
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-rolling-stock-noise-and-its-reference-track-iso-3095/en-15610-2009-7-3/curvature-processing-of-an-11-mm-pit-50-m-deep-the-0-375-m-circle-rests-on-its-rims-6-mm-from-its-middle-m",
+      "domain": "railway-rolling-stock-noise-and-its-reference-track-iso-3095",
+      "reference": {
+        "cite": "EN 15610:2009 7.3",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "EN 15610",
+            "edition": "2009",
+            "clause": "7.3"
+          }
+        ]
+      },
+      "quantity": "Curvature processing of an 11 mm pit 50 µm deep: the 0,375 m circle rests on its rims 6 mm from its middle, µm",
+      "kind": "scalar",
+      "expected": {
+        "value": -48.00307239330141
+      },
+      "computed": {
+        "value": -48.003072
+      },
+      "unit": "µm",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-rolling-stock-noise-and-its-reference-track-iso-3095/en-15461-2008-a1-2010-formula-1-and-annex-a/decay-rate-of-a-response-a-0-exp-x-sampled-every-millimetre-over-150-m-against-20-lg-e-db-m",
+      "domain": "railway-rolling-stock-noise-and-its-reference-track-iso-3095",
+      "reference": {
+        "cite": "EN 15461:2008+A1:2010 Formula 1 and Annex A",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "EN 15461",
+            "edition": "2008+A1:2010",
+            "clause": "Formula 1 and Annex A"
+          }
+        ]
+      },
+      "quantity": "Decay rate of a response A(0) exp(-βx) sampled every millimetre over 150 m, against 20 lg e^β, dB/m",
+      "kind": "scalar",
+      "expected": {
+        "value": 1.9977546167549585
+      },
+      "computed": {
+        "value": 1.9978
+      },
+      "unit": "dB/m",
+      "tolerance": {
+        "mode": "relative",
+        "value": 0.0002
+      },
+      "deviation": {
+        "value": 2.53e-05
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-rolling-stock-noise-and-its-reference-track-iso-3095/iso-3095-2013-annex-c/effect-of-a-3-db-exceedance-in-the-4-cm-band-at-36-km-h-carried-whole-onto-250-hz-on-a-flat-25-band-spectrum-10-lg-25-10-lg-24-10-0-3-db",
+      "domain": "railway-rolling-stock-noise-and-its-reference-track-iso-3095",
+      "reference": {
+        "cite": "ISO 3095:2013 Annex C",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 3095",
+            "edition": "2013",
+            "clause": "Annex C"
+          }
+        ]
+      },
+      "quantity": "Effect of a 3 dB exceedance in the 4 cm band at 36 km/h, carried whole onto 250 Hz, on a flat 25-band spectrum: 10 lg 25 - 10 lg(24 + 10^-0,3), dB",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.08752879551560966
+      },
+      "computed": {
+        "value": 0.087529
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-rolling-stock-noise-and-its-reference-track-iso-3095/iso-3095-2013-annex-d-formula-d-1/level-increase-of-60-db-measured-over-a-55-db-background-db",
+      "domain": "railway-rolling-stock-noise-and-its-reference-track-iso-3095",
+      "reference": {
+        "cite": "ISO 3095:2013 Annex D, Formula D.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 3095",
+            "edition": "2013",
+            "clause": "Annex D, Formula D.1"
+          }
+        ]
+      },
+      "quantity": "Level increase of 60 dB measured over a 55 dB background, dB",
+      "kind": "scalar",
+      "expected": {
+        "value": 1.6508853862676958
+      },
+      "computed": {
+        "value": 1.650885
       },
       "unit": "dB",
       "tolerance": {

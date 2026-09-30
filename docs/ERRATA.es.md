@@ -2488,6 +2488,127 @@ dos ediciones con las mismas entradas y en el mismo orden.
 - **Estado:** sin notificar (defecto de referencia cruzada, sin consecuencia
   numérica).
 
+## IEC 61094-5:2016, D.3 (una incertidumbre combinada que sus propias componentes no dan)
+
+- **Ubicación:** Anexo D, apartado D.3 «Combined and expanded uncertainties»
+  (folio impreso 21), que combina las ocho componentes de la Tabla D.1 (folio
+  impreso 20).
+- **El impreso:** «The combined standard uncertainty is found from the
+  root-sum-square of the uncertainty components, which gives a value of
+  **0,040 dB** [...]. The expanded uncertainty with a coverage factor of 2 is
+  then **0,08 dB**.» La Tabla D.1 imprime las ocho incertidumbres típicas
+  0,025 (sensibilidad del micrófono de referencia), 0,006 (capacidad), 0,017
+  (no linealidad), 0,003 (impedancia), 0,005 (tensión de polarización), 0,025
+  (repetibilidad), 0,017 (deriva desde la última calibración) y 0,003
+  (redondeo) dB, y D.2 dice que la incertidumbre «arises from eight different
+  sources».
+- **El problema:** la raíz de la suma de cuadrados de la columna impresa es
+  $\sqrt{2 \times 0{,}025^2 + 2 \times 0{,}017^2 + 0{,}006^2 + 0{,}005^2 + 2
+  \times 0{,}003^2} = \sqrt{0{,}001\,907} = 0{,}043\,67$ dB, que se lee
+  **0,044 dB**, no 0,040 dB; a partir de los valores que cada fila enuncia antes
+  de redondear (0,05/2, y 0,01, 0,03, 0,005, $20\lg(200{,}2/200)$, 0,03 y 0,005
+  entre $\sqrt{3}$) es 0,043 88 dB. Con $k = 2$ la incertidumbre expandida es
+  0,087 dB, **0,09 dB** con los dos decimales que da el apartado, no 0,08 dB.
+  El 0,040 dB impreso es la raíz de la suma de cuadrados de siete de las ocho
+  componentes, dejando fuera una de las dos filas de 0,017 dB:
+  $\sqrt{0{,}001\,907 - 0{,}017^2} = 0{,}040\,2$ dB.
+- **Evidencia:** los ocho valores impresos recombinados, y los valores
+  enunciados divididos entre sus divisores. Verificado en las páginas 22 y 23
+  del PDF (pp. 20 y 21 impresas) de IEC 61094-5:2016, edición 2.0 (2016-05),
+  inglés-francés.
+- **Comportamiento de la biblioteca:** `metrology.comparison_uncertainty_budget`
+  combina las componentes que recibe, 0,0437 dB y 0,087 dB para las de la
+  Tabla D.1, y las filas de conformidad de D.3 fijan esos valores con los
+  impresos señalados como errata
+  ([`tests/metrology/test_comparison_calibration.py`](../tests/metrology/test_comparison_calibration.py)).
+- **Estado:** sin notificar.
+
+## UNE-EN 61094-5:2017, Tabla D.1 y D.3 (seis valores perdidos y la incertidumbre combinada mal impresa en la traducción)
+
+- **Ubicación:** Anexo D, Tabla D.1 «Ejemplo de balance de incertidumbres»
+  (pp. 25 y 26 impresas) y D.3 «Incertidumbres combinada y expandida» (p. 27
+  impresa) de UNE-EN 61094-5 (febrero de 2017), la versión española de
+  EN 61094-5:2016, que adopta IEC 61094-5:2016.
+- **El impreso:** la columna «Incertidumbre típica dB» de la Tabla D.1 está
+  **vacía** en seis de sus ocho filas, «No linealidad», «Impedancia del
+  micrófono», «Voltaje de polarización», «Repetibilidad», «Deriva en la
+  sensibilidad del micrófono de referencia desde la última calibración» y
+  «Redondeo de los resultados presentados»; sólo las dos primeras filas
+  imprimen un valor, 0,025 y 0,006. D.3 dice «lo que da un valor de
+  **0,004 dB**». El texto de la primera fila dice «Esto es equivalente a una
+  incertidumbre típica de **0,025/2 dB** = 0,025 dB», y el primer caso
+  especial habla de «un micrófono de tipo **WG3**».
+- **El problema:** el texto inglés imprime los seis valores que la traducción
+  pierde, 0,017, 0,003, 0,005, 0,025, 0,017 y 0,003 dB (IEC 61094-5:2016,
+  p. 20 impresa), y «0,040 dB» en D.3 (p. 21 impresa), así que el 0,004 dB
+  español es la décima parte del valor inglés e incoherente con su propia
+  incertidumbre expandida de «0,08 dB» dos líneas más abajo. El texto de la
+  fila divide entre 2 los 0,05 dB, no 0,025 dB («0,05/2 dB = 0,025 dB» en el
+  inglés), y el caso especial es un micrófono de tipo **WS3**, como dicen el
+  inglés, la Tabla A.1 de la misma traducción y el último párrafo del mismo
+  caso especial. Quien lea sólo el texto español no puede reconstruir el
+  balance: faltan seis de sus ocho componentes, y el valor combinado que
+  enuncia no es la suma de nada impreso. El valor combinado inglés es a su vez
+  una errata (la entrada sobre IEC 61094-5:2016 D.3, más arriba).
+- **Evidencia:** los dos impresos leídos en paralelo. Verificado en las
+  páginas 25 a 27 del PDF (pp. 25 a 27 impresas) de UNE-EN 61094-5:2017 y en
+  las páginas 22 y 23 del PDF (pp. 20 y 21 impresas) de IEC 61094-5:2016.
+- **Comportamiento de la biblioteca:** implementa el texto inglés, cuya Tabla
+  D.1 leen los tests y las filas de conformidad; no hizo falta ningún cambio.
+- **Estado:** sin notificar (traducción nacional, no el texto del organismo
+  emisor).
+
+## IEC 61094-8:2012, 8.4 (una referencia cruzada sin resolver)
+
+- **Ubicación:** subapartado 8.4 «Differences between the sound pressure
+  applied to the reference microphone and to the microphone under test»
+  (folio impreso 15), su primera frase.
+- **El impreso:** «As stated in **Error! Reference source not found.** the
+  basis of a comparison method is that the test and reference microphones are
+  exposed to a sound field having the same modulus, phase and angle of
+  incidence.»
+- **El problema:** en lugar de la referencia cruzada se imprimió un campo sin
+  resolver del procesador de textos, así que la frase no remite a nada. Lo que
+  parafrasea es el principio general de 5.1: «When a calibrated reference
+  microphone and a microphone under test are exposed to the same free-field
+  sound pressure [...]» (folio impreso 8).
+- **Evidencia:** la frase tal como se imprime, leída contra 5.1. Verificado en
+  la página 17 del PDF (p. 15 impresa) de BS EN 61094-8:2012, el texto inglés
+  de EN 61094-8:2012, que es IEC 61094-8:2012 sin cambios.
+- **Comportamiento de la biblioteca:** nada del texto depende de la
+  referencia; no hizo falta ningún cambio.
+- **Estado:** sin notificar (defecto de referencia cruzada, sin consecuencia
+  numérica).
+
+## IEC 61094-8:2012, B.6.1, Fórmula (B.10) (el espectro de un pulso de duración 2b llamado de duración b)
+
+- **Ubicación:** Anexo B, B.6.1 «Outline of methods» del método de excitación
+  por impulso directo (folio impreso 28), la Fórmula (B.10) y las frases que
+  la rodean.
+- **El impreso:** «The Fourier transform, $X(f)$, of a rectangular pulse of
+  **duration $b$** and amplitude $a$ is $X(f) = \dfrac{2ab\sin(2\pi f b)}{2\pi
+  f b}$ (B.10). The first zero in the spectrum is at $f = 1/(2b)$. [...]
+  leading to a requirement for the duration, $b$ of just a few microseconds.»
+- **El problema:** la Fórmula (B.10) es la transformada de un pulso de
+  amplitud $a$ que dura de $-b$ a $b$, es decir, de duración **$2b$**: su valor
+  en $f = 0$ es el área del pulso, $2ab$, y su primer cero, donde $2\pi f b =
+  \pi$, está en $1/(2b)$, como dice el texto. Un pulso de duración $b$ tiene la
+  transformada $ab \sin(\pi f b)/(\pi f b)$ y su primer cero en $1/b$. La
+  fórmula y el primer cero concuerdan entre sí; las palabras «duration $b$»
+  discrepan de ambos, y han de leerse «semiduración $b$» o «duración $2b$». La
+  conclusión práctica se mantiene con cualquiera de las dos lecturas: un primer
+  cero diez veces por encima de un límite superior de 20 kHz, en 200 kHz, pide
+  un pulso de 5 µs ($b$ = 2,5 µs según la fórmula), «just a few
+  microseconds».
+- **Evidencia:** la transformada del pulso rectangular evaluada en frecuencia
+  cero y en su primer cero. Verificado en la página 30 del PDF (p. 28 impresa)
+  de BS EN 61094-8:2012, el texto inglés de EN 61094-8:2012, que es
+  IEC 61094-8:2012 sin cambios.
+- **Comportamiento de la biblioteca:** el método de impulso directo, que B.6.2
+  da por «largely superseded», no está implementado; no hizo falta ningún
+  cambio.
+- **Estado:** sin notificar.
+
 ## UNE-EN ISO 9614-1:2010, apartado 9.1 (el signo perdido de «signed magnitude» en la traducción)
 
 - **Ubicación:** apartado 9.1, la lista de símbolos bajo la Fórmula (11)

@@ -2339,6 +2339,122 @@ in the same order.
   Annex F, so no change was required.
 - **Status:** unreported (cross-reference defect, no numerical consequence).
 
+## IEC 61094-5:2016, D.3 (a combined uncertainty its own components do not give)
+
+- **Location:** Annex D, clause D.3 "Combined and expanded uncertainties"
+  (printed folio 21), which combines the eight components of Table D.1
+  (printed folio 20).
+- **The print:** "The combined standard uncertainty is found from the
+  root-sum-square of the uncertainty components, which gives a value of
+  **0,040 dB** [...]. The expanded uncertainty with a coverage factor of 2 is
+  then **0,08 dB**." Table D.1 prints the eight standard uncertainties 0,025
+  (sensitivity of the reference microphone), 0,006 (capacitance), 0,017
+  (non-linearity), 0,003 (impedance), 0,005 (polarising voltage), 0,025
+  (repeatability), 0,017 (drift since the last calibration) and 0,003
+  (rounding) dB, and D.2 says the uncertainty "arises from eight different
+  sources".
+- **The problem:** the root-sum-square of the printed column is
+  $\sqrt{2 \times 0{,}025^2 + 2 \times 0{,}017^2 + 0{,}006^2 + 0{,}005^2 + 2
+  \times 0{,}003^2} = \sqrt{0{,}001\,907} = 0{,}043\,67$ dB, which reads
+  **0,044 dB**, not 0,040 dB; from the values each row states before rounding
+  (0,05/2, and 0,01, 0,03, 0,005, $20\lg(200{,}2/200)$, 0,03 and 0,005 over
+  $\sqrt{3}$) it is 0,043 88 dB. With $k = 2$ the expanded uncertainty is
+  0,087 dB, **0,09 dB** to the two decimals the clause quotes, not 0,08 dB.
+  The printed 0,040 dB is the root-sum-square of seven of the eight
+  components, with one of the two 0,017 dB rows left out:
+  $\sqrt{0{,}001\,907 - 0{,}017^2} = 0{,}040\,2$ dB.
+- **Evidence:** the eight printed values recombined, and the stated values
+  divided by their divisors. Verified on PDF pages 22 and 23 (printed pp. 20
+  and 21) of IEC 61094-5:2016, Edition 2.0 (2016-05), English-French.
+- **Library behaviour:** `metrology.comparison_uncertainty_budget` combines
+  the components it is given, 0,0437 dB and 0,087 dB for those of Table D.1,
+  and the conformance rows on D.3 pin those values with the printed ones named
+  as the erratum
+  ([`tests/metrology/test_comparison_calibration.py`](https://github.com/jmrplens/phonometry/blob/main/tests/metrology/test_comparison_calibration.py)).
+- **Status:** unreported.
+
+## UNE-EN 61094-5:2017, Table D.1 and D.3 (six values dropped and the combined uncertainty misprinted in translation)
+
+- **Location:** Anexo D, Tabla D.1 "Ejemplo de balance de incertidumbres"
+  (printed pp. 25 and 26) and D.3 "Incertidumbres combinada y expandida"
+  (printed p. 27) of UNE-EN 61094-5 (February 2017), the Spanish version of
+  EN 61094-5:2016, which adopts IEC 61094-5:2016.
+- **The print:** the "Incertidumbre típica dB" column of Table D.1 is **empty**
+  for six of its eight rows, "No linealidad", "Impedancia del micrófono",
+  "Voltaje de polarización", "Repetibilidad", "Deriva en la sensibilidad del
+  micrófono de referencia desde la última calibración" and "Redondeo de los
+  resultados presentados"; only the first two rows print a value, 0,025 and
+  0,006. D.3 reads "lo que da un valor de **0,004 dB**". The first row's text
+  reads "Esto es equivalente a una incertidumbre típica de **0,025/2 dB** =
+  0,025 dB", and the first special case speaks of "un micrófono de tipo
+  **WG3**".
+- **The problem:** the English text prints the six values the translation
+  drops, 0,017, 0,003, 0,005, 0,025, 0,017 and 0,003 dB (IEC 61094-5:2016,
+  printed p. 20), and "0,040 dB" in D.3 (printed p. 21), so the Spanish
+  0,004 dB is a tenth of the English value and inconsistent with its own
+  "0,08 dB" expanded uncertainty two lines further on. The row text divides
+  0,05 dB, not 0,025 dB, by 2 ("0,05/2 dB = 0,025 dB" in the English), and
+  the special case is a type **WS3** microphone, as the English, Table A.1 of
+  the same translation and the last paragraph of the same special case say. A
+  reader of the Spanish text alone cannot rebuild the budget: six of its eight
+  components are missing, and the combined value it states is not the sum of
+  anything printed. The English combined value is itself an erratum (the
+  entry on IEC 61094-5:2016 D.3 above).
+- **Evidence:** the two prints read side by side. Verified on PDF pages 25
+  to 27 (printed pp. 25 to 27) of UNE-EN 61094-5:2017 and on PDF pages 22 and
+  23 (printed pp. 20 and 21) of IEC 61094-5:2016.
+- **Library behaviour:** implements the English text, whose Table D.1 the
+  tests and the conformance rows read; no change was required.
+- **Status:** unreported (national translation, not the issuing body's text).
+
+## IEC 61094-8:2012, 8.4 (an unresolved cross-reference)
+
+- **Location:** subclause 8.4 "Differences between the sound pressure applied
+  to the reference microphone and to the microphone under test" (printed
+  folio 15), its first sentence.
+- **The print:** "As stated in **Error! Reference source not found.** the
+  basis of a comparison method is that the test and reference microphones are
+  exposed to a sound field having the same modulus, phase and angle of
+  incidence."
+- **The problem:** a word processor's unresolved field was printed in place
+  of the cross-reference, so the sentence refers to nothing. The statement it
+  paraphrases is the general principle of 5.1: "When a calibrated reference
+  microphone and a microphone under test are exposed to the same free-field
+  sound pressure [...]" (printed folio 8).
+- **Evidence:** the sentence as printed, read against 5.1. Verified on PDF
+  page 17 (printed p. 15) of BS EN 61094-8:2012, the English text of
+  EN 61094-8:2012, which is IEC 61094-8:2012 unchanged.
+- **Library behaviour:** none of the text depends on the reference; no change
+  was required.
+- **Status:** unreported (cross-reference defect, no numerical consequence).
+
+## IEC 61094-8:2012, B.6.1, Formula (B.10) (the spectrum of a pulse of duration 2b called one of duration b)
+
+- **Location:** Annex B, B.6.1 "Outline of methods" of the direct impulse
+  excitation method (printed folio 28), Formula (B.10) and the sentences
+  around it.
+- **The print:** "The Fourier transform, $X(f)$, of a rectangular pulse of
+  **duration $b$** and amplitude $a$ is $X(f) = \dfrac{2ab\sin(2\pi f b)}{2\pi
+  f b}$ (B.10). The first zero in the spectrum is at $f = 1/(2b)$. [...]
+  leading to a requirement for the duration, $b$ of just a few microseconds."
+- **The problem:** Formula (B.10) is the transform of a pulse of amplitude
+  $a$ that lasts from $-b$ to $b$, that is of duration **$2b$**: its value at
+  $f = 0$ is the area of the pulse, $2ab$, and its first zero, where $2\pi f b
+  = \pi$, is at $1/(2b)$, as the text says. A pulse of duration $b$ has the
+  transform $ab \sin(\pi f b)/(\pi f b)$ and its first zero at $1/b$. The
+  formula and the first zero agree with each other; the words "duration $b$"
+  disagree with both, and read "half-duration $b$" or "duration $2b$". The
+  practical conclusion stands on either reading: a first zero ten times above
+  a 20 kHz upper limit, at 200 kHz, asks for a pulse of 5 µs ($b$ = 2,5 µs by
+  the formula), "just a few microseconds".
+- **Evidence:** the transform of the rectangular pulse evaluated at zero
+  frequency and at its first zero. Verified on PDF page 30 (printed p. 28) of
+  BS EN 61094-8:2012, the English text of EN 61094-8:2012, which is
+  IEC 61094-8:2012 unchanged.
+- **Library behaviour:** the direct impulse method, which B.6.2 says has
+  "been largely superseded", is not implemented; no change was required.
+- **Status:** unreported.
+
 ## UNE-EN ISO 9614-1:2010, clause 9.1 (the sign dropped from "signed magnitude" in translation)
 
 - **Location:** clause 9.1, the symbol list under Formula (11)

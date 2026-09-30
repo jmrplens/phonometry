@@ -1,6 +1,6 @@
 ---
 title: "Guides"
-description: "The 160 guides of phonometry, grouped into the thirteen topics the library covers: what each area is for, the standards implemented in it, and a one-line summary of every guide inside it."
+description: "The 161 guides of phonometry, grouped into the thirteen topics the library covers: what each area is for, the standards implemented in it, and a one-line summary of every guide inside it."
 head:
   - tag: script
     attrs:
@@ -117,7 +117,7 @@ makes, then runnable code and the figure it draws. Nothing here is a survey of
 the field; each page is the working documentation of a module, written so that
 a result can be defended clause by clause rather than trusted.
 
-This page is the map. A hundred and sixty guides sit in thirteen topics, and each topic has its
+This page is the map. A hundred and sixty-one guides sit in thirteen topics, and each topic has its
 own overview page with the longer story of how its pieces fit together. If you
 are arriving without a specific question, read
 [Getting Started](/phonometry/start/getting-started/) first: it runs one signal
@@ -154,7 +154,7 @@ every other area consumes it: a loudness model needs calibrated band levels, a
 room parameter needs a filtered impulse response, an environmental rating is an
 adjusted $L_\mathrm{eq}$. Implements IEC 61260-1, IEC 61260-3, ANSI S1.11,
 IEC 61672-1, IEC 61672-3, ISO 7196, IEC 61252, ISO 1996-1, IEC 60942,
-IEC 61183, IEC 62585 and the GUM.
+IEC 61183, IEC 62585, IEC 61094-5, IEC 61094-8 and the GUM.
 
 - [Build a sound level meter](/phonometry/signals/sound-level-meter/):
   the whole area assembled end to end on one runnable page, from the
@@ -264,6 +264,10 @@ IEC 61183, IEC 62585 and the GUM.
   the verdict on a laboratory's periodic-test results, clause by clause
   against the limits of IEC 61672-1 and the maxima of its Table B.1, and the
   statement of Clause 22.
+- [Microphone Calibration by Comparison (IEC 61094-5/-8)](/phonometry/signals/metrology/comparison-calibration/):
+  a working standard microphone calibrated against a reference in a coupler
+  or a free field, with the interchange of Annex C, the monitor of a
+  substitution, the corrections and the budgets of Table D.1 and Table 2.
 
 ## [The medium](/phonometry/fluids/)
 

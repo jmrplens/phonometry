@@ -175,6 +175,10 @@ What the numbers mean and how much to trust them.
 - [Periodic Tests of a Sound Level Meter (IEC 61672-3)](metrology/sound-level-meter-periodic-tests.md):
   the verdict on a laboratory's periodic-test results for a working meter,
   clause by clause, and the statement of Clause 22.
+- [Microphone Calibration by Comparison (IEC 61094-5/-8)](metrology/comparison-calibration.md):
+  a working standard microphone calibrated against a reference in a pressure
+  field or a free field, with the corrections and the uncertainty budget each
+  part asks for.
 
 ## What this section does not cover
 

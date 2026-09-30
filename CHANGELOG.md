@@ -949,6 +949,52 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   by what each reading is of. A new guide under Calibration and uncertainty runs every
   method on a synthetic meter and on the two worked budgets, in English and
   Spanish.
+- **The calibration of a working standard microphone by comparison with a
+  reference microphone, in a pressure field and in a free field
+  (IEC 61094-5:2016, IEC 61094-8:2012).** The new
+  `metrology.comparison_calibration` module carries a reference microphone's
+  sensitivity over to the microphone under test through the ratio of their
+  output voltages, $M_\mathrm{test} = M_\mathrm{ref} R_V / R_P$ of IEC
+  61094-5 D.2 written in levels. `metrology.simultaneous_comparison` takes the
+  reading difference between the two channels before and after the
+  microphones are interchanged, whose difference cancels the gains of the
+  channels, a drift of the source and the asymmetry of the field (Annex C,
+  Formula (C.3)), and refuses a pressure calibration without the interchange
+  5.1.2 requires; `metrology.sequential_comparison` takes the two outputs in
+  turn and, when a monitor microphone watches the source, each against the
+  monitor reading taken with it, the quotient IEC 61094-8 A.2 corrects a
+  drifting source with. Both average one row per
+  determination and return a `metrology.ComparisonCalibration` with the
+  sensitivity level and the sensitivity in mV/Pa, the corrections it carries
+  by name, the part it follows and, when given, its expanded uncertainty.
+  `metrology.environmental_sensitivity_correction` corrects a sensitivity
+  level for the static pressure, the temperature and the humidity to first
+  order, from the microphone's own coefficients in the units IEC 61094-2
+  Annex D gives them; the reference's is added and the test microphone's
+  subtracted to refer the result to the reference conditions of clause 4.
+  `metrology.jig_diameter_correction` reads Table A.1 for a WS3 microphone
+  against an LS2aP in the jig of Figure A.4, with its expanded uncertainty of
+  a tenth of the correction (printed without a coverage factor, and read with
+  the $k = 2$ of 7.9 and D.2), and a free-field calibration against a
+  pressure-calibrated reference takes the reference's IEC/TS 61094-7
+  difference. `metrology.comparison_uncertainty_budget` combines the
+  components of Table D.1 or of IEC 61094-8 Table 2 on
+  `metrology.combine_uncertainty` with $k = 2$, and
+  `metrology.free_field_region` gives the effective free-field region of a
+  time window, $A = d + \tau c$ (B.1), with the speed of sound of the
+  IEC 61094-2 Annex F air, and the clearance it asks of the room and of the
+  mounting rod. Tables A.1 and D.1 of IEC 61094-5 and Tables 1 and 2 of
+  IEC 61094-8 are published read-only, every result has `.plot()`, and the
+  IEC 61183 diffuse-field comparison now computes through the same model. The
+  tables, the budget and the three measurement models are conformance rows.
+  Four printed defects are in the errata: D.3 of IEC 61094-5 states 0,040 dB
+  and 0,08 dB where its own eight components give 0,0437 dB and 0,087 dB; the
+  Spanish UNE-EN 61094-5:2017 leaves six of the eight values of Table D.1
+  blank and prints 0,004 dB for the combined uncertainty; IEC 61094-8 prints
+  an unresolved cross-reference in 8.4; and its Formula (B.10) is the
+  spectrum of a pulse of duration $2b$ that the text calls one of duration
+  $b$. A new guide under Calibration and uncertainty runs a pressure and a
+  free-field calibration with their budgets, in English and Spanish.
 - **What a sound level meter reads when sound arrives from every direction
   (IEC 61183:1994).** `metrology.directivity_factor` takes the levels a meter
   indicates at equal angular steps in two planes (or four, as NOTE 2 of A.6

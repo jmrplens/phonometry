@@ -78,7 +78,11 @@ any of the three and returns a [`DiffuseFieldSensitivity`](/phonometry/reference
 prints both the directivity factor and that difference for a type LS2aP/LS2F
 laboratory standard microphone, one of the two types Annex B
 recommends for the reference (the other is LS2bP);
-[`IEC61183_TABLE_B1`](/phonometry/reference/api/metrology/random-incidence/#iec61183_table_b1) holds it and supplies them by default.
+[`IEC61183_TABLE_B1`](/phonometry/reference/api/metrology/random-incidence/#iec61183_table_b1) holds it and supplies them by default. The method is
+a sequential comparison calibration without a monitor, so Formula (8) and the
+sum of Formulas (9) to (11) are computed by the level model of IEC 61094-5 D.2
+in [`phonometry.metrology.comparison_calibration`](/phonometry/reference/api/metrology/comparison-calibration/), the one the microphone
+calibrations by comparison use.
 
 Two readings the text leaves to the implementer
 -----------------------------------------------

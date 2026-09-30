@@ -80,7 +80,11 @@ any of the three and returns a :class:`DiffuseFieldSensitivity`. Table B.1
 prints both the directivity factor and that difference for a type LS2aP/LS2F
 laboratory standard microphone, one of the two types Annex B
 recommends for the reference (the other is LS2bP);
-:data:`IEC61183_TABLE_B1` holds it and supplies them by default.
+:data:`IEC61183_TABLE_B1` holds it and supplies them by default. The method is
+a sequential comparison calibration without a monitor, so Formula (8) and the
+sum of Formulas (9) to (11) are computed by the level model of IEC 61094-5 D.2
+in :mod:`phonometry.metrology.comparison_calibration`, the one the microphone
+calibrations by comparison use.
 
 Two readings the text leaves to the implementer
 -----------------------------------------------
@@ -135,6 +139,7 @@ from .._internal.validation import (
     require_positive_array,
 )
 from .._internal.warnings import PhonometryWarning
+from .comparison_calibration import _compared_level_db, _output_level_difference_db
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -1106,7 +1111,9 @@ class DiffuseFieldSensitivity:
         r""":math:`\Delta G_\mathrm{D} = L_\mathrm{D} - L_\mathrm{D,ref}`, in dB
         (Formula (8)).
         """
-        return self.indicated_level_db - self.reference_indicated_level_db
+        return _output_level_difference_db(
+            self.indicated_level_db, self.reference_indicated_level_db
+        )
 
     @property
     def reference_diffuse_field_level_db(self) -> NDArray[np.float64]:
@@ -1120,7 +1127,9 @@ class DiffuseFieldSensitivity:
         r""":math:`G_\mathrm{D}`, the diffuse-field sensitivity level of the
         instrument under test, in dB (Formulas (9) to (11)).
         """
-        return self.level_difference_db + self.reference_diffuse_field_level_db
+        return _compared_level_db(
+            self.reference_diffuse_field_level_db, self.level_difference_db
+        )
 
     def plot(
         self,

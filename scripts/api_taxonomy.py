@@ -100,6 +100,7 @@ _SECTION_LIST: tuple[Section, ...] = (
             "phonometry.metrology.random_incidence",
             "phonometry.metrology.free_field_corrections",
             "phonometry.metrology.sound_level_meter",
+            "phonometry.metrology.comparison_calibration",
         ),
     ),
     Section(
@@ -708,6 +709,12 @@ OBJECT_MODULE_OVERRIDES: dict[str, str] = {
     "PERIODIC_TEST_ENVIRONMENT": "phonometry.metrology.sound_level_meter",
     "SLM_PERIODIC_REQUIREMENTS": "phonometry.metrology.sound_level_meter",
     "TONEBURST_TEST_DURATIONS_MS": "phonometry.metrology.sound_level_meter",
+    # The IEC 61094-5 and IEC 61094-8 tables of the comparison calibration are
+    # read-only mappings too, owned by the module whose functions read them.
+    "IEC61094_5_TABLE_A1": "phonometry.metrology.comparison_calibration",
+    "IEC61094_5_TABLE_D1": "phonometry.metrology.comparison_calibration",
+    "IEC61094_8_TABLE_1": "phonometry.metrology.comparison_calibration",
+    "IEC61094_8_TABLE_2": "phonometry.metrology.comparison_calibration",
     # Defined in phonometry._internal.warnings, exported at the top level.
     "PhonometryWarning": "phonometry",
     # The io subpackage keeps its implementation modules private and

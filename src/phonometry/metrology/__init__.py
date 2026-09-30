@@ -8,8 +8,10 @@ from, the conformance rule the IEC TC 29 instrument standards written since
 every calibration starts from, the IEC 61183 random-incidence and
 diffuse-field sensitivity of a sound level meter, the IEC 62585
 corrections that bring a sound level meter on a calibrator, coupler or
-actuator to its free-field response, and the IEC 61672-3 verdict on the
-periodic tests of a sound level meter. The filter banks and weightings moved to
+actuator to its free-field response, the IEC 61672-3 verdict on the periodic
+tests of a sound level meter, and the calibration of a measurement microphone
+by comparison with a reference microphone, in a pressure field by IEC 61094-5
+and in a free field by IEC 61094-8. The filter banks and weightings moved to
 :mod:`phonometry.filters`, the general signal analysis to
 :mod:`phonometry.signals` and the IEC 61043 intensity-instrument class check
 to :mod:`phonometry.emission.intensity_compliance`, which is what it verifies.
@@ -18,6 +20,25 @@ to :mod:`phonometry.emission.intensity_compliance`, which is what it verifies.
 from __future__ import annotations
 
 from .calibration import CalibrationWarning, sensitivity
+from .comparison_calibration import (
+    IEC61094_5_TABLE_A1,
+    IEC61094_5_TABLE_D1,
+    IEC61094_8_TABLE_1,
+    IEC61094_8_TABLE_2,
+    ComparisonCalibration,
+    ComparisonUncertaintyBudget,
+    ComparisonUncertaintyRow,
+    EnvironmentalSensitivityCorrection,
+    FreeFieldRegion,
+    JigDiameterCorrection,
+    ReferenceCalibrationRow,
+    comparison_uncertainty_budget,
+    environmental_sensitivity_correction,
+    free_field_region,
+    jig_diameter_correction,
+    sequential_comparison,
+    simultaneous_comparison,
+)
 from .conformance import ConformanceVerification, verify_conformance
 from .data_qualification import (
     LevelCrossingResult,
@@ -140,6 +161,10 @@ __all__ = [
     "FLUCTUATION_MAX_UNCERTAINTY_DB",
     "FREQUENCY_ACCEPTANCE_LIMITS_PERCENT",
     "FREQUENCY_MAX_UNCERTAINTY_PERCENT",
+    "IEC61094_5_TABLE_A1",
+    "IEC61094_5_TABLE_D1",
+    "IEC61094_8_TABLE_1",
+    "IEC61094_8_TABLE_2",
     "IEC61183_TABLE_B1",
     "IEC61672_TABLE_4",
     "IEC61672_TABLE_5",
@@ -156,12 +181,18 @@ __all__ = [
     "AdjustmentValue",
     "CalibrationWarning",
     "CalibratorTableRow",
+    "ComparisonCalibration",
+    "ComparisonUncertaintyBudget",
+    "ComparisonUncertaintyRow",
     "ConformanceVerification",
     "CorrectionUncertaintyBudget",
     "CorrectionUncertaintyVerification",
     "DiffuseFieldSensitivity",
     "DirectivityFactor",
+    "EnvironmentalSensitivityCorrection",
     "FreeFieldCorrection",
+    "FreeFieldRegion",
+    "JigDiameterCorrection",
     "LevelCrossingResult",
     "MaxUncertaintyRow",
     "MonteCarloResult",
@@ -169,6 +200,7 @@ __all__ = [
     "PeakStatisticsResult",
     "Quantity",
     "RandomIncidenceSensitivity",
+    "ReferenceCalibrationRow",
     "ReferenceMicrophoneRow",
     "ReferenceValue",
     "SoundCalibratorMeasurements",
@@ -190,15 +222,19 @@ __all__ = [
     "axisymmetric_directivity_factor",
     "combine_uncertainty",
     "comparison_coupler_correction",
+    "comparison_uncertainty_budget",
     "correction_uncertainty_budget",
     "coverage_factor",
     "diffuse_field_sensitivity",
     "directivity_factor",
     "electrostatic_actuator_correction",
+    "environmental_sensitivity_correction",
     "equal_area_directivity_factor",
     "equal_area_incidence_angles",
     "exact_frequencies",
     "expanded_uncertainty",
+    "free_field_region",
+    "jig_diameter_correction",
     "largest_element_fraction",
     "level_crossing_rate",
     "maximum_expanded_uncertainty",
@@ -207,6 +243,8 @@ __all__ = [
     "random_incidence_sensitivity",
     "rectangular",
     "sensitivity",
+    "sequential_comparison",
+    "simultaneous_comparison",
     "sound_calibrator_correction",
     "stationarity_test",
     "trend_test",

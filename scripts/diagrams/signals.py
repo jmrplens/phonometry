@@ -4166,3 +4166,133 @@ def _d_free_field_corrections_setup(s: SVG, th: Theme) -> None:
         13,
         th.muted,
     )
+
+
+# ---------------------------------------------------------------------------
+# IEC 61094-5 and IEC 61094-8: a microphone calibrated by comparison
+# ---------------------------------------------------------------------------
+
+
+def _test_mic_side(s: SVG, th: Theme, x: float, y: float, facing: float) -> None:
+    """A working standard microphone on its preamplifier, the diaphragm at
+    (x, y), facing left (``facing`` = -1) or right (+1).
+    """
+    back = -facing
+    capsule_end = x + back * 12
+    body_end = x + back * 80
+    s.rect(min(x, capsule_end), y - 6, 12, 12, th.primary, th.fg, rx=2, sw=1.3)
+    s.rect(min(capsule_end, body_end), y - 4, 68, 8, th.panel, th.fg, rx=2, sw=1.2)
+
+
+def _monitor_mic(s: SVG, th: Theme, x: float, y: float) -> None:
+    """A small monitor microphone near the source, facing down to the field."""
+    s.rect(x - 4, y - 4, 8, 8, th.accent, th.fg, rx=1.5, sw=1.2)
+    s.line(x, y - 4, x, y - 22, th.fg, 1.4)
+
+
+def _coupler_pair(
+    s: SVG, th: Theme, cx: float, y: float, *, reference_left: bool
+) -> None:
+    """Two microphones face to face in a coupler, each on its own channel."""
+    left, right = cx - 20.0, cx + 20.0
+    s.rect(left, y - 18, right - left, 36, th.panel, th.fg, rx=3, sw=1.5)
+    if reference_left:
+        _reference_side(s, th, left - 2, y, 1.0)
+        _test_mic_side(s, th, right + 2, y, -1.0)
+    else:
+        _test_mic_side(s, th, left - 2, y, 1.0)
+        _reference_side(s, th, right + 2, y, -1.0)
+    s.text(cx - 64, y + 28, "channel 1", 12, th.muted)
+    s.text(cx + 64, y + 28, "channel 2", 12, th.muted)
+
+
+def _field_position(
+    s: SVG, th: Theme, y: float, *, reference: bool, reading: str, monitor: str
+) -> None:
+    """The source, its monitor and one microphone at the measuring point."""
+    _speaker(s, th, 492, y, 1.0)
+    _monitor_mic(s, th, 532, y - 26)
+    s.text(544, y - 22, monitor, 14, th.fg, anchor="start")
+    for dy in (-8.0, 0.0, 8.0):
+        s.arrow(526, y + dy, 600, y + dy, th.muted, 1.3)
+    if reference:
+        _reference_side(s, th, 640, y, -1.0)
+    else:
+        _test_mic_side(s, th, 640, y, -1.0)
+    s.text(748, y + 5, reading, 15, th.fg, anchor="start")
+
+
+def _d_comparison_calibration_setup(s: SVG, th: Theme) -> None:
+    """IEC 61094-5 and IEC 61094-8: the readings of a comparison calibration.
+
+    Left, a pressure calibration by simultaneous excitation: the reference and
+    the microphone under test face to face in a coupler, read on two channels,
+    then interchanged (Annex C). Right, a free-field calibration by
+    sequential excitation: the reference and then the microphone under test at
+    the same point, each read against a monitor microphone near the source
+    (A.2).
+    """
+    s.text(225, 66, "Pressure field, simultaneous", 15, th.fg, bold=True)
+    s.text(225, 86, "IEC 61094-5, Annex C", 13, th.muted)
+    s.text(675, 66, "Free field, sequential", 15, th.fg, bold=True)
+    s.text(675, 86, "IEC 61094-8, Annex A", 13, th.muted)
+    s.line(450, 54, 450, 374, th.muted, 1.0, dash="4,4")
+
+    # ----- Left: the coupler, then the interchange ------------------------
+    rows_y = (146.0, 262.0)
+    for k, (y, label, reference_left) in enumerate(
+        zip(rows_y, ("$L_{C12}$", "$L_{C21}$"), (True, False), strict=True)
+    ):
+        _step(s, th, 22, y, str(k + 1))
+        _coupler_pair(s, th, 225, y, reference_left=reference_left)
+        s.text(225, y - 28, label, 15, th.fg)
+    s.text(225, 202, "interchanged in the ports and on the preamplifiers", 12, th.muted)
+    s.text(225, 318, "Formula (C.3)", 13, th.fg, bold=True)
+    s.text(225, 338, "$L_{test} = L_{ref} − ½(L_{C12} − L_{C21})$", 14, th.fg)
+    s.text(
+        225,
+        358,
+        "the gains of the channels and the field's asymmetry cancel",
+        12,
+        th.muted,
+    )
+
+    # ----- Right: the reference, then the microphone under test -----------
+    for k, (y, reference, reading, monitor) in enumerate(
+        zip(
+            rows_y,
+            (True, False),
+            ("$V_{ref}$", "$V_{test}$"),
+            ("$V_{mon,1}$", "$V_{mon,2}$"),
+            strict=True,
+        )
+    ):
+        _step(s, th, 470, y, str(k + 1))
+        _field_position(s, th, y, reference=reference, reading=reading, monitor=monitor)
+    s.text(675, 202, "the same point, in turn", 12, th.muted)
+    s.text(675, 318, "IEC 61094-8 A.2", 13, th.fg, bold=True)
+    s.text(
+        675,
+        338,
+        "$L_{test} = L_{ref} + 20 lg(V_{test}/V_{mon,2}) − 20 lg(V_{ref}/V_{mon,1})$",
+        14,
+        th.fg,
+    )
+    s.text(675, 358, "the monitor takes out any drift of the source", 12, th.muted)
+
+    # ----- Key and what follows -------------------------------------------
+    ky = 404.0
+    _reference_side(s, th, 30, ky, -1.0)
+    s.text(132, ky + 5, "reference microphone", 13, th.fg, anchor="start")
+    _test_mic_side(s, th, 322, ky, -1.0)
+    s.text(412, ky + 5, "microphone under test", 13, th.fg, anchor="start")
+    _monitor_mic(s, th, 640, ky + 8)
+    s.text(656, ky + 5, "monitor microphone", 13, th.fg, anchor="start")
+    s.text(
+        450,
+        446,
+        "Then the corrections (environment, the WS3 jig, the reference's "
+        "free-field difference) and $U$ with $k$ = 2 (D.3, 8.8).",
+        13,
+        th.muted,
+    )

@@ -207,6 +207,11 @@ DIFFERENT_REFERENCES: dict[tuple[str, str], tuple[float, str]] = {
         101.325,
         "ECAC Doc 29 Eq. 4-7, the mean-sea-level static pressure in kPa",
     ),
+    ("phonometry.metrology.comparison_calibration", "_REFERENCE_STATIC_PRESSURE_KPA"): (
+        101.325,
+        "IEC 61094-5:2016 and IEC 61094-8:2012 clause 4, the reference static "
+        "pressure in kPa",
+    ),
     ("phonometry.building.measurement.heavy_impact", "_FORCE_REFERENCE"): (
         1.0,
         "ISO 16283-2:2020 Formula (A.1), a force level re 1 N",

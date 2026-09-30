@@ -763,6 +763,60 @@ def _correction_verification() -> ph.metrology.CorrectionUncertaintyVerification
     )
 
 
+def _comparison_calibration() -> ph.metrology.ComparisonCalibration:
+    """A WS2P against an LS2P reference, interchanged in a coupler
+    (IEC 61094-5 Annex C).
+    """
+    return ph.metrology.simultaneous_comparison(
+        [1000.0, 2000.0, 4000.0],
+        [-38.0, -37.98, -37.95],
+        [-11.2, -11.3, -11.4],
+        [11.4, 11.5, 11.6],
+        expanded_uncertainty_db=[0.08, 0.09, 0.12],
+    )
+
+
+def _comparison_budget() -> ph.metrology.ComparisonUncertaintyBudget:
+    """The eight components of IEC 61094-5 Table D.1, at 2 kHz."""
+    return ph.metrology.comparison_uncertainty_budget(
+        {
+            "reference": 0.025,
+            "capacitance": 0.006,
+            "non_linearity": 0.017,
+            "impedance": 0.003,
+            "polarizing_voltage": 0.005,
+            "repeatability": 0.025,
+            "drift": 0.017,
+            "rounding": 0.003,
+        },
+        frequency_hz=2000.0,
+    )
+
+
+def _environmental_sensitivity_correction() -> (
+    ph.metrology.EnvironmentalSensitivityCorrection
+):
+    """A reference microphone from its certificate to the test conditions."""
+    return ph.metrology.environmental_sensitivity_correction(
+        [250.0, 1000.0, 4000.0],
+        static_pressure_kpa=97.0,
+        temperature_c=26.0,
+        relative_humidity_percent=40.0,
+        static_pressure_coefficient_db_per_kpa=[-0.005, -0.005, -0.008],
+        temperature_coefficient_db_per_k=0.003,
+    )
+
+
+def _jig_diameter_correction() -> ph.metrology.JigDiameterCorrection:
+    """The corrections of IEC 61094-5 Table A.1."""
+    return ph.metrology.jig_diameter_correction()
+
+
+def _free_field_region() -> ph.metrology.FreeFieldRegion:
+    """A 5 ms window at 1 m in air at the reference conditions."""
+    return ph.metrology.free_field_region(1.0, 0.005)
+
+
 def _static_airflow() -> ph.materials.StaticAirflowResult:
     u = np.array([0.2e-3, 0.4e-3, 0.6e-3, 0.8e-3, 1.0e-3])
     dp = 30000.0 * u + 4.0e6 * u**2

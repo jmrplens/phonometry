@@ -43,6 +43,12 @@ harmonic separation that turns a single exponential sweep into the full set
 of harmonic frequency responses and a THD measured as a function of the
 excitation frequency, plus the minimum-phase, group-delay and excess-phase
 utilities that dissect what the measured response's phase is made of.
+[Audio-Frequency Induction Loops (IEC 60118-4)](induction-loops.md)
+follows the signal past the loudspeaker to the listeners who cannot use it: a
+hearing loop drives a current round a room so a hearing aid's telecoil picks
+the voice up as a magnetic field, and that page judges the installed system by
+IEC 60118-4 and its components, the amplifier, the loop as a load and the neck
+loop, by IEC 62489-1.
 
 [Programme loudness](../broadcast/program-loudness.md) covers the signal
 the devices carry: the ITU-R BS.1770-5 loudness of a broadcast or streaming
@@ -73,6 +79,10 @@ are the place to start.
   harmonic separation and THD(f) from one exponential sweep (Farina /
   Novak synchronized swept-sine), and minimum phase, group delay and
   excess phase from a measured response.
+- [Audio-Frequency Induction Loops (IEC 60118-4)](induction-loops.md):
+  the installed hearing loop judged by IEC 60118-4 and its Amendment 1, over a
+  room's useful volume or at the points of a refuge and a counter, and its
+  amplifier, loop and neck loop measured by IEC 62489-1.
 - [Broadcast](../broadcast/index.md): the loudness problem solved
   with a measurement rather than a compressor, one gated number per programme
   and the range that says how much it moves.

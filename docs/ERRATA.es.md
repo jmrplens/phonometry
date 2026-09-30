@@ -2131,6 +2131,363 @@ dos ediciones con las mismas entradas y en el mismo orden.
   ([`tests/metrology/test_free_field_corrections.py`](../tests/metrology/test_free_field_corrections.py)).
 - **Estado:** sin notificar.
 
+## IEC 60118-4:2014, 6.4 NOTA 2, e IEC 62489-1:2010, 5.4.8.2 NOTA 3 (las respuestas de los filtros de limitación de banda intercambiadas)
+
+- **Ubicación:** IEC 60118-4:2014, 6.4 «Pink noise signal», NOTE 2 (folio
+  impreso 13); IEC 62489-1:2010+A1:2014, 5.4.8.2 b), NOTE 3 (folio impreso
+  11), que la repite para la señal de la tensión de cumplimiento.
+- **El impreso:** «the theoretical responses of the specified 3rd order
+  Butterworth filters are **−0,8 dB at 100 Hz** and **−0,7 dB at 5 kHz**».
+- **El problema:** los dos apartados especifican filtros Butterworth de
+  tercer orden paso alto y paso bajo «giving −3 dB responses at 75 Hz and
+  6,5 kHz». Su respuesta combinada es
+  $10\lg\{[1 + (75/f)^6]^{-1}[1 + (f/6\,500)^6]^{-1}\}$ dB. A 100 Hz el
+  término del paso alto es $(75/100)^6 = 0{,}178$ y la respuesta
+  $-0{,}711$ dB; a 5 kHz el término del paso bajo es $(5\,000/6\,500)^6 =
+  0{,}207$ y la respuesta $-0{,}818$ dB. A la décima que imprime la nota se
+  leen **−0,7 dB a 100 Hz** y **−0,8 dB a 5 kHz**: los dos valores están
+  intercambiados. La planitud de ±1 dB que explica la nota se cumple de
+  cualquier modo.
+- **Evidencia:** el módulo Butterworth evaluado en las dos frecuencias.
+  Verificado en la página 15 del PDF (p. 13 impresa) de BS EN 60118-4:2015,
+  el texto inglés de EN 60118-4:2015, que es IEC 60118-4:2014 sin cambios, y
+  en la página 13 del PDF (p. 11 impresa) de BS EN 62489-1:2010+A1:2015, el
+  texto inglés de EN 62489-1:2010+A1:2015, que es IEC 62489-1:2010 con su
+  Modificación 1:2014 sin cambios.
+- **Comportamiento de la biblioteca:** `electroacoustics.band_limit_response`
+  evalúa los dos filtros, y las filas de conformidad de 6.4 NOTA 2 fijan
+  $-0{,}711$ dB a 100 Hz y $-0{,}818$ dB a 5 kHz, con los valores impresos
+  nombrados como la errata; `electroacoustics.loop_test_noise` filtra con las
+  mismas secciones.
+- **Estado:** sin notificar.
+
+## IEC 60118-4:2014, 6.4 (el orden del filtro impreso como «one-third-order»)
+
+- **Ubicación:** 6.4 «Pink noise signal», segundo párrafo (folio impreso 13).
+- **El impreso:** «Bandwidth limitation shall be carried out by means of at
+  least **one-third-order** Butterworth high pass and low pass filters giving
+  −3 dB responses at 75 Hz and 6,5 kHz».
+- **El problema:** un filtro no tiene un orden de un tercio: la redacción
+  cruza el «third-octave-band spectrum» de la frase anterior con
+  «third-order». El B.2.3 del mismo documento dice «The band-limiting filters
+  should be at least of the **third-order**», la NOTA 2 de 6.4 habla de «the
+  specified **3rd order** Butterworth filters», y el 5.4.8.2 b) de
+  IEC 62489-1, que especifica la misma señal, imprime «at least
+  **third-order** Butterworth». El apartado se lee «de tercer orden como
+  mínimo».
+- **Evidencia:** los tres pasajes comparados. Verificado en la página 15 del
+  PDF (p. 13 impresa) y en la página 32 del PDF (p. 30 impresa) de
+  BS EN 60118-4:2015, el texto inglés de EN 60118-4:2015, que es
+  IEC 60118-4:2014 sin cambios, y en la página 13 del PDF (p. 11 impresa) de
+  BS EN 62489-1:2010+A1:2015.
+- **Comportamiento de la biblioteca:** `electroacoustics.loop_test_noise` y
+  `electroacoustics.band_limit_response` usan secciones Butterworth de tercer
+  orden; no hizo falta ningún cambio.
+- **Estado:** sin notificar (tipográfico, sin consecuencia numérica).
+
+## IEC 60118-4:2014, 6.6 y 8.2.1 (el medidor remitido a 5.1)
+
+- **Ubicación:** 6.6 «Combi signal», tercer párrafo (folio impreso 14), y
+  8.2.1 «Characteristic to be specified» (folio impreso 16).
+- **El impreso:** 6.6: «to allow either meter specified in **5.1** to reach
+  the correct measurement level»; 8.2.1: «measured with a meter as specified
+  in **5.1** and a pick-up coil whose magnetic axis is vertical (unless
+  otherwise specified – see **6.1**)».
+- **El problema:** 5.1 es el apartado «General» del capítulo 5, «Using
+  components of a sound system in an induction-loop system» (folio impreso
+  11), y no especifica ningún medidor. Los dos medidores se especifican en
+  6.1, el de valor eficaz verdadero en 6.1.3 y el medidor de programa de pico
+  en 6.1.4, y la bobina de captación vertical «unless otherwise specified» es
+  la regla de 8.1 (folio impreso 15), que 7.1 y 10.2.1 citan para las mismas
+  palabras. Las referencias se leen **6.1** y **8.1**.
+- **Evidencia:** las dos referencias comparadas con los títulos de los
+  capítulos 5, 6 y 8. Verificado en las páginas 13, 16, 17 y 18 del PDF
+  (pp. 11, 14, 15 y 16 impresas) de BS EN 60118-4:2015, el texto inglés de
+  EN 60118-4:2015, que es IEC 60118-4:2014 sin cambios.
+- **Comportamiento de la biblioteca:** `electroacoustics.field_strength_meter`
+  es el medidor de valor eficaz verdadero de 6.1.3, que 6.1.1 hace definitivo
+  en caso de duda; no hizo falta ningún cambio.
+- **Estado:** sin notificar (defecto de referencia cruzada, sin consecuencia
+  numérica).
+
+## IEC 60118-4:2014, Figura 2 a) (el radio exterior acotado como 200 mm)
+
+- **Ubicación:** Figura 2 «Measurement points for disabled refuge and
+  similar call-points», leyenda de a) «Magnetic field source of small
+  dimensions» (folio impreso 21).
+- **El impreso:** «$l_2$ inner radius 300», «$l_3$ **outer radius 200**», con
+  $l_3$ acotada en el dibujo desde el anillo interior de puntos hasta el
+  exterior.
+- **El problema:** un radio exterior de 200 mm quedaría dentro del radio
+  interior de 300 mm. Tal como está dibujada, $l_3$ es la distancia entre los
+  dos anillos, así que el radio exterior es $l_2 + l_3 = 500$ mm, que es
+  también la distancia de la segunda fila de b) a su línea de referencia
+  ($l_2 + l_3 = 300 + 200$ mm). La Modificación 1:2017 rehace la leyenda como
+  «$l_2 + l_3$ Radio exterior: 500 mm».
+- **Evidencia:** la leyenda comparada con las cotas del dibujo y con b).
+  Verificado en la página 23 del PDF (p. 21 impresa) de BS EN 60118-4:2015,
+  el texto inglés de EN 60118-4:2015, que es IEC 60118-4:2014 sin cambios, y
+  en la página 7 del PDF (p. 7 impresa) de UNE-EN IEC 60118-4:2016/A1:2018,
+  la edición española de IEC 60118-4:2014/A1:2017.
+- **Comportamiento de la biblioteca:**
+  `electroacoustics.small_volume_measurement_points` sitúa el anillo exterior
+  a 500 mm, como la leyenda modificada, y la fila de conformidad de las
+  Figuras 2 y 3 comprueba los dos radios.
+- **Estado:** sin notificar (corregido por el organismo emisor en 2017).
+
+## IEC 60118-4:2014, Anexo A.4 frente a 9.5 (+12 dB a 1,45 m en un mostrador)
+
+- **Ubicación:** Anexo A (informativo), A.4 «Specific locations such as help
+  and information points, ticket and bank counters», los dos párrafos tras la
+  Figura A.2 (folio impreso 29), frente a 9.5 «Requirements for counter
+  systems» (folio impreso 24).
+- **El impreso:** A.4: «At this height, the field strength level ref.
+  400 mA/m at some of the points may be up to, but not greater than,
+  **+12 dB**», de las mediciones a 1,45 m, y «For the points in the plan
+  view, a **less stringent** requirement is appropriate for a counter
+  system». 9.5: «The magnetic field strength level at these points shall be
+  ±6 dB ref. 400 mA/m», en «all measurement points specified in Figure 3,
+  across both vertical and horizontal ranges», y «The field strength shall
+  not be above +8 dB ref. 400 mA/m in the area where people are expected to
+  stand».
+- **El problema:** la Figura 3 sitúa los puntos del mostrador a 1,2 m,
+  1,45 m y 1,7 m, y 9.5 los somete todos a los ±6 dB de un refugio (9.3), con
+  el techo de +8 dB en la zona donde se espera que la gente se sitúe, sin
+  exceptuar ninguna altura. Nada del apartado normativo es menos exigente para
+  un mostrador que para un refugio, y el anexo informativo permite a 1,45 m
+  4 dB más de lo que 9.5 permite en cualquier punto. La Modificación 1:2017
+  reescribe el capítulo 9 con los mismos límites en su 9.5 y no modifica el
+  Anexo A.
+- **Evidencia:** los dos pasajes comparados. Verificado en las páginas 26 y
+  31 del PDF (pp. 24 y 29 impresas) de BS EN 60118-4:2015, el texto inglés de
+  EN 60118-4:2015, que es IEC 60118-4:2014 sin cambios, y en la página 10 del
+  PDF (p. 10 impresa) de UNE-EN IEC 60118-4:2016/A1:2018, la edición española
+  de IEC 60118-4:2014/A1:2017.
+- **Comportamiento de la biblioteca:**
+  `electroacoustics.verify_small_volume_system` aplica 9.5 modificado, ±6 dB
+  en cada punto de medición y +8 dB en la zona donde se espera que la gente se
+  sitúe, a todas las alturas; la fila de conformidad de 9.5 fija los dos
+  bordes.
+- **Estado:** sin notificar.
+
+## IEC 60118-4:2014, Figura E.2 a) (la línea del campo vertical trazada a lo largo)
+
+- **Ubicación:** Anexo E, Figura E.2 «Strengths of the components of the
+  magnetic field due to current in a horizontal rectangular loop at points in
+  a plane above or below the loop plane», panel a) (folio impreso 38), frente
+  al texto de E.1 que la presenta (folio impreso 36).
+- **El impreso:** el panel a) dibuja un bucle «15 units by 10 units» con dos
+  líneas discontinuas por su centro. La que va a lo largo de las 15 unidades
+  lleva el rótulo «**Vertical** field strength measured along a line parallel
+  to this and 1,2 units above or below the loop plane», y la que cruza las
+  10 unidades de anchura «**Horizontal** field strength measured along a line
+  parallel to this». E.1 dice que «Figure E.2 shows the distribution of the
+  vertical component **across** a loop» y que «the horizontal axis gives
+  position as a percentage of the loop **width**».
+- **El problema:** las dos curvas del panel b) son el recorrido a través de
+  las 10 unidades de anchura, como dice E.1, y ninguna es el recorrido a lo
+  largo. El campo del bucle, 1,2 unidades por encima y en decibelios respecto
+  al campo en su centro y en su plano, da para la componente vertical al 5 %,
+  7,5 %, 10 % y 12,5 % de la dimensión $-0{,}3$, $+1{,}1$, $+1{,}7$ y
+  $+1{,}9$ dB a través de la anchura, y $+1{,}8$, $+2{,}4$, $+2{,}4$ y
+  $+2{,}1$ dB a lo largo; la curva impresa marca en torno a $-0{,}8$,
+  $+0{,}8$, $+1{,}5$ y $+1{,}7$ dB, con el máximo cerca del 12,5 %, donde lo
+  tiene el campo a través de la anchura, y no cerca del 8,5 %, donde lo tiene
+  el campo a lo largo. La componente horizontal dice lo mismo: al $-10$ % es
+  $-0{,}1$ dB a través de la anchura y $-4{,}0$ dB a lo largo, y la curva
+  marca $-0{,}2$ dB. La línea del campo vertical del panel a) va a través de
+  la anchura, sobre la línea rotulada para el campo horizontal.
+- **Evidencia:** el campo de Biot-Savart de los cuatro lados del bucle de 15
+  por 10 evaluado a lo largo de las dos líneas, frente a las curvas leídas en
+  la página sobre su propia cuadrícula. Verificado en las
+  páginas 38 y 40 del PDF (pp. 36 y 38 impresas) de BS EN 60118-4:2015, el
+  texto inglés de EN 60118-4:2015, que es IEC 60118-4:2014 sin cambios.
+- **Comportamiento de la biblioteca:** `electroacoustics.rectangular_loop_field`
+  calcula el campo en cualquier punto, y las filas de conformidad de la
+  Figura E.2 b) comparan el recorrido a través de la anchura con puntos leídos
+  de las dos curvas.
+- **Estado:** sin notificar.
+
+## IEC 60118-4:2014, E.6 (la inducción de 1 A/m impresa como 1,256 µT)
+
+- **Ubicación:** Anexo E, E.6 «Magnetic units», la viñeta de la inducción
+  magnética (folio impreso 44).
+- **El impreso:** «$B = \mu_0\mu_r H$, where $\mu_0$ is the permeability of
+  free space ($4\pi \times 10^{-7}$ H/m) [...] the magnetic induction due to a
+  field strength of 1 A/m is **1,256 µT**».
+- **El problema:** $4\pi \times 10^{-7}\ \mathrm{H/m} \times 1\ \mathrm{A/m} =
+  1{,}256\,64\ \mu\mathrm{T}$, que con las cuatro cifras impresas se lee
+  **1,257 µT**; el impreso trunca la última cifra en lugar de redondearla. La
+  intensidad de campo de 79,58 A/m que la misma viñeta da para un gauss en el
+  aire, $10^{-4}\ \mathrm{T}/\mu_0 = 79{,}577$ A/m, está bien redondeada.
+- **Evidencia:** $4\pi \times 10^{-7}$ evaluado. Verificado en la página 46
+  del PDF (p. 44 impresa) de BS EN 60118-4:2015, el texto inglés de
+  EN 60118-4:2015, que es IEC 60118-4:2014 sin cambios.
+- **Comportamiento de la biblioteca:**
+  `electroacoustics.magnetic_flux_density` multiplica por
+  $\mu_0 = 4\pi \times 10^{-7}$ H/m; la fila de conformidad de E.6 lo compara
+  con el 1,256 µT impreso con una tolerancia de 0,001 µT y nombra el impreso
+  como la errata.
+- **Estado:** sin notificar (tipográfico, sin consecuencia numérica).
+
+## IEC 60118-4:2014/A1:2017, 8.4 (remisiones a 10.2.7 que la renumeración deja atrás)
+
+- **Ubicación:** 8.4.1, 8.4.2 y 8.4.3 de IEC 60118-4:2014 (folio impreso
+  19), que la Modificación 1:2017 no modifica, frente al capítulo 10 tal como
+  lo sustituye la modificación (folios impresos 11 a 13 de la edición
+  española).
+- **El impreso:** 8.4.1: «The volume within which the requirements
+  recommended or specified in Clause 7, 8.2.7, 8.3.7 and **10.2.7** are
+  met»; 8.4.2: «See Clause 7, 8.2, 8.3 and **10.2**»; 8.4.3: «the
+  requirements in 8.3.7 and **10.2.7** apply». En el texto de 2014, 10.2 es
+  «Magnetic noise level due to the system» y 10.2.7 su requisito.
+- **El problema:** la Modificación 1 sustituye el texto del capítulo 10. Su
+  10.2 es el requisito de la puesta en servicio («Requisitos»), sin 10.2.7, y
+  el ruido con el sistema encendido pasa a 10.4, cuyo 10.4.7 lleva palabra
+  por palabra la regla del antiguo 10.2.7. La modificación no toca 8.4, así
+  que tras ella el volumen de campo magnético útil se define por un apartado
+  que ya no existe. Las referencias se leen **10.4.7** y **10.4**.
+- **Evidencia:** los títulos del capítulo 10 de los dos textos comparados con
+  las remisiones de 8.4. Verificado en las páginas 21 y 26 del PDF (pp. 19 y
+  24 impresas) de BS EN 60118-4:2015, el texto inglés de EN 60118-4:2015, que
+  es IEC 60118-4:2014 sin cambios, y en las páginas 11 y 13 del PDF (pp. 11 y
+  13 impresas) de UNE-EN IEC 60118-4:2016/A1:2018, la edición española de
+  IEC 60118-4:2014/A1:2017.
+- **Comportamiento de la biblioteca:**
+  `electroacoustics.verify_induction_loop_system` juzga el ruido con el
+  sistema encendido por 10.4.7 y nombra ese apartado en su veredicto; no hizo
+  falta ningún cambio.
+- **Estado:** sin notificar (defecto de referencia cruzada, sin consecuencia
+  numérica).
+
+## IEC 60118-4:2014, 10.2.7, e IEC 60118-4:2014/A1:2017, 10.4.7 (una relación señal-ruido de referencia de 47 dB justos)
+
+- **Ubicación:** 10.2.7 «Requirements» de IEC 60118-4:2014 (folio impreso
+  25), y 10.4.7 «Requisitos» de la Modificación 1:2017, que lleva la misma
+  regla tras la renumeración (folio impreso 13 de la edición española).
+- **El impreso:** 10.2.7: «If the reference signal-to-noise ratio as measured
+  in 7.2 is **greater than 47 dB**, the magnetic field strength level at any
+  point with the system switched on shall not exceed −47 dB. If the reference
+  signal-to-noise ratio is **less than 47 dB** then the magnetic field
+  strength level at any point with the system switched on shall not exceed
+  that with the system switched off by more than 1 dB.» El 10.4.7 de la
+  modificación: «es mayor de 47 dB [...] es menor de 47 dB».
+- **El problema:** un emplazamiento cuya relación señal-ruido de referencia
+  es de 47 dB justos no cae en ninguna de las dos frases, así que el apartado
+  no fija ahí ningún límite al ruido con el sistema encendido, y las dos
+  reglas dan límites distintos en ese punto: con el punto más ruidoso a
+  −47 dB, la primera limita el ruido del sistema a −47 dB y la segunda a
+  −46 dB. El 7.2 solo llama ideal a una relación «greater than 47 dB», lo que
+  pone los 47 dB en la rama inferior.
+- **Evidencia:** las dos frases de cada edición comparadas. Verificado en la
+  página 27 del PDF (p. 25 impresa) de BS EN 60118-4:2015, el texto inglés de
+  EN 60118-4:2015, que es IEC 60118-4:2014 sin cambios, y en la página 13 del
+  PDF (p. 13 impresa) de UNE-EN IEC 60118-4:2016/A1:2018, la edición española
+  de IEC 60118-4:2014/A1:2017.
+- **Comportamiento de la biblioteca:**
+  `electroacoustics.verify_induction_loop_system` aplica el techo de −47 dB
+  solo por encima de 47 dB y la regla de 1 dB a 47 dB y por debajo, y lo dice
+  en su docstring.
+- **Estado:** sin notificar.
+
+## IEC 62489-1:2010, Tabla B.1 (el perímetro del bucle de mostrador)
+
+- **Ubicación:** Anexo B, Tabla B.1 «Typical loop characteristics» (folio
+  impreso 22), la fila «Counter loop».
+- **El impreso:** dimensiones «0,35 × 0,45» m, 10 espiras, perímetro
+  **1,5** m, sección del conductor 0,75 mm², resistencia 0,37 Ω.
+- **El problema:** un rectángulo de 0,35 m por 0,45 m tiene un perímetro de
+  $2(0{,}35 + 0{,}45) = 1{,}6$ m, y todas las demás filas imprimen el
+  perímetro que dan sus dimensiones: 0,7 m para el diámetro de 0,22 m
+  ($\pi \times 0{,}22 = 0{,}69$ m) y 14 m, 28 m, 60 m y 110 m para los cuatro
+  rectángulos. La propia resistencia de la fila necesita 1,6 m: con la
+  resistividad del cobre recocido patrón a 20 °C, 1/58 Ω·mm²/m (IEC 60028),
+  diez espiras de 1,6 m en 0,75 mm² son 0,368 Ω, impresos 0,37, mientras que
+  diez espiras de 1,5 m serían 0,345 Ω. La misma resistividad da la
+  resistencia impresa de las otras cinco filas a la centésima. El perímetro
+  se lee **1,6** m.
+- **Evidencia:** $R = \rho N l / a$ evaluada para las seis filas. Verificado
+  en la página 24 del PDF (p. 22 impresa) de BS EN 62489-1:2010+A1:2015, el
+  texto inglés de EN 62489-1:2010+A1:2015, que es IEC 62489-1:2010 con su
+  Modificación 1:2014 sin cambios; la resistividad, en la página 7 del PDF
+  (p. 5 impresa) de IEC 60028:1925.
+- **Comportamiento de la biblioteca:** `electroacoustics.loop_resistance`
+  toma el perímetro, y la fila de conformidad del bucle de mostrador lo
+  calcula a partir de los lados, 1,6 m, y nombra el 1,5 m impreso como la
+  errata.
+- **Estado:** sin notificar.
+
+## IEC 62489-1:2010+A1:2014, 5.4.8.2 a) (la corriente de salida máxima remitida a 5.4.5)
+
+- **Ubicación:** 5.4.8 «Compliance voltage», 5.4.8.2 «Method of
+  measurement», paso a) (folio impreso 11).
+- **El impreso:** «the loop current is increased to achieve the maximum
+  output current as defined in **5.4.5**».
+- **El problema:** 5.4.5 es «Rated time for delivery of rated
+  distortion-limited output current», un tiempo que declara el fabricante. La
+  corriente de salida máxima se define en 5.4.7, «Maximum
+  (distortion-limited) output current», como la corriente a 1 kHz que puede
+  entregarse durante al menos 10 s a la carga asignada sin superar la
+  distorsión armónica total asignada, y el paso c) del mismo apartado la llama
+  «the maximum output current, measured in step a)». La referencia se lee
+  **5.4.7**. El texto de 2010 imprime la misma remisión con la misma
+  numeración; la Modificación 1 no la cambia.
+- **Evidencia:** la remisión comparada con los títulos de 5.4.5 y 5.4.7.
+  Verificado en las páginas 12 y 13 del PDF (pp. 10 y 11 impresas) de
+  BS EN 62489-1:2010+A1:2015, el texto inglés de EN 62489-1:2010+A1:2015, que
+  es IEC 62489-1:2010 con su Modificación 1:2014 sin cambios.
+- **Comportamiento de la biblioteca:** `electroacoustics.compliance_voltage`
+  lee la tensión registrada en la carga, no la corriente, así que no hizo
+  falta ningún cambio.
+- **Estado:** sin notificar (defecto de referencia cruzada, sin consecuencia
+  numérica).
+
+## IEC 62489-1:2010+A1:2014, 5.4.14.1 (la caída donde los campos se restan impresa como 0,72 dB)
+
+- **Ubicación:** 5.4.14 «Phase error of quadrature networks for phased loop
+  arrays», 5.4.14.1 «Explanation», añadido por la Modificación 1 (folio
+  impreso 15).
+- **El impreso:** «cos 85° = 0,087, so the in-phase field is increased or
+  decreased by **0,72 dB**, depending on where the measurement is taken; in
+  some places the fields add; in others they subtract.»
+- **El problema:** una componente en fase de 0,087 del campo de referencia
+  sube el nivel $20\lg(1 + 0{,}087) = 0{,}72$ dB donde los dos se suman y lo
+  baja $20\lg(1 - 0{,}087) = -0{,}79$ dB donde se restan. Las dos cifras no
+  son iguales en decibelios, así que el 0,72 dB único es sólo la subida. La
+  caída se lee **0,79 dB**.
+- **Evidencia:** los dos niveles evaluados a partir del 0,087 impreso.
+  Verificado en la página 17 del PDF (p. 15 impresa) de
+  BS EN 62489-1:2010+A1:2015, el texto inglés de EN 62489-1:2010+A1:2015, que
+  es IEC 62489-1:2010 con su Modificación 1:2014 sin cambios.
+- **Comportamiento de la biblioteca:**
+  `electroacoustics.QuadraturePhaseError` da la subida y la caída por
+  separado, como `level_increase_db` y `level_decrease_db`; las filas de
+  conformidad de 5.4.14.1 fijan la subida en el 0,72 dB impreso y la caída en
+  $20\lg(1 - \cos 85°) = -0{,}792$ dB, y nombran el impreso como la errata.
+- **Estado:** sin notificar.
+
+## IEC 62489-1:2010+A1:2014, F.2.3 (la respuesta objetivo remitida a una Figura 1)
+
+- **Ubicación:** Anexo F, F.2 «Assistive listening device (ALD)», F.2.3
+  «Frequency response», añadido por la Modificación 1 (folio impreso 28).
+- **El impreso:** «The overall sound-to-electrical output frequency response
+  should approximate to the target shown in **Figure 1**.»
+- **El problema:** el documento no tiene Figura 1; sus figuras son A.1, E.1 a
+  E.4 y F.1. El objetivo que describe la frase siguiente, −3 dB a 350 Hz ±
+  50 Hz con una pendiente final de 12 dB/octava y −3 dB a 10 kHz ± 1 kHz con
+  una pendiente final de 6 dB/octava, es el que F.1.2 describe con las mismas
+  palabras para el receptor de bucle y dibuja en la Figura F.1. La referencia
+  se lee **Figura F.1**.
+- **Evidencia:** la remisión comparada con F.1.2 y con las figuras que
+  contiene el documento. Verificado en las páginas 29 y 30 del PDF (pp. 27 y
+  28 impresas) de BS EN 62489-1:2010+A1:2015, el texto inglés de
+  EN 62489-1:2010+A1:2015, que es IEC 62489-1:2010 con su Modificación 1:2014
+  sin cambios.
+- **Comportamiento de la biblioteca:** la biblioteca no implementa los
+  receptores del Anexo F, así que no hizo falta ningún cambio.
+- **Estado:** sin notificar (defecto de referencia cruzada, sin consecuencia
+  numérica).
+
 ## UNE-EN ISO 9614-1:2010, apartado 9.1 (el signo perdido de «signed magnitude» en la traducción)
 
 - **Ubicación:** apartado 9.1, la lista de símbolos bajo la Fórmula (11)

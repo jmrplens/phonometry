@@ -19,7 +19,7 @@
 
 ## Numerical conformance report
 
-**1691/1691 conformance checks pass** across 106 domains and 509 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+**1758/1758 conformance checks pass** across 107 domains and 513 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub><b>&#916;</b> is the difference between the computed value and the one the standard publishes. <b>Used</b> is how much of that clause's published tolerance the difference consumes: 100 % means it sits exactly on the limit, 5 % means it uses a twentieth of the allowance, and a dash means the clause states no two-sided tolerance for the quantity, so there is no budget to spend. It is reported and never used to decide a verdict, which is settled at full precision before any rounding.</sub>
 
@@ -2220,6 +2220,81 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | IEC 62585:2012 Formulas (E.1) to (E.6), Figure E.1 | A coupler's correction from readings built by (E.1) to (E.3B) | 0 dB (+/-0.000000000001 dB) | 0 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 | IEC 62585:2012 Formulas (F.1) to (F.13) | An actuator's normalised correction from readings built by (F.1) to (F.3) | 0 dB (+/-0.000000000001 dB) | 0 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 | IEC 62585:2012 Annex A, Figure A.1 | Adjustment value of a response whose fit is known in closed form | 0.2 dB (closed form) | 0.2 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+
+</details>
+
+<details>
+<summary><b>Audio-frequency induction loops (IEC 60118-4:2014+A1, IEC 62489-1:2010+A1)</b>: 100% (67/67)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
+|:---|:---|:---|:---|:---|:---:|:---:|
+| IEC 60118-4:2014 3.1 | Level of 400 mA/m, the reference magnetic field strength | 0 dB (+/-0 dB) | 0 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| IEC 60118-4:2014 4.3 | Level of 100 mA/m, the long-term average of 70 dB SPL | -12 dB (+/-0.05 dB) | -12.04 dB | -0.041 dB | 82 % | ![Pass][cv-pass] Pass |
+| IEC 60118-4:2014 6.4 NOTE 2 | Third-order Butterworth band limit at 100 Hz (-3 dB at 75 Hz and 6,5 kHz) | -0.711 dB from the 6.4 filters (NOTE 2 prints -0.8 dB, see ERRATA) | -0.711 dB | 0 dB | 75 % | ![Pass][cv-pass] Pass |
+| IEC 60118-4:2014 6.4 NOTE 2 | Third-order Butterworth band limit at 5 kHz (-3 dB at 75 Hz and 6,5 kHz) | -0.818 dB from the 6.4 filters (NOTE 2 prints -0.7 dB, see ERRATA) | -0.818 dB | 0 dB | 59 % | ![Pass][cv-pass] Pass |
+| IEC 60118-4:2014 6.4 | Band-limited pink noise flat within 1 dB from 100 Hz to 5 kHz | within +/-1 dB from 100 Hz to 5 kHz | worst -0.818 dB at 5000 Hz | headroom 0.182 dB | 82 % | ![Pass][cv-pass] Pass |
+| IEC 60118-4:2014 6.4 | Peak-to-peak over RMS of the pink noise, at least 18 dB (crest factor 4) | at least 18 dB (IEC 62489-1 5.4.8.2 b): 18 dB +/-2 dB) | 18.062 dB | headroom 0.062 dB | 94 % | ![Pass][cv-pass] Pass |
+| IEC 60118-4:2014 Table 2 | Combi signal: RMS of the pink noise re the sine | -6 dB (+/-0.02 dB) | -5.999 dB | 0.001 dB | 5 % | ![Pass][cv-pass] Pass |
+| IEC 60118-4:2014 Table 2 | Combi signal: sine peaks below the maximum peak of the noise | 3 dB (+/-0.05 dB) | 3.031 dB | 0.031 dB | 62 % | ![Pass][cv-pass] Pass |
+| IEC 60118-4:2014 7.2 | Reference signal-to-noise ratio classed at 47, 32 and 22 dB | each boundary in its 7.2 class | above 47 dB = 1; 47 dB = 1; 32 dB = 1; below 32 dB = 1; 22 dB = 1; below 22 dB = 1 | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 60118-4:2014 8.4.3 | Field strength at every point within 3 dB of 8.2.7 | +3 dB = 1; -3 dB = 1; +3,01 dB = 0; -3,01 dB = 0; -2,9 dB on a meter reading 400 mA/m as -5,9 dB = 1 | +3 dB = 1; -3 dB = 1; +3,01 dB = 0; -3,01 dB = 0; -2,9 dB on a meter reading 400 mA/m as -5,9 dB = 1 | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 60118-4:2014 8.2.7 | Maximum field of 400 mA/m reached at one point at least | 0 dB at one point, -3 dB elsewhere = 1; -0,01 dB at best = 0; pink noise: -6 dB at one point (Table 3) = 1; pink noise: -6,01 dB at best = 0 | 0 dB at one point, -3 dB elsewhere = 1; -0,01 dB at best = 0; pink noise: -6 dB at one point (Table 3) = 1; pink noise: -6,01 dB at best = 0 | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 60118-4:2014 8.3.7 | Frequency response within 3 dB of 1 kHz from 100 Hz to 5 kHz | -3 dB at 100 Hz, +3 dB at 5 kHz = 1; -3,01 dB at 100 Hz = 0; +3,01 dB at 5 kHz = 0; -20 dB outside the band = 1; -18,6 dB at 100 Hz against -15,6 dB at 1 kHz = 1; -31,7 dB at 5 kHz against -34,7 dB at 1 kHz = 1 | -3 dB at 100 Hz, +3 dB at 5 kHz = 1; -3,01 dB at 100 Hz = 0; +3,01 dB at 5 kHz = 0; -20 dB outside the band = 1; -18,6 dB at 100 Hz against -15,6 dB at 1 kHz = 1; -31,7 dB at 5 kHz against -34,7 dB at 1 kHz = 1 | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 60118-4:2014+A1 9.5 | Small-volume limits: 6 dB range, 0 dB reached, +8 dB area | +/-6 dB with 0 dB reached = 1; +6,01 dB at one point = 0; every point below 0 dB = 0; +8 dB in the standing area = 1; +8,01 dB in the standing area = 0 | +/-6 dB with 0 dB reached = 1; +6,01 dB at one point = 0; every point below 0 dB = 0; +8 dB in the standing area = 1; +8,01 dB in the standing area = 0 | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 60118-4:2014+A1 Figures 2 and 3 | Measurement points of a refuge and a counter, in millimetres | 2 a) inner radius = 300 mm; 2 a) outer radius = 500 mm; 2 b) l4 = 424 mm; 2 b) l5 = 700 mm; 3 a) radius = 300 mm; 3 a) l4 = 150 mm; 3 b) top height = 1700 mm | 2 a) inner radius = 300 mm; 2 a) outer radius = 500 mm; 2 b) l4 = 424 mm; 2 b) l5 = 700 mm; 3 a) radius = 300 mm; 3 a) l4 = 150 mm; 3 b) top height = 1700 mm | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 60118-4:2014+A1 10.2 | Lower end of the 3 dB commissioning window, mA/m | 283 mA/m (+/-0.5 mA/m) | 283.2 mA/m | 0.178 mA/m | 36 % | ![Pass][cv-pass] Pass |
+| IEC 60118-4:2014+A1 10.2 | Upper end of the 3 dB commissioning window, mA/m | 566 mA/m (+/-1: printed as 400 sqrt(2), 565 at +3 dB) | 565 mA/m | -0.985 mA/m | 98 % | ![Pass][cv-pass] Pass |
+| IEC 60118-4:2014+A1 Table 4 | Programme material and overload test frequency | transient_speech limit = 1250 Hz; transient_speech test = 2500 Hz; speech limit = 1600 Hz; speech test = 3150 Hz; music limit = 2000 Hz; music test = 4000 Hz | transient_speech limit = 1250 Hz; transient_speech test = 2500 Hz; speech limit = 1600 Hz; speech test = 3150 Hz; music limit = 2000 Hz; music test = 4000 Hz | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 60118-4:2014+A1 10.3.2 | Overload test current 7 dB below the one for the required field | -7 dB (+/-0 dB) | -7 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| IEC 60118-4:2014+A1 10.3.2 | Sweep end where the voltage of a 0,69 ohm, 109 uH loop doubles, Hz | 2654.268 Hz, where \|Z\| is twice its 1 kHz value | 2654.268 Hz | 0 Hz | 0 % | ![Pass][cv-pass] Pass |
+| IEC 60118-4:2014+A1 10.3.3 | No clipping at the Table 4 frequency, judged there when the sweep runs past | compliance at the 2,5 kHz voltage = 1; compliance 0,1 % below it = 0 | compliance at the 2,5 kHz voltage = 1; compliance 0,1 % below it = 0 | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 60118-4:2014+A1 10.4.7 | System noise: -47 dB ceiling or 1 dB rise | SNR 55 dB, on at -47 dB = 1; SNR 55 dB, on at -46,99 dB = 0; SNR 40 dB, on 1 dB up = 1; SNR 40 dB, on 1,01 dB up = 0; SNR 32,7 dB, on at -31,7 dB = 1 | SNR 55 dB, on at -47 dB = 1; SNR 55 dB, on at -46,99 dB = 0; SNR 40 dB, on 1 dB up = 1; SNR 40 dB, on 1,01 dB up = 0; SNR 32,7 dB, on at -31,7 dB = 1 | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 60118-4:2014 E.1 | Centre field of a 5 m square loop by Biot-Savart, against 2 sqrt(2) I/(pi d) | 0.54019 A/m (+/-1e-10%) | 0.54019 A/m | 0 A/m | 0 % | ![Pass][cv-pass] Pass |
+| IEC 60118-4:2014 E.1 | Centre field of a 10 m by 15 m loop with d = sqrt(d1 d2), as E.1 prints it | 0.220532 A/m (+/-1e-10%) | 0.220532 A/m | 0 A/m | 0 % | ![Pass][cv-pass] Pass |
+| IEC 60118-4:2014 Figure E.2 b) | Horizontal component of a 15 by 10 loop at 1,2 units, 2,5 % across its width | 4.2 dB read off the curve (+/-0,5) | 4.21 dB | 0.011 dB | 2 % | ![Pass][cv-pass] Pass |
+| IEC 60118-4:2014 Figure E.2 b) | Horizontal component of a 15 by 10 loop at 1,2 units, 30 % across its width | -15.0 dB read off the curve (+/-0,5) | -14.72 dB | 0.28 dB | 56 % | ![Pass][cv-pass] Pass |
+| IEC 60118-4:2014 Figure E.2 b) | Vertical component of a 15 by 10 loop at 1,2 units, 12,5 % across its width | 1.7 dB read off the curve (+/-0,5) | 1.89 dB | 0.189 dB | 38 % | ![Pass][cv-pass] Pass |
+| IEC 60118-4:2014 Figure E.2 b) | Vertical component of a 15 by 10 loop at 1,2 units, 50 % across its width | -0.8 dB read off the curve (+/-0,5) | -0.48 dB | 0.32 dB | 64 % | ![Pass][cv-pass] Pass |
+| IEC 60118-4:2014 Figure H.1 | Current for 400 mA/m 1,4 m above a 10 m loop of aspect ratio 1 | 4.89 A read off the curve (+/-0,03) | 4.884 A | -0.006 A | 20 % | ![Pass][cv-pass] Pass |
+| IEC 60118-4:2014 Figure H.1 | Current for 400 mA/m 1,4 m above a 10 m loop of aspect ratio 1,5 | 5.64 A read off the curve (+/-0,03) | 5.632 A | -0.008 A | 27 % | ![Pass][cv-pass] Pass |
+| IEC 60118-4:2014 Figure H.1 | Current for 400 mA/m 1,4 m above a 10 m loop of aspect ratio 2 | 6.04 A read off the curve (+/-0,03) | 6.038 A | -0.002 A | 7 % | ![Pass][cv-pass] Pass |
+| IEC 60118-4:2014 Figure H.1 | Current for 400 mA/m 1,4 m above a 10 m loop of aspect ratio 3 | 6.41 A read off the curve (+/-0,03) | 6.409 A | -0.001 A | 3 % | ![Pass][cv-pass] Pass |
+| IEC 60118-4:2014 Figure H.1 | Current for 400 mA/m 1,4 m above a 10 m loop of aspect ratio 5 | 6.63 A read off the curve (+/-0,03) | 6.635 A | 0.005 A | 17 % | ![Pass][cv-pass] Pass |
+| IEC 62489-1:2010+A1 5.4.10.2 | Loop current for 400 mA/m 1,4 m above a 3-turn 6 m by 2 m loop, by Biot-Savart | 0.4 A/m (+/-1e-10%) | 0.4 A/m | 0 A/m | 0 % | ![Pass][cv-pass] Pass |
+| IEC 60118-4:2014 E.2 | Telecoil response 45 degrees off axis | -3 dB (+/-0.05 dB) | -3.01 dB | -0.01 dB | 20 % | ![Pass][cv-pass] Pass |
+| IEC 60118-4:2014 E.2 | Telecoil response 70 degrees off axis | -9.3 dB (+/-0.05 dB) | -9.32 dB | -0.019 dB | 38 % | ![Pass][cv-pass] Pass |
+| IEC 60118-4:2014 E.3 | Loop impedance over resistance where the reactance equals it | 1.4 (+/-0.015) | 1.414 | 0.014 | 93 % | ![Pass][cv-pass] Pass |
+| IEC 60118-4:2014 E.6 | One oersted in amperes per metre | 79.58 A/m (+/-0.005 A/m) | 79.577 A/m | -0.003 A/m | 60 % | ![Pass][cv-pass] Pass |
+| IEC 60118-4:2014 E.6 | Flux density of 1 A/m in air, microtesla | 1,256 µT (+/-0,001: the print truncates 1,2566, see ERRATA) | 1.2566 µT | 0.0006 µT | 60 % | ![Pass][cv-pass] Pass |
+| IEC 62489-1:2010+A1 Table B.1 | neck loop: resistance, 1/58 ohm mm2/m copper | 0.24 ohm | 0.238 ohm | -0.002 ohm | 40 % | ![Pass][cv-pass] Pass |
+| IEC 62489-1:2010+A1 Table B.1 | neck loop: impedance at 2 kHz from the printed R and L | 1.09 ohm (+/-0.012 ohm) | 1.095 ohm | 0.005 ohm | 41 % | ![Pass][cv-pass] Pass |
+| IEC 62489-1:2010+A1 Table B.1 | neck loop: impedance at 5 kHz from the printed R and L | 2.67 ohm (+/-0.021 ohm) | 2.681 ohm | 0.011 ohm | 52 % | ![Pass][cv-pass] Pass |
+| IEC 62489-1:2010+A1 Table B.1 | counter loop: resistance, 1/58 ohm mm2/m copper | 0.37 ohm (with the 1.6 m its sides give, see ERRATA) | 0.368 ohm | -0.002 ohm | 40 % | ![Pass][cv-pass] Pass |
+| IEC 62489-1:2010+A1 Table B.1 | counter loop: inductance by Grover's Formula (58), no internal term | 189 µH (+/-0.5 µH) | 189.42 µH | 0.416 µH | 83 % | ![Pass][cv-pass] Pass |
+| IEC 62489-1:2010+A1 Table B.1 | counter loop: impedance at 2 kHz from the printed R and L | 2.41 ohm (+/-0.012 ohm) | 2.404 ohm | -0.006 ohm | 50 % | ![Pass][cv-pass] Pass |
+| IEC 62489-1:2010+A1 Table B.1 | counter loop: impedance at 5 kHz from the printed R and L | 5.96 ohm (+/-0.021 ohm) | 5.949 ohm | -0.011 ohm | 52 % | ![Pass][cv-pass] Pass |
+| IEC 62489-1:2010+A1 Table B.1 | home loop: resistance, 1/58 ohm mm2/m copper | 0.24 ohm | 0.241 ohm | 0.001 ohm | 20 % | ![Pass][cv-pass] Pass |
+| IEC 62489-1:2010+A1 Table B.1 | home loop: inductance by Grover's Formula (58), no internal term | 22 µH (+/-0.5 µH) | 22.23 µH | 0.232 µH | 46 % | ![Pass][cv-pass] Pass |
+| IEC 62489-1:2010+A1 Table B.1 | home loop: impedance at 2 kHz from the printed R and L | 0.37 ohm (+/-0.013 ohm) | 0.366 ohm | -0.004 ohm | 31 % | ![Pass][cv-pass] Pass |
+| IEC 62489-1:2010+A1 Table B.1 | home loop: impedance at 5 kHz from the printed R and L | 0.74 ohm (+/-0.021 ohm) | 0.732 ohm | -0.008 ohm | 37 % | ![Pass][cv-pass] Pass |
+| IEC 62489-1:2010+A1 Table B.1 | small room: resistance, 1/58 ohm mm2/m copper | 0.32 ohm | 0.322 ohm | 0.002 ohm | 40 % | ![Pass][cv-pass] Pass |
+| IEC 62489-1:2010+A1 Table B.1 | small room: inductance by Grover's Formula (58), no internal term | 47 µH (+/-0.5 µH) | 47.21 µH | 0.21 µH | 42 % | ![Pass][cv-pass] Pass |
+| IEC 62489-1:2010+A1 Table B.1 | small room: impedance at 2 kHz from the printed R and L | 0.67 ohm (+/-0.013 ohm) | 0.672 ohm | 0.002 ohm | 15 % | ![Pass][cv-pass] Pass |
+| IEC 62489-1:2010+A1 Table B.1 | small room: impedance at 5 kHz from the printed R and L | 1.52 ohm (+/-0.021 ohm) | 1.511 ohm | -0.009 ohm | 42 % | ![Pass][cv-pass] Pass |
+| IEC 62489-1:2010+A1 Table B.1 | typical place of worship: resistance, 1/58 ohm mm2/m copper | 0.69 ohm | 0.69 ohm | 0 ohm | 7 % | ![Pass][cv-pass] Pass |
+| IEC 62489-1:2010+A1 Table B.1 | typical place of worship: inductance by Grover's Formula (58), no internal term | 109 µH (+/-0.5 µH) | 109.24 µH | 0.237 µH | 47 % | ![Pass][cv-pass] Pass |
+| IEC 62489-1:2010+A1 Table B.1 | typical place of worship: impedance at 2 kHz from the printed R and L | 1.54 ohm (+/-0.013 ohm) | 1.534 ohm | -0.006 ohm | 47 % | ![Pass][cv-pass] Pass |
+| IEC 62489-1:2010+A1 Table B.1 | typical place of worship: impedance at 5 kHz from the printed R and L | 3.5 ohm (+/-0.021 ohm) | 3.493 ohm | -0.007 ohm | 33 % | ![Pass][cv-pass] Pass |
+| IEC 62489-1:2010+A1 Table B.1 | large place of worship: resistance, 1/58 ohm mm2/m copper | 0.76 ohm | 0.759 ohm | -0.001 ohm | 20 % | ![Pass][cv-pass] Pass |
+| IEC 62489-1:2010+A1 Table B.1 | large place of worship: impedance at 2 kHz from the printed R and L | 2.85 ohm (+/-0.012 ohm) | 2.843 ohm | -0.007 ohm | 56 % | ![Pass][cv-pass] Pass |
+| IEC 62489-1:2010+A1 Table B.1 | large place of worship: impedance at 5 kHz from the printed R and L | 6.89 ohm (+/-0.021 ohm) | 6.891 ohm | 0.001 ohm | 5 % | ![Pass][cv-pass] Pass |
+| IEC 60028:1925 clause I | Resistivity of standard annealed copper at 20 degC, from 1 m of 1 mm2 | 0.017241 ohm·mm²/m (+/-1e-10%) | 0.017241 ohm·mm²/m | 0 ohm·mm²/m | 0 % | ![Pass][cv-pass] Pass |
+| IEC 62489-1:2010+A1 5.4.7.2 | Maximum output current: the voltage across the resistance over its value where the THD reaches its rating | 6.6489 A (+/-1e-10%) | 6.6489 A | 0 A | 0 % | ![Pass][cv-pass] Pass |
+| IEC 62489-1:2010+A1 5.4.8.2 | Compliance voltage of a sine, the average peak over sqrt(2) | 9.8995 V (+/-0 V) | 9.8995 V | 0 V | 0 % | ![Pass][cv-pass] Pass |
+| IEC 62489-1:2010+A1 5.4.14.1 | In-phase part of a quadrature network at 85 degrees | 0.087 (+/-0.0005) | 0.0872 | 0.0002 | 40 % | ![Pass][cv-pass] Pass |
+| IEC 62489-1:2010+A1 5.4.14.1 | Rise where the fields add at 85 degrees | 0.72 dB (+/-0.01 dB) | 0.726 dB | 0.006 dB | 60 % | ![Pass][cv-pass] Pass |
+| IEC 62489-1:2010+A1 5.4.14.1 | Fall where the fields subtract at 85 degrees | -0.792 dB, 20 lg(1 - cos 85) (printed as 0,72 dB, see ERRATA) | -0.792 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| E DIN EN 62489-1/A2:2017-10 Annex D, D.1.2 and D.1.3 | Neck-loop types of the draft: DC resistance and input voltage for 400 mA/m | type 1 at -5 % = 1; type 1 at +5 % = 1; type 1 at +5,1 % = 0; type 2 at 32 ohm = 1; type 2 below 32 ohm = 0; 1,07 V for 400 mA/m = 0 | type 1 at -5 % = 1; type 1 at +5 % = 1; type 1 at +5,1 % = 0; type 2 at 32 ohm = 1; type 2 below 32 ohm = 0; 1,07 V for 400 mA/m = 0 | exact | 0 % | ![Pass][cv-pass] Pass |
 
 </details>
 

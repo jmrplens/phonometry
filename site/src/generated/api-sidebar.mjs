@@ -359,6 +359,8 @@ export const apiSections = {
       'reference/api/electroacoustics/loudspeaker',
       'reference/api/electroacoustics/microphone',
       'reference/api/electroacoustics/sound-reinforcement',
+      'reference/api/electroacoustics/induction-loop',
+      'reference/api/electroacoustics/induction-loop-components',
     ],
   },
   'noise_control': {

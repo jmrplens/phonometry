@@ -68,6 +68,7 @@ from .devices import (
     _d_duct_path,
     _d_enclosure_cabin_measurement,
     _d_in_duct_rig,
+    _d_induction_loop_measurement,
     _d_intensity_scan,
     _d_loudspeaker_freefield,
     _d_loudspeaker_polar,
@@ -647,6 +648,11 @@ DIAGRAMS = {
         _d_microphone_references,
         ("The three fields a microphone sensitivity is defined in (IEC 60268-4)"),
         590,
+    ),
+    "diagram_induction_loop_measurement": (
+        _d_induction_loop_measurement,
+        "Where an induction loop is measured, and what it meets (IEC 60118-4)",
+        560,
     ),
     "diagram_distortion_bench": (
         _d_distortion_bench,

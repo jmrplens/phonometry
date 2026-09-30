@@ -1501,3 +1501,98 @@ def _time_invariance() -> ph.filters.TimeInvarianceResult:
     """IEC 61260-1:2014 5.14: a small octave bank swept at 5 s per decade."""
     bank = ph.filters.OctaveFilterBank(48000, fraction=1, order=6, limits=[500, 2000])
     return ph.filters.verify_time_invariance(bank, seconds_per_decade=(5.0,))
+
+
+def _loop_field() -> ph.electroacoustics.LoopField:
+    """A 10 m by 15 m loop, its field across the short side at 1,2 m."""
+    return ph.electroacoustics.rectangular_loop_field(
+        4.0, 15.0, 10.0, 0.0, np.linspace(-7.0, 7.0, 57), 1.2
+    )
+
+
+def _loop_impedance() -> ph.electroacoustics.LoopImpedance:
+    """IEC 62489-1:2010 Table B.1: the typical place of worship, 0,69 ohm and 109 uH."""
+    return ph.electroacoustics.loop_impedance(0.69, 109e-6)
+
+
+def _amplifier_frequency_response() -> ph.electroacoustics.AmplifierFrequencyResponse:
+    """A loop amplifier rolling off below 100 Hz and above 5 kHz."""
+    return ph.electroacoustics.amplifier_frequency_response(
+        [50.0, 100.0, 1000.0, 5000.0, 8000.0], [0.8, 0.97, 1.0, 0.95, 0.7]
+    )
+
+
+def _agc_characteristic() -> ph.electroacoustics.AgcCharacteristic:
+    """An automatic gain control like the one of IEC 62489-1:2010 Figure A.1."""
+    return ph.electroacoustics.agc_characteristic(
+        [-60.0, -50.0, -40.0, -30.0, -20.0, -10.0, 0.0],
+        [-33.0, -23.0, -13.0, -3.0, 0.0, 0.0, 0.0],
+    )
+
+
+def _quadrature_phase_error() -> ph.electroacoustics.QuadraturePhaseError:
+    """A quadrature network drifting to 85 degrees at 5 kHz."""
+    return ph.electroacoustics.quadrature_phase_error(
+        [100.0, 1000.0, 2000.0, 5000.0], [92.0, 90.0, 88.0, 85.0]
+    )
+
+
+def _neck_loop_characteristics() -> ph.electroacoustics.NeckLoopCharacteristics:
+    """A passive neck loop on the jig of IEC 62489-1:2010+A1:2014 Annex E."""
+    return ph.electroacoustics.neck_loop_characteristics(
+        [100.0, 200.0, 1000.0, 5000.0, 8000.0],
+        [-6.0, -2.0, 0.5, -1.0, -5.0],
+        [31.0, 31.5, 32.0, 36.0, 42.0],
+        input_voltage_v=1.0,
+    )
+
+
+def _neck_loop_verification() -> ph.electroacoustics.NeckLoopVerification:
+    """A type 1 neck loop of the draft Amendment 2."""
+    return ph.electroacoustics.verify_neck_loop(32.4, 0.94)
+
+
+def _field_strength_reading() -> ph.electroacoustics.FieldStrengthReading:
+    """Half a second of a 1 kHz sine at 400 mA/m on the true-RMS meter."""
+    t = np.arange(FS // 2) / FS
+    return ph.electroacoustics.field_strength_meter(
+        0.4 * np.sqrt(2.0) * np.sin(2.0 * np.pi * 1000.0 * t), FS
+    )
+
+
+def _background_noise() -> ph.electroacoustics.BackgroundNoiseAssessment:
+    """IEC 60118-4:2014 7.2: five points, the noisiest at -35 dB."""
+    return ph.electroacoustics.assess_background_noise(
+        [-52.0, -48.0, -35.0, -44.0, -50.0]
+    )
+
+
+def _induction_loop_verification() -> ph.electroacoustics.InductionLoopVerification:
+    """IEC 60118-4:2014: four points, the response and the noise with the system on."""
+    return ph.electroacoustics.verify_induction_loop_system(
+        [0.5, -1.0, 2.0, -2.5],
+        frequencies_hz=[100.0, 1000.0, 5000.0],
+        response_db=[[-1.0, 0.0, -2.5], [0.0, 0.0, -3.4]],
+        background_noise_levels_db=[-50.0, -49.0, -48.0, -51.0],
+        system_noise_levels_db=[-48.0, -47.5, -47.0, -48.0],
+    )
+
+
+def _loop_requirement() -> ph.electroacoustics.LoopRequirement:
+    """The frequency response requirement of that verdict."""
+    return _induction_loop_verification().requirement("frequency_response")
+
+
+def _amplifier_overload() -> ph.electroacoustics.AmplifierOverloadVerification:
+    """IEC 60118-4:2014/A1:2017 10.3: the place of worship of Table B.1 on 3 A."""
+    return ph.electroacoustics.verify_amplifier_overload(3.0, _loop_impedance(), 6.0)
+
+
+def _maximum_output_current() -> ph.electroacoustics.MaximumOutputCurrent:
+    """IEC 62489-1:2010 5.4.7: five steps of level into 0,5 ohm, rated at 1 % THD."""
+    return ph.electroacoustics.maximum_output_current(
+        [1.0, 2.0, 3.0, 4.0, 5.0],
+        [0.1, 0.2, 0.5, 1.5, 3.0],
+        load_resistance_ohm=0.5,
+        rated_thd_percent=1.0,
+    )

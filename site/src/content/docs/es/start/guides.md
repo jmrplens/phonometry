@@ -1,6 +1,6 @@
 ---
 title: "Guías"
-description: "Las 158 guías de phonometry, agrupadas en los trece temas que cubre la biblioteca: para qué sirve cada área, las normas que implementa y un resumen de una línea de cada guía que contiene."
+description: "Las 159 guías de phonometry, agrupadas en los trece temas que cubre la biblioteca: para qué sirve cada área, las normas que implementa y un resumen de una línea de cada guía que contiene."
 head:
   - tag: script
     attrs:
@@ -118,7 +118,7 @@ hay ninguna panorámica del campo: cada página es la documentación de trabajo 
 un módulo, escrita para que un resultado se pueda defender apartado por
 apartado en lugar de darlo por bueno.
 
-Esta página es el mapa. Ciento cincuenta y ocho guías repartidas en trece temas, y cada
+Esta página es el mapa. Ciento cincuenta y nueve guías repartidas en trece temas, y cada
 área tiene su propio índice con el relato largo de cómo encajan sus piezas. Si
 llegas sin una pregunta concreta, lee primero la
 [introducción](/phonometry/es/start/getting-started/): recorre una señal por toda la
@@ -843,7 +843,8 @@ Potencia acústica, intensidad, declaraciones de emisión, electroacústica y
 sonoridad de programa. Lo que emite una fuente y no lo que recibe un receptor,
 más la cadena electroacústica que lo reproduce o lo mide. Implementa ISO 3741,
 ISO 3743-1/-2, ISO 3744/3746, ISO 3745, ISO 26101, ISO 6926, ISO 9614-1/-2/-3,
-IEC 61043, ISO 4871, IEC 60268-3/-4/-5, ITU-R BS.1770-5 y EBU R 128.
+IEC 61043, ISO 4871, IEC 60268-3/-4/-5, IEC 60118-4, IEC 62489-1, ITU-R BS.1770-5
+y EBU R 128.
 
 **[Potencia acústica e intensidad](/phonometry/es/devices/emission/)**
 
@@ -910,6 +911,11 @@ IEC 61043, ISO 4871, IEC 60268-3/-4/-5, ITU-R BS.1770-5 y EBU R 128.
   la separación de armónicos a partir de un solo barrido exponencial, la THD
   frente a la frecuencia de excitación, y la fase mínima, el retardo de grupo y
   la fase en exceso.
+- [Bucles de inducción para audífonos (IEC 60118-4)](/phonometry/es/devices/electroacoustics/induction-loops/):
+  los bucles magnéticos para oyentes con telebobina: la referencia de
+  400 mA/m, el campo de un bucle por Biot-Savart, el bucle como carga, los
+  veredictos sobre una sala, un refugio y un mostrador, el ensayo de
+  sobrecarga, el amplificador y el bucle de cuello.
 **[Radiodifusión](/phonometry/es/devices/broadcast/)**
 
 - [Sonoridad de programa y pico verdadero](/phonometry/es/devices/broadcast/program-loudness/):

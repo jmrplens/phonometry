@@ -345,6 +345,8 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | [`electroacoustics.loudspeaker`](/phonometry/reference/api/electroacoustics/loudspeaker/) | Rated loudspeaker characteristics (IEC 60268-5). |
 | [`electroacoustics.microphone`](/phonometry/reference/api/electroacoustics/microphone/) | Rated microphone characteristics (IEC 60268-4). |
 | [`electroacoustics.sound_reinforcement`](/phonometry/reference/api/electroacoustics/sound-reinforcement/) | Gain before feedback of a sound-reinforcement system. |
+| [`electroacoustics.induction_loop`](/phonometry/reference/api/electroacoustics/induction-loop/) | Audio-frequency induction-loop systems for hearing aids: the performance of an installed system. |
+| [`electroacoustics.induction_loop_components`](/phonometry/reference/api/electroacoustics/induction-loop-components/) | Components of an audio-frequency induction-loop system: the loop, its amplifier, the neck loop. |
 
 ## Industrial noise control
 

@@ -114,6 +114,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike
 
     from .._report.metadata import ReportMetadata
+    from .reference_sound_source import ReferenceSourceCalibration
 
 from .._internal.levels_math import energy_mean, energy_sum
 from .._internal.validation import (
@@ -130,6 +131,7 @@ from ._shared import (
     _a_weighting_corrections,
     _background_exposure,
     _c2_correction,
+    _reference_power_levels,
     _settled,
     _single_event_mean,
     _validate_meteorology,
@@ -615,7 +617,7 @@ class _Reference:
     """
 
     levels_ref: ArrayLike
-    lw_ref: ArrayLike
+    lw_ref: ArrayLike | ReferenceSourceCalibration
     frequencies: ArrayLike
     background_levels: ArrayLike | None
     background_levels_ref: ArrayLike | None
@@ -654,7 +656,19 @@ def _determine(
         )
         raise ValueError(msg)
     mean_ref = _position_mean(ref_arr, "levels_ref", n_positions, n_bands)  # Eq. (11)
-    power = _finite(reference.lw_ref, "lw_ref", (1,))
+    # Eq. (14) and (20) give the level under the conditions of the test
+    # (Annex A), so a calibration is read there, less its own C2.
+    power = _finite(
+        _reference_power_levels(
+            reference.lw_ref,
+            freqs,
+            bandwidth="octave",
+            temperature_c=reference.temperature_c,
+            static_pressure_kpa=reference.static_pressure_kpa,
+        ),
+        "lw_ref",
+        (1,),
+    )
     if power.shape != (n_bands,):
         msg = f"'lw_ref' must carry one value per band ({n_bands})."
         raise ValueError(msg)
@@ -722,7 +736,7 @@ def _determine(
 def sound_power_hard_walled(
     levels: ArrayLike,
     levels_ref: ArrayLike,
-    lw_ref: ArrayLike,
+    lw_ref: ArrayLike | ReferenceSourceCalibration,
     frequencies: ArrayLike,
     *,
     background_levels: ArrayLike | None = None,
@@ -761,7 +775,13 @@ def sound_power_hard_walled(
         microphone positions, ``(NM, bands)``, or its traverse level
         ``(bands,)``.
     :param lw_ref: Calibrated octave-band sound power level of the reference
-        source ``LW(RSS)``, ``(bands,)``, in decibels.
+        source ``LW(RSS)``, ``(bands,)``, in decibels, under the
+        meteorological conditions of the test, since Eq. (14) gives ``LW``
+        there (Annex A); or the
+        :class:`~phonometry.emission.ReferenceSourceCalibration` of ISO 6926,
+        whose one-third octave bands are summed into the octaves at
+        ``frequencies`` and carried from the reference conditions to those of
+        the test by its own ``C2`` (ISO 6926:2016, 8.4).
     :param frequencies: Nominal octave mid-band frequencies, one per band,
         ascending, from 125 Hz to 8 kHz; 63 Hz is accepted where the room and
         the instrumentation are satisfactory there (3.11, Table B.1 footnote).
@@ -785,7 +805,9 @@ def sound_power_hard_walled(
         shape, the reference or background levels do not match the source's
         positions and bands, ``frequencies`` are not distinct ascending octave
         centres of Table B.1, the climate is out of range, ``sigma_omc_db`` is
-        negative, or ``coverage_factor`` is not positive.
+        negative, ``coverage_factor`` is not positive, or a calibration does
+        not cover the bands or used the manufacturer's ``C2``, whose value at
+        the test only the manufacturer gives.
     """
     arr = _finite(levels, "levels", (1, 2, 3))
     grid, traverse = _source_grid(arr)
@@ -855,7 +877,7 @@ def _event_grid(arr: np.ndarray, events: int | None) -> tuple[np.ndarray, bool, 
 def sound_energy_hard_walled(
     event_levels: ArrayLike,
     levels_ref: ArrayLike,
-    lw_ref: ArrayLike,
+    lw_ref: ArrayLike | ReferenceSourceCalibration,
     frequencies: ArrayLike,
     *,
     events: int | None = None,
@@ -898,7 +920,9 @@ def sound_energy_hard_walled(
     :param levels_ref: Time-averaged levels of the reference sound source,
         ``(NM, bands)`` or ``(bands,)``, as in :func:`sound_power_hard_walled`.
     :param lw_ref: Calibrated sound power level of the reference source,
-        ``(bands,)``, in decibels.
+        ``(bands,)``, in decibels, under the meteorological conditions of the
+        test, or its :class:`~phonometry.emission.ReferenceSourceCalibration`,
+        as for :func:`sound_power_hard_walled`.
     :param frequencies: Nominal octave mid-band frequencies, one per band.
     :param events: The number :math:`N_\mathrm{e}` of events one measurement
         encompasses (Eq. 16); ``None`` when the events are on the first axis.

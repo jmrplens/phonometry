@@ -17,7 +17,10 @@ normalizadas y cierra el trabajo con la declaración de emisión de ISO 4871, y
 cada ruta tiene su propia página:
 [Potencia acústica por métodos de presión](/phonometry/es/devices/emission/sound-power-pressure/)
 para la superficie envolvente de ISO 3744/3746 y el grado de precisión
-anecoico de ISO 3745,
+anecoico de ISO 3745, cuya sala cualifica por ISO 26101 la guía
+[Campo libre y fuente de referencia](/phonometry/es/devices/emission/free-field-qualification/),
+junto a la calibración de ISO 6926 de la fuente de referencia que necesita
+todo método de comparación,
 [Potencia acústica en cámara reverberante](/phonometry/es/devices/emission/sound-power-reverberation/)
 para los métodos directo y de comparación de ISO 3741,
 [Potencia acústica en salas de ensayo pequeñas](/phonometry/es/devices/emission/sound-power-test-rooms/)
@@ -92,6 +95,10 @@ referencia contra la que se juzgan las medidas correctoras de las páginas de
   de ISO 3745, y el nivel de energía acústica de una ráfaga sobre la superficie
   envolvente de ISO 3744/3746
   superficie.
+- [Campo libre y fuente de referencia](/phonometry/es/devices/emission/free-field-qualification/):
+  la cualificación de ISO 26101 de una cámara anecoica o semianecoica frente al
+  anexo A que la modificación 1:2017 escribió en ISO 3745, y la calibración y
+  los requisitos de una fuente sonora de referencia de ISO 6926.
 - [Potencia acústica en cámara reverberante](/phonometry/es/devices/emission/sound-power-reverberation/):
   los métodos directo y de comparación de ISO 3741, para la potencia acústica y
   para la energía acústica de un suceso aislado.
@@ -130,10 +137,20 @@ referencia contra la que se juzgan las medidas correctoras de las páginas de
 <ScopeClaim status="not-covered">
 Los métodos de determinación empiezan después de haber cualificado el recinto
 y la sonda. La cualificación de campo libre de una sala anecoica o
-semianecoica de ISO 3745, la cualificación de la cámara reverberante de ISO
-3741 (recuento de frecuencias propias o comparación con una fuente de
-referencia) y el ensayo de intensidad residual de IEC 61043 de una cadena de
-sonda y analizador se **dan por supuestos, no se ejecutan**: la biblioteca
+semianecoica sí se ejecuta, por ISO 26101 frente al anexo A modificado de
+ISO 3745, en
+[Campo libre y fuente de referencia](/phonometry/es/devices/emission/free-field-qualification/),
+y también las comprobaciones de sala de ISO 3743, en
+[Potencia acústica en salas de ensayo pequeñas](/phonometry/es/devices/emission/sound-power-test-rooms/):
+el volumen, las superficies y la idoneidad acústica de la sala de paredes
+rígidas de la Parte 1 (`check_hard_walled_room`) y el tiempo de
+reverberación, las superficies y la idoneidad de la sala reverberante
+especial de la Parte 2 (`check_special_room_reverberation`,
+`check_special_room_surfaces`, `check_special_room_suitability`).
+La cualificación de la cámara reverberante de ISO 3741 (recuento de
+frecuencias propias o comparación con una fuente de referencia) y el ensayo
+de intensidad residual de IEC 61043 de una cadena de sonda y analizador se
+**dan por supuestos, no se ejecutan**: la biblioteca
 avisa de los criterios orientativos gruesos que las normas declaran
 explícitamente (el volumen mínimo de la Tabla 1, el número de posiciones, una
 dispersión entre posiciones superior a 1,5 dB, la validez de K₂ en ISO 3744)

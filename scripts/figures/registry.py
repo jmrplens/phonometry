@@ -133,6 +133,8 @@ from .devices import (
     generate_fan_sound_power,
     generate_feedback_stability,
     generate_field_indicators,
+    generate_free_field_check,
+    generate_free_field_deviations,
     generate_frequency_response,
     generate_hard_walled_sound_power,
     generate_helmholtz_branch_geometry,
@@ -178,6 +180,7 @@ from .devices import (
     generate_quasi_peak_meter,
     generate_radiation_efficiency,
     generate_radiation_plate_geometry,
+    generate_reference_source_calibration,
     generate_reverberation_correction_terms,
     generate_room_to_room_chain,
     generate_room_to_room_partitions,
@@ -973,6 +976,12 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     # Tables 1 and 2, and a direct and a tonal determination.
     generate_high_frequency_air_absorption,
     generate_high_frequency_sound_power,
+    # ISO 26101 and ISO 3745 Annex A as amended in 2017: the deviations along
+    # six traverses of a hemi-anechoic room and the verdict with the test
+    # source directionality; ISO 6926: a reference source calibration.
+    generate_free_field_deviations,
+    generate_free_field_check,
+    generate_reference_source_calibration,
     # Human vibration (ISO 8041-1, ISO 2631-1/-2/-4, ISO 5349-1/-2,
     # Directive 2002/44/EC): frequency weighting, weighted a_w, daily A(8)
     generate_vibration_weighting,

@@ -293,6 +293,7 @@ silencers.
 - [Sound Intensity (p-p)](devices/emission/intensity.md): two-microphone intensity and field indicators
 - [Sound Power](devices/emission/sound-power.md): choosing the determination method for a source and declaring the noise emission (ISO 4871)
 - [Sound power by pressure methods](devices/emission/sound-power-pressure.md): the enveloping surface of ISO 3744/3746 and the precision anechoic grade of ISO 3745, and the sound energy level of a burst over the ISO 3744/3746 enveloping surface
+- [Free field and reference sources](devices/emission/free-field-qualification.md): the ISO 26101 inverse-square-law qualification of an anechoic or hemi-anechoic room against the Annex A that Amendment 1:2017 wrote into ISO 3745, with the fit of $b$ and of the origin inside the source, and the calibration and clause 5 requirements of an ISO 6926 reference sound source
 - [Sound power in the reverberation room](devices/emission/sound-power-reverberation.md): the direct and comparison methods of ISO 3741, for sound power and for the sound energy of a single event
 - [Sound power in small test rooms](devices/emission/sound-power-test-rooms.md): the ISO 3743-1 comparison in a hard-walled room and the ISO 3743-2 direct and comparison methods in a special reverberation room, for small movable sources
 - [Sound power in situ by comparison](devices/emission/sound-power-in-situ.md): the ISO 3747 comparison against a reference sound source where the machine works, with the sound energy level of an impulsive source

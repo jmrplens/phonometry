@@ -643,9 +643,12 @@ surface is section 4: `sound_energy_pressure` (ISO 3744 clause 8.3, ISO 3746
 clause 8.4) with `mean_single_event_level` (Eq. 19/20) and the Annex G
 correction of `reference_atmosphere_correction` (Eq. G.1/G.3).
 
-**Not covered.** Neither method performs the facility qualification it assumes:
-ISO 3745's free-field qualification of the anechoic or hemi-anechoic
-environment is taken for granted, and ISO 3744's $K_2$ validity only warns.
+**Not covered.** Neither determination performs the facility qualification it
+rests on: the free-field qualification of the anechoic or hemi-anechoic room
+is its own step, by ISO 26101 against the amended ISO 3745 Annex A, in
+[Free Field and Reference Sources](free-field-qualification.md), whose verdict
+`sound_power_anechoic` takes as `room_qualification` and warns on, and
+ISO 3744's $K_2$ validity only warns.
 ISO 3744 **Annex G**, the correction to reference meteorological conditions
 required above 500 m of altitude or below 10 °C (clauses 8.2.5 and 8.3.6), is
 evaluated by `reference_atmosphere_correction` but never applied inside a

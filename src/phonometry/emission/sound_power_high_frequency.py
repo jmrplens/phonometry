@@ -138,12 +138,15 @@ from ._shared import (
     SoundPowerWarning,
     _c1_correction,
     _c2_correction,
+    _reference_power_levels,
     _validate_meteorology,
 )
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
+
+    from .reference_sound_source import ReferenceSourceCalibration
 
 #: The 16 kHz octave band the standard covers, in hertz (ISO 9295:2015,
 #: clause 1: "frecuencias comprendidas entre 11,2 kHz y 22,4 kHz").
@@ -671,7 +674,7 @@ def high_frequency_sound_power_comparison(
     *,
     frequencies_hz: ArrayLike,
     reference_pressure_levels_db: ArrayLike,
-    reference_sound_power_levels_db: ArrayLike,
+    reference_sound_power_levels_db: ArrayLike | ReferenceSourceCalibration,
     noise_bandwidth_hz: float | None = None,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = 101.325,
@@ -698,7 +701,12 @@ def high_frequency_sound_power_comparison(
         8.4); a 2-D input is averaged by Formula (1) as well.
     :param reference_sound_power_levels_db: :math:`L_{W(\mathrm{FAR})}` of the
         calibrated reference source, in dB re 1 pW, a scalar or one value per
-        band: per band for broadband noise, per hertz for tones.
+        band: per band for broadband noise, per hertz for tones. For broadband
+        noise it may be the
+        :class:`~phonometry.emission.ReferenceSourceCalibration` of ISO 6926,
+        read in the one-third octave bands at ``frequencies_hz`` and carried
+        from the reference conditions to those of the test by its own ``C2``,
+        since clause 10.1 corrects the result as ISO 3741 does.
     :param noise_bandwidth_hz: :math:`\Delta F`, the noise bandwidth of the
         analyser, in hertz, which selects Formula (9); ``None`` (default)
         selects Formula (8). Clause 8.5.2 allows 1 Hz for a constant
@@ -728,8 +736,28 @@ def high_frequency_sound_power_comparison(
             f"'pressure_levels_db' ({n_bands})."
         )
         raise ValueError(msg)
+    from .reference_sound_source import ReferenceSourceCalibration
+
+    if noise_bandwidth_hz is not None and isinstance(
+        reference_sound_power_levels_db, ReferenceSourceCalibration
+    ):
+        msg = (
+            "a tonal comparison needs the reference source's level per hertz "
+            "(clause 8.1); 'reference_sound_power_levels_db' must be given as "
+            "levels, not as a band calibration."
+        )
+        raise ValueError(msg)
     reference_power = _per_band(
-        reference_sound_power_levels_db, "reference_sound_power_levels_db", n_bands
+        _reference_power_levels(
+            reference_sound_power_levels_db,
+            freqs,
+            bandwidth="one-third-octave",
+            name="reference_sound_power_levels_db",
+            temperature_c=temperature_c,
+            static_pressure_kpa=static_pressure_kpa,
+        ),
+        "reference_sound_power_levels_db",
+        n_bands,
     )
     if not np.all(np.isfinite(reference_power)):
         msg = "'reference_sound_power_levels_db' must be finite."

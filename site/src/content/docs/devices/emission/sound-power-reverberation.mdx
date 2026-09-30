@@ -379,7 +379,7 @@ source's levels and known power.
 | Parameter | Type | Units | Range / default | Notes |
 | :--- | :--- | :--- | :--- | :--- |
 | `levels_ref` | 1D or 2D array | dB | matches `levels` | Mean room SPL with the reference source (RSS) running |
-| `lw_ref` | 1D array | dB | per band | Known sound power $L_W(\text{RSS})$ of the reference source, from its ISO 6926 calibration |
+| `lw_ref` | 1D array or `ReferenceSourceCalibration` | dB | per band | Known sound power $L_W(\text{RSS})$ of the reference source, from its ISO 6926 calibration; a [`ReferenceSourceCalibration`](/phonometry/devices/emission/free-field-qualification/) is read in the one-third octave bands at `frequencies` |
 | `background_levels` | 1D or 2D array | dB | matches `levels` | Background for the test source; per-band $K_1$ on $L_p(\text{ST})$ |
 | `background_levels_ref` | 1D or 2D array | dB | matches `levels_ref` | Background for the **reference** source; per-band $K_1$ on $L_p(\text{RSS})$ |
 

@@ -331,7 +331,7 @@ and the speed of sound.
 sound_energy_comparison(
     levels: np.ndarray,
     levels_ref: np.ndarray,
-    lw_ref: np.ndarray,
+    lw_ref: np.ndarray | ReferenceSourceCalibration,
     *,
     frequencies: np.ndarray | None = None,
     events: int | None = None,
@@ -372,7 +372,7 @@ time-averaged correction of 9.1.2.
 | :--- | :--- |
 | `levels` | Single event levels of the source under test, in decibels. |
 | `levels_ref` | Mean room SPL per band (1D) or `(NM, NB)` per-position time-averaged levels of the reference sound source, in decibels. |
-| `lw_ref` | Known sound power level `LW(RSS)` per band, in decibels, under the meteorological conditions of the test. |
+| `lw_ref` | Known sound power level `LW(RSS)` per band, in decibels, under the meteorological conditions of the test (Eq. 31), or the [`ReferenceSourceCalibration`](/phonometry/reference/api/power/reference-sound-source/#referencesourcecalibration) of ISO 6926, read in the one-third octave bands at `frequencies` and carried from the reference conditions to those of the test by its own `C2`. |
 | `frequencies` | Band mid-frequencies (Hz) for the `K1` criterion and the A-weighted total. |
 | `events` | The number of events `Ne` one measurement encompasses (Eq. 23); `None` when `levels` is per event or already the mean of one event. |
 | `background_levels` | Time-averaged background levels for the `K1` correction of `levels` (per position, or a single spectrum). |
@@ -465,7 +465,7 @@ NOTE 1), so that the energies Eq. (25) subtracts share one reference;
 sound_power_comparison(
     levels: np.ndarray,
     levels_ref: np.ndarray,
-    lw_ref: np.ndarray,
+    lw_ref: np.ndarray | ReferenceSourceCalibration,
     *,
     frequencies: np.ndarray | None = None,
     background_levels: np.ndarray | None = None,
@@ -496,8 +496,8 @@ the two sources, so the room absorption need not be known.
 | :--- | :--- |
 | `levels` | Mean room SPL per band (1D) or `(NM, NB)` per-position levels of the source under test, in decibels. |
 | `levels_ref` | Same, for the reference sound source, in decibels. |
-| `lw_ref` | Known sound power level `LW(RSS)` per band, in decibels. |
-| `frequencies` | Band mid-frequencies (Hz) for the A-weighted total. |
+| `lw_ref` | Known sound power level `LW(RSS)` per band, in decibels, under the meteorological conditions of the test (Eq. 21), or the [`ReferenceSourceCalibration`](/phonometry/reference/api/power/reference-sound-source/#referencesourcecalibration) of ISO 6926, read in the one-third octave bands at `frequencies` and carried from the reference conditions to those of the test by its own `C2`. |
+| `frequencies` | Band mid-frequencies (Hz) for the A-weighted total; required with a calibration. |
 | `background_levels` | Background levels for the `K1` correction of `levels` (per position, or a single spectrum; applied per position per Eq. 14/15 before the Eq. 16 average when `levels` is 2D). |
 | `background_levels_ref` | Background levels matching `levels_ref`. |
 | `temperature_c` | Air temperature `theta` in the room, in degrees Celsius. |

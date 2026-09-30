@@ -2433,6 +2433,80 @@ dos ediciones con las mismas entradas y en el mismo orden.
   falta ningún cambio.
 - **Estado:** sin notificar.
 
+## ISO 3745:2012/Amd.1:2017, A.2.4 frente a A.4.3 (dos resoluciones espaciales para un mismo recorrido)
+
+- **Ubicación:** A.2.4 del anexo A de sustitución (página 7 del PDF, p. 3
+  impresa) y A.4.3 del mismo anexo (página 9 del PDF, p. 5 impresa) de
+  ISO 3745:2012/Amd.1:2017, leídos frente a ISO 26101:2017, A.4.3 (página 17
+  del PDF, p. 11 impresa).
+- **El impreso:** A.2.4 dice «Within each qualified radius, each microphone
+  traverse shall meet the requirements for traverse length of
+  ISO 26101:2017, 5.1.4.3 and for spatial resolution of ISO 26101:2017,
+  A.4.3.» El A.4.3 de ISO 26101:2017 dice «The spacing shall not exceed
+  one-tenth of a wavelength at each frequency of interest below 1 kHz and
+  shall not exceed 25 mm at frequencies above 1 kHz.» El A.4.3 de la propia
+  modificación dice «The spacing between points shall not exceed a tenth of a
+  wavelength at each frequency of interest below 250 Hz and shall not exceed
+  100 mm at frequencies above 250 Hz», y su último párrafo recomienda más
+  puntos «If a 100 mm spatial resolution traverse indicates» una desviación
+  dentro del 10 % del criterio.
+- **El problema:** el anexo fija dos resoluciones espaciales para el mismo
+  recorrido, las dos con «shall». Entre 250 Hz y 1 kHz la décima de longitud
+  de onda de ISO 26101 (de 137 mm a 34 mm a 343 m/s) es más holgada que
+  100 mm hasta 343 Hz y más estricta por encima, y por encima de 1 kHz
+  ISO 26101 pide 25 mm donde A.4.3 permite 100 mm. Un recorrido muestreado a
+  los 100 mm que A.4.3 permite, y que su último párrafo da por supuestos,
+  incumple la resolución que exige A.2.4 en todas las frecuencias por encima
+  de 343 Hz. El anexo de 2012 tenía una sola regla. Cuál de las dos pretende la
+  modificación no se puede decidir con su texto.
+- **Evidencia:** Verificado en la página 7 del PDF (p. 3 impresa) y en la
+  página 9 del PDF (p. 5 impresa) de ISO 3745:2012/Amd.1:2017, y en la
+  página 17 del PDF (p. 11 impresa) de ISO 26101:2017.
+- **Comportamiento de la biblioteca:** `check_free_field` juzga las dos y
+  informa de cada una por separado: `spacing_met` recoge el A.4.3 modificado e
+  `iso26101_spacing_met` el A.4.3 de ISO 26101 que cita A.2.4, y `passes` pide
+  las dos, porque las dos están impresas como requisitos. Un laboratorio que
+  lea A.4.3 como la regla del anexo ve la segunda marca falsa y la primera
+  verdadera. `tests/emission/test_free_field_qualification.py` fija un
+  recorrido de 100 mm que cumple A.4.3 por encima de 250 Hz e incumple el
+  A.4.3 de ISO 26101 en todas las bandas por encima de 343 Hz.
+- **Estado:** sin notificar.
+
+## ISO 6926:2016, anexo A, Fórmula (A.1) (d_0 como la mitad de una longitud que ISO 3745 ya reduce a la mitad)
+
+- **Ubicación:** anexo A (informativo), A.2 a), Fórmula (A.1) y la definición
+  de $d_0$ que la sigue (página 22 del PDF, p. 16 impresa) de ISO 6926:2016,
+  tercera edición, leída frente a ISO 3745:2012, 3.14 (página 13 del PDF,
+  p. 4 impresa). La adopción española UNE-EN ISO 6926:2016 imprime la misma
+  definición.
+- **El impreso:** $f_\mathrm{k} = \dfrac{c}{2\pi} \cdot \dfrac{1}{d_0}$, con
+  «$d_0$ is half the characteristic source dimension of the source (see
+  ISO 3745), in metres», y la NOTA «the knee frequency is defined as the
+  frequency at which the radiation efficiency has dropped 3 dB relative its
+  maximum value at high frequencies». ISO 3745:2012 3.14 define la dimensión
+  característica de la fuente, con el mismo símbolo $d_0$, como la «distance
+  from the origin of the co-ordinate system to the farthest corner of the
+  reference box».
+- **El problema:** la longitud que ISO 3745 llama $d_0$ ya es un radio, la
+  distancia del centro de la fuente a su esquina más lejana, así que su mitad
+  es la cuarta parte del tamaño de la fuente. La NOTA sitúa la frecuencia de
+  codo donde la eficiencia de radiación de una esfera pulsante,
+  $(ka)^2/(1 + (ka)^2)$, ha caído a la mitad, en $ka = 1$, que es la
+  Fórmula (A.1) con $d_0$ igual al radio $a$. Volver a dividir entre dos la
+  longitud de ISO 3745 duplica $f_\mathrm{k}$ y sube una octava el cambio
+  entre las Fórmulas (A.2) y (A.3). La definición da al símbolo dos
+  significados en dos normas que se citan entre sí.
+- **Evidencia:** Verificado en la página 22 del PDF (p. 16 impresa) de
+  ISO 6926:2016 y en la página 13 del PDF (p. 4 impresa) de
+  BS EN ISO 3745:2012; la lectura física descansa en la eficiencia de
+  radiación de una esfera pulsante, un recálculo y no un valor impreso.
+- **Comportamiento de la biblioteca:** `knee_frequency` toma el $d_0$ que
+  entra en la Fórmula (A.1), una longitud del orden de un radio, y su
+  docstring remite aquí; qué longitud es queda en manos de quien llama.
+  Ningún número que la biblioteca da depende de la elección. No hizo falta
+  ningún cambio.
+- **Estado:** sin notificar.
+
 ## ISO/PAS 1996-3:2022, apartado 5 (referencias cruzadas de r y d)
 
 - **Ubicación:** apartado 5, Fórmula (2), las definiciones de los símbolos de

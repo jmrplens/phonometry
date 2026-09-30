@@ -437,6 +437,63 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   resonator struck by a Gaussian pulse, whose response is known exactly,
   gives its mobility and its damping back.
 
+- **Qualify an anechoic or hemi-anechoic room (ISO 26101, ISO 3745 Annex A as
+  amended in 2017) and calibrate a reference sound source (ISO 6926).** The
+  precision method of ISO 3745 and every comparison method rest on a room and
+  a reference source qualified before the machine arrives, and the library
+  took both on trust. The new `emission.free_field_qualification` module
+  measures the room by the divergence loss method of ISO 26101:2017.
+  `MicrophoneTraverse` holds a straight traverse and
+  `inverse_square_law_deviations` applies the monitor correction of
+  Formula (1) and the deviations of Formulae (2) and (4), with the source
+  strength $b$ fitted as the midpoint of the interval that maximizes the
+  qualified distance and the mathematical origin fixed or searched inside the
+  box the test source occupies, as ISO 26101 5.1.3.2 and the amended A.3.3
+  require; no source prints the fit, and the rule is stated in the docstring
+  and the guide. `check_free_field` returns the verdict of the Annex A that
+  ISO 3745:2012/Amd.1:2017 wrote: the Table A.1 limits for both room types,
+  the frequencies of A.2.3 (`qualification_frequencies_hz`, one-third
+  octaves below 125 Hz and above 4 kHz and octaves between), the maximum
+  qualified radius of A.2.4, the traverse count, the five path targets
+  (`MicrophoneTraverse.targets`), the working area (`paths_in_working_area`)
+  and the path angles of A.3.3, the points, equal spacing and largest spacing
+  of A.4.3 beside the resolution and traverse length of ISO 26101, the 6 dB
+  background margin, the test source directionality of
+  ISO 26101 Annex B (`verify_source_directionality`,
+  `directionality_positions`) and the reflecting plane of A.2.5, with the
+  widest reduced range when the full one fails and every requirement without
+  data named in `not_judged`. `sound_power_anechoic` takes the verdict as
+  `room_qualification` and warns when the measurement leaves it. The new
+  `emission.reference_sound_source` module judges a reference sound source by
+  ISO 6926:2016 clause 5 (`verify_reference_sound_source`: Table 1 and the
+  variation over the declared supply range of 5.2, the spectrum of 5.4, the
+  directivity index of 5.5) and its drift by 5.6
+  (`verify_reference_source_drift`), and calibrates it on the 2 m hemisphere
+  of clause 8 (`reference_source_calibration`: Formula (2) with $C_1$, the
+  $C_2$ of Annex A and $C_3$ read from the temperature, static pressure and
+  air absorption that `CalibrationConditions` holds, the Annex B intensity
+  bands and the expanded uncertainty from Table 2). `sound_power_comparison`,
+  `sound_energy_comparison`, `sound_power_hard_walled`,
+  `sound_energy_hard_walled`, `sound_power_special_room_comparison`,
+  `sound_power_in_situ`, `sound_energy_in_situ` and
+  `high_frequency_sound_power_comparison` accept the calibration where they
+  accept the levels and read the bands they need, octaves summed from its
+  one-third octaves. The ISO 3741, ISO 3743 and ISO 9295 comparisons read it
+  at the temperature and pressure of the test, as $L_W$ less the
+  calibration's own $C_2$ there, since ISO 3741 asks for the reference
+  source's power "corrected to the meteorological conditions at the time of
+  test" and both parts of ISO 3743 give $L_W$ under the conditions of the
+  test before their annex carries it to the reference ones; ISO 3747 corrects
+  the measured levels of the reference source instead and reads the
+  calibration as it is. Every result has `.plot()`, and a new guide in both
+  languages qualifies a synthetic hemi-anechoic room and calibrates a
+  fan-type source. No source prints a worked example, so the conformance
+  rows hold the printed tables, the printed limits of both verdicts at their
+  edges and closed forms: an exact inverse-square field qualifies at every
+  distance, and one known reflection deviates by exactly the excess it adds. The errata registry gains the two spatial resolutions
+  the amended Annex A sets for one traverse, and the $d_0$ that ISO 6926
+  Formula (A.1) halves twice.
+
 - **Sound power in the 16 kHz octave band (ISO 9295).** The general sound
   power methods stop at the 10 kHz one-third-octave band, and a printer's
   paper noise or a power supply's whine sits above it. The new

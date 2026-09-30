@@ -305,7 +305,7 @@ high_frequency_sound_power_comparison(
     *,
     frequencies_hz: ArrayLike,
     reference_pressure_levels_db: ArrayLike,
-    reference_sound_power_levels_db: ArrayLike,
+    reference_sound_power_levels_db: ArrayLike | ReferenceSourceCalibration,
     noise_bandwidth_hz: float | None = None,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = 101.325,
@@ -330,7 +330,7 @@ comparison method.
 | `pressure_levels_db` | $\overline{L_{p(\mathrm{ST})}}$ per band, in dB re 20 µPa, or an `(N, bands)` array averaged by Formula (1). |
 | `frequencies_hz` | Band centre or tone frequencies, in hertz, one per band. |
 | `reference_pressure_levels_db` | $\overline{L_{p(\mathrm{FAR})}}$ per band, in dB re 20 µPa, measured with the same bandwidth at the same location (clauses 8.3, 8.4); a 2-D input is averaged by Formula (1) as well. |
-| `reference_sound_power_levels_db` | $L_{W(\mathrm{FAR})}$ of the calibrated reference source, in dB re 1 pW, a scalar or one value per band: per band for broadband noise, per hertz for tones. |
+| `reference_sound_power_levels_db` | $L_{W(\mathrm{FAR})}$ of the calibrated reference source, in dB re 1 pW, a scalar or one value per band: per band for broadband noise, per hertz for tones. For broadband noise it may be the [`ReferenceSourceCalibration`](/phonometry/reference/api/power/reference-sound-source/#referencesourcecalibration) of ISO 6926, read in the one-third octave bands at `frequencies_hz` and carried from the reference conditions to those of the test by its own `C2`, since clause 10.1 corrects the result as ISO 3741 does. |
 | `noise_bandwidth_hz` | $\Delta F$, the noise bandwidth of the analyser, in hertz, which selects Formula (9); `None` (default) selects Formula (8). Clause 8.5.2 allows 1 Hz for a constant percentage analyser, and holds an FFT to 112 Hz or less: a wider one emits a [`SoundPowerWarning`](/phonometry/reference/api/power/sound-power/#soundpowerwarning). |
 | `temperature_c` | Air temperature in the room, in degrees Celsius (default 23,0 °C). |
 | `static_pressure_kpa` | Static pressure in the room, in kilopascals (default 101,325 kPa). |

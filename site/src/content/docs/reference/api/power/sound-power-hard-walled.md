@@ -532,7 +532,7 @@ value is still returned.
 sound_energy_hard_walled(
     event_levels: ArrayLike,
     levels_ref: ArrayLike,
-    lw_ref: ArrayLike,
+    lw_ref: ArrayLike | ReferenceSourceCalibration,
     frequencies: ArrayLike,
     *,
     events: int | None = None,
@@ -572,7 +572,7 @@ $L_J = L_W + 10 \log_{10}(T/T_0)$, $T_0$ = 1 s (3.4 NOTE 1).
 | :--- | :--- |
 | `event_levels` | Measured (uncorrected) octave-band single event levels, in decibels. With `events` `None`: `(Ne, bands)` for a traverse, `(Ne, NM, bands)` or `(Ne, NS, NM, bands)`, one entry per event on the first axis (Eq. 15). With `events`: `(bands,)`, `(NM, bands)` or `(NS, NM, bands)`, one measurement encompassing `events` events (Eq. 16). |
 | `levels_ref` | Time-averaged levels of the reference sound source, `(NM, bands)` or `(bands,)`, as in [`sound_power_hard_walled`](/phonometry/reference/api/power/sound-power-hard-walled/#sound_power_hard_walled). |
-| `lw_ref` | Calibrated sound power level of the reference source, `(bands,)`, in decibels. |
+| `lw_ref` | Calibrated sound power level of the reference source, `(bands,)`, in decibels, under the meteorological conditions of the test, or its [`ReferenceSourceCalibration`](/phonometry/reference/api/power/reference-sound-source/#referencesourcecalibration), as for [`sound_power_hard_walled`](/phonometry/reference/api/power/sound-power-hard-walled/#sound_power_hard_walled). |
 | `frequencies` | Nominal octave mid-band frequencies, one per band. |
 | `events` | The number $N_\mathrm{e}$ of events one measurement encompasses (Eq. 16); `None` when the events are on the first axis. Fewer than five warns (7.6). |
 | `background_levels` | Time-averaged background levels `Lpi(B)`, `(NM, bands)` or `(bands,)`, in decibels; requires `integration_time_s`. `None` applies no correction, warns and leaves `background_requirement_met` `False` throughout. |
@@ -597,7 +597,7 @@ $L_J = L_W + 10 \log_{10}(T/T_0)$, $T_0$ = 1 s (3.4 NOTE 1).
 sound_power_hard_walled(
     levels: ArrayLike,
     levels_ref: ArrayLike,
-    lw_ref: ArrayLike,
+    lw_ref: ArrayLike | ReferenceSourceCalibration,
     frequencies: ArrayLike,
     *,
     background_levels: ArrayLike | None = None,
@@ -634,7 +634,7 @@ total.
 | :--- | :--- |
 | `levels` | Measured (uncorrected) octave-band time-averaged levels of the source under test, in decibels: `(bands,)` for one microphone traverse (NOTE to 8.1.2), `(NM, bands)` for fixed positions, or `(NS, NM, bands)` for several source locations (Eq. 9). |
 | `levels_ref` | The same for the reference sound source at the same microphone positions, `(NM, bands)`, or its traverse level `(bands,)`. |
-| `lw_ref` | Calibrated octave-band sound power level of the reference source `LW(RSS)`, `(bands,)`, in decibels. |
+| `lw_ref` | Calibrated octave-band sound power level of the reference source `LW(RSS)`, `(bands,)`, in decibels, under the meteorological conditions of the test, since Eq. (14) gives `LW` there (Annex A); or the [`ReferenceSourceCalibration`](/phonometry/reference/api/power/reference-sound-source/#referencesourcecalibration) of ISO 6926, whose one-third octave bands are summed into the octaves at `frequencies` and carried from the reference conditions to those of the test by its own `C2` (ISO 6926:2016, 8.4). |
 | `frequencies` | Nominal octave mid-band frequencies, one per band, ascending, from 125 Hz to 8 kHz; 63 Hz is accepted where the room and the instrumentation are satisfactory there (3.11, Table B.1 footnote). |
 | `background_levels` | Octave-band background levels `Lpi(B)`, `(NM, bands)` or one averaged `(bands,)` spectrum, in decibels. `None` applies no correction, warns and leaves `background_requirement_met` `False` throughout (4.5, 7.5). |
 | `background_levels_ref` | Background for the reference-source measurement, same shapes; `None` reuses `background_levels`. |
@@ -649,7 +649,7 @@ total.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | if a level array is not finite or of an admissible shape, the reference or background levels do not match the source's positions and bands, `frequencies` are not distinct ascending octave centres of Table B.1, the climate is out of range, `sigma_omc_db` is negative, or `coverage_factor` is not positive. |
+| ValueError | if a level array is not finite or of an admissible shape, the reference or background levels do not match the source's positions and bands, `frequencies` are not distinct ascending octave centres of Table B.1, the climate is out of range, `sigma_omc_db` is negative, `coverage_factor` is not positive, or a calibration does not cover the bands or used the manufacturer's `C2`, whose value at the test only the manufacturer gives. |
 
 ## SourceLocationPlan
 

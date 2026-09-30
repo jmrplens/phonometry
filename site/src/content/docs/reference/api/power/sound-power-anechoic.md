@@ -319,6 +319,7 @@ sound_power_anechoic(
     air_absorption_coefficient: float | np.ndarray | None = ...,
     sigma_omc: float = ...,
     coverage_factor: float = ...,
+    room_qualification: FreeFieldCheck | None = ...,
 ) -> PrecisionSoundPowerResult
 
 sound_power_anechoic(
@@ -333,6 +334,7 @@ sound_power_anechoic(
     air_absorption_coefficient: float | np.ndarray | None = ...,
     sigma_omc: float = ...,
     coverage_factor: float = ...,
+    room_qualification: FreeFieldCheck | None = ...,
 ) -> PrecisionSoundPowerResult
 ```
 
@@ -371,5 +373,12 @@ environmental term. The reproducibility `sigma_R0` is taken from Table 3
 | `air_absorption_coefficient` | `a(f)` (dB/m) for C3, scalar or per band; `None` leaves $C_3 = 0$. |
 | `sigma_omc` | Operating/mounting standard deviation, dB. |
 | `coverage_factor` | `k` (2 two-sided, 1.6 one-sided). |
+| `room_qualification` | The [`check_free_field`](/phonometry/reference/api/power/free-field-qualification/#check_free_field) verdict of the room (Annex A as Amendment 1:2017 wrote it). Its room type must match `surface`; a [`SoundPowerWarning`](/phonometry/reference/api/power/sound-power/#soundpowerwarning) says when the room is not qualified, when `radius` lies beyond the qualified radius, or when a band lies outside the qualified frequency range. |
 
 **Returns:** [`PrecisionSoundPowerResult`](/phonometry/reference/api/power/sound-power-anechoic/#precisionsoundpowerresult).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | for a room qualification of the other room type. |

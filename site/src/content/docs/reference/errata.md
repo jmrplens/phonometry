@@ -2248,6 +2248,78 @@ in the same order.
   ISO 3744 chain. No change was required.
 - **Status:** unreported.
 
+## ISO 3745:2012/Amd.1:2017, A.2.4 against A.4.3 (two spatial resolutions for one traverse)
+
+- **Location:** A.2.4 of the replacement Annex A (PDF page 7, printed p. 3)
+  and A.4.3 of the same annex (PDF page 9, printed p. 5) of
+  ISO 3745:2012/Amd.1:2017, read against ISO 26101:2017, A.4.3 (PDF page 17,
+  printed p. 11).
+- **The print:** A.2.4 says "Within each qualified radius, each microphone
+  traverse shall meet the requirements for traverse length of
+  ISO 26101:2017, 5.1.4.3 and for spatial resolution of ISO 26101:2017,
+  A.4.3." ISO 26101:2017 A.4.3 says "The spacing shall not exceed one-tenth
+  of a wavelength at each frequency of interest below 1 kHz and shall not
+  exceed 25 mm at frequencies above 1 kHz." The amendment's own A.4.3 says
+  "The spacing between points shall not exceed a tenth of a wavelength at each
+  frequency of interest below 250 Hz and shall not exceed 100 mm at
+  frequencies above 250 Hz", and its last paragraph goes on to recommend
+  further points "If a 100 mm spatial resolution traverse indicates" a
+  deviation within 10 % of the criterion.
+- **The problem:** the annex sets two spatial resolutions for the same
+  traverse, both with "shall". Between 250 Hz and 1 kHz the tenth of a
+  wavelength of ISO 26101 (137 mm to 34 mm at 343 m/s) is looser than 100 mm
+  down to 343 Hz and tighter above it, and above 1 kHz ISO 26101 asks for
+  25 mm where A.4.3 allows 100 mm. A traverse sampled at the 100 mm that
+  A.4.3 permits, and that its last paragraph presupposes, fails the resolution
+  A.2.4 requires at every frequency above 343 Hz. The 2012 annex had a single
+  rule. Which of the two the amendment intends cannot be settled from its
+  text.
+- **Evidence:** Verified on PDF page 7 (printed p. 3) and PDF page 9 (printed
+  p. 5) of ISO 3745:2012/Amd.1:2017, and on PDF page 17 (printed p. 11) of
+  ISO 26101:2017.
+- **Library behaviour:** `check_free_field` judges both and reports each on
+  its own: `spacing_met` holds the amended A.4.3 and `iso26101_spacing_met`
+  the ISO 26101 A.4.3 that A.2.4 cites, and `passes` asks for both, since both
+  are printed as requirements. A laboratory that reads A.4.3 as the rule of
+  the annex sees the second flag false and the first true.
+  `tests/emission/test_free_field_qualification.py` pins a 100 mm traverse
+  that meets A.4.3 above 250 Hz and fails ISO 26101 A.4.3 at every band above
+  343 Hz.
+- **Status:** unreported.
+
+## ISO 6926:2016, Annex A, Formula (A.1) (d_0 as half of a length ISO 3745 already halves)
+
+- **Location:** Annex A (informative), A.2 a), Formula (A.1) and the
+  definition of $d_0$ beneath it (PDF page 22, printed p. 16) of
+  ISO 6926:2016, third edition, read against ISO 3745:2012, 3.14 (PDF page 13,
+  printed p. 4). The Spanish adoption UNE-EN ISO 6926:2016 prints the same
+  definition.
+- **The print:** $f_\mathrm{k} = \dfrac{c}{2\pi} \cdot \dfrac{1}{d_0}$, with
+  "$d_0$ is half the characteristic source dimension of the source (see
+  ISO 3745), in metres", and the NOTE "the knee frequency is defined as the
+  frequency at which the radiation efficiency has dropped 3 dB relative its
+  maximum value at high frequencies". ISO 3745:2012 3.14 defines the
+  characteristic source dimension, with the same symbol $d_0$, as the
+  "distance from the origin of the co-ordinate system to the farthest corner
+  of the reference box".
+- **The problem:** the length ISO 3745 calls $d_0$ is already a radius, the
+  distance from the centre of the source to its farthest corner, so half of
+  it is a quarter of the source's size. The NOTE places the knee where the
+  radiation efficiency of a pulsating sphere, $(ka)^2/(1 + (ka)^2)$, has
+  fallen to half, at $ka = 1$, which is Formula (A.1) with $d_0$ the radius
+  $a$. Halving the ISO 3745 length again doubles $f_\mathrm{k}$ and moves the
+  switch between Formulae (A.2) and (A.3) an octave up. The definition gives
+  the symbol two meanings in two standards that cite each other.
+- **Evidence:** Verified on PDF page 22 (printed p. 16) of ISO 6926:2016 and
+  on PDF page 13 (printed p. 4) of BS EN ISO 3745:2012; the physical reading
+  rests on the radiation efficiency of a pulsating sphere, a recomputation
+  rather than a printed value.
+- **Library behaviour:** `knee_frequency` takes the $d_0$ that enters
+  Formula (A.1), a radius-like length, and its docstring points here; which
+  length that is stays with the caller. No number the library reports depends
+  on the choice. No change was required.
+- **Status:** unreported.
+
 ## ISO/PAS 1996-3:2022, Clause 5 (cross-references of r and d)
 
 - **Location:** Clause 5, Formula (2), the definitions of the symbols of the

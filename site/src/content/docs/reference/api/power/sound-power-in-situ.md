@@ -268,7 +268,7 @@ matplotlib (`pip install phonometry[plot]`); returns the
 sound_energy_in_situ(
     event_levels: ArrayLike,
     levels_ref: ArrayLike,
-    lw_ref: ArrayLike,
+    lw_ref: ArrayLike | ReferenceSourceCalibration,
     frequencies: ArrayLike,
     *,
     events: int | None = None,
@@ -309,7 +309,7 @@ time-averaged, over 30 s (7.6), exactly as for a steady source.
 | :--- | :--- |
 | `event_levels` | Measured (uncorrected) octave-band single event levels `L'Ei,q(ST)` as `(n, N, bands)`, or `L'Ei,N(ST)` of one measurement encompassing `events` events as `(n, bands)`, in decibels. |
 | `levels_ref` | Time-averaged levels of the reference sound source, `(n, bands)` or `(m, n, bands)`, as in [`sound_power_in_situ`](/phonometry/reference/api/power/sound-power-in-situ/#sound_power_in_situ). |
-| `lw_ref` | Calibrated sound power level of the reference source, `(bands,)` or `(m, bands)`, in decibels. |
+| `lw_ref` | Calibrated sound power level of the reference source, `(bands,)` or `(m, bands)`, in decibels, or its [`ReferenceSourceCalibration`](/phonometry/reference/api/power/reference-sound-source/#referencesourcecalibration), as for [`sound_power_in_situ`](/phonometry/reference/api/power/sound-power-in-situ/#sound_power_in_situ). |
 | `frequencies` | Nominal octave mid-band frequencies, one per band. |
 | `events` | The number `N` of events a 2D `event_levels` contains (Eq. 17); must be `None` with the 3D form, which counts them. |
 | `background_levels` | Octave-band time-averaged background levels `Lpi(B)`, `(n, bands)` or `(bands,)`, in decibels; `None` applies no correction, warns, and leaves `background_requirement_met` `False` in every band (7.5, 8.1). |
@@ -335,7 +335,7 @@ time-averaged, over 30 s (7.6), exactly as for a steady source.
 sound_power_in_situ(
     levels: ArrayLike,
     levels_ref: ArrayLike,
-    lw_ref: ArrayLike,
+    lw_ref: ArrayLike | ReferenceSourceCalibration,
     frequencies: ArrayLike,
     *,
     background_levels: ArrayLike | None = None,
@@ -373,7 +373,7 @@ conditions of Annex C, and `sound_power_level_a` is the Annex D total.
 | :--- | :--- |
 | `levels` | Measured (uncorrected) octave-band time-averaged levels `L'pi(ST)` of the source under test, `(n, bands)`, one row per microphone position, in decibels. |
 | `levels_ref` | The same for the reference sound source, `L'pi(RSS)` already corrected for speed, temperature and static pressure per its manufacturer but not for background: `(n, bands)` for one location, or `(m, n, bands)` for `m` locations (Eq. 10). |
-| `lw_ref` | Calibrated octave-band sound power level `LW(RSS)` of the reference source, `(bands,)`, or `(m, bands)` when each location was calibrated in its own similar position (Eq. 12), in decibels. |
+| `lw_ref` | Calibrated octave-band sound power level `LW(RSS)` of the reference source, `(bands,)`, or `(m, bands)` when each location was calibrated in its own similar position (Eq. 12), in decibels; or the [`ReferenceSourceCalibration`](/phonometry/reference/api/power/reference-sound-source/#referencesourcecalibration) of ISO 6926, whose one-third octave bands are summed into the octaves at `frequencies`. It is read as calibrated: Eq. (9) corrects the measured levels of the reference source for speed, temperature and static pressure by the manufacturer's specifications instead. |
 | `frequencies` | Nominal octave mid-band frequencies, one per band, from 63 Hz to 8 kHz (Table D.1), in hertz. |
 | `background_levels` | Octave-band time-averaged background levels `Lpi(B)`, `(n, bands)` or one `(bands,)` spectrum for every position, in decibels; `None` applies no correction, warns, and leaves `background_requirement_met` `False` in every band, since 7.5 has the background measured at each position and 8.1 needs the margin to declare the measurement valid. |
 | `background_levels_ref` | Background for the reference-source measurement, same shapes; `None` reuses `background_levels`, since the procedure takes one background reading (7.5). |

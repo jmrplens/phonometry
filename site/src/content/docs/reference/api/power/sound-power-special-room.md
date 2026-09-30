@@ -345,7 +345,7 @@ Annex F total of the octave bands.
 sound_power_special_room_comparison(
     levels: ArrayLike,
     levels_ref: ArrayLike,
-    lw_ref: ArrayLike,
+    lw_ref: ArrayLike | ReferenceSourceCalibration,
     frequencies: ArrayLike,
     *,
     background_levels: ArrayLike | None = None,
@@ -380,7 +380,7 @@ needed, and the 300 m³ ceiling of 6.2 does not apply (NOTE).
 | :--- | :--- |
 | `levels` | Levels of the source under test, `(bands,)`, `(NM, bands)` or `(NS, NM, bands)`, in decibels. |
 | `levels_ref` | Levels of the reference source, `(NMr, bands)`, at least six positions (10.3), or one traverse level `(bands,)`. |
-| `lw_ref` | The reference source's calibrated octave-band power level $L_{W\mathrm{r}}$, `(bands,)`, in decibels. |
+| `lw_ref` | The reference source's calibrated octave-band power level $L_{W\mathrm{r}}$, `(bands,)`, in decibels, under the meteorological conditions of the test, since Formula (10) gives $L_{W\mathrm{e}}$ there (Annex E); or the [`ReferenceSourceCalibration`](/phonometry/reference/api/power/reference-sound-source/#referencesourcecalibration) of ISO 6926, whose one-third octave bands are summed into the octaves at `frequencies` and carried from the reference conditions to those of the test by its own `C2` (ISO 6926:2016, 8.4). |
 | `frequencies` | Nominal octave centres from 63 Hz to 8 kHz. |
 | `background_levels` | Background for the source under test, as in [`sound_power_special_room`](/phonometry/reference/api/power/sound-power-special-room/#sound_power_special_room). |
 | `background_levels_ref` | Background at the reference source's positions; `None` reuses `background_levels` when it fits them. |
@@ -395,7 +395,7 @@ needed, and the 300 m³ ceiling of 6.2 does not apply (NOTE).
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | for levels of an inadmissible shape, a reference spectrum of other bands, a background that fits neither source, frequencies outside Table F.1, a climate out of range, a negative `sigma_omc_db` or a coverage factor that is not positive. |
+| ValueError | for levels of an inadmissible shape, a reference spectrum of other bands, a background that fits neither source, frequencies outside Table F.1, a climate out of range, a negative `sigma_omc_db`, a coverage factor that is not positive, or a calibration that does not cover the bands or used the manufacturer's `C2`, whose value at the test only the manufacturer gives. |
 
 ## special_room_background_correction
 

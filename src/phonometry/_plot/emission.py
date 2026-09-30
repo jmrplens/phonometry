@@ -32,6 +32,8 @@ from .common import (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
+
     from matplotlib.axes import Axes
     from matplotlib.container import BarContainer
     from matplotlib.patches import Rectangle
@@ -66,6 +68,12 @@ if TYPE_CHECKING:
         SpecialRoomSoundPowerResult,
         SpecialRoomSuitabilityCheck,
         SpecialRoomSurfaceCheck,
+    )
+    from ..emission.turbine_noise import (
+        TurbineMeasurementSurface,
+        TurbineMicrophoneArray,
+        TurbineNoiseDeclaration,
+        TurbineSoundPowerResult,
     )
     from ..emission.vibration_sound_power import VibrationSoundPowerResult
     from ..emission.workstation import EmissionPressureResult
@@ -112,6 +120,10 @@ _NOT_QUALIFIED = "not qualified"
 _LWA_SYMBOL = "$L_{W\\mathrm{A}}$"
 #: Legend corner of the ISO 3743 renderers whose curves leave it free.
 _LEGEND_LOWER_RIGHT: Final = "lower right"
+#: Text coordinates of an annotation placed a few points from its anchor.
+_OFFSET_POINTS: Final = "offset points"
+#: Title of the IEC 61063 position plot, the same in both languages.
+_IEC_61063_TITLE = r"IEC 61063: $L_{{W\mathrm{{A}}}}$ = {power} dB re 1 pW"
 #: Legend of a band the standard makes an upper bound: the source under test's
 #: own background margin fell short (ISO 3743-1 8.1.3, ISO 3747 8.1).
 _UPPER_BOUND_LABEL = "Upper bound: source margin below 6 dB"
@@ -217,6 +229,35 @@ _STRINGS: dict[str, str] = {
     "ISO 3743-2 room suitability (6.7): {verdict}": "Idoneidad de la sala ISO 3743-2 (apartado 6.7): {verdict}",
     "suitable": "idónea",
     "not suitable": "no idónea",
+    "Measurement surface": "Superficie de medición",
+    "Additional positions": "Posiciones adicionales",
+    "Overhead positions": "Posiciones superiores",
+    "Key positions": "Posiciones clave",
+    "Along the shaft $x$ [m]": "A lo largo del eje $x$ [m]",
+    "Across the shaft $y$ [m]": "Transversal al eje $y$ [m]",
+    "Height $z$ [m]": "Altura $z$ [m]",
+    "IEC 61063 plan, $S$ = {area} m²": "Planta IEC 61063, $S$ = {area} m²",
+    "IEC 61063 elevation, $S$ = {area} m²": "Alzado IEC 61063, $S$ = {area} m²",
+    "7 dB limit (A.3.3)": "Límite de 7 dB (A.3.3)",
+    "This room, $K$ = {k} dB": "Esta sala, $K$ = {k} dB",
+    "Reference source, $K$ = {k} dB": "Fuente de referencia, $K$ = {k} dB",
+    "Environmental correction $K$ [dB]": "Corrección ambiental $K$ [dB]",
+    "IEC 61063 Figure A.3": "Figura A.3 de IEC 61063",
+    "qualifies": "apta",
+    "does not qualify": "no apta",
+    r"Corrected level $L_{p\mathrm{A}i}$": r"Nivel corregido $L_{p\mathrm{A}i}$",
+    "Background": "Ruido de fondo",
+    "Energy average": "Promedio energético",
+    "Surface level {level} dB": "Nivel en la superficie {level} dB",
+    "Overhead position": "Posición superior",
+    "Upper limit: background within 3 dB": "Límite superior (fondo < 3 dB)",
+    "Microphone position (key positions numbered)": "Posición de micrófono (posiciones clave numeradas)",
+    "Microphone position, in the order given": "Posición de micrófono, en el orden dado",
+    "A-weighted sound pressure level [dB]": "Nivel de presión sonora ponderado A [dB]",
+    _IEC_61063_TITLE: _IEC_61063_TITLE,
+    "Table 1: ±{sigma} dB": "Tabla 1: ±{sigma} dB",
+    "A-weighted sound power level [dB re 1 pW]": "Nivel de potencia acústica ponderado A [dB re 1 pW]",
+    "IEC 61063 report: loudest at {condition}": "Informe IEC 61063: condición más ruidosa, {condition}",
 }
 
 
@@ -314,7 +355,7 @@ def plot_emission_pressure(
             shown,
             xy=(bar.get_x() + bar.get_width() / 2.0, bar.get_y() + bar.get_height()),
             xytext=(0, 4),
-            textcoords="offset points",
+            textcoords=_OFFSET_POINTS,
             ha="center",
             va="bottom",
             fontsize=9,
@@ -1394,7 +1435,7 @@ def plot_source_location_plan(
             text,
             (bar.get_x() + bar.get_width() / 2.0, bar.get_height()),
             xytext=(0.0, 3.0),
-            textcoords="offset points",
+            textcoords=_OFFSET_POINTS,
             ha="center",
             va="bottom",
             fontsize="small",
@@ -1655,5 +1696,535 @@ def plot_special_room_suitability(
     )
     ax.legend(handles=handles, loc=_LEGEND_LOWER_RIGHT, fontsize="small")
     ax.grid(visible=True, axis="y", alpha=0.3)
+    localize_axes(ax, language)
+    return ax
+
+
+# ---------------------------------------------------------------------------
+# Steam turbine sets (IEC 61063)
+# ---------------------------------------------------------------------------
+
+#: Label of the dashed outline every turbine layout draws.
+_TURBINE_SURFACE_LABEL = "Measurement surface"
+#: The horizontal extent of Figure A.3, in A/S: from 0,5 to 300.
+_FIGURE_A3_RATIO_RANGE = (0.5, 300.0)
+#: The A/S values Figure A.3 labels on its axis.
+_FIGURE_A3_RATIO_TICKS = (0.5, 1.0, 5.0, 10.0, 50.0, 100.0, 300.0)
+#: Where Figure A.3 turns from dashed to solid: the qualification of A.3.3.
+_FIGURE_A3_QUALIFIED_RATIO = 1.0
+#: The environmental correction A.3.3 allows at most, in dB.
+_TURBINE_K_LIMIT_DB = 7.0
+
+
+def _turbine_outline(
+    surface: TurbineMeasurementSurface, view: str
+) -> tuple[np.ndarray, np.ndarray]:
+    """The closed outline of the measurement surface in plan or elevation."""
+    edges = np.asarray(surface.x_edges_m)
+    upper_x = np.repeat(edges, 2)[1:-1]
+    if view == "plan":
+        half = np.asarray(surface.widths_m) / 2.0
+        upper_y = np.repeat(half, 2)
+        xs = np.concatenate(
+            ([edges[0]], upper_x, [edges[-1]], upper_x[::-1], [edges[0]])
+        )
+        ys = np.concatenate(([0.0], upper_y, [0.0], -upper_y[::-1], [0.0]))
+        return xs, ys
+    heights = np.asarray(surface.heights_m)
+    xs = np.concatenate(([edges[0]], upper_x, [edges[-1]]))
+    zs = np.concatenate(([0.0], np.repeat(heights, 2), [0.0]))
+    return xs, zs
+
+
+def _turbine_boxes(surface: TurbineMeasurementSurface, ax: Axes, view: str) -> None:
+    """Shade each reference box and write its label inside it."""
+    from matplotlib.patches import Rectangle
+
+    d = float(surface.measurement_distance_m)
+    edges = np.asarray(surface.x_edges_m)
+    box_fill = theme_fill(_C_MUTED, ax)
+    for i, box in enumerate(surface.reference_boxes):
+        x0 = float(edges[i]) + (d if i == 0 else 0.0)
+        if view == "plan":
+            rect = Rectangle((x0, -box.width_m / 2.0), box.length_m, box.width_m)
+            # Off the shaft line, where the overhead positions stand in plan.
+            centre = -box.width_m / 4.0
+            across = box.width_m / 2.0
+        else:
+            rect = Rectangle((x0, 0.0), box.length_m, box.height_m)
+            # Above the row of microphones round the sides, which the
+            # elevation draws across every box.
+            centre = 0.72 * box.height_m
+            across = box.height_m
+        rect.set_facecolor(box_fill)
+        rect.set_edgecolor(_C_EDGE)
+        rect.set_linewidth(1.0)
+        ax.add_patch(rect)
+        if box.label:
+            ax.text(
+                x0 + box.length_m / 2.0,
+                centre,
+                box.label,
+                ha="center",
+                va="center",
+                fontsize=8,
+                rotation=90 if box.length_m < 0.6 * across else 0,
+            )
+
+
+def _turbine_positions(
+    array: TurbineMicrophoneArray, ax: Axes, view: str, language: str
+) -> None:
+    """Draw the key positions as numbered crosses and the others as circles."""
+    positions = np.asarray(array.positions_m)
+    overhead = np.asarray(array.overhead_mask, dtype=bool)
+    key = np.asarray(array.key_mask, dtype=bool)
+    if view == "plan":
+        px, py = positions[:, 0], positions[:, 1]
+        shown = np.ones(len(positions), dtype=bool)
+    else:
+        # The elevation is seen from the side of key position 4, as both
+        # elevations of Figure 2 are: the far side would stand on the same
+        # points and add nothing.
+        px, py = positions[:, 0], positions[:, 2]
+        shown = overhead | (positions[:, 1] <= 0.0)
+    side = shown & ~key & ~overhead
+    top = shown & ~key & overhead
+    ax.plot(
+        px[side],
+        py[side],
+        linestyle="none",
+        marker="o",
+        ms=5.0,
+        mfc="none",
+        mec=_C_PRIMARY,
+        label=_t("Additional positions", language),
+    )
+    if np.any(top):
+        ax.plot(
+            px[top],
+            py[top],
+            linestyle="none",
+            marker="o",
+            ms=5.0,
+            mfc="none",
+            mec=_C_SECONDARY,
+            label=_t("Overhead positions", language),
+        )
+    marked = shown & key
+    ax.plot(
+        px[marked],
+        py[marked],
+        linestyle="none",
+        marker="x",
+        ms=8.0,
+        mew=2.0,
+        color=_C_REFERENCE,
+        label=_t("Key positions", language),
+    )
+    labels = np.asarray(array.labels)[marked]
+    for x, y, label in zip(px[marked], py[marked], labels, strict=True):
+        ax.annotate(
+            str(label),
+            xy=(x, y),
+            xytext=(5, 5),
+            textcoords=_OFFSET_POINTS,
+            fontsize=9,
+            fontweight="bold",
+            color=_C_REFERENCE,
+        )
+
+
+def plot_turbine_layout(
+    surface: TurbineMeasurementSurface,
+    array: TurbineMicrophoneArray | None,
+    ax: Axes | None = None,
+    *,
+    view: str = "plan",
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """The reference boxes, the measurement surface and the positions on it.
+
+    Figure 2 of IEC 61063 in plan or in elevation: each reference box as a
+    shaded rectangle with its label, the measurement surface 1 m out as a
+    dashed outline, and, when an array is given, the key positions as crosses
+    with their number and the additional ones as circles, the overhead ones in
+    a second colour. The elevation shows the near side only, the side of key
+    position 4, as both elevations of the figure do, with the reflecting
+    plane beneath.
+
+    :param surface: A
+        :class:`~phonometry.emission.turbine_noise.TurbineMeasurementSurface`.
+    :param array: A
+        :class:`~phonometry.emission.turbine_noise.TurbineMicrophoneArray`, or
+        ``None`` for the surface alone.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param view: ``"plan"`` or ``"elevation"``.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the outline of the measurement surface.
+    :return: The axes.
+    :raises ValueError: for a view that is neither.
+    """
+    from .._i18n import format_number, localize_axes
+
+    if view not in ("plan", "elevation"):
+        msg = f"view must be 'plan' or 'elevation'; got {view!r}."
+        raise ValueError(msg)
+    ax = ax if ax is not None else _new_axes()
+    _turbine_boxes(surface, ax, view)
+    xs, ys = _turbine_outline(surface, view)
+    style_default(kwargs, "color", _C_PRIMARY)
+    style_default(kwargs, "linestyle", "--")
+    style_default(kwargs, "linewidth", 1.4)
+    kwargs.setdefault("label", _t(_TURBINE_SURFACE_LABEL, language))
+    ax.plot(xs, ys, **kwargs)
+    if view == "elevation":
+        # The reflecting plane, in the page's own ink.
+        ax.axhline(0.0, color=ax.xaxis.label.get_color(), linewidth=2.0)
+    if array is not None:
+        _turbine_positions(array, ax, view, language)
+    # Metres on both axes at one scale, the frame fitted to the surface with a
+    # margin for the position numbers and a band above it for the legend.
+    length = float(np.asarray(surface.x_edges_m)[-1])
+    band = max(3.5, 0.15 * length)
+    ax.set_xlim(-1.0, length + 1.0)
+    if view == "plan":
+        half = float(surface.max_width_m) / 2.0
+        ax.set_ylim(-half - 1.0, half + band)
+    else:
+        ax.set_ylim(-0.5, float(surface.max_height_m) + band)
+    ax.set_aspect("equal", adjustable="box")
+    ax.set_xlabel(_t("Along the shaft $x$ [m]", language))
+    ax.set_ylabel(
+        _t("Across the shaft $y$ [m]", language)
+        if view == "plan"
+        else _t("Height $z$ [m]", language)
+    )
+    area = format_number(float(surface.area_m2), language, decimals=1)
+    title = (
+        "IEC 61063 plan, $S$ = {area} m²"
+        if view == "plan"
+        else "IEC 61063 elevation, $S$ = {area} m²"
+    )
+    ax.set_title(_t(title, language, area=area))
+    legend = ax.legend(fontsize="small", ncols=2)
+    place_legend_clear(legend)
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_turbine_environmental_correction(
+    correction_db: float,
+    ratio: float | None,
+    *,
+    passes: bool | None,
+    ax: Axes | None = None,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    r"""Figure A.3 of IEC 61063 with one test environment on it.
+
+    The curve :math:`K = 10 \lg[1 + 4/(A/S)]` over the range the figure
+    prints, 0,5 to 300, dashed where :math:`A/S < 1` as the figure draws it,
+    the 7 dB of A.3.3 as a limit line, and the environment as a point, or as
+    a horizontal line when its :math:`K` came from a reference source and
+    carries no :math:`A/S`.
+
+    :param correction_db: :math:`K` of the environment, in dB.
+    :param ratio: Its :math:`A/S`, or ``None``.
+    :param passes: The verdict of the check, for the title, or ``None``.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the solid part of the curve.
+    :return: The axes.
+    """
+    from matplotlib.ticker import FixedLocator, FuncFormatter, LogLocator, NullFormatter
+
+    from .._i18n import decimal_comma, format_number, localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    low, high = _FIGURE_A3_RATIO_RANGE
+    grid = np.geomspace(low, high, 400)
+    curve = 10.0 * np.log10(1.0 + 4.0 / grid)
+    qualified = grid >= _FIGURE_A3_QUALIFIED_RATIO
+    style_default(kwargs, "color", _C_PRIMARY)
+    style_default(kwargs, "linewidth", 1.8)
+    kwargs.setdefault("label", r"$K = 10\,\lg[1 + 4/(A/S)]$")
+    (line,) = ax.plot(grid[qualified], curve[qualified], **kwargs)
+    below = np.append(grid[~qualified], _FIGURE_A3_QUALIFIED_RATIO)
+    ax.plot(
+        below,
+        10.0 * np.log10(1.0 + 4.0 / below),
+        color=line.get_color(),
+        linewidth=line.get_linewidth(),
+        linestyle="--",
+    )
+    ax.axhline(
+        _TURBINE_K_LIMIT_DB,
+        color=_C_REFERENCE,
+        linestyle=":",
+        linewidth=1.4,
+        label=_t("7 dB limit (A.3.3)", language),
+    )
+    shown = format_number(correction_db, language, decimals=2)
+    if ratio is not None:
+        ax.plot(
+            [ratio],
+            [correction_db],
+            linestyle="none",
+            marker="o",
+            ms=8.0,
+            color=_C_SECONDARY,
+            label=_t("This room, $K$ = {k} dB", language, k=shown),
+        )
+    else:
+        ax.axhline(
+            correction_db,
+            color=_C_SECONDARY,
+            linestyle="-.",
+            linewidth=1.4,
+            label=_t("Reference source, $K$ = {k} dB", language, k=shown),
+        )
+    ax.set_xscale("log")
+    # The default log axis writes only 10^0, 10^1 and 10^2, and a reader could
+    # not place an A/S of 7 on it. The figure labels 0,5, 1, 5, 10, 50, 100
+    # and 300, written plainly; the other decades' steps stay as grid lines.
+    ax.xaxis.set_major_locator(FixedLocator(_FIGURE_A3_RATIO_TICKS))
+    ax.xaxis.set_major_formatter(
+        FuncFormatter(lambda value, _pos: decimal_comma(f"{value:g}", language))
+    )
+    ax.xaxis.set_minor_locator(
+        LogLocator(base=10.0, subs=(2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0))
+    )
+    ax.xaxis.set_minor_formatter(NullFormatter())
+    ax.set_xlim(low, high)
+    ax.set_ylim(0.0, 10.0)
+    ax.set_xlabel("$A/S$")
+    ax.set_ylabel(_t("Environmental correction $K$ [dB]", language))
+    title = _t("IEC 61063 Figure A.3", language)
+    if passes is not None:
+        verdict = _t("qualifies" if passes else "does not qualify", language)
+        title = f"{title}: {verdict}"
+    ax.set_title(title)
+    ax.grid(visible=True, which="both", alpha=0.3)
+    legend = ax.legend(fontsize="small")
+    place_legend_clear(legend)
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_turbine_sound_power(
+    result: TurbineSoundPowerResult,
+    ax: Axes | None = None,
+    *,
+    position_labels: Sequence[str] | None = None,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """The level at each position after Table 2, and the surface level.
+
+    One bar per microphone position of the corrected A-weighted level, the
+    overhead positions in the second colour; the background at each position
+    as a grey mark; the energy average of the positions as a dashed line and
+    the surface sound pressure level of Equation (2), :math:`K` subtracted,
+    as a solid one. A position whose background was less than 3 dB below is
+    hatched, since the determination is then an upper limit.
+
+    The bars stand in the order the levels were given. With the labels of the
+    array the levels were measured on, the axis names only the key positions,
+    with the numbers Figure 2 gives them; without them it counts the bars from
+    1, which is not the numbering of the figure.
+
+    :param result: A
+        :class:`~phonometry.emission.turbine_noise.TurbineSoundPowerResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param position_labels: One label per position, ``"1"`` to ``"5"`` for the
+        key positions and ``""`` for the others
+        (:attr:`~phonometry.emission.turbine_noise.TurbineMicrophoneArray.labels`),
+        or ``None``.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the position :meth:`~matplotlib.axes.Axes.bar`.
+    :return: The axes.
+    :raises ValueError: if ``position_labels`` does not have one entry per
+        position.
+    """
+    from matplotlib.patches import Patch
+    from matplotlib.ticker import FixedLocator, MaxNLocator
+
+    from .._i18n import format_number, localize_axes
+
+    corrected = np.asarray(result.corrected_levels_db, dtype=np.float64)
+    names = None if position_labels is None else tuple(str(n) for n in position_labels)
+    if names is not None and len(names) != corrected.size:
+        msg = (
+            f"position_labels must have one entry per position ({corrected.size}); "
+            f"got {len(names)}."
+        )
+        raise ValueError(msg)
+    ax = ax if ax is not None else _new_axes()
+    positions = np.arange(1, corrected.size + 1)
+    overhead = (
+        np.zeros(corrected.size, dtype=bool)
+        if result.overhead_mask is None
+        else np.asarray(result.overhead_mask, dtype=bool)
+    )
+    colours = [_C_SECONDARY if top else _C_PRIMARY for top in overhead]
+    style_default(kwargs, "color", colours)
+    kwargs.setdefault("edgecolor", _C_EDGE)
+    kwargs.setdefault("width", 0.8)
+    kwargs.setdefault("label", _t(r"Corrected level $L_{p\mathrm{A}i}$", language))
+    bars = ax.bar(positions, corrected, **kwargs)
+    limited = result.limited_positions
+    if limited is not None:
+        _hatch_invalid(bars, np.asarray(limited, dtype=bool))
+    floor = float(np.min(corrected))
+    if result.background_levels_db is not None:
+        background = np.asarray(result.background_levels_db, dtype=np.float64)
+        floor = min(floor, float(np.min(background)))
+        ax.plot(
+            positions,
+            background,
+            linestyle="none",
+            marker="_",
+            ms=10.0,
+            mew=2.0,
+            color=_C_MUTED,
+            label=_t("Background", language),
+        )
+    energy = float(
+        result.surface_pressure_level_db + result.environmental_correction_db
+    )
+    ax.axhline(
+        energy,
+        color=theme_line(ax.xaxis.label.get_color(), ax, quiet=0.7),
+        linestyle="--",
+        linewidth=1.2,
+        label=_t("Energy average", language),
+    )
+    level = format_number(result.surface_pressure_level_db, language, decimals=1)
+    ax.axhline(
+        float(result.surface_pressure_level_db),
+        color=_C_REFERENCE,
+        linewidth=1.6,
+        label=_t("Surface level {level} dB", language, level=level),
+    )
+    top = max(float(np.max(corrected)), energy)
+    ax.set_ylim(np.floor(floor / 5.0) * 5.0 - 5.0, top + 6.0)
+    ax.set_xlim(0.5, corrected.size + 0.5)
+    keys = [] if names is None else [(i + 1, n) for i, n in enumerate(names) if n]
+    if keys:
+        # Only the key positions carry a number in Figure 2; every other bar
+        # keeps an unlabelled tick.
+        ax.xaxis.set_major_locator(FixedLocator([float(i) for i, _ in keys]))
+        ax.set_xticklabels([n for _, n in keys])
+        ax.xaxis.set_minor_locator(FixedLocator([float(i) for i in positions]))
+        ax.set_xlabel(_t("Microphone position (key positions numbered)", language))
+    else:
+        ax.xaxis.set_major_locator(MaxNLocator(integer=True, steps=[1, 2, 5, 10]))
+        ax.set_xlabel(_t("Microphone position, in the order given", language))
+    ax.set_ylabel(_t("A-weighted sound pressure level [dB]", language))
+    power = format_number(result.sound_power_level_db, language, decimals=1)
+    ax.set_title(
+        _t(
+            _IEC_61063_TITLE,
+            language,
+            power=power,
+        )
+    )
+    # The positions are categories: no vertical grid line through the bars.
+    ax.grid(visible=False, axis="x")
+    ax.grid(visible=True, axis="y", alpha=0.3)
+    handles, labels = ax.get_legend_handles_labels()
+    if np.any(overhead):
+        handles.append(Patch(facecolor=_C_SECONDARY, edgecolor=_C_EDGE))
+        labels.append(_t("Overhead position", language))
+    if result.upper_limit:
+        handles.append(Patch(facecolor=_C_PRIMARY, edgecolor=_C_EDGE, hatch="//"))
+        labels.append(_t("Upper limit: background within 3 dB", language))
+    legend = ax.legend(handles, labels, fontsize="small", ncols=2)
+    place_legend_clear(legend)
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_turbine_noise_declaration(
+    declaration: TurbineNoiseDeclaration,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """The reported sound power level of each operating condition.
+
+    One bar per condition of the whole-decibel :math:`L_{WA}` of the report,
+    with the standard deviation of Table 1 as an error bar, and the loudest
+    condition named in the title (6.2 suggests repeating the measurement
+    under every typical sustained load to find it).
+
+    :param declaration: A
+        :class:`~phonometry.emission.turbine_noise.TurbineNoiseDeclaration`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the :meth:`~matplotlib.axes.Axes.bar`.
+    :return: The axes.
+    """
+    from .._i18n import format_number, localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    levels = np.asarray(declaration.reported_sound_power_levels_db, dtype=np.float64)
+    sigma = float(declaration.standard_deviation_db)
+    x = np.arange(levels.size)
+    style_default(kwargs, "color", _C_PRIMARY)
+    kwargs.setdefault("edgecolor", _C_EDGE)
+    kwargs.setdefault("width", 0.6)
+    kwargs.setdefault("label", r"$L_{W\mathrm{A}}$")
+    bars = ax.bar(x, levels, **kwargs)
+    spread = format_number(sigma, language, decimals=0)
+    ax.errorbar(
+        x,
+        levels,
+        yerr=sigma,
+        fmt="none",
+        ecolor=theme_line(ax.xaxis.label.get_color(), ax, quiet=0.8),
+        capsize=5.0,
+        label=_t("Table 1: ±{sigma} dB", language, sigma=spread),
+    )
+    for bar, value in zip(bars, levels, strict=True):
+        # On a chip of the axes' own colour, so no grid line runs through
+        # the digits.
+        ax.annotate(
+            format_number(value, language, decimals=0),
+            xy=(bar.get_x() + bar.get_width() / 2.0, value + sigma),
+            xytext=(0, 4),
+            textcoords=_OFFSET_POINTS,
+            ha="center",
+            va="bottom",
+            fontsize=9,
+            bbox={
+                "boxstyle": "round,pad=0.15",
+                "facecolor": ax.get_facecolor(),
+                "edgecolor": "none",
+            },
+        )
+    ax.set_xticks(x)
+    ax.set_xticklabels(declaration.operating_conditions)
+    ax.set_ylim(
+        float(np.min(levels)) - 3.0 * sigma, float(np.max(levels)) + 3.0 * sigma
+    )
+    ax.set_ylabel(_t("A-weighted sound power level [dB re 1 pW]", language))
+    ax.set_title(
+        _t(
+            "IEC 61063 report: loudest at {condition}",
+            language,
+            condition=declaration.loudest_condition,
+        )
+    )
+    # The conditions are categories: no vertical grid line through the bars
+    # and the values written over them.
+    ax.grid(visible=False, axis="x")
+    ax.grid(visible=True, axis="y", alpha=0.3)
+    legend = ax.legend(fontsize="small")
+    place_legend_clear(legend)
     localize_axes(ax, language)
     return ax

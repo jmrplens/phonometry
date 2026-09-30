@@ -1,0 +1,474 @@
+---
+title: "Potencia acústica de turbinas de vapor (IEC 61063)"
+description: "El código de ensayo IEC 61063 para el ruido aéreo de un grupo de turbina de vapor y su máquina accionada: la superficie de medición escalonada a 1 m y su área por la ecuación (1), las cinco posiciones de micrófono clave de la figura 2 y las adicionales, la corrección escalonada por ruido de fondo de la tabla 2 frente a la K1A de ISO 3746, la corrección ambiental K de la figura A.3 y su límite de 7 dB, el nivel de presión sonora en la superficie y el nivel de potencia acústica, y el informe del apartado 10."
+references:
+  - type: standard
+    organization: "International Electrotechnical Commission"
+    year: 1991
+    title: "Acoustics — Measurement of airborne noise emitted by steam turbines and driven machinery"
+    designation: "IEC 61063:1991"
+    note: "Leída en su adopción inglesa, BS EN 61063:1996, el texto de EN 61063:1996, que es IEC 1063:1991 sin modificaciones. Las ecuaciones (1) a (3), las tablas 1 y 2, la figura 2, la figura A.3 del anexo A y el informe de los apartados 9 y 10 que implementa esta guía."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2010
+    title: "Acoustics — Determination of sound power levels and sound energy levels of noise sources using sound pressure — Survey method using an enveloping measurement surface over a reflecting plane"
+    designation: "ISO 3746:2010"
+    url: "https://www.iso.org/standard/52056.html"
+    note: "El método de control sobre el que se construye IEC 61063 (que cita la edición de 1979), y la corrección por ruido de fondo K1A de la ecuación (12), apartado 8.3.3, con la que se compara la tabla 2."
+---
+
+import Scope from '../../../../../components/Scope.astro';
+import ScopeClaim from '../../../../../components/ScopeClaim.astro';
+import SeeAlso from '../../../../../components/SeeAlso.astro';
+import ThemeImage from '../../../../../components/ThemeImage.astro';
+
+Un grupo de turbina de vapor es demasiado grande, está demasiado caliente y
+demasiado atado a su cimentación para llevarlo a una sala de ensayo, y se mide
+donde funciona, en la sala de turbinas, con la planta auxiliar de la central
+trabajando alrededor. IEC 61063 es el código de ensayo para ese trabajo. Toma
+el método de control de ISO 3746 y fija lo que el método deja abierto para
+esta familia de máquinas: la forma de la superficie envolvente alrededor de
+una turbina, un reductor o un generador y una excitatriz puestos en fila sobre
+su planta de operación, dónde van los micrófonos, cómo se corrigen el ruido de
+fondo y la sala, y qué tiene que decir el informe. Esta guía recorre cada
+paso: la superficie de medición escalonada y su área, las posiciones de
+micrófono clave y adicionales, la corrección por ruido de fondo de la tabla 2
+y en qué se aparta de la $K_{1\mathrm{A}}$ de ISO 3746, la corrección
+ambiental de la figura A.3 y la cualificación de la sala, el nivel de presión
+sonora en la superficie y el nivel de potencia acústica, y el informe. Qué vía
+encaja con otras máquinas se sopesa en
+[Potencia acústica](/phonometry/es/devices/emission/sound-power/).
+
+## 1. El código de ensayo (IEC 61063)
+
+La norma se aplica a la parte de un grupo de turbina, la turbina, la máquina
+accionada y los componentes unidos a ellas, que queda por encima del suelo de
+la sala de turbinas, dentro de una superficie envolvente continua limitada por
+ese suelo (apartado 1.1.1). Qué suelo hace de plano reflectante depende de
+cómo esté montado el grupo. Una planta de operación continua y reflectante lo
+es; también la planta de operación cercana al eje horizontal de un grupo
+grande, siempre que no tenga aberturas por las que el ruido radiado bajo ella
+llegue a los micrófonos (1.1.2). Un emparrillado, un suelo con aberturas junto
+al grupo o unas pasarelas a su alrededor no lo son, y el plano pasa a ser el
+suelo de cimentación (1.1.3); la planta de debajo aporta entonces tanto en los
+micrófonos que el nivel de potencia acústica deja de ser válido, salvo que las
+aberturas se tapen con paneles durante el ensayo. Los tratamientos de control
+de ruido montados en el grupo, cerramientos o pantallas, se informan por tipo,
+situación y extensión (1.1.5).
+
+El método es el de control de ISO 3746 (introducción), y la tabla 1 da la
+desviación típica dentro de la que tienden a quedar sus niveles de potencia
+acústica: 5 dB para una fuente con tonos discretos destacados y 4 dB para una
+cuyo sonido se reparte por igual en frecuencia. Cuando el método compara
+máquinas parecidas que son omnidireccionales y radian ruido de banda ancha,
+medidas en salas parecidas, la NOTA 1 sitúa la desviación típica de esa
+comparación en 3 dB o menos. IEC 61063 se escribió frente a
+la edición de 1979 de ISO 3746; la ISO 3746 de la biblioteca es la edición de
+2010, y donde esta guía pone las dos una al lado de la otra lo dice.
+
+### Cómo se hace la medida
+
+1. Encierra cada parte del grupo en una **caja de referencia**, la caja más
+   pequeña que la contiene con su calorifugado y cualquier pantalla, apoyada
+   en el plano reflectante (7.1). La **superficie de medición** es el conjunto
+   de paralelepípedos situados a 1 m de las cajas.
+2. Coloca en ella las **cinco posiciones clave** de la figura 2 y las
+   **posiciones adicionales** entre ellas, a distancias iguales y lo bastante
+   juntas para que cada carcasa tenga una sección de medida (7.2). Las
+   superiores pueden omitirse si un ensayo previo muestra que cambian el
+   resultado en no más de 1,0 dB.
+3. Con el grupo en régimen estable a la carga nominal (y, para encontrar la
+   condición más ruidosa, también al 25 %, 50 % y 75 %, 6.2), lee el nivel
+   ponderado A en cada posición con un sonómetro según IEC 651 en ponderación
+   temporal lenta, calibrado antes de cada serie con un calibrador de
+   $\pm 0{,}5$ dB (5.1, 5.2, 7.4).
+4. Obtén el **ruido de fondo** en cada posición. Con la turbina en marcha
+   rara vez puede medirse, y la NOTA 1 de 8.1 permite calcularlo a partir de
+   la potencia acústica de la planta auxiliar y de las reflexiones de la sala.
+5. **Cualifica la sala**: la corrección ambiental $K$, a partir de su tiempo
+   de reverberación o de una fuente sonora de referencia calibrada, no puede
+   superar 7 dB (anexo A). Al aire libre $K$ es cero y el viento tiene que
+   quedar por debajo de 6 m/s (4.3, A.4).
+6. **Calcula** los niveles corregidos (tabla 2), el nivel de presión sonora en
+   la superficie (ecuación (2)) y el nivel de potencia acústica (ecuación (3)),
+   y redacta el informe del apartado 10.
+
+## 2. La superficie de medición
+
+Los paralelepípedos de la superficie de medición son paralelos a las cajas de
+referencia a la distancia de medición $d$, y «la distancia de medición ($d$)
+es 1 m» (7.1): cada uno es 2 m más ancho y 1 m más alto que su caja, y el primero
+y el último son 1 m más largos, en los dos extremos del grupo. La figura 2 los
+acota sobre la superficie de medición, y la ecuación (1) da su área:
+
+$$
+S = 2\,h_\mathrm{max}\,b_\mathrm{max} + \sum_{i=1}^{Z} l_i\,(2 h_i + b_i),
+$$
+
+con $l_i$, $b_i$ y $h_i$ la longitud, la anchura y la altura del paralelepípedo
+$i$ de los $Z$. La suma son las caras superiores y los costados; el primer
+término hace las veces de todas las caras transversales, los dos extremos y
+los escalones entre vecinos. Es el área exacta cuando las secciones menguan
+desde una sección mayor hacia los dos extremos, cada una conteniendo a la
+siguiente, que es como están construidos los dos dibujos de la figura 2. Si
+no, deja de serlo: cuenta de más cuando la caja más alta y la más ancha son
+distintas, y de menos cuando una sección pequeña queda entre dos grandes.
+`enveloping_area_m2` suma la superficie escalonada cara a cara para ese caso.
+Una sola caja da el paralelepípedo envolvente de ISO 3746, $lb + 2lh + 2bh$.
+
+El grupo de esta guía es el que dibuja la figura 2 b: las carcasas de alta y
+media presión en una caja, la turbina de baja en otra, y después el generador
+y la excitatriz.
+
+```python
+from phonometry import emission
+
+boxes = [                      # longitud, anchura, altura sobre el suelo [m]
+    emission.TurbineReferenceBox(6.0, 4.0, 3.5, "AP-MP"),
+    emission.TurbineReferenceBox(5.0, 5.0, 4.5, "BP"),
+    emission.TurbineReferenceBox(7.0, 3.5, 3.0, "Generador"),
+    emission.TurbineReferenceBox(3.0, 2.5, 2.2, "Excitatriz"),
+]
+surface = emission.turbine_measurement_surface(boxes)
+print(surface.lengths_m, surface.widths_m, surface.heights_m)
+# [7. 5. 7. 4.] [6.  7.  5.5 4.5] [4.5 5.5 4.  3.2]
+print(round(surface.area_m2, 1), round(surface.enveloping_area_m2, 1))   # 410.1 410.1
+```
+
+## 3. Las posiciones de micrófono
+
+La figura 2 prescribe cinco **posiciones clave** (7.2.1): 1 y 5 en el centro de
+los dos extremos, 2 y 4 en los dos costados y 3 en la parte superior, estas
+tres en el plano que separa la turbina de la máquina accionada. En la
+figura 2 a ese plano está tras la caja de la turbina; en la figura 2 b, entre la
+turbina de baja y el generador, así que la biblioteca toma el número de cajas
+del lado de la turbina (`turbine_boxes`) y pone 2, 3 y 4 en la esquina exterior
+del más ancho (y más alto) de los dos paralelepípedos que se encuentran allí,
+como hacen los dos dibujos.
+
+Las **posiciones adicionales** parten de las posiciones clave y se «disponen
+a distancias iguales», de modo «que haya al menos una sección de medida en
+cada carcasa» (7.2.2). La biblioteca recorre dos caminos, como los dibujan
+las plantas y los alzados de la figura 2: alrededor de los costados a la
+altura de los micrófonos, de 1 por 2, 5 y 4 de vuelta a 1, y la línea
+superior en el plano vertical del eje, de 1 subiendo por el extremo
+delantero, por encima y sus escalones hasta 3, y hasta el extremo trasero,
+bajando por él hasta 5 (los dos alzados ponen una posición en el extremo
+delantero sobre la posición clave 1). Divide cada tramo entre posiciones clave
+en el menor número de intervalos iguales no mayores que `spacing_m` y pone una
+posición en cada división. Los dos caminos se dividen cada uno por su cuenta,
+así que sus estaciones no tienen por qué caer en las mismas secciones
+transversales, como las ponen los dibujos de la figura 2; el 7.2.2 solo pide
+distancias iguales. La «sección de medida en cada carcasa» se comprueba por
+paralelepípedo: un espaciado que deja uno sin posición en sus costados emite
+un `SoundPowerWarning`, y donde una caja contiene dos carcasas, como las
+turbinas de alta y media presión de este grupo, si llegan posiciones a las
+dos se lee en `positions_m`. La altura de la fila alrededor de los costados
+la eliges tú: la figura 2 la dibuja sin acotarla. La NOTA de 7.2.2 permite
+eliminar las posiciones superiores, por seguridad o por coste, cuando un
+ensayo previo ha mostrado que cambian el nivel de potencia acústica en no más
+de 1,0 dB (sección 6), y `include_overhead=False` las deja fuera.
+
+```python
+array = emission.turbine_microphone_positions(
+    surface, microphone_height_m=1.5, spacing_m=4.0, turbine_boxes=2)
+print(array.count, int(array.overhead_mask.sum()))      # 23 7
+print(array.positions_m[array.key_mask])
+# [[ 0.   0.   1.5]     posición clave 1
+#  [12.   3.5  1.5]     2
+#  [23.   0.   1.5]     5
+#  [12.  -3.5  1.5]     4
+#  [12.   0.   5.5]]    3
+print(array.positions_per_box, array.every_box_sampled)   # (2, 2, 2, 1) True
+array.plot(language="es")     # planta; view="elevation" para el alzado
+```
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/turbine_positions.svg" alt="Dos paneles, el grupo de turbina del ejemplo visto desde arriba y de lado. Cuatro cajas grises en fila a lo largo del eje, rotuladas AP-MP, BP, Generador y Excitatriz, la caja BP la más ancha y la más alta. Un contorno azul discontinuo a 1 metro de ellas entra y sale con las cajas: en planta va de x igual a 0 a 23 metros y de menos 3,5 a más 3,5 metros en transversal, y de lado escalona de 4,5 metros de altura sobre la caja AP-MP a 5,5 sobre la caja BP y baja a 4 y 3,2 metros. Unas cruces rojas marcan las cinco posiciones clave, 1 y 5 en el centro de los dos extremos, 2 y 4 en los dos costados en x igual a 12 metros, entre la caja BP y el generador, y 3 encima en el mismo sitio, a 5,5 metros de altura. Unos círculos azules marcan las posiciones adicionales alrededor de los costados, a 1,5 metros del suelo, y unos círculos naranjas las posiciones superiores a lo largo de la parte alta de la superficie" width="100%" />
+
+*La superficie alrededor del grupo de la figura 2 b, 410,1 m², y las 23
+posiciones de un espaciado de 4 m: 16 alrededor de los costados a 1,5 m y 7
+encima. La planta muestra los dos costados y la línea superior sobre el eje;
+el alzado muestra el costado de la posición clave 4, como los dos alzados de
+la figura 2, y la parte alta, que es donde está la posición clave 3.*
+
+## 4. La corrección por ruido de fondo: tabla 2 frente a ISO 3746
+
+El nivel de cada posición se corrige por ruido de fondo antes del promedio
+(8.1), y la corrección se lee en la tabla 2:
+
+| Nivel con la fuente en funcionamiento menos el fondo (dB) | Corrección a restar (dB) |
+| :--- | :--- |
+| 3 | 3 |
+| 4 | 2 |
+| 5 | 2 |
+| 6 | 1 |
+| 7 | 1 |
+| 8 | 1 |
+| 9 | 0,5 |
+| 10 | 0,5 |
+| > 10 | 0,0 |
+
+`turbine_background_correction` juzga primero la última fila, sobre la
+diferencia tal como se mide: todo lo que pasa de 10 dB es «> 10» y no lleva
+corrección, lo mismo 10,2 dB que 11 dB. Entre 3 y 10 dB la tabla está impresa
+en decibelios enteros, así que la diferencia se redondea al más próximo, las
+mitades hacia arriba, antes de leerla, y de 9,5 a 10 dB toma los 0,5 dB de la
+fila 10; la biblioteca lee igual la tabla escalonada de ISO/TS 7849-1. Por
+debajo de 3 dB no hay fila: el fondo «debería estar
+al menos 3 dB por debajo» (4.2), y por debajo de eso «no puede hacerse una
+medida válida de la máquina ensayada». La función devuelve ahí los 3 dB de la
+primera fila, que siguen dejando un límite superior, porque la corrección
+exacta para una diferencia menor es mayor, y así es como la NOTA de 4.2
+permite usar un resultado así. Es también el valor que imprime
+ISO 3746:2010 para el mismo caso.
+
+```python
+print(emission.turbine_background_correction([3.0, 4.0, 5.0, 6.0, 9.0, 10.0, 11.0]))
+# [3.  2.  2.  1.  0.5 0.5 0. ]
+print(emission.turbine_background_correction([4.4, 4.5, 9.5, 10.0, 10.2]))
+# [2.  2.  0.5 0.5 0. ]
+```
+
+ISO 3746:2010 corrige el fondo con una fórmula, la ecuación (12) del
+apartado 8.3.3,
+
+$$
+K_{1\mathrm{A}} = -10 \lg\left(1 - 10^{-0{,}1 \Delta L_{p\mathrm{A}}}\right),
+$$
+
+que se toma como cero por encima de 10 dB y como 3 dB por debajo de 3 dB, y la
+aplica una sola vez, a la diferencia entre los niveles promediados sobre la
+superficie, mientras que IEC 61063 corrige cada posición antes del promedio. En
+las diferencias que imprime la tabla 2 las dos coinciden a 0,35 dB: los
+escalones quedan por encima de la fórmula a 5 dB (2 frente a 1,65) y a 8 dB
+(1 frente a 0,75), y por debajo a 4 dB (2 frente a 2,20) y a 6 dB (1 frente a
+1,26). Entre filas, donde suele caer una diferencia medida, el redondeo las
+separa más, desde 0,57 dB por debajo de la fórmula a 3,5 dB hasta 0,56 dB por
+encima justo antes de 5,5 dB. Por encima de 10 dB ninguna de las dos resta
+nada.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/turbine_background_correction.svg" alt="Dos paneles frente al nivel con la fuente en funcionamiento menos el fondo, de 3 a 12 decibelios. A la izquierda, la corrección a restar: una curva roja para la ecuación (12) de ISO 3746, que baja suavemente de 3 decibelios en 3 a 0,46 en 10 y cae después a cero, y una escalera azul para la tabla 2 de IEC 61063, a 3 decibelios hasta 3,5, 2 decibelios hasta 5,5, 1 decibelio hasta 8,5, 0,5 decibelios hasta 10 y cero después, con puntos azules en las filas impresas de 3 a 11. A la derecha, la escalera menos la curva: unos dientes de sierra entre menos 0,57 y más 0,56 decibelios, con un punto en cada fila impresa a no más de 0,35 de cero, y cero por encima de 10" width="100%" />
+
+*El mismo fondo, dos correcciones. La tabla 2 leída en decibelios enteros es
+una escalera sobre la curva de la ecuación (12) de ISO 3746:2010; sus filas
+impresas quedan a 0,35 dB de la curva, y el redondeo entre ellas a 0,6 dB.*
+
+## 5. La corrección ambiental y la sala
+
+Las reflexiones de la sala elevan los niveles sobre la superficie, y la
+corrección ambiental $K$ las descuenta (8.2). La figura A.3 imprime la curva y
+su fórmula,
+
+$$
+K = 10 \lg\left[1 + \frac{4}{A/S}\right],
+$$
+
+la $K_2$ de ISO 3744 e ISO 3746, con $A$ el área de absorción equivalente de la
+sala a partir de su tiempo de reverberación, $A = 0{,}16\,V/T$, medido con
+ruido de banda ancha o un impulso y ponderación A en la recepción (A.3.1). La
+sala es apta cuando $K$ no supera 7 dB (8.3, A.3.3), que el apartado reescribe
+como $A/S \ge 1$. Las dos formas coinciden al decibelio entero en que está
+impreso el límite: la curva da $10 \lg 5 = 6{,}99$ dB en $A/S = 1$ y llega a
+7 dB en $A/S = 0{,}997$. `check_turbine_test_environment` juzga los 7 dB, a
+partir de la propia corrección o de un `environmental_correction_db` suelto
+(0 al aire libre).
+
+El A.3.2 ofrece una segunda vía: una fuente sonora de referencia calibrada en
+campo libre sobre un plano reflectante, cuyo nivel de potencia acústica
+$L_{Wr}$ se compara con el nivel $L_W$ que muestra en la sala por el método de
+ISO 3746 con $K$ igual a cero, de modo que $K = L_W - L_{Wr}$. Según su NOTA,
+$L_W$ es la media de dos determinaciones, con la fuente en el centro de cada
+costado largo del grupo, y una máquina de más de 10 m lleva otras dos, en los
+extremos. Al aire libre, y en salas muy grandes o que no están cerradas, $K$
+es cero (A.4), y el viento tiene que quedar por debajo de 6 m/s, con
+pantalla antiviento por encima de 1 m/s (4.3).
+
+```python
+room = emission.turbine_environmental_correction(
+    surface.area_m2, volume_m3=60_000.0, reverberation_time_s=3.2)
+print(room.absorption_area_m2, round(room.ratio, 2),
+      round(room.environmental_correction_db, 2))           # 3000.0 7.32 1.89
+print(emission.check_turbine_test_environment(room).passes)  # True
+
+source = emission.turbine_reference_source_correction(
+    [95.6, 96.3, 95.9, 96.8], calibrated_level_db=94.2, machine_length_m=21.0)
+print(round(source.environmental_correction_db, 2))           # 1.95
+```
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/turbine_room_correction.svg" alt="La corrección ambiental K en decibelios frente al cociente A entre S en un eje logarítmico de 0,5 a 300, rotulado en 0,5, 1, 5, 10, 50, 100 y 300 como la figura impresa: una curva azul que baja de 9,5 decibelios en 0,5, discontinua hasta A entre S igual a 1 y continua después, donde cruza una línea horizontal roja punteada en 7 decibelios, hasta casi cero en 300. Un punto naranja sobre la curva marca la sala del ejemplo, en A entre S de 7,3 y K de 1,89 decibelios, y el título dice que la sala es apta" width="100%" />
+
+*La figura A.3 con la sala del ejemplo: 60 000 m³ y 3,2 s dan 3000 m² de
+absorción, un $A/S$ de 7,3 y una $K$ de 1,89 dB, muy dentro de los 7 dB de
+A.3.3.*
+
+## 6. El nivel en la superficie y el nivel de potencia acústica
+
+Los niveles corregidos se promedian en energía y se resta $K$, ecuación (2),
+
+$$
+\overline{L_{p\mathrm{A}}} = 10 \lg\left[\frac{1}{N}
+    \sum_{i=1}^{N} 10^{0{,}1 L_{p\mathrm{A}i}}\right] - K,
+$$
+
+y el término de superficie da el nivel de potencia acústica, ecuación (3),
+$L_{W\mathrm{A}} = \overline{L_{p\mathrm{A}}} + 10 \lg(S/S_0)$ con
+$S_0 = 1$ m². El nivel se anota redondeado al decibelio entero (9.4 g).
+
+```python
+import numpy as np
+
+levels = np.array([         # dB re 20 uPa, en el orden de array.positions_m
+    91.8, 93.1, 93.6, 94.2, 93.0, 90.4, 89.7, 88.2, 87.5, 88.6, 90.1, 90.9,
+    93.4, 94.6, 93.9, 92.7, 92.2, 94.0, 95.1, 93.8, 90.6, 89.3, 87.9])
+background = np.array([     # calculado a partir de la planta auxiliar (8.1, NOTA 1)
+    84.0, 84.2, 84.5, 84.8, 85.0, 83.2, 82.5, 81.4, 80.6, 81.3, 82.9, 83.4,
+    85.0, 84.8, 84.5, 84.2, 83.0, 83.0, 83.0, 83.0, 83.0, 82.0, 81.0])
+full = emission.turbine_sound_power(
+    levels, surface_area_m2=surface.area_m2, background_levels_db=background,
+    environmental_correction_db=room.environmental_correction_db,
+    overhead_mask=array.overhead_mask)
+print(round(full.surface_pressure_level_db, 2),
+      round(full.sound_power_level_db, 2))                   # 89.78 115.91
+print(full.reported_sound_power_level_db)                    # 116.0
+print(round(full.overhead_effect_db, 2), full.overhead_may_be_deleted)  # 0.27 True
+print(round(full.level_range_db, 1), full.arithmetic_mean_allowed)      # 8.6 False
+full.plot(position_labels=array.labels, language="es")   # las claves numeradas
+```
+
+Las diferencias con el fondo van de 6,8 a 12,1 dB, así que la tabla 2 resta
+1 dB en trece posiciones, 0,5 dB en siete y nada en tres. Las siete posiciones
+superiores suben el nivel 0,27 dB, muy dentro del 1,0 dB que permitiría
+dejarlas fuera en un ensayo posterior del mismo grupo.
+
+La NOTA de 8.3 admite un promedio aritmético simple en lugar de la ecuación (2)
+cuando los niveles de las posiciones no abarcan más de 5 dB, y dice que ese
+promedio no debería diferir de la ecuación (2) en más de 0,7 dB. Para un rango fijo, el promedio
+energético adelanta más al aritmético cuando los niveles están en los dos
+extremos del rango, y el peor de esos conjuntos, dos niveles separados 5 dB
+con el más alto en el 41 % de las posiciones, los separa 0,707 dB: la cifra de
+la NOTA con su único decimal. Aquí los niveles abarcan 8,6 dB, así que la nota
+no se aplica (`arithmetic_mean_allowed` es `False`).
+
+Una carga menor baja el nivel sin bajar el fondo. A un cuarto de la carga
+nominal, 4,5 dB más bajo, ocho posiciones quedan a menos de 3 dB del fondo, y
+el resultado es solo un límite superior:
+
+```python
+import warnings
+
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore", emission.SoundPowerWarning)
+    quarter = emission.turbine_sound_power(
+        levels - 4.5, surface_area_m2=surface.area_m2,
+        background_levels_db=background,
+        environmental_correction_db=room.environmental_correction_db)
+print(quarter.upper_limit, quarter.conforms)                 # True False
+```
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/turbine_sound_power.svg" alt="Dos paneles. A la izquierda, una barra por posición de micrófono, 23 en el orden del array, con las posiciones clave numeradas 1, 2, 5, 4 y 3 bajo sus barras como las numera la figura 2, del nivel ponderado A tras la corrección de la tabla 2, entre 86,5 y 95,1 decibelios, azul para las dieciséis posiciones de los costados y naranja para las siete superiores, con una marca gris corta en cada barra en su nivel de fondo, entre 80,6 y 85 decibelios; una línea gris discontinua en el promedio energético de 91,7 decibelios y una línea roja por debajo en el nivel de presión sonora en la superficie de 89,8 decibelios, y el título con el nivel de potencia acústica ponderado A, 115,9 decibelios re 1 picovatio. A la derecha, el informe: dos barras, 114 decibelios al 50 por ciento de carga y 116 decibelios al 100 por ciento, cada una con una barra de error de más o menos 5 decibelios, y el título que señala el 100 por ciento de carga como la más ruidosa" width="100%" />
+
+*El ensayo a plena carga posición a posición, y el informe de las dos cargas.
+La corrección de la tabla 2 ya está descontada de cada barra; la separación
+entre la línea discontinua y la roja es la corrección ambiental de la sala.*
+
+## 7. El informe
+
+El apartado 10 pide que el informe declare que el nivel de potencia acústica
+ponderado A «se ha obtenido en plena conformidad con los procedimientos de
+esta norma y que este nivel se expresa en decibelios por encima de 1 pW», y
+que dé como mínimo: la turbina con sus pantallas y cerramientos de control de
+ruido, las condiciones de funcionamiento, los niveles ponderados A en cada
+posición corregidos por ruido de fondo, el nivel de presión sonora en la
+superficie, el nivel de potencia acústica, y la fecha y la hora de las
+medidas. `turbine_noise_declaration` lo construye a partir de una
+determinación por condición de funcionamiento. Guarda cada nivel de potencia
+acústica tal como se determinó y lo da en el informe redondeado al decibelio
+entero, busca la condición más ruidosa en los niveles anteriores a ese
+redondeo, de modo que dos cargas que redondean al mismo decibelio siguen
+distinguiéndose, y lleva la desviación típica de la tabla 1 para el tipo de
+sonido. Una determinación que no está en plena conformidad, un límite superior
+o una sala por encima de 7 dB, no puede llevar la declaración y se rechaza con
+un `ValueError`.
+
+```python
+half = emission.turbine_sound_power(
+    levels - 1.5, surface_area_m2=surface.area_m2, background_levels_db=background,
+    environmental_correction_db=room.environmental_correction_db,
+    overhead_mask=array.overhead_mask)
+report = emission.turbine_noise_declaration(
+    {"50 % de carga": half, "100 % de carga": full},
+    turbine="Grupo de condensación de tres carcasas, 60 MW, con generador y excitatriz",
+    noise_control="ninguno",
+    measured_at="2026-09-25, de 10:30 a 12:10",
+    tonal=True)
+print(report.reported_sound_power_levels_db)                   # (114.0, 116.0)
+print(report.loudest_condition, report.standard_deviation_db)  # 100 % de carga 5.0
+print(report.statement)
+report.plot(language="es")
+```
+
+### Parámetros de `turbine_sound_power()`
+
+| Parámetro | Tipo | Unidades | Rango / defecto | Notas |
+| :--- | :--- | :--- | :--- | :--- |
+| `pressure_levels_db` | array 1D | dB | al menos 4 posiciones | $L_{p\mathrm{A}i}$ con el grupo en marcha |
+| `surface_area_m2` | float | m² | positivo | $S$ de la ecuación (1) |
+| `background_levels_db` | array 1D o `None` | dB | obligatorio | Uno por posición; `None` indica que no se determinó |
+| `environmental_correction_db` | float | dB | obligatorio | $K$; 0 al aire libre; un valor por encima de 7 dB avisa |
+| `overhead_mask` | array de bool | | `None` | Para `overhead_effect_db` (NOTA de 7.2.2) |
+
+## Qué cubre esta guía
+
+<Scope>
+<ScopeClaim status="covered" label="Cubierto">
+La determinación de IEC 61063:1991 del nivel de potencia acústica ponderado A
+de un grupo de turbina de vapor: la superficie de medición escalonada a 1 m y
+su área por la ecuación (1) (con el área escalonada exacta al lado), las cinco
+posiciones clave de la figura 2 y las posiciones adicionales a distancias
+iguales con la comprobación de 7.2.2 hecha por caja de referencia, la
+corrección escalonada
+por ruido de fondo de la tabla 2 posición a posición, la corrección ambiental
+de la figura A.3 a partir del tiempo de reverberación o de una fuente sonora
+de referencia (A.3.2), la cualificación de 7 dB de A.3.3 y el límite de viento
+de 4.3, el nivel de presión sonora en la superficie y el nivel de potencia
+acústica de las ecuaciones (2) y (3), el promedio aritmético de la NOTA de
+8.3, la prueba de omisión de las posiciones superiores de 7.2.2, el redondeo
+al decibelio entero de 9.4 g, el informe del apartado 10 y las desviaciones
+típicas de la tabla 1.
+</ScopeClaim>
+
+<ScopeClaim status="not-covered" label="No cubierto">
+Los instrumentos se dan por buenos: el sonómetro IEC 651 en ponderación
+temporal lenta, el calibrador de 5.2 y la colocación que aparta vapor, aire y
+campos del micrófono (7.4) son cosa del operador. El plano reflectante no se
+comprueba frente a A.2.1 (absorción por debajo de 0,1, 4 m más allá de la
+superficie), la altura de la fila de micrófonos la elige quien llama porque la
+figura 2 no la acota, y las determinaciones de $L_W$ de una fuente de
+referencia se hacen con el método de ISO 3746
+(`sound_power_pressure(grade="survey")`) antes de pasarlas. Cómo llega a los
+micrófonos la planta situada bajo la planta de operación o alrededor del grupo
+(1.1.3) queda fuera de la norma, y por tanto de la biblioteca. Cada caja de
+referencia se toma centrada en un mismo eje, así que un grupo cuyas cajas
+enrasan por un costado y solo escalonan por el otro, como dibuja la
+figura 2 a, se modela simétrico; la ecuación (1) no cambia. La fila de los
+costados y la línea superior se dividen cada una por su cuenta, no en las
+secciones transversales alineadas que muestran los dibujos de la figura 2, y
+una caja de referencia que contiene varias carcasas se comprueba como una
+sola.
+</ScopeClaim>
+</Scope>
+
+<SeeAlso>
+
+## Véase también
+
+- [Potencia acústica](/phonometry/es/devices/emission/sound-power/): cómo elegir
+  entre las vías de determinación y la declaración de ISO 4871.
+- [Potencia acústica por métodos de presión (ISO 3744 / ISO 3746 / ISO 3745)](/phonometry/es/devices/emission/sound-power-pressure/):
+  el método de control con superficie envolvente sobre el que se construye este
+  código de ensayo, y sus $K_1$ y $K_2$.
+- [Potencia acústica in situ por comparación (ISO 3747)](/phonometry/es/devices/emission/sound-power-in-situ/):
+  la otra vía para una máquina que no puede salir de su instalación.
+- Referencia de la API: [`emission.turbine_noise`](/phonometry/es/reference/api/power/turbine-noise/).
+
+</SeeAlso>

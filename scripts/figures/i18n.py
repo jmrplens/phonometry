@@ -4711,6 +4711,20 @@ _ES_EXACT = {
     ),
     # WindTurbineRatingLevel.plot(): the tonal adjustment reads the same.
     "Tonal": "Tonal",
+    # IEC 61063 Table 2 against the K1A of ISO 3746:2010 Equation (12).
+    "ISO 3746:2010 Equation (12), $K_{1\\mathrm{A}}$": (
+        "Ecuación (12) de ISO 3746:2010, $K_{1\\mathrm{A}}$"
+    ),
+    "Table 2 of IEC 61063": "Tabla 2 de IEC 61063",
+    "The printed rows": "Las filas impresas",
+    "At the printed rows": "En las filas impresas",
+    "Level with the source operating less the background [dB]": (
+        "Nivel con la fuente en funcionamiento menos el fondo [dB]"
+    ),
+    "Correction to subtract [dB]": "Corrección a restar [dB]",
+    "Two Corrections for One Background": "Dos correcciones para un mismo fondo",
+    "Table 2 less Equation (12)": "Tabla 2 menos la ecuación (12)",
+    "Where the Steps Leave the Curve": "Dónde se apartan los escalones de la curva",
 }
 
 

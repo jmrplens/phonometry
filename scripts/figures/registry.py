@@ -213,6 +213,10 @@ from .devices import (
     generate_swept_sine_methods,
     generate_swept_sine_thd,
     generate_true_peak_intersample,
+    generate_turbine_background_correction,
+    generate_turbine_positions,
+    generate_turbine_room_correction,
+    generate_turbine_sound_power,
     generate_valve_cavitation_noise,
     generate_vdi2081_chain_cascade,
     generate_vdi2081_fan_assemblies,
@@ -1018,6 +1022,12 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     generate_free_field_deviations,
     generate_free_field_check,
     generate_reference_source_calibration,
+    # IEC 61063 steam turbine sets: the stepped surface and Figure 2, Table 2
+    # against ISO 3746 K1A, Figure A.3 and the determination with its report.
+    generate_turbine_positions,
+    generate_turbine_background_correction,
+    generate_turbine_room_correction,
+    generate_turbine_sound_power,
     # Human vibration (ISO 8041-1, ISO 2631-1/-2/-4, ISO 5349-1/-2,
     # Directive 2002/44/EC): frequency weighting, weighted a_w, daily A(8)
     generate_vibration_weighting,

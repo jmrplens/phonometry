@@ -1,6 +1,6 @@
 ---
 title: "Guías"
-description: "Las 157 guías de phonometry, agrupadas en los trece temas que cubre la biblioteca: para qué sirve cada área, las normas que implementa y un resumen de una línea de cada guía que contiene."
+description: "Las 158 guías de phonometry, agrupadas en los trece temas que cubre la biblioteca: para qué sirve cada área, las normas que implementa y un resumen de una línea de cada guía que contiene."
 head:
   - tag: script
     attrs:
@@ -118,7 +118,7 @@ hay ninguna panorámica del campo: cada página es la documentación de trabajo 
 un módulo, escrita para que un resultado se pueda defender apartado por
 apartado en lugar de darlo por bueno.
 
-Esta página es el mapa. Ciento cincuenta y siete guías repartidas en trece temas, y cada
+Esta página es el mapa. Ciento cincuenta y ocho guías repartidas en trece temas, y cada
 área tiene su propio índice con el relato largo de cómo encajan sus piezas. Si
 llegas sin una pregunta concreta, lee primero la
 [introducción](/phonometry/es/start/getting-started/): recorre una señal por toda la
@@ -877,6 +877,11 @@ IEC 61043, ISO 4871, IEC 60268-3/-4/-5, ITU-R BS.1770-5 y EBU R 128.
   los cuatro métodos de ISO 9295 por encima del rango de ISO 3741 e ISO 3744,
   con la constante de sala a partir del tiempo de reverberación o de la
   absorción del aire, y la comparación para tonos.
+- [Potencia acústica de turbinas de vapor](/phonometry/es/devices/emission/sound-power-turbines/):
+  el código de ensayo IEC 61063 para un grupo de turbina en su sala, con la
+  superficie escalonada a 1 m, las posiciones clave de la figura 2, la
+  corrección escalonada por ruido de fondo de la tabla 2 y el informe del
+  apartado 10.
 - [Potencia acústica por barrido de intensidad](/phonometry/es/devices/emission/sound-power-intensity/):
   el barrido in situ de ISO 9614-2 y el grado de precisión ISO 9614-3.
 - [Presión sonora de emisión en el puesto](/phonometry/es/devices/emission/workstation-emission/):

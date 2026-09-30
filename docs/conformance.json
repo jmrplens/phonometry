@@ -3,13 +3,13 @@
   "library": "4.0.0rc1",
   "generator": "scripts/conformance_report.py",
   "counts": {
-    "checks": 1683,
-    "passing": 1683,
+    "checks": 1691,
+    "passing": 1691,
     "failing": 0,
-    "domains": 105,
-    "standards": 508,
-    "citations": 1181,
-    "designations": 212,
+    "domains": 106,
+    "standards": 509,
+    "citations": 1189,
+    "designations": 214,
     "sources": 122
   },
   "units": [
@@ -683,6 +683,12 @@
       "title": "Suspended ceilings in a reverberation room (EN 16487)",
       "checks": 12,
       "passing": 12
+    },
+    {
+      "id": "steam-turbine-sets-iec-61063",
+      "title": "Steam turbine sets (IEC 61063)",
+      "checks": 8,
+      "passing": 8
     },
     {
       "id": "control-valve-noise-iec-60534-8-3",
@@ -55309,6 +55315,403 @@
       "computed": {
         "value": 8.0,
         "label": "8/8 printed ratings and practical coefficients reproduced"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "steam-turbine-sets-iec-61063/iec-61063-1991-table-2-bs-en-61063-1996-printed-folio-8-pdf-page-14/correction-for-background-noise-the-nine-printed-rows-from-a-difference-of-3-db-to-one-above-10-db",
+      "domain": "steam-turbine-sets-iec-61063",
+      "reference": {
+        "cite": "IEC 61063:1991 Table 2 (BS EN 61063:1996, printed folio 8, PDF page 14)",
+        "tail": ")",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61063",
+            "edition": "1991",
+            "clause": "Table 2"
+          },
+          {
+            "kind": "standard",
+            "designation": "BS EN 61063",
+            "edition": "1996",
+            "clause": "printed folio 8, PDF page 14",
+            "lead": " (",
+            "relation": "mentions"
+          }
+        ]
+      },
+      "quantity": "Correction for background noise, the nine printed rows from a difference of 3 dB to one above 10 dB",
+      "kind": "record",
+      "expected": {
+        "label": "3 dB = 3 dB; 4 dB = 2 dB; 5 dB = 2 dB; 6 dB = 1 dB; 7 dB = 1 dB; 8 dB = 1 dB; 9 dB = 0.5 dB; 10 dB = 0.5 dB; > 10 dB, at 11 dB = 0 dB; > 10 dB, at 10,2 dB = 0 dB",
+        "record": {
+          "3 dB": 3.0,
+          "4 dB": 2.0,
+          "5 dB": 2.0,
+          "6 dB": 1.0,
+          "7 dB": 1.0,
+          "8 dB": 1.0,
+          "9 dB": 0.5,
+          "10 dB": 0.5,
+          "> 10 dB, at 11 dB": 0.0,
+          "> 10 dB, at 10,2 dB": 0.0
+        }
+      },
+      "computed": {
+        "label": "3 dB = 3 dB; 4 dB = 2 dB; 5 dB = 2 dB; 6 dB = 1 dB; 7 dB = 1 dB; 8 dB = 1 dB; 9 dB = 0.5 dB; 10 dB = 0.5 dB; > 10 dB, at 11 dB = 0 dB; > 10 dB, at 10,2 dB = 0 dB",
+        "record": {
+          "3 dB": 3.0,
+          "4 dB": 2.0,
+          "5 dB": 2.0,
+          "6 dB": 1.0,
+          "7 dB": 1.0,
+          "8 dB": 1.0,
+          "9 dB": 0.5,
+          "10 dB": 0.5,
+          "> 10 dB, at 11 dB": 0.0,
+          "> 10 dB, at 10,2 dB": 0.0
+        }
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "steam-turbine-sets-iec-61063/iec-61063-1991-table-1-bs-en-61063-1996-printed-folio-4-pdf-page-10/standard-deviation-of-the-a-weighted-sound-power-level-by-the-survey-method-with-and-without-prominent-discrete-tones",
+      "domain": "steam-turbine-sets-iec-61063",
+      "reference": {
+        "cite": "IEC 61063:1991 Table 1 (BS EN 61063:1996, printed folio 4, PDF page 10)",
+        "tail": ")",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61063",
+            "edition": "1991",
+            "clause": "Table 1"
+          },
+          {
+            "kind": "standard",
+            "designation": "BS EN 61063",
+            "edition": "1996",
+            "clause": "printed folio 4, PDF page 10",
+            "lead": " (",
+            "relation": "mentions"
+          }
+        ]
+      },
+      "quantity": "Standard deviation of the A-weighted sound power level by the survey method, with and without prominent discrete tones",
+      "kind": "record",
+      "expected": {
+        "label": "tonal = 5 dB; broadband = 4 dB",
+        "record": {
+          "tonal": 5.0,
+          "broadband": 4.0
+        }
+      },
+      "computed": {
+        "label": "tonal = 5 dB; broadband = 4 dB",
+        "record": {
+          "tonal": 5.0,
+          "broadband": 4.0
+        }
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "steam-turbine-sets-iec-61063/iec-61063-1991-7-1-bs-en-61063-1996-printed-folio-7-pdf-page-13/the-measurement-surface-stands-1-m-from-the-reference-box-on-every-side-but-the-floor",
+      "domain": "steam-turbine-sets-iec-61063",
+      "reference": {
+        "cite": "IEC 61063:1991 7.1 (BS EN 61063:1996, printed folio 7, PDF page 13)",
+        "tail": ")",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61063",
+            "edition": "1991",
+            "clause": "7.1"
+          },
+          {
+            "kind": "standard",
+            "designation": "BS EN 61063",
+            "edition": "1996",
+            "clause": "printed folio 7, PDF page 13",
+            "lead": " (",
+            "relation": "mentions"
+          }
+        ]
+      },
+      "quantity": "The measurement surface stands 1 m from the reference box on every side but the floor",
+      "kind": "record",
+      "expected": {
+        "label": "length = 2 m; width = 2 m; height = 1 m",
+        "record": {
+          "length": 2.0,
+          "width": 2.0,
+          "height": 1.0
+        }
+      },
+      "computed": {
+        "label": "length = 2 m; width = 2 m; height = 1 m",
+        "record": {
+          "length": 2.0,
+          "width": 2.0,
+          "height": 1.0
+        }
+      },
+      "unit": "m",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "steam-turbine-sets-iec-61063/iec-61063-1991-equation-1-bs-en-61063-1996-printed-folio-7-pdf-page-13/area-of-the-measurement-surface-around-the-large-set-of-figure-2-b-against-the-exact-area-of-the-stepped-surface",
+      "domain": "steam-turbine-sets-iec-61063",
+      "reference": {
+        "cite": "IEC 61063:1991 Equation (1) (BS EN 61063:1996, printed folio 7, PDF page 13)",
+        "tail": ")",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61063",
+            "edition": "1991",
+            "clause": "Equation (1)"
+          },
+          {
+            "kind": "standard",
+            "designation": "BS EN 61063",
+            "edition": "1996",
+            "clause": "printed folio 7, PDF page 13",
+            "lead": " (",
+            "relation": "mentions"
+          }
+        ]
+      },
+      "quantity": "Area of the measurement surface around the large set of Figure 2 b against the exact area of the stepped surface",
+      "kind": "scalar",
+      "expected": {
+        "value": 410.1
+      },
+      "computed": {
+        "value": 410.1
+      },
+      "unit": "m²",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "steam-turbine-sets-iec-61063/iec-61063-1991-figure-a-3-bs-en-61063-1996-printed-folio-12-pdf-page-18/the-environmental-correction-against-the-formula-the-figure-prints-k-10-lg-1-4-a-s-across-the-a-s-it-labels",
+      "domain": "steam-turbine-sets-iec-61063",
+      "reference": {
+        "cite": "IEC 61063:1991 Figure A.3 (BS EN 61063:1996, printed folio 12, PDF page 18)",
+        "tail": ")",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61063",
+            "edition": "1991",
+            "clause": "Figure A.3"
+          },
+          {
+            "kind": "standard",
+            "designation": "BS EN 61063",
+            "edition": "1996",
+            "clause": "printed folio 12, PDF page 18",
+            "lead": " (",
+            "relation": "mentions"
+          }
+        ]
+      },
+      "quantity": "The environmental correction against the formula the figure prints, K = 10 lg[1 + 4/(A/S)], across the A/S it labels",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0,
+        "label": "max abs(K - 10 lg[1 + 4/(A/S)]) <= 1e-9 dB at 9 values of A/S"
+      },
+      "computed": {
+        "value": 0.0
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "steam-turbine-sets-iec-61063/iec-61063-1991-figure-a-3-against-a-3-3-bs-en-61063-1996-printed-folios-12-and-13-pdf-pages-18-and-19/the-a-s-at-which-the-environmental-correction-reaches-the-7-db-limit-against-the-a-s-of-1-the-clause-restates-the-limit-as",
+      "domain": "steam-turbine-sets-iec-61063",
+      "reference": {
+        "cite": "IEC 61063:1991 Figure A.3 against A.3.3 (BS EN 61063:1996, printed folios 12 and 13, PDF pages 18 and 19)",
+        "tail": ")",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61063",
+            "edition": "1991",
+            "clause": "Figure A.3 against A.3.3"
+          },
+          {
+            "kind": "standard",
+            "designation": "BS EN 61063",
+            "edition": "1996",
+            "clause": "printed folios 12 and 13, PDF pages 18 and 19",
+            "lead": " (",
+            "relation": "mentions"
+          }
+        ]
+      },
+      "quantity": "The A/S at which the environmental correction reaches the 7 dB limit, against the A/S of 1 the clause restates the limit as",
+      "kind": "scalar",
+      "expected": {
+        "value": 1.0
+      },
+      "computed": {
+        "value": 0.997
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.5
+      },
+      "deviation": {
+        "value": -0.003
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "steam-turbine-sets-iec-61063/iec-61063-1991-8-3-note-bs-en-61063-1996-printed-folio-9-pdf-page-15/largest-gap-between-the-arithmetic-average-and-equation-2-for-levels-spanning-5-db",
+      "domain": "steam-turbine-sets-iec-61063",
+      "reference": {
+        "cite": "IEC 61063:1991 8.3 NOTE (BS EN 61063:1996, printed folio 9, PDF page 15)",
+        "tail": ")",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61063",
+            "edition": "1991",
+            "clause": "8.3 NOTE"
+          },
+          {
+            "kind": "standard",
+            "designation": "BS EN 61063",
+            "edition": "1996",
+            "clause": "printed folio 9, PDF page 15",
+            "lead": " (",
+            "relation": "mentions"
+          }
+        ]
+      },
+      "quantity": "Largest gap between the arithmetic average and Equation (2) for levels spanning 5 dB",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.7
+      },
+      "computed": {
+        "value": 0.707
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.05
+      },
+      "deviation": {
+        "value": 0.007
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "steam-turbine-sets-iec-61063/iec-61063-1991-4-2-4-3-7-2-2-and-a-3-3-bs-en-61063-1996-printed-folios-5-6-8-and-12/the-background-wind-overhead-and-environmental-limits-judged-at-the-printed-value-and-just-past-it",
+      "domain": "steam-turbine-sets-iec-61063",
+      "reference": {
+        "cite": "IEC 61063:1991 4.2, 4.3, 7.2.2 and A.3.3 (BS EN 61063:1996, printed folios 5, 6, 8 and 12)",
+        "tail": ")",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61063",
+            "edition": "1991",
+            "clause": "4.2, 4.3, 7.2.2 and A.3.3"
+          },
+          {
+            "kind": "standard",
+            "designation": "BS EN 61063",
+            "edition": "1996",
+            "clause": "printed folios 5, 6, 8 and 12",
+            "lead": " (",
+            "relation": "mentions"
+          }
+        ]
+      },
+      "quantity": "The background, wind, overhead and environmental limits, judged at the printed value and just past it",
+      "kind": "record",
+      "expected": {
+        "label": "every limit holds at the printed value and fails past it",
+        "record": {
+          "4.2 at 3 dB": 1.0,
+          "4.2 below 3 dB": 1.0,
+          "4.3 below 6 m/s": 1.0,
+          "4.3 at 6 m/s": 1.0,
+          "A.3.3 at 7 dB": 1.0,
+          "A.3.3 above 7 dB": 1.0,
+          "7.2.2 at 1,0 dB": 1.0,
+          "7.2.2 above 1,0 dB": 1.0
+        }
+      },
+      "computed": {
+        "label": "4.2 at 3 dB = 1; 4.2 below 3 dB = 1; 4.3 below 6 m/s = 1; 4.3 at 6 m/s = 1; A.3.3 at 7 dB = 1; A.3.3 above 7 dB = 1; 7.2.2 at 1,0 dB = 1; 7.2.2 above 1,0 dB = 1",
+        "record": {
+          "4.2 at 3 dB": 1.0,
+          "4.2 below 3 dB": 1.0,
+          "4.3 below 6 m/s": 1.0,
+          "4.3 at 6 m/s": 1.0,
+          "A.3.3 at 7 dB": 1.0,
+          "A.3.3 above 7 dB": 1.0,
+          "7.2.2 at 1,0 dB": 1.0,
+          "7.2.2 above 1,0 dB": 1.0
+        }
       },
       "tolerance": {
         "mode": "absolute",

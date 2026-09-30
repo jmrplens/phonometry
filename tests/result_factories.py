@@ -1323,6 +1323,46 @@ def _special_room_suitability() -> ph.emission.SpecialRoomSuitabilityCheck:
     )
 
 
+def _turbine_surface() -> ph.emission.TurbineMeasurementSurface:
+    """IEC 61063: a turbine box and a generator box, as Figure 2 a draws them."""
+    return ph.emission.turbine_measurement_surface(
+        [
+            ph.emission.TurbineReferenceBox(5.0, 3.0, 3.0, "turbine"),
+            ph.emission.TurbineReferenceBox(6.0, 2.5, 2.5, "generator"),
+        ]
+    )
+
+
+def _turbine_array() -> ph.emission.TurbineMicrophoneArray:
+    """IEC 61063 key and additional positions every 2 m around that set."""
+    return ph.emission.turbine_microphone_positions(
+        _turbine_surface(), microphone_height_m=1.2, spacing_m=2.0
+    )
+
+
+def _turbine_power() -> ph.emission.TurbineSoundPowerResult:
+    """IEC 61063 determination at the positions above, one overhead."""
+    levels = np.array([88.0, 90.5, 91.0, 89.0, 92.5, 90.0])
+    return ph.emission.turbine_sound_power(
+        levels,
+        surface_area_m2=_turbine_surface().area_m2,
+        background_levels_db=levels - np.array([9.0, 12.0, 6.0, 15.0, 4.0, 11.0]),
+        environmental_correction_db=1.8,
+        overhead_mask=np.array([False, False, False, False, True, False]),
+    )
+
+
+def _turbine_declaration() -> ph.emission.TurbineNoiseDeclaration:
+    """IEC 61063 report of the determination above at two loads."""
+    return ph.emission.turbine_noise_declaration(
+        {"50 %": _turbine_power(), "100 %": _turbine_power()},
+        turbine="Two-box set",
+        noise_control="none",
+        measured_at="2026-09-25 10:00",
+        tonal=False,
+    )
+
+
 def _immission_record(fs_hz: float = 2048.0) -> np.ndarray:
     """A two-second burst of ground vibration inside a quiet 70 s record.
 

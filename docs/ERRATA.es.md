@@ -10110,6 +10110,30 @@ dos ediciones con las mismas entradas y en el mismo orden.
   centrales nominales que acepta el módulo son las de la IEC 61260-1.
 - **Estado:** sin notificar (el documento es un borrador en consulta).
 
+## IEC 61063:1991, 8.3 ($L_{p\mathrm{A}I}$ por $L_{p\mathrm{A}i}$)
+
+- **Ubicación:** apartado 8.3, la lista de definiciones bajo la Ecuación (2)
+  y la NOTA que la sigue.
+- **El impreso:** «$L_{p\mathrm{A}I}$ is the A-weighted sound pressure level
+  in decibels at the $i^\mathrm{th}$ measurement position», con una $I$
+  mayúscula, y en la NOTA «When the range of values of $L_{p\mathrm{A}I}$
+  does not exceed 5 dB, a simple arithmetic average may be used.»
+- **El problema:** la Ecuación (2) y la frase que la presenta escriben
+  $L_{p\mathrm{A}i}$, con la $i$ minúscula de la suma
+  $\sum_{i=1}^{N} 10^{0{,}1 L_{p\mathrm{A}i}}$, y la propia línea de la
+  lista habla de la posición $i^\mathrm{th}$; $L_{p\mathrm{A}I}$ no nombra
+  ninguna magnitud de la norma.
+- **Evidencia:** la Ecuación (2), su lista de definiciones y la NOTA en la
+  página 15 del PDF (p. 9 impresa) de BS EN 61063:1996, el texto inglés de
+  EN 61063:1996, que reproduce IEC 1063:1991 sin modificaciones.
+- **Comportamiento de la biblioteca:** `turbine_sound_power` promedia los
+  niveles corregidos de cada posición, $L_{p\mathrm{A}i}$, por la
+  Ecuación (2), y `arithmetic_mean_allowed` lee la NOTA sobre el rango de
+  esos mismos niveles
+  ([`turbine_noise.py`](../src/phonometry/emission/turbine_noise.py)). No
+  hizo falta ningún cambio.
+- **Estado:** sin notificar.
+
 ## Propiedades de las fuentes, relacionadas, que no son erratas
 
 Registradas aquí para prevenir futuros «arreglos» que romperían la

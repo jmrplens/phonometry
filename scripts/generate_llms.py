@@ -333,13 +333,19 @@ def _area_members() -> dict[str, list[str]]:
 #: application rules of ISO 10140-1 and the two laboratory methods beside it,
 #: which leaves the field measurements in the folder's own shard.
 #:
-#: ``devices/emission`` has eleven, and the family sorts its determination
+#: ``devices/emission`` has thirteen, and the family sorts its determination
 #: routes by the quantity actually measured: sound pressure, sound intensity,
 #: and the surface velocity of the casing. The intensity pair carves out, and
 #: so do the four pressure routes that read a reverberant field instead of an
 #: enveloping surface: the reverberation room of ISO 3741, the small test
 #: rooms of ISO 3743, the in situ comparison of ISO 3747 and the 16 kHz octave
-#: of ISO 9295, which extends the first above 10 kHz.
+#: of ISO 9295, which extends the first above 10 kHz. The pressure routes that
+#: read an enveloping surface carve out as well: ISO 3744, ISO 3746 and
+#: ISO 3745, the ISO 26101 qualification of the free-field room the last one
+#: needs with the ISO 6926 reference source, and the IEC 61063 test code that
+#: takes the survey surface of ISO 3746 to a steam turbine set in its hall.
+#: That leaves the choice of route, the in-duct method, the surface vibration
+#: route and the work station in the folder's own shard.
 #:
 #: ``buildings/rooms`` has eleven, and four of them are the auditorium
 #: measures of the ISO 3382-1 annexes and the tables that report them, which
@@ -392,6 +398,15 @@ MANUAL_SPLITS: dict[str, tuple[tuple[str, str, tuple[str, ...]], ...]] = {
                 "sound-power-test-rooms",
                 "sound-power-in-situ",
                 "sound-power-high-frequency",
+            ),
+        ),
+        (
+            "devices-emission-enveloping",
+            "Sound power on an enveloping surface",
+            (
+                "sound-power-pressure",
+                "free-field-qualification",
+                "sound-power-turbines",
             ),
         ),
     ),

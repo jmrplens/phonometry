@@ -647,6 +647,50 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   heavy/soft impact source is now cited to ISO 10140-5:2021 Annex F, whose
   Table F.1 is unchanged.
 
+- **Sound power of a steam turbine set in its own hall (IEC 61063).** A
+  turbine set is measured where it runs, and IEC 61063:1991 is the test code
+  that fixes how. The new `emission.turbine_noise` module builds the stepped
+  measurement surface 1 m out from the reference boxes of the turbine, the
+  driven machinery and their attachments, with its area by Equation (1)
+  (`turbine_measurement_surface`, which also gives the exact stepped area for
+  sets whose sections do not nest), and places the five key microphone
+  positions of Figure 2 and the additional ones at equal distances round the
+  sides and over the set, up the front end, across the top and down the rear
+  end as the elevations of Figure 2 draw them, warning when a reference box
+  gets no position on its long sides (`turbine_microphone_positions`).
+  `turbine_background_correction` is the stepped Table 2 applied at each
+  position, not the $K_{1\mathrm{A}}$ formula of ISO 3746: any difference
+  above 10 dB takes the printed "> 10" row, and one from 3 to 10 dB is read in
+  whole decibels; the guide sets the two corrections side by side.
+  `turbine_environmental_correction` gives the $K$ of Figure A.3 from the
+  room's reverberation time, `turbine_reference_source_correction` gives it
+  from a calibrated reference source (A.3.2, two determinations up to 10 m of
+  machine and four above), and `check_turbine_test_environment` judges the
+  7 dB limit of A.3.3 and the 6 m/s wind limit outdoors, from either
+  correction or from a bare `environmental_correction_db` (0 outdoors).
+  `turbine_sound_power` returns the surface sound pressure level and the
+  sound power level of Equations (2) and (3), flags an upper limit when a
+  background is within 3 dB and names the positions that make it one
+  (`limited_positions`), and reports the arithmetic average the NOTE of 8.3
+  allows and how much the overhead positions move the result. Every limit is
+  judged on the number as read rather than on its last bits in binary: a
+  background of 29,3 dB under 32,3 dB is the 3 dB of 4.2, and overhead
+  positions that move the level by 1,0 dB may be deleted on every machine.
+  `turbine_noise_declaration` writes the minimum report of clause 10, one row
+  per load, the sound power level in whole decibels, the conformity statement
+  and the Table 1 standard deviation, and refuses a determination that is not
+  in full conformity. Every result has `.plot()`: the positions in plan and
+  in elevation as Figure 2 draws them, Figure A.3 with its printed axis, and
+  the determination bar by bar, with the key positions numbered when it is
+  given the array's labels. A new guide in both languages takes a set of
+  three casings, HP, IP and LP, with generator and exciter through the test.
+  The standard prints no worked example: the nine cells of Table 2, the two
+  of Table 1 and the limits it fixes are pinned in the conformance report,
+  and Equation (1), the formula of Figure A.3 and the NOTE of 8.3 against
+  closed forms. The where-list of Equation (2) and the NOTE of 8.3 print the
+  position level as $L_{p\mathrm{A}I}$, with a capital $I$, for the
+  $L_{p\mathrm{A}i}$ of the equation; that is registered in the errata.
+
 - **Sound power in the 16 kHz octave band (ISO 9295).** The general sound
   power methods stop at the 10 kHz one-third-octave band, and a printer's
   paper noise or a power supply's whine sits above it. The new
@@ -1671,6 +1715,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- **The sound power guides on an enveloping surface have an llms shard of
+  their own.** With the steam turbine guide, `llms-devices-emission.txt` went
+  over the 200 000-byte budget, so the pressure methods of ISO 3744, ISO 3746
+  and ISO 3745, the free field and reference sources of ISO 26101 and
+  ISO 6926, and the IEC 61063 guide moved to a new
+  `llms-devices-emission-enveloping.txt`, which `llms.txt` lists beside the
+  other shards. A client that fetched `llms-devices-emission.txt` for one of
+  them finds it at the new address.
 - **The glossary has an llms shard of its own.** The glossary left
   `llms-reference.txt` for a new `llms-glossary.txt`, which `llms.txt` lists
   beside the other shards: next to the bibliography it pushed the reference

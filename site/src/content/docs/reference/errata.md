@@ -9579,6 +9579,29 @@ in the same order.
   module accepts are those of IEC 61260-1.
 - **Status:** unreported (the document is a draft under comment).
 
+## IEC 61063:1991, 8.3 ($L_{p\mathrm{A}I}$ for $L_{p\mathrm{A}i}$)
+
+- **Location:** clause 8.3, the where-list under Equation (2) and the NOTE
+  that follows it.
+- **The print:** "$L_{p\mathrm{A}I}$ is the A-weighted sound pressure level
+  in decibels at the $i^\mathrm{th}$ measurement position", with a capital
+  $I$, and in the NOTE "When the range of values of $L_{p\mathrm{A}I}$ does
+  not exceed 5 dB, a simple arithmetic average may be used."
+- **The problem:** Equation (2) and the sentence that introduces it write
+  $L_{p\mathrm{A}i}$, with the lower-case $i$ of the sum
+  $\sum_{i=1}^{N} 10^{0{,}1 L_{p\mathrm{A}i}}$, and the where-list line
+  itself speaks of the $i^\mathrm{th}$ position; $L_{p\mathrm{A}I}$ names no
+  quantity of the standard.
+- **Evidence:** Equation (2), its where-list and the NOTE on PDF page 15
+  (printed p. 9) of BS EN 61063:1996, the English text of EN 61063:1996,
+  which reproduces IEC 1063:1991 without modification.
+- **Library behaviour:** `turbine_sound_power` averages the corrected
+  position levels $L_{p\mathrm{A}i}$ by Equation (2), and
+  `arithmetic_mean_allowed` reads the NOTE on the range of the same levels
+  ([`turbine_noise.py`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/emission/turbine_noise.py)). No
+  change was required.
+- **Status:** unreported.
+
 ## Related source properties that are not errata
 
 Recorded here to prevent future "fixes" that would break agreement with the

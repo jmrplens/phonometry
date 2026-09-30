@@ -580,11 +580,41 @@ def test_without_hard_links_a_file_renamed_over_the_taken_name_is_kept(
     _kept_alone(tmp_path)
 
 
+@pytest.mark.skipif(
+    sys.platform == "win32",
+    reason="the reserving fallback runs on POSIX, whose O_EXCL never follows a "
+    "link; Windows renames, and follows a link on open",
+)
 def test_without_hard_links_a_link_made_at_the_name_is_kept(
     tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """A symbolic link that names nothing takes the name as a file does."""
     _no_hard_links(monkeypatch)
+    path = tmp_path / "mine.json"
+    fsync = os.fsync
+
+    def and_a_link(fd: int) -> None:
+        fsync(fd)
+        path.symlink_to(tmp_path / "nowhere.json")
+
+    try:
+        (tmp_path / "probe").symlink_to(tmp_path / "nowhere.json")
+    except OSError:
+        pytest.skip("this system does not let the test make a symbolic link")
+    (tmp_path / "probe").unlink()
+    monkeypatch.setattr(os, "fsync", and_a_link)
+    with pytest.raises(FileExistsError, match=_KEPT):
+        io.write_catalogue(_mine(), path)
+    monkeypatch.undo()
+    assert path.is_symlink()
+    assert [item.name for item in tmp_path.iterdir()] == ["mine.json"]
+
+
+@pytest.mark.skipif(sys.platform != "win32", reason="Windows's own rename")
+def test_on_windows_a_link_made_at_the_name_is_kept(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Windows's rename refuses a symbolic link that names nothing, as a file."""
     path = tmp_path / "mine.json"
     fsync = os.fsync
 

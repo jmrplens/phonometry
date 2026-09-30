@@ -1380,10 +1380,23 @@ class _SheetRow:
                 pieces.word = held
 
     def provenance(self, value: Mapping[str, Any]) -> None:
-        """The row's narrowing of its provenance, each entry in its column."""
+        """The row's narrowing of its provenance, each entry in its column.
+
+        A row narrows an entry only where it says other than its document, so
+        an empty entry clears one the document fills. It is refused, as an
+        empty cell reads back as the document's, and the row would then cite
+        a page or a report it does not.
+        """
         for entry, text in value.items():
             if entry == "field_test_standards":
                 self.refuse(("provenance", entry), _in_json(entry))
+            elif text == "":
+                self.refuse(
+                    ("provenance", entry),
+                    f"provenance.{entry} is empty where the document's is not, "
+                    "and an empty CSV cell reads as the document's; a row that "
+                    "clears it is written only in a JSON catalogue",
+                )
             else:
                 self.cells[f"provenance.{entry}"] = _escape(str(text))
 

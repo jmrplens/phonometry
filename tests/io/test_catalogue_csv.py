@@ -1640,6 +1640,49 @@ def test_an_empty_text_whose_default_says_something_is_refused(
     assert "empty where its default is 'person'" in issue.message
 
 
+@pytest.mark.parametrize("given", ["in-the-row", "by-provenance="])
+def test_a_provenance_entry_a_row_empties_is_refused(
+    tmp_path: pathlib.Path, given: str
+) -> None:
+    """An empty cell reads as the document's entry, so the row cannot hold one.
+
+    A row that empties the page its document gives, in a JSON catalogue or
+    against a page given by ``provenance=``, was written as an empty cell and
+    read back citing the document's page. The row goes into a JSON catalogue.
+    """
+    document = _document(**{_B: 0.5})
+    provenance = None
+    if given == "in-the-row":
+        document["rows"][0]["provenance"] = {"page": ""}
+        document["provenance"]["page"] = "12"
+    mine = io.parse_catalogue(document, row_type=AbsorptionSpectrum)
+    if given == "by-provenance=":
+        assert mine.provenance is not None
+        provenance = dataclasses.replace(mine.provenance, page="12")
+    row = mine["ceiling-tiles/a"]
+    assert row.provenance is not None
+    assert row.provenance.page == ""
+    path = tmp_path / "out.csv"
+    with pytest.raises(io.CatalogueError, match="a CSV file cannot hold") as caught:
+        io.write_catalogue(mine, path, provenance=provenance)
+    (issue,) = caught.value.issues
+    assert (issue.file, issue.location, issue.row_key) == (
+        "out.csv",
+        "/rows/0/provenance/page",
+        "a",
+    )
+    assert issue.message == (
+        "provenance.page is empty where the document's is not, and an empty "
+        "CSV cell reads as the document's; a row that clears it is written "
+        "only in a JSON catalogue"
+    )
+    assert list(tmp_path.iterdir()) == []
+    json_path = tmp_path / "out.json"
+    io.write_catalogue(mine, json_path, provenance=provenance)
+    back = io.read_catalogue(json_path, row_type=AbsorptionSpectrum)
+    assert back["ceiling-tiles/a"].provenance == row.provenance
+
+
 @pytest.mark.parametrize(
     ("delimiter", "decimal", "said"),
     [

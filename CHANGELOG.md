@@ -133,7 +133,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   a sheet as any other; what one cell cannot hold (several readings, a
   misprint, a carried cell, a credit, a basis or a standard for a single cell,
   a table whose rows credit it apart) is refused with the pointer the JSON
-  document would write it at, and nothing is written.
+  document would write it at, and nothing is written. So is a row that
+  empties an entry of its document's provenance, such as the page, since an
+  empty cell reads back as the document's and the row would cite a page it
+  does not; such a row is written in a JSON catalogue.
   `io.Catalogue.header_sha256` records the header a CSV file was read with,
   beside `file_sha256` for the file itself. The guide "Your own catalogues"
   gains a section on it, in both languages.

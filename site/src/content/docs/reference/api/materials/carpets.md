@@ -329,18 +329,29 @@ s/m2) and no value"`, never a figure the page does not print.
 ## carpets_named
 
 ```python
-carpets_named(name: str) -> tuple[Carpet, ...]
+carpets_named(
+    name: str,
+    *,
+    catalogue: Mapping[str, Carpet] | None = None,
+) -> tuple[Carpet, ...]
 ```
 
-Every published carpet whose construction, surface or fibre contains *name*.
+Every carpet whose construction, surface or fibre contains *name*.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
 | `name` | Part of what the page prints, in Spanish, matched without regard to case: `"nylon"` answers with every nylon carpet of both tables, and `"de nudo"` with every knotted one. |
+| `catalogue` | The rows to search in place of [`PUBLISHED_CARPETS`](/phonometry/reference/api/materials/carpets/#published_carpets): a catalogue of your own that [`phonometry.io.read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) returns, `PUBLISHED_CARPETS \| mine` to search both at once, or any mapping of key to row (Default: `None`, which searches [`PUBLISHED_CARPETS`](/phonometry/reference/api/materials/carpets/#published_carpets)). |
 
-**Returns:** The matching rows, in the order the tables list them. Empty when nothing matches, which is not an error.
+**Returns:** The matching rows, in catalogue order. Empty when nothing matches, which is not an error.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | for a *catalogue* that is not a mapping, or that holds a row that is not a [`Carpet`](/phonometry/reference/api/materials/carpets/#carpet), naming its key. |
 
 ## PUBLISHED_CARPETS
 

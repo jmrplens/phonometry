@@ -41,7 +41,13 @@ from dataclasses import dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING
 
-from ..._internal.catalogue import CatalogueRow, read_table, take
+from ..._internal.catalogue import (
+    CatalogueRow,
+    read_table,
+    rows_to_search,
+    search_text,
+    take,
+)
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from collections.abc import Mapping
@@ -105,18 +111,27 @@ def _load() -> dict[str, Carpet]:
 PUBLISHED_CARPETS: Mapping[str, Carpet] = MappingProxyType(_load())
 
 
-def carpets_named(name: str) -> tuple[Carpet, ...]:
-    """Every published carpet whose construction, surface or fibre contains *name*.
+def carpets_named(
+    name: str, *, catalogue: Mapping[str, Carpet] | None = None
+) -> tuple[Carpet, ...]:
+    """Every carpet whose construction, surface or fibre contains *name*.
 
     :param name: Part of what the page prints, in Spanish, matched without
         regard to case: ``"nylon"`` answers with every nylon carpet of both
         tables, and ``"de nudo"`` with every knotted one.
-    :return: The matching rows, in the order the tables list them. Empty when
-        nothing matches, which is not an error.
+    :param catalogue: The rows to search in place of :data:`PUBLISHED_CARPETS`:
+        a catalogue of your own that :func:`phonometry.io.read_catalogue`
+        returns, ``PUBLISHED_CARPETS | mine`` to search both at once, or any
+        mapping of key to row (Default: ``None``, which searches
+        :data:`PUBLISHED_CARPETS`).
+    :return: The matching rows, in catalogue order. Empty when nothing
+        matches, which is not an error.
+    :raises TypeError: for a *catalogue* that is not a mapping, or that holds a
+        row that is not a :class:`Carpet`, naming its key.
     """
-    wanted = name.casefold()
+    wanted = search_text(name)
     return tuple(
         row
-        for row in PUBLISHED_CARPETS.values()
-        if wanted in f"{row.name} {row.pile_surface} {row.fibre}".casefold()
+        for row in rows_to_search(catalogue, PUBLISHED_CARPETS, Carpet, "carpets_named")
+        if wanted in search_text(f"{row.name} {row.pile_surface} {row.fibre}")
     )

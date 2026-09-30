@@ -87,7 +87,13 @@ from dataclasses import dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING, ClassVar
 
-from .._internal.catalogue import BandedRow, read_table, take
+from .._internal.catalogue import (
+    BandedRow,
+    read_table,
+    rows_to_search,
+    search_text,
+    take,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -246,7 +252,9 @@ PUBLISHED_DUCT_TRANSMISSION_LOSS: Mapping[str, DuctWallSpectrum] = MappingProxyT
 )
 
 
-def duct_wall_named(name: str) -> tuple[DuctWallSpectrum, ...]:
+def duct_wall_named(
+    name: str, *, catalogue: Mapping[str, DuctWallSpectrum] | None = None
+) -> tuple[DuctWallSpectrum, ...]:
     """Every duct wall whose printed label contains *name*, without case.
 
     A tuple and not one row, and a long one: the label a duct table prints is
@@ -258,11 +266,24 @@ def duct_wall_named(name: str) -> tuple[DuctWallSpectrum, ...]:
 
     :param name: Part of a row label, as its page prints it, with the unit its
         column heading carries: ``"610"``, ``"305 × 1220"``, ``"152 mm"``.
+    :param catalogue: The rows to search in place of
+        :data:`PUBLISHED_DUCT_TRANSMISSION_LOSS`: a catalogue of your own that
+        :func:`phonometry.io.read_catalogue` returns,
+        ``PUBLISHED_DUCT_TRANSMISSION_LOSS | mine`` to search both at once, or
+        any mapping of key to row (Default: ``None``, which searches
+        :data:`PUBLISHED_DUCT_TRANSMISSION_LOSS`).
     :return: The matching rows, in catalogue order. Empty when none match.
+    :raises TypeError: for a *catalogue* that is not a mapping, or that holds a
+        row that is not a :class:`DuctWallSpectrum`, naming its key.
     """
-    needle = name.casefold()
+    needle = search_text(name)
     return tuple(
         row
-        for row in PUBLISHED_DUCT_TRANSMISSION_LOSS.values()
-        if needle in row.name.casefold()
+        for row in rows_to_search(
+            catalogue,
+            PUBLISHED_DUCT_TRANSMISSION_LOSS,
+            DuctWallSpectrum,
+            "duct_wall_named",
+        )
+        if needle in search_text(row.name)
     )

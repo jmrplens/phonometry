@@ -44,7 +44,13 @@ from dataclasses import dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING
 
-from ..._internal.catalogue import CatalogueRow, read_table, take
+from ..._internal.catalogue import (
+    CatalogueRow,
+    read_table,
+    rows_to_search,
+    search_text,
+    take,
+)
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from collections.abc import Mapping
@@ -98,18 +104,33 @@ def _load() -> dict[str, ResilientMaterial]:
 PUBLISHED_RESILIENT_MODULI: Mapping[str, ResilientMaterial] = MappingProxyType(_load())
 
 
-def resilient_moduli_named(name: str) -> tuple[ResilientMaterial, ...]:
-    """Every published resilient material whose name contains *name*.
+def resilient_moduli_named(
+    name: str, *, catalogue: Mapping[str, ResilientMaterial] | None = None
+) -> tuple[ResilientMaterial, ...]:
+    """Every resilient material whose name contains *name*.
 
     :param name: Part of a material name as the page prints it, matched without
         regard to case: ``"rock wool"`` answers with both of Vigran's rock
         wools, which only their densities tell apart.
-    :return: The matching rows, in the order the table lists them. Empty when
-        nothing matches, which is not an error.
+    :param catalogue: The rows to search in place of
+        :data:`PUBLISHED_RESILIENT_MODULI`: a catalogue of your own that
+        :func:`phonometry.io.read_catalogue` returns,
+        ``PUBLISHED_RESILIENT_MODULI | mine`` to search both at once, or any
+        mapping of key to row (Default: ``None``, which searches
+        :data:`PUBLISHED_RESILIENT_MODULI`).
+    :return: The matching rows, in catalogue order. Empty when nothing
+        matches, which is not an error.
+    :raises TypeError: for a *catalogue* that is not a mapping, or that holds a
+        row that is not a :class:`ResilientMaterial`, naming its key.
     """
-    wanted = name.casefold()
+    wanted = search_text(name)
     return tuple(
         row
-        for row in PUBLISHED_RESILIENT_MODULI.values()
-        if wanted in row.name.casefold()
+        for row in rows_to_search(
+            catalogue,
+            PUBLISHED_RESILIENT_MODULI,
+            ResilientMaterial,
+            "resilient_moduli_named",
+        )
+        if wanted in search_text(row.name)
     )

@@ -36,7 +36,13 @@ from dataclasses import dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING
 
-from .._internal.catalogue import CatalogueRow, read_table, take
+from .._internal.catalogue import (
+    CatalogueRow,
+    read_table,
+    rows_to_search,
+    search_text,
+    take,
+)
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from collections.abc import Mapping
@@ -95,18 +101,33 @@ def _load() -> dict[str, DampingTreatment]:
 PUBLISHED_DAMPING_TREATMENTS: Mapping[str, DampingTreatment] = MappingProxyType(_load())
 
 
-def damping_treatments_named(name: str) -> tuple[DampingTreatment, ...]:
-    """Every published treatment whose printed description contains *name*.
+def damping_treatments_named(
+    name: str, *, catalogue: Mapping[str, DampingTreatment] | None = None
+) -> tuple[DampingTreatment, ...]:
+    """Every treatment whose printed description contains *name*.
 
     :param name: Part of the description as the page prints it, in Spanish,
         matched without regard to case: ``"muescado"`` answers with every
         notched felt.
-    :return: The matching rows, in the order the table lists them. Empty when
-        nothing matches, which is not an error.
+    :param catalogue: The rows to search in place of
+        :data:`PUBLISHED_DAMPING_TREATMENTS`: a catalogue of your own that
+        :func:`phonometry.io.read_catalogue` returns,
+        ``PUBLISHED_DAMPING_TREATMENTS | mine`` to search both at once, or any
+        mapping of key to row (Default: ``None``, which searches
+        :data:`PUBLISHED_DAMPING_TREATMENTS`).
+    :return: The matching rows, in catalogue order. Empty when nothing
+        matches, which is not an error.
+    :raises TypeError: for a *catalogue* that is not a mapping, or that holds a
+        row that is not a :class:`DampingTreatment`, naming its key.
     """
-    wanted = name.casefold()
+    wanted = search_text(name)
     return tuple(
         row
-        for row in PUBLISHED_DAMPING_TREATMENTS.values()
-        if wanted in row.name.casefold()
+        for row in rows_to_search(
+            catalogue,
+            PUBLISHED_DAMPING_TREATMENTS,
+            DampingTreatment,
+            "damping_treatments_named",
+        )
+        if wanted in search_text(row.name)
     )

@@ -15,11 +15,12 @@ from __future__ import annotations
 
 import dataclasses
 import math
+import re
 
 import numpy as np
 import pytest
 
-from phonometry import building, vibration
+from phonometry import building, io, solids, vibration
 from phonometry.fluids import Fluid
 from phonometry.materials import miki
 
@@ -596,6 +597,199 @@ def test_plateau_rejects_bad_frequency_axis() -> None:
         )
     with pytest.raises(ValueError, match=r"'frequency' must be a non-empty"):
         building.plateau_transmission_loss([], material="brick", thickness_mm=110.0)
+
+
+# ---------------------------------------------------------------------------
+# The plateau construction from a catalogue row.
+# ---------------------------------------------------------------------------
+#: A fictitious data sheet's board, as a catalogue file of the caller's own.
+_BOARD: dict[str, object] = {
+    "schema": "phonometry-catalogue",
+    "schema_version": 1,
+    "catalogue": "example-boards",
+    "row_type": "PlateauMaterial",
+    "about": "Plateau constants of two boards from a fictitious data sheet.",
+    "provenance": {
+        "kind": "datasheet",
+        "document": "Example board data sheet",
+        "publisher": "Example Acoustics Ltd",
+        "version": "Rev. 1",
+        "consulted": "2026-09-25",
+    },
+    "rows": [
+        {
+            "key": "dense",
+            "name": "Dense board",
+            "surface_density_per_mm_kg_m2": 1.1,
+            "coincidence_height_db": 29,
+            "plateau_frequency_ratio": 6,
+        },
+        {
+            "key": "declared",
+            "name": "Declared board",
+            "surface_density_per_mm_kg_m2": 0.8,
+            "ranges": {"coincidence_height_db": [None, 30]},
+            "bounded_above": ["coincidence_height_db"],
+            "plateau_frequency_ratio": 7,
+        },
+        {
+            "key": "ratio-bound",
+            "name": "Ratio-bound board",
+            "surface_density_per_mm_kg_m2": 1.0,
+            "coincidence_height_db": 31,
+            "ranges": {"plateau_frequency_ratio": [None, 8]},
+            "bounded_above": ["plateau_frequency_ratio"],
+        },
+        {
+            "key": "density-bound",
+            "name": "Density-bound board",
+            "ranges": {"surface_density_per_mm_kg_m2": [None, 0.9]},
+            "bounded_above": ["surface_density_per_mm_kg_m2"],
+            "coincidence_height_db": 27,
+            "plateau_frequency_ratio": 5,
+        },
+    ],
+}
+
+
+def _boards() -> dict[str, solids.PlateauMaterial]:
+    catalogue = io.parse_catalogue(_BOARD, row_type=solids.PlateauMaterial)
+    return {row.name: row for row in catalogue.values()}
+
+
+@pytest.mark.parametrize(
+    "key", sorted(solids.PUBLISHED_PLATEAU_DATA), ids=lambda key: key.split("/")[1]
+)
+def test_plateau_takes_a_published_row_as_it_takes_its_name(key: str) -> None:
+    # Norton's rows are the table PLATEAU_MATERIALS is built from, so the row
+    # and its lower-case name draw the same curve, number for number.
+    row = solids.PUBLISHED_PLATEAU_DATA[key]
+    by_row = building.plateau_transmission_loss(
+        P311_BANDS, material=row, thickness_mm=10.0, fluid=NORTON_AIR
+    )
+    by_name = building.plateau_transmission_loss(
+        P311_BANDS, material=row.name.casefold(), thickness_mm=10.0, fluid=NORTON_AIR
+    )
+    np.testing.assert_array_equal(by_row.transmission_loss, by_name.transmission_loss)
+    assert by_row.plateau_start == by_name.plateau_start
+    assert by_row.plateau_end == by_name.plateau_end
+
+
+def test_plateau_takes_a_row_of_your_own_catalogue() -> None:
+    # A row read from a file gives its three numbers as the explicit route
+    # takes them: 1.1 kg/m2 per mm over 12.5 mm is 13.75 kg/m2.
+    dense = _boards()["Dense board"]
+    by_row = building.plateau_transmission_loss(
+        P311_BANDS, material=dense, thickness_mm=12.5, fluid=NORTON_AIR
+    )
+    by_hand = building.plateau_transmission_loss(
+        P311_BANDS,
+        mass_per_area=1.1 * 12.5,
+        plateau_height=29.0,
+        frequency_ratio=6.0,
+        fluid=NORTON_AIR,
+    )
+    np.testing.assert_array_equal(by_row.transmission_loss, by_hand.transmission_loss)
+    assert by_row.plateau_height == 29.0
+    assert by_row.plateau_end == pytest.approx(6.0 * by_row.plateau_start, rel=1e-12)
+
+
+@pytest.mark.parametrize(
+    ("board", "field", "bound"),
+    [
+        ("Declared board", "coincidence_height_db", "30"),
+        ("Ratio-bound board", "plateau_frequency_ratio", "8"),
+        ("Density-bound board", "surface_density_per_mm_kg_m2", "0.9"),
+    ],
+)
+def test_plateau_refuses_a_row_that_prints_a_bound_where_it_reads_a_number(
+    board: str, field: str, bound: str
+) -> None:
+    # A declared "no more than 30 dB" is not a plateau height, and the refusal
+    # says what the sheet printed rather than drawing a curve at 30 dB; the
+    # same holds for each of the three numbers the construction reads.
+    row = _boards()[board]
+    expected = (
+        f"'{board}' has no {field}, which 'plateau_transmission_loss' needs: "
+        f"the datasheet prints an upper bound of {bound} and no value"
+    )
+    with pytest.raises(ValueError, match=re.escape(expected)):
+        building.plateau_transmission_loss(P311_BANDS, material=row, thickness_mm=12.5)
+
+
+#: Each explicit number with a row, and the three numbers the curve then
+#: takes: the given one, and the row's own for the other two.
+_EXPLICIT_WITH_A_ROW = [
+    pytest.param(
+        "Declared board",
+        {"thickness_mm": 12.5, "plateau_height": 28.0},
+        {"mass_per_area": 0.8 * 12.5, "plateau_height": 28.0, "frequency_ratio": 7.0},
+        id="height",
+    ),
+    pytest.param(
+        "Ratio-bound board",
+        {"thickness_mm": 12.5, "frequency_ratio": 5.0},
+        {"mass_per_area": 1.0 * 12.5, "plateau_height": 31.0, "frequency_ratio": 5.0},
+        id="frequency-ratio",
+    ),
+    pytest.param(
+        "Density-bound board",
+        {"thickness_mm": 12.5, "mass_per_area": 20.0},
+        {"mass_per_area": 20.0, "plateau_height": 27.0, "frequency_ratio": 5.0},
+        id="mass-per-area",
+    ),
+    pytest.param(
+        "Density-bound board",
+        {"mass_per_area": 20.0},
+        {"mass_per_area": 20.0, "plateau_height": 27.0, "frequency_ratio": 5.0},
+        id="mass-per-area-without-thickness",
+    ),
+]
+
+
+@pytest.mark.parametrize(("board", "given", "by_hand"), _EXPLICIT_WITH_A_ROW)
+def test_an_explicit_number_replaces_the_row_s_and_the_row_s_is_not_read(
+    board: str, given: dict[str, float], by_hand: dict[str, float]
+) -> None:
+    # The number the caller gives wins, so the bound the row holds in its
+    # place is never asked for; the other two numbers still come from the row.
+    row = _boards()[board]
+    res = building.plateau_transmission_loss(
+        P311_BANDS,
+        material=row,
+        fluid=NORTON_AIR,
+        **given,  # type: ignore[arg-type]
+    )
+    expected = building.plateau_transmission_loss(
+        P311_BANDS,
+        fluid=NORTON_AIR,
+        **by_hand,  # type: ignore[arg-type]
+    )
+    np.testing.assert_array_equal(res.transmission_loss, expected.transmission_loss)
+    assert res.plateau_height == by_hand["plateau_height"]
+    assert res.plateau_end == pytest.approx(
+        by_hand["frequency_ratio"] * res.plateau_start, rel=1e-12
+    )
+
+
+def test_plateau_with_a_row_still_needs_the_thickness() -> None:
+    dense = _boards()["Dense board"]
+    with pytest.raises(ValueError, match="give 'thickness_mm' with 'material'"):
+        building.plateau_transmission_loss(P311_BANDS, material=dense)
+
+
+def test_plateau_refuses_a_row_of_another_catalogue() -> None:
+    steel = solids.solids_named("Steel")[0]
+    expected = (
+        r"'material' is a name in PLATEAU_MATERIALS or a solids\.PlateauMaterial "
+        r"row; got SolidMaterial\."
+    )
+    with pytest.raises(TypeError, match=expected):
+        building.plateau_transmission_loss(
+            P311_BANDS,
+            material=steel,  # type: ignore[call-overload]
+            thickness_mm=10.0,
+        )
 
 
 def test_negative_field_correction_rejected() -> None:

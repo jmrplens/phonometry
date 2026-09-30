@@ -70,7 +70,13 @@ from dataclasses import dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING, ClassVar
 
-from ..._internal.catalogue import CatalogueRow, read_table, take
+from ..._internal.catalogue import (
+    CatalogueRow,
+    read_table,
+    rows_to_search,
+    search_text,
+    take,
+)
 from .porous import (
     PUBLISHED_AIR,
     delany_bazley,
@@ -437,8 +443,10 @@ def _load() -> dict[str, PorousMaterial]:
 PUBLISHED_POROUS: Mapping[str, PorousMaterial] = MappingProxyType(_load())
 
 
-def porous_materials_named(name: str) -> tuple[PorousMaterial, ...]:
-    """Every published row for a specimen name, across the tables.
+def porous_materials_named(
+    name: str, *, catalogue: Mapping[str, PorousMaterial] | None = None
+) -> tuple[PorousMaterial, ...]:
+    """Every row for a specimen name, across the tables.
 
     Comparing two printings of one specimen is the point of holding both, and
     it has to be a deliberate act: a lookup that returned one row for "Foam"
@@ -450,10 +458,21 @@ def porous_materials_named(name: str) -> tuple[PorousMaterial, ...]:
 
     :param name: The specimen name as a table prints it, matched without
         regard to case: ``"Foam"``, ``"foam"``.
-    :return: The rows whose :attr:`PorousMaterial.name` matches, in the order
-        the tables are read, which is empty when no page names it.
+    :param catalogue: The rows to search in place of :data:`PUBLISHED_POROUS`:
+        a catalogue of your own that :func:`phonometry.io.read_catalogue`
+        returns, ``PUBLISHED_POROUS | mine`` to search both at once, or any
+        mapping of key to row (Default: ``None``, which searches
+        :data:`PUBLISHED_POROUS`).
+    :return: The rows whose :attr:`PorousMaterial.name` matches, in catalogue
+        order, which is empty when no row names it.
+    :raises TypeError: for a *catalogue* that is not a mapping, or that holds a
+        row that is not a :class:`PorousMaterial`, naming its key.
     """
-    wanted = name.casefold()
+    wanted = search_text(name)
     return tuple(
-        row for row in PUBLISHED_POROUS.values() if row.name.casefold() == wanted
+        row
+        for row in rows_to_search(
+            catalogue, PUBLISHED_POROUS, PorousMaterial, "porous_materials_named"
+        )
+        if search_text(row.name) == wanted
     )

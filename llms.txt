@@ -104,6 +104,7 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 
 - [Overview](https://jmrplens.github.io/phonometry/io/)
 - [Reading and writing measurement audio](https://jmrplens.github.io/phonometry/io/audio-files/)
+- [Your own catalogues](https://jmrplens.github.io/phonometry/io/material-catalogues/)
 
 ## Hearing and perception
 

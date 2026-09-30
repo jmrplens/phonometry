@@ -113,6 +113,21 @@ print(sea.model)
 print(sea.validity)
 ```
 
+## Tu propio catálogo
+
+Esta página muestra lo que la biblioteca ha leído de un libro o de una norma,
+y nunca mostrará la tabla de un fabricante: una hoja de características se
+revisa bajo el mismo título, sus condiciones de uso rara vez permiten
+copiarla, y el valor que necesita un proyecto es el de la hoja con la que se
+especificó. Tus hojas de características, declaraciones de prestaciones,
+informes de ensayo y medidas van en un archivo de catálogo tuyo, que
+`io.read_catalogue` lee en las mismas clases de fila que las tablas de abajo,
+y todas las búsquedas por nombre buscan en él con `catalogue=`, solo o unido a
+un catálogo publicado. [Tus propios catálogos](/phonometry/es/io/material-catalogues/)
+explica cómo, desde una tabla publicada escrita como plantilla hasta el
+rechazo que señala una celda. Una tabla de un fabricante pegada en una issue o
+en una pull request nunca se incorpora, y nada de esta página sale de una.
+
 ## Sólidos
 
 Constantes elásticas, velocidades de onda y factores de pérdidas, leídos de
@@ -202,8 +217,9 @@ esa unidad porque es la unidad en la que la usa el método. El segundo es una
 pérdida por transmisión, el nivel que el método dibuja como una recta
 horizontal sobre la zona de coincidencia, y depende del material y no del
 espesor. Son los números que lee la predicción por el método de la meseta de
-la propia biblioteca. El aislamiento medido de construcciones reales está en
-la tabla de pérdida por transmisión de más abajo.
+la propia biblioteca, que admite como material una fila de esta tabla o una
+fila tuya. El aislamiento medido de construcciones reales está en la tabla
+de pérdida por transmisión de más abajo.
 
 <Catalogues catalogue="plateau" lang="es" />
 

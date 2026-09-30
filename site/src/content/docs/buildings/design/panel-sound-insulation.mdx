@@ -387,6 +387,28 @@ print(res.transmission_loss.round(1))
 # [35.8 37.  37.  43.3 53.3 63.3 73.3]
 ```
 
+The material does not have to be a name. `material=` also takes a
+`PlateauMaterial` row: one of `solids.PUBLISHED_PLATEAU_DATA`, which draws
+the same curve as its name, or a row of your own that `io.read_catalogue`
+read from a data sheet ([Your own catalogues](/phonometry/io/material-catalogues/)).
+A row gives its three numbers only through
+`printed()`, so a sheet that declares its plateau height as a bound ("no
+more than 30 dB") is refused with what it prints rather than drawn at
+30 dB, and a `plateau_height` you give replaces the row's without reading
+it.
+
+```python
+import numpy as np
+from phonometry import building, solids
+
+glass = solids.plateau_material_named("glass")[0]
+bands = np.array([250.0, 500.0, 1000.0, 2000.0, 4000.0])
+by_row = building.plateau_transmission_loss(bands, material=glass, thickness_mm=6.0,
+                                            field_correction=5.5)
+print(glass.table, round(by_row.plateau_start), round(by_row.plateau_end))
+# norton-karczub-2003-table-3-1 374 3742
+```
+
 The physical model has its own Norton-flavoured variant for the region above
 coincidence: `coincidence_model="cremer"` replaces Sharp's Eq. 7.44 with
 Cremer's empirical `TL = TL₀ + 10 lg(f/fc − 1) + 10 lg η − 2 dB`

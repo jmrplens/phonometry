@@ -48,8 +48,18 @@ from __future__ import annotations
 from dataclasses import dataclass
 from math import isfinite
 from types import MappingProxyType
+from typing import TYPE_CHECKING
 
-from .._internal.catalogue import CatalogueRow, read_table, take
+from .._internal.catalogue import (
+    CatalogueRow,
+    read_table,
+    rows_to_search,
+    search_text,
+    take,
+)
+
+if TYPE_CHECKING:
+    from collections.abc import Mapping
 
 __all__ = [
     "PUBLISHED_DAMPING",
@@ -150,7 +160,9 @@ _TABLES = ("ver-beranek-2006-table-14-1",)
 PUBLISHED_DAMPING: MappingProxyType[str, DampingMaterial] = MappingProxyType(_rows())
 
 
-def damping_named(name: str) -> tuple[DampingMaterial, ...]:
+def damping_named(
+    name: str, *, catalogue: Mapping[str, DampingMaterial] | None = None
+) -> tuple[DampingMaterial, ...]:
     """Every damping material whose name contains *name*, case-insensitively.
 
     A tuple and not one row, because a name can be printed by more than one
@@ -158,9 +170,20 @@ def damping_named(name: str) -> tuple[DampingMaterial, ...]:
     behalf.
 
     :param name: Part of a material name, as its page prints it.
+    :param catalogue: The rows to search in place of :data:`PUBLISHED_DAMPING`:
+        a catalogue of your own that :func:`phonometry.io.read_catalogue`
+        returns, ``PUBLISHED_DAMPING | mine`` to search both at once, or any
+        mapping of key to row (Default: ``None``, which searches
+        :data:`PUBLISHED_DAMPING`).
     :return: The matching rows, in catalogue order. Empty when none match.
+    :raises TypeError: for a *catalogue* that is not a mapping, or that holds a
+        row that is not a :class:`DampingMaterial`, naming its key.
     """
-    needle = name.casefold()
+    needle = search_text(name)
     return tuple(
-        row for row in PUBLISHED_DAMPING.values() if needle in row.name.casefold()
+        row
+        for row in rows_to_search(
+            catalogue, PUBLISHED_DAMPING, DampingMaterial, "damping_named"
+        )
+        if needle in search_text(row.name)
     )

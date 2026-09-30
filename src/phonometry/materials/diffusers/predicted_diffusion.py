@@ -46,7 +46,13 @@ from dataclasses import dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING, ClassVar
 
-from ..._internal.catalogue import BandedRow, read_table, take
+from ..._internal.catalogue import (
+    BandedRow,
+    read_table,
+    rows_to_search,
+    search_text,
+    take,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -178,19 +184,33 @@ PUBLISHED_DIFFUSION: Mapping[str, NormalizedDiffusionSpectrum] = MappingProxyTyp
 )
 
 
-def diffusion_named(name: str) -> tuple[NormalizedDiffusionSpectrum, ...]:
-    """Every published row whose description or section heading contains *name*.
+def diffusion_named(
+    name: str, *, catalogue: Mapping[str, NormalizedDiffusionSpectrum] | None = None
+) -> tuple[NormalizedDiffusionSpectrum, ...]:
+    """Every row whose description or section heading contains *name*.
 
     :param name: A fragment of the printed description or of the numbered
         heading above it, matched without case. The heading is where the
         geometry is, so ``"semiellipse"`` and ``"Schroeder"`` find their
         sections and ``"6 periods"`` finds the rows that say so.
-    :return: The rows that match, in the order the tables are read, which is
-        empty when no page has one. A surface answers with its three angles.
+    :param catalogue: The rows to search in place of
+        :data:`PUBLISHED_DIFFUSION`: a catalogue of your own that
+        :func:`phonometry.io.read_catalogue` returns, ``PUBLISHED_DIFFUSION |
+        mine`` to search both at once, or any mapping of key to row (Default:
+        ``None``, which searches :data:`PUBLISHED_DIFFUSION`).
+    :return: The rows that match, in catalogue order, which is empty when no
+        row has one. A surface answers with its three angles.
+    :raises TypeError: for a *catalogue* that is not a mapping, or that holds a
+        row that is not a :class:`NormalizedDiffusionSpectrum`, naming its key.
     """
-    wanted = name.casefold()
+    wanted = search_text(name)
     return tuple(
         row
-        for row in PUBLISHED_DIFFUSION.values()
-        if wanted in row.name.casefold() or wanted in row.group.casefold()
+        for row in rows_to_search(
+            catalogue,
+            PUBLISHED_DIFFUSION,
+            NormalizedDiffusionSpectrum,
+            "diffusion_named",
+        )
+        if wanted in search_text(row.name) or wanted in search_text(row.group)
     )

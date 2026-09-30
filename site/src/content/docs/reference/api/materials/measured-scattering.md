@@ -75,18 +75,29 @@ SCATTERING_BANDS_HZ = (100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000, 1
 ## scattering_named
 
 ```python
-scattering_named(name: str) -> tuple[ScatteringCoefficientSpectrum, ...]
+scattering_named(
+    name: str,
+    *,
+    catalogue: Mapping[str, ScatteringCoefficientSpectrum] | None = None,
+) -> tuple[ScatteringCoefficientSpectrum, ...]
 ```
 
-Every published row whose description or group contains *name*.
+Every row whose description or group contains *name*.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
 | `name` | A fragment of the printed description or of the group heading above it, matched without case. The headings are where the useful words are: `"pyramid"`, `"vegetation"`, `"batten"`, since a row of its own reads `"h = w = 10 cm, L = 2h"`. |
+| `catalogue` | The rows to search in place of [`PUBLISHED_SCATTERING`](/phonometry/reference/api/materials/measured-scattering/#published_scattering): a catalogue of your own that [`phonometry.io.read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) returns, `PUBLISHED_SCATTERING \| mine` to search both at once, or any mapping of key to row (Default: `None`, which searches [`PUBLISHED_SCATTERING`](/phonometry/reference/api/materials/measured-scattering/#published_scattering)). |
 
-**Returns:** The rows that match, in the order the tables are read, which is empty when no page has one.
+**Returns:** The rows that match, in catalogue order, which is empty when no row has one.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | for a *catalogue* that is not a mapping, or that holds a row that is not a [`ScatteringCoefficientSpectrum`](/phonometry/reference/api/materials/measured-scattering/#scatteringcoefficientspectrum), naming its key. |
 
 ## ScatteringCoefficientSpectrum
 

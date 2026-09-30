@@ -99,7 +99,11 @@ DUCT_WALL_BANDS_HZ = (63, 125, 250, 500, 1000, 2000, 4000, 8000)
 ## duct_wall_named
 
 ```python
-duct_wall_named(name: str) -> tuple[DuctWallSpectrum, ...]
+duct_wall_named(
+    name: str,
+    *,
+    catalogue: Mapping[str, DuctWallSpectrum] | None = None,
+) -> tuple[DuctWallSpectrum, ...]
 ```
 
 Every duct wall whose printed label contains *name*, without case.
@@ -116,8 +120,15 @@ apart two rows of one diameter.
 | Name | Description |
 | :--- | :--- |
 | `name` | Part of a row label, as its page prints it, with the unit its column heading carries: `"610"`, `"305 × 1220"`, `"152 mm"`. |
+| `catalogue` | The rows to search in place of [`PUBLISHED_DUCT_TRANSMISSION_LOSS`](/phonometry/reference/api/noise_control/duct-walls/#published_duct_transmission_loss): a catalogue of your own that [`phonometry.io.read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) returns, `PUBLISHED_DUCT_TRANSMISSION_LOSS \| mine` to search both at once, or any mapping of key to row (Default: `None`, which searches [`PUBLISHED_DUCT_TRANSMISSION_LOSS`](/phonometry/reference/api/noise_control/duct-walls/#published_duct_transmission_loss)). |
 
 **Returns:** The matching rows, in catalogue order. Empty when none match.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | for a *catalogue* that is not a mapping, or that holds a row that is not a [`DuctWallSpectrum`](/phonometry/reference/api/noise_control/duct-walls/#ductwallspectrum), naming its key. |
 
 ## DuctWallSpectrum
 

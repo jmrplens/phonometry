@@ -60,3 +60,7 @@ def test_a_code_span_beside_open_maths_does_not_close_it(
 def test_counting_skips_escaped_display_and_code_dollars() -> None:
     assert checker._unescaped_dollars("`$a` and ``b $ c`` and \\$ and $$") == 0
     assert checker._unescaped_dollars("`$a` then $x$") == 2
+    # A closing run is a whole run of the opener's length: one tick of `` never
+    # closes a single ` , so the $ after an unmatched ` is prose.
+    assert checker._unescaped_dollars("a `$x`` b") == 1
+    assert checker._unescaped_dollars("a ``$x` b``") == 0

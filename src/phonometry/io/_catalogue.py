@@ -1711,12 +1711,16 @@ def _decode(text: str, label: str) -> object:
     return document
 
 
+#: What a size refusal calls the file when the caller names nothing else.
+_CATALOGUE_FILE = "a catalogue file"
+
+
 def _size_refusal(
     label: str,
     size: int | None,
     *,
     limit: int | None = None,
-    held_as: str = "a catalogue file",
+    held_as: str = _CATALOGUE_FILE,
 ) -> CatalogueError:
     """The refusal of a text past *limit* bytes, of *size* bytes if known.
 
@@ -1736,7 +1740,7 @@ def _check_size(
     label: str,
     *,
     limit: int | None = None,
-    held_as: str = "a catalogue file",
+    held_as: str = _CATALOGUE_FILE,
 ) -> None:
     """Refuse *data* past *limit* bytes as the reader refuses a file of it.
 
@@ -1755,7 +1759,7 @@ def _file_bytes(
     *,
     limit: int | None = None,
     read_as: str = "a catalogue",
-    held_as: str = "a catalogue file",
+    held_as: str = _CATALOGUE_FILE,
 ) -> bytes:
     """The bytes of the regular file *target*, or its refusal as *label*.
 

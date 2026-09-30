@@ -99,10 +99,12 @@ _ANCHOR = re.compile(r"\]\(#([^)]+)\)")
 _MATH_META = re.compile(r"^\$\$\s*\S")
 
 
-#: An inline code span: a run of backticks, its text, and the same run again.
-#: A ``$`` inside one is code (the ``$schema`` key of a JSON document), and
-#: CommonMark reads the span before any maths could open in it.
-_CODE_SPAN = re.compile(r"(`+)(.+?)\1")
+#: An inline code span: a run of backticks, its text, and a run of the same
+#: length again. Each run is a whole run, as CommonMark reads it, so one tick
+#: of a longer run never closes a shorter one. A ``$`` inside a span is code
+#: (the ``$schema`` key of a JSON document), and CommonMark reads the span
+#: before any maths could open in it.
+_CODE_SPAN = re.compile(r"(?<!`)(`+)(?!`)(.+?)(?<!`)\1(?!`)")
 
 
 def _unescaped_dollars(line: str) -> int:

@@ -522,13 +522,40 @@ for (const lang of LANGS) {
 
   // D. No regression on searches that are not designations: the hand-written
   // controls, and every word the field carries that does not name an issuer.
+  //
+  // The two runs have to differ in the weight and in nothing else, and that
+  // includes how much of the index each has read. Pagefind fetches the word
+  // index in chunks and keeps every chunk it has fetched. A search ranks every
+  // indexed word that begins with what was typed among the chunks held, but it
+  // fetches only the chunk whose range takes in the typed word or its stem.
+  // When the words that begin with it fall on both sides of a chunk boundary,
+  // as "ruid", the stem of "ruido", and "ruidos", the stem of "ruidoso", did
+  // when this was found, a copy that some earlier search sent to the second
+  // chunk counts those words and a fresh copy does not, whatever either weight
+  // is: the pages whose image text says "ruidoso" then rise to the top of a
+  // search for "ruido". The copy measured above has run every designation by
+  // now, so both copies here start fresh and run the same searches in the same
+  // order. Each search must then return the same pages from both, which is
+  // what shows they read the same chunks, before its top five is compared.
+  const weighted = await loadSearchIndex(distDir, lang, PAGEFIND_RANKING);
   const unweighted = await loadSearchIndex(distDir, lang, { metaWeights: { standards: 0 } });
   const fieldWords = new Set();
   for (const url of scope) for (const token of built.get(url).tokens) if (!/[0-9]/.test(token)) fieldWords.add(token);
   const plainFieldWords = [...fieldWords].filter((word) => !ISSUER_WORDS.has(word)).sort();
   for (const query of [...CONTROLS, ...plainFieldWords]) {
-    const before = (await run(unweighted, query)).slice(0, 5).map((r) => r.url);
-    const after = (await run(pagefind, query)).slice(0, 5).map((r) => r.url);
+    const without = await run(unweighted, query);
+    const withField = await run(weighted, query);
+    const pages = (results) => results.map((r) => r.url).sort().join('|');
+    if (pages(without) !== pages(withField)) {
+      fail(
+        `[${lang}] "${query}": the weighted and unweighted copies returned different pages ` +
+          `(${withField.length} against ${without.length}), so they did not read the same index chunks ` +
+          'and their order says nothing about the weight',
+      );
+      continue;
+    }
+    const before = without.slice(0, 5).map((r) => r.url);
+    const after = withField.slice(0, 5).map((r) => r.url);
     if (before.join('|') !== after.join('|')) {
       const why = fieldWords.has(query)
         ? 'is in the standards field without naming an issuer (add it to ISSUER_WORDS only if it names one), and the field reordered it'

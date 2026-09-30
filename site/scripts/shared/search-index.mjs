@@ -15,6 +15,9 @@ import { foldPartWords } from '../../src/lib/standard-search.mjs';
 
 const FAKE_BASE = 'http://pagefind.invalid/pagefind/';
 
+/** How many copies of the bundle loadSearchIndex has loaded, to give each its own address. */
+let loadedCopies = 0;
+
 /** @returns {Promise<string[]>} every file under `dir` whose name passes `keep` */
 export async function filesUnder(dir, keep) {
   const out = [];
@@ -77,6 +80,13 @@ export async function readDeclaredDesignations(contentDir) {
  * scripts run Pagefind directly rather than through Starlight's Search
  * component.
  *
+ * Every call returns a copy of its own, with nothing of the index read yet,
+ * even for a language and a ranking asked for before. Node keeps one module
+ * per address, so the address carries a count: a copy that earlier searches
+ * sent to more index chunks can rank the same search differently (see D in
+ * check-search-designation.mjs), and a caller asking for a fresh copy must not
+ * be handed that one.
+ *
  * @param {string} distDir the built site
  * @param {'en'|'es'} lang
  * @param {{metaWeights?: Record<string, number>}} ranking
@@ -92,7 +102,8 @@ export async function loadSearchIndex(distDir, lang, ranking) {
     querySelector: (selector) => (selector === 'html' ? { getAttribute: () => lang } : null),
   };
   const weight = ranking.metaWeights?.standards ?? 'default';
-  const href = `${pathToFileURL(path.join(pagefindDir, 'pagefind.js')).href}?lang=${lang}-${weight}`;
+  loadedCopies += 1;
+  const href = `${pathToFileURL(path.join(pagefindDir, 'pagefind.js')).href}?lang=${lang}-${weight}&copy=${loadedCopies}`;
   const pagefind = await import(href);
   await pagefind.options({
     basePath: FAKE_BASE,

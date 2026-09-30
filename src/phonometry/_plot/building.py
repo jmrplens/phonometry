@@ -60,6 +60,7 @@ if TYPE_CHECKING:
         LowFrequencyIntensityResult,
     )
     from ..building.measurement.low_frequency import LowFrequencyResult
+    from ..building.measurement.ratings import ImpactImprovementRatingResult
     from ..building.measurement.structure_borne_power import StructureBornePowerResult
     from ..building.measurement.uncertainty import BandUncertainty
     from ..building.prediction.aperture_transmission import ApertureTransmissionResult
@@ -546,13 +547,16 @@ def _plot_extended_rating(
     core_measured = np.asarray(result.core.measured, dtype=np.float64)
     core_ref = np.asarray(result.core.shifted_reference, dtype=np.float64)
 
-    # Mark the bands outside the 100-3150 Hz core as the enlarged range.
+    # Mark the bands outside the 100-3150 Hz core as the enlarged range, with
+    # an opaque wash that stays visible on a dark page as on a light one.
+    enlarged = theme_fill(_C_MUTED, ax)
     if float(freqs.min()) < float(core_freqs.min()):
         ax.axvspan(
             float(freqs.min()),
             float(core_freqs.min()),
-            color=_C_MUTED,
-            alpha=0.12,
+            color=enlarged,
+            lw=0,
+            zorder=0,
             label=_t(span_label, language),
         )
     if float(freqs.max()) > float(core_freqs.max()):
@@ -564,8 +568,9 @@ def _plot_extended_rating(
         ax.axvspan(
             float(core_freqs.max()),
             float(freqs.max()),
-            color=_C_MUTED,
-            alpha=0.12,
+            color=enlarged,
+            lw=0,
+            zorder=0,
             label=label,
         )
 
@@ -1471,6 +1476,56 @@ def plot_band_uncertainty(
     return ax
 
 
+def _plot_improvement(
+    ax: Axes,
+    freqs: np.ndarray,
+    dl: np.ndarray,
+    limited: np.ndarray | None,
+    title: str,
+    language: str,
+    kwargs: dict[str, Any],
+) -> Axes:
+    """The improvement spectrum ``ΔL`` against frequency, titled *title*.
+
+    Shared by the ISO 16251-1 result and the ISO 717-2 rating of a covering:
+    the curve, the bands at the limit of measurement when a mask is given,
+    the frequency axis and the legend.
+    """
+    from .._i18n import localize_axes
+
+    style_default(kwargs, "color", _C_PRIMARY)
+    kwargs.setdefault("marker", "o")
+    ax.plot(freqs, dl, **kwargs)
+    # Mark bands at the limit of measurement (reported as > delta-L).
+    if limited is not None and limited.size and bool(np.any(limited)):
+        ax.plot(
+            freqs[limited],
+            dl[limited],
+            ls="",
+            marker="v",
+            color=_C_SECONDARY,
+            ms=9,
+            mfc="none",
+            mew=1.6,
+            zorder=5,
+            label=_t(r"limit of measurement (> $\Delta L$)", language),
+        )
+    _freq_axis(ax, freqs, language=language)
+    ax.set_ylabel(_t(_IMPROVEMENT_LABEL, language))
+    # The axis starts at 0 dB only when no band is below it: a floating
+    # floor's mass-spring resonance makes the covering worsen the floor in
+    # its low bands, and those negative bands are the ones CI,Δ answers to.
+    finite = dl[np.isfinite(dl)]
+    if not finite.size or bool(np.all(finite >= 0.0)):
+        ax.set_ylim(bottom=0.0)
+    ax.set_title(title)
+    ax.grid(visible=True, which="both", alpha=0.3)
+    if ax.get_legend_handles_labels()[0]:
+        ax.legend()
+    localize_axes(ax, language)
+    return ax
+
+
 def plot_floor_covering_improvement(
     result: FloorCoveringImprovementResult,
     ax: Axes | None = None,
@@ -1486,42 +1541,62 @@ def plot_floor_covering_improvement(
     :param kwargs: Forwarded to the improvement-curve ``plot`` call.
     :return: The axes.
     """
-    from .._i18n import decimal_comma, localize_axes
+    from .._i18n import decimal_comma
 
-    ax = ax if ax is not None else _new_axes()
-    freqs, dl = result.frequencies, result.improvement
-    style_default(kwargs, "color", _C_PRIMARY)
-    kwargs.setdefault("marker", "o")
-    ax.plot(freqs, dl, **kwargs)
-    # Mark bands at the limit of measurement (reported as > delta-L).
-    if result.limited.size and bool(np.any(result.limited)):
-        ax.plot(
-            freqs[result.limited],
-            dl[result.limited],
-            ls="",
-            marker="v",
-            color=_C_SECONDARY,
-            ms=9,
-            mfc="none",
-            mew=1.6,
-            zorder=5,
-            label=_t(r"limit of measurement (> $\Delta L$)", language),
-        )
-    _freq_axis(ax, freqs, language=language)
-    ax.set_ylabel(_t(_IMPROVEMENT_LABEL, language))
-    ax.set_ylim(bottom=0.0)
     title = _t("ISO 16251-1 Floor-Covering Impact Sound Improvement", language)
     if result.delta_lw is not None:
         title += (
             r"  ($\Delta L_\mathrm{w}$ = "
             f"{decimal_comma(str(result.delta_lw), language)} dB)"
         )
-    ax.set_title(title)
-    ax.grid(visible=True, which="both", alpha=0.3)
-    if ax.get_legend_handles_labels()[0]:
-        ax.legend()
-    localize_axes(ax, language)
-    return ax
+    return _plot_improvement(
+        ax if ax is not None else _new_axes(),
+        result.frequencies,
+        result.improvement,
+        result.limited,
+        title,
+        language,
+        kwargs,
+    )
+
+
+def plot_impact_improvement_rating(
+    result: ImpactImprovementRatingResult,
+    ax: Axes | None = None,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    r"""The improvement spectrum ΔL a covering is rated from (ISO 717-2).
+
+    The title gives the rating in the form of the other ISO 717 renderers,
+    the symbols carrying the names: :math:`\Delta L_\mathrm{w}` with
+    :math:`C_{\mathrm{I},\Delta}` and :math:`C_\mathrm{I,r}` in parentheses.
+
+    :param result: A
+        :class:`~phonometry.building.measurement.ratings.ImpactImprovementRatingResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the improvement-curve ``plot`` call.
+    :return: The axes.
+    """
+    from .._i18n import format_number
+
+    title = (
+        # Sign only when negative, the style of ISO 717-2's own examples.
+        r"ISO 717-2 $\Delta L_\mathrm{w}$ "
+        rf"($C_{{\mathrm{{I}},\Delta}}$={format_number(result.ci_delta, language, decimals=0)}; "
+        rf"$C_\mathrm{{I,r}}$={format_number(result.ci_r, language, decimals=0)}) = "
+        rf"{format_number(result.delta_lw, language, decimals=0)} dB"
+    )
+    return _plot_improvement(
+        ax if ax is not None else _new_axes(),
+        result.band_centers,
+        result.improvement,
+        None,
+        title,
+        language,
+        kwargs,
+    )
 
 
 #: Localised names of the DB-HR normalised source spectra.

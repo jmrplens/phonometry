@@ -9,6 +9,15 @@ that measure them, the single-number ratings that summarise them, the
 prediction models that anticipate them, and the in-situ methods that recover
 them outside the laboratory.
 
+Before any of them,
+[Reading a material datasheet](reading-a-datasheet.md)
+says what the numbers on a data sheet or a test report are: the practical
+coefficient against the one-third-octave one, a level declared under CE
+marking against a measurement, the mounting and the revision; and it shows
+how to keep them, with a laboratory's sound reduction index and a covering's
+impact improvement, in a catalogue of your own that rates them again from
+their bands.
+
 The **Absorbers** subsection covers how much energy a material takes out of
 the field, one instrument or model family per guide.
 [Sound Absorption Measurement and Rating](absorbers/absorption-measurement.md)

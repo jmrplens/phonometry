@@ -1,192 +1,4 @@
-# phonometry: Materials and surfaces
-
-Part of https://jmrplens.github.io/phonometry/llms.txt. Full text of the pages in this area.
-
----
-
-<!-- source: docs/materials/index.md | canonical: https://jmrplens.github.io/phonometry/materials/ -->
-Source: https://jmrplens.github.io/phonometry/materials/
-
-# Materials and surfaces
-
-Every room prediction and many an insulation model end up consuming a
-coefficient that describes what a material or a surface does to sound. This
-section covers where those coefficients come from: the laboratory instruments
-that measure them, the single-number ratings that summarise them, the
-prediction models that anticipate them, and the in-situ methods that recover
-them outside the laboratory.
-
-Before any of them,
-[Reading a material datasheet](https://jmrplens.github.io/phonometry/materials/reading-a-datasheet/)
-says what the numbers on a data sheet or a test report are: the practical
-coefficient against the one-third-octave one, a level declared under CE
-marking against a measurement, the mounting and the revision; and it shows
-how to keep them, with a laboratory's sound reduction index and a covering's
-impact improvement, in a catalogue of your own that rates them again from
-their bands.
-
-The **Absorbers** subsection covers how much energy a material takes out of
-the field, one instrument or model family per guide.
-[Sound Absorption Measurement and Rating](https://jmrplens.github.io/phonometry/materials/absorbers/absorption-measurement/)
-is the reverberation room: the random-incidence coefficients of ISO 354 and
-the ISO 11654 weighted rating α_w with its letter class, the figure absorber
-datasheets quote, with the ISO 12999-2 measurement uncertainty.
-[Airflow Resistance](https://jmrplens.github.io/phonometry/materials/absorbers/airflow-resistance/) is the flow rig:
-resistance and resistivity per ISO 9053-1/-2, the parameter that governs a
-porous absorber's low-frequency behaviour and anchors most material models.
-[Impedance Tube](https://jmrplens.github.io/phonometry/materials/absorbers/impedance-tube/) is the bench instrument:
-the complex surface impedance, reflection factor and absorption of a small
-sample at normal incidence (ISO 10534-1/-2) and, with four microphones, its
-transmission loss (ASTM E2611), plus the virtual FDTD tube that cross-checks
-the wave solver against the same standards.
-[Porous and Multilayer Absorbers](https://jmrplens.github.io/phonometry/materials/absorbers/porous-absorbers/) turns
-the measured flow resistivity into *predictions*: the Delany-Bazley, Miki and
-Johnson-Champoux-Allard equivalent-fluid models give a porous material's
-characteristic impedance and wavenumber, and a transfer-matrix stack of
-porous, air, perforated, microperforated (Maa) and membrane layers predicts
-the absorption of a whole construction before anything is built.
-[Metamaterial Absorbers](https://jmrplens.github.io/phonometry/materials/absorbers/metamaterial-absorbers/) pushes
-the same transfer matrices past the classical thickness rules: slow-sound
-slit panels loaded by Helmholtz resonators reach perfect absorption at
-critical coupling from deep-subwavelength panels.
-
-The **Diffusers and surfaces** subsection moves from samples to *surfaces*,
-asking not how much energy a surface absorbs but where it sends what it
-reflects. [Diffusers and Their Coefficients](https://jmrplens.github.io/phonometry/materials/diffusers/diffusers/)
-covers the two standardised gradings, the random-incidence **scattering
-coefficient** (ISO 17497-1) and the **diffusion coefficient** (ISO 17497-2),
-together with Schroeder diffuser design and its far-field prediction.
-[Metadiffusers](https://jmrplens.github.io/phonometry/materials/diffusers/metadiffusers/) rebuilds the Schroeder
-diffuser from resonator-loaded slits, one to two orders of magnitude thinner.
-
-Nested inside that group is **Surfaces measured in place**, for the surfaces
-that have no sample. A pavement cannot be cut out and carried indoors without
-destroying the connected pore structure that governs its absorption, so the
-laboratory geometry is replaced by a time window over an extended surface, or
-by a tube pressed onto the road.
-[In-situ Road-Surface Absorption](https://jmrplens.github.io/phonometry/materials/surfaces/road-absorption/)
-measures it where it lies, by the ISO 13472-1 subtraction technique or the
-ISO 13472-2 spot tube, and says which of the two a given pavement allows.
-
-The **Resilient layers** subsection covers the one material property here that
-is mechanical rather than acoustic: a resilient layer is characterised not by
-what it does to airborne sound but by how softly it supports a mass, so its
-measurement is a resonance and not an absorption. A floating floor is a
-mass-spring system, the screed is the mass and the layer is the spring, and the
-dynamic stiffness per unit area s' of the layer sets the resonance above which
-the floor starts working.
-[Dynamic stiffness of resilient materials (EN 29052-1)](https://jmrplens.github.io/phonometry/materials/resilient/dynamic-stiffness/)
-is the load-plate resonance measurement that produces s', with the enclosed-gas
-term that makes an air-permeable layer stiffer than its frame alone.
-
-The consumers of these numbers are spread across the site: absorption
-coefficients feed the reverberation predictions in
-[Room acoustics](https://jmrplens.github.io/phonometry/buildings/rooms/); the dynamic stiffness measured
-here feeds the floating-floor model of
-[Sound insulation](https://jmrplens.github.io/phonometry/buildings/insulation/) through
-[Predicting resilient-layer performance](https://jmrplens.github.io/phonometry/buildings/design/resilient-layers/);
-and the road-surface methods connect to the outdoor-noise interest of the
-[Environment and transport](https://jmrplens.github.io/phonometry/environment/)
-section.
-
-## [Absorbers](https://jmrplens.github.io/phonometry/materials/absorbers/)
-
-How much energy a material takes out of the field, one instrument or model
-family per guide.
-
-- [Absorbers overview](https://jmrplens.github.io/phonometry/materials/absorbers/): the
-  measurement chain from reverberation room to flow rig to impedance tube,
-  and the prediction models that tie them together.
-- [Sound Absorption Measurement and Rating](https://jmrplens.github.io/phonometry/materials/absorbers/absorption-measurement/):
-  the ISO 354 measurement, the ISO 11654 weighted rating and class, and the
-  ISO 12999-2 uncertainty.
-- [Airflow Resistance](https://jmrplens.github.io/phonometry/materials/absorbers/airflow-resistance/): the ISO 9053
-  static and alternating methods.
-- [Impedance Tube](https://jmrplens.github.io/phonometry/materials/absorbers/impedance-tube/): normal-incidence
-  absorption, impedance and ASTM E2611 transmission loss, plus the virtual
-  FDTD tube.
-- [Porous and Multilayer Absorbers](https://jmrplens.github.io/phonometry/materials/absorbers/porous-absorbers/):
-  the Delany-Bazley, Miki and JCA porous models, the transfer-matrix
-  multilayer solver with perforated, microperforated and membrane layers,
-  and the random-incidence Paris integral.
-- [Metamaterial Absorbers](https://jmrplens.github.io/phonometry/materials/absorbers/metamaterial-absorbers/):
-  critical coupling and the slow-sound slit panel with its design solver.
-
-## [Diffusers and surfaces](https://jmrplens.github.io/phonometry/materials/diffusers/)
-
-Where a surface sends what it reflects, and the surfaces that can only be
-measured in place.
-
-- [Diffusers and surfaces overview](https://jmrplens.github.io/phonometry/materials/diffusers/):
-  what a surface does with the sound it returns, from coefficients to
-  metamaterial panels.
-- [Diffusers and Their Coefficients](https://jmrplens.github.io/phonometry/materials/diffusers/diffusers/):
-  ISO 17497-1/2 scattering and diffusion coefficients, Schroeder design and
-  the far-field prediction.
-- [Metadiffusers](https://jmrplens.github.io/phonometry/materials/diffusers/metadiffusers/): deep-subwavelength
-  Schroeder diffusers from resonator-loaded slits.
-- [Surfaces measured in place overview](https://jmrplens.github.io/phonometry/materials/surfaces/):
-  surfaces that cannot be taken to a laboratory, characterised where they lie.
-- [In-situ Road-Surface Absorption](https://jmrplens.github.io/phonometry/materials/surfaces/road-absorption/):
-  ISO 13472-1/-2 in-situ road-surface absorption.
-
-## [Resilient layers](https://jmrplens.github.io/phonometry/materials/resilient/)
-
-The mechanical property a floating floor is designed around.
-
-- [Resilient layers overview](https://jmrplens.github.io/phonometry/materials/resilient/):
-  what a resilient layer does under a floating floor, and the dynamic
-  stiffness that sets it.
-- [Dynamic stiffness of resilient materials (EN 29052-1)](https://jmrplens.github.io/phonometry/materials/resilient/dynamic-stiffness/):
-  the resonance method that measures what a resilient layer does under a
-  floating floor, and the apparent stiffness the insulation design chapter
-  asks it for.
-
-## What this section does not cover
-
-Everything here characterises a **material or a surface**, never a
-construction. The transmission loss of a wall, the impact improvement of a
-floor and the flanking paths of a junction are [Sound
-insulation](https://jmrplens.github.io/phonometry/buildings/insulation/) and [Insulation
-design](https://jmrplens.github.io/phonometry/buildings/design/); this section supplies the coefficients
-they consume. Two boundaries inside the measurements themselves are worth
-knowing before you start. The in-situ road methods implement ISO 13472-1:2002
-and ISO 13472-2:2010; **their 2022 and 2025 revisions are not implemented**.
-And the resilient-layer measurement expects a resonant frequency that has
-already been extrapolated to zero force amplitude by clause 7 of EN 29052-1, a
-procedure that is not implemented, and an airflow resistivity supplied as an
-input rather than measured in place. Nothing in this section predicts a
-material from its chemistry or its manufacture: the models run forwards from
-measured macroscopic parameters (flow resistivity, porosity, tortuosity) to
-an impedance, and there is no inverse solver that recovers those parameters
-from a measured impedance curve.
-
-## Before and after these pages
-
-Every coefficient on these pages is derived from band levels or from a
-transfer function between microphones, so the filtering, weighting and
-calibration that produce them are in [Signal analysis](https://jmrplens.github.io/phonometry/signals/),
-and [Build a sound level meter](https://jmrplens.github.io/phonometry/signals/sound-level-meter/) runs
-that chain end to end on one runnable page. The derivations are in [Materials
-and surfaces theory](https://jmrplens.github.io/phonometry/reference/theory/materials-surfaces/): the characterisation
-quantities, the in-situ subtraction and the scattering and diffusion
-coefficients.
-
-If you came here for a number rather than for a method, the
-[published catalogues](https://jmrplens.github.io/phonometry/reference/catalogues/) page holds every
-value this library reads from a printed page, one table per catalogue, with
-the book and the page each row was read on.
-
-If you arrived here from a search and want the shape of the whole library,
-[What do you need to measure?](https://jmrplens.github.io/phonometry/start/tasks/) indexes it by the job
-and [All guides](https://jmrplens.github.io/phonometry/) lists every page with a line on
-each.
-
----
-
-
-<!-- source: docs/materials/reading-a-datasheet.md | canonical: https://jmrplens.github.io/phonometry/materials/reading-a-datasheet/ -->
-Source: https://jmrplens.github.io/phonometry/materials/reading-a-datasheet/
+← [Documentation index](../README.md)
 
 # Reading a material datasheet
 
@@ -196,7 +8,7 @@ measurement, a rounded practical coefficient or a level the manufacturer
 declares no product falls below, and the sheet does not always say which.
 This page is about reading those numbers before you type them: what each
 kind is, which row class of the library holds it, and how a
-[catalogue of your own](https://jmrplens.github.io/phonometry/io/material-catalogues/) keeps what the
+[catalogue of your own](../io/material-catalogues.md) keeps what the
 sheet prints without turning it into something it is not.
 
 Nothing here ships with data. The sheets are yours, you type them into a
@@ -420,7 +232,7 @@ in JSON, or `>=5` and `<=9` in a CSV cell, and the value stays empty. Give
 the row, or the cell, `basis` `"declared"`. A model that needs the number is
 then refused, and the refusal says what the sheet printed; nothing turns a
 bound into a value. The
-[catalogues guide](https://jmrplens.github.io/phonometry/io/material-catalogues/) walks through a
+[catalogues guide](../io/material-catalogues.md) walks through a
 declared airflow resistivity and a declared dynamic stiffness.
 
 ## Measured, declared, calculated, estimated
@@ -734,9 +546,9 @@ library, and a sheet pasted into an issue or a pull request is never merged.
 
 ## See also
 
-- [Your own catalogues](https://jmrplens.github.io/phonometry/io/material-catalogues/): the file, its provenance, the CSV front end and every refusal.
-- [Sound Absorption Measurement and Rating](https://jmrplens.github.io/phonometry/materials/absorbers/absorption-measurement/): ISO 354 and the rating of ISO 11654 in full.
-- [Dynamic stiffness of resilient materials](https://jmrplens.github.io/phonometry/materials/resilient/dynamic-stiffness/): $s'$ and $s'_\mathrm{t}$, which a floating floor's sheet declares.
+- [Your own catalogues](../io/material-catalogues.md): the file, its provenance, the CSV front end and every refusal.
+- [Sound Absorption Measurement and Rating](absorbers/absorption-measurement.md): ISO 354 and the rating of ISO 11654 in full.
+- [Dynamic stiffness of resilient materials](resilient/dynamic-stiffness.md): $s'$ and $s'_\mathrm{t}$, which a floating floor's sheet declares.
 - API reference: [`materials.absorbers.datasheets`](https://jmrplens.github.io/phonometry/reference/api/materials/datasheets/), [`building.datasheets`](https://jmrplens.github.io/phonometry/reference/api/building/datasheets/).
 
 ## References
@@ -763,5 +575,3 @@ library, and a sheet pasted into an issue or a pull request is never merged.
 - International Organization for Standardization. (2020). *Acoustics — Rating of sound insulation in buildings and of building elements — Part 2: Impact sound insulation* (ISO 717-2:2020).
   [iso.org catalogue](https://www.iso.org/standard/69867.html).
   The weighted reduction of impact sound pressure level against the reference floor of Table 4, and Clause A.2.2 with CI,Δ = CI,r,0 − CI,r, CI,r,0 = −11 dB (Formula (A.4)).
-
----

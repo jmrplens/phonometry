@@ -1748,7 +1748,13 @@ The file is written beside its final name and renamed into place, so a
 reader never finds half of it. A file it replaces keeps its permission
 bits, and a hard link to the old file keeps the old document (on Windows
 without a read-only flag the old file had, since the flag belongs to the
-file and is cleared for the rename).
+file and is cleared for the rename). Without *overwrite*, a file at the
+name is kept, one another program makes there while this one is written
+among them: the new file is put at the name in a step that refuses a
+file already there, a hard link on POSIX and a rename on Windows. On a
+file system that makes no hard link, such as FAT, the name is looked at
+again just before the rename, and only a file made in that instant is
+replaced.
 
 **Parameters**
 
@@ -1770,7 +1776,7 @@ file and is cleared for the rename).
 | CatalogueError | for no rows, rows from more than one table or document, a key a file cannot hold, or a name that is reserved or malformed. |
 | TypeError | for rows that are not catalogue rows of one class (fluid states among them), or a *catalogue* or *about* the rows need and do not bring. |
 | ValueError | for a name that does not end in `.json`. |
-| FileExistsError | for a file at *path* without *overwrite*, and for a symbolic link at *path*. |
+| FileExistsError | for a file at *path* without *overwrite*, one made there while the file is written among them, and for a symbolic link at *path*. |
 
 ## write_sidecar
 

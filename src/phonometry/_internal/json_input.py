@@ -18,12 +18,15 @@ the name finds the old file or the new one whole, never half of either. The
 new file keeps the permission bits of the old on every system, Windows's
 read-only flag among them, and a hard link to the old file keeps the old
 bytes (on Windows without the read-only flag, which belongs to the file and
-is cleared for the rename).
+is cleared for the rename). A writer that keeps a file already at the name
+puts the new file there in a step that refuses one, so that a file another
+program makes at the name while the new one is written is kept as well.
 """
 
 from __future__ import annotations
 
 import contextlib
+import errno
 import os
 import re
 import secrets
@@ -67,6 +70,11 @@ UNSAFE = re.compile(r"[\x00-\x08\x0b-\x1f\x7f-\x9f\u202a-\u202e\u2066-\u2069]")
 #: Whether files are Windows's: their permission bits are one read-only flag,
 #: and no file that holds it can be replaced or removed.
 _WINDOWS = sys.platform == "win32"
+
+#: What a hard link raises on a file system that makes none: FAT and exFAT
+#: give EPERM on Linux and ENOTSUP on macOS, and some network shares and
+#: FUSE file systems give EOPNOTSUPP or ENOSYS.
+_NO_HARD_LINKS = frozenset({errno.EPERM, errno.ENOTSUP, errno.EOPNOTSUPP, errno.ENOSYS})
 
 #: The flag that keeps an open from waiting: opening a pipe for reading waits
 #: until a writer comes, which may be never. Windows has no such flag.
@@ -147,12 +155,17 @@ def not_regular_at(path: Path) -> str | None:
     return _not_regular(mode)
 
 
-def write_beside(target: Path, data: bytes) -> None:
+def write_beside(target: Path, data: bytes, *, replace: bool = True) -> None:
     """Put *data* at *target* through a new file beside it, renamed into place.
 
     *target* itself is never opened. What is at the name is replaced by the
     rename, so a caller refuses first what it will not replace
-    (:func:`not_regular_at` says what a name holds). The new file takes the
+    (:func:`not_regular_at` says what a name holds). A caller that replaces
+    nothing passes ``replace=False``, and the new file is then put at the
+    name in a step that refuses anything already there (see
+    :func:`_install`): a caller's own look at the name comes before the
+    file is written, and a file another program makes there in between
+    would otherwise be replaced without a word. The new file takes the
     permission bits of the file it replaces, and a hard link to the old file
     keeps the old bytes, since the name is given a new file rather than new
     bytes. The new file is flushed to the disk before the rename, and removed
@@ -174,12 +187,16 @@ def write_beside(target: Path, data: bytes) -> None:
 
     :param target: Where the file goes.
     :param data: Its bytes.
+    :param replace: Whether a file at *target* is replaced; without it,
+        anything at the name when the new file is put there is kept.
+    :raises FileExistsError: without *replace*, for anything at *target*
+        when the new file is put there, the new file removed.
     :raises OSError: as the file system raises it, untouched, for any
         failure before the file is in place; when the new file cannot be
         removed after it, a note on the error names the file left behind.
     """
     temporary = target.with_name(f".{target.name}.{secrets.token_hex(8)}.tmp")
-    mode = _mode_of(target)
+    mode = _mode_of(target) if replace else None
     try:
         with temporary.open("xb") as handle:
             handle.write(data)
@@ -187,7 +204,10 @@ def write_beside(target: Path, data: bytes) -> None:
             if mode is not None and not _WINDOWS:
                 os.fchmod(handle.fileno(), mode)
             os.fsync(handle.fileno())
-        _rename(temporary, target, mode)
+        if replace:
+            _rename(temporary, target, mode)
+        else:
+            _install(temporary, target)
     except BaseException as error:
         _discard(temporary, error)
         raise
@@ -231,6 +251,40 @@ def _rename(temporary: Path, target: Path, mode: int | None) -> None:
         raise
     with contextlib.suppress(OSError):
         target.chmod(mode)
+
+
+def _install(temporary: Path, target: Path) -> None:
+    """Put *temporary* at *target* in one step that refuses anything there.
+
+    Windows's rename refuses a name that holds a file, in the same step as
+    it renames. A POSIX rename replaces it, and a hard link does not: the new
+    file is linked at the name, which fails for anything there (a link that
+    names nothing among them), and its temporary name is then removed; one
+    that cannot be removed is left beside the file rather than raised, since
+    the file is in place and the write is done. A file system that makes no hard
+    link (FAT and exFAT, some network shares) is asked once more whether the
+    name is free, just before the rename: there a file made at the name in
+    the instant between the two is replaced, and one made before is kept.
+
+    :raises FileExistsError: for anything at *target*.
+    :raises OSError: as the file system raises it, untouched.
+    """
+    if _WINDOWS:
+        temporary.rename(target)
+        return
+    try:
+        os.link(temporary, target)
+    except OSError as error:
+        if error.errno not in _NO_HARD_LINKS:
+            raise
+        if os.path.lexists(target):
+            raise FileExistsError(
+                errno.EEXIST, os.strerror(errno.EEXIST), str(target)
+            ) from None
+        temporary.replace(target)
+        return
+    with contextlib.suppress(OSError):
+        temporary.unlink()
 
 
 def _discard(temporary: Path, error: BaseException) -> None:

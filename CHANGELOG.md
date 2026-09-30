@@ -50,8 +50,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   yours and never imported. `io.write_catalogue` writes rows as a file that
   reads back into the same rows, a published table among them as a template
   to start from; every table of every published catalogue is written, read
-  back and compared field for field in the test suite. The `io` section of
-  the documentation is now "Files", since it holds more than audio.
+  back and compared field for field in the test suite. A file already at the
+  name is kept unless you pass `overwrite=True`, and so is one another
+  program makes there while the file is written. The `io` section of the
+  documentation is now "Files", since it holds more than audio.
 
 - **Sound power in the 16 kHz octave band (ISO 9295).** The general sound
   power methods stop at the 10 kHz one-third-octave band, and a printer's

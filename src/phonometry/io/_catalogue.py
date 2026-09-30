@@ -2186,8 +2186,18 @@ def _packaged_table(row: CatalogueRow) -> dict[str, Any] | None:
 _NAME_CHARS = re.compile(r"[a-z0-9][a-z0-9._-]*")
 
 
+def _exists(target: Path) -> str:
+    """The refusal of a file at *target*, written without ``overwrite``."""
+    return f"{_escaped(str(target))} exists; pass overwrite=True to replace it"
+
+
 def _write_atomic(target: Path, text: str, *, overwrite: bool) -> None:
     """Write *text* to *target* through a file beside it, renamed into place.
+
+    Without *overwrite*, the name is looked at before a byte is written, and
+    the new file is then put there in a step that refuses a file already at
+    it, so that one another program makes at the name in between is kept,
+    and refused in the same words.
 
     :raises FileExistsError: for a file already there without *overwrite*,
         and for a symbolic link at the name, which is never followed.
@@ -2199,9 +2209,13 @@ def _write_atomic(target: Path, text: str, *, overwrite: bool) -> None:
         )
         raise FileExistsError(msg)
     if target.exists() and not overwrite:
-        msg = f"{_escaped(str(target))} exists; pass overwrite=True to replace it"
-        raise FileExistsError(msg)
-    write_beside(target, text.encode("utf-8"))
+        raise FileExistsError(_exists(target))
+    try:
+        write_beside(target, text.encode("utf-8"), replace=overwrite)
+    except FileExistsError:
+        if overwrite:
+            raise
+        raise FileExistsError(_exists(target)) from None
 
 
 @dataclass(frozen=True)
@@ -2349,7 +2363,13 @@ def write_catalogue(
     reader never finds half of it. A file it replaces keeps its permission
     bits, and a hard link to the old file keeps the old document (on Windows
     without a read-only flag the old file had, since the flag belongs to the
-    file and is cleared for the rename).
+    file and is cleared for the rename). Without *overwrite*, a file at the
+    name is kept, one another program makes there while this one is written
+    among them: the new file is put at the name in a step that refuses a
+    file already there, a hard link on POSIX and a rename on Windows. On a
+    file system that makes no hard link, such as FAT, the name is looked at
+    again just before the rename, and only a file made in that instant is
+    replaced.
 
     :param rows: A :class:`Catalogue`, or a mapping of rows of one class.
     :param path: Where to write, a name ending in ``.json`` (in any case).
@@ -2367,8 +2387,9 @@ def write_catalogue(
         (fluid states among them), or a *catalogue* or *about* the rows
         need and do not bring.
     :raises ValueError: for a name that does not end in ``.json``.
-    :raises FileExistsError: for a file at *path* without *overwrite*, and
-        for a symbolic link at *path*.
+    :raises FileExistsError: for a file at *path* without *overwrite*, one
+        made there while the file is written among them, and for a symbolic
+        link at *path*.
     """
     target = _json_path(path, "write_catalogue writes")
     if not isinstance(rows, Mapping):

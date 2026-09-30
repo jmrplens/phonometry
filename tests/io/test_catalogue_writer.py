@@ -15,6 +15,7 @@ from __future__ import annotations
 import copy
 import dataclasses
 import datetime
+import errno
 import importlib
 import json
 import os
@@ -30,6 +31,7 @@ import pytest
 
 import phonometry
 from phonometry import fluids, io, materials, solids
+from phonometry._internal import json_input
 from phonometry.materials import AbsorptionAreaSpectrum, PorousMaterial
 
 
@@ -428,12 +430,109 @@ def test_a_file_is_never_replaced_unless_asked(tmp_path: pathlib.Path) -> None:
     assert io.read_catalogue(path, row_type=PorousMaterial) == mine
 
 
-@pytest.mark.skipif(not hasattr(os, "symlink"), reason="no symbolic links here")
+#: The refusal of a file at ``mine.json`` written without ``overwrite``.
+_KEPT = r"mine\.json exists; pass overwrite=True to replace it$"
+
+
+def _made_while_written(monkeypatch: pytest.MonkeyPatch, path: pathlib.Path) -> None:
+    """Have another program make a file at *path* while the new one is written.
+
+    The writer looks at the name before it writes a byte; the file is made
+    after that, once the new file's bytes are on the disk, and before the
+    new file is put at the name.
+    """
+    fsync = os.fsync
+
+    def and_theirs(fd: int) -> None:
+        fsync(fd)
+        path.write_text("theirs", encoding="utf-8")
+
+    monkeypatch.setattr(os, "fsync", and_theirs)
+
+
+def _kept_alone(tmp_path: pathlib.Path) -> None:
+    """The other program's file is at the name, and the new file nowhere."""
+    assert (tmp_path / "mine.json").read_text(encoding="utf-8") == "theirs"
+    assert [path.name for path in tmp_path.iterdir()] == ["mine.json"]
+
+
+def test_a_file_made_at_the_name_while_it_is_written_is_kept(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The name is refused in the step that puts the new file there.
+
+    Looked at only before the file was written, the name was then renamed
+    over, and a file another program had made there was replaced without a
+    word.
+    """
+    path = tmp_path / "mine.json"
+    _made_while_written(monkeypatch, path)
+    with pytest.raises(FileExistsError, match=_KEPT):
+        io.write_catalogue(_mine(), path)
+    monkeypatch.undo()
+    _kept_alone(tmp_path)
+    path.unlink()
+    io.write_catalogue(_mine(), path)
+    assert io.read_catalogue(path, row_type=PorousMaterial) == _mine()
+    assert [item.name for item in tmp_path.iterdir()] == ["mine.json"]
+
+
+def test_without_hard_links_the_name_is_looked_at_again_before_the_rename(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A file system that makes no hard link, such as FAT, still writes.
+
+    The file is renamed into place, and a file made at the name before the
+    rename is kept.
+    """
+
+    def no_hard_links(*_: object, **__: object) -> None:
+        raise PermissionError(errno.EPERM, "Operation not permitted")
+
+    monkeypatch.setattr(json_input, "_WINDOWS", False)
+    monkeypatch.setattr(os, "link", no_hard_links)
+    path = tmp_path / "mine.json"
+    io.write_catalogue(_mine(), path)
+    assert io.read_catalogue(path, row_type=PorousMaterial) == _mine()
+    assert [item.name for item in tmp_path.iterdir()] == ["mine.json"]
+    path.unlink()
+    _made_while_written(monkeypatch, path)
+    with pytest.raises(FileExistsError, match=_KEPT):
+        io.write_catalogue(_mine(), path)
+    monkeypatch.undo()
+    _kept_alone(tmp_path)
+
+
+def test_on_windows_the_rename_refuses_a_file_made_at_the_name(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Windows's rename refuses a name that holds a file, as it renames."""
+    rename = os.rename
+
+    def windows_rename(source: str, target: str) -> None:
+        if os.path.lexists(target):
+            message = "Cannot create a file when that file already exists"
+            raise FileExistsError(errno.EEXIST, message, str(target))
+        rename(source, target)
+
+    monkeypatch.setattr(json_input, "_WINDOWS", True)
+    monkeypatch.setattr(os, "rename", windows_rename)
+    path = tmp_path / "mine.json"
+    _made_while_written(monkeypatch, path)
+    with pytest.raises(FileExistsError, match=_KEPT):
+        io.write_catalogue(_mine(), path)
+    monkeypatch.undo()
+    _kept_alone(tmp_path)
+
+
 def test_a_symbolic_link_is_never_written_through(tmp_path: pathlib.Path) -> None:
     target = tmp_path / "elsewhere.json"
     target.write_text("keep", encoding="utf-8")
     link = tmp_path / "link.json"
-    link.symlink_to(target)
+    try:
+        link.symlink_to(target)
+    except OSError:
+        pytest.skip("this system does not let the test make a symbolic link")
     mine = _mine()
     with pytest.raises(FileExistsError, match="symbolic link"):
         io.write_catalogue(mine, link, overwrite=True)
@@ -484,16 +583,21 @@ def test_a_write_leaves_no_file_but_its_own(tmp_path: pathlib.Path) -> None:
     assert [path.name for path in tmp_path.iterdir()] == ["mine.json"]
 
 
+@pytest.mark.parametrize("overwrite", [False, True])
 def test_a_failed_write_leaves_nothing_behind(
-    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, *, overwrite: bool
 ) -> None:
+    """Whichever step puts the new file at the name fails, on every system."""
+
     def refuse(self: pathlib.Path, target: pathlib.Path) -> None:
         raise OSError(self, target)
 
     monkeypatch.setattr(pathlib.Path, "replace", refuse)
+    monkeypatch.setattr(pathlib.Path, "rename", refuse)
+    monkeypatch.setattr(os, "link", refuse)
     mine = _mine()
     with pytest.raises(OSError, match=r"\.mine\.json\.[0-9a-f]{16}\.tmp"):
-        io.write_catalogue(mine, tmp_path / "mine.json")
+        io.write_catalogue(mine, tmp_path / "mine.json", overwrite=overwrite)
     assert list(tmp_path.iterdir()) == []
 
 

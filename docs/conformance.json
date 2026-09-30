@@ -3,14 +3,14 @@
   "library": "4.0.0rc1",
   "generator": "scripts/conformance_report.py",
   "counts": {
-    "checks": 1608,
-    "passing": 1608,
+    "checks": 1640,
+    "passing": 1640,
     "failing": 0,
-    "domains": 101,
-    "standards": 496,
-    "citations": 1115,
-    "designations": 207,
-    "sources": 114
+    "domains": 103,
+    "standards": 504,
+    "citations": 1147,
+    "designations": 208,
+    "sources": 122
   },
   "units": [
     "%",
@@ -533,6 +533,18 @@
       "title": "Road-surface influence on traffic noise (ISO 11819-1)",
       "checks": 7,
       "passing": 7
+    },
+    {
+      "id": "wind-turbine-sound-at-a-receptor-iec-ts-61400-11-2",
+      "title": "Wind turbine sound at a receptor (IEC TS 61400-11-2)",
+      "checks": 23,
+      "passing": 23
+    },
+    {
+      "id": "wind-turbine-amplitude-modulation-iec-ts-61400-11-2-clause-13",
+      "title": "Wind turbine amplitude modulation (IEC TS 61400-11-2 clause 13)",
+      "checks": 9,
+      "passing": 9
     },
     {
       "id": "porous-multilayer-absorbers-mechel-bies-cox-d-antonio",
@@ -40784,6 +40796,1157 @@
         "value": 0.0
       },
       "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "wind-turbine-sound-at-a-receptor-iec-ts-61400-11-2/iec-ts-61400-11-2-2024-table-k-1/wind-speed-at-10-m-from-120-m-every-cell",
+      "domain": "wind-turbine-sound-at-a-receptor-iec-ts-61400-11-2",
+      "reference": {
+        "cite": "IEC TS 61400-11-2:2024 Table K.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC TS 61400-11-2",
+            "edition": "2024",
+            "clause": "Table K.1"
+          }
+        ]
+      },
+      "quantity": "Wind speed at 10 m from 120 m, every cell",
+      "kind": "count",
+      "expected": {
+        "value": 156.0,
+        "label": "156/156 cells of Table K.1"
+      },
+      "computed": {
+        "value": 156.0,
+        "label": "156/156 cells of Table K.1"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "wind-turbine-sound-at-a-receptor-iec-ts-61400-11-2/iec-ts-61400-11-2-2024-table-k-2/shear-exponent-from-10-m-and-120-m-every-cell-and-every-blank",
+      "domain": "wind-turbine-sound-at-a-receptor-iec-ts-61400-11-2",
+      "reference": {
+        "cite": "IEC TS 61400-11-2:2024 Table K.2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC TS 61400-11-2",
+            "edition": "2024",
+            "clause": "Table K.2"
+          }
+        ]
+      },
+      "quantity": "Shear exponent from 10 m and 120 m, every cell and every blank",
+      "kind": "count",
+      "expected": {
+        "value": 195.0,
+        "label": "195/195 cells of Table K.2, the blanks outside -0.1 to 0.5"
+      },
+      "computed": {
+        "value": 195.0,
+        "label": "195/195 cells of Table K.2, the blanks outside -0.1 to 0.5"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "wind-turbine-sound-at-a-receptor-iec-ts-61400-11-2/iec-ts-61400-11-2-2024-table-k-3/roughness-length-of-four-terrains-m",
+      "domain": "wind-turbine-sound-at-a-receptor-iec-ts-61400-11-2",
+      "reference": {
+        "cite": "IEC TS 61400-11-2:2024 Table K.3",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC TS 61400-11-2",
+            "edition": "2024",
+            "clause": "Table K.3"
+          }
+        ]
+      },
+      "quantity": "Roughness length of four terrains, m",
+      "kind": "record",
+      "expected": {
+        "label": "Water, snow or sand surfaces = 0.0001 m; Open, flat land, mown grass, bare soil = 0.01 m; Farmland with some vegetation = 0.05 m; Suburbs, towns, forests, many trees and bushes = 0.3 m",
+        "record": {
+          "Water, snow or sand surfaces": 0.0001,
+          "Open, flat land, mown grass, bare soil": 0.01,
+          "Farmland with some vegetation": 0.05,
+          "Suburbs, towns, forests, many trees and bushes": 0.3
+        }
+      },
+      "computed": {
+        "label": "Water, snow or sand surfaces = 0.0001 m; Open, flat land, mown grass, bare soil = 0.01 m; Farmland with some vegetation = 0.05 m; Suburbs, towns, forests, many trees and bushes = 0.3 m",
+        "record": {
+          "Water, snow or sand surfaces": 0.0001,
+          "Open, flat land, mown grass, bare soil": 0.01,
+          "Farmland with some vegetation": 0.05,
+          "Suburbs, towns, forests, many trees and bushes": 0.3
+        }
+      },
+      "unit": "m",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "wind-turbine-sound-at-a-receptor-iec-ts-61400-11-2/iec-ts-61400-11-2-2024-9-3-2-1-with-iec-61400-11-2012-equation-29/hub-height-wind-speed-brought-back-to-10-m-over-z0ref-0-05-m-m-s",
+      "domain": "wind-turbine-sound-at-a-receptor-iec-ts-61400-11-2",
+      "reference": {
+        "cite": "IEC TS 61400-11-2:2024 9.3.2.1 with IEC 61400-11:2012 Equation (29)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC TS 61400-11-2",
+            "edition": "2024",
+            "clause": "9.3.2.1"
+          },
+          {
+            "kind": "standard",
+            "designation": "IEC 61400-11",
+            "edition": "2012",
+            "clause": "Equation (29)",
+            "lead": " with ",
+            "relation": "supplies"
+          }
+        ]
+      },
+      "quantity": "Hub-height wind speed brought back to 10 m over z0ref = 0.05 m, m/s",
+      "kind": "scalar",
+      "expected": {
+        "value": 6.0
+      },
+      "computed": {
+        "value": 6.0
+      },
+      "unit": "m/s",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-06
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "wind-turbine-sound-at-a-receptor-iec-ts-61400-11-2/iec-ts-61400-11-2-2024-equations-1-to-5/combined-uncertainty-of-an-energy-averaged-bin-of-three-intervals-db",
+      "domain": "wind-turbine-sound-at-a-receptor-iec-ts-61400-11-2",
+      "reference": {
+        "cite": "IEC TS 61400-11-2:2024 Equations (1) to (5)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC TS 61400-11-2",
+            "edition": "2024",
+            "clause": "Equations (1) to (5)"
+          }
+        ]
+      },
+      "quantity": "Combined uncertainty of an energy-averaged bin of three intervals, dB",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.7091683335063447
+      },
+      "computed": {
+        "value": 0.709168
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-06
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "wind-turbine-sound-at-a-receptor-iec-ts-61400-11-2/iec-ts-61400-11-2-2024-equations-6-and-7/turbine-level-and-its-uncertainty-5-db-over-the-background-db",
+      "domain": "wind-turbine-sound-at-a-receptor-iec-ts-61400-11-2",
+      "reference": {
+        "cite": "IEC TS 61400-11-2:2024 Equations (6) and (7)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC TS 61400-11-2",
+            "edition": "2024",
+            "clause": "Equations (6) and (7)"
+          }
+        ]
+      },
+      "quantity": "Turbine level and its uncertainty 5 dB over the background, dB",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0
+      },
+      "computed": {
+        "value": 0.0,
+        "label": "worst deviation 0.00e+00 dB"
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-06
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "wind-turbine-sound-at-a-receptor-iec-ts-61400-11-2/iec-ts-61400-11-2-2024-11-7/turbine-level-of-a-total-2-db-over-the-background-the-suggested-3-db-correction-db",
+      "domain": "wind-turbine-sound-at-a-receptor-iec-ts-61400-11-2",
+      "reference": {
+        "cite": "IEC TS 61400-11-2:2024 11.7",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC TS 61400-11-2",
+            "edition": "2024",
+            "clause": "11.7"
+          }
+        ]
+      },
+      "quantity": "Turbine level of a total 2 dB over the background: the suggested 3 dB correction, dB",
+      "kind": "scalar",
+      "expected": {
+        "value": 39.0
+      },
+      "computed": {
+        "value": 39.0
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-06
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "wind-turbine-sound-at-a-receptor-iec-ts-61400-11-2/iec-ts-61400-11-2-2024-table-3/type-b-uncertainty-examples-typical-range-and-standard-uncertainty-db",
+      "domain": "wind-turbine-sound-at-a-receptor-iec-ts-61400-11-2",
+      "reference": {
+        "cite": "IEC TS 61400-11-2:2024 Table 3",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC TS 61400-11-2",
+            "edition": "2024",
+            "clause": "Table 3"
+          }
+        ]
+      },
+      "quantity": "Type B uncertainty examples: typical range and standard uncertainty, dB",
+      "kind": "count",
+      "expected": {
+        "value": 4.0,
+        "label": "4/4 components of Table 3"
+      },
+      "computed": {
+        "value": 4.0,
+        "label": "4/4 components of Table 3"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "wind-turbine-sound-at-a-receptor-iec-ts-61400-11-2/iec-ts-61400-11-2-2024-equations-10-and-11/combined-uncertainty-of-a-prediction-over-three-turbines-db",
+      "domain": "wind-turbine-sound-at-a-receptor-iec-ts-61400-11-2",
+      "reference": {
+        "cite": "IEC TS 61400-11-2:2024 Equations (10) and (11)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC TS 61400-11-2",
+            "edition": "2024",
+            "clause": "Equations (10) and (11)"
+          }
+        ]
+      },
+      "quantity": "Combined uncertainty of a prediction over three turbines, dB",
+      "kind": "scalar",
+      "expected": {
+        "value": 2.418548807484577
+      },
+      "computed": {
+        "value": 2.418549
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-06
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "wind-turbine-sound-at-a-receptor-iec-ts-61400-11-2/iec-ts-61400-11-2-2024-9-3-2-3/sound-relevant-turbines-of-six-at-35-33-32-25-20-and-18-db",
+      "domain": "wind-turbine-sound-at-a-receptor-iec-ts-61400-11-2",
+      "reference": {
+        "cite": "IEC TS 61400-11-2:2024 9.3.2.3",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC TS 61400-11-2",
+            "edition": "2024",
+            "clause": "9.3.2.3"
+          }
+        ]
+      },
+      "quantity": "Sound relevant turbines of six at 35, 33, 32, 25, 20 and 18 dB",
+      "kind": "record",
+      "expected": {
+        "label": "the three loudest (the other three drop the total by 0.3 dB)",
+        "record": {
+          "turbine 1": 1.0,
+          "turbine 2": 1.0,
+          "turbine 3": 1.0,
+          "turbine 4": 0.0,
+          "turbine 5": 0.0,
+          "turbine 6": 0.0
+        }
+      },
+      "computed": {
+        "label": "1, 2, 3",
+        "record": {
+          "turbine 1": 1.0,
+          "turbine 2": 1.0,
+          "turbine 3": 1.0,
+          "turbine 4": 0.0,
+          "turbine 5": 0.0,
+          "turbine 6": 0.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "wind-turbine-sound-at-a-receptor-iec-ts-61400-11-2/iec-ts-61400-11-2-2024-table-c-1/impedance-classes-a-to-h-flow-resistivity-nordtest-classes-and-ground",
+      "domain": "wind-turbine-sound-at-a-receptor-iec-ts-61400-11-2",
+      "reference": {
+        "cite": "IEC TS 61400-11-2:2024 Table C.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC TS 61400-11-2",
+            "edition": "2024",
+            "clause": "Table C.1"
+          }
+        ]
+      },
+      "quantity": "Impedance classes A to H: flow resistivity, Nordtest classes and ground",
+      "kind": "count",
+      "expected": {
+        "value": 8.0,
+        "label": "8/8 classes of Table C.1"
+      },
+      "computed": {
+        "value": 8.0,
+        "label": "8/8 classes of Table C.1"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "wind-turbine-sound-at-a-receptor-iec-ts-61400-11-2/iec-ts-61400-11-2-2024-tables-c-2-c-3-and-c-5/ground-correction-air-attenuation-facade-insulation-and-the-swedish-curve",
+      "domain": "wind-turbine-sound-at-a-receptor-iec-ts-61400-11-2",
+      "reference": {
+        "cite": "IEC TS 61400-11-2:2024 Tables C.2, C.3 and C.5",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC TS 61400-11-2",
+            "edition": "2024",
+            "clause": "Tables C.2, C.3 and C.5"
+          }
+        ]
+      },
+      "quantity": "Ground correction, air attenuation, facade insulation and the Swedish curve",
+      "kind": "count",
+      "expected": {
+        "value": 65.0,
+        "label": "65/65 cells of Tables C.2, C.3 and C.5"
+      },
+      "computed": {
+        "value": 65.0,
+        "label": "65/65 cells of Tables C.2, C.3 and C.5"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "wind-turbine-sound-at-a-receptor-iec-ts-61400-11-2/iec-ts-61400-11-2-2024-table-c-2-with-iso-9613-1/air-attenuation-at-125-hz-to-200-hz-iso-9613-1-at-10-degrees-c-and-70-at-the-nominal-band-centres",
+      "domain": "wind-turbine-sound-at-a-receptor-iec-ts-61400-11-2",
+      "reference": {
+        "cite": "IEC TS 61400-11-2:2024 Table C.2 with ISO 9613-1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC TS 61400-11-2",
+            "edition": "2024",
+            "clause": "Table C.2"
+          },
+          {
+            "kind": "standard",
+            "designation": "ISO 9613-1",
+            "lead": " with ",
+            "relation": "supplies"
+          }
+        ]
+      },
+      "quantity": "Air attenuation at 125 Hz to 200 Hz: ISO 9613-1 at 10 degrees C and 70 % at the nominal band centres",
+      "kind": "count",
+      "expected": {
+        "value": 3.0,
+        "label": "3/3 cells of Table C.2 to 0.01 dB/km"
+      },
+      "computed": {
+        "value": 3.0,
+        "label": "3/3 cells of Table C.2 to 0.01 dB/km"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "wind-turbine-sound-at-a-receptor-iec-ts-61400-11-2/iec-ts-61400-11-2-2024-table-c-2-with-iso-9613-1-and-bek-nr-135-2019-table-1-4/air-attenuation-at-50-hz-to-100-hz-under-iso-9613-1-at-70-db-km",
+      "domain": "wind-turbine-sound-at-a-receptor-iec-ts-61400-11-2",
+      "reference": {
+        "cite": "IEC TS 61400-11-2:2024 Table C.2 with ISO 9613-1 and BEK nr. 135:2019 Table 1.4",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC TS 61400-11-2",
+            "edition": "2024",
+            "clause": "Table C.2"
+          },
+          {
+            "kind": "standard",
+            "designation": "ISO 9613-1",
+            "clause": "and BEK nr. 135:2019 Table 1.4",
+            "lead": " with ",
+            "relation": "supplies"
+          }
+        ]
+      },
+      "quantity": "Air attenuation at 50 Hz to 100 Hz under ISO 9613-1 at 70 %, dB/km",
+      "kind": "record",
+      "expected": {
+        "label": "0.01, 0.01, 0.02, 0.02 dB/km: the cells are the Danish order's, at 80 %",
+        "record": {
+          "50 Hz": 0.01,
+          "63 Hz": 0.01,
+          "80 Hz": 0.02,
+          "100 Hz": 0.02
+        }
+      },
+      "computed": {
+        "label": "50 Hz = 0.01 dB/km; 63 Hz = 0.01 dB/km; 80 Hz = 0.02 dB/km; 100 Hz = 0.02 dB/km",
+        "record": {
+          "50 Hz": 0.01,
+          "63 Hz": 0.01,
+          "80 Hz": 0.02,
+          "100 Hz": 0.02
+        }
+      },
+      "unit": "dB/km",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "wind-turbine-sound-at-a-receptor-iec-ts-61400-11-2/iec-ts-61400-11-2-2024-table-c-2-with-bek-nr-135-2019-table-1-4/air-attenuation-at-25-hz-to-100-hz-within-0-01-db-km-of-iso-9613-1-at-80",
+      "domain": "wind-turbine-sound-at-a-receptor-iec-ts-61400-11-2",
+      "reference": {
+        "cite": "IEC TS 61400-11-2:2024 Table C.2 with BEK nr. 135:2019 Table 1.4",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC TS 61400-11-2",
+            "edition": "2024",
+            "clause": "Table C.2 with BEK nr. 135:2019 Table 1.4"
+          }
+        ]
+      },
+      "quantity": "Air attenuation at 25 Hz to 100 Hz within 0.01 dB/km of ISO 9613-1 at 80 %",
+      "kind": "count",
+      "expected": {
+        "value": 7.0,
+        "label": "7/7 cells of Table C.2, the Danish order's cells"
+      },
+      "computed": {
+        "value": 7.0,
+        "label": "7/7 cells of Table C.2, the Danish order's cells"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "wind-turbine-sound-at-a-receptor-iec-ts-61400-11-2/iec-ts-61400-11-2-2024-table-c-4/a-weighting-row-10-hz-to-200-hz-against-iec-61672-1-2013-table-3",
+      "domain": "wind-turbine-sound-at-a-receptor-iec-ts-61400-11-2",
+      "reference": {
+        "cite": "IEC TS 61400-11-2:2024 Table C.4",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC TS 61400-11-2",
+            "edition": "2024",
+            "clause": "Table C.4"
+          }
+        ]
+      },
+      "quantity": "A-weighting row, 10 Hz to 200 Hz, against IEC 61672-1:2013 Table 3",
+      "kind": "count",
+      "expected": {
+        "value": 14.0,
+        "label": "14/14 bands of Table C.4"
+      },
+      "computed": {
+        "value": 14.0,
+        "label": "14/14 bands of Table C.4"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "wind-turbine-sound-at-a-receptor-iec-ts-61400-11-2/iec-ts-61400-11-2-2024-equation-c-1/indoor-a-weighted-63-hz-level-of-95-db-at-500-m-from-a-100-m-hub-db",
+      "domain": "wind-turbine-sound-at-a-receptor-iec-ts-61400-11-2",
+      "reference": {
+        "cite": "IEC TS 61400-11-2:2024 Equation (C.1)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC TS 61400-11-2",
+            "edition": "2024",
+            "clause": "Equation (C.1)"
+          }
+        ]
+      },
+      "quantity": "Indoor A-weighted 63 Hz level of 95 dB at 500 m from a 100 m hub, dB",
+      "kind": "scalar",
+      "expected": {
+        "value": -8.705822694357707
+      },
+      "computed": {
+        "value": -8.705823
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-06
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "wind-turbine-sound-at-a-receptor-iec-ts-61400-11-2/iec-ts-61400-11-2-2024-equation-j-1/emergence-of-a-44-5-db-ambient-over-41-db-db",
+      "domain": "wind-turbine-sound-at-a-receptor-iec-ts-61400-11-2",
+      "reference": {
+        "cite": "IEC TS 61400-11-2:2024 Equation (J.1)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC TS 61400-11-2",
+            "edition": "2024",
+            "clause": "Equation (J.1)"
+          }
+        ]
+      },
+      "quantity": "Emergence of a 44.5 dB ambient over 41 dB, dB",
+      "kind": "scalar",
+      "expected": {
+        "value": 3.5
+      },
+      "computed": {
+        "value": 3.5
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-06
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "wind-turbine-sound-at-a-receptor-iec-ts-61400-11-2/iec-ts-61400-11-2-2024-figure-a-1/amplitude-modulation-adjustment-at-the-grid-points-the-curve-meets",
+      "domain": "wind-turbine-sound-at-a-receptor-iec-ts-61400-11-2",
+      "reference": {
+        "cite": "IEC TS 61400-11-2:2024 Figure A.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC TS 61400-11-2",
+            "edition": "2024",
+            "clause": "Figure A.1"
+          }
+        ]
+      },
+      "quantity": "Amplitude modulation adjustment at the grid points the curve meets",
+      "kind": "count",
+      "expected": {
+        "value": 6.0,
+        "label": "6/6 points of Figure A.1"
+      },
+      "computed": {
+        "value": 6.0,
+        "label": "6/6 points of Figure A.1"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "wind-turbine-sound-at-a-receptor-iec-ts-61400-11-2/iec-ts-61400-11-2-2024-table-a-1-and-a-2/tonal-adjustment-at-each-limit-of-the-mean-audibility-both-step-sizes",
+      "domain": "wind-turbine-sound-at-a-receptor-iec-ts-61400-11-2",
+      "reference": {
+        "cite": "IEC TS 61400-11-2:2024 Table A.1 and A.2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC TS 61400-11-2",
+            "edition": "2024",
+            "clause": "Table A.1 and A.2"
+          }
+        ]
+      },
+      "quantity": "Tonal adjustment at each limit of the mean audibility, both step sizes",
+      "kind": "count",
+      "expected": {
+        "value": 10.0,
+        "label": "10/10 limits of Table A.1 and A.2"
+      },
+      "computed": {
+        "value": 10.0,
+        "label": "10/10 limits of Table A.1 and A.2"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "wind-turbine-sound-at-a-receptor-iec-ts-61400-11-2/iec-ts-61400-11-2-2024-a-1/rating-level-with-the-most-severe-adjustment-alone-db",
+      "domain": "wind-turbine-sound-at-a-receptor-iec-ts-61400-11-2",
+      "reference": {
+        "cite": "IEC TS 61400-11-2:2024 A.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC TS 61400-11-2",
+            "edition": "2024",
+            "clause": "A.1"
+          }
+        ]
+      },
+      "quantity": "Rating level with the most severe adjustment alone, dB",
+      "kind": "scalar",
+      "expected": {
+        "value": 44.0
+      },
+      "computed": {
+        "value": 44.0
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-06
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "wind-turbine-sound-at-a-receptor-iec-ts-61400-11-2/iec-ts-61400-11-2-2024-table-7/upper-tone-search-frequency-the-four-rows-printed-at-their-own-atmosphere",
+      "domain": "wind-turbine-sound-at-a-receptor-iec-ts-61400-11-2",
+      "reference": {
+        "cite": "IEC TS 61400-11-2:2024 Table 7",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC TS 61400-11-2",
+            "edition": "2024",
+            "clause": "Table 7"
+          }
+        ]
+      },
+      "quantity": "Upper tone search frequency, the four rows printed at their own atmosphere",
+      "kind": "count",
+      "expected": {
+        "value": 16.0,
+        "label": "16/16 cells of Table 7"
+      },
+      "computed": {
+        "value": 16.0,
+        "label": "16/16 cells of Table 7"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "wind-turbine-sound-at-a-receptor-iec-ts-61400-11-2/iec-ts-61400-11-2-2024-table-7-fourth-row/the-row-printed-at-10-degrees-c-and-80-reproduced-at-10-degrees-c",
+      "domain": "wind-turbine-sound-at-a-receptor-iec-ts-61400-11-2",
+      "reference": {
+        "cite": "IEC TS 61400-11-2:2024 Table 7, fourth row",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC TS 61400-11-2",
+            "edition": "2024",
+            "clause": "Table 7, fourth row"
+          }
+        ]
+      },
+      "quantity": "The row printed at 10 degrees C and 80 %, reproduced at -10 degrees C",
+      "kind": "count",
+      "expected": {
+        "value": 4.0,
+        "label": "4/4 cells of the fourth row at -10 degrees C"
+      },
+      "computed": {
+        "value": 4.0,
+        "label": "4/4 cells of the fourth row at -10 degrees C"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "wind-turbine-amplitude-modulation-iec-ts-61400-11-2-clause-13/ioa-amwg-reference-code-v1-4-sample-sample-50-200hz/prominence-fundamental-modulation-frequency-and-10-s-am-of-band-1",
+      "domain": "wind-turbine-amplitude-modulation-iec-ts-61400-11-2-clause-13",
+      "reference": {
+        "cite": "IOA AMWG reference code v1.4, sample Sample-50_200Hz",
+        "documents": [
+          {
+            "kind": "derivation",
+            "designation": "IOA AMWG reference code v1.4, sample Sample-50_200Hz"
+          }
+        ]
+      },
+      "quantity": "Prominence, fundamental modulation frequency and 10 s AM of band 1",
+      "kind": "record",
+      "expected": {
+        "label": "40.43, 0.70 Hz, 5.36 dB",
+        "record": {
+          "prominence": 40.43,
+          "f0": 0.7,
+          "AM": 5.36
+        }
+      },
+      "computed": {
+        "label": "40.43, 0.70 Hz, 5.36 dB",
+        "record": {
+          "prominence": 40.43,
+          "f0": 0.7,
+          "AM": 5.36
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "wind-turbine-amplitude-modulation-iec-ts-61400-11-2-clause-13/ioa-amwg-reference-code-v1-4-sample-sample-100-400hz/prominence-fundamental-modulation-frequency-and-10-s-am-of-band-2",
+      "domain": "wind-turbine-amplitude-modulation-iec-ts-61400-11-2-clause-13",
+      "reference": {
+        "cite": "IOA AMWG reference code v1.4, sample Sample-100_400Hz",
+        "documents": [
+          {
+            "kind": "derivation",
+            "designation": "IOA AMWG reference code v1.4, sample Sample-100_400Hz"
+          }
+        ]
+      },
+      "quantity": "Prominence, fundamental modulation frequency and 10 s AM of band 2",
+      "kind": "record",
+      "expected": {
+        "label": "44.64, 0.70 Hz, 8.38 dB",
+        "record": {
+          "prominence": 44.64,
+          "f0": 0.7,
+          "AM": 8.38
+        }
+      },
+      "computed": {
+        "label": "44.64, 0.70 Hz, 8.38 dB",
+        "record": {
+          "prominence": 44.64,
+          "f0": 0.7,
+          "AM": 8.38
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "wind-turbine-amplitude-modulation-iec-ts-61400-11-2-clause-13/ioa-amwg-reference-code-v1-4-sample-sample-200-800hz/prominence-fundamental-modulation-frequency-and-10-s-am-of-band-3",
+      "domain": "wind-turbine-amplitude-modulation-iec-ts-61400-11-2-clause-13",
+      "reference": {
+        "cite": "IOA AMWG reference code v1.4, sample Sample-200_800Hz",
+        "documents": [
+          {
+            "kind": "derivation",
+            "designation": "IOA AMWG reference code v1.4, sample Sample-200_800Hz"
+          }
+        ]
+      },
+      "quantity": "Prominence, fundamental modulation frequency and 10 s AM of band 3",
+      "kind": "record",
+      "expected": {
+        "label": "52.31, 0.70 Hz, 7.66 dB",
+        "record": {
+          "prominence": 52.31,
+          "f0": 0.7,
+          "AM": 7.66
+        }
+      },
+      "computed": {
+        "label": "52.31, 0.70 Hz, 7.66 dB",
+        "record": {
+          "prominence": 52.31,
+          "f0": 0.7,
+          "AM": 7.66
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "wind-turbine-amplitude-modulation-iec-ts-61400-11-2-clause-13/ioa-amwg-sample-band-filtering-workbook/a-weighted-sums-of-seven-one-third-octave-bands-rounded-to-0-1-db",
+      "domain": "wind-turbine-amplitude-modulation-iec-ts-61400-11-2-clause-13",
+      "reference": {
+        "cite": "IOA AMWG sample band filtering workbook",
+        "documents": [
+          {
+            "kind": "derivation",
+            "designation": "IOA AMWG sample band filtering workbook"
+          }
+        ]
+      },
+      "quantity": "A-weighted sums of seven one-third-octave bands, rounded to 0.1 dB",
+      "kind": "count",
+      "expected": {
+        "value": 303.0,
+        "label": "303/303 sums of the three bands, one per 100 ms sample"
+      },
+      "computed": {
+        "value": 303.0,
+        "label": "303/303 sums of the three bands, one per 100 ms sample"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "wind-turbine-amplitude-modulation-iec-ts-61400-11-2-clause-13/ioa-amwg-reference-code-v1-4-synthetic-10-s-blocks/status-prominence-fundamental-and-depth-of-nine-designed-blocks",
+      "domain": "wind-turbine-amplitude-modulation-iec-ts-61400-11-2-clause-13",
+      "reference": {
+        "cite": "IOA AMWG reference code v1.4, synthetic 10 s blocks",
+        "documents": [
+          {
+            "kind": "derivation",
+            "designation": "IOA AMWG reference code v1.4, synthetic 10 s blocks"
+          }
+        ]
+      },
+      "quantity": "Status, prominence, fundamental and depth of nine designed blocks",
+      "kind": "count",
+      "expected": {
+        "value": 9.0,
+        "label": "9/9 blocks"
+      },
+      "computed": {
+        "value": 9.0,
+        "label": "9/9 blocks"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "wind-turbine-amplitude-modulation-iec-ts-61400-11-2-clause-13/ioa-amwg-reference-code-v1-4-10-min-rating/90th-percentile-of-36-valid-10-s-blocks-db",
+      "domain": "wind-turbine-amplitude-modulation-iec-ts-61400-11-2-clause-13",
+      "reference": {
+        "cite": "IOA AMWG reference code v1.4, 10 min rating",
+        "documents": [
+          {
+            "kind": "derivation",
+            "designation": "IOA AMWG reference code v1.4, 10 min rating"
+          }
+        ]
+      },
+      "quantity": "90th percentile of 36 valid 10 s blocks, dB",
+      "kind": "scalar",
+      "expected": {
+        "value": 10.43973984504268
+      },
+      "computed": {
+        "value": 10.43974
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-06
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "wind-turbine-amplitude-modulation-iec-ts-61400-11-2-clause-13/ioa-amwg-reference-code-v1-4-with-iec-ts-61400-11-2-2024-13-6-2-2/a-period-of-exactly-30-valid-blocks-is-rated-db",
+      "domain": "wind-turbine-amplitude-modulation-iec-ts-61400-11-2-clause-13",
+      "reference": {
+        "cite": "IOA AMWG reference code v1.4 with IEC TS 61400-11-2:2024 13.6.2.2",
+        "documents": [
+          {
+            "kind": "derivation",
+            "designation": "IOA AMWG reference code v1.4 with IEC TS 61400-11-2:2024 13.6.2.2"
+          }
+        ]
+      },
+      "quantity": "A period of exactly 30 valid blocks is rated, dB",
+      "kind": "scalar",
+      "expected": {
+        "value": 9.364678097643017
+      },
+      "computed": {
+        "value": 9.364678
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-06
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "wind-turbine-amplitude-modulation-iec-ts-61400-11-2-clause-13/iec-ts-61400-11-2-2024-13-6-3-the-ioa-code-discards-the-period/a-period-of-29-valid-blocks-is-rated-0-db-and-kept-db",
+      "domain": "wind-turbine-amplitude-modulation-iec-ts-61400-11-2-clause-13",
+      "reference": {
+        "cite": "IEC TS 61400-11-2:2024 13.6.3 (the IOA code discards the period)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC TS 61400-11-2",
+            "edition": "2024",
+            "clause": "13.6.3 (the IOA code discards the period)"
+          }
+        ]
+      },
+      "quantity": "A period of 29 valid blocks is rated 0 dB and kept, dB",
+      "kind": "record",
+      "expected": {
+        "label": "29 valid blocks, rated 0 dB (the AMWG report discards it)",
+        "record": {
+          "valid blocks": 29.0,
+          "rating": 0.0
+        }
+      },
+      "computed": {
+        "label": "29 valid blocks, rated 0 dB",
+        "record": {
+          "valid blocks": 29.0,
+          "rating": 0.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "wind-turbine-amplitude-modulation-iec-ts-61400-11-2-clause-13/ioa-amwg-reference-code-v1-4-with-iec-ts-61400-11-2-2024-13-6-3/mean-and-mode-fundamental-of-a-rated-period-20-of-36-valid-blocks-at-0-7-hz",
+      "domain": "wind-turbine-amplitude-modulation-iec-ts-61400-11-2-clause-13",
+      "reference": {
+        "cite": "IOA AMWG reference code v1.4 with IEC TS 61400-11-2:2024 13.6.3",
+        "documents": [
+          {
+            "kind": "derivation",
+            "designation": "IOA AMWG reference code v1.4 with IEC TS 61400-11-2:2024 13.6.3"
+          }
+        ]
+      },
+      "quantity": "Mean and mode fundamental of a rated period, 20 of 36 valid blocks at 0.7 Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0,
+        "label": "mean 0.7778 Hz, mode 0.70 Hz"
+      },
+      "computed": {
+        "value": 0.0,
+        "label": "mean 0.7778 Hz, mode 0.70 Hz"
+      },
+      "unit": "Hz",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 9,
       "verdict": "pass"
     },
     {

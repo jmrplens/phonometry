@@ -261,7 +261,14 @@ from .environment import (
     generate_tonal_audibility,
     generate_wind_turbine_apparent_power,
     generate_wind_turbine_audibility_criterion,
+    generate_wind_turbine_modulation_block,
+    generate_wind_turbine_modulation_period,
+    generate_wind_turbine_receptor_bins,
+    generate_wind_turbine_receptor_low_frequency,
+    generate_wind_turbine_receptor_rating,
+    generate_wind_turbine_receptor_shear,
     generate_wind_turbine_tonality,
+    generate_wind_turbine_tone_search,
 )
 from .fields import (
     _absorption_placement_fields,
@@ -891,6 +898,15 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     generate_refraction_homogeneous_check,
     generate_wind_turbine_apparent_power,
     generate_wind_turbine_audibility_criterion,
+    # IEC TS 61400-11-2: the same turbines heard at a dwelling, with the
+    # amplitude modulation of clause 13.
+    generate_wind_turbine_receptor_bins,
+    generate_wind_turbine_receptor_shear,
+    generate_wind_turbine_receptor_low_frequency,
+    generate_wind_turbine_modulation_block,
+    generate_wind_turbine_modulation_period,
+    generate_wind_turbine_receptor_rating,
+    generate_wind_turbine_tone_search,
     generate_rd1367_tonal_correction,
     generate_rd1367_kf_ki,
     generate_rd1367_vs_iso_tonal,

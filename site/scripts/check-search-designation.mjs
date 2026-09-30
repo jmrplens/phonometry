@@ -146,13 +146,15 @@ const CONTROLS = [
  * "air" (SAE AIR 5662) and "noise" (the NOISE research project) are deliberately
  * absent: they are ordinary words on an acoustics site first. "en" is here even
  * though it is the Spanish preposition, because a search is never "en" alone and
- * the Spanish searches built around it are in CONTROLS.
+ * the Spanish searches built around it are in CONTROLS. "bek" is the series of
+ * Danish statutory orders, as Retsinformation files them ("BEK nr 135 af
+ * 07/02/2019"), in the way "rd" is the Spanish Real Decreto.
  */
 const ISSUER_WORDS = new Set([
-  'acou', 'aes', 'ahri', 'ansi', 'arp', 'asa', 'astm', 'bs', 'ceac', 'cte', 'dbhr',
-  'dhhs', 'din', 'ebu', 'ecac', 'en', 'eur', 'icao', 'iec', 'iso', 'itu', 'jcgm',
-  'jis', 'nasa', 'niosh', 'noaa', 'nt', 'oj', 'pas', 'rd', 'rfc', 'sae', 'tr',
-  'ts', 'uit', 'vdi',
+  'acou', 'aes', 'ahri', 'ansi', 'arp', 'asa', 'astm', 'bek', 'bs', 'ceac', 'cte',
+  'dbhr', 'dhhs', 'din', 'ebu', 'ecac', 'en', 'eur', 'icao', 'iec', 'iso', 'itu',
+  'jcgm', 'jis', 'nasa', 'niosh', 'noaa', 'nt', 'oj', 'pas', 'rd', 'rfc', 'sae',
+  'tr', 'ts', 'uit', 'vdi',
 ]);
 
 /** Score ratio a declaring page must keep over the best page that does not declare. */

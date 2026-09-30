@@ -1,6 +1,6 @@
 ---
 title: "Guides"
-description: "The 153 guides of phonometry, grouped into the thirteen topics the library covers: what each area is for, the standards implemented in it, and a one-line summary of every guide inside it."
+description: "The 154 guides of phonometry, grouped into the thirteen topics the library covers: what each area is for, the standards implemented in it, and a one-line summary of every guide inside it."
 head:
   - tag: script
     attrs:
@@ -117,7 +117,7 @@ makes, then runnable code and the figure it draws. Nothing here is a survey of
 the field; each page is the working documentation of a module, written so that
 a result can be defended clause by clause rather than trusted.
 
-This page is the map. A hundred and fifty-three guides sit in thirteen topics, and each topic has its
+This page is the map. A hundred and fifty-four guides sit in thirteen topics, and each topic has its
 own overview page with the longer story of how its pieces fit together. If you
 are arriving without a specific question, read
 [Getting Started](/phonometry/start/getting-started/) first: it runs one signal
@@ -665,7 +665,7 @@ has to travel a long way before it is assessed, so the atmosphere, the ground
 and the source's own motion all enter the answer. Implements ISO 9613-1/-2,
 ISO 1996-1/-2, ISO/PAS 1996-3, NT ACOU 112, ISO 13474, ISO/TS 12913-2/-3,
 CNOSSOS-EU (2002/49/EC Annex II), EN 1793-1/-2/-3/-5, EN 16272-3-1,
-ISO 11819-1 and IEC 61400-11.
+ISO 11819-1, IEC 61400-11 and IEC TS 61400-11-2.
 
 One scope boundary is worth stating here rather than one click away. Of
 CNOSSOS-EU, what is implemented is the **source** side of Annex II: the road
@@ -709,6 +709,11 @@ regulatory mapping.
 - [Wind-turbine noise: sound power and tonal audibility](/phonometry/environment/sources/wind-turbine-noise/):
   the apparent sound power level referred to the rotor centre, and the tonal
   audibility chain that decides whether a tone is audible.
+- [Wind turbine sound at a dwelling (IEC TS 61400-11-2)](/phonometry/environment/sources/wind-turbine-receptor/):
+  what arrives at the receptor: the wind speed between heights, the bin
+  averages and the background correction, the low frequency level indoors, the
+  emergence, the amplitude modulation rating checked against the IOA code, and
+  the rating level.
 
 **[Assessment and regulation](/phonometry/environment/assessment/)**
 

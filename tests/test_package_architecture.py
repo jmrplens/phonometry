@@ -153,6 +153,9 @@ ALLOWED_FAMILY_EDGES: set[tuple[str, str, str]] = {
     ("materials", "diffusers", "absorbers"),
     # Every sound quality metric is read off a loudness pattern.
     ("psychoacoustics", "quality", "loudness"),
+    # IEC TS 61400-11-2 ends the search for tones at the receptor where the
+    # ISO 9613-1 air attenuation over the distance reaches 20 dB.
+    ("environment", "assessment", "propagation"),
 }
 
 

@@ -18,7 +18,15 @@ from phonometry._plot.common import format_frequency_axis, theme_fill
 from phonometry.environment import StatisticalPassByResult
 
 if TYPE_CHECKING:
-    from phonometry.environment import SelDistribution
+    from numpy.typing import ArrayLike
+
+    from phonometry.environment import (
+        BinnedModulation,
+        BinnedSoundLevels,
+        LowFrequencyLevel,
+        ModulationPeriod,
+        SelDistribution,
+    )
 
 from .i18n import _LANG, _fmt_minus
 from .theme import (
@@ -2633,6 +2641,372 @@ def generate_wind_turbine_audibility_criterion(output_dir: str) -> None:
     right.legend(loc="upper left", fontsize=8.5)
     plt.tight_layout()
     save_figure(output_dir, "wind_turbine_audibility_criterion.svg")
+    plt.close()
+
+
+# ---------------------------------------------------------------------------
+# IEC TS 61400-11-2: wind turbine sound at a receptor
+# ---------------------------------------------------------------------------
+def _wt_text(english: str, spanish: str) -> str:
+    """The label in the language being drawn (these panels are the script's own)."""
+    return spanish if _LANG == "es" else english
+
+
+def _wt_receptor_campaign() -> tuple["BinnedSoundLevels", "BinnedSoundLevels"]:
+    """A receptor campaign: 10 min totals with the turbines on and a background.
+
+    The turbine level grows 2 dB per m/s up to its rated wind speed of 9 m/s
+    and then holds; the background grows 3.4 dB per m/s from the trees, so the
+    two meet in the top bins, where 11.7 stops subtracting.
+    """
+    from phonometry import environment
+
+    rng = np.random.default_rng(611)
+    speeds = rng.uniform(2.6, 11.45, 420)
+    turbine = 33.0 + 2.0 * np.minimum(speeds, 9.0)
+    background = 15.0 + 3.4 * speeds
+    total = 10.0 * np.log10(10.0 ** (turbine / 10.0) + 10.0 ** (background / 10.0))
+    total_levels = np.round(total + rng.normal(0.0, 1.2, speeds.size), 1)
+    off_speeds = rng.uniform(2.6, 11.45, 240)
+    off_levels = np.round(15.0 + 3.4 * off_speeds + rng.normal(0.0, 1.5, 240), 1)
+    binned = environment.bin_sound_levels(
+        total_levels, speeds, type_b_uncertainty_db=0.5
+    )
+    off = environment.bin_sound_levels(
+        off_levels, off_speeds, type_b_uncertainty_db=0.5
+    )
+    return binned, off
+
+
+def generate_wind_turbine_receptor_bins(output_dir: str) -> None:
+    """IEC TS 61400-11-2 10.3 and 11.7: bin averages and the background."""
+    print("Generating wind_turbine_receptor_bins...")
+    binned, off = _wt_receptor_campaign()
+    fig, (left, right) = plt.subplots(1, 2, figsize=(13.0, 5.4))
+    binned.plot(left, language=_LANG)
+    left.set_title(
+        _wt_text(
+            "Total level per 1 m/s bin, Equations (1) to (5)",
+            "Nivel total por intervalo de 1 m/s, ecuaciones (1) a (5)",
+        )
+    )
+    binned.background_corrected(off).plot(right, language=_LANG)
+    fig.tight_layout()
+    save_figure(output_dir, "wind_turbine_receptor_bins.svg")
+    plt.close()
+
+
+def generate_wind_turbine_receptor_shear(output_dir: str) -> None:
+    """IEC TS 61400-11-2 Annex K and 9.3.2.3: shear and relevant turbines."""
+    print("Generating wind_turbine_receptor_shear...")
+    from phonometry import environment
+
+    profile = environment.wind_shear_profile(4.5, 8.6, upper_height_m=120.0)
+    relevant = environment.sound_relevant_turbines(
+        [33.5, 38.2, 29.4, 36.9, 25.1, 31.8, 27.0]
+    )
+    fig, (left, right) = plt.subplots(1, 2, figsize=(13.0, 5.4))
+    profile.plot(left, language=_LANG)
+    relevant.plot(right, language=_LANG)
+    right.set_title(
+        _wt_text(
+            "Sound relevant turbines (9.3.2.3)",
+            "Aerogeneradores relevantes para el sonido (9.3.2.3)",
+        )
+    )
+    fig.tight_layout()
+    save_figure(output_dir, "wind_turbine_receptor_shear.svg")
+    plt.close()
+
+
+def _wt_low_frequency() -> "LowFrequencyLevel":
+    """Three 120 m turbines at 650 m, 820 m and 1100 m, indoors behind brick."""
+    from phonometry import environment
+
+    power = 118.0 - np.arange(environment.LOW_FREQUENCY_BANDS_HZ.size, dtype=float)
+    return environment.wind_turbine_low_frequency_level(
+        np.vstack([power, power, power - 1.0]),
+        distance_m=[650.0, 820.0, 1100.0],
+        hub_height_m=120.0,
+        facade_insulation_db=environment.LOW_FREQUENCY_FACADE_INSULATION_DB[
+            "Denmark brick or similar"
+        ],
+    )
+
+
+def generate_wind_turbine_receptor_low_frequency(output_dir: str) -> None:
+    """IEC TS 61400-11-2 Annex C: Equation (C.1) and the air of Table C.2.
+
+    The right panel is why Table C.2 sits under ISO 9613-1 at the atmosphere
+    its caption names: from 25 Hz to 100 Hz its cells are the Danish order's
+    80 % values, from 125 Hz up they are ISO 9613-1 at 70 %. Each point is the
+    printed cell minus ISO 9613-1 at the nominal band centre; the shaded strip
+    is the half unit of the printed second decimal, inside which a cell and a
+    computed value are the same number.
+    """
+    print("Generating wind_turbine_receptor_low_frequency...")
+    import warnings
+
+    from matplotlib.ticker import FixedFormatter, FixedLocator, NullLocator
+
+    from phonometry import environment
+    from phonometry._plot.common import _format_freq
+    from phonometry.environment.propagation.air_absorption import air_attenuation
+
+    fig, (left, right) = plt.subplots(1, 2, figsize=(13.0, 5.4))
+    _wt_low_frequency().plot(left, language=_LANG)
+    left.set_title(
+        _wt_text(
+            "Equation (C.1), three turbines, brick facade",
+            "Ecuación (C.1), tres aerogeneradores, fachada de ladrillo",
+        )
+    )
+    bands = np.asarray(environment.LOW_FREQUENCY_BANDS_HZ)
+    table = np.asarray(environment.LOW_FREQUENCY_AIR_ATTENUATION_DB_PER_KM)
+    shown = bands >= 25.0
+    right.axhspan(
+        -0.005,
+        0.005,
+        color=theme_fill(COLOR_PRIMARY, right),
+        zorder=0,
+        label=_wt_text(
+            "Within the printed rounding (0.005 dB/km)",
+            "Dentro del redondeo impreso (0,005 dB/km)",
+        ),
+    )
+    right.axhline(0.0, color=COLOR_MUTED, linewidth=0.9, zorder=1)
+    for humidity, colour, marker in (
+        (70.0, COLOR_SECONDARY, "o"),
+        (80.0, COLOR_TERTIARY, "s"),
+    ):
+        with warnings.catch_warnings():
+            # Below 50 Hz ISO 9613-1 is advisory; the table goes there anyway.
+            warnings.simplefilter("ignore")
+            computed = 1000.0 * np.asarray(
+                air_attenuation(
+                    bands[shown],
+                    temperature_c=10.0,
+                    relative_humidity_percent=humidity,
+                )
+            )
+        right.plot(
+            bands[shown],
+            table[shown] - computed,
+            marker=marker,
+            color=colour,
+            linewidth=1.6,
+            markersize=7,
+            label=_wt_text(
+                f"Table C.2 minus ISO 9613-1 at 10 °C, {humidity:.0f} %",
+                f"Tabla C.2 menos ISO 9613-1 a 10 °C, {humidity:.0f} %",
+            ),
+            zorder=4,
+        )
+    right.set_xscale("log")
+    right.set_xlim(22.0, 225.0)
+    right.set_ylim(-0.03, 0.06)
+    format_frequency_axis(right, 22.0, 225.0, language=_LANG)
+    # Every band of the panel is labelled, the 100 Hz and 125 Hz the title
+    # turns on among them, not only the octave centres.
+    right.xaxis.set_major_locator(FixedLocator(bands[shown].tolist()))
+    right.xaxis.set_major_formatter(
+        FixedFormatter([_format_freq(float(f), _LANG) for f in bands[shown]])
+    )
+    right.xaxis.set_minor_locator(NullLocator())
+    right.set_xlabel(_wt_text(LABEL_FREQ_HZ, "Frecuencia [Hz]"))
+    right.set_ylabel(
+        _wt_text(r"Difference in $\alpha$ [dB/km]", r"Diferencia de $\alpha$ [dB/km]")
+    )
+    right.set_title(
+        _wt_text(
+            "Table C.2 is 80 % air up to 100 Hz, 70 % above",
+            "La Tabla C.2 es aire al 80 % hasta 100 Hz y al 70 % por encima",
+        )
+    )
+    right.grid(which="both", color=COLOR_GRID, linestyle="--", alpha=0.5, zorder=0)
+    right.set_axisbelow(True)
+    right.legend(loc="upper left", fontsize=9)
+    fig.tight_layout()
+    save_figure(output_dir, "wind_turbine_receptor_low_frequency.svg")
+    plt.close()
+
+
+def _wt_modulated_levels(
+    seconds: float,
+    rng: np.random.Generator,
+    depth_db: "ArrayLike",
+    *,
+    fundamental_hz: float = 0.8,
+) -> NDArray[np.float64]:
+    """Band-limited 100 ms levels with a blade-passage swish and its harmonic.
+
+    ``depth_db`` is the peak-to-peak swing of the fundamental, one value or one
+    per sample; the second harmonic carries a third of it, the level drifts
+    slowly with the wind, and the logger rounds to 0.1 dB.
+    """
+    t = np.arange(round(seconds / 0.1)) * 0.1
+    depth = np.broadcast_to(np.asarray(depth_db, dtype=float), t.shape)
+    swish = 0.5 * depth * np.sin(2.0 * np.pi * fundamental_hz * t)
+    harmonic = depth / 6.0 * np.sin(4.0 * np.pi * fundamental_hz * t + 0.9)
+    drift = 1.2 * np.sin(2.0 * np.pi * t / 47.0)
+    noise = rng.normal(0.0, 1.0, t.size)
+    return np.round(38.0 + drift + swish + harmonic + noise, 1)
+
+
+def generate_wind_turbine_modulation_block(output_dir: str) -> None:
+    """IEC TS 61400-11-2 13.6.2.3: one 10 s block, spectrum and series."""
+    print("Generating wind_turbine_modulation_block...")
+    from phonometry import environment
+
+    rng = np.random.default_rng(1340)
+    block = environment.amplitude_modulation_block(
+        _wt_modulated_levels(10.0, rng, 4.0),
+        modulation_frequency_range_hz=(0.5, 1.1),
+    )
+    fig, (left, right) = plt.subplots(1, 2, figsize=(13.0, 5.4))
+    block.plot(left, language=_LANG)
+    block.plot(right, kind="series", language=_LANG)
+    fig.tight_layout()
+    save_figure(output_dir, "wind_turbine_modulation_block.svg")
+    plt.close()
+
+
+def _wt_modulation_period() -> "ModulationPeriod":
+    """A 10 min period whose swish fades in and out, with a gusty minute."""
+    from phonometry import environment
+
+    rng = np.random.default_rng(1363)
+    t = np.arange(6000) * 0.1
+    depth = 3.0 + 2.5 * np.sin(2.0 * np.pi * t / 600.0) ** 2
+    depth[(t >= 240.0) & (t < 330.0)] = 0.0
+    levels = _wt_modulated_levels(600.0, rng, depth)
+    gust = (t >= 240.0) & (t < 330.0)
+    levels[gust] = np.round(levels[gust] + rng.normal(0.0, 2.5, int(gust.sum())), 1)
+    return environment.amplitude_modulation_period(
+        levels, modulation_frequency_range_hz=(0.5, 1.1)
+    )
+
+
+def _wt_binned_modulation() -> "BinnedModulation":
+    """A survey of 10 min ratings in three bands, binned by wind speed."""
+    from phonometry import environment
+
+    rng = np.random.default_rng(1364)
+    periods = 600
+    speeds = rng.uniform(3.5, 10.45, periods)
+    # Each band swishes hardest at its own wind speeds: the low band in light
+    # winds, the middle one around rated power, the high one above it.
+    peaks = (5.0, 7.0, 9.0)
+    heights = (2.5, 4.0, 4.5)
+    ratings = np.column_stack(
+        [
+            np.clip(
+                1.5
+                + height * np.exp(-(((speeds - peak) / 2.0) ** 2))
+                + rng.normal(0.0, 0.8, periods),
+                0.0,
+                None,
+            )
+            for peak, height in zip(peaks, heights, strict=True)
+        ]
+    )
+    # Periods with fewer than 30 valid blocks are rated 0 dB, most often where
+    # no band swishes.
+    audible = np.exp(-(((speeds - 7.0) / 2.5) ** 2))
+    unrated = rng.uniform(0.0, 1.0, periods) < 0.35 * (1.0 - audible)
+    ratings[unrated] = 0.0
+    return environment.bin_amplitude_modulation(np.round(ratings, 2), speeds)
+
+
+def generate_wind_turbine_modulation_period(output_dir: str) -> None:
+    """IEC TS 61400-11-2 13.6.3 and 13.6.4: the 10 min rating and the bins."""
+    print("Generating wind_turbine_modulation_period...")
+    fig, (left, right) = plt.subplots(1, 2, figsize=(13.0, 5.4))
+    _wt_modulation_period().plot(left, language=_LANG)
+    _wt_binned_modulation().plot(right, language=_LANG)
+    right.set_title(
+        _wt_text(
+            "Worst band per 1 m/s bin, unrated periods at 0 dB",
+            "Peor banda por intervalo de 1 m/s, periodos sin valorar a 0 dB",
+        )
+    )
+    fig.tight_layout()
+    save_figure(output_dir, "wind_turbine_modulation_period.svg")
+    plt.close()
+
+
+def generate_wind_turbine_receptor_rating(output_dir: str) -> None:
+    """IEC TS 61400-11-2 Annex A: Figure A.1 and the rating level."""
+    print("Generating wind_turbine_receptor_rating...")
+    from phonometry import environment
+
+    rating = _wt_modulation_period().rating_db
+    k_am = float(environment.amplitude_modulation_adjustment(rating))
+    fig, (left, right) = plt.subplots(1, 2, figsize=(13.0, 5.4))
+    # Figure A.1 steps at 3 dB: the curve is drawn up the step, as printed.
+    depth = np.concatenate([np.linspace(0.0, 3.0, 2), np.linspace(3.0, 12.0, 361)])
+    adjustment = np.asarray(environment.amplitude_modulation_adjustment(depth))
+    adjustment[1] = 0.0
+    left.plot(
+        depth,
+        adjustment,
+        color=COLOR_PRIMARY,
+        linewidth=2.2,
+        label=_wt_text("Figure A.1", "Figura A.1"),
+    )
+    shown_rating = f"{rating:.2f}"
+    shown_k = f"{k_am:.1f}"
+    if _LANG == "es":
+        shown_rating = shown_rating.replace(".", ",")
+        shown_k = shown_k.replace(".", ",")
+    left.plot(
+        [rating],
+        [k_am],
+        "o",
+        color=COLOR_SECONDARY,
+        markersize=9,
+        zorder=5,
+        label=_wt_text(
+            f"10 min rating {shown_rating} dB: $K_\\mathrm{{am}}$ = {shown_k} dB",
+            f"Valoración de 10 min {shown_rating} dB: $K_\\mathrm{{am}}$ = {shown_k} dB",
+        ),
+    )
+    left.set_xlim(0.0, 12.0)
+    left.set_ylim(0.0, 6.0)
+    left.set_xlabel(_wt_text("Modulation depth [dB]", "Profundidad de modulación [dB]"))
+    left.set_ylabel(
+        _wt_text(r"Adjustment $K_\mathrm{am}$ [dB]", r"Ajuste $K_\mathrm{am}$ [dB]")
+    )
+    left.set_title(
+        _wt_text(
+            "Amplitude modulation adjustment (A.3)",
+            "Ajuste por modulación de amplitud (A.3)",
+        )
+    )
+    left.grid(color=COLOR_GRID, linestyle="--", alpha=0.5, zorder=0)
+    left.set_axisbelow(True)
+    left.legend(loc="lower right", fontsize=9)
+    environment.wind_turbine_rating_level(
+        41.0,
+        tonal_adjustment_db=2.0,
+        amplitude_modulation_adjustment_db=k_am,
+    ).plot(right, language=_LANG)
+    fig.tight_layout()
+    save_figure(output_dir, "wind_turbine_receptor_rating.svg")
+    plt.close()
+
+
+def generate_wind_turbine_tone_search(output_dir: str) -> None:
+    """IEC TS 61400-11-2 12.5.2.4: the upper frequency of the tone search."""
+    print("Generating wind_turbine_tone_search...")
+    from phonometry import environment
+
+    fig, ax = plt.subplots(figsize=(10.0, 5.6))
+    environment.upper_tone_search_frequency(
+        600.0, temperature_c=10.0, relative_humidity_percent=50.0
+    ).plot(ax, language=_LANG)
+    fig.tight_layout()
+    save_figure(output_dir, "wind_turbine_tone_search.svg")
     plt.close()
 
 

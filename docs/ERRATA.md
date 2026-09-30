@@ -9086,6 +9086,214 @@ in the same order.
   5 dB. A field that meets 4 dB passes either reading.
 - **Status:** unreported.
 
+## IEC TS 61400-11-2:2024, Table 7 (the 10 °C, 80 % row computed at −10 °C)
+
+- **Location:** 12.5.2.4, Table 7 "Upper tone search frequencies based on a
+  range of distance and meteorological conditions" (printed folio 45), the row
+  "10 | 80".
+- **The print:** 10, 5, 2,5 and 2 kHz at 100 m, 300 m, 600 m and 1 000 m.
+- **The problem:** 12.5.2.4 puts the top of the tone search at the lowest
+  one-third-octave band that ISO 9613-1 attenuates by 20 dB or more over the
+  distance to the nearest turbine. At 10 °C and 80 % relative humidity that
+  band is 10, 6,3, 5 and 4 kHz. The printed cells are what the same rule gives
+  at −10 °C and 80 %, cell for cell. The other four rows reproduce at their own
+  atmospheres (the "3,2" of the −10 °C, 100 % row is the 3,15 kHz band), so
+  either the temperature of the row has lost its minus sign or its cells were
+  computed at the wrong temperature. At the 10 °C and 80 % the row prints, it
+  reads **10, 6,3, 5 and 4 kHz**.
+- **Evidence:** the rule of 12.5.2.4 evaluated with ISO 9613-1 at the exact
+  mid-band frequencies and 101,325 kPa for the twenty cells of the table.
+  Table 7 read on PDF page 47 (printed p. 45) of IEC TS 61400-11-2:2024
+  (Edition 1.0, 2024-03).
+- **Library behaviour:** `upper_tone_search_frequency` applies the rule of
+  12.5.2.4 and never reads Table 7, so no change was required. The conformance
+  rows check the four rows that hold and the printed fourth row at −10 °C
+  (`test_table_7_fourth_row_is_minus_10_degrees` in
+  [`tests/environment/assessment/test_wind_turbine_receptor.py`](../tests/environment/assessment/test_wind_turbine_receptor.py)).
+- **Status:** unreported.
+
+## IEC TS 61400-11-2:2024, 12.5.2.6 and 12.5.2.7 (ISO/TS 60025:2022 for ISO/TS 20065:2022)
+
+- **Location:** 12.5.2.6 "Frequency grouping" (printed folio 46) and 12.5.2.7
+  "Determination of mean audibility for each 1 min period" (printed folio 47).
+- **The print:** 12.5.2.6 first cites "ISO method (ISO/TS 20065:2022), 5.3.8,
+  Step 1 and Step 2", and then "ISO method (ISO/TS 60025:2022), 5.3.8,
+  Step 3", "ISO method (ISO/TS 60025:2022), Figure D.4" and "ISO method
+  (ISO/TS 60025:2022), 5.3.8, Step 1 and Step, in turn"; 12.5.2.7 cites "ISO
+  method (ISO/TS 60025:2022), 5.3.9".
+- **The problem:** 12.1 defines the "ISO method" as ISO/TS 20065, its NOTE 1
+  cites ISO/TS 20065:2022, and the first sentence of 12.5.2.6 cites it
+  correctly; there is no ISO/TS 60025. The
+  four later citations read **ISO/TS 20065:2022**, and "Step 1 and Step" reads
+  "Step 1 and Step 2", the two steps the first sentence names.
+- **Evidence:** a comparison of the citations with each other and with 12.1.
+  Read on PDF page 44 (printed p. 42), PDF page 48 (printed p. 46) and PDF
+  page 49 (printed p. 47) of IEC TS 61400-11-2:2024 (Edition 1.0, 2024-03).
+- **Library behaviour:** none needed. The frequency grouping of 12.5.2.6 and
+  the 1 min mean of 12.5.2.7 are not implemented; the tonal audibility the
+  library computes is that of ISO/PAS 20065:2016
+  ([`tone_audibility.py`](../src/phonometry/psychoacoustics/quality/tone_audibility.py)).
+- **Status:** unreported.
+
+## IEC TS 61400-11-2:2024, 13.6.2.2 against 13.6.3 (a 10 min period of exactly 30 valid blocks)
+
+- **Location:** 13.6.2.2 "Valid data" (printed folio 51) and 13.6.3 "Signal
+  analysis – 10 min results" (printed folio 54).
+- **The print:** 13.6.2.2: the 90th percentile "is only calculated over the
+  distribution of valid 10 s blocks, and only if the 10 min period contains at
+  least 50 % valid blocks". 13.6.3: "where the n number is greater than 50 %
+  (30 valid 10 s blocks), calculate the 90th percentile of the valid
+  modulation depths" and "where the n number is less than 50 % (30 valid 10 s
+  blocks), a modulation depth value of 0 is assigned to that 10 min period".
+- **The problem:** a period of sixty blocks with exactly 30 valid is rated by
+  13.6.2.2 ("at least 50 %") and falls under neither bullet of 13.6.3, whose
+  "greater than" and "less than" both leave it out. The AMWG Final Report the
+  clause implements (13.2) says "at least 50 % (i.e. 30) valid samples"
+  (4.4.4), and the working group's reference code rates a period of 30. The
+  bullets of 13.6.3 read **"at least 50 %"** and **"fewer than 50 %"**.
+- **Evidence:** a comparison of the two subclauses and of the AMWG report.
+  Read on PDF page 53 (printed p. 51) and PDF page 56 (printed p. 54) of
+  IEC TS 61400-11-2:2024 (Edition 1.0, 2024-03), and 4.4.4 on PDF page 23
+  (printed p. 20) of the IOA AMWG Final Report, Version 1 (9 August 2016).
+- **Library behaviour:** `amplitude_modulation_period` rates a period of 30
+  valid blocks, as 13.6.2.2 and the AMWG report do
+  (`AM_MINIMUM_VALID_BLOCKS`); the conformance rows pin the periods of 30 and
+  29 valid blocks
+  (`test_periods_agree_with_the_ioa_code_and_the_ts` in
+  [`tests/environment/assessment/test_wind_turbine_modulation.py`](../tests/environment/assessment/test_wind_turbine_modulation.py)).
+- **Status:** unreported.
+
+## IEC TS 61400-11-2:2024, Figure 1 ("Power specimen amplitude", "Initiate estimate")
+
+- **Location:** 13.6.2.3, Figure 1 "Power spectrum for a 10 s block" (printed
+  folio 54).
+- **The print:** the vertical axis is labelled "Power specimen amplitude, $S$"
+  and the legend reads "Initiate estimate of $f_1$ and $f_2$".
+- **The problem:** the axis is the power spectrum of Equation (12), which the
+  caption and 13.6.2.3 c) name; "specimen" reads **spectrum**. The dashed lines
+  are the initial estimates of the harmonics, as the NOTE under the figure and
+  the annotations inside it ("Initial $f_1$ estimate = 1,4 Hz") say;
+  "Initiate" reads **Initial**.
+- **Evidence:** Figure 1 and its NOTE on PDF page 56 (printed p. 54) of
+  IEC TS 61400-11-2:2024 (Edition 1.0, 2024-03).
+- **Library behaviour:** none needed; `ModulationBlock.plot()` labels the axis
+  "Power spectrum $S_{xx}$" and the lines "Estimated harmonics".
+- **Status:** unreported.
+
+## IEC TS 61400-11-2:2024, Table C.2 (the air attenuation of an 80 % atmosphere under a 70 % caption)
+
+- **Location:** Annex C (informative), C.2, Table C.2 "Equation coefficients
+  for a rural setting at 70 % humidity and 10 °C" (printed folio 64), the row
+  "α [dB/km]", and the sentence under the table.
+- **The print:** 0,0, 0,0, 0,0, 0,0, 0,02, 0,03, 0,05, 0,07, 0,11, 0,17,
+  0,26, 0,41, 0,59 and 0,80 dB/km from 10 Hz to 200 Hz, and "The air
+  absorption coefficient is calculated according to ISO 9613-1."
+- **The problem:** ISO 9613-1 at the caption's 10 °C and 70 % relative
+  humidity, at 101,325 kPa and the nominal band centres, gives to two decimals
+  0,01, 0,01, 0,02 and 0,02 dB/km more than the table at 50 Hz, 63 Hz, 80 Hz
+  and 100 Hz (0,08, 0,12, 0,19 and 0,28), and 0,01 dB/km where the table
+  prints 0,0 at 12,5 Hz to 20 Hz; from 125 Hz to 200 Hz it gives the printed
+  cells. The cells from 10 Hz to 100 Hz are those of the Danish statutory order
+  on wind turbine noise, BEK nr. 135 of 7 February 2019, Table 1.4, which is
+  set for **80 %** relative humidity and 10 °C, uses the Nord2000 attenuation
+  rates and ignores air absorption below 25 Hz, as Plovsing (DELTA, 2011),
+  Table 5, recommends; at 80 % ISO 9613-1 gives 0,07, 0,11, 0,17 and 0,25
+  dB/km from 50 Hz to 100 Hz, within 0,01 dB/km of them. The row joins two
+  atmospheres at 100 Hz, and a reader who recomputes it at the caption's
+  cannot reproduce its lower half. The difference is at most 0,02 dB/km, a few
+  hundredths of a decibel of Equation (C.1) at the distances Annex C is used
+  for.
+- **Evidence:** ISO 9613-1 evaluated at both humidities for the fourteen
+  bands. Table C.2 read on PDF page 66 (printed p. 64) of IEC TS
+  61400-11-2:2024 (Edition 1.0, 2024-03); Table 1.4 on PDF pages 13 and 14
+  (printed pp. 12 and 13) of BEK nr 135 af 07/02/2019; Table 5 on PDF page 25
+  (printed p. 25) of B. Plovsing, *Beregningsmetode for lavfrekvent støj fra
+  vindmøller*, Miljøstyrelsen arbejdsrapport nr. 2, 2011.
+- **Library behaviour:** `LOW_FREQUENCY_AIR_ATTENUATION_DB_PER_KM` holds the
+  row as printed and is the default of `wind_turbine_low_frequency_level`,
+  which reproduces the TS and the Danish order; a caller who wants ISO 9613-1
+  at another atmosphere passes `air_attenuation_db_per_km`. The conformance
+  rows check the row against both atmospheres
+  (`test_table_c2_air_attenuation_to_100_hz_is_the_danish_order_at_80_percent`
+  in
+  [`tests/environment/assessment/test_wind_turbine_receptor.py`](../tests/environment/assessment/test_wind_turbine_receptor.py)).
+- **Status:** unreported.
+
+## IEC TS 61400-11-2:2024, C.4 (uncertainty cross-referenced to 9.2, which is data sampling)
+
+- **Location:** Annex C (informative), C.4 "Uncertainty" (printed folio 65).
+- **The print:** "The principles from 9.2 on uncertainty can be applied to
+  each 1/3-octave band individually."
+- **The problem:** 9.2 is "Data sampling" of the non-acoustic measurements
+  and says nothing about uncertainty. The principles are those of **10.3**
+  "Uncertainty", to which 12.5.4 and 13.6.5 refer for the same purpose.
+- **Evidence:** a comparison of the cross-reference with the table of contents
+  and with 12.5.4 and 13.6.5. Read on PDF page 67 (printed p. 65), PDF page
+  49 (printed p. 47) and PDF page 57 (printed p. 55) of IEC TS
+  61400-11-2:2024 (Edition 1.0, 2024-03).
+- **Library behaviour:** none needed; `wind_turbine_low_frequency_level`
+  computes no uncertainty.
+- **Status:** unreported.
+
+## IEC TS 61400-11-2:2024, Table C.4 (the distance term added where Equation (C.1) subtracts it)
+
+- **Location:** Annex C (informative), C.5, Table C.4 "Low frequency
+  measurements reporting table" (printed folio 66), the third row.
+- **The print:** the row is labelled "+ 10log ($l^2$ +$h^2$)", between the
+  A-weighting row and the "− 11 dB" row.
+- **The problem:** Equation (C.1) subtracts the term,
+  $L_{p,\mathrm{LF}} = L_{W,\mathrm{LF}} - 10\lg(l^2 + h^2) - 11\ \mathrm{dB} +
+  \Delta L_{g,\mathrm{LF}} - \Delta L_a - \Delta L_\sigma$, and every other
+  row of the table carries the sign with which it enters the equation. Filled
+  in as labelled, the table adds twice the distance term to the level. The row
+  reads **"− 10log ($l^2$ + $h^2$)"**.
+- **Evidence:** Equation (C.1) on PDF page 65 (printed p. 63) and Table C.4 on
+  PDF page 68 (printed p. 66) of IEC TS 61400-11-2:2024 (Edition 1.0,
+  2024-03).
+- **Library behaviour:** `wind_turbine_low_frequency_level` evaluates Equation
+  (C.1) and reports the term it subtracts as `distance_terms_db`; the
+  conformance row on Equation (C.1) checks the sign
+  (`test_equation_c1_band_by_band` in
+  [`tests/environment/assessment/test_wind_turbine_receptor.py`](../tests/environment/assessment/test_wind_turbine_receptor.py)).
+- **Status:** unreported.
+
+## IEC TS 61400-11-2:2024, G.3 (band ends of 3 200 Hz and 6 400 Hz, which are not band centres)
+
+- **Location:** Annex G (informative), G.3 "Higher frequency bands" (printed
+  folio 73).
+- **The print:** "These bands are suggested to include the seven 1/3-octave
+  bands with centres of: Band 4: 400 Hz to 1 600 Hz; Band 5: 800 Hz to
+  3 200 Hz; Band 6: 1 600 Hz to 6 400 Hz".
+- **The problem:** 3 200 Hz and 6 400 Hz are not one-third-octave centre
+  frequencies. Seven bands span two octaves, and the nominal centre two
+  octaves above 800 Hz is 3 150 Hz, above 1 600 Hz it is 6 300 Hz; band 4
+  ends right only because 1 600 Hz is both four times 400 Hz and a nominal
+  centre. The ends read **3 150 Hz** and **6 300 Hz**.
+- **Evidence:** the seven nominal one-third-octave centres counted from each
+  lower end. Read on PDF page 75 (printed p. 73) of IEC TS 61400-11-2:2024
+  (Edition 1.0, 2024-03).
+- **Library behaviour:** `AM_FREQUENCY_BANDS_HZ` holds bands 5 and 6 with the
+  nominal 3 150 Hz and 6 300 Hz bands as their seventh.
+- **Status:** unreported.
+
+## IEC TS 61400-11-2:2024, K.4.9 (a sentence that stops at a comma)
+
+- **Location:** Annex K (informative), K.4.9 "Roughness length" (printed
+  folio 85).
+- **The print:** "Table K.3 is provided below as a reminder. Since this is a
+  crude estimate, valid only for cloudy conditions and long-term average,",
+  followed by blank lines and the next paragraph, "K.4.3 gives some guidance
+  on how to determine an apparent roughness length ...".
+- **The problem:** the sentence has a subordinate clause and no main clause;
+  what the crude estimate implies is lost. The next paragraph suggests it was
+  to send the reader to K.4.3 for a roughness length derived from the site.
+- **Evidence:** K.4.9 on PDF page 87 (printed p. 85) of IEC TS
+  61400-11-2:2024 (Edition 1.0, 2024-03).
+- **Library behaviour:** none needed; `ROUGHNESS_LENGTHS_M` holds Table K.3
+  and its docstring carries the TS's warning that the values are a crude
+  estimate.
+- **Status:** unreported.
+
 ## Related source properties that are not errata
 
 Recorded here to prevent future "fixes" that would break agreement with the

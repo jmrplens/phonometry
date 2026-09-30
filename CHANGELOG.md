@@ -494,6 +494,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   the amended Annex A sets for one traverse, and the $d_0$ that ISO 6926
   Formula (A.1) halves twice.
 
+- **Wind turbine sound at a dwelling, with its amplitude modulation rating
+  (IEC TS 61400-11-2:2024).** IEC 61400-11 measures what a turbine emits; the
+  new `environment.assessment.wind_turbine_receptor` and
+  `environment.assessment.wind_turbine_modulation` modules carry the
+  calculations of the TS that measures what arrives at a neighbour's house.
+  `power_law_wind_speed`, `wind_shear_exponent`, `wind_shear_profile` and
+  `logarithmic_wind_speed` move wind speeds between heights (Annex K and
+  9.3.2.1), and `sound_relevant_turbines` finds the turbines whose mean speed
+  is the binning wind speed of a wind farm (9.3.2.3). `bin_sound_levels`
+  averages the intervals of each 1 m/s and 30° bin with their type A and
+  type B uncertainty (Equations (1) to (5), (8) and (9)), and
+  `background_corrected` takes off the background under the rule of 11.7
+  (Equations (6) and (7)); `predicted_receptor_level` is the prediction
+  uncertainty of Equations (10) and (11). `wind_turbine_low_frequency_level`
+  predicts the low frequency level indoors band by band by Equation (C.1)
+  with Tables C.1 to C.3, `sound_emergence` is the emergence of Annex J,
+  `upper_tone_search_frequency` the top of the tone search of 12.5.2.4, and
+  `wind_turbine_rating_level` with `amplitude_modulation_adjustment` the
+  rating level of A.1 and the adjustment of Figure A.1. The amplitude
+  modulation of clause 13 runs from the logged one-third-octave levels
+  (`amplitude_modulation_band_levels`) through the 10 s block
+  (`amplitude_modulation_block`: de-trending, the power spectrum of Equation
+  (12), the prominence of Equation (13), the harmonics and the
+  reconstruction) and the 10 min rating (`amplitude_modulation_period`) to
+  the bins with their worst band (`bin_amplitude_modulation`). It is checked
+  against the reference code of the Institute of Acoustics working group,
+  used as an oracle only: its three sample series give the printed
+  prominence, fundamental and rating (44.64, 0.70 Hz and 8.38 dB for the
+  100 Hz to 400 Hz band). Where the TS departs from the working group's
+  report, the TS is followed: a period with fewer than 30 valid blocks is
+  rated 0 dB and kept in its bin, and the band is chosen per bin. Every
+  result has `.plot()`, and a new guide in both languages explains why the
+  air attenuation of Table C.2 sits 0,01 dB/km to 0,02 dB/km under
+  ISO 9613-1 between 50 Hz and 100 Hz: those cells are the Danish statutory
+  order's, set for 80 % relative humidity where the caption says 70 %. That
+  row and eight other printed defects of the TS are in the errata register,
+  among them the 10 °C, 80 % row of Table 7, computed at −10 °C and 80 %.
 - **Sound power in the 16 kHz octave band (ISO 9295).** The general sound
   power methods stop at the 10 kHz one-third-octave band, and a printer's
   paper noise or a power supply's whine sits above it. The new

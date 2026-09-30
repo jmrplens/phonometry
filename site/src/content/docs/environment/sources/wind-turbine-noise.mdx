@@ -378,26 +378,30 @@ repository; click the preview to open the PDF.
 The closed-form quantities of IEC 61400-11:2012+A1:2018: `slant_distance`
 (Formulae 1 and 2), `apparent_sound_power_level` (Formula 26) and the
 tonal-audibility chain of subclauses 9.5.2 to 9.5.8 through
-`wind_turbine_tonality`, with its `.report()` fiche. The instrumentation and
-position requirements of clauses 6 and 7 are documented above as the
-conditions those formulae assume, and the measurement-position tolerances are
-drawn.
+`wind_turbine_tonality`, with its `.report()` fiche. The Formula (29) mapping
+of a 10 m wind speed to hub height over $z_{0ref} = 0{,}05$ m is
+`environment.logarithmic_wind_speed`, on the
+[receptor page](/phonometry/environment/sources/wind-turbine-receptor/). The
+instrumentation and position requirements of clauses 6 and 7 are documented
+above as the conditions those formulae assume, and the measurement-position
+tolerances are drawn.
 </ScopeClaim>
 
 <ScopeClaim status="not-covered" label="Not covered">
 The measurement campaign itself: the 10 s averaging, the 0,5 m/s wind-speed
 binning with its 10 + 10 periods, the background correction, the interpolation
-to bin centres, the Formula (29) mapping to $z_{0ref} =
-0{,}05$ m and the
-uncertainty budget of clause 9.3 all operate on whole campaigns and are the
-user's. The declaration route of IEC TS 61400-14, which turns a batch of
+to bin centres and the uncertainty budget of clause 9.3 all operate on whole
+campaigns and are the user's. The declaration route of IEC TS 61400-14, which turns a batch of
 measured machines into the single number a planning authority receives, is not
 implemented either. And two things a wind-turbine reader often arrives looking
 for are outside IEC 61400-11 altogether: **amplitude modulation** (the
 "swish", which is folded into $L_{W\mathrm{A}}$ and rated nowhere in this standard) and
 **infrasound**. Both are listed in 7.2.1 as *optional* measurements with no
-rating method attached, so their assessment falls to national guidance; the
-psychoacoustic route to them starts at [Fluctuation strength and
+rating method attached. Amplitude modulation at a dwelling is rated by clause
+13 of IEC TS 61400-11-2, on the
+[receptor page](/phonometry/environment/sources/wind-turbine-receptor/);
+infrasound falls to national guidance, and the psychoacoustic route to both
+starts at [Fluctuation strength and
 roughness](/phonometry/perception/psychoacoustics/sound-quality/) and at
 [Special weightings](/phonometry/signals/levels/special-weightings/) for the
 G-weighted infrasound level.
@@ -411,6 +415,7 @@ G-weighted infrasound level.
 - [Environmental noise levels](/phonometry/environment/assessment/environmental-levels/): the ISO 1996-2 rating adjustment this page's $\Delta L_\mathrm{a}$ feeds.
 - [Tone audibility](/phonometry/perception/psychoacoustics/tone-audibility/): the same tonal-audibility idea outside the wind-turbine context.
 - [Outdoor Sound Propagation](/phonometry/environment/propagation/outdoor-propagation/): the chain that carries $L_{W\mathrm{A}}$ from the rotor to a dwelling.
+- [Wind turbine sound at a dwelling](/phonometry/environment/sources/wind-turbine-receptor/): IEC TS 61400-11-2, what arrives at the receptor, with its amplitude modulation rating and the low frequency level indoors.
 - API reference: [`environment.sources.wind_turbine`](/phonometry/reference/api/environment/wind-turbine/).
 
 </SeeAlso>

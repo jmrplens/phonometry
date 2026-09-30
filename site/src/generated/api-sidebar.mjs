@@ -272,6 +272,8 @@ export const apiSections = {
       'reference/api/environment/exposure-distribution',
       'reference/api/environment/rating',
       'reference/api/environment/wind-turbine',
+      'reference/api/environment/wind-turbine-receptor',
+      'reference/api/environment/wind-turbine-modulation',
       'reference/api/environment/measurement',
       'reference/api/environment/spain',
       'reference/api/environment/soundscape',

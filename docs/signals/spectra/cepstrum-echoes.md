@@ -393,7 +393,7 @@ pinned bit-exact in the tests. The envelope spectrum is the frequency-domain
 view of the same analytic signal the
 [Hilbert envelope](correlation-delay.md) returns in time, and a
 natural pre-analysis before the dedicated
-[wind-turbine amplitude-modulation](../../environment/sources/wind-turbine-noise.md)
+[wind-turbine amplitude-modulation](../../environment/sources/wind-turbine-receptor.md)
 metrics: the envelope spectrum tells you *whether and at what rate* a signal
 is modulated, the domain metrics quantify it normatively.
 

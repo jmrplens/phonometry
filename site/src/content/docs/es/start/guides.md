@@ -1,6 +1,6 @@
 ---
 title: "Guías"
-description: "Las 153 guías de phonometry, agrupadas en los trece temas que cubre la biblioteca: para qué sirve cada área, las normas que implementa y un resumen de una línea de cada guía que contiene."
+description: "Las 154 guías de phonometry, agrupadas en los trece temas que cubre la biblioteca: para qué sirve cada área, las normas que implementa y un resumen de una línea de cada guía que contiene."
 head:
   - tag: script
     attrs:
@@ -118,7 +118,7 @@ hay ninguna panorámica del campo: cada página es la documentación de trabajo 
 un módulo, escrita para que un resultado se pueda defender apartado por
 apartado en lugar de darlo por bueno.
 
-Esta página es el mapa. Ciento cincuenta y tres guías repartidas en trece temas, y cada
+Esta página es el mapa. Ciento cincuenta y cuatro guías repartidas en trece temas, y cada
 área tiene su propio índice con el relato largo de cómo encajan sus piezas. Si
 llegas sin una pregunta concreta, lee primero la
 [introducción](/phonometry/es/start/getting-started/): recorre una señal por toda la
@@ -698,7 +698,7 @@ valorarse, así que la atmósfera, el suelo y el propio movimiento de la fuente
 entran en la respuesta. Implementa ISO 9613-1/-2, ISO 1996-1/-2,
 ISO/PAS 1996-3, NT ACOU 112, ISO 13474, ISO/TS 12913-2/-3, CNOSSOS-EU
 (Directiva 2002/49/CE, anexo II), EN 1793-1/-2/-3/-5, EN 16272-3-1,
-ISO 11819-1 e IEC 61400-11.
+ISO 11819-1, IEC 61400-11 e IEC TS 61400-11-2.
 
 Hay un límite de alcance que vale la pena decir aquí y no a un clic de
 distancia. De CNOSSOS-EU, lo implementado es el lado de la **fuente** del anexo
@@ -743,6 +743,11 @@ para la cartografía reglamentaria.
 - [Ruido de aerogeneradores: potencia y audibilidad tonal](/phonometry/es/environment/sources/wind-turbine-noise/):
   el nivel de potencia acústica aparente referido al centro del rotor y la cadena
   de audibilidad tonal que decide si un tono se oye.
+- [Aerogeneradores en la vivienda (IEC TS 61400-11-2)](/phonometry/es/environment/sources/wind-turbine-receptor/):
+  lo que llega al receptor: la velocidad del viento entre alturas, los promedios
+  por intervalo y la corrección por fondo, el nivel de baja frecuencia en el
+  interior, la emergencia, la valoración de la modulación de amplitud contrastada
+  con el código del IOA y el nivel de evaluación.
 
 **[Evaluación y normativa](/phonometry/es/environment/assessment/)**
 

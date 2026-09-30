@@ -137,8 +137,11 @@ def documents(reference: Reference) -> tuple[Cited, ...]:
 # the airport-noise method and Doc 32 the rotorcraft one, and reading the body
 # as the designation filed both under "ECAC Doc" as though they were one book.
 # The rule for the ones that follow is the same as for the bodies: a fixed
-# prefix that every citation of that series is written with. Longest first,
-# since the alternation takes the first branch that matches.
+# prefix that every citation of that series is written with. IEC writes its
+# technical specifications and reports with a space, "IEC TS 61400-11-2", where
+# ISO writes a slash; read with the bare body, the "TS" was the designation and
+# the document number fell into the clause. Longest first, since the
+# alternation takes the first branch that matches.
 _BODIES = (
     "BS EN ISO",
     "BS EN",
@@ -150,6 +153,8 @@ _BODIES = (
     "ISO/TR",
     "ISO/TS",
     "ISO",
+    "IEC TS",
+    "IEC TR",
     "IEC/TR",
     "IEC",
     "CEN/TS",

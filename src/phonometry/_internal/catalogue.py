@@ -3071,7 +3071,9 @@ def rows_to_search[R: CatalogueRow](
     *row_type*, a subclass of the caller's own included. A row of another
     class is refused rather than skipped, because a lookup that skipped it
     would leave it out of the answer under the very name asked for, and
-    nothing would say so.
+    nothing would say so. The mapping is read once, and the rows the lookup
+    reads are the ones held to the class, so that a mapping that hands out
+    other values on a second reading cannot slip a row past the check.
 
     :param catalogue: What the caller passed as ``catalogue=``, or ``None``.
     :param published: The lookup's own published catalogue.
@@ -3089,6 +3091,7 @@ def rows_to_search[R: CatalogueRow](
             f"what io.read_catalogue returns; got {type(catalogue).__name__}"
         )
         raise TypeError(msg)
+    rows: list[R] = []
     for key, row in catalogue.items():
         if not isinstance(row, row_type):
             msg = (
@@ -3096,7 +3099,8 @@ def rows_to_search[R: CatalogueRow](
                 f"{key!r}, and {lookup} reads {row_type.__name__} rows"
             )
             raise TypeError(msg)
-    return tuple(catalogue.values())
+        rows.append(row)
+    return tuple(rows)
 
 
 def search_text(text: str) -> str:

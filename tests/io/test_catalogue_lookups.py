@@ -25,7 +25,7 @@ import importlib
 import inspect
 import pkgutil
 import typing
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Iterator, Mapping, ValuesView
 from typing import Any
 
 import pytest
@@ -273,6 +273,49 @@ def test_a_row_of_another_class_is_refused_by_its_key(name: str) -> None:
     )
     with pytest.raises(TypeError, match=expected):
         lookup("anything", catalogue=catalogue)
+
+
+class _ReadTwice(Mapping[str, io.CatalogueRow]):
+    """A mapping whose values, read a second time, are not the rows it held.
+
+    Its items are the rows it was made with, and its values are *later*, as
+    a mapping another thread changes between two readings hands them out.
+    """
+
+    def __init__(
+        self, rows: Mapping[str, io.CatalogueRow], later: Mapping[str, object]
+    ) -> None:
+        self._rows = dict(rows)
+        self._later = dict(later)
+
+    def __getitem__(self, key: str) -> io.CatalogueRow:
+        return self._rows[key]
+
+    def __iter__(self) -> Iterator[str]:
+        return iter(self._rows)
+
+    def __len__(self) -> int:
+        return len(self._rows)
+
+    def values(self) -> ValuesView[object]:  # type: ignore[override]
+        return self._later.values()
+
+
+@pytest.mark.parametrize("name", NAMES)
+def test_the_rows_searched_are_the_rows_held_to_the_class(name: str) -> None:
+    """A mapping read a second time cannot hand a lookup a row of another class.
+
+    The rows were held to the class over the mapping's items and then read
+    again from its values, so a row of another class put in between went
+    past the check.
+    """
+    lookup, published = LOOKUPS[name]
+    row_type = _row_type(lookup)
+    assert row_type is not None
+    row = dataclasses.replace(_first(published), name=_COMPOSED)
+    stranger = dataclasses.replace(_stranger(row_type), name=_COMPOSED)
+    catalogue = _ReadTwice({"mine/one": row}, {"mine/one": stranger})
+    assert lookup(_COMPOSED, catalogue=catalogue) == (row,)
 
 
 @pytest.mark.parametrize("name", NAMES)

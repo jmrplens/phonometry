@@ -3,13 +3,13 @@
   "library": "4.0.0rc1",
   "generator": "scripts/conformance_report.py",
   "counts": {
-    "checks": 1648,
-    "passing": 1648,
+    "checks": 1664,
+    "passing": 1664,
     "failing": 0,
-    "domains": 104,
-    "standards": 506,
-    "citations": 1153,
-    "designations": 210,
+    "domains": 105,
+    "standards": 507,
+    "citations": 1167,
+    "designations": 211,
     "sources": 122
   },
   "units": [
@@ -173,6 +173,12 @@
       "title": "Free-field qualification & reference sound sources",
       "checks": 31,
       "passing": 31
+    },
+    {
+      "id": "service-equipment-sound-in-buildings-iso-dis-16032-2023",
+      "title": "Service-equipment sound in buildings (ISO/DIS 16032:2023)",
+      "checks": 16,
+      "passing": 16
     },
     {
       "id": "building-prediction-uncertainty",
@@ -17389,6 +17395,551 @@
         "value": 0.1
       },
       "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "service-equipment-sound-in-buildings-iso-dis-16032-2023/iso-dis-16032-2023-clause-9/correction-for-a-background-4-db-below",
+      "domain": "service-equipment-sound-in-buildings-iso-dis-16032-2023",
+      "reference": {
+        "cite": "ISO/DIS 16032:2023 Clause 9",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO/DIS 16032",
+            "edition": "2023",
+            "clause": "Clause 9"
+          }
+        ]
+      },
+      "quantity": "Correction for a background 4 dB below",
+      "kind": "scalar",
+      "expected": {
+        "value": 2.2
+      },
+      "computed": {
+        "value": 2.2
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.05
+      },
+      "deviation": {
+        "value": 0.005
+      },
+      "precision": 2,
+      "verdict": "pass"
+    },
+    {
+      "id": "service-equipment-sound-in-buildings-iso-dis-16032-2023/iso-dis-16032-2023-clause-9/correction-held-at-2-2-db-below-4-db",
+      "domain": "service-equipment-sound-in-buildings-iso-dis-16032-2023",
+      "reference": {
+        "cite": "ISO/DIS 16032:2023 Clause 9",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO/DIS 16032",
+            "edition": "2023",
+            "clause": "Clause 9"
+          }
+        ]
+      },
+      "quantity": "Correction held at 2,2 dB below 4 dB",
+      "kind": "count",
+      "expected": {
+        "value": 3.0,
+        "label": "3/3 bands held at 2,2 dB"
+      },
+      "computed": {
+        "value": 3.0,
+        "label": "3/3 bands held at 2,2 dB"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "service-equipment-sound-in-buildings-iso-dis-16032-2023/iso-dis-16032-2023-clause-9/thresholds-of-10-db-and-4-db-met-by-decimal-levels",
+      "domain": "service-equipment-sound-in-buildings-iso-dis-16032-2023",
+      "reference": {
+        "cite": "ISO/DIS 16032:2023 Clause 9",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO/DIS 16032",
+            "edition": "2023",
+            "clause": "Clause 9"
+          }
+        ]
+      },
+      "quantity": "Thresholds of 10 dB and 4 dB met by decimal levels",
+      "kind": "count",
+      "expected": {
+        "value": 2.0,
+        "label": "2/2 bands placed as Clause 9 reads"
+      },
+      "computed": {
+        "value": 2.0,
+        "label": "2/2 bands placed as Clause 9 reads"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "service-equipment-sound-in-buildings-iso-dis-16032-2023/iso-dis-16032-2023-clause-9-formulae-7-to-9/correction-from-4-db-to-10-db-is-the-energy-subtraction",
+      "domain": "service-equipment-sound-in-buildings-iso-dis-16032-2023",
+      "reference": {
+        "cite": "ISO/DIS 16032:2023 Clause 9, Formulae (7) to (9)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO/DIS 16032",
+            "edition": "2023",
+            "clause": "Clause 9, Formulae (7) to (9)"
+          }
+        ]
+      },
+      "quantity": "Correction from 4 dB to 10 dB is the energy subtraction",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0
+      },
+      "computed": {
+        "value": 0.0
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "service-equipment-sound-in-buildings-iso-dis-16032-2023/iso-dis-16032-2023-annex-a-table-a-1/a-weighting-one-third-octave-and-octave",
+      "domain": "service-equipment-sound-in-buildings-iso-dis-16032-2023",
+      "reference": {
+        "cite": "ISO/DIS 16032:2023 Annex A, Table A.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO/DIS 16032",
+            "edition": "2023",
+            "clause": "Annex A, Table A.1"
+          }
+        ]
+      },
+      "quantity": "A-weighting, one-third-octave and octave",
+      "kind": "count",
+      "expected": {
+        "value": 36.0,
+        "label": "36/36 A-weighting cells of Table A.1"
+      },
+      "computed": {
+        "value": 36.0,
+        "label": "36/36 A-weighting cells of Table A.1"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "service-equipment-sound-in-buildings-iso-dis-16032-2023/iso-dis-16032-2023-annex-a-table-a-1-against-iec-61672-1-2013-table-3/c-weighting-printed-cells-kept-misprinted-cells-from-iec-61672-1",
+      "domain": "service-equipment-sound-in-buildings-iso-dis-16032-2023",
+      "reference": {
+        "cite": "ISO/DIS 16032:2023 Annex A, Table A.1 against IEC 61672-1:2013 Table 3",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO/DIS 16032",
+            "edition": "2023",
+            "clause": "Annex A, Table A.1"
+          },
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-1",
+            "edition": "2013",
+            "clause": "Table 3",
+            "lead": " against ",
+            "relation": "compares"
+          }
+        ]
+      },
+      "quantity": "C-weighting: printed cells kept, misprinted cells from IEC 61672-1",
+      "kind": "count",
+      "expected": {
+        "value": 36.0,
+        "label": "36/36 C-weighting cells: 26 as printed, 10 from IEC 61672-1"
+      },
+      "computed": {
+        "value": 36.0,
+        "label": "36/36 C-weighting cells"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "service-equipment-sound-in-buildings-iso-dis-16032-2023/iso-dis-16032-2023-clause-10-table-2/reproducibility-standard-deviations",
+      "domain": "service-equipment-sound-in-buildings-iso-dis-16032-2023",
+      "reference": {
+        "cite": "ISO/DIS 16032:2023 Clause 10, Table 2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO/DIS 16032",
+            "edition": "2023",
+            "clause": "Clause 10, Table 2"
+          }
+        ]
+      },
+      "quantity": "Reproducibility standard deviations",
+      "kind": "count",
+      "expected": {
+        "value": 38.0,
+        "label": "38/38 cells of Table 2"
+      },
+      "computed": {
+        "value": 38.0,
+        "label": "38/38 cells of Table 2"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "service-equipment-sound-in-buildings-iso-dis-16032-2023/iso-dis-16032-2023-formula-1-and-7-5/band-average-of-three-readings-to-0-1-db",
+      "domain": "service-equipment-sound-in-buildings-iso-dis-16032-2023",
+      "reference": {
+        "cite": "ISO/DIS 16032:2023 Formula (1) and 7.5",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO/DIS 16032",
+            "edition": "2023",
+            "clause": "Formula (1) and 7.5"
+          }
+        ]
+      },
+      "quantity": "Band average of three readings, to 0,1 dB",
+      "kind": "scalar",
+      "expected": {
+        "value": 43.7
+      },
+      "computed": {
+        "value": 43.7
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 2,
+      "verdict": "pass"
+    },
+    {
+      "id": "service-equipment-sound-in-buildings-iso-dis-16032-2023/iso-dis-16032-2023-formula-5-and-7-7/standardization-by-t-2-t0-in-50-hz-to-5-000-hz-octaves-63-hz-to-4-000-hz-only",
+      "domain": "service-equipment-sound-in-buildings-iso-dis-16032-2023",
+      "reference": {
+        "cite": "ISO/DIS 16032:2023 Formula (5) and 7.7",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO/DIS 16032",
+            "edition": "2023",
+            "clause": "Formula (5) and 7.7"
+          }
+        ]
+      },
+      "quantity": "Standardization by T = 2 T0 in 50 Hz to 5 000 Hz (octaves 63 Hz to 4 000 Hz) only",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0
+      },
+      "computed": {
+        "value": 0.0
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "service-equipment-sound-in-buildings-iso-dis-16032-2023/iso-dis-16032-2023-formula-6/normalization-of-an-equivalent-absorption-area-of-16-m-to-a0-10-m-at-1-khz",
+      "domain": "service-equipment-sound-in-buildings-iso-dis-16032-2023",
+      "reference": {
+        "cite": "ISO/DIS 16032:2023 Formula (6)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO/DIS 16032",
+            "edition": "2023",
+            "clause": "Formula (6)"
+          }
+        ]
+      },
+      "quantity": "Normalization of an equivalent absorption area of 16 m² to A0 = 10 m² at 1 kHz",
+      "kind": "scalar",
+      "expected": {
+        "value": 42.0412
+      },
+      "computed": {
+        "value": 42.0412
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 5e-05
+      },
+      "deviation": {
+        "value": -1.73e-07
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "service-equipment-sound-in-buildings-iso-dis-16032-2023/iso-dis-16032-2023-formula-2-and-7-8/la-eq-of-a-flat-40-db-spectrum-over-50-hz-to-5-000-hz",
+      "domain": "service-equipment-sound-in-buildings-iso-dis-16032-2023",
+      "reference": {
+        "cite": "ISO/DIS 16032:2023 Formula (2) and 7.8",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO/DIS 16032",
+            "edition": "2023",
+            "clause": "Formula (2) and 7.8"
+          }
+        ]
+      },
+      "quantity": "LA,eq of a flat 40 dB spectrum over 50 Hz to 5 000 Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 51.00036490684148
+      },
+      "computed": {
+        "value": 51.0004
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "service-equipment-sound-in-buildings-iso-dis-16032-2023/iso-dis-16032-2023-formula-3-and-7-8/lc-eq-of-a-flat-40-db-spectrum-over-25-hz-to-10-000-hz",
+      "domain": "service-equipment-sound-in-buildings-iso-dis-16032-2023",
+      "reference": {
+        "cite": "ISO/DIS 16032:2023 Formula (3) and 7.8",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO/DIS 16032",
+            "edition": "2023",
+            "clause": "Formula (3) and 7.8"
+          }
+        ]
+      },
+      "quantity": "LC,eq of a flat 40 dB spectrum over 25 Hz to 10 000 Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 53.55069421650335
+      },
+      "computed": {
+        "value": 53.5507
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "service-equipment-sound-in-buildings-iso-dis-16032-2023/iso-dis-16032-2023-7-8/single-numbers-rounded-to-whole-decibels",
+      "domain": "service-equipment-sound-in-buildings-iso-dis-16032-2023",
+      "reference": {
+        "cite": "ISO/DIS 16032:2023 7.8",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO/DIS 16032",
+            "edition": "2023",
+            "clause": "7.8"
+          }
+        ]
+      },
+      "quantity": "Single numbers rounded to whole decibels",
+      "kind": "count",
+      "expected": {
+        "value": 3.0,
+        "label": "3/3 single numbers rounded as 7.8 reads"
+      },
+      "computed": {
+        "value": 3.0,
+        "label": "3/3 single numbers rounded as 7.8 reads"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "service-equipment-sound-in-buildings-iso-dis-16032-2023/iso-dis-16032-2023-7-4-1/position-ladder-at-its-thresholds",
+      "domain": "service-equipment-sound-in-buildings-iso-dis-16032-2023",
+      "reference": {
+        "cite": "ISO/DIS 16032:2023 7.4.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO/DIS 16032",
+            "edition": "2023",
+            "clause": "7.4.1"
+          }
+        ]
+      },
+      "quantity": "Position ladder at its thresholds",
+      "kind": "count",
+      "expected": {
+        "value": 8.0,
+        "label": "8/8 stages decided as 7.4.1 reads"
+      },
+      "computed": {
+        "value": 8.0,
+        "label": "8/8 stages decided as 7.4.1 reads"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "service-equipment-sound-in-buildings-iso-dis-16032-2023/iso-dis-16032-2023-7-2-and-7-3/distances-and-heights-of-the-positions-at-each-limit",
+      "domain": "service-equipment-sound-in-buildings-iso-dis-16032-2023",
+      "reference": {
+        "cite": "ISO/DIS 16032:2023 7.2 and 7.3",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO/DIS 16032",
+            "edition": "2023",
+            "clause": "7.2 and 7.3"
+          }
+        ]
+      },
+      "quantity": "Distances and heights of the positions at each limit",
+      "kind": "count",
+      "expected": {
+        "value": 26.0,
+        "label": "26/26 limits decided as 7.2 and 7.3 read"
+      },
+      "computed": {
+        "value": 26.0,
+        "label": "26/26 limits decided as 7.2 and 7.3 read"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "service-equipment-sound-in-buildings-iso-dis-16032-2023/iso-dis-16032-2023-7-9/additional-position-for-a-source-in-the-room",
+      "domain": "service-equipment-sound-in-buildings-iso-dis-16032-2023",
+      "reference": {
+        "cite": "ISO/DIS 16032:2023 7.9",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO/DIS 16032",
+            "edition": "2023",
+            "clause": "7.9"
+          }
+        ]
+      },
+      "quantity": "Additional position for a source in the room",
+      "kind": "count",
+      "expected": {
+        "value": 3.0,
+        "label": "3/3 positions placed as 7.9 reads"
+      },
+      "computed": {
+        "value": 3.0,
+        "label": "3/3 positions placed as 7.9 reads"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
       "verdict": "pass"
     },
     {

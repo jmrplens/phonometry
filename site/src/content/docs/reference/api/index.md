@@ -173,6 +173,7 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | [`building.prediction.aperture_transmission`](/phonometry/reference/api/building/aperture-transmission/) | Sound transmission through slits, holes and apertures (Hopkins 2007, Sound Insulation, Section 4.3.10; Gomperts 1964; Wilson & Soroka 1965). |
 | [`building.measurement.lab_insulation`](/phonometry/reference/api/building/lab-insulation/) | Laboratory sound insulation of building elements (ISO 10140). |
 | [`building.measurement.survey_insulation`](/phonometry/reference/api/building/survey-insulation/) | Field survey method for sound insulation and service-equipment noise (ISO 10052:2021). |
+| [`building.measurement.service_equipment`](/phonometry/reference/api/building/service-equipment/) | Sound from service equipment and activities in buildings, engineering method. |
 | [`building.measurement.intensity_insulation`](/phonometry/reference/api/building/intensity-insulation/) | Sound insulation measured with sound intensity (ISO 15186). |
 | [`building.measurement.flanking_transmission`](/phonometry/reference/api/building/flanking-transmission/) | Laboratory measurement of flanking sound transmission (ISO 10848:2006/2010). |
 | [`building.prediction.facade`](/phonometry/reference/api/building/facade/) | Façade sound insulation and outdoor radiation prediction (EN 12354-3/-4:2000). |

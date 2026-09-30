@@ -49,6 +49,12 @@ level and the Annex D rating.
 When the question does not deserve that effort,
 [Sound Insulation Survey Method (ISO 10052)](insulation-survey.md)
 trades accuracy for speed with octave bands and a reverberation index.
+The same field work measures the sound the building's own equipment makes in
+its rooms, and ISO 10052 has a survey quantity for it; the engineering method
+is
+[Service-Equipment and Activity Noise (ISO 16032)](service-equipment-noise.md),
+implemented from the draft of its second edition, which adds activities such
+as a bar or a sports hall to the installed equipment.
 
 **Ratings and the envelope.**
 [Insulation Ratings (ISO 717)](insulation-ratings.md) is the
@@ -85,6 +91,10 @@ related EN 12354-5, lives in
 - [Sound Insulation Survey Method (ISO 10052)](insulation-survey.md):
   the octave-band control method, its reverberation index and its survey
   quantities.
+- [Service-Equipment and Activity Noise (ISO 16032)](service-equipment-noise.md):
+  the engineering method for the sound of taps, lifts, ventilation and
+  activities in a room, from the ISO/DIS 16032:2023 draft: positions,
+  background, standardization and the Table 1 single numbers.
 - [Laboratory Flanking Transmission (ISO 10848)](flanking-lab.md):
   the measured vibration reduction index Kij, the flanking descriptors Dn,f
   and Ln,f, and the suspended-ceiling plenum path with its normalized ceiling
@@ -115,16 +125,22 @@ microphone positions behind those spectra, not the corner positions the
 ISO 16283 low-frequency procedure is fed from, and not the test-facility and
 mounting requirements of ISO 10140-1. Those are the operator's
 responsibility and the report's, and
-they are what makes the numbers here mean something. Background noise is the
-one correction genuinely left to the caller: field levels must arrive already
-corrected, their 6 dB signal-to-background floor checked by the operator,
-while the ISO 10140-4 laboratory helper applies its rule itself, warning when
-its own floor is broken and capping the correction. Two consequences worth
-naming: the field and laboratory background corrections are *different*
-rules, so that laboratory helper must not be applied to field data; and the
-intensity route takes both the pressure and the intensity level as inputs,
-with the scanning probe and its phase-mismatch calibration outside the
-library.
+they are what makes the numbers here mean something. The one method that
+checks its own positions is the ISO 16032 engineering method for
+service-equipment noise, with the position ladder of its 7.4.1, the
+distances of 7.3 and the corner height of 7.2 in a rectangular room.
+Background noise is the one correction genuinely left to the caller of the
+insulation routines: their
+field levels must arrive already corrected, their 6 dB signal-to-background
+floor checked by the operator. Two helpers apply their own rule instead: the
+ISO 10140-4 laboratory one, warning when its floor is broken and capping the
+correction, and the Clause 9 field correction of ISO 16032 for service
+equipment, which holds its correction at 2.2 dB below a 4 dB margin and marks
+the result an upper limit. Two consequences worth naming: the background
+corrections are *different* rules, so neither helper is to be applied to
+the field data of an insulation index; and the intensity route takes both
+the pressure and the intensity level as inputs, with the scanning probe and
+its phase-mismatch calibration outside the library.
 
 **Coverage inside the standards is partial in two places.** Of ISO 10848 only
 the Part 1 formulae are implemented generically, plus the Part 4 modal-overlap

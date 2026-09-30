@@ -204,7 +204,7 @@ export const en: HomeContent = {
 				name: 'Rooms and buildings',
 				href: '/phonometry/buildings/',
 				summary: 'Room parameters, background noise, field and laboratory insulation, prediction.',
-				standards: ['ISO 3382-1/-2/-3', 'ISO 16283-1/-2/-3', 'ISO 10140', 'ISO 10848', 'ISO 15186-1/-2', 'ISO 16251-1', 'ISO 717-1/-2', 'EN 12354-1…-6', 'ISO 18233', 'ISO 12999-1', 'ISO 10052', 'ANSI/ASA S12.2', 'ASTM E413/E1414'],
+				standards: ['ISO 3382-1/-2/-3', 'ISO 16283-1/-2/-3', 'ISO 10140', 'ISO 10848', 'ISO 15186-1/-2', 'ISO 16251-1', 'ISO 717-1/-2', 'EN 12354-1…-6', 'ISO 18233', 'ISO 12999-1', 'ISO 10052', 'ISO 16032', 'ANSI/ASA S12.2', 'ASTM E413/E1414'],
 			},
 			{
 				name: 'Materials and surfaces',
@@ -359,7 +359,7 @@ export const es: HomeContent = {
 				name: 'Salas y edificación',
 				href: '/phonometry/es/buildings/',
 				summary: 'Parámetros de sala, ruido de fondo, aislamiento en campo y laboratorio, predicción.',
-				standards: ['ISO 3382-1/-2/-3', 'ISO 16283-1/-2/-3', 'ISO 10140', 'ISO 10848', 'ISO 15186-1/-2', 'ISO 16251-1', 'ISO 717-1/-2', 'EN 12354-1…-6', 'ISO 18233', 'ISO 12999-1', 'ISO 10052', 'ANSI/ASA S12.2', 'ASTM E413/E1414'],
+				standards: ['ISO 3382-1/-2/-3', 'ISO 16283-1/-2/-3', 'ISO 10140', 'ISO 10848', 'ISO 15186-1/-2', 'ISO 16251-1', 'ISO 717-1/-2', 'EN 12354-1…-6', 'ISO 18233', 'ISO 12999-1', 'ISO 10052', 'ISO 16032', 'ANSI/ASA S12.2', 'ASTM E413/E1414'],
 			},
 			{
 				name: 'Materiales y superficies',

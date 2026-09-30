@@ -430,6 +430,46 @@ def _calculation_verification() -> ph.environment.CalculationVerification:
     )
 
 
+def _service_equipment() -> ph.building.ServiceEquipmentResult:
+    """A ventilation outlet heard in a bedroom, 25 Hz to 10 kHz (ISO/DIS 16032)."""
+    freqs = np.array(list(ph.building.SERVICE_EQUIPMENT_WEIGHTING["third"]["A"]))
+    shape = 48.0 - 0.6 * np.arange(freqs.size)
+    readings = shape + np.array([[0.4], [-0.3], [0.8]])
+    background = shape - 12.0
+    background[[1, 24]] = shape[[1, 24]] - 3.0
+    t = np.full(freqs.size, 0.6)
+    return ph.building.service_equipment_level(
+        readings,
+        freqs,
+        quantity="eq",
+        background_db=background,
+        reverberation_time_s=t,
+        volume_m3=32.0,
+    )
+
+
+def _service_equipment_background() -> ph.building.ServiceEquipmentBackgroundResult:
+    """Three octave bands, one of them held at 2,2 dB (ISO/DIS 16032 Clause 9)."""
+    return ph.building.service_equipment_background_correction(
+        [52.0, 48.0, 41.0], [38.0, 42.0, 39.0], frequencies_hz=[125.0, 250.0, 500.0]
+    )
+
+
+def _position_spread() -> ph.building.PositionSpreadCheck:
+    """Six A-weighted readings of 7.4.1 that settle on the second stage."""
+    return ph.building.check_position_spread([36.2, 33.0, 34.1, 35.8, 32.4, 34.6])
+
+
+def _service_equipment_positions() -> ph.building.ServiceEquipmentPositionCheck:
+    """A 4,2 m by 3,4 m bedroom with a supply outlet near the ceiling."""
+    return ph.building.check_service_equipment_positions(
+        (4.2, 3.4, 2.5),
+        (0.5, 0.5, 0.5),
+        [(2.1, 1.9, 1.3), (3.4, 0.8, 1.6)],
+        source_positions_m=[(4.0, 3.2, 2.3)],
+    )
+
+
 def _soundscape_answers() -> tuple[np.ndarray, list[str]]:
     """Twelve Method A part 2 answers at three sites (ISO/TS 12913-3 A.3)."""
     answers = np.array(

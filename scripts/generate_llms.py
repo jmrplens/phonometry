@@ -326,9 +326,11 @@ def _area_members() -> dict[str, list[str]]:
 #: a cut chosen to fit the budget, so a reader fetching one shard gets a
 #: coherent set of guides and not an arbitrary half.
 #:
-#: ``buildings/insulation`` has ten guides, and its own overview groups them by
-#: hand (``docs/buildings/insulation/index.md``: "Laboratory.", "Field.",
-#: "Ratings and the envelope.").
+#: ``buildings/insulation`` has eleven guides, and its own overview groups them
+#: by hand (``docs/buildings/insulation/index.md``: "Laboratory.", "Field.",
+#: "Ratings and the envelope."). Two of those groups carve out, the laboratory
+#: methods and the ratings with the envelope, and the field methods keep the
+#: folder's own shard.
 #:
 #: ``devices/emission`` has eleven, and the family sorts its determination
 #: routes by the quantity actually measured: sound pressure, sound intensity,
@@ -359,6 +361,11 @@ def _area_members() -> dict[str, list[str]]:
 #: below).
 MANUAL_SPLITS: dict[str, tuple[tuple[str, str, tuple[str, ...]], ...]] = {
     "buildings/insulation": (
+        (
+            "buildings-insulation-laboratory",
+            "Laboratory insulation measurement",
+            ("insulation-lab", "insulation-intensity", "flanking-lab"),
+        ),
         (
             "buildings-insulation-ratings",
             "Insulation ratings and the envelope",

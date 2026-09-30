@@ -11,6 +11,7 @@ a regulation quotes. Everything here is embedded by a page under
 """
 
 import warnings
+from typing import TYPE_CHECKING
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -31,6 +32,9 @@ from .theme import (
     _band_index_axis,
     save_figure,
 )
+
+if TYPE_CHECKING:
+    from phonometry.building import ServiceEquipmentResult
 
 
 def generate_insulation_rating(output_dir: str) -> None:
@@ -3322,4 +3326,90 @@ def generate_low_frequency_procedure(output_dir: str) -> None:
     )
     plt.tight_layout()
     save_figure(output_dir, "low_frequency_procedure.svg")
+    plt.close()
+
+
+#: The receiving bedroom of the ISO/DIS 16032 figures, 4,2 m by 3,4 m by
+#: 2,5 m (36 m³), next to the bathroom whose water closet is measured.
+_SERVICE_ROOM = (4.2, 3.4, 2.5)
+
+
+def _service_equipment_measurement() -> "ServiceEquipmentResult":
+    """A water closet heard in the bedroom next door, 25 Hz to 10 kHz."""
+    from phonometry import building
+
+    freqs = np.array(list(building.SERVICE_EQUIPMENT_WEIGHTING["third"]["A"]))
+    # Flushing and refilling one full cycle (Annex B.2.6), the equivalent
+    # level of each of the three readings of 7.4.1.
+    spectrum = np.array(
+        [
+            29.5, 31.0, 33.2, 35.4, 37.1, 38.6, 40.2, 41.5, 42.3, 42.8,
+            42.6, 41.9, 40.8, 39.4, 37.9, 36.2, 34.6, 33.1, 31.4, 29.8,
+            28.1, 26.5, 24.6, 22.9, 21.0, 19.4, 17.6,
+        ]
+    )  # fmt: skip
+    readings = spectrum + np.array([[0.6], [-0.9], [0.4]])
+    # A quiet bedroom at night: the background climbs at low frequencies,
+    # where the three lowest bands end up within 4 dB of the flushing.
+    background = np.array(
+        [
+            28.0, 28.4, 29.6, 27.2, 25.1, 23.0, 21.2, 19.6, 18.1, 16.9,
+            15.8, 14.9, 14.1, 13.4, 12.8, 12.3, 11.9, 11.6, 11.4, 11.3,
+            11.2, 11.2, 11.3, 11.5, 11.8, 12.2, 12.7,
+        ]
+    )  # fmt: skip
+    # ISO 3382-2 in 50 Hz to 5 000 Hz only (Clause 8); the other bands are
+    # never standardized (7.7).
+    reverberation = np.array(
+        [
+            np.nan, np.nan, np.nan, 0.82, 0.78, 0.74, 0.70, 0.66, 0.63, 0.60,
+            0.58, 0.56, 0.55, 0.54, 0.53, 0.52, 0.51, 0.50, 0.49, 0.48,
+            0.47, 0.46, 0.45, 0.44, np.nan, np.nan, np.nan,
+        ]
+    )  # fmt: skip
+    return building.service_equipment_level(
+        readings,
+        freqs,
+        quantity="eq",
+        background_db=background,
+        reverberation_time_s=reverberation,
+        volume_m3=float(np.prod(_SERVICE_ROOM)),
+    )
+
+
+def generate_service_equipment_level(output_dir: str) -> None:
+    """ISO/DIS 16032: from the readings to L_A,eq,nT, band by band."""
+    print("Generating service_equipment_level...")
+    _fig, ax = plt.subplots(figsize=(11, 6.2))
+    _service_equipment_measurement().plot(ax=ax, language=_LANG)
+    save_figure(output_dir, "service_equipment_level.png")
+    plt.close()
+
+
+def generate_service_equipment_position_spread(output_dir: str) -> None:
+    """ISO/DIS 16032 7.4.1: six readings, the second stage settles it."""
+    print("Generating service_equipment_position_spread...")
+    from phonometry import building
+
+    check = building.check_position_spread([34.1, 31.2, 35.6, 33.9, 32.4, 34.8])
+    _fig, ax = plt.subplots(figsize=(9, 5.6))
+    check.plot(ax=ax, language=_LANG)
+    save_figure(output_dir, "service_equipment_position_spread.png")
+    plt.close()
+
+
+def generate_service_equipment_positions(output_dir: str) -> None:
+    """ISO/DIS 16032 7.2 and 7.3: the positions in the bedroom, in plan."""
+    print("Generating service_equipment_positions...")
+    from phonometry import building
+
+    check = building.check_service_equipment_positions(
+        _SERVICE_ROOM,
+        (3.7, 2.9, 0.5),  # the loudest corner, against the bathroom wall
+        [(1.4, 1.9, 1.2), (3.1, 0.8, 1.5)],
+        source_positions_m=[(0.6, 3.0, 2.5)],  # a supply outlet in the ceiling
+    )
+    _fig, ax = plt.subplots(figsize=(9, 7))
+    check.plot(ax=ax, language=_LANG)
+    save_figure(output_dir, "service_equipment_positions.png")
     plt.close()

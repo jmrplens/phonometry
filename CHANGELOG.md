@@ -571,6 +571,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   Table 69 of ISO/TR 17534-3, whose worked TRC form answers "yes" for a
   250 Hz result below its lower limit.
 
+- **Service-equipment and activity noise in buildings, engineering method
+  (ISO 16032, from the ISO/DIS 16032:2023 draft).** The number a building
+  regulation puts on a neighbour's water closet, a lift or a ventilation
+  outlet, and, new in the revision, on activities such as a bar downstairs or
+  a sports hall, in rooms of about 300 m³ or less, now comes out of
+  `service_equipment_level`. It takes the band spectra of every reading in one of the three Table 1 quantities (S- or
+  F-weighted maximum, or equivalent level), averages them by Formula (1) to a
+  tenth of a decibel, corrects the background by Clause 9 (held at 2.2 dB
+  below a 4 dB margin, and the band then marked as an upper limit; a margin
+  of exactly 10.0 dB or 4.0 dB between levels read to 0.1 dB falls on the
+  side the clause prints),
+  standardizes to $T_0$ or normalizes to $A_0 = 10$ m² over 50 Hz to 5000 Hz
+  only, and sums the A- and C-weighted single numbers keyed by the Table 1
+  notation (`"LA,eq,nT"`, `"LC,Fmax"`...), rounded to whole decibels, with the
+  Table 2 reproducibility of each. `check_position_spread` is the ladder of
+  7.4.1 that decides between three, six and nine readings, and interrupts as
+  soon as the readings are 9.0 dB apart, since more of them can only widen
+  the spread;
+  `loudest_corner` and `additional_microphone_position` place the
+  microphones by 7.2 and 7.9, and `check_service_equipment_positions` holds
+  them to the distances and heights of 7.3 and the corner height of 7.2;
+  `service_equipment_background_correction` is Clause 9 on its own; and
+  `SERVICE_EQUIPMENT_OPERATING_CONDITIONS` holds how Annex B runs each kind of
+  equipment, the activities of B.10 included. Every result has `.plot()`, and
+  a new guide in both languages takes a water closet from the readings to
+  $L_\mathrm{A,eq,nT}$. The published second edition was not available, so
+  the draft is followed throughout and cited as a draft with its own clause
+  numbers. Its one-third-octave C-weighting in Table A.1 is misprinted (0 dB
+  from 1600 Hz up, −5 dB at 25 Hz), and the library takes those ten cells from
+  IEC 61672-1; that defect and five more of the draft are in the errata
+  registry.
+
 - **Sound power in the 16 kHz octave band (ISO 9295).** The general sound
   power methods stop at the 10 kHz one-third-octave band, and a printer's
   paper noise or a power supply's whine sits above it. The new

@@ -1,8 +1,8 @@
 # phonometry
 
-> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1648 numerical conformance checks against 506 standards enforced in CI.
+> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1664 numerical conformance checks against 507 standards enforced in CI.
 
-phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1648 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 104 domains.
+phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1664 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 105 domains.
 
 The project was published as **PyOctaveBand** until version 3.0.0. Third-party references and dependency pins still using that name refer to this library.
 
@@ -161,16 +161,21 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 - [Stage support and uncertainty (ISO 3382-1)](https://jmrplens.github.io/phonometry/buildings/rooms/stage-and-uncertainty/)
 - [Reporting and source qualification (ISO 3382-1)](https://jmrplens.github.io/phonometry/buildings/rooms/reporting-and-qualification/)
 
-### Sound insulation
+### Laboratory insulation measurement
 
-- [Overview](https://jmrplens.github.io/phonometry/buildings/insulation/) · [full text](https://jmrplens.github.io/phonometry/llms/llms-buildings-insulation.txt)
+- [Overview](https://jmrplens.github.io/phonometry/buildings/insulation/) · [full text](https://jmrplens.github.io/phonometry/llms/llms-buildings-insulation-laboratory.txt)
 - [Laboratory Insulation Measurement](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-lab/)
 - [Sound Insulation by Intensity (ISO 15186)](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-intensity/)
 - [Laboratory Flanking Transmission (ISO 10848)](https://jmrplens.github.io/phonometry/buildings/insulation/flanking-lab/)
+
+### Sound insulation
+
+- [Overview](https://jmrplens.github.io/phonometry/buildings/insulation/) · [full text](https://jmrplens.github.io/phonometry/llms/llms-buildings-insulation.txt)
 - [Field Insulation Measurement (ISO 16283)](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-field/)
 - [Small Rooms: the ISO 16283 Low-Frequency Procedure](https://jmrplens.github.io/phonometry/buildings/insulation/low-frequency-procedure/)
 - [Heavy and Soft Impact Sources (ISO 16283-2)](https://jmrplens.github.io/phonometry/buildings/insulation/heavy-impact-sources/)
 - [Sound Insulation Survey Method (ISO 10052)](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-survey/)
+- [Service-Equipment and Activity Noise (ISO 16032)](https://jmrplens.github.io/phonometry/buildings/insulation/service-equipment-noise/)
 
 ### Insulation ratings and the envelope
 
@@ -433,6 +438,7 @@ One file per area, each small enough to fetch whole. `llms-full.txt` is the comp
 - [Room acoustics](https://jmrplens.github.io/phonometry/llms/llms-buildings-rooms.txt)
 - [Auditorium measures of the ISO 3382-1 annexes](https://jmrplens.github.io/phonometry/llms/llms-buildings-rooms-auditorium.txt)
 - [Sound insulation](https://jmrplens.github.io/phonometry/llms/llms-buildings-insulation.txt)
+- [Laboratory insulation measurement](https://jmrplens.github.io/phonometry/llms/llms-buildings-insulation-laboratory.txt)
 - [Insulation ratings and the envelope](https://jmrplens.github.io/phonometry/llms/llms-buildings-insulation-ratings.txt)
 - [Insulation design](https://jmrplens.github.io/phonometry/llms/llms-buildings-design.txt)
 - [Materials and surfaces](https://jmrplens.github.io/phonometry/llms/llms-materials.txt)
@@ -505,6 +511,7 @@ The generated API reference, one page per module. Fetch these only when a specif
 - [building/panel-transmission](https://jmrplens.github.io/phonometry/reference/api/building/panel-transmission/)
 - [building/ratings](https://jmrplens.github.io/phonometry/reference/api/building/ratings/)
 - [building/resilient-layers](https://jmrplens.github.io/phonometry/reference/api/building/resilient-layers/)
+- [building/service-equipment](https://jmrplens.github.io/phonometry/reference/api/building/service-equipment/)
 - [building/simplified-model](https://jmrplens.github.io/phonometry/reference/api/building/simplified-model/)
 - [building/spain](https://jmrplens.github.io/phonometry/reference/api/building/spain/)
 - [building/structure-borne-power](https://jmrplens.github.io/phonometry/reference/api/building/structure-borne-power/)
@@ -6077,6 +6084,9 @@ laboratory, and predicted from element data.
   the direct-power route to the same indices when flanking is high.
 - [Sound Insulation Survey Method (ISO 10052)](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-survey/):
   the octave-band control method and its reverberation index.
+- [Service-Equipment and Activity Noise (ISO 16032)](https://jmrplens.github.io/phonometry/buildings/insulation/service-equipment-noise/):
+  the engineering method for equipment and activity noise in a room, from the
+  ISO/DIS 16032:2023 draft.
 - [Heavy and Soft Impact Sources (ISO 16283-2)](https://jmrplens.github.io/phonometry/buildings/insulation/heavy-impact-sources/):
   the rubber ball and the bang machine, the impact force exposure level that
   specifies them and the ISO 717-2 Annex D single number.
@@ -6123,10 +6133,15 @@ the measurement side, position averaging happens once positions are supplied
 nothing verifies how the measurement was made: the position counts and
 placements, the corner positions the ISO 16283 low-frequency procedure is fed
 from and the test-facility qualifications of ISO 16283, ISO 10140 and ISO 3382
-are the operator's job. So is measuring
-the background noise: only the ISO 10140-4 laboratory correction is
-implemented, warning when its 6 dB floor is broken, and field levels must
-arrive already corrected. On the prediction side, the element ratings, the
+are the operator's job. The exception is the ISO 16032 engineering method for
+service-equipment noise, which checks its own position ladder, the distances
+of its 7.3 and the height of its corner position (7.2). Measuring the
+background noise is the operator's job too, and two corrections are
+implemented: the ISO 10140-4
+laboratory one, warning when its 6 dB floor is broken, and the Clause 9 field
+correction of ISO 16032 for service equipment, held at 2.2 dB below a 4 dB
+margin. The field levels of an insulation index must arrive already
+corrected. On the prediction side, the element ratings, the
 junction indices and the covering improvements are inputs you supply from
 measurement or from a standard's own annex; none is derived from a drawing.
 
@@ -7518,6 +7533,12 @@ level and the Annex D rating.
 When the question does not deserve that effort,
 [Sound Insulation Survey Method (ISO 10052)](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-survey/)
 trades accuracy for speed with octave bands and a reverberation index.
+The same field work measures the sound the building's own equipment makes in
+its rooms, and ISO 10052 has a survey quantity for it; the engineering method
+is
+[Service-Equipment and Activity Noise (ISO 16032)](https://jmrplens.github.io/phonometry/buildings/insulation/service-equipment-noise/),
+implemented from the draft of its second edition, which adds activities such
+as a bar or a sports hall to the installed equipment.
 
 **Ratings and the envelope.**
 [Insulation Ratings (ISO 717)](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-ratings/) is the
@@ -7554,6 +7575,10 @@ related EN 12354-5, lives in
 - [Sound Insulation Survey Method (ISO 10052)](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-survey/):
   the octave-band control method, its reverberation index and its survey
   quantities.
+- [Service-Equipment and Activity Noise (ISO 16032)](https://jmrplens.github.io/phonometry/buildings/insulation/service-equipment-noise/):
+  the engineering method for the sound of taps, lifts, ventilation and
+  activities in a room, from the ISO/DIS 16032:2023 draft: positions,
+  background, standardization and the Table 1 single numbers.
 - [Laboratory Flanking Transmission (ISO 10848)](https://jmrplens.github.io/phonometry/buildings/insulation/flanking-lab/):
   the measured vibration reduction index Kij, the flanking descriptors Dn,f
   and Ln,f, and the suspended-ceiling plenum path with its normalized ceiling
@@ -7584,16 +7609,22 @@ microphone positions behind those spectra, not the corner positions the
 ISO 16283 low-frequency procedure is fed from, and not the test-facility and
 mounting requirements of ISO 10140-1. Those are the operator's
 responsibility and the report's, and
-they are what makes the numbers here mean something. Background noise is the
-one correction genuinely left to the caller: field levels must arrive already
-corrected, their 6 dB signal-to-background floor checked by the operator,
-while the ISO 10140-4 laboratory helper applies its rule itself, warning when
-its own floor is broken and capping the correction. Two consequences worth
-naming: the field and laboratory background corrections are *different*
-rules, so that laboratory helper must not be applied to field data; and the
-intensity route takes both the pressure and the intensity level as inputs,
-with the scanning probe and its phase-mismatch calibration outside the
-library.
+they are what makes the numbers here mean something. The one method that
+checks its own positions is the ISO 16032 engineering method for
+service-equipment noise, with the position ladder of its 7.4.1, the
+distances of 7.3 and the corner height of 7.2 in a rectangular room.
+Background noise is the one correction genuinely left to the caller of the
+insulation routines: their
+field levels must arrive already corrected, their 6 dB signal-to-background
+floor checked by the operator. Two helpers apply their own rule instead: the
+ISO 10140-4 laboratory one, warning when its floor is broken and capping the
+correction, and the Clause 9 field correction of ISO 16032 for service
+equipment, which holds its correction at 2.2 dB below a 4 dB margin and marks
+the result an upper limit. Two consequences worth naming: the background
+corrections are *different* rules, so neither helper is to be applied to
+the field data of an insulation index; and the intensity route takes both
+the pressure and the intensity level as inputs, with the scanning probe and
+its phase-mismatch calibration outside the library.
 
 **Coverage inside the standards is partial in two places.** Of ISO 10848 only
 the Part 1 formulae are implemented generically, plus the Part 4 modal-overlap
@@ -9715,6 +9746,9 @@ ISO 717-2.
 - [Field Insulation Measurement (ISO 16283)](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-field/): the
   engineering-grade airborne, impact and façade measurements this method
   approximates, and their ISO 12999-1 uncertainty.
+- [Service-Equipment and Activity Noise (ISO 16032)](https://jmrplens.github.io/phonometry/buildings/insulation/service-equipment-noise/):
+  the engineering method for the service-equipment sound this survey
+  measures quickly: band spectra and a measured reverberation time.
 - [Insulation Ratings (ISO 717)](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-ratings/): the reference-curve
   engines behind the survey ratings.
 - [Room Acoustics](https://jmrplens.github.io/phonometry/buildings/rooms/room-acoustics/): the measured reverberation times
@@ -10332,6 +10366,501 @@ ISO 16283-3 Annex E are outside the procedure by Clause 6.
 - [Errata found in published sources](https://jmrplens.github.io/phonometry/reference/errata/): the two defects of
   ISO 16283-2 that this procedure runs into.
 - API reference: [`building.measurement.low_frequency`](https://jmrplens.github.io/phonometry/reference/api/building/low-frequency/) and [`building.measurement.insulation`](https://jmrplens.github.io/phonometry/reference/api/building/insulation/).
+
+---
+
+
+<!-- source: docs/buildings/insulation/service-equipment-noise.md | canonical: https://jmrplens.github.io/phonometry/buildings/insulation/service-equipment-noise/ -->
+Source: https://jmrplens.github.io/phonometry/buildings/insulation/service-equipment-noise/
+
+# Service-Equipment and Activity Noise (ISO 16032)
+
+A neighbour's toilet flushing at night, a lift motor behind a bedroom wall, a
+ventilation outlet that hums, or the bar downstairs: the number a building
+regulation puts on them comes from ISO 16032, the **engineering method** for
+the sound pressure level that service equipment makes in a room. Its revision
+widens the scope from installed equipment to **activities**, sources in or
+near the building whose operation nobody on site controls, such as sports
+facilities, pubs and amplified music.
+
+The library implements the revision from its draft, **ISO/DIS 16032:2023**,
+published in Germany as E DIN EN ISO 16032:2023-05. The published second
+edition is not available to the project; the draft is the only text of the
+revision there is, so everything the library implements follows it, and it
+is cited as a draft, with
+its own clause numbers. The withdrawn 2004 edition is used only to say what
+changed. The survey method for the same quantities is
+[ISO 10052](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-survey/), and the
+prediction of the structure-borne part of equipment noise is
+[EN 12354-5](https://jmrplens.github.io/phonometry/buildings/design/installed-structure-borne/).
+
+**Where it applies.** Clause 1 intends the method for rooms of about 300 m³
+or less, in dwellings, hotels, schools, offices and hospitals. It is not meant
+for large auditoriums and concert halls, nor for a source so far from the
+building that the weather changes how the sound gets there, although the
+operating conditions of Annex B can still be used in such cases.
+
+## What the method measures
+
+The linear band spectrum is recorded together with the A- or C-weighted level
+(a *multispectral* recording, Clause 6) in one of three quantities: the
+**maximum level** with time weighting S or F, read at the instant the
+weighted level peaks, or the **equivalent continuous level** over an
+integration time. The single numbers are then computed from the bands, never
+read off the meter, and Table 1 names them:
+
+| | A-weighted | C-weighted |
+| :--- | :--- | :--- |
+| Maximum, time weighting S | $L_\mathrm{A,Smax}$, $L_\mathrm{A,Smax,nT}$, $L_\mathrm{A,Smax,n}$ | $L_\mathrm{C,Smax}$, $L_\mathrm{C,Smax,nT}$, $L_\mathrm{C,Smax,n}$ |
+| Maximum, time weighting F | $L_\mathrm{A,Fmax}$, $L_\mathrm{A,Fmax,nT}$, $L_\mathrm{A,Fmax,n}$ | $L_\mathrm{C,Fmax}$, $L_\mathrm{C,Fmax,nT}$, $L_\mathrm{C,Fmax,n}$ |
+| Equivalent continuous | $L_\mathrm{A,eq}$, $L_\mathrm{A,eq,nT}$, $L_\mathrm{A,eq,n}$ | $L_\mathrm{C,eq}$, $L_\mathrm{C,eq,nT}$, $L_\mathrm{C,eq,n}$ |
+
+The draft is explicit that these are not interchangeable: only results
+obtained with the same method are compared, and a result compared with a
+legal requirement has to be the quantity the requirement names. The library
+keys every single number by exactly this notation.
+
+## Where the microphones go (7.2 and 7.3)
+
+**Position 1 is a corner.** The corner with the highest C-weighted level is
+found first, by the maximum level with S or F or by the equivalent level,
+under the chosen operating conditions or any steady condition that finds the
+loudest corner. A hand-held integrating meter will do: no band calculation,
+no correction. The microphone goes preferably 0.5 m from the two walls and
+the floor, raised to 1.0 m or 1.5 m where furniture is in the way, and at
+least 0.2 m from any obstacle. A corner dominated by direct sound from a
+source in the room, a ventilation outlet for example, is left out of the
+search.
+
+**Positions 2 and 3 are in the reverberant field.** They keep preferably
+1.5 m, and at least 1.0 m, from each other and from the corner position;
+1.5 m from any sound source in the room; 0.50 m from every room surface
+(0.30 m in a small room where that cannot be met); and a height from 0.5 m to
+2.0 m.
+
+`loudest_corner` picks position 1 from the corner readings, and
+`check_service_equipment_positions` holds a set of positions in a rectangular
+room to the distances and heights of 7.3, and the corner to its height of
+0.5 m to 1.5 m. The two preferences, the corner 0.5 m from its walls and the
+positions 1.5 m apart, are reported as `preferred_corner_wall_distance` and
+`preferred_separation` and do not decide `passes`:
+
+```python
+import numpy as np
+from phonometry import building
+
+# The loudest corner of four, C-weighted and read directly.
+corner = building.loudest_corner([47.8, 49.3, 51.6, 50.2])
+print(corner)                   # 2: the third corner, counted from 0
+
+# A 4.2 m x 3.4 m x 2.5 m bedroom next to the bathroom.
+positions = building.check_service_equipment_positions(
+    (4.2, 3.4, 2.5),                            # length, width, height [m]
+    (3.7, 2.9, 0.5),                            # position 1, in that corner
+    [(1.4, 1.9, 1.2), (3.1, 0.8, 1.5)],         # positions 2 and 3
+    source_positions_m=[(0.6, 3.0, 2.5)],       # a supply outlet in the ceiling
+)
+print(positions.passes, round(positions.separation_m, 2))   # True 2.05
+print(positions.preferred_corner_wall_distance)             # True: 0.5 m from both walls
+positions.plot()
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/service_equipment_positions_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/service_equipment_positions.svg" alt="Plan of a 4.2 by 3.4 metre bedroom. A shaded rectangle with a dashed edge, half a metre inside the walls, marks the zone the surface clearance leaves to the reverberant-field positions. The corner position, numbered 1, sits in the upper right corner, half a metre from both walls; positions 2 and 3 sit inside the shaded zone, more than 2 metres apart. A supply outlet in the ceiling near the upper left corner is joined to position 2, the nearest, by a dotted line labelled 1.88 metres, the distance in three dimensions. The second line of the title reads that the requirements are met." width="90%"></picture>
+
+*The plan cannot show a distance in three dimensions: the outlet is in the
+ceiling and position 2 is 1.2 m high, so the two are 1.88 m apart although
+they look closer. The figure joins each source to its nearest position and
+writes the true distance on the line.*
+
+The 0.2 m from obstacles and the choice of corner cannot be judged from a room
+outline, and the check leaves them to the person placing the microphone.
+
+**A source in the room gets a position of its own (7.9).** Where a source
+stands in the room itself, a ventilation outlet in the wall or in the ceiling
+for example, one additional position is measured for each: 1 m in front of a
+wall source at 1.5 m above the floor, or 1.5 m above the floor directly below
+a ceiling source. Its result is reported separately, never standardized or
+normalized, and not averaged with positions 1, 2 and 3.
+`additional_microphone_position` places it in the same coordinates:
+
+```python
+extra = building.additional_microphone_position(
+    (4.2, 3.4, 2.5), (0.6, 3.0, 2.5), mounting="ceiling")
+print(extra)                                    # [0.6 3.  1.5]
+```
+
+## How many positions (7.4.1)
+
+The A-weighted readings of positions 1, 2 and 3, as the instrument shows them
+without any correction, decide whether three are enough. If they are within
+3.0 dB of each other the corrections follow. Otherwise the corner is measured
+again with two new room positions, 4 and 5, and the six have to be less than
+6.0 dB apart; failing that, the corner once more with positions 6 and 7, and
+the nine less than 9.0 dB apart. A difference larger than 9.0 dB that comes
+from unpredictable variations in time, while the corner readings show a
+steady source, interrupts the session: the cause is investigated before a new
+series, and no reading of the interrupted one is used. The same ladder
+applies to a maximum level (7.4.2), where the sound exposure level
+$L_\mathrm{AE}$ may stand in for short events.
+
+`check_position_spread` takes the readings in that order (corner, 2, 3, then
+corner, 4, 5 and corner, 6, 7) and says what comes next:
+
+```python
+first = building.check_position_spread([34.1, 31.2, 35.6])
+print(first.action, first.next_positions)       # add_positions (4, 5)
+
+second = building.check_position_spread([34.1, 31.2, 35.6, 33.9, 32.4, 34.8])
+print(second.action, round(second.corner_standard_deviation_db, 2))  # proceed 0.14
+second.plot()
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/service_equipment_position_spread_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/service_equipment_position_spread.svg" alt="Six A-weighted readings in the order of 7.4.1: the corner at 34.1 dB, positions 2 and 3 at 31.2 and 35.6 dB, the corner again at 33.9 dB and positions 4 and 5 at 32.4 and 34.8 dB. A shaded band 6 dB tall starting at the lowest reading holds all six. The title gives the spread, 4.4 dB, and the verdict, proceed." width="80%"></picture>
+
+*The first three readings are 4.4 dB apart, past the 3.0 dB of the first
+stage; with positions 4 and 5 the six are still 4.4 dB apart, under the
+6.0 dB the second stage allows, so the method proceeds with all six. The
+corner, measured twice, is the reading 7.4.1 uses when a statistical value is
+wanted: the standard deviation of the corner readings is taken as
+representative of the room average.*
+
+The draft leaves two boundaries without a rule: six readings exactly 6.0 dB
+apart, and nine exactly 9.0 dB apart, are neither "less than" nor "exceeding"
+the limit. The library reads the ladder as a sequence, so a spread at a limit
+does not pass it. Positions 6 and 7 answer only a difference under 9.0 dB,
+and more readings can only widen the spread, so three or six readings already
+9.0 dB apart or more get `"interrupt"` at once: no later stage can pass.
+Whether the difference comes from the time variation or from the source is
+for the person measuring to judge, since the levels alone cannot say. The
+gaps are in the
+[errata registry](https://jmrplens.github.io/phonometry/reference/errata/).
+
+## From readings to a single number
+
+Clause 6 fixes the order: average, correct for the background, standardize or
+normalize if a regulation asks for it, then weight.
+
+**The band average (Formula (1), 7.5).** Every reading enters the energy
+average, the repeated corner readings included, and the band levels are
+rounded to one decimal:
+
+$$
+L = 10 \lg \left[ \frac{1}{n} \sum_{i=1}^{n} 10^{0.1 L_i} \right]\ \mathrm{dB}
+$$
+
+**The background (Clause 9).** The background is measured as the equivalent
+level over about 30 s just before or after each set of measurements, at the
+same positions. With $\Delta L = L_1 - L_2$ between the measured band and the
+background band, nothing is corrected at 10 dB or more; from 4 dB to 10 dB
+the band is corrected by Formulae (7) to (9),
+
+$$
+L = L_1 - K, \qquad K = -10 \lg \left[ 1 - 10^{-0.1 \Delta L} \right]\ \mathrm{dB}
+$$
+
+and below 4 dB the correction is held at the 2.2 dB a 4 dB margin gives. Such
+a band is influenced by the background: the report has to say so, and for a
+comparison with a limit the result is an upper limit of the equipment level.
+`service_equipment_background_correction` applies the clause on its own:
+
+```python
+k = building.service_equipment_background_correction(
+    [40.0, 40.0, 40.0], [28.0, 34.0, 38.0])
+print(np.round(k.correction_db, 2), k.regime)
+# [0.   1.26 2.2 ] ('none', 'corrected', 'limited')
+```
+
+**Standardization and normalization (4.8, 7.7).** If required, the corrected
+bands are referred to a reference reverberation time $T_0$, 0.5 s unless
+another value is specified, or to a reference absorption area
+$A_0 = 10$ m² (Formulae (5) and (6)):
+
+$$
+L_\mathrm{nT} = L - 10 \lg \frac{T}{T_0}\ \mathrm{dB}, \qquad
+L_\mathrm{n} = L - 10 \lg \frac{A_0\,T}{0.16\,V}\ \mathrm{dB}
+$$
+
+The reverberation time is measured by ISO 3382-2 in the one-third-octave
+bands 50 Hz to 5000 Hz (octave bands 63 Hz to 4000 Hz), preferably by the
+impulse response method at least from 50 Hz to 315 Hz (Clause 8). Only those
+bands are standardized: 25, 31.5, 40, 6300, 8000 and 10 000 Hz enter the
+weighted sums unstandardized, and the report mentions it whenever they
+contribute. The draft also advises against standardizing an unfurnished room
+with one highly absorbing surface, where late reflections between the other,
+parallel surfaces lengthen the reverberation time and the correction goes
+wrong.
+
+**The weighted values (4.3, 4.4, 7.8).** The A- and C-weighted single numbers
+are energy sums of the corrected bands plus the Annex A corrections, rounded
+to whole decibels:
+
+$$
+L_\mathrm{A} = 10 \lg \sum_{i} 10^{0.1 (L_i + A_i)}\ \mathrm{dB}, \qquad
+L_\mathrm{C} = 10 \lg \sum_{i} 10^{0.1 (L_i + C_i)}\ \mathrm{dB}
+$$
+
+The A-weighted value is summed over the restricted range 50 Hz to 5000 Hz or
+the extended range 25 Hz to 10 000 Hz, and the C-weighted value over the
+extended range; the report names the range. The draft's NOTE to 7.8 suggests
+comparing the result with the weighted level the instrument showed: more
+than 2 dB apart, the calculation deserves a second look.
+
+`service_equipment_level` runs the whole chain. Here a water closet is flushed
+and refilled (Annex B.2.6) and heard in the bedroom next door, three readings
+from 25 Hz to 10 kHz:
+
+```python
+freqs = np.array(list(building.SERVICE_EQUIPMENT_WEIGHTING["third"]["A"]))
+spectrum = np.array([29.5, 31.0, 33.2, 35.4, 37.1, 38.6, 40.2, 41.5, 42.3,
+                     42.8, 42.6, 41.9, 40.8, 39.4, 37.9, 36.2, 34.6, 33.1,
+                     31.4, 29.8, 28.1, 26.5, 24.6, 22.9, 21.0, 19.4, 17.6])
+readings = spectrum + np.array([[0.6], [-0.9], [0.4]])   # positions 1, 2, 3
+background = np.array([28.0, 28.4, 29.6, 27.2, 25.1, 23.0, 21.2, 19.6, 18.1,
+                       16.9, 15.8, 14.9, 14.1, 13.4, 12.8, 12.3, 11.9, 11.6,
+                       11.4, 11.3, 11.2, 11.2, 11.3, 11.5, 11.8, 12.2, 12.7])
+t = np.array([np.nan, np.nan, np.nan, 0.82, 0.78, 0.74, 0.70, 0.66, 0.63,
+              0.60, 0.58, 0.56, 0.55, 0.54, 0.53, 0.52, 0.51, 0.50, 0.49,
+              0.48, 0.47, 0.46, 0.45, 0.44, np.nan, np.nan, np.nan])
+res = building.service_equipment_level(
+    readings, freqs, quantity="eq",
+    background_db=background, reverberation_time_s=t, volume_m3=35.7,
+)
+print(res.ratings["LA,eq"], res.ratings["LA,eq,nT"], res.ratings["LC,eq,nT"])
+# 45 45 51
+print(res.upper_limit("A"), res.upper_limit("C"))  # False True
+print(res.unstandardized_bands_hz)
+# (25.0, 31.5, 40.0, 6300.0, 8000.0, 10000.0)
+res.plot()
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/service_equipment_level_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/service_equipment_level.svg" alt="The one-third-octave spectrum of a water closet heard in a bedroom, 25 Hz to 10 kHz. The average of the three readings peaks near 43 dB at 200 Hz and falls to about 18 dB at 10 kHz. The background, dotted, lies 1.6 to 3.7 dB under the average at 25, 31.5 and 40 Hz, 8.3 dB under it at 50 Hz, more than 11 dB under it from 63 Hz to 5 kHz, and 5 to 9 dB under it from 6.3 to 10 kHz. The curve corrected for the background meets the average from 63 Hz to 5 kHz; it lies 2.2 dB under it in the three lowest bands, 0.7 dB under it at 50 Hz and 0.5 to 1.7 dB under it from 6.3 to 10 kHz. The standardized curve runs up to 2.8 dB below the average at low frequencies, where the room is live, and up to 0.6 dB above it near 5 kHz. Grey bands mark 25 to 40 Hz and 6.3 to 10 kHz as not standardized, and orange triangles mark the three lowest bands as upper limits. The title gives L A,eq,nT = 45 dB." width="94%"></picture>
+
+*The three lowest bands sit within 4 dB of the background, so their
+correction is held at 2.2 dB and they are upper limits. They lie in the
+C-weighted range, which makes $L_\mathrm{C,eq}$ an upper limit, and outside
+the restricted A-weighted range, which leaves $L_\mathrm{A,eq}$ unaffected.
+At 50 Hz and from 6.3 kHz up the background is 5 dB to 9 dB below, and
+Formula (8) takes 0.5 dB to 1.7 dB off those bands.
+The standardization lowers the bands where the room is more reverberant than
+0.5 s and raises those where it is less, and leaves the six grey bands as
+they are.*
+
+### `service_equipment_level` parameters
+
+| Parameter | Type | Units | Default | Notes |
+| :--- | :--- | :--- | :--- | :--- |
+| `levels_db` | array | dB | required | Band levels of every reading, `(readings, bands)`; one row for a single reading |
+| `frequencies_hz` | array | Hz | required | Nominal centres, increasing: one-third octaves 25 Hz to 10 kHz or octaves 31.5 Hz to 8 kHz |
+| `quantity` | str | | required | `"Smax"`, `"Fmax"` or `"eq"`, the Table 1 quantity; it names the single numbers |
+| `band` | str | | `"third"` | `"third"` or `"octave"`; Clause 6 asks for one-third octaves, octaves are optional |
+| `background_db` | array | dB | `None` | One level per band, or one row per position, energy-averaged |
+| `reverberation_time_s` | array | s | `None` | Per band; only 50 Hz to 5 kHz (octaves 63 Hz to 4 kHz) is read, the rest may be `nan` |
+| `volume_m3` | float | m³ | `None` | Room volume for the normalized levels; needs the reverberation time |
+| `reference_reverberation_time_s` | float | s | `0.5` | $T_0$ of Formula (5) |
+| `a_weighting_range` | str | | `"restricted"` | `"restricted"` (50 Hz to 5 kHz; octaves 63 Hz to 4 kHz) or `"extended"` (25 Hz to 10 kHz; octaves 31.5 Hz to 8 kHz) |
+
+The result carries `average_db`, `background` (the Clause 9 correction),
+`corrected_db`, `standardized_db`, `normalized_db`, `standardizable`,
+`ratings` and `unrounded_ratings` keyed by Table 1, `upper_limit("A")` and
+`upper_limit("C")`, `unstandardized_bands_hz`, `reproducibility_db` and
+`weighted_reproducibility_db`. The C-weighted values are formed only when the
+bands cover the extended range.
+
+For the octave counterpart of the restricted A-weighting range the draft
+gives no range of its own; the library uses 63 Hz to 4000 Hz, the octave
+range the draft pairs with 50 Hz to 5000 Hz for the standardization.
+
+## Operating conditions (Annex B)
+
+How the equipment runs while it is measured decides the number as much as the
+microphones do. Annex B is normative, but national requirements and
+regulations take precedence (B.1.1), and equipment it does not list is
+measured by its principles with the chosen conditions reported in detail.
+`SERVICE_EQUIPMENT_OPERATING_CONDITIONS` holds each entry as data:
+
+| Key | Clause | Maximum level | Equivalent level |
+| :--- | :--- | :--- | :--- |
+| `water_tap` | B.2.2 | a single tap: open fully, wait, close; a hot and cold mixer: hot tap open, then cold, closed in the same order; single-lever, flow and temperature, and thermostatic mixers: through the temperature range | about 30 s at the loudest setting; for single-lever, flow and temperature, and thermostatic mixers the highest of the average, hot and cold settings |
+| `shower_cabin` | B.2.3 | as a tap | as a tap |
+| `bath` | B.2.4 | as a tap, and the shower; without a wall fixture the shower is held about 1.5 m above the tub bottom | as a tap |
+| `filling_emptying` | B.2.5 | filling, then emptying | the filling period and the emptying period, half full |
+| `water_closet` | B.2.6 | a full flushing and refilling cycle | the same cycle |
+| `mechanical_ventilation` | B.3 | about 30 s at the loudest setting | about 30 s |
+| `heating` / `cooling` | B.4 | start from cold, full load, each appliance / about 30 s | about 30 s |
+| `lift` | B.5 | 1 or 2 persons, up to five floors each way, at least three repetitions | the same cycle |
+| `rubbish_chute` | B.6 | two PVC tubes, 0.1 m long, 50 mm across, 0.7 kg/m | not measured |
+| `auxiliary_equipment` | B.7 | start, operate, stop; or a full automatic cycle | the cycle |
+| `car_park_door` | B.8 | opening and closing | a full cycle |
+| `other_equipment` | B.9 | the cycle of normal use | the cycle |
+| `unknown_source` | B.10 | | several 30 s periods in the loudest hour of normal operation |
+
+B.10 is the new part. An activity, a restaurant's coolers or live music next
+door, is measured in normal operation, automatic controls suspended where
+needed, over several 30 s periods within the hour the level is expected to be
+highest, leaving out downtime and minor irregular events. Where the sound is
+too irregular for the corner search, the acoustically most reflective corner
+becomes position 1, and the report says so. Where no operating cycle can be
+defined at all, the equivalent level is averaged until it is stable, and not
+for less than 30 s (B.1.3).
+
+```python
+wc = building.SERVICE_EQUIPMENT_OPERATING_CONDITIONS["water_closet"]
+print(wc.clause, wc.equivalent_cycle)
+# B.2.6 a full flushing and refilling cycle
+chute = building.SERVICE_EQUIPMENT_OPERATING_CONDITIONS["rubbish_chute"]
+print(chute.equivalent_level, chute.parameters["tube_length_m"])   # False 0.1
+```
+
+## Precision (Clause 10)
+
+Table 2 estimates the reproducibility standard deviation of a room-average
+band level from a limited number of measurements of steady sources:
+
+| One-third-octave bands | Octave bands | $\sigma_\mathrm{R}$ |
+| :--- | :--- | :--- |
+| 25 Hz to 160 Hz | 31.5 Hz to 125 Hz | 1.9 dB |
+| 200 Hz to 315 Hz | 250 Hz | 1.5 dB |
+| 400 Hz to 630 Hz | 500 Hz | 1.2 dB |
+| 800 Hz to 10 000 Hz | 1000 Hz to 8000 Hz | 1.0 dB |
+| A-weighted | | 0.8 dB |
+| C-weighted | | 1.2 dB |
+
+The two weighted values hold for a steady sound with a relatively flat
+spectrum from 25 Hz to 10 kHz, at least 10 dB above the background. A source
+that fluctuates raises the uncertainty, the maximum levels most of all. The
+result carries the band values as `reproducibility_db` and the value of each
+single number, keyed like `ratings`, as `weighted_reproducibility_db`; the
+tables are `SERVICE_EQUIPMENT_REPRODUCIBILITY` and
+`SERVICE_EQUIPMENT_WEIGHTED_REPRODUCIBILITY`. The draft states no coverage
+factor, so the library does not form an expanded uncertainty.
+
+```python
+print(dict(res.weighted_reproducibility_db))
+# {'LA,eq': 0.8, 'LC,eq': 1.2, 'LA,eq,nT': 0.8, 'LC,eq,nT': 1.2, 'LA,eq,n': 0.8, 'LC,eq,n': 1.2}
+```
+
+## What the revision changes
+
+Against the withdrawn ISO 16032:2004, the draft:
+
+- widens the scope from installed service equipment to activities and
+  unknown sources in or near the building (B.10);
+- measures in one-third-octave bands, octaves being optional, where 2004
+  measured in octaves only;
+- sets the number of positions by the spread ladder of 7.4.1, where 2004 took
+  two corner readings and measured each position as many times as the
+  difference between them in whole decibels;
+- standardizes 50 Hz to 5000 Hz (octaves 63 Hz to 4000 Hz) only;
+- sums the A-weighted value over 50 Hz to 5000 Hz or 25 Hz to 10 000 Hz, where
+  2004 used octaves 63 Hz to 8000 Hz (31.5 Hz to 8000 Hz for C);
+- relaxes the reverberant-field positions: 1.0 m apart at least (2004 asked
+  1.5 m), 0.50 m from surfaces (0.75 m) and up to 2.0 m high (1.5 m);
+- raises the low-frequency reproducibility of Table 2 from 1.5 dB to 1.9 dB
+  and the C-weighted one from 1.1 dB to 1.2 dB.
+
+## Verifying it without a worked example
+
+The draft prints no worked example, so the conformance rows stand on what it
+does print and on closed forms. Printed: the 2.2 dB a 4 dB background margin
+gives (Clause 9), the 36 A-weighting cells of Table A.1, its C-weighting cells
+with the ten misprinted ones taken from IEC 61672-1, and the 38 cells of
+Table 2. Closed forms: the band average of three readings, a reverberation
+time of $2T_0$ lowering exactly 50 Hz to 5000 Hz (octaves 63 Hz to 4000 Hz)
+by $10\lg 2$, an equivalent absorption area of 16 m² normalized to
+$A_0 = 10$ m² gaining
+$10\lg 1.6 = 2.04$ dB, the A- and C-weighted sums of a flat spectrum and
+their rounding half up to whole decibels, the thresholds of Clause 9 met by
+levels given to 0.1 dB, the thresholds of 7.4.1 at their boundaries, every
+distance and height limit of 7.3, and the corner height and preferred wall
+distance of 7.2, met exactly and missed by 0.01 m, and the positions 7.9
+places in front of a wall source and below a ceiling one.
+
+## Quick answers
+
+### Why does the C-weighted value differ from Table A.1 as printed?
+
+Because the table misprints it. The draft's one-third-octave C-weighting
+column reads 0 dB in every band from 1600 Hz to 10 000 Hz and −5 dB at 25 Hz,
+which contradicts its own octave column (−0.2, −0.8 and −3.0 dB at 2, 4 and
+8 kHz) and IEC 61672-1 (−0.1 dB to −4.4 dB from 1600 Hz up, −4.4 dB at
+25 Hz). The library uses the IEC 61672-1 values in those ten cells, from
+Table 3 of IEC 61672-1:2013, which the
+[frequency weighting](https://jmrplens.github.io/phonometry/signals/levels/weighting/) implements;
+read as printed, a flat spectrum would sum 0.4 dB higher. The defect is in the
+[errata registry](https://jmrplens.github.io/phonometry/reference/errata/).
+
+### Are the 25 Hz and 10 kHz bands standardized?
+
+No. 7.7 standardizes and normalizes only 50 Hz to 5000 Hz, because the
+reverberation time outside cannot be measured reliably. The outer bands enter
+the weighted sums as corrected, and `unstandardized_bands_hz` lists the ones
+that do, for the report.
+
+### Can I use it for the bar downstairs?
+
+Yes: that is what B.10 adds. Run the activity normally, measure several 30 s
+periods in its loudest hour, and treat each set of three positions exactly as
+for a service equipment. Where the sound is too irregular to find the loudest
+corner, use the most reflective one and report the deviation.
+
+### Is the result an upper limit?
+
+When a band of the weighted range was within 4 dB of the background, yes:
+`upper_limit("A")` and `upper_limit("C")` say which single number is, and the
+report has to state it.
+
+## References
+
+- **E DIN EN ISO 16032:2023-05**, *Acoustics — Measurement of sound pressure level from service equipment or activities in buildings — Engineering method (draft international standard)*. The draft ISO/DIS 16032:2023 of the second edition (prEN ISO 16032:2023) in its German publication, German and English text, and cited as a draft. Every clause number on this page is the draft's. Six printed defects are in the errata registry, the C-weighting of Table A.1 among them.
+- **ISO 16032:2004**, *Acoustics — Measurement of sound pressure level from service equipment in buildings — Engineering method*. The first edition, which the draft revises and which is withdrawn. Read in BS EN ISO 16032:2004 for what changed: octave bands only, a position count set by two corner readings, and no activity sources.
+- **ISO 10052:2021**, *Acoustics — Field measurements of airborne and impact sound insulation and of service equipment sound — Survey method* (https://www.iso.org/standard/76560.html). The survey method for the same quantities: three A- or C-weighted readings, no band analysis, and the reverberation index in place of a measured reverberation time.
+
+## Standards
+
+**Covered.** The engineering method of ISO/DIS 16032:2023, the draft of the second edition
+of ISO 16032, read in E DIN EN ISO 16032:2023-05: the Table 1 quantities, the
+corner search of 7.2 and the distances of 7.3 for a rectangular room, the
+position ladder of 7.4.1 with the corner standard deviation, the additional
+position of 7.9 for a source in the room, the band average
+of Formula (1) rounded to 0.1 dB, the background correction of Clause 9 held
+at 2.2 dB, standardization and normalization by Formulae (5) and (6) over
+50 Hz to 5000 Hz, the A- and C-weighted sums of Formulae (2) and (3) over the
+ranges of 7.8 rounded to whole decibels, Table A.1 (with the misprinted
+C-weighting cells from IEC 61672-1), Table 2, and the operating conditions of
+Annex B as data, the activities of B.10 included.
+
+**Not covered.** The draft is not the published standard: where ISO 16032:2024 differs, this
+page follows the draft. The library does not record the multispectral time
+trace or find the instant of the maximum: it takes the band levels at that
+instant as given. Nothing checks the 0.2 m from obstacles, the calibrator
+drift of 0.5 dB (Clause 5), the 30 s of the background measurement, the
+10 min to 15 min maximum background of the NOTE to Clause 9, the 5 dB
+maximum-to-equivalent check that follows it, or the 2 dB comparison of the
+NOTE to 7.8. Nor does anything check the room volume of about 300 m³ or less
+that Clause 1 intends the method for. The "specific frequency range" that 4.2 admits
+beside the two ranges, and that the form of Annex C has a box for, is not
+offered: 7.8 forms the weighted values over the restricted or the extended
+range only, and a band set that does not cover the chosen range is refused.
+No `.report()` fiche is produced: the building fiches are drawn around an
+ISO 717 reference curve that this method does not have. There is no printed
+worked example, so no row reproduces one.
+
+## See also
+
+- [Sound Insulation Survey Method (ISO 10052)](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-survey/):
+  the survey method for the same service-equipment quantities.
+- [Installed structure-borne sound (EN 12354-5)](https://jmrplens.github.io/phonometry/buildings/design/installed-structure-borne/):
+  predicting the structure-borne part of the same noise before the building
+  exists.
+- [Room acoustic parameters (ISO 3382-1/2)](https://jmrplens.github.io/phonometry/buildings/rooms/room-acoustics/): the ISO 3382-2
+  reverberation times the standardization needs.
+- [Frequency Weighting (A, C, Z)](https://jmrplens.github.io/phonometry/signals/levels/weighting/): the
+  IEC 61672-1 A- and C-weightings, whose Table 3 gives the ten C-weighting
+  cells the draft misprints.
+- [Errata found in published sources](https://jmrplens.github.io/phonometry/reference/errata/): the six
+  defects of the draft this method meets.
+- API reference:
+  [`building.measurement.service_equipment`](https://jmrplens.github.io/phonometry/reference/api/building/service-equipment/).
 
 ---
 
@@ -47979,6 +48508,13 @@ documents, one page per module.
 | `survey_impact_insulation` / `survey_facade_insulation` | `function` | **Survey impact & façade insulation (ISO 10052:2021 Clauses 3.7-3.9 / 3.13-3.15).**<br>• `li` (impact) or `l1_2m`/`l2` (façade), `reverberation_index`, `volume` | `imp = building.survey_impact_insulation(li, k, volume=50)`<br><br>• `SurveyImpactResult` / `SurveyFacadeResult` |
 | `survey_service_equipment_level` | `function` | **Service-equipment noise LXY (ISO 10052:2021 Clauses 3.16-3.18).**<br>• `measurements`: three A/C-weighted positions [dB]<br>• `reverberation_index`: k (scalar or per band)<br>• `volume` (for LXY,n) | `se = building.survey_service_equipment_level([35, 30, 32], 3.0, volume=50)`<br><br>• `SurveyServiceEquipmentResult` (`l_xy`, `l_xy_nt`, `l_xy_n`) |
 | `SurveyAirborneResult` / `SurveyImpactResult` / `SurveyFacadeResult` / `SurveyServiceEquipmentResult` | `dataclass` | **ISO 10052 survey-method results.**<br>• per-band quantities (`d`, `d_nt`, `d_n`, `r_prime`; `l_i`, `l_nt`, `l_n`; `d_2m`...; `l_xy`...)<br>• weighted `rating` where the method defines one | `res = building.survey_airborne_insulation(...)` |
+| `service_equipment_level` / `ServiceEquipmentResult` | `function` / `dataclass` | **Service-equipment sound pressure level, engineering method (ISO/DIS 16032:2023, the draft of the second edition).**<br>• `levels_db`: band levels of every reading, `(readings, bands)` [dB]; `frequencies_hz` [Hz]<br>• `quantity`: 'Smax' / 'Fmax' / 'eq' (Table 1)<br>• `background_db` (Clause 9), `reverberation_time_s` and `volume_m3` (Formulae (5) and (6), 50-5000 Hz only), `reference_reverberation_time_s` (0.5 s)<br>• `band`: 'third' / 'octave'; `a_weighting_range`: 'restricted' (50-5000 Hz) / 'extended' (25-10 000 Hz)<br>• `.plot()` | `res = building.service_equipment_level(levels, freqs, quantity='eq', reverberation_time_s=t)`<br><br>• `ratings` keyed by Table 1 (`'LA,eq'`, `'LA,eq,nT'`, `'LC,eq'`...), `average_db`, `corrected_db`, `standardized_db`, `normalized_db`, `upper_limit('A')`, `unstandardized_bands_hz`, `reproducibility_db`, `weighted_reproducibility_db` (Table 2: 0.8 dB A, 1.2 dB C) |
+| `service_equipment_background_correction` / `ServiceEquipmentBackgroundResult` | `function` / `dataclass` | **Background correction of ISO/DIS 16032:2023 Clause 9.**<br>• `levels_db`, `background_db` [dB], one per band<br>• none at 10 dB or more, Formula (8) from 4 dB, held at 2.2 dB below 4 dB (an upper limit)<br>• `.plot()` | `bg = building.service_equipment_background_correction([50, 48], [38, 45])`<br><br>• `corrected_db`, `correction_db`, `regime`, `limited`, `influenced` |
+| `check_position_spread` / `PositionSpreadCheck` | `function` / `dataclass` | **How many positions: the ladder of ISO/DIS 16032:2023 7.4.1.**<br>• `levels_db`: 3, 6 or 9 uncorrected A-weighted readings (corner, 2, 3, then corner, 4, 5 and corner, 6, 7)<br>• spread up to 3.0 dB, under 6.0 dB, under 9.0 dB<br>• `.plot()` | `chk = building.check_position_spread([35.0, 32.1, 36.2])`<br><br>• `passes`, `action` ('proceed' / 'add_positions' / 'interrupt'), `next_positions`, `corner_standard_deviation_db` |
+| `check_service_equipment_positions` / `ServiceEquipmentPositionCheck` / `loudest_corner` | `function` / `dataclass` | **Where the microphones go (ISO/DIS 16032:2023 7.2 and 7.3).**<br>• `room_dimensions_m`, `corner_position_m`, `room_positions_m`, `source_positions_m` [m]; `small_room`<br>• 1.0 m between positions (1.5 m preferred), 1.5 m from sources, 0.50 m (0.30 m) from surfaces, 0.5-2.0 m high; corner 0.5-1.5 m high<br>• `loudest_corner(c_weighted_levels_db, excluded=...)`: position 1<br>• `.plot()` | `pos = building.check_service_equipment_positions((5, 4, 2.6), (0.5, 0.5, 0.5), [(2.5, 2, 1.2), (4, 3.2, 1.5)])`<br><br>• `passes`, `separation_ok`, `surface_ok`, `source_ok`, `height_ok` |
+| `additional_microphone_position` | `function` | **The extra position for a source in the room (ISO/DIS 16032:2023 7.9).**<br>• `room_dimensions_m`, `source_position_m` [m]<br>• `mounting`: 'wall' (1 m in front of the source, 1.5 m high) / 'ceiling' (1.5 m high, directly below)<br>• the reading there is reported separately, never standardized, never averaged with positions 1, 2 and 3 | `p = building.additional_microphone_position((4.2, 3.4, 2.5), (0.6, 3.0, 2.5), mounting='ceiling')`<br><br>• `(x, y, z)` [m] |
+| `SERVICE_EQUIPMENT_WEIGHTING` / `SERVICE_EQUIPMENT_REPRODUCIBILITY` / `SERVICE_EQUIPMENT_WEIGHTED_REPRODUCIBILITY` | `mapping` | **Annex A and Clause 10 of ISO/DIS 16032:2023.**<br>• Table A.1 A- and C-weighting [dB] by band width and centre; the one-third-octave C cells the draft misprints (25 Hz, 1600-10 000 Hz) are IEC 61672-1<br>• Table 2 reproducibility standard deviation [dB] per band, and 0.8 dB (A) / 1.2 dB (C) | `building.SERVICE_EQUIPMENT_WEIGHTING['third']['C'][4000.0]  # -0.8` |
+| `SERVICE_EQUIPMENT_OPERATING_CONDITIONS` / `OperatingCondition` | `mapping` / `dataclass` | **Operating conditions and cycles of ISO/DIS 16032:2023 Annex B.**<br>• taps, showers, baths, water closets, ventilation, heating, cooling, lifts, rubbish chutes, auxiliary equipment, car park doors, other equipment and the activities of B.10 (`'unknown_source'`)<br>• `clause`, `maximum_level`, `equivalent_level`, `nominal_integration_time_s` (30 s or a cycle), `parameters` | `building.SERVICE_EQUIPMENT_OPERATING_CONDITIONS['lift'].parameters['repetitions_min']  # 3.0` |
 | `background_correction` | `function` | **Background-noise correction (ISO 10140-4 §4.3).**<br>• `signal_and_background`: Combined Lsb per band [dB]<br>• `background`: Lb per band [dB]<br>• 6–15 dB margin corrected, ≤6 dB capped at 1.3 dB, ≥15 dB unchanged | `L = building.background_correction(lsb, lb)`<br><br>• Corrected levels [dB] (`LabInsulationWarning` at the limit of measurement) |
 | `LabAirborneInsulationResult` | `dataclass` | **Laboratory airborne result.**<br>• `r`: Sound reduction index R [dB]<br>• `absorption`: A = 0.16 V/T [m²]<br>• `rating`: `WeightedRatingResult` or None<br>• `.plot()` (needs the rating)<br>• `.report(path, ...)`: ISO 10140-2 laboratory test report with the ISO 717-1 rating → PDF (also needs the rating; 16 one-third-octave or 5 octave bands) | `lab.r, lab.rating.rating` |
 | `LabImpactInsulationResult` | `dataclass` | **Laboratory impact result.**<br>• `l_n`: Normalized impact level Ln [dB]<br>• `absorption`: A [m²]<br>• `rating`: `ImpactRatingResult` or None<br>• `.plot()` (needs the rating)<br>• `.report(path, ...)`: ISO 10140-3 laboratory test report with the ISO 717-2 rating → PDF (also needs the rating; 16 one-third-octave or 5 octave bands) | `imp.l_n, imp.rating.rating` |
@@ -66015,7 +66551,7 @@ the normative PDF fiche.
 - [Filter Architecture Gallery](https://jmrplens.github.io/phonometry/signals/filters/filter-gallery/): choose an architecture and inspect responses
 - [Calibration and dBFS](https://jmrplens.github.io/phonometry/signals/metrology/calibration/): get real-world SPL values
 - [Why phonometry](https://jmrplens.github.io/phonometry/start/why-phonometry/): the conformance-first design philosophy
-- [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): the expected and computed value of all 1648 checks
+- [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): the expected and computed value of all 1664 checks
 - [API Reference](https://jmrplens.github.io/phonometry/reference/api/): every parameter of every function
 - [Bibliography](https://jmrplens.github.io/phonometry/reference/bibliography/): the books and papers behind every guide, each with a verified link
 
@@ -67023,7 +67559,7 @@ sample from the metrology core:
 | IEC 61252:1993 | The personal sound exposure quantities, `sound_exposure()` and the normalized 8 h level `lex_8h()`; IEC 61252:2025 has since superseded this print, and the transcription still targets the 1993+A2 text | `tests/signals/test_levels.py` |
 
 The same discipline applies far beyond the metrology core: today the suite runs
-1648 numerical conformance checks across 104 domains and 506 standards, covering
+1664 numerical conformance checks across 105 domains and 507 standards, covering
 psychoacoustics and speech intelligibility, room, building and materials
 acoustics, human and machine vibration, environmental, aircraft, rotorcraft
 and underwater noise, electroacoustics, broadcast loudness, industrial noise

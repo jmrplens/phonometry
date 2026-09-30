@@ -21,6 +21,7 @@ from .common import (
     _facade_x_axis,
     _format_freq,
     _freq_axis,
+    _import_pyplot,
     _new_axes,
     _plot_band_level_bars,
     _plot_insulation_bands,
@@ -61,6 +62,12 @@ if TYPE_CHECKING:
     )
     from ..building.measurement.low_frequency import LowFrequencyResult
     from ..building.measurement.ratings import ImpactImprovementRatingResult
+    from ..building.measurement.service_equipment import (
+        PositionSpreadCheck,
+        ServiceEquipmentBackgroundResult,
+        ServiceEquipmentPositionCheck,
+        ServiceEquipmentResult,
+    )
     from ..building.measurement.structure_borne_power import StructureBornePowerResult
     from ..building.measurement.uncertainty import BandUncertainty
     from ..building.prediction.aperture_transmission import ApertureTransmissionResult
@@ -157,6 +164,25 @@ _LOW_FREQUENCY_INTENSITY_TITLE = (
 _LOW_FREQUENCY_ELEMENT_TITLE = (
     "Low-frequency element normalized level difference (ISO 15186-3)"
 )
+
+#: Titles of the ISO/DIS 16032 figures.
+_SERVICE_TITLE = "Service-equipment level (ISO/DIS 16032)"
+_BACKGROUND_TITLE = "Background correction (ISO/DIS 16032, Clause 9)"
+_SPREAD_TITLE = "Spread between positions (ISO/DIS 16032, 7.4.1)"
+_POSITIONS_TITLE = "Microphone positions (ISO/DIS 16032, 7.2 and 7.3)"
+#: Legend labels the measurement and background figures of ISO/DIS 16032
+#: share.
+_BACKGROUND_L2_LABEL = "background $L_2$"
+_CORRECTED_LABEL = "corrected for background"
+#: Size of a plan of the positions the renderer draws on a figure of its own,
+#: in inches: wide enough for the plan and the key beside it.
+_POSITIONS_FIGURE_SIZE_IN = (9.0, 6.0)
+#: Where the plan sits on that figure, as (left, bottom, width, height) in
+#: figure fractions: the right third is left to the key, the top to the
+#: two-line title. A fixed place rather than a layout engine, which settles an
+#: equal-aspect axes with a key beside it only after several passes and not
+#: the same way with every font.
+_POSITIONS_AXES_RECT = (0.08, 0.1, 0.58, 0.76)
 
 #: Spanish translations of the fixed labels/titles/legends rendered by the
 #: building-domain ``.plot()`` renderers, keyed by their verbatim English
@@ -280,6 +306,36 @@ _STRINGS: dict[str, str] = {
     "Floating floor improvement (ISO 12354-2 Annex C)": "Reducción por suelo flotante (ISO 12354-2 Anexo C)",
     "Sound reduction index improvement [dB]": "Mejora del índice de reducción acústica [dB]",
     "Additional-layer rating (ISO 12354-1 Annex D)": "Magnitud global de capa adicional (ISO 12354-1 Anexo D)",
+    _SERVICE_TITLE: "Nivel de los equipamientos (ISO/DIS 16032)",
+    _BACKGROUND_TITLE: "Corrección por ruido de fondo (ISO/DIS 16032, cap. 9)",
+    _SPREAD_TITLE: "Dispersión entre posiciones (ISO/DIS 16032, apartado 7.4.1)",
+    _POSITIONS_TITLE: "Posiciones de micrófono (ISO/DIS 16032, apartados 7.2 y 7.3)",
+    "average of the readings": "promedio de las lecturas",
+    _BACKGROUND_L2_LABEL: "ruido de fondo $L_2$",
+    "measured $L_1$": "medido $L_1$",
+    _CORRECTED_LABEL: "corregido por ruido de fondo",
+    "standardized $L_\\mathrm{nT}$": "estandarizado $L_\\mathrm{nT}$",
+    "upper limit (background)": "límite superior (ruido de fondo)",
+    "not standardized (7.7)": "sin estandarizar (apartado 7.7)",
+    "Reading": "Lectura",
+    "A-weighted level [dB]": "Nivel ponderado A [dB]",
+    "corner": "esquina",
+    "room positions": "posiciones en la sala",
+    "allowed spread": "dispersión admitida",
+    "proceed": "se continúa",
+    "add positions": "añadir posiciones",
+    "interrupt": "interrumpir",
+    "and": "y",
+    "room outline": "contorno de la sala",
+    "surface clearance": "distancia a las superficies",
+    "corner position": "posición de esquina",
+    "reverberant-field positions": "posiciones en campo reverberante",
+    "sound source": "fuente sonora",
+    "distance to a source": "distancia a una fuente",
+    "Length $x$ [m]": "Longitud $x$ [m]",
+    "Width $y$ [m]": "Anchura $y$ [m]",
+    "requirements met": "requisitos cumplidos",
+    "requirements not met": "requisitos no cumplidos",
 }
 
 #: Localised names of the two standard heavy and soft impact sources.
@@ -1757,7 +1813,11 @@ def _plot_shaded_band_pair(
     positions = _band_axis(
         ax,
         labels,
-        xlabel=_FREQ_LABEL if frequencies is not None else _BAND_INDEX_LABEL,
+        # Translated here: "Band index" is this module's string, and the
+        # table _band_axis translates its label with does not hold it.
+        xlabel=_t(
+            _FREQ_LABEL if frequencies is not None else _BAND_INDEX_LABEL, language
+        ),
         language=language,
     )
     ax.plot(
@@ -2500,3 +2560,401 @@ def plot_low_frequency_element(
         language=language,
         kwargs=kwargs,
     )
+
+
+def _rating_symbol(key: str) -> str:
+    """Table 1 notation as mathtext: ``"LA,eq,nT"`` to an upright subscript."""
+    return rf"$L_\mathrm{{{key[1:]}}}$"
+
+
+def _headline_rating(result: ServiceEquipmentResult) -> str | None:
+    """The A-weighted single number of the curve the figure draws last."""
+    for suffix in (",nT", ""):
+        key = f"LA,{result.quantity}{suffix}"
+        if key in result.ratings:
+            return key
+    return None
+
+
+def _mark_upper_limits(
+    ax: Axes,
+    positions: np.ndarray,
+    levels: np.ndarray,
+    limited: np.ndarray,
+    language: str,
+) -> None:
+    """Mark the bands the background held at 2,2 dB as upper limits."""
+    ax.plot(
+        positions[limited],
+        np.asarray(levels)[limited],
+        ls="",
+        marker="v",
+        ms=10,
+        color=_C_SECONDARY,
+        zorder=6,
+        label=_t("upper limit (background)", language),
+    )
+
+
+def plot_service_equipment_level(
+    result: ServiceEquipmentResult,
+    ax: Axes | None = None,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """Band spectrum of a service-equipment measurement, step by step.
+
+    :param result: A
+        :class:`~phonometry.building.measurement.service_equipment.ServiceEquipmentResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the curve of the final band levels.
+    :return: The axes.
+    """
+    from .._i18n import localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    positions = _band_axis(ax, result.frequencies_hz, language=language)
+    if result.standardized_db is not None:
+        shade = theme_fill(_C_MUTED, ax)
+        for x in positions[~np.asarray(result.standardizable)]:
+            ax.axvspan(x - 0.5, x + 0.5, color=shade, lw=0, zorder=0)
+        ax.fill_between(
+            [], [], color=shade, lw=0, label=_t("not standardized (7.7)", language)
+        )
+    ax.plot(
+        positions,
+        result.average_db,
+        "o--",
+        color=_C_REFERENCE,
+        lw=1.0,
+        ms=4,
+        label=_t("average of the readings", language),
+    )
+    if result.background is not None:
+        ax.plot(
+            positions,
+            result.background.background_db,
+            ":",
+            color=_C_MUTED,
+            lw=1.4,
+            label=_t(_BACKGROUND_L2_LABEL, language),
+        )
+    final = result.corrected_db
+    final_label = _t(_CORRECTED_LABEL, language)
+    if result.standardized_db is not None:
+        ax.plot(
+            positions,
+            result.corrected_db,
+            "-",
+            color=_C_TERTIARY,
+            lw=1.2,
+            label=final_label,
+        )
+        final = result.standardized_db
+        final_label = _t("standardized $L_\\mathrm{nT}$", language)
+    style_default(kwargs, "color", _C_PRIMARY)
+    kwargs.setdefault("marker", "s")
+    kwargs.setdefault("label", final_label)
+    ax.plot(positions, final, "-", **kwargs)
+    if result.background is not None and result.background.influenced:
+        _mark_upper_limits(ax, positions, final, result.background.limited, language)
+    ax.set_ylabel(_t(_SPL_LABEL, language))
+    headline = _headline_rating(result)
+    title = _t(_SERVICE_TITLE, language)
+    if headline is not None:
+        title = f"{title}: {_rating_symbol(headline)} = {result.ratings[headline]} dB"
+    ax.set_title(title)
+    ax.grid(visible=True, axis="y", alpha=0.3)
+    place_legend_clear(ax.legend(fontsize="small"))
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_service_equipment_background(
+    result: ServiceEquipmentBackgroundResult,
+    ax: Axes | None = None,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """Measured, background and corrected band levels (ISO/DIS 16032 Clause 9).
+
+    :param result: A
+        :class:`~phonometry.building.measurement.service_equipment.ServiceEquipmentBackgroundResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the corrected-level curve.
+    :return: The axes.
+    """
+    from .._i18n import localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    freqs = result.frequencies_hz
+    labels = freqs if freqs is not None else np.arange(result.measured_db.size) + 1.0
+    positions = _band_axis(
+        ax,
+        labels,
+        # Translated here, for the reason given in _plot_shaded_band_pair.
+        xlabel=_t(_FREQ_LABEL if freqs is not None else _BAND_INDEX_LABEL, language),
+        language=language,
+    )
+    ax.plot(
+        positions,
+        result.measured_db,
+        "o--",
+        color=_C_REFERENCE,
+        lw=1.0,
+        ms=4,
+        label=_t("measured $L_1$", language),
+    )
+    ax.plot(
+        positions,
+        result.background_db,
+        ":",
+        color=_C_MUTED,
+        lw=1.4,
+        label=_t(_BACKGROUND_L2_LABEL, language),
+    )
+    style_default(kwargs, "color", _C_PRIMARY)
+    kwargs.setdefault("marker", "s")
+    kwargs.setdefault("label", _t(_CORRECTED_LABEL, language))
+    ax.plot(positions, result.corrected_db, "-", **kwargs)
+    if result.influenced:
+        _mark_upper_limits(ax, positions, result.corrected_db, result.limited, language)
+    ax.set_ylabel(_t(_SPL_LABEL, language))
+    ax.set_title(_t(_BACKGROUND_TITLE, language))
+    ax.grid(visible=True, axis="y", alpha=0.3)
+    place_legend_clear(ax.legend(fontsize="small"))
+    localize_axes(ax, language)
+    return ax
+
+
+def _reading_names(count: int) -> list[str]:
+    """Position numbers of the readings of 7.4.1: 1, 2, 3, 1, 4, 5, 1, 6, 7."""
+    names: list[str] = []
+    room = 2
+    for i in range(count):
+        if i % 3 == 0:
+            names.append("1")
+        else:
+            names.append(str(room))
+            room += 1
+    return names
+
+
+def plot_position_spread(
+    result: PositionSpreadCheck,
+    ax: Axes | None = None,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """The A-weighted readings of 7.4.1 against the spread their stage allows.
+
+    :param result: A
+        :class:`~phonometry.building.measurement.service_equipment.PositionSpreadCheck`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the markers of the room positions.
+    :return: The axes.
+    """
+    from .._i18n import format_number, localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    levels = np.asarray(result.levels_db, dtype=np.float64)
+    x = np.arange(levels.size, dtype=np.float64)
+    corner = np.zeros(levels.size, dtype=bool)
+    corner[::3] = True
+    low = float(np.min(levels))
+    ax.fill_between(
+        [-0.5, levels.size - 0.5],
+        [low, low],
+        [low + result.limit_db] * 2,
+        color=theme_fill(_C_TERTIARY, ax),
+        lw=0,
+        zorder=0,
+        label=(
+            f"{_t('allowed spread', language)} "
+            f"({format_number(result.limit_db, language)} dB)"
+        ),
+    )
+    ax.plot(
+        x[corner],
+        levels[corner],
+        ls="",
+        marker="s",
+        ms=9,
+        color=_C_SECONDARY,
+        zorder=4,
+        label=_t("corner", language),
+    )
+    style_default(kwargs, "color", _C_PRIMARY)
+    kwargs.setdefault("marker", "o")
+    style_default(kwargs, "ms", 8)
+    kwargs.setdefault("label", _t("room positions", language))
+    ax.plot(x[~corner], levels[~corner], ls="", zorder=4, **kwargs)
+    ax.set_xticks(x)
+    ax.set_xticklabels(_reading_names(levels.size))
+    ax.set_xlim(-0.5, levels.size - 0.5)
+    ax.set_xlabel(_t("Reading", language))
+    ax.set_ylabel(_t("A-weighted level [dB]", language))
+    if result.action == "add_positions":
+        a, b = result.next_positions
+        verdict = f"{_t('add positions', language)} {a} {_t('and', language)} {b}"
+    else:
+        verdict = _t(result.action, language)
+    ax.set_title(
+        f"{_t(_SPREAD_TITLE, language)}: "
+        f"{format_number(result.spread_db, language)} dB, {verdict}"
+    )
+    span = max(result.limit_db, result.spread_db)
+    ax.set_ylim(low - 0.4 * span, low + 1.6 * span)
+    ax.grid(visible=True, axis="y", alpha=0.3)
+    place_legend_clear(ax.legend(fontsize="small"))
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_service_equipment_positions(
+    result: ServiceEquipmentPositionCheck,
+    ax: Axes | None = None,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """Plan view of the room with the microphone positions of 7.2 and 7.3.
+
+    The key stands beside the plan, which has no empty corner to spare. A
+    figure the renderer creates itself is wide enough for it, with the plan
+    placed to leave the key and the title room, so a plain ``savefig()`` or
+    ``plt.show()`` keeps both on the canvas; on axes the caller passes, the
+    caller lays the figure out (``plt.tight_layout()``).
+
+    :param result: A
+        :class:`~phonometry.building.measurement.service_equipment.ServiceEquipmentPositionCheck`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the markers of the reverberant-field positions.
+    :return: The axes.
+    """
+    from matplotlib.patches import Rectangle
+
+    from .._i18n import format_number, localize_axes
+    from .geometry._draft import _chip
+
+    if ax is None:
+        figure = _import_pyplot().figure(figsize=_POSITIONS_FIGURE_SIZE_IN)
+        ax = figure.add_axes(_POSITIONS_AXES_RECT)
+    length = float(result.room_dimensions_m[0])
+    width = float(result.room_dimensions_m[1])
+    ax.add_patch(
+        Rectangle(
+            (0.0, 0.0),
+            length,
+            width,
+            fill=False,
+            # The spine colour, so the walls read on a dark page as well.
+            edgecolor=ax.spines["bottom"].get_edgecolor(),
+            lw=1.6,
+            label=_t("room outline", language),
+        )
+    )
+    clearance = result.surface_limit_m
+    # The zone the reverberant-field positions may take, washed and edged in
+    # a hue of its own: a grey dashed edge would pass for one more gridline,
+    # and on a dark page its lower edge sat on the 0.5 m line and vanished.
+    # The wash stays under the grid, which still reads across it, and the
+    # edge is drawn again over the grid, so a gridline under it cannot cut it.
+    zone = (clearance, clearance)
+    zone_length = length - 2.0 * clearance
+    zone_width = width - 2.0 * clearance
+    edge: dict[str, Any] = {"edgecolor": _C_TERTIARY, "ls": "--", "lw": 1.4}
+    ax.add_patch(
+        Rectangle(
+            zone,
+            zone_length,
+            zone_width,
+            facecolor=theme_fill(_C_TERTIARY, ax),
+            zorder=1,
+            label=_t("surface clearance", language),
+            **edge,
+        )
+    )
+    ax.add_patch(Rectangle(zone, zone_length, zone_width, fill=False, zorder=2, **edge))
+    sources = np.asarray(result.source_positions_m)
+    rooms = np.asarray(result.room_positions_m)
+    # A plan cannot show a distance in three dimensions, and a source in the
+    # ceiling can sit above a position that is well clear of it; so each
+    # source is joined to its nearest room position and the line carries the
+    # true distance, rather than a circle the plan would misdraw.
+    for i, source in enumerate(sources):
+        gaps = np.linalg.norm(rooms - source, axis=1)
+        nearest = rooms[int(np.argmin(gaps))]
+        ax.plot(
+            [source[0], nearest[0]],
+            [source[1], nearest[1]],
+            ls=":",
+            lw=1.2,
+            color=_C_REFERENCE,
+            zorder=2,
+            label=_t("distance to a source", language) if i == 0 else None,
+        )
+        ax.annotate(
+            f"{format_number(float(np.min(gaps)), language, decimals=2)} m",
+            ((source[0] + nearest[0]) / 2.0, (source[1] + nearest[1]) / 2.0),
+            ha="center",
+            va="center",
+            fontsize="small",
+            zorder=7,
+            bbox=_chip(ax, 0.2),
+        )
+    if sources.size:
+        ax.plot(
+            sources[:, 0],
+            sources[:, 1],
+            ls="",
+            marker="X",
+            ms=11,
+            color=_C_REFERENCE,
+            zorder=5,
+            label=_t("sound source", language),
+        )
+    corner = np.asarray(result.corner_position_m)
+    ax.plot(
+        [corner[0]],
+        [corner[1]],
+        ls="",
+        marker="s",
+        ms=10,
+        color=_C_SECONDARY,
+        zorder=6,
+        label=_t("corner position", language),
+    )
+    style_default(kwargs, "color", _C_PRIMARY)
+    kwargs.setdefault("marker", "o")
+    style_default(kwargs, "ms", 9)
+    kwargs.setdefault("label", _t("reverberant-field positions", language))
+    ax.plot(rooms[:, 0], rooms[:, 1], ls="", zorder=6, **kwargs)
+    # Numbered as the draft numbers them: the corner is position 1 (7.2) and
+    # the reverberant-field positions follow from 2.
+    points = [(float(corner[0]), float(corner[1]))]
+    points += [(float(px), float(py)) for px, py, _ in rooms]
+    for number, (px, py) in enumerate(points, start=1):
+        ax.annotate(
+            str(number),
+            (px, py),
+            xytext=(7, 7),
+            textcoords="offset points",
+            fontsize="small",
+            zorder=7,
+        )
+    ax.set_aspect("equal")
+    ax.set_xlim(-0.3, length + 0.3)
+    ax.set_ylim(-0.3, width + 0.3)
+    ax.set_xlabel(_t("Length $x$ [m]", language))
+    ax.set_ylabel(_t("Width $y$ [m]", language))
+    verdict = "requirements met" if result.passes else "requirements not met"
+    # The verdict on a line of its own: beside the key, one line of title
+    # and verdict is wider than the plan in Spanish.
+    ax.set_title(f"{_t(_POSITIONS_TITLE, language)}\n{_t(verdict, language)}")
+    ax.legend(fontsize="small", loc="upper left", bbox_to_anchor=(1.02, 1.0))
+    localize_axes(ax, language)
+    return ax

@@ -255,6 +255,9 @@ from .environment import (
     generate_sel_distribution_density,
     generate_sel_distribution_exceedance,
     generate_shadow_zone_map,
+    generate_software_quality_quantiles,
+    generate_software_quality_round_robin,
+    generate_software_quality_trc,
     generate_soundscape_binaural_indicators,
     generate_soundscape_pleasantness_eventfulness,
     generate_statistical_pass_by,
@@ -887,6 +890,12 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     generate_outdoor_level_cascade,
     # The quality-assurance cases ISO/TR 17534-3 prints for ISO 9613-2.
     generate_iso17534_qa_cases,
+    # ISO 17534-1, each drawn by its result's own .plot(): the TRC form of
+    # ISO/TR 17534-3 test case T03 as this library computes it, the quantiles
+    # of the C.4 example and a round robin of four programs.
+    generate_software_quality_trc,
+    generate_software_quality_quantiles,
+    generate_software_quality_round_robin,
     # What a road device is declared by, over the EN 1793-3 spectrum.
     generate_road_device_ratings,
     # EN 1793-5: the sound reflection of a barrier measured where it stands.

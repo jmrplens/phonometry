@@ -3,9 +3,11 @@
 # Outdoor sound
 
 This section is the **path**: what happens to a sound between a source of known
-power and a receiver hundreds of metres away. Three of its pages go from the
-engineering method down to the physics it approximates, and then to the one
-thing both of them assume does not happen.
+power and a receiver hundreds of metres away. Its first three pages go from
+the engineering method down to the physics it approximates, and then to the
+one thing both of them assume does not happen; the fourth measures the barrier
+itself, and the fifth asks whether the program that computes the method
+computes it correctly.
 
 [Outdoor Sound Propagation](outdoor-propagation.md) is the
 engineering method. Starting from a source's **sound power**, ISO 9613-2
@@ -52,6 +54,17 @@ a road barrier where it stands, to the sound reflection index band by band and
 to its single number DL_RI, the in-place counterpart of the absorption rating
 the product is declared by.
 
+[Quality of Outdoor Sound Software (ISO 17534-1)](software-quality.md)
+turns from the physics to the program. A noise map is computed by software,
+often in a faster "modified configuration" that neglects paths and
+interpolates between grid points, and two programs implementing the same
+method need not agree. ISO 17534-1 checks a program's results against the
+limits of a method's certified test cases (the TRC form, with ISO/TR 17534-3
+supplying the cases for ISO 9613-2), and measures what the faster
+configuration costs by the 0,1- and 0,9-quantiles of a sample of level
+differences. Open it when a map has to carry a statement of its own
+uncertainty.
+
 The rating that a predicted level ends in is not here:
 the period levels come from [Integrated and Statistical
 Levels](../../signals/levels/levels.md), and Lden, Ldn and the rating level
@@ -78,6 +91,10 @@ for a machine, and in [Aircraft noise](../../aircraft/index.md) for aircraft.
 - [Sound reflection of a noise barrier in situ](barrier-reflection.md):
   the sound reflection index of EN 1793-5 measured in front of a road barrier,
   with the signal subtraction, the Adrienne window and the single number DL_RI.
+- [Quality of Outdoor Sound Software (ISO 17534-1)](software-quality.md):
+  a program's results against the limits of its certified test cases, the
+  quantiles of the level differences a modified configuration introduces, and
+  the precision of a method across programs.
 
 ## See also
 
@@ -111,4 +128,5 @@ and the wave-acoustic and refraction pages assume a non-turbulent atmosphere
 outright. Nothing on these pages produces an environmental rating: no Lden, no
 limit value and no verdict on a site (those are [Assessment and
 regulation](../assessment/index.md)); the single number and the
-position check of EN 1793-5 are about a product and its measurement.
+position check of EN 1793-5 are about a product and its measurement, and the
+TRC form of ISO 17534-1 judges a program, not a site.

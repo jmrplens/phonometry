@@ -1150,6 +1150,18 @@ from .room import EVEREST_EX1_VOLUME as EVEREST_EX1_VOLUME
 from .scattering import COX_D_BANDS_HZ as COX_D_BANDS_HZ
 from .scattering import COX_D_FIRST_AUTHORS as COX_D_FIRST_AUTHORS
 from .scattering import COX_D_SCATTERING as COX_D_SCATTERING
+from .software_quality import (
+    ISO17534_1_EXAMPLE_DIFFERENCES_DB as ISO17534_1_EXAMPLE_DIFFERENCES_DB,
+)
+from .software_quality import (
+    ISO17534_1_EXAMPLE_QUANTILES_DB as ISO17534_1_EXAMPLE_QUANTILES_DB,
+)
+from .software_quality import ISO17534_1_EXAMPLE_RANKS as ISO17534_1_EXAMPLE_RANKS
+from .software_quality import ISO17534_1_TABLE_B2 as ISO17534_1_TABLE_B2
+from .software_quality import ISO17534_1_TABLE_C1 as ISO17534_1_TABLE_C1
+from .software_quality import ISO17534_3_TABLE_69 as ISO17534_3_TABLE_69
+from .software_quality import VDI3723_1_TABLE_5_K as VDI3723_1_TABLE_5_K
+from .software_quality import VDI3723_1_TABLE_6_K as VDI3723_1_TABLE_6_K
 from .solids import ARAU_4_1_PRODUCTS as ARAU_4_1_PRODUCTS
 from .solids import ARAU_AGAINST_HOPKINS as ARAU_AGAINST_HOPKINS
 from .solids import (

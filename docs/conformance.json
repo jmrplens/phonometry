@@ -3,13 +3,13 @@
   "library": "4.0.0rc1",
   "generator": "scripts/conformance_report.py",
   "counts": {
-    "checks": 1640,
-    "passing": 1640,
+    "checks": 1648,
+    "passing": 1648,
     "failing": 0,
-    "domains": 103,
-    "standards": 504,
-    "citations": 1147,
-    "designations": 208,
+    "domains": 104,
+    "standards": 506,
+    "citations": 1153,
+    "designations": 210,
     "sources": 122
   },
   "units": [
@@ -215,6 +215,12 @@
       "title": "Outdoor propagation quality assurance (ISO/TR 17534-3)",
       "checks": 34,
       "passing": 34
+    },
+    {
+      "id": "outdoor-sound-software-quality-assurance-iso-17534-1",
+      "title": "Outdoor sound software quality assurance (ISO 17534-1)",
+      "checks": 8,
+      "passing": 8
     },
     {
       "id": "human-vibration-iso-8041-2631-5349",
@@ -20128,6 +20134,291 @@
         "value": -0.0012
       },
       "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "outdoor-sound-software-quality-assurance-iso-17534-1/iso-17534-1-2015-table-c-1/ranking-position-r-q0-1-of-the-0-1-quantile-n-20-to-50",
+      "domain": "outdoor-sound-software-quality-assurance-iso-17534-1",
+      "reference": {
+        "cite": "ISO 17534-1:2015 Table C.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 17534-1",
+            "edition": "2015",
+            "clause": "Table C.1"
+          }
+        ]
+      },
+      "quantity": "Ranking position R(q0,1) of the 0,1-quantile, N = 20 to 50",
+      "kind": "count",
+      "expected": {
+        "value": 31.0,
+        "label": "31/31 rows of Table C.1"
+      },
+      "computed": {
+        "value": 31.0,
+        "label": "31/31 rows of Table C.1"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "outdoor-sound-software-quality-assurance-iso-17534-1/iso-17534-1-2015-table-c-1/ranking-position-r-q0-9-of-the-0-9-quantile-n-20-to-50",
+      "domain": "outdoor-sound-software-quality-assurance-iso-17534-1",
+      "reference": {
+        "cite": "ISO 17534-1:2015 Table C.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 17534-1",
+            "edition": "2015",
+            "clause": "Table C.1"
+          }
+        ]
+      },
+      "quantity": "Ranking position R(q0,9) of the 0,9-quantile, N = 20 to 50",
+      "kind": "count",
+      "expected": {
+        "value": 31.0,
+        "label": "31/31 rows of Table C.1"
+      },
+      "computed": {
+        "value": 31.0,
+        "label": "31/31 rows of Table C.1"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "outdoor-sound-software-quality-assurance-iso-17534-1/vdi-3723-blatt-1-1993-05-tables-5-and-6/ranking-positions-of-l-x-90-and-l-x-10-the-source-of-table-c-1-n-20-to-50",
+      "domain": "outdoor-sound-software-quality-assurance-iso-17534-1",
+      "reference": {
+        "cite": "VDI 3723 Blatt 1:1993-05 Tables 5 and 6",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "VDI 3723 Blatt 1",
+            "edition": "1993-05",
+            "clause": "Tables 5 and 6"
+          }
+        ]
+      },
+      "quantity": "Ranking positions of L_x,90 and L_x,10, the source of Table C.1, N = 20 to 50",
+      "kind": "count",
+      "expected": {
+        "value": 31.0,
+        "label": "31/31 rows of Tables 5 and 6"
+      },
+      "computed": {
+        "value": 31.0,
+        "label": "31/31 rows of Tables 5 and 6"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "outdoor-sound-software-quality-assurance-iso-17534-1/iso-17534-1-2015-formulas-c-1-and-c-2/ranking-positions-above-50-values-n-51-to-1000",
+      "domain": "outdoor-sound-software-quality-assurance-iso-17534-1",
+      "reference": {
+        "cite": "ISO 17534-1:2015 Formulas (C.1) and (C.2)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 17534-1",
+            "edition": "2015",
+            "clause": "Formulas (C.1) and (C.2)"
+          }
+        ]
+      },
+      "quantity": "Ranking positions above 50 values, N = 51 to 1000",
+      "kind": "count",
+      "expected": {
+        "value": 950.0,
+        "label": "950/950 sample sizes"
+      },
+      "computed": {
+        "value": 950.0,
+        "label": "950/950 sample sizes"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "outdoor-sound-software-quality-assurance-iso-17534-1/iso-17534-1-2015-c-4-example/ranking-positions-of-25-level-differences",
+      "domain": "outdoor-sound-software-quality-assurance-iso-17534-1",
+      "reference": {
+        "cite": "ISO 17534-1:2015 C.4, EXAMPLE",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 17534-1",
+            "edition": "2015",
+            "clause": "C.4, EXAMPLE"
+          }
+        ]
+      },
+      "quantity": "Ranking positions of 25 level differences",
+      "kind": "record",
+      "expected": {
+        "label": "R(q0,1) = 2; R(q0,9) = 24",
+        "record": {
+          "R(q0,1)": 2.0,
+          "R(q0,9)": 24.0
+        }
+      },
+      "computed": {
+        "label": "R(q0,1) = 2; R(q0,9) = 24",
+        "record": {
+          "R(q0,1)": 2.0,
+          "R(q0,9)": 24.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "outdoor-sound-software-quality-assurance-iso-17534-1/iso-17534-1-2015-c-4-example/quantiles-q0-1-and-q0-9-of-25-level-differences-db",
+      "domain": "outdoor-sound-software-quality-assurance-iso-17534-1",
+      "reference": {
+        "cite": "ISO 17534-1:2015 C.4, EXAMPLE",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 17534-1",
+            "edition": "2015",
+            "clause": "C.4, EXAMPLE"
+          }
+        ]
+      },
+      "quantity": "Quantiles q0,1 and q0,9 of 25 level differences, dB",
+      "kind": "record",
+      "expected": {
+        "label": "q0,1 = -1 dB; q0,9 = 3 dB",
+        "record": {
+          "q0,1": -1.0,
+          "q0,9": 3.0
+        }
+      },
+      "computed": {
+        "label": "q0,1 = -1 dB; q0,9 = 3 dB",
+        "record": {
+          "q0,1": -1.0,
+          "q0,9": 3.0
+        }
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "outdoor-sound-software-quality-assurance-iso-17534-1/iso-17534-1-2015-table-b-2/result-inside-tolerances-eight-octave-bands-and-the-total-of-test-case-t-xx",
+      "domain": "outdoor-sound-software-quality-assurance-iso-17534-1",
+      "reference": {
+        "cite": "ISO 17534-1:2015 Table B.2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 17534-1",
+            "edition": "2015",
+            "clause": "Table B.2"
+          }
+        ]
+      },
+      "quantity": "Result inside tolerances, eight octave bands and the total of test case T XX",
+      "kind": "count",
+      "expected": {
+        "value": 9.0,
+        "label": "9/9 rows answered \"yes\""
+      },
+      "computed": {
+        "value": 9.0,
+        "label": "9/9 rows answered \"yes\""
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "outdoor-sound-software-quality-assurance-iso-17534-1/iso-17534-1-2015-table-a-5-note-a-table-b-2/width-of-each-certified-interval-twice-the-0-05-db-tolerance",
+      "domain": "outdoor-sound-software-quality-assurance-iso-17534-1",
+      "reference": {
+        "cite": "ISO 17534-1:2015 Table A.5, note a; Table B.2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 17534-1",
+            "edition": "2015",
+            "clause": "Table A.5, note a; Table B.2"
+          }
+        ]
+      },
+      "quantity": "Width of each certified interval, twice the 0,05 dB tolerance",
+      "kind": "count",
+      "expected": {
+        "value": 9.0,
+        "label": "9/9 rows of Table B.2"
+      },
+      "computed": {
+        "value": 9.0,
+        "label": "9/9 rows of Table B.2"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
       "verdict": "pass"
     },
     {

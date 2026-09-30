@@ -104,6 +104,11 @@ def test_dash_in_a_fenced_block_is_data() -> None:
     assert ced.markdown_hits("```\na — b\n```\n") == []
 
 
+def test_dash_after_a_fence_shown_inside_another_is_prose() -> None:
+    text = "````\n```\na — b\n````\nThe level rises — and falls.\n"
+    assert ced.markdown_hits(text) == [5]
+
+
 def test_dash_alone_in_a_table_cell_is_an_empty_cell() -> None:
     assert ced.markdown_hits("| a | — | b |\n") == []
 

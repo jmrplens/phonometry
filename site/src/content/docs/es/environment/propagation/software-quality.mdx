@@ -1,0 +1,501 @@
+---
+title: "Calidad del software de ruido exterior (ISO 17534-1)"
+description: "Lo que la ISO 17534-1:2015 hace calculable sobre un programa que predice el sonido en exteriores: sus resultados frente a los límites de los resultados certificados de los casos de prueba (el formulario TRC del Anexo B), los cuantiles 0,1 y 0,9 de las diferencias de nivel que introduce una configuración modificada más rápida (Anexo C, con la Tabla C.1 y las Fórmulas (C.1) y (C.2)), dónde se toma esa muestra, y la precisión de un método entre programas a partir de una intercomparación."
+references:
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2015
+    title: "Acoustics — Software for the calculation of sound outdoors — Part 1: Quality requirements and quality assurance"
+    designation: "ISO 17534-1:2015"
+    primary: true
+    note: "Las partes implementadas: la comparación con los casos de prueba del apartado 7.1 con el formulario TRC del Anexo B (Tablas B.1 y B.2) y los ±0,05 dB de la nota a de la Tabla A.5; los valores característicos del Anexo C (C.2 a C.5, la Tabla C.1 y las Fórmulas (C.1) y (C.2)); y el resultado de una intercomparación del 4.5.2 y el A.3. Leída en BS ISO 17534-1:2015, cuyas páginas llevan el texto ISO sin cambios."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2015
+    title: "Acoustics — Software for the calculation of sound outdoors — Part 3: Recommendations for quality assured implementation of ISO 9613-2 in software according to ISO 17534-1"
+    designation: "ISO/TR 17534-3:2015"
+    url: "https://www.iso.org/standard/63697.html"
+    note: "Los casos de prueba específicos de la ISO 9613-2; el caso T03 (Tabla 6, fila L_A) es el formulario TRC que se resuelve en esta página."
+  - type: standard
+    organization: "Deutsches Institut für Normung"
+    year: 2006
+    title: "Akustik — Software-Erzeugnisse zur Berechnung der Geräuschimmission im Freien — Qualitätsanforderungen und Prüfbestimmungen"
+    designation: "DIN 45687:2006-05"
+    note: "La norma nacional de la que se tomó el Anexo C de la ISO 17534-1. Su Anexo F.4 basa la Tabla C.1 en la VDI 3723 Blatt 1 y da las Fórmulas (C.1) y (C.2) como complemento de esa directriz por encima de 50 valores, con concordancia suficiente con la E VDI 2450 Blatt 5, e imprime la (C.2) exactamente igual que la ISO 17534-1."
+  - type: standard
+    organization: "Verein Deutscher Ingenieure"
+    year: 1993
+    title: "Anwendung statistischer Methoden bei der Kennzeichnung schwankender Geräuschimmissionen"
+    designation: "VDI 3723 Blatt 1:1993-05"
+    note: "La fuente que la DIN 45687 da para la Tabla C.1: sus Tablas 5 y 6 dan las mismas posiciones de 20 a 50 valores, simétricas, y se detiene en 50 sin fórmula, remitiendo a la VDI 2450 Blatt 5 para muestras mayores."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 1996
+    title: "Acoustics — Attenuation of sound during propagation outdoors — Part 2: General method of calculation"
+    designation: "ISO 9613-2:1996"
+    url: "https://www.iso.org/standard/20649.html"
+    note: "El método de cálculo cuya implementación comprueba el ejemplo del T03."
+---
+
+import Scope from '../../../../../components/Scope.astro';
+import ScopeClaim from '../../../../../components/ScopeClaim.astro';
+import SeeAlso from '../../../../../components/SeeAlso.astro';
+import ThemeImage from '../../../../../components/ThemeImage.astro';
+
+Un mapa de ruido lo calcula un programa, y dos programas que implementan el
+mismo método no siempre coinciden. La ISO 17534-1:2015 no predice ningún nivel
+ni pregunta si un método concuerda con las mediciones; dice cómo demuestra un
+programa que implementa su método correctamente, y cómo averigua su usuario lo
+que le cuestan los atajos del programa. Dos configuraciones sostienen toda la
+norma. En la **configuración de referencia** (2.12) se ejecutan todos los
+pasos del método y no se simplifica ninguno; en una **configuración
+modificada** (2.7) uno o más pasos se aproximan, se omiten o se simplifican de
+otra forma, normalmente para que un mapa grande termine en un tiempo razonable.
+
+Cuatro cosas de la norma son aritmética, y
+`phonometry.environment.propagation.software_quality` son esas cuatro:
+
+- la comparación de los resultados de un programa con los límites de los
+  resultados certificados de los casos de prueba de un método, que el
+  fabricante declara en el formulario TRC del Anexo B y el usuario repite con
+  cada actualización (7.1);
+- los valores característicos $q_{0,1}$ y $q_{0,9}$ de las diferencias de
+  nivel entre una configuración modificada y la de referencia (Anexo C, 5.2.3,
+  7.2);
+- dónde se toma la muestra de esas diferencias (C.2, C.3);
+- la precisión de un método entre programas, a partir de una intercomparación
+  (4.5.2, A.3).
+
+El resto (la documentación que debe tener un método, la declaración de
+conformidad, el formulario de grado de implementación y el formato de datos QA
+del Anexo D) son requisitos sobre documentos.
+
+## 1. Un programa frente a sus resultados certificados
+
+Los casos de prueba de un método imprimen, para cada banda y para el total, un
+resultado correcto y el intervalo en el que tiene que caer el resultado de un
+programa. El resultado final se da con dos decimales, y «the result values in
+frequency bands and for the total level are considered to be correct if the
+deviation does not exceed ±0,05 dB» (nota a de la Tabla A.5), que es
+`CERTIFIED_RESULT_TOLERANCE_DB`. El A.2 y el 4.5.2 expresan ese mismo
+intervalo de redondeo de otra manera: los límites «are given to one decimal
+place», y «an interval of 0,1 is always included for rounding purposes»
+cuando el resultado acaba en 5 (13,65 da de 13,6 a 13,7, que es
+13,65 ± 0,05). La Tabla B.2 y todos los casos de prueba de la ISO/TR 17534-3
+imprimen los límites con dos decimales, que es el convenio que sigue la
+constante, y la función compara con los límites que se le den, sean los que
+sean. El fabricante pone cada resultado junto a
+sus límites en el **formulario de comparación de resultados de los casos de
+prueba** (formulario TRC, Tablas B.1 y B.2) y responde «Result inside
+tolerances: yes/no»; el usuario resuelve los mismos casos en la configuración
+de referencia «with each new installation or update» (7.1).
+`verify_calculation_results` rellena esa columna. La Tabla B.2, el formulario
+resuelto de un caso «T XX» de la ISO/TR 17534-3, queda así:
+
+```python
+from phonometry import environment
+
+bandas = ["63 Hz", "125 Hz", "250 Hz", "500 Hz", "1 kHz", "2 kHz", "4 kHz", "8 kHz", "Total"]
+superior = [13.75, 19.55, 21.15, 26.05, 34.85, 37.05, 34.15, 21.65, 40.65]
+inferior = [13.65, 19.45, 21.05, 25.95, 34.75, 36.95, 34.05, 21.55, 40.55]
+resultado = [13.7, 19.5, 21.1, 26.0, 34.8, 37.0, 34.1, 21.6, 40.60]
+
+v = environment.verify_calculation_results(resultado, inferior, superior, labels=bandas)
+print(v.passes)                # True
+print(v.inside)                # (True, True, True, True, True, True, True, True, True)
+print(v.margins_db.round(2))   # [0.05 0.05 0.05 0.05 0.05 0.05 0.05 0.05 0.05]
+v.plot(language="es")
+```
+
+El dictamen es el objeto: `v.passes` es la respuesta, `failing_labels` nombra
+las filas que quedan fuera, y `bool(v)` lanza una excepción en lugar de dejar
+que `if verify_calculation_results(...):` apruebe cualquier programa. Un límite
+forma parte del intervalo, porque una desviación que llega a 0,05 dB «does not
+exceed» la tolerancia, y un resultado que cae sobre un límite por la
+aritmética de coma flotante está sobre él.
+
+La figura aplica el formulario a la propia implementación de la ISO 9613-2 de
+esta biblioteca, con el caso T03 de la ISO/TR 17534-3 (suelo poroso, Tabla 6).
+Las filas son las del formulario: el nivel ponderado A de cada banda de octava
+y su total, frente a la fila $L_A$ de la Tabla 6, la que su nota al pie
+certifica a ±0,05 dB. A la izquierda, la biblioteca tal cual: todas las filas
+dentro de su intervalo, con una desviación máxima de 0,008 dB. A la derecha, con
+un solo detalle cambiado: la absorción del aire leída en las frecuencias
+nominales de banda en lugar de en las frecuencias medias exactas de base 10 de
+la ISO 9613-1, en las que se calculan los coeficientes de atenuación de la
+ISO 9613-2. En 8 kHz eso es 8000 Hz en lugar de 7943 Hz, y basta para apartar
+la banda 0,20 dB de su resultado certificado, 0,15 dB por debajo del límite
+inferior, mientras el total sigue dentro. Es el tipo de detalle de
+implementación que el formulario existe para detectar, y un total que aprueba
+no lo muestra.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/software_quality_trc.svg" alt="Dos paneles del formulario TRC del caso T03, cada fila dibujada respecto al centro de su intervalo certificado: nueve barras sombreadas de 0,1 dB de alto para los niveles ponderados A de las ocho bandas de octava y su total. A la izquierda, con el título 9 de 9 resultados dentro: todos los puntos del resultado de la biblioteca quedan a menos de 0,01 dB del centro. A la derecha, con el título 8 de 9 resultados dentro: con la absorción del aire leída en las frecuencias nominales de banda el punto de 4 kHz baja a menos 0,04 dB, todavía dentro, y el resultado de 8 kHz es un aspa en menos 0,20 dB, muy por debajo de su intervalo" width="100%" />
+
+*El mismo caso de prueba dos veces, con el propio `.plot()` del dictamen: la
+cadena ISO 9613-2 de la biblioteca a la izquierda, y a la derecha con un
+detalle de implementación cambiado.*
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import math
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+from phonometry import environment
+
+# Caso de prueba T03 de la ISO/TR 17534-3: suelo poroso, 93 dB en todas las
+# octavas, la fuente en (10, 10, 1) m y el receptor en (200, 50, 4) m, 20 °C y 70 %.
+bandas = np.array([63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0])
+d_p = math.hypot(190.0, 40.0)
+d = math.hypot(d_p, 3.0)
+niveles = np.asarray(
+    environment.predicted_receiver_level(
+        np.full(8, 93.0),
+        environment.PropagationGeometry(d, 1.0, 4.0, projected_distance=d_p),
+        frequencies=bandas,
+        ground=environment.GroundFactors(1.0, 1.0, 1.0),
+        atmosphere=environment.AtmosphericConditions(
+            temperature_c=20.0, relative_humidity_percent=70.0
+        ),
+    )
+)
+# Los mismos niveles con la absorción del aire leída en las frecuencias nominales.
+nominal = (
+    niveles
+    + environment.atmospheric_absorption(
+        d, frequencies=bandas, temperature_c=20.0, relative_humidity_percent=70.0
+    )
+    - d * environment.air_attenuation(
+        bandas, temperature_c=20.0, relative_humidity_percent=70.0
+    )
+)
+
+# Las filas del formulario van ponderadas A: las ocho bandas y su total.
+ponderacion_a = np.array([-26.2, -16.1, -8.6, -3.2, 0.0, 1.2, 1.0, -1.1])
+
+
+def filas_trc(niveles_banda):
+    ponderados = niveles_banda + ponderacion_a
+    return np.append(ponderados, 10 * np.log10(np.sum(10 ** (ponderados / 10))))
+
+
+# Fila L_A de la Tabla 6 del informe, certificada a ±0,05 dB: bandas y total.
+impreso = np.array([13.70, 16.38, 17.73, 23.83, 33.27, 35.69, 32.79, 20.26, 39.14])
+tol = environment.CERTIFIED_RESULT_TOLERANCE_DB
+etiquetas = ["63 Hz", "125 Hz", "250 Hz", "500 Hz", "1 kHz", "2 kHz", "4 kHz", "8 kHz",
+             "Total"]
+
+fig, ejes = plt.subplots(1, 2, figsize=(13, 5.4))
+for ax, niveles_banda in zip(ejes, (niveles, nominal)):
+    v = environment.verify_calculation_results(
+        filas_trc(niveles_banda), impreso - tol, impreso + tol, labels=etiquetas
+    )
+    print(v.passes, v.failing_labels, v.deviations_db.round(3))
+    v.plot(ax, language="es")
+# True () [ 0.001 -0.004 -0.008 -0.003  0.008 -0.005 -0.004 -0.003 -0.001]
+# False ('8 kHz',) [ 0.001 -0.003 -0.006 -0.001  0.008 -0.01  -0.037 -0.2   -0.013]
+plt.show()
+```
+
+</details>
+
+## 2. Lo que cuesta una configuración modificada: los cuantiles del Anexo C
+
+Un mapa de una zona extensa rara vez se calcula en la configuración de
+referencia. Los programas omiten «the contribution of sources and propagation
+paths probably not relevant» e interpolan entre los puntos de la malla, y las
+incertidumbres que eso añade «depend on the individual project» (7.2). Por
+eso la norma pide a todo programa conforme que permita a su usuario medirlas
+(5.2.3): calcular dos veces una muestra aleatoria de puntos receptores, una en
+la configuración de referencia y otra en la configuración modificada con la
+que de verdad se calculará el mapa, y describir las diferencias de nivel con
+dos estadísticos de orden de la muestra (Anexo C, que es informativo). Las
+diferencias se ordenan de menor a mayor, y los valores situados en dos
+**posiciones de la ordenación** son el **cuantil 0,1** $q_{0,1}$ y el
+**cuantil 0,9** $q_{0,9}$: se espera que el 10 % de todas las diferencias del
+área de cálculo quede por debajo del primero y el 10 % por encima del segundo
+(C.2, NOTA 2). Los dos valores pueden ir en la leyenda del mapa (7.2).
+
+El ejemplo de la propia norma ordena 25 diferencias entre dos variantes de
+cálculo y lee $R(q_{0,1}) = 2$, $R(q_{0,9}) = 24$, $q_{0,1} = -1$ dB y
+$q_{0,9} = 3$ dB, de modo que se espera que el 80 % de las diferencias quede
+entre −1 dB y +3 dB:
+
+```python
+from phonometry import environment
+
+d = [-1.4, -1.0, -0.4, 0.8, 1.0, 1.0, 1.0, 1.2, 1.4, 1.4, 1.4, 1.6, 1.8,
+     1.8, 2.0, 2.0, 2.0, 2.2, 2.2, 2.4, 2.6, 2.8, 2.8, 3.0, 3.4]
+q = environment.level_difference_quantiles(d)
+print(q.rank_q01, q.rank_q09)                                   # 2 24
+print(q.q01_db, q.q09_db)                                       # -1.0 3.0
+print(round(q.mean_db, 2), round(q.standard_deviation_db, 2))   # 1.56 1.17
+q.plot(language="es")
+```
+
+La muestra puede llegar en cualquier orden; el resultado la guarda ordenada y
+de solo lectura, y todo lo demás se lee de ella, así que nada puede
+contradecirla. El C.5 añade dos valores más: la media de las diferencias,
+«for considering a systematic deviation», y su desviación típica estimada,
+como incertidumbre que llevar a un cálculo de propagación de errores según la
+ISO/IEC Guide 98-3. La estimación es la desviación típica muestral, con
+$N - 1$ grados de libertad. El ejemplo no dice qué variante se restó de cuál.
+Si las diferencias fueran la configuración modificada menos la de referencia,
+el convenio de más abajo, la configuración modificada daría de media 1,56 dB
+de más, y los cuantiles dirían más que la media: se esperaría que una décima
+parte del área quedara más de 3 dB por encima.
+
+Hay dos convenios que conviene decir. Una diferencia es el nivel de la
+configuración modificada menos el de la configuración de referencia, así que
+un $q_{0,9}$ positivo es un atajo que sobrestima. Y los cuantiles son los del
+estadístico, no los del acústico: la NOTA 2 del C.2 advierte que su $q_{0,1}$
+deja el 10 % de los valores por debajo, lo contrario de un nivel percentil
+$L_{10}$, que se supera el 10 % del tiempo. El C.4 dice lo mismo al revés: las
+posiciones de $q_{0,1}$ se basan en $L_{x,90}$ y las de $q_{0,9}$ en
+$L_{x,10}$.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/software_quality_quantiles.svg" alt="Las 25 diferencias de nivel del ejemplo ordenadas por posición, de 1 a 25, subiendo desde menos 1,4 dB por una meseta de 1 a 2 dB hasta 3,4 dB; una franja sombreada entre menos 1 dB y más 3 dB recoge el 80 % central de las diferencias, un rombo en la posición 2 marca q0,1 = menos 1,00 dB y un rombo en la posición 24 marca q0,9 = 3,00 dB, cada uno con una línea vertical de puntos en su posición" width="88%" />
+
+*El ejemplo del C.4 con el propio `.plot()` del resultado: la muestra
+ordenada, las dos posiciones y la franja que recoge el 80 % central.*
+
+## 3. La Tabla C.1, las fórmulas por encima de 50 valores y la costura entre ambas
+
+La Tabla C.1 imprime las posiciones de la ordenación para muestras de 20 a 50
+valores, y por encima de 50 la norma da en su lugar dos fórmulas,
+
+$$
+R(q_{0,1}) = \mathrm{IP}\!\left(\frac{N + 4}{10}\right),
+\qquad
+R(q_{0,9}) = \mathrm{IP}\!\left(\frac{9 N}{10}\right) + 1,
+$$
+
+con IP la parte entera (Fórmulas (C.1) y (C.2)). No se admite una muestra de
+menos de 20 valores (C.2). `ranking_positions` devuelve el par, leyendo hasta
+50 valores `RANKING_POSITIONS`, la tabla tal como está impresa:
+
+```python
+from phonometry import environment
+
+for n in (20, 25, 26, 50, 51, 55, 56, 100):
+    print(n, environment.ranking_positions(n))
+# 20 (2, 19)
+# 25 (2, 24)
+# 26 (3, 24)
+# 50 (5, 46)
+# 51 (5, 46)
+# 55 (5, 50)
+# 56 (6, 51)
+# 100 (10, 91)
+```
+
+La tabla y las fórmulas no empalman. En cada una de las 31 filas de la tabla
+$R(q_{0,9}) = N + 1 - R(q_{0,1})$: deja tantos valores por debajo de
+$q_{0,1}$ como por encima de $q_{0,9}$. La Fórmula (C.1) continúa la primera
+columna y reproduce las 31 filas. La Fórmula (C.2) no continúa la segunda:
+solo reproduce 16 de ellas, y da una posición menos para $N$ = 21 a 25, 31 a
+35 y 41 a 45. Por encima de 50 conserva esa costumbre: siempre que la última
+cifra de $N$ es de 1 a 5, $q_{0,9}$ deja un valor más por encima que $q_{0,1}$
+por debajo, así que en $N = 51$ la fórmula da 46 donde la simetría de la tabla
+daría 47.
+
+| $N$ | Regla | $R(q_{0,1})$ | $R(q_{0,9})$ | Valores bajo $q_{0,1}$ | Valores sobre $q_{0,9}$ |
+| ---: | --- | ---: | ---: | ---: | ---: |
+| 25 | Tabla C.1 | 2 | 24 | 1 | 1 |
+| 26 | Tabla C.1 | 3 | 24 | 2 | 2 |
+| 50 | Tabla C.1 | 5 | 46 | 4 | 4 |
+| 51 | (C.1), (C.2) | 5 | 46 | 4 | 5 |
+| 55 | (C.1), (C.2) | 5 | 50 | 4 | 5 |
+| 56 | (C.1), (C.2) | 6 | 51 | 5 | 5 |
+
+La ruptura está solo en la (C.2). La Fórmula (C.1) es la regla de la tabla
+prolongada, y no es la posición $\mathrm{IP}(0{,}1 N) + 1$ del cuantil 0,1
+empírico (en $N = 51$ esa posición es 6, y la (C.1) da 5), mientras que la
+(C.2) es exactamente esa clase de posición, $\mathrm{IP}(0{,}9 N) + 1$.
+Escrita con la forma de la (C.2), la regla simétrica sería
+$\mathrm{IP}((9N + 5)/10) + 1$, y un «+ 5» perdido es imaginable.
+
+Si es un descuido no puede zanjarse con las páginas que se han leído.
+El Anexo C se tomó de la DIN 45687:2006-05, cuyo Anexo F.4 imprime la misma
+tabla, las mismas dos fórmulas y el mismo ejemplo resuelto. Basa las
+posiciones de la tabla en la VDI 3723 Blatt 1 (Tabla 6, columna $L_{x,90}$,
+para $q_{0,1}$, y Tabla 5, columna $L_{x,10}$, para $q_{0,9}$), e introduce
+las fórmulas con «Falls die Anzahl der Stichproben N > 50 ist, gilt ergänzend
+zu VDI 3723 Blatt 1 [15] mit ausreichender Übereinstimmung zu E VDI 2450
+Blatt 5 [17]»: por encima de 50 valores las fórmulas complementan la
+VDI 3723 Blatt 1, la fuente de la tabla, con concordancia *suficiente* con un
+proyecto de directriz sobre los cuantiles de las mediciones de contaminantes
+atmosféricos. La ISO 17534-1 suprimió las dos citas, la de la entrada del C.4
+y la que precede a las fórmulas.
+
+La VDI 3723 Blatt 1:1993-05 confirma la tabla y se detiene donde ella se
+detiene. Sus Tablas 5 y 6 (páginas 7 y 8 de la directriz) dan la posición $k$
+de los niveles superados el 10 % y el 90 % del tiempo, $L_{x,10}$ y
+$L_{x,90}$, para muestras de hasta 50 valores, y de 20 a 50 son las dos
+columnas de la Tabla C.1, fila por fila: la simetría ya es de la directriz. La
+directriz no va más allá. «Die Werte in den Tabellen 4 bis 6 sind auf n = 50
+begrenzt», dice, porque apenas se miden muestras mayores, y para más de 50
+valores remite a la VDI 2450 Blatt 5, entonces un proyecto, sin fórmula propia
+(página 7). Así que las fórmulas no vienen de la fuente de la tabla: las
+introduce la DIN 45687, y solo la E VDI 2450 Blatt 5, que aquí no se ha leído,
+podría decir si la (C.2) quería seguirla a ella en lugar de la simetría de la
+tabla. Con las páginas leídas encaja una (C.2) que se desvió de la regla
+simétrica en la norma nacional y pasó a la internacional, y encaja también una
+(C.2) elegida para concordar con la E VDI 2450 Blatt 5 mientras la (C.1)
+conservaba la regla de la tabla. Por eso la costura no se registra como
+errata, y tampoco se corrige.
+
+Lo que decide es que la ISO 17534-1 y la DIN 45687 imprimen las dos la (C.2)
+así, y `ranking_positions` aplica lo que imprimen: la tabla hasta 50 y las
+fórmulas por encima. Un programa que prolongara la regla simétrica más allá
+de 50 daría $q_{0,9}$ una posición más arriba que este en la mitad de los
+tamaños de muestra, que es justo el desacuerdo entre dos implementaciones con
+calidad asegurada que la norma se escribió para evitar.
+`LevelDifferenceQuantiles.from_table` dice cuál de las dos reglas respondió.
+
+## 4. Dónde se toma la muestra
+
+Primero se descartan los puntos receptores a menos de 2 m en horizontal de una
+fuente o de un obstáculo (`SAMPLE_CLEARANCE_M`), y la muestra de $M$ puntos se
+reparte por igual entre los $N$ que quedan: numerados de forma consecutiva, se
+toman los puntos de número de orden $\mathrm{IP}((i - 0{,}5) N/M)$,
+$i = 1, \ldots, M$ (C.2). La norma recomienda al menos un punto de muestra de
+cada cien (`RECOMMENDED_SAMPLE_RATIO`); una muestra más escasa se toma
+igualmente, con un `SoftwareQualityWarning`, porque sus cuantiles están
+definidos, solo que representan peor el mapa.
+
+```python
+import numpy as np
+
+from phonometry import environment
+
+print(environment.uniform_sample_indices(2000, 20))
+# [  50  150  250 ... 1850 1950]
+
+distancia = np.full(2000, 10.0)
+distancia[:100] = 1.0                      # los 100 primeros puntos están junto a un muro
+print(environment.uniform_sample_indices(2000, 20, horizontal_clearances_m=distancia))
+# [ 147  242  337 ... 1857 1952]
+
+print(environment.contour_sample_chainages_m(1234.0, 20))
+# [  30.   92.  154. ... 1141. 1203.]
+```
+
+La fórmula deja dos cosas al implementador, y las dos lecturas están escritas
+en el módulo. Los números de orden se cuentan desde cero: contados desde uno,
+la fórmula pediría el número 0, que no existe, siempre que $N$ sea menor que
+$2M$, mientras que desde cero cada punto de muestra queda en el centro de su
+$M$-ésima parte de la lista. Para una isófona (C.3), el nivel de la isófona en
+puntos equiespaciados se compara con un cálculo en punto único en los mismos
+sitios, y los puntos se sitúan en lo que el C.3 llama «kilometerages»,
+$\mathrm{IP}((i - 0{,}5) L/M)$, a lo largo de las isófonas puestas una tras
+otra (la DIN 45687, F.3: «Kilometrierungen»). El término designa una abscisa a
+lo largo de un recorrido, como el punto kilométrico de una carretera: nombra
+esa posición, no la unidad en que se cuenta. Tomada en kilómetros, la parte
+entera pondría todos los puntos de una isófona de menos de un kilómetro en su
+comienzo, así que la abscisa se lee en metros, y unas isófonas tan cortas que
+dos puntos caerían en el mismo metro, lo que solo puede ocurrir por debajo de
+$M$ metros, se rechazan en lugar de muestrearse dos veces en el mismo sitio.
+
+## 5. La precisión de un método entre programas
+
+La misma comparación funciona entre programas. Con $M$ participantes de una
+intercomparación que calculan los mismos $N$ receptores con el mismo método y
+la misma configuración, la media $\bar L_n$ en cada receptor es la media
+aritmética de los $M$ niveles, cada participante se aparta de ella en
+$dL_{n,m} = L_{n,m} - \bar L_n$, y «the result of such a round robin test is
+the quantile $q_{0,9}$ according to C.4 of the $N$ maximal absolute
+differences» (4.5.2). El ejemplo de la norma es el escenario TestCity del A.3,
+con cuatro participantes y 400 receptores; su Figura A.3 es un histograma de
+$|dL_n|_{\max}$ cuyo pie aclara «only shown to demonstrate the principle», así
+que la figura de abajo construye una intercomparación sintética con la misma
+forma.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/software_quality_round_robin.svg" alt="Histograma de la mayor desviación absoluta respecto al nivel medio en cada uno de 400 receptores de una intercomparación sintética de cuatro programas, en clases de 0,2 dB de ancho: 39 receptores por debajo de 0,2 dB, el máximo, 120, entre 0,2 y 0,4 dB, luego 84, 60, 33, 20 y 16 bajando, y una cola fina de unos pocos receptores hasta 3,4 dB; una línea vertical discontinua marca q0,9 = 1,28 dB" width="88%" />
+
+*La mayor desviación en cada receptor, con el propio `.plot()` del resultado:
+nueve de cada diez receptores quedan por debajo de $q_{0,9}$ = 1,28 dB.*
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import numpy as np
+
+from phonometry import environment
+
+# Cuatro programas en 400 receptores, cada uno apartado del nivel común con una
+# dispersión que cambia de un receptor a otro.
+rng = np.random.default_rng(17534)
+comun = rng.uniform(45.0, 70.0, 400)
+dispersion = 0.15 + 0.6 * rng.gamma(1.5, 0.4, 400)
+niveles = comun[:, None] + dispersion[:, None] * rng.standard_normal((400, 4))
+
+rr = environment.round_robin_precision(niveles)
+print(rr.receivers, rr.participants, rr.rank_q09, round(rr.q09_db, 2))   # 400 4 361 1.28
+rr.plot(language="es")
+```
+
+</details>
+
+La media es aritmética, no energética, como la define la norma, y el cuantil
+se lee con las mismas posiciones que el Anexo C: para 400 receptores,
+$R(q_{0,9}) = 361$ por la Fórmula (C.2).
+
+## Qué cubre esta guía
+
+<Scope>
+<ScopeClaim status="covered" label="Cubierto">
+**ISO 17534-1:2015, las partes que son aritmética:** la comparación de los
+resultados de un programa con los límites de los resultados certificados
+(apartado 7.1, el formulario TRC de las Tablas B.1 y B.2, los ±0,05 dB de la
+nota a de la Tabla A.5), con los límites incluidos; las posiciones de la
+ordenación de la Tabla C.1 y de las Fórmulas (C.1) y (C.2) y los valores
+característicos del C.4, con la media y la desviación típica estimada del C.5;
+la muestra uniforme del C.2 con la exclusión de 2 m y la recomendación de
+1:100, y las abscisas del C.3; y el resultado de una intercomparación del
+4.5.2 y el A.3. La Tabla C.1, leída también en las Tablas 5 y 6 de la
+VDI 3723 Blatt 1, el ejemplo del C.4 y la Tabla B.2 se reproducen en el
+[informe de conformidad](/phonometry/es/reference/conformance/).
+</ScopeClaim>
+
+<ScopeClaim status="covered" label="Cubierto, con una lectura del texto">
+**Tres convenios que el texto deja abiertos:** los números de orden del C.2
+contados desde cero, las abscisas del C.3 en metros enteros, y una diferencia
+de nivel tomada como la configuración modificada menos la de referencia. La
+costura entre la Tabla C.1 y la Fórmula (C.2) se aplica tal como está impresa,
+por las razones del apartado 3.
+</ScopeClaim>
+
+<ScopeClaim status="not-covered" label="No cubierto">
+Los requisitos sobre documentos: la documentación oficial que debe tener un
+método (capítulo 4), la declaración de conformidad y el formulario de grado de
+implementación del Anexo B, las propiedades del software del 5.2 y el formato
+de datos QA del Anexo D. Los programas en sí: aquí nada calcula un mapa de
+ruido ni una configuración modificada; los niveles que se comparan salen del
+programa que se ensaya. Los casos de prueba específicos del método son los de
+la ISO/TR 17534-3 para la ISO 9613-2, y del T08 al T19 de ese informe, que
+necesitan pantallas, edificios y reflexiones, no están implementados (véase la
+guía de [Propagación del sonido en
+exteriores](/phonometry/es/environment/propagation/outdoor-propagation/)).
+</ScopeClaim>
+</Scope>
+
+<SeeAlso>
+
+## Véase también
+
+- [Propagación del sonido en exteriores](/phonometry/es/environment/propagation/outdoor-propagation/):
+  la cadena de la ISO 9613-2 y los siete casos de prueba de la ISO/TR 17534-3
+  que resuelve por sí sola, que es lo que comprueba el ejemplo TRC de arriba.
+- [Incertidumbre de medida](/phonometry/es/signals/metrology/gum-uncertainty/):
+  la propagación de la GUM a la que va destinada la desviación típica del C.5.
+- [Niveles integrados y estadísticos](/phonometry/es/signals/levels/levels/):
+  los niveles percentiles $L_{10}$ y $L_{90}$ cuyo sentido invierten los
+  cuantiles del Anexo C.
+- Referencia de la API: [`environment.propagation.software_quality`](/phonometry/es/reference/api/environment/software-quality/).
+
+</SeeAlso>

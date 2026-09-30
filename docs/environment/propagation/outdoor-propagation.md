@@ -519,6 +519,12 @@ Thirty-four conformance rows hold the seven cases to the document's own
 envelope, band by band and on both totals. The worst deviation over all of them
 is 0,012 dB, a quarter of what the report allows.
 
+The comparison itself, each result against the limits of its certified result
+as the TRC form of ISO 17534-1 records it, is `verify_calculation_results`,
+and what a faster configuration of a mapping program costs is measured by the
+quantiles of Annex C of the same standard: both are in [Quality of outdoor
+sound software (ISO 17534-1)](software-quality.md).
+
 ## 4. Scope, assumptions and pitfalls
 
 ### What "favourable propagation conditions" means
@@ -700,6 +706,7 @@ against the exact half-plane and coherent-ground models.
 
 - [Spherical ground effect and advanced barriers](ground-barriers.md): the wave acoustics underneath the Table 3 ground fit and the Eq. (14) screening curve.
 - [Atmospheric refraction](atmospheric-refraction.md): what the favourable-condition assumption and $C_\mathrm{met}$ stand in for.
+- [Quality of outdoor sound software (ISO 17534-1)](software-quality.md): the TRC form a program's results are checked with, and the quantiles that say what a faster configuration of a mapping program costs.
 - [CNOSSOS-EU road emission](../sources/cnossos-road-emission.md) and [CNOSSOS-EU rail emission](../sources/cnossos-rail-emission.md): the source strengths the comparison in section 4 refers to.
 - [Environmental noise levels](../assessment/environmental-levels.md): what happens to the predicted level once it becomes an assessed one.
 - API reference: [`environment.propagation.outdoor_propagation`](https://jmrplens.github.io/phonometry/reference/api/environment/outdoor-propagation/) and [`environment.propagation.air_absorption`](https://jmrplens.github.io/phonometry/reference/api/environment/air-absorption/).

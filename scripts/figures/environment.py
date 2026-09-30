@@ -3642,3 +3642,162 @@ def generate_barrier_reflection_limit(output_dir: str) -> None:
     plt.tight_layout()
     save_figure(output_dir, "barrier_reflection_limit.svg")
     plt.close()
+
+
+def _qa_example_differences() -> tuple[float, ...]:
+    """The 25 level differences of the example of ISO 17534-1 C.4, in dB.
+
+    Read from the shared oracle the tests and the conformance report read, so
+    the figure cannot drift from the rows that pin it.
+    """
+    import sys
+    from pathlib import Path
+
+    # parents[2] is the repository root from scripts/figures/<module>.py.
+    tests = str(Path(__file__).resolve().parents[2] / "tests")
+    if tests not in sys.path:
+        sys.path.insert(0, tests)
+    import reference_data as ref
+
+    return tuple(float(value) for value in ref.ISO17534_1_EXAMPLE_DIFFERENCES_DB)
+
+
+#: ISO/TR 17534-3:2015, Table 6 (T03, porous ground), printed folio 9 (PDF
+#: page 15): the row L_A, the A-weighted level at the receiver in each octave
+#: band from 63 Hz to 8 kHz, dB. Footnote a puts the +/-0,05 dB of the
+#: certified results on this row, and the TRC form of ISO 17534-1 (Tables B.1
+#: and B.2) lists A-weighted results.
+_QA_T03_LA = (13.70, 16.38, 17.73, 23.83, 33.27, 35.69, 32.79, 20.26)
+#: The same row, its total over the eight bands, dB.
+_QA_T03_LA_TOTAL = 39.14
+#: The A-weighting every spectral table of ISO/TR 17534-3 prints in its own
+#: row, dB, so the A-weighted levels are formed as the document forms them.
+_QA_A_WEIGHTING = np.array([-26.2, -16.1, -8.6, -3.2, 0.0, 1.2, 1.0, -1.1])
+#: The row labels of a TRC form over the eight octaves and their total.
+_QA_TRC_LABELS = (
+    "63 Hz",
+    "125 Hz",
+    "250 Hz",
+    "500 Hz",
+    "1 kHz",
+    "2 kHz",
+    "4 kHz",
+    "8 kHz",
+    "Total",
+)
+
+
+def generate_software_quality_quantiles(output_dir: str) -> None:
+    """ISO 17534-1 C.4: the 25 level differences of the example, by rank."""
+    print("Generating software_quality_quantiles...")
+    from phonometry import environment
+
+    result = environment.level_difference_quantiles(_qa_example_differences())
+    _fig, ax = plt.subplots(figsize=(10, 5.6))
+    result.plot(ax, language=_LANG)
+    plt.tight_layout()
+    save_figure(output_dir, "software_quality_quantiles.svg")
+    plt.close()
+
+
+def _qa_trc_rows(levels: NDArray[np.float64]) -> NDArray[np.float64]:
+    """The eight A-weighted band levels of a case and their total, dB."""
+    weighted = levels + _QA_A_WEIGHTING
+    total = 10.0 * np.log10(np.sum(10.0 ** (weighted / 10.0)))
+    return np.concatenate((weighted, [total]))
+
+
+def generate_software_quality_trc(output_dir: str) -> None:
+    """ISO 17534-1 7.1: this library's TRC form for ISO/TR 17534-3 case T03.
+
+    The rows are those of the form: the A-weighted level in each octave band
+    and their total, against the row L_A of Table 6, which footnote a
+    certifies to +/-0,05 dB. Left, the library as it is: every band and the
+    total of T03 (porous ground) inside. Right, the same calculation with the
+    air absorption read at the nominal band centres instead of the exact
+    base-10 midbands ISO 9613-2 Table 2 is computed at: 8 kHz is read at
+    8000 Hz instead of 7943 Hz, which alone moves that band 0,20 dB off its
+    certified result, 0,15 dB below the lower limit. The kind of
+    implementation detail the form exists to catch.
+    """
+    print("Generating software_quality_trc...")
+    from phonometry import environment
+
+    printed = np.array((*_QA_T03_LA, _QA_T03_LA_TOTAL))
+    tol = environment.CERTIFIED_RESULT_TOLERANCE_DB
+    exact = _qa_levels()["T03"]
+    d_p = math.hypot(_QA_RECEIVER[0] - _QA_SOURCE[0], _QA_RECEIVER[1] - _QA_SOURCE[1])
+    d = math.hypot(d_p, _QA_RECEIVER[2] - _QA_SOURCE[2])
+    # Swap the exact-midband absorption for one read at the nominal centres.
+    nominal = (
+        exact
+        + environment.atmospheric_absorption(
+            d,
+            frequencies=_QA_BANDS,
+            temperature_c=_QA_TEMPERATURE,
+            relative_humidity_percent=_QA_HUMIDITY,
+        )
+        - d
+        * environment.air_attenuation(
+            _QA_BANDS,
+            temperature_c=_QA_TEMPERATURE,
+            relative_humidity_percent=_QA_HUMIDITY,
+        )
+    )
+    _fig, axes = plt.subplots(1, 2, figsize=(13.0, 5.4), sharey=False)
+    notes = (
+        "T03 as this library computes it:\nthe air at the exact midbands",
+        "The same, with the air read at\nthe nominal band centres",
+    )
+    for ax, levels, note in zip(axes, (exact, nominal), notes, strict=True):
+        verdict = environment.verify_calculation_results(
+            _qa_trc_rows(np.asarray(levels)),
+            printed - tol,
+            printed + tol,
+            labels=_QA_TRC_LABELS,
+        )
+        verdict.plot(ax, language=_LANG)
+        ax.text(
+            0.02,
+            0.03,
+            note,
+            transform=ax.transAxes,
+            ha="left",
+            va="bottom",
+            fontsize=9,
+            color=COLOR_FG,
+            bbox={
+                "boxstyle": "round,pad=0.3",
+                "facecolor": COLOR_PANEL,
+                "edgecolor": COLOR_GRID,
+            },
+        )
+    plt.tight_layout()
+    save_figure(output_dir, "software_quality_trc.svg")
+    plt.close()
+
+
+def generate_software_quality_round_robin(output_dir: str) -> None:
+    """ISO 17534-1 4.5.2 and A.3: four programs at 400 receivers.
+
+    A synthetic round robin in the shape of the TestCity example of A.3: 400
+    receivers and four participants, each program off the common level by a
+    spread that differs from receiver to receiver, so a few receivers
+    disagree by far more than most. Fixed seed.
+    """
+    print("Generating software_quality_round_robin...")
+    from phonometry import environment
+
+    rng = np.random.default_rng(17534)
+    receivers, programs = 400, 4
+    common = rng.uniform(45.0, 70.0, receivers)
+    spread = 0.15 + 0.6 * rng.gamma(1.5, 0.4, receivers)
+    levels = common[:, None] + spread[:, None] * rng.standard_normal(
+        (receivers, programs)
+    )
+    result = environment.round_robin_precision(levels)
+    _fig, ax = plt.subplots(figsize=(10, 5.4))
+    result.plot(ax, language=_LANG)
+    plt.tight_layout()
+    save_figure(output_dir, "software_quality_round_robin.svg")
+    plt.close()

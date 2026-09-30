@@ -1,6 +1,6 @@
 ---
 title: "Guías"
-description: "Las 154 guías de phonometry, agrupadas en los trece temas que cubre la biblioteca: para qué sirve cada área, las normas que implementa y un resumen de una línea de cada guía que contiene."
+description: "Las 155 guías de phonometry, agrupadas en los trece temas que cubre la biblioteca: para qué sirve cada área, las normas que implementa y un resumen de una línea de cada guía que contiene."
 head:
   - tag: script
     attrs:
@@ -118,7 +118,7 @@ hay ninguna panorámica del campo: cada página es la documentación de trabajo 
 un módulo, escrita para que un resultado se pueda defender apartado por
 apartado en lugar de darlo por bueno.
 
-Esta página es el mapa. Ciento cincuenta y cuatro guías repartidas en trece temas, y cada
+Esta página es el mapa. Ciento cincuenta y cinco guías repartidas en trece temas, y cada
 área tiene su propio índice con el relato largo de cómo encajan sus piezas. Si
 llegas sin una pregunta concreta, lee primero la
 [introducción](/phonometry/es/start/getting-started/): recorre una señal por toda la
@@ -695,9 +695,9 @@ Propagación en exteriores, barreras, refracción, fuentes viarias,
 ferroviarias y de aerogenerador, y la valoración construida sobre ellas. Todo
 lo de aquí trata de sonido que tiene que recorrer una distancia larga antes de
 valorarse, así que la atmósfera, el suelo y el propio movimiento de la fuente
-entran en la respuesta. Implementa ISO 9613-1/-2, ISO 1996-1/-2,
-ISO/PAS 1996-3, NT ACOU 112, ISO 13474, ISO/TS 12913-2/-3, CNOSSOS-EU
-(Directiva 2002/49/CE, anexo II), EN 1793-1/-2/-3/-5, EN 16272-3-1,
+entran en la respuesta. Implementa ISO 9613-1/-2, ISO 17534-1,
+ISO 1996-1/-2, ISO/PAS 1996-3, NT ACOU 112, ISO 13474, ISO/TS 12913-2/-3,
+CNOSSOS-EU (Directiva 2002/49/CE, anexo II), EN 1793-1/-2/-3/-5, EN 16272-3-1,
 ISO 11819-1, IEC 61400-11 e IEC TS 61400-11-2.
 
 Hay un límite de alcance que vale la pena decir aquí y no a un clic de
@@ -725,6 +725,10 @@ para la cartografía reglamentaria.
   el índice de reflexión acústica de la EN 1793-5 a partir de las respuestas al
   impulso de la rejilla de nueve micrófonos, su índice global DL_RI y el límite
   de baja frecuencia que fija el tamaño de la muestra.
+- [Calidad del software de ruido exterior (ISO 17534-1)](/phonometry/es/environment/propagation/software-quality/):
+  los resultados de un programa frente a los certificados de los casos de
+  prueba, y los cuantiles 0,1 y 0,9 de lo que cuesta una configuración
+  modificada más rápida.
 
 **[Fuentes](/phonometry/es/environment/sources/)**
 

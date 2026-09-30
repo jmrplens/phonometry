@@ -1,6 +1,6 @@
 ---
 title: "Guides"
-description: "The 154 guides of phonometry, grouped into the thirteen topics the library covers: what each area is for, the standards implemented in it, and a one-line summary of every guide inside it."
+description: "The 155 guides of phonometry, grouped into the thirteen topics the library covers: what each area is for, the standards implemented in it, and a one-line summary of every guide inside it."
 head:
   - tag: script
     attrs:
@@ -117,7 +117,7 @@ makes, then runnable code and the figure it draws. Nothing here is a survey of
 the field; each page is the working documentation of a module, written so that
 a result can be defended clause by clause rather than trusted.
 
-This page is the map. A hundred and fifty-four guides sit in thirteen topics, and each topic has its
+This page is the map. A hundred and fifty-five guides sit in thirteen topics, and each topic has its
 own overview page with the longer story of how its pieces fit together. If you
 are arriving without a specific question, read
 [Getting Started](/phonometry/start/getting-started/) first: it runs one signal
@@ -663,9 +663,9 @@ Outdoor propagation, barriers, refraction, road, rail and wind-turbine
 sources, and the assessment built on them. Everything here concerns sound that
 has to travel a long way before it is assessed, so the atmosphere, the ground
 and the source's own motion all enter the answer. Implements ISO 9613-1/-2,
-ISO 1996-1/-2, ISO/PAS 1996-3, NT ACOU 112, ISO 13474, ISO/TS 12913-2/-3,
-CNOSSOS-EU (2002/49/EC Annex II), EN 1793-1/-2/-3/-5, EN 16272-3-1,
-ISO 11819-1, IEC 61400-11 and IEC TS 61400-11-2.
+ISO 17534-1, ISO 1996-1/-2, ISO/PAS 1996-3, NT ACOU 112, ISO 13474,
+ISO/TS 12913-2/-3, CNOSSOS-EU (2002/49/EC Annex II), EN 1793-1/-2/-3/-5,
+EN 16272-3-1, ISO 11819-1, IEC 61400-11 and IEC TS 61400-11-2.
 
 One scope boundary is worth stating here rather than one click away. Of
 CNOSSOS-EU, what is implemented is the **source** side of Annex II: the road
@@ -692,6 +692,9 @@ regulatory mapping.
   the sound reflection index of EN 1793-5 from the impulse responses of the
   nine-microphone grid, its single number DL_RI and the low frequency limit a
   sample's size sets.
+- [Quality of Outdoor Sound Software (ISO 17534-1)](/phonometry/environment/propagation/software-quality/):
+  a program's results against its certified test-case results, and the 0,1-
+  and 0,9-quantiles of what a faster modified configuration costs.
 
 **[Sources](/phonometry/environment/sources/)**
 

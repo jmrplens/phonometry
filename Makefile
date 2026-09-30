@@ -134,8 +134,11 @@ mathtext:
 # and KaTeX reads what the docstring actually holds: `\\mathrm` is a line break
 # with a `mathrm` after it, which it refuses, swallowing the rest of the block.
 # The spelling is right in one kind of docstring and wrong in the other, so this
-# reads the VALUE Python builds rather than the text of the file. The site's own
-# check catches it after a full build; this costs a second.
+# reads the VALUE Python builds rather than the text of the file. It also
+# refuses a bare command KaTeX will not take as a sub- or superscript (write
+# |dL_n|_{\max}, not |dL_n|_\max), in the docstrings and in the hand-written
+# pages. The site's own check catches both after a full build; this costs a
+# second.
 docstring-math:
 	$(PYTHON) scripts/check_docstring_math.py
 

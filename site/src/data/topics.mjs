@@ -403,6 +403,7 @@ export const topics = [
           'environment/propagation/ground-barriers',
           'environment/propagation/atmospheric-refraction',
           'environment/propagation/barrier-reflection',
+          'environment/propagation/software-quality',
         ],
       },
       {

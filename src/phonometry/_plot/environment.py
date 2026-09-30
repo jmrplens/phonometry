@@ -73,6 +73,11 @@ if TYPE_CHECKING:
         AtmosphericRayResult,
         EffectiveSoundSpeedProfile,
     )
+    from ..environment.propagation.software_quality import (
+        CalculationVerification,
+        LevelDifferenceQuantiles,
+        RoundRobinPrecision,
+    )
     from ..environment.sources.cnossos_rail import RailwayEmissionResult
     from ..environment.sources.cnossos_road import RoadEmissionResult
     from ..environment.sources.statistical_pass_by import (
@@ -100,6 +105,12 @@ _LT_LABEL = "$L_\\mathrm{t}$ [dB]"
 #: The abscissa of the three ISO 13474 views: the level ``x`` the density and
 #: the exceedance are functions of.
 _SEL_X_LABEL = "Single-event sound exposure level $x$ [dB]"
+#: Axis labels of the three ISO 17534-1 renderers, named once so the
+#: translation table and the axes cannot drift apart.
+_RANK_LABEL = "Ranking position $R$"
+_DIFFERENCE_LABEL = r"Level difference $\Delta L$ [dB]"
+_MAX_DEVIATION_LABEL = r"Largest absolute deviation $|dL_n|_\mathrm{max}$ [dB]"
+_CENTRE_DEVIATION_LABEL = "Deviation from the interval centre [dB]"
 #: Axis labels and legend names of the two ISO 11819-1 renderers, the names
 #: keyed by vehicle category, written once so the table and the axes agree.
 _SPB_SPEED_LABEL = "Vehicle speed [km/h]"
@@ -265,6 +276,28 @@ _STRINGS: dict[str, str] = {
     "Grid against reference plane (5.6.2.6)": "Rejilla frente al plano de referencia (5.6.2.6)",
     "position correct": "posición correcta",
     "position to adjust": "posición que corregir",
+    # ISO 17534-1, quality assurance of outdoor sound software.
+    _RANK_LABEL: "Posición en la ordenación $R$",
+    _DIFFERENCE_LABEL: r"Diferencia de nivel $\Delta L$ [dB]",
+    "Sorted level differences": "Diferencias de nivel ordenadas",
+    "Central 80 % of the differences": "El 80 % central de las diferencias",
+    "{symbol} = {value} dB at $R$ = {rank}": "{symbol} = {value} dB en $R$ = {rank}",
+    "ISO 17534-1: characteristic values of {n} level differences": (
+        "ISO 17534-1: valores característicos de {n} diferencias de nivel"
+    ),
+    _MAX_DEVIATION_LABEL: r"Mayor desviación absoluta $|dL_n|_\mathrm{max}$ [dB]",
+    "Number of receivers": "Número de receptores",
+    "Receivers": "Receptores",
+    "ISO 17534-1: round robin of {m} programs at {n} receivers": (
+        "ISO 17534-1: intercomparación de {m} programas en {n} receptores"
+    ),
+    _CENTRE_DEVIATION_LABEL: "Desviación respecto al centro del intervalo [dB]",
+    "Certified interval": "Intervalo certificado",
+    "Program's result": "Resultado del programa",
+    "Outside the limits": "Fuera de los límites",
+    "ISO 17534-1 TRC form: {inside} of {total} results inside": (
+        "Formulario TRC de ISO 17534-1: {inside} de {total} resultados dentro"
+    ),
 }
 
 
@@ -2614,6 +2647,272 @@ def plot_binaural_indicators(
     # Horizontal rules only: a vertical one would run through the middle of
     # every pair of bars, where the tick of each metric sits.
     ax.grid(visible=False, axis="x")
+    ax.grid(visible=True, axis="y", alpha=0.3)
+    ax.set_axisbelow(True)
+    legend = ax.legend(fontsize="small")
+    place_legend_clear(legend)
+    localize_axes(ax, language)
+    return ax
+
+
+# ---------------------------------------------------------------------------
+# ISO 17534-1: quality assurance of software for outdoor sound
+# ---------------------------------------------------------------------------
+
+#: Round class widths, in dB, the round-robin histogram chooses from: the
+#: narrowest that keeps the classes to :data:`_ROUND_ROBIN_MAX_CLASSES`.
+_ROUND_ROBIN_CLASS_WIDTHS_DB: tuple[float, ...] = (0.05, 0.1, 0.2, 0.25, 0.5, 1.0, 2.0)
+
+#: The most classes the round-robin histogram draws before it widens them.
+_ROUND_ROBIN_MAX_CLASSES = 25
+
+#: How far past the widest interval or deviation the verification axis
+#: reaches, as a ratio, so the markers keep clear of the frame.
+_TRC_AXIS_MARGIN = 1.6
+
+#: Above this many rows the verification's row labels are tilted to keep
+#: clear of each other.
+_TRC_FLAT_LABELS = 6
+
+
+def plot_level_difference_quantiles(
+    result: LevelDifferenceQuantiles,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    r"""The sorted sample of ISO 17534-1 C.4 by rank, with its two quantiles.
+
+    Each level difference is a point at its ranking position; the values at
+    :math:`R(q_{0,1})` and :math:`R(q_{0,9})` are marked, and the band between
+    them, which holds the central 80 % of the differences, is shaded.
+
+    :param result: A
+        :class:`~phonometry.environment.propagation.software_quality.LevelDifferenceQuantiles`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the line of sample points.
+    :return: The axes.
+    """
+    from .._i18n import format_number, localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    values = np.asarray(result.sorted_differences_db, dtype=np.float64)
+    ranks = np.arange(1, values.size + 1)
+    ax.axhspan(
+        result.q01_db,
+        result.q09_db,
+        color=theme_fill(_C_PRIMARY, ax),
+        zorder=0,
+        label=_t("Central 80 % of the differences", language),
+    )
+    ax.plot(
+        ranks,
+        values,
+        **styled(
+            kwargs,
+            color=_C_PRIMARY,
+            lw=1.2,
+            marker="o",
+            ms=4,
+            label=_t("Sorted level differences", language),
+        ),
+    )
+    template = _t("{symbol} = {value} dB at $R$ = {rank}", language)
+    for rank, value, color, symbol in (
+        (result.rank_q01, result.q01_db, _C_SECONDARY, "$q_{0,1}$"),
+        (result.rank_q09, result.q09_db, _C_TERTIARY, "$q_{0,9}$"),
+    ):
+        ax.axvline(rank, color=color, ls=":", lw=1.1, zorder=1)
+        ax.plot(
+            [rank],
+            [value],
+            "D",
+            color=color,
+            ms=8,
+            zorder=4,
+            label=template.format(
+                symbol=symbol,
+                value=format_number(value, language, decimals=2),
+                rank=rank,
+            ),
+        )
+    ax.set_xlim(0.0, values.size + 1.0)
+    ax.set_xlabel(_t(_RANK_LABEL, language))
+    ax.set_ylabel(_t(_DIFFERENCE_LABEL, language))
+    ax.set_title(
+        _t(
+            "ISO 17534-1: characteristic values of {n} level differences",
+            language,
+        ).format(n=values.size)
+    )
+    ax.grid(visible=True, alpha=0.3)
+    legend = ax.legend(fontsize="small")
+    place_legend_clear(legend)
+    localize_axes(ax, language)
+    return ax
+
+
+def _round_robin_class_width(largest: float) -> float:
+    """The narrowest round class width that keeps the histogram readable."""
+    for width in _ROUND_ROBIN_CLASS_WIDTHS_DB:
+        if largest / width <= _ROUND_ROBIN_MAX_CLASSES:
+            return width
+    return float(math.ceil(largest / _ROUND_ROBIN_MAX_CLASSES))
+
+
+def plot_round_robin_precision(
+    result: RoundRobinPrecision,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    r"""The distribution of :math:`|dL_n|_{\max}` of a round robin, as Figure A.3.
+
+    A histogram of the largest absolute deviation at each receiver, in
+    classes of a round width, with the 0,9-quantile of C.4 marked.
+
+    :param result: A
+        :class:`~phonometry.environment.propagation.software_quality.RoundRobinPrecision`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the histogram bars.
+    :return: The axes.
+    """
+    from .._i18n import format_number, localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    maxima = np.asarray(result.max_abs_deviations_db, dtype=np.float64)
+    largest = float(np.max(maxima))
+    width = _round_robin_class_width(largest)
+    classes = max(1, math.ceil(largest / width))
+    edges = width * np.arange(classes + 1, dtype=np.float64)
+    edges[-1] = max(float(edges[-1]), largest)
+    counts, _ = np.histogram(maxima, bins=edges)
+    ax.bar(
+        edges[:-1],
+        counts,
+        width=np.diff(edges),
+        align="edge",
+        **styled(
+            kwargs,
+            color=theme_fill(_C_PRIMARY, ax),
+            edgecolor=_C_PRIMARY,
+            lw=0.9,
+            label=_t("Receivers", language),
+        ),
+    )
+    q09 = result.q09_db
+    ax.axvline(
+        q09,
+        color=_C_REFERENCE,
+        ls="--",
+        lw=1.6,
+        label=f"$q_{{0,9}}$ = {format_number(q09, language, decimals=2)} dB",
+    )
+    ax.set_xlim(0.0, float(edges[-1]))
+    ax.set_xlabel(_t(_MAX_DEVIATION_LABEL, language))
+    ax.set_ylabel(_t("Number of receivers", language))
+    ax.set_title(
+        _t(
+            "ISO 17534-1: round robin of {m} programs at {n} receivers",
+            language,
+        ).format(m=result.participants, n=result.receivers)
+    )
+    ax.grid(visible=True, axis="y", alpha=0.3)
+    ax.set_axisbelow(True)
+    legend = ax.legend(fontsize="small")
+    place_legend_clear(legend)
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_calculation_verification(
+    result: CalculationVerification,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """Each result of the ISO 17534-1 TRC form against its certified interval.
+
+    Every row is drawn about the centre of its certified interval, so rows
+    tens of decibels apart with intervals a tenth of a decibel wide share one
+    axis: the bar is the interval, the marker the program's deviation from
+    its centre, a cross where it falls outside.
+
+    :param result: A
+        :class:`~phonometry.environment.propagation.software_quality.CalculationVerification`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the line of result markers.
+    :return: The axes.
+    """
+    from .._i18n import localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    lower = np.asarray(result.lower_limits_db, dtype=np.float64)
+    upper = np.asarray(result.upper_limits_db, dtype=np.float64)
+    centres = 0.5 * (lower + upper)
+    deviations = np.asarray(result.deviations_db, dtype=np.float64)
+    positions = np.arange(deviations.size, dtype=np.float64)
+    ax.bar(
+        positions,
+        upper - lower,
+        bottom=lower - centres,
+        width=0.55,
+        color=theme_fill(_C_TERTIARY, ax),
+        edgecolor=_C_TERTIARY,
+        lw=0.9,
+        zorder=1,
+        label=_t("Certified interval", language),
+    )
+    ax.axhline(0.0, color=_C_MUTED, lw=0.8, zorder=1)
+    ax.plot(
+        positions,
+        deviations,
+        **styled(
+            kwargs,
+            color=_C_PRIMARY,
+            ls="none",
+            marker="o",
+            ms=7,
+            zorder=3,
+            label=_t("Program's result", language),
+        ),
+    )
+    outside = ~np.asarray(result.inside, dtype=bool)
+    if np.any(outside):
+        ax.plot(
+            positions[outside],
+            deviations[outside],
+            "X",
+            color=_C_REFERENCE,
+            ms=10,
+            zorder=4,
+            label=_t("Outside the limits", language),
+        )
+    reach = float(
+        np.max(np.abs(np.concatenate((lower - centres, upper - centres, deviations))))
+    )
+    reach = _TRC_AXIS_MARGIN * reach if reach > 0.0 else 1.0
+    ax.set_ylim(-reach, reach)
+    ax.set_xlim(-0.6, deviations.size - 0.4)
+    ax.set_xticks(positions)
+    tilted = deviations.size > _TRC_FLAT_LABELS
+    ax.set_xticklabels(
+        result.labels,
+        rotation=30 if tilted else 0,
+        ha="right" if tilted else "center",
+    )
+    ax.set_ylabel(_t(_CENTRE_DEVIATION_LABEL, language))
+    ax.set_title(
+        _t("ISO 17534-1 TRC form: {inside} of {total} results inside", language).format(
+            inside=int(np.count_nonzero(~outside)), total=deviations.size
+        )
+    )
     ax.grid(visible=True, axis="y", alpha=0.3)
     ax.set_axisbelow(True)
     legend = ax.legend(fontsize="small")

@@ -86,6 +86,10 @@ arrives.
 - [Sound reflection of a noise barrier in situ](propagation/barrier-reflection.md):
   the barrier measured where it stands: the sound reflection index of EN 1793-5
   and its single number DL_RI.
+- [Quality of Outdoor Sound Software (ISO 17534-1)](propagation/software-quality.md):
+  a program's results against the limits of its certified test cases, the
+  quantiles of the level differences a modified configuration introduces, and
+  the precision of a method across programs.
 
 ## [Environmental sources](sources/index.md)
 

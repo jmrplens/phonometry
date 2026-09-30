@@ -121,6 +121,13 @@ _ES_EXACT = {
     "Every Case, Against Its Printed Table": "Cada caso, contra su tabla impresa",
     "Worst band deviation (dB)": "Peor desviación por banda (dB)",
     "the envelope the document declares: 0.05 dB": "el margen que declara el documento: 0,05 dB",
+    # ISO 17534-1: this library's TRC form for ISO/TR 17534-3 case T03.
+    "T03 as this library computes it:\nthe air at the exact midbands": (
+        "T03 tal como lo calcula esta biblioteca:\nel aire en las frecuencias medias exactas"
+    ),
+    "The same, with the air read at\nthe nominal band centres": (
+        "Lo mismo, con el aire leído en\nlas frecuencias nominales de banda"
+    ),
     # HVAC noise by the German method (VDI 2081): the fan its assembly type
     # describes, the worked sheet element by element, and the room step.
     "The Same Duty Point, Three Assemblies": "El mismo punto de trabajo, tres montajes",

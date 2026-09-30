@@ -318,6 +318,7 @@ _SECTION_LIST: tuple[Section, ...] = (
             "phonometry.environment.propagation.noise_reducing_devices",
             "phonometry.environment.propagation.barrier_in_situ",
             "phonometry.environment.propagation.barrier_reflection",
+            "phonometry.environment.propagation.software_quality",
             "phonometry.environment.propagation.refraction",
             "phonometry.environment.propagation.air_absorption",
             "phonometry.environment.sources.cnossos_rail",

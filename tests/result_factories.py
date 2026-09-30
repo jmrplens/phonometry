@@ -402,6 +402,34 @@ def _sel_distribution() -> ph.environment.SelDistribution:
     )
 
 
+def _level_difference_quantiles() -> ph.environment.LevelDifferenceQuantiles:
+    """The 25 level differences of the ISO 17534-1 C.4 example."""
+    from reference_data import software_quality
+
+    return ph.environment.level_difference_quantiles(
+        software_quality.ISO17534_1_EXAMPLE_DIFFERENCES_DB
+    )
+
+
+def _round_robin_precision() -> ph.environment.RoundRobinPrecision:
+    """Thirty receivers calculated by three programs (ISO 17534-1 4.5.2)."""
+    base = np.linspace(45.0, 65.0, 30)[:, None]
+    spread = np.linspace(0.1, 1.5, 30)[:, None]
+    return ph.environment.round_robin_precision(
+        base + spread * np.array([-1.0, 0.25, 0.75])
+    )
+
+
+def _calculation_verification() -> ph.environment.CalculationVerification:
+    """Three rows of a TRC form, the last outside its limits (ISO 17534-1 B.2)."""
+    return ph.environment.verify_calculation_results(
+        [13.7, 19.5, 21.2],
+        [13.65, 19.45, 21.05],
+        [13.75, 19.55, 21.15],
+        labels=["63 Hz", "125 Hz", "250 Hz"],
+    )
+
+
 def _soundscape_answers() -> tuple[np.ndarray, list[str]]:
     """Twelve Method A part 2 answers at three sites (ISO/TS 12913-3 A.3)."""
     answers = np.array(

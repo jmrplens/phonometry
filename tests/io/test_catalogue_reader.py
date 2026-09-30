@@ -1,0 +1,1607 @@
+#  Copyright (c) 2026. Jose Manuel Requena Plens
+"""A catalogue file of your own, read into the rows every catalogue hands out.
+
+``io.read_catalogue`` and ``io.parse_catalogue`` read one table: a header
+with the document's provenance, and rows whose cells are named as the fields
+of the row class the caller passes. These tests read the example of the
+design (a data sheet with a declared bound in kPa s/m2 and a laboratory
+characterisation on another page), and then break every rule the reader
+holds a document to, one at a time, watching each refusal name the file, the
+place as a JSON pointer, the row and the field. A document with several
+problems is refused once, with all of them.
+
+The manufacturer here is fictitious, as in every example of the repository.
+"""
+
+from __future__ import annotations
+
+import copy
+import dataclasses
+import hashlib
+import importlib
+import json
+import math
+import os
+import pathlib
+import pkgutil
+import stat
+import sys
+import time
+import warnings
+from collections.abc import Mapping
+from typing import IO, Any
+
+import numpy as np
+import pytest
+from special_files import (
+    SPECIAL_KINDS,
+    make_special,
+    raised_within,
+    size_says_nothing,
+)
+
+import phonometry
+from phonometry import fluids, io, materials, solids
+from phonometry._internal import json_input
+from phonometry.building import ImpactInsulation
+from phonometry.io import _catalogue
+from phonometry.materials import AbsorptionAreaSpectrum, PorousMaterial
+
+_SCRIPTS = str(pathlib.Path(__file__).resolve().parents[2] / "scripts")
+if _SCRIPTS not in sys.path:
+    sys.path.insert(0, _SCRIPTS)
+
+from check_frozen_constants import mutable_parts  # noqa: E402
+
+_DATASHEET: dict[str, Any] = {
+    "kind": "datasheet",
+    "document": "Panel 40 technical data sheet",
+    "publisher": "Example Acoustics Ltd",
+    "version": "Rev. 4",
+    "issued": "2026-03",
+    "consulted": "2026-09-23",
+    "page": "2",
+}
+
+_PANEL_40: dict[str, Any] = {
+    "schema": "phonometry-catalogue",
+    "schema_version": 1,
+    "catalogue": "panel-40",
+    "row_type": "PorousMaterial",
+    "about": (
+        "Core of the Panel 40 absorber as its data sheet gives it. Page 2 "
+        "declares the airflow resistivity class under CE marking; page 3 "
+        "quotes the laboratory characterisation of a 40 mm specimen."
+    ),
+    "provenance": _DATASHEET,
+    "basis": "declared",
+    "rows": [
+        {
+            "key": "core-declared",
+            "name": "Panel 40 core",
+            "variant": "as declared",
+            "thickness_mm": 40,
+            "frame_density_kg_m3": 40,
+            "ranges": {"flow_resistivity_kpa_s_m2": [5, None]},
+            "bounded_below": ["flow_resistivity_kpa_s_m2"],
+            "note": "the sheet prints the designation code AFr5",
+            "x-product-code": "P40-C",
+        },
+        {
+            "key": "core-lab",
+            "name": "Panel 40 core",
+            "variant": "40 mm specimen",
+            "provenance": {
+                "page": "3",
+                "printed_table": "Table 2",
+                "laboratory": "Example Lab",
+                "accreditation": "ENAC 000/LE000",
+                "report": "26-014",
+                "test_date": "2025-11-04",
+                "test_standard": "ISO 9053-1:2018",
+            },
+            "basis": {
+                "row": "measured",
+                "youngs_modulus_pa": "calculated",
+                "poisson_ratio": "estimated",
+            },
+            "flow_resistivity_pa_s_m2": 12500,
+            "uncertainty": {"flow_resistivity_pa_s_m2": 900},
+            "porosity": 0.97,
+            "tortuosity": 1.02,
+            "approximate": ["tortuosity"],
+            "viscous_length_um": 95,
+            "thermal_length_um": 190,
+            "frame_density_kg_m3": 40,
+            "thickness_mm": 40,
+            "youngs_modulus_pa": 140000,
+            "poisson_ratio": 0.0,
+            "unquantified": {"structural_loss_factor": "n.m."},
+            "x-product-code": "P40-C",
+        },
+    ],
+}
+
+
+def _panel() -> dict[str, Any]:
+    """A fresh copy of the design's example document."""
+    return copy.deepcopy(_PANEL_40)
+
+
+def _read(document: object) -> io.Catalogue[PorousMaterial]:
+    """The example document, or a broken copy of it, read as porous rows."""
+    return io.parse_catalogue(
+        document,  # type: ignore[arg-type]
+        row_type=PorousMaterial,
+        label="panel-40.json",
+    )
+
+
+def _issues(document: object) -> tuple[io.CatalogueIssue, ...]:
+    """Every issue the reader finds in *document*, which it must refuse."""
+    with pytest.raises(io.CatalogueError, match="panel-40.json") as caught:
+        _read(document)
+    return caught.value.issues
+
+
+# ---------------------------------------------------------------------------
+# The example of the design
+# ---------------------------------------------------------------------------
+def test_the_example_reads_into_porous_rows_keyed_by_the_catalogue() -> None:
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        mine = _read(_panel())
+    assert isinstance(mine, io.Catalogue)
+    assert list(mine) == ["panel-40/core-declared", "panel-40/core-lab"]
+    assert mine.name == "panel-40"
+    assert mine.row_type is PorousMaterial
+    assert all(row.table == "panel-40" for row in mine.values())
+    assert mine.notes == ()
+    assert mine.schema_version == 1
+
+
+def test_a_declared_bound_in_kilopascals_is_held_as_a_bound_in_pascals() -> None:
+    declared = _read(_panel())["panel-40/core-declared"]
+    assert declared.flow_resistivity_pa_s_m2 is None
+    assert declared.ranges == {"flow_resistivity_pa_s_m2": (5000.0, None)}
+    assert declared.bounded_below == frozenset({"flow_resistivity_pa_s_m2"})
+    assert declared.converted == {"flow_resistivity_pa_s_m2": ("5", "kPa s/m2")}
+    assert not declared.is_derived("flow_resistivity_pa_s_m2")
+
+
+def test_the_refusal_quotes_the_datasheet_figure_before_the_converted_one() -> None:
+    declared = _read(_panel())["panel-40/core-declared"]
+    expected = (
+        "'Panel 40 core' has no flow_resistivity_pa_s_m2, which 'the caller' "
+        "needs: the datasheet prints a lower bound of 5 kPa s/m2 (5000 Pa s/m2) "
+        "and no value (Panel 40 technical data sheet (Example Acoustics Ltd), "
+        "Rev. 4, p. 2; consulted 2026-09-23)."
+    )
+    with pytest.raises(ValueError, match="flow_resistivity_pa_s_m2") as caught:
+        declared.printed("flow_resistivity_pa_s_m2")
+    assert str(caught.value) == expected
+
+
+def test_the_document_basis_is_the_row_entry_of_a_row_without_one() -> None:
+    mine = _read(_panel())
+    assert mine["panel-40/core-declared"].basis == {"row": "declared"}
+    lab = mine["panel-40/core-lab"]
+    assert lab.basis_of("flow_resistivity_pa_s_m2") == "measured"
+    assert lab.basis_of("poisson_ratio") == "estimated"
+
+
+def test_a_row_narrows_the_provenance_and_its_source_says_so() -> None:
+    mine = _read(_panel())
+    lab = mine["panel-40/core-lab"]
+    assert lab.provenance is not None
+    assert lab.provenance.page == "3"
+    assert lab.provenance.report == "26-014"
+    assert lab.provenance.document == "Panel 40 technical data sheet"
+    assert lab.source == (
+        "Panel 40 technical data sheet (Example Acoustics Ltd), Rev. 4, p. 3, "
+        "Table 2; report 26-014 (Example Lab); consulted 2026-09-23"
+    )
+    assert mine.provenance.page == "2"
+    assert mine["panel-40/core-declared"].provenance == mine.provenance
+
+
+def test_the_shear_modulus_is_derived_and_names_the_bases_it_rests_on() -> None:
+    lab = _read(_panel())["panel-40/core-lab"]
+    assert lab.is_derived("shear_modulus_pa")
+    assert "(calculated)" in lab.derived["shear_modulus_pa"]
+    assert "(estimated)" in lab.derived["shear_modulus_pa"]
+
+
+def test_the_rows_work_where_a_packaged_row_does() -> None:
+    lab = _read(_panel())["panel-40/core-lab"]
+    medium = lab.medium(np.geomspace(100, 5000, 8))
+    assert medium.characteristic_impedance.shape == (8,)
+    assert lab.viscous_length_um == 95
+    assert lab.printed("porosity") == 0.97
+
+
+def test_a_row_with_no_value_for_a_cell_a_consumer_needs_is_refused_by_it() -> None:
+    declared = _read(_panel())["panel-40/core-declared"]
+    frequencies = np.geomspace(100, 5000, 8)
+    with pytest.raises(ValueError, match="flow_resistivity_pa_s_m2") as caught:
+        declared.medium(frequencies)
+    assert "the datasheet prints a lower bound of 5 kPa s/m2" in str(caught.value)
+
+
+def test_a_column_of_your_own_is_kept_as_text_beside_the_row() -> None:
+    mine = _read(_panel())
+    assert mine.extras == {
+        "panel-40/core-declared": {"x-product-code": "P40-C"},
+        "panel-40/core-lab": {"x-product-code": "P40-C"},
+    }
+
+
+def test_a_number_in_a_column_of_your_own_keeps_its_digits() -> None:
+    document = _panel()
+    document["rows"][0]["x-edge"] = 1.50
+    text = json.dumps(document).replace('"x-edge": 1.5', '"x-edge": 1.50')
+    mine = _read(text)
+    assert mine.extras["panel-40/core-declared"]["x-edge"] == "1.50"
+
+
+def test_the_text_is_read_from_its_digits_and_hashed() -> None:
+    text = json.dumps(_panel())
+    mine = _read(text)
+    assert mine.file_sha256 == hashlib.sha256(text.encode("utf-8")).hexdigest()
+    assert _read(_panel()).file_sha256 == ""
+
+
+def test_a_file_is_read_and_hashed_as_its_bytes(tmp_path: pathlib.Path) -> None:
+    path = tmp_path / "panel-40.JSON"
+    raw = ("\ufeff" + json.dumps(_panel())).encode("utf-8")
+    path.write_bytes(raw)
+    mine = io.read_catalogue(path, row_type=PorousMaterial)
+    assert mine.file_sha256 == hashlib.sha256(raw).hexdigest()
+    assert len(mine) == 2
+
+
+def test_a_catalogue_is_frozen_all_the_way_down() -> None:
+    mine = _read(_panel())
+    assert list(mutable_parts(mine, "mine")) == []
+    for item in ("rows", "extras", "conventions", "notes", "provenance"):
+        assert list(mutable_parts(getattr(mine, item), item)) == [], item
+    with pytest.raises(AttributeError, match="'name'"):
+        mine.name = "other"  # type: ignore[misc]
+
+
+def test_a_catalogue_equals_a_mapping_of_the_same_rows() -> None:
+    mine = _read(_panel())
+    assert mine == dict(mine)
+    assert _read(_panel()) == mine
+    assert repr(mine) == (
+        "Catalogue(name='panel-40', row_type=PorousMaterial, rows=2, notes=0)"
+    )
+
+
+# ---------------------------------------------------------------------------
+# Joining with the published catalogues
+# ---------------------------------------------------------------------------
+def test_a_published_catalogue_joins_yours_without_sharing_a_key() -> None:
+    mine = _read(_panel())
+    joined = materials.PUBLISHED_POROUS | mine
+    assert len(joined) == len(materials.PUBLISHED_POROUS) + 2
+    assert joined["panel-40/core-lab"] is mine["panel-40/core-lab"]
+    both = mine | materials.PUBLISHED_POROUS
+    assert list(both)[:2] == list(mine)
+
+
+def test_a_key_in_both_catalogues_is_refused_at_every_join() -> None:
+    mine = _read(_panel())
+    joined = materials.PUBLISHED_POROUS | mine
+    with pytest.raises(io.CatalogueError, match="panel-40/core-lab"):
+        _ = joined | mine
+
+
+def test_a_join_is_read_only() -> None:
+    joined = materials.PUBLISHED_POROUS | _read(_panel())
+    with pytest.raises(TypeError, match="item assignment"):
+        joined["panel-40/other"] = None  # type: ignore[index]
+
+
+def test_a_join_with_what_is_not_a_mapping_is_not_one() -> None:
+    mine = _read(_panel())
+    with pytest.raises(TypeError, match="unsupported operand"):
+        _ = mine | 3  # type: ignore[operator]
+
+
+# ---------------------------------------------------------------------------
+# Notes: kept, never acted on
+# ---------------------------------------------------------------------------
+def test_a_measured_row_without_a_report_or_laboratory_is_noted() -> None:
+    document = _panel()
+    del document["rows"][1]["provenance"]
+    with pytest.warns(io.CatalogueWarning, match="1 note"):
+        mine = _read(document)
+    (note,) = mine.notes
+    assert note.severity == "note"
+    assert note.row_key == "core-lab"
+    assert note.location == "/rows/1"
+    assert "neither a report nor a laboratory" in note.message
+
+
+@pytest.mark.parametrize("named", ["report", "laboratory"])
+def test_a_measured_row_that_names_a_report_or_a_laboratory_is_not_noted(
+    named: str,
+) -> None:
+    document = _panel()
+    narrowed = document["rows"][1]["provenance"]
+    for key in ("report", "laboratory", "accreditation"):
+        if key != named:
+            del narrowed[key]
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        assert _read(document).notes == ()
+
+
+def test_a_sentence_where_a_word_goes_is_noted_and_kept() -> None:
+    document = _panel()
+    sentence = "not measured, because the sample was too thin to test"
+    document["rows"][1]["unquantified"] = {"structural_loss_factor": sentence}
+    with pytest.warns(io.CatalogueWarning, match="structural_loss_factor"):
+        mine = _read(document)
+    assert mine["panel-40/core-lab"].unquantified["structural_loss_factor"] == sentence
+    assert mine.notes[0].field == "structural_loss_factor"
+
+
+def test_an_alias_and_a_column_of_your_own_are_not_notes() -> None:
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        assert _read(_panel()).notes == ()
+
+
+def test_a_row_class_notes_what_only_it_can_judge() -> None:
+    """The reader asks every row for the notes its own class writes."""
+    import dataclasses
+
+    @dataclasses.dataclass(frozen=True, kw_only=True)
+    class Noted(PorousMaterial):
+        def _catalogue_notes(self) -> tuple[str, ...]:
+            return ("the printed rating does not follow from the bands",)
+
+    document = _panel()
+    document["row_type"] = "Noted"
+    with pytest.warns(io.CatalogueWarning, match="2 notes"):
+        mine = io.parse_catalogue(document, row_type=Noted)
+    assert [note.message for note in mine.notes] == [
+        "the printed rating does not follow from the bands"
+    ] * 2
+
+
+# ---------------------------------------------------------------------------
+# One refusal with every issue in it
+# ---------------------------------------------------------------------------
+def test_every_problem_of_a_document_is_raised_at_once() -> None:
+    document = _panel()
+    document["rows"][0]["porosity"] = "0,97"
+    document["rows"][1]["tortuosity"] = True
+    document["rows"][1]["x-bad"] = [1, 2]
+    issues = _issues(document)
+    assert [issue.location for issue in issues] == [
+        "/rows/0/porosity",
+        "/rows/1/tortuosity",
+        "/rows/1/x-bad",
+    ]
+    assert issues[0].row_key == "core-declared"
+    assert issues[0].field == "porosity"
+    assert str(issues[0]) == (
+        "panel-40.json: /rows/0/porosity (row 'core-declared'): expected a "
+        "number, got the text '0,97'; JSON numbers use a decimal point"
+    )
+
+
+def test_the_message_counts_the_issues_and_lists_the_first_twenty() -> None:
+    document = _panel()
+    document["rows"] = [
+        {"key": f"row-{index}", "name": "Panel", "porosity": "x"} for index in range(25)
+    ]
+    with pytest.raises(io.CatalogueError, match="25 problems") as caught:
+        _read(document)
+    assert len(caught.value.issues) == 25
+    assert "and 5 more" in str(caught.value)
+
+
+def test_a_refused_document_builds_no_row() -> None:
+    document = _panel()
+    document["rows"][1]["porosity"] = 1.5
+    (issue,) = _issues(document)
+    assert issue.location == "/rows/1/porosity"
+    assert "porosity is a fraction from 0 to 1" in issue.message
+
+
+def test_the_contract_of_a_clean_row_is_reported_beside_the_problems_of_another() -> (
+    None
+):
+    """A fixed file meets no problem the refusal did not already name."""
+    document = _panel()
+    document["rows"][0]["porosity"] = "0,97"
+    document["rows"][1]["frame_density_kg_m3"] = -40
+    issues = _issues(document)
+    assert [issue.location for issue in issues] == [
+        "/rows/0/porosity",
+        "/rows/1/frame_density_kg_m3",
+    ]
+    assert "never negative" in issues[1].message
+
+
+def test_a_row_provenance_that_fails_hides_no_other_row() -> None:
+    document = _panel()
+    document["rows"][0]["frame_density_kg_m3"] = -40
+    document["rows"][1]["provenance"]["test_date"] = 5
+    issues = _issues(document)
+    assert [issue.location for issue in issues] == [
+        "/rows/0/frame_density_kg_m3",
+        "/rows/1/provenance/test_date",
+    ]
+
+
+def test_a_document_key_that_fails_hides_no_row() -> None:
+    document = _broken("/about", "")
+    document["rows"][1]["frame_density_kg_m3"] = -40
+    issues = _issues(document)
+    assert [issue.location for issue in issues] == [
+        "/about",
+        "/rows/1/frame_density_kg_m3",
+    ]
+
+
+def test_a_row_standard_narrows_the_document_standards_field_by_field() -> None:
+    document = _panel()
+    document["provenance"]["field_test_standards"] = {
+        "structural_loss_factor": "ISO 4664-1"
+    }
+    document["rows"][1]["provenance"]["field_test_standards"] = {"porosity": "ISO 4590"}
+    mine = _read(document)
+    lab = mine["panel-40/core-lab"].provenance
+    assert lab is not None
+    assert lab.field_test_standards == {
+        "structural_loss_factor": "ISO 4664-1",
+        "porosity": "ISO 4590",
+    }
+    assert lab.test_standard_of("structural_loss_factor") == "ISO 4664-1"
+    assert lab.test_standard_of("porosity") == "ISO 4590"
+    assert lab.test_standard_of("tortuosity") == "ISO 9053-1:2018"
+    declared = mine["panel-40/core-declared"].provenance
+    assert declared is not None
+    assert declared.field_test_standards == {"structural_loss_factor": "ISO 4664-1"}
+
+
+@pytest.mark.parametrize(
+    ("row_type", "written", "message"),
+    [
+        (
+            materials.ResilientLayer,
+            "dynamic_stiffness_mn_per_m3",
+            "'mn_per_m3' is not a unit this reader converts; write "
+            "dynamic_stiffness_n_m3 (N/m3) or dynamic_stiffness_mn_m3 (MN/m3)",
+        ),
+        (
+            PorousMaterial,
+            "fibre_diameter_distribution_paramter",
+            "no field 'fibre_diameter_distribution_paramter' on PorousMaterial; "
+            "did you mean 'fibre_diameter_distribution_parameter'?",
+        ),
+        (
+            solids.SolidMaterial,
+            "longitudinal_speed_bar_m_s",
+            "no field 'longitudinal_speed_bar_m_s' on SolidMaterial; did you mean "
+            "'longitudinal_speed_m_s'?",
+        ),
+        (
+            PorousMaterial,
+            "thickness_average",
+            "no field 'thickness_average' on PorousMaterial",
+        ),
+    ],
+)
+def test_a_wrong_unit_is_told_apart_from_a_misspelt_field(
+    row_type: type[io.CatalogueRow], written: str, message: str
+) -> None:
+    """The message about units is kept for a name that differs in its unit alone."""
+    document = _document(row_type.__name__, {"key": "a", "name": "A", written: 1.0})
+    with pytest.raises(io.CatalogueError, match=written) as caught:
+        io.parse_catalogue(document, row_type=row_type, label="mine.json")
+    (issue,) = caught.value.issues
+    assert issue.location == f"/rows/0/{written}"
+    assert issue.message == message
+
+
+def test_a_figure_under_another_unit_keeps_the_digits_the_file_writes() -> None:
+    """The record of a converted figure quotes it as printed, never as a float."""
+    document = _panel()
+    row = document["rows"][1]
+    del row["flow_resistivity_pa_s_m2"], row["uncertainty"], row["thickness_mm"]
+    row["flow_resistivity_kpa_s_m2"] = 12.5
+    row["thickness_cm"] = 4
+    text = json.dumps(document)
+    for written, printed in (
+        ('"flow_resistivity_kpa_s_m2": 12.5,', '"flow_resistivity_kpa_s_m2": 12.50,'),
+        ('"thickness_cm": 4}', '"thickness_cm": 4e0}'),
+        (
+            '"flow_resistivity_kpa_s_m2": [5, null]',
+            '"flow_resistivity_kpa_s_m2": [5.00, null]',
+        ),
+    ):
+        assert text.count(written) == 1, written
+        text = text.replace(written, printed)
+    mine = _read(text)
+    lab = mine["panel-40/core-lab"]
+    assert lab.converted == {
+        "flow_resistivity_pa_s_m2": ("12.50", "kPa s/m2"),
+        "thickness_mm": ("4e0", "cm"),
+    }
+    assert lab.flow_resistivity_pa_s_m2 == 12500.0
+    assert lab.thickness_mm == 40.0
+    declared = mine["panel-40/core-declared"]
+    assert declared.converted["flow_resistivity_pa_s_m2"] == ("5.00", "kPa s/m2")
+    assert declared.why_missing("flow_resistivity_pa_s_m2").startswith(
+        "the datasheet prints a lower bound of 5.00 kPa s/m2 (5000 Pa s/m2)"
+    )
+
+
+def _broken(path: str, value: object) -> dict[str, Any]:
+    """The example with the member at *path* set to *value*, or removed."""
+    document = _panel()
+    *parents, last = path.strip("/").split("/")
+    node: Any = document
+    for part in parents:
+        node = node[int(part)] if isinstance(node, list) else node[part]
+    if value is _REMOVE:
+        del node[int(last) if isinstance(node, list) else last]
+    elif isinstance(node, list):
+        node[int(last)] = value
+    else:
+        node[last] = value
+    return document
+
+
+_REMOVE = object()
+
+
+@pytest.mark.parametrize(
+    ("path", "value", "location", "fragment"),
+    [
+        # the header
+        ("/schema", "phonometry-calibration", "/schema", "not 'phonometry-catalogue'"),
+        ("/schema_version", 2, "/schema_version", "upgrade phonometry"),
+        ("/schema_version", True, "/schema_version", "not a whole number"),
+        ("/schema_version", 1.5, "/schema_version", "not a whole number"),
+        ("/schema_version", 0, "/schema_version", "the first version is 1"),
+        ("/row_type", "SolidMaterial", "/row_type", "row_type=PorousMaterial"),
+        ("/about", "", "/about", "is empty"),
+        ("/basis", "estimate", "/basis", "not one of measured"),
+        ("/conventions", "a legend", "/conventions", "not a list of texts"),
+        ("/csv", {"delimiter": ";"}, "/csv", "has no 'csv'"),
+        ("/rows", [], "/rows", "at least one"),
+        ("/about", _REMOVE, "", "needs a top-level 'about'"),
+        # the name
+        ("/catalogue", "acme-2026-rev4", "/catalogue", "'acme-rev4-2026'"),
+        ("/catalogue", "Panel 40", "/catalogue", "not a catalogue name"),
+        ("/catalogue", "en-12354-1-2017-annex-c", "/catalogue", "packaged table"),
+        # the provenance
+        ("/provenance/kind", "brochure", "/provenance/kind", "not one of datasheet"),
+        ("/provenance/consulted", "23/09/2026", "/provenance/consulted", "YYYY-MM-DD"),
+        ("/provenance/consulted", "2026-02-30", "/provenance/consulted", "YYYY-MM-DD"),
+        ("/provenance/issued", "March 2026", "/provenance/issued", "YYYY-MM"),
+        ("/provenance/sha256", "abc", "/provenance/sha256", "not a SHA-256"),
+        ("/provenance/version", _REMOVE, "/provenance", "write null"),
+        ("/provenance/version", "", "/provenance/version", "or None"),
+        ("/provenance/source", "x", "/provenance/source", "has no 'source'"),
+        ("/provenance/document", "", "/provenance/document", "names its document"),
+        # the rows and their keys
+        ("/rows/0/key", "core/declared", "/rows/0/key", "no '/'"),
+        ("/rows/0/key", "core declared", "/rows/0/key", "no '/', ':' or space"),
+        ("/rows/0/key", "core:declared", "/rows/0/key", "no '/', ':' or space"),
+        ("/rows/0/key", "core-lab", "/rows/1/key", "the key of row 0 too"),
+        ("/rows/0/key", _REMOVE, "/rows/0", "a key of its own"),
+        ("/rows/0/name", _REMOVE, "/rows/0", "needs 'name'"),
+        ("/rows/0/name", "", "/rows/0/name", "has no name"),
+        ("/rows/0", "a row", "/rows/0", "a row is a JSON object"),
+        # cells
+        ("/rows/1/porosity", "0,97", "/rows/1/porosity", "decimal point"),
+        ("/rows/1/porosity", True, "/rows/1/porosity", "true, which is a flag"),
+        ("/rows/1/porosity", [0.97], "/rows/1/porosity", "got a list"),
+        ("/rows/1/porosityy", 0.97, "/rows/1/porosityy", "did you mean 'porosity'"),
+        (
+            "/rows/1/thickness_inch",
+            1.5,
+            "/rows/1/thickness_inch",
+            "'inch' is not a unit",
+        ),
+        (
+            "/rows/1/derived",
+            {"porosity": "x"},
+            "/rows/1/derived",
+            "cells the page prints",
+        ),
+        (
+            "/rows/1/estimated",
+            ["porosity"],
+            "/rows/1/estimated",
+            "an estimate is a basis",
+        ),
+        ("/rows/1/table", "other", "/rows/1/table", "catalogue's name"),
+        ("/rows/1/source", "other", "/rows/1/source", "composed from the provenance"),
+        ("/rows/1/x-code", {"a": 1}, "/rows/1/x-code", "holds text or a number"),
+        ("/rows/1/x-code", True, "/rows/1/x-code", "holds text or a number"),
+        ("/rows/1/x-", "P40", "/rows/1/x-", "not a column name"),
+        # hedges
+        (
+            "/rows/1/approximate",
+            ["tortuosityy"],
+            "/rows/1/approximate/0",
+            "did you mean",
+        ),
+        (
+            "/rows/1/approximate",
+            "tortuosity",
+            "/rows/1/approximate",
+            "not a list of fields",
+        ),
+        ("/rows/1/ranges", {"porosity": [0.9]}, "/rows/1/ranges/porosity", "two ends"),
+        (
+            "/rows/1/ranges",
+            {"porosity": ["a", 1]},
+            "/rows/1/ranges/porosity/0",
+            "expected a number",
+        ),
+        (
+            "/rows/1/reported",
+            {"tortuosity": []},
+            "/rows/1/reported/tortuosity",
+            "at least one",
+        ),
+        (
+            "/rows/1/basis",
+            {"row": "guessed"},
+            "/rows/1/basis/row",
+            "not one of measured",
+        ),
+        (
+            "/rows/1/basis",
+            {"name": "measured"},
+            "/rows/1/basis/name",
+            "cannot be named here",
+        ),
+        (
+            "/rows/1/converted",
+            {"porosity": ["97"]},
+            "/rows/1/converted/porosity",
+            "two texts",
+        ),
+        (
+            "/rows/1/unquantified",
+            {"porosity": 3},
+            "/rows/1/unquantified/porosity",
+            "expected text",
+        ),
+        (
+            "/rows/1/uncertainty",
+            {"porosity": "0.01"},
+            "/rows/1/uncertainty/porosity",
+            "expected a number",
+        ),
+        # the row contract, found in the pass and located
+        (
+            "/rows/1/misprinted",
+            {"porosity": "the page prints 9.7"},
+            "/rows/1/porosity",
+            "misprinted says",
+        ),
+        (
+            "/rows/1/bounded_above",
+            ["porosity"],
+            "/rows/1/bounded_above",
+            "has no range",
+        ),
+        (
+            "/rows/1/converted",
+            {"shear_modulus_pa": ["1", "psi"]},
+            "/rows/1/converted/shear_modulus_pa",
+            "holds nothing",
+        ),
+        (
+            "/rows/1/carried",
+            {"shear_modulus_pa": "the row above"},
+            "/rows/1/carried/shear_modulus_pa",
+            "holds nothing",
+        ),
+        (
+            "/rows/0/bounded_below",
+            ["thickness_mm"],
+            "/rows/0/bounded_below",
+            "has no range",
+        ),
+        (
+            "/rows/0/ranges",
+            {"flow_resistivity_kpa_s_m2": [None, 5]},
+            "/rows/0/ranges/flow_resistivity_kpa_s_m2",
+            "missing an end the page prints",
+        ),
+        (
+            "/rows/1/frame_density_kg_m3",
+            -40,
+            "/rows/1/frame_density_kg_m3",
+            "never negative",
+        ),
+        # the row's provenance
+        (
+            "/rows/1/provenance/document",
+            "Other",
+            "/rows/1/provenance/document",
+            "another catalogue file",
+        ),
+        (
+            "/rows/1/provenance/kind",
+            "test_report",
+            "/rows/1/provenance/kind",
+            "another catalogue file",
+        ),
+        (
+            "/rows/1/provenance/pages",
+            "3",
+            "/rows/1/provenance/pages",
+            "did you mean 'page'",
+        ),
+        (
+            "/rows/1/provenance/field_test_standards",
+            {"porosityy": "ISO 4638"},
+            "/rows/1/provenance/field_test_standards/porosityy",
+            "did you mean",
+        ),
+    ],
+)
+def test_a_document_that_breaks_a_rule_is_refused_where_it_breaks_it(
+    path: str, value: object, location: str, fragment: str
+) -> None:
+    document = _broken(path, value)
+    issues = _issues(document)
+    located = [issue for issue in issues if issue.location == location]
+    assert located, [str(issue) for issue in issues]
+    assert any(fragment in issue.message for issue in located), [
+        issue.message for issue in located
+    ]
+    assert all(issue.file == "panel-40.json" for issue in issues)
+    assert all(issue.severity == "error" for issue in issues)
+
+
+# ---------------------------------------------------------------------------
+# What only text can hold
+# ---------------------------------------------------------------------------
+@pytest.mark.parametrize(
+    ("text", "location", "fragment"),
+    [
+        ('{"schema": NaN}', "/schema", "NaN is not JSON"),
+        ('{"schema": "a", "schema": "b"}', "/", "names 'schema' twice"),
+        ("{", "line 1, column 2", "this is not JSON"),
+        ("[1, 2]", "", "one JSON object"),
+    ],
+)
+def test_text_that_is_not_strict_json_is_refused(
+    text: str, location: str, fragment: str
+) -> None:
+    issues = _issues(text)
+    assert any(
+        issue.location == location and fragment in issue.message for issue in issues
+    ), [str(issue) for issue in issues]
+
+
+def test_a_nan_inside_a_row_is_refused_by_its_pointer() -> None:
+    text = json.dumps(_panel()).replace('"porosity": 0.97', '"porosity": Infinity')
+    issues = _issues(text)
+    messages = [
+        issue.message for issue in issues if issue.location == "/rows/1/porosity"
+    ]
+    assert "Infinity is not JSON and not a number any page prints" in messages
+    assert "expected a number, got Infinity, which is not a finite number" in messages
+
+
+@pytest.mark.parametrize(
+    ("value", "said"),
+    [(None, "null"), (3, "the number 3"), (["a"], "a list"), ({}, "an object")],
+)
+def test_a_text_field_says_what_it_got_instead(value: object, said: str) -> None:
+    (issue,) = _issues(_broken("/rows/1/variant", value))
+    assert issue.location == "/rows/1/variant"
+    assert issue.row_key == "core-lab"
+    assert issue.message == f"expected text, got {said}"
+
+
+def test_a_name_written_twice_in_a_row_is_refused() -> None:
+    text = json.dumps(_panel()).replace(
+        '"porosity": 0.97', '"porosity": 0.97, "porosity": 0.5'
+    )
+    issues = _issues(text)
+    assert any(
+        issue.location == "/rows/1" and "'porosity' twice" in issue.message
+        for issue in issues
+    )
+
+
+@pytest.mark.parametrize("key", [1, None], ids=["int", "none"])
+@pytest.mark.parametrize(
+    "block", ["/provenance", "/rows/1/provenance"], ids=["document", "row"]
+)
+def test_a_key_that_is_not_text_is_refused_in_a_provenance(
+    block: str, key: object
+) -> None:
+    """A mapping handed in can hold one; it is refused, never raised."""
+    document = _panel()
+    held = document
+    for part in block.strip("/").split("/"):
+        held = held[int(part)] if isinstance(held, list) else held[part]
+    held[key] = "Example Lab"
+    issues = _issues(document)
+    assert [(issue.location, issue.message) for issue in issues] == [
+        (block, f"has the key {key!r}, which is not text")
+    ]
+
+
+def test_a_nan_from_a_mapping_is_refused_as_it_is_from_text() -> None:
+    document = _broken("/rows/1/porosity", float("nan"))
+    issues = _issues(document)
+    assert issues[0].location == "/rows/1/porosity"
+    assert "not a finite number" in issues[0].message
+
+
+def test_a_number_too_large_for_a_float_is_refused() -> None:
+    text = json.dumps(_panel()).replace('"porosity": 0.97', '"porosity": 1e400')
+    issues = _issues(text)
+    assert "not a finite number" in issues[0].message
+
+
+#: Figures no page prints, each once a way to make the exact reading of a
+#: figure in another unit cost minutes or raise past the refusal: a power of
+#: ten a billion digits long (read as zero by a float, so the finiteness check
+#: let it through), the same behind a zero, an exponent a Decimal cannot hold,
+#: and more digits than Python reads as one integer.
+_UNREADABLE_FIGURES = {
+    "exponent": ("1e-999999999", "is written 999999999 powers of ten below one"),
+    "zero": ("0e999999999", "is written 999999999 powers of ten above one"),
+    "decimal": (
+        "1e-99999999999999999999",
+        "is written 99999999999999999999 powers of ten below one",
+    ),
+    "digits": ("0." + "0" * 4400 + "1", "runs to 4403 characters"),
+}
+
+
+def _read_from(source: object) -> io.Catalogue[PorousMaterial]:
+    """The example read from a file, given its path, or from its text."""
+    if isinstance(source, pathlib.Path):
+        return io.read_catalogue(source, row_type=PorousMaterial)
+    return _read(source)
+
+
+def _thickness_in_centimetres(figure: str) -> str:
+    """The example's text, the laboratory row's thickness written as *figure* cm."""
+    document = _panel()
+    row = document["rows"][1]
+    del row["thickness_mm"]
+    row["thickness_cm"] = "FIGURE"
+    return json.dumps(document).replace('"FIGURE"', figure)
+
+
+@pytest.mark.parametrize("reader", ["file", "text"])
+@pytest.mark.parametrize("trigger", sorted(_UNREADABLE_FIGURES))
+def test_a_figure_too_far_from_one_or_too_long_is_refused_where_it_stands(
+    trigger: str, reader: str, tmp_path: pathlib.Path
+) -> None:
+    figure, said = _UNREADABLE_FIGURES[trigger]
+    text = _thickness_in_centimetres(figure)
+    path = tmp_path / "panel-40.json"
+    path.write_text(text, encoding="utf-8")
+    source: object = path if reader == "file" else text
+    start = time.perf_counter()
+    with pytest.raises(io.CatalogueError, match="panel-40.json") as caught:
+        _read_from(source)
+    assert time.perf_counter() - start < 1.0
+    (issue,) = caught.value.issues
+    assert (issue.location, issue.row_key, issue.field) == (
+        "/rows/1/thickness_cm",
+        "core-lab",
+        "thickness_mm",
+    )
+    assert said in issue.message
+
+
+def test_a_figure_a_decimal_cannot_hold_is_read_as_the_float_it_is() -> None:
+    """Past every float, it is refused as any infinite number is."""
+    text = json.dumps(_panel()).replace(
+        '"porosity": 0.97', '"porosity": 1e99999999999999999999'
+    )
+    messages = [
+        issue.message for issue in _issues(text) if issue.location == "/rows/1/porosity"
+    ]
+    assert messages == [
+        "expected a number, got 1e99999999999999999999, which is not a finite number"
+    ]
+
+
+def test_a_whole_number_longer_than_python_reads_is_refused_in_a_mapping() -> None:
+    """A field of a class of your own holding a mapping of numbers."""
+
+    @dataclasses.dataclass(frozen=True, kw_only=True)
+    class Sheet(io.CatalogueRow):
+        levels: Mapping[str, float] = dataclasses.field(default_factory=dict)
+
+    document = _document("Sheet", {"key": "a", "name": "Sheet", "levels": {"a": 0}})
+    text = json.dumps(document).replace('{"a": 0}', '{"a": 1' + "0" * 5000 + "}")
+    with pytest.raises(io.CatalogueError, match="levels") as caught:
+        io.parse_catalogue(text, row_type=Sheet, label="mine.json")
+    (issue,) = caught.value.issues
+    assert issue.location == "/rows/0/levels"
+    assert "not a finite number" in issue.message
+
+
+def test_a_lone_surrogate_in_the_text_is_refused() -> None:
+    """Text in memory can hold one, which UTF-8 has no bytes for."""
+    (issue,) = _issues('{"about": "\ud800"}')
+    assert issue.message == (
+        "holds a lone surrogate, U+D800, at character 12, which is not text "
+        "UTF-8 can write"
+    )
+
+
+@pytest.mark.parametrize("reader", ["file", "mapping"])
+def test_a_lone_surrogate_a_json_escape_spells_is_refused_at_its_cell(
+    reader: str, tmp_path: pathlib.Path
+) -> None:
+    """The escape is ASCII in the file; what it decodes to UTF-8 cannot write."""
+    document = _broken("/rows/1/note", "Panel \ud800 40")
+    text = json.dumps(document)
+    assert "\\ud800" in text
+    path = tmp_path / "panel-40.json"
+    path.write_text(text, encoding="ascii")
+    source: object = path if reader == "file" else document
+    with pytest.raises(io.CatalogueError, match="panel-40.json") as caught:
+        _read_from(source)
+    (issue,) = caught.value.issues
+    assert issue.location == "/rows/1/note"
+    assert issue.message == (
+        "holds a lone surrogate, U+D800, in 'Panel \\ud800 40', which is not "
+        "text UTF-8 can write"
+    )
+
+
+def test_a_name_that_holds_a_lone_surrogate_is_refused_in_text_that_prints() -> None:
+    """The pointer to the name writes the escape, so the refusal can be logged."""
+    document = _panel()
+    document["rows"][1]["x-code\udfff"] = "P40-C"
+    with pytest.raises(io.CatalogueError, match="panel-40.json") as caught:
+        _read(document)
+    issues = caught.value.issues
+    assert {issue.location for issue in issues} == {"/rows/1/x-code\\udfff"}
+    assert "U+DFFF" in issues[0].message
+    refusal = str(caught.value)
+    assert "x-code\\udfff" in refusal
+    refusal.encode("utf-8")
+
+
+@pytest.mark.parametrize(
+    "character",
+    ["\x00", "\x1b", "\r", "\x7f", "\x80", "\x85", "\x9b", "\x9f", "\u202e", "\u2066"],
+)
+def test_a_control_character_or_a_reordering_mark_is_refused(character: str) -> None:
+    """DEL and the C1 controls too.
+
+    A next line (U+0085) breaks a line, and U+009B opens a terminal's commands
+    as ESC [ does.
+    """
+    document = _broken("/rows/1/note", f"Panel{character}40")
+    issues = _issues(document)
+    assert issues[0].location == "/rows/1/note"
+    assert f"U+{ord(character):04X}" in issues[0].message
+
+
+def test_a_name_that_holds_a_c1_control_is_refused_in_text_that_prints() -> None:
+    document = _panel()
+    document["rows"][1]["x-code\x9b"] = "P40-C"
+    with pytest.raises(io.CatalogueError, match="panel-40.json") as caught:
+        _read(document)
+    locations = {issue.location for issue in caught.value.issues}
+    assert locations == {"/rows/1/x-code\\x9b"}
+    assert "\x9b" not in str(caught.value)
+    assert "x-code\\x9b" in str(caught.value)
+
+
+def test_no_packaged_text_holds_a_character_a_catalogue_file_refuses() -> None:
+    """Every table the package ships could be written to a file and read back."""
+    found = []
+    for path in sorted(pathlib.Path(phonometry.__file__).parent.glob("**/data/*.json")):
+        text = json.loads(path.read_text(encoding="utf-8"))
+        for where, held in _texts(text, ""):
+            if _catalogue._UNSAFE.search(held) is not None:
+                found.append(f"{path.name}{where}")
+    assert found == []
+
+
+def _texts(node: object, where: str) -> list[tuple[str, str]]:
+    """Every text in *node*, its keys among them, with the pointer to it."""
+    if isinstance(node, str):
+        return [(where, node)]
+    if isinstance(node, dict):
+        pairs = [(f"{where}/{key}", key) for key in node]
+        for key, value in node.items():
+            pairs += _texts(value, f"{where}/{key}")
+        return pairs
+    if isinstance(node, list):
+        return [
+            pair
+            for index, value in enumerate(node)
+            for pair in _texts(value, f"{where}/{index}")
+        ]
+    return []
+
+
+def test_a_tab_and_a_line_feed_are_text() -> None:
+    document = _broken("/rows/1/note", "first line\n\tsecond line")
+    assert _read(document)["panel-40/core-lab"].note == "first line\n\tsecond line"
+
+
+def test_a_name_is_read_in_its_composed_form() -> None:
+    """The same word, composed or decomposed, is one name to the searches."""
+    decomposed = "Lana de roca co\u0301ncava"
+    document = _broken("/rows/1/name", decomposed)
+    row = _read(document)["panel-40/core-lab"]
+    assert row.name == "Lana de roca cóncava"
+
+
+def test_a_text_past_its_length_is_refused() -> None:
+    document = _broken("/rows/1/variant", "x" * 2001)
+    issues = _issues(document)
+    assert "at most 2000" in issues[0].message
+
+
+def test_a_document_nested_past_six_levels_is_refused() -> None:
+    document = _broken("/rows/1/reported", {"tortuosity": [[[1.0, 1.1]]]})
+    issues = _issues(document)
+    assert any("nests at most 6" in issue.message for issue in issues)
+
+
+#: How deep the brackets of a text nest before the reader refuses it undecoded.
+_NESTING = 64
+#: The document, its rows, a row and the row's hedge, around a hedge's value.
+_AROUND_A_HEDGE = 4
+
+
+def _nested(levels: int) -> object:
+    """A number inside *levels* lists."""
+    value: object = 1.0
+    for _ in range(levels):
+        value = [value]
+    return value
+
+
+def test_a_document_nested_past_what_a_reader_follows_is_refused() -> None:
+    """Refused before it is decoded, whatever stack the interpreter runs on."""
+    text = "[" * 100_000 + "]" * 100_000
+    (issue,) = _issues(text)
+    assert "nests deeper than a reader follows" in issue.message
+    assert issue.location == f"line 1, column {_NESTING + 1}"
+
+
+@pytest.mark.parametrize("depth", [7, _NESTING], ids=["one-too-many", "last-decoded"])
+def test_a_text_nested_to_the_last_level_decoded_is_told_where(depth: int) -> None:
+    levels = depth - _AROUND_A_HEDGE
+    document = _broken("/rows/1/reported", {"tortuosity": _nested(levels)})
+    issues = _issues(json.dumps(document))
+    deep = [issue for issue in issues if "levels" in issue.message]
+    assert [(issue.location, issue.message) for issue in deep] == [
+        (
+            "/rows/1/reported/tortuosity/0/0",
+            "is nested 7 levels deep, and a catalogue nests at most 6",
+        )
+    ]
+
+
+def test_a_text_nested_one_level_past_that_is_refused_at_the_bracket() -> None:
+    levels = _NESTING + 1 - _AROUND_A_HEDGE
+    document = _broken("/rows/1/reported", {"tortuosity": _nested(levels)})
+    lines = json.dumps(document, indent=2).splitlines()
+    first = next(n for n, line in enumerate(lines) if '"tortuosity": [' in line)
+    # One bracket to a line after the first, each indented two spaces a level.
+    culprit = lines[first + levels - 1]
+    assert culprit.strip() == "["
+    assert culprit.index("[") == 2 * _NESTING
+    (issue,) = _issues("\n".join(lines))
+    assert "nests deeper than a reader follows" in issue.message
+    assert issue.location == f"line {first + levels}, column {2 * _NESTING + 1}"
+
+
+@pytest.mark.parametrize(
+    ("variant", "note"),
+    [
+        ("40 mm specimen", "[" * 1000),
+        ("40 mm specimen", "{[" * 1000),
+        ("40 mm specimen", '"' + "[" * 1000),
+        ("40 mm specimen", '\\\\\\"' + "[" * 1000),
+        ("C:\\", "[" * 1000),
+    ],
+    ids=["brackets", "braces", "escaped-quote", "escapes-then-quote", "backslash-end"],
+)
+def test_brackets_a_text_quotes_do_not_nest(variant: str, note: str) -> None:
+    document = _broken("/rows/1/note", note)
+    document["rows"][1]["variant"] = variant
+    row = _read(json.dumps(document))["panel-40/core-lab"]
+    assert (row.variant, row.note) == (variant, note)
+
+
+def test_a_string_left_open_is_not_json_whatever_brackets_follow() -> None:
+    (issue,) = _issues('{"about": "' + "[" * 1000)
+    assert issue.location == "line 1, column 11"
+    assert issue.message.startswith("this is not JSON: Unterminated string")
+
+
+def test_the_brackets_are_counted_to_the_end_of_the_value_the_text_opens() -> None:
+    """What follows the value is not JSON, however deep it nests."""
+    (issue,) = _issues("[]" + "[" * (_NESTING + 1))
+    assert issue.location == "line 1, column 3"
+    assert issue.message == "this is not JSON: Extra data"
+
+
+def test_sixteen_mebibytes_of_empty_lists_are_refused_at_once() -> None:
+    """Counted to the end of the text, they held a reader for seconds."""
+    text = "[]" * (8 * 1024 * 1024)
+    start = time.perf_counter()
+    (issue,) = _issues(text)
+    assert time.perf_counter() - start < 1.0
+    assert (issue.location, issue.message) == (
+        "line 1, column 3",
+        "this is not JSON: Extra data",
+    )
+
+
+def test_a_decoder_out_of_stack_is_a_refusal_of_the_text(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A caller already deep in its own stack can still run the decoder out."""
+
+    def out_of_stack(text: str, *, figures: bool) -> tuple[object, bool]:
+        raise RecursionError(text[:10], figures)
+
+    monkeypatch.setattr(_catalogue, "decode_marked", out_of_stack)
+    (issue,) = _issues(json.dumps(_panel()))
+    assert issue.location == ""
+    assert issue.message == (
+        "the text nests deeper than a reader follows, and a catalogue nests at "
+        "most 6 levels"
+    )
+
+
+#: The most bytes a catalogue file holds.
+_LIMIT = 16 * 1024 * 1024
+
+
+class _Unread:
+    """An open file whose size may be asked and whose bytes may not be read."""
+
+    def __init__(self, handle: IO[bytes]) -> None:
+        self.handle = handle
+
+    def __enter__(self) -> _Unread:
+        return self
+
+    def __exit__(self, *_: object) -> None:
+        self.handle.close()
+
+    def fileno(self) -> int:
+        return self.handle.fileno()
+
+    def read(self, *_: object) -> bytes:
+        raise AssertionError(self.handle.name)
+
+
+def test_a_file_past_sixteen_mebibytes_is_refused_before_it_is_read(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    path = tmp_path / "huge.json"
+    with path.open("wb") as handle:
+        handle.truncate(_LIMIT + 1)
+    opened: list[pathlib.Path] = []
+
+    def unread(file: pathlib.Path, mode: str, **_: object) -> _Unread:
+        opened.append(file)
+        return _Unread(file.open(mode))
+
+    monkeypatch.setattr(json_input, "open", unread, raising=False)
+    with pytest.raises(io.CatalogueError, match="huge.json: is 16777217 bytes"):
+        io.read_catalogue(path, row_type=PorousMaterial)
+    assert opened == [path]
+
+
+def test_a_file_of_sixteen_mebibytes_is_read(tmp_path: pathlib.Path) -> None:
+    text = json.dumps(_panel())
+    path = tmp_path / "panel-40.json"
+    path.write_bytes((text + " " * (_LIMIT - len(text))).encode("ascii"))
+    assert path.stat().st_size == _LIMIT
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", io.CatalogueWarning)
+        mine = io.read_catalogue(path, row_type=PorousMaterial)
+    assert set(mine) == {"panel-40/core-declared", "panel-40/core-lab"}
+
+
+def test_a_file_that_holds_more_than_its_size_says_is_refused_one_byte_past(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A file of /proc says it holds nothing, and a file may grow as it is read."""
+    path = tmp_path / "grown.json"
+    with path.open("wb") as handle:
+        handle.truncate(_LIMIT + 1)
+    size_says_nothing(monkeypatch)
+    with pytest.raises(io.CatalogueError) as caught:
+        io.read_catalogue(path, row_type=PorousMaterial)
+    assert str(caught.value) == (
+        "grown.json: runs past 16777216 bytes, and a catalogue file is at most "
+        "16777216 bytes (16 MiB)"
+    )
+
+
+@pytest.mark.parametrize("kind", SPECIAL_KINDS)
+def test_a_name_that_holds_no_regular_file_is_refused_without_waiting(
+    kind: str, tmp_path: pathlib.Path
+) -> None:
+    """A pipe no one writes to would keep the open waiting, /dev/zero the read."""
+    path = tmp_path / "special.json"
+    what = make_special(kind, path)
+    error = raised_within(
+        lambda: io.read_catalogue(path, row_type=PorousMaterial),
+        pipe=path if kind == "pipe" else None,
+    )
+    assert isinstance(error, io.CatalogueError)
+    assert str(error) == (
+        f"special.json: is {what}, and a catalogue is read only from a regular file"
+    )
+    (issue,) = error.issues
+    assert (issue.file, issue.location) == ("special.json", "")
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="POSIX pipes")
+def test_a_pipe_put_in_the_place_of_a_regular_file_is_refused_at_the_open(
+    tmp_path: pathlib.Path,
+) -> None:
+    """Between the look at the name and the open, a pipe may take its place."""
+    regular = tmp_path / "regular.json"
+    regular.write_text("{}", encoding="utf-8")
+    looked = regular.stat()
+
+    class Swapped(pathlib.Path):
+        """A name whose look before the open finds the regular file."""
+
+        def stat(self, *, follow_symlinks: bool = True) -> os.stat_result:
+            return looked
+
+    pipe = tmp_path / "swapped.json"
+    os.mkfifo(pipe)
+    error = raised_within(
+        lambda: json_input.read_at_most(Swapped(pipe), _LIMIT), pipe=pipe
+    )
+    assert isinstance(error, json_input.NotRegularError)
+    assert error.kind == "a named pipe (FIFO)"
+
+
+@pytest.mark.parametrize(
+    ("mode", "kind"),
+    [
+        (stat.S_IFSOCK, "a socket"),
+        (stat.S_IFBLK, "a block device"),
+        (stat.S_IFREG, None),
+        (0, "a special file"),
+    ],
+    ids=["socket", "block-device", "regular", "no-type"],
+)
+def test_every_file_but_a_regular_one_is_named_for_what_it_is(
+    mode: int, kind: str | None
+) -> None:
+    assert json_input._not_regular(mode) == kind
+
+
+def test_text_past_sixteen_mebibytes_is_refused_before_it_is_decoded() -> None:
+    text = json.dumps(_panel()) + " " * (16 * 1024 * 1024)
+    with pytest.raises(io.CatalogueError, match="panel-40.json: is 1677"):
+        _read(text)
+
+
+def _not_utf8_name(tmp_path: pathlib.Path) -> pathlib.Path:
+    """A file whose name holds a byte UTF-8 has no character for."""
+    path = tmp_path / os.fsdecode(b"\xff-panel.json")
+    try:
+        path.touch()
+    except (OSError, UnicodeEncodeError):
+        pytest.skip("this file system takes only names that are text")
+    return path
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="POSIX names are bytes")
+@pytest.mark.parametrize("text", ["{", "document"], ids=["not-json", "issues"])
+def test_a_file_name_that_is_not_utf8_is_named_by_its_escape(
+    tmp_path: pathlib.Path, text: str
+) -> None:
+    """The byte is decoded as a lone surrogate, which no refusal can print."""
+    path = _not_utf8_name(tmp_path)
+    if text == "document":
+        text = json.dumps(_broken("/rows/1/porosity", "high"))
+    path.write_text(text, encoding="utf-8")
+    with pytest.raises(io.CatalogueError) as caught:
+        io.read_catalogue(path, row_type=PorousMaterial)
+    refusal = str(caught.value)
+    assert refusal.startswith("\\udcff-panel.json: ")
+    refusal.encode("utf-8")
+    assert {issue.file for issue in caught.value.issues} == {"\\udcff-panel.json"}
+    for issue in caught.value.issues:
+        str(issue).encode("utf-8")
+
+
+def test_a_label_is_written_with_the_escapes_a_pointer_takes() -> None:
+    with pytest.raises(io.CatalogueError) as caught:
+        io.parse_catalogue("{", row_type=PorousMaterial, label="mine\udcff\x1b.json")
+    assert str(caught.value).startswith("mine\\udcff\\x1b.json: line 1")
+    (issue,) = caught.value.issues
+    assert issue.file == "mine\\udcff\\x1b.json"
+
+
+def test_text_that_is_not_utf8_is_refused(tmp_path: pathlib.Path) -> None:
+    path = tmp_path / "latin.json"
+    path.write_bytes(json.dumps(_panel()).replace("Panel", "Panél").encode("latin-1"))
+    with pytest.raises(io.CatalogueError, match="save it as UTF-8"):
+        io.read_catalogue(path, row_type=PorousMaterial)
+
+
+def test_more_rows_than_a_catalogue_holds_are_refused() -> None:
+    document = _panel()
+    document["rows"] = [{"key": "a", "name": "A"}] * 50_001
+    issues = _issues(document)
+    assert "at most 50000" in issues[0].message
+
+
+# ---------------------------------------------------------------------------
+# The call itself
+# ---------------------------------------------------------------------------
+def test_a_fluid_is_not_a_row_type() -> None:
+    document = _panel()
+    with pytest.raises(TypeError, match="Gas.ideal_state"):
+        io.parse_catalogue(document, row_type=fluids.Fluid)  # type: ignore[type-var]
+
+
+def test_a_row_type_must_be_a_row_class() -> None:
+    document = _panel()
+    with pytest.raises(TypeError, match="row_type is <class 'dict'>"):
+        io.parse_catalogue(document, row_type=dict)  # type: ignore[type-var]
+
+
+def test_a_document_must_be_text_or_a_mapping() -> None:
+    with pytest.raises(TypeError, match="parse_catalogue reads"):
+        io.parse_catalogue(b"{}", row_type=PorousMaterial)  # type: ignore[arg-type]
+
+
+def test_a_file_must_be_named_json(tmp_path: pathlib.Path) -> None:
+    path = tmp_path / "panel-40.csv"
+    with pytest.raises(ValueError, match="ends in .json"):
+        io.read_catalogue(path, row_type=PorousMaterial)
+
+
+def test_an_os_error_passes_untouched(tmp_path: pathlib.Path) -> None:
+    with pytest.raises(FileNotFoundError, match=r"missing\.json"):
+        io.read_catalogue(tmp_path / "missing.json", row_type=PorousMaterial)
+
+
+def test_the_class_the_file_names_is_never_imported() -> None:
+    document = _panel()
+    document["row_type"] = "os.system"
+    document["rows"][0]["x-module"] = "subprocess"
+    before = set(sys.modules)
+    issues = _issues(document)
+    assert set(sys.modules) == before
+    assert issues[0].location == "/row_type"
+
+
+def _published_catalogues() -> dict[tuple[str, str], Any]:
+    """Every PUBLISHED_* mapping of every public package, by package and name."""
+    found: dict[tuple[str, str], Any] = {}
+    for module in pkgutil.iter_modules(phonometry.__path__):
+        if module.name.startswith("_") or not module.ispkg:
+            continue
+        package = importlib.import_module(f"phonometry.{module.name}")
+        for name in getattr(package, "__all__", ()):
+            value = getattr(package, name)
+            if name.startswith("PUBLISHED_") and isinstance(value, Mapping):
+                found[module.name, name] = value
+    return found
+
+
+def test_reading_leaves_every_published_catalogue_as_it_was(
+    tmp_path: pathlib.Path,
+) -> None:
+    published = {
+        where: (value, dict(value)) for where, value in _published_catalogues().items()
+    }
+    assert len(published) >= 20
+    path = tmp_path / "panel-40.json"
+    path.write_text(json.dumps(_panel()), encoding="utf-8")
+    listing = sorted(tmp_path.iterdir())
+    io.read_catalogue(path, row_type=PorousMaterial)
+    _read(_panel())
+    _ = materials.PUBLISHED_POROUS | _read(_panel())
+    assert sorted(tmp_path.iterdir()) == listing
+    for (package, name), (value, copy_before) in published.items():
+        assert getattr(importlib.import_module(f"phonometry.{package}"), name) is value
+        assert dict(value) == copy_before
+
+
+# ---------------------------------------------------------------------------
+# Other row classes
+# ---------------------------------------------------------------------------
+def _document(row_type: str, *rows: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "schema": "phonometry-catalogue",
+        "schema_version": 1,
+        "catalogue": "mine",
+        "row_type": row_type,
+        "about": "A table of my own.",
+        "provenance": {
+            "kind": "measurement",
+            "document": "Laboratory notebook 7",
+            "version": None,
+            "consulted": "2026-09-23",
+            "laboratory": "Example Lab",
+        },
+        "rows": list(rows),
+    }
+
+
+def test_a_flag_is_true_or_false_and_nothing_else() -> None:
+    good = _document(
+        "ImpactInsulation", {"key": "a", "name": "Floor", "has_section_drawing": True}
+    )
+    row = io.parse_catalogue(good, row_type=ImpactInsulation)["mine/a"]
+    assert row.has_section_drawing is True
+    bad = _document(
+        "ImpactInsulation", {"key": "a", "name": "Floor", "has_section_drawing": 1}
+    )
+    with pytest.raises(
+        io.CatalogueError, match="has_section_drawing .*: expected true or false"
+    ):
+        io.parse_catalogue(bad, row_type=ImpactInsulation)
+
+
+def test_a_whole_number_field_takes_a_whole_number() -> None:
+    bad = _document("NonlinearityParameter", {"key": "a", "name": "Water", "year": 1.5})
+    with pytest.raises(io.CatalogueError, match="year .*: expected a whole number"):
+        io.parse_catalogue(bad, row_type=fluids.NonlinearityParameter)
+
+
+def test_sabins_per_thousand_cubic_feet_need_what_they_are_per() -> None:
+    bad = _document(
+        "AbsorptionAreaSpectrum",
+        {"key": "air", "name": "Air", "absorption_area_2000_ft2_per_1000_ft3": 2.3},
+    )
+    with pytest.raises(
+        io.CatalogueError, match="needs per written beside it"
+    ) as caught:
+        io.parse_catalogue(bad, row_type=AbsorptionAreaSpectrum)
+    assert caught.value.issues[0].location == (
+        "/rows/0/absorption_area_2000_ft2_per_1000_ft3"
+    )
+
+
+def test_a_name_two_fields_could_take_is_refused_where_it_is_written() -> None:
+    import dataclasses
+
+    @dataclasses.dataclass(frozen=True, kw_only=True)
+    class Board(io.CatalogueRow):
+        thickness_mm: float | None = None
+        thickness_m: float | None = None
+
+    document = _document("Board", {"key": "a", "name": "Board", "thickness_cm": 4})
+    with pytest.raises(io.CatalogueError, match="'thickness_cm' could be") as caught:
+        io.parse_catalogue(document, row_type=Board)
+    (issue,) = caught.value.issues
+    assert issue.location == "/rows/0/thickness_cm"
+    assert "'thickness_m' or 'thickness_mm'" in issue.message
+
+
+# ---------------------------------------------------------------------------
+# A row read from a file where a packaged row goes
+# ---------------------------------------------------------------------------
+def test_a_gas_of_your_own_closes_its_state() -> None:
+    document = _document(
+        "Gas",
+        {
+            "key": "n2",
+            "name": "Nitrogen",
+            "molar_mass_kg_mol": 0.028,
+            "heat_capacity_ratio": 1.4,
+        },
+        {
+            "key": "x",
+            "name": "Gas X",
+            "molar_mass_kg_mol": 0.03,
+            "unquantified": {"heat_capacity_ratio": "n.a."},
+        },
+    )
+    gases = io.parse_catalogue(document, row_type=fluids.Gas)
+    state = gases["mine/n2"].ideal_state(
+        temperature_c=20.0, static_pressure_pa=101325.0
+    )
+    # c = sqrt(gamma R T / M), R the molar gas constant of the 2019 SI
+    molar_gas_constant = 6.02214076e23 * 1.380649e-23
+    expected = math.sqrt(1.4 * molar_gas_constant * 293.15 / 0.028)
+    assert state.speed_of_sound == pytest.approx(expected, rel=1e-12)
+    unknown = gases["mine/x"]
+    with pytest.raises(ValueError, match="heat_capacity_ratio") as caught:
+        unknown.ideal_state(temperature_c=20.0, static_pressure_pa=101325.0)
+    assert "the measurement record prints “n.a.” where the number would be" in str(
+        caught.value
+    )
+
+
+def test_a_spectrum_of_your_own_is_rated_as_a_packaged_one() -> None:
+    bands = (250, 500, 1000, 2000, 4000)
+    measured = dict(zip(bands, (0.55, 0.9, 1.0, 0.95, 0.9), strict=True))
+    cells = {
+        f"absorption_coefficient_{band}": value for band, value in measured.items()
+    }
+    document = _document(
+        "AbsorptionSpectrum",
+        {"key": "p40", "name": "Panel 40", **cells},
+        {
+            "key": "p50",
+            "name": "Panel 50",
+            **{name: value for name, value in cells.items() if "4000" not in name},
+            "unquantified": {"absorption_coefficient_4000": "n.m."},
+        },
+    )
+    spectra = io.parse_catalogue(document, row_type=materials.AbsorptionSpectrum)
+    panel = spectra["mine/p40"]
+    assert panel.spectrum() == measured
+    at = list(bands)
+    rating = materials.weighted_absorption(panel.values_at(at))
+    assert rating.alpha_w == pytest.approx(0.85)
+    assert rating.absorption_class == "B"
+    other = spectra["mine/p50"]
+    with pytest.raises(ValueError, match="absorption_coefficient_4000") as caught:
+        other.values_at(at)
+    assert "prints “n.m.” where the number would be" in str(caught.value)
+
+
+def test_a_resilient_layer_of_your_own_carries_a_floor() -> None:
+    document = _document(
+        "ResilientLayer",
+        {"key": "a", "name": "Underlay A", "dynamic_stiffness_mn_m3": 9},
+        {
+            "key": "b",
+            "name": "Underlay B",
+            "ranges": {"dynamic_stiffness_mn_m3": [None, 9]},
+            "bounded_above": ["dynamic_stiffness_mn_m3"],
+        },
+    )
+    layers = io.parse_catalogue(document, row_type=materials.ResilientLayer)
+    layer = materials.resilient_layer(layers["mine/a"])
+    assert layer is layers["mine/a"]
+    # f0 = (1/2 pi) sqrt(s'/m'), EN 29052-1 Formula 2
+    assert layer.natural_frequency(100.0) == pytest.approx(
+        math.sqrt(9e6 / 100.0) / (2 * math.pi), rel=1e-12
+    )
+    bound = materials.resilient_layer(layers["mine/b"])
+    with pytest.raises(ValueError, match="dynamic_stiffness_n_m3") as caught:
+        bound.natural_frequency(100.0)
+    assert "prints an upper bound of 9 MN/m3 (9000000 N/m3) and no value" in str(
+        caught.value
+    )
+
+
+def test_a_row_of_a_measurement_names_its_laboratory_in_the_source() -> None:
+    document = _document(
+        "SolidMaterial", {"key": "a", "name": "Board", "density_kg_m3": 860}
+    )
+    row = io.parse_catalogue(document, row_type=solids.SolidMaterial)["mine/a"]
+    assert row.source == (
+        "Laboratory notebook 7, no version printed; laboratory Example Lab; "
+        "consulted 2026-09-23"
+    )
+    assert row.provenance is not None
+    assert row.provenance.noun == "the measurement record"

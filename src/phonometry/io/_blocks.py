@@ -44,14 +44,14 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
-from ._backends import _import_soundfile, _sniff, _warn_lossy, soundfile_stamp
+from ._backends import _import_soundfile, _sniff, _warn_lossy, info, soundfile_stamp
 from ._chunks import (
     WAVE_FORMAT_IEEE_FLOAT,
     WAVE_FORMAT_PCM,
     FormatChunk,
     parse_wav_chunks,
 )
-from ._sidecar import read_sidecar
+from ._sidecar import CalibrationSidecar, check_sidecar_labels, read_sidecar
 from ._signal import Signal
 from ._wav import linear_wav_origin
 
@@ -173,6 +173,25 @@ def _iter_soundfile_blocks(
         )
 
 
+def _sidecar_labels(
+    path: str | Path, sidecar: CalibrationSidecar | None, channels: int | None
+) -> tuple[str, ...] | None:
+    """The sidecar's channel labels, refused at the call when they do not fit.
+
+    :param channels: The file's channels when its headers are already read,
+        or ``None`` to have them described, which happens only when the
+        sidecar gives labels.
+    :raises ValueError: naming the sidecar, for labels that do not give one
+        to each channel of the file.
+    """
+    if sidecar is None or sidecar.channel_labels is None:
+        return None
+    if channels is None:
+        channels = info(path).channels
+    check_sidecar_labels(path, sidecar.channel_labels, channels)
+    return sidecar.channel_labels
+
+
 def read_blocks(
     path: str | Path,
     block_size: int,
@@ -206,9 +225,10 @@ def read_blocks(
     :return: An iterator of Signal blocks.
     :raises ValueError: If the geometry is invalid, ``calibration_factor`` is
         not a positive finite number, the file matches no known audio
-        format, or a sidecar exists but is invalid (all at the call), or the
-        data chunk is shorter than its header claims (at the block that
-        reaches the end of it).
+        format, or a sidecar exists but is invalid or gives a count of
+        channel labels that is not the file's count of channels (all at the
+        call), or the data chunk is shorter than its header claims (at the
+        block that reaches the end of it).
     :raises ImportError: If the format needs the ``[audio]`` extra and it
         is not installed.
     """
@@ -237,10 +257,10 @@ def read_blocks(
     sidecar = read_sidecar(path)
     if sidecar is not None and calibration_factor is None:
         calibration_factor = sidecar.calibration_factor
-    labels = sidecar.channel_labels if sidecar is not None else None
     format_name = _sniff(path)
     if format_name is None:
         chunks = parse_wav_chunks(path)
+        labels = _sidecar_labels(path, sidecar, chunks.fmt.channels)
         if chunks.fmt.resolved_tag in (WAVE_FORMAT_PCM, WAVE_FORMAT_IEEE_FLOAT):
             return _iter_wav_blocks(
                 path,
@@ -259,6 +279,7 @@ def read_blocks(
             channel_labels=labels,
             chunks=chunks,
         )
+    labels = _sidecar_labels(path, sidecar, None)
     return _iter_soundfile_blocks(
         path,
         format_name,

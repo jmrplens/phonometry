@@ -256,7 +256,7 @@ synchronous averaging, Golay for the complementary pairs.
   and
   [Cepstrum, echoes and the envelope spectrum](/phonometry/signals/spectra/cepstrum-echoes/).
 
-## Audio files
+## Files
 
 Standards rather than books: the file layer implements published container
 and metadata specifications, and each entry pins the piece of the module

@@ -9,6 +9,54 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- **Read a catalogue of your own from a JSON file, and write one back.** The
+  library publishes the tables of its books and standards and nothing a
+  manufacturer prints, so a data sheet, a declaration of performance, a test
+  report or a measurement of your own lives in a catalogue file of yours.
+  `io.read_catalogue(path, row_type=...)` reads one table from a versioned
+  JSON document into rows of the class you pass, the same classes the
+  `PUBLISHED_*` catalogues hand out, each built through
+  `io.CatalogueRow.from_printed` as the packaged rows are, so `medium()`,
+  `printed()`, `why_missing()` and every other method behave alike on both;
+  `io.parse_catalogue` reads the same from text or from a mapping in memory.
+  The document carries an `io.Provenance`: the kind of document (one of
+  `io.PROVENANCE_KINDS`), its version, the day it was consulted and, where a
+  row narrows it, the page, the table, the laboratory, the report and the
+  standard of each test. Every row keeps it in its new `provenance` field, its
+  `source` is composed from it, and a refusal names the document by its kind:
+  "the datasheet prints a lower bound of 5 kPa s/m2 (5000 Pa s/m2) and no
+  value", quoting the sheet's own figure before the converted one. A cell may
+  be written in another unit of the same kind as its field (`thickness_m` for
+  `thickness_mm`, `flow_resistivity_kpa_s_m2`, `youngs_modulus_gpa`,
+  `temperature_k`), as a value or as the key of a hedge, and
+  `CatalogueRow.from_printed` now converts it wherever it stands, on its
+  digits with the exact factor, rounded once and recorded in `converted`. A
+  unit no family holds is refused rather than scaled, and so is any other
+  unit for a field whose unit is compound, such as a specific flow resistance
+  in Pa s/m or a stiffness in N/m on a row class of your own, whose last word
+  is not its unit. What comes back is an
+  `io.Catalogue`, a read-only mapping keyed `"<catalogue>/<key>"` that joins a
+  published catalogue with `|` and refuses a key both hold; a catalogue of
+  yours can never take a name of the packaged form (a four-digit year
+  followed by a word), so the keys of the two never meet. The problems in a
+  file are raised together in one `io.CatalogueError`, whose new `issues`
+  holds an `io.CatalogueIssue` for each, with its JSON pointer, its row and
+  its field: every problem of form (a text where a number goes, an unknown
+  field with the name most like it, a `NaN`, a name written twice, a reserved
+  name, a newer schema) and the first rule of the row contract each row
+  breaks; what is only worth a second look is kept in
+  `Catalogue.notes` with one `io.CatalogueWarning`. The file never runs
+  anything: only `json` reads it, and the class it names is compared with
+  yours and never imported. `io.write_catalogue` writes rows as a file that
+  reads back into the same rows, a published table among them as a template
+  to start from; every table of every published catalogue is written, read
+  back and compared field for field in the test suite. A file already at the
+  name is kept unless you pass `overwrite=True`, and so is one another
+  program makes there while the file is written; on a file system without
+  hard links, such as FAT, the name holds an empty file for the instant
+  before the new one is renamed over it. The `io` section of the
+  documentation is now "Files", since it holds more than audio.
+
 - **Sound power in the 16 kHz octave band (ISO 9295).** The general sound
   power methods stop at the 10 kHz one-third-octave band, and a printer's
   paper noise or a power supply's whine sits above it. The new
@@ -584,6 +632,86 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   the same twenty-four numbers a second time, is now built from it.
 
 ### Fixed
+
+- **A calibration sidecar no reader can take is refused as a `ValueError`,
+  and none is written into a pipe.** `io.read_sidecar`, which `io.read` and
+  `io.read_blocks` call for every audio file they open, read the file at the
+  sidecar's name whole and handed it to the JSON decoder as it was: a text of
+  100 000 nested brackets escaped as a `RecursionError`, an integer too large
+  for a float as an `OverflowError`, a link to a device that never ends, such
+  as `/dev/zero`, was read until memory ran out, and a named pipe no program
+  writes to kept the read of the audio waiting for ever. `io.write_sidecar`,
+  which `io.write` calls with `sidecar=True`, opened the name for writing, so
+  a named pipe there kept it waiting for a program to read it, once the audio
+  was written. `NaN` and `Infinity`, which are not JSON, were written by
+  `io.write_sidecar` and read back as a reference level or a calibrator
+  frequency, and as the text `'nan'` or `'inf'` for the version that wrote
+  the file, and a text escaped as half a UTF-16 pair (`\ud800`) was read as
+  that version, or as a calibrator model or a channel label that
+  `io.write_sidecar` then failed to write, after it had emptied the sidecar
+  already there. A sidecar is now read only from a regular file, and a pipe,
+  a device, a socket or a directory at its name is refused before it is
+  opened; it is read to 1 MiB at most, its brackets are counted before it is
+  decoded and refused past 64 levels with the line and column where they go
+  too deep, and a number past every float, longer than Python reads or not
+  finite, a version that is not text, and a text with a lone surrogate, are
+  refused by name: each is the `ValueError` the function documents, naming
+  the file once, and by its escapes when the audio's name is not UTF-8.
+  `io.CalibrationSidecar` itself refuses a version, a calibrator model or a
+  channel label that is not text, and labels that are not a tuple or a list,
+  each by the name of its field, and keeps the labels as a tuple. It takes a
+  calibration factor, a reference level and a calibrator frequency where
+  `io.Signal` takes a calibration factor and the number is a real scalar: an
+  `int` or a `float`, a NumPy integer or floating-point number, or a 0-d
+  array of one, each kept as a float. It now refuses by name, as a
+  `ValueError`, a bool, a text, a `Decimal`, a `Fraction`, a complex number,
+  a NumPy timedelta, an array that is not 0-d (one of one element among
+  them), a masked value and an integer past 64 bits. It took each of these
+  as a reference level or a calibrator frequency; as a calibration factor it
+  took a bool, a text, a `Decimal`, a `Fraction`, a NumPy complex number, a
+  NumPy timedelta in years, in months or with no unit, and an integer past
+  64 bits that a float holds, and refused the rest in other terms: a Python
+  complex number, a NumPy timedelta in weeks or a finer unit and an array
+  that is not 0-d as a `TypeError`, an integer past every float as an
+  `OverflowError`, and a masked value as a factor that is not finite and
+  positive.
+  `io.Signal` refuses these too, but for a bool, an array of one element, a
+  NumPy complex number and a NumPy timedelta, which it takes as a
+  calibration factor and `io.write` with `sidecar=True` now refuses before
+  it writes a sample, where it wrote the audio and then either a sidecar of
+  the number `float()` made of it (a bool, a NumPy complex number, a NumPy
+  timedelta in years, in months or with no unit) or no sidecar at all,
+  raising `TypeError` (an array of one element, a NumPy timedelta in weeks
+  or a finer unit).
+  `io.write_sidecar` refuses the same numbers and texts before it touches
+  the file, where it wrote `true` or `"94"` over a good sidecar that every
+  read of the audio then refused, took `"LR"` as two labels, and let an
+  integer past every float escape as an `OverflowError`. It refuses as well,
+  before it touches the file, fields whose sidecar would pass the 1 MiB a
+  reader takes (a calibrator model or a label of two megabytes, which it
+  wrote over the good sidecar), and labels whose count is not the channel
+  count of the audio file, when one is at the name and its channels can be
+  read; each of these left the audio beside it unreadable. `io.read` and
+  `io.read_blocks` refuse a sidecar whose labels do not give one to each
+  channel of the audio with a `ValueError` that names the sidecar, where
+  they failed building the signal in a message that named neither the
+  sidecar nor the file, and `io.convert` refuses it before it writes a
+  sample. It writes the sidecar to a new file beside it, renamed into place,
+  so that the name is never opened for writing and a reader finds the old
+  sidecar or the new one whole: the file is replaced, not written into, so
+  the new one keeps the permission bits of the old (on Windows the read-only
+  flag, which is cleared for the rename and set on the new file, since
+  Windows neither replaces nor removes a read-only file; a flag that cannot
+  be set again once the new file is in place is not raised, since the file
+  is replaced) and a hard link to the old file keeps the old calibration (on
+  Windows without the read-only flag, which belongs to the file and is
+  cleared with it); a new file that cannot be removed after a failure is
+  named in a note on the error rather than raised in its place. A pipe, a
+  device, a socket or a directory at the name is refused, and `io.write` and
+  `io.convert` ask before they write a sample, `io.write` by making the
+  sidecar of the Signal's calibration and labels first, so that no audio is
+  left without the sidecar it was written with. `io.convert` reads the
+  source's sidecar once, checks it and carries those bytes.
 
 - **A derived value names the cells it rests on in words.** When the cells a
   catalogue value is worked out from have mixed bases, `derived` says the basis

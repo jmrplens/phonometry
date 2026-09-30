@@ -86,6 +86,7 @@ from ._bext import (
     with_measured_loudness,
 )
 from ._chunks import _RF64_SIZE_SENTINEL, BroadcastMetadata
+from ._sidecar import put_sidecar, sidecar_file, writable_sidecar
 from ._signal import Signal
 
 if TYPE_CHECKING:
@@ -612,17 +613,27 @@ def _check_target_suffix(path: str | Path, target: Path) -> None:
         raise ValueError(msg)
 
 
-def _check_sidecar_request(
+def _sidecar_request(
     x: Signal | NDArray[np.generic] | list[float], *, sidecar: bool
-) -> None:
-    """Refuse a sidecar request without a calibrated Signal behind it."""
-    if sidecar and (not isinstance(x, Signal) or x.calibration_factor is None):
+) -> bytes | None:
+    """The bytes of the sidecar requested, or ``None`` when none is.
+
+    A Signal without a calibration has nothing for a sidecar to carry, and one
+    whose calibration or labels no sidecar holds (a factor of ``True``, a label
+    that is not text, labels past the 1 MiB a reader takes) would leave the
+    audio written without its sidecar, so the sidecar's bytes are made here,
+    before a sample is written, and refused here when they cannot be.
+    """
+    if not sidecar:
+        return None
+    if not isinstance(x, Signal) or x.calibration_factor is None:
         msg = (
             "sidecar=True needs a Signal with a calibration_factor: the "
             "sidecar exists to carry a calibration, and inventing one "
             "is the single thing this library must never do"
         )
         raise ValueError(msg)
+    return sidecar_file(x.calibration_factor, channel_labels=x.channel_labels)
 
 
 def _refuse_passthrough_dither(dither: str | None) -> None:
@@ -786,12 +797,17 @@ def write(
         conflicting ``fs``, a dither request outside ``PCM_16``, an
         ``rng`` without a ``dither`` for it to seed, bext
         metadata that violates Tech 3285 (oversize field, version too old
-        for a carried UMID or loudness), or a sidecar request without a
-        calibrated :class:`Signal`.
+        for a carried UMID or loudness), a sidecar request without a
+        calibrated :class:`Signal`, one whose calibration or channel labels
+        no sidecar holds or whose sidecar would pass the 1 MiB a reader
+        takes, or one with a pipe, a device, a socket or a directory at the
+        sidecar's name, refused before the audio is written.
     """
     target = Path(path)
     _check_target_suffix(path, target)
-    _check_sidecar_request(x=x, sidecar=sidecar)
+    carried = _sidecar_request(x=x, sidecar=sidecar)
+    if carried is not None:
+        writable_sidecar(target)
     if rng is not None and dither is None:
         msg = (
             "rng seeds the TPDF dither noise and does nothing without it; "
@@ -801,7 +817,7 @@ def write(
     data, rate = _resolve_input(x, fs)
     if target.suffix.lower() == ".flac":
         _write_flac(path, x, data, rate, subtype, bext, dither, rng)
-        _write_signal_sidecar(path=path, x=x, sidecar=sidecar)
+        _write_signal_sidecar(path, carried)
         return
     resolved = _resolve_subtype(data, subtype)
     _check_dither(dither, resolved)
@@ -811,36 +827,24 @@ def write(
         _scipy_write(path, rate, data)
     elif resolved == "PCM_24":
         _write_pcm24(path, data, rate, resolved, dither, rng, bext_payload)
-        _write_signal_sidecar(path=path, x=x, sidecar=sidecar)
+        _write_signal_sidecar(path, carried)
         return
     else:
         _write_through_scipy(path, data, rate, resolved, dither, rng)
     if bext_payload is not None:
         append_riff_chunk(path, b"bext", bext_payload)
-    _write_signal_sidecar(path=path, x=x, sidecar=sidecar)
+    _write_signal_sidecar(path, carried)
 
 
-def _write_signal_sidecar(
-    path: str | Path,
-    x: Signal | NDArray[np.generic] | list[float],
-    *,
-    sidecar: bool,
-) -> None:
-    """Write the calibration sidecar for a just-written Signal, on request.
+def _write_signal_sidecar(path: str | Path, carried: bytes | None) -> None:
+    """Put the sidecar made before the audio was written beside it, on request.
 
-    The precondition (a :class:`Signal` with a calibration) was validated
-    before any bytes hit the disk, so this step cannot fail after the
-    audio file already exists half-committed to the pair.
+    The sidecar's bytes were made and checked before any bytes hit the disk,
+    and the name was found writable, so this step fails after the audio file
+    exists only as the file system fails.
     """
-    if not sidecar or not isinstance(x, Signal) or x.calibration_factor is None:
-        return
-    from ._sidecar import write_sidecar
-
-    write_sidecar(
-        path,
-        x.calibration_factor,
-        channel_labels=x.channel_labels,
-    )
+    if carried is not None:
+        put_sidecar(path, carried)
 
 
 def _scipy_write(path: str | Path, fs: int, data: np.ndarray) -> None:

@@ -893,6 +893,18 @@ and the rule that matters most here: a new normative implementation must name
 the numeric oracle it was validated against, and that oracle must be independent
 of the implementation.
 
+### Manufacturers' data
+
+The library publishes the tables of books and standards, with the page each
+row was read from, and no manufacturer's data sheet, declaration of
+performance or test report. A sheet is revised under the same title, its terms
+rarely allow copying it, and the value a project needs is the one on the
+sheet the project was specified against. So such data is never merged, from an
+issue or from a pull request, however it is offered. Keep it in a catalogue
+file of your own and read it with `phonometry.io.read_catalogue`: that is what
+the reader is for, and a problem with how it reads your file is a bug report
+that needs the shape of the file, not its numbers.
+
 ### Security
 
 A suspected vulnerability goes through

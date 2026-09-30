@@ -98,7 +98,7 @@ AREAS: tuple[tuple[str, str], ...] = (
     ("signals", "Signal analysis"),
     ("fluids", "The medium"),
     ("solids", "Elastic solids"),
-    ("io", "Audio files"),
+    ("io", "Files"),
     ("perception", "Hearing and perception"),
     ("buildings", "Rooms and buildings"),
     ("materials", "Materials and surfaces"),

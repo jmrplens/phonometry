@@ -46,10 +46,40 @@ ROW_CLASSES = _row_classes()
 
 
 def test_the_row_types_are_published_from_io() -> None:
-    """Four names, one owner, and the same objects the catalogues are built on."""
-    for name in ("CatalogueRow", "BandedRow", "CatalogueError", "CATALOGUE_BASES"):
+    """Seven names, one owner, and the same objects the catalogues are built on."""
+    for name in (
+        "CatalogueRow",
+        "BandedRow",
+        "CatalogueError",
+        "CatalogueIssue",
+        "Provenance",
+        "CATALOGUE_BASES",
+        "PROVENANCE_KINDS",
+    ):
         assert name in io.__all__, name
         assert getattr(io, name) is getattr(private, name), name
+
+
+def test_the_catalogue_file_names_are_published_from_io() -> None:
+    """The reader, the writer, what they return and what they warn with.
+
+    ``CatalogueWarning`` is defined in a private module, which the test that
+    every warning is published does not walk, so it is named here.
+    """
+    from phonometry.io import _catalogue
+
+    for name in (
+        "Catalogue",
+        "CatalogueWarning",
+        "read_catalogue",
+        "parse_catalogue",
+        "write_catalogue",
+    ):
+        assert name in io.__all__, name
+        assert getattr(io, name) is getattr(_catalogue, name), name
+    assert issubclass(io.CatalogueWarning, phonometry.PhonometryWarning)
+    assert "CATALOGUE_SCHEMA" not in io.__all__
+    assert "CATALOGUE_SCHEMA_VERSION" not in io.__all__
 
 
 def test_the_bases_are_the_five_a_source_can_claim() -> None:

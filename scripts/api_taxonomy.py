@@ -133,8 +133,8 @@ _SECTION_LIST: tuple[Section, ...] = (
     ),
     Section(
         key="io",
-        label_en="Audio files",
-        label_es="Archivos de audio",
+        label_en="Files",
+        label_es="Archivos",
         # The whole public surface of the subpackage lives in its
         # ``__init__`` (the implementation modules are private), so the one
         # documented module is the package itself.
@@ -687,9 +687,19 @@ OBJECT_MODULE_OVERRIDES: dict[str, str] = {
     # io importing a domain would close a cycle; io publishes them, as it
     # publishes Signal, and they are documented there.
     "CATALOGUE_BASES": "phonometry.io",
+    "PROVENANCE_KINDS": "phonometry.io",
     "BandedRow": "phonometry.io",
     "CatalogueError": "phonometry.io",
+    "CatalogueIssue": "phonometry.io",
     "CatalogueRow": "phonometry.io",
+    "Provenance": "phonometry.io",
+    # The reader and the writer of a caller's catalogue file, private like
+    # the rest of the implementation modules of io.
+    "Catalogue": "phonometry.io",
+    "CatalogueWarning": "phonometry.io",
+    "parse_catalogue": "phonometry.io",
+    "read_catalogue": "phonometry.io",
+    "write_catalogue": "phonometry.io",
     # Defined in phonometry.emission._shared, where the three sound power
     # standards share it; documented with the free-field method that raises it
     # most often.

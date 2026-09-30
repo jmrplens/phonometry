@@ -40,8 +40,8 @@ head:
           {
             "@type": "ListItem",
             "position": 4,
-            "name": "Audio files",
-            "description": "Measurement audio in and out: calibrated reading, provenance, streaming, BWF writing and lossless conversion.",
+            "name": "Files",
+            "description": "Measurement audio in and out: calibrated reading, provenance, streaming, BWF writing and lossless conversion; catalogues of materials of your own.",
             "url": "https://jmrplens.github.io/phonometry/io/"
           },
           {
@@ -288,7 +288,7 @@ between them is written here once instead of in each caller's head.
   Young's modulus, and the thickness-critical-frequency product that lets two
   books be checked against each other for free.
 
-## [Audio files](/phonometry/io/)
+## [Files](/phonometry/io/)
 
 Measurement audio in and out. The file layer of the signal chain: every
 linear WAV a sound level meter or field recorder writes comes back as a
@@ -296,6 +296,8 @@ calibrated `Signal` with its `bext` provenance, long recordings stream
 through the stateful filters block by block, and what leaves the library is
 a BWF with its provenance and a sidecar carrying the calibration.
 Implements EBU Tech 3285 and ITU-R BS.2088; FLAC archives follow RFC 9639.
+A catalogue of materials of your own, from a data sheet or a test report,
+is read from a JSON file into the rows every published catalogue hands out.
 
 - [Reading and writing measurement audio](/phonometry/io/audio-files/): the
   whole workflow on one runnable page, from the meter's WAV to the

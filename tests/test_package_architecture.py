@@ -648,10 +648,22 @@ def test_a_published_field_type_is_published_too() -> None:
     no supported way to import: the other four digits were published and these
     two were not. The round-trip test had the same gap, asserting digits 1, 2, 3
     and 6 and skipping the two it could not name either.
+
+    The annotations are resolved, not skipped when they will not resolve: the
+    modules import ``Mapping``, ``NDArray`` and the other names an annotation
+    uses for the type checker only, so they are supplied, together with every
+    published name, and an annotation that still does not resolve fails the
+    test. Catching the failure and moving on had left 177 of the 494
+    published dataclasses unchecked, every catalogue row among them, so a
+    field typed with a type nobody publishes could not have been seen.
     """
+    import collections.abc
     import dataclasses
     import inspect
+    import numbers
     import typing
+
+    from numpy.typing import ArrayLike, NDArray
 
     import phonometry
 
@@ -661,11 +673,29 @@ def test_a_published_field_type_is_published_too() -> None:
         if not name.startswith("_") and inspect.ismodule(getattr(phonometry, name))
     }
     published = {
-        name
+        name: getattr(getattr(phonometry, domain), name)
         for domain in domains
         for name in getattr(getattr(phonometry, domain), "__all__", ())
     }
+    localns: dict[str, object] = {
+        **published,
+        "Callable": collections.abc.Callable,
+        "Hashable": collections.abc.Hashable,
+        "Iterable": collections.abc.Iterable,
+        "Iterator": collections.abc.Iterator,
+        "Mapping": collections.abc.Mapping,
+        "Sequence": collections.abc.Sequence,
+        "ArrayLike": ArrayLike,
+        "NDArray": NDArray,
+        "Real": numbers.Real,
+    }
 
+    def parts(annotation: object) -> typing.Iterator[object]:
+        yield annotation
+        for argument in typing.get_args(annotation):
+            yield from parts(argument)
+
+    unresolved: list[str] = []
     unreachable: list[str] = []
     for domain in sorted(domains):
         package = getattr(phonometry, domain)
@@ -674,11 +704,14 @@ def test_a_published_field_type_is_published_too() -> None:
             if not dataclasses.is_dataclass(obj):
                 continue
             try:
-                hints = typing.get_type_hints(obj)
-            except Exception:  # noqa: BLE001 - a forward reference we cannot resolve
+                hints = typing.get_type_hints(obj, localns=localns)
+            except NameError as error:
+                unresolved.append(f"phonometry.{domain}.{owner}: {error}")
                 continue
             for field, annotation in hints.items():
-                for part in getattr(annotation, "__args__", (annotation,)):
+                if field.startswith("_"):
+                    continue
+                for part in parts(annotation):
                     if not inspect.isclass(part):
                         continue
                     module = getattr(part, "__module__", "")
@@ -691,6 +724,11 @@ def test_a_published_field_type_is_published_too() -> None:
                         f"{part.__name__}, defined in {module}"
                     )
 
+    assert not unresolved, (
+        "published dataclasses whose annotations do not resolve:\n  "
+        + "\n  ".join(sorted(unresolved))
+        + "\nSupply the missing name here, or import it where it is used."
+    )
     assert not unreachable, (
         "types a published dataclass exposes but no package publishes:\n  "
         + "\n  ".join(sorted(set(unreachable)))

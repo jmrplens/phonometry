@@ -124,8 +124,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `overwrite=True`, and so is one another program makes there while the file
   is written; on a file system without hard links, such as FAT, the name
   holds an empty file for the instant before the new one is renamed over it.
-  The `io` section of the documentation is now "Files", since it holds more
-  than audio.
+  What is to be written is first read as `io.read_catalogue` reads the file,
+  so nothing the reader refuses is written or replaces a file: more than
+  50 000 rows, more than 16 MiB (64 KiB for the header of a CSV file) or a
+  text longer than the reader takes is refused in the reader's own words,
+  naming the file. The `io` section of the documentation is now "Files",
+  since it holds more than audio.
 
 - **Search a catalogue of your own with the same lookups, and draw a panel's
   plateau from its row.** Every `*_named` lookup of a published catalogue,

@@ -1715,25 +1715,45 @@ def _size_refusal(
     label: str,
     size: int | None,
     *,
-    limit: int = _MAX_BYTES,
+    limit: int | None = None,
     held_as: str = "a catalogue file",
 ) -> CatalogueError:
     """The refusal of a text past *limit* bytes, of *size* bytes if known.
 
     A regular file that grows while it is read says less than it holds, and
-    is read one byte past the limit before it is refused.
+    is read one byte past the limit before it is refused. *limit* is
+    :data:`_MAX_BYTES` when not given.
     """
+    limit = _MAX_BYTES if limit is None else limit
     held = f"is {size} bytes" if size is not None else f"runs past {limit} bytes"
     shown = f"{limit >> 20} MiB" if limit % (1 << 20) == 0 else f"{limit >> 10} KiB"
     message = f"{held}, and {held_as} is at most {limit} bytes ({shown})"
     return _refusal(label, "", message)
 
 
+def _check_size(
+    data: bytes,
+    label: str,
+    *,
+    limit: int | None = None,
+    held_as: str = "a catalogue file",
+) -> None:
+    """Refuse *data* past *limit* bytes as the reader refuses a file of it.
+
+    *limit* is :data:`_MAX_BYTES` when not given.
+
+    :raises CatalogueError: for more than *limit* bytes, naming *label*.
+    """
+    limit = _MAX_BYTES if limit is None else limit
+    if len(data) > limit:
+        raise _size_refusal(label, len(data), limit=limit, held_as=held_as)
+
+
 def _file_bytes(
     target: Path,
     label: str,
     *,
-    limit: int = _MAX_BYTES,
+    limit: int | None = None,
     read_as: str = "a catalogue",
     held_as: str = "a catalogue file",
 ) -> bytes:
@@ -1747,6 +1767,7 @@ def _file_bytes(
     :raises CatalogueError: for either, naming the file as *label*.
     :raises OSError: as the file system raises it, untouched.
     """
+    limit = _MAX_BYTES if limit is None else limit
     try:
         return read_at_most(target, limit)
     except NotRegularError as error:
@@ -1915,29 +1936,39 @@ def parse_catalogue[R: CatalogueRow](
     cls = _check_row_type(row_type)
     label = _escaped(label)
     if isinstance(document, str):
-        try:
-            encoded = document.encode("utf-8")
-        except UnicodeEncodeError as error:
-            message = (
-                f"holds a lone surrogate, U+{ord(document[error.start]):04X}, at "
-                f"character {error.start + 1}, which is not text UTF-8 can write"
-            )
-            raise _refusal(label, "", message) from None
-        if len(encoded) > _MAX_BYTES:
-            raise _size_refusal(label, len(encoded))
-        decoded = _decode(document, label)
-        digest = hashlib.sha256(encoded).hexdigest()
+        catalogue = _read_text(document, cls, label)
     elif isinstance(document, Mapping):
-        decoded, digest = document, ""
+        catalogue = _read(document, cls, label, "")
     else:
         msg = (
             f"document is a {type(document).__name__}; parse_catalogue reads "
             "JSON text or a mapping, and read_catalogue reads a file"
         )
         raise TypeError(msg)
-    catalogue = _read(decoded, cls, label, digest)
     _warn(catalogue, label)
     return catalogue
+
+
+def _read_text(text: str, row_type: type[CatalogueRow], label: str) -> Catalogue[Any]:
+    """The catalogue a JSON text holds, refused as the file holding it would be.
+
+    The text is held to what :func:`read_catalogue` holds the file to: its
+    UTF-8 bytes to :data:`_MAX_BYTES`, and then every rule of the document.
+    Nothing is announced: the caller warns of the notes, or does not.
+
+    :raises CatalogueError: for everything :func:`read_catalogue` refuses.
+    """
+    try:
+        encoded = text.encode("utf-8")
+    except UnicodeEncodeError as error:
+        message = (
+            f"holds a lone surrogate, U+{ord(text[error.start]):04X}, at "
+            f"character {error.start + 1}, which is not text UTF-8 can write"
+        )
+        raise _refusal(label, "", message) from None
+    _check_size(encoded, label)
+    digest = hashlib.sha256(encoded).hexdigest()
+    return _read(_decode(text, label), row_type, label, digest)
 
 
 # ---------------------------------------------------------------------------
@@ -2620,6 +2651,12 @@ def write_catalogue(
     nothing is there, and the new file is renamed over it, so a reader of
     the name may find that empty file for the instant between the two.
 
+    What is to be written is first read as :func:`read_catalogue` reads the
+    file, so that nothing it refuses is ever written or replaces a file:
+    more than 50 000 rows, a file past 16 MiB or a CSV header past 64 KiB, a
+    text longer than a reader takes, or anything else the reader refuses, in
+    the reader's own words and naming the file.
+
     :param rows: A :class:`Catalogue`, or a mapping of rows of one class.
     :param path: Where to write, a name ending in ``.json`` or ``.csv`` (in
         any case).
@@ -2637,7 +2674,10 @@ def write_catalogue(
         header.
     :raises CatalogueError: for no rows, rows from more than one table or
         document, a key a file cannot hold, a name that is reserved or
-        malformed, and the cells a CSV file cannot hold.
+        malformed, the cells a CSV file cannot hold, and what
+        :func:`read_catalogue` would refuse in the file: more than 50 000
+        rows, a file past 16 MiB or a CSV header past 64 KiB, and a text
+        longer than a reader takes among it.
     :raises TypeError: for rows that are not catalogue rows of one class
         (fluid states among them), or a *catalogue* or *about* the rows
         need and do not bring.
@@ -2663,7 +2703,9 @@ def write_catalogue(
             raise ValueError(msg)
         writer = _Writer(rows)
         document = _document(writer, rows, catalogue, about, provenance)
-        _write_atomic(target, _dumps(document) + "\n", overwrite=overwrite)
+        text = _dumps(document) + "\n"
+        _read_text(text, writer.row_type, _escaped(target.name))
+        _write_atomic(target, text, overwrite=overwrite)
         return (target,)
     from ._catalogue_csv import check_dialect
 
@@ -2683,16 +2725,25 @@ def _write_sheet(
 ) -> tuple[Path, ...]:
     """Write *document* as a CSV file at *target* and its JSON header beside it.
 
-    Nothing is written until both texts are made and both names are free.
+    Nothing is written until both texts are made, both are read as
+    :func:`read_catalogue` reads the two files, and both names are free.
 
     :return: The CSV file and its header.
     """
-    from ._catalogue_csv import sheet_texts
+    from ._catalogue_csv import read_sheet_texts, sheet_texts
 
     header = target.with_name(target.name + CSV_HEADER_TAIL)
     sheet, head = sheet_texts(document, writer.names, dialect, target.name)
+    head_text = _dumps(head) + "\n"
+    read_sheet_texts(
+        sheet,
+        head_text,
+        writer.row_type,
+        _escaped(target.name),
+        _escaped(header.name),
+    )
     _check_target(target, overwrite=overwrite)
     _check_target(header, overwrite=overwrite)
     _write_atomic(target, sheet, overwrite=overwrite)
-    _write_atomic(header, _dumps(head) + "\n", overwrite=overwrite)
+    _write_atomic(header, head_text, overwrite=overwrite)
     return (target, header)

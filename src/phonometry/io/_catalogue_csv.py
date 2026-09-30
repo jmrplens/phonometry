@@ -107,6 +107,7 @@ from ._catalogue import (
     _WORD,
     CATALOGUE_SCHEMA,
     CSV_HEADER_TAIL,
+    _check_size,
     _closest,
     _decode,
     _escaped,
@@ -134,6 +135,8 @@ _DECIMALS = (".", ",")
 #: The largest header read, checked before more than the limit is read, as
 #: the largest file is.
 _MAX_HEADER = 64 * 1024
+#: What a refusal of the header's size calls it.
+_HEADER_HELD_AS = "the header of a catalogue CSV"
 #: A text the writer writes after an apostrophe: one a spreadsheet would run
 #: as a formula, or one that already reads as such an escape.
 _NEEDS_APOSTROPHE = re.compile(r"'*[=+\-@\t\r]")
@@ -1149,8 +1152,8 @@ def read_sheet(
             header,
             header_label,
             limit=_MAX_HEADER,
-            read_as="the header of a catalogue CSV",
-            held_as="the header of a catalogue CSV",
+            read_as=_HEADER_HELD_AS,
+            held_as=_HEADER_HELD_AS,
         )
     except FileNotFoundError as error:
         msg = (
@@ -1159,6 +1162,40 @@ def read_sheet(
             "header_path="
         )
         raise FileNotFoundError(errno.ENOENT, msg, str(header)) from error
+    return _sheet_catalogue(raw, head, row_type, label, header_label)
+
+
+def read_sheet_texts(
+    sheet: str,
+    head: str,
+    row_type: type[CatalogueRow],
+    label: str,
+    header_label: str,
+) -> Catalogue[Any]:
+    """The catalogue a CSV file and its header of these texts would hold.
+
+    The texts are held to what :func:`read_sheet` holds the two files to:
+    the UTF-8 bytes of each to its limit, 16 MiB and 64 KiB, and then every
+    rule of the sheet and of the document it makes, so that a writer about to
+    write them is refused as a reader of the files would be.
+
+    :raises CatalogueError: for everything :func:`read_sheet` refuses in the
+        bytes of the two files, naming each as *label* and *header_label*.
+    """
+    raw, head_raw = sheet.encode("utf-8"), head.encode("utf-8")
+    _check_size(raw, label)
+    _check_size(head_raw, header_label, limit=_MAX_HEADER, held_as=_HEADER_HELD_AS)
+    return _sheet_catalogue(raw, head_raw, row_type, label, header_label)
+
+
+def _sheet_catalogue(
+    raw: bytes,
+    head: bytes,
+    row_type: type[CatalogueRow],
+    label: str,
+    header_label: str,
+) -> Catalogue[Any]:
+    """The catalogue the bytes of a CSV file and of its header hold, or its refusal."""
     document = _decode(_text_of(head, header_label, "UTF-8"), header_label)
     if isinstance(document, Mapping) and document.get("schema") == SIDECAR_SCHEMA:
         message = (

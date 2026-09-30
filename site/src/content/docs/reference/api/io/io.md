@@ -1839,6 +1839,12 @@ such as FAT, the name is first taken by an empty file, made only where
 nothing is there, and the new file is renamed over it, so a reader of
 the name may find that empty file for the instant between the two.
 
+What is to be written is first read as [`read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) reads the
+file, so that nothing it refuses is ever written or replaces a file:
+more than 50 000 rows, a file past 16 MiB or a CSV header past 64 KiB, a
+text longer than a reader takes, or anything else the reader refuses, in
+the reader's own words and naming the file.
+
 **Parameters**
 
 | Name | Description |
@@ -1858,7 +1864,7 @@ the name may find that empty file for the instant between the two.
 
 | Exception | When |
 | :--- | :--- |
-| CatalogueError | for no rows, rows from more than one table or document, a key a file cannot hold, a name that is reserved or malformed, and the cells a CSV file cannot hold. |
+| CatalogueError | for no rows, rows from more than one table or document, a key a file cannot hold, a name that is reserved or malformed, the cells a CSV file cannot hold, and what [`read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) would refuse in the file: more than 50 000 rows, a file past 16 MiB or a CSV header past 64 KiB, and a text longer than a reader takes among it. |
 | TypeError | for rows that are not catalogue rows of one class (fluid states among them), or a *catalogue* or *about* the rows need and do not bring. |
 | ValueError | for a name that ends in neither `.json` nor `.csv`, a dialect a CSV file cannot take, and a dialect beside a JSON file. |
 | FileExistsError | for a file at *path* or at its header without *overwrite*, one made at either while the files are written among them (where no hard link is made, each name holds an empty file of the writer's own for the instant before its file is in place), and for a symbolic link at either. |

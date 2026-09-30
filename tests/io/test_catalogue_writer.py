@@ -784,3 +784,195 @@ def test_an_area_per_volume_keeps_what_it_is_per(tmp_path: pathlib.Path) -> None
     back = io.read_catalogue(path, row_type=AbsorptionAreaSpectrum)
     for key, row in rows.items():
         assert back[f"air/{key.rpartition('/')[2]}"].per == row.per
+
+
+# ---------------------------------------------------------------------------
+# Nothing the reader refuses for its size is ever written
+# ---------------------------------------------------------------------------
+#: The one document every row below is read from.
+_FOAMS: dict[str, Any] = {
+    "schema": "phonometry-catalogue",
+    "schema_version": 1,
+    "catalogue": "foams",
+    "row_type": "PorousMaterial",
+    "about": "Foams of a fictitious data sheet.",
+    "provenance": {
+        "kind": "datasheet",
+        "document": "Example foam data sheet",
+        "publisher": "Example Acoustics Ltd",
+        "version": "Rev. 2",
+        "consulted": "2026-09-30",
+    },
+    "rows": [{"key": "f0", "name": "Foam", "porosity": 0.9}],
+}
+
+
+def _foams(count: int = 1, **first: object) -> dict[str, io.CatalogueRow]:
+    """*count* rows of the foam sheet, built in Python, the first with *first*.
+
+    Built in Python, so that a text the reader would refuse can be held.
+    """
+    row = io.parse_catalogue(_FOAMS, row_type=PorousMaterial)["foams/f0"]
+    rows: dict[str, io.CatalogueRow] = {
+        f"foams/f{index}": dataclasses.replace(row, variant=f"batch {index}")
+        for index in range(count)
+    }
+    rows["foams/f0"] = dataclasses.replace(rows["foams/f0"], **first)
+    return rows
+
+
+def _write(
+    rows: Mapping[str, io.CatalogueRow],
+    path: pathlib.Path,
+    about: str = "Foams.",
+    *,
+    overwrite: bool = False,
+) -> None:
+    io.write_catalogue(rows, path, catalogue="foams", about=about, overwrite=overwrite)
+
+
+def _refused_past_the_edge(
+    tmp_path: pathlib.Path,
+    suffix: str,
+    good: tuple[Mapping[str, io.CatalogueRow], str],
+    past: tuple[Mapping[str, io.CatalogueRow], str],
+) -> io.CatalogueIssue:
+    """*good* written and read back, *past* refused over it, the files kept.
+
+    :return: The one issue *past* is refused with.
+    """
+    path = tmp_path / f"mine.{suffix}"
+    _write(good[0], path, good[1])
+    back = io.read_catalogue(path, row_type=PorousMaterial)
+    assert list(back.values()) == list(good[0].values())
+    kept = {item.name: item.read_bytes() for item in tmp_path.iterdir()}
+    with pytest.raises(io.CatalogueError) as caught:
+        _write(past[0], path, past[1], overwrite=True)
+    assert {item.name: item.read_bytes() for item in tmp_path.iterdir()} == kept
+    (issue,) = caught.value.issues
+    return issue
+
+
+def _fewer_rows(monkeypatch: pytest.MonkeyPatch, most: int) -> None:
+    """The most rows a catalogue holds, lowered, for the JSON and the CSV reader."""
+    from phonometry.io import _catalogue, _catalogue_csv
+
+    monkeypatch.setattr(_catalogue, "_MAX_ROWS", most)
+    monkeypatch.setattr(_catalogue_csv, "_MAX_ROWS", most)
+
+
+@pytest.mark.parametrize(
+    ("suffix", "where", "said"),
+    [
+        ("json", "/rows", "holds 4 rows, and a catalogue holds at most 3"),
+        ("csv", "line 1", "heads 4 rows, and a catalogue holds at most 3"),
+    ],
+    ids=["json", "csv"],
+)
+def test_no_more_rows_are_written_than_a_reader_takes(
+    tmp_path: pathlib.Path,
+    monkeypatch: pytest.MonkeyPatch,
+    suffix: str,
+    where: str,
+    said: str,
+) -> None:
+    """At the limit the file is written and read back; past it, nothing is.
+
+    The writer wrote any number of rows, and a file of more than the reader
+    takes replaced a good one with a file no reader reads.
+    """
+    _fewer_rows(monkeypatch, 3)
+    issue = _refused_past_the_edge(
+        tmp_path, suffix, (_foams(3), "Foams."), (_foams(4), "Foams.")
+    )
+    assert (issue.file, issue.location, issue.message) == (
+        f"mine.{suffix}",
+        where,
+        said,
+    )
+
+
+def _bytes_of(
+    written: tuple[Mapping[str, io.CatalogueRow], str],
+    suffix: str,
+    folder: pathlib.Path,
+) -> list[int]:
+    """The size of each file *written* makes, the CSV file first, in *folder*."""
+    folder.mkdir()
+    paths = io.write_catalogue(
+        written[0], folder / f"size.{suffix}", catalogue="foams", about=written[1]
+    )
+    return [path.stat().st_size for path in paths]
+
+
+@pytest.mark.parametrize(
+    ("suffix", "limit", "held_as", "grown"),
+    [
+        ("json", "_MAX_BYTES", "a catalogue file", "variant"),
+        ("csv", "_MAX_BYTES", "a catalogue file", "variant"),
+        ("csv", "_MAX_HEADER", "the header of a catalogue CSV", "about"),
+    ],
+    ids=["json-file", "csv-file", "csv-header"],
+)
+def test_no_file_is_written_past_the_bytes_a_reader_takes(
+    tmp_path: pathlib.Path,
+    monkeypatch: pytest.MonkeyPatch,
+    suffix: str,
+    limit: str,
+    held_as: str,
+    grown: str,
+) -> None:
+    """A file of exactly the limit is written and read back; one byte more is not."""
+    from phonometry.io import _catalogue, _catalogue_csv
+
+    good = (_foams(), "Foams.")
+    past = (
+        (_foams(variant="batch 0+"), "Foams.")
+        if grown == "variant"
+        else (_foams(), "Foams!.")
+    )
+    sizes = _bytes_of(good, suffix, tmp_path / "good")
+    size = sizes[-1] if limit == "_MAX_HEADER" else sizes[0]
+    assert _bytes_of(past, suffix, tmp_path / "past") != sizes
+    module = _catalogue_csv if limit == "_MAX_HEADER" else _catalogue
+    monkeypatch.setattr(module, limit, size)
+    folder = tmp_path / "edge"
+    folder.mkdir()
+    issue = _refused_past_the_edge(folder, suffix, good, past)
+    name = f"mine.{suffix}" + (".phonometry.json" if limit == "_MAX_HEADER" else "")
+    assert (issue.file, issue.location) == (name, "")
+    assert issue.message.startswith(
+        f"is {size + 1} bytes, and {held_as} is at most {size} bytes"
+    )
+
+
+@pytest.mark.parametrize("suffix", ["json", "csv"])
+@pytest.mark.parametrize(
+    ("field_name", "limit"),
+    [("variant", 2_000), ("note", 20_000)],
+    ids=["text", "prose"],
+)
+def test_no_text_is_written_longer_than_a_reader_takes(
+    tmp_path: pathlib.Path, suffix: str, field_name: str, limit: int
+) -> None:
+    """A text of the longest a reader takes is written and read back; one more is not.
+
+    The writer wrote a text of any length from a row built in Python, and
+    the reader then refused the file.
+    """
+    from phonometry.io import _catalogue
+
+    assert limit == (
+        _catalogue._MAX_PROSE if field_name == "note" else _catalogue._MAX_TEXT
+    )
+    good = (_foams(**{field_name: "x" * limit}), "Foams.")
+    past = (_foams(**{field_name: "x" * (limit + 1)}), "Foams.")
+    issue = _refused_past_the_edge(tmp_path, suffix, good, past)
+    if suffix == "json":
+        assert (issue.file, issue.location) == ("mine.json", f"/rows/0/{field_name}")
+    else:
+        assert issue.file == "mine.csv"
+        assert issue.location.startswith("line 2, column ")
+    assert issue.message == (
+        f"holds {limit + 1} characters, and a text here holds at most {limit}"
+    )

@@ -1060,65 +1060,457 @@ def _chk_lab_airborne_rw() -> Outcome:
     )
 
 
+#: The 16 core rating bands and the 21 bands of ISO 717-1:2020 Table E.1, in Hz.
+_CORE_BANDS = tuple(float(f) for f in ref.ISO717_2_REFERENCE_FLOOR_FREQ)
+_TABLE_E1_BANDS = (50.0, 63.0, 80.0, *_CORE_BANDS, 4000.0, 5000.0)
+
+
+def _table_e1_matches(*, one_decimal: bool) -> tuple[int, int]:
+    """Printed terms of Table E.1 the published curves reproduce, and how many."""
+    matching = total = 0
+    column = 1 if one_decimal else 0
+    for element, printed in ref.ISO717_1_TABLE_E1_PRINTED.items():
+        table = ph.building.LINING_REFERENCE_ELEMENTS[element]
+        curve = np.asarray([table[f] for f in _TABLE_E1_BANDS])
+        rated = ph.building.weighted_rating_extended(
+            curve, _TABLE_E1_BANDS, one_decimal=one_decimal
+        )
+        for term, values in printed.items():
+            total += 1
+            matching += abs(float(getattr(rated, term)) - values[column]) <= 1e-9
+    return matching, total
+
+
 @register(
     "Room & building acoustics",
-    "ISO 10140-5:2010+A1 Annex B, Table B.1",
-    "Reference elements end-to-end: printed Rw (C; Ctr) of all three",
+    "ISO 717-1:2020 Annex E, Table E.1",
+    "Standard basic elements: printed Rw and eight adaptation terms of all three",
 )
-def _chk_iso10140_5_reference_elements() -> Outcome:
-    rows = [
-        (ref.ISO10140_5_B1_HEAVY_WALL_R, ref.ISO10140_5_B1_HEAVY_WALL_RATING),
-        (ref.ISO10140_5_B1_HEAVY_FLOOR_R, ref.ISO10140_5_B1_HEAVY_FLOOR_RATING),
-        (ref.ISO10140_5_B1_LIGHT_WALL_R, ref.ISO10140_5_B1_LIGHT_WALL_RATING),
-    ]
-    computed = []
-    ok = True
-    for r, expected in rows:
-        # S = A (10 m2) so the ISO 10140-2 chain returns R = L1 - L2 exactly.
-        res = ph.building.lab_airborne_insulation(
-            np.full(16, 90.0),
-            90.0 - np.asarray(r, dtype=float),
-            np.full(16, 0.8),
-            area=10.0,
-            volume=50.0,
+def _chk_iso717_1_table_e1() -> Outcome:
+    # The curves are the library's published table (ISO 10140-5:2010+A1 printed
+    # them as Table B.1); the oracle is the single numbers printed under them.
+    matching, total = _table_e1_matches(one_decimal=False)
+    return count(matching, total, subject="printed single numbers")
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 717-1:2020 Annex E, Table E.1",
+    "Standard basic elements to one decimal place (the printed values in parentheses)",
+)
+def _chk_iso717_1_table_e1_one_decimal() -> Outcome:
+    matching, total = _table_e1_matches(one_decimal=True)
+    return count(matching, total, subject="printed single numbers")
+
+
+def _table_4_matches(*, one_decimal: bool) -> tuple[int, int]:
+    """Printed Ln,r,0,w and CI,r,0 of Table 4 reproduced, and how many."""
+    matching = total = 0
+    column = 1 if one_decimal else 0
+    for floor in ("heavyweight", "lightweight_1", "lightweight_3"):
+        rating, ci = ref.ISO717_2_TABLE4_PRINTED[floor]
+        curve = np.asarray(list(ph.building.IMPACT_REFERENCE_FLOORS[floor].values()))
+        rated = ph.building.weighted_impact_rating_extended(
+            curve, one_decimal=one_decimal
         )
-        assert res.rating is not None
-        got = (res.rating.rating, res.rating.c, res.rating.ctr)
-        computed.append(got)
-        ok = ok and got == expected
+        total += 2
+        matching += abs(float(rated.rating) - rating[column]) <= 1e-9
+        matching += abs(float(rated.ci) - ci[column]) <= 1e-9
+    return matching, total
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 717-2:2020 Table 4",
+    "Reference floors: printed Ln,r,0,w (CI) of the heavyweight and both lightweight curves",
+)
+def _chk_iso717_2_table_4() -> Outcome:
+    # ISO 10140-5:2010+A1 printed the lightweight curves as Table C.1; its 2021
+    # edition refers to this table.
+    matching, total = _table_4_matches(one_decimal=False)
+    return count(matching, total, subject="printed single numbers")
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 717-2:2020 Table 4",
+    "Reference floors to one decimal: 77,6 (-10,3), 71,8 (0,0) and 75,0 (-2,8)",
+)
+def _chk_iso717_2_table_4_one_decimal() -> Outcome:
+    matching, total = _table_4_matches(one_decimal=True)
+    return count(matching, total, subject="printed single numbers")
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 717-1:2020 Annex E, Table E.1",
+    "Standard basic elements: the 63 band values of the three curves as printed",
+)
+def _chk_iso717_1_table_e1_bands() -> Outcome:
+    # A single number under a curve does not respond to every band (a 1 dB
+    # typo at 4000 Hz of the heavy floor moves none of them), so the curves
+    # are also compared, band by band, with an independent reading of the page.
+    matching = total = 0
+    for element, printed in ref.ISO717_1_TABLE_E1_CURVES.items():
+        table = ph.building.LINING_REFERENCE_ELEMENTS[element]
+        for band, value in zip(ref.ISO717_1_TABLE_E1_BANDS, printed, strict=True):
+            total += 1
+            matching += band in table and abs(table[band] - value) <= 1e-9
+    return count(matching, total, subject="printed band values")
+
+
+#: The floors that read each printed column of ISO 717-2:2020 Table 4.
+_TABLE_4_COLUMNS = {
+    "heavyweight": ("heavyweight",),
+    "lightweight_1_and_2": ("lightweight_1", "lightweight_2"),
+    "lightweight_3": ("lightweight_3",),
+}
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 717-2:2020 Table 4",
+    "Reference floors: the 48 band values of the three printed columns, "
+    "floors No 1 and No 2 both on the shared one",
+)
+def _chk_iso717_2_table_4_bands() -> Outcome:
+    matching = total = 0
+    for column, printed in ref.ISO717_2_TABLE4_CURVES.items():
+        tables = [
+            ph.building.IMPACT_REFERENCE_FLOORS[floor]
+            for floor in _TABLE_4_COLUMNS[column]
+        ]
+        for band, value in zip(_CORE_BANDS, printed, strict=True):
+            total += 1
+            matching += all(
+                band in table and abs(table[band] - value) <= 1e-9 for table in tables
+            )
+    return count(matching, total, subject="printed band values")
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 717-1:2020 Annex D, Formulas (D.3) and (D.4)",
+    "Lining on the heavy wall with Rref,with on the Table 3 shape + 20 dB -> ΔRw = 21",
+)
+def _chk_iso717_1_lining_rating() -> Outcome:
+    # Rref,with laid on the ISO 717-1 Table 3 curve raised by 20 dB has no
+    # unfavourable deviation; the shift search then goes two steps further
+    # (16 bands x 2 dB = 32 dB), so Rw,with = 52 + 22 = 74 and, with the
+    # printed Rw = 53 of the bare heavy wall, ΔRw = 21.
+    table = ph.building.LINING_REFERENCE_ELEMENTS["heavy_wall"]
+    without = np.asarray([table[f] for f in _CORE_BANDS])
+    shape = np.asarray(
+        [33, 36, 39, 42, 45, 48, 51, 52, 53, 54, 55, 56, 56, 56, 56, 56], dtype=float
+    )
+    rating = ph.building.weighted_reduction_improvement(shape + 20.0 - without)
+    return numeric(21.0, float(rating.delta_rw), 0.0, unit="dB", places=0)
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 717-2:2020 Clauses 5 and 6, Formulas (A.4) and (A.6)",
+    "Sloped ΔL on each of the four reference floors -> ΔLw or ΔLt,n,w and CIΔ, "
+    "rated independently: 20 (-10), 6 (-1), 6 (-1), 11 (-3)",
+)
+def _chk_iso717_2_sloped_improvement() -> Outcome:
+    # A flat ΔL gives the same ΔLw on every curve; a sloped one tells the four
+    # reference floors apart. The expected pairs come from a rater written from
+    # the printed clauses (Table 3, 4.3.1, A.2.1 to A.2.3), not from the library.
+    dl = np.asarray(ref.ISO717_2_SLOPED_DELTA_L, dtype=float)
+    matching = total = 0
+    for floor, expected in ref.ISO717_2_SLOPED_EXPECTED.items():
+        got = (
+            ph.building.weighted_impact_improvement(dl, reference_floor=floor),
+            ph.building.impact_improvement_adaptation_term(dl, reference_floor=floor),
+        )
+        total += 2
+        matching += (got[0] == expected[0]) + (got[1] == expected[1])
+    return count(matching, total, subject="single numbers")
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 717-1:2020 Annex D, Formulas (D.3) and (D.4)",
+    "Two non-flat ΔR on each standard element -> ΔRw, Δ(Rw + C), Δ(Rw + Ctr) "
+    "and the six enlarged-range terms, rated independently",
+)
+def _chk_iso717_1_sloped_lining() -> Outcome:
+    # Only a sloped ΔR tells C from Ctr, and one element from another; only one
+    # that weighs in 50 Hz to 80 Hz and 4 000 Hz to 5 000 Hz tells each
+    # enlarged range from its neighbour, which the dipped lining does for every
+    # two of the nine terms on at least one element.
+    terms = (
+        "delta_rw",
+        "delta_rw_c",
+        "delta_rw_ctr",
+        "delta_rw_c_50_3150",
+        "delta_rw_c_50_5000",
+        "delta_rw_c_100_5000",
+        "delta_rw_ctr_50_3150",
+        "delta_rw_ctr_50_5000",
+        "delta_rw_ctr_100_5000",
+    )
+    matching = total = 0
+    for delta_r, table in (
+        (ref.ISO717_1_SLOPED_DELTA_R, ref.ISO717_1_SLOPED_EXPECTED),
+        (ref.ISO717_1_DIPPED_DELTA_R, ref.ISO717_1_DIPPED_EXPECTED),
+    ):
+        for element, expected in table.items():
+            rating = ph.building.weighted_reduction_improvement(
+                delta_r,
+                ref.ISO717_1_TABLE_E1_BANDS,
+                basic_element=element,
+            )
+            for term, value in zip(terms, expected, strict=True):
+                total += 1
+                matching += getattr(rating, term) == value
+    return count(matching, total, subject="single numbers")
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 717-1:2020 Formula (D.2)",
+    "Direct differences of a sloped lining on a measured wall: "
+    "ΔRw,direct = 6, Δ(Rw + C)direct = 5, Δ(Rw + Ctr)direct = 3",
+)
+def _chk_iso717_1_direct_difference() -> Outcome:
+    without = np.asarray(ref.ISO717_1_MEASURED_WALL_R, dtype=float)
+    res = ph.building.lab_lining_improvement(
+        without,
+        without + np.asarray(ref.ISO717_1_SLOPED_DELTA_R, dtype=float),
+        ref.ISO717_1_TABLE_E1_BANDS,
+        basic_element=None,
+    )
+    got = (res.delta_rw_direct_db, res.delta_rw_c_direct_db, res.delta_rw_ctr_direct_db)
+    expected = ref.ISO717_1_MEASURED_WALL_DIRECT
     return Outcome(
-        expected="Rw(C;Ctr) = 53(-1;-5) / 52(-1;-5) / 33(-1;-2)",
-        computed=" / ".join(f"{rw}({c};{ctr})" for rw, c, ctr in computed),
-        delta="exact",
+        expected=" / ".join(f"{v} dB" for v in expected),
+        computed=" / ".join(f"{v} dB" for v in got),
+        delta="exact" if got == expected else "differs",
+        passed=got == expected,
+    )
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 10140-1:2021 Formula (H.1)",
+    "ISO 717-2 Table C.2 improvement through the Annex H front end -> ΔLw = 15 as "
+    "printed, CIΔ = -9 from the Table 4 floor (the print's C.2 chain gives -8)",
+)
+def _chk_iso10140_1_annex_h() -> Outcome:
+    dl = np.asarray(ref.ISO717_2_ANNEX_C2_DELTA_L, dtype=float)
+    bare = np.full(16, 75.0)
+    res = ph.building.lab_floor_covering_improvement(bare, bare - dl, _CORE_BANDS)
+    expected = (ref.ISO717_2_ANNEX_C2_DELTA_LW, ref.ISO717_2_ANNEX_C2_CI_DELTA)
+    got = (res.delta_lw_db, res.ci_delta_db)
+    return Outcome(
+        expected=f"ΔLw = {expected[0]} dB, CIΔ = {expected[1]} dB",
+        computed=f"ΔLw = {got[0]} dB, CIΔ = {got[1]} dB",
+        delta="exact" if got == expected else "differs",
+        passed=got == expected,
+    )
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 10140-1:2021 G.4",
+    "Curing example: two measurements within 1 d may start 3 d after construction; "
+    "on the same bound, 2,1 d after 6,3 d passes too",
+)
+def _chk_iso10140_1_curing_example() -> Outcome:
+    # 3 x 2,1 is 6,300000000000001 in binary: the decimal pair sits on the
+    # inclusive bound of G.4 as the printed one does.
+    on_bound = ph.building.check_lining_curing(3.0, 1.0)
+    early = ph.building.check_lining_curing(2.9, 1.0)
+    decimal = ph.building.check_lining_curing(6.3, 2.1)
+    ok = on_bound.passes and not early.passes and decimal.passes
+    return Outcome(
+        expected="3 d passes, 2,9 d fails, 6,3 d with 2,1 d passes",
+        computed=f"3 d {'passes' if on_bound.passes else 'fails'}, "
+        f"2,9 d {'passes' if early.passes else 'fails'}, "
+        f"6,3 d with 2,1 d {'passes' if decimal.passes else 'fails'}",
+        delta="exact" if ok else "differs",
         passed=ok,
     )
 
 
 @register(
     "Room & building acoustics",
-    "ISO 10140-5:2010+A1 Annex C, Table C.1",
-    "Reference floors end-to-end: printed Ln,t,r,0,w (CI) of both",
+    "ISO 10140-1:2021 Table K.2",
+    "The 18 C_j are the IEC 61672-1 A-weighting at the exact midband "
+    "frequencies of the nominal bands, to 0,1 dB",
 )
-def _chk_iso10140_5_reference_floors() -> Outcome:
-    rows = [
-        (ref.ISO10140_5_C1_FLOOR_C1C2_LN, ref.ISO10140_5_C1_FLOOR_C1C2_RATING),
-        (ref.ISO10140_5_C1_FLOOR_C3_LN, ref.ISO10140_5_C1_FLOOR_C3_RATING),
-    ]
-    computed = []
-    ok = True
-    for ln, expected in rows:
-        # A = A0 (V = 31,25 m3, T = 0,5 s) so Ln equals the receiving level.
-        res = ph.building.lab_impact_insulation(
-            np.asarray(ln, dtype=float), np.full(16, 0.5), volume=31.25
+def _chk_iso10140_1_table_k2() -> Outcome:
+    from phonometry.filters.weighting_compliance import _analytic_weighting_db
+
+    # The library's IEC 61672-1:2013 Annex E design goal at the exact base-ten
+    # midband frequency of each nominal band (100 Hz is band 20), rounded to
+    # 0,1 dB as Table K.2 prints it.
+    exact = 10.0 ** (np.arange(20, 38) / 10.0)
+    design = np.round(_analytic_weighting_db("A", exact), 1)
+    printed = np.fromiter(ph.building.RAINFALL_A_WEIGHTING.values(), dtype=float)
+    matching = int(np.sum(np.abs(design - printed) <= 1e-9))
+    return count(matching, printed.size, subject="bands")
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 10140-1:2021 Formula (K.2) with Table K.2",
+    "Flat LI = 50 dB in the 18 bands -> LIA = 50 + 10 lg sum 10^(0,1 C_j), printed C_j",
+)
+def _chk_iso10140_1_formula_k2() -> Outcome:
+    # The expected value is built from the 18 C_j as the page prints them, the
+    # computed one from the library's published table through Formula (K.2):
+    # a mistyped C_j or a wrong energetic sum would both show.
+    printed = np.asarray(ref.ISO10140_1_TABLE_K2_CJ, dtype=float)
+    expected = 50.0 + 10.0 * math.log10(float(np.sum(10.0 ** (0.1 * printed))))
+    bands = list(ph.building.RAINFALL_A_WEIGHTING)
+    res = ph.building.rainfall_sound_from_intensity(
+        np.full(len(bands), 50.0), bands, measuring_area_m2=1.0, excited_area_m2=1.0
+    )
+    if res.l_ia_db is None:
+        return Outcome(
+            expected=f"LIA = {expected:.6f} dB",
+            computed="no A-weighted level",
+            delta="differs",
+            passed=False,
         )
-        assert res.rating is not None
-        got = (res.rating.rating, res.rating.ci)
-        computed.append(got)
-        ok = ok and got == expected
+    return numeric(expected, res.l_ia_db, 1e-12, unit="dB", places=6)
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 10140-1:2021 Formula (K.1)",
+    "Rain in a 100 m³ room, T = 2 s, Se = 4 m²: "
+    "LI = Lpr - 10 lg 2 + 10 lg 100 - 14 - 10 lg 4",
+)
+def _chk_iso10140_1_formula_k1() -> Outcome:
+    # Every term away from zero, so a wrong sign on any of them shows: the
+    # expected value is Formula (K.1) with its printed constant 14 dB.
+    expected = (
+        60.0 - 10.0 * math.log10(2.0) + 10.0 * math.log10(100.0) - 14.0
+    ) - 10.0 * math.log10(4.0)
+    res = ph.building.rainfall_sound(
+        [60.0], [2.0], [1000.0], volume_m3=100.0, excited_area_m2=4.0
+    )
+    return numeric(expected, float(res.l_i_db[0]), 1e-12, unit="dB", places=6)
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 10140-1:2021 Formula (K.4)",
+    "Direct intensity over Sm = 4 m² of a 1 m² specimen: LI = LIm + 10 lg 4",
+)
+def _chk_iso10140_1_formula_k4() -> Outcome:
+    res = ph.building.rainfall_sound_from_intensity(
+        [50.0], [1000.0], measuring_area_m2=4.0, excited_area_m2=1.0
+    )
+    return numeric(
+        50.0 + 10.0 * math.log10(4.0), float(res.l_i_db[0]), 1e-12, unit="dB", places=6
+    )
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 10140-5:2021 Table I.1",
+    "Reference pane: the 36 cells, 10 lg(ηref) and LIc,ref in 18 bands, as printed",
+)
+def _chk_iso10140_5_table_i1() -> Outcome:
+    loss = ph.building.RAINFALL_REFERENCE_LOSS_FACTOR_DB
+    level = ph.building.RAINFALL_REFERENCE_INTENSITY_DB
+    matching = total = 0
+    for band, eta_ref_db, l_ic_ref in ref.ISO10140_5_TABLE_I1:
+        total += 2
+        matching += band in loss and abs(loss[band] - eta_ref_db) <= 1e-9
+        matching += band in level and abs(level[band] - l_ic_ref) <= 1e-9
+    return count(matching, total, subject="printed cells")
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 10140-5:2021 Annex I, Formulas (I.1) to (I.3)",
+    "Reference pane at twice the reference loss factor and at the printed LIc,ref: "
+    "ΔLIc = 10 lg 2 in all 18 bands",
+)
+def _chk_iso10140_5_reference_pane() -> Outcome:
+    # Built from the page transcription of Table I.1, not from the library's
+    # table: Ts is Formula (I.1) solved for twice the printed reference loss
+    # factor and the level is the printed LIc,ref, so Formula (I.2) adds
+    # 10 lg 2 and Formula (I.3) subtracts LIc,ref again. A wrong sign or a
+    # wrong cell in either published column moves the band off 10 lg 2.
+    bands = np.asarray([row[0] for row in ref.ISO10140_5_TABLE_I1])
+    eta_ref = 10.0 ** (np.asarray([row[1] for row in ref.ISO10140_5_TABLE_I1]) / 10.0)
+    level = np.asarray([row[2] for row in ref.ISO10140_5_TABLE_I1])
+    res = ph.building.rainfall_reference_correction(
+        level, 2.2 / (bands * 2.0 * eta_ref), bands
+    )
+    target = 10.0 * math.log10(2.0)
+    matching = int(np.sum(np.abs(res.correction_db - target) <= 1e-9))
+    return count(matching, bands.size, subject="bands")
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 10140-5:2021 Tables H.1 and H.2",
+    "Intense and heavy rain: rate, drop diameter, fall velocity, holes, hole "
+    "density and fall height as printed",
+)
+def _chk_iso10140_5_tables_h1_h2() -> Outcome:
+    matching = total = 0
+    for rain, printed in ref.ISO10140_5_TABLES_H1_H2.items():
+        row = ph.building.ARTIFICIAL_RAIN[rain]
+        got = (
+            row.rainfall_rate_mm_h,
+            row.median_drop_diameter_mm,
+            row.fall_velocity_m_s,
+            row.hole_diameter_mm,
+            row.holes_per_m2,
+            row.fall_height_m,
+        )
+        for value, cell in zip(got, printed, strict=True):
+            total += 1
+            matching += value == cell
+    return count(matching, total, subject="printed cells")
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 10140-1:2021 Table K.1",
+    "Moderate, intense, heavy and cloudburst rain: rate, drop diameter and fall "
+    "velocity ranges as printed",
+)
+def _chk_iso10140_1_table_k1() -> Outcome:
+    matching = total = 0
+    for name, printed in ref.ISO10140_1_TABLE_K1.items():
+        row = ph.building.RAINFALL_CLASSIFICATION[name]
+        got = (row.rainfall_rate_mm_h, row.drop_diameter_mm, row.fall_velocity_m_s)
+        for value, cell in zip(got, printed, strict=True):
+            total += 1
+            matching += value == cell
+    return count(matching, total, subject="printed cells")
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 10140-5:2021 H.1",
+    "Heavy rain of Table H.1, 40 mm/h, within the ±2 mm/h of the H.1 text: "
+    "38 and 42 pass, and 38 collected as 3,8 L on 0,1 m² in one hour; "
+    "37,9 and 42,1 fail",
+)
+def _chk_iso10140_5_rain_rate() -> Outcome:
+    # The collected rate divides out to 37,99999999999999 mm/h: still on the
+    # inclusive bound.
+    collected = ph.building.rainfall_rate(3.8, 0.1, 3600.0)
+    verdicts = [
+        ph.building.verify_rain_generator(rate).passes
+        for rate in (38.0, 42.0, collected, 37.9, 42.1)
+    ]
+    ok = verdicts == [True, True, True, False, False]
     return Outcome(
-        expected="Ln,t,r,0,w(CI) = 72(0) / 75(-3)",
-        computed=" / ".join(f"{lnw}({ci})" for lnw, ci in computed),
-        delta="exact",
+        expected="pass, pass, pass, fail, fail",
+        computed=", ".join("pass" if v else "fail" for v in verdicts),
+        delta="exact" if ok else "differs",
         passed=ok,
     )
 
@@ -1336,7 +1728,8 @@ def _chk_survey_reverberation_estimate() -> Outcome:
     "Reference-floor weighted level Ln,r,0,w and CI (ISO 16251-1 ΔLw anchor)",
 )
 def _chk_iso717_2_reference_floor() -> Outcome:
-    res = ph.building.weighted_impact_rating(ref.ISO717_2_REFERENCE_FLOOR_LN_R0)
+    heavy = ph.building.IMPACT_REFERENCE_FLOORS["heavyweight"]
+    res = ph.building.weighted_impact_rating(list(heavy.values()))
     ok = (
         res.rating == ref.ISO717_2_REFERENCE_FLOOR_LN_R0_W
         and res.ci == ref.ISO717_2_REFERENCE_FLOOR_CI

@@ -1,6 +1,6 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
 r"""Heavy and soft impact sources: rubber ball and bang machine
-(ISO 16283-2:2020 Annex A, ISO 10140-5:2010 Annex F, JIS A 1418-2:2019,
+(ISO 16283-2:2020 Annex A, ISO 10140-5:2021 Annex F, JIS A 1418-2:2019,
 ISO 717-2:2020 Annex D).
 
 The ISO tapping machine is a *light* impact source: five 500 g hammers dropped
@@ -36,7 +36,7 @@ table and :func:`check_heavy_impact_source` verifies the five band results
 against it.
 
 The two source specifications are printed identically in ISO 16283-2:2020
-Table A.1 and ISO 10140-5:2010 Table F.1 (rubber ball), and in
+Table A.1 and ISO 10140-5:2021 Table F.1 (rubber ball), and in
 JIS A 1418-2:2019 Tables A.2 (rubber ball, *impact force characteristic 2*) and
 A.1 (bang machine, *impact force characteristic 1*):
 
@@ -144,8 +144,9 @@ HEAVY_IMPACT_OCTAVE_BANDS: tuple[float, ...] = (31.5, 63.0, 125.0, 250.0, 500.0)
 #: Impact force exposure level ``LFE`` and its tolerance per octave band, in
 #: dB re 1 N, transcribed digit-for-digit from the primary texts. The rubber
 #: ball is printed identically in **ISO 16283-2:2020 Table A.1** (printed p. 23),
-#: **ISO 10140-5:2010 Table F.1** and **JIS A 1418-2:2019 Table A.2** (impact
-#: force characteristic 2); the bang machine only in **JIS A 1418-2:2019
+#: **ISO 10140-5:2021 Table F.1** (PDF page 35, printed p. 29, unchanged from the
+#: 2010 edition) and **JIS A 1418-2:2019 Table A.2** (impact force
+#: characteristic 2); the bang machine only in **JIS A 1418-2:2019
 #: Table A.1** (impact force characteristic 1, printed p. 6). Keyed by source
 #: name, each value is the tuple of ``(LFE, tolerance)`` pairs ordered as
 #: :data:`HEAVY_IMPACT_OCTAVE_BANDS`.
@@ -350,7 +351,7 @@ def impact_force_exposure_level(
     r"""Impact force exposure level ``LFE`` of a force pulse (Formula (A.1)).
 
     :math:`L_{F\mathrm{E}} = 10 \log_{10}[(1/T_\mathrm{ref}) \int F(t)^2 / F_0^2\,dt]` dB re 1 N
-    (ISO 16283-2:2020 Formula (A.1) = ISO 10140-5:2010 Formula (F.2) =
+    (ISO 16283-2:2020 Formula (A.1) = ISO 10140-5:2021 Formula (F.2) =
     JIS A 1418-2:2019 Formula (1)). The integral is taken over the whole
     supplied record with the trapezoidal rule, so pass one isolated impact.
 
@@ -498,7 +499,7 @@ def check_heavy_impact_source(
     """Check a measured heavy impact source against its printed spectrum.
 
     Compares the five measured octave-band impact force exposure levels with
-    the tolerance band of ISO 16283-2:2020 Table A.1 / ISO 10140-5:2010
+    the tolerance band of ISO 16283-2:2020 Table A.1 / ISO 10140-5:2021
     Table F.1 / JIS A 1418-2:2019 Table A.2 (rubber ball) or JIS A 1418-2:2019
     Table A.1 (bang machine).
 

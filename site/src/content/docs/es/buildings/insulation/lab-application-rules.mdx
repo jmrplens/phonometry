@@ -1,0 +1,717 @@
+---
+title: "Trasdosados, revestimientos y lluvia (ISO 10140-1)"
+description: "Tres reglas de aplicación de laboratorio de ISO 10140-1:2021: la mejora que un trasdosado da a una pared (Anexo G), la que un revestimiento de suelo da a un suelo de referencia, suelos ligeros incluidos (Anexo H), y el ruido de la lluvia artificial sobre una cubierta o un lucernario (Anexo K), con las curvas de referencia de ISO 717 sobre las que se valoran."
+references:
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2021
+    title: "Acoustics — Laboratory measurement of sound insulation of building elements — Part 1: Application rules for specific products"
+    designation: "ISO 10140-1:2021"
+    note: "Anexo G (trasdosados: ΔR, la condición de curado de G.4 y el informe de G.5), Anexo H (revestimientos de suelo: Fórmulas (H.1) a (H.3), las tres categorías de revestimiento y las posiciones de la máquina de impactos) y Anexo K (ruido de lluvia: Fórmulas (K.1) a (K.5) y los 18 C_j de la Tabla K.2). Tercera edición."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2021
+    title: "Acoustics — Laboratory measurement of sound insulation of building elements — Part 5: Requirements for test facilities and equipment"
+    designation: "ISO 10140-5:2021"
+    note: "Los Anexos B y C construyen los elementos base normalizados y los cuatro suelos de referencia y remiten a ISO 717 para sus curvas; el Anexo H especifica las dos lluvias artificiales (Tablas H.1 y H.2) y el Anexo I el vidrio de referencia (Tabla I.1, Fórmulas (I.1) a (I.3)). El Anexo F especifica la pelota de caucho de H.6.1."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2020
+    title: "Acoustics — Rating of sound insulation in buildings and of building elements — Part 1: Airborne sound insulation"
+    designation: "ISO 717-1:2020"
+    note: "El Anexo D valora un trasdosado sobre un elemento base normalizado (Fórmulas (D.1) a (D.4)); el Anexo E imprime las curvas de referencia de los tres elementos, Tabla E.1, con todas las magnitudes globales debajo."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2020
+    title: "Acoustics — Rating of sound insulation in buildings and of building elements — Part 2: Impact sound insulation"
+    designation: "ISO 717-2:2020"
+    note: "Los apartados 5 y 6 valoran un revestimiento de suelo sobre el suelo de referencia pesado y sobre los ligeros; la Tabla 4 imprime las cuatro curvas de referencia; A.2.2 y A.2.3 dan los términos de adaptación CIΔ y CIΔ,t."
+---
+
+import Scope from '../../../../../components/Scope.astro';
+import ScopeClaim from '../../../../../components/ScopeClaim.astro';
+import SeeAlso from '../../../../../components/SeeAlso.astro';
+import ThemeImage from '../../../../../components/ThemeImage.astro';
+
+Casi toda ISO 10140 mide lo que un elemento *es*: el índice de reducción
+acústica de una pared, el nivel de impactos bajo un suelo. Tres de las reglas
+de aplicación de ISO 10140-1 miden otra cosa. El Anexo G mide lo que un
+**trasdosado** añade a la pared sobre la que se fija, el Anexo H lo que un
+**revestimiento de suelo** le quita al nivel de impactos del suelo sobre el que
+se coloca, y el Anexo K lo que la **lluvia** le hace a una cubierta, a una
+ventana de tejado o a un lucernario. Los dos primeros son productos que nunca
+se venden solos, así que el laboratorio mide el elemento dos veces, sin el
+producto y con él, y declara la diferencia. El tercero es una fuente de
+impactos que cae del cielo en lugar de una máquina de impactos, así que el
+laboratorio tiene que fabricar su propia lluvia.
+
+Las mediciones en sí son las de
+[Medición del aislamiento en laboratorio](/phonometry/es/buildings/insulation/insulation-lab/):
+$R$ según ISO 10140-2 y $L_\mathrm{n}$ según ISO 10140-3, en una instalación
+con la transmisión por flancos suprimida. Lo que añade esta página es lo que
+hacen los anexos con ellas, y las magnitudes globales que ponen de acuerdo a
+dos laboratorios sobre un producto cuyo efecto depende de aquello a lo que va
+fijado.
+
+## Trasdosados: la mejora ΔR (Anexo G)
+
+Un trasdosado es una capa adicional sobre una pared o un techo: una placa de
+yeso sobre montantes, un sistema de aislamiento térmico por el exterior, un
+trasdosado directo pegado a la fábrica. El Anexo G mide el elemento base sin él
+y después con él, y declara la **mejora del índice de reducción acústica** en
+cada banda de tercio de octava,
+
+$$
+\Delta R = R_\mathrm{with} - R_\mathrm{without}
+$$
+
+(G.1). La mejora no es una propiedad del trasdosado solo. Solo es
+independiente de la pared cuando la pared es mucho más pesada que el
+trasdosado, su frecuencia crítica queda por debajo del rango medido y el
+acoplamiento entre los dos es débil (G.2); un trasdosado sobre una pared ligera
+se comporta de otra manera, porque la coincidencia de la propia pared mueve el
+resultado. Por eso G.2 fija las paredes sobre las que se mide: los **elementos
+base normalizados** del Anexo B de ISO 10140-5:2021.
+
+| Elemento base | Construcción | $R_\mathrm{w}$ ($C$; $C_\mathrm{tr}$) de su curva de referencia |
+| :--- | :--- | :--- |
+| Pared pesada | fábrica u hormigón de (350 ± 50) kg/m², frecuencia crítica en la octava de 125 Hz | 53 (−1; −5) dB |
+| Suelo pesado | la losa de hormigón armado del suelo de referencia pesado | 52 (−1; −5) dB |
+| Pared ligera | 10 cm de hormigón celular de (600 ± 50) kg/m³ enlucido, unos 70 kg/m², frecuencia crítica en la octava de 500 Hz | 33 (−1; −2) dB |
+
+La pared del laboratorio nunca es exactamente la de referencia, así que la
+magnitud global no se lee en las dos curvas medidas. El Anexo D de
+ISO 717-1:2020 suma la $\Delta R$ medida a la **curva de referencia** del
+elemento, $R_\mathrm{ref,with} = R_\mathrm{ref,without} + \Delta R$
+(Fórmula (D.3)), valora las dos curvas y resta:
+$\Delta R_\mathrm{w} = R_\mathrm{w,ref,with} - R_\mathrm{w,ref,without}$
+(Fórmula (D.4)). $\Delta(R_\mathrm{w} + C)$ y
+$\Delta(R_\mathrm{w} + C_\mathrm{tr})$ salen del mismo modo, y también todos los
+términos de rango ampliado del Anexo B a los que lleguen las bandas medidas. El
+resultado lleva el elemento como índice, $\Delta R_\mathrm{w,heavy}$ o
+$\Delta R_\mathrm{w,light}$. Las curvas de referencia son la Tabla E.1 de
+ISO 717-1:2020, que la biblioteca publica como
+`building.LINING_REFERENCE_ELEMENTS`; ISO 10140-5 imprimió los mismos números
+como su Tabla B.1 hasta que su edición de 2021 los trasladó allí.
+
+```python
+import numpy as np
+from phonometry import building
+
+freqs = [50, 63, 80, 100, 125, 160, 200, 250, 315, 400, 500, 630, 800,
+         1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000]
+# La pared pesada del laboratorio, y la misma pared con placa de yeso sobre
+# montantes autoportantes y lana mineral.
+r_without = np.array([36.1, 37.0, 38.2, 39.5, 40.3, 41.2, 40.6, 41.8, 43.9,
+                      46.4, 48.9, 51.6, 54.2, 56.5, 58.7, 61.4, 63.3, 64.2,
+                      64.8, 65.9, 66.4])
+delta_r = np.array([-2.1, -5.4, -3.2, 1.5, 4.8, 7.9, 10.6, 12.9, 14.7, 16.2,
+                    17.4, 18.3, 19.1, 19.6, 19.9, 19.5, 18.2, 16.4, 15.8,
+                    17.1, 18.0])
+res = building.lab_lining_improvement(r_without, r_without + delta_r, freqs,
+                                      basic_element="heavy_wall")
+rating = res.rating
+print(rating.index, rating.delta_rw, rating.delta_rw_c, rating.delta_rw_ctr)
+# heavy 12 11 10
+print(rating.without_lining.rating, rating.with_lining.rating)   # 53 65
+print(rating.delta_rw_c_50_3150, rating.delta_rw_ctr_50_3150)   # 9 3
+```
+
+El trasdosado cuesta unos decibelios en su resonancia masa-muelle-masa, cerca
+de 63 Hz, y gana hasta 20 dB por encima; el término de tráfico, que pesa las
+bandas bajas, es el que menos gana, y el de rango ampliado
+$C_\mathrm{tr,50\text{–}3150}$, que ve la propia resonancia, se queda en 3 dB.
+
+Sobre una pared que no es ninguno de los tres elementos normalizados
+(`basic_element=None`), el Anexo D no tiene curva de referencia con la que
+generalizar, y G.2 c) solo admite la **diferencia directa** de las magnitudes
+globales medidas,
+$\Delta R_\mathrm{w,direct} = R_\mathrm{w,with} - R_\mathrm{w,without}$
+(Fórmula (D.2)). Describe el trasdosado sobre esa pared en ese laboratorio y en
+ningún otro sitio. El resultado la lleva siempre, porque solo necesita las dos
+curvas medidas:
+
+```python
+print(res.delta_rw_direct_db, res.delta_rw_c_direct_db, res.delta_rw_ctr_direct_db)
+# 13 12 9
+other = building.lab_lining_improvement(r_without, r_without + delta_r, freqs,
+                                        basic_element=None)
+print(other.rating, other.delta_rw_direct_db)                   # None 13
+```
+
+Los valores por octava de G.1, cuando el informe los pide, salen de los tres
+tercios de cada octava por la Fórmula (D.1) de ISO 717-1:2020,
+$\Delta R_\mathrm{oct} = -10 \log_{10}[(1/3) \sum 10^{-\Delta R_j/10}]$, que
+promedia los factores de transmisión y no los decibelios, de modo que el tercio
+que menos mejora es el que más pesa; los da `res.octave_bands()`.
+
+### La pared no puede cambiar entre las dos mediciones (G.4)
+
+$\Delta R$ es la diferencia de dos mediciones de la misma pared, así que tiene
+que ser la misma pared las dos veces. G.4 le pone números para la fábrica y el
+hormigón: un curado de al menos **dos semanas** antes de la primera medición
+o, si el laboratorio no puede esperar, un intervalo entre las dos mediciones de
+como mucho **un tercio** del tiempo de curado ya transcurrido. Su propio
+ejemplo: dos mediciones hechas en un mismo día pueden empezar tres días después
+de terminar la construcción.
+
+```python
+check = building.check_lining_curing(10.0, 2.0)      # días
+print(check.passes, check.cured, check.lag_within_third)   # True False True
+print(building.check_lining_curing(2.9, 1.0).passes)       # False
+```
+
+La especificación del producto puede fijar otro periodo de curado
+(`required_curing_days=`). El veredicto no tiene valor de verdad propio: se lee
+`.passes`, y `.plot()` dibuja la región admisible con la medición dentro.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/lab_lining_improvement.svg" alt="Dos paneles para un trasdosado medido sobre la pared pesada normalizada. A la izquierda: la mejora del índice de reducción acústica en 21 bandas de tercio de octava de 50 Hz a 5000 Hz, negativa entre 50 y 80 Hz con su mínimo cerca de menos 5 dB en 63 Hz, cruzando el cero en 100 Hz, subiendo a unos 20 dB en 1250 Hz, bajando a 16 dB hacia 2500 y 3150 Hz y recuperando 18 dB en 5000 Hz; el título dice delta R w heavy igual a 12 dB. A la derecha: la curva de referencia de la pared pesada, plana en 40 dB de 100 a 200 Hz y subiendo hasta 65 dB, con Rw de 53 dB, y la misma curva elevada con la mejora medida, con Rw de 65 dB" width="100%" />
+
+*Un trasdosado de placa de yeso sobre la pared pesada. A la izquierda, la
+mejora que midió el laboratorio, banda a banda; a la derecha, las dos curvas
+que valora el Anexo D: la pared de referencia de la Tabla E.1 y la misma pared
+con la $\Delta R$ del trasdosado sumada. Los 12 dB entre sus índices son
+$\Delta R_\mathrm{w,heavy}$, un número que no depende de la pared del
+laboratorio.*
+
+<details>
+<summary>Ver el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import building
+
+freqs = [50, 63, 80, 100, 125, 160, 200, 250, 315, 400, 500, 630, 800,
+         1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000]
+r_without = np.array([36.1, 37.0, 38.2, 39.5, 40.3, 41.2, 40.6, 41.8, 43.9,
+                      46.4, 48.9, 51.6, 54.2, 56.5, 58.7, 61.4, 63.3, 64.2,
+                      64.8, 65.9, 66.4])
+delta_r = np.array([-2.1, -5.4, -3.2, 1.5, 4.8, 7.9, 10.6, 12.9, 14.7, 16.2,
+                    17.4, 18.3, 19.1, 19.6, 19.9, 19.5, 18.2, 16.4, 15.8,
+                    17.1, 18.0])
+res = building.lab_lining_improvement(r_without, r_without + delta_r, freqs)
+
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13, 5.6))
+res.plot(ax=ax1, language="es")
+res.rating.plot(ax=ax2, language="es")
+plt.tight_layout()
+plt.show()
+```
+
+</details>
+
+## Revestimientos de suelo: la mejora ΔL (Anexo H)
+
+Un revestimiento de suelo (una moqueta, una lámina de vinilo o de caucho, una
+solera flotante, un parqué sobre una capa elástica) se coloca sobre un **suelo
+de referencia** y se hace funcionar la máquina de impactos sobre él, con y sin
+revestimiento, en las mismas posiciones. La mejora del aislamiento a ruido de
+impactos es
+
+$$
+\Delta L = L_\mathrm{n0} - L_\mathrm{n}
+$$
+
+(Fórmula (H.1)) en cada banda de tercio de octava, y el valor por octava sale
+de los tres tercios por
+$\Delta L_\mathrm{oct} = -10 \log_{10}[(1/3) \sum 10^{-\Delta L_j/10}]$
+(Fórmula (H.2)), una media de $10^{-\Delta L_j/10}$ en la que el tercio que
+menos mejora es el que más pesa. Mientras la absorción del recinto receptor no cambie entre las
+dos mediciones, la reducción de $L_\mathrm{i}$ es la reducción de
+$L_\mathrm{n}$ (NOTA de H.1).
+
+El suelo de referencia importa más que en un trasdosado, porque un
+revestimiento trabaja contra la rigidez de lo que tiene debajo. El Anexo C de
+ISO 10140-5:2021 construye un suelo **pesado**, una losa de hormigón armado de
+120 mm (+40/−20 mm, preferiblemente 140 mm), y tres suelos **ligeros** (de
+madera) que representan los forjados de viguetas que se construyen en el mundo:
+
+| Suelo de referencia | Construcción (ISO 10140-5:2021 C.2.1, C.3.3) | Curva de referencia | $L_\mathrm{n,w}$ ($C_\mathrm{I}$) |
+| :--- | :--- | :--- | :--- |
+| Pesado | losa de hormigón de 120 mm | $L_\mathrm{n,r,0}$ | 78 (−11) dB |
+| Ligero n.º 1 | tablero aglomerado de 22 mm sobre viguetas de 120 mm × 180 mm cada 625 mm, lana mineral, rastreles y placa de yeso de 12,5 mm | $L_\mathrm{n,t,r,0}$ | 72 (0) dB |
+| Ligero n.º 2 | tablero OSB, contrachapado o aglomerado de 20 mm sobre viguetas de 42 mm × 225 mm cada 610 mm, lana mineral, perfiles elásticos y dos placas de yeso | la misma curva que el n.º 1 | 72 (0) dB |
+| Ligero n.º 3 | dos tableros contrachapados de 15 mm sobre viguetas de 45 mm × 60 mm cada 300 mm apoyadas en vigas de 120 mm × 240 mm cada 1 m | $L_\mathrm{n,t,r,0}$ | 75 (−3) dB |
+
+Las curvas son la Tabla 4 de ISO 717-2:2020, publicada como
+`building.IMPACT_REFERENCE_FLOORS`; la edición de 2010 de ISO 10140-5 las
+imprimía como su Tabla C.1. Sobre ellas se lee la magnitud global, igual que en
+un trasdosado: $L_\mathrm{n,r} = L_\mathrm{n,r,0} - \Delta L$
+(Fórmula (1) de ISO 717-2:2020) y
+$\Delta L_\mathrm{w} = L_\mathrm{n,r,0,w} - L_\mathrm{n,r,w}$
+(Fórmula (2)). Sobre el suelo pesado el resultado es $\Delta L_\mathrm{w}$
+(apartado 5); sobre uno ligero es $\Delta L_\mathrm{t,1,w}$,
+$\Delta L_\mathrm{t,2,w}$ o $\Delta L_\mathrm{t,3,w}$ (apartado 6), cada uno
+con su término de adaptación $C_{\mathrm{I}\Delta}$ o
+$C_{\mathrm{I}\Delta,\mathrm{t}}$ (Fórmulas (A.4) y (A.6)).
+
+```python
+freqs = [100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000, 1250,
+         1600, 2000, 2500, 3150, 4000, 5000]
+# Un vinilo elástico sobre el suelo de referencia de madera n.º 3.
+l_n0 = np.array([70.5, 73.4, 75.8, 77.2, 78.9, 78.1, 77.6, 78.3, 77.1, 75.4,
+                 73.8, 71.2, 68.9, 65.7, 62.8, 59.6, 56.9, 53.8])
+delta_l = np.array([0.4, 0.8, 1.5, 2.3, 3.4, 4.9, 6.8, 9.1, 11.6, 14.2, 16.9,
+                    19.8, 22.4, 25.1, 27.3, 29.4, 30.8, 31.9])
+cover = building.lab_floor_covering_improvement(l_n0, l_n0 - delta_l, freqs,
+                                                reference_floor="lightweight_3")
+print(cover.designation, cover.delta_lw_db, cover.ci_delta_db)   # ΔLt,3,w 8 -3
+print(cover.reference_rating.rating, cover.bare_rating.rating)   # 67 75
+```
+
+Los dos índices del final son los que H.5 i) pide que el informe declare junto
+a $\Delta L$: el suelo de referencia con el revestimiento, $L_\mathrm{n,t,r,w}$,
+y el suelo desnudo medido, $L_\mathrm{n,0,w}$. La misma $\Delta L$ leída sobre la
+curva del suelo pesado daría $\Delta L_\mathrm{w} = 18$ dB, porque la referencia
+de hormigón es más ruidosa donde el vinilo trabaja mejor, en alta frecuencia, y
+la de madera lo es donde apenas trabaja. Por eso el apartado 5.4 de
+ISO 717-2:2020 limita a los suelos macizos una $\Delta L_\mathrm{w}$ medida
+sobre hormigón, y por eso un revestimiento pensado para forjados de madera se
+valora sobre un suelo de madera.
+
+Las dos funciones de la biblioteca que valoran directamente un espectro
+$\Delta L$, `weighted_impact_improvement` y
+`impact_improvement_adaptation_term`, admiten el mismo `reference_floor=` y,
+con `one_decimal=True`, la forma que prescribe el apartado 5.4 de ISO 717-2
+cuando se declara una incertidumbre junto al número.
+
+### Elementos de ensayo, posiciones y cargas
+
+El Anexo H clasifica los revestimientos en tres categorías, y la categoría
+decide el elemento de ensayo y el número de posiciones de la máquina de
+impactos (H.2.2 y H.4.6):
+
+- **Categoría I**, revestimientos flexibles colocados sueltos o pegados
+  (plásticos, caucho, corcho, esteras): al menos tres elementos de ensayo
+  pequeños de al menos 650 mm × 350 mm, una posición de la máquina sobre cada
+  uno, con los martillos a al menos 100 mm de los bordes. El suelo desnudo se
+  puede medir en las mismas posiciones o con la máquina a cada lado de cada
+  elemento de ensayo, promediando las dos aritméticamente; sobre un suelo de
+  madera la línea de martillos va a 45° de las viguetas, con al menos un
+  martillo sobre una vigueta.
+- **Categoría II**, revestimientos rígidos o compuestos, y **categoría III**,
+  revestimientos tensados de pared a pared: todo el suelo o al menos 10 m² con
+  el lado menor de al menos 2,3 m; al menos cuatro posiciones de la máquina
+  sobre el suelo pesado y seis, distribuidas al azar, sobre uno ligero. Un
+  revestimiento de categoría II se puede ensayar cargado con 20 kg/m² a
+  25 kg/m².
+
+La superficie del suelo debería estar entre 18 °C y 25 °C (H.4.5). Ninguna de
+estas condiciones cambia la aritmética, y ninguna se comprueba: son lo que el
+informe de ensayo tiene que declarar.
+
+### La pelota de caucho y el suelo de maqueta (H.6)
+
+H.6.1 mide el mismo revestimiento bajo la fuente de impacto pesada y blanda, la
+pelota de caucho del Anexo F de ISO 10140-5:2021, y declara la reducción de su
+nivel máximo,
+$\Delta L_\mathrm{r} = L_\mathrm{i,Fmax,0} - L_\mathrm{i,Fmax}$
+(Fórmula (H.3)):
+
+```python
+ball = building.heavy_impact_improvement([79.2, 73.5, 66.1, 58.4],
+                                         [78.6, 71.9, 62.3, 51.0],
+                                         [63, 125, 250, 500])
+print(ball.improvement_db)                    # [0.6 1.6 3.8 7.4]
+```
+
+Para un laboratorio que no puede construir un suelo de madera, H.6.2 admite en
+su lugar una maqueta de madera sobre la losa de hormigón (Anexo G de
+ISO 10140-5:2021): un tablero de partículas de 22 mm sobre veinte patas, cargado
+con cinco pesos de 20 kg a 25 kg y golpeado en seis posiciones fijas. El
+Anexo H no le asigna curva de referencia, así que su $\Delta L$ describe el
+revestimiento sobre un tablero parecido, y el índice que se le da aquí es el
+del `reference_floor` que elige quien llama.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/lab_floor_covering_improvement.svg" alt="Dos paneles. A la izquierda: las curvas de referencia de la Tabla 4 de ISO 717-2 en las 16 bandas de 100 Hz a 3150 Hz: el suelo pesado subiendo despacio de 67 a 72 dB, los suelos ligeros n.º 1 y n.º 2 planos en 78 dB hasta 315 Hz y bajando a 51 dB, y el suelo ligero n.º 3 subiendo de 69 a 78 dB, plano hasta 630 Hz y bajando a 60 dB. A la derecha: la mejora de un vinilo elástico sobre el suelo ligero n.º 3 en 18 bandas, por debajo de 1 dB en 100 Hz y subiendo sin parar hasta 32 dB en 5000 Hz; el título dice delta L t 3 w igual a 8 dB con C I delta t 3 de menos 3 dB" width="100%" />
+
+*A la izquierda, los cuatro suelos de referencia, tres curvas porque el n.º 1 y
+el n.º 2 comparten una. La losa de hormigón es más ruidosa en alta frecuencia;
+los forjados de viguetas, por debajo de 400 Hz. A la derecha, un vinilo
+elástico medido sobre el suelo n.º 3: una mejora que crece con la frecuencia y
+que sobre la curva de madera se valora en solo 8 dB, cuando el mismo espectro
+valdría 18 dB sobre la de hormigón.*
+
+<details>
+<summary>Ver el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import building
+
+freqs = [100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000, 1250,
+         1600, 2000, 2500, 3150, 4000, 5000]
+l_n0 = np.array([70.5, 73.4, 75.8, 77.2, 78.9, 78.1, 77.6, 78.3, 77.1, 75.4,
+                 73.8, 71.2, 68.9, 65.7, 62.8, 59.6, 56.9, 53.8])
+delta_l = np.array([0.4, 0.8, 1.5, 2.3, 3.4, 4.9, 6.8, 9.1, 11.6, 14.2, 16.9,
+                    19.8, 22.4, 25.1, 27.3, 29.4, 30.8, 31.9])
+cover = building.lab_floor_covering_improvement(l_n0, l_n0 - delta_l, freqs,
+                                                reference_floor="lightweight_3")
+
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13, 5.6))
+floors = building.IMPACT_REFERENCE_FLOORS
+x = np.arange(16)
+for key, style in (("heavyweight", "s--"), ("lightweight_1", "o-"),
+                   ("lightweight_3", "^-")):
+    ax1.plot(x, list(floors[key].values()), style, label=key)
+ax1.set_xticks(x, [f"{f:g}" for f in floors["heavyweight"]], rotation=45)
+ax1.set(xlabel="Frecuencia [Hz]",
+        ylabel="Nivel de presión acústica de impactos [dB]",
+        title="Suelos de referencia (ISO 717-2 Tabla 4)")
+ax1.legend()
+cover.plot(ax=ax2, language="es")
+plt.tight_layout()
+plt.show()
+```
+
+</details>
+
+## Lluvia sobre una cubierta (Anexo K)
+
+La lluvia es ruido de impactos. Se mide como el **nivel de intensidad
+acústica** $L_I$ que la cubierta, la ventana de tejado o el lucernario radia al
+recinto de debajo: potencia acústica por unidad de superficie, referida a
+$10^{-12}$ W/m² (K.1). Por unidad de superficie, porque sobre una cubierta
+grande solo se moja una parte, y la potencia crece con la superficie que la
+lluvia golpea de verdad.
+
+### La lluvia
+
+La lluvia natural se clasifica por intensidad, tamaño de gota y velocidad de
+caída (Tabla K.1, según IEC 60721-2-2:1988): moderada hasta 4 mm/h, intensa
+hasta 15 mm/h, fuerte hasta 40 mm/h y aguacero por encima de 100 mm/h,
+publicada como `building.RAINFALL_CLASSIFICATION`. El laboratorio reproduce dos
+de ellas en su límite superior, «ya que las gotas grandes producen la mayor
+parte del sonido» (H.1 de ISO 10140-5:2021), con un depósito cuya base
+perforada deja caer el agua desde una altura fija (Tablas H.1 y H.2,
+`building.ARTIFICIAL_RAIN`):
+
+| Lluvia artificial | Intensidad de lluvia | Diámetro mediano en volumen | Velocidad de caída | Orificios y altura de caída |
+| :--- | :--- | :--- | :--- | :--- |
+| Intensa (opcional) | 15 mm/h | 2,0 mm | 4,0 m/s | 0,3 mm a 0,5 mm, unos 25 por m², aproximadamente 1 m |
+| Fuerte (obligatoria) | 40 mm/h | 5,0 mm | 7,0 m/s | 1 mm, unos 60 por m², aproximadamente 3,5 m |
+
+La lluvia fuerte es aquella bajo la que se comparan los productos (K.4.1). El
+generador se comprueba por su intensidad, que «debe estar dentro de ±2 mm/h» de
+la tabla; para un generador que no sea el depósito de la Tabla H.2, además, la
+mitad de las gotas debería estar a menos de ±0,5 mm del diámetro mediano y a
+menos de ±1 m/s de la velocidad de caída. La intensidad se mide recogiendo el
+agua, sabiendo que un litro por metro cuadrado es un milímetro:
+
+```python
+rate = building.rainfall_rate(3.1, 0.08, 3600.0)     # litros, m², s
+print(rate)                                          # 38.75 mm/h
+check = building.verify_rain_generator(rate, rain_type="heavy")
+print(check.passes, check.rate_deviation_mm_h)       # True -1.25
+```
+
+### El nivel
+
+Con la lluvia cayendo de forma estable durante al menos 5 min, el nivel de
+presión acústica promediado en el recinto $L_\mathrm{pr}$ y el tiempo de
+reverberación $T$ del recinto de ensayo se miden según ISO 10140-4 y se
+convierten en el nivel de intensidad
+
+$$
+L_I = L_\mathrm{pr} - 10 \log_{10}\frac{T}{T_0} + 10 \log_{10}\frac{V}{V_0}
+- 14 - 10 \log_{10}\frac{S_\mathrm{e}}{S_0}
+$$
+
+(Fórmula (K.1), $T_0 = 1$ s, $V_0 = 1$ m³, $S_0 = 1$ m²). La constante es la
+potencia acústica en campo difuso de un recinto con el área de Sabine
+$A = 0{,}16\,V/T$, $10 \log_{10}(0{,}16/4) \approx -14$ dB, y $S_\mathrm{e}$ es la
+superficie que excita la lluvia: el elemento de ensayo entero para una ventana
+de tejado o un lucernario de unos 1,25 m × 1,5 m, y tres veces la superficie
+perforada del depósito para una cubierta grande de 10 m² a 20 m², sobre la que
+llueve desde tres posiciones cuyos niveles se suman energéticamente (K.4.2).
+Las 18 bandas de 100 Hz a 5000 Hz se combinan en el nivel ponderado A,
+$L_{I\mathrm{A}} = 10 \log_{10} \sum_j 10^{0{,}1(L_{Ij} + C_j)}$
+(Fórmula (K.2)), cuyas 18 correcciones $C_j$ de la Tabla K.2 son la ponderación
+A de IEC 61672-1:2013, la [ponderación frecuencial](/phonometry/es/signals/levels/weighting/)
+de la biblioteca, en las frecuencias centrales exactas de las bandas,
+redondeada a 0,1 dB (`building.RAINFALL_A_WEIGHTING`). K.4.3 admite medir la intensidad
+directamente con una sonda sobre una superficie $S_\mathrm{m}$,
+$L_I = L_{I\mathrm{m}} + 10 \log_{10}(S_\mathrm{m}/S_\mathrm{e})$
+(Fórmula (K.4), `rainfall_sound_from_intensity`).
+
+### Normalizado con el vidrio de referencia
+
+Dos laboratorios con el mismo depósito siguen sin coincidir, porque su lluvia y
+sus montajes difieren. Por eso K.6 mide primero un **elemento de ensayo de
+referencia**: un vidrio monolítico de 6 mm de 1,25 m × 1,5 m, montado como el
+vidrio de una ventana y centrado bajo lluvia fuerte (Anexo I de
+ISO 10140-5:2021). Su tiempo de reverberación estructural $T_\mathrm{s}$ da su
+factor de pérdidas, $\eta = 2{,}2/(f T_\mathrm{s})$ (Fórmula (I.1)); su nivel se
+lleva al factor de pérdidas de referencia de la Tabla I.1,
+$L_{I,\mathrm{m,ref}} = L_{I,\mathrm{ref}} + 10 \log_{10}(\eta/\eta_\mathrm{ref})$
+(Fórmula (I.2)), y la diferencia con el nivel de referencia de la misma tabla es
+la corrección del laboratorio,
+$\Delta L_{I\mathrm{c}} = L_{I,\mathrm{m,ref}} - L_{I\mathrm{c,ref}}$
+(Fórmula (I.3)). Todos los elementos de ensayo se declaran después
+normalizados, $L_{I\mathrm{norm}} = L_I - \Delta L_{I\mathrm{c}}$
+(Fórmula (K.5)).
+
+```python
+freqs = [100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000, 1250,
+         1600, 2000, 2500, 3150, 4000, 5000]
+# El vidrio de referencia, montado con algo más de pérdidas de las que supone
+# la Tabla I.1.
+l_i_ref = np.array([46.2, 45.8, 46.9, 46.5, 47.8, 47.2, 47.9, 48.1, 47.6,
+                    46.8, 44.9, 43.1, 43.8, 46.9, 51.6, 50.9, 46.8, 44.6])
+t_s = np.array([0.176, 0.177, 0.138, 0.139, 0.140, 0.111, 0.111, 0.088,
+                0.088, 0.070, 0.070, 0.071, 0.055, 0.056, 0.044, 0.044,
+                0.035, 0.035])
+correction = building.rainfall_reference_correction(l_i_ref, t_s)
+
+# Un lucernario de policarbonato de 1,25 m x 1,5 m bajo lluvia fuerte, en un
+# recinto de 62 m3.
+l_pr = np.array([48.2, 51.0, 53.1, 55.4, 57.0, 58.3, 59.1, 59.8, 60.2, 60.4,
+                 60.1, 59.4, 58.6, 57.5, 56.2, 54.4, 52.3, 49.8])
+t = np.array([1.9, 1.8, 1.7, 1.6, 1.5, 1.45, 1.4, 1.35, 1.3, 1.25, 1.2, 1.15,
+              1.1, 1.05, 1.0, 0.95, 0.9, 0.85])
+rain = building.rainfall_sound(l_pr, t, freqs, volume_m3=62.0,
+                               excited_area_m2=1.875,
+                               reference_correction=correction)
+print(round(rain.l_ia_db, 1), round(rain.l_ia_norm_db, 1))     # 69.3 67.5
+print(rain.octave_bands()[0])       # [ 125.  250.  500. 1000. 2000. 4000.]
+```
+
+K.5 e) pide $L_I$, $L_{I\mathrm{norm}}$, $L_{I\mathrm{A}}$ y
+$L_{I\mathrm{A,norm}}$ con una décima de decibelio, y la intensidad de lluvia
+junto a ellos. La potencia acústica que radia el elemento de ensayo entero sale
+de la NOTA a la Fórmula (K.2), $L_W = L_I + 10 \log_{10}(S/S_0)$, como
+`rain.sound_power_levels(area_m2)`.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rainfall_sound.svg" alt="Dos paneles en 18 bandas de tercio de octava de 100 Hz a 5000 Hz. A la izquierda: el nivel del vidrio de referencia corregido al factor de pérdidas de referencia, entre 44 y 53 dB, por encima del nivel de referencia de la Tabla I.1, que va de 45 dB, pasando por un mínimo de 42 dB en 1250 Hz, a un máximo de 51 dB en 2500 Hz y vuelve a 44 dB; la separación entre ambos, sombreada, es la corrección del laboratorio, de 1,2 a 2,2 dB aproximadamente. A la derecha: el nivel de intensidad acústica de un lucernario bajo lluvia fuerte, que sube de 47 dB en 100 Hz a unos 61 dB en 800 Hz y baja a 52 dB en 5000 Hz, con el nivel normalizado unos 2 dB por debajo; el título dice L I A igual a 69,3 dB y L I A norm igual a 67,5 dB" width="100%" />
+
+*A la izquierda, el vidrio de referencia del laboratorio, corregido al factor
+de pérdidas de referencia, frente al nivel de referencia de la Tabla I.1: la
+separación sombreada es la corrección con la que se normalizan después todos
+los elementos de ensayo. Las dos curvas tienen su máximo en 2500 Hz, justo por
+encima de la frecuencia de coincidencia de un vidrio de 6 mm. A la derecha, un
+lucernario bajo lluvia fuerte: el nivel de intensidad medido y normalizado, y
+sus totales ponderados A.*
+
+<details>
+<summary>Ver el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import building
+
+freqs = [100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000, 1250,
+         1600, 2000, 2500, 3150, 4000, 5000]
+l_i_ref = np.array([46.2, 45.8, 46.9, 46.5, 47.8, 47.2, 47.9, 48.1, 47.6,
+                    46.8, 44.9, 43.1, 43.8, 46.9, 51.6, 50.9, 46.8, 44.6])
+t_s = np.array([0.176, 0.177, 0.138, 0.139, 0.140, 0.111, 0.111, 0.088,
+                0.088, 0.070, 0.070, 0.071, 0.055, 0.056, 0.044, 0.044,
+                0.035, 0.035])
+correction = building.rainfall_reference_correction(l_i_ref, t_s)
+l_pr = np.array([48.2, 51.0, 53.1, 55.4, 57.0, 58.3, 59.1, 59.8, 60.2, 60.4,
+                 60.1, 59.4, 58.6, 57.5, 56.2, 54.4, 52.3, 49.8])
+t = np.array([1.9, 1.8, 1.7, 1.6, 1.5, 1.45, 1.4, 1.35, 1.3, 1.25, 1.2, 1.15,
+              1.1, 1.05, 1.0, 0.95, 0.9, 0.85])
+rain = building.rainfall_sound(l_pr, t, freqs, volume_m3=62.0,
+                               excited_area_m2=1.875,
+                               reference_correction=correction)
+
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13, 5.6))
+correction.plot(ax=ax1, language="es")
+rain.plot(ax=ax2, language="es")
+plt.tight_layout()
+plt.show()
+```
+
+</details>
+
+## Cómo se hace la medida
+
+**Un trasdosado.** Se construye el elemento base en el hueco de ensayo (la
+pared pesada, el suelo pesado o la pared ligera del Anexo B de ISO 10140-5, o
+la pared que interese), se deja curar y se mide $R_\mathrm{without}$ según
+ISO 10140-2. Se fija el trasdosado como se fijaría en obra, sin unión rígida
+con los elementos de flanco del laboratorio (G.3), se deja llegar a su estado
+final y se mide $R_\mathrm{with}$ dentro del intervalo de G.4. Se declaran las
+dos curvas, la mejora, las magnitudes globales con el índice del elemento y la
+masa y la construcción del elemento (G.5).
+
+**Un revestimiento de suelo.** Se mide $L_\mathrm{n0}$ sobre el suelo de
+referencia desnudo según ISO 10140-3, se coloca el revestimiento según su
+categoría y se mide $L_\mathrm{n}$ en las mismas posiciones de la máquina de
+impactos. Se declaran la categoría, el elemento de ensayo, las posiciones, la
+carga, la temperatura del suelo, $\Delta L$ con su valor ponderado y su término
+de adaptación, y los dos índices de H.5 i).
+
+**Lluvia.** Se instala el elemento de ensayo con su pendiente (al menos 5° para
+cubiertas y lucernarios, 30° para ventanas de tejado) en un hueco de 10 m² a
+20 m², o una ventana de tejado en un cerramiento pesado de relleno; se
+comprueba la intensidad de lluvia; se hace llover de forma estable durante
+5 min antes de medir; se miden $L_\mathrm{pr}$, $T$ y el ruido de fondo, desde
+una posición del generador o desde tres; y se normaliza con el vidrio de
+referencia del propio laboratorio. Se declaran el tipo y la intensidad de
+lluvia, el generador y su posición, $L_I$ y $L_{I\mathrm{norm}}$ con una décima
+de decibelio y los totales ponderados A (K.5).
+
+## Verificarlo
+
+Las tablas y los ejemplos impresos de los tres anexos, y las tablas en que se
+apoyan, son filas de conformidad:
+
+- Las **curvas de referencia, banda a banda**: los 63 valores de la Tabla E.1
+  de ISO 717-1:2020 y los 48 de la Tabla 4 de ISO 717-2:2020, frente a una
+  lectura de la página hecha aparte de la biblioteca, y las **magnitudes
+  globales bajo ellas**: los nueve términos de la Tabla E.1 bajo cada uno de
+  los tres elementos base, enteros y con un decimal (54 números), y
+  $L_\mathrm{n,r,0,w}$ con $C_{\mathrm{I,r,0}}$ bajo cada una de las tres
+  curvas de la Tabla 4, en las dos formas (12 números), que las curvas
+  publicadas reproducen a través del motor de valoración de ISO 717. Hacen
+  falta los valores por banda además de las magnitudes globales, porque una
+  magnitud global no se mueve con todas las bandas: un decibelio mal transcrito
+  en 4 000 Hz del forjado pesado no cambia ninguna de ellas.
+- Una **mejora con pendiente en cada suelo de referencia** y un **trasdosado
+  con pendiente en cada elemento base**, valorados por una implementación
+  aparte de los apartados impresos de ISO 717-1 e ISO 717-2: un espectro plano
+  da el mismo número en todas las curvas, y la misma
+  $\Delta(R_\mathrm{w} + C)$ que $\Delta(R_\mathrm{w} + C_\mathrm{tr})$, mientras
+  que uno con pendiente los distingue. Las diferencias directas de la
+  Fórmula (D.2) se comprueban con el mismo trasdosado. Un segundo trasdosado,
+  con su resonancia masa-muelle-masa en 100 Hz y la caída del aislamiento en
+  la coincidencia en 4 000 Hz, da peso a las bandas de 50 Hz a 80 Hz y de
+  4 000 Hz a 5 000 Hz, que son las que separan los rangos ampliados: valorado
+  del mismo modo, da a cada dos de los nueve términos del trasdosado números
+  distintos en al menos un elemento, así que no podrían intercambiarse sin que
+  se notara.
+- Los **18 $C_j$ de la Tabla K.2** frente a la ponderación A de IEC 61672-1 en
+  las frecuencias centrales exactas, redondeada a 0,1 dB: coinciden los 18. Los
+  mismos 18 valores, tal como están impresos, llevan además un espectro plano
+  por la Fórmula (K.2), así que un $C_j$ mal transcrito en la tabla publicada se
+  notaría en $L_{I\mathrm{A}}$.
+- El **ejemplo del Anexo C de ISO 717-2**, llevado de principio a fin por la
+  entrada del Anexo H: $\Delta L_\mathrm{w} = 15$ dB tal como está impreso, y
+  $C_{\mathrm{I}\Delta} = -9$ dB con el suelo de la Tabla 4, donde la cadena
+  del propio ejemplo da −8 dB (véase el
+  [registro de erratas](/phonometry/es/reference/errata/)).
+- El **ejemplo de G.4**: mediciones hechas en un día que empiezan 3 d después
+  de la construcción pasan, y con 2,9 d no. El límite se incluye con cualquier
+  dato: 2,1 d tras 6,3 d también pasa, aunque 3 × 2,1 salga en aritmética
+  binaria un error de redondeo por encima de 6,3.
+- **Las Tablas K.1, H.1, H.2 e I.1** celda a celda tal como están impresas, y
+  las Fórmulas (I.1) a (I.3) en un vidrio con el doble del factor de pérdidas
+  de referencia de la Tabla I.1 impresa, que tiene que dar
+  $10 \log_{10} 2$ dB en las 18 bandas.
+- La **tolerancia de H.1** en sus límites, que incluye: 38 mm/h pasa, también
+  cuando sale de `rainfall_rate` como 3,8 L recogidos en 0,1 m² en una hora,
+  un error de redondeo por debajo de 38. Después, la Fórmula (K.1) con todos
+  sus términos lejos de cero, y las formas cerradas de las Fórmulas (D.4) y
+  (K.4).
+
+La lluvia no tiene ejemplo resuelto en ninguna de las dos normas, así que las
+Fórmulas (K.1) a (K.5) se comprueban en forma cerrada y no frente a un
+resultado impreso. Las Tablas H.1 e I.1 se leyeron en las páginas de la
+edición de 2021 y coinciden dígito a dígito con la edición de 2010 y su
+modificación de 2014, donde aparecieron por primera vez.
+
+## Respuestas rápidas
+
+### ¿Es ΔRw la diferencia de los dos Rw medidos?
+
+Solo sobre una pared que no sea un elemento base normalizado, donde es
+$\Delta R_\mathrm{w,direct}$. Sobre un elemento normalizado la $\Delta R$ medida
+se suma a la curva de referencia del elemento y se restan los dos índices de
+referencia, lo que quita del número la pared concreta del laboratorio. En el
+ejemplo de arriba los dos difieren en un decibelio, 12 dB frente a 13 dB.
+
+### ¿Por qué mi revestimiento da 18 dB sobre hormigón y 8 dB sobre madera?
+
+Porque los dos índices leen la misma $\Delta L$ frente a suelos de referencia
+distintos. La curva de referencia de hormigón es más ruidosa en alta
+frecuencia, donde un revestimiento elástico trabaja mejor; las de madera lo son
+por debajo de 400 Hz, donde apenas trabaja. Una $\Delta L_\mathrm{w}$ medida
+sobre hormigón solo vale para suelos macizos (apartado 5.4 de ISO 717-2:2020).
+
+### ¿Necesito el vidrio de referencia para declarar el ruido de lluvia?
+
+El nivel de intensidad $L_I$ y $L_{I\mathrm{A}}$ se declaran sin él. Los niveles
+normalizados, que son los que hacen comparables dos laboratorios, necesitan la
+medición de referencia del propio laboratorio (K.6, K.5 f)). Para cubiertas
+grandes no hay elemento de ensayo de referencia definido (I.3 de
+ISO 10140-5:2021).
+
+## Normas
+
+<Scope>
+<ScopeClaim status="covered" label="Cubierto">
+Anexo G de ISO 10140-1:2021: la mejora del índice de reducción acústica
+$\Delta R$ de G.1, sus valores por octava, las magnitudes globales
+$\Delta R_\mathrm{w}$, $\Delta(R_\mathrm{w} + C)$ y
+$\Delta(R_\mathrm{w} + C_\mathrm{tr})$ con todos los términos de rango ampliado
+sobre los tres elementos base normalizados (Anexo D de ISO 717-1:2020,
+Fórmulas (D.1) a (D.4)), las diferencias directas de la Fórmula (D.2) y la
+condición de curado de G.4. Anexo H: $\Delta L$ de la Fórmula (H.1), los valores
+por octava de la Fórmula (H.2), las reducciones ponderadas $\Delta L_\mathrm{w}$
+y $\Delta L_\mathrm{t,n,w}$ con $C_{\mathrm{I}\Delta}$ y
+$C_{\mathrm{I}\Delta,\mathrm{t}}$ sobre los cuatro suelos de referencia
+(apartados 5 y 6, A.2.2 y A.2.3 de ISO 717-2:2020), los dos índices de H.5 i) y
+la mejora con impacto pesado y blando de la Fórmula (H.3). Anexo K: las
+Fórmulas (K.1) a (K.5), los 18 $C_j$ de la Tabla K.2, las tres posiciones del
+generador, la corrección por ruido de fondo, las clases de lluvia de la
+Tabla K.1, las lluvias artificiales y sus tolerancias de las Tablas H.1 y H.2
+de ISO 10140-5:2021 con la comprobación de intensidad de H.2.3, y la corrección
+con el vidrio de referencia de su Anexo I (Tabla I.1, Fórmulas (I.1) a (I.3)).
+Las curvas de referencia de la Tabla E.1 de ISO 717-1:2020 y de la Tabla 4 de
+ISO 717-2:2020 se publican como tablas de solo lectura.
+</ScopeClaim>
+
+<ScopeClaim status="not-covered" label="No cubierto">
+Los requisitos de montaje, de elemento de ensayo y de procedimiento de los tres
+anexos están documentados arriba y solo se comprueban donde G.4 y el H.1 de
+ISO 10140-5 ponen un veredicto: nada comprueba la categoría del revestimiento,
+el tamaño de los elementos de ensayo, el número y la colocación de las
+posiciones de la máquina de impactos, la carga, la temperatura del suelo, la
+pendiente de una cubierta ni los 5 min de lluvia estable. La maqueta de madera
+de H.6.2 no tiene curva de referencia propia. El formulario de la Figura H.4
+pide un $C_{\mathrm{I,r,50\text{–}2500}}$ que el suelo de referencia no puede
+dar, porque la Tabla 4 empieza en 100 Hz (anotado en el
+[registro de erratas](/phonometry/es/reference/errata/)); el término de rango
+ampliado del propio suelo desnudo sale de `weighted_impact_rating_extended`.
+Ningún resultado de los tres anexos genera una ficha de informe: el formulario
+de ejemplo de la Figura H.4 no se produce como PDF con `.report()`, como sí
+ocurre con las mediciones de ISO 10140-2 e ISO 10140-3 y con ISO 16251-1. Las mediciones
+de las que parten estos anexos, $R$, $L_\mathrm{n}$ y los tiempos de
+reverberación, son las de
+[Medición del aislamiento en laboratorio](/phonometry/es/buildings/insulation/insulation-lab/),
+y los demás anexos de ISO 10140-1 son reglas de montaje para ese $R$ y ese
+$L_\mathrm{n}$ (paredes, puertas, ventanas, acristalamientos, elementos técnicos
+pequeños, suelos, persianas), salvo el Anexo J, cuyo índice de reducción
+acústica de una junta sellada por metro, el $R_\mathrm{s}$ de las
+Fórmulas (J.1) y (J.2), no está implementado.
+</ScopeClaim>
+</Scope>
+
+<SeeAlso>
+
+## Véase también
+
+- [Medición del aislamiento en laboratorio](/phonometry/es/buildings/insulation/insulation-lab/):
+  el $R$ y el $L_\mathrm{n}$ de ISO 10140-2 y -3 de los que parten todos los
+  anexos de esta página.
+- [Índices de aislamiento (ISO 717)](/phonometry/es/buildings/insulation/insulation-ratings/):
+  el motor de curva de referencia que valora las dos curvas de referencia.
+- [Fuentes de impacto pesadas y blandas](/phonometry/es/buildings/insulation/heavy-impact-sources/):
+  la pelota de caucho de H.6.1 y su magnitud global.
+- [Mejora a impactos de revestimientos de suelo (ISO 16251-1)](/phonometry/es/buildings/design/impact-improvement/):
+  la alternativa de la maqueta pequeña para revestimientos blandos.
+- [Predicción del comportamiento de capas elásticas](/phonometry/es/buildings/design/resilient-layers/):
+  la predicción de ISO 12354 de la mejora de un trasdosado a partir de su
+  resonancia, y su traslado del laboratorio a la obra.
+- [Aislamiento acústico por intensidad (ISO 15186)](/phonometry/es/buildings/insulation/insulation-intensity/):
+  el método de intensidad que admite K.4.3 para la lluvia.
+- Referencia de la API:
+  [`building.measurement.lab_improvement`](/phonometry/es/reference/api/building/lab-improvement/),
+  [`building.measurement.rainfall_sound`](/phonometry/es/reference/api/building/rainfall-sound/)
+  y [`building.measurement.ratings`](/phonometry/es/reference/api/building/ratings/).
+
+</SeeAlso>

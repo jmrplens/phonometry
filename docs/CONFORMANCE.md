@@ -19,7 +19,7 @@
 
 ## Numerical conformance report
 
-**1664/1664 conformance checks pass** across 105 domains and 507 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+**1683/1683 conformance checks pass** across 105 domains and 508 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub><b>&#916;</b> is the difference between the computed value and the one the standard publishes. <b>Used</b> is how much of that clause's published tolerance the difference consumes: 100 % means it sits exactly on the limit, 5 % means it uses a twentieth of the allowance, and a dash means the clause states no two-sided tolerance for the quantity, so there is no budget to spend. It is reported and never used to decide a verdict, which is settled at full precision before any rounding.</sub>
 
@@ -194,7 +194,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary><b>Room &amp; building acoustics</b>: 100% (134/134)</summary>
+<summary><b>Room &amp; building acoustics</b>: 100% (153/153)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
 |:---|:---|:---|:---|:---|:---:|:---:|
@@ -245,8 +245,27 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO 16283-1:2014 Clause 10.4 / -2:2020 Clause 10.4 / -3:2016 Clause 8.4 | 63 Hz octave T replaces exactly the 50 Hz, 63 Hz and 80 Hz bands | 5/5 reverberation-time bands | 5/5 reverberation-time bands | exact | 0 % | ![Pass][cv-pass] Pass |
 | ISO 16283-1:2014 (13) / -2:2020 (16) / -3:2016 (5) | Airborne, impact and facade run one low-frequency implementation | 3/3 parts reaching the same L_LF | 3/3 parts reaching the same L_LF | exact | 0 % | ![Pass][cv-pass] Pass |
 | ISO 10140-2:2010 Formula (2) | Lab airborne R on the ISO 717-1 reference shape -> Rw = 54 | Rw 54 dB | Rw 54 dB | +0 dB | - | ![Pass][cv-pass] Pass |
-| ISO 10140-5:2010+A1 Annex B, Table B.1 | Reference elements end-to-end: printed Rw (C; Ctr) of all three | Rw(C;Ctr) = 53(-1;-5) / 52(-1;-5) / 33(-1;-2) | 53(-1;-5) / 52(-1;-5) / 33(-1;-2) | exact | - | ![Pass][cv-pass] Pass |
-| ISO 10140-5:2010+A1 Annex C, Table C.1 | Reference floors end-to-end: printed Ln,t,r,0,w (CI) of both | Ln,t,r,0,w(CI) = 72(0) / 75(-3) | 72(0) / 75(-3) | exact | - | ![Pass][cv-pass] Pass |
+| ISO 717-1:2020 Annex E, Table E.1 | Standard basic elements: printed Rw and eight adaptation terms of all three | 27/27 printed single numbers | 27/27 printed single numbers | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 717-1:2020 Annex E, Table E.1 | Standard basic elements to one decimal place (the printed values in parentheses) | 27/27 printed single numbers | 27/27 printed single numbers | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 717-2:2020 Table 4 | Reference floors: printed Ln,r,0,w (CI) of the heavyweight and both lightweight curves | 6/6 printed single numbers | 6/6 printed single numbers | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 717-2:2020 Table 4 | Reference floors to one decimal: 77,6 (-10,3), 71,8 (0,0) and 75,0 (-2,8) | 6/6 printed single numbers | 6/6 printed single numbers | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 717-1:2020 Annex E, Table E.1 | Standard basic elements: the 63 band values of the three curves as printed | 63/63 printed band values | 63/63 printed band values | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 717-2:2020 Table 4 | Reference floors: the 48 band values of the three printed columns, floors No 1 and No 2 both on the shared one | 48/48 printed band values | 48/48 printed band values | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 717-1:2020 Annex D, Formulas (D.3) and (D.4) | Lining on the heavy wall with Rref,with on the Table 3 shape + 20 dB -> ΔRw = 21 | 21 dB (+/-0 dB) | 21 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| ISO 717-2:2020 Clauses 5 and 6, Formulas (A.4) and (A.6) | Sloped ΔL on each of the four reference floors -> ΔLw or ΔLt,n,w and CIΔ, rated independently: 20 (-10), 6 (-1), 6 (-1), 11 (-3) | 8/8 single numbers | 8/8 single numbers | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 717-1:2020 Annex D, Formulas (D.3) and (D.4) | Two non-flat ΔR on each standard element -> ΔRw, Δ(Rw + C), Δ(Rw + Ctr) and the six enlarged-range terms, rated independently | 54/54 single numbers | 54/54 single numbers | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 717-1:2020 Formula (D.2) | Direct differences of a sloped lining on a measured wall: ΔRw,direct = 6, Δ(Rw + C)direct = 5, Δ(Rw + Ctr)direct = 3 | 6 dB / 5 dB / 3 dB | 6 dB / 5 dB / 3 dB | exact | - | ![Pass][cv-pass] Pass |
+| ISO 10140-1:2021 Formula (H.1) | ISO 717-2 Table C.2 improvement through the Annex H front end -> ΔLw = 15 as printed, CIΔ = -9 from the Table 4 floor (the print's C.2 chain gives -8) | ΔLw = 15 dB, CIΔ = -9 dB | ΔLw = 15 dB, CIΔ = -9 dB | exact | - | ![Pass][cv-pass] Pass |
+| ISO 10140-1:2021 G.4 | Curing example: two measurements within 1 d may start 3 d after construction; on the same bound, 2,1 d after 6,3 d passes too | 3 d passes, 2,9 d fails, 6,3 d with 2,1 d passes | 3 d passes, 2,9 d fails, 6,3 d with 2,1 d passes | exact | - | ![Pass][cv-pass] Pass |
+| ISO 10140-1:2021 Table K.2 | The 18 C_j are the IEC 61672-1 A-weighting at the exact midband frequencies of the nominal bands, to 0,1 dB | 18/18 bands | 18/18 bands | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 10140-1:2021 Formula (K.2) with Table K.2 | Flat LI = 50 dB in the 18 bands -> LIA = 50 + 10 lg sum 10^(0,1 C_j), printed C_j | 60.997267 dB (+/-0 dB) | 60.997267 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| ISO 10140-1:2021 Formula (K.1) | Rain in a 100 m³ room, T = 2 s, Se = 4 m²: LI = Lpr - 10 lg 2 + 10 lg 100 - 14 - 10 lg 4 | 56.9691 dB (+/-0 dB) | 56.9691 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| ISO 10140-1:2021 Formula (K.4) | Direct intensity over Sm = 4 m² of a 1 m² specimen: LI = LIm + 10 lg 4 | 56.0206 dB (+/-0 dB) | 56.0206 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| ISO 10140-5:2021 Table I.1 | Reference pane: the 36 cells, 10 lg(ηref) and LIc,ref in 18 bands, as printed | 36/36 printed cells | 36/36 printed cells | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 10140-5:2021 Annex I, Formulas (I.1) to (I.3) | Reference pane at twice the reference loss factor and at the printed LIc,ref: ΔLIc = 10 lg 2 in all 18 bands | 18/18 bands | 18/18 bands | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 10140-5:2021 Tables H.1 and H.2 | Intense and heavy rain: rate, drop diameter, fall velocity, holes, hole density and fall height as printed | 12/12 printed cells | 12/12 printed cells | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 10140-1:2021 Table K.1 | Moderate, intense, heavy and cloudburst rain: rate, drop diameter and fall velocity ranges as printed | 12/12 printed cells | 12/12 printed cells | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 10140-5:2021 H.1 | Heavy rain of Table H.1, 40 mm/h, within the ±2 mm/h of the H.1 text: 38 and 42 pass, and 38 collected as 3,8 L on 0,1 m² in one hour; 37,9 and 42,1 fail | pass, pass, pass, fail, fail | pass, pass, pass, fail, fail | exact | - | ![Pass][cv-pass] Pass |
 | ISO 15186-1:2000 Formula (7) | Intensity RI on the ISO 717-1 reference shape -> RI,w = 30 | RI,w 30 dB (scalar anchor RI = 34 dB) | RI,w 30 dB (RI = 34 dB) | +0 dB | - | ![Pass][cv-pass] Pass |
 | ISO 15186-1:2000 Annex B, Table B.1 | Adaptation term Kc: all 21 printed rows; (B.1) reduces to (B.2) | max abs(Kc - Table B.1) <= 0,05 dB (1 dp print) | 0.047 dB (B.1 vs B.2: 4.33e-04 dB) | 0.047 dB | - | ![Pass][cv-pass] Pass |
 | ISO 15186-3:2002 Annex A, Table A.1 | Limp-panel qualification: the printed plaster-board column | max abs(R - Table A.1) <= 0,05 dB (1 dp print) | 0.050 dB over 50 Hz to 160 Hz | 0.050 dB | - | ![Pass][cv-pass] Pass |

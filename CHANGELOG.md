@@ -603,6 +603,50 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   IEC 61672-1; that defect and five more of the draft are in the errata
   registry.
 
+- **Linings, floor coverings and rain in the laboratory (ISO 10140-1:2021
+  Annexes G, H and K).** A lining measured without and with it now gives its
+  improvement band by band, `building.lab_lining_improvement`, with the single
+  numbers ΔRw, Δ(Rw + C) and Δ(Rw + Ctr) read on the reference curve of the
+  standard basic element it was measured on (ISO 717-1:2020 Annex D,
+  `weighted_reduction_improvement`) and the direct differences of Formula (D.2)
+  for any other wall; `check_lining_curing` is the curing condition of G.4. A
+  floor covering gives ΔL on the heavyweight reference floor or on any of the
+  three lightweight ones, `lab_floor_covering_improvement`, rated as ΔLw or
+  ΔLt,1,w, ΔLt,2,w, ΔLt,3,w with its adaptation term and the two ratings H.5 i)
+  asks the report to state, and `heavy_impact_improvement` is the rubber-ball
+  improvement of H.6.1. `weighted_impact_improvement` and
+  `impact_improvement_adaptation_term` take `reference_floor=` and
+  `one_decimal=`. Rain on a roof, a roof window or a rooflight gives its sound
+  intensity level from the room level (`rainfall_sound`, Formula (K.1)) or
+  from a direct intensity measurement (`rainfall_sound_from_intensity`), its
+  A-weighted value over the 18 C_j of Table K.2, its octaves and, with the
+  laboratory's reference glass pane of ISO 10140-5:2021 Annex I
+  (`rainfall_reference_correction`), its normalized level; `rainfall_rate` and
+  `verify_rain_generator` check the artificial rain against Table H.1. The
+  reference curves are published read-only tables now rather than test data:
+  `LINING_REFERENCE_ELEMENTS` (ISO 717-1:2020 Table E.1) and
+  `IMPACT_REFERENCE_FLOORS` (ISO 717-2:2020 Table 4), which the 2021 edition of
+  ISO 10140-5 no longer prints, beside `RAINFALL_CLASSIFICATION`,
+  `ARTIFICIAL_RAIN`, `RAINFALL_A_WEIGHTING` and the two decibel columns of
+  Table I.1, `RAINFALL_REFERENCE_LOSS_FACTOR_DB` and
+  `RAINFALL_REFERENCE_INTENSITY_DB`. Every result has `.plot()`, and a new
+  guide in both languages walks a lining, a vinyl on a timber floor and a
+  rooflight under heavy rain through the three annexes. The conformance rows
+  hold the reference curves band by band against a reading of the page, every
+  single number printed under them, integer and to one decimal place, a sloped
+  improvement on each floor and two linings on each element rated by a
+  separate implementation of ISO 717, the second of which tells every two of
+  the nine lining terms apart, every cell of Tables K.1, H.1, H.2 and I.1, and
+  the 18 C_j, both against the IEC 61672-1 A-weighting and carried through
+  Formula (K.2). The H.1 tolerances and the G.4 curing bound include their
+  limits, also for a rate or a day count that reaches them through a division
+  or a product that rounds. Figure E.3 of ISO 717-1:2020 draws the lightweight
+  wall away from its own Table E.1, and Figure H.4 of ISO 10140-1:2021 asks for
+  a C_I,r,50-2500 the reference floor cannot give; both are in the errata
+  registry, and the library follows the tables. The rubber ball of the
+  heavy/soft impact source is now cited to ISO 10140-5:2021 Annex F, whose
+  Table F.1 is unchanged.
+
 - **Sound power in the 16 kHz octave band (ISO 9295).** The general sound
   power methods stop at the 10 kHz one-third-octave band, and a printer's
   paper noise or a power supply's whine sits above it. The new

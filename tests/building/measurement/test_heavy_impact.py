@@ -6,7 +6,7 @@ the clause or table reference in the test docstring:
 
 * **ISO 16283-2:2020 Table A.1** (printed p. 23) and **JIS A 1418-2:2019
   Tables A.1 and A.2** (printed pp. 6-7) for the impact force exposure level
-  specification of both sources. ISO 10140-5:2010 Table F.1 prints the same
+  specification of both sources. ISO 10140-5:2021 Table F.1 prints the same
   rubber-ball column a third time.
 * **ISO 717-2:2020 Table D.4** (printed p. 22) for the A-weighted rating,
   including the deliberately unrounded intermediate ``55,350 66...``, and
@@ -29,7 +29,7 @@ from phonometry import building
 # Printed oracles
 # ---------------------------------------------------------------------------
 
-#: ISO 16283-2:2020 Table A.1 = ISO 10140-5:2010 Table F.1 = JIS A 1418-2:2019
+#: ISO 16283-2:2020 Table A.1 = ISO 10140-5:2021 Table F.1 = JIS A 1418-2:2019
 #: Table A.2 (impact force characteristic 2), rubber ball: (LFE, tolerance) in
 #: dB re 1 N at 31,5 / 63 / 125 / 250 / 500 Hz.
 RUBBER_BALL_LFE = ((39.0, 1.0), (31.0, 1.5), (23.0, 1.5), (17.0, 2.0), (12.5, 2.0))

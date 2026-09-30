@@ -86,6 +86,11 @@ from figures.building_design import (
     generate_soft_covering_prediction,
     generate_structure_borne_power,
 )
+from figures.building_lab_rules import (
+    generate_lab_floor_covering_improvement,
+    generate_lab_lining_improvement,
+    generate_rainfall_sound,
+)
 from figures.correlation_analysis import (
     generate_cepstrum_echo,
     generate_cepstrum_variants,
@@ -659,7 +664,9 @@ __all__ = [
     "generate_junction_plate_geometry",
     "generate_junction_transmission",
     "generate_k_weighting_response",
+    "generate_lab_floor_covering_improvement",
     "generate_lab_insulation_result",
+    "generate_lab_lining_improvement",
     "generate_lden_profile",
     "generate_lifter_split",
     "generate_limp_frame_effective_density",
@@ -728,6 +735,7 @@ __all__ = [
     "generate_quarter_wave_geometry",
     "generate_quasi_peak_meter",
     "generate_radiated_power_outdoor",
+    "generate_rainfall_sound",
     "generate_radiation_plate_geometry",
     "generate_random_incidence_correction",
     "generate_random_incidence_directivity",

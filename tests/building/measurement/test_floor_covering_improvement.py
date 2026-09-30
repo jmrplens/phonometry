@@ -11,6 +11,11 @@ import reference_data as ref
 
 from phonometry import building
 
+#: The heavyweight reference floor Ln,r,0 of ISO 717-2:2020 Table 4, as the
+#: library publishes it; the printed single numbers it is checked against stay
+#: in reference_data.
+_HEAVY_FLOOR = list(building.IMPACT_REFERENCE_FLOORS["heavyweight"].values())
+
 #: The clause 6.3 measurement range: 18 one-third-octave bands 100-5000 Hz.
 _CLAUSE_63_FREQS = [
     100.0,
@@ -39,7 +44,7 @@ _CLAUSE_63_FREQS = [
 # ---------------------------------------------------------------------------
 def test_reference_floor_rating_is_78() -> None:
     """weighted_impact_rating of the ISO 717-2 Table 4 reference floor is 78 dB."""
-    res = building.weighted_impact_rating(ref.ISO717_2_REFERENCE_FLOOR_LN_R0)
+    res = building.weighted_impact_rating(_HEAVY_FLOOR)
     assert res.rating == ref.ISO717_2_REFERENCE_FLOOR_LN_R0_W
     assert res.ci == ref.ISO717_2_REFERENCE_FLOOR_CI
 

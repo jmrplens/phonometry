@@ -16,6 +16,7 @@ from .common import (
     _C_SECONDARY,
     _C_SECONDARY_LIGHT,
     _C_TERTIARY,
+    _LEGEND_UPPER_LEFT,
     _annotate_impact_500,
     _band_axis,
     _facade_x_axis,
@@ -60,8 +61,22 @@ if TYPE_CHECKING:
         LowFrequencyElementResult,
         LowFrequencyIntensityResult,
     )
+    from ..building.measurement.lab_improvement import (
+        HeavyImpactImprovementResult,
+        LabFloorCoveringImprovementResult,
+        LabLiningImprovementResult,
+        LiningCuringCheck,
+    )
     from ..building.measurement.low_frequency import LowFrequencyResult
-    from ..building.measurement.ratings import ImpactImprovementRatingResult
+    from ..building.measurement.rainfall_sound import (
+        RainfallReferenceCorrection,
+        RainfallSoundResult,
+        RainGeneratorVerification,
+    )
+    from ..building.measurement.ratings import (
+        ImpactImprovementRatingResult,
+        ReductionImprovementRating,
+    )
     from ..building.measurement.service_equipment import (
         PositionSpreadCheck,
         ServiceEquipmentBackgroundResult,
@@ -184,6 +199,10 @@ _POSITIONS_FIGURE_SIZE_IN = (9.0, 6.0)
 #: the same way with every font.
 _POSITIONS_AXES_RECT = (0.08, 0.1, 0.58, 0.76)
 
+#: The verdict words the conformance figures read in their titles.
+_CONFORMS = "conforms"
+_DOES_NOT_CONFORM = "does not conform"
+
 #: Spanish translations of the fixed labels/titles/legends rendered by the
 #: building-domain ``.plot()`` renderers, keyed by their verbatim English
 #: text. ``_t`` returns the English key unchanged for any language other
@@ -266,8 +285,8 @@ _STRINGS: dict[str, str] = {
     "measured $L_{FE}$": "$L_{FE}$ medido",
     "outside tolerance": "fuera de tolerancia",
     "Impact force exposure level $L_{FE}$ [dB re 1 N]": "Nivel de exposición a la fuerza de impacto $L_{FE}$ [dB re 1 N]",
-    "conforms": "cumple",
-    "does not conform": "no cumple",
+    _CONFORMS: "cumple",
+    _DOES_NOT_CONFORM: "no cumple",
     "Heavy impact source conformance": "Conformidad de la fuente de impacto pesada",
     "rubber ball": "pelota de caucho",
     "bang machine": "máquina de neumático",
@@ -351,6 +370,11 @@ _HEAVY_IMPACT_BAND_LABELS = {"third": "one-third octave", "octave": "octave"}
 def _t(text: str, language: str = "en") -> str:
     """Localise a fixed string; English is returned verbatim (byte-identical)."""
     return _STRINGS.get(text, text) if language == "es" else text
+
+
+def _verdict_word(*, passes: bool, language: str) -> str:
+    """``conforms`` or ``does not conform``, localised."""
+    return _t(_CONFORMS if passes else _DOES_NOT_CONFORM, language)
 
 
 def plot_sound_reduction(
@@ -1723,7 +1747,7 @@ def plot_db_hr_global_index(
     ax.legend(
         handles + extra_handles,
         labels + extra_labels,
-        loc="upper left",
+        loc=_LEGEND_UPPER_LEFT,
         fontsize="small",
     )
     ax.grid(visible=True, axis="y", alpha=0.3)
@@ -1903,9 +1927,7 @@ def plot_heavy_impact_source(
             label=_t("outside tolerance", language),
         )
     ax.set_ylabel(_t("Impact force exposure level $L_{FE}$ [dB re 1 N]", language))
-    verdict = (
-        _t("conforms", language) if result.passes else _t("does not conform", language)
-    )
+    verdict = _verdict_word(passes=result.passes, language=language)
     source = _t(_HEAVY_IMPACT_SOURCE_LABELS[result.source], language)
     ax.set_title(
         f"{_t('Heavy impact source conformance', language)}: {source} ({verdict})"
@@ -2955,6 +2977,548 @@ def plot_service_equipment_positions(
     # The verdict on a line of its own: beside the key, one line of title
     # and verdict is wider than the plan in Spanish.
     ax.set_title(f"{_t(_POSITIONS_TITLE, language)}\n{_t(verdict, language)}")
-    ax.legend(fontsize="small", loc="upper left", bbox_to_anchor=(1.02, 1.0))
+    ax.legend(fontsize="small", loc=_LEGEND_UPPER_LEFT, bbox_to_anchor=(1.02, 1.0))
+    localize_axes(ax, language)
+    return ax
+
+
+# --- ISO 10140-1:2021 Annexes G, H and K ------------------------------------
+
+#: Labels of the laboratory improvement and rainfall figures, kept as names so
+#: the renderers and :data:`_LAB_STRINGS` cannot drift apart.
+_DELTA_R_LABEL = r"Sound reduction improvement index $\Delta R$ [dB]"
+_INTENSITY_LEVEL_LABEL = r"Sound intensity level $L_I$ [dB re 1 pW/m²]"
+_LINING_TITLE = "Lining improvement (ISO 10140-1 Annex G)"
+_LINING_RATING_TITLE = "Lining rated on the reference curve (ISO 717-1 Annex D)"
+_COVERING_TITLE = "Floor-covering improvement (ISO 10140-1 Annex H)"
+_HEAVY_SOFT_TITLE = "Heavy/soft impact improvement (ISO 10140-1 H.6.1)"
+_CURING_TITLE = "Curing of the basic element (ISO 10140-1 G.4)"
+_RAIN_TITLE = "Rainfall sound (ISO 10140-1 Annex K)"
+_RAIN_REFERENCE_TITLE = "Reference specimen correction (ISO 10140-5 Annex I)"
+_RAIN_GENERATOR_TITLE = "Rain generator (ISO 10140-5 Table H.1)"
+
+#: Spanish translations of the figures above, merged into :data:`_STRINGS`.
+_LAB_STRINGS: dict[str, str] = {
+    _DELTA_R_LABEL: r"Mejora del índice de reducción acústica $\Delta R$ [dB]",
+    _INTENSITY_LEVEL_LABEL: r"Nivel de intensidad acústica $L_I$ [dB re 1 pW/m²]",
+    _LINING_TITLE: "Mejora por trasdosado (ISO 10140-1 Anexo G)",
+    _LINING_RATING_TITLE: "Trasdosado sobre la curva de referencia (ISO 717-1 Anexo D)",
+    _COVERING_TITLE: "Mejora por revestimiento de suelo (ISO 10140-1 Anexo H)",
+    _HEAVY_SOFT_TITLE: "Mejora con impacto pesado y blando (ISO 10140-1 H.6.1)",
+    _CURING_TITLE: "Curado del elemento base (ISO 10140-1 G.4)",
+    _RAIN_TITLE: "Ruido de lluvia (ISO 10140-1 Anexo K)",
+    _RAIN_REFERENCE_TITLE: "Corrección con el vidrio de referencia (ISO 10140-5 Anexo I)",
+    _RAIN_GENERATOR_TITLE: "Generador de lluvia (ISO 10140-5 Tabla H.1)",
+    "heavy wall": "pared pesada",
+    "heavy floor": "suelo pesado",
+    "lightweight wall": "pared ligera",
+    "heavyweight floor": "suelo de referencia pesado",
+    "lightweight floor No 1": "suelo de referencia ligero n.º 1",
+    "lightweight floor No 2": "suelo de referencia ligero n.º 2",
+    "lightweight floor No 3": "suelo de referencia ligero n.º 3",
+    "no rating (bands missing)": "sin índice (faltan bandas)",
+    "Time from construction to the first measurement [d]": (
+        "Tiempo desde la construcción hasta la primera medición [d]"
+    ),
+    "Time between the two measurements [d]": "Tiempo entre las dos mediciones [d]",
+    "admissible": "admisible",
+    "lag = curing time / 3": "intervalo = tiempo de curado / 3",
+    "required curing": "curado exigido",
+    "this measurement": "esta medición",
+    "rainfall rate": "intensidad de lluvia",
+    "drop diameter": "diámetro de gota",
+    "fall velocity": "velocidad de caída",
+    "Deviation from nominal / tolerance": "Desviación respecto al nominal / tolerancia",
+    "measured drops": "gotas medidas",
+    "measured rate": "intensidad medida",
+    "intense rain": "lluvia intensa",
+    "heavy rain": "lluvia fuerte",
+    "normalized": "normalizado",
+    "Maximum impact level improvement": "Mejora del nivel máximo de impactos",
+    r"$L_{I\mathrm{c,ref}}$ (Table I.1)": r"$L_{I\mathrm{c,ref}}$ (Tabla I.1)",
+    "lightweight floors No 1 and No 2": "suelos de referencia ligeros n.º 1 y n.º 2",
+    "Reference floors (ISO 717-2 Table 4)": "Suelos de referencia (ISO 717-2 Tabla 4)",
+}
+_STRINGS.update(_LAB_STRINGS)
+
+#: Localised names of the three standard basic elements and the four
+#: reference floors, as the figure titles write them.
+_BASIC_ELEMENT_LABELS = {
+    "heavy_wall": "heavy wall",
+    "heavy_floor": "heavy floor",
+    "lightweight_wall": "lightweight wall",
+}
+_REFERENCE_FLOOR_LABELS = {
+    "heavyweight": "heavyweight floor",
+    "lightweight_1": "lightweight floor No 1",
+    "lightweight_2": "lightweight floor No 2",
+    "lightweight_3": "lightweight floor No 3",
+}
+
+#: Mathtext symbol of the weighted reduction on each reference floor.
+_FLOOR_SYMBOLS = {
+    "heavyweight": r"$\Delta L_\mathrm{w}$",
+    "lightweight_1": r"$\Delta L_\mathrm{t,1,w}$",
+    "lightweight_2": r"$\Delta L_\mathrm{t,2,w}$",
+    "lightweight_3": r"$\Delta L_\mathrm{t,3,w}$",
+}
+
+#: Mathtext symbol of its spectrum adaptation term: ``CI,Δ`` on the heavyweight
+#: floor, as ISO 10140-1:2021 H.5 h) prints it, and ``CIΔ,t1`` to ``CIΔ,t3`` on
+#: the lightweight floors of type C1 to C3 (ISO 717-2:2020 A.2.3).
+_FLOOR_ADAPTATION_SYMBOLS = {
+    "heavyweight": r"$C_{\mathrm{I},\Delta}$",
+    "lightweight_1": r"$C_{\mathrm{I}\Delta,\mathrm{t1}}$",
+    "lightweight_2": r"$C_{\mathrm{I}\Delta,\mathrm{t2}}$",
+    "lightweight_3": r"$C_{\mathrm{I}\Delta,\mathrm{t3}}$",
+}
+
+
+def _db(value: float, language: str) -> str:
+    """A decibel value for a title: typographic minus, the locale's separator."""
+    from .._i18n import decimal_comma, fmt_minus
+
+    spec = "g" if float(value).is_integer() else ".1f"
+    return decimal_comma(fmt_minus(float(value), spec), language)
+
+
+def _improvement_curve(
+    ax: Axes,
+    freqs: np.ndarray,
+    values: np.ndarray,
+    label: str,
+    language: str,
+    kwargs: dict[str, Any],
+) -> None:
+    """Draw one improvement spectrum on a band axis with its zero line."""
+    positions = _band_axis(ax, freqs, language=language)
+    ax.axhline(0.0, color=_C_MUTED, lw=1.0, zorder=1)
+    style_default(kwargs, "color", _C_PRIMARY)
+    kwargs.setdefault("marker", "o")
+    kwargs.setdefault("label", label)
+    ax.plot(positions, values, **kwargs)
+    ax.grid(visible=True, which="both", alpha=0.3)
+
+
+def plot_reduction_improvement_rating(
+    result: ReductionImprovementRating,
+    ax: Axes | None = None,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """The two curves ISO 717-1 Annex D rates, and the improvement between them.
+
+    :param result: A
+        :class:`~phonometry.building.measurement.ratings.ReductionImprovementRating`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the ``Rref,with`` curve ``plot`` call.
+    :return: The axes.
+    """
+    from .._i18n import localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    without, with_ = result.without_lining, result.with_lining
+    if without.band_centers is None or without.measured is None:
+        msg = "The rating carries no reference curve to plot."
+        raise ValueError(msg)
+    if with_.measured is None:
+        msg = "The rating carries no curve with the lining to plot."
+        raise ValueError(msg)
+    positions = _band_axis(ax, without.band_centers, language=language)
+    ax.plot(
+        positions,
+        without.measured,
+        "s--",
+        color=_C_REFERENCE,
+        lw=1.2,
+        label=rf"$R_\mathrm{{ref,without}}$ ($R_\mathrm{{w}}$ = "
+        rf"{_db(without.rating, language)} dB)",
+    )
+    style_default(kwargs, "color", _C_PRIMARY)
+    kwargs.setdefault("marker", "o")
+    kwargs.setdefault(
+        "label",
+        rf"$R_\mathrm{{ref,with}}$ ($R_\mathrm{{w}}$ = {_db(with_.rating, language)} dB)",
+    )
+    ax.plot(positions, with_.measured, **kwargs)
+    ax.set_ylabel(_t(_R_INDEX_LABEL, language))
+    element = _t(_BASIC_ELEMENT_LABELS[result.basic_element], language)
+    ax.set_title(
+        f"{_t(_LINING_RATING_TITLE, language)}\n{element}: "
+        rf"$\Delta R_\mathrm{{w,{result.index}}}$ = {_db(result.delta_rw, language)} dB"
+    )
+    ax.grid(visible=True, which="both", alpha=0.3)
+    ax.legend(loc="best", fontsize="small")
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_lab_lining_improvement(
+    result: LabLiningImprovementResult,
+    ax: Axes | None = None,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """Improvement ``ΔR`` of a lining per band (ISO 10140-1:2021 Annex G).
+
+    :param result: A
+        :class:`~phonometry.building.measurement.lab_improvement.LabLiningImprovementResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the improvement-curve ``plot`` call.
+    :return: The axes.
+    """
+    from .._i18n import localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    _improvement_curve(
+        ax, result.frequencies_hz, result.delta_r_db, r"$\Delta R$", language, kwargs
+    )
+    ax.set_ylabel(_t(_DELTA_R_LABEL, language))
+    if result.rating is not None:
+        element = _t(_BASIC_ELEMENT_LABELS[result.rating.basic_element], language)
+        headline = (
+            rf"{element}: $\Delta R_\mathrm{{w,{result.rating.index}}}$ = "
+            f"{_db(result.rating.delta_rw, language)} dB"
+        )
+    elif result.delta_rw_direct_db is not None:
+        headline = (
+            r"$\Delta R_\mathrm{w,direct}$ = "
+            f"{_db(result.delta_rw_direct_db, language)} dB"
+        )
+    else:
+        headline = _t("no rating (bands missing)", language)
+    ax.set_title(f"{_t(_LINING_TITLE, language)}\n{headline}")
+    ax.legend(loc="best", fontsize="small")
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_lining_curing_check(
+    result: LiningCuringCheck,
+    ax: Axes | None = None,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """Admissible curing time and time lag of ISO 10140-1:2021 G.4.
+
+    The admissible region is the union of the two ways out G.4 allows: a
+    curing time of at least the required period, whatever the lag, and a lag
+    of at most a third of the curing time.
+
+    :param result: A
+        :class:`~phonometry.building.measurement.lab_improvement.LiningCuringCheck`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the marker of this measurement.
+    :return: The axes.
+    """
+    from .._i18n import localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    x_max = 1.3 * max(result.required_curing_days, result.curing_time_days, 1.0)
+    y_max = 1.3 * max(x_max / 3.0, result.time_lag_days, 0.5)
+    curing = np.linspace(0.0, x_max, 400)
+    ceiling = np.where(curing >= result.required_curing_days, y_max, curing / 3.0)
+    ax.fill_between(
+        curing,
+        0.0,
+        ceiling,
+        color=theme_fill(_C_TERTIARY, ax),
+        lw=0,
+        zorder=0,
+        label=_t("admissible", language),
+    )
+    ax.plot(
+        curing,
+        curing / 3.0,
+        color=_C_REFERENCE,
+        ls="--",
+        lw=1.2,
+        label=_t("lag = curing time / 3", language),
+    )
+    ax.axvline(
+        result.required_curing_days,
+        color=_C_MUTED,
+        ls=":",
+        lw=1.4,
+        label=f"{_t('required curing', language)} = "
+        f"{_db(result.required_curing_days, language)} d",
+    )
+    style_default(kwargs, "color", _C_PRIMARY if result.passes else _C_SECONDARY)
+    kwargs.setdefault("marker", "o" if result.passes else "X")
+    style_default(kwargs, "ms", 10)
+    style_default(kwargs, "ls", "")
+    kwargs.setdefault("label", _t("this measurement", language))
+    ax.plot([result.curing_time_days], [result.time_lag_days], **kwargs)
+    ax.set_xlim(0.0, x_max)
+    ax.set_ylim(0.0, y_max)
+    ax.set_xlabel(_t("Time from construction to the first measurement [d]", language))
+    ax.set_ylabel(_t("Time between the two measurements [d]", language))
+    verdict = _verdict_word(passes=result.passes, language=language)
+    ax.set_title(f"{_t(_CURING_TITLE, language)}: {verdict}")
+    ax.grid(visible=True, alpha=0.3)
+    ax.legend(loc=_LEGEND_UPPER_LEFT, fontsize="small")
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_lab_floor_covering_improvement(
+    result: LabFloorCoveringImprovementResult,
+    ax: Axes | None = None,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """Improvement ``ΔL`` of a floor covering per band (ISO 10140-1:2021 Annex H).
+
+    :param result: A
+        :class:`~phonometry.building.measurement.lab_improvement.LabFloorCoveringImprovementResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the improvement-curve ``plot`` call.
+    :return: The axes.
+    """
+    from .._i18n import localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    _improvement_curve(
+        ax,
+        result.frequencies_hz,
+        result.improvement_db,
+        r"$\Delta L$",
+        language,
+        kwargs,
+    )
+    ax.set_ylabel(_t(_IMPROVEMENT_LABEL, language))
+    floor = _t(_REFERENCE_FLOOR_LABELS[result.reference_floor], language)
+    if result.delta_lw_db is not None and result.ci_delta_db is not None:
+        headline = (
+            f"{floor}: {_FLOOR_SYMBOLS[result.reference_floor]} = "
+            f"{_db(result.delta_lw_db, language)} dB "
+            f"({_FLOOR_ADAPTATION_SYMBOLS[result.reference_floor]} = "
+            f"{_db(result.ci_delta_db, language)} dB)"
+        )
+    else:
+        headline = f"{floor}: {_t('no rating (bands missing)', language)}"
+    ax.set_title(f"{_t(_COVERING_TITLE, language)}\n{headline}")
+    ax.legend(loc="best", fontsize="small")
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_heavy_impact_improvement(
+    result: HeavyImpactImprovementResult,
+    ax: Axes | None = None,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """Improvement ``ΔLr`` of a floor covering under the rubber ball (H.6.1).
+
+    :param result: A
+        :class:`~phonometry.building.measurement.lab_improvement.HeavyImpactImprovementResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the improvement-curve ``plot`` call.
+    :return: The axes.
+    """
+    from .._i18n import localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    _improvement_curve(
+        ax,
+        result.frequencies_hz,
+        result.improvement_db,
+        r"$\Delta L_\mathrm{r}$",
+        language,
+        kwargs,
+    )
+    ax.set_ylabel(f"{_t('Maximum impact level improvement', language)} [dB]")
+    ax.set_title(_t(_HEAVY_SOFT_TITLE, language))
+    ax.legend(loc="best", fontsize="small")
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_rain_generator_verification(
+    result: RainGeneratorVerification,
+    ax: Axes | None = None,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """Each quantity of the generated rain against its tolerance window.
+
+    Every quantity is drawn as its deviation from the nominal value of
+    Table H.1 in units of its tolerance, so the window is -1 to 1 on every
+    row: the rainfall rate as one marker, and the measured drops, when given,
+    as a strip of points.
+
+    :param result: A
+        :class:`~phonometry.building.measurement.rainfall_sound.RainGeneratorVerification`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the rainfall-rate marker.
+    :return: The axes.
+    """
+    from .._i18n import localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    nominal = result.nominal
+    rows: list[tuple[str, np.ndarray]] = [
+        (
+            "rainfall rate",
+            np.asarray(
+                [result.rate_deviation_mm_h / nominal.rainfall_rate_tolerance_mm_h]
+            ),
+        )
+    ]
+    if result.drop_diameters_mm is not None:
+        rows.append(
+            (
+                "drop diameter",
+                (result.drop_diameters_mm - nominal.median_drop_diameter_mm)
+                / nominal.drop_diameter_tolerance_mm,
+            )
+        )
+    if result.fall_velocities_m_s is not None:
+        rows.append(
+            (
+                "fall velocity",
+                (result.fall_velocities_m_s - nominal.fall_velocity_m_s)
+                / nominal.fall_velocity_tolerance_m_s,
+            )
+        )
+    reach = max(1.5, 1.15 * max(float(np.max(np.abs(v))) for _, v in rows))
+    ax.axvspan(-1.0, 1.0, color=theme_fill(_C_TERTIARY, ax), lw=0, zorder=0)
+    ax.axvline(0.0, color=_C_MUTED, lw=1.0, zorder=1)
+    style_default(kwargs, "color", _C_PRIMARY if result.rate_ok else _C_SECONDARY)
+    kwargs.setdefault("marker", "o" if result.rate_ok else "X")
+    style_default(kwargs, "ms", 10)
+    style_default(kwargs, "ls", "")
+    kwargs.setdefault("label", _t("measured rate", language))
+    ax.plot(rows[0][1], [0.0], **kwargs)
+    drops_labelled = False
+    for index, (_, values) in enumerate(rows[1:], start=1):
+        # Spread the drops over the height of their row on a fixed pattern,
+        # so the strip reads as a distribution and the figure is reproducible.
+        spread = 0.25 * ((np.arange(values.size) % 7) / 3.0 - 1.0)
+        ax.plot(
+            values,
+            index + spread,
+            ls="",
+            marker=".",
+            ms=5,
+            color=_C_REFERENCE,
+            label=None if drops_labelled else _t("measured drops", language),
+        )
+        drops_labelled = True
+    ax.set_yticks(np.arange(len(rows)))
+    ax.set_yticklabels([_t(name, language) for name, _ in rows])
+    ax.set_ylim(-0.6, len(rows) - 0.4)
+    ax.set_xlim(-reach, reach)
+    ax.set_xlabel(_t("Deviation from nominal / tolerance", language))
+    verdict = _verdict_word(passes=result.passes, language=language)
+    rain = _t(f"{result.rain_type} rain", language)
+    ax.set_title(f"{_t(_RAIN_GENERATOR_TITLE, language)}\n{rain}: {verdict}")
+    ax.grid(visible=True, axis="x", alpha=0.3)
+    ax.legend(loc="best", fontsize="small")
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_rainfall_reference_correction(
+    result: RainfallReferenceCorrection,
+    ax: Axes | None = None,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """Corrected level of the reference pane against Table I.1 (Annex I).
+
+    :param result: A
+        :class:`~phonometry.building.measurement.rainfall_sound.RainfallReferenceCorrection`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the corrected-level curve ``plot`` call.
+    :return: The axes.
+    """
+    from .._i18n import localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    positions = _band_axis(ax, result.frequencies_hz, language=language)
+    ax.fill_between(
+        positions,
+        result.l_ic_ref_db,
+        result.l_i_m_ref_db,
+        color=theme_fill(_C_TERTIARY, ax),
+        lw=0,
+        zorder=0,
+        label=r"$\Delta L_{I\mathrm{c}}$",
+    )
+    ax.plot(
+        positions,
+        result.l_ic_ref_db,
+        "s--",
+        color=_C_REFERENCE,
+        lw=1.2,
+        label=_t(r"$L_{I\mathrm{c,ref}}$ (Table I.1)", language),
+    )
+    style_default(kwargs, "color", _C_PRIMARY)
+    kwargs.setdefault("marker", "o")
+    kwargs.setdefault("label", r"$L_{I,\mathrm{m,ref}}$")
+    ax.plot(positions, result.l_i_m_ref_db, **kwargs)
+    ax.set_ylabel(_t(_INTENSITY_LEVEL_LABEL, language))
+    ax.set_title(_t(_RAIN_REFERENCE_TITLE, language))
+    ax.grid(visible=True, which="both", alpha=0.3)
+    ax.legend(loc="best", fontsize="small")
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_rainfall_sound(
+    result: RainfallSoundResult,
+    ax: Axes | None = None,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """Sound intensity level of a specimen under rain, per band (Annex K).
+
+    :param result: A
+        :class:`~phonometry.building.measurement.rainfall_sound.RainfallSoundResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the ``L_I`` curve ``plot`` call.
+    :return: The axes.
+    """
+    from .._i18n import localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    positions = _band_axis(ax, result.frequencies_hz, language=language)
+    style_default(kwargs, "color", _C_PRIMARY)
+    kwargs.setdefault("marker", "o")
+    kwargs.setdefault("label", r"$L_I$")
+    ax.plot(positions, result.l_i_db, **kwargs)
+    if result.l_i_norm_db is not None:
+        ax.plot(
+            positions,
+            result.l_i_norm_db,
+            "s--",
+            color=_C_SECONDARY,
+            lw=1.2,
+            label=rf"$L_{{I\mathrm{{norm}}}}$ ({_t('normalized', language)})",
+        )
+    ax.set_ylabel(_t(_INTENSITY_LEVEL_LABEL, language))
+    title = _t(_RAIN_TITLE, language)
+    if result.l_ia_db is not None:
+        title += "\n" + (
+            rf"$L_{{I\mathrm{{A}}}}$ = {_db(round(result.l_ia_db, 1), language)} dB"
+        )
+        if result.l_ia_norm_db is not None:
+            title += (
+                rf", $L_{{I\mathrm{{A,norm}}}}$ = "
+                f"{_db(round(result.l_ia_norm_db, 1), language)} dB"
+            )
+    ax.set_title(title)
+    ax.grid(visible=True, which="both", alpha=0.3)
+    ax.legend(loc="best", fontsize="small")
     localize_axes(ax, language)
     return ax

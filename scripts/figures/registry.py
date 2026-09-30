@@ -101,6 +101,11 @@ from .building_design import (
     generate_structure_borne_power,
     generate_tapping_force_spectrum,
 )
+from .building_lab_rules import (
+    generate_lab_floor_covering_improvement,
+    generate_lab_lining_improvement,
+    generate_rainfall_sound,
+)
 from .correlation_analysis import (
     generate_cepstrum_echo,
     generate_cepstrum_variants,
@@ -795,6 +800,9 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     generate_low_frequency_intensity,
     generate_survey_insulation,
     generate_floor_covering_improvement,
+    generate_lab_lining_improvement,
+    generate_lab_floor_covering_improvement,
+    generate_rainfall_sound,
     generate_heavy_impact_sources,
     generate_ceiling_plenum_flanking,
     generate_insulation_adaptation_terms,

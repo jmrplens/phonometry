@@ -561,6 +561,9 @@ ISO15186_3_PLASTER_TABLE_A1 = [10.7, 11.9, 13.4, 14.8, 16.3, 17.9]
 # example), so the conformance anchor is the ISO 717-2:2020 reference floor:
 # weighted_impact_rating(Ln,r,0) must return exactly 78 dB (CI = -11), and a
 # zero improvement must give Delta-Lw = 0 (Formula 2: Delta-Lw = 78 - Ln,r,w).
+# The curve itself is published by the library as
+# phonometry.building.IMPACT_REFERENCE_FLOORS["heavyweight"]; only the single
+# numbers printed under it stay here, as the oracle it is checked against.
 # ---------------------------------------------------------------------------
 ISO717_2_REFERENCE_FLOOR_FREQ = [
     100,
@@ -579,24 +582,6 @@ ISO717_2_REFERENCE_FLOOR_FREQ = [
     2000,
     2500,
     3150,
-]
-ISO717_2_REFERENCE_FLOOR_LN_R0 = [
-    67.0,
-    67.5,
-    68.0,
-    68.5,
-    69.0,
-    69.5,
-    70.0,
-    70.5,
-    71.0,
-    71.5,
-    72.0,
-    72.0,
-    72.0,
-    72.0,
-    72.0,
-    72.0,
 ]
 ISO717_2_REFERENCE_FLOOR_LN_R0_W = 78
 ISO717_2_REFERENCE_FLOOR_CI = -11
@@ -751,108 +736,266 @@ ISO9611_MEAN_EXPECTED = 72.30174601124772
 ISO9611_FREE_VELOCITY_REFERENCE = 5.0e-8  # m/s
 
 # ---------------------------------------------------------------------------
-# ISO 10140-5:2010+A1 - reference building elements (real printed end-to-end
-# anchors). Annex B Table B.1 gives the sound reduction index R of three
-# airborne reference elements (16 one-third-octave bands 100-3150 Hz) with
-# their printed weighted ratings; Annex C Table C.1 gives the normalized
-# impact sound pressure levels of two lightweight reference floors with
-# their printed Ln,t,r,0,w (CI).
+# Reference elements for the improvement ratings of linings and floor
+# coverings. The curves are published by the library
+# (phonometry.building.LINING_REFERENCE_ELEMENTS and IMPACT_REFERENCE_FLOORS);
+# what stays here is the oracle they are checked against, the single numbers
+# each standard prints under each curve, read on the rasterized pages. Each
+# value is a pair: the integer rating and, in parentheses on the page, the
+# one-decimal value "for the expression of uncertainty".
+#
+# ISO 717-1:2020 Table E.1 (PDF pages 30 and 31, printed folios 24 and 25).
+# ISO 10140-5:2010+A1:2014 Table B.1 printed the same curves with the same
+# integer ratings; its 2021 edition refers to ISO 717-1 for them.
 # ---------------------------------------------------------------------------
-ISO10140_5_B1_HEAVY_WALL_R: list[float] = [
-    40,
-    40,
-    40,
-    40,
-    41,
-    43.5,
-    46.1,
-    48.5,
-    51,
-    53.6,
-    56,
-    58.4,
-    61.1,
-    63.6,
-    65,
-    65,
-]
-ISO10140_5_B1_HEAVY_WALL_RATING = (53, -1, -5)  # Rw (C; Ctr)
-ISO10140_5_B1_HEAVY_FLOOR_R: list[float] = [
-    40,
-    40,
-    40,
-    40,
-    40,
-    41.8,
-    44.4,
-    46.8,
-    49.3,
-    51.9,
-    54.4,
-    56.8,
-    59.5,
-    61.9,
-    64.3,
-    65,
-]
-ISO10140_5_B1_HEAVY_FLOOR_RATING = (52, -1, -5)
-ISO10140_5_B1_LIGHT_WALL_R: list[float] = [
-    27,
-    27,
-    27,
-    27,
-    27,
-    27,
-    27,
-    27,
-    28,
-    30.5,
-    32.8,
-    35.1,
-    37.6,
-    40,
-    42.3,
-    44.6,
-]
-ISO10140_5_B1_LIGHT_WALL_RATING = (33, -1, -2)
-ISO10140_5_C1_FLOOR_C1C2_LN: list[float] = [
-    78,
-    78,
-    78,
-    78,
-    78,
-    78,
-    76,
-    74,
-    72,
-    69,
-    66,
-    63,
-    60,
-    57,
-    54,
-    51,
-]
-ISO10140_5_C1_FLOOR_C1C2_RATING = (72, 0)  # Ln,t,r,0,w (CI)
-ISO10140_5_C1_FLOOR_C3_LN: list[float] = [
-    69,
-    72,
-    75,
-    78,
-    78,
-    78,
-    78,
-    78,
-    78,
-    76,
-    74,
-    72,
-    69,
-    66,
-    63,
-    60,
-]
-ISO10140_5_C1_FLOOR_C3_RATING = (75, -3)
+ISO717_1_TABLE_E1_PRINTED: dict[str, dict[str, tuple[int, float]]] = {
+    "heavy_wall": {
+        "rating": (53, 53.4),
+        "c": (-1, -1.6),
+        "c_100_5000": (0, -0.6),
+        "c_50_3150": (-1, -1.7),
+        "c_50_5000": (0, -0.7),
+        "ctr": (-5, -5.0),
+        "ctr_100_5000": (-5, -5.0),
+        "ctr_50_3150": (-5, -5.8),
+        "ctr_50_5000": (-5, -5.8),
+    },
+    "heavy_floor": {
+        "rating": (52, 52.0),
+        "c": (-1, -1.4),
+        "c_100_5000": (0, -0.4),
+        "c_50_3150": (-1, -1.5),
+        "c_50_5000": (0, -0.5),
+        "ctr": (-5, -4.5),
+        "ctr_100_5000": (-5, -4.5),
+        "ctr_50_3150": (-5, -5.3),
+        "ctr_50_5000": (-5, -5.3),
+    },
+    "lightweight_wall": {
+        "rating": (33, 33.4),
+        "c": (-1, -1.0),
+        "c_100_5000": (0, 0.0),
+        "c_50_3150": (-1, -1.0),
+        "c_50_5000": (0, 0.0),
+        "ctr": (-2, -2.8),
+        "ctr_100_5000": (-2, -2.8),
+        "ctr_50_3150": (-3, -3.2),
+        "ctr_50_5000": (-3, -3.2),
+    },
+}
+
+# ISO 717-2:2020 Table 4 (PDF page 13, printed folio 7): Ln,r,0,w or Ln,t,r,0,w
+# and CI,r,0 or CI,t,r,0 of the three printed curves, as ((integer, one
+# decimal), (integer, one decimal)). The lightweight floors No 1 and No 2 share
+# the column "C1 and C2". ISO 10140-5:2010+A1:2014 Table C.1 printed the same
+# integer values; its 2021 edition refers to ISO 717-2 for them.
+ISO717_2_TABLE4_PRINTED: dict[str, tuple[tuple[int, float], tuple[int, float]]] = {
+    "heavyweight": ((78, 77.6), (-11, -10.3)),
+    "lightweight_1": ((72, 71.8), (0, 0.0)),
+    "lightweight_2": ((72, 71.8), (0, 0.0)),
+    "lightweight_3": ((75, 75.0), (-3, -2.8)),
+}
+
+# ISO 10140-1:2021 Table K.2 (PDF page 57, printed folio 51): the 18 values
+# C_j, in dB, that Formula (K.2) adds to the one-third-octave intensity levels
+# 100 Hz to 5 000 Hz before the energetic sum, j = 1 to 18 in band order.
+ISO10140_1_TABLE_K2_CJ: tuple[float, ...] = (
+    -19.1,
+    -16.1,
+    -13.4,
+    -10.9,
+    -8.6,
+    -6.6,
+    -4.8,
+    -3.2,
+    -1.9,
+    -0.8,
+    0.0,
+    0.6,
+    1.0,
+    1.2,
+    1.3,
+    1.2,
+    1.0,
+    0.5,
+)
+
+# The curves themselves, band by band, typed from the same printed pages rather
+# than copied from the library, so that a mistyped band of the published
+# tables shows even where no single number under the curve responds to it.
+#
+# ISO 717-1:2020 Table E.1 (PDF pages 30 and 31, printed folios 24 and 25):
+# Rref,without of the three standard basic elements in the 21 one-third-octave
+# bands 50 Hz to 5 000 Hz, in dB.
+ISO717_1_TABLE_E1_BANDS: tuple[float, ...] = (
+    50.0,
+    63.0,
+    80.0,
+    100.0,
+    125.0,
+    160.0,
+    200.0,
+    250.0,
+    315.0,
+    400.0,
+    500.0,
+    630.0,
+    800.0,
+    1000.0,
+    1250.0,
+    1600.0,
+    2000.0,
+    2500.0,
+    3150.0,
+    4000.0,
+    5000.0,
+)
+ISO717_1_TABLE_E1_CURVES: dict[str, tuple[float, ...]] = {
+    "heavy_wall": (
+        *(35.3, 37.3, 39.4, 40.0, 40.0, 40.0, 40.0, 41.0, 43.5, 46.1, 48.5),
+        *(51.0, 53.6, 56.0, 58.4, 61.1, 63.6, 65.0, 65.0, 65.0, 65.0),
+    ),
+    "heavy_floor": (
+        *(34.0, 36.0, 38.1, 40.0, 40.0, 40.0, 40.0, 40.0, 41.8, 44.4, 46.8),
+        *(49.3, 51.9, 54.4, 56.8, 59.5, 61.9, 64.3, 65.0, 65.0, 65.0),
+    ),
+    "lightweight_wall": (
+        *(21.3, 23.3, 25.3, 27.0, 27.0, 27.0, 27.0, 27.0, 27.0, 27.0, 27.0),
+        *(28.0, 30.5, 32.8, 35.1, 37.6, 40.0, 42.3, 44.6, 47.1, 49.4),
+    ),
+}
+
+# ISO 717-2:2020 Table 4 (PDF page 13, printed folio 7): the three printed
+# columns in the 16 one-third-octave bands 100 Hz to 3 150 Hz, in dB. The
+# column "for lightweight floors C1 and C2" is one curve for two floors.
+ISO717_2_TABLE4_CURVES: dict[str, tuple[float, ...]] = {
+    "heavyweight": (
+        *(67.0, 67.5, 68.0, 68.5, 69.0, 69.5, 70.0, 70.5),
+        *(71.0, 71.5, 72.0, 72.0, 72.0, 72.0, 72.0, 72.0),
+    ),
+    "lightweight_1_and_2": (
+        *(78.0, 78.0, 78.0, 78.0, 78.0, 78.0, 76.0, 74.0),
+        *(72.0, 69.0, 66.0, 63.0, 60.0, 57.0, 54.0, 51.0),
+    ),
+    "lightweight_3": (
+        *(69.0, 72.0, 75.0, 78.0, 78.0, 78.0, 78.0, 78.0),
+        *(78.0, 76.0, 74.0, 72.0, 69.0, 66.0, 63.0, 60.0),
+    ),
+}
+
+# ISO 10140-5:2021 Table I.1 (PDF page 44, printed folio 38): per
+# one-third-octave band 100 Hz to 5 000 Hz, (band in Hz, reference loss factor
+# 10 lg(eta_ref/eta_0) in dB, reference intensity level LIc,ref in dB). The same
+# 36 cells are printed in ISO 10140-5:2010/Amd 1:2014.
+ISO10140_5_TABLE_I1: tuple[tuple[float, float, float], ...] = (
+    (100.0, -10.0, 45.0),
+    (125.0, -11.0, 45.0),
+    (160.0, -11.0, 46.0),
+    (200.0, -12.0, 46.0),
+    (250.0, -13.0, 47.0),
+    (315.0, -13.0, 47.0),
+    (400.0, -14.0, 47.0),
+    (500.0, -14.0, 47.0),
+    (630.0, -15.0, 47.0),
+    (800.0, -15.0, 46.0),
+    (1000.0, -16.0, 44.0),
+    (1250.0, -17.0, 42.0),
+    (1600.0, -17.0, 43.0),
+    (2000.0, -18.0, 46.0),
+    (2500.0, -18.0, 51.0),
+    (3150.0, -19.0, 50.0),
+    (4000.0, -19.0, 46.0),
+    (5000.0, -20.0, 44.0),
+)
+
+# ISO 10140-5:2021 Tables H.1 and H.2 (PDF page 39, printed folio 33), per rain
+# type: (rainfall rate in mm/h, volume median drop diameter in mm, fall velocity
+# in m/s) of Table H.1, then (hole diameter range in mm, holes per m2, fall
+# height in m) of rows 1 to 3 of Table H.2. Rows 4, 6 and 7 of Table H.2 repeat
+# Table H.1. The tolerances are in the text of H.1 below Table H.2: rate within
+# +-2 mm/h, half of the drops within +-0,5 mm and within +-1 m/s.
+ISO10140_5_TABLES_H1_H2: dict[
+    str, tuple[float, float, float, tuple[float, float], float, float]
+] = {
+    "intense": (15.0, 2.0, 4.0, (0.3, 0.5), 25.0, 1.0),
+    "heavy": (40.0, 5.0, 7.0, (1.0, 1.0), 60.0, 3.5),
+}
+ISO10140_5_H1_TOLERANCES: tuple[float, float, float] = (2.0, 0.5, 1.0)
+
+# ISO 10140-1:2021 Table K.1 (PDF page 54, printed folio 48), after
+# IEC 60721-2-2:1988: per class, (rainfall rate, typical drop diameter, fall
+# velocity) as (lower, upper) ranges in mm/h, mm and m/s; None is the open end
+# of "up to", "greater than" and ">".
+ISO10140_1_TABLE_K1: dict[
+    str,
+    tuple[
+        tuple[float | None, float | None],
+        tuple[float | None, float | None],
+        tuple[float | None, float | None],
+    ],
+] = {
+    "moderate": ((None, 4.0), (0.5, 1.0), (1.0, 2.0)),
+    "intense": ((None, 15.0), (1.0, 2.0), (2.0, 4.0)),
+    "heavy": ((None, 40.0), (2.0, 5.0), (5.0, 7.0)),
+    "cloudburst": ((100.0, None), (3.0, None), (6.0, None)),
+}
+
+# A non-flat improvement rated on each reference floor, and a non-flat lining
+# rated on each standard basic element. The expected single numbers were
+# computed with a rater written for this purpose from the printed clauses only
+# (ISO 717-2:2020 Table 3, 4.3.1 and A.2.1 to A.2.3 with the curves of Table 4;
+# ISO 717-1:2020 Tables 3 and 4, 4.4, 4.5, Table B.1 and Annex D with the curves
+# of Table E.1), not with the library. A flat improvement shifts every rating
+# one for one on any curve, so only a spectrum with a slope tells the reference
+# curves apart and tells C from Ctr.
+ISO717_2_SLOPED_DELTA_L: tuple[float, ...] = (
+    *(2.0, 3.0, 4.0, 5.0, 6.0, 8.0, 10.0, 12.0),
+    *(15.0, 18.0, 21.0, 24.0, 26.0, 28.0, 30.0, 30.0),
+)
+# (weighted reduction, adaptation term, Ln,r,w of the covered reference curve,
+# its CI,r), per floor.
+ISO717_2_SLOPED_EXPECTED: dict[str, tuple[int, int, int, int]] = {
+    "heavyweight": (20, -10, 58, -1),
+    "lightweight_1": (6, -1, 66, 1),
+    "lightweight_2": (6, -1, 66, 1),
+    "lightweight_3": (11, -3, 64, 0),
+}
+# Delta-R over the 21 bands 50 Hz to 5 000 Hz.
+ISO717_1_SLOPED_DELTA_R: tuple[float, ...] = (
+    *(-3.0, -5.0, -2.0, 0.0, 0.0, 1.0, 2.0, 4.0, 6.0, 9.0, 12.0),
+    *(15.0, 18.0, 20.0, 22.0, 24.0, 25.0, 25.0, 25.0, 26.0, 27.0),
+)
+# Delta of Rw, Rw + C, Rw + Ctr, Rw + C50-3150, Rw + C50-5000, Rw + C100-5000,
+# Rw + Ctr,50-3150, Rw + Ctr,50-5000 and Rw + Ctr,100-5000, per element.
+ISO717_1_SLOPED_EXPECTED: dict[str, tuple[int, ...]] = {
+    "heavy_wall": (6, 5, 4, 4, 4, 5, 1, 1, 4),
+    "heavy_floor": (6, 5, 4, 5, 5, 5, 1, 1, 4),
+    "lightweight_wall": (10, 10, 7, 9, 9, 10, 5, 5, 7),
+}
+# That lining is 25 dB to 27 dB better from 2 500 Hz up and changes little
+# below 100 Hz, so the bands that set the enlarged ranges apart hardly weigh:
+# on every element it rates C and C100-5000 alike, Ctr and Ctr,100-5000 alike,
+# and each 50-3150 term like its 50-5000 twin. A second lining, with its
+# mass-spring-mass resonance at 100 Hz and a coincidence dip at 4 000 Hz, rated by
+# the same independent rater, gives each of the nine terms a value that differs
+# from every other term's on at least one element.
+ISO717_1_DIPPED_DELTA_R: tuple[float, ...] = (
+    *(1.0, 1.0, 1.0, -7.0, -3.0, 1.0, 5.0, 9.0, 13.0, 14.0, 14.0),
+    *(14.0, 14.0, 14.0, 14.0, 14.0, 14.0, 6.0, -3.0, -11.0, -3.0),
+)
+ISO717_1_DIPPED_EXPECTED: dict[str, tuple[int, ...]] = {
+    "heavy_wall": (7, 5, 2, 4, 3, 4, 1, 1, 2),
+    "heavy_floor": (7, 5, 3, 5, 4, 4, 2, 2, 3),
+    "lightweight_wall": (11, 10, 6, 9, 8, 8, 6, 5, 5),
+}
+# The same Delta-R on a measured wall that is not a standard element: the
+# direct differences of Formula (D.2), Rw 53 (C -1; Ctr -4) without the lining
+# and 59 (-2; -7) with it.
+ISO717_1_MEASURED_WALL_R: tuple[float, ...] = (
+    *(36.1, 37.0, 38.2, 39.5, 40.3, 41.2, 40.6, 41.8, 43.9, 46.4, 48.9),
+    *(51.6, 54.2, 56.5, 58.7, 61.4, 63.3, 64.2, 64.8, 65.9, 66.4),
+)
+ISO717_1_MEASURED_WALL_DIRECT: tuple[int, int, int] = (6, 5, 3)
 
 # ---------------------------------------------------------------------------
 # Hopkins, Sound Insulation (2007), Table A2, PDF pages 635-636 (no printed

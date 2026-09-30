@@ -241,6 +241,7 @@ export const topics = [
           'buildings/insulation/insulation-field',
           'buildings/insulation/low-frequency-procedure',
           'buildings/insulation/insulation-lab',
+          'buildings/insulation/lab-application-rules',
           'buildings/insulation/insulation-intensity',
           'buildings/insulation/insulation-survey',
           'buildings/insulation/service-equipment-noise',

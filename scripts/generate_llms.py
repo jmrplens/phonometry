@@ -326,11 +326,12 @@ def _area_members() -> dict[str, list[str]]:
 #: a cut chosen to fit the budget, so a reader fetching one shard gets a
 #: coherent set of guides and not an arbitrary half.
 #:
-#: ``buildings/insulation`` has eleven guides, and its own overview groups them
+#: ``buildings/insulation`` has twelve guides, and its own overview groups them
 #: by hand (``docs/buildings/insulation/index.md``: "Laboratory.", "Field.",
-#: "Ratings and the envelope."). Two of those groups carve out, the laboratory
-#: methods and the ratings with the envelope, and the field methods keep the
-#: folder's own shard.
+#: "Ratings and the envelope."). The ratings and the envelope carve out, and so
+#: do the four laboratory guides, the ISO 10140 measurement with the
+#: application rules of ISO 10140-1 and the two laboratory methods beside it,
+#: which leaves the field measurements in the folder's own shard.
 #:
 #: ``devices/emission`` has eleven, and the family sorts its determination
 #: routes by the quantity actually measured: sound pressure, sound intensity,
@@ -364,7 +365,12 @@ MANUAL_SPLITS: dict[str, tuple[tuple[str, str, tuple[str, ...]], ...]] = {
         (
             "buildings-insulation-laboratory",
             "Laboratory insulation measurement",
-            ("insulation-lab", "insulation-intensity", "flanking-lab"),
+            (
+                "insulation-lab",
+                "lab-application-rules",
+                "insulation-intensity",
+                "flanking-lab",
+            ),
         ),
         (
             "buildings-insulation-ratings",

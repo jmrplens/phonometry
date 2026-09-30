@@ -1,6 +1,6 @@
 ---
 title: "Guides"
-description: "The 156 guides of phonometry, grouped into the thirteen topics the library covers: what each area is for, the standards implemented in it, and a one-line summary of every guide inside it."
+description: "The 157 guides of phonometry, grouped into the thirteen topics the library covers: what each area is for, the standards implemented in it, and a one-line summary of every guide inside it."
 head:
   - tag: script
     attrs:
@@ -117,7 +117,7 @@ makes, then runnable code and the figure it draws. Nothing here is a survey of
 the field; each page is the working documentation of a module, written so that
 a result can be defended clause by clause rather than trusted.
 
-This page is the map. A hundred and fifty-six guides sit in thirteen topics, and each topic has its
+This page is the map. A hundred and fifty-seven guides sit in thirteen topics, and each topic has its
 own overview page with the longer story of how its pieces fit together. If you
 are arriving without a specific question, read
 [Getting Started](/phonometry/start/getting-started/) first: it runs one signal
@@ -437,6 +437,10 @@ ASTM E413/E1414.
   octave reverberation time that comes with it.
 - [Laboratory Insulation Measurement](/phonometry/buildings/insulation/insulation-lab/):
   the ISO 10140 characterisation of an element with flanking suppressed.
+- [Linings, Floor Coverings and Rain (ISO 10140-1)](/phonometry/buildings/insulation/lab-application-rules/):
+  the improvement a lining or a floor covering gives the element it is laid
+  on, rated on the ISO 717 reference curves, and the sound of artificial rain
+  on a roof or a rooflight.
 - [Sound Insulation by Intensity (ISO 15186)](/phonometry/buildings/insulation/insulation-intensity/):
   the transmitted power read off the radiating face, for the whole element or
   element by element.

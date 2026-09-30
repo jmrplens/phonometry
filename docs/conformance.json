@@ -3,13 +3,13 @@
   "library": "4.0.0rc1",
   "generator": "scripts/conformance_report.py",
   "counts": {
-    "checks": 1664,
-    "passing": 1664,
+    "checks": 1683,
+    "passing": 1683,
     "failing": 0,
     "domains": 105,
-    "standards": 507,
-    "citations": 1167,
-    "designations": 211,
+    "standards": 508,
+    "citations": 1181,
+    "designations": 212,
     "sources": 122
   },
   "units": [
@@ -117,8 +117,8 @@
     {
       "id": "room-building-acoustics",
       "title": "Room & building acoustics",
-      "checks": 134,
-      "passing": 134
+      "checks": 153,
+      "passing": 153
     },
     {
       "id": "room-acoustics",
@@ -14517,26 +14517,331 @@
       "verdict": "pass"
     },
     {
-      "id": "room-building-acoustics/iso-10140-5-2010-a1-annex-b-table-b-1/reference-elements-end-to-end-printed-rw-c-ctr-of-all-three",
+      "id": "room-building-acoustics/iso-717-1-2020-annex-e-table-e-1/standard-basic-elements-printed-rw-and-eight-adaptation-terms-of-all-three",
       "domain": "room-building-acoustics",
       "reference": {
-        "cite": "ISO 10140-5:2010+A1 Annex B, Table B.1",
+        "cite": "ISO 717-1:2020 Annex E, Table E.1",
         "documents": [
           {
             "kind": "standard",
-            "designation": "ISO 10140-5",
-            "edition": "2010+A1",
-            "clause": "Annex B, Table B.1"
+            "designation": "ISO 717-1",
+            "edition": "2020",
+            "clause": "Annex E, Table E.1"
           }
         ]
       },
-      "quantity": "Reference elements end-to-end: printed Rw (C; Ctr) of all three",
-      "kind": "record",
+      "quantity": "Standard basic elements: printed Rw and eight adaptation terms of all three",
+      "kind": "count",
       "expected": {
-        "label": "Rw(C;Ctr) = 53(-1;-5) / 52(-1;-5) / 33(-1;-2)"
+        "value": 27.0,
+        "label": "27/27 printed single numbers"
       },
       "computed": {
-        "label": "53(-1;-5) / 52(-1;-5) / 33(-1;-2)"
+        "value": 27.0,
+        "label": "27/27 printed single numbers"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "room-building-acoustics/iso-717-1-2020-annex-e-table-e-1/standard-basic-elements-to-one-decimal-place-the-printed-values-in-parentheses",
+      "domain": "room-building-acoustics",
+      "reference": {
+        "cite": "ISO 717-1:2020 Annex E, Table E.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 717-1",
+            "edition": "2020",
+            "clause": "Annex E, Table E.1"
+          }
+        ]
+      },
+      "quantity": "Standard basic elements to one decimal place (the printed values in parentheses)",
+      "kind": "count",
+      "expected": {
+        "value": 27.0,
+        "label": "27/27 printed single numbers"
+      },
+      "computed": {
+        "value": 27.0,
+        "label": "27/27 printed single numbers"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "room-building-acoustics/iso-717-2-2020-table-4/reference-floors-printed-ln-r-0-w-ci-of-the-heavyweight-and-both-lightweight-curves",
+      "domain": "room-building-acoustics",
+      "reference": {
+        "cite": "ISO 717-2:2020 Table 4",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 717-2",
+            "edition": "2020",
+            "clause": "Table 4"
+          }
+        ]
+      },
+      "quantity": "Reference floors: printed Ln,r,0,w (CI) of the heavyweight and both lightweight curves",
+      "kind": "count",
+      "expected": {
+        "value": 6.0,
+        "label": "6/6 printed single numbers"
+      },
+      "computed": {
+        "value": 6.0,
+        "label": "6/6 printed single numbers"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "room-building-acoustics/iso-717-2-2020-table-4/reference-floors-to-one-decimal-77-6-10-3-71-8-0-0-and-75-0-2-8",
+      "domain": "room-building-acoustics",
+      "reference": {
+        "cite": "ISO 717-2:2020 Table 4",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 717-2",
+            "edition": "2020",
+            "clause": "Table 4"
+          }
+        ]
+      },
+      "quantity": "Reference floors to one decimal: 77,6 (-10,3), 71,8 (0,0) and 75,0 (-2,8)",
+      "kind": "count",
+      "expected": {
+        "value": 6.0,
+        "label": "6/6 printed single numbers"
+      },
+      "computed": {
+        "value": 6.0,
+        "label": "6/6 printed single numbers"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "room-building-acoustics/iso-717-1-2020-annex-e-table-e-1/standard-basic-elements-the-63-band-values-of-the-three-curves-as-printed",
+      "domain": "room-building-acoustics",
+      "reference": {
+        "cite": "ISO 717-1:2020 Annex E, Table E.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 717-1",
+            "edition": "2020",
+            "clause": "Annex E, Table E.1"
+          }
+        ]
+      },
+      "quantity": "Standard basic elements: the 63 band values of the three curves as printed",
+      "kind": "count",
+      "expected": {
+        "value": 63.0,
+        "label": "63/63 printed band values"
+      },
+      "computed": {
+        "value": 63.0,
+        "label": "63/63 printed band values"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "room-building-acoustics/iso-717-2-2020-table-4/reference-floors-the-48-band-values-of-the-three-printed-columns-floors-no-1-and-no-2-both-on-the-shared-one",
+      "domain": "room-building-acoustics",
+      "reference": {
+        "cite": "ISO 717-2:2020 Table 4",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 717-2",
+            "edition": "2020",
+            "clause": "Table 4"
+          }
+        ]
+      },
+      "quantity": "Reference floors: the 48 band values of the three printed columns, floors No 1 and No 2 both on the shared one",
+      "kind": "count",
+      "expected": {
+        "value": 48.0,
+        "label": "48/48 printed band values"
+      },
+      "computed": {
+        "value": 48.0,
+        "label": "48/48 printed band values"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "room-building-acoustics/iso-717-1-2020-annex-d-formulas-d-3-and-d-4/lining-on-the-heavy-wall-with-rref-with-on-the-table-3-shape-20-db-rw-21",
+      "domain": "room-building-acoustics",
+      "reference": {
+        "cite": "ISO 717-1:2020 Annex D, Formulas (D.3) and (D.4)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 717-1",
+            "edition": "2020",
+            "clause": "Annex D, Formulas (D.3) and (D.4)"
+          }
+        ]
+      },
+      "quantity": "Lining on the heavy wall with Rref,with on the Table 3 shape + 20 dB -> ΔRw = 21",
+      "kind": "scalar",
+      "expected": {
+        "value": 21.0
+      },
+      "computed": {
+        "value": 21.0
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "room-building-acoustics/iso-717-2-2020-clauses-5-and-6-formulas-a-4-and-a-6/sloped-l-on-each-of-the-four-reference-floors-lw-or-lt-n-w-and-ci-rated-independently-20-10-6-1-6-1-11-3",
+      "domain": "room-building-acoustics",
+      "reference": {
+        "cite": "ISO 717-2:2020 Clauses 5 and 6, Formulas (A.4) and (A.6)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 717-2",
+            "edition": "2020",
+            "clause": "Clauses 5 and 6, Formulas (A.4) and (A.6)"
+          }
+        ]
+      },
+      "quantity": "Sloped ΔL on each of the four reference floors -> ΔLw or ΔLt,n,w and CIΔ, rated independently: 20 (-10), 6 (-1), 6 (-1), 11 (-3)",
+      "kind": "count",
+      "expected": {
+        "value": 8.0,
+        "label": "8/8 single numbers"
+      },
+      "computed": {
+        "value": 8.0,
+        "label": "8/8 single numbers"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "room-building-acoustics/iso-717-1-2020-annex-d-formulas-d-3-and-d-4/two-non-flat-r-on-each-standard-element-rw-rw-c-rw-ctr-and-the-six-enlarged-range-terms-rated-independently",
+      "domain": "room-building-acoustics",
+      "reference": {
+        "cite": "ISO 717-1:2020 Annex D, Formulas (D.3) and (D.4)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 717-1",
+            "edition": "2020",
+            "clause": "Annex D, Formulas (D.3) and (D.4)"
+          }
+        ]
+      },
+      "quantity": "Two non-flat ΔR on each standard element -> ΔRw, Δ(Rw + C), Δ(Rw + Ctr) and the six enlarged-range terms, rated independently",
+      "kind": "count",
+      "expected": {
+        "value": 54.0,
+        "label": "54/54 single numbers"
+      },
+      "computed": {
+        "value": 54.0,
+        "label": "54/54 single numbers"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "room-building-acoustics/iso-717-1-2020-formula-d-2/direct-differences-of-a-sloped-lining-on-a-measured-wall-rw-direct-6-rw-c-direct-5-rw-ctr-direct-3",
+      "domain": "room-building-acoustics",
+      "reference": {
+        "cite": "ISO 717-1:2020 Formula (D.2)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 717-1",
+            "edition": "2020",
+            "clause": "Formula (D.2)"
+          }
+        ]
+      },
+      "quantity": "Direct differences of a sloped lining on a measured wall: ΔRw,direct = 6, Δ(Rw + C)direct = 5, Δ(Rw + Ctr)direct = 3",
+      "kind": "record",
+      "expected": {
+        "label": "6 dB / 5 dB / 3 dB"
+      },
+      "computed": {
+        "label": "6 dB / 5 dB / 3 dB"
       },
       "deviation": {
         "label": "exact"
@@ -14545,26 +14850,351 @@
       "verdict": "pass"
     },
     {
-      "id": "room-building-acoustics/iso-10140-5-2010-a1-annex-c-table-c-1/reference-floors-end-to-end-printed-ln-t-r-0-w-ci-of-both",
+      "id": "room-building-acoustics/iso-10140-1-2021-formula-h-1/iso-717-2-table-c-2-improvement-through-the-annex-h-front-end-lw-15-as-printed-ci-9-from-the-table-4-floor-the-print-s-c-2-chain-gives-8",
       "domain": "room-building-acoustics",
       "reference": {
-        "cite": "ISO 10140-5:2010+A1 Annex C, Table C.1",
+        "cite": "ISO 10140-1:2021 Formula (H.1)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 10140-1",
+            "edition": "2021",
+            "clause": "Formula (H.1)"
+          }
+        ]
+      },
+      "quantity": "ISO 717-2 Table C.2 improvement through the Annex H front end -> ΔLw = 15 as printed, CIΔ = -9 from the Table 4 floor (the print's C.2 chain gives -8)",
+      "kind": "record",
+      "expected": {
+        "label": "ΔLw = 15 dB, CIΔ = -9 dB"
+      },
+      "computed": {
+        "label": "ΔLw = 15 dB, CIΔ = -9 dB"
+      },
+      "deviation": {
+        "label": "exact"
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "room-building-acoustics/iso-10140-1-2021-g-4/curing-example-two-measurements-within-1-d-may-start-3-d-after-construction-on-the-same-bound-2-1-d-after-6-3-d-passes-too",
+      "domain": "room-building-acoustics",
+      "reference": {
+        "cite": "ISO 10140-1:2021 G.4",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 10140-1",
+            "edition": "2021",
+            "clause": "G.4"
+          }
+        ]
+      },
+      "quantity": "Curing example: two measurements within 1 d may start 3 d after construction; on the same bound, 2,1 d after 6,3 d passes too",
+      "kind": "record",
+      "expected": {
+        "label": "3 d passes, 2,9 d fails, 6,3 d with 2,1 d passes"
+      },
+      "computed": {
+        "label": "3 d passes, 2,9 d fails, 6,3 d with 2,1 d passes"
+      },
+      "deviation": {
+        "label": "exact"
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "room-building-acoustics/iso-10140-1-2021-table-k-2/the-18-c-j-are-the-iec-61672-1-a-weighting-at-the-exact-midband-frequencies-of-the-nominal-bands-to-0-1-db",
+      "domain": "room-building-acoustics",
+      "reference": {
+        "cite": "ISO 10140-1:2021 Table K.2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 10140-1",
+            "edition": "2021",
+            "clause": "Table K.2"
+          }
+        ]
+      },
+      "quantity": "The 18 C_j are the IEC 61672-1 A-weighting at the exact midband frequencies of the nominal bands, to 0,1 dB",
+      "kind": "count",
+      "expected": {
+        "value": 18.0,
+        "label": "18/18 bands"
+      },
+      "computed": {
+        "value": 18.0,
+        "label": "18/18 bands"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "room-building-acoustics/iso-10140-1-2021-formula-k-2-with-table-k-2/flat-li-50-db-in-the-18-bands-lia-50-10-lg-sum-10-0-1-c-j-printed-c-j",
+      "domain": "room-building-acoustics",
+      "reference": {
+        "cite": "ISO 10140-1:2021 Formula (K.2) with Table K.2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 10140-1",
+            "edition": "2021",
+            "clause": "Formula (K.2) with Table K.2"
+          }
+        ]
+      },
+      "quantity": "Flat LI = 50 dB in the 18 bands -> LIA = 50 + 10 lg sum 10^(0,1 C_j), printed C_j",
+      "kind": "scalar",
+      "expected": {
+        "value": 60.99726716319903
+      },
+      "computed": {
+        "value": 60.997267
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "room-building-acoustics/iso-10140-1-2021-formula-k-1/rain-in-a-100-m-room-t-2-s-se-4-m-li-lpr-10-lg-2-10-lg-100-14-10-lg-4",
+      "domain": "room-building-acoustics",
+      "reference": {
+        "cite": "ISO 10140-1:2021 Formula (K.1)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 10140-1",
+            "edition": "2021",
+            "clause": "Formula (K.1)"
+          }
+        ]
+      },
+      "quantity": "Rain in a 100 m³ room, T = 2 s, Se = 4 m²: LI = Lpr - 10 lg 2 + 10 lg 100 - 14 - 10 lg 4",
+      "kind": "scalar",
+      "expected": {
+        "value": 56.96910013008056
+      },
+      "computed": {
+        "value": 56.9691
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "room-building-acoustics/iso-10140-1-2021-formula-k-4/direct-intensity-over-sm-4-m-of-a-1-m-specimen-li-lim-10-lg-4",
+      "domain": "room-building-acoustics",
+      "reference": {
+        "cite": "ISO 10140-1:2021 Formula (K.4)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 10140-1",
+            "edition": "2021",
+            "clause": "Formula (K.4)"
+          }
+        ]
+      },
+      "quantity": "Direct intensity over Sm = 4 m² of a 1 m² specimen: LI = LIm + 10 lg 4",
+      "kind": "scalar",
+      "expected": {
+        "value": 56.020599913279625
+      },
+      "computed": {
+        "value": 56.0206
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "room-building-acoustics/iso-10140-5-2021-table-i-1/reference-pane-the-36-cells-10-lg-ref-and-lic-ref-in-18-bands-as-printed",
+      "domain": "room-building-acoustics",
+      "reference": {
+        "cite": "ISO 10140-5:2021 Table I.1",
         "documents": [
           {
             "kind": "standard",
             "designation": "ISO 10140-5",
-            "edition": "2010+A1",
-            "clause": "Annex C, Table C.1"
+            "edition": "2021",
+            "clause": "Table I.1"
           }
         ]
       },
-      "quantity": "Reference floors end-to-end: printed Ln,t,r,0,w (CI) of both",
-      "kind": "record",
+      "quantity": "Reference pane: the 36 cells, 10 lg(ηref) and LIc,ref in 18 bands, as printed",
+      "kind": "count",
       "expected": {
-        "label": "Ln,t,r,0,w(CI) = 72(0) / 75(-3)"
+        "value": 36.0,
+        "label": "36/36 printed cells"
       },
       "computed": {
-        "label": "72(0) / 75(-3)"
+        "value": 36.0,
+        "label": "36/36 printed cells"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "room-building-acoustics/iso-10140-5-2021-annex-i-formulas-i-1-to-i-3/reference-pane-at-twice-the-reference-loss-factor-and-at-the-printed-lic-ref-lic-10-lg-2-in-all-18-bands",
+      "domain": "room-building-acoustics",
+      "reference": {
+        "cite": "ISO 10140-5:2021 Annex I, Formulas (I.1) to (I.3)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 10140-5",
+            "edition": "2021",
+            "clause": "Annex I, Formulas (I.1) to (I.3)"
+          }
+        ]
+      },
+      "quantity": "Reference pane at twice the reference loss factor and at the printed LIc,ref: ΔLIc = 10 lg 2 in all 18 bands",
+      "kind": "count",
+      "expected": {
+        "value": 18.0,
+        "label": "18/18 bands"
+      },
+      "computed": {
+        "value": 18.0,
+        "label": "18/18 bands"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "room-building-acoustics/iso-10140-5-2021-tables-h-1-and-h-2/intense-and-heavy-rain-rate-drop-diameter-fall-velocity-holes-hole-density-and-fall-height-as-printed",
+      "domain": "room-building-acoustics",
+      "reference": {
+        "cite": "ISO 10140-5:2021 Tables H.1 and H.2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 10140-5",
+            "edition": "2021",
+            "clause": "Tables H.1 and H.2"
+          }
+        ]
+      },
+      "quantity": "Intense and heavy rain: rate, drop diameter, fall velocity, holes, hole density and fall height as printed",
+      "kind": "count",
+      "expected": {
+        "value": 12.0,
+        "label": "12/12 printed cells"
+      },
+      "computed": {
+        "value": 12.0,
+        "label": "12/12 printed cells"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "room-building-acoustics/iso-10140-1-2021-table-k-1/moderate-intense-heavy-and-cloudburst-rain-rate-drop-diameter-and-fall-velocity-ranges-as-printed",
+      "domain": "room-building-acoustics",
+      "reference": {
+        "cite": "ISO 10140-1:2021 Table K.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 10140-1",
+            "edition": "2021",
+            "clause": "Table K.1"
+          }
+        ]
+      },
+      "quantity": "Moderate, intense, heavy and cloudburst rain: rate, drop diameter and fall velocity ranges as printed",
+      "kind": "count",
+      "expected": {
+        "value": 12.0,
+        "label": "12/12 printed cells"
+      },
+      "computed": {
+        "value": 12.0,
+        "label": "12/12 printed cells"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "room-building-acoustics/iso-10140-5-2021-h-1/heavy-rain-of-table-h-1-40-mm-h-within-the-2-mm-h-of-the-h-1-text-38-and-42-pass-and-38-collected-as-3-8-l-on-0-1-m-in-one-hour-37-9-and-42-1-fail",
+      "domain": "room-building-acoustics",
+      "reference": {
+        "cite": "ISO 10140-5:2021 H.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 10140-5",
+            "edition": "2021",
+            "clause": "H.1"
+          }
+        ]
+      },
+      "quantity": "Heavy rain of Table H.1, 40 mm/h, within the ±2 mm/h of the H.1 text: 38 and 42 pass, and 38 collected as 3,8 L on 0,1 m² in one hour; 37,9 and 42,1 fail",
+      "kind": "record",
+      "expected": {
+        "label": "pass, pass, pass, fail, fail"
+      },
+      "computed": {
+        "label": "pass, pass, pass, fail, fail"
       },
       "deviation": {
         "label": "exact"

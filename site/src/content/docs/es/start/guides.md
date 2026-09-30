@@ -1,6 +1,6 @@
 ---
 title: "Guías"
-description: "Las 156 guías de phonometry, agrupadas en los trece temas que cubre la biblioteca: para qué sirve cada área, las normas que implementa y un resumen de una línea de cada guía que contiene."
+description: "Las 157 guías de phonometry, agrupadas en los trece temas que cubre la biblioteca: para qué sirve cada área, las normas que implementa y un resumen de una línea de cada guía que contiene."
 head:
   - tag: script
     attrs:
@@ -118,7 +118,7 @@ hay ninguna panorámica del campo: cada página es la documentación de trabajo 
 un módulo, escrita para que un resultado se pueda defender apartado por
 apartado en lugar de darlo por bueno.
 
-Esta página es el mapa. Ciento cincuenta y seis guías repartidas en trece temas, y cada
+Esta página es el mapa. Ciento cincuenta y siete guías repartidas en trece temas, y cada
 área tiene su propio índice con el relato largo de cómo encajan sus piezas. Si
 llegas sin una pregunta concreta, lee primero la
 [introducción](/phonometry/es/start/getting-started/): recorre una señal por toda la
@@ -456,6 +456,10 @@ ASTM E413/E1414.
   el tiempo de reverberación de la octava de 63 Hz que la acompaña.
 - [Medición del aislamiento en laboratorio](/phonometry/es/buildings/insulation/insulation-lab/):
   la caracterización ISO 10140 de un elemento con los flancos suprimidos.
+- [Trasdosados, revestimientos y lluvia (ISO 10140-1)](/phonometry/es/buildings/insulation/lab-application-rules/):
+  la mejora que un trasdosado o un revestimiento de suelo da al elemento sobre
+  el que se coloca, valorada sobre las curvas de referencia de ISO 717, y el
+  ruido de la lluvia artificial sobre una cubierta o un lucernario.
 - [Aislamiento acústico por intensidad (ISO 15186)](/phonometry/es/buildings/insulation/insulation-intensity/):
   la potencia transmitida leída sobre la cara radiante, del elemento completo o
   elemento a elemento.

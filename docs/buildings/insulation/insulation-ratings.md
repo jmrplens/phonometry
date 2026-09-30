@@ -454,6 +454,9 @@ sources it rates, in
 
 ## See also
 
+- [Linings, Floor Coverings and Rain (ISO 10140-1)](lab-application-rules.md):
+  the improvements $\Delta R_\mathrm{w}$ and $\Delta L_\mathrm{w}$ rated on
+  the reference curves of ISO 717-1 Table E.1 and ISO 717-2 Table 4.
 - [Field Insulation Measurement (ISO 16283)](insulation-field.md): the
   airborne, impact and façade spectra these engines rate in the field.
 - [Laboratory Insulation Measurement](insulation-lab.md): the laboratory

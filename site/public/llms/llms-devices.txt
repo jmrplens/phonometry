@@ -59,6 +59,8 @@ The total acoustic emission of a source, and the power flux it is built on.
   works.
 - [Sound Power in a Duct](https://jmrplens.github.io/phonometry/devices/emission/sound-power-in-duct/):
   the ISO 5136 in-duct method for fans.
+- [Sound Power of Multisource Industrial Plants](https://jmrplens.github.io/phonometry/devices/emission/sound-power-plant/):
+  the ISO 8297 contour round a whole industrial plant.
 - [Sound Power in the 16 kHz Octave](https://jmrplens.github.io/phonometry/devices/emission/sound-power-high-frequency/):
   the ISO 9295 methods above 10 kHz.
 - [Sound Power of Steam Turbine Sets](https://jmrplens.github.io/phonometry/devices/emission/sound-power-turbines/):

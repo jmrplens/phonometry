@@ -1,6 +1,6 @@
 ---
 title: "Guides"
-description: "The 161 guides of phonometry, grouped into the thirteen topics the library covers: what each area is for, the standards implemented in it, and a one-line summary of every guide inside it."
+description: "The 162 guides of phonometry, grouped into the thirteen topics the library covers: what each area is for, the standards implemented in it, and a one-line summary of every guide inside it."
 head:
   - tag: script
     attrs:
@@ -117,7 +117,7 @@ makes, then runnable code and the figure it draws. Nothing here is a survey of
 the field; each page is the working documentation of a module, written so that
 a result can be defended clause by clause rather than trusted.
 
-This page is the map. A hundred and sixty-one guides sit in thirteen topics, and each topic has its
+This page is the map. A hundred and sixty-two guides sit in thirteen topics, and each topic has its
 own overview page with the longer story of how its pieces fit together. If you
 are arriving without a specific question, read
 [Getting Started](/phonometry/start/getting-started/) first: it runs one signal
@@ -840,6 +840,10 @@ and EBU R 128.
 - [Sound Power in a Duct](/phonometry/devices/emission/sound-power-in-duct/):
   the ISO 5136 in-duct method for fans, with the sampling-tube flow and modal
   correction of Annex A and the plane-wave relation of clause 8.
+- [Sound Power of Multisource Industrial Plants](/phonometry/devices/emission/sound-power-plant/):
+  the ISO 8297 contour round a whole industrial plant, with the area,
+  proximity and air absorption terms of clause 10 and the uncertainty of
+  Table 1.
 - [Sound Power in the 16 kHz Octave](/phonometry/devices/emission/sound-power-high-frequency/):
   the four ISO 9295 methods above the range of ISO 3741 and ISO 3744, with the
   room constant from the reverberation time or from the air absorption, and

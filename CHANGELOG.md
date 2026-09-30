@@ -217,6 +217,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   beside `file_sha256` for the file itself. The guide "Your own catalogues"
   gains a section on it, in both languages.
 
+- **The sound power of a whole industrial plant, measured round a contour on
+  its plot plan (ISO 8297).** A quarry, a crushing plant or a petrochemical
+  complex is too large for an enveloping surface and too full of sources to
+  measure one at a time; ISO 8297 measures the plant as one source for the
+  prediction of the levels at its neighbours. The new
+  `emission.sound_power_plant` module lays the positions on a contour given as
+  a polygon round the plant polygon (`plant_measurement_contour`), with the
+  distances to the perimeter, the aspect angles, the microphone directions,
+  the characteristic height with NOTE 7 and the microphone height of 9.3.
+  `plant_sound_power` runs the nine steps of clause 10: the background
+  correction of Table 2, the energy average with the cap of 10.2 and 10.3, the
+  area, proximity, microphone and air absorption terms, and the A-weighted
+  total; the result plots the power beside the contour average and states the
+  uncertainty of Table 1. The air absorption is Table 3 as printed, or, for the
+  weather at the measurement, the SAE ARP 866A coefficient of ISO 3891
+  Annex A that the ECAC Doc 29 Appendix D curves already use, through the same
+  implementation. Table 3 departs from that coefficient at 125 Hz, 4 kHz and
+  8 kHz, which the guide shows; it is kept as printed, so the weather is for a
+  measurement whose weather differs markedly from 15 °C and 70 %, and passing
+  those very conditions adds about 0.0074 sqrt(Sm) dB at 8 kHz, as the
+  docstrings and the guide say. `check_plant_measurement` returns one verdict
+  on clauses 1.2, 6 b), 7.1, 9.1, 9.3, 9.5.1, 9.5.3 and 10.2, and keeps apart
+  the requirements the standard lets go unmet if reported. It finds the
+  largest aspect angle anywhere on the contour exactly, not only at the
+  positions; it holds the microphone height of 9.3 as a height to stand at, to
+  the ±5 % of the plan, so a microphone too high is reported as well as one too
+  low; and, given `leq_range_db`, it checks the ±0.5 dB to which 9.5.3 wants
+  an integrated reading steady. `partial_plant_contributions` puts together the
+  parts of an industrial area measured on their own contours. The contour and
+  every result keep frozen copies of the arrays they are given. The
+  conformance report holds the three tables, the bound of NOTE 11, ISO 3891
+  Table 9 through the new weather path and the closed form of a point source
+  on the ground; four misprints of the standard are in the errata. A new guide
+  in both languages measures a crushing plant whose sources are known and
+  lands within half a decibel of their power, and puts it beside an asphalt
+  plant of the same industrial area.
 - **NPD curves for the air at the airport, not the average air of
   certification tests (ECAC Doc 29 Vol. 2 Appendix D, SAE ARP 866A through
   ISO 3891).** The ANP noise-power-distance data are normalised to the SAE

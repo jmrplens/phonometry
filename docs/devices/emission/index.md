@@ -26,6 +26,9 @@ for the ISO 3747 comparison against a reference sound source where the
 machine works,
 [Sound Power in a Duct](sound-power-in-duct.md)
 for the ISO 5136 in-duct method that measures a fan inside its own test duct,
+[Sound Power of Multisource Industrial Plants](sound-power-plant.md)
+for the ISO 8297 contour round a whole plant, a quarry or a petrochemical
+complex,
 [Sound Power in the 16 kHz Octave](sound-power-high-frequency.md)
 for the ISO 9295 methods that carry the reverberation room and the free
 field above 10 kHz,
@@ -104,6 +107,10 @@ judged against.
 - [Sound Power in a Duct](sound-power-in-duct.md):
   the ISO 5136 in-duct method for fans, with the sampling-tube flow and
   modal correction of Annex A and the plane-wave relation.
+- [Sound Power of Multisource Industrial Plants](sound-power-plant.md):
+  the ISO 8297 engineering method for a whole industrial plant, measured
+  round a contour drawn on the plot plan, with the proximity and air
+  absorption terms of clause 10 and the uncertainty of Table 1.
 - [Sound Power in the 16 kHz Octave](sound-power-high-frequency.md):
   the ISO 9295 methods for the octave band above 10 kHz, with the room
   constant from the reverberation time or from the air absorption of

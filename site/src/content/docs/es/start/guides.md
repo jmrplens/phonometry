@@ -1,6 +1,6 @@
 ---
 title: "Guías"
-description: "Las 161 guías de phonometry, agrupadas en los trece temas que cubre la biblioteca: para qué sirve cada área, las normas que implementa y un resumen de una línea de cada guía que contiene."
+description: "Las 162 guías de phonometry, agrupadas en los trece temas que cubre la biblioteca: para qué sirve cada área, las normas que implementa y un resumen de una línea de cada guía que contiene."
 head:
   - tag: script
     attrs:
@@ -118,7 +118,7 @@ hay ninguna panorámica del campo: cada página es la documentación de trabajo 
 un módulo, escrita para que un resultado se pueda defender apartado por
 apartado en lugar de darlo por bueno.
 
-Esta página es el mapa. Ciento sesenta y una guías repartidas en trece temas, y cada
+Esta página es el mapa. Ciento sesenta y dos guías repartidas en trece temas, y cada
 área tiene su propio índice con el relato largo de cómo encajan sus piezas. Si
 llegas sin una pregunta concreta, lee primero la
 [introducción](/phonometry/es/start/getting-started/): recorre una señal por toda la
@@ -885,6 +885,10 @@ y EBU R 128.
   el método en conducto de ISO 5136 para ventiladores, con la corrección de
   flujo y modal del tubo de muestreo del Anexo A y la relación de onda plana
   del apartado 8.
+- [Potencia acústica de plantas industriales multifuente](/phonometry/es/devices/emission/sound-power-plant/):
+  el contorno de ISO 8297 alrededor de una planta industrial entera, con los
+  términos de área, de proximidad y de absorción atmosférica del apartado 10 y
+  la incertidumbre de la Tabla 1.
 - [Potencia acústica en la octava de 16 kHz](/phonometry/es/devices/emission/sound-power-high-frequency/):
   los cuatro métodos de ISO 9295 por encima del rango de ISO 3741 e ISO 3744,
   con la constante de sala a partir del tiempo de reverberación o de la

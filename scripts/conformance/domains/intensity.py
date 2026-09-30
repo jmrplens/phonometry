@@ -24,7 +24,15 @@ import reference_data as ref
 import phonometry as ph
 from phonometry.environment.propagation.air_absorption import _pure_tone_terms
 
-from ..registry import Outcome, count, numeric, record, register, residue_text
+from ..registry import (
+    Outcome,
+    aircraft_test_data,
+    count,
+    numeric,
+    record,
+    register,
+    residue_text,
+)
 from .levels import _FS
 
 if TYPE_CHECKING:
@@ -1402,6 +1410,186 @@ def _chk_iso5136_table_c1() -> Outcome:
         expected_label=f"{len(ref.ISO5136_TABLE_C1)} tabulated values of C_j reproduced",
         computed_label=f"max absolute deviation {residue_text(worst, 'dB', '.1e')}",
     )
+
+
+# ---------------------------------------------------------------------------
+# ISO 8297:1994: sound power levels of multisource industrial plants.
+#
+# The standard prints no worked example, so no printed number anchors the whole
+# chain. What it does print is checked: its three tables, the bound of NOTE 11
+# on the proximity term, and, through the SAE ARP 866A transcription shared
+# with ECAC Doc 29 Appendix D, the ISO 3891 coefficients its Table 3 cites. The
+# rest is closed form: the area term of a circular contour is the hemisphere
+# over it, so a point source on the ground gives its own power back as the
+# microphones come down to the ground (h -> 0), and 10 lg((R^2 + R h)/(R^2 +
+# h^2)) more at a height h.
+# ---------------------------------------------------------------------------
+
+_PLANT_OCTAVES = (63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0)
+
+
+@register(
+    "Intensity & sound power",
+    "ISO 3891:1978 Annex A Table 9 (ISO 8297:1994 10.7)",
+    "alpha at 15 °C and 70 % in the octave-centre bands 63 Hz to 8 kHz by the "
+    "weather path of ISO 8297 10.7, through the shared SAE ARP 866A "
+    "transcription, against ISO 3891 Table 9 (printed in dB/100 m to one "
+    "decimal); ISO 8297 Table 3 prints other values at 125 Hz, 4 kHz and 8 kHz",
+)
+def _chk_iso8297_air_absorption_iso3891() -> Outcome:
+    # Table 3 prints alpha "taken from ISO 3891" and asks for the value at the
+    # measured weather when it differs; the weather path evaluates ISO 3891
+    # Annex A at the one-third-octave band centred on each octave. ISO 3891
+    # Table 9 (PDF page 19, printed p. 16) prints that coefficient, 15 degC
+    # column, to one decimal in dB/100 m, and is the source of every expected
+    # value here; the row of ISO 8297 Table 3 is its own check below.
+    tables = aircraft_test_data("iso3891_tables_data")
+    column = tables.TEMPERATURES_C.index(15.0)
+    printed = {
+        f"{f:g} Hz": float(tables.TABLE_9[tables.FREQUENCIES_HZ.index(f)][column])
+        / 100.0
+        for f in _PLANT_OCTAVES
+    }
+    alpha = ph.emission.plant_air_absorption_db_per_m(
+        _PLANT_OCTAVES, temperature_c=15.0, relative_humidity_percent=70.0
+    )
+    computed = {
+        f"{f:g} Hz": round(float(a) * 100.0, 1) / 100.0
+        for f, a in zip(_PLANT_OCTAVES, alpha, strict=True)
+    }
+    return record(printed, computed, unit="dB/m")
+
+
+@register(
+    "Intensity & sound power",
+    "ISO 8297:1994 Table 3",
+    "alpha at 15 °C and 70 % by ISO 3891 Annex A, to the printed digit, in the five "
+    "rows it reproduces (63 Hz, 250 Hz to 2 kHz; 125 Hz, 4 kHz and 8 kHz are "
+    "printed otherwise, see the guide)",
+)
+def _chk_iso8297_table_3() -> Outcome:
+    rows = (63.0, 250.0, 500.0, 1000.0, 2000.0)
+    table = dict(ref.ISO8297_TABLE_3)
+    alpha = ph.emission.plant_air_absorption_db_per_m(
+        rows, temperature_c=15.0, relative_humidity_percent=70.0
+    )
+    return record(
+        {f"{f:g} Hz": table[f] for f in rows},
+        {f"{f:g} Hz": round(float(a), 3) for f, a in zip(rows, alpha, strict=True)},
+        unit="dB/m",
+    )
+
+
+@register(
+    "Intensity & sound power",
+    "ISO 8297:1994 10.5 NOTE 11",
+    "Proximity term lg(d/(4 sqrt(Sp))) at the two ends 0,5 and 0,05 of 9.1.1 a), "
+    "to the printed decimal: -0,9 dB and -1,9 dB",
+)
+def _chk_iso8297_note_11() -> Outcome:
+    area = 10_000.0
+    computed: dict[str, float] = {}
+    for ratio in ref.ISO8297_NOTE_11_RATIOS:
+        res = ph.emission.plant_sound_power(
+            [[70.0]], [1000.0], measurement_area_m2=4.0 * area,
+            contour_length_m=800.0, microphone_height_m=5.0,
+            mean_distance_m=ratio * math.sqrt(area), plant_area_m2=area,
+        )  # fmt: skip
+        computed[f"d/sqrt(Sp) = {ratio:g}"] = round(res.near_field_term_db, 1)
+    expected = {
+        f"d/sqrt(Sp) = {ratio:g}": value
+        for ratio, value in zip(
+            ref.ISO8297_NOTE_11_RATIOS, ref.ISO8297_NOTE_11_DB, strict=True
+        )
+    }
+    return record(expected, computed, unit="dB")
+
+
+@register(
+    "Intensity & sound power",
+    "ISO 8297:1994 Table 2",
+    "Background correction at differences of 6 to 10 dB and at 12 dB, read through "
+    "plant_background_correction_db",
+)
+def _chk_iso8297_table_2() -> Outcome:
+    expected = {f"{d} dB": c for d, c in ref.ISO8297_TABLE_2} | {"12 dB": 0.0}
+    computed = {
+        f"{d} dB": float(ph.emission.plant_background_correction_db(float(d)))
+        for d in (*(row[0] for row in ref.ISO8297_TABLE_2), 12)
+    }
+    return record(expected, computed, unit="dB")
+
+
+@register(
+    "Intensity & sound power",
+    "ISO 8297:1994 Table 1",
+    "Uncertainty of the method, 95 % interval (lower, upper), at the four printed "
+    "ratios d/sqrt(Sp)",
+)
+def _chk_iso8297_table_1() -> Outcome:
+    expected: dict[str, float] = {}
+    computed: dict[str, float] = {}
+    for ratio, lower, upper in ref.ISO8297_TABLE_1:
+        got = ph.emission.plant_method_uncertainty_db(ratio)
+        expected |= {f"{ratio:g} lower": lower, f"{ratio:g} upper": upper}
+        computed |= {f"{ratio:g} lower": got[0], f"{ratio:g} upper": got[1]}
+    return record(expected, computed, unit="dB")
+
+
+@register(
+    "Intensity & sound power",
+    "ISO 8297:1994 10.4 / 10.8",
+    "Point source on the ground at the centre of a circular contour: L_W(ISO 8297) "
+    "- L_W(source) = 10 lg((R^2 + R h)/(R^2 + h^2)), 0 as h tends to 0 (closed "
+    "form, R = 150 m, h = 5 m)",
+)
+def _chk_iso8297_point_source() -> Outcome:
+    source_lw, radius, height = 120.0, 150.0, 5.0
+    angles = np.linspace(0.0, 2.0 * np.pi, 7200, endpoint=False)
+    circle = np.c_[radius * np.cos(angles), radius * np.sin(angles)]
+    area = 0.5 * abs(
+        float(np.sum(circle[:, 0] * np.roll(circle[:, 1], -1)
+                     - np.roll(circle[:, 0], -1) * circle[:, 1]))
+    )  # fmt: skip
+    length = float(np.sum(np.hypot(*(np.roll(circle, -1, axis=0) - circle).T)))
+    lp = source_lw - 10.0 * math.log10(2.0 * math.pi * (radius**2 + height**2))
+    # d = 4 sqrt(Sp) sets the proximity term to 0 and alpha is 0 at 63 Hz, so
+    # the area term alone carries the level on the rim to the power.
+    res = ph.emission.plant_sound_power(
+        np.full((24, 1), lp), [63.0], measurement_area_m2=area,
+        contour_length_m=length, microphone_height_m=height,
+        mean_distance_m=40.0, plant_area_m2=100.0,
+    )  # fmt: skip
+    expected = 10.0 * math.log10(
+        (radius**2 + radius * height) / (radius**2 + height**2)
+    )
+    return numeric(
+        expected,
+        float(res.sound_power_level_db[0]) - source_lw,
+        1e-5,
+        unit="dB",
+        places=6,
+    )
+
+
+@register(
+    "Intensity & sound power",
+    "ISO 8297:1994 9.1.1 b)",
+    "Aspect angle of a unit square seen from (0,5; -d): 180 - 2 atan(2 d) degrees at "
+    "d = 0,1, 0,5 and 2 (closed form)",
+)
+def _chk_iso8297_aspect_angle() -> Outcome:
+    from phonometry.emission.sound_power_plant import _aspect_angle_deg
+
+    square = np.array([[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]])
+    worst = max(
+        abs(
+            _aspect_angle_deg(np.array([0.5, -depth]), square)
+            - (180.0 - 2.0 * math.degrees(math.atan(2.0 * depth)))
+        )
+        for depth in (0.1, 0.5, 2.0)
+    )
+    return numeric(0.0, worst, 1e-9, unit="deg", places=9, expected_label="0 deg")
 
 
 # ---------------------------------------------------------------------------

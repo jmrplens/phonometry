@@ -296,6 +296,50 @@ ISO5136_COVERAGE_FACTOR = 2.0
 
 
 # ---------------------------------------------------------------------------
+# ISO 8297:1994, sound power levels of multisource industrial plants, read in
+# the identical British adoption BS ISO 8297:1994 on the rendered pages (the
+# printed folio is the PDF page index minus 8); the decimal comma of the print
+# is written as a point. Mirrors tests/emission/test_sound_power_plant.py.
+# ---------------------------------------------------------------------------
+#: Table 1 (PDF page 10, printed p. 2), the uncertainty inherent in the
+#: method as a 95 % confidence interval for one determination:
+#: d/sqrt(Sp) -> (lower, upper) in dB.
+ISO8297_TABLE_1: tuple[tuple[float, float, float], ...] = (
+    (0.05, -3.5, 3.0),
+    (0.1, -2.5, 2.5),
+    (0.2, -2.5, 2.0),
+    (0.5, -2.0, 1.5),
+)
+#: Table 2 (PDF page 14, printed p. 6), the correction subtracted for the
+#: background: difference in whole dB -> correction in dB. "< 6" is printed
+#: "Measurement invalid" and "> 10" as 0.
+ISO8297_TABLE_2: tuple[tuple[int, float], ...] = (
+    (6, 1.0),
+    (7, 1.0),
+    (8, 1.0),
+    (9, 0.5),
+    (10, 0.5),
+)
+#: Table 3 (PDF page 15, printed p. 7), alpha in dB/m at 15 degC and 70 % per
+#: octave band; the first row is printed "31" for the 31,5 Hz octave.
+ISO8297_TABLE_3: tuple[tuple[float, float], ...] = (
+    (31.5, 0.0),
+    (63.0, 0.0),
+    (125.0, 0.0),
+    (250.0, 0.001),
+    (500.0, 0.002),
+    (1000.0, 0.005),
+    (2000.0, 0.01),
+    (4000.0, 0.026),
+    (8000.0, 0.046),
+)
+#: NOTE 11 of 10.5 (PDF page 15, printed p. 7): "When the requirements of 9.1
+#: are satisfied, dLF may be expected to lie between - 0,9 dB and - 1,9 dB",
+#: the values of lg(d/(4 sqrt(Sp))) at the two ends 0,5 and 0,05 of 9.1.1 a).
+ISO8297_NOTE_11_DB: tuple[float, float] = (-0.9, -1.9)
+ISO8297_NOTE_11_RATIOS: tuple[float, float] = (0.5, 0.05)
+
+# ---------------------------------------------------------------------------
 # ISO 9295:2015 Tables 1 and 2: the air absorption coefficient alpha, in Np/m,
 # at a static pressure of 101,325 kPa, transcribed from the Spanish adoption
 # UNE-EN ISO 9295:2015 (October 2015), PDF pages 15 and 16, printed folios 15

@@ -44,11 +44,14 @@ from .theme import (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
+
     from phonometry.electroacoustics import (
         LoudspeakerCharacteristics,
         MicrophoneCharacteristics,
     )
     from phonometry.emission import (
+        PlantMeasurementContour,
         TurbineEnvironmentalCorrection,
         TurbineMeasurementSurface,
         TurbineMicrophoneArray,
@@ -8494,3 +8497,366 @@ def generate_induction_loop_neck_loop(output_dir: str) -> None:
     fig.tight_layout()
     save_figure(output_dir, "induction_loop_neck_loop.svg")
     plt.close()
+
+
+# ---------------------------------------------------------------------------
+# ISO 8297:1994: the sound power of a multisource industrial plant.
+# ---------------------------------------------------------------------------
+
+#: The octave bands of the plant example, 63 Hz to 8 kHz.
+_PLANT_BANDS = np.array([63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0])
+#: The eight sources of the example crushing and screening plant: position and
+#: height of each midpoint in metres, and its octave-band sound power level.
+_PLANT_SOURCES = (
+    ((30.0, 30.0, 3.0), (108, 110, 109, 106, 103, 99, 93, 85)),  # primary crusher
+    ((80.0, 25.0, 6.5), (104, 106, 106, 104, 101, 97, 91, 83)),  # secondary crusher
+    ((150.0, 30.0, 12.0), (100, 103, 105, 104, 102, 99, 94, 87)),  # screen tower
+    ((60.0, 85.0, 9.0), (98, 100, 101, 99, 96, 92, 86, 78)),  # conveyor transfer
+    ((100.0, 90.0, 4.0), (101, 102, 100, 97, 94, 90, 84, 76)),  # generator set
+    ((20.0, 95.0, 15.0), (97, 99, 100, 98, 95, 91, 85, 77)),  # stacker
+    ((130.0, 15.0, 7.5), (99, 101, 101, 98, 95, 91, 85, 77)),  # compressor house
+    ((95.0, 45.0, 5.0), (96, 98, 99, 97, 94, 90, 84, 76)),  # pumps
+)
+#: The asphalt mixing plant that shares the industrial area, 120 m to the east:
+#: its three sources, as in section 5 of the guide.
+_ASPHALT_SOURCES = (
+    ((315.0, 40.0, 4.0), (106, 105, 103, 100, 97, 93, 87, 79)),  # dryer drum
+    ((340.0, 30.0, 8.0), (100, 102, 101, 98, 95, 91, 85, 77)),  # exhaust fan
+    ((350.0, 52.0, 12.0), (95, 97, 97, 95, 92, 88, 82, 74)),  # mixing tower
+)
+
+
+#: One source of an example plant: (x, y, height of the midpoint) in metres and
+#: the octave-band sound power level, 63 Hz to 8 kHz, in dB re 1 pW.
+_PlantSource = tuple[tuple[float, float, float], tuple[int, ...]]
+
+
+def _plant_levels(
+    contour: "PlantMeasurementContour", sources: "Sequence[_PlantSource]"
+) -> NDArray[np.float64]:
+    """What the microphones of a contour read from sources of known power:
+    each radiates over the ground as a hemisphere and loses alpha r to the
+    air of Table 3, and the levels are rounded to 0.1 dB as a meter shows them.
+    """
+    from phonometry import emission
+
+    alpha = emission.plant_air_absorption_db_per_m(_PLANT_BANDS)
+    mic = contour.prescribed_microphone_height_m
+    squares = np.zeros((contour.positions_m.shape[0], _PLANT_BANDS.size))
+    for (x, y, z), lw in sources:
+        dx = contour.positions_m[:, 0] - x
+        dy = contour.positions_m[:, 1] - y
+        r = np.sqrt(dx**2 + dy**2 + (mic - z) ** 2)[:, None]
+        level = np.asarray(lw) - 10.0 * np.log10(2.0 * np.pi * r**2) - alpha * r
+        squares += 10.0 ** (level / 10.0)
+    return np.asarray(np.round(10.0 * np.log10(squares), 1), dtype=np.float64)
+
+
+def _plant_example() -> tuple[Any, Any, NDArray[np.float64]]:
+    """The crushing and screening plant of the ISO 8297 guide.
+
+    An L-shaped plant area of 180 m by 110 m, a rectangular contour 25 m out,
+    and eight sources whose power is known, so the level the contour reads
+    is computed rather than invented: each source radiates over the ground,
+    spreads as a hemisphere and loses alpha r to the air of Table 3. What
+    ISO 8297 makes of those levels can then be held against the power the
+    sources actually radiate.
+    """
+    from phonometry import emission
+
+    plant = [[0, 0], [180, 0], [180, 60], [120, 60], [120, 110], [0, 110]]
+    contour_m = [[-25, -25], [205, -25], [205, 135], [-25, 135]]
+    height = emission.plant_characteristic_height_m(
+        [z for (_x, _y, z), _lw in _PLANT_SOURCES], low_source_count=14
+    )
+    contour = emission.plant_measurement_contour(
+        plant, contour_m, characteristic_height_m=height
+    )
+    levels = _plant_levels(contour, _PLANT_SOURCES)
+    background = levels - np.array([14.0, 13.0, 15.0, 17.0, 19.0, 20.0, 22.0, 24.0])
+    result = contour.sound_power(levels, _PLANT_BANDS, background_levels_db=background)
+    true_lw = 10.0 * np.log10(
+        np.sum([10.0 ** (np.asarray(lw) / 10.0) for _p, lw in _PLANT_SOURCES], axis=0)
+    )
+    return contour, result, true_lw
+
+
+def generate_plant_measurement_contour(output_dir: str) -> None:
+    """ISO 8297: the contour round the example plant, positions and sources."""
+    print("Generating plant_measurement_contour.svg...")
+    from matplotlib.lines import Line2D
+
+    contour, _result, _true_lw = _plant_example()
+    fig, ax = plt.subplots(figsize=(10.5, 5.8), layout="constrained")
+    contour.plot(ax=ax, language=_LANG)
+    xs = [x for (x, _y, _z), _lw in _PLANT_SOURCES]
+    ys = [y for (_x, y, _z), _lw in _PLANT_SOURCES]
+    ax.plot(
+        xs,
+        ys,
+        linestyle="none",
+        marker="*",
+        markersize=11,
+        color=COLOR_QUATERNARY,
+        markeredgecolor=COLOR_FG,
+        markeredgewidth=0.6,
+        zorder=6,
+    )
+    legend = ax.get_legend()
+    if legend is None:
+        msg = "PlantMeasurementContour.plot() drew no legend to extend."
+        raise RuntimeError(msg)
+    handles: list[Any] = [h for h in legend.legend_handles if h is not None]
+    labels = [t.get_text() for t in legend.get_texts()]
+    handles.append(
+        Line2D(
+            [],
+            [],
+            linestyle="none",
+            marker="*",
+            markersize=11,
+            color=COLOR_QUATERNARY,
+            markeredgecolor=COLOR_FG,
+            markeredgewidth=0.6,
+        )
+    )
+    labels.append("Noise source of the example")
+    legend.remove()
+    ax.legend(
+        handles,
+        labels,
+        fontsize="small",
+        loc="upper left",
+        bbox_to_anchor=(1.02, 1.0),
+        borderaxespad=0.0,
+    )
+    save_figure(output_dir, "plant_measurement_contour.svg")
+    plt.close(fig)
+
+
+def generate_plant_sound_power(output_dir: str) -> None:
+    """ISO 8297: the plant's L_W beside the contour average and the true power."""
+    print("Generating plant_sound_power.svg...")
+    _contour, result, true_lw = _plant_example()
+    fig, (axl, axr) = plt.subplots(1, 2, figsize=(12.5, 5.4), layout="constrained")
+    result.plot(ax=axl, language=_LANG)
+
+    lower, upper = result.uncertainty_db
+    lw = result.sound_power_level_db
+    x = np.arange(_PLANT_BANDS.size, dtype=float)
+    axr.errorbar(
+        x,
+        lw,
+        yerr=[np.full(x.size, -lower), np.full(x.size, upper)],
+        fmt="o",
+        color=COLOR_PRIMARY,
+        ecolor=COLOR_PRIMARY,
+        capsize=4,
+        markersize=6,
+        linewidth=1.3,
+        label="ISO 8297 $L_W$ with the interval of Table 1",
+        zorder=3,
+    )
+    axr.plot(
+        x,
+        true_lw,
+        linestyle="none",
+        marker="D",
+        markersize=6,
+        markerfacecolor="white",
+        color=COLOR_SECONDARY,
+        markeredgewidth=1.4,
+        label="Power the eight sources radiate",
+        zorder=4,
+    )
+    axr.set_xticks(x)
+    axr.set_xticklabels(
+        [f"{f:g}" if f < 1000 else f"{f / 1000:g}k" for f in _PLANT_BANDS]
+    )
+    axr.set_xlabel(LABEL_FREQ_HZ)
+    axr.set_ylabel("Sound power level $L_W$ [dB]")
+    axr.set_ylim(float(np.min(lw)) - 8.0, float(np.max(lw)) + 8.0)
+    axr.set_title("Against the power the sources radiate")
+    axr.grid(visible=True, axis="y", color=COLOR_GRID, linestyle="--", alpha=0.6)
+    axr.set_axisbelow(True)
+    axr.legend(loc="lower left", fontsize=9)
+    save_figure(output_dir, "plant_sound_power.svg")
+    plt.close(fig)
+
+
+def generate_plant_air_absorption(output_dir: str) -> None:
+    """ISO 8297 Table 3 against the ISO 3891 coefficient it was taken from."""
+    print("Generating plant_air_absorption.svg...")
+    from phonometry import emission
+
+    fig, ax = plt.subplots(figsize=(10.0, 5.6))
+    x = np.arange(_PLANT_BANDS.size, dtype=float)
+    printed = emission.plant_air_absorption_db_per_m(_PLANT_BANDS)
+    for (temp, rh), color, marker in (
+        ((15.0, 70.0), COLOR_PRIMARY, "o"),
+        ((0.0, 80.0), COLOR_TERTIARY, "s"),
+        ((30.0, 40.0), COLOR_SECONDARY, "^"),
+    ):
+        alpha = emission.plant_air_absorption_db_per_m(
+            _PLANT_BANDS, temperature_c=temp, relative_humidity_percent=rh
+        )
+        ax.plot(
+            x,
+            1000.0 * alpha,
+            color=color,
+            marker=marker,
+            linewidth=1.7,
+            markersize=5.5,
+            label=f"ISO 3891 Annex A, {temp:g} °C and {rh:g} %",
+            zorder=3,
+        )
+    ax.plot(
+        x,
+        1000.0 * printed,
+        linestyle="none",
+        marker="X",
+        markersize=10,
+        color=COLOR_FG,
+        label="ISO 8297 Table 3 as printed (15 °C, 70 %)",
+        zorder=4,
+    )
+    ax.set_xticks(x)
+    ax.set_xticklabels(
+        [f"{f:g}" if f < 1000 else f"{f / 1000:g}k" for f in _PLANT_BANDS]
+    )
+    ax.set_xlabel(LABEL_FREQ_HZ)
+    ax.set_ylabel(r"Attenuation coefficient $\alpha$ [dB/km]")
+    ax.set_ylim(0.0, 110.0)
+    ax.set_title("The air absorption of Table 3 and of the weather at the measurement")
+    ax.grid(visible=True, axis="y", color=COLOR_GRID, linestyle="--", alpha=0.6)
+    ax.set_axisbelow(True)
+    ax.legend(loc="upper left", fontsize=9)
+    plt.tight_layout()
+    save_figure(output_dir, "plant_air_absorption.svg")
+    plt.close(fig)
+
+
+def generate_plant_proximity_uncertainty(output_dir: str) -> None:
+    """ISO 8297: the proximity term of 10.5 and the uncertainty of Table 1."""
+    print("Generating plant_proximity_uncertainty.svg...")
+    from phonometry import emission
+
+    _contour, result, _true_lw = _plant_example()
+    ratio = result.distance_ratio
+    ratios = np.geomspace(0.05, 0.5, 200)
+    term = np.log10(ratios / 4.0)
+    fig, (axl, axr) = plt.subplots(1, 2, figsize=(12.5, 5.2))
+    axl.semilogx(ratios, term, color=COLOR_PRIMARY, linewidth=2.0, zorder=3,
+                 label=r"$\Delta L_\mathrm{F} = \lg[\bar{d}/(4\sqrt{S_\mathrm{p}})]$")  # fmt: skip
+    for value in (-0.9, -1.9):
+        axl.axhline(value, color=COLOR_MUTED, linestyle="--", linewidth=1.2, zorder=2)
+    axl.plot(
+        [ratio],
+        [result.near_field_term_db],
+        marker="o",
+        markersize=8,
+        color=COLOR_SECONDARY,
+        linestyle="none",
+        zorder=4,
+        label="The example plant",
+    )
+    axl.set_xlim(0.045, 0.55)
+    axl.set_ylim(-2.1, -0.7)
+    axl.set_xticks([0.05, 0.1, 0.2, 0.5])
+    axl.set_xticklabels(["0.05", "0.1", "0.2", "0.5"])
+    axl.xaxis.set_minor_formatter(mticker.NullFormatter())
+    axl.set_xlabel(r"$\bar{d}/\sqrt{S_\mathrm{p}}$")
+    axl.set_ylabel(r"Proximity term $\Delta L_\mathrm{F}$ [dB]")
+    axl.set_title("NOTE 11: from −1.9 dB to −0.9 dB inside 9.1.1 a)")
+    axl.grid(visible=True, which="major", color=COLOR_GRID, linestyle="--", alpha=0.6)
+    axl.legend(loc="lower right", fontsize=9)
+
+    # The four printed rows as intervals at their own ratio, and the reading
+    # between them: each row holds up to the next, the wider interval.
+    rows = sorted(emission.PLANT_METHOD_UNCERTAINTY_DB)
+    lowers = np.array([emission.PLANT_METHOD_UNCERTAINTY_DB[r][0] for r in rows])
+    uppers = np.array([emission.PLANT_METHOD_UNCERTAINTY_DB[r][1] for r in rows])
+    fill = theme_fill(COLOR_PRIMARY, ax=axr)
+    for start, stop, lower, upper in zip(
+        rows[:-1], rows[1:], lowers, uppers, strict=False
+    ):
+        axr.fill_between(
+            [start, stop], lower, upper, color=fill, linewidth=0.0, zorder=1
+        )
+        axr.plot([start, stop], [upper, upper], color=COLOR_PRIMARY, linestyle="--",
+                 linewidth=1.3, zorder=2)  # fmt: skip
+        axr.plot([start, stop], [lower, lower], color=COLOR_PRIMARY, linestyle="--",
+                 linewidth=1.3, zorder=2)  # fmt: skip
+    axr.errorbar(
+        rows,
+        np.zeros(len(rows)),
+        yerr=[-lowers, uppers],
+        fmt="none",
+        ecolor=COLOR_PRIMARY,
+        elinewidth=2.2,
+        capsize=6,
+        zorder=3,
+        label="Printed row of Table 1",
+    )
+    axr.axhline(0.0, color=COLOR_FG, linewidth=0.8)
+    axr.axvline(ratio, color=COLOR_SECONDARY, linestyle=":", linewidth=1.6,
+                label="The example plant")  # fmt: skip
+    axr.set_xscale("log")
+    axr.set_xlim(0.045, 0.55)
+    axr.set_xticks([0.05, 0.1, 0.2, 0.5])
+    axr.set_xticklabels(["0.05", "0.1", "0.2", "0.5"])
+    # Headroom above the widest row for the legend, in the upper left: the
+    # dotted line of the example runs the full height at 0.24, and a legend
+    # on the right of the panel would sit across it.
+    axr.set_ylim(-4.2, 5.4)
+    axr.set_xlabel(r"$\bar{d}/\sqrt{S_\mathrm{p}}$")
+    axr.set_ylabel("95 % interval of one determination [dB]")
+    axr.set_title("Table 1, each row read up to the next")
+    axr.xaxis.set_minor_formatter(mticker.NullFormatter())
+    axr.legend(loc="upper left", fontsize=9)
+    axr.grid(visible=True, which="major", color=COLOR_GRID, linestyle="--", alpha=0.6)
+    plt.tight_layout()
+    save_figure(output_dir, "plant_proximity_uncertainty.svg")
+    plt.close(fig)
+
+
+def generate_plant_partial_contributions(output_dir: str) -> None:
+    """ISO 8297 0.2 b): two plants of one industrial area and their sum."""
+    print("Generating plant_partial_contributions.svg...")
+    from phonometry import emission
+
+    _contour, result, _true_lw = _plant_example()
+    asphalt = emission.plant_measurement_contour(
+        [[300, 20], [360, 20], [360, 60], [300, 60]],
+        [[285, 5], [375, 5], [375, 75], [285, 75]],
+        characteristic_height_m=emission.plant_characteristic_height_m(
+            [z for (_x, _y, z), _lw in _ASPHALT_SOURCES]
+        ),
+    )
+    asphalt_result = asphalt.sound_power(
+        _plant_levels(asphalt, _ASPHALT_SOURCES), _PLANT_BANDS
+    )
+    area = emission.partial_plant_contributions(
+        [result, asphalt_result],
+        names=[_es("Crushing and screening"), _es("Asphalt mixing")],
+    )
+    fig, ax = plt.subplots(figsize=(10.0, 5.6), layout="constrained")
+    area.plot(ax=ax, language=_LANG)
+    save_figure(output_dir, "plant_partial_contributions.svg")
+    plt.close(fig)
+
+
+def generate_plant_measurement_check(output_dir: str) -> None:
+    """ISO 8297: the verdict on the example, requirement by requirement."""
+    print("Generating plant_measurement_check.svg...")
+    from phonometry import emission
+
+    contour, result, _true_lw = _plant_example()
+    check = emission.check_plant_measurement(
+        contour, result, measurement_time_s=120.0, leq_range_db=0.6
+    )
+    rows = len(check.requirements)
+    fig, ax = plt.subplots(figsize=(10.0, 1.8 + 0.42 * rows), layout="constrained")
+    check.plot(ax=ax, language=_LANG)
+    save_figure(output_dir, "plant_measurement_check.svg")
+    plt.close(fig)

@@ -1753,6 +1753,30 @@ _ES_EXACT = {
     "Formula (B.3): $10\\lg(1 \\pm 2 F_4/\\sqrt{N})$,\n"
     "the sampling part of the band uncertainty": "Fórmula (B.3): $10\\lg(1 \\pm 2 F_4/\\sqrt{N})$,\n"
     "la parte de muestreo de la incertidumbre de la banda",
+    # plant_*: the ISO 8297 figures of the multisource-plant guide.
+    "Noise source of the example": "Fuente de ruido del ejemplo",
+    "ISO 8297 $L_W$ with the interval of Table 1": "$L_W$ de ISO 8297 con el intervalo de la tabla 1",
+    "Power the eight sources radiate": "Potencia que radian las ocho fuentes",
+    "Against the power the sources radiate": "Frente a la potencia que radian las fuentes",
+    "ISO 3891 Annex A, 15 °C and 70 %": "ISO 3891 anexo A, 15 °C y 70 %",
+    "ISO 3891 Annex A, 0 °C and 80 %": "ISO 3891 anexo A, 0 °C y 80 %",
+    "ISO 3891 Annex A, 30 °C and 40 %": "ISO 3891 anexo A, 30 °C y 40 %",
+    "ISO 8297 Table 3 as printed (15 °C, 70 %)": "Tabla 3 de ISO 8297 tal como se imprime (15 °C, 70 %)",
+    "The air absorption of Table 3 and of the weather at the measurement": (
+        "La absorción del aire de la tabla 3 y la del tiempo durante la medición"
+    ),
+    r"$\Delta L_\mathrm{F} = \lg[\bar{d}/(4\sqrt{S_\mathrm{p}})]$": (
+        r"$\Delta L_\mathrm{F} = \lg[\bar{d}/(4\sqrt{S_\mathrm{p}})]$"
+    ),
+    "The example plant": "La planta del ejemplo",
+    r"$\bar{d}/\sqrt{S_\mathrm{p}}$": r"$\bar{d}/\sqrt{S_\mathrm{p}}$",
+    r"Proximity term $\Delta L_\mathrm{F}$ [dB]": r"Término de proximidad $\Delta L_\mathrm{F}$ [dB]",
+    "NOTE 11: from −1.9 dB to −0.9 dB inside 9.1.1 a)": "NOTA 11: de −1,9 dB a −0,9 dB dentro de 9.1.1 a)",
+    "95 % interval of one determination [dB]": "Intervalo del 95 % de una determinación [dB]",
+    "Table 1, each row read up to the next": "Tabla 1, cada fila leída hasta la siguiente",
+    "Printed row of Table 1": "Fila impresa de la tabla 1",
+    "Crushing and screening": "Machaqueo y cribado",
+    "Asphalt mixing": "Aglomerado asfáltico",
     # in_situ_sound_power: the ISO 3747 comparison position by position and
     # the LW it yields (the decimal inside the annotation is prose, so the
     # pair carries the comma itself).

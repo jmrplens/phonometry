@@ -23,7 +23,7 @@ import numpy as np
 
 import phonometry as ph
 
-from ..registry import _ROOT, Outcome, count, numeric, register
+from ..registry import Outcome, aircraft_test_data, count, numeric, register
 
 if TYPE_CHECKING:
     from types import ModuleType
@@ -158,16 +158,10 @@ def _chk_doc29_event_assembly() -> Outcome:
     # reference segment SELs must reproduce the B-1 total 74.73 dB. No oracle
     # exists for per-event LAmax, non-zero bank angles or the Annex 16
     # bandsharing adjustment (no ETM worked example); registered gaps.
-    import sys as _sys
-
-    tests_dir = str(_ROOT / "tests" / "aircraft")
-    if tests_dir not in _sys.path:
-        _sys.path.insert(0, tests_dir)
-    from doc29_workbook_data import B1, SEGMENTS
-
-    rows = SEGMENTS[("JETFDS", "R03")]
+    workbook = aircraft_test_data("doc29_workbook_data")
+    rows = workbook.SEGMENTS[("JETFDS", "R03")]
     total = 10.0 * math.log10(sum(10.0 ** (r[-1] / 10.0) for r in rows))
-    return numeric(B1[("JETFDS", "R03")], total, 1e-2, unit="dB", places=3)
+    return numeric(workbook.B1[("JETFDS", "R03")], total, 1e-2, unit="dB", places=3)
 
 
 # ARP 5534 §3.2.2 splits the SAE Method at a mid-band attenuation of
@@ -940,24 +934,9 @@ _HALF_MILLI_DB = 0.0005 + 1e-9
 _HALF_DECI_DB = 0.05 + 1e-9
 
 
-def _aircraft_test_data(name: str) -> ModuleType:
-    """A transcription module of printed tables from the aircraft test suite.
-
-    The rows read the tables the tests read, so the report and the suite hold
-    one copy of each printed value.
-    """
-    import importlib
-    import sys as _sys
-
-    tests_dir = str(_ROOT / "tests" / "aircraft")
-    if tests_dir not in _sys.path:
-        _sys.path.insert(0, tests_dir)
-    return importlib.import_module(name)
-
-
 def _appendix_d_tables() -> ModuleType:
     """The transcription module of the printed Appendix D tables."""
-    return _aircraft_test_data("doc29_appendix_d_data")
+    return aircraft_test_data("doc29_appendix_d_data")
 
 
 def _appendix_d_increment(
@@ -1161,7 +1140,7 @@ def _chk_iso3891_annex_c() -> Outcome:
     # suite's transcription, in thirds of a decibel as the page prints them.
     from phonometry.aircraft.certification import _tone_background
 
-    example = _aircraft_test_data("iso3891_annex_c_data")
+    example = aircraft_test_data("iso3891_annex_c_data")
     background, excess = _tone_background([0.0, 0.0, *example.LEVELS_DB])
     fields = [
         *zip(background[2:], example.BACKGROUND_THIRDS, strict=True),
@@ -1182,7 +1161,7 @@ def _chk_iso3891_table_10() -> Outcome:
     # it (PDF page 19, printed p. 16), to its one decimal. Linear interpolation
     # misses 11 of the 264 cells. The 12 500 Hz row the table also prints has
     # no evaluation frequency in Table 2 and is not a band of the function.
-    tables = _aircraft_test_data("iso3891_tables_data")
+    tables = aircraft_test_data("iso3891_tables_data")
     printed = np.asarray(tables.TABLE_10)
     got = np.column_stack(
         [

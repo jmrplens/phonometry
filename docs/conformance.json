@@ -3,13 +3,13 @@
   "library": "4.0.0rc1",
   "generator": "scripts/conformance_report.py",
   "counts": {
-    "checks": 1786,
-    "passing": 1786,
+    "checks": 1793,
+    "passing": 1793,
     "failing": 0,
     "domains": 109,
-    "standards": 518,
-    "citations": 1243,
-    "designations": 222,
+    "standards": 519,
+    "citations": 1250,
+    "designations": 223,
     "sources": 123
   },
   "units": [
@@ -167,8 +167,8 @@
     {
       "id": "intensity-sound-power",
       "title": "Intensity & sound power",
-      "checks": 78,
-      "passing": 78
+      "checks": 85,
+      "passing": 85
     },
     {
       "id": "emission-sound-pressure-level-iso-11200-group",
@@ -10263,6 +10263,325 @@
         "label": "max absolute deviation below 1e-12 dB"
       },
       "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 9,
+      "verdict": "pass"
+    },
+    {
+      "id": "intensity-sound-power/iso-3891-1978-annex-a-table-9-iso-8297-1994-10-7/alpha-at-15-c-and-70-in-the-octave-centre-bands-63-hz-to-8-khz-by-the-weather-path-of-iso-8297-10-7-through-the-shared-sae-arp-866a-transcription-against-iso-3891-table-9-printed-in-db-100-m-to-one-decimal-iso-8297-table-3-prints-other-values-at-125-hz-4-khz-and-8-khz",
+      "domain": "intensity-sound-power",
+      "reference": {
+        "cite": "ISO 3891:1978 Annex A Table 9 (ISO 8297:1994 10.7)",
+        "tail": ")",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 3891",
+            "edition": "1978",
+            "clause": "Annex A Table 9"
+          },
+          {
+            "kind": "standard",
+            "designation": "ISO 8297",
+            "edition": "1994",
+            "clause": "10.7",
+            "lead": " (",
+            "relation": "mentions"
+          }
+        ]
+      },
+      "quantity": "alpha at 15 °C and 70 % in the octave-centre bands 63 Hz to 8 kHz by the weather path of ISO 8297 10.7, through the shared SAE ARP 866A transcription, against ISO 3891 Table 9 (printed in dB/100 m to one decimal); ISO 8297 Table 3 prints other values at 125 Hz, 4 kHz and 8 kHz",
+      "kind": "record",
+      "expected": {
+        "label": "63 Hz = 0 dB/m; 125 Hz = 0.001 dB/m; 250 Hz = 0.001 dB/m; 500 Hz = 0.002 dB/m; 1000 Hz = 0.005 dB/m; 2000 Hz = 0.01 dB/m; 4000 Hz = 0.025 dB/m; 8000 Hz = 0.061 dB/m",
+        "record": {
+          "63 Hz": 0.0,
+          "125 Hz": 0.001,
+          "250 Hz": 0.001,
+          "500 Hz": 0.002,
+          "1000 Hz": 0.005,
+          "2000 Hz": 0.01,
+          "4000 Hz": 0.025,
+          "8000 Hz": 0.061
+        }
+      },
+      "computed": {
+        "label": "63 Hz = 0 dB/m; 125 Hz = 0.001 dB/m; 250 Hz = 0.001 dB/m; 500 Hz = 0.002 dB/m; 1000 Hz = 0.005 dB/m; 2000 Hz = 0.01 dB/m; 4000 Hz = 0.025 dB/m; 8000 Hz = 0.061 dB/m",
+        "record": {
+          "63 Hz": 0.0,
+          "125 Hz": 0.001,
+          "250 Hz": 0.001,
+          "500 Hz": 0.002,
+          "1000 Hz": 0.005,
+          "2000 Hz": 0.01,
+          "4000 Hz": 0.025,
+          "8000 Hz": 0.061
+        }
+      },
+      "unit": "dB/m",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "intensity-sound-power/iso-8297-1994-table-3/alpha-at-15-c-and-70-by-iso-3891-annex-a-to-the-printed-digit-in-the-five-rows-it-reproduces-63-hz-250-hz-to-2-khz-125-hz-4-khz-and-8-khz-are-printed-otherwise-see-the-guide",
+      "domain": "intensity-sound-power",
+      "reference": {
+        "cite": "ISO 8297:1994 Table 3",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 8297",
+            "edition": "1994",
+            "clause": "Table 3"
+          }
+        ]
+      },
+      "quantity": "alpha at 15 °C and 70 % by ISO 3891 Annex A, to the printed digit, in the five rows it reproduces (63 Hz, 250 Hz to 2 kHz; 125 Hz, 4 kHz and 8 kHz are printed otherwise, see the guide)",
+      "kind": "record",
+      "expected": {
+        "label": "63 Hz = 0 dB/m; 250 Hz = 0.001 dB/m; 500 Hz = 0.002 dB/m; 1000 Hz = 0.005 dB/m; 2000 Hz = 0.01 dB/m",
+        "record": {
+          "63 Hz": 0.0,
+          "250 Hz": 0.001,
+          "500 Hz": 0.002,
+          "1000 Hz": 0.005,
+          "2000 Hz": 0.01
+        }
+      },
+      "computed": {
+        "label": "63 Hz = 0 dB/m; 250 Hz = 0.001 dB/m; 500 Hz = 0.002 dB/m; 1000 Hz = 0.005 dB/m; 2000 Hz = 0.01 dB/m",
+        "record": {
+          "63 Hz": 0.0,
+          "250 Hz": 0.001,
+          "500 Hz": 0.002,
+          "1000 Hz": 0.005,
+          "2000 Hz": 0.01
+        }
+      },
+      "unit": "dB/m",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "intensity-sound-power/iso-8297-1994-10-5-note-11/proximity-term-lg-d-4-sqrt-sp-at-the-two-ends-0-5-and-0-05-of-9-1-1-a-to-the-printed-decimal-0-9-db-and-1-9-db",
+      "domain": "intensity-sound-power",
+      "reference": {
+        "cite": "ISO 8297:1994 10.5 NOTE 11",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 8297",
+            "edition": "1994",
+            "clause": "10.5 NOTE 11"
+          }
+        ]
+      },
+      "quantity": "Proximity term lg(d/(4 sqrt(Sp))) at the two ends 0,5 and 0,05 of 9.1.1 a), to the printed decimal: -0,9 dB and -1,9 dB",
+      "kind": "record",
+      "expected": {
+        "label": "d/sqrt(Sp) = 0.5 = -0.9 dB; d/sqrt(Sp) = 0.05 = -1.9 dB",
+        "record": {
+          "d/sqrt(Sp) = 0.5": -0.9,
+          "d/sqrt(Sp) = 0.05": -1.9
+        }
+      },
+      "computed": {
+        "label": "d/sqrt(Sp) = 0.5 = -0.9 dB; d/sqrt(Sp) = 0.05 = -1.9 dB",
+        "record": {
+          "d/sqrt(Sp) = 0.5": -0.9,
+          "d/sqrt(Sp) = 0.05": -1.9
+        }
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "intensity-sound-power/iso-8297-1994-table-2/background-correction-at-differences-of-6-to-10-db-and-at-12-db-read-through-plant-background-correction-db",
+      "domain": "intensity-sound-power",
+      "reference": {
+        "cite": "ISO 8297:1994 Table 2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 8297",
+            "edition": "1994",
+            "clause": "Table 2"
+          }
+        ]
+      },
+      "quantity": "Background correction at differences of 6 to 10 dB and at 12 dB, read through plant_background_correction_db",
+      "kind": "record",
+      "expected": {
+        "label": "6 dB = 1 dB; 7 dB = 1 dB; 8 dB = 1 dB; 9 dB = 0.5 dB; 10 dB = 0.5 dB; 12 dB = 0 dB",
+        "record": {
+          "6 dB": 1.0,
+          "7 dB": 1.0,
+          "8 dB": 1.0,
+          "9 dB": 0.5,
+          "10 dB": 0.5,
+          "12 dB": 0.0
+        }
+      },
+      "computed": {
+        "label": "6 dB = 1 dB; 7 dB = 1 dB; 8 dB = 1 dB; 9 dB = 0.5 dB; 10 dB = 0.5 dB; 12 dB = 0 dB",
+        "record": {
+          "6 dB": 1.0,
+          "7 dB": 1.0,
+          "8 dB": 1.0,
+          "9 dB": 0.5,
+          "10 dB": 0.5,
+          "12 dB": 0.0
+        }
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "intensity-sound-power/iso-8297-1994-table-1/uncertainty-of-the-method-95-interval-lower-upper-at-the-four-printed-ratios-d-sqrt-sp",
+      "domain": "intensity-sound-power",
+      "reference": {
+        "cite": "ISO 8297:1994 Table 1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 8297",
+            "edition": "1994",
+            "clause": "Table 1"
+          }
+        ]
+      },
+      "quantity": "Uncertainty of the method, 95 % interval (lower, upper), at the four printed ratios d/sqrt(Sp)",
+      "kind": "record",
+      "expected": {
+        "label": "0.05 lower = -3.5 dB; 0.05 upper = 3 dB; 0.1 lower = -2.5 dB; 0.1 upper = 2.5 dB; 0.2 lower = -2.5 dB; 0.2 upper = 2 dB; 0.5 lower = -2 dB; 0.5 upper = 1.5 dB",
+        "record": {
+          "0.05 lower": -3.5,
+          "0.05 upper": 3.0,
+          "0.1 lower": -2.5,
+          "0.1 upper": 2.5,
+          "0.2 lower": -2.5,
+          "0.2 upper": 2.0,
+          "0.5 lower": -2.0,
+          "0.5 upper": 1.5
+        }
+      },
+      "computed": {
+        "label": "0.05 lower = -3.5 dB; 0.05 upper = 3 dB; 0.1 lower = -2.5 dB; 0.1 upper = 2.5 dB; 0.2 lower = -2.5 dB; 0.2 upper = 2 dB; 0.5 lower = -2 dB; 0.5 upper = 1.5 dB",
+        "record": {
+          "0.05 lower": -3.5,
+          "0.05 upper": 3.0,
+          "0.1 lower": -2.5,
+          "0.1 upper": 2.5,
+          "0.2 lower": -2.5,
+          "0.2 upper": 2.0,
+          "0.5 lower": -2.0,
+          "0.5 upper": 1.5
+        }
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "intensity-sound-power/iso-8297-1994-10-4-10-8/point-source-on-the-ground-at-the-centre-of-a-circular-contour-l-w-iso-8297-l-w-source-10-lg-r-2-r-h-r-2-h-2-0-as-h-tends-to-0-closed-form-r-150-m-h-5-m",
+      "domain": "intensity-sound-power",
+      "reference": {
+        "cite": "ISO 8297:1994 10.4 / 10.8",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 8297",
+            "edition": "1994",
+            "clause": "10.4 / 10.8"
+          }
+        ]
+      },
+      "quantity": "Point source on the ground at the centre of a circular contour: L_W(ISO 8297) - L_W(source) = 10 lg((R^2 + R h)/(R^2 + h^2)), 0 as h tends to 0 (closed form, R = 150 m, h = 5 m)",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.13758157574872112
+      },
+      "computed": {
+        "value": 0.137581
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-05
+      },
+      "deviation": {
+        "value": -1e-06
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "intensity-sound-power/iso-8297-1994-9-1-1-b/aspect-angle-of-a-unit-square-seen-from-0-5-d-180-2-atan-2-d-degrees-at-d-0-1-0-5-and-2-closed-form",
+      "domain": "intensity-sound-power",
+      "reference": {
+        "cite": "ISO 8297:1994 9.1.1 b)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 8297",
+            "edition": "1994",
+            "clause": "9.1.1 b)"
+          }
+        ]
+      },
+      "quantity": "Aspect angle of a unit square seen from (0,5; -d): 180 - 2 atan(2 d) degrees at d = 0,1, 0,5 and 2 (closed form)",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0,
+        "label": "0 deg"
+      },
+      "computed": {
+        "value": 0.0
+      },
+      "unit": "deg",
       "tolerance": {
         "mode": "absolute",
         "value": 1e-09

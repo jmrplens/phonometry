@@ -125,6 +125,8 @@ from result_factories import (
     _pass_by_measurement,
     _pass_by_uncertainty,
     _people_assessment,
+    _plant_contour,
+    _plant_sound_power,
     _pleasantness_eventfulness,
     _porous_medium,
     _position_spread,
@@ -735,6 +737,22 @@ _KWARG_PLOT_CASES = [
         ),
         "line",
     ),
+    ("plant_contour", _plant_contour, "line"),
+    ("plant_sound_power", _plant_sound_power, "bar"),
+    (
+        "plant_measurement_check",
+        lambda: ph.emission.check_plant_measurement(
+            _plant_contour(), _plant_sound_power(), measurement_time_s=90.0
+        ),
+        "bar",
+    ),
+    (
+        "partial_plant_contributions",
+        lambda: ph.emission.partial_plant_contributions(
+            [_plant_sound_power(), _plant_sound_power()], names=["North", "South"]
+        ),
+        "bar",
+    ),
     (
         "revised_npd_curves",
         lambda: ph.aircraft.load_anp_database().revised_npd_curves(
@@ -1017,6 +1035,9 @@ def test_single_axes_plots_accept_external_ax() -> None:
         _turbine_array(),
         _turbine_power(),
         _turbine_declaration(),
+        _plant_contour(),
+        _plant_sound_power(),
+        ph.emission.check_plant_measurement(_plant_contour()),
         ph.aircraft.load_anp_database().flight_profile(
             "A320-211", "departure", aerodrome=ph.aircraft.Aerodrome(elevation_ft=0.0)
         ),

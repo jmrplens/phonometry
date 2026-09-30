@@ -41,6 +41,7 @@ from __future__ import annotations
 
 import enum
 import functools
+import importlib
 import math
 import pathlib
 import re
@@ -52,6 +53,7 @@ from .units import canonical_unit
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Mapping
+    from types import ModuleType
 
 # The checks do not re-type their expected values: they read the test suite's
 # shared tables (``reference_data``) and its worked-example helpers
@@ -64,6 +66,24 @@ _DATA = _TESTS / "data"
 for _p in (str(_TESTS),):
     if _p not in sys.path:
         sys.path.insert(0, _p)
+
+
+def aircraft_test_data(name: str) -> ModuleType:
+    """A transcription module of printed tables from the aircraft test suite.
+
+    The rows read the tables the tests read, so the report and the suite hold
+    one copy of each printed value. It lives here, beside the path set-up,
+    because more than one domain reads these modules and a domain importing
+    another would register that domain's checks first and reorder the report.
+
+    :param name: The module under ``tests/aircraft``, such as
+        ``"iso3891_tables_data"``.
+    :return: The imported module.
+    """
+    tests_dir = str(_TESTS / "aircraft")
+    if tests_dir not in sys.path:
+        sys.path.insert(0, tests_dir)
+    return importlib.import_module(name)
 
 
 class Verdict(enum.StrEnum):

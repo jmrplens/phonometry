@@ -1,0 +1,614 @@
+---
+title: "Potencia acústica de plantas industriales multifuente"
+description: "El método de ingeniería de ISO 8297 para un complejo petroquímico, una cantera o una planta de machaqueo: un contorno de medición alrededor del área de la planta, las posiciones, alturas y direcciones de los micrófonos, los términos de área, de proximidad, del micrófono y de absorción atmosférica del apartado 10, la corrección por ruido de fondo de la Tabla 2, la absorción del aire de la Tabla 3 o del tiempo atmosférico de la medición, la incertidumbre de la Tabla 1 y un único veredicto sobre la disposición."
+references:
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 1994
+    title: "Acoustics — Determination of sound power levels of multisource industrial plants for evaluation of sound pressure levels in the environment — Engineering method"
+    designation: "ISO 8297:1994"
+    note: "El contorno de 9.1, las dimensiones de la planta de 9.2, la altura y la dirección del micrófono de 9.3 y 9.4, la corrección por ruido de fondo de la Tabla 2, los nueve pasos del apartado 10 con la absorción del aire de la Tabla 3 y la incertidumbre de la Tabla 1 que esta guía implementa; leída en la adopción británica idéntica BS ISO 8297:1994."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 1978
+    title: "Acoustics — Procedure for describing aircraft noise heard on the ground"
+    designation: "ISO 3891:1978"
+    note: "Anexo A, el coeficiente de atenuación SAE ARP 866A del que se tomó la Tabla 3 de ISO 8297 y que esta guía evalúa para el tiempo atmosférico de la medición. Anulada."
+---
+
+import Scope from '../../../../../components/Scope.astro';
+import ScopeClaim from '../../../../../components/ScopeClaim.astro';
+import SeeAlso from '../../../../../components/SeeAlso.astro';
+import ThemeImage from '../../../../../components/ThemeImage.astro';
+
+Un complejo petroquímico, una cantera o una planta de machaqueo son demasiado
+grandes para la superficie envolvente de ISO 3744 y tienen demasiadas fuentes
+para medir ninguna por separado. Lo que oyen sus vecinos, a unos cientos de
+metros, es la planta entera, y lo que necesita un modelo de predicción es un
+nivel de potencia acústica por banda de octava para ese conjunto, situado en
+el centro del área de la planta. ISO 8297 es el método de ingeniería (grado 2
+de ISO 2204) que lo mide. Sobre el plano de planta se traza un camino cerrado
+alrededor de la planta, el **contorno de medición**; los micrófonos se colocan
+sobre él a intervalos iguales, elevados a una altura que crece con el área
+que encierra el contorno y apuntando en horizontal hacia la planta; sus
+niveles por bandas de octava se promedian; y cuatro términos convierten ese
+promedio en la potencia. El método es para plantas cuya mayor dimensión
+horizontal está entre 16 m y unos 320 m, que radian de forma más o menos
+uniforme en todas las direcciones horizontales, y cuyo resultado se usará a
+por lo menos 1,5 veces esa dimensión de su centro (apartados 0.2 y 1.2).
+
+## 1. El contorno de medición (apartado 9)
+
+El contorno es cualquier camino cerrado de forma sencilla alrededor del
+**área de la planta** $S_\mathrm{p}$, el área que contiene todas las fuentes.
+Tres requisitos fijan a qué distancia pasa y con qué densidad se muestrea
+(9.1.1). La **distancia de medición media**, la media sobre las $N$ posiciones
+de la distancia $d_i$ de cada posición al punto más cercano del perímetro de
+la planta,
+
+$$
+\bar{d} = \frac{1}{N}\sum_{i=1}^{N} d_i ,
+$$
+
+debe superar $0{,}05\sqrt{S_\mathrm{p}}$ o 5 m, lo que sea mayor, y no debe
+superar $0{,}5\sqrt{S_\mathrm{p}}$ o 35 m, lo que sea menor. Desde cualquier
+punto del contorno el área de la planta debe verse dentro de un **ángulo de
+visión** de como mucho 180°, es decir, el contorno nunca se mete en un entrante
+de la planta. Y las posiciones contiguas deben estar a lo sumo a $2\bar{d}$ una
+de otra. La longitud del contorno $l$, el área que encierra $S_\mathrm{m}$
+(incluida la planta) y la **altura característica** de la planta, la altura
+media de los puntos medios de sus $n$ fuentes, $H = \frac{1}{n}\sum_k h_k$, se
+leen en el plano con una exactitud de ±5 % (9.2); si hay diez o más fuentes de
+menos de 2 m, la NOTA 7 permite contarlas de forma aproximada y tomarlas a
+1 m. El micrófono se coloca entonces a
+
+$$
+h = H + 0{,}025\sqrt{S_\mathrm{m}} \quad \text{o a 5 m, lo que sea mayor,}
+$$
+
+en cada posición (9.3), con su dirección de referencia horizontal y a 90° del
+contorno, hacia la planta (9.4).
+
+`plant_measurement_contour()` toma los dos polígonos en metros y reparte las
+posiciones a lo largo del contorno desde su primer vértice. Sin
+`position_count` elige las mínimas que cumplen 9.1.1 c); una distribución
+propia, y las posiciones que un río o un edificio obligaron a omitir (como
+mucho el 10 %, 9.1.2.4), se indican con `position_count` y `omitted_positions`.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/plant_measurement_contour.svg" alt="Plano de un área de planta en forma de L, de 180 m por 110 m con un entrante de 60 m por 50 m recortado en su esquina superior derecha, rayado en naranja, con ocho estrellas para sus fuentes de ruido. Un contorno de medición rectangular de 780 m de longitud pasa 25 m por fuera, y trece posiciones de medición se sitúan sobre él a 60 m unas de otras, cada una con una flecha verde corta que apunta en horizontal hacia la planta en ángulo recto con el contorno, la de la esquina inferior izquierda en diagonal hacia dentro. Una línea gris de puntos une cada posición con el punto más cercano del perímetro de la planta. El título da N = 13, una distancia de medición media de 30,9 m y una altura del micrófono de 8,3 m; la leyenda queda fuera del plano, a la derecha" width="100%" />
+
+*El contorno del ejemplo de más abajo. Trece posiciones son las mínimas que
+dejan 60 m entre vecinas dentro de $2\bar{d} = 61{,}8$ m; las líneas de puntos
+son las $d_i$ cuya media es $\bar{d}$, y llegan al punto más cercano del
+perímetro, que para las posiciones de las esquinas es una esquina de la
+planta. El entrante de arriba a la derecha no afecta a 9.1.1 b): el contorno
+queda fuera de la envolvente convexa de la planta, así que ningún punto suyo
+la ve bajo más de 149°.*
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+from phonometry import emission
+
+plant = [[0, 0], [180, 0], [180, 60], [120, 60], [120, 110], [0, 110]]
+contour_m = [[-25, -25], [205, -25], [205, 135], [-25, 135]]
+source_heights_m = [3.0, 6.5, 12.0, 9.0, 4.0, 15.0, 7.5, 5.0]
+H = emission.plant_characteristic_height_m(source_heights_m, low_source_count=14)
+contour = emission.plant_measurement_contour(plant, contour_m, characteristic_height_m=H)
+fig, ax = plt.subplots(figsize=(10.5, 5.8), layout="constrained")
+contour.plot(ax=ax, language="es")
+# Las ocho fuentes de ruido del ejemplo del apartado 3, en el plano y en su leyenda.
+source_xy = [(30, 30), (80, 25), (150, 30), (60, 85),
+             (100, 90), (20, 95), (130, 15), (95, 45)]
+(stars,) = ax.plot(*zip(*source_xy), "*", markersize=11, label="Fuente de ruido del ejemplo")
+legend = ax.get_legend()
+labels = [text.get_text() for text in legend.get_texts()]
+ax.legend([*legend.legend_handles, stars], [*labels, stars.get_label()], fontsize="small",
+          loc="upper left", bbox_to_anchor=(1.02, 1.0), borderaxespad=0.0)
+plt.show()
+```
+
+</details>
+
+### Cómo se hace la medida
+
+Se traza un primer contorno en el plano de planta, se reparten sobre él las
+posiciones y se comprueban allí 9.1.1 a) y b); si no se cumplen, se traza
+otro (9.1.2.3; la NOTA 6 cuenta con que baste una iteración). Se miden $l$, $S_\mathrm{m}$ y $H$
+en el plano, se elevan los micrófonos a la altura de 9.3 (tan alto como se
+pueda por encima de 5 m si no se alcanza, y se indica) y se orientan hacia la
+planta. Toda la cadena se comprueba con un calibrador de clase 1 en cada serie.
+Con la planta en el modo de funcionamiento que se quiere describir, se leen
+los niveles por bandas de octava de 63 Hz a 4 kHz en cada posición (pueden
+añadirse 31,5 Hz y 8 kHz), al menos 1 min por banda si el ruido es estable y
+con un sonómetro integrador en cualquier otro caso; si se usa un sonómetro
+convencional, una aguja que oscila menos de 5 dB indica un ruido estable, y el
+nivel es la media del máximo y el mínimo (9.5.2); con un sonómetro integrador,
+el $L_{\mathrm{eq},T}$ se toma cuando ya no se mueve más de ±0,5 dB (9.5.3). Con
+la planta parada, se lee el ruido de fondo en las mismas posiciones. El viento debe mantenerse estable
+durante una serie, no debe haber superficies reflectantes detrás de los
+micrófonos, y la serie completa se repite para cada modo de funcionamiento
+(apartados 6 y 8).
+
+## 2. Del contorno a la potencia acústica (apartado 10)
+
+El apartado 10 son nueve pasos. Los niveles, corregido antes cada uno por
+ruido de fondo según la Tabla 2 (9.5.4, en la sección siguiente), se
+promedian energéticamente por banda (paso 1):
+
+$$
+\overline{L_p} = 10 \lg\left[\frac{1}{N}\sum_{i=1}^{N} 10^{0{,}1 L_{pi}}\right] \mathrm{dB}.
+$$
+
+Un nivel que supera ese promedio en más de 5 dB indica que el contorno pasa
+demasiado cerca de una parte de la planta; 10.2 pide un contorno más alejado
+y, si no es factible, sustituye cada uno de esos niveles por
+$\overline{L_p} + 5$ dB y vuelve a promediar, obteniendo $\overline{L_p^*}$
+(pasos 2 y 3). `plant_sound_power()` hace esto último con un
+`SoundPowerWarning` y registra en `capped` qué niveles sustituyó. Cuatro
+términos llevan después el promedio a la potencia (pasos 4 a 8):
+
+$$
+L_W = \overline{L_p} + \Delta L_\mathrm{S} + \Delta L_\mathrm{F} + \Delta L_\mathrm{M} + \Delta L_\alpha ,
+$$
+
+$$
+\Delta L_\mathrm{S} = 10 \lg\frac{2 S_\mathrm{m} + h l}{S_0}\ \mathrm{dB},\qquad
+\Delta L_\mathrm{F} = \lg\frac{\bar{d}}{4\sqrt{S_\mathrm{p}}}\ \mathrm{dB},
+$$
+
+$$
+\Delta L_\mathrm{M} = 3\left(1 - \frac{\theta}{90}\right) \mathrm{dB},\qquad
+\Delta L_\alpha = 0{,}5\,\alpha\sqrt{S_\mathrm{m}}\ \mathrm{dB},
+$$
+
+con $S_0 = 1$ m². Cada uno tiene una lectura sencilla. El **término de área**
+es la superficie de medición de ISO 3744: sobre un contorno circular de
+radio $r$, $2S_\mathrm{m} = 2\pi r^2$ es el hemisferio que lo cubre y $hl$ la
+franja de pared de altura $h$ a su alrededor, de modo que una fuente puntual
+sobre el suelo en el centro devuelve su propia potencia a medida que los
+micrófonos bajan al suelo. El **término de proximidad** descuenta lo que las
+fuentes cercanas añaden al promedio; no lleva factor 10, y la NOTA 11 dice
+que queda entre −0,9 dB y −1,9 dB cuando se cumple 9.1, que son
+$\lg(0{,}5/4)$ y $\lg(0{,}05/4)$, sus valores en los dos extremos de 9.1.1 a).
+El **término del micrófono** compensa un micrófono direccional, cuyo ángulo a
+−3 dB $\theta$ debe superar 30° (7.1); es 0 dB para uno omnidireccional. El
+**término de absorción atmosférica** devuelve lo que el aire se lleva a lo
+largo de la mitad de la raíz del área de medición. El nivel ponderado A es la
+suma de las bandas con la ponderación A $C_j$ (paso 9),
+$L_{W\mathrm{A}} = 10 \lg \sum_j 10^{0{,}1(L_{Wj} + C_j)}$ dB, con los valores
+por bandas de octava del Anexo E de ISO 3744:2010 que usan todos los métodos
+de potencia acústica de esta biblioteca; una banda de 31,5 Hz, que el Anexo E
+no pondera, queda fuera.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/plant_proximity_uncertainty.svg" alt="Dos paneles frente al cociente entre la distancia de medición media y la raíz del área de la planta, en un eje logarítmico de 0,05 a 0,5. A la izquierda, el término de proximidad sube en línea recta de −1,9 dB en 0,05 a −0,9 dB en 0,5, entre dos líneas horizontales discontinuas en esos valores, con la planta del ejemplo marcada en un cociente de 0,24 y −1,22 dB. A la derecha, las cuatro filas impresas de la Tabla 1 como intervalos verticales en sus cocientes, de −3,5 a +3,0 dB en 0,05, ±2,5 dB en 0,1, de −2,5 a +2,0 dB en 0,2 y de −2,0 a +1,5 dB en 0,5, cada una prolongada como una banda sombreada con bordes discontinuos hasta la fila siguiente, y una línea vertical de puntos en el cociente del ejemplo" width="100%" />
+
+*Todo lo que el plano decide sobre el resultado vive en un cociente,
+$\bar{d}/\sqrt{S_\mathrm{p}}$. A la izquierda, el término de proximidad en
+todo el intervalo que admite 9.1.1 a): un decibelio de un extremo a otro, y
+nunca más negativo que −1,9 dB. A la derecha, la incertidumbre de la Tabla 1
+en el mismo intervalo; la tabla imprime cuatro filas y no dice nada entre
+ellas, así que un cociente entre dos filas toma la de abajo, el intervalo más
+ancho. La planta del ejemplo está en 0,24, en la fila de $+2{,}0/-2{,}5$ dB.*
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import emission
+
+ratio = contour.distance_ratio  # la planta del ejemplo, del contorno de arriba
+ratios = np.geomspace(0.05, 0.5, 200)
+fig, (axl, axr) = plt.subplots(1, 2, figsize=(12.5, 5.2))
+axl.semilogx(ratios, np.log10(ratios / 4.0), label="dLF = lg(d / (4 raíz(Sp)))")
+axl.axhline(-0.9, linestyle="--")
+axl.axhline(-1.9, linestyle="--")
+axl.plot([ratio], [np.log10(ratio / 4.0)], "o", label="La planta del ejemplo")
+axl.set(xlabel="d / raíz(Sp)", ylabel="Término de proximidad dLF [dB]")
+axl.legend(loc="lower right")
+rows = sorted(emission.PLANT_METHOD_UNCERTAINTY_DB)
+lowers = [emission.PLANT_METHOD_UNCERTAINTY_DB[row][0] for row in rows]
+uppers = [emission.PLANT_METHOD_UNCERTAINTY_DB[row][1] for row in rows]
+# Cada fila impresa vale hasta la siguiente: una banda sombreada con bordes discontinuos.
+for start, stop, lower, upper in zip(rows[:-1], rows[1:], lowers, uppers):
+    axr.fill_between([start, stop], lower, upper, alpha=0.25)
+    axr.hlines([lower, upper], start, stop, linestyles="--")
+axr.errorbar(rows, [0.0] * len(rows), yerr=[[-v for v in lowers], uppers], fmt="none",
+             capsize=6, label="Fila impresa de la tabla 1")
+axr.axvline(ratio, linestyle=":", color="C3", label="La planta del ejemplo")
+axr.set(xscale="log", ylim=(-4.2, 5.4), xlabel="d / raíz(Sp)",
+        ylabel="Intervalo del 95 % [dB]")
+axr.legend(loc="upper left")
+plt.show()
+```
+
+</details>
+
+### El ruido de fondo, Tabla 2
+
+Si la planta puede pararse, el ruido de fondo se lee en las mismas posiciones,
+y cada nivel se corrige con la tabla en decibelios enteros de 9.5.4 antes del
+promedio: 1 dB para una diferencia de 6, 7 u 8 dB, 0,5 dB para 9 o 10 dB,
+nada por encima de 10 dB y «Measurement invalid» por debajo de 6 dB. Una
+diferencia entre dos filas se redondea al decibelio entero más próximo, con
+las mitades hacia arriba; los dos extremos se toman tal como se imprimen, así que 5,9 dB es una medición no válida y 10,2 dB
+no se corrige. `plant_background_correction_db()` lee la tabla por sí sola, y
+`plant_sound_power()` rechaza una determinación con un nivel a menos de 6 dB
+de su ruido de fondo, porque la tabla no tiene corrección que darle. Si la
+planta no puede pararse, los niveles quedan sin corregir, el informe lo dice,
+y la NOTA 1 advierte de que la incertidumbre puede ser entonces mayor que la
+de la Tabla 1.
+
+## 3. Una planta de machaqueo y cribado
+
+El ejemplo es una planta de machaqueo y cribado en forma de L, de 180 m por
+110 m, en el plano de la figura anterior, con un contorno a 25 m. Para poder
+comprobar el resultado, los trece micrófonos leen lo que pondrían allí ocho
+fuentes de potencia conocida: cada una radia sobre el suelo como un
+hemisferio y pierde $\alpha r$ en el aire de la Tabla 3. El ruido de fondo,
+leído con la planta parada, queda entre 13 dB y 24 dB por debajo.
+
+```python
+import numpy as np
+from phonometry import emission
+
+plant = [[0, 0], [180, 0], [180, 60], [120, 60], [120, 110], [0, 110]]
+contour_m = [[-25, -25], [205, -25], [205, 135], [-25, 135]]
+# (x, y, altura del punto medio) en metros y LW de 63 Hz a 8 kHz, dB re 1 pW.
+sources = [
+    ((30, 30, 3.0), [108, 110, 109, 106, 103, 99, 93, 85]),  # machacadora primaria
+    ((80, 25, 6.5), [104, 106, 106, 104, 101, 97, 91, 83]),  # machacadora secundaria
+    ((150, 30, 12.0), [100, 103, 105, 104, 102, 99, 94, 87]),  # torre de cribado
+    ((60, 85, 9.0), [98, 100, 101, 99, 96, 92, 86, 78]),  # transferencia de cintas
+    ((100, 90, 4.0), [101, 102, 100, 97, 94, 90, 84, 76]),  # grupo electrógeno
+    ((20, 95, 15.0), [97, 99, 100, 98, 95, 91, 85, 77]),  # apilador
+    ((130, 15, 7.5), [99, 101, 101, 98, 95, 91, 85, 77]),  # caseta de compresores
+    ((95, 45, 5.0), [96, 98, 99, 97, 94, 90, 84, 76]),  # bombas
+]
+bands = np.array([63, 125, 250, 500, 1000, 2000, 4000, 8000], dtype=float)
+alpha = emission.plant_air_absorption_db_per_m(bands)  # Tabla 3, 15 °C y 70 %
+
+
+def levels_at(contour, sources):
+    """Lo que leen los micrófonos: divergencia hemisférica y alpha r."""
+    h = contour.prescribed_microphone_height_m
+    squares = 0.0
+    for (x, y, z), lw in sources:
+        dx = contour.positions_m[:, 0] - x
+        dy = contour.positions_m[:, 1] - y
+        r = np.sqrt(dx**2 + dy**2 + (h - z) ** 2)[:, None]
+        level = np.array(lw) - 10 * np.log10(2 * np.pi * r**2) - alpha * r
+        squares = squares + 10 ** (level / 10)
+    return np.round(10 * np.log10(squares), 1)  # una fila por posición
+
+
+# Catorce motores y bombas de menos de 2 m se cuentan por la NOTA 7, a 1 m.
+H = emission.plant_characteristic_height_m(
+    [z for (_x, _y, z), _lw in sources], low_source_count=14
+)
+contour = emission.plant_measurement_contour(plant, contour_m, characteristic_height_m=H)
+print(f"H = {H:.2f} m, N = {contour.positions_m.shape[0]}, "
+      f"d = {contour.mean_distance_m:.1f} m, h = {contour.prescribed_microphone_height_m:.2f} m")
+# H = 3.45 m, N = 13, d = 30.9 m, h = 8.25 m
+
+levels = levels_at(contour, sources)
+background = levels - np.array([14, 13, 15, 17, 19, 20, 22, 24])
+result = contour.sound_power(levels, bands, background_levels_db=background)
+print(np.round(result.mean_level_db, 1))
+# [63.8 65.8 65.6 63.2 60.2 56.  49.1 39.9]
+print(f"dLS = {result.area_term_db:.2f} dB, dLF = {result.near_field_term_db:.2f} dB")
+# dLS = 49.03 dB, dLF = -1.22 dB
+print(np.round(result.sound_power_level_db, 1))
+# [111.6 113.6 113.5 111.2 108.5 104.8  99.4  92.1]
+print(f"LWA = {result.a_weighted_sound_power_level_db:.1f} dB, Tabla 1: {result.uncertainty_db}")
+# LWA = 113.5 dB, Tabla 1: (-2.5, 2.0)
+```
+
+El término de área sube el promedio 49 dB, porque la superficie ronda los
+80 000 m², y el término de proximidad devuelve 1,2 dB. El término de absorción
+atmosférica es nulo por debajo de 250 Hz y de 4,4 dB en 8 kHz, donde la mitad
+de la raíz de 36 800 m² de aire son unos 96 m a 0,046 dB/m. Las ocho fuentes
+radian entre todas 113,0 dB(A); ISO 8297 obtiene 113,5 dB(A), y de 0,3 dB a
+0,7 dB más en las bandas hasta 4 kHz, muy dentro de los $+2{,}0/-2{,}5$ dB de
+la Tabla 1.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/plant_sound_power.svg" alt="Dos paneles sobre las bandas de octava de 63 Hz a 8 kHz. A la izquierda, barras del nivel de potencia acústica de la planta, de 111,6 dB en 63 Hz pasando por 113,6 dB en 125 Hz hasta 92,1 dB en 8 kHz, con la media en el contorno como una línea de círculos naranjas entre 48 y 52 dB más abajo, de 63,8 dB a 39,9 dB; el título da un nivel de potencia acústica ponderado A de 113,5 dB. A la derecha, los mismos niveles de potencia como puntos azules con barras verticales para el intervalo de la Tabla 1, de −2,5 a +2,0 dB, y rombos rojos huecos para la potencia que radian las ocho fuentes, cada uno de 0,3 a 0,7 dB por debajo del punto azul hasta 4 kHz y 1,1 dB por debajo en 8 kHz, todos dentro de las barras" width="100%" />
+
+*A la izquierda, la figura que dibuja `result.plot()`: la potencia por banda
+junto a la media en el contorno de la que sale, y entre ambas los cuatro
+términos. A la derecha, la misma potencia frente a lo que radian las fuentes,
+con el intervalo de la Tabla 1. El método no sabe nada de las fuentes: lee
+trece niveles, un plano y una altura, y queda a medio decibelio de la verdad
+en las bandas que pesan en $L_{W\mathrm{A}}$.*
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+true_lw = 10 * np.log10(sum(10 ** (np.array(lw) / 10) for _p, lw in sources))
+lower, upper = result.uncertainty_db
+fig, (axl, axr) = plt.subplots(1, 2, figsize=(12.5, 5.4), layout="constrained")
+result.plot(ax=axl, language="es")
+x = np.arange(bands.size)
+axr.errorbar(x, result.sound_power_level_db, yerr=[[-lower] * x.size, [upper] * x.size],
+             fmt="o", capsize=4, label="LW de ISO 8297 con el intervalo de la tabla 1")
+axr.plot(x, true_lw, "D", markerfacecolor="white", label="Potencia que radian las ocho fuentes")
+axr.set_xticks(x)
+axr.set_xticklabels([f"{f:g}" for f in bands])
+axr.set(xlabel="Frecuencia [Hz]", ylabel="Nivel de potencia acústica LW [dB]")
+axr.legend()
+plt.show()
+```
+
+</details>
+
+### El veredicto sobre la disposición
+
+`check_plant_measurement()` contrasta el contorno y las lecturas con los
+requisitos de ISO 8297 que dependen de ellos y devuelve un único veredicto. No
+puede usarse en un `if` por descuido: su valor de verdad lanza una excepción, y
+la respuesta es `passes`.
+
+```python
+check = emission.check_plant_measurement(
+    contour, result, measurement_time_s=120.0, leq_range_db=0.6
+)
+print(check.passes, [r.key for r in check.failures], [r.key for r in check.deviations])
+# True [] []
+row = check.requirement("position_spacing")
+print(f"{row.clause}: {row.value:.1f} m {row.comparison} {row.limit:.1f} m")
+# 9.1.1 c): 60.0 m <= 61.8 m
+```
+
+Las filas son los apartados 1.2 (la mayor dimensión de la planta, de 16 m a
+unos 320 m), 9.1.1 a) a c), 9.1.2.4 (posiciones omitidas), 9.3 (el micrófono a
+por lo menos 5 m), 7.1 (el ángulo a −3 dB de un micrófono direccional por
+encima de 30°), 6 b) (el ruido de fondo al menos 6 dB por debajo), 9.5.1 a)
+(las siete bandas de 63 Hz a 4 kHz), 9.5.1 (un minuto por posición) y, si se
+da `leq_range_db`, 9.5.3 (una lectura integrada que no se mueve más de
+±0,5 dB, un recorrido de 1 dB). Otras cuatro son **recomendaciones**: la norma
+permite no cumplirlas siempre que el informe lo diga, así que se listan en
+`deviations` y no deciden `passes`. La primera es la altura de 9.3 en sí, que
+es una altura a la que situarse y no un mínimo: la fila se cumple cuando los
+micrófonos están a esa altura dentro del ±5 % con que 9.2 lee $H$ y
+$S_\mathrm{m}$ en el plano, y un micrófono más bajo (tan alto como se pueda,
+si no se alcanza esa altura) o más alto es una desviación que hay que
+indicar. Las otras son el ruido de fondo «preferably more than 10 dB» por
+debajo, un nivel más de 5 dB por encima del promedio (10.2) y los
+«approximately 320 m» de 1.2.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/plant_measurement_check.svg" alt="Diagrama de barras horizontales de quince requisitos de ISO 8297 para el ejemplo, cada barra el margen del valor medido dentro de su límite como porcentaje del límite, de −100 a +100; todas las barras son verdes y quedan a la derecha del cero, así que el título dice que los requisitos se cumplen. Los mayores márgenes, recortados en el 100 %, son los límites inferiores de la dimensión de la planta y de la distancia media, las posiciones omitidas, el margen sobre el ruido de fondo y el tiempo de medición; los menores son la separación de posiciones con un 3 %, la altura del micrófono prescrita con un 5 %, el límite superior de la distancia media con un 12 % y el ángulo de visión con un 17 %, y el recorrido de la lectura integrada queda en un 40 %. Las bandas de octava quedan justo en cero, marcadas con un punto. Cuatro barras van rayadas como recomendaciones y terminan en una marca hueca: la dimensión superior de la planta, la altura del micrófono prescrita, el margen preferente sobre el ruido de fondo y el exceso sobre la media" width="100%" />
+
+*El veredicto sobre el ejemplo, dibujado por `check.plot()`. El margen más
+justo es el de la separación: trece posiciones dejan 60 m entre vecinas frente
+a los 61,8 m que permite $2\bar{d}$, y por eso no bastarían doce. Los
+micrófonos están a la altura prescrita, así que esa fila conserva entero el
+±5 % que le concede el plano. Una fila queda justo en cero, la de las bandas
+de octava: las siete bandas exigidas, de 63 Hz a 4 kHz, están todas entre las
+ocho medidas, y su recuento no puede pasar de siete.*
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+fig, ax = plt.subplots(figsize=(10.0, 8.1), layout="constrained")
+check.plot(ax=ax, language="es")
+plt.show()
+```
+
+</details>
+
+## 4. La absorción del aire, la Tabla 3 y el tiempo atmosférico
+
+La Tabla 3 imprime $\alpha$ por banda de octava a 15 °C y 70 %, «taken from
+ISO 3891», y pide los valores a la temperatura y la humedad de la medición
+cuando el tiempo atmosférico difiere notablemente.
+`plant_air_absorption_db_per_m()` devuelve la tabla tal como se imprime si no
+se da el tiempo atmosférico. Con una temperatura y una humedad relativa,
+evalúa el coeficiente de atenuación del Anexo A de ISO 3891, la fórmula
+SAE ARP 866A, en la banda de tercio de octava centrada en cada octava, con la
+misma implementación que usan los
+[datos NPD para el aire del aeropuerto](/phonometry/es/aircraft/npd-atmosphere/);
+ISO 3891 no da frecuencia de evaluación por debajo de 50 Hz, así que la banda
+de 31,5 Hz conserva el 0 de la Tabla 3. Como la fórmula no devuelve la Tabla 3
+a 15 °C y 70 % (véase la figura), pasar esas mismas condiciones no equivale a
+no pasar ninguna: en 8 kHz da
+$0{,}5 \times 0{,}0148\sqrt{S_\mathrm{m}} \approx 0{,}0074\sqrt{S_\mathrm{m}}$ dB
+más en la potencia, 1,4 dB sobre los 36 800 m² del ejemplo. El tiempo
+atmosférico se pasa cuando difiere notablemente de 15 °C y 70 %, que es cuando
+lo pide la Tabla 3; la norma no pone número a «notablemente».
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/plant_air_absorption.svg" alt="Coeficiente de atenuación del aire en decibelios por kilómetro sobre las bandas de octava de 63 Hz a 8 kHz. Tres curvas del Anexo A de ISO 3891 suben desde casi cero en 63 Hz: a 15 grados Celsius y 70 % de humedad relativa hasta 25 dB/km en 4 kHz y 61 dB/km en 8 kHz; a 0 grados y 80 % hasta 45 y 104 dB/km; a 30 grados y 40 % cerca de la primera. Unas cruces grandes marcan la Tabla 3 de ISO 8297 tal como se imprime, sobre la curva de 15 grados hasta 2 kHz, un poco por encima en 4 kHz con 26 dB/km y muy por debajo en 8 kHz con 46 dB/km" width="100%" />
+
+*La Tabla 3 y la fórmula de la que se tomó. Coinciden en 63 Hz y de 250 Hz a
+2 kHz hasta la cifra impresa, y no en tres filas: 125 Hz, donde la fórmula da
+0,000 59 dB/m y la tabla 0; 4 kHz, 0,025 05 frente a 0,026; y 8 kHz, 0,061
+frente a 0,046. La propia Tabla 9 de ISO 3891 imprime 0,1, 2,5 y
+6,1 dB/100 m en esas bandas a 15 °C y 70 %, y ningún tiempo atmosférico hace
+que la fórmula reproduzca la Tabla 3 en todas sus filas. ISO 8297 no dice
+cómo obtuvo sus valores por octavas a partir de los datos en tercios de octava
+de ISO 3891, así que la tabla se usa tal como se imprime y la diferencia se
+declara aquí en lugar de corregirse.*
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+x = np.arange(bands.size)
+fig, ax = plt.subplots(figsize=(10.0, 5.6))
+for temperature_c, humidity in ((15.0, 70.0), (0.0, 80.0), (30.0, 40.0)):
+    coefficient = emission.plant_air_absorption_db_per_m(
+        bands, temperature_c=temperature_c, relative_humidity_percent=humidity
+    )
+    ax.plot(x, 1000 * coefficient, marker="o",
+            label=f"ISO 3891 anexo A, {temperature_c:g} °C y {humidity:g} %")
+ax.plot(x, 1000 * emission.plant_air_absorption_db_per_m(bands), "X",
+        label="Tabla 3 de ISO 8297 tal como se imprime (15 °C, 70 %)")
+ax.set_xticks(x)
+ax.set_xticklabels([f"{f:g}" for f in bands])
+ax.set(xlabel="Frecuencia [Hz]", ylabel="Coeficiente de atenuación [dB/km]")
+ax.legend()
+plt.show()
+```
+
+</details>
+
+Para la planta del ejemplo, medida en una tarde cálida y seca, el tiempo
+atmosférico solo mueve el término del aire: frente a la Tabla 3, la potencia en
+8 kHz sube 2,4 dB y $L_{W\mathrm{A}}$ 0,1 dB. De esos 2,4 dB, 1,4 dB son el
+salto de la Tabla 3 a la fórmula, que ya se da a 15 °C y 70 %; el aire cálido
+y seco añade por sí mismo 1,0 dB.
+
+```python
+warm = contour.sound_power(levels, bands, background_levels_db=background,
+                           temperature_c=25.0, relative_humidity_percent=40.0)
+print(np.round(warm.sound_power_level_db - result.sound_power_level_db, 2))
+# [0.03 0.07 0.04 0.08 0.08 0.19 0.34 2.4 ]
+reference = contour.sound_power(levels, bands, background_levels_db=background,
+                                temperature_c=15.0, relative_humidity_percent=70.0)
+print(np.round(warm.sound_power_level_db - reference.sound_power_level_db, 2))
+# [0.01 0.01 0.02 0.05 0.1  0.19 0.43 0.97]
+print(f"LWA = {warm.a_weighted_sound_power_level_db:.1f} dB")
+# LWA = 113.6 dB
+```
+
+## 5. Partes de una planta, y fuentes por encima de ella
+
+El método sirve también para averiguar lo que aportan **partes concretas** de
+una zona industrial y para comparar instalaciones (0.2 b y c). Cada parte se
+mide alrededor de su propio contorno, y `partial_plant_contributions()` las
+junta: las partes radian de forma incoherente, así que el conjunto es la suma
+energética de sus potencias banda a banda, y la contribución de cada parte es
+su nivel menos esa suma. La NOTA 2 es la advertencia que la acompaña: la
+potencia de una planta medida alrededor de un solo contorno puede diferir de
+la suma de las potencias de sus fuentes, así que una suma de partes no es la
+misma determinación que la zona entera medida de una vez. Aquí la planta de
+machaqueo comparte su zona industrial con una planta de aglomerado asfáltico
+120 m al este.
+
+```python
+# Una planta de aglomerado asfáltico en la misma zona industrial, de 60 m por
+# 40 m, con su propio contorno a 15 m y sus propias tres fuentes.
+asphalt_plant = [[300, 20], [360, 20], [360, 60], [300, 60]]
+asphalt_sources = [
+    ((315, 40, 4.0), [106, 105, 103, 100, 97, 93, 87, 79]),  # tambor secador y quemador
+    ((340, 30, 8.0), [100, 102, 101, 98, 95, 91, 85, 77]),  # extractor y filtro de mangas
+    ((350, 52, 12.0), [95, 97, 97, 95, 92, 88, 82, 74]),  # torre de mezcla
+]
+asphalt = emission.plant_measurement_contour(
+    asphalt_plant,
+    [[285, 5], [375, 5], [375, 75], [285, 75]],
+    characteristic_height_m=emission.plant_characteristic_height_m([4.0, 8.0, 12.0]),
+)
+asphalt_result = asphalt.sound_power(levels_at(asphalt, asphalt_sources), bands)
+print(f"LWA = {asphalt_result.a_weighted_sound_power_level_db:.1f} dB")
+# LWA = 105.4 dB
+
+area = emission.partial_plant_contributions(
+    [result, asphalt_result], names=["Machaqueo y cribado", "Aglomerado asfáltico"]
+)
+print(f"LWA de la zona = {area.a_weighted_total_db:.1f} dB")
+# LWA de la zona = 114.1 dB
+print(np.round(area.a_weighted_contribution_db, 1))
+# [-0.6 -8.7]
+```
+
+Las fuentes muy elevadas sobre la altura característica de la planta, que el
+apantallamiento o su propia directividad dejaron fuera de la lectura del
+contorno, se determinan con la norma que les corresponda (ISO 3744 o
+ISO 3746, por ejemplo) y se informan junto a la planta (apartado 11, y
+punto m) del apartado 12); no se suman a su $L_W$.
+
+La planta de machaqueo queda 0,6 dB por debajo del total de la zona y la de
+aglomerado 8,7 dB por debajo: el control del ruido en la machacadora es donde
+están los decibelios. `area.plot()` dibuja el $L_W$ de cada parte y el total
+banda a banda.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/plant_partial_contributions.svg" alt="Niveles de potencia acústica por bandas de octava de 63 Hz a 8 kHz de las dos plantas de la zona industrial y de su suma. Unas barras azul claro dan la suma, de 113,0 dB en 63 Hz, pasando por 114,6 dB en 125 Hz, hasta 92,6 dB en 8 kHz. Unos círculos naranja dan la planta de machaqueo y cribado, de 111,6 dB a 92,1 dB, nunca más de 1,4 dB por debajo de las barras; unos cuadrados verdes dan la planta de aglomerado asfáltico, de 107,5 dB a 82,2 dB, entre 5,5 dB y 10,3 dB por debajo. La leyenda da los niveles ponderados A: 113,5 dB, 105,4 dB y 114,1 dB para la suma" width="100%" />
+
+*Las dos plantas de la zona y su suma, dibujadas por `area.plot()`. La planta
+de machaqueo queda como mucho 1,4 dB por debajo de la suma en cada banda, así que es
+la que fija la potencia de la zona; la de aglomerado añade 0,6 dB al total
+ponderado A.*
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+fig, ax = plt.subplots(figsize=(10.0, 5.6), layout="constrained")
+area.plot(ax=ax, language="es")
+plt.show()
+```
+
+</details>
+
+## 6. La incertidumbre que hay que declarar
+
+La Tabla 1 declara la incertidumbre propia del método como un intervalo de
+confianza del 95 % para una determinación, y la hace depender de una sola
+cosa, $\bar{d}/\sqrt{S_\mathrm{p}}$: $+3{,}0/-3{,}5$ dB en 0,05,
+$\pm 2{,}5$ dB en 0,1, $+2{,}0/-2{,}5$ dB en 0,2 y $+1{,}5/-2{,}0$ dB en 0,5.
+El intervalo no es simétrico y se estrecha al alejarse el contorno, porque
+procede de la dispersión de los niveles alrededor del contorno que causa un
+reparto irregular de las fuentes; un contorno más alejado ve la planta de
+forma más uniforme. No incluye un cambio de la emisión en el tiempo, y si no se
+pudo corregir el ruido de fondo la NOTA 1 dice que puede ser mayor.
+`plant_method_uncertainty_db()` lee la tabla, y cada resultado la lleva como
+`uncertainty_db`.
+
+## Qué cubre esta guía
+
+<Scope>
+<ScopeClaim status="covered" label="Cubierto">
+El método de ingeniería de ISO 8297:1994, cada paso que convierte el plano y
+las lecturas en números: el contorno y sus posiciones, direcciones y
+distancias a partir de dos polígonos (`plant_measurement_contour`), la altura
+característica con la NOTA 7 (`plant_characteristic_height_m`), la altura del
+micrófono de 9.3, el intervalo de 9.1.1 a) y el mayor ángulo de visión de
+9.1.1 b) sobre el contorno; la corrección por ruido de fondo de la Tabla 2, la
+lectura estable de 9.5.2 y la estabilidad de una lectura integrada de 9.5.3;
+los nueve pasos del apartado 10 (`plant_sound_power`) con la absorción del
+aire de la Tabla 3 o del Anexo A de ISO 3891 para el tiempo atmosférico de la
+medición; la incertidumbre de la Tabla 1; el veredicto sobre 1.2, 6 b), 7.1,
+9.1, 9.3, 9.5.1, 9.5.3 y 10.2 (`check_plant_measurement`); y
+las partes de una planta juntas (`partial_plant_contributions`). La norma no
+imprime ningún ejemplo resuelto, así que el informe de conformidad ancla la
+cadena en sus tres tablas, la cota de la NOTA 11, la Tabla 9 de ISO 3891 y
+formas cerradas.
+</ScopeClaim>
+
+<ScopeClaim status="not-covered" label="No cubierto">
+Lo que se deja al equipo de medición por decisión, aunque parte de ello lleve
+un número impreso: la exactitud con que se lee el plano (±5 %, y ±30 % para
+$\bar{d}/\sqrt{S_\mathrm{p}}$), los plazos de calibración de 7.3, las
+superficies reflectantes y el viento de 6 a) y c), y el informe del
+apartado 12.
+La potencia acústica de las fuentes elevadas sobre la planta (apartado 11)
+corresponde a otras normas y no se suma a la de la planta. La Tabla 3 se usa
+tal como se imprime allí donde se aparta del coeficiente de ISO 3891 que cita.
+</ScopeClaim>
+</Scope>
+
+<SeeAlso>
+
+## Véase también
+
+- [Potencia acústica](/phonometry/es/devices/emission/sound-power/): cómo
+  elegir entre los métodos de determinación y los grados de precisión.
+- [Potencia acústica por métodos de presión (ISO 3744 / ISO 3746 / ISO 3745)](/phonometry/es/devices/emission/sound-power-pressure/):
+  la superficie envolvente de la que 10.4 toma su término de área, y el camino
+  para una fuente elevada sobre la planta.
+- [Potencia acústica in situ por comparación (ISO 3747)](/phonometry/es/devices/emission/sound-power-in-situ/):
+  una sola máquina que no puede salir de su sala.
+- [Datos NPD para el aire del aeropuerto](/phonometry/es/aircraft/npd-atmosphere/):
+  el coeficiente SAE ARP 866A de ISO 3891 que evalúa el camino del tiempo
+  atmosférico.
+- [Propagación del sonido en exteriores](/phonometry/es/environment/propagation/outdoor-propagation/):
+  para qué sirve el $L_W$ de la planta, el nivel en casa del vecino.
+- Referencia de la API: [`emission.plant_sound_power`](/phonometry/es/reference/api/power/sound-power-plant/).
+
+</SeeAlso>

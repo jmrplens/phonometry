@@ -1171,7 +1171,8 @@ vuelo.
   El anexo A da el coeficiente de atenuación de SAE ARP 866A que ofrece como
   vía heredada el apéndice D de la ECAC Doc 29; el anexo C es un ejemplo
   resuelto de corrección tonal.
-  Citado por [Datos NPD para el aire del aeropuerto](/phonometry/es/aircraft/npd-atmosphere/).
+  Citado por [Datos NPD para el aire del aeropuerto](/phonometry/es/aircraft/npd-atmosphere/),
+  [Potencia acústica de plantas industriales multifuente](/phonometry/es/devices/emission/sound-power-plant/).
 - SAE International. (2012). *Standard values of atmospheric absorption as a
   function of temperature and humidity* (SAE ARP 866B, estabilizada en 2012).
   [sae.org](https://www.sae.org/standards/content/arp866b/).
@@ -1458,6 +1459,14 @@ implementación.
   [Catálogo iso.org](https://www.iso.org/standard/46426.html).
   La comparación in situ con una fuente sonora de referencia.
   Citado por [Potencia acústica in situ por comparación](/phonometry/es/devices/emission/sound-power-in-situ/).
+- International Organization for Standardization. (1994). *Acoustics —
+  Determination of sound power levels of multisource industrial plants for
+  evaluation of sound pressure levels in the environment — Engineering
+  method* (ISO 8297:1994).
+  El contorno alrededor de una planta industrial entera, sus términos de
+  área, de proximidad y de absorción atmosférica y la incertidumbre de la
+  Tabla 1.
+  Citado por [Potencia acústica de plantas industriales multifuente](/phonometry/es/devices/emission/sound-power-plant/).
 - International Organization for Standardization. (2010). *Acoustics —
   Determination of sound power levels and sound energy levels of noise
   sources using sound pressure — Engineering methods for an essentially free

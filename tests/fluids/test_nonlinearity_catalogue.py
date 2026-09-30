@@ -28,10 +28,21 @@ T83 = "rossing-2014-table-8-3"
 T84 = "rossing-2014-table-8-4"
 KELVIN = (303.15, 313.15, 323.15, 333.15, 343.15, 353.15, 363.15, 373.15)
 GROUPS = ("Liquid metals", "Liquid gases", "Other substances")
+#: The scope each table credits its paper at: a Reference column beside every
+#: value credits the measurement the row is, and Table 8.2's caption names one
+#: paper for the whole table.
+SCOPE = {T81: "row", T82: "table", T83: "row", T84: "row"}
 
 
 def _rows(table: str) -> list[NonlinearityParameter]:
     return [row for row in PUBLISHED_NONLINEARITY.values() if row.table == table]
+
+
+def _credit(row: NonlinearityParameter) -> str:
+    """The paper *row* comes from, credited at the scope its page prints it."""
+    scope = SCOPE[row.table]
+    assert list(row.attributed_to) == [scope]
+    return row.attributed_to[scope]
 
 
 def _number(cell: str) -> float:
@@ -53,7 +64,7 @@ def _check(row: NonlinearityParameter, cell: str, reference: str) -> None:
         assert "b_over_a" not in row.uncertainty
     else:
         assert row.uncertainty == {"b_over_a": spread}
-    assert row.attributed_to["b_over_a"].endswith(f" {reference}")
+    assert _credit(row).endswith(f" {reference}")
 
 
 # ---------------------------------------------------------------------------
@@ -74,7 +85,7 @@ def test_table_8_1_holds_every_measurement_with_its_year_and_paper() -> None:
             assert year == "2001"
             assert row.year is None
             assert "2002" in row.why_missing("year")
-            assert "2002" in row.attributed_to["b_over_a"]
+            assert "2002" in _credit(row)
         else:
             assert row.year == int(year)
 
@@ -99,7 +110,7 @@ def test_the_two_tables_of_water_agree_where_they_print_the_same_paper() -> None
     atmospheric = {
         row.temperature_c: row.b_over_a
         for row in _rows(T81)
-        if row.attributed_to["b_over_a"].endswith("[8.65]")
+        if _credit(row).endswith("[8.65]")
     }
     low_pressure = {
         row.temperature_c: row.b_over_a
@@ -170,10 +181,19 @@ def test_a_liquefied_gas_is_held_at_the_negative_temperature_printed() -> None:
 # ---------------------------------------------------------------------------
 def test_every_value_names_the_paper_it_comes_from() -> None:
     for row in PUBLISHED_NONLINEARITY.values():
-        credit = row.attributed_to["b_over_a"]
+        credit = _credit(row)
         assert credit.endswith("]")
         # The reference list is spelled out, not left as a bracketed number.
         assert len(credit) > 40
+
+
+def test_table_8_2_credits_the_one_paper_its_caption_names() -> None:
+    """The caption prints [8.65] once, so every row holds the same table credit."""
+    papers = {_credit(row) for row in _rows(T82)}
+    assert len(papers) == 1
+    (credit,) = papers
+    assert credit.startswith("F. Plantier, L. Daridon, B. Lagourette")
+    assert credit.endswith("(2002) [8.65]")
 
 
 def test_only_the_pressure_table_holds_a_pressure() -> None:

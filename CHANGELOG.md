@@ -46,16 +46,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   name, a newer schema) and the first rule of the row contract each row
   breaks; what is only worth a second look is kept in
   `Catalogue.notes` with one `io.CatalogueWarning`. The file never runs
-  anything: only `json` reads it, and the class it names is compared with
-  yours and never imported. `io.write_catalogue` writes rows as a file that
-  reads back into the same rows, a published table among them as a template
-  to start from; every table of every published catalogue is written, read
-  back and compared field for field in the test suite. A file already at the
-  name is kept unless you pass `overwrite=True`, and so is one another
-  program makes there while the file is written; on a file system without
-  hard links, such as FAT, the name holds an empty file for the instant
-  before the new one is renamed over it. The `io` section of the
-  documentation is now "Files", since it holds more than audio.
+  anything: only the standard library's `json` and `csv` read it, and the
+  class it names is compared with yours and never imported.
+  `io.write_catalogue` writes rows as a file that reads back into the same
+  rows, a published table among them as a template to start from; every table
+  of every published catalogue is written, read back and compared field for
+  field in the test suite. A file already at the name is kept unless you pass
+  `overwrite=True`, and so is one another program makes there while the file
+  is written; on a file system without hard links, such as FAT, the name
+  holds an empty file for the instant before the new one is renamed over it.
+  The `io` section of the documentation is now "Files", since it holds more
+  than audio.
 
 - **Search a catalogue of your own with the same lookups, and draw a panel's
   plateau from its row.** Every `*_named` lookup of a published catalogue,
@@ -95,6 +96,53 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   laboratory's sound reduction index is not a book's transmission loss. The
   published catalogues page gains a section that says why it will never show
   a manufacturer's table and where your own go instead.
+
+- **Keep a catalogue of your own in a spreadsheet, saved as CSV.** A name
+  ending in `.csv` makes `io.read_catalogue` read the rows from a CSV file,
+  each starting on a line of its own under a first line that names the
+  columns, and the rest of the document from a JSON header beside it, named as
+  the file with `.phonometry.json` after it (or wherever `header_path=` says).
+  The header declares the delimiter (a comma, a semicolon or a tab) and the
+  decimal mark, and nothing about the dialect is guessed. Each cell holds one
+  value, bound, range or word in a closed grammar that writes the same hedges
+  as a JSON document: `0,85`, `~0,85`, `<=30`, `>=5`, `0,30..0,50`,
+  `0,85±0,05`, `[AFr5]`, and `true` or `false` in a column of flags. The
+  columns are the row class's fields, in any unit of the same kind, plus
+  `key`, `basis` for the row, `attributed_to.row` for the credit of the row,
+  `provenance.page`, `provenance.report` and the other columns that narrow the
+  provenance of one row, and columns of your own named `x-`. The credit of the
+  whole table goes once in the header, as a top-level `attributed_to` that a
+  JSON document may now write as well, and every row reads it as its `"table"`
+  credit. The rows go through the same checks as a JSON document's, so every
+  problem is raised at once, each at its line and its column as a spreadsheet
+  letters them; a text where a number goes is never read as a word, a `NaN` or
+  a zero, a thousands separator is never read, and a range typed with a dash,
+  a plus-or-minus typed as `+-`, a unit typed after the number and a number
+  grouped in thousands are each told how to write them; when every failing
+  number is written with the other decimal mark, or the first line splits at
+  another delimiter, the refusal says which one to declare. The file is UTF-8
+  with or without a byte order mark, and any other encoding is refused with
+  the advice to save it as "CSV UTF-8". The file and its header are read as a
+  JSON document is, from a regular file only: a pipe, a device, a socket or a
+  directory at either name is refused before it is opened, and the header is
+  read to 64 KiB at most. `io.write_catalogue` writes the pair in the dialect
+  you ask for, with a byte order mark and an apostrophe before any text a
+  spreadsheet would run as a formula, which the reader takes off again; a
+  row's credit goes in its column and the credit every row gives the table in
+  the header, so a published table credited row by row or as a whole goes into
+  a sheet as any other; what one cell cannot hold (several readings, a
+  misprint, a carried cell, a credit, a basis or a standard for a single cell,
+  a table whose rows credit it apart) is refused with the pointer the JSON
+  document would write it at, and nothing is written. An empty cell reads as
+  nothing written, so an empty text goes into a sheet only in a field whose
+  default is empty: one anywhere else is refused, since it would read back
+  as something the row does not say, the field's default, the document's
+  provenance (a row that empties the page would cite the document's page),
+  a row without a column of your own, or a row without a field its class
+  needs; such a row is written in a JSON catalogue.
+  `io.Catalogue.header_sha256` records the header a CSV file was read with,
+  beside `file_sha256` for the file itself. The guide "Your own catalogues"
+  gains a section on it, in both languages.
 
 - **Sound power in the 16 kHz octave band (ISO 9295).** The general sound
   power methods stop at the 10 kHz one-third-octave band, and a printer's
@@ -597,12 +645,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   liquid metals and liquefied gases, each value with the temperature (and,
   where printed, the pressure and the year) it was measured at, the paper it
   comes from spelled out from the chapter's reference list, and the
-  plus-or-minus where the page prints one. `fluids.nonlinearity_named` finds a
-  substance. A line of Table 8.3 printed twice is held once, six years of
-  Table 8.1 that the chapter's own reference list contradicts serve nothing,
-  and six liquefied gases of Table 8.4 that are above their boiling point at
-  the atmospheric pressure the caption gives say so; all three are
-  registered.
+  plus-or-minus where the page prints one. The paper is the row's credit,
+  `attributed_to["row"]`, and on Table 8.2, whose caption names one paper for
+  every cell, the whole table's, `attributed_to["table"]`.
+  `fluids.nonlinearity_named` finds a substance. A line of Table 8.3 printed
+  twice is held once, six years of Table 8.1 that the chapter's own reference
+  list contradicts serve nothing, and six liquefied gases of Table 8.4 that
+  are above their boiling point at the atmospheric pressure the caption gives
+  say so; all three are registered.
   The published catalogue page now writes a printed uncertainty in its cell,
   which also brings back the seven of Cox's ground table that only a note
   carried, and writes a year without grouping its digits.

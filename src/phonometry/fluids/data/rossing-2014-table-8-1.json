@@ -8,7 +8,7 @@
       "temperature_c": 0,
       "b_over_a": 4.2,
       "attributed_to": {
-        "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+        "row": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
       },
       "year": 1974
     },
@@ -18,7 +18,7 @@
       "temperature_c": 20,
       "b_over_a": 5,
       "attributed_to": {
-        "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+        "row": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
       },
       "year": 1974
     },
@@ -31,7 +31,7 @@
         "b_over_a": 0.063
       },
       "attributed_to": {
-        "b_over_a": "E.C. Everbach: Tissue Composition Determination via Measurement of the Acoustic Nonlinearity Parameter B/A. Ph.D. Thesis (Yale Univ., New Haven 1989) pp. 66– [8.60]"
+        "row": "E.C. Everbach: Tissue Composition Determination via Measurement of the Acoustic Nonlinearity Parameter B/A. Ph.D. Thesis (Yale Univ., New Haven 1989) pp. 66– [8.60]"
       },
       "year": 1989
     },
@@ -44,7 +44,7 @@
         "b_over_a": 0.2
       },
       "attributed_to": {
-        "b_over_a": "Z. Zhu, S. Roos, N. Cobb, K. Jensen: Determination of the acoustic nonlinearity parameter B/A from phase measurements, J. Acoust. Soc. Am. 74, 1518–1521 (1983) [8.61]"
+        "row": "Z. Zhu, S. Roos, N. Cobb, K. Jensen: Determination of the acoustic nonlinearity parameter B/A from phase measurements, J. Acoust. Soc. Am. 74, 1518–1521 (1983) [8.61]"
       },
       "year": 1983
     },
@@ -54,7 +54,7 @@
       "temperature_c": 26,
       "b_over_a": 5.1,
       "attributed_to": {
-        "b_over_a": "X. Gong, Z. Zhu, T. Shi, J. Huang: Determination of the acoustic nonlinearity parameter in biological media using FAIS and ITD methods, J. Acoust. Soc. Am. 86, 1–5 (1989) [8.62]"
+        "row": "X. Gong, Z. Zhu, T. Shi, J. Huang: Determination of the acoustic nonlinearity parameter in biological media using FAIS and ITD methods, J. Acoust. Soc. Am. 86, 1–5 (1989) [8.62]"
       },
       "year": 1989
     },
@@ -64,7 +64,7 @@
       "temperature_c": 30,
       "b_over_a": 5.31,
       "attributed_to": {
-        "b_over_a": "K. Law, A. Frizell, F. Dunn: Determination of the nonlinearity parameter B/A of biological media, Ultrasound Med. Biol. 11, 307–318 (1985) [8.63]"
+        "row": "K. Law, A. Frizell, F. Dunn: Determination of the nonlinearity parameter B/A of biological media, Ultrasound Med. Biol. 11, 307–318 (1985) [8.63]"
       },
       "year": 1985
     },
@@ -77,7 +77,7 @@
         "b_over_a": 0.033
       },
       "attributed_to": {
-        "b_over_a": "J. Zhang, F. Dunn: A small volume thermodynamic system for B/A measurement, J. Acoust. Soc. Am. 89, 73–79 (1991) [8.64]"
+        "row": "J. Zhang, F. Dunn: A small volume thermodynamic system for B/A measurement, J. Acoust. Soc. Am. 89, 73–79 (1991) [8.64]"
       },
       "year": 1991
     },
@@ -90,7 +90,7 @@
         "b_over_a": 0.021
       },
       "attributed_to": {
-        "b_over_a": "E.C. Everbach: Tissue Composition Determination via Measurement of the Acoustic Nonlinearity Parameter B/A. Ph.D. Thesis (Yale Univ., New Haven 1989) pp. 66– [8.60]"
+        "row": "E.C. Everbach: Tissue Composition Determination via Measurement of the Acoustic Nonlinearity Parameter B/A. Ph.D. Thesis (Yale Univ., New Haven 1989) pp. 66– [8.60]"
       },
       "year": 1989
     },
@@ -103,7 +103,7 @@
         "b_over_a": 0.12
       },
       "attributed_to": {
-        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        "row": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
       },
       "misprinted": {
         "year": "the page prints 2001 in the Year column, and the chapter's own reference list dates [8.65] to 2002 (J. Acoust. Soc. Am. 111, 707-715), where every other row's year is its reference's; registered in docs/ERRATA.md"
@@ -115,7 +115,7 @@
       "temperature_c": 40,
       "b_over_a": 5.4,
       "attributed_to": {
-        "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+        "row": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
       },
       "year": 1974
     },
@@ -128,7 +128,7 @@
         "b_over_a": 0.12
       },
       "attributed_to": {
-        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        "row": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
       },
       "misprinted": {
         "year": "the page prints 2001 in the Year column, and the chapter's own reference list dates [8.65] to 2002 (J. Acoust. Soc. Am. 111, 707-715), where every other row's year is its reference's; registered in docs/ERRATA.md"
@@ -143,7 +143,7 @@
         "b_over_a": 0.13
       },
       "attributed_to": {
-        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        "row": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
       },
       "misprinted": {
         "year": "the page prints 2001 in the Year column, and the chapter's own reference list dates [8.65] to 2002 (J. Acoust. Soc. Am. 111, 707-715), where every other row's year is its reference's; registered in docs/ERRATA.md"
@@ -155,7 +155,7 @@
       "temperature_c": 60,
       "b_over_a": 5.7,
       "attributed_to": {
-        "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+        "row": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
       },
       "year": 1974
     },
@@ -168,7 +168,7 @@
         "b_over_a": 0.13
       },
       "attributed_to": {
-        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        "row": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
       },
       "misprinted": {
         "year": "the page prints 2001 in the Year column, and the chapter's own reference list dates [8.65] to 2002 (J. Acoust. Soc. Am. 111, 707-715), where every other row's year is its reference's; registered in docs/ERRATA.md"
@@ -183,7 +183,7 @@
         "b_over_a": 0.13
       },
       "attributed_to": {
-        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        "row": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
       },
       "misprinted": {
         "year": "the page prints 2001 in the Year column, and the chapter's own reference list dates [8.65] to 2002 (J. Acoust. Soc. Am. 111, 707-715), where every other row's year is its reference's; registered in docs/ERRATA.md"
@@ -195,7 +195,7 @@
       "temperature_c": 80,
       "b_over_a": 6.1,
       "attributed_to": {
-        "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+        "row": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
       },
       "year": 1974
     },
@@ -208,7 +208,7 @@
         "b_over_a": 0.13
       },
       "attributed_to": {
-        "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        "row": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
       },
       "misprinted": {
         "year": "the page prints 2001 in the Year column, and the chapter's own reference list dates [8.65] to 2002 (J. Acoust. Soc. Am. 111, 707-715), where every other row's year is its reference's; registered in docs/ERRATA.md"
@@ -220,7 +220,7 @@
       "temperature_c": 100,
       "b_over_a": 6.1,
       "attributed_to": {
-        "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+        "row": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
       },
       "year": 1974
     }

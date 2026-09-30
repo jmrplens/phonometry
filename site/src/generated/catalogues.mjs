@@ -56660,7 +56660,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.1, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+          "row": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
         },
         "cells": [
           {
@@ -56706,7 +56706,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.1, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+          "row": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
         },
         "cells": [
           {
@@ -56752,7 +56752,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.1, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "E.C. Everbach: Tissue Composition Determination via Measurement of the Acoustic Nonlinearity Parameter B/A. Ph.D. Thesis (Yale Univ., New Haven 1989) pp. 66– [8.60]"
+          "row": "E.C. Everbach: Tissue Composition Determination via Measurement of the Acoustic Nonlinearity Parameter B/A. Ph.D. Thesis (Yale Univ., New Haven 1989) pp. 66– [8.60]"
         },
         "cells": [
           {
@@ -56798,7 +56798,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.1, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "Z. Zhu, S. Roos, N. Cobb, K. Jensen: Determination of the acoustic nonlinearity parameter B/A from phase measurements, J. Acoust. Soc. Am. 74, 1518–1521 (1983) [8.61]"
+          "row": "Z. Zhu, S. Roos, N. Cobb, K. Jensen: Determination of the acoustic nonlinearity parameter B/A from phase measurements, J. Acoust. Soc. Am. 74, 1518–1521 (1983) [8.61]"
         },
         "cells": [
           {
@@ -56844,7 +56844,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.1, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "X. Gong, Z. Zhu, T. Shi, J. Huang: Determination of the acoustic nonlinearity parameter in biological media using FAIS and ITD methods, J. Acoust. Soc. Am. 86, 1–5 (1989) [8.62]"
+          "row": "X. Gong, Z. Zhu, T. Shi, J. Huang: Determination of the acoustic nonlinearity parameter in biological media using FAIS and ITD methods, J. Acoust. Soc. Am. 86, 1–5 (1989) [8.62]"
         },
         "cells": [
           {
@@ -56890,7 +56890,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.1, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "K. Law, A. Frizell, F. Dunn: Determination of the nonlinearity parameter B/A of biological media, Ultrasound Med. Biol. 11, 307–318 (1985) [8.63]"
+          "row": "K. Law, A. Frizell, F. Dunn: Determination of the nonlinearity parameter B/A of biological media, Ultrasound Med. Biol. 11, 307–318 (1985) [8.63]"
         },
         "cells": [
           {
@@ -56936,7 +56936,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.1, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "J. Zhang, F. Dunn: A small volume thermodynamic system for B/A measurement, J. Acoust. Soc. Am. 89, 73–79 (1991) [8.64]"
+          "row": "J. Zhang, F. Dunn: A small volume thermodynamic system for B/A measurement, J. Acoust. Soc. Am. 89, 73–79 (1991) [8.64]"
         },
         "cells": [
           {
@@ -56982,7 +56982,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.1, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "E.C. Everbach: Tissue Composition Determination via Measurement of the Acoustic Nonlinearity Parameter B/A. Ph.D. Thesis (Yale Univ., New Haven 1989) pp. 66– [8.60]"
+          "row": "E.C. Everbach: Tissue Composition Determination via Measurement of the Acoustic Nonlinearity Parameter B/A. Ph.D. Thesis (Yale Univ., New Haven 1989) pp. 66– [8.60]"
         },
         "cells": [
           {
@@ -57028,7 +57028,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.1, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "row": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -57075,7 +57075,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.1, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+          "row": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
         },
         "cells": [
           {
@@ -57121,7 +57121,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.1, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "row": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -57168,7 +57168,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.1, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "row": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -57215,7 +57215,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.1, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+          "row": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
         },
         "cells": [
           {
@@ -57261,7 +57261,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.1, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "row": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -57308,7 +57308,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.1, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "row": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -57355,7 +57355,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.1, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+          "row": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
         },
         "cells": [
           {
@@ -57401,7 +57401,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.1, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "row": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -57448,7 +57448,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.1, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+          "row": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
         },
         "cells": [
           {
@@ -57494,7 +57494,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "table": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -57540,7 +57540,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "table": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -57586,7 +57586,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "table": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -57632,7 +57632,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "table": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -57678,7 +57678,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "table": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -57724,7 +57724,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "table": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -57770,7 +57770,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "table": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -57816,7 +57816,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "table": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -57862,7 +57862,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "table": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -57908,7 +57908,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "table": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -57954,7 +57954,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "table": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -58000,7 +58000,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "table": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -58046,7 +58046,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "table": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -58092,7 +58092,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "table": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -58138,7 +58138,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "table": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -58184,7 +58184,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "table": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -58230,7 +58230,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "table": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -58276,7 +58276,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "table": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -58322,7 +58322,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "table": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -58368,7 +58368,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "table": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -58414,7 +58414,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "table": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -58460,7 +58460,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "table": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -58506,7 +58506,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "table": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -58552,7 +58552,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "table": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -58598,7 +58598,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "table": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -58644,7 +58644,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "table": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -58690,7 +58690,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "table": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -58736,7 +58736,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "table": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -58782,7 +58782,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "table": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -58828,7 +58828,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "table": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -58874,7 +58874,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "table": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -58920,7 +58920,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "table": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -58966,7 +58966,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "table": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -59012,7 +59012,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "table": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -59058,7 +59058,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "table": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -59104,7 +59104,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "table": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -59150,7 +59150,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "table": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -59196,7 +59196,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "table": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -59242,7 +59242,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "table": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -59288,7 +59288,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "table": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -59334,7 +59334,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "table": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -59380,7 +59380,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "table": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -59426,7 +59426,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "table": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -59472,7 +59472,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "table": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -59518,7 +59518,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "table": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -59564,7 +59564,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "table": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -59610,7 +59610,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "table": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -59656,7 +59656,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "table": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -59702,7 +59702,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "table": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -59748,7 +59748,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "table": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -59794,7 +59794,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "table": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -59840,7 +59840,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "table": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -59886,7 +59886,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "table": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -59932,7 +59932,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "table": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -59978,7 +59978,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "table": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -60024,7 +60024,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "table": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -60070,7 +60070,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "table": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -60116,7 +60116,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "table": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -60162,7 +60162,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "table": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -60208,7 +60208,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "table": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -60254,7 +60254,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "table": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -60300,7 +60300,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+          "table": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
         },
         "cells": [
           {
@@ -60346,7 +60346,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+          "row": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
         },
         "cells": [
           {
@@ -60391,7 +60391,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "J. Banchet, J.D.N. Cheeke: Measurements of the acoustic nonlinearity parameter B/A in solvents: Dependence on chain length and sound velocity, J. Acoust. Soc. Am. 108, 2754–2758 (2000) [8.68]"
+          "row": "J. Banchet, J.D.N. Cheeke: Measurements of the acoustic nonlinearity parameter B/A in solvents: Dependence on chain length and sound velocity, J. Acoust. Soc. Am. 108, 2754–2758 (2000) [8.68]"
         },
         "cells": [
           {
@@ -60436,7 +60436,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "J. Banchet, J.D.N. Cheeke: Measurements of the acoustic nonlinearity parameter B/A in solvents: Dependence on chain length and sound velocity, J. Acoust. Soc. Am. 108, 2754–2758 (2000) [8.68]"
+          "row": "J. Banchet, J.D.N. Cheeke: Measurements of the acoustic nonlinearity parameter B/A in solvents: Dependence on chain length and sound velocity, J. Acoust. Soc. Am. 108, 2754–2758 (2000) [8.68]"
         },
         "cells": [
           {
@@ -60481,7 +60481,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
         "note": "The page prints this row twice, one line under the other, with the same temperature, value and reference; it is one measurement and is held once. The repetition is registered in docs/ERRATA.md.",
         "attributedTo": {
-          "b_over_a": "J. Banchet, J.D.N. Cheeke: Measurements of the acoustic nonlinearity parameter B/A in solvents: Dependence on chain length and sound velocity, J. Acoust. Soc. Am. 108, 2754–2758 (2000) [8.68]"
+          "row": "J. Banchet, J.D.N. Cheeke: Measurements of the acoustic nonlinearity parameter B/A in solvents: Dependence on chain length and sound velocity, J. Acoust. Soc. Am. 108, 2754–2758 (2000) [8.68]"
         },
         "cells": [
           {
@@ -60527,7 +60527,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "J. Banchet, J.D.N. Cheeke: Measurements of the acoustic nonlinearity parameter B/A in solvents: Dependence on chain length and sound velocity, J. Acoust. Soc. Am. 108, 2754–2758 (2000) [8.68]"
+          "row": "J. Banchet, J.D.N. Cheeke: Measurements of the acoustic nonlinearity parameter B/A in solvents: Dependence on chain length and sound velocity, J. Acoust. Soc. Am. 108, 2754–2758 (2000) [8.68]"
         },
         "cells": [
           {
@@ -60572,7 +60572,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "J. Banchet, J.D.N. Cheeke: Measurements of the acoustic nonlinearity parameter B/A in solvents: Dependence on chain length and sound velocity, J. Acoust. Soc. Am. 108, 2754–2758 (2000) [8.68]"
+          "row": "J. Banchet, J.D.N. Cheeke: Measurements of the acoustic nonlinearity parameter B/A in solvents: Dependence on chain length and sound velocity, J. Acoust. Soc. Am. 108, 2754–2758 (2000) [8.68]"
         },
         "cells": [
           {
@@ -60617,7 +60617,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "J. Banchet, J.D.N. Cheeke: Measurements of the acoustic nonlinearity parameter B/A in solvents: Dependence on chain length and sound velocity, J. Acoust. Soc. Am. 108, 2754–2758 (2000) [8.68]"
+          "row": "J. Banchet, J.D.N. Cheeke: Measurements of the acoustic nonlinearity parameter B/A in solvents: Dependence on chain length and sound velocity, J. Acoust. Soc. Am. 108, 2754–2758 (2000) [8.68]"
         },
         "cells": [
           {
@@ -60662,7 +60662,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "J. Banchet, J.D.N. Cheeke: Measurements of the acoustic nonlinearity parameter B/A in solvents: Dependence on chain length and sound velocity, J. Acoust. Soc. Am. 108, 2754–2758 (2000) [8.68]"
+          "row": "J. Banchet, J.D.N. Cheeke: Measurements of the acoustic nonlinearity parameter B/A in solvents: Dependence on chain length and sound velocity, J. Acoust. Soc. Am. 108, 2754–2758 (2000) [8.68]"
         },
         "cells": [
           {
@@ -60707,7 +60707,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "J. Banchet, J.D.N. Cheeke: Measurements of the acoustic nonlinearity parameter B/A in solvents: Dependence on chain length and sound velocity, J. Acoust. Soc. Am. 108, 2754–2758 (2000) [8.68]"
+          "row": "J. Banchet, J.D.N. Cheeke: Measurements of the acoustic nonlinearity parameter B/A in solvents: Dependence on chain length and sound velocity, J. Acoust. Soc. Am. 108, 2754–2758 (2000) [8.68]"
         },
         "cells": [
           {
@@ -60752,7 +60752,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
+          "row": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
         },
         "cells": [
           {
@@ -60798,7 +60798,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "J. Banchet, J.D.N. Cheeke: Measurements of the acoustic nonlinearity parameter B/A in solvents: Dependence on chain length and sound velocity, J. Acoust. Soc. Am. 108, 2754–2758 (2000) [8.68]"
+          "row": "J. Banchet, J.D.N. Cheeke: Measurements of the acoustic nonlinearity parameter B/A in solvents: Dependence on chain length and sound velocity, J. Acoust. Soc. Am. 108, 2754–2758 (2000) [8.68]"
         },
         "cells": [
           {
@@ -60844,7 +60844,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
+          "row": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
         },
         "cells": [
           {
@@ -60890,7 +60890,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+          "row": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
         },
         "cells": [
           {
@@ -60936,7 +60936,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "O. Nomoto: Nonlinear parameter of the ‘Rao Liquid’, J. Phys. Soc. Jpn. 21, 569–571 (1966) [8.70]"
+          "row": "O. Nomoto: Nonlinear parameter of the ‘Rao Liquid’, J. Phys. Soc. Jpn. 21, 569–571 (1966) [8.70]"
         },
         "cells": [
           {
@@ -60982,7 +60982,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "R.T. Beyer: Parameter of nonlinearity in fluids, J. Acoust. Soc. Am. 32, 719–721 (1960) [8.71]"
+          "row": "R.T. Beyer: Parameter of nonlinearity in fluids, J. Acoust. Soc. Am. 32, 719–721 (1960) [8.71]"
         },
         "cells": [
           {
@@ -61028,7 +61028,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "R.T. Beyer: Parameter of nonlinearity in fluids, J. Acoust. Soc. Am. 32, 719–721 (1960) [8.71]"
+          "row": "R.T. Beyer: Parameter of nonlinearity in fluids, J. Acoust. Soc. Am. 32, 719–721 (1960) [8.71]"
         },
         "cells": [
           {
@@ -61074,7 +61074,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
+          "row": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
         },
         "cells": [
           {
@@ -61120,7 +61120,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
+          "row": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
         },
         "cells": [
           {
@@ -61166,7 +61166,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "R.T. Beyer: Parameter of nonlinearity in fluids, J. Acoust. Soc. Am. 32, 719–721 (1960) [8.71]"
+          "row": "R.T. Beyer: Parameter of nonlinearity in fluids, J. Acoust. Soc. Am. 32, 719–721 (1960) [8.71]"
         },
         "cells": [
           {
@@ -61212,7 +61212,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "R.T. Beyer: Parameter of nonlinearity in fluids, J. Acoust. Soc. Am. 32, 719–721 (1960) [8.71]"
+          "row": "R.T. Beyer: Parameter of nonlinearity in fluids, J. Acoust. Soc. Am. 32, 719–721 (1960) [8.71]"
         },
         "cells": [
           {
@@ -61258,7 +61258,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "R.T. Beyer: Parameter of nonlinearity in fluids, J. Acoust. Soc. Am. 32, 719–721 (1960) [8.71]"
+          "row": "R.T. Beyer: Parameter of nonlinearity in fluids, J. Acoust. Soc. Am. 32, 719–721 (1960) [8.71]"
         },
         "cells": [
           {
@@ -61304,7 +61304,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "R.T. Beyer: Parameter of nonlinearity in fluids, J. Acoust. Soc. Am. 32, 719–721 (1960) [8.71]"
+          "row": "R.T. Beyer: Parameter of nonlinearity in fluids, J. Acoust. Soc. Am. 32, 719–721 (1960) [8.71]"
         },
         "cells": [
           {
@@ -61350,7 +61350,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "R.T. Beyer: Parameter of nonlinearity in fluids, J. Acoust. Soc. Am. 32, 719–721 (1960) [8.71]"
+          "row": "R.T. Beyer: Parameter of nonlinearity in fluids, J. Acoust. Soc. Am. 32, 719–721 (1960) [8.71]"
         },
         "cells": [
           {
@@ -61396,7 +61396,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "Z. Zhu, S. Roos, N. Cobb, K. Jensen: Determination of the acoustic nonlinearity parameter B/A from phase measurements, J. Acoust. Soc. Am. 74, 1518–1521 (1983) [8.61]"
+          "row": "Z. Zhu, S. Roos, N. Cobb, K. Jensen: Determination of the acoustic nonlinearity parameter B/A from phase measurements, J. Acoust. Soc. Am. 74, 1518–1521 (1983) [8.61]"
         },
         "cells": [
           {
@@ -61442,7 +61442,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "R.T. Beyer: Parameter of nonlinearity in fluids, J. Acoust. Soc. Am. 32, 719–721 (1960) [8.71]"
+          "row": "R.T. Beyer: Parameter of nonlinearity in fluids, J. Acoust. Soc. Am. 32, 719–721 (1960) [8.71]"
         },
         "cells": [
           {
@@ -61488,7 +61488,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
+          "row": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
         },
         "cells": [
           {
@@ -61534,7 +61534,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "R.T. Beyer: Parameter of nonlinearity in fluids, J. Acoust. Soc. Am. 32, 719–721 (1960) [8.71]"
+          "row": "R.T. Beyer: Parameter of nonlinearity in fluids, J. Acoust. Soc. Am. 32, 719–721 (1960) [8.71]"
         },
         "cells": [
           {
@@ -61580,7 +61580,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+          "row": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
         },
         "cells": [
           {
@@ -61626,7 +61626,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
+          "row": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
         },
         "cells": [
           {
@@ -61672,7 +61672,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
+          "row": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
         },
         "cells": [
           {
@@ -61718,7 +61718,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
+          "row": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
         },
         "cells": [
           {
@@ -61764,7 +61764,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "J. Banchet, J.D.N. Cheeke: Measurements of the acoustic nonlinearity parameter B/A in solvents: Dependence on chain length and sound velocity, J. Acoust. Soc. Am. 108, 2754–2758 (2000) [8.68]"
+          "row": "J. Banchet, J.D.N. Cheeke: Measurements of the acoustic nonlinearity parameter B/A in solvents: Dependence on chain length and sound velocity, J. Acoust. Soc. Am. 108, 2754–2758 (2000) [8.68]"
         },
         "cells": [
           {
@@ -61810,7 +61810,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
+          "row": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
         },
         "cells": [
           {
@@ -61856,7 +61856,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "Z. Zhu, S. Roos, N. Cobb, K. Jensen: Determination of the acoustic nonlinearity parameter B/A from phase measurements, J. Acoust. Soc. Am. 74, 1518–1521 (1983) [8.61]"
+          "row": "Z. Zhu, S. Roos, N. Cobb, K. Jensen: Determination of the acoustic nonlinearity parameter B/A from phase measurements, J. Acoust. Soc. Am. 74, 1518–1521 (1983) [8.61]"
         },
         "cells": [
           {
@@ -61902,7 +61902,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "X. Gong, Z. Zhu, T. Shi, J. Huang: Determination of the acoustic nonlinearity parameter in biological media using FAIS and ITD methods, J. Acoust. Soc. Am. 86, 1–5 (1989) [8.62]"
+          "row": "X. Gong, Z. Zhu, T. Shi, J. Huang: Determination of the acoustic nonlinearity parameter in biological media using FAIS and ITD methods, J. Acoust. Soc. Am. 86, 1–5 (1989) [8.62]"
         },
         "cells": [
           {
@@ -61948,7 +61948,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+          "row": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
         },
         "cells": [
           {
@@ -61994,7 +61994,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "K. Law, A. Frizell, F. Dunn: Determination of the nonlinearity parameter B/A of biological media, Ultrasound Med. Biol. 11, 307–318 (1985) [8.63]"
+          "row": "K. Law, A. Frizell, F. Dunn: Determination of the nonlinearity parameter B/A of biological media, Ultrasound Med. Biol. 11, 307–318 (1985) [8.63]"
         },
         "cells": [
           {
@@ -62040,7 +62040,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "J. Zhang, F. Dunn: A small volume thermodynamic system for B/A measurement, J. Acoust. Soc. Am. 89, 73–79 (1991) [8.64]"
+          "row": "J. Zhang, F. Dunn: A small volume thermodynamic system for B/A measurement, J. Acoust. Soc. Am. 89, 73–79 (1991) [8.64]"
         },
         "cells": [
           {
@@ -62086,7 +62086,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+          "row": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
         },
         "cells": [
           {
@@ -62132,7 +62132,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+          "row": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
         },
         "cells": [
           {
@@ -62178,7 +62178,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "K.L. Narayana, K.M. Swamy: Acoustic nonlinear parameter (B/A) in n-pentane, Acustica 49, 336–339 (1981) [8.72]"
+          "row": "K.L. Narayana, K.M. Swamy: Acoustic nonlinear parameter (B/A) in n-pentane, Acustica 49, 336–339 (1981) [8.72]"
         },
         "cells": [
           {
@@ -62224,7 +62224,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "Z. Zhu, S. Roos, N. Cobb, K. Jensen: Determination of the acoustic nonlinearity parameter B/A from phase measurements, J. Acoust. Soc. Am. 74, 1518–1521 (1983) [8.61]"
+          "row": "Z. Zhu, S. Roos, N. Cobb, K. Jensen: Determination of the acoustic nonlinearity parameter B/A from phase measurements, J. Acoust. Soc. Am. 74, 1518–1521 (1983) [8.61]"
         },
         "cells": [
           {
@@ -62270,7 +62270,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+          "row": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
         },
         "cells": [
           {
@@ -62316,7 +62316,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "K.L. Narayana, K.M. Swamy: Acoustic nonlinear parameter (B/A) in n-pentane, Acustica 49, 336–339 (1981) [8.72]"
+          "row": "K.L. Narayana, K.M. Swamy: Acoustic nonlinear parameter (B/A) in n-pentane, Acustica 49, 336–339 (1981) [8.72]"
         },
         "cells": [
           {
@@ -62362,7 +62362,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "J. Banchet, J.D.N. Cheeke: Measurements of the acoustic nonlinearity parameter B/A in solvents: Dependence on chain length and sound velocity, J. Acoust. Soc. Am. 108, 2754–2758 (2000) [8.68]"
+          "row": "J. Banchet, J.D.N. Cheeke: Measurements of the acoustic nonlinearity parameter B/A in solvents: Dependence on chain length and sound velocity, J. Acoust. Soc. Am. 108, 2754–2758 (2000) [8.68]"
         },
         "cells": [
           {
@@ -62408,7 +62408,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
+          "row": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
         },
         "cells": [
           {
@@ -62454,7 +62454,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
+          "row": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
         },
         "cells": [
           {
@@ -62500,7 +62500,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+          "row": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
         },
         "cells": [
           {
@@ -62546,7 +62546,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+          "row": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
         },
         "cells": [
           {
@@ -62592,7 +62592,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+          "row": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
         },
         "cells": [
           {
@@ -62638,7 +62638,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
+          "row": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
         },
         "cells": [
           {
@@ -62683,7 +62683,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
+          "row": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
         },
         "cells": [
           {
@@ -62728,7 +62728,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
+          "row": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
         },
         "cells": [
           {
@@ -62773,7 +62773,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
+          "row": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
         },
         "cells": [
           {
@@ -62818,7 +62818,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
+          "row": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
         },
         "cells": [
           {
@@ -62863,7 +62863,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
+          "row": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
         },
         "cells": [
           {
@@ -62908,7 +62908,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "K.L. Narayana, K.M. Swamy: Acoustic nonlinear parameter (B/A) in n-pentane, Acustica 49, 336–339 (1981) [8.72]"
+          "row": "K.L. Narayana, K.M. Swamy: Acoustic nonlinear parameter (B/A) in n-pentane, Acustica 49, 336–339 (1981) [8.72]"
         },
         "cells": [
           {
@@ -62954,7 +62954,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "K.L. Narayana, K.M. Swamy: Acoustic nonlinear parameter (B/A) in n-pentane, Acustica 49, 336–339 (1981) [8.72]"
+          "row": "K.L. Narayana, K.M. Swamy: Acoustic nonlinear parameter (B/A) in n-pentane, Acustica 49, 336–339 (1981) [8.72]"
         },
         "cells": [
           {
@@ -63000,7 +63000,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "R.T. Beyer: Parameter of nonlinearity in fluids, J. Acoust. Soc. Am. 32, 719–721 (1960) [8.71]"
+          "row": "R.T. Beyer: Parameter of nonlinearity in fluids, J. Acoust. Soc. Am. 32, 719–721 (1960) [8.71]"
         },
         "cells": [
           {
@@ -63046,7 +63046,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "R.T. Beyer: Parameter of nonlinearity in fluids, J. Acoust. Soc. Am. 32, 719–721 (1960) [8.71]"
+          "row": "R.T. Beyer: Parameter of nonlinearity in fluids, J. Acoust. Soc. Am. 32, 719–721 (1960) [8.71]"
         },
         "cells": [
           {
@@ -63092,7 +63092,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "S.K. Kor, U.S. Tandon: Scattering of sound by sound from Beyers (B/A) parameters, Acustica 28, 129–130 (1973) [8.73]"
+          "row": "S.K. Kor, U.S. Tandon: Scattering of sound by sound from Beyers (B/A) parameters, Acustica 28, 129–130 (1973) [8.73]"
         },
         "cells": [
           {
@@ -63138,7 +63138,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.4, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+          "row": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
         },
         "cells": [
           {
@@ -63185,7 +63185,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.4, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+          "row": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
         },
         "cells": [
           {
@@ -63232,7 +63232,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.4, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+          "row": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
         },
         "cells": [
           {
@@ -63279,7 +63279,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.4, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+          "row": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
         },
         "cells": [
           {
@@ -63326,7 +63326,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.4, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+          "row": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
         },
         "cells": [
           {
@@ -63373,7 +63373,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.4, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+          "row": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
         },
         "cells": [
           {
@@ -63420,7 +63420,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.4, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
+          "row": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
         },
         "cells": [
           {
@@ -63467,7 +63467,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.4, PDF page 285 (printed p. 269)",
         "note": "The caption says atmospheric pressure, and argon boils at -185.85 °C at one atmosphere, so at -183.15 °C it is liquid only under a higher pressure the page does not print; the reference, [8.74], measured B/A in liquefied gases as a function of temperature and pressure. The value is served as printed and the caption's condition is registered in docs/ERRATA.md.",
         "attributedTo": {
-          "b_over_a": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
+          "row": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
         },
         "cells": [
           {
@@ -63515,7 +63515,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.4, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "H.A. Kashkooli, P.J. Dolan Jr., C.W. Smith: Measurement of the acoustic nonlinearity parameter in water, methanol, liquid nitrogen, and liquid helium-II by two different methods: A comparison, J. Acoust. Soc. Am. 82, 2086–2089 (1987) [8.75]"
+          "row": "H.A. Kashkooli, P.J. Dolan Jr., C.W. Smith: Measurement of the acoustic nonlinearity parameter in water, methanol, liquid nitrogen, and liquid helium-II by two different methods: A comparison, J. Acoust. Soc. Am. 82, 2086–2089 (1987) [8.75]"
         },
         "cells": [
           {
@@ -63562,7 +63562,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.4, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
+          "row": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
         },
         "cells": [
           {
@@ -63609,7 +63609,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.4, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
+          "row": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
         },
         "cells": [
           {
@@ -63656,7 +63656,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.4, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
+          "row": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
         },
         "cells": [
           {
@@ -63703,7 +63703,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.4, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
+          "row": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
         },
         "cells": [
           {
@@ -63750,7 +63750,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.4, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
+          "row": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
         },
         "cells": [
           {
@@ -63797,7 +63797,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.4, PDF page 285 (printed p. 269)",
         "note": "The caption says atmospheric pressure, and methane boils at -161.49 °C at one atmosphere, so at -153.15 °C it is liquid only under a higher pressure the page does not print; the reference, [8.74], measured B/A in liquefied gases as a function of temperature and pressure. The value is served as printed and the caption's condition is registered in docs/ERRATA.md.",
         "attributedTo": {
-          "b_over_a": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
+          "row": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
         },
         "cells": [
           {
@@ -63845,7 +63845,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.4, PDF page 285 (printed p. 269)",
         "note": "The caption says atmospheric pressure, and methane boils at -161.49 °C at one atmosphere, so at -143.15 °C it is liquid only under a higher pressure the page does not print; the reference, [8.74], measured B/A in liquefied gases as a function of temperature and pressure. The value is served as printed and the caption's condition is registered in docs/ERRATA.md.",
         "attributedTo": {
-          "b_over_a": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
+          "row": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
         },
         "cells": [
           {
@@ -63893,7 +63893,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.4, PDF page 285 (printed p. 269)",
         "note": "The caption says atmospheric pressure, and methane boils at -161.49 °C at one atmosphere, so at -138.15 °C it is liquid only under a higher pressure the page does not print; the reference, [8.74], measured B/A in liquefied gases as a function of temperature and pressure. The value is served as printed and the caption's condition is registered in docs/ERRATA.md.",
         "attributedTo": {
-          "b_over_a": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
+          "row": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
         },
         "cells": [
           {
@@ -63941,7 +63941,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.4, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
+          "row": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
         },
         "cells": [
           {
@@ -63988,7 +63988,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.4, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "H.A. Kashkooli, P.J. Dolan Jr., C.W. Smith: Measurement of the acoustic nonlinearity parameter in water, methanol, liquid nitrogen, and liquid helium-II by two different methods: A comparison, J. Acoust. Soc. Am. 82, 2086–2089 (1987) [8.75]"
+          "row": "H.A. Kashkooli, P.J. Dolan Jr., C.W. Smith: Measurement of the acoustic nonlinearity parameter in water, methanol, liquid nitrogen, and liquid helium-II by two different methods: A comparison, J. Acoust. Soc. Am. 82, 2086–2089 (1987) [8.75]"
         },
         "cells": [
           {
@@ -64035,7 +64035,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.4, PDF page 285 (printed p. 269)",
         "note": "The caption says atmospheric pressure, and nitrogen boils at -195.79 °C at one atmosphere, so at -193.15 °C it is liquid only under a higher pressure the page does not print; the reference, [8.74], measured B/A in liquefied gases as a function of temperature and pressure. The value is served as printed and the caption's condition is registered in docs/ERRATA.md.",
         "attributedTo": {
-          "b_over_a": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
+          "row": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
         },
         "cells": [
           {
@@ -64083,7 +64083,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.4, PDF page 285 (printed p. 269)",
         "note": "The caption says atmospheric pressure, and nitrogen boils at -195.79 °C at one atmosphere, so at -183.15 °C it is liquid only under a higher pressure the page does not print; the reference, [8.74], measured B/A in liquefied gases as a function of temperature and pressure. The value is served as printed and the caption's condition is registered in docs/ERRATA.md.",
         "attributedTo": {
-          "b_over_a": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
+          "row": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
         },
         "cells": [
           {
@@ -64131,7 +64131,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.4, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+          "row": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
         },
         "cells": [
           {
@@ -64178,7 +64178,7 @@ export const catalogues = {
         "source": "Rossing (2014) Table 8.4, PDF page 285 (printed p. 269)",
         "note": "",
         "attributedTo": {
-          "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+          "row": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
         },
         "cells": [
           {

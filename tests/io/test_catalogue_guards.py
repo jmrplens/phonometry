@@ -1,8 +1,11 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
 """Guards that keep the catalogue reader closed over what the package adds.
 
-Two classes of mistake would slip past the reader's own tests the day they
-are made: a new row class the reader cannot read, and a new packaged table
+Four classes of mistake would slip past the reader's own tests the day they
+are made: a new row class the reader cannot read, from a JSON document or
+from a CSV file; a new kind of field the CSV front end would refuse as an
+unknown column; a new text a CSV file would write as an empty cell that
+reads back as something the row does not say; and a new packaged table
 whose name a caller's catalogue could already hold. Each guard below walks
 what the package publishes rather than a list, so the class is closed.
 """
@@ -22,7 +25,7 @@ import pytest
 import phonometry
 from phonometry import io
 from phonometry._internal import catalogue as private
-from phonometry.io import _catalogue
+from phonometry.io import _catalogue, _catalogue_csv
 
 
 def _published_row_classes() -> list[type[io.CatalogueRow]]:
@@ -49,14 +52,13 @@ def test_the_walk_finds_the_row_classes() -> None:
 
 
 def _one_row(cls: type[io.CatalogueRow]) -> dict[str, object]:
-    """A row of *cls* that fills its first numeric field, if it has one."""
+    """A row of *cls* that fills its first field of numbers and of whole numbers."""
     row: dict[str, object] = {"key": "a", "name": "Specimen A"}
     kinds = private.field_kinds(cls)
-    numeric = sorted(
-        name for name, kind in kinds.items() if kind in ("number", "whole")
-    )
-    if numeric:
-        row[numeric[0]] = 1 if kinds[numeric[0]] == "whole" else 0.5
+    for kind, value in (("number", 0.5), ("whole", 1)):
+        named = sorted(name for name, held in kinds.items() if held == kind)
+        if named:
+            row[named[0]] = value
     return row
 
 
@@ -92,6 +94,186 @@ def test_every_published_row_class_is_read_from_a_one_row_document(
     for name, value in row.items():
         if name != "key":
             assert getattr(read, name) == value
+
+
+@pytest.mark.parametrize("cls", ROW_CLASSES, ids=lambda cls: cls.__name__)
+def test_every_published_row_class_is_read_from_a_one_row_sheet(
+    cls: type[io.CatalogueRow], tmp_path: pathlib.Path
+) -> None:
+    """Guard (a), for a CSV file: no row class escapes the CSV front end."""
+    row = _one_row(cls)
+    header = {
+        "schema": "phonometry-catalogue",
+        "schema_version": 1,
+        "catalogue": "guard",
+        "row_type": cls.__name__,
+        "about": "One row, to show the CSV reader reads the class.",
+        "provenance": {
+            "kind": "other",
+            "document": "A test of the reader",
+            "version": None,
+            "consulted": "2026-09-25",
+        },
+        "csv": {"delimiter": ";", "decimal": ","},
+    }
+    path = tmp_path / "guard.csv"
+    cells = [str(value).replace(".", ",") for value in row.values()]
+    path.write_text(
+        f"{';'.join(row)}\n{';'.join(cells)}\n", encoding="utf-8", newline=""
+    )
+    (tmp_path / "guard.csv.phonometry.json").write_text(
+        json.dumps(header), encoding="utf-8"
+    )
+    read = io.read_catalogue(path, row_type=cls)["guard/a"]
+    assert type(read) is cls
+    for name, value in row.items():
+        if name != "key":
+            assert getattr(read, name) == value
+
+
+@pytest.mark.parametrize("cls", ROW_CLASSES, ids=lambda cls: cls.__name__)
+def test_every_field_is_a_csv_column_or_is_sent_where_it_is_written(
+    cls: type[io.CatalogueRow],
+) -> None:
+    """Every field of every row class is a column, or its refusal says where it goes.
+
+    Each kind of field is held to what it is: a number, a whole number, a
+    flag or a text is a column of its own kind, but the two texts the
+    library composes; a set or a mapping is the basis column, the credit
+    column and the header, a mark the cell writes, or a form only a JSON
+    document writes; the provenance is narrowed in its own columns. A kind the CSV front end does not know
+    fails here, instead of coming out as some refusal that reads right.
+    """
+    reader = _catalogue._Reader(cls, _catalogue._Issues("guard"))
+    kinds = private.field_kinds(cls)
+    for item in dataclasses.fields(cls):
+        name, kind = item.name, kinds[item.name]
+        role, target, problem = _catalogue_csv._Sheet.role(name, reader)
+        where = (name, kind, role, problem)
+        if kind in ("number", "whole") or (
+            kind in ("flag", "text") and name not in ("source", "table")
+        ):
+            expected = "number" if kind == "whole" else kind
+            assert (role, target, problem) == (expected, name, ""), where
+        elif kind in ("flag", "text"):
+            assert not role, where
+            assert "composed from the provenance" in problem or (
+                "the catalogue's name" in problem
+            ), where
+        elif name == "basis":
+            assert (role, target, problem) == ("basis", "basis", ""), where
+        elif name == "attributed_to":
+            assert not role, where
+            assert "the column attributed_to.row" in problem, where
+            assert "the whole table in its header" in problem, where
+            credit = _catalogue_csv._Sheet.role("attributed_to.row", reader)
+            assert credit == ("credit", "row", ""), where
+        elif kind in ("set", "mapping"):
+            assert not role, where
+            assert (
+                "only in a JSON catalogue" in problem
+                or "in its own cell" in problem
+                or "what the library works out" in problem
+            ), where
+        else:
+            assert kind == "provenance", where
+            assert problem.startswith("a row narrows its provenance"), where
+
+
+#: The document's provenance, every entry a row may narrow filled, so that a
+#: row that empties one says other than its document.
+_FILLED = {
+    "page": "7",
+    "printed_table": "Table 1",
+    "laboratory": "Example Lab",
+    "accreditation": "ENAC 0/LE000",
+    "report": "R-1",
+    "test_date": "2026-01-02",
+    "test_standard": "ISO 354:2003",
+}
+
+
+def _empty_texts(cls: type[io.CatalogueRow]) -> list[tuple[str, dict[str, object]]]:
+    """Each text a row of *cls* may hold empty, by its pointer in the row.
+
+    Every text field but the two the library composes, a column of the
+    caller's, and every entry of the provenance a row narrows.
+    """
+    kinds = private.field_kinds(cls)
+    cases: list[tuple[str, dict[str, object]]] = [
+        (name, {name: ""})
+        for name, kind in kinds.items()
+        if kind == "text" and name not in ("source", "table")
+    ]
+    cases.append(("x-batch", {"x-batch": ""}))
+    cases += [(f"provenance/{entry}", {"provenance": {entry: ""}}) for entry in _FILLED]
+    return cases
+
+
+def _sheet_of(
+    cls: type[io.CatalogueRow], row: dict[str, object], folder: pathlib.Path
+) -> tuple[io.Catalogue[io.CatalogueRow], tuple[pathlib.Path, ...]] | None:
+    """The one-row catalogue *row* reads into and the sheet written of it.
+
+    ``None`` when the JSON reader refuses the row, which then holds no such
+    empty text to write: a row with no name, and nothing else, as the guard
+    holds.
+
+    :raises CatalogueError: for what the CSV writer refuses.
+    """
+    document = {
+        "schema": "phonometry-catalogue",
+        "schema_version": 1,
+        "catalogue": "guard",
+        "row_type": cls.__name__,
+        "about": "One row, to show what an empty text does in a sheet.",
+        "provenance": {
+            "kind": "test_report",
+            "document": "A test of the writer",
+            "version": None,
+            "consulted": "2026-09-30",
+            **_FILLED,
+        },
+        "rows": [row],
+    }
+    try:
+        mine = io.parse_catalogue(document, row_type=cls)
+    except io.CatalogueError:
+        return None
+    folder.mkdir()
+    return mine, io.write_catalogue(mine, folder / "guard.csv")
+
+
+@pytest.mark.parametrize("cls", ROW_CLASSES, ids=lambda cls: cls.__name__)
+def test_every_empty_text_reads_back_from_a_sheet_or_is_refused_there(
+    cls: type[io.CatalogueRow], tmp_path: pathlib.Path
+) -> None:
+    """Guard (e): an empty cell never reads back as what the row did not say.
+
+    An empty cell reads as nothing written: a text field takes its default,
+    a provenance entry the document's, and a column of the caller's is left
+    out. Each text a row may hold is emptied in turn, and the sheet either
+    reads back as the rows read from the document or is refused at that
+    text's pointer, with nothing written.
+    """
+    unread = []
+    for index, (where, change) in enumerate(_empty_texts(cls)):
+        folder = tmp_path / str(index)
+        try:
+            written = _sheet_of(cls, {**_one_row(cls), **change}, folder)
+        except io.CatalogueError as refused:
+            pointers = [issue.location for issue in refused.issues]
+            assert pointers == [f"/rows/0/{where}"], where
+            assert list(folder.iterdir()) == [], where
+            continue
+        if written is None:
+            unread.append(where)
+            continue
+        mine, paths = written
+        back = io.read_catalogue(paths[0], row_type=cls)
+        assert dict(back) == dict(mine), where
+        assert dict(back.extras) == dict(mine.extras), where
+    assert unread == ["name"]
 
 
 def _data_files() -> list[pathlib.Path]:

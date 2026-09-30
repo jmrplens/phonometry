@@ -1,6 +1,6 @@
 ---
 title: "Guides"
-description: "The 151 guides of phonometry, grouped into the thirteen topics the library covers: what each area is for, the standards implemented in it, and a one-line summary of every guide inside it."
+description: "The 152 guides of phonometry, grouped into the thirteen topics the library covers: what each area is for, the standards implemented in it, and a one-line summary of every guide inside it."
 head:
   - tag: script
     attrs:
@@ -117,7 +117,7 @@ makes, then runnable code and the figure it draws. Nothing here is a survey of
 the field; each page is the working documentation of a module, written so that
 a result can be defended clause by clause rather than trusted.
 
-This page is the map. A hundred and fifty-one guides sit in thirteen topics, and each topic has its
+This page is the map. A hundred and fifty-two guides sit in thirteen topics, and each topic has its
 own overview page with the longer story of how its pieces fit together. If you
 are arriving without a specific question, read
 [Getting Started](/phonometry/start/getting-started/) first: it runs one signal
@@ -551,7 +551,7 @@ ISO 9053-1/-2, ISO 17497-1/-2, ISO 13472-1/-2, EN 29052-1 and ISO 12999-2.
 Mobility and frequency-response functions, isolators, radiated power,
 junctions and human vibration. The area covers the path a machine takes into a
 structure and out again as airborne sound, and the separate question of what
-vibration does to the person exposed to it. Implements ISO 7626-1/-2,
+vibration does to the person exposed to it. Implements ISO 7626-1/-2/-5,
 ISO 10846-1/-2/-3/-4/-5, ISO 9611, ISO/TS 7849-1/-2, EN 15657, EN 12354-5,
 ISO 2631-1/-2/-4/-5, ISO 5349-1/-2, ISO 8041-1/-2 and DIN 4150-3.
 
@@ -560,6 +560,11 @@ ISO 2631-1/-2/-4/-5, ISO 5349-1/-2, ISO 8041-1/-2 and DIN 4150-3.
 - [Mechanical mobility and the FRF family (ISO 7626-1)](/phonometry/vibration/structural/mechanical-mobility/):
   receptance, mobility and accelerance with their reciprocals, conversion
   between them, and the closed-form single-degree-of-freedom resonator.
+- [Mobility by impact excitation (ISO 7626-5)](/phonometry/vibration/structural/impact-mobility/):
+  the mobility measured with an impact hammer: the force and exponential
+  windows, the average over impacts with its coherence, the damping the window
+  adds taken away by Annex A, and verdicts on double hits, the force spectrum,
+  overload and the response decay.
 - [Bending-wave transmission at plate junctions](/phonometry/vibration/structural/junction-transmission/):
   the wave-approach transmission coefficients for rigid X, T, L and in-line
   junctions, their diffuse-field average, and the coupling loss factor and

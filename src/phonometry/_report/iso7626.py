@@ -41,6 +41,7 @@ from ._frf_fiche import frequency_range, frf_metadata_pairs, render_frf_fiche
 from ._i18n import format_number, t
 
 if TYPE_CHECKING:
+    from ..vibration.structural.impact_mobility import ImpactMobilityResult
     from ..vibration.structural.mechanical_mobility import MobilityResult
     from .metadata import ReportMetadata
 
@@ -178,6 +179,107 @@ def render_mobility_report(
         metric_rows=_metric_rows(result, language),
         statement=_statement(result, language),
         extended=_extended_terms(result, language),
+        metadata=metadata,
+        language=language,
+    )
+
+
+def _impact_basis(result: ImpactMobilityResult, language: str = "en") -> str:
+    """The standard-basis line of an impact measurement, naming ISO 7626-5."""
+    kind = _kind(result.mobility_result, language)
+    if result.impacts == 1:
+        return t(
+            "Measurement of the {kind} mechanical mobility Y = v/F by impact "
+            "excitation, from a single impact (ISO 7626-5:2019; "
+            "frequency-response function of ISO 7626-1:2011).",
+            language,
+        ).format(kind=kind)
+    return t(
+        "Measurement of the {kind} mechanical mobility Y = v/F by impact "
+        "excitation, averaged over {n} impacts (ISO 7626-5:2019, 8.6; "
+        "frequency-response function of ISO 7626-1:2011).",
+        language,
+    ).format(kind=kind, n=result.impacts)
+
+
+def _window_reading(result: ImpactMobilityResult, language: str = "en") -> str:
+    """The exponential window's decay rate, or the word for none."""
+    if result.exponential_decay_rate_per_s > 0.0:
+        return format_number(result.exponential_decay_rate_per_s, language, decimals=1)
+    return t("none", language)
+
+
+def _impact_rows(
+    result: ImpactMobilityResult, language: str = "en"
+) -> list[tuple[str, str]]:
+    """The characteristic points of the mobility, then the impact specifics."""
+    mobility = result.mobility_result
+    index, _, _ = _peak(mobility)
+    coherence = float(np.asarray(result.coherence, dtype=np.float64)[index])
+    return [
+        *_metric_rows(mobility, language),
+        (t("Impacts averaged", language), str(result.impacts)),
+        (t("Exponential window a [1/s]", language), _window_reading(result, language)),
+        (
+            t("Coherence at peak", language),
+            format_number(coherence, language, decimals=3),
+        ),
+    ]
+
+
+def _impact_extended(result: ImpactMobilityResult, language: str = "en") -> list[str]:
+    """The extended terms, with the window's effect on the peaks stated."""
+    terms = _extended_terms(result.mobility_result, language)
+    if result.exponential_decay_rate_per_s > 0.0:
+        terms.append(
+            t(
+                "Exponential window a = {a} 1/s: the peaks carry its damping "
+                "(ISO 7626-5 Annex A)",
+                language,
+            ).format(a=_window_reading(result, language))
+        )
+    return terms
+
+
+def render_impact_mobility_report(
+    result: ImpactMobilityResult,
+    path: str,
+    *,
+    metadata: ReportMetadata | None = None,
+    verbose: bool = False,
+    language: str = "en",
+) -> str:
+    """Render the ISO 7626 fiche for a mobility measured by impact (ISO 7626-5).
+
+    The layout of :func:`render_mobility_report`; the basis line names
+    ISO 7626-5:2019 and the averaging of 8.6, and the table adds the number of
+    impacts, the exponential window and the coherence at the peak.
+
+    :param result: An
+        :class:`~phonometry.vibration.structural.impact_mobility.ImpactMobilityResult`.
+    :param path: Destination path of the PDF file.
+    :param metadata: Optional :class:`ReportMetadata`.
+    :param verbose: Accepted for a uniform ``.report()`` signature; no effect.
+    :param language: ``"en"`` (default) or ``"es"``.
+    :return: The written ``path`` as a :class:`str`.
+    :raises ImportError: If reportlab or matplotlib is not installed.
+    """
+    del verbose  # uniform signature; the mobility fiche has one body layout
+    header_pairs = (
+        frf_metadata_pairs(metadata, [], language)
+        if metadata is not None and not metadata.is_empty()
+        else []
+    )
+    return render_frf_fiche(
+        result,
+        path,
+        title=t("Mechanical mobility by impact excitation", language),
+        basis=_impact_basis(result, language),
+        caption=t("Mobility FRF characteristics", language),
+        header_pairs=header_pairs,
+        metric_rows=_impact_rows(result, language),
+        statement=_statement(result.mobility_result, language),
+        extended=_impact_extended(result, language),
         metadata=metadata,
         language=language,
     )

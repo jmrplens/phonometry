@@ -208,7 +208,8 @@ elsewhere for the transfer FRFs. ISO 7626-5 covers the alternative of impact
 excitation with an exciter that is not attached to the structure, in
 practice usually an instrumented hammer: it trades the attached exciter's
 controlled spectrum for speed, with an excitation spectrum set by the
-impactor mass and tip stiffness.
+impactor mass and tip stiffness, and it has [a page of its
+own](/phonometry/vibration/structural/impact-mobility/).
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_mobility_rig.svg" alt="ISO 7626 mobility measurement: a free-free beam on soft suspension driven by an exciter through a drive rod and an impedance head at the driving point, an accelerometer at a transfer point, and an impact hammer as the alternative excitation. Below, a three-panel inset shows the accelerometer routed through the drive rod marked invalid, the force transducer at the structure marked valid, and the force transducer at the exciter end marked with caution, with the ten-times mobility criteria for the exciter attachment and the suspension stated underneath." width="92%" />
 
@@ -702,10 +703,10 @@ acceptance criteria: the 7.5.2 rigid-mass operational calibration
 </ScopeClaim>
 
 <ScopeClaim status="not-covered" label="Not covered">
-ISO 7626-5 covers impact-hammer excitation as an alternative to the attached
-exciter. It is named here for context only: no function synthesizes or
-processes an impact-excitation spectrum. The *blocked* matrix quantities of
-Table 1, needed for multi-coordinate systems, are not built either.
+Impact-hammer excitation (ISO 7626-5) is not processed on this page but on
+[its own](/phonometry/vibration/structural/impact-mobility/). The *blocked*
+matrix quantities of Table 1, needed for multi-coordinate systems, are not
+built.
 `convert_frf` returns only the element-wise *free* reciprocals of ISO 7626-1,
 3.1.4, correct for driving-point or single-path use but not for a full FRF
 matrix. Of the acceptance procedure, only the two criteria above are computed:
@@ -722,6 +723,9 @@ page](/phonometry/vibration/structural/transfer-stiffness/).
 
 ## See also
 
+- [Mobility by impact excitation (ISO 7626-5)](/phonometry/vibration/structural/impact-mobility/):
+  the same FRFs measured with an impact hammer, with the windows, the average
+  over impacts and the Annex A correction that measurement needs.
 - [Transfer stiffness of resilient elements (ISO 10846)](/phonometry/vibration/structural/transfer-stiffness/):
   the blocked-force limit of section 1, applied to characterise an isolator.
 - [Structure-borne sound power of equipment (EN 15657)](/phonometry/buildings/design/structure-borne-power/):

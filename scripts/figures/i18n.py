@@ -462,6 +462,48 @@ _ES_EXACT = {
     "0.59 to 0.74 Hz": "0,59 a 0,74 Hz",
     "0.90 to 1.20 Hz": "0,90 a 1,20 Hz",
     "$f = 46/h$: 0.77 Hz": "$f = 46/h$: 0,77 Hz",
+    # impact_force_window, impact_exponential_window, impact_double_hit and
+    # impact_a3_first_order (ISO 7626-5): the force window of 8.5.1, the
+    # exponential window of 8.5.2 with the Annex A correction, a double hit
+    # (6.4) and Formula (A.3) against the pole shift. Exact entries, readings
+    # included, for the reason given above.
+    "The Force Window of ISO 7626-5 (8.5.1)": "La ventana de fuerza de la ISO 7626-5 (8.5.1)",
+    "The Pulse Takes a Few Samples of the Record": "El impulso ocupa unas pocas muestras del registro",
+    "Zeroing the Rest of the Record Removes Its Noise": "Anular el resto del registro elimina su ruido",
+    "force record with noise": "registro de fuerza con ruido",
+    "force window (unity for 15 ms)": "ventana de fuerza (unidad durante 15 ms)",
+    "Force [N]": "Fuerza [N]",
+    "Force energy spectral density $G_{FF}$ [N²·s/Hz]": "Densidad espectral de energía de la fuerza $G_{FF}$ [N²·s/Hz]",
+    "whole record: the noise of 1 s": "registro entero: el ruido de 1 s",
+    "force window: the noise of 15 ms": "ventana de fuerza: el ruido de 15 ms",
+    "the pulse alone": "el impulso solo",
+    "Exponential Window and Its Correction (ISO 7626-5 8.5.2, Annex A)": "La ventana exponencial y su corrección (ISO 7626-5, 8.5.2 y anexo A)",
+    "Still Ringing at the End, Then Made to Decay": "Aún vibra al final, y se le obliga a decaer",
+    "The Peak Lost to the Window, and Restored": "El máximo que se lleva la ventana, restituido",
+    "response as recorded": "respuesta tal como se registró",
+    "times the exponential window": "por la ventana exponencial",
+    "window, 1 % at the end": "ventana, 1 % al final",
+    "Acceleration [m/s²]": "Aceleración [m/s²]",
+    "the resonator": "el resonador",
+    "no window: truncated, leaking": "sin ventana: truncada, con fuga",
+    "exponential window: smooth, too damped": "ventana exponencial: suave, demasiado amortiguada",
+    "window taken out by Annex A": "ventana retirada con el anexo A",
+    "A Double Hit in the Force Record (ISO 7626-5 6.4)": "Un doble golpe en el registro de fuerza (ISO 7626-5, apartado 6.4)",
+    "A Second Impact Inside the Record": "Un segundo impacto dentro del registro",
+    "force record": "registro de fuerza",
+    "two impacts, 60 ms apart": "dos impactos, separados 60 ms",
+    "one impact": "un impacto",
+    "both: dips every 1/τ = 16.7 Hz": "los dos: valles cada 1/τ = 16,7 Hz",
+    "Ripple Between (1 + r)² and (1 \u2212 r)², r = 0.6": "Rizado entre (1 + r)² y (1 \u2212 r)², r = 0,6",
+    "Formula (A.3) Is the First Order of the Pole Shift": "La fórmula (A.3) es el primer orden del desplazamiento del polo",
+    "Damping the window adds, $a/\\omega_r$ [%]": "Amortiguamiento que añade la ventana, $a/\\omega_r$ [%]",
+    "Error in the true damping [%]": "Error en el amortiguamiento real [%]",
+    "Formula (A.3), true damping 0.2 %": "Fórmula (A.3), amortiguamiento real 0,2 %",
+    "Formula (A.3), true damping 0.5 %": "Fórmula (A.3), amortiguamiento real 0,5 %",
+    "Formula (A.3), true damping 1 %": "Fórmula (A.3), amortiguamiento real 1 %",
+    "Formula (A.3), true damping 2 %": "Fórmula (A.3), amortiguamiento real 2 %",
+    "exact pole shift, all four": "desplazamiento exacto del polo, los cuatro",
+    "window of this guide, 1 % at the end, at 50 Hz": "ventana de esta guía, 1 % al final, a 50 Hz",
     # kb_weighting, kb_time_response and assessment_weighting (DIN 45669-1):
     # the KB chain of a building vibration meter, what it reduces a record to,
     # and the Annex E weightings. The two readings carry their own digits for
@@ -2311,7 +2353,7 @@ _ES_EXACT = {
     "The First-Order Family and Its Directivity Index (IEC 60268-4 13.2.2)": "La familia de primer orden y su índice de directividad "
     "(IEC 60268-4 13.2.2)",
     # microphone_noise_weightings (IEC 60268-4 17.2)
-    "One Noise Voltage, Two Networks (IEC 60268-4 17.2)": "Una tensión de ruido, dos redes (IEC 60268-4 17.2)",
+    "One Noise Voltage, Two Networks (IEC 60268-4 17.2)": "Una tensión de ruido, dos redes (IEC 60268-4, apartado 17.2)",
     "Inherent noise, unweighted": "Ruido inherente, sin ponderar",
     "A-weighted": "Con ponderación A",
     "ITU-R BS.468-4 weighted": "Con ponderación ITU-R BS.468-4",

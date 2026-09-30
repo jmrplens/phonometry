@@ -1,6 +1,6 @@
 ---
 title: "Guías"
-description: "Las 151 guías de phonometry, agrupadas en los trece temas que cubre la biblioteca: para qué sirve cada área, las normas que implementa y un resumen de una línea de cada guía que contiene."
+description: "Las 152 guías de phonometry, agrupadas en los trece temas que cubre la biblioteca: para qué sirve cada área, las normas que implementa y un resumen de una línea de cada guía que contiene."
 head:
   - tag: script
     attrs:
@@ -118,7 +118,7 @@ hay ninguna panorámica del campo: cada página es la documentación de trabajo 
 un módulo, escrita para que un resultado se pueda defender apartado por
 apartado en lugar de darlo por bueno.
 
-Esta página es el mapa. Ciento cincuenta y una guías repartidas en trece temas, y cada
+Esta página es el mapa. Ciento cincuenta y dos guías repartidas en trece temas, y cada
 área tiene su propio índice con el relato largo de cómo encajan sus piezas. Si
 llegas sin una pregunta concreta, lee primero la
 [introducción](/phonometry/es/start/getting-started/): recorre una señal por toda la
@@ -580,7 +580,7 @@ Movilidad y funciones de respuesta en frecuencia, aisladores, potencia radiada,
 uniones y vibración en humanos. El área cubre el camino que sigue una máquina
 al entrar en una estructura y volver a salir como sonido aéreo, y la cuestión
 aparte de qué le hace la vibración a la persona expuesta. Implementa
-ISO 7626-1/-2, ISO 10846-1/-2/-3/-4/-5, ISO 9611, ISO/TS 7849-1/-2, EN 15657,
+ISO 7626-1/-2/-5, ISO 10846-1/-2/-3/-4/-5, ISO 9611, ISO/TS 7849-1/-2, EN 15657,
 EN 12354-5, ISO 2631-1/-2/-4/-5, ISO 5349-1/-2, ISO 8041-1/-2 y DIN 4150-3.
 
 **[Fuentes de ruido estructural](/phonometry/es/vibration/structural/)**
@@ -588,6 +588,11 @@ EN 12354-5, ISO 2631-1/-2/-4/-5, ISO 5349-1/-2, ISO 8041-1/-2 y DIN 4150-3.
 - [Movilidad mecánica y la familia de FRF (ISO 7626-1)](/phonometry/es/vibration/structural/mechanical-mobility/):
   receptancia, movilidad y acelerancia con sus recíprocas, la conversión entre
   ellas y el resonador de un grado de libertad en forma cerrada.
+- [Movilidad por excitación con impacto (ISO 7626-5)](/phonometry/es/vibration/structural/impact-mobility/):
+  la movilidad medida con un martillo de impacto: las ventanas de fuerza y
+  exponencial, el promedio sobre impactos con su coherencia, el amortiguamiento
+  que añade la ventana retirado con el anexo A, y los veredictos sobre dobles
+  golpes, espectro de fuerza, sobrecarga y decaimiento de la respuesta.
 - [Transmisión de onda de flexión en uniones de placas](/phonometry/es/vibration/structural/junction-transmission/):
   los coeficientes de transmisión por el método de ondas para uniones rígidas en
   X, T, L y en línea, su promedio en campo difuso, y el factor de pérdidas por

@@ -631,6 +631,10 @@ from .vibration import (
     generate_ground_propagation_decay,
     generate_ground_wave_speeds,
     generate_hav_vwf_lifetime,
+    generate_impact_a3_first_order,
+    generate_impact_double_hit,
+    generate_impact_exponential_window,
+    generate_impact_force_window,
     generate_industrial_machine_zones,
     generate_infinite_mobilities,
     generate_junction_kij_thickness,
@@ -835,6 +839,13 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     generate_transfer_stiffness,
     generate_driving_point_stiffness,
     generate_rigid_mass_calibration,
+    # Mobility by impact excitation (ISO 7626-5): the force window, the
+    # exponential window with the Annex A correction, a double hit, and how
+    # far Formula (A.3) is from the pole shift it approximates.
+    generate_impact_force_window,
+    generate_impact_exponential_window,
+    generate_impact_double_hit,
+    generate_impact_a3_first_order,
     generate_vibration_sound_power,
     generate_workstation_emission,
     generate_structure_borne_power,

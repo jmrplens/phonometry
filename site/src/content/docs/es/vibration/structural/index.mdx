@@ -10,15 +10,14 @@ import SeeAlso from '../../../../../components/SeeAlso.astro';
 Una máquina fijada a un edificio radia sonido dos veces: directamente desde
 su propia superficie vibrante, e indirectamente inyectando **potencia
 estructural** en la estructura, que la transporta y la vuelve a radiar en
-salas lejanas. Siete páginas cubren ambos caminos y la pregunta que no
-trata del sonido, cuatro aquí y tres en otras
-partes del sitio: una estima la radiación directa desde la propia vibración
-superficial, cinco caracterizan de extremo a extremo ese segundo
-camino
-estructural, el más escurridizo, desde describir la vibración y caracterizar
-los aisladores hasta cuantificar la potencia y predecir el nivel que
-finalmente oye un oyente, y la séptima pregunta en cambio si la sacudida daña
-el edificio.
+salas lejanas. Nueve páginas cubren ambos caminos y la pregunta que no
+trata del sonido, seis aquí y tres en otras partes del sitio: una estima la
+radiación directa desde la propia vibración superficial, seis caracterizan de
+extremo a extremo ese segundo camino estructural, el más escurridizo, desde
+describir y medir la vibración y caracterizar los aisladores hasta cuantificar
+la potencia y predecir el nivel que finalmente oye un oyente, y las dos
+últimas preguntan en cambio si la sacudida daña el edificio, y a qué
+frecuencia responde el edificio.
 
 Primero el lenguaje.
 [Movilidad mecánica y la familia de FRF (ISO 7626-1)](/phonometry/es/vibration/structural/mechanical-mobility/)
@@ -29,6 +28,12 @@ como referencia y los criterios de aceptación de medida de ISO 7626-2. Las
 *movilidades* de fuente y receptor son las que deciden cuánta potencia se
 acopla realmente a través de una interfaz, y por eso importa este
 vocabulario.
+[Movilidad por excitación con impacto (ISO 7626-5)](/phonometry/es/vibration/structural/impact-mobility/)
+mide las mismas funciones con un martillo instrumentado en lugar de un
+excitador acoplado: las ventanas de fuerza y exponencial que necesita un
+registro de impacto, el promedio sobre impactos con su coherencia, el
+amortiguamiento que añade una ventana exponencial retirado con el anexo A, y
+las comprobaciones que deciden si un registro puede usarse siquiera.
 
 Tres páginas caracterizan después los elementos del camino.
 [Transmisión de onda de flexión en uniones de placas
@@ -82,6 +87,10 @@ de predecirlo.
 - [Movilidad mecánica y la familia de FRF (ISO 7626-1)](/phonometry/es/vibration/structural/mechanical-mobility/):
   la familia de FRF, las conversiones y el resonador de referencia de un
   grado de libertad.
+- [Movilidad por excitación con impacto (ISO 7626-5)](/phonometry/es/vibration/structural/impact-mobility/):
+  las ventanas de fuerza y exponencial, el promedio sobre impactos con su
+  coherencia, la corrección del amortiguamiento del anexo A y las
+  comprobaciones sobre el registro.
 - [Transmisión de onda de flexión en uniones de placas (Cremer/Craik/Hopkins)](/phonometry/es/vibration/structural/junction-transmission/):
   los coeficientes del enfoque ondulatorio para uniones rígidas en X, T, L y en
   línea, su media angular y el factor de pérdidas por acoplamiento y el Kij,
@@ -133,12 +142,12 @@ esquina.
 
 <ScopeClaim status="not-covered">
 La página de FRF implementa la ISO 7626-1 y los criterios de aceptación de la
-ISO 7626-2 para un excitador acoplado; **la excitación por martillo de impacto
-(ISO 7626-5) se nombra solo como contexto**, sin nada que sintetice ni procese
-un espectro de impacto, y las conversiones devuelven recíprocas *libres*
-elemento a elemento, correctas para el punto de excitación o para una sola
-vía, no para una matriz de FRF completa, cuyas magnitudes matriciales
-bloqueadas no se construyen.
+ISO 7626-2 para un excitador acoplado, y la página de impacto la ISO 7626-5;
+las conversiones devuelven recíprocas *libres* elemento a elemento, correctas
+para el punto de excitación o para una sola vía, no para una matriz de FRF
+completa, cuyas magnitudes matriciales bloqueadas no se construyen. La página
+de impacto estima el amortiguamiento de un modo cada vez, así que los modos
+muy próximos necesitan un ajuste de curvas de varios modos, que no se ofrece.
 </ScopeClaim>
 
 <ScopeClaim status="not-covered">

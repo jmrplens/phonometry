@@ -16,7 +16,10 @@ from .common import (
     _C_QUATERNARY,
     _C_REFERENCE,
     _C_SECONDARY,
+    _C_SECONDARY_LIGHT,
     _C_TERTIARY,
+    _LEGEND_LOWER_LEFT,
+    _LEGEND_UPPER_RIGHT,
     _band_axis,
     _new_axes,
     _new_axes_column,
@@ -80,6 +83,17 @@ if TYPE_CHECKING:
         BuildingFrequencyEstimate,
     )
     from ..vibration.structural.experimental_sea import PowerInjectionResult
+    from ..vibration.structural.impact_mobility import (
+        ChannelMatchVerification,
+        CoherenceCheck,
+        DoubleHitCheck,
+        ExponentialWindowCorrection,
+        ForceSpectrumCheck,
+        ImpactMobilityResult,
+        OverloadCheck,
+        ResponseDecayCheck,
+        SingleModeFitResult,
+    )
     from ..vibration.structural.junction_transmission import (
         JunctionTransmissionResult,
     )
@@ -117,6 +131,8 @@ if TYPE_CHECKING:
 _FREQ_LABEL = "Frequency [Hz]"
 #: Mobility ordinate label of the ISO 7626 panels.
 _MOBILITY_LABEL = "Mobility $|Y|$ [m/(N·s)]"
+#: Accelerance ordinate label of the ISO 7626-2 check and ISO 7626-5 fit panels.
+_ACCELERANCE_LABEL = "Accelerance $|A|$ [1/kg]"
 #: Deviation ordinate shared by the mobility, seat and signal-burst panels.
 _DEVIATION_LABEL = "Deviation [%]"
 #: The three legend entries every ISO 8041-1 verifier panel carries: the band
@@ -174,6 +190,63 @@ _F3_LABEL = "$f_3$ = {f3} Hz"
 _FUL_LABEL = r"$f_\mathrm{{UL}}$ = {ful} Hz"
 _EXPANDED_U_LABEL = "$U = 2u$ = {u} dB"
 
+#: The ISO 7626-5 impact-excitation figures, named once so the label a curve
+#: carries and the key its translation is filed under cannot drift apart.
+_IMPACT_TITLE = "ISO 7626-5 mobility by impact excitation"
+_IMPACT_WINDOW_SUFFIX = ", exponential window $a$ = {a} 1/s"
+_IMPACT_AVERAGE_LABEL = "average of {n} impacts (8.6)"
+_SINGLE_IMPACT_LABEL = "a single impact, no average"
+_COHERENCE_LABEL = r"Coherence $\gamma^2$"
+_HIGH_COHERENCE_LABEL = "high coherence: above {value} (9.1)"
+_FIT_DATA_LABEL = "data fitted"
+_FIT_CURVE_LABEL = r"fitted mode, $\hat\zeta$ = {z} %"
+_FIT_CORRECTED_LABEL = r"window taken out (Annex A), $\zeta$ = {z} %"
+_FIT_TITLE = "Single-mode fit at {f} Hz"
+_TRUE_DAMPING_LABEL = "true damping, Formula (A.3)"
+_WINDOW_DAMPING_LABEL = r"added by the window, $a/\omega_r$"
+_MODE_FREQUENCY_LABEL = "Damped natural frequency of the mode"
+_DAMPING_RATIO_LABEL = "Damping ratio [%]"
+_CORRECTION_TITLE = "ISO 7626-5 Annex A: exponential window $a$ = {a} 1/s"
+_FORCE_LABEL = "force"
+_THRESHOLD_LABEL = "threshold: {r} % of the largest peak"
+_IMPACTS_LABEL = "impacts found: {n}"
+_FORCE_AXIS_LABEL = "Force [N]"
+_SINGLE_IMPACT_TITLE = "ISO 7626-5 6.4: one impact in the record"
+_DOUBLE_HIT_TITLE = "ISO 7626-5 6.4: {n} impacts in the record"
+_ESD_LABEL = "force energy spectral density"
+_NOTCH_TITLE = "Notches every {df} Hz, ripple {ripple} dB"
+_ESD_AXIS_LABEL = "$G_{FF}$ [N²·s/Hz]"
+_RANGE_LABEL = "frequency range of interest"
+_DROP_LIMIT_LABEL = "limit: {d} dB below the highest"
+_LOWEST_LABEL = "lowest in the range: {d} dB"
+_ESD_LEVEL_LABEL = "$G_{FF}$ [dB re highest in the range]"
+_FORCE_SPECTRUM_TITLE = "ISO 7626-5 6.3: force spectrum falls {d} dB across the range"
+_EXCLUDED_LABEL = "excluded (anti-resonance)"
+_BELOW_MINIMUM_LABEL = "below the minimum"
+_COHERENCE_TITLE = "ISO 7626-5 9.1: coherence over {n} impacts"
+_SINGLE_COHERENCE_TITLE = "ISO 7626-5 9.1: coherence of a single impact"
+_FULL_SCALE_LABEL = "full scale"
+_RECORD_LABEL = "record"
+_CLIPPED_LABEL = "at full scale: {n} samples"
+_AMPLITUDE_LABEL = "Amplitude"
+_OVERLOAD_TITLE = "ISO 7626-5 8.4: headroom {h} dB"
+_RESPONSE_LEVEL_LABEL = "response, peak per segment"
+_END_LIMIT_LABEL = "limit at the end: {p} % of the highest peak"
+_MIDPOINT_LABEL = "midpoint check: 10 % (8.5.2)"
+_CARRIED_DECAY_LABEL = "midpoint {p} %, decay carried to the end"
+_END_READING_LABEL = "end of record: {p} %"
+_BEFORE_START_LABEL = "left out of the peak search"
+_RESPONSE_DB_LABEL = "Level re highest peak [dB]"
+_DECAY_TITLE = "ISO 7626-5 8.3: decay without a window"
+_WINDOWED_DECAY_TITLE = "ISO 7626-5 8.5.2: natural decay before the window"
+_MAGNITUDE_BAND_LABEL = r"$\pm$5 % (8.1)"
+_MAGNITUDE_DEVIATION_LABEL = "magnitude deviation $|H| - 1$"
+_PHASE_BAND_LABEL = r"$\pm$5° (8.1)"
+_PHASE_LABEL = "phase"
+_PHASE_AXIS_LABEL = "Phase [°]"
+_CHANNEL_TITLE = "ISO 7626-5 8.1: channel-to-channel match"
+_COMPLIANCE_AXIS_LABEL = "Dynamic compliance $|H|$ [m/N]"
+
 #: Spanish translations of the fixed strings rendered by the vibration
 #: ``.plot()`` renderers, keyed by their verbatim English text. ``_t``
 #: returns the English key unchanged for any language other than ``"es"``,
@@ -194,7 +267,7 @@ _STRINGS: dict[str, str] = {
     "Probability of lumbar injury [%]": "Probabilidad de lesión lumbar [%]",
     "ISO 7626-1 mechanical mobility": "ISO 7626-1 movilidad mecánica",
     "ISO 7626-2 rigid-mass calibration check": "ISO 7626-2 verificación de calibración con masa rígida",
-    "Accelerance $|A|$ [1/kg]": "Acelerancia $|A|$ [1/kg]",
+    _ACCELERANCE_LABEL: "Acelerancia $|A|$ [1/kg]",
     "Deviation [%]": "Desviación [%]",
     r"expected $|A| = 1/m$": r"esperado $|A| = 1/m$",
     r"expected $|Y| = 1/(2\pi f m)$": r"esperado $|Y| = 1/(2\pi f m)$",
@@ -386,6 +459,60 @@ _STRINGS: dict[str, str] = {
     "ISO 10846-5 driving-point stiffness": "ISO 10846-5 rigidez en el punto de excitación",
     _EXPANDED_U_LABEL: _EXPANDED_U_LABEL,
     r"ISO 10846-5 Annex B: $L_{{k,\mathrm{{av}}}}$ = {level} dB, $U$ = {u} dB": r"ISO 10846-5 Anexo B: $L_{{k,\mathrm{{av}}}}$ = {level} dB, $U$ = {u} dB",
+    _IMPACT_TITLE: "ISO 7626-5 movilidad por excitación con impacto",
+    _IMPACT_WINDOW_SUFFIX: ", ventana exponencial $a$ = {a} 1/s",
+    _IMPACT_AVERAGE_LABEL: "promedio de {n} impactos (8.6)",
+    _SINGLE_IMPACT_LABEL: "un solo impacto, sin promedio",
+    _COHERENCE_LABEL: r"Coherencia $\gamma^2$",
+    _HIGH_COHERENCE_LABEL: "coherencia alta: por encima de {value} (9.1)",
+    _FIT_DATA_LABEL: "datos ajustados",
+    _FIT_CURVE_LABEL: r"modo ajustado, $\hat\zeta$ = {z} %",
+    _FIT_CORRECTED_LABEL: r"sin la ventana (Anexo A), $\zeta$ = {z} %",
+    _FIT_TITLE: "Ajuste de un modo en {f} Hz",
+    _TRUE_DAMPING_LABEL: "amortiguamiento real, Fórmula (A.3)",
+    _WINDOW_DAMPING_LABEL: r"añadido por la ventana, $a/\omega_r$",
+    _MODE_FREQUENCY_LABEL: "Frecuencia natural amortiguada del modo",
+    _DAMPING_RATIO_LABEL: "Relación de amortiguamiento [%]",
+    _CORRECTION_TITLE: "ISO 7626-5 Anexo A: ventana exponencial $a$ = {a} 1/s",
+    _FORCE_LABEL: "fuerza",
+    _THRESHOLD_LABEL: "umbral: {r} % del pico mayor",
+    _IMPACTS_LABEL: "impactos detectados: {n}",
+    _FORCE_AXIS_LABEL: "Fuerza [N]",
+    _SINGLE_IMPACT_TITLE: "ISO 7626-5 6.4: un impacto en el registro",
+    _DOUBLE_HIT_TITLE: "ISO 7626-5 6.4: {n} impactos en el registro",
+    _ESD_LABEL: "densidad espectral de energía de la fuerza",
+    _NOTCH_TITLE: "Muescas cada {df} Hz, rizado de {ripple} dB",
+    _ESD_AXIS_LABEL: _ESD_AXIS_LABEL,
+    _RANGE_LABEL: "rango de frecuencias de interés",
+    _DROP_LIMIT_LABEL: "límite: {d} dB por debajo del máximo",
+    _LOWEST_LABEL: "mínimo en el rango: {d} dB",
+    _ESD_LEVEL_LABEL: "$G_{FF}$ [dB re máximo en el rango]",
+    _FORCE_SPECTRUM_TITLE: "ISO 7626-5 6.3: el espectro cae {d} dB en el rango",
+    _EXCLUDED_LABEL: "excluida (antirresonancia)",
+    _BELOW_MINIMUM_LABEL: "por debajo del mínimo",
+    _COHERENCE_TITLE: "ISO 7626-5 9.1: coherencia con {n} impactos",
+    _SINGLE_COHERENCE_TITLE: "ISO 7626-5 9.1: coherencia de un solo impacto",
+    _FULL_SCALE_LABEL: "fondo de escala",
+    _RECORD_LABEL: "registro",
+    _CLIPPED_LABEL: "en fondo de escala: {n} muestras",
+    _AMPLITUDE_LABEL: "Amplitud",
+    _OVERLOAD_TITLE: "ISO 7626-5 8.4: margen hasta saturar {h} dB",
+    _RESPONSE_LEVEL_LABEL: "respuesta, pico por segmento",
+    _END_LIMIT_LABEL: "límite al final: {p} % del pico mayor",
+    _MIDPOINT_LABEL: "comprobación a mitad del registro: 10 % (8.5.2)",
+    _CARRIED_DECAY_LABEL: "mitad del registro {p} %, decaimiento llevado al final",
+    _END_READING_LABEL: "final del registro: {p} %",
+    _BEFORE_START_LABEL: "fuera de la búsqueda del pico mayor",
+    _RESPONSE_DB_LABEL: "Nivel re pico mayor [dB]",
+    _DECAY_TITLE: "ISO 7626-5 8.3: decaimiento sin ventana",
+    _WINDOWED_DECAY_TITLE: "ISO 7626-5 8.5.2: decaimiento antes de la ventana",
+    _MAGNITUDE_BAND_LABEL: _MAGNITUDE_BAND_LABEL,
+    _MAGNITUDE_DEVIATION_LABEL: "desviación del módulo $|H| - 1$",
+    _PHASE_BAND_LABEL: _PHASE_BAND_LABEL,
+    _PHASE_LABEL: "fase",
+    _PHASE_AXIS_LABEL: "Fase [°]",
+    _CHANNEL_TITLE: "ISO 7626-5 8.1: concordancia entre canales",
+    _COMPLIANCE_AXIS_LABEL: "Receptancia $|H|$ [m/N]",
 }
 
 
@@ -750,7 +877,7 @@ def plot_rigid_mass_calibration(
         else _t(r"expected $|Y| = 1/(2\pi f m)$", language)
     )
     mag_ylabel = (
-        _t("Accelerance $|A|$ [1/kg]", language)
+        _t(_ACCELERANCE_LABEL, language)
         if result.quantity == "accelerance"
         else _t(_MOBILITY_LABEL, language)
     )
@@ -816,10 +943,7 @@ def plot_rigid_mass_calibration(
     axm.set_ylabel(mag_ylabel)
     axm.grid(visible=True, which="both", alpha=0.3)
     axm.legend(loc="best", fontsize="small")
-    if result.passes:
-        verdict = "CORRECTO" if language == "es" else "PASS"
-    else:
-        verdict = "INCORRECTO" if language == "es" else "FAIL"
+    verdict = _t("PASS" if result.passes else "FAIL", language)
     axm.set_title(
         _t("ISO 7626-2 rigid-mass calibration check", language) + f" ({verdict})"
     )
@@ -2244,7 +2368,9 @@ def plot_fault_frequencies(
     )
     # The legend belongs to the spectrum, so it is anchored to the part of the
     # axes the spectrum has: above the strip start there are only line names.
-    ax.legend(loc="upper right", fontsize="small", bbox_to_anchor=(0.0, 0.0, 1.0, band))
+    ax.legend(
+        loc=_LEGEND_UPPER_RIGHT, fontsize="small", bbox_to_anchor=(0.0, 0.0, 1.0, band)
+    )
     ax.grid(visible=True, axis="y", alpha=0.3)
     localize_axes(ax, language)
     return ax
@@ -2502,7 +2628,7 @@ def plot_vector_change(
         )
     )
     ax.grid(visible=True, alpha=0.3)
-    ax.legend(loc="lower left", fontsize="small", bbox_to_anchor=(-0.15, -0.1))
+    ax.legend(loc=_LEGEND_LOWER_LEFT, fontsize="small", bbox_to_anchor=(-0.15, -0.1))
     localize_axes(ax, language)
     return ax
 
@@ -3129,3 +3255,781 @@ def plot_train_category_prediction(
     ax.legend(loc="best", fontsize="small")
     localize_axes(ax, language)
     return ax
+
+
+# ---------------------------------------------------------------------------
+# ISO 7626-5: mobility by impact excitation.
+# ---------------------------------------------------------------------------
+
+
+def _verdict_word(*, passes: bool, language: str) -> str:
+    """The PASS/FAIL word the ISO 7626 verdict titles carry, localised."""
+    return _t("PASS" if passes else "FAIL", language)
+
+
+def plot_impact_mobility(
+    result: ImpactMobilityResult,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes | np.ndarray:
+    """Averaged impact mobility ``|Y(f)|`` and its coherence (ISO 7626-5, 8.6).
+
+    With ``ax`` only the magnitude is drawn on it; otherwise a two-panel
+    column holds the magnitude and the coherence of 9.1 beneath it.
+
+    :param result: An
+        :class:`~phonometry.vibration.structural.impact_mobility.ImpactMobilityResult`.
+    :param ax: Existing axes for the magnitude, or ``None`` for a fresh figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the magnitude curve.
+    :return: The axes (``ax`` given) or the two-axes array.
+    """
+    from .._i18n import format_number, localize_axes
+    from ..vibration.structural.impact_mobility import HIGH_COHERENCE
+
+    freq = np.asarray(result.frequencies, dtype=np.float64)
+    magnitude = np.asarray(result.magnitude, dtype=np.float64)
+    fmin, fmax = float(freq.min()), float(freq.max())
+    title = _t(_IMPACT_TITLE, language)
+    if result.exponential_decay_rate_per_s > 0.0:
+        title += _t(_IMPACT_WINDOW_SUFFIX, language).format(
+            a=format_number(result.exponential_decay_rate_per_s, language, decimals=1)
+        )
+
+    def _magnitude(axm: Axes, **line_kwargs: Any) -> None:
+        style_default(line_kwargs, "color", _C_PRIMARY)
+        style_default(line_kwargs, "linewidth", 1.3)
+        line_kwargs.setdefault(
+            "label",
+            _t(_SINGLE_IMPACT_LABEL, language)
+            if result.impacts == 1
+            else _t(_IMPACT_AVERAGE_LABEL, language).format(n=result.impacts),
+        )
+        axm.loglog(freq, magnitude, **line_kwargs)
+        format_frequency_axis(axm, fmin, fmax, language=language)
+        axm.set_ylabel(_t(_MOBILITY_LABEL, language))
+        axm.set_title(title)
+        axm.legend(loc="best", fontsize="small")
+        axm.grid(visible=True, which="both", alpha=0.3)
+
+    if ax is not None:
+        _magnitude(ax, **kwargs)
+        ax.set_xlabel(_t(_FREQ_LABEL, language))
+        localize_axes(ax, language)
+        return ax
+
+    axes = _new_axes_column(2, sharex=True, figsize=(8.0, 6.6))
+    _magnitude(axes[0], **kwargs)
+    axc = axes[1]
+    axc.axhline(
+        HIGH_COHERENCE,
+        color=_C_REFERENCE,
+        ls="--",
+        lw=1.0,
+        label=_t(_HIGH_COHERENCE_LABEL, language).format(
+            value=format_number(HIGH_COHERENCE, language, decimals=1)
+        ),
+    )
+    axc.semilogx(
+        freq,
+        np.asarray(result.coherence, dtype=np.float64),
+        color=_C_TERTIARY,
+        lw=1.2,
+        label=_t(_COHERENCE_LABEL, language),
+    )
+    axc.set_ylim(0.0, 1.05)
+    format_frequency_axis(axc, fmin, fmax, language=language)
+    axc.set_xlabel(_t(_FREQ_LABEL, language))
+    axc.set_ylabel(_t(_COHERENCE_LABEL, language))
+    axc.legend(loc=_LEGEND_LOWER_LEFT, fontsize="small")
+    axc.grid(visible=True, which="both", alpha=0.3)
+    for axis in axes:
+        localize_axes(axis, language)
+    _lay_out_own_figure(axes[0])
+    return axes
+
+
+_FRF_AXIS_LABELS = {
+    "mobility": _MOBILITY_LABEL,
+    "accelerance": _ACCELERANCE_LABEL,
+    "receptance": _COMPLIANCE_AXIS_LABEL,
+}
+
+
+def plot_single_mode_fit(
+    result: SingleModeFitResult,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """One mode fitted over its band, and the same mode with the window taken out.
+
+    :param result: A
+        :class:`~phonometry.vibration.structural.impact_mobility.SingleModeFitResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the fitted curve.
+    :return: The axes.
+    """
+    from .._i18n import format_number, localize_axes
+
+    created = ax is None
+    ax = ax if ax is not None else _new_axes()
+    freq = np.asarray(result.frequencies, dtype=np.float64)
+    dense = np.linspace(float(freq.min()), float(freq.max()), 600)
+    ax.semilogy(
+        freq,
+        np.abs(np.asarray(result.frf)),
+        "o",
+        color=_C_MUTED,
+        markersize=4,
+        label=_t(_FIT_DATA_LABEL, language),
+    )
+    style_default(kwargs, "color", _C_PRIMARY)
+    style_default(kwargs, "linewidth", 1.5)
+    kwargs.setdefault(
+        "label",
+        _t(_FIT_CURVE_LABEL, language).format(
+            z=format_number(100.0 * result.apparent_damping_ratio, language, decimals=2)
+        ),
+    )
+    ax.semilogy(dense, np.abs(result.fitted_frf(dense)), **kwargs)
+    if result.exponential_decay_rate_per_s > 0.0:
+        exact = float(result.correction.exact_damping_ratio[0])
+        ax.semilogy(
+            dense,
+            np.abs(result.corrected_frf(dense)),
+            ls="--",
+            color=_C_SECONDARY,
+            lw=1.5,
+            label=_t(_FIT_CORRECTED_LABEL, language).format(
+                z=format_number(100.0 * exact, language, decimals=2)
+            ),
+        )
+    ax.axvline(result.damped_natural_frequency_hz, color=_C_MUTED, ls=":", lw=0.9)
+    ax.set_xlabel(_t(_FREQ_LABEL, language))
+    ax.set_ylabel(_t(_FRF_AXIS_LABELS[result.kind], language))
+    ax.set_title(
+        _t(_FIT_TITLE, language).format(
+            f=format_number(result.damped_natural_frequency_hz, language, decimals=2)
+        )
+    )
+    ax.legend(loc="best", fontsize="small")
+    ax.grid(visible=True, which="both", alpha=0.3)
+    localize_axes(ax, language)
+    if created:
+        _lay_out_own_figure(ax)
+    return ax
+
+
+def plot_exponential_window_correction(
+    result: ExponentialWindowCorrection,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """Each mode's apparent damping, split into the true part and the window's.
+
+    :param result: An
+        :class:`~phonometry.vibration.structural.impact_mobility.ExponentialWindowCorrection`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the bars of the true damping.
+    :return: The axes.
+    """
+    from .._i18n import format_number, localize_axes
+
+    created = ax is None
+    ax = ax if ax is not None else _new_axes()
+    freqs = np.asarray(result.damped_natural_frequency_hz, dtype=np.float64)
+    positions = np.arange(freqs.size, dtype=np.float64)
+    true = 100.0 * np.asarray(result.damping_ratio, dtype=np.float64)
+    added = 100.0 * np.asarray(result.window_damping_ratio, dtype=np.float64)
+    style_default(kwargs, "color", _C_PRIMARY)
+    kwargs.setdefault("label", _t(_TRUE_DAMPING_LABEL, language))
+    ax.bar(positions, true, width=0.55, **kwargs)
+    ax.bar(
+        positions,
+        added,
+        bottom=true,
+        width=0.55,
+        color=_C_SECONDARY_LIGHT,
+        edgecolor=_C_SECONDARY,
+        label=_t(_WINDOW_DAMPING_LABEL, language),
+    )
+    ax.set_xticks(positions)
+    ax.set_xticklabels([f"{format_number(f, language, decimals=1)} Hz" for f in freqs])
+    ax.set_xlim(-0.75, freqs.size - 0.25)
+    ax.set_ylim(0.0, 1.25 * float(np.max(true + added)))
+    ax.set_xlabel(_t(_MODE_FREQUENCY_LABEL, language))
+    ax.set_ylabel(_t(_DAMPING_RATIO_LABEL, language))
+    ax.set_title(
+        _t(_CORRECTION_TITLE, language).format(
+            a=format_number(result.exponential_decay_rate_per_s, language, decimals=1)
+        )
+    )
+    ax.legend(loc="upper left", fontsize="small")
+    ax.grid(visible=True, axis="y", alpha=0.3)
+    ax.set_axisbelow(True)
+    localize_axes(ax, language)
+    if created:
+        _lay_out_own_figure(ax)
+    return ax
+
+
+def plot_double_hit_check(
+    result: DoubleHitCheck,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes | np.ndarray:
+    """The force record with its impacts, and its energy spectral density (6.4).
+
+    :param result: A
+        :class:`~phonometry.vibration.structural.impact_mobility.DoubleHitCheck`.
+    :param ax: Existing axes for the time history, or ``None`` for a fresh
+        two-panel figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the force curve.
+    :return: The axes (``ax`` given) or the two-axes array.
+    """
+    from .._i18n import format_number, localize_axes
+    from ..vibration.structural.impact_mobility import energy_spectral_density
+
+    times = result.times
+    force = np.asarray(result.force, dtype=np.float64)
+    peaks = result.impact_peaks
+    primary = float(peaks[int(np.argmax(np.abs(peaks)))])
+    last = float(np.max(result.impact_times_s))
+    right = min(float(times[-1]), max(2.0 * last, last + 0.02))
+
+    def _history(axt: Axes, **line_kwargs: Any) -> None:
+        style_default(line_kwargs, "color", _C_PRIMARY)
+        style_default(line_kwargs, "linewidth", 1.2)
+        line_kwargs.setdefault("label", _t(_FORCE_LABEL, language))
+        axt.plot(times, force, **line_kwargs)
+        axt.axhline(
+            result.threshold_ratio * primary,
+            color=_C_MUTED,
+            ls=":",
+            lw=1.0,
+            label=_t(_THRESHOLD_LABEL, language).format(
+                r=format_number(100.0 * result.threshold_ratio, language, decimals=0)
+            ),
+        )
+        axt.plot(
+            result.impact_times_s,
+            peaks,
+            "o",
+            color=_C_TERTIARY if result.passes else _C_REFERENCE,
+            zorder=4,
+            label=_t(_IMPACTS_LABEL, language).format(n=result.impacts),
+        )
+        axt.set_xlim(0.0, right)
+        axt.set_xlabel(_t(_TIME_LABEL, language))
+        axt.set_ylabel(_t(_FORCE_AXIS_LABEL, language))
+        key = _SINGLE_IMPACT_TITLE if result.passes else _DOUBLE_HIT_TITLE
+        axt.set_title(
+            _t(key, language).format(n=result.impacts)
+            + f" ({_verdict_word(passes=result.passes, language=language)})"
+        )
+        axt.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
+        axt.grid(visible=True, alpha=0.3)
+
+    if ax is not None:
+        _history(ax, **kwargs)
+        localize_axes(ax, language)
+        return ax
+
+    axes = _new_axes_column(2, figsize=(8.0, 6.6))
+    _history(axes[0], **kwargs)
+    freqs, esd = energy_spectral_density(force, result.fs)
+    axe = axes[1]
+    shown = np.where(esd[1:] > 0.0, esd[1:], np.nan)
+    axe.semilogy(
+        freqs[1:], shown, color=_C_PRIMARY, lw=1.0, label=_t(_ESD_LABEL, language)
+    )
+    spacing = result.notch_spacing_hz
+    if spacing is not None:
+        axe.set_title(
+            _t(_NOTCH_TITLE, language).format(
+                df=format_number(spacing, language, decimals=1),
+                ripple=format_number(result.ripple_db, language, decimals=1),
+            )
+        )
+    axe.set_xlim(0.0, float(freqs[-1]))
+    top = float(np.nanmax(shown))
+    axe.set_ylim(max(float(np.nanmin(shown)), top * 1e-6), top * 3.0)
+    axe.set_xlabel(_t(_FREQ_LABEL, language))
+    axe.set_ylabel(_t(_ESD_AXIS_LABEL, language))
+    axe.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
+    axe.grid(visible=True, which="both", alpha=0.3)
+    for axis in axes:
+        localize_axes(axis, language)
+    _lay_out_own_figure(axes[0])
+    return axes
+
+
+def plot_force_spectrum_check(
+    result: ForceSpectrumCheck,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """The force energy spectral density against the range and the limit (6.3).
+
+    :param result: A
+        :class:`~phonometry.vibration.structural.impact_mobility.ForceSpectrumCheck`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the density curve.
+    :return: The axes.
+    """
+    from .._i18n import format_number, localize_axes
+
+    created = ax is None
+    ax = ax if ax is not None else _new_axes()
+    freq = np.asarray(result.frequencies, dtype=np.float64)
+    level = np.asarray(result.level_db, dtype=np.float64)
+    shown = np.where(np.isfinite(level), level, np.nan)
+    low, high = result.frequency_range_hz
+    ax.axvspan(
+        low, high, color=_C_PRIMARY_LIGHT, alpha=0.25, label=_t(_RANGE_LABEL, language)
+    )
+    ax.axhline(
+        -result.max_drop_db,
+        color=_C_REFERENCE,
+        ls="--",
+        lw=1.2,
+        label=_t(_DROP_LIMIT_LABEL, language).format(
+            d=format_number(result.max_drop_db, language, decimals=1)
+        ),
+    )
+    style_default(kwargs, "color", _C_PRIMARY)
+    style_default(kwargs, "linewidth", 1.4)
+    kwargs.setdefault("label", _t(_ESD_LABEL, language))
+    ax.plot(freq, shown, **kwargs)
+    inside = result.in_range
+    lowest = int(np.flatnonzero(inside)[int(np.argmin(level[inside]))])
+    ax.plot(
+        freq[lowest],
+        level[lowest],
+        "o",
+        color=_C_TERTIARY if result.passes else _C_REFERENCE,
+        zorder=4,
+        label=_t(_LOWEST_LABEL, language).format(
+            d=format_number(-result.drop_db, language, decimals=1)
+        ),
+    )
+    right = min(float(freq[-1]), 2.0 * high)
+    ax.set_xlim(0.0, right)
+    visible = shown[freq <= right]
+    bottom = min(-1.5 * result.max_drop_db, float(np.nanmin(visible)) - 3.0)
+    ax.set_ylim(max(bottom, -80.0), 3.0)
+    ax.set_xlabel(_t(_FREQ_LABEL, language))
+    ax.set_ylabel(_t(_ESD_LEVEL_LABEL, language))
+    ax.set_title(
+        _t(_FORCE_SPECTRUM_TITLE, language).format(
+            d=format_number(result.drop_db, language, decimals=1)
+        )
+        + f" ({_verdict_word(passes=result.passes, language=language)})"
+    )
+    ax.legend(loc=_LEGEND_LOWER_LEFT, fontsize="small")
+    ax.grid(visible=True, alpha=0.3)
+    localize_axes(ax, language)
+    if created:
+        _lay_out_own_figure(ax)
+    return ax
+
+
+def _runs(mask: NDArray[np.bool_]) -> list[tuple[int, int]]:
+    """Start and stop index of every run of ``True`` in ``mask``."""
+    edges = np.diff(np.concatenate(([0], mask.astype(np.int8), [0])))
+    return list(
+        zip(np.flatnonzero(edges == 1), np.flatnonzero(edges == -1) - 1, strict=True)
+    )
+
+
+def plot_coherence_check(
+    result: CoherenceCheck,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """The coherence against its minimum, excluded frequencies shaded (9.1).
+
+    :param result: A
+        :class:`~phonometry.vibration.structural.impact_mobility.CoherenceCheck`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the coherence curve.
+    :return: The axes.
+    """
+    from .._i18n import format_number, localize_axes
+
+    created = ax is None
+    ax = ax if ax is not None else _new_axes()
+    freq = np.asarray(result.frequencies, dtype=np.float64)
+    gamma2 = np.asarray(result.coherence, dtype=np.float64)
+    judged = np.asarray(result.judged, dtype=bool)
+    excluded_label = _t(_EXCLUDED_LABEL, language)
+    for start, stop in _runs(~judged):
+        ax.axvspan(
+            freq[start], freq[stop], color=_C_MUTED, alpha=0.25, label=excluded_label
+        )
+        excluded_label = "_nolegend_"
+    ax.axhline(
+        result.minimum_coherence,
+        color=_C_REFERENCE,
+        ls="--",
+        lw=1.1,
+        label=_t(_HIGH_COHERENCE_LABEL, language).format(
+            value=format_number(
+                result.minimum_coherence, language, decimals=2, trim=True
+            )
+        ),
+    )
+    style_default(kwargs, "color", _C_PRIMARY)
+    style_default(kwargs, "linewidth", 1.3)
+    kwargs.setdefault("label", _t(_COHERENCE_LABEL, language))
+    ax.semilogx(freq, gamma2, **kwargs)
+    failing = judged & ~result.high
+    if np.any(failing):
+        ax.plot(
+            freq[failing],
+            gamma2[failing],
+            "o",
+            color=_C_SECONDARY,
+            markersize=4,
+            zorder=3,
+            label=_t(_BELOW_MINIMUM_LABEL, language),
+        )
+    ax.set_ylim(0.0, 1.05)
+    format_frequency_axis(ax, float(freq.min()), float(freq.max()), language=language)
+    ax.set_xlabel(_t(_FREQ_LABEL, language))
+    ax.set_ylabel(_t(_COHERENCE_LABEL, language))
+    title = (
+        _t(_SINGLE_COHERENCE_TITLE, language)
+        if result.impacts == 1
+        else _t(_COHERENCE_TITLE, language).format(n=result.impacts)
+    )
+    ax.set_title(title + f" ({_verdict_word(passes=result.passes, language=language)})")
+    ax.legend(loc=_LEGEND_LOWER_LEFT, fontsize="small")
+    ax.grid(visible=True, which="both", alpha=0.3)
+    localize_axes(ax, language)
+    if created:
+        _lay_out_own_figure(ax)
+    return ax
+
+
+def plot_overload_check(
+    result: OverloadCheck,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """A record against its full scale, clipped samples marked (8.4).
+
+    :param result: An
+        :class:`~phonometry.vibration.structural.impact_mobility.OverloadCheck`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the record curve.
+    :return: The axes.
+    """
+    from .._i18n import format_number, localize_axes
+
+    created = ax is None
+    ax = ax if ax is not None else _new_axes()
+    record = np.asarray(result.record, dtype=np.float64)
+    times = np.arange(record.size) / result.fs
+    full_scale_label = _t(_FULL_SCALE_LABEL, language)
+    for level in (result.full_scale, -result.full_scale):
+        ax.axhline(level, color=_C_REFERENCE, ls="--", lw=1.1, label=full_scale_label)
+        full_scale_label = "_nolegend_"
+    style_default(kwargs, "color", _C_PRIMARY)
+    style_default(kwargs, "linewidth", 1.0)
+    kwargs.setdefault("label", _t(_RECORD_LABEL, language))
+    ax.plot(times, record, **kwargs)
+    clipped = np.abs(record) >= result.full_scale
+    if np.any(clipped):
+        ax.plot(
+            times[clipped],
+            record[clipped],
+            "o",
+            color=_C_REFERENCE,
+            markersize=4,
+            zorder=3,
+            label=_t(_CLIPPED_LABEL, language).format(n=result.clipped_samples),
+        )
+    span = 1.15 * max(result.full_scale, result.peak)
+    ax.set_ylim(-span, span)
+    ax.set_xlabel(_t(_TIME_LABEL, language))
+    ax.set_ylabel(_t(_AMPLITUDE_LABEL, language))
+    headroom = result.headroom_db
+    reading = (
+        format_number(headroom, language, decimals=1) if np.isfinite(headroom) else "∞"
+    )
+    ax.set_title(
+        _t(_OVERLOAD_TITLE, language).format(h=reading)
+        + f" ({_verdict_word(passes=result.passes, language=language)})"
+    )
+    ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
+    ax.grid(visible=True, alpha=0.3)
+    localize_axes(ax, language)
+    if created:
+        _lay_out_own_figure(ax)
+    return ax
+
+
+def plot_response_decay_check(
+    result: ResponseDecayCheck,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """The response level against the levels 8.3 and 8.5.2 ask for.
+
+    The magnitude of the response is drawn in decibels re its highest peak,
+    thin, and over it the peak of every segment, the segments laid back from
+    the end of the record as the check lays the last one. The check's two
+    readings are marked where it takes them: the midpoint segment, against
+    the 10 % check of 8.5.2, and the last sample, reached from the last
+    segment by the decay from the midpoint, against the limit. The part of
+    the record before ``start_s``, left out of the search for the highest
+    peak, is shaded.
+
+    :param result: A
+        :class:`~phonometry.vibration.structural.impact_mobility.ResponseDecayCheck`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the segment-peak curve.
+    :return: The axes.
+    """
+    from .._i18n import format_number, localize_axes
+    from ..vibration.structural.impact_mobility import RESPONSE_MIDPOINT_RATIO
+
+    created = ax is None
+    ax = ax if ax is not None else _new_axes()
+    record = np.abs(np.asarray(result.record, dtype=np.float64))
+    size = record.size
+    times = np.arange(size) / result.fs
+    floor = -80.0
+    reference = result.peak if result.peak > 0.0 else 1.0
+
+    def _db(ratio: float | np.ndarray) -> np.ndarray:
+        with np.errstate(divide="ignore"):
+            return np.maximum(20.0 * np.log10(np.asarray(ratio, dtype=float)), floor)
+
+    level = _db(record / reference)
+    if result.start_s > 0.0:
+        ax.axvspan(
+            0.0,
+            result.start_s,
+            color=_C_MUTED,
+            alpha=0.18,
+            lw=0.0,
+            label=_t(_BEFORE_START_LABEL, language),
+        )
+    ax.plot(times, level, color=_C_MUTED, lw=0.5, alpha=0.6)
+    segment = max(1, round(result.segment_s * result.fs))
+    start = round(result.start_s * result.fs)
+    blocks = max(1, (size - start) // segment)
+    # The segments the check reads are laid back from the end of the record:
+    # the last one ends at the last sample, the others follow it backwards,
+    # and whatever is left between the start and the first one is a shorter
+    # segment of its own.
+    edges = size - segment * np.arange(blocks, -1, -1)
+    if edges[0] > start:
+        edges = np.insert(edges, 0, start)
+    block_peaks = np.array(
+        [record[lo:hi].max() for lo, hi in zip(edges[:-1], edges[1:], strict=True)]
+    )
+    block_level = _db(block_peaks / reference)
+    style_default(kwargs, "color", _C_PRIMARY)
+    style_default(kwargs, "linewidth", 1.6)
+    kwargs.setdefault("drawstyle", "steps-post")
+    kwargs.setdefault("label", _t(_RESPONSE_LEVEL_LABEL, language))
+    ax.plot(edges / result.fs, np.append(block_level, block_level[-1]), **kwargs)
+    duration = size / result.fs
+    middle = (size // 2) / result.fs
+    last_start = (size - segment) / result.fs
+    end_time = (size - 1) / result.fs
+    ax.hlines(
+        20.0 * np.log10(RESPONSE_MIDPOINT_RATIO),
+        middle,
+        middle + segment / result.fs,
+        color=_C_SECONDARY,
+        lw=2.2,
+        ls=":",
+        label=_t(_MIDPOINT_LABEL, language),
+    )
+    ax.hlines(
+        20.0 * np.log10(result.limit_ratio),
+        last_start,
+        duration,
+        color=_C_REFERENCE,
+        lw=2.2,
+        label=_t(_END_LIMIT_LABEL, language).format(
+            p=format_number(100.0 * result.limit_ratio, language, decimals=0)
+        ),
+    )
+    ax.plot(
+        [middle, last_start, end_time],
+        _db(
+            np.array(
+                [result.midpoint_ratio, result.last_segment_ratio, result.end_ratio]
+            )
+        ),
+        color=_C_TERTIARY,
+        lw=1.1,
+        ls="--",
+        marker="o",
+        markevery=[0],
+        markersize=4,
+        label=_t(_CARRIED_DECAY_LABEL, language).format(
+            p=format_number(100.0 * result.midpoint_ratio, language, decimals=1)
+        ),
+    )
+    ax.plot(
+        end_time,
+        float(_db(result.end_ratio)),
+        "o",
+        color=_C_TERTIARY if result.passes else _C_REFERENCE,
+        zorder=4,
+        label=_t(_END_READING_LABEL, language).format(
+            p=format_number(100.0 * result.end_ratio, language, decimals=1)
+        ),
+    )
+    ax.set_xlim(0.0, duration)
+    ax.set_ylim(floor, max(6.0, float(np.max(level)) + 3.0))
+    ax.set_xlabel(_t(_TIME_LABEL, language))
+    ax.set_ylabel(_t(_RESPONSE_DB_LABEL, language))
+    key = _WINDOWED_DECAY_TITLE if result.exponential_window else _DECAY_TITLE
+    ax.set_title(
+        _t(key, language)
+        + f" ({_verdict_word(passes=result.passes, language=language)})"
+    )
+    ax.legend(loc=_LEGEND_LOWER_LEFT, fontsize="small")
+    ax.grid(visible=True, alpha=0.3)
+    localize_axes(ax, language)
+    if created:
+        _lay_out_own_figure(ax)
+    return ax
+
+
+def _symmetric_limits(values: np.ndarray, tolerance: float) -> tuple[float, float]:
+    """Axis limits about zero: twice the tolerance, or wider to hold every value."""
+    reach = max(2.0 * tolerance, 1.1 * float(np.max(np.abs(values))))
+    return -reach, reach
+
+
+def plot_channel_match(
+    result: ChannelMatchVerification,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes | np.ndarray:
+    """Channel-to-channel magnitude and phase deviations against 8.1.
+
+    :param result: A
+        :class:`~phonometry.vibration.structural.impact_mobility.ChannelMatchVerification`.
+    :param ax: Existing axes for the magnitude panel, or ``None`` for a fresh
+        two-panel figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the magnitude-deviation curve.
+    :return: The axes (``ax`` given) or the two-axes array.
+    """
+    from .._i18n import localize_axes
+    from ..vibration.structural.impact_mobility import (
+        CHANNEL_MAGNITUDE_TOLERANCE,
+        CHANNEL_PHASE_TOLERANCE_DEG,
+    )
+
+    freq = np.asarray(result.frequencies, dtype=np.float64)
+    fmin, fmax = float(freq.min()), float(freq.max())
+    magnitude = 100.0 * np.asarray(result.magnitude_deviation, dtype=np.float64)
+    phase = np.asarray(result.phase_deg, dtype=np.float64)
+    band = 100.0 * CHANNEL_MAGNITUDE_TOLERANCE
+
+    def _magnitude(axm: Axes, **line_kwargs: Any) -> None:
+        axm.axhspan(
+            -band,
+            band,
+            color=_C_REFERENCE,
+            alpha=0.12,
+            label=_t(_MAGNITUDE_BAND_LABEL, language),
+        )
+        style_default(line_kwargs, "color", _C_PRIMARY)
+        style_default(line_kwargs, "linewidth", 1.3)
+        line_kwargs.setdefault("label", _t(_MAGNITUDE_DEVIATION_LABEL, language))
+        axm.semilogx(freq, magnitude, **line_kwargs)
+        outside = ~np.asarray(result.magnitude_within, dtype=bool)
+        if np.any(outside):
+            axm.plot(
+                freq[outside],
+                magnitude[outside],
+                "o",
+                color=_C_SECONDARY,
+                markersize=4,
+                label=_t(_OUTSIDE_LABEL, language),
+            )
+        axm.set_ylim(*_symmetric_limits(magnitude, band))
+        format_frequency_axis(axm, fmin, fmax, language=language)
+        axm.set_ylabel(_t(_DEVIATION_LABEL, language))
+        axm.set_title(
+            _t(_CHANNEL_TITLE, language)
+            + f" ({_verdict_word(passes=result.passes, language=language)})"
+        )
+        axm.legend(loc=_LEGEND_LOWER_LEFT, fontsize="small")
+        axm.grid(visible=True, which="both", alpha=0.3)
+
+    if ax is not None:
+        _magnitude(ax, **kwargs)
+        ax.set_xlabel(_t(_FREQ_LABEL, language))
+        localize_axes(ax, language)
+        return ax
+
+    axes = _new_axes_column(2, sharex=True, figsize=(8.0, 6.6))
+    _magnitude(axes[0], **kwargs)
+    axp = axes[1]
+    axp.axhspan(
+        -CHANNEL_PHASE_TOLERANCE_DEG,
+        CHANNEL_PHASE_TOLERANCE_DEG,
+        color=_C_REFERENCE,
+        alpha=0.12,
+        label=_t(_PHASE_BAND_LABEL, language),
+    )
+    axp.semilogx(
+        freq, phase, color=_C_TERTIARY, lw=1.3, label=_t(_PHASE_LABEL, language)
+    )
+    outside = ~np.asarray(result.phase_within, dtype=bool)
+    if np.any(outside):
+        axp.plot(
+            freq[outside],
+            phase[outside],
+            "o",
+            color=_C_SECONDARY,
+            markersize=4,
+            label=_t(_OUTSIDE_LABEL, language),
+        )
+    axp.set_ylim(*_symmetric_limits(phase, CHANNEL_PHASE_TOLERANCE_DEG))
+    format_frequency_axis(axp, fmin, fmax, language=language)
+    axp.set_xlabel(_t(_FREQ_LABEL, language))
+    axp.set_ylabel(_t(_PHASE_AXIS_LABEL, language))
+    axp.legend(loc=_LEGEND_LOWER_LEFT, fontsize="small")
+    axp.grid(visible=True, which="both", alpha=0.3)
+    for axis in axes:
+        localize_axes(axis, language)
+    _lay_out_own_figure(axes[0])
+    return axes

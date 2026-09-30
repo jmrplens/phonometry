@@ -541,6 +541,7 @@ _WAVEFORM_NAMES = frozenset(
         "trace",
         "samples",
         "record",
+        "force",
     }
 )
 
@@ -571,6 +572,18 @@ _BARE_ON_PURPOSE = {
     ),
     "phonometry.simulation.fdtd.SignalSource.samples": (
         "an excitation the caller supplies, not a result"
+    ),
+    "phonometry.vibration.structural.impact_mobility.DoubleHitCheck.force": (
+        "a force in newtons, read without the Signal's digital-to-pascal "
+        "factor: a Signal would claim a conversion that never happened"
+    ),
+    "phonometry.vibration.structural.impact_mobility.OverloadCheck.record": (
+        "the raw samples judged against the channel's full scale, in the "
+        "channel's own unit: a calibrated Signal would present other numbers"
+    ),
+    "phonometry.vibration.structural.impact_mobility.ResponseDecayCheck.record": (
+        "a motion, not a pressure, read without the Signal's factor: a "
+        "Signal would claim a conversion that never happened"
     ),
 }
 

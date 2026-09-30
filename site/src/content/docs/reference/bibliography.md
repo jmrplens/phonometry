@@ -916,14 +916,28 @@ the transmission physics above them.
   (ISO 7626-1:2011).
   [iso.org catalogue](https://www.iso.org/standard/50426.html).
   The FRF family and its free/blocked distinctions.
-  Cited by [Mechanical mobility and the FRF family](/phonometry/vibration/structural/mechanical-mobility/).
+  Cited by [Mechanical mobility and the FRF family](/phonometry/vibration/structural/mechanical-mobility/) and
+  [Mobility by impact excitation](/phonometry/vibration/structural/impact-mobility/).
 - International Organization for Standardization. (2015). *Mechanical
   vibration and shock — Experimental determination of mechanical mobility —
   Part 2: Measurements using single-point translation excitation with an
   attached vibration exciter* (ISO 7626-2:2015).
   [iso.org catalogue](https://www.iso.org/standard/62483.html).
   The attached-exciter measurement method and its acceptance criteria.
-  Cited by [Mechanical mobility and the FRF family](/phonometry/vibration/structural/mechanical-mobility/).
+  Cited by [Mechanical mobility and the FRF family](/phonometry/vibration/structural/mechanical-mobility/) and
+  [Mobility by impact excitation](/phonometry/vibration/structural/impact-mobility/).
+- International Organization for Standardization. (2019). *Mechanical
+  vibration and shock — Experimental determination of mechanical mobility —
+  Part 5: Measurements using impact excitation with an exciter which is not
+  attached to the structure* (ISO 7626-5:2019).
+  The impact-hammer measurement: the force and exponential windows, the
+  average over impacts, the checks on the record and the Annex A correction.
+  Cited by [Mobility by impact excitation](/phonometry/vibration/structural/impact-mobility/).
+- International Organization for Standardization. (2018). *Mechanical
+  vibration, shock and condition monitoring — Vocabulary* (ISO 2041:2018).
+  The damping ratio, the damping coefficient over the critical one (3.2.96),
+  against which Formula (A.3) of ISO 7626-5 is first order.
+  Cited by [Mobility by impact excitation](/phonometry/vibration/structural/impact-mobility/).
 - International Organization for Standardization. (2008). *Acoustics and
   vibration — Laboratory measurement of vibro-acoustic transfer properties of
   resilient elements — Part 1: Principles and guidelines* (ISO 10846-1:2008).

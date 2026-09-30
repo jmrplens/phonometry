@@ -62,6 +62,11 @@ from phonometry.underwater import (
 )
 from phonometry.vibration import (
     apply_weighting,
+    check_double_hit,
+    check_force_spectrum,
+    check_overload,
+    check_response_decay,
+    energy_spectral_density,
     running_rms,
     spinal_response,
     vibration_dose_value,
@@ -247,19 +252,27 @@ def test_a_full_scale_reading_still_resolves_the_rate(
 # Exemption 2: the quantity is not a pressure
 # ---------------------------------------------------------------------------
 
-NOT_PRESSURE = [
+NOT_PRESSURE: list[tuple[Callable[..., object], dict[str, object]]] = [
     (apply_weighting, {"name": "Wk"}),
     (running_rms, {}),
     (vibration_dose_value, {}),
     (spinal_response, {}),
     (impact_force_exposure_level, {}),
+    (energy_spectral_density, {}),
+    (check_double_hit, {}),
+    (
+        check_force_spectrum,
+        {"frequency_range_hz": (10.0, 2000.0), "max_drop_db": 20.0},
+    ),
+    (check_overload, {"full_scale": 1.0}),
+    (check_response_decay, {}),
 ]
 NOT_PRESSURE_IDS = [f.__name__ for f, _ in NOT_PRESSURE]
 
 
 @pytest.mark.parametrize(("func", "kwargs"), NOT_PRESSURE, ids=NOT_PRESSURE_IDS)
 def test_a_non_pressure_record_never_sees_the_calibration(
-    func: Callable[..., object], kwargs: dict[str, str]
+    func: Callable[..., object], kwargs: dict[str, object]
 ) -> None:
     """An acceleration in m/s2 and a force in N are not pascals waiting to be."""
     calibrated = func(Signal(_RECORD, FS, calibration_factor=CAL), **kwargs)
@@ -271,7 +284,7 @@ def test_a_non_pressure_record_never_sees_the_calibration(
 
 @pytest.mark.parametrize(("func", "kwargs"), NOT_PRESSURE, ids=NOT_PRESSURE_IDS)
 def test_a_non_pressure_record_still_resolves_the_rate(
-    func: Callable[..., object], kwargs: dict[str, str]
+    func: Callable[..., object], kwargs: dict[str, object]
 ) -> None:
     """An acceleration is not a pressure, and it still needs a sample rate."""
     sig = Signal(_RECORD, FS)

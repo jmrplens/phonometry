@@ -100,7 +100,7 @@ def test_metadata_header_renders(tmp_path: Path) -> None:
         specimen="Machine support bracket",
         client="Example structures client",
         test_room="Modal-analysis rig",
-        instrumentation="Impact hammer + accelerometer",
+        instrumentation="Electrodynamic exciter + impedance head",
         laboratory="Vibration laboratory",
         report_id="MOB-7626",
     )
@@ -110,7 +110,7 @@ def test_metadata_header_renders(tmp_path: Path) -> None:
     text = _extract_text(str(out))
     assert "Example structures client" in text
     assert "Machine support bracket" in text
-    assert "Impact hammer + accelerometer" in text
+    assert "Electrodynamic exciter + impedance head" in text
     assert "MOB-7626" in text
 
 

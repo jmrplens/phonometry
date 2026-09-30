@@ -281,6 +281,7 @@ _SECTION_LIST: tuple[Section, ...] = (
         modules=(
             "phonometry.vibration.structural.mechanical_mobility",
             "phonometry.vibration.structural.point_mobility",
+            "phonometry.vibration.structural.impact_mobility",
             "phonometry.vibration.structural.radiation_efficiency",
             "phonometry.vibration.structural.junction_transmission",
             "phonometry.vibration.structural.experimental_sea",

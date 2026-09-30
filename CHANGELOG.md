@@ -9,6 +9,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- **Take a solid's row into the elastic simulation and the detailed building
+  model, and a ground's into the outdoor models.** A solid's catalogue row,
+  one of `solids.PUBLISHED_SOLIDS` or one read from a catalogue file of your
+  own, goes wherever the elastic FDTD takes a `Material`:
+  `simulation.scholte_speed` and `ElasticFDTD2D.from_regions` read its bulk
+  longitudinal speed, its transverse speed and its density through
+  `printed()`, and never the plate or bar speed a table prints beside them.
+  `environment.GroundSurface.medium()` turns a ground row into the porous
+  half-space, by the Delany and Bazley or the Miki model, that
+  `ground_effect`, `barrier_insertion_loss` and
+  `atmospheric_parabolic_equation` take as the ground; a row Cox and
+  D'Antonio tie to the model it was fitted with, by a footnote or in their
+  text, goes into that model only.
+  `building.HomogeneousElement.from_solid()` builds the ISO 12354 element a
+  layer of a solid makes, with m' = ρt and fc = c0²/(1.8 cL t) from the
+  row's density and plate speed, and takes the internal loss factor from you,
+  never from the row. A cell the page does not print as one number is
+  refused in each case with what the page has there.
+
+- **Complete a catalogue file in your editor with its JSON Schema.**
+  `io.catalogue_schema()` writes the JSON Schema (2020-12) of a catalogue
+  document for the row classes you give it, your own among them: every field
+  under its own name and under each other unit the reader converts, the fields
+  each hedge may name, the provenance, the credit of the whole table, the
+  limits a field's unit sets and a CSV file's header. The documentation site
+  publishes the schema of every published row class as
+  `schemas/phonometry-catalogue-1.json`, and a document may name it in a
+  top-level `$schema`, which the reader takes and never reads. A document the
+  reader reads is never refused by the schema, by Python's `jsonschema` or by
+  an editor's JavaScript validator: its patterns spell every class of
+  characters out, so that Python's `re` and ECMA-262 both read a key, a
+  column's name and a text that is not blank as the reader does; and each of
+  the seven patterns that hold a whole text is anchored at the very end of it
+  rather than with a `$`, which Python also matches before a final line
+  feed, so that a name, a key, a column's name, a day, a date or a digest
+  that ends in a line feed is refused under both, as the reader refuses it.
+  The other two, the test of a text that is not blank and the reserved form
+  of a name, match a part of the text and are not anchored at its end. The
+  end is a lookahead, which a validator built on RE2 does not compile. What
+  depends on two cells at once stays the reader's to refuse.
+
 - **Keep a data sheet's absorption and a laboratory's insulation as rows of
   their own, rated again from their bands.** Four row classes hold what a
   data sheet or a test report prints, each read by `io.read_catalogue` and
@@ -83,8 +124,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `overwrite=True`, and so is one another program makes there while the file
   is written; on a file system without hard links, such as FAT, the name
   holds an empty file for the instant before the new one is renamed over it.
-  The `io` section of the documentation is now "Files", since it holds more
-  than audio.
+  What is to be written is first read as `io.read_catalogue` reads the file,
+  so nothing the reader refuses is written or replaces a file: more than
+  50 000 rows, more than 16 MiB (64 KiB for the header of a CSV file) or a
+  text longer than the reader takes is refused in the reader's own words,
+  naming the file. The `io` section of the documentation is now "Files",
+  since it holds more than audio.
 
 - **Search a catalogue of your own with the same lookups, and draw a panel's
   plateau from its row.** Every `*_named` lookup of a published catalogue,

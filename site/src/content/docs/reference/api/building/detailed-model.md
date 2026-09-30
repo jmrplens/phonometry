@@ -1031,6 +1031,73 @@ A Type A homogeneous element of the detailed model.
 | `density` | Density `ρ` of the material, in kg/m³; supplied together with `longitudinal_velocity` it enables the high-frequency plateau of Formula (B.10). `None` (the default) leaves the plateau off. |
 | `longitudinal_velocity` | Quasi-longitudinal phase velocity `cL` of the material, in m/s (ISO 12354-1 Table B.3). |
 
+`from_solid` builds one from a solid's catalogue row and the
+element's thickness, and works out `m'` and `fc` itself.
+
+### HomogeneousElement.from_solid()
+
+*classmethod*
+
+```python
+HomogeneousElement.from_solid(
+    row: SolidMaterial,
+    *,
+    thickness_m: float,
+    internal_loss_factor: float,
+    area_m2: float,
+    length1_m: float,
+    length2_m: float,
+    perimeter_absorption_m: float = 0.0,
+    label: str = '',
+    fluid: Fluid = ...,
+) -> HomogeneousElement
+```
+
+The element a layer of a solid's catalogue row makes.
+
+Annex B describes a homogeneous element by the material properties
+Table B.3 lists, the density $\rho$ and the quasi-longitudinal
+phase velocity $c_\mathrm{L}$ of a plate, and by its thickness
+$t$: the mass per unit area is $m' = \rho t$ and the
+critical frequency $f_\mathrm{c} = c_\mathrm{o}^2 / (1.8\, c_\mathrm{L} t)$ (ISO 12354-1:2017, the symbols of Formula (B.2)).
+A row's plate speed is that $c_\mathrm{L}$, read with its
+density through [`printed`](/phonometry/reference/api/io/io/#cataloguerowprinted), so a
+cell the page leaves empty or prints as a range is refused in the
+page's terms; a row whose page prints a modulus and a Poisson ratio
+instead holds the plate speed its completion works out of them,
+marked as derived. The element carries both properties, so the
+high-frequency limit of Formula (B.10) applies to it.
+
+The internal loss factor is never read from the row. A solid's row
+holds up to four loss factors (flexural, longitudinal, in situ and
+one the page does not say which), and only the caller knows which of
+them, if any, is the $\eta_\mathrm{int}$ of Annex C: pass
+`row.printed("flexural_loss_factor")`, a value of Table B.3 or a
+measured one.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `row` | A [`SolidMaterial`](/phonometry/reference/api/solids/catalogue/#solidmaterial), one of [`PUBLISHED_SOLIDS`](/phonometry/reference/api/solids/catalogue/#published_solids) or one read from a catalogue file of your own. |
+| `thickness_m` | Element thickness `t`, in metres. |
+| `internal_loss_factor` | Internal loss factor `ηint`. |
+| `area_m2` | Element area `S`, in m². |
+| `length1_m` | One side length of the rectangular element, in m. |
+| `length2_m` | The other side length, in m. |
+| `perimeter_absorption_m` | $\sum l_k \alpha_k$ over the element's perimeter, in m (Default: 0). |
+| `label` | The element's name (Default: the row's [`name`](/phonometry/reference/api/io/io/#cataloguerow)). |
+| `fluid` | The air whose speed of sound `co` enters `fc` (Default: [`EN_12354_AIR`](/phonometry/reference/api/building/detailed-model/#en_12354_air), the 340 m/s of Annex A). |
+
+**Returns:** The [`HomogeneousElement`](/phonometry/reference/api/building/detailed-model/#homogeneouselement).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | for a row that is not a [`SolidMaterial`](/phonometry/reference/api/solids/catalogue/#solidmaterial). |
+| ValueError | for a thickness or a loss factor that is not positive and finite, or for a density or a plate speed the row holds no number for, in the row's own terms. |
+
 ## impact_flanking_path
 
 ```python

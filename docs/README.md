@@ -90,7 +90,7 @@ your own is read from a JSON file, or from a spreadsheet saved as CSV, into
 the rows every published catalogue hands out, and written back.
 
 - [Reading and writing measurement audio](io/audio-files.md): the whole workflow on one runnable page, from the meter's WAV to the calibrated level, the lossy warning, streaming, BWF writing, the sidecar and lossless conversion
-- [Your own catalogues](io/material-catalogues.md): a data sheet, a test report or a measurement of yours as a catalogue file, read into the rows every published catalogue hands out, searched with the same lookups and handed to the same models
+- [Your own catalogues](io/material-catalogues.md): a data sheet, a test report or a measurement of yours as a catalogue file, read into the rows every published catalogue hands out, searched with the same lookups, handed to the same models and completed in your editor with its JSON Schema
 
 ### [Hearing and perception](perception/index.md)
 

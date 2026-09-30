@@ -111,6 +111,7 @@ from ..._internal.validation import (
     require_same_length,
 )
 from ...fluids import Fluid
+from ...solids.catalogue import SolidMaterial
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -1302,6 +1303,9 @@ class HomogeneousElement:
         of Formula (B.10). ``None`` (the default) leaves the plateau off.
     :ivar longitudinal_velocity: Quasi-longitudinal phase velocity ``cL`` of
         the material, in m/s (ISO 12354-1 Table B.3).
+
+    :meth:`from_solid` builds one from a solid's catalogue row and the
+    element's thickness, and works out ``m'`` and ``fc`` itself.
     """
 
     label: str
@@ -1314,6 +1318,92 @@ class HomogeneousElement:
     perimeter_absorption: float = 0.0
     density: float | None = None
     longitudinal_velocity: float | None = None
+
+    @classmethod
+    def from_solid(
+        cls,
+        row: SolidMaterial,
+        *,
+        thickness_m: float,
+        internal_loss_factor: float,
+        area_m2: float,
+        length1_m: float,
+        length2_m: float,
+        perimeter_absorption_m: float = 0.0,
+        label: str = "",
+        fluid: Fluid = EN_12354_AIR,
+    ) -> HomogeneousElement:
+        r"""The element a layer of a solid's catalogue row makes.
+
+        Annex B describes a homogeneous element by the material properties
+        Table B.3 lists, the density :math:`\rho` and the quasi-longitudinal
+        phase velocity :math:`c_\mathrm{L}` of a plate, and by its thickness
+        :math:`t`: the mass per unit area is :math:`m' = \rho t` and the
+        critical frequency :math:`f_\mathrm{c} = c_\mathrm{o}^2 / (1.8\,
+        c_\mathrm{L} t)` (ISO 12354-1:2017, the symbols of Formula (B.2)).
+        A row's plate speed is that :math:`c_\mathrm{L}`, read with its
+        density through :meth:`~phonometry.io.CatalogueRow.printed`, so a
+        cell the page leaves empty or prints as a range is refused in the
+        page's terms; a row whose page prints a modulus and a Poisson ratio
+        instead holds the plate speed its completion works out of them,
+        marked as derived. The element carries both properties, so the
+        high-frequency limit of Formula (B.10) applies to it.
+
+        The internal loss factor is never read from the row. A solid's row
+        holds up to four loss factors (flexural, longitudinal, in situ and
+        one the page does not say which), and only the caller knows which of
+        them, if any, is the :math:`\eta_\mathrm{int}` of Annex C: pass
+        ``row.printed("flexural_loss_factor")``, a value of Table B.3 or a
+        measured one.
+
+        :param row: A :class:`~phonometry.solids.SolidMaterial`, one of
+            :data:`~phonometry.solids.PUBLISHED_SOLIDS` or one read from a
+            catalogue file of your own.
+        :param thickness_m: Element thickness ``t``, in metres.
+        :param internal_loss_factor: Internal loss factor ``ηint``.
+        :param area_m2: Element area ``S``, in m².
+        :param length1_m: One side length of the rectangular element, in m.
+        :param length2_m: The other side length, in m.
+        :param perimeter_absorption_m: :math:`\sum l_k \alpha_k` over the
+            element's perimeter, in m (Default: 0).
+        :param label: The element's name (Default: the row's
+            :attr:`~phonometry.io.CatalogueRow.name`).
+        :param fluid: The air whose speed of sound ``co`` enters
+            ``fc`` (Default: :data:`EN_12354_AIR`, the 340 m/s of Annex A).
+        :return: The :class:`HomogeneousElement`.
+        :raises TypeError: for a row that is not a
+            :class:`~phonometry.solids.SolidMaterial`.
+        :raises ValueError: for a thickness or a loss factor that is not
+            positive and finite, or for a density or a plate speed the row
+            holds no number for, in the row's own terms.
+        """
+        if not isinstance(row, SolidMaterial):
+            msg = (
+                "row must be a solids.SolidMaterial, the row a table of "
+                f"solids prints; got {type(row).__name__}."
+            )
+            raise TypeError(msg)
+        from ..measurement.flanking_transmission import critical_frequency
+
+        thickness = require_positive(thickness_m, "thickness_m")
+        eta = require_positive(internal_loss_factor, "internal_loss_factor")
+        wanted_by = "HomogeneousElement.from_solid"
+        density = row.printed("density_kg_m3", wanted_by=wanted_by)
+        speed = row.printed("plate_longitudinal_speed_m_s", wanted_by=wanted_by)
+        return cls(
+            label=label or row.name,
+            area=area_m2,
+            length1=length1_m,
+            length2=length2_m,
+            mass_per_area=density * thickness,
+            critical_frequency=critical_frequency(
+                speed, thickness, speed_of_sound=fluid.speed_of_sound
+            ),
+            internal_loss_factor=eta,
+            perimeter_absorption=perimeter_absorption_m,
+            density=density,
+            longitudinal_velocity=speed,
+        )
 
 
 @dataclass(frozen=True)

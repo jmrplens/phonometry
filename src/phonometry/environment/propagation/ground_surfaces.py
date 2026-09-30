@@ -12,11 +12,12 @@ An **effective** flow resistivity, which is not the flow resistivity of the
 material under your feet. It is the single number that makes a
 semi-infinite, locally reacting, rigid-framed ground model reproduce a
 measured excess attenuation, so it carries the model it was fitted with. Cox
-and D'Antonio say so explicitly and mark each row with the fit it belongs to,
-which is why a surface there is several rows: the same grass fitted with the
-Delany and Bazley model, with the semi-phenomenological model and with the
-variable-porosity model is three numbers, and averaging them would be an
-average of three different quantities.
+and D'Antonio say so explicitly, and where they print a surface once per fit
+they mark each line with the fit it belongs to, which is why a surface there
+is several rows: the same grass fitted with the Delany and Bazley model, with
+the semi-phenomenological model and with the variable-porosity model is three
+numbers, and averaging them would be an average of three different
+quantities.
 
 Why the numbers spread the way they do
 --------------------------------------
@@ -26,6 +27,19 @@ in flow resistivity measured data from different sources". Grass runs from
 100 to 300 kPa s/m2 in one row of that table; the same grass is 4 to 850
 kPa s/m2 across the fits Cox tabulates. A row is a place to start, not a
 measurement of your site.
+
+Into the outdoor models
+-----------------------
+:meth:`GroundSurface.medium` turns a row's resistivity into the porous
+half-space :func:`~phonometry.environment.ground_effect`,
+:func:`~phonometry.environment.barrier_insertion_loss` and
+:func:`~phonometry.environment.atmospheric_parabolic_equation` take as their
+ground impedance, through the Delany and Bazley or the
+Miki model those functions offer themselves. It reads the resistivity through
+:meth:`~phonometry.io.CatalogueRow.printed`, so a range, a bound or an empty
+cell is refused in the page's terms rather than collapsed to one number, and
+a row whose page names the model it was fitted with is taken into that model
+only.
 
 The classes are a different thing
 ---------------------------------
@@ -49,7 +63,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 from ..._internal.catalogue import (
     CatalogueRow,
@@ -58,9 +72,15 @@ from ..._internal.catalogue import (
     search_text,
     take,
 )
+from ...materials.absorbers.porous import PUBLISHED_AIR, delany_bazley, miki
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
+
+    from numpy.typing import ArrayLike
+
+    from ...fluids import Fluid
+    from ...materials.absorbers.porous import PorousMediumResult
 
 __all__ = [
     "PUBLISHED_GROUND",
@@ -111,6 +131,139 @@ class GroundSurface(CatalogueRow):
     iso_9613_ground_factor: float | None = None
     nmpb_ground_factor: float | None = None
     harmonoise_class: str = ""
+
+    def medium(
+        self,
+        frequency: ArrayLike,
+        *,
+        model: Literal["delany_bazley", "miki"] = "delany_bazley",
+        fluid: Fluid = PUBLISHED_AIR,
+    ) -> PorousMediumResult:
+        """The ground as a semi-infinite porous half-space.
+
+        The outdoor models take a ground as the normalized surface impedance
+        of a locally reacting half-space, which is the characteristic
+        impedance of its porous medium; this is that medium, worked out from
+        the row's effective flow resistivity with the Delany and Bazley or
+        the Miki model, and it goes into
+        :func:`~phonometry.environment.ground_effect` as ``impedance``,
+        :func:`~phonometry.environment.barrier_insertion_loss` as
+        ``ground_impedance`` and
+        :func:`~phonometry.environment.atmospheric_parabolic_equation` as
+        ``impedance``, unchanged. Those functions work out the same medium from a bare
+        ``flow_resistivity``; this is the path for a row, which keeps the
+        refusal of a cell the page did not print as a number.
+
+        An effective flow resistivity is the parameter of the model it was
+        fitted with, and Cox and D'Antonio name that model for some of their
+        rows. Where they print a surface once per fit, a footnote marks each
+        line, and the row's :attr:`~phonometry.io.CatalogueRow.variant`
+        quotes it; for the two sands Horoshenkov and Mohamed measured at four
+        water contents, the text beside the table says the parameters are
+        those of the two-parameter model of Attenborough. A row fitted with
+        the Delany and Bazley model is taken into that model only, and a row
+        fitted with the semi-phenomenological, the variable-porosity or the
+        two-parameter model into neither of the two here, because its
+        resistivity is not a parameter of either. A row whose page names no
+        fit, most of Cox's, every one of Bies's and a caller's own, is taken
+        into both.
+
+        :param frequency: Frequency vector ``f``, in hertz.
+        :param model: ``"delany_bazley"`` (Default) or ``"miki"``, the two
+            ground models the outdoor functions take.
+        :param fluid: The air above the ground, a
+            :class:`~phonometry.fluids.Fluid` (Default:
+            :data:`~phonometry.materials.absorbers.PUBLISHED_AIR`, the air
+            the two models were published with, as the outdoor functions
+            default to).
+        :return: A
+            :class:`~phonometry.materials.absorbers.PorousMediumResult`, in
+            the materials domain's time convention, which the outdoor
+            functions convert themselves.
+        :raises ValueError: for a model other than the two, for a row whose
+            page names another fit than *model*, or when the row holds no
+            number for the resistivity, in which case the message says what
+            the page has there instead.
+        """
+        if model not in _GROUND_MODELS:
+            msg = f"'model' must be 'delany_bazley' or 'miki'; got {model!r}."
+            raise ValueError(msg)
+        self._check_fit(model)
+        sigma = self.printed("flow_resistivity_pa_s_m2", wanted_by=model)
+        if model == "miki":
+            return miki(frequency, sigma, fluid=fluid)
+        return delany_bazley(frequency, sigma, fluid=fluid)
+
+    def _check_fit(self, model: str) -> None:
+        """Refuse a row whose page fitted its resistivity with another model.
+
+        :raises ValueError: naming the fit the page prints and the model
+            asked for.
+        """
+        if self.variant in _FITS:
+            fitted = _FITS[self.variant]
+            named = f"the row the page marks “{self.variant}” ({self.source})"
+        elif (self.table, self.name) in _FITS_IN_TEXT:
+            words, fitted, where = _FITS_IN_TEXT[self.table, self.name]
+            named = (
+                f"the row “{self.variant}”, whose parameters the text beside "
+                f"the table gives as those of “{words}” ({where})"
+            )
+        else:
+            return
+        if fitted == model:
+            return
+        instead = (
+            f"ask for model={fitted!r}"
+            if fitted
+            else "neither 'delany_bazley' nor 'miki' is that model"
+        )
+        msg = (
+            f"{self.name!r} is {named}: its effective flow resistivity is a "
+            f"parameter of that model and not of {model!r}; {instead}, or take "
+            "row.printed('flow_resistivity_pa_s_m2') into another model "
+            "yourself."
+        )
+        raise ValueError(msg)
+
+
+#: The two ground models the outdoor functions take a resistivity into.
+_GROUND_MODELS = ("delany_bazley", "miki")
+
+#: The fit a row names in its variant, as the three footnotes under Cox &
+#: D'Antonio 3e Table 6.7, PDF page 258 (printed p. 201), print it, and the
+#: model of :meth:`GroundSurface.medium` the resistivity of that fit is a
+#: parameter of: none, for the two models the outdoor functions do not
+#: implement.
+_FITS: Mapping[str, str] = MappingProxyType(
+    {
+        "Fitted using Delany and Bazley model": "delany_bazley",
+        "Fitted using semi-phenomenological model": "",
+        "Fitted using variable porosity model": "",
+    }
+)
+
+#: The rows of Cox & D'Antonio 3e Table 6.7 no footnote marks but the text
+#: ties to a fit, keyed ``(table, surface name)``: the model as the text names
+#: it, the model of :meth:`GroundSurface.medium` its resistivity is a
+#: parameter of (none), and where the text says it. Sect. 6.6.3, PDF page 272
+#: (printed p. 215), on the sands Horoshenkov and Mohamed wetted in the
+#: laboratory: "They also found that the two-parameter model of Attenborough
+#: was more suitable than one based on the Delany and Bazley formulations;
+#: the parameters for the model they deduced are shown in Table 6.7." Those
+#: are the two sands printed at four water contents each, with the porosity
+#: decay rate of that model (Eq. 6.46, PDF page 271, printed p. 214) beside
+#: every resistivity.
+_FITS_IN_TEXT: Mapping[tuple[str, str], tuple[str, str, str]] = MappingProxyType(
+    {
+        ("cox-2017-table-6-7", surface): (
+            "the two-parameter model of Attenborough",
+            "",
+            "Cox & D'Antonio 3e Sect. 6.6.3, PDF page 272, printed p. 215",
+        )
+        for surface in ("Coarse sand, pore size 98 μm", "Fine sand, pore size 65 μm")
+    }
+)
 
 
 # ---------------------------------------------------------------------------

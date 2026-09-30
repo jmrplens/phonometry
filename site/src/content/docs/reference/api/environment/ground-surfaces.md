@@ -18,11 +18,12 @@ An **effective** flow resistivity, which is not the flow resistivity of the
 material under your feet. It is the single number that makes a
 semi-infinite, locally reacting, rigid-framed ground model reproduce a
 measured excess attenuation, so it carries the model it was fitted with. Cox
-and D'Antonio say so explicitly and mark each row with the fit it belongs to,
-which is why a surface there is several rows: the same grass fitted with the
-Delany and Bazley model, with the semi-phenomenological model and with the
-variable-porosity model is three numbers, and averaging them would be an
-average of three different quantities.
+and D'Antonio say so explicitly, and where they print a surface once per fit
+they mark each line with the fit it belongs to, which is why a surface there
+is several rows: the same grass fitted with the Delany and Bazley model, with
+the semi-phenomenological model and with the variable-porosity model is three
+numbers, and averaging them would be an average of three different
+quantities.
 
 Why the numbers spread the way they do
 --------------------------------------
@@ -32,6 +33,19 @@ in flow resistivity measured data from different sources". Grass runs from
 100 to 300 kPa s/m2 in one row of that table; the same grass is 4 to 850
 kPa s/m2 across the fits Cox tabulates. A row is a place to start, not a
 measurement of your site.
+
+Into the outdoor models
+-----------------------
+[`GroundSurface.medium`](/phonometry/reference/api/environment/ground-surfaces/#groundsurfacemedium) turns a row's resistivity into the porous
+half-space [`ground_effect`](/phonometry/reference/api/environment/ground-barriers/#ground_effect),
+[`barrier_insertion_loss`](/phonometry/reference/api/environment/ground-barriers/#barrier_insertion_loss) and
+[`atmospheric_parabolic_equation`](/phonometry/reference/api/environment/refraction/#atmospheric_parabolic_equation) take as their
+ground impedance, through the Delany and Bazley or the
+Miki model those functions offer themselves. It reads the resistivity through
+[`printed`](/phonometry/reference/api/io/io/#cataloguerowprinted), so a range, a bound or an empty
+cell is refused in the page's terms rather than collapsed to one number, and
+a row whose page names the model it was fitted with is taken into that model
+only.
 
 The classes are a different thing
 ---------------------------------
@@ -269,6 +283,62 @@ Whether this library computed this field instead of reading it.
 | `field_name` | One of the numeric field names of this class. |
 
 **Returns:** `True` when the page did not print it and the value follows from cells that it did. `derived` says how. A value the page prints in another unit, or gives by reference to another of its rows, answers `False`: the number is the page's, and `converted` or `carried` says so.
+
+### GroundSurface.medium()
+
+```python
+GroundSurface.medium(
+    frequency: ArrayLike,
+    *,
+    model: Literal['delany_bazley', 'miki'] = 'delany_bazley',
+    fluid: Fluid = ...,
+) -> PorousMediumResult
+```
+
+The ground as a semi-infinite porous half-space.
+
+The outdoor models take a ground as the normalized surface impedance
+of a locally reacting half-space, which is the characteristic
+impedance of its porous medium; this is that medium, worked out from
+the row's effective flow resistivity with the Delany and Bazley or
+the Miki model, and it goes into
+[`ground_effect`](/phonometry/reference/api/environment/ground-barriers/#ground_effect) as `impedance`,
+[`barrier_insertion_loss`](/phonometry/reference/api/environment/ground-barriers/#barrier_insertion_loss) as
+`ground_impedance` and
+[`atmospheric_parabolic_equation`](/phonometry/reference/api/environment/refraction/#atmospheric_parabolic_equation) as
+`impedance`, unchanged. Those functions work out the same medium from a bare
+`flow_resistivity`; this is the path for a row, which keeps the
+refusal of a cell the page did not print as a number.
+
+An effective flow resistivity is the parameter of the model it was
+fitted with, and Cox and D'Antonio name that model for some of their
+rows. Where they print a surface once per fit, a footnote marks each
+line, and the row's [`variant`](/phonometry/reference/api/io/io/#cataloguerow)
+quotes it; for the two sands Horoshenkov and Mohamed measured at four
+water contents, the text beside the table says the parameters are
+those of the two-parameter model of Attenborough. A row fitted with
+the Delany and Bazley model is taken into that model only, and a row
+fitted with the semi-phenomenological, the variable-porosity or the
+two-parameter model into neither of the two here, because its
+resistivity is not a parameter of either. A row whose page names no
+fit, most of Cox's, every one of Bies's and a caller's own, is taken
+into both.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `frequency` | Frequency vector `f`, in hertz. |
+| `model` | `"delany_bazley"` (Default) or `"miki"`, the two ground models the outdoor functions take. |
+| `fluid` | The air above the ground, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`PUBLISHED_AIR`](/phonometry/reference/api/materials/porous/#published_air), the air the two models were published with, as the outdoor functions default to). |
+
+**Returns:** A [`PorousMediumResult`](/phonometry/reference/api/materials/porous/#porousmediumresult), in the materials domain's time convention, which the outdoor functions convert themselves.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | for a model other than the two, for a row whose page names another fit than *model*, or when the row holds no number for the resistivity, in which case the message says what the page has there instead. |
 
 ### GroundSurface.printed()
 

@@ -52362,7 +52362,7 @@ export const catalogues = {
         "weave": "",
         "bonding": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
-        "note": "First of four. One of four lines printed under this one surface name, one per water content; the water content is the only thing that distinguishes them. Porosity cell prints a dash.",
+        "note": "First of four. One of four lines printed under this one surface name, one per water content; the water content is the only thing that distinguishes them. Porosity cell prints a dash. The text on folio 215 (PDF page 272) says Horoshenkov and Mohamed found the two-parameter model of Attenborough more suitable for these sands than one based on the Delany and Bazley formulations, and that these are the parameters of that model they deduced.",
         "attributedTo": {
           "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
         },
@@ -52402,7 +52402,7 @@ export const catalogues = {
           "name": "Arena gruesa, tamaño de poro 98 μm",
           "variant": "contenido de agua 0 %",
           "group": "Arena",
-          "note": "Primera de cuatro. Una de las cuatro líneas impresas bajo este mismo nombre de superficie, una por contenido de agua; el contenido de agua es lo único que las distingue. La celda de porosidad imprime un guion.",
+          "note": "Primera de cuatro. Una de las cuatro líneas impresas bajo este mismo nombre de superficie, una por contenido de agua; el contenido de agua es lo único que las distingue. La celda de porosidad imprime un guion. El texto del folio 215 (página 272 del PDF) dice que Horoshenkov y Mohamed encontraron más adecuado para estas arenas el modelo de dos parámetros de Attenborough que uno basado en las formulaciones de Delany y Bazley, y que estos son los parámetros de ese modelo que dedujeron.",
           "source": "Cox & D'Antonio 3e Tabla 6.7, páginas 257-258 del PDF (pp. 200-201 impresas)"
         }
       },
@@ -52421,7 +52421,7 @@ export const catalogues = {
         "weave": "",
         "bonding": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
-        "note": "Second of four. One of four lines printed under this one surface name, one per water content; the water content is the only thing that distinguishes them. Porosity cell prints a dash.",
+        "note": "Second of four. One of four lines printed under this one surface name, one per water content; the water content is the only thing that distinguishes them. Porosity cell prints a dash. The text on folio 215 (PDF page 272) says Horoshenkov and Mohamed found the two-parameter model of Attenborough more suitable for these sands than one based on the Delany and Bazley formulations, and that these are the parameters of that model they deduced.",
         "attributedTo": {
           "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
         },
@@ -52461,7 +52461,7 @@ export const catalogues = {
           "name": "Arena gruesa, tamaño de poro 98 μm",
           "variant": "contenido de agua 11 %",
           "group": "Arena",
-          "note": "Segunda de cuatro. Una de las cuatro líneas impresas bajo este mismo nombre de superficie, una por contenido de agua; el contenido de agua es lo único que las distingue. La celda de porosidad imprime un guion.",
+          "note": "Segunda de cuatro. Una de las cuatro líneas impresas bajo este mismo nombre de superficie, una por contenido de agua; el contenido de agua es lo único que las distingue. La celda de porosidad imprime un guion. El texto del folio 215 (página 272 del PDF) dice que Horoshenkov y Mohamed encontraron más adecuado para estas arenas el modelo de dos parámetros de Attenborough que uno basado en las formulaciones de Delany y Bazley, y que estos son los parámetros de ese modelo que dedujeron.",
           "source": "Cox & D'Antonio 3e Tabla 6.7, páginas 257-258 del PDF (pp. 200-201 impresas)"
         }
       },
@@ -52480,7 +52480,7 @@ export const catalogues = {
         "weave": "",
         "bonding": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
-        "note": "Third of four. One of four lines printed under this one surface name, one per water content; the water content is the only thing that distinguishes them. Porosity cell prints a dash.",
+        "note": "Third of four. One of four lines printed under this one surface name, one per water content; the water content is the only thing that distinguishes them. Porosity cell prints a dash. The text on folio 215 (PDF page 272) says Horoshenkov and Mohamed found the two-parameter model of Attenborough more suitable for these sands than one based on the Delany and Bazley formulations, and that these are the parameters of that model they deduced.",
         "attributedTo": {
           "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
         },
@@ -52520,7 +52520,7 @@ export const catalogues = {
           "name": "Arena gruesa, tamaño de poro 98 μm",
           "variant": "contenido de agua 51 %",
           "group": "Arena",
-          "note": "Tercera de cuatro. Una de las cuatro líneas impresas bajo este mismo nombre de superficie, una por contenido de agua; el contenido de agua es lo único que las distingue. La celda de porosidad imprime un guion.",
+          "note": "Tercera de cuatro. Una de las cuatro líneas impresas bajo este mismo nombre de superficie, una por contenido de agua; el contenido de agua es lo único que las distingue. La celda de porosidad imprime un guion. El texto del folio 215 (página 272 del PDF) dice que Horoshenkov y Mohamed encontraron más adecuado para estas arenas el modelo de dos parámetros de Attenborough que uno basado en las formulaciones de Delany y Bazley, y que estos son los parámetros de ese modelo que dedujeron.",
           "source": "Cox & D'Antonio 3e Tabla 6.7, páginas 257-258 del PDF (pp. 200-201 impresas)"
         }
       },
@@ -52539,7 +52539,7 @@ export const catalogues = {
         "weave": "",
         "bonding": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
-        "note": "Fourth of four. One of four lines printed under this one surface name, one per water content; the water content is the only thing that distinguishes them. Porosity cell prints a dash. The flow resistivity falls back at the highest water content, below the 51 % and 11 % lines.",
+        "note": "Fourth of four. One of four lines printed under this one surface name, one per water content; the water content is the only thing that distinguishes them. Porosity cell prints a dash. The flow resistivity falls back at the highest water content, below the 51 % and 11 % lines. The text on folio 215 (PDF page 272) says Horoshenkov and Mohamed found the two-parameter model of Attenborough more suitable for these sands than one based on the Delany and Bazley formulations, and that these are the parameters of that model they deduced.",
         "attributedTo": {
           "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
         },
@@ -52579,7 +52579,7 @@ export const catalogues = {
           "name": "Arena gruesa, tamaño de poro 98 μm",
           "variant": "contenido de agua 95 %",
           "group": "Arena",
-          "note": "Cuarta de cuatro. Una de las cuatro líneas impresas bajo este mismo nombre de superficie, una por contenido de agua; el contenido de agua es lo único que las distingue. La celda de porosidad imprime un guion. La resistividad al flujo vuelve a bajar con el contenido de agua más alto, por debajo de las líneas del 51 % y del 11 %.",
+          "note": "Cuarta de cuatro. Una de las cuatro líneas impresas bajo este mismo nombre de superficie, una por contenido de agua; el contenido de agua es lo único que las distingue. La celda de porosidad imprime un guion. La resistividad al flujo vuelve a bajar con el contenido de agua más alto, por debajo de las líneas del 51 % y del 11 %. El texto del folio 215 (página 272 del PDF) dice que Horoshenkov y Mohamed encontraron más adecuado para estas arenas el modelo de dos parámetros de Attenborough que uno basado en las formulaciones de Delany y Bazley, y que estos son los parámetros de ese modelo que dedujeron.",
           "source": "Cox & D'Antonio 3e Tabla 6.7, páginas 257-258 del PDF (pp. 200-201 impresas)"
         }
       },
@@ -52656,7 +52656,7 @@ export const catalogues = {
         "weave": "",
         "bonding": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
-        "note": "First of four. One of four lines printed under this one surface name, one per water content; the water content is the only thing that distinguishes them. Porosity cell prints a dash.",
+        "note": "First of four. One of four lines printed under this one surface name, one per water content; the water content is the only thing that distinguishes them. Porosity cell prints a dash. The text on folio 215 (PDF page 272) says Horoshenkov and Mohamed found the two-parameter model of Attenborough more suitable for these sands than one based on the Delany and Bazley formulations, and that these are the parameters of that model they deduced.",
         "attributedTo": {
           "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
         },
@@ -52696,7 +52696,7 @@ export const catalogues = {
           "name": "Arena fina, tamaño de poro 65 μm",
           "variant": "contenido de agua 0 %",
           "group": "Arena",
-          "note": "Primera de cuatro. Una de las cuatro líneas impresas bajo este mismo nombre de superficie, una por contenido de agua; el contenido de agua es lo único que las distingue. La celda de porosidad imprime un guion.",
+          "note": "Primera de cuatro. Una de las cuatro líneas impresas bajo este mismo nombre de superficie, una por contenido de agua; el contenido de agua es lo único que las distingue. La celda de porosidad imprime un guion. El texto del folio 215 (página 272 del PDF) dice que Horoshenkov y Mohamed encontraron más adecuado para estas arenas el modelo de dos parámetros de Attenborough que uno basado en las formulaciones de Delany y Bazley, y que estos son los parámetros de ese modelo que dedujeron.",
           "source": "Cox & D'Antonio 3e Tabla 6.7, páginas 257-258 del PDF (pp. 200-201 impresas)"
         }
       },
@@ -52715,7 +52715,7 @@ export const catalogues = {
         "weave": "",
         "bonding": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
-        "note": "Second of four. One of four lines printed under this one surface name, one per water content; the water content is the only thing that distinguishes them. Porosity cell prints a dash.",
+        "note": "Second of four. One of four lines printed under this one surface name, one per water content; the water content is the only thing that distinguishes them. Porosity cell prints a dash. The text on folio 215 (PDF page 272) says Horoshenkov and Mohamed found the two-parameter model of Attenborough more suitable for these sands than one based on the Delany and Bazley formulations, and that these are the parameters of that model they deduced.",
         "attributedTo": {
           "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
         },
@@ -52755,7 +52755,7 @@ export const catalogues = {
           "name": "Arena fina, tamaño de poro 65 μm",
           "variant": "contenido de agua 15 %",
           "group": "Arena",
-          "note": "Segunda de cuatro. Una de las cuatro líneas impresas bajo este mismo nombre de superficie, una por contenido de agua; el contenido de agua es lo único que las distingue. La celda de porosidad imprime un guion.",
+          "note": "Segunda de cuatro. Una de las cuatro líneas impresas bajo este mismo nombre de superficie, una por contenido de agua; el contenido de agua es lo único que las distingue. La celda de porosidad imprime un guion. El texto del folio 215 (página 272 del PDF) dice que Horoshenkov y Mohamed encontraron más adecuado para estas arenas el modelo de dos parámetros de Attenborough que uno basado en las formulaciones de Delany y Bazley, y que estos son los parámetros de ese modelo que dedujeron.",
           "source": "Cox & D'Antonio 3e Tabla 6.7, páginas 257-258 del PDF (pp. 200-201 impresas)"
         }
       },
@@ -52774,7 +52774,7 @@ export const catalogues = {
         "weave": "",
         "bonding": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
-        "note": "Third of four. One of four lines printed under this one surface name, one per water content; the water content is the only thing that distinguishes them. Porosity cell prints a dash.",
+        "note": "Third of four. One of four lines printed under this one surface name, one per water content; the water content is the only thing that distinguishes them. Porosity cell prints a dash. The text on folio 215 (PDF page 272) says Horoshenkov and Mohamed found the two-parameter model of Attenborough more suitable for these sands than one based on the Delany and Bazley formulations, and that these are the parameters of that model they deduced.",
         "attributedTo": {
           "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
         },
@@ -52814,7 +52814,7 @@ export const catalogues = {
           "name": "Arena fina, tamaño de poro 65 μm",
           "variant": "contenido de agua 48 %",
           "group": "Arena",
-          "note": "Tercera de cuatro. Una de las cuatro líneas impresas bajo este mismo nombre de superficie, una por contenido de agua; el contenido de agua es lo único que las distingue. La celda de porosidad imprime un guion.",
+          "note": "Tercera de cuatro. Una de las cuatro líneas impresas bajo este mismo nombre de superficie, una por contenido de agua; el contenido de agua es lo único que las distingue. La celda de porosidad imprime un guion. El texto del folio 215 (página 272 del PDF) dice que Horoshenkov y Mohamed encontraron más adecuado para estas arenas el modelo de dos parámetros de Attenborough que uno basado en las formulaciones de Delany y Bazley, y que estos son los parámetros de ese modelo que dedujeron.",
           "source": "Cox & D'Antonio 3e Tabla 6.7, páginas 257-258 del PDF (pp. 200-201 impresas)"
         }
       },
@@ -52833,7 +52833,7 @@ export const catalogues = {
         "weave": "",
         "bonding": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
-        "note": "Fourth of four. One of four lines printed under this one surface name, one per water content; the water content is the only thing that distinguishes them. Porosity cell prints a dash.",
+        "note": "Fourth of four. One of four lines printed under this one surface name, one per water content; the water content is the only thing that distinguishes them. Porosity cell prints a dash. The text on folio 215 (PDF page 272) says Horoshenkov and Mohamed found the two-parameter model of Attenborough more suitable for these sands than one based on the Delany and Bazley formulations, and that these are the parameters of that model they deduced.",
         "attributedTo": {
           "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
         },
@@ -52873,7 +52873,7 @@ export const catalogues = {
           "name": "Arena fina, tamaño de poro 65 μm",
           "variant": "contenido de agua 95 %",
           "group": "Arena",
-          "note": "Cuarta de cuatro. Una de las cuatro líneas impresas bajo este mismo nombre de superficie, una por contenido de agua; el contenido de agua es lo único que las distingue. La celda de porosidad imprime un guion.",
+          "note": "Cuarta de cuatro. Una de las cuatro líneas impresas bajo este mismo nombre de superficie, una por contenido de agua; el contenido de agua es lo único que las distingue. La celda de porosidad imprime un guion. El texto del folio 215 (página 272 del PDF) dice que Horoshenkov y Mohamed encontraron más adecuado para estas arenas el modelo de dos parámetros de Attenborough que uno basado en las formulaciones de Delany y Bazley, y que estos son los parámetros de ese modelo que dedujeron.",
           "source": "Cox & D'Antonio 3e Tabla 6.7, páginas 257-258 del PDF (pp. 200-201 impresas)"
         }
       },

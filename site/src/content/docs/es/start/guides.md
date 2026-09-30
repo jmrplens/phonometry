@@ -322,8 +322,8 @@ los catálogos publicados.
 - [Tus propios catálogos](/phonometry/es/io/material-catalogues/): una hoja
   de características, un informe de ensayo o una medida tuya como archivo
   de catálogo, leído en las filas que entregan todos los catálogos
-  publicados, buscado con las mismas búsquedas y pasado a los mismos
-  modelos.
+  publicados, buscado con las mismas búsquedas, pasado a los mismos
+  modelos y completado en tu editor con su esquema JSON.
 
 ## [Audición y percepción](/phonometry/es/perception/)
 

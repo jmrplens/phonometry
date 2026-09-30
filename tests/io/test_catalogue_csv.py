@@ -1640,6 +1640,85 @@ def test_an_empty_text_whose_default_says_something_is_refused(
     assert "empty where its default is 'person'" in issue.message
 
 
+def _refused_alone(
+    rows: Mapping[str, io.CatalogueRow], tmp_path: pathlib.Path, **options: object
+) -> io.CatalogueIssue:
+    """The one issue a sheet of *rows* is refused with, nothing written."""
+    with pytest.raises(io.CatalogueError, match="a CSV file cannot hold") as caught:
+        io.write_catalogue(rows, tmp_path / "out.csv", **options)  # type: ignore[arg-type]
+    assert list(tmp_path.iterdir()) == []
+    (issue,) = caught.value.issues
+    return issue
+
+
+def test_an_empty_text_in_a_column_of_your_own_is_refused(
+    tmp_path: pathlib.Path,
+) -> None:
+    """An empty cell reads as a row without the column, so it cannot hold one.
+
+    The sheet was written, and read back without the column, so the entry
+    was lost from the catalogue's extras. The JSON document keeps it.
+    """
+    mine = io.parse_catalogue(
+        _document(**{_B: 0.5, "x-batch": ""}), row_type=AbsorptionSpectrum
+    )
+    assert dict(mine.extras) == {"ceiling-tiles/a": {"x-batch": ""}}
+    issue = _refused_alone(mine, tmp_path)
+    assert (issue.file, issue.location, issue.row_key) == (
+        "out.csv",
+        "/rows/0/x-batch",
+        "a",
+    )
+    assert issue.message == (
+        "x-batch is empty, and an empty CSV cell reads as a row without that "
+        "column of yours; a row that holds an empty text there is written only "
+        "in a JSON catalogue"
+    )
+    io.write_catalogue(mine, tmp_path / "out.json")
+    back = io.read_catalogue(tmp_path / "out.json", row_type=AbsorptionSpectrum)
+    assert dict(back.extras) == dict(mine.extras)
+
+
+@dataclasses.dataclass(frozen=True, kw_only=True)
+class _Batched(AbsorptionSpectrum):
+    """A row class of the caller's own, with a text every row of it needs."""
+
+    batch: str
+
+
+@pytest.mark.parametrize("given", ["a-document", "rows-built-in-python"])
+def test_an_empty_text_in_a_field_every_row_needs_is_refused(
+    tmp_path: pathlib.Path, given: str
+) -> None:
+    """An empty cell reads as a row without the field, which the class needs.
+
+    The sheet was written, and the reader then refused every line of it for
+    the missing field, so the catalogue could not be read back at all.
+    """
+    document = _document(**{_B: 0.5, "batch": ""})
+    document["row_type"] = "_Batched"
+    mine = io.parse_catalogue(document, row_type=_Batched)
+    rows: Mapping[str, _Batched] = mine if given == "a-document" else dict(mine)
+    options: dict[str, object] = {}
+    if given == "rows-built-in-python":
+        options = {"catalogue": "ceiling-tiles", "about": mine.about}
+    assert mine["ceiling-tiles/a"].batch == ""
+    issue = _refused_alone(rows, tmp_path, **options)
+    assert (issue.location, issue.row_key, issue.field) == (
+        "/rows/0/batch",
+        "a",
+        "batch",
+    )
+    assert issue.message == (
+        "batch is empty, and an empty CSV cell reads as a row without batch, "
+        "which every _Batched row needs; a row that holds an empty text there "
+        "is written only in a JSON catalogue"
+    )
+    io.write_catalogue(rows, tmp_path / "out.json", **options)  # type: ignore[arg-type]
+    back = io.read_catalogue(tmp_path / "out.json", row_type=_Batched)
+    assert back["ceiling-tiles/a"] == mine["ceiling-tiles/a"]
+
+
 @pytest.mark.parametrize("given", ["in-the-row", "by-provenance="])
 def test_a_provenance_entry_a_row_empties_is_refused(
     tmp_path: pathlib.Path, given: str
@@ -1662,10 +1741,7 @@ def test_a_provenance_entry_a_row_empties_is_refused(
     row = mine["ceiling-tiles/a"]
     assert row.provenance is not None
     assert row.provenance.page == ""
-    path = tmp_path / "out.csv"
-    with pytest.raises(io.CatalogueError, match="a CSV file cannot hold") as caught:
-        io.write_catalogue(mine, path, provenance=provenance)
-    (issue,) = caught.value.issues
+    issue = _refused_alone(mine, tmp_path, provenance=provenance)
     assert (issue.file, issue.location, issue.row_key) == (
         "out.csv",
         "/rows/0/provenance/page",
@@ -1676,7 +1752,6 @@ def test_a_provenance_entry_a_row_empties_is_refused(
         "CSV cell reads as the document's; a row that clears it is written "
         "only in a JSON catalogue"
     )
-    assert list(tmp_path.iterdir()) == []
     json_path = tmp_path / "out.json"
     io.write_catalogue(mine, json_path, provenance=provenance)
     back = io.read_catalogue(json_path, row_type=AbsorptionSpectrum)

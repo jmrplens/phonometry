@@ -26,7 +26,11 @@ cell takes the document's; ``provenance.page``, ``provenance.printed_table``,
 the row; ``attributed_to.row``, the credit of the row as a whole; and any
 number of columns of the caller's own, named ``x-...``, kept as text. A
 column is named once, and a name the reader does not know is refused with
-the name most like it. The credit of the whole table is the header's own
+the name most like it. An empty cell reads as nothing written: a text field
+takes its default, a provenance entry the document's, and a column of the
+caller's is left out of the row. So the writer writes an empty text only in
+a field whose default is empty, and refuses one anywhere else, which a JSON
+document writes. The credit of the whole table is the header's own
 ``attributed_to``, as in a JSON document, and a column never gives it.
 
 **The cells.** A numeric cell holds one thing, in a closed grammar:
@@ -217,6 +221,28 @@ def _in_json(name: str, subject: str = "") -> str:
     return (
         f"{subject or name} is written only in a JSON catalogue, as "
         f"{_IN_JSON[name]}; a CSV cell holds one value, bound, range or word"
+    )
+
+
+def _empty_text(member: str, default: str | None, row_class: str) -> str:
+    """Why an empty text cannot go into *member*'s cell, and where it goes.
+
+    :param default: The field's default, or ``None`` for a column of the
+        caller's and for a field with none.
+    """
+    if default:
+        return (
+            f"{member} is empty where its default is {default!r}, and an empty "
+            "CSV cell reads as the default; an empty text is written only in a "
+            "JSON catalogue"
+        )
+    if member.startswith("x-"):
+        reads = "a row without that column of yours"
+    else:
+        reads = f"a row without {member}, which every {row_class} row needs"
+    return (
+        f"{member} is empty, and an empty CSV cell reads as {reads}; a row that "
+        "holds an empty text there is written only in a JSON catalogue"
     )
 
 
@@ -1334,16 +1360,16 @@ class _SheetRow:
     def text(self, member: str, value: object, defaults: Mapping[str, str]) -> None:
         """A text or a column of the caller's, written after its formula guard.
 
-        An empty text where the field's default is not empty is refused, as
-        an empty cell reads back as the default.
+        An empty cell reads as nothing written, so an empty text is written
+        only where nothing written reads back as the empty text: in a field
+        whose default is empty. Anywhere else it is refused, as the cell
+        would read back as the field's default, as a row without the
+        caller's column, or as a row without a field its class needs.
         """
-        if value == "" and defaults.get(member):
+        if value == "" and defaults.get(member) != "":
+            row_class = self.names.row_type.__name__
             self.refuse(
-                (member,),
-                f"{member} is empty where its default is {defaults[member]!r}, "
-                "and an empty CSV cell reads as the default; an empty text "
-                "is written only in a JSON catalogue",
-                member,
+                (member,), _empty_text(member, defaults.get(member), row_class), member
             )
         else:
             self.cells[member] = _escape(str(value))

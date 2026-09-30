@@ -1,12 +1,13 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
 """Guards that keep the catalogue reader closed over what the package adds.
 
-Three classes of mistake would slip past the reader's own tests the day they
+Four classes of mistake would slip past the reader's own tests the day they
 are made: a new row class the reader cannot read, from a JSON document or
 from a CSV file; a new kind of field the CSV front end would refuse as an
-unknown column; and a new packaged table whose name a caller's catalogue
-could already hold. Each guard below walks what the package publishes rather
-than a list, so the class is closed.
+unknown column; a new text a CSV file would write as an empty cell that
+reads back as something the row does not say; and a new packaged table
+whose name a caller's catalogue could already hold. Each guard below walks
+what the package publishes rather than a list, so the class is closed.
 """
 
 from __future__ import annotations
@@ -177,6 +178,102 @@ def test_every_field_is_a_csv_column_or_is_sent_where_it_is_written(
         else:
             assert kind == "provenance", where
             assert problem.startswith("a row narrows its provenance"), where
+
+
+#: The document's provenance, every entry a row may narrow filled, so that a
+#: row that empties one says other than its document.
+_FILLED = {
+    "page": "7",
+    "printed_table": "Table 1",
+    "laboratory": "Example Lab",
+    "accreditation": "ENAC 0/LE000",
+    "report": "R-1",
+    "test_date": "2026-01-02",
+    "test_standard": "ISO 354:2003",
+}
+
+
+def _empty_texts(cls: type[io.CatalogueRow]) -> list[tuple[str, dict[str, object]]]:
+    """Each text a row of *cls* may hold empty, by its pointer in the row.
+
+    Every text field but the two the library composes, a column of the
+    caller's, and every entry of the provenance a row narrows.
+    """
+    kinds = private.field_kinds(cls)
+    cases: list[tuple[str, dict[str, object]]] = [
+        (name, {name: ""})
+        for name, kind in kinds.items()
+        if kind == "text" and name not in ("source", "table")
+    ]
+    cases.append(("x-batch", {"x-batch": ""}))
+    cases += [(f"provenance/{entry}", {"provenance": {entry: ""}}) for entry in _FILLED]
+    return cases
+
+
+def _sheet_of(
+    cls: type[io.CatalogueRow], row: dict[str, object], folder: pathlib.Path
+) -> tuple[io.Catalogue[io.CatalogueRow], tuple[pathlib.Path, ...]] | None:
+    """The one-row catalogue *row* reads into and the sheet written of it.
+
+    ``None`` when the JSON reader refuses the row, which then holds no such
+    empty text to write: a row with no name, and nothing else, as the guard
+    holds.
+
+    :raises CatalogueError: for what the CSV writer refuses.
+    """
+    document = {
+        "schema": "phonometry-catalogue",
+        "schema_version": 1,
+        "catalogue": "guard",
+        "row_type": cls.__name__,
+        "about": "One row, to show what an empty text does in a sheet.",
+        "provenance": {
+            "kind": "test_report",
+            "document": "A test of the writer",
+            "version": None,
+            "consulted": "2026-09-30",
+            **_FILLED,
+        },
+        "rows": [row],
+    }
+    try:
+        mine = io.parse_catalogue(document, row_type=cls)
+    except io.CatalogueError:
+        return None
+    folder.mkdir()
+    return mine, io.write_catalogue(mine, folder / "guard.csv")
+
+
+@pytest.mark.parametrize("cls", ROW_CLASSES, ids=lambda cls: cls.__name__)
+def test_every_empty_text_reads_back_from_a_sheet_or_is_refused_there(
+    cls: type[io.CatalogueRow], tmp_path: pathlib.Path
+) -> None:
+    """Guard (e): an empty cell never reads back as what the row did not say.
+
+    An empty cell reads as nothing written: a text field takes its default,
+    a provenance entry the document's, and a column of the caller's is left
+    out. Each text a row may hold is emptied in turn, and the sheet either
+    reads back as the rows read from the document or is refused at that
+    text's pointer, with nothing written.
+    """
+    unread = []
+    for index, (where, change) in enumerate(_empty_texts(cls)):
+        folder = tmp_path / str(index)
+        try:
+            written = _sheet_of(cls, {**_one_row(cls), **change}, folder)
+        except io.CatalogueError as refused:
+            pointers = [issue.location for issue in refused.issues]
+            assert pointers == [f"/rows/0/{where}"], where
+            assert list(folder.iterdir()) == [], where
+            continue
+        if written is None:
+            unread.append(where)
+            continue
+        mine, paths = written
+        back = io.read_catalogue(paths[0], row_type=cls)
+        assert dict(back) == dict(mine), where
+        assert dict(back.extras) == dict(mine.extras), where
+    assert unread == ["name"]
 
 
 def _data_files() -> list[pathlib.Path]:

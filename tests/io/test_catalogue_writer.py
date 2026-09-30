@@ -467,8 +467,9 @@ def test_a_file_made_at_the_name_while_it_is_written_is_kept(
     """
     path = tmp_path / "mine.json"
     _made_while_written(monkeypatch, path)
+    mine = _mine()
     with pytest.raises(FileExistsError, match=_KEPT):
-        io.write_catalogue(_mine(), path)
+        io.write_catalogue(mine, path)
     monkeypatch.undo()
     _kept_alone(tmp_path)
     path.unlink()
@@ -502,8 +503,9 @@ def test_without_hard_links_a_file_made_before_the_name_is_taken_is_kept(
     assert [item.name for item in tmp_path.iterdir()] == ["mine.json"]
     path.unlink()
     _made_while_written(monkeypatch, path)
+    mine = _mine()
     with pytest.raises(FileExistsError, match=_KEPT):
-        io.write_catalogue(_mine(), path)
+        io.write_catalogue(mine, path)
     monkeypatch.undo()
     _kept_alone(tmp_path)
 
@@ -550,8 +552,9 @@ def test_without_hard_links_a_failed_rename_leaves_nothing_behind(
         raise OSError(errno.EIO, "Input/output error", str(target))
 
     monkeypatch.setattr(pathlib.Path, "replace", refuse)
+    mine = _mine()
     with pytest.raises(OSError, match="Input/output error"):
-        io.write_catalogue(_mine(), tmp_path / "mine.json")
+        io.write_catalogue(mine, tmp_path / "mine.json")
     assert list(tmp_path.iterdir()) == []
 
 
@@ -574,8 +577,9 @@ def test_without_hard_links_a_file_renamed_over_the_taken_name_is_kept(
         raise OSError(errno.EIO, "Input/output error", str(target))
 
     monkeypatch.setattr(pathlib.Path, "replace", theirs_then_fail)
+    mine = _mine()
     with pytest.raises(OSError, match="Input/output error"):
-        io.write_catalogue(_mine(), path)
+        io.write_catalogue(mine, path)
     monkeypatch.undo()
     _kept_alone(tmp_path)
 
@@ -603,8 +607,9 @@ def test_without_hard_links_a_link_made_at_the_name_is_kept(
         pytest.skip("this system does not let the test make a symbolic link")
     (tmp_path / "probe").unlink()
     monkeypatch.setattr(os, "fsync", and_a_link)
+    mine = _mine()
     with pytest.raises(FileExistsError, match=_KEPT):
-        io.write_catalogue(_mine(), path)
+        io.write_catalogue(mine, path)
     monkeypatch.undo()
     assert path.is_symlink()
     assert [item.name for item in tmp_path.iterdir()] == ["mine.json"]
@@ -628,8 +633,9 @@ def test_on_windows_a_link_made_at_the_name_is_kept(
         pytest.skip("this system does not let the test make a symbolic link")
     (tmp_path / "probe").unlink()
     monkeypatch.setattr(os, "fsync", and_a_link)
+    mine = _mine()
     with pytest.raises(FileExistsError, match=_KEPT):
-        io.write_catalogue(_mine(), path)
+        io.write_catalogue(mine, path)
     monkeypatch.undo()
     assert path.is_symlink()
     assert [item.name for item in tmp_path.iterdir()] == ["mine.json"]
@@ -651,8 +657,9 @@ def test_on_windows_the_rename_refuses_a_file_made_at_the_name(
     monkeypatch.setattr(os, "rename", windows_rename)
     path = tmp_path / "mine.json"
     _made_while_written(monkeypatch, path)
+    mine = _mine()
     with pytest.raises(FileExistsError, match=_KEPT):
-        io.write_catalogue(_mine(), path)
+        io.write_catalogue(mine, path)
     monkeypatch.undo()
     _kept_alone(tmp_path)
 

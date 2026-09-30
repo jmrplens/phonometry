@@ -75,6 +75,9 @@ _WINDOWS = sys.platform == "win32"
 #: give EPERM on Linux and ENOTSUP on macOS, and some network shares and
 #: FUSE file systems give EOPNOTSUPP or ENOSYS.
 _NO_HARD_LINKS = frozenset({errno.EPERM, errno.ENOTSUP, errno.EOPNOTSUPP, errno.ENOSYS})
+#: How the name is taken where no hard link is made: a new file, made only
+#: where nothing is at the name, a link that names nothing among them.
+_RESERVE = os.O_CREAT | os.O_EXCL | os.O_WRONLY | getattr(os, "O_NOFOLLOW", 0)
 
 #: The flag that keeps an open from waiting: opening a pipe for reading waits
 #: until a writer comes, which may be never. Windows has no such flag.
@@ -188,7 +191,10 @@ def write_beside(target: Path, data: bytes, *, replace: bool = True) -> None:
     :param target: Where the file goes.
     :param data: Its bytes.
     :param replace: Whether a file at *target* is replaced; without it,
-        anything at the name when the new file is put there is kept.
+        anything at the name when the new file is put there is kept. On a
+        file system that makes no hard link, a reader of the name may then
+        find an empty file of the writer's own there for the instant before
+        the new file is renamed over it.
     :raises FileExistsError: without *replace*, for anything at *target*
         when the new file is put there, the new file removed.
     :raises OSError: as the file system raises it, untouched, for any
@@ -261,10 +267,9 @@ def _install(temporary: Path, target: Path) -> None:
     file is linked at the name, which fails for anything there (a link that
     names nothing among them), and its temporary name is then removed; one
     that cannot be removed is left beside the file rather than raised, since
-    the file is in place and the write is done. A file system that makes no hard
-    link (FAT and exFAT, some network shares) is asked once more whether the
-    name is free, just before the rename: there a file made at the name in
-    the instant between the two is replaced, and one made before is kept.
+    the file is in place and the write is done. A file system that makes no
+    hard link (FAT and exFAT, some network shares) has the name taken first,
+    by :func:`_install_over_reserved`.
 
     :raises FileExistsError: for anything at *target*.
     :raises OSError: as the file system raises it, untouched.
@@ -277,14 +282,57 @@ def _install(temporary: Path, target: Path) -> None:
     except OSError as error:
         if error.errno not in _NO_HARD_LINKS:
             raise
-        if os.path.lexists(target):
-            raise FileExistsError(
-                errno.EEXIST, os.strerror(errno.EEXIST), str(target)
-            ) from None
-        temporary.replace(target)
+        _install_over_reserved(temporary, target)
         return
     with contextlib.suppress(OSError):
         temporary.unlink()
+
+
+def _install_over_reserved(temporary: Path, target: Path) -> None:
+    """Take *target* with an empty file of the writer's own, then rename over it.
+
+    The empty file is made only where nothing is at the name, a link that
+    names nothing among them, in the one step that looks and makes, so a
+    file made at the name by another program before it is kept and refused,
+    and none can be made there after. The new file is then renamed over the
+    empty one. A reader of the name may find the empty file for the instant
+    between the two. When anything fails after the name is taken, the empty
+    file is removed while it is still the one the writer made, and a file
+    another program has renamed over it by then is left as it is.
+
+    :raises FileExistsError: for anything at *target*.
+    :raises OSError: as the file system raises it, untouched.
+    """
+    handle = os.open(target, _RESERVE, 0o666)
+    try:
+        reserved = os.fstat(handle)
+    finally:
+        os.close(handle)
+    try:
+        temporary.replace(target)
+    except BaseException as error:
+        _release(target, (reserved.st_dev, reserved.st_ino), error)
+        raise
+
+
+def _release(target: Path, reserved: tuple[int, int], error: BaseException) -> None:
+    """Remove the empty file at *target* while it is the one *reserved* names.
+
+    A failure to remove it is noted on *error*, which is what the caller is
+    told, rather than raised in its place.
+    """
+    try:
+        found = target.lstat()
+    except OSError:
+        return
+    if (found.st_dev, found.st_ino) != reserved:
+        return
+    try:
+        target.unlink()
+    except OSError as kept:
+        error.add_note(
+            f"{escaped(str(target))} could not be removed and is left behind: {kept}"
+        )
 
 
 def _discard(temporary: Path, error: BaseException) -> None:

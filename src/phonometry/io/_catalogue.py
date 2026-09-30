@@ -2367,9 +2367,10 @@ def write_catalogue(
     name is kept, one another program makes there while this one is written
     among them: the new file is put at the name in a step that refuses a
     file already there, a hard link on POSIX and a rename on Windows. On a
-    file system that makes no hard link, such as FAT, the name is looked at
-    again just before the rename, and only a file made in that instant is
-    replaced.
+    file system that makes no hard link, such as FAT, the name is first
+    taken by an empty file, made only where nothing is there, and the new
+    file is renamed over it, so a reader of the name may find that empty
+    file for the instant between the two.
 
     :param rows: A :class:`Catalogue`, or a mapping of rows of one class.
     :param path: Where to write, a name ending in ``.json`` (in any case).
@@ -2388,8 +2389,10 @@ def write_catalogue(
         need and do not bring.
     :raises ValueError: for a name that does not end in ``.json``.
     :raises FileExistsError: for a file at *path* without *overwrite*, one
-        made there while the file is written among them, and for a symbolic
-        link at *path*.
+        made there while the file is written among them (where no hard link
+        is made, the name holds an empty file of the writer's own for the
+        instant before the new one is in place), and for a symbolic link at
+        *path*.
     """
     target = _json_path(path, "write_catalogue writes")
     if not isinstance(rows, Mapping):

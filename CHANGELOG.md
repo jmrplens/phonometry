@@ -52,7 +52,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   to start from; every table of every published catalogue is written, read
   back and compared field for field in the test suite. A file already at the
   name is kept unless you pass `overwrite=True`, and so is one another
-  program makes there while the file is written. The `io` section of the
+  program makes there while the file is written; on a file system without
+  hard links, such as FAT, the name holds an empty file for the instant
+  before the new one is renamed over it. The `io` section of the
   documentation is now "Files", since it holds more than audio.
 
 - **Sound power in the 16 kHz octave band (ISO 9295).** The general sound

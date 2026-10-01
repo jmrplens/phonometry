@@ -93,6 +93,10 @@ arrives.
 - [Sound reflection of a noise barrier in situ](https://jmrplens.github.io/phonometry/environment/propagation/barrier-reflection/):
   the barrier measured where it stands: the sound reflection index of EN 1793-5
   and its single number DL_RI.
+- [Quality of Outdoor Sound Software (ISO 17534-1)](https://jmrplens.github.io/phonometry/environment/propagation/software-quality/):
+  a program's results against the limits of its certified test cases, the
+  quantiles of the level differences a modified configuration introduces, and
+  the precision of a method across programs.
 
 ## [Environmental sources](https://jmrplens.github.io/phonometry/environment/sources/)
 

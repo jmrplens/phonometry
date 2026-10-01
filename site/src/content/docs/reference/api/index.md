@@ -259,6 +259,7 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | [`environment.propagation.noise_reducing_devices`](/phonometry/reference/api/environment/noise-reducing-devices/) | Single-number ratings of noise reducing devices (EN 1793, EN 16272). |
 | [`environment.propagation.barrier_in_situ`](/phonometry/reference/api/environment/barrier-in-situ/) | What a barrier by the road is worth, measured (ISO 10847:1997). |
 | [`environment.propagation.barrier_reflection`](/phonometry/reference/api/environment/barrier-reflection/) | What a noise barrier sends back across the road, measured where it stands (EN 1793-5:2016). |
+| [`environment.propagation.software_quality`](/phonometry/reference/api/environment/software-quality/) | Quality assurance of software for outdoor sound: a program's results against the certified ones, and the spread of level differences (ISO 17534-1:2015). |
 | [`environment.propagation.refraction`](/phonometry/reference/api/environment/refraction/) | Atmospheric refraction: ray tracing and the parabolic equation (PE). |
 | [`environment.propagation.air_absorption`](/phonometry/reference/api/environment/air-absorption/) | Atmospheric absorption of sound: ISO 9613-1:1993. |
 | [`environment.sources.cnossos_rail`](/phonometry/reference/api/environment/cnossos-rail/) | CNOSSOS-EU railway source emission (Directive 2002/49/EC Annex II, 2.3). |

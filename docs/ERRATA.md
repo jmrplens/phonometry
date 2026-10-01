@@ -2692,6 +2692,34 @@ in the same order.
   implements $q$ from footnote 2, which is what reproduces the printed 0,23.
 - **Status:** unreported.
 
+## ISO/TR 17534-3:2015, Table 69 (the worked TRC form answers "yes" for a result below its lower limit)
+
+- **Location:** Table 69, "Example of a TRC-form based on test case 1", the
+  row of test case T01 at 250 Hz.
+- **The print:** upper limit 31,15, lower limit 31,05, software calculation
+  result (exemplary) 31,0, and "yes" in the column "Result inside
+  tolerances".
+- **The problem:** 31,0 dB lies 0,05 dB below the lower limit 31,05 dB, so
+  the row answers "yes" for a result outside its interval. The interval itself
+  is right: Table 4, the spectral step-by-step results of T01, certifies
+  $L_A = 31{,}10$ dB at 250 Hz, and 31,05 to 31,15 is that result ±0,05 dB.
+  Every other row of the form carries its certified result to one decimal,
+  and each of them is inside: seven rounded, among them 13,70 as 13,7,
+  23,76 as 23,8 and the total 44,29 as 44,3, and the 1 000 Hz row cut
+  down, 38,95 printed as 38,9 on its lower limit of 38,90, where rounding
+  gives 39,0. Rounded or cut,
+  31,10 to one decimal is 31,1, and the exemplary result was most likely
+  meant to read 31,1.
+- **Evidence:** read on PDF page 59 (printed p. 53) of ISO/TR 17534-3:2015,
+  first edition, with Table 4 on PDF page 14 (printed p. 8) of the same
+  edition.
+- **Library behaviour:** unaffected, since the library never reads Table 69.
+  Given the nine rows of the form,
+  [`verify_calculation_results`](../src/phonometry/environment/propagation/software_quality.py)
+  answers "no" for the 250 Hz row alone, which
+  `test_table_69_of_iso_tr_17534_3_fails_only_at_250_hz` pins.
+- **Status:** unreported.
+
 ## VDI 2081 Blatt 1:2001, Section 6.7.3 (the symbol list of Equation (36) sends A back to Equation (36))
 
 - **Location:** Section 6.7.3, the symbol list under Equation (36), the entry

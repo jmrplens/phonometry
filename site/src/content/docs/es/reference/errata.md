@@ -2926,6 +2926,34 @@ dos ediciones con las mismas entradas y en el mismo orden.
   impreso.
 - **Estado:** sin notificar.
 
+## ISO/TR 17534-3:2015, Tabla 69 (el formulario TRC resuelto responde «yes» a un resultado por debajo de su límite inferior)
+
+- **Ubicación:** Tabla 69, «Example of a TRC-form based on test case 1», la
+  fila del caso de prueba T01 en 250 Hz.
+- **Lo impreso:** límite superior 31,15, límite inferior 31,05, resultado del
+  software (de ejemplo) 31,0, y «yes» en la columna «Result inside
+  tolerances».
+- **El problema:** 31,0 dB queda 0,05 dB por debajo del límite inferior
+  31,05 dB, así que la fila responde «yes» a un resultado fuera de su
+  intervalo. El intervalo en sí es correcto: la Tabla 4, los resultados
+  espectrales paso a paso del T01, certifica $L_A = 31{,}10$ dB en 250 Hz, y de
+  31,05 a 31,15 es ese resultado ±0,05 dB. Todas las demás filas del
+  formulario llevan su resultado certificado con un decimal, y todas quedan
+  dentro: siete redondeadas, entre ellas 13,70 como 13,7, 23,76 como 23,8 y
+  el total 44,29 como 44,3, y la de 1 000 Hz truncada, 38,95 impreso como
+  38,9 sobre su límite inferior de 38,90, donde el redondeo da 39,0. Redondeado o truncado, 31,10
+  con un decimal es 31,1, y lo más probable es que el resultado de ejemplo
+  debiera decir 31,1.
+- **Evidencia:** leído en la página 59 del PDF (p. 53 impresa) de
+  ISO/TR 17534-3:2015, primera edición, con la Tabla 4 en la página 14 del PDF
+  (p. 8 impresa) de la misma edición.
+- **Comportamiento de la biblioteca:** no le afecta, porque la biblioteca no
+  lee nunca la Tabla 69. Con las nueve filas del formulario,
+  [`verify_calculation_results`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/environment/propagation/software_quality.py)
+  responde «no» solo en la fila de 250 Hz, lo que fija
+  `test_table_69_of_iso_tr_17534_3_fails_only_at_250_hz`.
+- **Estado:** sin notificar.
+
 ## VDI 2081 Blatt 1:2001, apartado 6.7.3 (la lista de símbolos de la ecuación (36) remite A a la propia ecuación (36))
 
 - **Ubicación:** apartado 6.7.3, la lista de símbolos bajo la ecuación (36), la

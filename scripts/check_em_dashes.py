@@ -41,6 +41,8 @@ import re
 import sys
 import tokenize
 
+from markdown_fences import code_lines
+
 EM_DASH = "—"
 
 #: Where the published prose lives: the pages and their mirrors, the package
@@ -208,24 +210,18 @@ def _strip_exempt_markdown(
 def markdown_hits(text: str) -> list[int]:
     """The 1-based lines of a markdown or MDX page that carry a prose dash."""
     hits: list[int] = []
-    in_fence = False
-    fence = ""
     italic_open = False
     quote_closer: str | None = None
     in_reference = False
     caption = False
     opening = True
-    for number, line in enumerate(text.splitlines(), start=1):
+    lines = text.splitlines()
+    for number, (line, code) in enumerate(
+        zip(lines, code_lines(lines), strict=True), start=1
+    ):
+        if code:
+            continue
         stripped = line.lstrip()
-        if stripped.startswith(("```", "~~~")):
-            marker = stripped[:3]
-            if not in_fence:
-                in_fence, fence = True, marker
-            elif marker == fence:
-                in_fence = False
-            continue
-        if in_fence:
-            continue
         if not stripped:
             italic_open = False
             quote_closer = None

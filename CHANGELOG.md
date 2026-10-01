@@ -531,6 +531,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   order's, set for 80 % relative humidity where the caption says 70 %. That
   row and eight other printed defects of the TS are in the errata register,
   among them the 10 °C, 80 % row of Table 7, computed at −10 °C and 80 %.
+
+- **Quality requirements for outdoor sound software (ISO 17534-1).** A noise
+  map is computed by a program, often in a faster configuration than the
+  method describes, and ISO 17534-1:2015 says how that program shows it
+  implements its method and what the shortcuts cost. The new
+  `environment.propagation.software_quality` module is the arithmetic of it.
+  `verify_calculation_results` fills the "Result inside tolerances" column of
+  the TRC form of Annex B: each result a program computes in its reference
+  configuration against the limits of the certified result, a limit
+  included, with `CERTIFIED_RESULT_TOLERANCE_DB` the 0.05 dB of Table A.5;
+  the verdict carries `passes` and refuses to stand in for a boolean.
+  `level_difference_quantiles` reads the 0.1- and 0.9-quantiles of Annex C
+  off a sample of level differences between a modified configuration and the
+  reference one, with the mean and the estimated standard deviation of C.5,
+  at the ranking positions of `ranking_positions`: Table C.1
+  (`RANKING_POSITIONS`) from 20 to 50 values and Formulas (C.1) and (C.2)
+  above. The table is symmetric and Formula (C.2) is not, so the two rules
+  give different ranks for N ending in 1 to 5 and jump at 51 values. Neither
+  ISO 17534-1 nor DIN 45687:2006-05, from which Annex C was taken, says
+  whether that seam is deliberate, and both print (C.2) the same way, so the
+  function applies the print. VDI 3723 Blatt 1:1993-05, the source of the
+  table, prints the same 31 rows, symmetric, and stops at 50 values without
+  a formula; the docstring and the guide set out what the three documents do
+  say and why the seam is neither corrected nor recorded as an erratum.
+  `uniform_sample_indices` takes the sample of C.2, leaving out the points
+  closer than 2 m to a source or an obstacle and warning with
+  `SoftwareQualityWarning` below the 1:100 ratio C.2 recommends;
+  `contour_sample_chainages_m` places the points of C.3 on the length of
+  contour left once the sections within 2 m are removed; and
+  `round_robin_precision` gives the 0.9-quantile of the largest deviations
+  from the mean at each receiver that 4.5.2 names as the result of a round
+  robin of programs. Every result has `.plot()`, and a new guide in both
+  languages runs the TRC form on this library's own ISO 9613-2 chain with
+  test case T03 of ISO/TR 17534-3. Eight conformance rows pin both columns
+  of Table C.1, the same ranks read in Tables 5 and 6 of VDI 3723 Blatt 1,
+  the formulas from 51 to 1000 values, the worked example of C.4 and the TRC
+  form of Table B.2. The errata registry gains
+  Table 69 of ISO/TR 17534-3, whose worked TRC form answers "yes" for a
+  250 Hz result below its lower limit.
+
 - **Sound power in the 16 kHz octave band (ISO 9295).** The general sound
   power methods stop at the 10 kHz one-third-octave band, and a printer's
   paper noise or a power supply's whine sits above it. The new

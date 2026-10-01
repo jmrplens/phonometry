@@ -19,7 +19,7 @@
 
 ## Numerical conformance report
 
-**1640/1640 conformance checks pass** across 103 domains and 504 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+**1648/1648 conformance checks pass** across 104 domains and 506 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub><b>&#916;</b> is the difference between the computed value and the one the standard publishes. <b>Used</b> is how much of that clause's published tolerance the difference consumes: 100 % means it sits exactly on the limit, 5 % means it uses a twentieth of the allowance, and a dash means the clause states no two-sided tolerance for the quantity, so there is no budget to spend. It is reported and never used to decide a verdict, which is settled at full precision before any rounding.</sub>
 
@@ -778,6 +778,22 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO/TR 17534-3:2015 Table 14 (T06) | Straight-line path length d3, m | 194.6 m (+/-0.005 m) | 194.6 m | 0 m | 8 % | ![Pass][cv-pass] Pass |
 | ISO/TR 17534-3:2015 Table 17 (T05) | Mean path height hm over flat ground, m | 2.5 m (+/-0.005 m) | 2.4997 m | -0.0003 m | 6 % | ![Pass][cv-pass] Pass |
 | ISO/TR 17534-3:2015 Table 17 (T07) | Mean path height hm over a slope, m | 4.99 m (+/-0.005 m) | 4.9888 m | -0.0012 m | 24 % | ![Pass][cv-pass] Pass |
+
+</details>
+
+<details>
+<summary><b>Outdoor sound software quality assurance (ISO 17534-1)</b>: 100% (8/8)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
+|:---|:---|:---|:---|:---|:---:|:---:|
+| ISO 17534-1:2015 Table C.1 | Ranking position R(q0,1) of the 0,1-quantile, N = 20 to 50 | 31/31 rows of Table C.1 | 31/31 rows of Table C.1 | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 17534-1:2015 Table C.1 | Ranking position R(q0,9) of the 0,9-quantile, N = 20 to 50 | 31/31 rows of Table C.1 | 31/31 rows of Table C.1 | exact | 0 % | ![Pass][cv-pass] Pass |
+| VDI 3723 Blatt 1:1993-05 Tables 5 and 6 | Ranking positions of L_x,90 and L_x,10, the source of Table C.1, N = 20 to 50 | 31/31 rows of Tables 5 and 6 | 31/31 rows of Tables 5 and 6 | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 17534-1:2015 Formulas (C.1) and (C.2) | Ranking positions above 50 values, N = 51 to 1000 | 950/950 sample sizes | 950/950 sample sizes | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 17534-1:2015 C.4, EXAMPLE | Ranking positions of 25 level differences | R(q0,1) = 2; R(q0,9) = 24 | R(q0,1) = 2; R(q0,9) = 24 | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 17534-1:2015 C.4, EXAMPLE | Quantiles q0,1 and q0,9 of 25 level differences, dB | q0,1 = -1 dB; q0,9 = 3 dB | q0,1 = -1 dB; q0,9 = 3 dB | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 17534-1:2015 Table B.2 | Result inside tolerances, eight octave bands and the total of test case T XX | 9/9 rows answered "yes" | 9/9 rows answered "yes" | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 17534-1:2015 Table A.5, note a; Table B.2 | Width of each certified interval, twice the 0,05 dB tolerance | 9/9 rows of Table B.2 | 9/9 rows of Table B.2 | exact | 0 % | ![Pass][cv-pass] Pass |
 
 </details>
 

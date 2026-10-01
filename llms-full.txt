@@ -1,8 +1,8 @@
 # phonometry
 
-> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1640 numerical conformance checks against 504 standards enforced in CI.
+> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1648 numerical conformance checks against 506 standards enforced in CI.
 
-phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1640 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 103 domains.
+phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1648 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 104 domains.
 
 The project was published as **PyOctaveBand** until version 3.0.0. Third-party references and dependency pins still using that name refer to this library.
 
@@ -279,6 +279,7 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 - [Spherical ground effect and advanced barriers (Attenborough / Salomons / Bies)](https://jmrplens.github.io/phonometry/environment/propagation/ground-barriers/)
 - [Atmospheric refraction: ray tracing and the parabolic equation (Salomons / Attenborough)](https://jmrplens.github.io/phonometry/environment/propagation/atmospheric-refraction/)
 - [Sound reflection of a noise barrier in situ (EN 1793-5)](https://jmrplens.github.io/phonometry/environment/propagation/barrier-reflection/)
+- [Quality of outdoor sound software (ISO 17534-1)](https://jmrplens.github.io/phonometry/environment/propagation/software-quality/)
 
 ### Environmental sources
 
@@ -532,6 +533,7 @@ The generated API reference, one page per module. Fetch these only when a specif
 - [environment/outdoor-propagation](https://jmrplens.github.io/phonometry/reference/api/environment/outdoor-propagation/)
 - [environment/rating](https://jmrplens.github.io/phonometry/reference/api/environment/rating/)
 - [environment/refraction](https://jmrplens.github.io/phonometry/reference/api/environment/refraction/)
+- [environment/software-quality](https://jmrplens.github.io/phonometry/reference/api/environment/software-quality/)
 - [environment/soundscape](https://jmrplens.github.io/phonometry/reference/api/environment/soundscape/)
 - [environment/soundscape-binaural](https://jmrplens.github.io/phonometry/reference/api/environment/soundscape-binaural/)
 - [environment/spain](https://jmrplens.github.io/phonometry/reference/api/environment/spain/)
@@ -29709,6 +29711,10 @@ arrives.
 - [Sound reflection of a noise barrier in situ](https://jmrplens.github.io/phonometry/environment/propagation/barrier-reflection/):
   the barrier measured where it stands: the sound reflection index of EN 1793-5
   and its single number DL_RI.
+- [Quality of Outdoor Sound Software (ISO 17534-1)](https://jmrplens.github.io/phonometry/environment/propagation/software-quality/):
+  a program's results against the limits of its certified test cases, the
+  quantiles of the level differences a modified configuration introduces, and
+  the precision of a method across programs.
 
 ## [Environmental sources](https://jmrplens.github.io/phonometry/environment/sources/)
 
@@ -31079,9 +31085,11 @@ Source: https://jmrplens.github.io/phonometry/environment/propagation/
 # Outdoor sound
 
 This section is the **path**: what happens to a sound between a source of known
-power and a receiver hundreds of metres away. Three of its pages go from the
-engineering method down to the physics it approximates, and then to the one
-thing both of them assume does not happen.
+power and a receiver hundreds of metres away. Its first three pages go from
+the engineering method down to the physics it approximates, and then to the
+one thing both of them assume does not happen; the fourth measures the barrier
+itself, and the fifth asks whether the program that computes the method
+computes it correctly.
 
 [Outdoor Sound Propagation](https://jmrplens.github.io/phonometry/environment/propagation/outdoor-propagation/) is the
 engineering method. Starting from a source's **sound power**, ISO 9613-2
@@ -31128,6 +31136,17 @@ a road barrier where it stands, to the sound reflection index band by band and
 to its single number DL_RI, the in-place counterpart of the absorption rating
 the product is declared by.
 
+[Quality of Outdoor Sound Software (ISO 17534-1)](https://jmrplens.github.io/phonometry/environment/propagation/software-quality/)
+turns from the physics to the program. A noise map is computed by software,
+often in a faster "modified configuration" that neglects paths and
+interpolates between grid points, and two programs implementing the same
+method need not agree. ISO 17534-1 checks a program's results against the
+limits of a method's certified test cases (the TRC form, with ISO/TR 17534-3
+supplying the cases for ISO 9613-2), and measures what the faster
+configuration costs by the 0,1- and 0,9-quantiles of a sample of level
+differences. Open it when a map has to carry a statement of its own
+uncertainty.
+
 The rating that a predicted level ends in is not here:
 the period levels come from [Integrated and Statistical
 Levels](https://jmrplens.github.io/phonometry/signals/levels/levels/), and Lden, Ldn and the rating level
@@ -31154,6 +31173,10 @@ for a machine, and in [Aircraft noise](https://jmrplens.github.io/phonometry/air
 - [Sound reflection of a noise barrier in situ](https://jmrplens.github.io/phonometry/environment/propagation/barrier-reflection/):
   the sound reflection index of EN 1793-5 measured in front of a road barrier,
   with the signal subtraction, the Adrienne window and the single number DL_RI.
+- [Quality of Outdoor Sound Software (ISO 17534-1)](https://jmrplens.github.io/phonometry/environment/propagation/software-quality/):
+  a program's results against the limits of its certified test cases, the
+  quantiles of the level differences a modified configuration introduces, and
+  the precision of a method across programs.
 
 ## See also
 
@@ -31187,7 +31210,8 @@ and the wave-acoustic and refraction pages assume a non-turbulent atmosphere
 outright. Nothing on these pages produces an environmental rating: no Lden, no
 limit value and no verdict on a site (those are [Assessment and
 regulation](https://jmrplens.github.io/phonometry/environment/assessment/)); the single number and the
-position check of EN 1793-5 are about a product and its measurement.
+position check of EN 1793-5 are about a product and its measurement, and the
+TRC form of ISO 17534-1 judges a program, not a site.
 
 ---
 
@@ -31714,6 +31738,12 @@ Thirty-four conformance rows hold the seven cases to the document's own
 envelope, band by band and on both totals. The worst deviation over all of them
 is 0,012 dB, a quarter of what the report allows.
 
+The comparison itself, each result against the limits of its certified result
+as the TRC form of ISO 17534-1 records it, is `verify_calculation_results`,
+and what a faster configuration of a mapping program costs is measured by the
+quantiles of Annex C of the same standard: both are in [Quality of outdoor
+sound software (ISO 17534-1)](https://jmrplens.github.io/phonometry/environment/propagation/software-quality/).
+
 ## 4. Scope, assumptions and pitfalls
 
 ### What "favourable propagation conditions" means
@@ -31895,6 +31925,7 @@ against the exact half-plane and coherent-ground models.
 
 - [Spherical ground effect and advanced barriers](https://jmrplens.github.io/phonometry/environment/propagation/ground-barriers/): the wave acoustics underneath the Table 3 ground fit and the Eq. (14) screening curve.
 - [Atmospheric refraction](https://jmrplens.github.io/phonometry/environment/propagation/atmospheric-refraction/): what the favourable-condition assumption and $C_\mathrm{met}$ stand in for.
+- [Quality of outdoor sound software (ISO 17534-1)](https://jmrplens.github.io/phonometry/environment/propagation/software-quality/): the TRC form a program's results are checked with, and the quantiles that say what a faster configuration of a mapping program costs.
 - [CNOSSOS-EU road emission](https://jmrplens.github.io/phonometry/environment/sources/cnossos-road-emission/) and [CNOSSOS-EU rail emission](https://jmrplens.github.io/phonometry/environment/sources/cnossos-rail-emission/): the source strengths the comparison in section 4 refers to.
 - [Environmental noise levels](https://jmrplens.github.io/phonometry/environment/assessment/environmental-levels/): what happens to the predicted level once it becomes an assessed one.
 - API reference: [`environment.propagation.outdoor_propagation`](https://jmrplens.github.io/phonometry/reference/api/environment/outdoor-propagation/) and [`environment.propagation.air_absorption`](https://jmrplens.github.io/phonometry/reference/api/environment/air-absorption/).
@@ -31968,6 +31999,481 @@ ISO 354:2003, *Acoustics — Measurement of sound
 absorption in a reverberation room*: only the clause 8.1.2.1 conversion
 $m = \alpha/(10 \log_{10} e)$ behind `air_attenuation_m`; the reverberation-room
 method itself is covered in the [Room Acoustics guide](https://jmrplens.github.io/phonometry/buildings/rooms/room-acoustics/).
+
+---
+
+
+<!-- source: docs/environment/propagation/software-quality.md | canonical: https://jmrplens.github.io/phonometry/environment/propagation/software-quality/ -->
+Source: https://jmrplens.github.io/phonometry/environment/propagation/software-quality/
+
+# Quality of outdoor sound software (ISO 17534-1)
+
+A noise map is computed by a program, and two programs that implement the
+same method do not always agree. ISO 17534-1:2015 does not predict a level
+and does not ask whether a method agrees with measurements; it says how a
+program shows that it implements its method correctly, and how the user of
+the program finds out what the program's shortcuts cost. Two configurations
+carry the whole standard. In the **reference configuration** (2.12) every
+step of the method is performed and none is simplified; in a **modified
+configuration** (2.7) one or more steps are approximated, neglected or
+otherwise simplified, usually to make a large map finish in reasonable time.
+
+Four things in the standard are arithmetic, and
+`phonometry.environment.propagation.software_quality` is those four:
+
+- the comparison of a program's results with the limits of the certified
+  results of a method's test cases, which the producer declares in the TRC
+  form of Annex B and the user repeats with every update (7.1);
+- the characteristic values $q_{0,1}$ and $q_{0,9}$ of the level differences
+  between a modified configuration and the reference one (Annex C, 5.2.3,
+  7.2);
+- where the sample of those differences is taken (C.2, C.3);
+- the precision of a method across programs, from a round robin (4.5.2, A.3).
+
+The rest (the documentation a method must have, the declaration of
+conformity, the grade-of-implementation form and the QA data format of
+Annex D) are requirements on documents.
+
+## 1. A program against its certified results
+
+A method's test cases print, for every band and for the total, a correct
+result and the interval a program's result has to fall inside. The final
+result is given to two decimal places, and "the result values in frequency
+bands and for the total level are considered to be correct if the deviation
+does not exceed ±0,05 dB" (Table A.5, note a), which is
+`CERTIFIED_RESULT_TOLERANCE_DB`. A.2 and 4.5.2 put the same rounding interval
+another way: the limits are "given to one decimal place", and "an interval of
+0,1 is always included for rounding purposes" when the result ends in 5
+(13,65 gives 13,6 to 13,7, which is 13,65 ± 0,05). Table B.2 and every test
+case of ISO/TR 17534-3 print the limits to two decimals, which is the
+convention the constant follows, and the function compares with whatever
+limits it is given. The producer lists each result beside its
+limits in the **Test Case Results Comparison form** (TRC form, Tables B.1 and
+B.2) and answers "Result inside tolerances: yes/no"; the user runs the same
+cases in the reference configuration "with each new installation or update"
+(7.1). `verify_calculation_results` fills that column. Table B.2, the worked
+form for a test case "T XX" of ISO/TR 17534-3, reads:
+
+```python
+from phonometry import environment
+
+bands = ["63 Hz", "125 Hz", "250 Hz", "500 Hz", "1 kHz", "2 kHz", "4 kHz", "8 kHz", "Total"]
+upper = [13.75, 19.55, 21.15, 26.05, 34.85, 37.05, 34.15, 21.65, 40.65]
+lower = [13.65, 19.45, 21.05, 25.95, 34.75, 36.95, 34.05, 21.55, 40.55]
+result = [13.7, 19.5, 21.1, 26.0, 34.8, 37.0, 34.1, 21.6, 40.60]
+
+v = environment.verify_calculation_results(result, lower, upper, labels=bands)
+print(v.passes)                # True
+print(v.inside)                # (True, True, True, True, True, True, True, True, True)
+print(v.margins_db.round(2))   # [0.05 0.05 0.05 0.05 0.05 0.05 0.05 0.05 0.05]
+v.plot()
+```
+
+The verdict is the object: `v.passes` is the answer, `failing_labels` names
+the rows outside, and `bool(v)` raises rather than let
+`if verify_calculation_results(...):` pass every program. A limit is part of
+the interval, because a deviation that reaches 0,05 dB "does not exceed" it,
+and a result that lands on a limit through floating-point arithmetic is on it.
+
+The figure runs the form on this library's own implementation of ISO 9613-2,
+with test case T03 of ISO/TR 17534-3 (porous ground, Table 6). The rows are
+the form's: the A-weighted level in each octave band and their total, against
+the row $L_A$ of Table 6, the one its footnote certifies to ±0,05 dB. On the
+left, the library as it is: every row inside its interval, the largest
+deviation 0,008 dB. On the right, one detail changed: the air
+absorption read at the nominal band centres instead of at the exact base-10
+midband frequencies of ISO 9613-1, which the attenuation coefficients of
+ISO 9613-2 are computed at. At 8 kHz that is 8000 Hz instead of 7943 Hz, and
+it alone moves the band 0,20 dB off its certified result, 0,15 dB below the
+lower limit, while the total stays inside. This is the kind of
+implementation detail the form exists to catch, and a total that passes does
+not show it.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/software_quality_trc_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/software_quality_trc.svg" alt="Two panels of the TRC form of test case T03, each row drawn about the centre of its certified interval: nine shaded bars 0.1 dB tall for the A-weighted levels of the eight octave bands and their total. Left, titled 9 of 9 results inside: every dot of the library's result sits within 0.01 dB of the centre. Right, titled 8 of 9 results inside: with the air absorption read at the nominal band centres the 4 kHz dot drops to minus 0.04 dB, still inside, and the 8 kHz result is a cross at minus 0.20 dB, well below its interval" width="100%"></picture>
+
+*The same test case twice, from the verdict's own `.plot()`: the library's
+ISO 9613-2 chain on the left, and on the right with one implementation detail
+changed.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import math
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+from phonometry import environment
+
+# ISO/TR 17534-3 test case T03: porous ground, 93 dB in every octave, the
+# source at (10, 10, 1) m and the receiver at (200, 50, 4) m, 20 degC and 70 %.
+bands = np.array([63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0])
+d_p = math.hypot(190.0, 40.0)
+d = math.hypot(d_p, 3.0)
+levels = np.asarray(
+    environment.predicted_receiver_level(
+        np.full(8, 93.0),
+        environment.PropagationGeometry(d, 1.0, 4.0, projected_distance=d_p),
+        frequencies=bands,
+        ground=environment.GroundFactors(1.0, 1.0, 1.0),
+        atmosphere=environment.AtmosphericConditions(
+            temperature_c=20.0, relative_humidity_percent=70.0
+        ),
+    )
+)
+# The same levels with the air absorption read at the nominal band centres.
+nominal = (
+    levels
+    + environment.atmospheric_absorption(
+        d, frequencies=bands, temperature_c=20.0, relative_humidity_percent=70.0
+    )
+    - d * environment.air_attenuation(
+        bands, temperature_c=20.0, relative_humidity_percent=70.0
+    )
+)
+
+# The rows of the form are A-weighted: the eight bands and their total.
+a_weighting = np.array([-26.2, -16.1, -8.6, -3.2, 0.0, 1.2, 1.0, -1.1])
+
+
+def trc_rows(band_levels):
+    weighted = band_levels + a_weighting
+    return np.append(weighted, 10 * np.log10(np.sum(10 ** (weighted / 10))))
+
+
+# Row L_A of Table 6 of the report, certified to +/-0,05 dB: bands and total.
+printed = np.array([13.70, 16.38, 17.73, 23.83, 33.27, 35.69, 32.79, 20.26, 39.14])
+tol = environment.CERTIFIED_RESULT_TOLERANCE_DB
+labels = ["63 Hz", "125 Hz", "250 Hz", "500 Hz", "1 kHz", "2 kHz", "4 kHz", "8 kHz",
+          "Total"]
+
+fig, axes = plt.subplots(1, 2, figsize=(13, 5.4))
+for ax, band_levels in zip(axes, (levels, nominal)):
+    v = environment.verify_calculation_results(
+        trc_rows(band_levels), printed - tol, printed + tol, labels=labels
+    )
+    print(v.passes, v.failing_labels, v.deviations_db.round(3))
+    v.plot(ax)
+# True () [ 0.001 -0.004 -0.008 -0.003  0.008 -0.005 -0.004 -0.003 -0.001]
+# False ('8 kHz',) [ 0.001 -0.003 -0.006 -0.001  0.008 -0.01  -0.037 -0.2   -0.013]
+plt.show()
+```
+
+</details>
+
+## 2. What a modified configuration costs: the quantiles of Annex C
+
+A map of a large area is rarely computed in the reference configuration.
+Programs neglect "the contribution of sources and propagation paths probably
+not relevant" and interpolate between grid points, and the uncertainties this
+adds "depend on the individual project" (7.2). So the standard asks every conforming program to let its user measure
+it (5.2.3): calculate a random sample of receiver points twice, once in the
+reference configuration and once in the modified configuration the map will
+really be computed with, and describe the level differences by two order
+statistics of the sample (Annex C, which is informative). The differences are
+sorted in ascending order, and the values at two **ranking positions** are the
+**0,1-quantile** $q_{0,1}$ and the **0,9-quantile** $q_{0,9}$: 10 % of all the
+differences in the calculation area are expected below the one and 10 % above
+the other (C.2, NOTE 2). The two values can go into the legend of the map
+(7.2).
+
+The standard's own example sorts 25 differences between two calculation
+variants and reads $R(q_{0,1}) = 2$, $R(q_{0,9}) = 24$, $q_{0,1} = -1$ dB and
+$q_{0,9} = 3$ dB, so that 80 % of the differences are expected between −1 dB
+and +3 dB:
+
+```python
+from phonometry import environment
+
+d = [-1.4, -1.0, -0.4, 0.8, 1.0, 1.0, 1.0, 1.2, 1.4, 1.4, 1.4, 1.6, 1.8,
+     1.8, 2.0, 2.0, 2.0, 2.2, 2.2, 2.4, 2.6, 2.8, 2.8, 3.0, 3.4]
+q = environment.level_difference_quantiles(d)
+print(q.rank_q01, q.rank_q09)                                   # 2 24
+print(q.q01_db, q.q09_db)                                       # -1.0 3.0
+print(round(q.mean_db, 2), round(q.standard_deviation_db, 2))   # 1.56 1.17
+q.plot()
+```
+
+The sample may come in any order; the result keeps it sorted and read-only,
+and every other value is read from it, so none can disagree with it. C.5 adds
+two more: the average of the differences, "for considering a systematic
+deviation", and their estimated standard deviation, as the uncertainty to
+carry into an error-propagation calculation by ISO/IEC Guide 98-3. The
+estimate is the sample standard deviation, with $N - 1$ degrees of freedom.
+The example does not say which variant was subtracted from which. Were the
+differences the modified configuration minus the reference one, the
+convention below, the modified configuration would read 1,56 dB high on
+average, and the quantiles would say more than the mean: a tenth of the area
+would be expected more than 3 dB high.
+
+Two conventions need saying. A difference is the modified configuration's
+level minus the reference configuration's, so a positive $q_{0,9}$ is a
+shortcut that overestimates. And the quantiles are the statistician's, not
+the acoustician's: C.2 NOTE 2 warns that its $q_{0,1}$ leaves 10 % of the
+values below it, the opposite of a percentile level $L_{10}$, which is
+exceeded 10 % of the time. C.4 says the same thing the other way round: the
+ranks of $q_{0,1}$ are based on $L_{x,90}$ and those of $q_{0,9}$ on
+$L_{x,10}$.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/software_quality_quantiles_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/software_quality_quantiles.svg" alt="The 25 level differences of the example sorted by ranking position from 1 to 25, rising from minus 1.4 dB through a plateau near 1 to 2 dB to 3.4 dB; a shaded band between minus 1 dB and plus 3 dB holds the central 80 % of the differences, a diamond at rank 2 marks q0,1 = minus 1.00 dB and a diamond at rank 24 marks q0,9 = 3.00 dB, each with a dotted vertical line at its rank" width="88%"></picture>
+
+*The example of C.4 from the result's own `.plot()`: the sorted sample, the
+two ranks and the band that holds the central 80 %.*
+
+## 3. Table C.1, the formulas above 50 values, and the seam between them
+
+Table C.1 prints the ranking positions for samples of 20 to 50 values, and
+above 50 the standard gives two formulas instead,
+
+$$
+R(q_{0,1}) = \mathrm{IP}\!\left(\frac{N + 4}{10}\right),
+\qquad
+R(q_{0,9}) = \mathrm{IP}\!\left(\frac{9 N}{10}\right) + 1,
+$$
+
+with IP the integer part (Formulas (C.1) and (C.2)). A sample smaller than 20
+is not allowed (C.2). `ranking_positions` returns the pair, reading
+`RANKING_POSITIONS`, the table as printed, up to 50 values:
+
+```python
+from phonometry import environment
+
+for n in (20, 25, 26, 50, 51, 55, 56, 100):
+    print(n, environment.ranking_positions(n))
+# 20 (2, 19)
+# 25 (2, 24)
+# 26 (3, 24)
+# 50 (5, 46)
+# 51 (5, 46)
+# 55 (5, 50)
+# 56 (6, 51)
+# 100 (10, 91)
+```
+
+The table and the formulas do not join. In every one of the 31 rows of the
+table $R(q_{0,9}) = N + 1 - R(q_{0,1})$: it leaves as many values below
+$q_{0,1}$ as above $q_{0,9}$. Formula (C.1) continues the first column and
+reproduces all 31 rows. Formula (C.2) does not continue the second: it
+reproduces only 16 of them, and gives one rank less for $N$ = 21 to 25, 31 to
+35 and 41 to 45. Above 50 it keeps that habit: whenever the last digit of $N$
+is 1 to 5, $q_{0,9}$ leaves one value more above it than $q_{0,1}$ leaves
+below, so at $N = 51$ the formula gives 46 where the symmetry of the table
+would give 47.
+
+| $N$ | Rule | $R(q_{0,1})$ | $R(q_{0,9})$ | Values below $q_{0,1}$ | Values above $q_{0,9}$ |
+| ---: | --- | ---: | ---: | ---: | ---: |
+| 25 | Table C.1 | 2 | 24 | 1 | 1 |
+| 26 | Table C.1 | 3 | 24 | 2 | 2 |
+| 50 | Table C.1 | 5 | 46 | 4 | 4 |
+| 51 | (C.1), (C.2) | 5 | 46 | 4 | 5 |
+| 55 | (C.1), (C.2) | 5 | 50 | 4 | 5 |
+| 56 | (C.1), (C.2) | 6 | 51 | 5 | 5 |
+
+The break is in (C.2) alone. Formula (C.1) is the table's rule carried on,
+and it is not the rank $\mathrm{IP}(0{,}1 N) + 1$ of the empirical
+0,1-quantile (at $N = 51$ that rank is 6, and (C.1) gives 5), while (C.2) is
+exactly that kind of rank, $\mathrm{IP}(0{,}9 N) + 1$. Written in the shape of
+(C.2), the symmetric rule would read $\mathrm{IP}((9N + 5)/10) + 1$, and a lost
+"+ 5" is conceivable.
+
+Whether it is a slip cannot be settled from the pages that have been read.
+Annex C was taken from DIN 45687:2006-05, whose Annex F.4 prints the same
+table, the same two formulas and the same worked example. It bases the ranks
+of the table on VDI 3723 Blatt 1 (Table 6, column $L_{x,90}$, for $q_{0,1}$,
+and Table 5, column $L_{x,10}$, for $q_{0,9}$), and it introduces the
+formulas with "Falls die Anzahl der Stichproben N > 50 ist, gilt ergänzend zu
+VDI 3723 Blatt 1 [15] mit ausreichender Übereinstimmung zu E VDI 2450 Blatt 5
+[17]": above 50 values the formulas supplement VDI 3723 Blatt 1, the source of
+the table, in *sufficient* agreement with a draft guideline on the quantiles
+of air-pollutant measurements. ISO 17534-1 dropped both citations, the one in
+the lead-in of C.4 and the one before the formulas.
+
+VDI 3723 Blatt 1:1993-05 bears the table out and stops where it stops. Its
+Tables 5 and 6 (printed pages 7 and 8) give the ranking position $k$ of the 10 % and
+the 90 % exceedance levels, $L_{x,10}$ and $L_{x,90}$, for samples of up to
+50 values, and from 20 to 50 they are the two columns of Table C.1, row for
+row: the symmetry is already the guideline's. The guideline goes no further.
+"Die Werte in den Tabellen 4 bis 6 sind auf n = 50 begrenzt", it says, since
+larger samples are hardly ever measured, and for more than 50 values it points
+to VDI 2450 Blatt 5, then a draft, with no formula of its own (page 7). So
+the formulas do not come from the source of the table: DIN 45687 brings them
+in, and only E VDI 2450 Blatt 5, which has not been read here, could say
+whether (C.2) was meant to follow it rather than the symmetry of the table. A
+(C.2) that slipped from the symmetric rule in the national standard and
+travelled into the international one fits the pages that have been read, and
+so does a (C.2) chosen to agree with E VDI 2450 Blatt 5 while (C.1) kept the
+table's rule. So the seam is not recorded as an erratum, and it is not
+corrected either.
+
+What decides is that ISO 17534-1 and DIN 45687 both print (C.2) this way, and
+`ranking_positions` applies what they print: the table up to 50, the formulas
+above. A program that carried the symmetric rule past 50 would report
+$q_{0,9}$ one rank higher than this one for half of all sample sizes, which is
+exactly the disagreement between two quality-assured implementations the
+standard is written to prevent. `LevelDifferenceQuantiles.from_table` says
+which of the two rules answered.
+
+## 4. Where the sample is taken
+
+The receiver points closer than 2 m horizontally to a source or an obstacle
+are left out first (`SAMPLE_CLEARANCE_M`), and the sample of $M$ points is
+spread evenly over the $N$ that remain: numbered consecutively, the points of
+ordinal number $\mathrm{IP}((i - 0{,}5) N/M)$, $i = 1, \ldots, M$, are taken
+(C.2). The standard recommends at least one sample point in a hundred
+(`RECOMMENDED_SAMPLE_RATIO`); a thinner sample is still drawn, with a
+`SoftwareQualityWarning`, because its quantiles are defined, only less
+representative of the map.
+
+```python
+import numpy as np
+
+from phonometry import environment
+
+print(environment.uniform_sample_indices(2000, 20))
+# [  50  150  250 ... 1850 1950]
+
+clearance = np.full(2000, 10.0)
+clearance[:100] = 1.0                      # the first 100 points stand next to a wall
+print(environment.uniform_sample_indices(2000, 20, horizontal_clearances_m=clearance))
+# [ 147  242  337 ... 1857 1952]
+
+print(environment.contour_sample_chainages_m(1234.0, 20))
+# [  30.   92.  154. ... 1141. 1203.]
+```
+
+The formula leaves two things to the implementer, and both readings are
+written down in the module. The ordinals are counted from zero: counted from
+one, the formula would ask for the ordinal 0, which does not exist, whenever
+$N$ is less than $2M$, while from zero every sample point sits at the middle
+of its $M$-th of the list. For a sound contour (C.3), the level of the contour
+at evenly spaced points is compared with a single-point calculation at the
+same places, the points sitting at what C.3 calls the "kilometerages"
+$\mathrm{IP}((i - 0{,}5) L/M)$ along the contours laid end to end (DIN 45687
+F.3: "Kilometrierungen"). A kilometerage is a chainage, a position counted
+along a route: the word names that position, not the unit it is counted in.
+Taken in kilometres, the integer part would put every point of a contour
+shorter than a kilometre at its start, so the chainage is read in metres, and
+contours so short that two points would fall on the same metre, which can only
+happen below $M$ metres, are refused rather than sampled twice at one place.
+
+## 5. The precision of a method across programs
+
+The same comparison works between programs. With $M$ participants of a round
+robin calculating the same $N$ receivers with the same method and the same
+configuration, the mean $\bar L_n$ at each receiver is the arithmetic mean of
+the $M$ levels, each participant deviates from it by
+$dL_{n,m} = L_{n,m} - \bar L_n$, and "the result of such a round robin test is
+the quantile $q_{0,9}$ according to C.4 of the $N$ maximal absolute
+differences" (4.5.2). The standard's example is the TestCity scenario of A.3,
+with four participants and 400 receivers; its Figure A.3 is a histogram of
+$|dL_n|_{\max}$ drawn "only shown to demonstrate the principle", so the figure below
+builds a synthetic round robin in the same shape.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/software_quality_round_robin_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/software_quality_round_robin.svg" alt="Histogram of the largest absolute deviation from the mean level at each of 400 receivers in a synthetic round robin of four programs, in classes 0.2 dB wide: 39 receivers below 0.2 dB, the most, 120, between 0.2 and 0.4 dB, then 84, 60, 33, 20 and 16 falling away, and a thin tail of a few receivers out to 3.4 dB; a dashed vertical line marks q0,9 = 1.28 dB" width="88%"></picture>
+
+*The largest deviation at each receiver, from the result's own `.plot()`:
+nine receivers in ten sit below $q_{0,9}$ = 1,28 dB.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import numpy as np
+
+from phonometry import environment
+
+# Four programs at 400 receivers, each off the common level by a spread that
+# differs from receiver to receiver.
+rng = np.random.default_rng(17534)
+common = rng.uniform(45.0, 70.0, 400)
+spread = 0.15 + 0.6 * rng.gamma(1.5, 0.4, 400)
+levels = common[:, None] + spread[:, None] * rng.standard_normal((400, 4))
+
+rr = environment.round_robin_precision(levels)
+print(rr.receivers, rr.participants, rr.rank_q09, round(rr.q09_db, 2))   # 400 4 361 1.28
+rr.plot()
+```
+
+</details>
+
+The mean is arithmetic, not energetic, as the standard defines it, and the
+quantile is read with the same ranks as Annex C: for 400 receivers,
+$R(q_{0,9}) = 361$ by Formula (C.2).
+
+## What this guide covers
+
+**Covered.** ISO 17534-1:2015, the parts that are arithmetic: the comparison
+of a program's results with the limits of the certified results (clause 7.1, the
+TRC form of Tables B.1 and B.2, the ±0,05 dB of Table A.5, note a), limits
+included; the ranking positions of Table C.1 and Formulas (C.1) and (C.2) and
+the characteristic values of C.4, with the mean and the estimated standard
+deviation of C.5; the uniform sample of C.2 with the 2 m exclusion and the
+1:100 recommendation, and the chainages of C.3; and the round-robin result of
+4.5.2 and A.3. Table C.1, read also in Tables 5 and 6 of VDI 3723 Blatt 1,
+the example of C.4 and Table B.2 are reproduced in the
+[conformance report](https://jmrplens.github.io/phonometry/reference/conformance/).
+
+**Covered, by a reading of the text.** Three conventions the text leaves
+open: the ordinals of C.2 counted from zero, the chainages of C.3 in whole metres, and a level difference taken as
+the modified configuration minus the reference one. The seam between Table
+C.1 and Formula (C.2) is applied as printed, for the reasons of section 3.
+
+**Not covered.** The requirements on documents: the official documentation a
+method must have (clause 4), the declaration of conformity and the grade-of-implementation form
+of Annex B, the software properties of 5.2, and the QA data format of Annex D.
+The programs themselves: nothing here runs a noise map or a modified
+configuration; the levels to compare come from the program under test. The
+method-specific test cases are those of ISO/TR 17534-3 for ISO 9613-2, and T08
+to T19 of that report, which need barriers, buildings and reflections, are not
+implemented (see the [Outdoor Sound
+Propagation](https://jmrplens.github.io/phonometry/environment/propagation/outdoor-propagation/) guide).
+
+## See also
+
+- [Outdoor Sound Propagation](https://jmrplens.github.io/phonometry/environment/propagation/outdoor-propagation/):
+  the ISO 9613-2 chain and the seven test cases of ISO/TR 17534-3 it answers
+  on its own, which the TRC example above checks.
+- [Measurement uncertainty](https://jmrplens.github.io/phonometry/signals/metrology/gum-uncertainty/):
+  the GUM propagation that the standard deviation of C.5 is meant for.
+- [Integrated and statistical levels](https://jmrplens.github.io/phonometry/signals/levels/levels/): the
+  percentile levels $L_{10}$ and $L_{90}$ whose sense the quantiles of Annex C
+  reverse.
+- API reference: [`environment.propagation.software_quality`](https://jmrplens.github.io/phonometry/reference/api/environment/software-quality/).
+
+## References
+
+- International Organization for Standardization. (2015). *Acoustics —
+  Software for the calculation of sound outdoors — Part 1: Quality
+  requirements and quality assurance* (ISO 17534-1:2015). The test-case
+  comparison of clause 7.1 with the TRC form of Annex B and the ±0,05 dB of
+  Table A.5, note a; the characteristic values of Annex C (Table C.1 and
+  Formulas (C.1) and (C.2)); the round-robin result of 4.5.2 and A.3. Read from
+  BS ISO 17534-1:2015.
+- International Organization for Standardization. (2015). *Acoustics —
+  Software for the calculation of sound outdoors — Part 3: Recommendations for
+  quality assured implementation of ISO 9613-2 in software according to
+  ISO 17534-1* (ISO/TR 17534-3:2015).
+  [iso.org catalogue](https://www.iso.org/standard/63697.html). Test case T03,
+  Table 6, row L_A.
+- Deutsches Institut für Normung. (2006). *Akustik — Software-Erzeugnisse zur
+  Berechnung der Geräuschimmission im Freien — Qualitätsanforderungen und
+  Prüfbestimmungen* (DIN 45687:2006-05). Annex F.4, the provenance of Table C.1
+  and of Formulas (C.1) and (C.2).
+- Verein Deutscher Ingenieure. (1993). *Anwendung statistischer Methoden bei
+  der Kennzeichnung schwankender Geräuschimmissionen* (VDI 3723 Blatt 1:1993-05).
+  Tables 5 and 6, the source of Table C.1, and the limit of 50 values.
+- International Organization for Standardization. (1996). *Acoustics —
+  Attenuation of sound during propagation outdoors — Part 2: General method of
+  calculation* (ISO 9613-2:1996).
+  [iso.org catalogue](https://www.iso.org/standard/20649.html).
+
+---
+
+← [Outdoor propagation (ISO 9613-2)](https://jmrplens.github.io/phonometry/environment/propagation/outdoor-propagation/) ·
+[Spherical ground and barriers](https://jmrplens.github.io/phonometry/environment/propagation/ground-barriers/) ·
+[Atmospheric refraction](https://jmrplens.github.io/phonometry/environment/propagation/atmospheric-refraction/) ·
+[Documentation index](https://jmrplens.github.io/phonometry/)
 
 ---
 
@@ -47748,6 +48254,11 @@ documents, one page per module.
 | `AtmosphericConditions` | `dataclass` | **Air state behind Aatm (ISO 9613-2 Eq. 8).**<br>• `temperature_c` [°C] (Default: 20)<br>• `relative_humidity_percent` [%] (Default: None → 70)<br>• `atmospheric_pressure_kpa` [kPa] (Default: 101.325) | `AtmosphericConditions(temperature_c=15.0)` |
 | `DirectivityCorrection` | `dataclass` | **Directivity correction Dc = Di + DΩ (ISO 9613-2 Eq. 3).**<br>• `index` Di [dB] (Default: 0)<br>• `d_omega` DΩ [dB] (Default: 0) | `DirectivityCorrection(index=3.0)` |
 | `DEFAULT_FREQUENCIES` | `tuple` | **ISO 9613-2 nominal octave bands.**<br>(no parameters) | `DEFAULT_FREQUENCIES  # (63, …, 8000)` |
+| `verify_calculation_results` / `CalculationVerification` / `CERTIFIED_RESULT_TOLERANCE_DB` | `function` / `dataclass` / `constant` | **Is a program's result inside the limits of every certified result? The TRC form of ISO 17534-1 (clause 7.1, Tables B.1 and B.2).**<br>• `results_db`, `lower_limits_db`, `upper_limits_db` [dB], one per row (a band or a total of a test case)<br>• `labels`: a name per row (Default: "1", "2", …)<br>• a limit is included: a deviation that reaches the tolerance does not exceed it<br>• `CERTIFIED_RESULT_TOLERANCE_DB`: 0.05 dB round a result given to two decimals (Table A.5, note a)<br>• result: `inside` per row, `passes`, `failing_labels`, `deviations_db`, `margins_db`, `.plot()`; `bool()` raises | `v = environment.verify_calculation_results(r, lo, up, labels=bands)`<br>`v.passes` |
+| `ranking_positions` / `RANKING_POSITIONS` / `MINIMUM_SAMPLE_SIZE` | `function` / `mapping` / `constant` | **Ranking positions of the 0,1- and 0,9-quantiles of a sorted sample (ISO 17534-1 C.4).**<br>• `sample_size` N, at least 20 (C.2)<br>• Table C.1 from 20 to 50 values, symmetric: R(q0,9) = N + 1 − R(q0,1)<br>• above 50, Formulas (C.1) IP((N + 4)/10) and (C.2) IP(9N/10) + 1, which give one rank less than the symmetric rule when N ends in 1 to 5; the seam at 50 comes from DIN 45687 and is kept as printed | `environment.ranking_positions(25)  # (2, 24)`<br>`environment.ranking_positions(51)  # (5, 46)` |
+| `level_difference_quantiles` / `LevelDifferenceQuantiles` | `function` / `dataclass` | **The characteristic values q0,1 and q0,9 of a sample of level differences (ISO 17534-1 C.4 and C.5).**<br>• `level_differences_db` [dB], at least 20, in any order; for a modified configuration, its levels minus the reference configuration's (5.2.3, 7.2)<br>• result: `sorted_differences_db`, `rank_q01`, `rank_q09`, `q01_db`, `q09_db`, `from_table`, and the `mean_db` and `standard_deviation_db` of C.5 (N − 1 degrees of freedom), `.plot()` | `q = environment.level_difference_quantiles(d)`<br>`q.q01_db, q.q09_db  # (-1.0, 3.0) for the C.4 example` |
+| `uniform_sample_indices` / `contour_sample_chainages_m` / `SAMPLE_CLEARANCE_M` / `RECOMMENDED_SAMPLE_RATIO` / `SoftwareQualityWarning` | `function` / `constant` / `warning class` | **Where the sample of ISO 17534-1 Annex C is taken (C.2, C.3).**<br>• `uniform_sample_indices(point_count, sample_size, horizontal_clearances_m=None)`: the ordinals IP((i − 0,5) N/M), counted from zero, of the points left once those under 2 m from a source or obstacle are dropped<br>• `SoftwareQualityWarning` when fewer than one point in a hundred is sampled (C.2 recommends 1:100)<br>• `contour_sample_chainages_m(total_length_m, sample_size)`: IP((i − 0,5) L/M) along the sound contours, in whole metres | `environment.uniform_sample_indices(2000, 20)`<br>`environment.contour_sample_chainages_m(1000.0, 20)` |
+| `round_robin_precision` / `RoundRobinPrecision` | `function` / `dataclass` | **The precision of a method across programs, from a round robin (ISO 17534-1 4.5.2 and A.3).**<br>• `levels_db`: (N receivers, M participants) [dB], N ≥ 20, M ≥ 2<br>• result: `mean_levels_db` (arithmetic), `deviations_db` dL(n,m), `max_abs_deviations_db` \|dL(n)\|max, `rank_q09`, `q09_db` (the result of the round robin), `.plot()` (Figure A.3) | `environment.round_robin_precision(levels).q09_db` |
 | `railway_source_power` | `function` | **CNOSSOS-EU railway source line power at the two source heights (Directive 2002/49/EC Annex II, 2.3.1).**<br>• `traffic`: one `RailwayVehicle` or a sequence<br>• `track`: the `RailwayTrack` of the section<br>• `psi`/`phi` [deg]: receiver angles (Default: 0 / 90, broadside)<br>• `reference_time` Tref (Default: 12)<br>• `minimum_speed` [km/h] (Default: 50, or 30 for a tram; 0 switches the floor off)<br>• `interpolation` (`RoughnessInterpolation`), `directivity_edition` (`DirectivityEdition`) | `res = environment.railway_source_power(environment.RailwayVehicle(stock, 96.0, 160.0), track)`<br><br>• `RailwayEmissionResult` |
 | `RailwayEmissionResult` | `dataclass` | **CNOSSOS-EU railway source-line power per metre.**<br>• `third_octave_frequencies` (50…10000 Hz), `frequencies` (63…8000 Hz)<br>• `heights` (0.5, 4.0) m<br>• `third_octave_line_power` (2, 24), `line_power` (2, 8) [dB re 1 pW/m]<br>• `total_line_power` (8,)<br>• `components`: rolling / traction / aerodynamic / bridge, per height<br>• `.plot()` | `res.total_line_power, res.components["rolling"]` |
 | `RailwayVehicle` | `dataclass` | **One vehicle of the traffic on a track section.**<br>• `stock`: `RollingStock`<br>• `flow_rate` Q [veh/h], `speed` v [km/h]<br>• `condition`: `RunningCondition`<br>• `idling_time` Tidle | `RailwayVehicle(stock, flow_rate=96.0, speed=160.0)` |
@@ -49172,7 +49683,7 @@ documents, one page per module.
 | `TonalityWarning` | `warning class` | **Tonality advisory.**<br>Emitted for biased tonality estimates (e.g. coarse FFT resolution) | `warnings.simplefilter('error', TonalityWarning)` |
 | `STIWarning` | `warning class` | **STI/STIPA advisory.**<br>Emitted for suspect speech-intelligibility measurements or inputs | `warnings.simplefilter('error', STIWarning)` |
 | `__version__` | `str` | **Package version string.**<br>(no parameters) | `phonometry.__version__  # '4.0.0rc1'` |
-| `.plot()` | `method` | **One-line canonical figure on every result object (soft matplotlib dependency).**<br>Available on `ZwickerLoudness`, `MooreGlasbergLoudness`, `MooreGlasbergTimeVaryingLoudness`, `EcmaLoudness`, `EcmaTonality`, `EcmaRoughness`, `PsychoacousticAnnoyanceResult`, `FluctuationStrengthResult`, `ProgramLoudnessResult`, `KWeightingResponse`, `STIResult`, `SIIResult`, `SIIProcedure`, `StandardSpeechSpectrum`, `NCResult`, `RCResult`, `AgeThresholdResult`, `NiptsResult`, `HtlanResult`, `ImpulseProminenceResult`, `ImpulsiveSoundResult`, `SelDistribution`, `DirectivityFactor`, `RandomIncidenceSensitivity`, `DiffuseFieldSensitivity`, `AdjustmentValue`, `FreeFieldCorrection`, `CorrectionUncertaintyBudget`, `CorrectionUncertaintyVerification`, `SoundLevelMeterPeriodicRequirement`, `SoundLevelMeterPeriodicVerification`, `MultipleShockResult`, `ImpulseResponseResult`, `DecayCurve`, `RoomAcousticsResult`, `ReverberationResult`, `ReverberationModelResult`, `DynamicStiffnessResult`, `MobilityResult`, `TransferStiffnessResult`, `BandAveragedStiffness`, `LevelDifferenceCheck`, `OutputMassCheck`, `EffectiveBlockingMass`, `DrivingPointStiffnessResult`, `DrivingPointUncertainty`, `VibrationSoundPowerResult`, `StructureBornePowerResult`, `InstalledSourceResult`, `WeightedRatingResult`, `ImpactRatingResult`, `ImpactImprovementRatingResult`, `FacadeInsulationResult`, `LabAirborneInsulationResult`, `LabImpactInsulationResult`, `SoundPowerResult`, `SoundEnergyResult`, `ReverberationSoundPowerResult`, `ReverberationSoundEnergyResult`, `InSituSoundPowerResult`, `InDuctSoundPowerResult`, `HighFrequencySoundPowerResult`, `InverseSquareLawResult`, `FreeFieldCheck`, `SourceDirectionalityResult`, `ReferenceSourceCalibration`, `ReferenceSoundSourceVerdict`, `ReferenceSourceDriftResult`, `SoundPowerIntensityResult`, `DiscretePointIntensityResult`, `PrecisionSoundPowerResult`, `PrecisionIntensityResult`, `IntensityResult`, `UncertaintyResult`, `AbsorptionRatingResult`, `ScatteringResult`, `DiffusionResult`, `DiffusionSpectrum`, `InsituAbsorptionResult`, `WeightingResponse`, `WeightedSpectrum`, `Signal` and `DailyVibrationExposure`.<br>• `ax`: existing Axes, or None to build a fresh figure (Default: None)<br>• returns the Matplotlib `Axes` (an array of Axes for multi-panel figures); never calls `plt.show()`<br>• needs matplotlib (`pip install phonometry[plot]`) | `res.plot()`<br>`decay_curve(ir, fs).plot()` |
+| `.plot()` | `method` | **One-line canonical figure on every result object (soft matplotlib dependency).**<br>Available on `ZwickerLoudness`, `MooreGlasbergLoudness`, `MooreGlasbergTimeVaryingLoudness`, `EcmaLoudness`, `EcmaTonality`, `EcmaRoughness`, `PsychoacousticAnnoyanceResult`, `FluctuationStrengthResult`, `ProgramLoudnessResult`, `KWeightingResponse`, `STIResult`, `SIIResult`, `SIIProcedure`, `StandardSpeechSpectrum`, `NCResult`, `RCResult`, `AgeThresholdResult`, `NiptsResult`, `HtlanResult`, `ImpulseProminenceResult`, `ImpulsiveSoundResult`, `SelDistribution`, `LevelDifferenceQuantiles`, `RoundRobinPrecision`, `CalculationVerification`, `DirectivityFactor`, `RandomIncidenceSensitivity`, `DiffuseFieldSensitivity`, `AdjustmentValue`, `FreeFieldCorrection`, `CorrectionUncertaintyBudget`, `CorrectionUncertaintyVerification`, `SoundLevelMeterPeriodicRequirement`, `SoundLevelMeterPeriodicVerification`, `MultipleShockResult`, `ImpulseResponseResult`, `DecayCurve`, `RoomAcousticsResult`, `ReverberationResult`, `ReverberationModelResult`, `DynamicStiffnessResult`, `MobilityResult`, `TransferStiffnessResult`, `BandAveragedStiffness`, `LevelDifferenceCheck`, `OutputMassCheck`, `EffectiveBlockingMass`, `DrivingPointStiffnessResult`, `DrivingPointUncertainty`, `VibrationSoundPowerResult`, `StructureBornePowerResult`, `InstalledSourceResult`, `WeightedRatingResult`, `ImpactRatingResult`, `ImpactImprovementRatingResult`, `FacadeInsulationResult`, `LabAirborneInsulationResult`, `LabImpactInsulationResult`, `SoundPowerResult`, `SoundEnergyResult`, `ReverberationSoundPowerResult`, `ReverberationSoundEnergyResult`, `InSituSoundPowerResult`, `InDuctSoundPowerResult`, `HighFrequencySoundPowerResult`, `InverseSquareLawResult`, `FreeFieldCheck`, `SourceDirectionalityResult`, `ReferenceSourceCalibration`, `ReferenceSoundSourceVerdict`, `ReferenceSourceDriftResult`, `SoundPowerIntensityResult`, `DiscretePointIntensityResult`, `PrecisionSoundPowerResult`, `PrecisionIntensityResult`, `IntensityResult`, `UncertaintyResult`, `AbsorptionRatingResult`, `ScatteringResult`, `DiffusionResult`, `DiffusionSpectrum`, `InsituAbsorptionResult`, `WeightingResponse`, `WeightedSpectrum`, `Signal` and `DailyVibrationExposure`.<br>• `ax`: existing Axes, or None to build a fresh figure (Default: None)<br>• returns the Matplotlib `Axes` (an array of Axes for multi-panel figures); never calls `plt.show()`<br>• needs matplotlib (`pip install phonometry[plot]`) | `res.plot()`<br>`decay_curve(ir, fs).plot()` |
 
 ## Notes
 
@@ -65504,7 +66015,7 @@ the normative PDF fiche.
 - [Filter Architecture Gallery](https://jmrplens.github.io/phonometry/signals/filters/filter-gallery/): choose an architecture and inspect responses
 - [Calibration and dBFS](https://jmrplens.github.io/phonometry/signals/metrology/calibration/): get real-world SPL values
 - [Why phonometry](https://jmrplens.github.io/phonometry/start/why-phonometry/): the conformance-first design philosophy
-- [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): the expected and computed value of all 1640 checks
+- [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): the expected and computed value of all 1648 checks
 - [API Reference](https://jmrplens.github.io/phonometry/reference/api/): every parameter of every function
 - [Bibliography](https://jmrplens.github.io/phonometry/reference/bibliography/): the books and papers behind every guide, each with a verified link
 
@@ -66512,7 +67023,7 @@ sample from the metrology core:
 | IEC 61252:1993 | The personal sound exposure quantities, `sound_exposure()` and the normalized 8 h level `lex_8h()`; IEC 61252:2025 has since superseded this print, and the transcription still targets the 1993+A2 text | `tests/signals/test_levels.py` |
 
 The same discipline applies far beyond the metrology core: today the suite runs
-1640 numerical conformance checks across 103 domains and 504 standards, covering
+1648 numerical conformance checks across 104 domains and 506 standards, covering
 psychoacoustics and speech intelligibility, room, building and materials
 acoustics, human and machine vibration, environmental, aircraft, rotorcraft
 and underwater noise, electroacoustics, broadcast loudness, industrial noise

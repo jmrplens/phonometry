@@ -137,6 +137,23 @@ from .refraction import (
     ray_curvature_radius,
     shadow_zone_distance,
 )
+from .software_quality import (
+    CERTIFIED_RESULT_TOLERANCE_DB,
+    MINIMUM_SAMPLE_SIZE,
+    RANKING_POSITIONS,
+    RECOMMENDED_SAMPLE_RATIO,
+    SAMPLE_CLEARANCE_M,
+    CalculationVerification,
+    LevelDifferenceQuantiles,
+    RoundRobinPrecision,
+    SoftwareQualityWarning,
+    contour_sample_chainages_m,
+    level_difference_quantiles,
+    ranking_positions,
+    round_robin_precision,
+    uniform_sample_indices,
+    verify_calculation_results,
+)
 
 __all__ = [
     "ADRIENNE_CALIBRATION_LENGTH_S",
@@ -257,4 +274,19 @@ __all__ = [
     "wind_class",
     "WIND_CLASSES",
     "WIND_VECTOR_TOLERANCE_M_S",
+    "CERTIFIED_RESULT_TOLERANCE_DB",
+    "MINIMUM_SAMPLE_SIZE",
+    "RANKING_POSITIONS",
+    "RECOMMENDED_SAMPLE_RATIO",
+    "SAMPLE_CLEARANCE_M",
+    "CalculationVerification",
+    "LevelDifferenceQuantiles",
+    "RoundRobinPrecision",
+    "SoftwareQualityWarning",
+    "contour_sample_chainages_m",
+    "level_difference_quantiles",
+    "ranking_positions",
+    "round_robin_precision",
+    "uniform_sample_indices",
+    "verify_calculation_results",
 ]

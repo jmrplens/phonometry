@@ -6,9 +6,10 @@ data qualification, the ISO 1683 reference values every level is counted
 from, the conformance rule the IEC TC 29 instrument standards written since
 2013 grade an instrument by, the IEC 60942 verdict on the sound calibrator
 every calibration starts from, the IEC 61183 random-incidence and
-diffuse-field sensitivity of a sound level meter, and the IEC 62585
+diffuse-field sensitivity of a sound level meter, the IEC 62585
 corrections that bring a sound level meter on a calibrator, coupler or
-actuator to its free-field response. The filter banks and weightings moved to
+actuator to its free-field response, and the IEC 61672-3 verdict on the
+periodic tests of a sound level meter. The filter banks and weightings moved to
 :mod:`phonometry.filters`, the general signal analysis to
 :mod:`phonometry.signals` and the IEC 61043 intensity-instrument class check
 to :mod:`phonometry.emission.intensity_compliance`, which is what it verifies.
@@ -88,6 +89,24 @@ from .sound_calibrator import (
     SoundCalibratorVerification,
     verify_sound_calibrator,
 )
+from .sound_level_meter import (
+    ACOUSTIC_TEST_FREQUENCIES_HZ,
+    ELECTRICAL_TEST_FREQUENCIES_HZ,
+    IEC61672_TABLE_4,
+    IEC61672_TABLE_5,
+    IEC61672_TABLE_B1,
+    PERIODIC_TEST_ENVIRONMENT,
+    SLM_PERIODIC_REQUIREMENTS,
+    TONEBURST_TEST_DURATIONS_MS,
+    MaxUncertaintyRow,
+    PeakReference,
+    SoundLevelMeterFeatures,
+    SoundLevelMeterPeriodicMeasurements,
+    SoundLevelMeterPeriodicRequirement,
+    SoundLevelMeterPeriodicVerification,
+    ToneburstReference,
+    verify_sound_level_meter_periodic,
+)
 from .uncertainty import (
     MonteCarloResult,
     Quantity,
@@ -105,10 +124,12 @@ from .uncertainty import (
 __all__ = [
     "ABBREVIATED_FREQUENCY_ACCEPTANCE_LIMITS_PERCENT",
     "ABBREVIATED_LEVEL_REDUCTIONS_DB",
+    "ACOUSTIC_TEST_FREQUENCIES_HZ",
     "CALIBRATOR_CLASSES",
     "CALIBRATOR_REQUIREMENTS",
     "DISTORTION_ACCEPTANCE_LIMITS_PERCENT",
     "DISTORTION_MAX_UNCERTAINTY_PERCENT",
+    "ELECTRICAL_TEST_FREQUENCIES_HZ",
     "ENVIRONMENTAL_FREQUENCY_ACCEPTANCE_LIMITS_PERCENT",
     "ENVIRONMENTAL_FREQUENCY_MAX_UNCERTAINTY_PERCENT",
     "ENVIRONMENTAL_LEVEL_ACCEPTANCE_LIMITS_DB",
@@ -120,12 +141,18 @@ __all__ = [
     "FREQUENCY_ACCEPTANCE_LIMITS_PERCENT",
     "FREQUENCY_MAX_UNCERTAINTY_PERCENT",
     "IEC61183_TABLE_B1",
+    "IEC61672_TABLE_4",
+    "IEC61672_TABLE_5",
+    "IEC61672_TABLE_B1",
     "IEC62585_TABLE_I1",
     "ISO1683_REFERENCE_VALUES",
     "LEVEL_ACCEPTANCE_LIMITS_DB",
     "LEVEL_MAX_UNCERTAINTY_DB",
+    "PERIODIC_TEST_ENVIRONMENT",
+    "SLM_PERIODIC_REQUIREMENTS",
     "SUPPLY_VOLTAGE_ACCEPTANCE_LIMITS_DB",
     "SUPPLY_VOLTAGE_MAX_UNCERTAINTY_DB",
+    "TONEBURST_TEST_DURATIONS_MS",
     "AdjustmentValue",
     "CalibrationWarning",
     "CalibratorTableRow",
@@ -136,7 +163,9 @@ __all__ = [
     "DirectivityFactor",
     "FreeFieldCorrection",
     "LevelCrossingResult",
+    "MaxUncertaintyRow",
     "MonteCarloResult",
+    "PeakReference",
     "PeakStatisticsResult",
     "Quantity",
     "RandomIncidenceSensitivity",
@@ -145,8 +174,13 @@ __all__ = [
     "SoundCalibratorMeasurements",
     "SoundCalibratorRequirement",
     "SoundCalibratorVerification",
+    "SoundLevelMeterFeatures",
+    "SoundLevelMeterPeriodicMeasurements",
+    "SoundLevelMeterPeriodicRequirement",
+    "SoundLevelMeterPeriodicVerification",
     "SphereDivisionWarning",
     "StationarityTestResult",
+    "ToneburstReference",
     "TrendTestResult",
     "UncertaintyComponentRow",
     "UncertaintyResult",
@@ -181,4 +215,5 @@ __all__ = [
     "verify_conformance",
     "verify_correction_uncertainty",
     "verify_sound_calibrator",
+    "verify_sound_level_meter_periodic",
 ]

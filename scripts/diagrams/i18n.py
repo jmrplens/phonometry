@@ -4622,6 +4622,7 @@ _ES: dict[str, str] = {
     "by sound at 125 Hz, 1 kHz, 8 kHz; electrically at": "con sonido a 125 Hz, 1 kHz y 8 kHz; eléctricamente en",
     "octaves from 63 Hz to 16 kHz for class 1; linearity,": "octavas de 63 Hz a 16 kHz en clase 1; linealidad,",
     "tonebursts, C-weighted peak, overload": "ráfagas tonales, pico con ponderación C, sobrecarga",
+    "frequency and time weightings at 1 kHz, stability": "ponderaciones frecuenciales y temporales a 1 kHz, estabilidad",
     "every filter at mid-band, ±0.4 dB for class 1, or one sweep": "cada filtro en su centro, ±0,4 dB en clase 1, o un barrido",
     "across the set if the filters are time invariant": "por todo el juego si los filtros son invariantes en el tiempo",
     "three filters (31.5 Hz, 1 kHz, 16 kHz recommended): level": "tres filtros (se recomiendan 31,5 Hz, 1 kHz, 16 kHz): linealidad",
@@ -4631,7 +4632,7 @@ _ES: dict[str, str] = {
     "$δ$ within the acceptance limits    and    $U ≤ U_{max}$": "$δ$ dentro de los límites de aceptación    y    $U ≤ U_{max}$",
     "$δ$ the deviation from the design goal, $U$ the expanded uncertainty for 95 % coverage": "$δ$ la desviación respecto del objetivo de diseño, $U$ la incertidumbre expandida para una cobertura del 95 %",
     "a design verifier reads the first half off a computed response; a laboratory has to meet both,": "un verificador de diseño lee la primera mitad en una respuesta calculada; un laboratorio tiene que cumplir las dos,",
-    "and verify_filter_periodic grades both on a band filter's periodic results": "y verify_filter_periodic califica las dos en los resultados periódicos de un filtro de bandas",
+    "and verify_sound_level_meter_periodic and verify_filter_periodic grade both on periodic results": "y verify_sound_level_meter_periodic y verify_filter_periodic califican las dos en resultados periódicos",
     "IEC 61043 keeps all three in one document: requirements in clauses 6 to 10, type tests in 11 to 13, periodic verification in Annex A": "IEC 61043 reúne las tres partes: requisitos en los apartados 6 a 10, ensayos de tipo en 11 a 13, verificación periódica en el Anexo A",
 }
 

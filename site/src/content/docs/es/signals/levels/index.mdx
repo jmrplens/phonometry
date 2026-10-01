@@ -96,9 +96,15 @@ Páginas de otras áreas del sitio en las que se apoya esta sección:
 <ScopeClaim status="not-covered">
 Estas páginas implementan el procesado de señal de un sonómetro, no el
 sonómetro. El resto de IEC 61672-1 (los rangos de nivel, la indicación de
-sobrecarga, el ruido autogenerado, la respuesta direccional y los ensayos
-periódicos de IEC 61672-3) no está implementado en ninguna parte de la
-biblioteca, así que aquí nada asigna una clase a un instrumento físico;
+sobrecarga, el ruido autogenerado, la respuesta direccional) no se mide en
+ninguna parte de la biblioteca. De esos requisitos, el control de rango de
+niveles (apartado 17) y la indicación de sobrecarga (apartado 20) se juzgan a
+partir de los resultados que devuelve un laboratorio de los ensayos
+periódicos de IEC 61672-3 sobre un sonómetro físico ([Ensayos periódicos de
+un sonómetro](/phonometry/es/signals/metrology/sound-level-meter-periodic-tests/));
+el ruido autogenerado solo se registra allí a título informativo
+(IEC 61672-3 11.1.2, NOTA 2), y la respuesta direccional pertenece a la
+evaluación de modelo (IEC 61672-2). Así que aquí nada asigna una clase a un instrumento físico;
 [Construye un sonómetro](/phonometry/es/signals/sound-level-meter/) dice
 exactamente qué significa y qué no significa un veredicto de clase de la
 biblioteca. Dos curvas llegan sin veredicto de ningún tipo: ISO 7196 define

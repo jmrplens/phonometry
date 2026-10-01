@@ -190,6 +190,9 @@ Qué significan los números y cuánto fiarse de ellos.
 - [Correcciones de campo libre de un sonómetro (IEC 62585)](/phonometry/es/signals/metrology/free-field-corrections/):
   las correcciones que devuelven a su respuesta en campo libre un sonómetro
   ensayado con un calibrador, un acoplador o un actuador, y su incertidumbre.
+- [Ensayos periódicos de un sonómetro (IEC 61672-3)](/phonometry/es/signals/metrology/sound-level-meter-periodic-tests/):
+  el dictamen sobre los resultados de los ensayos periódicos de un sonómetro
+  en servicio, apartado por apartado, y la declaración del apartado 22.
 
 ## Qué no cubre esta sección
 
@@ -205,9 +208,10 @@ de IEC 61672-2 que un sonómetro físico necesita para su aprobación de tipo,
 los ensayos periódicos de IEC 61672-3 que recibe en servicio, los ensayos de
 IEC 61260-2 e IEC 61260-3 sobre un filtro de bandas físico y los ensayos del
 propio calibrador de IEC 60942, no se ejecutan (los resultados de laboratorio
-de un calibrador los califica `metrology.verify_sound_calibrator` y los de los
-ensayos periódicos de un filtro `filters.verify_filter_periodic`, y ninguno de
-los dos hace un ensayo físico; los ensayos de IEC 61260-2 que no necesitan una
+de un calibrador los califica `metrology.verify_sound_calibrator`, los de los
+ensayos periódicos de un sonómetro `metrology.verify_sound_level_meter_periodic`
+y los de un filtro `filters.verify_filter_periodic`, y ninguno de los tres hace
+un ensayo físico; los ensayos de IEC 61260-2 que no necesitan una
 muestra se calculan sobre el diseño), así que un veredicto de clase de los verificadores de filtros y ponderaciones describe el algoritmo
 y no un aparato construido;
 [Conformidad y

@@ -192,6 +192,8 @@ with the IEC 61672-1 acceptance limits that clause 15 p) asks for separately.
   and the Welch-Satterthwaite degrees of freedom the budget is built on.
 - [Compliance and verification](compliance-verification.md): what the
   IEC 61672-1 class of a meter asserts.
+- [Periodic tests of a sound level meter (IEC 61672-3)](sound-level-meter-periodic-tests.md):
+  the verdict on the periodic test that uses these corrections.
 - [Errata in published sources](../../ERRATA.md): Table I.2, Table H.1 and
   Formulas (E.4) to (E.6).
 - API reference: [`metrology.free_field_corrections`](https://jmrplens.github.io/phonometry/reference/api/metrology/free-field-corrections/).

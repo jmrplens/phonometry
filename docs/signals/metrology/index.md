@@ -40,9 +40,10 @@ instrument, how to read and cite the numerical conformance report the
 site publishes, and the honest boundary against the pattern-evaluation and
 periodic tests of IEC 61672-2/-3 and IEC 61260-2/-3: the measurements need an
 instrument in a laboratory rather than a library, and what the library does
-with them is grade the results (`filters.verify_filter_periodic` for the
-periodic tests of a band filter) and compute on a design the tests that need
-no specimen.
+with them is grade the results (`metrology.verify_sound_level_meter_periodic`
+for the periodic tests of a sound level meter, `filters.verify_filter_periodic`
+for those of a band filter) and compute on a design the tests that need no
+specimen.
 
 [Data qualification](data-qualification.md) guards the gate
 in front of both: every average - a Leq, a Welch PSD, every averaged input
@@ -66,6 +67,12 @@ electrostatic actuator back to the free field it is specified for: the IEC
 62585 adjustment value at the calibration check frequency, the correction at
 each frequency, the uncertainty budget that goes with it, and the maximum each
 clause permits.
+
+[Periodic tests of a sound level meter](sound-level-meter-periodic-tests.md)
+grade what a laboratory measured on a working meter by IEC 61672-3: every
+clause from the frequency weightings to the high-level stability against the
+acceptance limits of IEC 61672-1 and the maxima of its Table B.1, what a
+complete test holds, and the statement Clause 22 prescribes for the outcome.
 
 The same discipline extends into the frequency domain: the
 [Signals and spectra](../spectra/index.md) pages
@@ -102,6 +109,9 @@ budgets that are specialisations of the GUM machinery described here.
 - [Free-Field Corrections of a Sound Level Meter (IEC 62585)](free-field-corrections.md):
   the adjustment value, the corrections for a calibrator, a coupler and an
   actuator, the budget of Annex I and the verdict of clauses 9 to 14.
+- [Periodic Tests of a Sound Level Meter (IEC 61672-3)](sound-level-meter-periodic-tests.md):
+  the verdict on a laboratory's results, clause by clause, with Tables 4, 5
+  and B.1 of IEC 61672-1, and the statement of Clause 22.
 
 ## What this section does not cover
 
@@ -109,8 +119,9 @@ Nothing here measures an instrument or a calibrator. No IEC 60942 test is
 performed: `verify_sound_calibrator` grades the numbers a laboratory measured
 on a calibrator, and the static-pressure correction of an LS/M or 1/M
 pistonphone comes from its manual, so pass an already corrected `target_spl`
-when the manual asks for one; the IEC 61672-3 periodic tests are cited as
-laboratory practice rather than run;
+when the manual asks for one; the IEC 61672-3 periodic tests are not run
+either, and `verify_sound_level_meter_periodic` grades the results a
+laboratory returns;
 [Compliance and
 verification](compliance-verification.md) draws
 that boundary precisely, part by part. The dBFS half of the calibration page

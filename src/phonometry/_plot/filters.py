@@ -9,6 +9,8 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
+
     from matplotlib.axes import Axes
 
     from ..filters.compliance import FilterComplianceResult
@@ -593,40 +595,34 @@ def _draw_margins(
     language: str,
     kwargs: dict[str, Any],
     shown: set[str],
+    *,
+    unusable_label: str | None = None,
+    unusable: Sequence[bool] | None = None,
 ) -> None:
     """One marker per result at its margin, with its uncertainty as error bar.
 
     A diamond conforms, a cross does not, and a hollow marker is a result
     5.3 of IEC 61260-3 forbids using (its uncertainty exceeds the maximum).
+    Another standard that forbids it under another clause (IEC 61672-3:2013
+    4.3) names it with its own ``unusable_label``, already localised, and
+    may say which results are unusable in ``unusable``, one flag per result,
+    when not every result over its maximum is (IEC 61672-3:2013 4.4).
     """
-    for x, v in zip(positions, verifications, strict=True):
-        margin = _margin_db(v)
-        style = dict(kwargs)
-        if not v.uncertainty_within_maximum:
-            key = _UNUSABLE_LABEL
-            style_default(style, "color", _C_SECONDARY)
-            style.setdefault("marker", "o")
-            style_default(style, "markerfacecolor", "none")
-        elif v.passes:
-            key = "Conforms"
-            style_default(style, "color", _C_TERTIARY)
-            style.setdefault("marker", "D")
-        else:
-            key = "Does not conform"
-            style_default(style, "color", _C_REFERENCE)
-            style.setdefault("marker", "X")
-        style_default(style, "markersize", 7)
-        style_default(style, "linestyle", "none")
-        if "label" in kwargs:
-            # A caller's label names the whole series once, not each verdict.
-            style["label"] = "_nolegend_" if "label" in shown else kwargs["label"]
-            shown.add("label")
-        else:
-            style["label"] = "_nolegend_" if key in shown else _t(key, language)
-            shown.add(key)
+    flags = (
+        [not v.uncertainty_within_maximum for v in verifications]
+        if unusable is None
+        else list(unusable)
+    )
+    for x, v, hollow in zip(positions, verifications, flags, strict=True):
+        key, style = _margin_marker(
+            v, kwargs, hollow=hollow, unusable_label=unusable_label
+        )
+        style["label"] = _margin_legend_label(
+            key, kwargs, shown, unusable_label=unusable_label, language=language
+        )
         ax.errorbar(
             [x],
-            [margin],
+            [_margin_db(v)],
             yerr=[v.uncertainty],
             ecolor=_C_MUTED,
             elinewidth=1.0,
@@ -634,6 +630,62 @@ def _draw_margins(
             zorder=3,
             **style,
         )
+
+
+def _margin_marker(
+    verification: ConformanceVerification,
+    kwargs: dict[str, Any],
+    *,
+    hollow: bool,
+    unusable_label: str | None,
+) -> tuple[str, dict[str, Any]]:
+    """The legend key of one result's verdict and the style of its marker.
+
+    A hollow circle for a result the standard forbids using, a diamond for
+    one that conforms and a cross for one that does not; the caller's
+    ``kwargs`` win over every default.
+    """
+    style = dict(kwargs)
+    if hollow:
+        key = _UNUSABLE_LABEL if unusable_label is None else unusable_label
+        style_default(style, "color", _C_SECONDARY)
+        style.setdefault("marker", "o")
+        style_default(style, "markerfacecolor", "none")
+    elif verification.passes:
+        key = "Conforms"
+        style_default(style, "color", _C_TERTIARY)
+        style.setdefault("marker", "D")
+    else:
+        key = "Does not conform"
+        style_default(style, "color", _C_REFERENCE)
+        style.setdefault("marker", "X")
+    style_default(style, "markersize", 7)
+    style_default(style, "linestyle", "none")
+    return key, style
+
+
+def _margin_legend_label(
+    key: str,
+    kwargs: dict[str, Any],
+    shown: set[str],
+    *,
+    unusable_label: str | None,
+    language: str,
+) -> object:
+    """The legend label of one marker: each verdict once, or the caller's label once.
+
+    ``unusable_label`` comes localised already; the other keys are
+    translated here.
+    """
+    if "label" in kwargs:
+        # A caller's label names the whole series once, not each verdict.
+        label = "_nolegend_" if "label" in shown else kwargs["label"]
+        shown.add("label")
+        return label
+    text = key if key == unusable_label else _t(key, language)
+    label = "_nolegend_" if key in shown else text
+    shown.add(key)
+    return label
 
 
 #: The margins a periodic-test figure may mark, dB; those inside the axis
@@ -664,7 +716,9 @@ def _margin_axis(
     Margins run from a few hundredths of a decibel in the pass band to tens
     of decibels deep in the stop band; the axis is linear within one decibel
     of the limit and logarithmic beyond it, labelled in decibels rather than
-    in powers of ten.
+    in powers of ten. It reaches at least from -0.5 dB to 1 dB, the whole
+    range when there is no result to draw, so a verdict that holds none
+    still has its axis.
     """
     import matplotlib.ticker as mticker
 
@@ -678,8 +732,8 @@ def _margin_axis(
         (_margin_db(v) - v.uncertainty, _margin_db(v) + v.uncertainty)
         for v in verifications
     ]
-    bottom = min(-0.5, min(lo for lo, _ in reach) * 1.3)
-    top = max(1.0, max(hi for _, hi in reach) * 1.6)
+    bottom = min(-0.5, min((lo for lo, _ in reach), default=0.0) * 1.3)
+    top = max(1.0, max((hi for _, hi in reach), default=0.0) * 1.6)
     ax.set_ylim(bottom, top)
     ticks = [t for t in _MARGIN_TICKS_DB if bottom <= t <= top]
     ax.yaxis.set_major_locator(mticker.FixedLocator(ticks))
@@ -786,7 +840,8 @@ def plot_periodic_verification(
             ax.axvline(start - 1.0, color=_C_MUTED, lw=0.8, ls=":")
         start += count + 1.0
     _margin_axis(ax, [v for c in result.clauses for v in c.verifications], language)
-    ax.set_xlim(0.0, start - 1.0)
+    # A verdict that holds no clause still spans one slot, not an empty range.
+    ax.set_xlim(0.0, max(start - 1.0, 1.0))
     ax.set_xticks(centres)
     ax.set_xticklabels(names)
     ax.set_xlabel(_t("Clause", language))

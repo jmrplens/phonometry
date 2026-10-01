@@ -1,0 +1,588 @@
+---
+title: "Periodic Tests of a Sound Level Meter (IEC 61672-3)"
+description: "The verdict IEC 61672-3:2013 gives a working sound level meter from a laboratory's periodic-test results: each clause from the frequency weightings to the high-level stability against the acceptance limits of IEC 61672-1 and the maxima of its Table B.1, the tables it reads, what a complete test holds, and the statement of Clause 22."
+references:
+  - type: standard
+    organization: "International Electrotechnical Commission"
+    year: 2013
+    title: "Electroacoustics — Sound level meters — Part 3: Periodic tests"
+    designation: "IEC 61672-3:2013"
+    primary: true
+    note: "The implemented grading: the conformance rule of 4.1, the unusable results of 4.3 and the exception of 4.4 for the manufacturer's correction data, the environmental conditions of 7.1, what 8.1 makes a complete test, the tests of Clauses 10 to 21 and the statements of 22 r), s) and t). Read from BS EN 61672-3:2013, the English text of EN 61672-3:2013, which is IEC 61672-3:2013 unchanged."
+  - type: standard
+    organization: "International Electrotechnical Commission"
+    year: 2013
+    title: "Electroacoustics — Sound level meters — Part 1: Specifications"
+    designation: "IEC 61672-1:2013"
+    note: "The acceptance limits each clause of Part 3 points to: Table 3 (frequency weightings), 5.5.9, 5.6.5, 5.8.3, Table 4 (tonebursts), 5.11.3, Table 5 (C-weighted peak), 5.14.2 and 5.15.2, and the maximum-permitted uncertainties of Table B.1. Tables 4, 5 and B.1 are published by the module. Read from BS EN 61672-1:2013."
+  - type: standard
+    organization: "International Electrotechnical Commission"
+    year: 2013
+    title: "Electroacoustics — Sound level meters — Part 2: Pattern evaluation tests"
+    designation: "IEC 61672-2:2013"
+    note: "The pattern evaluation whose public approval turns a passed periodic test into a statement of conformance (22 r), and whose calculation procedure the level linearity deviations of 16.2 follow."
+  - type: standard
+    organization: "International Electrotechnical Commission"
+    year: 2012
+    title: "Electroacoustics — Methods to determine corrections to obtain the free-field response of a sound level meter"
+    designation: "IEC 62585:2012"
+    note: "Where the correction data of the acoustical test of Clause 12 come from, and their maximum uncertainties when the manufacturer states none (12.5)."
+  - type: standard
+    organization: "International Electrotechnical Commission"
+    year: 2017
+    title: "Electroacoustics — Sound calibrators"
+    designation: "IEC 60942:2017"
+    note: "The calibrator of Clause 9, whose own periodic test the laboratory needs before the meter's."
+---
+
+import Scope from '../../../../components/Scope.astro';
+import ScopeClaim from '../../../../components/ScopeClaim.astro';
+import SeeAlso from '../../../../components/SeeAlso.astro';
+import ThemeImage from '../../../../components/ThemeImage.astro';
+
+A sound level meter in service goes back to a laboratory every year or two
+for its **periodic tests**, the short list of key checks IEC 61672-3:2013
+keeps "to the minimum considered necessary" (Clause 1): a calibrator on the
+microphone, the frequency weightings acoustically at three frequencies and
+electrically at the octaves, the weightings and time weightings at 1 kHz, the
+stability over half an hour and at the top of the range, the level linearity,
+the tonebursts, the C-weighted peak and the overload indicator. The laboratory
+measures; `metrology.verify_sound_level_meter_periodic` grades what it
+measured, clause by clause, and writes the statement Clause 22 prescribes for
+the outcome. It runs none of the tests.
+
+This page grades the record of a synthetic class 1 meter whose one fault is a
+0.25 ms toneburst, then shows what the verdict needs from a record to call
+it complete.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/slm_periodic_verdict.svg" alt="The periodic tests of a synthetic class 1 sound level meter, one slot per clause from 12 to 21 on a symmetric-logarithmic axis with a dashed line at zero: the distance from each result's deviation to its nearer acceptance limit is a short blue dash, and over the dashes of each clause the result that decides it is marked with its actual expanded uncertainty as error bar. Clause 13 spreads its 27 dashes from 0.7 dB to 3.7 dB and Clause 16 its 25 from 0.2 dB to 0.8 dB. Every clause is marked by a green diamond above the line, those of 14.2, 14.3, 15 and 21 within 0.1 dB of it, except clause 18, whose red cross at -0.4 dB is the maximum F-weighted response to the 0.25 ms toneburst; the title reads IEC 61672-3 periodic tests, class 1: not passed" width="100%" />
+
+*Every graded clause of the record in one slot, from the result's own
+`.plot()`: each result's margin to its nearer acceptance limit is a dash, and
+the result that decides the clause is marked over them. One toneburst below
+its limit holds the verdict back.*
+
+## 1. The rule every clause is graded by
+
+IEC 61672-3 grades a result the way every IEC TC 29 instrument standard
+written since 2013 does (4.1): the measured deviation from the design goal
+within the acceptance limits of IEC 61672-1 **and** the laboratory's actual
+expanded uncertainty, for a coverage probability of 95 %, within the maximum
+permitted by Table B.1 of IEC 61672-1, both limits inclusive. The
+uncertainty is not added to the deviation; the tolerance the meter has to
+meet lies beyond the acceptance limit by that maximum. Each result is one
+`metrology.verify_conformance`, and [Compliance and
+verification](/phonometry/signals/metrology/compliance-verification/) shows
+the rule on the printed examples of IEC 61672-1 Table C.1.
+
+A result measured with more uncertainty than its maximum "shall not be used
+to evaluate conformance" (4.3). It is not a failure of the meter, and the
+verdict does not pass while it is there: the verdict lists it under
+`unusable`, apart from the results under `failed`.
+
+The one exception is 4.4. The acoustical test of the frequency weighting
+(Clause 12) and the electrical one (Clause 13) correct the indications with
+the manufacturer's free-field or random-incidence correction data, and the
+uncertainty of that data is part of the laboratory's budget. Without it, the
+laboratory's uncertainty "shall not exceed" the maximum; when the total
+exceeds the maximum only because of it, "testing may proceed", and the
+result is one that did not conform, with that reason in the statement. The
+record takes the uncertainty without the correction data beside the total
+(section 6 shows one); without it, the total is all the verdict knows and 4.3
+applies.
+
+## 2. What each clause is judged against
+
+| Clause | Test | Acceptance limits (IEC 61672-1) | Maximum uncertainty (Table B.1) |
+| :--- | :--- | :--- | :--- |
+| 12 | Frequency weighting with acoustical signals, at 125 Hz and 8 kHz relative to 1 kHz | Table 3 | 0.60 dB up to 4 kHz, 0.70 dB above |
+| 13 | Every frequency weighting with electrical signals, 63 Hz to 16 kHz (class 1) or to 8 kHz (class 2) | Table 3 | 0.60 dB, 0.70 dB above 4 kHz, 1.00 dB above 10 kHz |
+| 14.2 | C and Z against A at 1 kHz | ±0.2 dB (5.5.9) | 0.20 dB |
+| 14.3 | S and time-averaged against F at 1 kHz | ±0.1 dB (5.8.3) | 0.20 dB |
+| 15 | Long-term stability, 25 min to 35 min | ±0.1 dB, class 2 ±0.3 dB (5.14.2) | 0.10 dB |
+| 16 | Level linearity at 8 kHz on the reference level range | ±0.8 dB, class 2 ±1.1 dB (5.6.5) | 0.30 dB |
+| 17 | Level linearity including the level range control, at 1 kHz | ±0.8 dB, class 2 ±1.1 dB (5.6.5) | 0.30 dB |
+| 18 | 4 kHz tonebursts of 200 ms, 2 ms and 0.25 ms | Table 4 | 0.30 dB |
+| 19 | C-weighted peak: one cycle at 8 kHz, half cycles at 500 Hz | Table 5 | 0.35 dB |
+| 20 | Overload indication, positive against negative half cycle | 1.5 dB (5.11.3) | 0.25 dB |
+| 21 | High-level stability, 5 min near the top of the least-sensitive range | ±0.1 dB, class 2 ±0.3 dB (5.15.2) | 0.10 dB |
+
+Two things in the table are as the pages print them and not what one might
+expect. The maximum uncertainty of 14.3, 0.20 dB, is twice its acceptance
+limit, 0.1 dB. And Part 3 grades the level linearity of Clauses 16 and 17
+against 5.6.5 alone: the limit of 5.6.6 on a 1 dB to 10 dB change in level is
+a pattern-evaluation requirement (IEC 61672-2, 9.8.1.7) that Part 3 never
+mentions.
+
+Clauses 10 and 11 are records, not tests: the indications at the calibration
+check frequency before and after the adjustment, and the self-generated
+noise, which "is reported for information only and is not used to assess
+conformance" and without an uncertainty (11.1.2, NOTE 2). Clauses 16, 19 and
+20 each hold a yes/no requirement besides the numbers: no overload or
+under-range indication inside the linear operating range the manual states
+(16.4), the C-weighted peak signals shall not cause an overload indication
+(19.3, 19.5), and the overload indicator shall latch on (20.5).
+
+## 3. Grading a record
+
+`metrology.SoundLevelMeterPeriodicMeasurements` holds what the laboratory
+measured, each graded result beside its expanded uncertainty and every field
+named by its unit. The toneburst responses and the C-weighted peak
+differences go in as measured, relative to the steady level; the verdict
+takes the deviation from Tables 4 and 5 itself. Everything else goes in as
+the deviation the clause defines. Clause 16 also carries what shows that its
+steps cover the procedure of 16.3: over a linear operating range of 80 dB,
+the 25 steps a laboratory takes, which the verdict's figure draws in one
+slot. The meter's two level ranges, which no record can count, are declared
+beside it; section 5 says why.
+
+```python
+from phonometry import metrology
+
+record = metrology.SoundLevelMeterPeriodicMeasurements(
+    # Clause 7: the conditions at the start and the end of the tests.
+    static_pressures_kpa=[100.9, 100.7],
+    air_temperatures_c=[22.8, 23.3],
+    relative_humidities_percent=[48.0, 46.0],
+    # Clauses 10 and 11: recorded, not graded.
+    calibration_check_initial_db=93.8,
+    calibration_check_adjusted_db=94.0,
+    self_noise_microphone_db=16.9,
+    self_noise_electrical_db={"A": 11.8, "C": 13.9, "Z": 19.2},
+    # Clause 12: 125 Hz and 8 kHz, relative to 1 kHz, after the corrections.
+    acoustic_weighting_deviations_db=[0.3, -0.9],
+    acoustic_weighting_uncertainties_db=[0.28, 0.45],
+    # Clause 13: every weighting, at the nine octaves from 63 Hz to 16 kHz.
+    electrical_weighting_deviations_db={
+        "A": [0.1, 0.1, 0.0, 0.0, 0.0, 0.0, -0.1, -0.3, -0.9],
+        "C": [0.2, 0.1, 0.0, 0.0, 0.0, 0.0, -0.1, -0.4, -1.2],
+        "Z": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -0.2, -0.8],
+    },
+    electrical_weighting_uncertainties_db={
+        w: [0.14] * 7 + [0.18, 0.25] for w in ("A", "C", "Z")
+    },
+    # Clause 14: C and Z against A, S and time-averaged against F, at 1 kHz.
+    weighting_at_1khz_deviations_db={"C": 0.0, "Z": 0.1},
+    weighting_at_1khz_uncertainties_db={"C": 0.12, "Z": 0.12},
+    time_weighting_at_1khz_deviations_db={"S": 0.0, "eq": 0.05},
+    time_weighting_at_1khz_uncertainties_db={"S": 0.12, "eq": 0.12},
+    # Clause 15: the long-term stability.
+    long_term_stability_db=0.04,
+    long_term_stability_uncertainty_db=0.07,
+    # Clause 16 at 8 kHz: the linear operating range and the starting point
+    # the manual states, each step by its anticipated level, up from the
+    # starting point in 5 dB steps and in 1 dB steps from within 5 dB of the
+    # upper boundary, then down the same way, and the levels that first
+    # indicated overload and under-range.
+    linear_operating_range_db=[40.0, 120.0],
+    linearity_starting_point_db=94.0,
+    linearity_levels_db=[
+        94.0, 99.0, 104.0, 109.0, 114.0, 119.0, 120.0, 121.0, 122.0,
+        89.0, 84.0, 79.0, 74.0, 69.0, 64.0, 59.0, 54.0, 49.0, 44.0,
+        43.0, 42.0, 41.0, 40.0, 39.0, 38.0,
+    ],
+    linearity_deviations_db=[
+        0.0, 0.0, 0.1, 0.1, 0.1, 0.1, 0.0, -0.1, -0.2,
+        0.0, 0.0, 0.0, -0.1, 0.0, 0.0, 0.1, 0.1, 0.1, 0.2,
+        0.2, 0.3, 0.3, 0.4, 0.5, 0.6,
+    ],
+    linearity_uncertainties_db=[0.18] * 25,
+    linearity_overload_level_db=123.0,
+    linearity_under_range_level_db=37.0,
+    # Clause 17 at 1 kHz: 5 dB above the first under-range indication on
+    # both level ranges, the reference one first (17.4), and the reference
+    # level held on the other one (17.3).
+    range_linearity_deviations_db={"17.3": [0.1], "17.4": [0.1, -0.2]},
+    range_linearity_uncertainties_db={"17.3": [0.18], "17.4": [0.18, 0.18]},
+    # Clause 18: the responses at 200 ms, 2 ms and 0.25 ms (S: 200 ms, 2 ms).
+    toneburst_responses_db={
+        "F": [-1.1, -18.2, -30.4],
+        "S": [-7.5, -27.4],
+        "E": [-7.0, -27.1, -36.6],
+    },
+    toneburst_uncertainties_db={
+        "F": [0.2, 0.2, 0.25],
+        "S": [0.2, 0.2],
+        "E": [0.2, 0.2, 0.25],
+    },
+    # Clause 19: one cycle at 8 kHz, then the two half cycles at 500 Hz.
+    c_peak_differences_db=[3.9, 2.5, 2.2],
+    c_peak_uncertainties_db=[0.3, 0.3, 0.3],
+    c_peak_overload_indicated=False,
+    # Clauses 20 and 21.
+    overload_difference_db=0.4,
+    overload_uncertainty_db=0.2,
+    overload_latched=True,
+    high_level_stability_db=0.03,
+    high_level_stability_uncertainty_db=0.07,
+)
+meter = metrology.SoundLevelMeterFeatures(level_ranges=2)
+result = metrology.verify_sound_level_meter_periodic(1, record, features=meter)
+print(result.passes)  # False
+print(result.failed)  # (('18', 'F, 0.25 ms'),)
+result.plot()
+```
+
+The verdict is an object, not a boolean: `result.passes` is the answer, and
+`bool(result)` raises rather than let `if verify_sound_level_meter_periodic(...):`
+pass every meter. Each requirement is one `result.requirement(name)`, with
+its results under `labels` and one `ConformanceVerification` each under
+`verifications`, and `result.requirements` holds them in the order of the
+standard.
+
+## 4. Tonebursts and the C-weighted peak
+
+The reference responses the toneburst test is judged from are those of
+IEC 61672-1 Table 4, which its NOTES derive from Equation (7) for a maximum
+time-weighted level,
+
+$$
+\delta_\mathrm{ref} = 10\,\lg\!\left(1 - \mathrm{e}^{-T_\mathrm{b}/\tau}\right)\ \mathrm{dB},
+$$
+
+with $\tau$ = 0.125 s for F and 1 s for S, and from Equation (8) for a sound
+exposure level, $\delta_\mathrm{ref} = 10\,\lg(T_\mathrm{b}/T_0)$ dB with
+$T_0$ = 1 s, both rounded to a tenth of a decibel. Their limits widen as the
+toneburst shortens, and the S rows have limits of their own. The module
+publishes the table as `IEC61672_TABLE_4`, keyed `"F"`, `"S"` and `"E"`:
+
+```python
+row = metrology.IEC61672_TABLE_4["F"][-1]
+print(row.duration_ms, row.reference_response_db, row.limits_db(1))
+# 0.25 -27.0 (-3.0, 1.0)
+worst = result.requirement("toneburst").verifications[2]
+print(round(worst.deviation, 2), worst.lower_limit)  # -3.4 -3.0
+```
+
+The meter read -30.4 dB for the 0.25 ms toneburst, 3.4 dB below the
+reference, where class 1 allows 3.0 dB. Its uncertainty, 0.25 dB, is within
+the 0.30 dB of Table B.1, so the result is usable and the meter fails the
+clause.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/slm_periodic_toneburst.svg" alt="The eight toneburst results of clause 18 of the synthetic class 1 meter, as IEC 61672-1 Figure C.1 draws its examples: for each of F at 200 ms, 2 ms and 0.25 ms, S at 200 ms and 2 ms and E at 200 ms, 2 ms and 0.25 ms, the deviation from the reference response of Table 4 as a marker, its actual uncertainty as an error bar, the maximum-permitted uncertainty of 0.30 dB as a grey band behind it, and the acceptance limits of Table 4 as short orange bars, plus and minus 0.5 dB at 200 ms, +1.0 and -1.5 dB at 2 ms for F and E and -3.0 dB for S, and +1.0 and -3.0 dB at 0.25 ms. Every marker is a green diamond near zero except F at 0.25 ms, a red cross at -3.4 dB below its -3.0 dB limit; the title reads IEC 61672-3 §18: does not conform, over Toneburst response" width="92%" />
+
+*The toneburst requirement, drawn by its own `.plot()`.*
+
+The C-weighted peak test works the same way from Table 5: the difference
+$L_\mathrm{Cpeak} - L_\mathrm{C}$ measured for one cycle at 8 kHz and for the
+positive and the negative half cycle at 500 Hz, less the reference
+difference of 3.4 dB, 2.4 dB and 2.4 dB. The record gives them in that
+order, and the test's other requirement, that none of the three signals
+causes an overload indication, as `c_peak_overload_indicated`.
+
+```python
+print(metrology.IEC61672_TABLE_5[2])
+# PeakReference(signal='one cycle', nominal_frequency_hz=8000.0,
+#   reference_difference_db=3.4, class_1_limits_db=(-2.0, 2.0),
+#   class_2_limits_db=(-3.0, 3.0))
+```
+
+Table B.1, the maximum-permitted uncertainty of every requirement of
+IEC 61672-1 and not only the periodic ones, is `IEC61672_TABLE_B1`, its
+frequency bands with their printed ends; the frequency weightings are read
+through `filters.weighting_class_limits`, which publishes Table 3.
+
+## 5. What a complete test holds
+
+A pass is a verdict on a complete record. 8.1 asks for every test of a
+design feature IEC 61672-1 requires and the meter provides. A record shows
+the features whose results it holds, and the verdict holds it to them:
+
+- Clauses 7, 10, 11, 12, 13, 15, 16, 18 and 21 for every meter;
+- frequency weighting A in Clause 13 always, and C as well for class 1,
+  which has to provide it (5.1.9, 5.1.10 of IEC 61672-1), and for a meter
+  with a C-weighted peak, which 5.1.10 has measure C-weighted time-averaged
+  sound level too;
+- every weighting any clause names, whether Clause 13, the self-generated
+  noise of 11.2 or 14.2, tested in all three (C and Z compared with A in
+  14.2);
+- Clause 16 over the steps of 16.3: up from the starting point in 5 dB steps
+  until within 5 dB of the upper boundary of the linear operating range, in
+  1 dB steps from there up to, but not including, the first indication of
+  overload, and down the same way to the first indication of under-range. A
+  step wider than that, or a record without the levels to tell, leaves the
+  clause incomplete; smaller steps cover more and are accepted. An overload
+  or under-range indication inside the linear operating range, where the
+  manual says the meter shows neither (IEC 61672-1 5.6.10), fails the clause
+  (16.4);
+- Clause 17 at 5 dB above the first under-range indication on every level
+  range, the reference one included and first (17.4 tests "each level
+  range"), and with the reference level held on every other one (17.3), NaN
+  where a range does not display it. On the reference level range 17.3 has
+  nothing to read: the reference level 17.2 set is the anticipated level
+  there, a deviation of zero by construction (IEC 61672-1 5.6.3);
+- the F, S and time-averaged displays in the toneburst tests of Clause 18,
+  the sound exposure level calculated from the time-averaged one when the
+  meter does not measure it (18.2), and the other way round: 14.3, with S,
+  for a meter whose S-time-weighted toneburst Clause 18 holds, and with the
+  time-averaged display for a meter whose overload indication Clause 20
+  holds;
+- Clause 20 for a meter that displays time-averaged sound level (20.1);
+- the environmental conditions within 80 kPa to 105 kPa, 20 °C to 26 °C and
+  25 % to 70 % (7.1), recorded at the start and the end at least (7.2).
+
+What a record cannot show is a feature the meter lacks: a meter with one
+level range and a record that left Clause 17 out read the same, and so do a
+meter without C-weighted peak and a record without Clause 19. The instruction
+manual says which optional features the meter has, and
+`metrology.SoundLevelMeterFeatures` carries that answer to the verdict,
+through `features=`: `True` for a feature the meter has, `False` for one it
+lacks, `None` (the default) for one not declared. A feature declared present
+owes its tests as a shown one does, and one declared absent takes its
+clauses out of the test. A feature neither declared nor shown keeps the
+verdict from passing, as the record could be hiding a test left out.
+
+The level ranges are a number, `level_ranges`, because a record cannot count
+them either: a Clause 17 with one reading reads the same for a meter with two
+level ranges and for a record that left the others out. `level_ranges=1`
+takes Clause 17 out; a larger number is how many ranges 17.4 covers, the
+reference one included, and 17.3 covers besides it, and until it is
+declared, a meter whose Clause 17 shows several keeps the question open. A feature declared absent also takes
+away the one IEC 61672-1 makes depend on it: a meter without frequency
+weighting C measures no C-weighted peak sound level (5.1.10), so Clause 19 is
+not applicable rather than undeclared, and a meter without F has no S
+(5.1.9). A declaration without F, a time-averaged display and sound exposure
+level is refused, as 5.1.9 asks one of them of every sound level meter.
+
+`missing` names the clauses not measured, `incomplete` what a measured clause
+is short of, `undeclared` the features the verdict cannot place,
+`not_applicable` the clauses the declared features take out, and
+`conditions_outside` the readings outside 7.1. The record of section 3 shows
+every feature, and `meter` gives the number of level ranges, so nothing is
+open. Without Clauses 17 and 19 it is open on both, until the meter is
+declared with one level range and no C-weighted peak:
+
+```python
+import dataclasses
+
+basic = dataclasses.replace(
+    record,
+    range_linearity_deviations_db=None,
+    range_linearity_uncertainties_db=None,
+    c_peak_differences_db=None,
+    c_peak_uncertainties_db=None,
+    c_peak_overload_indicated=None,
+)
+unsaid = metrology.verify_sound_level_meter_periodic(1, basic)
+print([name for name, _ in unsaid.undeclared])
+# ['level_ranges', 'c_weighted_peak']
+declared = metrology.verify_sound_level_meter_periodic(
+    1,
+    basic,
+    features=metrology.SoundLevelMeterFeatures(
+        level_ranges=1, c_weighted_peak=False
+    ),
+)
+print(declared.undeclared, [clause for clause, _ in declared.not_applicable])
+# () ['17', '19']
+```
+
+The verdict's figure gives every graded clause one slot, however many
+results it holds, and keeps one for every graded clause the record does not
+hold, named under the slot: not measured, not declared or not applicable.
+
+The same record without the S toneburst results, whose meter 14.3 shows to
+have S, is incomplete:
+
+```python
+no_s = dataclasses.replace(
+    record,
+    toneburst_responses_db={"F": [-1.1, -18.2, -30.4], "E": [-7.0, -27.1, -36.6]},
+    toneburst_uncertainties_db={"F": [0.2, 0.2, 0.25], "E": [0.2, 0.2, 0.25]},
+)
+short = metrology.verify_sound_level_meter_periodic(1, no_s, features=meter)
+print(short.passes, short.incomplete[0][0])  # False 18
+```
+
+So is a Clause 16 of one step at the starting point, however well it
+conforms: it covers neither the way up to the overload nor the way down to
+the under-range.
+
+```python
+one_step = dataclasses.replace(
+    record,
+    linearity_levels_db=[94.0],
+    linearity_deviations_db=[0.0],
+    linearity_uncertainties_db=[0.18],
+)
+thin = metrology.verify_sound_level_meter_periodic(1, one_step, features=meter)
+print(thin.passes, [clause for clause, _ in thin.incomplete])  # False ['16', '16']
+print(thin.incomplete[0][1][:60])
+# the steps go from 94 dB to the first indication of overload
+```
+
+And so is a Clause 17 whose 17.4 leaves out the reference level range, NaN
+in its first place: 17.4 reads "for each level range", and a level 5 dB
+above the first under-range indication is not the reference level 17.2 set
+there.
+
+```python
+nan = float("nan")
+no_reference = dataclasses.replace(
+    record,
+    range_linearity_deviations_db={"17.3": [0.1], "17.4": [nan, -0.2]},
+    range_linearity_uncertainties_db={"17.3": [0.18], "17.4": [nan, 0.18]},
+)
+open_17 = metrology.verify_sound_level_meter_periodic(1, no_reference, features=meter)
+print(open_17.incomplete)
+# (('17', '17.4 was not measured on the reference level range, and it tests
+#   every level range, the reference one included'),)
+```
+
+The conditions matter to the uncertainty too: below 97 kPa, and unless the
+model's data say otherwise, 7.3 asks the laboratory to add a standard
+uncertainty of 0.09 dB up to 3 kHz and 0.14 dB above it to its tests of the
+frequency weightings. That component belongs to the laboratory's budget, and
+the verdict reads the expanded uncertainty it is given.
+
+## 6. The statement of Clause 22
+
+`result.statement` is the text the documentation of the test carries,
+chosen as Clause 22 chooses it and with the class and the year filled in.
+The first of these that applies decides it:
+
+- **a notice** when the tests were not performed within the conditions of
+  7.1: tests outside them are not periodic tests to IEC 61672-3, whatever
+  their results, and none of 22 r), s) and t) is theirs;
+- **22 t)** when a result lies outside its limits, a check fails or a
+  result exceeds its maximum only by the manufacturer's correction data
+  (4.4): the meter
+  "did not successfully complete the class 1 tests of IEC 61672-3:2013" and
+  "did not conform to the class 1 specifications of IEC 61672-1:2013",
+  followed by the tests not completed and why, in the words its NOTE
+  suggests;
+- **a notice** when a result is unusable (4.3) or the record is
+  incomplete, as 22 r) and s) both need the results of all the periodic
+  tests;
+- **22 r)** when every result passes, evidence of the model's pattern
+  approval under IEC 61672-2 is publicly available
+  (`pattern_approval_public=True`) and the correction data of the acoustical
+  test came from the instruction manual (`corrections_in_manual=True`): the
+  meter "conforms to the class 1 specifications of IEC 61672-1:2013";
+- **22 s)** when every result passes but either is missing: no general
+  conclusion can be drawn about IEC 61672-1, because the periodic tests
+  "cover only a limited subset of the specifications".
+
+Both declarations default to `False`: 22 c) and 12.5 have the laboratory
+state them, and the verdict assumes neither. With the 0.25 ms toneburst
+brought within its limit, a public pattern approval and the correction data
+of Clause 12 taken from the instruction manual, as 12.3 asks first, the same
+meter earns 22 r). `corrections_in_manual=True` is what says where the data
+came from: data from the manufacturer of the microphone or of the calibrator
+(12.4), or a source left undeclared, would give 22 s) instead.
+
+```python
+fixed = dataclasses.replace(
+    record,
+    toneburst_responses_db={
+        "F": [-1.1, -18.2, -29.6],
+        "S": [-7.5, -27.4],
+        "E": [-7.0, -27.1, -36.6],
+    },
+)
+again = metrology.verify_sound_level_meter_periodic(
+    1,
+    fixed,
+    pattern_approval_public=True,
+    corrections_in_manual=True,
+    features=meter,
+)
+print(again.passes)                                  # True
+print(again.statement.endswith("of IEC 61672-1:2013."))  # True
+```
+
+A laboratory whose uncertainty at 8 kHz in Clause 12 is 0.85 dB, past the
+0.70 dB of Table B.1 only because of the manufacturer's correction data,
+gives the 0.66 dB it has without them beside the total. The result is then
+one that did not conform, by 4.4, and the statement is 22 t) with the reason
+the NOTE to 22 t) gives:
+
+```python
+over = dataclasses.replace(
+    fixed,
+    acoustic_weighting_uncertainties_db=[0.28, 0.85],
+    acoustic_weighting_uncertainties_without_correction_data_db=[0.28, 0.66],
+)
+check = metrology.verify_sound_level_meter_periodic(
+    1,
+    over,
+    pattern_approval_public=True,
+    corrections_in_manual=True,
+    features=meter,
+)
+print(check.unusable, check.over_maximum_by_correction_data)
+# () (('12', '8 kHz'),)
+reason = check.requirement("acoustic_weighting").failure_reason("8 kHz")
+print(reason.endswith("uncertainty budget (4.4)"))  # True
+```
+
+<details>
+<summary>Show the code for these figures</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+fig, ax = plt.subplots(figsize=(11, 6.2), layout="constrained")
+result.plot(ax=ax)
+
+fig, ax = plt.subplots(figsize=(10, 5.6), layout="constrained")
+result.requirement("toneburst").plot(ax=ax)
+plt.show()
+```
+
+</details>
+
+## What this guide covers
+
+<Scope>
+<ScopeClaim status="covered" label="Covered">
+**IEC 61672-3:2013, the grading of a laboratory's results:** the conformance
+rule of 4.1 on every graded result of Clauses 12 to 21, with the acceptance
+limits of IEC 61672-1:2013 (Table 3, 5.5.9, 5.6.5, 5.8.3, Table 4, 5.11.3,
+Table 5, 5.14.2 and 5.15.2) and the maxima of its Table B.1; the unusable
+results of 4.3 and the exception of 4.4 for the uncertainty of the
+manufacturer's correction data; the yes/no requirements of 16.4, 19.3, 19.5
+and 20.5; the
+environmental conditions of 7.1 and 7.2; the completeness 8.1 asks for, from
+the features the record shows and those `SoundLevelMeterFeatures` declares
+present or absent, with what IEC 61672-1 5.1.9 and 5.1.10 make of a feature
+declared absent; the extent of Clause 16 over the steps of 16.3 and of
+Clause 17 over every level range (17.3, 17.4); and the statements of 22 r),
+s) and t). Tables 4, 5 and B.1 of IEC 61672-1 are published read-only.
+</ScopeClaim>
+
+<ScopeClaim status="not-covered" label="Not covered">
+The tests themselves: the library drives no calibrator, coupler, actuator or
+electrical input. The level linearity deviations of 16.2 (by the procedure of
+IEC 61672-2), the relative frequency weightings of 12.15 and 13.9 with their
+corrections, and the laboratory's uncertainty budget are inputs. The checks
+that are not a measured deviation are the laboratory's record: the instruction
+manual and markings of Clause 3, the preliminary inspection of Clause 5, the
+power supply of Clause 6, the calibrator's own conformance of Clause 9 (which
+`metrology.verify_sound_calibrator` grades against IEC 60942), the general
+test requirements of 8.2 to 8.5, among them the confirmation of 8.4 that an
+electrical output used for the tests reads as the display does (within the
+±0.1 dB of IEC 61672-1 5.19.4), and the source of the correction data of
+12.2 to 12.6. The 22 l) statement, which the documentation carries when the
+free-field correction data come without an uncertainty, is not written.
+</ScopeClaim>
+</Scope>
+
+<SeeAlso>
+
+## See also
+
+- [Compliance and verification](/phonometry/signals/metrology/compliance-verification/):
+  the conformance rule of IEC TC 29, and what pattern evaluation and periodic
+  tests each attest.
+- [Free-field corrections of a sound level meter](/phonometry/signals/metrology/free-field-corrections/):
+  IEC 62585, the corrections the acoustical test of Clause 12 applies and
+  their uncertainty.
+- [Calibration and dBFS](/phonometry/signals/metrology/calibration/): the
+  sound calibrator of Clause 9 and its own verdict under IEC 60942.
+- [Sound level meter](/phonometry/signals/sound-level-meter/): the frequency
+  and time weightings, and the design verdict the library gives its own
+  chain.
+- API reference: [`metrology.sound_level_meter`](/phonometry/reference/api/metrology/sound-level-meter/).
+
+</SeeAlso>

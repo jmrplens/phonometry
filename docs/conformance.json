@@ -3,13 +3,13 @@
   "library": "4.0.0rc1",
   "generator": "scripts/conformance_report.py",
   "counts": {
-    "checks": 1457,
-    "passing": 1457,
+    "checks": 1497,
+    "passing": 1497,
     "failing": 0,
-    "domains": 97,
-    "standards": 486,
-    "citations": 993,
-    "designations": 197,
+    "domains": 98,
+    "standards": 487,
+    "citations": 1016,
+    "designations": 198,
     "sources": 114
   },
   "units": [
@@ -131,6 +131,12 @@
       "title": "Sound calibrators and the conformance rule (IEC 60942, IEC 61672-1)",
       "checks": 28,
       "passing": 28
+    },
+    {
+      "id": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1",
+      "title": "Sound level meter periodic tests (IEC 61672-3, IEC 61672-1)",
+      "checks": 40,
+      "passing": 40
     },
     {
       "id": "psychoacoustics",
@@ -5531,6 +5537,1830 @@
       "computed": {
         "value": 3.0,
         "label": "3/3 verdicts"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1/iec-61672-1-2013-table-4/reference-responses-and-limits-of-lafmax-la-and-lae-la-12-durations",
+      "domain": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1",
+      "reference": {
+        "cite": "IEC 61672-1:2013 Table 4",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-1",
+            "edition": "2013",
+            "clause": "Table 4"
+          }
+        ]
+      },
+      "quantity": "Reference responses and limits of LAFmax - LA and LAE - LA, 12 durations",
+      "kind": "count",
+      "expected": {
+        "value": 96.0,
+        "label": "96/96 cells"
+      },
+      "computed": {
+        "value": 96.0,
+        "label": "96/96 cells"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1/iec-61672-1-2013-table-4/reference-responses-and-limits-of-lasmax-la-9-durations",
+      "domain": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1",
+      "reference": {
+        "cite": "IEC 61672-1:2013 Table 4",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-1",
+            "edition": "2013",
+            "clause": "Table 4"
+          }
+        ]
+      },
+      "quantity": "Reference responses and limits of LASmax - LA, 9 durations",
+      "kind": "count",
+      "expected": {
+        "value": 36.0,
+        "label": "36/36 cells"
+      },
+      "computed": {
+        "value": 36.0,
+        "label": "36/36 cells"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1/iec-61672-1-2013-table-4-equations-7-and-8/reference-toneburst-responses-against-10-lg-1-exp-tb-tau-and-10-lg-tb-t0",
+      "domain": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1",
+      "reference": {
+        "cite": "IEC 61672-1:2013 Table 4, Equations (7) and (8)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-1",
+            "edition": "2013",
+            "clause": "Table 4, Equations (7) and (8)"
+          }
+        ]
+      },
+      "quantity": "Reference toneburst responses against 10 lg(1 - exp(-Tb/tau)) and 10 lg(Tb/T0)",
+      "kind": "count",
+      "expected": {
+        "value": 33.0,
+        "label": "33/33 reference responses"
+      },
+      "computed": {
+        "value": 33.0,
+        "label": "33/33 reference responses"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1/iec-61672-1-2013-table-5/reference-differences-lcpeak-lc-and-limits-5-test-signals",
+      "domain": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1",
+      "reference": {
+        "cite": "IEC 61672-1:2013 Table 5",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-1",
+            "edition": "2013",
+            "clause": "Table 5"
+          }
+        ]
+      },
+      "quantity": "Reference differences LCpeak - LC and limits, 5 test signals",
+      "kind": "count",
+      "expected": {
+        "value": 25.0,
+        "label": "25/25 cells"
+      },
+      "computed": {
+        "value": 25.0,
+        "label": "25/25 cells"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1/iec-61672-1-2013-table-b-1/maximum-permitted-uncertainties-31-printed-rows-the-f-and-s-decay-rates-in-two",
+      "domain": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1",
+      "reference": {
+        "cite": "IEC 61672-1:2013 Table B.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-1",
+            "edition": "2013",
+            "clause": "Table B.1"
+          }
+        ]
+      },
+      "quantity": "Maximum-permitted uncertainties, 31 printed rows (the F and S decay rates in two)",
+      "kind": "count",
+      "expected": {
+        "value": 32.0,
+        "label": "32/32 rows"
+      },
+      "computed": {
+        "value": 32.0,
+        "label": "32/32 rows"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1/iec-61672-3-2013-12-16-with-iec-61672-1-2013-table-3/acoustical-weighting-at-8-khz-class-1-upper-limit",
+      "domain": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1",
+      "reference": {
+        "cite": "IEC 61672-3:2013 12.16 with IEC 61672-1:2013 Table 3",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-3",
+            "edition": "2013",
+            "clause": "12.16"
+          },
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-1",
+            "edition": "2013",
+            "clause": "Table 3",
+            "lead": " with ",
+            "relation": "supplies"
+          }
+        ]
+      },
+      "quantity": "Acoustical weighting at 8 kHz, class 1, upper limit",
+      "kind": "record",
+      "expected": {
+        "label": "conforms 0.01 dB inside and at the limit, not 0.01 dB past it",
+        "record": {
+          "just inside": 1.0,
+          "at the limit": 1.0,
+          "past it": 0.0
+        }
+      },
+      "computed": {
+        "label": "conforms inside, conforms at the limit, does not conform past it",
+        "record": {
+          "just inside": 1.0,
+          "at the limit": 1.0,
+          "past it": 0.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1/iec-61672-3-2013-12-16-with-iec-61672-1-2013-table-3/acoustical-weighting-at-8-khz-class-1-lower-limit",
+      "domain": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1",
+      "reference": {
+        "cite": "IEC 61672-3:2013 12.16 with IEC 61672-1:2013 Table 3",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-3",
+            "edition": "2013",
+            "clause": "12.16"
+          },
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-1",
+            "edition": "2013",
+            "clause": "Table 3",
+            "lead": " with ",
+            "relation": "supplies"
+          }
+        ]
+      },
+      "quantity": "Acoustical weighting at 8 kHz, class 1, lower limit",
+      "kind": "record",
+      "expected": {
+        "label": "conforms 0.01 dB inside and at the limit, not 0.01 dB past it",
+        "record": {
+          "just inside": 1.0,
+          "at the limit": 1.0,
+          "past it": 0.0
+        }
+      },
+      "computed": {
+        "label": "conforms inside, conforms at the limit, does not conform past it",
+        "record": {
+          "just inside": 1.0,
+          "at the limit": 1.0,
+          "past it": 0.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1/iec-61672-3-2013-12-16-with-iec-61672-1-2013-table-3/acoustical-weighting-at-125-hz-class-2-lower-limit",
+      "domain": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1",
+      "reference": {
+        "cite": "IEC 61672-3:2013 12.16 with IEC 61672-1:2013 Table 3",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-3",
+            "edition": "2013",
+            "clause": "12.16"
+          },
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-1",
+            "edition": "2013",
+            "clause": "Table 3",
+            "lead": " with ",
+            "relation": "supplies"
+          }
+        ]
+      },
+      "quantity": "Acoustical weighting at 125 Hz, class 2, lower limit",
+      "kind": "record",
+      "expected": {
+        "label": "conforms 0.01 dB inside and at the limit, not 0.01 dB past it",
+        "record": {
+          "just inside": 1.0,
+          "at the limit": 1.0,
+          "past it": 0.0
+        }
+      },
+      "computed": {
+        "label": "conforms inside, conforms at the limit, does not conform past it",
+        "record": {
+          "just inside": 1.0,
+          "at the limit": 1.0,
+          "past it": 0.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1/iec-61672-3-2013-12-16-with-iec-61672-1-2013-table-3/acoustical-weighting-at-8-khz-class-2-upper-limit",
+      "domain": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1",
+      "reference": {
+        "cite": "IEC 61672-3:2013 12.16 with IEC 61672-1:2013 Table 3",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-3",
+            "edition": "2013",
+            "clause": "12.16"
+          },
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-1",
+            "edition": "2013",
+            "clause": "Table 3",
+            "lead": " with ",
+            "relation": "supplies"
+          }
+        ]
+      },
+      "quantity": "Acoustical weighting at 8 kHz, class 2, upper limit",
+      "kind": "record",
+      "expected": {
+        "label": "conforms 0.01 dB inside and at the limit, not 0.01 dB past it",
+        "record": {
+          "just inside": 1.0,
+          "at the limit": 1.0,
+          "past it": 0.0
+        }
+      },
+      "computed": {
+        "label": "conforms inside, conforms at the limit, does not conform past it",
+        "record": {
+          "just inside": 1.0,
+          "at the limit": 1.0,
+          "past it": 0.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1/iec-61672-3-2013-13-10-with-iec-61672-1-2013-table-3/electrical-weighting-a-at-16-khz-class-1-lower-limit",
+      "domain": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1",
+      "reference": {
+        "cite": "IEC 61672-3:2013 13.10 with IEC 61672-1:2013 Table 3",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-3",
+            "edition": "2013",
+            "clause": "13.10"
+          },
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-1",
+            "edition": "2013",
+            "clause": "Table 3",
+            "lead": " with ",
+            "relation": "supplies"
+          }
+        ]
+      },
+      "quantity": "Electrical weighting A at 16 kHz, class 1, lower limit",
+      "kind": "record",
+      "expected": {
+        "label": "conforms 0.01 dB inside and at the limit, not 0.01 dB past it",
+        "record": {
+          "just inside": 1.0,
+          "at the limit": 1.0,
+          "past it": 0.0
+        }
+      },
+      "computed": {
+        "label": "conforms inside, conforms at the limit, does not conform past it",
+        "record": {
+          "just inside": 1.0,
+          "at the limit": 1.0,
+          "past it": 0.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1/iec-61672-3-2013-13-10-with-iec-61672-1-2013-table-3/electrical-weighting-c-at-1-khz-class-1-upper-limit",
+      "domain": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1",
+      "reference": {
+        "cite": "IEC 61672-3:2013 13.10 with IEC 61672-1:2013 Table 3",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-3",
+            "edition": "2013",
+            "clause": "13.10"
+          },
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-1",
+            "edition": "2013",
+            "clause": "Table 3",
+            "lead": " with ",
+            "relation": "supplies"
+          }
+        ]
+      },
+      "quantity": "Electrical weighting C at 1 kHz, class 1, upper limit",
+      "kind": "record",
+      "expected": {
+        "label": "conforms 0.01 dB inside and at the limit, not 0.01 dB past it",
+        "record": {
+          "just inside": 1.0,
+          "at the limit": 1.0,
+          "past it": 0.0
+        }
+      },
+      "computed": {
+        "label": "conforms inside, conforms at the limit, does not conform past it",
+        "record": {
+          "just inside": 1.0,
+          "at the limit": 1.0,
+          "past it": 0.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1/iec-61672-3-2013-13-10-with-iec-61672-1-2013-table-3/electrical-weighting-z-at-8-khz-class-2-lower-limit",
+      "domain": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1",
+      "reference": {
+        "cite": "IEC 61672-3:2013 13.10 with IEC 61672-1:2013 Table 3",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-3",
+            "edition": "2013",
+            "clause": "13.10"
+          },
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-1",
+            "edition": "2013",
+            "clause": "Table 3",
+            "lead": " with ",
+            "relation": "supplies"
+          }
+        ]
+      },
+      "quantity": "Electrical weighting Z at 8 kHz, class 2, lower limit",
+      "kind": "record",
+      "expected": {
+        "label": "conforms 0.01 dB inside and at the limit, not 0.01 dB past it",
+        "record": {
+          "just inside": 1.0,
+          "at the limit": 1.0,
+          "past it": 0.0
+        }
+      },
+      "computed": {
+        "label": "conforms inside, conforms at the limit, does not conform past it",
+        "record": {
+          "just inside": 1.0,
+          "at the limit": 1.0,
+          "past it": 0.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1/iec-61672-3-2013-14-2-with-iec-61672-1-2013-5-5-9/c-against-a-at-1-khz",
+      "domain": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1",
+      "reference": {
+        "cite": "IEC 61672-3:2013 14.2 with IEC 61672-1:2013 5.5.9",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-3",
+            "edition": "2013",
+            "clause": "14.2"
+          },
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-1",
+            "edition": "2013",
+            "clause": "5.5.9",
+            "lead": " with ",
+            "relation": "supplies"
+          }
+        ]
+      },
+      "quantity": "C against A at 1 kHz",
+      "kind": "record",
+      "expected": {
+        "label": "conforms 0.01 dB inside and at the limit, not 0.01 dB past it",
+        "record": {
+          "just inside": 1.0,
+          "at the limit": 1.0,
+          "past it": 0.0
+        }
+      },
+      "computed": {
+        "label": "conforms inside, conforms at the limit, does not conform past it",
+        "record": {
+          "just inside": 1.0,
+          "at the limit": 1.0,
+          "past it": 0.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1/iec-61672-3-2013-14-3-with-iec-61672-1-2013-5-8-3/time-averaged-against-f-at-1-khz",
+      "domain": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1",
+      "reference": {
+        "cite": "IEC 61672-3:2013 14.3 with IEC 61672-1:2013 5.8.3",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-3",
+            "edition": "2013",
+            "clause": "14.3"
+          },
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-1",
+            "edition": "2013",
+            "clause": "5.8.3",
+            "lead": " with ",
+            "relation": "supplies"
+          }
+        ]
+      },
+      "quantity": "Time-averaged against F at 1 kHz",
+      "kind": "record",
+      "expected": {
+        "label": "conforms 0.01 dB inside and at the limit, not 0.01 dB past it",
+        "record": {
+          "just inside": 1.0,
+          "at the limit": 1.0,
+          "past it": 0.0
+        }
+      },
+      "computed": {
+        "label": "conforms inside, conforms at the limit, does not conform past it",
+        "record": {
+          "just inside": 1.0,
+          "at the limit": 1.0,
+          "past it": 0.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1/iec-61672-3-2013-15-3-with-iec-61672-1-2013-5-14-2/long-term-stability-class-1",
+      "domain": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1",
+      "reference": {
+        "cite": "IEC 61672-3:2013 15.3 with IEC 61672-1:2013 5.14.2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-3",
+            "edition": "2013",
+            "clause": "15.3"
+          },
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-1",
+            "edition": "2013",
+            "clause": "5.14.2",
+            "lead": " with ",
+            "relation": "supplies"
+          }
+        ]
+      },
+      "quantity": "Long-term stability, class 1",
+      "kind": "record",
+      "expected": {
+        "label": "conforms 0.01 dB inside and at the limit, not 0.01 dB past it",
+        "record": {
+          "just inside": 1.0,
+          "at the limit": 1.0,
+          "past it": 0.0
+        }
+      },
+      "computed": {
+        "label": "conforms inside, conforms at the limit, does not conform past it",
+        "record": {
+          "just inside": 1.0,
+          "at the limit": 1.0,
+          "past it": 0.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1/iec-61672-3-2013-15-3-with-iec-61672-1-2013-5-14-2/long-term-stability-class-2",
+      "domain": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1",
+      "reference": {
+        "cite": "IEC 61672-3:2013 15.3 with IEC 61672-1:2013 5.14.2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-3",
+            "edition": "2013",
+            "clause": "15.3"
+          },
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-1",
+            "edition": "2013",
+            "clause": "5.14.2",
+            "lead": " with ",
+            "relation": "supplies"
+          }
+        ]
+      },
+      "quantity": "Long-term stability, class 2",
+      "kind": "record",
+      "expected": {
+        "label": "conforms 0.01 dB inside and at the limit, not 0.01 dB past it",
+        "record": {
+          "just inside": 1.0,
+          "at the limit": 1.0,
+          "past it": 0.0
+        }
+      },
+      "computed": {
+        "label": "conforms inside, conforms at the limit, does not conform past it",
+        "record": {
+          "just inside": 1.0,
+          "at the limit": 1.0,
+          "past it": 0.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1/iec-61672-3-2013-16-4-with-iec-61672-1-2013-5-6-5/level-linearity-on-the-reference-level-range-class-1",
+      "domain": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1",
+      "reference": {
+        "cite": "IEC 61672-3:2013 16.4 with IEC 61672-1:2013 5.6.5",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-3",
+            "edition": "2013",
+            "clause": "16.4"
+          },
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-1",
+            "edition": "2013",
+            "clause": "5.6.5",
+            "lead": " with ",
+            "relation": "supplies"
+          }
+        ]
+      },
+      "quantity": "Level linearity on the reference level range, class 1",
+      "kind": "record",
+      "expected": {
+        "label": "conforms 0.01 dB inside and at the limit, not 0.01 dB past it",
+        "record": {
+          "just inside": 1.0,
+          "at the limit": 1.0,
+          "past it": 0.0
+        }
+      },
+      "computed": {
+        "label": "conforms inside, conforms at the limit, does not conform past it",
+        "record": {
+          "just inside": 1.0,
+          "at the limit": 1.0,
+          "past it": 0.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1/iec-61672-3-2013-16-4-with-iec-61672-1-2013-5-6-5/level-linearity-on-the-reference-level-range-class-2",
+      "domain": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1",
+      "reference": {
+        "cite": "IEC 61672-3:2013 16.4 with IEC 61672-1:2013 5.6.5",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-3",
+            "edition": "2013",
+            "clause": "16.4"
+          },
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-1",
+            "edition": "2013",
+            "clause": "5.6.5",
+            "lead": " with ",
+            "relation": "supplies"
+          }
+        ]
+      },
+      "quantity": "Level linearity on the reference level range, class 2",
+      "kind": "record",
+      "expected": {
+        "label": "conforms 0.01 dB inside and at the limit, not 0.01 dB past it",
+        "record": {
+          "just inside": 1.0,
+          "at the limit": 1.0,
+          "past it": 0.0
+        }
+      },
+      "computed": {
+        "label": "conforms inside, conforms at the limit, does not conform past it",
+        "record": {
+          "just inside": 1.0,
+          "at the limit": 1.0,
+          "past it": 0.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1/iec-61672-3-2013-17-5-with-iec-61672-1-2013-5-6-5/level-linearity-including-the-range-control-class-1",
+      "domain": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1",
+      "reference": {
+        "cite": "IEC 61672-3:2013 17.5 with IEC 61672-1:2013 5.6.5",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-3",
+            "edition": "2013",
+            "clause": "17.5"
+          },
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-1",
+            "edition": "2013",
+            "clause": "5.6.5",
+            "lead": " with ",
+            "relation": "supplies"
+          }
+        ]
+      },
+      "quantity": "Level linearity including the range control, class 1",
+      "kind": "record",
+      "expected": {
+        "label": "conforms 0.01 dB inside and at the limit, not 0.01 dB past it",
+        "record": {
+          "just inside": 1.0,
+          "at the limit": 1.0,
+          "past it": 0.0
+        }
+      },
+      "computed": {
+        "label": "conforms inside, conforms at the limit, does not conform past it",
+        "record": {
+          "just inside": 1.0,
+          "at the limit": 1.0,
+          "past it": 0.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1/iec-61672-3-2013-17-5-with-iec-61672-1-2013-5-6-5/level-linearity-including-the-range-control-class-2",
+      "domain": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1",
+      "reference": {
+        "cite": "IEC 61672-3:2013 17.5 with IEC 61672-1:2013 5.6.5",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-3",
+            "edition": "2013",
+            "clause": "17.5"
+          },
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-1",
+            "edition": "2013",
+            "clause": "5.6.5",
+            "lead": " with ",
+            "relation": "supplies"
+          }
+        ]
+      },
+      "quantity": "Level linearity including the range control, class 2",
+      "kind": "record",
+      "expected": {
+        "label": "conforms 0.01 dB inside and at the limit, not 0.01 dB past it",
+        "record": {
+          "just inside": 1.0,
+          "at the limit": 1.0,
+          "past it": 0.0
+        }
+      },
+      "computed": {
+        "label": "conforms inside, conforms at the limit, does not conform past it",
+        "record": {
+          "just inside": 1.0,
+          "at the limit": 1.0,
+          "past it": 0.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1/iec-61672-3-2013-18-8-with-iec-61672-1-2013-table-4/toneburst-lafmax-la-at-0-25-ms-class-1-lower-limit",
+      "domain": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1",
+      "reference": {
+        "cite": "IEC 61672-3:2013 18.8 with IEC 61672-1:2013 Table 4",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-3",
+            "edition": "2013",
+            "clause": "18.8"
+          },
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-1",
+            "edition": "2013",
+            "clause": "Table 4",
+            "lead": " with ",
+            "relation": "supplies"
+          }
+        ]
+      },
+      "quantity": "Toneburst LAFmax - LA at 0.25 ms, class 1, lower limit",
+      "kind": "record",
+      "expected": {
+        "label": "conforms 0.01 dB inside and at the limit, not 0.01 dB past it",
+        "record": {
+          "just inside": 1.0,
+          "at the limit": 1.0,
+          "past it": 0.0
+        }
+      },
+      "computed": {
+        "label": "conforms inside, conforms at the limit, does not conform past it",
+        "record": {
+          "just inside": 1.0,
+          "at the limit": 1.0,
+          "past it": 0.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1/iec-61672-3-2013-18-8-with-iec-61672-1-2013-table-4/toneburst-lafmax-la-at-0-25-ms-class-2-lower-limit",
+      "domain": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1",
+      "reference": {
+        "cite": "IEC 61672-3:2013 18.8 with IEC 61672-1:2013 Table 4",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-3",
+            "edition": "2013",
+            "clause": "18.8"
+          },
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-1",
+            "edition": "2013",
+            "clause": "Table 4",
+            "lead": " with ",
+            "relation": "supplies"
+          }
+        ]
+      },
+      "quantity": "Toneburst LAFmax - LA at 0.25 ms, class 2, lower limit",
+      "kind": "record",
+      "expected": {
+        "label": "conforms 0.01 dB inside and at the limit, not 0.01 dB past it",
+        "record": {
+          "just inside": 1.0,
+          "at the limit": 1.0,
+          "past it": 0.0
+        }
+      },
+      "computed": {
+        "label": "conforms inside, conforms at the limit, does not conform past it",
+        "record": {
+          "just inside": 1.0,
+          "at the limit": 1.0,
+          "past it": 0.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1/iec-61672-3-2013-18-8-with-iec-61672-1-2013-table-4/toneburst-lafmax-la-at-0-25-ms-class-2-upper-limit",
+      "domain": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1",
+      "reference": {
+        "cite": "IEC 61672-3:2013 18.8 with IEC 61672-1:2013 Table 4",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-3",
+            "edition": "2013",
+            "clause": "18.8"
+          },
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-1",
+            "edition": "2013",
+            "clause": "Table 4",
+            "lead": " with ",
+            "relation": "supplies"
+          }
+        ]
+      },
+      "quantity": "Toneburst LAFmax - LA at 0.25 ms, class 2, upper limit",
+      "kind": "record",
+      "expected": {
+        "label": "conforms 0.01 dB inside and at the limit, not 0.01 dB past it",
+        "record": {
+          "just inside": 1.0,
+          "at the limit": 1.0,
+          "past it": 0.0
+        }
+      },
+      "computed": {
+        "label": "conforms inside, conforms at the limit, does not conform past it",
+        "record": {
+          "just inside": 1.0,
+          "at the limit": 1.0,
+          "past it": 0.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1/iec-61672-3-2013-18-8-with-iec-61672-1-2013-table-4/toneburst-lasmax-la-at-2-ms-class-1-lower-limit",
+      "domain": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1",
+      "reference": {
+        "cite": "IEC 61672-3:2013 18.8 with IEC 61672-1:2013 Table 4",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-3",
+            "edition": "2013",
+            "clause": "18.8"
+          },
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-1",
+            "edition": "2013",
+            "clause": "Table 4",
+            "lead": " with ",
+            "relation": "supplies"
+          }
+        ]
+      },
+      "quantity": "Toneburst LASmax - LA at 2 ms, class 1, lower limit",
+      "kind": "record",
+      "expected": {
+        "label": "conforms 0.01 dB inside and at the limit, not 0.01 dB past it",
+        "record": {
+          "just inside": 1.0,
+          "at the limit": 1.0,
+          "past it": 0.0
+        }
+      },
+      "computed": {
+        "label": "conforms inside, conforms at the limit, does not conform past it",
+        "record": {
+          "just inside": 1.0,
+          "at the limit": 1.0,
+          "past it": 0.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1/iec-61672-3-2013-18-8-with-iec-61672-1-2013-table-4/toneburst-lasmax-la-at-2-ms-class-2-lower-limit",
+      "domain": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1",
+      "reference": {
+        "cite": "IEC 61672-3:2013 18.8 with IEC 61672-1:2013 Table 4",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-3",
+            "edition": "2013",
+            "clause": "18.8"
+          },
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-1",
+            "edition": "2013",
+            "clause": "Table 4",
+            "lead": " with ",
+            "relation": "supplies"
+          }
+        ]
+      },
+      "quantity": "Toneburst LASmax - LA at 2 ms, class 2, lower limit",
+      "kind": "record",
+      "expected": {
+        "label": "conforms 0.01 dB inside and at the limit, not 0.01 dB past it",
+        "record": {
+          "just inside": 1.0,
+          "at the limit": 1.0,
+          "past it": 0.0
+        }
+      },
+      "computed": {
+        "label": "conforms inside, conforms at the limit, does not conform past it",
+        "record": {
+          "just inside": 1.0,
+          "at the limit": 1.0,
+          "past it": 0.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1/iec-61672-3-2013-19-6-with-iec-61672-1-2013-table-5/c-weighted-peak-one-cycle-at-8-khz-class-1-upper-limit",
+      "domain": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1",
+      "reference": {
+        "cite": "IEC 61672-3:2013 19.6 with IEC 61672-1:2013 Table 5",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-3",
+            "edition": "2013",
+            "clause": "19.6"
+          },
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-1",
+            "edition": "2013",
+            "clause": "Table 5",
+            "lead": " with ",
+            "relation": "supplies"
+          }
+        ]
+      },
+      "quantity": "C-weighted peak, one cycle at 8 kHz, class 1, upper limit",
+      "kind": "record",
+      "expected": {
+        "label": "conforms 0.01 dB inside and at the limit, not 0.01 dB past it",
+        "record": {
+          "just inside": 1.0,
+          "at the limit": 1.0,
+          "past it": 0.0
+        }
+      },
+      "computed": {
+        "label": "conforms inside, conforms at the limit, does not conform past it",
+        "record": {
+          "just inside": 1.0,
+          "at the limit": 1.0,
+          "past it": 0.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1/iec-61672-3-2013-19-6-with-iec-61672-1-2013-table-5/c-weighted-peak-one-cycle-at-8-khz-class-2-upper-limit",
+      "domain": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1",
+      "reference": {
+        "cite": "IEC 61672-3:2013 19.6 with IEC 61672-1:2013 Table 5",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-3",
+            "edition": "2013",
+            "clause": "19.6"
+          },
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-1",
+            "edition": "2013",
+            "clause": "Table 5",
+            "lead": " with ",
+            "relation": "supplies"
+          }
+        ]
+      },
+      "quantity": "C-weighted peak, one cycle at 8 kHz, class 2, upper limit",
+      "kind": "record",
+      "expected": {
+        "label": "conforms 0.01 dB inside and at the limit, not 0.01 dB past it",
+        "record": {
+          "just inside": 1.0,
+          "at the limit": 1.0,
+          "past it": 0.0
+        }
+      },
+      "computed": {
+        "label": "conforms inside, conforms at the limit, does not conform past it",
+        "record": {
+          "just inside": 1.0,
+          "at the limit": 1.0,
+          "past it": 0.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1/iec-61672-3-2013-19-6-with-iec-61672-1-2013-table-5/c-weighted-peak-negative-half-cycle-at-500-hz-class-1-lower-limit",
+      "domain": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1",
+      "reference": {
+        "cite": "IEC 61672-3:2013 19.6 with IEC 61672-1:2013 Table 5",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-3",
+            "edition": "2013",
+            "clause": "19.6"
+          },
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-1",
+            "edition": "2013",
+            "clause": "Table 5",
+            "lead": " with ",
+            "relation": "supplies"
+          }
+        ]
+      },
+      "quantity": "C-weighted peak, negative half cycle at 500 Hz, class 1, lower limit",
+      "kind": "record",
+      "expected": {
+        "label": "conforms 0.01 dB inside and at the limit, not 0.01 dB past it",
+        "record": {
+          "just inside": 1.0,
+          "at the limit": 1.0,
+          "past it": 0.0
+        }
+      },
+      "computed": {
+        "label": "conforms inside, conforms at the limit, does not conform past it",
+        "record": {
+          "just inside": 1.0,
+          "at the limit": 1.0,
+          "past it": 0.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1/iec-61672-3-2013-19-6-with-iec-61672-1-2013-table-5/c-weighted-peak-negative-half-cycle-at-500-hz-class-2-lower-limit",
+      "domain": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1",
+      "reference": {
+        "cite": "IEC 61672-3:2013 19.6 with IEC 61672-1:2013 Table 5",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-3",
+            "edition": "2013",
+            "clause": "19.6"
+          },
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-1",
+            "edition": "2013",
+            "clause": "Table 5",
+            "lead": " with ",
+            "relation": "supplies"
+          }
+        ]
+      },
+      "quantity": "C-weighted peak, negative half cycle at 500 Hz, class 2, lower limit",
+      "kind": "record",
+      "expected": {
+        "label": "conforms 0.01 dB inside and at the limit, not 0.01 dB past it",
+        "record": {
+          "just inside": 1.0,
+          "at the limit": 1.0,
+          "past it": 0.0
+        }
+      },
+      "computed": {
+        "label": "conforms inside, conforms at the limit, does not conform past it",
+        "record": {
+          "just inside": 1.0,
+          "at the limit": 1.0,
+          "past it": 0.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1/iec-61672-3-2013-20-4-with-iec-61672-1-2013-5-11-3/overload-indication-positive-less-negative-half-cycle",
+      "domain": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1",
+      "reference": {
+        "cite": "IEC 61672-3:2013 20.4 with IEC 61672-1:2013 5.11.3",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-3",
+            "edition": "2013",
+            "clause": "20.4"
+          },
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-1",
+            "edition": "2013",
+            "clause": "5.11.3",
+            "lead": " with ",
+            "relation": "supplies"
+          }
+        ]
+      },
+      "quantity": "Overload indication, positive less negative half cycle",
+      "kind": "record",
+      "expected": {
+        "label": "conforms 0.01 dB inside and at the limit, not 0.01 dB past it",
+        "record": {
+          "just inside": 1.0,
+          "at the limit": 1.0,
+          "past it": 0.0
+        }
+      },
+      "computed": {
+        "label": "conforms inside, conforms at the limit, does not conform past it",
+        "record": {
+          "just inside": 1.0,
+          "at the limit": 1.0,
+          "past it": 0.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1/iec-61672-3-2013-21-3-with-iec-61672-1-2013-5-15-2/high-level-stability-class-1",
+      "domain": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1",
+      "reference": {
+        "cite": "IEC 61672-3:2013 21.3 with IEC 61672-1:2013 5.15.2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-3",
+            "edition": "2013",
+            "clause": "21.3"
+          },
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-1",
+            "edition": "2013",
+            "clause": "5.15.2",
+            "lead": " with ",
+            "relation": "supplies"
+          }
+        ]
+      },
+      "quantity": "High-level stability, class 1",
+      "kind": "record",
+      "expected": {
+        "label": "conforms 0.01 dB inside and at the limit, not 0.01 dB past it",
+        "record": {
+          "just inside": 1.0,
+          "at the limit": 1.0,
+          "past it": 0.0
+        }
+      },
+      "computed": {
+        "label": "conforms inside, conforms at the limit, does not conform past it",
+        "record": {
+          "just inside": 1.0,
+          "at the limit": 1.0,
+          "past it": 0.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1/iec-61672-3-2013-21-3-with-iec-61672-1-2013-5-15-2/high-level-stability-class-2",
+      "domain": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1",
+      "reference": {
+        "cite": "IEC 61672-3:2013 21.3 with IEC 61672-1:2013 5.15.2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-3",
+            "edition": "2013",
+            "clause": "21.3"
+          },
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-1",
+            "edition": "2013",
+            "clause": "5.15.2",
+            "lead": " with ",
+            "relation": "supplies"
+          }
+        ]
+      },
+      "quantity": "High-level stability, class 2",
+      "kind": "record",
+      "expected": {
+        "label": "conforms 0.01 dB inside and at the limit, not 0.01 dB past it",
+        "record": {
+          "just inside": 1.0,
+          "at the limit": 1.0,
+          "past it": 0.0
+        }
+      },
+      "computed": {
+        "label": "conforms inside, conforms at the limit, does not conform past it",
+        "record": {
+          "just inside": 1.0,
+          "at the limit": 1.0,
+          "past it": 0.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1/iec-61672-3-2013-4-3-with-iec-61672-1-2013-table-b-1/the-maximum-of-every-requirement-conforms-at-its-value-unusable-0-01-db-above",
+      "domain": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1",
+      "reference": {
+        "cite": "IEC 61672-3:2013 4.3 with IEC 61672-1:2013 Table B.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-3",
+            "edition": "2013",
+            "clause": "4.3"
+          },
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-1",
+            "edition": "2013",
+            "clause": "Table B.1",
+            "lead": " with ",
+            "relation": "supplies"
+          }
+        ]
+      },
+      "quantity": "The maximum of every requirement: conforms at its value, unusable 0.01 dB above",
+      "kind": "count",
+      "expected": {
+        "value": 11.0,
+        "label": "11/11 maxima"
+      },
+      "computed": {
+        "value": 11.0,
+        "label": "11/11 maxima"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1/iec-61672-3-2013-4-4-with-iec-61672-1-2013-table-b-1/over-the-maximum-only-by-the-correction-data-did-not-conform-and-unusable-past-it",
+      "domain": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1",
+      "reference": {
+        "cite": "IEC 61672-3:2013 4.4 with IEC 61672-1:2013 Table B.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-3",
+            "edition": "2013",
+            "clause": "4.4"
+          },
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-1",
+            "edition": "2013",
+            "clause": "Table B.1",
+            "lead": " with ",
+            "relation": "supplies"
+          }
+        ]
+      },
+      "quantity": "Over the maximum only by the correction data: did not conform, and unusable past it",
+      "kind": "record",
+      "expected": {
+        "label": "4.4 inside and at the maximum, unusable (4.3) past it",
+        "record": {
+          "just inside": 1.0,
+          "at the maximum": 1.0,
+          "past it": 0.0
+        }
+      },
+      "computed": {
+        "label": "4.4 just inside, 4.4 at the maximum, not 4.4 past it",
+        "record": {
+          "just inside": 1.0,
+          "at the maximum": 1.0,
+          "past it": 0.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1/iec-61672-3-2013-8-1-with-iec-61672-1-2013-5-1-10/a-class-2-meter-with-c-weighted-peak-owes-c-in-11-2-13-and-14-2",
+      "domain": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1",
+      "reference": {
+        "cite": "IEC 61672-3:2013 8.1 with IEC 61672-1:2013 5.1.10",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-3",
+            "edition": "2013",
+            "clause": "8.1"
+          },
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-1",
+            "edition": "2013",
+            "clause": "5.1.10",
+            "lead": " with ",
+            "relation": "supplies"
+          }
+        ]
+      },
+      "quantity": "A class 2 meter with C-weighted peak owes C in 11.2, 13 and 14.2",
+      "kind": "count",
+      "expected": {
+        "value": 4.0,
+        "label": "4/4 completeness findings"
+      },
+      "computed": {
+        "value": 4.0,
+        "label": "4/4 completeness findings"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1/iec-61672-3-2013-8-1-14-1-and-20-1/s-tonebursts-and-an-overload-test-show-the-displays-14-3-compares-with-f",
+      "domain": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1",
+      "reference": {
+        "cite": "IEC 61672-3:2013 8.1, 14.1 and 20.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-3",
+            "edition": "2013",
+            "clause": "8.1, 14.1 and 20.1"
+          }
+        ]
+      },
+      "quantity": "S tonebursts and an overload test show the displays 14.3 compares with F",
+      "kind": "count",
+      "expected": {
+        "value": 4.0,
+        "label": "4/4 completeness findings"
+      },
+      "computed": {
+        "value": 4.0,
+        "label": "4/4 completeness findings"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1/iec-61672-3-2013-16-3-17-3-and-17-4/steps-short-of-16-3-or-a-level-range-left-out-of-17-4-the-reference-one-included-leave-the-test-open",
+      "domain": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1",
+      "reference": {
+        "cite": "IEC 61672-3:2013 16.3, 17.3 and 17.4",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-3",
+            "edition": "2013",
+            "clause": "16.3, 17.3 and 17.4"
+          }
+        ]
+      },
+      "quantity": "Steps short of 16.3, or a level range left out of 17.4, the reference one included, leave the test open",
+      "kind": "count",
+      "expected": {
+        "value": 7.0,
+        "label": "7/7 completeness findings"
+      },
+      "computed": {
+        "value": 7.0,
+        "label": "7/7 completeness findings"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1/iec-61672-3-2013-22-r/statement-of-a-pass-with-public-pattern-approval-class-1",
+      "domain": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1",
+      "reference": {
+        "cite": "IEC 61672-3:2013 22 r)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-3",
+            "edition": "2013",
+            "clause": "22 r)"
+          }
+        ]
+      },
+      "quantity": "Statement of a pass with public pattern approval, class 1",
+      "kind": "count",
+      "expected": {
+        "value": 1.0,
+        "label": "1/1 statement word for word"
+      },
+      "computed": {
+        "value": 1.0,
+        "label": "1/1 statement word for word"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1/iec-61672-3-2013-22-s/statement-of-a-pass-without-public-pattern-approval-class-2",
+      "domain": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1",
+      "reference": {
+        "cite": "IEC 61672-3:2013 22 s)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-3",
+            "edition": "2013",
+            "clause": "22 s)"
+          }
+        ]
+      },
+      "quantity": "Statement of a pass without public pattern approval, class 2",
+      "kind": "count",
+      "expected": {
+        "value": 1.0,
+        "label": "1/1 statement word for word"
+      },
+      "computed": {
+        "value": 1.0,
+        "label": "1/1 statement word for word"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1/iec-61672-3-2013-22-t/statement-of-a-failure-class-1",
+      "domain": "sound-level-meter-periodic-tests-iec-61672-3-iec-61672-1",
+      "reference": {
+        "cite": "IEC 61672-3:2013 22 t)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61672-3",
+            "edition": "2013",
+            "clause": "22 t)"
+          }
+        ]
+      },
+      "quantity": "Statement of a failure, class 1",
+      "kind": "count",
+      "expected": {
+        "value": 1.0,
+        "label": "1/1 statement word for word"
+      },
+      "computed": {
+        "value": 1.0,
+        "label": "1/1 statement word for word"
       },
       "tolerance": {
         "mode": "absolute",

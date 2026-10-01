@@ -3459,9 +3459,10 @@ def _d_verification_regimes(s: SVG, th: Theme) -> None:
     set and below 1,5 times the highest, so fifteen is a ceiling. The box at
     the foot is the conformance criterion both series apply (5.1.21 of
     IEC 61672-1, 5.1.9 of IEC 61260-1), of which a computed response can show
-    only the first half. The arrow down the right margin is
-    ``verify_filter_periodic``, which grades a laboratory's Part 3 results
-    for a band filter on both halves without running a test.
+    only the first half. The arrows down the two outer margins are
+    ``verify_sound_level_meter_periodic`` and ``verify_filter_periodic``,
+    which grade a laboratory's Part 3 results for a sound level meter and for
+    a band filter on both halves without running a test.
     """
     left, right, mid = 36.0, 864.0, 450.0
     xl, xr = 52.0, 466.0  # text start of the meter cell and of the filter cell
@@ -3672,6 +3673,7 @@ def _d_verification_regimes(s: SVG, th: Theme) -> None:
             "by sound at 125 Hz, 1 kHz, 8 kHz; electrically at",
             "octaves from 63 Hz to 16 kHz for class 1; linearity,",
             "tonebursts, C-weighted peak, overload",
+            "frequency and time weightings at 1 kHz, stability",
         ),
     )
     lines(
@@ -3696,14 +3698,30 @@ def _d_verification_regimes(s: SVG, th: Theme) -> None:
     )
 
     # The approval that Part 2 publishes is what the verdict of Part 3 leans on.
+    # Its line breaks where the grader's arrow below crosses it, so that the
+    # crossing reads as one line passing over the other and not as a junction.
     s.path(
-        f"M {left} {y2 + 208} H 22 V {y3 + 220} H {left - 10}",
+        f"M {left} {y2 + 208} H 22 V {y3 + 38} M 22 {y3 + 50} V {y3 + 220} "
+        f"H {left - 10}",
         stroke=th.accent,
         sw=1.6,
     )
     s.arrow(left - 10, y3 + 220, left - 1, y3 + 220, th.accent, 1.6)
 
-    # The periodic grader: a laboratory's Part 3 results, read on both halves.
+    # The periodic graders: a laboratory's Part 3 results, read on both
+    # halves. The meter's runs down the far left, outside the approval arrow,
+    # and names itself after the heading of the cell it reaches.
+    s.path(f"M 150 80 H 10 V {y3 + 44}", stroke=th.primary, sw=1.6)
+    s.arrow(10, y3 + 44, left + 1, y3 + 44, th.primary, 1.6)
+    s.text(
+        xl + s.text_width("IEC 61672-3", 13, bold=True) + 14,
+        y3 + 48,
+        "verify_sound_level_meter_periodic",
+        12,
+        th.primary,
+        "start",
+        mono=True,
+    )
     s.path(f"M 750 80 H 882 V {y3 + 44}", stroke=th.primary, sw=1.6)
     s.arrow(882, y3 + 44, right + 1, y3 + 44, th.primary, 1.6)
     s.text(
@@ -3745,7 +3763,8 @@ def _d_verification_regimes(s: SVG, th: Theme) -> None:
     s.text(
         mid,
         yf + 92,
-        "and verify_filter_periodic grades both on a band filter's periodic results",
+        "and verify_sound_level_meter_periodic and verify_filter_periodic grade "
+        "both on periodic results",
         12,
         th.muted,
     )

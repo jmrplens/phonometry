@@ -421,7 +421,12 @@ de la Tabla 3 (ponderación) y la Tabla 1 (filtro) que comprueban
 propia cobertura en detalle. El calibrador del que parte la cadena tiene su
 propio veredicto: `metrology.verify_sound_calibrator` juzga lo que un
 laboratorio midió en él frente a cada requisito de IEC 60942:2017 que tiene
-límite de aceptación, con la regla de conformidad del IEC TC 29.
+límite de aceptación, con la regla de conformidad del IEC TC 29. También lo
+tiene el ensayo periódico de un sonómetro en servicio:
+`metrology.verify_sound_level_meter_periodic` juzga lo que un laboratorio
+midió en los ensayos de IEC 61672-3:2013, apartado por apartado ([Ensayos
+periódicos de un
+sonómetro](/phonometry/es/signals/metrology/sound-level-meter-periodic-tests/)).
 </ScopeClaim>
 
 <ScopeClaim status="not-covered" label="No cubierto">
@@ -431,7 +436,8 @@ normas; no realizan los ensayos de evaluación de patrón de IEC 61672-2:2013
 que necesita un instrumento físico para su aprobación de tipo, como el ruido
 autogenerado, el rango de linealidad, la indicación de sobrecarga o la
 respuesta direccional, ni los ensayos periódicos de IEC 61672-3:2013 que
-recibe un instrumento en servicio. Un veredicto de clase de esta página
+recibe un instrumento en servicio, cuyos resultados devuelve un laboratorio y
+juzga `verify_sound_level_meter_periodic`. Un veredicto de clase de esta página
 describe el algoritmo, no un aparato construido, y las tres comprobaciones del
 paso 7 criban la *grabación*, no el instrumento. Lo mismo vale para el
 calibrador: aquí no se realiza sobre él ningún ensayo de IEC 60942:2017.

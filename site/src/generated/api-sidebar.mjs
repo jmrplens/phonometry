@@ -50,6 +50,7 @@ export const apiSections = {
       'reference/api/metrology/reference-values',
       'reference/api/metrology/random-incidence',
       'reference/api/metrology/free-field-corrections',
+      'reference/api/metrology/sound-level-meter',
     ],
   },
   'fluids': {

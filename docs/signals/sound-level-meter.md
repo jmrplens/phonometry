@@ -200,14 +200,18 @@ the Table 3 (weighting) and Table 1 (filter) class acceptance limits checked by
 states its coverage in detail. The calibrator the pipeline starts from has a
 verdict of its own: `metrology.verify_sound_calibrator` grades what a
 laboratory measured on it against every IEC 60942:2017 requirement that has an
-acceptance limit, by the conformance rule of IEC TC 29.
+acceptance limit, by the conformance rule of IEC TC 29. So has a working
+meter's periodic test: `metrology.verify_sound_level_meter_periodic` grades
+what a laboratory measured in the tests of IEC 61672-3:2013, clause by clause
+([Periodic tests of a sound level meter](metrology/sound-level-meter-periodic-tests.md)).
 
 **Not covered.** `verify_weighting_class` and `verify_filter_class` check the
 frequency-response *design* of the digital filters against the standards'
 tables. They do not run the IEC 61672-2:2013 pattern-evaluation tests a
 physical instrument needs for type approval (self-generated noise, linearity
 range, overload indication, directional response) nor the IEC 61672-3:2013
-periodic tests a working instrument receives. A class verdict from this page
+periodic tests a working instrument receives, whose results a laboratory
+returns and `verify_sound_level_meter_periodic` grades. A class verdict from this page
 describes an algorithm, not a built device, and the screening checks of the
 last section screen the *recording*, not the instrument. The same holds for
 the calibrator: nothing here performs an IEC 60942:2017 test on one.

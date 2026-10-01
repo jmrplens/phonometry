@@ -834,6 +834,80 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   width, which is what it takes to sketch a single panel's transmission loss
   without solving the plate model. `building.PLATEAU_MATERIALS`, which typed
   the same twenty-four numbers a second time, is now built from it.
+- **The periodic tests of a sound level meter get their verdict (IEC
+  61672-3:2013).** `metrology.verify_sound_level_meter_periodic` grades what a
+  laboratory measured on a working meter,
+  `metrology.SoundLevelMeterPeriodicMeasurements`, clause by clause by the
+  conformance rule of IEC TC 29 that 4.1 states: the frequency weighting with
+  acoustical signals at 125 Hz and 8 kHz and every weighting with electrical
+  signals at the octaves of 13.4, against Table 3 of IEC 61672-1:2013; C and Z
+  against A and S and time-averaged against F at 1 kHz (5.5.9, 5.8.3); the
+  long-term and the high-level stability (5.14.2, 5.15.2); the level
+  linearity on the reference level range and through the level range control
+  (5.6.5); the 4 kHz tonebursts against Table 4 and the C-weighted peak
+  against Table 5, from the responses as measured; and the overload
+  indication (5.11.3). Each result carries the maximum-permitted uncertainty
+  of Table B.1, results above it are listed as unusable (4.3), and the yes/no
+  requirements of 16.4, 19.3, 19.5 and 20.5 are checks of their clauses. A
+  frequency-weighting result over its maximum only because of the uncertainty
+  of the manufacturer's free-field or random-incidence correction data is a
+  result that did not conform, by 4.4, with the reason the NOTE to 22 t)
+  gives, when the record carries the uncertainty without that data
+  (`acoustic_weighting_uncertainties_without_correction_data_db` and its
+  Clause 13 twin); the uncertainty without it is still held to the maximum.
+  The verdict also says what a complete test lacks by the rule of 8.1, from
+  the weightings the class has to provide, or a C-weighted peak result shows
+  (IEC 61672-1 5.1.10), to the displays 14.3 compares with F, which S
+  tonebursts and an overload test show as well, and the sound exposure level
+  18.2 calculates from a time-averaged display. A record cannot show a
+  feature the meter lacks, so `metrology.SoundLevelMeterFeatures`, passed as
+  `features`, declares the optional ones (C and Z, F and S, a time-averaged
+  display, sound exposure level and C-weighted peak) and the number of level
+  ranges, `level_ranges`: a feature declared present owes its tests, one
+  declared absent takes its clauses out under `not_applicable`, together with
+  the one IEC 61672-1 makes depend on it (no C-weighted peak without C,
+  5.1.10; no S without F, 5.1.9), and one neither declared nor shown is listed
+  under `undeclared` and keeps the verdict from passing, as the record could
+  be hiding a test left out; a meter declared without F, a time-averaged
+  display and sound exposure level is refused (5.1.9). A measured clause is
+  held to its extent: Clause 16 to the steps of 16.3, in 5 dB and then 1 dB
+  steps from the starting point up to the first indication of overload and
+  down to the first indication of under-range, which the record carries with
+  the linear operating range and the starting point the manual states, and
+  the clause fails when either indication falls inside that range (16.4;
+  IEC 61672-1 5.6.10); Clause 17 to 17.4 on every level range, the reference
+  one included and first, as 17.4 reads "for each level range", and to 17.3
+  on every other one, as on the reference range the level 17.2 set is the
+  anticipated one, a deviation of zero by construction (IEC 61672-1 5.6.3).
+  A record short of either is incomplete, and says why. The verdict also says whether the
+  conditions stayed within 7.1, and it writes the statement of Clause 22 r),
+  s) or t) word for word, with the class and the year filled in; a test
+  outside 7.1 gets a notice saying so, ahead of anything its results would
+  say, and 22 r) is written only when the public pattern approval and the
+  correction data from the instruction manual are both declared
+  (`pattern_approval_public` and `corrections_in_manual`, both `False` by
+  default), as 22 c) and 12.5 have the laboratory state them. Tables 4, 5 and
+  B.1 of IEC 61672-1 are published read-only as `metrology.IEC61672_TABLE_4`,
+  `metrology.IEC61672_TABLE_5` and `metrology.IEC61672_TABLE_B1`, with the
+  test plan of Part 3 in `ACOUSTIC_TEST_FREQUENCIES_HZ`,
+  `ELECTRICAL_TEST_FREQUENCIES_HZ`, `TONEBURST_TEST_DURATIONS_MS` and
+  `PERIODIC_TEST_ENVIRONMENT`. Every result has `.plot()`: a requirement as
+  IEC 61672-1 Figure C.1 draws its examples, the whole verdict as one slot
+  per clause, each result's margin to its limits a dash and the result that
+  decides the clause marked over them, so the dozens of steps 16.3 takes
+  over a linear operating range of 60 dB to 80 dB leave every clause's name
+  legible, with every graded clause the record does not hold named as not
+  measured, not declared or not applicable. The three tables are conformance rows cell by
+  cell against the printed pages, Table 4 also against its Equations (7) and
+  (8); so is the verdict just inside, on and just past a printed limit of each
+  requirement, for class 1 and for class 2 where its column differs, at the
+  maximum of each requirement, under 4.4, where another clause shows a
+  feature and at the extent of Clauses 16 and 17, and so are the three
+  statements. The test suite sweeps every limit
+  the periodic test reads, for both classes, and every maximum of Table B.1 it
+  reads, which is the same for both. A new guide in
+  both languages grades a synthetic class 1 meter, and the pages that said the
+  library does not grade periodic tests of a meter now point to it.
 
 ### Fixed
 

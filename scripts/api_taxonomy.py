@@ -99,6 +99,7 @@ _SECTION_LIST: tuple[Section, ...] = (
             "phonometry.metrology.reference_values",
             "phonometry.metrology.random_incidence",
             "phonometry.metrology.free_field_corrections",
+            "phonometry.metrology.sound_level_meter",
         ),
     ),
     Section(
@@ -672,6 +673,17 @@ OBJECT_MODULE_OVERRIDES: dict[str, str] = {
     # IEC 62585 Table I.1 likewise, owned by the module whose budget builder
     # reads its divisors.
     "IEC62585_TABLE_I1": "phonometry.metrology.free_field_corrections",
+    # The IEC 61672-1:2013 tables and the IEC 61672-3:2013 test plan are
+    # tuples and read-only mappings too, owned by the module that grades a
+    # sound level meter's periodic tests against them.
+    "ACOUSTIC_TEST_FREQUENCIES_HZ": "phonometry.metrology.sound_level_meter",
+    "ELECTRICAL_TEST_FREQUENCIES_HZ": "phonometry.metrology.sound_level_meter",
+    "IEC61672_TABLE_4": "phonometry.metrology.sound_level_meter",
+    "IEC61672_TABLE_5": "phonometry.metrology.sound_level_meter",
+    "IEC61672_TABLE_B1": "phonometry.metrology.sound_level_meter",
+    "PERIODIC_TEST_ENVIRONMENT": "phonometry.metrology.sound_level_meter",
+    "SLM_PERIODIC_REQUIREMENTS": "phonometry.metrology.sound_level_meter",
+    "TONEBURST_TEST_DURATIONS_MS": "phonometry.metrology.sound_level_meter",
     # Defined in phonometry._internal.warnings, exported at the top level.
     "PhonometryWarning": "phonometry",
     # The io subpackage keeps its implementation modules private and

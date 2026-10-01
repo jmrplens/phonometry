@@ -48,9 +48,10 @@ leer y citar el informe numérico de conformidad que publica el sitio, y la
 frontera honesta frente a los ensayos de tipo y periódicos de
 IEC 61672-2/-3 e IEC 61260-2/-3: las medidas necesitan un instrumento en un
 laboratorio y no una biblioteca, y lo que la biblioteca hace con ellas es
-calificar los resultados (`filters.verify_filter_periodic` para los ensayos
-periódicos de un filtro de bandas) y calcular sobre un diseño los ensayos que
-no necesitan una muestra.
+calificar los resultados (`metrology.verify_sound_level_meter_periodic` para
+los ensayos periódicos de un sonómetro, `filters.verify_filter_periodic` para
+los de un filtro de bandas) y calcular sobre un diseño los ensayos que no
+necesitan una muestra.
 
 [Cualificación de datos](/phonometry/es/signals/metrology/data-qualification/) guarda la
 puerta delante de ambas: todo promedio - un Leq, una PSD de Welch, toda
@@ -77,6 +78,13 @@ electrostático: el valor de ajuste de IEC 62585 a la frecuencia de
 comprobación de la calibración, la corrección a cada frecuencia, el
 presupuesto de incertidumbre que la acompaña y el máximo que permite cada
 apartado.
+
+[Los ensayos periódicos de un sonómetro](/phonometry/es/signals/metrology/sound-level-meter-periodic-tests/)
+juzgan lo que un laboratorio midió en un sonómetro en servicio según la
+IEC 61672-3: cada apartado, de las ponderaciones frecuenciales a la
+estabilidad a niveles elevados, frente a los límites de aceptación de la
+IEC 61672-1 y los máximos de su Tabla B.1, lo que contiene un ensayo completo
+y la declaración que el apartado 22 prescribe para el resultado.
 
 La misma disciplina se extiende al dominio de la frecuencia: las páginas de
 [Señales y espectros](/phonometry/es/signals/spectra/)
@@ -117,6 +125,10 @@ la maquinaria GUM descrita aquí.
 - [Correcciones de campo libre de un sonómetro (IEC 62585)](/phonometry/es/signals/metrology/free-field-corrections/):
   el valor de ajuste, las correcciones para un calibrador, un acoplador y un
   actuador, el presupuesto del Anexo I y el dictamen de los apartados 9 a 14.
+- [Ensayos periódicos de un sonómetro (IEC 61672-3)](/phonometry/es/signals/metrology/sound-level-meter-periodic-tests/):
+  el dictamen sobre los resultados de un laboratorio, apartado por apartado,
+  con las Tablas 4, 5 y B.1 de la IEC 61672-1, y la declaración del
+  apartado 22.
 
 ## Qué no cubre esta sección
 
@@ -126,8 +138,9 @@ Aquí nada mide un instrumento ni un calibrador. No se realiza ningún ensayo
 de IEC 60942: `verify_sound_calibrator` califica los números que un
 laboratorio midió en un calibrador, y la corrección por presión estática de un
 pistófono LS/M o 1/M sale de su manual, así que pasa un `target_spl` ya
-corregido cuando el manual lo pida; los ensayos periódicos de IEC 61672-3 se
-citan como práctica de laboratorio, no se ejecutan; [Conformidad y
+corregido cuando el manual lo pida; tampoco se ejecutan los ensayos
+periódicos de IEC 61672-3, y `verify_sound_level_meter_periodic` califica los
+resultados que devuelve un laboratorio; [Conformidad y
 verificación](/phonometry/es/signals/metrology/compliance-verification/) traza
 esa frontera con precisión, parte por parte. La parte de dBFS de la página de
 calibración queda fuera de cualquier norma y no hace ninguna afirmación

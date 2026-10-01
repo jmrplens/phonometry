@@ -122,6 +122,7 @@ export const topics = [
           'signals/metrology/data-qualification',
           'signals/metrology/random-incidence',
           'signals/metrology/free-field-corrections',
+          'signals/metrology/sound-level-meter-periodic-tests',
         ],
       },
       apiGroup('filters', 'signals', 'metrology'),

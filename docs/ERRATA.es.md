@@ -8742,6 +8742,27 @@ dos ediciones con las mismas entradas y en el mismo orden.
   mantiene la Fórmula (3) en lo que lee el banco en marcha.
 - **Estado:** no reportada.
 
+## IEC 61672-1:2013, tabla 3 (el límite inferior de clase 1 a 6 300 Hz impreso con punto decimal)
+
+- **Ubicación:** tabla 3, "Frequency weightings and acceptance limits", fila
+  de 6 300 Hz, columna "Performance class 1", página impresa 22.
+- **Lo impreso:** "+1,5; -2.0".
+- **El problema:** todos los demás números de la tabla escriben sus
+  decimales con coma, como hace la IEC: la celda de clase 2 de
+  la misma fila dice "±4,5" y la celda de clase 1 de la fila siguiente
+  "+1,5; -2,5". El límite inferior a 6 300 Hz es la única celda escrita con
+  punto decimal. El valor no ofrece duda, -2,0 dB, entre el -1,5 dB de
+  encima y el -2,5 dB de debajo.
+- **Evidencia:** verificado en la página 24 del PDF (p. 22 impresa) de la
+  BS EN 61672-1:2013, la implementación británica de la IEC 61672-1:2013
+  (segunda edición); la celda es legible y dice "-2.0" junto a "+1,5;".
+- **Comportamiento de la biblioteca:** no hace falta ninguno. La biblioteca
+  guarda el número, -2.0 dB, en
+  [`filters.weighting_class_limits`](../src/phonometry/filters/weighting_compliance.py),
+  que [`verify_sound_level_meter_periodic`](../src/phonometry/metrology/sound_level_meter.py)
+  lee para las ponderaciones frecuenciales.
+- **Estado:** no reportada.
+
 ## Propiedades de las fuentes, relacionadas, que no son erratas
 
 Registradas aquí para prevenir futuros «arreglos» que romperían la

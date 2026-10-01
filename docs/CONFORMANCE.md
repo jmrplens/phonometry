@@ -19,7 +19,7 @@
 
 ## Numerical conformance report
 
-**1786/1786 conformance checks pass** across 109 domains and 518 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+**1793/1793 conformance checks pass** across 109 domains and 519 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub><b>&#916;</b> is the difference between the computed value and the one the standard publishes. <b>Used</b> is how much of that clause's published tolerance the difference consumes: 100 % means it sits exactly on the limit, 5 % means it uses a twentieth of the allowance, and a dash means the clause states no two-sided tolerance for the quantity, so there is no budget to spend. It is reported and never used to decide a verdict, which is settled at full precision before any rounding.</sub>
 
@@ -520,7 +520,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary><b>Intensity &amp; sound power</b>: 100% (78/78)</summary>
+<summary><b>Intensity &amp; sound power</b>: 100% (85/85)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
 |:---|:---|:---|:---|:---|:---:|:---:|
@@ -573,6 +573,13 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO 5136:2003 Eq. (12) | Plane-wave relation LW - Lp = 10 lg(S/S0) - 10 lg(rho c/400), d = 0,5 m | -7.2113 dB (+/-0 dB) | -7.2113 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 | ISO 5136:2003 Table 2 / Table 3 | Reproducibility sigma_R per band, 50 Hz to 10 kHz, and the extrapolated 12,5 to 20 kHz | 27 tabulated values of sigma_R reproduced | max absolute deviation 0.000 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 | ISO 5136:2003 Annex C Table C.1 | A-weighting C_j of the 27 bands, read back as LWA - LW of one band at a time | 27 tabulated values of C_j reproduced | max absolute deviation below 1e-12 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| ISO 3891:1978 Annex A Table 9 (ISO 8297:1994 10.7) | alpha at 15 °C and 70 % in the octave-centre bands 63 Hz to 8 kHz by the weather path of ISO 8297 10.7, through the shared SAE ARP 866A transcription, against ISO 3891 Table 9 (printed in dB/100 m to one decimal); ISO 8297 Table 3 prints other values at 125 Hz, 4 kHz and 8 kHz | 63 Hz = 0 dB/m; 125 Hz = 0.001 dB/m; 250 Hz = 0.001 dB/m; 500 Hz = 0.002 dB/m; 1000 Hz = 0.005 dB/m; 2000 Hz = 0.01 dB/m; 4000 Hz = 0.025 dB/m; 8000 Hz = 0.061 dB/m | 63 Hz = 0 dB/m; 125 Hz = 0.001 dB/m; 250 Hz = 0.001 dB/m; 500 Hz = 0.002 dB/m; 1000 Hz = 0.005 dB/m; 2000 Hz = 0.01 dB/m; 4000 Hz = 0.025 dB/m; 8000 Hz = 0.061 dB/m | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 8297:1994 Table 3 | alpha at 15 °C and 70 % by ISO 3891 Annex A, to the printed digit, in the five rows it reproduces (63 Hz, 250 Hz to 2 kHz; 125 Hz, 4 kHz and 8 kHz are printed otherwise, see the guide) | 63 Hz = 0 dB/m; 250 Hz = 0.001 dB/m; 500 Hz = 0.002 dB/m; 1000 Hz = 0.005 dB/m; 2000 Hz = 0.01 dB/m | 63 Hz = 0 dB/m; 250 Hz = 0.001 dB/m; 500 Hz = 0.002 dB/m; 1000 Hz = 0.005 dB/m; 2000 Hz = 0.01 dB/m | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 8297:1994 10.5 NOTE 11 | Proximity term lg(d/(4 sqrt(Sp))) at the two ends 0,5 and 0,05 of 9.1.1 a), to the printed decimal: -0,9 dB and -1,9 dB | d/sqrt(Sp) = 0.5 = -0.9 dB; d/sqrt(Sp) = 0.05 = -1.9 dB | d/sqrt(Sp) = 0.5 = -0.9 dB; d/sqrt(Sp) = 0.05 = -1.9 dB | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 8297:1994 Table 2 | Background correction at differences of 6 to 10 dB and at 12 dB, read through plant_background_correction_db | 6 dB = 1 dB; 7 dB = 1 dB; 8 dB = 1 dB; 9 dB = 0.5 dB; 10 dB = 0.5 dB; 12 dB = 0 dB | 6 dB = 1 dB; 7 dB = 1 dB; 8 dB = 1 dB; 9 dB = 0.5 dB; 10 dB = 0.5 dB; 12 dB = 0 dB | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 8297:1994 Table 1 | Uncertainty of the method, 95 % interval (lower, upper), at the four printed ratios d/sqrt(Sp) | 0.05 lower = -3.5 dB; 0.05 upper = 3 dB; 0.1 lower = -2.5 dB; 0.1 upper = 2.5 dB; 0.2 lower = -2.5 dB; 0.2 upper = 2 dB; 0.5 lower = -2 dB; 0.5 upper = 1.5 dB | 0.05 lower = -3.5 dB; 0.05 upper = 3 dB; 0.1 lower = -2.5 dB; 0.1 upper = 2.5 dB; 0.2 lower = -2.5 dB; 0.2 upper = 2 dB; 0.5 lower = -2 dB; 0.5 upper = 1.5 dB | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 8297:1994 10.4 / 10.8 | Point source on the ground at the centre of a circular contour: L_W(ISO 8297) - L_W(source) = 10 lg((R^2 + R h)/(R^2 + h^2)), 0 as h tends to 0 (closed form, R = 150 m, h = 5 m) | 0.137582 dB (+/-0.00001 dB) | 0.137581 dB | -0.000001 dB | 10 % | ![Pass][cv-pass] Pass |
+| ISO 8297:1994 9.1.1 b) | Aspect angle of a unit square seen from (0,5; -d): 180 - 2 atan(2 d) degrees at d = 0,1, 0,5 and 2 (closed form) | 0 deg | 0 deg | 0 deg | 0 % | ![Pass][cv-pass] Pass |
 | ISO 3743-1:2010 9.5 EXAMPLE | Expanded uncertainty U = 2 sqrt(1,5^2 + 2^2) dB = 5 dB, sigma_omc = 2,0 dB | 5 dB (+/-0 dB) | 5 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 | ISO 3743-1:2010 Table 3 | Typical upper bounds of sigma_R0 per octave band and A-weighted (the '400 to 5 000' row read as 500 Hz to 4 kHz) | 125 Hz = 3 dB; 250 Hz = 2 dB; 500 Hz = 1.5 dB; 1 kHz = 1.5 dB; 2 kHz = 1.5 dB; 4 kHz = 1.5 dB; 8 kHz = 2.5 dB; A = 1.5 dB | 125 Hz = 3 dB; 250 Hz = 2 dB; 500 Hz = 1.5 dB; 1 kHz = 1.5 dB; 2 kHz = 1.5 dB; 4 kHz = 1.5 dB; 8 kHz = 2.5 dB; A = 1.5 dB | exact | 0 % | ![Pass][cv-pass] Pass |
 | ISO 3743-1:2010 Table C.1 | Total standard deviation of the grade 2 row, sigma_R0 = 1,5 dB, for sigma_omc = 0,5, 2 and 4 dB | sigma_omc 0,5 = 1.6 dB; sigma_omc 2 = 2.5 dB; sigma_omc 4 = 4.3 dB | sigma_omc 0,5 = 1.6 dB; sigma_omc 2 = 2.5 dB; sigma_omc 4 = 4.3 dB | exact | 0 % | ![Pass][cv-pass] Pass |

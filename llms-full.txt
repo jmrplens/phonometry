@@ -1,8 +1,8 @@
 # phonometry
 
-> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1786 numerical conformance checks against 518 standards enforced in CI.
+> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1793 numerical conformance checks against 519 standards enforced in CI.
 
-phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1786 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 109 domains.
+phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1793 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 109 domains.
 
 The project was published as **PyOctaveBand** until version 3.0.0. Third-party references and dependency pins still using that name refer to this library.
 
@@ -324,6 +324,7 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 - [Overview](https://jmrplens.github.io/phonometry/devices/emission/) · [full text](https://jmrplens.github.io/phonometry/llms/llms-devices-emission.txt)
 - [Sound Power](https://jmrplens.github.io/phonometry/devices/emission/sound-power/)
 - [Sound Power in a Duct (ISO 5136)](https://jmrplens.github.io/phonometry/devices/emission/sound-power-in-duct/)
+- [Sound Power of Multisource Industrial Plants (ISO 8297)](https://jmrplens.github.io/phonometry/devices/emission/sound-power-plant/)
 - [Sound power from surface vibration (ISO/TS 7849)](https://jmrplens.github.io/phonometry/devices/emission/vibration-sound-power/)
 - [Emission Sound Pressure at a Work Station (ISO 11200 group)](https://jmrplens.github.io/phonometry/devices/emission/workstation-emission/)
 
@@ -654,6 +655,7 @@ The generated API reference, one page per module. Fetch these only when a specif
 - [power/sound-power-in-situ](https://jmrplens.github.io/phonometry/reference/api/power/sound-power-in-situ/)
 - [power/sound-power-intensity](https://jmrplens.github.io/phonometry/reference/api/power/sound-power-intensity/)
 - [power/sound-power-intensity-points](https://jmrplens.github.io/phonometry/reference/api/power/sound-power-intensity-points/)
+- [power/sound-power-plant](https://jmrplens.github.io/phonometry/reference/api/power/sound-power-plant/)
 - [power/sound-power-reverberation](https://jmrplens.github.io/phonometry/reference/api/power/sound-power-reverberation/)
 - [power/sound-power-special-room](https://jmrplens.github.io/phonometry/reference/api/power/sound-power-special-room/)
 - [power/turbine-noise](https://jmrplens.github.io/phonometry/reference/api/power/turbine-noise/)
@@ -20059,6 +20061,9 @@ for the ISO 3747 comparison against a reference sound source where the
 machine works,
 [Sound Power in a Duct](https://jmrplens.github.io/phonometry/devices/emission/sound-power-in-duct/)
 for the ISO 5136 in-duct method that measures a fan inside its own test duct,
+[Sound Power of Multisource Industrial Plants](https://jmrplens.github.io/phonometry/devices/emission/sound-power-plant/)
+for the ISO 8297 contour round a whole plant, a quarry or a petrochemical
+complex,
 [Sound Power in the 16 kHz Octave](https://jmrplens.github.io/phonometry/devices/emission/sound-power-high-frequency/)
 for the ISO 9295 methods that carry the reverberation room and the free
 field above 10 kHz,
@@ -20137,6 +20142,10 @@ judged against.
 - [Sound Power in a Duct](https://jmrplens.github.io/phonometry/devices/emission/sound-power-in-duct/):
   the ISO 5136 in-duct method for fans, with the sampling-tube flow and
   modal correction of Annex A and the plane-wave relation.
+- [Sound Power of Multisource Industrial Plants](https://jmrplens.github.io/phonometry/devices/emission/sound-power-plant/):
+  the ISO 8297 engineering method for a whole industrial plant, measured
+  round a contour drawn on the plot plan, with the proximity and air
+  absorption terms of clause 10 and the uncertainty of Table 1.
 - [Sound Power in the 16 kHz Octave](https://jmrplens.github.io/phonometry/devices/emission/sound-power-high-frequency/):
   the ISO 9295 methods for the octave band above 10 kHz, with the room
   constant from the reverberation time or from the air absorption of
@@ -22843,6 +22852,606 @@ criteria of section 1. ISO 9614-3:2002, *… Part 3: Precision method for
 measurement by scanning*: the grade-1 scanning method, its field indicators and
 the
 clause 9.2 not-applicable flagging of section 2.
+
+---
+
+
+<!-- source: docs/devices/emission/sound-power-plant.md | canonical: https://jmrplens.github.io/phonometry/devices/emission/sound-power-plant/ -->
+Source: https://jmrplens.github.io/phonometry/devices/emission/sound-power-plant/
+
+# Sound Power of Multisource Industrial Plants (ISO 8297)
+
+A petrochemical complex, a quarry or a crushing plant is too large for the
+enveloping surface of ISO 3744 and too full of sources for any one of them to
+be measured alone. What its neighbours hear, at a few hundred metres, is the
+plant as a whole, and what a prediction model needs is one sound power level
+per octave band for that whole, placed at the centre of the plant area.
+ISO 8297 is the engineering method (grade 2 of ISO 2204) that measures it. A
+closed path, the **measurement contour**, is drawn round the plant on the plot
+plan; microphones stand on it at equal spacing, raised to a height that grows
+with the area the contour encloses and pointed horizontally at the plant; their
+octave-band levels are averaged; and four terms turn that average into the
+power. The method is for plants whose largest horizontal dimension lies
+between 16 m and about 320 m, which radiate roughly evenly in every horizontal
+direction, and whose result will be used at least 1.5 times that dimension
+from their centre (clauses 0.2 and 1.2).
+
+## 1. The measurement contour (clause 9)
+
+The contour is any simply shaped closed path round the **plant area**
+$S_\mathrm{p}$, the area that holds every source. Three requirements fix how
+far out it runs and how densely it is sampled (9.1.1). The **average
+measurement distance**, the mean over the $N$ positions of the distance
+$d_i$ from each position to the nearest point of the plant perimeter,
+
+$$
+\bar{d} = \frac{1}{N}\sum_{i=1}^{N} d_i ,
+$$
+
+shall exceed $0.05\sqrt{S_\mathrm{p}}$ or 5 m, whichever is the greater, and
+shall not exceed $0.5\sqrt{S_\mathrm{p}}$ or 35 m, whichever is the lesser. From
+any point of the contour the plant area shall be seen inside an **aspect
+angle** of at most 180°, which is to say the contour never dips into a notch
+of the plant. And adjacent positions shall be at most $2\bar{d}$ apart. The
+contour length $l$, the area it encloses $S_\mathrm{m}$ (the plant included)
+and the **characteristic height** of the plant, the mean height of the
+midpoints of its $n$ sources, $H = \frac{1}{n}\sum_k h_k$, are read off the
+plan to within ±5 % (9.2); where ten or more sources are lower than 2 m,
+NOTE 7 lets them be counted approximately and taken at 1 m. The microphone
+then stands at
+
+$$
+h = H + 0.025\sqrt{S_\mathrm{m}} \quad \text{or 5 m, whichever is the greater,}
+$$
+
+at every position (9.3), its reference direction horizontal and at 90° to the
+contour, towards the plant (9.4).
+
+`plant_measurement_contour()` takes the two polygons in metres and lays the
+positions along the contour from its first vertex. With no `position_count`
+it chooses the fewest that meet 9.1.1 c); give your own layout, and the
+positions a river or a building made you leave out (at most 10 %, 9.1.2.4),
+as `position_count` and `omitted_positions`.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/plant_measurement_contour_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/plant_measurement_contour.svg" alt="Plan of an L-shaped plant area, 180 m by 110 m with a 60 m by 50 m notch cut from its top right corner, hatched in orange, with eight star markers for its noise sources. A rectangular measurement contour 780 m long runs 25 m outside it, and thirteen measurement positions sit on the contour 60 m apart, each with a short green arrow pointing horizontally at the plant at right angles to the contour, the one at the bottom left corner pointing diagonally inwards. A dotted grey line joins each position to the nearest point of the plant perimeter. The title gives N = 13, an average measurement distance of 30.9 m and a microphone height of 8.3 m; the legend sits outside the plan on the right" width="100%"></picture>
+
+*The contour of the example below. Thirteen positions are the fewest that
+keep 60 m between neighbours within $2\bar{d} = 61.8$ m; the dotted lines are
+the $d_i$ whose mean is $\bar{d}$, and they run to the nearest point of the
+perimeter, which for the corner positions is a corner of the plant. The notch
+at the top right does not trouble 9.1.1 b): the contour stays outside the
+convex hull of the plant, so no point of it sees the plant over more than
+149°.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+from phonometry import emission
+
+plant = [[0, 0], [180, 0], [180, 60], [120, 60], [120, 110], [0, 110]]
+contour_m = [[-25, -25], [205, -25], [205, 135], [-25, 135]]
+source_heights_m = [3.0, 6.5, 12.0, 9.0, 4.0, 15.0, 7.5, 5.0]
+H = emission.plant_characteristic_height_m(source_heights_m, low_source_count=14)
+contour = emission.plant_measurement_contour(plant, contour_m, characteristic_height_m=H)
+fig, ax = plt.subplots(figsize=(10.5, 5.8), layout="constrained")
+contour.plot(ax=ax)
+# The eight noise sources of the example in section 3, on the plan and in its legend.
+source_xy = [(30, 30), (80, 25), (150, 30), (60, 85),
+             (100, 90), (20, 95), (130, 15), (95, 45)]
+(stars,) = ax.plot(*zip(*source_xy), "*", markersize=11, label="Noise source of the example")
+legend = ax.get_legend()
+labels = [text.get_text() for text in legend.get_texts()]
+ax.legend([*legend.legend_handles, stars], [*labels, stars.get_label()], fontsize="small",
+          loc="upper left", bbox_to_anchor=(1.02, 1.0), borderaxespad=0.0)
+plt.show()
+```
+
+</details>
+
+**How the measurement goes.** Draw a first contour on the plot plan, lay the positions on it and check
+9.1.1 a) and b) there; if they fail, draw another (9.1.2.3; NOTE 6 expects one
+iteration to be enough). Measure $l$, $S_\mathrm{m}$ and $H$ on the plan, raise the
+microphones to the height of 9.3 (as high as possible above 5 m where it
+cannot be reached, and say so), and point them at the plant. Check the whole
+chain with a class 1 calibrator during each series. With the plant in the
+operating mode to be described, read the octave-band levels from 63 Hz to
+4 kHz at every position (31.5 Hz and 8 kHz may be added), at least 1 min per
+band for a steady noise and with an integrating meter for anything else;
+where a sound level meter is used, a needle swinging less than 5 dB marks the
+noise as steady and the level is the mean of the maximum and the minimum
+(9.5.2); an integrating meter's $L_{\mathrm{eq},T}$ is taken once it moves by no
+more than ±0.5 dB (9.5.3). With the plant stopped, read the background at the
+same positions.
+Keep the wind steady over a set, keep reflecting surfaces out from behind the
+microphones, and repeat the whole set for each operating mode (clauses 6 and
+8).
+
+## 2. From the contour to the sound power (clause 10)
+
+Clause 10 is nine steps. The levels, each first corrected for the background
+by Table 2 (9.5.4, next section), are energy-averaged per band (step 1):
+
+$$
+\overline{L_p} = 10 \lg\left[\frac{1}{N}\sum_{i=1}^{N} 10^{0.1 L_{pi}}\right] \mathrm{dB}.
+$$
+
+A level more than 5 dB above that average means the contour runs too close to
+one part of the plant; 10.2 asks for a contour further out, and where that is
+not practicable, replaces every such level by $\overline{L_p} + 5$ dB and
+averages again into $\overline{L_p^*}$ (steps 2 and 3). `plant_sound_power()`
+does the latter with a `SoundPowerWarning` and records which levels it
+replaced in `capped`. Four terms then carry the average to the power
+(steps 4 to 8):
+
+$$
+L_W = \overline{L_p} + \Delta L_\mathrm{S} + \Delta L_\mathrm{F} + \Delta L_\mathrm{M} + \Delta L_\alpha ,
+$$
+
+$$
+\Delta L_\mathrm{S} = 10 \lg\frac{2 S_\mathrm{m} + h l}{S_0}\ \mathrm{dB},\qquad
+\Delta L_\mathrm{F} = \lg\frac{\bar{d}}{4\sqrt{S_\mathrm{p}}}\ \mathrm{dB},
+$$
+
+$$
+\Delta L_\mathrm{M} = 3\left(1 - \frac{\theta}{90}\right) \mathrm{dB},\qquad
+\Delta L_\alpha = 0.5\,\alpha\sqrt{S_\mathrm{m}}\ \mathrm{dB},
+$$
+
+with $S_0 = 1$ m². Each has a plain reading. The **area term** is the
+measurement surface of ISO 3744: over a circular contour of radius $r$,
+$2S_\mathrm{m} = 2\pi r^2$ is the hemisphere over it and $hl$ the band of wall
+of height $h$ round it, so a point source on the ground at the centre gives its
+own power back as the microphones come down to the ground. The **proximity
+term** takes back what the near sources add to the average; it has no
+factor 10, and NOTE 11 says it lies between −0.9 dB and −1.9 dB when 9.1 is
+met, which are $\lg(0.5/4)$ and $\lg(0.05/4)$, its values at the two ends of
+9.1.1 a). The **microphone term** makes up for a directional microphone,
+whose 3 dB angle $\theta$ has to exceed 30° (7.1); it is 0 dB for an
+omnidirectional one. The **air absorption term** puts back what the air takes
+over half the root of the measurement area. The A-weighted level is the sum
+of the bands with the A-weighting $C_j$ (step 9),
+$L_{W\mathrm{A}} = 10 \lg \sum_j 10^{0.1(L_{Wj} + C_j)}$ dB, with the
+octave-band values of ISO 3744:2010 Annex E that every sound power method
+of this library uses; a 31.5 Hz band, which Annex E does not weight, is left
+out of it.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/plant_proximity_uncertainty_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/plant_proximity_uncertainty.svg" alt="Two panels against the ratio of the average measurement distance to the root of the plant area, on a logarithmic axis from 0.05 to 0.5. On the left, the proximity term rises as a straight line from minus 1.9 dB at 0.05 to minus 0.9 dB at 0.5, between two dashed horizontal lines at those values, with the example plant marked at a ratio of 0.24 and minus 1.22 dB. On the right, the four printed rows of Table 1 as vertical intervals at their ratios, from minus 3.5 to plus 3.0 dB at 0.05, plus or minus 2.5 dB at 0.1, minus 2.5 to plus 2.0 dB at 0.2 and minus 2.0 to plus 1.5 dB at 0.5, each extended as a shaded band with dashed edges up to the next row, and a dotted vertical line at the ratio of the example" width="100%"></picture>
+
+*Everything the plan decides about the answer lives in one ratio,
+$\bar{d}/\sqrt{S_\mathrm{p}}$. On the left, the proximity term over the
+whole range 9.1.1 a) allows: one decibel from one end to the other, and never
+more negative than −1.9 dB. On the right, the uncertainty of Table 1 over the
+same range; the table prints four rows and says nothing between them, so a
+ratio between two rows takes the row below, the wider interval. The example
+plant sits at 0.24, in the $+2.0/-2.5$ dB row.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import emission
+
+ratio = contour.distance_ratio  # the example plant, from the contour above
+ratios = np.geomspace(0.05, 0.5, 200)
+fig, (axl, axr) = plt.subplots(1, 2, figsize=(12.5, 5.2))
+axl.semilogx(ratios, np.log10(ratios / 4.0), label="dLF = lg(d / (4 sqrt(Sp)))")
+axl.axhline(-0.9, linestyle="--")
+axl.axhline(-1.9, linestyle="--")
+axl.plot([ratio], [np.log10(ratio / 4.0)], "o", label="The example plant")
+axl.set(xlabel="d / sqrt(Sp)", ylabel="Proximity term dLF [dB]")
+axl.legend(loc="lower right")
+rows = sorted(emission.PLANT_METHOD_UNCERTAINTY_DB)
+lowers = [emission.PLANT_METHOD_UNCERTAINTY_DB[row][0] for row in rows]
+uppers = [emission.PLANT_METHOD_UNCERTAINTY_DB[row][1] for row in rows]
+# Each printed row is read up to the next: a shaded band with dashed edges.
+for start, stop, lower, upper in zip(rows[:-1], rows[1:], lowers, uppers):
+    axr.fill_between([start, stop], lower, upper, alpha=0.25)
+    axr.hlines([lower, upper], start, stop, linestyles="--")
+axr.errorbar(rows, [0.0] * len(rows), yerr=[[-v for v in lowers], uppers], fmt="none",
+             capsize=6, label="Printed row of Table 1")
+axr.axvline(ratio, linestyle=":", color="C3", label="The example plant")
+axr.set(xscale="log", ylim=(-4.2, 5.4), xlabel="d / sqrt(Sp)", ylabel="95 % interval [dB]")
+axr.legend(loc="upper left")
+plt.show()
+```
+
+</details>
+
+### The background, Table 2
+
+Where the plant can be stopped, the background is read at the same positions,
+and each level is corrected by the whole-decibel table of 9.5.4 before the
+average: 1 dB for a difference of 6, 7 or 8 dB, 0.5 dB for 9 or 10 dB,
+nothing above 10 dB, and "Measurement invalid" below 6 dB. A difference
+between two rows is rounded to the nearest whole decibel, a half going up; the
+two ends are taken as printed, so 5.9 dB is invalid and 10.2 dB is not
+corrected. `plant_background_correction_db()` reads the table
+on its own, and `plant_sound_power()` refuses a determination with a level
+less than 6 dB above its background, since the table has no correction to
+give it. Where the plant cannot be stopped, the levels go uncorrected, the
+report says so, and NOTE 1 warns that the uncertainty may then be larger than
+Table 1's.
+
+## 3. A crushing and screening plant
+
+The example is an L-shaped crushing and screening plant, 180 m by 110 m, on
+the plan of the figure above, with a contour 25 m out. So that the answer can
+be checked, the thirteen microphones read what eight sources of known power
+would put there: each radiates over the ground as a hemisphere and loses
+$\alpha r$ to the air of Table 3. The background, read with the plant
+stopped, is 13 dB to 24 dB below.
+
+```python
+import numpy as np
+from phonometry import emission
+
+plant = [[0, 0], [180, 0], [180, 60], [120, 60], [120, 110], [0, 110]]
+contour_m = [[-25, -25], [205, -25], [205, 135], [-25, 135]]
+# (x, y, height of the midpoint) in metres and LW from 63 Hz to 8 kHz, dB re 1 pW.
+sources = [
+    ((30, 30, 3.0), [108, 110, 109, 106, 103, 99, 93, 85]),  # primary crusher
+    ((80, 25, 6.5), [104, 106, 106, 104, 101, 97, 91, 83]),  # secondary crusher
+    ((150, 30, 12.0), [100, 103, 105, 104, 102, 99, 94, 87]),  # screen tower
+    ((60, 85, 9.0), [98, 100, 101, 99, 96, 92, 86, 78]),  # conveyor transfer
+    ((100, 90, 4.0), [101, 102, 100, 97, 94, 90, 84, 76]),  # generator set
+    ((20, 95, 15.0), [97, 99, 100, 98, 95, 91, 85, 77]),  # stacker
+    ((130, 15, 7.5), [99, 101, 101, 98, 95, 91, 85, 77]),  # compressor house
+    ((95, 45, 5.0), [96, 98, 99, 97, 94, 90, 84, 76]),  # pumps
+]
+bands = np.array([63, 125, 250, 500, 1000, 2000, 4000, 8000], dtype=float)
+alpha = emission.plant_air_absorption_db_per_m(bands)  # Table 3, 15 °C and 70 %
+
+
+def levels_at(contour, sources):
+    """What the microphones read: hemispherical spreading and alpha r."""
+    h = contour.prescribed_microphone_height_m
+    squares = 0.0
+    for (x, y, z), lw in sources:
+        dx = contour.positions_m[:, 0] - x
+        dy = contour.positions_m[:, 1] - y
+        r = np.sqrt(dx**2 + dy**2 + (h - z) ** 2)[:, None]
+        level = np.array(lw) - 10 * np.log10(2 * np.pi * r**2) - alpha * r
+        squares = squares + 10 ** (level / 10)
+    return np.round(10 * np.log10(squares), 1)  # one row per position
+
+
+# Fourteen motors and pumps lower than 2 m are counted by NOTE 7, at 1 m.
+H = emission.plant_characteristic_height_m(
+    [z for (_x, _y, z), _lw in sources], low_source_count=14
+)
+contour = emission.plant_measurement_contour(plant, contour_m, characteristic_height_m=H)
+print(f"H = {H:.2f} m, N = {contour.positions_m.shape[0]}, "
+      f"d = {contour.mean_distance_m:.1f} m, h = {contour.prescribed_microphone_height_m:.2f} m")
+# H = 3.45 m, N = 13, d = 30.9 m, h = 8.25 m
+
+levels = levels_at(contour, sources)
+background = levels - np.array([14, 13, 15, 17, 19, 20, 22, 24])
+result = contour.sound_power(levels, bands, background_levels_db=background)
+print(np.round(result.mean_level_db, 1))
+# [63.8 65.8 65.6 63.2 60.2 56.  49.1 39.9]
+print(f"dLS = {result.area_term_db:.2f} dB, dLF = {result.near_field_term_db:.2f} dB")
+# dLS = 49.03 dB, dLF = -1.22 dB
+print(np.round(result.sound_power_level_db, 1))
+# [111.6 113.6 113.5 111.2 108.5 104.8  99.4  92.1]
+print(f"LWA = {result.a_weighted_sound_power_level_db:.1f} dB, Table 1: {result.uncertainty_db}")
+# LWA = 113.5 dB, Table 1: (-2.5, 2.0)
+```
+
+The area term carries the average up by 49 dB, since the surface is some
+80 000 m², and the proximity term takes 1.2 dB back. The air absorption term
+is nothing below 250 Hz and 4.4 dB at 8 kHz, where half the root of
+36 800 m² of air is about 96 m at 0.046 dB/m. The eight sources radiate
+113.0 dB(A) between them; ISO 8297 finds 113.5 dB(A), and 0.3 dB to 0.7 dB
+more in the bands up to 4 kHz, well inside the $+2.0/-2.5$ dB of Table 1.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/plant_sound_power_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/plant_sound_power.svg" alt="Two panels over the octave bands from 63 Hz to 8 kHz. On the left, bars of the sound power level of the plant, from 111.6 dB at 63 Hz through 113.6 dB at 125 Hz down to 92.1 dB at 8 kHz, with the contour average as a line of orange circles about 48 to 52 dB lower, from 63.8 dB down to 39.9 dB; the title gives an A-weighted sound power level of 113.5 dB. On the right, the same sound power levels as blue points with vertical bars for the interval of Table 1, minus 2.5 to plus 2.0 dB, and open red diamonds for the power the eight sources radiate, each 0.3 to 0.7 dB below the blue point up to 4 kHz and 1.1 dB below at 8 kHz, all inside the bars" width="100%"></picture>
+
+*On the left, the figure `result.plot()` draws: the power per band beside the
+contour average it came from, the gap between them being the four terms. On
+the right, the same power against what the sources radiate, with the interval
+of Table 1. The method knows nothing of the sources; it reads thirteen
+levels, a plan and a height, and lands within half a decibel of the truth in
+the bands that carry $L_{W\mathrm{A}}$.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+true_lw = 10 * np.log10(sum(10 ** (np.array(lw) / 10) for _p, lw in sources))
+lower, upper = result.uncertainty_db
+fig, (axl, axr) = plt.subplots(1, 2, figsize=(12.5, 5.4), layout="constrained")
+result.plot(ax=axl)
+x = np.arange(bands.size)
+axr.errorbar(x, result.sound_power_level_db, yerr=[[-lower] * x.size, [upper] * x.size],
+             fmt="o", capsize=4, label="ISO 8297 LW with the interval of Table 1")
+axr.plot(x, true_lw, "D", markerfacecolor="white", label="Power the eight sources radiate")
+axr.set_xticks(x)
+axr.set_xticklabels([f"{f:g}" for f in bands])
+axr.set(xlabel="Frequency [Hz]", ylabel="Sound power level LW [dB]")
+axr.legend()
+plt.show()
+```
+
+</details>
+
+### The verdict on the arrangement
+
+`check_plant_measurement()` holds the contour and the readings against the
+requirements of ISO 8297 that they decide, and returns one verdict. It cannot be
+used in an `if` by accident: its truth value raises, and the answer is
+`passes`.
+
+```python
+check = emission.check_plant_measurement(
+    contour, result, measurement_time_s=120.0, leq_range_db=0.6
+)
+print(check.passes, [r.key for r in check.failures], [r.key for r in check.deviations])
+# True [] []
+row = check.requirement("position_spacing")
+print(f"{row.clause}: {row.value:.1f} m {row.comparison} {row.limit:.1f} m")
+# 9.1.1 c): 60.0 m <= 61.8 m
+```
+
+The rows are clauses 1.2 (the largest dimension of the plant, 16 m to about
+320 m), 9.1.1 a) to c), 9.1.2.4 (omitted positions), 9.3 (the microphone at
+least 5 m up), 7.1 (a directional microphone's 3 dB angle above 30°), 6 b)
+(the background at least 6 dB below), 9.5.1 a) (the seven bands from 63 Hz to
+4 kHz), 9.5.1 (a minute per position) and, given `leq_range_db`, 9.5.3 (an
+integrated reading that moves by no more than ±0.5 dB, a range of 1 dB). Four
+more are **advisory**: the standard lets them go unmet provided the report
+says so, so they are listed in `deviations` and do not decide `passes`. The
+first is the height of 9.3 itself, which is a height to stand at rather than a
+lower bound: the row holds when the microphones stand at it to within the
+±5 % to which 9.2 reads $H$ and $S_\mathrm{m}$ off the plan, and a microphone
+lower (as high as possible, where the height cannot be reached) or higher is
+a deviation to report. The others are the background "preferably more than
+10 dB" below, a level more than 5 dB above the average (10.2), and the
+"approximately 320 m" of 1.2.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/plant_measurement_check_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/plant_measurement_check.svg" alt="Horizontal bar chart of fifteen requirements of ISO 8297 for the example, each bar the margin of the measured value inside its limit as a percentage of the limit, from minus 100 to plus 100; every bar is green and to the right of zero, so the title reads that the requirements are met. The largest margins, clipped at 100 %, are the lower bounds of the plant dimension and of the mean distance, the omitted positions, the background margin and the measurement time; the smallest are the position spacing at 3 %, the prescribed microphone height at 5 %, the upper bound of the mean distance at 12 % and the aspect angle at 17 %, and the range of the integrated reading sits at 40 %. The octave bands sit at exactly zero, shown by a dot. Four bars are hatched as advisory and end in a hollow mark: the upper plant dimension, the prescribed microphone height, the preferred background margin and the excess over the average" width="100%"></picture>
+
+*The verdict on the example, drawn by `check.plot()`. The tightest margin is
+the spacing: thirteen positions put 60 m between neighbours against the
+61.8 m that $2\bar{d}$ allows, which is why twelve would not do. The
+microphones stand at the prescribed height, so that row keeps the whole ±5 %
+the plan allows it. One row sits at exactly zero, the octave bands: the seven
+required, 63 Hz to 4 kHz, are all among the eight measured, and a count of
+them cannot exceed seven.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+fig, ax = plt.subplots(figsize=(10.0, 8.1), layout="constrained")
+check.plot(ax=ax)
+plt.show()
+```
+
+</details>
+
+## 4. The air absorption, Table 3 and the weather
+
+Table 3 prints $\alpha$ per octave band at 15 °C and 70 %, "taken from
+ISO 3891", and asks for the values at the temperature and humidity of the
+measurement when the weather differs markedly. `plant_air_absorption_db_per_m()`
+returns the table as printed when no weather is given. Given a temperature
+and a relative humidity, it evaluates the attenuation coefficient of ISO 3891
+Annex A, the SAE ARP 866A formula, at the one-third-octave band centred on
+each octave, through the same implementation the
+[NPD curves for the air at the airport](https://jmrplens.github.io/phonometry/aircraft/npd-atmosphere/)
+use; ISO 3891 gives no evaluation frequency below 50 Hz, so the 31.5 Hz band
+keeps the 0 of Table 3. Since the formula does not return Table 3 at 15 °C and
+70 % (see the figure), passing those very conditions is not the same as
+passing none: at 8 kHz it gives $0.5 \times 0.0148\sqrt{S_\mathrm{m}} \approx
+0.0074\sqrt{S_\mathrm{m}}$ dB more in the power, 1.4 dB over the 36 800 m² of
+the example. Pass the weather when it differs markedly from 15 °C and 70 %,
+which is when Table 3 asks for it; the standard puts no number on
+"markedly".
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/plant_air_absorption_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/plant_air_absorption.svg" alt="Attenuation coefficient of the air in decibels per kilometre over the octave bands from 63 Hz to 8 kHz. Three curves from ISO 3891 Annex A rise from nearly zero at 63 Hz: at 15 degrees Celsius and 70 % relative humidity to 25 dB/km at 4 kHz and 61 dB/km at 8 kHz; at 0 degrees and 80 % to 45 and 104 dB/km; at 30 degrees and 40 % close to the first. Large crosses mark Table 3 of ISO 8297 as printed, on the 15 degree curve up to 2 kHz, just above it at 4 kHz with 26 dB/km, and well below it at 8 kHz with 46 dB/km" width="100%"></picture>
+
+*Table 3 and the formula it was taken from. They meet at 63 Hz and from
+250 Hz to 2 kHz to the printed digit, and not in three rows: 125 Hz, where the
+formula gives 0.000 59 dB/m and the table 0; 4 kHz, 0.025 05 against 0.026;
+and 8 kHz, 0.061 against 0.046. ISO 3891 Table 9 itself prints 0.1, 2.5 and
+6.1 dB/100 m in those bands at 15 °C and 70 %, and no single weather makes the
+formula reproduce Table 3 in every row. ISO 8297 does not say how it drew its
+octave values from the one-third-octave data of ISO 3891, so the table is used
+as printed and the difference is stated here rather than corrected.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+x = np.arange(bands.size)
+fig, ax = plt.subplots(figsize=(10.0, 5.6))
+for temperature_c, humidity in ((15.0, 70.0), (0.0, 80.0), (30.0, 40.0)):
+    coefficient = emission.plant_air_absorption_db_per_m(
+        bands, temperature_c=temperature_c, relative_humidity_percent=humidity
+    )
+    ax.plot(x, 1000 * coefficient, marker="o",
+            label=f"ISO 3891 Annex A, {temperature_c:g} °C and {humidity:g} %")
+ax.plot(x, 1000 * emission.plant_air_absorption_db_per_m(bands), "X",
+        label="ISO 8297 Table 3 as printed (15 °C, 70 %)")
+ax.set_xticks(x)
+ax.set_xticklabels([f"{f:g}" for f in bands])
+ax.set(xlabel="Frequency [Hz]", ylabel="Attenuation coefficient [dB/km]")
+ax.legend()
+plt.show()
+```
+
+</details>
+
+For the example plant, measured on a warm dry afternoon, the weather moves
+only the air term: against Table 3 the power at 8 kHz rises by 2.4 dB and
+$L_{W\mathrm{A}}$ by 0.1 dB. Of those 2.4 dB, 1.4 dB is the step from Table 3
+to the formula, which 15 °C and 70 % already take; the warm dry air itself
+adds 1.0 dB.
+
+```python
+warm = contour.sound_power(levels, bands, background_levels_db=background,
+                           temperature_c=25.0, relative_humidity_percent=40.0)
+print(np.round(warm.sound_power_level_db - result.sound_power_level_db, 2))
+# [0.03 0.07 0.04 0.08 0.08 0.19 0.34 2.4 ]
+reference = contour.sound_power(levels, bands, background_levels_db=background,
+                                temperature_c=15.0, relative_humidity_percent=70.0)
+print(np.round(warm.sound_power_level_db - reference.sound_power_level_db, 2))
+# [0.01 0.01 0.02 0.05 0.1  0.19 0.43 0.97]
+print(f"LWA = {warm.a_weighted_sound_power_level_db:.1f} dB")
+# LWA = 113.6 dB
+```
+
+## 5. Parts of a plant, and sources above it
+
+The method also serves to find what **particular parts** of an industrial
+area contribute and to compare installations (0.2 b and c). Each part is
+measured round its own contour, and `partial_plant_contributions()` puts them
+together: the parts radiate incoherently, so the whole is the energy sum of
+their powers band by band, and each part's contribution is its level less that
+sum. NOTE 2 is the caveat that goes with it: the power of a plant measured
+round one contour may differ from the sum of the powers of its sources, so a
+sum of parts is not the same determination as the whole area measured at
+once. Here the crushing plant shares its industrial area with an asphalt
+mixing plant 120 m to the east.
+
+```python
+# An asphalt mixing plant in the same industrial area, 60 m by 40 m, with its
+# own contour 15 m out and its own three sources.
+asphalt_plant = [[300, 20], [360, 20], [360, 60], [300, 60]]
+asphalt_sources = [
+    ((315, 40, 4.0), [106, 105, 103, 100, 97, 93, 87, 79]),  # dryer drum and burner
+    ((340, 30, 8.0), [100, 102, 101, 98, 95, 91, 85, 77]),  # exhaust fan and bag house
+    ((350, 52, 12.0), [95, 97, 97, 95, 92, 88, 82, 74]),  # mixing tower
+]
+asphalt = emission.plant_measurement_contour(
+    asphalt_plant,
+    [[285, 5], [375, 5], [375, 75], [285, 75]],
+    characteristic_height_m=emission.plant_characteristic_height_m([4.0, 8.0, 12.0]),
+)
+asphalt_result = asphalt.sound_power(levels_at(asphalt, asphalt_sources), bands)
+print(f"LWA = {asphalt_result.a_weighted_sound_power_level_db:.1f} dB")
+# LWA = 105.4 dB
+
+area = emission.partial_plant_contributions(
+    [result, asphalt_result], names=["Crushing and screening", "Asphalt mixing"]
+)
+print(f"LWA of the area = {area.a_weighted_total_db:.1f} dB")
+# LWA of the area = 114.1 dB
+print(np.round(area.a_weighted_contribution_db, 1))
+# [-0.6 -8.7]
+```
+
+Sources raised well above the characteristic height of the plant, which
+screening or their own directivity kept out of the contour's reading, are
+determined by the standard that fits them (ISO 3744 or ISO 3746, for
+example) and reported beside the plant (clause 11, and item m) of clause 12);
+they are not added into its $L_W$.
+
+The crushing plant is 0.6 dB below the total of the area and the asphalt
+plant 8.7 dB below it: noise control at the crusher is where the decibels
+are. `area.plot()` draws each part's $L_W$ and the total band by band.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/plant_partial_contributions_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/plant_partial_contributions.svg" alt="Octave-band sound power levels from 63 Hz to 8 kHz of the two plants of the industrial area and of their sum. Light blue bars give the sum, from 113.0 dB at 63 Hz through 114.6 dB at 125 Hz down to 92.6 dB at 8 kHz. Orange circles give the crushing and screening plant, from 111.6 dB down to 92.1 dB, never more than 1.4 dB under the bars; green squares give the asphalt mixing plant, from 107.5 dB down to 82.2 dB, 5.5 dB to 10.3 dB under them. The legend gives the A-weighted levels: 113.5 dB, 105.4 dB and 114.1 dB for the sum" width="100%"></picture>
+
+*The two plants of the area and their sum, drawn by `area.plot()`. The
+crushing plant sits within 1.4 dB of the sum in every band, so it sets the
+power of the area; the asphalt plant adds 0.6 dB to the A-weighted total.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+fig, ax = plt.subplots(figsize=(10.0, 5.6), layout="constrained")
+area.plot(ax=ax)
+plt.show()
+```
+
+</details>
+
+## 6. The uncertainty to be stated
+
+Table 1 states the uncertainty inherent in the method as a 95 % confidence
+interval for one determination, and makes it depend on one thing,
+$\bar{d}/\sqrt{S_\mathrm{p}}$: $+3.0/-3.5$ dB at 0.05, $\pm 2.5$ dB at 0.1,
+$+2.0/-2.5$ dB at 0.2 and $+1.5/-2.0$ dB at 0.5. The interval is not
+symmetric, and it narrows as the contour moves out, because it comes from the
+spread of the levels round the contour that an uneven distribution of sources
+causes; a contour further out sees the plant more evenly. It does not include
+a change of the emission over time, and where the background could not be
+corrected NOTE 1 says it may be larger. `plant_method_uncertainty_db()`
+reads the table, and every result carries it as `uncertainty_db`.
+
+## What this guide covers
+
+**Covered.** The ISO 8297:1994 engineering method, every step that turns the plan and the
+readings into numbers: the contour and its positions, directions and
+distances from two polygons (`plant_measurement_contour`), the characteristic
+height with NOTE 7 (`plant_characteristic_height_m`), the microphone height of
+9.3, the window of 9.1.1 a) and the largest aspect angle of 9.1.1 b) on the
+contour; the background correction of Table 2, the steady reading of 9.5.2
+and the steadiness of an integrated reading of 9.5.3; the nine steps of
+clause 10 (`plant_sound_power`) with the air absorption of Table 3 or of
+ISO 3891 Annex A for the weather at the measurement; the uncertainty of
+Table 1; the verdict on 1.2, 6 b), 7.1, 9.1, 9.3, 9.5.1, 9.5.3 and 10.2
+(`check_plant_measurement`); and the parts of a plant put together
+(`partial_plant_contributions`). The standard prints no worked example, so
+the conformance report anchors the chain in its three tables, the bound of
+NOTE 11, ISO 3891 Table 9 and closed forms.
+
+**Not covered.** Left to the measurement team by choice, although some of it carries a
+printed number: the accuracy the plan is read to (±5 %, and ±30 % for
+$\bar{d}/\sqrt{S_\mathrm{p}}$), the calibration intervals of 7.3, the
+reflecting surfaces and the wind of clause 6 a) and c), and the report of
+clause 12. The sound power
+of sources raised above the plant (clause 11) belongs to other standards and
+is not summed into the plant's. Table 3 is used as printed where it departs
+from the ISO 3891 coefficient it cites.
+
+## See also
+
+- [Sound Power](https://jmrplens.github.io/phonometry/devices/emission/sound-power/): choosing among the
+  determination routes and the accuracy grades.
+- [Sound Power by Pressure Methods (ISO 3744 / ISO 3746 / ISO 3745)](https://jmrplens.github.io/phonometry/devices/emission/sound-power-pressure/):
+  the enveloping surface whose area term 10.4 borrows, and the route for a
+  source raised above the plant.
+- [Sound Power in Situ by Comparison (ISO 3747)](https://jmrplens.github.io/phonometry/devices/emission/sound-power-in-situ/):
+  a single machine that cannot leave its room.
+- [NPD data for the air at the airport](https://jmrplens.github.io/phonometry/aircraft/npd-atmosphere/):
+  the SAE ARP 866A coefficient of ISO 3891 that the weather path evaluates.
+- [Outdoor Sound Propagation](https://jmrplens.github.io/phonometry/environment/propagation/outdoor-propagation/):
+  what the plant's $L_W$ is for, the level at a neighbour.
+- API reference: [`emission.plant_sound_power`](https://jmrplens.github.io/phonometry/reference/api/power/sound-power-plant/).
+
+## References
+
+- International Organization for Standardization. (1994). *Acoustics —
+  Determination of sound power levels of multisource industrial plants for
+  evaluation of sound pressure levels in the environment — Engineering
+  method* (ISO 8297:1994). The contour of 9.1, the plant dimensions of 9.2, the
+  microphone height and direction of 9.3 and 9.4, the background correction of
+  Table 2, the nine steps of clause 10 with the air absorption of Table 3, and
+  the uncertainty of Table 1 that this guide implements; read in the identical
+  British adoption BS ISO 8297:1994.
+- International Organization for Standardization. (1978). *Acoustics —
+  Procedure for describing aircraft noise heard on the ground* (ISO 3891:1978,
+  withdrawn). Annex A, the SAE ARP 866A attenuation coefficient that ISO 8297
+  Table 3 was taken from and that this guide evaluates for the weather at the
+  measurement.
+
+## Standards
+
+ISO 8297:1994, *Acoustics — Determination of sound power levels of multisource
+industrial plants for evaluation of sound pressure levels in the environment —
+Engineering method*: the measurement contour (9.1), the plant dimensions (9.2),
+the microphone height and direction (9.3, 9.4), the background correction of
+Table 2, clause 10 with the air absorption of Table 3, the uncertainty of
+Table 1 and the requirements of clauses 1.2, 6, 7.1 and 9.5. ISO 3891:1978,
+Annex A: the attenuation coefficient of the air for the weather at the
+measurement.
 
 ---
 
@@ -26071,6 +26680,8 @@ The total acoustic emission of a source, and the power flux it is built on.
   works.
 - [Sound Power in a Duct](https://jmrplens.github.io/phonometry/devices/emission/sound-power-in-duct/):
   the ISO 5136 in-duct method for fans.
+- [Sound Power of Multisource Industrial Plants](https://jmrplens.github.io/phonometry/devices/emission/sound-power-plant/):
+  the ISO 8297 contour round a whole industrial plant.
 - [Sound Power in the 16 kHz Octave](https://jmrplens.github.io/phonometry/devices/emission/sound-power-high-frequency/):
   the ISO 9295 methods above 10 kHz.
 - [Sound Power of Steam Turbine Sets](https://jmrplens.github.io/phonometry/devices/emission/sound-power-turbines/):
@@ -50842,6 +51453,17 @@ documents, one page per module.
 | `flow_modal_correction` | `function` | **Mean-flow and modal correction C3,4 (ISO 5136 Eq. 7 / Eq. 8).**<br>• `frequencies` [Hz]: nominal thirds<br>• `flow_velocity` U [m/s], signed<br>• `duct_diameter_m` [m]: selects the Annex A table<br>• `shield`: sampling tube polynomial (Annex A) or the omni-directional Eq. 8<br>• `speed_of_sound` [m/s] (Default: 340, Eq. 8 only) | `c34 = emission.flow_modal_correction(f, 15.0, 0.5)`<br><br>• C3,4 per band [dB] |
 | `in_duct_reproducibility` | `function` | **Reproducibility σR per band (ISO 5136 Table 2 / Table 3).**<br>• `frequencies` [Hz]: nominal thirds 50 Hz-20 kHz<br>• 12.5-20 kHz: the extrapolated Table 3 values | `s = emission.in_duct_reproducibility(f)`<br><br>• σR per band [dB]; U95 = 2 σR (clause 9.2) |
 | `InDuctSoundPowerResult` | `dataclass` | **In-duct sound power.**<br>• `frequencies` [Hz]<br>• `sound_power_level` [dB], `sound_power_level_a` [dB]<br>• `mean_pressure_level`, `corrected_pressure_level` [dB]<br>• `microphone_correction`, `shield_correction`, `flow_modal_correction`, `combined_correction` [dB]<br>• `reproducibility_standard_deviation`, `expanded_uncertainty` [dB]<br>• `information_only_band`: > 10 kHz or \|U\| > 40 m/s<br>• `duct_diameter_m`, `duct_area`, `characteristic_impedance`, `speed_of_sound`, `flow_velocity`, `shield` | `duct.sound_power_level, duct.flow_modal_correction` |
+| `plant_measurement_contour` | `function` | **Measurement contour round a multisource industrial plant (ISO 8297 9.1 to 9.4).**<br>• `plant_outline_m`, `contour_m`: polygons in plan coordinates [m], the contour enclosing the plant without touching it<br>• `characteristic_height_m` H [m], from `plant_characteristic_height_m`<br>• `position_count` (Default: the fewest that meet Dm ≤ 2 d̄ of 9.1.1 c)), `omitted_positions`: layout indices left out (9.1.2.4) | `c = emission.plant_measurement_contour(plant, ring, characteristic_height_m=6.0)`<br><br>• `PlantMeasurementContour` |
+| `PlantMeasurementContour` | `dataclass` | **The contour, its positions and the plan quantities.**<br>• `positions_m`, `microphone_directions` (9.4), `distances_m` d_i, `nearest_perimeter_points_m`, `aspect_angles_deg`, `largest_aspect_angle_deg` (9.1.1 b)<br>• `plant_area_m2` Sp, `measurement_area_m2` Sm, `contour_length_m` l, `position_spacing_m` Dm, `mean_distance_m` d̄, `distance_ratio`<br>• `prescribed_microphone_height_m` (9.3), `mean_distance_limits_m` (9.1.1 a), `largest_plant_dimension_m` (1.2), `plant_centre_m`, `minimum_receiver_distance_m` (0.2 a)<br>• `.sound_power(levels_db, frequencies_hz, ...)` runs clause 10 with this geometry | `c.mean_distance_m, c.sound_power(lp, f)` |
+| `plant_sound_power` | `function` | **Sound power level of a plant, clause 10 of ISO 8297.**<br>• `levels_db`: SPL [dB], `(positions, bands)`<br>• `frequencies_hz`: octaves 31.5 Hz-8 kHz<br>• `measurement_area_m2`, `contour_length_m`, `microphone_height_m`, `mean_distance_m`, `plant_area_m2`<br>• `background_levels_db` (Table 2, refused below 6 dB)<br>• `directional_microphone_angle_deg` θ, (0°, 90°] (Default: None, omnidirectional)<br>• `temperature_c`, `relative_humidity_percent` (Default: None, Table 3 at 15 °C and 70 %) | `res = emission.plant_sound_power(lp, f, measurement_area_m2=4e4, contour_length_m=800.0, microphone_height_m=10.0, mean_distance_m=25.0, plant_area_m2=1.5e4)`<br><br>• `PlantSoundPowerResult`; `SoundPowerWarning` when 10.2 caps a level |
+| `PlantSoundPowerResult` | `dataclass` | **The steps of clause 10, derived from the readings.**<br>• `mean_level_db`, `capped`, `corrected_mean_level_db` (10.1 to 10.3)<br>• `area_term_db`, `near_field_term_db`, `microphone_term_db`, `air_absorption_db_per_m`, `air_absorption_term_db` (10.4 to 10.7)<br>• `sound_power_level_db`, `a_weighted_sound_power_level_db`, `a_weighted_bands_hz` (10.8, 10.9)<br>• `background_margin_db`, `background_correction_db`, `levels_db` (9.5.4)<br>• `distance_ratio`, `uncertainty_db` (Table 1) | `res.sound_power_level_db, res.uncertainty_db` |
+| `check_plant_measurement` / `PlantMeasurementCheck` / `PlantRequirement` | `function` / `dataclass` / `dataclass` | **May clause 10 be applied here? ISO 8297 1.2, 6 b), 7.1, 9.1, 9.3, 9.5.1 and 10.2.**<br>• `contour`: a `PlantMeasurementContour`; `sound_power`: its determination (Default: None, the arrangement alone); `measurement_time_s` (Default: None)<br>• `passes` over the requirements that are not advisory; `failures`, `deviations` (advisory rows to report: the height of 9.3, the preferred 10 dB background, 10.2, the approximate 320 m); `requirement(key)`<br>• `PlantRequirement`: `clause`, `value`, `comparison`, `limit`, `unit`, `holds`, `advisory`, `margin`<br>• truth value raises: read `passes` | `chk = emission.check_plant_measurement(c, res)`<br>`chk.passes` |
+| `partial_plant_contributions` / `PartialPlantContributions` | `function` / `dataclass` | **Parts of an industrial area measured on their own contours, put together (ISO 8297 0.2 b).**<br>• `parts`: `PlantSoundPowerResult` over the same bands; `names` (Default: Part 1, Part 2, ...)<br>• `total_level_db` (energy sum), `contribution_db`, `a_weighted_part_levels_db`, `a_weighted_total_db`, `a_weighted_contribution_db` | `emission.partial_plant_contributions([a, b]).a_weighted_contribution_db` |
+| `plant_characteristic_height_m` | `function` | **Characteristic height H of a plant (ISO 8297 9.2 c), NOTE 7).**<br>• `source_heights_m` h_k [m]<br>• `low_source_count`: sources below 2 m taken at 1 m, 0 or at least 10 (Default: 0) | `H = emission.plant_characteristic_height_m([4.0, 10.0], low_source_count=12)` |
+| `plant_microphone_height_m` / `plant_mean_distance_limits_m` / `plant_steady_reading_db` | `function` / `function` / `function` | **The numbers of 9.3, 9.1.1 a) and 9.5.2.**<br>• h = max(H + 0.025 √Sm, 5 m)<br>• (max(0.05 √Sp, 5 m), min(0.5 √Sp, 35 m)): d̄ above the first, at most the second<br>• arithmetic mean of the maximum and minimum of a needle swinging less than 5 dB | `emission.plant_microphone_height_m(8.0, 4e4)` |
+| `plant_background_correction_db` / `PLANT_BACKGROUND_CORRECTION_DB` | `function` / `mapping` | **Background correction of ISO 8297 Table 2.**<br>• 1 dB for 6 to 8 dB, 0.5 dB for 9 to 10 dB, 0 above 10 dB; below 6 dB the measurement is invalid (`ValueError`)<br>• between rows: nearest whole decibel, halves up | `emission.plant_background_correction_db(8.2)` |
+| `plant_air_absorption_db_per_m` / `PLANT_AIR_ABSORPTION_DB_PER_M` | `function` / `mapping` | **Air absorption α of ISO 8297 10.7 [dB/m].**<br>• no weather: Table 3 as printed (15 °C, 70 %)<br>• `temperature_c`, `relative_humidity_percent`: ISO 3891 Annex A (SAE ARP 866A) at the octave-centre third, through `aircraft.arp866a_attenuation`; 31.5 Hz stays 0 | `emission.plant_air_absorption_db_per_m(f, temperature_c=25.0, relative_humidity_percent=40.0)` |
+| `plant_method_uncertainty_db` / `PLANT_METHOD_UNCERTAINTY_DB` | `function` / `mapping` | **Uncertainty of ISO 8297 Table 1, (lower, upper) [dB].**<br>• keyed by d̄/√Sp: 0.05, 0.1, 0.2, 0.5; a ratio between rows takes the row below, the wider interval<br>• outside 0.05 to 0.5: `ValueError` | `emission.plant_method_uncertainty_db(0.24)` |
 | `high_frequency_sound_power` | `function` | **Sound power in the 16 kHz octave band, direct method (ISO 9295 Formula (6), clauses 6 and 7).**<br>• `pressure_levels_db`: Lp(ST) [dB], `(bands,)` or `(N, bands)` averaged by Formula (1)<br>• `frequencies_hz` [Hz]: one per band, 11.2-22.4 kHz<br>• `room_constant_m2` R [m²], scalar or per band<br>• `temperature_c` [°C] (Default: 23), `static_pressure_kpa` [kPa] (Default: 101.325): C1 + C2 of ISO 3741 (clause 10.1)<br>• `tonal` (Default: False) | `res = emission.high_frequency_sound_power(lp, frequencies_hz=f, room_constant_m2=r)`<br><br>• `HighFrequencySoundPowerResult` (method='direct') |
 | `high_frequency_sound_power_comparison` | `function` | **Sound power in the 16 kHz octave band against a reference sound source (ISO 9295 Formulae (8) and (9)).**<br>• `pressure_levels_db`: Lp(ST) [dB]<br>• `frequencies_hz` [Hz]<br>• `reference_pressure_levels_db`: Lp(FAR) [dB]<br>• `reference_sound_power_levels_db`: LW(FAR) [dB re 1 pW], per band, or per hertz for tones; for broadband noise it may be the `ReferenceSourceCalibration` (ISO 6926)<br>• `noise_bandwidth_hz` ΔF [Hz]: selects Formula (9); ≤ 112 Hz for an FFT<br>• `temperature_c`, `static_pressure_kpa`: C2 of ISO 3741 | `res = emission.high_frequency_sound_power_comparison(lp, frequencies_hz=f, reference_pressure_levels_db=lp_ref, reference_sound_power_levels_db=lw_ref, noise_bandwidth_hz=12.5)` |
 | `room_constant_from_reverberation_time` | `function` | **Room constant from the measured reverberation time (ISO 9295 Formulae (4), (5)).**<br>• `reverberation_time_s` T [s], scalar or per band<br>• `volume_m3` V [m³], `surface_area_m2` S [m²] | `r = emission.room_constant_from_reverberation_time([0.70, 0.42, 0.26], volume_m3=200.0, surface_area_m2=210.0)`<br><br>• R per band [m²] |
@@ -52449,7 +53071,7 @@ documents, one page per module.
 | `TonalityWarning` | `warning class` | **Tonality advisory.**<br>Emitted for biased tonality estimates (e.g. coarse FFT resolution) | `warnings.simplefilter('error', TonalityWarning)` |
 | `STIWarning` | `warning class` | **STI/STIPA advisory.**<br>Emitted for suspect speech-intelligibility measurements or inputs | `warnings.simplefilter('error', STIWarning)` |
 | `__version__` | `str` | **Package version string.**<br>(no parameters) | `phonometry.__version__  # '4.0.0rc1'` |
-| `.plot()` | `method` | **One-line canonical figure on every result object (soft matplotlib dependency).**<br>Available on `ZwickerLoudness`, `MooreGlasbergLoudness`, `MooreGlasbergTimeVaryingLoudness`, `EcmaLoudness`, `EcmaTonality`, `EcmaRoughness`, `PsychoacousticAnnoyanceResult`, `FluctuationStrengthResult`, `ProgramLoudnessResult`, `KWeightingResponse`, `STIResult`, `SIIResult`, `SIIProcedure`, `StandardSpeechSpectrum`, `NCResult`, `RCResult`, `AgeThresholdResult`, `NiptsResult`, `HtlanResult`, `ImpulseProminenceResult`, `ImpulsiveSoundResult`, `SelDistribution`, `LevelDifferenceQuantiles`, `RoundRobinPrecision`, `CalculationVerification`, `DirectivityFactor`, `RandomIncidenceSensitivity`, `DiffuseFieldSensitivity`, `AdjustmentValue`, `FreeFieldCorrection`, `CorrectionUncertaintyBudget`, `CorrectionUncertaintyVerification`, `ComparisonCalibration`, `EnvironmentalSensitivityCorrection`, `JigDiameterCorrection`, `ComparisonUncertaintyBudget`, `FreeFieldRegion`, `SoundLevelMeterPeriodicRequirement`, `SoundLevelMeterPeriodicVerification`, `FieldStrengthReading`, `BackgroundNoiseAssessment`, `InductionLoopVerification`, `LoopRequirement`, `AmplifierOverloadVerification`, `LoopField`, `LoopImpedance`, `AmplifierFrequencyResponse`, `AgcCharacteristic`, `QuadraturePhaseError`, `MaximumOutputCurrent`, `NeckLoopCharacteristics`, `NeckLoopVerification`, `MultipleShockResult`, `ImpulseResponseResult`, `DecayCurve`, `RoomAcousticsResult`, `ReverberationResult`, `ReverberationModelResult`, `DynamicStiffnessResult`, `MobilityResult`, `TransferStiffnessResult`, `BandAveragedStiffness`, `LevelDifferenceCheck`, `OutputMassCheck`, `EffectiveBlockingMass`, `DrivingPointStiffnessResult`, `DrivingPointUncertainty`, `VibrationSoundPowerResult`, `StructureBornePowerResult`, `InstalledSourceResult`, `WeightedRatingResult`, `ImpactRatingResult`, `ImpactImprovementRatingResult`, `FacadeInsulationResult`, `LabAirborneInsulationResult`, `LabImpactInsulationResult`, `SoundPowerResult`, `SoundEnergyResult`, `ReverberationSoundPowerResult`, `ReverberationSoundEnergyResult`, `InSituSoundPowerResult`, `InDuctSoundPowerResult`, `HighFrequencySoundPowerResult`, `InverseSquareLawResult`, `FreeFieldCheck`, `SourceDirectionalityResult`, `ReferenceSourceCalibration`, `ReferenceSoundSourceVerdict`, `ReferenceSourceDriftResult`, `TurbineMeasurementSurface`, `TurbineMicrophoneArray`, `TurbineEnvironmentalCorrection`, `TurbineTestEnvironmentCheck`, `TurbineSoundPowerResult`, `TurbineNoiseDeclaration`, `SoundPowerIntensityResult`, `DiscretePointIntensityResult`, `PrecisionSoundPowerResult`, `PrecisionIntensityResult`, `IntensityResult`, `UncertaintyResult`, `AbsorptionRatingResult`, `ScatteringResult`, `DiffusionResult`, `DiffusionSpectrum`, `InsituAbsorptionResult`, `WeightingResponse`, `WeightedSpectrum`, `Signal` and `DailyVibrationExposure`.<br>• `ax`: existing Axes, or None to build a fresh figure (Default: None)<br>• returns the Matplotlib `Axes` (an array of Axes for multi-panel figures); never calls `plt.show()`<br>• needs matplotlib (`pip install phonometry[plot]`) | `res.plot()`<br>`decay_curve(ir, fs).plot()` |
+| `.plot()` | `method` | **One-line canonical figure on every result object (soft matplotlib dependency).**<br>Available on `ZwickerLoudness`, `MooreGlasbergLoudness`, `MooreGlasbergTimeVaryingLoudness`, `EcmaLoudness`, `EcmaTonality`, `EcmaRoughness`, `PsychoacousticAnnoyanceResult`, `FluctuationStrengthResult`, `ProgramLoudnessResult`, `KWeightingResponse`, `STIResult`, `SIIResult`, `SIIProcedure`, `StandardSpeechSpectrum`, `NCResult`, `RCResult`, `AgeThresholdResult`, `NiptsResult`, `HtlanResult`, `ImpulseProminenceResult`, `ImpulsiveSoundResult`, `SelDistribution`, `LevelDifferenceQuantiles`, `RoundRobinPrecision`, `CalculationVerification`, `DirectivityFactor`, `RandomIncidenceSensitivity`, `DiffuseFieldSensitivity`, `AdjustmentValue`, `FreeFieldCorrection`, `CorrectionUncertaintyBudget`, `CorrectionUncertaintyVerification`, `ComparisonCalibration`, `EnvironmentalSensitivityCorrection`, `JigDiameterCorrection`, `ComparisonUncertaintyBudget`, `FreeFieldRegion`, `SoundLevelMeterPeriodicRequirement`, `SoundLevelMeterPeriodicVerification`, `FieldStrengthReading`, `BackgroundNoiseAssessment`, `InductionLoopVerification`, `LoopRequirement`, `AmplifierOverloadVerification`, `LoopField`, `LoopImpedance`, `AmplifierFrequencyResponse`, `AgcCharacteristic`, `QuadraturePhaseError`, `MaximumOutputCurrent`, `NeckLoopCharacteristics`, `NeckLoopVerification`, `MultipleShockResult`, `ImpulseResponseResult`, `DecayCurve`, `RoomAcousticsResult`, `ReverberationResult`, `ReverberationModelResult`, `DynamicStiffnessResult`, `MobilityResult`, `TransferStiffnessResult`, `BandAveragedStiffness`, `LevelDifferenceCheck`, `OutputMassCheck`, `EffectiveBlockingMass`, `DrivingPointStiffnessResult`, `DrivingPointUncertainty`, `VibrationSoundPowerResult`, `StructureBornePowerResult`, `InstalledSourceResult`, `WeightedRatingResult`, `ImpactRatingResult`, `ImpactImprovementRatingResult`, `FacadeInsulationResult`, `LabAirborneInsulationResult`, `LabImpactInsulationResult`, `SoundPowerResult`, `SoundEnergyResult`, `ReverberationSoundPowerResult`, `ReverberationSoundEnergyResult`, `InSituSoundPowerResult`, `InDuctSoundPowerResult`, `PlantMeasurementContour`, `PlantSoundPowerResult`, `PlantMeasurementCheck`, `PartialPlantContributions`, `HighFrequencySoundPowerResult`, `InverseSquareLawResult`, `FreeFieldCheck`, `SourceDirectionalityResult`, `ReferenceSourceCalibration`, `ReferenceSoundSourceVerdict`, `ReferenceSourceDriftResult`, `TurbineMeasurementSurface`, `TurbineMicrophoneArray`, `TurbineEnvironmentalCorrection`, `TurbineTestEnvironmentCheck`, `TurbineSoundPowerResult`, `TurbineNoiseDeclaration`, `SoundPowerIntensityResult`, `DiscretePointIntensityResult`, `PrecisionSoundPowerResult`, `PrecisionIntensityResult`, `IntensityResult`, `UncertaintyResult`, `AbsorptionRatingResult`, `ScatteringResult`, `DiffusionResult`, `DiffusionSpectrum`, `InsituAbsorptionResult`, `WeightingResponse`, `WeightedSpectrum`, `Signal` and `DailyVibrationExposure`.<br>• `ax`: existing Axes, or None to build a fresh figure (Default: None)<br>• returns the Matplotlib `Axes` (an array of Axes for multi-panel figures); never calls `plt.show()`<br>• needs matplotlib (`pip install phonometry[plot]`) | `res.plot()`<br>`decay_curve(ir, fs).plot()` |
 
 ## Notes
 
@@ -52763,6 +53385,13 @@ it; the list grows as guides gain their References sections.
   [iso.org catalogue](https://www.iso.org/standard/46426.html).
   The in situ comparison against a reference sound source.
   Cited by [Sound power in situ by comparison](https://jmrplens.github.io/phonometry/devices/emission/sound-power-in-situ/).
+- International Organization for Standardization. (1994). *Acoustics —
+  Determination of sound power levels of multisource industrial plants for
+  evaluation of sound pressure levels in the environment — Engineering
+  method* (ISO 8297:1994).
+  The contour round a whole industrial plant, its area, proximity and air
+  absorption terms and the uncertainty of Table 1.
+  Cited by [Sound power of multisource industrial plants](https://jmrplens.github.io/phonometry/devices/emission/sound-power-plant/).
 - International Organization for Standardization. (2010). *Acoustics —
   Determination of sound power levels and sound energy levels of noise
   sources using sound pressure — Engineering methods for an essentially free
@@ -53479,7 +54108,8 @@ it; the list grows as guides gain their References sections.
   Annex A gives the SAE ARP 866A attenuation coefficient that ECAC Doc 29
   Appendix D keeps as its legacy route; Annex C is a worked tone-correction
   example.
-  Cited by [NPD data for the air at the airport](https://jmrplens.github.io/phonometry/aircraft/npd-atmosphere/).
+  Cited by [NPD data for the air at the airport](https://jmrplens.github.io/phonometry/aircraft/npd-atmosphere/),
+  [Sound power of multisource industrial plants](https://jmrplens.github.io/phonometry/devices/emission/sound-power-plant/).
 - SAE International. (2012). *Standard values of atmospheric absorption as a
   function of temperature and humidity* (SAE ARP 866B, stabilized 2012).
   [sae.org](https://www.sae.org/standards/content/arp866b/).
@@ -69084,7 +69714,7 @@ the normative PDF fiche.
 - [Filter Architecture Gallery](https://jmrplens.github.io/phonometry/signals/filters/filter-gallery/): choose an architecture and inspect responses
 - [Calibration and dBFS](https://jmrplens.github.io/phonometry/signals/metrology/calibration/): get real-world SPL values
 - [Why phonometry](https://jmrplens.github.io/phonometry/start/why-phonometry/): the conformance-first design philosophy
-- [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): the expected and computed value of all 1786 checks
+- [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): the expected and computed value of all 1793 checks
 - [API Reference](https://jmrplens.github.io/phonometry/reference/api/): every parameter of every function
 - [Bibliography](https://jmrplens.github.io/phonometry/reference/bibliography/): the books and papers behind every guide, each with a verified link
 
@@ -70092,7 +70722,7 @@ sample from the metrology core:
 | IEC 61252:1993 | The personal sound exposure quantities, `sound_exposure()` and the normalized 8 h level `lex_8h()`; IEC 61252:2025 has since superseded this print, and the transcription still targets the 1993+A2 text | `tests/signals/test_levels.py` |
 
 The same discipline applies far beyond the metrology core: today the suite runs
-1786 numerical conformance checks across 109 domains and 518 standards, covering
+1793 numerical conformance checks across 109 domains and 519 standards, covering
 psychoacoustics and speech intelligibility, room, building and materials
 acoustics, human and machine vibration, environmental, aircraft, rotorcraft
 and underwater noise, electroacoustics, broadcast loudness, industrial noise

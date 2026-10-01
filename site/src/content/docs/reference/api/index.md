@@ -328,6 +328,7 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | [`emission.sound_power_hard_walled`](/phonometry/reference/api/power/sound-power-hard-walled/) | Sound power and sound energy levels of a small movable source in a hard-walled test room, by comparison with a reference sound source: ISO 3743-1:2010 (engineering grade 2). |
 | [`emission.sound_power_special_room`](/phonometry/reference/api/power/sound-power-special-room/) | Sound power level of a small movable source in a special reverberation test room: ISO 3743-2:2018 (engineering grade 2), the direct method and the comparison method. |
 | [`emission.sound_power_in_duct`](/phonometry/reference/api/power/sound-power-in-duct/) | Sound power radiated into a duct by a fan, in-duct method: ISO 5136:2003. |
+| [`emission.sound_power_plant`](/phonometry/reference/api/power/sound-power-plant/) | Sound power levels of multisource industrial plants for the evaluation of sound pressure levels in the environment: ISO 8297:1994, engineering method (grade 2). |
 | [`emission.sound_power_high_frequency`](/phonometry/reference/api/power/sound-power-high-frequency/) | Sound power levels in the 16 kHz octave band: ISO 9295:2015. |
 | [`emission.turbine_noise`](/phonometry/reference/api/power/turbine-noise/) | Airborne noise of a steam turbine set and its driven machinery: IEC 61063:1991 (EN 61063:1996). |
 | [`emission.intensity`](/phonometry/reference/api/power/intensity/) | Two-microphone (p-p) sound intensity per IEC 61043:1993 and the ISO 9614-1:1993 field indicators. |

@@ -340,6 +340,7 @@ export const apiSections = {
       'reference/api/power/sound-power-hard-walled',
       'reference/api/power/sound-power-special-room',
       'reference/api/power/sound-power-in-duct',
+      'reference/api/power/sound-power-plant',
       'reference/api/power/sound-power-high-frequency',
       'reference/api/power/turbine-noise',
       'reference/api/power/intensity',

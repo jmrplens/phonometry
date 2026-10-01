@@ -473,6 +473,7 @@ export const topics = [
           'devices/emission/sound-power-test-rooms',
           'devices/emission/sound-power-in-situ',
           'devices/emission/sound-power-in-duct',
+          'devices/emission/sound-power-plant',
           'devices/emission/sound-power-high-frequency',
           'devices/emission/sound-power-turbines',
           'devices/emission/vibration-sound-power',

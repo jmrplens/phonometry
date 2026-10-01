@@ -1134,7 +1134,8 @@ contour around an airport rather than a level under a flight path.
   Annex A gives the SAE ARP 866A attenuation coefficient that ECAC Doc 29
   Appendix D keeps as its legacy route; Annex C is a worked tone-correction
   example.
-  Cited by [NPD data for the air at the airport](/phonometry/aircraft/npd-atmosphere/).
+  Cited by [NPD data for the air at the airport](/phonometry/aircraft/npd-atmosphere/),
+  [Sound Power of Multisource Industrial Plants](/phonometry/devices/emission/sound-power-plant/).
 - SAE International. (2012). *Standard values of atmospheric absorption as a
   function of temperature and humidity* (SAE ARP 866B, stabilized 2012).
   [sae.org](https://www.sae.org/standards/content/arp866b/).
@@ -1413,6 +1414,13 @@ implementation is validated against.
   [iso.org catalogue](https://www.iso.org/standard/46426.html).
   The in situ comparison against a reference sound source.
   Cited by [Sound Power in Situ by Comparison](/phonometry/devices/emission/sound-power-in-situ/).
+- International Organization for Standardization. (1994). *Acoustics —
+  Determination of sound power levels of multisource industrial plants for
+  evaluation of sound pressure levels in the environment — Engineering
+  method* (ISO 8297:1994).
+  The contour round a whole industrial plant, its area, proximity and air
+  absorption terms and the uncertainty of Table 1.
+  Cited by [Sound Power of Multisource Industrial Plants](/phonometry/devices/emission/sound-power-plant/).
 - International Organization for Standardization. (2010). *Acoustics —
   Determination of sound power levels and sound energy levels of noise
   sources using sound pressure — Engineering methods for an essentially free

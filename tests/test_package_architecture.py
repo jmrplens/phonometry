@@ -62,6 +62,10 @@ ALLOWED_EDGES: set[tuple[str, str]] = {
     # nepers per metre and evaluated up to 22,4 kHz, so the high-frequency
     # sound power methods read the one implementation of it
     ("emission", "environment"),
+    # ISO 8297 Table 3 takes the air absorption of an industrial plant from
+    # ISO 3891, whose Annex A (SAE ARP 866A) is transcribed once, in
+    # aircraft.atmospheric_absorption; aircraft imports nothing from emission
+    ("emission", "aircraft"),
     # the level functions detect io.Signal so a read measurement carries
     # its own fs and calibration; io imports no toolbox code back at
     # module level, so import stays acyclic

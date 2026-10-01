@@ -1404,6 +1404,26 @@ def _reference_source_drift() -> ph.emission.ReferenceSourceDriftResult:
     )
 
 
+def _plant_contour() -> ph.emission.PlantMeasurementContour:
+    """ISO 8297: an L-shaped plant area and a rectangular contour 25 m out."""
+    return ph.emission.plant_measurement_contour(
+        [[0, 0], [200, 0], [200, 70], [140, 70], [140, 120], [0, 120]],
+        [[-25, -25], [225, -25], [225, 145], [-25, 145]],
+        characteristic_height_m=8.0,
+    )
+
+
+def _plant_sound_power() -> ph.emission.PlantSoundPowerResult:
+    """ISO 8297 clause 10 on levels within 1 dB of a smooth plant spectrum."""
+    contour = _plant_contour()
+    base = np.array([80.0, 82.0, 81.0, 78.0, 75.0, 71.0, 65.0])
+    rng = np.random.default_rng(8297)
+    levels = base + rng.uniform(-1.0, 1.0, (contour.positions_m.shape[0], base.size))
+    return contour.sound_power(
+        levels, [63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0]
+    )
+
+
 def _in_situ_power() -> ph.emission.InSituSoundPowerResult:
     """ISO 3747 in situ comparison at four positions, one band an upper bound."""
     freqs = np.array([250.0, 500.0, 1000.0, 2000.0])

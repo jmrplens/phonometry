@@ -2841,6 +2841,92 @@ in the same order.
   on the choice. No change was required.
 - **Status:** unreported.
 
+## ISO 8297:1994, 3.7 (a misspelt term in the heading of the definition)
+
+- **Location:** definition 3.7 (PDF page 11, printed p. 3) of BS ISO
+  8297:1994, the identical British adoption of ISO 8297:1994.
+- **The print:** "characteristics height of the plant, $H$".
+- **The problem:** "characteristics" for "characteristic". The symbol list of
+  clause 4 on the same page ("Characteristic height of the plant, in metres")
+  and 9.2 c) (PDF page 13, printed p. 5: "the characteristic height of the
+  plant, $H$") write the term without the extra letter; the heading of the
+  definition is the one place that names it otherwise.
+- **Evidence:** Verified on PDF page 11 (printed p. 3) of BS ISO 8297:1994,
+  definition 3.7, against the symbol list of clause 4 on the same page and
+  9.2 c) on PDF page 13 (printed p. 5).
+- **Library behaviour:** none to take; no number depends on it. The height is
+  `plant_characteristic_height_m` and the `characteristic_height_m` of the
+  contour.
+- **Status:** unreported.
+
+## ISO 8297:1994, 9.1.1 b) (the aspect angle written with the symbol of the microphone's 3 dB angle)
+
+- **Location:** clause 9.1.1 b) (PDF page 13, printed p. 5), against the
+  symbol list of clause 4 (PDF page 11, printed p. 3), the aspect-angle
+  callout of Figure 1 and clause 7.1 (PDF page 12, printed p. 4) of BS ISO 8297:1994, the
+  identical British adoption of ISO 8297:1994.
+- **The print:** "from any point on the measurement contour, the plant area
+  shall be seen inside an aspect angle, $\theta$, not greater than 180°
+  (see Figure 1)".
+- **The problem:** clause 4 gives the two angles of the standard two
+  symbols: $\theta$ is the "Angle at which the sensitivity of a directional
+  microphone has fallen by 3 dB", the angle 7.1 requires to exceed ±30° and
+  10.6 puts in $\Delta L_\mathrm{M} = 3(1 - \theta/90)$ dB, and $\phi$ is
+  the "Aspect angle subtended at a microphone position by the extremities of
+  the perimeter of the plant area". Figure 1, to which 9.1.1 b) refers, labels
+  the aspect angle $\phi$. The clause therefore writes the aspect angle with
+  the symbol of the microphone's angle. Figure 1 also writes the bound as
+  "$\phi < 180°$", strict, where the clause says "not greater than 180°".
+- **Evidence:** Verified on PDF page 13 (printed p. 5) of BS ISO 8297:1994,
+  clause 9.1.1 b), against the symbol list on PDF page 11 (printed p. 3) and
+  Figure 1 and clause 7.1 on PDF page 12 (printed p. 4).
+- **Library behaviour:** the aspect angle is $\phi$ of clause 4 and
+  Figure 1, and the bound is the clause's, at most 180°
+  (`check_plant_measurement`, requirement `aspect_angle`, and
+  `PlantMeasurementContour.aspect_angles_deg`); $\theta$ keeps its clause 4
+  meaning as `directional_microphone_angle_deg`. No change was required.
+- **Status:** unreported.
+
+## ISO 8297:1994, 10.4 (the area term written with a lower-case subscript)
+
+- **Location:** clause 10.4, step 4 (PDF page 15, printed p. 7) of BS ISO
+  8297:1994.
+- **The print:** "Calculate an area term, $\Delta L_\mathrm{s}$, in decibels,
+  for the measurement surface (as defined in ISO 3744)".
+- **The problem:** the equation directly below the sentence writes
+  $\Delta L_\mathrm{S} = 10 \lg[(2S_\mathrm{m} + hl)/S_0]$ dB with a capital
+  subscript, and so do the symbol list of clause 4 (PDF page 11, printed p. 3:
+  "$\Delta L_\mathrm{S}$ Area term, in decibels") and the sum of 10.8 on the
+  same page. The prose of 10.4 is the only place that writes the subscript in
+  lower case; steps 5 to 7 name their terms with the symbols their equations
+  use.
+- **Evidence:** Verified on PDF page 15 (printed p. 7) of BS ISO 8297:1994,
+  clause 10.4, against its own equation and 10.8 on the same page and the
+  symbol list on PDF page 11 (printed p. 3). The running text of this reprint
+  is set apart from its equations, so the slip may belong to the British
+  adoption rather than to ISO 8297:1994.
+- **Library behaviour:** none to take; the term is
+  `PlantSoundPowerResult.area_term_db`, written $\Delta L_\mathrm{S}$ in its
+  docstring.
+- **Status:** unreported.
+
+## ISO 8297:1994, Table 3 (the 31,5 Hz octave printed as 31 Hz)
+
+- **Location:** Table 3, first row (PDF page 15, printed p. 7) of BS ISO
+  8297:1994.
+- **The print:** the first octave-band centre frequency of Table 3 is "31".
+- **The problem:** 7.2 requires the centre frequencies of the bands to
+  "correspond to those of ISO 266", whose octave band is 31,5 Hz, and NOTE 8
+  (PDF page 14, printed p. 6) names the same band "31,5 Hz". The row is the
+  31,5 Hz octave; its value, 0 dB/m, is unaffected.
+- **Evidence:** Verified on PDF page 15 (printed p. 7) of BS ISO 8297:1994,
+  Table 3, against clause 7.2 on PDF page 13 (printed p. 5) and NOTE 8 on PDF
+  page 14 (printed p. 6).
+- **Library behaviour:** `PLANT_AIR_ABSORPTION_DB_PER_M` keys the row as
+  31.5 Hz, the band the rest of the method names. No change of any value was
+  required.
+- **Status:** unreported.
+
 ## ISO/PAS 1996-3:2022, Clause 5 (cross-references of r and d)
 
 - **Location:** Clause 5, Formula (2), the definitions of the symbols of the

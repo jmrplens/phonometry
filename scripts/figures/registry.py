@@ -186,6 +186,12 @@ from .devices import (
     generate_piston_baffle_geometry,
     generate_piston_directivity,
     generate_piston_radiation_impedance,
+    generate_plant_air_absorption,
+    generate_plant_measurement_check,
+    generate_plant_measurement_contour,
+    generate_plant_partial_contributions,
+    generate_plant_proximity_uncertainty,
+    generate_plant_sound_power,
     generate_plenum_geometry,
     generate_pp_probe_geometry,
     generate_precision_anechoic_power,
@@ -1034,6 +1040,16 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     generate_hard_walled_sound_power,
     generate_special_room_reverberation,
     generate_special_room_sound_power,
+    # ISO 8297 multisource plants: the contour round an example plant, its
+    # sound power against the power its sources radiate, Table 3 against the
+    # ISO 3891 coefficient, the proximity term and Table 1, the verdict, and
+    # two plants of one industrial area against their sum.
+    generate_plant_measurement_contour,
+    generate_plant_sound_power,
+    generate_plant_air_absorption,
+    generate_plant_proximity_uncertainty,
+    generate_plant_measurement_check,
+    generate_plant_partial_contributions,
     # ISO 9295 16 kHz octave: Annex A against the 624 printed cells of
     # Tables 1 and 2, and a direct and a tonal determination.
     generate_high_frequency_air_absorption,

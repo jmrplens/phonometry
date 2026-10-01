@@ -3,13 +3,13 @@
   "library": "4.0.0rc1",
   "generator": "scripts/conformance_report.py",
   "counts": {
-    "checks": 1774,
-    "passing": 1774,
+    "checks": 1786,
+    "passing": 1786,
     "failing": 0,
-    "domains": 108,
-    "standards": 516,
-    "citations": 1232,
-    "designations": 220,
+    "domains": 109,
+    "standards": 518,
+    "citations": 1243,
+    "designations": 222,
     "sources": 123
   },
   "units": [
@@ -661,6 +661,12 @@
       "title": "Free-field corrections of a sound level meter (IEC 62585)",
       "checks": 16,
       "passing": 16
+    },
+    {
+      "id": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8",
+      "title": "Microphone calibration by comparison (IEC 61094-5, IEC 61094-8)",
+      "checks": 12,
+      "passing": 12
     },
     {
       "id": "audio-frequency-induction-loops-iec-60118-4-2014-a1-iec-62489-1-2010-a1",
@@ -48568,6 +48574,414 @@
         "value": 0.0
       },
       "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8/iec-61094-5-2016-table-d-1/standard-uncertainty-at-2-khz-of-the-7-components-whose-row-states-a-value",
+      "domain": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8",
+      "reference": {
+        "cite": "IEC 61094-5:2016 Table D.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61094-5",
+            "edition": "2016",
+            "clause": "Table D.1"
+          }
+        ]
+      },
+      "quantity": "Standard uncertainty at 2 kHz of the 7 components whose row states a value",
+      "kind": "count",
+      "expected": {
+        "value": 7.0,
+        "label": "7/7 components of Table D.1"
+      },
+      "computed": {
+        "value": 7.0,
+        "label": "7/7 components of Table D.1"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8/iec-61094-5-2016-d-3/combined-standard-uncertainty-of-the-example-budget-at-2-khz",
+      "domain": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8",
+      "reference": {
+        "cite": "IEC 61094-5:2016 D.3",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61094-5",
+            "edition": "2016",
+            "clause": "D.3"
+          }
+        ]
+      },
+      "quantity": "Combined standard uncertainty of the example budget at 2 kHz",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0437,
+        "label": "0.0437 dB (printed 0,040, an erratum)"
+      },
+      "computed": {
+        "value": 0.0437
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 5e-05
+      },
+      "deviation": {
+        "value": -3.08e-05
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8/iec-61094-5-2016-d-2-d-3/expanded-uncertainty-k-2-of-the-example-budget-at-2-khz",
+      "domain": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8",
+      "reference": {
+        "cite": "IEC 61094-5:2016 D.2, D.3",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61094-5",
+            "edition": "2016",
+            "clause": "D.2, D.3"
+          }
+        ]
+      },
+      "quantity": "Expanded uncertainty (k = 2) of the example budget at 2 kHz",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.087,
+        "label": "0.087 dB (printed 0,08, an erratum)"
+      },
+      "computed": {
+        "value": 0.087
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": 0.000338
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8/iec-61094-5-2016-d-3/combined-standard-uncertainty-by-the-strict-calculation-in-linear-form",
+      "domain": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8",
+      "reference": {
+        "cite": "IEC 61094-5:2016 D.3",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61094-5",
+            "edition": "2016",
+            "clause": "D.3"
+          }
+        ]
+      },
+      "quantity": "Combined standard uncertainty by the strict calculation in linear form",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.043614,
+        "label": "0.043614 dB (0.043669 dB in decibels)"
+      },
+      "computed": {
+        "value": 0.043614
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-06
+      },
+      "deviation": {
+        "value": 2.45e-07
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8/iec-61094-5-2016-table-a-1/correction-of-a-ws3-microphone-against-an-ls2ap-in-the-jig-of-figure-a-4-14-frequencies",
+      "domain": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8",
+      "reference": {
+        "cite": "IEC 61094-5:2016 Table A.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61094-5",
+            "edition": "2016",
+            "clause": "Table A.1"
+          }
+        ]
+      },
+      "quantity": "Correction of a WS3 microphone against an LS2aP in the jig of Figure A.4, 14 frequencies",
+      "kind": "count",
+      "expected": {
+        "value": 14.0,
+        "label": "14/14 corrections of Table A.1"
+      },
+      "computed": {
+        "value": 14.0,
+        "label": "14/14 corrections of Table A.1"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8/iec-61094-5-2016-table-a-1-note/expanded-uncertainty-of-the-correction-at-20-khz-a-tenth-of-its-value",
+      "domain": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8",
+      "reference": {
+        "cite": "IEC 61094-5:2016 Table A.1 NOTE",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61094-5",
+            "edition": "2016",
+            "clause": "Table A.1 NOTE"
+          }
+        ]
+      },
+      "quantity": "Expanded uncertainty of the correction at 20 kHz, a tenth of its value",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.1443
+      },
+      "computed": {
+        "value": 0.1443
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8/iec-61094-5-2016-formulas-c-1-to-c-3/sensitivity-level-of-the-test-microphone-through-the-interchange-whatever-the-channel-gains-source-drift-and-field-asymmetry",
+      "domain": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8",
+      "reference": {
+        "cite": "IEC 61094-5:2016 Formulas (C.1) to (C.3)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61094-5",
+            "edition": "2016",
+            "clause": "Formulas (C.1) to (C.3)"
+          }
+        ]
+      },
+      "quantity": "Sensitivity level of the test microphone through the interchange, whatever the channel gains, source drift and field asymmetry",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0,
+        "label": "the test microphone's level at all 5 frequencies"
+      },
+      "computed": {
+        "value": 0.0,
+        "label": "max deviation 0.000000000 dB"
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8/iec-61094-5-2016-d-2/m-test-m-ref-x-r-v-r-p-in-linear-form-against-the-level-form",
+      "domain": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8",
+      "reference": {
+        "cite": "IEC 61094-5:2016 D.2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61094-5",
+            "edition": "2016",
+            "clause": "D.2"
+          }
+        ]
+      },
+      "quantity": "M_test = M_ref x R_V / R_P in linear form against the level form",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0,
+        "label": "M_ref x R_V / R_P at all 5 frequencies"
+      },
+      "computed": {
+        "value": 0.0,
+        "label": "max relative deviation 0.000000000000"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 12,
+      "verdict": "pass"
+    },
+    {
+      "id": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8/iec-61094-8-2012-a-2/monitor-ratios-cancel-a-source-that-drifts-between-the-two-measurements",
+      "domain": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8",
+      "reference": {
+        "cite": "IEC 61094-8:2012 A.2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61094-8",
+            "edition": "2012",
+            "clause": "A.2"
+          }
+        ]
+      },
+      "quantity": "Monitor ratios cancel a source that drifts between the two measurements",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0,
+        "label": "the test microphone's level at all 5 frequencies"
+      },
+      "computed": {
+        "value": 0.0,
+        "label": "max deviation 0.000000000 dB"
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8/iec-61094-8-2012-table-1/typical-expanded-uncertainty-of-the-5-reference-calibration-options-at-1-khz-and-10-khz",
+      "domain": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8",
+      "reference": {
+        "cite": "IEC 61094-8:2012 Table 1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61094-8",
+            "edition": "2012",
+            "clause": "Table 1"
+          }
+        ]
+      },
+      "quantity": "Typical expanded uncertainty of the 5 reference calibration options at 1 kHz and 10 kHz",
+      "kind": "count",
+      "expected": {
+        "value": 10.0,
+        "label": "10/10 cells of Table 1"
+      },
+      "computed": {
+        "value": 10.0,
+        "label": "10/10 cells of Table 1"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8/iec-61094-8-2012-table-2/source-of-uncertainty-and-subclause-references-of-the-12-typical-components",
+      "domain": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8",
+      "reference": {
+        "cite": "IEC 61094-8:2012 Table 2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61094-8",
+            "edition": "2012",
+            "clause": "Table 2"
+          }
+        ]
+      },
+      "quantity": "Source of uncertainty and subclause references of the 12 typical components",
+      "kind": "count",
+      "expected": {
+        "value": 12.0,
+        "label": "12/12 rows of Table 2"
+      },
+      "computed": {
+        "value": 12.0,
+        "label": "12/12 rows of Table 2"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8/iec-61094-8-2012-formula-b-1-figure-b-1/a-reflection-from-the-boundary-of-the-effective-free-field-region-arrives-at-the-end-of-a-5-ms-window",
+      "domain": "microphone-calibration-by-comparison-iec-61094-5-iec-61094-8",
+      "reference": {
+        "cite": "IEC 61094-8:2012 Formula (B.1), Figure B.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "IEC 61094-8",
+            "edition": "2012",
+            "clause": "Formula (B.1), Figure B.1"
+          }
+        ]
+      },
+      "quantity": "A reflection from the boundary of the effective free-field region arrives at the end of a 5 ms window",
+      "kind": "scalar",
+      "expected": {
+        "value": 5.0
+      },
+      "computed": {
+        "value": 5.0
+      },
+      "unit": "ms",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 6,
       "verdict": "pass"
     },
     {

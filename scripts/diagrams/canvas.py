@@ -188,6 +188,10 @@ _ROMAN_SCRIPTS = frozenset(
         # printed upright in C_FF,RM.
         "FF",
         "RM",
+        # test/mon: the microphone under test of IEC 61094-5:2016 D.2, printed
+        # upright in M_test, and the monitor microphone of IEC 61094-8:2012.
+        "test",
+        "mon",
         "rms",
         "tot",
         "TOT",

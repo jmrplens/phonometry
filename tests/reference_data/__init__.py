@@ -420,6 +420,46 @@ from .calibrators import IEC60942_TABLE_A5 as IEC60942_TABLE_A5
 from .calibrators import IEC60942_TABLE_E1 as IEC60942_TABLE_E1
 from .calibrators import IEC61672_1_TABLE_C1 as IEC61672_1_TABLE_C1
 from .calibrators import TC29_REASONS as TC29_REASONS
+from .comparison_calibration import (
+    IEC61094_5_D3_COMBINED_DB as IEC61094_5_D3_COMBINED_DB,
+)
+from .comparison_calibration import (
+    IEC61094_5_D3_EXPANDED_DB as IEC61094_5_D3_EXPANDED_DB,
+)
+from .comparison_calibration import (
+    IEC61094_5_D3_LINEAR_COMBINED_DB as IEC61094_5_D3_LINEAR_COMBINED_DB,
+)
+from .comparison_calibration import (
+    IEC61094_5_D3_PRINTED_COMBINED_DB as IEC61094_5_D3_PRINTED_COMBINED_DB,
+)
+from .comparison_calibration import (
+    IEC61094_5_D3_PRINTED_EXPANDED_DB as IEC61094_5_D3_PRINTED_EXPANDED_DB,
+)
+from .comparison_calibration import (
+    IEC61094_5_TABLE_A1_DB as IEC61094_5_TABLE_A1_DB,
+)
+from .comparison_calibration import (
+    IEC61094_5_TABLE_A1_RELATIVE_EXPANDED as IEC61094_5_TABLE_A1_RELATIVE_EXPANDED,
+)
+from .comparison_calibration import (
+    IEC61094_5_TABLE_D1_STANDARD_DB as IEC61094_5_TABLE_D1_STANDARD_DB,
+)
+from .comparison_calibration import (
+    IEC61094_5_TABLE_D1_STATED as IEC61094_5_TABLE_D1_STATED,
+)
+from .comparison_calibration import IEC61094_8_TABLE_1_DB as IEC61094_8_TABLE_1_DB
+from .comparison_calibration import (
+    IEC61094_8_TABLE_1_TEXT as IEC61094_8_TABLE_1_TEXT,
+)
+from .comparison_calibration import (
+    IEC61094_8_TABLE_2_SOURCES as IEC61094_8_TABLE_2_SOURCES,
+)
+from .comparison_calibration import (
+    IEC61094_8_TABLE_2_SUBCLAUSES as IEC61094_8_TABLE_2_SUBCLAUSES,
+)
+from .comparison_calibration import (
+    IEC61094_REFERENCE_CONDITIONS as IEC61094_REFERENCE_CONDITIONS,
+)
 from .damping import VER_BERANEK_14_1 as VER_BERANEK_14_1
 from .damping import VER_BERANEK_14_1_COLUMNS as VER_BERANEK_14_1_COLUMNS
 from .diffusion import COX_B_BANDS_HZ as COX_B_BANDS_HZ

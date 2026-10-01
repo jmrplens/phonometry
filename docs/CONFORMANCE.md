@@ -19,7 +19,7 @@
 
 ## Numerical conformance report
 
-**1774/1774 conformance checks pass** across 108 domains and 516 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+**1786/1786 conformance checks pass** across 109 domains and 518 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub><b>&#916;</b> is the difference between the computed value and the one the standard publishes. <b>Used</b> is how much of that clause's published tolerance the difference consumes: 100 % means it sits exactly on the limit, 5 % means it uses a twentieth of the allowance, and a dash means the clause states no two-sided tolerance for the quantity, so there is no budget to spend. It is reported and never used to decide a verdict, which is settled at full precision before any rounding.</sub>
 
@@ -2220,6 +2220,26 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | IEC 62585:2012 Formulas (E.1) to (E.6), Figure E.1 | A coupler's correction from readings built by (E.1) to (E.3B) | 0 dB (+/-0.000000000001 dB) | 0 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 | IEC 62585:2012 Formulas (F.1) to (F.13) | An actuator's normalised correction from readings built by (F.1) to (F.3) | 0 dB (+/-0.000000000001 dB) | 0 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 | IEC 62585:2012 Annex A, Figure A.1 | Adjustment value of a response whose fit is known in closed form | 0.2 dB (closed form) | 0.2 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+
+</details>
+
+<details>
+<summary><b>Microphone calibration by comparison (IEC 61094-5, IEC 61094-8)</b>: 100% (12/12)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
+|:---|:---|:---|:---|:---|:---:|:---:|
+| IEC 61094-5:2016 Table D.1 | Standard uncertainty at 2 kHz of the 7 components whose row states a value | 7/7 components of Table D.1 | 7/7 components of Table D.1 | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61094-5:2016 D.3 | Combined standard uncertainty of the example budget at 2 kHz | 0.0437 dB (printed 0,040, an erratum) | 0.0437 dB | 0 dB | 62 % | ![Pass][cv-pass] Pass |
+| IEC 61094-5:2016 D.2, D.3 | Expanded uncertainty (k = 2) of the example budget at 2 kHz | 0.087 dB (printed 0,08, an erratum) | 0.087 dB | 0 dB | 68 % | ![Pass][cv-pass] Pass |
+| IEC 61094-5:2016 D.3 | Combined standard uncertainty by the strict calculation in linear form | 0.043614 dB (0.043669 dB in decibels) | 0.043614 dB | 0 dB | 24 % | ![Pass][cv-pass] Pass |
+| IEC 61094-5:2016 Table A.1 | Correction of a WS3 microphone against an LS2aP in the jig of Figure A.4, 14 frequencies | 14/14 corrections of Table A.1 | 14/14 corrections of Table A.1 | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61094-5:2016 Table A.1 NOTE | Expanded uncertainty of the correction at 20 kHz, a tenth of its value | 0.1443 dB (+/-0 dB) | 0.1443 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61094-5:2016 Formulas (C.1) to (C.3) | Sensitivity level of the test microphone through the interchange, whatever the channel gains, source drift and field asymmetry | the test microphone's level at all 5 frequencies | max deviation 0.000000000 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61094-5:2016 D.2 | M_test = M_ref x R_V / R_P in linear form against the level form | M_ref x R_V / R_P at all 5 frequencies | max relative deviation 0.000000000000 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61094-8:2012 A.2 | Monitor ratios cancel a source that drifts between the two measurements | the test microphone's level at all 5 frequencies | max deviation 0.000000000 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61094-8:2012 Table 1 | Typical expanded uncertainty of the 5 reference calibration options at 1 kHz and 10 kHz | 10/10 cells of Table 1 | 10/10 cells of Table 1 | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61094-8:2012 Table 2 | Source of uncertainty and subclause references of the 12 typical components | 12/12 rows of Table 2 | 12/12 rows of Table 2 | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61094-8:2012 Formula (B.1), Figure B.1 | A reflection from the boundary of the effective free-field region arrives at the end of a 5 ms window | 5 ms (+/-0 ms) | 5 ms | 0 ms | 0 % | ![Pass][cv-pass] Pass |
 
 </details>
 

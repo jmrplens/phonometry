@@ -15,6 +15,13 @@ if TYPE_CHECKING:
     from matplotlib.ticker import FuncFormatter
     from numpy.typing import NDArray
 
+    from ..metrology.comparison_calibration import (
+        ComparisonCalibration,
+        ComparisonUncertaintyBudget,
+        EnvironmentalSensitivityCorrection,
+        FreeFieldRegion,
+        JigDiameterCorrection,
+    )
     from ..metrology.conformance import ConformanceVerification
     from ..metrology.data_qualification import (
         LevelCrossingResult,
@@ -84,6 +91,10 @@ _FREQUENCY_LABEL = "Frequency [Hz]"
 _DIFFUSE_DEVIATION_LABEL = r"$\Delta G_\mathrm{D} = L_\mathrm{D} - L_\mathrm{D,ref}$"
 _CORRECTION_AXIS_LABEL = "Correction [dB]"
 _REFERENCE_MIC_LABEL = r"$C_\mathrm{FF,RM}$, reference microphone"
+
+#: The axis of the uncertainty budgets of IEC 62585 Annex I, IEC 61094-5
+#: Table D.1 and IEC 61094-8 Table 2, written once.
+_STANDARD_UNCERTAINTY_LABEL = r"Standard uncertainty $u_i$ [dB]"
 
 #: The legend entry of a periodic-test result IEC 61672-3:2013 4.3 forbids
 #: using, and the title of one requirement's figure: the clause and its
@@ -227,7 +238,7 @@ _STRINGS: dict[str, str] = {
     "Range of the {n} determinations": "Intervalo de las {n} determinaciones",
     "{label}, mean": "{label}, media",
     r"$f_0$ = {f} Hz, where it is zero": r"$f_0$ = {f} Hz, donde es nula",
-    r"Standard uncertainty $u_i$ [dB]": r"Incertidumbre típica $u_i$ [dB]",
+    _STANDARD_UNCERTAINTY_LABEL: r"Incertidumbre típica $u_i$ [dB]",
     "Uncertainty budget at {f} Hz (IEC 62585 Annex I)": "Presupuesto de incertidumbre a {f} Hz (IEC 62585, anexo I)",
     "Type B": "Tipo B",
     "Type A, from repeat measurements": "Tipo A, de medidas repetidas",
@@ -2226,7 +2237,7 @@ def plot_correction_budget(
     )
     ax.invert_yaxis()
     ax.set_xlim(0.0, 1.15 * max(float(values.max()), result.combined_uncertainty_db))
-    ax.set_xlabel(_t(r"Standard uncertainty $u_i$ [dB]", language))
+    ax.set_xlabel(_t(_STANDARD_UNCERTAINTY_LABEL, language))
     frequency = format_number(result.frequency_hz, language, decimals=0)
     dof = result.effective_dof
     nu = "∞" if math.isinf(dof) else format_number(dof, language, decimals=2)
@@ -2374,5 +2385,499 @@ def plot_correction_uncertainty_verification(
     ax.set_title(title)
     ax.grid(visible=True, which="both", alpha=0.3)
     place_legend_clear(ax.legend(fontsize="small"))
+    localize_axes(ax, language)
+    return ax
+
+
+# ---------------------------------------------------------------------------
+# IEC 61094-5 and IEC 61094-8: microphone calibration by comparison
+# ---------------------------------------------------------------------------
+
+#: The title of a calibration, by field.
+_COMPARISON_TITLES: dict[str, str] = {
+    "pressure": "Pressure sensitivity by comparison (IEC 61094-5)",
+    "free_field": "Free-field sensitivity by comparison (IEC 61094-8)",
+}
+
+#: The table a budget follows, named in its title, by field.
+_COMPARISON_BUDGET_TITLES: dict[str, str] = {
+    "pressure": "Uncertainty budget at {f} Hz (IEC 61094-5 Table D.1)",
+    "free_field": "Uncertainty budget at {f} Hz (IEC 61094-8 Table 2)",
+}
+
+#: Short tick labels of the components of IEC 61094-5 Table D.1 and
+#: IEC 61094-8 Table 2, by the key the budget takes them by.
+_COMPARISON_COMPONENT_LABELS: dict[str, str] = {
+    "reference": "Reference microphone",
+    "capacitance": "Microphone capacitance",
+    "non_linearity": "Non-linearity",
+    "impedance": "Microphone impedance",
+    "polarizing_voltage": "Polarizing voltage",
+    "repeatability": "Repeatability",
+    "drift": "Drift of the reference",
+    "rounding": "Rounding",
+    "source_stability": "Stability of the source",
+    "positioning": "Positioning",
+    "alignment": "Alignment",
+    "free_field": "Free-field quality",
+    "non_plane_wave": "Non-plane wave",
+    "environment": "Environmental conditions",
+}
+
+#: The three terms of an environmental correction: label, colour, line style
+#: and marker, in the order the result names them.
+_ENVIRONMENT_TERMS: tuple[tuple[str, str, str, str], ...] = (
+    (r"Static pressure, $\delta_p\,(p_s - p_{s,0})$", _C_SECONDARY, "--", "s"),
+    (r"Temperature, $\delta_t\,(t - t_0)$", _C_TERTIARY, ":", "^"),
+    (r"Humidity, $\delta_H\,(H - H_0)$", _C_QUATERNARY, "-.", "v"),
+)
+
+#: Labels the comparison plots share with the translation table, the same
+#: in both languages: the band of the expanded uncertainty of a calibration,
+#: the coverage line of a budget's title and the total environmental
+#: correction.
+_LEVEL_UNCERTAINTY_BAND_LABEL = r"$L_\mathrm{test} \pm U$ ($k$ = 2)"
+_COVERAGE_TITLE_LINE = r"$k$ = {k}, $U$ = {u} dB"
+_ENVIRONMENT_TOTAL_LABEL = r"$C_\mathrm{env}$, total"
+
+#: Head-room above the tallest bar of a budget, as a fraction of it.
+_COMPARISON_BUDGET_HEADROOM = 1.18
+
+#: How far past the region the drawn rod runs, as a fraction of the major
+#: axis, so that its end is visibly outside it.
+_ROD_OVERHANG = 0.12
+
+#: Points drawn along the boundary of the free-field region.
+_ELLIPSE_POINTS = 361
+
+#: The margin round the free-field region, as a multiple of its semi-axes.
+_REGION_MARGIN = 1.15
+
+#: The size of a figure the free-field region draws on its own, in inches:
+#: wide enough for the legend beside the axes and the two-line title.
+_REGION_FIGURE_SIZE_IN = (10.0, 6.0)
+
+
+_STRINGS.update(
+    {
+        _COMPARISON_TITLES[
+            "pressure"
+        ]: "Sensibilidad en presión por comparación (IEC 61094-5)",
+        _COMPARISON_TITLES[
+            "free_field"
+        ]: "Sensibilidad en campo libre por comparación (IEC 61094-8)",
+        _COMPARISON_BUDGET_TITLES[
+            "pressure"
+        ]: "Balance de incertidumbre a {f} Hz (IEC 61094-5, tabla D.1)",
+        _COMPARISON_BUDGET_TITLES[
+            "free_field"
+        ]: "Balance de incertidumbre a {f} Hz (IEC 61094-8, tabla 2)",
+        r"$L_\mathrm{test}$, microphone under test": r"$L_\mathrm{test}$, micrófono en ensayo",
+        r"$L_\mathrm{ref}$, reference microphone": r"$L_\mathrm{ref}$, micrófono de referencia",
+        "Reference microphone, free-field level": "Micrófono de referencia, nivel en campo libre",
+        _LEVEL_UNCERTAINTY_BAND_LABEL: _LEVEL_UNCERTAINTY_BAND_LABEL,
+        "Sensitivity level [dB re 1 V/Pa]": "Nivel de sensibilidad [dB re 1 V/Pa]",
+        "Reference microphone": "Micrófono de referencia",
+        "Microphone capacitance": "Capacidad del micrófono",
+        "Non-linearity": "No linealidad",
+        "Microphone impedance": "Impedancia del micrófono",
+        "Polarizing voltage": "Tensión de polarización",
+        "Drift of the reference": "Deriva de la referencia",
+        "Stability of the source": "Estabilidad de la fuente",
+        "Positioning": "Posicionamiento",
+        "Alignment": "Alineación",
+        "Free-field quality": "Calidad del campo libre",
+        "Non-plane wave": "Onda no plana",
+        "Environmental conditions": "Condiciones ambientales",
+        _COVERAGE_TITLE_LINE: _COVERAGE_TITLE_LINE,
+        _ENVIRONMENT_TOTAL_LABEL: _ENVIRONMENT_TOTAL_LABEL,
+        _ENVIRONMENT_TERMS[0][0]: r"Presión estática, $\delta_p\,(p_s - p_{s,0})$",
+        _ENVIRONMENT_TERMS[1][0]: r"Temperatura, $\delta_t\,(t - t_0)$",
+        _ENVIRONMENT_TERMS[2][0]: r"Humedad, $\delta_H\,(H - H_0)$",
+        "Environmental correction: {p} kPa, {t} °C, {h} % re {p0} kPa, {t0} °C, {h0} %": "Corrección ambiental: {p} kPa, {t} °C, {h} % re {p0} kPa, {t0} °C, {h0} %",
+        "Correction, Table A.1": "Corrección, tabla A.1",
+        "Expanded uncertainty, 10 % of the correction": "Incertidumbre expandida, 10 % de la corrección",
+        "WS3 microphone in the jig of Figure A.4 (IEC 61094-5 Table A.1)": "Micrófono WS3 en el soporte de la figura A.4 (IEC 61094-5, tabla A.1)",
+        "Boundary of the effective free-field region": "Límite de la región de campo libre efectiva",
+        "Sound source, F1": "Fuente sonora, F1",
+        "Microphone, F2": "Micrófono, F2",
+        "Direct path, $d$ = {d} m": "Trayecto directo, $d$ = {d} m",
+        "Mounting rod": "Varilla de montaje",
+        "Along the axis [m]": "A lo largo del eje [m]",
+        "Across the axis [m]": "Transversal al eje [m]",
+        r"Effective free-field region (IEC 61094-8 B.1): $A = d + \tau c$ = {a} m": r"Región de campo libre efectiva (IEC 61094-8, B.1): $A = d + \tau c$ = {a} m",
+        r"$\tau$ = {tau} ms, $c$ = {c} m/s; clearance {b} m across, {r} m behind the microphone": r"$\tau$ = {tau} ms, $c$ = {c} m/s; holgura {b} m transversal, {r} m tras el micrófono",
+    }
+)
+
+
+def plot_comparison_calibration(
+    result: ComparisonCalibration,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    r"""The sensitivity level of a microphone calibrated by comparison.
+
+    Draws :math:`L_\mathrm{test}` with its expanded uncertainty as a band when
+    the calibration carries one, and the reference's level it was compared
+    with: :math:`L_\mathrm{ref}` as given, or, for a free-field calibration
+    against a pressure-calibrated reference, :math:`L_\mathrm{ref}` plus the
+    reference's free-field to pressure difference, its free-field level.
+
+    :param result: A
+        :class:`~phonometry.metrology.comparison_calibration.ComparisonCalibration`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the :math:`L_\mathrm{test}` curve.
+    :return: The axes.
+    """
+    from .._i18n import localize_axes
+    from ..metrology.comparison_calibration import _FREE_FIELD_DIFFERENCE
+
+    ax = ax if ax is not None else _new_axes()
+    frequencies = np.asarray(result.frequencies_hz, dtype=np.float64)
+    level = np.asarray(result.sensitivity_level_db, dtype=np.float64)
+    if result.expanded_uncertainty_db is not None:
+        uncertainty = np.asarray(result.expanded_uncertainty_db, dtype=np.float64)
+        ax.fill_between(
+            frequencies,
+            level - uncertainty,
+            level + uncertainty,
+            color=theme_fill(_C_PRIMARY, ax),
+            lw=0.0,
+            label=_t(_LEVEL_UNCERTAINTY_BAND_LABEL, language),
+        )
+    style_default(kwargs, "color", _C_PRIMARY)
+    style_default(kwargs, "lw", 1.6)
+    style_default(kwargs, "marker", "o")
+    style_default(kwargs, "ms", 3.5)
+    kwargs.setdefault(
+        "label", _t(r"$L_\mathrm{test}$, microphone under test", language)
+    )
+    ax.plot(frequencies, level, **kwargs)
+    reference = np.asarray(result.reference_sensitivity_level_db, dtype=np.float64)
+    reference_label = r"$L_\mathrm{ref}$, reference microphone"
+    difference = result.corrections_db.get(_FREE_FIELD_DIFFERENCE)
+    if difference is not None:
+        # The level the free field compared the test microphone with, not the
+        # pressure level the reference was calibrated at.
+        reference = reference + np.asarray(difference, dtype=np.float64)
+        reference_label = "Reference microphone, free-field level"
+    ax.plot(
+        frequencies,
+        reference,
+        color=_C_SECONDARY,
+        lw=1.2,
+        ls="--",
+        marker="s",
+        ms=4.0,
+        mfc="none",
+        label=_t(reference_label, language),
+    )
+    ax.set_xscale("log")
+    format_frequency_axis(ax, language=language)
+    ax.set_xlabel(_t(_FREQUENCY_LABEL, language))
+    ax.set_ylabel(_t("Sensitivity level [dB re 1 V/Pa]", language))
+    ax.set_title(_t(_COMPARISON_TITLES[result.field], language))
+    ax.grid(visible=True, which="both", alpha=0.3)
+    place_legend_clear(ax.legend(fontsize="small"))
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_environmental_sensitivity_correction(
+    result: EnvironmentalSensitivityCorrection,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    r"""The environmental correction of a sensitivity level and its three
+    terms against frequency.
+
+    :param result: An
+        :class:`~phonometry.metrology.comparison_calibration.EnvironmentalSensitivityCorrection`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the :math:`C_\mathrm{env}` curve.
+    :return: The axes.
+    """
+    from .._i18n import format_number, localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    frequencies = np.asarray(result.frequencies_hz, dtype=np.float64)
+    ax.axhline(0.0, color=_C_MUTED, lw=0.8)
+    values = (
+        result.static_pressure_term_db,
+        result.temperature_term_db,
+        result.humidity_term_db,
+    )
+    for (label, colour, style, marker), term in zip(
+        _ENVIRONMENT_TERMS, values, strict=True
+    ):
+        ax.plot(
+            frequencies,
+            term,
+            color=colour,
+            lw=1.1,
+            ls=style,
+            marker=marker,
+            ms=4.0,
+            mfc="none",
+            label=_t(label, language),
+        )
+    style_default(kwargs, "color", _C_PRIMARY)
+    style_default(kwargs, "lw", 1.7)
+    style_default(kwargs, "marker", "o")
+    style_default(kwargs, "ms", 3.5)
+    kwargs.setdefault("label", _t(_ENVIRONMENT_TOTAL_LABEL, language))
+    ax.plot(frequencies, result.correction_db, **kwargs)
+    ax.set_xscale("log")
+    format_frequency_axis(ax, language=language)
+    ax.set_xlabel(_t(_FREQUENCY_LABEL, language))
+    ax.set_ylabel(_t(_CORRECTION_AXIS_LABEL, language))
+    ax.set_title(
+        _t(
+            "Environmental correction: {p} kPa, {t} °C, {h} % re {p0} kPa, {t0} °C, {h0} %",
+            language,
+            p=format_number(result.static_pressure_kpa, language, decimals=3),
+            t=format_number(result.temperature_c, language, decimals=1),
+            h=format_number(result.relative_humidity_percent, language, decimals=0),
+            p0=format_number(
+                result.reference_static_pressure_kpa, language, decimals=3
+            ),
+            t0=format_number(result.reference_temperature_c, language, decimals=1),
+            h0=format_number(
+                result.reference_relative_humidity_percent, language, decimals=0
+            ),
+        )
+    )
+    ax.grid(visible=True, which="both", alpha=0.3)
+    place_legend_clear(ax.legend(fontsize="small"))
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_jig_diameter_correction(
+    result: JigDiameterCorrection,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """The corrections of IEC 61094-5 Table A.1 with their expanded
+    uncertainty.
+
+    :param result: A
+        :class:`~phonometry.metrology.comparison_calibration.JigDiameterCorrection`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the correction curve.
+    :return: The axes.
+    """
+    from .._i18n import localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    frequencies = np.asarray(result.frequencies_hz, dtype=np.float64)
+    correction = np.asarray(result.correction_db, dtype=np.float64)
+    uncertainty = np.asarray(result.expanded_uncertainty_db, dtype=np.float64)
+    ax.fill_between(
+        frequencies,
+        correction - uncertainty,
+        correction + uncertainty,
+        color=theme_fill(_C_PRIMARY, ax),
+        lw=0.0,
+        label=_t("Expanded uncertainty, 10 % of the correction", language),
+    )
+    ax.axhline(0.0, color=_C_MUTED, lw=0.8)
+    style_default(kwargs, "color", _C_PRIMARY)
+    style_default(kwargs, "lw", 1.6)
+    style_default(kwargs, "marker", "o")
+    style_default(kwargs, "ms", 3.5)
+    kwargs.setdefault("label", _t("Correction, Table A.1", language))
+    ax.plot(frequencies, correction, **kwargs)
+    ax.set_xscale("log")
+    format_frequency_axis(ax, language=language)
+    ax.set_xlabel(_t(_FREQUENCY_LABEL, language))
+    ax.set_ylabel(_t(_CORRECTION_AXIS_LABEL, language))
+    ax.set_title(
+        _t("WS3 microphone in the jig of Figure A.4 (IEC 61094-5 Table A.1)", language)
+    )
+    ax.grid(visible=True, which="both", alpha=0.3)
+    place_legend_clear(ax.legend(fontsize="small"))
+    localize_axes(ax, language)
+    return ax
+
+
+def _comparison_component_label(name: str, language: str) -> str:
+    """The tick label of one component: its short name, or its own name."""
+    label = _COMPARISON_COMPONENT_LABELS.get(name)
+    return name if label is None else _t(label, language)
+
+
+def plot_comparison_budget(
+    result: ComparisonUncertaintyBudget,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    r"""The standard uncertainty of each component of a comparison budget.
+
+    One bar per component in the order of its table, then the additional
+    ones, with the combined standard uncertainty marked and the coverage
+    factor and expanded uncertainty in the title.
+
+    :param result: A
+        :class:`~phonometry.metrology.comparison_calibration.ComparisonUncertaintyBudget`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to :meth:`~matplotlib.axes.Axes.barh`.
+    :return: The axes.
+    """
+    from .._i18n import format_number, localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    values = np.asarray(result.standard_uncertainties_db, dtype=np.float64)
+    positions = np.arange(values.size)
+    style_default(kwargs, "color", _C_PRIMARY)
+    ax.barh(positions, values, **kwargs)
+    uc = format_number(result.combined_uncertainty_db, language, decimals=4)
+    combined = ax.axvline(
+        result.combined_uncertainty_db,
+        color=_C_REFERENCE,
+        ls="--",
+        lw=1.2,
+        label=_t(r"$u_\mathrm{{c}}$ = {uc} dB", language, uc=uc),
+    )
+    ax.set_yticks(positions)
+    ax.set_yticklabels(
+        [_comparison_component_label(name, language) for name in result.names]
+    )
+    ax.invert_yaxis()
+    top = max(float(values.max()), result.combined_uncertainty_db)
+    ax.set_xlim(0.0, _COMPARISON_BUDGET_HEADROOM * top)
+    ax.set_xlabel(_t(_STANDARD_UNCERTAINTY_LABEL, language))
+    frequency = format_number(result.frequency_hz, language, decimals=0)
+    k = format_number(result.coverage_factor, language, decimals=0)
+    expanded = format_number(result.expanded_uncertainty_db, language, decimals=3)
+    ax.set_title(
+        _t(_COMPARISON_BUDGET_TITLES[result.field], language, f=frequency)
+        + "\n"
+        + _t(_COVERAGE_TITLE_LINE, language, k=k, u=expanded)
+    )
+    place_legend_clear(ax.legend(handles=[combined], fontsize="small"))
+    ax.grid(visible=True, axis="x", alpha=0.3)
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_free_field_region(
+    result: FreeFieldRegion,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    r"""The effective free-field region of IEC 61094-8 B.1 in a plane through
+    its axis, as Figure B.1 draws it.
+
+    The ellipse with the source and the microphone at its foci, the direct
+    path between them and the mounting rod behind the microphone, running out
+    of the region.
+
+    :param result: A
+        :class:`~phonometry.metrology.comparison_calibration.FreeFieldRegion`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the boundary of the region.
+    :return: The axes.
+    """
+    from .._i18n import format_number, localize_axes
+
+    if ax is None:
+        # The legend sits beside the axes and the title runs to two long
+        # lines: a figure of its own is sized and laid out to keep both.
+        _fig, ax = _import_pyplot().subplots(
+            figsize=_REGION_FIGURE_SIZE_IN, layout="constrained"
+        )
+        # The equal aspect shrinks the axes inside the room the layout gave
+        # them; held to the left, they keep the legend beside them in view.
+        ax.set_anchor("W")
+    half_major = result.major_axis_m / 2.0
+    half_minor = result.semi_minor_axis_m
+    half_distance = result.source_distance_m / 2.0
+    angle = np.linspace(0.0, 2.0 * np.pi, _ELLIPSE_POINTS)
+    style_default(kwargs, "color", _C_PRIMARY)
+    style_default(kwargs, "lw", 1.6)
+    kwargs.setdefault(
+        "label", _t("Boundary of the effective free-field region", language)
+    )
+    ax.plot(half_major * np.cos(angle), half_minor * np.sin(angle), **kwargs)
+    rod_end = half_major + _ROD_OVERHANG * result.major_axis_m
+    ax.plot(
+        [half_distance, rod_end],
+        [0.0, 0.0],
+        color=_C_MUTED,
+        lw=4.0,
+        solid_capstyle="butt",
+        label=_t("Mounting rod", language),
+    )
+    distance = format_number(result.source_distance_m, language, decimals=2)
+    ax.plot(
+        [-half_distance, half_distance],
+        [0.0, 0.0],
+        color=_C_TERTIARY,
+        lw=1.2,
+        ls="--",
+        label=_t("Direct path, $d$ = {d} m", language, d=distance),
+    )
+    ax.plot(
+        [-half_distance],
+        [0.0],
+        ls="none",
+        marker="s",
+        ms=8.0,
+        color=_C_SECONDARY,
+        label=_t("Sound source, F1", language),
+    )
+    ax.plot(
+        [half_distance],
+        [0.0],
+        ls="none",
+        marker="o",
+        ms=7.0,
+        color=_C_REFERENCE,
+        label=_t("Microphone, F2", language),
+    )
+    ax.set_ylim(-_REGION_MARGIN * half_minor, _REGION_MARGIN * half_minor)
+    ax.set_xlim(
+        -_REGION_MARGIN * half_major, rod_end + (_REGION_MARGIN - 1.0) * half_major
+    )
+    ax.set_aspect("equal", adjustable="box")
+    ax.set_xlabel(_t("Along the axis [m]", language))
+    ax.set_ylabel(_t("Across the axis [m]", language))
+    ax.set_title(
+        _t(
+            r"Effective free-field region (IEC 61094-8 B.1): $A = d + \tau c$ = {a} m",
+            language,
+            a=format_number(result.major_axis_m, language, decimals=2),
+        )
+        + "\n"
+        + _t(
+            r"$\tau$ = {tau} ms, $c$ = {c} m/s; clearance {b} m across, {r} m behind the microphone",
+            language,
+            tau=format_number(1000.0 * result.window_time_s, language, decimals=1),
+            c=format_number(result.speed_of_sound, language, decimals=1),
+            b=format_number(half_minor, language, decimals=2),
+            r=format_number(result.rod_clearance_m, language, decimals=2),
+        )
+    )
+    ax.grid(visible=True, alpha=0.3)
+    # Beside the axes rather than on them: inside, a legend covers the region
+    # it describes or the source and the microphone on its axis.
+    ax.legend(fontsize="small", loc="center left", bbox_to_anchor=(1.02, 0.5))
     localize_axes(ax, language)
     return ax

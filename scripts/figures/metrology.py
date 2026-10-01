@@ -32,6 +32,8 @@ if TYPE_CHECKING:
     from collections.abc import Callable
 
     from phonometry.metrology import (
+        ComparisonCalibration,
+        ComparisonUncertaintyBudget,
         DirectivityFactor,
         FreeFieldCorrection,
         RandomIncidenceSensitivity,
@@ -1709,4 +1711,154 @@ def generate_free_field_verification(output_dir: str) -> None:
     verdict.plot(ax, language=_LANG)
     fig.tight_layout()
     save_figure(output_dir, "free_field_verification.svg")
+    plt.close()
+
+
+#: IEC 61094-5 Table D.1, the eight standard uncertainties at 2 kHz, dB.
+_TABLE_D1_DB = {
+    "reference": 0.025,
+    "capacitance": 0.006,
+    "non_linearity": 0.017,
+    "impedance": 0.003,
+    "polarizing_voltage": 0.005,
+    "repeatability": 0.025,
+    "drift": 0.017,
+    "rounding": 0.003,
+}
+
+
+def _pressure_comparison() -> "ComparisonCalibration":
+    """The guide's ``c``: a WS2P against an LS2P, interchanged in a coupler."""
+    from phonometry import metrology
+
+    f = metrology.exact_frequencies(250, 20000, fraction=3)
+    x = f / 1000
+    l_ref = -38.0 + 0.04 * np.log10(x) - 0.25 * (x / 20) ** 2
+    l_true = -38.6 + 0.08 * np.log10(x) + 0.2 * (x / 12) ** 2 - 0.5 * (x / 20) ** 4
+    gain_1, gain_2 = 0.35, -0.20
+    field_a = 0.03 * np.sqrt(x)
+    rng = np.random.default_rng(61094)
+    noise = rng.normal(0.0, 0.004, (2, 3, f.size))
+    l_c12 = (l_ref + gain_1) - (l_true + gain_2) + field_a + noise[0]
+    l_c21 = (l_true + gain_1) - (l_ref + gain_2) + field_a + noise[1]
+    env = metrology.environmental_sensitivity_correction(
+        f,
+        static_pressure_kpa=99.2,
+        temperature_c=21.5,
+        relative_humidity_percent=45.0,
+        static_pressure_coefficient_db_per_kpa=-0.005,
+        temperature_coefficient_db_per_k=0.002,
+    )
+    budgets = [
+        metrology.comparison_uncertainty_budget(
+            {**_TABLE_D1_DB, "impedance": 0.003 + 0.09 * (fx / 20000) ** 2},
+            frequency_hz=fx,
+        )
+        for fx in f
+    ]
+    return metrology.simultaneous_comparison(
+        f,
+        l_ref,
+        l_c12,
+        l_c21,
+        reference_environment=env,
+        expanded_uncertainty_db=[b.expanded_uncertainty_db for b in budgets],
+    )
+
+
+def _free_field_budget(frequency_hz: float) -> "ComparisonUncertaintyBudget":
+    """The guide's free-field budget: the components of IEC 61094-8 Table 2."""
+    from phonometry import metrology
+
+    x = frequency_hz / 20000
+    return metrology.comparison_uncertainty_budget(
+        {
+            "reference": 0.06 + 0.14 * x,
+            "source_stability": 0.01,
+            "positioning": 0.02,
+            "alignment": 0.01 + 0.04 * x**2,
+            "free_field": 0.03 + 0.12 * x**2,
+            "non_linearity": 0.017,
+            "rounding": 0.003,
+            "repeatability": 0.02,
+        },
+        frequency_hz=frequency_hz,
+        field="free_field",
+    )
+
+
+def _free_field_comparison() -> "ComparisonCalibration":
+    """The guide's ``free``: a WS2F by substitution, with a monitor."""
+    from phonometry import metrology
+
+    f = metrology.exact_frequencies(500, 20000, fraction=3)
+    x = f / 1000
+    c_ff = 0.05 * x**1.3
+    l_ref_p = -38.0 + 0.04 * np.log10(x) - 0.25 * (x / 20) ** 2
+    l_ws2f = -38.3 + 0.1 * np.log10(x) - 0.3 * (x / 20) ** 3
+    field_1 = 74.0 + 0.05 * np.sin(x)
+    field_2 = field_1 + 0.25
+    monitor = -40.0
+    return metrology.sequential_comparison(
+        f,
+        l_ref_p,
+        l_ref_p + c_ff + field_1,
+        l_ws2f + field_2,
+        reference_monitor_level_db=monitor + field_1,
+        test_monitor_level_db=monitor + field_2,
+        field="free_field",
+        reference_free_field_difference_db=c_ff,
+        expanded_uncertainty_db=[
+            _free_field_budget(fx).expanded_uncertainty_db for fx in f
+        ],
+    )
+
+
+def generate_comparison_calibration(output_dir: str) -> None:
+    """IEC 61094-5 and IEC 61094-8: a pressure and a free-field calibration."""
+    print("Generating comparison_calibration...")
+    fig, (ax_pressure, ax_free) = plt.subplots(1, 2, figsize=(13.5, 5.6))
+    _pressure_comparison().plot(ax_pressure, language=_LANG)
+    _free_field_comparison().plot(ax_free, language=_LANG)
+    fig.tight_layout()
+    save_figure(output_dir, "comparison_calibration.svg")
+    plt.close()
+
+
+def generate_comparison_budget(output_dir: str) -> None:
+    """IEC 61094-5 Table D.1 at 2 kHz and an IEC 61094-8 budget at 8 kHz."""
+    print("Generating comparison_budget...")
+    from phonometry import metrology
+
+    pressure = metrology.comparison_uncertainty_budget(_TABLE_D1_DB, frequency_hz=2000)
+    free = _free_field_budget(8000)
+    fig, (ax_pressure, ax_free) = plt.subplots(1, 2, figsize=(13.5, 5.6))
+    pressure.plot(ax_pressure, language=_LANG)
+    free.plot(ax_free, language=_LANG)
+    fig.tight_layout()
+    save_figure(output_dir, "comparison_budget.svg")
+    plt.close()
+
+
+def generate_comparison_jig_correction(output_dir: str) -> None:
+    """IEC 61094-5 Table A.1: a WS3 microphone in the jig of Figure A.4."""
+    print("Generating comparison_jig_correction...")
+    from phonometry import metrology
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+    metrology.jig_diameter_correction().plot(ax, language=_LANG)
+    fig.tight_layout()
+    save_figure(output_dir, "comparison_jig_correction.svg")
+    plt.close()
+
+
+def generate_free_field_region(output_dir: str) -> None:
+    """IEC 61094-8 B.1: the effective free-field region of a 5 ms window."""
+    print("Generating free_field_region...")
+    from phonometry import metrology
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+    metrology.free_field_region(1.0, 0.005).plot(ax, language=_LANG)
+    fig.tight_layout()
+    save_figure(output_dir, "free_field_region.svg")
     plt.close()

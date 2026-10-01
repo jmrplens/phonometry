@@ -163,6 +163,7 @@ from .signals import (
     _d_calibration_coupling,
     _d_calibration_dataflow,
     _d_cepstrum_echoes,
+    _d_comparison_calibration_setup,
     _d_correlation_delay,
     _d_data_qualification,
     _d_echo_geometry,
@@ -249,6 +250,11 @@ DIAGRAMS = {
         _d_free_field_corrections_setup,
         "The readings of IEC 62585: a meter compared with a reference",
         522,
+    ),
+    "diagram_comparison_calibration_setup": (
+        _d_comparison_calibration_setup,
+        "Calibration by comparison: the readings of IEC 61094-5 and IEC 61094-8",
+        470,
     ),
     "diagram_env_measurement": (
         _d_env_positions,

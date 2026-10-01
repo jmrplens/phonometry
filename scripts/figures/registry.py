@@ -412,11 +412,15 @@ from .metrology import (
     generate_calibration_narrowband_bias,
     generate_calibration_stability,
     generate_calibrator_verification,
+    generate_comparison_budget,
+    generate_comparison_calibration,
+    generate_comparison_jig_correction,
     generate_conformance_rule_examples,
     generate_dbfs_versus_spl,
     generate_diffuse_field_sensitivity,
     generate_free_field_adjustment,
     generate_free_field_correction,
+    generate_free_field_region,
     generate_free_field_uncertainty,
     generate_free_field_verification,
     generate_random_incidence_correction,
@@ -1133,6 +1137,12 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     generate_free_field_correction,
     generate_free_field_uncertainty,
     generate_free_field_verification,
+    # IEC 61094-5 and IEC 61094-8: a working standard microphone calibrated
+    # by comparison with a reference, in a pressure and in a free field.
+    generate_comparison_calibration,
+    generate_comparison_budget,
+    generate_comparison_jig_correction,
+    generate_free_field_region,
     generate_stationarity_glide_blind_spot,
     generate_rice_nongaussian_screen,
     # Psychoacoustics / open-plan plots (sharpness weighting, spatial decay)

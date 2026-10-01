@@ -129,8 +129,8 @@ elsewhere for the transfer FRFs. ISO 7626-5 covers the alternative of impact
 excitation with an exciter that is not attached to the structure, in
 practice usually an instrumented hammer: it trades the attached exciter's
 controlled spectrum for speed, with an excitation spectrum set by the
-impactor mass and tip stiffness. It is named here for context only: no
-function synthesizes or processes an impact-excitation spectrum.
+impactor mass and tip stiffness, and it has [a page of its
+own](impact-mobility.md).
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_mobility_rig_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_mobility_rig.svg" alt="ISO 7626 mobility measurement: a free-free beam on soft suspension driven by an exciter through an impedance head at the driving point, an accelerometer at a transfer point, and an impact hammer as the alternative excitation" width="92%"></picture>
 
@@ -306,6 +306,9 @@ res.report(
 
 ## See also
 
+- [Mobility by impact excitation (ISO 7626-5)](impact-mobility.md):
+  the same FRFs measured with an impact hammer, with the windows, the average
+  over impacts and the Annex A correction that measurement needs.
 - [Transfer stiffness of resilient elements (ISO 10846)](transfer-stiffness.md):
   the blocked-force limit of section 1, applied to characterise an isolator.
 - [Structure-borne sound power of equipment (EN 15657)](../../buildings/design/structure-borne-power.md):

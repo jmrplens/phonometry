@@ -3,13 +3,13 @@
   "library": "4.0.0rc1",
   "generator": "scripts/conformance_report.py",
   "counts": {
-    "checks": 1562,
-    "passing": 1562,
+    "checks": 1577,
+    "passing": 1577,
     "failing": 0,
     "domains": 100,
-    "standards": 493,
-    "citations": 1081,
-    "designations": 204,
+    "standards": 494,
+    "citations": 1093,
+    "designations": 205,
     "sources": 114
   },
   "units": [
@@ -117,8 +117,8 @@
     {
       "id": "room-building-acoustics",
       "title": "Room & building acoustics",
-      "checks": 119,
-      "passing": 119
+      "checks": 134,
+      "passing": 134
     },
     {
       "id": "room-acoustics",
@@ -14339,6 +14339,522 @@
         "value": 0.0
       },
       "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "room-building-acoustics/iso-7626-5-2019-8-6/averaged-impact-estimate-of-a-10-resonator-mag-y-at-40-hz-closed-form",
+      "domain": "room-building-acoustics",
+      "reference": {
+        "cite": "ISO 7626-5:2019 8.6",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 7626-5",
+            "edition": "2019",
+            "clause": "8.6"
+          }
+        ]
+      },
+      "quantity": "Averaged impact estimate of a 10 % resonator: mag(Y) at 40 Hz = closed form",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.00994718394324346
+      },
+      "computed": {
+        "value": 0.0099472
+      },
+      "unit": "m/(N·s)",
+      "tolerance": {
+        "mode": "relative",
+        "value": 1e-07
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 7,
+      "verdict": "pass"
+    },
+    {
+      "id": "room-building-acoustics/iso-7626-5-2019-8-6/three-noisy-impacts-estimate-averaged-cross-spectrum-averaged-force-auto-spectrum",
+      "domain": "room-building-acoustics",
+      "reference": {
+        "cite": "ISO 7626-5:2019 8.6",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 7626-5",
+            "edition": "2019",
+            "clause": "8.6"
+          }
+        ]
+      },
+      "quantity": "Three noisy impacts: estimate = averaged cross-spectrum / averaged force auto-spectrum",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.010518343389972384
+      },
+      "computed": {
+        "value": 0.0105183
+      },
+      "unit": "m/(N·s)",
+      "tolerance": {
+        "mode": "relative",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 7,
+      "verdict": "pass"
+    },
+    {
+      "id": "room-building-acoustics/iso-7626-5-2019-annex-a-formula-a-2/exponential-window-on-force-and-response-windowed-accelerance-a-s-a",
+      "domain": "room-building-acoustics",
+      "reference": {
+        "cite": "ISO 7626-5:2019 Annex A Formula (A.2)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 7626-5",
+            "edition": "2019",
+            "clause": "Annex A Formula (A.2)"
+          }
+        ]
+      },
+      "quantity": "Exponential window on force and response: windowed accelerance = A(s + a)",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0,
+        "label": "0 (A(s + a) below 500 Hz)"
+      },
+      "computed": {
+        "value": 1.93e-08,
+        "label": "max relative deviation 1.9e-08"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-07
+      },
+      "deviation": {
+        "value": 1.93e-08
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "room-building-acoustics/iso-7626-5-2019-annex-a-formula-a-3/damping-of-a-0-5-resonator-after-a-5-1-s-window-corrected-by-a-3-as-printed",
+      "domain": "room-building-acoustics",
+      "reference": {
+        "cite": "ISO 7626-5:2019 Annex A Formula (A.3)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 7626-5",
+            "edition": "2019",
+            "clause": "Annex A Formula (A.3)"
+          }
+        ]
+      },
+      "quantity": "Damping of a 0,5 % resonator after a 5 1/s window, corrected by (A.3) as printed",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0049923519079238775
+      },
+      "computed": {
+        "value": 0.0049904
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 3e-06
+      },
+      "deviation": {
+        "value": -2e-06
+      },
+      "precision": 7,
+      "verdict": "pass"
+    },
+    {
+      "id": "room-building-acoustics/iso-7626-5-2019-annex-a/damping-back-from-a-20-1-s-window-the-pole-moved-back-by-a-0-5",
+      "domain": "room-building-acoustics",
+      "reference": {
+        "cite": "ISO 7626-5:2019 Annex A",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 7626-5",
+            "edition": "2019",
+            "clause": "Annex A"
+          }
+        ]
+      },
+      "quantity": "Damping back from a 20 1/s window, the pole moved back by a: 0,5 %",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.005
+      },
+      "computed": {
+        "value": 0.005
+      },
+      "tolerance": {
+        "mode": "relative",
+        "value": 1e-06
+      },
+      "deviation": {
+        "value": -6.93e-12
+      },
+      "precision": 7,
+      "verdict": "pass"
+    },
+    {
+      "id": "room-building-acoustics/iso-7626-5-2019-annex-a/corrected-mobility-peak-of-a-0-5-resonator-after-a-20-1-s-window-1-c",
+      "domain": "room-building-acoustics",
+      "reference": {
+        "cite": "ISO 7626-5:2019 Annex A",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 7626-5",
+            "edition": "2019",
+            "clause": "Annex A"
+          }
+        ]
+      },
+      "quantity": "Corrected mobility peak of a 0,5 % resonator after a 20 1/s window = 1/c",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.1989436788648692
+      },
+      "computed": {
+        "value": 0.19894
+      },
+      "unit": "m/(N·s)",
+      "tolerance": {
+        "mode": "relative",
+        "value": 1e-05
+      },
+      "deviation": {
+        "value": -1.92e-10
+      },
+      "precision": 5,
+      "verdict": "pass"
+    },
+    {
+      "id": "room-building-acoustics/iso-7626-5-2019-6-4-figure-5/two-equal-impacts-62-5-ms-apart-notches-every-1-16-hz-zero-at-8-24-40-hz",
+      "domain": "room-building-acoustics",
+      "reference": {
+        "cite": "ISO 7626-5:2019 6.4 (Figure 5)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 7626-5",
+            "edition": "2019",
+            "clause": "6.4 (Figure 5)"
+          }
+        ]
+      },
+      "quantity": "Two equal impacts 62,5 ms apart: notches every 1/τ = 16 Hz, zero at 8, 24, 40 Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 16.0
+      },
+      "computed": {
+        "value": 16.0
+      },
+      "unit": "Hz",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "room-building-acoustics/iso-7626-5-2019-6-4/second-impact-0-6-of-the-first-ripple-20-lg-1-6-0-4-12-04-db",
+      "domain": "room-building-acoustics",
+      "reference": {
+        "cite": "ISO 7626-5:2019 6.4",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 7626-5",
+            "edition": "2019",
+            "clause": "6.4"
+          }
+        ]
+      },
+      "quantity": "Second impact 0,6 of the first: ripple 20 lg(1,6/0,4) = 12,04 dB",
+      "kind": "scalar",
+      "expected": {
+        "value": 12.041199826559248
+      },
+      "computed": {
+        "value": 12.041
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-06
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "room-building-acoustics/iso-7626-5-2019-7-2-iso-7626-2-2015-7-5-2/rigid-3-kg-block-through-both-windows-accelerance-1-m-0-3333-1-kg",
+      "domain": "room-building-acoustics",
+      "reference": {
+        "cite": "ISO 7626-5:2019 7.2 (ISO 7626-2:2015 7.5.2)",
+        "tail": ")",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 7626-5",
+            "edition": "2019",
+            "clause": "7.2"
+          },
+          {
+            "kind": "standard",
+            "designation": "ISO 7626-2",
+            "edition": "2015",
+            "clause": "7.5.2",
+            "lead": " (",
+            "relation": "mentions"
+          }
+        ]
+      },
+      "quantity": "Rigid 3 kg block through both windows: accelerance 1/m = 0,3333 1/kg",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.3333333333333333
+      },
+      "computed": {
+        "value": 0.3333
+      },
+      "unit": "1/kg",
+      "tolerance": {
+        "mode": "relative",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "room-building-acoustics/iso-7626-5-2019-8-5-2-figure-10/exponential-window-that-decays-to-5-at-the-end-of-the-record",
+      "domain": "room-building-acoustics",
+      "reference": {
+        "cite": "ISO 7626-5:2019 8.5.2 (Figure 10)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 7626-5",
+            "edition": "2019",
+            "clause": "8.5.2 (Figure 10)"
+          }
+        ]
+      },
+      "quantity": "Exponential window that decays to 5 % at the end of the record",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.05
+      },
+      "computed": {
+        "value": 0.05
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "room-building-acoustics/iso-7626-5-2019-8-3-8-5-2/response-decaying-to-1-at-the-end-reads-10-at-the-midpoint",
+      "domain": "room-building-acoustics",
+      "reference": {
+        "cite": "ISO 7626-5:2019 8.3, 8.5.2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 7626-5",
+            "edition": "2019",
+            "clause": "8.3, 8.5.2"
+          }
+        ]
+      },
+      "quantity": "Response decaying to 1 % at the end reads 10 % at the midpoint",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.1
+      },
+      "computed": {
+        "value": 0.1
+      },
+      "tolerance": {
+        "mode": "relative",
+        "value": 0.001
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "room-building-acoustics/iso-7626-5-2019-8-3-8-5-2/response-whose-envelope-ends-at-1-level-at-the-last-sample-1-passes",
+      "domain": "room-building-acoustics",
+      "reference": {
+        "cite": "ISO 7626-5:2019 8.3, 8.5.2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 7626-5",
+            "edition": "2019",
+            "clause": "8.3, 8.5.2"
+          }
+        ]
+      },
+      "quantity": "Response whose envelope ends at 1 %: level at the last sample = 1 %, passes",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.01
+      },
+      "computed": {
+        "value": 0.0099
+      },
+      "tolerance": {
+        "mode": "relative",
+        "value": 0.02
+      },
+      "deviation": {
+        "value": -0.0001
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "room-building-acoustics/iso-7626-5-2019-3-3-3-4/force-esd-of-a-0-5-ms-gaussian-fall-across-1-hz-to-500-hz-in-closed-form",
+      "domain": "room-building-acoustics",
+      "reference": {
+        "cite": "ISO 7626-5:2019 3.3, 3.4",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 7626-5",
+            "edition": "2019",
+            "clause": "3.3, 3.4"
+          }
+        ]
+      },
+      "quantity": "Force ESD of a 0,5 ms Gaussian: fall across 1 Hz to 500 Hz in closed form",
+      "kind": "scalar",
+      "expected": {
+        "value": 10.715743961755592
+      },
+      "computed": {
+        "value": 10.7157
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "relative",
+        "value": 1e-08
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "room-building-acoustics/iso-7626-5-2019-9-1/noise-free-records-coherence-1-over-the-range-five-records-pass",
+      "domain": "room-building-acoustics",
+      "reference": {
+        "cite": "ISO 7626-5:2019 9.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 7626-5",
+            "edition": "2019",
+            "clause": "9.1"
+          }
+        ]
+      },
+      "quantity": "Noise-free records: coherence 1 over the range; five records pass",
+      "kind": "scalar",
+      "expected": {
+        "value": 1.0
+      },
+      "computed": {
+        "value": 1.0
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "room-building-acoustics/iso-7626-5-2019-8-1-8-3-8-5-2-9-1/the-printed-limits-channel-match-response-decay-and-coherence",
+      "domain": "room-building-acoustics",
+      "reference": {
+        "cite": "ISO 7626-5:2019 8.1, 8.3, 8.5.2, 9.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 7626-5",
+            "edition": "2019",
+            "clause": "8.1, 8.3, 8.5.2, 9.1"
+          }
+        ]
+      },
+      "quantity": "The printed limits: channel match, response decay and coherence",
+      "kind": "record",
+      "expected": {
+        "label": "channel magnitude = 0.05; channel phase deg = 5; end of record = 0.01; midpoint = 0.1; windowed end = 0.25; high coherence = 0.9; coherence records = 5",
+        "record": {
+          "channel magnitude": 0.05,
+          "channel phase deg": 5.0,
+          "end of record": 0.01,
+          "midpoint": 0.1,
+          "windowed end": 0.25,
+          "high coherence": 0.9,
+          "coherence records": 5.0
+        }
+      },
+      "computed": {
+        "label": "channel magnitude = 0.05; channel phase deg = 5; end of record = 0.01; midpoint = 0.1; windowed end = 0.25; high coherence = 0.9; coherence records = 5",
+        "record": {
+          "channel magnitude": 0.05,
+          "channel phase deg": 5.0,
+          "end of record": 0.01,
+          "midpoint": 0.1,
+          "windowed end": 0.25,
+          "high coherence": 0.9,
+          "coherence records": 5.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
       "verdict": "pass"
     },
     {

@@ -395,6 +395,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   converts it into one for ISO 4869-2. Its `.plot()` draws the insertion loss
   as Clause 6 asks, increasing downwards at 50 dB per decade, on any axes. The
   hearing protectors guide has a new section on it.
+
+- **Mobility measured with an impact hammer (ISO 7626-5).** The
+  `vibration.structural.impact_mobility` module processes the records of
+  ISO 7626-5:2019, one impact and its free decay per record.
+  `energy_spectral_density` is the $G_{FF} = 2\lvert F\rvert^2$ of 3.3 and
+  3.4, `force_window` the window of 8.5.1 that is unity over the pulse and
+  exactly zero elsewhere, and `exponential_window` with
+  `exponential_decay_rate` the window of 8.5.2, described by the value it
+  ends the record at. `impact_mobility` averages the impacts at one point as
+  8.6 prescribes, the averaged cross-spectrum over the averaged force
+  auto-spectrum, with the coherence of 9.1 beside it, warns when its force
+  window would cut out a second impact (6.4 forbids it), and keeps the
+  estimate to a stated frequency range of interest (3.2), so the noise above
+  the bandwidth of the pulse never becomes a peak. The damping an exponential
+  window adds is taken away by `exponential_window_correction`, which gives
+  Formula (A.3) as printed and the exact damping of the pole moved back by
+  the decay rate; the two differ by about
+  $(\hat\zeta^3 - \zeta^3)/2$, which matters once the window adds several per
+  cent of damping. `single_mode_fit`, and `ImpactMobilityResult.fit_mode` on
+  the kind the accelerometer measured, estimate the apparent damping with a
+  rational-fraction fit of one mode and synthesize the corrected mobility.
+  The record is judged by verdict objects with `passes`:
+  `check_double_hit` (6.4), `check_force_spectrum` (6.2, 6.3),
+  `check_overload` (8.4), `check_response_decay` (the 1 % of 8.3 and the
+  25 % of 8.5.2), `check_coherence` (0.9 over at least five impacts, 9.1) and
+  `verify_channel_match` (±5 % and ±5°, 8.1). `check_response_decay` reads the
+  response at the last sample of the record, carrying the peak of the last
+  segment down at the rate the peaks fall from the midpoint, and compares it
+  with the printed figure to a whole per cent, so a record that ends at the
+  "about 1 %" of 8.3 passes; given the force record of the same impact, it
+  judges the free decay after the pulse, not the impact a driving-point
+  acceleration carries. Every function that reads a
+  record also takes a `Signal`, which brings its rate; its calibration factor
+  is not applied, because a force and an acceleration are not pressures.
+  Every result has `.plot()`,
+  `ImpactMobilityResult.report()` prints the ISO 7626 fiche with the impacts,
+  the window and the coherence at the peak, and a new guide in both languages
+  strikes a resonator of known mobility through the whole procedure. The part
+  prints no worked example, so its conformance rows are closed forms: a
+  resonator struck by a Gaussian pulse, whose response is known exactly,
+  gives its mobility and its damping back.
+
 - **Sound power in the 16 kHz octave band (ISO 9295).** The general sound
   power methods stop at the 10 kHz one-third-octave band, and a printer's
   paper noise or a power supply's whine sits above it. The new
@@ -1168,6 +1210,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   failing 8.1 without being a bound. The ISO 3741 comparison method warned
   "the levels are upper bounds" when it clamped the reference source's
   correction; it now says the clamp lowers the result.
+
+- **Spanish verdicts and clause numbers read as they should in two figures
+  that already existed.** The Spanish title of the ISO 7626-2 rigid-mass
+  calibration plot said CORRECTO or INCORRECTO; it now says CUMPLE or
+  NO CUMPLE, like every other verdict of the library. The Spanish figure of
+  the IEC 60268-4 noise weightings cited "(IEC 60268-4 17,2)", a clause number
+  written as a decimal; it now cites "apartado 17.2", and
+  `scripts/check_figure_decimal_point.py` fails on a Spanish figure that
+  writes a clause number with a decimal comma straight after a standard's
+  designation, in each form the save-time translation produces from an
+  English citation: after a space or a comma, in parentheses, after "cl.",
+  and after a designation such as "ECAC Doc 29". The
+  example ISO 7626-2 fiche described an impact hammer, which is the method of
+  ISO 7626-5; it now describes the attached exciter of ISO 7626-2.
 
 - **A derived value names the cells it rests on in words.** When the cells a
   catalogue value is worked out from have mixed bases, `derived` says the basis

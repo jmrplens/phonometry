@@ -442,6 +442,13 @@ _STRINGS: dict[str, str] = {
     "FRF type: {kind}": "Tipo de FRF: {kind}",
     "Frequency range: {range} Hz": "Rango de frecuencias: {range} Hz",
     "Phase at peak: {value}&#176;": "Fase en el máximo: {value}&#176;",
+    "Mechanical mobility by impact excitation": "Movilidad mecánica por excitación con impacto",
+    "Measurement of the {kind} mechanical mobility Y = v/F by impact excitation, averaged over {n} impacts (ISO 7626-5:2019, 8.6; frequency-response function of ISO 7626-1:2011).": "Medición de la movilidad mecánica {kind} Y = v/F por excitación con impacto, promediada sobre {n} impactos (ISO 7626-5:2019, 8.6; función de respuesta en frecuencia de la ISO 7626-1:2011).",
+    "Measurement of the {kind} mechanical mobility Y = v/F by impact excitation, from a single impact (ISO 7626-5:2019; frequency-response function of ISO 7626-1:2011).": "Medición de la movilidad mecánica {kind} Y = v/F por excitación con impacto, a partir de un solo impacto (ISO 7626-5:2019; función de respuesta en frecuencia de la ISO 7626-1:2011).",
+    "Impacts averaged": "Impactos promediados",
+    "Exponential window a [1/s]": "Ventana exponencial a [1/s]",
+    "Coherence at peak": "Coherencia en el máximo",
+    "Exponential window a = {a} 1/s: the peaks carry its damping (ISO 7626-5 Annex A)": "Ventana exponencial a = {a} 1/s: los máximos llevan su amortiguamiento (ISO 7626-5, anexo A)",
     # --- dynamic transfer stiffness (ISO 10846) ----------------------------
     "Dynamic transfer stiffness of a resilient element": "Rigidez dinámica de transferencia de un elemento resiliente",
     "Transfer-stiffness characteristics": "Características de la rigidez de transferencia",

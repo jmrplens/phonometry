@@ -24,6 +24,16 @@ can catch, and it is narrow enough to leave prose alone. A decimal inside a
 longer label is the business of ``scripts/check_decimal_comma.py``, which reads
 the drawn strings at the source.
 
+The second shape runs the other way: a clause number that lost its point. A
+clause cited straight after a standard's designation, ``(ISO 7626-5, 6.4)``,
+keeps its point in Spanish, but the save-time pass only knows it for a clause
+when a word such as "apartado" stands before it, so without one it writes
+``6,4``, a decimal the clause never was. The check flags a designation followed
+by a number with a comma between its digits, whether the number follows a
+comma, a space, an opening parenthesis or a ``cl.`` the pass does not know,
+and whether the designation is ``ISO 7626-5`` or ``ECAC Doc 29``; the fix is
+the word, at the source.
+
 Not every hit is a defect: a clause number is not a measurement, and keeps its
 point in Spanish as it does in English. Those go in :data:`ALLOWED` with the
 reason, keyed ``figure: label``. An entry that no longer matches fails too, so
@@ -56,6 +66,32 @@ _COMMENT = re.compile(r"<!--\s*(.*?)\s*-->", re.DOTALL)
 #: typographic U+2212 the formatters ship), digits, a point, digits, and the
 #: engineering suffix a frequency axis writes (``2.5k``).
 _NUMERIC_LABEL = re.compile(r"^[-+−]?\d+\.\d+[kM]?$")
+
+#: A standard's designation: its body (``ISO``, ``ISO/TS``, ``ECAC Doc``) and
+#: its number, with any part and year (``7626-5``, ``3744:2010``, ``29``).
+_DESIGNATION = (
+    r"\b(?:ISO|IEC|EN|UNE|ANSI|DIN|VDI|SAE|ASTM|ITU-[RT]|ECAC|CEI|AES|EBU|ARP)"
+    r"(?:/(?:TS|TR|IEC|PAS))?(?:\s+Doc)?\s[\w.:/-]*\d[\w:/-]*"
+)
+
+#: A word that names the number after it a clause but that the save-time pass
+#: does not protect (``cl.``), or one it does, written with the comma by hand.
+_CLAUSE_WORD = r"(?:(?:cl\.|clause|apartado|§)\s*)?"
+
+#: A clause number written with a decimal comma straight after a standard's
+#: designation, in each form the save-time pass writes one from an English
+#: citation: ``ISO 7626-5, 6,4``, ``IEC 60268-4 17,2``, ``ISO 7626-5 cl. 6,4``,
+#: ``ECAC Doc 29 4,5`` and, in parentheses, ``ISO 7626-5 (6,4)``. In
+#: parentheses the number must close them or be followed by a comma or a
+#: semicolon, so that a reading such as ``ISO 9613-2 (2,5 dB)`` is left alone.
+_CLAUSE_WITH_COMMA = re.compile(
+    _DESIGNATION
+    + r"(?:,?\s+"
+    + _CLAUSE_WORD
+    + r"\d+,\d+|\s*\(\s*"
+    + _CLAUSE_WORD
+    + r"\d+,\d+(?=\s*[),;]))"
+)
 
 #: Numeric labels that are not measurements, keyed ``figure: label`` with the
 #: reason. Nothing belongs here that a pass could write with a comma instead.
@@ -105,6 +141,24 @@ def check(images: pathlib.Path) -> tuple[list[tuple[str, str]], list[str]]:
     return found, sorted(set(ALLOWED) - seen)
 
 
+def clause_commas(images: pathlib.Path) -> list[tuple[str, str]]:
+    """Find the clause numbers a Spanish figure wrote as decimals.
+
+    :param images: The directory the figures are committed in.
+    :return: The ``(figure, citation)`` pairs where a number straight after a
+        standard's designation carries a comma, in the order found.
+    """
+    found: list[tuple[str, str]] = []
+    paths = sorted({p for pattern in SPANISH for p in images.glob(pattern)})
+    for path in paths:
+        figure = stem(path)
+        for label in labels(path):
+            for citation in _CLAUSE_WITH_COMMA.findall(label):
+                if (figure, citation) not in found:
+                    found.append((figure, citation))
+    return found
+
+
 def main(argv: list[str] | None = None) -> int:
     """Report every Spanish figure that writes a number with a point."""
     parser = argparse.ArgumentParser(description=(__doc__ or "").splitlines()[0])
@@ -113,8 +167,9 @@ def main(argv: list[str] | None = None) -> int:
 
     images = pathlib.Path(args.images)
     found, stale = check(images)
+    clauses = clause_commas(images)
     total = len({p for pattern in SPANISH for p in images.glob(pattern)})
-    if not found and not stale:
+    if not found and not stale and not clauses:
         print(
             f"No Spanish figure writes a numeric label with a decimal point: "
             f"{total} files, {len(ALLOWED)} allowed."
@@ -141,6 +196,20 @@ def main(argv: list[str] | None = None) -> int:
     for key in stale:
         print(
             f"ALLOWED lists {key!r}, which no figure draws any more: drop the entry",
+            file=sys.stderr,
+        )
+    for figure, citation in clauses:
+        print(
+            f"{figure}: the Spanish figure cites {citation!r}, a clause number "
+            f"written as a decimal",
+            file=sys.stderr,
+        )
+    if clauses:
+        print(
+            "\nPut the word that marks the number as a clause before it in the "
+            'Spanish string ("ISO 7626-5, apartado 6.4"), so the save-time '
+            "pass of scripts/figures/i18n.py keeps its point, and regenerate "
+            "the figure.",
             file=sys.stderr,
         )
     return 1

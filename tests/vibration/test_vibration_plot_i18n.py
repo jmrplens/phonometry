@@ -49,7 +49,7 @@ def test_rigid_mass_spanish_labels() -> None:
 
     axes_es = res.plot(language="es")
     assert axes_es[0].get_title() == (
-        "ISO 7626-2 verificación de calibración con masa rígida (CORRECTO)"
+        "ISO 7626-2 verificación de calibración con masa rígida (CUMPLE)"
     )
     assert axes_es[1].get_ylabel() == "Desviación [%]"
     assert axes_es[1].get_xlabel() == "Frecuencia [Hz]"

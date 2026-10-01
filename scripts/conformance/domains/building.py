@@ -1876,6 +1876,339 @@ def _chk_iso7626_decade_identity() -> Outcome:
     )
 
 
+# --- Mobility by impact excitation (ISO 7626-5:2019) ---
+# The part prints no worked example. Every row below is anchored in a closed
+# form: a 2 kg resonator at 40 Hz struck by a Gaussian force pulse, whose
+# response is the exact convolution of reference_data.sdof_gaussian_impact.
+
+
+def _iso7626_5_sdof(zeta: float) -> tuple[float, float, float]:
+    """Mass, stiffness and viscous damping of the reference resonator."""
+    m = ref.ISO7626_5_MASS_KG
+    k = m * (2.0 * math.pi * ref.ISO7626_5_NATURAL_FREQUENCY_HZ) ** 2
+    return m, k, 2.0 * zeta * math.sqrt(k * m)
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 7626-5:2019 8.6",
+    "Averaged impact estimate of a 10 % resonator: mag(Y) at 40 Hz = closed form",
+)
+def _chk_iso7626_5_averaged_estimate() -> Outcome:
+    force, response = ref.sdof_gaussian_impact(0.1)
+    forces = np.array([force * (1.0 + 0.25 * i) for i in range(3)])
+    responses = np.array([response * (1.0 + 0.25 * i) for i in range(3)])
+    res = ph.vibration.impact_mobility(forces, responses, ref.ISO7626_5_FS_HZ)
+    index = int(np.argmin(np.abs(res.frequencies - 40.0)))
+    m, k, c = _iso7626_5_sdof(0.1)
+    expected = abs(complex(ph.vibration.sdof_mobility(40.0, m, k, c)))
+    return numeric(
+        expected, float(res.magnitude[index]), 1e-7, rel=True, unit="m/(N·s)", places=7
+    )
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 7626-5:2019 8.6",
+    "Three noisy impacts: estimate = averaged cross-spectrum / averaged force auto-spectrum",
+)
+def _chk_iso7626_5_averaging_definition() -> Outcome:
+    force, response = ref.sdof_gaussian_impact(0.1)
+    scales = np.array([1.0, 1.25, 1.5])[:, np.newaxis]
+    rng = np.random.default_rng(7626)
+    noise = (
+        0.05 * float(np.max(np.abs(response))) * rng.standard_normal((3, force.size))
+    )
+    forces = scales * force
+    responses = scales * response + noise
+    res = ph.vibration.impact_mobility(forces, responses, ref.ISO7626_5_FS_HZ)
+    # 8.6 in its own words, from the raw transforms: the averaged
+    # cross-spectrum of response and force over the averaged force
+    # auto-spectrum, an accelerance, divided by j*omega for the mobility.
+    f_spec = np.fft.rfft(forces, axis=-1)
+    x_spec = np.fft.rfft(responses, axis=-1)
+    freqs = np.fft.rfftfreq(force.size, d=1.0 / ref.ISO7626_5_FS_HZ)
+    k = int(np.argmin(np.abs(freqs - 40.0)))
+    accelerance = np.sum(x_spec[:, k] * np.conj(f_spec[:, k])) / np.sum(
+        np.abs(f_spec[:, k]) ** 2
+    )
+    expected = abs(complex(accelerance / (2j * math.pi * freqs[k])))
+    index = int(np.argmin(np.abs(res.frequencies - 40.0)))
+    return numeric(
+        expected, float(res.magnitude[index]), 1e-9, rel=True, unit="m/(N·s)", places=7
+    )
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 7626-5:2019 Annex A Formula (A.2)",
+    "Exponential window on force and response: windowed accelerance = A(s + a)",
+)
+def _chk_iso7626_5_pole_shift() -> Outcome:
+    zeta, rate = 0.005, 20.0
+    force, response = ref.sdof_gaussian_impact(zeta)
+    res = ph.vibration.impact_mobility(
+        force, response, ref.ISO7626_5_FS_HZ, exponential_decay_rate_per_s=rate
+    )
+    band = res.frequencies <= 500.0
+    s = 2j * np.pi * res.frequencies[band] + rate
+    omega_n = 2.0 * math.pi * ref.ISO7626_5_NATURAL_FREQUENCY_HZ
+    shifted = s**2 / (
+        ref.ISO7626_5_MASS_KG * (s**2 + 2.0 * zeta * omega_n * s + omega_n**2)
+    )
+    deviation = float(np.max(np.abs(res.to("accelerance")[band] / shifted - 1.0)))
+    return numeric(
+        0.0,
+        deviation,
+        1e-7,
+        expected_label="0 (A(s + a) below 500 Hz)",
+        computed_label=f"max relative deviation {deviation:.1e}",
+    )
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 7626-5:2019 Annex A Formula (A.3)",
+    "Damping of a 0,5 % resonator after a 5 1/s window, corrected by (A.3) as printed",
+)
+def _chk_iso7626_5_formula_a3() -> Outcome:
+    zeta, rate = 0.005, 5.0
+    force, response = ref.sdof_gaussian_impact(zeta)
+    res = ph.vibration.impact_mobility(
+        force, response, ref.ISO7626_5_FS_HZ, exponential_decay_rate_per_s=rate
+    )
+    correction = res.fit_mode((30.0, 50.0)).correction
+    # The window moves the pole from -sigma + j*omega_d to -(sigma + a) +
+    # j*omega_d, so the apparent damping ratio is (sigma + a)/|pole|, and
+    # (A.3) as printed subtracts a/omega_d from it. That leaves (A.3)'s own
+    # first-order residual, -(zeta_hat**3 - zeta**3)/2 = -7,6e-6, in the
+    # expected value; the tolerance holds only the 2e-6 the truncation of a
+    # 1 s record adds, so the exact pole shift would fail the row.
+    omega_n = 2.0 * math.pi * ref.ISO7626_5_NATURAL_FREQUENCY_HZ
+    sigma, omega_d = zeta * omega_n, omega_n * math.sqrt(1.0 - zeta**2)
+    apparent = (sigma + rate) / math.hypot(sigma + rate, omega_d)
+    return numeric(
+        apparent - rate / omega_d, float(correction.damping_ratio[0]), 3e-6, places=7
+    )
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 7626-5:2019 Annex A",
+    "Damping back from a 20 1/s window, the pole moved back by a: 0,5 %",
+)
+def _chk_iso7626_5_exact_damping() -> Outcome:
+    force, response = ref.sdof_gaussian_impact(0.005)
+    res = ph.vibration.impact_mobility(
+        force, response, ref.ISO7626_5_FS_HZ, exponential_decay_rate_per_s=20.0
+    )
+    correction = res.fit_mode((30.0, 50.0)).correction
+    return numeric(
+        0.005, float(correction.exact_damping_ratio[0]), 1e-6, rel=True, places=7
+    )
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 7626-5:2019 Annex A",
+    "Corrected mobility peak of a 0,5 % resonator after a 20 1/s window = 1/c",
+)
+def _chk_iso7626_5_corrected_peak() -> Outcome:
+    zeta = 0.005
+    force, response = ref.sdof_gaussian_impact(zeta, quantity="velocity")
+    res = ph.vibration.impact_mobility(
+        force,
+        response,
+        ref.ISO7626_5_FS_HZ,
+        response_quantity="velocity",
+        exponential_decay_rate_per_s=20.0,
+    )
+    _, _, c = _iso7626_5_sdof(zeta)
+    f0 = ref.ISO7626_5_NATURAL_FREQUENCY_HZ
+    peak = abs(complex(res.fit_mode((30.0, 50.0)).corrected_mobility(f0)))
+    return numeric(1.0 / c, peak, 1e-5, rel=True, unit="m/(N·s)", places=5)
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 7626-5:2019 6.4 (Figure 5)",
+    "Two equal impacts 62,5 ms apart: notches every 1/τ = 16 Hz, zero at 8, 24, 40 Hz",
+)
+def _chk_iso7626_5_double_hit_notches() -> Outcome:
+    force, _ = ref.sdof_gaussian_impact(0.1)
+    shift = 256
+    double = force + np.roll(force, shift)
+    fs = ref.ISO7626_5_FS_HZ
+    _, esd = ph.vibration.energy_spectral_density(double, fs)
+    _, single = ph.vibration.energy_spectral_density(force, fs)
+    notches = (2 * np.arange(3) + 1) * (ref.ISO7626_5_SAMPLES // (2 * shift))
+    zeros = bool(np.all(esd[notches] <= 1e-20 * single[notches]))
+    check = ph.vibration.check_double_hit(double, fs)
+    spacing = check.notch_spacing_hz if (zeros and not check.passes) else None
+    return numeric(
+        fs / shift, math.nan if spacing is None else spacing, 1e-9, unit="Hz", places=3
+    )
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 7626-5:2019 6.4",
+    "Second impact 0,6 of the first: ripple 20 lg(1,6/0,4) = 12,04 dB",
+)
+def _chk_iso7626_5_double_hit_ripple() -> Outcome:
+    force, _ = ref.sdof_gaussian_impact(0.1)
+    check = ph.vibration.check_double_hit(
+        force + 0.6 * np.roll(force, 245), ref.ISO7626_5_FS_HZ
+    )
+    return numeric(
+        20.0 * math.log10(1.6 / 0.4), check.ripple_db, 1e-6, unit="dB", places=3
+    )
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 7626-5:2019 7.2 (ISO 7626-2:2015 7.5.2)",
+    "Rigid 3 kg block through both windows: accelerance 1/m = 0,3333 1/kg",
+)
+def _chk_iso7626_5_rigid_block() -> Outcome:
+    force, _ = ref.sdof_gaussian_impact(0.1)
+    block_kg = 3.0
+    res = ph.vibration.impact_mobility(
+        force,
+        force / block_kg,
+        ref.ISO7626_5_FS_HZ,
+        exponential_decay_rate_per_s=10.0,
+        force_window_s=0.02,
+    )
+    band = res.frequencies <= 500.0
+    accelerance = np.abs(res.to("accelerance")[band])
+    check = ph.vibration.rigid_mass_calibration_check(
+        accelerance, res.frequencies[band], block_kg
+    )
+    worst = float(accelerance[int(np.argmax(np.abs(accelerance - 1.0 / block_kg)))])
+    return numeric(
+        1.0 / block_kg,
+        worst if check.passes else math.nan,
+        1e-12,
+        rel=True,
+        unit="1/kg",
+        places=4,
+    )
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 7626-5:2019 8.5.2 (Figure 10)",
+    "Exponential window that decays to 5 % at the end of the record",
+)
+def _chk_iso7626_5_window_end_value() -> Outcome:
+    n, fs = ref.ISO7626_5_SAMPLES, ref.ISO7626_5_FS_HZ
+    rate = ph.vibration.exponential_decay_rate(
+        n, fs, final_value=ref.ISO7626_5_FIGURE10_FINAL_VALUE
+    )
+    window = ph.vibration.exponential_window(n, fs, decay_rate_per_s=rate)
+    return numeric(
+        ref.ISO7626_5_FIGURE10_FINAL_VALUE, float(window[-1]), 1e-12, places=4
+    )
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 7626-5:2019 8.3, 8.5.2",
+    "Response decaying to 1 % at the end reads 10 % at the midpoint",
+)
+def _chk_iso7626_5_midpoint_check() -> Outcome:
+    n, fs = ref.ISO7626_5_SAMPLES, ref.ISO7626_5_FS_HZ
+    t = np.arange(n) / fs
+    record = np.exp(-math.log(1.0 / ref.ISO7626_5_RESPONSE_END_RATIO) * t) * np.cos(
+        2.0 * math.pi * 200.0 * t
+    )
+    check = ph.vibration.check_response_decay(record, fs, segment_s=0.01)
+    return numeric(
+        ref.ISO7626_5_RESPONSE_MIDPOINT_RATIO,
+        check.midpoint_ratio,
+        1e-3,
+        rel=True,
+        places=4,
+    )
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 7626-5:2019 8.3, 8.5.2",
+    "Response whose envelope ends at 1 %: level at the last sample = 1 %, passes",
+)
+def _chk_iso7626_5_end_of_record() -> Outcome:
+    n, fs = ref.ISO7626_5_SAMPLES, ref.ISO7626_5_FS_HZ
+    t = np.arange(n) / fs
+    end = ref.ISO7626_5_RESPONSE_END_RATIO
+    record = np.exp(math.log(end) * t / t[-1]) * np.cos(2.0 * math.pi * 200.0 * t)
+    check = ph.vibration.check_response_decay(record, fs)
+    return numeric(
+        end, check.end_ratio if check.passes else math.nan, 0.02, rel=True, places=4
+    )
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 7626-5:2019 3.3, 3.4",
+    "Force ESD of a 0,5 ms Gaussian: fall across 1 Hz to 500 Hz in closed form",
+)
+def _chk_iso7626_5_force_spectrum_drop() -> Outcome:
+    force, _ = ref.sdof_gaussian_impact(0.1)
+    check = ph.vibration.check_force_spectrum(
+        force, ref.ISO7626_5_FS_HZ, frequency_range_hz=(1.0, 500.0), max_drop_db=20.0
+    )
+    sigma = ref.ISO7626_5_PULSE_SIGMA_S
+    expected = 10.0 * (2.0 * math.pi * sigma) ** 2 * (500.0**2 - 1.0) / math.log(10.0)
+    return numeric(expected, check.drop_db, 1e-8, rel=True, unit="dB", places=4)
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 7626-5:2019 9.1",
+    "Noise-free records: coherence 1 over the range; five records pass",
+)
+def _chk_iso7626_5_coherence() -> Outcome:
+    force, response = ref.sdof_gaussian_impact(0.1)
+    records = ref.ISO7626_5_COHERENCE_RECORDS
+    res = ph.vibration.impact_mobility(
+        np.tile(force, (records, 1)),
+        np.tile(response, (records, 1)),
+        ref.ISO7626_5_FS_HZ,
+    )
+    check = ph.vibration.check_coherence(res, frequency_range_hz=(1.0, 500.0))
+    lowest = float(np.min(check.coherence)) if check.passes else math.nan
+    return numeric(1.0, lowest, 1e-9, places=6)
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 7626-5:2019 8.1, 8.3, 8.5.2, 9.1",
+    "The printed limits: channel match, response decay and coherence",
+)
+def _chk_iso7626_5_printed_limits() -> Outcome:
+    expected = {
+        "channel magnitude": ref.ISO7626_5_CHANNEL_MAGNITUDE,
+        "channel phase deg": ref.ISO7626_5_CHANNEL_PHASE_DEG,
+        "end of record": ref.ISO7626_5_RESPONSE_END_RATIO,
+        "midpoint": ref.ISO7626_5_RESPONSE_MIDPOINT_RATIO,
+        "windowed end": ref.ISO7626_5_WINDOWED_END_RATIO,
+        "high coherence": ref.ISO7626_5_HIGH_COHERENCE,
+        "coherence records": float(ref.ISO7626_5_COHERENCE_RECORDS),
+    }
+    computed = {
+        "channel magnitude": ph.vibration.CHANNEL_MAGNITUDE_TOLERANCE,
+        "channel phase deg": ph.vibration.CHANNEL_PHASE_TOLERANCE_DEG,
+        "end of record": ph.vibration.RESPONSE_END_RATIO,
+        "midpoint": ph.vibration.RESPONSE_MIDPOINT_RATIO,
+        "windowed end": ph.vibration.WINDOWED_RESPONSE_END_RATIO,
+        "high coherence": ph.vibration.HIGH_COHERENCE,
+        "coherence records": float(ph.vibration.COHERENCE_RECORDS),
+    }
+    return record(expected, computed)
+
+
 @register(
     "Room & building acoustics",
     "ISO 10846-3:2002 6.1 Inequality (2)",

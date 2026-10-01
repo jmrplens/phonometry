@@ -1,8 +1,8 @@
 # phonometry
 
-> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1562 numerical conformance checks against 493 standards enforced in CI.
+> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1577 numerical conformance checks against 494 standards enforced in CI.
 
-phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1562 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 100 domains.
+phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1577 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 100 domains.
 
 The project was published as **PyOctaveBand** until version 3.0.0. Third-party references and dependency pins still using that name refer to this library.
 
@@ -229,6 +229,7 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 
 - [Overview](https://jmrplens.github.io/phonometry/vibration/structural/) · [full text](https://jmrplens.github.io/phonometry/llms/llms-vibration-structural.txt)
 - [Mechanical mobility and the FRF family (ISO 7626-1)](https://jmrplens.github.io/phonometry/vibration/structural/mechanical-mobility/)
+- [Mobility by impact excitation (ISO 7626-5)](https://jmrplens.github.io/phonometry/vibration/structural/impact-mobility/)
 - [Bending-wave transmission at plate junctions (Cremer / Craik / Hopkins)](https://jmrplens.github.io/phonometry/vibration/structural/junction-transmission/)
 - [Dynamic transfer stiffness of resilient elements (ISO 10846)](https://jmrplens.github.io/phonometry/vibration/structural/transfer-stiffness/)
 - [Vibration damage to structures (DIN 4150-3)](https://jmrplens.github.io/phonometry/vibration/structural/structural-damage/)
@@ -698,6 +699,7 @@ The generated API reference, one page per module. Fetch these only when a specif
 - [vibration/experimental-sea](https://jmrplens.github.io/phonometry/reference/api/vibration/experimental-sea/)
 - [vibration/exposure](https://jmrplens.github.io/phonometry/reference/api/vibration/exposure/)
 - [vibration/ground](https://jmrplens.github.io/phonometry/reference/api/vibration/ground/)
+- [vibration/impact-mobility](https://jmrplens.github.io/phonometry/reference/api/vibration/impact-mobility/)
 - [vibration/instrumentation](https://jmrplens.github.io/phonometry/reference/api/vibration/instrumentation/)
 - [vibration/junction-transmission](https://jmrplens.github.io/phonometry/reference/api/vibration/junction-transmission/)
 - [vibration/mechanical-mobility](https://jmrplens.github.io/phonometry/reference/api/vibration/mechanical-mobility/)

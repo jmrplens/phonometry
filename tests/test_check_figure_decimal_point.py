@@ -107,6 +107,66 @@ def test_an_allowed_label_passes_and_a_stale_allowance_fails(
     assert stale == ["diagram_es_clauses: 9.1"]
 
 
+def test_a_clause_number_written_as_a_decimal_fails(images: pathlib.Path) -> None:
+    """The published defect: "(ISO 7626-5, 6.4)" came out as "6,4"."""
+    _figure(
+        images,
+        "impact_double_hit_es",
+        "Un doble golpe en el registro de fuerza (ISO 7626-5, 6,4)",
+        "Una tensión de ruido, dos redes (IEC 60268-4 17,2)",
+    )
+    assert gate.clause_commas(images) == [
+        ("impact_double_hit", "ISO 7626-5, 6,4"),
+        ("impact_double_hit", "IEC 60268-4 17,2"),
+    ]
+
+
+@pytest.mark.parametrize(
+    ("english", "citation"),
+    [
+        ("A Double Hit (ISO 7626-5 (6.4))", "ISO 7626-5 (6,4"),
+        ("A Double Hit, ISO 7626-5 cl. 6.4", "ISO 7626-5 cl. 6,4"),
+        ("Lateral attenuation (ECAC Doc 29 4.5)", "ECAC Doc 29 4,5"),
+    ],
+)
+def test_every_form_the_save_time_pass_writes_fails(
+    images: pathlib.Path, english: str, citation: str
+) -> None:
+    """The comma the pass itself puts into a clause cited without "apartado".
+
+    A parenthesis, a ``cl.`` it does not know and a ``Doc`` designation each
+    slipped past the first reading of the gate.
+    """
+    from figures.i18n import _decimal_comma
+
+    _figure(images, "impact_double_hit_es", _decimal_comma(english))
+    assert gate.clause_commas(images) == [("impact_double_hit", citation)]
+
+
+def test_a_reading_in_parentheses_after_a_designation_is_not_a_clause(
+    images: pathlib.Path,
+) -> None:
+    _figure(
+        images,
+        "barrier_es",
+        "Atenuación (ISO 9613-2 (2,5 dB de margen))",
+        "ECAC Doc 29, capítulo 4",
+        "ECAC Doc 29 §4.5.7",
+    )
+    assert gate.clause_commas(images) == []
+
+
+def test_a_clause_marked_as_a_clause_keeps_its_point(images: pathlib.Path) -> None:
+    _figure(
+        images,
+        "impact_double_hit_es",
+        "Un doble golpe en el registro de fuerza (ISO 7626-5, apartado 6.4)",
+        "ISO 7626-5:2019",
+        "$L$ = 52,4 dB",
+    )
+    assert gate.clause_commas(images) == []
+
+
 def test_every_allowance_carries_a_reason() -> None:
     assert all(reason.strip() for reason in gate.ALLOWED.values())
 
@@ -116,3 +176,4 @@ def test_the_committed_figures_pass() -> None:
     found, stale = gate.check(gate.IMAGES)
     assert found == []
     assert stale == []
+    assert gate.clause_commas(gate.IMAGES) == []

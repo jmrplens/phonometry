@@ -938,14 +938,30 @@ por encima.
   (ISO 7626-1:2011).
   [Catálogo iso.org](https://www.iso.org/standard/50426.html).
   La familia de FRF y sus distinciones libre/bloqueada.
-  Citado por [Movilidad mecánica y la familia de FRF](/phonometry/es/vibration/structural/mechanical-mobility/).
+  Citado por [Movilidad mecánica y la familia de FRF](/phonometry/es/vibration/structural/mechanical-mobility/) y
+  [Movilidad por excitación con impacto](/phonometry/es/vibration/structural/impact-mobility/).
 - International Organization for Standardization. (2015). *Mechanical
   vibration and shock — Experimental determination of mechanical mobility —
   Part 2: Measurements using single-point translation excitation with an
   attached vibration exciter* (ISO 7626-2:2015).
   [Catálogo iso.org](https://www.iso.org/standard/62483.html).
   El método de medición con excitador acoplado y sus criterios de aceptación.
-  Citado por [Movilidad mecánica y la familia de FRF](/phonometry/es/vibration/structural/mechanical-mobility/).
+  Citado por [Movilidad mecánica y la familia de FRF](/phonometry/es/vibration/structural/mechanical-mobility/) y
+  [Movilidad por excitación con impacto](/phonometry/es/vibration/structural/impact-mobility/).
+- International Organization for Standardization. (2019). *Mechanical
+  vibration and shock — Experimental determination of mechanical mobility —
+  Part 5: Measurements using impact excitation with an exciter which is not
+  attached to the structure* (ISO 7626-5:2019).
+  La medida con martillo de impacto: las ventanas de fuerza y exponencial, el
+  promedio sobre impactos, las comprobaciones sobre el registro y la corrección
+  del anexo A.
+  Citado por [Movilidad por excitación con impacto](/phonometry/es/vibration/structural/impact-mobility/).
+- International Organization for Standardization. (2018). *Mechanical
+  vibration, shock and condition monitoring — Vocabulary* (ISO 2041:2018).
+  La relación de amortiguamiento, el coeficiente de amortiguamiento sobre el
+  crítico (3.2.96), frente a la que la fórmula (A.3) de la ISO 7626-5 es de
+  primer orden.
+  Citado por [Movilidad por excitación con impacto](/phonometry/es/vibration/structural/impact-mobility/).
 - International Organization for Standardization. (2008). *Acoustics and
   vibration — Laboratory measurement of vibro-acoustic transfer properties of
   resilient elements — Part 1: Principles and guidelines* (ISO 10846-1:2008).

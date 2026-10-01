@@ -6919,3 +6919,362 @@ def generate_machine_count_correction(output_dir: str) -> None:
     plt.tight_layout()
     save_figure(output_dir, "machine_count_correction.svg")
     plt.close()
+
+
+# ---------------------------------------------------------------------------
+# ISO 7626-5: mobility by impact excitation.
+# ---------------------------------------------------------------------------
+
+#: The resonator every ISO 7626-5 figure strikes: 2 kg on a spring tuned to
+#: 50 Hz, damped at 0.5 % of critical, sampled at 4096 Hz for one second.
+_IMPACT_FS = 4096.0
+_IMPACT_N = 4096
+_IMPACT_MASS_KG = 2.0
+_IMPACT_FN_HZ = 50.0
+_IMPACT_ZETA = 0.005
+
+
+def _impact_records() -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Time axis, a 0.5 ms Gaussian force pulse and the resonator's acceleration."""
+    from scipy import signal
+
+    t = np.arange(_IMPACT_N) / _IMPACT_FS
+    wn = 2.0 * np.pi * _IMPACT_FN_HZ
+    accelerance = [1.0 / _IMPACT_MASS_KG, 0.0, 0.0]
+    system = signal.lti(accelerance, [1.0, 2.0 * _IMPACT_ZETA * wn, wn**2])
+    force = 100.0 * np.exp(-((t - 0.005) ** 2) / (2.0 * 0.0005**2))
+    _, response, _ = signal.lsim(system, force, t)
+    return t, force, np.asarray(response, dtype=np.float64)
+
+
+def generate_impact_force_window(output_dir: str) -> None:
+    """ISO 7626-5 8.5.1: the force window and what it does to the spectrum."""
+    print("Generating impact_force_window...")
+    from phonometry import vibration
+
+    t, force, _ = _impact_records()
+    rng = np.random.default_rng(7626)
+    noisy = force + 0.3 * rng.standard_normal(force.size)
+    window = vibration.force_window(_IMPACT_N, _IMPACT_FS, width_s=0.015)
+
+    fig, (ax_t, ax_f) = plt.subplots(
+        1, 2, figsize=(12.4, 5.2), gridspec_kw={"width_ratios": [1.0, 1.25]}
+    )
+    shown = t <= 0.04
+    ax_t.plot(
+        1e3 * t[shown],
+        noisy[shown],
+        color=COLOR_PRIMARY,
+        linewidth=1.0,
+        label="force record with noise",
+    )
+    ax_t.plot(
+        1e3 * t[shown],
+        110.0 * window[shown],
+        color=COLOR_SECONDARY,
+        linewidth=1.6,
+        linestyle="--",
+        label="force window (unity for 15 ms)",
+    )
+    ax_t.set_xlim(0.0, 40.0)
+    # Room above the window's 110 N top for the legend, so neither the top
+    # edge nor the drop at 15 ms runs under it in the longer Spanish labels.
+    ax_t.set_ylim(-10.0, 150.0)
+    ax_t.set_xlabel("Time [ms]")
+    ax_t.set_ylabel("Force [N]")
+    ax_t.set_title("The Pulse Takes a Few Samples of the Record", pad=10)
+    ax_t.grid(color=COLOR_GRID, linestyle="--", alpha=0.5)
+    ax_t.legend(loc="upper right", fontsize=9)
+
+    freqs, bare = vibration.energy_spectral_density(noisy, _IMPACT_FS)
+    _, windowed = vibration.energy_spectral_density(noisy * window, _IMPACT_FS)
+    _, clean = vibration.energy_spectral_density(force, _IMPACT_FS)
+    band = (freqs > 0.0) & (freqs <= 2000.0)
+    ax_f.semilogy(
+        freqs[band],
+        bare[band],
+        color=COLOR_MUTED,
+        linewidth=0.8,
+        label="whole record: the noise of 1 s",
+    )
+    ax_f.semilogy(
+        freqs[band],
+        windowed[band],
+        color=COLOR_PRIMARY,
+        linewidth=1.3,
+        label="force window: the noise of 15 ms",
+    )
+    ax_f.semilogy(
+        freqs[band],
+        clean[band],
+        color=COLOR_SECONDARY,
+        linewidth=1.4,
+        linestyle="--",
+        label="the pulse alone",
+    )
+    ax_f.set_xlim(0.0, 2000.0)
+    ax_f.set_ylim(1e-7, 1.0)
+    ax_f.set_xlabel(LABEL_FREQ_HZ)
+    ax_f.set_ylabel("Force energy spectral density $G_{FF}$ [N²·s/Hz]")
+    ax_f.set_title("Zeroing the Rest of the Record Removes Its Noise", pad=10)
+    ax_f.grid(color=COLOR_GRID, linestyle="--", alpha=0.5, which="both")
+    ax_f.legend(loc="lower left", fontsize=9)
+
+    fig.suptitle("The Force Window of ISO 7626-5 (8.5.1)", fontsize=13)
+    plt.tight_layout(rect=(0.0, 0.0, 1.0, 0.95))
+    save_figure(output_dir, "impact_force_window.svg")
+    plt.close()
+
+
+def generate_impact_exponential_window(output_dir: str) -> None:
+    """ISO 7626-5 8.5.2 and Annex A: the exponential window and its correction."""
+    print("Generating impact_exponential_window...")
+    from phonometry import vibration
+
+    t, force, accel = _impact_records()
+    rate = vibration.exponential_decay_rate(_IMPACT_N, _IMPACT_FS, final_value=0.01)
+    window = vibration.exponential_window(_IMPACT_N, _IMPACT_FS, decay_rate_per_s=rate)
+    bare = vibration.impact_mobility(force, accel, _IMPACT_FS)
+    windowed = vibration.impact_mobility(
+        force, accel, _IMPACT_FS, exponential_decay_rate_per_s=rate
+    )
+    fit = windowed.fit_mode((40.0, 60.0))
+    wn = 2.0 * np.pi * _IMPACT_FN_HZ
+    stiffness = _IMPACT_MASS_KG * wn**2
+    damping = 2.0 * _IMPACT_ZETA * _IMPACT_MASS_KG * wn
+
+    fig, (ax_t, ax_f) = plt.subplots(
+        1, 2, figsize=(12.4, 5.4), gridspec_kw={"width_ratios": [1.0, 1.2]}
+    )
+    free = t >= 0.02
+    ax_t.plot(
+        t[free],
+        accel[free],
+        color=COLOR_MUTED,
+        linewidth=0.6,
+        label="response as recorded",
+    )
+    ax_t.plot(
+        t[free],
+        (accel * window)[free],
+        color=COLOR_PRIMARY,
+        linewidth=0.6,
+        label="times the exponential window",
+    )
+    envelope = float(np.max(np.abs(accel[free])))
+    ax_t.plot(
+        t,
+        envelope * window,
+        color=COLOR_SECONDARY,
+        linewidth=1.6,
+        linestyle="--",
+        label="window, 1 % at the end",
+    )
+    ax_t.set_xlim(0.0, 1.0)
+    ax_t.set_xlabel("Time [s]")
+    ax_t.set_ylabel("Acceleration [m/s²]")
+    ax_t.set_title("Still Ringing at the End, Then Made to Decay", pad=10)
+    ax_t.grid(color=COLOR_GRID, linestyle="--", alpha=0.5)
+    ax_t.legend(loc="upper right", fontsize=9)
+
+    band = (bare.frequencies >= 40.0) & (bare.frequencies <= 60.0)
+    dense = np.linspace(40.0, 60.0, 2001)
+    exact = np.abs(vibration.sdof_mobility(dense, _IMPACT_MASS_KG, stiffness, damping))
+    ax_f.semilogy(
+        dense,
+        exact,
+        color=COLOR_FG,
+        linewidth=1.2,
+        linestyle=":",
+        label="the resonator",
+    )
+    ax_f.semilogy(
+        bare.frequencies[band],
+        bare.magnitude[band],
+        color=COLOR_MUTED,
+        linewidth=1.2,
+        marker="o",
+        markersize=3,
+        label="no window: truncated, leaking",
+    )
+    ax_f.semilogy(
+        windowed.frequencies[band],
+        windowed.magnitude[band],
+        color=COLOR_PRIMARY,
+        linewidth=1.4,
+        marker="o",
+        markersize=3,
+        label="exponential window: smooth, too damped",
+    )
+    ax_f.semilogy(
+        dense,
+        np.abs(fit.corrected_mobility(dense)),
+        color=COLOR_SECONDARY,
+        linewidth=1.6,
+        linestyle="--",
+        label="window taken out by Annex A",
+    )
+    ax_f.set_xlim(40.0, 60.0)
+    ax_f.set_ylim(2e-3, 1.5)
+    ax_f.set_xlabel(LABEL_FREQ_HZ)
+    ax_f.set_ylabel("Mobility $|Y|$ [m/(N·s)]")
+    ax_f.set_title("The Peak Lost to the Window, and Restored", pad=10)
+    ax_f.grid(color=COLOR_GRID, linestyle="--", alpha=0.5, which="both")
+    ax_f.legend(loc="upper right", fontsize=8.5)
+
+    fig.suptitle(
+        "Exponential Window and Its Correction (ISO 7626-5 8.5.2, Annex A)",
+        fontsize=13,
+    )
+    plt.tight_layout(rect=(0.0, 0.0, 1.0, 0.95))
+    save_figure(output_dir, "impact_exponential_window.svg")
+    plt.close()
+
+
+def generate_impact_double_hit(output_dir: str) -> None:
+    """ISO 7626-5 6.4 and Figure 5: what a second impact does to the spectrum."""
+    print("Generating impact_double_hit...")
+    from phonometry import vibration
+
+    t, force, _ = _impact_records()
+    shift = round(0.06 * _IMPACT_FS)
+    double = force + 0.6 * np.roll(force, shift)
+    check = vibration.check_double_hit(double, _IMPACT_FS)
+
+    fig, (ax_t, ax_f) = plt.subplots(
+        1, 2, figsize=(12.4, 5.2), gridspec_kw={"width_ratios": [1.0, 1.25]}
+    )
+    shown = t <= 0.1
+    ax_t.plot(
+        1e3 * t[shown],
+        double[shown],
+        color=COLOR_PRIMARY,
+        linewidth=1.2,
+        label="force record",
+    )
+    ax_t.plot(
+        1e3 * check.impact_times_s,
+        check.impact_peaks,
+        linestyle="none",
+        marker="o",
+        color=COLOR_SECONDARY,
+        label="two impacts, 60 ms apart",
+    )
+    ax_t.set_xlim(0.0, 100.0)
+    ax_t.set_ylim(-5.0, 115.0)
+    ax_t.set_xlabel("Time [ms]")
+    ax_t.set_ylabel("Force [N]")
+    ax_t.set_title("A Second Impact Inside the Record", pad=10)
+    ax_t.grid(color=COLOR_GRID, linestyle="--", alpha=0.5)
+    ax_t.legend(loc="upper right", fontsize=9)
+
+    freqs, single = vibration.energy_spectral_density(force, _IMPACT_FS)
+    _, esd = vibration.energy_spectral_density(double, _IMPACT_FS)
+    band = (freqs > 0.0) & (freqs <= 400.0)
+    ax_f.semilogy(
+        freqs[band],
+        single[band],
+        color=COLOR_MUTED,
+        linewidth=1.4,
+        linestyle="--",
+        label="one impact",
+    )
+    ax_f.semilogy(
+        freqs[band],
+        esd[band],
+        color=COLOR_PRIMARY,
+        linewidth=1.2,
+        label="both: dips every 1/τ = 16.7 Hz",
+    )
+    ax_f.set_xlim(0.0, 400.0)
+    ax_f.set_ylim(1e-3, 1.0)
+    ax_f.set_xlabel(LABEL_FREQ_HZ)
+    ax_f.set_ylabel("Force energy spectral density $G_{FF}$ [N²·s/Hz]")
+    ax_f.set_title("Ripple Between (1 + r)² and (1 − r)², r = 0.6", pad=10)
+    ax_f.grid(color=COLOR_GRID, linestyle="--", alpha=0.5, which="both")
+    ax_f.legend(loc="lower left", fontsize=9)
+
+    fig.suptitle("A Double Hit in the Force Record (ISO 7626-5 6.4)", fontsize=13)
+    plt.tight_layout(rect=(0.0, 0.0, 1.0, 0.95))
+    save_figure(output_dir, "impact_double_hit.svg")
+    plt.close()
+
+
+def generate_impact_a3_first_order(output_dir: str) -> None:
+    """ISO 7626-5 Formula (A.3) against the pole shift it is the first order of.
+
+    Every point is a measurement: the resonator of this guide, tuned to a
+    50 Hz damped frequency at four true dampings, is struck, windowed at a
+    rate that adds ``a/omega_r`` of damping, fitted, and corrected both ways.
+    """
+    print("Generating impact_a3_first_order...")
+    from scipy import signal
+
+    from phonometry import vibration
+
+    t = np.arange(_IMPACT_N) / _IMPACT_FS
+    force = 100.0 * np.exp(-((t - 0.005) ** 2) / (2.0 * 0.0005**2))
+    omega_d = 2.0 * np.pi * _IMPACT_FN_HZ
+    window_ratio = np.linspace(0.01, 0.1, 19)
+    fig, ax = plt.subplots(figsize=(9.0, 5.6))
+    styles = (
+        (0.002, COLOR_PRIMARY, "-"),
+        (0.005, COLOR_TERTIARY, "--"),
+        (0.01, COLOR_QUATERNARY, "-."),
+        (0.02, COLOR_SECONDARY, ":"),
+    )
+    for index, (zeta, colour, style) in enumerate(styles):
+        wn = omega_d / math.sqrt(1.0 - zeta**2)
+        system = signal.lti(
+            [1.0 / _IMPACT_MASS_KG, 0.0, 0.0], [1.0, 2.0 * zeta * wn, wn**2]
+        )
+        _, accel, _ = signal.lsim(system, force, t)
+        a3, exact = [], []
+        for ratio in window_ratio:
+            estimate = vibration.impact_mobility(
+                force,
+                accel,
+                _IMPACT_FS,
+                exponential_decay_rate_per_s=float(ratio * omega_d),
+                frequency_range_hz=(5.0, 800.0),
+            )
+            correction = estimate.fit_mode((40.0, 60.0)).correction
+            a3.append(float(correction.damping_ratio[0]))
+            exact.append(float(correction.exact_damping_ratio[0]))
+        ax.plot(
+            100.0 * window_ratio,
+            100.0 * (np.asarray(a3) - zeta) / zeta,
+            color=colour,
+            linestyle=style,
+            linewidth=1.8,
+            marker="o",
+            markersize=3.5,
+            label=f"Formula (A.3), true damping {100.0 * zeta:g} %",
+        )
+        ax.plot(
+            100.0 * window_ratio,
+            100.0 * (np.asarray(exact) - zeta) / zeta,
+            color=COLOR_FG,
+            linewidth=1.0,
+            linestyle=(0, (1, 2)),
+            label="exact pole shift, all four" if index == len(styles) - 1 else None,
+        )
+    ax.axvline(
+        100.0
+        * vibration.exponential_decay_rate(_IMPACT_N, _IMPACT_FS, final_value=0.01)
+        / omega_d,
+        color=COLOR_MUTED,
+        linewidth=1.2,
+        linestyle="--",
+        label="window of this guide, 1 % at the end, at 50 Hz",
+    )
+    ax.set_xlim(0.0, 10.0)
+    ax.set_ylim(-30.0, 2.0)
+    ax.set_xlabel("Damping the window adds, $a/\\omega_r$ [%]")
+    ax.set_ylabel("Error in the true damping [%]")
+    ax.set_title("Formula (A.3) Is the First Order of the Pole Shift", pad=10)
+    ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.5)
+    ax.legend(loc="lower left", fontsize=9)
+    plt.tight_layout()
+    save_figure(output_dir, "impact_a3_first_order.svg")
+    plt.close()

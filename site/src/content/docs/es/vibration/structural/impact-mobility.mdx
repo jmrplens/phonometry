@@ -1,0 +1,736 @@
+---
+title: "Movilidad por excitación con impacto (ISO 7626-5)"
+description: "La movilidad mecánica medida con un martillo de impacto según la ISO 7626-5:2019: la densidad espectral de energía de un impulso de fuerza, la ventana de fuerza del 8.5.1, la estimación H1 promediada sobre impactos del 8.6 con su coherencia, el decaimiento de la respuesta del 8.3 y la ventana exponencial del 8.5.2, el amortiguamiento que añade la ventana retirado con el anexo A, y los veredictos sobre el registro: dobles golpes, espectro de fuerza, sobrecarga, concordancia entre canales y calibración con masa rígida."
+references:
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2019
+    title: "Mechanical vibration and shock — Experimental determination of mechanical mobility — Part 5: Measurements using impact excitation with an exciter which is not attached to the structure"
+    designation: "ISO 7626-5:2019"
+    note: "Toda la página: la densidad espectral de energía de 3.3 y 3.4, los dobles golpes del 6.4, la calibración del 7.2, la concordancia entre canales del 8.1, las reglas de muestreo y decaimiento del 8.3, la saturación (8.4), la ventana de fuerza del 8.5.1, la ventana exponencial del 8.5.2, el promediado del 8.6, la coherencia del 9.1 y la corrección del anexo A, fórmulas (A.1) a (A.3). No trae ningún ejemplo resuelto, así que la conformidad se ancla en formas cerradas: un resonador golpeado por un impulso gaussiano, cuya respuesta se conoce exactamente, devuelve su movilidad y su amortiguamiento."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2015
+    title: "Mechanical vibration and shock — Experimental determination of mechanical mobility — Part 2: Measurements using single-point translation excitation with an attached vibration exciter"
+    designation: "ISO 7626-2:2015"
+    url: "https://www.iso.org/standard/62483.html"
+    note: "La calibración operacional con masa rígida del 7.5.2, que el 7.2 de la ISO 7626-5 llama esencialmente el mismo procedimiento, y la fórmula del error aleatorio del anexo A, de la que informa la comprobación de coherencia."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2011
+    title: "Mechanical vibration and shock — Experimental determination of mechanical mobility — Part 1: Basic terms and definitions, and transducer specifications"
+    designation: "ISO 7626-1:2011"
+    url: "https://www.iso.org/standard/50426.html"
+    note: "La familia de FRF (Tabla 1) en la que se expresa la estimación: acelerancia desde un acelerómetro, convertida a movilidad."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2018
+    title: "Mechanical vibration, shock and condition monitoring — Vocabulary"
+    designation: "ISO 2041:2018"
+    note: "La relación de amortiguamiento, el coeficiente de amortiguamiento sobre el crítico (3.2.96), frente a la que la fórmula (A.3) es de primer orden; la ISO 7626-5 toma de ella sus términos (apartado 3)."
+---
+
+import ReportPreview from '../../../../../components/ReportPreview.astro';
+import Scope from '../../../../../components/Scope.astro';
+import ScopeClaim from '../../../../../components/ScopeClaim.astro';
+import SeeAlso from '../../../../../components/SeeAlso.astro';
+import ThemeImage from '../../../../../components/ThemeImage.astro';
+
+Un martillo instrumentado es la forma más rápida de medir una movilidad: no hay
+excitador que acoplar ni varilla de accionamiento que alinear, y el punto de
+excitación pasa de un lugar al siguiente en segundos. La **ISO 7626-5:2019** es
+la parte de la serie ISO 7626 que hace exacta esa medida. Mide las mismas
+funciones de respuesta en frecuencia que la
+[ISO 7626-2](/phonometry/es/vibration/structural/mechanical-mobility/), pero el
+registro con el que trabaja tiene una forma peculiar: un impulso de fuerza de
+unos pocos milisegundos seguido del decaimiento libre que deja detrás. Casi
+todos los apartados de la parte tratan de alguna consecuencia de esa forma. El
+impulso ocupa una fracción mínima del registro, así que el ruido de alrededor
+cuenta (8.5.1). El decaimiento puede no haber terminado cuando acaba el
+registro, así que el espectro sufre fuga (8.3, 8.5.2). Un segundo impacto
+dentro del registro abre valles en el espectro de fuerza (6.4). Y el promedio
+se hace sobre impactos, no sobre segmentos de una señal larga (8.6).
+
+La parte no trae ningún ejemplo resuelto. Los ejemplos de abajo golpean un
+resonador cuya respuesta se conoce, 2 kg sobre un muelle sintonizado a 50 Hz
+con un 0,5 % del amortiguamiento crítico, cuya movilidad en el punto de
+excitación alcanza $1/c = 0{,}159$ m/(N·s), y cada número que imprimen puede
+comprobarse contra eso.
+
+## Cómo se hace la medida
+
+El martillo lleva un transductor de fuerza entre su masa y una punta
+intercambiable (6.1). La estructura cuelga de una suspensión blanda o descansa
+sobre su apoyo previsto (apartado 5), un acelerómetro recoge la respuesta, y un
+analizador de Fourier de dos canales captura cada impacto con algunos datos de
+predisparo, para no perder el flanco de subida del impulso (8.2).
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_mobility_rig.svg" alt="Medida de movilidad ISO 7626: una viga libre-libre sobre suspensión blanda excitada por un excitador a través de una varilla y una cabeza de impedancia en el punto de excitación, un acelerómetro en un punto de transferencia y un martillo de impacto como excitación alternativa. Debajo, un recuadro de tres paneles muestra el acelerómetro colocado a través de la varilla marcado como no válido, el transductor de fuerza en la estructura marcado como válido y el transductor de fuerza en el extremo del excitador marcado con precaución, con los criterios de movilidad diez veces mayor para el acoplamiento del excitador y para la suspensión indicados debajo." width="92%" />
+
+El orden de trabajo que implica la parte, y la función que juzga cada paso:
+
+1. **Calibrar sobre un bloque rígido** de masa conocida, suspendido libremente,
+   al principio y al final de cada serie y siempre que cambie la punta o la
+   masa (7.2). Su acelerancia debería leer $1/m$ con ±5 %:
+   `rigid_mass_calibration_check`, la comprobación de la ISO 7626-2 que el 7.2
+   llama esencialmente el mismo procedimiento.
+2. **Comprobar los canales entre sí** alimentando los dos con una misma señal
+   de banda ancha: unidad con ±5 % y fase nula con ±5° (8.1),
+   `verify_channel_match`.
+3. **Fijar el rango de frecuencias y el registro.** La frecuencia de muestreo
+   es de 2,56 a 4 veces la frecuencia de corte del filtro (8.3), y el registro
+   debería ser lo bastante largo para que la respuesta decaiga a alrededor del
+   1 % de su valor inicial.
+4. **Golpear una vez con la fuerza más alta que vaya a usar el ensayo** y
+   comprobar la saturación de los canales (8.4, `check_overload`) y el espectro
+   de fuerza en el rango de interés (6.3, `check_force_spectrum`). Cambiar la
+   punta o la masa si el impulso es demasiado corto o demasiado largo.
+5. **Golpear al menos cinco veces** en el mismo punto, dejando que la
+   estructura se detenga entre golpe y golpe (8.6), y descartar todo registro
+   con doble golpe (6.4, `check_double_hit`). De tres a cinco impactos suelen
+   bastar para verificar la calidad de los datos en un entorno de poco ruido
+   (8.6), y cinco es el mínimo de registros con el que se confía en una
+   coherencia alta (9.1), que es lo que pide la comprobación de coherencia del
+   paso 7.
+6. **Juzgar el decaimiento** (8.3, 8.5.2, `check_response_decay`, con la
+   fuerza, para dejar fuera el propio impacto) y, si es demasiado lento,
+   añadir una ventana exponencial y prever su corrección (anexo A).
+7. **Promediar** (8.6, `impact_mobility`) y **juzgar la coherencia** (9.1,
+   `check_coherence`).
+
+## 1. Qué contiene un registro de impacto
+
+El analizador toma $N$ muestras a un intervalo $\Delta t$, un registro de
+duración $T = N\,\Delta t$ cuya transformada discreta de Fourier tiene
+$N/2 + 1$ líneas separadas $1/T$ (8.3). Cuando el transitorio cabe entero en el
+registro, la transformada escalada por $\Delta t$ muestrea la transformada de
+Fourier continua $F(f)$, y la parte describe el impulso por su **densidad
+espectral de energía** (3.3, 3.4), la densidad espectral de potencia
+$2\lvert F\rvert^2/T$ multiplicada por la duración del registro:
+
+$$
+G_{FF}(f) = 2\,\lvert F(f)\rvert^2 \qquad [\mathrm{N^2\,s/Hz}].
+$$
+
+Un impulso tiene un lóbulo principal a baja frecuencia y lóbulos laterales que
+caen deprisa, y su ancho de banda útil es inversamente proporcional a su
+duración (6.2): una punta más dura o un martillo más ligero lo ensanchan, una
+punta más blanda o un martillo más pesado lo estrechan (6.3).
+
+La fuerza ocupa de ordinario menos del 1 % del registro (8.5.1), y el ruido que
+lleve el canal de fuerza recorre el registro entero. Como ese ruido se suma al
+autoespectro de la fuerza, promediar no lo elimina. La **ventana de fuerza** sí:
+unidad sobre la parte del registro que contiene el impulso y la respuesta del
+filtro, y exactamente cero en todo lo demás. El ruido que llega al espectro es
+entonces sólo el que queda dentro de la ventana.
+
+```python
+import numpy as np
+from scipy import signal
+from phonometry import vibration
+
+fs, n = 4096.0, 4096                      # un registro de 1 s: 1 Hz entre líneas
+t = np.arange(n) / fs
+
+# Un resonador de 2 kg sintonizado a 50 Hz con un 0,5 % de amortiguamiento,
+# golpeado por un impulso de 0,5 ms.
+m, fn, zeta = 2.0, 50.0, 0.005
+wn = 2.0 * np.pi * fn
+accelerance = signal.lti([1.0 / m, 0.0, 0.0], [1.0, 2.0 * zeta * wn, wn**2])
+force = 100.0 * np.exp(-((t - 0.005) ** 2) / (2.0 * 0.0005**2))
+_, accel, _ = signal.lsim(accelerance, force, t)
+
+# El mismo impulso con ruido de banda ancha en el canal de fuerza, y una
+# ventana de fuerza que conserva los primeros 15 ms del registro (8.5.1).
+rng = np.random.default_rng(7626)
+noisy = force + 0.3 * rng.standard_normal(n)
+window = vibration.force_window(n, fs, width_s=0.015)
+f, whole = vibration.energy_spectral_density(noisy, fs)
+_, kept = vibration.energy_spectral_density(noisy * window, fs)
+above = f > 1500.0                        # donde ya no queda impulso
+print(round(10 * np.log10(whole[above].mean() / kept[above].mean()), 1))  # 18.4 dB
+print(round(10 * np.log10(1.0 / 0.015), 1))    # 18.2 dB, 10 lg(T / anchura)
+```
+
+El suelo baja en la razón entre el registro y la ventana, 18 dB aquí, y el
+impulso queda intacto porque la ventana nunca lo atenúa. Con la ventana vienen
+dos advertencias. Una rectangular reparte el ruido periódico y el desplazamiento
+de continua sobre una banda ancha (8.5.1, Figura 8), así que hay que quitarlos
+antes de aplicarla; `taper_s` añade rampas de medio coseno fuera de la parte
+unitaria si se quiere un borde suave. Y **nunca** debe recortar un segundo
+impacto del registro (6.4): la respuesta sigue llevando ese impacto.
+`impact_mobility` avisa con `ImpactExcitationWarning` cuando su ventana de
+fuerza anula un impacto que el registro contiene.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impact_force_window.svg" alt="Dos paneles. A la izquierda, los primeros 40 milisegundos de un registro de fuerza: un impulso gaussiano de unos 100 newtons a los 5 milisegundos sobre un suelo de ruido bajo, y una ventana de fuerza a trazos que vale uno de 0 a 15 milisegundos y cero después. A la derecha, la densidad espectral de energía de la fuerza en escala logarítmica hasta 2 kilohercios: el registro entero se aplana en un suelo de ruido cerca de diez a la menos cuatro desde unos 800 hercios, el registro con ventana sigue al impulso solo hasta pasar de diez a la menos seis antes de su propio suelo, y el impulso solo cae suavemente." width="92%" loading="eager" />
+
+*La ventana de fuerza en acción. El impulso ocupa unas pocas muestras del
+registro de un segundo; todo lo que viene después de 15 ms es ruido, y
+anularlo baja el suelo del espectro de fuerza unos 18 dB sin cambiar el
+espectro del propio impulso, que es lo que el 8.5.1 quiere decir con una
+ventana que «no introduce distorsión».*
+
+<details>
+<summary>Ver el código de esta figura</summary>
+
+El espectro de fuerza del registro con ventana, leído contra un rango de
+frecuencias de interés, es lo que dibuja `ForceSpectrumCheck.plot()`:
+
+```python
+vibration.check_force_spectrum(noisy * window, fs, frequency_range_hz=(0.0, 800.0),
+                               max_drop_db=20.0).plot(language="es")
+```
+
+La figura en sí, a mano:
+
+```python
+import matplotlib.pyplot as plt
+
+fig, (left, right) = plt.subplots(1, 2, figsize=(12.4, 5.2))
+shown = t <= 0.04
+left.plot(1e3 * t[shown], noisy[shown], label="registro de fuerza con ruido")
+left.plot(1e3 * t[shown], 110.0 * window[shown], "--",
+          label="ventana de fuerza (unidad durante 15 ms)")
+left.set_xlabel("Tiempo [ms]"); left.set_ylabel("Fuerza [N]"); left.legend()
+
+_, clean = vibration.energy_spectral_density(force, fs)
+band = (f > 0.0) & (f <= 2000.0)
+right.semilogy(f[band], whole[band], color="0.6", label="registro entero")
+right.semilogy(f[band], kept[band], label="ventana de fuerza")
+right.semilogy(f[band], clean[band], "--", label="el impulso solo")
+right.set_ylim(1e-7, 1.0)
+right.set_xlabel("Frecuencia [Hz]"); right.set_ylabel("G_FF [N²·s/Hz]")
+right.legend(); plt.show()
+```
+
+</details>
+
+## 2. La estimación promediada y su coherencia (8.6, 9.1)
+
+Promediar sobre varios impactos en un mismo punto mejora la estimación, y la
+parte prescribe la forma: el **espectro cruzado promediado** de respuesta y
+fuerza dividido por el **autoespectro promediado** de la fuerza (8.6), el
+estimador H1, con la coherencia ordinaria al lado (9.1):
+
+$$
+H = \frac{\sum_i X_i F_i^{*}}{\sum_i \lvert F_i\rvert^2}, \qquad
+\gamma^2 = \frac{\left\lvert \sum_i X_i F_i^{*} \right\rvert^2}
+               {\sum_i \lvert F_i\rvert^2 \,\sum_i \lvert X_i\rvert^2}.
+$$
+
+En un entorno de poco ruido, de tres a cinco impactos suelen bastar para
+verificar los datos (8.6), y la respuesta debe haber decaído por debajo del
+límite de detección antes del impacto siguiente, o su vibración residual
+estropea el registro siguiente.
+
+```python
+# Cinco impactos de distinta fuerza, con algo de ruido en el acelerómetro.
+gains = np.array([0.8, 1.0, 1.1, 0.9, 1.2])[:, np.newaxis]
+forces = force * gains
+accels = accel * gains + 0.02 * rng.standard_normal((5, n))
+estimate = vibration.impact_mobility(forces, accels, fs, force_window_s=0.015,
+                                     frequency_range_hz=(5.0, 800.0))
+print(estimate.impacts, estimate.measured_frf)     # 5 accelerance
+
+coh = vibration.check_coherence(estimate, frequency_range_hz=(10.0, 400.0))
+print(coh.passes, round(float(coh.coherence.min()), 3))   # True 0.992
+print(round(float(np.nanmax(coh.random_error_percent)), 2))  # 2.83 %
+```
+
+Cada fila de `forces` y `accels` es un impacto. El canal de respuesta midió
+aceleración, así que la estimación se forma como acelerancia y se convierte a
+movilidad (`estimate.to(...)` da cualquier otro tipo). `frequency_range_hz` la
+limita al rango de frecuencias de interés del 3.2: por encima del ancho de
+banda útil del impulso el espectro es ruido sobre casi ninguna fuerza, y nada de
+lo que se construye sobre el resultado, su gráfica, su ficha o un ajuste, debe
+ver esa parte.
+
+Los registros leídos de un fichero de medida llegan como un
+[`Signal`](/phonometry/es/io/audio-files/): se pasa en lugar del
+array y se omite `fs`, que ya trae consigo (un impacto por canal). Una fuerza y
+una aceleración no son presiones, así que no se les aplica el factor de
+calibración que lleve el `Signal`. Las comprobaciones de la sección 5 que leen
+un registro aceptan un `Signal` de la misma manera.
+
+La comprobación de coherencia pasa cuando $\gamma^2$ supera **0,9** en todas
+las frecuencias que juzga y se promediaron al menos **cinco** impactos. Los dos
+números son del 9.1: una coherencia por encima de 0,9 es lo que llama alta, y
+de cinco a diez registros es lo que necesita una coherencia alta para confiar
+en su propia estimación. Cinco es también el extremo alto de los tres a cinco
+que el 8.6 considera suficientes por lo general, así que promediar cinco cumple
+con los dos; `minimum_records` baja la cuenta cuando se juzgan suficientes
+menos. Un impacto aislado tiene coherencia 1 por construcción, y por eso falla
+la segunda condición. Una coherencia baja en una
+antirresonancia no suele ser motivo de preocupación (9.1 NOTA 1), y
+`exclude_hz=[(f_low, f_high), ...]` deja esas bandas fuera del veredicto. La
+coherencia no lo ve todo: un impacto repetible esconde la fuga, la no
+linealidad estructural y el recorte (9.1 NOTA 2), y para eso están las
+comprobaciones de la sección 5.
+
+## 3. La fuga, y la ventana exponencial (8.3, 8.5.2)
+
+La estimación de arriba tiene un defecto que la coherencia no ve:
+
+```python
+at_50 = estimate.frequencies == 50.0
+print(round(float(estimate.magnitude[at_50][0]), 4))   # 0.1257 m/(N·s)
+print(round(1.0 / (2.0 * zeta * m * wn), 4))           # 0.1592, el máximo real
+```
+
+El máximo se queda un 21 % corto. El resonador está tan poco amortiguado que
+sigue vibrando cuando acaba el registro de un segundo, y la transformada de un
+decaimiento truncado sufre fuga. La regla de la parte es que la respuesta
+decaiga a alrededor del **1 %** de su magnitud inicial al final del registro,
+una cifra que el 8.3 llama un compromiso: un registro más largo mejora la
+resolución en frecuencia pero puede empeorar la relación señal-ruido. Ofrece
+además una comprobación cómoda: el máximo en el punto medio del registro, en
+torno al **10 %** del más alto (8.3, 8.5.2).
+
+```python
+# Dar a la comprobación la fuerza del mismo impacto: una aceleración en el punto
+# de excitación sigue a la fuerza durante el impacto (la línea de masa), así
+# que el decaimiento se juzga desde el final del impulso.
+decay = vibration.check_response_decay(accel, fs, force=force)
+print(decay.passes, round(100 * decay.end_ratio, 1))    # False 21.1 (%)
+print(round(100 * decay.midpoint_ratio, 1))             # 46.3 (%), no 10 %
+```
+
+El nivel al final se lee en la última muestra. El valor más grande del último
+segmento del registro está en el principio del segmento, por encima del final
+de un decaimiento que sigue en curso, así que la comprobación lo lleva hasta la
+última muestra al ritmo al que caen los máximos entre el punto medio y el
+último segmento, el decaimiento uniforme que la propia comprobación del punto
+medio supone. El veredicto compara ese nivel con la cifra impresa redondeado a
+un tanto por ciento entero, de modo que «alrededor del 1 %» acepta cualquier
+nivel por debajo del 1,5 %, que se redondea a 1 %. Sin la fuerza, el máximo más
+alto de este registro es el impacto, dos veces y media el decaimiento libre, y
+el mismo registro leería un 8,5 %.
+
+Un registro más largo exigiría un tamaño de bloque o una banda de zoom que el
+analizador puede no tener (8.3). La alternativa que recomienda la parte es una
+**ventana exponencial**, $w(t) = e^{-at}$, que empieza en la unidad y añade al
+dato un decaimiento conocido para que el registro acabe donde debe. Como pauta
+general, el decaimiento natural debería llegar aun así al **25 %** o menos dentro
+del registro, o la corrección del anexo A se vuelve demasiado sensible a los
+errores de la estimación del amortiguamiento (8.5.2), y la comprobación aplica
+ese límite cuando se le dice que se usará una ventana:
+
+```python
+windowed_decay = vibration.check_response_decay(accel, fs, force=force,
+                                                exponential_window=True)
+print(windowed_decay.passes, windowed_decay.limit_ratio)   # True 0.25
+
+rate = vibration.exponential_decay_rate(n, fs, final_value=0.01)
+print(round(rate, 3))                                      # 4.606 1/s
+windowed = vibration.impact_mobility(forces, accels, fs, force_window_s=0.015,
+                                     exponential_decay_rate_per_s=rate,
+                                     frequency_range_hz=(5.0, 800.0))
+print(round(float(windowed.magnitude[at_50][0]), 4))       # 0.0404 m/(N·s)
+```
+
+La ventana cambió un error por otro. La fuga ha desaparecido, pero el máximo es
+ahora la cuarta parte del real: la ventana multiplica toda la respuesta por un
+decaimiento, y un modo que decae más deprisa parece más amortiguado. No es un
+error que haya que evitar, sino una cantidad conocida que hay que retirar, y
+eso es lo que hace el anexo A.
+
+## 4. Retirar la ventana (anexo A)
+
+Si se multiplican los dos miembros de la convolución
+$x(t) = \int_0^t h(\tau) f(t - \tau)\,\mathrm{d}\tau$ (fórmula (A.1)) por
+$e^{-at}$, y como $e^{-at} = e^{-a\tau} e^{-a(t-\tau)}$, la respuesta con
+ventana es la fuerza con ventana convolucionada con una respuesta al impulso
+con ventana (fórmula (A.2)). Cada modo $A_r e^{s_r t}$ de la respuesta al
+impulso pasa a ser $A_r e^{(s_r - a)t}$: la ventana desplaza cada polo en $a$
+y deja su residuo como estaba. Una relación de amortiguamiento $\hat\zeta_r$
+estimada de datos con ventana lleva por tanto la parte de la ventana, y la
+fórmula (A.3) la retira:
+
+$$
+\zeta_r = \hat{\zeta}_r - \frac{a}{\omega_r},
+$$
+
+con $\omega_r$ la frecuencia natural amortiguada en rad/s. Para un modo poco
+amortiguado y bien separado, el máximo medido se multiplica por
+$\hat\zeta_r/\zeta_r$ para obtener el real.
+
+El anexo deja abierto el estimador del amortiguamiento («una variedad de
+métodos de ajuste de curvas»), y `single_mode_fit` es el que ofrece esta
+librería: un ajuste de fracción racional de un modo sobre una banda, escrito
+como un polo, su residuo y una constante para los modos de fuera de la banda.
+`ImpactMobilityResult.fit_mode` lo aplica al tipo que midió el canal de
+respuesta, el registro que la ventana multiplicó de verdad, y recuerda la tasa
+de la ventana:
+
+```python
+fit = windowed.fit_mode((40.0, 60.0))
+print(round(fit.damped_natural_frequency_hz, 2))             # 50.0 Hz
+print(round(100 * fit.apparent_damping_ratio, 3))            # 1.966 %
+
+correction = fit.correction
+print(round(100 * float(correction.window_damping_ratio[0]), 3))  # 1.466 %, a / omega_r
+print(round(100 * float(correction.damping_ratio[0]), 3))         # 0.499 %, fórmula (A.3)
+print(round(100 * float(correction.exact_damping_ratio[0]), 3))   # 0.5 %, el polo devuelto
+print(round(float(correction.peak_correction_factor[0]), 2))      # 3.94
+
+f_d = fn * np.sqrt(1.0 - zeta**2)
+print(round(abs(complex(fit.corrected_mobility(f_d))), 4))   # 0.1588 m/(N·s)
+```
+
+El amortiguamiento vuelve como 0,499 % frente a un 0,5 % real, y la movilidad
+sintetizada, el modo ajustado con su polo devuelto en $a$, alcanza 0,1588
+frente al 0,1592 real. Lo que queda, alrededor de un 0,2 %, vuelve a ser
+truncamiento: el registro con ventana sigue acabando en torno al 0,2 % de su
+valor inicial, un 21 % de decaimiento natural por un 1 % de ventana.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impact_exponential_window.svg" alt="Dos paneles. A la izquierda, la aceleración del resonador durante un segundo: la respuesta registrada sigue vibrando a alrededor de un cuarto de su amplitud inicial al final, la respuesta con ventana decae hasta casi nada, y una ventana exponencial a trazos cae desde la amplitud inicial hasta el uno por ciento de ella. A la derecha, la magnitud de la movilidad de 40 a 60 hercios en escala logarítmica: el resonador alcanza unos 0,16, la estimación sin ventana se queda corta en el máximo y va baja en los dos flancos, la estimación con ventana exponencial es suave pero sólo llega a 0,04, y el modo con la ventana retirada con el anexo A cae sobre la curva del resonador." width="92%" />
+
+*Lo que se lleva la ventana y lo que devuelve el anexo A. Sin ventana, la
+estimación sufre fuga: queda baja en el máximo y baja en los flancos en una
+cantidad que ninguna corrección puede prever (8.5.2). Con ventana, es suave
+pero está demasiado amortiguada, en una cantidad conocida, y devolver el polo
+ajustado en $a$ cae sobre el resonador.*
+
+<details>
+<summary>Ver el código de esta figura</summary>
+
+`SingleModeFitResult.plot()` dibuja los datos ajustados, el modo ajustado y el
+modo con la ventana retirada:
+
+```python
+fit.plot(language="es")
+```
+
+La figura en sí, a mano:
+
+```python
+import matplotlib.pyplot as plt
+
+fig, (left, right) = plt.subplots(1, 2, figsize=(12.4, 5.4))
+w = vibration.exponential_window(n, fs, decay_rate_per_s=rate)
+free = t >= 0.02
+left.plot(t[free], accel[free], color="0.6", lw=0.6, label="respuesta tal como se registró")
+left.plot(t[free], (accel * w)[free], lw=0.6, label="por la ventana exponencial")
+left.plot(t, float(np.max(np.abs(accel[free]))) * w, "--", label="ventana, 1 % al final")
+left.set_xlabel("Tiempo [s]"); left.set_ylabel("Aceleración [m/s²]"); left.legend()
+
+single = vibration.impact_mobility(force, accel, fs, frequency_range_hz=(5.0, 800.0))
+single_windowed = vibration.impact_mobility(force, accel, fs,
+                                            exponential_decay_rate_per_s=rate,
+                                            frequency_range_hz=(5.0, 800.0))
+dense = np.linspace(40.0, 60.0, 2001)
+band = (single.frequencies >= 40.0) & (single.frequencies <= 60.0)
+exact = vibration.sdof_mobility(dense, m, m * wn**2, 2.0 * zeta * m * wn)
+right.semilogy(dense, np.abs(exact), "k:", label="el resonador")
+right.semilogy(single.frequencies[band], single.magnitude[band], "o-", color="0.6",
+               label="sin ventana: truncada, con fuga")
+right.semilogy(single_windowed.frequencies[band], single_windowed.magnitude[band],
+               "o-", label="ventana exponencial: suave, demasiado amortiguada")
+single_fit = single_windowed.fit_mode((40.0, 60.0))
+right.semilogy(dense, np.abs(single_fit.corrected_mobility(dense)), "--",
+               label="ventana retirada con el anexo A")
+right.set_xlabel("Frecuencia [Hz]"); right.set_ylabel("Movilidad |Y| [m/(N·s)]")
+right.legend(); plt.show()
+```
+
+</details>
+
+### La fórmula (A.3) es el primer orden del desplazamiento del polo
+
+El anexo enuncia el efecto con exactitud, el polo sustituido por $s_r - a$, y
+luego da la (A.3) para el amortiguamiento. No son lo mismo. El polo con ventana
+tiene la tasa de decaimiento $\hat\sigma_r = \sigma_r + a$ a la misma frecuencia
+amortiguada $\omega_r$, y una relación de amortiguamiento es una tasa de
+decaimiento dividida por la frecuencia *no amortiguada*,
+$\zeta = \sigma/\sqrt{\sigma^2 + \omega_r^2}$, que se mueve con la tasa de
+decaimiento. Resolver eso con exactitud y desarrollarlo da la (A.3) más un
+resto de alrededor de $(\hat\zeta_r^3 - \zeta_r^3)/2$, siempre por defecto. El
+resultado lleva los dos: `damping_ratio` es la (A.3) tal como está impresa y
+`exact_damping_ratio` es el amortiguamiento del polo devuelto, que es también
+lo que sintetizan `corrected_frf` y `corrected_mobility`.
+
+La diferencia no se nota con la ventana del ejemplo, que añade un 1,5 % de
+amortiguamiento, y crece deprisa con una más fuerte:
+
+```python
+heavy = vibration.impact_mobility(forces, accels, fs, force_window_s=0.015,
+                                  exponential_decay_rate_per_s=20.0,
+                                  frequency_range_hz=(5.0, 800.0))
+heavy_correction = heavy.fit_mode((40.0, 60.0)).correction
+print(round(100 * float(heavy_correction.apparent_damping_ratio[0]), 3))  # 6.851 %
+print(round(100 * float(heavy_correction.damping_ratio[0]), 3))           # 0.484 %
+print(round(100 * float(heavy_correction.exact_damping_ratio[0]), 3))     # 0.5 %
+```
+
+No es una errata. El anexo escribe la (A.3) para un «factor de
+amortiguamiento» que no define, y la parte toma sus términos de la ISO 2041
+(apartado 3), cuya relación de amortiguamiento es el coeficiente de
+amortiguamiento sobre el crítico, $c/c_c$ (ISO 2041:2018, 3.2.96). Para esa
+relación la (A.3) es el primer orden del desplazamiento del polo; para una tasa
+de decaimiento sobre la frecuencia amortiguada, $\sigma_r/\omega_r$, sería
+exacta. Es una razón para mantener ligera la ventana, el mismo consejo que da
+el 8.5.2 por otro motivo, y para preferir la forma exacta cuando la ventana
+añade varios puntos porcentuales.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impact_a3_first_order.svg" alt="El error del amortiguamiento corregido, en tanto por ciento del amortiguamiento real, frente al amortiguamiento que añade la ventana exponencial, del 1 al 10 por ciento. Cuatro curvas medidas, una por amortiguamiento real de 0,2, 0,5, 1 y 2 por ciento, se mantienen cerca de cero mientras la ventana añade menos de alrededor del 2 por ciento y luego caen cada vez más deprisa, la del amortiguamiento más ligero la primera, hasta menos 26 por ciento con una ventana del 10 por ciento; las curvas del desplazamiento exacto del polo quedan sobre el cero con cualquier ventana. Una línea vertical a trazos en el 1,5 por ciento marca la ventana de esta guía." width="82%" />
+
+*La fórmula (A.3) frente al desplazamiento exacto del polo, cada punto una
+medida completa: el resonador golpeado, con ventana, ajustado y corregido.
+Cuanto más ligera es la estructura, antes se queda atrás la (A.3), porque el
+amortiguamiento de la ventana domina entonces el amortiguamiento aparente del
+que parte la fórmula.*
+
+<details>
+<summary>Ver el código de esta figura</summary>
+
+`ExponentialWindowCorrection.plot()` separa el amortiguamiento aparente de cada
+modo en la parte real y la de la ventana:
+
+```python
+fit.correction.plot(language="es")
+```
+
+La figura en sí, a mano, una medida por punto:
+
+```python
+import matplotlib.pyplot as plt
+
+ratios = np.linspace(0.01, 0.1, 19)
+omega_d = 2.0 * np.pi * fn
+for true in (0.002, 0.005, 0.01, 0.02):
+    w_n = omega_d / np.sqrt(1.0 - true**2)
+    system = signal.lti([1.0 / m, 0.0, 0.0], [1.0, 2.0 * true * w_n, w_n**2])
+    _, response, _ = signal.lsim(system, force, t)
+    a3, exact = [], []
+    for ratio in ratios:
+        result = vibration.impact_mobility(force, response, fs,
+                                           exponential_decay_rate_per_s=ratio * omega_d,
+                                           frequency_range_hz=(5.0, 800.0))
+        c = result.fit_mode((40.0, 60.0)).correction
+        a3.append(float(c.damping_ratio[0]))
+        exact.append(float(c.exact_damping_ratio[0]))
+    plt.plot(100 * ratios, 100 * (np.array(a3) - true) / true, "o-",
+             label=f"fórmula (A.3), amortiguamiento real {100 * true:g} %")
+    plt.plot(100 * ratios, 100 * (np.array(exact) - true) / true, "k:")
+plt.xlabel("Amortiguamiento que añade la ventana, a/omega_r [%]")
+plt.ylabel("Error en el amortiguamiento real [%]")
+plt.legend(); plt.show()
+```
+
+</details>
+
+Dos puntos prácticos cierran el anexo. La ventana se aplica a menudo sólo a la
+respuesta: el impulso es tan corto que aplicársela equivale a multiplicar la
+fuerza por el valor de la ventana en su máximo, que es lo que hace
+`exponential_on_force=False`, y ese valor es cercano a 1 cuando el impulso cae
+cerca del principio del registro. Y si la calibración del 7.2 usa la misma
+ventana y el mismo predisparo que la medida, ese factor ya está en la
+calibración.
+
+## 5. Comprobaciones sobre el registro
+
+Cada comprobación devuelve un objeto de veredicto con `passes` y un `.plot()`;
+leer uno como valor de verdad lanza una excepción, para que un veredicto nunca
+se confunda con un número.
+
+**Dobles golpes (6.4).** Dos impactos en un registro son dos impulsos cuyas
+transformadas interfieren: un segundo impulso $r$ veces el primero y $\tau$
+después multiplica el espectro por $1 + r e^{-j\omega\tau}$, que ondula entre
+$(1 + r)^2$ y $(1 - r)^2$ cada $1/\tau$ hercios. Los valles sólo son profundos
+cuando el segundo impacto es casi tan fuerte como el primero, y por eso la
+parte dice que un segundo impacto pequeño se ve como un ligero rizado y que
+pueden tolerarse valles moderados. En un valle casi no hay fuerza, y la
+movilidad allí es ruido.
+
+```python
+double = force + 0.6 * np.roll(force, round(0.06 * fs))   # otro 60 %, 60 ms después
+hit = vibration.check_double_hit(double, fs)
+print(hit.passes, hit.impacts, round(hit.delay_s, 3))     # False 2 0.06
+print(round(hit.notch_spacing_hz, 1), round(hit.ripple_db, 1))  # 16.7 12.0
+print(vibration.check_double_hit(force, fs).passes)       # True
+```
+
+Un impacto es una racha de muestras por encima de una fracción de la fuerza
+más grande, 0,1 por defecto (`threshold_ratio`); ese número es de esta
+librería, porque la parte no da ninguno. Con 0,1, un segundo impulso de la
+misma forma que el primero que pase sin detectar ondula el espectro como mucho
+1,74 dB. Un rebote más blando y más largo, el del martillo que rebota, lleva
+más espectro de baja frecuencia del que dice su máximo, y puede quedarse por
+debajo del umbral y ondular el espectro varios decibelios; por eso el 6.4
+encuentra los impactos múltiples con más facilidad en el dominio de la
+frecuencia, que es donde los lee la comprobación del espectro de fuerza de más
+abajo. La comprobación se hace sobre la fuerza sin ventana, y sin filtrar cuando
+el analizador lo permite: el filtro antisolapamiento puede esconder un segundo
+impacto pequeño en la oscilación del primero, y por eso el 6.4 recomienda un
+osciloscopio con memoria sobre la señal sin filtrar; además, un filtro de corte
+abrupto puede oscilar él mismo por encima del umbral, de modo que un solo
+impacto se lee como varios.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impact_double_hit.svg" alt="Dos paneles. A la izquierda, un registro de fuerza de 100 milisegundos con dos impactos gaussianos marcados, de unos 97 newtons a los 5 milisegundos y de unos 58 newtons a los 65 milisegundos. A la derecha, la densidad espectral de energía de la fuerza hasta 400 hercios en escala logarítmica: un impacto aislado cae suavemente desde unos 0,03, y el doble golpe oscila a su alrededor, subiendo a unas dos veces y media y bajando a alrededor de un sexto cada 16,7 hercios." width="92%" />
+
+*Un doble golpe en el registro de fuerza. Los dos impactos están separados
+60 ms, así que el espectro tiene un valle cada 16,7 Hz; con el segundo al 60 %
+del primero, oscila entre 2,56 y 0,16 veces el del impulso aislado, 12 dB de
+máximo a valle.*
+
+<details>
+<summary>Ver el código de esta figura</summary>
+
+`DoubleHitCheck.plot()` dibuja el registro con sus impactos y el espectro con
+sus valles:
+
+```python
+hit.plot(language="es")
+```
+
+La figura en sí, a mano:
+
+```python
+import matplotlib.pyplot as plt
+
+fig, (left, right) = plt.subplots(1, 2, figsize=(12.4, 5.2))
+shown = t <= 0.1
+left.plot(1e3 * t[shown], double[shown], label="registro de fuerza")
+left.plot(1e3 * hit.impact_times_s, hit.impact_peaks, "o",
+          label="dos impactos, separados 60 ms")
+left.set_xlabel("Tiempo [ms]"); left.set_ylabel("Fuerza [N]"); left.legend()
+
+_, one = vibration.energy_spectral_density(force, fs)
+_, both = vibration.energy_spectral_density(double, fs)
+band = (f > 0.0) & (f <= 400.0)
+right.semilogy(f[band], one[band], "--", color="0.6", label="un impacto")
+right.semilogy(f[band], both[band], label="los dos: valles cada 16,7 Hz")
+right.set_xlabel("Frecuencia [Hz]"); right.set_ylabel("G_FF [N²·s/Hz]")
+right.legend(); plt.show()
+```
+
+</details>
+
+**El espectro de fuerza (6.2, 6.3).** El impulso debería poner su energía en el
+rango de frecuencias de interés y no mucho más allá. La comprobación lee
+cuánto cae la densidad espectral de energía a lo largo del rango, de su valor
+más alto al más bajo dentro de él, contra un límite que fija quien la llama,
+porque la parte no imprime ninguno; al lado, la fracción de la energía de la
+fuerza por encima del rango, que el 6.3 pide mantener pequeña:
+
+```python
+spectrum = vibration.check_force_spectrum(force, fs, frequency_range_hz=(0.0, 400.0),
+                                          max_drop_db=10.0)
+print(spectrum.passes, round(spectrum.drop_db, 2))       # True 6.86 (dB)
+print(round(100 * spectrum.energy_fraction_above, 1))    # 7.5 % por encima de 400 Hz
+
+wide = vibration.check_force_spectrum(force, fs, frequency_range_hz=(0.0, 1000.0),
+                                      max_drop_db=10.0)
+print(wide.passes, round(wide.drop_db, 1))               # False 42.9: una punta más dura
+```
+
+Un doble golpe suspende la misma comprobación por sus valles (18,4 dB de 0 a
+400 Hz para el registro de arriba), que es el propio consejo de la parte: los
+impactos múltiples se detectan con más facilidad en el dominio de la frecuencia
+(6.4).
+
+**Sobrecarga (8.4).** Las señales de impacto llevan energía fuera de banda, y
+el rango dinámico se usa al límite, así que la saturación es un riesgo real.
+La comprobación compara cada canal con el máximo del fabricante para
+funcionamiento lineal; pasarla es necesario pero no suficiente, porque un
+registro digital filtrado define mal la forma de onda que vio el convertidor:
+
+```python
+over = vibration.check_overload(accel, fs, full_scale=50.0)
+print(over.passes, round(over.peak, 1), round(over.headroom_db, 1))   # True 47.6 0.4
+```
+
+**Concordancia entre canales (8.1).** Una misma señal de banda ancha en los dos
+canales, la respuesta en frecuencia entre ellos estimada, por ejemplo con
+`phonometry.electroacoustics.frequency_response.transfer_function`, y
+`verify_channel_match(frequencies, response, frequency_range_hz=...)` pide la
+unidad con ±5 % y fase nula con ±5° en todo el rango. Es la única comprobación
+de esta página que juzga el instrumento y no el registro, de ahí `verify_` en
+lugar de `check_`.
+
+**Calibración (7.2).** La comprobación con bloque rígido del 7.5.2 de la
+ISO 7626-2, `rigid_mass_calibration_check`, descrita en la [página de
+movilidad](/phonometry/es/vibration/structural/mechanical-mobility/). La masa
+del bloque debe elegirse para que su movilidad sea representativa de las
+movilidades que se van a medir, y el martillo y el analizador deben estar
+montados exactamente como en la medida.
+
+## 6. La ficha
+
+`ImpactMobilityResult.report(path)` genera la ficha ISO 7626 de una página con
+la línea de base que nombra la ISO 7626-5:2019 y el promediado del 8.6, y la
+tabla ampliada con el número de impactos, la ventana exponencial y la
+coherencia en el máximo. Cuando se usó una ventana, la ficha dice que los
+máximos llevan su amortiguamiento: la movilidad corregida es un resultado
+modal, y la ficha informa de la medida.
+
+```python
+from phonometry import ReportMetadata
+
+windowed.report(
+    "movilidad_impacto.pdf",
+    metadata=ReportMetadata(
+        specimen="Soporte de máquina (punto de excitación)",
+        measurement_standard="ISO 7626-5",
+    ),
+    language="es",
+)   # ficha de una página (necesita phonometry[report,plot])
+```
+
+<ReportPreview
+	name="iso7626_5_impact_mobility_example"
+	title="Informe de ejemplo de movilidad por impacto ISO 7626-5 (PDF)"
+	description="Ficha de movilidad mecánica de una página para una medida con impacto: una cabecera de metadatos, una tabla de los puntos característicos (el tipo de FRF, el rango de frecuencias de 5 a 800 hercios, el máximo a 50 hercios, la movilidad máxima de 0,0404, la fase allí, cinco impactos promediados, una ventana exponencial de 4,6 por segundo y una coherencia de 1,000 en el máximo) junto al espectro de movilidad promediado, y la movilidad máxima enmarcada con una nota de que los máximos llevan el amortiguamiento de la ventana."
+	caption="Ficha de movilidad por impacto (ImpactMobilityResult.report): la estimación promediada, los impactos y la ventana que lleva."
+/>
+
+## Qué cubre esta guía
+
+<Scope>
+<ScopeClaim status="covered" label="Cubierto">
+El procesado de registros de impacto de la ISO 7626-5:2019: la densidad
+espectral de energía de 3.3 y 3.4 (`energy_spectral_density`), la ventana de
+fuerza del 8.5.1 (`force_window`), la ventana exponencial del 8.5.2
+(`exponential_window`, `exponential_decay_rate`), la estimación H1 promediada
+sobre impactos del 8.6 con la coherencia del 9.1 (`impact_mobility`,
+`ImpactMobilityResult`), la corrección del amortiguamiento del anexo A tanto
+como fórmula (A.3) como con el desplazamiento exacto del polo
+(`exponential_window_correction`), con un ajuste de fracción racional de un
+modo para estimar el amortiguamiento (`single_mode_fit`,
+`ImpactMobilityResult.fit_mode`), y los veredictos sobre el registro: dobles
+golpes (6.4), espectro de fuerza en el rango de interés (6.2, 6.3), sobrecarga
+(8.4), decaimiento de la respuesta (8.3, 8.5.2), coherencia (9.1) y
+concordancia entre canales del analizador (8.1). La calibración del 7.2 pasa
+por la comprobación con masa rígida de la ISO 7626-2.
+</ScopeClaim>
+
+<ScopeClaim status="not-covered" label="No cubierto">
+Las indicaciones de la parte sobre el equipo se describen, no se calculan: la
+elección de la punta y de la masa del impactador (6.1, 6.3), la alineación del
+impacto a 10° (6.1), la suspensión del apartado 5 y el ensayo de protección
+contra el solapamiento del 8.1. Los límites de la comprobación del espectro de
+fuerza y el umbral del doble golpe son de quien la llama y de la librería,
+porque la parte no imprime ninguno. El ajuste de un modo es un estimador entre
+muchos y necesita una banda con una sola resonancia: los modos muy próximos
+necesitan un ajuste de curvas de varios modos, que no se ofrece, y el análisis
+con zoom (8.3 b) no está implementado. Las comprobaciones de repetibilidad,
+reciprocidad, linealidad y comparación con excitador acoplado del 9.2 al 9.5
+se dejan al operador.
+</ScopeClaim>
+</Scope>
+
+<SeeAlso>
+
+## Véase también
+
+- [Movilidad mecánica y la familia de FRF (ISO 7626-1)](/phonometry/es/vibration/structural/mechanical-mobility/):
+  el vocabulario de FRF en el que estima esta página, la medida con excitador
+  acoplado de la ISO 7626-2 y la calibración con masa rígida.
+- [Respuesta en frecuencia y coherencia](/phonometry/es/devices/electroacoustics/electroacoustics/):
+  el estimador `transfer_function` para el ensayo de concordancia entre
+  canales del 8.1.
+- [Rigidez dinámica de transferencia (ISO 10846)](/phonometry/es/vibration/structural/transfer-stiffness/):
+  una FRF fuerza-por-movimiento medida en un banco de laboratorio.
+- Referencia de la API: [`vibration.structural.impact_mobility`](/phonometry/es/reference/api/vibration/impact-mobility/).
+
+</SeeAlso>

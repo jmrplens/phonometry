@@ -20,7 +20,8 @@ engrana o pasa, a una frecuencia que fija la geometría.
 
 Las páginas de **fuentes de ruido estructural** siguen la cadena de la fuente
 en orden. La familia de funciones de respuesta en frecuencia de ISO 7626
-(receptancia, movilidad, acelerancia) es el vocabulario; los coeficientes de
+(receptancia, movilidad, acelerancia) es el vocabulario, medido con un
+excitador acoplado o con un martillo de impacto; los coeficientes de
 transmisión del enfoque ondulatorio de una unión de placas describen la
 estructura por la que corre después esa potencia; la rigidez de transferencia
 de ISO 10846 caracteriza los elementos resilientes que interrumpen ese camino;
@@ -64,6 +65,10 @@ Del vocabulario de FRF al nivel predicho en el recinto receptor.
 - [Movilidad mecánica y la familia de FRF (ISO 7626-1)](/phonometry/es/vibration/structural/mechanical-mobility/):
   receptancia, movilidad y acelerancia con sus recíprocas, y el resonador de
   referencia de un grado de libertad.
+- [Movilidad por excitación con impacto (ISO 7626-5)](/phonometry/es/vibration/structural/impact-mobility/):
+  la movilidad medida con un martillo de impacto, sus ventanas, el promedio
+  sobre impactos, la corrección del amortiguamiento del anexo A y las
+  comprobaciones sobre el registro.
 - [Transmisión de onda de flexión en uniones de placas (Cremer/Craik/Hopkins)](/phonometry/es/vibration/structural/junction-transmission/):
   los coeficientes del enfoque ondulatorio independientes de la frecuencia para
   uniones rígidas en X, T, L y en línea, su media angular y el factor de
@@ -195,8 +200,8 @@ una unión rígida y simplemente apoyada (el índice de reducción vibratoria
 laboratorio](/phonometry/es/buildings/insulation/flanking-lab/)) y la página
 de FRF devuelve recíprocas libres elemento a elemento, correctas para el punto
 de excitación o para una sola vía pero no para una matriz de FRF completa, sin
-procesado de excitación por martillo de impacto (ISO 7626-5) y sin magnitudes
-matriciales bloqueadas. En la página de aisladores, el ensayo de linealidad de
+magnitudes matriciales bloqueadas, y la página de impacto ajusta los modos de
+uno en uno. En la página de aisladores, el ensayo de linealidad de
 la ISO 10846 (apartado 7.7 de las Partes 2, 4 y 5, apartado 7.6 de la Parte 3)
 se describe, pero la biblioteca no lo calcula por ti, y los nomogramas de la Figura 11 de la ISO 10846-4 para masas de
 bloqueo de acero no están tabulados.

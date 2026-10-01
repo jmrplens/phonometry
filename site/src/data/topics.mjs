@@ -328,6 +328,7 @@ export const topics = [
         items: [
           { slug: 'vibration/structural', label: 'Overview', translations: { es: 'Resumen' } },
           'vibration/structural/mechanical-mobility',
+          'vibration/structural/impact-mobility',
           'vibration/structural/junction-transmission',
           'vibration/structural/transfer-stiffness',
           'vibration/structural/structural-damage',

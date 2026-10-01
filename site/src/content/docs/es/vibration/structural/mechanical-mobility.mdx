@@ -222,7 +222,8 @@ de transferencia. ISO 7626-5 cubre la alternativa de excitación por impacto
 con un excitador no unido a la estructura, en la práctica casi siempre un
 martillo instrumentado: cambia el espectro controlado del excitador acoplado
 por rapidez, con un espectro de excitación fijado por la masa del impactador
-y la rigidez de la punta.
+y la rigidez de la punta, y tiene [página
+propia](/phonometry/es/vibration/structural/impact-mobility/).
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_mobility_rig.svg" alt="Medición de movilidad ISO 7626: una viga libre-libre en suspensión blanda excitada por un excitador a través de una varilla de arrastre y una cabeza de impedancia en el punto de excitación, un acelerómetro en un punto de transferencia y un martillo de impacto como excitación alternativa. Debajo, un recuadro de tres paneles muestra el acelerómetro conectado a través de la varilla de arrastre marcado como no válido, el transductor de fuerza en la estructura marcado como válido y el transductor de fuerza en el extremo del excitador marcado con precaución, con los criterios de movilidad de diez veces para el acoplo del excitador y para la suspensión enunciados debajo." width="92%" />
 
@@ -741,11 +742,10 @@ calibración operacional con masa rígida del 7.5.2
 </ScopeClaim>
 
 <ScopeClaim status="not-covered" label="No cubierto">
-La ISO 7626-5 cubre la excitación por martillo de impacto como alternativa al
-excitador acoplado. Se nombra aquí solo como contexto: ninguna función
-sintetiza ni procesa un espectro de excitación por impacto. Las magnitudes
-matriciales *bloqueadas* de la Tabla 1, necesarias para sistemas de varias
-coordenadas, tampoco están implementadas. `convert_frf` devuelve solo las
+La excitación por martillo de impacto (ISO 7626-5) no se procesa en esta
+página sino en [la suya](/phonometry/es/vibration/structural/impact-mobility/).
+Las magnitudes matriciales *bloqueadas* de la Tabla 1, necesarias para
+sistemas de varias coordenadas, no están implementadas. `convert_frf` devuelve solo las
 recíprocas *libres* elemento a elemento de la ISO 7626-1, 3.1.4, correctas
 para el punto de excitación o para una sola vía, pero no para una matriz de
 FRF completa. Del procedimiento de aceptación solo se calculan los dos
@@ -763,6 +763,9 @@ transferencia](/phonometry/es/vibration/structural/transfer-stiffness/).
 
 ## Véase también
 
+- [Movilidad por excitación con impacto (ISO 7626-5)](/phonometry/es/vibration/structural/impact-mobility/):
+  las mismas FRF medidas con un martillo de impacto, con las ventanas, el
+  promedio sobre impactos y la corrección del anexo A que esa medida necesita.
 - [Rigidez dinámica de transferencia (ISO 10846)](/phonometry/es/vibration/structural/transfer-stiffness/):
   el límite de fuerza bloqueada de la sección 1, aplicado a caracterizar un
   aislador.

@@ -689,6 +689,84 @@ def _driving_point_stiffness() -> ph.vibration.DrivingPointStiffnessResult:
     return ph.vibration.driving_point_stiffness(f, k11 * 1.0e-6, -(w**2) * 1.0e-6)
 
 
+def _impact_records() -> tuple[np.ndarray, np.ndarray]:
+    """Five impacts on a 2 kg, 40 Hz, 0.5 % resonator, sampled at 4096 Hz.
+
+    A Gaussian force pulse and the resonator's acceleration, built by a
+    convolution long enough that the decay never wraps round the record.
+    """
+    fs, n = 4096, 4096
+    t = np.arange(n) / fs
+    force = 100.0 * np.exp(-((t - 0.005) ** 2) / (2.0 * 5e-4**2))
+    omega = 2.0 * np.pi * 40.0
+    impulse = (np.exp(-0.005 * omega * t) * np.sin(omega * t)) / (2.0 * omega)
+    displacement = np.convolve(force, impulse)[:n] / fs
+    acceleration = np.gradient(np.gradient(displacement, 1.0 / fs), 1.0 / fs)
+    rows = np.arange(1.0, 1.5, 0.1)[:, np.newaxis]
+    return force * rows, acceleration * rows + 1e-3 * RNG.standard_normal((5, n))
+
+
+def _impact_mobility() -> ph.vibration.ImpactMobilityResult:
+    force, response = _impact_records()
+    return ph.vibration.impact_mobility(
+        force,
+        response,
+        4096.0,
+        exponential_decay_rate_per_s=20.0,
+        force_window_s=0.02,
+        frequency_range_hz=(1.0, 800.0),
+    )
+
+
+def _single_mode_fit() -> ph.vibration.SingleModeFitResult:
+    return _impact_mobility().fit_mode((30.0, 50.0))
+
+
+def _window_correction() -> ph.vibration.ExponentialWindowCorrection:
+    return ph.vibration.exponential_window_correction(
+        [40.0, 125.0], [0.03, 0.02], exponential_decay_rate_per_s=5.0
+    )
+
+
+def _double_hit() -> ph.vibration.DoubleHitCheck:
+    force, _ = _impact_records()
+    return ph.vibration.check_double_hit(
+        force[0] + 0.6 * np.roll(force[0], 245), 4096.0
+    )
+
+
+def _force_spectrum() -> ph.vibration.ForceSpectrumCheck:
+    force, _ = _impact_records()
+    return ph.vibration.check_force_spectrum(
+        force[0], 4096.0, frequency_range_hz=(0.0, 400.0), max_drop_db=10.0
+    )
+
+
+def _coherence_check() -> ph.vibration.CoherenceCheck:
+    return ph.vibration.check_coherence(
+        _impact_mobility(), frequency_range_hz=(10.0, 400.0), exclude_hz=[(60.0, 80.0)]
+    )
+
+
+def _overload() -> ph.vibration.OverloadCheck:
+    _, response = _impact_records()
+    return ph.vibration.check_overload(response[0], 4096.0, full_scale=40.0)
+
+
+def _response_decay() -> ph.vibration.ResponseDecayCheck:
+    _, response = _impact_records()
+    return ph.vibration.check_response_decay(response[0], 4096.0, start_s=0.02)
+
+
+def _channel_match() -> ph.vibration.ChannelMatchVerification:
+    f = np.geomspace(10.0, 1000.0, 60)
+    return ph.vibration.verify_channel_match(
+        f,
+        1.0 + 0.03 * np.exp(-f / 300.0) * np.exp(0.02j),
+        frequency_range_hz=(10.0, 1000.0),
+    )
+
+
 def _radiation_efficiency() -> ph.vibration.RadiationEfficiencyResult:
     bp = ph.vibration.plate_bending_stiffness(6.2e10, 0.006, 0.24)
     fc = ph.vibration.coincidence_frequency(2500.0 * 0.006, bp)

@@ -9,14 +9,14 @@ import SeeAlso from '../../../../components/SeeAlso.astro';
 
 A machine fixed to a building radiates sound twice: directly from its own
 vibrating surface, and indirectly by injecting **structure-borne power** into
-the structure, which carries it away and re-radiates it in distant rooms. Seven
-pages cover both paths and the question that is not about sound at all, four of
+the structure, which carries it away and re-radiates it in distant rooms. Nine
+pages cover both paths and the question that is not about sound at all, six of
 them here and three elsewhere on the site: one estimates the direct radiation
-from the surface vibration itself, five characterise
-the second, sneakier structure-borne path end to end, from describing the
-vibration and characterising the isolators to quantifying the power and
-predicting the level a listener finally hears, and the seventh asks instead
-whether the shaking damages the building.
+from the surface vibration itself, six characterise the second, sneakier
+structure-borne path end to end, from describing and measuring the vibration
+and characterising the isolators to quantifying the power and predicting the
+level a listener finally hears, and the last two ask instead whether the
+shaking damages the building, and at what frequency the building answers.
 
 The language comes first.
 [Mechanical mobility and the FRF family (ISO 7626-1)](/phonometry/vibration/structural/mechanical-mobility/)
@@ -26,6 +26,12 @@ with the closed-form SDOF resonator as the reference and the ISO 7626-2
 measurement acceptance criteria. Source and receiver *mobilities* are what
 decide how much power actually couples across an interface, which is why this
 vocabulary matters.
+[Mobility by impact excitation (ISO 7626-5)](/phonometry/vibration/structural/impact-mobility/)
+measures the same functions with an instrumented hammer instead of an attached
+exciter: the force and exponential windows an impact record needs, the average
+over impacts with its coherence, the damping an exponential window adds taken
+away again by Annex A, and the checks that decide whether a record may be used
+at all.
 
 Three pages then characterise the path elements.
 [Bending-wave transmission at plate junctions (Cremer/Craik/Hopkins)](/phonometry/vibration/structural/junction-transmission/)
@@ -73,6 +79,9 @@ range the annex reports without offering a way to predict it.
 
 - [Mechanical mobility and the FRF family (ISO 7626-1)](/phonometry/vibration/structural/mechanical-mobility/):
   the FRF family, conversions and the SDOF reference resonator.
+- [Mobility by impact excitation (ISO 7626-5)](/phonometry/vibration/structural/impact-mobility/):
+  the force and exponential windows, the average over impacts with its
+  coherence, the Annex A damping correction and the checks on the record.
 - [Bending-wave transmission at plate junctions (Cremer/Craik/Hopkins)](/phonometry/vibration/structural/junction-transmission/):
   the wave-approach transmission coefficients for rigid X, T, L and in-line
   junctions, their angular average and the derived coupling loss factor and Kij,
@@ -118,11 +127,11 @@ have no collinear third plate, so only the corner path applies there.
 
 <ScopeClaim status="not-covered">
 The FRF page implements ISO 7626-1 and the ISO 7626-2 acceptance criteria for
-an attached exciter; **impact-hammer excitation (ISO 7626-5) is named for
-context only**, with nothing that synthesises or processes an impact spectrum,
-and the conversions return element-wise *free* reciprocals, correct for a
-driving-point or single-path use, not for a full FRF matrix, whose blocked
-matrix quantities are not built.
+an attached exciter, and the impact page ISO 7626-5; the conversions return
+element-wise *free* reciprocals, correct for a driving-point or single-path
+use, not for a full FRF matrix, whose blocked matrix quantities are not built.
+The impact page estimates the damping one mode at a time, so closely spaced
+modes need a multi-mode curve fitter, which is not provided.
 </ScopeClaim>
 
 <ScopeClaim status="not-covered">

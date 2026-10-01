@@ -137,6 +137,7 @@ from reports.room import (
 )
 from reports.vibration import (
     _human_vibration_example,
+    _impact_mobility_example,
     _mechanical_mobility_example,
     _multiple_shock_example,
     _transfer_stiffness_example,
@@ -215,6 +216,7 @@ _FICHES: dict[str, Callable[[], _Fiche]] = {
     "iso3382_3_open_plan_example.pdf": _open_plan_example,
     "iso2631_5_multiple_shock_example.pdf": _multiple_shock_example,
     "iso7626_mobility_example.pdf": _mechanical_mobility_example,
+    "iso7626_5_impact_mobility_example.pdf": _impact_mobility_example,
     "iso10846_transfer_stiffness_example.pdf": _transfer_stiffness_example,
     "iso3744_sound_power_example.pdf": _sound_power_example,
     "iso9614_sound_power_intensity_example.pdf": _intensity_sound_power_example,

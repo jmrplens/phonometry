@@ -19,7 +19,7 @@
 
 ## Numerical conformance report
 
-**1562/1562 conformance checks pass** across 100 domains and 493 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+**1577/1577 conformance checks pass** across 100 domains and 494 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub><b>&#916;</b> is the difference between the computed value and the one the standard publishes. <b>Used</b> is how much of that clause's published tolerance the difference consumes: 100 % means it sits exactly on the limit, 5 % means it uses a twentieth of the allowance, and a dash means the clause states no two-sided tolerance for the quantity, so there is no budget to spend. It is reported and never used to decide a verdict, which is settled at full precision before any rounding.</sub>
 
@@ -194,7 +194,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary><b>Room &amp; building acoustics</b>: 100% (119/119)</summary>
+<summary><b>Room &amp; building acoustics</b>: 100% (134/134)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
 |:---|:---|:---|:---|:---|:---:|:---:|
@@ -283,6 +283,21 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO 7626-2:2015 7.5.2 | Rigid-mass calibration: mobility mag(Y) = 1/(2πf·m) at 100 Hz  (m=10 kg) | 0.0001592 m/(N·s) (+/-0.001%) | 0.0001592 m/(N·s) | 0 m/(N·s) | 4 % | ![Pass][cv-pass] Pass |
 | ISO 7626-2:2015 Annex A | Normalized random error ε = √((1−γ²)/(2nγ²)): γ²=0,8, n=75 → 4,08 % (< 5 %) | 4.08 % (+/-0.01 %) | 4.08 % | 0.002 % | 40 % | ![Pass][cv-pass] Pass |
 | ISO 7626-1:2011 Table 1 | Rigid 1 kg mass at ω = 1000 rad/s: mobility 1e-3, compliance 1e-6 (decades) | 0.001 m/(N·s) (+/-1e-07%) | 0.001 m/(N·s) | 0 m/(N·s) | 0 % | ![Pass][cv-pass] Pass |
+| ISO 7626-5:2019 8.6 | Averaged impact estimate of a 10 % resonator: mag(Y) at 40 Hz = closed form | 0.0099472 m/(N·s) (+/-1e-05%) | 0.0099472 m/(N·s) | 0 m/(N·s) | 0 % | ![Pass][cv-pass] Pass |
+| ISO 7626-5:2019 8.6 | Three noisy impacts: estimate = averaged cross-spectrum / averaged force auto-spectrum | 0.0105183 m/(N·s) (+/-1e-07%) | 0.0105183 m/(N·s) | 0 m/(N·s) | 0 % | ![Pass][cv-pass] Pass |
+| ISO 7626-5:2019 Annex A Formula (A.2) | Exponential window on force and response: windowed accelerance = A(s + a) | 0 (A(s + a) below 500 Hz) | max relative deviation 1.9e-08 | 0 | 19 % | ![Pass][cv-pass] Pass |
+| ISO 7626-5:2019 Annex A Formula (A.3) | Damping of a 0,5 % resonator after a 5 1/s window, corrected by (A.3) as printed | 0.0049924 (+/-0.000003) | 0.0049904 | -0.000002 | 67 % | ![Pass][cv-pass] Pass |
+| ISO 7626-5:2019 Annex A | Damping back from a 20 1/s window, the pole moved back by a: 0,5 % | 0.005 (+/-0.0001%) | 0.005 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| ISO 7626-5:2019 Annex A | Corrected mobility peak of a 0,5 % resonator after a 20 1/s window = 1/c | 0.19894 m/(N·s) (+/-0.001%) | 0.19894 m/(N·s) | 0 m/(N·s) | 0 % | ![Pass][cv-pass] Pass |
+| ISO 7626-5:2019 6.4 (Figure 5) | Two equal impacts 62,5 ms apart: notches every 1/τ = 16 Hz, zero at 8, 24, 40 Hz | 16 Hz (+/-0 Hz) | 16 Hz | 0 Hz | 0 % | ![Pass][cv-pass] Pass |
+| ISO 7626-5:2019 6.4 | Second impact 0,6 of the first: ripple 20 lg(1,6/0,4) = 12,04 dB | 12.041 dB (+/-0 dB) | 12.041 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| ISO 7626-5:2019 7.2 (ISO 7626-2:2015 7.5.2) | Rigid 3 kg block through both windows: accelerance 1/m = 0,3333 1/kg | 0.3333 1/kg (+/-1e-10%) | 0.3333 1/kg | 0 1/kg | 0 % | ![Pass][cv-pass] Pass |
+| ISO 7626-5:2019 8.5.2 (Figure 10) | Exponential window that decays to 5 % at the end of the record | 0.05 (+/-0) | 0.05 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| ISO 7626-5:2019 8.3, 8.5.2 | Response decaying to 1 % at the end reads 10 % at the midpoint | 0.1 (+/-0.1%) | 0.1 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| ISO 7626-5:2019 8.3, 8.5.2 | Response whose envelope ends at 1 %: level at the last sample = 1 %, passes | 0.01 (+/-2%) | 0.0099 | -0.0001 | 50 % | ![Pass][cv-pass] Pass |
+| ISO 7626-5:2019 3.3, 3.4 | Force ESD of a 0,5 ms Gaussian: fall across 1 Hz to 500 Hz in closed form | 10.7157 dB (+/-1e-06%) | 10.7157 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| ISO 7626-5:2019 9.1 | Noise-free records: coherence 1 over the range; five records pass | 1 (+/-0) | 1 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| ISO 7626-5:2019 8.1, 8.3, 8.5.2, 9.1 | The printed limits: channel match, response decay and coherence | channel magnitude = 0.05; channel phase deg = 5; end of record = 0.01; midpoint = 0.1; windowed end = 0.25; high coherence = 0.9; coherence records = 5 | channel magnitude = 0.05; channel phase deg = 5; end of record = 0.01; midpoint = 0.1; windowed end = 0.25; high coherence = 0.9; coherence records = 5 | exact | 0 % | ![Pass][cv-pass] Pass |
 | ISO 10846-3:2002 6.1 Inequality (2) | Indirect-method validity limit mag(T) = 0,1 ↔ ΔL1,2 = 20 dB | 20 dB (+/-0 dB) | 20 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 | ISO 10846-3:2002 6.1 | Model bias at the validity limit: k_ind/k = 1,1 (0,83 dB ≤ 1 dB, 10 % ≤ 12 %) | 1.1 (+/-1e-07%) | 1.1 | 0 | 0 % | ![Pass][cv-pass] Pass |
 | ISO 10846-1:2008 Equation (6) | Delivered/blocking force F2/F2,b = 1/1,1 at mag(k2,2/kt) = 0,1 (within 10 %) | 0.9091 (+/-0) | 0.9091 | 0 | 0 % | ![Pass][cv-pass] Pass |

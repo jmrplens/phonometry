@@ -16,6 +16,9 @@ from __future__ import annotations
 
 import math
 
+import numpy as np
+from scipy.special import erfc
+
 # ---------------------------------------------------------------------------
 # PR-F human vibration (ISO 8041-1 / ISO 2631 / ISO 5349 / Directive 2002/44/EC).
 # The true IEC 61260 one-third-octave centre is 10^(n/10) Hz; the reference
@@ -1223,6 +1226,83 @@ ISO10846_3_ACCURACY_FRACTION = 0.12  # i.e. within 12 %
 ISO10846_1_EQ6_FORCE_RATIO = 1.0 / 1.1  # F2/F2,b at mag(k2,2/kt) = 0,1
 ISO10846_LINEARITY_STEP_DB = 10.0  # -2 7.7 b), -3 7.6 b): A/B 10 dB apart
 ISO10846_LINEARITY_TOL_DB = 1.5  # -2 7.7 c), -3 7.6 c): within 1,5 dB
+
+# ---------------------------------------------------------------------------
+# ISO 7626-5:2019, mobility by impact excitation. The part prints no worked
+# example, so its rows are anchored in a closed form: a single-degree-of-
+# freedom resonator struck by a Gaussian force pulse, whose response is the
+# exact convolution below. The pulse is smooth enough that its spectrum is
+# negligible at the Nyquist frequency of 4096 Hz sampling, so the DFT of the
+# sampled records is the continuous transform to about 1e-9 below 500 Hz.
+# Printed numbers the rows hold the library to: 8.3 and 8.5.2 (folios 14, 19
+# and 23, PDF pages 20, 25 and 29), 9.1 (folio 24, PDF page 30), 8.1 (folio
+# 13, PDF page 19), Annex A (folio 26, PDF page 32).
+# ---------------------------------------------------------------------------
+ISO7626_5_FS_HZ = 4096.0
+ISO7626_5_SAMPLES = 4096
+ISO7626_5_MASS_KG = 2.0
+ISO7626_5_NATURAL_FREQUENCY_HZ = 40.0
+ISO7626_5_PULSE_SIGMA_S = 5e-4
+ISO7626_5_PULSE_TIME_S = 0.005
+ISO7626_5_PEAK_N = 100.0
+ISO7626_5_RESPONSE_END_RATIO = 0.01  # 8.3: "about 1 %" at the end of the record
+ISO7626_5_RESPONSE_MIDPOINT_RATIO = 0.1  # 8.5.2: "about 10 %" at the midpoint
+ISO7626_5_WINDOWED_END_RATIO = 0.25  # 8.5.2: "25 % or less" of natural decay
+ISO7626_5_HIGH_COHERENCE = 0.9  # 9.1: "high (greater than 0,9)"
+ISO7626_5_COHERENCE_RECORDS = 5  # 9.1: "a few records (five to ten)"
+ISO7626_5_CHANNEL_MAGNITUDE = 0.05  # 8.1: unity within +/- 5 %
+ISO7626_5_CHANNEL_PHASE_DEG = 5.0  # 8.1: zero within +/- 5 degrees
+ISO7626_5_FIGURE10_FINAL_VALUE = 0.05  # 8.5.2: Figure 10 decays to 5 %
+
+
+def sdof_gaussian_impact(
+    damping_ratio: float,
+    *,
+    quantity: str = "acceleration",
+    natural_frequency_hz: float = ISO7626_5_NATURAL_FREQUENCY_HZ,
+    mass_kg: float = ISO7626_5_MASS_KG,
+    peak_n: float = ISO7626_5_PEAK_N,
+    pulse_time_s: float = ISO7626_5_PULSE_TIME_S,
+) -> tuple[np.ndarray, np.ndarray]:
+    r"""Force and exact response of an SDOF resonator struck by a Gaussian pulse.
+
+    With the receptance written as :math:`A/(s-p) + A^*/(s-p^*)`, the response
+    is :math:`x(t) = 2\,\mathrm{Re}[A I(t)]` with
+    :math:`I(t) = \int_{-\infty}^t e^{p(t-u)} f(u)\,du`, which for
+    :math:`f(u) = F_0 e^{-(u-t_0)^2/2\sigma^2}` is
+    :math:`F_0 e^{p(t-t_0)} e^{p^2\sigma^2/2} \sigma\sqrt{\pi/2}\,
+    \mathrm{erfc}[-(t - t_0 + p\sigma^2)/(\sigma\sqrt 2)]`. Velocity and
+    acceleration follow by differentiating, the latter carrying the direct
+    term :math:`f(t)/m` of the mass line.
+
+    :param damping_ratio: Damping ratio of the resonator, in (0, 1).
+    :param quantity: ``"acceleration"``, ``"velocity"`` or ``"displacement"``.
+    :return: ``(force, response)``, one record each of 4096 samples at 4096 Hz.
+    """
+    fs, n, sigma_t = ISO7626_5_FS_HZ, ISO7626_5_SAMPLES, ISO7626_5_PULSE_SIGMA_S
+    t = np.arange(n) / fs
+    omega_n = 2.0 * math.pi * natural_frequency_hz
+    pole = complex(
+        -damping_ratio * omega_n, omega_n * math.sqrt(1.0 - damping_ratio**2)
+    )
+    residue = 1.0 / (mass_kg * (pole - pole.conjugate()))
+    force = peak_n * np.exp(-((t - pulse_time_s) ** 2) / (2.0 * sigma_t**2))
+    argument = -(t - pulse_time_s + pole * sigma_t**2) / (sigma_t * math.sqrt(2.0))
+    integral = (
+        peak_n
+        * np.exp(pole * (t - pulse_time_s))
+        * np.exp(pole**2 * sigma_t**2 / 2.0)
+        * sigma_t
+        * math.sqrt(math.pi / 2.0)
+        * erfc(argument)
+    )
+    response = {
+        "displacement": 2.0 * np.real(residue * integral),
+        "velocity": 2.0 * np.real(residue * pole * integral),
+        "acceleration": 2.0 * np.real(residue * pole**2 * integral) + force / mass_kg,
+    }[quantity]
+    return force, np.asarray(response, dtype=np.float64)
+
 
 # ---------------------------------------------------------------------------
 # ISO 10846-4:2003 (BS EN ISO 10846-4:2003) and ISO 10846-5:2008 (BS EN

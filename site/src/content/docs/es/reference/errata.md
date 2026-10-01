@@ -167,6 +167,86 @@ dos ediciones con las mismas entradas y en el mismo orden.
   conformidad anota la procedencia explícitamente.
 - **Estado:** sin notificar.
 
+## ISO 717-1:2020, Anexo E, Figuras E.3 y E.2 (curvas de referencia dibujadas fuera de la Tabla E.1)
+
+- **Ubicación:** Anexo E, Figura E.3 «Reference curve for standard wall with
+  medium critical frequency» (p. 24 impresa), frente a la columna del muro
+  ligero de la Tabla E.1 (pp. 24 y 25 impresas). El mismo dibujo es la
+  Figura B.3 de ISO 10140-5:2010+A1:2014 (p. 15 impresa), frente a la misma
+  columna de su Tabla B.1 (p. 16 impresa).
+- **El impreso:** la NOTA de E.1 dice que las Figuras E.1, E.2 y E.3 «as well
+  as Table E.1 give typical smoothed values» de las curvas de referencia. La
+  Tabla E.1 imprime el muro ligero como 21,3, 23,3 y 25,3 dB a 50, 63 y 80 Hz,
+  una meseta de 27,0 dB de 100 Hz a 500 Hz, y luego 28,0 dB a 630 Hz subiendo
+  hasta 44,6 dB a 3 150 Hz y 49,4 dB a 5 000 Hz.
+- **El problema:** la Figura E.3 no dibuja esa curva. Leída contra su propia
+  cuadrícula en los centros de banda, su meseta está en 25,9 dB, 1,1 dB por
+  debajo de la tabla, y su rama ascendente va un tercio de octava a la
+  izquierda de la de la tabla: la figura marca 30,5 dB a 630 Hz, 35,3 dB a
+  1 000 Hz y 42,5 dB a 2 000 Hz, donde la tabla imprime 30,5, 35,1 y 42,3 dB
+  una banda más arriba, a 800, 1 250 y 2 500 Hz, y 28,0, 32,8 y 40,0 dB a
+  630, 1 000 y 2 000 Hz. La línea se detiene cerca de 2,2 kHz, así que la
+  figura no tiene curva para los 2 500 Hz a 5 000 Hz de la tabla. Solo el
+  arranque de 50 Hz a 80 Hz coincide con la tabla. El dibujo viene sin
+  cambios de ISO 10140-5, cuya edición de 2021 retiró la figura y la tabla en
+  favor de ISO 717-1. La Figura E.2, redibujada para la edición de 2020,
+  también se aparta de su columna, menos: su codo está cerca de 230 Hz en vez
+  de 250 Hz, así que su rama ascendente va hasta 1,2 dB por encima de la tabla
+  de 315 Hz a 630 Hz (45,6 dB a 400 Hz donde la tabla imprime 44,4 dB),
+  mientras que la Figura B.2 de ISO 10140-5:2010+A1:2014 sigue la misma
+  columna con menos de 0,3 dB de diferencia. La Figura E.1 sigue su columna
+  con menos de 0,3 dB de diferencia.
+- **Evidencia:** la línea de cada figura leída en cada centro de banda de la
+  tabla que ilustra; la Figura E.3 da 25,9 dB a 125, 160, 250 y 315 Hz,
+  28,0 dB a 500 Hz, 30,5 dB a 630 Hz, 35,3 dB a 1 000 Hz, 37,7 dB a
+  1 250 Hz y 42,5 dB a 2 000 Hz, y ninguna línea a 2 500 Hz ni por
+  encima; la Figura E.2 da 40,7, 42,8, 45,6, 48,0 y 50,4 dB a 250, 315, 400,
+  500 y 630 Hz frente a los 40,0, 41,8, 44,4, 46,8 y 49,3 dB impresos.
+  Verificado en las páginas 28 a 31 del PDF (pp. 22 a 25 impresas) de
+  ISO 717-1:2020, y en las páginas 22 a 24 del PDF (pp. 14 a 16 impresas) de
+  ISO 10140-5:2010+A1:2014.
+- **Comportamiento de la biblioteca:** publica la tabla, no las figuras.
+  `building.LINING_REFERENCE_ELEMENTS` guarda los 21 valores de cada columna
+  de la Tabla E.1, comprobados banda a banda frente a una transcripción de la
+  página (comprobación de conformidad «ISO 717-1:2020 Annex E, Table E.1», los
+  63 valores por banda), y reproducen todas las magnitudes globales impresas
+  bajo cada columna, enteras y con un decimal. No hizo falta ningún cambio.
+- **Estado:** sin notificar.
+
+## ISO 10140-1:2021, Anexo H, Figura H.4 (un CI,r,50-2500 que el suelo de referencia no puede dar)
+
+- **Ubicación:** Anexo H, Figura H.4 «Example of form for expression of
+  results» (p. 31 impresa), la línea de valoración bajo el diagrama. El
+  formulario de ISO 10140-1:2010+A2:2014, Figura H.4 (p. 27 impresa), lleva
+  el mismo término.
+- **El impreso:** «Rating in accordance with ISO 717-2: $\Delta L_w$ = dB;
+  $C_{I\Delta}$ = dB; $C_{I,r,50\text{–}2\,500}$ = dB». El formulario de 2010
+  imprime «$C_{I,r}$ = dB; $C_{I,r,50\text{-}2\,500}$ = dB» en la misma
+  línea.
+- **El problema:** $C_{I,r}$ es el término de adaptación espectral del suelo de
+  referencia con el revestimiento (ISO 717-2:2020 A.2.2), obtenido de
+  $L_{n,r} = L_{n,r,0} - \Delta L$ (Fórmula (1)). La Tabla 4 de
+  ISO 717-2:2020 define $L_{n,r,0}$ solo de 100 Hz a 3 150 Hz, y el rango
+  ampliado de la NOTA de A.2.1 necesita además 50, 63 y 80 Hz, así que no
+  existe $L_{n,r}$ en esas tres bandas y ninguno de los dos documentos define
+  $C_{I,r,50\text{–}2\,500}$. La propia tabla del formulario pide $\Delta L$
+  desde 50 Hz, las tres bandas donde harían falta los valores de referencia.
+  H.5 i), que el formulario ilustra, pide $L_{n,r,w}$ y $C_{I,r}$ o
+  $L_{n,0,w}$ y $C_{I,0}$, que la Tabla 4 sí puede dar.
+- **Evidencia:** la línea de valoración del formulario frente a A.2.1, A.2.2 y
+  la Tabla 4 de ISO 717-2:2020, y frente a H.5 h) e i) del mismo anexo.
+  Verificado en las páginas 35 y 37 del PDF (pp. 29 y 31 impresas) de
+  ISO 10140-1:2021, en las páginas 13, 17 y 18 del PDF (pp. 7, 11 y 12
+  impresas) de ISO 717-2:2020, y en la página 36 del PDF (p. 27 impresa) de
+  BS EN ISO 10140-1:2010+A2:2014.
+- **Comportamiento de la biblioteca:** `building.lab_floor_covering_improvement`
+  da las dos valoraciones que pide H.5 i) y ningún
+  $C_{I,r,50\text{–}2\,500}$; el término de rango ampliado del suelo desnudo
+  medido, que sí está definido, sale de
+  `building.weighted_impact_rating_extended`. Ningún número de la biblioteca
+  depende del formulario, y no hizo falta ningún cambio.
+- **Estado:** sin notificar.
+
 ## ISO 2631-5:2018, ejemplos resueltos del Anexo C (fórmula masculina desplegada, R femenino)
 
 - **Ubicación:** Anexo C: el ejemplo resuelto masculino desplegado (varón de

@@ -172,6 +172,8 @@ export const apiSections = {
       'reference/api/building/ceiling-plenum',
       'reference/api/building/aperture-transmission',
       'reference/api/building/lab-insulation',
+      'reference/api/building/lab-improvement',
+      'reference/api/building/rainfall-sound',
       'reference/api/building/survey-insulation',
       'reference/api/building/service-equipment',
       'reference/api/building/intensity-insulation',

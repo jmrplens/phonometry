@@ -122,7 +122,7 @@ The same formula applies to `ΔRw`, `ΔRA` and `ΔRA,tr`.
 
 | Name | Description |
 | :--- | :--- |
-| `laboratory_improvement` | Laboratory rating `ΔRlab` measured to ISO 10140-1:2016 Annex G for the heavy basic element, in dB. |
+| `laboratory_improvement` | Laboratory rating `ΔRlab` measured to ISO 10140-1:2021 Annex G on the heavy basic element and rated to ISO 717-1:2020 Annex D ([`lab_lining_improvement`](/phonometry/reference/api/building/lab-improvement/#lab_lining_improvement)), in dB. |
 | `resonance_frequency` | Resonance frequency `fo` of the system, in Hz. |
 | `base_rating_in_situ` | Weighted sound reduction index `Rw,situ` of the basic element in the field situation, in dB. |
 

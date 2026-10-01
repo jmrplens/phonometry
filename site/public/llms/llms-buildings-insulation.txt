@@ -23,7 +23,12 @@ shifts no curve at all: it sums A-weighted band levels in energy.
 **Laboratory.**
 [Laboratory Insulation Measurement](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-lab/) covers
 the ISO 10140 sound reduction index and normalized impact level with their
-background-noise correction. Two laboratory methods sit beside it:
+background-noise correction, and
+[Linings, Floor Coverings and Rain (ISO 10140-1)](https://jmrplens.github.io/phonometry/buildings/insulation/lab-application-rules/)
+what three of its application rules do with them: the improvement a lining
+or a floor covering gives the element it is laid on, rated on the reference
+curves of ISO 717, and the sound of artificial rain on a roof. Two laboratory
+methods sit beside it:
 [Sound Insulation by Intensity (ISO 15186)](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-intensity/)
 reads the transmitted power off the radiating face when flanking is too high
 for the pressure method, and
@@ -93,6 +98,10 @@ related EN 12354-5, lives in
   (Clause 8.4 in Part 3).
 - [Laboratory Insulation Measurement](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-lab/):
   the ISO 10140 characterisation of an element with flanking suppressed.
+- [Linings, Floor Coverings and Rain (ISO 10140-1)](https://jmrplens.github.io/phonometry/buildings/insulation/lab-application-rules/):
+  the improvement ΔR of a lining and ΔL of a floor covering on their reference
+  elements, lightweight floors included, and the sound intensity level of
+  artificial rain (Annexes G, H and K).
 - [Sound Insulation by Intensity (ISO 15186)](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-intensity/):
   the ISO 15186-1/-2 direct-power route to the same indices.
 - [Sound Insulation Survey Method (ISO 10052)](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-survey/):
@@ -1386,7 +1395,7 @@ $$
 with $F_0 = 1$ N, $T_\mathrm{ref} = 1$ s and $t_2 - t_1$ the duration of the
 impact. Both characteristics require a **single-peak** waveform of
 $20 \pm 2$ ms (JIS A 1418-2:2019 A.2 b)). The octave-band values are printed
-identically in ISO 16283-2:2020 Table A.1, ISO 10140-5:2010 Table F.1 and
+identically in ISO 16283-2:2020 Table A.1, ISO 10140-5:2021 Table F.1 and
 JIS A 1418-2:2019 Table A.2 for the ball; the bang machine appears only in
 JIS A 1418-2:2019 Table A.1.
 
@@ -1541,7 +1550,7 @@ loudest band by 10 dB.
 **Covered.** The impact force exposure level of ISO 16283-2:2020
 Formula (A.1) from a sampled force record, via
 `building.impact_force_exposure_level`; the printed octave-band specifications
-of ISO 16283-2:2020 Table A.1 / ISO 10140-5:2010 Table F.1 (rubber ball) and
+of ISO 16283-2:2020 Table A.1 / ISO 10140-5:2021 Table F.1 (rubber ball) and
 JIS A 1418-2:2019 Tables A.1 and A.2 (both characteristics) with their
 tolerances, via `building.heavy_impact_source_specification`,
 `building.heavy_impact_source_limits` and
@@ -1575,7 +1584,7 @@ published 25-band reproduction of Formula (4).
   buildings and of building elements — Part 2: Impact sound insulation*.
   Definition 3.16 and Formulae (4), (5), (6), (9), (15) and (20); Annex A.2
   (rubber ball) with Table A.1 and Formula (A.1).
-- ISO 10140-5:2010, *Acoustics — Laboratory measurement of sound insulation of
+- ISO 10140-5:2021, *Acoustics — Laboratory measurement of sound insulation of
   building elements — Part 5: Requirements for test facilities and equipment*.
   Annex F (normative): F.1 the modified tapping machine, F.2 the rubber ball
   with Table F.1.
@@ -1595,7 +1604,7 @@ published 25-band reproduction of Formula (4).
 | Standard | Scope in this guide |
 |---|---|
 | ISO 16283-2:2020 | Field measurement with the rubber ball: the source spectrum (Annex A) and the standardized maximum level (Formulae (4) to (6), (20)) |
-| ISO 10140-5:2010 | Laboratory requirements: Annex F, the heavy and soft impact sources |
+| ISO 10140-5:2021 | Laboratory requirements: Annex F, the heavy and soft impact sources |
 | ISO 10140-3:2010 | Laboratory measurement with heavy and soft sources (Annex A) |
 | JIS A 1418-2:2019 | Both impact force characteristics with their tolerances and construction examples |
 | ISO 717-2:2020 | Annex D, the A-weighted maximum impact sound pressure level |

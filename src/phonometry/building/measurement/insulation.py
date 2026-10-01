@@ -126,7 +126,6 @@ if TYPE_CHECKING:
 # in the tree reads it from there, the names this module used to define stay
 # importable from this path, unchanged; the ``__all__`` below re-exports them.
 from .ratings import (
-    _IMPACT_REFERENCE_FLOOR,
     _INDEX_500_THIRD,
     _REF_IMPACT_THIRD_OCTAVE,
     _REF_THIRD_OCTAVE,
@@ -143,7 +142,6 @@ from .ratings import (
 # The ISO 717 names above are listed here so they keep resolving through this
 # module; everything else is defined below.
 __all__ = [
-    "_IMPACT_REFERENCE_FLOOR",
     "_INDEX_500_THIRD",
     "_REF_IMPACT_THIRD_OCTAVE",
     "_REF_THIRD_OCTAVE",

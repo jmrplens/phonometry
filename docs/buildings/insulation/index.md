@@ -16,7 +16,12 @@ shifts no curve at all: it sums A-weighted band levels in energy.
 **Laboratory.**
 [Laboratory Insulation Measurement](insulation-lab.md) covers
 the ISO 10140 sound reduction index and normalized impact level with their
-background-noise correction. Two laboratory methods sit beside it:
+background-noise correction, and
+[Linings, Floor Coverings and Rain (ISO 10140-1)](lab-application-rules.md)
+what three of its application rules do with them: the improvement a lining
+or a floor covering gives the element it is laid on, rated on the reference
+curves of ISO 717, and the sound of artificial rain on a roof. Two laboratory
+methods sit beside it:
 [Sound Insulation by Intensity (ISO 15186)](insulation-intensity.md)
 reads the transmitted power off the radiating face when flanking is too high
 for the pressure method, and
@@ -86,6 +91,10 @@ related EN 12354-5, lives in
   (Clause 8.4 in Part 3).
 - [Laboratory Insulation Measurement](insulation-lab.md):
   the ISO 10140 characterisation of an element with flanking suppressed.
+- [Linings, Floor Coverings and Rain (ISO 10140-1)](lab-application-rules.md):
+  the improvement ΔR of a lining and ΔL of a floor covering on their reference
+  elements, lightweight floors included, and the sound intensity level of
+  artificial rain (Annexes G, H and K).
 - [Sound Insulation by Intensity (ISO 15186)](insulation-intensity.md):
   the ISO 15186-1/-2 direct-power route to the same indices.
 - [Sound Insulation Survey Method (ISO 10052)](insulation-survey.md):

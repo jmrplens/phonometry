@@ -672,6 +672,77 @@ def _impact_insulation() -> ph.building.ImpactInsulationResult:
     )
 
 
+#: The 16 ISO 717 rating bands and the two above them, 100 Hz to 5000 Hz.
+_LAB_BANDS = [
+    *(100.0, 125.0, 160.0, 200.0, 250.0, 315.0, 400.0, 500.0, 630.0),
+    *(800.0, 1000.0, 1250.0, 1600.0, 2000.0, 2500.0, 3150.0, 4000.0, 5000.0),
+]
+
+
+def _lab_lining_improvement() -> ph.building.LabLiningImprovementResult:
+    """A lining 2 dB to 19 dB better, on the heavy standard wall (ISO 10140-1 G)."""
+    without = np.linspace(40.0, 65.0, 18)
+    return ph.building.lab_lining_improvement(
+        without, without + np.linspace(2.0, 19.0, 18), _LAB_BANDS
+    )
+
+
+def _reduction_improvement_rating() -> ph.building.ReductionImprovementRating:
+    """The ISO 717-1 Annex D rating of that lining."""
+    rating = _lab_lining_improvement().rating
+    assert rating is not None
+    return rating
+
+
+def _lab_floor_covering_improvement() -> ph.building.LabFloorCoveringImprovementResult:
+    """A covering on the lightweight reference floor No 3 (ISO 10140-1 H)."""
+    bare = np.full(18, 75.0)
+    return ph.building.lab_floor_covering_improvement(
+        bare,
+        bare - np.linspace(1.0, 30.0, 18),
+        _LAB_BANDS,
+        reference_floor="lightweight_3",
+    )
+
+
+def _heavy_impact_improvement() -> ph.building.HeavyImpactImprovementResult:
+    """The rubber-ball improvement of ISO 10140-1 H.6.1 in four octaves."""
+    return ph.building.heavy_impact_improvement(
+        [80.0, 75.0, 70.0, 65.0], [78.0, 70.0, 62.0, 55.0], [63, 125, 250, 500]
+    )
+
+
+def _lining_curing_check() -> ph.building.LiningCuringCheck:
+    """The G.4 example: measurements within 1 d, 3 d after construction."""
+    return ph.building.check_lining_curing(3.0, 1.0)
+
+
+def _rainfall_reference_correction() -> ph.building.RainfallReferenceCorrection:
+    """A reference pane 1 dB to 3 dB above Table I.1 (ISO 10140-5 Annex I)."""
+    return ph.building.rainfall_reference_correction(
+        np.linspace(46.0, 48.0, 18), np.linspace(0.18, 0.035, 18)
+    )
+
+
+def _rainfall_sound() -> ph.building.RainfallSoundResult:
+    """A rooflight under heavy rain, normalized (ISO 10140-1 Annex K)."""
+    return ph.building.rainfall_sound(
+        np.linspace(48.0, 60.0, 18),
+        np.linspace(1.9, 0.85, 18),
+        _LAB_BANDS,
+        volume_m3=62.0,
+        excited_area_m2=1.875,
+        reference_correction=_rainfall_reference_correction(),
+    )
+
+
+def _rain_generator_verification() -> ph.building.RainGeneratorVerification:
+    """A heavy-rain tank at 41 mm/h with its drops measured (ISO 10140-5 H.1)."""
+    return ph.building.verify_rain_generator(
+        41.0, drop_diameters_mm=np.linspace(4.2, 5.8, 20)
+    )
+
+
 def _low_frequency_procedure() -> ph.building.LowFrequencyResult:
     """The ISO 16283 corner procedure in a 18 m3 receiving room."""
     return ph.building.apply_low_frequency_procedure(

@@ -481,7 +481,9 @@ def lining_improvement_in_situ(
     The same formula applies to ``ΔRw``, ``ΔRA`` and ``ΔRA,tr``.
 
     :param laboratory_improvement: Laboratory rating ``ΔRlab`` measured to
-        ISO 10140-1:2016 Annex G for the heavy basic element, in dB.
+        ISO 10140-1:2021 Annex G on the heavy basic element and rated
+        to ISO 717-1:2020 Annex D
+        (:func:`~phonometry.building.lab_lining_improvement`), in dB.
     :param resonance_frequency: Resonance frequency ``fo`` of the system, in
         Hz.
     :param base_rating_in_situ: Weighted sound reduction index ``Rw,situ`` of

@@ -145,7 +145,7 @@ def _reference_floor_with_covering(
     imports deferred).
     """
     from ..building.measurement.floor_covering_improvement import _RATING_FREQS
-    from ..building.measurement.insulation import _IMPACT_REFERENCE_FLOOR
+    from ..building.measurement.ratings import IMPACT_REFERENCE_FLOORS
 
     freqs = np.asarray(result.frequencies, dtype=np.float64)
     rating = np.asarray(_RATING_FREQS, dtype=np.float64)
@@ -158,7 +158,9 @@ def _reference_floor_with_covering(
         freqs, rating, rtol=0.0, atol=0.5
     ):
         return None
-    reference = np.asarray(_IMPACT_REFERENCE_FLOOR, dtype=np.float64)
+    reference = np.fromiter(
+        IMPACT_REFERENCE_FLOORS["heavyweight"].values(), dtype=np.float64
+    )
     return reference - np.asarray(result.improvement, dtype=np.float64)
 
 

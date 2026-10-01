@@ -180,6 +180,14 @@ ENGLISH_BY_DESIGN: dict[str, str] = {
     "standard prints; a subscript follows its source (correction_uncertainty_budget)",
     r"a4: $L_\mathrm{ind3b}$": "the descriptor and symbol of IEC 62585 Table I.1, whose ind subscript the "
     "standard prints; a subscript follows its source (correction_uncertainty_budget)",
+    r"$R_\mathrm{ref,without}$ ($R_\mathrm{w}$ = 53 dB)": "the symbol of ISO 717-1:2020 Formula (D.3) "
+    "with its rating; the ref,without subscript is the one the standard prints, and a subscript "
+    "follows its source (lab_lining_improvement)",
+    r"$R_\mathrm{ref,with}$ ($R_\mathrm{w}$ = 65 dB)": "the symbol of ISO 717-1:2020 Formula (D.3) "
+    "with its rating; the ref,with subscript is the one the standard prints, and a subscript "
+    "follows its source (lab_lining_improvement)",
+    r"$L_{I,\mathrm{m,ref}}$": "the symbol of ISO 10140-5:2021 Formula (I.2); the m,ref subscript is "
+    "the one the standard prints, and a subscript follows its source (rainfall_sound)",
 }
 
 # A run of at least three letters, in any alphabet: shorter runs are unit and

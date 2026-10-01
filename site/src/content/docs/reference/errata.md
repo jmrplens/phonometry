@@ -146,6 +146,80 @@ in the same order.
   notes the provenance explicitly.
 - **Status:** unreported.
 
+## ISO 717-1:2020, Annex E, Figures E.3 and E.2 (reference curves drawn off Table E.1)
+
+- **Location:** Annex E, Figure E.3 "Reference curve for standard wall with
+  medium critical frequency" (printed p. 24), against the lightweight-wall
+  column of Table E.1 (printed pp. 24 and 25). The same drawing is Figure B.3
+  of ISO 10140-5:2010+A1:2014 (printed p. 15), against the same column of its
+  Table B.1 (printed p. 16).
+- **The print:** the NOTE to E.1 says that Figures E.1, E.2 and E.3 "as well as
+  Table E.1 give typical smoothed values" of the reference curves. Table E.1
+  prints the lightweight wall as 21,3, 23,3 and 25,3 dB at 50, 63 and 80 Hz, a
+  plateau of 27,0 dB from 100 Hz to 500 Hz, then 28,0 dB at 630 Hz rising to
+  44,6 dB at 3 150 Hz and 49,4 dB at 5 000 Hz.
+- **The problem:** Figure E.3 does not draw that curve. Read against its own
+  gridlines at the band centres, its plateau lies at 25,9 dB, 1,1 dB under the
+  table, and its rising branch runs one third-octave to the left of the
+  table's: the figure reads 30,5 dB at 630 Hz, 35,3 dB at 1 000 Hz and
+  42,5 dB at 2 000 Hz, where the table prints 30,5, 35,1 and 42,3 dB one band
+  higher, at 800, 1 250 and 2 500 Hz, and 28,0, 32,8 and 40,0 dB at 630,
+  1 000 and 2 000 Hz. The line stops near 2,2 kHz, so the figure has no
+  curve for the table's 2 500 Hz to 5 000 Hz. Only the 50 Hz to 80 Hz start
+  of the line agrees with the table. The drawing has been carried unchanged
+  from ISO 10140-5, whose 2021 edition dropped both the figure and the table in
+  favour of ISO 717-1. Figure E.2, redrawn for the 2020 edition, departs from
+  its column as well, by less: its knee sits near 230 Hz instead of 250 Hz, so
+  its rising branch runs up to 1,2 dB above the table from 315 Hz to 630 Hz
+  (45,6 dB at 400 Hz where the table prints 44,4 dB), while Figure B.2 of
+  ISO 10140-5:2010+A1:2014 follows the same column within 0,3 dB. Figure E.1
+  follows its column within 0,3 dB.
+- **Evidence:** the line of each figure read at every band centre of the table
+  it illustrates; Figure E.3 gives 25,9 dB at 125, 160, 250 and 315 Hz, 28,0 dB
+  at 500 Hz, 30,5 dB at 630 Hz, 35,3 dB at 1 000 Hz, 37,7 dB at 1 250 Hz and
+  42,5 dB at 2 000 Hz, and no line at 2 500 Hz and above; Figure E.2 gives
+  40,7, 42,8, 45,6, 48,0 and 50,4 dB at 250, 315, 400, 500 and 630 Hz against
+  the printed 40,0, 41,8, 44,4, 46,8 and 49,3 dB. Verified on PDF pages 28
+  to 31 (printed pp. 22 to 25) of ISO 717-1:2020, and on PDF pages 22 to 24
+  (printed pp. 14 to 16) of ISO 10140-5:2010+A1:2014.
+- **Library behaviour:** publishes the table, not the figures.
+  `building.LINING_REFERENCE_ELEMENTS` holds the 21 values of each column of
+  Table E.1, checked band by band against a transcription of the page
+  (conformance check "ISO 717-1:2020 Annex E, Table E.1", the 63 band values),
+  and they reproduce every single number printed under each column, integer
+  and to one decimal place. No change was required.
+- **Status:** unreported.
+
+## ISO 10140-1:2021, Annex H, Figure H.4 (a CI,r,50-2500 the reference floor cannot give)
+
+- **Location:** Annex H, Figure H.4 "Example of form for expression of
+  results" (printed p. 31), the rating line under the diagram. The form of
+  ISO 10140-1:2010+A2:2014, Figure H.4 (printed p. 27), carries the same term.
+- **The print:** "Rating in accordance with ISO 717-2: $\Delta L_w$ = dB;
+  $C_{I\Delta}$ = dB; $C_{I,r,50\text{–}2\,500}$ = dB". The 2010 form prints
+  "$C_{I,r}$ = dB; $C_{I,r,50\text{-}2\,500}$ = dB" in the same line.
+- **The problem:** $C_{I,r}$ is the spectrum adaptation term of the reference
+  floor with the covering (ISO 717-2:2020 A.2.2), taken from
+  $L_{n,r} = L_{n,r,0} - \Delta L$ (Formula (1)). ISO 717-2:2020 Table 4
+  defines $L_{n,r,0}$ only from 100 Hz to 3 150 Hz, and the enlarged range of
+  the NOTE to A.2.1 needs 50, 63 and 80 Hz as well, so no $L_{n,r}$ exists in
+  those three bands and neither document defines $C_{I,r,50\text{–}2\,500}$.
+  The form's own table asks for $\Delta L$ from 50 Hz, the three bands where
+  the reference values would be needed. H.5 i), which the form illustrates,
+  asks for $L_{n,r,w}$ and $C_{I,r}$ or $L_{n,0,w}$ and $C_{I,0}$, all of
+  which Table 4 can give.
+- **Evidence:** the rating line of the form against ISO 717-2:2020 A.2.1, A.2.2
+  and Table 4, and against H.5 h) and i) of the same annex. Verified on PDF
+  pages 35 and 37 (printed pp. 29 and 31) of ISO 10140-1:2021, on PDF pages 13,
+  17 and 18 (printed pp. 7, 11 and 12) of ISO 717-2:2020, and on PDF page 36
+  (printed p. 27) of BS EN ISO 10140-1:2010+A2:2014.
+- **Library behaviour:** `building.lab_floor_covering_improvement` reports the
+  two ratings H.5 i) asks for and no $C_{I,r,50\text{–}2\,500}$; the
+  enlarged-range term of the measured bare floor, which is defined, comes from
+  `building.weighted_impact_rating_extended`. No number the library reports
+  depends on the form, and no change was required.
+- **Status:** unreported.
+
 ## ISO 2631-5:2018, Annex C worked examples (male displayed formula, female R)
 
 - **Location:** Annex C: the displayed male worked example (82 kg male,

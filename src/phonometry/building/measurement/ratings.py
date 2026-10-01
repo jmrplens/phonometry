@@ -55,6 +55,19 @@ rounded to an integer (Clause A.2.1, Formulae (A.1) to (A.3)). The Table 3
 reference values, the shifting rule and CI are identical in the 2013 and
 2020 editions of ISO 717-2 (the 2020 edition only adds Annex D for the
 rubber-ball heavy/soft impactor, out of scope here).
+
+**Improvements rated on a reference element (ISO 717-2:2020 Clauses 5 and 6,
+ISO 717-1:2020 Annex D).** A floor covering and a lining are rated on a
+standard element rather than on the floor or wall they were measured on, so
+that the single number describes the product and not the laboratory. The
+measured improvement is added to (subtracted from) the reference curve of the
+element, the two curves are rated, and the improvement is the difference of
+the two ratings: ``ΔLw`` on the heavyweight floor and ``ΔLt,w`` on the three
+lightweight floors of Table 4 (:data:`IMPACT_REFERENCE_FLOORS`), and ``ΔRw``
+with ``Δ(Rw + C)`` and ``Δ(Rw + Ctr)`` on the heavy wall, the heavy floor and
+the lightweight wall of Table E.1 (:data:`LINING_REFERENCE_ELEMENTS`). Both
+tables were printed in ISO 10140-5:2010 (Tables C.1 and B.1); its 2021
+edition keeps the constructions and refers to ISO 717 for the curves.
 """
 
 from __future__ import annotations
@@ -62,13 +75,15 @@ from __future__ import annotations
 import math
 from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Literal
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 
 from ..._internal.levels_math import energy_sum
 from ..._internal.validation import (
     check_engine,
+    require_choice,
     require_equal_shapes,
     require_ranks,
     require_same_length,
@@ -1108,104 +1123,6 @@ def weighted_impact_rating(
     )
 
 
-#: ISO 717-2:2020 Table 4: normalized impact sound pressure level ``Ln,r,0`` of
-#: the heavyweight reference floor, 16 one-third-octave bands 100 Hz to 3150 Hz,
-#: in dB. Its weighted rating is ``Ln,r,0,w = 78 dB`` (Clause 5.2).
-_IMPACT_REFERENCE_FLOOR = (
-    67.0,
-    67.5,
-    68.0,
-    68.5,
-    69.0,
-    69.5,
-    70.0,
-    70.5,
-    71.0,
-    71.5,
-    72.0,
-    72.0,
-    72.0,
-    72.0,
-    72.0,
-    72.0,
-)
-_IMPACT_REFERENCE_FLOOR_RATING = 78  # Ln,r,0,w (Table 4 / Clause 5.2)
-#: Spectrum adaptation term of the bare reference floor (ISO 717-2:2020
-#: Clause A.2.2): ``CI,r,0 = −11 dB``.
-_IMPACT_REFERENCE_FLOOR_CI = -11
-
-
-def weighted_impact_improvement(
-    delta_l: Mapping[float, float] | Sequence[float] | np.ndarray,
-) -> int:
-    r"""Weighted reduction of impact level ``ΔLw`` (ISO 717-2:2020 §5).
-
-    Relates a measured improvement spectrum ``ΔL`` to the heavyweight
-    reference
-    floor of Table 4: the reference level with the covering is
-    :math:`L_\mathrm{n,r} = L_\mathrm{n,r,0} - \Delta L` (Formula (1)) and the weighted
-    improvement is
-    :math:`\Delta L_\mathrm{w} = L_\mathrm{n,r,0,w} - L_\mathrm{n,r,w} = 78 - L_\mathrm{n,r,w}`
-    (Formula (2)), where ``Ln,r,w`` is
-    the ISO 717-2 weighted rating of ``Ln,r`` from
-    :func:`weighted_impact_rating`.
-
-    :param delta_l: The reduction of impact sound pressure level ``ΔL`` per band,
-        in dB; 16 one-third-octave values from 100 Hz to 3150 Hz (e.g. from a
-        floor-covering measurement to ISO 10140-3 or ISO 16251-1), or a
-        mapping of band centre frequency in hertz to ``ΔL`` that holds those
-        16 bands, other keys not read.
-    :return: The weighted reduction ``ΔLw``, in dB (rounded, per ISO 717-2).
-    :raises ValueError: If ``delta_l`` is not 16 one-third-octave values, a
-        mapping lacks one of them, or it is non-finite.
-    """
-    dl, _ = _by_band(delta_l, "third-octave", "delta_l")
-    if dl.shape != (16,):
-        msg = "'delta_l' must give the 16 one-third-octave values 100-3150 Hz."
-        raise ValueError(msg)
-    if not np.all(np.isfinite(dl)):
-        msg = "'delta_l' must contain only finite values."
-        raise ValueError(msg)
-    ln_r = np.asarray(_IMPACT_REFERENCE_FLOOR, dtype=np.float64) - dl
-    ln_r_w = weighted_impact_rating(ln_r).rating
-    return _IMPACT_REFERENCE_FLOOR_RATING - ln_r_w
-
-
-def impact_improvement_adaptation_term(
-    delta_l: Mapping[float, float] | Sequence[float] | np.ndarray,
-) -> int:
-    r"""Adaptation term ``CI,Δ`` of a floor covering (ISO 717-2:2020 A.2.2).
-
-    :math:`C_{\mathrm{I},\Delta} = C_\mathrm{I,r,0} - C_\mathrm{I,r}` (Formula (A.4)) with
-    :math:`C_\mathrm{I,r,0} = -11` dB (the
-    bare Table 4 reference floor) and ``CI,r`` the ISO 717-2 spectrum
-    adaptation term of the reference floor with the covering under test,
-    :math:`L_\mathrm{n,r} = L_\mathrm{n,r,0} - \Delta L` (Formula (1)). Together with
-    :func:`weighted_impact_improvement` it yields the single-number reduction
-    for a flat spectrum, :math:`\Delta L_\mathrm{lin} = \Delta L_\mathrm{w} + C_{\mathrm{I},\Delta}`
-    (Formula (A.5)). ISO 16251-1
-    Clause 8 e) requires this term in the statement of results.
-
-    :param delta_l: The reduction of impact sound pressure level ``ΔL`` per
-        band, in dB; 16 one-third-octave values from 100 Hz to 3150 Hz, or a
-        mapping of band centre frequency in hertz to ``ΔL`` that holds those
-        16 bands, other keys not read.
-    :return: The spectrum adaptation term ``CI,Δ``, in dB (integer).
-    :raises ValueError: If ``delta_l`` is not 16 one-third-octave values, a
-        mapping lacks one of them, or it is non-finite.
-    """
-    dl, _ = _by_band(delta_l, "third-octave", "delta_l")
-    if dl.shape != (16,):
-        msg = "'delta_l' must give the 16 one-third-octave values 100-3150 Hz."
-        raise ValueError(msg)
-    if not np.all(np.isfinite(dl)):
-        msg = "'delta_l' must contain only finite values."
-        raise ValueError(msg)
-    ln_r = np.asarray(_IMPACT_REFERENCE_FLOOR, dtype=np.float64) - dl
-    ci_r = weighted_impact_rating(ln_r).ci
-    return _IMPACT_REFERENCE_FLOOR_CI - ci_r
-
-
 @dataclass(frozen=True)
 class ImpactImprovementRatingResult:
     r"""The weighted reduction of impact level of a covering, with its terms.
@@ -1654,4 +1571,475 @@ def weighted_impact_rating_extended(
         ),
         band_centers=freqs,
         measured=measured,
+    )
+
+
+# --- Reference floors and standard basic elements -------------------------
+
+
+def _band_table(values: tuple[float, ...]) -> Mapping[float, float]:
+    """A read-only ``{band centre in Hz: value}`` table over the 16 core bands."""
+    return MappingProxyType(dict(zip(_FREQ_THIRD_OCTAVE, values, strict=True)))
+
+
+#: The one curve ISO 717-2:2020 Table 4 prints for the lightweight reference
+#: floors of type No 1 and No 2 (its column "for lightweight floors C1 and C2").
+_LIGHTWEIGHT_C1_C2 = _band_table(
+    (78.0, 78.0, 78.0, 78.0, 78.0, 78.0, 76.0, 74.0)
+    + (72.0, 69.0, 66.0, 63.0, 60.0, 57.0, 54.0, 51.0)
+)
+
+#: Normalized impact sound pressure level of the four reference floors, in dB,
+#: keyed by floor and then by one-third-octave band centre frequency in Hz,
+#: 100 Hz to 3 150 Hz: ``Ln,r,0`` of the heavyweight concrete floor and
+#: ``Ln,t,r,0`` of the three lightweight (timber) floors, as printed in
+#: ISO 717-2:2020 Table 4 (PDF page 13, printed folio 7). The floors themselves
+#: are built to ISO 10140-5:2021 Annex C; that edition no longer prints the
+#: curves and refers to this table, which the 2010 edition printed with the
+#: same numbers as its Table C.1. Floors No 1 and No 2 share one column, so
+#: their two entries are the same curve; the weighted reduction they yield is
+#: still designated apart, ``ΔLt,1,w`` and ``ΔLt,2,w`` (ISO 717-2:2020 6.2).
+#: The single numbers the table prints under each curve (78, 72 and 75 dB,
+#: with ``CI`` of -11, 0 and -3 dB) are what :func:`weighted_impact_rating`
+#: returns for it, and they are not stored: Clause 5.3 obtains ``Ln,r,0,w``
+#: from the curve "in accordance with 4.3.1".
+IMPACT_REFERENCE_FLOORS: Mapping[str, Mapping[float, float]] = MappingProxyType(
+    {
+        "heavyweight": _band_table(
+            (67.0, 67.5, 68.0, 68.5, 69.0, 69.5, 70.0, 70.5)
+            + (71.0, 71.5, 72.0, 72.0, 72.0, 72.0, 72.0, 72.0)
+        ),
+        "lightweight_1": _LIGHTWEIGHT_C1_C2,
+        "lightweight_2": _LIGHTWEIGHT_C1_C2,
+        "lightweight_3": _band_table(
+            (69.0, 72.0, 75.0, 78.0, 78.0, 78.0, 78.0, 78.0)
+            + (78.0, 76.0, 74.0, 72.0, 69.0, 66.0, 63.0, 60.0)
+        ),
+    }
+)
+
+#: A reference floor of :data:`IMPACT_REFERENCE_FLOORS`.
+ReferenceFloor = Literal[
+    "heavyweight", "lightweight_1", "lightweight_2", "lightweight_3"
+]
+
+#: Sound reduction index of the three standard basic elements a lining is
+#: rated on, in dB, keyed by element and then by one-third-octave band centre
+#: frequency in Hz, 50 Hz to 5 000 Hz: ``Rref,without`` of the heavy wall, the
+#: heavy floor and the lightweight wall, as printed in ISO 717-1:2020 Table E.1
+#: (PDF pages 30 and 31, printed folios 24 and 25). The elements are built to
+#: ISO 10140-5:2021 Annex B, B.2 to B.4; that edition no longer prints the
+#: curves and refers to ISO 717-1, and the 2010 edition printed the same
+#: numbers as its Table B.1. The single numbers under each curve (``Rw`` of 53,
+#: 52 and 33 dB with every adaptation term of Annex B) are what
+#: :func:`weighted_rating_extended` returns for it and are not stored.
+LINING_REFERENCE_ELEMENTS: Mapping[str, Mapping[float, float]] = MappingProxyType(
+    {
+        name: MappingProxyType(dict(zip(_FREQ_50_5000, values, strict=True)))
+        for name, values in (
+            (
+                "heavy_wall",
+                (35.3, 37.3, 39.4, 40.0, 40.0, 40.0, 40.0, 41.0, 43.5, 46.1, 48.5)
+                + (51.0, 53.6, 56.0, 58.4, 61.1, 63.6, 65.0, 65.0, 65.0, 65.0),
+            ),
+            (
+                "heavy_floor",
+                (34.0, 36.0, 38.1, 40.0, 40.0, 40.0, 40.0, 40.0, 41.8, 44.4, 46.8)
+                + (49.3, 51.9, 54.4, 56.8, 59.5, 61.9, 64.3, 65.0, 65.0, 65.0),
+            ),
+            (
+                "lightweight_wall",
+                (21.3, 23.3, 25.3, 27.0, 27.0, 27.0, 27.0, 27.0, 27.0, 27.0, 27.0)
+                + (28.0, 30.5, 32.8, 35.1, 37.6, 40.0, 42.3, 44.6, 47.1, 49.4),
+            ),
+        )
+    }
+)
+
+#: A standard basic element of :data:`LINING_REFERENCE_ELEMENTS`.
+BasicElement = Literal["heavy_wall", "heavy_floor", "lightweight_wall"]
+
+#: The index ISO 717-1:2020 D.3 appends to a lining rating to name the basic
+#: element it was rated on: "heavy" for the heavyweight wall and floor and
+#: "light" for the lightweight wall.
+_ELEMENT_INDEX: Mapping[str, str] = MappingProxyType(
+    {"heavy_wall": "heavy", "heavy_floor": "heavy", "lightweight_wall": "light"}
+)
+
+
+def _reference_floor_curve(reference_floor: str) -> np.ndarray:
+    """A fresh array of the 16 ``Ln,r,0`` values of one reference floor."""
+    require_choice(reference_floor, "reference_floor", tuple(IMPACT_REFERENCE_FLOORS))
+    return np.fromiter(
+        IMPACT_REFERENCE_FLOORS[reference_floor].values(), dtype=np.float64
+    )
+
+
+def _validated_improvement(
+    delta: Sequence[float] | np.ndarray, name: str
+) -> np.ndarray:
+    """The 16 core one-third-octave values of an improvement spectrum."""
+    values = np.asarray(delta, dtype=np.float64)
+    if values.shape != (_N_THIRD_OCTAVE_BANDS,):
+        msg = f"'{name}' must give the 16 one-third-octave values 100-3150 Hz."
+        raise ValueError(msg)
+    if not np.all(np.isfinite(values)):
+        msg = f"'{name}' must contain only finite values."
+        raise ValueError(msg)
+    return values
+
+
+def _impact_improvement_ratings(
+    delta_l: Mapping[float, float] | Sequence[float] | np.ndarray,
+    reference_floor: str,
+    *,
+    one_decimal: bool,
+) -> tuple[float, float]:
+    """``(ΔLw, CI,Δ)`` of Formulas (1), (2) and (A.4)/(A.6), unrounded types."""
+    dl, _ = _by_band(delta_l, "third-octave", "delta_l")
+    bare = _reference_floor_curve(reference_floor)
+    covered = bare - _validated_improvement(dl, "delta_l")  # Formula (1)
+    rated_bare = weighted_impact_rating_extended(bare, one_decimal=one_decimal)
+    rated_covered = weighted_impact_rating_extended(covered, one_decimal=one_decimal)
+    delta_lw = _reduce(
+        rated_bare.rating - rated_covered.rating, one_decimal=one_decimal
+    )
+    ci_delta = _reduce(rated_bare.ci - rated_covered.ci, one_decimal=one_decimal)
+    return delta_lw, ci_delta
+
+
+@overload
+def weighted_impact_improvement(
+    delta_l: Mapping[float, float] | Sequence[float] | np.ndarray,
+    *,
+    reference_floor: ReferenceFloor = ...,
+    one_decimal: Literal[False] = ...,
+) -> int: ...
+
+
+@overload
+def weighted_impact_improvement(
+    delta_l: Mapping[float, float] | Sequence[float] | np.ndarray,
+    *,
+    reference_floor: ReferenceFloor = ...,
+    one_decimal: Literal[True],
+) -> float: ...
+
+
+@overload
+def weighted_impact_improvement(
+    delta_l: Mapping[float, float] | Sequence[float] | np.ndarray,
+    *,
+    reference_floor: ReferenceFloor = ...,
+    one_decimal: bool = ...,
+) -> int | float: ...
+
+
+def weighted_impact_improvement(
+    delta_l: Mapping[float, float] | Sequence[float] | np.ndarray,
+    *,
+    reference_floor: ReferenceFloor = "heavyweight",
+    one_decimal: bool = False,
+) -> int | float:
+    r"""Weighted reduction of impact level ``ΔLw`` or ``ΔLt,w`` (ISO 717-2:2020).
+
+    Relates a measured improvement spectrum ``ΔL`` to a reference floor of
+    Table 4 (:data:`IMPACT_REFERENCE_FLOORS`): the reference level with the
+    covering is :math:`L_\mathrm{n,r} = L_\mathrm{n,r,0} - \Delta L`
+    (Formula (1)) and the weighted improvement is
+    :math:`\Delta L_\mathrm{w} = L_\mathrm{n,r,0,w} - L_\mathrm{n,r,w}`
+    (Formula (2)), both weighted ratings taken with
+    :func:`weighted_impact_rating`. On the heavyweight floor this is the
+    ``ΔLw`` of Clause 5, :math:`78 - L_\mathrm{n,r,w}`; on a lightweight floor
+    it is the ``ΔLt,w`` of Clause 6, which 6.3 computes "as specified in 5.3,
+    substituting the heavy reference floor by a lightweight reference floor"
+    and 6.2 designates ``ΔLt,1,w``, ``ΔLt,2,w`` or ``ΔLt,3,w`` by floor type.
+
+    ``one_decimal=True`` rates both curves with the 0,1 dB shift and keeps one
+    decimal place, the form 5.4 prescribes when the uncertainty of ``ΔLw`` is
+    stated (its EXAMPLE, ``ΔLw = 18,9 ± 1,1``); ``Ln,r,0,w`` is then 77,6 dB for
+    the heavyweight floor, as A.2.2 prints.
+
+    :param delta_l: The reduction of impact sound pressure level ``ΔL`` per band,
+        in dB; 16 one-third-octave values from 100 Hz to 3150 Hz (e.g. from a
+        floor-covering measurement to ISO 10140-1:2021 Annex H or
+        ISO 16251-1), or a mapping of band centre frequency in hertz to ``ΔL``
+        that holds those 16 bands, other keys not read.
+    :param reference_floor: ``"heavyweight"`` (default), ``"lightweight_1"``,
+        ``"lightweight_2"`` or ``"lightweight_3"``.
+    :param one_decimal: Use the 0,1 dB shift and one-decimal reductions.
+    :return: The weighted reduction, in dB: an integer, or a value to one
+        decimal place when ``one_decimal`` is set.
+    :raises ValueError: If ``delta_l`` is not 16 finite one-third-octave values,
+        a mapping lacks one of them, or ``reference_floor`` is not one of the
+        four floors.
+    """
+    delta_lw, _ = _impact_improvement_ratings(
+        delta_l, reference_floor, one_decimal=one_decimal
+    )
+    return delta_lw if one_decimal else int(delta_lw)
+
+
+@overload
+def impact_improvement_adaptation_term(
+    delta_l: Mapping[float, float] | Sequence[float] | np.ndarray,
+    *,
+    reference_floor: ReferenceFloor = ...,
+    one_decimal: Literal[False] = ...,
+) -> int: ...
+
+
+@overload
+def impact_improvement_adaptation_term(
+    delta_l: Mapping[float, float] | Sequence[float] | np.ndarray,
+    *,
+    reference_floor: ReferenceFloor = ...,
+    one_decimal: Literal[True],
+) -> float: ...
+
+
+@overload
+def impact_improvement_adaptation_term(
+    delta_l: Mapping[float, float] | Sequence[float] | np.ndarray,
+    *,
+    reference_floor: ReferenceFloor = ...,
+    one_decimal: bool = ...,
+) -> int | float: ...
+
+
+def impact_improvement_adaptation_term(
+    delta_l: Mapping[float, float] | Sequence[float] | np.ndarray,
+    *,
+    reference_floor: ReferenceFloor = "heavyweight",
+    one_decimal: bool = False,
+) -> int | float:
+    r"""Adaptation term ``CI,Δ`` or ``CIΔ,t`` of a floor covering (ISO 717-2:2020).
+
+    :math:`C_{\mathrm{I},\Delta} = C_\mathrm{I,r,0} - C_\mathrm{I,r}`
+    (Formula (A.4)) on the heavyweight floor, with :math:`C_\mathrm{I,r,0} = -11`
+    dB, and :math:`C_{\mathrm{I}\Delta,\mathrm{t}} = C_\mathrm{I,t,r,0} -
+    C_\mathrm{I,t,r}` (Formula (A.6)) on a lightweight one, with
+    :math:`C_\mathrm{I,t,r,0}` of 0 dB for floors No 1 and No 2 and -3 dB for
+    No 3. ``CI,r`` is the ISO 717-2 spectrum adaptation term of the reference
+    floor with the covering under test,
+    :math:`L_\mathrm{n,r} = L_\mathrm{n,r,0} - \Delta L` (Formula (1)). Together
+    with :func:`weighted_impact_improvement` it yields the single-number
+    reduction for a flat spectrum,
+    :math:`\Delta L_\mathrm{lin} = \Delta L_\mathrm{w} + C_{\mathrm{I},\Delta}`
+    (Formula (A.5), or (A.7) on a lightweight floor). ISO 16251-1 Clause 8 e)
+    and ISO 10140-1:2021 H.5 h) require this term in the statement of results.
+
+    With ``one_decimal=True`` both terms keep one decimal place, which gives
+    ``CI,r,0 = -10,3`` dB and ``CI,t,r,0`` of 0,0 and -2,8 dB as A.2.2 and
+    A.2.3 print.
+
+    :param delta_l: The reduction of impact sound pressure level ``ΔL`` per
+        band, in dB; 16 one-third-octave values from 100 Hz to 3150 Hz, or a
+        mapping of band centre frequency in hertz to ``ΔL`` that holds those
+        16 bands, other keys not read.
+    :param reference_floor: ``"heavyweight"`` (default), ``"lightweight_1"``,
+        ``"lightweight_2"`` or ``"lightweight_3"``.
+    :param one_decimal: Use the 0,1 dB shift and one-decimal reductions.
+    :return: The spectrum adaptation term, in dB: an integer, or a value to
+        one decimal place when ``one_decimal`` is set.
+    :raises ValueError: If ``delta_l`` is not 16 finite one-third-octave
+        values, a mapping lacks one of them, or ``reference_floor`` is not one
+        of the four floors.
+    """
+    _, ci_delta = _impact_improvement_ratings(
+        delta_l, reference_floor, one_decimal=one_decimal
+    )
+    return ci_delta if one_decimal else int(ci_delta)
+
+
+#: The spectrum adaptation term ``CI,r,0`` of the bare heavyweight reference
+#: floor, -11 dB (ISO 717-2:2020 A.2.2), rated from its Table 4 curve as
+#: Clause 5.3 rates the floor rather than stored beside it.
+_IMPACT_REFERENCE_FLOOR_CI = weighted_impact_rating(
+    IMPACT_REFERENCE_FLOORS["heavyweight"]
+).ci
+
+
+@dataclass(frozen=True)
+class ReductionImprovementRating:
+    r"""Single-number improvement of the sound reduction index by a lining.
+
+    The rating of ISO 717-1:2020 Annex D: the measured ``ΔR`` is added to the
+    reference curve of a standard basic element,
+    :math:`R_\mathrm{ref,with} = R_\mathrm{ref,without} + \Delta R`
+    (Formula (D.3)), both curves are rated, and each improvement is the
+    difference of the two ratings (Formula (D.4)). Every value is an integer
+    unless the rating was computed with ``one_decimal=True``. An enlarged-range
+    term is ``None`` when ``ΔR`` did not cover its bands.
+
+    :ivar basic_element: ``"heavy_wall"``, ``"heavy_floor"`` or
+        ``"lightweight_wall"``.
+    :ivar delta_rw: ``ΔRw``, in dB.
+    :ivar delta_rw_c: ``Δ(Rw + C)``, in dB.
+    :ivar delta_rw_ctr: ``Δ(Rw + Ctr)``, in dB.
+    :ivar delta_rw_c_50_3150: ``Δ(Rw + C50-3150)``, in dB, or ``None``.
+    :ivar delta_rw_c_50_5000: ``Δ(Rw + C50-5000)``, in dB, or ``None``.
+    :ivar delta_rw_c_100_5000: ``Δ(Rw + C100-5000)``, in dB, or ``None``.
+    :ivar delta_rw_ctr_50_3150: ``Δ(Rw + Ctr,50-3150)``, in dB, or ``None``.
+    :ivar delta_rw_ctr_50_5000: ``Δ(Rw + Ctr,50-5000)``, in dB, or ``None``.
+    :ivar delta_rw_ctr_100_5000: ``Δ(Rw + Ctr,100-5000)``, in dB, or ``None``.
+    :ivar without_lining: The rating of ``Rref,without``, the bare reference
+        curve over the bands ``ΔR`` was given in.
+    :ivar with_lining: The rating of ``Rref,with``.
+    """
+
+    basic_element: str
+    delta_rw: float
+    delta_rw_c: float
+    delta_rw_ctr: float
+    delta_rw_c_50_3150: float | None
+    delta_rw_c_50_5000: float | None
+    delta_rw_c_100_5000: float | None
+    delta_rw_ctr_50_3150: float | None
+    delta_rw_ctr_50_5000: float | None
+    delta_rw_ctr_100_5000: float | None
+    without_lining: ExtendedWeightedRatingResult
+    with_lining: ExtendedWeightedRatingResult
+
+    def __post_init__(self) -> None:
+        """Reject a basic element the reference table does not carry.
+
+        The plot titles the rating with the index Annex D appends to it, read
+        from the element name, so a name outside the three standard elements
+        would reach the figure before anything had said which names there are.
+
+        :raises ValueError: if ``basic_element`` is not a standard element.
+        """
+        require_choice(
+            self.basic_element, "basic_element", tuple(LINING_REFERENCE_ELEMENTS)
+        )
+
+    @property
+    def index(self) -> str:
+        """The element index of ISO 717-1:2020 D.3: ``"heavy"`` or ``"light"``."""
+        return _ELEMENT_INDEX[self.basic_element]
+
+    def plot(
+        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    ) -> Axes:
+        """Plot ``Rref,without`` and ``Rref,with`` with the improvement ratings.
+
+        Draws the reference curve of the basic element and the same curve
+        raised by the measured ``ΔR``, the two curves Annex D rates; the title
+        carries ``ΔRw``, ``Δ(Rw + C)`` and ``Δ(Rw + Ctr)`` with the element
+        index. Requires matplotlib (``pip install phonometry[plot]``); returns
+        the :class:`~matplotlib.axes.Axes`.
+        """
+        from ..._i18n import check_language
+        from ..._plot.building import plot_reduction_improvement_rating
+
+        check_language(language)
+        return plot_reduction_improvement_rating(
+            self, ax=ax, language=language, **kwargs
+        )
+
+
+def weighted_reduction_improvement(
+    delta_r: Sequence[float] | np.ndarray,
+    frequencies: Sequence[float] | np.ndarray | None = None,
+    *,
+    basic_element: BasicElement = "heavy_wall",
+    one_decimal: bool = False,
+) -> ReductionImprovementRating:
+    r"""Weighted improvement of the sound reduction index by a lining (ISO 717-1).
+
+    ISO 717-1:2020 Annex D rates a lining on a standard basic element rather
+    than on the wall it was measured on, so that the number describes the
+    lining and not the laboratory: the measured improvement ``ΔR`` is added
+    to the reference curve of the element (:data:`LINING_REFERENCE_ELEMENTS`),
+    :math:`R_\mathrm{ref,with} = R_\mathrm{ref,without} + \Delta R`
+    (Formula (D.3)), both curves are rated with
+    :func:`weighted_rating_extended`, and
+    :math:`\Delta R_\mathrm{w} = R_\mathrm{w,ref,with} - R_\mathrm{w,ref,without}`
+    (Formula (D.4)). ``Δ(Rw + C)`` and ``Δ(Rw + Ctr)`` are "calculated in an
+    equivalent way", as differences of the sums, and so is every
+    enlarged-range term of Annex B whose bands ``ΔR`` covers. The rating
+    carries the element index of D.3, ``ΔRw,heavy`` or ``ΔRw,light``.
+
+    For a basic element that is not one of the three standard ones, D.3 takes
+    the ratings "directly from the single-number ratings for that basic
+    element with and without the tested acoustical lining", the direct
+    difference ``ΔRw,direct`` of Formula (D.2); that needs both measured
+    curves and is what :func:`~phonometry.building.lab_lining_improvement`
+    returns beside this rating.
+
+    :param delta_r: The sound reduction improvement index ``ΔR`` per
+        one-third-octave band, in dB (ISO 10140-1:2021 G.1).
+    :param frequencies: Band centre frequencies of ``delta_r``, in Hz; ``None``
+        assumes exactly the 16 core bands 100 Hz to 3 150 Hz. The 16 core
+        bands must be present, and every band must be one Table E.1 prints
+        (50 Hz to 5 000 Hz).
+    :param basic_element: ``"heavy_wall"`` (default), ``"heavy_floor"`` or
+        ``"lightweight_wall"``.
+    :param one_decimal: Rate both curves with the 0,1 dB shift and one-decimal
+        reductions, the form of Clause 4.4 for the expression of uncertainty.
+    :return: A :class:`ReductionImprovementRating`.
+    :raises ValueError: If ``delta_r`` is not one-dimensional and finite, the
+        band counts differ, a band is not in Table E.1, the core bands are
+        missing, or ``basic_element`` is not a standard element.
+    """
+    require_choice(basic_element, "basic_element", tuple(LINING_REFERENCE_ELEMENTS))
+    delta = np.asarray(delta_r, dtype=np.float64)
+    if delta.ndim != 1:
+        msg = "'delta_r' must be one-dimensional (one value per band)."
+        raise ValueError(msg)
+    if not np.all(np.isfinite(delta)):
+        msg = "'delta_r' must contain only finite values."
+        raise ValueError(msg)
+    if frequencies is None:
+        freqs = np.asarray(_FREQ_THIRD_OCTAVE, dtype=np.float64)
+    else:
+        freqs = np.asarray(frequencies, dtype=np.float64)
+    require_equal_shapes(
+        "weighted_reduction_improvement",
+        {"delta_r": delta.shape, "frequencies": freqs.shape},
+        "band",
+    )
+    table = LINING_REFERENCE_ELEMENTS[basic_element]
+    indices = _match_bands(np.asarray(tuple(table), dtype=np.float64), tuple(freqs))
+    if indices is None or np.unique(indices).size != indices.size:
+        msg = (
+            "Every band of 'delta_r' must be a one-third-octave band of "
+            "ISO 717-1:2020 Table E.1, 50 Hz to 5000 Hz, each given once."
+        )
+        raise ValueError(msg)
+    without = np.asarray(tuple(table.values()), dtype=np.float64)[indices]
+    rated_without = weighted_rating_extended(without, freqs, one_decimal=one_decimal)
+    rated_with = weighted_rating_extended(
+        without + delta, freqs, one_decimal=one_decimal
+    )
+
+    def _delta(before: float, after: float) -> float:
+        value = _reduce(after - before, one_decimal=one_decimal)
+        return value if one_decimal else int(value)
+
+    def _extended(term: str) -> float | None:
+        before, after = getattr(rated_without, term), getattr(rated_with, term)
+        if before is None or after is None:
+            return None
+        return _delta(rated_without.rating + before, rated_with.rating + after)
+
+    return ReductionImprovementRating(
+        basic_element=basic_element,
+        delta_rw=_delta(rated_without.rating, rated_with.rating),
+        delta_rw_c=_delta(
+            rated_without.rating + rated_without.c, rated_with.rating + rated_with.c
+        ),
+        delta_rw_ctr=_delta(
+            rated_without.rating + rated_without.ctr,
+            rated_with.rating + rated_with.ctr,
+        ),
+        delta_rw_c_50_3150=_extended("c_50_3150"),
+        delta_rw_c_50_5000=_extended("c_50_5000"),
+        delta_rw_c_100_5000=_extended("c_100_5000"),
+        delta_rw_ctr_50_3150=_extended("ctr_50_3150"),
+        delta_rw_ctr_50_5000=_extended("ctr_50_5000"),
+        delta_rw_ctr_100_5000=_extended("ctr_100_5000"),
+        without_lining=rated_without,
+        with_lining=rated_with,
     )

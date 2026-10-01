@@ -31,6 +31,11 @@ from reference_data import ISO717_2_ANNEX_C1_LN as _ANNEX_C1_LN
 
 from phonometry import building
 
+#: The heavyweight reference floor Ln,r,0 of ISO 717-2:2020 Table 4, as the
+#: library publishes it; the printed single numbers it is checked against stay
+#: in reference_data.
+_HEAVY_FLOOR = list(building.IMPACT_REFERENCE_FLOORS["heavyweight"].values())
+
 # One-third-octave reference values, ISO 717-1 Table 3 (100 Hz to 3150 Hz).
 _REF_THIRD = [33, 36, 39, 42, 45, 48, 51, 52, 53, 54, 55, 56, 56, 56, 56, 56]
 # Octave reference values, ISO 717-1 Table 3 (125 Hz to 2000 Hz).
@@ -590,14 +595,14 @@ def test_impact_extended_ci_50_2500() -> None:
         80,
         *[int(f) for f in np.asarray(ref.ISO717_2_REFERENCE_FLOOR_FREQ, dtype=float)],
     ]
-    ln = [30.0, 30.0, 30.0, *ref.ISO717_2_REFERENCE_FLOOR_LN_R0]
+    ln = [30.0, 30.0, 30.0, *_HEAVY_FLOOR]
     res = building.weighted_impact_rating_extended(ln, freqs)
     assert res.rating == 78
     assert res.ci == -11
     # 30 dB extension bands are ~40 dB below the sum: CI unchanged.
     assert res.ci_50_2500 == -11
     # Strong low-frequency content raises the enlarged-range term.
-    ln_low = [75.0, 75.0, 75.0, *ref.ISO717_2_REFERENCE_FLOOR_LN_R0]
+    ln_low = [75.0, 75.0, 75.0, *_HEAVY_FLOOR]
     boosted = building.weighted_impact_rating_extended(ln_low, freqs)
     assert boosted.ci_50_2500 is not None
     assert boosted.ci_50_2500 > -11
@@ -607,11 +612,7 @@ def test_impact_one_decimal_reference_floor() -> None:
     """The 0,1 dB variant reproduces the printed uncertainty constants of
     ISO 717-2:2020 A.2.2: Ln,r,0,w = 77,6 dB and CI,r,0 = -10,3 dB.
     """
-    import reference_data as ref
-
-    res = building.weighted_impact_rating_extended(
-        ref.ISO717_2_REFERENCE_FLOOR_LN_R0, one_decimal=True
-    )
+    res = building.weighted_impact_rating_extended(_HEAVY_FLOOR, one_decimal=True)
     assert res.rating == pytest.approx(77.6)
     assert res.ci == pytest.approx(-10.3)
     assert res.core.rating == 78

@@ -1,6 +1,6 @@
 ---
 title: "Guides"
-description: "The 148 guides of phonometry, grouped into the thirteen topics the library covers: what each area is for, the standards implemented in it, and a one-line summary of every guide inside it."
+description: "The 149 guides of phonometry, grouped into the thirteen topics the library covers: what each area is for, the standards implemented in it, and a one-line summary of every guide inside it."
 head:
   - tag: script
     attrs:
@@ -117,7 +117,7 @@ makes, then runnable code and the figure it draws. Nothing here is a survey of
 the field; each page is the working documentation of a module, written so that
 a result can be defended clause by clause rather than trusted.
 
-This page is the map. A hundred and forty-eight guides sit in thirteen topics, and each topic has its
+This page is the map. A hundred and forty-nine guides sit in thirteen topics, and each topic has its
 own overview page with the longer story of how its pieces fit together. If you
 are arriving without a specific question, read
 [Getting Started](/phonometry/start/getting-started/) first: it runs one signal
@@ -654,7 +654,8 @@ sources, and the assessment built on them. Everything here concerns sound that
 has to travel a long way before it is assessed, so the atmosphere, the ground
 and the source's own motion all enter the answer. Implements ISO 9613-1/-2,
 ISO 1996-1/-2, ISO/PAS 1996-3, NT ACOU 112, ISO 13474, ISO/TS 12913-2/-3,
-CNOSSOS-EU (2002/49/EC Annex II), ISO 11819-1 and IEC 61400-11.
+CNOSSOS-EU (2002/49/EC Annex II), EN 1793-1/-2/-3/-5, EN 16272-3-1,
+ISO 11819-1 and IEC 61400-11.
 
 One scope boundary is worth stating here rather than one click away. Of
 CNOSSOS-EU, what is implemented is the **source** side of Annex II: the road
@@ -677,6 +678,10 @@ regulatory mapping.
 - [Atmospheric refraction: rays and the GFPE](/phonometry/environment/propagation/atmospheric-refraction/):
   effective sound-speed profiles, curved rays with a closed-form shadow-zone
   distance, and the GFPE relative-level field.
+- [Sound reflection of a noise barrier in situ](/phonometry/environment/propagation/barrier-reflection/):
+  the sound reflection index of EN 1793-5 from the impulse responses of the
+  nine-microphone grid, its single number DL_RI and the low frequency limit a
+  sample's size sets.
 
 **[Sources](/phonometry/environment/sources/)**
 

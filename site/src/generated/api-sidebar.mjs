@@ -260,6 +260,7 @@ export const apiSections = {
       'reference/api/environment/ground-surfaces',
       'reference/api/environment/noise-reducing-devices',
       'reference/api/environment/barrier-in-situ',
+      'reference/api/environment/barrier-reflection',
       'reference/api/environment/refraction',
       'reference/api/environment/air-absorption',
       'reference/api/environment/cnossos-rail',

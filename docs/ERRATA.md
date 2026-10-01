@@ -5647,6 +5647,213 @@ in the same order.
   "EN 16272-3-1:2012 Clause 6 (DLR on the railway spectrum)" records it.
 - **Status:** unreported.
 
+## EN 1793-5:2016, Formula (1) against Formula (4) (a gain factor that multiplies)
+
+- **Location:** 5.2, Formula (1) and the list under it, printed folios 15 and
+  16 (PDF pages 17 and 18); 5.5.1, Formula (4) and the paragraph above it,
+  printed folio 25 (PDF page 27) of BS EN 1793-5:2016.
+- **The print:** Formula (1) closes the ratio of the reflected to the incident
+  band energy with the product
+  $\cdot\, C_{geo,k} \cdot C_{dir,k}(\Delta f_j) \cdot C_{gain,k}(\Delta f_g)$,
+  and the list under it calls $C_{gain,k}$ "the correction factor to account
+  for a change in the amplification settings of the loudspeaker and in the
+  sensitivity settings of the individual microphones when changing the
+  measurement configuration from free field to in front of the sample under
+  test or vice versa". 5.5.1 then defines it as "the ratio between the
+  spectrum obtained from windowing the incident component from the impulse
+  response in front of the sample under test and the spectrum of the incident
+  component obtained from windowing the free field impulse response":
+  $C_{gain,k}(\Delta f_g) = \int_{\Delta f_g} |F[h_{i,k,D}(t)\, w_{i,k}(t)]|^2\, df \,/\, \int_{\Delta f_g} |F[h_{i,k,FF}(t)\, w_{i,k}(t)]|^2\, df$.
+- **The problem:** the two formulas put the factor on the same side. In
+  Formula (1) the reflected component comes from the record in front of the
+  device and the incident component from the free-field record, so a gain
+  that differs by an amplitude factor $g$ between the two configurations
+  already multiplies the ratio by $g^2$. Formula (4) measures exactly that
+  $g^2$. Multiplying by it, as Formula (1) prints, leaves $g^4$ in the index;
+  dividing by it removes the change, which is what the list under Formula (1)
+  says the factor is for. At the 20 % that 5.5.1 still accepts
+  ($C_{gain,k} = 1{,}2$), the product as printed reports the index 44 % high,
+  where leaving the change uncorrected would have reported it 20 % high.
+  The two other factors of Formula (1) are the right way round:
+  $C_{geo,k} = (d_{r,k}/d_{i,k})^2$ puts back the spreading of the longer
+  reflected path, and $C_{dir,k}$ divides the loudspeaker's output towards
+  the microphone by its output towards the specular point.
+- **Evidence:** both formulas as printed, read on the page: Formula (1) on
+  PDF page 17 (printed p. 15), its list on PDF page 18 (printed p. 16), and
+  Formula (4) with the paragraph that defines it on PDF page 27 (printed
+  p. 25) of BS EN 1793-5:2016. The consequence is a recomputation: synthetic
+  records of a reflection of amplitude 0,5, with the in-front records scaled
+  by 1,08, return 0,25 in every band when the factor divides and
+  $0{,}25 \times 1{,}08^4$ when it multiplies.
+- **Library behaviour:**
+  [`reflection_index`](../src/phonometry/environment/propagation/barrier_reflection.py)
+  divides by $C_{gain,k}$ and says so in its docstring. The conformance row
+  "EN 1793-5:2016 Formulas (1) and (4) (a gain change between configurations)"
+  and a test on the scaled records pin it.
+- **Status:** unreported.
+
+## EN 1793-5:2016, Table B.2 (seven expanded uncertainties a hundredth below 1,96 times the printed $s_R$)
+
+- **Location:** Annex B.5 and Table B.2, printed folios 54 and 55 (PDF
+  pages 56 and 57) of BS EN 1793-5:2016; Table A.1 on printed folio 47 (PDF
+  page 49).
+- **The print:** B.5 says the uncertainty is "estimated using the values for
+  the standard deviation of reproducibility given in Table A.1", with "a
+  coverage factor of 1,96" and "the maximal ones (last column of Table A.1)".
+  Table B.2 prints, against $s_R$ (High) of 0,32, 0,18, 0,12, 0,14, 0,15,
+  0,15 and 0,17 in the bands of 100 Hz, 125 Hz, 500 Hz, 630 Hz, 800 Hz,
+  1 250 Hz and 3 150 Hz, an expanded uncertainty $U$ of 0,62, 0,34, 0,23,
+  0,26, 0,28, 0,28 and 0,32.
+- **The problem:** 1,96 times the printed $s_R$ gives 0,63, 0,35, 0,24,
+  0,27, 0,29, 0,29 and 0,33 in those seven bands, a hundredth above each
+  printed cell. The other eleven bands reproduce to the hundredth, and so does
+  the row of $DL_{RI}$ (1,96 times 0,81 dB is 1,59 dB, and 7,68 dB plus or minus
+  that is the [6,09; 9,27] dB of B.5). No single coverage factor reproduces
+  the seven: the 100 Hz cell needs one between 1,922 and 1,953, the 125 Hz cell
+  one between 1,861 and 1,917.
+- **The likely mechanism:** every one of the seven is consistent with 1,96
+  times an unrounded standard deviation that rounds to the printed one (0,316
+  prints as 0,32, and 1,96 times 0,316 is 0,619). The print does not show
+  which values the example multiplied; if it was those, they are values the
+  reader of Table A.1 does not have.
+- **Consequence:** a hundredth of the index, which is the resolution the
+  report states it to (5.11). A laboratory following B.5 with Table A.1 as
+  printed obtains the higher values.
+- **Evidence:** the two tables as printed, read on the page: Table B.2 on PDF
+  page 57 (printed p. 55) and Table A.1 on PDF page 49 (printed p. 47) of
+  BS EN 1793-5:2016. The rest is a recomputation from the printed cells.
+- **Library behaviour:**
+  [`ReflectionIndexResult.expanded_uncertainty`](../src/phonometry/environment/propagation/barrier_reflection.py)
+  multiplies the values of Table A.1 as printed. The conformance row
+  "EN 1793-5:2016 Table B.2 (expanded uncertainty per band)" checks the
+  eleven cells that follow from them, and a test pins the other seven a
+  hundredth above the print.
+- **Status:** unreported.
+
+## EN 1793-5:2016, 5.5.7 against 5.8 (a low frequency limit read against the bands two ways)
+
+- **Location:** 5.5.7, fifth paragraph, printed folio 33 (PDF page 35), and
+  5.8, the paragraph on other purposes, the third after the list under
+  Formula (12), printed folio 43 (PDF page 45) of BS EN 1793-5:2016.
+- **The print:** 5.5.7: the qualification sample of 4 m by 4 m gives "a low
+  frequency limit for the reflection index ... of about 160 Hz at
+  microphone 2, 170 Hz at microphone 5 and 220 Hz at microphone 8 ..., i.e.
+  using the two window lengths specified in 5.5.5 measurements are valid down
+  to the 200 Hz one-third octave band". 5.8: "for a 3,5 m high barrier the
+  single number rating of sound reflection is $DL_{RI}$ (400 - 5 000 Hz),
+  because 300 Hz is the lowest frequency applicable to all microphones and
+  this invalidates the measurements in the 315 one-third octave band and
+  below".
+- **The problem:** the first example keeps a band whose centre, 200 Hz, lies
+  below the limit of one of its microphones, 220 Hz; the second drops a band
+  whose centre, 315 Hz, lies above the limit, 300 Hz. No single rule relating a
+  limit to a band gives both: against the centre, the 4 m sample loses its
+  200 Hz band; against the lower band edge (178 Hz and 282 Hz), it loses it as
+  well; against the upper band edge (224 Hz and 355 Hz), the 3,5 m barrier
+  keeps its 315 Hz band.
+- **Consequence:** the lowest reliable band $m$ of Formula (12) cannot be
+  derived from a low frequency limit by the rule the clause illustrates,
+  because the two illustrations disagree.
+- **Evidence:** both sentences as printed, read on the page: PDF page 35
+  (printed p. 33) and PDF page 45 (printed p. 43) of BS EN 1793-5:2016. The
+  band edges are the base-ten one-third octave edges,
+  $f_m \cdot 10^{\pm 1/20}$.
+- **Library behaviour:**
+  [`sound_reflection_rating`](../src/phonometry/environment/propagation/noise_reducing_devices.py)
+  and
+  [`reflection_index`](../src/phonometry/environment/propagation/barrier_reflection.py)
+  take the lowest reliable band from the caller, 200 Hz by default, which is
+  what 5.5.7 states for the qualification sample and what Annex B uses;
+  [`reflection_low_frequency_limit`](../src/phonometry/environment/propagation/barrier_reflection.py)
+  reports the limit of each microphone and leaves the choice of band to the
+  report, which states both: the low frequency limit by 5.11 n), and the
+  lowest reliable band used in the single number by 5.11 q).
+- **Status:** unreported.
+
+## EN 1793-5:2016, Table 1 against Formula (7) (what $T_{W,BH}$ is the length of)
+
+- **Location:** Table 1, the row of $T_{W,BH}$, printed folio 14 (PDF
+  page 16); 5.5.5, NOTE 1 and Formula (7), printed folio 31 (PDF page 33) of
+  BS EN 1793-5:2016.
+- **The print:** Table 1: "$T_{W,BH}$ Length of the Blackman-Harris trailing
+  edge of the Adrienne temporal window". NOTE 1: "A four-term full
+  Blackman-Harris window of length $T_{W,BH}$ is:" Formula (7), with
+  $0 \le t \le T_{W,BH}$.
+- **The problem:** Formula (7) rises from nearly zero to 1 over the first half
+  of $T_{W,BH}$ and falls back over the second, so read with the length of the
+  trailing edge in it, it draws a whole bell over those 2,22 ms rather than
+  the fall that 5.5.5 describes. The edges of the Adrienne window are halves
+  of Formula (7), each over a full window twice its own length, which is the
+  reading NOTE 1 gives and Table 1 does not.
+- **Evidence:** the row and the note as printed, read on the page: PDF
+  page 16 (printed p. 14) and PDF page 33 (printed p. 31) of
+  BS EN 1793-5:2016.
+- **Library behaviour:**
+  [`adrienne_reflection_window`](../src/phonometry/environment/propagation/barrier_reflection.py)
+  takes each edge as a half of Formula (7) over twice the edge's length, which
+  gives the window Figure 13 draws; the conformance row
+  "EN 1793-5:2016 5.5.5 and 5.5.1 (the three Adrienne windows)" checks the
+  three lengths of each window. No number changes with the reading of the row.
+- **Status:** unreported.
+
+## EN 1793-5:2016, 5.5.5 ("microphones 1 to 3, microphones 4 to 6 and microphones 1 to 9")
+
+- **Location:** 5.5.5, last paragraph, printed folio 32 (PDF page 34) of
+  BS EN 1793-5:2016; the test report template of Annex B.1, item (m), printed
+  folio 49 (PDF page 51).
+- **The print:** 5.5.5: "different window lengths for microphones 1 to 3,
+  microphones 4 to 6 and microphones 1 to 9 may be used". Annex B.1 (m):
+  "Adrienne temporal window (State length for each microphone height)",
+  followed by "Length for microphones 1–3", "Length for microphones 4–6" and
+  "Length for microphones 7–9".
+- **The problem:** the three groups of 5.5.5 overlap, since microphones 1 to
+  9 include the other six, and they leave the bottom row without a group of
+  its own. The template of the same standard names the rows of the grid, 1 to
+  3, 4 to 6 and 7 to 9, one window length per microphone height; the bottom
+  row is the one the ground reflection reaches first (5.5.7), so it is the one
+  a reduced sample most needs a window of its own for. "1 to 9" reads as a
+  misprint for "7 to 9".
+- **Evidence:** the paragraph and the template as printed, read on the page:
+  PDF page 34 (printed p. 32) and PDF page 51 (printed p. 49) of
+  BS EN 1793-5:2016.
+- **Library behaviour:**
+  [`reflection_index`](../src/phonometry/environment/propagation/barrier_reflection.py)
+  takes one window length per microphone, so the three rows of the template,
+  or any other split, can be given. No number changes with the reading.
+- **Status:** unreported.
+
+## EN 1793-5:2016, Figure 15 Key (a distance from the loudspeaker named $d_M$, and a garbled item B)
+
+- **Location:** 5.6.2.3, the Key of Figure 15, printed folio 38 (PDF page 40);
+  Table 1, printed folio 13 (PDF page 15) of BS EN 1793-5:2016.
+- **The print:** Key item 1: "Distance from the loudspeaker front panel to the
+  reference plane $d_M$ [m]". Key item B: "reference position midway and B of
+  the sample under test". Table 1: "$d_M$ Horizontal distance from the source
+  and microphone reference plane to the measurement grid; it is equal to
+  $d_M$ = 0,25 m" and "$d_S$ Horizontal distance from the front panel of the
+  loudspeaker to the source and microphone reference plane; it is equal to:
+  $d_S$ = 1,50 m".
+- **The problem:** item 1 puts the words of one distance to the symbol of
+  another. The distance from the loudspeaker front panel to the reference
+  plane is $d_S$, 1,50 m; $d_M$ is the 0,25 m from the plane to the grid, and
+  that is what the dimension marked 1 spans in Figure 15 (a), from the
+  microphones A, B and C to the dashed reference plane, with no loudspeaker
+  drawn. The drawing and the symbol agree with Table 1; the words do not.
+  Item B names B inside its own definition and has lost words: the caption of
+  Figure 15 (a) calls B the position "midway", between the most protruding
+  part (A) and the less protruding one (C).
+- **Consequence:** none numerically, since Table 1 and 3.14 fix $d_M$. A
+  reader who takes the key at its word would read $d_M$ as the 1,50 m of the
+  loudspeaker rather than the 0,25 m of the grid.
+- **Evidence:** the key, the drawing and Table 1 as printed, read on the page:
+  PDF page 40 (printed p. 38) and PDF page 15 (printed p. 13) of
+  BS EN 1793-5:2016.
+- **Library behaviour:** none required; no value is read from Figure 15.
+  `REFLECTION_SOURCE_DISTANCE_M` and `REFLECTION_MICROPHONE_DISTANCE_M` in
+  [`barrier_reflection`](../src/phonometry/environment/propagation/barrier_reflection.py)
+  carry $d_S$ = 1,50 m and $d_M$ = 0,25 m as Table 1 defines them.
+- **Status:** unreported.
+
 ## ISO 8041-1:2017, clause 12.7 ("the appropriate weighting factor (see Table 1)" for `Wf`)
 
 - **Location:** clause 12.7, printed folio 30 (PDF page 30 of the ISO release,

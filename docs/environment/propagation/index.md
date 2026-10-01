@@ -3,7 +3,7 @@
 # Outdoor sound
 
 This section is the **path**: what happens to a sound between a source of known
-power and a receiver hundreds of metres away. Its three pages go from the
+power and a receiver hundreds of metres away. Three of its pages go from the
 engineering method down to the physics it approximates, and then to the one
 thing both of them assume does not happen.
 
@@ -44,7 +44,15 @@ compresses into the scalar meteorological correction. This page computes it,
 with curved rays and closed-form shadow-zone distances, and with the Green's
 function parabolic equation as the reference field.
 
-Read them in that order. The rating that a predicted level ends in is not here:
+Read them in that order. The fourth page turns round and measures the
+barrier itself: [Sound reflection of a noise barrier
+in situ](barrier-reflection.md) takes the
+impulse responses of EN 1793-5, a loudspeaker and nine microphones in front of
+a road barrier where it stands, to the sound reflection index band by band and
+to its single number DL_RI, the in-place counterpart of the absorption rating
+the product is declared by.
+
+The rating that a predicted level ends in is not here:
 the period levels come from [Integrated and Statistical
 Levels](../../signals/levels/levels.md), and Lden, Ldn and the rating level
 from [Environmental Levels (ISO
@@ -67,6 +75,9 @@ for a machine, and in [Aircraft noise](../../aircraft/index.md) for aircraft.
 - [Atmospheric refraction: rays and the GFPE](atmospheric-refraction.md):
   the refracting atmosphere itself: effective sound-speed profiles, curved rays
   with their shadow zones, and the Green's function parabolic equation.
+- [Sound reflection of a noise barrier in situ](barrier-reflection.md):
+  the sound reflection index of EN 1793-5 measured in front of a road barrier,
+  with the signal subtraction, the Adrienne window and the single number DL_RI.
 
 ## See also
 
@@ -97,6 +108,7 @@ computed over the overall geometry, so it is coherent and reciprocal but is
 not a boundary-element solution, and no model here computes turbulent
 scattering: ISO 9613-2 absorbs it into the fixed caps on its screening term,
 and the wave-acoustic and refraction pages assume a non-turbulent atmosphere
-outright. Nothing on these pages produces a rating: no Lden, no limit value
-and no verdict (those are [Assessment and
-regulation](../assessment/index.md)).
+outright. Nothing on these pages produces an environmental rating: no Lden, no
+limit value and no verdict on a site (those are [Assessment and
+regulation](../assessment/index.md)); the single number and the
+position check of EN 1793-5 are about a product and its measurement.

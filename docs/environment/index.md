@@ -83,6 +83,9 @@ arrives.
   wave-theoretic screen diffraction.
 - [Atmospheric refraction](propagation/atmospheric-refraction.md):
   how wind and temperature gradients bend a ray into or out of a shadow zone.
+- [Sound reflection of a noise barrier in situ](propagation/barrier-reflection.md):
+  the barrier measured where it stands: the sound reflection index of EN 1793-5
+  and its single number DL_RI.
 
 ## [Environmental sources](sources/index.md)
 

@@ -1,8 +1,8 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
 r"""Single-number ratings of noise reducing devices (EN 1793, EN 16272).
 
-A barrier beside a road is not judged band by band. It is judged by two
-numbers, and both are the same operation on a spectrum nobody measures on
+A barrier beside a road is not judged band by band. It is judged by single
+numbers, and each is the same operation on a spectrum nobody measures on
 site: the normalised traffic noise spectrum of **EN 1793-3:1997**, eighteen
 one-third octave bands from 100 Hz to 5 kHz carrying relative A-weighted
 levels :math:`L_i` that stand for what a road sounds like at the roadside.
@@ -39,20 +39,40 @@ notes, and a rating there is the number and nothing more.
      \frac{\sum_{i=1}^{18} 10^{0.1 L_i}\, 10^{-0.1 R_i}}
           {\sum_{i=1}^{18} 10^{0.1 L_i}} \right|
 
-Both are reported rounded to the nearest integer (EN 1793-1 Clause 6.1,
-EN 1793-2 Clause 7.1), and both have a normative category ladder in their
-Annex A: A1 to A5 for absorption, B1 to B4 for insulation, with A0 and B0
-reserved for "not determined". The categories are read off the reported
-integer, which is why the ladders have no gaps between their steps.
+* **EN 1793-5:2016** rates the sound reflection measured in place, the
+  index :math:`RI` of
+  :mod:`~phonometry.environment.propagation.barrier_reflection`, on the same
+  spectrum but from the lowest band the size of the sample makes reliable
+  (Clause 5.8, Formula (12)):
 
-The two ratings answer different questions and are not comparable. A device
-can be a perfect reflector and still keep the noise out (high :math:`DL_R`,
-low :math:`DL_\alpha`); a device can be highly absorptive and let sound
-through (the other way round). The declaration carries both.
+  .. math::
+
+     DL_{RI} = -10 \lg\left[
+     \frac{\sum_{i=m}^{18} RI_i\, 10^{0.1 L_i}}
+          {\sum_{i=m}^{18} 10^{0.1 L_i}} \right]
+
+  The clause copies the 0,99 limit on the ratio from EN 1793-1, so a device
+  reflecting more than it receives in the weighted sum rates 0,04 dB.
+
+All three are reported rounded to the nearest integer (EN 1793-1 Clause 6.1,
+EN 1793-2 Clause 7.1, EN 1793-5 Clause 5.11). The first two have a normative
+category ladder in their Annex A: A1 to A5 for absorption, B1 to B4 for
+insulation, with A0 and B0 reserved for "not determined". The categories are
+read off the reported integer, which is why the ladders have no gaps between
+their steps. EN 1793-5 prints no ladder.
+
+Absorption and insulation answer different questions and are not
+comparable. A device can be a perfect reflector and still keep the noise out
+(high :math:`DL_R`, low :math:`DL_\alpha`); a device can be highly absorptive
+and let sound through (the other way round). The declaration carries both.
+:math:`DL_{RI}` answers the first question again, in the direct sound field
+beside the road rather than the diffuse field of a reverberation room, so it
+does not convert into :math:`DL_\alpha` either.
 """
 
 from __future__ import annotations
 
+import math
 import warnings
 from dataclasses import dataclass
 from types import MappingProxyType
@@ -60,7 +80,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from ..._internal.validation import require_finite_array
+from ..._internal.validation import require_finite_array, require_positive
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from collections.abc import Mapping
@@ -153,6 +173,18 @@ SPECTRA: Mapping[str, tuple[float, ...]] = MappingProxyType(
 #: coefficient above one cannot leave the logarithm without an argument.
 ABSORPTION_RATIO_LIMIT = 0.99
 
+#: Slack on the 0,99 maximum of EN 1793-5 Clause 5.8, so a weighted ratio
+#: that is 0,99 in decimal is not taken as above it for the last bits of the
+#: energy mean: every index read as 0,99 from 500 Hz weighs to two units in
+#: the last place above 0,99 in binary. A millionth of a millionth is far
+#: below the two decimals an index is reported to.
+_RATIO_SLACK = 1e-12
+
+#: How far, as a natural logarithm, a requested band may sit from a printed
+#: centre and still name it: a hundredth, well inside the third of an
+#: octave (0,23) that separates two centres.
+_BAND_MATCH = 0.01
+
 #: EN 1793-1:2012, Table A.1. Categories of absorptive performance, read
 #: off the reported integer: each pair is the inclusive range of that
 #: category, open at either end for A1 and A5.
@@ -182,19 +214,25 @@ class RoadDeviceWarning(UserWarning):
 class RoadDeviceRating:
     """One single-number rating of a road traffic noise reducing device.
 
-    :ivar rating: The rating before rounding, in dB. ``DLα`` (EN 1793-1) or
-        ``DL_R`` (EN 1793-2), depending on ``quantity``.
+    :ivar rating: The rating before rounding, in dB. ``DLα`` (EN 1793-1),
+        ``DL_R`` (EN 1793-2) or ``DL_RI`` (EN 1793-5), depending on
+        ``quantity``.
     :ivar reported: The same rating rounded to the nearest integer, which is
         what a test report carries and what the category is read off.
     :ivar category: The Annex A category of the reported value, ``"A1"`` to
         ``"A5"`` for absorption or ``"B1"`` to ``"B4"`` for insulation, or
-        ``None`` for a railway rating, whose standard prints no ladder.
-    :ivar quantity: ``"absorption"`` or ``"insulation"``.
+        ``None`` for a railway rating and for reflection, whose standards
+        print no ladder.
+    :ivar quantity: ``"absorption"``, ``"insulation"`` or ``"reflection"``.
     :ivar spectrum: ``"road"`` (EN 1793-3) or ``"railway"`` (EN 16272-3-1).
     :ivar bands_hz: The eighteen band centre frequencies, in Hz.
     :ivar values: The per-band input the rating was weighted from: the sound
-        absorption coefficients, or the sound reduction indices in dB.
+        absorption coefficients, the sound reduction indices in dB, or the
+        sound reflection indices (``nan`` allowed below ``lowest_band_hz``).
     :ivar weights: The normalised traffic noise spectrum, in dB.
+    :ivar lowest_band_hz: The lowest band the rating sums from: 100 Hz for
+        ``DLα`` and ``DL_R``, which sum all eighteen, and the lowest reliable
+        band :math:`m` for ``DL_RI``.
     """
 
     rating: float
@@ -205,6 +243,7 @@ class RoadDeviceRating:
     bands_hz: NDArray[np.float64]
     values: NDArray[np.float64]
     weights: NDArray[np.float64]
+    lowest_band_hz: float = TRAFFIC_NOISE_BANDS_HZ[0]
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -346,4 +385,84 @@ def airborne_insulation_rating(
         bands_hz=np.asarray(TRAFFIC_NOISE_BANDS_HZ, dtype=float),
         values=reduction,
         weights=weights,
+    )
+
+
+def sound_reflection_rating(
+    reflection_indices: ArrayLike, *, lowest_band_hz: float = 200.0
+) -> RoadDeviceRating:
+    r"""``DL_RI``, the single-number rating of sound reflection.
+
+    EN 1793-5:2016 Clause 5.8, Formula (12): the sound reflection index
+    weighted by the normalised traffic noise spectrum of EN 1793-3, summed
+    from the lowest reliable band :math:`m` to 5 kHz. For the qualification
+    sample of 4 m by 4 m that band is 200 Hz (5.5.7), the default; a smaller
+    device starts higher and the report names the range, for example
+    ``DL_RI (400 - 5 000 Hz)`` for a 3,5 m barrier. Annex B's example rates
+    7,68 dB before rounding on the two-decimal averages of Table B.1
+    (7,65 dB on its particular values), reported as 8 dB. EN 1793-5 prints no
+    category ladder.
+
+    :param reflection_indices: :math:`RI` in the eighteen one-third octave
+        bands of :data:`TRAFFIC_NOISE_BANDS_HZ`; a band below
+        ``lowest_band_hz`` may be ``nan``.
+    :param lowest_band_hz: The centre of the lowest reliable band, one of the
+        eighteen.
+    :return: The rating and its reported integer, category ``None``.
+    :raises ValueError: If there are not eighteen values, a band from
+        ``lowest_band_hz`` up is not a finite non-negative number, the band is
+        not positive or not one of the eighteen, or the weighted ratio is
+        zero.
+    :warns RoadDeviceWarning: If the weighted ratio exceeds the maximum of
+        0,99 Clause 5.8 limits it to; a ratio of 0,99 itself is not limited.
+    """
+    values = np.atleast_1d(np.asarray(reflection_indices, dtype=float))
+    bands = np.asarray(TRAFFIC_NOISE_BANDS_HZ, dtype=float)
+    if values.ndim != 1 or values.size != bands.size:
+        msg = (
+            f"reflection_indices must cover the {bands.size} one-third octave "
+            f"bands from 100 Hz to 5 kHz; got {values.size}"
+        )
+        raise ValueError(msg)
+    lowest = require_positive(lowest_band_hz, "lowest_band_hz")
+    first = int(np.argmin(np.abs(np.log(bands / lowest))))
+    if abs(math.log(bands[first] / lowest)) > _BAND_MATCH:
+        msg = (
+            f"lowest_band_hz must be one of the band centres {TRAFFIC_NOISE_BANDS_HZ}; "
+            f"got {lowest_band_hz!r}"
+        )
+        raise ValueError(msg)
+    used = values[first:]
+    if not np.all(np.isfinite(used)) or np.any(used < 0.0):
+        msg = (
+            f"reflection_indices must be finite and non-negative from the "
+            f"{bands[first]:g} Hz band upward"
+        )
+        raise ValueError(msg)
+    weights = np.asarray(SPECTRA["road"], dtype=float)
+    energy = 10.0 ** (0.1 * weights[first:])
+    ratio = float(np.sum(used * energy) / np.sum(energy))
+    if ratio > ABSORPTION_RATIO_LIMIT + _RATIO_SLACK:
+        msg = (
+            "the weighted reflection ratio exceeded the "
+            f"{ABSORPTION_RATIO_LIMIT} limit of EN 1793-5 Clause 5.8, so the "
+            f"rating is that limit rather than the measurement; the ratio was "
+            f"{ratio!r}"
+        )
+        warnings.warn(msg, RoadDeviceWarning, stacklevel=2)
+        ratio = ABSORPTION_RATIO_LIMIT
+    if ratio <= 0.0:
+        msg = "the weighted reflection ratio is zero, so DL_RI has no finite value"
+        raise ValueError(msg)
+    rating = -10.0 * math.log10(ratio)
+    return RoadDeviceRating(
+        rating=rating,
+        reported=_round_half_up(rating),
+        category=None,
+        quantity="reflection",
+        spectrum="road",
+        bands_hz=bands,
+        values=values.copy(),
+        weights=weights,
+        lowest_band_hz=float(bands[first]),
     )

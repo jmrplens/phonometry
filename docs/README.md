@@ -240,6 +240,7 @@ limits a noise map is drawn against.
 - [Outdoor Sound Propagation](environment/propagation/outdoor-propagation.md): atmospheric absorption $\alpha(f)$ (ISO 9613-1) and the ISO 9613-2 general method: divergence, atmospheric absorption, ground effect and barrier screening
 - [Spherical ground effect and advanced barriers](environment/propagation/ground-barriers.md): the Weyl-Van der Pol spherical-wave reflection coefficient over a finite-impedance ground, and wave-theoretic barriers (Kurze-Anderson Fresnel number, exact rigid half-plane, thick barriers and the coherent four-path barrier on the ground)
 - [Atmospheric refraction: rays and the GFPE](environment/propagation/atmospheric-refraction.md): effective sound-speed profiles (linear and logarithmic), ray tracing through a refracting atmosphere (curved paths, turning points, closed-form curvature radius and shadow-zone distance) and the Green's Function parabolic equation (GFPE) for the relative-level field over the range-height plane, anchored to the spherical ground effect in the homogeneous limit
+- [Sound reflection of a noise barrier in situ](environment/propagation/barrier-reflection.md): the sound reflection index of EN 1793-5 measured in front of a road noise barrier where it stands, with the signal subtraction, the Adrienne window, the single number DL_RI and the low frequency limit a sample's size sets
 
 **[Environmental sources](environment/sources/index.md)**
 

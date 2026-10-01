@@ -433,6 +433,21 @@ def _align(x: Signal | np.ndarray, fs: float | None) -> object:
     return align_impulse_responses(x, reference, fs)
 
 
+def _subtraction(x: Signal | np.ndarray, fs: float | None) -> object:
+    from phonometry.environment import subtract_direct_sound
+
+    free_field: Signal | np.ndarray
+    if isinstance(x, Signal):
+        free_field = Signal(
+            np.roll(np.asarray(x.data[0]), 1),
+            FS,
+            calibration_factor=x.calibration_factor,
+        )
+    else:
+        free_field = np.roll(x, 1)
+    return subtract_direct_sound(x, free_field, fs)
+
+
 def _strike(x: Signal | np.ndarray, fs: float | None) -> object:
     from phonometry.underwater import pile_strike_metrics
 
@@ -448,6 +463,12 @@ RESULT_FIELDS = [
     ("resample_signal.signal", _resample, ("signal",), FS // 2),
     ("align_impulse_responses", _align, ("aligned", "reference"), FS),
     ("pile_strike_metrics.pressure", _strike, ("pressure",), FS),
+    (
+        "subtract_direct_sound",
+        _subtraction,
+        ("in_front", "aligned_free_field", "residual"),
+        FS,
+    ),
 ]
 FIELD_IDS = [name for name, *_ in RESULT_FIELDS]
 

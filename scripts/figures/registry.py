@@ -215,8 +215,11 @@ from .environment import (
     generate_atmospheric_ray_fan,
     generate_atmospheric_refraction,
     generate_atmospheric_sound_speed_profiles,
+    generate_barrier_direct_sound_subtraction,
     generate_barrier_geometry,
     generate_barrier_insertion_loss_methods,
+    generate_barrier_reflection_index,
+    generate_barrier_reflection_limit,
     generate_barrier_thickness_gain,
     generate_cnossos_rail_components,
     generate_cnossos_rail_directivity,
@@ -858,6 +861,10 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     generate_iso17534_qa_cases,
     # What a road device is declared by, over the EN 1793-3 spectrum.
     generate_road_device_ratings,
+    # EN 1793-5: the sound reflection of a barrier measured where it stands.
+    generate_barrier_reflection_index,
+    generate_barrier_direct_sound_subtraction,
+    generate_barrier_reflection_limit,
     generate_atmospheric_refraction,
     generate_shadow_zone_map,
     generate_refraction_homogeneous_check,

@@ -837,6 +837,31 @@ it; the list grows as guides gain their References sections.
   The exact wedge-diffraction solution whose flat-wedge (thin-screen) limit
   the barrier insertion loss uses.
   Cited by [Spherical ground effect and advanced barriers](../environment/propagation/ground-barriers.md).
+- Garai, M., & Guidorzi, P. (2000). European methodology for testing the
+  airborne sound insulation characteristics of noise barriers in situ:
+  experimental verification and comparison with laboratory data. *Journal of
+  the Acoustical Society of America*, 108(3), 1054-1067.
+  [doi:10.1121/1.1286811](https://doi.org/10.1121/1.1286811).
+  Section III.D: the window that ends where the first unwanted component
+  arrives, and the first notch of its spectrum as the low frequency limit.
+  Cited by [Sound reflection of a noise barrier in situ](../environment/propagation/barrier-reflection.md).
+- Guidorzi, P., & Garai, M. (2013). Advancements in sound reflection and
+  airborne sound insulation measurement on noise barriers. *Open Journal of
+  Acoustics*, 3(2A), 25-38.
+  [doi:10.4236/oja.2013.32A004](https://doi.org/10.4236/oja.2013.32A004).
+  The QUIESST revision the 2016 edition of EN 1793-5 adopted: the
+  nine-microphone grid, the sub-sample alignment and the directivity
+  correction.
+  Cited by [Sound reflection of a noise barrier in situ](../environment/propagation/barrier-reflection.md).
+- European Committee for Standardization. (2016). *Road traffic noise
+  reducing devices - Test method for determining the acoustic performance -
+  Part 5: Intrinsic characteristics - In situ values of sound reflection
+  under direct sound field conditions* (EN 1793-5:2016).
+  The in situ sound reflection index of a road noise barrier: the signal
+  subtraction and Adrienne window it shares with ISO 13472-1, the
+  nine-microphone grid, the single number $DL_{RI}$ and the example of
+  Annex B.
+  Cited by [Sound reflection of a noise barrier in situ](../environment/propagation/barrier-reflection.md).
 - Kephalopoulos, S., Paviotti, M., & Anfosso-Lédée, F. (2012). *Common noise
   assessment methods in Europe (CNOSSOS-EU)* (EUR 25379 EN). Publications
   Office of the European Union.

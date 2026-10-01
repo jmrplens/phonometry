@@ -48,6 +48,12 @@ if TYPE_CHECKING:
         LoudspeakerCharacteristics,
         MicrophoneCharacteristics,
     )
+    from phonometry.emission import (
+        TurbineEnvironmentalCorrection,
+        TurbineMeasurementSurface,
+        TurbineMicrophoneArray,
+        TurbineSoundPowerResult,
+    )
     from phonometry.noise_control import (
         EnclosureResult,
         HydrodynamicValveNoise,
@@ -8107,4 +8113,201 @@ def generate_special_room_sound_power(output_dir: str) -> None:
     axb.legend(loc="lower right", fontsize="small")
     fig.tight_layout()
     save_figure(output_dir, "special_room_sound_power.svg")
+    plt.close()
+
+
+#: The large turbine set of the IEC 61063 guide, in reference boxes (length,
+#: width, height in metres, and the part each encloses): the HP and IP casings
+#: share one box and the LP turbine has its own, as Figure 2 b draws them.
+_TURBINE_SET = (
+    (6.0, 4.0, 3.5, "HP-IP"),
+    (5.0, 5.0, 4.5, "LP"),
+    (7.0, 3.5, 3.0, "Generator"),
+    (3.0, 2.5, 2.2, "Exciter"),
+)
+#: The A-weighted levels at the 23 positions of the guide's array at full
+#: load, in the order the array lists them, and the background the auxiliary
+#: plant leaves at each, in dB.
+_TURBINE_LEVELS = (
+    91.8, 93.1, 93.6, 94.2, 93.0, 90.4, 89.7, 88.2, 87.5, 88.6, 90.1, 90.9,
+    93.4, 94.6, 93.9, 92.7, 92.2, 94.0, 95.1, 93.8, 90.6, 89.3, 87.9,
+)  # fmt: skip
+_TURBINE_BACKGROUND = (
+    84.0, 84.2, 84.5, 84.8, 85.0, 83.2, 82.5, 81.4, 80.6, 81.3, 82.9, 83.4,
+    85.0, 84.8, 84.5, 84.2, 83.0, 83.0, 83.0, 83.0, 83.0, 82.0, 81.0,
+)  # fmt: skip
+
+
+#: The parts as the Spanish figures name them: HP, IP and LP turbines are
+#: "alta", "media" and "baja presión" there.
+_TURBINE_PARTS_ES = {
+    "HP-IP": "AP-MP",
+    "LP": "BP",
+    "Generator": "Generador",
+    "Exciter": "Excitatriz",
+}
+
+
+def _turbine_example() -> tuple[
+    "TurbineMeasurementSurface",
+    "TurbineMicrophoneArray",
+    "TurbineEnvironmentalCorrection",
+]:
+    """The guide's set, its positions and its turbine hall."""
+    from phonometry import emission
+
+    surface = emission.turbine_measurement_surface(
+        [
+            emission.TurbineReferenceBox(
+                length,
+                width,
+                height,
+                _TURBINE_PARTS_ES[part] if _LANG == "es" else part,
+            )
+            for length, width, height, part in _TURBINE_SET
+        ]
+    )
+    array = emission.turbine_microphone_positions(
+        surface, microphone_height_m=1.5, spacing_m=4.0, turbine_boxes=2
+    )
+    room = emission.turbine_environmental_correction(
+        surface.area_m2, volume_m3=60000.0, reverberation_time_s=3.2
+    )
+    return surface, array, room
+
+
+def generate_turbine_positions(output_dir: str) -> None:
+    """IEC 61063 Figure 2: the stepped surface and its positions, plan and side."""
+    print("Generating turbine_positions.svg...")
+    _surface, array, _room = _turbine_example()
+    fig, (plan, side) = plt.subplots(2, 1, figsize=(10.5, 10.0))
+    array.plot(ax=plan, language=_LANG)
+    array.plot(ax=side, view="elevation", language=_LANG)
+    fig.tight_layout()
+    save_figure(output_dir, "turbine_positions.svg")
+    plt.close()
+
+
+def generate_turbine_background_correction(output_dir: str) -> None:
+    """IEC 61063 Table 2 against the K1A of ISO 3746:2010 Equation (12)."""
+    print("Generating turbine_background_correction.svg...")
+    from phonometry import emission
+
+    grid = np.linspace(3.0, 12.0, 1801)
+    steps = np.asarray(emission.turbine_background_correction(grid))
+    # ISO 3746 applies its K1A to the surface-averaged levels; for one level
+    # against one background the correction is the same function of the
+    # difference, which is what is drawn.
+    iso = np.asarray(
+        emission.background_noise_correction(grid, np.zeros_like(grid), grade="survey")
+    )
+    rows = np.arange(3.0, 12.0)
+    fig, (ax, diff) = plt.subplots(
+        1, 2, figsize=(12.0, 5.2), gridspec_kw={"width_ratios": [1.25, 1.0]}
+    )
+    ax.plot(
+        grid,
+        iso,
+        color=COLOR_SECONDARY,
+        lw=2.0,
+        label="ISO 3746:2010 Equation (12), $K_{1\\mathrm{A}}$",
+    )
+    ax.plot(grid, steps, color=COLOR_PRIMARY, lw=2.0, label="Table 2 of IEC 61063")
+    ax.plot(
+        rows,
+        np.asarray(emission.turbine_background_correction(rows)),
+        linestyle="none",
+        marker="o",
+        ms=6.0,
+        color=COLOR_PRIMARY,
+        label="The printed rows",
+    )
+    ax.set_xlabel("Level with the source operating less the background [dB]")
+    ax.set_ylabel("Correction to subtract [dB]")
+    ax.set_title("Two Corrections for One Background")
+    ax.set_xlim(3.0, 12.0)
+    ax.set_ylim(-0.1, 3.3)
+    ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.5)
+    ax.legend(loc="upper right", fontsize=9)
+
+    departure = steps - iso
+    diff.axhline(0.0, color=COLOR_MUTED, lw=1.0)
+    diff.plot(
+        grid, departure, color=COLOR_PRIMARY, lw=1.8, label="Table 2 less Equation (12)"
+    )
+    diff.plot(
+        rows[:-1],
+        departure[np.searchsorted(grid, rows[:-1])],
+        linestyle="none",
+        marker="o",
+        ms=6.0,
+        color=COLOR_PRIMARY,
+        label="At the printed rows",
+    )
+    diff.set_xlabel("Level with the source operating less the background [dB]")
+    diff.set_ylabel("Difference [dB]")
+    diff.set_title("Where the Steps Leave the Curve")
+    diff.set_xlim(3.0, 12.0)
+    diff.set_ylim(-0.75, 0.75)
+    diff.grid(color=COLOR_GRID, linestyle="--", alpha=0.5)
+    diff.legend(loc="lower right", fontsize=9)
+    for panel in (ax, diff):
+        panel.set_axisbelow(True)
+        localize_panel(panel)
+    fig.tight_layout()
+    save_figure(output_dir, "turbine_background_correction.svg")
+    plt.close()
+
+
+def generate_turbine_room_correction(output_dir: str) -> None:
+    """IEC 61063 Figure A.3 with the turbine hall of the guide on it."""
+    print("Generating turbine_room_correction.svg...")
+    from phonometry import emission
+
+    _surface, _array, room = _turbine_example()
+    fig, ax = plt.subplots(figsize=(8.0, 5.4))
+    emission.check_turbine_test_environment(room).plot(ax=ax, language=_LANG)
+    fig.tight_layout()
+    save_figure(output_dir, "turbine_room_correction.svg")
+    plt.close()
+
+
+def generate_turbine_sound_power(output_dir: str) -> None:
+    """IEC 61063: the positions of the full-load run and the two-load report."""
+    print("Generating turbine_sound_power.svg...")
+    from phonometry import emission
+
+    surface, array, room = _turbine_example()
+    levels = np.asarray(_TURBINE_LEVELS)
+    background = np.asarray(_TURBINE_BACKGROUND)
+
+    def run(drop_db: float) -> "TurbineSoundPowerResult":
+        return emission.turbine_sound_power(
+            levels - drop_db,
+            surface_area_m2=surface.area_m2,
+            background_levels_db=background,
+            environmental_correction_db=room.environmental_correction_db,
+            overhead_mask=array.overhead_mask,
+        )
+
+    full = run(0.0)
+    half, rated = (
+        ("50 % de carga", "100 % de carga")
+        if _LANG == "es"
+        else ("50 % load", "100 % load")
+    )
+    report = emission.turbine_noise_declaration(
+        {half: run(1.5), rated: full},
+        turbine="Three-casing condensing set, 60 MW, generator and exciter",
+        noise_control="none",
+        measured_at="2026-09-25, 10:30 to 12:10",
+        tonal=True,
+    )
+    fig, (ax, bars) = plt.subplots(
+        1, 2, figsize=(13.0, 5.4), gridspec_kw={"width_ratios": [2.0, 1.0]}
+    )
+    full.plot(ax=ax, position_labels=array.labels, language=_LANG)
+    report.plot(ax=bars, language=_LANG)
+    fig.tight_layout()
+    save_figure(output_dir, "turbine_sound_power.svg")
     plt.close()

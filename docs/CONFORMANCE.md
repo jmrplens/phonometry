@@ -19,7 +19,7 @@
 
 ## Numerical conformance report
 
-**1683/1683 conformance checks pass** across 105 domains and 508 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+**1691/1691 conformance checks pass** across 106 domains and 509 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub><b>&#916;</b> is the difference between the computed value and the one the standard publishes. <b>Used</b> is how much of that clause's published tolerance the difference consumes: 100 % means it sits exactly on the limit, 5 % means it uses a twentieth of the allowance, and a dash means the clause states no two-sided tolerance for the quantity, so there is no budget to spend. It is reported and never used to decide a verdict, which is settled at full precision before any rounding.</sub>
 
@@ -2435,6 +2435,22 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | EN 16487:2014 4.1.1.1.1 and 4.1.1.2.3.1 (printed folios 6 and 9, PDF pages 8 and 11) | Four real suspended-ceiling arrangements judged against the printed 10,80 m2 and the printed 200 mm | 4/4 against the 10,80 m2 of 4.1.1.1.1 and the 200 mm of 4.1.1.2.3.1 | 4/4 arrangements judged as the two clauses print them | exact | 0 % | ![Pass][cv-pass] Pass |
 | EN 16487:2014 4.2.2 (printed folio 12, PDF page 14) | The 50 % relative humidity floor against the room climates three laboratories printed | 3/3 against the 50 % of 4.2.2, one of them below it | 3/3 printed climates judged against the floor of the clause | exact | 0 % | ![Pass][cv-pass] Pass |
 | EN 16487:2014 Table 1 footnote b with EN ISO 11654:1997 4.1 and 4.2 (printed folios 2 and 3) | The weighted rating and absorption class three laboratories printed for their own suspended ceilings | 3/3 printed alpha_w with class and indicator, and 5/5 printed alpha_p | 8/8 printed ratings and practical coefficients reproduced | exact | 0 % | ![Pass][cv-pass] Pass |
+
+</details>
+
+<details>
+<summary><b>Steam turbine sets (IEC 61063)</b>: 100% (8/8)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
+|:---|:---|:---|:---|:---|:---:|:---:|
+| IEC 61063:1991 Table 2 (BS EN 61063:1996, printed folio 8, PDF page 14) | Correction for background noise, the nine printed rows from a difference of 3 dB to one above 10 dB | 3 dB = 3 dB; 4 dB = 2 dB; 5 dB = 2 dB; 6 dB = 1 dB; 7 dB = 1 dB; 8 dB = 1 dB; 9 dB = 0.5 dB; 10 dB = 0.5 dB; > 10 dB, at 11 dB = 0 dB; > 10 dB, at 10,2 dB = 0 dB | 3 dB = 3 dB; 4 dB = 2 dB; 5 dB = 2 dB; 6 dB = 1 dB; 7 dB = 1 dB; 8 dB = 1 dB; 9 dB = 0.5 dB; 10 dB = 0.5 dB; > 10 dB, at 11 dB = 0 dB; > 10 dB, at 10,2 dB = 0 dB | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61063:1991 Table 1 (BS EN 61063:1996, printed folio 4, PDF page 10) | Standard deviation of the A-weighted sound power level by the survey method, with and without prominent discrete tones | tonal = 5 dB; broadband = 4 dB | tonal = 5 dB; broadband = 4 dB | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61063:1991 7.1 (BS EN 61063:1996, printed folio 7, PDF page 13) | The measurement surface stands 1 m from the reference box on every side but the floor | length = 2 m; width = 2 m; height = 1 m | length = 2 m; width = 2 m; height = 1 m | exact | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61063:1991 Equation (1) (BS EN 61063:1996, printed folio 7, PDF page 13) | Area of the measurement surface around the large set of Figure 2 b against the exact area of the stepped surface | 410.1 m² (+/-0 m²) | 410.1 m² | 0 m² | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61063:1991 Figure A.3 (BS EN 61063:1996, printed folio 12, PDF page 18) | The environmental correction against the formula the figure prints, K = 10 lg[1 + 4/(A/S)], across the A/S it labels | max abs(K - 10 lg[1 + 4/(A/S)]) <= 1e-9 dB at 9 values of A/S | 0 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| IEC 61063:1991 Figure A.3 against A.3.3 (BS EN 61063:1996, printed folios 12 and 13, PDF pages 18 and 19) | The A/S at which the environmental correction reaches the 7 dB limit, against the A/S of 1 the clause restates the limit as | 1 (+/-0.5) | 0.997 | -0.003 | 1 % | ![Pass][cv-pass] Pass |
+| IEC 61063:1991 8.3 NOTE (BS EN 61063:1996, printed folio 9, PDF page 15) | Largest gap between the arithmetic average and Equation (2) for levels spanning 5 dB | 0.7 dB (+/-0.05 dB) | 0.707 dB | 0.007 dB | 14 % | ![Pass][cv-pass] Pass |
+| IEC 61063:1991 4.2, 4.3, 7.2.2 and A.3.3 (BS EN 61063:1996, printed folios 5, 6, 8 and 12) | The background, wind, overhead and environmental limits, judged at the printed value and just past it | every limit holds at the printed value and fails past it | 4.2 at 3 dB = 1; 4.2 below 3 dB = 1; 4.3 below 6 m/s = 1; 4.3 at 6 m/s = 1; A.3.3 at 7 dB = 1; A.3.3 above 7 dB = 1; 7.2.2 at 1,0 dB = 1; 7.2.2 above 1,0 dB = 1 | exact | 0 % | ![Pass][cv-pass] Pass |
 
 </details>
 

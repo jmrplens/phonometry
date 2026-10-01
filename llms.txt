@@ -1,8 +1,8 @@
 # phonometry
 
-> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1683 numerical conformance checks against 508 standards enforced in CI.
+> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1691 numerical conformance checks against 509 standards enforced in CI.
 
-phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1683 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 105 domains.
+phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1691 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 106 domains.
 
 The project was published as **PyOctaveBand** until version 3.0.0. Third-party references and dependency pins still using that name refer to this library.
 
@@ -321,11 +321,16 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 
 - [Overview](https://jmrplens.github.io/phonometry/devices/emission/) · [full text](https://jmrplens.github.io/phonometry/llms/llms-devices-emission.txt)
 - [Sound Power](https://jmrplens.github.io/phonometry/devices/emission/sound-power/)
-- [Sound Power by Pressure Methods (ISO 3744 / ISO 3746 / ISO 3745)](https://jmrplens.github.io/phonometry/devices/emission/sound-power-pressure/)
-- [Free Field and Reference Sources (ISO 26101 / ISO 6926)](https://jmrplens.github.io/phonometry/devices/emission/free-field-qualification/)
 - [Sound Power in a Duct (ISO 5136)](https://jmrplens.github.io/phonometry/devices/emission/sound-power-in-duct/)
 - [Sound power from surface vibration (ISO/TS 7849)](https://jmrplens.github.io/phonometry/devices/emission/vibration-sound-power/)
 - [Emission Sound Pressure at a Work Station (ISO 11200 group)](https://jmrplens.github.io/phonometry/devices/emission/workstation-emission/)
+
+### Sound power on an enveloping surface
+
+- [Overview](https://jmrplens.github.io/phonometry/devices/emission/) · [full text](https://jmrplens.github.io/phonometry/llms/llms-devices-emission-enveloping.txt)
+- [Sound Power by Pressure Methods (ISO 3744 / ISO 3746 / ISO 3745)](https://jmrplens.github.io/phonometry/devices/emission/sound-power-pressure/)
+- [Free Field and Reference Sources (ISO 26101 / ISO 6926)](https://jmrplens.github.io/phonometry/devices/emission/free-field-qualification/)
+- [Sound Power of Steam Turbine Sets (IEC 61063)](https://jmrplens.github.io/phonometry/devices/emission/sound-power-turbines/)
 
 ### Sound power in a reverberant field
 
@@ -460,6 +465,7 @@ One file per area, each small enough to fetch whole. `llms-full.txt` is the comp
 - [Underwater acoustics](https://jmrplens.github.io/phonometry/llms/llms-underwater.txt)
 - [Sources and devices](https://jmrplens.github.io/phonometry/llms/llms-devices.txt)
 - [Sound power and intensity](https://jmrplens.github.io/phonometry/llms/llms-devices-emission.txt)
+- [Sound power on an enveloping surface](https://jmrplens.github.io/phonometry/llms/llms-devices-emission-enveloping.txt)
 - [Sound intensity and sound power from it](https://jmrplens.github.io/phonometry/llms/llms-devices-emission-intensity.txt)
 - [Sound power in a reverberant field](https://jmrplens.github.io/phonometry/llms/llms-devices-emission-reverberant.txt)
 - [Electroacoustics](https://jmrplens.github.io/phonometry/llms/llms-devices-electroacoustics.txt)
@@ -641,6 +647,7 @@ The generated API reference, one page per module. Fetch these only when a specif
 - [power/sound-power-intensity-points](https://jmrplens.github.io/phonometry/reference/api/power/sound-power-intensity-points/)
 - [power/sound-power-reverberation](https://jmrplens.github.io/phonometry/reference/api/power/sound-power-reverberation/)
 - [power/sound-power-special-room](https://jmrplens.github.io/phonometry/reference/api/power/sound-power-special-room/)
+- [power/turbine-noise](https://jmrplens.github.io/phonometry/reference/api/power/turbine-noise/)
 - [power/vibration-sound-power](https://jmrplens.github.io/phonometry/reference/api/power/vibration-sound-power/)
 - [power/workstation](https://jmrplens.github.io/phonometry/reference/api/power/workstation/)
 - [psychoacoustics/annoyance](https://jmrplens.github.io/phonometry/reference/api/psychoacoustics/annoyance/)

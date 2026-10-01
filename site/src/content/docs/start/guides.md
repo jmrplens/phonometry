@@ -1,6 +1,6 @@
 ---
 title: "Guides"
-description: "The 157 guides of phonometry, grouped into the thirteen topics the library covers: what each area is for, the standards implemented in it, and a one-line summary of every guide inside it."
+description: "The 158 guides of phonometry, grouped into the thirteen topics the library covers: what each area is for, the standards implemented in it, and a one-line summary of every guide inside it."
 head:
   - tag: script
     attrs:
@@ -117,7 +117,7 @@ makes, then runnable code and the figure it draws. Nothing here is a survey of
 the field; each page is the working documentation of a module, written so that
 a result can be defended clause by clause rather than trusted.
 
-This page is the map. A hundred and fifty-seven guides sit in thirteen topics, and each topic has its
+This page is the map. A hundred and fifty-eight guides sit in thirteen topics, and each topic has its
 own overview page with the longer story of how its pieces fit together. If you
 are arriving without a specific question, read
 [Getting Started](/phonometry/start/getting-started/) first: it runs one signal
@@ -833,6 +833,10 @@ IEC 61043, ISO 4871, IEC 60268-3/-4/-5, ITU-R BS.1770-5 and EBU R 128.
   the four ISO 9295 methods above the range of ISO 3741 and ISO 3744, with the
   room constant from the reverberation time or from the air absorption, and
   the comparison for tones.
+- [Sound Power of Steam Turbine Sets](/phonometry/devices/emission/sound-power-turbines/):
+  the IEC 61063 test code for a turbine set in its hall, with the stepped
+  surface 1 m out, the key positions of Figure 2, the stepped background
+  correction of Table 2 and the report of clause 10.
 - [Sound Power by Intensity Scanning](/phonometry/devices/emission/sound-power-intensity/):
   the on-site scanning of ISO 9614-2 and the ISO 9614-3 precision grade.
 - [Emission Sound Pressure at a Work Station](/phonometry/devices/emission/workstation-emission/):

@@ -152,8 +152,12 @@ from result_factories import (
     _time_invariance,
     _tone_search,
     _train_passage,
+    _turbine_array,
+    _turbine_declaration,
     _turbine_levels,
     _turbine_levels_by_sector,
+    _turbine_power,
+    _turbine_surface,
     _vibration_meter_reading,
     _vibration_meter_verification,
     _wind_shear,
@@ -281,6 +285,26 @@ _KWARG_PLOT_CASES = [
     ("reference_source_calibration", _reference_source_calibration, "bar"),
     ("reference_sound_source", _reference_sound_source, "line"),
     ("reference_source_drift", _reference_source_drift, "bar"),
+    ("turbine_surface", _turbine_surface, "line"),
+    ("turbine_array", _turbine_array, "line"),
+    (
+        "turbine_environment",
+        lambda: ph.emission.check_turbine_test_environment(
+            ph.emission.turbine_environmental_correction(
+                _turbine_surface().area_m2, absorption_area_m2=900.0
+            )
+        ),
+        "line",
+    ),
+    (
+        "turbine_correction",
+        lambda: ph.emission.turbine_reference_source_correction(
+            [95.0, 96.0], calibrated_level_db=93.0, machine_length_m=8.0
+        ),
+        "line",
+    ),
+    ("turbine_power", _turbine_power, "bar"),
+    ("turbine_declaration", _turbine_declaration, "bar"),
     ("sound_energy", _sound_energy, "bar"),
     ("reverb_energy", _reverb_energy, "bar"),
     ("intensity_power", _intensity_power_negative, "bar"),
@@ -911,6 +935,10 @@ def test_single_axes_plots_accept_external_ax() -> None:
         _slm_periodic().requirement("toneburst"),
         _slm_periodic().requirement("electrical_weighting"),
         _time_invariance(),
+        _turbine_surface(),
+        _turbine_array(),
+        _turbine_power(),
+        _turbine_declaration(),
         ph.aircraft.load_anp_database().flight_profile(
             "A320-211", "departure", aerodrome=ph.aircraft.Aerodrome(elevation_ft=0.0)
         ),

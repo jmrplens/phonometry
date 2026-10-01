@@ -159,6 +159,10 @@ from figures.devices import (
     generate_special_room_reverberation,
     generate_special_room_sound_power,
     generate_swept_sine_thd,
+    generate_turbine_background_correction,
+    generate_turbine_positions,
+    generate_turbine_room_correction,
+    generate_turbine_sound_power,
     generate_vibration_sound_power,
 )
 from figures.environment import (
@@ -633,6 +637,10 @@ __all__ = [
     "generate_free_field_deviations",
     "generate_free_field_check",
     "generate_reference_source_calibration",
+    "generate_turbine_background_correction",
+    "generate_turbine_positions",
+    "generate_turbine_room_correction",
+    "generate_turbine_sound_power",
     "generate_helmholtz_resonator_geometry",
     "generate_hilbert_envelope",
     "generate_hms_modulation_bandpass",

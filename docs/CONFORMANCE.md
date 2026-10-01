@@ -19,7 +19,7 @@
 
 ## Numerical conformance report
 
-**1539/1539 conformance checks pass** across 98 domains and 490 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+**1562/1562 conformance checks pass** across 100 domains and 493 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub><b>&#916;</b> is the difference between the computed value and the one the standard publishes. <b>Used</b> is how much of that clause's published tolerance the difference consumes: 100 % means it sits exactly on the limit, 5 % means it uses a twentieth of the allowance, and a dash means the clause states no two-sided tolerance for the quantity, so there is no budget to spend. It is reported and never used to decide a verdict, which is settled at full precision before any rounding.</sub>
 
@@ -1347,6 +1347,45 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 |:---|:---|:---|:---|:---|:---:|:---:|
 | EN 12354-6:2003 Formula 1 | Equivalent absorption area, Annex E bare room | 2.26 m² (+/-0.01 m²) | 2.26 m² | 0.003 m² | 30 % | ![Pass][cv-pass] Pass |
 | EN 12354-6:2003 Formula 5 | Reverberation time, Annex E bare room | 2.1 s (+/-0.1 s) | 2.1 s | 0.003 s | 6 % | ![Pass][cv-pass] Pass |
+
+</details>
+
+<details>
+<summary><b>Audiometric test methods (ISO 8253)</b>: 100% (19/19)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
+|:---|:---|:---|:---|:---|:---:|:---:|
+| ISO 8253-1:2010 Table 2 | Maximum permissible ambient levels for air conduction, three test ranges | 75/75 cells of Table 2 | 75/75 cells of Table 2 | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 8253-1:2010 Table 3 | Average sound attenuation of the supra-aural, ER-3A and HDA 200 earphones | 75/75 cells of Table 3 | 75/75 cells of Table 3 | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 8253-1:2010 Table 4 | Maximum permissible ambient levels for bone conduction, two test ranges | 50/50 cells of Table 4 | 50/50 cells of Table 4 | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 8253-1:2010 11.1 | The limit at 1 kHz with each adjustment of 11.1 and the NOTE to Table 2 | supra-aural = 23 dB; ER-3A = 45 dB; shift +5 dB = 31 dB; lowest HL 10 dB = 33 dB | supra-aural = 23 dB; ER-3A = 45 dB; shift +5 dB = 31 dB; lowest HL 10 dB = 33 dB | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 8253-1:2010 A.3.3 | Audiometer standard uncertainty, air conduction up to 4 kHz, 5 dB steps | u(delta_eq) = 2.3 dB | u(delta_eq) = 2.3 dB | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 8253-1:2010 A.3.4 | Transducer standard uncertainty up to and above 4 kHz | up to 4 kHz = 2.9 dB; above 4 kHz = 3.9 dB | up to 4 kHz = 2.9 dB; above 4 kHz = 3.9 dB | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 8253-1:2010 Table A.2 | The four components, combined and expanded uncertainty, air conduction below 4 kHz, no masking | u1 L'_HT = 2.5 dB; u2 delta_eq = 2.3 dB; u3 delta_tr = 2.9 dB; u4 delta_n = 2 dB; u = 4.9 dB; U = 10 dB | u1 L'_HT = 2.5 dB; u2 delta_eq = 2.3 dB; u3 delta_tr = 2.9 dB; u4 delta_n = 2 dB; u = 4.9 dB; U = 10 dB | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 8253-1:2010 6.2.4.2 | Ascending method: three responses at one level out of five ascents | threshold = 30 dB | threshold = 30 dB | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 8253-1:2010 6.2.4.3 | Bracketing method: mean of the two averages to the nearest 5 dB step | mean = 33.333 dB; threshold = 35 dB | mean = 33.333 dB; threshold = 35 dB | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 8253-1:2010 6.3.5 | Automatic recording: first reversal and small excursions dropped, rounded up | peaks = 30.5 dB; valleys = 20 dB; mean = 25.25 dB; threshold = 26 dB | peaks = 30.5 dB; valleys = 20 dB; mean = 25.25 dB; threshold = 26 dB | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 8253-1:2010 7.5 | Sweep-frequency audiometry: three nearest peaks and valleys, rounded | mean = 25.3 dB; threshold = 25 dB | mean = 25.3 dB; threshold = 25 dB | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 8253-1:2010 6.2.3.2, Step 3 | Repeat at 1 kHz: 5 dB or less agrees, 10 dB or more retests further | 4/4 repeats judged as Step 3 words it | 4/4 repeats judged as Step 3 words it | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 8253-1:2010 6.2.3.2 | Cross-hearing: a hearing level of 40 dB or more calls for caution | 3/3 levels judged as 6.2.3.2 words it | 3/3 levels judged as 6.2.3.2 words it | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 8253-1:2010 8.4 | Average vibrotactile threshold, mastoid and forehead placement | 250 Hz mastoid = 40 dB; 500 Hz mastoid = 60 dB; 1000 Hz mastoid = 70 dB; 250 Hz forehead = 30 dB; 500 Hz forehead = 50 dB; 1000 Hz forehead = 60 dB | 250 Hz mastoid = 40 dB; 500 Hz mastoid = 60 dB; 1000 Hz mastoid = 70 dB; 250 Hz forehead = 30 dB; 500 Hz forehead = 50 dB; 1000 Hz forehead = 60 dB | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 8253-2:2009 Table 2 | Maximum permissible ambient levels for sound field audiometry, to 12,5 kHz | 54/54 cells of Table 2 | 54/54 cells of Table 2 | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 8253-2:2009 Table 2, footnote a | Derived from ISO 8253-1 for binaural listening; the cells equal Table 4 less 3 dB, an offset the library reads off the two tables | 50/50 cells equal to Table 4 less 3 dB | 50/50 cells equal to Table 4 less 3 dB | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 8253-2:2009 Table B.1 | Increase at the nearer ear at 45 and 90 degrees, 125 Hz to 12,5 kHz | 48/48 cells of Table B.1 | 48/48 cells of Table B.1 | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 8253-2:2009 Table 1 | Allowable field variation by the microphone's front-to-random index | index 5 dB = 5 dB; index 4.5 dB = 4.5 dB; index 4 dB = 4 dB | index 5 dB = 5 dB; index 4.5 dB = 4.5 dB; index 4 dB = 4 dB | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 8253-2:2009 5.2 c) and 5.4 c) | Axial level difference the inverse distance law gives at 1 m (closed form; the standard prints no value) | free = 2.626 dB; quasi-free = 1.743 dB | free = 2.626 dB; quasi-free = 1.743 dB | exact | 0 % | ![Pass][cv-pass] Pass |
+
+</details>
+
+<details>
+<summary><b>Earmuff insertion loss on a test fixture (ISO 4869-3)</b>: 100% (4/4)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
+|:---|:---|:---|:---|:---|:---:|:---:|
+| ISO 4869-3:2007 Table B.1 and B.4 | Combined and expanded uncertainty of the typical budget | u = 1.3 dB; U = 2.6 dB | u = 1.3 dB; U = 2.6 dB | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 4869-3:2007 5.2.2, Table 1 | Allowable field variation, read with the text for an index of 5 dB | index 5 dB = 5 dB; index 4.5 dB = 4 dB; index 4 dB = 4 dB | index 5 dB = 5 dB; index 4.5 dB = 4 dB; index 4 dB = 4 dB | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 4869-3:2007 Table A.1 | Front-to-random index of the fixture, and the bands it may test itself | 14/14 cells of Table A.1 and its suitable bands | 14/14 cells of Table A.1 and its suitable bands | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 4869-3:2007 5.1.4 | Least acoustic isolation of the fixture in each band, 63 Hz to 8 kHz | 22/22 bands of 5.1.4 | 22/22 bands of 5.1.4 | exact | 0 % | ![Pass][cv-pass] Pass |
 
 </details>
 

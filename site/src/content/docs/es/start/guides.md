@@ -1,6 +1,6 @@
 ---
 title: "Guías"
-description: "Las 150 guías de phonometry, agrupadas en los trece temas que cubre la biblioteca: para qué sirve cada área, las normas que implementa y un resumen de una línea de cada guía que contiene."
+description: "Las 151 guías de phonometry, agrupadas en los trece temas que cubre la biblioteca: para qué sirve cada área, las normas que implementa y un resumen de una línea de cada guía que contiene."
 head:
   - tag: script
     attrs:
@@ -118,7 +118,7 @@ hay ninguna panorámica del campo: cada página es la documentación de trabajo 
 un módulo, escrita para que un resultado se pueda defender apartado por
 apartado en lugar de darlo por bueno.
 
-Esta página es el mapa. Ciento cincuenta guías repartidas en trece temas, y cada
+Esta página es el mapa. Ciento cincuenta y una guías repartidas en trece temas, y cada
 área tiene su propio índice con el relato largo de cómo encajan sus piezas. Si
 llegas sin una pregunta concreta, lee primero la
 [introducción](/phonometry/es/start/getting-started/): recorre una señal por toda la
@@ -337,7 +337,7 @@ oyente con él: cuán fuerte le parece, cuán agudo, rugoso o molesto, cuánto
 sobrevive de un locutor tras pasar por la sala, y cuánta audición cuesta una
 vida laboral en ese ruido. Implementa ISO 532-1/-2/-3, ECMA-418-1/-2, ISO 226,
 DIN 45692, IEC 60268-16, ANSI S3.5, DIN 45681, ISO/PAS 20065, ISO 7029,
-ISO 389-7, ISO 1999 e ISO 9612.
+ISO 389-7, ISO 8253-1/-2, ISO 1999, ISO 9612 e ISO 4869-1/-2/-3/-6.
 
 **[Psicoacústica](/phonometry/es/perception/psychoacoustics/)**
 
@@ -378,16 +378,22 @@ ISO 389-7, ISO 1999 e ISO 9612.
 - [Umbral de audición (edad y cero de referencia)](/phonometry/es/perception/hearing/hearing-threshold/):
   la distribución del umbral con la edad de ISO 7029 y el umbral de audición de
   referencia de ISO 389-7.
+- [Métodos de ensayo audiométricos (ISO 8253-1 y -2)](/phonometry/es/perception/hearing/audiometry/):
+  si la sala de ensayo es lo bastante silenciosa y su campo sonoro libre, cuasi
+  libre o difuso, las reglas que convierten las respuestas en un nivel del
+  umbral de audición, y su incertidumbre.
 - [Pérdida auditiva inducida por ruido (ISO 1999)](/phonometry/es/perception/hearing/noise-induced-hearing-loss/):
   el desplazamiento permanente del umbral en función del nivel, la duración y la
   frecuencia, combinado con la componente de la edad.
 - [Exposición al ruido en el trabajo (ISO 9612)](/phonometry/es/perception/hearing/occupational-exposure/):
   las estrategias por tareas, basadas en la función y de jornada completa para
   $L_\mathrm{EX,8h}$, con el balance de incertidumbre y el límite superior.
-- [Protectores auditivos (ISO 4869-1, -2 y -6)](/phonometry/es/perception/hearing/hearing-protectors/):
+- [Protectores auditivos (ISO 4869-1, -2, -3 y -6)](/phonometry/es/perception/hearing/hearing-protectors/):
   la atenuación medida sobre dieciséis sujetos con su incertidumbre y su prueba
   de significación, los métodos por bandas de octava, HML y SNR que dicen lo que
-  un protector deja en el oído, y lo que añade una orejera de reducción activa.
+  un protector deja en el oído, lo que añade una orejera de reducción activa, y
+  la pérdida por inserción con la que se criba una orejera sobre un montaje de
+  ensayo.
 
 ## [Salas y edificación](/phonometry/es/buildings/)
 

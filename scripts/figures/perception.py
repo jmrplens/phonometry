@@ -4481,3 +4481,128 @@ def generate_audiometric_zero_earphones(output_dir: str) -> None:
     plt.tight_layout()
     save_figure(output_dir, "audiometric_zero_earphones.svg")
     plt.close()
+
+
+#: A single-walled booth whose ventilation leaves low-frequency noise behind:
+#: its one-third-octave ambient levels from 31,5 Hz to 8 kHz, in dB.
+_BOOTH_AMBIENT_DB = (
+    50.0, 48.0, 45.0, 43.0, 40.0, 36.0, 30.0, 24.0, 19.0, 16.0, 14.0, 12.0, 11.0,
+    10.0, 10.0, 10.0, 9.0, 9.0, 9.0, 8.0, 8.0, 8.0, 8.0, 8.0, 8.0,
+)  # fmt: skip
+
+
+def generate_audiometry_test_room(output_dir: str) -> None:
+    """ISO 8253-1 Clause 11: one booth, two earphones, Tables 2 and 3."""
+    print("Generating audiometry_test_room...")
+    from phonometry import hearing
+
+    supra_aural = hearing.check_audiometric_ambient_noise(_BOOTH_AMBIENT_DB)
+    insert = hearing.check_audiometric_ambient_noise(
+        _BOOTH_AMBIENT_DB, earphone="ER-3A"
+    )
+    fig, (ax_supra, ax_insert) = plt.subplots(1, 2, figsize=(13.5, 5.6), sharey=True)
+    supra_aural.plot(ax_supra, language=_LANG)
+    insert.plot(ax_insert, language=_LANG)
+    fig.tight_layout()
+    save_figure(output_dir, "audiometry_test_room.svg")
+    plt.close()
+
+
+def generate_audiometry_threshold_rules(output_dir: str) -> None:
+    """ISO 8253-1 6.2.4.2 and 6.3.5: an ascending series and a tracing."""
+    print("Generating audiometry_threshold_rules...")
+    from phonometry import hearing
+
+    ascending = hearing.ascending_method_threshold(
+        presentation_levels_db=[30, 20, 25, 15, 20, 25, 15, 20, 10, 15, 20, 25],
+        responses=[1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 1],
+        familiarization_level_db=40.0,
+    )
+    tracing = hearing.automatic_audiometry_threshold(
+        [38, 22, 31, 21, 32, 20, 30, 29, 31, 19, 30, 20, 31, 21]
+    )
+    fig, (ax_manual, ax_auto) = plt.subplots(1, 2, figsize=(13.5, 5.6))
+    ascending.plot(ax_manual, language=_LANG)
+    tracing.plot(ax_auto, language=_LANG)
+    fig.tight_layout()
+    save_figure(output_dir, "audiometry_threshold_rules.svg")
+    plt.close()
+
+
+def generate_audiometry_sound_field(output_dir: str) -> None:
+    """ISO 8253-2 5.3 and 5.4: a quasi-free field and a diffuse one."""
+    print("Generating audiometry_sound_field...")
+    from phonometry import hearing
+
+    # A treated room with the loudspeaker 1.2 m from the listener: the room's
+    # modes spoil the two lowest bands, so the usable range starts at 500 Hz.
+    lateral = {
+        "left": [2.6, -2.2, 0.8, 0.6, -0.4, 0.5, 0.9, -0.7, 1.2, -1.1, 1.4],
+        "right": [-2.4, 1.9, -0.6, 0.3, 0.7, -0.8, 0.4, 1.1, -1.3, 1.5, -0.9],
+        "up": [1.2, 2.3, 0.5, -0.9, 0.2, 0.6, -0.5, 0.8, 0.4, -1.2, 1.6],
+        "down": [-1.5, -1.8, -0.9, 0.4, -0.6, -0.3, 0.7, -0.4, -0.8, 0.9, -1.7],
+    }
+    law = 20.0 * np.log10(1.3 / 1.1)
+    front = law + np.array([1.8, 1.2, 0.4, -0.3, 0.2, -0.4, 0.3, 0.5, -0.2, 0.6, -0.5])
+    quasi = hearing.check_quasi_free_sound_field(
+        lateral,
+        np.zeros(11),
+        front_levels_db=front,
+        back_levels_db=np.zeros(11),
+        loudspeaker_distance_m=1.2,
+    )
+    # Four loudspeakers fed with uncorrelated narrow bands of noise.
+    six = {
+        "front": [1.4, 0.9, 0.6, -0.8, 0.5, 1.1, -0.4, 0.7, -0.6, 0.9, 1.2],
+        "back": [-1.2, -0.6, 0.8, 0.5, -0.9, -0.7, 0.6, -0.5, 0.8, -1.0, -0.8],
+        "left": [0.8, 1.3, -0.5, 0.9, 0.4, -0.6, 1.0, 0.6, -0.9, 0.5, 1.4],
+        "right": [-0.9, -1.1, 0.7, -0.4, -0.8, 0.9, -0.7, -0.8, 0.7, -0.6, -1.1],
+        "up": [2.1, 1.6, -1.1, 0.6, 1.2, -0.9, 0.8, -1.2, 0.5, 1.3, -0.7],
+        "down": [-1.8, -1.4, 0.9, -1.0, -0.5, 0.8, -1.1, 0.9, -0.4, -0.9, 0.6],
+    }
+    readings = np.zeros((2, 11))
+    readings[1] = [np.nan, np.nan, 3.1, 2.7, 3.4, 2.9, 3.8, 3.2, 3.6, 4.1, 4.3]
+    diffuse = hearing.check_diffuse_sound_field(
+        six,
+        np.zeros(11),
+        directional_levels_db=readings,
+        front_to_random_index_db=5.0,
+    )
+    fig, (ax_quasi, ax_diffuse) = plt.subplots(1, 2, figsize=(13.5, 5.6))
+    quasi.plot(ax_quasi, language=_LANG)
+    diffuse.plot(ax_diffuse, language=_LANG)
+    fig.tight_layout()
+    save_figure(output_dir, "audiometry_sound_field.svg")
+    plt.close()
+
+
+def generate_hearing_protector_insertion_loss(output_dir: str) -> None:
+    """ISO 4869-3: an earmuff on the test fixture, and the fixture's isolation."""
+    print("Generating hearing_protector_insertion_loss...")
+    from phonometry import hearing
+
+    bands = np.asarray(hearing.EARMUFF_TEST_BANDS_HZ)
+    loss = np.array(
+        [7.5, 9.0, 11.0, 13.5, 16.5, 20.0, 23.5, 27.0, 30.0, 32.5, 34.5, 36.0]
+        + [37.0, 37.5, 37.0, 36.0, 35.5, 36.5, 38.0, 37.0, 35.0, 33.5]
+    )
+    spread = np.array([[-0.6], [0.1], [0.5]]) * np.linspace(1.0, 2.2, bands.size)
+    open_levels = np.full(bands.size, 88.0)
+    fittings = open_levels - loss + spread
+    insertion = hearing.earmuff_insertion_loss(
+        open_levels, fittings, isolation_cup_levels_db=open_levels - 70.0
+    )
+    isolation = hearing.verify_fixture_isolation(
+        np.full(bands.size, 120.0),
+        120.0
+        - np.array(
+            [54, 55, 57, 59, 61, 63, 66, 68, 70, 71, 72, 73, 74, 74, 73, 72, 71]
+            + [70, 68, 64, 61, 59]
+        ),
+    )
+    fig, (ax_loss, ax_isolation) = plt.subplots(1, 2, figsize=(13.5, 5.6))
+    insertion.plot(ax_loss, language=_LANG)
+    isolation.plot(ax_isolation, language=_LANG)
+    fig.tight_layout()
+    save_figure(output_dir, "hearing_protector_insertion_loss.svg")
+    plt.close()

@@ -3,13 +3,13 @@
   "library": "4.0.0rc1",
   "generator": "scripts/conformance_report.py",
   "counts": {
-    "checks": 1539,
-    "passing": 1539,
+    "checks": 1562,
+    "passing": 1562,
     "failing": 0,
-    "domains": 98,
-    "standards": 490,
-    "citations": 1058,
-    "designations": 201,
+    "domains": 100,
+    "standards": 493,
+    "citations": 1081,
+    "designations": 204,
     "sources": 114
   },
   "units": [
@@ -371,6 +371,18 @@
       "title": "Sound absorption in enclosed spaces (EN 12354-6)",
       "checks": 2,
       "passing": 2
+    },
+    {
+      "id": "audiometric-test-methods-iso-8253",
+      "title": "Audiometric test methods (ISO 8253)",
+      "checks": 19,
+      "passing": 19
+    },
+    {
+      "id": "earmuff-insertion-loss-on-a-test-fixture-iso-4869-3",
+      "title": "Earmuff insertion loss on a test fixture (ISO 4869-3)",
+      "checks": 4,
+      "passing": 4
     },
     {
       "id": "impulsive-sound-exposure-distribution-iso-13474",
@@ -31598,6 +31610,903 @@
         "value": 0.003
       },
       "precision": 1,
+      "verdict": "pass"
+    },
+    {
+      "id": "audiometric-test-methods-iso-8253/iso-8253-1-2010-table-2/maximum-permissible-ambient-levels-for-air-conduction-three-test-ranges",
+      "domain": "audiometric-test-methods-iso-8253",
+      "reference": {
+        "cite": "ISO 8253-1:2010 Table 2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 8253-1",
+            "edition": "2010",
+            "clause": "Table 2"
+          }
+        ]
+      },
+      "quantity": "Maximum permissible ambient levels for air conduction, three test ranges",
+      "kind": "count",
+      "expected": {
+        "value": 75.0,
+        "label": "75/75 cells of Table 2"
+      },
+      "computed": {
+        "value": 75.0,
+        "label": "75/75 cells of Table 2"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "audiometric-test-methods-iso-8253/iso-8253-1-2010-table-3/average-sound-attenuation-of-the-supra-aural-er-3a-and-hda-200-earphones",
+      "domain": "audiometric-test-methods-iso-8253",
+      "reference": {
+        "cite": "ISO 8253-1:2010 Table 3",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 8253-1",
+            "edition": "2010",
+            "clause": "Table 3"
+          }
+        ]
+      },
+      "quantity": "Average sound attenuation of the supra-aural, ER-3A and HDA 200 earphones",
+      "kind": "count",
+      "expected": {
+        "value": 75.0,
+        "label": "75/75 cells of Table 3"
+      },
+      "computed": {
+        "value": 75.0,
+        "label": "75/75 cells of Table 3"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "audiometric-test-methods-iso-8253/iso-8253-1-2010-table-4/maximum-permissible-ambient-levels-for-bone-conduction-two-test-ranges",
+      "domain": "audiometric-test-methods-iso-8253",
+      "reference": {
+        "cite": "ISO 8253-1:2010 Table 4",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 8253-1",
+            "edition": "2010",
+            "clause": "Table 4"
+          }
+        ]
+      },
+      "quantity": "Maximum permissible ambient levels for bone conduction, two test ranges",
+      "kind": "count",
+      "expected": {
+        "value": 50.0,
+        "label": "50/50 cells of Table 4"
+      },
+      "computed": {
+        "value": 50.0,
+        "label": "50/50 cells of Table 4"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "audiometric-test-methods-iso-8253/iso-8253-1-2010-11-1/the-limit-at-1-khz-with-each-adjustment-of-11-1-and-the-note-to-table-2",
+      "domain": "audiometric-test-methods-iso-8253",
+      "reference": {
+        "cite": "ISO 8253-1:2010 11.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 8253-1",
+            "edition": "2010",
+            "clause": "11.1"
+          }
+        ]
+      },
+      "quantity": "The limit at 1 kHz with each adjustment of 11.1 and the NOTE to Table 2",
+      "kind": "record",
+      "expected": {
+        "label": "supra-aural = 23 dB; ER-3A = 45 dB; shift +5 dB = 31 dB; lowest HL 10 dB = 33 dB",
+        "record": {
+          "supra-aural": 23.0,
+          "ER-3A": 45.0,
+          "shift +5 dB": 31.0,
+          "lowest HL 10 dB": 33.0
+        }
+      },
+      "computed": {
+        "label": "supra-aural = 23 dB; ER-3A = 45 dB; shift +5 dB = 31 dB; lowest HL 10 dB = 33 dB",
+        "record": {
+          "supra-aural": 23.0,
+          "ER-3A": 45.0,
+          "shift +5 dB": 31.0,
+          "lowest HL 10 dB": 33.0
+        }
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "audiometric-test-methods-iso-8253/iso-8253-1-2010-a-3-3/audiometer-standard-uncertainty-air-conduction-up-to-4-khz-5-db-steps",
+      "domain": "audiometric-test-methods-iso-8253",
+      "reference": {
+        "cite": "ISO 8253-1:2010 A.3.3",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 8253-1",
+            "edition": "2010",
+            "clause": "A.3.3"
+          }
+        ]
+      },
+      "quantity": "Audiometer standard uncertainty, air conduction up to 4 kHz, 5 dB steps",
+      "kind": "record",
+      "expected": {
+        "label": "u(delta_eq) = 2.3 dB",
+        "record": {
+          "u(delta_eq)": 2.3
+        }
+      },
+      "computed": {
+        "label": "u(delta_eq) = 2.3 dB",
+        "record": {
+          "u(delta_eq)": 2.3
+        }
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "audiometric-test-methods-iso-8253/iso-8253-1-2010-a-3-4/transducer-standard-uncertainty-up-to-and-above-4-khz",
+      "domain": "audiometric-test-methods-iso-8253",
+      "reference": {
+        "cite": "ISO 8253-1:2010 A.3.4",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 8253-1",
+            "edition": "2010",
+            "clause": "A.3.4"
+          }
+        ]
+      },
+      "quantity": "Transducer standard uncertainty up to and above 4 kHz",
+      "kind": "record",
+      "expected": {
+        "label": "up to 4 kHz = 2.9 dB; above 4 kHz = 3.9 dB",
+        "record": {
+          "up to 4 kHz": 2.9,
+          "above 4 kHz": 3.9
+        }
+      },
+      "computed": {
+        "label": "up to 4 kHz = 2.9 dB; above 4 kHz = 3.9 dB",
+        "record": {
+          "up to 4 kHz": 2.9,
+          "above 4 kHz": 3.9
+        }
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "audiometric-test-methods-iso-8253/iso-8253-1-2010-table-a-2/the-four-components-combined-and-expanded-uncertainty-air-conduction-below-4-khz-no-masking",
+      "domain": "audiometric-test-methods-iso-8253",
+      "reference": {
+        "cite": "ISO 8253-1:2010 Table A.2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 8253-1",
+            "edition": "2010",
+            "clause": "Table A.2"
+          }
+        ]
+      },
+      "quantity": "The four components, combined and expanded uncertainty, air conduction below 4 kHz, no masking",
+      "kind": "record",
+      "expected": {
+        "label": "u1 L'_HT = 2.5 dB; u2 delta_eq = 2.3 dB; u3 delta_tr = 2.9 dB; u4 delta_n = 2 dB; u = 4.9 dB; U = 10 dB",
+        "record": {
+          "u1 L'_HT": 2.5,
+          "u2 delta_eq": 2.3,
+          "u3 delta_tr": 2.9,
+          "u4 delta_n": 2.0,
+          "u": 4.9,
+          "U": 10.0
+        }
+      },
+      "computed": {
+        "label": "u1 L'_HT = 2.5 dB; u2 delta_eq = 2.3 dB; u3 delta_tr = 2.9 dB; u4 delta_n = 2 dB; u = 4.9 dB; U = 10 dB",
+        "record": {
+          "u1 L'_HT": 2.5,
+          "u2 delta_eq": 2.3,
+          "u3 delta_tr": 2.9,
+          "u4 delta_n": 2.0,
+          "u": 4.9,
+          "U": 10.0
+        }
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "audiometric-test-methods-iso-8253/iso-8253-1-2010-6-2-4-2/ascending-method-three-responses-at-one-level-out-of-five-ascents",
+      "domain": "audiometric-test-methods-iso-8253",
+      "reference": {
+        "cite": "ISO 8253-1:2010 6.2.4.2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 8253-1",
+            "edition": "2010",
+            "clause": "6.2.4.2"
+          }
+        ]
+      },
+      "quantity": "Ascending method: three responses at one level out of five ascents",
+      "kind": "record",
+      "expected": {
+        "label": "threshold = 30 dB",
+        "record": {
+          "threshold": 30.0
+        }
+      },
+      "computed": {
+        "label": "threshold = 30 dB",
+        "record": {
+          "threshold": 30.0
+        }
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "audiometric-test-methods-iso-8253/iso-8253-1-2010-6-2-4-3/bracketing-method-mean-of-the-two-averages-to-the-nearest-5-db-step",
+      "domain": "audiometric-test-methods-iso-8253",
+      "reference": {
+        "cite": "ISO 8253-1:2010 6.2.4.3",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 8253-1",
+            "edition": "2010",
+            "clause": "6.2.4.3"
+          }
+        ]
+      },
+      "quantity": "Bracketing method: mean of the two averages to the nearest 5 dB step",
+      "kind": "record",
+      "expected": {
+        "label": "mean = 33.333 dB; threshold = 35 dB",
+        "record": {
+          "mean": 33.333,
+          "threshold": 35.0
+        }
+      },
+      "computed": {
+        "label": "mean = 33.333 dB; threshold = 35 dB",
+        "record": {
+          "mean": 33.333,
+          "threshold": 35.0
+        }
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "audiometric-test-methods-iso-8253/iso-8253-1-2010-6-3-5/automatic-recording-first-reversal-and-small-excursions-dropped-rounded-up",
+      "domain": "audiometric-test-methods-iso-8253",
+      "reference": {
+        "cite": "ISO 8253-1:2010 6.3.5",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 8253-1",
+            "edition": "2010",
+            "clause": "6.3.5"
+          }
+        ]
+      },
+      "quantity": "Automatic recording: first reversal and small excursions dropped, rounded up",
+      "kind": "record",
+      "expected": {
+        "label": "peaks = 30.5 dB; valleys = 20 dB; mean = 25.25 dB; threshold = 26 dB",
+        "record": {
+          "peaks": 30.5,
+          "valleys": 20.0,
+          "mean": 25.25,
+          "threshold": 26.0
+        }
+      },
+      "computed": {
+        "label": "peaks = 30.5 dB; valleys = 20 dB; mean = 25.25 dB; threshold = 26 dB",
+        "record": {
+          "peaks": 30.5,
+          "valleys": 20.0,
+          "mean": 25.25,
+          "threshold": 26.0
+        }
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "audiometric-test-methods-iso-8253/iso-8253-1-2010-7-5/sweep-frequency-audiometry-three-nearest-peaks-and-valleys-rounded",
+      "domain": "audiometric-test-methods-iso-8253",
+      "reference": {
+        "cite": "ISO 8253-1:2010 7.5",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 8253-1",
+            "edition": "2010",
+            "clause": "7.5"
+          }
+        ]
+      },
+      "quantity": "Sweep-frequency audiometry: three nearest peaks and valleys, rounded",
+      "kind": "record",
+      "expected": {
+        "label": "mean = 25.3 dB; threshold = 25 dB",
+        "record": {
+          "mean": 25.3,
+          "threshold": 25.0
+        }
+      },
+      "computed": {
+        "label": "mean = 25.3 dB; threshold = 25 dB",
+        "record": {
+          "mean": 25.3,
+          "threshold": 25.0
+        }
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "audiometric-test-methods-iso-8253/iso-8253-1-2010-6-2-3-2-step-3/repeat-at-1-khz-5-db-or-less-agrees-10-db-or-more-retests-further",
+      "domain": "audiometric-test-methods-iso-8253",
+      "reference": {
+        "cite": "ISO 8253-1:2010 6.2.3.2, Step 3",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 8253-1",
+            "edition": "2010",
+            "clause": "6.2.3.2, Step 3"
+          }
+        ]
+      },
+      "quantity": "Repeat at 1 kHz: 5 dB or less agrees, 10 dB or more retests further",
+      "kind": "count",
+      "expected": {
+        "value": 4.0,
+        "label": "4/4 repeats judged as Step 3 words it"
+      },
+      "computed": {
+        "value": 4.0,
+        "label": "4/4 repeats judged as Step 3 words it"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "audiometric-test-methods-iso-8253/iso-8253-1-2010-6-2-3-2/cross-hearing-a-hearing-level-of-40-db-or-more-calls-for-caution",
+      "domain": "audiometric-test-methods-iso-8253",
+      "reference": {
+        "cite": "ISO 8253-1:2010 6.2.3.2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 8253-1",
+            "edition": "2010",
+            "clause": "6.2.3.2"
+          }
+        ]
+      },
+      "quantity": "Cross-hearing: a hearing level of 40 dB or more calls for caution",
+      "kind": "count",
+      "expected": {
+        "value": 3.0,
+        "label": "3/3 levels judged as 6.2.3.2 words it"
+      },
+      "computed": {
+        "value": 3.0,
+        "label": "3/3 levels judged as 6.2.3.2 words it"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "audiometric-test-methods-iso-8253/iso-8253-1-2010-8-4/average-vibrotactile-threshold-mastoid-and-forehead-placement",
+      "domain": "audiometric-test-methods-iso-8253",
+      "reference": {
+        "cite": "ISO 8253-1:2010 8.4",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 8253-1",
+            "edition": "2010",
+            "clause": "8.4"
+          }
+        ]
+      },
+      "quantity": "Average vibrotactile threshold, mastoid and forehead placement",
+      "kind": "record",
+      "expected": {
+        "label": "250 Hz mastoid = 40 dB; 500 Hz mastoid = 60 dB; 1000 Hz mastoid = 70 dB; 250 Hz forehead = 30 dB; 500 Hz forehead = 50 dB; 1000 Hz forehead = 60 dB",
+        "record": {
+          "250 Hz mastoid": 40.0,
+          "500 Hz mastoid": 60.0,
+          "1000 Hz mastoid": 70.0,
+          "250 Hz forehead": 30.0,
+          "500 Hz forehead": 50.0,
+          "1000 Hz forehead": 60.0
+        }
+      },
+      "computed": {
+        "label": "250 Hz mastoid = 40 dB; 500 Hz mastoid = 60 dB; 1000 Hz mastoid = 70 dB; 250 Hz forehead = 30 dB; 500 Hz forehead = 50 dB; 1000 Hz forehead = 60 dB",
+        "record": {
+          "250 Hz mastoid": 40.0,
+          "500 Hz mastoid": 60.0,
+          "1000 Hz mastoid": 70.0,
+          "250 Hz forehead": 30.0,
+          "500 Hz forehead": 50.0,
+          "1000 Hz forehead": 60.0
+        }
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "audiometric-test-methods-iso-8253/iso-8253-2-2009-table-2/maximum-permissible-ambient-levels-for-sound-field-audiometry-to-12-5-khz",
+      "domain": "audiometric-test-methods-iso-8253",
+      "reference": {
+        "cite": "ISO 8253-2:2009 Table 2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 8253-2",
+            "edition": "2009",
+            "clause": "Table 2"
+          }
+        ]
+      },
+      "quantity": "Maximum permissible ambient levels for sound field audiometry, to 12,5 kHz",
+      "kind": "count",
+      "expected": {
+        "value": 54.0,
+        "label": "54/54 cells of Table 2"
+      },
+      "computed": {
+        "value": 54.0,
+        "label": "54/54 cells of Table 2"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "audiometric-test-methods-iso-8253/iso-8253-2-2009-table-2-footnote-a/derived-from-iso-8253-1-for-binaural-listening-the-cells-equal-table-4-less-3-db-an-offset-the-library-reads-off-the-two-tables",
+      "domain": "audiometric-test-methods-iso-8253",
+      "reference": {
+        "cite": "ISO 8253-2:2009 Table 2, footnote a",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 8253-2",
+            "edition": "2009",
+            "clause": "Table 2, footnote a"
+          }
+        ]
+      },
+      "quantity": "Derived from ISO 8253-1 for binaural listening; the cells equal Table 4 less 3 dB, an offset the library reads off the two tables",
+      "kind": "count",
+      "expected": {
+        "value": 50.0,
+        "label": "50/50 cells equal to Table 4 less 3 dB"
+      },
+      "computed": {
+        "value": 50.0,
+        "label": "50/50 cells equal to Table 4 less 3 dB"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "audiometric-test-methods-iso-8253/iso-8253-2-2009-table-b-1/increase-at-the-nearer-ear-at-45-and-90-degrees-125-hz-to-12-5-khz",
+      "domain": "audiometric-test-methods-iso-8253",
+      "reference": {
+        "cite": "ISO 8253-2:2009 Table B.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 8253-2",
+            "edition": "2009",
+            "clause": "Table B.1"
+          }
+        ]
+      },
+      "quantity": "Increase at the nearer ear at 45 and 90 degrees, 125 Hz to 12,5 kHz",
+      "kind": "count",
+      "expected": {
+        "value": 48.0,
+        "label": "48/48 cells of Table B.1"
+      },
+      "computed": {
+        "value": 48.0,
+        "label": "48/48 cells of Table B.1"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "audiometric-test-methods-iso-8253/iso-8253-2-2009-table-1/allowable-field-variation-by-the-microphone-s-front-to-random-index",
+      "domain": "audiometric-test-methods-iso-8253",
+      "reference": {
+        "cite": "ISO 8253-2:2009 Table 1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 8253-2",
+            "edition": "2009",
+            "clause": "Table 1"
+          }
+        ]
+      },
+      "quantity": "Allowable field variation by the microphone's front-to-random index",
+      "kind": "record",
+      "expected": {
+        "label": "index 5 dB = 5 dB; index 4.5 dB = 4.5 dB; index 4 dB = 4 dB",
+        "record": {
+          "index 5 dB": 5.0,
+          "index 4.5 dB": 4.5,
+          "index 4 dB": 4.0
+        }
+      },
+      "computed": {
+        "label": "index 5 dB = 5 dB; index 4.5 dB = 4.5 dB; index 4 dB = 4 dB",
+        "record": {
+          "index 5 dB": 5.0,
+          "index 4.5 dB": 4.5,
+          "index 4 dB": 4.0
+        }
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "audiometric-test-methods-iso-8253/iso-8253-2-2009-5-2-c-and-5-4-c/axial-level-difference-the-inverse-distance-law-gives-at-1-m-closed-form-the-standard-prints-no-value",
+      "domain": "audiometric-test-methods-iso-8253",
+      "reference": {
+        "cite": "ISO 8253-2:2009 5.2 c) and 5.4 c)",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 8253-2",
+            "edition": "2009",
+            "clause": "5.2 c) and 5.4 c)"
+          }
+        ]
+      },
+      "quantity": "Axial level difference the inverse distance law gives at 1 m (closed form; the standard prints no value)",
+      "kind": "record",
+      "expected": {
+        "label": "free = 2.626 dB; quasi-free = 1.743 dB",
+        "record": {
+          "free": 2.626,
+          "quasi-free": 1.743
+        }
+      },
+      "computed": {
+        "label": "free = 2.626 dB; quasi-free = 1.743 dB",
+        "record": {
+          "free": 2.626,
+          "quasi-free": 1.743
+        }
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "earmuff-insertion-loss-on-a-test-fixture-iso-4869-3/iso-4869-3-2007-table-b-1-and-b-4/combined-and-expanded-uncertainty-of-the-typical-budget",
+      "domain": "earmuff-insertion-loss-on-a-test-fixture-iso-4869-3",
+      "reference": {
+        "cite": "ISO 4869-3:2007 Table B.1 and B.4",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 4869-3",
+            "edition": "2007",
+            "clause": "Table B.1 and B.4"
+          }
+        ]
+      },
+      "quantity": "Combined and expanded uncertainty of the typical budget",
+      "kind": "record",
+      "expected": {
+        "label": "u = 1.3 dB; U = 2.6 dB",
+        "record": {
+          "u": 1.3,
+          "U": 2.6
+        }
+      },
+      "computed": {
+        "label": "u = 1.3 dB; U = 2.6 dB",
+        "record": {
+          "u": 1.3,
+          "U": 2.6
+        }
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "earmuff-insertion-loss-on-a-test-fixture-iso-4869-3/iso-4869-3-2007-5-2-2-table-1/allowable-field-variation-read-with-the-text-for-an-index-of-5-db",
+      "domain": "earmuff-insertion-loss-on-a-test-fixture-iso-4869-3",
+      "reference": {
+        "cite": "ISO 4869-3:2007 5.2.2, Table 1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 4869-3",
+            "edition": "2007",
+            "clause": "5.2.2, Table 1"
+          }
+        ]
+      },
+      "quantity": "Allowable field variation, read with the text for an index of 5 dB",
+      "kind": "record",
+      "expected": {
+        "label": "index 5 dB = 5 dB; index 4.5 dB = 4 dB; index 4 dB = 4 dB",
+        "record": {
+          "index 5 dB": 5.0,
+          "index 4.5 dB": 4.0,
+          "index 4 dB": 4.0
+        }
+      },
+      "computed": {
+        "label": "index 5 dB = 5 dB; index 4.5 dB = 4 dB; index 4 dB = 4 dB",
+        "record": {
+          "index 5 dB": 5.0,
+          "index 4.5 dB": 4.0,
+          "index 4 dB": 4.0
+        }
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "earmuff-insertion-loss-on-a-test-fixture-iso-4869-3/iso-4869-3-2007-table-a-1/front-to-random-index-of-the-fixture-and-the-bands-it-may-test-itself",
+      "domain": "earmuff-insertion-loss-on-a-test-fixture-iso-4869-3",
+      "reference": {
+        "cite": "ISO 4869-3:2007 Table A.1",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 4869-3",
+            "edition": "2007",
+            "clause": "Table A.1"
+          }
+        ]
+      },
+      "quantity": "Front-to-random index of the fixture, and the bands it may test itself",
+      "kind": "count",
+      "expected": {
+        "value": 14.0,
+        "label": "14/14 cells of Table A.1 and its suitable bands"
+      },
+      "computed": {
+        "value": 14.0,
+        "label": "14/14 cells of Table A.1 and its suitable bands"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "earmuff-insertion-loss-on-a-test-fixture-iso-4869-3/iso-4869-3-2007-5-1-4/least-acoustic-isolation-of-the-fixture-in-each-band-63-hz-to-8-khz",
+      "domain": "earmuff-insertion-loss-on-a-test-fixture-iso-4869-3",
+      "reference": {
+        "cite": "ISO 4869-3:2007 5.1.4",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 4869-3",
+            "edition": "2007",
+            "clause": "5.1.4"
+          }
+        ]
+      },
+      "quantity": "Least acoustic isolation of the fixture in each band, 63 Hz to 8 kHz",
+      "kind": "count",
+      "expected": {
+        "value": 22.0,
+        "label": "22/22 bands of 5.1.4"
+      },
+      "computed": {
+        "value": 22.0,
+        "label": "22/22 bands of 5.1.4"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
       "verdict": "pass"
     },
     {

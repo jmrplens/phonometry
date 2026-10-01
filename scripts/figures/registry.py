@@ -402,6 +402,9 @@ from .perception import (
     generate_age_threshold_sex_and_spread,
     generate_annoyance_weightings,
     generate_audiometric_zero_earphones,
+    generate_audiometry_sound_field,
+    generate_audiometry_test_room,
+    generate_audiometry_threshold_rules,
     generate_equal_loudness_contours,
     generate_erb_bandwidth,
     generate_exposure_budget,
@@ -409,6 +412,7 @@ from .perception import (
     generate_fluctuation_strength,
     generate_fluctuation_strength_specific,
     generate_hearing_protector_anr,
+    generate_hearing_protector_insertion_loss,
     generate_hearing_protector_methods,
     generate_hearing_protector_reat,
     generate_hearing_threshold,
@@ -1017,6 +1021,12 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     generate_hearing_protector_methods,
     generate_hearing_protector_reat,
     generate_hearing_protector_anr,
+    # ISO 4869-3: the earmuff on its test fixture. ISO 8253-1 and -2: the
+    # audiometric test room, the threshold rules and the sound field.
+    generate_hearing_protector_insertion_loss,
+    generate_audiometry_test_room,
+    generate_audiometry_threshold_rules,
+    generate_audiometry_sound_field,
     # Multiple-shock whole-body vibration (ISO 2631-5 Clause 5 + Annex C).
     generate_tonal_audibility,
     generate_multiple_shock,

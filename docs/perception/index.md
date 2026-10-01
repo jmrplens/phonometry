@@ -101,17 +101,26 @@ signal-based STOI and ESTOI measures.
 
 ## [Hearing and exposure](hearing/index.md)
 
-The hearing threshold, what noise does to it, and how exposure is measured.
+The hearing threshold, how it is measured, what noise does to it, how exposure
+is measured, and how much a hearing protector takes off.
 
 - [Hearing threshold (age and reference zero)](hearing/hearing-threshold.md):
   the ISO 7029:2017 age-related threshold distribution and the ISO 389-7:2005
   reference threshold of hearing.
+- [Audiometric Test Methods (ISO 8253-1 and -2)](hearing/audiometry.md):
+  whether the test room is quiet enough and its sound field good enough, the
+  rules that turn responses into a hearing threshold level, and the
+  uncertainty of that level.
 - [Noise-induced hearing loss (ISO 1999)](hearing/noise-induced-hearing-loss.md):
   the noise-induced permanent threshold shift and its combination with age
   into HTLAN.
 - [Occupational Noise Exposure (ISO 9612)](hearing/occupational-exposure.md):
   the task-based, job-based and full-day strategies for LEX,8h with the
   Annex C uncertainty budget.
+- [Hearing Protectors (ISO 4869-1, -2, -3 and -6)](hearing/hearing-protectors.md):
+  the real-ear attenuation of sixteen subjects, the effective A-weighted level
+  under the protector, active noise reduction, and the earmuff screened on a
+  test fixture.
 
 ## What this section does not cover
 

@@ -117,9 +117,10 @@ noise costs a hearing threshold.
 **[Hearing and exposure](perception/hearing/index.md)**
 
 - [Hearing threshold](perception/hearing/hearing-threshold.md): the age-related hearing threshold distribution (ISO 7029:2017) and the free-field/diffuse-field reference threshold of hearing (ISO 389-7:2005)
+- [Audiometric test methods](perception/hearing/audiometry.md): whether an audiometric test room is quiet enough (ISO 8253-1 Clause 11) and its sound field free, quasi-free or diffuse (ISO 8253-2), the ascending, bracketing, automatic and sweep-frequency rules that turn responses into a hearing threshold level, and its Annex A uncertainty
 - [Noise-induced hearing loss](perception/hearing/noise-induced-hearing-loss.md): the ISO 1999:2013 noise-induced permanent threshold shift (NIPTS) and its population distribution, and the combination with age into the hearing threshold level associated with age and noise (HTLAN)
 - [Occupational noise exposure](perception/hearing/occupational-exposure.md): the ISO 9612 task-based, job-based and full-day measurement strategies and the Annex C uncertainty budget behind every $L_\mathrm{EX,8h}$ report
-- [Hearing protectors](perception/hearing/hearing-protectors.md): the ISO 4869-1 attenuation on sixteen subjects with its uncertainty and significance test, the ISO 4869-2 octave-band, HML and SNR methods that turn it into the effective A-weighted level left at the ear, and the ISO 4869-6 total attenuation of an active noise reduction earmuff
+- [Hearing protectors](perception/hearing/hearing-protectors.md): the ISO 4869-1 attenuation on sixteen subjects with its uncertainty and significance test, the ISO 4869-2 octave-band, HML and SNR methods that turn it into the effective A-weighted level left at the ear, the ISO 4869-6 total attenuation of an active noise reduction earmuff, and the ISO 4869-3 insertion loss that screens an earmuff on an acoustic test fixture
 
 ### [Rooms and buildings](buildings/index.md)
 

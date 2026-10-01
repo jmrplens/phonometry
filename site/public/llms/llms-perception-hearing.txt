@@ -22,6 +22,12 @@ fractile. **ISO 389-7:2005** fixes the other end of the scale: the reference
 threshold of hearing, the physical sound pressure level that audiometric
 0 dB HL corresponds to under free-field and diffuse-field listening.
 
+[Audiometric Test Methods (ISO 8253-1 and -2)](https://jmrplens.github.io/phonometry/perception/hearing/audiometry/)
+says what it takes to measure a threshold against that zero: a test room quiet
+enough (ISO 8253-1 Clause 11) or with a qualified sound field (ISO 8253-2), the
+rules that turn responses into a hearing threshold level, and the uncertainty
+of that level.
+
 [Occupational Noise Exposure (ISO 9612)](https://jmrplens.github.io/phonometry/perception/hearing/occupational-exposure/)
 measures the cause. A regulated daily exposure level LEX,8h is assembled from
 samples of a real working day by one of three strategies (task-based,
@@ -64,17 +70,20 @@ In the order the chain runs.
 - **Baseline**: [Hearing threshold (age and reference zero)](https://jmrplens.github.io/phonometry/perception/hearing/hearing-threshold/):
   the ISO 7029:2017 age-related threshold distribution and the ISO 389-7:2005
   reference threshold of hearing.
+- **Measurement**: [Audiometric Test Methods (ISO 8253-1 and -2)](https://jmrplens.github.io/phonometry/perception/hearing/audiometry/):
+  the test room's ambient noise and sound field, the ascending, bracketing,
+  automatic and sweep-frequency threshold rules, and the Annex A uncertainty.
 - **Exposure**: [Occupational Noise Exposure (ISO 9612)](https://jmrplens.github.io/phonometry/perception/hearing/occupational-exposure/):
   the three measurement strategies for LEX,8h with the Annex C uncertainty
   budget.
 - **Damage**: [Noise-induced hearing loss (ISO 1999)](https://jmrplens.github.io/phonometry/perception/hearing/noise-induced-hearing-loss/):
   NIPTS and its population distribution, and the combination with age into
   HTLAN.
-- **Protection**: [Hearing Protectors (ISO 4869-1, -2 and -6)](https://jmrplens.github.io/phonometry/perception/hearing/hearing-protectors/):
+- **Protection**: [Hearing Protectors (ISO 4869-1, -2, -3 and -6)](https://jmrplens.github.io/phonometry/perception/hearing/hearing-protectors/):
   the attenuation measured on sixteen subjects with its uncertainty and its
   significance test, the octave-band, HML and SNR methods that say what a
-  protector actually leaves at the ear, and what an active noise reduction
-  earmuff adds.
+  protector actually leaves at the ear, what an active noise reduction earmuff
+  adds, and the insertion loss that screens an earmuff on a test fixture.
 
 ## What this section does not cover
 
@@ -96,9 +105,10 @@ implemented for ISO 1999: `htlan` always draws its age component from ISO
 ISO 389-7, only the Table 1 reference values are implemented, not the
 procedures by which they were established.
 
-And no audiometry happens here. Nothing generates a test tone, drives an
-audiometer or corrects for an earphone coupler: the pages consume and produce
-threshold levels as data.
+And no audiometer's hardware is driven here. Nothing generates a test tone or
+presents it to a subject: ISO 8253's rules turn the responses a tester records into a
+threshold, and judge the room it was measured in, but the responses themselves
+are data, and so are the threshold levels the other pages consume and produce.
 
 ---
 
@@ -372,6 +382,177 @@ reference zeros of **ISO 389-2** (insert earphones) and **ISO 389-8**
 **ISO 389-5**, the sound-field audiometric procedure of **ISO 8253-2**, and how
 the ISO 389-7 values were established are all outside this module; the
 supra-aural zeros of ISO 389-1 are in it, and are what section 3 is about.
+
+---
+
+
+<!-- source: docs/perception/hearing/audiometry.md | canonical: https://jmrplens.github.io/phonometry/perception/hearing/audiometry/ -->
+Source: https://jmrplens.github.io/phonometry/perception/hearing/audiometry/
+
+# Audiometric Test Methods (ISO 8253-1 and -2)
+
+An audiogram is a set of hearing threshold levels, and each of them rests on a
+room quiet enough not to mask the faintest tone, a rule that turns "heard" and
+"not heard" into one number, and an uncertainty. ISO 8253-1 sets all three out
+for earphones and bone vibrators, and ISO 8253-2 adds what a loudspeaker needs:
+a room whose sound field is known.
+
+## Is the room quiet enough? (ISO 8253-1 Clause 11)
+
+Tables 2 and 4 give the maximum permissible ambient sound pressure level
+$L_{S,\mathrm{max}}$ per one-third-octave band from 31.5 Hz to 8 kHz, for air
+conduction with supra-aural earphones and for bone conduction, and for the
+lowest test frequency (125 Hz, 250 Hz or, with earphones, 500 Hz). An earphone
+that excludes more noise adds the difference of the attenuations of Table 3, a
+lowest hearing threshold level other than 0 dB is added band by band, and a
+threshold shift of +5 dB instead of +2 dB adds 8 dB (11.1 and the NOTEs):
+
+$$
+L_{S,\mathrm{max}}' = L_{S,\mathrm{max}}
++ \left(A_\mathrm{earphone} - A_\mathrm{supra\text{-}aural}\right)
++ L_\mathrm{HT,min} + \Delta
+$$
+
+```python
+import numpy as np
+from phonometry import hearing
+
+# One-third-octave ambient levels of a single-walled booth, 31.5 Hz to 8 kHz.
+booth = [50, 48, 45, 43, 40, 36, 30, 24, 19, 16, 14, 12, 11,
+         10, 10, 10, 9, 9, 9, 8, 8, 8, 8, 8, 8]
+supra_aural = hearing.check_audiometric_ambient_noise(booth)
+print(supra_aural.passes, supra_aural.lowest_measurable_hearing_level_db)  # False 3.0
+insert = hearing.check_audiometric_ambient_noise(booth, earphone="ER-3A")
+print(insert.passes)                                                       # True
+bone = hearing.check_audiometric_ambient_noise(
+    booth, presentation="bone", lowest_test_frequency_hz=250
+)
+print(bone.lowest_measurable_hearing_level_db)                             # 6.0
+```
+
+`presentation="sound field"` judges the room against ISO 8253-2 Table 2, up to
+12.5 kHz, derived from ISO 8253-1 for binaural listening (footnote a); laid side
+by side, its cells are ISO 8253-1 Table 4 less 3 dB. For narrow-band noise as
+the test signal, footnote b asks for lower limits and prints no figure, so the
+check applies the table as printed. A measurement that leaves bands out does not
+pass, and `noise_floor_db=` flags the bands within 6 dB of the meter's own floor
+(11.1).
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/audiometry_test_room_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/audiometry_test_room.svg" alt="The same booth's ambient spectrum against the air-conduction limits from 125 Hz: with supra-aural earphones it exceeds them from 63 Hz to 160 Hz, marked with crosses; with ER-3A insert earphones the limits are raised by the extra attenuation and the room qualifies" width="92%"></picture>
+
+## From responses to a threshold (6.2 to 7.5)
+
+- **Ascending method** (6.2.3.2, 6.2.4.2): 10 dB down after each response, 5 dB
+  up after each miss; the threshold is the lowest level answered in more than
+  half of the ascents, once three of at most five end at one level (two of
+  three, shortened). The presentation sequence can be replayed, and the result
+  gives the level to present next.
+- **Bracketing method** (6.2.4.3): the mean of the averaged ascent and descent
+  levels, rounded to the nearest 5 dB step (the library sends a tie up; the
+  clause gives no rule for it).
+- **Automatic recording** (6.3.5): the first reversal and both ends of
+  excursions of 3 dB or less are ignored, and the mean of the averaged peaks and
+  valleys is rounded **up** to the next whole decibel.
+- **Sweep-frequency audiometry** (7.5): the three nearest peaks and valleys on a
+  log-frequency axis, or a running average of six reversals.
+
+```python
+series = hearing.ascending_method_threshold(
+    presentation_levels_db=[30, 20, 25, 15, 20, 25, 15, 20, 10, 15, 20, 25],
+    responses=[1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 1],
+    familiarization_level_db=40.0,
+)
+print(series.ascent_levels_db, series.threshold_db)   # [25. 25. 20. 25.] 25.0
+print(hearing.bracketing_method_threshold([30, 30, 35], [30, 35, 35]).threshold_db)  # 35.0
+tracing = hearing.automatic_audiometry_threshold(
+    [38, 22, 31, 21, 32, 20, 30, 29, 31, 19, 30, 20, 31, 21]
+)
+print(tracing.mean_db, tracing.threshold_db)          # 25.75 26.0
+```
+
+Each rule carries its clause's reliability test: a spread of more than 10 dB
+between the levels it combines.
+
+Three more rules judge the levels once found. `hearing.check_retest_agreement`
+applies Step 3 of 6.2.3.2: the repeat at 1 kHz agrees to 5 dB or less, or a
+change of 10 dB or more sends the test back to the further frequencies.
+`hearing.audiogram_cautions` flags an air-conduction level of 40 dB or more
+(cross-hearing, 6.2.3.2) and a bone-conduction level at the average vibrotactile
+threshold of 8.4, 40, 60 and 70 dB at 250 Hz, 500 Hz and 1 kHz for the mastoid
+and about 10 dB lower for the forehead
+(`hearing.VIBROTACTILE_HEARING_LEVELS_DB`).
+
+```python
+print(hearing.check_retest_agreement(25.0, 35.0).retest_further_frequencies)  # True
+cautions = hearing.audiogram_cautions(
+    [250, 500, 1000, 2000], air_conduction_db=[20, 25, 30, 45],
+    bone_conduction_db=[40, 20, 25, 40],
+)
+print(cautions.cross_hearing, cautions.vibrotactile)
+# [False False False  True] [ True False False False]
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/audiometry_threshold_rules_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/audiometry_threshold_rules.svg" alt="Left: an ascending series of twelve presentations, the four ascents ending at 25, 25, 20 and 25 dB and the threshold of 25 dB. Right: an automatic recording, its ignored reversals grey, the peaks averaging 31 dB, the valleys 20.5 dB and the threshold 26 dB" width="92%"></picture>
+
+## The uncertainty of a threshold (Annex A)
+
+Eight uncorrelated inputs with a sensitivity coefficient of 1:
+$u = \sqrt{\sum u_i^2}$ and $U = 2u$. With the typical values of A.3, air
+conduction below 4 kHz without masking gives the example of Table A.2:
+
+```python
+budget = hearing.audiometric_uncertainty(1000.0)
+print(np.round(budget.components_db[:4], 1))                   # [2.5 2.3 2.9 2. ]
+print(round(budget.combined_db, 1), round(budget.expanded_db))  # 4.9 10
+```
+
+## The sound field (ISO 8253-2)
+
+`hearing.check_free_sound_field` (5.2: ±1 dB at the lateral positions up to
+4 kHz, ±2 dB above, the axial pair at 0.15 m within ±1 dB of the inverse
+distance law), `hearing.check_quasi_free_sound_field` (5.4: ±2 dB, the axial
+pair at 0.10 m, and a usable frequency range) and
+`hearing.check_diffuse_sound_field` (5.3: six positions within ±2.5 dB, the ear
+sides within 3 dB, and from 500 Hz a directional microphone's variation within
+Table 1) qualify the room band by band; the directional test is a requirement,
+and without it a diffuse field does not pass. The same diffuse-field check
+serves ISO 4869-3 on the [hearing protectors](https://jmrplens.github.io/phonometry/perception/hearing/hearing-protectors/) page.
+`hearing.incidence_correction` reads the off-axis increases of Annex B, which
+the text announces from 200 Hz and the table prints from 125 Hz (see
+[ERRATA](https://jmrplens.github.io/phonometry/reference/errata/)).
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/audiometry_sound_field_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/audiometry_sound_field.svg" alt="Left: a quasi-free field whose lateral and axial deviations leave 125 Hz and 250 Hz outside the field, usable from 500 Hz to 8000 Hz. Right: a diffuse field within all its limits, its directional variation under the 5 dB of Table 1" width="92%"></picture>
+
+## References
+
+- International Organization for Standardization (2010). *Acoustics —
+  Audiometric test methods — Part 1: Pure-tone air and bone conduction
+  audiometry* (ISO 8253-1:2010). Clause 11 with Tables 2 to 4, the threshold
+  rules of 6.2.4, 6.3.5 and 7.5, the repeat and the cautions of 6.2.3.2 and
+  8.4, and Annex A, validated against Tables 2 to 4, the levels of 8.4 and
+  Table A.2.
+- International Organization for Standardization (2009). *Acoustics —
+  Audiometric test methods — Part 2: Sound field audiometry with pure-tone and
+  narrow-band test signals* (ISO 8253-2:2009). The sound fields of 5.2 to 5.4,
+  the ambient limits of Table 2 and the off-axis increases of Table B.1.
+
+## Standards
+
+ISO 8253-1:2010, which sets the maximum permissible ambient levels of an
+audiometric test room (Clause 11, Tables 2 to 4), the rules that turn responses
+into a hearing threshold level (6.2.4, 6.3.5, 7.5), the repeat at 1 kHz and the
+cautions that judge that level (6.2.3.2, 8.4), and its uncertainty (Annex A). ISO 8253-2:2009, which qualifies a sound field as free,
+quasi-free or diffuse (Clause 5), sets its ambient limits (Clause 6) and prints
+the off-axis increases of Annex B.
+
+## See also
+
+- [Hearing threshold (age and reference zero)](https://jmrplens.github.io/phonometry/perception/hearing/hearing-threshold/): the
+  audiometric zero the hearing levels are measured from.
+- [Hearing Protectors (ISO 4869-1, -2, -3 and -6)](https://jmrplens.github.io/phonometry/perception/hearing/hearing-protectors/): the
+  same diffuse-field test on the site where an earmuff is screened.
+- API reference: [`hearing.audiometry`](https://jmrplens.github.io/phonometry/reference/api/hearing/audiometry/)
+  and [`hearing.sound_field_audiometry`](https://jmrplens.github.io/phonometry/reference/api/hearing/sound-field-audiometry/).
 
 ---
 
@@ -969,7 +1150,7 @@ of Annex D. The age component (database A) is ISO 7029:2017.
 <!-- source: docs/perception/hearing/hearing-protectors.md | canonical: https://jmrplens.github.io/phonometry/perception/hearing/hearing-protectors/ -->
 Source: https://jmrplens.github.io/phonometry/perception/hearing/hearing-protectors/
 
-# Hearing Protectors (ISO 4869-1, -2 and -6)
+# Hearing Protectors (ISO 4869-1, -2, -3 and -6)
 
 A hearing protector is not measured on a coupler. ISO 4869-1 seats it on
 sixteen people and records the threshold shift each of them gets, so what
@@ -1179,6 +1360,46 @@ ear still follows the 5 dB steps of 5.4.4 within ±1 dB.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/hearing_protector_anr_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/hearing_protector_anr.svg" alt="Left: averaged over sixteen subjects, the passive attenuation of an active noise reduction earmuff interpolated into one-third-octave bands, the active insertion loss of the ear with the lower value, their sum, and the assumed protection value at 84 % in each octave band. Right: the active insertion loss of each subject in one-third-octave bands, with the mean and the expanded uncertainty of the mean as error bars and a line at zero" width="92%"></picture>
 
+## Earmuffs on a test fixture (ISO 4869-3)
+
+ISO 4869-3 measures an earmuff without subjects: the insertion loss is the
+level at the microphone of an acoustic test fixture (a 135 mm cylinder, end
+faces 145 mm apart) without the earmuff less the level with it, in
+one-third-octave bands from at least 63 Hz to 8 kHz (5.4.2),
+$IL_f = \overline{L}_{\mathrm{open},f} - \overline{L}_{\mathrm{occl},f}$.
+It screens production and ageing; Clause 1 says its data are not the real-ear
+attenuation of the earmuff nor the protection it provides, so nothing feeds it
+to the ISO 4869-2 methods.
+
+```python
+# An earmuff fitted three times on the fixture (5.4.3), 63 Hz to 8 kHz.
+bands = np.asarray(hearing.EARMUFF_TEST_BANDS_HZ)
+loss = np.array([7.5, 9.0, 11.0, 13.5, 16.5, 20.0, 23.5, 27.0, 30.0, 32.5, 34.5,
+                 36.0, 37.0, 37.5, 37.0, 36.0, 35.5, 36.5, 38.0, 37.0, 35.0, 33.5])
+spread = np.array([[-0.6], [0.1], [0.5]]) * np.linspace(1.0, 2.2, 22)
+open_level = np.full(22, 88.0)
+il = hearing.earmuff_insertion_loss(
+    open_level, open_level - loss + spread, isolation_cup_levels_db=open_level - 70.0
+)
+print(il.reported_db[[3, 9, 12, 18]])                        # [13.5 32.5 37.  38. ]
+print(np.round(il.expanded_uncertainty_db[[3, 12, 21]], 1))  # [1.8 1.9 2.1]
+```
+
+Annex B's uncertainty is evaluated band by band from the repetitions, with
+Table B.1's typical values ($u$ = 1.3 dB, $U$ = 2.6 dB,
+`hearing.EARMUFF_INSERTION_LOSS_UNCERTAINTY`) where they are missing.
+`il.plot()` draws the insertion loss as Clause 6 asks, increasing downwards on
+the IEC 60263 scale of 50 dB per decade, on axes it creates or is given.
+`hearing.check_random_incidence_field` judges the site's random-incidence field
+with the diffuse-field check of ISO 8253-2 and this standard's Table 1 (the
+fixture itself may be the directional microphone where its index of Table A.1
+reaches 4 dB), `hearing.check_plane_progressive_wave` the plane wave of 5.2.3,
+and `hearing.verify_fixture_isolation` the fixture's isolation of 5.1.4. Table 1
+prints "> 5" where 5.2.2 asks for "at least 5 dB"; the library follows the text
+(see [ERRATA](https://jmrplens.github.io/phonometry/reference/errata/)).
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/hearing_protector_insertion_loss_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/hearing_protector_insertion_loss.svg" alt="Left: the insertion loss of an earmuff on the acoustic test fixture from 63 Hz to 8 kHz, increasing downwards, three fittings around the mean with the expanded uncertainty as error bars. Right: the fixture's acoustic isolation above the stepped requirement of 5.1.4" width="92%"></picture>
+
 ## References
 
 - International Organization for Standardization (2018). *Acoustics — Hearing
@@ -1198,6 +1419,11 @@ ear still follows the 5 dB steps of 5.4.4 within ±1 dB.
   reduction earmuffs* (ISO 4869-6:2019). The active insertion loss, its
   uncertainty, the total attenuation of 5.5 and the linear-operation check of
   5.4.4, validated against Tables A.2 and A.3 and ISO's calculation workbook.
+- International Organization for Standardization (2007). *Acoustics — Hearing
+  protectors — Part 3: Measurement of insertion loss of ear-muff type
+  protectors using an acoustic test fixture* (ISO 4869-3:2007). The insertion
+  loss of 5.4 with Annex B, the test site of 5.2 and the fixture's isolation of
+  5.1.4, validated against Tables 1, A.1 and B.1.
 
 ## Standards
 
@@ -1208,7 +1434,9 @@ room (4.2.2, Table 1). ISO 4869-2:2018, which defines the assumed protection
 value $APV_{fx}$ (Clause 5), the octave-band method (Clause 6), the $H$, $M$ and
 $L$ values (Clause 7) and the single number rating $SNR$ (Clause 8).
 ISO 4869-6:2019, which adds the active insertion loss of an active noise
-reduction earmuff to that attenuation (5.4, 5.5, Annex A).
+reduction earmuff to that attenuation (5.4, 5.5, Annex A). ISO 4869-3:2007,
+which screens an earmuff by its insertion loss on an acoustic test fixture
+(5.4, Annex B) and qualifies the fixture and its test site (5.1.4, 5.2).
 
 ## See also
 
@@ -1218,8 +1446,11 @@ reduction earmuff to that attenuation (5.4, 5.5, Annex A).
   the exposure the protector did not stop does over a working life.
 - [Hearing threshold (age and reference zero)](https://jmrplens.github.io/phonometry/perception/hearing/hearing-threshold/): the
   baseline any protected exposure is judged against.
+- [Audiometric Test Methods (ISO 8253-1 and -2)](https://jmrplens.github.io/phonometry/perception/hearing/audiometry/): the
+  diffuse-field test the site of ISO 4869-3 shares.
 - API reference: [`hearing.real_ear_attenuation`](https://jmrplens.github.io/phonometry/reference/api/hearing/real-ear-attenuation/),
-  [`hearing.hearing_protectors`](https://jmrplens.github.io/phonometry/reference/api/hearing/hearing-protectors/)
-  and [`hearing.active_noise_reduction`](https://jmrplens.github.io/phonometry/reference/api/hearing/active-noise-reduction/).
+  [`hearing.hearing_protectors`](https://jmrplens.github.io/phonometry/reference/api/hearing/hearing-protectors/),
+  [`hearing.active_noise_reduction`](https://jmrplens.github.io/phonometry/reference/api/hearing/active-noise-reduction/)
+  and [`hearing.earmuff_insertion_loss`](https://jmrplens.github.io/phonometry/reference/api/hearing/earmuff-insertion-loss/).
 
 ---

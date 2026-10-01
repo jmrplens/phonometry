@@ -1,6 +1,6 @@
 ---
 title: "Hearing and exposure"
-description: "The statistics of hearing and the noise that damages it: the ISO 7029 age-related threshold distribution and ISO 389-7 reference zero, the ISO 1999 noise-induced permanent threshold shift, and the ISO 9612 occupational-exposure survey."
+description: "The statistics of hearing and the noise that damages it: the ISO 7029 age-related threshold distribution and ISO 389-7 reference zero, the ISO 8253 audiometric test room and threshold rules, the ISO 1999 noise-induced permanent threshold shift, the ISO 9612 occupational-exposure survey, and the ISO 4869 hearing protectors."
 ---
 
 import Scope from '../../../../components/Scope.astro';
@@ -18,6 +18,12 @@ high-frequency-first loss of presbycusis, resolved by age, sex and population
 fractile. **ISO 389-7:2005** fixes the other end of the scale: the reference
 threshold of hearing, the physical sound pressure level that audiometric
 0 dB HL corresponds to under free-field and diffuse-field listening.
+
+[Audiometric Test Methods (ISO 8253-1 and -2)](/phonometry/perception/hearing/audiometry/)
+says what it takes to measure a threshold against that zero: a test room quiet
+enough (ISO 8253-1 Clause 11) or with a qualified sound field (ISO 8253-2), the
+rules that turn responses into a hearing threshold level, and the uncertainty
+of that level.
 
 [Occupational Noise Exposure (ISO 9612)](/phonometry/perception/hearing/occupational-exposure/)
 measures the cause. A regulated daily exposure level LEX,8h is assembled from
@@ -61,17 +67,20 @@ In the order the chain runs.
 - **Baseline**: [Hearing threshold (age and reference zero)](/phonometry/perception/hearing/hearing-threshold/):
   the ISO 7029:2017 age-related threshold distribution and the ISO 389-7:2005
   reference threshold of hearing.
+- **Measurement**: [Audiometric Test Methods (ISO 8253-1 and -2)](/phonometry/perception/hearing/audiometry/):
+  the test room's ambient noise and sound field, the ascending, bracketing,
+  automatic and sweep-frequency threshold rules, and the Annex A uncertainty.
 - **Exposure**: [Occupational Noise Exposure (ISO 9612)](/phonometry/perception/hearing/occupational-exposure/):
   the three measurement strategies for LEX,8h with the Annex C uncertainty
   budget.
 - **Damage**: [Noise-induced hearing loss (ISO 1999)](/phonometry/perception/hearing/noise-induced-hearing-loss/):
   NIPTS and its population distribution, and the combination with age into
   HTLAN.
-- **Protection**: [Hearing Protectors (ISO 4869-1, -2 and -6)](/phonometry/perception/hearing/hearing-protectors/):
+- **Protection**: [Hearing Protectors (ISO 4869-1, -2, -3 and -6)](/phonometry/perception/hearing/hearing-protectors/):
   the attenuation measured on sixteen subjects with its uncertainty and its
   significance test, the octave-band, HML and SNR methods that say what a
-  protector actually leaves at the ear, and what an active noise reduction
-  earmuff adds.
+  protector actually leaves at the ear, what an active noise reduction earmuff
+  adds, and the insertion loss that screens an earmuff on a test fixture.
 
 ## What this section does not cover
 
@@ -99,9 +108,10 @@ procedures by which they were established.
 </ScopeClaim>
 
 <ScopeClaim status="not-covered">
-And no audiometry happens here. Nothing generates a test tone, drives an
-audiometer or corrects for an earphone coupler: the pages consume and produce
-threshold levels as data.
+And no audiometer's hardware is driven here. Nothing generates a test tone or
+presents it to a subject: ISO 8253's rules turn the responses a tester records into a
+threshold, and judge the room it was measured in, but the responses themselves
+are data, and so are the threshold levels the other pages consume and produce.
 </ScopeClaim>
 </Scope>
 

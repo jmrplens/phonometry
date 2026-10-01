@@ -354,6 +354,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   Figure B.3 that widens its limits at 6.3 kHz where the text widens them
   above it, and the F.1 that ties Annex F to the direct method while 10.4
   sends the comparison method to it.
+- **Audiometric test methods (ISO 8253-1 and ISO 8253-2).** A hearing
+  threshold level is only as good as the room it was measured in and the rule
+  that turned the subject's responses into it, and the new
+  `hearing.audiometry` and `hearing.sound_field_audiometry` modules carry both.
+  `check_audiometric_ambient_noise` judges a measured one-third-octave spectrum
+  against the maximum permissible ambient levels of ISO 8253-1 Tables 2 (air
+  conduction) and 4 (bone conduction) or ISO 8253-2 Table 2 (sound field, up
+  to 12.5 kHz), with the earphone allowance of Table 3 for insert and
+  circumaural earphones, the lowest hearing level to be measured and the
+  +8 dB of a +5 dB threshold shift, and reports the lowest hearing level the
+  room lets be measured; `ambient_noise_limits` gives the limits alone. The
+  threshold rules are `ascending_method_threshold` (6.2.4.2, which also
+  replays a presentation sequence against the steps of 6.2.3.2 and says what
+  to present next), `bracketing_method_threshold` (6.2.4.3),
+  `automatic_audiometry_threshold` (6.3.5) and `sweep_audiometry_threshold`
+  (7.5), each with its clause's reliability test. `check_retest_agreement`
+  applies the repeat at 1 kHz of 6.2.3.2 Step 3, and `audiogram_cautions`
+  flags the air-conduction levels of 40 dB or more that 6.2.3.2 asks to treat
+  with caution for cross-hearing and the bone-conduction levels at the average
+  vibrotactile threshold of 8.4 (`VIBROTACTILE_HEARING_LEVELS_DB`).
+  `audiometric_uncertainty` builds the Annex A budget, which reproduces
+  Table A.2: $u$ = 4.9 dB and $U$ = 10 dB. `check_free_sound_field`,
+  `check_quasi_free_sound_field` and `check_diffuse_sound_field` qualify a
+  sound field by 5.2 to 5.4, and `incidence_correction` reads the off-axis
+  increases of Annex B. Every result has `.plot()`, and a new guide in both
+  languages walks a booth, a threshold series and two sound fields through
+  them.
+- **Earmuffs on an acoustic test fixture (ISO 4869-3).** The screening method
+  that checks production and ageing without a panel of subjects.
+  `hearing.earmuff_insertion_loss` gives the insertion loss of an earmuff on
+  the test fixture from its fittings, reported to 0.1 dB, with the Annex B
+  uncertainty band by band and the checks of 5.3 on the isolation cup, the
+  test signal and its spectrum; `check_random_incidence_field` judges the test
+  site by the diffuse-field check of ISO 8253-2 with this standard's Table 1,
+  the fixture itself serving as the directional microphone where its index of
+  Table A.1 allows, `check_plane_progressive_wave` judges the plane wave of
+  5.2.3, and `verify_fixture_isolation` the fixture's isolation of 5.1.4. The
+  insertion loss is not a real-ear attenuation, as Clause 1 says, and nothing
+  converts it into one for ISO 4869-2. Its `.plot()` draws the insertion loss
+  as Clause 6 asks, increasing downwards at 50 dB per decade, on any axes. The
+  hearing protectors guide has a new section on it.
 - **Sound power in the 16 kHz octave band (ISO 9295).** The general sound
   power methods stop at the 10 kHz one-third-octave band, and a printer's
   paper noise or a power supply's whine sits above it. The new

@@ -1,6 +1,6 @@
 ← [Documentation index](../../README.md)
 
-# Hearing Protectors (ISO 4869-1, -2 and -6)
+# Hearing Protectors (ISO 4869-1, -2, -3 and -6)
 
 A hearing protector is not measured on a coupler. ISO 4869-1 seats it on
 sixteen people and records the threshold shift each of them gets, so what
@@ -210,6 +210,46 @@ ear still follows the 5 dB steps of 5.4.4 within ±1 dB.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/hearing_protector_anr_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/hearing_protector_anr.svg" alt="Left: averaged over sixteen subjects, the passive attenuation of an active noise reduction earmuff interpolated into one-third-octave bands, the active insertion loss of the ear with the lower value, their sum, and the assumed protection value at 84 % in each octave band. Right: the active insertion loss of each subject in one-third-octave bands, with the mean and the expanded uncertainty of the mean as error bars and a line at zero" width="92%"></picture>
 
+## Earmuffs on a test fixture (ISO 4869-3)
+
+ISO 4869-3 measures an earmuff without subjects: the insertion loss is the
+level at the microphone of an acoustic test fixture (a 135 mm cylinder, end
+faces 145 mm apart) without the earmuff less the level with it, in
+one-third-octave bands from at least 63 Hz to 8 kHz (5.4.2),
+$IL_f = \overline{L}_{\mathrm{open},f} - \overline{L}_{\mathrm{occl},f}$.
+It screens production and ageing; Clause 1 says its data are not the real-ear
+attenuation of the earmuff nor the protection it provides, so nothing feeds it
+to the ISO 4869-2 methods.
+
+```python
+# An earmuff fitted three times on the fixture (5.4.3), 63 Hz to 8 kHz.
+bands = np.asarray(hearing.EARMUFF_TEST_BANDS_HZ)
+loss = np.array([7.5, 9.0, 11.0, 13.5, 16.5, 20.0, 23.5, 27.0, 30.0, 32.5, 34.5,
+                 36.0, 37.0, 37.5, 37.0, 36.0, 35.5, 36.5, 38.0, 37.0, 35.0, 33.5])
+spread = np.array([[-0.6], [0.1], [0.5]]) * np.linspace(1.0, 2.2, 22)
+open_level = np.full(22, 88.0)
+il = hearing.earmuff_insertion_loss(
+    open_level, open_level - loss + spread, isolation_cup_levels_db=open_level - 70.0
+)
+print(il.reported_db[[3, 9, 12, 18]])                        # [13.5 32.5 37.  38. ]
+print(np.round(il.expanded_uncertainty_db[[3, 12, 21]], 1))  # [1.8 1.9 2.1]
+```
+
+Annex B's uncertainty is evaluated band by band from the repetitions, with
+Table B.1's typical values ($u$ = 1.3 dB, $U$ = 2.6 dB,
+`hearing.EARMUFF_INSERTION_LOSS_UNCERTAINTY`) where they are missing.
+`il.plot()` draws the insertion loss as Clause 6 asks, increasing downwards on
+the IEC 60263 scale of 50 dB per decade, on axes it creates or is given.
+`hearing.check_random_incidence_field` judges the site's random-incidence field
+with the diffuse-field check of ISO 8253-2 and this standard's Table 1 (the
+fixture itself may be the directional microphone where its index of Table A.1
+reaches 4 dB), `hearing.check_plane_progressive_wave` the plane wave of 5.2.3,
+and `hearing.verify_fixture_isolation` the fixture's isolation of 5.1.4. Table 1
+prints "> 5" where 5.2.2 asks for "at least 5 dB"; the library follows the text
+(see [ERRATA](../../ERRATA.md)).
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/hearing_protector_insertion_loss_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/hearing_protector_insertion_loss.svg" alt="Left: the insertion loss of an earmuff on the acoustic test fixture from 63 Hz to 8 kHz, increasing downwards, three fittings around the mean with the expanded uncertainty as error bars. Right: the fixture's acoustic isolation above the stepped requirement of 5.1.4" width="92%"></picture>
+
 ## References
 
 - International Organization for Standardization (2018). *Acoustics — Hearing
@@ -229,6 +269,11 @@ ear still follows the 5 dB steps of 5.4.4 within ±1 dB.
   reduction earmuffs* (ISO 4869-6:2019). The active insertion loss, its
   uncertainty, the total attenuation of 5.5 and the linear-operation check of
   5.4.4, validated against Tables A.2 and A.3 and ISO's calculation workbook.
+- International Organization for Standardization (2007). *Acoustics — Hearing
+  protectors — Part 3: Measurement of insertion loss of ear-muff type
+  protectors using an acoustic test fixture* (ISO 4869-3:2007). The insertion
+  loss of 5.4 with Annex B, the test site of 5.2 and the fixture's isolation of
+  5.1.4, validated against Tables 1, A.1 and B.1.
 
 ## Standards
 
@@ -239,7 +284,9 @@ room (4.2.2, Table 1). ISO 4869-2:2018, which defines the assumed protection
 value $APV_{fx}$ (Clause 5), the octave-band method (Clause 6), the $H$, $M$ and
 $L$ values (Clause 7) and the single number rating $SNR$ (Clause 8).
 ISO 4869-6:2019, which adds the active insertion loss of an active noise
-reduction earmuff to that attenuation (5.4, 5.5, Annex A).
+reduction earmuff to that attenuation (5.4, 5.5, Annex A). ISO 4869-3:2007,
+which screens an earmuff by its insertion loss on an acoustic test fixture
+(5.4, Annex B) and qualifies the fixture and its test site (5.1.4, 5.2).
 
 ## See also
 
@@ -249,6 +296,9 @@ reduction earmuff to that attenuation (5.4, 5.5, Annex A).
   the exposure the protector did not stop does over a working life.
 - [Hearing threshold (age and reference zero)](hearing-threshold.md): the
   baseline any protected exposure is judged against.
+- [Audiometric Test Methods (ISO 8253-1 and -2)](audiometry.md): the
+  diffuse-field test the site of ISO 4869-3 shares.
 - API reference: [`hearing.real_ear_attenuation`](https://jmrplens.github.io/phonometry/reference/api/hearing/real-ear-attenuation/),
-  [`hearing.hearing_protectors`](https://jmrplens.github.io/phonometry/reference/api/hearing/hearing-protectors/)
-  and [`hearing.active_noise_reduction`](https://jmrplens.github.io/phonometry/reference/api/hearing/active-noise-reduction/).
+  [`hearing.hearing_protectors`](https://jmrplens.github.io/phonometry/reference/api/hearing/hearing-protectors/),
+  [`hearing.active_noise_reduction`](https://jmrplens.github.io/phonometry/reference/api/hearing/active-noise-reduction/)
+  and [`hearing.earmuff_insertion_loss`](https://jmrplens.github.io/phonometry/reference/api/hearing/earmuff-insertion-loss/).

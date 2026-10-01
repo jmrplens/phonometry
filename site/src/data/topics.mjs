@@ -417,6 +417,7 @@ export const topics = [
           'environment/sources/cnossos-road-emission',
           'environment/sources/road-surface-pass-by',
           'environment/sources/cnossos-rail-emission',
+          'environment/sources/rolling-stock-noise',
           'environment/sources/wind-turbine-noise',
           'environment/sources/wind-turbine-receptor',
         ],

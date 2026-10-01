@@ -1,6 +1,6 @@
 ---
 title: "Fuentes ambientales"
-description: "Los descriptores de fuente de los que parte una predicción ambiental: la emisión de carretera y ferrocarril de CNOSSOS-EU según el Anexo II de la Directiva 2002/49/CE, el método estadístico de paso de la ISO 11819-1 que mide lo que añade un pavimento, y la potencia acústica aparente y la audibilidad tonal de un aerogenerador según IEC 61400-11."
+description: "Los descriptores de fuente de los que parte una predicción ambiental: la emisión de carretera y ferrocarril de CNOSSOS-EU según el Anexo II de la Directiva 2002/49/CE, el método estadístico de paso de la ISO 11819-1 que mide lo que añade un pavimento, el ensayo de tipo ISO 3095 de un vehículo ferroviario sobre una vía juzgada por la EN 15610 y la EN 15461, y la potencia acústica aparente y la audibilidad tonal de un aerogenerador según IEC 61400-11."
 ---
 
 import Scope from '../../../../../components/Scope.astro';
@@ -45,10 +45,21 @@ juntas y desvíos, el chirrido en curva, la tracción, el ruido aerodinámico po
 encima de 200 km/h y un término de puente se asignan cada uno a la altura desde
 la que radian.
 
+[Ruido del material rodante: el ensayo de tipo
+ISO 3095](/phonometry/es/environment/sources/rolling-stock-noise/)
+es donde la fuente ferroviaria se **mide** en lugar de predecirse: el ruido de
+un vehículo parado, pasando a velocidad constante, arrancando y frenando, con
+las posiciones de micrófono y el promediado que fija la ISO 3095:2013. Su
+resultado a velocidad constante solo es comparable sobre una vía de referencia,
+cuya rugosidad del carril mide la EN 15610 y cuyas tasas de decaimiento mide la
+EN 15461. Su límite de rugosidad es, banda a banda de 0,4 m a 3,15 mm, la
+rugosidad del carril de la clase E de la página de CNOSSOS, la clase a la que el
+apéndice G da el nombre de la ISO 3095.
+
 [Ruido y pavimento: el método estadístico de
 paso](/phonometry/es/environment/sources/road-surface-pass-by/)
-es la única página de aquí que mide lo que aporta un **pavimento** en lugar de
-lo que emite una fuente. La ISO 11819-1 registra el nivel máximo y la velocidad
+es la otra página de aquí que mide en lugar de predecir, y la única que mide lo
+que aporta un **pavimento** en lugar de lo que emite una fuente. La ISO 11819-1 registra el nivel máximo y la velocidad
 de turismos y pesados aislados, ajusta cada categoría con una recta en el
 logaritmo de la velocidad, la lee a las velocidades de referencia de su tabla 1
 y suma los tres niveles sonoros de vehículo en el índice estadístico de paso,
@@ -97,6 +108,10 @@ ningún modelo de propagación: su índice ordena pavimentos.
   de la rugosidad y las funciones de transferencia a las dos líneas fuente
   equivalentes a 0,5 m y 4,0 m, con los términos de impacto, chirrido,
   tracción, aerodinámico y de puente.
+- [Ruido del material rodante: el ensayo de tipo ISO 3095](/phonometry/es/environment/sources/rolling-stock-noise/):
+  los cuatro ensayos de un vehículo ferroviario, el nivel de paso y el nivel de
+  exposición al tránsito, la vía de referencia según la EN 15610 y la EN 15461,
+  el anexo C y el balance de incertidumbre del anexo G.
 - [Ruido de aerogeneradores: potencia y audibilidad tonal](/phonometry/es/environment/sources/wind-turbine-noise/):
   la potencia acústica aparente de IEC 61400-11 referida al centro del rotor,
   su clasificación por velocidad de viento y la cadena de audibilidad tonal,

@@ -325,6 +325,9 @@ _SECTION_LIST: tuple[Section, ...] = (
             "phonometry.environment.propagation.refraction",
             "phonometry.environment.propagation.air_absorption",
             "phonometry.environment.sources.cnossos_rail",
+            "phonometry.environment.sources.rolling_stock_noise",
+            "phonometry.environment.sources.acoustic_roughness",
+            "phonometry.environment.sources.track_decay",
             "phonometry.environment.assessment.impulsive_sound",
             "phonometry.environment.assessment.exposure_distribution",
             "phonometry.environment.assessment.rating",
@@ -530,6 +533,9 @@ OBJECT_MODULE_OVERRIDES: dict[str, str] = {
     # owned by the module that uses it and re-exported by the package, the
     # same shape as the three above.
     "DEFAULT_SPEED_OF_SOUND_M_S": "phonometry.solids.elastic",
+    # The two decay-rate directions are owned by EN 15461 and imported by the
+    # ISO 3095 module, which judges the rates in both of them.
+    "TRACK_DECAY_DIRECTIONS": "phonometry.environment.sources.track_decay",
     # The published catalogue is a mapping, so a plain scan sees it in the
     # module that builds it and in the package that re-exports it.
     "PUBLISHED_DAMPING": "phonometry.solids.damping",

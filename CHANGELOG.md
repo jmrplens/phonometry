@@ -736,6 +736,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   it, the gap the noise rule of 10.4.7 leaves at exactly 47 dB and the counter
   loop's perimeter in Table B.1.
 
+- **Railway rolling-stock noise (ISO 3095), on a track judged by EN 15610
+  and EN 15461.** Three new modules under `environment.sources` measure the
+  noise of a train, a locomotive or a wagon the way its type test does.
+  `rolling_stock_noise` covers ISO 3095:2013: `pass_by_measurement` reads the
+  equivalent level over any interval of a pressure record, the maximum
+  AF-weighted level and the 10 dB record margins of 6.6.3, and spreads the
+  energy of the interval over the pass-by time as the transit exposure level
+  of ISO 3095:2005 (or Formula B.1 for a single trailer);
+  `stationary_test` averages a stationary mesh on energy weighted by length
+  (Formulae 1 to 3); `rolling_stock_test` gives the result of the
+  constant-speed, starting and braking tests from their runs, the highest
+  rounded mean with the 3 dB spread of 9.3; `type_test_speeds`,
+  `minimum_curve_radius` and `acceleration_test_positions` (Figure 10) state
+  the rules around them, and `impulsiveness_rise_speed` (Annex A),
+  `check_adjacent_vehicle_neutrality` (6.3.4) and `background_level_increase`
+  (Annex D) complete the tests. `check_reference_track` judges a test track
+  against 6.2 in one verdict read from `.passes`: the roughness of every rail
+  against the limit Figure 2 prints, over the wavelengths 6.2.5 asks for; the
+  vertical and lateral decay rates against the limits Figure 3 prints; and the
+  curve radius and gradient of 6.2.2. `check_small_roughness_deviations`
+  accepts a small exceedance by its effect on the pass-by level (Annex C),
+  which the verdict takes only at its own speed, on the quadratic average
+  of its rails and against its own roughness limit,
+  `roughness_comparability` bounds what the roughness of two sites could
+  change (Annex E), and `pass_by_uncertainty` sums an Annex G budget.
+  `acoustic_roughness` turns a rail roughness record into its one-third octave
+  band spectrum by EN 15610:2009: spike removal, the curvature of a wheel of
+  0.375 m radius, Method A with the band synthesis of Annex C, the mean square average
+  and the measurement lines of 6.4.3. `track_decay` gives the decay rate from
+  the responses along the rail by EN 15461:2008+A1:2010, on the hammer grid of
+  Figure 2, with the floor of Formula 2 and the 10 dB far-field drop. Every
+  result has `.plot()`, and a new guide in both languages walks a pass-by, a
+  reference track and the Annex G budget through. The conformance suite pins
+  the twenty-two roughness limits Figure 2 prints (and the same values typed
+  in the EN 15610 listing), the twenty-eight decay-rate limits of Figure 3,
+  the microphone positions of Figure 10 and the worked budget of Table G.2,
+  55.68 dB, 0.83 dB and 1.66 dB. Four printed defects are in the errata
+  register: two cells of Table G.1 that Formula G.2 does not give, its wind
+  screen interval printed with the bounds out of order, and a spike-removal
+  loop in the EN 15610 listing that leaves out the change of sign clause 7.2
+  asks of a spike and never ends on a sharp bend of the rail.
+
 - **Sound power in the 16 kHz octave band (ISO 9295).** The general sound
   power methods stop at the 10 kHz one-third-octave band, and a printer's
   paper noise or a power supply's whine sits above it. The new

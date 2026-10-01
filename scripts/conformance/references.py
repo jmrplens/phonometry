@@ -259,11 +259,14 @@ _BODY_ALTERNATION = "|".join(re.escape(body) for body in _BODIES)
 #: optional edition group achieves. The edition takes an amendment marker,
 #: because ``ISO 10140-5:2010+A1`` otherwise matches no year at all and the
 #: whole of ``10140-5:2010+A1`` falls into the clause, leaving the bare body as
-#: the document. ISO writes an amendment issued on its own as the edition it
-#: amends, a slash and its own number and year, ``ISO 3745:2012/Amd.1:2017``:
-#: without that form the edition stopped at the slash, nothing after it could
-#: open a clause, and the citation fell back to the bare body "ISO" with the
-#: document number in the clause.
+#: the document. The amendment may carry its own year, as CEN writes it
+#: (``EN 15461:2008+A1:2010``): without it the designation stopped at the
+#: body, the bare "EN" was recorded as a document, and every clause that
+#: mentions an "EN printing" read as naming it. ISO writes an amendment issued
+#: on its own as the edition it amends, a slash and its own number and year,
+#: ``ISO 3745:2012/Amd.1:2017``: without that form the edition stopped at the
+#: slash, nothing after it could open a clause, and the citation fell back to
+#: the bare body "ISO" with the document number in the clause.
 #:
 #: The year is anchored to a century, because a series number is written the
 #: same way an edition is: ``NASA CR-3406`` read with four loose digits is the
@@ -288,7 +291,7 @@ _STANDARD = re.compile(
     rf"^(?P<designation>(?:{_BODY_ALTERNATION})[ ]?[A-Za-z]?[\w./()-]*?"
     r"(?:\s(?:Blatt|Teil|Ber|Berichtigung)\s\d+)?)"
     r"(?:(?P<sep>[:-])(?P<edition>(?:19|20)\d{2}(?:-(?:0[1-9]|1[0-2]))?"
-    r"(?:\+A\d+|/Amd\.?\s?\d+(?::(?:19|20)\d{2})?)?))?"
+    r"(?:\+A\d+(?::(?:19|20)\d{2})?|/Amd\.?\s?\d+(?::(?:19|20)\d{2})?)?))?"
     r"(?:,?\s+(?P<clause>\S.*))?$"
 )
 

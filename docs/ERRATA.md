@@ -9907,6 +9907,137 @@ in the same order.
   change was required.
 - **Status:** unreported.
 
+## ISO 3095:2013, Table G.1 (the standard uncertainty of the 25 m microphone distance printed as 0,004 dB)
+
+- **Location:** Annex G (informative), Table G.1, the $\delta_\mathrm{distance}$
+  row, printed p. 49.
+- **The print:** "for a microphone distance of 25 m: ±0,07 dB" in the
+  Uncertainty interval column and "for a microphone distance of 25 m:
+  0,004 dB" in the Standard uncertainty column; the 7,5 m line of the same row
+  prints ±0,23 dB and 0,13 dB.
+- **The problem:** G.3 derives every standard uncertainty of the table from
+  its interval as $u(x_i) = a/\sqrt{3}$ (Formula G.2), and so does every other
+  row: ±0,25 dB gives 0,14 dB, ±0,44 dB gives 0,25 dB, and the 7,5 m line of
+  this row gives $0{,}23/\sqrt{3} = 0{,}13$ dB, as printed. For ±0,07 dB the
+  formula gives $0{,}07/\sqrt{3} = 0{,}040$ dB. The printed 0,004 dB is ten
+  times smaller, a digit zero too many after the decimal comma; the cell
+  should read 0,04 dB.
+- **Evidence:** Table G.1 read on PDF page 55 (printed p. 49) and Formula G.2
+  on PDF page 54 (printed p. 48) of ISO 3095:2013 (third edition,
+  2013-08-01).
+- **Library behaviour:** Table G.1 is not published by the library;
+  [`pass_by_uncertainty`](../src/phonometry/environment/sources/rolling_stock_noise.py)
+  takes each input as a value and its standard uncertainty, and
+  `metrology.rectangular(0.0, 0.07)` gives the 0,040 dB of Formula G.2. The
+  conformance check "ISO 3095:2013 Table G.1" holds the eighteen rectangular
+  rows whose print Formula G.2 reproduces and leaves this cell out. No change
+  was required.
+- **Status:** unreported.
+
+## ISO 3095:2013, Table G.1 against Table G.2 (the ground-level uncertainty at 7,5 m printed as 0,55 dB in one and 0,30 dB in the other)
+
+- **Location:** Annex G (informative), the $\delta_\mathrm{ground\ level,7,5}$
+  row of Table G.1, printed p. 49, and the $\delta_\mathrm{ground\ level}$ row
+  of Table G.2, printed p. 51.
+- **The print:** Table G.1 gives the interval "[0 dB; 1,03 dB]" and the
+  standard uncertainty "0,55 dB" with "$\Delta L_p$ = 0,515 dB" for a
+  microphone at 7,5 m. Table G.2, the example of G.6 for a standstill
+  measurement whose ground "over a distance of 7,5 m varies between 0 and 2 m
+  below to the top of the rail", uses the same correction 0,515 dB with a
+  standard uncertainty of 0,30 dB.
+- **The problem:** footnote a of Table G.1 treats an unsymmetrical range
+  $[a; b]$ as a symmetric one about its mean, which is where the correction
+  $(0 + 1{,}03)/2 = 0{,}515$ dB comes from, and Formula G.2 then gives the half
+  width over $\sqrt{3}$: $0{,}515/\sqrt{3} = 0{,}297$ dB, the 0,30 dB of Table
+  G.2. The 25 m line of the same quantity follows that arithmetic,
+  $0{,}165/\sqrt{3} = 0{,}10$ dB as printed. The 0,55 dB of Table G.1 is
+  neither the half width nor the whole width over $\sqrt{3}$ (0,59 dB); the
+  cell should read 0,30 dB. The two tables also differ on the distance at
+  7,5 m, where Table G.1 prints 0,13 dB and Table G.2 carries 0,06 dB without
+  saying where that value comes from; the combined 0,83 dB of Table G.2 needs
+  its 0,06 dB (0,13 dB would give 0,84 dB), so that difference is recorded
+  here and not corrected.
+- **Evidence:** Table G.1 read on PDF page 55 (printed p. 49), Formula G.2 and
+  footnote a on PDF page 54 (printed p. 48), and Table G.2 on PDF pages 56 and
+  57 (printed pp. 50 and 51) of ISO 3095:2013 (third edition, 2013-08-01).
+- **Library behaviour:** the conformance checks "ISO 3095:2013 Table G.2" feed
+  [`pass_by_uncertainty`](../src/phonometry/environment/sources/rolling_stock_noise.py)
+  the thirteen rows of Table G.2 as printed, 0,30 dB and 0,06 dB included, and
+  reproduce its 55,68 dB, 0,83 dB and 1,66 dB. No change was required.
+- **Status:** unreported.
+
+## ISO 3095:2013, Table G.1 (the wind screen interval printed with its bounds out of order)
+
+- **Location:** Annex G (informative), Table G.1, the
+  $\delta_\mathrm{slm,\ wind\ screen}$ row, printed p. 49.
+- **The print:** "Damping of the wind screen", interval "[0,12 dB; 0 dB]",
+  standard uncertainty "0,03 dB" and "$\Delta L_p$ = 0,06 dB".
+- **The problem:** footnote a writes an unsymmetrical range as $[a; b]$, and
+  the four other rows that use one write the lower bound first: "[−0,21 dB;
+  0 dB]" for the distortion factor of the calibrator, "[−1,5 dB; 1 dB]" for
+  impulses, and "[0 dB; 1,03 dB]" and "[0 dB; 0,33 dB]" for the ground level
+  at 7,5 m and at 25 m. Printed as it is, the wind screen interval has its
+  lower bound above its upper one, and is empty. It should read either
+  [−0,12 dB; 0 dB], a range that lowers the reading written the way the
+  distortion row writes its own, whose mean value correction footnote a says
+  "increases the average sound level", or [0 dB; 0,12 dB], written the way
+  the ground-level rows write theirs. Both readings give the printed 0,03 dB
+  and 0,06 dB, so the table does not say which one was meant.
+- **Evidence:** Table G.1 and its footnote a read on PDF page 55 (printed
+  p. 49) and on PDF page 54 (printed p. 48) of ISO 3095:2013 (third edition,
+  2013-08-01).
+- **Library behaviour:** the library reads no interval of Table G.1; the
+  conformance check "ISO 3095:2013 Table G.1" uses the half width 0,06 dB and
+  the Table G.2 checks the correction and uncertainty as printed. No change
+  was required.
+- **Status:** unreported.
+
+## EN 15610:2009, Annex B, B.9.2 (a spike-removal loop that asks for no change of sign and never ends on a bend)
+
+- **Location:** Annex B (informative), B.9.2, the spike-removal section of the
+  listing of RoughProcess.m, printed pp. 23 and 24; clause 7.2, printed
+  pp. 12 and 13.
+- **The print:** the listing repeats its sweep under
+  `while min(d2rdx2) <-10^7`, and inside it treats a sample as a spike only
+  `if (y < -10^7) && (d1 ~= d2)`, the second derivative and a change of sign
+  of the first, and interpolates across it only `if height > w^2/3`. Clause
+  7.2 c) identifies a spike "by the criteria $\mathrm{d}^2r/\mathrm{d}x^2 <
+  -10^7\ \mathrm{\mu m/m^2}$ and a change of sign for $\mathrm{d}r/\mathrm{d}x$",
+  removes it when $h > w^2/a$ with $a = 3$ m, and ends: "The spike removal
+  procedure shall be repeated until no further spike is detected."
+- **The problem:** the loop condition leaves out the change of sign that
+  7.2 c) and the sweep inside the loop both ask of a spike. Wherever the
+  record bends sharply without a maximum or a minimum, its second derivative
+  falls below $-10^7\ \mathrm{\mu m/m^2}$ with no spike there by 7.2 c), no
+  sweep changes the record, and the loop does not terminate. A rail rising
+  20 µm per millimetre and then 5 µm per millimetre, sampled every
+  millimetre, is such a bend: $\mathrm{d}^2r/\mathrm{d}x^2 = -1{,}5 \times
+  10^7\ \mathrm{\mu m/m^2}$ at the bend, and $\mathrm{d}r/\mathrm{d}x$ is
+  positive on both sides of it. That is where the listing departs from the
+  clause it illustrates. On a peak that 7.2 c) does detect and that the
+  height test keeps as roughness a wheel feels, the listing is no worse than
+  the clause read literally: a ridge 200 µm high, sampled every millimetre,
+  whose edges the listing's slope rule places 42 mm apart, has
+  $\mathrm{d}^2r/\mathrm{d}x^2 = -2 \times 10^7\ \mathrm{\mu m/m^2}$ at its
+  tip and $h = 2 \times 10^{-4}$ m below $w^2/3 = 5{,}9 \times 10^{-4}$ m; it
+  is detected on every pass and kept, so neither the listing nor "until no
+  further spike is detected" ever stops on it.
+- **Evidence:** the listing read on PDF pages 25 and 26 (printed pp. 23 and
+  24), and clause 7.2 on PDF pages 14 and 15 (printed pp. 12 and 13) of
+  BS EN 15610:2009, the UK implementation of EN 15610:2009 (approved by CEN on
+  16 April 2009). The non-termination is a run of the listing's loop,
+  transcribed line for line, on the bend and on the ridge above.
+- **Library behaviour:**
+  [`remove_roughness_spikes`](../src/phonometry/environment/sources/acoustic_roughness.py)
+  detects a spike by both criteria of 7.2 c) and repeats its sweep until a
+  sweep removes nothing, which is how it reads "until no further spike is
+  detected" for a peak that is detected and kept. It returns the bend and the
+  ridge above unchanged; `test_a_bend_without_an_extremum_is_no_spike` and
+  `test_a_broad_ridge_is_kept_and_the_sweep_ends` in
+  [`tests/environment/sources/test_acoustic_roughness.py`](../tests/environment/sources/test_acoustic_roughness.py)
+  hold it on both.
+- **Status:** unreported.
+
 ## Related source properties that are not errata
 
 Recorded here to prevent future "fixes" that would break agreement with the

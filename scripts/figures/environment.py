@@ -15,7 +15,12 @@ import numpy as np
 from numpy.typing import NDArray
 
 from phonometry._plot.common import format_frequency_axis, theme_fill
-from phonometry.environment import StatisticalPassByResult
+from phonometry.environment import (
+    PassByMeasurement,
+    ReferenceTrackCheck,
+    SmallRoughnessDeviation,
+    StatisticalPassByResult,
+)
 
 if TYPE_CHECKING:
     from numpy.typing import ArrayLike
@@ -3800,4 +3805,179 @@ def generate_software_quality_round_robin(output_dir: str) -> None:
     result.plot(ax, language=_LANG)
     plt.tight_layout()
     save_figure(output_dir, "software_quality_round_robin.svg")
+    plt.close()
+
+
+# ---------------------------------------------------------------------------
+# ISO 3095 rolling stock noise, on a track judged by EN 15610 and EN 15461.
+# The scenes are the ones the rolling-stock guide's code blocks build, seeded,
+# so every figure and every printed number are one measurement.
+# ---------------------------------------------------------------------------
+
+#: The one-third octave bands the track decay rates and the pass-by spectrum
+#: of the guide are given in, 100 Hz to 5 kHz.
+_ROLLING_STOCK_BANDS_HZ = (
+    100.0, 125.0, 160.0, 200.0, 250.0, 315.0, 400.0, 500.0, 630.0, 800.0,
+    1000.0, 1250.0, 1600.0, 2000.0, 2500.0, 3150.0, 4000.0, 5000.0,
+)  # fmt: skip
+
+
+def _rolling_stock_pass_by() -> PassByMeasurement:
+    """A 100 m unit at 80 km/h past a microphone at 7,5 m, as a line source."""
+    from phonometry import environment
+
+    fs = 16000
+    length_m, speed_kmh, distance_m = 100.0, 80.0, 7.5
+    tp = environment.pass_by_time(length_m, speed_kmh=speed_kmh)
+    t = np.arange(int(14.0 * fs)) / fs
+    front_s = 4.0
+    x_front = speed_kmh / 3.6 * (t - front_s)
+    angle = np.arctan(x_front / distance_m) - np.arctan(
+        (x_front - length_m) / distance_m
+    )
+    rng = np.random.default_rng(3095)
+    p = 0.25 * np.sqrt(angle / np.pi + 1e-4) * rng.standard_normal(t.size)
+    return environment.pass_by_measurement(p, fs, start_s=front_s, end_s=front_s + tp)
+
+
+def _rolling_stock_track() -> tuple[ReferenceTrackCheck, SmallRoughnessDeviation]:
+    """The reference track of the guide: two rails, two decay rates, Annex C."""
+    from phonometry import environment
+
+    limit = environment.REFERENCE_TRACK_ROUGHNESS_LIMIT_DB
+    x = np.arange(0.0, 20.0, 1.0e-3)
+
+    def rail(offsets_db: dict[float, float], seed: int) -> NDArray[np.float64]:
+        rng = np.random.default_rng(seed)
+        r = np.zeros_like(x)
+        for wavelength, level in limit.items():
+            target = level + offsets_db.get(wavelength, -3.0)
+            k = 10.0 ** np.linspace(-0.045, 0.045, 10) / wavelength
+            amplitude = np.sqrt(2.0 * 10.0 ** (target / 10.0) / k.size)
+            for kk in k:
+                r += amplitude * np.cos(
+                    2.0 * np.pi * kk * x + rng.uniform(0.0, 2.0 * np.pi)
+                )
+        return r
+
+    left = rail({0.05: -1.0, 0.04: 2.0, 0.0315: 2.5, 0.025: 0.5}, seed=1)
+    right = rail({0.04: 1.0, 0.0315: 1.5}, seed=2)
+    left[7300] += 25.0
+    spectra = [
+        environment.acoustic_roughness_spectrum(r, sample_spacing_m=1.0e-3)
+        for r in (left, right)
+    ]
+    bands = list(_ROLLING_STOCK_BANDS_HZ)
+    vertical = [9.0, 8.0, 6.0, 4.0, 3.0, 3.5, 7.0, 8.0, 7.0, 3.0, 1.2, 0.9, 0.9, 1.0, 1.1, 1.3, 1.5, 1.8]  # fmt: skip
+    lateral = [6.0, 5.0, 4.0, 3.0, 3.0, 2.2, 1.2, 0.9, 0.7, 0.6, 0.5, 0.5, 0.6, 0.8, 0.9, 1.0, 1.2, 1.4]  # fmt: skip
+    x_hammer = environment.track_decay_excitation_positions(sleeper_spacing_m=0.6)
+
+    def responses(rates_db_per_m: list[float]) -> NDArray[np.float64]:
+        beta = np.asarray(rates_db_per_m) / (20.0 * np.log10(np.e))
+        return np.exp(-np.outer(x_hammer, beta))
+
+    decay = [
+        environment.track_decay_rate(
+            responses(vertical), frequencies_hz=bands, direction="vertical"
+        ),
+        environment.track_decay_rate(
+            responses(lateral), frequencies_hz=bands, direction="lateral"
+        ),
+    ]
+    noise = [68.0, 69.5, 71.0, 72.5, 74.0, 76.0, 78.0, 80.5, 83.0, 85.5, 87.0, 87.5, 86.5, 84.5, 82.0, 79.0, 75.5, 72.0]  # fmt: skip
+    small = environment.check_small_roughness_deviations(
+        environment.average_roughness_spectra(spectra),
+        noise,
+        frequencies_hz=bands,
+        speed_kmh=160.0,
+    )
+    check = environment.check_reference_track(
+        spectra,
+        decay,
+        speed_kmh=160.0,
+        curve_radius_m=6000.0,
+        track_gradient_ratio=0.002,
+        small_deviations=small,
+    )
+    return check, small
+
+
+#: ISO 3095 Table G.2: each input's name in the two languages, its mean value
+#: correction and its standard uncertainty, dB.
+_TABLE_G2_ROWS: tuple[tuple[str, str, float, float], ...] = (
+    ("cal, reference", "calibrador, referencia", 0.0, 0.14),
+    ("cal, long term", "calibrador, largo plazo", 0.0, 0.04),
+    ("cal, supply voltage", "calibrador, alimentación", 0.0, 0.06),
+    ("cal, distortion factor", "calibrador, distorsión", 0.105, 0.06),
+    ("slm, direction", "sonómetro, dirección", 0.0, 0.25),
+    ("slm, frequency", "sonómetro, frecuencia", 0.0, 0.25),
+    ("slm, level linearity", "sonómetro, linealidad", 0.0, 0.46),
+    ("calibrator, meteorological", "calibrador, meteorología", 0.0, 0.14),
+    ("slm, wind screen", "sonómetro, pantalla antiviento", 0.06, 0.03),
+    ("tripod", "trípode", 0.0, 0.35),
+    ("distance", "distancia", 0.0, 0.06),
+    ("ground level", "nivel del terreno", 0.515, 0.30),
+    ("rounding", "redondeo", 0.0, 0.29),
+)
+
+
+def generate_rolling_stock_pass_by(output_dir: str) -> None:
+    """ISO 3095 6.6.3: the level history of a pass-by and its interval Tp."""
+    print("Generating rolling_stock_pass_by...")
+    _fig, ax = plt.subplots(figsize=(10, 6.2))
+    _rolling_stock_pass_by().plot(ax=ax, language=_LANG)
+    plt.tight_layout()
+    save_figure(output_dir, "rolling_stock_pass_by.svg")
+    plt.close()
+
+
+def generate_rolling_stock_track_roughness(output_dir: str) -> None:
+    """ISO 3095 6.2.5: the roughness of two rails against Figure 2."""
+    print("Generating rolling_stock_track_roughness...")
+    check, _small = _rolling_stock_track()
+    _fig, ax = plt.subplots(figsize=(10, 6.2))
+    check.plot(ax=ax, panel="roughness", language=_LANG)
+    plt.tight_layout()
+    save_figure(output_dir, "rolling_stock_track_roughness.svg")
+    plt.close()
+
+
+def generate_rolling_stock_track_decay(output_dir: str) -> None:
+    """ISO 3095 6.2.6: the vertical and lateral decay rates against Figure 3."""
+    print("Generating rolling_stock_track_decay...")
+    check, _small = _rolling_stock_track()
+    _fig, ax = plt.subplots(figsize=(10, 6.2))
+    check.plot(ax=ax, panel="decay", language=_LANG)
+    plt.tight_layout()
+    save_figure(output_dir, "rolling_stock_track_decay.svg")
+    plt.close()
+
+
+def generate_rolling_stock_small_deviation(output_dir: str) -> None:
+    """ISO 3095 Annex C: the measured and revised pass-by spectra at 160 km/h."""
+    print("Generating rolling_stock_small_deviation...")
+    _check, small = _rolling_stock_track()
+    _fig, ax = plt.subplots(figsize=(10, 6.2))
+    small.plot(ax=ax, language=_LANG)
+    plt.tight_layout()
+    save_figure(output_dir, "rolling_stock_small_deviation.svg")
+    plt.close()
+
+
+def generate_rolling_stock_uncertainty(output_dir: str) -> None:
+    """ISO 3095 Annex G: the budget of Table G.2 drawn as Figure G.1."""
+    print("Generating rolling_stock_uncertainty...")
+    from phonometry import environment, metrology
+
+    budget = environment.pass_by_uncertainty(
+        55.0,
+        [
+            metrology.Quantity(value, u, name=spanish if _LANG == "es" else english)
+            for english, spanish, value, u in _TABLE_G2_ROWS
+        ],
+    )
+    _fig, ax = plt.subplots(figsize=(10, 6.4))
+    budget.plot(ax=ax, language=_LANG)
+    plt.tight_layout()
+    save_figure(output_dir, "rolling_stock_uncertainty.svg")
     plt.close()

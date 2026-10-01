@@ -4725,6 +4725,9 @@ _ES_EXACT = {
     "Two Corrections for One Background": "Dos correcciones para un mismo fondo",
     "Table 2 less Equation (12)": "Tabla 2 menos la ecuación (12)",
     "Where the Steps Leave the Curve": "Dónde se apartan los escalones de la curva",
+    # EN 15461 track decay rates: the two directions read the same in Spanish.
+    "Vertical": "Vertical",
+    "Lateral": "Lateral",
 }
 
 

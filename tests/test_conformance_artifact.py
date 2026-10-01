@@ -621,6 +621,21 @@ def test_an_amendment_issued_on_its_own_is_part_of_the_edition() -> None:
     ]
 
 
+def test_an_amendment_dated_by_year_stays_in_the_edition() -> None:
+    """CEN dates an amendment on its own, ``EN 15461:2008+A1:2010``.
+
+    The marker took no year, so the designation stopped at the body and "EN"
+    became a document of its own, which every "EN printing" in a clause then
+    read as naming.
+    """
+    document = _first("EN 15461:2008+A1:2010 Formula 1 and Annex A")
+    assert (document.designation, document.edition, document.clause) == (
+        "EN 15461",
+        "2008+A1:2010",
+        "Formula 1 and Annex A",
+    )
+
+
 def test_an_edition_dated_to_the_month_keeps_its_month() -> None:
     """DIN and VDI identify an edition by year and month, and so must the split.
 

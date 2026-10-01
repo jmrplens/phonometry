@@ -331,6 +331,147 @@ def _tone_search() -> ph.environment.ToneSearchLimit:
     )
 
 
+def _rolling_stock_roughness(
+    offset_db: float = -1.0,
+) -> ph.environment.AcousticRoughnessSpectrum:
+    """A roughness spectrum held 1 dB under the ISO 3095 Figure 2 limit."""
+    limit = ph.environment.REFERENCE_TRACK_ROUGHNESS_LIMIT_DB
+    wavelengths = sorted(limit, reverse=True)
+    return ph.environment.AcousticRoughnessSpectrum(
+        wavelengths, [limit[w] + offset_db for w in wavelengths]
+    )
+
+
+def _rolling_stock_roughness_record() -> ph.environment.AcousticRoughnessSpectrum:
+    """EN 15610 Method A on a 3 m record of two sinusoids and a little noise."""
+    x = np.arange(0.0, 3.0, 1.0e-3)
+    record = 2.0 * np.cos(2.0 * np.pi * 25.0 * x) + 0.5 * np.cos(
+        2.0 * np.pi * 125.0 * x
+    )
+    record += 0.05 * RNG.standard_normal(x.size)
+    return ph.environment.acoustic_roughness_spectrum(record, sample_spacing_m=1.0e-3)
+
+
+def _track_decay_rate() -> ph.environment.TrackDecayRate:
+    """EN 15461 Formula 1 on exponential responses 20 % above the vertical limit."""
+    limit = ph.environment.REFERENCE_TRACK_DECAY_LIMITS_DB_PER_M["vertical"]
+    rates = np.array(list(limit.values())) * 1.2
+    positions = ph.environment.track_decay_excitation_positions()
+    return ph.environment.track_decay_rate(
+        np.exp(-np.outer(positions, rates / 8.686)), frequencies_hz=list(limit)
+    )
+
+
+def _pass_by_measurement() -> ph.environment.PassByMeasurement:
+    """ISO 3095 6.6.3 on a 1 kHz tone swelling through a 10 s record."""
+    t = np.arange(int(10.0 * FS)) / FS
+    swell = np.exp(-(((t - 5.0) / 1.5) ** 2)) + 1.0e-3
+    return ph.environment.pass_by_measurement(
+        np.sin(2.0 * np.pi * 1000.0 * t) * swell, FS, start_s=4.0, end_s=6.0
+    )
+
+
+def _stationary_test() -> ph.environment.StationaryTestResult:
+    """ISO 3095 5.8.1 on three sets of four positions, one of them an end."""
+    return ph.environment.stationary_test(
+        [[60.0, 62.0, 61.0, 65.0], [60.5, 62.0, 61.0, 64.0], [61.0, 62.5, 61.0, 64.5]],
+        [4.0, 4.0, 4.0, ph.environment.STATIONARY_END_POSITION_LENGTH_M],
+    )
+
+
+def _rolling_stock_test() -> ph.environment.RollingStockTestResult:
+    """ISO 3095 6.7.1 on three runs at each side."""
+    return ph.environment.rolling_stock_test(
+        {"left": [80.2, 80.9, 81.4], "right": [81.6, 82.4, 81.9]}
+    )
+
+
+def _rise_speed() -> ph.environment.RiseSpeedResult:
+    """ISO 3095 Annex A on a history with one 12 dB ramp."""
+    times = np.arange(0.0, 2.0, 0.01)
+    levels = np.full(times.size, 60.0)
+    levels[50:71] = 60.0 + 0.6 * np.arange(21)
+    levels[71:] = 72.0
+    return ph.environment.impulsiveness_rise_speed(times, levels)
+
+
+def _adjacent_neutrality() -> ph.environment.AdjacentVehicleNeutrality:
+    """ISO 3095 6.3.4 on levels 1,9 dB apart."""
+    return ph.environment.check_adjacent_vehicle_neutrality(83.0, 81.1)
+
+
+def _small_roughness_deviation() -> ph.environment.SmallRoughnessDeviation:
+    """ISO 3095 Annex C with the 4 cm band 2 dB over the limit at 80 km/h."""
+    base = _rolling_stock_roughness()
+    levels = np.array(base.levels_db)
+    levels[base.bands.index(14)] += 3.0
+    roughness = ph.environment.AcousticRoughnessSpectrum(base.wavelengths_m, levels)
+    frequencies = [
+        100.0,
+        125.0,
+        160.0,
+        200.0,
+        250.0,
+        315.0,
+        400.0,
+        500.0,
+        630.0,
+        800.0,
+        1000.0,
+        1250.0,
+        1600.0,
+        2000.0,
+        2500.0,
+        3150.0,
+        4000.0,
+    ]
+    noise = 70.0 + 5.0 * np.sin(np.linspace(0.0, 3.0, len(frequencies)))
+    return ph.environment.check_small_roughness_deviations(
+        roughness, noise, frequencies_hz=frequencies, speed_kmh=80.0
+    )
+
+
+def _roughness_comparability() -> ph.environment.RoughnessComparability:
+    """ISO 3095 Annex E between two tracks 3 dB apart in three bands."""
+    one = _rolling_stock_roughness(-2.0)
+    levels = np.array(one.levels_db)
+    levels[8:11] += 3.0
+    two = ph.environment.AcousticRoughnessSpectrum(one.wavelengths_m, levels)
+    frequencies = [250.0, 315.0, 400.0, 500.0, 630.0, 800.0, 1000.0]
+    noise = np.full(len(frequencies), 75.0)
+    return ph.environment.roughness_comparability(
+        one, two, noise, noise + 1.0, frequencies_hz=frequencies, speed_kmh=100.0
+    )
+
+
+def _reference_track() -> ph.environment.ReferenceTrackCheck:
+    """ISO 3095 6.2 on roughness under Figure 2 and rates over Figure 3."""
+    limits = ph.environment.REFERENCE_TRACK_DECAY_LIMITS_DB_PER_M
+    rates = [
+        ph.environment.TrackDecayRate(
+            d, list(limits[d]), [1.1 * v for v in limits[d].values()]
+        )
+        for d in ("vertical", "lateral")
+    ]
+    return ph.environment.check_reference_track(
+        [_rolling_stock_roughness(), _rolling_stock_roughness(-1.5)],
+        rates,
+        speed_kmh=160.0,
+    )
+
+
+def _pass_by_uncertainty() -> ph.environment.PassByUncertainty:
+    """ISO 3095 Annex G, three inputs of Table G.1."""
+    return ph.environment.pass_by_uncertainty(
+        55.0,
+        [
+            ph.metrology.Quantity(0.0, 0.46, name="level linearity"),
+            ph.metrology.Quantity(0.0, 0.35, name="tripod"),
+            ph.metrology.Quantity(0.515, 0.30, name="ground level"),
+        ],
+    )
+
+
 def _porous_medium() -> ph.materials.PorousMediumResult:
     f = np.linspace(400.0, 4000.0, 40)
     return ph.materials.miki(f, 20000.0)

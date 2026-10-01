@@ -37,9 +37,19 @@ arithmetic. Impact noise at joints and switches, curve squeal, traction,
 aerodynamic noise above 200 km/h and a bridge term are each allocated to the
 height they radiate from.
 
+[Railway rolling-stock noise: the ISO 3095 type test](rolling-stock-noise.md)
+is where the railway source is **measured** rather than predicted: the noise of
+one vehicle, standing, passing at constant speed, starting and braking, with
+the microphone positions and the averaging ISO 3095:2013 fixes. Its
+constant-speed result is only comparable on a reference track, whose rail
+roughness EN 15610 measures and whose decay rates EN 15461 measures. Its
+roughness limit is, band for band from 0,4 m to 3,15 mm, the rail roughness of
+class E on the CNOSSOS page, the class Appendix G names after ISO 3095.
+
 [Road-surface noise: the statistical pass-by method](road-surface-pass-by.md)
-is the one page here that measures what a **road surface** contributes rather
-than what a source emits. ISO 11819-1 records the maximum level and the speed of
+is the other page here that measures rather than predicts, and the only one
+that measures what a **road surface** contributes rather than what a source
+emits. ISO 11819-1 records the maximum level and the speed of
 isolated cars and heavy vehicles, fits each category with a line in the
 logarithm of speed, reads it at the reference speeds of its Table 1 and adds the
 three vehicle sound levels into the Statistical Pass-By Index, in many cases
@@ -83,6 +93,10 @@ propagation model: its index ranks surfaces.
 - [CNOSSOS-EU railway source emission](cnossos-rail-emission.md):
   roughness and transfer functions to the two equivalent source lines at 0,5 m
   and 4,0 m, with the impact, squeal, traction, aerodynamic and bridge terms.
+- [Railway rolling-stock noise: the ISO 3095 type test](rolling-stock-noise.md):
+  the four tests of a railway vehicle, the pass-by level and the transit
+  exposure level, the reference track by EN 15610 and EN 15461, Annex C and the
+  uncertainty budget of Annex G.
 - [Wind-turbine noise: sound power and tonal audibility](wind-turbine-noise.md):
   the IEC 61400-11 apparent sound power referred to the rotor centre, its
   wind-speed binning and the tonal-audibility chain, with the assessment fiche.

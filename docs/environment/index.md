@@ -23,8 +23,9 @@ environmental model wants it. CNOSSOS-EU gives road traffic and railways a
 source power per band and per category, and IEC 61400-11 rates a wind turbine
 by its apparent sound power and its tonal audibility. What unites them is the
 pattern: a carefully standardised source descriptor that the path model above
-then attenuates. ISO 11819-1 sits beside them and measures something else, how
-much a road surface adds to the noise of the traffic on it.
+then attenuates. Two measurement methods sit beside them: ISO 11819-1, which
+measures how much a road surface adds to the noise of the traffic on it, and
+ISO 3095, the type test of a railway vehicle on a reference track.
 
 This section leans on the core toolkit, but only up to the period level.
 [Integrated and Statistical Levels](../signals/levels/levels.md) supplies
@@ -106,6 +107,9 @@ surface adds to the traffic on it.
 - [CNOSSOS-EU railway source emission](sources/cnossos-rail-emission.md):
   the equivalent for rail, with its source heights and its rolling, traction
   and aerodynamic contributions.
+- [Railway rolling-stock noise: the ISO 3095 type test](sources/rolling-stock-noise.md):
+  the noise of one railway vehicle measured standing, passing, starting and
+  braking, and the reference track it is measured on.
 - [Wind-turbine noise: sound power and tonal audibility](sources/wind-turbine-noise.md):
   the IEC 61400-11 apparent sound power level and tonal-audibility chain.
 - [Wind turbine sound at a dwelling (IEC TS 61400-11-2)](sources/wind-turbine-receptor.md):

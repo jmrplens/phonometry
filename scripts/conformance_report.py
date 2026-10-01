@@ -117,6 +117,7 @@ from conformance.domains import (
     silencer_measurement,
     vdi2081,
     cnossos_rail,
+    rolling_stock_noise,
 )
 
 # isort: on
@@ -281,6 +282,7 @@ __all__ = [
     "random_incidence",
     "record",
     "register",
+    "rolling_stock_noise",
     "noise_reducing_devices",
     "render_markdown",
     "signal_analysis",

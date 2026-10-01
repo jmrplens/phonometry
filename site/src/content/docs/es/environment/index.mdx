@@ -1,6 +1,6 @@
 ---
 title: "Medio ambiente y transporte"
-description: "El sonido en exteriores y las fuentes que lo dominan: el modelo de propagación ISO 9613 y los requisitos de calidad de la ISO 17534-1 para el software que lo calcula, el nivel de evaluación de ISO 1996 y su aplicación española, el ajuste por sonidos impulsivos NT ACOU 112, la distribución de ISO 13474 del nivel de exposición sonora de una voladura, el análisis del paisaje sonoro de ISO/TS 12913, los modelos de fuente CNOSSOS-EU de carretera y ferrocarril y de aerogeneradores de IEC 61400-11, el método estadístico de paso de la ISO 11819-1, que califica un pavimento, y los índices EN 1793 y EN 16272 de una pantalla acústica, con su reflexión medida in situ por la EN 1793-5."
+description: "El sonido en exteriores y las fuentes que lo dominan: el modelo de propagación ISO 9613 y los requisitos de calidad de la ISO 17534-1 para el software que lo calcula, el nivel de evaluación de ISO 1996 y su aplicación española, el ajuste por sonidos impulsivos NT ACOU 112, la distribución de ISO 13474 del nivel de exposición sonora de una voladura, el análisis del paisaje sonoro de ISO/TS 12913, los modelos de fuente CNOSSOS-EU de carretera y ferrocarril y de aerogeneradores de IEC 61400-11, el método estadístico de paso de la ISO 11819-1, que califica un pavimento, los índices EN 1793 y EN 16272 de una pantalla acústica, cuya reflexión mide in situ la EN 1793-5, y el ensayo de tipo ISO 3095 de un vehículo ferroviario sobre una vía juzgada por la EN 15610 y la EN 15461."
 ---
 
 import Scope from '../../../../components/Scope.astro';
@@ -28,9 +28,10 @@ como lo quiere un modelo ambiental. CNOSSOS-EU da al tráfico viario y al
 ferrocarril una potencia de fuente por banda y por categoría, e IEC 61400-11
 valora un aerogenerador por su potencia acústica aparente y su audibilidad
 tonal. Lo que los une es el patrón: un descriptor de fuente cuidadosamente
-normalizado que el modelo de camino de arriba atenúa después. La ISO 11819-1
-está junto a ellos y mide otra cosa: cuánto añade un pavimento al ruido del
-tráfico que circula por él.
+normalizado que el modelo de camino de arriba atenúa después. Junto a ellos
+hay dos métodos de medida: la ISO 11819-1, que mide cuánto añade un pavimento
+al ruido del tráfico que circula por él, y la ISO 3095, el ensayo de tipo de un
+vehículo ferroviario sobre una vía de referencia.
 
 Esta sección se apoya en el núcleo de la biblioteca, pero solo hasta el nivel
 de periodo.
@@ -120,6 +121,9 @@ pavimento añade al tráfico que circula por él.
 - [Emisión de la fuente ferroviaria CNOSSOS-EU](/phonometry/es/environment/sources/cnossos-rail-emission/):
   el equivalente para ferrocarril, con sus alturas de fuente y sus aportes de
   rodadura, tracción y aerodinámico.
+- [Ruido del material rodante: el ensayo de tipo ISO 3095](/phonometry/es/environment/sources/rolling-stock-noise/):
+  el ruido de un vehículo ferroviario medido parado, pasando, arrancando y
+  frenando, y la vía de referencia sobre la que se mide.
 - [Ruido de aerogeneradores: potencia y audibilidad tonal](/phonometry/es/environment/sources/wind-turbine-noise/):
   el nivel de potencia acústica aparente de IEC 61400-11 y la cadena de
   audibilidad tonal.

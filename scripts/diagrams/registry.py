@@ -112,6 +112,7 @@ from .environment import (
     _d_impulse_prominence,
     _d_outdoor,
     _d_rd1367_chain,
+    _d_rolling_stock_site,
     _d_statistical_pass_by_site,
     _d_wind_turbine,
     _d_wind_turbine_board,
@@ -1053,6 +1054,11 @@ DIAGRAMS = {
         _d_statistical_pass_by_site,
         "ISO 11819-1 pass-by site: the microphone and the test section",
         596,
+    ),
+    "diagram_rolling_stock_site": (
+        _d_rolling_stock_site,
+        "ISO 3095 pass-by site: the microphones and the free area",
+        920,
     ),
     "diagram_wind_turbine_board": (
         _d_wind_turbine_board,
